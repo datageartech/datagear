@@ -2,19 +2,19 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.web.cometd;
+package org.datagear.web.dataexchange;
 
 /**
- * Cometd消息。
+ * 数据交换消息。
  * 
  * @author datagear@163.com
  *
  */
-public class Message
+public abstract class DataExchangeMessage
 {
 	private String type;
 
-	public Message()
+	public DataExchangeMessage()
 	{
 		super();
 		this.type = getClass().getSimpleName();

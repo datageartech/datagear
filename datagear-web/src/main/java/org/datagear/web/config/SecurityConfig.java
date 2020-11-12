@@ -114,9 +114,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				// 切换主题
 				.antMatchers("/changeThemeData/**").permitAll()
 
-				// cometd
-				.antMatchers("/cometd/**").hasAnyAuthority(disableAnonymous ? ROLES_USER : ROLES_ANONYMOUS_AND_USER)
-
 				// 驱动程序管理
 				.antMatchers("/driverEntity/add", "/driverEntity/saveAdd", "/driverEntity/import",
 						"/driverEntity/uploadImportFile", "/driverEntity/saveImport", "/driverEntity/edit",

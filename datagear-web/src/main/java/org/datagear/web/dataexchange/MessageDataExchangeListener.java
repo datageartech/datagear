@@ -2,11 +2,10 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.web.cometd.dataexchange;
+package org.datagear.web.dataexchange;
 
 import java.util.Locale;
 
-import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.CircularDependencyException;
 import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.DataExchangeException;
@@ -19,25 +18,26 @@ import org.datagear.dataexchange.TableNotFoundException;
 import org.datagear.dataexchange.UnsupportedExchangeException;
 import org.datagear.dataexchange.support.IllegalJsonDataFormatException;
 import org.datagear.dataexchange.support.TableMismatchException;
+import org.datagear.web.util.MessageChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 
 /**
- * 基于Cometd的{@linkplain DataExchangeListener}。
+ * 发送消息的{@linkplain DataExchangeListener}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class CometdDataExchangeListener implements DataExchangeListener
+public abstract class MessageDataExchangeListener implements DataExchangeListener
 {
-	protected static final Logger LOGGER = LoggerFactory.getLogger(CometdDataExchangeListener.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(MessageDataExchangeListener.class);
 
 	public static final String EXCEPTION_DISPLAY_MESSAGE_KEY = "dataExchange.error.";
 
-	private DataExchangeCometdService dataExchangeCometdService;
+	private MessageChannel messageChannel;
 
-	private ServerChannel dataExchangeServerChannel;
+	private String dataExchangeServerChannel;
 
 	private MessageSource messageSource;
 
@@ -45,32 +45,37 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 
 	private volatile long _startTime = System.currentTimeMillis();
 
-	public CometdDataExchangeListener()
+	public MessageDataExchangeListener()
 	{
 		super();
 	}
 
-	public CometdDataExchangeListener(DataExchangeCometdService dataExchangeCometdService,
-			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale)
+	public MessageDataExchangeListener(MessageChannel messageChannel,
+			String dataExchangeServerChannel, MessageSource messageSource, Locale locale)
 	{
 		super();
-		this.dataExchangeCometdService = dataExchangeCometdService;
+		this.messageChannel = messageChannel;
 		this.dataExchangeServerChannel = dataExchangeServerChannel;
 		this.messageSource = messageSource;
 		this.locale = locale;
 	}
 
-	public void setDataExchangeCometdService(DataExchangeCometdService dataExchangeCometdService)
+	public MessageChannel getMessageChannel()
 	{
-		this.dataExchangeCometdService = dataExchangeCometdService;
+		return messageChannel;
 	}
 
-	public ServerChannel getDataExchangeServerChannel()
+	public void setMessageChannel(MessageChannel messageChannel)
+	{
+		this.messageChannel = messageChannel;
+	}
+
+	public String getDataExchangeServerChannel()
 	{
 		return dataExchangeServerChannel;
 	}
 
-	public void setDataExchangeServerChannel(ServerChannel dataExchangeServerChannel)
+	public void setDataExchangeServerChannel(String dataExchangeServerChannel)
 	{
 		this.dataExchangeServerChannel = dataExchangeServerChannel;
 	}
@@ -129,7 +134,7 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 	{
 		try
 		{
-			this.dataExchangeCometdService.sendMessage(this.dataExchangeServerChannel, dataExchangeMessage);
+			this.messageChannel.push(this.dataExchangeServerChannel, dataExchangeMessage);
 		}
 		catch (Throwable t)
 		{

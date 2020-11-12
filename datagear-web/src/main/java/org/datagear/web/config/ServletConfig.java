@@ -8,19 +8,13 @@
 package org.datagear.web.config;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.cometd.server.CometDServlet;
 import org.datagear.util.IOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.Ordered;
-import org.springframework.web.context.support.ServletContextAttributeExporter;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 /**
@@ -61,32 +55,6 @@ public class ServletConfig
 		bean.setName(CharacterEncodingFilter.class.getSimpleName());
 		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		bean.setAsyncSupported(true);
-
-		return bean;
-	}
-
-	@Bean
-	@DependsOn("bayeuxServerServletContextAttributeExporter")
-	public ServletRegistrationBean<CometDServlet> CometDServletRegistrationBean()
-	{
-		CometDServlet cometDServlet = new CometDServlet();
-		ServletRegistrationBean<CometDServlet> bean = new ServletRegistrationBean<>(cometDServlet, "/cometd/*");
-		bean.setName(CometDServlet.class.getSimpleName());
-		bean.setLoadOnStartup(1);
-		bean.setAsyncSupported(true);
-
-		return bean;
-	}
-
-	@Bean("bayeuxServerServletContextAttributeExporter")
-	public ServletContextAttributeExporter bayeuxServerServletContextAttributeExporter()
-	{
-		ServletContextAttributeExporter bean = new ServletContextAttributeExporter();
-
-		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(org.cometd.bayeux.server.BayeuxServer.ATTRIBUTE, this.coreConfig.bayeuxServer());
-
-		bean.setAttributes(attributes);
 
 		return bean;
 	}

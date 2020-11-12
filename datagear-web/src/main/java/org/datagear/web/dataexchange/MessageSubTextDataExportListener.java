@@ -2,38 +2,38 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.web.cometd.dataexchange;
+package org.datagear.web.dataexchange;
 
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.TextDataExportListener;
+import org.datagear.web.util.MessageChannel;
 import org.springframework.context.MessageSource;
 
 /**
- * 基于Cometd的子数据导出{@linkplain TextDataExportListener}。
+ * 发送消息的子数据导出{@linkplain TextDataExportListener}。
  * 
  * @author datagear@163.com
  *
  */
-public class CometdSubTextDataExportListener extends CometdSubDataExchangeListener implements TextDataExportListener
+public class MessageSubTextDataExportListener extends MessageSubDataExchangeListener implements TextDataExportListener
 {
 	private AtomicInteger _successCount = new AtomicInteger(0);
 
-	public CometdSubTextDataExportListener()
+	public MessageSubTextDataExportListener()
 	{
 		super();
 	}
 
-	public CometdSubTextDataExportListener(DataExchangeCometdService dataExchangeCometdService,
-			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale,
+	public MessageSubTextDataExportListener(MessageChannel messageChannel,
+			String dataExchangeServerChannel, MessageSource messageSource, Locale locale,
 			String subDataExchangeId)
 	{
-		super(dataExchangeCometdService, dataExchangeServerChannel, messageSource, locale, subDataExchangeId);
+		super(messageChannel, dataExchangeServerChannel, messageSource, locale, subDataExchangeId);
 	}
 
 	@Override

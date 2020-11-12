@@ -37,6 +37,7 @@ import org.datagear.web.sqlpad.SqlpadExecutionService.CommitMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.ExceptionHandleMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
 import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
+import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,9 @@ public class SqlpadController extends AbstractSchemaConnController
 	private SqlSelectManager sqlSelectManager;
 
 	@Autowired
+	private MessageChannel messageChannel;
+
+	@Autowired
 	private SqlpadExecutionService sqlpadExecutionService;
 
 	@Autowired
@@ -88,6 +92,16 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setSqlSelectManager(SqlSelectManager sqlSelectManager)
 	{
 		this.sqlSelectManager = sqlSelectManager;
+	}
+
+	public MessageChannel getMessageChannel()
+	{
+		return messageChannel;
+	}
+
+	public void setMessageChannel(MessageChannel messageChannel)
+	{
+		this.messageChannel = messageChannel;
 	}
 
 	public SqlpadExecutionService getSqlpadExecutionService()
@@ -225,6 +239,15 @@ public class SqlpadController extends AbstractSchemaConnController
 		this.sqlpadExecutionService.command(sqlpadId, sqlCommand);
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
+	}
+
+	@RequestMapping(value = "/{schemaId}/message", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<Object> message(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("sqlpadChannelId") String sqlpadChannelId) throws Throwable
+	{
+		return this.messageChannel.pull(sqlpadChannelId, 10);
 	}
 
 	@RequestMapping(value = "/{schemaId}/select", produces = CONTENT_TYPE_JSON)

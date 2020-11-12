@@ -11,16 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.cometd.bayeux.server.BayeuxServer;
-import org.cometd.bayeux.server.BayeuxServer.Extension;
-import org.cometd.server.ext.AcknowledgedMessagesExtension;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
@@ -78,8 +73,6 @@ import org.datagear.persistence.support.DefaultDialectSource;
 import org.datagear.persistence.support.DefaultPersistenceManager;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.util.IOUtil;
-import org.datagear.web.cometd.CustomJacksonJSONContextServer;
-import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
@@ -91,12 +84,11 @@ import org.datagear.web.json.jackson.LocaleSqlTimestampSerializer;
 import org.datagear.web.json.jackson.ObjectMapperBuilder;
 import org.datagear.web.json.jackson.ObjectMapperBuilder.JsonSerializerConfig;
 import org.datagear.web.security.UserPasswordEncoderImpl;
-import org.datagear.web.sqlpad.SqlpadCometdService;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
-import org.datagear.web.util.BayeuxServerFactory;
 import org.datagear.web.util.ChangelogResolver;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
+import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.TableCache;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
@@ -626,26 +618,10 @@ public class CoreConfig implements InitializingBean
 		return new ChangelogResolver();
 	}
 
-	@Bean(initMethod = "start", destroyMethod = "stop")
-	public BayeuxServer bayeuxServer()
+	@Bean
+	public MessageChannel messageChannel()
 	{
-		return buildBayeuxServerFactory().getBayeuxServer();
-	}
-
-	protected BayeuxServerFactory buildBayeuxServerFactory()
-	{
-		BayeuxServerFactory bean = new BayeuxServerFactory();
-
-		Map<String, Object> options = new HashMap<>();
-		options.put("jsonContext", new CustomJacksonJSONContextServer(this.objectMapperBuilder()));
-
-		List<Extension> extensions = new ArrayList<>();
-		extensions.add(new AcknowledgedMessagesExtension());
-
-		bean.setOptions(options);
-		bean.setExtensions(extensions);
-
-		return bean;
+		return new MessageChannel();
 	}
 
 	@Bean
@@ -656,17 +632,10 @@ public class CoreConfig implements InitializingBean
 	}
 
 	@Bean
-	public SqlpadCometdService sqlpadCometdService()
-	{
-		SqlpadCometdService bean = new SqlpadCometdService(this.bayeuxServer());
-		return bean;
-	}
-
-	@Bean
 	public SqlpadExecutionService sqlpadExecutionService()
 	{
 		SqlpadExecutionService bean = new SqlpadExecutionService(this.connectionSource(), this.messageSource(),
-				this.sqlpadCometdService(), this.sqlHistoryService(), this.sqlSelectManager());
+				this.messageChannel(), this.sqlHistoryService(), this.sqlSelectManager());
 		return bean;
 	}
 
@@ -699,13 +668,6 @@ public class CoreConfig implements InitializingBean
 	public GenericDataExchangeService dataExchangeService()
 	{
 		GenericDataExchangeService bean = new GenericDataExchangeService();
-		return bean;
-	}
-
-	@Bean
-	public DataExchangeCometdService dataExchangeCometdService()
-	{
-		DataExchangeCometdService bean = new DataExchangeCometdService(this.bayeuxServer());
 		return bean;
 	}
 

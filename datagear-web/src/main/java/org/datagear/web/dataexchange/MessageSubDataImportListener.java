@@ -2,25 +2,25 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.web.cometd.dataexchange;
+package org.datagear.web.dataexchange;
 
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataImportListener;
 import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.ExceptionResolve;
+import org.datagear.web.util.MessageChannel;
 import org.springframework.context.MessageSource;
 
 /**
- * 基于Cometd的子数据导入{@linkplain DataImportListener}。
+ * 发送消息的子数据导入{@linkplain DataImportListener}。
  * 
  * @author datagear@163.com
  *
  */
-public class CometdSubDataImportListener extends CometdSubDataExchangeListener implements DataImportListener
+public class MessageSubDataImportListener extends MessageSubDataExchangeListener implements DataImportListener
 {
 	private ExceptionResolve exceptionResolve;
 
@@ -28,16 +28,16 @@ public class CometdSubDataImportListener extends CometdSubDataExchangeListener i
 	protected final AtomicInteger _failCount = new AtomicInteger(0);
 	protected volatile String _lastIgnoreException = "";
 
-	public CometdSubDataImportListener()
+	public MessageSubDataImportListener()
 	{
 		super();
 	}
 
-	public CometdSubDataImportListener(DataExchangeCometdService dataExchangeCometdService,
-			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale,
+	public MessageSubDataImportListener(MessageChannel messageChannel,
+			String dataExchangeServerChannel, MessageSource messageSource, Locale locale,
 			String subDataExchangeId, ExceptionResolve exceptionResolve)
 	{
-		super(dataExchangeCometdService, dataExchangeServerChannel, messageSource, locale, subDataExchangeId);
+		super(messageChannel, dataExchangeServerChannel, messageSource, locale, subDataExchangeId);
 		this.exceptionResolve = exceptionResolve;
 	}
 

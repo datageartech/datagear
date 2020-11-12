@@ -191,7 +191,15 @@ Schema schema 数据库，不允许为null
 	po.element("#sqlCommitModeSet").buttonset();
 	po.element("#sqlExceptionHandleModeSet").buttonset();
 	
-	po.cometdInitIfNot();
+	po.sqlpadTaskClient = new $.TaskClient("${contextPath}/sqlpad/"+po.schemaId+"/message",
+			function(message)
+			{
+				return po.handleMessage(message);
+			},
+			{
+				data: { sqlpadChannelId: po.sqlpadChannelId }
+			}
+		);
 	
 	po.getSqlEditorSchemaId = function(){ return po.schemaId; };
 	po.initSqlEditor();
@@ -355,7 +363,8 @@ Schema schema 数据库，不允许为null
 	
 	po.handleMessage = function(message)
 	{
-		var msgData = message.data;
+		var isFinish = false;
+		var msgData = message;
 		var msgDataType = (msgData ? msgData.type : "");
 		var $msgDiv = $("<div class='execution-message' />");
 		
@@ -515,6 +524,7 @@ Schema schema 数据库，不允许为null
 		}
 		else if(msgDataType == "FINISH")
 		{
+			isFinish = true;
 			po.executingSqlCount = -1;
 			
 			$msgDiv.addClass("execution-finish");
@@ -532,7 +542,9 @@ Schema schema 数据库，不允许为null
 			$msgDiv.appendTo(po.resultMessageElement);
 			po.resultMessageElement.scrollTop(po.resultMessageElement.prop("scrollHeight"));
 		}
-	},
+		
+		return isFinish;
+	};
 	
 	po.sendSqlCommand = function(sqlCommand, $commandButton)
 	{
@@ -920,15 +932,8 @@ Schema schema 数据库，不允许为null
 			
 			po.updateExecuteSqlButtonState($this, "executing");
 			
-			po.cometdExecuteAfterSubscribe(po.sqlpadChannelId,
-			function()
-			{
-				po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
-			},
-			function(message)
-			{
-				po.handleMessage(message);
-			});
+			po.sqlpadTaskClient.start();
+			po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
 		}
 		
 		po.sqlEditor.focus();

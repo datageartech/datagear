@@ -9,7 +9,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +19,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.management.domain.Schema;
@@ -29,6 +30,8 @@ import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.web.controller.SqlpadController.SqlpadFileDirectory;
+import org.datagear.web.util.MessageChannel;
+import org.datagear.web.util.OperationMessage;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 
@@ -44,7 +47,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	private MessageSource messageSource;
 
-	private SqlpadCometdService sqlpadCometdService;
+	private MessageChannel messageChannel;
 
 	private SqlHistoryService sqlHistoryService;
 
@@ -64,13 +67,13 @@ public class SqlpadExecutionService extends PersistenceSupport
 	}
 
 	public SqlpadExecutionService(ConnectionSource connectionSource, MessageSource messageSource,
-			SqlpadCometdService sqlpadCometdService, SqlHistoryService sqlHistoryService,
+			MessageChannel messageChannel, SqlHistoryService sqlHistoryService,
 			SqlSelectManager sqlSelectManager)
 	{
 		super();
 		this.connectionSource = connectionSource;
 		this.messageSource = messageSource;
-		this.sqlpadCometdService = sqlpadCometdService;
+		this.messageChannel = messageChannel;
 		this.sqlHistoryService = sqlHistoryService;
 		this.sqlSelectManager = sqlSelectManager;
 	}
@@ -95,14 +98,14 @@ public class SqlpadExecutionService extends PersistenceSupport
 		this.messageSource = messageSource;
 	}
 
-	public SqlpadCometdService getSqlpadCometdService()
+	public MessageChannel getMessageChannel()
 	{
-		return sqlpadCometdService;
+		return messageChannel;
 	}
 
-	public void setSqlpadCometdService(SqlpadCometdService sqlpadCometdService)
+	public void setMessageChannel(MessageChannel messageChannel)
 	{
-		this.sqlpadCometdService = sqlpadCometdService;
+		this.messageChannel = messageChannel;
 	}
 
 	public SqlHistoryService getSqlHistoryService()
@@ -155,16 +158,13 @@ public class SqlpadExecutionService extends PersistenceSupport
 	{
 		String sqlpadChannelId = getSqlpadChannelId(submit.getSqlpadId());
 
-		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(submit, sqlpadChannelId,
-				sqlpadCometdService);
+		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(submit, sqlpadChannelId);
 
 		SqlpadExecutionRunnable old = this._sqlpadExecutionRunnableMap.putIfAbsent(submit.getSqlpadId(),
 				sqlpadExecutionRunnable);
 
 		if (old != null)
 			return false;
-
-		sqlpadExecutionRunnable.init();
 
 		this._executorService.submit(sqlpadExecutionRunnable);
 
@@ -222,6 +222,230 @@ public class SqlpadExecutionService extends PersistenceSupport
 	}
 
 	/**
+	 * 发送执行开始消息。
+	 * 
+	 * @param channel
+	 * @param sqlCount
+	 */
+	protected void sendStartMessage(String channel, int sqlCount)
+	{
+		this.messageChannel.push(channel, new StartMessageData(sqlCount));
+	}
+
+	/**
+	 * 发送SQL执行成功消息。
+	 * 
+	 * @param channel
+	 * @param sqlStatement
+	 * @param sqlStatementCount
+	 */
+	protected void sendSqlSuccessMessage(String channel, SqlStatement sqlStatement, int sqlStatementIndex)
+	{
+		this.messageChannel.push(channel,
+				new SqlSuccessMessageData(sqlStatement, sqlStatementIndex, SqlResultType.NONE));
+	}
+
+	/**
+	 * 发送SQL执行成功消息。
+	 * 
+	 * @param channel
+	 * @param sqlStatement
+	 * @param sqlStatementIndex
+	 * @param updateCount
+	 */
+	protected void sendSqlSuccessMessage(String channel, SqlStatement sqlStatement, int sqlStatementIndex,
+			int updateCount)
+	{
+		SqlSuccessMessageData sqlSuccessMessageData = new SqlSuccessMessageData(sqlStatement, sqlStatementIndex,
+				SqlResultType.UPDATE_COUNT);
+		sqlSuccessMessageData.setUpdateCount(updateCount);
+
+		this.messageChannel.push(channel, sqlSuccessMessageData);
+	}
+
+	/**
+	 * 发送SQL执行成功消息。
+	 * 
+	 * @param channel
+	 * @param sqlStatement
+	 * @param sqlStatementIndex
+	 * @param sqlSelectResult
+	 */
+	protected void sendSqlSuccessMessage(String channel, SqlStatement sqlStatement, int sqlStatementIndex,
+			SqlSelectResult sqlSelectResult)
+	{
+		SqlSuccessMessageData sqlSuccessMessageData = new SqlSuccessMessageData(sqlStatement, sqlStatementIndex,
+				SqlResultType.RESULT_SET);
+		sqlSuccessMessageData.setSqlSelectResult(sqlSelectResult);
+
+		this.messageChannel.push(channel, sqlSuccessMessageData);
+	}
+
+	/**
+	 * 发送SQL异常消息。
+	 * 
+	 * @param channel
+	 * @param sqlStatement
+	 * @param sqlStatementIndex
+	 * @param e
+	 * @param content
+	 */
+	protected void sendSqlExceptionMessage(String channel, SqlStatement sqlStatement, int sqlStatementIndex,
+			SQLException e, String content)
+	{
+		SQLExceptionMessageData messageData = new SQLExceptionMessageData(sqlStatement, sqlStatementIndex, content);
+
+		this.messageChannel.push(channel, messageData);
+	}
+
+	/**
+	 * 发送SQL异常消息。
+	 * 
+	 * @param channel
+	 * @param sqlStatement
+	 * @param sqlStatementIndex
+	 * @param content
+	 */
+	protected void sendSqlExceptionMessage(String channel, SqlStatement sqlStatement, int sqlStatementIndex,
+			String content)
+	{
+		SQLExceptionMessageData messageData = new SQLExceptionMessageData(sqlStatement, sqlStatementIndex, content);
+
+		this.messageChannel.push(channel, messageData);
+	}
+
+	/**
+	 * 发送异常消息。
+	 * 
+	 * @param channel
+	 * @param t
+	 * @param content
+	 * @param trace
+	 */
+	protected void sendExceptionMessage(String channel, Throwable t, String content, boolean trace)
+	{
+		ExceptionMessageData messageData = new ExceptionMessageData(content);
+		if (trace)
+			messageData.setDetailTrace(t);
+
+		this.messageChannel.push(channel, messageData);
+	}
+
+	/**
+	 * 发送异常消息。
+	 * 
+	 * @param channel
+	 * @param content
+	 */
+	protected void sendExceptionMessage(String channel, String content)
+	{
+		ExceptionMessageData messageData = new ExceptionMessageData(content);
+		this.messageChannel.push(channel, messageData);
+	}
+
+	/**
+	 * 发送执行命令消息。
+	 * 
+	 * @param channel
+	 * @param sqlCommand
+	 * @param content
+	 */
+	protected void sendSqlCommandMessage(String channel, SqlCommand sqlCommand, String content)
+	{
+		this.messageChannel.push(channel, new SqlCommandMessageData(sqlCommand, content));
+	}
+
+	/**
+	 * 发送执行命令消息。
+	 * 
+	 * @param channel
+	 * @param sqlCommand
+	 * @param content
+	 * @param sqlExecutionStat
+	 */
+	protected void sendSqlCommandMessage(String channel, SqlCommand sqlCommand, String content,
+			SQLExecutionStat sqlExecutionStat)
+	{
+		SqlCommandMessageData sqlCommandMessageData = new SqlCommandMessageData(sqlCommand, content);
+		sqlCommandMessageData.setSqlExecutionStat(sqlExecutionStat);
+
+		this.messageChannel.push(channel, sqlCommandMessageData);
+	}
+
+	/**
+	 * 发送文本消息。
+	 * 
+	 * @param channel
+	 * @param text
+	 */
+	protected void sendTextMessage(String channel, String text)
+	{
+		this.messageChannel.push(channel, new TextMessageData(text));
+	}
+
+	/**
+	 * 发送文本消息。
+	 * 
+	 * @param channel
+	 * @param text
+	 * @param cssClass
+	 */
+	protected void sendTextMessage(String channel, String text, String cssClass)
+	{
+		TextMessageData textMessageData = new TextMessageData(text);
+		textMessageData.setCssClass(cssClass);
+
+		this.messageChannel.push(channel, textMessageData);
+	}
+
+	/**
+	 * 发送文本消息。
+	 * 
+	 * @param channel
+	 * @param text
+	 * @param cssClass
+	 * @param sqlExecutionStat
+	 */
+	protected void sendTextMessage(String channel, String text, String cssClass, SQLExecutionStat sqlExecutionStat)
+	{
+		TextMessageData textMessageData = new TextMessageData(text);
+		textMessageData.setCssClass(cssClass);
+		textMessageData.setSqlExecutionStat(sqlExecutionStat);
+
+		this.messageChannel.push(channel, textMessageData);
+	}
+
+	/**
+	 * 发送执行完成消息。
+	 * <p>
+	 * 无论是否出现异常，都要发送此消息。
+	 * </p>
+	 * 
+	 * @param channel
+	 */
+	protected void sendFinishMessage(String channel)
+	{
+		this.messageChannel.push(channel, new FinishMessageData());
+	}
+
+	/**
+	 * 发送执行完成消息。
+	 * <p>
+	 * 无论是否出现异常，都要发送此消息。
+	 * </p>
+	 * 
+	 * @param channel
+	 * @param sqlExecutionStat
+	 */
+	protected void sendFinishMessage(String channel, SQLExecutionStat sqlExecutionStat)
+	{
+		FinishMessageData finishMessageData = new FinishMessageData();
+		finishMessageData.setSqlExecutionStat(sqlExecutionStat);
+
+		this.messageChannel.push(channel, finishMessageData);
+	}
+
+	/**
 	 * 获取I18N消息内容。
 	 * <p>
 	 * 如果找不到对应消息码的消息，则返回<code>"???[code]???"<code>（例如：{@code "???error???"}）。
@@ -254,24 +478,18 @@ public class SqlpadExecutionService extends PersistenceSupport
 	{
 		private String sqlpadChannelId;
 
-		private SqlpadCometdService sqlpadCometdService;
-
 		/** 发送给此Runnable的SQL命令 */
 		private volatile SqlCommand sqlCommand;
-
-		private ServerChannel _sqlpadServerChannel;
 
 		public SqlpadExecutionRunnable()
 		{
 			super();
 		}
 
-		public SqlpadExecutionRunnable(SqlpadExecutionSubmit submit, String sqlpadChannelId,
-				SqlpadCometdService sqlpadCometdService)
+		public SqlpadExecutionRunnable(SqlpadExecutionSubmit submit, String sqlpadChannelId)
 		{
 			super(submit);
 			this.sqlpadChannelId = sqlpadChannelId;
-			this.sqlpadCometdService = sqlpadCometdService;
 		}
 
 		public String getSqlpadChannelId()
@@ -284,16 +502,6 @@ public class SqlpadExecutionService extends PersistenceSupport
 			this.sqlpadChannelId = sqlpadChannelId;
 		}
 
-		public SqlpadCometdService getSqlpadCometdService()
-		{
-			return sqlpadCometdService;
-		}
-
-		public void setSqlpadCometdService(SqlpadCometdService sqlpadCometdService)
-		{
-			this.sqlpadCometdService = sqlpadCometdService;
-		}
-
 		public SqlCommand getSqlCommand()
 		{
 			return sqlCommand;
@@ -304,24 +512,13 @@ public class SqlpadExecutionService extends PersistenceSupport
 			this.sqlCommand = sqlCommand;
 		}
 
-		/**
-		 * 初始化。
-		 * <p>
-		 * 此方法应该在{@linkplain #run()}之前调用。
-		 * </p>
-		 */
-		public void init()
-		{
-			this._sqlpadServerChannel = this.sqlpadCometdService.getChannelWithCreation(this.sqlpadChannelId);
-		}
-
 		@Override
 		public void run()
 		{
 			Connection cn = null;
 			Statement st = null;
 
-			this.sqlpadCometdService.sendStartMessage(this._sqlpadServerChannel, getSqlStatements().size());
+			sendStartMessage(this.sqlpadChannelId, getSqlStatements().size());
 
 			try
 			{
@@ -332,10 +529,10 @@ public class SqlpadExecutionService extends PersistenceSupport
 			}
 			catch (Throwable t)
 			{
-				this.sqlpadCometdService.sendExceptionMessage(_sqlpadServerChannel, t,
+				sendExceptionMessage(sqlpadChannelId, t,
 						getMessage(getLocale(), "sqlpad.executionConnectionException"), false);
 
-				this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel);
+				sendFinishMessage(this.sqlpadChannelId);
 
 				_sqlpadExecutionRunnableMap.remove(getSqlpadId());
 
@@ -361,7 +558,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 					if (!SqlpadExecutionService.this.sqlPermissionChecker.hasPermission(getUser(), getSchema(),
 							sqlStatement))
 					{
-						this.sqlpadCometdService.sendSqlExceptionMessage(_sqlpadServerChannel, sqlStatement, i,
+						sendSqlExceptionMessage(sqlpadChannelId, sqlStatement, i,
 								getMessage(getLocale(), "sqlpad.executionSQLPermissionDenied"));
 
 						sqlExecutionStat.increaseExceptionCount();
@@ -379,7 +576,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 						{
 							sqlExecutionStat.increaseExceptionCount();
 
-							this.sqlpadCometdService.sendSqlExceptionMessage(_sqlpadServerChannel, sqlStatement, i, e,
+							sendSqlExceptionMessage(sqlpadChannelId, sqlStatement, i, e,
 									getMessage(getLocale(), "sqlpad.executionSQLException", e.getMessage()));
 
 							if (ExceptionHandleMode.IGNORE.equals(getExceptionHandleMode()))
@@ -410,7 +607,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			}
 			catch (Throwable t)
 			{
-				this.sqlpadCometdService.sendExceptionMessage(_sqlpadServerChannel, t,
+				sendExceptionMessage(sqlpadChannelId, t,
 						getMessage(getLocale(), "sqlpad.executionErrorOccure"), true);
 			}
 			finally
@@ -420,7 +617,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 				sqlExecutionStat.setTaskDuration(System.currentTimeMillis() - startTime);
 
-				this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel, sqlExecutionStat);
+				sendFinishMessage(this.sqlpadChannelId, sqlExecutionStat);
 
 				_sqlpadExecutionRunnableMap.remove(getSqlpadId());
 			}
@@ -463,7 +660,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 				// 暂停超时
 				if (SqlCommand.PAUSE.equals(this.sqlCommand))
 				{
-					this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
+					sendTextMessage(this.sqlpadChannelId,
 							getMessage(getLocale(), "sqlpad.pauseOverTime"));
 
 					this.sqlCommand = SqlCommand.RESUME;
@@ -535,7 +732,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			{
 				if (!sendWatingMessage)
 				{
-					this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
+					sendTextMessage(this.sqlpadChannelId,
 							getMessage(getLocale(), "sqlpad.waitingForCommitOrRollback", getOverTimeThreashold()),
 							"message-content-highlight", sqlExecutionStat);
 
@@ -548,7 +745,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			// 等待超时
 			if (!SqlCommand.COMMIT.equals(this.sqlCommand) && !SqlCommand.ROLLBACK.equals(this.sqlCommand))
 			{
-				this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
+				sendTextMessage(this.sqlpadChannelId,
 						getMessage(getLocale(), "sqlpad.waitOverTime"));
 
 				this.sqlCommand = (sqlExecutionStat.getExceptionCount() > 0 ? SqlCommand.ROLLBACK : SqlCommand.COMMIT);
@@ -603,7 +800,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 				SqlSelectResult sqlSelectResult = SqlpadExecutionService.this.sqlSelectManager.select(cn, sql, rs, 1,
 						getResultsetFetchSize(), getResultsetRowMapper());
 
-				this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
+				sendSqlSuccessMessage(this.sqlpadChannelId, sqlStatement,
 						sqlStatementIndex, sqlSelectResult);
 			}
 			else
@@ -613,13 +810,13 @@ public class SqlpadExecutionService extends PersistenceSupport
 				// 更新操作
 				if (updateCount > -1)
 				{
-					this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
+					sendSqlSuccessMessage(this.sqlpadChannelId, sqlStatement,
 							sqlStatementIndex, updateCount);
 				}
 				// 其他操作
 				else
 				{
-					this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
+					sendSqlSuccessMessage(this.sqlpadChannelId, sqlStatement,
 							sqlStatementIndex);
 				}
 			}
@@ -635,7 +832,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 		{
 			String messageKey = "sqlpad.SqlCommand." + sqlCommand.toString() + ".ok";
 
-			this.sqlpadCometdService.sendSqlCommandMessage(this._sqlpadServerChannel, sqlCommand,
+			SqlpadExecutionService.this.sendSqlCommandMessage(this.sqlpadChannelId, sqlCommand,
 					getMessage(getLocale(), messageKey, messageArgs));
 		}
 
@@ -863,5 +1060,377 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 		/** 无结果 */
 		NONE
+	}
+
+	protected static abstract class MessageData
+	{
+		protected static final String TIME_PATTERN = "HH:mm:ss";
+
+		private String type;
+
+		private Date date;
+
+		public MessageData()
+		{
+			super();
+			this.date = new Date();
+		}
+
+		public MessageData(String type)
+		{
+			super();
+			this.type = type;
+			this.date = new Date();
+		}
+
+		public String getType()
+		{
+			return type;
+		}
+
+		protected void setType(String type)
+		{
+			this.type = type;
+		}
+
+		public Date getDate()
+		{
+			return date;
+		}
+
+		public void setDate(Date date)
+		{
+			this.date = date;
+		}
+
+		public String getTimeText()
+		{
+			return new SimpleDateFormat(TIME_PATTERN).format(this.date);
+		}
+	}
+
+	protected static class StartMessageData extends MessageData
+	{
+		public static final String TYPE = "START";
+
+		private int sqlCount = 0;
+
+		public StartMessageData()
+		{
+			super(TYPE);
+		}
+
+		public StartMessageData(int sqlCount)
+		{
+			super(TYPE);
+			this.sqlCount = sqlCount;
+		}
+
+		public int getSqlCount()
+		{
+			return sqlCount;
+		}
+
+		public void setSqlCount(int sqlCount)
+		{
+			this.sqlCount = sqlCount;
+		}
+	}
+
+	protected static class SqlSuccessMessageData extends MessageData
+	{
+		public static final String TYPE = "SQLSUCCESS";
+
+		private SqlStatement sqlStatement;
+
+		/** SQL语句索引 */
+		private int sqlStatementIndex;
+
+		/** SQL结果类型 */
+		private SqlResultType sqlResultType = SqlResultType.NONE;
+
+		/** 更新数目 */
+		private int updateCount = -1;
+
+		private SqlSelectResult sqlSelectResult;
+
+		public SqlSuccessMessageData()
+		{
+			super(TYPE);
+		}
+
+		public SqlSuccessMessageData(SqlStatement sqlStatement, int sqlStatementIndex, SqlResultType sqlResultType)
+		{
+			super(TYPE);
+			this.sqlStatement = sqlStatement;
+			this.sqlStatementIndex = sqlStatementIndex;
+			this.sqlResultType = sqlResultType;
+		}
+
+		public SqlStatement getSqlStatement()
+		{
+			return sqlStatement;
+		}
+
+		public void setSqlStatement(SqlStatement sqlStatement)
+		{
+			this.sqlStatement = sqlStatement;
+		}
+
+		public int getSqlStatementIndex()
+		{
+			return sqlStatementIndex;
+		}
+
+		public void setSqlStatementIndex(int sqlStatementIndex)
+		{
+			this.sqlStatementIndex = sqlStatementIndex;
+		}
+
+		public SqlResultType getSqlResultType()
+		{
+			return sqlResultType;
+		}
+
+		public void setSqlResultType(SqlResultType sqlResultType)
+		{
+			this.sqlResultType = sqlResultType;
+		}
+
+		public int getUpdateCount()
+		{
+			return updateCount;
+		}
+
+		public void setUpdateCount(int updateCount)
+		{
+			this.updateCount = updateCount;
+		}
+
+		public SqlSelectResult getSqlSelectResult()
+		{
+			return sqlSelectResult;
+		}
+
+		public void setSqlSelectResult(SqlSelectResult sqlSelectResult)
+		{
+			this.sqlSelectResult = sqlSelectResult;
+		}
+	}
+
+	protected static class ExceptionMessageData extends MessageData
+	{
+		public static final String TYPE = "EXCEPTION";
+
+		private String content;
+
+		private String detailTrace;
+
+		public ExceptionMessageData()
+		{
+			super(TYPE);
+		}
+
+		public ExceptionMessageData(String content)
+		{
+			super(TYPE);
+			this.content = content;
+		}
+
+		public String getContent()
+		{
+			return content;
+		}
+
+		public void setContent(String content)
+		{
+			this.content = content;
+		}
+
+		public String getDetailTrace()
+		{
+			return detailTrace;
+		}
+
+		public void setDetailTrace(String detailTrace)
+		{
+			this.detailTrace = detailTrace;
+		}
+
+		public void setDetailTrace(Throwable t)
+		{
+			this.detailTrace = OperationMessage.printThrowableTrace(t);
+		}
+	}
+
+	protected static class SQLExceptionMessageData extends ExceptionMessageData
+	{
+		public static final String TYPE = "SQLEXCEPTION";
+
+		private SqlStatement sqlStatement;
+
+		/** SQL语句索引 */
+		private int sqlStatementIndex;
+
+		public SQLExceptionMessageData()
+		{
+			super();
+			super.setType(TYPE);
+		}
+
+		public SQLExceptionMessageData(SqlStatement sqlStatement, int sqlStatementIndex, String content)
+		{
+			super(content);
+			super.setType(TYPE);
+			this.sqlStatement = sqlStatement;
+			this.sqlStatementIndex = sqlStatementIndex;
+		}
+
+		public SqlStatement getSqlStatement()
+		{
+			return sqlStatement;
+		}
+
+		public void setSqlStatement(SqlStatement sqlStatement)
+		{
+			this.sqlStatement = sqlStatement;
+		}
+
+		public int getSqlStatementIndex()
+		{
+			return sqlStatementIndex;
+		}
+
+		public void setSqlStatementIndex(int sqlStatementIndex)
+		{
+			this.sqlStatementIndex = sqlStatementIndex;
+		}
+	}
+
+	protected static class SqlCommandMessageData extends MessageData
+	{
+		public static final String TYPE = "SQLCOMMAND";
+
+		private SqlCommand sqlCommand;
+
+		private String content;
+
+		private SQLExecutionStat sqlExecutionStat;
+
+		public SqlCommandMessageData()
+		{
+			super(TYPE);
+		}
+
+		public SqlCommandMessageData(SqlCommand sqlCommand, String content)
+		{
+			super(TYPE);
+			this.sqlCommand = sqlCommand;
+			this.content = content;
+		}
+
+		public SqlCommand getSqlCommand()
+		{
+			return sqlCommand;
+		}
+
+		public void setSqlCommand(SqlCommand sqlCommand)
+		{
+			this.sqlCommand = sqlCommand;
+		}
+
+		public String getContent()
+		{
+			return content;
+		}
+
+		public void setContent(String content)
+		{
+			this.content = content;
+		}
+
+		public SQLExecutionStat getSqlExecutionStat()
+		{
+			return sqlExecutionStat;
+		}
+
+		public void setSqlExecutionStat(SQLExecutionStat sqlExecutionStat)
+		{
+			this.sqlExecutionStat = sqlExecutionStat;
+		}
+	}
+
+	protected static class TextMessageData extends MessageData
+	{
+		public static final String TYPE = "TEXT";
+
+		private String text;
+
+		private String cssClass;
+
+		private SQLExecutionStat sqlExecutionStat;
+
+		public TextMessageData()
+		{
+			super(TYPE);
+		}
+
+		public TextMessageData(String text)
+		{
+			super(TYPE);
+			this.text = text;
+		}
+
+		public String getText()
+		{
+			return text;
+		}
+
+		public void setText(String text)
+		{
+			this.text = text;
+		}
+
+		public String getCssClass()
+		{
+			return cssClass;
+		}
+
+		public void setCssClass(String cssClass)
+		{
+			this.cssClass = cssClass;
+		}
+
+		public SQLExecutionStat getSqlExecutionStat()
+		{
+			return sqlExecutionStat;
+		}
+
+		public void setSqlExecutionStat(SQLExecutionStat sqlExecutionStat)
+		{
+			this.sqlExecutionStat = sqlExecutionStat;
+		}
+	}
+
+	protected static class FinishMessageData extends MessageData
+	{
+		public static final String TYPE = "FINISH";
+
+		private SQLExecutionStat sqlExecutionStat;
+
+		public FinishMessageData()
+		{
+			super(TYPE);
+		}
+
+		public SQLExecutionStat getSqlExecutionStat()
+		{
+			return sqlExecutionStat;
+		}
+
+		public void setSqlExecutionStat(SQLExecutionStat sqlExecutionStat)
+		{
+			this.sqlExecutionStat = sqlExecutionStat;
+		}
 	}
 }

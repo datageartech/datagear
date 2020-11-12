@@ -2,38 +2,38 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.web.cometd.dataexchange;
+package org.datagear.web.dataexchange;
 
 import java.util.Locale;
 
-import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.BatchDataExchangeListener;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.SubDataExchange;
+import org.datagear.web.util.MessageChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 
 /**
- * 基于Cometd的{@linkplain BatchDataExchangeListener}。
+ * 发送消息的{@linkplain BatchDataExchangeListener}。
  * 
  * @author datagear@163.com
  *
  * @param <T>
  */
-public class CometdBatchDataExchangeListener extends CometdDataExchangeListener implements BatchDataExchangeListener
+public class MessageBatchDataExchangeListener extends MessageDataExchangeListener implements BatchDataExchangeListener
 {
-	protected static final Logger LOGGER = LoggerFactory.getLogger(CometdBatchDataExchangeListener.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(MessageBatchDataExchangeListener.class);
 
-	public CometdBatchDataExchangeListener()
+	public MessageBatchDataExchangeListener()
 	{
 		super();
 	}
 
-	public CometdBatchDataExchangeListener(DataExchangeCometdService dataExchangeCometdService,
-			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale)
+	public MessageBatchDataExchangeListener(MessageChannel messageChannel,
+			String dataExchangeServerChannel, MessageSource messageSource, Locale locale)
 	{
-		super(dataExchangeCometdService, dataExchangeServerChannel, messageSource, locale);
+		super(messageChannel, dataExchangeServerChannel, messageSource, locale);
 	}
 
 	@Override

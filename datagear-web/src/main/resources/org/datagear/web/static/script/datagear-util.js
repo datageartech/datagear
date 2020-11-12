@@ -3431,5 +3431,85 @@
 	{
 		$.handleAjaxOperationMessage(jqXHR, thrownError);
 	});
+	
+	/**
+	 * 创建任务客户端。
+	 * 任务客户端接收任务消息，直到任务完成。
+	 *
+	 * @param url 任务消息响应URL
+	 * @param messageHandler 消息处理器，格式为：function(message){ return true || false }，返回true表示任务已完成
+	 * @param options 可选，附加选项
+	 */
+	$.TaskClient = function(url, messageHandler, options)
+	{
+		this.url = url;
+		this.messageHandler = messageHandler;
+		this.options = $.extend(
+				{
+					interval: 50,
+					data: undefined
+				},
+				options);
+	};
+	
+	$.TaskClient.prototype =
+	{
+		//开始接收消息
+		start: function()
+		{
+			if(this._status == "run")
+				return false;
+			
+			this._status = "run";
+			
+			this._receiveAndHandleMessage();
+		},
+		
+		isStart: function()
+		{
+			return (this._status == "run");
+		},
+		
+		isFinish: function()
+		{
+			return (this._status == "finish");
+		},
+		
+		_receiveAndHandleMessage: function()
+		{
+			if(this._status == "finish")
+				return;
+			
+			var taskClient = this;
+			
+			$.ajax({
+				type : "POST",
+				url : this.url,
+				data : this.options.data,
+				success : function(messages)
+				{
+					if(messages == null)
+						messages = [];
+					else if(!$.isArray(messages))
+						messages = [ messages ];
+					
+					var isFinish = false;
+					
+					for(var i=0; i<messages.length; i++)
+					{
+						var myIsFinish = taskClient.messageHandler(messages[i]);
+						
+						if(!isFinish && myIsFinish === true)
+							isFinish = true;
+					}
+					
+					if(isFinish)
+						taskClient._status = "finish";
+					else
+						setTimeout(function(){ taskClient._receiveAndHandleMessage(); }, taskClient.options.interval);
+				}
+			});
+		}
+	};
 })
 (jQuery);

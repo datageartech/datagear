@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.web.cometd.dataexchange;
+package org.datagear.web.dataexchange;
 
 import org.datagear.dataexchange.BatchDataExchangeListener;
 import org.datagear.dataexchange.SubDataExchange;

@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.BatchDataExchange;
 import org.datagear.dataexchange.BatchDataExchangeResult;
 import org.datagear.dataexchange.DataExchange;
@@ -82,11 +81,11 @@ import org.datagear.util.resource.FileOutputStreamResourceFactory;
 import org.datagear.util.resource.FileReaderResourceFactory;
 import org.datagear.util.resource.FileWriterResourceFactory;
 import org.datagear.util.resource.ResourceFactory;
-import org.datagear.web.cometd.dataexchange.CometdBatchDataExchangeListener;
-import org.datagear.web.cometd.dataexchange.CometdSubDataImportListener;
-import org.datagear.web.cometd.dataexchange.CometdSubTextDataExportListener;
-import org.datagear.web.cometd.dataexchange.CometdSubTextValueDataImportListener;
-import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
+import org.datagear.web.dataexchange.MessageBatchDataExchangeListener;
+import org.datagear.web.dataexchange.MessageSubDataImportListener;
+import org.datagear.web.dataexchange.MessageSubTextDataExportListener;
+import org.datagear.web.dataexchange.MessageSubTextValueDataImportListener;
+import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +117,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	private DataExchangeService<DataExchange> dataExchangeService;
 
 	@Autowired
-	private DataExchangeCometdService dataExchangeCometdService;
+	private MessageChannel messageChannel;
 
 	@Autowired
 	private DBMetaResolver dbMetaResolver;
@@ -141,14 +140,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService = dataExchangeService;
 	}
 
-	public DataExchangeCometdService getDataExchangeCometdService()
+	public MessageChannel getMessageChannel()
 	{
-		return dataExchangeCometdService;
+		return messageChannel;
 	}
 
-	public void setDataExchangeCometdService(DataExchangeCometdService dataExchangeCometdService)
+	public void setMessageChannel(MessageChannel messageChannel)
 	{
-		this.dataExchangeCometdService = dataExchangeCometdService;
+		this.messageChannel = messageChannel;
 	}
 
 	public DBMetaResolver getDbMetaResolver()
@@ -269,7 +268,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String importChannelId = getDataExchangeChannelId(dataExchangeId);
-		ServerChannel importServerChannel = this.dataExchangeCometdService.getChannelWithCreation(importChannelId);
 
 		Locale locale = getLocale(request);
 
@@ -284,8 +282,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataImportForm.getDataFormat(),
 					dataImportForm.getImportOption(), tableNames[i], readerFactory);
 
-			CometdSubTextValueDataImportListener listener = new CometdSubTextValueDataImportListener(
-					this.dataExchangeCometdService, importServerChannel, getMessageSource(), locale,
+			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
+					this.messageChannel, importChannelId, getMessageSource(), locale,
 					subDataExchangeIds[i], csvDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
@@ -314,7 +312,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
-				importServerChannel, locale);
+				importChannelId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -398,7 +396,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String importChannelId = getDataExchangeChannelId(dataExchangeId);
-		ServerChannel importServerChannel = this.dataExchangeCometdService.getChannelWithCreation(importChannelId);
 
 		Locale locale = getLocale(request);
 
@@ -413,8 +410,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			SqlDataImport sqlDataImport = new SqlDataImport(connectionFactory, dataImportForm.getImportOption(),
 					readerFactory);
 
-			CometdSubDataImportListener listener = new CometdSubDataImportListener(this.dataExchangeCometdService,
-					importServerChannel, getMessageSource(), locale, subDataExchangeIds[i],
+			MessageSubDataImportListener listener = new MessageSubDataImportListener(this.messageChannel, importChannelId,
+					getMessageSource(), locale, subDataExchangeIds[i],
 					dataImportForm.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
@@ -431,7 +428,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
-				importServerChannel, locale);
+				importChannelId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -530,7 +527,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String importChannelId = getDataExchangeChannelId(dataExchangeId);
-		ServerChannel importServerChannel = this.dataExchangeCometdService.getChannelWithCreation(importChannelId);
 
 		Locale locale = getLocale(request);
 
@@ -545,8 +541,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			JsonDataImport jsonDataImport = new JsonDataImport(connectionFactory, importForm.getDataFormat(),
 					importForm.getImportOption(), (tableNames == null ? null : tableNames[i]), readerFactory);
 
-			CometdSubTextValueDataImportListener listener = new CometdSubTextValueDataImportListener(
-					this.dataExchangeCometdService, importServerChannel, getMessageSource(), locale,
+			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
+					this.messageChannel, importChannelId, getMessageSource(), locale,
 					subDataExchangeIds[i], jsonDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
@@ -578,7 +574,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
-				importServerChannel, locale);
+				importChannelId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -664,7 +660,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String importChannelId = getDataExchangeChannelId(dataExchangeId);
-		ServerChannel importServerChannel = this.dataExchangeCometdService.getChannelWithCreation(importChannelId);
 
 		Locale locale = getLocale(request);
 
@@ -678,8 +673,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 					dataImportForm.getImportOption(), file);
 			excelDataImport.setUnifiedTable(tableNames[i]);
 
-			CometdSubTextValueDataImportListener listener = new CometdSubTextValueDataImportListener(
-					this.dataExchangeCometdService, importServerChannel, getMessageSource(), locale,
+			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
+					this.messageChannel, importChannelId, getMessageSource(), locale,
 					subDataExchangeIds[i], excelDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
@@ -708,7 +703,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
-				importServerChannel, locale);
+				importChannelId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -800,7 +795,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		try
 		{
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(logFile),
-					CometdSubTextValueDataImportListener.LOG_FILE_CHARSET));
+					MessageSubTextValueDataImportListener.LOG_FILE_CHARSET));
 
 			IOUtil.write(reader, out);
 		}
@@ -921,7 +916,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
-		ServerChannel exportServerChannel = this.dataExchangeCometdService.getChannelWithCreation(exportChannelId);
 
 		Locale locale = getLocale(request);
 
@@ -938,8 +932,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			CsvDataExport csvDataExport = new CsvDataExport(connectionFactory, exportForm.getDataFormat(),
 					exportForm.getExportOption(), query, writerFactory);
 
-			CometdSubTextDataExportListener listener = new CometdSubTextDataExportListener(
-					this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
+					this.messageChannel, exportChannelId, getMessageSource(), getLocale(request),
 					subDataExchangeIds[i]);
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
@@ -951,7 +945,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
-				exportServerChannel, locale);
+				exportChannelId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -1029,7 +1023,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
-		ServerChannel exportServerChannel = this.dataExchangeCometdService.getChannelWithCreation(exportChannelId);
 
 		Locale locale = getLocale(request);
 
@@ -1045,8 +1038,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			ExcelDataExport excelDataExport = new ExcelDataExport(connectionFactory, exportForm.getDataFormat(),
 					exportForm.getExportOption(), query, writerFactory);
 
-			CometdSubTextDataExportListener listener = new CometdSubTextDataExportListener(
-					this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
+					this.messageChannel, exportChannelId, getMessageSource(), getLocale(request),
 					subDataExchangeIds[i]);
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
@@ -1058,7 +1051,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
-				exportServerChannel, locale);
+				exportChannelId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -1145,7 +1138,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
-		ServerChannel exportServerChannel = this.dataExchangeCometdService.getChannelWithCreation(exportChannelId);
 
 		Locale locale = getLocale(request);
 
@@ -1162,8 +1154,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			SqlDataExport sqlDataExport = new SqlDataExport(connectionFactory, exportForm.getDataFormat(),
 					exportForm.getExportOption(), query, tableNames[i], writerFactory);
 
-			CometdSubTextDataExportListener listener = new CometdSubTextDataExportListener(
-					this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
+					this.messageChannel, exportChannelId, getMessageSource(), getLocale(request),
 					subDataExchangeIds[i]);
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
@@ -1175,7 +1167,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
-				exportServerChannel, locale);
+				exportChannelId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -1267,7 +1259,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
-		ServerChannel exportServerChannel = this.dataExchangeCometdService.getChannelWithCreation(exportChannelId);
 
 		Locale locale = getLocale(request);
 
@@ -1284,8 +1275,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			JsonDataExport csvDataExport = new JsonDataExport(connectionFactory, exportForm.getDataFormat(),
 					exportOption, query, writerFactory, (tableNames == null ? null : tableNames[i]));
 
-			CometdSubTextDataExportListener listener = new CometdSubTextDataExportListener(
-					this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
+					this.messageChannel, exportChannelId, getMessageSource(), getLocale(request),
 					subDataExchangeIds[i]);
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
@@ -1297,7 +1288,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
-				exportServerChannel, locale);
+				exportChannelId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -1535,12 +1526,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 	}
 
 	protected BatchDataExchange buildBatchDataExchange(ConnectionFactory connectionFactory,
-			Set<SubDataExchange> subDataExchanges, ServerChannel serverChannel, Locale locale)
+			Set<SubDataExchange> subDataExchanges, String channel, Locale locale)
 	{
 		BatchDataExchange batchDataExchange = new SimpleBatchDataExchange(connectionFactory, subDataExchanges);
 
-		CometdBatchDataExchangeListener listener = new CometdBatchDataExchangeListener(this.dataExchangeCometdService,
-				serverChannel, getMessageSource(), locale);
+		MessageBatchDataExchangeListener listener = new MessageBatchDataExchangeListener(this.messageChannel,
+				channel, getMessageSource(), locale);
 		batchDataExchange.setListener(listener);
 
 		return batchDataExchange;

@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.web.cometd.dataexchange;
+package org.datagear.web.dataexchange;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,22 +11,22 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Locale;
 
-import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
 import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.util.IOUtil;
-import org.datagear.web.cometd.dataexchange.CometdBatchDataExchangeListener.SubSubmitSuccess;
+import org.datagear.web.dataexchange.MessageBatchDataExchangeListener.SubSubmitSuccess;
+import org.datagear.web.util.MessageChannel;
 import org.springframework.context.MessageSource;
 
 /**
- * 基于Cometd的子数据交换{@linkplain DataExchangeListener}。
+ * 发送消息的子数据交换{@linkplain DataExchangeListener}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class CometdSubDataExchangeListener extends CometdDataExchangeListener
+public abstract class MessageSubDataExchangeListener extends MessageDataExchangeListener
 {
 	public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
 
@@ -44,16 +44,16 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	private volatile long _prevSendExchangingMessageTime = 0;
 	private volatile Writer _logWriter;
 
-	public CometdSubDataExchangeListener()
+	public MessageSubDataExchangeListener()
 	{
 		super();
 	}
 
-	public CometdSubDataExchangeListener(DataExchangeCometdService dataExchangeCometdService,
-			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale,
+	public MessageSubDataExchangeListener(MessageChannel messageChannel,
+			String dataExchangeServerChannel, MessageSource messageSource, Locale locale,
 			String subDataExchangeId)
 	{
-		super(dataExchangeCometdService, dataExchangeServerChannel, messageSource, locale);
+		super(messageChannel, dataExchangeServerChannel, messageSource, locale);
 		this.subDataExchangeId = subDataExchangeId;
 	}
 
