@@ -571,7 +571,7 @@
 		
 		/**
 		 * 表单数据转JSON对象。
-		 * @param form 表单元素、表单JQuery对象、名称/值对象数组，名称支持“a.b[0].c”格式的属性路径
+		 * @param form 表单元素、表单JQuery对象、名称/值对象数组，名称支持“a.b[0].c”、“a.b[]”格式的属性路径
 		 * @param ignores 忽略的表单项名称，可选
 		 */
 		formToJson: function(form, ignores)
@@ -583,7 +583,7 @@
 			var json = {};
 			var KeyForArray = $.uid("__KEY_FOR_ARRAY_");
 			
-			$(array).each(function()
+			$(array).each(function(indexInArray)
 			{
 				var name = this.name;
 				
@@ -596,10 +596,22 @@
 				var parent = json;
 				for(var i=0; i<names.length; i++)
 				{
-					var name = names[i];
-					var isEleKey = (name.length > 2 && name.charAt(0) == '[' && name.charAt(name.length-1) == ']');
+					name = names[i];
+					var isEleKey = (name.length >= 2 && name.charAt(0) == '[' && name.charAt(name.length-1) == ']');
 					if(isEleKey)
-						name = name.substring(1, name.length-1);
+					{
+						// []
+						if(name.length == 2)
+						{
+							if(i != names.length - 1)
+								throw new Error("'[]' must be at the tail of '"+this.name+"'");
+							
+							name = "";
+						}
+						// [...]
+						else
+							name = name.substring(1, name.length-1);
+					}
 					
 					if(i == names.length - 1)
 					{
@@ -608,6 +620,10 @@
 						{
 							if(parent[KeyForArray] == undefined)
 								parent[KeyForArray] = true;
+							
+							// [] 格式，取数组索引作为key，符合数组顺序
+							if(name == "")
+								name = indexInArray+"";
 							
 							parent[name] = value;
 						}
