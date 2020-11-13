@@ -2,7 +2,6 @@
 导出公用片段
 
 String dataExchangeId 数据交换ID
-String dataExchangeChannelId 数据交换cometd通道ID
 
 依赖：
 dataExchange_js.ftl
@@ -11,8 +10,6 @@ dataExchange_js.ftl
 <script type="text/javascript">
 (function(po)
 {
-	po.dataExchangeChannelId = "${dataExchangeChannelId}";
-	
 	po.addSubDataExchange = function(query)
 	{
 		if(query == null)
@@ -342,25 +339,26 @@ dataExchange_js.ftl
 		
 		po.element("#${pageId}-form").submit(function()
 		{
+			if(po.dataExchangeTaskClient.isActive())
+				return;
+			
+			po.dataExchangeTaskClient.start();
+			
 			po.resetAllSubDataExchangeStatus();
 			
-			po.cometdExecuteAfterSubscribe(po.dataExchangeChannelId,
-			function()
+			po.element("#${pageId}-form").ajaxSubmit(
 			{
-				po.element("#${pageId}-form").ajaxSubmit(
+				success: function(data)
 				{
-					success: function(data)
-					{
-						po.subDataExchangeFileNameMap = data.data;
-						
-						if(!po.isDataExchangePageStatus("finish"))
-							po.updateDataExchangePageStatus("exchange");
-					}
-				});
-			},
-			function(message)
-			{
-				po.handleDataExchangeCometdMessage(message);
+					po.subDataExchangeFileNameMap = data.data;
+					
+					if(!po.isDataExchangePageStatus("finish"))
+						po.updateDataExchangePageStatus("exchange");
+				},
+				error: function()
+				{
+					po.dataExchangeTaskClient.stop();
+				}
 			});
 			
 			return false;

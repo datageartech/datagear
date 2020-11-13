@@ -111,7 +111,6 @@ Schema schema 数据库，不允许为null
 
 <#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_grid.ftl">
-<#include "../include/page_obj_cometd.ftl">
 <#include "../include/page_obj_format_time.ftl" >
 <#include "include/dataExchange_js.ftl" >
 <#include "include/dataExport_js.ftl" >
@@ -148,7 +147,6 @@ Schema schema 数据库，不允许为null
 	});
 	po.dataExportTableColumns[0].width = "30%";
 	
-	po.cometdInitIfNot();
 	po.initDataExportSteps();
 	po.initDataExchangeUIs();
 	po.initDataExportUIs();

@@ -170,7 +170,6 @@ Schema schema 数据库，不允许为null
 
 <#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_tabs.ftl" >
-<#include "../include/page_obj_cometd.ftl">
 <#include "../include/page_obj_format_time.ftl" >
 <#include "../include/page_obj_data_permission.ftl">
 <#include "../include/page_obj_data_permission_ds_table.ftl">
@@ -180,7 +179,6 @@ Schema schema 数据库，不允许为null
 {
 	po.schemaId = "${schema.id}";
 	po.sqlpadId = "${sqlpadId}";
-	po.sqlpadChannelId = "${sqlpadChannelId}";
 	po.sqlResultReadActualBinaryRows = parseInt("${sqlResultRowMapper.readActualBinaryRows}");
 	po.sqlResultBinaryPlaceholder = "${sqlResultRowMapper.binaryPlaceholder?js_string}";
 	
@@ -197,7 +195,7 @@ Schema schema 数据库，不允许为null
 				return po.handleMessage(message);
 			},
 			{
-				data: { sqlpadChannelId: po.sqlpadChannelId }
+				data: { sqlpadId: po.sqlpadId }
 			}
 		);
 	
@@ -309,6 +307,7 @@ Schema schema 数据库，不允许为null
 			},
 			error : function()
 			{
+				po.sqlpadTaskClient.stop();
 				po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "init");
 			}
 		});
@@ -542,6 +541,12 @@ Schema schema 数据库，不允许为null
 			$msgDiv.appendTo(po.resultMessageElement);
 			po.resultMessageElement.scrollTop(po.resultMessageElement.prop("scrollHeight"));
 		}
+		
+		//如果在暂停，则应挂起（比如暂停时执行命令）；否则，应唤醒（比如暂停超时）
+		if(po.isExecutionStatePaused())
+			po.sqlpadTaskClient.suspend();
+		else
+			po.sqlpadTaskClient.resume();
 		
 		return isFinish;
 	};
@@ -890,6 +895,13 @@ Schema schema 数据库，不允许为null
 		return resultsetFetchSize;
 	};
 	
+	po.isExecutionStatePaused = function()
+	{
+		var executionState = po.element("#executeSqlButton").attr("execution-state");
+		
+		return (executionState == "paused");
+	};
+	
 	po.element("#executeSqlButton").click(function()
 	{
 		var $this = $(this);
@@ -902,6 +914,7 @@ Schema schema 数据库，不允许为null
 		}
 		else if(executionState == "paused")
 		{
+			po.sqlpadTaskClient.resume();
 			po.sendSqlCommand("RESUME", $this);
 		}
 		else
@@ -923,6 +936,9 @@ Schema schema 数据库，不允许为null
 			if(!sql)
 				return;
 			
+			if(po.sqlpadTaskClient.isActive())
+				return;
+			
 			var settingForm = po.element("#settingForm");
 			
 			var commitMode = po.element("input[name='sqlCommitMode']:checked", settingForm).val();
@@ -941,21 +957,42 @@ Schema schema 数据库，不允许为null
 	
 	po.element("#stopSqlButton").click(function()
 	{
-		po.sendSqlCommand("STOP", $(this));
+		if(po.sqlpadTaskClient.isActive())
+		{
+			//如果挂起，则应唤醒接收命令响应
+			if(po.sqlpadTaskClient.isSuspend())
+				po.sqlpadTaskClient.resume();
+			
+			po.sendSqlCommand("STOP", $(this));
+		}
 		
 		po.sqlEditor.focus();
 	});
-
+	
 	po.element("#commitSqlButton").click(function()
 	{
-		po.sendSqlCommand("COMMIT", $(this));
+		if(po.sqlpadTaskClient.isActive())
+		{
+			//如果挂起，则应唤醒接收命令响应
+			if(po.sqlpadTaskClient.isSuspend())
+				po.sqlpadTaskClient.resume();
+			
+			po.sendSqlCommand("COMMIT", $(this));
+		}
 		
 		po.sqlEditor.focus();
 	});
 	
 	po.element("#rollbackSqlButton").click(function()
 	{
-		po.sendSqlCommand("ROLLBACK", $(this));
+		if(po.sqlpadTaskClient.isActive())
+		{
+			//如果挂起，则应唤醒接收命令响应
+			if(po.sqlpadTaskClient.isSuspend())
+				po.sqlpadTaskClient.resume();
+			
+			po.sendSqlCommand("ROLLBACK", $(this));
+		}
 		
 		po.sqlEditor.focus();
 	});

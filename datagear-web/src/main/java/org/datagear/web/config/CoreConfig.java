@@ -88,7 +88,6 @@ import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.util.ChangelogResolver;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
-import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.TableCache;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
@@ -619,12 +618,6 @@ public class CoreConfig implements InitializingBean
 	}
 
 	@Bean
-	public MessageChannel messageChannel()
-	{
-		return new MessageChannel();
-	}
-
-	@Bean
 	public SqlSelectManager sqlSelectManager()
 	{
 		SqlSelectManager bean = new SqlSelectManager(this.dbMetaResolver());
@@ -635,7 +628,7 @@ public class CoreConfig implements InitializingBean
 	public SqlpadExecutionService sqlpadExecutionService()
 	{
 		SqlpadExecutionService bean = new SqlpadExecutionService(this.connectionSource(), this.messageSource(),
-				this.messageChannel(), this.sqlHistoryService(), this.sqlSelectManager());
+				this.sqlHistoryService(), this.sqlSelectManager());
 		return bean;
 	}
 

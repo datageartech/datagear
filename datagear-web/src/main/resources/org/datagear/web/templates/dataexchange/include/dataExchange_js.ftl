@@ -50,6 +50,16 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		
 		return po.nextSubDataExchangeIdSeq;
 	};
+
+	po.dataExchangeTaskClient = new $.TaskClient("${contextPath}/dataexchange/"+po.schemaId+"/message",
+			function(message)
+			{
+				return po.handleDataExchangeMessage(message);
+			},
+			{
+				data: { dataExchangeId: po.dataExchangeId }
+			}
+		);
 	
 	po.calTableHeight = function()
 	{
@@ -228,9 +238,9 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		return true;
 	};
 	
-	po.handleDataExchangeCometdMessage = function(message)
+	po.handleDataExchangeMessage = function(message)
 	{
-		message = message.data;
+		var isFinish = false;
 		var type = (message ? message.type : "");
 		
 		if("Start" == type)
@@ -251,15 +261,18 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		}
 		else if("Finish" == type)
 		{
+			isFinish = true;
 			po.refreshSubDataExchangeStatus();
 			po.setDataExchangeProgress(100, message.duration);
 			po.updateDataExchangePageStatus("finish");
 		}
 		else
-			po.handleSubDataExchangeCometdMessage(message);
+			po.handleSubDataExchangeMessage(message);
+		
+		return isFinish;
 	};
 	
-	po.handleSubDataExchangeCometdMessage = function(message)
+	po.handleSubDataExchangeMessage = function(message)
 	{
 		var subDataExchangeId = message.subDataExchangeId;
 		

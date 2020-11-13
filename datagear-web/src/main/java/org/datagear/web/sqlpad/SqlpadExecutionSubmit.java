@@ -26,6 +26,9 @@ import org.datagear.web.sqlpad.SqlpadExecutionService.ExceptionHandleMode;
  */
 public class SqlpadExecutionSubmit
 {
+	/** 暂停允许最大分钟数 */
+	public static final int MAX_PAUSE_OVER_TIME_THREASHOLD_MINUTES = 60;
+
 	private User user;
 
 	private Schema schema;
@@ -40,6 +43,7 @@ public class SqlpadExecutionSubmit
 
 	private ExceptionHandleMode exceptionHandleMode;
 
+	/** 暂停超时过期分钟数 */
 	private int overTimeThreashold;
 
 	private int resultsetFetchSize;
@@ -61,7 +65,7 @@ public class SqlpadExecutionSubmit
 
 	public SqlpadExecutionSubmit(User user, Schema schema, String sqlpadId, File sqlpadFileDirectory,
 			List<SqlStatement> sqlStatements, CommitMode commitMode, ExceptionHandleMode exceptionHandleMode,
-			int overTimeThreashold, int resultsetFetchSize, RowMapper resultsetRowMapper, Locale locale)
+			Integer overTimeThreashold, int resultsetFetchSize, RowMapper resultsetRowMapper, Locale locale)
 	{
 		super();
 		this.user = user;
@@ -71,7 +75,7 @@ public class SqlpadExecutionSubmit
 		this.sqlStatements = sqlStatements;
 		this.commitMode = commitMode;
 		this.exceptionHandleMode = exceptionHandleMode;
-		this.overTimeThreashold = overTimeThreashold;
+		setOverTimeThreashold(overTimeThreashold);
 		this.resultsetFetchSize = resultsetFetchSize;
 		this.resultsetRowMapper = resultsetRowMapper;
 		this.locale = locale;
@@ -152,8 +156,15 @@ public class SqlpadExecutionSubmit
 		return overTimeThreashold;
 	}
 
-	public void setOverTimeThreashold(int overTimeThreashold)
+	public void setOverTimeThreashold(Integer overTimeThreashold)
 	{
+		if (overTimeThreashold == null)
+			overTimeThreashold = 10;
+		else if (overTimeThreashold < 1)
+			overTimeThreashold = 1;
+		else if (overTimeThreashold > MAX_PAUSE_OVER_TIME_THREASHOLD_MINUTES)
+			overTimeThreashold = MAX_PAUSE_OVER_TIME_THREASHOLD_MINUTES;
+
 		this.overTimeThreashold = overTimeThreashold;
 	}
 

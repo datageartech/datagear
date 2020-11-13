@@ -37,7 +37,6 @@ import org.datagear.web.sqlpad.SqlpadExecutionService.CommitMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.ExceptionHandleMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
 import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
-import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +65,6 @@ public class SqlpadController extends AbstractSchemaConnController
 	private SqlSelectManager sqlSelectManager;
 
 	@Autowired
-	private MessageChannel messageChannel;
-
-	@Autowired
 	private SqlpadExecutionService sqlpadExecutionService;
 
 	@Autowired
@@ -92,16 +88,6 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setSqlSelectManager(SqlSelectManager sqlSelectManager)
 	{
 		this.sqlSelectManager = sqlSelectManager;
-	}
-
-	public MessageChannel getMessageChannel()
-	{
-		return messageChannel;
-	}
-
-	public void setMessageChannel(MessageChannel messageChannel)
-	{
-		this.messageChannel = messageChannel;
 	}
 
 	public SqlpadExecutionService getSqlpadExecutionService()
@@ -165,10 +151,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			initSql = "";
 
 		String sqlpadId = generateSqlpadId(request, response);
-		String sqlpadChannelId = this.sqlpadExecutionService.getSqlpadChannelId(sqlpadId);
 
 		springModel.addAttribute("sqlpadId", sqlpadId);
-		springModel.addAttribute("sqlpadChannelId", sqlpadChannelId);
 		springModel.addAttribute("sqlResultRowMapper", buildDefaultLOBRowMapper());
 		springModel.addAttribute("initSql", initSql);
 
@@ -208,13 +192,6 @@ public class SqlpadController extends AbstractSchemaConnController
 		if (exceptionHandleMode == null)
 			exceptionHandleMode = ExceptionHandleMode.ABORT;
 
-		if (overTimeThreashold == null)
-			overTimeThreashold = 10;
-		else if (overTimeThreashold < 1)
-			overTimeThreashold = 1;
-		else if (overTimeThreashold > 60)
-			overTimeThreashold = 60;
-
 		if (resultsetFetchSize == null)
 			resultsetFetchSize = DEFAULT_SQL_RESULTSET_FETCH_SIZE;
 
@@ -245,9 +222,15 @@ public class SqlpadController extends AbstractSchemaConnController
 	@ResponseBody
 	public List<Object> message(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("sqlpadChannelId") String sqlpadChannelId) throws Throwable
+			@RequestParam("sqlpadId") String sqlpadId,
+			@RequestParam(value = "messageCount", required = false) Integer messageCount) throws Throwable
 	{
-		return this.messageChannel.pull(sqlpadChannelId, 10);
+		if (messageCount == null)
+			messageCount = 50;
+		if (messageCount < 1)
+			messageCount = 1;
+
+		return this.sqlpadExecutionService.message(sqlpadId, messageCount);
 	}
 
 	@RequestMapping(value = "/{schemaId}/select", produces = CONTENT_TYPE_JSON)

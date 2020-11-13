@@ -3444,71 +3444,161 @@
 	{
 		this.url = url;
 		this.messageHandler = messageHandler;
+		this._status = "";
 		this.options = $.extend(
 				{
-					interval: 50,
-					data: undefined
+					//轮询间隔
+					interval: 100,
+					//挂起状态时的轮询间隔
+					suspendInterval: 3000,
+					//当连续接收空消息这些秒数后，自动进入挂起状态，-1 表示不自动挂起
+					autoSuspendExpireSeconds: 10,
+					//自动挂起状态时的轮询间隔
+					autoSuspendInterval: 1500,
+					//ajax设置项
+					ajaxOptions: {}
 				},
 				options);
 	};
 	
 	$.TaskClient.prototype =
 	{
-		//开始接收消息
+		//开始轮询接收消息
 		start: function()
 		{
-			if(this._status == "run")
+			if(this.isActive())
 				return false;
 			
-			this._status = "run";
-			
+			this._status = "active.run";
 			this._receiveAndHandleMessage();
+			
+			return true;
 		},
 		
-		isStart: function()
+		//挂起，进入慢轮询状态
+		suspend: function()
 		{
-			return (this._status == "run");
+			if(!this.isActive())
+				return false;
+			
+			this._status = "active.suspend";
+			
+			return true;
 		},
 		
-		isFinish: function()
+		//唤醒，从慢轮询状态恢复
+		resume: function()
 		{
-			return (this._status == "finish");
+			if(!this.isSuspend())
+				return false;
+			
+			this.stop();
+			this.start();
+			
+			return true;
+		},
+		
+		//停止轮询接收消息，停止后可重新start
+		stop: function()
+		{
+			if(!this.isActive())
+				return false;
+			
+			this._status = "stop";
+			if(this._timeoutId)
+			{
+				clearTimeout(this._timeoutId);
+				this._timeoutId = "";
+			}
+			
+			return true;
+		},
+		
+		isActive: function()
+		{
+			return (this._status && this._status.indexOf("active") == 0);
+		},
+		
+		isSuspend: function()
+		{
+			return (this._status == "active.suspend");
 		},
 		
 		_receiveAndHandleMessage: function()
 		{
-			if(this._status == "finish")
+			if(!this.isActive())
 				return;
 			
 			var taskClient = this;
 			
-			$.ajax({
-				type : "POST",
-				url : this.url,
-				data : this.options.data,
-				success : function(messages)
-				{
-					if(messages == null)
-						messages = [];
-					else if(!$.isArray(messages))
-						messages = [ messages ];
-					
-					var isFinish = false;
-					
-					for(var i=0; i<messages.length; i++)
+			var ajaxOptions = $.extend({}, this.options.ajaxOptions,
 					{
-						var myIsFinish = taskClient.messageHandler(messages[i]);
-						
-						if(!isFinish && myIsFinish === true)
-							isFinish = true;
-					}
-					
-					if(isFinish)
-						taskClient._status = "finish";
-					else
-						setTimeout(function(){ taskClient._receiveAndHandleMessage(); }, taskClient.options.interval);
-				}
-			});
+						type : "POST",
+						url : this.url,
+						data : this.options.data,
+						success : function(messages)
+						{
+							if(messages == null)
+								messages = [];
+							else if(!$.isArray(messages))
+								messages = [ messages ];
+							
+							var isFinish = false;
+							
+							for(var i=0; i<messages.length; i++)
+							{
+								var myIsFinish = taskClient.messageHandler(messages[i]);
+								
+								if(!isFinish && myIsFinish === true)
+									isFinish = true;
+							}
+							
+							if(isFinish)
+								taskClient._status = "stop";
+							
+							//处理自动挂起
+							var autoSuspend = false;
+							if(taskClient.options.autoSuspendExpireSeconds > -1)
+							{
+								if(messages.length > 0)
+								{
+									autoSuspend = false;
+									taskClient._firstEmptyTime = null;
+								}
+								else
+								{
+									if(taskClient._firstEmptyTime
+											&& (new Date().getTime() - taskClient._firstEmptyTime)
+													>= taskClient.options.autoSuspendExpireSeconds*1000)
+									{
+										autoSuspend = true;
+									}
+									
+									if(!taskClient._prevMessagesEmpty)
+										taskClient._firstEmptyTime = new Date().getTime();
+								}
+								
+								taskClient._prevMessagesEmpty = (messages.length == 0);
+							}
+							
+							if(taskClient.isActive())
+							{
+								var interval = (taskClient.isSuspend() || autoSuspend ?
+										taskClient.options.suspendInterval : taskClient.options.interval);
+								
+								if(autoSuspend)
+									interval = taskClient.options.autoSuspendInterval;
+								
+								taskClient._timeoutId = setTimeout(function()
+										{
+											taskClient._receiveAndHandleMessage();
+										},
+										interval);
+							}
+						}
+					});
+			
+			$.ajax(ajaxOptions);
 		}
 	};
 })

@@ -117,13 +117,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 	private DataExchangeService<DataExchange> dataExchangeService;
 
 	@Autowired
-	private MessageChannel messageChannel;
-
-	@Autowired
 	private DBMetaResolver dbMetaResolver;
 
 	@Autowired
 	private File tempDirectory;
+
+	private MessageChannel messageChannel = new MessageChannel();
 
 	public DataExchangeController()
 	{
@@ -145,7 +144,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return messageChannel;
 	}
 
-	public void setMessageChannel(MessageChannel messageChannel)
+	protected void setMessageChannel(MessageChannel messageChannel)
 	{
 		this.messageChannel = messageChannel;
 	}
@@ -211,7 +210,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 
@@ -267,8 +265,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		String importChannelId = getDataExchangeChannelId(dataExchangeId);
-
 		Locale locale = getLocale(request);
 
 		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
@@ -283,8 +279,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 					dataImportForm.getImportOption(), tableNames[i], readerFactory);
 
 			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
-					this.messageChannel, importChannelId, getMessageSource(), locale,
-					subDataExchangeIds[i], csvDataImport.getImportOption().getExceptionResolve());
+					this.messageChannel, dataExchangeId, getMessageSource(), locale, subDataExchangeIds[i],
+					csvDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
 					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, csvDataImport));
@@ -312,7 +308,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
-				importChannelId, locale);
+				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -344,7 +340,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 
@@ -395,8 +390,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		String importChannelId = getDataExchangeChannelId(dataExchangeId);
-
 		Locale locale = getLocale(request);
 
 		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
@@ -410,8 +403,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			SqlDataImport sqlDataImport = new SqlDataImport(connectionFactory, dataImportForm.getImportOption(),
 					readerFactory);
 
-			MessageSubDataImportListener listener = new MessageSubDataImportListener(this.messageChannel, importChannelId,
-					getMessageSource(), locale, subDataExchangeIds[i],
+			MessageSubDataImportListener listener = new MessageSubDataImportListener(this.messageChannel,
+					dataExchangeId, getMessageSource(), locale, subDataExchangeIds[i],
 					dataImportForm.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
@@ -428,7 +421,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
-				importChannelId, locale);
+				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -461,7 +454,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 
@@ -526,8 +518,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		String importChannelId = getDataExchangeChannelId(dataExchangeId);
-
 		Locale locale = getLocale(request);
 
 		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
@@ -542,8 +532,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 					importForm.getImportOption(), (tableNames == null ? null : tableNames[i]), readerFactory);
 
 			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
-					this.messageChannel, importChannelId, getMessageSource(), locale,
-					subDataExchangeIds[i], jsonDataImport.getImportOption().getExceptionResolve());
+					this.messageChannel, dataExchangeId, getMessageSource(), locale, subDataExchangeIds[i],
+					jsonDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
 					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, jsonDataImport));
@@ -574,7 +564,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
-				importChannelId, locale);
+				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -606,7 +596,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 
 		return "/dataexchange/import_excel";
 	}
@@ -659,8 +648,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		String importChannelId = getDataExchangeChannelId(dataExchangeId);
-
 		Locale locale = getLocale(request);
 
 		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
@@ -674,8 +661,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			excelDataImport.setUnifiedTable(tableNames[i]);
 
 			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
-					this.messageChannel, importChannelId, getMessageSource(), locale,
-					subDataExchangeIds[i], excelDataImport.getImportOption().getExceptionResolve());
+					this.messageChannel, dataExchangeId, getMessageSource(), locale, subDataExchangeIds[i],
+					excelDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
 					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, excelDataImport));
@@ -703,7 +690,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
-				importChannelId, locale);
+				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -874,7 +861,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 		setParamInitSqlsAttribute(request, springModel);
@@ -915,8 +901,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
-
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
@@ -932,9 +916,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			CsvDataExport csvDataExport = new CsvDataExport(connectionFactory, exportForm.getDataFormat(),
 					exportForm.getExportOption(), query, writerFactory);
 
-			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
-					this.messageChannel, exportChannelId, getMessageSource(), getLocale(request),
-					subDataExchangeIds[i]);
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
+					dataExchangeId, getMessageSource(), getLocale(request), subDataExchangeIds[i]);
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
 					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, csvDataExport));
@@ -945,7 +928,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
-				exportChannelId, locale);
+				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -982,7 +965,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 		setParamInitSqlsAttribute(request, springModel);
@@ -1022,8 +1004,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
-
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
@@ -1038,9 +1018,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			ExcelDataExport excelDataExport = new ExcelDataExport(connectionFactory, exportForm.getDataFormat(),
 					exportForm.getExportOption(), query, writerFactory);
 
-			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
-					this.messageChannel, exportChannelId, getMessageSource(), getLocale(request),
-					subDataExchangeIds[i]);
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
+					dataExchangeId, getMessageSource(), getLocale(request), subDataExchangeIds[i]);
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
 					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, excelDataExport));
@@ -1051,7 +1030,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
-				exportChannelId, locale);
+				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -1093,7 +1072,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 		setParamInitSqlsAttribute(request, springModel);
@@ -1137,8 +1115,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
-
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
@@ -1154,9 +1130,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			SqlDataExport sqlDataExport = new SqlDataExport(connectionFactory, exportForm.getDataFormat(),
 					exportForm.getExportOption(), query, tableNames[i], writerFactory);
 
-			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
-					this.messageChannel, exportChannelId, getMessageSource(), getLocale(request),
-					subDataExchangeIds[i]);
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
+					dataExchangeId, getMessageSource(), getLocale(request), subDataExchangeIds[i]);
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
 					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, sqlDataExport));
@@ -1167,7 +1142,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
-				exportChannelId, locale);
+				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -1205,7 +1180,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 		setParamInitSqlsAttribute(request, springModel);
@@ -1258,8 +1232,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
-
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
@@ -1275,9 +1247,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			JsonDataExport csvDataExport = new JsonDataExport(connectionFactory, exportForm.getDataFormat(),
 					exportOption, query, writerFactory, (tableNames == null ? null : tableNames[i]));
 
-			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
-					this.messageChannel, exportChannelId, getMessageSource(), getLocale(request),
-					subDataExchangeIds[i]);
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
+					dataExchangeId, getMessageSource(), getLocale(request), subDataExchangeIds[i]);
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
 					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, csvDataExport));
@@ -1288,7 +1259,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
-				exportChannelId, locale);
+				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -1351,6 +1322,21 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			IOUtil.close(out);
 		}
+	}
+
+	@RequestMapping(value = "/{schemaId}/message", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<Object> message(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("dataExchangeId") String dataExchangeId,
+			@RequestParam(value = "messageCount", required = false) Integer messageCount) throws Throwable
+	{
+		if (messageCount == null)
+			messageCount = 50;
+		if (messageCount < 1)
+			messageCount = 1;
+
+		return this.messageChannel.pull(dataExchangeId, messageCount);
 	}
 
 	protected String[] setParamInitSqlsAttribute(HttpServletRequest request, org.springframework.ui.Model springModel)
@@ -1530,8 +1516,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		BatchDataExchange batchDataExchange = new SimpleBatchDataExchange(connectionFactory, subDataExchanges);
 
-		MessageBatchDataExchangeListener listener = new MessageBatchDataExchangeListener(this.messageChannel,
-				channel, getMessageSource(), locale);
+		MessageBatchDataExchangeListener listener = new MessageBatchDataExchangeListener(this.messageChannel, channel,
+				getMessageSource(), locale);
 		batchDataExchange.setListener(listener);
 
 		return batchDataExchange;
@@ -1637,7 +1623,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	/**
 	 * 计算导入/导出中消息发送间隔。
 	 * <p>
-	 * 如果发送频率过快，当数据交换很多时会出现cometd卡死的情况。
+	 * 如果发送频率过快，当数据交换很多时会出现卡死的情况。
 	 * </p>
 	 * 
 	 * @param total
@@ -1780,17 +1766,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 	protected File getDataExchangeTmpDirectory()
 	{
 		return FileUtil.getDirectory(this.tempDirectory, "dataExchange", true);
-	}
-
-	/**
-	 * 获取指定数据交换操作ID对应的cometd通道ID。
-	 * 
-	 * @param dataExchangeId
-	 * @return
-	 */
-	protected String getDataExchangeChannelId(String dataExchangeId)
-	{
-		return "/dataexchange/channel/" + dataExchangeId;
 	}
 
 	public static class DataImportFileInfo extends FileInfo
