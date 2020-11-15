@@ -93,6 +93,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -229,10 +230,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptCsvDoImport(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("dataExchangeId") String dataExchangeId, TextValueFileBatchDataImportForm dataImportForm,
-			@RequestParam("dependentNumberAuto") final String dependentNumberAuto) throws Throwable
+			@RequestBody TextValueFileBatchDataImportForm dataImportForm) throws Throwable
 	{
-		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || dataImportForm == null
+		if (dataImportForm == null || isEmpty(dataImportForm.getDataExchangeId())
 				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
 				|| isEmpty(dataImportForm.getFileEncoding()) || isEmpty(dataImportForm.getNumbers())
 				|| isEmpty(dataImportForm.getDependentNumbers()) || isEmpty(dataImportForm.getImportOption())
@@ -245,6 +245,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		final User user = WebUtils.getUser(request, response);
 
+		String dataExchangeId = dataImportForm.getDataExchangeId();
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
 		final String[] numbers = dataImportForm.getNumbers();
 		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
@@ -298,7 +299,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			{
 				Connection cn = getConnection();
 
-				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers, dependentNumberAuto);
+				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers,
+						dataImportForm.getDependentNumberAuto());
 			}
 		}.execute();
 
@@ -358,10 +360,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/import/sql/doImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptSqlDoImport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			SqlFileBatchDataImportForm dataImportForm) throws Exception
+			@PathVariable("schemaId") String schemaId, @RequestBody SqlFileBatchDataImportForm dataImportForm)
+			throws Exception
 	{
-		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || dataImportForm == null
+		if (dataImportForm == null || isEmpty(dataImportForm.getDataExchangeId())
 				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
 				|| isEmpty(dataImportForm.getFileEncoding()) || isEmpty(dataImportForm.getNumbers())
 				|| isEmpty(dataImportForm.getDependentNumbers()) || isEmpty(dataImportForm.getImportOption())
@@ -372,6 +374,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		final User user = WebUtils.getUser(request, response);
 
+		String dataExchangeId = dataImportForm.getDataExchangeId();
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
 		String[] numbers = dataImportForm.getNumbers();
 		String[] dependentNumbers = dataImportForm.getDependentNumbers();
@@ -473,14 +476,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptJsonDoImport(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("dataExchangeId") String dataExchangeId, JsonFileBatchDataImportForm importForm,
-			@RequestParam("dependentNumberAuto") final String dependentNumberAuto) throws Throwable
+			@RequestBody JsonFileBatchDataImportForm importForm) throws Throwable
 	{
-		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || importForm == null
-				|| isEmpty(importForm.getSubDataExchangeIds()) || isEmpty(importForm.getFileNames())
-				|| isEmpty(importForm.getFileEncoding()) || isEmpty(importForm.getNumbers())
-				|| isEmpty(importForm.getDependentNumbers()) || isEmpty(importForm.getImportOption())
-				|| isEmpty(importForm.getDataFormat())
+		if (importForm == null || isEmpty(importForm.getDataExchangeId()) || isEmpty(importForm.getSubDataExchangeIds())
+				|| isEmpty(importForm.getFileNames()) || isEmpty(importForm.getFileEncoding())
+				|| isEmpty(importForm.getNumbers()) || isEmpty(importForm.getDependentNumbers())
+				|| isEmpty(importForm.getImportOption()) || isEmpty(importForm.getDataFormat())
 				|| importForm.getSubDataExchangeIds().length != importForm.getFileNames().length
 				|| importForm.getSubDataExchangeIds().length != importForm.getNumbers().length
 				|| importForm.getSubDataExchangeIds().length != importForm.getDependentNumbers().length)
@@ -497,6 +498,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		final User user = WebUtils.getUser(request, response);
 
+		String dataExchangeId = importForm.getDataExchangeId();
 		String[] subDataExchangeIds = importForm.getSubDataExchangeIds();
 		final String[] numbers = importForm.getNumbers();
 		final String[] dependentNumbers = importForm.getDependentNumbers();
@@ -553,7 +555,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				{
 					Connection cn = getConnection();
 
-					inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers, dependentNumberAuto);
+					inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers,
+							importForm.getDependentNumberAuto());
 				}
 			}.execute();
 		}
@@ -613,10 +616,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptExcelDoImport(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("dataExchangeId") String dataExchangeId, TextValueFileBatchDataImportForm dataImportForm,
-			@RequestParam("dependentNumberAuto") final String dependentNumberAuto) throws Throwable
+			@RequestBody TextValueFileBatchDataImportForm dataImportForm) throws Throwable
 	{
-		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || dataImportForm == null
+		if (dataImportForm == null || isEmpty(dataImportForm.getDataExchangeId())
 				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
 				|| isEmpty(dataImportForm.getNumbers()) || isEmpty(dataImportForm.getDependentNumbers())
 				|| isEmpty(dataImportForm.getImportOption()) || isEmpty(dataImportForm.getDataFormat())
@@ -629,6 +631,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		final User user = WebUtils.getUser(request, response);
 
+		String dataExchangeId = dataImportForm.getDataExchangeId();
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
 		final String[] numbers = dataImportForm.getNumbers();
 		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
@@ -680,7 +683,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			{
 				Connection cn = getConnection();
 
-				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers, dependentNumberAuto);
+				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers,
+						dataImportForm.getDependentNumberAuto());
 			}
 		}.execute();
 
@@ -871,10 +875,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/csv/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptCsvDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			TextFileBatchDataExportForm exportForm) throws Exception
+			@PathVariable("schemaId") String schemaId, @RequestBody TextFileBatchDataExportForm exportForm)
+			throws Exception
 	{
-		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || exportForm == null || isEmpty(exportForm.getDataFormat())
+		if (exportForm == null || isEmpty(exportForm.getDataExchangeId()) || isEmpty(exportForm.getDataFormat())
 				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getFileEncoding())
 				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
 				|| isEmpty(exportForm.getFileNames())
@@ -884,6 +888,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		final User user = WebUtils.getUser(request, response);
 
+		String dataExchangeId = exportForm.getDataExchangeId();
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] fileNames = exportForm.getFileNames();
@@ -975,10 +980,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/excel/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptExcelDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			TextFileBatchDataExportForm exportForm) throws Exception
+			@PathVariable("schemaId") String schemaId, @RequestBody TextFileBatchDataExportForm exportForm)
+			throws Exception
 	{
-		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || exportForm == null || isEmpty(exportForm.getDataFormat())
+		if (exportForm == null || isEmpty(exportForm.getDataExchangeId()) || isEmpty(exportForm.getDataFormat())
 				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getSubDataExchangeIds())
 				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getFileNames())
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
@@ -987,6 +992,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		final User user = WebUtils.getUser(request, response);
 
+		String dataExchangeId = exportForm.getDataExchangeId();
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] fileNames = exportForm.getFileNames();
@@ -1082,10 +1088,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/sql/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptSqlDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			SqlFileBatchDataExportForm exportForm) throws Exception
+			@PathVariable("schemaId") String schemaId, @RequestBody SqlFileBatchDataExportForm exportForm)
+			throws Exception
 	{
-		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || exportForm == null || isEmpty(exportForm.getDataFormat())
+		if (exportForm == null || isEmpty(exportForm.getDataExchangeId()) || isEmpty(exportForm.getDataFormat())
 				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getFileEncoding())
 				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
 				|| isEmpty(exportForm.getTableNames()) || isEmpty(exportForm.getFileNames())
@@ -1096,6 +1102,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		final User user = WebUtils.getUser(request, response);
 
+		String dataExchangeId = exportForm.getDataExchangeId();
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] tableNames = exportForm.getTableNames();
@@ -1190,10 +1197,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/json/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptJsonDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			JsonFileBatchDataExportForm exportForm) throws Exception
+			@PathVariable("schemaId") String schemaId, @RequestBody JsonFileBatchDataExportForm exportForm)
+			throws Exception
 	{
-		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || exportForm == null || isEmpty(exportForm.getDataFormat())
+		if (exportForm == null || isEmpty(exportForm.getDataExchangeId()) || isEmpty(exportForm.getDataFormat())
 				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getFileEncoding())
 				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
 				|| isEmpty(exportForm.getFileNames())
@@ -1214,6 +1221,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		final User user = WebUtils.getUser(request, response);
 
+		String dataExchangeId = exportForm.getDataExchangeId();
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] tableNames = exportForm.getTableNames();
@@ -1899,6 +1907,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
+		private String dataExchangeId;
+
 		private String[] subDataExchangeIds;
 
 		private String[] fileNames;
@@ -1908,6 +1918,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public AbstractFileBatchDataExchangeForm()
 		{
 			super();
+		}
+
+		public String getDataExchangeId()
+		{
+			return dataExchangeId;
+		}
+
+		public void setDataExchangeId(String dataExchangeId)
+		{
+			this.dataExchangeId = dataExchangeId;
 		}
 
 		public String[] getSubDataExchangeIds()
@@ -1952,6 +1972,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		/** 导入条目依赖编号 */
 		private String[] dependentNumbers;
 
+		/** 自动处理导入条目依赖编号的字面值 */
+		private String dependentNumberAuto;
+
 		public AbstractFileBatchDataImportForm()
 		{
 			super();
@@ -1975,6 +1998,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setDependentNumbers(String[] dependentNumbers)
 		{
 			this.dependentNumbers = dependentNumbers;
+		}
+
+		public String getDependentNumberAuto()
+		{
+			return dependentNumberAuto;
+		}
+
+		public void setDependentNumberAuto(String dependentNumberAuto)
+		{
+			this.dependentNumberAuto = dependentNumberAuto;
 		}
 	}
 
@@ -2028,21 +2061,18 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
+		private JsonDataImportOption importOption;
+
 		@Override
 		public JsonDataImportOption getImportOption()
 		{
-			return (JsonDataImportOption) super.getImportOption();
+			return importOption;
 		}
 
-		@Override
-		public void setImportOption(ValueDataImportOption importOption)
+		public void setImportOption(JsonDataImportOption importOption)
 		{
-			if (!(importOption instanceof JsonDataImportOption))
-				throw new IllegalArgumentException();
-
-			super.setImportOption(importOption);
+			this.importOption = importOption;
 		}
-
 	}
 
 	public static class SqlFileBatchDataImportForm extends AbstractFileBatchDataImportForm implements Serializable
@@ -2119,6 +2149,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		private String[] tableNames;
 
+		private SqlDataExportOption exportOption;
+
 		public SqlFileBatchDataExportForm()
 		{
 			super();
@@ -2127,16 +2159,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 		@Override
 		public SqlDataExportOption getExportOption()
 		{
-			return (SqlDataExportOption) super.getExportOption();
+			return exportOption;
 		}
 
-		@Override
-		public void setExportOption(TextDataExportOption exportOption)
+		public void setExportOption(SqlDataExportOption exportOption)
 		{
-			if (!(exportOption instanceof SqlDataExportOption))
-				throw new IllegalArgumentException();
-
-			super.setExportOption(exportOption);
+			this.exportOption = exportOption;
 		}
 
 		public String[] getTableNames()
@@ -2156,24 +2184,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		private String[] tableNames;
 
+		private JsonDataExportOption exportOption;
+
 		public JsonFileBatchDataExportForm()
 		{
 			super();
-		}
-
-		@Override
-		public JsonDataExportOption getExportOption()
-		{
-			return (JsonDataExportOption) super.getExportOption();
-		}
-
-		@Override
-		public void setExportOption(TextDataExportOption exportOption)
-		{
-			if (!(exportOption instanceof JsonDataExportOption))
-				throw new IllegalArgumentException();
-
-			super.setExportOption(exportOption);
 		}
 
 		public String[] getTableNames()
@@ -2184,6 +2199,17 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setTableNames(String[] tableNames)
 		{
 			this.tableNames = tableNames;
+		}
+
+		@Override
+		public JsonDataExportOption getExportOption()
+		{
+			return exportOption;
+		}
+
+		public void setExportOption(JsonDataExportOption exportOption)
+		{
+			this.exportOption = exportOption;
 		}
 	}
 

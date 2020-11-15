@@ -151,7 +151,7 @@ Schema schema 数据库，不允许为null
 		data : "tableName",
 		render : function(data, type, row, meta)
 		{
-			return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' placeholder='<@spring.message code='dataImport.excel.importTableInput.placeholder' />' class='table-name-input ui-widget ui-widget-content' style='width:90%' />";
+			return "<input type='text' name='tableNames[]' value='"+$.escapeHtml(data)+"' placeholder='<@spring.message code='dataImport.excel.importTableInput.placeholder' />' class='table-name-input ui-widget ui-widget-content' style='width:90%' />";
 		},
 		defaultContent: "",
 		width : "20%"

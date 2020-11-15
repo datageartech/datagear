@@ -532,11 +532,22 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@Override
+	protected void setOperationMessageForThrowable(HttpServletRequest request, String messageCode, Throwable throwable,
+			boolean traceException, Object... messageArgs)
+	{
+		super.setOperationMessageForThrowable(request, messageCode, throwable, traceException, messageArgs);
+
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Operation cause error: ", throwable);
+	}
+
 	protected void setOperationMessageForInternalServerError(HttpServletRequest request, String messageCode,
 			Throwable t)
 	{
-		setOperationMessageForThrowable(request, messageCode, t, true, t.getMessage());
-		LOGGER.error("", t);
+		super.setOperationMessageForThrowable(request, messageCode, t, true, t.getMessage());
+
+		LOGGER.error("Operation cause interal server error: ", t);
 	}
 
 	protected String buildMessageCode(Class<? extends Throwable> clazz)

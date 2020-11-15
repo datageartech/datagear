@@ -61,7 +61,7 @@ dataExchange_js.ftl
 			data : "number",
 			render : function(data, type, row, meta)
 			{
-				return $.escapeHtml(data) + "<input type='hidden' name='numbers' value='"+$.escapeHtml(data)+"' class='table-number-input ui-widget ui-widget-content' style='width:90%' />";
+				return $.escapeHtml(data) + "<input type='hidden' name='numbers[]' value='"+$.escapeHtml(data)+"' class='table-number-input ui-widget ui-widget-content' style='width:90%' />";
 			},
 			defaultContent: "",
 			width : "10%"
@@ -72,8 +72,8 @@ dataExchange_js.ftl
 			render : function(data, type, row, meta)
 			{
 				return po.renderFileNameColumn(data)
-					+ "<input type='hidden' name='subDataExchangeIds' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
-					+ "<input type='hidden' name='fileNames' value='"+$.escapeHtml(row.name)+"' />";
+					+ "<input type='hidden' name='subDataExchangeIds[]' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
+					+ "<input type='hidden' name='fileNames[]' value='"+$.escapeHtml(row.name)+"' />";
 			},
 			defaultContent: "",
 			width : "45%",
@@ -90,7 +90,7 @@ dataExchange_js.ftl
 			data : "dependentNumber",
 			render : function(data, type, row, meta)
 			{
-				return "<input type='text' name='dependentNumbers' value='"+$.escapeHtml(data)+"' "
+				return "<input type='text' name='dependentNumbers[]' value='"+$.escapeHtml(data)+"' "
 						+ (po.dependentNumberInputPlaceholder ? "placeholder='"+$.escapeHtml(po.dependentNumberInputPlaceholder)+"'" : "")
 						+ " class='table-dependent-number-input ui-widget ui-widget-content' style='width:90%' />";
 			},
@@ -236,8 +236,12 @@ dataExchange_js.ftl
 			
 			po.resetAllSubDataExchangeStatus();
 			
-			po.element("#${pageId}-form").ajaxSubmit(
+			var $form = $(this);
+			var data = $.formToJson($form);
+			
+			$.ajaxJson($form.attr("action"),
 			{
+				data: data,
 				success: function()
 				{
 					if(!po.isDataExchangePageStatus("finish"))

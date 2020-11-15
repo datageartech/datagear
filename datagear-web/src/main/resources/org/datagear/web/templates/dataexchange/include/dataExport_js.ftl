@@ -135,8 +135,8 @@ dataExchange_js.ftl
 				if(!data)
 					data = "";
 				
-				return "<input type='hidden' name='subDataExchangeIds' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
-						+ "<textarea name='queries' class='query-input input-in-table ui-widget ui-widget-content' style='width:90%'>"+$.escapeHtml(data)+"</textarea>";
+				return "<input type='hidden' name='subDataExchangeIds[]' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
+						+ "<textarea name='queries[]' class='query-input input-in-table ui-widget ui-widget-content' style='width:90%'>"+$.escapeHtml(data)+"</textarea>";
 			},
 			defaultContent: "",
 			width : "50%",
@@ -149,7 +149,7 @@ dataExchange_js.ftl
 				if(!data)
 					data = "";
 				
-				return "<input type='text' name='fileNames' value='"+$.escapeHtml(data)+"' class='file-name-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
+				return "<input type='text' name='fileNames[]' value='"+$.escapeHtml(data)+"' class='file-name-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
 			},
 			defaultContent: "",
 			width : "20%"
@@ -346,8 +346,12 @@ dataExchange_js.ftl
 			
 			po.resetAllSubDataExchangeStatus();
 			
-			po.element("#${pageId}-form").ajaxSubmit(
+			var $form = $(this);
+			var data = $.formToJson($form);
+			
+			$.ajaxJson($form.attr("action"),
 			{
+				data: data,
 				success: function(data)
 				{
 					po.subDataExchangeFileNameMap = data.data;

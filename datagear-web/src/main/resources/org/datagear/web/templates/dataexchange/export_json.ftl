@@ -151,7 +151,7 @@ Schema schema 数据库，不允许为null
 			if(!data)
 				data = "";
 			
-			return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' class='table-name-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
+			return "<input type='text' name='tableNames[]' value='"+$.escapeHtml(data)+"' class='table-name-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
 		},
 		defaultContent: "",
 		width : "20%"
