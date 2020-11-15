@@ -482,7 +482,7 @@ public class DefaultConnectionSource implements ConnectionSource
 	{
 		DriverBasicDataSource re = new DriverBasicDataSource(driver, url, properties);
 
-		LOGGER.info("Create internal data source for {}", ConnectionIdentity.valueOf(url, properties));
+		LOGGER.debug("Create internal data source for {}", ConnectionIdentity.valueOf(url, properties));
 
 		return re;
 	}
@@ -676,8 +676,8 @@ public class DefaultConnectionSource implements ConnectionSource
 			{
 				((DriverBasicDataSource) dataSource).close();
 
-				if (LOGGER.isInfoEnabled())
-					LOGGER.info("Close internal data source for {}", notification.getKey());
+				if (LOGGER.isDebugEnabled())
+					LOGGER.debug("Close internal data source for {}", notification.getKey());
 			}
 			catch (SQLException e)
 			{
