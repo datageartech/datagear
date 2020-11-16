@@ -922,6 +922,18 @@
 		return validationOk;
 	};
 	
+	/**
+	 * 获取图表数据集参数表单的参数值对象。
+	 * 
+	 * 图表参数化数据集要求这里的表单返回对象必须符合以下规则：
+	 * 1. 所有输入项必须在返回对象中出现；（避免出现因未出现而导致无法覆盖上次设置数据集参数值的情况）
+	 * 2. 如果返回对象的某个属性值为空字符串，则应将其置为null；（表示未填写，用于支持参数化数据集的“<#if param??>”语法）
+	 * 3. 如果返回对象的某个属性值为空数组，则应将其置为null；（表示未填写，用于支持参数化数据集的“<#if param??>”语法）
+	 * 4. 如果返回对象的某个属性值为数组，则元素不允许出现null；
+	 * 切记遵循上述规则，否则可能导致已定义的参数化数据集逻辑错误。
+	 * 
+	 * @param form
+	 */
 	chartForm.getDataSetParamValueObj = function(form)
 	{
 		var $form = $(form);
@@ -941,39 +953,54 @@
 			var name = this.name;
 			var value = this.value;
 			
-			//XXX 如果是null值，无论是否多值输入项，都应该忽略
-			//XXX 切勿修改此处逻辑，因为可能会影响参数化数据集的SQL语句逻辑
-			if(value == null)
-				return;
+			var prev = re[name];
 			
-			//XXX 对于没有填写的空值，当是单值输入框时忽略，多值输入框时保留
-			//XXX 切勿修改此处逻辑，因为可能会影响参数化数据集的SQL语句逻辑
-			if(value == "" && !multipleValNames[name])
-				return;
-			
-			if(re[name] === undefined)
+			if(multipleValNames[name])
 			{
-				//XXX 如果是多值输入项，即使单值也应该设为数组
-				//XXX 切勿修改此处逻辑，因为可能会影响参数化数据集的SQL语句逻辑
-				re[name] = (multipleValNames[name] ? [ value ] : value);
+				if(prev == null)
+				{
+					prev = [];
+					re[name] = prev;
+				}
+				
+				if(value != null)
+					prev.push(value);
 			}
+			else if(prev == null)
+			{
+				re[name] = value;
+			}
+			//可能出现同名单值输入项的情况
 			else
 			{
-				//XXX 如果有多个同名的单值输入框，则将值转换为数组
-				//XXX 切勿修改此处逻辑，因为可能会影响参数化数据集的SQL语句逻辑
-				
-				var prev = re[name];
-				
-				if($.isArray(prev))
-					prev.push(value);
-				else
+				if(value != null)
 				{
-					prev = [ prev ];
-					prev.push(value);
-					re[name] = prev;
+					if($.isArray(prev))
+						prev.push(value);
+					else
+					{
+						prev = [ prev ];
+						prev.push(value);
+						re[name] = prev;
+					}
 				}
 			}
 		});
+		
+		for(var p in re)
+		{
+			var v = re[p];
+			
+			if(v == "" || ($.isArray(v) && v.length == 0))
+				re[p] = null;
+		}
+		
+		//当多选框没有任一选中时，此时re不会出现对应属性，这里需要检查补充
+		for(var p in multipleValNames)
+		{
+			if(re[p] === undefined)
+				re[p] = null;
+		}
 		
 		return re;
 	};

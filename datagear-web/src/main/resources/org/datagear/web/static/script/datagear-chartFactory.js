@@ -2456,7 +2456,7 @@
 	/**
 	 * 记录异常日志。
 	 * 
-	 * @param exception 异常对象
+	 * @param exception 异常对象、异常消息字符串
 	 */
 	chartFactory.logException = function(exception)
 	{

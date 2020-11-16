@@ -489,6 +489,9 @@
 	{
 		this._assertActive();
 		
+		if(!this.isDataSetParamValueReady())
+			global.chartFactory.logException("Chart '"+this.elementId+"' has required but unset data set param value");
+		
 		this.statusPreUpdate(true);
 	};
 	
