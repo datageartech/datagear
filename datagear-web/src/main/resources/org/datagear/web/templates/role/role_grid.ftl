@@ -142,8 +142,8 @@ selectOperation 是否选择操作，允许为null
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='role.id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='role.name' />", "name"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='role.description' />", "description"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='role.name' />"), "name"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='role.description' />"), "description"),
 		columnEnabled
 	];
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));

@@ -50,14 +50,6 @@
 						<input type="text" name="realName" value="" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='register.email' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="text" name="email" value="" class="ui-widget ui-widget-content" />
-					</div>
-				</div>
 			</div>
 			<div class="form-foot" style="text-align:center;">
 				<input type="submit" class="recommended" value="<@spring.message code='register.register' />" />
@@ -93,8 +85,7 @@
 		{
 			name : "required",
 			password : "required",
-			confirmPassword : { "required" : true, "equalTo" : po.element("input[name='password']") },
-			email : "email"
+			confirmPassword : { "required" : true, "equalTo" : po.element("input[name='password']") }
 		},
 		messages :
 		{
@@ -104,8 +95,7 @@
 			{
 				"required" : "<@spring.message code='validation.required' />",
 				"equalTo" : "<@spring.message code='register.validation.confirmPasswordError' />"
-			},
-			email : "<@spring.message code='validation.email' />"
+			}
 		},
 		submitHandler : function(form)
 		{

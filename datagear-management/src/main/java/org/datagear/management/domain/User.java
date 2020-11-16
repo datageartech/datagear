@@ -26,10 +26,10 @@ public class User extends AbstractStringIdEntity
 	private String password;
 
 	/** 姓名 */
-	private String realName;
+	private String realName = "";
 
 	/** 邮箱 */
-	private String email;
+	private String email = "";
 
 	/** 是否管理员 */
 	private boolean admin = false;

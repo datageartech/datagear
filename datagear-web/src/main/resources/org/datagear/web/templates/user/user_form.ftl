@@ -53,14 +53,6 @@ readonly 是否只读操作，允许为null
 					<input type="text" name="realName" value="${(user.realName)!''?html}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='user.email' /></label>
-				</div>
-				<div class="form-item-value">
-					<input type="text" name="email" value="${(user.email)!''?html}" class="ui-widget ui-widget-content" />
-				</div>
-			</div>
 			<#--
 			禁用新建管理员账号功能
 			<div class="form-item">
@@ -120,8 +112,7 @@ readonly 是否只读操作，允许为null
 				"required" : true,
 				</#if>
 				"equalTo" : po.element("input[name='password']")
-			},
-			email : "email"
+			}
 		},
 		messages :
 		{
@@ -135,8 +126,7 @@ readonly 是否只读操作，允许为null
 				"required" : "<@spring.message code='validation.required' />",
 				</#if>
 				"equalTo" : "<@spring.message code='user.validation.confirmPasswordError' />"
-			},
-			email : "<@spring.message code='validation.email' />"
+			}
 		},
 		submitHandler : function(form)
 		{

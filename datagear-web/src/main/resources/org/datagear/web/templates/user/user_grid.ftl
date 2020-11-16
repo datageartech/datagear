@@ -148,9 +148,8 @@ boolean readonly 是否只读操作，默认为false
 	
 	var tableColumns = [
 		po.buildTableColumValueOption("<@spring.message code='user.id' />", "id", true),
-		po.buildTableColumValueOption("<@spring.message code='user.name' />", "name"),
-		po.buildTableColumValueOption("<@spring.message code='user.realName' />", "realName"),
-		po.buildTableColumValueOption("<@spring.message code='user.email' />", "email"),
+		po.buildTableColumValueOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.name' />"), "name"),
+		po.buildTableColumValueOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.realName' />"), "realName"),
 		po.buildTableColumValueOption("<@spring.message code='user.createTime' />", "createTime")
 	];
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
