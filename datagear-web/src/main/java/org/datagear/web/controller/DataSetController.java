@@ -722,7 +722,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return result;
 	}
 
-	@RequestMapping(value = "/resolveSql", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/resolveSql", produces = CONTENT_TYPE_HTML)
 	@ResponseBody
 	public String resolveSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody ResolveSqlParam resolveSqlParam) throws Throwable
