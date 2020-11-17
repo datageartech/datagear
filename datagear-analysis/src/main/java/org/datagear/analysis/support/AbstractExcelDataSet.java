@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
@@ -223,8 +224,8 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	}
 
 	@Override
-	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
-			throws DataSetException
+	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
+			DataSetOption dataSetOption) throws DataSetException
 	{
 		File file = null;
 
@@ -244,9 +245,9 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 		ResolvedDataSetResult result = null;
 
 		if (isXls(file))
-			result = resolveResultForXls(paramValues, file, properties);
+			result = resolveResultForXls(paramValues, file, properties, dataSetOption);
 		else
-			result = resolveResultForXlsx(paramValues, file, properties);
+			result = resolveResultForXlsx(paramValues, file, properties, dataSetOption);
 
 		return result;
 	}
@@ -258,11 +259,13 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * @param file
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
+	 * @param dataSetOption
+	 *            允许为{@code null}
 	 * @return
 	 * @throws DataSetException
 	 */
 	protected ResolvedDataSetResult resolveResultForXls(Map<String, ?> paramValues, File file,
-			List<DataSetProperty> properties) throws DataSetException
+			List<DataSetProperty> properties, DataSetOption dataSetOption) throws DataSetException
 	{
 		POIFSFileSystem poifs = null;
 		HSSFWorkbook wb = null;
@@ -274,7 +277,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 
 			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
 
-			return resolveResultForSheet(paramValues, sheet, properties);
+			return resolveResultForSheet(paramValues, sheet, properties, dataSetOption);
 		}
 		catch (DataSetException e)
 		{
@@ -298,11 +301,13 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * @param file
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
+	 * @param dataSetOption
+	 *            允许为{@code null}
 	 * @return
 	 * @throws DataSetException
 	 */
 	protected ResolvedDataSetResult resolveResultForXlsx(Map<String, ?> paramValues, File file,
-			List<DataSetProperty> properties) throws DataSetException
+			List<DataSetProperty> properties, DataSetOption dataSetOption) throws DataSetException
 	{
 		OPCPackage pkg = null;
 		XSSFWorkbook wb = null;
@@ -314,7 +319,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 
 			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
 
-			return resolveResultForSheet(paramValues, sheet, properties);
+			return resolveResultForSheet(paramValues, sheet, properties, dataSetOption);
 		}
 		catch (DataSetException e)
 		{
@@ -338,11 +343,13 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * @param sheet
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
+	 * @param dataSetOption
+	 *            允许为{@code null}
 	 * @return
 	 * @throws DataSetException
 	 */
 	protected ResolvedDataSetResult resolveResultForSheet(Map<String, ?> paramValues, Sheet sheet,
-			List<DataSetProperty> properties) throws DataSetException
+			List<DataSetProperty> properties, DataSetOption dataSetOption) throws DataSetException
 	{
 		boolean resolveProperties = (properties == null || properties.isEmpty());
 
@@ -409,9 +416,16 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 						colIdx++;
 					}
 
-					data.add(rowObj);
+					boolean reachMaxCount = isReachResultDataMaxCount(dataSetOption, data.size());
+					boolean breakLoop = (reachMaxCount && (!resolveProperties || isAfterNameRow(rowIdx)));
+
+					if (!reachMaxCount)
+						data.add(rowObj);
 
 					dataRowIdx++;
+
+					if (breakLoop)
+						break;
 				}
 
 				rowIdx++;
@@ -598,6 +612,21 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	protected boolean isNameRow(int rowIndex)
 	{
 		return ((rowIndex + 1) == this.nameRow);
+	}
+
+	/**
+	 * 是否在名称行之后。
+	 * <p>
+	 * 如果没有名称行，应返回{@code true}。
+	 * </p>
+	 * 
+	 * @param rowIndex
+	 *            行索引（以{@code 0}计数）
+	 * @return
+	 */
+	protected boolean isAfterNameRow(int rowIndex)
+	{
+		return ((rowIndex + 1) > this.nameRow);
 	}
 
 	/**

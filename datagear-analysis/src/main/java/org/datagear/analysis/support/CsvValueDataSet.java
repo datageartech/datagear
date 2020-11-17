@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.util.IOUtil;
 
@@ -65,9 +66,10 @@ public class CsvValueDataSet extends AbstractCsvDataSet
 	}
 
 	@Override
-	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
+	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues, DataSetOption dataSetOption)
+			throws DataSetException
 	{
-		return (TemplateResolvedDataSetResult) resolveResult(paramValues, null);
+		return (TemplateResolvedDataSetResult) resolveResult(paramValues, null, dataSetOption);
 	}
 
 	@Override

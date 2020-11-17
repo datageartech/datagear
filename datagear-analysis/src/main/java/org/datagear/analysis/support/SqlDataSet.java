@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetProperty.DataType;
 import org.datagear.analysis.DataSetResult;
@@ -90,14 +91,15 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	}
 
 	@Override
-	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
+	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues, DataSetOption dataSetOption)
+			throws DataSetException
 	{
-		return resolveResult(paramValues, null);
+		return resolveResult(paramValues, null, dataSetOption);
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
-			throws DataSetException
+	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
+			DataSetOption dataSetOption) throws DataSetException
 	{
 		String sql = resolveAsFmkTemplate(getSql(), paramValues);
 
@@ -131,8 +133,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		try
 		{
 			ResultSet rs = qrs.getResultSet();
-
-			ResolvedDataSetResult result = resolveResult(cn, rs, properties);
+			ResolvedDataSetResult result = resolveResult(cn, rs, properties, dataSetOption);
 
 			return new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(), sql);
 		}
@@ -170,15 +171,17 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	 * @param rs
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
+	 * @param dataSetOption
+	 *            允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs, List<DataSetProperty> properties)
-			throws Throwable
+	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs, List<DataSetProperty> properties,
+			DataSetOption dataSetOption) throws Throwable
 	{
 		boolean resolveProperties = (properties == null || properties.isEmpty());
 
-		List<Map<String, ?>> datas = new ArrayList<>();
+		List<Map<String, ?>> data = new ArrayList<>();
 
 		JdbcSupport jdbcSupport = getJdbcSupport();
 		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
@@ -223,12 +226,19 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 				row.put(property.getName(), value);
 			}
 
-			datas.add(row);
+			boolean reachMaxCount = isReachResultDataMaxCount(dataSetOption, data.size());
+			boolean breakLoop = reachMaxCount;
+
+			if (!reachMaxCount)
+				data.add(row);
 
 			rowIdx++;
+
+			if (breakLoop)
+				break;
 		}
 
-		DataSetResult result = new DataSetResult(datas);
+		DataSetResult result = new DataSetResult(data);
 
 		return new ResolvedDataSetResult(result, properties);
 	}

@@ -592,6 +592,8 @@ po.previewOptions.url = "...";
 		$panel.position({ my : "right top", at : "left+5 top", of : po.element(".workspace-operation-wrapper")});
 	};
 	
+	po.resultDataMaxCountDefault = 100;
+	
 	//预览设置项
 	po.previewOptions =
 	{
@@ -601,7 +603,8 @@ po.previewOptions.url = "...";
 		data:
 		{
 			dataSet: {},
-			paramValues: {}
+			paramValues: {},
+			dataSetOption: { resultDataMaxCount: po.resultDataMaxCountDefault }
 		},
 		//预览操作前置回调函数，返回false阻止
 		beforePreview: function(){},
@@ -616,6 +619,32 @@ po.previewOptions.url = "...";
 		},
 		//预览请求成功回调函数
 		success: function(previewResponse){}
+	};
+	
+	po.resultDataMaxCountVal = function(val)
+	{
+		var $input = po.element(".resultDataMaxCountInput");
+		
+		if(val === undefined)
+		{
+			val = parseInt($input.val());
+			var validVal = val;
+			
+			if(isNaN(validVal))
+				validVal = po.resultDataMaxCountDefault;
+			else if(validVal < 1)
+				validVal = 1;
+			
+			if(validVal != val)
+			{
+				val = validVal;
+				$input.val(val);
+			}
+			
+			return val;
+		}
+		else
+			$input.val(val);
 	};
 	
 	//获取、设置上一次预览是否成功
@@ -699,6 +728,14 @@ po.previewOptions.url = "...";
 				$panel.hide();
 		});
 		
+		po.resultDataMaxCountVal(po.resultDataMaxCountDefault);
+		po.element(".resultDataMaxCountInput").on("keydown", function(e)
+		{
+			//防止提交数据集表单
+			if(e.keyCode == $.ui.keyCode.ENTER)
+				return false;
+		});
+		
 		$(po.element()).on("click", function(event)
 		{
 			var $target = $(event.target);
@@ -722,10 +759,14 @@ po.previewOptions.url = "...";
 		{
 			$(this).button("disable");
 		});
+
+		po.element(".preview-result-foot").hide();
 		
 		var table = po.previewResultTableElement();
 		var initDataTable = !$.isDatatTable(table);
 		
+		po.previewOptions.data.dataSetOption.resultDataMaxCount = po.resultDataMaxCountVal();
+
 		$.ajaxJson(
 		{
 			url : po.previewOptions.url,
@@ -776,6 +817,8 @@ po.previewOptions.url = "...";
 					
 					table.addClass("preview-result-table-inited");
 					table.dataTable(settings);
+					
+					po.element(".preview-result-foot").show();
 					
 					if(previewResponse.templateResult)
 					{

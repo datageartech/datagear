@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
@@ -95,15 +96,15 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	 * </p>
 	 */
 	@Override
-	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
-			throws DataSetException
+	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
+			DataSetOption dataSetOption) throws DataSetException
 	{
 		TemplateResolvedSource<Reader> reader = null;
 		try
 		{
 			reader = getJsonReader(paramValues);
 
-			ResolvedDataSetResult result = resolveResult(reader.getSource(), properties);
+			ResolvedDataSetResult result = resolveResult(reader.getSource(), properties, dataSetOption);
 
 			if (reader.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
@@ -145,10 +146,13 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	 *            JSON输入流
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
+	 * @param dataSetOption
+	 *            允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(Reader jsonReader, List<DataSetProperty> properties) throws Throwable
+	protected ResolvedDataSetResult resolveResult(Reader jsonReader, List<DataSetProperty> properties,
+			DataSetOption dataSetOption) throws Throwable
 	{
 		boolean resolveProperties = (properties == null || properties.isEmpty());
 
@@ -165,8 +169,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		if (resolveProperties)
 			properties = resolveDataSetProperties(data);
 
-		if (!resolveProperties)
-			data = convertJsonResultData(data, properties, createDataSetPropertyValueConverter());
+		data = convertJsonResultData(data, properties, dataSetOption, createDataSetPropertyValueConverter());
 
 		DataSetResult result = new DataSetResult(data);
 
@@ -227,12 +230,14 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	 * @param resultData
 	 *            允许为{@code null}
 	 * @param properties
+	 * @param dataSetOption
+	 *            允许为{@code null}
 	 * @param converter
 	 * @return
 	 * @throws Throwable
 	 */
 	protected Object convertJsonResultData(Object resultData, List<DataSetProperty> properties,
-			DataSetPropertyValueConverter converter) throws Throwable
+			DataSetOption dataSetOption, DataSetPropertyValueConverter converter) throws Throwable
 	{
 		Object re = null;
 
@@ -268,8 +273,14 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 
 			List<Object> reList = new ArrayList<>(list.size());
 
-			for (Object ele : list)
-				reList.add(convertJsonResultData(ele, properties, converter));
+			for (int i = 0; i < list.size(); i++)
+			{
+				if (isReachResultDataMaxCount(dataSetOption, reList.size()))
+					break;
+
+				Object ele = list.get(i);
+				reList.add(convertJsonResultData(ele, properties, null, converter));
+			}
 
 			re = reList;
 		}
@@ -277,10 +288,15 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		{
 			Object[] array = (Object[]) resultData;
 
-			Object[] reArray = new Object[array.length];
+			Object[] reArray = new Object[evalResultDataCount(dataSetOption, array.length)];
 
 			for (int i = 0; i < array.length; i++)
-				reArray[i] = convertJsonResultData(array[i], properties, converter);
+			{
+				if (isReachResultDataMaxCount(dataSetOption, i + 1))
+					break;
+
+				reArray[i] = convertJsonResultData(array[i], properties, null, converter);
+			}
 
 			re = reArray;
 		}

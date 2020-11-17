@@ -34,7 +34,7 @@ public class AbstractJsonDataSetTest
 
 		dataSet.setDataJsonPath("path0.path1[0].path2");
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(Collections.emptyMap());
+		TemplateResolvedDataSetResult result = dataSet.resolve(Collections.emptyMap(), null);
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();

@@ -18,6 +18,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
@@ -89,8 +90,8 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 * </p>
 	 */
 	@Override
-	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
-			throws DataSetException
+	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
+			DataSetOption dataSetOption) throws DataSetException
 	{
 		TemplateResolvedSource<Reader> reader = null;
 
@@ -98,7 +99,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		{
 			reader = getCsvReader(paramValues);
 
-			ResolvedDataSetResult result = resolveResult(reader.getSource(), properties);
+			ResolvedDataSetResult result = resolveResult(reader.getSource(), properties, dataSetOption);
 
 			if (reader.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
@@ -134,7 +135,8 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	protected abstract TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected ResolvedDataSetResult resolveResult(Reader csvReader, List<DataSetProperty> properties) throws Throwable
+	protected ResolvedDataSetResult resolveResult(Reader csvReader, List<DataSetProperty> properties,
+			DataSetOption dataSetOption) throws Throwable
 	{
 		boolean resolveProperties = (properties == null || properties.isEmpty());
 
@@ -160,12 +162,19 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 				if (resolveProperties && dataRowIdx == 0 && propertyNames == null)
 					propertyNames = resolveDataSetPropertyNames(csvRecord, true);
 
-				if (resolveProperties)
-					data.add(resolveCSVRecordValues(csvRecord, null, converter));
-				else
-					data.add(resolveCSVRecordValues(csvRecord, properties, converter));
+				List<Object> rowObj = (resolveProperties ? resolveCSVRecordValues(csvRecord, null, converter)
+						: resolveCSVRecordValues(csvRecord, properties, converter));
+
+				boolean reachMaxCount = isReachResultDataMaxCount(dataSetOption, data.size());
+				boolean breakLoop = (reachMaxCount && (!resolveProperties || isAfterNameRow(rowIdx)));
+
+				if (!reachMaxCount)
+					data.add(rowObj);
 
 				dataRowIdx++;
+
+				if (breakLoop)
+					break;
 			}
 
 			rowIdx++;
@@ -371,6 +380,21 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	protected boolean isNameRow(int rowIndex)
 	{
 		return ((rowIndex + 1) == this.nameRow);
+	}
+
+	/**
+	 * 是否在名称行之后。
+	 * <p>
+	 * 如果没有名称行，应返回{@code true}。
+	 * </p>
+	 * 
+	 * @param rowIndex
+	 *            行索引（以{@code 0}计数）
+	 * @return
+	 */
+	protected boolean isAfterNameRow(int rowIndex)
+	{
+		return ((rowIndex + 1) > this.nameRow);
 	}
 
 	/**

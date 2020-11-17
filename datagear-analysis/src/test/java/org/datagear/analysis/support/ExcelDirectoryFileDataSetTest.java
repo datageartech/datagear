@@ -142,7 +142,7 @@ public class ExcelDirectoryFileDataSetTest
 				"ExcelDirectoryFileDataSetTest-0.xlsx");
 		dataSet.setNameRow(1);
 
-		ResolvedDataSetResult resolvedResult = dataSet.resolve(new HashMap<>());
+		ResolvedDataSetResult resolvedResult = dataSet.resolve(new HashMap<>(), null);
 
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) resolvedResult.getResult().getData();
@@ -217,7 +217,7 @@ public class ExcelDirectoryFileDataSetTest
 				"ExcelDirectoryFileDataSetTest-1.xls");
 		dataSet.setNameRow(1);
 
-		ResolvedDataSetResult resolvedResult = dataSet.resolve(new HashMap<>());
+		ResolvedDataSetResult resolvedResult = dataSet.resolve(new HashMap<>(), null);
 
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) resolvedResult.getResult().getData();
@@ -294,7 +294,7 @@ public class ExcelDirectoryFileDataSetTest
 		dataSet.setDataRowExp("2,3-");
 		dataSet.setDataColumnExp("A,C-");
 
-		ResolvedDataSetResult resolvedResult = dataSet.resolve(new HashMap<>());
+		ResolvedDataSetResult resolvedResult = dataSet.resolve(new HashMap<>(), null);
 
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) resolvedResult.getResult().getData();

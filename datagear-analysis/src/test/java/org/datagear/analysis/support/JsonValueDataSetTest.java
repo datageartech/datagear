@@ -107,7 +107,7 @@ public class JsonValueDataSetTest
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("size", 12);
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(paramValues);
+		TemplateResolvedDataSetResult result = dataSet.resolve(paramValues, null);
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();

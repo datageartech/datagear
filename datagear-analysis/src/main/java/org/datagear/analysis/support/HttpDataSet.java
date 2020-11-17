@@ -34,6 +34,7 @@ import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
@@ -322,14 +323,15 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	}
 
 	@Override
-	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
+	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues, DataSetOption dataSetOption)
+			throws DataSetException
 	{
-		return resolveResult(paramValues, null);
+		return resolveResult(paramValues, null, dataSetOption);
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
-			throws DataSetException
+	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
+			DataSetOption dataSetOption) throws DataSetException
 	{
 		try
 		{
@@ -345,6 +347,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			JsonResponseHandler responseHandler = new JsonResponseHandler();
 			responseHandler.setProperties(properties);
 			responseHandler.setResponseDataJsonPath(getResponseDataJsonPath());
+			responseHandler.setDataSetOption(dataSetOption);
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
 
@@ -504,6 +507,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 		private String responseDataJsonPath = "";
 
+		private DataSetOption dataSetOption = null;
+
 		public JsonResponseHandler()
 		{
 			super();
@@ -535,6 +540,16 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			this.responseDataJsonPath = responseDataJsonPath;
 		}
 
+		public DataSetOption getDataSetOption()
+		{
+			return dataSetOption;
+		}
+
+		public void setDataSetOption(DataSetOption dataSetOption)
+		{
+			this.dataSetOption = dataSetOption;
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public ResolvedDataSetResult handleResponse(ClassicHttpResponse response) throws HttpException, IOException
@@ -560,7 +575,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(reader);
 				jsonDataSet.setDataJsonPath(this.responseDataJsonPath);
 
-				return jsonDataSet.resolve(Collections.EMPTY_MAP);
+				return jsonDataSet.resolve(Collections.EMPTY_MAP, this.dataSetOption);
 			}
 			else
 			{

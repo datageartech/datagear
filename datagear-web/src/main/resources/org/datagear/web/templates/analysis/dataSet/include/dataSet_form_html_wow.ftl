@@ -13,12 +13,17 @@
 			<button type="button" class="refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='dataSet.refreshSqlResult' /></button>
 		</div>
 		<table id="${pageId}-previewResultTable" width='100%' class='hover stripe'></table>
-		<div class="result-resolved-source">
-			<button type="button" class="show-resolved-source-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.showResolvedSource' />"><span class="ui-button-icon ui-icon ui-icon-comment"></span><span class="ui-button-icon-space"> </span><@spring.message code='dataSet.showResolvedSource' /></button>
-			<div class="result-resolved-source-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-				<div class="result-resolved-source-panel-content">
-					<textarea class="ui-widget ui-widget-content"></textarea>
+		<div class="preview-result-foot">
+			<div class="result-resolved-source">
+				<button type="button" class="show-resolved-source-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.showResolvedSource' />"><span class="ui-button-icon ui-icon ui-icon-comment"></span><span class="ui-button-icon-space"> </span><@spring.message code='dataSet.showResolvedSource' /></button>
+				<div class="result-resolved-source-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+					<div class="result-resolved-source-panel-content">
+						<textarea class="ui-widget ui-widget-content"></textarea>
+					</div>
 				</div>
+			</div>
+			<div class="result-data-max-count" title="<@spring.message code='dataSet.previewResultDataMaxCount' />">
+				<input type="text" class="resultDataMaxCountInput ui-widget ui-widget-content ui-corner-all" />
 			</div>
 		</div>
 	</div>

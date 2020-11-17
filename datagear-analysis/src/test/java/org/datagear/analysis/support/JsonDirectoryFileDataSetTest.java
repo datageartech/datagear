@@ -136,7 +136,7 @@ public class JsonDirectoryFileDataSetTest
 				"JsonDirectoryFileDataSetTest-0.json");
 
 		@SuppressWarnings("unchecked")
-		ResolvedDataSetResult result = dataSet.resolve(Collections.EMPTY_MAP);
+		ResolvedDataSetResult result = dataSet.resolve(Collections.EMPTY_MAP, null);
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();

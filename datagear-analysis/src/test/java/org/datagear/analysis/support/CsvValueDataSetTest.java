@@ -32,11 +32,10 @@ public class CsvValueDataSetTest
 		properties.add(new DataSetProperty("value", DataSetProperty.DataType.NUMBER));
 		properties.add(new DataSetProperty("size", DataSetProperty.DataType.NUMBER));
 
-		List<DataSetParam> params = new ArrayList<DataSetParam>();
+		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
-		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", properties,
-				"name, value, size \n aaa, 11, ${size}");
+		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", properties, "name, value, size \n aaa, 11, ${size}");
 		dataSet.setParams(params);
 		dataSet.setNameRow(1);
 
@@ -68,11 +67,10 @@ public class CsvValueDataSetTest
 		properties.add(new DataSetProperty("value", DataSetProperty.DataType.NUMBER));
 		properties.add(new DataSetProperty("size", DataSetProperty.DataType.STRING));
 
-		List<DataSetParam> params = new ArrayList<DataSetParam>();
+		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
-		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", properties,
-				"name, value, size \n aaa, 11, ${size}");
+		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", properties, "name, value, size \n aaa, 11, ${size}");
 		dataSet.setParams(params);
 		dataSet.setNameRow(1);
 
@@ -99,18 +97,17 @@ public class CsvValueDataSetTest
 	@Test
 	public void resolveTest_hasParam()
 	{
-		List<DataSetParam> params = new ArrayList<DataSetParam>();
+		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
-		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a",
-				"name, value, size \n aaa, 11, ${size}");
+		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", "name, value, size \n aaa, 11, ${size}");
 		dataSet.setParams(params);
 		dataSet.setNameRow(1);
 
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("size", 12);
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(paramValues);
+		TemplateResolvedDataSetResult result = dataSet.resolve(paramValues, null);
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
