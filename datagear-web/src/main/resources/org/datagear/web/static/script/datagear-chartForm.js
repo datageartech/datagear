@@ -1031,9 +1031,9 @@
 						value = (value.length != undefined ? value : [ value ]);
 					
 					if(chartForm.containsValueForString(value, $this.attr("value")))
-						$this.attr("checked", "checked");
+						$this.prop("checked", true);
 					else
-						$this.removeAttr("checked");
+						$this.prop("checked", false);
 				}
 				else
 					$this.val(value || "");
@@ -1050,9 +1050,9 @@
 					var $thisOpt = $(this);
 					
 					if(chartForm.containsValueForString(value, $thisOpt.attr("value")))
-						$thisOpt.attr("selected", "selected");
+						$thisOpt.prop("selected", true);
 					else
-						$thisOpt.removeAttr("selected");
+						$thisOpt.prop("selected", false);
 				});
 			}
 			else if($this.is("textarea"))
