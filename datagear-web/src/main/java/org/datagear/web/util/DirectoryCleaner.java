@@ -2,42 +2,43 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.web.scheduling;
+package org.datagear.web.util;
 
 import java.io.File;
 
 import org.datagear.util.FileUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * 删除过期文件任务。
- * <p>
- * 此类不会删除{@linkplain #getDirectory()}。
- * </p>
+ * 目录清洁工，删除目录内过期的文件（不删除目录本身）。
  * 
  * @author datagear@163.com
  *
  */
-public class DeleteExpiredFileJob
+public class DirectoryCleaner
 {
-	/** 处理目录 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryCleaner.class);
+
+	/** 目录 */
 	private File directory;
 
+	/** 过期分钟数 */
+	private int expiredMinutes;
+
 	/** 忽略删除的文件名 */
-	private String[] ignoreFileNames;
+	private String[] ignoreFileNames = null;
 
-	/** 过期阀值分钟数 */
-	private int expireThresholdMinutes;
-
-	public DeleteExpiredFileJob()
+	public DirectoryCleaner()
 	{
 		super();
 	}
 
-	public DeleteExpiredFileJob(File directory, int expireThresholdMinutes)
+	public DirectoryCleaner(File directory, int expiredMinutes)
 	{
 		super();
 		this.directory = directory;
-		this.expireThresholdMinutes = expireThresholdMinutes;
+		this.expiredMinutes = expiredMinutes;
 	}
 
 	public File getDirectory()
@@ -65,24 +66,27 @@ public class DeleteExpiredFileJob
 		this.ignoreFileNames = new String[] { ignoreFileName };
 	}
 
-	public int getExpireThresholdMinutes()
+	public int getExpiredMinutes()
 	{
-		return expireThresholdMinutes;
+		return expiredMinutes;
 	}
 
-	public void setExpireThresholdMinutes(int expireThresholdMinutes)
+	public void setExpiredMinutes(int expiredMinutes)
 	{
-		this.expireThresholdMinutes = expireThresholdMinutes;
+		this.expiredMinutes = expiredMinutes;
 	}
 
 	/**
-	 * 删除
+	 * 执行清洁，删除过期文件。
 	 */
-	public void delete()
+	public void clean()
 	{
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("start clean directory: {}", this.directory.getAbsolutePath());
+
 		if (this.directory.exists())
 		{
-			long time = new java.util.Date().getTime() - this.expireThresholdMinutes * 1000 * 60;
+			long time = new java.util.Date().getTime() - this.expiredMinutes * 1000 * 60;
 
 			File[] children = this.directory.listFiles();
 
@@ -106,6 +110,9 @@ public class DeleteExpiredFileJob
 					deleteFileIfModifiedBefore(child, time);
 			}
 		}
+
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("finish clean directory: {}", this.directory.getAbsolutePath());
 	}
 
 	protected boolean deleteFileIfModifiedBefore(File file, long beforeTime)
@@ -115,14 +122,14 @@ public class DeleteExpiredFileJob
 
 		boolean delete = false;
 
-		if (isModifiedBefore(file, beforeTime))
-			delete = true;
-		else
+		if (file.isDirectory())
 		{
-			if (file.isDirectory())
-			{
-				File[] children = file.listFiles();
+			File[] children = file.listFiles();
 
+			if (children == null || children.length == 0)
+				delete = isModifiedBefore(file, beforeTime);
+			else
+			{
 				int deleteCount = 0;
 
 				for (File child : children)
@@ -135,9 +142,16 @@ public class DeleteExpiredFileJob
 					delete = true;
 			}
 		}
+		else
+			delete = isModifiedBefore(file, beforeTime);
 
 		if (delete)
+		{
 			FileUtil.deleteFile(file);
+
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("delete expired file: {}", file.getAbsolutePath());
+		}
 
 		return delete;
 	}

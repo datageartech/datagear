@@ -7,7 +7,7 @@
  */
 package org.datagear.web.config;
 
-import org.datagear.web.scheduling.DeleteExpiredFileJob;
+import org.datagear.web.util.DirectoryCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,20 +57,17 @@ public class SchedulingConfig
 	}
 
 	@Bean
-	public DeleteExpiredFileJob deleteTempFileJob()
+	public DirectoryCleaner tempDirectoryCleaner()
 	{
-		int expiredMinutes = this.environment.getProperty("clearTempDirectory.expiredMinutes", Integer.class);
+		int expiredMinutes = this.environment.getProperty("cleanTempDirectory.expiredMinutes", Integer.class);
 
-		DeleteExpiredFileJob bean = new DeleteExpiredFileJob(this.coreConfig.tempDirectory(), expiredMinutes);
+		DirectoryCleaner bean = new DirectoryCleaner(this.coreConfig.tempDirectory(), expiredMinutes);
 		return bean;
 	}
 
-	/**
-	 * 定时清理系统的临时目录。
-	 */
-	@Scheduled(cron = "${clearTempDirectory.interval}")
-	public void deleteTempFile()
+	@Scheduled(cron = "${cleanTempDirectory.interval}")
+	public void cleanTempDirectory()
 	{
-		this.deleteTempFileJob().delete();
+		this.tempDirectoryCleaner().clean();
 	}
 }
