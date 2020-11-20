@@ -29,23 +29,26 @@ readonly 是否只读操作，允许为null
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
-			<div class="form-item form-item-templateName">
+			<div class="form-item form-item-resources">
 				<div class="form-item-label">
-					<label><@spring.message code='dashboard.templateName' /></label>
+					<label><@spring.message code='dashboard.dashboardResource' /></label>
 				</div>
-				<div class="form-item-value">
-					<input type="text" name="templateName" value="${templateName?html}" class="ui-widget ui-widget-content" />
-				</div>
-			</div>
-			<div class="form-item form-item-template">
-				<div class="form-item-label">
-					<label><@spring.message code='dashboard.template' /></label>
-				</div>
-				<div class="form-item-value error-newline form-item-value-template">
-					<textarea name="templateContent" class="ui-widget ui-widget-content" style="display: none;">${templateContent!''?html}</textarea>
-					<div class="template-editor-wrapper">
-						<div class="template-editor-parent ui-widget ui-widget-content">
-							<div id="${pageId}-template-editor" class="template-editor"></div>
+				<div class="form-item-value error-newline form-item-value-resources">
+					<div class="resources-wrapper">
+						<div id="${pageId}-resourceEditorTabs" class="resource-editor-tabs minor-tabs">
+							<ul>
+								<li><a href="#${pageId}-firstTemplate">${templateName?html}</a></li>
+							</ul>
+							<div id="${pageId}-firstTemplate" class="resource-editor-tab-pane">
+								<div class="form-item-value form-item-value-resource-name">
+									<label class="name-label"><@spring.message code='name' /></label>
+									<input type="text" name="templateName" value="${templateName?html}" class="name-input ui-widget ui-widget-content" />
+								</div>
+								<textarea name="templateContent" class="ui-widget ui-widget-content" style="display: none;">${templateContent!''?html}</textarea>
+								<div class="editor-wrapper ui-widget ui-widget-content">
+									<div id="${pageId}-template-editor" class="template-editor"></div>
+								</div>
+							</div>
 							<div class="resize-editor-wrapper resize-left">
 								<button type='button' class='resize-editor-button resize-editor-button-left ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='expandOrCollapse' />"><span class='ui-icon ui-icon-arrowstop-1-w'></span><span class='ui-button-icon-space'></span></button>
 							</div>
@@ -122,16 +125,16 @@ readonly 是否只读操作，允许为null
 {
 	$.initButtons(po.element());
 	po.initAnalysisProject("${(dashboard.analysisProject.id)!''?js_string}", "${(dashboard.analysisProject.name)!''?js_string}");
+	po.resourceEditorTabs = po.element("#${pageId}-resourceEditorTabs");
 	
 	if(po.isInDialog())
-		po.element(".form-item-value-template").height($(window).height()*5/9);
+		po.element(".form-item-value-resources").height($(window).height()*5/9);
 	else
 	{
 		var th = $(window).height() - po.element(".form-item-analysisProjectAware").outerHeight(true);
-		th = th - po.element(".form-item-templateName").outerHeight(true);
 		th = th - po.element(".form-foot").outerHeight(true);
 		th = th - 50;
-		po.element(".form-item-value-template").height(th);
+		po.element(".form-item-value-resources").height(th);
 	}
 	
 	po.templates = <@writeJson var=templates />;
@@ -525,7 +528,7 @@ readonly 是否只读操作，允许为null
 		if($ele.hasClass("max-template-editor-right"))
 		{
 			po.element(".template-control-parent").css("width", "");
-			po.element(".template-editor-parent").css("right", "");
+			po.element(".resource-editor-tabs").css("right", "");
 			
 			$ele.removeClass("max-template-editor-right");
 			$icon.removeClass("ui-icon-arrowstop-1-w").addClass("ui-icon-arrowstop-1-e");
@@ -537,7 +540,7 @@ readonly 是否只读操作，允许为null
 				width = po.element(".dashboard-resource-wrapper .resource-title").outerWidth(true) + 41;
 			
 			po.element(".template-control-parent").css("width", width);
-			po.element(".template-editor-parent").css("right", width+10);
+			po.element(".resource-editor-tabs").css("right", width+10);
 			
 			$ele.addClass("max-template-editor-right");
 			$icon.removeClass("ui-icon-arrowstop-1-e").addClass("ui-icon-arrowstop-1-w");
@@ -910,6 +913,13 @@ readonly 是否只读操作，允许为null
 		
 		return false;
 	};
+	
+	po.resourceEditorTabs.tabs(
+	{
+		event: "click",
+		activate: function(event, ui)
+		{}
+	});
 	
 	po.showAfterSave = false;
 	

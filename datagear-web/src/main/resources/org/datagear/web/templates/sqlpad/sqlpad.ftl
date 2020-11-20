@@ -115,7 +115,7 @@ Schema schema 数据库，不允许为null
 			</div>
 		</div>
 		<div class="content-result">
-			<div id="${pageId}-sqlResultTabs" class="result-tabs minor-dataTable">
+			<div id="${pageId}-sqlResultTabs" class="result-tabs minor-tabs minor-dataTable">
 				<ul>
 					<li class="result-message-tab not-closable"><a class="result-message-anchor" href="#${pageId}-resultMessage">消息</a></li>
 				</ul>

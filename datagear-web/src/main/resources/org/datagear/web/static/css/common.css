@@ -770,6 +770,48 @@ table.dataTable tbody tr td select{
 	display: none;
 }
 
+/*次要选项卡*/
+.minor-tabs.ui-tabs{
+	margin: 0 0;
+	padding: 0 0;
+	border-width: 0;
+}
+.minor-tabs.ui-tabs .ui-tabs-nav{
+	margin: 0 0;
+	padding: 0 0;
+	padding-left: 0.1em;
+	padding-right: 0.1em;
+	height: 1.5em !important;
+	background: none;
+	border-width: 0;
+	border-bottom-width: 1px;
+	opacity: 0.85;
+	filter: Alpha(Opacity=85);
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.minor-tabs.ui-tabs .ui-tabs-nav li{
+}
+.minor-tabs.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+	padding: 1px 36px 1px 0.8em !important;
+}
+.minor-tabs.ui-tabs .ui-tabs-nav li .tab-operation{
+	position: absolute;
+	right: 0px;
+	width: 32px;
+}
+.minor-tabs.ui-tabs .ui-tabs-nav li .tab-operation .tabs-more-operation-button{
+	float: right;
+	display: inline-block;
+	height: 1.4em;
+	vertical-align: middle;
+}
+.minor-tabs.ui-tabs .tabs-more-tab-button{
+	top: 0.25em;
+	right: 18em;
+}
+
 /*错误页*/
 .page-error{
 	padding-top: 2em;
@@ -1835,49 +1877,13 @@ table.dataTable tbody tr td select{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-sqlpad .content .content-result .result-tabs.ui-tabs{
-	margin: 0 0;
-	padding: 0 0;
-	border-width: 0;
-}
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav{
-	margin: 0 0;
-	padding: 0 0;
-	padding-left: 0.1em;
 	padding-right: 20em;
 	overflow: hidden;
-	height: 1.5em;
-	background: none;
-	border-width: 0;
-	border-bottom-width: 1px;
-	opacity: 0.85;
-	filter: Alpha(Opacity=85);
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
 }
-.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav li{
-}
-.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
-	padding: 1px 36px 1px 0.8em;
-}
+
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav .ui-tabs-anchor.result-message-anchor{
-	padding-right: 0.8em;
-}
-.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav li .tab-operation{
-	position: absolute;
-	right: 0px;
-	width: 32px;
-}
-.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav li .tab-operation .tabs-more-operation-button{
-	float: right;
-	display: inline-block;
-	height: 1.4em;
-	vertical-align: middle;
-}
-.page-sqlpad .content .content-result .result-tabs.ui-tabs .tabs-more-tab-button{
-	top: 0.25em;
-	right: 18em;
+	padding-right: 0.8em !important;
 }
 .page-sqlpad .content .content-result .result-operations{
 	float: right;
@@ -2746,21 +2752,68 @@ table.dataTable tbody tr td select{
 .page-form-dashboard.max-template-editor-left form .form-content .form-item .form-item-value{
 	width: 100%;
 }
-.page-form-dashboard .template-editor-wrapper{
+.page-form-dashboard .resources-wrapper{
 	position: relative;
 	width:100%;
 	height: 100%;
 	min-height:10em;
 	display: inline-block;
 }
-.page-form-dashboard .template-editor-wrapper .template-editor-parent{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs{
 	position: absolute;
 	left: 0;
 	top: 0;
 	bottom: 0;
 	right: 14.6em;
 }
-.page-form-dashboard .template-editor-wrapper .template-control-parent{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane{
+	position: absolute;
+    left: 0;
+    top: 1.8em;
+    right: 0;
+    bottom: 0;
+    padding: 0 0;
+    padding-top: 0.2em;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name{
+	font-size: 0.9em;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name .name-label{
+	margin-right: 0.8em;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name .name-input{
+	width: 41%;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name label.error{
+	position: inherit;
+    left: inherit;
+    bottom: inherit;
+    padding-left: inherit !important;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-wrapper{
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 2.6em;
+	bottom: 0;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .template-editor{
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+.page-form-dashboard .resources-wrapper .insert-chart-button-wrapper{
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 100%;
+}
+.page-form-dashboard .resources-wrapper .insert-chart-button-wrapper .ui-button{
+	margin-right: 0;
+}
+.page-form-dashboard .resources-wrapper .template-control-parent{
 	position: absolute;
 	right: 0;
 	top: 0;
@@ -2768,26 +2821,10 @@ table.dataTable tbody tr td select{
 	width: 14em;
 	white-space: nowrap;
 }
-.page-form-dashboard.max-template-editor-right  .template-editor-wrapper .template-control-parent .resource-button-wrapper{
+.page-form-dashboard.max-template-editor-right  .resources-wrapper .template-control-parent .resource-button-wrapper{
 	display: none;
 }
-.page-form-dashboard .template-editor-wrapper .template-editor-parent .template-editor{
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
-	bottom: 0;
-}
-.page-form-dashboard .template-editor-wrapper .insert-chart-button-wrapper{
-	position: absolute;
-	right: 0;
-	top: 0;
-	width: 100%;
-}
-.page-form-dashboard .template-editor-wrapper .insert-chart-button-wrapper .ui-button{
-	margin-right: 0;
-}
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper{
 	position: absolute;
 	right: 0;
 	top: 3em;
@@ -2797,7 +2834,7 @@ table.dataTable tbody tr td select{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-head{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-head{
 	font-weight: normal;
 	padding-left: 0.1em;
 	border-width: 0;
@@ -2807,43 +2844,43 @@ table.dataTable tbody tr td select{
 	margin-top: 0.1em;
 	position: relative;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-title{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-title{
 	display: inline-block;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-button-wrapper{
 	position: absolute;
 	display: inline-block;
 	top: 0;
     right: 0.1em;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .ui-button-icon-only{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-button-wrapper .ui-button-icon-only{
 	width: 1.5em;
 	height: 1.5em;
 	padding: 0.3em 0.3em;
 	margin-right: 0;
 	border: 0;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper{
 	display: inline-block;
 	position: relative;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-icon{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-icon{
 	margin-top: 0.2em;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel{
 	display: none;
 	position: absolute;
 	padding: 0.2em 0.2em;
 	top: 1.3em;
 	right: -0.5px;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel button{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel button{
 	display: block;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel button{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel button{
 	margin: 0.2em 0.2em;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-content{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-content{
 	position: absolute;
 	left: 0.2em;
 	right: 0.2em;
@@ -2851,17 +2888,17 @@ table.dataTable tbody tr td select{
 	bottom: 0.2em;
 	overflow: auto;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-item{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-item{
 	margin-top: 0.2em;
 	padding-left: 0.2em;
 	cursor: default;
 	white-space: nowrap;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-item.ui-state-default,
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-item.ui-state-active{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-item.ui-state-default,
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-item.ui-state-active{
 	border: 0px;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-item-divider{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .resource-item-divider{
 	display: inline-block;
 	width: 100%;
 	height: 3px;
@@ -2870,7 +2907,7 @@ table.dataTable tbody tr td select{
 	border-left-width: 0px;
 	border-right-width: 0px;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .add-resource-panel{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .add-resource-panel{
 	position: absolute;
 	display: none;
 	width: 120%;
@@ -2878,43 +2915,43 @@ table.dataTable tbody tr td select{
 	top: 1.8em;
 	padding: 0.3em 0.3em;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .add-resource-panel .ui-widget-header{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .add-resource-panel .ui-widget-header{
 	font-weight: normal;
 	padding-left: 0.2em;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-content{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-content{
 	padding: 1em 0.5em;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-content .content-item{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-content .content-item{
 	padding-top: 0.2em;
 	padding-bottom: 0.2em;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-content .add-resource-name-input{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-content .add-resource-name-input{
 	width: 90%;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-content .upload-file-info{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-content .upload-file-info{
 	display: block;
 	margin-left: 0;
 	height: 1.2em;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-foot{
+.page-form-dashboard .resources-wrapper .dashboard-resource-wrapper .add-resource-panel .add-resource-panel-foot{
 	text-align: center;
 	padding-top: 0.3em;
 	padding-bottom: 0.3em;
 }
-.page-form-dashboard .form-item-value-template .resize-editor-wrapper{
+.page-form-dashboard .form-item-value-resources .resize-editor-wrapper{
 	position: absolute;
 	display: inline-block;
 	z-index: 10;
 	bottom: -1em;
 }
-.page-form-dashboard .form-item-value-template .resize-editor-wrapper.resize-left{
+.page-form-dashboard .form-item-value-resources .resize-editor-wrapper.resize-left{
 	left: -0.6em;
 }
-.page-form-dashboard .form-item-value-template .resize-editor-wrapper.resize-right{
+.page-form-dashboard .form-item-value-resources .resize-editor-wrapper.resize-right{
 	right: -0.6em;
 }
-.page-form-dashboard .form-item-value-template .resize-editor-wrapper .ui-button.ui-button-icon-only{
+.page-form-dashboard .form-item-value-resources .resize-editor-wrapper .ui-button.ui-button-icon-only{
 	width: 1em;
 	height: 1em;
 	padding: 0 0.3em;
