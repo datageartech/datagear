@@ -100,8 +100,6 @@ readonly 是否只读操作，允许为null
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
 			&nbsp;&nbsp;
 			<button type="button" name="saveAndShow"><@spring.message code='chart.saveAndShow' /></button>
-			&nbsp;&nbsp;
-			<input type="reset" value="<@spring.message code='reset' />" />
 			</#if>
 		</div>
 	</form>

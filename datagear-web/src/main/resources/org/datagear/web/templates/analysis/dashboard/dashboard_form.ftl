@@ -29,7 +29,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
-			<div class="form-item">
+			<div class="form-item form-item-templateName">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.templateName' /></label>
 				</div>
@@ -37,7 +37,7 @@ readonly 是否只读操作，允许为null
 					<input type="text" name="templateName" value="${templateName?html}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
-			<div class="form-item">
+			<div class="form-item form-item-template">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.template' /></label>
 				</div>
@@ -112,8 +112,6 @@ readonly 是否只读操作，允许为null
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
 			&nbsp;&nbsp;
 			<button type="button" name="saveAndShow"><@spring.message code='dashboard.saveAndShow' /></button>
-			&nbsp;&nbsp;
-			<input type="reset" value="<@spring.message code='reset' />" />
 			</#if>
 		</div>
 	</form>
@@ -124,7 +122,17 @@ readonly 是否只读操作，允许为null
 {
 	$.initButtons(po.element());
 	po.initAnalysisProject("${(dashboard.analysisProject.id)!''?js_string}", "${(dashboard.analysisProject.name)!''?js_string}");
-	po.element(".form-item-value-template").height($(window).height()*5/9);
+	
+	if(po.isInDialog())
+		po.element(".form-item-value-template").height($(window).height()*5/9);
+	else
+	{
+		var th = $(window).height() - po.element(".form-item-analysisProjectAware").outerHeight(true);
+		th = th - po.element(".form-item-templateName").outerHeight(true);
+		th = th - po.element(".form-foot").outerHeight(true);
+		th = th - 50;
+		po.element(".form-item-value-template").height(th);
+	}
 	
 	po.templates = <@writeJson var=templates />;
 	

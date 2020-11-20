@@ -46,12 +46,13 @@
 			
 			if(options.target == "_blank")
 			{
-				//使用window.open()如果options.data很大的话会使URL超长导致请求失败，因而改为postOnForm
-				
-				//url = url + (options.data ? "?" + $.param(options.data) : "");
-				//window.open(url);
-				
-				$.postOnForm(url, {"data" : options.data, "target" : "_blank"});
+				if(!options.data)
+					window.open(url);
+				else
+				{
+					//使用window.open()会使URL超长导致请求失败，因而改为postOnForm
+					$.postOnForm(url, {"data" : options.data, "target" : "_blank"});
+				}
 			}
 			else if(options.target == "_file")
 			{

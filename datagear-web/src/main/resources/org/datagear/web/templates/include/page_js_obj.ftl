@@ -111,6 +111,13 @@ var ${pageId} =
 		}
 	},
 	
+	//页面是否在对话框内
+	isInDialog: function()
+	{
+		var myDialog = $.getInDialog(this.element());
+		return (myDialog && myDialog.length > 0);
+	},
+	
 	/*页面所在的对话框是否钉住*/
 	isDialogPinned: function()
 	{

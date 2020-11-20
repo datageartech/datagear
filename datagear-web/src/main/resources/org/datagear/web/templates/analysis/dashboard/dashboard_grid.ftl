@@ -30,15 +30,21 @@ selectOperation 是否选择操作，允许为null
 				<div class="addGroup">
 					<input name="addButton" type="button" value="<@spring.message code='add' />" />
 					<select class="addGroupSelect">
+						<option value="addInNewWindow"><@spring.message code='addInNewWindow' /></option>
 						<option value="importDashboard"><@spring.message code='import' /></option>
 					</select>
 				</div>
-				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<div class="editGroup">
+					<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+					<select class="editGroupSelect">
+						<option value="editInNewWindow"><@spring.message code='editInNewWindow' /></option>
+					</select>
+				</div>
 				<input name="showButton" type="button" value="<@spring.message code='dashboard.show' />" />
 				<#if !(currentUser.anonymous)>
 				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
 				</#if>
+				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<input name="exportButton" type="button" value="<@spring.message code='export' />" />
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 			</#if>
@@ -76,11 +82,35 @@ selectOperation 是否选择操作，允许为null
     	{
     		var action = $(ui.item).attr("value");
     		
-    		if(action == "importDashboard")
+    		if(action == "addInNewWindow")
+				po.open(po.url("add"), {target: "_blank"});
+    		else if(action == "importDashboard")
     			po.open(po.url("import"));
     	}
 	});
 	po.element(".addGroup").controlgroup();
+	po.element(".editGroupSelect").selectmenu(
+	{
+		appendTo: po.element(),
+		classes:
+		{
+	          "ui-selectmenu-button": "ui-button-icon-only",
+	          "ui-selectmenu-menu": "ui-widget-shadow ui-widget ui-widget-content"
+	    },
+		select: function(event, ui)
+    	{
+    		var action = $(ui.item).attr("value");
+    		
+    		if(action == "editInNewWindow")
+    		{
+    			po.executeOnSelect(function(row)
+				{
+					po.open(po.url("edit?id=" + row.id), {target: "_blank"});
+				});
+    		}
+    	}
+	});
+	po.element(".editGroup").controlgroup();
 	po.initDataFilter();
 	
 	po.currentUser = <@writeJson var=currentUser />;

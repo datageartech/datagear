@@ -102,8 +102,6 @@ readonly 是否只读操作，允许为null
 		<div class="form-foot" style="text-align:center;">
 			<#if !readonly>
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
-			&nbsp;&nbsp;
-			<input type="reset" value="<@spring.message code='reset' />" />
 			<#else>
 			<div class="form-foot-placeholder">&nbsp;</div>
 			</#if>

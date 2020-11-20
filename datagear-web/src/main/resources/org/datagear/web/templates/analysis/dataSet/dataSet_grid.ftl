@@ -52,11 +52,13 @@ boolean readonly 是否只读操作，默认为false
 				<#if !selectOperation>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				</#if>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<#if !selectOperation>
 				<#if !(currentUser.anonymous)>
 				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
 				</#if>
+				</#if>
+				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<#if !selectOperation>
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 				</#if>
 			</#if>
