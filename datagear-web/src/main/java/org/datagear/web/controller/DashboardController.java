@@ -253,8 +253,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/saveTemplateNames", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveTemplateNames(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id,
-			@RequestParam(value = "templates", required = false) String[] templates) throws Exception
+			org.springframework.ui.Model model, @RequestParam("id") String id, @RequestBody String[] templates)
+			throws Exception
 	{
 		if (isEmpty(templates))
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,

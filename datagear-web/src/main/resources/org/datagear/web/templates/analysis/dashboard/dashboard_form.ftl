@@ -66,7 +66,10 @@ readonly 是否只读操作，允许为null
 								<#if !readonly>
 								<div class="resource-button-wrapper">
 									<button type='button' class='edit-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
-									<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
+									<!--
+									<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource.desc' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
+									-->
+									<button type='button' class='upload-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
 									<button type='button' class='delete-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
 									<div class="resource-more-button-wrapper">
 										<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
@@ -74,7 +77,7 @@ readonly 是否只读操作，允许为null
 											<button type='button' class='copy-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
 											<button type='button' class='as-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
 											<button type='button' class='as-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='as-template-first-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='as-template-first-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-home'></span><span class='ui-button-icon-space'></span></button>
 											<button type='button' class='refresh-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
 										</div>
 									</div>
@@ -82,21 +85,29 @@ readonly 是否只读操作，允许为null
 								</#if>
 							</div>
 							<div class="resource-content"></div>
-							<div class='add-resource-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-								<div class="add-resource-panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
-								<div class="add-resource-panel-content">
+							<div class='upload-resource-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+								<div class="upload-resource-panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.uploadResource' /></div>
+								<div class="upload-resource-panel-content">
 									<div class="content-item">
-										<div class="fileinput-button ui-button ui-corner-all ui-widget" title="<@spring.message code='dashboard.import.desc' />">
+										<div class="label-wrapper">
+											<label><@spring.message code='dashboard.uploadResource.select' /></label>
+										</div>
+										<div class="fileinput-button ui-button ui-corner-all ui-widget">
 											<@spring.message code='select' /><input type="file" class="ignore">
 										</div>
 										<div class="upload-file-info"></div>
 									</div>
 									<div class="content-item">
-										<input type="text" name="" value="" class="add-resource-name-input ui-widget ui-widget-content" />
+										<div class="label-wrapper">
+											<label title="<@spring.message code='dashboard.uploadResource.savePath.desc' />" class="tip-label">
+												<@spring.message code='dashboard.uploadResource.savePath' />
+											</label>
+										</div>
+										<input type="text" name="" value="" class="upload-res-name-input ui-widget ui-widget-content" />
 										<input type="hidden" value="" class="resource-uploadFilePath" />
 									</div>
 								</div>
-								<div class="add-resource-panel-foot">
+								<div class="upload-resource-panel-foot">
 									<button type="button" class="save-resource-button"><@spring.message code='confirm' /></button>
 								</div>
 							</div>
@@ -532,16 +543,16 @@ readonly 是否只读操作，允许为null
 		$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
 	});
 	
-	po.element(".add-resource-panel").draggable({ handle : ".add-resource-panel-head" });
+	po.element(".upload-resource-panel").draggable({ handle : ".upload-resource-panel-head" });
 
 	$(document.body).on("click", function(event)
 	{
 		var $target = $(event.target);
 
-		var $ssp = po.element(".add-resource-panel");
+		var $ssp = po.element(".upload-resource-panel");
 		if(!$ssp.is(":hidden"))
 		{
-			if($target.closest(".add-resource-panel, .add-resource-button").length == 0)
+			if($target.closest(".upload-resource-panel, .upload-resource-button").length == 0)
 				$ssp.hide();
 		}
 	});
@@ -680,19 +691,31 @@ readonly 是否只读操作，允许为null
 		if(!id)
 			return;
 		
-		var param = $.toParamString("templates", templateNames);
-		
-		$.post(po.url("saveTemplateNames?id="+id), param, function(response)
+		$.ajaxJson(po.url("saveTemplateNames?id="+id),
 		{
-			po.templates = response.data.templates;
-			po.refreshDashboardResources();
-			
-			if(success)
-				success();
+			data: templateNames,
+			success : function(response)
+			{
+				po.templates = response.data.templates;
+				po.refreshDashboardResources();
+				
+				if(success)
+					success();
+			}
 		});
 	};
 	
-	po.element(".add-resource-button").click(function()
+	po.element(".upload-res-name-input").on("keydown", function(e)
+	{
+		if(e.keyCode == $.ui.keyCode.ENTER)
+		{
+			po.element(".save-resource-button").click();
+			//防止提交表单
+			return false;
+		}
+	});
+	
+	po.element(".upload-resource-button").click(function()
 	{
 		var id = po.getDashboardId();
 		
@@ -702,11 +725,11 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		po.element(".add-resource-name-input").val("");
+		po.element(".upload-res-name-input").val("");
 		po.element(".resource-uploadFilePath").val("");
 		po.element(".upload-file-info").text("");
 		
-		var $panel = po.element(".add-resource-panel");
+		var $panel = po.element(".upload-resource-panel");
 		$panel.show();
 		//$panel.position({ my : "right top", at : "right+20 bottom+3", of : this});
 	});
@@ -715,7 +738,7 @@ readonly 是否只读操作，允许为null
 	{
 		var id = po.getDashboardId();
 		var resourceFilePath = po.element(".resource-uploadFilePath").val();
-		var resourceName = po.element(".add-resource-name-input").val();
+		var resourceName = po.element(".upload-res-name-input").val();
 		
 		if(!id || !resourceFilePath || !resourceName)
 			return;
@@ -724,7 +747,7 @@ readonly 是否只读操作，允许为null
 		function()
 		{
 			po.refreshDashboardResources();
-			po.element(".add-resource-panel").hide();
+			po.element(".upload-resource-panel").hide();
 		});
 	});
 	
@@ -778,7 +801,7 @@ readonly 是否只读操作，允许为null
 			else
 				currentRes = "";
 			
-			po.element(".add-resource-name-input").val(currentRes + uploadResult.fileName);
+			po.element(".upload-res-name-input").val(currentRes + uploadResult.fileName);
 			po.element(".resource-uploadFilePath").val(uploadResult.uploadFilePath);
 			
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
