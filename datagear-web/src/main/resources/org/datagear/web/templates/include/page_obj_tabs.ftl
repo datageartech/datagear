@@ -32,7 +32,7 @@ page_js_obj.jsp
 	{
 		var tabId = $("> a.ui-tabs-anchor", $tab).attr("href");
 		
-		if(tabId.charAt(0) == "#")
+		if(tabId && tabId.charAt(0) == "#")
 			tabId = tabId.substr(1);
 		
 		return tabId;
@@ -77,7 +77,10 @@ page_js_obj.jsp
     	po.refreshTabsNavForHidden($tabs, $tabsNav);
     	
 		if($("> li.ui-tabs-tab", $tabsNav).length == 0)
-			$tabsNav.hide();
+		{
+			if(!tabsNav.hasClass("always-show"))
+				tabsNav.hide();
+		}
 	};
 	
 	po.showTabMoreOperationMenu = function($tabs, $tabsNav, $tab, $positionOf)
@@ -193,7 +196,10 @@ page_js_obj.jsp
     	po.refreshTabsNavForHidden($tabs, tabsNav);
     	
 		if($("> li.ui-tabs-tab", tabsNav).length == 0)
-			tabsNav.hide();
+		{
+			if(!tabsNav.hasClass("always-show"))
+				tabsNav.hide();
+		}
 	};
 	
 	po.refreshTabsNavForHidden = function($tabs, $tabsNav, $activeTab)
@@ -224,7 +230,7 @@ page_js_obj.jsp
 		{
 			if(showHiddenButton.length == 0)
 			{
-				showHiddenButton = $("<button class='tabs-more-tab-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-triangle-1-s'></span></button>")
+				showHiddenButton = $("<button type='button' class='tabs-more-tab-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-triangle-1-s'></span></button>")
 					.appendTo($tabs);
 				
 				showHiddenButton.click(function()

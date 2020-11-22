@@ -810,7 +810,7 @@ table.dataTable tbody tr td select{
 }
 .minor-tabs.ui-tabs .tabs-more-tab-button{
 	top: 0.25em;
-	right: 18em;
+	right: 0;
 }
 
 /*错误页*/
@@ -1311,7 +1311,7 @@ table.dataTable tbody tr td select{
 }
 .search-form .keyword-widget{
 	display: inline-block;
-	width: 66%;
+	width: 60%;
 	height: 2em;
 	margin-left: 0.1em;
 	vertical-align: middle;
@@ -1458,12 +1458,12 @@ table.dataTable tbody tr td select{
 }
 .page-grid .head .search{
 	display: inline-block;
-	width: 41%;
+	width: 40%;
 }
 .page-grid .head .operation{
 	display: inline-block;
 	float: right;
-	width: 57%;
+	width: 59%;
 	text-align: right;
 }
 .page-grid .content{
@@ -1882,7 +1882,9 @@ table.dataTable tbody tr td select{
 	padding-right: 20em;
 	overflow: hidden;
 }
-
+.page-sqlpad .content .content-result .result-tabs.ui-tabs .tabs-more-tab-button{
+	right: 18em;
+}
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav .ui-tabs-anchor.result-message-anchor{
 	padding-right: 0.8em !important;
 }
@@ -2747,10 +2749,10 @@ table.dataTable tbody tr td select{
 .page-form-dashboard{
 	position: relative;
 }
-.page-form-dashboard.max-template-editor-left form .form-content .form-item .form-item-label{
+.page-form-dashboard.max-resource-editor-left form .form-content .form-item .form-item-label{
 	width: 0;
 }
-.page-form-dashboard.max-template-editor-left form .form-content .form-item .form-item-value{
+.page-form-dashboard.max-resource-editor-left form .form-content .form-item .form-item-value{
 	width: 100%;
 }
 .page-form-dashboard .resources-wrapper{
@@ -2800,7 +2802,7 @@ table.dataTable tbody tr td select{
 	top: 2.6em;
 	bottom: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .template-editor{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor{
 	position: absolute;
 	left: 0;
 	right: 0;
