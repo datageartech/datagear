@@ -78,8 +78,8 @@ page_js_obj.jsp
     	
 		if($("> li.ui-tabs-tab", $tabsNav).length == 0)
 		{
-			if(!tabsNav.hasClass("always-show"))
-				tabsNav.hide();
+			if(!$tabsNav.hasClass("always-show"))
+				$tabsNav.hide();
 		}
 	};
 	

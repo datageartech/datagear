@@ -337,11 +337,11 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 			setContentTypeByName(request, response, servletContext, resName);
 
-			long lastModified = resManager.lastModifiedResource(id, resName);
+			long lastModified = resManager.lastModified(id, resName);
 			if (webRequest.checkNotModified(lastModified))
 				return;
 
-			InputStream in = resManager.getResourceInputStream(id, resName);
+			InputStream in = resManager.getInputStream(id, resName);
 			OutputStream out = response.getOutputStream();
 
 			try

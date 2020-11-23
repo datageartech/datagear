@@ -1,29 +1,21 @@
 package org.datagear.analysis.support;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
 import org.datagear.analysis.Dashboard;
-import org.datagear.analysis.TemplateDashboardWidget;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
-import org.datagear.util.StringUtil;
 
 /**
  * 基于文件的{@linkplain TemplateDashboardWidgetResManager}。
- * <p>
- * 此类将{@linkplain TemplateDashboardWidget#getTemplate()}作为资源文件名处理。
- * </p>
  * 
  * @author datagear@163.com
  *
@@ -31,8 +23,6 @@ import org.datagear.util.StringUtil;
 public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashboardWidgetResManager
 {
 	private File rootDirectory;
-
-	private boolean templateAsContent = false;
 
 	public FileTemplateDashboardWidgetResManager()
 	{
@@ -49,21 +39,6 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	{
 		super();
 		this.rootDirectory = FileUtil.getDirectory(FileUtil.trimPath(rootDirectory));
-	}
-
-	/**
-	 * 是否将{@linkplain TemplateDashboardWidget#getTemplate()}作为模板内容而非模板资源名处理。
-	 * 
-	 * @return
-	 */
-	public boolean isTemplateAsContent()
-	{
-		return templateAsContent;
-	}
-
-	public void setTemplateAsContent(boolean templateAsContent)
-	{
-		this.templateAsContent = templateAsContent;
 	}
 
 	public File getRootDirectory()
@@ -94,48 +69,21 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	}
 
 	@Override
-	public Reader getTemplateReader(TemplateDashboardWidget widget, String template) throws IOException
-	{
-		if (this.templateAsContent)
-		{
-			String content = template;
-			if (StringUtil.isEmpty(content))
-				content = "";
-
-			return IOUtil.getReader(content);
-		}
-		else
-		{
-			String name = getResourceNameForTemplate(widget, template);
-			return getResourceReader(widget.getId(), name, getTemplateEncodingWithDefault(widget));
-		}
-	}
-
-	@Override
-	public Writer getTemplateWriter(TemplateDashboardWidget widget, String template) throws IOException
-	{
-		if (this.templateAsContent)
-			throw new UnsupportedOperationException();
-		else
-		{
-			String name = getResourceNameForTemplate(widget, template);
-			return getResourceWriter(widget.getId(), name, getTemplateEncodingWithDefault(widget));
-		}
-	}
-
-	@Override
-	public InputStream getResourceInputStream(String id, String name) throws IOException
+	public boolean exists(String id, String name)
 	{
 		File file = getFile(id, name, false);
-
-		if (!file.exists())
-			return new ByteArrayInputStream(new byte[0]);
-		else
-			return IOUtil.getInputStream(file);
+		return file.exists();
 	}
 
 	@Override
-	public OutputStream getResourceOutputStream(String id, String name) throws IOException
+	public InputStream getInputStream(String id, String name) throws IOException
+	{
+		File file = getFile(id, name, false);
+		return IOUtil.getInputStream(file);
+	}
+
+	@Override
+	public OutputStream getOutputStream(String id, String name) throws IOException
 	{
 		File file = getFile(id, name, true);
 		return IOUtil.getOutputStream(file);
@@ -156,21 +104,14 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	}
 
 	@Override
-	public boolean containsResource(String id, String name)
-	{
-		File file = getFile(id, name, false);
-		return file.exists();
-	}
-
-	@Override
-	public long lastModifiedResource(String id, String name)
+	public long lastModified(String id, String name)
 	{
 		File file = getFile(id, name, false);
 		return file.lastModified();
 	}
 
 	@Override
-	public List<String> listResources(String id)
+	public List<String> list(String id)
 	{
 		File directory = FileUtil.getDirectory(this.rootDirectory, id, false);
 
@@ -233,18 +174,6 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 			if (child.isDirectory())
 				listAllDescendentFiles(child, files);
 		}
-	}
-
-	/**
-	 * 获取模板的资源名。
-	 * 
-	 * @param widget
-	 * @param template
-	 * @return
-	 */
-	protected String getResourceNameForTemplate(TemplateDashboardWidget widget, String template)
-	{
-		return template;
 	}
 
 	protected File getFile(String id, String name, boolean create)

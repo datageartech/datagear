@@ -232,7 +232,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	protected void renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			HtmlTplDashboard dashboard) throws Throwable
 	{
-		Reader in = getTemplateReaderNotNull(dashboard.getWidget(), dashboard.getTemplate());
+		Reader in = getResourceReaderNonNull(dashboard.getWidget(), dashboard.getTemplate());
 
 		try
 		{

@@ -16,7 +16,9 @@ import java.util.List;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.NameAsTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
@@ -479,9 +481,7 @@ public class CoreConfig implements InitializingBean
 	@Bean(NAME_CHART_SHOW_HtmlTplDashboardWidgetHtmlRenderer)
 	public HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer()
 	{
-		FileTemplateDashboardWidgetResManager resManager = new FileTemplateDashboardWidgetResManager(
-				this.dashboardRootDirectory());
-		resManager.setTemplateAsContent(true);
+		TemplateDashboardWidgetResManager resManager = new NameAsTemplateDashboardWidgetResManager();
 
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(resManager,
 				this.htmlChartWidgetEntityService());

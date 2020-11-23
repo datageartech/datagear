@@ -32,24 +32,37 @@ public abstract class AbstractTemplateDashboardWidgetResManager implements Templ
 	}
 
 	@Override
-	public Reader getResourceReader(String id, String name, String encoding) throws IOException
+	public Reader getReader(TemplateDashboardWidget widget, String name) throws IOException
+	{
+		String encoding = getResourceEncodingWithDefault(widget);
+		return getReader(widget.getId(), name, encoding);
+	}
+
+	@Override
+	public Reader getReader(String id, String name, String encoding) throws IOException
 	{
 		encoding = getResourceEncodingWithDefault(encoding);
-
-		InputStream in = getResourceInputStream(id, name);
+		InputStream in = getInputStream(id, name);
 		return IOUtil.getReader(in, encoding);
 	}
 
 	@Override
-	public Writer getResourceWriter(String id, String name, String encoding) throws IOException
+	public Writer getWriter(TemplateDashboardWidget widget, String name) throws IOException
+	{
+		String encoding = getResourceEncodingWithDefault(widget);
+		return getWriter(widget.getId(), name, encoding);
+	}
+
+	@Override
+	public Writer getWriter(String id, String name, String encoding) throws IOException
 	{
 		encoding = getResourceEncodingWithDefault(encoding);
 
-		OutputStream out = getResourceOutputStream(id, name);
+		OutputStream out = getOutputStream(id, name);
 		return IOUtil.getWriter(out, encoding);
 	}
 
-	protected String getTemplateEncodingWithDefault(TemplateDashboardWidget widget)
+	protected String getResourceEncodingWithDefault(TemplateDashboardWidget widget)
 	{
 		String encoding = widget.getTemplateEncoding();
 

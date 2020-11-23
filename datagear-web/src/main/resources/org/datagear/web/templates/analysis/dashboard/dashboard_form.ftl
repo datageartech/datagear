@@ -161,12 +161,10 @@ readonly 是否只读操作，允许为null
 	
 	po.newResourceEditorTab = function(name, content, isTemplate)
 	{
-		name = $.escapeHtml(name);
 		var tabsNav = po.getTabsNav(po.resourceEditorTabs);
 		var tabId = $.uid("resourceEditorTabPane");
-    	var tab = $(po.resourceEditorTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, name))
+    	var tab = $(po.resourceEditorTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, $.escapeHtml(name)))
     		.attr("id", $.uid("resourceEditorTab")).appendTo(tabsNav);
-    	$("<input type='hidden' class='resourceNameOrigin' />").val(name).appendTo(tab);
     	
     	var panePrevEle = $(".resource-editor-tab-pane", po.resourceEditorTabs).last();
     	if(panePrevEle.length == 0)
@@ -174,10 +172,9 @@ readonly 是否只读操作，允许为null
     	var tabPane = $("<div id='"+tabId+"' class='resource-editor-tab-pane' />").insertAfter(panePrevEle);
     	var pc0 = $("<div class='form-item-value form-item-value-resource-name' />").appendTo(tabPane);
     	$("<label class='name-label'></label>").html("<@spring.message code='name' />").appendTo(pc0);
-    	$("<input type='hidden' class='resourceIsTemplate' />").val(isTemplate).appendTo(pc0);
-    	$("<input type='text' class='resourceName name-input ui-widget ui-widget-content' />")
-    		.val(name).appendTo(pc0);
+    	$("<input type='text' class='resourceName name-input ui-widget ui-widget-content' readonly='readonly' />").val(name).appendTo(pc0);
     	$("<textarea class='resourceContent' style='display: none;' />").val(content).appendTo(pc0);
+    	$("<input type='hidden' class='resourceIsTemplate' />").val(isTemplate).appendTo(pc0);
     	
     	var pc1 = $("<div class='editor-wrapper ui-widget ui-widget-content' />").appendTo(tabPane);
 		var pc2 = $("<div class='resource-editor' />").attr("id", $.uid("resourceEditor")).appendTo(pc1);
@@ -478,7 +475,7 @@ readonly 是否只读操作，允许为null
 	{
 		var $res = $("<div class='resource-item resource-item-template'></div>").attr("resource-name", templateName).text(templateName);
 		$res.prepend($("<span class='ui-icon ui-icon-contact'></span>").attr("title", "<@spring.message code='dashboard.dashboardTemplateResource' />"));
-		$("<input type='hidden' name='templates' />").attr("value", templateName).appendTo($res);
+		$("<input type='hidden' name='templates[]' />").attr("value", templateName).appendTo($res);
 		
 		if(prepend == true)
 			$parent.prepend($res);
@@ -714,17 +711,9 @@ readonly 是否只读操作，允许为null
 	 		po.setTemplateNameAndContent(data.templateName, data.templateContent, true);
 	 	});
 	};
-
+	
 	po.element(".add-resource-button").click(function()
 	{
-		var id = po.getDashboardId();
-		
-		if(!id)
-		{
-			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
-			return;
-		}
-		
 		po.newResourceEditorTab("ttt.css", "ttt", false);
 	});
 	
@@ -1074,6 +1063,26 @@ readonly 是否只读操作，允许为null
 		return false;
 	};
 	
+	po.getResourceEditorData = function()
+	{
+		var data = {};
+		data.resourceNames=[];
+		data.resourceContents=[];
+		data.resourceIsTemplates=[];
+		
+		po.element(".resource-editor-tab-pane").each(function()
+		{
+			var tp = $(this);
+			var editor = tp.data("resourceEditorInstance");
+			
+			data.resourceNames.push($(".resourceName", tp).val());
+			data.resourceIsTemplates.push($(".resourceIsTemplate", tp).val());
+			data.resourceContents.push(editor.getValue());
+		});
+		
+		return data;
+	};
+	
 	po.showAfterSave = false;
 	
 	po.element("button[name=saveAndShow]").click(function()
@@ -1082,33 +1091,26 @@ readonly 是否只读操作，允许为null
 		po.element("input[type='submit']").click();
 	});
 	
-	$.validator.addMethod("dashboardTemplateContent", function(value, element)
-	{
-		var html = po.templateEditor.getValue();
-		return html.length > 0;
-	});
-			
 	po.form().validate(
 	{
 		ignore : "",
 		rules :
 		{
-			"name" : "required",
-			"templateName" : "required",
-			"templateContent" : "dashboardTemplateContent"
+			"name" : "required"
 		},
 		messages :
 		{
-			"name" : "<@spring.message code='validation.required' />",
-			"templateName" : "<@spring.message code='validation.required' />",
-			"templateContent" : "<@spring.message code='validation.required' />"
+			"name" : "<@spring.message code='validation.required' />"
 		},
 		submitHandler : function(form)
 		{
-			po.element("textarea[name='templateContent']").val(po.templateEditor.getValue());
+			var data = po.getResourceEditorData();
+			var formData = $.formToJson(form);
+			data.dashboard = formData;
 			
-			$(form).ajaxSubmit(
+			$.ajaxJson($(form).attr("action"),
 			{
+				data: data,
 				success : function(response)
 				{
 					var isSaveAdd = !po.getDashboardId();
@@ -1118,14 +1120,7 @@ readonly 是否只读操作，允许为null
 					po.templates = dashboard.templates;
 					
 					if(po.showAfterSave)
-					{
-						var showUrl = po.url("show/"+dashboard.id+"/");
-						var templateName = dashboard.templateName;
-						if(po.getTemplateIndex(templateName) != 0)
-							showUrl += templateName;
-						
-						window.open(showUrl, showUrl);
-					}
+						window.open(po.url("show/"+dashboard.id+"/"), "dashboard-" + dashboard.id);
 					
 					var close = po.pageParamCallAfterSave(false);
 					if(!close)

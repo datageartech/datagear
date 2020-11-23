@@ -312,4 +312,32 @@ public class StringUtil
 
 		return Arrays.asList(strs);
 	}
+
+	/**
+	 * 在数组中查找元素索引。
+	 * 
+	 * @param array
+	 *            数组，允许为{@code null}
+	 * @param element
+	 *            查找元素，允许为{@code null}
+	 * @return 数组索引，{@code -1}表示未找到
+	 */
+	public static int search(Object[] array, Object element)
+	{
+		if (array == null)
+			return -1;
+
+		for (int i = 0; i < array.length; i++)
+		{
+			if (element == null)
+			{
+				if (array[i] == null)
+					return i;
+			}
+			else if (element.equals(array[i]))
+				return i;
+		}
+
+		return -1;
+	}
 }

@@ -513,37 +513,37 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	}
 
 	/**
-	 * 读取指定{@linkplain HtmlTplDashboardWidget}的模板内容。
+	 * 读取指定{@linkplain HtmlTplDashboardWidget}的资源内容。
 	 * 
 	 * @param dashboardWidget
-	 * @param template
+	 * @param name
 	 * @return
 	 * @throws IOException
 	 */
-	public String readTemplateContent(HtmlTplDashboardWidget dashboardWidget, String template) throws IOException
+	public String readResourceContent(HtmlTplDashboardWidget dashboardWidget, String name) throws IOException
 	{
-		Reader reader = getTemplateReaderNotNull(dashboardWidget, template);
+		Reader reader = getResourceReaderNonNull(dashboardWidget, name);
 
 		return IOUtil.readString(reader, true);
 	}
 
 	/**
-	 * 保存指定指定{@linkplain HtmlTplDashboardWidget}的模板内容。
+	 * 保存指定{@linkplain HtmlTplDashboardWidget}的资源内容。
 	 * 
 	 * @param dashboardWidget
-	 * @param template
-	 * @param templateContent
+	 * @param name
+	 * @param content
 	 * @throws IOException
 	 */
-	public void saveTemplateContent(HtmlTplDashboardWidget dashboardWidget, String template, String templateContent)
+	public void saveResourceContent(HtmlTplDashboardWidget dashboardWidget, String name, String content)
 			throws IOException
 	{
 		Writer writer = null;
 
 		try
 		{
-			writer = getTemplateWriter(dashboardWidget, template);
-			writer.write(templateContent);
+			writer = getResourceWriter(dashboardWidget, name);
+			writer.write(content);
 		}
 		finally
 		{
@@ -551,14 +551,22 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		}
 	}
 
-	/**
-	 * 生成基本的模板内容。
-	 * 
-	 * @param htmlCharset
-	 * @param chartWidgetId
-	 * @return
-	 */
-	public abstract String simpleTemplateContent(String htmlCharset, String... chartWidgetId);
+	protected Reader getResourceReaderNonNull(HtmlTplDashboardWidget dashboardWidget, String name) throws IOException
+	{
+		TemplateDashboardWidgetResManager rm = getTemplateDashboardWidgetResManager();
+
+		Reader reader = rm.getReader(dashboardWidget, name);
+
+		if (reader == null)
+			reader = IOUtil.getReader("");
+
+		return reader;
+	}
+
+	protected Writer getResourceWriter(HtmlTplDashboardWidget dashboardWidget, String template) throws IOException
+	{
+		return getTemplateDashboardWidgetResManager().getWriter(dashboardWidget, template);
+	}
 
 	/**
 	 * 渲染{@linkplain HtmlTplDashboard}。
@@ -571,16 +579,14 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	protected abstract void renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			HtmlTplDashboard dashboard) throws Throwable;
 
-	protected Reader getTemplateReaderNotNull(HtmlTplDashboardWidget dashboardWidget, String template)
-			throws IOException
-	{
-		return getTemplateDashboardWidgetResManager().getTemplateReader(dashboardWidget, template);
-	}
-
-	protected Writer getTemplateWriter(HtmlTplDashboardWidget dashboardWidget, String template) throws IOException
-	{
-		return getTemplateDashboardWidgetResManager().getTemplateWriter(dashboardWidget, template);
-	}
+	/**
+	 * 生成基本的模板内容。
+	 * 
+	 * @param htmlCharset
+	 * @param chartWidgetId
+	 * @return
+	 */
+	public abstract String simpleTemplateContent(String htmlCharset, String... chartWidgetId);
 
 	/**
 	 * 获取用于渲染指定ID图表的{@linkplain ChartWidget}。

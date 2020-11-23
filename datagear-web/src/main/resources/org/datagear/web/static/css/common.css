@@ -2788,6 +2788,7 @@ table.dataTable tbody tr td select{
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name .name-input{
 	width: 41%;
+	border: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name label.error{
 	position: inherit;
