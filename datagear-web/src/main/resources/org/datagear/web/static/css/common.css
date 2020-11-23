@@ -236,6 +236,36 @@ form .form-foot .ui-button{
 	margin-right: .5em;
 }
 
+/*轻型面板*/
+.minor-panel{
+	padding: 0.3em 0.3em;
+}
+.minor-panel .panel-header,
+.minor-panel .panel-header.ui-widget-header{
+	font-weight: normal;
+	padding-left: 0.2em;
+}
+.minor-panel .panel-content{
+	padding: 1em 0.5em;
+}
+.minor-panel .panel-content .content-item{
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+}
+.minor-panel .panel-content .content-item .label-wrapper{
+	padding-bottom: 0.2em;
+}
+.minor-panel .panel-content .content-item input[type=text],
+.minor-panel .panel-content .content-item input[type=password],
+.minor-panel .panel-content .content-item .input{
+	width: 90% !important;
+}
+.minor-panel .panel-foot{
+	text-align: center;
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+}
+
 /*首选操作按钮*/
 .ui-button.recommended{
 	border: 1px solid #0066ff;
@@ -2830,7 +2860,7 @@ table.dataTable tbody tr td select{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-head{
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-head{
 	font-weight: normal;
 	padding-left: 0.1em;
 	border-width: 0;
@@ -2841,13 +2871,15 @@ table.dataTable tbody tr td select{
 	position: relative;
 	height: 1.5em;
 }
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-title{
-	display: none;
-}
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-button-wrapper{
 	position: absolute;
 	display: inline-block;
 	top: 0;
+}
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-button-wrapper.rbw-left{
+	left: 0.1em;
+}
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-button-wrapper.rbw-right{
     right: 0.1em;
 }
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-button-wrapper .ui-button-icon-only{
@@ -2877,7 +2909,7 @@ table.dataTable tbody tr td select{
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel button{
 	margin: 0.2em 0.2em;
 }
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-content{
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-content{
 	position: absolute;
 	left: 0.2em;
 	right: 0.2em;
@@ -2904,40 +2936,24 @@ table.dataTable tbody tr td select{
 	border-left-width: 0px;
 	border-right-width: 0px;
 }
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .add-resource-panel{
+	position: absolute;
+	display: none;
+	width: 120%;
+	right: 0px;
+	top: 1.8em;
+}
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel{
 	position: absolute;
 	display: none;
 	width: 120%;
 	right: 0px;
 	top: 1.8em;
-	padding: 0.3em 0.3em;
 }
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel .ui-widget-header{
-	font-weight: normal;
-	padding-left: 0.2em;
-}
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel .upload-resource-panel-content{
-	padding: 1em 0.5em;
-}
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel .upload-resource-panel-content .content-item{
-	padding-top: 0.2em;
-	padding-bottom: 0.2em;
-}
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel .upload-resource-panel-content .content-item .label-wrapper{
-	padding-bottom: 0.2em;
-}
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel .upload-resource-panel-content .upload-res-name-input{
-	width: 90%;
-}
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel .upload-resource-panel-content .upload-file-info{
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel .upload-file-info{
 	display: block;
 	margin-left: 0;
 	height: 1.2em;
-}
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel .upload-resource-panel-foot{
-	text-align: center;
-	padding-top: 0.3em;
-	padding-bottom: 0.3em;
 }
 .page-form-dashboard .form-item-value-resources .resize-editor-wrapper{
 	position: absolute;

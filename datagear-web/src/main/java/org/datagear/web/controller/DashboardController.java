@@ -166,6 +166,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
 		model.addAttribute("templateName", HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0]);
 		model.addAttribute("templateContent", templateContent);
+		model.addAttribute("defaultTemplateContent", templateContent);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -183,10 +184,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboard == null)
 			throw new RecordNotFoundException();
 
+		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
+				.getHtmlTplDashboardWidgetRenderer();
+
+		String defaultTemplateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
+
 		model.addAttribute("dashboard", dashboard);
 		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
 		model.addAttribute("templateName", dashboard.getFirstTemplate());
-		model.addAttribute("templateContent", readTemplateContent(dashboard, dashboard.getFirstTemplate()));
+		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
+		model.addAttribute("defaultTemplateContent", defaultTemplateContent);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -286,11 +293,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return responseEntity;
 	}
 
-	@RequestMapping(value = "/getTemplateContent", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/getResourceContent", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Map<String, Object> getTemplateContent(HttpServletRequest request, HttpServletResponse response,
+	public Map<String, Object> getResourceContent(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String id,
-			@RequestParam("templateName") String templateName) throws Exception
+			@RequestParam("resourceName") String resourceName) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
 
@@ -299,10 +306,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (widget == null)
 			throw new RecordNotFoundException();
 
+		resourceName = trimResourceName(resourceName);
+
 		Map<String, Object> data = new HashMap<>();
 		data.put("id", id);
-		data.put("templateName", templateName);
-		data.put("templateContent", readTemplateContent(widget, templateName));
+		data.put("resourceName", resourceName);
+		data.put("resourceContent", readResourceContent(widget, resourceName));
 
 		return data;
 	}
@@ -584,7 +593,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("dashboard", dashboard);
 		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
 		model.addAttribute("templateName", dashboard.getFirstTemplate());
-		model.addAttribute("templateContent", readTemplateContent(dashboard, dashboard.getFirstTemplate()));
+		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.viewDashboard");
 		model.addAttribute(KEY_READONLY, true);
 
@@ -995,7 +1004,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new IllegalInputException();
 	}
 
-	protected String readTemplateContent(HtmlTplDashboardWidgetEntity widget, String templateName) throws IOException
+	protected String readResourceContent(HtmlTplDashboardWidgetEntity widget, String templateName) throws IOException
 	{
 		String templateContent = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer()
 				.readResourceContent(widget, templateName);

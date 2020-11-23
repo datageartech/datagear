@@ -20,8 +20,10 @@ readonly 是否只读操作，允许为null
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(dashboard.id)!''?html}" />
+			<input type="hidden" name="templateEncoding" value="${(dashboard.templateEncoding)!''?html}" />
 			<textarea id="${pageId}-initTemplateName" style="display:none;">${templateName?html}</textarea>
 			<textarea id="${pageId}-initTemplateContent" style="display:none;">${templateContent!''?html}</textarea>
+			<textarea id="${pageId}-defaultTemplateContent" style="display:none;">${defaultTemplateContent!''?html}</textarea>
 			<div class="form-item form-item-analysisProjectAware">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.name' /></label>
@@ -62,14 +64,13 @@ readonly 是否只读操作，允许为null
 							</div>
 						</div>
 						<div class="resource-list-wrapper ui-widget ui-widget-content ui-corner-all">
-							<div class="resource-head ui-widget ui-widget-content">
-								<div class="resource-title">
-									<@spring.message code='dashboard.dashboardResource' />
-								</div>
+							<div class="resource-list-head ui-widget ui-widget-content">
 								<#if !readonly>
-								<div class="resource-button-wrapper">
-									<button type='button' class='edit-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
+								<div class="resource-button-wrapper rbw-left">
 									<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource.desc' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
+								</div>
+								<div class="resource-button-wrapper rbw-right">
+									<button type='button' class='edit-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
 									<button type='button' class='upload-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
 									<button type='button' class='delete-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
 									<div class="resource-more-button-wrapper">
@@ -85,10 +86,26 @@ readonly 是否只读操作，允许为null
 								</div>
 								</#if>
 							</div>
-							<div class="resource-content"></div>
-							<div class='upload-resource-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-								<div class="upload-resource-panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.uploadResource' /></div>
-								<div class="upload-resource-panel-content">
+							<div class="resource-list-content"></div>
+							<div class='add-resource-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+								<div class="add-resource-panel-header panel-header ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
+								<div class="panel-content">
+									<div class="content-item">
+										<div class="label-wrapper">
+											<label title="<@spring.message code='dashboard.addResource.name.desc' />" class="tip-label">
+												<@spring.message code='dashboard.addResource.name' />
+											</label>
+										</div>
+										<input type="text" value="" class="addResNameInput ui-widget ui-widget-content" />
+									</div>
+								</div>
+								<div class="panel-foot">
+									<button type="button" class="saveAddResourceButton"><@spring.message code='confirm' /></button>
+								</div>
+							</div>
+							<div class='upload-resource-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+								<div class="upload-resource-panel-header panel-header ui-widget-header ui-corner-all"><@spring.message code='dashboard.uploadResource' /></div>
+								<div class="panel-content">
 									<div class="content-item">
 										<div class="label-wrapper">
 											<label><@spring.message code='dashboard.uploadResource.select' /></label>
@@ -104,12 +121,12 @@ readonly 是否只读操作，允许为null
 												<@spring.message code='dashboard.uploadResource.savePath' />
 											</label>
 										</div>
-										<input type="text" name="" value="" class="upload-res-name-input ui-widget ui-widget-content" />
+										<input type="text" value="" class="upload-res-name-input ui-widget ui-widget-content" />
 										<input type="hidden" value="" class="resource-uploadFilePath" />
 									</div>
 								</div>
-								<div class="upload-resource-panel-foot">
-									<button type="button" class="save-resource-button"><@spring.message code='confirm' /></button>
+								<div class="panel-foot">
+									<button type="button" class="saveUploadResourceButton"><@spring.message code='confirm' /></button>
 								</div>
 							</div>
 						</div>
@@ -152,6 +169,18 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/analysis/dashboard/" + action;
 	};
 	
+	po.isHtmlResourceName = function(resName)
+	{
+		var htmlReg = /\.(html|htm)$/gi;
+		return htmlReg.test(resName);
+	};
+	
+	po.isEditableResourceName = function(resName)
+	{
+		var reg = /\.(html|htm|css|js|txt|json|xml)$/gi;
+		return reg.test(resName);
+	};
+	
 	po.resourceEditorTabTemplate = "<li class='resource-editor-tab' style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
 		+"<div class='tab-operation'>"
 		+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
@@ -161,10 +190,15 @@ readonly 是否只读操作，允许为null
 	
 	po.newResourceEditorTab = function(name, content, isTemplate)
 	{
+		var label = name;
+		var labelMaxLen = 5 + 3 + 10;
+		if(label.length > labelMaxLen)
+			label = name.substr(0, 5) +"..." + name.substr(label.length - 10);
+		
 		var tabsNav = po.getTabsNav(po.resourceEditorTabs);
 		var tabId = $.uid("resourceEditorTabPane");
-    	var tab = $(po.resourceEditorTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, $.escapeHtml(name)))
-    		.attr("id", $.uid("resourceEditorTab")).appendTo(tabsNav);
+    	var tab = $(po.resourceEditorTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, $.escapeHtml(label)))
+    		.attr("id", $.uid("resourceEditorTab")).attr("resourceName", name).appendTo(tabsNav);
     	
     	var panePrevEle = $(".resource-editor-tab-pane", po.resourceEditorTabs).last();
     	if(panePrevEle.length == 0)
@@ -429,7 +463,7 @@ readonly 是否只读操作，允许为null
 	
 	po.getSelectedResourceItem = function()
 	{
-		var $resources = po.element(".resource-content");
+		var $resources = po.element(".resource-list-content");
 		return $("> .resource-item.ui-state-active", $resources);
 	};
 	
@@ -504,9 +538,7 @@ readonly 是否只读操作，允许为null
 		if(!resName)
 			return false;
 		
-		var htmlReg = /\.(html|htm)$/gi;
-		
-		if(!htmlReg.test(resName))
+		if(!po.isHtmlResourceName(resName))
 			return false;
 		
 		var $parent = $res.parent();
@@ -540,7 +572,7 @@ readonly 是否只读操作，允许为null
 		if(!id)
 			return;
 		
-		var $resources = po.element(".resource-content");
+		var $resources = po.element(".resource-list-content");
 		$resources.empty();
 		
 		$.get(po.url("listResources?id="+id), function(resources)
@@ -573,7 +605,7 @@ readonly 是否只读操作，允许为null
 		});
 	};
 	
-	po.element(".resource-content").selectable
+	po.element(".resource-list-content").selectable
 	(
 		{
 			classes: {"ui-selected": "ui-state-active"},
@@ -588,7 +620,9 @@ readonly 是否只读操作，允许为null
 				
 				if(selectedCount == 1)
 				{
-					status[0] = po.isResourceItemTemplate($selected);
+					var resName = $selected.attr("resource-name");
+					
+					status[0] = po.isEditableResourceName(resName);
 					status[1] = true;
 					status[2] = true;
 					status[3] = po.asTemplateItemAllowed($selected);
@@ -652,17 +686,58 @@ readonly 是否只读操作，允许为null
 		$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
 	});
 	
-	po.element(".upload-resource-panel").draggable({ handle : ".upload-resource-panel-head" });
+	po.element(".add-resource-panel").draggable({ handle : ".add-resource-panel-header" });
+	
+	po.element(".addResNameInput").on("keydown", function(e)
+	{
+		if(e.keyCode == $.ui.keyCode.ENTER)
+		{
+			po.element(".saveAddResourceButton").click();
+			//防止提交表单
+			return false;
+		}
+	});
+	
+	po.element(".add-resource-button").click(function()
+	{
+		po.element(".addResNameInput").val("");
+		po.element(".add-resource-panel").show();
+	});
+	
+	po.element(".saveAddResourceButton").click(function()
+	{
+		var name = po.element(".addResNameInput").val();
+		if(!name)
+			return;
+		
+		var content = "";
+		var isHtml = po.isHtmlResourceName(name);
+		
+		if(isHtml)
+			content = po.element("#${pageId}-defaultTemplateContent").val();
+		
+		po.newResourceEditorTab(name, content, isHtml);
+		po.element(".add-resource-panel").hide();
+	});
+	
+	po.element(".upload-resource-panel").draggable({ handle : ".upload-resource-panel-header" });
 
-	$(document.body).on("click", function(event)
+	po.element().on("click", function(event)
 	{
 		var $target = $(event.target);
-
-		var $ssp = po.element(".upload-resource-panel");
-		if(!$ssp.is(":hidden"))
+		
+		var $p0 = po.element(".add-resource-panel");
+		if(!$p0.is(":hidden"))
+		{
+			if($target.closest(".add-resource-panel, .add-resource-button").length == 0)
+				$p0.hide();
+		}
+		
+		var $p1 = po.element(".upload-resource-panel");
+		if(!$p1.is(":hidden"))
 		{
 			if($target.closest(".upload-resource-panel, .upload-resource-button").length == 0)
-				$ssp.hide();
+				$p1.hide();
 		}
 	});
 	
@@ -675,7 +750,7 @@ readonly 是否只读操作，允许为null
 	{
 		po.element(".resource-more-button-panel").hide();
 	});
-	
+
 	po.element(".edit-resource-button").click(function()
 	{
 		var id = po.getDashboardId();
@@ -686,35 +761,36 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		var $parent = po.element(".resource-content");
+		var $parent = po.element(".resource-list-content");
 		var $res = $("> .resource-item.ui-state-active", $parent);
-		var templateName = $res.attr("resource-name");
+		var resName = $res.attr("resource-name");
 		
-	 	if(po.isTemplateContentModified())
+	 	if(!po.isEditableResourceName(resName))
+	 		return;
+	 	
+	 	var editIndex = -1;
+	 	var tabsNav = po.getTabsNav(po.resourceEditorTabs);
+	 	$(".resource-editor-tab", tabsNav).each(function(index)
 	 	{
-	 		po.confirm("<@spring.message code='dashboard.confirmDiscardCurrentTemplateContent' />",
-			{
-				"confirm" : function()
-				{
-					po.loadTemplateContentForEdit(id, templateName);
-				}
-			});
+	 		if($(this).attr("resourceName") == resName)
+	 		{
+	 			editIndex = index;
+	 			return false;
+	 		}
+	 	});
+	 	
+	 	if(editIndex > -1)
+	 	{
+	 		po.resourceEditorTabs.tabs( "option", "active",  editIndex);
 	 	}
 	 	else
-	 		po.loadTemplateContentForEdit(id, templateName);
-	});
-	
-	po.loadTemplateContentForEdit = function(id, templateName)
-	{
-	 	$.get(po.url("getTemplateContent"), {"id": id, "templateName": templateName}, function(data)
 	 	{
-	 		po.setTemplateNameAndContent(data.templateName, data.templateContent, true);
-	 	});
-	};
-	
-	po.element(".add-resource-button").click(function()
-	{
-		po.newResourceEditorTab("ttt.css", "ttt", false);
+		 	$.get(po.url("getResourceContent"), {"id": id, "resourceName": resName}, function(data)
+		 	{
+		 		var isTemplate = (po.getTemplateIndex(data.resourceName) > -1);
+		 		po.newResourceEditorTab(data.resourceName, data.resourceContent, isTemplate);
+		 	});
+	 	}
 	});
 	
 	po.asTemplateItem = function($parent, $res)
@@ -740,7 +816,7 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		var $parent = po.element(".resource-content");
+		var $parent = po.element(".resource-list-content");
 		var $res = $("> .resource-item.ui-state-active", $parent);
 		
 		po.asTemplateItem($parent, $res);
@@ -775,23 +851,11 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		var $parent = po.element(".resource-content");
+		var $parent = po.element(".resource-list-content");
 		var $res = $("> .resource-item.ui-state-active", $parent);
 		var resName = $res.attr("resource-name");
-		var isCurrent = po.isTemplateCurrent(resName);
 		
-		if(isCurrent && po.isTemplateContentModified())
-	 	{
-	 		po.confirm("<@spring.message code='dashboard.confirmDiscardCurrentTemplateContent' />",
-			{
-				"confirm" : function()
-				{
-					po.asNormalResourceItem($parent, $res);
-				}
-			});
-	 	}
-	 	else
-	 		po.asNormalResourceItem($parent, $res);
+		po.asNormalResourceItem($parent, $res);
 	});
 	
 	po.asResourceTemplateFirst = function($parent, $res)
@@ -820,7 +884,7 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		var $parent = po.element(".resource-content");
+		var $parent = po.element(".resource-list-content");
 		var $res = $("> .resource-item.ui-state-active", $parent);
 		
 		po.asResourceTemplateFirst($parent, $res);
@@ -850,7 +914,7 @@ readonly 是否只读操作，允许为null
 	{
 		if(e.keyCode == $.ui.keyCode.ENTER)
 		{
-			po.element(".save-resource-button").click();
+			po.element(".saveUploadResourceButton").click();
 			//防止提交表单
 			return false;
 		}
@@ -875,7 +939,7 @@ readonly 是否只读操作，允许为null
 		//$panel.position({ my : "right top", at : "right+20 bottom+3", of : this});
 	});
 	
-	po.element(".save-resource-button").click(function()
+	po.element(".saveUploadResourceButton").click(function()
 	{
 		var id = po.getDashboardId();
 		var resourceFilePath = po.element(".resource-uploadFilePath").val();
