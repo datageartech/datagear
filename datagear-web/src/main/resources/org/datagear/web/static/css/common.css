@@ -240,8 +240,8 @@ form .form-foot .ui-button{
 .minor-panel{
 	padding: 0.3em 0.3em;
 }
-.minor-panel .panel-header,
-.minor-panel .panel-header.ui-widget-header{
+.minor-panel .panel-head,
+.minor-panel .panel-head.ui-widget-header{
 	font-weight: normal;
 	padding-left: 0.2em;
 }
@@ -2840,13 +2840,12 @@ table.dataTable tbody tr td select{
 	top: 0;
 	bottom: 0;
 }
-.page-form-dashboard .resources-wrapper .insert-chart-button-wrapper{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .insert-chart-button-wrapper{
 	position: absolute;
-	right: 0;
-	top: 1.8em;
+	top: 0;
 	right: 0;
 }
-.page-form-dashboard .resources-wrapper .insert-chart-button-wrapper .ui-button{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .insert-chart-button-wrapper .ui-button{
 	margin-right: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-list-wrapper{
@@ -2936,13 +2935,7 @@ table.dataTable tbody tr td select{
 	border-left-width: 0px;
 	border-right-width: 0px;
 }
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .add-resource-panel{
-	position: absolute;
-	display: none;
-	width: 120%;
-	right: 0px;
-	top: 1.8em;
-}
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .add-resource-panel,
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel{
 	position: absolute;
 	display: none;

@@ -54,11 +54,6 @@ readonly 是否只读操作，允许为null
 								<ul class="tabs-more-tab-menu">
 								</ul>
 							</div>
-							<#if !readonly>
-							<div class="insert-chart-button-wrapper">
-								<button type="button" class="insert-chart-button"><@spring.message code='dashboard.insertChart' /></button>
-							</div>
-							</#if>
 							<div class="resize-editor-wrapper resize-left">
 								<button type='button' class='resize-editor-button resize-editor-button-left ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='expandOrCollapse' />"><span class='ui-icon ui-icon-arrowstop-1-w'></span><span class='ui-button-icon-space'></span></button>
 							</div>
@@ -67,28 +62,34 @@ readonly 是否只读操作，允许为null
 							<div class="resource-list-head ui-widget ui-widget-content">
 								<#if !readonly>
 								<div class="resource-button-wrapper rbw-left">
-									<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource.desc' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
+									<button type='button' class='addResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource.desc' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
 								</div>
+								</#if>
 								<div class="resource-button-wrapper rbw-right">
-									<button type='button' class='edit-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
-									<button type='button' class='upload-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
-									<button type='button' class='delete-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
+									<#if !readonly>
+									<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
+									<#else>
+									<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-search'></span><span class='ui-button-icon-space'></span></button>
+									</#if>
+									<#if !readonly>
+									<button type='button' class='uploadResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
+									<button type='button' class='deleteResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
 									<div class="resource-more-button-wrapper">
 										<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
 										<div class="resource-more-button-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow">
-											<button type='button' class='copy-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='as-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='as-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='as-template-first-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-home'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='refresh-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='copyResNameButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='asTemplateBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='asNormalResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='asFirstTemplateBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-home'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='refreshResListBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
 										</div>
 									</div>
+									</#if>
 								</div>
-								</#if>
 							</div>
 							<div class="resource-list-content"></div>
 							<div class='add-resource-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-								<div class="add-resource-panel-header panel-header ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
+								<div class="addResPanelHead panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
 								<div class="panel-content">
 									<div class="content-item">
 										<div class="label-wrapper">
@@ -100,11 +101,11 @@ readonly 是否只读操作，允许为null
 									</div>
 								</div>
 								<div class="panel-foot">
-									<button type="button" class="saveAddResourceButton"><@spring.message code='confirm' /></button>
+									<button type="button" class="saveAddResBtn"><@spring.message code='confirm' /></button>
 								</div>
 							</div>
 							<div class='upload-resource-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-								<div class="upload-resource-panel-header panel-header ui-widget-header ui-corner-all"><@spring.message code='dashboard.uploadResource' /></div>
+								<div class="uploadResPanelHead panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.uploadResource' /></div>
 								<div class="panel-content">
 									<div class="content-item">
 										<div class="label-wrapper">
@@ -121,8 +122,8 @@ readonly 是否只读操作，允许为null
 												<@spring.message code='dashboard.uploadResource.savePath' />
 											</label>
 										</div>
-										<input type="text" value="" class="upload-res-name-input ui-widget ui-widget-content" />
-										<input type="hidden" value="" class="resource-uploadFilePath" />
+										<input type="text" value="" class="uploadResNameInput ui-widget ui-widget-content" />
+										<input type="hidden" value="" class="uploadResFilePath" />
 									</div>
 								</div>
 								<div class="panel-foot">
@@ -172,12 +173,24 @@ readonly 是否只读操作，允许为null
 	po.isHtmlResourceName = function(resName)
 	{
 		var htmlReg = /\.(html|htm)$/gi;
-		return htmlReg.test(resName);
+		return (resName && htmlReg.test(resName));
+	};
+	
+	po.isJsResourceName = function(resName)
+	{
+		var jsReg = /\.(js)$/gi;
+		return (resName && jsReg.test(resName));
+	};
+	
+	po.isCssResourceName = function(resName)
+	{
+		var cssReg = /\.(css)$/gi;
+		return (resName && cssReg.test(resName));
 	};
 	
 	po.isEditableResourceName = function(resName)
 	{
-		var reg = /\.(html|htm|css|js|txt|json|xml)$/gi;
+		var reg = /\.(html|htm|css|js|json|xml|txt)$/gi;
 		return reg.test(resName);
 	};
 	
@@ -207,7 +220,6 @@ readonly 是否只读操作，允许为null
     	var pc0 = $("<div class='form-item-value form-item-value-resource-name' />").appendTo(tabPane);
     	$("<label class='name-label'></label>").html("<@spring.message code='name' />").appendTo(pc0);
     	$("<input type='text' class='resourceName name-input ui-widget ui-widget-content' readonly='readonly' />").val(name).appendTo(pc0);
-    	$("<textarea class='resourceContent' style='display: none;' />").val(content).appendTo(pc0);
     	$("<input type='hidden' class='resourceIsTemplate' />").val(isTemplate).appendTo(pc0);
     	
     	var pc1 = $("<div class='editor-wrapper ui-widget ui-widget-content' />").appendTo(tabPane);
@@ -216,11 +228,26 @@ readonly 是否只读操作，允许为null
 		var editor = ace.edit(pc2.attr("id"));
 		editor.setShowPrintMargin(false);
 		
-		if(isTemplate)
+		ace.require("ace/ext/language_tools");
+		
+		if(po.isHtmlResourceName(name))
 		{
-			var languageTools = ace.require("ace/ext/language_tools");
 			var HtmlMode = ace.require("ace/mode/html").Mode;
 			editor.session.setMode(new HtmlMode());
+		}
+		else if(po.isJsResourceName(name))
+		{
+			var JsMode = ace.require("ace/mode/javascript").Mode;
+			editor.session.setMode(new JsMode());
+		}
+		else if(po.isCssResourceName(name))
+		{
+			var CssMode = ace.require("ace/mode/css").Mode;
+			editor.session.setMode(new CssMode());
+		}
+		
+		if(isTemplate)
+		{
 			editor.setOptions(
 			{
 				enableBasicAutocompletion: po.templateEditorCompleters,
@@ -251,32 +278,50 @@ readonly 是否只读操作，允许为null
 		</#if>
 		
 		tabPane.data("resourceEditorInstance", editor);
-    	
+
+		<#if !readonly>
+		if(isTemplate)
+		{
+			var pc3 = $("<div class='insert-chart-button-wrapper' />").appendTo(tabPane);
+			var insertChartBtn = $("<button type='button' class='insertChartBtn' />")
+				.text("<@spring.message code='dashboard.insertChart' />").appendTo(pc3).button()
+				.click(function()
+				{
+					var options =
+					{
+						pageParam :
+						{
+							select : function(charts)
+							{
+								if(!$.isArray(charts))
+									charts = [charts];
+								
+								po.insertChartCode(editor, charts);
+								return true;
+							}
+						}
+					};
+					$.setGridPageHeightOption(options);
+					po.open("${contextPath}/analysis/chart/select?multiple", options);
+				});
+		}
+		</#if>
+		
    	    $(".tab-operation .ui-icon-close", tab).click(function()
    	    {
-   	    	po.closeTab(po.resourceEditorTabs, tabsNav, $(this).parent().parent());
+   	    	var tab = $(this).parent().parent();
+   	    	po.closeTab(po.resourceEditorTabs, tabsNav, tab);
    	    });
    	    
    	    $(".tab-operation .tabs-more-operation-button", tab).click(function()
    	    {
    	    	var tab = $(this).parent().parent();
-   	    	var tabId = po.getTabsTabId(po.resourceEditorTabs, tabsNav, tab);
-   	    	
-   	    	var menu = po.showTabMoreOperationMenu(po.resourceEditorTabs, tabsNav, tab, $(this));
+   	    	po.showTabMoreOperationMenu(po.resourceEditorTabs, tabsNav, tab, $(this));
    	    });
 		
 	    po.resourceEditorTabs.tabs("refresh");
     	po.resourceEditorTabs.tabs( "option", "active",  tab.index());
     	po.refreshTabsNavForHidden(po.resourceEditorTabs, tabsNav);
-	};
-	
-	po.getCurrentResourceEditor = function()
-	{
-		var tabsNav = po.getTabsNav(po.resourceEditorTabs);
-		var activeTabId = po.getTabsTabId(po.resourceEditorTabs, tabsNav, po.getActiveTab(po.resourceEditorTabs, tabsNav));
-		var tabPanel = po.getTabsTabPanelByTabId(po.resourceEditorTabs, activeTabId);
-		
-		return tabPanel.data("resourceEditorInstance");
 	};
 	
 	po.resourceEditorTabs.tabs(
@@ -290,11 +335,6 @@ readonly 是否只读操作，允许为null
 			var tabsNav = po.getTabsNav($this);
 			
 			po.refreshTabsNavForHidden($this, tabsNav, newTab);
-			
-			if($(".resourceIsTemplate", newPanel).val() == "true")
-				po.element(".insert-chart-button-wrapper").show();
-			else
-				po.element(".insert-chart-button-wrapper").hide();
 		}
 	});
 	
@@ -427,35 +467,6 @@ readonly 是否只读操作，允许为null
 		}
 	];
 	
-	po.setTemplateNameAndContent = function(templateName, templateContent, focusEditor)
-	{
-		po.element("input[name='templateName']").val(templateName);
-		po.element("textarea[name='templateContent']").val(templateContent);
-		
-		po.templateEditor.setValue("");
-		if(templateContent)
-		{
-			var cursor = {row: 0, column: 0};
-			po.templateEditor.session.insert(cursor, templateContent);
-		}
-		
-		if(focusEditor)
-			po.templateEditor.focus();
-	};
-	
-	po.isTemplateContentModified = function()
-	{
-		var initContent = po.element("textarea[name='templateContent']").val();
-	 	var curContent = po.templateEditor.getValue();
-	 	
-	 	return (initContent != curContent);
-	};
-	
-	po.isTemplateCurrent = function(templateName)
-	{
-		return (po.element("input[name='templateName']").val() == templateName);
-	};
-	
 	po.getDashboardId = function()
 	{
 		return  po.element("input[name='id']").val();
@@ -475,28 +486,21 @@ readonly 是否只读操作，允许为null
 		return $res.attr("resource-name");
 	};
 	
-	po.enableResButonStatus = function(status)
+	po.concatSelectedResDirectory = function(resName)
 	{
-		var buttons = [
-			po.element(".edit-resource-button"),
-			po.element(".copy-resource-button"),
-			po.element(".delete-resource-button"),
-			po.element(".as-template-button"),
-			po.element(".as-resource-button"),
-			po.element(".as-template-first-button")
-		];
-		
-		if(!status.length)
-			status = [status];
-		
-		for(var i=0; i<buttons.length; i++)
+		var currentRes = po.getSelectedResourceName();
+		if(currentRes)
 		{
-			var s = (status[i] != undefined ? status[i] : status[0]);
-			if(s)
-				buttons[i].button("enable");
+			var lastChar = currentRes.charAt(currentRes.length - 1);
+			if(lastChar == "/")
+				;
 			else
-				buttons[i].button("disable");
+				currentRes = "";
 		}
+		else
+			currentRes = "";
+		
+		return currentRes + resName;
 	};
 	
 	po.addDashboardResourceItem = function($parent, resourceName)
@@ -523,33 +527,9 @@ readonly 是否只读操作，允许为null
 		}
 	};
 	
-	po.isResourceItemTemplate = function($res)
+	po.isTemplateResourceItem = function($res)
 	{
 		return $res.hasClass("resource-item-template");
-	};
-	
-	po.asTemplateItemAllowed = function($res)
-	{
-		if(po.isResourceItemTemplate($res))
-			return false;
-		
-		var resName = $res.attr("resource-name");
-		
-		if(!resName)
-			return false;
-		
-		if(!po.isHtmlResourceName(resName))
-			return false;
-		
-		var $parent = $res.parent();
-		var $templates = $(".resource-item-template", $parent);
-		for(var i=0; i<$templates.length; i++)
-		{
-			if($($templates[i]).attr("resource-name") == resName)
-				return false;
-		}
-		
-		return true;
 	};
 	
 	po.getTemplateIndex = function(templateName, templates)
@@ -565,7 +545,7 @@ readonly 是否只读操作，允许为null
 		return -1;
 	};
 	
-	po.refreshDashboardResources = function()
+	po.refreshResourceList = function()
 	{
 		var id = po.getDashboardId();
 		
@@ -577,8 +557,6 @@ readonly 是否只读操作，允许为null
 		
 		$.get(po.url("listResources?id="+id), function(resources)
 		{
-			po.enableResButonStatus(false);
-			
 			if(!resources)
 				return;
 			
@@ -609,36 +587,7 @@ readonly 是否只读操作，允许为null
 	(
 		{
 			classes: {"ui-selected": "ui-state-active"},
-			filter: ".resource-item",
-			selected: function(event, ui)
-			{
-				<#if !readonly>
-				var $selected = $(ui.selected);
-				var selectedCount = $(".ui-selected", this).length;
-				
-				var status = [false, false, false, false, false, false];
-				
-				if(selectedCount == 1)
-				{
-					var resName = $selected.attr("resource-name");
-					
-					status[0] = po.isEditableResourceName(resName);
-					status[1] = true;
-					status[2] = true;
-					status[3] = po.asTemplateItemAllowed($selected);
-					status[4] = status[0];
-					status[5] = status[0];
-				}
-				
-				po.enableResButonStatus(status);
-				</#if>
-			},
-			unselected: function(event, ui)
-			{
-				<#if !readonly>
-				po.enableResButonStatus(false);
-				</#if>
-			}
+			filter: ".resource-item"
 		}
 	)
 	.on("mouseenter", ".resource-item", function()
@@ -668,47 +617,77 @@ readonly 是否只读操作，允许为null
 			$icon.removeClass("ui-icon-arrowstop-1-w").addClass("ui-icon-arrowstop-1-e");
 		}
 	});
-
-	<#if !readonly>
-	po.resourceNameClipboard = new ClipboardJS(po.element(".copy-resource-button")[0],
+	
+	var copyResNameButton = po.element(".copyResNameButton");
+	if(copyResNameButton.length > 0)
 	{
-		text: function(trigger)
+		po.resourceNameClipboard = new ClipboardJS(po.element(".copyResNameButton")[0],
 		{
-			var text = po.getSelectedResourceName();
-			if(!text)
-				text = "";
-			
-			return text;
-		}
-	});
-	po.resourceNameClipboard.on('success', function(e)
+			text: function(trigger)
+			{
+				var text = po.getSelectedResourceName();
+				if(!text)
+					text = "";
+				
+				return text;
+			}
+		});
+		po.resourceNameClipboard.on('success', function(e)
+		{
+			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
+		});
+	}
+	
+	po.element(".add-resource-panel").draggable({ handle : ".addResPanelHead" });
+	
+	po.element(".upload-resource-panel").draggable({ handle : ".uploadResPanelHead" });
+	
+	po.element(".resource-more-button-wrapper").hover(
+	function()
 	{
-		$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
+		po.element(".resource-more-button-panel").show();
+	},
+	function()
+	{
+		po.element(".resource-more-button-panel").hide();
 	});
 	
-	po.element(".add-resource-panel").draggable({ handle : ".add-resource-panel-header" });
-	
-	po.element(".addResNameInput").on("keydown", function(e)
+	po.checkDashboardSaved = function()
 	{
-		if(e.keyCode == $.ui.keyCode.ENTER)
+		var id = po.getDashboardId();
+		
+		if(!id)
 		{
-			po.element(".saveAddResourceButton").click();
-			//防止提交表单
+			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
 			return false;
 		}
-	});
-	
-	po.element(".add-resource-button").click(function()
+		
+		return true;
+	};
+
+	po.element(".addResBtn").click(function()
 	{
 		po.element(".addResNameInput").val("");
 		po.element(".add-resource-panel").show();
 	});
 	
-	po.element(".saveAddResourceButton").click(function()
+	po.element(".addResNameInput").on("keydown", function(e)
+	{
+		if(e.keyCode == $.ui.keyCode.ENTER)
+		{
+			po.element(".saveAddResBtn").click();
+			//防止提交表单
+			return false;
+		}
+	});
+	
+	po.element(".saveAddResBtn").click(function()
 	{
 		var name = po.element(".addResNameInput").val();
 		if(!name)
 			return;
+		
+		name = po.concatSelectedResDirectory(name);
 		
 		var content = "";
 		var isHtml = po.isHtmlResourceName(name);
@@ -720,53 +699,23 @@ readonly 是否只读操作，允许为null
 		po.element(".add-resource-panel").hide();
 	});
 	
-	po.element(".upload-resource-panel").draggable({ handle : ".upload-resource-panel-header" });
-
-	po.element().on("click", function(event)
+	po.element(".editResBtn").click(function()
 	{
-		var $target = $(event.target);
-		
-		var $p0 = po.element(".add-resource-panel");
-		if(!$p0.is(":hidden"))
-		{
-			if($target.closest(".add-resource-panel, .add-resource-button").length == 0)
-				$p0.hide();
-		}
-		
-		var $p1 = po.element(".upload-resource-panel");
-		if(!$p1.is(":hidden"))
-		{
-			if($target.closest(".upload-resource-panel, .upload-resource-button").length == 0)
-				$p1.hide();
-		}
-	});
-	
-	po.element(".resource-more-button-wrapper").hover(
-	function()
-	{
-		po.element(".resource-more-button-panel").show();
-	},
-	function()
-	{
-		po.element(".resource-more-button-panel").hide();
-	});
-
-	po.element(".edit-resource-button").click(function()
-	{
-		var id = po.getDashboardId();
-		
-		if(!id)
-		{
-			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+		if(!po.checkDashboardSaved())
 			return;
-		}
 		
 		var $parent = po.element(".resource-list-content");
 		var $res = $("> .resource-item.ui-state-active", $parent);
 		var resName = $res.attr("resource-name");
 		
+		if(!resName)
+			return;
+		
 	 	if(!po.isEditableResourceName(resName))
+	 	{
+	 		$.tipInfo("<@spring.message code='dashboard.editResUnsupport' />");
 	 		return;
+	 	}
 	 	
 	 	var editIndex = -1;
 	 	var tabsNav = po.getTabsNav(po.resourceEditorTabs);
@@ -785,7 +734,7 @@ readonly 是否只读操作，允许为null
 	 	}
 	 	else
 	 	{
-		 	$.get(po.url("getResourceContent"), {"id": id, "resourceName": resName}, function(data)
+		 	$.get(po.url("getResourceContent"), {"id": po.getDashboardId(), "resourceName": resName}, function(data)
 		 	{
 		 		var isTemplate = (po.getTemplateIndex(data.resourceName) > -1);
 		 		po.newResourceEditorTab(data.resourceName, data.resourceContent, isTemplate);
@@ -793,20 +742,7 @@ readonly 是否只读操作，允许为null
 	 	}
 	});
 	
-	po.asTemplateItem = function($parent, $res)
-	{
-		if(!po.asTemplateItemAllowed($res))
-			return;
-		
-		var resName = $res.attr("resource-name");
-		
-		var templates = po.templates.concat([]);
-		templates.push(resName);
-		
-		po.saveTemplateNames(templates);
-	};
-	
-	po.element(".as-template-button").click(function()
+	po.element(".uploadResBtn").click(function()
 	{
 		var id = po.getDashboardId();
 		
@@ -816,101 +752,16 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		var $parent = po.element(".resource-list-content");
-		var $res = $("> .resource-item.ui-state-active", $parent);
+		po.element(".uploadResNameInput").val("");
+		po.element(".uploadResFilePath").val("");
+		po.element(".upload-file-info").text("");
 		
-		po.asTemplateItem($parent, $res);
+		var $panel = po.element(".upload-resource-panel");
+		$panel.show();
+		//$panel.position({ my : "right top", at : "right+20 bottom+3", of : this});
 	});
 
-	po.asNormalResourceItem = function($parent, $res)
-	{
-		if(!po.isResourceItemTemplate($res))
-			return;
-		
-		var resName = $res.attr("resource-name");
-		
-		var templates = po.templates.concat([]);
-		var idx = po.getTemplateIndex(resName, templates);
-		if(idx > -1)
-			templates.splice(idx, 1);
-		
-		po.saveTemplateNames(templates, function()
-		{
-			if(po.isTemplateCurrent(resName))
-				po.setTemplateNameAndContent("", "");
-		});
-	};
-	
-	po.element(".as-resource-button").click(function()
-	{
-		var id = po.getDashboardId();
-		
-		if(!id)
-		{
-			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
-			return;
-		}
-		
-		var $parent = po.element(".resource-list-content");
-		var $res = $("> .resource-item.ui-state-active", $parent);
-		var resName = $res.attr("resource-name");
-		
-		po.asNormalResourceItem($parent, $res);
-	});
-	
-	po.asResourceTemplateFirst = function($parent, $res)
-	{
-		if(!po.isResourceItemTemplate($res))
-			return;
-		
-		var resName = $res.attr("resource-name");
-		
-		var templates = po.templates.concat([]);
-		var idx = po.getTemplateIndex(resName, templates);
-		if(idx > -1)
-			templates.splice(idx, 1);
-		templates.unshift(resName);
-		
-		po.saveTemplateNames(templates);
-	};
-	
-	po.element(".as-template-first-button").click(function()
-	{
-		var id = po.getDashboardId();
-		
-		if(!id)
-		{
-			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
-			return;
-		}
-		
-		var $parent = po.element(".resource-list-content");
-		var $res = $("> .resource-item.ui-state-active", $parent);
-		
-		po.asResourceTemplateFirst($parent, $res);
-	});
-	
-	po.saveTemplateNames = function(templateNames, success)
-	{
-		var id = po.getDashboardId();
-		if(!id)
-			return;
-		
-		$.ajaxJson(po.url("saveTemplateNames?id="+id),
-		{
-			data: templateNames,
-			success : function(response)
-			{
-				po.templates = response.data.templates;
-				po.refreshDashboardResources();
-				
-				if(success)
-					success();
-			}
-		});
-	};
-	
-	po.element(".upload-res-name-input").on("keydown", function(e)
+	po.element(".uploadResNameInput").on("keydown", function(e)
 	{
 		if(e.keyCode == $.ui.keyCode.ENTER)
 		{
@@ -920,30 +771,11 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	
-	po.element(".upload-resource-button").click(function()
-	{
-		var id = po.getDashboardId();
-		
-		if(!id)
-		{
-			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
-			return;
-		}
-		
-		po.element(".upload-res-name-input").val("");
-		po.element(".resource-uploadFilePath").val("");
-		po.element(".upload-file-info").text("");
-		
-		var $panel = po.element(".upload-resource-panel");
-		$panel.show();
-		//$panel.position({ my : "right top", at : "right+20 bottom+3", of : this});
-	});
-	
 	po.element(".saveUploadResourceButton").click(function()
 	{
 		var id = po.getDashboardId();
-		var resourceFilePath = po.element(".resource-uploadFilePath").val();
-		var resourceName = po.element(".upload-res-name-input").val();
+		var resourceFilePath = po.element(".uploadResFilePath").val();
+		var resourceName = po.element(".uploadResNameInput").val();
 		
 		if(!id || !resourceFilePath || !resourceName)
 			return;
@@ -951,12 +783,120 @@ readonly 是否只读操作，允许为null
 		$.post(po.url("saveResourceFile"), {"id": id, "resourceFilePath": resourceFilePath, "resourceName": resourceName},
 		function()
 		{
-			po.refreshDashboardResources();
+			po.refreshResourceList();
 			po.element(".upload-resource-panel").hide();
 		});
 	});
 	
-	po.element(".refresh-resource-button").click(function()
+	po.element(".asTemplateBtn").click(function()
+	{
+		if(!po.checkDashboardSaved())
+			return;
+		
+		var $parent = po.element(".resource-list-content");
+		var $res = $("> .resource-item.ui-state-active", $parent);
+		
+		if(po.isTemplateResourceItem($res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		
+		if(!resName)
+			return;
+		
+		if(!po.isHtmlResourceName(resName))
+		{
+	 		$.tipInfo("<@spring.message code='dashboard.resAsTemplateUnsupport' />");
+	 		return;
+		}
+		
+		var $templates = $(".resource-item-template", $parent);
+		for(var i=0; i<$templates.length; i++)
+		{
+			if($($templates[i]).attr("resource-name") == resName)
+				return;
+		}
+		
+		var templates = po.templates.concat([]);
+		templates.push(resName);
+		
+		po.saveTemplateNames(templates);
+	});
+	
+	po.element(".asNormalResBtn").click(function()
+	{
+		if(!po.checkDashboardSaved())
+			return;
+		
+		var $parent = po.element(".resource-list-content");
+		var $res = $("> .resource-item.ui-state-active", $parent);
+		
+		if(!po.isTemplateResourceItem($res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+
+		if(!resName)
+			return;
+		
+		var templates = po.templates.concat([]);
+		var idx = po.getTemplateIndex(resName, templates);
+		if(idx > -1)
+			templates.splice(idx, 1);
+		
+		po.saveTemplateNames(templates);
+	});
+	
+	po.element(".asFirstTemplateBtn").click(function()
+	{
+		if(!po.checkDashboardSaved())
+			return;
+		
+		var $parent = po.element(".resource-list-content");
+		var $res = $("> .resource-item.ui-state-active", $parent);
+		
+		if(!po.isTemplateResourceItem($res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		
+		if(!resName)
+			return;
+		
+		var templates = po.templates.concat([]);
+		var idx = po.getTemplateIndex(resName, templates);
+		if(idx > -1)
+			templates.splice(idx, 1);
+		templates.unshift(resName);
+		
+		po.saveTemplateNames(templates);
+	});
+	
+	po.saveTemplateNames = function(templateNames, success)
+	{
+		if(templateNames == null || templateNames.length == 0)
+		{
+			$.tipInfo("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
+			return;
+		}
+		
+		var id = po.getDashboardId();
+		
+		$.ajaxJson(po.url("saveTemplateNames?id="+id),
+		{
+			data: templateNames,
+			success : function(response)
+			{
+				po.templates = response.data.templates;
+				po.refreshResourceList();
+				
+				if(success)
+					success();
+			}
+		});
+	};
+	
+	po.element(".refreshResListBtn").click(function()
 	{
 		var id = po.getDashboardId();
 		
@@ -966,10 +906,10 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		po.refreshDashboardResources();
+		po.refreshResourceList();
 	});
 	
-	po.element(".delete-resource-button").click(function()
+	po.element(".deleteResBtn").click(function()
 	{
 		var id = po.getDashboardId();
 		
@@ -992,10 +932,7 @@ readonly 是否只读操作，允许为null
 				$.post(po.url("deleteResource"), {"id": id, "name" : name},
 				function(response)
 				{
-					if(po.isTemplateCurrent(name))
-						po.setTemplateNameAndContent("", "");
-					
-					po.refreshDashboardResources();
+					po.refreshResourceList();
 				});
 			}
 		});
@@ -1009,20 +946,8 @@ readonly 是否只读操作，允许为null
 		paramName : "file",
 		success : function(uploadResult, textStatus, jqXHR)
 		{
-			var currentRes = po.getSelectedResourceName();
-			if(currentRes)
-			{
-				var lastChar = currentRes.charAt(currentRes.length - 1);
-				if(lastChar == "/")
-					;
-				else
-					currentRes = "";
-			}
-			else
-				currentRes = "";
-			
-			po.element(".upload-res-name-input").val(currentRes + uploadResult.fileName);
-			po.element(".resource-uploadFilePath").val(uploadResult.uploadFilePath);
+			po.element(".uploadResNameInput").val(po.concatSelectedResDirectory(uploadResult.fileName));
+			po.element(".uploadResFilePath").val(uploadResult.uploadFilePath);
 			
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
 		}
@@ -1035,15 +960,31 @@ readonly 是否只读操作，允许为null
 	{
 		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
-	</#if>
 
-	<#if !readonly>
-	po.insertChartCode = function(charts)
+	po.element().on("click", function(event)
+	{
+		var $target = $(event.target);
+		
+		var $p0 = po.element(".add-resource-panel");
+		if(!$p0.is(":hidden"))
+		{
+			if($target.closest(".add-resource-panel, .addResBtn").length == 0)
+				$p0.hide();
+		}
+		
+		var $p1 = po.element(".upload-resource-panel");
+		if(!$p1.is(":hidden"))
+		{
+			if($target.closest(".upload-resource-panel, .uploadResBtn").length == 0)
+				$p1.hide();
+		}
+	});
+	
+	po.insertChartCode = function(editor, charts)
 	{
 		if(!charts || !charts.length)
 			return;
 		
-		var editor = po.getCurrentResourceEditor();
 		var cursor = editor.getCursorPosition();
 		
 		//如果body上没有定义dg-dashboard样式，则图表元素也不必添加dg-chart样式，比如导入的看板
@@ -1084,28 +1025,6 @@ readonly 是否只读操作，允许为null
 		editor.session.insert(cursor, code);
 		editor.focus();
 	};
-	
-	po.element(".insert-chart-button").click(function()
-	{
-		var options =
-		{
-			pageParam :
-			{
-				select : function(charts)
-				{
-					if(!$.isArray(charts))
-						charts = [charts];
-					
-					po.insertChartCode(charts);
-					return true;
-				}
-			}
-		};
-		
-		$.setGridPageHeightOption(options);
-		
-		po.open("${contextPath}/analysis/chart/select?multiple", options);
-	});
 	
 	po.isCodeHasDefaultThemeClass = function(editor, cursor)
 	{
@@ -1172,6 +1091,21 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			data.dashboard = formData;
 			
+			var templateCount = (data.dashboard.templates == null ? 0 : data.dashboard.templates.length);
+			for(var i=0; i<data.resourceIsTemplates.length; i++)
+			{
+				if(data.resourceIsTemplates[i] == "true")
+					templateCount++;
+			}
+			
+			if(templateCount == 0)
+			{
+				$.tipInfo("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
+				po.showAfterSave = false;
+				
+				return;
+			}
+			
 			$.ajaxJson($(form).attr("action"),
 			{
 				data: data,
@@ -1188,7 +1122,7 @@ readonly 是否只读操作，允许为null
 					
 					var close = po.pageParamCallAfterSave(false);
 					if(!close)
-						po.refreshDashboardResources();
+						po.refreshResourceList();
 				},
 				complete: function()
 				{
@@ -1201,13 +1135,12 @@ readonly 是否只读操作，允许为null
 			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
-	</#if>
 	
 	if(po.getDashboardId())
 		po.element(".resize-editor-button-left").click();
 	
 	po.newResourceEditorTab(po.element("#${pageId}-initTemplateName").val(), po.element("#${pageId}-initTemplateContent").val(), true);
-	po.refreshDashboardResources();
+	po.refreshResourceList();
 })
 (${pageId});
 </script>

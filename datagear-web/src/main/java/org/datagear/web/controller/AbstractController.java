@@ -808,6 +808,17 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 对象是否为{@code null}。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected boolean isNull(Object obj)
+	{
+		return (obj == null);
+	}
+
+	/**
 	 * 字符串是否为空格串。
 	 * 
 	 * @param s

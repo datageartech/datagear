@@ -39,6 +39,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/ace-21.02.19/mode-html.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/mode-json.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/mode-javascript.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/ace-21.02.19/mode-css.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/ext-language_tools.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/clipboard-2.0.4/clipboard.min.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-pagination.js?v=${_hh_Version}" type="text/javascript"></script>

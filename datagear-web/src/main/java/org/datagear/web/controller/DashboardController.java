@@ -205,13 +205,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody HtmlTplDashboardSaveForm form) throws Exception
 	{
-		if (isEmpty(form.getDashboard()) || isEmpty(form.getResourceNames()) || isEmpty(form.getResourceContents())
-				|| form.getResourceNames().length != form.getResourceContents().length)
+		if (isEmpty(form.getDashboard()) || isNull(form.getResourceNames()) || isNull(form.getResourceContents())
+				|| isNull(form.getResourceIsTemplates())
+				|| form.getResourceNames().length != form.getResourceContents().length
+				|| form.getResourceContents().length != form.getResourceIsTemplates().length)
 			throw new IllegalInputException();
 
 		User user = WebUtils.getUser(request, response);
 
 		HtmlTplDashboardWidgetEntity dashboard = form.getDashboard();
+		boolean isSaveAdd = isEmpty(dashboard.getId());
 
 		String[] templates = dashboard.getTemplates();
 		String[] resourceNames = form.getResourceNames();
@@ -223,9 +226,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		templates = mergeTemplates(templates, resourceNames, resourceIsTemplates);
 		dashboard.setTemplates(templates);
-
-		checkSaveEntity(dashboard);
 		trimAnalysisProjectAwareEntityForSave(dashboard);
+
+		if (isBlank(dashboard.getName()) || isEmpty(templates) || (isSaveAdd && isEmpty(resourceNames)))
+			throw new IllegalInputException();
 
 		// 如果编辑了首页模板，则应重新解析编码
 		int firstTemplateIndex = StringUtil.search(resourceNames, templates[0]);
@@ -234,7 +238,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		boolean save = false;
 
-		if (isEmpty(dashboard.getId()))
+		if (isSaveAdd)
 		{
 			dashboard.setId(IDUtil.randomIdOnTime20());
 			dashboard.setCreateUser(user);
@@ -268,8 +272,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throws Exception
 	{
 		if (isEmpty(templates))
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					"dashboard.saveFailForAtLeastOneTemplate");
+			throw new IllegalInputException();
 
 		User user = WebUtils.getUser(request, response);
 
@@ -562,7 +565,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			dashboard.setAnalysisProject(analysisProject);
 		}
 
-		checkSaveEntity(dashboard);
+		if (isBlank(dashboard.getName()) || isEmpty(dashboard.getTemplates()))
+			throw new IllegalInputException();
 
 		dashboard.setId(IDUtil.randomIdOnTime20());
 		dashboard.setCreateUser(user);

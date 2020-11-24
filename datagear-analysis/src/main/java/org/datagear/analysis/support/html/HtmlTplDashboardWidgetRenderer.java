@@ -7,6 +7,7 @@
  */
 package org.datagear.analysis.support.html;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -514,6 +515,9 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 	/**
 	 * 读取指定{@linkplain HtmlTplDashboardWidget}的资源内容。
+	 * <p>
+	 * 如果资源不存在，将返回空字符串。
+	 * </p>
 	 * 
 	 * @param dashboardWidget
 	 * @param name
@@ -555,7 +559,15 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	{
 		TemplateDashboardWidgetResManager rm = getTemplateDashboardWidgetResManager();
 
-		Reader reader = rm.getReader(dashboardWidget, name);
+		Reader reader = null;
+
+		try
+		{
+			reader = rm.getReader(dashboardWidget, name);
+		}
+		catch (FileNotFoundException e)
+		{
+		}
 
 		if (reader == null)
 			reader = IOUtil.getReader("");
