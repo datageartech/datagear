@@ -67,13 +67,13 @@ readonly 是否只读操作，允许为null
 								</#if>
 								<div class="resource-button-wrapper rbw-right">
 									<#if !readonly>
-									<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
+									<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editResource' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
 									<#else>
 									<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-search'></span><span class='ui-button-icon-space'></span></button>
 									</#if>
 									<#if !readonly>
 									<button type='button' class='uploadResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
-									<button type='button' class='deleteResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
+									<button type='button' class='deleteResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.deleteResource' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
 									<div class="resource-more-button-wrapper">
 										<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
 										<div class="resource-more-button-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow">
@@ -81,7 +81,7 @@ readonly 是否只读操作，允许为null
 											<button type='button' class='asTemplateBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
 											<button type='button' class='asNormalResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
 											<button type='button' class='asFirstTemplateBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-home'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='refreshResListBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='refreshResListBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.refreshResource' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
 										</div>
 									</div>
 									</#if>
@@ -621,8 +621,10 @@ readonly 是否只读操作，允许为null
 	var copyResNameButton = po.element(".copyResNameButton");
 	if(copyResNameButton.length > 0)
 	{
-		po.resourceNameClipboard = new ClipboardJS(po.element(".copyResNameButton")[0],
+		var clipboard = new ClipboardJS(po.element(".copyResNameButton")[0],
 		{
+			//需要设置container，不然在对话框中打开页面后复制不起作用
+			container: po.element()[0],
 			text: function(trigger)
 			{
 				var text = po.getSelectedResourceName();
@@ -632,7 +634,7 @@ readonly 是否只读操作，允许为null
 				return text;
 			}
 		});
-		po.resourceNameClipboard.on('success', function(e)
+		clipboard.on('success', function(e)
 		{
 			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
 		});
