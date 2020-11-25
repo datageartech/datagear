@@ -97,8 +97,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	{
 		boolean disableAnonymous = isDisableAnonymous();
 
-		// 默认是开启CSRF的，系统目前没有提供相关支持，所以这里需禁用
+		// 默认是开启CSRF的，系统目前没有提供相关支持，因此需禁用
 		http.csrf().disable();
+
+		// 默认"X-Frame-Options"值为"DENY"，这会导致系统的图表/看板展示页面无法被其他应用嵌入iframe，因此需禁用
+		http.headers().frameOptions().disable();
 
 		http.authorizeRequests()
 				// 静态资源
