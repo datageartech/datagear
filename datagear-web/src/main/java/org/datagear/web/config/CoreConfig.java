@@ -536,7 +536,7 @@ public class CoreConfig implements InitializingBean
 				+ scriptPrefix + "/jquery/jquery-1.12.4.min.js?v=" + vp + "'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("echarts", "<script type='text/javascript' res-name='echarts' src='"
-				+ scriptPrefix + "/echarts-4.7.0/echarts.min.js?v=" + vp + "'></script>"));
+				+ scriptPrefix + "/echarts-4.9.0/echarts.min.js?v=" + vp + "'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("echarts-wordcloud",
 				"<script type='text/javascript' res-name='echarts-wordcloud' src='" + scriptPrefix
