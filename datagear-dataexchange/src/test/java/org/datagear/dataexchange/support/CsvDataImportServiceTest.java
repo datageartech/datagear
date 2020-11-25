@@ -21,9 +21,7 @@ import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.ResourceFactory;
 import org.datagear.util.resource.SimpleConnectionFactory;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * {@linkplain CsvDataImportService}单元测试类。
@@ -34,9 +32,6 @@ import org.junit.rules.ExpectedException;
 public class CsvDataImportServiceTest extends DataexchangeTestSupport
 {
 	public static final String TABLE_NAME = "T_DATA_IMPORT";
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private CsvDataImportService csvDataImportService;
 
@@ -51,30 +46,32 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 	{
 		DataFormat dataFormat = new DataFormat();
 
-		Connection cn = getConnection();
-
-		try
+		ColumnNotFoundException exception = Assert.assertThrows(ColumnNotFoundException.class, () ->
 		{
-			cn = getConnection();
-			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
-					"support/CsvDataImportServiceTest_ignoreInexistentColumn.csv");
+			Connection cn = null;
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
-					true);
-			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					valueDataImportOption, TABLE_NAME, readerFactory);
+			try
+			{
+				cn = getConnection();
+				ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
+						"support/CsvDataImportServiceTest_ignoreInexistentColumn.csv");
 
-			clearTable(cn, TABLE_NAME);
+				ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
+						true);
+				CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
+						valueDataImportOption, TABLE_NAME, readerFactory);
 
-			this.thrown.expect(ColumnNotFoundException.class);
-			this.thrown.expectMessage("Column [INEXISTENT_COLUMN] not found");
+				clearTable(cn, TABLE_NAME);
 
-			this.csvDataImportService.exchange(impt);
-		}
-		finally
-		{
-			JdbcUtil.closeConnection(cn);
-		}
+				this.csvDataImportService.exchange(impt);
+			}
+			finally
+			{
+				JdbcUtil.closeConnection(cn);
+			}
+		});
+
+		Assert.assertTrue(exception.getMessage().contains("Column [INEXISTENT_COLUMN] not found"));
 	}
 
 	@Test
@@ -187,31 +184,32 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 	{
 		DataFormat dataFormat = new DataFormat();
 
-		Connection cn = null;
-		Reader reader = null;
-
-		try
+		Assert.assertThrows(IllegalImportSourceValueException.class, () ->
 		{
-			cn = getConnection();
+			Connection cn = null;
+			Reader reader = null;
 
-			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
-					"support/CsvDataImportServiceTest__ExceptionResolve.csv");
+			try
+			{
+				cn = getConnection();
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true,
-					false);
-			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					valueDataImportOption, TABLE_NAME, readerFactory);
+				ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
+						"support/CsvDataImportServiceTest__ExceptionResolve.csv");
 
-			clearTable(cn, TABLE_NAME);
+				ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true,
+						false);
+				CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
+						valueDataImportOption, TABLE_NAME, readerFactory);
 
-			this.thrown.expect(IllegalImportSourceValueException.class);
+				clearTable(cn, TABLE_NAME);
 
-			this.csvDataImportService.exchange(impt);
-		}
-		finally
-		{
-			JdbcUtil.closeConnection(cn);
-			IOUtil.close(reader);
-		}
+				this.csvDataImportService.exchange(impt);
+			}
+			finally
+			{
+				JdbcUtil.closeConnection(cn);
+				IOUtil.close(reader);
+			}
+		});
 	}
 }

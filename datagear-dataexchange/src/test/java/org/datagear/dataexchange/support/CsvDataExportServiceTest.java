@@ -30,9 +30,7 @@ import org.datagear.util.resource.FileWriterResourceFactory;
 import org.datagear.util.resource.ResourceFactory;
 import org.datagear.util.resource.SimpleConnectionFactory;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * {@linkplain CsvDataExportService}单元测试类。
@@ -43,9 +41,6 @@ import org.junit.rules.ExpectedException;
 public class CsvDataExportServiceTest extends DataexchangeTestSupport
 {
 	public static final String TABLE_NAME = "T_DATA_EXPORT";
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private CsvDataImportService csvDataImportService;
 	private CsvDataExportService csvDataExportService;

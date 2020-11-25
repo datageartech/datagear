@@ -19,9 +19,8 @@ import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.SimpleConnectionFactory;
-import org.junit.Rule;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * {@linkplain ExcelDataImportService}单元测试类。
@@ -31,9 +30,6 @@ import org.junit.rules.ExpectedException;
  */
 public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 {
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	private ExcelDataImportService excelDataImportService;
 
 	public ExcelDataImportServiceTest()
@@ -47,33 +43,34 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 	{
 		DataFormat dataFormat = new DataFormat();
 
-		Connection cn = getConnection();
-
-		try
+		Assert.assertThrows(ColumnNotFoundException.class, () ->
 		{
-			cn = getConnection();
+			Connection cn = null;
 
-			File excelFile = getClasspathFileForTest(
-					"org/datagear/dataexchange/support/ExcelDataImportServiceTest.xls");
+			try
+			{
+				cn = getConnection();
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
-					true);
+				File excelFile = getClasspathFileForTest(
+						"org/datagear/dataexchange/support/ExcelDataImportServiceTest.xls");
 
-			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					valueDataImportOption, excelFile);
+				ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
+						true);
 
-			clearTable(cn, TABLE_NAME_DATA_IMPORT);
-			clearTable(cn, TABLE_NAME_DATA_EXPORT);
+				ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
+						valueDataImportOption, excelFile);
 
-			this.thrown.expect(ColumnNotFoundException.class);
+				clearTable(cn, TABLE_NAME_DATA_IMPORT);
+				clearTable(cn, TABLE_NAME_DATA_EXPORT);
 
-			this.excelDataImportService.exchange(impt);
+				this.excelDataImportService.exchange(impt);
 
-		}
-		finally
-		{
-			JdbcUtil.closeConnection(cn);
-		}
+			}
+			finally
+			{
+				JdbcUtil.closeConnection(cn);
+			}
+		});
 	}
 
 	@Test

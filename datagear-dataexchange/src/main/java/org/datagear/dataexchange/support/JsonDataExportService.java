@@ -92,7 +92,6 @@ public class JsonDataExportService extends AbstractDevotedDBMetaDataExchangeServ
 	 * @param out
 	 * @param exportContext
 	 */
-	@SuppressWarnings("resource")
 	protected void writeRecords(JsonDataExport dataExchange, Connection cn, List<Column> columns, ResultSet rs,
 			Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
 	{

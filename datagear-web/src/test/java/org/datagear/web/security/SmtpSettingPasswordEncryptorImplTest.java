@@ -4,7 +4,6 @@
 
 package org.datagear.web.security;
 
-import org.datagear.web.security.SmtpSettingPasswordEncryptorImpl;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -5,6 +5,7 @@
 package org.datagear.persistence.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import org.datagear.persistence.LiteralSqlParamValue;
@@ -12,9 +13,7 @@ import org.datagear.persistence.PersistenceTestSupport;
 import org.datagear.persistence.SqlParamValueMapperException;
 import org.datagear.persistence.support.expression.ExpressionEvaluationContext;
 import org.datagear.util.SqlParamValue;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.springframework.core.convert.support.DefaultConversionService;
 
 /**
@@ -25,9 +24,6 @@ import org.springframework.core.convert.support.DefaultConversionService;
  */
 public class ConversionSqlParamValueMapperTest extends PersistenceTestSupport
 {
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-
 	public ConversionSqlParamValueMapperTest()
 	{
 		super();
@@ -137,25 +133,29 @@ public class ConversionSqlParamValueMapperTest extends PersistenceTestSupport
 	@Test
 	public void mapTest_error_variable_expression_for_non_text()
 	{
-		ExpressionEvaluationContext context = new ExpressionEvaluationContext();
-		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
-		mapper.setConversionService(new DefaultConversionService());
-		mapper.setExpressionEvaluationContext(context);
+		assertThrows(SqlParamValueVariableExpressionException.class, () ->
+		{
+			ExpressionEvaluationContext context = new ExpressionEvaluationContext();
+			ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
+			mapper.setConversionService(new DefaultConversionService());
+			mapper.setExpressionEvaluationContext(context);
 
-		expectedException.expect(SqlParamValueVariableExpressionException.class);
-		mapper.map(connection, MOCK_TABLE, MOCK_COLUMN_ID, "#{invalid-expression-for-non-text}");
+			mapper.map(connection, MOCK_TABLE, MOCK_COLUMN_ID, "#{invalid-expression-for-non-text}");
+		});
 	}
 
 	@Test
 	public void mapTest_error_sql_expression_for_non_text()
 	{
-		ExpressionEvaluationContext context = new ExpressionEvaluationContext();
-		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
-		mapper.setConversionService(new DefaultConversionService());
-		mapper.setExpressionEvaluationContext(context);
+		assertThrows(SqlParamValueMapperException.class, () ->
+		{
+			ExpressionEvaluationContext context = new ExpressionEvaluationContext();
+			ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
+			mapper.setConversionService(new DefaultConversionService());
+			mapper.setExpressionEvaluationContext(context);
 
-		expectedException.expect(SqlParamValueMapperException.class);
-		mapper.map(connection, MOCK_TABLE, MOCK_COLUMN_ID, "100${invalid-expression-for-non-text}");
+			mapper.map(connection, MOCK_TABLE, MOCK_COLUMN_ID, "100${invalid-expression-for-non-text}");
+		});
 	}
 
 	protected ConversionSqlParamValueMapper createMapper()

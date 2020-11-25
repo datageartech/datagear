@@ -181,9 +181,11 @@ public class JsonSupport
 	 * 
 	 * @param objectMapper
 	 */
+	@SuppressWarnings("deprecation")
 	public static void setWriteJsonFeatures(ObjectMapper objectMapper)
 	{
 		objectMapper.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, false);
+		// XXX jackson默认输出JSON是会加双引号的，这里保留仅用于标识此项设置是必须的
 		objectMapper.configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, true);
 		objectMapper.setSerializationInclusion(Include.NON_NULL);
 	}
