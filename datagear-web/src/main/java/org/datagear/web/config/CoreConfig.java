@@ -156,7 +156,7 @@ public class CoreConfig implements InitializingBean
 	public MessageSource messageSource()
 	{
 		ResourceBundleMessageSource bean = new ResourceBundleMessageSource();
-		bean.setBasename("org.datagear.web.messages.message");
+		bean.setBasename("org.datagear.web.i18n.message");
 		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);
 
 		return bean;
