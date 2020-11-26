@@ -67,7 +67,7 @@ readonly 是否只读操作，允许为null
 								</#if>
 								<div class="resource-button-wrapper rbw-right">
 									<#if !readonly>
-									<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editResource' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
+									<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editResource.desc' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
 									<#else>
 									<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-search'></span><span class='ui-button-icon-space'></span></button>
 									</#if>
