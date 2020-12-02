@@ -324,3 +324,9 @@ DataGear版本更新日志
 改进：图表支持库ECharts版本由4.7.0升级至4.9.0；
 其他：项目开发框架由Spring迁移至Spring Boot；
 其他：系统配置文件由config/datagear.properties改为config/application.properties；
+
+
+-----------------------------------------
+--v2.1.0
+-----------------------------------------
+
