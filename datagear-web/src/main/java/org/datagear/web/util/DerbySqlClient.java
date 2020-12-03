@@ -14,12 +14,18 @@ import java.util.Scanner;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.datagear.web.config.PropertiesConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * Derby数据库SQL客户端。
@@ -36,14 +42,13 @@ public class DerbySqlClient extends JdbcSupport
 
 	public void run() throws Exception
 	{
-		ClassPathXmlApplicationContext applicationContext = null;
+		AnnotationConfigApplicationContext applicationContext = null;
 		Connection cn = null;
 
 		try
 		{
-			applicationContext = new ClassPathXmlApplicationContext(
-					"classpath:org/datagear/web/datagear-propertyConfigurer.xml",
-					"classpath:org/datagear/web/datagear-dataSource.xml");
+			applicationContext = new AnnotationConfigApplicationContext(PropertiesConfig.class,
+					DerbySqlClientDataSourceConfig.class);
 
 			DataSource dataSource = applicationContext.getBean(DataSource.class);
 			cn = dataSource.getConnection();
@@ -53,9 +58,16 @@ public class DerbySqlClient extends JdbcSupport
 			println("URL :" + JdbcUtil.getURLIfSupports(cn));
 			println("*****************************************");
 			println();
-			println("Print SQL for executing single sql, example: SELECT * FROM DATAGEAR_VERSION");
-			println("Print @<sql-file-path> for executing UTF-8 sql scripts, example: @/home/tmp.sql");
-			println("Print [exit] for exit");
+			println("*****************************************");
+			println("Print [SQL] for executing single sql, example:");
+			println("SELECT * FROM DATAGEAR_VERSION");
+			println();
+			println("Print [@<sql-file-path>] for executing UTF-8 sql scripts, example:");
+			println("@/home/tmp.sql");
+			println();
+			println("Print [exit] for exit, example:");
+			println("exit");
+			println("*****************************************");
 
 			Scanner scanner = new Scanner(System.in);
 
@@ -219,5 +231,40 @@ public class DerbySqlClient extends JdbcSupport
 	public static void main(String[] args) throws Exception
 	{
 		new DerbySqlClient().run();
+	}
+
+	@Configuration
+	public static class DerbySqlClientDataSourceConfig
+	{
+		private Environment environment;
+
+		@Autowired
+		public DerbySqlClientDataSourceConfig(Environment environment)
+		{
+			this.environment = environment;
+		}
+
+		public Environment getEnvironment()
+		{
+			return environment;
+		}
+
+		public void setEnvironment(Environment environment)
+		{
+			this.environment = environment;
+		}
+
+		@Bean
+		public DataSource dataSource()
+		{
+			BasicDataSource bean = new BasicDataSource();
+
+			bean.setDriverClassName(this.environment.getProperty("datasource.driverClassName"));
+			bean.setUrl(this.environment.getProperty("datasource.url"));
+			bean.setUsername(this.environment.getProperty("datasource.username"));
+			bean.setPassword(this.environment.getProperty("datasource.password"));
+
+			return bean;
+		}
 	}
 }
