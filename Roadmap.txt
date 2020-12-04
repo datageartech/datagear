@@ -2,8 +2,9 @@
 	
 	添加角色功能：数据操作员、数据分析员；
 	看板列表页添加复制看板链接功能按钮；
-	DATAGEAR_SCHEMA表的SCHEMA_URL列扩长；
 	添加更多内置图表插件；
+	系统添加英语语言支持；
+	ok DATAGEAR_SCHEMA表的SCHEMA_URL列扩长；
 	
 待定：
 	
