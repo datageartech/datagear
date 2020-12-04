@@ -839,7 +839,7 @@ ${detectNewVersionScript}
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/user/query", options);
+					po.open(contextPath+"/user/pagingQuery", options);
 				}
 				else if($item.hasClass("system-set-dataSetResDirectory-manage"))
 				{
@@ -851,7 +851,7 @@ ${detectNewVersionScript}
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/role/query", options);
+					po.open(contextPath+"/role/pagingQuery", options);
 				}
 				else if($item.hasClass("system-set-authorization-manage"))
 				{

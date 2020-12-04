@@ -7,7 +7,6 @@ boolean readonly 是否只读操作，默认为false
 -->
 <#assign selectOperation=(selectOperation!false)>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
-<#assign readonly=(readonly!false)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -17,7 +16,7 @@ boolean readonly 是否只读操作，默认为false
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-user">
+<div id="${pageId}" class="page-grid page-grid-user">
 	<div class="head">
 		<div class="search">
 			<#include "../include/page_obj_searchform.html.ftl">
@@ -25,18 +24,14 @@ boolean readonly 是否只读操作，默认为false
 		<div class="operation">
 			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
-			</#if>
-			<#if readonly>
+				<#--只有管理员可以查看用户详细信息
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				-->
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
-				<#if !selectOperation>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
-				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
-				<#if !selectOperation>
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
-				</#if>
 			</#if>
 		</div>
 	</div>
@@ -54,6 +49,7 @@ boolean readonly 是否只读操作，默认为false
 </div>
 </#if>
 <#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj_pagination.ftl">
 <#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_grid.ftl">
 <script type="text/javascript">
@@ -129,30 +125,15 @@ boolean readonly 是否只读操作，默认为false
 		</#if>
 	});
 	
-	po.buildTableColumValueOption = function(title, data, hidden)
-	{
-		var option =
-		{
-			title : title,
-			data : data,
-			visible : !hidden,
-			render: function(data, type, row, meta)
-			{
-				return $.escapeHtml(data);
-			},
-			defaultContent: "",
-		};
-		
-		return option;
-	};
+	po.initPagination();
 	
 	var tableColumns = [
-		po.buildTableColumValueOption("<@spring.message code='user.id' />", "id", true),
-		po.buildTableColumValueOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.name' />"), "name"),
-		po.buildTableColumValueOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.realName' />"), "realName"),
-		po.buildTableColumValueOption("<@spring.message code='user.createTime' />", "createTime")
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='user.id' />", "id", true),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.name' />"), "name"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.realName' />"), "realName"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='user.createTime' />", "createTime")
 	];
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
 	po.initDataTable(tableSettings);
 })
 (${pageId});

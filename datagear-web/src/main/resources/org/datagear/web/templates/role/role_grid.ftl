@@ -14,7 +14,7 @@ selectOperation 是否选择操作，允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-role">
+<div id="${pageId}" class="page-grid page-grid-role">
 	<div class="head">
 		<div class="search">
 			<#include "../include/page_obj_searchform.html.ftl">
@@ -22,7 +22,9 @@ selectOperation 是否选择操作，允许为null
 		<div class="operation">
 			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+				<#--只有管理员可以查看角色详细信息
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				-->
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
@@ -46,6 +48,7 @@ selectOperation 是否选择操作，允许为null
 </div>
 </#if>
 <#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj_pagination.ftl">
 <#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_grid.ftl">
 <script type="text/javascript">
@@ -95,7 +98,7 @@ selectOperation 是否选择操作，允许为null
 			
 			$.setGridPageHeightOption(options);
 			
-			po.open(po.url("user/query"), options);
+			po.open(po.url("user/pagingQuery"), options);
 		});
 	});
 	
@@ -129,6 +132,8 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
+	po.initPagination();
+	
 	var columnEnabled = $.buildDataTablesColumnSimpleOption("<@spring.message code='role.enabled' />", "enabled");
 	columnEnabled.render = function(data, type, row, meta)
 	{
@@ -146,7 +151,7 @@ selectOperation 是否选择操作，允许为null
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='role.description' />"), "description"),
 		columnEnabled
 	];
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
 	po.initDataTable(tableSettings);
 })
 (${pageId});

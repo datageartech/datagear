@@ -68,6 +68,29 @@
 		<include refid="common.queryOrder" />
 	</select>
 	
+	<select id="pagingQueryForRoleCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+			AND T.${_iq_}role.id${_iq_} = #{role.id}
+	</select>
+	
+	<select id="pagingQueryForRole" resultType="org.datagear.management.domain.RoleUser">
+		<include refid="common.pagingQueryHead" />
+			SELECT
+				T.*
+			FROM
+				(<include refid="queryView" />) T
+			WHERE
+				<include refid="queryCondition" />
+				AND T.${_iq_}role.id${_iq_} = #{role.id}
+			<include refid="common.queryOrder" />
+		<include refid="common.pagingQueryFoot" />
+	</select>
+	
 	<select id="pagingQueryCount" resultType="int">
 		SELECT
 			COUNT(*)

@@ -125,12 +125,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				.hasAuthority(AuthUser.ROLE_ADMIN)
 
 				// 用户管理
-				.antMatchers("/user/personalSet", "/user/savePersonalSet", "/user/select", "/user/queryData")
-				.hasAuthority(AuthUser.ROLE_USER).antMatchers("/user/**").hasAuthority(AuthUser.ROLE_ADMIN)
+				.antMatchers("/user/personalSet", "/user/savePersonalSet", "/user/select", "/user/pagingQueryData")
+				.hasAuthority(AuthUser.ROLE_USER)
+				//
+				.antMatchers("/user/**").hasAuthority(AuthUser.ROLE_ADMIN)
 
 				// 角色管理
-				.antMatchers("/role/select", "/role/queryData").hasAuthority(AuthUser.ROLE_USER).antMatchers("/role/**")
-				.hasAuthority(AuthUser.ROLE_ADMIN)
+				.antMatchers("/role/select", "/role/pagingQueryData").hasAuthority(AuthUser.ROLE_USER)
+				//
+				.antMatchers("/role/**").hasAuthority(AuthUser.ROLE_ADMIN)
 
 				// 权限管理
 				.antMatchers("/authorization/**").hasAuthority(AuthUser.ROLE_USER)

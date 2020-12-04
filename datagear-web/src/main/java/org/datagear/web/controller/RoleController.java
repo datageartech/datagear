@@ -14,6 +14,7 @@ import org.datagear.management.domain.RoleUser;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.service.RoleUserService;
+import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
@@ -144,8 +145,9 @@ public class RoleController extends AbstractController
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/query")
-	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	@RequestMapping(value = "/pagingQuery")
+	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "role.manageRole");
 
@@ -161,19 +163,19 @@ public class RoleController extends AbstractController
 		return "/role/role_grid";
 	}
 
-	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<Role> queryData(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<Role> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
-		List<Role> roles = this.roleService.query(pagingQuery);
+		PagingData<Role> roles = this.roleService.pagingQuery(pagingQuery);
 		return roles;
 	}
 
-	@RequestMapping(value = "/user/query")
-	public String userQuery(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping(value = "/user/pagingQuery")
+	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String id)
 	{
 		Role role = this.roleService.getById(id);
@@ -186,9 +188,9 @@ public class RoleController extends AbstractController
 		return "/role/role_user_grid";
 	}
 
-	@RequestMapping(value = "/user/queryData", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/user/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<RoleUser> userQueryData(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<RoleUser> userPagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("roleId") String roleId, @RequestBody(required = false) PagingQuery pagingQueryParam)
 			throws Exception
 	{
@@ -199,7 +201,7 @@ public class RoleController extends AbstractController
 		if (role == null)
 			throw new RecordNotFoundException();
 
-		List<RoleUser> roleUsers = this.roleUserService.queryForRole(role, pagingQuery);
+		PagingData<RoleUser> roleUsers = this.roleUserService.pagingQueryForRole(role, pagingQuery);
 
 		return roleUsers;
 	}

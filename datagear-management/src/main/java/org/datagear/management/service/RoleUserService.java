@@ -9,6 +9,8 @@ import java.util.List;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.RoleUser;
 import org.datagear.management.domain.User;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 
 /**
@@ -54,4 +56,12 @@ public interface RoleUserService extends EntityService<String, RoleUser>
 	 */
 	List<RoleUser> queryForRole(Role role, Query query);
 
+	/**
+	 * 查询。
+	 * 
+	 * @param role
+	 * @param query
+	 * @return
+	 */
+	PagingData<RoleUser> pagingQueryForRole(Role role, PagingQuery query);
 }
