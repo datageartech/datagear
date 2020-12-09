@@ -8,8 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.management.domain.Role;
+import org.datagear.management.domain.RoleUser;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.RoleUserService;
 import org.datagear.management.service.UserService;
+import org.datagear.util.IDUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -22,6 +26,8 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 {
 	protected static final String SQL_NAMESPACE = User.class.getName();
 
+	private RoleUserService roleUserService;
+
 	private UserPasswordEncoder userPasswordEncoder;
 
 	public UserServiceImpl()
@@ -29,14 +35,26 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 		super();
 	}
 
-	public UserServiceImpl(SqlSessionFactory sqlSessionFactory)
+	public UserServiceImpl(SqlSessionFactory sqlSessionFactory, RoleUserService roleUserService)
 	{
 		super(sqlSessionFactory);
+		this.roleUserService = roleUserService;
 	}
 
-	public UserServiceImpl(SqlSessionTemplate sqlSessionTemplate)
+	public UserServiceImpl(SqlSessionTemplate sqlSessionTemplate, RoleUserService roleUserService)
 	{
 		super(sqlSessionTemplate);
+		this.roleUserService = roleUserService;
+	}
+
+	public RoleUserService getRoleUserService()
+	{
+		return roleUserService;
+	}
+
+	public void setRoleUserService(RoleUserService roleUserService)
+	{
+		this.roleUserService = roleUserService;
 	}
 
 	public UserPasswordEncoder getUserPasswordEncoder()
@@ -57,7 +75,15 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 		if (password != null && !password.isEmpty() && this.userPasswordEncoder != null)
 			entity.setPassword(this.userPasswordEncoder.encode(password));
 
-		return super.add(entity, params);
+		boolean add = super.add(entity, params);
+
+		if (add)
+		{
+			RoleUser roleUser = new RoleUser(IDUtil.randomIdOnTime20(), new Role(Role.ROLE_REGISTRY, ""), entity);
+			this.roleUserService.add(roleUser);
+		}
+
+		return add;
 	}
 
 	@Override

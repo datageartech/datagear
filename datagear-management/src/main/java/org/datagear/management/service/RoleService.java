@@ -14,4 +14,9 @@ import org.datagear.management.domain.Role;
  */
 public interface RoleService extends EntityService<String, Role>
 {
+	@Override
+	boolean deleteById(String id) throws DeleteBuiltinRoleDeniedException;
+
+	@Override
+	boolean[] deleteByIds(String[] ids) throws DeleteBuiltinRoleDeniedException;
 }

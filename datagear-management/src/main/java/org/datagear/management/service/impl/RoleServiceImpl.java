@@ -4,8 +4,11 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.Map;
+
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Role;
+import org.datagear.management.service.DeleteBuiltinRoleDeniedException;
 import org.datagear.management.service.RoleService;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -32,6 +35,15 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role> 
 	public RoleServiceImpl(SqlSessionTemplate sqlSessionTemplate)
 	{
 		super(sqlSessionTemplate);
+	}
+
+	@Override
+	protected boolean deleteById(String id, Map<String, Object> params)
+	{
+		if (Role.isBuiltinRole(id))
+			throw new DeleteBuiltinRoleDeniedException(id);
+
+		return super.deleteById(id, params);
 	}
 
 	@Override
