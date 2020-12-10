@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,7 +38,14 @@ public class AuthUser implements UserDetails
 		super();
 		this.user = user;
 
-		this.authorities = new HashSet<GrantedAuthority>();
+		this.authorities = new HashSet<>();
+
+		Set<Role> roles = user.getRoles();
+		if (roles != null && !roles.isEmpty())
+		{
+			for (Role role : roles)
+				this.authorities.add(new SimpleGrantedAuthority(role.getId()));
+		}
 
 		if (user.isAnonymous())
 			this.authorities.add(new SimpleGrantedAuthority(ROLE_ANONYMOUS));

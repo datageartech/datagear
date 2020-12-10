@@ -5,13 +5,17 @@
 package org.datagear.web.controller;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.UserService;
 import org.datagear.util.IDUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +44,9 @@ public class RegisterController extends AbstractController
 
 	private boolean disableRegister = false;
 
+	/** 注册用户默认角色 */
+	private String defaultRoleRegister = "";
+
 	public RegisterController()
 	{
 		super();
@@ -64,6 +71,17 @@ public class RegisterController extends AbstractController
 	public void setDisableRegister(boolean disableRegister)
 	{
 		this.disableRegister = disableRegister;
+	}
+
+	public String getDefaultRoleRegister()
+	{
+		return defaultRoleRegister;
+	}
+
+	@Value("${defaultRole.register}")
+	public void setDefaultRoleRegister(String defaultRoleRegister)
+	{
+		this.defaultRoleRegister = defaultRoleRegister;
 	}
 
 	@RequestMapping
@@ -105,6 +123,8 @@ public class RegisterController extends AbstractController
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMessageCode("userNameExists"), user.getName());
 
+		user.setRoles(buildUserRolesForSave(this.defaultRoleRegister));
+
 		this.userService.add(user);
 
 		request.getSession().setAttribute(SESSION_KEY_REGISTER_USER_NAME, user.getName());
@@ -127,5 +147,20 @@ public class RegisterController extends AbstractController
 	protected String buildMessageCode(String code)
 	{
 		return buildMessageCode("register", code);
+	}
+
+	public static Set<Role> buildUserRolesForSave(String roleIdsStr)
+	{
+		Set<Role> roles = new HashSet<>();
+
+		if (!StringUtil.isBlank(roleIdsStr))
+		{
+			String[] roleIds = StringUtil.split(roleIdsStr, ",", true);
+
+			for (String roleId : roleIds)
+				roles.add(new Role(roleId, roleId));
+		}
+
+		return roles;
 	}
 }

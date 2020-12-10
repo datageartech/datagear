@@ -419,8 +419,10 @@ public class CoreConfig implements InitializingBean
 	@Bean
 	public UserService userService()
 	{
-		UserServiceImpl bean = new UserServiceImpl(this.sqlSessionFactory(), this.roleUserService());
+		UserServiceImpl bean = new UserServiceImpl(this.sqlSessionFactory(), this.roleUserService(),
+				this.roleService());
 		bean.setUserPasswordEncoder(this.userPasswordEncoder());
+
 		return bean;
 	}
 

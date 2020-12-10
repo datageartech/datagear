@@ -16,6 +16,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -40,6 +41,9 @@ public class UserController extends AbstractController
 	@Autowired
 	private SchemaService schemaService;
 
+	/** 添加用户默认角色 */
+	private String defaultRoleAdd = "";
+
 	public UserController()
 	{
 		super();
@@ -63,6 +67,17 @@ public class UserController extends AbstractController
 	public void setSchemaService(SchemaService schemaService)
 	{
 		this.schemaService = schemaService;
+	}
+
+	public String getDefaultRoleAdd()
+	{
+		return defaultRoleAdd;
+	}
+
+	@Value("${defaultRole.add}")
+	public void setDefaultRoleAdd(String defaultRoleAdd)
+	{
+		this.defaultRoleAdd = defaultRoleAdd;
 	}
 
 	@RequestMapping("/add")
@@ -95,9 +110,9 @@ public class UserController extends AbstractController
 					buildMessageCode("userNameExists"), user.getName());
 
 		user.setId(IDUtil.randomIdOnTime20());
-
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
+		user.setRoles(RegisterController.buildUserRolesForSave(this.defaultRoleAdd));
 
 		this.userService.add(user);
 

@@ -38,6 +38,18 @@
 			T.${_iq_}id${_iq_} = #{id}
 	</select>
 	
+	<select id="findByUserId" resultType="org.datagear.management.domain.Role">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			T.${_iq_}id${_iq_} IN
+			(
+				SELECT RU_ROLE_ID FROM DATAGEAR_ROLE_USER WHERE RU_USER_ID = #{userId}
+			)
+	</select>
+	
 	<select id="query" resultType="org.datagear.management.domain.Role">
 		SELECT
 			T.*

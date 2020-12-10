@@ -4,7 +4,10 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Role;
@@ -35,6 +38,21 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role> 
 	public RoleServiceImpl(SqlSessionTemplate sqlSessionTemplate)
 	{
 		super(sqlSessionTemplate);
+	}
+
+	@Override
+	public Set<Role> findByUserId(String userId)
+	{
+		Set<Role> set = new HashSet<>();
+
+		Map<String, Object> params = buildParamMap();
+		params.put("userId", userId);
+
+		List<Role> roles = query("findByUserId", params);
+
+		set.addAll(roles);
+
+		return set;
 	}
 
 	@Override
