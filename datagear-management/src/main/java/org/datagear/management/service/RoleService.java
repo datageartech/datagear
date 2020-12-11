@@ -4,6 +4,7 @@
 
 package org.datagear.management.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.datagear.management.domain.Role;
@@ -29,4 +30,12 @@ public interface RoleService extends EntityService<String, Role>
 	 * @return 没有则返回空集合
 	 */
 	Set<Role> findByUserId(String userId);
+
+	/**
+	 * 获取。
+	 * 
+	 * @param ids
+	 * @return 元素可能为{@code null}，表示未找到对应对象
+	 */
+	List<Role> getByIds(String... ids);
 }

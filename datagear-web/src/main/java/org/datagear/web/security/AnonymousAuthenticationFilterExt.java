@@ -8,8 +8,10 @@
 package org.datagear.web.security;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.FilterChain;
@@ -143,10 +145,13 @@ public class AnonymousAuthenticationFilterExt extends AnonymousAuthenticationFil
 
 		if (anonymousRoleIds != null)
 		{
-			for (String anonymousRoleId : anonymousRoleIds)
-			{
-				Role role = this.roleService.getById(anonymousRoleId);
+			List<String> idList = new ArrayList<>(anonymousRoleIds);
+			String[] idArray = idList.toArray(new String[idList.size()]);
 
+			List<Role> roleList = this.roleService.getByIds(idArray);
+
+			for (Role role : roleList)
+			{
 				if (role != null)
 					roles.add(role);
 			}

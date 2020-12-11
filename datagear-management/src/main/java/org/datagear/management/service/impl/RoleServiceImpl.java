@@ -4,6 +4,7 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,17 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role> 
 		set.addAll(roles);
 
 		return set;
+	}
+
+	@Override
+	public List<Role> getByIds(String... ids)
+	{
+		List<Role> roles = new ArrayList<Role>(ids.length);
+
+		for (String id : ids)
+			roles.add(getById(id));
+
+		return roles;
 	}
 
 	@Override
