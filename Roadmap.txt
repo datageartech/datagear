@@ -4,6 +4,7 @@
 	看板列表页添加复制看板链接功能按钮；
 	添加更多内置图表插件；
 	系统添加英语语言支持；
+	内置图表插件支持在update时自定义图表options，通过调用新添加chart.optionsUpdate(options)函数实现；
 	ok DATAGEAR_SCHEMA表的SCHEMA_URL列扩长；
 	
 待定：
