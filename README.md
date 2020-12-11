@@ -39,17 +39,21 @@ DataGear是一款开源免费的数据可视化分析平台，使用Java语言�
 
 [http://www.datagear.tech/documentation](http://www.datagear.tech/documentation)
 
-## 交流
+## 示例
 
-QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[1128360199](https://jq.qq.com/?_wv=1027&k=XkQ4ARMY)
-
-留言板：[http://www.datagear.tech/messageboard](http://www.datagear.tech/messageboard/)
+[https://my.oschina.net/u/4035217](https://my.oschina.net/u/4035217)
 
 ## 源码
 
 Gitee：[https://gitee.com/datagear/datagear](https://gitee.com/datagear/datagear)
 
 Github：[https://github.com/datageartech/datagear](https://github.com/datageartech/datagear)
+
+## 交流
+
+QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[1128360199](https://jq.qq.com/?_wv=1027&k=XkQ4ARMY)
+
+留言板：[http://www.datagear.tech/messageboard](http://www.datagear.tech/messageboard/)
 
 ## 界面
 
@@ -96,8 +100,6 @@ SQL工作台
 看板-联动异步加载图表
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif)
-
-## [更多示例...](https://my.oschina.net/u/4035217)
 
 ## 模块介绍
 
