@@ -6,6 +6,7 @@ package org.datagear.management.domain;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -203,6 +204,9 @@ public class User extends AbstractStringIdEntity
 		re.setAdmin(user.isAdmin());
 		re.setAnonymous(user.isAnonymous());
 		re.setCreateTime(user.getCreateTime());
+
+		if (user.getRoles() != null)
+			re.setRoles(new HashSet<>(user.getRoles()));
 
 		return re;
 	}

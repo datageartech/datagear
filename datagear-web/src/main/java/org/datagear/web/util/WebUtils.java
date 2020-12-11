@@ -10,7 +10,6 @@ import java.util.Locale;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.datagear.management.domain.User;
 import org.datagear.util.IDUtil;
@@ -30,10 +29,6 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class WebUtils
 {
-	public static final String SESSION_KEY_USER_ANONYMOUS = "USER_ANONYMOUS";
-
-	public static final String COOKIE_USER_ID_ANONYMOUS = "USER_ID_ANONYMOUS";
-
 	public static final String COOKIE_PAGINATION_SIZE = "PAGINATION_PAGE_SIZE";
 
 	/**
@@ -74,45 +69,13 @@ public class WebUtils
 	public static User getUser(HttpServletRequest request, HttpServletResponse response)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-		if (authentication != null)
-		{
-			User user = getUser(authentication);
-
-			if (user != null)
-				return user;
-		}
-
-		HttpSession session = request.getSession();
-
-		User anonymousUser = (User) request.getSession().getAttribute(SESSION_KEY_USER_ANONYMOUS);
-
-		if (anonymousUser == null)
-		{
-			String anonymousUserId = getCookieValue(request, COOKIE_USER_ID_ANONYMOUS);
-
-			if (anonymousUserId == null || anonymousUserId.isEmpty())
-			{
-				anonymousUserId = IDUtil.uuid();
-				setCookie(request, response, COOKIE_USER_ID_ANONYMOUS, anonymousUserId, 60 * 60 * 24 * 365 * 10);
-			}
-
-			anonymousUser = new User(anonymousUserId);
-			anonymousUser.setName(anonymousUserId);
-			anonymousUser.setAdmin(false);
-			anonymousUser.setAnonymous(true);
-			anonymousUser.setCreateTime(new java.util.Date());
-
-			session.setAttribute(SESSION_KEY_USER_ANONYMOUS, anonymousUser);
-		}
-
-		return anonymousUser;
+		return getUser(authentication);
 	}
 
 	/**
-	 * 获取认证用户。
+	 * 获取当前用户（认证用户或者匿名用户）。
 	 * <p>
-	 * 如果未认证，此方法将返回{@code null}。
+	 * 此方法不会返回{@code null}。
 	 * </p>
 	 * 
 	 * @param authentication
@@ -120,19 +83,24 @@ public class WebUtils
 	 */
 	public static User getUser(Authentication authentication)
 	{
+		User user = null;
+
 		Object principal = authentication.getPrincipal();
 
 		if (principal instanceof User)
 		{
-			return (User) principal;
+			user = (User) principal;
 		}
 		else if (principal instanceof AuthUser)
 		{
 			AuthUser ou = (AuthUser) principal;
-			return ou.getUser();
+			user = ou.getUser();
 		}
-		else
-			return null;
+
+		if (user == null)
+			throw new IllegalStateException();
+
+		return user;
 	}
 
 	/**

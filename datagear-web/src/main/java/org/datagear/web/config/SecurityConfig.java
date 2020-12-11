@@ -8,9 +8,14 @@
 package org.datagear.web.config;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.datagear.management.service.CreateUserEntityService;
+import org.datagear.util.StringUtil;
+import org.datagear.web.security.AnonymousAuthenticationFilterExt;
 import org.datagear.web.security.AuthUser;
 import org.datagear.web.security.AuthenticationSuccessHandlerImpl;
 import org.datagear.web.security.UserDetailsServiceImpl;
@@ -18,9 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
@@ -167,6 +174,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 
 				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
 				.rememberMeParameter("rememberMe").rememberMeCookieName("REMEMBER_ME");
+
+		configureAnonymous(http);
+	}
+
+	/**
+	 * 将默认的{@linkplain AnonymousAuthenticationFilter}配置改为{@linkplain AnonymousAuthenticationFilterExt}。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configureAnonymous(HttpSecurity http) throws Exception
+	{
+		String anonymousAuthKey = UUID.randomUUID().toString();
+
+		String[] anonymousRoleIds = StringUtil.split(this.environment.getProperty("defaultRole.anonymous"), ",", true);
+		Set<String> anonymousRoleIdSet = new HashSet<>();
+		anonymousRoleIdSet.addAll(Arrays.asList(anonymousRoleIds));
+
+		AnonymousAuthenticationFilterExt anonymousAuthenticationFilter = new AnonymousAuthenticationFilterExt(
+				anonymousAuthKey);
+		anonymousAuthenticationFilter.setAnonymousRoleIds(anonymousRoleIdSet);
+		anonymousAuthenticationFilter.setRoleService(this.coreConfig.roleService());
+
+		http.anonymous().authenticationProvider(new AnonymousAuthenticationProvider(anonymousAuthKey))
+				.authenticationFilter(anonymousAuthenticationFilter);
 	}
 
 	@Bean

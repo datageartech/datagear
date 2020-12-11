@@ -68,16 +68,17 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 	protected void mergeAnonymousUserEntities(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication)
 	{
-		User loginUser = WebUtils.getUser(authentication);
+		User user = WebUtils.getUser(authentication);
 
-		if (loginUser == null)
+		if (user.isAnonymous())
 			return;
 
 		// 不迁移至管理员用户上
-		if (loginUser.isAdmin())
+		if (user.isAdmin())
 			return;
 
-		String anonymousUserId = WebUtils.getCookieValue(request, WebUtils.COOKIE_USER_ID_ANONYMOUS);
+		String anonymousUserId = WebUtils.getCookieValue(request,
+				AnonymousAuthenticationFilterExt.COOKIE_USER_ID_ANONYMOUS);
 
 		if (anonymousUserId != null && !anonymousUserId.isEmpty())
 		{
@@ -85,7 +86,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 			{
 				for (CreateUserEntityService service : this.createUserEntityServices)
 				{
-					service.updateCreateUserId(anonymousUserId, loginUser.getId());
+					service.updateCreateUserId(anonymousUserId, user.getId());
 				}
 			}
 		}

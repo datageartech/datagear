@@ -44,7 +44,13 @@ public class AuthUser implements UserDetails
 		if (roles != null && !roles.isEmpty())
 		{
 			for (Role role : roles)
+			{
+				// 未启用的角色不应加入
+				if (!role.isEnabled())
+					continue;
+
 				this.authorities.add(new SimpleGrantedAuthority(role.getId()));
+			}
 		}
 
 		if (user.isAnonymous())
