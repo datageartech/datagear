@@ -2,6 +2,7 @@
 <#include "include/html_doctype.ftl">
 <#assign Global=statics['org.datagear.util.Global']>
 <#assign Themes=statics['org.datagear.web.util.Themes']>
+<#assign Role=statics['org.datagear.management.domain.Role']>
 <html>
 <head>
 <#include "include/html_head.ftl">
@@ -9,6 +10,7 @@ ${detectNewVersionScript}
 <title><@spring.message code='app.pageTitle' /></title>
 <#include "include/page_js_obj.ftl" >
 <#include "include/page_obj_tabs.ftl" >
+<#include "include/page_obj_opt_permission.ftl" >
 <#include "include/page_obj_data_permission.ftl" >
 <#include "include/page_obj_data_permission_ds_table.ftl" >
 <script type="text/javascript">
@@ -1472,21 +1474,21 @@ ${detectNewVersionScript}
 						</form>
 					</div>
 					<div class="schema-panel-operation">
-						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" visible-any-role="${Role.ROLE_DATA_ADMIN}" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 						<ul id="schemaOperationMenu" class="lightweight-menu">
 							<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
 								<ul class="ui-widget-shadow">
-									<li class="schema-operation-edit"><a href="javascript:void(0);"><@spring.message code='edit' /></a></li>
-									<li class="schema-operation-delete"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
+									<li class="schema-operation-edit" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='edit' /></a></li>
+									<li class="schema-operation-delete" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
 									<li class="schema-operation-view"><a href="javascript:void(0);"><@spring.message code='view' /></a></li>
 									<li class="schema-operation-refresh" title="<@spring.message code='main.schemaOperationMenuRefreshComment' />"><a href="javascript:void(0);"><@spring.message code='refresh' /></a></li>
-									<li class="schema-operation-authorize"><a href="javascript:void(0);"><@spring.message code='authorize' /></a></li>
+									<li class="schema-operation-authorize" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='authorize' /></a></li>
 									<li class="ui-widget-header"></li>
 									<li class="schema-operation-reload" title="<@spring.message code='main.schemaOperationMenuReloadComment' />"><a href="javascript:void(0);"><@spring.message code='reload' /></a></li>
 									<li class="ui-widget-header"></li>
 									<li class="schema-operation-sqlpad"><a href="javascript:void(0);"><@spring.message code='main.sqlpad' /></a></li>
 									<li class="ui-widget-header"></li>
-									<li class="schema-operation-dataimport"><a href="javascript:void(0);"><@spring.message code='main.dataimport' /></a></li>
+									<li class="schema-operation-dataimport" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='main.dataimport' /></a></li>
 									<li class="schema-operation-dataexport"><a href="javascript:void(0);"><@spring.message code='main.dataexport' /></a></li>
 								</ul>
 							</li>
@@ -1505,7 +1507,7 @@ ${detectNewVersionScript}
 						</div>
 					</div>
 					<div class="analysis-project-operation">
-						<div class="analysis-project-operation-group">
+						<div class="analysis-project-operation-group" show-any-role="${Role.ROLE_DATA_ADMIN}">
 							<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title="<@spring.message code='main.analysisProject.add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 							<button id="manageAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only manage-analysis-project-button" title="<@spring.message code='main.analysisProject.manage' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='manage' /></button>
 						</div>
@@ -1521,7 +1523,7 @@ ${detectNewVersionScript}
 							<a href="${contextPath}/analysis/dataSet/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dataSet' />
 								<#if currentUser.anonymous>
-								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />"></span>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
 								</#if>
 							</a>
 						</li>
@@ -1529,7 +1531,7 @@ ${detectNewVersionScript}
 							<a href="${contextPath}/analysis/chart/pagingQuery">
 								<@spring.message code='main.dataAnalysis.chart' />
 								<#if currentUser.anonymous>
-								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />"></span>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
 								</#if>
 							</a>
 						</li>
@@ -1537,7 +1539,7 @@ ${detectNewVersionScript}
 							<a href="${contextPath}/analysis/dashboard/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dashboard' />
 								<#if currentUser.anonymous>
-								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />"></span>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
 								</#if>
 							</a>
 						</li>
@@ -1567,5 +1569,12 @@ ${detectNewVersionScript}
 		</div>
 	</div>
 </div>
+<script type="text/javascript">
+(function(po)
+{
+	po.handlePermissionElement();
+})
+(${pageId});
+</script>
 </body>
 </html>

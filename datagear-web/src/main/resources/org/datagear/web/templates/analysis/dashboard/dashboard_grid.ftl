@@ -1,5 +1,6 @@
 <#include "../../include/import_global.ftl">
 <#include "../../include/html_doctype.ftl">
+<#assign Role=statics['org.datagear.management.domain.Role']>
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
@@ -16,6 +17,7 @@ selectOperation 是否选择操作，允许为null
 <div class="fill-parent">
 </#if>
 <#include "../../include/page_js_obj.ftl">
+<#include "../../include/page_obj_opt_permission.ftl" >
 <div id="${pageId}" class="page-grid page-grid-dashboard">
 	<div class="head">
 		<div class="search">
@@ -27,14 +29,14 @@ selectOperation 是否选择操作，允许为null
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
-				<div class="addGroup">
+				<div class="addGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
 					<input name="addButton" type="button" value="<@spring.message code='add' />" />
 					<select class="addGroupSelect">
 						<option value="addInNewWindow"><@spring.message code='addInNewWindow' /></option>
 						<option value="importDashboard"><@spring.message code='import' /></option>
 					</select>
 				</div>
-				<div class="editGroup">
+				<div class="editGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
 					<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 					<select class="editGroupSelect">
 						<option value="editInNewWindow"><@spring.message code='editInNewWindow' /></option>
@@ -42,11 +44,11 @@ selectOperation 是否选择操作，允许为null
 				</div>
 				<input name="showButton" type="button" value="<@spring.message code='dashboard.show' />" />
 				<#if !(currentUser.anonymous)>
-				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
+				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
-				<input name="exportButton" type="button" value="<@spring.message code='export' />" />
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				<input name="exportButton" type="button" value="<@spring.message code='export' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 			</#if>
 		</div>
 	</div>
@@ -228,6 +230,7 @@ selectOperation 是否选择操作，允许为null
 	tableSettings.order = [[$.getDataTableColumn(tableSettings, "createTime"), "desc"]];
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
+	po.handlePermissionElement();
 })
 (${pageId});
 </script>

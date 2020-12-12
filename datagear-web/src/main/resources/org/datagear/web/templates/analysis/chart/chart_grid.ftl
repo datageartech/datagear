@@ -1,5 +1,6 @@
 <#include "../../include/import_global.ftl">
 <#include "../../include/html_doctype.ftl">
+<#assign Role=statics['org.datagear.management.domain.Role']>
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
@@ -19,6 +20,7 @@ boolean readonly 是否只读操作，默认为false
 <div class="fill-parent">
 </#if>
 <#include "../../include/page_js_obj.ftl">
+<#include "../../include/page_obj_opt_permission.ftl" >
 <div id="${pageId}" class="page-grid page-grid-chart">
 	<div class="head">
 		<div class="search">
@@ -32,17 +34,17 @@ boolean readonly 是否只读操作，默认为false
 			<#if readonly>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
-				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<input name="addButton" type="button" value="<@spring.message code='add' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				<#if !selectOperation>
-				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+				<input name="editButton" type="button" value="<@spring.message code='edit' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				<input name="showButton" type="button" value="<@spring.message code='chart.show' />" />
 				<#if !(currentUser.anonymous)>
-				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
+				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				</#if>
 				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<#if !selectOperation>
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				</#if>
 			</#if>
 		</div>
@@ -196,6 +198,7 @@ boolean readonly 是否只读操作，默认为false
 	tableSettings.order = [[$.getDataTableColumn(tableSettings, "createTime"), "desc"]];
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
+	po.handlePermissionElement();
 })
 (${pageId});
 </script>
