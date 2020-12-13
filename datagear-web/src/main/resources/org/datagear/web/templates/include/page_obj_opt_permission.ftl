@@ -7,17 +7,20 @@ page_js_obj.ftl
 <script type="text/javascript">
 (function(po)
 {
-	po.handlePermissionElement = function(currentUser)
+	po.handlePermissionElement = function(currentUser, parentElement)
 	{
 		if(!currentUser)
 			currentUser = po.currentUser;
+		
+		if(!parentElement)
+			parentElement = null;
 		
 		if(!po.currentUser)
 			throw new Error("[currentUser] must be set");
 		
 		var roles = (currentUser.roles || []);
 		
-		var showAnyEle = po.element("[show-any-role]");
+		var showAnyEle = po.element("[show-any-role]", parentElement);
 		showAnyEle.each(function()
 		{
 			var $this = $(this);
@@ -29,7 +32,7 @@ page_js_obj.ftl
 				$this.hide();
 		});
 
-		var visibleAnyEle = po.element("[visible-any-role]");
+		var visibleAnyEle = po.element("[visible-any-role]", parentElement);
 		visibleAnyEle.each(function()
 		{
 			var $this = $(this);
@@ -41,7 +44,7 @@ page_js_obj.ftl
 				$this.css("visibility", "hidden");
 		});
 		
-		var showAllEle = po.element("[show-all-role]");
+		var showAllEle = po.element("[show-all-role]", parentElement);
 		showAllEle.each(function()
 		{
 			var $this = $(this);
@@ -52,8 +55,8 @@ page_js_obj.ftl
 			else
 				$this.hide();
 		});
-
-		var visibleAllEle = po.element("[visible-all-role]");
+		
+		var visibleAllEle = po.element("[visible-all-role]", parentElement);
 		visibleAllEle.each(function()
 		{
 			var $this = $(this);
@@ -99,7 +102,7 @@ page_js_obj.ftl
 				return false;
 		}
 		
-		return (all ? containsCount == roleIds.length : containsCount > 0);
+		return (all ? containsCount > 0 && containsCount == roleIds.length : containsCount > 0);
 	};
 })
 (${pageId});

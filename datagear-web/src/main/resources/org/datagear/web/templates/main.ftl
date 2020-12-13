@@ -1464,7 +1464,7 @@ ${detectNewVersionScript}
 				<li><a href="#${pageId}-nav-dataAnalysis"><@spring.message code='main.dataAnalysis' /></a></li>
 			</ul>
 			<div id="${pageId}-nav-dataSource" class="ui-widget ui-widget-content schema-panel">
-				<div class="schema-panel-head">
+				<div class="schema-panel-head" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 					<div class="schema-panel-form ui-widget ui-widget-content ui-corner-all">
 						<form id="schemaSearchForm" action="javascript:void(0);">
 							<div id="schemaSearchSwitch" class="schema-search-switch ui-button-icon-only"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
@@ -1473,7 +1473,7 @@ ${detectNewVersionScript}
 							<input name="pageSize" type="hidden" value="100" />
 						</form>
 					</div>
-					<div class="schema-panel-operation">
+					<div class="schema-panel-operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" visible-any-role="${Role.ROLE_DATA_ADMIN}" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 						<ul id="schemaOperationMenu" class="lightweight-menu">
 							<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
@@ -1495,11 +1495,11 @@ ${detectNewVersionScript}
 						</ul>
 					</div>
 				</div>
-				<div class="schema-panel-content">
+				<div class="schema-panel-content" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 				</div>
 			</div>
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
-				<div class="dataAnalysis-panel-head">
+				<div class="dataAnalysis-panel-head" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 					<div class="analysis-project-current ui-widget ui-widget-content ui-corner-all">
 						<div class="analysis-project-current-value" title="<@spring.message code='main.analysisProject.currentValue' />"></div>
 						<div class="analysis-project-current-reset ui-button-icon-only" title="<@spring.message code='main.analysisProject.currentValue.clear' />">
@@ -1517,7 +1517,7 @@ ${detectNewVersionScript}
 						<div class="analysis-project-list-panel-content minor-dataTable pagination-light"></div>
 					</div>
 				</div>
-				<div class="dataAnalysis-panel-content">
+				<div class="dataAnalysis-panel-content" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 					<ul>
 						<li class="item-dataset" tabId="dataAnalysis-dataSet">
 							<a href="${contextPath}/analysis/dataSet/pagingQuery">
