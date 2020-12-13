@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
@@ -100,6 +101,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	}
 
 	@Override
+	public void configure(WebSecurity web) throws Exception
+	{
+		// 静态资源
+		web.ignoring().antMatchers("/static/**");
+	}
+
+	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
 		boolean disableAnonymous = isDisableAnonymous();
@@ -111,8 +119,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 		http.headers().frameOptions().disable();
 
 		http.authorizeRequests()
-				// 静态资源
-				.antMatchers("/static/**").permitAll()
 
 				// 图表、看板展示功能始终允许匿名用户访问，用于支持外部系统iframe嵌套场景
 				.antMatchers("/analysis/chartPlugin/icon/*", "/analysis/chartPlugin/chartPluginManager.js",
@@ -153,12 +159,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				// 图表插件管理
 				.antMatchers("/analysis/chartPlugin/select", "/analysis/chartPlugin/selectData")
 				.hasAnyAuthority(disableAnonymous ? ROLES_USER : ROLES_ANONYMOUS_AND_USER)
+				//
 				.antMatchers("/analysis/chartPlugin/**").hasAuthority(AuthUser.ROLE_ADMIN)
 
 				// 数据集资源目录管理
 				.antMatchers("/dataSetResDirectory/view", "/dataSetResDirectory/select",
 						"/dataSetResDirectory/pagingQueryData", "/dataSetResDirectory/listFiles")
 				.hasAnyAuthority(disableAnonymous ? ROLES_USER : ROLES_ANONYMOUS_AND_USER)
+				//
 				.antMatchers("/dataSetResDirectory/**").hasAuthority(AuthUser.ROLE_ADMIN)
 
 				//
