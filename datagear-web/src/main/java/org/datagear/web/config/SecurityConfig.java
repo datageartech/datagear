@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.datagear.management.domain.Role;
 import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.util.StringUtil;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
@@ -43,6 +44,55 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	protected static final String[] ROLES_ANONYMOUS_AND_USER = { AuthUser.ROLE_ANONYMOUS, AuthUser.ROLE_USER };
 
 	protected static final String[] ROLES_USER = { AuthUser.ROLE_USER };
+
+	/**
+	 * 授权角色：(登录用户 或 系统管理员) 且 数据管理员
+	 */
+	protected static final String AUTH_USER_ADMIN_AND_DATA_ADMIN = "hasAnyAuthority('" + AuthUser.ROLE_USER + "','"
+			+ AuthUser.ROLE_ADMIN + "') and hasAuthority('" + Role.ROLE_DATA_ADMIN + "')";
+
+	/**
+	 * 授权角色：(登录用户 或 系统管理员) 且 (数据管理员 或 数据分析员)
+	 */
+	protected static final String AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST = "hasAnyAuthority('" + AuthUser.ROLE_USER
+			+ "','" + AuthUser.ROLE_ADMIN + "') and hasAnyAuthority('" + Role.ROLE_DATA_ADMIN + "','"
+			+ Role.ROLE_DATA_ANALYST + "')";
+
+	/**
+	 * 授权角色：(匿名用户 或 登录用户 或 系统管理员) 且 数据管理员
+	 */
+	protected static final String AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN = "hasAnyAuthority('"
+			+ AuthUser.ROLE_ANONYMOUS + "','" + AuthUser.ROLE_USER + "','" + AuthUser.ROLE_ADMIN
+			+ "') and hasAuthority('" + Role.ROLE_DATA_ADMIN + "')";
+
+	/**
+	 * 授权角色：(匿名用户 或 登录用户 或 系统管理员) 且 (数据管理员 或 数据分析员)
+	 */
+	protected static final String AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST = "hasAnyAuthority('"
+			+ AuthUser.ROLE_ANONYMOUS + "','" + AuthUser.ROLE_USER + "','" + AuthUser.ROLE_ADMIN
+			+ "') and hasAnyAuthority('" + Role.ROLE_DATA_ADMIN + "','" + Role.ROLE_DATA_ANALYST + "')";
+
+	/**
+	 * 授权角色：系统管理员
+	 */
+	protected static final String AUTH_ADMIN = "hasAuthority('" + AuthUser.ROLE_ADMIN + "')";
+
+	/**
+	 * 授权角色：登录用户 或 系统管理员
+	 */
+	protected static final String AUTH_USER_ADMIN = "hasAnyAuthority('" + AuthUser.ROLE_USER + "','"
+			+ AuthUser.ROLE_ADMIN + "')";
+
+	/**
+	 * 授权角色：匿名用户 或 登录用户 或 系统管理员
+	 */
+	protected static final String AUTH_ANONYMOUS_USER_ADMIN = "hasAnyAuthority('" + AuthUser.ROLE_ANONYMOUS + "','"
+			+ AuthUser.ROLE_USER + "','" + AuthUser.ROLE_ADMIN + "')";
+
+	/**
+	 * 授权角色：匿名用户
+	 */
+	protected static final String AUTH_ANONYMOUS = "hasAuthority('" + AuthUser.ROLE_ANONYMOUS + "')";
 
 	private CoreConfig coreConfig;
 
@@ -120,60 +170,132 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 
 		http.authorizeRequests()
 
-				// 图表、看板展示功能始终允许匿名用户访问，用于支持外部系统iframe嵌套场景
+				// 切换主题
+				.antMatchers("/changeThemeData/**").permitAll()
+
+				// 展示图表和看板
+				// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
 				.antMatchers("/analysis/chartPlugin/icon/*", "/analysis/chartPlugin/chartPluginManager.js",
 						"/analysis/chart/show/**", "/analysis/chart/showData", "/analysis/dashboard/show/**",
 						"/analysis/dashboard/showData", "/analysis/dashboard/loadChart",
 						"/analysis/dashboard/heartbeat")
-				.permitAll()
+				.access(AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
-				// 切换主题
-				.antMatchers("/changeThemeData/**").permitAll()
+				// 数据源
+				// 编辑
+				.antMatchers("/schema/add", "/schema/saveadd", "/schema/edit", "/schema/saveedit", "/schema/delete")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
+				// 其他
+				.antMatchers("/schema/**")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
-				// 驱动程序管理
-				.antMatchers("/driverEntity/add", "/driverEntity/saveAdd", "/driverEntity/import",
-						"/driverEntity/uploadImportFile", "/driverEntity/saveImport", "/driverEntity/edit",
-						"/driverEntity/saveEdit", "/driverEntity/delete", "/driverEntity/query",
-						"/driverEntity/uploadDriverFile", "/driverEntity/deleteDriverFile")
-				.hasAuthority(AuthUser.ROLE_ADMIN)
+				// 数据源数据管理、导入导出、SQL工作台、SQL编辑器
+				// 用户针对数据源数据的所有操作都已受其所属数据源权限控制，所以不必再引入数据管理员/数据分析员权限
+				.antMatchers("/data/**").access(disableAnonymous ? AUTH_USER_ADMIN : AUTH_ANONYMOUS_USER_ADMIN)
+				.antMatchers("/dataexchange/**").access(disableAnonymous ? AUTH_USER_ADMIN : AUTH_ANONYMOUS_USER_ADMIN)
+				.antMatchers("/sqlpad/**").access(disableAnonymous ? AUTH_USER_ADMIN : AUTH_ANONYMOUS_USER_ADMIN)
+				.antMatchers("/sqlEditor/**").access(disableAnonymous ? AUTH_USER_ADMIN : AUTH_ANONYMOUS_USER_ADMIN)
 
-				// 用户管理
-				.antMatchers("/user/personalSet", "/user/savePersonalSet", "/user/select", "/user/pagingQueryData")
-				.hasAuthority(AuthUser.ROLE_USER)
-				//
-				.antMatchers("/user/**").hasAuthority(AuthUser.ROLE_ADMIN)
+				// 数据集
+				// 编辑
+				.antMatchers("/analysis/dataSet/addFor*", "/analysis/dataSet/saveAddFor*", "/analysis/dataSet/edit",
+						"/analysis/dataSet/saveEditFor*", "/analysis/dataSet/delete", "/analysis/dataSet/uploadFile")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
+				// 其他
+				.antMatchers("/analysis/dataSet/**")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
-				// 角色管理
-				.antMatchers("/role/select", "/role/pagingQueryData").hasAuthority(AuthUser.ROLE_USER)
-				//
-				.antMatchers("/role/**").hasAuthority(AuthUser.ROLE_ADMIN)
+				// 图表
+				// 编辑
+				.antMatchers("/analysis/chart/add", "/analysis/chart/edit", "/analysis/chart/save",
+						"/analysis/chart/delete")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
+				// 其他
+				.antMatchers("/analysis/chart/**")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
-				// 权限管理
-				.antMatchers("/authorization/**").hasAuthority(AuthUser.ROLE_USER)
+				// 看板
+				// 编辑
+				.antMatchers("/analysis/dashboard/add", "/analysis/dashboard/edit", "/analysis/dashboard/save",
+						"/analysis/dashboard/saveTemplateNames", "/analysis/dashboard/deleteResource",
+						"/analysis/dashboard/uploadResourceFile", "/analysis/dashboard/saveResourceFile",
+						"/analysis/dashboard/import", "/analysis/dashboard/uploadImportFile",
+						"/analysis/dashboard/saveImport", "/analysis/dashboard/delete")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
+				// 其他
+				.antMatchers("/analysis/dashboard/**")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
-				// 设置数据库URL构建器脚本
-				.antMatchers("/schemaUrlBuilder/editScriptCode", "/schemaUrlBuilder/saveScriptCode",
-						"/schemaUrlBuilder/previewScriptCode")
-				.hasAuthority(AuthUser.ROLE_ADMIN)
+				// 数据分析项目
+				// 编辑
+				.antMatchers("/analysis/project/add", "/analysis/project/edit", "/analysis/project/save",
+						"/analysis/project/delete")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
+				// 其他
+				.antMatchers("/analysis/project/**")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
-				// 图表插件管理
+				// 图表插件
+				// 选择
 				.antMatchers("/analysis/chartPlugin/select", "/analysis/chartPlugin/selectData")
-				.hasAnyAuthority(disableAnonymous ? ROLES_USER : ROLES_ANONYMOUS_AND_USER)
-				//
-				.antMatchers("/analysis/chartPlugin/**").hasAuthority(AuthUser.ROLE_ADMIN)
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
+				// 管理
+				.antMatchers("/analysis/chartPlugin/**").access(AUTH_ADMIN)
 
-				// 数据集资源目录管理
+				// 数据集资源
+				// 选择
 				.antMatchers("/dataSetResDirectory/view", "/dataSetResDirectory/select",
 						"/dataSetResDirectory/pagingQueryData", "/dataSetResDirectory/listFiles")
-				.hasAnyAuthority(disableAnonymous ? ROLES_USER : ROLES_ANONYMOUS_AND_USER)
-				//
-				.antMatchers("/dataSetResDirectory/**").hasAuthority(AuthUser.ROLE_ADMIN)
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
+				// 管理
+				.antMatchers("/dataSetResDirectory/**").access(AUTH_ADMIN)
+
+				// 数据授权
+				.antMatchers("/authorization/**").access(AUTH_USER_ADMIN)
+
+				// 驱动程序
+				// 选择
+				.antMatchers("/driverEntity/view", "/driverEntity/select", "/driverEntity/queryData",
+						"/driverEntity/downloadDriverFile", "/driverEntity/listDriverFile")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
+				// 管理
+				.antMatchers("/driverEntity/**").access(AUTH_ADMIN)
+
+				// 数据源URL构建器
+				// 构建
+				.antMatchers("/schemaUrlBuilder/buildUrl")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
+				// 管理
+				.antMatchers("/schemaUrlBuilder/*").access(AUTH_ADMIN)
+
+				// 用户
+				// 个人设置
+				.antMatchers("/user/personalSet", "/user/savePersonalSet").access(AUTH_USER_ADMIN)
+				// 选择
+				.antMatchers("/user/select", "/user/pagingQueryData").access(AUTH_USER_ADMIN)
+				// 管理
+				.antMatchers("/user/**").access(AUTH_ADMIN)
+
+				// 角色
+				// 选择
+				.antMatchers("/role/select", "/role/pagingQueryData").access(AUTH_USER_ADMIN)
+				// 管理
+				.antMatchers("/role/**").access(AUTH_ADMIN)
 
 				//
-				.antMatchers("/login/**", "/register/**", "/resetPassword/**").hasAuthority(AuthUser.ROLE_ANONYMOUS)
+				.antMatchers("/login/**", "/register/**", "/resetPassword/**").access(AUTH_ANONYMOUS)
 
 				//
-				.antMatchers("/**").hasAnyAuthority(disableAnonymous ? ROLES_USER : ROLES_ANONYMOUS_AND_USER)
+				.antMatchers("/**").access(disableAnonymous ? AUTH_USER_ADMIN : AUTH_ANONYMOUS_USER_ADMIN)
 
 				.and().formLogin().loginPage("/login").loginProcessingUrl("/login/doLogin").usernameParameter("name")
 				.passwordParameter("password").successHandler(getAuthenticationSuccessHandler())

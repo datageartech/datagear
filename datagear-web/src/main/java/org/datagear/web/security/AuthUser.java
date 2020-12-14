@@ -22,10 +22,19 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public class AuthUser implements UserDetails
 {
+	/**
+	 * 角色：系统管理员。
+	 */
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
+	/**
+	 * 角色：登录用户。
+	 */
 	public static final String ROLE_USER = "ROLE_USER";
 
+	/**
+	 * 角色：匿名用户。
+	 */
 	public static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
 
 	private static final long serialVersionUID = 1L;
@@ -54,13 +63,16 @@ public class AuthUser implements UserDetails
 		}
 
 		if (user.isAnonymous())
+		{
 			this.authorities.add(new SimpleGrantedAuthority(ROLE_ANONYMOUS));
+		}
+		else if (user.isAdmin())
+		{
+			this.authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
+		}
 		else
 		{
 			this.authorities.add(new SimpleGrantedAuthority(ROLE_USER));
-
-			if (user.isAdmin())
-				this.authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
 		}
 	}
 

@@ -1488,7 +1488,7 @@ ${detectNewVersionScript}
 									<li class="ui-widget-header"></li>
 									<li class="schema-operation-sqlpad"><a href="javascript:void(0);"><@spring.message code='main.sqlpad' /></a></li>
 									<li class="ui-widget-header"></li>
-									<li class="schema-operation-dataimport" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='main.dataimport' /></a></li>
+									<li class="schema-operation-dataimport"><a href="javascript:void(0);"><@spring.message code='main.dataimport' /></a></li>
 									<li class="schema-operation-dataexport"><a href="javascript:void(0);"><@spring.message code='main.dataexport' /></a></li>
 								</ul>
 							</li>

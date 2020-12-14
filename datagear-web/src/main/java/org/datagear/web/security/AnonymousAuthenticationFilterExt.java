@@ -29,6 +29,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.web.util.WebUtils;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
@@ -99,8 +100,14 @@ public class AnonymousAuthenticationFilterExt extends AnonymousAuthenticationFil
 
 		AuthUser principal = createAnonymousPrincipal(request, response);
 
-		AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken(this.key, principal,
-				authSuper.getAuthorities());
+		Set<GrantedAuthority> authorities = new HashSet<>();
+
+		if (authSuper.getAuthorities() != null)
+			authorities.addAll(authSuper.getAuthorities());
+		if (principal.getAuthorities() != null)
+			authorities.addAll(principal.getAuthorities());
+
+		AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken(this.key, principal, authorities);
 		auth.setDetails(authSuper.getDetails());
 
 		return auth;
