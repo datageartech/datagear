@@ -265,6 +265,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
+		User user = WebUtils.getUser(request, response);
+		model.addAttribute("currentUser", user);
+
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.selectChart");
 		model.addAttribute(KEY_SELECT_OPERATION, true);
 		setIsMultipleSelectAttribute(request, model);

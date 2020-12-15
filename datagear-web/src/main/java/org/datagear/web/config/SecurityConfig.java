@@ -41,10 +41,6 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
-	protected static final String[] ROLES_ANONYMOUS_AND_USER = { AuthUser.ROLE_ANONYMOUS, AuthUser.ROLE_USER };
-
-	protected static final String[] ROLES_USER = { AuthUser.ROLE_USER };
-
 	/**
 	 * 授权角色：(登录用户 或 系统管理员) 且 数据管理员
 	 */
