@@ -10,6 +10,15 @@ APP_MAIN="${productNameJar}"
 
 APP_PID=0
 
+echo "  ____        _         ____                 "
+echo " |  _ \  __ _| |_ __ _ / ___| ___  __ _ _ __ "
+echo " | | | |/ _\` | __/ _\` | |  _ / _ \/ _\` | '__|"
+echo " | |_| | (_| | |_ (_| | |_| |  __/ (_| | |   "
+echo " |____/ \__,_|\__\__,_|\____|\___|\__,_|_|   "
+echo ""
+echo "  DataGear-v${project.version}  http://www.datagear.tech";
+echo ""
+
 if [ -n "$JAVA_HOME" ]; then
 	echo "$ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
 else

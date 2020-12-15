@@ -40,7 +40,6 @@ public class DataGearApplication
 		@Override
 		public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out)
 		{
-			out.println("");
 			out.println("  ____        _         ____                 ");
 			out.println(" |  _ \\  __ _| |_ __ _ / ___| ___  __ _ _ __ ");
 			out.println(" | | | |/ _` | __/ _` | |  _ / _ \\/ _` | '__|");
