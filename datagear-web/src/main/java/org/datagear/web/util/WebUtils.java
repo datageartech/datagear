@@ -57,6 +57,42 @@ public class WebUtils
 	}
 
 	/**
+	 * 获取应用服务URL。
+	 * <p>
+	 * 例如：<br>
+	 * {@code http://192.168.1.1}<br>
+	 * {@code http://192.168.1.1:8080}<br>
+	 * {@code http://server-name:8080}<br>
+	 * {@code https://192.168.1.1}<br>
+	 * {@code https://192.168.1.1:8080}<br>
+	 * {@code http://server-name:8080}<br>
+	 * {@code https://server-name:8080}
+	 * </p>
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getServerURL(HttpServletRequest request)
+	{
+		String schema = request.getScheme();
+		String name = request.getServerName();
+		int port = request.getServerPort();
+
+		String url = schema + "://" + name;
+
+		// 省略默认http端口
+		if ("http".equalsIgnoreCase(schema) && port == 80)
+			;
+		// 省略默认https端口
+		else if ("https".equalsIgnoreCase(schema) && port == 443)
+			;
+		else
+			url = url + ":" + port;
+
+		return url;
+	}
+
+	/**
 	 * 获取当前用户（认证用户或者匿名用户）。
 	 * <p>
 	 * 此方法不会返回{@code null}。

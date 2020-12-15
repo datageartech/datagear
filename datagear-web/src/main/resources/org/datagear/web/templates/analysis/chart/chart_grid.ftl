@@ -37,7 +37,13 @@ boolean readonly 是否只读操作，默认为false
 				<input name="addButton" type="button" value="<@spring.message code='add' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				<#if !selectOperation>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
-				<input name="showButton" type="button" value="<@spring.message code='chart.show' />" />
+				<div class="showGroup">
+					<input name="showButton" type="button" value="<@spring.message code='chart.show' />" />
+					<select class="showGroupSelect">
+						<option value="copyShowURL"><@spring.message code='copyShowURL' /></option>
+					</select>
+					<button type="button" class="copyShowURLDelegation" style="display:none;">&nbsp;</button>
+				</div>
 				<#if !(currentUser.anonymous)>
 				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				</#if>
@@ -76,6 +82,11 @@ boolean readonly 是否只读操作，默认为false
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/chart/" + action;
+	};
+	
+	po.buildShowURL = function(id)
+	{
+		return po.url("show/"+id+"/");
 	};
 
 	po.element("input[name=addButton]").click(function()
@@ -135,14 +146,58 @@ boolean readonly 是否只读操作，默认为false
 			});
 		});
 	});
-	
+
 	po.element("input[name=showButton]").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
-			window.open(po.url("show/"+row.id+"/"), row.id);
+			window.open(po.buildShowURL(row.id), row.id);
 		});
 	});
+	
+	po.element(".showGroupSelect").selectmenu(
+	{
+		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
+		classes:
+		{
+	          "ui-selectmenu-button": "ui-button-icon-only",
+	          "ui-selectmenu-menu": "ui-widget-shadow ui-widget ui-widget-content"
+	    },
+		select: function(event, ui)
+    	{
+    		var action = $(ui.item).attr("value");
+    		
+    		if(action == "copyShowURL")
+    		{
+    			po._currentShowURL = "";
+    			po.executeOnSelect(function(row)
+ 				{
+    				po._currentShowURL = "${serverURL}" + po.buildShowURL(row.id);
+    				po.element(".copyShowURLDelegation").click();
+ 				});
+    		}
+    	}
+	});
+	po.element(".showGroup").controlgroup();
+	
+	var copyShowURLButton = po.element(".copyShowURLDelegation");
+	if(copyShowURLButton.length > 0)
+	{
+		var clipboard = new ClipboardJS(copyShowURLButton[0],
+		{
+			//需要设置container，不然在对话框中打开页面后复制不起作用
+			container: po.element()[0],
+			text: function(trigger)
+			{
+				return (po._currentShowURL || "");
+			}
+		});
+		clipboard.on('success', function(e)
+		{
+			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
+		});
+	}
 	
 	po.element("input[name=deleteButton]").click(
 	function()

@@ -257,6 +257,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		User user = WebUtils.getUser(request, response);
 		model.addAttribute("currentUser", user);
 
+		model.addAttribute("serverURL", WebUtils.getServerURL(request));
+
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.manageChart");
 
 		return "/analysis/chart/chart_grid";
@@ -267,6 +269,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		User user = WebUtils.getUser(request, response);
 		model.addAttribute("currentUser", user);
+
+		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.selectChart");
 		model.addAttribute(KEY_SELECT_OPERATION, true);

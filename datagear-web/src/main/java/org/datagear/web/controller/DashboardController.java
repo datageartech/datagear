@@ -661,6 +661,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		User user = WebUtils.getUser(request, response);
 		model.addAttribute("currentUser", user);
 
+		model.addAttribute("serverURL", WebUtils.getServerURL(request));
+
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.manageDashboard");
 
 		return "/analysis/dashboard/dashboard_grid";
@@ -671,6 +673,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		User user = WebUtils.getUser(request, response);
 		model.addAttribute("currentUser", user);
+
+		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.selectDashboard");
 		model.addAttribute(KEY_SELECT_OPERATION, true);

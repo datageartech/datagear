@@ -42,7 +42,13 @@ selectOperation 是否选择操作，允许为null
 						<option value="editInNewWindow"><@spring.message code='editInNewWindow' /></option>
 					</select>
 				</div>
-				<input name="showButton" type="button" value="<@spring.message code='dashboard.show' />" />
+				<div class="showGroup">
+					<input name="showButton" type="button" value="<@spring.message code='dashboard.show' />" />
+					<select class="showGroupSelect">
+						<option value="copyShowURL"><@spring.message code='copyShowURL' /></option>
+					</select>
+					<button type="button" class="copyShowURLDelegation" style="display:none;">&nbsp;</button>
+				</div>
 				<#if !(currentUser.anonymous)>
 				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				</#if>
@@ -75,6 +81,7 @@ selectOperation 是否选择操作，允许为null
 	po.element(".addGroupSelect").selectmenu(
 	{
 		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
 		classes:
 		{
 	          "ui-selectmenu-button": "ui-button-icon-only",
@@ -91,9 +98,11 @@ selectOperation 是否选择操作，允许为null
     	}
 	});
 	po.element(".addGroup").controlgroup();
+	
 	po.element(".editGroupSelect").selectmenu(
 	{
 		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
 		classes:
 		{
 	          "ui-selectmenu-button": "ui-button-icon-only",
@@ -113,6 +122,51 @@ selectOperation 是否选择操作，允许为null
     	}
 	});
 	po.element(".editGroup").controlgroup();
+	
+	po.element(".showGroupSelect").selectmenu(
+	{
+		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
+		classes:
+		{
+	          "ui-selectmenu-button": "ui-button-icon-only",
+	          "ui-selectmenu-menu": "ui-widget-shadow ui-widget ui-widget-content"
+	    },
+		select: function(event, ui)
+    	{
+    		var action = $(ui.item).attr("value");
+    		
+    		if(action == "copyShowURL")
+    		{
+    			po._currentShowURL = "";
+    			po.executeOnSelect(function(row)
+ 				{
+    				po._currentShowURL = "${serverURL}" + po.buildShowURL(row.id);
+    				po.element(".copyShowURLDelegation").click();
+ 				});
+    		}
+    	}
+	});
+	po.element(".showGroup").controlgroup();
+	
+	var copyShowURLButton = po.element(".copyShowURLDelegation");
+	if(copyShowURLButton.length > 0)
+	{
+		var clipboard = new ClipboardJS(copyShowURLButton[0],
+		{
+			//需要设置container，不然在对话框中打开页面后复制不起作用
+			container: po.element()[0],
+			text: function(trigger)
+			{
+				return (po._currentShowURL || "");
+			}
+		});
+		clipboard.on('success', function(e)
+		{
+			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
+		});
+	}
+	
 	po.initDataFilter();
 	
 	po.currentUser = <@writeJson var=currentUser />;
@@ -120,6 +174,11 @@ selectOperation 是否选择操作，允许为null
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dashboard/" + action;
+	};
+	
+	po.buildShowURL = function(id)
+	{
+		return po.url("show/"+id+"/");
 	};
 
 	po.element("input[name=addButton]").click(function()
@@ -184,11 +243,11 @@ selectOperation 是否选择操作，允许为null
 	{
 		po.executeOnSelect(function(row)
 		{
-			var showUrl = po.url("show/"+row.id+"/");
-			window.open(showUrl, showUrl);
+			var showUrl = po.buildShowURL(row.id);
+			window.open(showUrl, row.id);
 		});
 	});
-
+	
 	po.element("input[name=exportButton]").click(function()
 	{
 		po.executeOnSelect(function(row)
