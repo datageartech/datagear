@@ -835,6 +835,8 @@ po.previewOptions.url = "...";
 				{
 					var dataTable = table.DataTable();
 					$.addDataTableData(dataTable, tableData, 0);
+					
+					po.element(".preview-result-foot").show();
 				}
 				
 				po.previewOptions.success(previewResponse);
