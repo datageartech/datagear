@@ -6,7 +6,9 @@ package org.datagear.web.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 主页控制器。
@@ -149,6 +152,15 @@ public class MainController extends AbstractController
 		response.setContentType(CONTENT_TYPE_JSON);
 
 		return "/change_theme_data";
+	}
+
+	@RequestMapping(value = "/changeLocale", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Object changeLocale(HttpServletRequest request, HttpServletResponse response)
+	{
+		Map<String, Object> map = new HashMap<>();
+		map.put("status", "ok");
+		return map;
 	}
 
 	protected void resolveDetectNewVersionScript(HttpServletRequest request, HttpServletResponse response)

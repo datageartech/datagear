@@ -885,6 +885,21 @@ ${detectNewVersionScript}
 							$(data[i].selector).attr(data[i].attr, data[i].value);
 					});
 				}
+				else if($item.hasClass("locale-item"))
+				{
+					po.confirm("<@spring.message code='main.changeLocaleConfirm' />",
+					{
+						confirm: function()
+						{
+							var locale = $item.attr("locale");
+							
+							$.getJSON(contextPath+"/changeLocale?locale="+locale, function()
+							{
+								window.location.href = contextPath;
+							});
+						}
+					});
+				}
 				else if($item.hasClass("about"))
 				{
 					po.open(contextPath+"/about", { width : "50%" });
@@ -1425,9 +1440,15 @@ ${detectNewVersionScript}
 					</#if>
 					<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeTheme' /></a>
 						<ul class="ui-widget-shadow">
-							<li class="theme-item" theme="${Themes.LIGHT}"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.light' /><span class="ui-widget ui-widget-content theme-sample theme-sample-light"></span></a></li>
-							<li class="theme-item" theme="${Themes.DARK}"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.dark' /><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span></a></li>
-							<li class="theme-item" theme="${Themes.GREEN}"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
+							<li class="theme-item" theme="${Themes.LIGHT}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-light"></span><@spring.message code='main.changeTheme.light' /></a></li>
+							<li class="theme-item" theme="${Themes.DARK}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span><@spring.message code='main.changeTheme.dark' /></a></li>
+							<li class="theme-item" theme="${Themes.GREEN}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span><@spring.message code='main.changeTheme.green' /></a></li>
+						</ul>
+					</li>
+					<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeLocale' /></a>
+						<ul class="ui-widget-shadow">
+							<li class="locale-item" locale="zh"><a href="javascript:void(0);"><@spring.message code='main.changeLocale.zh' /></a></li>
+							<li class="locale-item" locale="en"><a href="javascript:void(0);"><@spring.message code='main.changeLocale.en' /></a></li>
 						</ul>
 					</li>
 					<li><a href="javascript:void(0);"><@spring.message code='help' /><span class="new-version-tip"></span></a>
