@@ -93,6 +93,14 @@
 			chart.extValue("chartOptionSeriesTemplate", (options.series || []));
 	};
 	
+	//将chart.optionsUpdate()合并至options
+	chartSupport.mergeUpdateOptions = function(options, chart)
+	{
+		var ou = chart.optionsUpdate();
+		if(ou)
+			$.extend(options, ou);
+	};
+	
 	/**
 	 * 指定数据集属性数据是否字符串类型。
 	 */
@@ -643,6 +651,7 @@
 		var options = { legend: {data: legendData}, series: series };
 		if(isCategory)
 			options.xAxis = {data: xAxisData};
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -808,6 +817,7 @@
 			else
 				options.xAxis = {data: axisData};
 		}
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -922,6 +932,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, data: seriesData}) ];
 		
 		var options = { legend: { data: legendData }, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 
@@ -1014,6 +1026,7 @@
 		chartSupport.setChartOriginalDataIndexForRange(chart, 0, 0, seriesData.length, 0);
 		
 		var options = { series : [ { name: seriesName, min: min, max: max, data: seriesData } ]};
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -1184,6 +1197,7 @@
 		var options = { legend: {data: legendData}, series: series };
 		if(isCategory)
 			options.xAxis = {data: xAxisData};
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -1333,9 +1347,11 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
-
+	
 	chartSupport.scatterCoordResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
@@ -1501,6 +1517,8 @@
 		
 		var series = [ { data: seriesData } ];
 		var options = { legend: {data: legendData}, radar: {indicator: indicatorData}, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 		
 		chart.extValue("radarIndicatorData", indicatorData);
@@ -1728,6 +1746,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, min: min, max: max, data: seriesData }) ];
 		
 		var options = { legend: { data: legendData }, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 
@@ -1860,6 +1880,8 @@
 		//没有更新地图、或者更新的地图已注册
 		if(!map || chart.echartsMapRegistered(map))
 		{
+			chartSupport.mergeUpdateOptions(updateOptions, chart);
+			
 			chart.echartsOptions(updateOptions);
 			
 			if(map)
@@ -1871,6 +1893,8 @@
 		{
 			chart.echartsLoadMap(map, function()
 			{
+				chartSupport.mergeUpdateOptions(updateOptions, chart);
+				
 				chart.echartsOptions(updateOptions);
 				chart.extValue("presetMap", map);
 				
@@ -2553,6 +2577,8 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 	
@@ -2721,6 +2747,7 @@
 		
 		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
 		chartSupport.checkMinAndMax(options.visualMap);
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -2820,6 +2847,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 	
@@ -2898,6 +2927,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 
@@ -2983,6 +3014,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 
@@ -3264,6 +3297,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData, links: seriesLinks }) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 		
 		chart.extValue("sankeySeriesData", seriesData);
@@ -3532,6 +3567,8 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 		
 		chart.extValue("graphSeriesData", seriesData);
@@ -3729,9 +3766,11 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, data: seriesData}) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
-
+	
 	chartSupport.wordcloudResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
