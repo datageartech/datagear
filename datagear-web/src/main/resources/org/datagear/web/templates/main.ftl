@@ -775,19 +775,53 @@ ${detectNewVersionScript}
 	
 	$(document).ready(function()
 	{
-		var westMinSize = po.element(".schema-panel-head").css("min-width");
-		
-		if(westMinSize)
+		//需要先初始化导航栏，以计算左侧布局宽度
+		po.element("#${pageId}-nav").tabs(
 		{
-			var pxIndex = westMinSize.indexOf("px");
+			event: "click",
+			active: false,
+			collapsible: true,
+			activate: function(event, ui)
+			{
+				var $this = $(this);
+				var newTab = $(ui.newTab);
+				var newPanel = $(ui.newPanel);
+				
+				if(newPanel.hasClass("schema-panel"))
+				{
+					var $element = po.element(".schema-panel-content");
+					
+					if(!$element.hasClass("jstree"))
+						po.initSchemaPanelContent($element);
+				}
+				else if(newPanel.hasClass("dataAnalysis-panel"))
+				{
+					po.initDataAnalysisPanelIfNot();
+				}
+				
+				var newTabIndex = newTab.index();
+				$.cookie("MAIN_NAV_ACTIVE_TAB_INDEX", newTabIndex, {expires : 365*5, path : "${contextPath}"});
+			}
+		});
+		
+		var panelMinWidth = po.element(".schema-panel-head").css("min-width");
+		if(panelMinWidth)
+		{
+			var pxIndex = panelMinWidth.indexOf("px");
 			if(pxIndex > -1)
-				westMinSize = westMinSize.substring(0, pxIndex);
+				panelMinWidth = panelMinWidth.substring(0, pxIndex);
 		}
+		panelMinWidth = parseInt(panelMinWidth);
 		
-		westMinSize = parseInt(westMinSize);
+		var mainNavTabsNav = po.element(".main-nav-tabs-nav", po.element("#${pageId}-nav"));
+		var navMinWidth = 0;
+		$("> li", mainNavTabsNav).each(function()
+		{
+			navMinWidth = navMinWidth + $(this).outerWidth(true) + 10;
+		});
 		
-		if(isNaN(westMinSize) || westMinSize < 245)
-			westMinSize = 245;
+		var westMinSize = Math.max(panelMinWidth, navMinWidth);
+		westMinSize = Math.max(westMinSize, 250);
 		
 		po.element(".main-page-content").layout(
 		{
@@ -916,34 +950,6 @@ ${detectNewVersionScript}
 				{
 					window.open("${Global.WEB_SITE}");
 				}
-			}
-		});
-		
-		po.element("#${pageId}-nav").tabs(
-		{
-			event: "click",
-			active: false,
-			collapsible: true,
-			activate: function(event, ui)
-			{
-				var $this = $(this);
-				var newTab = $(ui.newTab);
-				var newPanel = $(ui.newPanel);
-				
-				if(newPanel.hasClass("schema-panel"))
-				{
-					var $element = po.element(".schema-panel-content");
-					
-					if(!$element.hasClass("jstree"))
-						po.initSchemaPanelContent($element);
-				}
-				else if(newPanel.hasClass("dataAnalysis-panel"))
-				{
-					po.initDataAnalysisPanelIfNot();
-				}
-				
-				var newTabIndex = newTab.index();
-				$.cookie("MAIN_NAV_ACTIVE_TAB_INDEX", newTabIndex, {expires : 365*5, path : "${contextPath}"});
 			}
 		});
 		
@@ -1480,7 +1486,7 @@ ${detectNewVersionScript}
 <div class="main-page-content">
 	<div class="ui-layout-west">
 		<div id="${pageId}-nav" class="main-nav">
-			<ul>
+			<ul class="main-nav-tabs-nav">
 				<li><a href="#${pageId}-nav-dataSource"><@spring.message code='main.dataSource' /></a></li>
 				<li><a href="#${pageId}-nav-dataAnalysis"><@spring.message code='main.dataAnalysis' /></a></li>
 			</ul>

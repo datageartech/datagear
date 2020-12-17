@@ -155,6 +155,7 @@ form .form-content .form-item .form-item-value .binary-label-input{/*二进制�
 }
 form .form-content .form-item label.error{
 	color: red;
+	font-size: 0.9em;
 	padding-left: 0.2em;
 	white-space: nowrap;
 }
@@ -234,6 +235,23 @@ form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch
 form .form-foot .ui-button{
 	margin-left: .5em;
 	margin-right: .5em;
+}
+form.display-block .form-content .form-item .form-item-label{
+	display: block;
+	width: auto;
+	padding-bottom: 0.2em;
+}
+form.display-block .form-content .form-item .form-item-value{
+	display: block;
+	width: auto;
+	margin-left: 0;
+	padding-left: 0;
+}
+form.display-block .form-content .form-item .form-item-value input[type=text],
+form.display-block .form-content .form-item .form-item-value input[type=password],
+form.display-block .form-content .form-item .form-item-value textarea,
+form.display-block .form-content .form-item .form-item-value .input{
+	width: 70%;
 }
 
 /*轻型面板*/
