@@ -86,19 +86,18 @@ readonly 是否只读操作，允许为null
 							</select>
 						</div>
 					</div>
-					
-					<div class="form-item">
-						<div class="form-item-label">
-							<label><@spring.message code='dataSet.http.responseContentType' /></label>
-						</div>
-						<div class="form-item-value form-item-value-responseContentType no-padding-bottom">
-							<select name="responseContentType">
-								<option value="${HttpDataSet.RESPONSE_CONTENT_TYPE_JSON}" <#if HttpDataSet.RESPONSE_CONTENT_TYPE_JSON == dataSet.responseContentType>selected="selected"</#if>>
-									<@spring.message code='dataSet.http.responseContentType.JSON' />
-								</option>
-							</select>
-						</div>
-					</div>
+				</div>
+			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='dataSet.http.responseContentType' /></label>
+				</div>
+				<div class="form-item-value form-item-value-responseContentType no-padding-bottom">
+					<select name="responseContentType">
+						<option value="${HttpDataSet.RESPONSE_CONTENT_TYPE_JSON}" <#if HttpDataSet.RESPONSE_CONTENT_TYPE_JSON == dataSet.responseContentType>selected="selected"</#if>>
+							<@spring.message code='dataSet.http.responseContentType.JSON' />
+						</option>
+					</select>
 				</div>
 			</div>
 			<div class="workspace">
