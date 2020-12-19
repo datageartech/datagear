@@ -74,7 +74,7 @@ page_js_obj.ftl
 		var roles = $ele.attr(attrName);
 		roles = (roles ? roles.split(",") : []);
 		for(var i=0; i<roles.length; i++)
-			roles[i] = roles[i].trim();
+			roles[i] = $.trim(roles[i]);
 		
 		return roles;
 	};

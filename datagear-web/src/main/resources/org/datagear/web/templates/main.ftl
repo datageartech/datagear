@@ -39,7 +39,7 @@ ${detectNewVersionScript}
 			
 	po.activeWorkTab = function(tabId, tabLabel, tabTitle, url, schema)
 	{
-		tabLabel = $.truncateIf(tabLabel, "..", 20);
+		tabLabel = $.truncateIf($.trim(tabLabel), "..", 20);
 		
 		var mainTabsNav = po.getTabsNav(po.mainTabs);
 		var tab = po.getTabsTabByTabId(po.mainTabs, mainTabsNav, tabId);
