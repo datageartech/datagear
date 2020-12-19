@@ -236,6 +236,10 @@ form .form-foot .ui-button{
 	margin-left: .5em;
 	margin-right: .5em;
 }
+form.display-block .form-content .form-item{
+	position: relative;
+	padding-bottom: 1.4em;
+}
 form.display-block .form-content .form-item .form-item-label{
 	display: block;
 	width: auto;
@@ -251,7 +255,13 @@ form.display-block .form-content .form-item .form-item-value input[type=text],
 form.display-block .form-content .form-item .form-item-value input[type=password],
 form.display-block .form-content .form-item .form-item-value textarea,
 form.display-block .form-content .form-item .form-item-value .input{
-	width: 70%;
+	width: 95%;
+}
+form.display-block .form-content .form-item .form-item-value label.error{
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	padding-left: 0 !important;
 }
 
 /*轻型面板*/

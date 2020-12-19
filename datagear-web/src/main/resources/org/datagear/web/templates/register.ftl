@@ -75,7 +75,7 @@
 		position: {my : "center top", at : "center top+75"},
 		resizable: false,
 		draggable: true,
-		width: "41%",
+		width: "30%",
 		beforeClose: function(){ return false; }
 	});
 	
