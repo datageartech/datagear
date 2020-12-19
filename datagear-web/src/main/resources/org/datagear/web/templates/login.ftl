@@ -42,7 +42,7 @@
 				&nbsp;&nbsp;
 				<input type="reset" value="<@spring.message code='reset' />" />
 			</div>
-			<div class="form-foot small-text" style="text-align:right;">
+			<div class="form-foot small-text login-form-ext" style="text-align:right;">
 				<label for="remember-me-checkbox"><@spring.message code='login.rememberMe' /></label>
 	   			<input type="checkbox" id="remember-me-checkbox" name="rememberMe" value="1" />
 	   			<a class="link" href="${contextPath}/resetPassword"><@spring.message code='login.fogetPassword' /></a>

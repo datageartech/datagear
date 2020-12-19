@@ -1307,6 +1307,12 @@ table.dataTable tbody tr td select{
     overflow: auto;
 }
 
+/*登录表单页*/
+.page-form-login{}
+.page-form-login form .form-foot.login-form-ext{
+	padding-top: 2em;
+}
+
 /*驱动信息管理表单页*/
 .page-form-driverEntity{
 }
@@ -1519,7 +1525,7 @@ table.dataTable tbody tr td select{
 	width: 40%;
 }
 .page-grid .head .operation{
-	display: inline-block;
+	display: inline-block; 
 	float: right;
 	width: 60%;
 	text-align: right;
