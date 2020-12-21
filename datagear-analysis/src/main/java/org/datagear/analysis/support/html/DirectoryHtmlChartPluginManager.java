@@ -16,9 +16,11 @@ import java.util.zip.ZipOutputStream;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.support.AbstractChartPlugin;
 import org.datagear.analysis.support.ConcurrentChartPluginManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.util.version.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -235,7 +237,6 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		if (file.isDirectory())
 		{
 			HtmlChartPlugin myPlugin = this.htmlChartPluginLoader.load(file);
-			inflateCagetory(myPlugin);
 
 			if (myPlugin != null)
 			{
@@ -256,7 +257,6 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		else if (this.htmlChartPluginLoader.isHtmlChartPluginZip(file))
 		{
 			HtmlChartPlugin myPlugin = this.htmlChartPluginLoader.loadZip(file);
-			inflateCagetory(myPlugin);
 
 			if (myPlugin != null)
 			{
@@ -506,7 +506,6 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		try
 		{
 			HtmlChartPlugin plugin = this.htmlChartPluginLoader.loadFile(file);
-			inflateCagetory(plugin);
 			return registerHtmlChartPlugin(plugin, file);
 		}
 		catch (Throwable t)
@@ -537,7 +536,10 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		else
 		{
 			if (registerChartPlugin(plugin))
+			{
+				inflateCagetory(plugin);
 				this.pluginIdFileNameMap.put(plugin.getId(), fileName);
+			}
 			else
 				plugin = null;
 		}
@@ -557,34 +559,52 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		return super.canReplaceForSameId(my, myVersion, old, oldVersion);
 	}
 
-	protected boolean inflateCagetory(HtmlChartPlugin plugin)
+	protected void inflateCagetory(HtmlChartPlugin plugin)
 	{
 		if (plugin == null)
-			return false;
+			return;
 
 		Category category = plugin.getCategory();
 
 		if (category == null)
-			return false;
+			return;
 
-		if (category.hasNameLabel())
-			return false;
+		String categoryName = category.getName();
 
 		Map<String, ChartPlugin> map = getChartPluginMap();
 
-		for (ChartPlugin chartPlugin : map.values())
+		// 如果类别定义了更详细的信息，则全部替换为使用它
+		if (category.hasNameLabel())
 		{
-			Category myCategory = chartPlugin.getCategory();
-
-			if (myCategory != null && myCategory.hasNameLabel() && myCategory.getName() != null
-					&& myCategory.getName().equals(category.getName()))
+			for (ChartPlugin chartPlugin : map.values())
 			{
-				plugin.setCategory(myCategory);
-				return true;
+				if (!(chartPlugin instanceof AbstractChartPlugin))
+					continue;
+
+				Category myCategory = chartPlugin.getCategory();
+
+				if (myCategory != null && myCategory != category
+						&& StringUtil.isEquals(myCategory.getName(), categoryName))
+				{
+					((AbstractChartPlugin) chartPlugin).setCategory(category);
+				}
 			}
 		}
+		// 否则，查找并使用定义详细信息的类别
+		else
+		{
+			for (ChartPlugin chartPlugin : map.values())
+			{
+				Category myCategory = chartPlugin.getCategory();
 
-		return false;
+				if (myCategory != null && myCategory != category && myCategory.hasNameLabel()
+						&& StringUtil.isEquals(myCategory.getName(), categoryName))
+				{
+					plugin.setCategory(myCategory);
+					break;
+				}
+			}
+		}
 	}
 
 	/**
