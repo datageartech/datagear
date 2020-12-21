@@ -2101,12 +2101,6 @@ table.dataTable tbody tr td select{
 	padding-top: 0.5em;
 	padding-bottom: 0.5em;
 }
-.page-dataexchange-type form .form-content .form-item .form-item-label{
-	width: 30%;
-}
-.page-dataexchange-type form .form-content .form-item .form-item-value{
-	width: 65%;
-}
 .page-dataexchange-type form .form-content .form-item .input-desc{
 	margin-left: 1em;
 }
