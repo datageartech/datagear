@@ -2563,6 +2563,7 @@ table.dataTable tbody tr td select{
 }
 .page-grid-chart td .plugin-name{
 	display: inline-block;
+	vertical-align: middle;
 	margin-left: 0.41em;
 }
 
