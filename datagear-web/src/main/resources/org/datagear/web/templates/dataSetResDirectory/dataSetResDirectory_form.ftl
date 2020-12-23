@@ -21,7 +21,9 @@ readonly 是否只读操作，允许为null
 			<input type="hidden" name="id" value="${(dataSetResDirectory.id)!''?html}" />
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='dataSetResDirectory.directory' /></label>
+					<label title="<@spring.message code='dataSetResDirectory.directory.desc' />">
+						<@spring.message code='dataSetResDirectory.directory' />
+					</label>
 				</div>
 				<div class="form-item-value">
 					<input type="text" name="directory" value="${(dataSetResDirectory.directory)!''?html}" class="ui-widget ui-widget-content" />
