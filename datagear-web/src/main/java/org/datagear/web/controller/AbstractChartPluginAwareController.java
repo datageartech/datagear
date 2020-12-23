@@ -15,7 +15,6 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.Category;
-import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.DashboardTheme;
@@ -24,11 +23,11 @@ import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.support.AbstractChartPlugin;
 import org.datagear.analysis.support.CategorizationResolver;
 import org.datagear.analysis.support.CategorizationResolver.Categorization;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
+import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.util.i18n.Label;
 import org.datagear.web.util.KeywordMatcher;
@@ -159,10 +158,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		pluginVO.setDescLabel(toConcreteLabel(chartPlugin.getDescLabel(), locale));
 		pluginVO.setManualLabel(toConcreteLabel(chartPlugin.getManualLabel(), locale));
 
-		Icon icon = chartPlugin.getIcon(themeName);
-		pluginVO.setHasIcon(icon != null);
-		if (pluginVO.isHasIcon())
-			pluginVO.setIconUrl(resolveIconUrl(chartPlugin));
+		pluginVO.setIconUrl(resolveIconUrl(chartPlugin, themeName));
 
 		List<DataSign> dataSigns = chartPlugin.getDataSigns();
 		if (dataSigns != null)
@@ -214,6 +210,22 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return new Label(value);
 	}
 
+	/**
+	 * 解析插件图标URL，没有则返回{@code null}
+	 * 
+	 * @param plugin
+	 * @param themeName
+	 * @return
+	 */
+	protected String resolveIconUrl(HtmlChartPlugin plugin, String themeName)
+	{
+		if (plugin == null)
+			return null;
+
+		Icon icon = plugin.getIcon(themeName);
+		return (icon == null ? null : resolveIconUrl(plugin));
+	}
+
 	protected String resolveIconUrl(HtmlChartPlugin plugin)
 	{
 		return "/analysis/chartPlugin/icon/" + plugin.getId();
@@ -238,13 +250,11 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class HtmlChartPluginVO extends AbstractChartPlugin implements Serializable
+	public static class HtmlChartPluginVO extends HtmlChartPlugin implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
-		private boolean hasIcon;
-
-		private String iconUrl;
+		private String iconUrl = null;
 
 		public HtmlChartPluginVO()
 		{
@@ -253,17 +263,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 
 		public HtmlChartPluginVO(String id, Label nameLabel)
 		{
-			super(id, nameLabel);
-		}
-
-		public boolean isHasIcon()
-		{
-			return hasIcon;
-		}
-
-		public void setHasIcon(boolean hasIcon)
-		{
-			this.hasIcon = hasIcon;
+			super.setId(id);
+			super.setNameLabel(nameLabel);
 		}
 
 		public String getIconUrl()
@@ -277,7 +278,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		}
 
 		@Override
-		public Chart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException
+		public HtmlChart renderChart(RenderContext renderContext, ChartDefinition chartDefinition)
+				throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}

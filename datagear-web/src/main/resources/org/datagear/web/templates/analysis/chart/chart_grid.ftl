@@ -237,10 +237,36 @@ boolean readonly 是否只读操作，默认为false
 		}
 	};
 	
+	//使用ID作为列数据，确保排序可用
+	var chartPluginColumnData = "htmlChartPlugin.id";
+	var chartPluginColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", chartPluginColumnData);
+	chartPluginColumn.render = function(data, type, row)
+	{
+		data = row.htmlChartPlugin;
+		
+		var content = (data.nameLabel ? data.nameLabel.value : data.id);
+		if(!content)
+			content = data.id;
+		
+		if(type == "display")
+		{
+			content = $.truncateIf(content);
+			content = $.escapeHtml(content);
+			
+			if(data.iconUrl)
+			{
+				content = "<div class='plugin-icon' style='background-image:url(${contextPath}"+$.escapeHtml(data.iconUrl)+")'></div>"
+							+ "<div class='plugin-name'>"+content+"</div>";
+			}
+		}
+		
+		return content;
+	};
+	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='id' />"), "id"),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.name' />"), "name"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", "chartPluginName"),
+		chartPluginColumn,
 		updateIntervalColumn,
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='analysisProject.ownerAnalysisProject' />"), "analysisProject.name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createUser' />", "createUser.realName"),

@@ -81,20 +81,22 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	var columnIcon = $.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.icon' />", "iconUrl", true);
+	var columnIcon = $.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.icon' />", "iconUrl", false);
 	columnIcon.render = function(data, type, row, meta)
 	{
-		if(data)
-			data = "<a class=\"plugin-icon\" style=\"background-image: url(${contextPath}/"+data+")\">&nbsp;</a>";
-		
-		return data;
+		if($.dataTableUtil.isDisplayType(type))
+		{
+			return (data ? "<a class=\"plugin-icon\" style=\"background-image: url(${contextPath}"+data+")\">&nbsp;</a>" : data);
+		}
+		else
+			return data;
 	};
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.name' />"), "nameLabel.value"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.desc' />"), "descLabel.value"),
 		columnIcon,
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.desc' />"), "descLabel.value"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.version' />", "version")
 	];
 	

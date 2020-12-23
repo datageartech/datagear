@@ -259,6 +259,7 @@ public class HtmlChartWidgetEntityServiceImpl
 				{
 					htmlChartPlugin.setNameLabel(full.getNameLabel());
 					htmlChartPlugin.setDescLabel(full.getDescLabel());
+					htmlChartPlugin.setIcons(full.getIcons());
 				}
 			}
 		}

@@ -67,7 +67,7 @@
 			var $item = $("<div class='ui-widget ui-widget-content ui-corner-all chart-plugin-item' />")
 				.appendTo(po.chartPluginInfos());
 			
-			if(chartPluginInfo.hasIcon)
+			if(chartPluginInfo.iconUrl)
 				$("<a class=\"plugin-icon\" style=\"background-image: url(${contextPath}/"+chartPluginInfo.iconUrl+")\">&nbsp;</a>").appendTo($item);
 			
 			$("<span class='name'></span>").text(chartPluginInfo.nameLabel.value).appendTo($item);

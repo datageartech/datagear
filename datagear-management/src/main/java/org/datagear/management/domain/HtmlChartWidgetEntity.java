@@ -8,14 +8,12 @@
 package org.datagear.management.domain;
 
 import java.util.Date;
-import java.util.Locale;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartWidget;
-import org.datagear.util.i18n.Label;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -45,9 +43,6 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
 	private AnalysisProject analysisProject = null;
-
-	/** 插件名称，展示用 */
-	private String chartPluginName = "";
 
 	public HtmlChartWidgetEntity()
 	{
@@ -131,35 +126,10 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 		this.analysisProject = analysisProject;
 	}
 
-	public String getChartPluginName()
-	{
-		return chartPluginName;
-	}
-
-	public void setChartPluginName(String chartPluginName)
-	{
-		this.chartPluginName = chartPluginName;
-	}
-
 	@JsonIgnore
 	@Override
 	public DataSetResult[] getDataSetResults() throws DataSetException
 	{
 		return super.getDataSetResults();
-	}
-
-	public void updateChartPluginName(Locale locale)
-	{
-		String name = null;
-		HtmlChartPlugin plugin = getHtmlChartPlugin();
-
-		if (plugin != null)
-		{
-			Label nameLabel = plugin.getNameLabel();
-			if (nameLabel != null)
-				name = nameLabel.getValue(locale);
-		}
-
-		setChartPluginName(name);
 	}
 }

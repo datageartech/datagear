@@ -164,6 +164,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (chart == null)
 			throw new RecordNotFoundException();
 
+		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
+
 		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
 				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
 				: null);
@@ -220,6 +222,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		if (chart == null)
 			throw new RecordNotFoundException();
+
+		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
 
 		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
 				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
@@ -290,7 +294,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
-		setChartPluginNames(request, pagingData.getItems());
+		setChartPluginViewInfo(request, pagingData.getItems());
 
 		return pagingData;
 	}
@@ -438,15 +442,18 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		return webContext;
 	}
 
-	protected void setChartPluginNames(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
+	protected void setChartPluginViewInfo(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
 	{
 		if (entities == null)
 			return;
 
 		Locale locale = WebUtils.getLocale(request);
+		String themeName = resolveChartPluginIconThemeName(request);
 
 		for (HtmlChartWidgetEntity entity : entities)
-			entity.updateChartPluginName(locale);
+		{
+			entity.setPlugin(toHtmlChartPluginVO(entity.getPlugin(), themeName, locale));
+		}
 	}
 
 	protected void inflateHtmlChartWidgetEntity(HtmlChartWidgetEntity entity, HttpServletRequest request)

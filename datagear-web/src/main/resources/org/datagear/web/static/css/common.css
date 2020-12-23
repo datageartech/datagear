@@ -2552,6 +2552,20 @@ table.dataTable tbody tr td select{
 	min-width: 6em;
 }
 
+.page-grid-chart{}
+.page-grid-chart td .plugin-icon{
+	display: inline-block;
+	width: 2em;
+	height: 2em;
+	vertical-align: middle;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+.page-grid-chart td .plugin-name{
+	display: inline-block;
+	margin-left: 0.41em;
+}
+
 .page-form-chart .chart-plugin{
 	display: inline-block;
 	height: 70px;
@@ -2776,7 +2790,8 @@ table.dataTable tbody tr td select{
 }
 .page-grid-chartPlugin a.plugin-icon{
 	display: inline-block;
-	width: 20px;
+	width: 2em;
+	height: 2em;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 }
