@@ -858,6 +858,176 @@
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
 	};
+
+	//极坐标柱状图
+	
+	chartSupport.barPolarRender = function(chart, nameSign, valueSign, options)
+	{
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		
+		var chartDataSet = chart.chartDataSetFirst();
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		//是否堆叠
+		var stack = (options && options.dgStack);
+		//坐标类型：radius（径向）、angle（角度）
+		var axisType = (options && options.dgAxisType ? options.dgAxisType : "radius");
+		
+		var defaultOptions =
+		{
+			dgStack: stack,
+			dgAxisType: axisType,
+			
+			title: { text: chart.nameNonNull() },
+			angleAxis: {},
+			radiusAxis: {},
+			polar: { radius: "60%" },
+			tooltip: { trigger: "item" },
+			legend:{ data: [] },
+			series:
+			[{
+				name: "",
+				type: "bar",
+				label: { show: stack },
+				coordinateSystem: 'polar',
+				data: []
+			}]
+		};
+		
+		if(axisType == "angle")
+		{
+			defaultOptions.angleAxis =
+			{
+		        type: 'category',
+		        data: []
+			};
+		}
+		else
+		{
+			defaultOptions.radiusAxis =
+			{
+				name: chart.dataSetPropertyLabel(np),
+				nameGap: 20,
+		        type: 'category',
+		        data: [],
+		        z: 10
+			};
+		}
+		
+		options = $.extend(true,
+		defaultOptions,
+		options,
+		chart.options());
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options);
+	};
+	
+	chartSupport.barPolarUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var initOptions= chartSupport.initOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+		var stack = initOptions.dgStack;
+		var axisType = initOptions.dgAxisType;
+		//是否按数据集分组堆叠
+		var stackGroup = initOptions.stackGroup == undefined ? true : initOptions.stackGroup;
+		var isCategory = true;
+		
+		chartSupport.clearChartOriginalDataIndexForRange(chart);
+		
+		var legendData = [];
+		var axisData = [];
+		var series = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var result = chart.resultAt(results, i);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				var legendName = dataSetName;
+				if(chartDataSets.length > 1 && vps.length > 1)
+					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vps[j]);
+				else if(vps.length > 1)
+					legendName = chart.dataSetPropertyLabel(vps[j]);
+				
+				var data = chart.resultNameValueObjects(result, np, vps[j]);
+				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, {name: legendName, data: data});
+				
+				if(stack)
+					mySeries.stack = (stackGroup ? "stack-"+i : "stack");
+				
+				legendData.push(legendName);
+				series.push(mySeries);
+				
+				chartSupport.setChartOriginalDataIndexForRange(chart, series.length-1, 0, data.length, i);
+				
+				//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
+				if(isCategory)
+				{
+					if(axisData.length == 0)
+						axisData = chart.resultRowArrays(result, np);
+					else
+					{
+						var axisDataMy = chart.resultRowArrays(result, np);
+						chartSupport.appendDistinct(axisData, axisDataMy);
+					}
+				}
+			}
+		}
+		
+		var options = { legend: {data: legendData}, series: series };
+		if(axisType == "angle")
+			options.angleAxis = {data: axisData};
+		else
+			options.radiusAxis = {data: axisData};
+		chartSupport.mergeUpdateOptions(options, chart);
+		
+		chart.echartsOptions(options);
+	};
+	
+	chartSupport.barPolarResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.barPolarDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+	
+	chartSupport.barPolarOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.barPolarSetChartEventData);
+	};
+	
+	chartSupport.barPolarOff = function(chart, eventType, handler)
+	{
+		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+	};
+	
+	chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var initOptions= chartSupport.initOptions(chart);
+		
+		var echartsData = echartsEventParams.data;
+		var data = {};
+		
+		data[signNameMap.name] = echartsData.name;
+		data[signNameMap.value] = echartsData.value;
+		
+		chart.eventData(chartEvent, data);
+		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
+	};
 	
 	//饼图
 	
