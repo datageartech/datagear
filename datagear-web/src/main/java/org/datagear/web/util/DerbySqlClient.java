@@ -35,6 +35,10 @@ import org.springframework.core.env.Environment;
  */
 public class DerbySqlClient extends JdbcSupport
 {
+	private static final String COMMAND_TABLES = "/t";
+
+	private static final String COMMAND_COLUMNS = "/c ";
+
 	public DerbySqlClient()
 	{
 		super();
@@ -65,6 +69,12 @@ public class DerbySqlClient extends JdbcSupport
 			println("Print [@<sql-file-path>] for executing UTF-8 sql scripts, example:");
 			println("@/home/tmp.sql");
 			println();
+			println("Print [" + COMMAND_TABLES + "] for listing tables, example:");
+			println(COMMAND_TABLES);
+			println();
+			println("Print [" + COMMAND_COLUMNS + "<table-name>] for listing table columns, example:");
+			println(COMMAND_COLUMNS + "DATAGEAR_VERSION");
+			println();
 			println("Print [exit] for exit, example:");
 			println("exit");
 			println("*****************************************");
@@ -82,6 +92,20 @@ public class DerbySqlClient extends JdbcSupport
 					println("Bye!");
 					scanner.close();
 					System.exit(0);
+				}
+				else if (input.equals(COMMAND_TABLES))
+				{
+					executeSql(cn, "SELECT * FROM SYS.SYSTABLES");
+				}
+				else if (input.startsWith(COMMAND_COLUMNS))
+				{
+					String tableName = input.substring(COMMAND_COLUMNS.length());
+
+					String sql = "SELECT C.* FROM SYS.SYSCOLUMNS C, SYS.SYSTABLES T "
+							+ " WHERE C.REFERENCEID = T.TABLEID AND T.TABLENAME='" + tableName
+							+ "' ORDER BY C.COLUMNNUMBER ASC";
+
+					executeSql(cn, sql);
 				}
 				else if (input.startsWith("@"))
 				{
