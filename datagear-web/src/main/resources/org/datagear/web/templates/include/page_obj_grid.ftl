@@ -193,7 +193,10 @@ page_js_obj.jsp
 		for(; orderColumn < newColumns.length; orderColumn++)
 		{
 			var column = newColumns[orderColumn];
-			if(column.visible == null || column.visible)
+			
+			if(column.visible == false || column.orderable == false)
+				continue;
+			else
 				break;
 		}
 		
