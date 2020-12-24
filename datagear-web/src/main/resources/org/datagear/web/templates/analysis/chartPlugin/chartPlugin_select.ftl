@@ -19,7 +19,13 @@
 		</div>
 	</div>
 	<div class="content">
-		<div class="chart-plugin-nav ui-widget ui-widget-content ui-corner-all"></div>
+		<div class="chart-plugin-nav ui-widget ui-widget-content ui-corner-all">
+			<div class="chart-plugin-nav-content"></div>
+			<div class="chart-plugin-nav-foot">
+				<span><@spring.message code='total' /><@spring.message code='colon' /></span>
+				<span class="plugin-total"></span>
+			</div>
+		</div>
 		<div class="chart-plugin-content"></div>
 	</div>
 	<div class="foot">
@@ -61,7 +67,7 @@
 		
 		po.categorizations = categorizations;
 		
-		var $nav = po.element(".chart-plugin-nav");
+		var $nav = po.element(".chart-plugin-nav-content");
 		var $content = po.element(".chart-plugin-content");
 		
 		$nav.empty();
@@ -70,16 +76,23 @@
 		var $navul = $("<ul />").appendTo($nav);
 		var $contentul = $("<ul />").appendTo($content);
 		
+		var pluginTotal = 0;
+		
 		for(var i=0; i<categorizations.length; i++)
 		{
 			var category = categorizations[i].category;
+			var pluginCount = (categorizations[i].chartPlugins ? categorizations[i].chartPlugins.length : 0);
+			pluginTotal += pluginCount;
 			var categoryId = (category.name ? "${pageId}-category-"+category.name : "${pageId}-uncategorized");
 			var label = (category.name ? (category.nameLabel && category.nameLabel.value ? category.nameLabel.value : category.name)
 							: "<@spring.message code='chartPlugin.uncategorized' />");
+			pluginCount = "<@spring.message code='bracketLeft' />" + pluginCount + "<@spring.message code='bracketRight' />";
 			
 			var $li = $("<li />").attr("categoryId", categoryId).appendTo($navul);
-			$("<a />").html(label).appendTo($li);
+			$("<a />").html(label + pluginCount).appendTo($li);
 		}
+		
+		po.element(".plugin-total").html(pluginTotal);
 		
 		for(var i=0; i<categorizations.length; i++)
 		{
@@ -89,9 +102,10 @@
 			var categoryId = (category.name ? "${pageId}-category-"+category.name : "${pageId}-uncategorized");
 			var label = (category.name ? (category.nameLabel && category.nameLabel.value ? category.nameLabel.value : category.name)
 							: "<@spring.message code='chartPlugin.uncategorized' />");
+			var pluginCount = "<@spring.message code='bracketLeft' />" + chartPlugins.length + "<@spring.message code='bracketRight' />";
 			
 			var $li = $("<li />").attr("id", categoryId).appendTo($contentul);
-			$("<div class='category-header ui-widget-header ui-corner-all' />").html(label).appendTo($li);
+			$("<div class='category-header ui-widget-header ui-corner-all' />").html(label + pluginCount).appendTo($li);
 			
 			var $liul = $("<ul />").appendTo($li);
 			

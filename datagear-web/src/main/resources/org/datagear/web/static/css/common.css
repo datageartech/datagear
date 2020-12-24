@@ -2272,16 +2272,27 @@ table.dataTable tbody tr td select{
 	left: 0.1em;
 	bottom: 0;
 	width: 25%;
+	overflow: auto;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+.page-grid-chartPlugin-select .chart-plugin-nav-content{
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 2em;
+	width: 100%;
 	padding: 0.5em 0.5em;
 	overflow: auto;
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
 }
-.page-grid-chartPlugin-select .chart-plugin-nav .ui-menu{
+.page-grid-chartPlugin-select .chart-plugin-nav-content .ui-menu{
 	border: none;
 }
-.page-grid-chartPlugin-select .chart-plugin-nav .ui-menu li .ui-menu-item-wrapper {
+.page-grid-chartPlugin-select .chart-plugin-nav-content .ui-menu li .ui-menu-item-wrapper {
     display: block;
     padding-top: 0.3em;
     padding-bottom: 0.3em;
@@ -2289,6 +2300,20 @@ table.dataTable tbody tr td select{
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
+}
+.page-grid-chartPlugin-select .chart-plugin-nav-foot{
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	height: 2em;
+	width: 100%;
+	padding: 0.5em 0.5em;
+	padding-right: 1em;
+	overflow: auto;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    text-align: right;
 }
 .page-grid-chartPlugin-select .chart-plugin-content{
 	position: absolute;
