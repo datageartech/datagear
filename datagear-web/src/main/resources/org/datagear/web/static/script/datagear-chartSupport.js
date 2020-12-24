@@ -4062,6 +4062,20 @@
 			
 			//DataTable图表配置项
 			"ordering": false,
+			"scrollX": true,
+			"autoWidth": true,
+			"scrollY" : chartEle.height(),
+	        "scrollCollapse": false,
+			"paging" : false,
+			"searching" : false,
+			"info": false,
+			"select" : { style : 'os' },
+			"dom": "t",
+			"language":
+		    {
+				"emptyTable": "",
+				"zeroRecords" : ""
+			},
 			
 			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
 			carousel: carouselConfig
@@ -4119,20 +4133,6 @@
 		{
 			"columns" : columns,
 			"data" : [],
-			"scrollX": true,
-			"autoWidth": true,
-			"scrollY" : chartEle.height(),
-	        "scrollCollapse": false,
-			"paging" : false,
-			"searching" : false,
-			"info": false,
-			"select" : { style : 'os' },
-			"dom": "t",
-			"language":
-		    {
-				"emptyTable": "",
-				"zeroRecords" : ""
-			},
 			"rowCallback": function(row, data, displayNum, displayIndex, dataIndex)
 			{
 				chartSupport.tableSetTableRowStyle(row, chartOptions);
