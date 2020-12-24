@@ -1646,7 +1646,7 @@
 		if(count != null && count < getCount)
 			getCount = count;
 		
-		if(properties.length > 0)
+		if($.isArray(properties))
 		{
 			for(var i=row; i< getCount; i++)
 			{
@@ -1707,7 +1707,7 @@
 		if(count != null && count < getCount)
 			getCount = count;
 		
-		if(properties.length > 0)
+		if($.isArray(properties))
 		{
 			for(var i=0; i<properties.length; i++)
 			{
@@ -1768,7 +1768,7 @@
 		
 		nameProperty = (nameProperty.name || nameProperty);
 		
-		if(valueProperty.length)
+		if($.isArray(valueProperty))
 		{
 			for(var i=row; i< getCount; i++)
 			{
