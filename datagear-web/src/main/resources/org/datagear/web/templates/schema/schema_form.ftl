@@ -17,13 +17,13 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="${contextPath}/schema/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(schema.id)!''?html}">
+			<input type="hidden" name="id" value="${(schema.id)!''}">
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='schema.title' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="title" value="${(schema.title)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="title" value="${(schema.title)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -31,7 +31,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.url' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="url" value="${(schema.url)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="url" value="${(schema.url)!''}" class="ui-widget ui-widget-content" />
 					<#if !readonly>
 					<span id="schemaBuildUrlHelp" class="ui-state-default ui-corner-all" style="cursor: pointer;" title="<@spring.message code='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></span>&nbsp;
 					</#if>
@@ -42,7 +42,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.user' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="user" value="${(schema.user)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="user" value="${(schema.user)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<#if !readonly>
@@ -51,7 +51,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.password' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="password" value="${(schema.password)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="password" name="password" value="${(schema.password)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			</#if>
@@ -61,7 +61,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.createUser' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="user" value="${(schema.createUser.nameLabel)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="user" value="${(schema.createUser.nameLabel)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -69,7 +69,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.createTime' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="user" value="${((schema.createTime)?datetime)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="user" value="${((schema.createTime)?datetime)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			</#if>
@@ -90,8 +90,8 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div id="driverEntityFormItemValue" class="form-item-value">
-					<input type="hidden" id="driverEntityId" name="driverEntity.id" value="${(schema.driverEntity.id)!''?html}" />
-					<input type="text" id="driverEntityText" value="${(schema.driverEntity.displayText)!''?html}" size="20" readonly="readonly" class="ui-widget ui-widget-content" />
+					<input type="hidden" id="driverEntityId" name="driverEntity.id" value="${(schema.driverEntity.id)!''}" />
+					<input type="text" id="driverEntityText" value="${(schema.driverEntity.displayText)!''}" size="20" readonly="readonly" class="ui-widget ui-widget-content" />
 					<#if !readonly>
 					<div id="driverEntityActionGroup">
 						<button id="driverEntitySelectButton" type="button"><@spring.message code='select' /></button>

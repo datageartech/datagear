@@ -30,7 +30,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''?html}</textarea>
+						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''}</textarea>
 						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
 						</div>
@@ -58,7 +58,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
-	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
+	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string}", "${((dataSet.analysisProject.name)!'')?js_string}");
 	po.initWorkspaceHeight();
 
 	var languageTools = ace.require("ace/ext/language_tools");

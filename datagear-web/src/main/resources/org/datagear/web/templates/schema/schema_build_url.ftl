@@ -12,10 +12,10 @@ preview 是否是预览请求，允许为null
 <body>
 <div id="${pageId}" class="page-form page-form-buildSchemaUrl">
 	<div id="dbUrlBuilderScriptCode" style="display: none;">
-		${scriptCode!''?html}
+		${scriptCode!''}
 	</div>
 	<div class="builtInBuildersJson" style="display: none;">
-		${builtInBuildersJson!''?html}
+		${builtInBuildersJson!''}
 	</div>
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
@@ -71,7 +71,7 @@ preview 是否是预览请求，允许为null
 
 	$.initButtons(po.element());
 	
-	po.initUrl = "${url!''?js_string}";
+	po.initUrl = "${(url!'')?js_string}";
 	
 	$.schemaUrlBuilder.clear();
 	

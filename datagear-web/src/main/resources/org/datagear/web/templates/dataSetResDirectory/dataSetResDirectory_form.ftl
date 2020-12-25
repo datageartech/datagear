@@ -18,7 +18,7 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="${contextPath}/dataSetResDirectory/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(dataSetResDirectory.id)!''?html}" />
+			<input type="hidden" name="id" value="${(dataSetResDirectory.id)!''}" />
 			<div class="form-item">
 				<div class="form-item-label">
 					<label title="<@spring.message code='dataSetResDirectory.directory.desc' />">
@@ -26,7 +26,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="directory" value="${(dataSetResDirectory.directory)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="directory" value="${(dataSetResDirectory.directory)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSetResDirectory.desc' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="desc" class="ui-widget ui-widget-content">${(dataSetResDirectory.desc)!''?html}</textarea>
+					<textarea name="desc" class="ui-widget ui-widget-content">${(dataSetResDirectory.desc)!''}</textarea>
 				</div>
 			</div>
 		</div>

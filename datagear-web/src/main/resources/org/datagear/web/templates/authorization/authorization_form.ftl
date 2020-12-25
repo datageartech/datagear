@@ -33,9 +33,9 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="${contextPath}/authorization/${resourceMeta.resourceType}/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(authorization.id)!''?html}" />
-			<input type="hidden" name="resource" value="${resource?html}" />
-			<input type="hidden" name="principal" value="${(authorization.principal)!''?html}" />
+			<input type="hidden" name="id" value="${(authorization.id)!''}" />
+			<input type="hidden" name="resource" value="${resource}" />
+			<input type="hidden" name="principal" value="${(authorization.principal)!''}" />
 			
 			<#if assignedResource??>
 				<input type="hidden" name="resourceType" value="${resourceType}" />

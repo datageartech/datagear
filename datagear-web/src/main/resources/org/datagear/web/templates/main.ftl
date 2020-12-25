@@ -1472,7 +1472,7 @@ ${detectNewVersionScript}
 		</ul>
 		<#if !currentUser.anonymous>
 		<div class="user-name">
-		${currentUser.nameLabel?html}
+		${currentUser.nameLabel}
 		</div>
 		<a class="link" href="${contextPath}/logout"><@spring.message code='main.logout' /></a>
 		<#else>

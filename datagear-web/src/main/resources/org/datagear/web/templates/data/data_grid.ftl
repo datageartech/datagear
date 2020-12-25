@@ -25,14 +25,14 @@ boolean readonly 是否只读操作，默认为false
 	<@spring.message code='query' />
 	</#if>
 	<@spring.message code='titleSeparator' />
-	${titleDisplayName?html}
+	${titleDisplayName}
 	<#if titleDisplayDesc != ''>
 	<@spring.message code='bracketLeft' />
-	${titleDisplayDesc?html}
+	${titleDisplayDesc}
 	<@spring.message code='bracketRight' />
 	</#if>
 	<@spring.message code='bracketLeft' />
-	${schema.title?html}
+	${schema.title}
 	<@spring.message code='bracketRight' />
 </title>
 </head>

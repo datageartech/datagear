@@ -10,7 +10,7 @@
 	<form id="${pageId}-form" action="${contextPath}/driverEntity/saveImport" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="importId" value="${importId?html}" />
+			<input type="hidden" name="importId" value="${importId}" />
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='driverEntity.import.selectFile' /></label>

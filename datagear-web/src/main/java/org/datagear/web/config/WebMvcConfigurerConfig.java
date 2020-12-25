@@ -133,6 +133,12 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 		settings.setProperty("date_format", "yyyy-MM-dd");
 		settings.setProperty("number_format", "#.##");
 
+		// 开启自动转义功能，并设置默认转义格式为HTML，页面不再需要每个地方都转义
+		// ${content?html}
+		// 可简写为
+		// ${content}
+		settings.setProperty("output_format", "HTMLOutputFormat");
+
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("writeJson", new WriteJsonTemplateDirectiveModel(this.coreConfig.objectMapperBuilder()));
 

@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''?html}" class="ui-widget ui-widget-content" />
+						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" />
 						<span class="nameRow-radios">
 							<label for="${pageId}-nameRow_0">
 								<@spring.message code='dataSet.csv.nameRow.none' />
@@ -50,7 +50,7 @@ readonly 是否只读操作，允许为null
 				   			<input type="radio" id="${pageId}-nameRow_1" name="nameRowRadio" value="1"  />
 						</span>
 						&nbsp;
-						<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''?html}" class="ui-widget ui-widget-content" style="width:4.1em;" />
+						<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" style="width:4.1em;" />
 					</div>
 				</div>
 				<div class="form-item form-item-encoding">
@@ -88,7 +88,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
-	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
+	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string}", "${((dataSet.analysisProject.name)!'')?js_string}");
 	po.element("select[name='encoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	po.element(".nameRow-radios").controlgroup();
 	po.initWorkspaceHeight();
@@ -98,7 +98,7 @@ readonly 是否只读操作，允许为null
 	po.initPreviewParamValuePanel();
 	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
 
-	po.initDataSetFileInput(po.url("uploadFile"), "${(dataSet.fileSourceType)!''?js_string}", ${isAdd?string("true", "false")});
+	po.initDataSetFileInput(po.url("uploadFile"), "${((dataSet.fileSourceType)!'')?js_string}", ${isAdd?string("true", "false")});
 	
 	po.updatePreviewOptionsData = function()
 	{

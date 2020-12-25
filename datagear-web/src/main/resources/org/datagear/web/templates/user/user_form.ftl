@@ -18,13 +18,13 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="${contextPath}/user/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(user.id)!''?html}" />
+			<input type="hidden" name="id" value="${(user.id)!''}" />
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='user.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(user.name)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(user.name)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<#if !readonly>
@@ -50,7 +50,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.realName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="realName" value="${(user.realName)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="realName" value="${(user.realName)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<#--

@@ -10,7 +10,7 @@ Schema schema 数据库，不允许为null
 	<#include "../include/html_title_app_name.ftl">
 	<@spring.message code='dataExport.dataExport' />
 	<@spring.message code='bracketLeft' />
-	${schema.title?html}
+	${schema.title}
 	<@spring.message code='bracketRight' />
 </title>
 </head>
@@ -26,7 +26,7 @@ Schema schema 数据库，不允许为null
 			<div class="init-sqls" style="display:none;">
 				<#if initSqls??>
 				<#list initSqls as initSql>
-					<textarea name="initSqls">${initSql?html}</textarea>
+					<textarea name="initSqls">${initSql}</textarea>
 				</#list>
 				</#if>
 			</div>

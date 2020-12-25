@@ -27,8 +27,8 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSet.dataSource' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="schemaConnectionFactory.schema.title" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.title)!''?html}" readonly="readonly" />
-					<input type="hidden" name="schemaConnectionFactory.schema.id" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.id)!''?html}" />
+					<input type="text" name="schemaConnectionFactory.schema.title" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.title)!''}" readonly="readonly" />
+					<input type="hidden" name="schemaConnectionFactory.schema.id" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.id)!''}" />
 					<#if !readonly>
 					<button type="button" class="select-schema-button"><@spring.message code='select' /></button>
 					</#if>
@@ -42,7 +42,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
+						<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''}</textarea>
 						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
 						</div>
@@ -76,7 +76,7 @@ readonly 是否只读操作，允许为null
 			+"<span class='ui-button-icon-space'> </span><@spring.message code='sqlpad.exportSqlResult' /></button>");
 	
 	$.initButtons(po.element());
-	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
+	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string}", "${((dataSet.analysisProject.name)!'')?js_string}");
 	po.initWorkspaceHeight();
 	
 	po.getDataSetSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };

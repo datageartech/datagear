@@ -18,13 +18,13 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="${contextPath}/role/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(role.id)!''?html}" />
+			<input type="hidden" name="id" value="${(role.id)!''}" />
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='role.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(role.name)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(role.name)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -32,7 +32,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='role.description' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="description" class="ui-widget ui-widget-content">${(role.description)!''?html}</textarea>
+					<textarea name="description" class="ui-widget ui-widget-content">${(role.description)!''}</textarea>
 				</div>
 			</div>
 			<div class="form-item">

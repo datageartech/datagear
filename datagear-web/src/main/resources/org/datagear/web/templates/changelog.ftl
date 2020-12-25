@@ -31,7 +31,7 @@
 					<div class="form-item-value">
 						<ul class="changelog-content">
 						<#list versionChangelog.contents as item>
-						<li class="changelog-item">${item?html}</li>
+						<li class="changelog-item">${item}</li>
 						</#list>
 						</ul>
 					</div>

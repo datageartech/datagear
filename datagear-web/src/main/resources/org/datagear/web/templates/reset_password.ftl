@@ -46,7 +46,7 @@
 							<label><@spring.message code='resetPassword.username' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="text" value="${(step.user.name)!''?html}" class="ui-widget ui-widget-content" readonly="readonly" />
+							<input type="text" value="${(step.user.name)!''}" class="ui-widget ui-widget-content" readonly="readonly" />
 						</div>
 					</div>
 					<div class="form-item">
@@ -63,7 +63,7 @@
 							<label><@spring.message code='resetPassword.username' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="text" value="${(step.user.name)!''?html}" class="ui-widget ui-widget-content" readonly="readonly" />
+							<input type="text" value="${(step.user.name)!''}" class="ui-widget ui-widget-content" readonly="readonly" />
 						</div>
 					</div>
 					<div class="form-item">
