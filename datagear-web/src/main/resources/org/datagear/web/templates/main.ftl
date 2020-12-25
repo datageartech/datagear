@@ -6,7 +6,7 @@
 <html>
 <head>
 <#include "include/html_head.ftl">
-${detectNewVersionScript}
+${detectNewVersionScript?no_esc}
 <title><@spring.message code='app.pageTitle' /></title>
 <#include "include/page_js_obj.ftl" >
 <#include "include/page_obj_tabs.ftl" >
