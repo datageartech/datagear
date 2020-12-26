@@ -315,7 +315,7 @@
 	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，
 	 * 其中value函数的sourceValueContext参数为图表事件对象（chartEvent）对象。
 	 * 
-	 * 图表渲染器相关：
+	 * 图表渲染器实现相关：
 	 * 图表渲染器应实现on函数，以支持“dg-chart-link”特性。
 	 * 
 	 * @param links 可选，要设置的图表联动设置对象、数组，没有则执行获取操作。
@@ -336,7 +336,7 @@
 	/**
 	 * 获取/设置图表是否自动调整大小。
 	 * 
-	 * 图表渲染器相关：
+	 * 图表渲染器实现相关：
 	 * 图表渲染器应实现resize函数，以支持“dg-chart-auto-resize”特性。
 	 * 
 	 * @param autoResize 可选，设置为是否自动调整大小，没有则执行获取操作。
@@ -352,7 +352,7 @@
 	/**
 	 * 为指定图表联动设置绑定事件处理函数。
 	 * 
-	 * 图表渲染器相关：
+	 * 图表渲染器实现相关：
 	 * 图表渲染器应实现on函数，以支持此特性。
 	 * 
 	 * @param links 图表联动设置对象、数组，格式参考chartBaseExt.links函数说明
