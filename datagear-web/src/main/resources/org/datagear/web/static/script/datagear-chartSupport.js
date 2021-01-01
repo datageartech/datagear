@@ -4060,28 +4060,47 @@
 				}
 			},
 			
+			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
+			carousel: carouselConfig,
+			
 			//DataTable图表配置项
+			"data" : [],
 			"ordering": false,
 			"scrollX": true,
+			"scrollY": chartEle.height(),
 			"autoWidth": true,
-			"scrollY" : chartEle.height(),
 	        "scrollCollapse": false,
-			"paging" : false,
-			"searching" : false,
-			"info": false,
+			"pagingType": "full_numbers",
 			"select" : { style : 'os' },
-			"dom": "t",
+			"searching" : false,
 			"language":
 		    {
 				"emptyTable": "",
-				"zeroRecords" : ""
-			},
-			
-			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
-			carousel: carouselConfig
+				"zeroRecords": "",
+				"lengthMenu": "每页_MENU_条",
+				"info": "共_TOTAL_条，当前_START_-_END_条",
+				"paginate":
+				{
+					"first": "首页",
+					"last": "尾页",
+					"next": "下一页",
+					"previous": "上一页"
+				},
+				select:
+				{
+					"rows": ""
+				}
+			}
 		},
 		options,
 		chart.options());
+		
+		//设置默认分页选项
+		chartOptions.paging = (chartOptions.paging != null ? chartOptions.paging : false);
+		chartOptions.info = (chartOptions.info != null ? chartOptions.info :
+								(chartOptions.paging ? true : false));
+		chartOptions.dom = (chartOptions.dom != null ? chartOptions.dom :
+								(chartOptions.paging ? "tilpr" : "t"));
 		
 		if(chartOptions.carousel === true || chartOptions.carousel === false)
 		{
@@ -4132,10 +4151,12 @@
 		options = $.extend({}, chartOptions,
 		{
 			"columns" : columns,
-			"data" : [],
 			"rowCallback": function(row, data, displayNum, displayIndex, dataIndex)
 			{
 				chartSupport.tableSetTableRowStyle(row, chartOptions);
+				
+				if(chartOptions.rowCallback)
+					chartOptions.rowCallback.call(this, row, data, displayNum, displayIndex, dataIndex);
 			}
 		});
 		
@@ -4349,9 +4370,21 @@
 	
 	chartSupport.tableEvalDataTableBodyHeight = function($chartContent, dataTable)
 	{
+		var container = $(dataTable.table().container());
 		var tableHeader = $(dataTable.table().header()).closest(".dataTables_scrollHead");
 		var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
-		tableBody.css("height", $chartContent.height() - tableHeader.outerHeight());
+		var tbh = $chartContent.height() - tableHeader.outerHeight();
+		tableBody.css("height", tbh);
+		
+		var ch = container.height();
+		var cch = $chartContent.height();
+		
+		//如果表格容器高度超出了图表内容限高，则重新设置
+		if(ch - cch > 0)
+		{
+			tbh = tbh - (ch - cch);
+			tableBody.css("height", tbh);
+		}
 	};
 	
 	chartSupport.tableAddDataTableData = function(dataTable, datas, startRowIndex, notDraw)

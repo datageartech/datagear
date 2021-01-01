@@ -46,6 +46,22 @@
 .dg-chart-table .dg-chart-table-content table.dataTable td.dataTables_empty{
 	display: none;/*隐藏初始未加载数据时的空行，避免影响样式*/
 }
+.dg-chart-table .dg-chart-table-content .dataTables_wrapper .dataTables_info{
+	padding-top: 0.5em;
+}
+.dg-chart-table .dg-chart-table-content .dataTables_wrapper .dataTables_length{
+	float: none;
+	margin-left: 1em;
+	display: inline-block;
+	padding-top: 0.5em;
+}
+.dg-chart-table .dg-chart-table-content .dataTables_wrapper .dataTables_paginate .fg-button{
+	padding: 0.2em 0.41em;
+}
+.dg-chart-table .dg-chart-table-content .dataTables_wrapper .dataTables_length select{
+	margin-left: 0.2em;
+	margin-right: 0.2em;
+}
 /*轮播表格隐藏竖向滚动条*/
 .dg-chart-table.dg-chart-table-carousel .dataTables_scrollBody{
 	overflow-y: hidden !important;
