@@ -2311,6 +2311,30 @@
 	};
 	
 	/**
+	 * 获取样式集对象的CSS样式文本。
+	 * 
+	 * @param stylesObj 样式对象，格式为：{ color: "...", backgroundColor: "...", fontSize: "...", ...  }，不合法的项将被忽略
+	 * @return CSS样式文本，格式为："color: red; background-color: red; font-size: 1px;"
+	 */
+	chartFactory.stylesObjToCssText = function(stylesObj)
+	{
+		var elementId = (chartFactory._stylesObjToCssTextElementId
+				|| (chartFactory._stylesObjToCssTextElementId = chartFactory.nextElementId()));
+		
+		var element = $("#" + elementId);
+		if(element.length == 0)
+		{
+			var parent = $("<div style='display:none' />").appendTo(document.body);
+			element = $("<div />").attr("id", elementId).appendTo(parent);
+		}
+		
+		element.attr("style", "");
+		chartFactory.setStyles(element, stylesObj);
+		
+		return (element.attr("style") || "");
+	};
+	
+	/**
 	 * 获取主题指定因子的渐变色。
 	 * 
 	 * @param theme

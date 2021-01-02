@@ -4005,19 +4005,10 @@
 			pauseOnHover: true
 		};
 		
-		//表格图表样式设置项
-		var chartOptions = $.extend(true,
+		var themeBindTableOptions = chartTheme._chartTableThemeBindOptions;
+		if(themeBindTableOptions == null)
 		{
-			//标题样式
-			"title":
-			{
-				"text": chart.nameNonNull(),
-				"show": true,
-				"color": chartTheme.titleColor,
-				"backgroundColor": chartTheme.backgroundColor
-			},
-			//表格
-			"table":
+			themeBindTableOptions=
 			{
 				//表头样式
 				"header":
@@ -4057,8 +4048,29 @@
 				renderValue: function(value, name, rowIndex, columnIndex, row, meta)
 				{
 					return chartFactory.escapeHtml(value);
-				}
+				},
+				
+				_chartTableStyleClassName: global.chartFactory.nextElementId(),
+				_chartTableStyleSheetId: global.chartFactory.nextElementId()
+			};
+			
+			chartTheme._chartTableThemeBindOptions = themeBindTableOptions;
+		}
+		
+		//表格图表样式设置项
+		var chartOptions = $.extend(true,
+		{
+			//标题样式
+			"title":
+			{
+				"text": chart.nameNonNull(),
+				"show": true,
+				"color": chartTheme.titleColor,
+				"backgroundColor": chartTheme.backgroundColor
 			},
+			
+			//表格，格式参考上面的themeBindTableOptions
+			"table": null,
 			
 			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
 			carousel: carouselConfig,
@@ -4097,6 +4109,16 @@
 		options,
 		chart.options());
 		
+		//如果没有定义table选项，则采用themeBindTableOptions
+		if(chartOptions.table == null)
+			chartOptions.table = themeBindTableOptions;
+		else
+		{
+			chartOptions.table = $.extend(true, {}, themeBindTableOptions, chartOptions.table);
+			chartOptions.table._chartTableStyleClassName =global.chartFactory.nextElementId();
+			chartOptions.table._chartTableStyleSheetId = global.chartFactory.nextElementId();
+		}
+		
 		//设置默认分页选项
 		chartOptions.paging = (chartOptions.paging != null ? chartOptions.paging : false);
 		chartOptions.info = (chartOptions.info != null ? chartOptions.info :
@@ -4118,6 +4140,9 @@
 		
 		if(chartOptions.carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
+		
+		chartSupport.tableCreateTableStyleSheet(chart, chartOptions,
+				chartOptions.table._chartTableStyleClassName, chartOptions.table._chartTableStyleSheetId);
 		
 		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
 		var columns = [];
@@ -4153,13 +4178,6 @@
 		options = $.extend({}, chartOptions,
 		{
 			"columns" : columns,
-			"rowCallback": function(row, data, displayNum, displayIndex, dataIndex)
-			{
-				chartSupport.tableSetTableRowStyle(row, chartOptions);
-				
-				if(chartOptions.rowCallback)
-					chartOptions.rowCallback.call(this, row, data, displayNum, displayIndex, dataIndex);
-			}
 		});
 		
 		if(!options.title || !options.title.show)
@@ -4175,54 +4193,26 @@
 		table.dataTable(options);
 		
 		var dataTable = table.DataTable();
-		
-		dataTable
-		.on("select", function(e, dt, type, indexes )
-		{
-			if(type === 'row')
-			{
-				var rowNodes = dt.rows(indexes).nodes();
-				$(rowNodes).each(function(index)
-				{
-					global.chartFactory.setStyles(this, chartOptions.table.row.selected);
-				});
-			}
-		})
-		.on("deselect", function(e, dt, type, indexes )
-		{
-			if(type === 'row')
-			{
-				var rowNodes = dt.rows(indexes).nodes();
-				$(rowNodes).each(function(index)
-				{
-					chartSupport.tableSetTableRowStyle(this, chartOptions);
-				});
-			}
-		});
-		
-		$("tr", dataTable.table().header()).each(function()
-		{
-			global.chartFactory.setStyles(this, chartOptions.table.header);
-		});
-		
-		$(dataTable.table().body()).on("mouseenter", "tr", function()
-		{
-			if(chartOptions.carousel.pauseOnHover)
-				chartSupport.tableStopCarousel(chart);
-			
-			if(!$(this).hasClass("selected"))
-				global.chartFactory.setStyles(this, chartOptions.table.row.hover);
-		})
-		.on("mouseleave", "tr", function()
-		{
-			if(!$(this).hasClass("selected"))
-				chartSupport.tableSetTableRowStyle(this, chartOptions);
-			
-			if(chartOptions.carousel.pauseOnHover && chartOptions.carousel.enable)
-				chartSupport.tableStartCarousel(chart);
-		});
-		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
+		
+		//固定选择列后hover效果默认不能同步，需要自己实现
+		if(options.fixedColumns)
+		{
+			$(dataTable.table().body()).on("mouseover mouseout", "tr",
+			function(event)
+			{
+				var rowIndex = $(this).index() + 1;
+				var $tableContainer = $(dataTable.table().container());
+				
+				$(".dataTable", $tableContainer).each(function()
+				{
+					if(event.type == "mouseover")
+						$("tr:eq("+rowIndex+")", this).addClass("hover");
+					else
+						$("tr:eq("+rowIndex+")", this).removeClass("hover");
+				});
+			});
+		}
 		
 		chart.extValue("chartTableId", tableId);
 		chartSupport.initOptions(chart, options);
@@ -4356,18 +4346,50 @@
 		return cps;
 	};
 	
-	chartSupport.tableSetTableRowStyle = function(rowElement, chartOptions)
+	chartSupport.tableCreateTableStyleSheet = function(chart, chartOptions, styleClassName, styleSheetId)
 	{
-		//公用样式
-		global.chartFactory.setStyles(rowElement, chartOptions.table.row);
+		chart.elementJquery().addClass(styleClassName);
 		
-		if($(rowElement).hasClass("odd"))
-			global.chartFactory.setStyles(rowElement, chartOptions.table.row.odd);
-		else
-			global.chartFactory.setStyles(rowElement, chartOptions.table.row.even);
+		if(global.chartFactory.isStyleSheetCreated(styleSheetId))
+			return false;
 		
-		if($(rowElement).hasClass("selected"))
-			var oldStyleObj = global.chartFactory.setStyles(rowElement, chartOptions.table.row.selected);
+		var qualifier = "." + styleClassName;
+		
+		var cssText = 
+			qualifier + " table.dataTable tbody tr {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row)
+			+"} \n"
+			+qualifier + " table.dataTable thead th, table.dataTable thead td {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.header)
+			+"} \n"
+			+qualifier + " table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.odd)
+			+"} \n"
+			+qualifier + " table.dataTable.stripe tbody tr.even, table.dataTable.display tbody tr.even {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.even)
+			+"} \n"
+			+qualifier + " table.dataTable.hover tbody tr.hover,"
+			+qualifier + " table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover"
+			+qualifier + " table.dataTable.hover tbody tr.hover.selected,"
+			+qualifier + " table.dataTable.hover tbody > tr.selected:hover,"
+			+qualifier + " table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover,"
+			+qualifier + " table.dataTable.display tbody > tr > .selected:hover {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.hover)
+			+"} \n"
+			+qualifier + " table.dataTable tbody > tr.selected,"
+			+qualifier + " table.dataTable tbody > tr > .selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.even.selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.even > .selected, table.dataTable.display tbody > tr.even.selected,"
+			+qualifier + " table.dataTable.display tbody > tr.even > .selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.odd.selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,"
+			+qualifier + " table.dataTable.display tbody > tr.odd > .selected {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.selected)
+			+"} \n";
+		
+		global.chartFactory.createStyleSheet(styleSheetId, cssText);
+		
+		return true;
 	};
 	
 	chartSupport.tableEvalDataTableBodyHeight = function($chartContent, dataTable)
