@@ -4071,6 +4071,8 @@
 			"autoWidth": true,
 	        "scrollCollapse": false,
 			"pagingType": "full_numbers",
+			"lengthMenu": [ 10, 25, 50, 75, 100 ],
+			"pageLength": 50,
 			"select" : { style : 'os' },
 			"searching" : false,
 			"language":
@@ -4379,8 +4381,8 @@
 		var ch = container.height();
 		var cch = $chartContent.height();
 		
-		//如果表格容器高度超出了图表内容限高，则重新设置
-		if(ch - cch > 0)
+		//如果表格容器高度不等于图表内容限高，则重新设置
+		if(ch - cch != 0)
 		{
 			tbh = tbh - (ch - cch);
 			tableBody.css("height", tbh);
