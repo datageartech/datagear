@@ -4244,6 +4244,10 @@
 		
 		chartSupport.tableAddDataTableData(dataTable, datas, 0, false);
 		
+		dataTable.columns.adjust();
+		if(dataTable.init().fixedColumns)
+			dataTable.fixedColumns().relayout();
+		
 		if(initOptions.carousel.enable)
 		{
 			chartSupport.tablePrepareCarousel(chart);
@@ -4257,6 +4261,10 @@
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
+		
+		dataTable.columns.adjust();
+		if(dataTable.init().fixedColumns)
+			dataTable.fixedColumns().relayout();
 	};
 	
 	chartSupport.tableDestroy = function(chart)

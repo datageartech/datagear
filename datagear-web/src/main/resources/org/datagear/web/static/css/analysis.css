@@ -66,6 +66,11 @@
 .dg-chart-table.dg-chart-table-carousel .dataTables_scrollBody{
 	overflow-y: hidden !important;
 }
+/*经测试，设置固定列后，在Chrome-87.0.4280.88版本左侧固定列会出现横向滚动条，所以这里通过此样式将滚动条隐藏*/
+.dg-chart-table .dg-chart-table-content .DTFC_LeftBodyLiner,
+.dg-chart-table .dg-chart-table-content .DTFC_RightBodyLiner{
+	overflow-x: hidden;
+}
 
 /*标签图表*/
 .dg-chart-label{
