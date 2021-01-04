@@ -51,7 +51,7 @@ Github：[https://github.com/datageartech/datagear](https://github.com/datageart
 
 ## 交流
 
-QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[1128360199](https://jq.qq.com/?_wv=1027&k=XkQ4ARMY)
+QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[1128360199（已满）](https://jq.qq.com/?_wv=1027&k=XkQ4ARMY)、[541252568](https://jq.qq.com/?_wv=1027&k=F7dwDVLO)
 
 留言板：[http://www.datagear.tech/messageboard](http://www.datagear.tech/messageboard/)
 
