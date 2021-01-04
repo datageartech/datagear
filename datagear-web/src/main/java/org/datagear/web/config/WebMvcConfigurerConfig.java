@@ -25,11 +25,13 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.ui.context.support.ResourceBundleThemeSource;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
@@ -74,8 +76,11 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
-		ThemeChangeInterceptor interceptor = new ThemeChangeInterceptor();
-		registry.addInterceptor(interceptor);
+		ThemeChangeInterceptor themeChangeInterceptor = new ThemeChangeInterceptor();
+		registry.addInterceptor(themeChangeInterceptor).addPathPatterns("/changeThemeData");
+
+		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
+		registry.addInterceptor(localeChangeInterceptor).addPathPatterns("/changeLocale");
 	}
 
 	@Override
@@ -128,6 +133,12 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 		settings.setProperty("date_format", "yyyy-MM-dd");
 		settings.setProperty("number_format", "#.##");
 
+		// 开启自动转义功能，并设置默认转义格式为HTML，页面不再需要每个地方都转义
+		// ${content?html}
+		// 可简写为
+		// ${content}
+		settings.setProperty("output_format", "HTMLOutputFormat");
+
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("writeJson", new WriteJsonTemplateDirectiveModel(this.coreConfig.objectMapperBuilder()));
 
@@ -156,9 +167,11 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 	}
 
 	@Bean("localeResolver")
-	public AcceptHeaderLocaleResolver localeResolver()
+	public LocaleResolver localeResolver()
 	{
-		AcceptHeaderLocaleResolver bean = new AcceptHeaderLocaleResolver();
+		CookieLocaleResolver bean = new CookieLocaleResolver();
+		bean.setCookieName("LOCALE");
+
 		return bean;
 	}
 

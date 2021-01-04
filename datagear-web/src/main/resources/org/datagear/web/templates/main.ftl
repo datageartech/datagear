@@ -2,13 +2,15 @@
 <#include "include/html_doctype.ftl">
 <#assign Global=statics['org.datagear.util.Global']>
 <#assign Themes=statics['org.datagear.web.util.Themes']>
+<#assign Role=statics['org.datagear.management.domain.Role']>
 <html>
 <head>
 <#include "include/html_head.ftl">
-${detectNewVersionScript}
+${detectNewVersionScript?no_esc}
 <title><@spring.message code='app.pageTitle' /></title>
 <#include "include/page_js_obj.ftl" >
 <#include "include/page_obj_tabs.ftl" >
+<#include "include/page_obj_opt_permission.ftl" >
 <#include "include/page_obj_data_permission.ftl" >
 <#include "include/page_obj_data_permission_ds_table.ftl" >
 <script type="text/javascript">
@@ -37,7 +39,7 @@ ${detectNewVersionScript}
 			
 	po.activeWorkTab = function(tabId, tabLabel, tabTitle, url, schema)
 	{
-		tabLabel = $.truncateIf(tabLabel, "..", 20);
+		tabLabel = $.truncateIf($.trim(tabLabel), "..", 20);
 		
 		var mainTabsNav = po.getTabsNav(po.mainTabs);
 		var tab = po.getTabsTabByTabId(po.mainTabs, mainTabsNav, tabId);
@@ -773,19 +775,53 @@ ${detectNewVersionScript}
 	
 	$(document).ready(function()
 	{
-		var westMinSize = po.element(".schema-panel-head").css("min-width");
-		
-		if(westMinSize)
+		//需要先初始化导航栏，以计算左侧布局宽度
+		po.element("#${pageId}-nav").tabs(
 		{
-			var pxIndex = westMinSize.indexOf("px");
+			event: "click",
+			active: false,
+			collapsible: true,
+			activate: function(event, ui)
+			{
+				var $this = $(this);
+				var newTab = $(ui.newTab);
+				var newPanel = $(ui.newPanel);
+				
+				if(newPanel.hasClass("schema-panel"))
+				{
+					var $element = po.element(".schema-panel-content");
+					
+					if(!$element.hasClass("jstree"))
+						po.initSchemaPanelContent($element);
+				}
+				else if(newPanel.hasClass("dataAnalysis-panel"))
+				{
+					po.initDataAnalysisPanelIfNot();
+				}
+				
+				var newTabIndex = newTab.index();
+				$.cookie("MAIN_NAV_ACTIVE_TAB_INDEX", newTabIndex, {expires : 365*5, path : "${contextPath}"});
+			}
+		});
+		
+		var panelMinWidth = po.element(".schema-panel-head").css("min-width");
+		if(panelMinWidth)
+		{
+			var pxIndex = panelMinWidth.indexOf("px");
 			if(pxIndex > -1)
-				westMinSize = westMinSize.substring(0, pxIndex);
+				panelMinWidth = panelMinWidth.substring(0, pxIndex);
 		}
+		panelMinWidth = parseInt(panelMinWidth);
 		
-		westMinSize = parseInt(westMinSize);
+		var mainNavTabsNav = po.element(".main-nav-tabs-nav", po.element("#${pageId}-nav"));
+		var navMinWidth = 0;
+		$("> li", mainNavTabsNav).each(function()
+		{
+			navMinWidth = navMinWidth + $(this).outerWidth(true) + 10;
+		});
 		
-		if(isNaN(westMinSize) || westMinSize < 245)
-			westMinSize = 245;
+		var westMinSize = Math.max(panelMinWidth, navMinWidth);
+		westMinSize = Math.max(westMinSize, 250);
 		
 		po.element(".main-page-content").layout(
 		{
@@ -839,7 +875,7 @@ ${detectNewVersionScript}
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/user/query", options);
+					po.open(contextPath+"/user/pagingQuery", options);
 				}
 				else if($item.hasClass("system-set-dataSetResDirectory-manage"))
 				{
@@ -851,7 +887,7 @@ ${detectNewVersionScript}
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/role/query", options);
+					po.open(contextPath+"/role/pagingQuery", options);
 				}
 				else if($item.hasClass("system-set-authorization-manage"))
 				{
@@ -883,6 +919,21 @@ ${detectNewVersionScript}
 							$(data[i].selector).attr(data[i].attr, data[i].value);
 					});
 				}
+				else if($item.hasClass("locale-item"))
+				{
+					po.confirm("<@spring.message code='main.changeLocaleConfirm' />",
+					{
+						confirm: function()
+						{
+							var locale = $item.attr("locale");
+							
+							$.getJSON(contextPath+"/changeLocale?locale="+locale, function()
+							{
+								window.location.href = contextPath;
+							});
+						}
+					});
+				}
 				else if($item.hasClass("about"))
 				{
 					po.open(contextPath+"/about", { width : "50%" });
@@ -899,34 +950,6 @@ ${detectNewVersionScript}
 				{
 					window.open("${Global.WEB_SITE}");
 				}
-			}
-		});
-		
-		po.element("#${pageId}-nav").tabs(
-		{
-			event: "click",
-			active: false,
-			collapsible: true,
-			activate: function(event, ui)
-			{
-				var $this = $(this);
-				var newTab = $(ui.newTab);
-				var newPanel = $(ui.newPanel);
-				
-				if(newPanel.hasClass("schema-panel"))
-				{
-					var $element = po.element(".schema-panel-content");
-					
-					if(!$element.hasClass("jstree"))
-						po.initSchemaPanelContent($element);
-				}
-				else if(newPanel.hasClass("dataAnalysis-panel"))
-				{
-					po.initDataAnalysisPanelIfNot();
-				}
-				
-				var newTabIndex = newTab.index();
-				$.cookie("MAIN_NAV_ACTIVE_TAB_INDEX", newTabIndex, {expires : 365*5, path : "${contextPath}"});
 			}
 		});
 		
@@ -1423,9 +1446,15 @@ ${detectNewVersionScript}
 					</#if>
 					<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeTheme' /></a>
 						<ul class="ui-widget-shadow">
-							<li class="theme-item" theme="${Themes.LIGHT}"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.light' /><span class="ui-widget ui-widget-content theme-sample theme-sample-light"></span></a></li>
-							<li class="theme-item" theme="${Themes.DARK}"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.dark' /><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span></a></li>
-							<li class="theme-item" theme="${Themes.GREEN}"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
+							<li class="theme-item" theme="${Themes.LIGHT}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-light"></span><@spring.message code='main.changeTheme.light' /></a></li>
+							<li class="theme-item" theme="${Themes.DARK}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span><@spring.message code='main.changeTheme.dark' /></a></li>
+							<li class="theme-item" theme="${Themes.GREEN}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span><@spring.message code='main.changeTheme.green' /></a></li>
+						</ul>
+					</li>
+					<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeLocale' /></a>
+						<ul class="ui-widget-shadow">
+							<li class="locale-item" locale="zh"><a href="javascript:void(0);"><@spring.message code='main.changeLocale.zh' /></a></li>
+							<li class="locale-item" locale="en"><a href="javascript:void(0);"><@spring.message code='main.changeLocale.en' /></a></li>
 						</ul>
 					</li>
 					<li><a href="javascript:void(0);"><@spring.message code='help' /><span class="new-version-tip"></span></a>
@@ -1443,7 +1472,7 @@ ${detectNewVersionScript}
 		</ul>
 		<#if !currentUser.anonymous>
 		<div class="user-name">
-		${currentUser.nameLabel?html}
+		${currentUser.nameLabel}
 		</div>
 		<a class="link" href="${contextPath}/logout"><@spring.message code='main.logout' /></a>
 		<#else>
@@ -1457,12 +1486,12 @@ ${detectNewVersionScript}
 <div class="main-page-content">
 	<div class="ui-layout-west">
 		<div id="${pageId}-nav" class="main-nav">
-			<ul>
+			<ul class="main-nav-tabs-nav">
 				<li><a href="#${pageId}-nav-dataSource"><@spring.message code='main.dataSource' /></a></li>
 				<li><a href="#${pageId}-nav-dataAnalysis"><@spring.message code='main.dataAnalysis' /></a></li>
 			</ul>
 			<div id="${pageId}-nav-dataSource" class="ui-widget ui-widget-content schema-panel">
-				<div class="schema-panel-head">
+				<div class="schema-panel-head" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 					<div class="schema-panel-form ui-widget ui-widget-content ui-corner-all">
 						<form id="schemaSearchForm" action="javascript:void(0);">
 							<div id="schemaSearchSwitch" class="schema-search-switch ui-button-icon-only"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
@@ -1471,16 +1500,16 @@ ${detectNewVersionScript}
 							<input name="pageSize" type="hidden" value="100" />
 						</form>
 					</div>
-					<div class="schema-panel-operation">
-						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+					<div class="schema-panel-operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
+						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" visible-any-role="${Role.ROLE_DATA_ADMIN}" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 						<ul id="schemaOperationMenu" class="lightweight-menu">
 							<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
 								<ul class="ui-widget-shadow">
-									<li class="schema-operation-edit"><a href="javascript:void(0);"><@spring.message code='edit' /></a></li>
-									<li class="schema-operation-delete"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
+									<li class="schema-operation-edit" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='edit' /></a></li>
+									<li class="schema-operation-delete" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
 									<li class="schema-operation-view"><a href="javascript:void(0);"><@spring.message code='view' /></a></li>
 									<li class="schema-operation-refresh" title="<@spring.message code='main.schemaOperationMenuRefreshComment' />"><a href="javascript:void(0);"><@spring.message code='refresh' /></a></li>
-									<li class="schema-operation-authorize"><a href="javascript:void(0);"><@spring.message code='authorize' /></a></li>
+									<li class="schema-operation-authorize" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='authorize' /></a></li>
 									<li class="ui-widget-header"></li>
 									<li class="schema-operation-reload" title="<@spring.message code='main.schemaOperationMenuReloadComment' />"><a href="javascript:void(0);"><@spring.message code='reload' /></a></li>
 									<li class="ui-widget-header"></li>
@@ -1493,11 +1522,11 @@ ${detectNewVersionScript}
 						</ul>
 					</div>
 				</div>
-				<div class="schema-panel-content">
+				<div class="schema-panel-content" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 				</div>
 			</div>
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
-				<div class="dataAnalysis-panel-head">
+				<div class="dataAnalysis-panel-head" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 					<div class="analysis-project-current ui-widget ui-widget-content ui-corner-all">
 						<div class="analysis-project-current-value" title="<@spring.message code='main.analysisProject.currentValue' />"></div>
 						<div class="analysis-project-current-reset ui-button-icon-only" title="<@spring.message code='main.analysisProject.currentValue.clear' />">
@@ -1505,7 +1534,7 @@ ${detectNewVersionScript}
 						</div>
 					</div>
 					<div class="analysis-project-operation">
-						<div class="analysis-project-operation-group">
+						<div class="analysis-project-operation-group" show-any-role="${Role.ROLE_DATA_ADMIN}">
 							<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title="<@spring.message code='main.analysisProject.add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 							<button id="manageAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only manage-analysis-project-button" title="<@spring.message code='main.analysisProject.manage' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='manage' /></button>
 						</div>
@@ -1515,13 +1544,13 @@ ${detectNewVersionScript}
 						<div class="analysis-project-list-panel-content minor-dataTable pagination-light"></div>
 					</div>
 				</div>
-				<div class="dataAnalysis-panel-content">
+				<div class="dataAnalysis-panel-content" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 					<ul>
 						<li class="item-dataset" tabId="dataAnalysis-dataSet">
 							<a href="${contextPath}/analysis/dataSet/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dataSet' />
 								<#if currentUser.anonymous>
-								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />"></span>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
 								</#if>
 							</a>
 						</li>
@@ -1529,7 +1558,7 @@ ${detectNewVersionScript}
 							<a href="${contextPath}/analysis/chart/pagingQuery">
 								<@spring.message code='main.dataAnalysis.chart' />
 								<#if currentUser.anonymous>
-								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />"></span>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
 								</#if>
 							</a>
 						</li>
@@ -1537,7 +1566,7 @@ ${detectNewVersionScript}
 							<a href="${contextPath}/analysis/dashboard/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dashboard' />
 								<#if currentUser.anonymous>
-								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />"></span>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
 								</#if>
 							</a>
 						</li>
@@ -1567,5 +1596,12 @@ ${detectNewVersionScript}
 		</div>
 	</div>
 </div>
+<script type="text/javascript">
+(function(po)
+{
+	po.handlePermissionElement();
+})
+(${pageId});
+</script>
 </body>
 </html>

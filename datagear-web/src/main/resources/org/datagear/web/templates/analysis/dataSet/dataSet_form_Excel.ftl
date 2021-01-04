@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''?html}" class="ui-widget ui-widget-content" style="width:41%;" />
+						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''}" class="ui-widget ui-widget-content" style="width:41%;" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -48,7 +48,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''?html}" class="ui-widget ui-widget-content" />
+						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" />
 						<span class="nameRow-radios">
 							<label for="${pageId}-nameRow_0">
 								<@spring.message code='dataSet.excel.nameRow.none' />
@@ -60,7 +60,7 @@ readonly 是否只读操作，允许为null
 				   			<input type="radio" id="${pageId}-nameRow_1" name="nameRowRadio" value="1"  />
 						</span>
 						&nbsp;
-						<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''?html}" class="ui-widget ui-widget-content" style="width:4.1em;" />
+						<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" style="width:4.1em;" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -70,7 +70,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<input type="text" name="dataRowExp" value="${(dataSet.dataRowExp)!''?html}" class="ui-widget ui-widget-content" />
+						<input type="text" name="dataRowExp" value="${(dataSet.dataRowExp)!''}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -80,7 +80,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<input type="text" name="dataColumnExp" value="${(dataSet.dataColumnExp)!''?html}" class="ui-widget ui-widget-content" />
+						<input type="text" name="dataColumnExp" value="${(dataSet.dataColumnExp)!''}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -119,7 +119,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
-	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
+	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string}", "${((dataSet.analysisProject.name)!'')?js_string}");
 	po.element(".nameRow-radios").controlgroup();
 	po.element("#${pageId}-forceXls").buttonset();
 	po.element("#${pageId}-forceXls-${((dataSet.forceXls)!true)?string('true', 'false')}").click();
@@ -130,7 +130,7 @@ readonly 是否只读操作，允许为null
 	po.initPreviewParamValuePanel();
 	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
 
-	po.initDataSetFileInput(po.url("uploadFile"), "${(dataSet.fileSourceType)!''?js_string}", ${isAdd?string("true", "false")});
+	po.initDataSetFileInput(po.url("uploadFile"), "${((dataSet.fileSourceType)!'')?js_string}", ${isAdd?string("true", "false")});
 	
 	po.updatePreviewOptionsData = function()
 	{

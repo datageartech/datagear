@@ -9,15 +9,6 @@ APP_MAIN="${productNameJar}"
 
 APP_PID=0
 
-echo "+-----------------------------------------+"
-echo "|                                         |"
-echo "|            DataGear - v${project.version}            |"
-echo "|        http://www.datagear.tech         |"
-echo "|                                         |"
-echo "|                  (^_^)                  |"
-echo "+-----------------------------------------+"
-echo ""
-
 if [ -n "$JAVA_HOME" ]; then
 	echo "$ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
 else

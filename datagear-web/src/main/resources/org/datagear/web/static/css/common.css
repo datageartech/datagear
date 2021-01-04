@@ -155,6 +155,7 @@ form .form-content .form-item .form-item-value .binary-label-input{/*二进制�
 }
 form .form-content .form-item label.error{
 	color: red;
+	font-size: 0.9em;
 	padding-left: 0.2em;
 	white-space: nowrap;
 }
@@ -234,6 +235,33 @@ form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch
 form .form-foot .ui-button{
 	margin-left: .5em;
 	margin-right: .5em;
+}
+form.display-block .form-content .form-item{
+	position: relative;
+	padding-bottom: 1.4em;
+}
+form.display-block .form-content .form-item .form-item-label{
+	display: block;
+	width: auto;
+	padding-bottom: 0.2em;
+}
+form.display-block .form-content .form-item .form-item-value{
+	display: block;
+	width: auto;
+	margin-left: 0;
+	padding-left: 0;
+}
+form.display-block .form-content .form-item .form-item-value input[type=text],
+form.display-block .form-content .form-item .form-item-value input[type=password],
+form.display-block .form-content .form-item .form-item-value textarea,
+form.display-block .form-content .form-item .form-item-value .input{
+	width: 95%;
+}
+form.display-block .form-content .form-item .form-item-value label.error{
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	padding-left: 0 !important;
 }
 
 /*轻型面板*/
@@ -923,7 +951,7 @@ table.dataTable tbody tr td select{
 	width: 16px;
 	height: 16px;
 	vertical-align: middle;
-	margin-left: 0.5em;
+	margin-right: 0.5em;
 }
 .main-page-head .toolbar #systemSetMenu .theme-sample-light{
 	background: #FFFFFF;
@@ -1279,6 +1307,12 @@ table.dataTable tbody tr td select{
     overflow: auto;
 }
 
+/*登录表单页*/
+.page-form-login{}
+.page-form-login form .form-foot.login-form-ext{
+	padding-top: 2em;
+}
+
 /*驱动信息管理表单页*/
 .page-form-driverEntity{
 }
@@ -1491,9 +1525,9 @@ table.dataTable tbody tr td select{
 	width: 40%;
 }
 .page-grid .head .operation{
-	display: inline-block;
+	display: inline-block; 
 	float: right;
-	width: 59%;
+	width: 60%;
 	text-align: right;
 }
 .page-grid .content{
@@ -2067,12 +2101,6 @@ table.dataTable tbody tr td select{
 	padding-top: 0.5em;
 	padding-bottom: 0.5em;
 }
-.page-dataexchange-type form .form-content .form-item .form-item-label{
-	width: 30%;
-}
-.page-dataexchange-type form .form-content .form-item .form-item-value{
-	width: 65%;
-}
 .page-dataexchange-type form .form-content .form-item .input-desc{
 	margin-left: 1em;
 }
@@ -2244,16 +2272,27 @@ table.dataTable tbody tr td select{
 	left: 0.1em;
 	bottom: 0;
 	width: 25%;
+	overflow: auto;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+.page-grid-chartPlugin-select .chart-plugin-nav-content{
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 2em;
+	width: 100%;
 	padding: 0.5em 0.5em;
 	overflow: auto;
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
 }
-.page-grid-chartPlugin-select .chart-plugin-nav .ui-menu{
+.page-grid-chartPlugin-select .chart-plugin-nav-content .ui-menu{
 	border: none;
 }
-.page-grid-chartPlugin-select .chart-plugin-nav .ui-menu li .ui-menu-item-wrapper {
+.page-grid-chartPlugin-select .chart-plugin-nav-content .ui-menu li .ui-menu-item-wrapper {
     display: block;
     padding-top: 0.3em;
     padding-bottom: 0.3em;
@@ -2261,6 +2300,20 @@ table.dataTable tbody tr td select{
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
+}
+.page-grid-chartPlugin-select .chart-plugin-nav-foot{
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	height: 2em;
+	width: 100%;
+	padding: 0.3em 0.5em;
+	padding-right: 1em;
+	overflow: auto;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    text-align: right;
 }
 .page-grid-chartPlugin-select .chart-plugin-content{
 	position: absolute;
@@ -2524,6 +2577,21 @@ table.dataTable tbody tr td select{
 	min-width: 6em;
 }
 
+.page-grid-chart{}
+.page-grid-chart td .plugin-icon{
+	display: inline-block;
+	width: 2em;
+	height: 2em;
+	vertical-align: middle;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+.page-grid-chart td .plugin-name{
+	display: inline-block;
+	vertical-align: middle;
+	margin-left: 0.41em;
+}
+
 .page-form-chart .chart-plugin{
 	display: inline-block;
 	height: 70px;
@@ -2748,7 +2816,8 @@ table.dataTable tbody tr td select{
 }
 .page-grid-chartPlugin a.plugin-icon{
 	display: inline-block;
-	width: 20px;
+	width: 2em;
+	height: 2em;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 }

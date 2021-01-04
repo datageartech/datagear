@@ -4,7 +4,10 @@
 
 package org.datagear.management.domain;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 用户实体。
@@ -39,6 +42,9 @@ public class User extends AbstractStringIdEntity
 
 	/** 此模式的创建时间 */
 	private Date createTime = new Date();
+
+	/** 角色集 */
+	private Set<Role> roles = Collections.emptySet();
 
 	public User()
 	{
@@ -127,6 +133,16 @@ public class User extends AbstractStringIdEntity
 		this.createTime = createTime;
 	}
 
+	public Set<Role> getRoles()
+	{
+		return roles;
+	}
+
+	public void setRoles(Set<Role> roles)
+	{
+		this.roles = roles;
+	}
+
 	/**
 	 * 获取账号名称标签。
 	 * 
@@ -188,6 +204,9 @@ public class User extends AbstractStringIdEntity
 		re.setAdmin(user.isAdmin());
 		re.setAnonymous(user.isAnonymous());
 		re.setCreateTime(user.getCreateTime());
+
+		if (user.getRoles() != null)
+			re.setRoles(new HashSet<>(user.getRoles()));
 
 		return re;
 	}

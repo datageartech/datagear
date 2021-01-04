@@ -1,5 +1,6 @@
 <#include "../../include/import_global.ftl">
 <#include "../../include/html_doctype.ftl">
+<#assign Role=statics['org.datagear.management.domain.Role']>
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
@@ -19,30 +20,37 @@ boolean readonly 是否只读操作，默认为false
 <div class="fill-parent">
 </#if>
 <#include "../../include/page_js_obj.ftl">
+<#include "../../include/page_obj_opt_permission.ftl" >
 <div id="${pageId}" class="page-grid page-grid-chart">
 	<div class="head">
 		<div class="search">
 			<#include "../../include/page_obj_searchform_data_filter.ftl">
 			<#include "../include/analysisProjectAware_grid_search.ftl">
 		</div>
-		<div class="operation">
+		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
 			</#if>
 			<#if readonly>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
-				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<input name="addButton" type="button" value="<@spring.message code='add' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				<#if !selectOperation>
-				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
-				<input name="showButton" type="button" value="<@spring.message code='chart.show' />" />
+				<input name="editButton" type="button" value="<@spring.message code='edit' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<div class="showGroup">
+					<input name="showButton" type="button" value="<@spring.message code='chart.show' />" />
+					<select class="showGroupSelect">
+						<option value="copyShowURL"><@spring.message code='copyShowURL' /></option>
+					</select>
+					<button type="button" class="copyShowURLDelegation" style="display:none;">&nbsp;</button>
+				</div>
 				<#if !(currentUser.anonymous)>
-				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
+				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				</#if>
 				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<#if !selectOperation>
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				</#if>
 			</#if>
 		</div>
@@ -74,6 +82,11 @@ boolean readonly 是否只读操作，默认为false
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/chart/" + action;
+	};
+	
+	po.buildShowURL = function(id)
+	{
+		return po.url("show/"+id+"/");
 	};
 
 	po.element("input[name=addButton]").click(function()
@@ -133,14 +146,58 @@ boolean readonly 是否只读操作，默认为false
 			});
 		});
 	});
-	
+
 	po.element("input[name=showButton]").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
-			window.open(po.url("show/"+row.id+"/"), row.id);
+			window.open(po.buildShowURL(row.id), row.id);
 		});
 	});
+	
+	po.element(".showGroupSelect").selectmenu(
+	{
+		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
+		classes:
+		{
+	          "ui-selectmenu-button": "ui-button-icon-only",
+	          "ui-selectmenu-menu": "ui-widget-shadow ui-widget ui-widget-content"
+	    },
+		select: function(event, ui)
+    	{
+    		var action = $(ui.item).attr("value");
+    		
+    		if(action == "copyShowURL")
+    		{
+    			po._currentShowURL = "";
+    			po.executeOnSelect(function(row)
+ 				{
+    				po._currentShowURL = "${serverURL}" + po.buildShowURL(row.id);
+    				po.element(".copyShowURLDelegation").click();
+ 				});
+    		}
+    	}
+	});
+	po.element(".showGroup").controlgroup();
+	
+	var copyShowURLButton = po.element(".copyShowURLDelegation");
+	if(copyShowURLButton.length > 0)
+	{
+		var clipboard = new ClipboardJS(copyShowURLButton[0],
+		{
+			//需要设置container，不然在对话框中打开页面后复制不起作用
+			container: po.element()[0],
+			text: function(trigger)
+			{
+				return (po._currentShowURL || "");
+			}
+		});
+		clipboard.on('success', function(e)
+		{
+			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
+		});
+	}
 	
 	po.element("input[name=deleteButton]").click(
 	function()
@@ -180,10 +237,36 @@ boolean readonly 是否只读操作，默认为false
 		}
 	};
 	
+	//使用ID作为列数据，确保排序可用
+	var chartPluginColumnData = "htmlChartPlugin.id";
+	var chartPluginColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", chartPluginColumnData);
+	chartPluginColumn.render = function(data, type, row)
+	{
+		data = row.htmlChartPlugin;
+		
+		var content = (data.nameLabel ? data.nameLabel.value : data.id);
+		if(!content)
+			content = data.id;
+		
+		if(type == "display")
+		{
+			content = $.truncateIf(content);
+			content = $.escapeHtml(content);
+			
+			if(data.iconUrl)
+			{
+				content = "<div class='plugin-icon' style='background-image:url(${contextPath}"+$.escapeHtml(data.iconUrl)+")'></div>"
+							+ "<div class='plugin-name'>"+content+"</div>";
+			}
+		}
+		
+		return content;
+	};
+	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='id' />"), "id"),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.name' />"), "name"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", "chartPluginName"),
+		chartPluginColumn,
 		updateIntervalColumn,
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='analysisProject.ownerAnalysisProject' />"), "analysisProject.name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createUser' />", "createUser.realName"),
@@ -196,6 +279,7 @@ boolean readonly 是否只读操作，默认为false
 	tableSettings.order = [[$.getDataTableColumn(tableSettings, "createTime"), "desc"]];
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
+	po.handlePermissionElement();
 })
 (${pageId});
 </script>

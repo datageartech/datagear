@@ -373,8 +373,8 @@
 	};
 	
 	/**
-	 * 初始化图表设置项。
-	 * 此方法依次从<body>元素、图表元素的"dg-chart-options"属性读取、合并图表设置项。
+	 * 初始化图表选项。
+	 * 此方法依次从<body>元素、图表元素的"dg-chart-options"属性读取、合并图表选项。
 	 */
 	chartBase._initOptions = function()
 	{
@@ -537,10 +537,13 @@
 	};
 	
 	/**
-	 * 获取/设置初始图表设置项。
-	 * 图表设置项格式为：{ ... }
+	 * 获取/设置初始图表选项。
+	 * 图表选项格式为：{ ... }
 	 * 
-	 * @param options 可选，要设置的图表设置项，没有则执行获取操作
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应使用此函数获取并应用图表选项，以支持“dg-chart-options”特性。
+	 * 
+	 * @param options 可选，要设置的图表选项，没有则执行获取操作
 	 */
 	chartBase.options = function(options)
 	{
@@ -551,8 +554,30 @@
 	};
 	
 	/**
+	 * 获取/设置图表更新时的图表选项。
+	 * 图表选项格式为： { ... }
+	 * 
+	 * 当希望根据图表更新数据动态自定义图表选项时，可以在图表监听器的onUpdate函数中调用此函数设置更新图表选项。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应使用此函数获取并应用更新图表选项（在其update函数中），以支持此特性。
+	 * 
+	 * @param options 可选，要设置的图表选项，没有则执行获取操作
+	 */
+	chartBase.optionsUpdate = function(options)
+	{
+		if(options === undefined)
+			return this.extValue("_optionsUpdate");
+		else
+			this.extValue("_optionsUpdate", options);
+	};
+	
+	/**
 	 * 获取/设置初始图表主题。
-	 * 图表主题格式参考：org.datagear.analysis.ChartTheme
+	 * 图表主题格式参考：org.datagear.analysis.ChartTheme。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应使用此函数获取并应用图表主题，以支持“dg-chart-theme”特性。
 	 * 
 	 * @param theme 可选，要设置的图表主题，没有则执行获取操作
 	 */
@@ -592,6 +617,9 @@
 	 * 获取/设置初始图表地图名。
 	 * 此方法用于为地图类图表提供支持，如果不是地图类图表，则不必设置此项。
 	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应使用此函数获取并应用图表地图，以支持“dg-chart-map”特性。
+	 * 
 	 * @param map 可选，要设置的地图名，没有则执行获取操作
 	 */
 	chartBase.map = function(map)
@@ -605,6 +633,9 @@
 	/**
 	 * 获取/设置初始图表的echarts主题名。
 	 * 此方法用于为echarts图表提供支持，如果不是echarts图表，则不必设置此项。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应使用此函数获取并应用echarts主题，以支持“dg-echarts-theme”特性。
 	 * 
 	 * @param themeName 可选，要设置的且已注册的echarts主题名，没有则执行获取操作
 	 */
@@ -631,6 +662,9 @@
 	
 	/**
 	 * 获取/设置初始图表事件处理函数数组。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
 	 * 
 	 * @param eventHandlers 可选，要设置的初始事件处理函数数组，没有则执行获取操作。数组元素格式为：
 	 * 						{ eventType: "...", eventHandler: function(chartEvent){ ... } }
@@ -720,6 +754,8 @@
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
 			return false;
 		
+		this.extValue("_updateResults", results);
+		
 		this.statusUpdating(true);
 		
 		var doUpdate = true;
@@ -730,8 +766,6 @@
 		
 		if(doUpdate != false)
 		{
-			this.extValue("_updateResults", results);
-			
 			var async = this.isAsyncUpdate(results);
 			
 			this.doUpdate(results);
@@ -768,6 +802,9 @@
 	
 	/**
 	 * 重新调整图表尺寸。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现resize函数，以支持此特性。
 	 */
 	chartBase.resize = function()
 	{
@@ -791,6 +828,9 @@
 	
 	/**
 	 * 销毁图表，释放图表占用的资源、恢复图表HTML元素初值。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现destroy函数，以支持此特性。
 	 */
 	chartBase.destroy = function()
 	{
@@ -1066,6 +1106,9 @@
 	/**
 	 * 绑定"click"事件处理函数。
 	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onClick = function(handler)
@@ -1075,6 +1118,9 @@
 	
 	/**
 	 * 绑定"dblclick"事件处理函数。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -1086,6 +1132,9 @@
 	/**
 	 * 绑定"mousedown"事件处理函数。
 	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onMousedown = function(handler)
@@ -1095,6 +1144,9 @@
 	
 	/**
 	 * 绑定"mouseup"事件处理函数。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -1106,6 +1158,9 @@
 	/**
 	 * 绑定"mouseover"事件处理函数。
 	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onMouseover = function(handler)
@@ -1116,6 +1171,9 @@
 	/**
 	 * 绑定"mouseout"事件处理函数。
 	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onMouseout = function(handler)
@@ -1125,6 +1183,9 @@
 	
 	/**
 	 * 绑定事件处理函数。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
 	 * 
 	 * @param eventType 事件类型：click、dblclick、mousedown、mouseup、mouseover、mouseout
 	 * @param handler 事件处理函数：function(chartEvent){ ... }
@@ -1148,6 +1209,9 @@
 	/**
 	 * 解绑事件处理函数。
 	 * 注意：此函数在图表渲染完成后才可调用。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现off函数，以支持此特性。
 	 * 
 	 * @param eventType 事件类型：click、dblclick、mousedown、mouseup、mouseover、mouseout
 	 * @param handler 可选，解绑的事件处理函数，不设置则解绑所有此事件类型的处理函数
@@ -1582,7 +1646,7 @@
 		if(count != null && count < getCount)
 			getCount = count;
 		
-		if(properties.length > 0)
+		if($.isArray(properties))
 		{
 			for(var i=row; i< getCount; i++)
 			{
@@ -1643,7 +1707,7 @@
 		if(count != null && count < getCount)
 			getCount = count;
 		
-		if(properties.length > 0)
+		if($.isArray(properties))
 		{
 			for(var i=0; i<properties.length; i++)
 			{
@@ -1704,7 +1768,7 @@
 		
 		nameProperty = (nameProperty.name || nameProperty);
 		
-		if(valueProperty.length)
+		if($.isArray(valueProperty))
 		{
 			for(var i=row; i< getCount; i++)
 			{
@@ -1780,6 +1844,7 @@
 	
 	/**
 	 * Echarts图表支持函数：初始化图表的Echarts对象。
+	 * 此方法会自动应用“dg-chart-theme”、“dg-echarts-theme”。
 	 * 
 	 * @param options echarts设置项
 	 * @return echarts实例对象
@@ -2243,6 +2308,30 @@
 		}
 		
 		return olds;
+	};
+	
+	/**
+	 * 获取样式集对象的CSS样式文本。
+	 * 
+	 * @param stylesObj 样式对象，格式为：{ color: "...", backgroundColor: "...", fontSize: "...", ...  }，不合法的项将被忽略
+	 * @return CSS样式文本，格式为："color: red; background-color: red; font-size: 1px;"
+	 */
+	chartFactory.stylesObjToCssText = function(stylesObj)
+	{
+		var elementId = (chartFactory._stylesObjToCssTextElementId
+				|| (chartFactory._stylesObjToCssTextElementId = chartFactory.nextElementId()));
+		
+		var element = $("#" + elementId);
+		if(element.length == 0)
+		{
+			var parent = $("<div style='display:none' />").appendTo(document.body);
+			element = $("<div />").attr("id", elementId).appendTo(parent);
+		}
+		
+		element.attr("style", "");
+		chartFactory.setStyles(element, stylesObj);
+		
+		return (element.attr("style") || "");
 	};
 	
 	/**

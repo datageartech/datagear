@@ -19,13 +19,13 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="${contextPath}/analysis/chart/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(chart.id)!''?html}" />
+			<input type="hidden" name="id" value="${(chart.id)!''}" />
 			<div class="form-item form-item-analysisProjectAware">
 				<div class="form-item-label">
 					<label><@spring.message code='chart.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(chart.name)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(chart.name)!''}" class="ui-widget ui-widget-content" />
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='chart.htmlChartPlugin' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="htmlChartPlugin.id" class="ui-widget ui-widget-content" value="${(chart.htmlChartPlugin.id)!''?html}" style="display:none" />
+					<input type="text" name="htmlChartPlugin.id" class="ui-widget ui-widget-content" value="${(chart.htmlChartPlugin.id)!''}" style="display:none" />
 					<div class="chart-plugin input ui-widget ui-widget-content"></div>
 					<#if !readonly>
 					<button class="selectChartPluginButton" type="button"><@spring.message code='select' /></button>
@@ -89,7 +89,7 @@ readonly 是否只读操作，允许为null
 					</div>
 					&nbsp;
 					<span class="updateInterval-wrapper">
-						<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'?html}" class="ui-widget ui-widget-content" style="width:7em;" />
+						<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'}" class="ui-widget ui-widget-content" style="width:7em;" />
 						<span><@spring.message code='chart.updateIntervalUnit' /></span>
 					</span>
 				</div>
@@ -113,7 +113,7 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	po.initAnalysisProject("${(chart.analysisProject.id)!''?js_string}", "${(chart.analysisProject.name)!''?js_string}");
+	po.initAnalysisProject("${((chart.analysisProject.id)!'')?js_string}", "${((chart.analysisProject.name)!'')?js_string}");
 	po.element(".form-item-value-chartDataSet").height($(window).height()/5*2);
 	
 	po.element("input[name='updateIntervalRadio']").checkboxradio({icon:false});

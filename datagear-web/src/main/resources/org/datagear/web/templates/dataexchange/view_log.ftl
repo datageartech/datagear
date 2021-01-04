@@ -10,7 +10,7 @@ Schema schema 数据库，不允许为null
 	<#include "../include/html_title_app_name.ftl">
 	<@spring.message code='dataExchange.viewLog' />
 	<@spring.message code='bracketLeft' />
-	${schema.title?html}
+	${schema.title}
 	<@spring.message code='bracketRight' />
 </title>
 </head>

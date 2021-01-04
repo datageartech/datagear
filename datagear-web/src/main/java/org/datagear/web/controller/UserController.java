@@ -4,19 +4,19 @@
 
 package org.datagear.web.controller;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
+import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -41,6 +41,9 @@ public class UserController extends AbstractController
 	@Autowired
 	private SchemaService schemaService;
 
+	/** 添加用户默认角色 */
+	private String defaultRoleAdd = "";
+
 	public UserController()
 	{
 		super();
@@ -64,6 +67,17 @@ public class UserController extends AbstractController
 	public void setSchemaService(SchemaService schemaService)
 	{
 		this.schemaService = schemaService;
+	}
+
+	public String getDefaultRoleAdd()
+	{
+		return defaultRoleAdd;
+	}
+
+	@Value("${defaultRole.add}")
+	public void setDefaultRoleAdd(String defaultRoleAdd)
+	{
+		this.defaultRoleAdd = defaultRoleAdd;
 	}
 
 	@RequestMapping("/add")
@@ -96,9 +110,9 @@ public class UserController extends AbstractController
 					buildMessageCode("userNameExists"), user.getName());
 
 		user.setId(IDUtil.randomIdOnTime20());
-
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
+		user.setRoles(RegisterController.buildUserRolesForSave(this.defaultRoleAdd));
 
 		this.userService.add(user);
 
@@ -171,11 +185,11 @@ public class UserController extends AbstractController
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/query")
-	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	@RequestMapping("/pagingQuery")
+	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.manageUser");
-
 		return "/user/user_grid";
 	}
 
@@ -189,15 +203,15 @@ public class UserController extends AbstractController
 		return "/user/user_grid";
 	}
 
-	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<User> queryData(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
+	public PagingData<User> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
+			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			throws Exception
 	{
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
-
-		List<User> users = this.userService.query(pagingQuery);
-		return users;
+		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		PagingData<User> pagingData = this.userService.pagingQuery(pagingQuery);
+		return pagingData;
 	}
 
 	@RequestMapping("/personalSet")

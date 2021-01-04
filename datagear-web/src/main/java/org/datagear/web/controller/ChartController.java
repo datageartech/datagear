@@ -164,6 +164,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (chart == null)
 			throw new RecordNotFoundException();
 
+		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
+
 		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
 				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
 				: null);
@@ -221,6 +223,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (chart == null)
 			throw new RecordNotFoundException();
 
+		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
+
 		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
 				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
 				: null);
@@ -257,6 +261,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		User user = WebUtils.getUser(request, response);
 		model.addAttribute("currentUser", user);
 
+		model.addAttribute("serverURL", WebUtils.getServerURL(request));
+
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.manageChart");
 
 		return "/analysis/chart/chart_grid";
@@ -265,6 +271,11 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
+		User user = WebUtils.getUser(request, response);
+		model.addAttribute("currentUser", user);
+
+		model.addAttribute("serverURL", WebUtils.getServerURL(request));
+
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.selectChart");
 		model.addAttribute(KEY_SELECT_OPERATION, true);
 		setIsMultipleSelectAttribute(request, model);
@@ -283,7 +294,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
-		setChartPluginNames(request, pagingData.getItems());
+		setChartPluginViewInfo(request, pagingData.getItems());
 
 		return pagingData;
 	}
@@ -431,15 +442,18 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		return webContext;
 	}
 
-	protected void setChartPluginNames(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
+	protected void setChartPluginViewInfo(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
 	{
 		if (entities == null)
 			return;
 
 		Locale locale = WebUtils.getLocale(request);
+		String themeName = resolveChartPluginIconThemeName(request);
 
 		for (HtmlChartWidgetEntity entity : entities)
-			entity.updateChartPluginName(locale);
+		{
+			entity.setPlugin(toHtmlChartPluginVO(entity.getPlugin(), themeName, locale));
+		}
 	}
 
 	protected void inflateHtmlChartWidgetEntity(HtmlChartWidgetEntity entity, HttpServletRequest request)

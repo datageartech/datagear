@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,10 +22,19 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public class AuthUser implements UserDetails
 {
+	/**
+	 * 角色：系统管理员。
+	 */
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
+	/**
+	 * 角色：登录用户。
+	 */
 	public static final String ROLE_USER = "ROLE_USER";
 
+	/**
+	 * 角色：匿名用户。
+	 */
 	public static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
 
 	private static final long serialVersionUID = 1L;
@@ -37,16 +47,32 @@ public class AuthUser implements UserDetails
 		super();
 		this.user = user;
 
-		this.authorities = new HashSet<GrantedAuthority>();
+		this.authorities = new HashSet<>();
+
+		Set<Role> roles = user.getRoles();
+		if (roles != null && !roles.isEmpty())
+		{
+			for (Role role : roles)
+			{
+				// 未启用的角色不应加入
+				if (!role.isEnabled())
+					continue;
+
+				this.authorities.add(new SimpleGrantedAuthority(role.getId()));
+			}
+		}
 
 		if (user.isAnonymous())
+		{
 			this.authorities.add(new SimpleGrantedAuthority(ROLE_ANONYMOUS));
+		}
+		else if (user.isAdmin())
+		{
+			this.authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
+		}
 		else
 		{
 			this.authorities.add(new SimpleGrantedAuthority(ROLE_USER));
-
-			if (user.isAdmin())
-				this.authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
 		}
 	}
 

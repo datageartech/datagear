@@ -93,6 +93,14 @@
 			chart.extValue("chartOptionSeriesTemplate", (options.series || []));
 	};
 	
+	//将chart.optionsUpdate()合并至options
+	chartSupport.mergeUpdateOptions = function(options, chart)
+	{
+		var ou = chart.optionsUpdate();
+		if(ou)
+			$.extend(options, ou);
+	};
+	
 	/**
 	 * 指定数据集属性数据是否字符串类型。
 	 */
@@ -643,6 +651,7 @@
 		var options = { legend: {data: legendData}, series: series };
 		if(isCategory)
 			options.xAxis = {data: xAxisData};
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -808,6 +817,7 @@
 			else
 				options.xAxis = {data: axisData};
 		}
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -844,6 +854,176 @@
 		
 		data[signNameMap.name] = (horizontal ? echartsData[1] : echartsData[0]);
 		data[signNameMap.value] = (horizontal ? echartsData[0] : echartsData[1]);
+		
+		chart.eventData(chartEvent, data);
+		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
+	};
+
+	//极坐标柱状图
+	
+	chartSupport.barPolarRender = function(chart, nameSign, valueSign, options)
+	{
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		
+		var chartDataSet = chart.chartDataSetFirst();
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		//是否堆叠
+		var stack = (options && options.dgStack);
+		//坐标类型：radius（径向）、angle（角度）
+		var axisType = (options && options.dgAxisType ? options.dgAxisType : "radius");
+		
+		var defaultOptions =
+		{
+			dgStack: stack,
+			dgAxisType: axisType,
+			
+			title: { text: chart.nameNonNull() },
+			angleAxis: {},
+			radiusAxis: {},
+			polar: { radius: "60%" },
+			tooltip: { trigger: "item" },
+			legend:{ data: [] },
+			series:
+			[{
+				name: "",
+				type: "bar",
+				label: { show: stack },
+				coordinateSystem: 'polar',
+				data: []
+			}]
+		};
+		
+		if(axisType == "angle")
+		{
+			defaultOptions.angleAxis =
+			{
+		        type: 'category',
+		        data: []
+			};
+		}
+		else
+		{
+			defaultOptions.radiusAxis =
+			{
+				name: chart.dataSetPropertyLabel(np),
+				nameGap: 20,
+		        type: 'category',
+		        data: [],
+		        z: 10
+			};
+		}
+		
+		options = $.extend(true,
+		defaultOptions,
+		options,
+		chart.options());
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options);
+	};
+	
+	chartSupport.barPolarUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var initOptions= chartSupport.initOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+		var stack = initOptions.dgStack;
+		var axisType = initOptions.dgAxisType;
+		//是否按数据集分组堆叠
+		var stackGroup = initOptions.stackGroup == undefined ? true : initOptions.stackGroup;
+		var isCategory = true;
+		
+		chartSupport.clearChartOriginalDataIndexForRange(chart);
+		
+		var legendData = [];
+		var axisData = [];
+		var series = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var result = chart.resultAt(results, i);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				var legendName = dataSetName;
+				if(chartDataSets.length > 1 && vps.length > 1)
+					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vps[j]);
+				else if(vps.length > 1)
+					legendName = chart.dataSetPropertyLabel(vps[j]);
+				
+				var data = chart.resultNameValueObjects(result, np, vps[j]);
+				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, {name: legendName, data: data});
+				
+				if(stack)
+					mySeries.stack = (stackGroup ? "stack-"+i : "stack");
+				
+				legendData.push(legendName);
+				series.push(mySeries);
+				
+				chartSupport.setChartOriginalDataIndexForRange(chart, series.length-1, 0, data.length, i);
+				
+				//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
+				if(isCategory)
+				{
+					if(axisData.length == 0)
+						axisData = chart.resultRowArrays(result, np);
+					else
+					{
+						var axisDataMy = chart.resultRowArrays(result, np);
+						chartSupport.appendDistinct(axisData, axisDataMy);
+					}
+				}
+			}
+		}
+		
+		var options = { legend: {data: legendData}, series: series };
+		if(axisType == "angle")
+			options.angleAxis = {data: axisData};
+		else
+			options.radiusAxis = {data: axisData};
+		chartSupport.mergeUpdateOptions(options, chart);
+		
+		chart.echartsOptions(options);
+	};
+	
+	chartSupport.barPolarResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.barPolarDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+	
+	chartSupport.barPolarOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.barPolarSetChartEventData);
+	};
+	
+	chartSupport.barPolarOff = function(chart, eventType, handler)
+	{
+		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+	};
+	
+	chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var initOptions= chartSupport.initOptions(chart);
+		
+		var echartsData = echartsEventParams.data;
+		var data = {};
+		
+		data[signNameMap.name] = echartsData.name;
+		data[signNameMap.value] = echartsData.value;
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
@@ -922,6 +1102,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, data: seriesData}) ];
 		
 		var options = { legend: { data: legendData }, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 
@@ -1014,6 +1196,7 @@
 		chartSupport.setChartOriginalDataIndexForRange(chart, 0, 0, seriesData.length, 0);
 		
 		var options = { series : [ { name: seriesName, min: min, max: max, data: seriesData } ]};
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -1184,6 +1367,7 @@
 		var options = { legend: {data: legendData}, series: series };
 		if(isCategory)
 			options.xAxis = {data: xAxisData};
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -1333,9 +1517,11 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
-
+	
 	chartSupport.scatterCoordResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
@@ -1501,6 +1687,8 @@
 		
 		var series = [ { data: seriesData } ];
 		var options = { legend: {data: legendData}, radar: {indicator: indicatorData}, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 		
 		chart.extValue("radarIndicatorData", indicatorData);
@@ -1728,6 +1916,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, min: min, max: max, data: seriesData }) ];
 		
 		var options = { legend: { data: legendData }, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 
@@ -1860,6 +2050,8 @@
 		//没有更新地图、或者更新的地图已注册
 		if(!map || chart.echartsMapRegistered(map))
 		{
+			chartSupport.mergeUpdateOptions(updateOptions, chart);
+			
 			chart.echartsOptions(updateOptions);
 			
 			if(map)
@@ -1871,6 +2063,8 @@
 		{
 			chart.echartsLoadMap(map, function()
 			{
+				chartSupport.mergeUpdateOptions(updateOptions, chart);
+				
 				chart.echartsOptions(updateOptions);
 				chart.extValue("presetMap", map);
 				
@@ -2553,6 +2747,8 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 	
@@ -2721,6 +2917,7 @@
 		
 		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
 		chartSupport.checkMinAndMax(options.visualMap);
+		chartSupport.mergeUpdateOptions(options, chart);
 		
 		chart.echartsOptions(options);
 	};
@@ -2820,6 +3017,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 	
@@ -2898,6 +3097,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 
@@ -2983,6 +3184,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
 
@@ -3264,6 +3467,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData, links: seriesLinks }) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 		
 		chart.extValue("sankeySeriesData", seriesData);
@@ -3532,6 +3737,8 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 		
 		chart.extValue("graphSeriesData", seriesData);
@@ -3729,9 +3936,11 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, data: seriesData}) ];
 		
 		var options = { series: series };
+		chartSupport.mergeUpdateOptions(options, chart);
+		
 		chart.echartsOptions(options);
 	};
-
+	
 	chartSupport.wordcloudResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
@@ -3796,19 +4005,10 @@
 			pauseOnHover: true
 		};
 		
-		//表格图表样式设置项
-		var chartOptions = $.extend(true,
+		var themeBindTableOptions = chartTheme._chartTableThemeBindOptions;
+		if(themeBindTableOptions == null)
 		{
-			//标题样式
-			"title":
-			{
-				"text": chart.nameNonNull(),
-				"show": true,
-				"color": chartTheme.titleColor,
-				"backgroundColor": chartTheme.backgroundColor
-			},
-			//表格
-			"table":
+			themeBindTableOptions=
 			{
 				//表头样式
 				"header":
@@ -3848,17 +4048,83 @@
 				renderValue: function(value, name, rowIndex, columnIndex, row, meta)
 				{
 					return chartFactory.escapeHtml(value);
-				}
+				},
+				
+				_chartTableStyleClassName: global.chartFactory.nextElementId(),
+				_chartTableStyleSheetId: global.chartFactory.nextElementId()
+			};
+			
+			chartTheme._chartTableThemeBindOptions = themeBindTableOptions;
+		}
+		
+		//表格图表样式设置项
+		var chartOptions = $.extend(true,
+		{
+			//标题样式
+			"title":
+			{
+				"text": chart.nameNonNull(),
+				"show": true,
+				"color": chartTheme.titleColor,
+				"backgroundColor": chartTheme.backgroundColor
 			},
 			
-			//DataTable图表配置项
-			"ordering": false,
+			//表格，格式参考上面的themeBindTableOptions
+			"table": null,
 			
 			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
-			carousel: carouselConfig
+			carousel: carouselConfig,
+			
+			//DataTable图表配置项
+			"data" : [],
+			"ordering": false,
+			"scrollX": true,
+			"scrollY": chartEle.height(),
+			"autoWidth": true,
+	        "scrollCollapse": false,
+			"pagingType": "full_numbers",
+			"lengthMenu": [ 10, 25, 50, 75, 100 ],
+			"pageLength": 50,
+			"select" : { style : 'os' },
+			"searching" : false,
+			"language":
+		    {
+				"emptyTable": "",
+				"zeroRecords": "",
+				"lengthMenu": "每页_MENU_条",
+				"info": "共_TOTAL_条，当前_START_-_END_条",
+				"paginate":
+				{
+					"first": "首页",
+					"last": "尾页",
+					"next": "下一页",
+					"previous": "上一页"
+				},
+				select:
+				{
+					"rows": ""
+				}
+			}
 		},
 		options,
 		chart.options());
+		
+		//如果没有定义table选项，则采用themeBindTableOptions
+		if(chartOptions.table == null)
+			chartOptions.table = themeBindTableOptions;
+		else
+		{
+			chartOptions.table = $.extend(true, {}, themeBindTableOptions, chartOptions.table);
+			chartOptions.table._chartTableStyleClassName =global.chartFactory.nextElementId();
+			chartOptions.table._chartTableStyleSheetId = global.chartFactory.nextElementId();
+		}
+		
+		//设置默认分页选项
+		chartOptions.paging = (chartOptions.paging != null ? chartOptions.paging : false);
+		chartOptions.info = (chartOptions.info != null ? chartOptions.info :
+								(chartOptions.paging ? true : false));
+		chartOptions.dom = (chartOptions.dom != null ? chartOptions.dom :
+								(chartOptions.paging ? "tilpr" : "t"));
 		
 		if(chartOptions.carousel === true || chartOptions.carousel === false)
 		{
@@ -3874,6 +4140,9 @@
 		
 		if(chartOptions.carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
+		
+		chartSupport.tableCreateTableStyleSheet(chart, chartOptions,
+				chartOptions.table._chartTableStyleClassName, chartOptions.table._chartTableStyleSheetId);
 		
 		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
 		var columns = [];
@@ -3909,25 +4178,6 @@
 		options = $.extend({}, chartOptions,
 		{
 			"columns" : columns,
-			"data" : [],
-			"scrollX": true,
-			"autoWidth": true,
-			"scrollY" : chartEle.height(),
-	        "scrollCollapse": false,
-			"paging" : false,
-			"searching" : false,
-			"info": false,
-			"select" : { style : 'os' },
-			"dom": "t",
-			"language":
-		    {
-				"emptyTable": "",
-				"zeroRecords" : ""
-			},
-			"rowCallback": function(row, data, displayNum, displayIndex, dataIndex)
-			{
-				chartSupport.tableSetTableRowStyle(row, chartOptions);
-			}
 		});
 		
 		if(!options.title || !options.title.show)
@@ -3943,54 +4193,26 @@
 		table.dataTable(options);
 		
 		var dataTable = table.DataTable();
-		
-		dataTable
-		.on("select", function(e, dt, type, indexes )
-		{
-			if(type === 'row')
-			{
-				var rowNodes = dt.rows(indexes).nodes();
-				$(rowNodes).each(function(index)
-				{
-					global.chartFactory.setStyles(this, chartOptions.table.row.selected);
-				});
-			}
-		})
-		.on("deselect", function(e, dt, type, indexes )
-		{
-			if(type === 'row')
-			{
-				var rowNodes = dt.rows(indexes).nodes();
-				$(rowNodes).each(function(index)
-				{
-					chartSupport.tableSetTableRowStyle(this, chartOptions);
-				});
-			}
-		});
-		
-		$("tr", dataTable.table().header()).each(function()
-		{
-			global.chartFactory.setStyles(this, chartOptions.table.header);
-		});
-		
-		$(dataTable.table().body()).on("mouseenter", "tr", function()
-		{
-			if(chartOptions.carousel.pauseOnHover)
-				chartSupport.tableStopCarousel(chart);
-			
-			if(!$(this).hasClass("selected"))
-				global.chartFactory.setStyles(this, chartOptions.table.row.hover);
-		})
-		.on("mouseleave", "tr", function()
-		{
-			if(!$(this).hasClass("selected"))
-				chartSupport.tableSetTableRowStyle(this, chartOptions);
-			
-			if(chartOptions.carousel.pauseOnHover && chartOptions.carousel.enable)
-				chartSupport.tableStartCarousel(chart);
-		});
-		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
+		
+		//固定选择列后hover效果默认不能同步，需要自己实现
+		if(options.fixedColumns)
+		{
+			$(dataTable.table().body()).on("mouseover mouseout", "tr",
+			function(event)
+			{
+				var rowIndex = $(this).index() + 1;
+				var $tableContainer = $(dataTable.table().container());
+				
+				$(".dataTable", $tableContainer).each(function()
+				{
+					if(event.type == "mouseover")
+						$("tr:eq("+rowIndex+")", this).addClass("hover");
+					else
+						$("tr:eq("+rowIndex+")", this).removeClass("hover");
+				});
+			});
+		}
 		
 		chart.extValue("chartTableId", tableId);
 		chartSupport.initOptions(chart, options);
@@ -4022,6 +4244,10 @@
 		
 		chartSupport.tableAddDataTableData(dataTable, datas, 0, false);
 		
+		dataTable.columns.adjust();
+		if(dataTable.init().fixedColumns)
+			dataTable.fixedColumns().relayout();
+		
 		if(initOptions.carousel.enable)
 		{
 			chartSupport.tablePrepareCarousel(chart);
@@ -4035,6 +4261,10 @@
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
+		
+		dataTable.columns.adjust();
+		if(dataTable.init().fixedColumns)
+			dataTable.fixedColumns().relayout();
 	};
 	
 	chartSupport.tableDestroy = function(chart)
@@ -4124,25 +4354,69 @@
 		return cps;
 	};
 	
-	chartSupport.tableSetTableRowStyle = function(rowElement, chartOptions)
+	chartSupport.tableCreateTableStyleSheet = function(chart, chartOptions, styleClassName, styleSheetId)
 	{
-		//公用样式
-		global.chartFactory.setStyles(rowElement, chartOptions.table.row);
+		chart.elementJquery().addClass(styleClassName);
 		
-		if($(rowElement).hasClass("odd"))
-			global.chartFactory.setStyles(rowElement, chartOptions.table.row.odd);
-		else
-			global.chartFactory.setStyles(rowElement, chartOptions.table.row.even);
+		if(global.chartFactory.isStyleSheetCreated(styleSheetId))
+			return false;
 		
-		if($(rowElement).hasClass("selected"))
-			var oldStyleObj = global.chartFactory.setStyles(rowElement, chartOptions.table.row.selected);
+		var qualifier = "." + styleClassName;
+		
+		var cssText = 
+			qualifier + " table.dataTable tbody tr {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row)
+			+"} \n"
+			+qualifier + " table.dataTable thead th, table.dataTable thead td {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.header)
+			+"} \n"
+			+qualifier + " table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.odd)
+			+"} \n"
+			+qualifier + " table.dataTable.stripe tbody tr.even, table.dataTable.display tbody tr.even {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.even)
+			+"} \n"
+			+qualifier + " table.dataTable.hover tbody tr.hover,"
+			+qualifier + " table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover"
+			+qualifier + " table.dataTable.hover tbody tr.hover.selected,"
+			+qualifier + " table.dataTable.hover tbody > tr.selected:hover,"
+			+qualifier + " table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover,"
+			+qualifier + " table.dataTable.display tbody > tr > .selected:hover {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.hover)
+			+"} \n"
+			+qualifier + " table.dataTable tbody > tr.selected,"
+			+qualifier + " table.dataTable tbody > tr > .selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.even.selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.even > .selected, table.dataTable.display tbody > tr.even.selected,"
+			+qualifier + " table.dataTable.display tbody > tr.even > .selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.odd.selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,"
+			+qualifier + " table.dataTable.display tbody > tr.odd > .selected {"
+			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.selected)
+			+"} \n";
+		
+		global.chartFactory.createStyleSheet(styleSheetId, cssText);
+		
+		return true;
 	};
 	
 	chartSupport.tableEvalDataTableBodyHeight = function($chartContent, dataTable)
 	{
+		var container = $(dataTable.table().container());
 		var tableHeader = $(dataTable.table().header()).closest(".dataTables_scrollHead");
 		var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
-		tableBody.css("height", $chartContent.height() - tableHeader.outerHeight());
+		var tbh = $chartContent.height() - tableHeader.outerHeight();
+		tableBody.css("height", tbh);
+		
+		var ch = container.height();
+		var cch = $chartContent.height();
+		
+		//如果表格容器高度不等于图表内容限高，则重新设置
+		if(ch - cch != 0)
+		{
+			tbh = tbh - (ch - cch);
+			tableBody.css("height", tbh);
+		}
 	};
 	
 	chartSupport.tableAddDataTableData = function(dataTable, datas, startRowIndex, notDraw)

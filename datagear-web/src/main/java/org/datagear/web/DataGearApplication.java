@@ -5,8 +5,6 @@
 package org.datagear.web;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.datagear.util.Global;
 import org.datagear.web.config.WebMvcConfigurerConfig;
@@ -39,54 +37,17 @@ public class DataGearApplication
 
 	public static class DataGearBanner implements Banner
 	{
-		public static final String BORDER = "-----------------------------------------";
-
 		@Override
 		public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out)
 		{
-			List<String> lines = buildBannerLines("", Global.PRODUCT_NAME_EN + " - v" + Global.VERSION, Global.WEB_SITE,
-					"", "(^_^)");
-
-			for (String line : lines)
-				out.println(line);
-		}
-
-		protected List<String> buildBannerLines(String... contents)
-		{
-			int maxLen = 0;
-			for (String content : contents)
-				maxLen = Math.max(maxLen, content.length());
-
-			String border = BORDER;
-			while (border.length() <= maxLen)
-				border = border + BORDER;
-
-			List<String> lines = new ArrayList<>();
-			lines.add("+" + border + "+");
-
-			// 每一行都居中显示
-			for (String content : contents)
-			{
-				int spaces = border.length() - content.length();
-				int spacesBefore = spaces / 2;
-				int spacesAfter = spaces - spacesBefore;
-
-				StringBuilder sb = new StringBuilder();
-
-				sb.append('|');
-				for (int i = 0; i < spacesBefore; i++)
-					sb.append(' ');
-				sb.append(content);
-				for (int i = 0; i < spacesAfter; i++)
-					sb.append(' ');
-				sb.append('|');
-
-				lines.add(sb.toString());
-			}
-
-			lines.add("+" + border + "+");
-
-			return lines;
+			out.println("  ____        _         ____                 ");
+			out.println(" |  _ \\  __ _| |_ __ _ / ___| ___  __ _ _ __ ");
+			out.println(" | | | |/ _` | __/ _` | |  _ / _ \\/ _` | '__|");
+			out.println(" | |_| | (_| | |_ (_| | |_| |  __/ (_| | |   ");
+			out.println(" |____/ \\__,_|\\__\\__,_|\\____|\\___|\\__,_|_|   ");
+			out.println("");
+			out.println("  " + Global.PRODUCT_NAME_EN + "-v" + Global.VERSION + "  " + Global.WEB_SITE);
+			out.println("");
 		}
 	}
 }

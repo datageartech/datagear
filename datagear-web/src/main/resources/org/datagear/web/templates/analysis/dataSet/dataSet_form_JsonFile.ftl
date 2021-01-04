@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<input type="text" name="dataJsonPath" value="${(dataSet.dataJsonPath)!''?html}" class="ui-widget ui-widget-content" />
+						<input type="text" name="dataJsonPath" value="${(dataSet.dataJsonPath)!''}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
 				<div class="form-item form-item-encoding">
@@ -75,7 +75,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
-	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
+	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string}", "${((dataSet.analysisProject.name)!'')?js_string}");
 	po.element("select[name='encoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	po.initWorkspaceHeight();
 	po.initWorkspaceTabs(true);
@@ -83,7 +83,7 @@ readonly 是否只读操作，允许为null
 	po.initDataSetParamsTable(po.dataSetParams);
 	po.initPreviewParamValuePanel();
 	
-	po.initDataSetFileInput(po.url("uploadFile"), "${(dataSet.fileSourceType)!''?js_string}", ${isAdd?string("true", "false")});
+	po.initDataSetFileInput(po.url("uploadFile"), "${((dataSet.fileSourceType)!'')?js_string}", ${isAdd?string("true", "false")});
 	
 	po.updatePreviewOptionsData = function()
 	{

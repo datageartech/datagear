@@ -1,5 +1,6 @@
 <#include "../../include/import_global.ftl">
 <#include "../../include/html_doctype.ftl">
+<#assign Role=statics['org.datagear.management.domain.Role']>
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
@@ -16,37 +17,44 @@ selectOperation 是否选择操作，允许为null
 <div class="fill-parent">
 </#if>
 <#include "../../include/page_js_obj.ftl">
+<#include "../../include/page_obj_opt_permission.ftl" >
 <div id="${pageId}" class="page-grid page-grid-dashboard">
 	<div class="head">
 		<div class="search">
 			<#include "../../include/page_obj_searchform_data_filter.ftl">
 			<#include "../include/analysisProjectAware_grid_search.ftl">
 		</div>
-		<div class="operation">
+		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
-				<div class="addGroup">
+				<div class="addGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
 					<input name="addButton" type="button" value="<@spring.message code='add' />" />
 					<select class="addGroupSelect">
 						<option value="addInNewWindow"><@spring.message code='addInNewWindow' /></option>
 						<option value="importDashboard"><@spring.message code='import' /></option>
 					</select>
 				</div>
-				<div class="editGroup">
+				<div class="editGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
 					<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 					<select class="editGroupSelect">
 						<option value="editInNewWindow"><@spring.message code='editInNewWindow' /></option>
 					</select>
 				</div>
-				<input name="showButton" type="button" value="<@spring.message code='dashboard.show' />" />
+				<div class="showGroup">
+					<input name="showButton" type="button" value="<@spring.message code='dashboard.show' />" />
+					<select class="showGroupSelect">
+						<option value="copyShowURL"><@spring.message code='copyShowURL' /></option>
+					</select>
+					<button type="button" class="copyShowURLDelegation" style="display:none;">&nbsp;</button>
+				</div>
 				<#if !(currentUser.anonymous)>
-				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
+				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
-				<input name="exportButton" type="button" value="<@spring.message code='export' />" />
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				<input name="exportButton" type="button" value="<@spring.message code='export' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 			</#if>
 		</div>
 	</div>
@@ -73,6 +81,7 @@ selectOperation 是否选择操作，允许为null
 	po.element(".addGroupSelect").selectmenu(
 	{
 		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
 		classes:
 		{
 	          "ui-selectmenu-button": "ui-button-icon-only",
@@ -89,9 +98,11 @@ selectOperation 是否选择操作，允许为null
     	}
 	});
 	po.element(".addGroup").controlgroup();
+	
 	po.element(".editGroupSelect").selectmenu(
 	{
 		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
 		classes:
 		{
 	          "ui-selectmenu-button": "ui-button-icon-only",
@@ -111,6 +122,51 @@ selectOperation 是否选择操作，允许为null
     	}
 	});
 	po.element(".editGroup").controlgroup();
+	
+	po.element(".showGroupSelect").selectmenu(
+	{
+		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
+		classes:
+		{
+	          "ui-selectmenu-button": "ui-button-icon-only",
+	          "ui-selectmenu-menu": "ui-widget-shadow ui-widget ui-widget-content"
+	    },
+		select: function(event, ui)
+    	{
+    		var action = $(ui.item).attr("value");
+    		
+    		if(action == "copyShowURL")
+    		{
+    			po._currentShowURL = "";
+    			po.executeOnSelect(function(row)
+ 				{
+    				po._currentShowURL = "${serverURL}" + po.buildShowURL(row.id);
+    				po.element(".copyShowURLDelegation").click();
+ 				});
+    		}
+    	}
+	});
+	po.element(".showGroup").controlgroup();
+	
+	var copyShowURLButton = po.element(".copyShowURLDelegation");
+	if(copyShowURLButton.length > 0)
+	{
+		var clipboard = new ClipboardJS(copyShowURLButton[0],
+		{
+			//需要设置container，不然在对话框中打开页面后复制不起作用
+			container: po.element()[0],
+			text: function(trigger)
+			{
+				return (po._currentShowURL || "");
+			}
+		});
+		clipboard.on('success', function(e)
+		{
+			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
+		});
+	}
+	
 	po.initDataFilter();
 	
 	po.currentUser = <@writeJson var=currentUser />;
@@ -118,6 +174,11 @@ selectOperation 是否选择操作，允许为null
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dashboard/" + action;
+	};
+	
+	po.buildShowURL = function(id)
+	{
+		return po.url("show/"+id+"/");
 	};
 
 	po.element("input[name=addButton]").click(function()
@@ -182,11 +243,11 @@ selectOperation 是否选择操作，允许为null
 	{
 		po.executeOnSelect(function(row)
 		{
-			var showUrl = po.url("show/"+row.id+"/");
-			window.open(showUrl, showUrl);
+			var showUrl = po.buildShowURL(row.id);
+			window.open(showUrl, row.id);
 		});
 	});
-
+	
 	po.element("input[name=exportButton]").click(function()
 	{
 		po.executeOnSelect(function(row)
@@ -228,6 +289,7 @@ selectOperation 是否选择操作，允许为null
 	tableSettings.order = [[$.getDataTableColumn(tableSettings, "createTime"), "desc"]];
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
+	po.handlePermissionElement();
 })
 (${pageId});
 </script>

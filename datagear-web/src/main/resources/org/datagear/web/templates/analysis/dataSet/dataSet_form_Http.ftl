@@ -30,7 +30,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="uri" value="${(dataSet.uri)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="uri" value="${(dataSet.uri)!''}" class="ui-widget ui-widget-content" />
 					
 					<div class="form-item" style="margin-left: 0;" title="<@spring.message code='dataSet.http.requestMethod' />">
 						<div class="form-item-label" style="display: none;">
@@ -86,22 +86,21 @@ readonly 是否只读操作，允许为null
 							</select>
 						</div>
 					</div>
-					
-					<div class="form-item">
-						<div class="form-item-label">
-							<label><@spring.message code='dataSet.http.responseContentType' /></label>
-						</div>
-						<div class="form-item-value form-item-value-responseContentType no-padding-bottom">
-							<select name="responseContentType">
-								<option value="${HttpDataSet.RESPONSE_CONTENT_TYPE_JSON}" <#if HttpDataSet.RESPONSE_CONTENT_TYPE_JSON == dataSet.responseContentType>selected="selected"</#if>>
-									<@spring.message code='dataSet.http.responseContentType.JSON' />
-								</option>
-							</select>
-						</div>
-					</div>
 				</div>
 			</div>
 			<div class="workspace">
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dataSet.http.responseContentType' /></label>
+					</div>
+					<div class="form-item-value form-item-value-responseContentType no-padding-bottom">
+						<select name="responseContentType">
+							<option value="${HttpDataSet.RESPONSE_CONTENT_TYPE_JSON}" <#if HttpDataSet.RESPONSE_CONTENT_TYPE_JSON == dataSet.responseContentType>selected="selected"</#if>>
+								<@spring.message code='dataSet.http.responseContentType.JSON' />
+							</option>
+						</select>
+					</div>
+				</div>
 				<div class="form-item">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.http.request.desc' />">
@@ -109,8 +108,8 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<textarea name="requestContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.requestContent)!''?html}</textarea>
-						<textarea name="headerContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.headerContent)!''?html}</textarea>
+						<textarea name="requestContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.requestContent)!''}</textarea>
+						<textarea name="headerContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.headerContent)!''}</textarea>
 						<div class="workspace-editor-tabs light-tabs">
 							<ul class="workspace-editor-nav">
 								<li class="editor-requestContent"><a href="#${pageId}-editor-requestContent"><@spring.message code='dataSet.http.requestContent' /></a></li>
@@ -132,7 +131,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<input type="text" name="responseDataJsonPath" value="${(dataSet.responseDataJsonPath)!''?html}" class="ui-widget ui-widget-content" />
+						<input type="text" name="responseDataJsonPath" value="${(dataSet.responseDataJsonPath)!''}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
 				<#include "include/dataSet_form_html_wow.ftl" >
@@ -157,7 +156,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
-	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
+	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string}", "${((dataSet.analysisProject.name)!'')?js_string}");
 	po.element("select[name='requestMethod']").selectmenu({ appendTo : po.element() });
 	po.element("select[name='requestContentType']").selectmenu({ appendTo : po.element() });
 	po.element("select[name='requestContentCharset']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });

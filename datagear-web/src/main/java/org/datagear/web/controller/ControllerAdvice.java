@@ -27,6 +27,7 @@ import org.datagear.connection.EstablishConnectionException;
 import org.datagear.connection.PathDriverFactoryException;
 import org.datagear.connection.URLNotAcceptedException;
 import org.datagear.connection.UnsupportedGetConnectionException;
+import org.datagear.management.service.DeleteBuiltinRoleDeniedException;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.impl.SaveSchemaUrlPermissionDeniedException;
 import org.datagear.meta.resolver.DBMetaResolverException;
@@ -493,8 +494,8 @@ public class ControllerAdvice extends AbstractController
 
 	@ExceptionHandler(SaveSchemaUrlPermissionDeniedException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleServicePermissionDeniedException(HttpServletRequest request, HttpServletResponse response,
-			SaveSchemaUrlPermissionDeniedException exception)
+	public String handleServiceSaveSchemaUrlPermissionDeniedException(HttpServletRequest request,
+			HttpServletResponse response, SaveSchemaUrlPermissionDeniedException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(SaveSchemaUrlPermissionDeniedException.class),
 				exception, false);
@@ -508,6 +509,17 @@ public class ControllerAdvice extends AbstractController
 			PermissionDeniedException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(PermissionDeniedException.class), exception, false);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(DeleteBuiltinRoleDeniedException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleServiceDeleteBuiltinRoleDeniedException(HttpServletRequest request,
+			HttpServletResponse response, DeleteBuiltinRoleDeniedException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(DeleteBuiltinRoleDeniedException.class), exception,
+				false);
 
 		return getErrorView(request, response);
 	}

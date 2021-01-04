@@ -18,13 +18,13 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="${contextPath}/analysis/project/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(analysisProject.id)!''?html}" />
+			<input type="hidden" name="id" value="${(analysisProject.id)!''}" />
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='analysisProject.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(analysisProject.name)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(analysisProject.name)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -32,7 +32,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='analysisProject.desc' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="desc" class="ui-widget ui-widget-content">${(analysisProject.desc)!''?html}</textarea>
+					<textarea name="desc" class="ui-widget ui-widget-content">${(analysisProject.desc)!''}</textarea>
 				</div>
 			</div>
 		</div>

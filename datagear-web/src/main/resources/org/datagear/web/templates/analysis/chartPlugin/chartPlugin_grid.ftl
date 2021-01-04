@@ -80,25 +80,44 @@ selectOperation 是否选择操作，允许为null
 			po.confirmDeleteEntities(po.url("delete"), rows);
 		});
 	});
-	
-	var columnIcon = $.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.icon' />", "iconUrl", true);
-	columnIcon.render = function(data, type, row, meta)
+
+	var snColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='serialNumber' />", "id");
+	snColumn.width="4.01em";
+	snColumn.orderable=false;
+	snColumn.render = function(data, type, row, meta)
 	{
-		if(data)
-			data = "<a class=\"plugin-icon\" style=\"background-image: url(${contextPath}/"+data+")\">&nbsp;</a>";
-		
-		return data;
+		if($.dataTableUtil.isDisplayType(type))
+		{
+			return (meta.row + 1);
+		}
+		else
+		{
+			return data;
+		}
+	};
+	
+	var iconColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.icon' />", "iconUrl", false);
+	iconColumn.render = function(data, type, row, meta)
+	{
+		if($.dataTableUtil.isDisplayType(type))
+		{
+			return (data ? "<a class=\"plugin-icon\" style=\"background-image: url(${contextPath}"+data+")\">&nbsp;</a>" : data);
+		}
+		else
+			return data;
 	};
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
+		snColumn,
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.name' />"), "nameLabel.value"),
+		iconColumn,
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.desc' />"), "descLabel.value"),
-		columnIcon,
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.version' />", "version")
 	];
 	
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	tableSettings.ordering = false;
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
 })

@@ -2004,6 +2004,11 @@
 	$.dataTableUtil = ($.dataTableUtil || {});
 	$.extend($.dataTableUtil,
 	{
+		isDisplayType: function(type)
+		{
+			return type == "display";
+		},
+		
 		renderCheckColumn: function(data, type, row, meta)
 		{
 			return "<div class='ui-widget ui-widget-content ui-corner-all checkbox'><span class='ui-icon ui-icon-check'></span></div>";

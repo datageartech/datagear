@@ -9,7 +9,7 @@
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-role-user">
+<div id="${pageId}" class="page-grid page-grid-role-user">
 	<div class="head">
 		<div class="search">
 			<#include "../include/page_obj_searchform.html.ftl">
@@ -33,6 +33,7 @@
 </div>
 </#if>
 <#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj_pagination.ftl">
 <#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_grid.ftl">
 <script type="text/javascript">
@@ -82,13 +83,15 @@
 		});
 	});
 	
+	po.initPagination();
+	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "user.id", true),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='user.name' />", "user.name"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='user.realName' />", "user.realName")
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.name' />"), "user.name"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.realName' />"), "user.realName")
 	];
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData?roleId=" + po.role.id));
+	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData?roleId=" + po.role.id));
 	po.initDataTable(tableSettings);
 })
 (${pageId});

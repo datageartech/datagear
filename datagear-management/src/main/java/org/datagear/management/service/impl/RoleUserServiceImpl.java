@@ -12,6 +12,8 @@ import org.datagear.management.domain.Role;
 import org.datagear.management.domain.RoleUser;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleUserService;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -85,6 +87,15 @@ public class RoleUserServiceImpl extends AbstractMybatisEntityService<String, Ro
 		param.put("role", role);
 
 		return query("queryForRole", query, param);
+	}
+
+	@Override
+	public PagingData<RoleUser> pagingQueryForRole(Role role, PagingQuery query)
+	{
+		Map<String, Object> param = buildParamMap();
+		param.put("role", role);
+
+		return pagingQuery("pagingQueryForRole", query, param);
 	}
 
 	@Override

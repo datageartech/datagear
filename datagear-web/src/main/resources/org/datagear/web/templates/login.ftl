@@ -17,7 +17,7 @@
 		</div>
 	</div>
 	<div class="page-form page-form-login">
-		<form id="${pageId}-form" action="${contextPath}/login/doLogin" method="POST">
+		<form id="${pageId}-form" action="${contextPath}/login/doLogin" method="POST" class="display-block">
 			<div class="form-head"></div>
 			<div class="form-content">
 				<div class="form-item">
@@ -42,7 +42,7 @@
 				&nbsp;&nbsp;
 				<input type="reset" value="<@spring.message code='reset' />" />
 			</div>
-			<div class="form-foot small-text" style="text-align:right;">
+			<div class="form-foot small-text login-form-ext" style="text-align:right;">
 				<label for="remember-me-checkbox"><@spring.message code='login.rememberMe' /></label>
 	   			<input type="checkbox" id="remember-me-checkbox" name="rememberMe" value="1" />
 	   			<a class="link" href="${contextPath}/resetPassword"><@spring.message code='login.fogetPassword' /></a>
@@ -65,7 +65,7 @@
 		position: {my : "center top", at : "center top+75"},
 		resizable: false,
 		draggable: true,
-		width: "41%",
+		width: "30%",
 		beforeClose: function(){ return false; }
 	});
 	

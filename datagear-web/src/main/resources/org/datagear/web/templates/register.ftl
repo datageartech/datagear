@@ -15,7 +15,7 @@
 		</div>
 	</div>
 	<div class="page-form page-form-register">
-		<form id="${pageId}-form" action="${contextPath}/register/doRegister" method="POST">
+		<form id="${pageId}-form" action="${contextPath}/register/doRegister" method="POST" class="display-block">
 			<div class="form-head"></div>
 			<div class="form-content">
 				<div class="form-item">
@@ -75,7 +75,7 @@
 		position: {my : "center top", at : "center top+75"},
 		resizable: false,
 		draggable: true,
-		width: "41%",
+		width: "30%",
 		beforeClose: function(){ return false; }
 	});
 	

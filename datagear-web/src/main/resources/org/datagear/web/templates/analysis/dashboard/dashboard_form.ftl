@@ -19,17 +19,17 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="${contextPath}/analysis/dashboard/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(dashboard.id)!''?html}" />
-			<input type="hidden" name="templateEncoding" value="${(dashboard.templateEncoding)!''?html}" />
-			<textarea id="${pageId}-initTemplateName" style="display:none;">${templateName?html}</textarea>
-			<textarea id="${pageId}-initTemplateContent" style="display:none;">${templateContent!''?html}</textarea>
-			<textarea id="${pageId}-defaultTemplateContent" style="display:none;">${defaultTemplateContent!''?html}</textarea>
+			<input type="hidden" name="id" value="${(dashboard.id)!''}" />
+			<input type="hidden" name="templateEncoding" value="${(dashboard.templateEncoding)!''}" />
+			<textarea id="${pageId}-initTemplateName" style="display:none;">${templateName}</textarea>
+			<textarea id="${pageId}-initTemplateContent" style="display:none;">${templateContent!''}</textarea>
+			<textarea id="${pageId}-defaultTemplateContent" style="display:none;">${defaultTemplateContent!''}</textarea>
 			<div class="form-item form-item-analysisProjectAware">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(dashboard.name)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(dashboard.name)!''}" class="ui-widget ui-widget-content" />
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
@@ -152,7 +152,7 @@ readonly 是否只读操作，允许为null
 	po.templates = <@writeJson var=templates />;
 	
 	$.initButtons(po.element());
-	po.initAnalysisProject("${(dashboard.analysisProject.id)!''?js_string}", "${(dashboard.analysisProject.name)!''?js_string}");
+	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string}", "${((dashboard.analysisProject.name)!'')?js_string}");
 	po.resourceEditorTabs = po.element("#${pageId}-resourceEditorTabs");
 	
 	if(po.isInDialog())

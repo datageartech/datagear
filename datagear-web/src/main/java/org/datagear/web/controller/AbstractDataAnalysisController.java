@@ -59,7 +59,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 更新看板数据请求的图表集参数值的参数名 */
 	public static final String UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES = "chartsParamValues";
 
-	public static final String DASHBOARD_THEME_NAME_PARAM = "themeName";
+	public static final String DASHBOARD_THEME_NAME_PARAM = "theme";
 
 	/** 看板心跳URL名 */
 	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";

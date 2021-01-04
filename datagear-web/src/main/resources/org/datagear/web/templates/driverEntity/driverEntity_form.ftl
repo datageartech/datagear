@@ -17,13 +17,13 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="${contextPath}/driverEntity/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(driverEntity.id)!''?html}" />
+			<input type="hidden" name="id" value="${(driverEntity.id)!''}" />
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='driverEntity.displayName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="displayName" value="${(driverEntity.displayName)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="displayName" value="${(driverEntity.displayName)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -47,7 +47,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='driverEntity.driverClassName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="driverClassName" value="${(driverEntity.driverClassName)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="driverClassName" value="${(driverEntity.driverClassName)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -55,7 +55,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='driverEntity.displayDesc' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="displayDesc" class="ui-widget ui-widget-content">${(driverEntity.displayDescMore)!''?html}</textarea>
+					<textarea name="displayDesc" class="ui-widget ui-widget-content">${(driverEntity.displayDescMore)!''}</textarea>
 				</div>
 			</div>
 		</div>

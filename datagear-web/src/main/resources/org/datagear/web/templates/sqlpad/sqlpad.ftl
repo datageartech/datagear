@@ -10,7 +10,7 @@ Schema schema 数据库，不允许为null
 	<#include "../include/html_title_app_name.ftl">
 	<@spring.message code='sqlpad.sqlpad' />
 	<@spring.message code='bracketLeft' />
-	${schema.title?html}
+	${schema.title}
 	<@spring.message code='bracketRight' />
 </title>
 </head>
@@ -111,13 +111,13 @@ Schema schema 数据库，不允许为null
 	<div class="content ui-widget ui-widget-content">
 		<div class="content-editor">
 			<div class="content-edit-content">
-				<div id="${pageId}-sql-editor" class="sql-editor">${initSql!''?html}</div>
+				<div id="${pageId}-sql-editor" class="sql-editor">${initSql!''}</div>
 			</div>
 		</div>
 		<div class="content-result">
 			<div id="${pageId}-sqlResultTabs" class="result-tabs minor-tabs minor-dataTable">
 				<ul>
-					<li class="result-message-tab not-closable"><a class="result-message-anchor" href="#${pageId}-resultMessage">消息</a></li>
+					<li class="result-message-tab not-closable"><a class="result-message-anchor" href="#${pageId}-resultMessage"><@spring.message code='sqlpad.message' /></a></li>
 				</ul>
 				<div id="${pageId}-resultMessage" class="result-message">
 				</div>

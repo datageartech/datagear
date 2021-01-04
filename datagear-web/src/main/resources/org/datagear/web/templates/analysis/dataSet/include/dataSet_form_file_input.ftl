@@ -17,13 +17,13 @@
 		</span>
 	</div>
 	<div class="upload-file-input-wrapper form-item-value error-newline">
-		<input type="hidden" id="${pageId}-originalFileName" value="${(dataSet.fileName)!''?html}" />
+		<input type="hidden" id="${pageId}-originalFileName" value="${(dataSet.fileName)!''}" />
 		
-		<input type="hidden" name="fileName" value="${(dataSet.fileName)!''?html}" />
+		<input type="hidden" name="fileName" value="${(dataSet.fileName)!''}" />
 		
 		<div class="row-wrapper">
-			<input type="text" name="displayName" value="${(dataSet.displayName)!''?html}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
-			<a id="${pageId}-uploadDownloadLink" href="${contextPath}/analysis/dataSet/downloadFile?id=${(dataSet.id)!''?html}" target="_blank" class="link"><@spring.message code='download' /></a>
+			<input type="text" name="displayName" value="${(dataSet.displayName)!''}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
+			<a id="${pageId}-uploadDownloadLink" href="${contextPath}/analysis/dataSet/downloadFile?id=${(dataSet.id)!''}" target="_blank" class="link"><@spring.message code='download' /></a>
 		</div>
 		
 		<#if !readonly>
@@ -34,15 +34,15 @@
 		</#if>
 	</div>
 	<div class="server-file-input-wrapper">
-		<input type="hidden" id="${pageId}-originalServerDirectoryId" value="${(dataSet.dataSetResDirectory.id)!''?html}" />
-		<input type="hidden" id="${pageId}-originalServerFileName" value="${(dataSet.dataSetResFileName)!''?html}" />
+		<input type="hidden" id="${pageId}-originalServerDirectoryId" value="${(dataSet.dataSetResDirectory.id)!''}" />
+		<input type="hidden" id="${pageId}-originalServerFileName" value="${(dataSet.dataSetResFileName)!''}" />
 		
 		<div class="row-wrapper form-item-value error-newline">
-			<input type="hidden" name="dataSetResDirectory.id" value="${(dataSet.dataSetResDirectory.id)!''?html}" />
+			<input type="hidden" name="dataSetResDirectory.id" value="${(dataSet.dataSetResDirectory.id)!''}" />
 			<div class="label">
 				<label title="<@spring.message code='dataSet.serverDirectory.desc' />" class="tip-label"><@spring.message code='dataSet.serverDirectory' /></label>
 			</div>
-			<input type="text" name="dataSetResDirectory.directory" value="${(dataSet.dataSetResDirectory.directory)!''?html}" class="ui-widget ui-widget-content" readonly="readonly" />
+			<input type="text" name="dataSetResDirectory.directory" value="${(dataSet.dataSetResDirectory.directory)!''}" class="ui-widget ui-widget-content" readonly="readonly" />
 			<#if !readonly>
 			<button type="button" class="selectServerDirectoryBtn"><@spring.message code='select' /></button>
 			</#if>
@@ -51,7 +51,7 @@
 			<div class="label">
 				<label title="<@spring.message code='dataSet.dataSetResFileName.desc' />" class="tip-label"><@spring.message code='dataSet.fileInDirectory' /></label>
 			</div>
-			<input type="text" name="dataSetResFileName" value="${(dataSet.dataSetResFileName)!''?html}" class="ui-widget ui-widget-content" />
+			<input type="text" name="dataSetResFileName" value="${(dataSet.dataSetResFileName)!''}" class="ui-widget ui-widget-content" />
 			<#if !readonly>
 			<button type="button" class="selectServerFileBtn ui-button-icon-only">
 				<span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span>
@@ -63,7 +63,7 @@
 			</#if>
 			<#--
 			服务端文件允许参数化文件名，所以没法下载
-			<a id="${pageId}-serverDownloadLink" href="${contextPath}/analysis/dataSet/downloadFile?id=${(dataSet.id)!''?html}" target="_blank" class="link"><@spring.message code='download' /></a>
+			<a id="${pageId}-serverDownloadLink" href="${contextPath}/analysis/dataSet/downloadFile?id=${(dataSet.id)!''}" target="_blank" class="link"><@spring.message code='download' /></a>
 			-->
 		</div>
 	</div>
