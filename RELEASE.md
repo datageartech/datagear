@@ -8,7 +8,7 @@
 
 3. 将刚才新建的标记推送到仓库保存；
 
-4. 将构建的程序包（`datagear-webappembd/target/datagear-[version]-packages/`目录内）发布到Gitee、网盘、官网；
+4. 将构建的程序包（`datagear-web/target/datagear-[version]-packages/`目录内）发布到Gitee、网盘、官网；
 
 5. 将当前分支合并至主干；
 
