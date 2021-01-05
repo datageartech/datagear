@@ -80,6 +80,8 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 		registry.addInterceptor(themeChangeInterceptor).addPathPatterns("/changeThemeData");
 
 		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
+		// 忽略非法语言，避免抛出异常
+		localeChangeInterceptor.setIgnoreInvalidLocale(true);
 		registry.addInterceptor(localeChangeInterceptor).addPathPatterns("/changeLocale");
 	}
 

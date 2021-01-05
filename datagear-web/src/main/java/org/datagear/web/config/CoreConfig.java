@@ -158,6 +158,10 @@ public class CoreConfig implements InitializingBean
 		ResourceBundleMessageSource bean = new ResourceBundleMessageSource();
 		bean.setBasename("org.datagear.web.i18n.message");
 		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);
+		// i18n找不到指定语言的bundle时不使用操作系统默认语言重新查找，直接使用默认bundle。
+		// 系统目前只有默认bundle（无后缀）、英语bundle（"en"后缀），如果设置为true（默认值），
+		// 当操作系统语言是英语时，会导致切换语言不起作用，i18n始终会被定位至英语bundle
+		bean.setFallbackToSystemLocale(false);
 
 		return bean;
 	}
