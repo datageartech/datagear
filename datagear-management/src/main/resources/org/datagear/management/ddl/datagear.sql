@@ -724,3 +724,9 @@ SELECT
 FROM DATAGEAR_USER USR
 WHERE
 	USR.USER_ID NOT IN (SELECT RU_USER_ID FROM DATAGEAR_ROLE_USER WHERE RU_ROLE_ID = 'ROLE_DATA_ADMIN');
+
+
+-----------------------------------------
+--version[2.1.1], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
