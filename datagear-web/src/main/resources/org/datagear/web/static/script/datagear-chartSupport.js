@@ -4044,11 +4044,9 @@
 						"backgroundColor": chartTheme.highlightTheme.backgroundColor
 					}
 				},
-				//单元格内容渲染函数
-				renderValue: function(value, name, rowIndex, columnIndex, row, meta)
-				{
-					return chartFactory.escapeHtml(value);
-				},
+				
+				//单元格内容渲染函数，格式为：function(value, name, rowIndex, columnIndex, row, meta){ return ...; }
+				renderValue: null,
 				
 				_chartTableStyleClassName: global.chartFactory.nextElementId(),
 				_chartTableStyleSheetId: global.chartFactory.nextElementId()
@@ -4075,7 +4073,11 @@
 			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
 			carousel: carouselConfig,
 			
+			//后置处理列函数，格式为：function(columns){ return columns; }
+			postProcessColumns: null,
+			
 			//DataTable图表配置项
+			"columns": null,
 			"data" : [],
 			"ordering": false,
 			"scrollX": true,
@@ -4160,11 +4162,17 @@
 					//单元格展示绘制
 					if(type == "display")
 					{
-						var rowIndex = meta.row;
-						var columnIndex = meta.col;
-						var name = columns[columnIndex].data;
-						
-						return chartOptions.table.renderValue(value, name, rowIndex, columnIndex, row, meta);
+						if(chartOptions.table.renderValue)
+						{
+							var rowIndex = meta.row;
+							var columnIndex = meta.col;
+							var name = columns[columnIndex].data;
+							
+							return chartOptions.table.renderValue.call(this, value, name,
+									rowIndex, columnIndex, row, meta);
+						}
+						else
+							return chartFactory.escapeHtml(value);
 					}
 					//其他绘制，比如排序
 					else
@@ -4173,6 +4181,15 @@
 			};
 			
 			columns.push(column);
+		}
+		
+		if(chartOptions.columns)
+			columns = $.extend(true, columns, chartOptions.columns);
+		if(chartOptions.postProcessColumns)
+		{
+			var tmpColumns = chartOptions.postProcessColumns(columns);
+			if(tmpColumns != null)
+				columns = tmpColumns;
 		}
 		
 		options = $.extend({}, chartOptions,
