@@ -4046,20 +4046,39 @@
 				},
 				
 				//单元格内容渲染函数，格式为：function(value, name, rowIndex, columnIndex, row, meta){ return ...; }
-				renderValue: null,
-				
-				_chartTableStyleClassName: global.chartFactory.nextElementId(),
-				_chartTableStyleSheetId: global.chartFactory.nextElementId()
+				renderValue: undefined
 			};
+			
+			themeBindTableOptions._chartTableStyleClassName = global.chartFactory.nextElementId();
+			themeBindTableOptions._chartTableStyleSheetId = global.chartFactory.nextElementId();
 			
 			chartTheme._chartTableThemeBindOptions = themeBindTableOptions;
 		}
 		
+		var columns = [];
+		
+		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
+		for(var i=0; i<cps.length; i++)
+		{
+			var column =
+			{
+				title: chart.dataSetPropertyLabel(cps[i]),
+				data: cps[i].name,
+				defaultContent: "",
+				orderable: true,
+				searchable: false,
+				//下面完善
+				render: undefined
+			};
+			
+			columns.push(column);
+		}
+		
 		//表格图表样式设置项
-		var chartOptions = $.extend(true,
+		var options = $.extend(true,
 		{
 			//标题样式
-			"title":
+			title:
 			{
 				"text": chart.nameNonNull(),
 				"show": true,
@@ -4068,16 +4087,16 @@
 			},
 			
 			//表格，格式参考上面的themeBindTableOptions
-			"table": null,
+			table: undefined,
 			
 			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
-			carousel: carouselConfig,
+			carousel: undefined,
 			
 			//后置处理列函数，格式为：function(columns){ return columns; }
-			postProcessColumns: null,
+			postProcessColumns: undefined,
 			
-			//DataTable图表配置项
-			"columns": null,
+			//DataTable配置项
+			"columns": columns,
 			"data" : [],
 			"ordering": false,
 			"scrollX": true,
@@ -4111,64 +4130,60 @@
 		options,
 		chart.options());
 		
-		//如果没有定义table选项，则采用themeBindTableOptions
-		if(chartOptions.table == null)
-			chartOptions.table = themeBindTableOptions;
+		//如果没有定义table选项，则采用全局themeBindTableOptions
+		if(options.table == null)
+			options.table = themeBindTableOptions;
 		else
 		{
-			chartOptions.table = $.extend(true, {}, themeBindTableOptions, chartOptions.table);
-			chartOptions.table._chartTableStyleClassName =global.chartFactory.nextElementId();
-			chartOptions.table._chartTableStyleSheetId = global.chartFactory.nextElementId();
+			options.table = $.extend(true, {}, themeBindTableOptions, options.table);
+			options.table._chartTableStyleClassName =global.chartFactory.nextElementId();
+			options.table._chartTableStyleSheetId = global.chartFactory.nextElementId();
 		}
 		
-		//设置默认分页选项
-		chartOptions.paging = (chartOptions.paging != null ? chartOptions.paging : false);
-		chartOptions.info = (chartOptions.info != null ? chartOptions.info :
-								(chartOptions.paging ? true : false));
-		chartOptions.dom = (chartOptions.dom != null ? chartOptions.dom :
-								(chartOptions.paging ? "tilpr" : "t"));
+		//完善分页选项
+		options.paging = (options.paging != null ? options.paging : false);
+		options.info = (options.info != null ? options.info :
+								(options.paging ? true : false));
+		options.dom = (options.dom != null ? options.dom :
+								(options.paging ? "tilpr" : "t"));
 		
-		if(chartOptions.carousel === true || chartOptions.carousel === false)
+		//完善轮播选项
+		if(options.carousel == null)
 		{
-			carouselConfig.enable = chartOptions.carousel;
-			chartOptions.carousel = carouselConfig;
+			
 		}
-		else if(typeof(chartOptions.carousel) == "number" || $.isFunction(chartOptions.carousel))
+		else if(options.carousel === true || options.carousel === false)
+		{
+			carouselConfig.enable = options.carousel;
+		}
+		else if(typeof(options.carousel) == "number" || $.isFunction(options.carousel))
 		{
 			carouselConfig.enable = true;
-			carouselConfig.interval = chartOptions.carousel;
-			chartOptions.carousel = carouselConfig;
+			carouselConfig.interval = options.carousel;
 		}
-		
-		if(chartOptions.carousel.enable)
-			chartEle.addClass("dg-chart-table-carousel");
-		
-		chartSupport.tableCreateTableStyleSheet(chart, chartOptions,
-				chartOptions.table._chartTableStyleClassName, chartOptions.table._chartTableStyleSheetId);
-		
-		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
-		var columns = [];
-		for(var i=0; i<cps.length; i++)
+		else
 		{
-			var column =
+			carouselConfig = $.extend(true, carouselConfig, options.carousel);
+		}
+		options.carousel = carouselConfig;
+		
+		//填充options.columns的render函数
+		for(var i=0; i<options.columns.length; i++)
+		{
+			if(options.columns[i].render == null)
 			{
-				title: chart.dataSetPropertyLabel(cps[i]),
-				data: cps[i].name,
-				defaultContent: "",
-				orderable: true,
-				searchable: false,
-				render: function(value, type, row, meta)
+				options.columns[i].render = function(value, type, row, meta)
 				{
 					//单元格展示绘制
 					if(type == "display")
 					{
-						if(chartOptions.table.renderValue)
+						if(options.table.renderValue)
 						{
 							var rowIndex = meta.row;
 							var columnIndex = meta.col;
 							var name = columns[columnIndex].data;
 							
-							return chartOptions.table.renderValue.call(this, value, name,
+							return options.table.renderValue(value, name,
 									rowIndex, columnIndex, row, meta);
 						}
 						else
@@ -4177,31 +4192,28 @@
 					//其他绘制，比如排序
 					else
 						return value;
-				}
-			};
-			
-			columns.push(column);
+				};
+			}
 		}
 		
-		if(chartOptions.columns)
-			columns = $.extend(true, columns, chartOptions.columns);
-		if(chartOptions.postProcessColumns)
+		if(options.postProcessColumns)
 		{
-			var tmpColumns = chartOptions.postProcessColumns(columns);
+			var tmpColumns = options.postProcessColumns(options.columns);
 			if(tmpColumns != null)
-				columns = tmpColumns;
+				options.columns = tmpColumns;
 		}
 		
-		options = $.extend({}, chartOptions,
-		{
-			"columns" : columns,
-		});
+		if(options.carousel.enable)
+			chartEle.addClass("dg-chart-table-carousel");
+		
+		chartSupport.tableCreateTableStyleSheet(chart, options,
+				options.table._chartTableStyleClassName, options.table._chartTableStyleSheetId);
 		
 		if(!options.title || !options.title.show)
 			chartEle.addClass("dg-hide-title");
 		
-		var chartTitle = $("<div class='dg-chart-table-title' />").html(chartOptions.title.text).appendTo(chartEle);
-		global.chartFactory.setStyles(chartTitle, chartOptions.title);
+		var chartTitle = $("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(chartEle);
+		global.chartFactory.setStyles(chartTitle, options.title);
 		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
 		var table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartContent);
 		var tableId = chart.id+"-table";
