@@ -4253,6 +4253,17 @@
 		if(evalHeight)
 			chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
 		
+		$(dataTable.table().body()).on("mouseenter", "tr", function()
+		{
+			if(options.carousel.pauseOnHover)
+				chartSupport.tableStopCarousel(chart);
+		})
+		.on("mouseleave", "tr", function()
+		{
+			if(options.carousel.pauseOnHover && options.carousel.enable)
+				chartSupport.tableStartCarousel(chart);
+		});
+		
 		//固定选择列后hover效果默认不能同步，需要自己实现
 		if(options.fixedColumns)
 		{
