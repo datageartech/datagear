@@ -101,6 +101,32 @@
 			$.extend(options, ou);
 	};
 	
+	//处理渲染options
+	chartSupport.processRenderOptions = function(chart, renderOptions)
+	{
+		if(renderOptions && renderOptions.processRenderOptions)
+		{
+			var tmpOptions = renderOptions.processRenderOptions(renderOptions, chart);
+			if(tmpOptions != null)
+				renderOptions = tmpOptions;
+		}
+		
+		return renderOptions;
+	};
+	
+	//处理更新options
+	chartSupport.processUpdateOptions = function(chart, results, renderOptions, updateOptions)
+	{
+		if(renderOptions && renderOptions.processUpdateOptions)
+		{
+			var tmpOptions = renderOptions.processUpdateOptions(updateOptions, chart, results);
+			if(tmpOptions != null)
+				updateOptions = tmpOptions;
+		}
+		
+		return updateOptions;
+	};
+	
 	/**
 	 * 指定数据集属性数据是否字符串类型。
 	 */
@@ -4100,7 +4126,7 @@
 			"data" : [],
 			"ordering": false,
 			"scrollX": true,
-			"scrollY": chartEle.height(),
+			"scrollY": undefined,
 			"autoWidth": true,
 	        "scrollCollapse": false,
 			"pagingType": "full_numbers",
@@ -4196,12 +4222,13 @@
 			}
 		}
 		
-		if(options.postProcessColumns)
-		{
-			var tmpColumns = options.postProcessColumns(options.columns);
-			if(tmpColumns != null)
-				options.columns = tmpColumns;
-		}
+		options = chartSupport.processRenderOptions(chart, options);
+		
+		var evalHeight = (options.scrollY == null);
+		
+		//临时设一个较小值，后面会重新计算
+		if(evalHeight)
+			options.scrollY = 4;
 		
 		if(options.carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
@@ -4222,7 +4249,9 @@
 		table.dataTable(options);
 		
 		var dataTable = table.DataTable();
-		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
+		
+		if(evalHeight)
+			chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
 		
 		//固定选择列后hover效果默认不能同步，需要自己实现
 		if(options.fixedColumns)
@@ -4253,7 +4282,8 @@
 		var chartDataSets = chart.chartDataSetsNonNull();
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
-		var datas = [];
+		var updateOptions = { data: [] };
+		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
@@ -4265,17 +4295,15 @@
 			{
 				var data = $.extend({}, resultDatas[j]);
 				chartSupport.chartDataOriginalDataIndex(data, i, j);
-				datas.push(data);
+				updateOptions.data.push(data);
 			}
 		}
 		
 		chartSupport.tableStopCarousel(chart);
 		
-		chartSupport.tableAddDataTableData(dataTable, datas, 0, false);
+		updateOptions = chartSupport.processUpdateOptions(chart, results, initOptions, updateOptions);
 		
-		dataTable.columns.adjust();
-		if(dataTable.init().fixedColumns)
-			dataTable.fixedColumns().relayout();
+		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0, false);
 		
 		if(initOptions.carousel.enable)
 		{
@@ -4431,20 +4459,25 @@
 	
 	chartSupport.tableEvalDataTableBodyHeight = function($chartContent, dataTable)
 	{
+		var chartContentHeight = $chartContent.height();
 		var container = $(dataTable.table().container());
+		var containerHeight = container.outerHeight(true);
 		var tableHeader = $(dataTable.table().header()).closest(".dataTables_scrollHead");
+		var tableHeaderHeight = tableHeader.outerHeight(true);
 		var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
-		var tbh = $chartContent.height() - tableHeader.outerHeight();
-		tableBody.css("height", tbh);
+		var fixedColumnContainer = tableBody.closest(".DTFC_ScrollWrapper");
+		var tableBodyHeight = chartContentHeight - tableHeaderHeight;
+		tableBody.css("height", tableBodyHeight);
+		fixedColumnContainer.css("height", tableBody.parent().height());
 		
-		var ch = container.height();
-		var cch = $chartContent.height();
+		containerHeight = container.outerHeight(true);
 		
 		//如果表格容器高度不等于图表内容限高，则重新设置
-		if(ch - cch != 0)
+		if(containerHeight - chartContentHeight != 0)
 		{
-			tbh = tbh - (ch - cch);
-			tableBody.css("height", tbh);
+			tableBodyHeight = tableBodyHeight - (containerHeight - chartContentHeight);
+			tableBody.css("height", tableBodyHeight);
+			fixedColumnContainer.css("height", tableBody.parent().height());
 		}
 	};
 	
@@ -4476,7 +4509,12 @@
 		dataTable.rows(removeRowIndexes).remove();
 		
 		if(!notDraw)
+		{
 			dataTable.draw();
+			
+			if(dataTable.init().fixedColumns)
+				dataTable.fixedColumns().relayout();
+		}
 	};
 
 	/**
