@@ -114,9 +114,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var dataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("myDashboardFactory.init(dataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.myDashboard=dataGearDashboardTmp;"));
+			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
+			Assert.assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
+			Assert.assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
 		}
 
 		// 看板属性，无引号
@@ -143,9 +143,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var dataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("myDashboardFactory.init(dataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.myDashboard=dataGearDashboardTmp;"));
+			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
+			Assert.assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
+			Assert.assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
 		}
 
 		// 看板属性，单引号
@@ -172,9 +172,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var dataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("myDashboardFactory.init(dataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.myDashboard=dataGearDashboardTmp;"));
+			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
+			Assert.assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
+			Assert.assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
 		}
 
 		// 看板属性，多个导入排除值
@@ -201,9 +201,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertFalse(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertFalse(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var dataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("myDashboardFactory.init(dataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.myDashboard=dataGearDashboardTmp;"));
+			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
+			Assert.assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
+			Assert.assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
 		}
 
 		// 看板属性，默认
@@ -229,9 +229,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var dataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("dashboardFactory.init(dataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.dashboard=dataGearDashboardTmp;"));
+			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
+			Assert.assertTrue(html.contains("dashboardFactory.init(DataGearDashboardTmp);"));
+			Assert.assertTrue(html.contains("window.dashboard=DataGearDashboardTmp;"));
 		}
 
 		// 图表属性
@@ -289,8 +289,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains("<div   id=element_6    dg-chart-widget=chartwidget_6  />"));
 			Assert.assertTrue(html.contains("<div   id=element_7    dg-chart-widget=chartwidget_7  /  >"));
 			Assert.assertTrue(
-					html.contains("<div     dg-chart-widget=chartwidget_8 id=\"dataGearChartElement7\"     /  >"));
-			Assert.assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"dataGearChartElement8\" />"));
+					html.contains("<div     dg-chart-widget=chartwidget_8 id=\"DataGearChartElement7\"     /  >"));
+			Assert.assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"DataGearChartElement8\" />"));
 			Assert.assertTrue(html.contains("<div     dg-chart-widget='' />"));
 			Assert.assertTrue(html.contains("<div     dg-chart-widget=\"\"  />"));
 			Assert.assertTrue(html.contains("</body></html>"));

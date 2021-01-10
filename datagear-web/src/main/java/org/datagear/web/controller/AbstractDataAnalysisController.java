@@ -112,7 +112,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 	protected HtmlTplDashboardRenderAttr createHtmlTplDashboardRenderAttr()
 	{
-		return new HtmlTplDashboardRenderAttr();
+		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+		return renderAttr;
 	}
 
 	protected Map<String, ?> resolveParamValues(HttpServletRequest request)

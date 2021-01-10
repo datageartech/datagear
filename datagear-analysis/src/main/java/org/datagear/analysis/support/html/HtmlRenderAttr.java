@@ -33,6 +33,9 @@ public abstract class HtmlRenderAttr implements Serializable
 	/** 属性名：忽略输出的属性集名 */
 	private String ignoreRenderAttrsName = "ignoreRenderAttrs";
 
+	/** 生成名称、ID的种子 */
+	private String seed = null;
+
 	public HtmlRenderAttr()
 	{
 		super();
@@ -184,6 +187,21 @@ public abstract class HtmlRenderAttr implements Serializable
 	}
 
 	/**
+	 * 获取种子。
+	 * 
+	 * @return 返回{@code null}表示无种子
+	 */
+	public String getSeed()
+	{
+		return seed;
+	}
+
+	public void setSeed(String seed)
+	{
+		this.seed = seed;
+	}
+
+	/**
 	 * 生成默认{@linkplain RenderContext}变量名。
 	 * 
 	 * @param suffix
@@ -202,10 +220,7 @@ public abstract class HtmlRenderAttr implements Serializable
 	 */
 	public String genRenderContextVarName(String suffix)
 	{
-		if (suffix == null)
-			suffix = "";
-
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderContext" + suffix;
+		return genIdentifier("RenderContext", suffix);
 	}
 
 	/**
@@ -227,10 +242,7 @@ public abstract class HtmlRenderAttr implements Serializable
 	 */
 	public String genChartPluginVarName(String suffix)
 	{
-		if (suffix == null)
-			suffix = "";
-
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "ChartPlugin" + suffix;
+		return genIdentifier("ChartPlugin", suffix);
 	}
 
 	/**
@@ -252,10 +264,7 @@ public abstract class HtmlRenderAttr implements Serializable
 	 */
 	public String genChartElementId(String suffix)
 	{
-		if (suffix == null)
-			suffix = "";
-
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "ChartElement" + suffix;
+		return genIdentifier("ChartElement", suffix);
 	}
 
 	/**
@@ -277,10 +286,7 @@ public abstract class HtmlRenderAttr implements Serializable
 	 */
 	public String genChartVarName(String suffix)
 	{
-		if (suffix == null)
-			suffix = "";
-
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Chart" + suffix;
+		return genIdentifier("Chart", suffix);
 	}
 
 	/**
@@ -302,9 +308,28 @@ public abstract class HtmlRenderAttr implements Serializable
 	 */
 	public String genDashboardVarName(String suffix)
 	{
-		if (suffix == null)
-			suffix = "";
+		return genIdentifier("Dashboard", suffix);
+	}
 
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Dashboard" + suffix;
+	/**
+	 * 生成标识。
+	 * 
+	 * @param prefix
+	 * @param suffix 允许为{@code null}
+	 * @return
+	 */
+	protected String genIdentifier(String prefix, String suffix)
+	{
+		StringBuilder sb = new StringBuilder(Global.PRODUCT_NAME_EN);
+
+		if (!StringUtil.isEmpty(this.seed))
+			sb.append(this.seed);
+
+		sb.append(prefix);
+
+		if (!StringUtil.isEmpty(suffix))
+			sb.append(suffix);
+
+		return sb.toString();
 	}
 }

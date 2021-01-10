@@ -2501,16 +2501,23 @@
 	
 	/**
 	 * 生成一个新的页面元素ID。
+	 *
+	 * @param prefix 可选，ID前缀
 	 */
-	chartFactory.nextElementId = function()
+	chartFactory.nextElementId = function(prefix)
 	{
-		var nextIdSeq = (this._nextElementIdSeq != null ? this._nextElementIdSeq : 0);
-		this._nextElementIdSeq = nextIdSeq + 1;
+		if(prefix == null)
+			prefix = "";
 		
-		return "dataGearClientElement" + nextIdSeq;
+		var seed = (chartFactory._nextElementIdSeed ||
+						(chartFactory._nextElementIdSeed = new Number(new Date().getTime()).toString(16)));
+		
+		var seq = (chartFactory._nextElementIdSequence != null ? chartFactory._nextElementIdSequence : 0);
+		chartFactory._nextElementIdSequence = seq + 1;
+		
+		return "DataGearClient" + seed + (prefix ? prefix : "") + seq;
 	};
 	
-
 	/**
 	 * 将给定值按照HTML规范转义，如果不是字符串，直接返回原值。
 	 */
