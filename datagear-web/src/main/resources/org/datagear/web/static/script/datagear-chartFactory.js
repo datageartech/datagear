@@ -2165,6 +2165,9 @@
 	// chartBase end
 	//----------------------------------------
 	
+	/** 生成元素ID用的前缀 */
+	chartFactory.ELEMENT_ID_PREFIX = "DataGearClient" + new Number(new Date().getTime()).toString(16);
+	
 	/**
 	 * 执行JS代码。
 	 * 
@@ -2318,8 +2321,7 @@
 	 */
 	chartFactory.stylesObjToCssText = function(stylesObj)
 	{
-		var elementId = (chartFactory._stylesObjToCssTextElementId
-				|| (chartFactory._stylesObjToCssTextElementId = chartFactory.nextElementId()));
+		var elementId = chartFactory.ELEMENT_ID_PREFIX +"StylesObjToCss";
 		
 		var element = $("#" + elementId);
 		if(element.length == 0)
@@ -2419,9 +2421,11 @@
 		//是颜色名称，则通过元素css函数转换
 		if((color.charAt(0) != '#') && (color.indexOf("(") < 0))
 		{
-			var $colorEle = $("#chartFactoryEleForConvertColor");
+			var elementId = chartFactory.ELEMENT_ID_PREFIX +"ForConvertColor";
+			
+			var $colorEle = $("#"+elementId);
 			if($colorEle.length == 0)
-				$colorEle = $("<div id='chartFactoryEleForConvertColor' style='position:absolute;left:0;bottom:0;width:0;height:0;'></div>")
+				$colorEle = $("<div id='"+elementId+"' style='position:absolute;left:0;bottom:0;width:0;height:0;'></div>")
 								.appendTo(document.body);
 			
 			$colorEle.css("color", color);
@@ -2509,13 +2513,10 @@
 		if(prefix == null)
 			prefix = "";
 		
-		var seed = (chartFactory._nextElementIdSeed ||
-						(chartFactory._nextElementIdSeed = new Number(new Date().getTime()).toString(16)));
+		var seq = (this._nextElementIdSequence != null ? this._nextElementIdSequence : 0);
+		this._nextElementIdSequence = seq + 1;
 		
-		var seq = (chartFactory._nextElementIdSequence != null ? chartFactory._nextElementIdSequence : 0);
-		chartFactory._nextElementIdSequence = seq + 1;
-		
-		return "DataGearClient" + seed + (prefix ? prefix : "") + seq;
+		return this.ELEMENT_ID_PREFIX + prefix + seq;
 	};
 	
 	/**
