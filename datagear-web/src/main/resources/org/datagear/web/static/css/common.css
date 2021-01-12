@@ -1430,8 +1430,8 @@ table.dataTable tbody tr td select{
 	margin-left: 0.1em;
 	padding: 2px 2px;
 	position: relative;
-	opacity: 0.8;
-	filter: Alpha(Opacity=80);
+	opacity: 0.9;
+	filter: Alpha(Opacity=90);
 }
 .search-form .condition-panel-parent .condition-panel .condition-panel-title-bar{
 	text-align: right;

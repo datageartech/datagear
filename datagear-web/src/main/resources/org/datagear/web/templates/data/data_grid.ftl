@@ -92,7 +92,7 @@ boolean readonly 是否只读操作，默认为false
 <script type="text/javascript">
 (function(po)
 {
-	po.sqlIdentifierQuote = "${sqlIdentifierQuote?js_string}";
+	po.sqlIdentifierQuote = "${sqlIdentifierQuote?js_string?no_esc}";
 	po.isMultipleSelect = ${isMultipleSelect?c};
 	
 	$.initButtons(po.element(".operation"));

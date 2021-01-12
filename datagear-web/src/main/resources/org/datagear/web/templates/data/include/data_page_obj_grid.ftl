@@ -14,10 +14,10 @@ int keywordQueryColumnCount
 <script type="text/javascript">
 (function(po)
 {
-	po.binaryPlaceholder = "${queryDefaultLOBRowMapper.binaryPlaceholder?js_string}";
-	po.clobPlaceholder = "${queryDefaultLOBRowMapper.clobPlaceholder?js_string}";
-	po.sqlXmlPlaceholder = "${queryDefaultLOBRowMapper.sqlXmlPlaceholder?js_string}";
-	po.keywordQueryColumnCount = parseInt("${keywordQueryColumnCount?js_string}");
+	po.binaryPlaceholder = "${queryDefaultLOBRowMapper.binaryPlaceholder?js_string?no_esc}";
+	po.clobPlaceholder = "${queryDefaultLOBRowMapper.clobPlaceholder?js_string?no_esc}";
+	po.sqlXmlPlaceholder = "${queryDefaultLOBRowMapper.sqlXmlPlaceholder?js_string?no_esc}";
+	po.keywordQueryColumnCount = parseInt("${keywordQueryColumnCount?js_string?no_esc}");
 	
 	po.isPlaceholderColumnValue = function(column, value)
 	{

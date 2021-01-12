@@ -58,7 +58,7 @@
 {
 	$.initButtons(po.element());
 	po.element(".fileinput-button").button();
-	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string}", "${((dashboard.analysisProject.name)!'')?js_string}");
+	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");
 	
 	po.url = function(action)
 	{

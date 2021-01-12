@@ -371,8 +371,8 @@ dataExchange_js.ftl
 		<#if initSqls??>
 		var $returnForm = po.element("#${pageId}-returnForm");
 		<#list initSqls as initSql>
-		po.addSubDataExchange("${initSql?js_string}");
-		$("<textarea name='initSqls' style='display:none;'></textarea>").val("${initSql?js_string}").appendTo($returnForm);
+		po.addSubDataExchange("${initSql?js_string?no_esc}");
+		$("<textarea name='initSqls' style='display:none;'></textarea>").val("${initSql?js_string?no_esc}").appendTo($returnForm);
 		</#list>
 		</#if>
 	};

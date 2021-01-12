@@ -16,7 +16,7 @@ ${detectNewVersionScript?no_esc}
 <script type="text/javascript">
 (function(po)
 {
-	po.currentVersion = "${currentVersion?js_string}";
+	po.currentVersion = "${currentVersion?js_string?no_esc}";
 	po.currentUser = <@writeJson var=currentUser />;
 	
 	//将在document.ready中初始化

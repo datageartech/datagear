@@ -83,7 +83,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 			var data =
 			{
 				<#if assignedResource??>
-				"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource?js_string}",
+				"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource?js_string?no_esc}",
 				</#if>
 				"id" : row.id
 			};
@@ -109,7 +109,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 			var data =
 			{
 				<#if assignedResource??>
-				"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource?js_string}",
+				"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource?js_string?no_esc}",
 				</#if>
 				"id" : row.id
 			};
@@ -152,7 +152,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	
 	var url = po.url("queryData");
 	<#if assignedResource??>
-	url = po.url("queryData?${AuthorizationController.PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent("${assignedResource?js_string}"));
+	url = po.url("queryData?${AuthorizationController.PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent("${assignedResource?js_string?no_esc}"));
 	</#if>
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, url);
 	po.initDataTable(tableSettings);

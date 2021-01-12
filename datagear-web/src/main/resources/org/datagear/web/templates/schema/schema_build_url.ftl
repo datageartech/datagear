@@ -71,7 +71,7 @@ preview 是否是预览请求，允许为null
 
 	$.initButtons(po.element());
 	
-	po.initUrl = "${(url!'')?js_string}";
+	po.initUrl = "${(url!'')?js_string?no_esc}";
 	
 	$.schemaUrlBuilder.clear();
 	

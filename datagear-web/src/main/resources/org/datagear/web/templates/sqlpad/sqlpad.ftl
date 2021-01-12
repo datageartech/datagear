@@ -180,7 +180,7 @@ Schema schema 数据库，不允许为null
 	po.schemaId = "${schema.id}";
 	po.sqlpadId = "${sqlpadId}";
 	po.sqlResultReadActualBinaryRows = parseInt("${sqlResultRowMapper.readActualBinaryRows}");
-	po.sqlResultBinaryPlaceholder = "${sqlResultRowMapper.binaryPlaceholder?js_string}";
+	po.sqlResultBinaryPlaceholder = "${sqlResultRowMapper.binaryPlaceholder?js_string?no_esc}";
 	
 	po.resultMessageElement = po.element("#${pageId}-resultMessage");
 	po.sqlResultTabs = po.element("#${pageId}-sqlResultTabs");

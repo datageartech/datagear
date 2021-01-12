@@ -152,7 +152,7 @@ readonly 是否只读操作，允许为null
 	po.templates = <@writeJson var=templates />;
 	
 	$.initButtons(po.element());
-	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string}", "${((dashboard.analysisProject.name)!'')?js_string}");
+	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");
 	po.resourceEditorTabs = po.element("#${pageId}-resourceEditorTabs");
 	
 	if(po.isInDialog())

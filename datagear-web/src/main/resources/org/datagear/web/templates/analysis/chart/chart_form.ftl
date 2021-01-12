@@ -113,7 +113,7 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	po.initAnalysisProject("${((chart.analysisProject.id)!'')?js_string}", "${((chart.analysisProject.name)!'')?js_string}");
+	po.initAnalysisProject("${((chart.analysisProject.id)!'')?js_string?no_esc}", "${((chart.analysisProject.name)!'')?js_string?no_esc}");
 	po.element(".form-item-value-chartDataSet").height($(window).height()/5*2);
 	
 	po.element("input[name='updateIntervalRadio']").checkboxradio({icon:false});

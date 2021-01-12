@@ -57,7 +57,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 	po.data = <@writeJson var=data />;
 	po.dataIsClient = ${dataIsClient?c};
 	po.readonly = ${readonly?c};
-	po.submitAction = "${submitAction?js_string}";
+	po.submitAction = "${submitAction?js_string?no_esc}";
 	po.batchSet = ${batchSet?c};
 	
 	if(!po.dataIsClient && po.data == null)

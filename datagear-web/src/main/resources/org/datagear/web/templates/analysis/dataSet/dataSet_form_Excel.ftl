@@ -119,7 +119,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
-	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string}", "${((dataSet.analysisProject.name)!'')?js_string}");
+	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.element(".nameRow-radios").controlgroup();
 	po.element("#${pageId}-forceXls").buttonset();
 	po.element("#${pageId}-forceXls-${((dataSet.forceXls)!true)?string('true', 'false')}").click();
@@ -130,7 +130,7 @@ readonly 是否只读操作，允许为null
 	po.initPreviewParamValuePanel();
 	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
 
-	po.initDataSetFileInput(po.url("uploadFile"), "${((dataSet.fileSourceType)!'')?js_string}", ${isAdd?string("true", "false")});
+	po.initDataSetFileInput(po.url("uploadFile"), "${((dataSet.fileSourceType)!'')?js_string?no_esc}", ${isAdd?string("true", "false")});
 	
 	po.updatePreviewOptionsData = function()
 	{
