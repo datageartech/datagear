@@ -1120,7 +1120,7 @@ readonly 是否只读操作，允许为null
 					po.templates = dashboard.templates;
 					
 					if(po.showAfterSave)
-						window.open(po.url("show/"+dashboard.id+"/"), "dashboard-" + dashboard.id);
+						window.open(po.url("show/"+dashboard.id+"/"), dashboard.id);
 					
 					var close = po.pageParamCallAfterSave(false);
 					if(!close)
