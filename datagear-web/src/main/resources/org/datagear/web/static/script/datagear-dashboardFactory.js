@@ -59,8 +59,8 @@
 		dashboard.init();
 		
 		//开启心跳，避免会话超时
-		var heartbeatURL = global.chartFactory.renderContextAttr(dashboard.renderContext,
-				global.chartFactory.renderContextAttrs.webContext).extraValues.heartbeatURL;
+		var webContext = chartFactory.renderContextAttrWebContext(dashboard.renderContext);
+		var heartbeatURL = global.chartFactory.toWebContextPathURL(webContext, webContext.attributes.heartbeatURL);
 		this.startHeartBeat(heartbeatURL);
 	};
 	
@@ -1084,8 +1084,8 @@
 		}
 		else
 		{
-			var webContext = this.renderContextAttr(dashboardFactory.renderContextAttrs.webContext);
-			
+			var webContext = global.chartFactory.renderContextAttrWebContext(this.renderContext);
+			var url = global.chartFactory.toWebContextPathURL(webContext, webContext.attributes.updateDashboardURL);
 			var data = this._buildUpdateDashboardAjaxData(preUpdates);
 			
 			var dashboard = this;
@@ -1093,7 +1093,7 @@
 			$.ajax({
 				contentType : "application/json",
 				type : "POST",
-				url : webContext.updateDashboardURL,
+				url : url,
 				data : JSON.stringify(data),
 				success : function(resultsMap)
 				{
@@ -1298,8 +1298,10 @@
 			$(element).attr("id", chartElementId);
 		}
 		
-		var webContext = this.renderContextAttr(dashboardFactory.renderContextAttrs.webContext);
+		var webContext = global.chartFactory.renderContextAttrWebContext(this.renderContext);
+		var url = global.chartFactory.toWebContextPathURL(webContext, webContext.attributes.loadChartURL);
 		var loadChartConfig = dashboardFactory.loadChartConfig;
+		
 		var _this = this;
 		
 		if(!ajaxOptions)
@@ -1320,7 +1322,7 @@
 		
 		var myAjaxOptions = $.extend(
 		{
-			url: webContext.loadChartURL,
+			url: url,
 			data: data,
 			error: function(jqXHR, textStatus, errorThrown)
 			{

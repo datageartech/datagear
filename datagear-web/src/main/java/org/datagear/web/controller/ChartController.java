@@ -6,7 +6,6 @@ package org.datagear.web.controller;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -431,12 +430,11 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		HttpSession session = request.getSession();
 
-		String contextPath = WebUtils.getContextPath(request);
-		WebContext webContext = new WebContext(contextPath,
-				addJsessionidParam(contextPath + "/analysis/chart/showData", session.getId()),
-				addJsessionidParam(contextPath + "/analysis/dashboard/loadChart", session.getId()));
+		WebContext webContext = createInitWebContext(request);
 
-		webContext.setExtraValues(new HashMap<String, Object>());
+		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME, addJsessionidParam("/analysis/chart/showData", session.getId()));
+		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
+				addJsessionidParam("/analysis/dashboard/loadChart", session.getId()));
 		addHeartBeatValue(request, webContext);
 
 		return webContext;

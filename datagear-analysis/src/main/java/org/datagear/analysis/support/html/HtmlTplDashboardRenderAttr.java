@@ -5,7 +5,7 @@
 package org.datagear.analysis.support.html;
 
 import java.io.Writer;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.datagear.analysis.DashboardTheme;
@@ -269,7 +269,7 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	/**
 	 * Web上下文信息。
 	 * <p>
-	 * 这些信息可以输出值客户端，提供看板交互支持。
+	 * 这些信息将输出至客户端，提供看板交互支持。
 	 * </p>
 	 * 
 	 * @author datagear@163.com
@@ -280,27 +280,18 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 		/** 上下文路径 */
 		private String contextPath;
 
-		/** 更新看板数据的URL */
-		private String updateDashboardURL;
-
-		/** 异步加载看板图表的URL */
-		private String loadChartURL;
-
-		/** 其他Web上下文信息 */
-		@SuppressWarnings("unchecked")
-		private Map<String, ?> extraValues = Collections.EMPTY_MAP;
+		/** Web属性集 */
+		private Map<String, ?> attributes = new HashMap<String, Object>();
 
 		public WebContext()
 		{
 			super();
 		}
 
-		public WebContext(String contextPath, String updateDashboardURL, String loadChartURL)
+		public WebContext(String contextPath)
 		{
 			super();
 			this.contextPath = contextPath;
-			this.updateDashboardURL = updateDashboardURL;
-			this.loadChartURL = loadChartURL;
 		}
 
 		public String getContextPath()
@@ -313,41 +304,26 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 			this.contextPath = contextPath;
 		}
 
-		public String getUpdateDashboardURL()
+		public Map<String, ?> getAttributes()
 		{
-			return updateDashboardURL;
+			return attributes;
 		}
 
-		public void setUpdateDashboardURL(String updateDashboardURL)
+		public void setAttributes(Map<String, ?> attributes)
 		{
-			this.updateDashboardURL = updateDashboardURL;
+			this.attributes = attributes;
 		}
 
-		public String getLoadChartURL()
+		@SuppressWarnings("unchecked")
+		public void addAttribute(String name, Object value)
 		{
-			return loadChartURL;
-		}
-
-		public void setLoadChartURL(String loadChartURL)
-		{
-			this.loadChartURL = loadChartURL;
-		}
-
-		public Map<String, ?> getExtraValues()
-		{
-			return extraValues;
-		}
-
-		public void setExtraValues(Map<String, ?> extraValues)
-		{
-			this.extraValues = extraValues;
+			((Map<String, Object>) this.attributes).put(name, value);
 		}
 
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [contextPath=" + contextPath + ", updateDashboardURL="
-					+ updateDashboardURL + ", loadChartURL=" + loadChartURL + ", extraValues=" + extraValues + "]";
+			return getClass().getSimpleName() + " [contextPath=" + contextPath + ", attributes=" + attributes + "]";
 		}
 	}
 }

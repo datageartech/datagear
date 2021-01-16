@@ -151,7 +151,7 @@
 	 */
 	chartFactory._initChartTheme = function(renderContext)
 	{
-		var theme = chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.chartTheme);
+		var theme = chartFactory.renderContextAttrChartTheme(renderContext);
 		
 		if(!theme)
 		{
@@ -304,6 +304,42 @@
 			return renderContext.attributes[attrName];
 		else
 			return renderContext.attributes[attrName] = attrValue;
+	};
+	
+	/**
+	 * 获取渲染上下文中的WebContext对象。
+	 * 
+	 * @param renderContext
+	 */
+	chartFactory.renderContextAttrWebContext = function(renderContext)
+	{
+		return chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.webContext);
+	};
+	
+	/**
+	 * 获取渲染上下文中的ChartTheme对象。
+	 * 
+	 * @param renderContext
+	 */
+	chartFactory.renderContextAttrChartTheme = function(renderContext)
+	{
+		return chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.chartTheme);
+	};
+	
+	/**
+	 * 将给定URL转换为web上下文路径URL。
+	 * 
+	 * @param webContext web上下文
+	 * @param url 待转换的URL
+	 */
+	chartFactory.toWebContextPathURL = function(webContext, url)
+	{
+		var contextPath = webContext.contextPath;
+		
+		if(url.indexOf("/") == 0)
+			url = contextPath + url;
+		
+		return url;
 	};
 	
 	/**
@@ -1834,10 +1870,8 @@
 		
 		url = (url || name);
 		
-		var contextPath = this.renderContextAttr(chartFactory.renderContextAttrs.webContext).contextPath;
-		
-		if(contextPath && url.indexOf("/") == 0 && url.indexOf(contextPath) != 0)
-			url = contextPath + url;
+		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
+		url = chartFactory.toWebContextPathURL(webContext, url);
 		
 		return url;
 	};
@@ -2326,7 +2360,7 @@
 		var element = $("#" + elementId);
 		if(element.length == 0)
 		{
-			var parent = $("<div style='display:none' />").appendTo(document.body);
+			var parent = $("<div style='display:none;position:absolute;left:0;bottom:0;width:0;height:0;z-index:-999;' />").appendTo(document.body);
 			element = $("<div />").attr("id", elementId).appendTo(parent);
 		}
 		
@@ -2425,7 +2459,7 @@
 			
 			var $colorEle = $("#"+elementId);
 			if($colorEle.length == 0)
-				$colorEle = $("<div id='"+elementId+"' style='position:absolute;left:0;bottom:0;width:0;height:0;'></div>")
+				$colorEle = $("<div id='"+elementId+"' style='display:none;position:absolute;left:0;bottom:0;width:0;height:0;z-index:-999;'></div>")
 								.appendTo(document.body);
 			
 			$colorEle.css("color", color);

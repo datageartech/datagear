@@ -61,6 +61,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 	public static final String DASHBOARD_THEME_NAME_PARAM = "theme";
 
+	public static final String WEB_CONTEXT_CONTEXT_PATH_PARAM = "";
+
+	/** 看板更新数据URL名 */
+	public static final String DASHBOARD_UPDATE_URL_NAME = "updateDashboardURL";
+
+	/** 看板加载图表URL名 */
+	public static final String DASHBOARD_LOAD_CHART_URL_NAME = "loadChartURL";
+
 	/** 看板心跳URL名 */
 	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";
 
@@ -114,6 +122,19 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	{
 		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 		return renderAttr;
+	}
+
+	/**
+	 * 创建初始{@linkplain WebContext}。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected WebContext createInitWebContext(HttpServletRequest request)
+	{
+		WebContext webContext = new WebContext(WebUtils.getContextPath(request));
+
+		return webContext;
 	}
 
 	protected Map<String, ?> resolveParamValues(HttpServletRequest request)
@@ -250,13 +271,12 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return re;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
-		String heartbeatURL = WebUtils.getContextPath(request) + "/analysis/dashboard/heartbeat";
+		String heartbeatURL = "/analysis/dashboard/heartbeat";
 		heartbeatURL = addJsessionidParam(heartbeatURL, request.getSession().getId());
 
-		((Map<String, Object>) webContext.getExtraValues()).put(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
+		webContext.addAttribute(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
 	}
 
 	/**
