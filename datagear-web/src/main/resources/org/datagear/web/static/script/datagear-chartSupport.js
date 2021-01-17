@@ -37,14 +37,14 @@
 	};
 	
 	/**
-	 * 获取/设置初始options。
+	 * 获取/设置图表渲染options。
 	 */
-	chartSupport.initOptions = function(chart, options)
+	chartSupport.renderOptions = function(chart, renderOptions)
 	{
-		if(options == undefined)
-			return (chart.extValue("initOptions") || {});
+		if(renderOptions == undefined)
+			return (chart.extValue("renderOptions") || {});
 		else
-			chart.extValue("initOptions", options);
+			chart.extValue("renderOptions", renderOptions);
 	};
 	
 	/**
@@ -93,31 +93,30 @@
 			chart.extValue("chartOptionSeriesTemplate", (options.series || []));
 	};
 	
-	//将chart.optionsUpdate()合并至options
-	chartSupport.mergeUpdateOptions = function(options, chart)
-	{
-		var ou = chart.optionsUpdate();
-		if(ou)
-			$.extend(options, ou);
-	};
-	
-	//处理渲染options
+	//在图表渲染前处理渲染options
 	chartSupport.processRenderOptions = function(chart, renderOptions)
 	{
-		if(renderOptions && renderOptions.processRenderOptions)
+		if(renderOptions.processRenderOptions)
 		{
 			var tmpOptions = renderOptions.processRenderOptions(renderOptions, chart);
 			if(tmpOptions != null)
 				renderOptions = tmpOptions;
 		}
 		
+		chartSupport.renderOptions(chart, renderOptions);
+		
 		return renderOptions;
 	};
 	
-	//处理更新options
+	//在图表更新前处理更新options
 	chartSupport.processUpdateOptions = function(chart, results, renderOptions, updateOptions)
 	{
-		if(renderOptions && renderOptions.processUpdateOptions)
+		//先将chart.optionsUpdate()合并至updateOptions
+		var cou = chart.optionsUpdate();
+		if(cou)
+			$.extend(true, updateOptions, cou);
+		
+		if(renderOptions.processUpdateOptions)
 		{
 			var tmpOptions = renderOptions.processUpdateOptions(updateOptions, chart, results);
 			if(tmpOptions != null)
@@ -611,7 +610,7 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -619,11 +618,11 @@
 	chartSupport.lineUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
-		var stack = (initOptions && initOptions.stack);//是否堆叠
+		var stack = (renderOptions && renderOptions.stack);//是否堆叠
 		
-		var isCategory = (initOptions.xAxis.type == "category");
+		var isCategory = (renderOptions.xAxis.type == "category");
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
 		
@@ -649,7 +648,7 @@
 					legendName = chart.dataSetPropertyLabel(vps[j]);
 				
 				var data = chart.resultRowArrays(result, [np, vps[j]]);
-				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, {name: legendName, data: data});
+				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
 				
 				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
 				if(stack)
@@ -677,7 +676,8 @@
 		var options = { legend: {data: legendData}, series: series };
 		if(isCategory)
 			options.xAxis = {data: xAxisData};
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -770,7 +770,7 @@
 			options.yAxis = xAxisTmp;
 		}
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -778,14 +778,14 @@
 	chartSupport.barUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
-		var stack = initOptions.stack;//是否堆叠
-		var horizontal = initOptions.horizontal;//是否横向
+		var stack = renderOptions.stack;//是否堆叠
+		var horizontal = renderOptions.horizontal;//是否横向
 		//是否按数据集分组堆叠
-		var stackGroup = initOptions.stackGroup == undefined ? true : initOptions.stackGroup;
+		var stackGroup = renderOptions.stackGroup == undefined ? true : renderOptions.stackGroup;
 		
-		var isCategory = ((horizontal ? initOptions.yAxis.type : initOptions.xAxis.type) == "category");
+		var isCategory = ((horizontal ? renderOptions.yAxis.type : renderOptions.xAxis.type) == "category");
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
 		
@@ -811,7 +811,7 @@
 					legendName = chart.dataSetPropertyLabel(vps[j]);
 				
 				var data = chart.resultRowArrays(result, (horizontal ? [vps[j], np] : [np, vps[j]]));
-				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, {name: legendName, data: data});
+				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
 				
 				if(stack)
 					mySeries.stack = (stackGroup ? "stack-"+i : "stack");
@@ -843,7 +843,8 @@
 			else
 				options.xAxis = {data: axisData};
 		}
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -872,8 +873,8 @@
 	chartSupport.barSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
-		var horizontal = initOptions.horizontal;
+		var renderOptions= chartSupport.renderOptions(chart);
+		var horizontal = renderOptions.horizontal;
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
@@ -945,7 +946,7 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -953,12 +954,12 @@
 	chartSupport.barPolarUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
-		var stack = initOptions.dgStack;
-		var axisType = initOptions.dgAxisType;
+		var stack = renderOptions.dgStack;
+		var axisType = renderOptions.dgAxisType;
 		//是否按数据集分组堆叠
-		var stackGroup = initOptions.stackGroup == undefined ? true : initOptions.stackGroup;
+		var stackGroup = renderOptions.stackGroup == undefined ? true : renderOptions.stackGroup;
 		var isCategory = true;
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -985,7 +986,7 @@
 					legendName = chart.dataSetPropertyLabel(vps[j]);
 				
 				var data = chart.resultNameValueObjects(result, np, vps[j]);
-				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, {name: legendName, data: data});
+				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
 				
 				if(stack)
 					mySeries.stack = (stackGroup ? "stack-"+i : "stack");
@@ -1014,7 +1015,8 @@
 			options.angleAxis = {data: axisData};
 		else
 			options.radiusAxis = {data: axisData};
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -1043,7 +1045,7 @@
 	chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
@@ -1089,7 +1091,7 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -1097,7 +1099,7 @@
 	chartSupport.pieUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -1125,10 +1127,11 @@
 			chartSupport.setChartOriginalDataIndexForRange(chart, 0, seriesData.length - nvv.length, seriesData.length, i);
 		}
 		
-		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, data: seriesData}) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, {name: seriesName, data: seriesData}) ];
 		
 		var options = { legend: { data: legendData }, series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -1196,12 +1199,15 @@
 		options,
 		chart.options());
 		
+		options = chartSupport.processRenderOptions(chart, options);
+		
 		chart.echartsInit(options);
 	};
 	
 	chartSupport.gaugeUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSet = chart.chartDataSetFirst();
 		var result = chart.resultFirst(results);
 		
@@ -1222,7 +1228,8 @@
 		chartSupport.setChartOriginalDataIndexForRange(chart, 0, 0, seriesData.length, 0);
 		
 		var options = { series : [ { name: seriesName, min: min, max: max, data: seriesData } ]};
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -1310,7 +1317,7 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -1318,10 +1325,10 @@
 	chartSupport.scatterUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
-		var isCategory = (initOptions.xAxis.type == "category");
+		var isCategory = (renderOptions.xAxis.type == "category");
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
 		
@@ -1330,8 +1337,8 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1358,7 +1365,7 @@
 					max = (max == undefined ? data[k][1] : Math.max(max, data[k][1]));
 				}
 				
-				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, { name: legendName, data: data });
+				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, { name: legendName, data: data });
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -1393,7 +1400,8 @@
 		var options = { legend: {data: legendData}, series: series };
 		if(isCategory)
 			options.xAxis = {data: xAxisData};
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -1480,7 +1488,7 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -1488,7 +1496,7 @@
 	chartSupport.scatterCoordUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -1497,8 +1505,8 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1521,7 +1529,7 @@
 				}
 			}
 			
-			var mySeries = chartSupport.optionsSeries(initOptions, i, { name: dataSetName, data: data });
+			var mySeries = chartSupport.optionsSeries(renderOptions, i, { name: dataSetName, data: data });
 			legendData.push(dataSetName);
 			series.push(mySeries);
 			
@@ -1543,7 +1551,8 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -1672,7 +1681,7 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -1680,7 +1689,7 @@
 	chartSupport.radarUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -1700,20 +1709,21 @@
 			//行式雷达网数据，必设置【雷达网条目名称】标记
 			if(ip)
 			{
-				chartSupport.radarUpdateForRowData(chart, results, signNameMap, initOptions,
+				chartSupport.radarUpdateForRowData(chart, results, signNameMap, renderOptions,
 						chartDataSet, i, result, legendData, indicatorData, seriesData)
 			}
 			//列式雷达网数据
 			else
 			{
-				chartSupport.radarUpdateForColumnData(chart, results, signNameMap, initOptions,
+				chartSupport.radarUpdateForColumnData(chart, results, signNameMap, renderOptions,
 						chartDataSet, i, result, legendData, indicatorData, seriesData)
 			}
 		}
 		
 		var series = [ { data: seriesData } ];
 		var options = { legend: {data: legendData}, radar: {indicator: indicatorData}, series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 		
@@ -1721,7 +1731,7 @@
 	};
 	
 	//行式雷达网数据处理，一行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*n
-	chartSupport.radarUpdateForRowData = function(chart, results, signNameMap, initOptions,
+	chartSupport.radarUpdateForRowData = function(chart, results, signNameMap, renderOptions,
 			chartDataSet, chartDataSetIdx, result, legendData, indicatorData, seriesData)
 	{
 		var ip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.item);
@@ -1761,7 +1771,7 @@
 	};
 	
 	//列式雷达网数据处理，一列【指标值】数据表示一条雷达网，列式结构为：指标名, 指标上限值, [指标值]*n，其中【指标值】列名将作为雷达网条目名称
-	chartSupport.radarUpdateForColumnData = function(chart, results, signNameMap, initOptions,
+	chartSupport.radarUpdateForColumnData = function(chart, results, signNameMap, renderOptions,
 			chartDataSet, chartDataSetIdx, result, legendData, indicatorData, seriesData)
 	{
 		//仅使用第一个数据集构建指示器
@@ -1889,8 +1899,8 @@
 		},
 		options,
 		chart.options());
-
-		chartSupport.initOptions(chart, options);
+		
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -1898,7 +1908,7 @@
 	chartSupport.funnelUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -1939,10 +1949,11 @@
 				max = v;
 		}
 		
-		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, min: min, max: max, data: seriesData }) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, {name: seriesName, min: min, max: max, data: seriesData }) ];
 		
 		var options = { legend: { data: legendData }, series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -1996,7 +2007,7 @@
 		if(!map)
 			throw new Error("[map] option must be set");
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		if(chart.echartsMapRegistered(map))
 		{
@@ -2017,11 +2028,11 @@
 		}
 	};
 	
-	chartSupport.mapUpdateChart = function(chart, initOptions, updateOptions)
+	chartSupport.mapUpdateChart = function(chart, results, renderOptions, updateOptions)
 	{
 		var map = undefined;
 		//地图作为坐标系，而非图表series
-		var isGeo = (initOptions.geo);
+		var isGeo = (renderOptions.geo);
 		
 		if(isGeo)
 			map = (updateOptions.geo ? updateOptions.geo.map : undefined);
@@ -2076,7 +2087,7 @@
 		//没有更新地图、或者更新的地图已注册
 		if(!map || chart.echartsMapRegistered(map))
 		{
-			chartSupport.mergeUpdateOptions(updateOptions, chart);
+			options = chartSupport.processUpdateOptions(chart, results, renderOptions, updateOptions);
 			
 			chart.echartsOptions(updateOptions);
 			
@@ -2089,7 +2100,7 @@
 		{
 			chart.echartsLoadMap(map, function()
 			{
-				chartSupport.mergeUpdateOptions(updateOptions, chart);
+				options = chartSupport.processUpdateOptions(chart, results, renderOptions, updateOptions);
 				
 				chart.echartsOptions(updateOptions);
 				chart.extValue("presetMap", map);
@@ -2143,7 +2154,7 @@
 	chartSupport.mapUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -2199,7 +2210,7 @@
 		if(map)
 			options.series[0].map = map;
 		
-		chartSupport.mapUpdateChart(chart, initOptions, options);
+		chartSupport.mapUpdateChart(chart, results, renderOptions, options);
 	};
 	
 	chartSupport.mapResize = function(chart)
@@ -2290,7 +2301,7 @@
 	chartSupport.mapScatterUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -2300,8 +2311,8 @@
 		var map = undefined;
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -2339,7 +2350,7 @@
 			}
 			
 			legendData[i] = dataSetName;
-			series[i] = chartSupport.optionsSeries(initOptions, i, { name: dataSetName, data: data });
+			series[i] = chartSupport.optionsSeries(renderOptions, i, { name: dataSetName, data: data });
 			
 			chartSupport.setChartOriginalDataIndexForRange(chart, series.length-1, 0, data.length, i);
 		}
@@ -2365,7 +2376,7 @@
 		if(map)
 			options.geo = { map: map };
 		
-		chartSupport.mapUpdateChart(chart, initOptions, options);
+		chartSupport.mapUpdateChart(chart, results, renderOptions, options);
 	};
 
 	chartSupport.mapScatterResize = function(chart)
@@ -2460,7 +2471,7 @@
 	chartSupport.mapGraphUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -2473,8 +2484,8 @@
 		var map = undefined;
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -2591,7 +2602,7 @@
 		if(min != null && max != null && max <= min)
 			max = min + 1;
 		
-		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
 		
 		//自动计算散点大小
 		if(series[0].symbolSize == null)
@@ -2612,7 +2623,7 @@
 		if(map)
 			options.geo = { map: map };
 		
-		chartSupport.mapUpdateChart(chart, initOptions, options);
+		chartSupport.mapUpdateChart(chart, results, renderOptions, options);
 		
 		chart.extValue("mapGraphSeriesData", seriesData);
 	};
@@ -2736,7 +2747,7 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -2744,7 +2755,7 @@
 	chartSupport.candlestickUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -2769,11 +2780,12 @@
 			for(var j=0; j<data.length; j++)
 				chartSupport.chartDataOriginalDataIndex(data[j], i, j);
 			
-			series.push(chartSupport.optionsSeries(initOptions, i, {name: dataSetName, data: data}));
+			series.push(chartSupport.optionsSeries(renderOptions, i, {name: dataSetName, data: data}));
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -2884,7 +2896,7 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -2892,7 +2904,7 @@
 	chartSupport.heatmapUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		chartSupport.clearChartOriginalDataIndexForRange(chart);
@@ -2939,11 +2951,12 @@
 		if(max < min)
 			max = min + 1;
 		
-		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData }) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, data: seriesData }) ];
 		
 		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
 		chartSupport.checkMinAndMax(options.visualMap);
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -3030,20 +3043,21 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
 	
 	chartSupport.treeUpdate = function(chart, results)
 	{
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		
 		var mySeries = chartSupport.buildTreeNodeSeries(chart, results);
-		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, mySeries) ];
 		
 		var options = { series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -3110,20 +3124,21 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
 	
 	chartSupport.treemapUpdate = function(chart, results)
 	{
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		
 		var mySeries = chartSupport.buildTreeNodeSeries(chart, results);
-		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, mySeries) ];
 		
 		var options = { series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -3197,20 +3212,21 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
 	
 	chartSupport.sunburstUpdate = function(chart, results)
 	{
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		
 		var mySeries = chartSupport.buildTreeNodeSeries(chart, results);
-		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, mySeries) ];
 		
 		var options = { series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -3417,7 +3433,7 @@
 			options.series[0].nodeGap = nodeGap;
 		}
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -3425,7 +3441,7 @@
 	chartSupport.sankeyUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var seriesName = "";
@@ -3490,10 +3506,11 @@
 			}
 		}
 		
-		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData, links: seriesLinks }) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, data: seriesData, links: seriesLinks }) ];
 		
 		var options = { series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 		
@@ -3605,7 +3622,7 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -3613,7 +3630,7 @@
 	chartSupport.graphUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var legendData = [];
@@ -3623,8 +3640,8 @@
 		var seriesLinks = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -3731,7 +3748,7 @@
 		if(min == undefined && max == undefined && symbolSizeMin < 10)
 			symbolSizeMin = 10;
 		
-		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
 		
 		//自动计算散点大小
 		if(series[0].symbolSize == null)
@@ -3763,7 +3780,8 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 		
@@ -3911,7 +3929,7 @@
 			options.colorGradients = colorGradients;
 		}
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
 	};
@@ -3919,7 +3937,7 @@
 	chartSupport.wordcloudUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var initOptions= chartSupport.initOptions(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 
 		var seriesName = "";
@@ -3949,7 +3967,7 @@
 			min = max - 1;
 		
 		//映射颜色值
-		var colorGradients = initOptions.colorGradients;
+		var colorGradients = renderOptions.colorGradients;
 		if(colorGradients)
 		{
 			for(var i=0; i<seriesData.length; i++)
@@ -3959,10 +3977,11 @@
 			}
 		}
 		
-		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, data: seriesData}) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, {name: seriesName, data: seriesData}) ];
 		
 		var options = { series: series };
-		chartSupport.mergeUpdateOptions(options, chart);
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -4284,12 +4303,11 @@
 		}
 		
 		chart.extValue("chartTableId", tableId);
-		chartSupport.initOptions(chart, options);
 	};
 	
 	chartSupport.tableUpdate = function(chart, results, options)
 	{
-		var initOptions = chartSupport.initOptions(chart);
+		var renderOptions = chartSupport.renderOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
@@ -4312,11 +4330,11 @@
 		
 		chartSupport.tableStopCarousel(chart);
 		
-		updateOptions = chartSupport.processUpdateOptions(chart, results, initOptions, updateOptions);
+		updateOptions = chartSupport.processUpdateOptions(chart, results, renderOptions, updateOptions);
 		
 		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0, false);
 		
-		if(initOptions.carousel.enable)
+		if(renderOptions.carousel.enable)
 		{
 			chartSupport.tablePrepareCarousel(chart);
 			chartSupport.tableStartCarousel(chart);
@@ -4533,10 +4551,10 @@
 	 */
 	chartSupport.tablePrepareCarousel = function(chart)
 	{
-		var initOptions = chartSupport.initOptions(chart);
+		var renderOptions = chartSupport.renderOptions(chart);
 		var chartEle = chart.elementJquery();
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
-		var carousel = initOptions.carousel;
+		var carousel = renderOptions.carousel;
 		
 		var rowCount = dataTable.rows().indexes().length;
 		
@@ -4574,7 +4592,7 @@
 	 */
 	chartSupport.tableStartCarousel = function(chart)
 	{
-		var initOptions = chartSupport.initOptions(chart);
+		var renderOptions = chartSupport.renderOptions(chart);
 		var chartEle = chart.elementJquery();
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
@@ -4590,7 +4608,7 @@
 		var scrollBody = $(".dataTables_scrollBody", chartEle);
 		var scrollTable = $(".dataTable", scrollBody);
 		
-		chartSupport.tableHandleCarousel(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable);
+		chartSupport.tableHandleCarousel(chart, renderOptions, chartEle, dataTable, scrollBody, scrollTable);
 	};
 	
 	/**
@@ -4603,7 +4621,7 @@
 		chartSupport.tableCarouselIntervalId(chart, null);
 	};
 	
-	chartSupport.tableHandleCarousel = function(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable)
+	chartSupport.tableHandleCarousel = function(chart, renderOptions, chartEle, dataTable, scrollBody, scrollTable)
 	{
 		if(chartEle.data("tableCarouselStatus") == "stop")
 			return;
@@ -4668,20 +4686,20 @@
 			scrollTop = scrollTop - offset;
 		}
 		
-		var span = ($.isFunction(initOptions.carousel.span) ?
-				initOptions.carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : initOptions.carousel.span);
+		var span = ($.isFunction(renderOptions.carousel.span) ?
+				renderOptions.carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : renderOptions.carousel.span);
 		
 		scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
 		
 		if(addRowDatas.length > 0)
 			dataTable.rows.add(addRowDatas).draw();
 		
-		var interval = ($.isFunction(initOptions.carousel.interval) ?
-				initOptions.carousel.interval(currentRow, currentRowVisibleHeight, currentRowHeight) : initOptions.carousel.interval);
+		var interval = ($.isFunction(renderOptions.carousel.interval) ?
+				renderOptions.carousel.interval(currentRow, currentRowVisibleHeight, currentRowHeight) : renderOptions.carousel.interval);
 		
 		var intervalId = setTimeout(function()
 		{
-			chartSupport.tableHandleCarousel(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable);
+			chartSupport.tableHandleCarousel(chart, renderOptions, chartEle, dataTable, scrollBody, scrollTable);
 		},
 		interval);
 		
@@ -4740,16 +4758,16 @@
 		options,
 		chart.options());
 		
-		chartSupport.initOptions(chart, options);
+		options = chartSupport.processRenderOptions(chart, options);
 	};
 	
 	chartSupport.labelUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var options = chartSupport.initOptions(chart);
-		var valueFirst = options.valueFirst;
-		var showName = options.showName;
-		var clear = (valueFirst != options.valueFirst || showName != options.showName);
+		var renderOptions = chartSupport.renderOptions(chart);
+		var valueFirst = renderOptions.valueFirst;
+		var showName = renderOptions.showName;
+		var clear = (valueFirst != renderOptions.valueFirst || showName != renderOptions.showName);
 		
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -4793,15 +4811,15 @@
 					var $labelName = $(".label-name", $label);
 					var $labelValue = $(".label-value", $label);
 					
-					if(options.label.name.show)
+					if(renderOptions.label.name.show)
 					{
-						if(options.valueFirst && $labelValue.length == 0)
+						if(renderOptions.valueFirst && $labelValue.length == 0)
 							$labelValue = $("<div class='label-value'></div>").appendTo($label);
 						
 						if($labelName.length == 0)
 							$labelName = $("<div class='label-name'></div>").appendTo($label);
 						
-						if(!options.valueFirst && $labelValue.length == 0)
+						if(!renderOptions.valueFirst && $labelValue.length == 0)
 							$labelValue = $("<div class='label-value'></div>").appendTo($label);
 					}
 					else
@@ -4810,14 +4828,14 @@
 							$labelValue = $("<div class='label-value'></div>").appendTo($label);
 					}
 					
-					if(options.label.name.show)
+					if(renderOptions.label.name.show)
 					{
 						$labelName.html(name);
-						global.chartFactory.setStyles($labelName, options.label.name);
+						global.chartFactory.setStyles($labelName, renderOptions.label.name);
 					}
 					
 					$labelValue.html(value);
-					global.chartFactory.setStyles($labelValue, options.label.value);
+					global.chartFactory.setStyles($labelValue, renderOptions.label.value);
 				}
 			}
 		}

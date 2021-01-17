@@ -1,7 +1,7 @@
 下一版本：
 	
+	ok 内置图表添加processRenderOptions、processUpdateOptions选项；
 	看板编辑页面支持搜索功能；
-	图表选项添加processRenderOptions()、processUpdateOptions()支持；
 	添加更多内置图表插件；
 	
 待定：
