@@ -218,6 +218,64 @@ public class DbVersionManager extends AbstractVersionContentReader
 
 		Statement st = cn.createStatement();
 
+		try
+		{
+			try
+			{
+				version = getCurrentVersionForNewTable(cn, st);
+			}
+			catch (SQLException e)
+			{
+				version = getCurrentVersionForOldTable(cn, st);
+			}
+		}
+		finally
+		{
+			// 需在这里释放st，不然如果更新脚本里有版本号表的DDL语句，可能会导致锁表无法执行更新脚本
+			JdbcUtil.closeStatement(st);
+		}
+
+		return version;
+	}
+
+	/**
+	 * 获取当前版本。
+	 * <p>
+	 * 此方法用于从新结构（{@code 2.2.0及以上版本}）的{@linkplain #versionTableName}中读取版本号。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @return
+	 */
+	protected Version getCurrentVersionForNewTable(Connection cn, Statement st) throws SQLException
+	{
+		Version version = null;
+
+		ResultSet rs = st.executeQuery("SELECT VERSION_VALUE FROM " + this.versionTableName);
+
+		if (rs.next())
+		{
+			version = Version.valueOf(rs.getString(1));
+		}
+
+		return version;
+	}
+
+	/**
+	 * 获取当前版本。
+	 * <p>
+	 * 此方法用于从旧结构（{@code 2.2.0以下版本}）的{@linkplain #versionTableName}中读取版本号。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param st
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Version getCurrentVersionForOldTable(Connection cn, Statement st) throws SQLException
+	{
+		Version version = null;
+
 		ResultSet rs = st.executeQuery(
 				"SELECT VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD FROM " + this.versionTableName);
 
@@ -242,6 +300,56 @@ public class DbVersionManager extends AbstractVersionContentReader
 	 * @throws SQLException
 	 */
 	protected void updateVersion(Connection cn, Version version) throws SQLException
+	{
+		try
+		{
+			updateVersionForNewTable(cn, version);
+		}
+		catch (SQLException e)
+		{
+			updateVersionForOldTable(cn, version);
+		}
+	}
+
+	/**
+	 * 更新数据库中的版本号。
+	 * <p>
+	 * 此方法用于更新新结构（{@code 2.2.0及以上版本}）的{@linkplain #versionTableName}中的版本号。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param version
+	 * @throws SQLException
+	 */
+	protected void updateVersionForNewTable(Connection cn, Version version) throws SQLException
+	{
+		PreparedStatement st = cn.prepareStatement("UPDATE " + this.versionTableName + " SET VERSION_VALUE = ?");
+
+		st.setString(1, Version.stringOf(version));
+
+		int count = st.executeUpdate();
+
+		if (count == 0)
+		{
+			st = cn.prepareStatement("INSERT INTO " + this.versionTableName + " (VERSION_VALUE) VALUES(?)");
+
+			st.setString(1, Version.stringOf(version));
+
+			st.executeUpdate();
+		}
+	}
+
+	/**
+	 * 更新数据库中的版本号。
+	 * <p>
+	 * 此方法用于更新旧结构（{@code 2.2.0以下版本}）的{@linkplain #versionTableName}中的版本号。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param version
+	 * @throws SQLException
+	 */
+	protected void updateVersionForOldTable(Connection cn, Version version) throws SQLException
 	{
 		PreparedStatement st = cn.prepareStatement("UPDATE " + this.versionTableName
 				+ " SET VERSION_MAJOR = ?, VERSION_MINOR = ?, VERSION_REVISION = ?, VERSION_BUILD = ?");

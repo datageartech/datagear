@@ -154,7 +154,7 @@ SQL工作台
 在调试开发分支前（`dev-*`），建议先备份DataGear工作目录（`[用户主目录]/.datagear`），
 因为开发分支程序启动时会修改DataGear工作目录，可能会导致先前使用的正式版程序、以及后续发布的正式版程序无法正常启动。
 
-系统启动时会根据当前版本号自动升级内置数据库（Derby），且成功后下次启动时不再自动执行，如果调试时遇到数据库异常，需要查看
+系统启动时会根据当前版本号自动升级内置数据库（Derby数据库，位于`[用户主目录]/.datagear/derby`目录下），且成功后下次启动时不再自动执行，如果调试时遇到数据库异常，需要查看
 
 	datagear-management/src/main/resources/org/datagear/management/ddl/datagear.sql
 
@@ -162,10 +162,10 @@ SQL工作台
 
 然后，手动执行下面更新系统版本号的SQL语句：
 
-	UPDATE DATAGEAR_VERSION SET VERSION_MAJOR='主版本号', VERSION_MINOR='次版本号', VERSION_REVISION = '修订版本号'
+	UPDATE DATAGEAR_VERSION SET VERSION_VALUE='当前版本号'
 	
 例如，对于`2.0.0`版本，应执行：
 
-	UPDATE DATAGEAR_VERSION SET VERSION_MAJOR='2', VERSION_MINOR='0', VERSION_REVISION = '0'
+	UPDATE DATAGEAR_VERSION SET VERSION_VALUE='2.0.0'
 
 系统自带了一个可用于为内置数据库执行SQL语句的简单工具类`org.datagear.web.util.DerbySqlClient`，可以在IDE中直接运行。注意：运行前需要先停止DataGear程序。
