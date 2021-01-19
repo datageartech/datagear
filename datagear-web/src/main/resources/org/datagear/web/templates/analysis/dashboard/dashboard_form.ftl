@@ -260,30 +260,32 @@ readonly 是否只读操作，允许为null
 		
 		if(isTemplate)
 		{
-			var found = editor.find("</body>",{backwards: true, wrap: false, caseSensitive: false, wholeWord: false, regExp: false});
+			//光标移至"</body>"之前，便于用户直接编辑
+			var found = editor.find("</body>",{backwards: true, wrap: false, caseSensitive: false, wholeWord: false, regExp: false}, true);
 			if(found && found.start && found.start.row > 0)
 			{
-				cursor = {row: found.start.row-1, column: 0};
-				editor.moveCursorToPosition(cursor);
+				cursor = {row: found.start.row-1, column: 1000};
 				var selection = editor.session.getSelection();
 				selection.clearSelection();
 			}
+			//滚动到底部
+			editor.session.setScrollTop(99999);
 		}
 		
-		//滚动到底部
-		editor.session.setScrollTop(99999);
+		editor.moveCursorToPosition(cursor);
 		editor.focus();
 		<#if readonly>
 		editor.setReadOnly(true);
 		</#if>
 		
 		tabPane.data("resourceEditorInstance", editor);
-
+		
+		var pc3 = $("<div class='editor-operation-wrapper' />").appendTo(tabPane);
+		
 		<#if !readonly>
 		if(isTemplate)
 		{
-			var pc3 = $("<div class='insert-chart-button-wrapper' />").appendTo(tabPane);
-			var insertChartBtn = $("<button type='button' class='insertChartBtn' />")
+			var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
 				.text("<@spring.message code='dashboard.insertChart' />").appendTo(pc3).button()
 				.click(function()
 				{
@@ -306,6 +308,42 @@ readonly 是否只读操作，允许为null
 				});
 		}
 		</#if>
+		
+		var searchGroup = $("<div class='search-group ui-widget ui-widget-content ui-corner-all' />").appendTo(pc3);
+		var searchInput = $("<input type='text' class='search-input ui-widget ui-widget-content' />").appendTo(searchGroup)
+				.on("keydown", function(e)
+				{
+					if(e.keyCode == $.ui.keyCode.ENTER)
+					{
+						po.element(".search-button", tabPane).click();
+						//防止提交表单
+						return false;
+					}
+				});
+		var searchButton = $("<button type='button' class='search-button ui-button ui-corner-all ui-widget ui-button-icon-only'>"
+				+"<span class='ui-icon ui-icon-search'></span><span class='ui-button-icon-space'></span>Search</button>")
+				.appendTo(searchGroup)
+				.click(function()
+				{
+					var $this = $(this);
+					
+					var text = po.element(".search-input", tabPane).val();
+					
+					if(!text)
+						return;
+					
+					var searchOptions = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+					
+					var prevSearchText = $this.data("prevSearchText");
+					
+					if(text == prevSearchText)
+						editor.findNext(searchOptions, true);
+					else
+					{
+						editor.find(text, searchOptions, true);
+						$this.data("prevSearchText", text);
+					}
+				});
 		
    	    $(".tab-operation .ui-icon-close", tab).click(function()
    	    {

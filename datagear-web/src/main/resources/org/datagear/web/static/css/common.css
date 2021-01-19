@@ -2909,12 +2909,25 @@ table.dataTable tbody tr td select{
 	top: 0;
 	bottom: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .insert-chart-button-wrapper{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper{
 	position: absolute;
 	top: 0;
 	right: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .insert-chart-button-wrapper .ui-button{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .insert-chart-button{
+	margin-right: 1em;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .search-group{
+	display: inline-block;
+	padding-left: 1px;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .search-group .search-input{
+	width: 8em !important;
+	margin-top: 0.5px;
+	border-width: 0;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .search-group .search-button{
+	border-width: 0;
 	margin-right: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-list-wrapper{
