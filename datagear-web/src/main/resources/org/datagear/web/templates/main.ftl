@@ -857,20 +857,24 @@ ${detectNewVersionScript?no_esc}
 				{
 					po.open(contextPath+"/schemaUrlBuilder/editScriptCode");
 				}
+				/*
 				else if($item.hasClass("system-set-driverEntity-add"))
 				{
 					po.open(contextPath+"/driverEntity/add");
 				}
+				*/
 				else if($item.hasClass("system-set-driverEntity-manage"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/driverEntity/query", options);
 				}
+				/*
 				else  if($item.hasClass("system-set-user-add"))
 				{
 					po.open(contextPath+"/user/add");
 				}
+				*/
 				else if($item.hasClass("system-set-user-manage"))
 				{
 					var options = {};
@@ -901,10 +905,12 @@ ${detectNewVersionScript?no_esc}
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/analysis/chartPlugin/query", options);
 				}
+				/*
 				else if($item.hasClass("system-set-chartPlugin-upload"))
 				{
 					po.open(contextPath+"/analysis/chartPlugin/upload");
 				}
+				*/
 				else if($item.hasClass("system-set-personal-set"))
 				{
 					po.open(contextPath+"/user/personalSet");
@@ -1427,18 +1433,24 @@ ${detectNewVersionScript?no_esc}
 					<#if !currentUser.anonymous>
 					<#if currentUser.admin>
 					<li class="system-set-driverEntity-manage"><a href="javascript:void(0);"><@spring.message code='main.manageDriverEntity' /></a></li>
+					<!--
 					<li class="system-set-driverEntity-add"><a href="javascript:void(0);"><@spring.message code='main.addDriverEntity' /></a></li>
 					<li class="ui-widget-header"></li>
+					-->
 					<li class="system-set-schema-url-builder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
 					<li class="system-set-authorization-manage"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaAuth' /></a></li>
 					<li class="ui-widget-header"></li>
+					<li class="system-set-dataSetResDirectory-manage"><a href="javascript:void(0);"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
 					<li class="system-set-chartPlugin-manage"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>
+					<!--
 					<li class="system-set-chartPlugin-upload"><a href="javascript:void(0);"><@spring.message code='main.uploadChartPlugin' /></a></li>
 					<li class="ui-widget-header"></li>
-					<li class="system-set-dataSetResDirectory-manage"><a href="javascript:void(0);"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
+					-->
 					<li class="ui-widget-header"></li>
 					<li class="system-set-user-manage"><a href="javascript:void(0);"><@spring.message code='main.manageUser' /></a></li>
+					<!--
 					<li class="system-set-user-add"><a href="javascript:void(0);"><@spring.message code='main.addUser' /></a></li>
+					-->
 					<li class="system-set-rold-manage"><a href="javascript:void(0);"><@spring.message code='main.manageRole' /></a></li>
 					</#if>
 					<li class="system-set-personal-set"><a href="javascript:void(0);"><@spring.message code='main.personalSet' /></a></li>
