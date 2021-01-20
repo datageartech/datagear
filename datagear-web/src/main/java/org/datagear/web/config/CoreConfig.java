@@ -492,7 +492,7 @@ public class CoreConfig implements InitializingBean
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(resManager,
 				this.htmlChartWidgetEntityService());
 
-		bean.setDashboardImports(this.buildHtmlTplDashboardWidgetRendererd_dshboardImports());
+		bean.setDashboardImports(this.buildHtmlTplDashboardWidgetRenderer_dshboardImports());
 		bean.setImportHtmlChartPluginVarNameResolver(
 				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver());
 
@@ -505,14 +505,14 @@ public class CoreConfig implements InitializingBean
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(
 				this.templateDashboardWidgetResManager(), this.htmlChartWidgetEntityService());
 
-		bean.setDashboardImports(this.buildHtmlTplDashboardWidgetRendererd_dshboardImports());
+		bean.setDashboardImports(this.buildHtmlTplDashboardWidgetRenderer_dshboardImports());
 		bean.setImportHtmlChartPluginVarNameResolver(
 				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver());
 
 		return bean;
 	}
 
-	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardWidgetRendererd_dshboardImports()
+	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardWidgetRenderer_dshboardImports()
 	{
 		List<HtmlTplDashboardImport> imports = new ArrayList<>();
 
@@ -527,34 +527,37 @@ public class CoreConfig implements InitializingBean
 		// CSS
 		imports.add(
 				new HtmlTplDashboardImport("dataTableStyle", "<link type='text/css' res-name='dataTableStyle' href='"
-						+ libPrefix + "/DataTables-1.10.18/css/datatables.min.css?v=" + vp + "'  rel='stylesheet' />"));
+						+ libPrefix + "/DataTables-1.10.18/css/datatables.min.css' rel='stylesheet' />"));
 
 		imports.add(new HtmlTplDashboardImport("datetimepickerStyle",
 				"<link type='text/css' res-name='datetimepickerStyle' href='" + libPrefix
-						+ "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css?v=" + vp
-						+ "'  rel='stylesheet' />"));
+						+ "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css'  rel='stylesheet' />"));
 
 		imports.add(
 				new HtmlTplDashboardImport("dashboardStyle", "<link type='text/css' res-name='dashboardStyle' href='"
-						+ cssPrefix + "/analysis.css?v=" + vp + "'  rel='stylesheet' />"));
+						+ cssPrefix + "/analysis.css?v=" + vp + "' rel='stylesheet' />"));
 
 		// JS
 		imports.add(new HtmlTplDashboardImport("jquery", "<script type='text/javascript' res-name='jquery' src='"
-				+ libPrefix + "/jquery-1.12.4/jquery-1.12.4.min.js?v=" + vp + "'></script>"));
+				+ libPrefix + "/jquery-1.12.4/jquery-1.12.4.min.js'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("echarts", "<script type='text/javascript' res-name='echarts' src='"
-				+ libPrefix + "/echarts-4.9.0/echarts.min.js?v=" + vp + "'></script>"));
+				+ libPrefix + "/echarts-4.9.0/echarts.min.js'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("echarts-wordcloud",
 				"<script type='text/javascript' res-name='echarts-wordcloud' src='" + libPrefix
-						+ "/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js?v=" + vp + "'></script>"));
+						+ "/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js'></script>"));
+
+		imports.add(new HtmlTplDashboardImport("echarts-liquidfill",
+				"<script type='text/javascript' res-name='echarts-liquidfill' src='" + libPrefix
+						+ "/echarts-liquidfill-2.0.6/echarts-liquidfill.min.js'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("dataTable", "<script type='text/javascript' res-name='dataTable' src='"
-				+ libPrefix + "/DataTables-1.10.18/js/datatables.min.js?v=" + vp + "'></script>"));
+				+ libPrefix + "/DataTables-1.10.18/js/datatables.min.js'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("datetimepicker",
 				"<script type='text/javascript' res-name='datetimepicker' src='" + libPrefix
-						+ "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js?v=" + vp + "'></script>"));
+						+ "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("chartFactory",
 				"<script type='text/javascript' res-name='chartFactory' src='" + scriptPrefix

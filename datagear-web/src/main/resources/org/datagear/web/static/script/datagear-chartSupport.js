@@ -4016,7 +4016,176 @@
 		
 		data[signNameMap.name] = echartsData.name;
 		data[signNameMap.value] = echartsData.value;
-
+		
+		chart.eventData(chartEvent, data);
+		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
+	};
+	
+	//水球图
+	
+	chartSupport.liquidfillRender = function(chart, nameSign, valueSign, options)
+	{
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		
+		//不支持在echarts主题中设置样式，只能在这里设置
+		var chartTheme = chart.theme();
+		
+		options = $.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			series:
+			[
+				{
+					name: "",
+					type: "liquidFill",
+					radius: "75%",
+					color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
+					backgroundStyle:
+					{
+						color: "transparent"
+					},
+					outline:
+					{
+						itemStyle:
+						{
+							shadowColor: global.chartFactory.getGradualColor(chartTheme, 0.4)
+						}
+					},
+					label:
+					{
+						color: chartTheme.color
+					},
+					shape: "circle",
+					data: [],
+					
+					//扩展配置项
+					//如果仅有一个波浪数据，则自动复制扩充至这些个波浪数据
+					autoInflateWave: 3,
+				}
+			]
+		},
+		options,
+		chart.options());
+		
+		options = chartSupport.processRenderOptions(chart, options);
+		
+		chart.echartsInit(options);
+	};
+	
+	chartSupport.liquidfillUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var seriesData = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var result = chart.resultAt(results, i);
+			
+			var nps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.name);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			var npsNone = (nps==null || nps.length==0);
+			
+			if(!npsNone && nps.length!=vps.length)
+				throw new Error("The ["+signNameMap.name+"] sign column must be "
+						+"one-to-one with ["+signNameMap.value+"] sign column");
+			
+			var data = [];
+			
+			if(npsNone)
+			{
+				var ras = chart.resultRowArrays(result, vps);
+				for(var j=0; j<ras.length; j++)
+				{
+					var ra = ras[j];
+					for(var k=0; k<ra.length; k++)
+					{
+						var sv = { name: chart.dataSetPropertyLabel(vps[k]), value: ra[k] };
+						chartSupport.chartDataOriginalDataIndex(sv, i, j);
+						data.push(sv);
+					}
+				}
+			}
+			else
+			{
+				var namess = chart.resultRowArrays(result, nps);
+				var valuess = chart.resultRowArrays(result, vps);
+				
+				for(var j=0; j<namess.length; j++)
+				{
+					var names = namess[j];
+					var values = valuess[j];
+					
+					for(var k=0; k<names.length; k++)
+					{
+						var sv = { name: names[k], value: values[k] };
+						chartSupport.chartDataOriginalDataIndex(sv, i, j);
+						data.push(sv);
+					}
+				}
+			}
+			
+			seriesData = seriesData.concat(data);
+		}
+		
+		if(seriesData.length == 1 && renderOptions.series[0].autoInflateWave > 1)
+		{
+			for(var i=1; i<renderOptions.series[0].autoInflateWave; i++)
+			{
+				var inflateValue = $.extend({}, seriesData[0]);
+				seriesData.push(inflateValue);
+			}
+		}
+		
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, {data: seriesData}) ];
+		
+		var options = { series: series };
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		
+		chart.echartsOptions(options);
+	};
+	
+	chartSupport.liquidfillResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.liquidfillDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+	
+	chartSupport.liquidfillOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.liquidfillSetChartEventData);
+	};
+	
+	chartSupport.liquidfillOff = function(chart, eventType, handler)
+	{
+		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+	};
+	
+	chartSupport.liquidfillSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var echartsData = echartsEventParams.data;
+		var data = {};
+		
+		data[signNameMap.name] = echartsData.name;
+		data[signNameMap.value] = echartsData.value;
+		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
 	};
