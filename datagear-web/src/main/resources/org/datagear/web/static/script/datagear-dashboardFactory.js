@@ -1481,7 +1481,7 @@
 	/**
 	 * 内置地图JSON地址配置。
 	 */
-	dashboardFactory.builtInEchartsMapBaseURL = "/static/script/echarts-map";
+	dashboardFactory.builtInEchartsMapBaseURL = "/static/lib/echarts-map";
 	dashboardFactory.builtInEchartsMaps =
 	[
 		{names: ["china", "中国"], url: "/china.json"},

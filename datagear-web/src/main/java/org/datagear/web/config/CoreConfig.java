@@ -520,16 +520,17 @@ public class CoreConfig implements InitializingBean
 		String vp = HtmlTplDashboardWidgetRenderer.DEFAULT_VERSION_PLACE_HOLDER;
 
 		String staticPrefix = cp + "/static";
+		String libPrefix = staticPrefix + "/lib";
 		String cssPrefix = staticPrefix + "/css";
 		String scriptPrefix = staticPrefix + "/script";
 
 		// CSS
 		imports.add(
 				new HtmlTplDashboardImport("dataTableStyle", "<link type='text/css' res-name='dataTableStyle' href='"
-						+ cssPrefix + "/DataTables-1.10.18/datatables.min.css?v=" + vp + "'  rel='stylesheet' />"));
+						+ libPrefix + "/DataTables-1.10.18/css/datatables.min.css?v=" + vp + "'  rel='stylesheet' />"));
 
 		imports.add(new HtmlTplDashboardImport("datetimepickerStyle",
-				"<link type='text/css' res-name='datetimepickerStyle' href='" + scriptPrefix
+				"<link type='text/css' res-name='datetimepickerStyle' href='" + libPrefix
 						+ "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css?v=" + vp
 						+ "'  rel='stylesheet' />"));
 
@@ -539,20 +540,20 @@ public class CoreConfig implements InitializingBean
 
 		// JS
 		imports.add(new HtmlTplDashboardImport("jquery", "<script type='text/javascript' res-name='jquery' src='"
-				+ scriptPrefix + "/jquery/jquery-1.12.4.min.js?v=" + vp + "'></script>"));
+				+ libPrefix + "/jquery-1.12.4/jquery-1.12.4.min.js?v=" + vp + "'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("echarts", "<script type='text/javascript' res-name='echarts' src='"
-				+ scriptPrefix + "/echarts-4.9.0/echarts.min.js?v=" + vp + "'></script>"));
+				+ libPrefix + "/echarts-4.9.0/echarts.min.js?v=" + vp + "'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("echarts-wordcloud",
-				"<script type='text/javascript' res-name='echarts-wordcloud' src='" + scriptPrefix
+				"<script type='text/javascript' res-name='echarts-wordcloud' src='" + libPrefix
 						+ "/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js?v=" + vp + "'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("dataTable", "<script type='text/javascript' res-name='dataTable' src='"
-				+ scriptPrefix + "/DataTables-1.10.18/datatables.min.js?v=" + vp + "'></script>"));
+				+ libPrefix + "/DataTables-1.10.18/js/datatables.min.js?v=" + vp + "'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("datetimepicker",
-				"<script type='text/javascript' res-name='datetimepicker' src='" + scriptPrefix
+				"<script type='text/javascript' res-name='datetimepicker' src='" + libPrefix
 						+ "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js?v=" + vp + "'></script>"));
 
 		imports.add(new HtmlTplDashboardImport("chartFactory",
