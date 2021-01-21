@@ -5,9 +5,6 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-/**
- * 
- */
 package org.datagear.analysis.support.html;
 
 import java.io.FileNotFoundException;
@@ -115,8 +112,8 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	private HtmlTplDashboardScriptObjectWriter htmlTplDashboardScriptObjectWriter = new HtmlTplDashboardScriptObjectWriter();
 
 	private ParamValueHtmlChartPlugin htmlChartPluginForGetWidgetException = new ParamValueHtmlChartPlugin(
-			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForGetWidgetException",
-			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForGetWidgetExceptionMsg");
+			Global.PRODUCT_NAME_EN + "HtmlChartPluginForGetWidgetException",
+			Global.PRODUCT_NAME_EN + "HtmlChartPluginForGetWidgetExceptionMsg");
 
 	/** 导入项 */
 	private HtmlTplDashboardImport htmlTplDashboardImport;

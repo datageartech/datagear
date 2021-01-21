@@ -5,9 +5,6 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-/**
- * 
- */
 package org.datagear.web.config.support;
 
 import javax.servlet.http.HttpServletRequest;

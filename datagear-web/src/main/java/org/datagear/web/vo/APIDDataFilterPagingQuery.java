@@ -5,9 +5,6 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-/**
- * 
- */
 package org.datagear.web.vo;
 
 import org.datagear.management.domain.AnalysisProject;

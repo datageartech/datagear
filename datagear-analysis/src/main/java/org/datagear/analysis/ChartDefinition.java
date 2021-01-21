@@ -5,10 +5,6 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-/**
- * 
- */
-
 package org.datagear.analysis;
 
 import java.util.Collections;
