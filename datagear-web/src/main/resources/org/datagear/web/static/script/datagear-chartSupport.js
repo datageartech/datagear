@@ -4054,6 +4054,7 @@
 					{
 						itemStyle:
 						{
+							borderColor: chartTheme.borderColor,
 							shadowColor: global.chartFactory.getGradualColor(chartTheme, 0.4)
 						}
 					},
