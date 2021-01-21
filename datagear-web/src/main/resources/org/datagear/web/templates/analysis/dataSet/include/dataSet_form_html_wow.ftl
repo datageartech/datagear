@@ -1,4 +1,12 @@
 <#--
+ *
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ *
+-->
+<#--
 数据集表单页：预览、参数、属性操作区
 -->
 <div class="workspace-operation-wrapper light-tabs">

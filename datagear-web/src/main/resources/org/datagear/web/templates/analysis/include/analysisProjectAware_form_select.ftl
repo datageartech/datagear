@@ -1,4 +1,12 @@
 <#--
+ *
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ *
+-->
+<#--
 数据分析项目相关表单页：所属数据分析项目选择框
 -->
 <div class="form-item form-item-analysisProject">

@@ -1,13 +1,10 @@
 /*
- * Copyright (c) 2018 datagear.tech
+ * Copyright 2018 datagear.tech
  *
  * Licensed under the LGPLv3 license:
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-/**
- * HTML模板看板导入项。
- */
 package org.datagear.analysis.support.html;
 
 import java.io.Serializable;

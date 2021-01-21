@@ -1,4 +1,12 @@
 <#--
+ *
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ *
+-->
+<#--
 导出公用片段
 
 String dataExchangeId 数据交换ID

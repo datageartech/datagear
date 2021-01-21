@@ -1,4 +1,12 @@
 <#--
+ *
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ *
+-->
+<#--
 Schema schema 数据库，不允许为null
 String dataExchangeId 数据交换ID，不允许为null
 

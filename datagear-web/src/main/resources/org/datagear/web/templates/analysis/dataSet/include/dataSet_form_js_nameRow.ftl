@@ -1,4 +1,12 @@
 <#--
+ *
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ *
+-->
+<#--
 数据集表单页：标题行操作JS片段
 
 依赖：

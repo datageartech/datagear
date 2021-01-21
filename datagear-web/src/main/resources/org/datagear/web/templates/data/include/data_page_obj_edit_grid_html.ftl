@@ -1,4 +1,12 @@
 <#--
+ *
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ *
+-->
+<#--
 编辑表格功能HTML片段。
 -->
 <#assign editGridFormPageId=(pageId +'_'+'egf')>

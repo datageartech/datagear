@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2018 datagear.tech. All Rights Reserved.
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
 /**
@@ -862,18 +865,21 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		{
 			List<ImportItem> importItems = this.htmlTplDashboardImport.getImportItems();
 
-			for (ImportItem impt : importItems)
+			if (importItems != null)
 			{
-				String name = impt.getName();
+				for (ImportItem impt : importItems)
+				{
+					String name = impt.getName();
 
-				if (excludes.contains(name))
-					continue;
+					if (excludes.contains(name))
+						continue;
 
-				String content = replaceContextPathPlaceholder(impt.getContent(), webContext.getContextPath());
-				content = replaceVersionPlaceholder(content, Global.VERSION);
+					String content = replaceContextPathPlaceholder(impt.getContent(), webContext.getContextPath());
+					content = replaceVersionPlaceholder(content, Global.VERSION);
 
-				writeNewLine(out);
-				out.write(content);
+					writeNewLine(out);
+					out.write(content);
+				}
 			}
 		}
 

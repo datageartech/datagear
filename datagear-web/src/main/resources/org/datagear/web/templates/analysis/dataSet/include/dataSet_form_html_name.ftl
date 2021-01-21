@@ -1,4 +1,12 @@
 <#--
+ *
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ *
+-->
+<#--
 数据集表单页：名称输入框片段
 -->
 <input type="hidden" name="id" value="${(dataSet.id)!''}" />

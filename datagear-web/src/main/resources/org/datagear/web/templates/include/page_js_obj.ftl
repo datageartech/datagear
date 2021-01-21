@@ -1,3 +1,11 @@
+<#--
+ *
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ *
+-->
 <#--页面JS对象块 -->
 <script type="text/javascript">
 var ${pageId} =
