@@ -29,6 +29,7 @@ import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
+import org.datagear.analysis.support.html.HtmlTplDashboardImport.ImportItem;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
@@ -66,15 +67,15 @@ import org.datagear.util.StringUtil;
  * 子类在调用此方法时可以传入自定义JS看板工厂对象的变量名，默认为{@linkplain #getDefaultDashboardFactoryVar()}。
  * </p>
  * <p>
- * 此类的{@linkplain #getHtmlTplDashboardImports()}的{@linkplain HtmlTplDashboardImport#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
+ * 此类的{@linkplain #getHtmlTplDashboardImport()}的{@linkplain ImportItem#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
  * 在渲染时，占位符会被替换为{@linkplain HtmlTplDashboardRenderAttr#getWebContext(RenderContext)}的{@linkplain WebContext#getContextPath()}。
  * </p>
  * <p>
- * 此类的{@linkplain #getHtmlTplDashboardImports()}的{@linkplain HtmlTplDashboardImport#getContent()}可以包含{@linkplain #getVersionPlaceholder()}占位符，
+ * 此类的{@linkplain #getHtmlTplDashboardImport()}的{@linkplain ImportItem#getContent()}可以包含{@linkplain #getVersionPlaceholder()}占位符，
  * 在渲染时，占位符会被替换为{@linkplain Global#VERSION}（可用于支持版本更新时浏览器缓存更新）。
  * </p>
  * <p>
- * 此类的{@linkplain #getExtDashboardInitScript()}可以包含{@linkplain #getDashboardVarPlaceholder()}占位符，
+ * 此类的{@linkplain #getHtmlTplDashboardImport()}可以包含{@linkplain #getDashboardVarPlaceholder()}占位符，
  * 在渲染时，占位符会被替换为实际的{@linkplain HtmlTplDashboard#getVarName()}。
  * </p>
  * 
@@ -114,8 +115,8 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForGetWidgetException",
 			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForGetWidgetExceptionMsg");
 
-	/** 内置导入内容 */
-	private List<HtmlTplDashboardImport> dashboardImports;
+	/** 导入项 */
+	private HtmlTplDashboardImport htmlTplDashboardImport;
 
 	/** 上下文路径占位符 */
 	private String contextPathPlaceholder = DEFAULT_CONTEXT_PATH_PLACE_HOLDER;
@@ -232,14 +233,14 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		this.htmlChartPluginForGetWidgetException = htmlChartPluginForGetWidgetException;
 	}
 
-	public List<HtmlTplDashboardImport> getDashboardImports()
+	public HtmlTplDashboardImport getHtmlTplDashboardImport()
 	{
-		return dashboardImports;
+		return htmlTplDashboardImport;
 	}
 
-	public void setDashboardImports(List<HtmlTplDashboardImport> dashboardImports)
+	public void setHtmlTplDashboardImport(HtmlTplDashboardImport htmlTplDashboardImport)
 	{
-		this.dashboardImports = dashboardImports;
+		this.htmlTplDashboardImport = htmlTplDashboardImport;
 	}
 
 	public String getContextPathPlaceholder()
@@ -857,9 +858,11 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 		List<String> excludes = StringUtil.splitWithTrim(importExclude, ",");
 
-		if (this.dashboardImports != null)
+		if (this.htmlTplDashboardImport != null)
 		{
-			for (HtmlTplDashboardImport impt : this.dashboardImports)
+			List<ImportItem> importItems = this.htmlTplDashboardImport.getImportItems();
+
+			for (ImportItem impt : importItems)
 			{
 				String name = impt.getName();
 

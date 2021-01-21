@@ -21,9 +21,11 @@ import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.NameAsTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
+import org.datagear.analysis.support.html.HtmlTplDashboardImport.ImportItem;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.TemplateImportHtmlChartPluginVarNameResolver;
+import org.datagear.analysis.support.html.SimpleHtmlTplDashboardImport;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.DefaultConnectionSource;
 import org.datagear.connection.GenericPropertiesProcessor;
@@ -492,7 +494,7 @@ public class CoreConfig implements InitializingBean
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(resManager,
 				this.htmlChartWidgetEntityService());
 
-		bean.setDashboardImports(this.buildHtmlTplDashboardWidgetRenderer_dshboardImports());
+		bean.setHtmlTplDashboardImport(this.buildHtmlTplDashboardWidgetRenderer_dshboardImport());
 		bean.setImportHtmlChartPluginVarNameResolver(
 				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver());
 
@@ -505,16 +507,18 @@ public class CoreConfig implements InitializingBean
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(
 				this.templateDashboardWidgetResManager(), this.htmlChartWidgetEntityService());
 
-		bean.setDashboardImports(this.buildHtmlTplDashboardWidgetRenderer_dshboardImports());
+		bean.setHtmlTplDashboardImport(this.buildHtmlTplDashboardWidgetRenderer_dshboardImport());
 		bean.setImportHtmlChartPluginVarNameResolver(
 				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver());
 
 		return bean;
 	}
 
-	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardWidgetRenderer_dshboardImports()
+	protected HtmlTplDashboardImport buildHtmlTplDashboardWidgetRenderer_dshboardImport()
 	{
-		List<HtmlTplDashboardImport> imports = new ArrayList<>();
+		SimpleHtmlTplDashboardImport dashboardImport = new SimpleHtmlTplDashboardImport();
+
+		List<ImportItem> importItems = new ArrayList<>();
 
 		String cp = HtmlTplDashboardWidgetRenderer.DEFAULT_CONTEXT_PATH_PLACE_HOLDER;
 		String vp = HtmlTplDashboardWidgetRenderer.DEFAULT_VERSION_PLACE_HOLDER;
@@ -525,60 +529,56 @@ public class CoreConfig implements InitializingBean
 		String scriptPrefix = staticPrefix + "/script";
 
 		// CSS
-		imports.add(
-				new HtmlTplDashboardImport("dataTableStyle", "<link type='text/css' res-name='dataTableStyle' href='"
-						+ libPrefix + "/DataTables-1.10.18/css/datatables.min.css' rel='stylesheet' />"));
+		importItems.add(new ImportItem("dataTableStyle", "<link type='text/css' res-name='dataTableStyle' href='"
+				+ libPrefix + "/DataTables-1.10.18/css/datatables.min.css' rel='stylesheet' />"));
 
-		imports.add(new HtmlTplDashboardImport("datetimepickerStyle",
+		importItems.add(new ImportItem("datetimepickerStyle",
 				"<link type='text/css' res-name='datetimepickerStyle' href='" + libPrefix
 						+ "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css'  rel='stylesheet' />"));
 
-		imports.add(
-				new HtmlTplDashboardImport("dashboardStyle", "<link type='text/css' res-name='dashboardStyle' href='"
-						+ cssPrefix + "/analysis.css?v=" + vp + "' rel='stylesheet' />"));
+		importItems.add(new ImportItem("dashboardStyle", "<link type='text/css' res-name='dashboardStyle' href='"
+				+ cssPrefix + "/analysis.css?v=" + vp + "' rel='stylesheet' />"));
 
 		// JS
-		imports.add(new HtmlTplDashboardImport("jquery", "<script type='text/javascript' res-name='jquery' src='"
-				+ libPrefix + "/jquery-1.12.4/jquery-1.12.4.min.js'></script>"));
+		importItems.add(new ImportItem("jquery", "<script type='text/javascript' res-name='jquery' src='" + libPrefix
+				+ "/jquery-1.12.4/jquery-1.12.4.min.js'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("echarts", "<script type='text/javascript' res-name='echarts' src='"
-				+ libPrefix + "/echarts-4.9.0/echarts.min.js'></script>"));
+		importItems.add(new ImportItem("echarts", "<script type='text/javascript' res-name='echarts' src='" + libPrefix
+				+ "/echarts-4.9.0/echarts.min.js'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("echarts-wordcloud",
-				"<script type='text/javascript' res-name='echarts-wordcloud' src='" + libPrefix
-						+ "/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js'></script>"));
+		importItems.add(new ImportItem("wordcloud", "<script type='text/javascript' res-name='wordcloud' src='"
+				+ libPrefix + "/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("echarts-liquidfill",
-				"<script type='text/javascript' res-name='echarts-liquidfill' src='" + libPrefix
-						+ "/echarts-liquidfill-2.0.6/echarts-liquidfill.min.js'></script>"));
+		importItems.add(new ImportItem("liquidfill", "<script type='text/javascript' res-name='liquidfill' src='"
+				+ libPrefix + "/echarts-liquidfill-2.0.6/echarts-liquidfill.min.js'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("dataTable", "<script type='text/javascript' res-name='dataTable' src='"
+		importItems.add(new ImportItem("dataTable", "<script type='text/javascript' res-name='dataTable' src='"
 				+ libPrefix + "/DataTables-1.10.18/js/datatables.min.js'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("datetimepicker",
-				"<script type='text/javascript' res-name='datetimepicker' src='" + libPrefix
-						+ "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js'></script>"));
+		importItems
+				.add(new ImportItem("datetimepicker", "<script type='text/javascript' res-name='datetimepicker' src='"
+						+ libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("chartFactory",
-				"<script type='text/javascript' res-name='chartFactory' src='" + scriptPrefix
-						+ "/datagear-chartFactory.js?v=" + vp + "'></script>"));
+		importItems.add(new ImportItem("chartFactory", "<script type='text/javascript' res-name='chartFactory' src='"
+				+ scriptPrefix + "/datagear-chartFactory.js?v=" + vp + "'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("dashboardFactory",
-				"<script type='text/javascript' res-name='dashboardFactory' src='" + scriptPrefix
-						+ "/datagear-dashboardFactory.js?v=" + vp + "'></script>"));
+		importItems.add(
+				new ImportItem("dashboardFactory", "<script type='text/javascript' res-name='dashboardFactory' src='"
+						+ scriptPrefix + "/datagear-dashboardFactory.js?v=" + vp + "'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("chartSupport",
-				"<script type='text/javascript' res-name='chartSupport' src='" + scriptPrefix
-						+ "/datagear-chartSupport.js?v=" + vp + "'></script>"));
+		importItems.add(new ImportItem("chartSupport", "<script type='text/javascript' res-name='chartSupport' src='"
+				+ scriptPrefix + "/datagear-chartSupport.js?v=" + vp + "'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("chartForm", "<script type='text/javascript' res-name='chartForm' src='"
+		importItems.add(new ImportItem("chartForm", "<script type='text/javascript' res-name='chartForm' src='"
 				+ scriptPrefix + "/datagear-chartForm.js?v=" + vp + "'></script>"));
 
-		imports.add(new HtmlTplDashboardImport("chartPluginManager",
+		importItems.add(new ImportItem("chartPluginManager",
 				"<script type='text/javascript' res-name='chartPluginManager' src='" + cp
 						+ "/analysis/chartPlugin/chartPluginManager.js?v=" + vp + "'></script>"));
 
-		return imports;
+		dashboardImport.setImportItems(importItems);
+
+		return dashboardImport;
 	}
 
 	protected TemplateImportHtmlChartPluginVarNameResolver buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver()

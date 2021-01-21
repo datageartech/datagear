@@ -18,6 +18,7 @@ import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
+import org.datagear.analysis.support.html.HtmlTplDashboardImport.ImportItem;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.ChartInfo;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardInfo;
@@ -58,14 +59,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);
 
-		List<HtmlTplDashboardImport> dashboardImports = new ArrayList<>();
-		dashboardImports.add(new HtmlTplDashboardImport("jquery", IMPORT_CONTENT_JQUERY));
-		dashboardImports.add(new HtmlTplDashboardImport("util", IMPORT_CONTENT_UTIL));
-		dashboardImports.add(new HtmlTplDashboardImport("theme", IMPORT_CONTENT_THEME));
-		dashboardImports.add(new HtmlTplDashboardImport("style", IMPORT_CONTENT_STYLE));
+		List<ImportItem> dashboardImports = new ArrayList<>();
+		dashboardImports.add(new ImportItem("jquery", IMPORT_CONTENT_JQUERY));
+		dashboardImports.add(new ImportItem("util", IMPORT_CONTENT_UTIL));
+		dashboardImports.add(new ImportItem("theme", IMPORT_CONTENT_THEME));
+		dashboardImports.add(new ImportItem("style", IMPORT_CONTENT_STYLE));
 
 		this.renderer = new HtmlTplDashboardWidgetHtmlRenderer(resManager, chartWidgetSource);
-		this.renderer.setDashboardImports(dashboardImports);
+		this.renderer.setHtmlTplDashboardImport(new SimpleHtmlTplDashboardImport(dashboardImports));
 	}
 
 	@Test
