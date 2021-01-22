@@ -54,6 +54,15 @@
 					<input type="text" name="template" value="" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label>
+					</label>
+				</div>
+				<div class="form-item-value">
+					<@spring.message code='dashboard.import.notice' />
+				</div>
+			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
