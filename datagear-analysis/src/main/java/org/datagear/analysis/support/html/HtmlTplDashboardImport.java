@@ -85,5 +85,40 @@ public interface HtmlTplDashboardImport
 		{
 			return getClass().getSimpleName() + " [name=" + name + ", content=" + content + "]";
 		}
+
+		public static ImportItem valueOf(String name, String content)
+		{
+			return new ImportItem(name, content);
+		}
+
+		/**
+		 * 构建{@code <link type='text/css' href='...' rel='stylesheet' />}导入条目。
+		 * 
+		 * @param name
+		 * @param href
+		 * @return
+		 */
+		public static ImportItem valueOfLinkCss(String name, String href)
+		{
+			String content = "<link type='text/css' href='" + href + "' rel='stylesheet' "
+					+ HtmlTplDashboardWidgetRenderer.DASHBOARD_IMPORT_ITEM_NAME_ATTR + "='" + name + "' />";
+
+			return new ImportItem(name, content);
+		}
+
+		/**
+		 * 构建{@code <script type='text/javascript' src='...'></script>}导入条目。
+		 * 
+		 * @param name
+		 * @param src
+		 * @return
+		 */
+		public static ImportItem valueOfJavaScript(String name, String src)
+		{
+			String content = "<script type='text/javascript' src='" + src + "' "
+					+ HtmlTplDashboardWidgetRenderer.DASHBOARD_IMPORT_ITEM_NAME_ATTR + "='" + name + "' ></script>";
+
+			return new ImportItem(name, content);
+		}
 	}
 }

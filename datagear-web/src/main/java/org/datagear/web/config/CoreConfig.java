@@ -529,52 +529,27 @@ public class CoreConfig implements InitializingBean
 		String scriptPrefix = staticPrefix + "/script";
 
 		// CSS
-		importItems.add(new ImportItem("dataTableStyle", "<link type='text/css' res-name='dataTableStyle' href='"
-				+ libPrefix + "/DataTables-1.10.18/css/datatables.min.css' rel='stylesheet' />"));
-
-		importItems.add(new ImportItem("datetimepickerStyle",
-				"<link type='text/css' res-name='datetimepickerStyle' href='" + libPrefix
-						+ "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css'  rel='stylesheet' />"));
-
-		importItems.add(new ImportItem("dashboardStyle", "<link type='text/css' res-name='dashboardStyle' href='"
-				+ cssPrefix + "/analysis.css?v=" + vp + "' rel='stylesheet' />"));
+		importItems.add(
+				ImportItem.valueOfLinkCss("dataTableStyle", libPrefix + "/DataTables-1.10.18/css/datatables.min.css"));
+		importItems.add(ImportItem.valueOfLinkCss("datetimepickerStyle",
+				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
+		importItems.add(ImportItem.valueOfLinkCss("dashboardStyle", cssPrefix + "/analysis.css?v=" + vp));
 
 		// JS
-		importItems.add(new ImportItem("jquery", "<script type='text/javascript' res-name='jquery' src='" + libPrefix
-				+ "/jquery-1.12.4/jquery-1.12.4.min.js'></script>"));
-
-		importItems.add(new ImportItem("echarts", "<script type='text/javascript' res-name='echarts' src='" + libPrefix
-				+ "/echarts-4.9.0/echarts.min.js'></script>"));
-
-		importItems.add(new ImportItem("wordcloud", "<script type='text/javascript' res-name='wordcloud' src='"
-				+ libPrefix + "/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js'></script>"));
-
-		importItems.add(new ImportItem("liquidfill", "<script type='text/javascript' res-name='liquidfill' src='"
-				+ libPrefix + "/echarts-liquidfill-2.0.6/echarts-liquidfill.min.js'></script>"));
-
-		importItems.add(new ImportItem("dataTable", "<script type='text/javascript' res-name='dataTable' src='"
-				+ libPrefix + "/DataTables-1.10.18/js/datatables.min.js'></script>"));
-
+		importItems.add(ImportItem.valueOfJavaScript("jquery", libPrefix + "/jquery-1.12.4/jquery-1.12.4.min.js"));
+		importItems.add(ImportItem.valueOfJavaScript("echarts", libPrefix + "/echarts-4.9.0/echarts.min.js"));
+		importItems.add(ImportItem.valueOfJavaScript("wordcloud", libPrefix + "/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js"));
+		importItems.add(ImportItem.valueOfJavaScript("liquidfill", libPrefix + "/echarts-liquidfill-2.0.6/echarts-liquidfill.min.js"));
+		importItems.add(ImportItem.valueOfJavaScript("dataTable", libPrefix + "/DataTables-1.10.18/js/datatables.min.js"));
 		importItems
-				.add(new ImportItem("datetimepicker", "<script type='text/javascript' res-name='datetimepicker' src='"
-						+ libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js'></script>"));
-
-		importItems.add(new ImportItem("chartFactory", "<script type='text/javascript' res-name='chartFactory' src='"
-				+ scriptPrefix + "/datagear-chartFactory.js?v=" + vp + "'></script>"));
-
-		importItems.add(
-				new ImportItem("dashboardFactory", "<script type='text/javascript' res-name='dashboardFactory' src='"
-						+ scriptPrefix + "/datagear-dashboardFactory.js?v=" + vp + "'></script>"));
-
-		importItems.add(new ImportItem("chartSupport", "<script type='text/javascript' res-name='chartSupport' src='"
-				+ scriptPrefix + "/datagear-chartSupport.js?v=" + vp + "'></script>"));
-
-		importItems.add(new ImportItem("chartForm", "<script type='text/javascript' res-name='chartForm' src='"
-				+ scriptPrefix + "/datagear-chartForm.js?v=" + vp + "'></script>"));
-
-		importItems.add(new ImportItem("chartPluginManager",
-				"<script type='text/javascript' res-name='chartPluginManager' src='" + cp
-						+ "/analysis/chartPlugin/chartPluginManager.js?v=" + vp + "'></script>"));
+				.add(ImportItem.valueOfJavaScript("datetimepicker", libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
+		importItems.add(ImportItem.valueOfJavaScript("chartFactory", scriptPrefix + "/datagear-chartFactory.js?v=" + vp));
+		importItems.add(ImportItem.valueOfJavaScript("dashboardFactory", scriptPrefix + "/datagear-dashboardFactory.js?v=" + vp));
+		importItems.add(ImportItem.valueOfJavaScript("chartSupport", scriptPrefix + "/datagear-chartSupport.js?v=" + vp));
+		importItems.add(ImportItem.valueOfJavaScript("chartForm", scriptPrefix + "/datagear-chartForm.js?v=" + vp));
+		importItems
+				.add(ImportItem.valueOfJavaScript("chartPluginManager",
+						cp + "/analysis/chartPlugin/chartPluginManager.js?v=" + vp));
 
 		dashboardImport.setImportItems(importItems);
 

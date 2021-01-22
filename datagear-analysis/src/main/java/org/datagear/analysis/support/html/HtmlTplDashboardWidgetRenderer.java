@@ -85,6 +85,8 @@ import org.datagear.util.StringUtil;
  */
 public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 {
+	public static final String DASHBOARD_IMPORT_ITEM_NAME_ATTR = "dg-import-name";
+
 	public static final String DEFAULT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
 
 	public static final String DEFAULT_VERSION_PLACE_HOLDER = "$VERSION";
@@ -93,7 +95,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 	public static final String DEFAULT_DASHBOARD_FACTORY_VAR = "dashboardFactory";
 
-	public static final String DEFAULT_THEME_IMPORT_NAME = "dg-theme";
+	public static final String DEFAULT_THEME_IMPORT_NAME = "dashboardThemeStyle";
 
 	public static final String DEFAULT_DASHBOARD_STYLE_NAME = "dg-dashboard";
 
@@ -992,7 +994,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	{
 		DashboardTheme dashboardTheme = renderAttr.getDashboardThemeNonNull(renderContext);
 
-		out.write("<style type=\"text/css\">");
+		out.write("<style type='text/css' " + DASHBOARD_IMPORT_ITEM_NAME_ATTR + "='" + this.themeImportName + "'>");
 		writeNewLine(out);
 		out.write("." + this.dashboardStyleName + "{");
 		writeNewLine(out);
