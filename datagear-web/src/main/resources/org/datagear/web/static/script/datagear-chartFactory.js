@@ -15,7 +15,7 @@
  * 运行时依赖:
  *   jquery.js
  *   echarts.js
- *   datagear-chartForm.js
+ *   datagear-chartSetting.js
  * 
  * 
  * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-options"属性来设置图表选项，格式为：
@@ -519,10 +519,25 @@
 	{
 		var disableSetting = this.elementJquery().attr("dg-chart-disable-setting");
 		
-		if(!disableSetting)
+		if(disableSetting == null)
 			disableSetting = $(document.body).attr("dg-chart-disable-setting");
 		
-		this.disableSetting(disableSetting == "true");
+		if(disableSetting == "false" || disableSetting == null)
+			disableSetting = false;
+		else if(disableSetting == "true")
+			disableSetting = true;
+		else
+		{
+			disableSetting = chartFactory.evalSilently(disableSetting, {});
+			
+			if(disableSetting.param == null)
+				disableSetting.param = false;
+			
+			if(disableSetting.data == null)
+				disableSetting.data = false;
+		}
+		
+		this.disableSetting(disableSetting);
 	};
 	
 	/**
@@ -689,12 +704,19 @@
 	/**
 	 * 获取/设置初始图表是否禁用交互设置。
 	 * 
-	 * @param disable 可选，是否禁用图表交互设置，没有则执行获取操作
+	 * @param disable 可选，是否禁用图表交互设置，没有则执行获取操作且不会返回null。
+	 * 					允许格式为：true、false、
+	 *					{
+	 *						//是否禁用参数
+	 *						param: true || false,
+	 *						//是否禁用数据表格
+	 *						data: true || false
+	 *					}
 	 */
 	chartBase.disableSetting = function(disable)
 	{
 		if(disable === undefined)
-			return (this._disableSetting === true);
+			return (this._disableSetting == null ? false :  this._disableSetting);
 		else
 			this._disableSetting = disable;
 	};
@@ -909,7 +931,7 @@
 	 */
 	chartBase._destroySetting = function()
 	{
-		chartFactory.chartForm.unbindChartSettingPanelEvent(this);
+		chartFactory.chartSetting.unbindChartSettingPanelEvent(this);
 	};
 	
 	/**
@@ -1037,14 +1059,11 @@
 	};
 	
 	/**
-	 * 渲染图表交互设置表单。
+	 * 渲染图表交互设置项。
 	 */
 	chartBase._renderSetting = function()
 	{
-		if(this.disableSetting())
-			return false;
-		
-		chartFactory.chartForm.bindChartSettingPanelEvent(this);
+		chartFactory.chartSetting.bindChartSettingPanelEvent(this);
 	};
 	
 	/**

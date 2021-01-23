@@ -58,5 +58,5 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/datagear-tableform.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-schema-url-builder.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-chartFactory.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-chartForm.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/datagear-chartSetting.js?v=${_hh_Version}" type="text/javascript"></script>
 </#if>

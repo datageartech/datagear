@@ -582,7 +582,7 @@ po.previewOptions.url = "...";
 			submitText: "<@spring.message code='confirm' />",
 			yesText: "<@spring.message code='yes' />",
 			noText: "<@spring.message code='no' />",
-			paramValues: chartFactory.chartForm.getDataSetParamValueObj(chartFactory.chartForm.getDataSetParamValueForm($panel)),
+			paramValues: chartFactory.chartSetting.getDataSetParamValueObj(chartFactory.chartSetting.getDataSetParamValueForm($panel)),
 			render: function()
 			{
 				$("select, input, textarea", this).addClass("ui-widget ui-widget-content");
@@ -593,7 +593,7 @@ po.previewOptions.url = "...";
 		
 		$panelContent.empty();
 		
-		chartFactory.chartForm.renderDataSetParamValueForm($panelContent,
+		chartFactory.chartSetting.renderDataSetParamValueForm($panelContent,
 				po.getFormDataSetParams(), formOptions);
 		
 		$panel.show();
@@ -698,7 +698,7 @@ po.previewOptions.url = "...";
 						po.destroyPreviewResultTable();
 						
 						po.previewOptions.data.dataSet.params = po.getFormDataSetParams();
-						po.previewOptions.data.paramValues = chartFactory.chartForm.getDataSetParamValueObj(this);
+						po.previewOptions.data.paramValues = chartFactory.chartSetting.getDataSetParamValueObj(this);
 						
 						po.executePreview(previewValueModified);
 					}

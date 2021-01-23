@@ -124,7 +124,7 @@
 }
 .dg-dspv-form .dg-dspv-form-content .dg-validation-required,
 .dg-dspv-form .dg-dspv-form-content .dg-validation-number{
-	border-color: red!important;
+	border-color: red !important;
 }
 .dg-dspv-form .dg-dspv-form-foot{
 	padding-top: 0.3em;
@@ -140,8 +140,8 @@
 	border-style: solid;
 }
 .dg-dspv-form .dg-form-invalid{
-	border-color: red!important;
-	color: red!important;
+	border-color: red !important;
+	color: red !important;
 }
 
 /*图表展示页面设置框*/
@@ -158,11 +158,9 @@
 	border-top-left-radius: 3px;
 }
 .dg-chart-setting-box .dg-chart-setting-button{
-	opacity: 0.8;
-	filter: Alpha(Opacity=80);
-	font-size: 0.8em!important;
-	padding: 0.1em 0.2em!important;
-	margin: 0 0!important;
+	font-size: 0.8em !important;
+	padding: 0.1em 0.2em !important;
+	margin: 0 0 0 0.41em !important;
 	border-width: 1px;
 	border-style: solid;
 }
@@ -231,8 +229,8 @@
 .dg-chart-setting-box .dg-chart-setting-panel button.dg-param-value-form-invalid,
 .dg-chart-setting-box .dg-chart-setting-panel input[type=submit].dg-param-value-form-invalid,
 .dg-chart-setting-box .dg-chart-setting-panel input[type=button].dg-param-value-form-invalid{
-	border-color: red!important;
-	color: red!important;
+	border-color: red !important;
+	color: red !important;
 }
 
 /*datetimepicker组件扩展样式*/

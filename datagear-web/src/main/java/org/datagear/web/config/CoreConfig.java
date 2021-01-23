@@ -546,7 +546,8 @@ public class CoreConfig implements InitializingBean
 		importItems.add(ImportItem.valueOfJavaScript("chartFactory", scriptPrefix + "/datagear-chartFactory.js?v=" + vp));
 		importItems.add(ImportItem.valueOfJavaScript("dashboardFactory", scriptPrefix + "/datagear-dashboardFactory.js?v=" + vp));
 		importItems.add(ImportItem.valueOfJavaScript("chartSupport", scriptPrefix + "/datagear-chartSupport.js?v=" + vp));
-		importItems.add(ImportItem.valueOfJavaScript("chartForm", scriptPrefix + "/datagear-chartForm.js?v=" + vp));
+		importItems
+				.add(ImportItem.valueOfJavaScript("chartSetting", scriptPrefix + "/datagear-chartSetting.js?v=" + vp));
 		importItems
 				.add(ImportItem.valueOfJavaScript("chartPluginManager",
 						cp + "/analysis/chartPlugin/chartPluginManager.js?v=" + vp));

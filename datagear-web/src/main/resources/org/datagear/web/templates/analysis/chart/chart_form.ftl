@@ -331,7 +331,7 @@ readonly 是否只读操作，允许为null
 		
 		$panelContent.empty();
 		
-		chartFactory.chartForm.renderDataSetParamValueForm($panelContent,
+		chartFactory.chartSetting.renderDataSetParamValueForm($panelContent,
 				$paramValueButton.data("dataSetParams"), formOptions);
 		
 		$panel.show();
@@ -407,7 +407,7 @@ readonly 是否只读操作，允许为null
 						$("button", this).addClass("ui-button ui-corner-all ui-widget");
 						
 						<#if !readonly>
-						var $foot = chartFactory.chartForm.getDataSetParamValueFormFoot(this);
+						var $foot = chartFactory.chartSetting.getDataSetParamValueFormFoot(this);
 						var $button = $(" <button type='button' class='ui-button ui-corner-all ui-widget' style='margin-left:1em;' />")
 										.html("<@spring.message code='clear' />").attr("title", "<@spring.message code='chart.chartDataSet.clearParamValueTip' />").appendTo($foot);
 						$button.click(function()

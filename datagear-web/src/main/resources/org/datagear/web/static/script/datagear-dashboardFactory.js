@@ -15,7 +15,7 @@
  * 运行时依赖:
  *   jquery.js
  *   datagear-chartFactory.js
- *   datagear-chartForm.js
+ *   datagear-chartSetting.js
  * 
  * 
  * 此看板工厂支持为<body>元素添加"dg-dashboard-listener"属性，用于指定看板监听器JS对象名，
@@ -833,13 +833,13 @@
 	 *   value: ...,
 	 *   //可选，输入项标签
 	 *   label: "...",
-	 *   //可选，输入项类型，参考chartForm.DataSetParamDataType，默认值为：chartForm.DataSetParamDataType.STRING
+	 *   //可选，输入项类型，参考chartSetting.DataSetParamDataType，默认值为：chartSetting.DataSetParamDataType.STRING
 	 *   type: "...",
 	 *   //可选，是否必须，默认为false
 	 *   required: true || false,
-	 *   //可选，输入框类型，参考chartForm.DataSetParamInputType，默认值为：chartForm.DataSetParamInputType.TEXT
+	 *   //可选，输入框类型，参考chartSetting.DataSetParamInputType，默认值为：chartSetting.DataSetParamInputType.TEXT
 	 *   inputType: "...",
-	 *   //可选，输入框配置，参考chartForm.renderDataSetParamValueForm函数说明
+	 *   //可选，输入框配置，参考chartSetting.renderDataSetParamValueForm函数说明
 	 *   inputPayload: ...,
 	 *   //可选，输入项的联动数据映射设置
 	 *   link: 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ]
@@ -860,7 +860,7 @@
 	 * 
 	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单DOM对象。
 	 * 
-	 * @param form 要渲染的<form>表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartForm.renderDataSetParamValueForm
+	 * @param form 要渲染的<form>表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
 	 * @param config 可选，表单配置对象，默认为表单元素的"dg-dashboard-form"属性值
 	 */
 	dashboardBase.renderForm = function(form, config)
@@ -929,7 +929,7 @@
 				item = $.extend({}, item);
 			
 			if(!item.type)
-				item.type = global.chartFactory.chartForm.DataSetParamDataType.STRING;
+				item.type = global.chartFactory.chartSetting.DataSetParamDataType.STRING;
 			
 			items.push(item);
 			
@@ -949,7 +949,7 @@
 		var dashboardTheme = this.renderContextAttr(dashboardFactory.renderContextAttrs.dashboardTheme);
 		config.chartTheme = dashboardTheme.chartTheme;
 		
-		global.chartFactory.chartForm.renderDataSetParamValueForm(form, items, config);
+		global.chartFactory.chartSetting.renderDataSetParamValueForm(form, items, config);
 	};
 	
 	/**
