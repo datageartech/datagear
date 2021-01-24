@@ -182,8 +182,6 @@
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-content{
 	overflow: auto;
 	font-size: 0.9em;
-	max-width: 41em;
-	min-height: 4.1em;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot{
 	padding-top: 0.41em;
@@ -197,14 +195,14 @@
 	border-width: 1px;
 	border-style: solid;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-param-value-form-wrapper{
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chartdataset-section{
 	border-width: 1px;
 	border-style: solid;
 	padding: 0.5em 0.5em;
 	margin: 0.5em 0;
 	border-radius: 3px;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-param-value-form-head{
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chartdataset-section-head{
 	font-weight: bold;
 	overflow: hidden;
 	white-space: nowrap;
@@ -231,6 +229,15 @@
 .dg-chart-setting-box .dg-chart-setting-panel input[type=button].dg-param-value-form-invalid{
 	border-color: red !important;
 	color: red !important;
+}
+.dg-chart-setting-box .dg-chart-setting-panel table.dataTable td.dataTables_empty{
+	display: none;/*隐藏初始未加载数据时的空行，避免影响样式*/
+}
+.dg-chart-setting-box .dg-chart-setting-panel table.dataTable thead th,
+.dg-chart-setting-box .dg-chart-setting-panel table.dataTable thead td{
+	padding: 0.41em 1em 0.41em 10px;
+	text-align: left;
+	white-space: nowrap;
 }
 
 /*datetimepicker组件扩展样式*/

@@ -3,8 +3,8 @@
 	ok 内置图表添加processRenderOptions、processUpdateOptions选项；
 	ok 看板编辑页面添加搜索功能；
 	ok 添加更多内置图表插件；
+	ok 图表、看板展示页面添加数据透视表功能；
 	全局看板资源管理功能；
-	图表、看板展示页面添加数据透视图功能；
 	
 待定：
 	

@@ -522,22 +522,30 @@
 		if(disableSetting == null)
 			disableSetting = $(document.body).attr("dg-chart-disable-setting");
 		
-		if(disableSetting == "false" || disableSetting == null)
-			disableSetting = false;
+		var setting =
+		{
+			param: false,
+			//通常情况下图表不需显示数据透视表，所以这里默认禁用
+			data: true
+		};
+		
+		if(disableSetting == "false")
+		{
+			setting.param = false;
+			setting.data = false;
+		}
 		else if(disableSetting == "true")
-			disableSetting = true;
+		{
+			setting.param = true;
+			setting.data = true;
+		}
 		else
 		{
-			disableSetting = chartFactory.evalSilently(disableSetting, {});
-			
-			if(disableSetting.param == null)
-				disableSetting.param = false;
-			
-			if(disableSetting.data == null)
-				disableSetting.data = false;
+			var tmpSetting = chartFactory.evalSilently(disableSetting, {});
+			setting = $.extend(setting, tmpSetting);
 		}
 		
-		this.disableSetting(disableSetting);
+		this.disableSetting(setting);
 	};
 	
 	/**
@@ -700,25 +708,25 @@
 		else
 			this._echartsThemeName = themeName;
 	};
-
+	
 	/**
-	 * 获取/设置初始图表是否禁用交互设置。
+	 * 获取/设置初始图表是否禁用设置。
 	 * 
-	 * @param disable 可选，是否禁用图表交互设置，没有则执行获取操作且不会返回null。
-	 * 					允许格式为：true、false、
+	 * @param setting 可选，禁用设置，没有则执行获取操作且不会返回null。
+	 * 					禁用设置格式为：
 	 *					{
 	 *						//是否禁用参数
-	 *						param: true || false,
-	 *						//是否禁用数据表格
+	 *						param: false || true,
+	 *						//是否禁用数据透视表
 	 *						data: true || false
 	 *					}
 	 */
-	chartBase.disableSetting = function(disable)
+	chartBase.disableSetting = function(setting)
 	{
-		if(disable === undefined)
-			return (this._disableSetting == null ? false :  this._disableSetting);
+		if(setting === undefined)
+			return (this._disableSetting == null ? {param: false, data: true} :  this._disableSetting);
 		else
-			this._disableSetting = disable;
+			this._disableSetting = setting;
 	};
 	
 	/**

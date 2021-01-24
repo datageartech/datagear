@@ -461,7 +461,7 @@ readonly 是否只读操作，允许为null
 			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-link' />", tagNames: ["div"]},
 		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"true\"", caption: "dg-chart-aut..ize",
 			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-auto-resize' />", tagNames: ["body", "div"]},
-		{name: "dg-chart-disable-setting", value: "dg-chart-disable-setting=\"true\"", caption: "dg-chart-dis..ing",
+		{name: "dg-chart-disable-setting", value: "dg-chart-disable-setting", caption: "dg-chart-dis..ing",
 			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-setting' />", tagNames: ["body", "div"]},
 		{name: "dg-chart-on-", value: "dg-chart-on-", caption: "",
 			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-on-' />", tagNames: ["div"]},

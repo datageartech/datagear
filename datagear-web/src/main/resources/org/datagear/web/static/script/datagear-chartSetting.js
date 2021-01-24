@@ -56,7 +56,8 @@
 		data: "数据",
 		colon: "：",
 		chartParam: "图表参数",
-		chartData: "图表数据"
+		chartData: "图表数据",
+		serialNumber: "序号"
 	});
 	
 	//datetimepicker组件I18N配置
@@ -1106,7 +1107,7 @@
 	{
 		var disableSetting = chart.disableSetting();
 		
-		if(disableSetting == true)
+		if(disableSetting.param == true && disableSetting.data == true)
 			return false;
 		
 		var $chart = chart.elementJquery();
@@ -1141,8 +1142,8 @@
 	chartSetting.unbindChartSettingPanelEvent = function(chart)
 	{
 		var disableSetting = chart.disableSetting();
-		
-		if(disableSetting == true)
+
+		if(disableSetting.param == true && disableSetting.data == true)
 			return false;
 		
 		var $chart = chart.elementJquery();
@@ -1161,9 +1162,6 @@
 	chartSetting.showChartSettingBox = function(chart)
 	{
 		var disableSetting = chart.disableSetting();
-		
-		if(disableSetting === true || disableSetting === false)
-			disableSetting = { param: disableSetting, data: disableSetting };
 		
 		var $chart = chart.elementJquery();
 		var $box = $(".dg-chart-setting-box", $chart);
@@ -1201,8 +1199,6 @@
 			}
 			
 			//数据
-			//TODO 表格数据面板还未实现，暂时禁用按钮
-			disableSetting.data = true;
 			if(!disableSetting.data)
 			{
 				var $button = $("<button type='button' class='dg-chart-setting-button dg-chart-setting-data-button' />")
@@ -1274,7 +1270,7 @@
 			+"  box-shadow: 0px 0px 6px "+shadowColor+";"
 			+"  -webkit-box-shadow: 0px 0px 6px "+shadowColor+";"
 			+"} "
-			+qualifier + ".dg-chart-setting-box .dg-chart-setting-panel .dg-param-value-form-wrapper{"
+			+qualifier + ".dg-chart-setting-box .dg-chart-setting-panel .dg-chartdataset-section{"
 			+"  color: "+color+";"
 			+"  background: "+bgColor+";"
 			+"  border-color: "+borderColor+";"
@@ -1309,9 +1305,17 @@
 		{
 			$panel = $("<div class='dg-chart-setting-panel dg-chart-setting-param-panel' />").appendTo($box);
 			
+			//先显示，避免布局计算错误
+			$panel.show();
+			
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartSetting.labels.chartParam).appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
+			
+			$panelContent.css("min-width", $chart.width()*2/5);
+			$panelContent.css("max-width", $(window).width()*3/5);
+			$panelContent.css("min-height", $chart.height()*2/5);
+			$panelContent.css("max-height", $(window).height()*3/5);
 			
 			for(var i=0; i<chartDataSets.length; i++)
 			{
@@ -1320,13 +1324,11 @@
 				if(!params || params.length == 0)
 					continue;
 				
-				var formTitle = (chartDataSets.length > 1 ? (i+1)+". " : "") + chart.chartDataSetName(chartDataSets[i]);
-				if(formTitle != chartDataSets[i].dataSet.name)
-					formTitle += " ("+chartDataSets[i].dataSet.name+")";
+				var myTitle = chartSetting.evalChartDataSetPanelTitle(chart, chartDataSets, i);
 				
-				var $fp = $("<div class='dg-param-value-form-wrapper' />").data("chartDataSetIndex", i).appendTo($panelContent);
-				var $head = $("<div class='dg-param-value-form-head' />").html(formTitle).appendTo($fp);
-				var $content = $("<div class='dg-param-value-form-content' />").appendTo($fp);
+				var $fp = $("<div class='dg-chartdataset-section' />").data("chartDataSetIndex", i).appendTo($panelContent);
+				var $head = $("<div class='dg-chartdataset-section-head' />").html(myTitle).appendTo($fp);
+				var $content = $("<div class='dg-chartdataset-section-content' />").appendTo($fp);
 				chartSetting.renderDataSetParamValueForm($content, params,
 				{
 					chartTheme: chart.theme(),
@@ -1349,7 +1351,7 @@
 				var validateOk = true;
 				var paramValuess = [];
 				
-				$(".dg-param-value-form-wrapper", $panelContent).each(function()
+				$(".dg-chartdataset-section", $panelContent).each(function()
 				{
 					if(!validateOk)
 						return;
@@ -1381,13 +1383,13 @@
 				else
 					$thisButton.addClass("dg-param-value-form-invalid");
 			});
-			
-			$panelContent.css("width", $chart.width()*3/4);
-			$panelContent.css("max-height", $chart.height()*3/4 - $panelHead.outerHeight(true) - $panelFoot.outerHeight(true));
 		}
 		else
 		{
-			$(".dg-param-value-form-wrapper", $panel).each(function()
+			//先显示，避免布局计算错误
+			$panel.show();
+			
+			$(".dg-chartdataset-section", $panel).each(function()
 			{
 				var chartDataSetIndex = $(this).data("chartDataSetIndex");
 				var $form = chartSetting.getDataSetParamValueForm(this);
@@ -1396,7 +1398,7 @@
 			});
 		}
 		
-		$panel.show();
+		chartSetting.adjustChartSetingPanelPosition($panel);
 	};
 	
 	/**
@@ -1437,33 +1439,57 @@
 		{
 			$panel = $("<div class='dg-chart-setting-panel dg-chart-setting-data-panel' />").appendTo($box);
 			
+			//先显示，避免布局计算错误
+			$panel.show();
+			
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartSetting.labels.chartData).appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
 			
+			chartSetting.setChartSettingDataPanelStyle($panel, chart.theme());
+			
+			$panelContent.css("min-width", $chart.width()*2/5);
+			$panelContent.css("max-width", $(window).width()*3/5);
+			$panelContent.css("min-height", $chart.height()*2/5);
+			$panelContent.css("max-height", $(window).height()*3/5);
+			
 			for(var i=0; i<chartDataSets.length; i++)
 			{
-				var formTitle = (chartDataSets.length > 1 ? (i+1)+". " : "") + chart.chartDataSetName(chartDataSets[i]);
-				if(formTitle != chartDataSets[i].dataSet.name)
-					formTitle += " ("+chartDataSets[i].dataSet.name+")";
+				var myTitle = chartSetting.evalChartDataSetPanelTitle(chart, chartDataSets, i);
 				
-				var $fp = $("<div class='dg-chart-data-table-wrapper' />").data("chartDataSetIndex", i).appendTo($panelContent);
-				var $head = $("<div class='dg-chart-data-table-head' />").html(formTitle).appendTo($fp);
-				var $content = $("<div class='dg-chart-data-table-content' />").appendTo($fp);
+				var $fp = $("<div class='dg-chartdataset-section' />").data("chartDataSetIndex", i).appendTo($panelContent);
+				var $head = $("<div class='dg-chartdataset-section-head' />").html(myTitle).appendTo($fp);
+				var $content = $("<div class='dg-chartdataset-section-content' />").appendTo($fp);
+				
+				var tableId = chartSetting.initChartDataSetDataTable(chart, chartDataSets, i, $content);
+				
+				$fp.data("chartDataTableId", tableId);
 			}
 			
-			$panelContent.css("width", $chart.width()*3/4);
-			$panelContent.css("max-height", $chart.height()*3/4 - $panelHead.outerHeight(true) - $panelFoot.outerHeight(true));
+			//当构建多个表格时，有时会出现列头未对齐的情况，这里处理一下后可解决此问题
+			$(".dg-chartdataset-section", $panel).each(function()
+			{
+				var tableId = $(this).data("chartDataTableId");
+				var dataTable = $("#"+tableId, this).DataTable();
+				dataTable.columns.adjust();
+			});
 		}
 		else
 		{
-			$(".dg-chart-data-table-wrapper", $panel).each(function()
+			//先显示，避免布局计算错误
+			$panel.show();
+			
+			$(".dg-chartdataset-section", $panel).each(function()
 			{
 				var chartDataSetIndex = $(this).data("chartDataSetIndex");
+				var tableId = $(this).data("chartDataTableId");
+				var $dataTable = $("#"+tableId, this);
+				
+				chartSetting.updateChartSettingDataTableData(chart, chartDataSets, chartDataSetIndex, $dataTable);
 			});
 		}
 		
-		$panel.show();
+		chartSetting.adjustChartSetingPanelPosition($panel);
 	};
 	
 	/**
@@ -1487,6 +1513,255 @@
 		var $panel = $(".dg-chart-setting-data-panel", chart.elementJquery());
 		
 		return ($panel.length == 0 || $panel.is(":hidden"));
+	};
+	
+	chartSetting.initChartDataSetDataTable = function(chart, chartDataSets, index, $parent)
+	{
+		var chartDataSet = chartDataSets[index];
+		var dataSetProperties = (chartDataSet.dataSet.properties || []);
+		var propertySigns = (chartDataSet.propertySigns || {});
+		var dataSigns = (chart.plugin && chart.plugin.dataSigns ? chart.plugin.dataSigns : []);
+		var signProperties = [];
+		
+		for(var i=0; i<dataSetProperties.length; i++)
+		{
+			var name = dataSetProperties[i].name;
+			var signs = propertySigns[name];
+			
+			if(signs != null && signs.length > 0)
+			{
+				signProperties.push(dataSetProperties[i]);
+			}
+		}
+		
+		//如果没有任何标记，则认为全部标记，比如表格图表
+		if(signProperties.length == 0)
+			signProperties = dataSetProperties;
+		
+		var columns = [];
+		
+		columns.push(
+		{
+			title: chartSetting.labels.serialNumber,
+			orderable: false,
+			data: "",
+			width: "4em",
+			render: function(value, type, row, meta)
+			{
+				return "";
+			}
+		});
+		
+		for(var i=0; i<signProperties.length; i++)
+		{
+			var column =
+			{
+				title: chartSetting.evalChartDataSetDataTableColumnTitle(chart, signProperties[i], propertySigns, dataSigns),
+				data: signProperties[i].name,
+				defaultContent: "",
+				orderable: false,
+				searchable: false,
+				render: function(value, type, row, meta)
+				{
+					//单元格展示绘制
+					if(type == "display")
+					{
+						return chartFactory.escapeHtml(value);
+					}
+					//其他绘制，比如排序
+					else
+						return value;
+				}
+			};
+			
+			columns.push(column);
+		}
+		
+		var results = chart.getUpdateResults();
+		var result = chart.resultAt(results, index);
+		var data = chart.resultDatas(result);
+		
+		var scrollY = chart.elementJquery().height()*2/5;
+		
+		var tableOptions =
+		{
+			"columns": columns,
+			"data" : data,
+			"ordering": false,
+			"scrollX": true,
+			"scrollY": scrollY,
+			"autoWidth": true,
+	        "scrollCollapse": false,
+	        "paging": false,
+	        "dom": "t",
+			"select" : { style : 'os' },
+			"searching" : false,
+			"language":
+		    {
+				"emptyTable": "",
+				"zeroRecords": ""
+			},
+			rowCallback: function(row, data, displayNum, displayIndex, dataIndex)
+			{
+				$("td:first", row).html(displayIndex+1);
+			}
+		};
+		
+		var table = $("<table width='100%' class='hover stripe'></table>").appendTo($parent);
+		var tableId = chartFactory.nextElementId("Table");
+		table.attr("id", tableId);
+		
+		table.dataTable(tableOptions);
+		
+		return tableId;
+	};
+	
+	chartSetting.evalChartDataSetDataTableColumnTitle = function(chart, dataSetProperty, propertySigns, dataSigns)
+	{
+		var title = chart.dataSetPropertyLabel(dataSetProperty);
+		
+		var name = dataSetProperty.name;
+		var signs = propertySigns[name];
+		
+		if(signs != null && signs.length > 0)
+		{
+			var signName = signs[0];
+			
+			for(var i=0; i<dataSigns.length; i++)
+			{
+				if(dataSigns[i].name == signName)
+				{
+					if(dataSigns[i].nameLabel && dataSigns[i].nameLabel.value)
+					{
+						signName = dataSigns[i].nameLabel.value +"("+signName+")";
+					}
+					
+					break;
+				}
+			}
+			
+			title = "<a title='"+chartFactory.escapeHtml(title)+"'>"+chartFactory.escapeHtml(signName)+"</a>";
+		}
+		
+		return title;
+	};
+	
+	chartSetting.setChartSettingDataPanelStyle = function($panel, chartTheme)
+	{
+		var styleClassName = chartTheme._chartSettingDataPanelStyleClassName;
+		if(!styleClassName)
+		{
+			styleClassName = global.chartFactory.nextElementId();
+			chartTheme._chartSettingDataPanelStyleClassName = styleClassName;
+		}
+		
+		$panel.addClass(styleClassName);
+		
+		var styleId = (chartTheme._chartSettingDataPanelStyleSheetId
+				|| (chartTheme._chartSettingDataPanelStyleSheetId = global.chartFactory.nextElementId()));
+		
+		if(global.chartFactory.isStyleSheetCreated(styleId))
+			return false;
+		
+		var qualifier = "." + styleClassName;
+		
+		var cssText = 
+			qualifier + " table.dataTable tbody tr {"
+			+ "  color:"+chartTheme.color+";"
+			+"} \n"
+			+qualifier + " table.dataTable thead th, table.dataTable thead td {"
+			+"  color:"+chartTheme.titleColor+";"
+			+"  background:transparent;"
+			+"} \n"
+			+qualifier + " table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {"
+			+"  background:"+chartFactory.getGradualColor(chartTheme, 0.1)+";"
+			+"} \n"
+			+qualifier + " table.dataTable.stripe tbody tr.even, table.dataTable.display tbody tr.even {"
+			+"  background:transparent;"
+			+"} \n"
+			+qualifier + " table.dataTable.hover tbody tr.hover,"
+			+qualifier + " table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover"
+			+qualifier + " table.dataTable.hover tbody tr.hover.selected,"
+			+qualifier + " table.dataTable.hover tbody > tr.selected:hover,"
+			+qualifier + " table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover,"
+			+qualifier + " table.dataTable.display tbody > tr > .selected:hover {"
+			+"  background:"+chartFactory.getGradualColor(chartTheme, 0.3)+";"
+			+"} \n"
+			+qualifier + " table.dataTable tbody > tr.selected,"
+			+qualifier + " table.dataTable tbody > tr > .selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.even.selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.even > .selected, table.dataTable.display tbody > tr.even.selected,"
+			+qualifier + " table.dataTable.display tbody > tr.even > .selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.odd.selected,"
+			+qualifier + " table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,"
+			+qualifier + " table.dataTable.display tbody > tr.odd > .selected {"
+			+"  color:"+chartTheme.highlightTheme.color+";"
+			+"  background:"+chartTheme.highlightTheme.backgroundColor+";"
+			+"} \n";
+		
+		global.chartFactory.createStyleSheet(styleId, cssText);
+		
+		return true;
+	};
+	
+	chartSetting.updateChartSettingDataTableData = function(chart, chartDataSets, index, $dataTable)
+	{
+		var results = chart.getUpdateResults();
+		var result = chart.resultAt(results, index);
+		var data = chart.resultDatas(result);
+		
+		var dataTable = $dataTable.DataTable();
+		
+		var rows = dataTable.rows();
+		var removeRowIndexes = [];
+		var dataIndex = 0;
+		
+		rows.every(function(rowIndex)
+		{
+			if(dataIndex >= data.length)
+				removeRowIndexes.push(rowIndex);
+			else
+				this.data(data[dataIndex]);
+			
+			dataIndex++;
+		});
+		
+		for(; dataIndex<data.length; dataIndex++)
+			var row = dataTable.row.add(data[dataIndex]);
+		
+		if(removeRowIndexes.length > 0)
+			dataTable.rows(removeRowIndexes).remove();
+		
+		dataTable.draw();
+	};
+	
+	chartSetting.evalChartDataSetPanelTitle = function(chart, chartDataSets, index)
+	{
+		var title = (chartDataSets.length > 1 ? (index+1)+". " : "") + chart.chartDataSetName(chartDataSets[index]);
+		if(title != chartDataSets[index].dataSet.name)
+			title += " ("+chartDataSets[index].dataSet.name+")";
+		
+		return title;
+	};
+	
+	chartSetting.adjustChartSetingPanelPosition = function($panel)
+	{
+		var offset = $panel.offset();
+		
+		if(offset.left >= 0 && offset.top >= 0)
+			return;
+		
+		var position = $panel.position();
+		
+		if(offset.left < 0)
+			position.left = position.left + Math.abs(offset.left) + 10;
+		
+		if(offset.top < 0)
+			position.top = position.top + Math.abs(offset.top);
+		
+		$panel.css("left", position.left);
+		$panel.css("top", position.top);
+		$panel.css("right", "unset");
 	};
 })
 (this);
