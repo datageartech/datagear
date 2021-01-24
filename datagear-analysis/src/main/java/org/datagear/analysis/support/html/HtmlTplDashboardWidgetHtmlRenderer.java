@@ -173,7 +173,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	@Override
 	public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
 	{
-		return simpleTemplateContent(htmlCharset, "", "", chartWidgetId);
+		return simpleTemplateContent(htmlCharset, "", "", chartWidgetId, "");
 	}
 
 	/**
@@ -181,13 +181,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * 
 	 * @param htmlCharset
 	 * @param htmlTitle
-	 * @param customChartCssAttrs
-	 *            自定义图表样式属性，允许为{@code null}
+	 * @param customChartCssAttrs 自定义图表样式属性，允许为{@code null}
 	 * @param chartWidgetId
+	 * @param chartEleAttrs       图表元素属性，允许为{@code null}
 	 * @return
 	 */
 	public String simpleTemplateContent(String htmlCharset, String htmlTitle, String customChartCssAttrs,
-			String[] chartWidgetId)
+			String[] chartWidgetId, String chartEleAttrs)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -220,7 +220,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 		for (String cwi : chartWidgetId)
 			sb.append("  <div class=\"" + getChartStyleName() + "\" " + getAttrNameChartWidget() + "=\"" + cwi
-					+ "\"></div>\n");
+					+ "\" " + (StringUtil.isEmpty(chartEleAttrs) ? "" : chartEleAttrs) + "></div>\n");
 
 		sb.append("</body>\n");
 		sb.append("</html>");

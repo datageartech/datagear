@@ -409,7 +409,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		HtmlTplDashboardWidget dashboardWidget = new HtmlTplDashboardWidget(id,
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
 						"  position:absolute;\n  left:1em;\n  right:1em;\n  top:1em;\n  bottom:1em;\n  margin:0 0;\n  width:auto;\n  height:auto;\n",
-						new String[] { id }),
+						new String[] { id }, "dg-chart-disable-setting=\"{param:false,data:false}\""),
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer);
 
 		String responseEncoding = dashboardWidget.getTemplateEncoding();
