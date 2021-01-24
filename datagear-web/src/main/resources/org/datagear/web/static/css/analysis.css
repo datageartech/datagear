@@ -169,7 +169,7 @@
 	right: 0;
 	border-width: 1px;
 	border-style: solid;
-	padding: 0.41em 0.8em;
+	padding: 0.41em 0.8em 0.6em 0.8em;
 	user-select: text;
 	-webkit-user-select: text;
 	z-index: 100;
@@ -230,6 +230,9 @@
 	border-color: red !important;
 	color: red !important;
 }
+.dg-chart-setting-box .dg-chart-setting-panel.dg-chart-setting-data-panel .dg-chart-setting-panel-foot{
+	display: none;
+}
 .dg-chart-setting-box .dg-chart-setting-panel table.dataTable td.dataTables_empty{
 	display: none;/*隐藏初始未加载数据时的空行，避免影响样式*/
 }
@@ -237,6 +240,10 @@
 .dg-chart-setting-box .dg-chart-setting-panel table.dataTable thead td{
 	padding: 0.41em 1em 0.41em 10px;
 	text-align: left;
+	white-space: nowrap;
+}
+.dg-chart-setting-box .dg-chart-setting-panel table.dataTable tbody th,
+.dg-chart-setting-box .dg-chart-setting-panel table.dataTable tbody td{
 	white-space: nowrap;
 }
 

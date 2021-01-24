@@ -1312,10 +1312,9 @@
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
 			
-			$panelContent.css("min-width", $chart.width()*2/5);
-			$panelContent.css("max-width", $(window).width()*3/5);
-			$panelContent.css("min-height", $chart.height()*2/5);
-			$panelContent.css("max-height", $(window).height()*3/5);
+			var $button = $("<button type='button' />").html(chartSetting.labels.confirm).appendTo($panelFoot);
+			
+			chartSetting.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent, $panelFoot);
 			
 			for(var i=0; i<chartDataSets.length; i++)
 			{
@@ -1344,7 +1343,6 @@
 				});
 			}
 			
-			var $button = $("<button type='button' />").html(chartSetting.labels.confirm).appendTo($panelFoot);
 			$button.click(function()
 			{
 				var $thisButton = $(this);
@@ -1447,11 +1445,7 @@
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
 			
 			chartSetting.setChartSettingDataPanelStyle($panel, chart.theme());
-			
-			$panelContent.css("min-width", $chart.width()*2/5);
-			$panelContent.css("max-width", $(window).width()*3/5);
-			$panelContent.css("min-height", $chart.height()*2/5);
-			$panelContent.css("max-height", $(window).height()*3/5);
+			chartSetting.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent,$panelFoot);
 			
 			for(var i=0; i<chartDataSets.length; i++)
 			{
@@ -1742,6 +1736,22 @@
 			title += " ("+chartDataSets[index].dataSet.name+")";
 		
 		return title;
+	};
+	
+	chartSetting.setChartSetingPanelContentSizeRange = function(chart, $panel, $panelContent, $panelFoot)
+	{
+		var $chart = chart.elementJquery();
+		
+		var cw = $chart.width();
+		var ch = $chart.height();
+		var ww = $(window).width();
+		var wh = $(window).height();
+		var fh = ($panelFoot.is(":hidden") ? 0 : $panelFoot.outerHeight());
+		
+		$panelContent.css("min-width", Math.max(cw*2/5, ww*1/5));
+		$panelContent.css("max-width", ww*3/5);
+		$panelContent.css("min-height", Math.max(ch*2/5, wh*1/5) - fh);
+		$panelContent.css("max-height", wh*3/5 - fh);
 	};
 	
 	chartSetting.adjustChartSetingPanelPosition = function($panel)
