@@ -510,42 +510,53 @@
 		
 		this.echartsThemeName(themeName);
 	};
-
+	
 	/**
 	 * 初始化图表是否禁用交互设置。
 	 * 此方法从图表元素的"dg-chart-disable-setting"属性获取是否禁用值。
 	 */
 	chartBase._initDisableSetting = function()
 	{
-		var disableSetting = this.elementJquery().attr("dg-chart-disable-setting");
+		var globalSetting = $(document.body).attr("dg-chart-disable-setting");
+		var localSetting = this.elementJquery().attr("dg-chart-disable-setting");
 		
-		if(disableSetting == null)
-			disableSetting = $(document.body).attr("dg-chart-disable-setting");
+		globalSetting = this._evalDisableSettingAttr(globalSetting);
 		
-		var setting =
+		if(localSetting != null && localSetting != "")
 		{
-			param: false,
-			//通常情况下图表不需显示数据透视表，所以这里默认禁用
-			data: true
-		};
+			localSetting = this._evalDisableSettingAttr(localSetting);
+			localSetting = $.extend({}, globalSetting, localSetting);
+		}
+		else
+			localSetting = globalSetting;
 		
-		if(disableSetting == "false")
+		this.disableSetting(localSetting);
+	};
+	
+	chartBase._evalDisableSettingAttr = function(settingAttr)
+	{
+		var setting = {};
+		
+		if(settingAttr == null || settingAttr == "")
+			settingAttr == "false";
+		
+		if(settingAttr == "false" || settingAttr == false)
 		{
 			setting.param = false;
 			setting.data = false;
 		}
-		else if(disableSetting == "true")
+		else if(settingAttr == "true" || settingAttr == true)
 		{
 			setting.param = true;
 			setting.data = true;
 		}
 		else
 		{
-			var tmpSetting = chartFactory.evalSilently(disableSetting, {});
+			var tmpSetting = chartFactory.evalSilently(settingAttr, {});
 			setting = $.extend(setting, tmpSetting);
 		}
 		
-		this.disableSetting(setting);
+		return setting;
 	};
 	
 	/**
@@ -712,21 +723,47 @@
 	/**
 	 * 获取/设置初始图表是否禁用设置。
 	 * 
-	 * @param setting 可选，禁用设置，没有则执行获取操作且不会返回null。
+	 * @param setting 可选，禁用设置，没有则执行获取操作且返回格式为：{param: true||false, data: true||false}。
 	 * 					禁用设置格式为：
+	 * 					//全部禁用
+	 * 					true、"true"、
+	 * 					//全部启用
+	 * 					false、"false"、
+	 * 					//详细设置
 	 *					{
-	 *						//是否禁用参数
+	 *						//可选，是否禁用参数
 	 *						param: false || true,
-	 *						//是否禁用数据透视表
+	 *						//可选，是否禁用数据透视表
 	 *						data: true || false
 	 *					}
 	 */
 	chartBase.disableSetting = function(setting)
 	{
+		var defaultSetting =
+		{
+			//影响图表主体功能，因此默认启用
+			param: false,
+			//不影响图表主体功能，因此默认禁用
+			data: true
+		};
+		
 		if(setting === undefined)
-			return (this._disableSetting == null ? {param: false, data: true} :  this._disableSetting);
+		{
+			return (this._disableSetting == null ? defaultSetting : this._disableSetting);
+		}
 		else
-			this._disableSetting = setting;
+		{
+			if(setting == true || setting == "true")
+			{
+				setting = {param: true, data: true};
+			}
+			else if(setting == false || setting == "false")
+			{
+				setting = {param: false, data: false};
+			}
+			
+			this._disableSetting = $.extend(defaultSetting, setting);
+		}
 	};
 	
 	/**

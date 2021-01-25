@@ -409,7 +409,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		HtmlTplDashboardWidget dashboardWidget = new HtmlTplDashboardWidget(id,
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
 						"  position:absolute;\n  left:1em;\n  right:1em;\n  top:1em;\n  bottom:1em;\n  margin:0 0;\n  width:auto;\n  height:auto;\n",
-						new String[] { id }, "dg-chart-disable-setting=\"{param:false,data:false}\""),
+						new String[] { id }, "dg-chart-disable-setting=\"false\""),
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer);
 
 		String responseEncoding = dashboardWidget.getTemplateEncoding();
@@ -435,7 +435,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		WebContext webContext = createInitWebContext(request);
 
-		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME, addJsessionidParam("/analysis/chart/showData", session.getId()));
+		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME,
+				addJsessionidParam("/analysis/chart/showData", session.getId()));
 		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
 				addJsessionidParam("/analysis/dashboard/loadChart", session.getId()));
 		addHeartBeatValue(request, webContext);
