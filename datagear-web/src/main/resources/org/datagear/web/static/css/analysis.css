@@ -42,7 +42,7 @@
 .dg-chart-table .dg-chart-table-content table.dataTable thead td,
 .dg-chart-table .dg-chart-table-content table.dataTable tbody th,
 .dg-chart-table .dg-chart-table-content table.dataTable tbody td{
-	padding: 0.5em 0.8em;
+	padding: 0.5em 18px;
 	text-align: left;
 	white-space: nowrap;
 }
@@ -73,6 +73,38 @@
 .dg-chart-table .dg-chart-table-content .DTFC_LeftBodyLiner,
 .dg-chart-table .dg-chart-table-content .DTFC_RightBodyLiner{
 	overflow-x: hidden;
+}
+/*排序图标*/
+.dg-chart-table table.dataTable thead th.sorting div.DataTables_sort_wrapper span{
+	position: absolute;
+	top: 50%;
+	margin-top: -2px;
+	right: -14px;
+	width: 6px;
+	height: 6px;
+	background: #333;
+	opacity: 0.3;
+	filter: Alpha(Opacity=30);
+}
+.dg-chart-table table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span{
+	width: 0;
+	height: 0;
+	border-left: 3px solid transparent;
+	border-right: 3px solid transparent;
+	border-bottom: 6px solid #333;
+	background: none;
+	opacity: 1;
+	filter: Alpha(Opacity=100);
+}
+.dg-chart-table table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span{
+	width: 0;
+	height: 0;
+	border-left: 3px solid transparent;
+	border-right: 3px solid transparent;
+	border-top: 6px solid #333;
+	background: none;
+	opacity: 1;
+	filter: Alpha(Opacity=100);
 }
 
 /*标签图表*/

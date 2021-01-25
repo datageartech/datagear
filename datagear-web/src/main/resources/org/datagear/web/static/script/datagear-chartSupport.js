@@ -4652,6 +4652,17 @@
 			+qualifier + " table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,"
 			+qualifier + " table.dataTable.display tbody > tr.odd > .selected {"
 			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.selected)
+			+"} \n"
+			+qualifier + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span {"
+			+ "  background:" + chartOptions.table.header.color+";"
+			+"} \n"
+			+qualifier + " table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span {"
+			+ "  border-bottom-color:" + chartOptions.table.header.color+";"
+			+ "  background: none;"
+			+"} \n"
+			+qualifier + " table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span {"
+			+ "  border-top-color:" + chartOptions.table.header.color+";"
+			+ "  background: none;"
 			+"} \n";
 		
 		global.chartFactory.createStyleSheet(styleSheetId, cssText);
