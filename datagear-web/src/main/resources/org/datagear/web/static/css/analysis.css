@@ -80,15 +80,16 @@
 	top: 50%;
 	margin-top: -2px;
 	right: -14px;
-	width: 6px;
-	height: 6px;
+	width: 4px;
+	height: 4px;
 	background: #333;
-	opacity: 0.3;
-	filter: Alpha(Opacity=30);
+	opacity: 0.6;
+	filter: Alpha(Opacity=60);
 }
 .dg-chart-table table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span{
 	width: 0;
 	height: 0;
+	margin-top: -3px;
 	border-left: 3px solid transparent;
 	border-right: 3px solid transparent;
 	border-bottom: 6px solid #333;
@@ -99,6 +100,7 @@
 .dg-chart-table table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span{
 	width: 0;
 	height: 0;
+	margin-top: -3px;
 	border-left: 3px solid transparent;
 	border-right: 3px solid transparent;
 	border-top: 6px solid #333;
