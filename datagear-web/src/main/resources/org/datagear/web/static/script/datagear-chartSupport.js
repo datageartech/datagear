@@ -4141,6 +4141,7 @@
 			seriesData = seriesData.concat(data);
 		}
 		
+		//如果仅有一个波浪，则自动扩充
 		if(seriesData.length == 1 && renderOptions.series[0].autoInflateWave > 1)
 		{
 			for(var i=1; i<renderOptions.series[0].autoInflateWave; i++)
@@ -4968,83 +4969,122 @@
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions = chartSupport.renderOptions(chart);
 		var valueFirst = renderOptions.valueFirst;
-		var showName = renderOptions.showName;
-		var clear = (valueFirst != renderOptions.valueFirst || showName != renderOptions.showName);
+		var showName = renderOptions.label.name.show;
 		
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var $parent = chart.elementJquery();
 		
-		if(clear)
-			$(".dg-chart-label-item", $parent).empty();
-		else
-			$(".dg-chart-label-item", $parent).addClass("dg-chart-label-item-pending");
+		$(".dg-chart-label-item", $parent).addClass("dg-chart-label-item-pending");
+		
+		var updateOptions = { data: [] };
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			var nps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.name);
 			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
-			var nv = (nps.length > 0 ? chart.resultRowArrays(result, nps) : [] );
-			var vv = chart.resultRowArrays(result, vps);
+			var npsNone = (nps==null || nps.length==0);
 			
-			for(var j=0; j<vv.length; j++)
+			if(!npsNone && nps.length!=vps.length)
+				throw new Error("The ["+signNameMap.name+"] sign column must be "
+						+"one-to-one with ["+signNameMap.value+"] sign column");
+			
+			if(npsNone)
 			{
-				var vvj = vv[j];
-				
-				for(var k=0; k<vvj.length; k++)
+				var ras = chart.resultRowArrays(result, vps);
+				for(var j=0; j<ras.length; j++)
 				{
-					var cssName = "dg-chart-label-item-"+i+"-"+j+"-"+k;
-					var name = (nv.length > j && nv[j].length > k ? nv[j][k] : chart.dataSetPropertyLabel(vps[k]));
-					var value = vv[j][k];
-					
-					var $label = $("."+ cssName, $parent);
-					if($label.length == 0)
-						$label = $("<div class='dg-chart-label-item dg-chart-label-item-"+i+" dg-chart-label-item-"+i+"-"+j+" "+cssName+"'></div>").appendTo($parent);
-					else
-						$label.removeClass("dg-chart-label-item-pending");
-					
-					$label.data("_dgChartLabelChartData", { name: name, value: value });
-					chartSupport.domOriginalDataIndex($label, i, j);
-					
-					var $labelName = $(".label-name", $label);
-					var $labelValue = $(".label-value", $label);
-					
-					if(renderOptions.label.name.show)
+					var ra = ras[j];
+					for(var k=0; k<ra.length; k++)
 					{
-						if(renderOptions.valueFirst && $labelValue.length == 0)
-							$labelValue = $("<div class='label-value'></div>").appendTo($label);
+						var sv = { name: chart.dataSetPropertyLabel(vps[k]), value: ra[k] };
+						chartSupport.chartDataOriginalDataIndex(sv, i, j);
 						
-						if($labelName.length == 0)
-							$labelName = $("<div class='label-name'></div>").appendTo($label);
+						updateOptions.data.push(sv);
+					}
+				}
+			}
+			else
+			{
+				var namess = chart.resultRowArrays(result, nps);
+				var valuess = chart.resultRowArrays(result, vps);
+				
+				for(var j=0; j<namess.length; j++)
+				{
+					var names = namess[j];
+					var values = valuess[j];
+					
+					for(var k=0; k<names.length; k++)
+					{
+						var sv = { name: names[k], value: values[k] };
+						chartSupport.chartDataOriginalDataIndex(sv, i, j);
 						
-						if(!renderOptions.valueFirst && $labelValue.length == 0)
-							$labelValue = $("<div class='label-value'></div>").appendTo($label);
+						updateOptions.data.push(sv);
 					}
-					else
-					{
-						if($labelValue.length == 0)
-							$labelValue = $("<div class='label-value'></div>").appendTo($label);
-					}
-					
-					if(renderOptions.label.name.show)
-					{
-						$labelName.html(name);
-						global.chartFactory.setStyles($labelName, renderOptions.label.name);
-					}
-					
-					$labelValue.html(value);
-					global.chartFactory.setStyles($labelValue, renderOptions.label.value);
 				}
 			}
 		}
 		
+		updateOptions = chartSupport.processUpdateOptions(chart, results, renderOptions, updateOptions);
+		
+		for(var i=0; i<updateOptions.data.length; i++)
+		{
+			var labelData = updateOptions.data[i];
+			
+			var cssName = "dg-chart-label-item-"+i;
+			
+			var $label = $("."+ cssName, $parent);
+			var $labelName = null;
+			var $labelValue = null;
+			
+			if($label.length == 0)
+			{
+				$label = $("<div class='dg-chart-label-item "+cssName+"'></div>").appendTo($parent);
+				
+				if(valueFirst)
+				{
+					$labelValue = $("<div class='label-value'></div>").appendTo($label);
+					global.chartFactory.setStyles($labelValue, renderOptions.label.value);
+					
+					if(showName)
+					{
+						$labelName = $("<div class='label-name'></div>").appendTo($label);
+						global.chartFactory.setStyles($labelName, renderOptions.label.name);
+					}
+				}
+				else
+				{
+					if(showName)
+					{
+						$labelName = $("<div class='label-name'></div>").appendTo($label);
+						global.chartFactory.setStyles($labelName, renderOptions.label.name);
+					}
+					
+					$labelValue = $("<div class='label-value'></div>").appendTo($label);
+					global.chartFactory.setStyles($labelValue, renderOptions.label.value);
+				}
+			}
+			else
+			{
+				$labelName = $(".label-name", $label);
+				$labelValue = $(".label-value", $label);
+				
+				$label.removeClass("dg-chart-label-item-pending");
+			}
+			
+			if(showName)
+				$labelName.html(labelData.name);
+			$labelValue.html(labelData.value);
+			
+			$label.data("_dgChartLabelChartData", labelData);
+		}
+		
 		$(".dg-chart-label-item-pending", $parent).remove();
 	};
-
+	
 	chartSupport.labelResize = function(chart)
 	{
 		
@@ -5084,8 +5124,8 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
-		var originalDataInfo = chartSupport.domOriginalDataIndex($label);
 		var chartData = $label.data("_dgChartLabelChartData");
+		var originalDataIndex = chartSupport.chartDataOriginalDataIndex(chartData);
 		
 		var data = {};
 		
@@ -5096,7 +5136,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chartSupport.setChartEventOriginalDataByIndex(chart, chartEvent, originalDataInfo);
+		chartSupport.setChartEventOriginalDataByIndex(chart, chartEvent, originalDataIndex);
 	};
 	
 	chartSupport.labelChartEventDelegationEventBinder =
