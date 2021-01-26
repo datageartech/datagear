@@ -5097,9 +5097,9 @@
 	
 	chartSupport.customAsyncRender = function(chart)
 	{
-		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
 		
-		if(customRenderer.asyncRender == undefined)
+		if(!customRenderer || customRenderer.asyncRender == null)
 			return false;
 		
 		if(typeof(customRenderer.asyncRender) == "function")
@@ -5110,15 +5110,24 @@
 	
 	chartSupport.customRender = function(chart)
 	{
-		var customRenderer = chartSupport.customGetCustomRenderer(chart);
-		customRenderer.render(chart);
+		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
+		
+		//如果未定义，则采用表格组件，避免空白页，又可以让用户浏览和调试数据
+		if(!customRenderer)
+		{
+			chartSupport.tableRender(chart, "column");
+		}
+		else
+		{
+			customRenderer.render(chart);
+		}
 	};
 	
 	chartSupport.customAsyncUpdate = function(chart, results)
 	{
-		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
 		
-		if(customRenderer.asyncUpdate == undefined)
+		if(!customRenderer || customRenderer.asyncUpdate == null)
 			return false;
 		
 		if(typeof(customRenderer.asyncUpdate) == "function")
@@ -5129,15 +5138,26 @@
 	
 	chartSupport.customUpdate = function(chart, results)
 	{
-		var customRenderer = chartSupport.customGetCustomRenderer(chart);
-		customRenderer.update(chart, results);
+		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
+		
+		//如果未定义，则采用表格组件，避免空白页，又可以让用户浏览和调试数据
+		if(!customRenderer)
+		{
+			chartSupport.tableUpdate(chart, results);
+		}
+		else
+		{
+			customRenderer.update(chart, results);
+		}
 	};
-
+	
 	chartSupport.customResize = function(chart)
 	{
-		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
 		
-		if(customRenderer.resize)
+		//即使customRenderer未定义，resize操作也可以不抛出异常，因为不影响主体功能
+		
+		if(customRenderer && customRenderer.resize)
 			customRenderer.resize(chart);
 	};
 	
@@ -5169,11 +5189,14 @@
 			throw new Error("Custom renderer 's [off] undefined");
 	};
 	
-	chartSupport.customGetCustomRenderer = function(chart)
+	chartSupport.customGetCustomRenderer = function(chart, nullable)
 	{
+		if(nullable == null)
+			nullable = false;
+		
 		var customRenderer = chart.customChartRenderer();
 		
-		if(customRenderer == null)
+		if(customRenderer == null && !nullable)
 			throw new Error("Custom chart renderer undefined");
 		
 		return customRenderer;

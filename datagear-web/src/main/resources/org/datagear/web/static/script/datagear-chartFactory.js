@@ -838,9 +838,11 @@
 	 */
 	chartBase.doRender = function()
 	{
-		if(this._customChartRenderer && this._customChartRenderer.render)
+		var customRenderer = this.customChartRenderer();
+		
+		if(customRenderer && customRenderer.render)
 		{
-			this._customChartRenderer.render(this);
+			customRenderer.render(this);
 		}
 		else
 		{
@@ -888,9 +890,11 @@
 	 */
 	chartBase.doUpdate = function(results)
 	{
-		if(this._customChartRenderer && this._customChartRenderer.update)
+		var customRenderer = this.customChartRenderer();
+		
+		if(customRenderer && customRenderer.update)
 		{
-			this._customChartRenderer.update(this, results);
+			customRenderer.update(this, results);
 		}
 		else
 		{
@@ -915,10 +919,12 @@
 	chartBase.resize = function()
 	{
 		this._assertActive();
+
+		var customRenderer = this.customChartRenderer();
 		
-		if(this._customChartRenderer && this._customChartRenderer.resize)
+		if(customRenderer && customRenderer.resize)
 		{
-			this._customChartRenderer.resize(this);
+			customRenderer.resize(this);
 		}
 		else if(this.plugin.chartRenderer.resize)
 		{
@@ -945,9 +951,11 @@
 		this.statusDestroyed(true);
 		this.elementJquery().removeClass(chartFactory.CHART_DISTINCT_CSS_NAME);
 		
-		if(this._customChartRenderer && this._customChartRenderer.destroy)
+		var customRenderer = this.customChartRenderer();
+		
+		if(customRenderer && customRenderer.destroy)
 		{
-			this._customChartRenderer.destroy(this);
+			customRenderer.destroy(this);
 		}
 		else if(this.plugin.chartRenderer.destroy)
 		{
@@ -984,12 +992,14 @@
 	 */
 	chartBase.isAsyncRender = function()
 	{
-		if(this._customChartRenderer && this._customChartRenderer.asyncRender !== undefined)
+		var customRenderer = this.customChartRenderer();
+		
+		if(customRenderer && customRenderer.asyncRender !== undefined)
 		{
-			if(typeof(this._customChartRenderer.asyncRender) == "function")
-				return this._customChartRenderer.asyncRender(this);
+			if(typeof(customRenderer.asyncRender) == "function")
+				return customRenderer.asyncRender(this);
 			
-			return (this._customChartRenderer.asyncRender == true);
+			return (customRenderer.asyncRender == true);
 		}
 		
 		if(this.plugin.chartRenderer.asyncRender == undefined)
@@ -1008,12 +1018,14 @@
 	 */
 	chartBase.isAsyncUpdate = function(results)
 	{
-		if(this._customChartRenderer && this._customChartRenderer.asyncUpdate !== undefined)
+		var customRenderer = this.customChartRenderer();
+		
+		if(customRenderer && customRenderer.asyncUpdate !== undefined)
 		{
-			if(typeof(this._customChartRenderer.asyncUpdate) == "function")
-				return this._customChartRenderer.asyncUpdate(this, results);
+			if(typeof(customRenderer.asyncUpdate) == "function")
+				return customRenderer.asyncUpdate(this, results);
 			
-			return (this._customChartRenderer.asyncUpdate == true);
+			return (customRenderer.asyncUpdate == true);
 		}
 		
 		if(this.plugin.chartRenderer.asyncUpdate == undefined)
@@ -1297,9 +1309,11 @@
 	{
 		this._assertActive();
 		
-		if(this._customChartRenderer && this._customChartRenderer.on)
+		var customRenderer = this.customChartRenderer();
+		
+		if(customRenderer && customRenderer.on)
 		{
-			this._customChartRenderer.on(this, eventType, handler);
+			customRenderer.on(this, eventType, handler);
 		}
 		else if(this.plugin.chartRenderer.on)
 		{
@@ -1323,9 +1337,11 @@
 	{
 		this._assertActive();
 		
-		if(this._customChartRenderer && this._customChartRenderer.off)
+		var customRenderer = this.customChartRenderer();
+		
+		if(customRenderer && customRenderer.off)
 		{
-			this._customChartRenderer.off(this, eventType, handler);
+			customRenderer.off(this, eventType, handler);
 		}
 		else if(this.plugin.chartRenderer.off)
 		{
