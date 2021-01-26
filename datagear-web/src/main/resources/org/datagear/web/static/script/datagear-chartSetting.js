@@ -1593,7 +1593,8 @@
 	        "dom": "t",
 			"select" : { style : 'os' },
 			"searching" : false,
-			"fixedColumns": { leftColumns: 1 },
+			//暂时禁用固定列，开启后会导致在固定列上鼠标悬浮没有hover效果、点击后会关闭面板、滚动会错位，奇怪！
+			//"fixedColumns": { leftColumns: 1 },
 			"language":
 		    {
 				"emptyTable": "",
@@ -1611,11 +1612,11 @@
 		
 		table.dataTable(tableOptions);
 		
-		var dataTable = table.DataTable();
-		
 		//固定选择列后hover效果默认不能同步，需要自己实现
+		/*
 		if(tableOptions.fixedColumns)
 		{
+			var dataTable = table.DataTable();
 			$(dataTable.table().body()).on("mouseover mouseout", "tr",
 			function(event)
 			{
@@ -1631,6 +1632,7 @@
 				});
 			});
 		}
+		*/
 		
 		return tableId;
 	};
