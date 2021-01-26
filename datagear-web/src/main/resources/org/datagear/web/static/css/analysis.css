@@ -66,16 +66,16 @@
 	margin-right: 0.2em;
 }
 /*轮播表格隐藏竖向滚动条*/
-.dg-chart-table.dg-chart-table-carousel .dataTables_scrollBody{
+.dg-chart-table.dg-chart-table-carousel .dg-chart-table-content .dataTables_scrollBody{
 	overflow-y: hidden !important;
 }
-/*经测试，设置固定列后，在Chrome-87.0.4280.88版本左侧固定列会出现横向滚动条，所以这里通过此样式将滚动条隐藏*/
+/*设置固定列后，在某些版本浏览器固定列会出现横向滚动条，所以这里通过此样式将滚动条隐藏*/
 .dg-chart-table .dg-chart-table-content .DTFC_LeftBodyLiner,
 .dg-chart-table .dg-chart-table-content .DTFC_RightBodyLiner{
 	overflow-x: hidden;
 }
 /*排序图标*/
-.dg-chart-table table.dataTable thead th.sorting div.DataTables_sort_wrapper span{
+.dg-chart-table .dg-chart-table-content table.dataTable thead th.sorting div.DataTables_sort_wrapper span{
 	position: absolute;
 	top: 50%;
 	margin-top: -2px;
@@ -86,7 +86,7 @@
 	opacity: 0.6;
 	filter: Alpha(Opacity=60);
 }
-.dg-chart-table table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span{
+.dg-chart-table .dg-chart-table-content table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span{
 	width: 0;
 	height: 0;
 	margin-top: -3px;
@@ -97,7 +97,7 @@
 	opacity: 1;
 	filter: Alpha(Opacity=100);
 }
-.dg-chart-table table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span{
+.dg-chart-table .dg-chart-table-content table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span{
 	width: 0;
 	height: 0;
 	margin-top: -3px;
@@ -279,6 +279,11 @@
 .dg-chart-setting-box .dg-chart-setting-panel table.dataTable tbody th,
 .dg-chart-setting-box .dg-chart-setting-panel table.dataTable tbody td{
 	white-space: nowrap;
+}
+/*设置固定列后，在某些版本浏览器固定列会出现横向滚动条，所以这里通过此样式将滚动条隐藏*/
+.dg-chart-setting-box .dg-chart-setting-panel .DTFC_LeftBodyLiner,
+.dg-chart-setting-box .dg-chart-setting-panel .DTFC_RightBodyLiner{
+	overflow-x: hidden;
 }
 
 /*datetimepicker组件扩展样式*/

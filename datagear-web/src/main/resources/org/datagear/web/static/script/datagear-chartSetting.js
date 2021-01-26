@@ -1593,6 +1593,7 @@
 	        "dom": "t",
 			"select" : { style : 'os' },
 			"searching" : false,
+			"fixedColumns": { leftColumns: 1 },
 			"language":
 		    {
 				"emptyTable": "",
@@ -1609,6 +1610,27 @@
 		table.attr("id", tableId);
 		
 		table.dataTable(tableOptions);
+		
+		var dataTable = table.DataTable();
+		
+		//固定选择列后hover效果默认不能同步，需要自己实现
+		if(tableOptions.fixedColumns)
+		{
+			$(dataTable.table().body()).on("mouseover mouseout", "tr",
+			function(event)
+			{
+				var rowIndex = $(this).index() + 1;
+				var $tableContainer = $(dataTable.table().container());
+				
+				$(".dataTable", $tableContainer).each(function()
+				{
+					if(event.type == "mouseover")
+						$("tr:eq("+rowIndex+")", this).addClass("hover");
+					else
+						$("tr:eq("+rowIndex+")", this).removeClass("hover");
+				});
+			});
+		}
 		
 		return tableId;
 	};
@@ -1660,6 +1682,9 @@
 		if(global.chartFactory.isStyleSheetCreated(styleId))
 			return false;
 		
+		//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列
+		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
+		
 		var qualifier = "." + styleClassName;
 		
 		var cssText = 
@@ -1668,13 +1693,13 @@
 			+"} \n"
 			+qualifier + " table.dataTable thead th, table.dataTable thead td {"
 			+"  color:"+chartTheme.titleColor+";"
-			+"  background:transparent;"
+			+"  background:"+bgColor+";"
 			+"} \n"
 			+qualifier + " table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {"
 			+"  background:"+chartFactory.getGradualColor(chartTheme, 0.1)+";"
 			+"} \n"
 			+qualifier + " table.dataTable.stripe tbody tr.even, table.dataTable.display tbody tr.even {"
-			+"  background:transparent;"
+			+"  background:"+bgColor+";"
 			+"} \n"
 			+qualifier + " table.dataTable.hover tbody tr.hover,"
 			+qualifier + " table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover"

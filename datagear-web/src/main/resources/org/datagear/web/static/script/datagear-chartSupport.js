@@ -4516,7 +4516,7 @@
 	
 	chartSupport.tableResize = function(chart)
 	{
-		var chartContent = $(".dg-chart-table-content", chart.element());
+		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
@@ -4597,10 +4597,18 @@
 		}
 	};
 	
+	chartSupport.tableGetChartContent = function(chart)
+	{
+		//图表的数据透视表功能也采用的是DataTable组件，可能会与表格图表处在同一个图表div内，
+		//因此，获取图表表格的DOM操作都应限定在".dg-chart-table-content"内
+		
+		return $(".dg-chart-table-content", chart.element());
+	};
+	
 	chartSupport.tableGetChartDataTable = function(chart)
 	{
 		var tableId = chart.extValue("chartTableId");
-		return $("#" + tableId, chart.element()).DataTable();
+		return $("#" + tableId, chartSupport.tableGetChartContent(chart)).DataTable();
 	};
 	
 	chartSupport.tableGetColumnProperties = function(chart, columnSign)
@@ -4620,7 +4628,8 @@
 		if(global.chartFactory.isStyleSheetCreated(styleSheetId))
 			return false;
 		
-		var qualifier = "." + styleClassName;
+		//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
+		var qualifier = "." + styleClassName + " .dg-chart-table-content";
 		
 		var cssText = 
 			qualifier + " table.dataTable tbody tr {"
@@ -4737,6 +4746,7 @@
 	{
 		var renderOptions = chartSupport.renderOptions(chart);
 		var chartEle = chart.elementJquery();
+		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		var carousel = renderOptions.carousel;
 		
@@ -4746,7 +4756,7 @@
 		if(rowCount == 0)
 			return;
 		
-		var scrollBody = $(".dataTables_scrollBody", chartEle);
+		var scrollBody = $(".dataTables_scrollBody", chartContent);
 		var scrollTable = $(".dataTable", scrollBody);
 		
 		var scrollBodyHeight = scrollBody.height();
@@ -4778,6 +4788,7 @@
 	{
 		var renderOptions = chartSupport.renderOptions(chart);
 		var chartEle = chart.elementJquery();
+		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
 		var rowCount = dataTable.rows().indexes().length;
@@ -4789,7 +4800,7 @@
 		chartSupport.tableStopCarousel(chart);
 		chartEle.data("tableCarouselStatus", "start");
 		
-		var scrollBody = $(".dataTables_scrollBody", chartEle);
+		var scrollBody = $(".dataTables_scrollBody", chartContent);
 		var scrollTable = $(".dataTable", scrollBody);
 		
 		chartSupport.tableHandleCarousel(chart, renderOptions, chartEle, dataTable, scrollBody, scrollTable);
