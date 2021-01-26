@@ -117,21 +117,25 @@ form .form-content .form-item .form-item-value textarea.error{
 table.dataTable tbody tr {
 	background-color: #285c00;
 }
-table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
+table.dataTable.stripe tbody tr.odd,
+table.dataTable.display tbody tr.odd {
 	background-color: #2b6300;
 }
 table.dataTable.hover tbody tr.hover,
-table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+table.dataTable.hover tbody tr:hover,
+table.dataTable.display tbody tr:hover {
 	background: #3f8f03;
 }
 table.dataTable.hover tbody tr.hover.selected,
 table.dataTable tbody > tr.selected,
 table.dataTable tbody > tr > .selected,
 table.dataTable.stripe tbody > tr.odd.selected,
-table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,
+table.dataTable.stripe tbody > tr.odd > .selected,
+table.dataTable.display tbody > tr.odd.selected,
 table.dataTable.display tbody > tr.odd > .selected,
 table.dataTable.hover tbody > tr.selected:hover,
-table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover,
+table.dataTable.hover tbody > tr > .selected:hover,
+table.dataTable.display tbody > tr.selected:hover,
 table.dataTable.display tbody > tr > .selected:hover {
     background: #59c908;
     color: #ffffff;

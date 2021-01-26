@@ -117,21 +117,25 @@ form .form-content .form-item .form-item-value textarea.error{
 table.dataTable tbody tr {
 	background-color: #ffffff;
 }
-table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
+table.dataTable.stripe tbody tr.odd,
+table.dataTable.display tbody tr.odd {
 	background-color: #f9f9f9;
 }
 table.dataTable.hover tbody tr.hover,
-table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+table.dataTable.hover tbody tr:hover,
+table.dataTable.display tbody tr:hover {
 	background-color: #f2f2f2;
 }
 table.dataTable.hover tbody tr.hover.selected,
 table.dataTable tbody > tr.selected,
 table.dataTable tbody > tr > .selected,
 table.dataTable.stripe tbody > tr.odd.selected,
-table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,
+table.dataTable.stripe tbody > tr.odd > .selected,
+table.dataTable.display tbody > tr.odd.selected,
 table.dataTable.display tbody > tr.odd > .selected,
 table.dataTable.hover tbody > tr.selected:hover,
-table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover,
+table.dataTable.hover tbody > tr > .selected:hover,
+table.dataTable.display tbody > tr.selected:hover,
 table.dataTable.display tbody > tr > .selected:hover {
 	background-color: #007FFF;
 	color: #ffffff;
