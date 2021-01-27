@@ -24,7 +24,7 @@
  * 此看板工厂支持为<body>元素添加"dg-chart-map-urls"属性，用于扩展或替换内置地图，格式为：
  * {customMap:'map/custom.json', china: 'map/myChina.json'}
  * 
- * 此看板工厂支持为图表元素添加"dg-chart-link"属性，用于设置图表联动，具体格式参考chartBaseExt.links函数说明。
+ * 此看板工厂支持为图表元素添加"dg-chart-link"属性，用于设置图表联动，具体格式参考chartBase.links函数说明。
  * 
  * 此看板工厂支持为<body>元素、图表元素添加"dg-chart-auto-resize"属性，用于设置图表是否自动调整大小。
  * 
@@ -33,9 +33,17 @@
  */
 (function(global)
 {
+	/**图表工厂*/
+	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
+	/**图表对象基类*/
+	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
+	/**图表状态集*/
+	var chartStatus = (chartFactory.chartStatus || (chartFactory.chartStatus = {}));
+	
+	/**看板工厂*/
 	var dashboardFactory = (global.dashboardFactory || (global.dashboardFactory = {}));
+	/**看板对象基类*/
 	var dashboardBase = (dashboardFactory.dashboardBase || (dashboardFactory.dashboardBase = {}));
-	var chartBaseExt = (dashboardFactory.chartBaseExt || (dashboardFactory.chartBaseExt = {}));
 	
 	/**
 	 * 初始化指定看板对象。
@@ -45,42 +53,39 @@
 	dashboardFactory.init = function(dashboard)
 	{
 		//如果未设置图表主题，则采用看板主题里定义的图表主题
-		if(global.chartFactory.renderContextAttr(dashboard.renderContext,
-				global.chartFactory.renderContextAttrs.chartTheme) == null)
+		if(chartFactory.renderContextAttr(dashboard.renderContext,
+				chartFactory.renderContextAttrs.chartTheme) == null)
 		{
-			var dashboardTheme = global.chartFactory.renderContextAttr(dashboard.renderContext,
+			var dashboardTheme = chartFactory.renderContextAttr(dashboard.renderContext,
 					dashboardFactory.renderContextAttrs.dashboardTheme);
-			global.chartFactory.renderContextAttr(dashboard.renderContext,
-					global.chartFactory.renderContextAttrs.chartTheme, dashboardTheme.chartTheme);
+			chartFactory.renderContextAttr(dashboard.renderContext,
+					chartFactory.renderContextAttrs.chartTheme, dashboardTheme.chartTheme);
 		}
 		
-		global.chartFactory.initRenderContext(dashboard.renderContext);
+		chartFactory.initRenderContext(dashboard.renderContext);
 		
-		this.extendChartBase();
-		this.initMapURLs();
+		this._initOverwriteChartBase();
+		this._initChartMapURLs();
 		$.extend(dashboard, this.dashboardBase);
 		dashboard.init();
 		
 		//开启心跳，避免会话超时
 		var webContext = chartFactory.renderContextAttrWebContext(dashboard.renderContext);
-		var heartbeatURL = global.chartFactory.toWebContextPathURL(webContext, webContext.attributes.heartbeatURL);
+		var heartbeatURL = chartFactory.toWebContextPathURL(webContext, webContext.attributes.heartbeatURL);
 		this.startHeartBeat(heartbeatURL);
 	};
 	
 	/**
-	 * 为chartFactory.chartBase扩展dashboardFactory.chartBaseExt。
+	 * 重写chartFactory.chartBase的部分逻辑。
 	 */
-	dashboardFactory.extendChartBase = function()
+	dashboardFactory._initOverwriteChartBase = function()
 	{
-		var chartBase = global.chartFactory.chartBase;
-		
-		if(chartBase._initLinks)
+		//此方法不能重复执行，这里确保只执行一次
+		if(chartBase._initSuper != null)
 			return false;
 		
 		chartBase._initSuper = chartBase.init;
 		chartBase._postProcessRenderedSuper = chartBase._postProcessRendered;
-		
-		$.extend(chartBase, chartBaseExt);
 		
 		chartBase.init = function()
 		{
@@ -97,24 +102,24 @@
 	};
 	
 	/**
-	 * 初始化chartFactory.mapURLs。
+	 * 初始化chartFactory.chartMapURLs。
 	 * 它将body元素的"dg-chart-map-urls"属性值设置为自定义地图JSON地址映射表。
 	 */
-	dashboardFactory.initMapURLs = function()
+	dashboardFactory._initChartMapURLs = function()
 	{
 		for(var i=0; i<this.builtInEchartsMaps.length; i++)
 		{
 			var urlNames = this.builtInEchartsMaps[i];
 			for(var j=0; j<urlNames.names.length; j++)
-				global.chartFactory.mapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
+				chartFactory.chartMapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
 		}
 		
 		var mapUrls = $(document.body).attr("dg-chart-map-urls");
 		
 		if(mapUrls)
-			mapUrls = global.chartFactory.evalSilently(mapUrls);
+			mapUrls = chartFactory.evalSilently(mapUrls);
 		
-		$.extend(global.chartFactory.mapURLs, mapUrls);
+		$.extend(chartFactory.chartMapURLs, mapUrls);
 	};
 	
 	/**
@@ -201,15 +206,6 @@
 				chartElementIdParamName: "chartElementId"
 			});
 
-	/*图表状态：需要参数值*/
-	dashboardFactory.CHART_STATUS_PARAM_VALUE_REQUIRED = "PARAM_VALUE_REQUIRED";
-	
-	/*图表状态：渲染出错*/
-	dashboardFactory.CHART_STATUS_RENDER_ERROR = "RENDER_ERROR";
-	
-	/*图表状态：更新出错*/
-	dashboardFactory.CHART_STATUS_UPDATE_ERROR = "UPDATE_ERROR";
-	
 	/**
 	 * 看板使用的渲染上下文属性名。
 	 */
@@ -260,14 +256,31 @@
 	};
 	
 	//----------------------------------------
-	// chartBaseExt start
+	// chartStatus扩展开始
+	//----------------------------------------
+	
+	/**图表状态：需要参数值*/
+	chartStatus.PARAM_VALUE_REQUIRED = "PARAM_VALUE_REQUIRED";
+	
+	/**图表状态：渲染出错*/
+	chartStatus.RENDER_ERROR = "RENDER_ERROR";
+	
+	/**图表状态：更新出错*/
+	chartStatus.UPDATE_ERROR = "UPDATE_ERROR";
+	
+	//----------------------------------------
+	// chartStatus扩展结束
+	//----------------------------------------
+	
+	//----------------------------------------
+	// chartBase扩展开始
 	//----------------------------------------
 	
 	/**
 	 * 初始化图表联动设置。
 	 * 此方法从图表元素的"dg-chart-link"属性获取联动设置。
 	 */
-	chartBaseExt._initLinks = function()
+	chartBase._initLinks = function()
 	{
 		var links = this.elementJquery().attr("dg-chart-link");
 		
@@ -286,7 +299,7 @@
 	 * 初始化图表自动调整大小设置。
 	 * 此方法从body元素、图表元素的"dg-chart-auto-resize"属性获取联动设置。
 	 */
-	chartBaseExt._initAutoResize = function()
+	chartBase._initAutoResize = function()
 	{
 		var autoResize = this.elementJquery().attr("dg-chart-auto-resize");
 		
@@ -323,7 +336,7 @@
 	 * 
 	 * @param links 可选，要设置的图表联动设置对象、数组，没有则执行获取操作。
 	 */
-	chartBaseExt.links = function(links)
+	chartBase.links = function(links)
 	{
 		if(links === undefined)
 			return this._links;
@@ -344,7 +357,7 @@
 	 * 
 	 * @param autoResize 可选，设置为是否自动调整大小，没有则执行获取操作。
 	 */
-	chartBaseExt.autoResize = function(autoResize)
+	chartBase.autoResize = function(autoResize)
 	{
 		if(autoResize === undefined)
 			return (this._autoResize == true);
@@ -358,10 +371,10 @@
 	 * 图表渲染器实现相关：
 	 * 图表渲染器应实现on函数，以支持此特性。
 	 * 
-	 * @param links 图表联动设置对象、数组，格式参考chartBaseExt.links函数说明
+	 * @param links 图表联动设置对象、数组，格式参考chartBase.links函数说明
 	 * @return 绑定的事件处理函数对象数组，格式为：[ { eventType: "...", eventHandler: function(chartEvent){ ... } }, ... ]
 	 */
-	chartBaseExt.bindLinksEventHanders = function(links)
+	chartBase.bindLinksEventHanders = function(links)
 	{
 		this._assertActive();
 		
@@ -398,7 +411,7 @@
 	/**
 	 * 解析不重复的联动设置触发事件数组。
 	 */
-	chartBaseExt._resolveLinksTriggers = function(links)
+	chartBase._resolveLinksTriggers = function(links)
 	{
 		var triggers = [];
 		
@@ -423,9 +436,9 @@
 	 * 此方法根据图表联动设置对象，将图表事件数据传递至目标图表数据集参数值，然后请求刷新图表数据。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param links 图表联动设置对象、数组，格式参考chartBaseExt.links函数说明
+	 * @param links 图表联动设置对象、数组，格式参考chartBase.links函数说明
 	 */
-	chartBaseExt.handleChartEventLink = function(chartEvent, links)
+	chartBase.handleChartEventLink = function(chartEvent, links)
 	{
 		this._assertActive();
 		
@@ -473,7 +486,7 @@
 			targetCharts[i].refreshData();
 	};
 	
-	chartBaseExt._isLinkTriggerableByEvent = function(link, chartEvent)
+	chartBase._isLinkTriggerableByEvent = function(link, chartEvent)
 	{
 		var eventType = chartEvent.type;
 		
@@ -497,19 +510,20 @@
 	/**
 	 * 从服务端获取并刷新图表数据。
 	 */
-	chartBaseExt.refreshData = function()
+	chartBase.refreshData = function()
 	{
 		this._assertActive();
 		
 		if(!this.isDataSetParamValueReady())
-			global.chartFactory.logException("Chart '"+this.elementId+"' has required but unset data set param value");
+			chartFactory.logException("Chart '"+this.elementId+"' has required but unset data set param value");
 		
 		this.statusPreUpdate(true);
 	};
 	
 	//----------------------------------------
-	// chartBaseExt end
+	// chartBase扩展结束
 	//----------------------------------------
+	
 	
 	//----------------------------------------
 	// dashboardBase start
@@ -539,7 +553,7 @@
 		var listener = $(document.body).attr("dg-dashboard-listener");
 		
 		if(listener)
-			listener = global.chartFactory.evalSilently(listener);
+			listener = chartFactory.evalSilently(listener);
 		
 		//@deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
 		else if(typeof(dashboardRenderer) != "undefined")
@@ -586,7 +600,7 @@
 		chart.renderContext = this.renderContext;
 		chart.dashboard = this;
 		
-		global.chartFactory.init(chart);
+		chartFactory.init(chart);
 		
 		//如果图表没有定义监听器，则使用代理看板监听器
 		if(!chart.listener())
@@ -808,7 +822,7 @@
 	 */
 	dashboardBase.renderContextAttr = function(attrName, attrValue)
 	{
-		return global.chartFactory.renderContextAttr(this.renderContext, attrName, attrValue);
+		return chartFactory.renderContextAttr(this.renderContext, attrName, attrValue);
 	};
 	
 	/**
@@ -870,7 +884,7 @@
 		form.addClass("dg-dashboard-form");
 		
 		if(!config)
-			config = global.chartFactory.evalSilently(form.attr("dg-dashboard-form"), {});
+			config = chartFactory.evalSilently(form.attr("dg-dashboard-form"), {});
 		
 		var _thisDashboard = this;
 		var bindBatchSetName = "dataGearBatchSet";
@@ -929,7 +943,7 @@
 				item = $.extend({}, item);
 			
 			if(!item.type)
-				item.type = global.chartFactory.chartSetting.DataSetParamDataType.STRING;
+				item.type = chartFactory.chartSetting.DataSetParamDataType.STRING;
 			
 			items.push(item);
 			
@@ -949,7 +963,7 @@
 		var dashboardTheme = this.renderContextAttr(dashboardFactory.renderContextAttrs.dashboardTheme);
 		config.chartTheme = dashboardTheme.chartTheme;
 		
-		global.chartFactory.chartSetting.renderDataSetParamValueForm(form, items, config);
+		chartFactory.chartSetting.renderDataSetParamValueForm(form, items, config);
 	};
 	
 	/**
@@ -1067,7 +1081,7 @@
 				//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
 				if(!chart.isDataSetParamValueReady())
 				{
-					chart.status(dashboardFactory.CHART_STATUS_PARAM_VALUE_REQUIRED);
+					chart.status(chartStatus.PARAM_VALUE_REQUIRED);
 				}
 				else
 				{
@@ -1087,8 +1101,8 @@
 		}
 		else
 		{
-			var webContext = global.chartFactory.renderContextAttrWebContext(this.renderContext);
-			var url = global.chartFactory.toWebContextPathURL(webContext, webContext.attributes.updateDashboardURL);
+			var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
+			var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.updateDashboardURL);
 			var data = this._buildUpdateDashboardAjaxData(preUpdates);
 			
 			var dashboard = this;
@@ -1127,7 +1141,7 @@
 					}
 					catch(e)
 					{
-						global.chartFactory.logException(e);
+						chartFactory.logException(e);
 					}
 					
 					dashboard._doHandleCharts();
@@ -1143,7 +1157,7 @@
 					}
 					catch(e)
 					{
-						global.chartFactory.logException(e);
+						chartFactory.logException(e);
 					}
 					
 					//请求出错则10秒后再尝试，避免请求出错后频繁地再次发送请求
@@ -1167,9 +1181,9 @@
 		catch(e)
 		{
 			//设置为渲染出错状态，避免渲染失败后会_doHandleCharts中会无限尝试渲染
-			chart.status(dashboardFactory.CHART_STATUS_RENDER_ERROR);
+			chart.status(chartStatus.RENDER_ERROR);
 			
-			global.chartFactory.logException(e);
+			chartFactory.logException(e);
 		}
 	};
 	
@@ -1222,9 +1236,9 @@
 		catch(e)
 		{
 			//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
-			chart.status(dashboardFactory.CHART_STATUS_UPDATE_ERROR);
+			chart.status(chartStatus.UPDATE_ERROR);
 			
-			global.chartFactory.logException(e);
+			chartFactory.logException(e);
 		}
 	};
 	
@@ -1291,7 +1305,7 @@
 	 */
 	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
-		if(global.chartFactory.isChartElement(element))
+		if(chartFactory.isChartElement(element))
 			return false;
 		
 		var chartElementId = $(element).attr("id");
@@ -1301,8 +1315,8 @@
 			$(element).attr("id", chartElementId);
 		}
 		
-		var webContext = global.chartFactory.renderContextAttrWebContext(this.renderContext);
-		var url = global.chartFactory.toWebContextPathURL(webContext, webContext.attributes.loadChartURL);
+		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
+		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.loadChartURL);
 		var loadChartConfig = dashboardFactory.loadChartConfig;
 		
 		var _this = this;
@@ -1370,7 +1384,7 @@
 	 */
 	dashboardBase._initLoadedChart = function(chart)
 	{
-		chart.plugin = global.chartFactory.chartPluginManager.get(chart.plugin.id);
+		chart.plugin = chartFactory.chartPluginManager.get(chart.plugin.id);
 		this._initChart(chart);
 	};
 	

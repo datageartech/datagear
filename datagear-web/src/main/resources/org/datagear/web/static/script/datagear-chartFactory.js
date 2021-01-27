@@ -93,10 +93,14 @@
  */
 (function(global)
 {
+	/**图表工厂*/
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
+	/**图表对象基类*/
 	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
-	
+	/**图表状态集*/
+	var chartStatus = (chartFactory.chartStatus || (chartFactory.chartStatus = {}));
 	/**
+	 * 图表地图映射表。
 	 * 地图类图表的地图名称与其地图数据地址映射表，用于为chartBase.mapURL函数提供支持。
 	 * 此映射表默认为空，用户可以填充它以扩展地图名映射。
 	 * 映射表格式示例：
@@ -114,8 +118,7 @@
 	 *   }
 	 * }
 	 */
-	if(!chartFactory.mapURLs)
-		chartFactory.mapURLs = {};
+	var chartMapURLs = (chartFactory.chartMapURLs || (chartFactory.chartMapURLs = {}));
 	
 	/**
 	 * 图表使用的渲染上下文属性名。
@@ -356,25 +359,25 @@
 	};
 	
 	/**图表状态：准备render*/
-	chartFactory.STATUS_PRE_RENDER = "PRE_RENDER";
+	chartStatus.PRE_RENDER = "PRE_RENDER";
 	
 	/**图表状态：正在render*/
-	chartFactory.STATUS_RENDERING = "RENDERING";
+	chartStatus.RENDERING = "RENDERING";
 	
 	/**图表状态：完成render*/
-	chartFactory.STATUS_RENDERED = "RENDERED";
+	chartStatus.RENDERED = "RENDERED";
 	
 	/**图表状态：准备update*/
-	chartFactory.STATUS_PRE_UPDATE = "PRE_UPDATE";
+	chartStatus.PRE_UPDATE = "PRE_UPDATE";
 	
 	/**图表状态：正在update*/
-	chartFactory.STATUS_UPDATING = "UPDATING";
+	chartStatus.UPDATING = "UPDATING";
 	
 	/**图表状态：完成update*/
-	chartFactory.STATUS_UPDATED = "UPDATED";
+	chartStatus.UPDATED = "UPDATED";
 	
 	/**图表状态：已销毁*/
-	chartFactory.STATUS_DESTROYED = "DESTROYED";
+	chartStatus.DESTROYED = "DESTROYED";
 	
 	/**用于标识图表元素的CSS名*/
 	chartFactory.CHART_DISTINCT_CSS_NAME = "dg-chart-for-distinction";
@@ -1064,9 +1067,9 @@
 	chartBase.statusPreRender = function(set)
 	{
 		if(set === true)
-			this.status(chartFactory.STATUS_PRE_RENDER);
+			this.status(chartStatus.PRE_RENDER);
 		else
-			return (this.status() == chartFactory.STATUS_PRE_RENDER);
+			return (this.status() == chartStatus.PRE_RENDER);
 	};
 	
 	/**
@@ -1077,9 +1080,9 @@
 	chartBase.statusRendering = function(set)
 	{
 		if(set === true)
-			this.status(chartFactory.STATUS_RENDERING);
+			this.status(chartStatus.RENDERING);
 		else
-			return (this.status() == chartFactory.STATUS_RENDERING);
+			return (this.status() == chartStatus.RENDERING);
 	};
 	
 	/**
@@ -1093,13 +1096,13 @@
 		if(set === true)
 		{
 			this._isActive = true;
-			this.status(chartFactory.STATUS_RENDERED);
+			this.status(chartStatus.RENDERED);
 			
 			if(postProcess != false)
 				this._postProcessRendered();
 		}
 		else
-			return (this.status() == chartFactory.STATUS_RENDERED);
+			return (this.status() == chartStatus.RENDERED);
 	};
 	
 	/**
@@ -1142,9 +1145,9 @@
 	chartBase.statusPreUpdate = function(set)
 	{
 		if(set === true)
-			this.status(chartFactory.STATUS_PRE_UPDATE);
+			this.status(chartStatus.PRE_UPDATE);
 		else
-			return (this.status() == chartFactory.STATUS_PRE_UPDATE);
+			return (this.status() == chartStatus.PRE_UPDATE);
 	};
 	
 	/**
@@ -1155,9 +1158,9 @@
 	chartBase.statusUpdating = function(set)
 	{
 		if(set === true)
-			this.status(chartFactory.STATUS_UPDATING);
+			this.status(chartStatus.UPDATING);
 		else
-			return (this.status() == chartFactory.STATUS_UPDATING);
+			return (this.status() == chartStatus.UPDATING);
 	};
 	
 	/**
@@ -1170,13 +1173,13 @@
 	{
 		if(set === true)
 		{
-			this.status(chartFactory.STATUS_UPDATED);
+			this.status(chartStatus.UPDATED);
 			
 			if(postProcess != false)
 				this._postProcessUpdated();
 		}
 		else
-			return (this.status() == chartFactory.STATUS_UPDATED);
+			return (this.status() == chartStatus.UPDATED);
 	};
 	
 	/**
@@ -1199,10 +1202,10 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this.status(chartFactory.STATUS_DESTROYED);
+			this.status(chartStatus.DESTROYED);
 		}
 		else
-			return (this.status() == chartFactory.STATUS_DESTROYED);
+			return (this.status() == chartStatus.DESTROYED);
 	};
 	
 	/**
@@ -1940,16 +1943,16 @@
 	
 	/**
 	 * 获取指定地图名对应的地图数据地址。
-	 * 此方法先从chartFactory.mapURLs查找对应的地址，如果没有，则直接返回name作为地址。
+	 * 此方法先从chartFactory.chartMapURLs查找对应的地址，如果没有，则直接返回name作为地址。
 	 * 
 	 * @param name 地图名称
 	 */
 	chartBase.mapURL = function(name)
 	{
-		var url = chartFactory.mapURLs[name];
+		var url = chartMapURLs[name];
 		
-		if(!url && typeof(chartFactory.mapURLs.mapURL) == "function")
-			url = chartFactory.mapURLs.mapURL(name);
+		if(!url && typeof(chartMapURLs.mapURL) == "function")
+			url = chartMapURLs.mapURL(name);
 		
 		url = (url || name);
 		
