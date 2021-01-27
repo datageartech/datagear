@@ -4506,7 +4506,9 @@
 		
 		updateOptions = chartSupport.processUpdateOptions(chart, results, renderOptions, updateOptions);
 		
-		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0, false);
+		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0);
+		
+		chartSupport.tableAdjust(chart);
 		
 		if(renderOptions.carousel.enable)
 		{
@@ -4711,7 +4713,7 @@
 		}
 	};
 	
-	chartSupport.tableAddDataTableData = function(dataTable, datas, startRowIndex, notDraw)
+	chartSupport.tableAddDataTableData = function(dataTable, datas, startRowIndex)
 	{
 		var rows = dataTable.rows();
 		var removeRowIndexes = [];
@@ -4738,15 +4740,24 @@
 		
 		dataTable.rows(removeRowIndexes).remove();
 		
-		if(!notDraw)
-		{
-			dataTable.draw();
-			
-			if(dataTable.init().fixedColumns)
-				dataTable.fixedColumns().relayout();
-		}
+		dataTable.draw();
 	};
-
+	
+	/**
+	 * 调整图表表格。
+	 * 当表格隐藏显示、位置调整、数据变更后，可能会出现表头、固定列错位的情况，需要重新调整。
+	 */
+	chartSupport.tableAdjust = function(chart)
+	{
+		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		
+		dataTable.columns.adjust();
+		if(dataTable.init().fixedHeader)
+			dataTable.fixedHeader.adjust();
+		if(dataTable.init().fixedColumns)
+			dataTable.fixedColumns().relayout();
+	};
+	
 	/**
 	 * 表格准备轮播。
 	 */

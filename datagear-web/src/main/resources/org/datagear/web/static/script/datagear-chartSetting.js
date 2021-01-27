@@ -1218,7 +1218,8 @@
 				{
 					if(!chartSetting.isChartSettingDataPanelClosed(chart))
 					{
-						if($(event.target).closest(".dg-chart-setting-box").length == 0)
+						//点击固定列的<td>，祖先元素竟然只能追溯到<table>！！！这里临时添加标识样式类名解决此问题！！！
+						if($(event.target).closest(".dg-chart-setting-box, .dataTableClassForFixedColumnAncestor").length == 0)
 							chartSetting.closeChartSettingDataPanel(chart);
 					}
 				});
@@ -1462,14 +1463,6 @@
 				
 				$fp.data("chartDataTableId", tableId);
 			}
-			
-			//当构建多个表格时，有时会出现列头未对齐的情况，这里处理一下后可解决此问题
-			$(".dg-chartdataset-section", $panel).each(function()
-			{
-				var tableId = $(this).data("chartDataTableId");
-				var dataTable = $("#"+tableId, this).DataTable();
-				dataTable.columns.adjust();
-			});
 		}
 		else
 		{
@@ -1487,6 +1480,17 @@
 		}
 		
 		chartSetting.adjustChartSetingPanelPosition($panel);
+		
+		//当设置完所有表格后再重新调整，避免出现列头未对齐、固定列鼠标悬浮不起作用等问题
+		$(".dg-chartdataset-section", $panel).each(function()
+		{
+			var tableId = $(this).data("chartDataTableId");
+			var dataTable = $("#"+tableId, this).DataTable();
+			
+			dataTable.columns.adjust();
+			dataTable.fixedHeader.adjust();
+			dataTable.fixedColumns().relayout();
+		});
 	};
 	
 	/**
@@ -1593,8 +1597,7 @@
 	        "dom": "t",
 			"select" : { style : 'os' },
 			"searching" : false,
-			//暂时禁用固定列，开启后会导致在固定列上鼠标悬浮没有hover效果、点击后会关闭面板、滚动会错位，奇怪！
-			//"fixedColumns": { leftColumns: 1 },
+			"fixedColumns": { leftColumns: 1 },
 			"language":
 		    {
 				"emptyTable": "",
@@ -1606,17 +1609,17 @@
 			}
 		};
 		
-		var table = $("<table width='100%' class='hover stripe'></table>").appendTo($parent);
+		var table = $("<table width='100%' class='hover stripe dataTableClassForFixedColumnAncestor'></table>").appendTo($parent);
 		var tableId = chartFactory.nextElementId("Table");
 		table.attr("id", tableId);
 		
 		table.dataTable(tableOptions);
 		
+		var dataTable = table.DataTable();
+		
 		//固定选择列后hover效果默认不能同步，需要自己实现
-		/*
 		if(tableOptions.fixedColumns)
 		{
-			var dataTable = table.DataTable();
 			$(dataTable.table().body()).on("mouseover mouseout", "tr",
 			function(event)
 			{
@@ -1632,7 +1635,6 @@
 				});
 			});
 		}
-		*/
 		
 		return tableId;
 	};
