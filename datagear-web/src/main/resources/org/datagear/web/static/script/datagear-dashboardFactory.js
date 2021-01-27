@@ -221,16 +221,6 @@
 	};
 	
 	/**
-	 * 更新数据ajax请求的重试秒数，当更新数据ajax请求出错后，会在过这些秒后重试请求。
-	 */
-	dashboardFactory.updateAjaxRetrySeconds = 5;
-	
-	/**
-	 * 处理图表状态间隔毫秒数。
-	 */
-	dashboardFactory.handleChartIntervalMs = 1;
-	
-	/**
 	 * 获取对象的指定属性路径的值。
 	 * 
 	 * @param obj
@@ -267,6 +257,16 @@
 		
 		return value;
 	};
+	
+	/**
+	 * 更新图表数据ajax请求的重试秒数，当更新图表数据ajax请求出错后，会在过这些秒后重试请求。
+	 */
+	dashboardFactory.UPDATE_AJAX_RETRY_SECONDS = 5;
+	
+	/**
+	 * 循环监视处理图表状态间隔毫秒数。
+	 */
+	dashboardFactory.HANDLE_CHART_INTERVAL_MS = 1;
 	
 	//----------------------------------------
 	// chartStatus扩展开始
@@ -1168,7 +1168,7 @@
 		{
 			dashboard._doHandleCharts();
 		},
-		dashboardFactory.handleChartIntervalMs);
+		dashboardFactory.HANDLE_CHART_INTERVAL_MS);
 	};
 	
 	dashboardBase._doHandleChartsAjax = function(url, preUpdateCharts)
@@ -1371,7 +1371,7 @@
 		if(errorTime == null)
 			return false;
 		
-		return ((errorTime + dashboardFactory.updateAjaxRetrySeconds*1000) >= currentTime);
+		return ((errorTime + dashboardFactory.UPDATE_AJAX_RETRY_SECONDS*1000) >= currentTime);
 	};
 	
 	/**
