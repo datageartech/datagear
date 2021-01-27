@@ -471,6 +471,8 @@ readonly 是否只读操作，允许为null
 			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-listener' />", tagNames: ["body", "div"]},
 		{name: "dg-chart-renderer", value: "dg-chart-renderer", caption: "",
 			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-renderer' />", tagNames: ["div"]},
+		{name: "dg-chart-update-group", value: "dg-chart-update-group", caption: "dg-chart-upd...oup",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-update-group' />", tagNames: ["body", "div"]},
 		{name: "dg-echarts-theme", value: "dg-echarts-theme", caption: "",
 			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", tagNames: ["body", "div"]},
 		{name: "dg-dashboard-listener", value: "dg-dashboard-listener", caption: "",

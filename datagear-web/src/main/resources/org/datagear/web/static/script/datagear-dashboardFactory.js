@@ -28,6 +28,8 @@
  * 
  * 此看板工厂支持为<body>元素、图表元素添加"dg-chart-auto-resize"属性，用于设置图表是否自动调整大小。
  * 
+ * 此看板工厂支持为<body>元素、图表元素添加"dg-chart-update-group"属性，用于设置图表更新ajax分组。
+ * 
  * 此看板工厂支持将页面内的<form dg-dashboard-form>元素构建为看板表单，具体参考dashboardBase._initForms函数说明。
  * 
  */
@@ -91,6 +93,7 @@
 		{
 			this._initLinks();
 			this._initAutoResize();
+			this._initUpdateGroup();
 			this._initSuper();
 		};
 		
@@ -218,6 +221,16 @@
 	};
 	
 	/**
+	 * 更新数据ajax请求的重试秒数，当更新数据ajax请求出错后，会在过这些秒后重试请求。
+	 */
+	dashboardFactory.updateAjaxRetrySeconds = 5;
+	
+	/**
+	 * 处理图表状态间隔毫秒数。
+	 */
+	dashboardFactory.handleChartIntervalMs = 1;
+	
+	/**
 	 * 获取对象的指定属性路径的值。
 	 * 
 	 * @param obj
@@ -294,7 +307,7 @@
 		
 		this.links(links);
 	};
-
+	
 	/**
 	 * 初始化图表自动调整大小设置。
 	 * 此方法从body元素、图表元素的"dg-chart-auto-resize"属性获取联动设置。
@@ -307,6 +320,20 @@
 			autoResize = $(document.body).attr("dg-chart-auto-resize");
 		
 		this.autoResize(autoResize == "true");
+	};
+
+	/**
+	 * 初始化图表更新分组。
+	 * 此方法从body元素、图表元素的"dg-chart-update-group"属性获取更新分组设置。
+	 */
+	chartBase._initUpdateGroup = function()
+	{
+		var updateGroup = this.elementJquery().attr("dg-chart-update-group");
+		
+		if(updateGroup == null)
+			updateGroup = $(document.body).attr("dg-chart-update-group");
+		
+		this.updateGroup(updateGroup);
 	};
 	
 	/**
@@ -363,6 +390,21 @@
 			return (this._autoResize == true);
 		else
 			this._autoResize = autoResize;
+	};
+	
+	/**
+	 * 获取/设置图表更新分组。
+	 * 如果图表从服务端加载数据比较耗时，可以为其指定一个分组标识，让其使用单独的ajax请求加载数据。
+	 * 注意：相同分组的图表将使用同一个ajax请求。
+	 * 
+	 * @param group 可选，设置更新分组，没有则执行获取操作返回非null值。
+	 */
+	chartBase.updateGroup = function(group)
+	{
+		if(group === undefined)
+			return (this._updateGroup == null ? "" : this._updateGroup);
+		else
+			this._updateGroup = group;
 	};
 	
 	/**
@@ -995,7 +1037,7 @@
 	 */
 	dashboardBase.isHandlingCharts = function()
 	{
-		return (this._doHandleChartsSwitch == true);
+		return (this._doHandlingCharts == true);
 	};
 	
 	/**
@@ -1005,10 +1047,10 @@
 	 */
 	dashboardBase.startHandleCharts = function()
 	{
-		if(this._doHandleChartsSwitch == true)
+		if(this._doHandlingCharts == true)
 			return false;
 		
-		this._doHandleChartsSwitch = true;
+		this._doHandlingCharts = true;
 		this._doHandleCharts();
 		
 		return true;
@@ -1019,7 +1061,7 @@
 	 */
 	dashboardBase.stopHandleCharts = function()
 	{
-		this._doHandleChartsSwitch = false;
+		this._doHandlingCharts = false;
 	};
 	
 	/**
@@ -1056,7 +1098,7 @@
 	 */
 	dashboardBase._doHandleCharts = function()
 	{
-		if(this._doHandleChartsSwitch != true)
+		if(this._doHandlingCharts != true)
 			return;
 		
 		var charts = (this.charts || []);
@@ -1069,18 +1111,26 @@
 				this._renderChart(chart);
 		}
 		
-		var preUpdates = [];
+		var preUpdateGroups = {};
 		var time = new Date().getTime();
 		
 		for(var i=0; i<charts.length; i++)
 		{
 			var chart = charts[i];
 			
+			//图表正处于更新数据ajax中
+			if(this._inUpdateDataAjax(chart))
+				continue;
+			
+			//图表更新ajax请求出错后，应等待一段时间后再尝试，避免频繁发送ajax请求
+			if(this._inUpdateDataAjaxErrorTime(chart, time))
+				continue;
+			
 			if(this.isWaitForUpdate(chart))
 			{
-				//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
 				if(!chart.isDataSetParamValueReady())
 				{
+					//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
 					chart.status(chartStatus.PARAM_VALUE_REQUIRED);
 				}
 				else
@@ -1089,82 +1139,107 @@
 					var prevUpdateTime = this._chartUpdateTime(chart);
 					
 					if(prevUpdateTime == null || (prevUpdateTime + updateInterval) <= time)
+					{
+						var group = chart.updateGroup();
+						var preUpdates = preUpdateGroups[group];
+						
+						if(preUpdates == null)
+						{
+							preUpdates = [];
+							preUpdateGroups[group] = preUpdates;
+						}
+						
 						preUpdates.push(chart);
+					}
 				}
 			}
 		}
 		
-		if(preUpdates.length == 0)
+		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
+		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.updateDashboardURL);
+		
+		for(var group in preUpdateGroups)
 		{
-			var dashboard = this;
-			setTimeout(function(){ dashboard._doHandleCharts(); }, 1);
+			this._doHandleChartsAjax(url, preUpdateGroups[group]);
 		}
-		else
+		
+		var dashboard = this;
+		setTimeout(function()
 		{
-			var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
-			var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.updateDashboardURL);
-			var data = this._buildUpdateDashboardAjaxData(preUpdates);
-			
-			var dashboard = this;
-			
-			$.ajax({
-				contentType : "application/json",
-				type : "POST",
-				url : url,
-				data : JSON.stringify(data),
-				success : function(resultsMap)
+			dashboard._doHandleCharts();
+		},
+		dashboardFactory.handleChartIntervalMs);
+	};
+	
+	dashboardBase._doHandleChartsAjax = function(url, preUpdateCharts)
+	{
+		if(!preUpdateCharts || preUpdateCharts.length == 0)
+			return;
+		
+		var data = this._buildUpdateDashboardAjaxData(preUpdateCharts);
+		var dashboard = this;
+		
+		dashboard._inUpdateDataAjax(preUpdateCharts, true);
+		
+		$.ajax({
+			contentType : "application/json",
+			type : "POST",
+			url : url,
+			data : JSON.stringify(data),
+			success : function(resultsMap)
+			{
+				//@deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
+				if(resultsMap)
 				{
-					//@deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
-					if(resultsMap)
+					for(var chartId in resultsMap)
 					{
-						for(var chartId in resultsMap)
+						var results = (resultsMap[chartId] || []);
+						for(var i=0; i<results.length; i++)
 						{
-							var results = (resultsMap[chartId] || []);
-							for(var i=0; i<results.length; i++)
+							if(results[i] && results[i].data != null)
 							{
-								if(results[i] && results[i].data != null)
-								{
-									var resultDatas = results[i].data;
-									if(resultDatas != null && !$.isArray(resultDatas))
-										resultDatas = [ resultDatas ];
-									
-									results[i].datas = resultDatas;
-								}
+								var resultDatas = results[i].data;
+								if(resultDatas != null && !$.isArray(resultDatas))
+									resultDatas = [ resultDatas ];
+								
+								results[i].datas = resultDatas;
 							}
 						}
 					}
-					//@deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
-					
-					try
-					{
-						dashboard._updateCharts(resultsMap);
-					}
-					catch(e)
-					{
-						chartFactory.logException(e);
-					}
-					
-					dashboard._doHandleCharts();
-				},
-				error : function()
-				{
-					var updateTime = new Date().getTime();
-					
-					try
-					{
-						for(var i=0; i<dashboard.charts.length; i++)
-							dashboard._chartUpdateTime(dashboard.charts[i], updateTime);
-					}
-					catch(e)
-					{
-						chartFactory.logException(e);
-					}
-					
-					//请求出错则10秒后再尝试，避免请求出错后频繁地再次发送请求
-					setTimeout(function(){ dashboard._doHandleCharts(); }, 1000*10);
 				}
-			});
-		}
+				//@deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
+				
+				try
+				{
+					dashboard._updateCharts(resultsMap);
+				}
+				catch(e)
+				{
+					chartFactory.logException(e);
+				}
+				
+				dashboard._inUpdateDataAjax(preUpdateCharts, false);
+			},
+			error : function()
+			{
+				var updateTime = new Date().getTime();
+				
+				try
+				{
+					for(var i=0; i<preUpdateCharts.length; i++)
+					{
+						dashboard._chartUpdateTime(preUpdateCharts[i], updateTime);
+						dashboard._updateDataAjaxErrorTime(preUpdateCharts[i], updateTime);
+					}
+				}
+				catch(e)
+				{
+					chartFactory.logException(e);
+				}
+				
+				dashboard._inUpdateDataAjax(preUpdateCharts, false);
+			}
+		});
 	};
 	
 	/**
@@ -1259,6 +1334,44 @@
 			return chart.extValue("_updateTime");
 		else
 			chart.extValue("_updateTime", updateTime);
+	};
+	
+	dashboardBase._inUpdateDataAjax = function(chart, inAjax)
+	{
+		if(inAjax === undefined)
+		{
+			return (chart.extValue("_inUpdateDataAjax") == true);
+		}
+		else
+		{
+			if($.isArray(chart))
+			{
+				for(var i=0; i<chart.length; i++)
+					chart[i].extValue("_inUpdateDataAjax", inAjax);
+			}
+			else
+			{
+				chart.extValue("_inUpdateDataAjax", inAjax);
+			}
+		}
+	};
+	
+	dashboardBase._updateDataAjaxErrorTime = function(chart, errorTime)
+	{
+		if(errorTime === undefined)
+			return chart.extValue("_updateDataAjaxErrorTime");
+		else
+			chart.extValue("_updateDataAjaxErrorTime", errorTime);
+	};
+	
+	dashboardBase._inUpdateDataAjaxErrorTime = function(chart, currentTime)
+	{
+		var errorTime = dashboardBase._updateDataAjaxErrorTime(chart);
+		
+		if(errorTime == null)
+			return false;
+		
+		return ((errorTime + dashboardFactory.updateAjaxRetrySeconds*1000) >= currentTime);
 	};
 	
 	/**
