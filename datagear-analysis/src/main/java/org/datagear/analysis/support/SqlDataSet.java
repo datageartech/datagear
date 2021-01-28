@@ -27,11 +27,12 @@ import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcSupport;
-import org.datagear.util.JdbcUtil;
 import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
 import org.datagear.util.SqlType;
 import org.datagear.util.resource.ConnectionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SQL {@linkplain DataSet}。
@@ -44,6 +45,8 @@ import org.datagear.util.resource.ConnectionFactory;
  */
 public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataSet.class);
+
 	protected static final JdbcSupport JDBC_SUPPORT = new JdbcSupport();
 
 	private ConnectionFactory connectionFactory;
@@ -107,58 +110,63 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 		try
 		{
-			cn = getConnectionFactory().get();
-		}
-		catch (Throwable t)
-		{
-			JdbcUtil.closeConnection(cn);
-			throw new SqlDataSetConnectionException(t);
-		}
+			try
+			{
+				cn = getConnectionFactory().get();
+			}
+			catch (Throwable t)
+			{
+				throw new SqlDataSetConnectionException(t);
+			}
 
-		Sql sqlObj = Sql.valueOf(sql);
+			Sql sqlObj = Sql.valueOf(sql);
 
-		JdbcSupport jdbcSupport = getJdbcSupport();
+			JdbcSupport jdbcSupport = getJdbcSupport();
 
-		QueryResultSet qrs = null;
+			QueryResultSet qrs = null;
 
-		try
-		{
-			qrs = jdbcSupport.executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
-		}
-		catch (Throwable t)
-		{
-			throw new SqlDataSetSqlExecutionException(sql, t);
-		}
+			try
+			{
+				qrs = jdbcSupport.executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
+			}
+			catch (Throwable t)
+			{
+				throw new SqlDataSetSqlExecutionException(sql, t);
+			}
 
-		try
-		{
-			ResultSet rs = qrs.getResultSet();
-			ResolvedDataSetResult result = resolveResult(cn, rs, properties, dataSetOption);
+			TemplateResolvedDataSetResult dataSetResult = null;
 
-			return new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(), sql);
-		}
-		catch (DataSetException e)
-		{
-			throw e;
-		}
-		catch (Throwable t)
-		{
-			throw new DataSetException(t);
+			try
+			{
+				ResultSet rs = qrs.getResultSet();
+				ResolvedDataSetResult result = resolveResult(cn, rs, properties, dataSetOption);
+
+				dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(), sql);
+			}
+			catch (DataSetException e)
+			{
+				throw e;
+			}
+			catch (Throwable t)
+			{
+				throw new DataSetException(t);
+			}
+
+			QueryResultSet.close(qrs);
+
+			return dataSetResult;
 		}
 		finally
 		{
-			try
-			{
-				QueryResultSet.close(qrs);
-			}
-			finally
+			if (cn != null)
 			{
 				try
 				{
 					getConnectionFactory().release(cn);
 				}
-				catch (Exception e)
+				catch (Throwable t)
 				{
+					LOGGER.error("Release connection error", t);
 				}
 			}
 		}
