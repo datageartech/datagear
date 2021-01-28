@@ -171,6 +171,9 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 	/**
 	 * 抽象模式连接执行器。
+	 * <p>
+	 * 注意：此类并非线程安全的。
+	 * </p>
 	 * 
 	 * @author datagear@163.com
 	 *
@@ -219,12 +222,11 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 		protected void doExecute() throws Throwable
 		{
-			this._schema = getSchemaForUserNotNull(request, response, schemaId);
-
-			springModel.addAttribute("schema", this._schema);
-
 			try
 			{
+				this._schema = getSchemaForUserNotNull(request, response, schemaId);
+				springModel.addAttribute("schema", this._schema);
+
 				doExecute(request, response, springModel, this._schema);
 
 				if (!customCommit)
@@ -238,11 +240,20 @@ public abstract class AbstractSchemaConnController extends AbstractController
 			}
 			finally
 			{
-				if (this._cn != null)
-					JdbcUtil.closeConnection(this._cn);
+				JdbcUtil.closeConnection(this._cn);
 			}
 		}
 
+		/**
+		 * 获取当前连接。
+		 * <p>
+		 * 注意：如果此方法在{@linkplain #doExecute(HttpServletRequest, HttpServletResponse, org.springframework.ui.Model, Schema)}内调用，
+		 * 则不需关闭连接，否则，需自行关闭连接。
+		 * </p>
+		 * 
+		 * @return
+		 * @throws Exception
+		 */
 		protected Connection getConnection() throws Exception
 		{
 			if (this._cn == null)
@@ -289,6 +300,9 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 	/**
 	 * 返回值{@linkplain AbstractSchemaConnExecutor}。
+	 * <p>
+	 * 注意：此类并非线程安全的。
+	 * </p>
 	 * 
 	 * @author datagear@163.com
 	 *
@@ -341,6 +355,9 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 	/**
 	 * 无返回值{@linkplain AbstractSchemaConnExecutor}。
+	 * <p>
+	 * 注意：此类并非线程安全的。
+	 * </p>
 	 * 
 	 * @author datagear@163.com
 	 *

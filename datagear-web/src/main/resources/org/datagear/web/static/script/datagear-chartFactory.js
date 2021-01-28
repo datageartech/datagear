@@ -18,24 +18,24 @@
  *   datagear-chartSetting.js
  * 
  * 
- * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-options"属性来设置图表选项，格式为：
+ * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.OPTIONS属性来设置图表选项，格式为：
  * { title: { show: false },... }
  * 
- * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-theme"属性来设置图表主题，格式为：
+ * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.THEME属性来设置图表主题，格式为：
  * { color:'...', backgroundColor:'...', ... }
  * 
- * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-listener"属性来设置图表监听器，格式参考chartBase.listener函数参数说明。
+ * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.LISTENER属性来设置图表监听器，格式参考chartBase.listener函数参数说明。
  * 
- * 此图表工厂支持为图表元素添加"dg-chart-map"属性来设置地图图表的地图名。
+ * 此图表工厂支持为图表元素添加elementAttrConst.MAP属性来设置地图图表的地图名。
  * 
- * 此图表工厂支持为<body>元素、图表元素添加"dg-echarts-theme"属性来设置图表Echarts主题名。
+ * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.ECHARTS_THEME属性来设置图表Echarts主题名。
  * 
- * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-disable-setting"属性，用于禁用图表交互设置功能，
+ * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.DISABLE_SETTING属性，用于禁用图表交互设置功能，
  * 值为"true"表示禁用，其他表示启用。
  * 
  * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数，具体参考chartBase._initEventHandlers函数说明。
  * 
- * 此图表工厂支持为图表元素添加"dg-chart-renderer"属性来自定义、扩展图表渲染器，具体参考chartBase._initCustomChartRenderer函数说明。
+ * 此图表工厂支持为图表元素添加elementAttrConst.RENDERER属性来自定义、扩展图表渲染器，具体参考chartBase._initCustomChartRenderer函数说明。
  * 
  * 此图表工厂要求图表插件的图表渲染器（chartRenderer）格式为：
  * {
@@ -97,8 +97,10 @@
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
 	/**图表对象基类*/
 	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
-	/**图表状态集*/
-	var chartStatus = (chartFactory.chartStatus || (chartFactory.chartStatus = {}));
+	/**图表状态常量*/
+	var chartStatusConst = (chartFactory.chartStatusConst || (chartFactory.chartStatusConst = {}));
+	/**DOM元素属性常量*/
+	var elementAttrConst = (chartFactory.elementAttrConst || (chartFactory.elementAttrConst = {}));
 	/**
 	 * 图表地图映射表。
 	 * 地图类图表的地图名称与其地图数据地址映射表，用于为chartBase.mapURL函数提供支持。
@@ -119,6 +121,83 @@
 	 * }
 	 */
 	var chartMapURLs = (chartFactory.chartMapURLs || (chartFactory.chartMapURLs = {}));
+
+	//----------------------------------------
+	// chartStatusConst开始
+	//----------------------------------------
+	
+	/**图表状态：准备render*/
+	chartStatusConst.PRE_RENDER = "PRE_RENDER";
+	
+	/**图表状态：正在render*/
+	chartStatusConst.RENDERING = "RENDERING";
+	
+	/**图表状态：完成render*/
+	chartStatusConst.RENDERED = "RENDERED";
+	
+	/**图表状态：准备update*/
+	chartStatusConst.PRE_UPDATE = "PRE_UPDATE";
+	
+	/**图表状态：正在update*/
+	chartStatusConst.UPDATING = "UPDATING";
+	
+	/**图表状态：完成update*/
+	chartStatusConst.UPDATED = "UPDATED";
+	
+	/**图表状态：已销毁*/
+	chartStatusConst.DESTROYED = "DESTROYED";
+
+	//----------------------------------------
+	// chartStatusConst结束
+	//----------------------------------------
+
+	//----------------------------------------
+	// elementAttrConst开始
+	//----------------------------------------
+	
+	/**图表部件*/
+	elementAttrConst.WIDGET = "dg-chart-widget";
+	
+	/**图表选项*/
+	elementAttrConst.OPTIONS = "dg-chart-options";
+	
+	/**图表主题*/
+	elementAttrConst.THEME = "dg-chart-theme";
+	
+	/**图表监听器*/
+	elementAttrConst.LISTENER = "dg-chart-listener";
+	
+	/**图表地图*/
+	elementAttrConst.MAP = "dg-chart-map";
+	
+	/**图表ECharts主题*/
+	elementAttrConst.ECHARTS_THEME = "dg-echarts-theme";
+	
+	/**图表禁用设置*/
+	elementAttrConst.DISABLE_SETTING = "dg-chart-disable-setting";
+	
+	/**图表事件处理（前缀）*/
+	elementAttrConst.ON = "dg-chart-on-";
+	
+	/**图表渲染器*/
+	elementAttrConst.RENDERER = "dg-chart-renderer";
+	
+	//----------------------------------------
+	// elementAttrConst结束
+	//----------------------------------------
+	
+	/**用于标识图表元素的CSS名*/
+	chartFactory.CHART_DISTINCT_CSS_NAME = "dg-chart-for-distinction";
+
+	/**图表事件的图表类型：Echarts*/
+	chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS = "echarts";
+	
+	/**图表事件的图表类型：HTML*/
+	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
+	
+	//----------------------------------------
+	// chartBase start
+	//----------------------------------------
 	
 	/**
 	 * 图表使用的渲染上下文属性名。
@@ -151,7 +230,7 @@
 	 * 初始化渲染上下文中的图表主题。
 	 * 初始渲染上下文中允许不设置图表主题，或者仅设置部分属性，比如前景色、背景色，此方法则初始化其他必要的属性。
 	 * 
-	 * 注意：此方法应在初始化任意图表前且body已加载后调用，因为它也会从body的"dg-chart-theme"读取用户设置的图表主题。
+	 * 注意：此方法应在初始化任意图表前且body已加载后调用，因为它也会从body的elementAttrConst.THEME读取用户设置的图表主题。
 	 * 
 	 * @param renderContext 渲染上下文
 	 */
@@ -183,7 +262,7 @@
 		
 		chartFactory._initChartThemeActualBackgroundColorIf(theme);
 		
-		var bodyThemeValue = $(document.body).attr("dg-chart-theme");
+		var bodyThemeValue = $(document.body).attr(elementAttrConst.THEME);
 		if(bodyThemeValue)
 		{
 			var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
@@ -357,41 +436,7 @@
 	{
 		return $(element).hasClass(chartFactory.CHART_DISTINCT_CSS_NAME);
 	};
-	
-	/**图表状态：准备render*/
-	chartStatus.PRE_RENDER = "PRE_RENDER";
-	
-	/**图表状态：正在render*/
-	chartStatus.RENDERING = "RENDERING";
-	
-	/**图表状态：完成render*/
-	chartStatus.RENDERED = "RENDERED";
-	
-	/**图表状态：准备update*/
-	chartStatus.PRE_UPDATE = "PRE_UPDATE";
-	
-	/**图表状态：正在update*/
-	chartStatus.UPDATING = "UPDATING";
-	
-	/**图表状态：完成update*/
-	chartStatus.UPDATED = "UPDATED";
-	
-	/**图表状态：已销毁*/
-	chartStatus.DESTROYED = "DESTROYED";
-	
-	/**用于标识图表元素的CSS名*/
-	chartFactory.CHART_DISTINCT_CSS_NAME = "dg-chart-for-distinction";
 
-	/**图表事件的图表类型：Echarts*/
-	chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS = "echarts";
-	
-	/**图表事件的图表类型：HTML*/
-	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
-	
-	//----------------------------------------
-	// chartBase start
-	//----------------------------------------
-	
 	/**
 	 * 初始化图表。
 	 */
@@ -416,7 +461,7 @@
 	
 	/**
 	 * 初始化图表选项。
-	 * 此方法依次从<body>元素、图表元素的"dg-chart-options"属性读取、合并图表选项。
+	 * 此方法依次从<body>元素、图表元素的elementAttrConst.OPTIONS属性读取、合并图表选项。
 	 */
 	chartBase._initOptions = function()
 	{
@@ -424,8 +469,8 @@
 		
 		var $ele = this.elementJquery();
 		
-		var bodyOptions = $(document.body).attr("dg-chart-options");
-		var eleOptions = $ele.attr("dg-chart-options");
+		var bodyOptions = $(document.body).attr(elementAttrConst.OPTIONS);
+		var eleOptions = $ele.attr(elementAttrConst.OPTIONS);
 		
 		if(bodyOptions)
 			options = $.extend(true, options, chartFactory.evalSilently(bodyOptions, {}));
@@ -438,7 +483,7 @@
 	
 	/**
 	 * 初始化图表主题。
-	 * 此方法依次从图表renderContext.chartTheme、<body>元素、图表元素的"dg-chart-theme"属性读取、合并图表主题。
+	 * 此方法依次从图表renderContext.chartTheme、<body>元素、图表元素的elementAttrConst.THEME属性读取、合并图表主题。
 	 * 
 	 * @return {...}
 	 */
@@ -450,7 +495,7 @@
 		if(!globalTheme || !globalRawTheme)
 			throw new Error("chartFactory.initRenderContext() must be called first");
 		
-		var eleThemeValue = this.elementJquery().attr("dg-chart-theme");
+		var eleThemeValue = this.elementJquery().attr(elementAttrConst.THEME);
 		
 		if(eleThemeValue)
 		{
@@ -469,15 +514,15 @@
 	
 	/**
 	 * 初始化图表监听器。
-	 * 此方法依次从图表元素、<body>元素的"dg-chart-listener"属性获取监听器对象。
+	 * 此方法依次从图表元素、<body>元素的elementAttrConst.LISTENER属性获取监听器对象。
 	 */
 	chartBase._initListener = function()
 	{
 		var $chart = this.elementJquery();
 		
-		var listenerStr = $chart.attr("dg-chart-listener");
+		var listenerStr = $chart.attr(elementAttrConst.LISTENER);
 		if(!listenerStr)
-			listenerStr = $(document.body).attr("dg-chart-listener");
+			listenerStr = $(document.body).attr(elementAttrConst.LISTENER);
 		
 		if(listenerStr)
 		{
@@ -490,11 +535,11 @@
 	
 	/**
 	 * 初始化图表的地图名。
-	 * 此方法从图表元素的"dg-chart-map"属性获取图表地图名。
+	 * 此方法从图表元素的elementAttrConst.MAP属性获取图表地图名。
 	 */
 	chartBase._initMap = function()
 	{
-		var map = this.elementJquery().attr("dg-chart-map");
+		var map = this.elementJquery().attr(elementAttrConst.MAP);
 		
 		if(map)
 			this.map(map);
@@ -502,26 +547,26 @@
 	
 	/**
 	 * 初始化图表的echarts主题名。
-	 * 此方法依次从图表元素、<body>元素的"dg-echarts-theme"属性获取echarts主题名。
+	 * 此方法依次从图表元素、<body>元素的elementAttrConst.ECHARTS_THEME属性获取echarts主题名。
 	 */
 	chartBase._initEchartsThemeName = function()
 	{
-		var themeName = this.elementJquery().attr("dg-echarts-theme");
+		var themeName = this.elementJquery().attr(elementAttrConst.ECHARTS_THEME);
 		
 		if(!themeName)
-			themeName = $(document.body).attr("dg-echarts-theme");
+			themeName = $(document.body).attr(elementAttrConst.ECHARTS_THEME);
 		
 		this.echartsThemeName(themeName);
 	};
 	
 	/**
 	 * 初始化图表是否禁用交互设置。
-	 * 此方法从图表元素的"dg-chart-disable-setting"属性获取是否禁用值。
+	 * 此方法从图表元素的elementAttrConst.DISABLE_SETTING属性获取是否禁用值。
 	 */
 	chartBase._initDisableSetting = function()
 	{
-		var globalSetting = $(document.body).attr("dg-chart-disable-setting");
-		var localSetting = this.elementJquery().attr("dg-chart-disable-setting");
+		var globalSetting = $(document.body).attr(elementAttrConst.DISABLE_SETTING);
+		var localSetting = this.elementJquery().attr(elementAttrConst.DISABLE_SETTING);
 		
 		globalSetting = this._evalDisableSettingAttr(globalSetting);
 		
@@ -564,7 +609,7 @@
 	
 	/**
 	 * 初始化图表事件处理函数。
-	 * 此方法从图表元素的所有以"dg-chart-on-"开头的属性获取事件处理函数。
+	 * 此方法从图表元素的所有以elementAttrConst.ON开头的属性获取事件处理函数。
 	 * 例如：
 	 * dg-chart-on-click="clickHandler" 						定义"click"事件处理函数；
 	 * dg-chart-on-mouseover="function(chartEvent){ ... }"		定义"mouseover"事件处理函数。
@@ -576,7 +621,7 @@
 		
 		var ehs = [];
 		
-		var prefix = "dg-chart-on-";
+		var prefix = elementAttrConst.ON;
 		
 		for(var i=0; i<attrs.length; i++)
 		{
@@ -597,11 +642,11 @@
 	
 	/**
 	 * 初始化自定义图表渲染器。
-	 * 此方法从图表元素的"dg-chart-renderer"属性获取自定义图表渲染器。
+	 * 此方法从图表元素的elementAttrConst.RENDERER属性获取自定义图表渲染器。
 	 */
 	chartBase._initCustomChartRenderer = function()
 	{
-		var chartRenderer = this.elementJquery().attr("dg-chart-renderer");
+		var chartRenderer = this.elementJquery().attr(elementAttrConst.RENDERER);
 		
 		if(chartRenderer)
 		{
@@ -1067,9 +1112,9 @@
 	chartBase.statusPreRender = function(set)
 	{
 		if(set === true)
-			this.status(chartStatus.PRE_RENDER);
+			this.status(chartStatusConst.PRE_RENDER);
 		else
-			return (this.status() == chartStatus.PRE_RENDER);
+			return (this.status() == chartStatusConst.PRE_RENDER);
 	};
 	
 	/**
@@ -1080,9 +1125,9 @@
 	chartBase.statusRendering = function(set)
 	{
 		if(set === true)
-			this.status(chartStatus.RENDERING);
+			this.status(chartStatusConst.RENDERING);
 		else
-			return (this.status() == chartStatus.RENDERING);
+			return (this.status() == chartStatusConst.RENDERING);
 	};
 	
 	/**
@@ -1096,13 +1141,13 @@
 		if(set === true)
 		{
 			this._isActive = true;
-			this.status(chartStatus.RENDERED);
+			this.status(chartStatusConst.RENDERED);
 			
 			if(postProcess != false)
 				this._postProcessRendered();
 		}
 		else
-			return (this.status() == chartStatus.RENDERED);
+			return (this.status() == chartStatusConst.RENDERED);
 	};
 	
 	/**
@@ -1145,9 +1190,9 @@
 	chartBase.statusPreUpdate = function(set)
 	{
 		if(set === true)
-			this.status(chartStatus.PRE_UPDATE);
+			this.status(chartStatusConst.PRE_UPDATE);
 		else
-			return (this.status() == chartStatus.PRE_UPDATE);
+			return (this.status() == chartStatusConst.PRE_UPDATE);
 	};
 	
 	/**
@@ -1158,9 +1203,9 @@
 	chartBase.statusUpdating = function(set)
 	{
 		if(set === true)
-			this.status(chartStatus.UPDATING);
+			this.status(chartStatusConst.UPDATING);
 		else
-			return (this.status() == chartStatus.UPDATING);
+			return (this.status() == chartStatusConst.UPDATING);
 	};
 	
 	/**
@@ -1173,13 +1218,13 @@
 	{
 		if(set === true)
 		{
-			this.status(chartStatus.UPDATED);
+			this.status(chartStatusConst.UPDATED);
 			
 			if(postProcess != false)
 				this._postProcessUpdated();
 		}
 		else
-			return (this.status() == chartStatus.UPDATED);
+			return (this.status() == chartStatusConst.UPDATED);
 	};
 	
 	/**
@@ -1202,10 +1247,10 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this.status(chartStatus.DESTROYED);
+			this.status(chartStatusConst.DESTROYED);
 		}
 		else
-			return (this.status() == chartStatus.DESTROYED);
+			return (this.status() == chartStatusConst.DESTROYED);
 	};
 	
 	/**

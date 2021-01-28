@@ -18,17 +18,17 @@
  *   datagear-chartSetting.js
  * 
  * 
- * 此看板工厂支持为<body>元素添加"dg-dashboard-listener"属性，用于指定看板监听器JS对象名，
+ * 此看板工厂支持为<body>元素添加elementAttrConst.DASHBOARD_LISTENER属性，用于指定看板监听器JS对象名，
  * 看板监听器格式参考dashboardBase.listener()函数说明。
  * 
- * 此看板工厂支持为<body>元素添加"dg-chart-map-urls"属性，用于扩展或替换内置地图，格式为：
+ * 此看板工厂支持为<body>元素添加elementAttrConst.MAP_URLS属性，用于扩展或替换内置地图，格式为：
  * {customMap:'map/custom.json', china: 'map/myChina.json'}
  * 
- * 此看板工厂支持为图表元素添加"dg-chart-link"属性，用于设置图表联动，具体格式参考chartBase.links函数说明。
+ * 此看板工厂支持为图表元素添加elementAttrConst.LINK属性，用于设置图表联动，具体格式参考chartBase.links函数说明。
  * 
- * 此看板工厂支持为<body>元素、图表元素添加"dg-chart-auto-resize"属性，用于设置图表是否自动调整大小。
+ * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.AUTO_RESIZE属性，用于设置图表是否自动调整大小。
  * 
- * 此看板工厂支持为<body>元素、图表元素添加"dg-chart-update-group"属性，用于设置图表更新ajax分组。
+ * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.UPDATE_GROUP属性，用于设置图表更新ajax分组。
  * 
  * 此看板工厂支持将页面内的<form dg-dashboard-form>元素构建为看板表单，具体参考dashboardBase._initForms函数说明。
  * 
@@ -39,13 +39,105 @@
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
 	/**图表对象基类*/
 	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
-	/**图表状态集*/
-	var chartStatus = (chartFactory.chartStatus || (chartFactory.chartStatus = {}));
+	/**图表状态常量*/
+	var chartStatusConst = (chartFactory.chartStatusConst || (chartFactory.chartStatusConst = {}));
+	/**DOM元素属性常量*/
+	var elementAttrConst = (chartFactory.elementAttrConst || (chartFactory.elementAttrConst = {}));
 	
 	/**看板工厂*/
 	var dashboardFactory = (global.dashboardFactory || (global.dashboardFactory = {}));
 	/**看板对象基类*/
 	var dashboardBase = (dashboardFactory.dashboardBase || (dashboardFactory.dashboardBase = {}));
+	
+	//----------------------------------------
+	// chartStatusConst扩展开始
+	//----------------------------------------
+	
+	/**图表状态：需要参数值*/
+	chartStatusConst.PARAM_VALUE_REQUIRED = "PARAM_VALUE_REQUIRED";
+	
+	/**图表状态：渲染出错*/
+	chartStatusConst.RENDER_ERROR = "RENDER_ERROR";
+	
+	/**图表状态：更新出错*/
+	chartStatusConst.UPDATE_ERROR = "UPDATE_ERROR";
+	
+	//----------------------------------------
+	// chartStatusConst扩展结束
+	//----------------------------------------
+	
+	//----------------------------------------
+	// elementAttrConst开始
+	//----------------------------------------
+	
+	/**看板监听器*/
+	elementAttrConst.DASHBOARD_LISTENER = "dg-dashboard-listener";
+	
+	/**看板表单*/
+	elementAttrConst.DASHBOARD_FORM = "dg-dashboard-form";
+	
+	/**图表地图URL映射表*/
+	elementAttrConst.MAP_URLS = "dg-chart-map-urls";
+	
+	/**图表联动*/
+	elementAttrConst.LINK = "dg-chart-link";
+	
+	/**图表自动调整尺寸*/
+	elementAttrConst.AUTO_RESIZE = "dg-chart-auto-resize";
+	
+	/**图表更新分组*/
+	elementAttrConst.UPDATE_GROUP = "dg-chart-update-group";
+	
+	//----------------------------------------
+	// elementAttrConst结束
+	//----------------------------------------
+	
+	/**
+	 * 更新看板数据配置，需与后台保持一致。
+	 */
+	dashboardFactory.updateDashboardConfig = (dashboardFactory.updateDashboardConfig ||
+			{
+				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_DASHBOARD_ID
+				dashboardIdParamName: "dashboardId",
+				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_CHART_IDS
+				chartIdsParamName: "chartIds",
+				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES
+				chartsParamValuesParamName: "chartsParamValues"
+			});
+	
+	/**
+	 * 异步加载图表配置，需与后台保持一致。
+	 */
+	dashboardFactory.loadChartConfig = (dashboardFactory.loadChartConfig ||
+			{
+				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_DASHBOARD_ID
+				dashboardIdParamName: "dashboardId",
+				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_WIDGET_ID
+				chartWidgetIdParamName: "chartWidgetId",
+				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_ELEMENT_ID
+				chartElementIdParamName: "chartElementId"
+			});
+
+	/**
+	 * 看板使用的渲染上下文属性名。
+	 */
+	dashboardFactory.renderContextAttrs =
+	{
+		//必须，看板主题，org.datagear.analysis.DashboardTheme
+		dashboardTheme: "dashboardTheme",
+		//必须，Web上下文，org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext
+		webContext: "webContext"
+	};
+	
+	/**
+	 * 更新图表数据ajax请求的重试秒数，当更新图表数据ajax请求出错后，会在过这些秒后重试请求。
+	 */
+	dashboardFactory.UPDATE_AJAX_RETRY_SECONDS = 5;
+	
+	/**
+	 * 循环监视处理图表状态间隔毫秒数。
+	 */
+	dashboardFactory.HANDLE_CHART_INTERVAL_MS = 1;
 	
 	/**
 	 * 初始化指定看板对象。
@@ -106,7 +198,7 @@
 	
 	/**
 	 * 初始化chartFactory.chartMapURLs。
-	 * 它将body元素的"dg-chart-map-urls"属性值设置为自定义地图JSON地址映射表。
+	 * 它将body元素的elementAttrConst.MAP_URLS属性值设置为自定义地图JSON地址映射表。
 	 */
 	dashboardFactory._initChartMapURLs = function()
 	{
@@ -117,7 +209,7 @@
 				chartFactory.chartMapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
 		}
 		
-		var mapUrls = $(document.body).attr("dg-chart-map-urls");
+		var mapUrls = $(document.body).attr(elementAttrConst.MAP_URLS);
 		
 		if(mapUrls)
 			mapUrls = chartFactory.evalSilently(mapUrls);
@@ -184,43 +276,6 @@
 	};
 	
 	/**
-	 * 更新看板数据配置，需与后台保持一致。
-	 */
-	dashboardFactory.updateDashboardConfig = (dashboardFactory.updateDashboardConfig ||
-			{
-				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_DASHBOARD_ID
-				dashboardIdParamName: "dashboardId",
-				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_CHART_IDS
-				chartIdsParamName: "chartIds",
-				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES
-				chartsParamValuesParamName: "chartsParamValues"
-			});
-	
-	/**
-	 * 异步加载图表配置，需与后台保持一致。
-	 */
-	dashboardFactory.loadChartConfig = (dashboardFactory.loadChartConfig ||
-			{
-				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_DASHBOARD_ID
-				dashboardIdParamName: "dashboardId",
-				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_WIDGET_ID
-				chartWidgetIdParamName: "chartWidgetId",
-				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_ELEMENT_ID
-				chartElementIdParamName: "chartElementId"
-			});
-
-	/**
-	 * 看板使用的渲染上下文属性名。
-	 */
-	dashboardFactory.renderContextAttrs =
-	{
-		//必须，看板主题，org.datagear.analysis.DashboardTheme
-		dashboardTheme: "dashboardTheme",
-		//必须，Web上下文，org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext
-		webContext: "webContext"
-	};
-	
-	/**
 	 * 获取对象的指定属性路径的值。
 	 * 
 	 * @param obj
@@ -258,44 +313,17 @@
 		return value;
 	};
 	
-	/**
-	 * 更新图表数据ajax请求的重试秒数，当更新图表数据ajax请求出错后，会在过这些秒后重试请求。
-	 */
-	dashboardFactory.UPDATE_AJAX_RETRY_SECONDS = 5;
-	
-	/**
-	 * 循环监视处理图表状态间隔毫秒数。
-	 */
-	dashboardFactory.HANDLE_CHART_INTERVAL_MS = 1;
-	
-	//----------------------------------------
-	// chartStatus扩展开始
-	//----------------------------------------
-	
-	/**图表状态：需要参数值*/
-	chartStatus.PARAM_VALUE_REQUIRED = "PARAM_VALUE_REQUIRED";
-	
-	/**图表状态：渲染出错*/
-	chartStatus.RENDER_ERROR = "RENDER_ERROR";
-	
-	/**图表状态：更新出错*/
-	chartStatus.UPDATE_ERROR = "UPDATE_ERROR";
-	
-	//----------------------------------------
-	// chartStatus扩展结束
-	//----------------------------------------
-	
 	//----------------------------------------
 	// chartBase扩展开始
 	//----------------------------------------
 	
 	/**
 	 * 初始化图表联动设置。
-	 * 此方法从图表元素的"dg-chart-link"属性获取联动设置。
+	 * 此方法从图表元素的elementAttrConst.LINK属性获取联动设置。
 	 */
 	chartBase._initLinks = function()
 	{
-		var links = this.elementJquery().attr("dg-chart-link");
+		var links = this.elementJquery().attr(elementAttrConst.LINK);
 		
 		if(!links)
 			return;
@@ -310,28 +338,28 @@
 	
 	/**
 	 * 初始化图表自动调整大小设置。
-	 * 此方法从body元素、图表元素的"dg-chart-auto-resize"属性获取联动设置。
+	 * 此方法从body元素、图表元素的elementAttrConst.AUTO_RESIZE属性获取联动设置。
 	 */
 	chartBase._initAutoResize = function()
 	{
-		var autoResize = this.elementJquery().attr("dg-chart-auto-resize");
+		var autoResize = this.elementJquery().attr(elementAttrConst.AUTO_RESIZE);
 		
 		if(autoResize == null)
-			autoResize = $(document.body).attr("dg-chart-auto-resize");
+			autoResize = $(document.body).attr(elementAttrConst.AUTO_RESIZE);
 		
 		this.autoResize(autoResize == "true");
 	};
 
 	/**
 	 * 初始化图表更新分组。
-	 * 此方法从body元素、图表元素的"dg-chart-update-group"属性获取更新分组设置。
+	 * 此方法从body元素、图表元素的elementAttrConst.UPDATE_GROUP属性获取更新分组设置。
 	 */
 	chartBase._initUpdateGroup = function()
 	{
-		var updateGroup = this.elementJquery().attr("dg-chart-update-group");
+		var updateGroup = this.elementJquery().attr(elementAttrConst.UPDATE_GROUP);
 		
 		if(updateGroup == null)
-			updateGroup = $(document.body).attr("dg-chart-update-group");
+			updateGroup = $(document.body).attr(elementAttrConst.UPDATE_GROUP);
 		
 		this.updateGroup(updateGroup);
 	};
@@ -588,11 +616,11 @@
 	
 	/**
 	 * 初始化看板的监听器。
-	 * 它将body元素的"dg-dashboard-listener"属性值设置为看板的监听器。
+	 * 它将body元素的elementAttrConst.DASHBOARD_LISTENER属性值设置为看板的监听器。
 	 */
 	dashboardBase._initListener = function()
 	{
-		var listener = $(document.body).attr("dg-dashboard-listener");
+		var listener = $(document.body).attr(elementAttrConst.DASHBOARD_LISTENER);
 		
 		if(listener)
 			listener = chartFactory.evalSilently(listener);
@@ -917,7 +945,7 @@
 	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单DOM对象。
 	 * 
 	 * @param form 要渲染的<form>表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
-	 * @param config 可选，表单配置对象，默认为表单元素的"dg-dashboard-form"属性值
+	 * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
 	 */
 	dashboardBase.renderForm = function(form, config)
 	{
@@ -926,7 +954,7 @@
 		form.addClass("dg-dashboard-form");
 		
 		if(!config)
-			config = chartFactory.evalSilently(form.attr("dg-dashboard-form"), {});
+			config = chartFactory.evalSilently(form.attr(elementAttrConst.DASHBOARD_FORM), {});
 		
 		var _thisDashboard = this;
 		var bindBatchSetName = "dataGearBatchSet";
@@ -1131,7 +1159,7 @@
 				if(!chart.isDataSetParamValueReady())
 				{
 					//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
-					chart.status(chartStatus.PARAM_VALUE_REQUIRED);
+					chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
 				}
 				else
 				{
@@ -1256,7 +1284,7 @@
 		catch(e)
 		{
 			//设置为渲染出错状态，避免渲染失败后会_doHandleCharts中会无限尝试渲染
-			chart.status(chartStatus.RENDER_ERROR);
+			chart.status(chartStatusConst.RENDER_ERROR);
 			
 			chartFactory.logException(e);
 		}
@@ -1311,7 +1339,7 @@
 		catch(e)
 		{
 			//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
-			chart.status(chartStatus.UPDATE_ERROR);
+			chart.status(chartStatusConst.UPDATE_ERROR);
 			
 			chartFactory.logException(e);
 		}
