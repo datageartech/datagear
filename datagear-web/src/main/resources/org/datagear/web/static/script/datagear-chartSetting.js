@@ -226,10 +226,12 @@
 				return false;
 		});
 		
-		if(options.render)
-			options.render.call($form[0]);
+		var formEle = $form[0];
 		
-		return $form[0];
+		if(options.render)
+			options.render.call(formEle, formEle);
+		
+		return formEle;
 	};
 	
 	chartSetting.setDataSetParamValueFormStyle = function($form, chartTheme)

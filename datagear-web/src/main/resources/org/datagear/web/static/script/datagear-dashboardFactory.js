@@ -30,7 +30,7 @@
  * 
  * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.UPDATE_GROUP属性，用于设置图表更新ajax分组。
  * 
- * 此看板工厂支持将页面内的<form dg-dashboard-form>元素构建为看板表单，具体参考dashboardBase._initForms函数说明。
+ * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboardBase._initForms函数说明。
  * 
  */
 (function(global)
@@ -906,7 +906,9 @@
 	 *   //可选，表单提交操作时执行的联动图表设置
 	 *   link: 图表联动设置对象,
 	 *   //可选，表单提交按钮文本
-	 *   submitText: "..."
+	 *   submitText: "...",
+	 *   //表单渲染完成回调函数
+	 *   render: function(form){ ... }
 	 * }
 	 * 
 	 * 表单输输入项对象格式为：
