@@ -363,6 +363,8 @@ form.display-block .form-content .form-item .form-item-value label.error{
 }
 .ui-controlgroup .ui-button-icon-only{
 	width: 1em;/*减小图标宽度*/
+	padding-left: 0.8em;
+	padding-right: 0.8em;
 }
 .ui-controlgroup .ui-selectmenu-button.ui-button-icon-only .ui-icon{
 	top: 30%;/*下拉选择组件的图标按钮，上下居中*/
