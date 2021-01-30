@@ -24,6 +24,7 @@
 	
 	//@deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
 	global.chartSupport = chartSupport;
+	//@deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
 	
 	//org.datagear.analysis.DataSetProperty.DataType
 	chartSupport.DataSetPropertyDataType =
@@ -3892,7 +3893,7 @@
 						"emphasis":
 						{
 							"shadowBlur" : 10,
-							"shadowColor" : global.chartFactory.getGradualColor(chartTheme, 0.9),
+							"shadowColor" : chartFactory.getGradualColor(chartTheme, 0.9),
 						}
 					}
 				}
@@ -4058,7 +4059,7 @@
 						itemStyle:
 						{
 							borderColor: chartTheme.borderColor,
-							shadowColor: global.chartFactory.getGradualColor(chartTheme, 0.4)
+							shadowColor: chartFactory.getGradualColor(chartTheme, 0.4)
 						}
 					},
 					label:
@@ -4244,7 +4245,7 @@
 					//偶数行样式
 					"odd":
 					{
-						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0)
+						"backgroundColor": chartFactory.getGradualColor(chartTheme, 0)
 					},
 					//奇数行样式
 					"even":
@@ -4254,7 +4255,7 @@
 					//悬浮行样式
 					"hover":
 					{
-						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0.2)
+						"backgroundColor": chartFactory.getGradualColor(chartTheme, 0.2)
 					},
 					//选中行样式
 					"selected":
@@ -4268,8 +4269,8 @@
 				renderValue: undefined
 			};
 			
-			themeBindTableOptions._chartTableStyleClassName = global.chartFactory.nextElementId();
-			themeBindTableOptions._chartTableStyleSheetId = global.chartFactory.nextElementId();
+			themeBindTableOptions._chartTableStyleClassName = chartFactory.nextElementId();
+			themeBindTableOptions._chartTableStyleSheetId = chartFactory.nextElementId();
 			
 			chartTheme._chartTableThemeBindOptions = themeBindTableOptions;
 		}
@@ -4355,8 +4356,8 @@
 		else
 		{
 			options.table = $.extend(true, {}, themeBindTableOptions, options.table);
-			options.table._chartTableStyleClassName =global.chartFactory.nextElementId();
-			options.table._chartTableStyleSheetId = global.chartFactory.nextElementId();
+			options.table._chartTableStyleClassName =chartFactory.nextElementId();
+			options.table._chartTableStyleSheetId = chartFactory.nextElementId();
 		}
 		
 		//完善分页选项
@@ -4433,7 +4434,7 @@
 			chartEle.addClass("dg-hide-title");
 		
 		var chartTitle = $("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(chartEle);
-		global.chartFactory.setStyles(chartTitle, options.title);
+		chartFactory.setStyles(chartTitle, options.title);
 		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
 		var table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartContent);
 		var tableId = chart.id+"-table";
@@ -4628,7 +4629,7 @@
 	{
 		chart.elementJquery().addClass(styleClassName);
 		
-		if(global.chartFactory.isStyleSheetCreated(styleSheetId))
+		if(chartFactory.isStyleSheetCreated(styleSheetId))
 			return false;
 		
 		//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
@@ -4636,19 +4637,19 @@
 		
 		var cssText = 
 			qualifier + " table.dataTable tbody tr{"
-			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row)
+			+ chartFactory.stylesObjToCssText(chartOptions.table.row)
 			+" }\n"
 			+qualifier + " table.dataTable thead th,\n"
 			+qualifier + " table.dataTable thead td{"
-			+ global.chartFactory.stylesObjToCssText(chartOptions.table.header)
+			+ chartFactory.stylesObjToCssText(chartOptions.table.header)
 			+" }\n"
 			+qualifier + " table.dataTable.stripe tbody tr.odd,\n"
 			+qualifier + " table.dataTable.display tbody tr.odd{"
-			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.odd)
+			+ chartFactory.stylesObjToCssText(chartOptions.table.row.odd)
 			+" }\n"
 			+qualifier + " table.dataTable.stripe tbody tr.even,\n"
 			+qualifier + " table.dataTable.display tbody tr.even{"
-			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.even)
+			+ chartFactory.stylesObjToCssText(chartOptions.table.row.even)
 			+" }\n"
 			+qualifier + " table.dataTable.hover tbody tr.hover,\n"
 			+qualifier + " table.dataTable.hover tbody tr:hover,\n"
@@ -4658,7 +4659,7 @@
 			+qualifier + " table.dataTable.hover tbody > tr > .selected:hover,\n"
 			+qualifier + " table.dataTable.display tbody > tr.selected:hover,\n"
 			+qualifier + " table.dataTable.display tbody > tr > .selected:hover{"
-			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.hover)
+			+ chartFactory.stylesObjToCssText(chartOptions.table.row.hover)
 			+" }\n"
 			+qualifier + " table.dataTable tbody > tr.selected,\n"
 			+qualifier + " table.dataTable tbody > tr > .selected,\n"
@@ -4670,7 +4671,7 @@
 			+qualifier + " table.dataTable.stripe tbody > tr.odd > .selected,\n"
 			+qualifier + " table.dataTable.display tbody > tr.odd.selected,\n"
 			+qualifier + " table.dataTable.display tbody > tr.odd > .selected{"
-			+ global.chartFactory.stylesObjToCssText(chartOptions.table.row.selected)
+			+ chartFactory.stylesObjToCssText(chartOptions.table.row.selected)
 			+" }\n"
 			+qualifier + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span{"
 			+ " background:" + chartOptions.table.header.color+";"
@@ -4684,7 +4685,7 @@
 			+ " background: none;"
 			+" }\n";
 		
-		global.chartFactory.createStyleSheet(styleSheetId, cssText);
+		chartFactory.createStyleSheet(styleSheetId, cssText);
 		
 		return true;
 	};
@@ -5058,12 +5059,12 @@
 				if(valueFirst)
 				{
 					$labelValue = $("<div class='label-value'></div>").appendTo($label);
-					global.chartFactory.setStyles($labelValue, renderOptions.label.value);
+					chartFactory.setStyles($labelValue, renderOptions.label.value);
 					
 					if(showName)
 					{
 						$labelName = $("<div class='label-name'></div>").appendTo($label);
-						global.chartFactory.setStyles($labelName, renderOptions.label.name);
+						chartFactory.setStyles($labelName, renderOptions.label.name);
 					}
 				}
 				else
@@ -5071,11 +5072,11 @@
 					if(showName)
 					{
 						$labelName = $("<div class='label-name'></div>").appendTo($label);
-						global.chartFactory.setStyles($labelName, renderOptions.label.name);
+						chartFactory.setStyles($labelName, renderOptions.label.name);
 					}
 					
 					$labelValue = $("<div class='label-value'></div>").appendTo($label);
-					global.chartFactory.setStyles($labelValue, renderOptions.label.value);
+					chartFactory.setStyles($labelValue, renderOptions.label.value);
 				}
 			}
 			else

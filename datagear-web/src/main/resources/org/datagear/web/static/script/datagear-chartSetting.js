@@ -23,8 +23,11 @@
 	
 	//@deprecated 兼容1.8.1版本的window.chartSetting变量名，未来版本会移除
 	global.chartForm = chartSetting;
+	//@deprecated 兼容1.8.1版本的window.chartSetting变量名，未来版本会移除
+	
 	//@deprecated 兼容2.1.1版本的window.chartFactory.chartSetting变量名，未来版本会移除
-	global.chartFactory.chartForm = chartSetting;
+	chartFactory.chartForm = chartSetting;
+	//@deprecated 兼容2.1.1版本的window.chartFactory.chartSetting变量名，未来版本会移除
 	
 	//org.datagear.analysis.DataSetParam.DataType
 	chartSetting.DataSetParamDataType =
@@ -239,16 +242,16 @@
 		var styleClassName = chartTheme._dataSetParamValueFormStyleClassName;
 		if(!styleClassName)
 		{
-			styleClassName = global.chartFactory.nextElementId();
+			styleClassName = chartFactory.nextElementId();
 			chartTheme._dataSetParamValueFormStyleClassName = styleClassName;
 		}
 		
 		$form.addClass(styleClassName);
 		
 		var styleId = (chartTheme._dataSetParamValueFormStyleSheetId
-				|| (chartTheme._dataSetParamValueFormStyleSheetId = global.chartFactory.nextElementId()));
+				|| (chartTheme._dataSetParamValueFormStyleSheetId = chartFactory.nextElementId()));
 		
-		if(global.chartFactory.isStyleSheetCreated(styleId))
+		if(chartFactory.isStyleSheetCreated(styleId))
 			return false;
 		
 		var qualifier = "." + styleClassName;
@@ -289,7 +292,7 @@
 			+" }\n"
 			;
 		
-		global.chartFactory.createStyleSheet(styleId, cssText);
+		chartFactory.createStyleSheet(styleId, cssText);
 		
 		return true;
 	};
@@ -541,7 +544,7 @@
 			if(optVal == null)
 				optVal = opt;
 			
-			var eleId = global.chartFactory.nextElementId();
+			var eleId = chartFactory.nextElementId();
 			
 			var $wrapper = $("<div class='dg-dspv-form-radio-wrapper' />").appendTo($inputsWrapper);
 			
@@ -605,7 +608,7 @@
 			if(optVal == null)
 				optVal = opt;
 			
-			var eleId = global.chartFactory.nextElementId();
+			var eleId = chartFactory.nextElementId();
 			
 			var $wrapper = $("<div class='dg-dspv-form-checkbox-wrapper' />").appendTo($inputsWrapper);
 			
@@ -659,7 +662,7 @@
 		if(chartTheme)
 		{
 			var containerId = (chartTheme._datetimepickerContainerId
-					|| (chartTheme._datetimepickerContainerId = global.chartFactory.nextElementId()));
+					|| (chartTheme._datetimepickerContainerId = chartFactory.nextElementId()));
 			var container = document.getElementById(containerId);
 			if(!container)
 				container = $("<div class='dg-dspv-datetimepicker-container' />").attr("id", containerId).appendTo(document.body);
@@ -727,9 +730,9 @@
 	chartSetting.datetimepickerSetStyle = function(parentSelector, chartTheme)
 	{
 		var styleId = (chartTheme._datetimepickerStyleSheetId
-				|| (chartTheme._datetimepickerStyleSheetId = global.chartFactory.nextElementId()));
+				|| (chartTheme._datetimepickerStyleSheetId = chartFactory.nextElementId()));
 		
-		if(global.chartFactory.isStyleSheetCreated(styleId))
+		if(chartFactory.isStyleSheetCreated(styleId))
 			return false;
 		
 		var color = chartFactory.getGradualColor(chartTheme, 1);
@@ -812,7 +815,7 @@
 			+" }\n"
 			;
 		
-		global.chartFactory.createStyleSheet(styleId, cssText);
+		chartFactory.createStyleSheet(styleId, cssText);
 		
 		return true;
 	};
@@ -820,7 +823,7 @@
 	chartSetting.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
 	{
 		if(typeof(dataSetParam.inputPayload) == "string" && dataSetParam.inputPayload != "")
-			return global.chartFactory.evalSilently(dataSetParam.inputPayload, defaultValue);
+			return chartFactory.evalSilently(dataSetParam.inputPayload, defaultValue);
 		else
 			return (dataSetParam.inputPayload || defaultValue);
 	};
@@ -1241,16 +1244,16 @@
 		var styleClassName = chartTheme._chartSettingBoxStyleClassName;
 		if(!styleClassName)
 		{
-			styleClassName = global.chartFactory.nextElementId();
+			styleClassName = chartFactory.nextElementId();
 			chartTheme._chartSettingBoxStyleClassName = styleClassName;
 		}
 		
 		$box.addClass(styleClassName);
 		
 		var styleId = (chartTheme._chartSettingBoxStyleSheetId
-				|| (chartTheme._chartSettingBoxStyleSheetId = global.chartFactory.nextElementId()));
+				|| (chartTheme._chartSettingBoxStyleSheetId = chartFactory.nextElementId()));
 		
-		if(global.chartFactory.isStyleSheetCreated(styleId))
+		if(chartFactory.isStyleSheetCreated(styleId))
 			return false;
 		
 		var qualifier = "." + styleClassName;
@@ -1291,7 +1294,7 @@
 			+"} \n"
 			;
 		
-		global.chartFactory.createStyleSheet(styleId, cssText);
+		chartFactory.createStyleSheet(styleId, cssText);
 		
 		return true;
 	};
@@ -1676,16 +1679,16 @@
 		var styleClassName = chartTheme._chartSettingDataPanelStyleClassName;
 		if(!styleClassName)
 		{
-			styleClassName = global.chartFactory.nextElementId();
+			styleClassName = chartFactory.nextElementId();
 			chartTheme._chartSettingDataPanelStyleClassName = styleClassName;
 		}
 		
 		$panel.addClass(styleClassName);
 		
 		var styleId = (chartTheme._chartSettingDataPanelStyleSheetId
-				|| (chartTheme._chartSettingDataPanelStyleSheetId = global.chartFactory.nextElementId()));
+				|| (chartTheme._chartSettingDataPanelStyleSheetId = chartFactory.nextElementId()));
 		
-		if(global.chartFactory.isStyleSheetCreated(styleId))
+		if(chartFactory.isStyleSheetCreated(styleId))
 			return false;
 		
 		//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列
@@ -1734,7 +1737,7 @@
 			+" background:"+chartTheme.highlightTheme.backgroundColor+";"
 			+" }\n";
 		
-		global.chartFactory.createStyleSheet(styleId, cssText);
+		chartFactory.createStyleSheet(styleId, cssText);
 		
 		return true;
 	};

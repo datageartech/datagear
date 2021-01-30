@@ -50,7 +50,7 @@
 	var dashboardBase = (dashboardFactory.dashboardBase || (dashboardFactory.dashboardBase = {}));
 	
 	//----------------------------------------
-	// chartStatusConst扩展开始
+	// chartStatusConst开始
 	//----------------------------------------
 	
 	/**图表状态：需要参数值*/
@@ -63,7 +63,7 @@
 	chartStatusConst.UPDATE_ERROR = "UPDATE_ERROR";
 	
 	//----------------------------------------
-	// chartStatusConst扩展结束
+	// chartStatusConst结束
 	//----------------------------------------
 	
 	//----------------------------------------
@@ -202,11 +202,11 @@
 	 */
 	dashboardFactory._initChartMapURLs = function()
 	{
-		for(var i=0; i<this.builtInEchartsMaps.length; i++)
+		for(var i=0; i<this.builtinChartMaps.length; i++)
 		{
-			var urlNames = this.builtInEchartsMaps[i];
+			var urlNames = this.builtinChartMaps[i];
 			for(var j=0; j<urlNames.names.length; j++)
-				chartFactory.chartMapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
+				chartFactory.chartMapURLs[urlNames.names[j]] = this.builtinChartMapBaseURL + urlNames.url;
 		}
 		
 		var mapUrls = $(document.body).attr(elementAttrConst.MAP_URLS);
@@ -1641,8 +1641,8 @@
 	/**
 	 * 内置地图JSON地址配置。
 	 */
-	dashboardFactory.builtInEchartsMapBaseURL = "/static/lib/echarts-map";
-	dashboardFactory.builtInEchartsMaps =
+	dashboardFactory.builtinChartMapBaseURL = "/static/lib/echarts-map";
+	dashboardFactory.builtinChartMaps =
 	[
 		{names: ["china", "中国"], url: "/china.json"},
 		{names: ["china-contour", "中国轮廓"], url: "/china-contour.json"},
