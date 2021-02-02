@@ -158,8 +158,8 @@ SQL工作台
 
 	UPDATE DATAGEAR_VERSION SET VERSION_VALUE='当前版本号'
 	
-例如，对于`2.0.0`版本，应执行：
+例如，对于`2.2.0`版本，应执行：
 
-	UPDATE DATAGEAR_VERSION SET VERSION_VALUE='2.0.0'
+	UPDATE DATAGEAR_VERSION SET VERSION_VALUE='2.2.0'
 
 系统自带了一个可用于为内置数据库执行SQL语句的简单工具类`org.datagear.web.util.DerbySqlClient`，可以在IDE中直接运行。注意：运行前需要先停止DataGear程序。
