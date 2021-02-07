@@ -56,10 +56,8 @@
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label>
-					</label>
 				</div>
-				<div class="form-item-value">
+				<div class="form-item-value minor">
 					<@spring.message code='dashboard.import.notice' />
 				</div>
 			</div>

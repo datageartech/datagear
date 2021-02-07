@@ -36,7 +36,7 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='driverEntity.driverFiles' /></label>
+					<label title="<@spring.message code='driverEntity.driverFiles.desc' />"><@spring.message code='driverEntity.driverFiles' /></label>
 				</div>
 				<div class="form-item-value">
 					<div class="ui-widget ui-widget-content input driver-files">
@@ -50,9 +50,20 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
+			<#if !readonly>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='driverEntity.driverClassName' /></label>
+				</div>
+				<div class="form-item-value minor">
+					<@spring.message code='driverEntity.driverFiles.notice' />
+				</div>
+			</div>
+			</#if>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label title="<@spring.message code='driverEntity.driverClassName.desc' />">
+						<@spring.message code='driverEntity.driverClassName' />
+					</label>
 				</div>
 				<div class="form-item-value">
 					<input type="text" name="driverClassName" value="${(driverEntity.driverClassName)!''}" class="ui-widget ui-widget-content" />
