@@ -87,6 +87,17 @@
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Built-By>datagear.tech</Built-By>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
 			<!-- 统一更新子模块版本号为父模块版本号插件 -->
 			<!-- mvn -N versions:update-child-modules -->
 			<plugin>
