@@ -533,7 +533,7 @@ public class ControllerAdvice extends AbstractController
 			DataIntegrityViolationException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(DataIntegrityViolationException.class), exception,
-				true);
+				false);
 
 		return getErrorView(request, response);
 	}
