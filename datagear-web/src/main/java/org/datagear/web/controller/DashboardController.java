@@ -52,10 +52,13 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.web.config.CoreConfig;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -96,6 +99,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@Autowired
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 
+	private String dashboardGlobalResUrlPrefix = null;
+
+	@Autowired
+	@Qualifier(CoreConfig.NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
+	private File dashboardGlobalResRootDirectory;
+
 	@Autowired
 	private AnalysisProjectService analysisProjectService;
 
@@ -118,6 +127,27 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService)
 	{
 		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
+	}
+
+	public String getDashboardGlobalResUrlPrefix()
+	{
+		return dashboardGlobalResUrlPrefix;
+	}
+
+	@Value("${dashboardGlobalResUrlPrefix}")
+	public void setDashboardGlobalResUrlPrefix(String dashboardGlobalResUrlPrefix)
+	{
+		this.dashboardGlobalResUrlPrefix = dashboardGlobalResUrlPrefix;
+	}
+
+	public File getDashboardGlobalResRootDirectory()
+	{
+		return dashboardGlobalResRootDirectory;
+	}
+
+	public void setDashboardGlobalResRootDirectory(File dashboardGlobalResRootDirectory)
+	{
+		this.dashboardGlobalResRootDirectory = dashboardGlobalResRootDirectory;
 	}
 
 	public AnalysisProjectService getAnalysisProjectService()
@@ -170,6 +200,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("templateName", HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0]);
 		model.addAttribute("templateContent", templateContent);
 		model.addAttribute("defaultTemplateContent", templateContent);
+		model.addAttribute("dashboardGlobalResUrlPrefix",
+				(StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix) ? "" : this.dashboardGlobalResUrlPrefix));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -197,6 +229,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("templateName", dashboard.getFirstTemplate());
 		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute("defaultTemplateContent", defaultTemplateContent);
+		model.addAttribute("dashboardGlobalResUrlPrefix",
+				(StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix) ? "" : this.dashboardGlobalResUrlPrefix));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -601,6 +635,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
 		model.addAttribute("templateName", dashboard.getFirstTemplate());
 		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
+		model.addAttribute("dashboardGlobalResUrlPrefix",
+				(StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix) ? "" : this.dashboardGlobalResUrlPrefix));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.viewDashboard");
 		model.addAttribute(KEY_READONLY, true);
 
@@ -741,7 +777,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new RecordNotFoundException();
 
 		String resName = resolvePathAfter(request, "/show/" + id + "/");
-
+		
+		if(StringUtil.isEmpty(resName))
+			throw new FileNotFoundException(resName);
+		
 		if (entity.isTemplate(resName))
 		{
 			HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
@@ -751,29 +790,58 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 		else
 		{
+			InputStream in = null;
+
 			TemplateDashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
 					.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
 
-			if (!resManager.exists(id, resName))
+			// 优先本地资源
+			if (resManager.exists(id, resName))
+			{
+				setContentTypeByName(request, response, getServletContext(), resName);
+
+				long lastModified = resManager.lastModified(id, resName);
+				if (webRequest.checkNotModified(lastModified))
+					return;
+
+				in = resManager.getInputStream(id, resName);
+			}
+			// 其次全局资源
+			else
+			{
+				if (!StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix)
+						&& resName.startsWith(this.dashboardGlobalResUrlPrefix))
+					resName = resName.substring(this.dashboardGlobalResUrlPrefix.length());
+
+				File globalRes = FileUtil.getFile(dashboardGlobalResRootDirectory, resName);
+				
+				if(globalRes.exists())
+				{
+					setContentTypeByName(request, response, getServletContext(), resName);
+
+					long lastModified = globalRes.lastModified();
+					if (webRequest.checkNotModified(lastModified))
+						return;
+
+					in = IOUtil.getInputStream(globalRes);
+				}
+			}
+
+			if (in != null)
+			{
+				OutputStream out = response.getOutputStream();
+
+				try
+				{
+					IOUtil.write(in, out);
+				}
+				finally
+				{
+					IOUtil.close(in);
+				}
+			}
+			else
 				throw new FileNotFoundException(resName);
-
-			setContentTypeByName(request, response, getServletContext(), resName);
-
-			long lastModified = resManager.lastModified(id, resName);
-			if (webRequest.checkNotModified(lastModified))
-				return;
-
-			InputStream in = resManager.getInputStream(id, resName);
-			OutputStream out = response.getOutputStream();
-
-			try
-			{
-				IOUtil.write(in, out);
-			}
-			finally
-			{
-				IOUtil.close(in);
-			}
 		}
 	}
 

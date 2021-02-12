@@ -39,6 +39,9 @@ public class FileUtil
 
 	/**
 	 * 获取子孙文件相对于祖先文件的路径。
+	 * <p>
+	 * 相对路径不会以{@linkplain #PATH_SEPARATOR}开头。
+	 * </p>
 	 * 
 	 * @param ancestor
 	 * @param descendent

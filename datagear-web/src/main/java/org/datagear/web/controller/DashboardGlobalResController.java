@@ -106,7 +106,7 @@ public class DashboardGlobalResController extends AbstractController
 		{
 			File parent = this.dashboardGlobalResRootDirectory;
 			if (!StringUtil.isEmpty(savePath))
-				parent = FileUtil.getDirectory(this.dashboardGlobalResRootDirectory, savePath);
+				parent = FileUtil.getDirectory(this.dashboardGlobalResRootDirectory, savePath, true);
 
 			ZipInputStream in = null;
 
@@ -125,7 +125,7 @@ public class DashboardGlobalResController extends AbstractController
 			if (isEmpty(form.getSavePath()))
 				throw new IllegalInputException();
 
-			File resFile = FileUtil.getFile(this.dashboardGlobalResRootDirectory, savePath);
+			File resFile = FileUtil.getFile(this.dashboardGlobalResRootDirectory, savePath, true);
 			IOUtil.copy(file, resFile, false);
 		}
 
