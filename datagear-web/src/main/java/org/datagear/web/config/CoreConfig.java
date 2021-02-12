@@ -122,6 +122,8 @@ public class CoreConfig implements InitializingBean
 
 	public static final String NAME_DASHBOARD_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "htmlTplDashboardWidgetRenderer";
 
+	public static final String NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY = "dashboardGlobalResRootDirectory";
+
 	private DataSourceConfig dataSourceConfig;
 
 	private Environment environment;
@@ -258,6 +260,12 @@ public class CoreConfig implements InitializingBean
 	public File dashboardRootDirectory()
 	{
 		return createDirectory(environment.getProperty("directory.dashboard"), true);
+	}
+
+	@Bean(NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
+	public File dashboardGlobalResRootDirectory()
+	{
+		return createDirectory(environment.getProperty("directory.dashboardGlobalRes"), true);
 	}
 
 	@Bean

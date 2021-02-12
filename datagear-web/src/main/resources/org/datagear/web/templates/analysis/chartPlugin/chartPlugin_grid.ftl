@@ -22,7 +22,7 @@ selectOperation 是否选择操作，允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-grid page-grid-chartPlugin">
+<div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-chartPlugin">
 	<div class="head">
 		<div class="search">
 			<#include "../../include/page_obj_searchform.html.ftl">

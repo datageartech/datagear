@@ -76,7 +76,7 @@
 				$fileLink[0].click();//$fileLink.click()无法触发下载动作
 				*/
 				
-				$.postOnForm(url, {"data" : options.data});
+				$.postOnForm(url, {"data" : options.data, "target" : "_blank"});
 			}
 			else
 			{
@@ -985,7 +985,7 @@
 			return columnName.replace("\\.", ".");
 		},
 		
-		buildDataTablesColumnSimpleOption : function(title, data, hidden)
+		buildDataTablesColumnSimpleOption : function(title, data, hidden, noTruncate)
 		{
 			var option =
 			{
@@ -999,6 +999,14 @@
 				},
 				defaultContent: "",
 			};
+			
+			if(noTruncate)
+			{
+				option.render = function(data, type, row, meta)
+				{
+					return $.escapeHtml(data);
+				};
+			}
 			
 			return option;
 		},

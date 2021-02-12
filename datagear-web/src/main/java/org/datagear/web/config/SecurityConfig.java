@@ -253,6 +253,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				// 管理
 				.antMatchers("/dataSetResDirectory/**").access(AUTH_ADMIN)
 
+				// 看板全局资源
+				// 选择
+				.antMatchers("/dashboardGlobalRes/queryData")
+				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
+						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
+				// 管理
+				.antMatchers("/dashboardGlobalRes/**").access(AUTH_ADMIN)
+
 				// 数据授权
 				.antMatchers("/authorization/**").access(AUTH_USER_ADMIN)
 

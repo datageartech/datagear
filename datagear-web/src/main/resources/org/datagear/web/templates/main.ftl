@@ -895,6 +895,12 @@ ${detectNewVersionScript?no_esc}
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/dataSetResDirectory/pagingQuery", options);
 				}
+				else if($item.hasClass("system-set-manageDashboardGlobalRes"))
+				{
+					var options = {};
+					$.setGridPageHeightOption(options);
+					po.open(contextPath+"/dashboardGlobalRes/query", options);
+				}
 				else if($item.hasClass("system-set-rold-manage"))
 				{
 					var options = {};
@@ -1449,6 +1455,7 @@ ${detectNewVersionScript?no_esc}
 					<li class="system-set-authorization-manage"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaAuth' /></a></li>
 					<li class="ui-widget-header"></li>
 					<li class="system-set-dataSetResDirectory-manage"><a href="javascript:void(0);"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
+					<li class="system-set-manageDashboardGlobalRes"><a href="javascript:void(0);"><@spring.message code='main.manageDashboardGlobalRes' /></a></li>
 					<li class="system-set-chartPlugin-manage"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>
 					<!--
 					<li class="system-set-chartPlugin-upload"><a href="javascript:void(0);"><@spring.message code='main.uploadChartPlugin' /></a></li>
