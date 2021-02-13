@@ -815,7 +815,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 				File globalRes = FileUtil.getFile(dashboardGlobalResRootDirectory, resName);
 				
-				if(globalRes.exists())
+				if (globalRes.exists() && !globalRes.isDirectory())
 				{
 					setContentTypeByName(request, response, getServletContext(), resName);
 

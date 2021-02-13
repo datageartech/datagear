@@ -81,22 +81,24 @@ readonly 是否只读操作，允许为null
 									<div class="resource-button-wrapper rbw-right">
 										<#if !readonly>
 										<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editResource.desc' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
-										<#else>
-										<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-search'></span><span class='ui-button-icon-space'></span></button>
-										</#if>
-										<#if !readonly>
 										<button type='button' class='uploadResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
 										<button type='button' class='deleteResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.deleteResource' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
 										<div class="resource-more-button-wrapper">
 											<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
 											<div class="resource-more-button-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow">
 												<button type='button' class='copyResNameButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
+												<button type='button' class='viewResButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.viewResource' />"><span class='ui-icon ui-icon-extlink'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='asTemplateBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='asNormalResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='asFirstTemplateBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-home'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='refreshResListBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.refreshResource' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
 											</div>
 										</div>
+										<#else>
+										<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editResource.desc' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='copyResNameButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='viewResButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.viewResource' />"><span class='ui-icon ui-icon-extlink'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='refreshResListBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.refreshResource' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
 										</#if>
 									</div>
 								</div>
@@ -146,7 +148,6 @@ readonly 是否只读操作，允许为null
 							</div>
 							<div id="${pageId}-resourceListGlobal" class="resource-list-wrapper resource-list-global-wrapper content-unloaded ui-widget ui-widget-content ui-corner-all">
 								<div class="resource-list-head ui-widget ui-widget-content">
-									<#if !readonly>
 									<div class="resource-button-wrapper rbw-left">
 										<div class="search-group ui-widget ui-widget-content ui-corner-all">
 											<input type="text" class="search-input ui-widget ui-widget-content" />
@@ -155,12 +156,10 @@ readonly 是否只读操作，允许为null
 											</button>
 										</div>
 									</div>
-									</#if>
 									<div class="resource-button-wrapper rbw-right">
-										<#if !readonly>
 										<button type='button' class='copyResNameButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='viewResButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.viewResource' />"><span class='ui-icon ui-icon-extlink'></span><span class='ui-button-icon-space'></span></button>
 										<button type='button' class='refreshResListBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.refreshResource' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
-										</#if>
 									</div>
 								</div>
 								<div class="resource-list-content"></div>
@@ -243,6 +242,11 @@ readonly 是否只读操作，允许为null
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dashboard/" + action;
+	};
+	
+	po.showUrl = function(dashboardId)
+	{
+		return po.url("show/"+dashboardId+"/");
 	};
 	
 	po.isHtmlResourceName = function(resName)
@@ -905,6 +909,24 @@ readonly 是否只读操作，允许为null
 		});
 	});
 	
+	po.elementResListLocal(".viewResButton").click(function(e)
+	{
+		var id = po.getDashboardId();
+		
+		if(!id)
+		{
+			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			return;
+		}
+		
+		var path = po.getSelectedResourceName();
+		
+		if(!path)
+			return;
+		
+		window.open(po.showUrl(id) + path);
+	});
+	
 	po.elementResListLocal(".asTemplateBtn").click(function()
 	{
 		if(!po.checkDashboardSaved())
@@ -1106,13 +1128,31 @@ readonly 是否只读操作，允许为null
 			return false;
 		}
 	});
-
+	
 	po.elementResListGlobal(".search-button").click(function(e)
 	{
 		var keyword = po.elementResListGlobal(".search-input").val();
 		po.refreshResourceGlobalList(keyword);
 	});
-
+	
+	po.elementResListGlobal(".viewResButton").click(function(e)
+	{
+		var id = po.getDashboardId();
+		
+		if(!id)
+		{
+			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			return;
+		}
+		
+		var path = po.getSelectedResourceGlobalName();
+		
+		if(!path)
+			return;
+		
+		window.open(po.showUrl(id) + path);
+	});
+	
 	var copyResGlobalNameButton = po.elementResListGlobal(".copyResNameButton");
 	if(copyResGlobalNameButton.length > 0)
 	{
@@ -1332,7 +1372,7 @@ readonly 是否只读操作，允许为null
 					po.templates = dashboard.templates;
 					
 					if(po.showAfterSave)
-						window.open(po.url("show/"+dashboard.id+"/"), dashboard.id);
+						window.open(po.showUrl(dashboard.id), dashboard.id);
 					
 					var close = po.pageParamCallAfterSave(false);
 					if(!close)
