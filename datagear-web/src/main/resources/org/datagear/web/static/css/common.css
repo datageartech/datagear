@@ -3134,3 +3134,13 @@ table.dataTable tbody tr td select{
 	width: 1.7em;
 	height: 2em;
 }
+
+.page-form.page-form-dashboardGlobalResContent{}
+.page-form.page-form-dashboardGlobalResContent .resource-editor-wrapper{
+	display: inline-block;
+	width: 80%;
+}
+.page-form.page-form-dashboardGlobalResContent .resource-editor-wrapper .resource-editor{
+	width: 100%;
+	height: 100%;
+}

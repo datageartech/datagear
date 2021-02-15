@@ -21,23 +21,11 @@ readonly 是否只读操作，允许为null
 <title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body>
-<div id="${pageId}" class="page-form page-form-dashboardGlobalRes">
+<div id="${pageId}" class="page-form page-form-dashboardGlobalResContent">
 	<form id="${pageId}-form" action="${contextPath}/dashboardGlobalRes/${formAction}" method="POST">
+		<input type="hidden" name="initSavePath" value="${resourcePath}" />
 		<div class="form-head"></div>
 		<div class="form-content">
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='dashboardGlobalRes.selectFile' /></label>
-				</div>
-				<div class="form-item-value">
-					<input type="hidden" name="filePath" value="" />
-					<input type="hidden" name="fileName" value="" />
-					<div class="ui-widget ui-corner-all ui-button fileinput-button">
-						<@spring.message code='select' /><input type="file">
-					</div>
-					<div class="upload-file-info"></div>
-				</div>
-			</div>
 			<div class="form-item form-item-savePath">
 				<div class="form-item-label">
 					<label title="<@spring.message code='dashboardGlobalRes.savePath.desc' />">
@@ -45,25 +33,19 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="savePath" class="ui-widget ui-widget-content" />
+					<input type="text" name="savePath" value="${resourcePath}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label title="<@spring.message code='dashboardGlobalRes.autoUnzip.desc' />">
-						<@spring.message code='dashboardGlobalRes.autoUnzip' />
+					<label>
+						<@spring.message code='dashboardGlobalRes.resourceContent' />
 					</label>
 				</div>
 				<div class="form-item-value">
-					<div class="autoUnzip-radios">
-						<label for="${pageId}-autoUnzip_true" title="">
-							<@spring.message code='yes' />
-						</label>
-			   			<input type="radio" id="${pageId}-autoUnzip_true" name="autoUnzip" value="true" />
-						<label for="${pageId}-autoUnzip_false" title="">
-							<@spring.message code='no' />
-						</label>
-			   			<input type="radio" id="${pageId}-autoUnzip_false" name="autoUnzip" value="false" checked="checked" />
+					<textarea name="resourceContent" style="display:none;">${resourceContent!''}</textarea>
+					<div class="resource-editor-wrapper ui-widget ui-widget-content">
+						<div id="${pageId}-resourceEditor" class="resource-editor"></div>
 					</div>
 				</div>
 			</div>
@@ -81,92 +63,58 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	po.element("input[name='autoUnzip']").checkboxradio({icon:false});
-	po.element(".autoUnzip-radios").controlgroup();
 	
-	po.isZipExtention = function(resName)
-	{
-		var reg = /\.(zip)$/gi;
-		return (resName && reg.test(resName));
-	};
+	po.element(".resource-editor-wrapper").height($(window).height()*5/9);
 	
-	po.element("input[name='autoUnzip']").on("change", function()
+	var resourcePath = po.element("input[name='savePath']").val();
+	po.resourceEditor = ace.edit("${pageId}-resourceEditor");
+	po.resourceEditor.setShowPrintMargin(false);
+	ace.require("ace/ext/language_tools");
+	if($.isHtmlFile(resourcePath))
 	{
-		var val = $(this).val();
-		var $savePath = po.element("input[name='savePath']");
-		
-		if(val == "true")
-		{
-			var savePath = po.element("input[name='savePath']").val();
-			
-			if(po.isZipExtention(savePath))
-				$savePath.val(savePath.substring(0, savePath.length - 4));
-		}
-		else
-		{
-			$savePath.val(po.element("input[name='fileName']").val());
-		}
-	});
+		var HtmlMode = ace.require("ace/mode/html").Mode;
+		po.resourceEditor.session.setMode(new HtmlMode());
+	}
+	else if($.isJsFile(resourcePath))
+	{
+		var JsMode = ace.require("ace/mode/javascript").Mode;
+		po.resourceEditor.session.setMode(new JsMode());
+	}
+	else if($.isCssFile(resourcePath))
+	{
+		var CssMode = ace.require("ace/mode/css").Mode;
+		po.resourceEditor.session.setMode(new CssMode());
+	}
 	
-	po.url = function(action)
-	{
-		return "${contextPath}/dashboardGlobalRes/" + action;
-	};
-
-	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
+	var cursor = {row: 0, column: 0};
+	po.resourceEditor.session.insert(cursor, po.element("textarea[name='resourceContent']").val());
 	
-	po.element(".fileinput-button").fileupload(
-	{
-		url : po.url("upload"),
-		paramName : "file",
-		success : function(uploadResult, textStatus, jqXHR)
-		{
-			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			po.element("input[name='filePath']").val(uploadResult.filePath);
-			po.element("input[name='fileName']").val(uploadResult.fileName);
-			po.element("input[name='savePath']").val(uploadResult.fileName);
-		}
-	})
-	.bind('fileuploadadd', function (e, data)
-	{
-		po.element("input[name='filePath']").val("");
-		po.element("input[name='fileName']").val("");
-		po.element("input[name='savePath']").val("");
-		po.form().validate().resetForm();
-		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	})
-	.bind('fileuploadprogressall', function (e, data)
-	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	});
-	
-	$.validator.addMethod("uploadDashboardGlobalResFileRequired", function(value, element)
-	{
-		var thisForm = $(element).closest("form");
-		var $filePath = $("input[name='filePath']", thisForm).val();
-		
-		return ($filePath.length > 0);
-	});
+	po.resourceEditor.moveCursorToPosition(cursor);
+	po.resourceEditor.focus();
+	<#if readonly>
+	po.resourceEditor.setReadOnly(true);
+	</#if>
 	
 	po.form().validate(
 	{
-		ignore : ".ignore",
 		rules :
 		{
-			filePath : "uploadDashboardGlobalResFileRequired"
+			savePath : "required"
 		},
 		messages :
 		{
-			filePath : "<@spring.message code='validation.required' />"
+			savePath : "<@spring.message code='validation.required' />"
 		},
 		submitHandler : function(form)
 		{
-			var formData = $.formToJson(form);
+			po.element("textarea[name='resourceContent']").val(po.resourceEditor.getValue());
 			
-			$.postJson("${contextPath}/dashboardGlobalRes/${formAction}", formData,
-			function(response)
+			$(form).ajaxSubmit(
 			{
-				po.pageParamCallAfterSave(true, response.data);
+				success : function(operationMessage)
+				{
+					po.pageParamCallAfterSave(true, operationMessage.data);
+				}
 			});
 		},
 		errorPlacement : function(error, element)

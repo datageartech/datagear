@@ -33,8 +33,10 @@ selectOperation 是否选择操作，允许为null
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
-				<input name="downloadButton" type="button" value="<@spring.message code='download' />" />
+				<input name="uploadButton" type="button" value="<@spring.message code='upload' />" />
+				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<input name="downloadButton" type="button" value="<@spring.message code='download' />" />
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 			</#if>
 		</div>
@@ -64,10 +66,34 @@ selectOperation 是否选择操作，允许为null
 	{
 		return "${contextPath}/dashboardGlobalRes/" + action;
 	};
-
+	
 	po.element("input[name=addButton]").click(function()
 	{
 		po.open(po.url("add"));
+	});
+	
+	po.element("input[name=uploadButton]").click(function()
+	{
+		po.open(po.url("upload"));
+	});
+	
+	po.element("input[name=editButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
+		{
+			if(!$.isTextFile(row.path))
+			{
+				$.tipInfo("<@spring.message code='dashboardGlobalRes.editResourceUnsupport' />");
+		 		return;
+			}
+			
+			var data = {"path" : row.path};
+			
+			po.open(po.url("edit"),
+			{
+				data : data
+			});
+		});
 	});
 	
 	po.element("input[name=downloadButton]").click(function()
@@ -83,17 +109,12 @@ selectOperation 是否选择操作，允许为null
 			});
 		});
 	});
-
+	
 	po.element("input[name=viewButton]").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
-			var data = {"path" : row.path};
-			
-			po.open(po.url("view"),
-			{
-				data : data
-			});
+			window.open(po.url("view/" + row.path));
 		});
 	});
 	

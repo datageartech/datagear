@@ -249,30 +249,6 @@ readonly 是否只读操作，允许为null
 		return po.url("show/"+dashboardId+"/");
 	};
 	
-	po.isHtmlResourceName = function(resName)
-	{
-		var htmlReg = /\.(html|htm)$/gi;
-		return (resName && htmlReg.test(resName));
-	};
-	
-	po.isJsResourceName = function(resName)
-	{
-		var jsReg = /\.(js)$/gi;
-		return (resName && jsReg.test(resName));
-	};
-	
-	po.isCssResourceName = function(resName)
-	{
-		var cssReg = /\.(css)$/gi;
-		return (resName && cssReg.test(resName));
-	};
-	
-	po.isEditableResourceName = function(resName)
-	{
-		var reg = /\.(html|htm|css|js|json|xml|txt)$/gi;
-		return reg.test(resName);
-	};
-	
 	po.resourceEditorTabTemplate = "<li class='resource-editor-tab' style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
 		+"<div class='tab-operation'>"
 		+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
@@ -309,17 +285,17 @@ readonly 是否只读操作，允许为null
 		
 		ace.require("ace/ext/language_tools");
 		
-		if(po.isHtmlResourceName(name))
+		if($.isHtmlFile(name))
 		{
 			var HtmlMode = ace.require("ace/mode/html").Mode;
 			editor.session.setMode(new HtmlMode());
 		}
-		else if(po.isJsResourceName(name))
+		else if($.isJsFile(name))
 		{
 			var JsMode = ace.require("ace/mode/javascript").Mode;
 			editor.session.setMode(new JsMode());
 		}
-		else if(po.isCssResourceName(name))
+		else if($.isCssFile(name))
 		{
 			var CssMode = ace.require("ace/mode/css").Mode;
 			editor.session.setMode(new CssMode());
@@ -811,7 +787,7 @@ readonly 是否只读操作，允许为null
 		name = po.concatSelectedResDirectory(name);
 		
 		var content = "";
-		var isHtml = po.isHtmlResourceName(name);
+		var isHtml = $.isHtmlFile(name);
 		
 		if(isHtml)
 			content = po.element("#${pageId}-defaultTemplateContent").val();
@@ -832,7 +808,7 @@ readonly 是否只读操作，允许为null
 		if(!resName)
 			return;
 		
-	 	if(!po.isEditableResourceName(resName))
+	 	if(!$.isTextFile(resName))
 	 	{
 	 		$.tipInfo("<@spring.message code='dashboard.editResUnsupport' />");
 	 		return;
@@ -943,7 +919,7 @@ readonly 是否只读操作，允许为null
 		if(!resName)
 			return;
 		
-		if(!po.isHtmlResourceName(resName))
+		if(!$.isHtmlFile(resName))
 		{
 	 		$.tipInfo("<@spring.message code='dashboard.resAsTemplateUnsupport' />");
 	 		return;

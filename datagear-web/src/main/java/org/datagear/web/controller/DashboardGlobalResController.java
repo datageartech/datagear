@@ -10,7 +10,9 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -20,6 +22,7 @@ import java.util.Map;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,6 +41,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -48,7 +53,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 @RequestMapping("/dashboardGlobalRes")
-public class DashboardGlobalResController extends AbstractController
+public class DashboardGlobalResController extends AbstractController implements ServletContextAware
 {
 	@Autowired
 	@Qualifier(CoreConfig.NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
@@ -56,6 +61,8 @@ public class DashboardGlobalResController extends AbstractController
 
 	@Autowired
 	private File tempDirectory;
+
+	private ServletContext servletContext;
 
 	public DashboardGlobalResController()
 	{
@@ -82,18 +89,41 @@ public class DashboardGlobalResController extends AbstractController
 		this.tempDirectory = tempDirectory;
 	}
 
-	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public ServletContext getServletContext()
 	{
+		return servletContext;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext)
+	{
+		this.servletContext = servletContext;
+	}
+
+	@RequestMapping("/add")
+	public String add(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model) throws Exception
+	{
+		model.addAttribute("resourcePath", "");
+		model.addAttribute("resourceContent", "");
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardGlobalRes.addDashboardGlobalRes");
-		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
+		model.addAttribute(KEY_FORM_ACTION, "save");
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
 	}
 
-	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
+	@RequestMapping("/upload")
+	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardGlobalRes.uploadDashboardGlobalRes");
+		model.addAttribute(KEY_FORM_ACTION, "saveUpload");
+
+		return "/dashboardGlobalRes/dashboardGlobalRes_upload";
+	}
+
+	@RequestMapping(value = "/saveUpload", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> saveUpload(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody DashboardGlobalResAddForm form) throws Exception
 	{
 		if (isEmpty(form.getFilePath()))
@@ -132,9 +162,9 @@ public class DashboardGlobalResController extends AbstractController
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/upload", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Map<String, Object> upload(HttpServletRequest request, HttpServletResponse response,
+	public Map<String, Object> uploadFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
 		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
@@ -164,20 +194,97 @@ public class DashboardGlobalResController extends AbstractController
 		return results;
 	}
 
-	@RequestMapping("/view")
-	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
-			@RequestParam("path") String path)
+	@RequestMapping("/edit")
+	public String edit(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model,
+			@RequestParam("path") String path) throws Exception
 	{
 		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path);
 
 		if (!file.exists())
 			throw new RecordNotFoundException();
 
-		DashboardGlobalResItem dashboardGlobalResItem = toDashboardGlobalResItem(file);
+		String resourceContent = IOUtil.readString(IOUtil.getInputStream(file), IOUtil.CHARSET_UTF_8, true);
 
-		model.addAttribute("dashboardGlobalResItem", dashboardGlobalResItem);
+		model.addAttribute("resourcePath", path);
+		model.addAttribute("resourceContent", resourceContent);
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardGlobalRes.editDashboardGlobalRes");
+		model.addAttribute(KEY_FORM_ACTION, "save");
 
-		return "/dashboardGlobalRes/dashboardGlobalRes_detail";
+		return "/dashboardGlobalRes/dashboardGlobalRes_form";
+	}
+
+	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(value = "initSavePath", required = false) String initSavePath,
+			@RequestParam("savePath") String savePath,
+			@RequestParam("resourceContent") String resourceContent) throws Exception
+	{
+		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, savePath);
+
+		Reader in = null;
+		Writer out = null;
+
+		try
+		{
+			in = IOUtil.getReader(resourceContent);
+			out = IOUtil.getWriter(file, IOUtil.CHARSET_UTF_8);
+
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
+		}
+
+		if (!StringUtil.isEmpty(initSavePath) && !initSavePath.equalsIgnoreCase(savePath))
+		{
+			File initFile = FileUtil.getFile(this.dashboardGlobalResRootDirectory, initSavePath);
+			FileUtil.deleteFile(initFile);
+		}
+
+		return buildOperationMessageSaveSuccessResponseEntity(request);
+	}
+
+	@RequestMapping("/view/**/*")
+	public void view(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
+			org.springframework.ui.Model model) throws Exception
+	{
+		String path = resolvePathAfter(request, "/dashboardGlobalRes/view/");
+
+		if (StringUtil.isEmpty(path))
+			throw new FileNotFoundException(path);
+
+		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path);
+
+		if (!file.exists())
+			throw new FileNotFoundException(path);
+
+		InputStream in = null;
+
+		if (file.exists() && !file.isDirectory())
+		{
+			setContentTypeByName(request, response, getServletContext(), file.getName());
+			in = IOUtil.getInputStream(file);
+		}
+
+		if (in != null)
+		{
+			OutputStream out = response.getOutputStream();
+
+			try
+			{
+				IOUtil.write(in, out);
+			}
+			finally
+			{
+				IOUtil.close(in);
+			}
+		}
+		else
+			throw new FileNotFoundException(path);
 	}
 
 	@RequestMapping(value = "/download")
