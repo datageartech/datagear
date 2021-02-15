@@ -861,71 +861,53 @@ ${detectNewVersionScript?no_esc}
 				if($item.hasClass("ui-state-disabled"))
 					return;
 				
-				if($item.hasClass("system-set-schema-url-builder"))
+				if($item.hasClass("system-set-schemaUrlBuilder"))
 				{
 					po.open(contextPath+"/schemaUrlBuilder/editScriptCode");
 				}
-				/*
-				else if($item.hasClass("system-set-driverEntity-add"))
-				{
-					po.open(contextPath+"/driverEntity/add");
-				}
-				*/
-				else if($item.hasClass("system-set-driverEntity-manage"))
+				else if($item.hasClass("system-set-driverEntity"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/driverEntity/query", options);
 				}
-				/*
-				else  if($item.hasClass("system-set-user-add"))
-				{
-					po.open(contextPath+"/user/add");
-				}
-				*/
-				else if($item.hasClass("system-set-user-manage"))
+				else if($item.hasClass("system-set-user"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/user/pagingQuery", options);
 				}
-				else if($item.hasClass("system-set-dataSetResDirectory-manage"))
+				else if($item.hasClass("system-set-dataSetResDirectory"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/dataSetResDirectory/pagingQuery", options);
 				}
-				else if($item.hasClass("system-set-manageDashboardGlobalRes"))
+				else if($item.hasClass("system-set-dashboardGlobalRes"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/dashboardGlobalRes/query", options);
 				}
-				else if($item.hasClass("system-set-rold-manage"))
+				else if($item.hasClass("system-set-role"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/role/pagingQuery", options);
 				}
-				else if($item.hasClass("system-set-authorization-manage"))
+				else if($item.hasClass("system-set-authorization"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/authorization/${statics['org.datagear.management.domain.Schema'].AUTHORIZATION_RESOURCE_TYPE}/query", options);
 				}
-				else if($item.hasClass("system-set-chartPlugin-manage"))
+				else if($item.hasClass("system-set-chartPlugin"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/analysis/chartPlugin/query", options);
 				}
-				/*
-				else if($item.hasClass("system-set-chartPlugin-upload"))
-				{
-					po.open(contextPath+"/analysis/chartPlugin/upload");
-				}
-				*/
-				else if($item.hasClass("system-set-personal-set"))
+				else if($item.hasClass("system-set-personalSet"))
 				{
 					po.open(contextPath+"/user/personalSet");
 				}
@@ -1446,29 +1428,18 @@ ${detectNewVersionScript?no_esc}
 				<ul style="display:none;" class="ui-widget-shadow">
 					<#if !currentUser.anonymous>
 					<#if currentUser.admin>
-					<li class="system-set-driverEntity-manage"><a href="javascript:void(0);"><@spring.message code='main.manageDriverEntity' /></a></li>
-					<!--
-					<li class="system-set-driverEntity-add"><a href="javascript:void(0);"><@spring.message code='main.addDriverEntity' /></a></li>
+					<li class="system-set-driverEntity"><a href="javascript:void(0);"><@spring.message code='main.manageDriverEntity' /></a></li>
+					<li class="system-set-schemaUrlBuilder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
+					<li class="system-set-authorization"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaAuth' /></a></li>
 					<li class="ui-widget-header"></li>
-					-->
-					<li class="system-set-schema-url-builder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
-					<li class="system-set-authorization-manage"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaAuth' /></a></li>
+					<li class="system-set-dataSetResDirectory"><a href="javascript:void(0);"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
+					<li class="system-set-chartPlugin"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>
+					<li class="system-set-dashboardGlobalRes"><a href="javascript:void(0);"><@spring.message code='main.manageDashboardGlobalRes' /></a></li>
 					<li class="ui-widget-header"></li>
-					<li class="system-set-dataSetResDirectory-manage"><a href="javascript:void(0);"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
-					<li class="system-set-manageDashboardGlobalRes"><a href="javascript:void(0);"><@spring.message code='main.manageDashboardGlobalRes' /></a></li>
-					<li class="system-set-chartPlugin-manage"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>
-					<!--
-					<li class="system-set-chartPlugin-upload"><a href="javascript:void(0);"><@spring.message code='main.uploadChartPlugin' /></a></li>
-					<li class="ui-widget-header"></li>
-					-->
-					<li class="ui-widget-header"></li>
-					<li class="system-set-user-manage"><a href="javascript:void(0);"><@spring.message code='main.manageUser' /></a></li>
-					<!--
-					<li class="system-set-user-add"><a href="javascript:void(0);"><@spring.message code='main.addUser' /></a></li>
-					-->
-					<li class="system-set-rold-manage"><a href="javascript:void(0);"><@spring.message code='main.manageRole' /></a></li>
+					<li class="system-set-user"><a href="javascript:void(0);"><@spring.message code='main.manageUser' /></a></li>
+					<li class="system-set-role"><a href="javascript:void(0);"><@spring.message code='main.manageRole' /></a></li>
 					</#if>
-					<li class="system-set-personal-set"><a href="javascript:void(0);"><@spring.message code='main.personalSet' /></a></li>
+					<li class="system-set-personalSet"><a href="javascript:void(0);"><@spring.message code='main.personalSet' /></a></li>
 					<li class="ui-widget-header"></li>
 					</#if>
 					<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeTheme' /></a>
