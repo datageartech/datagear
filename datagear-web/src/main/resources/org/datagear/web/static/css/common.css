@@ -2632,15 +2632,17 @@ table.dataTable tbody tr td select{
 	width: 60%;
 	height: 100%;
 	min-height: 10em;
-	padding: 0.3em 0.3em;
+	padding: 0.41em 0.41em;
 	overflow: auto;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
 .page-form-chart .data-set-wrapper .data-set-item{
-	padding: 0.3em 0.3em;
-	margin-top: 0.5em;
+	padding: 0.41em 0.41em;
+	margin-top: 0.6em;
+	border-bottom-width: 3px;
+	border-right-width: 3px;
 }
 .page-form-chart .data-set-wrapper .data-set-item:first-child{
 	margin-top: 0;
@@ -2652,31 +2654,39 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-set-wrapper .data-set-item .item-head{
 	padding: 0.2em 0.2em;
 }
-.page-form-chart .data-set-wrapper .data-set-item .item-alias{
+.page-form-chart .data-set-wrapper .data-set-item .item-setting{
 	padding: 0.4em 0.2em;
-	margin-bottom: 0.5em;
+	margin-top: 0.5em;
+	border-top-width: 1px;
 	border-left-width: 0;
-	border-top-width: 0;
 	border-right-width: 0;
-	border-bottom-width: 1px;
+	border-bottom-width: 0;
+	position: relative;
 }
-.page-form-chart .data-set-wrapper .data-set-item .item-alias .alias-label{
+.page-form-chart .data-set-wrapper .data-set-item .item-setting .setting-item{
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-setting .setting-item > label{
 	display: inline-block;
-	padding-left: 0.2em;
-	width: 30%;
+	padding-left: 1em;
+	width: 25%;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-form-chart .data-set-wrapper .data-set-item .item-alias input{
-	width: 40%!important;
+.page-form-chart .data-set-wrapper .data-set-item .item-setting .setting-item > input,
+.page-form-chart .data-set-wrapper .data-set-item .item-setting .setting-item > .input{
+	width: 30% !important;
 }
-.page-form-chart .data-set-wrapper .data-set-item .item-alias button{
-	float: right;
+.page-form-chart .data-set-wrapper .data-set-item .item-setting .ui-checkboxradio-label.ui-button{
+	padding: 0.2em 1em;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-setting .dataSetParamValueButton{
+	position: absolute;
+	right: 0.1em;
+	top: 0.6em;
 	border: 0;
-	padding-top: 0.2em;
-	padding-bottom: 0.2em;
-	margin-right: 0.3em;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-signs{
 	margin-top: 0.3em;

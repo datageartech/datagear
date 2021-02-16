@@ -291,6 +291,7 @@ readonly 是否只读操作，允许为null
 			var dataSetId = po.element(".chartDataSetId", this).val();
 			var propertySigns = {};
 			var alias = po.element(".chartDataSetAlias", this).val();
+			var attachment = po.element(".chartDataSetAttachment", this).prop("checked");
 			var dataSetParams = (po.element(".dataSetParamValueButton", this).data("dataSetParams") || []);
 			var paramValues = (po.element(".dataSetParamValueButton", this).data("paramValues") || {});
 			
@@ -307,7 +308,14 @@ readonly 是否只读操作，允许为null
 				propertySigns[signName] = signValues;
 			});
 			
-			re.push({ "summaryDataSetEntity": { "id": dataSetId, "params": dataSetParams }, "propertySigns": propertySigns, "alias": alias, "paramValues": paramValues });
+			re.push(
+			{
+				"summaryDataSetEntity": { "id": dataSetId, "params": dataSetParams },
+				"propertySigns": propertySigns,
+				"alias": alias,
+				"attachment": attachment,
+				"paramValues": paramValues
+			});
 		});
 		
 		return re;
@@ -362,6 +370,8 @@ readonly 是否只读操作，允许为null
 			po.renderChartDataSetItem($parent, chartPlugin, po.chartDataSets[i]);
 	};
 	
+	po.chartDataSetAttachmentIdSeq = 0;
+	
 	po.renderChartDataSetItem = function($parent, chartPlugin, chartDataSet)
 	{
 		var dataSet = chartDataSet.dataSet;
@@ -377,49 +387,6 @@ readonly 是否只读操作，允许为null
 		$("<div class='delete-icon''><span class=' ui-icon ui-icon-close'>&nbsp;</span></div>")
 			.attr("title", "<@spring.message code='delete' />").appendTo($head);
 		</#if>
-		
-		var $aliasDiv = $("<div class='item-alias ui-widget ui-widget-content' />").appendTo($item);
-		$("<div class='alias-label' />").html("<@spring.message code='chart.chartDataSet.alias' />")
-			.attr("title", "<@spring.message code='chart.chartDataSet.alias.desc' />").appendTo($aliasDiv);
-		$("<input type='text' class='chartDataSetAlias ui-widget ui-widget-content' />")
-			.attr("value", (chartDataSet.alias || "")).appendTo($aliasDiv);
-		
-		if(dataSet.params && dataSet.params.length > 0)
-		{
-			var $pvButton = $("<button type='button' class='dataSetParamValueButton ui-button ui-corner-all ui-widget'><@spring.message code='chart.chartDataSet.paramValue' /></button>")
-								.appendTo($aliasDiv);
-			$pvButton.data("dataSetParams", dataSet.params).data("paramValues", (chartDataSet.paramValues || {}));
-			
-			$pvButton.click(function(event)
-			{
-				var $this = $(this);
-				po.showDataSetParamValuePanel($this,
-				{
-					submit: function(formData)
-					{
-						$this.data("paramValues", formData);
-						po.element(".data-set-param-value-panel").hide();
-					},
-					readonly: <#if readonly>true<#else>false</#if>,
-					render: function()
-					{
-						$("select, input, textarea", this).addClass("ui-widget ui-widget-content");
-						$("button", this).addClass("ui-button ui-corner-all ui-widget");
-						
-						<#if !readonly>
-						var $foot = chartFactory.chartSetting.getDataSetParamValueFormFoot(this);
-						var $button = $(" <button type='button' class='ui-button ui-corner-all ui-widget' style='margin-left:1em;' />")
-										.html("<@spring.message code='clear' />").attr("title", "<@spring.message code='chart.chartDataSet.clearParamValueTip' />").appendTo($foot);
-						$button.click(function()
-						{
-							$this.data("paramValues", {});
-							po.element(".data-set-param-value-panel").hide();
-						});
-						</#if>
-					}
-				});
-			});
-		}
 		
 		var $signs = $("<div class='item-signs' />").appendTo($item);
 		for(var i=0; i<dataSetProperties.length; i++)
@@ -460,6 +427,62 @@ readonly 是否只读操作，允许为null
 				.attr("title", "<@spring.message code='chart.addDataSign' />")
 				.appendTo($valuesWrapper);
 			</#if>
+		}
+		
+		var $settingDiv = $("<div class='item-setting ui-widget ui-widget-content' />").appendTo($item);
+		var $aliasSetting = $("<div class='setting-item' />").appendTo($settingDiv);
+		$("<label class='tip-label' />").html("<@spring.message code='chart.chartDataSet.alias' />")
+			.attr("title", "<@spring.message code='chart.chartDataSet.alias.desc' />").appendTo($aliasSetting);
+		$("<input type='text' class='chartDataSetAlias ui-widget ui-widget-content' />")
+			.attr("value", (chartDataSet.alias || "")).appendTo($aliasSetting);
+		
+		var $attachment = $("<div class='setting-item' />").appendTo($settingDiv);
+		var atchChkId = "${pageId}-attachmentChk-" + (po.chartDataSetAttachmentIdSeq++);
+		$("<label class='tip-label' />").html("<@spring.message code='chart.chartDataSet.attachment' />")
+			.attr("title", "<@spring.message code='chart.chartDataSet.attachment.desc' />").appendTo($attachment);
+		var $chkWrapper = $("<span class='input' />").appendTo($attachment);
+		$("<label />").attr("for", atchChkId).html("").appendTo($chkWrapper);
+		var $atchChk = $("<input type='checkbox' class='chartDataSetAttachment ui-widget ui-widget-content' />")
+			.attr("id", atchChkId).attr("value", "true")
+			.appendTo($chkWrapper).checkboxradio();
+		
+		$atchChk.prop("checked", chartDataSet.attachment).checkboxradio("refresh");
+		
+		if(dataSet.params && dataSet.params.length > 0)
+		{
+			var $pvButton = $("<button type='button' class='dataSetParamValueButton ui-button ui-corner-all ui-widget'><@spring.message code='chart.chartDataSet.paramValue' /></button>")
+								.appendTo($settingDiv);
+			$pvButton.data("dataSetParams", dataSet.params).data("paramValues", (chartDataSet.paramValues || {}));
+			
+			$pvButton.click(function(event)
+			{
+				var $this = $(this);
+				po.showDataSetParamValuePanel($this,
+				{
+					submit: function(formData)
+					{
+						$this.data("paramValues", formData);
+						po.element(".data-set-param-value-panel").hide();
+					},
+					readonly: <#if readonly>true<#else>false</#if>,
+					render: function()
+					{
+						$("select, input, textarea", this).addClass("ui-widget ui-widget-content");
+						$("button", this).addClass("ui-button ui-corner-all ui-widget");
+						
+						<#if !readonly>
+						var $foot = chartFactory.chartSetting.getDataSetParamValueFormFoot(this);
+						var $button = $(" <button type='button' class='ui-button ui-corner-all ui-widget' style='margin-left:1em;' />")
+										.html("<@spring.message code='clear' />").attr("title", "<@spring.message code='chart.chartDataSet.clearParamValueTip' />").appendTo($foot);
+						$button.click(function()
+						{
+							$this.data("paramValues", {});
+							po.element(".data-set-param-value-panel").hide();
+						});
+						</#if>
+					}
+				});
+			});
 		}
 	};
 	
@@ -657,6 +680,9 @@ readonly 是否只读操作，允许为null
 		{
 			var $chartDataSetItem = $($chartDataSetItems[i]);
 			var $itemSigns = $(".item-signs" , $chartDataSetItem);
+			
+			if(po.element(".chartDataSetAttachment", $chartDataSetItem).prop("checked"))
+				continue;
 			
 			var setSigns = [];
 			$(".chartDataSetPropertySignValue", $itemSigns).each(function()

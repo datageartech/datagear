@@ -30,7 +30,10 @@ public class ChartDataSet
 	private Map<String, Set<String>> propertySigns = Collections.EMPTY_MAP;
 
 	/** 数据集别名 */
-	private String alias;
+	private String alias = "";
+
+	/** 是否附件数据集，不用作渲染图表 */
+	private boolean attachment = false;
 
 	/** 数据集参数值映射表 */
 	@SuppressWarnings("unchecked")
@@ -89,6 +92,24 @@ public class ChartDataSet
 	public void setAlias(String alias)
 	{
 		this.alias = alias;
+	}
+
+	/**
+	 * 是否作为附件。
+	 * <p>
+	 * 附件数据集不用作渲染图表，不需设置数据标记，仅作为图表的附件，通常用于扩展图表功能。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public boolean isAttachment()
+	{
+		return attachment;
+	}
+
+	public void setAttachment(boolean attachment)
+	{
+		this.attachment = attachment;
 	}
 
 	public Map<String, Object> getParamValues()

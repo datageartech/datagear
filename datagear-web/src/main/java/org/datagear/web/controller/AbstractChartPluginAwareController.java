@@ -304,6 +304,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			setDataSet(ProfileDataSet.valueOf(chartDataSet.getDataSet()));
 			setPropertySigns(chartDataSet.getPropertySigns());
 			setAlias(chartDataSet.getAlias());
+			setAttachment(chartDataSet.isAttachment());
 			setParamValues(chartDataSet.getParamValues());
 		}
 

@@ -303,6 +303,7 @@ public class HtmlChartWidgetEntityServiceImpl
 		ChartDataSetVO chartDataSet = new ChartDataSetVO(dataSet);
 		chartDataSet.setPropertySigns(toPropertySigns(relation.getPropertySignsJson()));
 		chartDataSet.setAlias(relation.getAlias());
+		chartDataSet.setAttachment(relation.isAttachment());
 		chartDataSet.setParamValues(toParamValues(relation.getParamValuesJson()));
 
 		return chartDataSet;
@@ -390,6 +391,7 @@ public class HtmlChartWidgetEntityServiceImpl
 					i + 1);
 			relation.setPropertySignsJson(propertySignsJson);
 			relation.setAlias(chartDataSet.getAlias());
+			relation.setAttachment(chartDataSet.isAttachment());
 			relation.setParamValuesJson(paramValuesJson);
 
 			list.add(relation);
@@ -407,6 +409,8 @@ public class HtmlChartWidgetEntityServiceImpl
 		private String propertySignsJson;
 
 		private String alias;
+
+		private boolean attachment;
 
 		private String paramValuesJson;
 
@@ -463,6 +467,16 @@ public class HtmlChartWidgetEntityServiceImpl
 		public void setAlias(String alias)
 		{
 			this.alias = alias;
+		}
+
+		public boolean isAttachment()
+		{
+			return attachment;
+		}
+
+		public void setAttachment(boolean attachment)
+		{
+			this.attachment = attachment;
 		}
 
 		public String getParamValuesJson()
