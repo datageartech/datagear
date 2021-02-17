@@ -101,8 +101,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model) throws Exception
+	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+			throws Exception
 	{
 		model.addAttribute("resourcePath", "");
 		model.addAttribute("resourceContent", "");
@@ -124,7 +124,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@RequestMapping(value = "/saveUpload", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveUpload(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DashboardGlobalResAddForm form) throws Exception
+			@RequestBody DashboardGlobalResUploadForm form) throws Exception
 	{
 		if (isEmpty(form.getFilePath()))
 			throw new IllegalInputException();
@@ -195,8 +195,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 	}
 
 	@RequestMapping("/edit")
-	public String edit(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model,
+	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("path") String path) throws Exception
 	{
 		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path);
@@ -218,8 +217,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(value = "initSavePath", required = false) String initSavePath,
-			@RequestParam("savePath") String savePath,
-			@RequestParam("resourceContent") String resourceContent) throws Exception
+			@RequestParam("savePath") String savePath, @RequestParam("resourceContent") String resourceContent)
+			throws Exception
 	{
 		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, savePath);
 
@@ -289,8 +288,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 
 	@RequestMapping(value = "/download")
 	public void downloadFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("path") String path)
-			throws Exception
+			@RequestParam("path") String path) throws Exception
 	{
 		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path);
 
@@ -365,7 +363,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 
 	protected List<DashboardGlobalResItem> findDashboardGlobalResItems(String keyword)
 	{
-		List<File> files = new ArrayList<File>();
+		List<File> files = new ArrayList<>();
 		listAllDescendentFiles(this.dashboardGlobalResRootDirectory, files);
 
 		List<DashboardGlobalResItem> resItems = new ArrayList<>(files.size());
@@ -379,7 +377,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		if (StringUtil.isEmpty(keyword))
 			return resItems;
 
-		return KeywordMatcher.<DashboardGlobalResItem>match(resItems, keyword,
+		return KeywordMatcher.<DashboardGlobalResItem> match(resItems, keyword,
 				new KeywordMatcher.MatchValue<DashboardGlobalResItem>()
 				{
 					@Override
@@ -392,7 +390,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 
 	protected DashboardGlobalResItem toDashboardGlobalResItem(File file)
 	{
-		String path = FileUtil.trimPath(FileUtil.getRelativePath(this.dashboardGlobalResRootDirectory, file));
+		String path = FileUtil.trimPath(FileUtil.getRelativePath(this.dashboardGlobalResRootDirectory, file),
+				FileUtil.PATH_SEPARATOR_SLASH);
 
 		if (file.isDirectory() && !path.endsWith(FileUtil.PATH_SEPARATOR_SLASH))
 			path += FileUtil.PATH_SEPARATOR_SLASH;
@@ -433,10 +432,10 @@ public class DashboardGlobalResController extends AbstractController implements 
 		}
 	}
 
-	public static class DashboardGlobalResAddForm implements Serializable
+	public static class DashboardGlobalResUploadForm implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
-		
+
 		private String filePath;
 
 		private String fileName;
@@ -447,12 +446,12 @@ public class DashboardGlobalResController extends AbstractController implements 
 		/** 存储路径 */
 		private String savePath = "";
 
-		public DashboardGlobalResAddForm()
+		public DashboardGlobalResUploadForm()
 		{
 			super();
 		}
 
-		public DashboardGlobalResAddForm(String filePath, String fileName)
+		public DashboardGlobalResUploadForm(String filePath, String fileName)
 		{
 			super();
 			this.filePath = filePath;
