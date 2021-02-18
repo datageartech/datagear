@@ -4,10 +4,11 @@
 <mapper namespace="common">
 	
 	<sql id="pagingQueryHead">
+		${_pagingQueryHead}
 	</sql>
 	
 	<sql id="pagingQueryFoot">
-		OFFSET ${pagingQueryStartIndex} ROWS FETCH NEXT ${pagingQueryRows} ROWS ONLY
+		${_pagingQueryFoot}
 	</sql>
 	
 	<sql id="queryCondition">

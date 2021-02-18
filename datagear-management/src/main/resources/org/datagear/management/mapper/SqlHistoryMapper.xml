@@ -32,7 +32,9 @@
 	<delete id="deleteExpired">
 		DELETE FROM DATAGEAR_SQL_HISTORY
 		WHERE
-			SQLHIS_SCHEMA_ID = #{schemaId} AND SQLHIS_USER_ID = #{userId} AND SQLHIS_ID NOT IN
+			SQLHIS_SCHEMA_ID = #{schemaId} AND SQLHIS_USER_ID = #{userId}
+			<choose><when test="_pagingQuerySupported == true">
+			AND SQLHIS_ID NOT IN
 			(
 				<include refid="common.pagingQueryHead" />
 					SELECT
@@ -45,6 +47,9 @@
 						SQLHIS_CREATE_TIME DESC
 				<include refid="common.pagingQueryFoot" />
 			)
+			</when><otherwise>
+			AND SQLHIS_CREATE_TIME &lt; #{deleteBeforeDate}
+			</otherwise></choose>
 	</delete>
 	
 	<select id="getById" resultType="org.datagear.management.domain.SqlHistory">

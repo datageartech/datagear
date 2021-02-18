@@ -17,6 +17,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -39,18 +40,18 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 		super();
 	}
 
-	public SchemaServiceImpl(SqlSessionFactory sqlSessionFactory, DriverEntityManager driverEntityManager,
-			AuthorizationService authorizationService)
+	public SchemaServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
+			DriverEntityManager driverEntityManager, AuthorizationService authorizationService)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 		this.driverEntityManager = driverEntityManager;
 		this.authorizationService = authorizationService;
 	}
 
-	public SchemaServiceImpl(SqlSessionTemplate sqlSessionTemplate, DriverEntityManager driverEntityManager,
-			AuthorizationService authorizationService)
+	public SchemaServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
+			DriverEntityManager driverEntityManager, AuthorizationService authorizationService)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 		this.driverEntityManager = driverEntityManager;
 		this.authorizationService = authorizationService;
 	}

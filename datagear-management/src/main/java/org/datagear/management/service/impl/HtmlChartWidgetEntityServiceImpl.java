@@ -32,6 +32,7 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.StringUtil;
@@ -60,20 +61,21 @@ public class HtmlChartWidgetEntityServiceImpl
 		super();
 	}
 
-	public HtmlChartWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, ChartPluginManager chartPluginManager,
-			DataSetEntityService dataSetEntityService, AuthorizationService authorizationService)
+	public HtmlChartWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
+			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService,
+			AuthorizationService authorizationService)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 		this.chartPluginManager = chartPluginManager;
 		this.dataSetEntityService = dataSetEntityService;
 		this.authorizationService = authorizationService;
 	}
 
-	public HtmlChartWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate,
+	public HtmlChartWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService,
 			AuthorizationService authorizationService)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 		this.chartPluginManager = chartPluginManager;
 		this.dataSetEntityService = dataSetEntityService;
 		this.authorizationService = authorizationService;

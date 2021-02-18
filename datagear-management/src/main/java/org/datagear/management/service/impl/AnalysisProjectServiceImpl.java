@@ -14,6 +14,7 @@ import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -32,14 +33,14 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 		super();
 	}
 
-	public AnalysisProjectServiceImpl(SqlSessionFactory sqlSessionFactory)
+	public AnalysisProjectServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 	}
 
-	public AnalysisProjectServiceImpl(SqlSessionTemplate sqlSessionTemplate)
+	public AnalysisProjectServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 	}
 
 	@Override

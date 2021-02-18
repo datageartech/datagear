@@ -19,6 +19,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -44,18 +45,18 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		super();
 	}
 
-	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory,
+	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer, AuthorizationService authorizationService)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
 		this.authorizationService = authorizationService;
 	}
 
-	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate,
+	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer, AuthorizationService authorizationService)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
 		this.authorizationService = authorizationService;
 	}

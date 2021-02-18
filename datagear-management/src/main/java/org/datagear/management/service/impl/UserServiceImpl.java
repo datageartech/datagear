@@ -18,6 +18,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.service.RoleUserService;
 import org.datagear.management.service.UserService;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.util.IDUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -42,18 +43,18 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 		super();
 	}
 
-	public UserServiceImpl(SqlSessionFactory sqlSessionFactory, RoleUserService roleUserService,
+	public UserServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect, RoleUserService roleUserService,
 			RoleService roleService)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 		this.roleUserService = roleUserService;
 		this.roleService = roleService;
 	}
 
-	public UserServiceImpl(SqlSessionTemplate sqlSessionTemplate, RoleUserService roleUserService,
+	public UserServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect, RoleUserService roleUserService,
 			RoleService roleService)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 		this.roleUserService = roleUserService;
 		this.roleService = roleService;
 	}

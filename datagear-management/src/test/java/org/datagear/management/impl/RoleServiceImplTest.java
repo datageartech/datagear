@@ -26,7 +26,7 @@ public class RoleServiceImplTest extends ServiceImplTestSupport
 	public RoleServiceImplTest()
 	{
 		super();
-		this.roleServiceImpl = new RoleServiceImpl(getSqlSessionFactory());
+		this.roleServiceImpl = new RoleServiceImpl(getSqlSessionFactory(), getDialect());
 	}
 
 	@Test

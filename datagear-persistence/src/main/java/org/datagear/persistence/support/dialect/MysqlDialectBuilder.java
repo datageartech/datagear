@@ -25,7 +25,7 @@ public class MysqlDialectBuilder extends AbstractURLSensedDialectBuilder
 {
 	public MysqlDialectBuilder()
 	{
-		super(new MySqlURLSensor());
+		super(MySqlURLSensor.INSTANCE);
 	}
 
 	@Override

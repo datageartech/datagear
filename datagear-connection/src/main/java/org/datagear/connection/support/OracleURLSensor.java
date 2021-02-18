@@ -20,6 +20,8 @@ public class OracleURLSensor extends PrefixURLSensor
 {
 	public static final String JDBC_PREFIX = "jdbc:oracle";
 
+	public static final OracleURLSensor INSTANCE = new OracleURLSensor();
+
 	public OracleURLSensor()
 	{
 		super(JDBC_PREFIX);

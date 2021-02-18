@@ -11,18 +11,18 @@ import org.datagear.connection.PrefixURLSensor;
 import org.datagear.connection.URLSensor;
 
 /**
- * MySQL {@linkplain URLSensor}。
+ * Derby {@linkplain URLSensor}。
  * 
  * @author datagear@163.com
  *
  */
-public class MySqlURLSensor extends PrefixURLSensor
+public class DerbyURLSensor extends PrefixURLSensor
 {
-	public static final String JDBC_PREFIX = "jdbc:mysql";
+	public static final String JDBC_PREFIX = "jdbc:derby";
 
-	public static final MySqlURLSensor INSTANCE = new MySqlURLSensor();
+	public static final DerbyURLSensor INSTANCE = new DerbyURLSensor();
 
-	public MySqlURLSensor()
+	public DerbyURLSensor()
 	{
 		super(JDBC_PREFIX);
 	}

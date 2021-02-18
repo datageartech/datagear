@@ -25,7 +25,7 @@ public class SqlServerDialectBuilder extends AbstractURLSensedDialectBuilder
 {
 	public SqlServerDialectBuilder()
 	{
-		super(new SqlServerURLSensor());
+		super(SqlServerURLSensor.INSTANCE);
 	}
 
 	@Override

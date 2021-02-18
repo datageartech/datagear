@@ -20,6 +20,8 @@ public class SqlServerURLSensor extends PrefixURLSensor
 {
 	public static final String JDBC_PREFIX = "jdbc:sqlserver";
 
+	public static final SqlServerURLSensor INSTANCE = new SqlServerURLSensor();
+
 	public SqlServerURLSensor()
 	{
 		super(JDBC_PREFIX);

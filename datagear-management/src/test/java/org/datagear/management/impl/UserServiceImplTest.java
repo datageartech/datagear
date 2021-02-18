@@ -30,9 +30,9 @@ public class UserServiceImplTest extends ServiceImplTestSupport
 	public UserServiceImplTest()
 	{
 		super();
-		RoleUserService roleUserService = new RoleUserServiceImpl(getSqlSessionFactory());
-		RoleService roleService = new RoleServiceImpl(getSqlSessionFactory());
-		this.userServiceImpl = new UserServiceImpl(getSqlSessionFactory(), roleUserService, roleService);
+		RoleUserService roleUserService = new RoleUserServiceImpl(getSqlSessionFactory(), getDialect());
+		RoleService roleService = new RoleServiceImpl(getSqlSessionFactory(), getDialect());
+		this.userServiceImpl = new UserServiceImpl(getSqlSessionFactory(), getDialect(), roleUserService, roleService);
 	}
 
 	@Test

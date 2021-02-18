@@ -19,10 +19,12 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.User;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
+import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.support.SqlSessionDaoSupport;
@@ -37,7 +39,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 {
 	public static final String DEFAULT_IDENTIFIER_QUOTE_KEY = "_iq_";
 
-	/** 查询参数：关键字 */
+	/** 查询参数：不匹配 */
 	public static final String QUERY_PARAM_NOT_LIKE = "queryNotLike";
 
 	/** 查询参数：关键字 */
@@ -49,57 +51,46 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	/** 查询参数：排序 */
 	public static final String QUERY_PARAM_ORDER = "queryOrder";
 
-	/** 分页查询参数：页起始索引（以0开始） */
-	public static final String PAGING_QUERY_PARAM_START_INDEX = "pagingQueryStartIndex";
+	/** 分页查询是否支持 */
+	public static final String PAGING_QUERY_SUPPORTED = "_pagingQuerySupported";
 
-	/** 分页查询参数：页起始行（以1开始） */
-	public static final String PAGING_QUERY_PARAM_START_ROW = "pagingQueryStartRow";
+	/** 分页查询SQL首部片段 */
+	public static final String PAGING_QUERY_HEAD_SQL = "_pagingQueryHead";
 
-	/** 分页查询参数：页结束索引（以0开始） */
-	public static final String PAGING_QUERY_PARAM_END_INDEX = "pagingQueryEndIndex";
+	/** 分页查询SQL尾部片段 */
+	public static final String PAGING_QUERY_FOOT_SQL = "_pagingQueryFoot";
 
-	/** 分页查询参数：页结束行（以1开始） */
-	public static final String PAGING_QUERY_PARAM_END_ROW = "pagingQueryEndRow";
-
-	/** 分页查询参数：页行数 */
-	public static final String PAGING_QUERY_PARAM_ROWS = "pagingQueryRows";
+	private MbSqlDialect dialect;
 
 	private String identifierQuoteKey = DEFAULT_IDENTIFIER_QUOTE_KEY;
-
-	private String identifierQuote = "";
 
 	public AbstractMybatisService()
 	{
 		super();
 	}
 
-	public AbstractMybatisService(SqlSessionFactory sqlSessionFactory)
+	public AbstractMybatisService(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
 	{
 		super();
 		setSqlSessionFactory(sqlSessionFactory);
+		this.dialect = dialect;
 	}
 
-	public AbstractMybatisService(SqlSessionTemplate sqlSessionTemplate)
+	public AbstractMybatisService(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
 	{
 		super();
 		setSqlSessionTemplate(sqlSessionTemplate);
+		this.dialect = dialect;
 	}
 
-	@Override
-	public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory)
+	public MbSqlDialect getDialect()
 	{
-		super.setSqlSessionFactory(sqlSessionFactory);
-
-		this.identifierQuote = getIdentifierQuote(
-				sqlSessionFactory.getConfiguration().getEnvironment().getDataSource());
+		return dialect;
 	}
 
-	@Override
-	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate)
+	public void setDialect(MbSqlDialect dialect)
 	{
-		super.setSqlSessionTemplate(sqlSessionTemplate);
-		this.identifierQuote = getIdentifierQuote(
-				sqlSessionTemplate.getSqlSessionFactory().getConfiguration().getEnvironment().getDataSource());
+		this.dialect = dialect;
 	}
 
 	public String getIdentifierQuoteKey()
@@ -301,6 +292,13 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 分页查询。
+	 * <p>
+	 * 此方法要求已定义{@code [statement]Count} SQL Mapper。例如：
+	 * </p>
+	 * <p>
+	 * 如果{@code statement}为{@code "pagingQuery"}，那么必须已定义{@code "pagingQueryCount"}
+	 * SQL Mapper。
+	 * </p>
 	 * 
 	 * @param statement
 	 * @param pagingQuery
@@ -320,7 +318,17 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 		addPagingQueryParams(params, startIndex, pagingData.getPageSize());
 
-		List<T> list = selectListMybatis(statement, params);
+		List<T> list = null;
+
+		if (this.dialect.supportsPaging())
+		{
+			list = selectListMybatis(statement, params);
+		}
+		else
+		{
+			list = selectListMybatis(statement, params, new RowBounds(startIndex, pagingData.getPageSize()));
+		}
+
 		postProcessSelects(list);
 
 		pagingData.setItems(list);
@@ -332,18 +340,33 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * 添加分页查询参数。
 	 * 
 	 * @param params
-	 * @param pageIndex
-	 *            页起始索引，以{@code 0}开始
-	 * @param pageSize
+	 * @param startIndex
+	 *            起始索引，以{@code 0}开始
+	 * @param fetchSize
 	 *            页大小
 	 */
-	protected void addPagingQueryParams(Map<String, Object> params, int pageIndex, int pageSize)
+	protected void addPagingQueryParams(Map<String, Object> params, int startIndex, int fetchSize)
 	{
-		params.put(PAGING_QUERY_PARAM_START_INDEX, pageIndex);
-		params.put(PAGING_QUERY_PARAM_START_ROW, pageIndex + 1);
-		params.put(PAGING_QUERY_PARAM_END_INDEX, pageIndex + pageSize);
-		params.put(PAGING_QUERY_PARAM_END_ROW, pageIndex + pageSize + 1);
-		params.put(PAGING_QUERY_PARAM_ROWS, pageSize);
+		params.put(PAGING_QUERY_SUPPORTED, this.dialect.supportsPaging());
+
+		String sqlHead = null;
+		String sqlFoot = null;
+
+		if (this.dialect.supportsPaging())
+		{
+			sqlHead = this.dialect.pagingSqlHead(startIndex, fetchSize);
+			sqlFoot = this.dialect.pagingSqlFoot(startIndex, fetchSize);
+		}
+		else
+		{
+			// 不支持的话，设为空字符串，方便底层SQL Mapper处理
+
+			sqlHead = "";
+			sqlFoot = "";
+		}
+
+		params.put(PAGING_QUERY_HEAD_SQL, sqlHead);
+		params.put(PAGING_QUERY_FOOT_SQL, sqlFoot);
 	}
 
 	/**
@@ -617,7 +640,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 */
 	protected void addIdentifierQuoteParameter(Map<String, Object> params)
 	{
-		params.put(this.identifierQuoteKey, this.identifierQuote);
+		params.put(this.identifierQuoteKey, this.dialect.getIdentifierQuote());
 	}
 
 	/**
@@ -628,7 +651,8 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 */
 	protected String toQuoteIdentifier(String s)
 	{
-		return this.identifierQuote + s + this.identifierQuote;
+		String iq = this.dialect.getIdentifierQuote();
+		return iq + s + iq;
 	}
 
 	/**
@@ -669,16 +693,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 */
 	protected void close(Connection cn)
 	{
-		if (cn == null)
-			return;
-
-		try
-		{
-			cn.close();
-		}
-		catch (SQLException e)
-		{
-		}
+		JdbcUtil.closeConnection(cn);
 	}
 
 	/**

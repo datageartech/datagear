@@ -36,6 +36,7 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
@@ -68,11 +69,11 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		super();
 	}
 
-	public DataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, ConnectionSource connectionSource,
-			SchemaService schemaService, AuthorizationService authorizationService, File dataSetRootDirectory,
-			HttpClient httpClient)
+	public DataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
+			ConnectionSource connectionSource, SchemaService schemaService, AuthorizationService authorizationService,
+			File dataSetRootDirectory, HttpClient httpClient)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
 		this.authorizationService = authorizationService;
@@ -80,11 +81,11 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.httpClient = httpClient;
 	}
 
-	public DataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, ConnectionSource connectionSource,
-			SchemaService schemaService, AuthorizationService authorizationService, File dataSetRootDirectory,
-			HttpClient httpClient)
+	public DataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
+			ConnectionSource connectionSource, SchemaService schemaService, AuthorizationService authorizationService,
+			File dataSetRootDirectory, HttpClient httpClient)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
 		this.authorizationService = authorizationService;

@@ -7,12 +7,14 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.SqlHistory;
 import org.datagear.management.service.SqlHistoryService;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
@@ -36,14 +38,14 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 		super();
 	}
 
-	public SqlHistoryServiceImpl(SqlSessionFactory sqlSessionFactory)
+	public SqlHistoryServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 	}
 
-	public SqlHistoryServiceImpl(SqlSessionTemplate sqlSessionTemplate)
+	public SqlHistoryServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 	}
 
 	@Override
@@ -76,7 +78,17 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 		Map<String, Object> param = buildParamMap();
 		param.put("schemaId", schemaId);
 		param.put("userId", userId);
+
 		addPagingQueryParams(param, 0, HISTORY_REMAIN);
+
+		// 如果不支持分页，则删除30天以前的历史
+		if (!getDialect().supportsPaging())
+		{
+			long time = System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30;
+			Date deleteBeforeDate = new Date(time);
+			param.put("deleteBeforeDate", deleteBeforeDate);
+		}
+
 		return deleteMybatis("deleteExpired", param);
 	}
 

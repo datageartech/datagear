@@ -25,7 +25,7 @@ public class PostgresqlDialectBuilder extends AbstractURLSensedDialectBuilder
 {
 	public PostgresqlDialectBuilder()
 	{
-		super(new PostgresqlURLSensor());
+		super(PostgresqlURLSensor.INSTANCE);
 	}
 
 	@Override

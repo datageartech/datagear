@@ -29,7 +29,7 @@ public class MySqlDevotedDBMetaResolver extends AbstractConnectionDevotedDBMetaR
 {
 	public MySqlDevotedDBMetaResolver()
 	{
-		super(new URLConnectionSensor(new MySqlURLSensor()));
+		super(new URLConnectionSensor(MySqlURLSensor.INSTANCE));
 	}
 
 	@Override

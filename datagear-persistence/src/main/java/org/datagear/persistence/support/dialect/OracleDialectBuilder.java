@@ -25,7 +25,7 @@ public class OracleDialectBuilder extends AbstractURLSensedDialectBuilder
 {
 	public OracleDialectBuilder()
 	{
-		super(new OracleURLSensor());
+		super(OracleURLSensor.INSTANCE);
 	}
 
 	@Override

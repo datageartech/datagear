@@ -8,6 +8,8 @@
 package org.datagear.management.impl;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.management.util.dialect.MbSqlDialect;
+import org.datagear.management.util.dialect.MbSqlDialectBuilder;
 import org.datagear.util.test.DBTestSupport;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.core.io.Resource;
@@ -21,7 +23,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  */
 public class ServiceImplTestSupport extends DBTestSupport
 {
-	private SqlSessionFactory sqlSessionFactory;
+	private final SqlSessionFactory sqlSessionFactory;
+
+	private final MbSqlDialect dialect;
 
 	public ServiceImplTestSupport()
 	{
@@ -38,6 +42,8 @@ public class ServiceImplTestSupport extends DBTestSupport
 			bean.setMapperLocations(resources);
 
 			this.sqlSessionFactory = bean.getObject();
+
+			this.dialect = new MbSqlDialectBuilder().build(getDataSource());
 		}
 		catch (Exception e)
 		{
@@ -48,5 +54,10 @@ public class ServiceImplTestSupport extends DBTestSupport
 	public SqlSessionFactory getSqlSessionFactory()
 	{
 		return sqlSessionFactory;
+	}
+
+	public MbSqlDialect getDialect()
+	{
+		return dialect;
 	}
 }

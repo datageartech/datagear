@@ -15,6 +15,7 @@ import org.datagear.management.domain.Role;
 import org.datagear.management.domain.RoleUser;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleUserService;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
@@ -35,14 +36,14 @@ public class RoleUserServiceImpl extends AbstractMybatisEntityService<String, Ro
 		super();
 	}
 
-	public RoleUserServiceImpl(SqlSessionFactory sqlSessionFactory)
+	public RoleUserServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 	}
 
-	public RoleUserServiceImpl(SqlSessionTemplate sqlSessionTemplate)
+	public RoleUserServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 	}
 
 	@Override

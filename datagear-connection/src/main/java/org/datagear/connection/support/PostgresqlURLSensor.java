@@ -20,6 +20,8 @@ public class PostgresqlURLSensor extends PrefixURLSensor
 {
 	public static final String JDBC_PREFIX = "jdbc:postgresql";
 
+	public static final PostgresqlURLSensor INSTANCE = new PostgresqlURLSensor();
+
 	public PostgresqlURLSensor()
 	{
 		super(JDBC_PREFIX);

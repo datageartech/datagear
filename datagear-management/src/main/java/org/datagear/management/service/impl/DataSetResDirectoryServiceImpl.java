@@ -14,6 +14,7 @@ import org.datagear.management.domain.DataSetResDirectory;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -22,9 +23,8 @@ import org.mybatis.spring.SqlSessionTemplate;
  * @author datagear@163.com
  *
  */
-public class DataSetResDirectoryServiceImpl
-		extends AbstractMybatisDataPermissionEntityService<String, DataSetResDirectory>
-		implements DataSetResDirectoryService
+public class DataSetResDirectoryServiceImpl extends
+		AbstractMybatisDataPermissionEntityService<String, DataSetResDirectory> implements DataSetResDirectoryService
 {
 	protected static final String SQL_NAMESPACE = DataSetResDirectory.class.getName();
 
@@ -33,14 +33,14 @@ public class DataSetResDirectoryServiceImpl
 		super();
 	}
 
-	public DataSetResDirectoryServiceImpl(SqlSessionFactory sqlSessionFactory)
+	public DataSetResDirectoryServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 	}
 
-	public DataSetResDirectoryServiceImpl(SqlSessionTemplate sqlSessionTemplate)
+	public DataSetResDirectoryServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 	}
 
 	@Override

@@ -9,6 +9,7 @@ package org.datagear.web.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,6 +70,8 @@ import org.datagear.management.service.impl.SchemaServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
 import org.datagear.management.service.impl.UserServiceImpl;
+import org.datagear.management.util.dialect.MbSqlDialect;
+import org.datagear.management.util.dialect.MbSqlDialectBuilder;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.meta.resolver.GenericDBMetaResolver;
 import org.datagear.persistence.DialectSource;
@@ -331,6 +334,25 @@ public class CoreConfig implements InitializingBean
 	}
 
 	@Bean
+	public MbSqlDialectBuilder mbSqlDialectBuilder()
+	{
+		return new MbSqlDialectBuilder();
+	}
+
+	@Bean
+	public MbSqlDialect mbSqlDialect()
+	{
+		try
+		{
+			return this.mbSqlDialectBuilder().build(this.dataSourceConfig.dataSource());
+		}
+		catch (SQLException e)
+		{
+			throw new BeanInitializationException("Init " + MbSqlDialect.class + " failed", e);
+		}
+	}
+
+	@Bean
 	public DBMetaResolver dbMetaResolver()
 	{
 		GenericDBMetaResolver bean = new GenericDBMetaResolver();
@@ -415,7 +437,7 @@ public class CoreConfig implements InitializingBean
 	@Bean
 	public AuthorizationService authorizationService()
 	{
-		AuthorizationServiceImpl bean = new AuthorizationServiceImpl(this.sqlSessionFactory(),
+		AuthorizationServiceImpl bean = new AuthorizationServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.authorizationResourceServices());
 
 		return bean;
@@ -424,8 +446,8 @@ public class CoreConfig implements InitializingBean
 	@Bean
 	public SchemaService schemaService()
 	{
-		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.driverEntityManager(),
-				this.authorizationService());
+		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
+				this.driverEntityManager(), this.authorizationService());
 
 		return bean;
 	}
@@ -433,8 +455,8 @@ public class CoreConfig implements InitializingBean
 	@Bean
 	public UserService userService()
 	{
-		UserServiceImpl bean = new UserServiceImpl(this.sqlSessionFactory(), this.roleUserService(),
-				this.roleService());
+		UserServiceImpl bean = new UserServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
+				this.roleUserService(), this.roleService());
 		bean.setUserPasswordEncoder(this.userPasswordEncoder());
 
 		return bean;
@@ -443,22 +465,23 @@ public class CoreConfig implements InitializingBean
 	@Bean
 	public RoleService roleService()
 	{
-		RoleServiceImpl bean = new RoleServiceImpl(this.sqlSessionFactory());
+		RoleServiceImpl bean = new RoleServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
 		return bean;
 	}
 
 	@Bean
 	public RoleUserService roleUserService()
 	{
-		RoleUserServiceImpl bean = new RoleUserServiceImpl(this.sqlSessionFactory());
+		RoleUserServiceImpl bean = new RoleUserServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
 		return bean;
 	}
 
 	@Bean
 	public DataSetEntityService dataSetEntityService()
 	{
-		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.connectionSource(),
-				this.schemaService(), this.authorizationService(), this.dataSetRootDirectory(), this.httpClient());
+		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
+				this.connectionSource(), this.schemaService(), this.authorizationService(), this.dataSetRootDirectory(),
+				this.httpClient());
 		return bean;
 	}
 
@@ -489,7 +512,8 @@ public class CoreConfig implements InitializingBean
 	public HtmlChartWidgetEntityService htmlChartWidgetEntityService()
 	{
 		HtmlChartWidgetEntityServiceImpl bean = new HtmlChartWidgetEntityServiceImpl(this.sqlSessionFactory(),
-				this.directoryHtmlChartPluginManager(), this.dataSetEntityService(), this.authorizationService());
+				this.mbSqlDialect(), this.directoryHtmlChartPluginManager(), this.dataSetEntityService(),
+				this.authorizationService());
 
 		return bean;
 	}
@@ -546,19 +570,24 @@ public class CoreConfig implements InitializingBean
 		// JS
 		importItems.add(ImportItem.valueOfJavaScript("jquery", libPrefix + "/jquery-1.12.4/jquery-1.12.4.min.js"));
 		importItems.add(ImportItem.valueOfJavaScript("echarts", libPrefix + "/echarts-4.9.0/echarts.min.js"));
-		importItems.add(ImportItem.valueOfJavaScript("wordcloud", libPrefix + "/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js"));
-		importItems.add(ImportItem.valueOfJavaScript("liquidfill", libPrefix + "/echarts-liquidfill-2.0.6/echarts-liquidfill.min.js"));
-		importItems.add(ImportItem.valueOfJavaScript("dataTable", libPrefix + "/DataTables-1.10.18/js/datatables.min.js"));
+		importItems.add(ImportItem.valueOfJavaScript("wordcloud",
+				libPrefix + "/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js"));
+		importItems.add(ImportItem.valueOfJavaScript("liquidfill",
+				libPrefix + "/echarts-liquidfill-2.0.6/echarts-liquidfill.min.js"));
 		importItems
-				.add(ImportItem.valueOfJavaScript("datetimepicker", libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
-		importItems.add(ImportItem.valueOfJavaScript("chartFactory", scriptPrefix + "/datagear-chartFactory.js?v=" + vp));
-		importItems.add(ImportItem.valueOfJavaScript("dashboardFactory", scriptPrefix + "/datagear-dashboardFactory.js?v=" + vp));
-		importItems.add(ImportItem.valueOfJavaScript("chartSupport", scriptPrefix + "/datagear-chartSupport.js?v=" + vp));
+				.add(ImportItem.valueOfJavaScript("dataTable", libPrefix + "/DataTables-1.10.18/js/datatables.min.js"));
+		importItems.add(ImportItem.valueOfJavaScript("datetimepicker",
+				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
+		importItems
+				.add(ImportItem.valueOfJavaScript("chartFactory", scriptPrefix + "/datagear-chartFactory.js?v=" + vp));
+		importItems.add(ImportItem.valueOfJavaScript("dashboardFactory",
+				scriptPrefix + "/datagear-dashboardFactory.js?v=" + vp));
+		importItems
+				.add(ImportItem.valueOfJavaScript("chartSupport", scriptPrefix + "/datagear-chartSupport.js?v=" + vp));
 		importItems
 				.add(ImportItem.valueOfJavaScript("chartSetting", scriptPrefix + "/datagear-chartSetting.js?v=" + vp));
-		importItems
-				.add(ImportItem.valueOfJavaScript("chartPluginManager",
-						cp + "/analysis/chartPlugin/chartPluginManager.js?v=" + vp));
+		importItems.add(ImportItem.valueOfJavaScript("chartPluginManager",
+				cp + "/analysis/chartPlugin/chartPluginManager.js?v=" + vp));
 
 		dashboardImport.setImportItems(importItems);
 
@@ -579,7 +608,8 @@ public class CoreConfig implements InitializingBean
 	public HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService()
 	{
 		HtmlTplDashboardWidgetEntityServiceImpl bean = new HtmlTplDashboardWidgetEntityServiceImpl(
-				this.sqlSessionFactory(), this.htmlTplDashboardWidgetRenderer(), this.authorizationService());
+				this.sqlSessionFactory(), this.mbSqlDialect(), this.htmlTplDashboardWidgetRenderer(),
+				this.authorizationService());
 
 		return bean;
 	}
@@ -587,21 +617,22 @@ public class CoreConfig implements InitializingBean
 	@Bean
 	public AnalysisProjectService analysisProjectService()
 	{
-		AnalysisProjectService bean = new AnalysisProjectServiceImpl(this.sqlSessionFactory());
+		AnalysisProjectService bean = new AnalysisProjectServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
 		return bean;
 	}
 
 	@Bean
 	public DataSetResDirectoryService dataSetResDirectoryService()
 	{
-		DataSetResDirectoryService bean = new DataSetResDirectoryServiceImpl(this.sqlSessionFactory());
+		DataSetResDirectoryService bean = new DataSetResDirectoryServiceImpl(this.sqlSessionFactory(),
+				this.mbSqlDialect());
 		return bean;
 	}
 
 	@Bean
 	public SqlHistoryService sqlHistoryService()
 	{
-		SqlHistoryServiceImpl bean = new SqlHistoryServiceImpl(this.sqlSessionFactory());
+		SqlHistoryServiceImpl bean = new SqlHistoryServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
 		return bean;
 	}
 

@@ -17,6 +17,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Role;
 import org.datagear.management.service.DeleteBuiltinRoleDeniedException;
 import org.datagear.management.service.RoleService;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -34,14 +35,14 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role> 
 		super();
 	}
 
-	public RoleServiceImpl(SqlSessionFactory sqlSessionFactory)
+	public RoleServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 	}
 
-	public RoleServiceImpl(SqlSessionTemplate sqlSessionTemplate)
+	public RoleServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 	}
 
 	@Override
@@ -62,7 +63,7 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role> 
 	@Override
 	public List<Role> getByIds(String... ids)
 	{
-		List<Role> roles = new ArrayList<Role>(ids.length);
+		List<Role> roles = new ArrayList<>(ids.length);
 
 		for (String id : ids)
 			roles.add(getById(id));

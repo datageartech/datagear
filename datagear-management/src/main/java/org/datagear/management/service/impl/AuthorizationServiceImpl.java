@@ -22,6 +22,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
@@ -46,17 +47,17 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 		super();
 	}
 
-	public AuthorizationServiceImpl(SqlSessionFactory sqlSessionFactory,
+	public AuthorizationServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			List<? extends DataPermissionEntityService<?, ?>> resourceServices)
 	{
-		super(sqlSessionFactory);
+		super(sqlSessionFactory, dialect);
 		this.resourceServices = resourceServices;
 	}
 
-	public AuthorizationServiceImpl(SqlSessionTemplate sqlSessionTemplate,
+	public AuthorizationServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			List<? extends DataPermissionEntityService<?, ?>> resourceServices)
 	{
-		super(sqlSessionTemplate);
+		super(sqlSessionTemplate, dialect);
 		this.resourceServices = resourceServices;
 	}
 
