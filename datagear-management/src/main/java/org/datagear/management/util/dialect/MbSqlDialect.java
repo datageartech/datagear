@@ -83,7 +83,7 @@ public abstract class MbSqlDialect
 	 *            页起始索引（以{@code 0}开头）
 	 * @param fetchSize
 	 *            页大小
-	 * @return
+	 * @return 返回{@code null}表示不支持分页
 	 */
 	public abstract String pagingSqlHead(int index, int fetchSize);
 
@@ -94,7 +94,14 @@ public abstract class MbSqlDialect
 	 *            页起始索引（以{@code 0}开头）
 	 * @param fetchSize
 	 *            页大小
-	 * @return
+	 * @return 返回{@code null}表示不支持分页
 	 */
 	public abstract String pagingSqlFoot(int index, int fetchSize);
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [supportsPaging=" + supportsPaging() + ", pagingSqlHead="
+				+ pagingSqlHead(0, 10) + ", pagingSqlFoot=" + pagingSqlFoot(0, 10) + "]";
+	}
 }

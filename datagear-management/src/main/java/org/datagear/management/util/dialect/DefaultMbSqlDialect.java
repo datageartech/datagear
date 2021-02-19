@@ -37,12 +37,12 @@ public class DefaultMbSqlDialect extends MbSqlDialect
 	@Override
 	public String pagingSqlHead(int index, int fetchSize)
 	{
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override
 	public String pagingSqlFoot(int index, int fetchSize)
 	{
-		throw new UnsupportedOperationException();
+		return null;
 	}
 }

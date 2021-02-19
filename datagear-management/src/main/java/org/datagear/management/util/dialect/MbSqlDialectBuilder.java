@@ -90,22 +90,37 @@ public class MbSqlDialectBuilder
 	 */
 	protected MbSqlDialect build(Connection cn, String url) throws SQLException
 	{
+		MbSqlDialect dialect = null;
+
 		if (StringUtil.isEmpty(url))
-			return buildDefaultMbSqlDialect(cn);
+		{
+			dialect = buildDefaultMbSqlDialect(cn);
+		}
+		else if (DerbyURLSensor.INSTANCE.supports(url))
+		{
+			dialect = buildDerbyMbSqlDialect(cn);
+		}
+		else if (MySqlURLSensor.INSTANCE.supports(url))
+		{
+			dialect = buildMysqlMbSqlDialect(cn);
+		}
+		else if (OracleURLSensor.INSTANCE.supports(url))
+		{
+			dialect = buildOracleMbSqlDialect(cn);
+		}
+		else if (PostgresqlURLSensor.INSTANCE.supports(url))
+		{
+			dialect = buildPostgresqlMbSqlDialect(cn);
+		}
+		else
+		{
+			dialect = buildDefaultMbSqlDialect(cn);
+		}
 
-		if (DerbyURLSensor.INSTANCE.supports(url))
-			return buildDerbyMbSqlDialect(cn);
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Build " + dialect.toString() + " for current environment");
 
-		if (MySqlURLSensor.INSTANCE.supports(url))
-			return buildMysqlMbSqlDialect(cn);
-
-		if (OracleURLSensor.INSTANCE.supports(url))
-			return buildOracleMbSqlDialect(cn);
-
-		if (PostgresqlURLSensor.INSTANCE.supports(url))
-			return buildPostgresqlMbSqlDialect(cn);
-
-		return buildDefaultMbSqlDialect(cn);
+		return dialect;
 	}
 
 	protected DerbyMbSqlDialect buildDerbyMbSqlDialect(Connection cn) throws SQLException
