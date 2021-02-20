@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * {@linkplain MbSqlDialect}构建器。
  * <p>
- * 此类根据给定的数据库连接，构建对应的{@linkplain MbSqlDialect}。
+ * 此类依次根据给定的{@linkplain #getDialectName()}、数据库连接，构建对应的{@linkplain MbSqlDialect}。
  * </p>
  * 
  * @author datagear@163.com
@@ -39,8 +39,41 @@ public class MbSqlDialectBuilder
 	 */
 	public static final String DEFAULT_IDENTIFIER_QUOTE = " ";
 
+	public static final String DIALECT_NAME_DERBY = "derby";
+
+	public static final String DIALECT_NAME_MYSQL = "mysql";
+
+	public static final String DIALECT_NAME_ORACLE = "oracle";
+
+	public static final String DIALECT_NAME_POSTGRESQL = "postgresql";
+
+	public static final String DIALECT_NAME_DEFAULT = "default";
+
+	/** 方言名 */
+	private String dialectName = null;
+
 	public MbSqlDialectBuilder()
 	{
+	}
+
+	/**
+	 * 获取方言名。
+	 * 
+	 * @return 可能为{@code null}
+	 */
+	public String getDialectName()
+	{
+		return dialectName;
+	}
+
+	/**
+	 * 设置方言，参考{@code DIALECT_NAME_*}。
+	 * 
+	 * @param dialectName
+	 */
+	public void setDialectName(String dialectName)
+	{
+		this.dialectName = dialectName;
 	}
 
 	/**
@@ -76,8 +109,65 @@ public class MbSqlDialectBuilder
 	 */
 	public MbSqlDialect build(Connection cn) throws SQLException
 	{
-		String url = JdbcUtil.getURLIfSupports(cn);
-		return build(cn, url);
+		MbSqlDialect dialect = null;
+
+		if (!StringUtil.isEmpty(this.dialectName))
+		{
+			dialect = buildByDialectName(cn, this.dialectName);
+		}
+
+		if (dialect == null)
+		{
+			String url = JdbcUtil.getURLIfSupports(cn);
+			dialect = buildByUrl(cn, url);
+		}
+
+		if (dialect == null)
+			dialect = buildDefaultMbSqlDialect(cn);
+
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Build " + dialect.toString() + " for current environment");
+
+		return dialect;
+	}
+
+	/**
+	 * 
+	 * @param cn
+	 * @param dialectName
+	 *            允许为{@code null}
+	 * @return 返回{@code null}表示不支持
+	 * @throws SQLException
+	 */
+	protected MbSqlDialect buildByDialectName(Connection cn, String dialectName) throws SQLException
+	{
+		MbSqlDialect dialect = null;
+
+		if (StringUtil.isEmpty(dialectName))
+		{
+		}
+		else if (DIALECT_NAME_DERBY.equalsIgnoreCase(dialectName))
+		{
+			dialect = buildDerbyMbSqlDialect(cn);
+		}
+		else if (DIALECT_NAME_MYSQL.equalsIgnoreCase(dialectName))
+		{
+			dialect = buildMysqlMbSqlDialect(cn);
+		}
+		else if (DIALECT_NAME_ORACLE.equalsIgnoreCase(dialectName))
+		{
+			dialect = buildOracleMbSqlDialect(cn);
+		}
+		else if (DIALECT_NAME_POSTGRESQL.equalsIgnoreCase(dialectName))
+		{
+			dialect = buildPostgresqlMbSqlDialect(cn);
+		}
+		else if (DIALECT_NAME_DEFAULT.equalsIgnoreCase(dialectName))
+		{
+			dialect = buildDefaultMbSqlDialect(cn);
+		}
+
+		return dialect;
 	}
 
 	/**
@@ -85,16 +175,15 @@ public class MbSqlDialectBuilder
 	 * @param cn
 	 * @param url
 	 *            允许为{@code null}
-	 * @return
+	 * @return 返回{@code null}表示不支持
 	 * @throws SQLException
 	 */
-	protected MbSqlDialect build(Connection cn, String url) throws SQLException
+	protected MbSqlDialect buildByUrl(Connection cn, String url) throws SQLException
 	{
 		MbSqlDialect dialect = null;
 
 		if (StringUtil.isEmpty(url))
 		{
-			dialect = buildDefaultMbSqlDialect(cn);
 		}
 		else if (DerbyURLSensor.INSTANCE.supports(url))
 		{
@@ -112,13 +201,6 @@ public class MbSqlDialectBuilder
 		{
 			dialect = buildPostgresqlMbSqlDialect(cn);
 		}
-		else
-		{
-			dialect = buildDefaultMbSqlDialect(cn);
-		}
-
-		if (LOGGER.isInfoEnabled())
-			LOGGER.info("Build " + dialect.toString() + " for current environment");
 
 		return dialect;
 	}

@@ -336,7 +336,12 @@ public class CoreConfig implements InitializingBean
 	@Bean
 	public MbSqlDialectBuilder mbSqlDialectBuilder()
 	{
-		return new MbSqlDialectBuilder();
+		String dialectName = environment.getProperty("datasourceDialect");
+
+		MbSqlDialectBuilder builder = new MbSqlDialectBuilder();
+		builder.setDialectName(dialectName);
+
+		return builder;
 	}
 
 	@Bean
