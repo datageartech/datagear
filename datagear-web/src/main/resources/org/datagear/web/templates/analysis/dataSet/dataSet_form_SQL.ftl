@@ -79,7 +79,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	po.element(".preview-result-table-wrapper .refresh-button")
-	.after("<button type='button' class='export-button ui-button ui-corner-all ui-widget ui-button-icon-only' title='<@spring.message code='sqlpad.exportSqlResult' />'>"
+	.after("&nbsp;<button type='button' class='export-button ui-button ui-corner-all ui-widget ui-button-icon-only' title='<@spring.message code='sqlpad.exportSqlResult' />'>"
 			+"<span class='ui-button-icon ui-icon ui-icon-arrowthick-1-ne'></span>"
 			+"<span class='ui-button-icon-space'> </span><@spring.message code='sqlpad.exportSqlResult' /></button>");
 	
