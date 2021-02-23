@@ -64,7 +64,7 @@ boolean readonly 是否只读操作，默认为false
 				</#if>
 				<#if !selectOperation>
 				<#if !(currentUser.anonymous)>
-				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
+				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				</#if>
 				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />

@@ -262,7 +262,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				.antMatchers("/dashboardGlobalRes/**").access(AUTH_ADMIN)
 
 				// 数据授权
-				.antMatchers("/authorization/**").access(AUTH_USER_ADMIN)
+				.antMatchers("/authorization/**").access(AUTH_USER_ADMIN_AND_DATA_ADMIN)
 
 				// 驱动程序
 				// 选择
