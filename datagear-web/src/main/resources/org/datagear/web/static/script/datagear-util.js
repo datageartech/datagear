@@ -2326,6 +2326,56 @@
 			dataTable.rows(indexes).remove().draw();
 		},
 		
+		moveSelectedUp: function(dataTable, notDraw)
+		{
+			dataTable.rows('.selected').every(function(rowIdx, tableLoop, rowLoop)
+			{
+				if(rowIdx <= 0)
+					return;
+				
+				var prevRow = dataTable.row(rowIdx - 1);
+				
+				if($(prevRow.node()).hasClass("selected"))
+					return;
+				
+				var prevRowData = prevRow.data();
+				var myRowData = this.data();
+				prevRow.data(myRowData);
+				this.data(prevRowData);
+				prevRow.select();
+				this.deselect();
+			});
+			
+			if(notDraw != true)
+				dataTable.draw();
+		},
+		
+		moveSelectedDown: function(dataTable, notDraw)
+		{
+			var count = dataTable.rows().indexes().length;
+			
+			dataTable.rows('.selected').every(function(rowIdx, tableLoop, rowLoop)
+			{
+				if(rowIdx >= count - 1)
+					return;
+				
+				var nextRow = dataTable.row(rowIdx + 1);
+				
+				if($(nextRow.node()).hasClass("selected"))
+					return;
+				
+				var nextRowData = nextRow.data();
+				var myRowData = this.data();
+				nextRow.data(myRowData);
+				this.data(nextRowData);
+				nextRow.select();
+				this.deselect();
+			});
+			
+			if(notDraw != true)
+				dataTable.draw();
+		},
+		
 		dataTableParent: function(dataTable)
 		{
 			var $tableParent = $(dataTable.table().body()).parent().parent();
