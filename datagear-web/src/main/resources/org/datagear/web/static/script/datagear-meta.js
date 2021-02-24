@@ -132,8 +132,25 @@
 			for(var i=0; i<primaryNames.length; i++)
 			{
 				var value = primaryObj[primaryNames[i]];
+				
+				//在某些情况（比如先将主表以大写命名语句创建加载至系统缓存，之后又以小写命名语句重新创建主表和外键表，而不刷新主表），
+				//会出现primaryNames与primaryObj属性名大小写不一致的情况，所以这里如果没取到，再使用忽略大小写的方式重试一次
+				if(value === undefined)
+				{
+					for(var p in primaryObj)
+					{
+						if(p.toLowerCase() == primaryNames[i].toLowerCase())
+						{
+							value = primaryObj[p];
+							break;
+						}
+					}
+				}
+				
 				if(value == undefined)
+				{
 					value = null;
+				}
 				
 				re[myNames[i]] = value;
 			}
