@@ -9,6 +9,7 @@ package org.datagear.web.controller;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -345,6 +346,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		}
 		else
 		{
+			// 处理可能的中文资源名
+			resName = URLDecoder.decode(resName, IOUtil.CHARSET_UTF_8);
+
 			TemplateDashboardWidgetResManager resManager = this.chartShowHtmlTplDashboardWidgetHtmlRenderer
 					.getTemplateDashboardWidgetResManager();
 

@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -777,10 +778,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new RecordNotFoundException();
 
 		String resName = resolvePathAfter(request, "/show/" + id + "/");
-		
-		if(StringUtil.isEmpty(resName))
+
+		if (StringUtil.isEmpty(resName))
 			throw new FileNotFoundException(resName);
-		
+
+		// 处理可能的中文资源名
+		resName = URLDecoder.decode(resName, IOUtil.CHARSET_UTF_8);
+
 		if (entity.isTemplate(resName))
 		{
 			HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
@@ -814,7 +818,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 					resName = resName.substring(this.dashboardGlobalResUrlPrefix.length());
 
 				File globalRes = FileUtil.getFile(dashboardGlobalResRootDirectory, resName);
-				
+
 				if (globalRes.exists() && !globalRes.isDirectory())
 				{
 					setContentTypeByName(request, response, getServletContext(), resName);
