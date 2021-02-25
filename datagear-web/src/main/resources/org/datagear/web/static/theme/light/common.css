@@ -22,6 +22,12 @@ a.link:hover{
 	color: #003eff;
 }
 
+input:focus,
+button:focus,
+textarea:focus{
+	box-shadow: 0px 0px 4px 0px #b2b2b2;
+}
+
 /*表单*/
 form .form-content .form-item label.error{
 	color: red;
