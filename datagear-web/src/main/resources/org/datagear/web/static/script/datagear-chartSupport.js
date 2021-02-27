@@ -105,12 +105,7 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				var legendName = dataSetName;
-				if(chartDataSets.length > 1 && vps.length > 1)
-					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vps[j]);
-				else if(vps.length > 1)
-					legendName = chart.dataSetPropertyLabel(vps[j]);
-				
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
 				var data = chart.resultRowArrays(result, [np, vps[j]]);
 				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
 				
@@ -272,12 +267,7 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				var legendName = dataSetName;
-				if(chartDataSets.length > 1 && vps.length > 1)
-					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vps[j]);
-				else if(vps.length > 1)
-					legendName = chart.dataSetPropertyLabel(vps[j]);
-				
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
 				var data = chart.resultRowArrays(result, (horizontal ? [vps[j], np] : [np, vps[j]]));
 				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
 				
@@ -451,12 +441,7 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				var legendName = dataSetName;
-				if(chartDataSets.length > 1 && vps.length > 1)
-					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vps[j]);
-				else if(vps.length > 1)
-					legendName = chart.dataSetPropertyLabel(vps[j]);
-				
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
 				var data = chart.resultNameValueObjects(result, np, vps[j]);
 				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
 				
@@ -813,8 +798,8 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -831,12 +816,7 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				var legendName = dataSetName;
-				if(chartDataSets.length > 1 && vps.length > 1)
-					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vps[j]);
-				else if(vps.length > 1)
-					legendName = chart.dataSetPropertyLabel(vps[j]);
-				
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
 				var data = chart.resultRowArrays(result, [np, vps[j]]);
 				
 				for(var k=0; k<data.length; k++)
@@ -873,7 +853,7 @@
 		{
 			series[i].symbolSize = function(value)
 			{
-				return chartSupport.scatterEvalSymbolSize(value[1], min, max, symbolSizeMax, symbolSizeMin);
+				return chartSupport.evalValueSymbolSize(value[1], min, max, symbolSizeMax, symbolSizeMin);
 			};
 		}
 		
@@ -985,8 +965,8 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1030,7 +1010,7 @@
 				if(value == null || value.length < 3)
 					return symbolSizeMin;
 				
-				return chartSupport.scatterEvalSymbolSize(value[2], min, max, symbolSizeMax, symbolSizeMin);
+				return chartSupport.evalValueSymbolSize(value[2], min, max, symbolSizeMax, symbolSizeMin);
 			};
 		}
 		
@@ -1076,61 +1056,6 @@
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
-	};
-	
-	/**
-	 * 获取散点图最大数据标记像素数
-	 * @param chart
-	 * @param options
-	 * @param 可选，自动获取的比率
-	 */
-	chartSupport.scatterSymbolSizeMax = function(chart, options, ratio)
-	{
-		var symbolSizeMax = (options ? options.symbolSizeMax : undefined);
-		ratio = (ratio == undefined ? 0.1 : ratio);
-		
-		//根据图表元素尺寸自动计算
-		if(!symbolSizeMax)
-		{
-			var chartEle = chart.elementJquery();
-			symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())*ratio);
-		}
-		
-		return symbolSizeMax;
-	};
-
-	/**
-	 * 获取散点图最小数据标记像素数
-	 * @param chart
-	 * @param options
-	 * @param symbolSizeMax
-	 */
-	chartSupport.scatterSymbolSizeMin = function(chart, options, symbolSizeMax, ratio)
-	{
-		var symbolSizeMin = (options ? options.symbolSizeMin : undefined);
-		ratio = (ratio == undefined ? 0.125 : ratio);
-		
-		if(!symbolSizeMin)
-		{
-			symbolSizeMin = parseInt(symbolSizeMax * ratio);
-			if(symbolSizeMin < 6)
-				symbolSizeMin = 6;
-		}
-		
-		return symbolSizeMin;
-	};
-	
-	//计算散点大小
-	chartSupport.scatterEvalSymbolSize = function(value, minValue, maxValue, symbolSizeMax, symbolSizeMin)
-	{
-		if(symbolSizeMin == undefined)
-			symbolSizeMin = 4;
-		
-		if(value == null)
-			return symbolSizeMin;
-		
-		var size = parseInt((value-minValue)/(maxValue-minValue)*symbolSizeMax);
-		return (size < symbolSizeMin ? symbolSizeMin : size);
 	};
 	
 	//雷达图
@@ -1810,8 +1735,8 @@
 		var map = undefined;
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1867,10 +1792,10 @@
 			{
 				var sv = (value && value.length > 2 ? value[2] : null);
 				
-				return chartSupport.scatterEvalSymbolSize(sv, min, max, symbolSizeMax, symbolSizeMin);
+				return chartSupport.evalValueSymbolSize(sv, min, max, symbolSizeMax, symbolSizeMin);
 			};
 		}
-
+		
 		var options = { legend: {data: legendData}, series: series };
 		
 		if(map)
@@ -1984,8 +1909,8 @@
 		var map = undefined;
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -2115,7 +2040,7 @@
 			{
 				var sv =  (value && value.length > 2 ? value[2] : null);
 				
-				return chartSupport.scatterEvalSymbolSize(sv, min, max, symbolSizeMax, symbolSizeMin);
+				return chartSupport.evalValueSymbolSize(sv, min, max, symbolSizeMax, symbolSizeMin);
 			};
 		}
 		
@@ -3157,8 +3082,8 @@
 		var seriesLinks = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, renderOptions);
-		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -3269,7 +3194,8 @@
 		if(min == undefined && max == undefined && symbolSizeMin < 10)
 			symbolSizeMin = 10;
 		
-		var series = [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0,
+						 { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
 		
 		//自动计算散点大小
 		if(series[0].symbolSize == null)
@@ -3279,7 +3205,7 @@
 				if(value && value.length > 0)
 					value = value[0];
 				
-				return chartSupport.scatterEvalSymbolSize(value, min, max, symbolSizeMax, symbolSizeMin);
+				return chartSupport.evalValueSymbolSize(value, min, max, symbolSizeMax, symbolSizeMin);
 			};
 		}
 		
@@ -5369,6 +5295,79 @@
 		}
 		
 		return undefined;
+	};
+	
+	//计算图例名
+	chartSupport.legendNameForMultipleSeries = function(chart, chartDataSets, chartDataSetIdx, chartDataSetName,
+					seriesProperties, seriesPropertyIdx)
+	{
+		var legendName = chartDataSetName;
+		
+		if(chartDataSets.length > 1 && seriesProperties.length > 1)
+		{
+			legendName = chartDataSetName +"-" + chart.dataSetPropertyLabel(seriesProperties[seriesPropertyIdx]);
+		}
+		else if(seriesProperties.length > 1)
+		{
+			legendName = chart.dataSetPropertyLabel(seriesProperties[seriesPropertyIdx]);
+		}
+		
+		return legendName;
+	};
+	
+	/**
+	 * 计算最大图符元素尺寸
+	 * @param chart
+	 * @param options
+	 * @param 可选，自动获取的比率
+	 */
+	chartSupport.evalSymbolSizeMax = function(chart, options, ratio)
+	{
+		var symbolSizeMax = (options ? options.symbolSizeMax : undefined);
+		ratio = (ratio == undefined ? 0.1 : ratio);
+		
+		//根据图表元素尺寸自动计算
+		if(!symbolSizeMax)
+		{
+			var chartEle = chart.elementJquery();
+			symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())*ratio);
+		}
+		
+		return symbolSizeMax;
+	};
+	
+	/**
+	 * 计算最小图符元素尺寸
+	 * @param chart
+	 * @param options
+	 * @param symbolSizeMax
+	 */
+	chartSupport.evalSymbolSizeMin = function(chart, options, symbolSizeMax, ratio)
+	{
+		var symbolSizeMin = (options ? options.symbolSizeMin : undefined);
+		ratio = (ratio == undefined ? 0.125 : ratio);
+		
+		if(!symbolSizeMin)
+		{
+			symbolSizeMin = parseInt(symbolSizeMax * ratio);
+			if(symbolSizeMin < 6)
+				symbolSizeMin = 6;
+		}
+		
+		return symbolSizeMin;
+	};
+	
+	//计算数值的图符元素尺寸
+	chartSupport.evalValueSymbolSize = function(value, minValue, maxValue, symbolSizeMax, symbolSizeMin)
+	{
+		if(symbolSizeMin == undefined)
+			symbolSizeMin = 4;
+		
+		if(value == null)
+			return symbolSizeMin;
+		
+		var size = parseInt((value-minValue)/(maxValue-minValue)*symbolSizeMax);
+		return (size < symbolSizeMin ? symbolSizeMin : size);
 	};
 	
 	//---------------------------------------------------------
