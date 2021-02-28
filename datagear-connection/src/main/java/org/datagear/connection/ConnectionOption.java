@@ -47,15 +47,15 @@ public class ConnectionOption implements Serializable
 	{
 		super();
 		this.url = url;
-		this.properties.put(PROPERTY_NAME_USER, user);
+		setUser(user);
 	}
 
 	public ConnectionOption(String url, String user, String password)
 	{
 		super();
 		this.url = url;
-		this.properties.put(PROPERTY_NAME_USER, user);
-		this.properties.put(PROPERTY_NAME_PASSWORD, password);
+		setUser(user);
+		setPassword(password);
 	}
 
 	public String getUrl()
@@ -80,22 +80,22 @@ public class ConnectionOption implements Serializable
 
 	public String getUser()
 	{
-		return this.properties.getProperty(PROPERTY_NAME_USER);
+		return getProperty(PROPERTY_NAME_USER);
 	}
 
 	public void setUser(String user)
 	{
-		this.properties.put(PROPERTY_NAME_USER, user);
+		setProperty(PROPERTY_NAME_USER, user);
 	}
 
 	public String getPassword()
 	{
-		return this.properties.getProperty(PROPERTY_NAME_PASSWORD);
+		return getProperty(PROPERTY_NAME_PASSWORD);
 	}
 
 	public void setPassword(String password)
 	{
-		this.properties.put(PROPERTY_NAME_PASSWORD, password);
+		setProperty(PROPERTY_NAME_PASSWORD, password);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -104,9 +104,25 @@ public class ConnectionOption implements Serializable
 		return (T) this.properties.getProperty(name);
 	}
 
-	public void setProperty(String name, Object value)
+	/**
+	 * 设置连接属性。
+	 * <p>
+	 * 如果{@code name}、{@code value}任一为{@code null}，将直接返回{@code false}。
+	 * </p>
+	 * 
+	 * @param name
+	 * @param value
+	 * @return
+	 */
+	public boolean setProperty(String name, Object value)
 	{
+		// 如果为null，则忽略，避免抛出异常导致程序不可用
+		if (name == null || value == null)
+			return false;
+
 		this.properties.put(name, value);
+
+		return true;
 	}
 
 	@Override
@@ -231,7 +247,6 @@ public class ConnectionOption implements Serializable
 	{
 		ConnectionOption connectionOption = valueOf(cn);
 
-		return (connectionOption == null ?
-				new ConnectionOption("") : connectionOption);
+		return (connectionOption == null ? new ConnectionOption("") : connectionOption);
 	}
 }
