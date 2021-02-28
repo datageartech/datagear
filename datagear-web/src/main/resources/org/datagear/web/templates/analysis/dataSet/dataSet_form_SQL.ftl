@@ -35,8 +35,8 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSet.dataSource' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="schemaConnectionFactory.schema.title" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.title)!''}" readonly="readonly" />
-					<input type="hidden" name="schemaConnectionFactory.schema.id" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.id)!''}" />
+					<input type="text" name="shmConFactory.schema.title" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.title)!''}" readonly="readonly" />
+					<input type="hidden" name="shmConFactory.schema.id" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.id)!''}" />
 					<#if !readonly>
 					<button type="button" class="select-schema-button"><@spring.message code='select' /></button>
 					</#if>
@@ -87,7 +87,7 @@ readonly 是否只读操作，允许为null
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.initWorkspaceHeight();
 	
-	po.getDataSetSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
+	po.getDataSetSchemaId = function(){ return po.element("input[name='shmConFactory.schema.id']").val(); };
 
 	po.element(".select-schema-button").click(function()
 	{
@@ -97,8 +97,8 @@ readonly 是否只读操作，允许为null
 			{
 				select : function(schema)
 				{
-					po.element("input[name='schemaConnectionFactory.schema.title']").val(schema.title);
-					po.element("input[name='schemaConnectionFactory.schema.id']").val(schema.id);
+					po.element("input[name='shmConFactory.schema.title']").val(schema.title);
+					po.element("input[name='shmConFactory.schema.id']").val(schema.id);
 				}
 			}
 		};
@@ -226,13 +226,13 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"schemaConnectionFactory.schema.title" : "required",
+			"shmConFactory.schema.title" : "required",
 			"sql" : {"dataSetSqlRequired": true, "dataSetSqlPreviewRequired": true, "dataSetPropertiesRequired": true}
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
-			"schemaConnectionFactory.schema.title" : "<@spring.message code='validation.required' />",
+			"shmConFactory.schema.title" : "<@spring.message code='validation.required' />",
 			"sql" :
 			{
 				"dataSetSqlRequired": "<@spring.message code='validation.required' />",

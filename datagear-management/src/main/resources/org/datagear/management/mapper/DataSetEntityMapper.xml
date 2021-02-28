@@ -23,7 +23,7 @@
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.schemaConnectionFactory.schema.id}, #{entity.sql}
+			#{entity.id}, #{entity.shmConFactory.schema.id}, #{entity.sql}
 			)
 	</insert>
 	
@@ -144,7 +144,7 @@
 	
 	<update id="updateSqlDataSetEntity">
 		UPDATE DATAGEAR_DATA_SET_SQL SET
-			DS_SCHEMA_ID = #{entity.schemaConnectionFactory.schema.id},
+			DS_SCHEMA_ID = #{entity.shmConFactory.schema.id},
 			DS_SQL = #{entity.sql}
 		WHERE
 			DS_ID = #{entity.id}
@@ -251,8 +251,8 @@
 	<select id="getSqlDataSetEntityById" resultType="org.datagear.management.domain.SqlDataSetEntity">
 		SELECT
 			T1.*,
-			T2.DS_SCHEMA_ID AS ${_iq_}schemaConnectionFactory.schema.id${_iq_},
-			T3.SCHEMA_TITLE AS ${_iq_}schemaConnectionFactory.schema.title${_iq_},
+			T2.DS_SCHEMA_ID AS ${_iq_}shmConFactory.schema.id${_iq_},
+			T3.SCHEMA_TITLE AS ${_iq_}shmConFactory.schema.title${_iq_},
 			T2.DS_SQL AS ${_iq_}sql${_iq_}
 		FROM
 			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1

@@ -64,12 +64,37 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
 		super.setConnectionFactory(connectionFactory);
 	}
 
-	public SchemaConnectionFactory getSchemaConnectionFactory()
+	/**
+	 * 获取{@linkplain SchemaConnectionFactory}。
+	 * <p>
+	 * 注意：
+	 * </p>
+	 * <p>
+	 * 此方法与{@linkplain #getConnectionFactory()}功能一致，另参考{@linkplain #setShmConFactory(SchemaConnectionFactory)}。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public SchemaConnectionFactory getShmConFactory()
 	{
 		return getConnectionFactory();
 	}
 
-	public void setSchemaConnectionFactory(SchemaConnectionFactory schemaConnectionFactory)
+	/**
+	 * 设置{@linkplain SchemaConnectionFactory}。
+	 * <p>
+	 * 注意：
+	 * </p>
+	 * <p>
+	 * 此方法与{@linkplain #setConnectionFactory(ConnectionFactory)}功能一致，主要用于序列化、反序列化此类实体对象（页面输入转换、ORM映射）时明确类型。
+	 * </p>
+	 * <p>
+	 * 此方法名不应过长，某些数据库对标识符长度有限制，过长可能导致底层ORM的SQL语法错误（比如Oracle-12.2及以下版本限定标识符最长30个字符）。
+	 * </p>
+	 * 
+	 * @param schemaConnectionFactory
+	 */
+	public void setShmConFactory(SchemaConnectionFactory schemaConnectionFactory)
 	{
 		setConnectionFactory(schemaConnectionFactory);
 	}
@@ -83,7 +108,7 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
 	@Override
 	public void setDataSetType(String dataSetType)
 	{
-		// XXX 什么也不做，不采用抛出异常的方式，便于统一底层SQL查询语句
+		// XXX 什么也不做，不采用抛出异常的方式，便于底层ORM统一SQL查询语句
 		// throw new UnsupportedOperationException();
 	}
 
