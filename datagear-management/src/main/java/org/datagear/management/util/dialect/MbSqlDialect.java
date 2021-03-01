@@ -15,7 +15,7 @@ import org.datagear.management.service.impl.AbstractMybatisService;
  * 此类仅用于为{@linkplain AbstractMybatisService}及其实现类提供多数据库部署支持。
  * </p>
  * <p>
- * 基本思路是：根据当前部署数据库，生成底层Mybatis所需的数据库方言SQL片段，然后以参数的方式传入底层SQL
+ * 对于分页，基本思路是：根据当前部署数据库，生成底层Mybatis所需的数据库方言SQL片段，然后以参数的方式传入底层SQL
  * Mapper语境，组装成合规的SQL语句。
  * </p>
  * 
@@ -45,6 +45,39 @@ public abstract class MbSqlDialect
 	public void setIdentifierQuote(String identifierQuote)
 	{
 		this.identifierQuote = identifierQuote;
+	}
+
+	/**
+	 * 将字符串转换为SQL字符串字面值。
+	 * <p>
+	 * 例如：{@code "abc'def"}应转换为{@code "'abc''def'"}
+	 * </p>
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public String toStringLiteral(String value)
+	{
+		if (value == null)
+			return "NULL";
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append('\'');
+
+		for (int i = 0, len = value.length(); i < len; i++)
+		{
+			char c = value.charAt(i);
+
+			if (c == '\'')
+				sb.append("''");
+			else
+				sb.append(c);
+		}
+
+		sb.append('\'');
+
+		return sb.toString();
 	}
 
 	/**

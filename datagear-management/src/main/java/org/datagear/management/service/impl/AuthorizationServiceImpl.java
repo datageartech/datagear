@@ -113,14 +113,16 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (user.isAdmin())
 			return Authorization.PERMISSION_MAX;
 
+		MbSqlDialect dialect = getDialect();
+
 		int unsetPermission = -9;
 
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user, resourceType, true, false);
 		params.put(DATA_PERMISSION_PARAM_UNSET_PERMISSION, unsetPermission);
 
-		params.put("placeholderId", IDUtil.uuid());
-		params.put("patternSource", escapeForSqlStringValue(patternSource));
+		params.put("placeholderId", dialect.toStringLiteral(IDUtil.uuid()));
+		params.put("patternSource", dialect.toStringLiteral(patternSource));
 
 		List<DataIdPermission> dataIdPermissions = selectListMybatis("getDataIdPermissionForPatternSource", params);
 

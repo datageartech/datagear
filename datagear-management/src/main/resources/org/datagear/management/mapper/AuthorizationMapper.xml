@@ -12,7 +12,7 @@
 		VALUES
 			(
 			#{entity.id}, #{entity.resource}, #{entity.resourceType}, #{entity.principal}, #{entity.principalType},
-			#{entity.permission}, #{entity.enabled},#{entity.createUser.id}
+			#{entity.permission}, #{entity.enabled, jdbcType=VARCHAR},#{entity.createUser.id}
 			)
 	</insert>
 	
@@ -23,7 +23,7 @@
 			AUTH_PRINCIPAL = #{entity.principal},
 			AUTH_PRINCIPAL_TYPE = #{entity.principalType},
 			AUTH_PERMISSION = #{entity.permission},
-			AUTH_ENABLED = #{entity.enabled}
+			AUTH_ENABLED = #{entity.enabled, jdbcType=VARCHAR}
 		WHERE
 			AUTH_ID = #{entity.id}
 	</update>
@@ -75,8 +75,8 @@
 			(
 				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
 				SELECT
-					'${placeholderId}' AS DP_AUTH_DATA_ID,
-					'${patternSource}' AS DP_AUTH_DATA_PATTERN_SRC,
+					${placeholderId} AS DP_AUTH_DATA_ID,
+					${patternSource} AS DP_AUTH_DATA_PATTERN_SRC,
 					PLACEHOLDER_TABLE.PLACEHOLDER_COL
 				FROM
 					/*Derby没有类似from dual的语法，为了兼容其它数据库，这里采用了此种方法*/

@@ -6,11 +6,13 @@
 	<insert id="insert">
 		INSERT INTO DATAGEAR_USER
 			(
-			USER_ID, USER_NAME, USER_PASSWORD, USER_REAL_NAME, USER_EMAIL, USER_IS_ADMIN, USER_CREATE_TIME
+			USER_ID, USER_NAME, USER_PASSWORD, USER_REAL_NAME, USER_EMAIL,
+			USER_IS_ADMIN, USER_CREATE_TIME
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.password}, #{entity.realName}, #{entity.email}, #{entity.admin}, #{entity.createTime}
+			#{entity.id}, #{entity.name}, #{entity.password}, #{entity.realName}, #{entity.email},
+			#{entity.admin, jdbcType=VARCHAR}, #{entity.createTime}
 			)
 	</insert>
 	
@@ -22,7 +24,7 @@
 			</if>
 			USER_REAL_NAME = #{entity.realName},
 			USER_EMAIL = #{entity.email},
-			USER_IS_ADMIN = #{entity.admin}
+			USER_IS_ADMIN = #{entity.admin, jdbcType=VARCHAR}
 		WHERE
 			USER_ID = #{entity.id}
 	</update>

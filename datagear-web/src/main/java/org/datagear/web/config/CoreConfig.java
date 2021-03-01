@@ -17,6 +17,7 @@ import java.util.List;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.TypeHandler;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.NameAsTemplateDashboardWidgetResManager;
@@ -70,6 +71,7 @@ import org.datagear.management.service.impl.SchemaServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
 import org.datagear.management.service.impl.UserServiceImpl;
+import org.datagear.management.util.LiteralBooleanTypeHandler;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.management.util.dialect.MbSqlDialectBuilder;
 import org.datagear.meta.resolver.DBMetaResolver;
@@ -325,6 +327,7 @@ public class CoreConfig implements InitializingBean
 			SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
 			bean.setDataSource(this.dataSourceConfig.dataSource());
 			bean.setMapperLocations(mapperResources);
+			bean.setTypeHandlers(new TypeHandler<?>[] { new LiteralBooleanTypeHandler() });
 			return bean.getObject();
 		}
 		catch (Exception e)
