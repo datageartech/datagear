@@ -7,6 +7,7 @@
 
 package org.datagear.analysis.support;
 
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -25,6 +26,7 @@ import org.datagear.analysis.DataSetProperty.DataType;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.QueryResultSet;
@@ -217,7 +219,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			{
 				DataSetProperty property = properties.get(i);
 
-				Object value = jdbcSupport.getColumnValue(cn, rs, colNames[i], sqlTypes[i].getType());
+				Object value = getColumnValue(cn, rs, colNames[i], sqlTypes[i].getType(), jdbcSupport);
 
 				if (resolveProperties && rowIdx == 0)
 				{
@@ -251,6 +253,21 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		return new ResolvedDataSetResult(result, properties);
 	}
 
+	protected Object getColumnValue(Connection cn, ResultSet rs, String columnName, int sqlType,
+			JdbcSupport jdbcSupport) throws Throwable
+	{
+		Object value = jdbcSupport.getColumnValue(cn, rs, columnName, sqlType);
+
+		// 对于大字符串类型，value可能是字符输入流，这里应转成字符串并关闭输入流，便于后续处理
+		if (value instanceof Reader)
+		{
+			Reader reader = (Reader) value;
+			value = IOUtil.readString(reader, true);
+		}
+
+		return value;
+	}
+
 	/**
 	 * 由SQL类型转换为{@linkplain DataSetProperty#getType()}。
 	 * 
@@ -279,8 +296,10 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 			case Types.CHAR:
 			case Types.NCHAR:
-			case Types.NVARCHAR:
 			case Types.VARCHAR:
+			case Types.NVARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.LONGNVARCHAR:
 			{
 				dataType = DataType.STRING;
 				break;
@@ -319,12 +338,14 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			}
 
 			case Types.TIME:
+			case Types.TIME_WITH_TIMEZONE:
 			{
 				dataType = DataType.TIME;
 				break;
 			}
 
 			case Types.TIMESTAMP:
+			case Types.TIMESTAMP_WITH_TIMEZONE:
 			{
 				dataType = DataType.TIMESTAMP;
 				break;
