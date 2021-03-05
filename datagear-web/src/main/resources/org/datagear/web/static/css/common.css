@@ -32,9 +32,7 @@ a.link:hover{
 	text-decoration: none;
 }
 
-input:focus,
-button:focus,
-textarea:focus{
+*:focus{
 	outline: none;
 }
 
