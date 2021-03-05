@@ -148,7 +148,6 @@ public class HtmlChartWidgetEntityServiceImpl
 	public int updateCreateUserId(String oldUserId, String newUserId)
 	{
 		Map<String, Object> params = buildParamMap();
-		addIdentifierQuoteParameter(params);
 		params.put("oldUserId", oldUserId);
 		params.put("newUserId", newUserId);
 
@@ -197,14 +196,22 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	protected void saveWidgetDataSetRelations(HtmlChartWidgetEntity entity)
 	{
-		deleteMybatis("deleteDataSetRelationById", entity.getId());
+		Map<String, Object> delParams = buildParamMap();
+		delParams.put("id", entity.getId());
+
+		deleteMybatis("deleteDataSetRelationById", delParams);
 
 		List<WidgetDataSetRelation> relations = getWidgetDataSetRelations(entity);
 
 		if (!relations.isEmpty())
 		{
 			for (WidgetDataSetRelation relation : relations)
-				insertMybatis("insertDataSetRelation", relation);
+			{
+				Map<String, Object> insertParams = buildParamMap();
+				insertParams.put("entity", relation);
+
+				insertMybatis("insertDataSetRelation", insertParams);
+			}
 		}
 	}
 
@@ -269,7 +276,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	protected void setChartDataSets(HtmlChartWidgetEntity widget, boolean forAnalysis)
 	{
-		Map<String, Object> sqlParams = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> sqlParams = buildParamMap();
 		sqlParams.put("widgetId", widget.getId());
 
 		List<WidgetDataSetRelation> relations = selectListMybatis("getDataSetRelations", sqlParams);

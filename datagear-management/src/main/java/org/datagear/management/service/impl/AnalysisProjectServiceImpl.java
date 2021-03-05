@@ -59,7 +59,6 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 	public int updateCreateUserId(String oldUserId, String newUserId)
 	{
 		Map<String, Object> params = buildParamMap();
-		addIdentifierQuoteParameter(params);
 		params.put("oldUserId", oldUserId);
 		params.put("newUserId", newUserId);
 

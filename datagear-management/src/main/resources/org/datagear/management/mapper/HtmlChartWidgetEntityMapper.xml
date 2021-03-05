@@ -24,8 +24,8 @@
 			)
 		VALUES
 			(
-			#{widgetId}, #{dataSetId}, #{propertySignsJson, jdbcType=VARCHAR}, #{alias, jdbcType=VARCHAR}, #{attachment, jdbcType=VARCHAR},
-			#{paramValuesJson, jdbcType=VARCHAR}, #{order}
+			#{entity.widgetId}, #{entity.dataSetId}, #{entity.propertySignsJson, jdbcType=VARCHAR}, #{entity.alias, jdbcType=VARCHAR}, #{entity.attachment, jdbcType=VARCHAR},
+			#{entity.paramValuesJson, jdbcType=VARCHAR}, #{entity.order}
 			)
 	</insert>
 	

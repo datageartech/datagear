@@ -16,6 +16,7 @@ import org.datagear.connection.support.DerbyURLSensor;
 import org.datagear.connection.support.MySqlURLSensor;
 import org.datagear.connection.support.OracleURLSensor;
 import org.datagear.connection.support.PostgresqlURLSensor;
+import org.datagear.connection.support.SqlServerURLSensor;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
@@ -46,6 +47,8 @@ public class MbSqlDialectBuilder
 	public static final String DIALECT_NAME_ORACLE = "oracle";
 
 	public static final String DIALECT_NAME_POSTGRESQL = "postgresql";
+
+	public static final String DIALECT_NAME_SQLSERVER = "sqlserver";
 
 	public static final String DIALECT_NAME_DEFAULT = "default";
 
@@ -162,6 +165,10 @@ public class MbSqlDialectBuilder
 		{
 			dialect = buildPostgresqlMbSqlDialect(cn);
 		}
+		else if (DIALECT_NAME_SQLSERVER.equalsIgnoreCase(dialectName))
+		{
+			dialect = buildSqlserverMbSqlDialect(cn);
+		}
 		else if (DIALECT_NAME_DEFAULT.equalsIgnoreCase(dialectName))
 		{
 			dialect = buildDefaultMbSqlDialect(cn);
@@ -201,6 +208,10 @@ public class MbSqlDialectBuilder
 		{
 			dialect = buildPostgresqlMbSqlDialect(cn);
 		}
+		else if (SqlServerURLSensor.INSTANCE.supports(url))
+		{
+			dialect = buildSqlserverMbSqlDialect(cn);
+		}
 
 		return dialect;
 	}
@@ -223,6 +234,11 @@ public class MbSqlDialectBuilder
 	protected PostgresqlMbSqlDialect buildPostgresqlMbSqlDialect(Connection cn) throws SQLException
 	{
 		return new PostgresqlMbSqlDialect(getIdentifierQuote(cn));
+	}
+
+	protected SqlserverMbSqlDialect buildSqlserverMbSqlDialect(Connection cn) throws SQLException
+	{
+		return new SqlserverMbSqlDialect(getIdentifierQuote(cn));
 	}
 
 	protected DefaultMbSqlDialect buildDefaultMbSqlDialect(Connection cn) throws SQLException

@@ -51,4 +51,45 @@ public class DerbyFunctionSupport
 
 		return source.replaceAll(regex, target);
 	}
+
+	/**
+	 * 取最大值。
+	 * 
+	 * @param v0
+	 * @param v1
+	 * @return
+	 */
+	public static Integer maxInt(Integer v0, Integer v1)
+	{
+		if (v0 == null)
+			return v1;
+
+		if (v1 == null)
+			return v0;
+
+		return Math.max(v0, v1);
+	}
+
+	/**
+	 * 取余数。
+	 * 
+	 * @param valueNum
+	 * @param divNum
+	 * @return
+	 */
+	public static int modInt(int valueNum, int divNum)
+	{
+		return valueNum % divNum;
+	}
+
+	/**
+	 * 取字符串长度。
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static int lengthStr(String str)
+	{
+		return (str == null ? 0 : str.length());
+	}
 }

@@ -100,7 +100,7 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 	@Override
 	public int deleteByResource(String resourceType, String... resources)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("resourceType", resourceType);
 		params.put("resources", resources);
 

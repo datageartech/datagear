@@ -24,6 +24,14 @@ import org.datagear.management.service.impl.AbstractMybatisService;
  */
 public abstract class MbSqlDialect
 {
+	public static final String FUNC_NAME_REPLACE = "DATAGEAR_REPLACE";
+
+	public static final String FUNC_NAME_MODINT = "DATAGEAR_FUNC_MODINT";
+
+	public static final String FUNC_NAME_LENGTH = "DATAGEAR_FUNC_LENGTH";
+
+	public static final String FUNC_NAME_MAX = "MAX";
+
 	/** 标识符引用符 */
 	private String identifierQuote;
 
@@ -45,6 +53,46 @@ public abstract class MbSqlDialect
 	public void setIdentifierQuote(String identifierQuote)
 	{
 		this.identifierQuote = identifierQuote;
+	}
+
+	/**
+	 * 获取替换字符串子串的函数名。
+	 * 
+	 * @return
+	 */
+	public String funcNameReplace()
+	{
+		return FUNC_NAME_REPLACE;
+	}
+
+	/**
+	 * 获取求余函数名。
+	 * 
+	 * @return
+	 */
+	public String funcNameModInt()
+	{
+		return FUNC_NAME_MODINT;
+	}
+
+	/**
+	 * 获取求字符串长度的函数名。
+	 * 
+	 * @return
+	 */
+	public String funcNameLength()
+	{
+		return FUNC_NAME_LENGTH;
+	}
+
+	/**
+	 * 获取MAX函数名。
+	 * 
+	 * @return
+	 */
+	public String funcNameMax()
+	{
+		return FUNC_NAME_MAX;
 	}
 
 	/**

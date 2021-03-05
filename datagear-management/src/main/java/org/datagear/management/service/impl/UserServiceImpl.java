@@ -142,7 +142,6 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 	public User getByName(String name)
 	{
 		Map<String, Object> params = buildParamMap();
-		addIdentifierQuoteParameter(params);
 		params.put("name", name);
 
 		User user = selectOneMybatis("getByName", params);
@@ -158,7 +157,6 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 			newPassword = this.userPasswordEncoder.encode(newPassword);
 
 		Map<String, Object> params = buildParamMap();
-		addIdentifierQuoteParameter(params);
 		params.put("id", id);
 		params.put("password", newPassword);
 

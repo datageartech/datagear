@@ -81,7 +81,6 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 */
 	protected boolean deleteById(ID id, Map<String, Object> params)
 	{
-		addIdentifierQuoteParameter(params);
 		params.put("id", id);
 
 		return (deleteMybatis("deleteById", params) > 0);
@@ -119,7 +118,6 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 */
 	protected T getById(ID id, Map<String, Object> params, boolean postProcessSelect)
 	{
-		addIdentifierQuoteParameter(params);
 		params.put("id", id);
 
 		T entity = selectOneMybatis("getById", params);

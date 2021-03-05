@@ -119,7 +119,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public int updateCreateUserId(String oldUserId, String newUserId)
 	{
 		Map<String, Object> params = buildParamMap();
-		addIdentifierQuoteParameter(params);
 		params.put("oldUserId", oldUserId);
 		params.put("newUserId", newUserId);
 
@@ -130,7 +129,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public int deleteByUserId(String... userIds)
 	{
 		Map<String, Object> params = buildParamMap();
-		addIdentifierQuoteParameter(params);
 		params.put("userIds", userIds);
 
 		return updateMybatis("deleteByUserId", params);

@@ -185,7 +185,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	public int updateCreateUserId(String oldUserId, String newUserId)
 	{
 		Map<String, Object> params = buildParamMap();
-		addIdentifierQuoteParameter(params);
 		params.put("oldUserId", oldUserId);
 		params.put("newUserId", newUserId);
 
@@ -233,7 +232,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean addSqlDataSetEntity(SqlDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("insertSqlDataSetEntity", params) > 0);
@@ -241,7 +240,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean addJsonValueDataSetEntity(JsonValueDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("insertJsonValueDataSetEntity", params) > 0);
@@ -249,7 +248,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean addJsonFileDataSetEntity(JsonFileDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("insertJsonFileDataSetEntity", params) > 0);
@@ -257,7 +256,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean addExcelDataSetEntity(ExcelDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("insertExcelDataSetEntity", params) > 0);
@@ -265,7 +264,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean addCsvValueDataSetEntity(CsvValueDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("insertCsvValueDataSetEntity", params) > 0);
@@ -273,7 +272,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean addCsvFileDataSetEntity(CsvFileDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("insertCsvFileDataSetEntity", params) > 0);
@@ -281,7 +280,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean addHttpDataSetEntity(HttpDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("insertHttpDataSetEntity", params) > 0);
@@ -321,7 +320,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean updateSqlDataSetEntity(SqlDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("updateSqlDataSetEntity", params) > 0);
@@ -329,7 +328,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean updateJsonValueDataSetEntity(JsonValueDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("updateJsonValueDataSetEntity", params) > 0);
@@ -337,7 +336,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean updateJsonFileDataSetEntity(JsonFileDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("updateJsonFileDataSetEntity", params) > 0);
@@ -345,7 +344,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean updateExcelDataSetEntity(ExcelDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("updateExcelDataSetEntity", params) > 0);
@@ -353,7 +352,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean updateCsvValueDataSetEntity(CsvValueDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("updateCsvValueDataSetEntity", params) > 0);
@@ -361,7 +360,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean updateCsvFileDataSetEntity(CsvFileDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("updateCsvFileDataSetEntity", params) > 0);
@@ -369,7 +368,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected boolean updateHttpDataSetEntity(HttpDataSetEntity entity)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("entity", entity);
 
 		return (updateMybatis("updateHttpDataSetEntity", params) > 0);
@@ -446,7 +445,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (dataSetEntity == null)
 			return;
 
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("dataSetId", dataSetEntity.getId());
 
 		List<DataSetPropertyPO> propertyPOs = selectListMybatis("getPropertyPOs", params);
@@ -460,7 +459,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected SqlDataSetEntity getSqlDataSetEntityById(String id)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("id", id);
 
 		SqlDataSetEntity entity = selectOneMybatis("getSqlDataSetEntityById", params);
@@ -470,7 +469,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected JsonValueDataSetEntity getJsonValueDataSetEntityById(String id)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("id", id);
 
 		JsonValueDataSetEntity entity = selectOneMybatis("getJsonValueDataSetEntityById", params);
@@ -480,7 +479,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected JsonFileDataSetEntity getJsonFileDataSetEntityById(String id)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("id", id);
 
 		JsonFileDataSetEntity entity = selectOneMybatis("getJsonFileDataSetEntityById", params);
@@ -493,7 +492,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected ExcelDataSetEntity getExcelDataSetEntityById(String id)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("id", id);
 
 		ExcelDataSetEntity entity = selectOneMybatis("getExcelDataSetEntityById", params);
@@ -506,7 +505,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected CsvValueDataSetEntity getCsvValueDataSetEntityById(String id)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("id", id);
 
 		CsvValueDataSetEntity entity = selectOneMybatis("getCsvValueDataSetEntityById", params);
@@ -516,7 +515,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected CsvFileDataSetEntity getCsvFileDataSetEntityById(String id)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("id", id);
 
 		CsvFileDataSetEntity entity = selectOneMybatis("getCsvFileDataSetEntityById", params);
@@ -529,7 +528,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected HttpDataSetEntity getHttpDataSetEntityById(String id)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		params.put("id", id);
 
 		HttpDataSetEntity entity = selectOneMybatis("getHttpDataSetEntityById", params);
@@ -562,27 +561,43 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected void saveDataSetPropertyPOs(DataSetEntity entity)
 	{
-		deleteMybatis("deletePropertyPOs", entity.getId());
+		Map<String, Object> delParams = buildParamMap();
+		delParams.put("dataSetId", entity.getId());
+
+		deleteMybatis("deletePropertyPOs", delParams);
 
 		List<DataSetPropertyPO> pos = DataSetPropertyPO.from(entity);
 
 		if (!pos.isEmpty())
 		{
 			for (DataSetPropertyPO relation : pos)
-				insertMybatis("insertPropertyPO", relation);
+			{
+				Map<String, Object> insertParams = buildParamMap();
+				insertParams.put("entity", relation);
+
+				insertMybatis("insertPropertyPO", insertParams);
+			}
 		}
 	}
 
 	protected void saveDataSetParamPOs(DataSetEntity entity)
 	{
-		deleteMybatis("deleteParamPOs", entity.getId());
+		Map<String, Object> delParams = buildParamMap();
+		delParams.put("dataSetId", entity.getId());
+
+		deleteMybatis("deleteParamPOs", delParams);
 
 		List<DataSetParamPO> pos = DataSetParamPO.from(entity);
 
 		if (!pos.isEmpty())
 		{
 			for (DataSetParamPO relation : pos)
-				insertMybatis("insertParamPO", relation);
+			{
+				Map<String, Object> insertParams = buildParamMap();
+				insertParams.put("entity", relation);
+
+				insertMybatis("insertParamPO", insertParams);
+			}
 		}
 	}
 

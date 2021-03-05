@@ -222,7 +222,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 */
 	protected List<Integer> getPermissions(User user, List<ID> ids, int permissionForAbsence)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user);
 		params.put("ids", ids);
 

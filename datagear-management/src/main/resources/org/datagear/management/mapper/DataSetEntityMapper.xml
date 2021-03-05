@@ -110,7 +110,7 @@
 			)
 		VALUES
 			(
-			#{dataSetId}, #{child.name}, #{child.type}, #{child.label, jdbcType=VARCHAR}, #{order}
+			#{entity.dataSetId}, #{entity.child.name}, #{entity.child.type}, #{entity.child.label, jdbcType=VARCHAR}, #{entity.order}
 			)
 	</insert>
 	
@@ -122,8 +122,8 @@
 			)
 		VALUES
 			(
-			#{dataSetId}, #{child.name}, #{child.type}, #{child.required}, #{child.desc, jdbcType=VARCHAR},
-			 #{child.inputType, jdbcType=VARCHAR}, #{child.inputPayload, jdbcType=VARCHAR}, #{order}
+			#{entity.dataSetId}, #{entity.child.name}, #{entity.child.type}, #{entity.child.required}, #{entity.child.desc, jdbcType=VARCHAR},
+			 #{entity.child.inputType, jdbcType=VARCHAR}, #{entity.child.inputPayload, jdbcType=VARCHAR}, #{entity.order}
 			)
 	</insert>
 	

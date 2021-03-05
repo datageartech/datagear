@@ -49,7 +49,7 @@ public class RoleUserServiceImpl extends AbstractMybatisEntityService<String, Ro
 	@Override
 	public RoleUser getByRoleAndUser(Role role, User user)
 	{
-		Map<String, Object> paramMap = buildParamMapWithIdentifierQuoteParameter();
+		Map<String, Object> paramMap = buildParamMap();
 		paramMap.put("role", role);
 		paramMap.put("user", user);
 

@@ -79,7 +79,7 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 		param.put("schemaId", schemaId);
 		param.put("userId", userId);
 
-		addPagingQueryParams(param, 0, HISTORY_REMAIN);
+		addDialectParamsPagingQuery(param, 0, HISTORY_REMAIN);
 
 		// 如果不支持分页，则删除30天以前的历史
 		if (!getDialect().supportsPaging())
