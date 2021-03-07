@@ -28,24 +28,6 @@ public class SqlserverMbSqlDialect extends MbSqlDialect
 	}
 
 	@Override
-	public String funcNameReplace()
-	{
-		return DEFAULT_FUNC_PREFIX + super.funcNameReplace();
-	}
-
-	@Override
-	public String funcNameModInt()
-	{
-		return DEFAULT_FUNC_PREFIX + super.funcNameModInt();
-	}
-
-	@Override
-	public String funcNameLength()
-	{
-		return DEFAULT_FUNC_PREFIX + super.funcNameLength();
-	}
-
-	@Override
 	public boolean supportsPaging()
 	{
 		return false;
@@ -61,5 +43,23 @@ public class SqlserverMbSqlDialect extends MbSqlDialect
 	public String pagingSqlFoot(int index, int fetchSize)
 	{
 		return null;
+	}
+
+	@Override
+	public String funcNameReplace()
+	{
+		return DEFAULT_FUNC_PREFIX + super.funcNameReplace();
+	}
+
+	@Override
+	public String funcNameModInt()
+	{
+		return DEFAULT_FUNC_PREFIX + super.funcNameModInt();
+	}
+
+	@Override
+	public String funcNameLength()
+	{
+		return DEFAULT_FUNC_PREFIX + super.funcNameLength();
 	}
 }

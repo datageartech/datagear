@@ -32,6 +32,18 @@ public class PostgresqlMbSqlDialect extends MbSqlDialect
 	}
 
 	@Override
+	public String pagingSqlHead(int index, int fetchSize)
+	{
+		return "SELECT PGQ.* FROM (";
+	}
+
+	@Override
+	public String pagingSqlFoot(int index, int fetchSize)
+	{
+		return ") PGQ LIMIT " + fetchSize + " OFFSET " + index;
+	}
+
+	@Override
 	public String toStringLiteral(String value)
 	{
 		String literal = super.toStringLiteral(value);
@@ -46,17 +58,5 @@ public class PostgresqlMbSqlDialect extends MbSqlDialect
 		// 错误，无法执行，在末尾添加::text进行类型转换可解决。
 
 		return literal + "::text";
-	}
-
-	@Override
-	public String pagingSqlHead(int index, int fetchSize)
-	{
-		return "SELECT PGQ.* FROM (";
-	}
-
-	@Override
-	public String pagingSqlFoot(int index, int fetchSize)
-	{
-		return ") PGQ LIMIT " + fetchSize + " OFFSET " + index;
 	}
 }

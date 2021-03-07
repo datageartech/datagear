@@ -70,9 +70,10 @@ public class MbSqlDialectBuilder
 	}
 
 	/**
-	 * 设置方言，参考{@code DIALECT_NAME_*}。
+	 * 设置方言名，可以是{@code DIALECT_NAME_*}常量标识，或者是{@linkplain MbSqlDialect}的实现类全名。
 	 * 
 	 * @param dialectName
+	 *            允许为{@code null}，此时将根当前数据库自动判断
 	 */
 	public void setDialectName(String dialectName)
 	{
@@ -173,8 +174,30 @@ public class MbSqlDialectBuilder
 		{
 			dialect = buildDefaultMbSqlDialect(cn);
 		}
+		else
+		{
+			dialect = buildByDialectClassName(cn, dialectName);
+		}
 
 		return dialect;
+	}
+
+	protected MbSqlDialect buildByDialectClassName(Connection cn, String dialectClassName) throws SQLException
+	{
+		try
+		{
+			Class<?> dialectClass = Class.forName(dialectClassName);
+			MbSqlDialect dialect = (MbSqlDialect) dialectClass.newInstance();
+
+			if (StringUtil.isEmpty(dialect.getIdentifierQuote()))
+				dialect.setIdentifierQuote(getIdentifierQuote(cn));
+
+			return dialect;
+		}
+		catch (Exception e)
+		{
+			throw new MbSqlDialectException(e);
+		}
 	}
 
 	/**
