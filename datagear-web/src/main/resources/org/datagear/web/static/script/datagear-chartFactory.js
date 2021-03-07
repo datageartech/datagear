@@ -1820,13 +1820,30 @@
 	};
 	
 	/**
-	 * 返回第一个数据集结果，没有则返回undefined。
+	 * 返回第一个主件或者附件数据集结果，没有则返回undefined。
 	 * 
 	 * @param results
+	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
 	 */
-	chartBase.resultFirst = function(results)
+	chartBase.resultFirst = function(results, attachment)
 	{
-		return this.resultAt(results, 0);
+		attachment = (attachment == null ? false : attachment);
+		
+		var index = undefined;
+		
+		var chartDataSets = this.chartDataSetsNonNull();
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var isAttachment = chartDataSets[i].attachment;
+			
+			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
+			{
+				index = i;
+				break;
+			}
+		}
+		
+		return (index == null ? undefined : this.resultAt(results, index));
 	};
 	
 	/**
