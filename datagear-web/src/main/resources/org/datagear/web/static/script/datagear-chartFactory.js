@@ -446,6 +446,7 @@
 			throw new Error("Chart has been initialized");
 		this._inited = true;
 		
+		this._initBaseProperties();
 		this._initOptions();
 		this._initTheme();
 		this._initListener();
@@ -457,6 +458,19 @@
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
+	};
+	
+	/**
+	 * 初始化基础属性。
+	 */
+	chartBase._initBaseProperties = function()
+	{
+		//为chartDataSets元素添加index属性，便于后续根据其索引获取结果集等信息
+		this.chartDataSets = (this.chartDataSets == null ? [] : this.chartDataSets);
+		for(var i=0; i<this.chartDataSets.length; i++)
+		{
+			this.chartDataSets[i].index = i;
+		}
 	};
 	
 	/**
@@ -1603,7 +1617,7 @@
 	};
 	
 	/**
-	 * 获取图表数据集对象数组。
+	 * 获取所有图表数据集对象数组。
 	 */
 	chartBase.chartDataSetsNonNull = function()
 	{
@@ -1611,14 +1625,45 @@
 	};
 	
 	/**
-	 * 获取第一个图表数据集对象。
+	 * 获取主体（非附件）图表数据集对象数组，它们的用途是绘制图表。
 	 * 
-	 * @param chart
-	 * @return {...} 或  undefined
+	 * @return []
 	 */
-	chartBase.chartDataSetFirst = function()
+	chartBase.chartDataSetsMain = function()
 	{
-		return this.chartDataSetAt(0);
+		var re = [];
+		
+		var chartDataSets = this.chartDataSetsNonNull();
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			if(chartDataSets[i].attachment)
+				continue;
+			
+			re.push(chartDataSets[i]);
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取附件图表数据集对象数组，它们的用途不是绘制图表。
+	 * 
+	 * @return []
+	 */
+	chartBase.chartDataSetsAttachment = function()
+	{
+		var re = [];
+		
+		var chartDataSets = this.chartDataSetsNonNull();
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			if(chartDataSets[i].attachment)
+			{
+				re.push(chartDataSets[i]);
+			}
+		}
+		
+		return re;
 	};
 	
 	/**
@@ -1629,6 +1674,33 @@
 	chartBase.chartDataSetAt = function(index)
 	{
 		return (!this.chartDataSets || this.chartDataSets.length <= index ? undefined : this.chartDataSets[index]);
+	};
+	
+	/**
+	 * 获取第一个主体或者附件图表数据集对象。
+	 * 
+	 * @param attachment 可选，true 获取第一个附件图表数据集；false 获取第一个主体（非附件）图表数据集。默认值为：false
+	 * @return {...} 或  undefined
+	 */
+	chartBase.chartDataSetFirst = function(attachment)
+	{
+		attachment = (attachment == null ? false : attachment);
+		
+		var re = undefined;
+		
+		var chartDataSets = this.chartDataSetsNonNull();
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var isAttachment = chartDataSets[i].attachment;
+			
+			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
+			{
+				re = chartDataSets[i];
+				break;
+			}
+		}
+		
+		return re;
 	};
 	
 	/**
@@ -1724,16 +1796,6 @@
 		
 		return (label || "");
 	};
-
-	/**
-	 * 返回第一个数据集结果，没有则返回undefined。
-	 * 
-	 * @param results
-	 */
-	chartBase.resultFirst = function(results)
-	{
-		return this.resultAt(results, 0);
-	};
 	
 	/**
 	 * 返回指定索引的数据集结果，没有则返回undefined。
@@ -1745,7 +1807,28 @@
 	{
 		return (!results || results.length <= index ? undefined : results[index]);
 	};
-
+	
+	/**
+	 * 返回指定图表数据集对应的数据集结果，没有则返回undefined。
+	 * 
+	 * @param results
+	 * @param chartDataSet
+	 */
+	chartBase.resultOf = function(results, chartDataSet)
+	{
+		return this.resultAt(results, chartDataSet.index);
+	};
+	
+	/**
+	 * 返回第一个数据集结果，没有则返回undefined。
+	 * 
+	 * @param results
+	 */
+	chartBase.resultFirst = function(results)
+	{
+		return this.resultAt(results, 0);
+	};
+	
 	/**
 	 * 获取数据集结果的数据对象。
 	 * 
