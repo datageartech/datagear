@@ -1625,7 +1625,7 @@
 	};
 	
 	/**
-	 * 获取主体（非附件）图表数据集对象数组，它们的用途是绘制图表。
+	 * 获取主件图表数据集对象数组，它们的用途是绘制图表。
 	 * 
 	 * @return []
 	 */
@@ -1677,9 +1677,9 @@
 	};
 	
 	/**
-	 * 获取第一个主体或者附件图表数据集对象。
+	 * 获取第一个主件或者附件图表数据集对象。
 	 * 
-	 * @param attachment 可选，true 获取第一个附件图表数据集；false 获取第一个主体（非附件）图表数据集。默认值为：false
+	 * @param attachment 可选，true 获取第一个附件图表数据集；false 获取第一个主件图表数据集。默认值为：false
 	 * @return {...} 或  undefined
 	 */
 	chartBase.chartDataSetFirst = function(attachment)
