@@ -16,6 +16,7 @@ import java.io.Reader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -492,7 +493,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		String dashboardFileName = "";
 		List<String> templates = new ArrayList<>();
 
-		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
+		File dashboardDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 
 		String fileName = multipartFile.getOriginalFilename();
 
@@ -501,43 +502,28 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			ZipInputStream in = IOUtil.getZipInputStream(multipartFile.getInputStream());
 			try
 			{
-				IOUtil.unzip(in, tmpDirectory);
+				IOUtil.unzip(in, dashboardDirectory);
 			}
 			finally
 			{
 				IOUtil.close(in);
 			}
 
-			File[] files = tmpDirectory.listFiles();
+			File[] files = dashboardDirectory.listFiles();
 
 			// 如果压缩包里仅有一个文件夹，那么继续往里查找，解决用户压缩包里有多余嵌套目录的情况
 			while (files != null && files.length == 1 && files[0].isDirectory())
 			{
-				tmpDirectory = files[0];
-				files = tmpDirectory.listFiles();
+				dashboardDirectory = files[0];
+				files = dashboardDirectory.listFiles();
 			}
 
-			if (files != null)
-			{
-				for (File file : files)
-				{
-					if (file.isDirectory())
-						continue;
-
-					String name = file.getName();
-
-					if (name.equalsIgnoreCase("index.html") || name.equalsIgnoreCase("index.htm"))
-						templates.add(0, name);
-					else if (FileUtil.isExtension(name, "html") || FileUtil.isExtension(name, "htm"))
-						templates.add(name);
-				}
-			}
-
-			dashboardFileName = FileUtil.getRelativePath(this.tempDirectory, tmpDirectory);
+			inflateTemplates(dashboardDirectory, dashboardDirectory, templates);
+			dashboardFileName = FileUtil.getRelativePath(this.tempDirectory, dashboardDirectory);
 		}
 		else
 		{
-			File file = FileUtil.getFile(tmpDirectory, fileName);
+			File file = FileUtil.getFile(dashboardDirectory, fileName);
 
 			InputStream in = null;
 			OutputStream out = null;
@@ -554,7 +540,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			}
 
 			templates.add(fileName);
-			dashboardFileName = tmpDirectory.getName();
+			dashboardFileName = dashboardDirectory.getName();
 		}
 
 		dasboardName = FileUtil.deleteExtension(fileName);
@@ -566,6 +552,65 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		results.put("dashboardFileName", dashboardFileName);
 
 		return results;
+	}
+
+	protected void inflateTemplates(File startDirectory, File currentDirectory, List<String> templates)
+	{
+		if (currentDirectory == null || !currentDirectory.isDirectory())
+			return;
+
+		File[] children = currentDirectory.listFiles();
+
+		// "index.html"、"index.htm"靠前排，作为首页模板，文件夹靠后排
+		Arrays.sort(children, new Comparator<File>()
+		{
+			@Override
+			public int compare(File o1, File o2)
+			{
+				String o1Name = o1.getName();
+				String o2Name = o2.getName();
+
+				if (o1.isDirectory() && o2.isDirectory())
+				{
+					return o1Name.compareTo(o2Name);
+				}
+				else if (o1.isDirectory())
+				{
+					return 1;
+				}
+				else if (o2.isDirectory())
+				{
+					return -1;
+				}
+				else
+				{
+					if (o1Name.equalsIgnoreCase("index.html") || o1Name.equalsIgnoreCase("index.htm"))
+						return -1;
+					else if (o2Name.equalsIgnoreCase("index.html") || o2Name.equalsIgnoreCase("index.htm"))
+						return 1;
+					else
+						return o1Name.compareTo(o2Name);
+				}
+			}
+		});
+
+		for (File child : children)
+		{
+			if (child.isDirectory())
+				inflateTemplates(startDirectory, child, templates);
+			else
+			{
+				String name = child.getName();
+
+				if (FileUtil.isExtension(name, "html") || FileUtil.isExtension(name, "htm"))
+				{
+					String path = FileUtil.getRelativePath(startDirectory, child);
+					path = FileUtil.trimPath(path, FileUtil.PATH_SEPARATOR_SLASH);
+
+					templates.add(path);
+				}
+			}
+		}
 	}
 
 	@RequestMapping(value = "/saveImport", produces = CONTENT_TYPE_JSON)
