@@ -494,8 +494,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 
-		dashboardFileName = tmpDirectory.getName();
-
 		String fileName = multipartFile.getOriginalFilename();
 
 		if (FileUtil.isExtension(fileName, "zip"))
@@ -511,6 +509,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			}
 
 			File[] files = tmpDirectory.listFiles();
+
+			// 如果压缩包里仅有一个文件夹，那么继续往里查找，解决用户压缩包里有多余嵌套目录的情况
+			while (files != null && files.length == 1 && files[0].isDirectory())
+			{
+				tmpDirectory = files[0];
+				files = tmpDirectory.listFiles();
+			}
+
 			if (files != null)
 			{
 				for (File file : files)
@@ -526,6 +532,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 						templates.add(name);
 				}
 			}
+
+			dashboardFileName = FileUtil.getRelativePath(this.tempDirectory, tmpDirectory);
 		}
 		else
 		{
@@ -546,6 +554,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			}
 
 			templates.add(fileName);
+			dashboardFileName = tmpDirectory.getName();
 		}
 
 		dasboardName = FileUtil.deleteExtension(fileName);
