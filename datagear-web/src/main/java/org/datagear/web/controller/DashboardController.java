@@ -808,7 +808,19 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidget(user, id);
 
-		showDashboard(request, response, model, user, dashboardWidget, dashboardWidget.getFirstTemplate());
+		String firstTemplate = dashboardWidget.getFirstTemplate();
+
+		// 如果首页模板是在嵌套路径下，则应重定向到具体路径，避免页面内以相对路径引用的资源找不到
+		int subPathSlashIdx = firstTemplate.indexOf(FileUtil.PATH_SEPARATOR_SLASH);
+		if (subPathSlashIdx > 0 && subPathSlashIdx < firstTemplate.length() - 1)
+		{
+			response.sendRedirect(
+					WebUtils.getContextPath(request) + "/analysis/dashboard/show/" + id + "/" + firstTemplate);
+		}
+		else
+		{
+			showDashboard(request, response, model, user, dashboardWidget, firstTemplate);
+		}
 	}
 
 	/**
