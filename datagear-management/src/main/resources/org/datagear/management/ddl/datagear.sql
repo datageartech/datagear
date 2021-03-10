@@ -774,3 +774,9 @@ PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'org.datagear.management
 --valueStr    字符串
 CREATE FUNCTION DATAGEAR_FUNC_LENGTH(valueStr VARCHAR(1000)) RETURNS INTEGER
 PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'org.datagear.management.util.DerbyFunctionSupport.lengthStr';
+
+
+-----------------------------------------
+--version[2.4.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
