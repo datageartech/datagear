@@ -103,6 +103,17 @@
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
 				var data = chart.resultNameValueObjects(result, np, vps[j]);
 				
+				//当np是数值类型时，采用{name:..., value:...}格式的数据会导致折线图不对，所以这里采用[name,value]格式
+				var data = chart.resultRowArrays(result, [ np, vps[j] ]);
+				var dataNew = [];
+				
+				for(var k=0; k<data.length; k++)
+				{
+					dataNew[k] = { value: data[k] };
+				}
+				
+				data = dataNew;
+				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
 				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
@@ -165,8 +176,8 @@
 		var echartsData = echartsEventParams.data;
 		var data = {};
 		
-		data[signNameMap.name] = echartsData.name;
-		data[signNameMap.value] = echartsData.value;
+		data[signNameMap.name] = echartsData.value[0];
+		data[signNameMap.value] = echartsData.value[1];
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -259,6 +270,8 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
+				
+				//当np是数值类型时，采用[name,value]格式的数据会导致柱状图无法绘制，所以这里采用{name:..., value:...}格式
 				var data = chart.resultNameValueObjects(result, np, vps[j]);
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
