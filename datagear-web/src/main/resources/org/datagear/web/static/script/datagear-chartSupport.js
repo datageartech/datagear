@@ -237,7 +237,7 @@
 		var stack = renderOptions.stack;//是否堆叠
 		var horizontal = renderOptions.horizontal;//是否横向
 		//是否按数据集分组堆叠
-		var stackGroup = renderOptions.stackGroup == undefined ? true : renderOptions.stackGroup;
+		var stackGroup = (renderOptions.stackGroup == undefined ? true : renderOptions.stackGroup);
 		var isCategory = ((horizontal ? renderOptions.yAxis.type : renderOptions.xAxis.type) == "category");
 		
 		var chartDataSets = chart.chartDataSetsMain();
@@ -342,7 +342,6 @@
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
-		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		//是否堆叠
 		var stack = (options && options.dgStack);
 		//坐标类型：radius（径向）、angle（角度）
@@ -953,14 +952,12 @@
 			
 			for(var j=0; j<data.length; j++)
 			{
-				var dataEle = { value: [ data[j][0], data[j][1] ] };
+				var dataEle = { value: data[j] };
 				
 				if(wp)
 				{
-					dataEle.weight = data[j][2];
-					
-					min = (min == undefined ? dataEle.weight : Math.min(min, dataEle.weight));
-					max = (max == undefined ? dataEle.weight : Math.max(max, dataEle.weight));
+					min = (min == undefined ? data[j][2] : Math.min(min, data[j][2]));
+					max = (max == undefined ? data[j][2] : Math.max(max, data[j][2]));
 				}
 				
 				dataNew[j] = dataEle;
@@ -978,7 +975,7 @@
 		if(min != null && max != null && max <= min)
 			max = min + 1;
 		
-		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "weight");
+		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
 		var options = { legend: {data: legendData}, series: series };
 		
@@ -1017,8 +1014,8 @@
 		
 		data[signNameMap.name] = echartsData.value[0];
 		data[signNameMap.value] = echartsData.value[1];
-		if(echartsData.weight !== undefined)
-			data[signNameMap.weight] = echartsData.weight;
+		if(echartsData.value.length > 2)
+			data[signNameMap.weight] = echartsData.value[2];
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -1071,8 +1068,6 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		chartSupport.clearChartOriginalDataIndexForRange(chart);
-		
 		var legendData = [];
 		var indicatorData = [];
 		var seriesData = [];
@@ -1080,8 +1075,6 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var ip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.item);
@@ -1144,9 +1137,10 @@
 		for(var j=0; j<iv.length; j++)
 		{
 			var myData = { name: iv[j], value: vpv[j] };
-			seriesData.push(myData);
 			
-			chartSupport.setChartOriginalDataIndexForRange(chart, 0, seriesData.length-1, seriesData.length, chartDataSet.index, j);
+			chartSupport.chartDataOriginalDataIndex(myData, chartDataSet, j);
+			
+			seriesData.push(myData);
 		}
 	};
 	
@@ -1180,14 +1174,10 @@
 			chartSupport.appendElement(legendData, name);
 			
 			var myData = { name: name, value: vv[i] };
-			seriesData.push(myData);
 			
-			chartSupport.setChartOriginalDataIndexForRange(chart, 0, seriesData.length-1, seriesData.length, chartDataSet.index,
-					{
-						type: "identical",
-						start: 0,
-						end: indicatorData.length//所有行数据
-					});
+			chartSupport.chartDataOriginalDataIndex(myData, chartDataSet, { start: 0, end: indicatorData.length });
+			
+			seriesData.push(myData);
 		}
 	};
 	
@@ -1200,7 +1190,7 @@
 	{
 		chartSupport.destroyChartEcharts(chart);
 	};
-
+	
 	chartSupport.radarOn = function(chart, eventType, handler)
 	{
 		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
@@ -1233,9 +1223,9 @@
 		
 		data[signNameMap.name] = names;
 		data[signNameMap.max] = maxes;
-
+		
 		chart.eventData(chartEvent, data);
-		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
+		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
 	};
 	
 	//漏斗图
@@ -1292,32 +1282,30 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		chartSupport.clearChartOriginalDataIndexForRange(chart);
-		
 		var legendData = [];
 		var seriesName = "";
 		var seriesData = [];
 		var min = 0;
 		var max = 100;
-
+		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
 			
 			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
-
+			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
 			var npv = chart.resultColumnArrays(result, np);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
-			var nvv = chart.resultNameValueObjects(result, np, vp);
-
+			var data = chart.resultNameValueObjects(result, np, vp);
+			
+			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
+			
 			legendData = legendData.concat(npv);
 			if(!seriesName)
 				seriesName = dataSetName;
-			seriesData = seriesData.concat(nvv);
-			
-			chartSupport.setChartOriginalDataIndexForRange(chart, 0, seriesData.length - nvv.length, seriesData.length, chartDataSet.index);
+			seriesData = seriesData.concat(data);
 		}
 		
 		for(var i=0; i<seriesData.length; i++)
@@ -1370,9 +1358,9 @@
 		
 		data[signNameMap.name] = echartsData.name;
 		data[signNameMap.value] = echartsData.value;
-
+		
 		chart.eventData(chartEvent, data);
-		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
+		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
 	};
 	
 	//地图
@@ -1540,8 +1528,6 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		chartSupport.clearChartOriginalDataIndexForRange(chart);
-		
 		var min = undefined;
 		var max = undefined;
 		var seriesName = "";
@@ -1568,20 +1554,20 @@
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
-			var nvv = chart.resultNameValueObjects(result, np, vp);
+			var data = chart.resultNameValueObjects(result, np, vp);
+			
+			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
 			if(!seriesName)
 				seriesName = dataSetName;
 			
-			seriesData = seriesData.concat(nvv);
+			seriesData = seriesData.concat(data);
 			
-			chartSupport.setChartOriginalDataIndexForRange(chart, 0, seriesData.length - nvv.length, seriesData.length, chartDataSet.index);
-			
-			if(nvv && nvv.length)
+			if(data && data.length)
 			{
-				for(var j=0; j<nvv.length; j++)
+				for(var j=0; j<data.length; j++)
 				{
-					var val = nvv[j].value;
+					var val = data[j].value;
 					min = (min == undefined ? val : Math.min(min, val));
 					max = (max == undefined ? val : Math.max(max, val));
 				}
@@ -1632,9 +1618,9 @@
 		
 		data[signNameMap.name] = echartsData.name;
 		data[signNameMap.value] = echartsData.value;
-
+		
 		chart.eventData(chartEvent, data);
-		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
+		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
 	};
 	
 	//散点值地图
@@ -1689,8 +1675,6 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		chartSupport.clearChartOriginalDataIndexForRange(chart);
-		
 		var legendData = [];
 		var series = [];
 		var map = undefined;
@@ -1724,6 +1708,8 @@
 			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name),
 					(vp ? [lop, lap, vp] : [lop, lap]));
 			
+			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
+			
 			if(vp)
 			{
 				for(var j=0; j<data.length; j++)
@@ -1737,22 +1723,12 @@
 			
 			legendData.push(dataSetName);
 			series.push(chartSupport.optionsSeries(renderOptions, i, { name: dataSetName, data: data }));
-			
-			chartSupport.setChartOriginalDataIndexForRange(chart, series.length-1, 0, data.length, chartDataSet.index);
 		}
 		
 		if(min != null && max != null && max <= min)
 			max = min + 1;
 		
-		for(var i=0; i<series.length; i++)
-		{
-			series[i].symbolSize = function(value)
-			{
-				var sv = (value && value.length > 2 ? value[2] : null);
-				
-				return chartSupport.evalValueSymbolSize(sv, min, max, symbolSizeMax, symbolSizeMin);
-			};
-		}
+		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
 		var options = { legend: {data: legendData}, series: series };
 		
@@ -1761,7 +1737,7 @@
 		
 		chartSupport.mapUpdateChart(chart, results, renderOptions, options);
 	};
-
+	
 	chartSupport.mapScatterResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
@@ -1796,9 +1772,9 @@
 		data[signNameMap.latitude] = echartsData.value[1];
 		if(echartsData.value.length > 2)
 			data[signNameMap.value] = echartsData.value[2];
-
+		
 		chart.eventData(chartEvent, data);
-		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
+		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
 	};
 	
 	//关系地图
@@ -1850,15 +1826,13 @@
 		
 		chartSupport.mapInitChart(chart, options);
 	};
-
+	
 	chartSupport.mapGraphUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
 		
 		var chartDataSets = chart.chartDataSetsMain();
-		
-		chartSupport.clearChartOriginalDataIndexForRange(chart);
 		
 		var legendData = [];
 		var seriesName = "";
@@ -1989,16 +1963,7 @@
 		
 		var series = [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
 		
-		//自动计算散点大小
-		if(series[0].symbolSize == null)
-		{
-			series[0].symbolSize = function(value, params)
-			{
-				var sv =  (value && value.length > 2 ? value[2] : null);
-				
-				return chartSupport.evalValueSymbolSize(sv, min, max, symbolSizeMax, symbolSizeMin);
-			};
-		}
+		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
 		var options = { legend: {data: legendData}, series: series };
 		
@@ -2141,8 +2106,6 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		chartSupport.clearChartOriginalDataIndexForRange(chart);
-		
 		var legendData = [];
 		var series = [];
 		
@@ -2161,8 +2124,7 @@
 						chart.dataSetPropertyOfSign(chartDataSet, signNameMap.max)
 					]);
 			
-			for(var j=0; j<data.length; j++)
-				chartSupport.chartDataOriginalDataIndex(data[j], chartDataSet, j);
+			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
 			series.push(chartSupport.optionsSeries(renderOptions, i, {name: dataSetName, data: data}));
 		}
@@ -2220,7 +2182,7 @@
 	chartSupport.heatmapRender = function(chart, nameSign, valueSign, weightSign, options)
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, weight: weightSign });
-
+		
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
@@ -2292,8 +2254,6 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		chartSupport.clearChartOriginalDataIndexForRange(chart);
-		
 		var xAxisData = [];
 		var yAxisData = [];
 		var seriesName = "";
@@ -2312,22 +2272,27 @@
 			var wp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.weight);
 			
 			var data = chart.resultRowArrays(result, [ np, vp, wp ]);
+			var dataNew = [];
 			
 			for(var j=0; j<data.length; j++)
 			{
-				var dj = data[j];
-				var dw = dj[2];
+				var dataEle = { value: data[j] };
+				var dw = dataEle.value[2];
 				
-				chartSupport.appendDistinct(xAxisData, dj[0]);
-				chartSupport.appendDistinct(yAxisData, dj[1]);
+				chartSupport.appendDistinct(xAxisData, dataEle.value[0]);
+				chartSupport.appendDistinct(yAxisData, dataEle.value[1]);
 				
 				min = (min == undefined ? dw : Math.min(min, dw));
 				max = (max == undefined ? dw : Math.max(max, dw));
+				
+				dataNew[j] = dataEle;
 			}
 			
-			seriesData = seriesData.concat(data);
+			data = dataNew;
 			
-			chartSupport.setChartOriginalDataIndexForRange(chart, 0, seriesData.length - data.length, seriesData.length, chartDataSet.index);
+			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
+			
+			seriesData = seriesData.concat(data);
 		}
 		
 		if(min == undefined)
@@ -2375,12 +2340,12 @@
 		var echartsData = echartsEventParams.data;
 		var data = {};
 		
-		data[signNameMap.name] = echartsData[0];
-		data[signNameMap.value] = echartsData[1];
-		data[signNameMap.weight] = echartsData[2];
+		data[signNameMap.name] = echartsData.value[0];
+		data[signNameMap.value] = echartsData.value[1];
+		data[signNameMap.weight] = echartsData.value[2];
 		
 		chart.eventData(chartEvent, data);
-		chartSupport.setChartEventOriginalDataForEchartsRange(chart, chartEvent, echartsEventParams);
+		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
 	};
 	
 	//树图
@@ -3142,17 +3107,7 @@
 		var series = [ chartSupport.optionsSeries(renderOptions, 0,
 						 { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
 		
-		//自动计算散点大小
-		if(series[0].symbolSize == null)
-		{
-			series[0].symbolSize = function(value, params)
-			{
-				if(value && value.length > 0)
-					value = value[0];
-				
-				return chartSupport.evalValueSymbolSize(value, min, max, symbolSizeMax, symbolSizeMin);
-			};
-		}
+		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin);
 		
 		if(series[0].layout == "force")
 		{
@@ -3959,7 +3914,6 @@
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
 		var chartData = dataTable.row(rowElement).data();
-		var originalDataInfo = chartSupport.chartDataOriginalDataIndex(chartData);
 		
 		var data = {};
 		
@@ -3975,7 +3929,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chartSupport.setChartEventOriginalDataByIndex(chart, chartEvent, originalDataInfo);
+		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, chartData);
 	};
 	
 	chartSupport.tableChartEventDelegationEventBinder =
@@ -4529,7 +4483,6 @@
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
 		var chartData = $label.data("_dgChartLabelChartData");
-		var originalDataIndex = chartSupport.chartDataOriginalDataIndex(chartData);
 		
 		var data = {};
 		
@@ -4540,7 +4493,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chartSupport.setChartEventOriginalDataByIndex(chart, chartEvent, originalDataIndex);
+		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, chartData);
 	};
 	
 	chartSupport.labelChartEventDelegationEventBinder =
@@ -4942,7 +4895,13 @@
 		else
 			chart.extValue("signNameMap", signNameMap);
 	};
-
+	
+	chartSupport.setChartEventOriginalDataForChartData = function(chart, chartEvent, chartData)
+	{
+		var index = chartSupport.chartDataOriginalDataIndex(chartData);
+		this.setChartEventOriginalDataByIndex(chart, chartEvent, index);
+	};
+	
 	/**
 	 * 根据原始数据索引对象设置图表事件对象的原始数据相关信息。
 	 * 
@@ -4967,6 +4926,7 @@
 			chart.eventOriginalData(chartEvent, null);
 			chart.eventOriginalChartDataSetIndex(chartEvent, null);
 			chart.eventOriginalResultDataIndex(chartEvent, null);
+			
 			return;
 		}
 		
@@ -4983,18 +4943,6 @@
 		}
 		
 		chart.eventOriginalInfo(chartEvent, originalDataIndex.chartDataSetIndex, rdi);
-	};
-	
-	chartSupport.setChartEventOriginalDataForChartData = function(chart, chartEvent, chartData)
-	{
-		var index = chartSupport.chartDataOriginalDataIndex(chartData);
-		this.setChartEventOriginalDataByIndex(chart, chartEvent, index);
-	};
-	
-	chartSupport.setChartEventOriginalDataForEchartsRange = function(chart, chartEvent, echartsEventParams)
-	{
-		var index = this.getChartOriginalDataIndexForRange(chart, echartsEventParams.seriesIndex, echartsEventParams.dataIndex);
-		this.setChartEventOriginalDataByIndex(chart, chartEvent, index);
 	};
 	
 	chartSupport.KEY_ORIGINAL_DATA_INDEX = "_DataGearOriginalDataIndex";
@@ -5037,10 +4985,12 @@
 		{
 			for(var i=0; i<chartData.length; i++)
 			{
+				var resultDataIndexMy = ($.isNumeric(resultDataIndex) ? resultDataIndex + i : resultDataIndex);
+				
 				chartData[i][chartSupport.KEY_ORIGINAL_DATA_INDEX] =
 				{
 					chartDataSetIndex : chartDataSet.index,
-					resultDataIndex: resultDataIndex + i
+					resultDataIndex: resultDataIndexMy
 				};
 			}
 		}
@@ -5052,151 +5002,6 @@
 				resultDataIndex: resultDataIndex
 			};
 		}
-	};
-	
-	/**
-	 * 设置图表特定系列的指定数据范围对应的的原始数据索引对象。
-	 * 
-	 * @param chart
-	 * @param seriesIndex 图表系列索引
-	 * @param dataIndexStart 图表系列的数据范围起始索引
-	 * @param dataIndexEnd 图表系列的数据范围结束索引，为null则表示为：dataIndexStart+1
-	 * @param resultDataIndexInfo 可选，原始图表数据集结果数据索引信息，格式为：
-	 * 								{
-	 * 									//与图表系列的数据范围顺序对应
-	 * 									type: "ordinal",
-	 * 									//可选，数据集结果数据索引起始索引，默认为0
-	 * 									start: 数值
-	 * 								}
-	 * 								或者
-	 * 								{
-	 * 									//图表系列的数据范围内都是相同的
-	 * 									type: "identical",
-	 * 									//数据集结果数据索引起始索引
-	 * 									start: 数值,
-	 * 									//可选，数据集结果数据索引结束索引，默认为start+1
-	 * 									end: 数值
-	 * 								}
-	 * 								或者
-	 * 								{
-	 * 									//图表系列的数据范围内都是相同的
-	 * 									type: "identical",
-	 * 									//数据集结果数据索引值、值数组
-	 * 									value: 数值、[ 数值, ... ]
-	 * 								}
-	 * 								或者
-	 * 								数值，表示：{ type: "ordinal", start: 此数值 }
-	 * 								
-	 * 								如果不设置，则默认为：{ type: "ordinal", start: 0 }
-	 */
-	chartSupport.setChartOriginalDataIndexForRange = function(chart, seriesIndex, dataIndexStart, dataIndexEnd,
-			chartDataSetIndex, resultDataIndexInfo)
-	{
-		dataIndexEnd = (dataIndexEnd == null ? dataIndexStart+1 : dataIndexEnd);
-		
-		if(resultDataIndexInfo == null)
-			resultDataIndexInfo = { type: "ordinal", start: 0 };
-		else if(typeof(resultDataIndexInfo) == "number")
-			resultDataIndexInfo = { type: "ordinal", start: resultDataIndexInfo };
-		
-		if(resultDataIndexInfo.type == "ordinal")
-		{
-			if(resultDataIndexInfo.start == null)
-				resultDataIndexInfo.start = 0;
-		}
-		else if(resultDataIndexInfo.type == "identical")
-		{
-			if(resultDataIndexInfo.start != null)
-				if(resultDataIndexInfo.end == null)
-					resultDataIndexInfo.end = resultDataIndexInfo.start + 1;
-		}
-		else
-			throw new Error("Unknown type ["+resultDataIndexInfo.type+"]");
-		
-		var originObj = chart.extValue("chartOriginalDataIndexForRange");
-		if(originObj == null)
-		{
-			originObj = {};
-			chart.extValue("chartOriginalDataIndexForRange", originObj);
-		}
-		
-		var ary = originObj[seriesIndex];
-		if(ary == null)
-		{
-			ary = [];
-			originObj[seriesIndex] = ary;
-		}
-		
-		ary.push({
-					dataIndexStart: dataIndexStart,
-					dataIndexEnd: dataIndexEnd,
-					chartDataSetIndex: chartDataSetIndex,
-					resultDataIndexInfo: resultDataIndexInfo
-				});
-	};
-	
-	/**
-	 * 获取图表特定系列的指定数据对应的原始数据索引对象。
-	 * 
-	 * @param chart
-	 * @param seriesIndex 图表系列索引
-	 * @param dataIndex 图表系列的数据索引
-	 * @return 参考setChartEventOriginalDataByIndex函数的originalDataIndex参数说明，可能返回undefined
-	 */
-	chartSupport.getChartOriginalDataIndexForRange = function(chart, seriesIndex, dataIndex)
-	{
-		var originObj = chart.extValue("chartOriginalDataIndexForRange");
-		
-		if(!originObj)
-			return undefined;
-		
-		var ary = originObj[seriesIndex];
-		
-		if(!ary)
-			return undefined;
-		
-		for(var i=0; i<ary.length; i++)
-		{
-			var ele = ary[i];
-			
-			if(ele.dataIndexStart <= dataIndex && ele.dataIndexEnd > dataIndex)
-			{
-				var originalDataIndex=
-				{
-					chartDataSetIndex: ele.chartDataSetIndex
-				};
-				
-				var indexInfo = ele.resultDataIndexInfo;
-				
-				if(indexInfo.type == "ordinal")
-				{
-					originalDataIndex.resultDataIndex = dataIndex - ele.dataIndexStart + indexInfo.start;
-				}
-				else if(indexInfo.type == "identical")
-				{
-					if(indexInfo.value != null)
-						originalDataIndex.resultDataIndex = indexInfo.value;
-					else
-						originalDataIndex.resultDataIndex = { start: indexInfo.start , end: indexInfo.end };
-				}
-				else
-					throw new Error("Unknown type ["+indexInfo.type+"]");
-				
-				return originalDataIndex;
-			}
-		}
-		
-		return undefined;
-	};
-	
-	/**
-	 * 清除图表所有数据范围对应的的原始数据索引对象。
-	 * 
-	 * @param chart
-	 */
-	chartSupport.clearChartOriginalDataIndexForRange = function(chart)
-	{
-		chart.extValue("chartOriginalDataIndexForRange", null);
 	};
 	
 	chartSupport.bindChartEventHandlerDelegationEcharts = function(chart, eventType, chartEventHanlder, chartEventDataSetter)
@@ -5308,7 +5113,8 @@
 	 * 
 	 * @param series 系列对象：{ data: [ {value: ...}, ... ] }，或者其数组
 	 */
-	chartSupport.evalSeriesDataValueSymbolSize = function(series, minValue, maxValue, symbolSizeMax, symbolSizeMin, valuePropertyName)
+	chartSupport.evalSeriesDataValueSymbolSize = function(series, minValue, maxValue, symbolSizeMax, symbolSizeMin,
+			valuePropertyName, valueElementIndex)
 	{
 		if(series == null)
 			return;
@@ -5325,8 +5131,13 @@
 			
 			for(var j=0; j<data.length; j++)
 			{
+				var value = data[j][valuePropertyName];
+				
+				if(valueElementIndex != null)
+					value = ($.isArray(value) && valueElementIndex < value.length ? value[valueElementIndex] : null);
+				
 				data[j].symbolSize = chartSupport.evalValueSymbolSize(
-					data[j][valuePropertyName], minValue, maxValue, symbolSizeMax, symbolSizeMin);
+					value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
 			}
 		}
 	};
