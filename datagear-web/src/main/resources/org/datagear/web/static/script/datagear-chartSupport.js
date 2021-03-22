@@ -101,8 +101,6 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
-				var data = chart.resultNameValueObjects(result, np, vps[j]);
-				
 				//当np是数值类型时，采用{name:..., value:...}格式的数据会导致折线图不对，所以这里采用[name,value]格式
 				var data = chart.resultRowArrays(result, [ np, vps[j] ]);
 				var dataNew = [];
@@ -270,7 +268,6 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
-				
 				//当np是数值类型时，采用[name,value]格式的数据会导致柱状图无法绘制，所以这里采用{name:..., value:...}格式
 				var data = chart.resultNameValueObjects(result, np, vps[j]);
 				
