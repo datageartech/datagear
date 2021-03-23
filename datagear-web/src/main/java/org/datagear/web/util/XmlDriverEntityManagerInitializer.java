@@ -10,8 +10,10 @@ package org.datagear.web.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.zip.ZipInputStream;
 
+import org.datagear.connection.DriverEntity;
 import org.datagear.connection.XmlDriverEntityManager;
 import org.datagear.util.IOUtil;
 import org.slf4j.Logger;
@@ -62,14 +64,14 @@ public class XmlDriverEntityManagerInitializer
 	 */
 	public void init() throws IOException
 	{
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug(
-					"start initializing " + XmlDriverEntityManager.class.getSimpleName() + " with built-in drivers");
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("start init {}", XmlDriverEntityManager.class.getSimpleName());
 
+		// 仅在首次初始化内置驱动，避免升级至使用新驱动的新版本时导致已有数据源功能不可用
 		if (isDriverEntityInfoFileExists())
 		{
-			if (LOGGER.isDebugEnabled())
-				LOGGER.debug("built-in drivers initialization is skipped, it is been done before");
+			if (LOGGER.isInfoEnabled())
+				LOGGER.info("init built-in driver is skipped, it will be done only if the directory is empty");
 		}
 		else
 		{
@@ -86,13 +88,22 @@ public class XmlDriverEntityManagerInitializer
 			{
 				IOUtil.close(in);
 			}
+
+			if (LOGGER.isInfoEnabled())
+				LOGGER.info("init built-in driver is done");
 		}
 
 		this.xmlDriverEntityManager.init();
 
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug(
-					"finish initializing " + XmlDriverEntityManager.class.getSimpleName() + " with built-in drivers");
+		if (LOGGER.isInfoEnabled())
+		{
+			List<DriverEntity> driverEntities = this.xmlDriverEntityManager.getAll();
+
+			for (DriverEntity driverEntity : driverEntities)
+				LOGGER.info("init {}", driverEntity.toString());
+
+			LOGGER.info("finish init {}", XmlDriverEntityManager.class.getSimpleName());
+		}
 	}
 
 	protected boolean isDriverEntityInfoFileExists()
