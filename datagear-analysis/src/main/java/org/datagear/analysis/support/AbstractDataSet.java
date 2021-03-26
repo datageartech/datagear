@@ -8,6 +8,7 @@
 package org.datagear.analysis.support;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -140,6 +141,54 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
+	 * 查找与名称数组对应的{@linkplain DataSetProperty}列表。
+	 * <p>
+	 * 如果{@code names}某元素没有对应的{@linkplain DataSetProperty}，返回列表对应元素位置将为{@code null}。
+	 * </p>
+	 * 
+	 * @param dataSetProperties
+	 * @param names
+	 * @return
+	 */
+	protected List<DataSetProperty> findDataSetProperties(List<DataSetProperty> dataSetProperties, String[] names)
+	{
+		return findDataSetProperties(dataSetProperties, Arrays.asList(names));
+	}
+
+	/**
+	 * 查找与名称数组对应的{@linkplain DataSetProperty}列表。
+	 * <p>
+	 * 如果{@code names}某元素没有对应的{@linkplain DataSetProperty}，返回列表对应元素位置将为{@code null}。
+	 * </p>
+	 * 
+	 * @param dataSetProperties
+	 * @param names
+	 * @return
+	 */
+	protected List<DataSetProperty> findDataSetProperties(List<DataSetProperty> dataSetProperties, List<String> names)
+	{
+		List<DataSetProperty> re = new ArrayList<>(names.size());
+
+		for (int i = 0, len = names.size(); i < len; i++)
+		{
+			DataSetProperty dp = null;
+
+			for (DataSetProperty dataSetProperty : dataSetProperties)
+			{
+				if (names.get(i).equals(dataSetProperty.getName()))
+				{
+					dp = dataSetProperty;
+					break;
+				}
+			}
+
+			re.add(dp);
+		}
+
+		return re;
+	}
+
+	/**
 	 * 将源对象转换为指定{@linkplain DataSetProperty.DataType}类型的对象。
 	 * <p>
 	 * 如果{@code property}为{@code null}，则什么也不做直接返回。
@@ -147,6 +196,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 
 	 * @param converter
 	 * @param source
+	 *            允许为{@code null}
 	 * @param property
 	 *            允许为{@code null}
 	 * @return
@@ -156,6 +206,9 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	{
 		if (property == null)
 			return source;
+
+		if (source == null)
+			return null;
 
 		return convertToPropertyDataType(converter, source, property.getType());
 	}

@@ -189,51 +189,127 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs, List<DataSetProperty> properties,
 			DataSetOption dataSetOption) throws Throwable
 	{
-		boolean resolveProperties = (properties == null || properties.isEmpty());
+		List<Map<String, ?>> rawData = resolveRawData(cn, rs, dataSetOption);
+		return resolveResult(cn, rs, rawData, properties, dataSetOption);
+	}
 
+	/**
+	 * 解析结果。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param rawData
+	 * @param properties
+	 *            允许为{@code null}，此时会自动解析
+	 * @param dataSetOption
+	 *            允许为{@code null}
+	 * @return
+	 * @throws Throwable
+	 */
+	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs, List<Map<String, ?>> rawData,
+			List<DataSetProperty> properties, DataSetOption dataSetOption) throws Throwable
+	{
+		if (properties == null || properties.isEmpty())
+			properties = resolveProperties(cn, rs, rawData);
+
+		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
+
+		List<Map<String, ?>> data = new ArrayList<>(rawData.size());
+
+		for (int i = 0, len = rawData.size(), plen = properties.size(); i < len; i++)
+		{
+			// 应当仅保留数据集属性对应的数据
+			Map<String, Object> row = new HashMap<>();
+
+			Map<String, ?> rowRaw = rawData.get(i);
+
+			for (int j = 0; j < plen; j++)
+			{
+				DataSetProperty property = properties.get(j);
+				String name = property.getName();
+
+				Object value = rowRaw.get(name);
+				value = convertToPropertyDataType(converter, value, property);
+
+				row.put(name, value);
+			}
+
+			data.add(row);
+		}
+
+		return new ResolvedDataSetResult(new DataSetResult(data), properties);
+	}
+
+	/**
+	 * 解析{@linkplain DataSetProperty}。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param rawData
+	 *            允许为{@code null}
+	 * @return
+	 * @throws Throwable
+	 */
+	protected List<DataSetProperty> resolveProperties(Connection cn, ResultSet rs, List<Map<String, ?>> rawData)
+			throws Throwable
+	{
+		JdbcSupport jdbcSupport = getJdbcSupport();
+		ResultSetMetaData rsMeta = rs.getMetaData();
+		String[] colNames = jdbcSupport.getColumnNames(rsMeta);
+		SqlType[] sqlTypes = jdbcSupport.getColumnSqlTypes(rsMeta);
+
+		List<DataSetProperty> properties = new ArrayList<>(colNames.length);
+
+		for (int i = 0; i < colNames.length; i++)
+		{
+			DataSetProperty property = new DataSetProperty(colNames[i], toPropertyDataType(sqlTypes[i], colNames[i]));
+
+			@JDBCCompatiblity("某些驱动程序可能存在一种情况，列类型会被toPropertyDataType()解析为DataType.UNKNOWN，但是实际值是允许的，"
+					+ "比如PostgreSQL-42.2.5驱动对于[SELECT 'aaa' as NAME]语句，结果的SQL类型是Types.OTHER，但实际值是允许的字符串")
+			boolean resolveTypeByValue = DataType.UNKNOWN.equals(property.getType());
+
+			if (resolveTypeByValue && rawData != null && rawData.size() > 0)
+			{
+				Map<String, ?> row0 = rawData.get(0);
+				property.setType(resolvePropertyDataType(row0.get(property.getName())));
+			}
+
+			properties.add(property);
+		}
+
+		return properties;
+	}
+
+	/**
+	 * 解析原始数据。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param dataSetOption
+	 * @return
+	 * @throws Throwable
+	 */
+	protected List<Map<String, ?>> resolveRawData(Connection cn, ResultSet rs, DataSetOption dataSetOption)
+			throws Throwable
+	{
 		List<Map<String, ?>> data = new ArrayList<>();
 
 		JdbcSupport jdbcSupport = getJdbcSupport();
-		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
 
 		ResultSetMetaData rsMeta = rs.getMetaData();
 		String[] colNames = jdbcSupport.getColumnNames(rsMeta);
 		SqlType[] sqlTypes = jdbcSupport.getColumnSqlTypes(rsMeta);
 
-		if (resolveProperties)
-		{
-			properties = new ArrayList<>(colNames.length);
-			for (int i = 0; i < colNames.length; i++)
-				properties.add(new DataSetProperty(colNames[i], toPropertyDataType(sqlTypes[i], colNames[i])));
-		}
-
-		int maxColumnSize = Math.min(colNames.length, properties.size());
-
-		int rowIdx = 0;
+		checkDataType(cn, rs, colNames, sqlTypes, jdbcSupport);
 
 		while (rs.next())
 		{
 			Map<String, Object> row = new HashMap<>();
 
-			for (int i = 0; i < maxColumnSize; i++)
+			for (int i = 0; i < colNames.length; i++)
 			{
-				DataSetProperty property = properties.get(i);
-
 				Object value = getColumnValue(cn, rs, colNames[i], sqlTypes[i].getType(), jdbcSupport);
-
-				if (resolveProperties && rowIdx == 0)
-				{
-					@JDBCCompatiblity("某些驱动程序可能存在一种情况，列类型会被toPropertyDataType()解析为DataType.UNKNOWN，但是实际值是允许的，"
-							+ "比如PostgreSQL-42.2.5驱动对于[SELECT 'aaa' as NAME]语句，结果的SQL类型是Types.OTHER，但实际值是允许的字符串")
-					boolean resolveTypeByValue = (DataType.UNKNOWN.equals(property.getType()));
-
-					if (resolveTypeByValue)
-						property.setType(resolvePropertyDataType(value));
-				}
-
-				value = convertToPropertyDataType(converter, value, property);
-
-				row.put(property.getName(), value);
+				row.put(colNames[i], value);
 			}
 
 			boolean reachMaxCount = isReachResultDataMaxCount(dataSetOption, data.size());
@@ -242,15 +318,29 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			if (!reachMaxCount)
 				data.add(row);
 
-			rowIdx++;
-
 			if (breakLoop)
 				break;
 		}
 
-		DataSetResult result = new DataSetResult(data);
+		return data;
+	}
 
-		return new ResolvedDataSetResult(result, properties);
+	/**
+	 * 校验{@linkplain ResultSet}的数据类型。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param colNames
+	 * @param sqlTypes
+	 * @param jdbcSupport
+	 * @throws SQLException
+	 * @throws SqlDataSetUnsupportedSqlTypeException
+	 */
+	protected void checkDataType(Connection cn, ResultSet rs, String[] colNames, SqlType[] sqlTypes,
+			JdbcSupport jdbcSupport) throws SQLException, SqlDataSetUnsupportedSqlTypeException
+	{
+		for (int i = 0; i < colNames.length; i++)
+			toPropertyDataType(sqlTypes[i], colNames[i]);
 	}
 
 	protected Object getColumnValue(Connection cn, ResultSet rs, String columnName, int sqlType,
