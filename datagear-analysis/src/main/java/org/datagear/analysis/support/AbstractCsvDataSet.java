@@ -9,6 +9,7 @@ package org.datagear.analysis.support;
 
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.util.IOUtil;
@@ -134,142 +134,160 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 */
 	protected abstract TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable;
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected ResolvedDataSetResult resolveResult(Reader csvReader, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws Throwable
-	{
-		boolean resolveProperties = (properties == null || properties.isEmpty());
-
-		CSVParser csvParser = buildCSVParser(csvReader);
-
-		List<String> propertyNames = null;
-		List<List<Object>> data = new ArrayList<>();
-
-		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
-
-		int rowIdx = 0;
-		int dataRowIdx = 0;
-
-		for (CSVRecord csvRecord : csvParser)
-		{
-			if (isNameRow(rowIdx))
-			{
-				if (resolveProperties)
-					propertyNames = resolveDataSetPropertyNames(csvRecord, false);
-			}
-			else
-			{
-				if (resolveProperties && dataRowIdx == 0 && propertyNames == null)
-					propertyNames = resolveDataSetPropertyNames(csvRecord, true);
-
-				List<Object> rowObj = (resolveProperties ? resolveCSVRecordValues(csvRecord, null, converter)
-						: resolveCSVRecordValues(csvRecord, properties, converter));
-
-				boolean reachMaxCount = isReachResultDataMaxCount(dataSetOption, data.size());
-				boolean breakLoop = (reachMaxCount && (!resolveProperties || isAfterNameRow(rowIdx)));
-
-				if (!reachMaxCount)
-					data.add(rowObj);
-
-				dataRowIdx++;
-
-				if (breakLoop)
-					break;
-			}
-
-			rowIdx++;
-		}
-
-		if (resolveProperties)
-			return resolveResult(propertyNames, ((List) data));
-		else
-		{
-			DataSetResult result = new DataSetResult(listRowsToMapRows(data, properties));
-			return new ResolvedDataSetResult(result, properties);
-		}
-	}
-
 	/**
-	 * 由原始的字符串CSV数据解析{@linkplain ResolvedDataSetResult}。
+	 * 解析结果。
 	 * 
-	 * @param propertyNames
-	 *            允许为{@code null}
-	 * @param data
-	 *            允许为{@code null}
+	 * @param csvReader
+	 * @param properties    允许为{@code null}，此时会自动解析
+	 * @param dataSetOption 允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(List<String> propertyNames, List<List<String>> data) throws Throwable
+	protected ResolvedDataSetResult resolveResult(Reader csvReader, List<DataSetProperty> properties,
+			DataSetOption dataSetOption) throws Throwable
 	{
-		List<DataSetProperty> properties = new ArrayList<>((propertyNames == null ? 0 : propertyNames.size()));
+		CSVParser csvParser = buildCSVParser(csvReader);
+		List<CSVRecord> csvRecords = csvParser.getRecords();
 
-		if (propertyNames != null)
+		List<String> rawDataPropertyNames = resolvePropertyNames(csvRecords);
+		List<Map<String, String>> rawData = resolveRawData(rawDataPropertyNames, csvRecords, dataSetOption);
+
+		if (properties == null || properties.isEmpty())
+			properties = resolveProperties(rawDataPropertyNames, rawData);
+
+		return resolveResult(rawData, properties);
+	}
+
+	/**
+	 * 解析数据属性名列表。
+	 * 
+	 * @param csvRecords
+	 * @return
+	 * @throws Throwable
+	 */
+	protected List<String> resolvePropertyNames(List<CSVRecord> csvRecords) throws Throwable
+	{
+		List<String> propertyNames = null;
+
+		for (int i = 0, len = csvRecords.size(); i < len; i++)
 		{
-			for (String name : propertyNames)
-				properties.add(new DataSetProperty(name, DataSetProperty.DataType.STRING));
+			CSVRecord csvRecord = csvRecords.get(i);
+
+			if (isNameRow(i))
+			{
+				int size = csvRecord.size();
+				propertyNames = new ArrayList<String>(csvRecord.size());
+
+				for (int j = 0; j < size; j++)
+					propertyNames.add(csvRecord.get(j));
+
+				break;
+			}
+			else
+			{
+				if (propertyNames == null)
+				{
+					int size = csvRecord.size();
+					propertyNames = new ArrayList<String>(csvRecord.size());
+
+					for (int j = 0; j < size; j++)
+						propertyNames.add(Integer.toString(j + 1));
+				}
+
+				if (isAfterNameRow(i))
+					break;
+			}
 		}
 
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> resultData = Collections.EMPTY_LIST;
+		if (propertyNames == null)
+			propertyNames = Collections.emptyList();
+
+		return propertyNames;
+	}
+
+	/**
+	 * 解析{@linkplain DataSetProperty}。
+	 * 
+	 * @param rawDataPropertyNames
+	 * @param rawData              允许为{@code null}
+	 * @return
+	 * @throws Throwable
+	 */
+	protected List<DataSetProperty> resolveProperties(List<String> rawDataPropertyNames,
+			List<Map<String, String>> rawData)
+			throws Throwable
+	{
+		int propertyLen = rawDataPropertyNames.size();
+		List<DataSetProperty> properties = new ArrayList<>(propertyLen);
+
+		for (String name : rawDataPropertyNames)
+			properties.add(new DataSetProperty(name, DataSetProperty.DataType.STRING));
 
 		// 根据数据格式，修订可能的数值类型：只有某一列的所有字符串都是数值格式，才认为是数值类型
-		if (data != null)
+		if (rawData != null && rawData.size() > 0)
 		{
-			int plen = properties.size();
+			boolean[] isNumbers = new boolean[propertyLen];
+			Arrays.fill(isNumbers, true);
 
-			// 指定索引的字符串是否都是数值内容
-			Map<Integer, Boolean> asNumberMap = new HashMap<>();
-
-			for (List<String> ele : data)
+			for (Map<String, String> row : rawData)
 			{
-				for (int i = 0; i < Math.min(plen, ele.size()); i++)
+				for (int i = 0; i < propertyLen; i++)
 				{
-					Boolean asNumber = asNumberMap.get(i);
-
-					if (Boolean.FALSE.equals(asNumber))
+					if (!isNumbers[i])
 						continue;
 
-					String val = ele.get(i);
-					asNumberMap.put(i, isNumberString(val));
+					String value = row.get(rawDataPropertyNames.get(i));
+					isNumbers[i] = isNumberString(value);
 				}
 			}
 
-			for (Map.Entry<Integer, Boolean> entry : asNumberMap.entrySet())
+			for (int i = 0; i < propertyLen; i++)
 			{
-				if (Boolean.TRUE.equals(entry.getValue()))
-					properties.get(entry.getKey()).setType(DataSetProperty.DataType.NUMBER);
+				if (isNumbers[i])
+					properties.get(i).setType(DataSetProperty.DataType.NUMBER);
 			}
-
-			List<List<Object>> newData = new ArrayList<>(data.size());
-
-			for (List<String> ele : data)
-			{
-				int size = Math.min(plen, ele.size());
-
-				List<Object> newEle = new ArrayList<>(size);
-
-				for (int i = 0; i < size; i++)
-				{
-					String val = ele.get(i);
-
-					if (Boolean.TRUE.equals(asNumberMap.get(i)))
-					{
-						Number num = parseNumberString(val);
-						newEle.add(num);
-					}
-					else
-						newEle.add(val);
-				}
-
-				newData.add(newEle);
-			}
-
-			resultData = listRowsToMapRows(newData, properties);
 		}
 
-		DataSetResult result = new DataSetResult(resultData);
+		return properties;
+	}
 
-		return new ResolvedDataSetResult(result, properties);
+	/**
+	 * 解析原始数据。
+	 * 
+	 * @param propertyNames
+	 * @param csvRecords
+	 * @param dataSetOption
+	 * @return
+	 * @throws Throwable
+	 */
+	protected List<Map<String, String>> resolveRawData(List<String> propertyNames, List<CSVRecord> csvRecords,
+			DataSetOption dataSetOption) throws Throwable
+	{
+		List<Map<String, String>> data = new ArrayList<>();
+
+		for (int i = 0, len = csvRecords.size(); i < len; i++)
+		{
+			if(isNameRow(i))
+				continue;
+
+			if (isReachResultDataMaxCount(dataSetOption, data.size()))
+				break;
+
+			Map<String, String> row = new HashMap<>();
+
+			CSVRecord csvRecord = csvRecords.get(i);
+			for (int j = 0, jlen = Math.min(csvRecord.size(), propertyNames.size()); j < jlen; j++)
+			{
+				String name = propertyNames.get(j);
+				String value = csvRecord.get(j);
+
+				row.put(name, value);
+			}
+
+			data.add(row);
+		}
+
+		return data;
 	}
 
 	/**
@@ -305,69 +323,6 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	protected Number parseNumberString(String s) throws Throwable
 	{
 		return Double.parseDouble(s);
-	}
-
-	/**
-	 * 
-	 * @param csvRecord
-	 * @param forceIndex
-	 *            是否强制使用索引号，将返回：{@code ["1"、"2"、....]}
-	 * @return
-	 * @throws Throwable
-	 */
-	protected List<String> resolveDataSetPropertyNames(CSVRecord csvRecord, boolean forceIndex) throws Throwable
-	{
-		int size = csvRecord.size();
-		List<String> list = new ArrayList<>(size);
-
-		for (int i = 0; i < size; i++)
-		{
-			if (forceIndex)
-				list.add(Integer.toString(i + 1));
-			else
-				list.add(csvRecord.get(i));
-		}
-
-		return list;
-	}
-
-	/**
-	 * 解析数据列表。
-	 * <p>
-	 * 如果{@code properties}为{@code null}或者对应元素为{@code null}，则返回列表对应元素将是{@linkplain String}类型。
-	 * </p>
-	 * 
-	 * @param csvRecord
-	 * @param properties
-	 *            允许为{@code null}、元素为{@code null}
-	 * @param converter
-	 * @return
-	 * @throws Throwable
-	 */
-	protected List<Object> resolveCSVRecordValues(CSVRecord csvRecord, List<DataSetProperty> properties,
-			DataSetPropertyValueConverter converter) throws Throwable
-	{
-		int size = csvRecord.size();
-		List<Object> list = new ArrayList<>(size);
-
-		int propertySize = (properties == null ? 0 : properties.size());
-
-		for (int i = 0; i < size; i++)
-		{
-			DataSetProperty property = (i < propertySize ? properties.get(i) : null);
-
-			String rawValue = csvRecord.get(i);
-
-			if (property == null)
-				list.add(rawValue);
-			else
-			{
-				Object value = convertToPropertyDataType(converter, rawValue, property);
-				list.add(value);
-			}
-		}
-
-		return list;
 	}
 
 	/**

@@ -19,6 +19,8 @@ import org.datagear.analysis.DataNameType;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.ResolvedDataSetResult;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -138,6 +140,50 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return true;
+	}
+
+	/**
+	 * 解析结果。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param rawData
+	 * @param properties
+	 * @param dataSetOption
+	 *            允许为{@code null}
+	 * @return
+	 * @throws Throwable
+	 */
+	protected ResolvedDataSetResult resolveResult(List<? extends Map<String, ?>> rawData,
+			List<DataSetProperty> properties)
+			throws Throwable
+	{
+		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
+
+		List<Map<String, ?>> data = new ArrayList<>(rawData.size());
+
+		for (int i = 0, len = rawData.size(), plen = properties.size(); i < len; i++)
+		{
+			// 应当仅保留数据集属性对应的数据
+			Map<String, Object> row = new HashMap<>();
+
+			Map<String, ?> rowRaw = rawData.get(i);
+
+			for (int j = 0; j < plen; j++)
+			{
+				DataSetProperty property = properties.get(j);
+				String name = property.getName();
+
+				Object value = rowRaw.get(name);
+				value = convertToPropertyDataType(converter, value, property);
+
+				row.put(name, value);
+			}
+
+			data.add(row);
+		}
+
+		return new ResolvedDataSetResult(new DataSetResult(data), properties);
 	}
 
 	/**

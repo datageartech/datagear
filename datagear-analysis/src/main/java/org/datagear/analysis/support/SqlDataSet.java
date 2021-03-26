@@ -23,7 +23,6 @@ import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetProperty.DataType;
-import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.util.IOUtil;
@@ -190,54 +189,11 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			DataSetOption dataSetOption) throws Throwable
 	{
 		List<Map<String, ?>> rawData = resolveRawData(cn, rs, dataSetOption);
-		return resolveResult(cn, rs, rawData, properties, dataSetOption);
-	}
 
-	/**
-	 * 解析结果。
-	 * 
-	 * @param cn
-	 * @param rs
-	 * @param rawData
-	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
-	 * @param dataSetOption
-	 *            允许为{@code null}
-	 * @return
-	 * @throws Throwable
-	 */
-	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs, List<Map<String, ?>> rawData,
-			List<DataSetProperty> properties, DataSetOption dataSetOption) throws Throwable
-	{
 		if (properties == null || properties.isEmpty())
 			properties = resolveProperties(cn, rs, rawData);
 
-		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
-
-		List<Map<String, ?>> data = new ArrayList<>(rawData.size());
-
-		for (int i = 0, len = rawData.size(), plen = properties.size(); i < len; i++)
-		{
-			// 应当仅保留数据集属性对应的数据
-			Map<String, Object> row = new HashMap<>();
-
-			Map<String, ?> rowRaw = rawData.get(i);
-
-			for (int j = 0; j < plen; j++)
-			{
-				DataSetProperty property = properties.get(j);
-				String name = property.getName();
-
-				Object value = rowRaw.get(name);
-				value = convertToPropertyDataType(converter, value, property);
-
-				row.put(name, value);
-			}
-
-			data.add(row);
-		}
-
-		return new ResolvedDataSetResult(new DataSetResult(data), properties);
+		return resolveResult(rawData, properties);
 	}
 
 	/**
@@ -304,6 +260,9 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 		while (rs.next())
 		{
+			if (isReachResultDataMaxCount(dataSetOption, data.size()))
+				break;
+
 			Map<String, Object> row = new HashMap<>();
 
 			for (int i = 0; i < colNames.length; i++)
@@ -312,14 +271,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 				row.put(colNames[i], value);
 			}
 
-			boolean reachMaxCount = isReachResultDataMaxCount(dataSetOption, data.size());
-			boolean breakLoop = reachMaxCount;
-
-			if (!reachMaxCount)
-				data.add(row);
-
-			if (breakLoop)
-				break;
+			data.add(row);
 		}
 
 		return data;
