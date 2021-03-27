@@ -10,6 +10,7 @@ package org.datagear.analysis.support;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.RangeExpResolver.IndexRange;
@@ -341,218 +341,208 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * 
 	 * @param paramValues
 	 * @param sheet
-	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
-	 * @param dataSetOption
-	 *            允许为{@code null}
+	 * @param properties    允许为{@code null}，此时会自动解析
+	 * @param dataSetOption 允许为{@code null}
 	 * @return
-	 * @throws DataSetException
+	 * @throws Throwable
 	 */
 	protected ResolvedDataSetResult resolveResultForSheet(Map<String, ?> paramValues, Sheet sheet,
-			List<DataSetProperty> properties, DataSetOption dataSetOption) throws DataSetException
+			List<DataSetProperty> properties, DataSetOption dataSetOption) throws Throwable
 	{
-		boolean resolveProperties = (properties == null || properties.isEmpty());
+		List<Row> excelRows = new ArrayList<Row>();
 
-		if (resolveProperties)
-			properties = new ArrayList<>();
+		for (Row row : sheet)
+			excelRows.add(row);
 
-		List<List<Object>> data = new ArrayList<>();
+		List<String> rawDataPropertyNames = resolvePropertyNames(excelRows);
+		List<Map<String, Object>> rawData = resolveRawData(rawDataPropertyNames, excelRows, dataSetOption);
 
+		if (properties == null || properties.isEmpty())
+			properties = resolveProperties(rawDataPropertyNames, rawData);
+
+		return resolveResult(rawData, properties);
+	}
+
+	/**
+	 * 解析数据属性名列表。
+	 * 
+	 * @param excelRows
+	 * @return
+	 * @throws Throwable
+	 */
+	@SuppressWarnings("unused")
+	protected List<String> resolvePropertyNames(List<Row> excelRows) throws Throwable
+	{
 		List<String> propertyNames = null;
 
-		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
-
-		try
+		for (int i = 0, len = excelRows.size(); i < len; i++)
 		{
-			int rowIdx = 0;
-			int dataRowIdx = 0;
+			Row row = excelRows.get(i);
 
-			for (Row row : sheet)
+			if (isNameRow(i))
 			{
-				if (isNameRow(rowIdx))
-				{
-					if (resolveProperties)
-						propertyNames = resolveDataSetPropertyNames(row, false);
-				}
-				else if (isDataRow(rowIdx))
-				{
-					if (resolveProperties && dataRowIdx == 0 && propertyNames == null)
-						propertyNames = resolveDataSetPropertyNames(row, true);
+				propertyNames = new ArrayList<String>();
 
-					// 名称行不一定在数据行之前，此时可能还无法确定属性名，所以暂时采用列表存储
-					List<Object> rowObj = new ArrayList<>();
+				int colIdx = 0;
+				for (Cell cell : row)
+				{
+					if (isDataColumn(colIdx))
+					{
+						String name = null;
+
+						try
+						{
+							name = cell.getStringCellValue();
+						}
+						catch(Throwable t)
+						{
+						}
+
+						if (StringUtil.isEmpty(name))
+							name = CellReference.convertNumToColString(colIdx);
+
+						propertyNames.add(name);
+					}
+
+					colIdx++;
+				}
+
+				break;
+			}
+			else if (isDataRow(i))
+			{
+				if (propertyNames == null)
+				{
+					propertyNames = new ArrayList<String>();
 
 					int colIdx = 0;
-					int dataColIdx = 0;
-
 					for (Cell cell : row)
 					{
 						if (isDataColumn(colIdx))
 						{
-							DataSetProperty property = null;
-
-							if (!resolveProperties)
-							{
-								if (dataColIdx >= properties.size())
-									throw new DataSetSourceParseException(
-											"No property defined for column index " + dataColIdx);
-
-								property = properties.get(dataColIdx);
-							}
-
-							Object value = resolvePropertyValue(cell, property, converter);
-
-							if (resolveProperties)
-							{
-								property = resolveDataSetProperty(row, rowIdx, dataRowIdx, cell, colIdx, dataColIdx,
-										value, properties);
-							}
-
-							rowObj.add(value);
-
-							dataColIdx++;
+							String name = CellReference.convertNumToColString(colIdx);
+							propertyNames.add(name);
 						}
 
 						colIdx++;
 					}
-
-					boolean reachMaxCount = isReachResultDataMaxCount(dataSetOption, data.size());
-					boolean breakLoop = (reachMaxCount && (!resolveProperties || isAfterNameRow(rowIdx)));
-
-					if (!reachMaxCount)
-						data.add(rowObj);
-
-					dataRowIdx++;
-
-					if (breakLoop)
-						break;
 				}
 
-				rowIdx++;
+				if (isAfterNameRow(i))
+					break;
 			}
 		}
-		catch (DataSetException e)
-		{
-			throw e;
-		}
-		catch (Throwable t)
-		{
-			throw new DataSetSourceParseException(t);
-		}
 
-		if (resolveProperties)
-			inflateDataSetProperties(properties, propertyNames);
-
-		DataSetResult result = new DataSetResult(listRowsToMapRows(data, properties));
-
-		return new ResolvedDataSetResult(result, properties);
-	}
-
-	protected void inflateDataSetProperties(List<DataSetProperty> properties, List<String> propertyNames)
-	{
-		for (int i = 0; i < properties.size(); i++)
-		{
-			DataSetProperty property = properties.get(i);
-			property.setName(propertyNames.get(i));
-
-			if (StringUtil.isEmpty(property.getType()))
-				property.setType(DataSetProperty.DataType.UNKNOWN);
-		}
-	}
-
-	/**
-	 * 解析{@linkplain DataSetProperty}并写入{@code properties}。
-	 * 
-	 * @param row
-	 * @param rowIdx
-	 * @param dataRowIdx
-	 * @param cell
-	 * @param colIdx
-	 * @param dataColIdx
-	 * @param cellValue
-	 * @param properties
-	 * @return
-	 */
-	protected DataSetProperty resolveDataSetProperty(Row row, int rowIdx, int dataRowIdx, Cell cell, int colIdx,
-			int dataColIdx, Object cellValue, List<DataSetProperty> properties)
-	{
-		DataSetProperty property = null;
-
-		if (dataRowIdx == 0)
-		{
-			// 空单元格先不处理数据类型，等待后续有非空单元格再判断
-			String dataType = (cellValue == null ? "" : resolvePropertyDataType(cellValue));
-
-			// 名称行不一定在数据行之前，所以此时可能无法确定属性名
-			property = new DataSetProperty("should-be-set-later", dataType);
-			properties.add(property);
-		}
-		else
-		{
-			property = properties.get(dataColIdx);
-
-			if (StringUtil.isEmpty(property.getType()) && cellValue != null)
-				property.setType(resolvePropertyDataType(cellValue));
-		}
-
-		return property;
-	}
-
-	/**
-	 * 解析属性名。
-	 * 
-	 * @param nameRow
-	 * @return
-	 */
-	protected List<String> resolveDataSetPropertyNames(Row nameRow, boolean forceColumnString)
-	{
-		List<String> propertyNames = new ArrayList<>();
-
-		int colIdx = 0;
-		for (Cell cell : nameRow)
-		{
-			if (isDataColumn(colIdx))
-			{
-				String name = null;
-
-				if (forceColumnString)
-					name = CellReference.convertNumToColString(colIdx);
-				else
-				{
-					try
-					{
-						name = cell.getStringCellValue();
-					}
-					catch (Throwable t)
-					{
-					}
-
-					if (StringUtil.isEmpty(name))
-						name = CellReference.convertNumToColString(colIdx);
-				}
-
-				propertyNames.add(name);
-			}
-
-			colIdx++;
-		}
+		if (propertyNames == null)
+			propertyNames = Collections.emptyList();
 
 		return propertyNames;
+	}
+
+	/**
+	 * 解析{@linkplain DataSetProperty}。
+	 * 
+	 * @param rawDataPropertyNames
+	 * @param rawData              允许为{@code null}
+	 * @return
+	 * @throws Throwable
+	 */
+	protected List<DataSetProperty> resolveProperties(List<String> rawDataPropertyNames,
+			List<Map<String, Object>> rawData) throws Throwable
+	{
+		int propertyLen = rawDataPropertyNames.size();
+		List<DataSetProperty> properties = new ArrayList<>(propertyLen);
+
+		for (String name : rawDataPropertyNames)
+			properties.add(new DataSetProperty(name, DataSetProperty.DataType.UNKNOWN));
+
+		if (rawData != null && rawData.size() > 0)
+		{
+			for (Map<String, Object> row : rawData)
+			{
+				int resolvedPropertyTypeCount = 0;
+
+				for (int i = 0; i < propertyLen; i++)
+				{
+					DataSetProperty property = properties.get(i);
+
+					if (!DataSetProperty.DataType.UNKNOWN.equals(property.getType()))
+					{
+						resolvedPropertyTypeCount++;
+						continue;
+					}
+
+					Object value = row.get(rawDataPropertyNames.get(i));
+
+					if (value != null)
+						property.setType(resolvePropertyDataType(value));
+				}
+
+				if (resolvedPropertyTypeCount == propertyLen)
+					break;
+			}
+		}
+
+		return properties;
+	}
+
+	/**
+	 * 解析原始数据。
+	 * 
+	 * @param propertyNames
+	 * @param excelRows
+	 * @param dataSetOption
+	 * @return
+	 * @throws Throwable
+	 */
+	protected List<Map<String, Object>> resolveRawData(List<String> propertyNames, List<Row> excelRows,
+			DataSetOption dataSetOption) throws Throwable
+	{
+		List<Map<String, Object>> data = new ArrayList<>();
+
+		for (int i = 0, len = excelRows.size(); i < len; i++)
+		{
+			if (isNameRow(i) || !isDataRow(i))
+				continue;
+
+			if (isReachResultDataMaxCount(dataSetOption, data.size()))
+				break;
+
+			Map<String, Object> row = new HashMap<>();
+
+			Row excelRow = excelRows.get(i);
+			int colIdx = 0;
+			int dataColIdx = 0;
+			for (Cell cell : excelRow)
+			{
+				if (isDataColumn(colIdx))
+				{
+					String name = propertyNames.get(dataColIdx);
+					Object value = resolveCellValue(cell);
+
+					row.put(name, value);
+
+					dataColIdx++;
+				}
+
+				colIdx++;
+			}
+
+			data.add(row);
+		}
+
+		return data;
 	}
 
 	/**
 	 * 解析单元格属性值。
 	 * 
 	 * @param cell
-	 * @param property
-	 *            允许为{@code null}
-	 * @param converter
 	 * @return
 	 * @throws DataSetSourceParseException
 	 * @throws DataSetException
 	 */
-	protected Object resolvePropertyValue(Cell cell, DataSetProperty property, DataSetPropertyValueConverter converter)
-			throws DataSetSourceParseException, DataSetException
+	protected Object resolveCellValue(Cell cell) throws DataSetSourceParseException, DataSetException
 	{
 		CellType cellType = cell.getCellTypeEnum();
 
@@ -588,16 +578,14 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 				cellValue = cell.getStringCellValue();
 			}
 		}
-		catch (DataSetException e)
+		catch(DataSetException e)
 		{
 			throw e;
 		}
-		catch (Throwable t)
+		catch(Throwable t)
 		{
 			throw new DataSetSourceParseException(t);
 		}
-
-		cellValue = convertToPropertyDataType(converter, cellValue, property);
 
 		return cellValue;
 	}

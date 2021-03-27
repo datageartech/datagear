@@ -9,8 +9,8 @@ package org.datagear.analysis.support;
 
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -154,40 +154,30 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	protected ResolvedDataSetResult resolveResult(Reader jsonReader, List<DataSetProperty> properties,
 			DataSetOption dataSetOption) throws Throwable
 	{
-		boolean resolveProperties = (properties == null || properties.isEmpty());
-
 		JsonNode jsonNode = getObjectMapperNonStardand().readTree(jsonReader);
 
 		if (!isLegalResultDataJsonNode(jsonNode))
 			throw new UnsupportedJsonResultDataException("Result data must be JSON object or array");
 
-		Object data = null;
+		Object rawData = resolveRawData(jsonNode, getDataJsonPath(), dataSetOption);
 
-		if (jsonNode != null)
-			data = readDataByJsonPath(jsonNode, getDataJsonPath());
+		if (properties == null || properties.isEmpty())
+			properties = resolveProperties(rawData);
 
-		if (resolveProperties)
-			properties = resolveDataSetProperties(data);
-
-		data = convertJsonResultData(data, properties, dataSetOption, createDataSetPropertyValueConverter());
-
-		DataSetResult result = new DataSetResult(data);
-
-		return new ResolvedDataSetResult(result, properties);
+		return resolveResult(rawData, properties);
 	}
 
 	/**
-	 * 读取指定JSON路径的数据。
+	 * 解析原始数据数据。
 	 * 
-	 * @param jsonNode
-	 *            允许为{@code null}
-	 * @param dataJsonPath
-	 *            允许为{@code null}
+	 * @param jsonNode      允许为{@code null}
+	 * @param dataJsonPath  允许为{@code null}
+	 * @param dataSetOption 允许为{@code null}
 	 * @return
 	 * @throws ReadJsonDataPathException
 	 * @throws Throwable
 	 */
-	protected Object readDataByJsonPath(JsonNode jsonNode, String dataJsonPath)
+	protected Object resolveRawData(JsonNode jsonNode, String dataJsonPath, DataSetOption dataSetOption)
 			throws ReadJsonDataPathException, Throwable
 	{
 		if (jsonNode == null)
@@ -195,115 +185,64 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 
 		Object data = getObjectMapperNonStardand().treeToValue(jsonNode, Object.class);
 
-		if (data == null)
-			return null;
-
-		if (StringUtil.isEmpty(dataJsonPath))
-			return data;
-
-		String stdDataJsonPath = dataJsonPath.trim();
-
-		if (StringUtil.isEmpty(stdDataJsonPath))
-			return data;
-
-		// 转换"stores[0].books"、"[1].stores"简化模式为规范的JSONPath
-		if (!stdDataJsonPath.startsWith("$"))
+		if (data != null && !StringUtil.isEmpty(dataJsonPath))
 		{
-			if (stdDataJsonPath.startsWith("["))
-				stdDataJsonPath = "$" + stdDataJsonPath;
-			else
-				stdDataJsonPath = "$." + stdDataJsonPath;
-		}
+			String stdDataJsonPath = dataJsonPath.trim();
 
-		try
-		{
-			return JsonPath.compile(stdDataJsonPath).read(data, JACKSON_JSON_PATH_CONFIGURATION);
-		}
-		catch (Throwable t)
-		{
-			throw new ReadJsonDataPathException(dataJsonPath, t);
-		}
-	}
-
-	/**
-	 * 
-	 * @param resultData
-	 *            允许为{@code null}
-	 * @param properties
-	 * @param dataSetOption
-	 *            允许为{@code null}
-	 * @param converter
-	 * @return
-	 * @throws Throwable
-	 */
-	protected Object convertJsonResultData(Object resultData, List<DataSetProperty> properties,
-			DataSetOption dataSetOption, DataSetPropertyValueConverter converter) throws Throwable
-	{
-		Object re = null;
-
-		// JSON对象
-		if (resultData == null)
-		{
-			re = null;
-		}
-		else if (resultData instanceof Map<?, ?>)
-		{
-			Map<String, Object> reMap = new HashMap<>();
-
-			@SuppressWarnings("unchecked")
-			Map<String, Object> source = (Map<String, Object>) resultData;
-
-			for (Map.Entry<String, Object> entry : source.entrySet())
+			if (!StringUtil.isEmpty(stdDataJsonPath))
 			{
-				String name = entry.getKey();
-				Object value = entry.getValue();
+				// 转换"stores[0].books"、"[1].stores"简化模式为规范的JSONPath
+				if (!stdDataJsonPath.startsWith("$"))
+				{
+					if (stdDataJsonPath.startsWith("["))
+						stdDataJsonPath = "$" + stdDataJsonPath;
+					else
+						stdDataJsonPath = "$." + stdDataJsonPath;
+				}
 
-				DataSetProperty property = getDataNameTypeByName(properties, name);
-
-				value = convertToPropertyDataType(converter, value, property);
-
-				reMap.put(name, value);
+				try
+				{
+					data = JsonPath.compile(stdDataJsonPath).read(data, JACKSON_JSON_PATH_CONFIGURATION);
+				}
+				catch(Throwable t)
+				{
+					throw new ReadJsonDataPathException(dataJsonPath, t);
+				}
 			}
-
-			re = reMap;
 		}
-		else if (resultData instanceof List<?>)
+
+		if (data != null && hasResultDataMaxCount(dataSetOption))
 		{
-			List<?> list = (List<?>) resultData;
-
-			List<Object> reList = new ArrayList<>(list.size());
-
-			for (int i = 0; i < list.size(); i++)
+			if (data instanceof Collection<?>)
 			{
-				if (isReachResultDataMaxCount(dataSetOption, reList.size()))
-					break;
+				Collection<?> collection = (List<?>) data;
+				List<Object> dataList = new ArrayList<>();
 
-				Object ele = list.get(i);
-				reList.add(convertJsonResultData(ele, properties, null, converter));
+				for (Object ele : collection)
+				{
+					if (isReachResultDataMaxCount(dataSetOption, dataList.size()))
+						break;
+
+					dataList.add(ele);
+				}
+
+				data = dataList;
 			}
-
-			re = reList;
-		}
-		else if (resultData instanceof Object[])
-		{
-			Object[] array = (Object[]) resultData;
-
-			Object[] reArray = new Object[evalResultDataCount(dataSetOption, array.length)];
-
-			for (int i = 0; i < array.length; i++)
+			else if (data instanceof Object[])
 			{
-				if (isReachResultDataMaxCount(dataSetOption, i + 1))
-					break;
+				Object[] array = (Object[]) data;
+				Object[] dataArray = new Object[evalResultDataCount(dataSetOption, array.length)];
 
-				reArray[i] = convertJsonResultData(array[i], properties, null, converter);
+				for (int i = 0; i < dataArray.length; i++)
+				{
+					dataArray[i] = array[i];
+				}
+
+				data = dataArray;
 			}
-
-			re = reArray;
 		}
-		else
-			throw new UnsupportedJsonResultDataException("Result data must be object or object array/list");
 
-		return re;
+		return data;
 	}
 
 	/**
@@ -344,15 +283,14 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	}
 
 	/**
-	 * 解析JSON对象的{@linkplain DataSetProperty}。
+	 * 解析{@linkplain DataSetProperty}。
 	 * 
-	 * @param resultData
-	 *            允许为{@code null}，JSON对象、JSON对象数组、JSON对象列表
+	 * @param resultData 允许为{@code null}，JSON对象、JSON对象数组、JSON对象列表
 	 * @return
 	 * @throws Throwable
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<DataSetProperty> resolveDataSetProperties(Object resultData) throws Throwable
+	protected List<DataSetProperty> resolveProperties(Object resultData) throws Throwable
 	{
 		if (resultData == null)
 		{
@@ -360,7 +298,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		}
 		else if (resultData instanceof Map<?, ?>)
 		{
-			return resolveJsonObjDataSetProperties((Map<String, ?>) resultData);
+			return resolveJsonObjProperties((Map<String, ?>) resultData);
 		}
 		else if (resultData instanceof List<?>)
 		{
@@ -369,7 +307,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 			if (list.size() == 0)
 				return Collections.EMPTY_LIST;
 			else
-				return resolveJsonObjDataSetProperties((Map<String, ?>) list.get(0));
+				return resolveJsonObjProperties((Map<String, ?>) list.get(0));
 		}
 		else if (resultData instanceof Object[])
 		{
@@ -378,20 +316,20 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 			if (array.length == 0)
 				return Collections.EMPTY_LIST;
 			else
-				return resolveJsonObjDataSetProperties((Map<String, ?>) array[0]);
+				return resolveJsonObjProperties((Map<String, ?>) array[0]);
 		}
 		else
 			throw new UnsupportedJsonResultDataException("Result data must be object or object array/list");
 	}
 
 	/**
-	 * 解析JSON对象的{@linkplain DataSetProperty}。
+	 * 解析{@linkplain DataSetProperty}。
 	 * 
 	 * @param jsonObj
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<DataSetProperty> resolveJsonObjDataSetProperties(Map<String, ?> jsonObj) throws Throwable
+	protected List<DataSetProperty> resolveJsonObjProperties(Map<String, ?> jsonObj) throws Throwable
 	{
 		List<DataSetProperty> properties = new ArrayList<>();
 

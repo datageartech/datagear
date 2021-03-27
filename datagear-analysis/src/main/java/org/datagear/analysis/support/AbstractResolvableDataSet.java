@@ -79,6 +79,25 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 			DataSetOption dataSetOption) throws DataSetException;
 
 	/**
+	 * 是否有{@linkplain DataSetOption#getResultDataMaxCount()}。
+	 * 
+	 * @param dataSetOption 允许为{@code null}
+	 * @return
+	 */
+	protected boolean hasResultDataMaxCount(DataSetOption dataSetOption)
+	{
+		if (dataSetOption == null)
+			return false;
+
+		int maxCount = dataSetOption.getResultDataMaxCount();
+
+		if (maxCount < 0)
+			return false;
+
+		return true;
+	}
+
+	/**
 	 * 给定数目是否已到达{@linkplain DataSetOption#getResultDataMaxCount()}。
 	 * 
 	 * @param dataSetOption

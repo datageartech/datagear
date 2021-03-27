@@ -9,6 +9,7 @@ package org.datagear.analysis.support;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -147,33 +148,77 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 
 	 * @param cn
 	 * @param rs
+	 * @param rawData       {@code Collection<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
+	 * @param properties
+	 * @param dataSetOption 允许为{@code null}
+	 * @return {@code List<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
+	 * @throws Throwable
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetProperty> properties) throws Throwable
+	{
+		Object data = null;
+
+		if (rawData == null)
+		{
+
+		}
+		else if (rawData instanceof Collection<?>)
+		{
+			Collection<Map<String, ?>> rawCollection = (Collection<Map<String, ?>>) rawData;
+
+			data = convertRawData(rawCollection, properties);
+		}
+		else if (rawData instanceof Map<?, ?>[])
+		{
+			Map<?, ?>[] rawArray = (Map<?, ?>[]) rawData;
+			List<Map<String, ?>> rawCollection = (List) Arrays.asList(rawArray);
+			List<Map<String, Object>> dataList = convertRawData(rawCollection, properties);
+
+			data = dataList.toArray(new Map<?, ?>[dataList.size()]);
+		}
+		else if (rawData instanceof Map<?, ?>)
+		{
+			Map<?, ?> rawMap = (Map<?, ?>) rawData;
+			List<Map<String, ?>> rawCollection = (List) Arrays.asList(rawMap);
+			List<Map<String, Object>> dataList = convertRawData(rawCollection, properties);
+
+			data = dataList.get(0);
+		}
+		else
+			throw new UnsupportedOperationException(
+					"Unsupported raw data type : " + rawData.getClass().getSimpleName());
+
+		return new ResolvedDataSetResult(new DataSetResult(data), properties);
+	}
+
+	/**
+	 * 转换原始数据。
+	 * 
 	 * @param rawData
 	 * @param properties
-	 * @param dataSetOption
-	 *            允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(List<? extends Map<String, ?>> rawData,
-			List<DataSetProperty> properties)
-			throws Throwable
+	protected List<Map<String, Object>> convertRawData(Collection<? extends Map<String, ?>> rawData,
+			List<DataSetProperty> properties) throws Throwable
 	{
 		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
 
-		List<Map<String, ?>> data = new ArrayList<>(rawData.size());
+		List<Map<String, Object>> data = new ArrayList<>(rawData.size());
 
-		for (int i = 0, len = rawData.size(), plen = properties.size(); i < len; i++)
+		int plen = properties.size();
+
+		for (Map<String, ?> rowRaw : rawData)
 		{
 			// 应当仅保留数据集属性对应的数据
 			Map<String, Object> row = new HashMap<>();
 
-			Map<String, ?> rowRaw = rawData.get(i);
-
 			for (int j = 0; j < plen; j++)
 			{
 				DataSetProperty property = properties.get(j);
-				String name = property.getName();
 
+				String name = property.getName();
 				Object value = rowRaw.get(name);
 				value = convertToPropertyDataType(converter, value, property);
 
@@ -183,7 +228,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 			data.add(row);
 		}
 
-		return new ResolvedDataSetResult(new DataSetResult(data), properties);
+		return data;
 	}
 
 	/**
