@@ -780,3 +780,5 @@ PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'org.datagear.management
 --version[2.4.0], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+--添加数据集属性默认值列
+ALTER TABLE DATAGEAR_DATA_SET_PROP ADD COLUMN PROP_DFT_VALUE VARCHAR(100);

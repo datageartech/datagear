@@ -26,7 +26,10 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 	private static final long serialVersionUID = 1L;
 
 	/** 展示标签 */
-	private String label;
+	private String label = null;
+
+	/** 默认值 */
+	private Object defaultValue = null;
 
 	public DataSetProperty()
 	{
@@ -53,10 +56,32 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 		this.label = label;
 	}
 
+	/**
+	 * 获取默认值，可能为{@code null}。
+	 * <p>
+	 * 如果数据中此属性值为{@code null}，那么应该设置为此默认值。
+	 * </p>
+	 * <p>
+	 * 注意：此默认值类型不一定是期望的数据类型，应当先对其进行类型转换。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public Object getDefaultValue()
+	{
+		return defaultValue;
+	}
+
+	public void setDefaultValue(Object defaultValue)
+	{
+		this.defaultValue = defaultValue;
+	}
+
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", label=" + label + "]";
+		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", label=" + label
+				+ ", defaultValue=" + defaultValue + "]";
 	}
 
 	/**

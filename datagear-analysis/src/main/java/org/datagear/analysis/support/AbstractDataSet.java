@@ -148,9 +148,11 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 
 	 * @param cn
 	 * @param rs
-	 * @param rawData       {@code Collection<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
+	 * @param rawData
+	 *            {@code Collection<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
 	 * @param properties
-	 * @param dataSetOption 允许为{@code null}
+	 * @param dataSetOption
+	 *            允许为{@code null}
 	 * @return {@code List<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
 	 * @throws Throwable
 	 */
@@ -209,9 +211,13 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 		int plen = properties.size();
 
+		Object[] defaultValues = new Object[plen];
+		Object dvPlaceholder = new Object();
+		Arrays.fill(defaultValues, dvPlaceholder);
+
 		for (Map<String, ?> rowRaw : rawData)
 		{
-			// 应当仅保留数据集属性对应的数据
+			// 应当仅保留数据集属性对应的数据，因为数据集属性是允许编辑的，如果用户删除了某个数据集属性，表明对应的值不想被使用
 			Map<String, Object> row = new HashMap<>();
 
 			for (int j = 0; j < plen; j++)
@@ -221,6 +227,17 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 				String name = property.getName();
 				Object value = rowRaw.get(name);
 				value = convertToPropertyDataType(converter, value, property);
+
+				if (value == null)
+				{
+					if (defaultValues[j] == dvPlaceholder)
+					{
+						Object defaultValue = property.getDefaultValue();
+						defaultValues[j] = convertToPropertyDataType(converter, defaultValue, property);
+					}
+
+					value = defaultValues[j];
+				}
 
 				row.put(name, value);
 			}

@@ -239,6 +239,18 @@ po.previewOptions.url = "...";
 					width: "8em",
 					defaultContent: "",
 					orderable: true
+				},
+				{
+					title: "<@spring.message code='dataSet.DataSetProperty.defaultValue' />",
+					data: "defaultValue",
+					render: function(data, type, row, meta)
+					{
+						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyDefaultValue input-in-table ui-widget ui-widget-content'"
+							+" title='<@spring.message code='dataSet.DataSetProperty.defaultValue.desc' />' />";
+					},
+					width: "6em",
+					defaultContent: "",
+					orderable: true
 				}
 			],
 			data: (initDataSetProperties || []),
@@ -312,6 +324,10 @@ po.previewOptions.url = "...";
 		po.element(".properties-table-wrapper .dataSetPropertyLabel").each(function(i)
 		{
 			properties[i]["label"] = $(this).val();
+		});
+		po.element(".properties-table-wrapper .dataSetPropertyDefaultValue").each(function(i)
+		{
+			properties[i]["defaultValue"] = $(this).val();
 		});
 		
 		return properties;
