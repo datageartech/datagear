@@ -1013,7 +1013,7 @@
 		
 		buildDataTablesColumnTitleWithTip : function(titleName, titleTip)
 		{
-			return "<a title='"+$.escapeHtml(titleTip)+"'>"+$.escapeHtml(titleName)+"</a>";
+			return "<a class='tip-label' title='"+$.escapeHtml(titleTip)+"'>"+$.escapeHtml(titleName)+"</a>";
 		},
 		
 		/**

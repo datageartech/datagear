@@ -230,7 +230,7 @@ po.previewOptions.url = "...";
 					orderable: true
 				},
 				{
-					title: "<@spring.message code='dataSet.DataSetProperty.label' />",
+					title: $.buildDataTablesColumnTitleWithTip("<@spring.message code='dataSet.DataSetProperty.label' />", "<@spring.message code='dataSet.DataSetProperty.label.desc' />"),
 					data: "label",
 					render: function(data, type, row, meta)
 					{
@@ -241,12 +241,11 @@ po.previewOptions.url = "...";
 					orderable: true
 				},
 				{
-					title: "<@spring.message code='dataSet.DataSetProperty.defaultValue' />",
+					title: $.buildDataTablesColumnTitleWithTip("<@spring.message code='dataSet.DataSetProperty.defaultValue' />", "<@spring.message code='dataSet.DataSetProperty.defaultValue.desc' />"),
 					data: "defaultValue",
 					render: function(data, type, row, meta)
 					{
-						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyDefaultValue input-in-table ui-widget ui-widget-content'"
-							+" title='<@spring.message code='dataSet.DataSetProperty.defaultValue.desc' />' />";
+						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyDefaultValue input-in-table ui-widget ui-widget-content' />";
 					},
 					width: "6em",
 					defaultContent: "",
@@ -288,6 +287,20 @@ po.previewOptions.url = "...";
 		po.element(".del-property-button").click(function()
 		{
 			$.dataTableUtil.deleteSelectedRows(po.dataSetPropertiesTableElement().DataTable());
+		});
+		
+		po.element(".up-property-button").click(function()
+		{
+			var dataTable = po.dataSetPropertiesTableElement().DataTable();
+			$.setDataTableData(dataTable, po.getFormDataSetProperties(true));
+			$.dataTableUtil.moveSelectedUp(dataTable);
+		});
+		
+		po.element(".down-property-button").click(function()
+		{
+			var dataTable = po.dataSetPropertiesTableElement().DataTable();
+			$.setDataTableData(dataTable, po.getFormDataSetProperties(true));
+			$.dataTableUtil.moveSelectedDown(dataTable);
 		});
 		
 		po.dataSetPropertiesTableElement().on("click", ".input-in-table", function(event)
@@ -517,6 +530,20 @@ po.previewOptions.url = "...";
 		po.element(".del-param-button").click(function()
 		{
 			$.dataTableUtil.deleteSelectedRows(po.dataSetParamsTableElement().DataTable());
+		});
+		
+		po.element(".up-param-button").click(function()
+		{
+			var dataTable = po.dataSetParamsTableElement().DataTable();
+			$.setDataTableData(dataTable, po.getFormDataSetParams());
+			$.dataTableUtil.moveSelectedUp(dataTable);
+		});
+		
+		po.element(".down-param-button").click(function()
+		{
+			var dataTable = po.dataSetParamsTableElement().DataTable();
+			$.setDataTableData(dataTable, po.getFormDataSetParams());
+			$.dataTableUtil.moveSelectedDown(dataTable);
 		});
 		
 		po.dataSetParamsTableElement().on("click", ".input-in-table", function(event)
