@@ -39,9 +39,9 @@
 		<div class="operation">
 			<#if !readonly>
 			<button type="button" class="add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
-			<button type="button" class="del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
 			<button type="button" class="up-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='moveUp' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-n"></span><span class="ui-button-icon-space"> </span><@spring.message code='moveUp' /></button>
 			<button type="button" class="down-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='moveDown' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='moveDown' /></button>
+			<button type="button" class="del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
 			</#if>
 		</div>
 		<table id="${pageId}-dataSetParamsTable" class='hover stripe'></table>
@@ -50,9 +50,9 @@
 		<div class="operation">
 			<#if !readonly>
 			<button type="button" class="add-property-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
-			<button type="button" class="del-property-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
 			<button type="button" class="up-property-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='moveUp' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-n"></span><span class="ui-button-icon-space"> </span><@spring.message code='moveUp' /></button>
 			<button type="button" class="down-property-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='moveDown' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='moveDown' /></button>
+			<button type="button" class="del-property-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
 			</#if>
 		</div>
 		<table id="${pageId}-dataSetPropertiesTable" class='hover stripe'></table>

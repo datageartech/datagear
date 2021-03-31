@@ -15,8 +15,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetParam;
+import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.CsvValueDataSet;
@@ -59,6 +62,7 @@ import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -162,7 +166,10 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
-		checkSaveSqlDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
@@ -195,7 +202,10 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
-		checkSaveJsonValueDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
@@ -229,7 +239,10 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
-		checkSaveJsonFileDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
@@ -265,7 +278,10 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
-		checkSaveExcelDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
@@ -301,7 +317,10 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
-		checkSaveCsvValueDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
@@ -336,7 +355,10 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
-		checkSaveCsvFileDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
@@ -372,7 +394,10 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
-		checkSaveHttpDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
@@ -413,7 +438,10 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		checkSaveSqlDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
@@ -429,7 +457,10 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		checkSaveJsonValueDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
@@ -446,7 +477,10 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		checkSaveJsonFileDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
@@ -465,7 +499,10 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		checkSaveExcelDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
@@ -483,7 +520,10 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		checkSaveCsvValueDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
@@ -500,7 +540,10 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		checkSaveCsvFileDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
@@ -518,7 +561,10 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		checkSaveHttpDataSetEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
@@ -944,18 +990,13 @@ public class DataSetController extends AbstractSchemaConnController
 		return AbstractDataSet.FMK_TEMPLATE_RESOLVER;
 	}
 
-	protected void checkSaveEntity(DataSetEntity dataSet)
+	protected ResponseEntity<OperationMessage> checkSaveSqlDataSetEntity(HttpServletRequest request,
+			SqlDataSetEntity dataSet)
 	{
-		if (isBlank(dataSet.getName()))
-			throw new IllegalInputException();
+		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, dataSet);
 
-		if (isEmpty(dataSet.getProperties()))
-			throw new IllegalInputException();
-	}
-
-	protected void checkSaveSqlDataSetEntity(SqlDataSetEntity dataSet)
-	{
-		checkSaveEntity(dataSet);
+		if (responseEntity != null)
+			return responseEntity;
 
 		if (isEmpty(dataSet.getConnectionFactory()))
 			throw new IllegalInputException();
@@ -968,54 +1009,139 @@ public class DataSetController extends AbstractSchemaConnController
 
 		if (isBlank(dataSet.getSql()))
 			throw new IllegalInputException();
+
+		return null;
 	}
 
-	protected void checkSaveJsonValueDataSetEntity(JsonValueDataSetEntity dataSet)
+	protected ResponseEntity<OperationMessage> checkSaveJsonValueDataSetEntity(HttpServletRequest request,
+			JsonValueDataSetEntity dataSet)
 	{
-		checkSaveEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		if (isEmpty(dataSet.getValue()))
 			throw new IllegalInputException();
+
+		return null;
 	}
 
-	protected void checkSaveJsonFileDataSetEntity(JsonFileDataSetEntity dataSet)
+	protected ResponseEntity<OperationMessage> checkSaveJsonFileDataSetEntity(HttpServletRequest request,
+			JsonFileDataSetEntity dataSet)
 	{
-		checkSaveEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
 			throw new IllegalInputException();
+
+		return null;
 	}
 
-	protected void checkSaveExcelDataSetEntity(ExcelDataSetEntity dataSet)
+	protected ResponseEntity<OperationMessage> checkSaveExcelDataSetEntity(HttpServletRequest request,
+			ExcelDataSetEntity dataSet)
 	{
-		checkSaveEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
 			throw new IllegalInputException();
+
+		return null;
 	}
 
-	protected void checkSaveCsvValueDataSetEntity(CsvValueDataSetEntity dataSet)
+	protected ResponseEntity<OperationMessage> checkSaveCsvValueDataSetEntity(HttpServletRequest request,
+			CsvValueDataSetEntity dataSet)
 	{
-		checkSaveEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		if (isEmpty(dataSet.getValue()))
 			throw new IllegalInputException();
+
+		return null;
 	}
 
-	protected void checkSaveCsvFileDataSetEntity(CsvFileDataSetEntity dataSet)
+	protected ResponseEntity<OperationMessage> checkSaveCsvFileDataSetEntity(HttpServletRequest request,
+			CsvFileDataSetEntity dataSet)
 	{
-		checkSaveEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
 			throw new IllegalInputException();
+
+		return null;
 	}
 
-	protected void checkSaveHttpDataSetEntity(HttpDataSetEntity dataSet)
+	protected ResponseEntity<OperationMessage> checkSaveHttpDataSetEntity(HttpServletRequest request,
+			HttpDataSetEntity dataSet)
 	{
-		checkSaveEntity(dataSet);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, dataSet);
+
+		if (responseEntity != null)
+			return responseEntity;
 
 		if (isEmpty(dataSet.getUri()))
 			throw new IllegalInputException();
+
+		return null;
+	}
+
+	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, DataSetEntity dataSet)
+	{
+		if (isBlank(dataSet.getName()))
+			throw new IllegalInputException();
+
+		if (isEmpty(dataSet.getProperties()))
+			throw new IllegalInputException();
+
+		List<DataSetParam> params = dataSet.getParams();
+		if (params != null)
+		{
+			Set<String> names = new HashSet<>();
+			for (DataSetParam param : params)
+			{
+				String name = param.getName();
+
+				if (names.contains(name))
+				{
+					return buildOperationMessageFailResponseEntity(null, HttpStatus.BAD_REQUEST,
+							"dataSet.error.duplicateParamName");
+				}
+				else
+					names.add(name);
+			}
+		}
+
+		List<DataSetProperty> properties = dataSet.getProperties();
+		if (properties != null)
+		{
+			Set<String> names = new HashSet<>();
+			for (DataSetProperty property : properties)
+			{
+				String name = property.getName();
+
+				if (names.contains(name))
+				{
+					return buildOperationMessageFailResponseEntity(null, HttpStatus.BAD_REQUEST,
+							"dataSet.error.duplicatePropertyName");
+				}
+				else
+					names.add(name);
+			}
+		}
+
+		return null;
 	}
 
 	public static class AbstractDataSetPreview<T extends DataSet>
