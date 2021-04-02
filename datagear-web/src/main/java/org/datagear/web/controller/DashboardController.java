@@ -32,7 +32,6 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
-import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
@@ -1031,30 +1030,32 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
 
-		ChartWidgetSource chartWidgetSource = getHtmlTplDashboardWidgetEntityService()
-				.getHtmlTplDashboardWidgetRenderer().getChartWidgetSource();
-
-		HtmlChartWidget chartWidget = (HtmlChartWidget) chartWidgetSource.getChartWidget(chartWidgetId);
-
-		if (chartWidget == null)
-			throw new RecordNotFoundException(chartWidgetId);
-
-		// 不缓存
-		response.setContentType(CONTENT_TYPE_JSON);
-		PrintWriter out = response.getWriter();
-
-		HtmlChartWidgetJsonSetting chartWidgetJsonSetting = new HtmlChartWidgetJsonSetting(chartWidget);
-		chartWidgetJsonSetting.setChartElementId(chartElementId);
-
-		HtmlChart chart = this.htmlChartWidgetJsonWriter.writeJsonSetting(out, chartWidgetJsonSetting);
-
-		synchronized (dashboard)
+		try
 		{
-			List<Chart> dashboardCharts = dashboard.getCharts();
-			List<Chart> newCharts = (dashboardCharts == null || dashboardCharts.isEmpty() ? new ArrayList<>()
-					: new ArrayList<>(dashboardCharts));
-			newCharts.add(chart);
-			dashboard.setCharts(newCharts);
+			HtmlChartWidget chartWidget = getHtmlTplDashboardWidgetEntityService().getHtmlTplDashboardWidgetRenderer()
+					.getHtmlChartWidget(chartWidgetId);
+
+			// 不缓存
+			response.setContentType(CONTENT_TYPE_JSON);
+			PrintWriter out = response.getWriter();
+
+			HtmlChartWidgetJsonSetting chartWidgetJsonSetting = new HtmlChartWidgetJsonSetting(chartWidget);
+			chartWidgetJsonSetting.setChartElementId(chartElementId);
+
+			HtmlChart chart = this.htmlChartWidgetJsonWriter.writeJsonSetting(out, chartWidgetJsonSetting);
+
+			synchronized (dashboard)
+			{
+				List<Chart> dashboardCharts = dashboard.getCharts();
+				List<Chart> newCharts = (dashboardCharts == null || dashboardCharts.isEmpty() ? new ArrayList<>()
+						: new ArrayList<>(dashboardCharts));
+				newCharts.add(chart);
+				dashboard.setCharts(newCharts);
+			}
+		}
+		finally
+		{
+			ChartWidgetSourceContext.remove();
 		}
 	}
 

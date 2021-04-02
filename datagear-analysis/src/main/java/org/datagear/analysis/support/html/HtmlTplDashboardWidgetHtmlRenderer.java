@@ -258,6 +258,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		boolean wroteDashboardScript = false;
 		boolean inHeadTag = false;
 		boolean handledTitle = false;
+		boolean inBodyTag = false;
 
 		DashboardInfo dashboardInfo = new DashboardInfo();
 
@@ -353,8 +354,15 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 					appendResolvedTagInfo(out, c, tagName, last);
 					inHeadTag = false;
 				}
+				// <body
+				else if ("body".equalsIgnoreCase(tagName))
+				{
+					inBodyTag = true;
+
+					appendResolvedTagInfo(out, c, tagName, last);
+				}
 				// <div
-				else if (this.chartTagName.equalsIgnoreCase(tagName))
+				else if (inBodyTag && this.chartTagName.equalsIgnoreCase(tagName))
 				{
 					appendResolvedTagInfo(out, c, tagName, last);
 
@@ -375,6 +383,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				// </body
 				else if ("/body".equalsIgnoreCase(tagName))
 				{
+					inBodyTag = false;
+
 					if (!wroteDashboardScript)
 					{
 						writeHtmlTplDashboardScript(renderContext, renderAttr, out, dashboard, dashboardInfo);
