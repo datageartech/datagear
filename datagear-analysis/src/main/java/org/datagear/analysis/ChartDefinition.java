@@ -8,6 +8,7 @@
 package org.datagear.analysis;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +20,10 @@ import java.util.Map;
  */
 public class ChartDefinition extends AbstractIdentifiable
 {
+	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_CHART_DATASETS = "chartDataSets";
-	public static final String PROPERTY_CHART_PARAM_VALUES = "paramValues";
+	public static final String PROPERTY_CHART_ATTRIBUTES = "attributes";
 	public static final String PROPERTY_UPDATE_INTERVAL = "updateInterval";
 
 	public static final ChartDataSet[] EMPTY_CHART_DATA_SET = new ChartDataSet[0];
@@ -32,9 +34,9 @@ public class ChartDefinition extends AbstractIdentifiable
 	/** 图表数据集 */
 	private ChartDataSet[] chartDataSets = EMPTY_CHART_DATA_SET;
 
-	/** 图表参数值映射表 */
+	/** 图表属性映射表 */
 	@SuppressWarnings("unchecked")
-	private Map<String, Object> paramValues = Collections.EMPTY_MAP;
+	private Map<String, Object> attributes = Collections.EMPTY_MAP;
 
 	/** 图表更新间隔毫秒数 */
 	private int updateInterval = -1;
@@ -71,14 +73,52 @@ public class ChartDefinition extends AbstractIdentifiable
 		this.chartDataSets = chartDataSets;
 	}
 
-	public Map<String, Object> getParamValues()
+	/**
+	 * 获取图表属性映射表。
+	 * 
+	 * @return
+	 */
+	public Map<String, Object> getAttributes()
 	{
-		return paramValues;
+		return attributes;
 	}
 
-	public void setParamValues(Map<String, Object> paramValues)
+	/**
+	 * 设置图表属性映射表。
+	 * 
+	 * @param attributes
+	 */
+	public void setAttributes(Map<String, Object> attributes)
 	{
-		this.paramValues = paramValues;
+		this.attributes = attributes;
+	}
+
+	/**
+	 * 设置属性。
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	public void setAttribute(String name, Object value)
+	{
+		if (this.attributes == null || this.attributes == Collections.EMPTY_MAP)
+			this.attributes = new HashMap<>();
+
+		this.attributes.put(name, value);
+	}
+
+	/**
+	 * 获取属性。
+	 * 
+	 * @param name
+	 * @return 返回{@code null}表示没有。
+	 */
+	public Object getAttribute(String name)
+	{
+		if (this.attributes == null)
+			return null;
+
+		return this.attributes.get(name);
 	}
 
 	/**
@@ -194,7 +234,7 @@ public class ChartDefinition extends AbstractIdentifiable
 		to.setId(from.getId());
 		to.setName(from.name);
 		to.setChartDataSets(from.chartDataSets);
-		to.setParamValues(from.paramValues);
+		to.setAttributes(from.attributes);
 		to.setUpdateInterval(from.updateInterval);
 	}
 }

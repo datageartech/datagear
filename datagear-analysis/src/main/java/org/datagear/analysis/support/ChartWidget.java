@@ -7,6 +7,9 @@
 
 package org.datagear.analysis.support;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
@@ -27,6 +30,9 @@ import org.datagear.util.IDUtil;
  */
 public class ChartWidget extends ChartDefinition
 {
+	/** 图表部件渲染时的部件信息属性名 */
+	public static final String ATTR_CHART_WIDGET = "chartWidget";
+
 	private ChartPlugin plugin;
 
 	public ChartWidget()
@@ -80,6 +86,18 @@ public class ChartWidget extends ChartDefinition
 		ChartDefinition chartDefinition = new ChartDefinition();
 		ChartDefinition.copy(this, chartDefinition);
 		chartDefinition.setId(generateChartId(renderContext));
+
+		// 添加图表对应的部件信息
+		Map<String, Object> attributesNew = new HashMap<>();
+		Map<String, Object> attributesOld = chartDefinition.getAttributes();
+		if (attributesOld != null)
+			attributesNew.putAll(attributesOld);
+		Map<String, Object> chartWidgetInfo = new HashMap<>();
+		chartWidgetInfo.put(ChartWidget.PROPERTY_ID, this.getId());
+		attributesNew.put(ATTR_CHART_WIDGET, chartWidgetInfo);
+
+		chartDefinition.setAttributes(attributesNew);
+
 		return chartDefinition;
 	}
 

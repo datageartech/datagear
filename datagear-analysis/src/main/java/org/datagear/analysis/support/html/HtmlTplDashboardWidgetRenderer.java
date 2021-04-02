@@ -15,9 +15,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
@@ -113,7 +111,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 	private HtmlTplDashboardScriptObjectWriter htmlTplDashboardScriptObjectWriter = new HtmlTplDashboardScriptObjectWriter();
 
-	private ParamValueHtmlChartPlugin htmlChartPluginForGetWidgetException = new ParamValueHtmlChartPlugin(
+	private AttributeValueHtmlChartPlugin htmlChartPluginForGetWidgetException = new AttributeValueHtmlChartPlugin(
 			Global.PRODUCT_NAME_EN + "HtmlChartPluginForGetWidgetException",
 			Global.PRODUCT_NAME_EN + "HtmlChartPluginForGetWidgetExceptionMsg");
 
@@ -225,12 +223,13 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		this.htmlTplDashboardScriptObjectWriter = htmlTplDashboardScriptObjectWriter;
 	}
 
-	public ParamValueHtmlChartPlugin getHtmlChartPluginForGetWidgetException()
+	public AttributeValueHtmlChartPlugin getHtmlChartPluginForGetWidgetException()
 	{
 		return htmlChartPluginForGetWidgetException;
 	}
 
-	public void setHtmlChartPluginForGetWidgetException(ParamValueHtmlChartPlugin htmlChartPluginForGetWidgetException)
+	public void setHtmlChartPluginForGetWidgetException(
+			AttributeValueHtmlChartPlugin htmlChartPluginForGetWidgetException)
 	{
 		this.htmlChartPluginForGetWidgetException = htmlChartPluginForGetWidgetException;
 	}
@@ -480,6 +479,21 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	}
 
 	/**
+	 * 获取用于渲染指定图表部件ID的{@linkplain HtmlChartWidget}。
+	 * <p>
+	 * 注意：如果没有找到对应的{@linkplain HtmlChartWidget}、或者底层出现异常，此方法将返回一个不同ID（{@linkplain HtmlChartWidget#getId()}）的替代对象，
+	 * 用于支持渲染相关错误信息。
+	 * </p>
+	 * 
+	 * @param htmlChartWidgetId
+	 * @return
+	 */
+	public HtmlChartWidget getHtmlChartWidget(String htmlChartWidgetId)
+	{
+		return getHtmlChartWidgetForRender(htmlChartWidgetId);
+	}
+
+	/**
 	 * 渲染{@linkplain Dashboard}。
 	 * 
 	 * @param renderContext
@@ -618,11 +632,10 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	 * 如果{@linkplain HtmlChartWidget#getChartPlugin()}为{@code null}，则返回{@linkplain #createHtmlChartWidgetForPluginNull(ChartWidget)}。
 	 * </p>
 	 * 
-	 * @param renderContext
 	 * @param id
 	 * @return
 	 */
-	protected HtmlChartWidget getHtmlChartWidgetForRender(RenderContext renderContext, String id)
+	protected HtmlChartWidget getHtmlChartWidgetForRender(String id)
 	{
 		ChartWidget chartWidget = null;
 
@@ -649,14 +662,11 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 	protected HtmlChartWidget createHtmlChartWidgetForGetException(String exceptionWidgetId, Throwable t)
 	{
-		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetGetException",
+		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetException",
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
-		Map<String, Object> paramValues = new HashMap<>();
-		paramValues.put(this.htmlChartPluginForGetWidgetException.getChartParamName(),
-				"Chart '" + (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
-
-		widget.setParamValues(paramValues);
+		widget.setAttribute(this.htmlChartPluginForGetWidgetException.getChartAttributeName(), "Chart widget '"
+				+ (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
 
 		return widget;
 	}
@@ -666,11 +676,8 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetNotFound",
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
-		Map<String, Object> paramValues = new HashMap<>();
-		paramValues.put(this.htmlChartPluginForGetWidgetException.getChartParamName(),
-				"Chart '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
-
-		widget.setParamValues(paramValues);
+		widget.setAttribute(this.htmlChartPluginForGetWidgetException.getChartAttributeName(),
+				"Chart widget '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
 
 		return widget;
 	}
@@ -680,11 +687,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetPluginNull",
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
-		Map<String, Object> paramValues = new HashMap<>();
-		paramValues.put(this.htmlChartPluginForGetWidgetException.getChartParamName(),
-				"Chart plugin for rendering chart '" + chartWidget.getName() + "' not found");
-
-		widget.setParamValues(paramValues);
+		widget.setAttribute(this.htmlChartPluginForGetWidgetException.getChartAttributeName(), "Chart plugin is null");
 
 		return widget;
 	}

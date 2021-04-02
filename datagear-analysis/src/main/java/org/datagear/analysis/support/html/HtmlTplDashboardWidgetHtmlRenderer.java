@@ -181,9 +181,11 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * 
 	 * @param htmlCharset
 	 * @param htmlTitle
-	 * @param customChartCssAttrs 自定义图表样式属性，允许为{@code null}
+	 * @param customChartCssAttrs
+	 *            自定义图表样式属性，允许为{@code null}
 	 * @param chartWidgetId
-	 * @param chartEleAttrs       图表元素属性，允许为{@code null}
+	 * @param chartEleAttrs
+	 *            图表元素属性，允许为{@code null}
 	 * @return
 	 */
 	public String simpleTemplateContent(String htmlCharset, String htmlTitle, String customChartCssAttrs,
@@ -219,8 +221,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		sb.append("\n");
 
 		for (String cwi : chartWidgetId)
-			sb.append("  <div class=\"" + getChartStyleName() + "\" " + getAttrNameChartWidget() + "=\"" + cwi
-					+ "\" " + (StringUtil.isEmpty(chartEleAttrs) ? "" : chartEleAttrs) + "></div>\n");
+			sb.append("  <div class=\"" + getChartStyleName() + "\" " + getAttrNameChartWidget() + "=\"" + cwi + "\" "
+					+ (StringUtil.isEmpty(chartEleAttrs) ? "" : chartEleAttrs) + "></div>\n");
 
 		sb.append("</body>\n");
 		sb.append("</html>");
@@ -461,7 +463,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		List<ChartInfo> chartInfos = dashboardInfo.getChartInfos();
 		if (chartInfos != null)
 		{
-			List<HtmlChartWidget> chartWidgets = getHtmlChartWidgets(renderContext, chartInfos);
+			List<HtmlChartWidget> chartWidgets = getHtmlChartWidgets(chartInfos);
 			List<String> chartPluginVarNames = writeHtmlChartPluginScriptsResolveImport(renderContext, renderAttr, out,
 					chartWidgets);
 
@@ -493,7 +495,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 	}
 
-	protected List<HtmlChartWidget> getHtmlChartWidgets(RenderContext renderContext, List<ChartInfo> chartInfos)
+	protected List<HtmlChartWidget> getHtmlChartWidgets(List<ChartInfo> chartInfos)
 	{
 		List<HtmlChartWidget> list = new ArrayList<>();
 
@@ -501,7 +503,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			return list;
 
 		for (ChartInfo chartInfo : chartInfos)
-			list.add(getHtmlChartWidgetForRender(renderContext, chartInfo.getWidgetId()));
+			list.add(getHtmlChartWidgetForRender(chartInfo.getWidgetId()));
 
 		return list;
 	}

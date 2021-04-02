@@ -34,7 +34,7 @@ public class Chart extends ChartDefinition
 	public Chart(ChartDefinition chartDefinition, ChartPlugin plugin, RenderContext renderContext)
 	{
 		super(chartDefinition.getId(), chartDefinition.getName(), chartDefinition.getChartDataSets());
-		setParamValues(chartDefinition.getParamValues());
+		setAttributes(chartDefinition.getAttributes());
 		setUpdateInterval(chartDefinition.getUpdateInterval());
 
 		this.plugin = plugin;
