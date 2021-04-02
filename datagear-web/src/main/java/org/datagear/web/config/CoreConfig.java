@@ -22,6 +22,7 @@ import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.NameAsTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
+import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport.ImportItem;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
@@ -610,6 +611,13 @@ public class CoreConfig implements InitializingBean
 				"chartFactory.chartPluginManager.get('" + pp + "')");
 
 		return resolver;
+	}
+
+	@Bean
+	public HtmlChartWidgetJsonWriter htmlChartWidgetJsonWriter()
+	{
+		HtmlChartWidgetJsonWriter bean = new HtmlChartWidgetJsonWriter();
+		return bean;
 	}
 
 	@Bean

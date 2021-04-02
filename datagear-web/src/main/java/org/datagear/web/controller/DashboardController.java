@@ -32,11 +32,11 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
-import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.DefaultRenderContext;
-import org.datagear.analysis.support.html.HtmlChartRenderAttr;
-import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
+import org.datagear.analysis.support.html.HtmlChart;
+import org.datagear.analysis.support.html.HtmlChartWidget;
+import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
+import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter.HtmlChartWidgetJsonSetting;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
@@ -111,6 +111,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	private AnalysisProjectService analysisProjectService;
 
 	@Autowired
+	private HtmlChartWidgetJsonWriter htmlChartWidgetJsonWriter;
+
+	@Autowired
 	private File tempDirectory;
 
 	private ServletContext servletContext;
@@ -160,6 +163,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
 	{
 		this.analysisProjectService = analysisProjectService;
+	}
+
+	public HtmlChartWidgetJsonWriter getHtmlChartWidgetJsonWriter()
+	{
+		return htmlChartWidgetJsonWriter;
+	}
+
+	public void setHtmlChartWidgetJsonWriter(HtmlChartWidgetJsonWriter htmlChartWidgetJsonWriter)
+	{
+		this.htmlChartWidgetJsonWriter = htmlChartWidgetJsonWriter;
 	}
 
 	public File getTempDirectory()
@@ -996,7 +1009,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @param request
 	 * @param response
 	 * @param model
-	 * @param dashbaordId
+	 * @param dashboardId
+	 * @param chartWidgetIds
+	 * @param returnArray
 	 * @throws Throwable
 	 */
 	@RequestMapping(value = "/loadChart", produces = CONTENT_TYPE_JSON)
@@ -1019,34 +1034,25 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		ChartWidgetSource chartWidgetSource = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer().getChartWidgetSource();
 
-		ChartWidget chartWidget = chartWidgetSource.getChartWidget(chartWidgetId);
+		HtmlChartWidget chartWidget = (HtmlChartWidget) chartWidgetSource.getChartWidget(chartWidgetId);
 
 		if (chartWidget == null)
-			throw new RecordNotFoundException();
+			throw new RecordNotFoundException(chartWidgetId);
 
 		// 不缓存
 		response.setContentType(CONTENT_TYPE_JSON);
-
-		RenderContext renderContext = new DefaultRenderContext();
-		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
 		PrintWriter out = response.getWriter();
-		HtmlChartRenderOption renderOption = new HtmlChartRenderOption(chartElementId,
-				"{\"id\": \"" + WebUtils.escapeJavaScriptStringValue(chartWidget.getPlugin().getId()) + "\"}",
-				"undefined", "{}");
-		renderOption.setNotWriteChartElement(true);
-		renderOption.setNotWritePluginObject(true);
-		renderOption.setNotWriteRenderContextObject(true);
-		renderOption.setNotWriteScriptTag(true);
-		renderOption.setNotWriteInvoke(true);
-		renderOption.setWriteChartJson(true);
-		renderAttr.inflate(renderContext, out, renderOption);
 
-		Chart chart = chartWidget.render(renderContext);
+		HtmlChartWidgetJsonSetting chartWidgetJsonSetting = new HtmlChartWidgetJsonSetting(chartWidget);
+		chartWidgetJsonSetting.setChartElementId(chartElementId);
+
+		HtmlChart chart = this.htmlChartWidgetJsonWriter.writeJsonSetting(out, chartWidgetJsonSetting);
 
 		synchronized (dashboard)
 		{
-			List<Chart> charts = dashboard.getCharts();
-			List<Chart> newCharts = (charts == null || charts.isEmpty() ? new ArrayList<>() : new ArrayList<>(charts));
+			List<Chart> dashboardCharts = dashboard.getCharts();
+			List<Chart> newCharts = (dashboardCharts == null || dashboardCharts.isEmpty() ? new ArrayList<>()
+					: new ArrayList<>(dashboardCharts));
 			newCharts.add(chart);
 			dashboard.setCharts(newCharts);
 		}
