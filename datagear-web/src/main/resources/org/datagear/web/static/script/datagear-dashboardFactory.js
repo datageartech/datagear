@@ -1442,7 +1442,7 @@
 	 * 如果指定的HTML元素已经是图表组件，则不加载图表而直接返回false。
 	 * 
 	 * @param element 用于渲染图表的HTML元素、Jquery对象
-	 * @param chartWidgetId 要加载的图表部件ID
+	 * @param chartWidgetId 选填参数，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
 	 * @param ajaxOptions 选填参数，参数格式可以是ajax配置项：{...}、也可以是图表加载成功回调函数：function(chart){ ... }。
 	 * 					  如果ajax配置项的success函数、图表加载成功回调函数返回false，则后续不会自动调用dashboardBase.addChart函数。
 	 */
@@ -1451,11 +1451,22 @@
 		if(chartFactory.isChartElement(element))
 			return false;
 		
-		var chartElementId = $(element).attr("id");
+		element = $(element);
+		
+		if(typeof(chartWidgetId) != "string")
+		{
+			ajaxOptions = chartWidgetId;
+			chartWidgetId = element.attr(chartFactory.elementAttrConst.WIDGET);
+			
+			if(!chartWidgetId)
+				throw new Error("["+chartFactory.elementAttrConst.WIDGET+"] attribute must be set");
+		}
+		
+		var chartElementId = element.attr("id");
 		if(!chartElementId)
 		{
-			chartElementId = "chart" + new Date().getTime();
-			$(element).attr("id", chartElementId);
+			chartElementId = chartFactory.nextElementId();
+			element.attr("id", chartElementId);
 		}
 		
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
@@ -1483,15 +1494,7 @@
 		var myAjaxOptions = $.extend(
 		{
 			url: url,
-			data: data,
-			error: function(jqXHR, textStatus, errorThrown)
-			{
-				var msg = (jqXHR.responseJSON ? jqXHR.responseJSON.message : undefined);
-				if(!msg)
-					msg = textStatus;
-				
-				$(element).html(msg);
-			}
+			data: data
 		},
 		ajaxOptions);
 		
