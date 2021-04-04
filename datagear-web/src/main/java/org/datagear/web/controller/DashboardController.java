@@ -35,7 +35,6 @@ import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
-import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter.HtmlChartWidgetJsonSetting;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
@@ -87,9 +86,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	/** 加载看板图表参数：图表部件ID */
 	public static final String LOAD_CHART_PARAM_CHART_WIDGET_ID = "chartWidgetId";
-
-	/** 加载看板图表参数：图表HTML元素ID */
-	public static final String LOAD_CHART_PARAM_CHART_ELEMENT_ID = "chartElementId";
 
 	static
 	{
@@ -1003,21 +999,19 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	}
 
 	/**
-	 * 加载看板图表。
+	 * 加载多个看板图表的JSON对象数组。
 	 * 
 	 * @param request
 	 * @param response
 	 * @param model
 	 * @param dashboardId
 	 * @param chartWidgetIds
-	 * @param returnArray
 	 * @throws Throwable
 	 */
 	@RequestMapping(value = "/loadChart", produces = CONTENT_TYPE_JSON)
 	public void loadChart(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam(LOAD_CHART_PARAM_DASHBOARD_ID) String dashboardId,
-			@RequestParam(LOAD_CHART_PARAM_CHART_WIDGET_ID) String chartWidgetId,
-			@RequestParam(LOAD_CHART_PARAM_CHART_ELEMENT_ID) String chartElementId) throws Throwable
+			@RequestParam(LOAD_CHART_PARAM_CHART_WIDGET_ID) String[] chartWidgetIds) throws Throwable
 	{
 		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
 		HtmlTplDashboard dashboard = dashboardManager.get(dashboardId);
@@ -1030,26 +1024,28 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
 
+		HtmlChartWidget[] chartWidgets = new HtmlChartWidget[chartWidgetIds.length];
+		HtmlTplDashboardWidgetRenderer dashboardWidgetRenderer = getHtmlTplDashboardWidgetEntityService()
+				.getHtmlTplDashboardWidgetRenderer();
 		try
 		{
-			HtmlChartWidget chartWidget = getHtmlTplDashboardWidgetEntityService().getHtmlTplDashboardWidgetRenderer()
-					.getHtmlChartWidget(chartWidgetId);
+			for (int i = 0; i < chartWidgetIds.length; i++)
+			{
+				chartWidgets[i] = dashboardWidgetRenderer.getHtmlChartWidget(chartWidgetIds[i]);
+			}
 
 			// 不缓存
 			response.setContentType(CONTENT_TYPE_JSON);
 			PrintWriter out = response.getWriter();
 
-			HtmlChartWidgetJsonSetting chartWidgetJsonSetting = new HtmlChartWidgetJsonSetting(chartWidget);
-			chartWidgetJsonSetting.setChartElementId(chartElementId);
-
-			HtmlChart chart = this.htmlChartWidgetJsonWriter.writeJsonSetting(out, chartWidgetJsonSetting);
+			HtmlChart[] charts = this.htmlChartWidgetJsonWriter.write(out, chartWidgets);
 
 			synchronized (dashboard)
 			{
 				List<Chart> dashboardCharts = dashboard.getCharts();
 				List<Chart> newCharts = (dashboardCharts == null || dashboardCharts.isEmpty() ? new ArrayList<>()
 						: new ArrayList<>(dashboardCharts));
-				newCharts.add(chart);
+				newCharts.addAll(Arrays.asList(charts));
 				dashboard.setCharts(newCharts);
 			}
 		}

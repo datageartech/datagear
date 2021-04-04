@@ -113,9 +113,7 @@
 				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_DASHBOARD_ID
 				dashboardIdParamName: "dashboardId",
 				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_WIDGET_ID
-				chartWidgetIdParamName: "chartWidgetId",
-				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_ELEMENT_ID
-				chartElementIdParamName: "chartElementId"
+				chartWidgetIdParamName: "chartWidgetId"
 			});
 
 	/**
@@ -1439,35 +1437,56 @@
 	
 	/**
 	 * 异步加载图表。
-	 * 如果指定的HTML元素已经是图表组件，则不加载图表而直接返回false。
+	 * 如果指定的HTML元素已经是图表组件，则不执行图表绘制。
 	 * 
 	 * @param element 用于渲染图表的HTML元素、Jquery对象
-	 * @param chartWidgetId 选填参数，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
+	 * @param chartWidgetId 选填参数，要加载的图表部件ID、图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
 	 * @param ajaxOptions 选填参数，参数格式可以是ajax配置项：{...}、也可以是图表加载成功回调函数：function(chart){ ... }。
 	 * 					  如果ajax配置项的success函数、图表加载成功回调函数返回false，则后续不会自动调用dashboardBase.addChart函数。
 	 */
 	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
-		if(chartFactory.isChartElement(element))
-			return false;
-		
 		element = $(element);
 		
-		if(typeof(chartWidgetId) != "string")
+		//整理参数
+		if(typeof(chartWidgetId) != "string" && !$.isArray(chartWidgetId))
 		{
 			ajaxOptions = chartWidgetId;
-			chartWidgetId = element.attr(chartFactory.elementAttrConst.WIDGET);
-			
-			if(!chartWidgetId)
-				throw new Error("["+chartFactory.elementAttrConst.WIDGET+"] attribute must be set");
+			chartWidgetId = null;
 		}
 		
-		var chartElementId = element.attr("id");
-		if(!chartElementId)
+		if(chartWidgetId == null)
+			chartWidgetId = [];
+		else if(typeof(chartWidgetId) == "string")
+			chartWidgetId = [ chartWidgetId ];
+		
+		var chartWidgetIds = [];
+		var chartElementIds = [];
+		var chartExists = [];
+		
+		element.each(function(index)
 		{
-			chartElementId = chartFactory.nextElementId();
-			element.attr("id", chartElementId);
-		}
+			var $thisEle = $(this);
+			
+			var widgetId = (index < chartWidgetId.length ? chartWidgetId[index] : null);
+			if(!widgetId)
+				widgetId = $thisEle.attr(chartFactory.elementAttrConst.WIDGET);
+			
+			if(!widgetId)
+				throw new Error("[chartWidgetId] argument or ["+chartFactory.elementAttrConst.WIDGET
+					+"] attribute must be set for "+index+"-th element");
+			
+			var elementId = $thisEle.attr("id");
+			if(!elementId)
+			{
+				elementId = chartFactory.nextElementId();
+				$thisEle.attr("id", elementId);
+			}
+			
+			chartWidgetIds.push(widgetId);
+			chartElementIds.push(elementId);
+			chartExists.push(chartFactory.isChartElement($thisEle));
+		});
 		
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
 		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.loadChartURL);
@@ -1486,10 +1505,12 @@
 			};
 		}
 		
-		var data = {};
-		data[loadChartConfig.dashboardIdParamName] = _this.id;
-		data[loadChartConfig.chartWidgetIdParamName] = chartWidgetId;
-		data[loadChartConfig.chartElementIdParamName] = chartElementId;
+		var data = [];
+		data[0] = { name: loadChartConfig.dashboardIdParamName, value: _this.id };
+		for(var i=0; i<chartWidgetIds.length; i++)
+		{
+			data.push({ name: loadChartConfig.chartWidgetIdParamName, value: chartWidgetIds[i] });
+		}
 		
 		var myAjaxOptions = $.extend(
 		{
@@ -1500,25 +1521,33 @@
 		
 		if(!myAjaxOptions.success)
 		{
-			myAjaxOptions.success = function(chart, textStatus, jqXHR)
+			myAjaxOptions.success = function(charts, textStatus, jqXHR)
 			{
-				_this._initLoadedChart(chart);
-				_this.addChart(chart);
+				return true;
 			};
 		}
-		else
+		
+		var successHandler = myAjaxOptions.success;
+		myAjaxOptions.success = function(charts, textStatus, jqXHR)
 		{
-			var successHandler = myAjaxOptions.success;
+			charts = (charts || []);
 			
-			myAjaxOptions.success = function(chart, textStatus, jqXHR)
+			for(var i=0; i<charts.length; i++)
 			{
-				_this._initLoadedChart(chart);
-				var re = successHandler.call(this, chart, textStatus, jqXHR);
-				
-				if(re != false)
-					_this.addChart(chart);
-			};
-		}
+				_this._initLoadedChart(charts[i], chartElementIds[i]);
+			}
+			
+			var re = successHandler.call(this, charts, textStatus, jqXHR);
+			
+			if(re != false)
+			{
+				for(var i=0; i<charts.length; i++)
+				{
+					if(!chartExists[i])
+						_this.addChart(charts[i]);
+				}
+			}
+		};
 		
 		$.ajax(myAjaxOptions);
 	};
@@ -1527,9 +1556,11 @@
 	 * 初始化异步加载的图表。
 	 * 
 	 * @param chart 图表JSON对象
+	 * @param elementId 图表DOM元素ID
 	 */
-	dashboardBase._initLoadedChart = function(chart)
+	dashboardBase._initLoadedChart = function(chart, elementId)
 	{
+		chart.elementId = elementId;
 		chart.plugin = chartFactory.chartPluginManager.get(chart.plugin.id);
 		this._initChart(chart);
 	};
