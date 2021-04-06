@@ -186,14 +186,14 @@
 	// elementAttrConst结束
 	//----------------------------------------
 	
-	/**用于标识图表元素的CSS名*/
-	chartFactory.CHART_DISTINCT_CSS_NAME = "dg-chart-for-distinction";
-
-	/**图表事件的图表类型：Echarts*/
+	/**图表事件的图表类型：ECharts*/
 	chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS = "echarts";
 	
 	/**图表事件的图表类型：HTML*/
 	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
+	
+	/**用于标识已完成渲染图表元素的属性名*/
+	chartFactory.CHART_RENDERED_ATTR_NAME = "_dg_chart_rendered";
 	
 	//----------------------------------------
 	// chartBase start
@@ -428,15 +428,27 @@
 	};
 	
 	/**
-	 * 判断指定HTML元素是否是图表组件。
+	 * 判断指定HTML元素是否是已渲染为图表。
+	 * 
+	 * @param element DOM元素、Jquery对象
+	 */
+	chartFactory.isRendered = function(element)
+	{
+		return ($(element).attr(chartFactory.CHART_RENDERED_ATTR_NAME) == "true");
+	};
+	
+	//@deprecated 兼容2.3.0版本，将在未来版本移除，已被chartFactory.isRendered取代
+	/**
+	 * 判断指定HTML元素是否是已渲染为图表。
 	 * 
 	 * @param element DOM元素、Jquery对象
 	 */
 	chartFactory.isChartElement = function(element)
 	{
-		return $(element).hasClass(chartFactory.CHART_DISTINCT_CSS_NAME);
+		return this.isRendered(element);
 	};
-
+	//@deprecated 兼容2.3.0版本，将在未来版本移除，已被chartFactory.isRendered取代
+	
 	/**
 	 * 初始化图表。
 	 */
@@ -871,7 +883,7 @@
 			return false;
 		
 		var $chart = this.elementJquery();
-		$chart.addClass(chartFactory.CHART_DISTINCT_CSS_NAME);
+		$chart.attr(chartFactory.CHART_RENDERED_ATTR_NAME, "true");
 		chartFactory.setThemeStyle($chart, this.theme());
 		
 		this.statusRendering(true);
@@ -1011,7 +1023,7 @@
 		this._assertActive();
 		
 		this.statusDestroyed(true);
-		this.elementJquery().removeClass(chartFactory.CHART_DISTINCT_CSS_NAME);
+		this.elementJquery().removeAttr(chartFactory.CHART_RENDERED_ATTR_NAME);
 		
 		var customRenderer = this.customChartRenderer();
 		
