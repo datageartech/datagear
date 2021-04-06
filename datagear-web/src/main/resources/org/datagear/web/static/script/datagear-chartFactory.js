@@ -99,7 +99,7 @@
 	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
 	/**图表状态常量*/
 	var chartStatusConst = (chartFactory.chartStatusConst || (chartFactory.chartStatusConst = {}));
-	/**DOM元素属性常量*/
+	/**HTML元素属性常量*/
 	var elementAttrConst = (chartFactory.elementAttrConst || (chartFactory.elementAttrConst = {}));
 	/**
 	 * 图表地图映射表。
@@ -430,7 +430,7 @@
 	/**
 	 * 判断指定HTML元素是否是已渲染为图表。
 	 * 
-	 * @param element DOM元素、Jquery对象
+	 * @param element HTML元素、Jquery对象
 	 */
 	chartFactory.isRendered = function(element)
 	{
@@ -441,7 +441,7 @@
 	/**
 	 * 判断指定HTML元素是否是已渲染为图表。
 	 * 
-	 * @param element DOM元素、Jquery对象
+	 * @param element HTML元素、Jquery对象
 	 */
 	chartFactory.isChartElement = function(element)
 	{
@@ -1565,7 +1565,7 @@
 	};
 	
 	/**
-	 * 获取图表的DOM元素。
+	 * 获取图表HTML元素。
 	 */
 	chartBase.element = function()
 	{
@@ -1573,7 +1573,7 @@
 	};
 	
 	/**
-	 * 获取图表的DOM元素的Jquery对象。
+	 * 获取图表HTML元素的Jquery对象。
 	 */
 	chartBase.elementJquery = function()
 	{
