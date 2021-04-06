@@ -41,7 +41,7 @@
 	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
 	/**图表状态常量*/
 	var chartStatusConst = (chartFactory.chartStatusConst || (chartFactory.chartStatusConst = {}));
-	/**DOM元素属性常量*/
+	/**HTML元素属性常量*/
 	var elementAttrConst = (chartFactory.elementAttrConst || (chartFactory.elementAttrConst = {}));
 	
 	/**看板工厂*/
@@ -766,7 +766,7 @@
 	/**
 	 * 获取图表，没有则返回undefined。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
 	dashboardBase.getChart = function(chartInfo)
 	{
@@ -799,7 +799,7 @@
 	/**
 	 * 删除图表。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 * @param doDestory 选填参数，是否销毁图表，默认为true
 	 * @return 移除的图表对象，或者图表未找到时为undefined
 	 */
@@ -828,7 +828,7 @@
 	/**
 	 * 刷新图表数据。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
 	dashboardBase.refreshData = function(chartInfo)
 	{
@@ -839,7 +839,7 @@
 	/**
 	 * 重新调整指定图表尺寸。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
 	dashboardBase.resizeChart = function(chartInfo)
 	{
@@ -861,7 +861,7 @@
 	/**
 	 * 判断指定图表是否是已完成渲染。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
 	dashboardBase.isRendered = function(chartInfo)
 	{
@@ -871,9 +871,9 @@
 		if(chart != null)
 			element = chart.element();
 		
-		//没有对应图表的DOM元素ID
 		if(typeof(element) == "string")
 		{
+			//没有对应图表，则认为是HTML元素ID
 			element = $("#" + element);
 		}
 		
@@ -883,7 +883,7 @@
 	/**
 	 * 获取图表索引号。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 * @param charts 选填，查找的图表数组，如果不设置，则取this.charts
 	 */
 	dashboardBase.getChartIndex = function(chartInfo, charts)
@@ -894,7 +894,7 @@
 		if(!charts)
 			return -1;
 		
-		//jQuery对象，取第一个DOM对象
+		//jQuery对象，取第一个元素
 		if(chartInfo instanceof jQuery)
 		{
 			chartInfo = (chartInfo.length > 0 ? chartInfo[0] : null);
@@ -973,7 +973,7 @@
 	 * }
 	 * 或者，简写为图表联动设置对象的target属性值。
 	 * 
-	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单DOM对象。
+	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
 	 * 
 	 * @param form 要渲染的<form>表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
 	 * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
@@ -1468,9 +1468,9 @@
 	
 	/**
 	 * 异步加载图表。
-	 * 如果指定的HTML元素已经是图表组件，则不执行图表绘制。
+	 * 如果指定的HTML元素已经被渲染为图表，则已加载的图表不会被加入看板对象，也不会执行渲染和更新数据操作。
 	 * 
-	 * @param element 用于渲染图表的HTML元素、Jquery对象
+	 * @param element 用于渲染图表的HTML元素、HTML元素数组、Jquery对象
 	 * @param chartWidgetId 选填参数，要加载的图表部件ID、图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
 	 * @param ajaxOptions 选填参数，参数格式可以是ajax配置项：{...}、也可以是图表加载成功回调函数：function(chart){ ... }。
 	 * 					  如果ajax配置项的success函数、图表加载成功回调函数返回false，则后续不会自动调用dashboardBase.addChart函数。
@@ -1587,7 +1587,7 @@
 	 * 初始化异步加载的图表。
 	 * 
 	 * @param chart 图表JSON对象
-	 * @param elementId 图表DOM元素ID
+	 * @param elementId 图表HTML元素ID
 	 */
 	dashboardBase._initLoadedChart = function(chart, elementId)
 	{
