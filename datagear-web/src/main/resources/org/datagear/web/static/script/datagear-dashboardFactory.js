@@ -894,15 +894,10 @@
 		if(!charts)
 			return -1;
 		
-		//jQuery对象
+		//jQuery对象，取第一个DOM对象
 		if(chartInfo instanceof jQuery)
 		{
-			chartInfo = chartInfo.attr("id");
-		}
-		//DOM对象
-		else if(chartInfo && chartInfo.nodeType)
-		{
-			chartInfo = $(chartInfo).attr("id");
+			chartInfo = (chartInfo.length > 0 ? chartInfo[0] : null);
 		}
 		
 		for(var i=0; i<charts.length; i++)
@@ -910,6 +905,7 @@
 			if(charts[i] === chartInfo
 					|| charts[i].elementId === chartInfo
 					|| charts[i].id === chartInfo
+					|| charts[i].element() === chartInfo
 					|| i === chartInfo)
 				return i;
 		}
