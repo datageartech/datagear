@@ -784,21 +784,16 @@
 	};
 	
 	/**
-	 * 添加已经初始化且还未渲染的图表。
+	 * 添加已经初始化的图表。
 	 * 
 	 * @param chart 图表对象
 	 */
 	dashboardBase.addChart = function(chart)
 	{
-		var $chart = chart.elementJquery();
-		
-		if(this.isRendered($chart))
-			return false;
+		//注意：此方法不应限制仅能添加未渲染的图表，因为应允许已完成渲染的图表先从看板移除，后续再加入看板
 		
 		var charts = (this.charts || []);
 		this.charts = charts.concat(chart);
-		
-		return true;
 	};
 	
 	/**
