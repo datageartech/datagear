@@ -784,14 +784,21 @@
 	};
 	
 	/**
-	 * 添加已经初始化的图表。
+	 * 添加已经初始化且还未渲染的图表。
 	 * 
 	 * @param chart 图表对象
 	 */
 	dashboardBase.addChart = function(chart)
 	{
+		var $chart = chart.elementJquery();
+		
+		if(this.isRendered($chart))
+			return false;
+		
 		var charts = (this.charts || []);
 		this.charts = charts.concat(chart);
+		
+		return true;
 	};
 	
 	/**
@@ -854,6 +861,28 @@
 		
 		for(var i=0; i<charts.length; i++)
 			charts[i].resize();
+	};
+	
+	/**
+	 * 判断指定图表是否是已完成渲染。
+	 * 
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
+	 */
+	dashboardBase.isRendered = function(chartInfo)
+	{
+		var element = chartInfo;
+		
+		var chart = this.getChart(chartInfo);
+		if(chart != null)
+			element = chart.element();
+		
+		//没有对应图表的DOM元素ID
+		if(typeof(element) == "string")
+		{
+			element = $("#" + element);
+		}
+		
+		return chartFactory.isRendered(element);
 	};
 	
 	/**
@@ -1473,7 +1502,7 @@
 		
 		var chartWidgetIds = [];
 		var chartElementIds = [];
-		var chartExists = [];
+		var chartRendereds = [];
 		
 		element.each(function(index)
 		{
@@ -1496,7 +1525,7 @@
 			
 			chartWidgetIds.push(widgetId);
 			chartElementIds.push(elementId);
-			chartExists.push(chartFactory.isChartElement($thisEle));
+			chartRendereds.push(chartFactory.isRendered($thisEle));
 		});
 		
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
@@ -1554,7 +1583,7 @@
 			{
 				for(var i=0; i<charts.length; i++)
 				{
-					if(!chartExists[i])
+					if(!chartRendereds[i])
 						_this.addChart(charts[i]);
 				}
 			}
