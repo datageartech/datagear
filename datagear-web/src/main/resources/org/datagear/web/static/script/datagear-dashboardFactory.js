@@ -766,7 +766,7 @@
 	/**
 	 * 获取图表，没有则返回undefined。
 	 * 
-	 * @param chartInfo 图表信息：图表HTML元素ID、图表ID、图表索引
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
 	 */
 	dashboardBase.getChart = function(chartInfo)
 	{
@@ -797,7 +797,7 @@
 	/**
 	 * 删除图表。
 	 * 
-	 * @param chartInfo 图表对象、图表HTML元素ID、图表ID、图表索引
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
 	 * @param doDestory 选填参数，是否销毁图表，默认为true
 	 * @return 移除的图表对象，或者图表未找到时为undefined
 	 */
@@ -826,7 +826,7 @@
 	/**
 	 * 刷新图表数据。
 	 * 
-	 * @param chartInfo 图表对象、图表HTML元素ID、图表ID、图表索引
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
 	 */
 	dashboardBase.refreshData = function(chartInfo)
 	{
@@ -837,7 +837,7 @@
 	/**
 	 * 重新调整指定图表尺寸。
 	 * 
-	 * @param chartInfo 图表对象、图表HTML元素ID、图表ID、图表索引
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
 	 */
 	dashboardBase.resizeChart = function(chartInfo)
 	{
@@ -859,7 +859,7 @@
 	/**
 	 * 获取图表索引号。
 	 * 
-	 * @param chartInfo 图表信息：图表对象、图表HTML元素ID、图表ID、图表索引
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表DOM对象、图表DOM元素ID、图表对象、图表ID
 	 * @param charts 选填，查找的图表数组，如果不设置，则取this.charts
 	 */
 	dashboardBase.getChartIndex = function(chartInfo, charts)
@@ -869,6 +869,17 @@
 		
 		if(!charts)
 			return -1;
+		
+		//jQuery对象
+		if(chartInfo instanceof jQuery)
+		{
+			chartInfo = chartInfo.attr("id");
+		}
+		//DOM对象
+		else if(chartInfo && chartInfo.nodeType)
+		{
+			chartInfo = $(chartInfo).attr("id");
+		}
 		
 		for(var i=0; i<charts.length; i++)
 		{
