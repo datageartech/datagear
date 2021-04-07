@@ -859,7 +859,7 @@
 	};
 	
 	/**
-	 * 判断指定图表是否是已完成渲染。
+	 * 判断指定图表是否是已渲染。
 	 * 
 	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
@@ -1467,29 +1467,110 @@
 	};
 	
 	/**
-	 * 异步加载图表。
-	 * 如果指定的HTML元素已经被渲染为图表，则已加载的图表不会被加入看板对象，也不会执行渲染和更新数据操作。
+	 * 异步加载单个图表，并将其加入此看板。
+	 * 如果指定的HTML元素已经被渲染为图表，则已加载的图表不会被加入看板，也不会执行渲染和更新数据操作。
 	 * 
-	 * @param element 用于渲染图表的HTML元素、HTML元素数组、Jquery对象
-	 * @param chartWidgetId 选填参数，要加载的图表部件ID、图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
-	 * @param ajaxOptions 选填参数，参数格式可以是ajax配置项：{...}、也可以是图表加载成功回调函数：function(chart){ ... }。
-	 * 					  如果ajax配置项的success函数、图表加载成功回调函数返回false，则后续不会自动调用dashboardBase.addChart函数。
+	 * @param element 用于渲染图表的HTML元素、Jquery对象
+	 * @param chartWidgetId 选填参数，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
+	 * @param ajaxOptions 选填参数，参数格式可以是图表加载成功回调函数：function(chart){ ... }，也可以是ajax配置项：{...}。
+	 * 					  如果图表加载成功回调函数、ajax配置项的success函数返回false，则这个图表不会加入此看板。
 	 */
 	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
+		if(typeof(chartWidgetId) != "string")
+		{
+			ajaxOptions = chartWidgetId;
+			chartWidgetId = null;
+		}
+		
 		element = $(element);
 		
-		//整理参数
+		if(!chartWidgetId)
+			chartWidgetId = element.attr(chartFactory.elementAttrConst.WIDGET);
+		
+		if(!chartWidgetId)
+			throw new Error("[chartWidgetId] argument or ["+chartFactory.elementAttrConst.WIDGET
+				+"] attribute must be set for HTML element");
+		
+		if(!ajaxOptions)
+			ajaxOptions = {};
+		else if($.isFunction(ajaxOptions))
+		{
+			var successHandler = ajaxOptions;
+			ajaxOptions =
+			{
+				success: successHandler
+			};
+		}
+		
+		var chartElementId = element.attr("id");
+		if(!chartElementId)
+		{
+			chartElementId = chartFactory.nextElementId();
+			element.attr("id", chartElementId);
+		}
+		
+		var chartRendered = this.isRendered(element);
+		
+		var _this = this;
+		
+		var myAjaxOptions = $.extend({}, ajaxOptions);
+		var successHandler = myAjaxOptions.success;
+		myAjaxOptions.success = function(chart, textStatus, jqXHR)
+		{
+			_this._initLoadedChart(chart, chartElementId);
+			
+			var re = true;
+			
+			if(successHandler)
+				re = successHandler.call(this, chart, textStatus, jqXHR);
+			
+			if(re != false)
+			{
+				if(!chartRendered)
+					_this.addChart(chart);
+			}
+		};
+		
+		this._loadChartJson(chartWidgetId, myAjaxOptions);
+	};
+	
+	/**
+	 * 异步加载多个图表，并将它们加入此看板。
+	 * 如果指定的HTML元素已经被渲染为图表，则已加载的图表不会被加入看板，也不会执行渲染和更新数据操作。
+	 * 
+	 * @param element 用于渲染图表的HTML元素、HTML元素数组、Jquery对象
+	 * @param chartWidgetId 选填参数，要加载的图表部件ID、图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
+	 * @param ajaxOptions 选填参数，参数格式可以是图表数组加载成功回调函数：function(charts){ ... }，也可以是ajax配置项：{...}。
+	 * 					  如果图表数组加载成功回调函数、ajax配置项的success函数返回false，则这些图表不会加入此看板。
+	 */
+	dashboardBase.loadCharts = function(element, chartWidgetId, ajaxOptions)
+	{
 		if(typeof(chartWidgetId) != "string" && !$.isArray(chartWidgetId))
 		{
 			ajaxOptions = chartWidgetId;
 			chartWidgetId = null;
 		}
 		
+		element = $(element);
+		
 		if(chartWidgetId == null)
 			chartWidgetId = [];
 		else if(typeof(chartWidgetId) == "string")
 			chartWidgetId = [ chartWidgetId ];
+		
+		if(!ajaxOptions)
+			ajaxOptions = {};
+		else if($.isFunction(ajaxOptions))
+		{
+			var successHandler = ajaxOptions;
+			ajaxOptions =
+			{
+				success: successHandler
+			};
+		}
+		
+		var _this = this;
 		
 		var chartWidgetIds = [];
 		var chartElementIds = [];
@@ -1516,18 +1597,68 @@
 			
 			chartWidgetIds.push(widgetId);
 			chartElementIds.push(elementId);
-			chartRendereds.push(chartFactory.isRendered($thisEle));
+			chartRendereds.push(_this.isRendered($thisEle));
 		});
 		
-		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
-		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.loadChartURL);
-		var loadChartConfig = dashboardFactory.loadChartConfig;
+		var myAjaxOptions = $.extend({}, ajaxOptions);
+		var successHandler = myAjaxOptions.success;
+		myAjaxOptions.success = function(charts, textStatus, jqXHR)
+		{
+			for(var i=0; i<charts.length; i++)
+				_this._initLoadedChart(charts[i], chartElementIds[i]);
+			
+			var re = true;
+			
+			if(successHandler)
+				re = successHandler.call(this, charts, textStatus, jqXHR);
+			
+			if(re != false)
+			{
+				for(var i=0; i<charts.length; i++)
+				{
+					if(!chartRendereds[i])
+						_this.addChart(charts[i]);
+				}
+			}
+		};
 		
-		var _this = this;
+		this._loadChartJson(chartWidgetIds, myAjaxOptions);
+	};
+	
+	/**
+	 * 初始化异步加载的图表。
+	 * 
+	 * @param chart 图表JSON对象
+	 * @param elementId 图表HTML元素ID
+	 */
+	dashboardBase._initLoadedChart = function(chart, elementId)
+	{
+		chart.elementId = elementId;
+		chart.plugin = chartFactory.chartPluginManager.get(chart.plugin.id);
+		this._initChart(chart);
+	};
+	
+	/**
+	 * 异步加载图表JSON对象。
+	 * 图表JSON对象仅是简单的JSON数据，没有初始化为实际可用的图表对象，也不会加入此看板。
+	 * 
+	 * @param chartWidgetId 图表部件ID、图表部件ID数组
+	 * @param ajaxOptions 选填参数，参数格式可以是ajax配置项的success回调函数：function(data){ ... }，也可以是ajax配置项：{...}。
+						  注意：当chartWidgetId是单个字符串时，success函数的data参数将是单个JSON对象；
+						  当chartWidgetId是数组时，success函数的data参数将是JSON对象数组。
+	 */
+	dashboardBase._loadChartJson = function(chartWidgetId, ajaxOptions)
+	{
+		var isFetchSingle = (!$.isArray(chartWidgetId));
+		
+		var chartWidgetIds = chartWidgetId;
+		
+		if(!$.isArray(chartWidgetIds))
+			chartWidgetIds = [ chartWidgetIds ];
 		
 		if(!ajaxOptions)
 			ajaxOptions = {};
-		else if(typeof(ajaxOptions) == "function")
+		else if($.isFunction(ajaxOptions))
 		{
 			var successHandler = ajaxOptions;
 			ajaxOptions =
@@ -1535,6 +1666,12 @@
 				success: successHandler
 			};
 		}
+		
+		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
+		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.loadChartURL);
+		var loadChartConfig = dashboardFactory.loadChartConfig;
+		
+		var _this = this;
 		
 		var data = [];
 		data[0] = { name: loadChartConfig.dashboardIdParamName, value: _this.id };
@@ -1550,50 +1687,19 @@
 		},
 		ajaxOptions);
 		
-		if(!myAjaxOptions.success)
-		{
-			myAjaxOptions.success = function(charts, textStatus, jqXHR)
-			{
-				return true;
-			};
-		}
-		
 		var successHandler = myAjaxOptions.success;
 		myAjaxOptions.success = function(charts, textStatus, jqXHR)
 		{
 			charts = (charts || []);
 			
-			for(var i=0; i<charts.length; i++)
+			if(successHandler)
 			{
-				_this._initLoadedChart(charts[i], chartElementIds[i]);
-			}
-			
-			var re = successHandler.call(this, charts, textStatus, jqXHR);
-			
-			if(re != false)
-			{
-				for(var i=0; i<charts.length; i++)
-				{
-					if(!chartRendereds[i])
-						_this.addChart(charts[i]);
-				}
+				var handlerChart = (isFetchSingle ? (charts.length > 0 ? charts[0] : null) : charts);
+				successHandler.call(this, handlerChart, textStatus, jqXHR);
 			}
 		};
 		
 		$.ajax(myAjaxOptions);
-	};
-	
-	/**
-	 * 初始化异步加载的图表。
-	 * 
-	 * @param chart 图表JSON对象
-	 * @param elementId 图表HTML元素ID
-	 */
-	dashboardBase._initLoadedChart = function(chart, elementId)
-	{
-		chart.elementId = elementId;
-		chart.plugin = chartFactory.chartPluginManager.get(chart.plugin.id);
-		this._initChart(chart);
 	};
 	
 	/**

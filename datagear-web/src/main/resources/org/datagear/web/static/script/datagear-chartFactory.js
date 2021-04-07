@@ -192,7 +192,7 @@
 	/**图表事件的图表类型：HTML*/
 	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
 	
-	/**用于标识已完成渲染图表元素的属性名*/
+	/**用于标识已渲染为图表的HTML元素的属性名*/
 	chartFactory.CHART_RENDERED_ATTR_NAME = "_dg_chart_rendered";
 	
 	//----------------------------------------
@@ -437,7 +437,7 @@
 		return ($(element).attr(chartFactory.CHART_RENDERED_ATTR_NAME) == "true");
 	};
 	
-	//@deprecated 兼容2.3.0版本，将在未来版本移除，已被chartFactory.isRendered取代
+	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartFactory.isRendered取代
 	/**
 	 * 判断指定HTML元素是否是已渲染为图表。
 	 * 
@@ -447,7 +447,7 @@
 	{
 		return this.isRendered(element);
 	};
-	//@deprecated 兼容2.3.0版本，将在未来版本移除，已被chartFactory.isRendered取代
+	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartFactory.isRendered取代
 	
 	/**
 	 * 初始化图表。
