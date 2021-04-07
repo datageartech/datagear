@@ -785,15 +785,28 @@
 	
 	/**
 	 * 添加已经初始化的图表。
+	 * 如果图表已添加至看板，或者图表HTML元素已被看板中的其他图表使用，将不会再次添加，直接返回false。
 	 * 
 	 * @param chart 图表对象
 	 */
 	dashboardBase.addChart = function(chart)
 	{
-		//注意：此方法不应限制仅能添加未渲染的图表，因为应允许已完成渲染的图表先从看板移除，后续再加入看板
+		var exists = this.getChart(chart);
+		
+		if(exists != null)
+			return false;
+		
+		exists = this.getChart(chart.elementId);
+		
+		if(exists != null)
+			return false;
+		
+		//这里不应限制仅能添加未渲染的图表，因为应允许已完成渲染的图表先从看板移除，后续再加入看板
 		
 		var charts = (this.charts || []);
 		this.charts = charts.concat(chart);
+		
+		return true;
 	};
 	
 	/**
@@ -1513,8 +1526,6 @@
 			element.attr("id", chartElementId);
 		}
 		
-		var chartRendered = this.isRendered(element);
-		
 		var _this = this;
 		
 		var myAjaxOptions = $.extend({}, ajaxOptions);
@@ -1529,10 +1540,7 @@
 				re = successHandler.call(this, chart, textStatus, jqXHR);
 			
 			if(re != false)
-			{
-				if(!chartRendered)
-					_this.addChart(chart);
-			}
+				_this.addChart(chart);
 		};
 		
 		this._loadChartJson(chartWidgetId, myAjaxOptions);
@@ -1577,7 +1585,6 @@
 		
 		var chartWidgetIds = [];
 		var chartElementIds = [];
-		var chartRendereds = [];
 		
 		element.each(function(index)
 		{
@@ -1600,7 +1607,6 @@
 			
 			chartWidgetIds.push(widgetId);
 			chartElementIds.push(elementId);
-			chartRendereds.push(_this.isRendered($thisEle));
 		});
 		
 		var myAjaxOptions = $.extend({}, ajaxOptions);
@@ -1618,10 +1624,7 @@
 			if(re != false)
 			{
 				for(var i=0; i<charts.length; i++)
-				{
-					if(!chartRendereds[i])
-						_this.addChart(charts[i]);
-				}
+					_this.addChart(charts[i]);
 			}
 		};
 		
