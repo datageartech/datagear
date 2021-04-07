@@ -437,7 +437,7 @@
 		return ($(element).attr(chartFactory.CHART_RENDERED_ATTR_NAME) == "true");
 	};
 	
-	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartFactory.isRendered取代
+	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.isRendered、chartBase.isRendered取代
 	/**
 	 * 判断指定HTML元素是否是已渲染为图表。
 	 * 
@@ -447,7 +447,7 @@
 	{
 		return this.isRendered(element);
 	};
-	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartFactory.isRendered取代
+	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.isRendered、chartBase.isRendered取代
 	
 	/**
 	 * 初始化图表。
@@ -1112,7 +1112,15 @@
 	};
 	
 	/**
-	 * 图表是否是活跃的，即已完成渲染且未被销毁。
+	 * 图表是否已渲染，即正在渲染或已完成渲染且未被销毁。
+	 */
+	chartBase.isRendered = function()
+	{
+		return chartFactory.isRendered(this.element());
+	};
+	
+	/**
+	 * 图表是否处于活跃可用的状态，即已完成渲染且未被销毁。
 	 */
 	chartBase.isActive = function()
 	{
@@ -1120,7 +1128,7 @@
 	};
 	
 	/**
-	 * 断言图表是活跃的。
+	 * 断言图表处于活跃可用的状态。
 	 */
 	chartBase._assertActive = function()
 	{

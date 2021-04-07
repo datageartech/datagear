@@ -859,7 +859,7 @@
 	};
 	
 	/**
-	 * 判断指定图表是否是已渲染。
+	 * 判断指定图表、HTML元素是否是已渲染。
 	 * 
 	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
@@ -868,16 +868,19 @@
 		var element = chartInfo;
 		
 		var chart = this.getChart(chartInfo);
-		if(chart != null)
-			element = chart.element();
 		
-		if(typeof(element) == "string")
+		if(chart != null)
+		{
+			return chart.isRendered();
+		}
+		else
 		{
 			//没有对应图表，则认为是HTML元素ID
-			element = $("#" + element);
+			if(typeof(element) == "string")
+				element = $("#" + element);
+			
+			return chartFactory.isRendered(element);
 		}
-		
-		return chartFactory.isRendered(element);
 	};
 	
 	/**
