@@ -2893,6 +2893,22 @@
 	};
 	
 	/**
+	 * 记录警告日志。
+	 * 
+	 * @param exception 警告消息字符串
+	 */
+	chartFactory.logWarn = function(exception)
+	{
+		if(typeof console != "undefined")
+		{
+			if(console.warn)
+				console.warn(exception);
+			else if(console.info)
+				console.info(exception);
+		}
+	};
+	
+	/**
 	 * 由图表主题构建echarts主题。
 	 * 
 	 * @param chartTheme 图表主题对象：org.datagear.analysis.ChartTheme

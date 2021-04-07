@@ -1484,7 +1484,7 @@
 	
 	/**
 	 * 异步加载单个图表，并将其加入此看板。
-	 * 如果指定的HTML元素已经被渲染为图表，则已加载的图表不会被加入看板，也不会执行渲染和更新数据操作。
+	 * 如果HTML元素已经被渲染为图表，则不加载图表而直接返回false。
 	 * 
 	 * @param element 用于渲染图表的HTML元素、Jquery对象
 	 * @param chartWidgetId 选填参数，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
@@ -1493,13 +1493,16 @@
 	 */
 	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
+		element = $(element);
+		
+		if(this.isRendered(element))
+			return false;
+		
 		if(typeof(chartWidgetId) != "string")
 		{
 			ajaxOptions = chartWidgetId;
 			chartWidgetId = null;
 		}
-		
-		element = $(element);
 		
 		if(!chartWidgetId)
 			chartWidgetId = chartFactory.elementWidgetId(element);
@@ -1537,11 +1540,13 @@
 		};
 		
 		this._loadChartJson(chartWidgetId, myAjaxOptions);
+		
+		return true;
 	};
 	
 	/**
 	 * 异步加载多个图表，并将它们加入此看板。
-	 * 如果指定的HTML元素已经被渲染为图表，则已加载的图表不会被加入看板，也不会执行渲染和更新数据操作。
+	 * 如果任一HTML元素已经被渲染为图表，则不加载任何图表而直接返回false。
 	 * 
 	 * @param element 用于渲染图表的HTML元素、HTML元素数组、Jquery对象
 	 * @param chartWidgetId 选填参数，要加载的图表部件ID、图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
@@ -1550,13 +1555,29 @@
 	 */
 	dashboardBase.loadCharts = function(element, chartWidgetId, ajaxOptions)
 	{
+		element = $(element);
+		
+		var _this = this;
+		
+		var hasRendered = false;
+		element.each(function(index)
+		{
+			if(_this.isRendered(this))
+			{
+				hasRendered = true;
+				chartFactory.logWarn("The "+index+"-th element has been rendered");
+				return false;
+			}
+		});
+		
+		if(hasRendered)
+			return false;
+		
 		if(typeof(chartWidgetId) != "string" && !$.isArray(chartWidgetId))
 		{
 			ajaxOptions = chartWidgetId;
 			chartWidgetId = null;
 		}
-		
-		element = $(element);
 		
 		if(chartWidgetId == null)
 			chartWidgetId = [];
@@ -1573,8 +1594,6 @@
 				success: successHandler
 			};
 		}
-		
-		var _this = this;
 		
 		var chartWidgetIds = [];
 		
@@ -1613,6 +1632,8 @@
 		};
 		
 		this._loadChartJson(chartWidgetIds, myAjaxOptions);
+		
+		return true;
 	};
 	
 	/**
