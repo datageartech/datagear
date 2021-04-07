@@ -428,6 +428,26 @@
 	};
 	
 	/**
+	 * 获取/设置HTML元素上的图表部件ID（"dg-chart-widget"属性值）。
+	 *
+	 * @param element HTML元素、Jquery对象
+	 * @param widgetId 选填参数，要设置的图表部件ID，不设置则执行获取操作
+	 */
+	chartFactory.elementWidgetId = function(element, widgetId)
+	{
+		element = $(element);
+		
+		if(widgetId === undefined)
+		{
+			return element.attr(chartFactory.elementAttrConst.WIDGET);
+		}
+		else
+		{
+			element.attr(chartFactory.elementAttrConst.WIDGET, widgetId);
+		}
+	};
+	
+	/**
 	 * 判断指定HTML元素是否是已渲染为图表。
 	 * 
 	 * @param element HTML元素、Jquery对象
@@ -1589,6 +1609,14 @@
 	};
 	
 	/**
+	 * 获取表HTML元素上的图表部件ID（"dg-chart-widget"属性值）。
+	 */
+	chartBase.elementWidgetId = function()
+	{
+		return chartFactory.elementWidgetId(this.element());
+	};
+	
+	/**
 	 * 获取图表名称。
 	 */
 	chartBase.nameNonNull = function()
@@ -1606,6 +1634,17 @@
 		
 		return -1;
 	},
+	
+	/**
+	 * 获取图表对应的图表部件ID。
+	 * 正常来说，此函数的返回值与期望渲染的图表部件ID相同（通常是chartBase.elementWidgetId()的返回值），
+	 * 当不同时，表明服务端因加载图表异常（未找到或出现错误）而使用了一个备用图表，用于在页面展示异常信息。
+	 */
+	chartBase.chartWidgetId = function()
+	{
+		//org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
+		return (this.attributes && this.attributes.chartWidget ? this.attributes.chartWidget.id : null);
+	};
 	
 	/**
 	 * 获取/设置图表渲染上下文的属性值。

@@ -1502,7 +1502,7 @@
 		element = $(element);
 		
 		if(!chartWidgetId)
-			chartWidgetId = element.attr(chartFactory.elementAttrConst.WIDGET);
+			chartWidgetId = chartFactory.elementWidgetId(element);
 		
 		if(!chartWidgetId)
 			throw new Error("[chartWidgetId] argument or ["+chartFactory.elementAttrConst.WIDGET
@@ -1519,20 +1519,13 @@
 			};
 		}
 		
-		var chartElementId = element.attr("id");
-		if(!chartElementId)
-		{
-			chartElementId = chartFactory.nextElementId();
-			element.attr("id", chartElementId);
-		}
-		
 		var _this = this;
 		
 		var myAjaxOptions = $.extend({}, ajaxOptions);
 		var successHandler = myAjaxOptions.success;
 		myAjaxOptions.success = function(chart, textStatus, jqXHR)
 		{
-			_this._initLoadedChart(chart, chartElementId);
+			_this._initLoadedChart(chart, element, chartWidgetId);
 			
 			var re = true;
 			
@@ -1584,7 +1577,6 @@
 		var _this = this;
 		
 		var chartWidgetIds = [];
-		var chartElementIds = [];
 		
 		element.each(function(index)
 		{
@@ -1592,21 +1584,13 @@
 			
 			var widgetId = (index < chartWidgetId.length ? chartWidgetId[index] : null);
 			if(!widgetId)
-				widgetId = $thisEle.attr(chartFactory.elementAttrConst.WIDGET);
+				widgetId = chartFactory.elementWidgetId($thisEle);
 			
 			if(!widgetId)
 				throw new Error("[chartWidgetId] argument or ["+chartFactory.elementAttrConst.WIDGET
 					+"] attribute must be set for "+index+"-th element");
 			
-			var elementId = $thisEle.attr("id");
-			if(!elementId)
-			{
-				elementId = chartFactory.nextElementId();
-				$thisEle.attr("id", elementId);
-			}
-			
 			chartWidgetIds.push(widgetId);
-			chartElementIds.push(elementId);
 		});
 		
 		var myAjaxOptions = $.extend({}, ajaxOptions);
@@ -1614,7 +1598,7 @@
 		myAjaxOptions.success = function(charts, textStatus, jqXHR)
 		{
 			for(var i=0; i<charts.length; i++)
-				_this._initLoadedChart(charts[i], chartElementIds[i]);
+				_this._initLoadedChart(charts[i], element[i], chartWidgetIds[i]);
 			
 			var re = true;
 			
@@ -1635,10 +1619,23 @@
 	 * 初始化异步加载的图表。
 	 * 
 	 * @param chart 图表JSON对象
-	 * @param elementId 图表HTML元素ID
+	 * @param element 图表HTML元素、Jquery对象
+	 * @param chartWidgetId 要异步加载的图表部件ID
 	 */
-	dashboardBase._initLoadedChart = function(chart, elementId)
+	dashboardBase._initLoadedChart = function(chart, element, chartWidgetId)
 	{
+		element = $(element);
+		
+		//这里不应设置"dg-chart-widget"属性而破坏了元素的原生结构
+		//chartFactory.elementWidgetId(element, chartWidgetId);
+		
+		var elementId = element.attr("id");
+		if(!elementId)
+		{
+			elementId = chartFactory.nextElementId();
+			element.attr("id", elementId);
+		}
+		
 		chart.elementId = elementId;
 		chart.plugin = chartFactory.chartPluginManager.get(chart.plugin.id);
 		this._initChart(chart);
