@@ -192,13 +192,6 @@
 	/**图表事件的图表类型：HTML*/
 	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
 	
-	/**用于标识已渲染为图表的HTML元素的属性名*/
-	chartFactory.CHART_RENDERED_ATTR_NAME = "_dg_chart_rendered";
-	
-	//----------------------------------------
-	// chartBase start
-	//----------------------------------------
-	
 	/**
 	 * 图表使用的渲染上下文属性名。
 	 */
@@ -376,98 +369,9 @@
 		chart.init();
 	};
 	
-	/**
-	 * 获取/设置渲染上下文的属性值。
-	 * 
-	 * @param renderContext
-	 * @param attrName
-	 * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
-	 */
-	chartFactory.renderContextAttr = function(renderContext, attrName, attrValue)
-	{
-		if(attrValue === undefined)
-			return renderContext.attributes[attrName];
-		else
-			return renderContext.attributes[attrName] = attrValue;
-	};
-	
-	/**
-	 * 获取渲染上下文中的WebContext对象。
-	 * 
-	 * @param renderContext
-	 */
-	chartFactory.renderContextAttrWebContext = function(renderContext)
-	{
-		return chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.webContext);
-	};
-	
-	/**
-	 * 获取渲染上下文中的ChartTheme对象。
-	 * 
-	 * @param renderContext
-	 */
-	chartFactory.renderContextAttrChartTheme = function(renderContext)
-	{
-		return chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.chartTheme);
-	};
-	
-	/**
-	 * 将给定URL转换为web上下文路径URL。
-	 * 
-	 * @param webContext web上下文
-	 * @param url 待转换的URL
-	 */
-	chartFactory.toWebContextPathURL = function(webContext, url)
-	{
-		var contextPath = webContext.contextPath;
-		
-		if(url.indexOf("/") == 0)
-			url = contextPath + url;
-		
-		return url;
-	};
-	
-	/**
-	 * 获取/设置HTML元素上的图表部件ID（"dg-chart-widget"属性值）。
-	 *
-	 * @param element HTML元素、Jquery对象
-	 * @param widgetId 选填参数，要设置的图表部件ID，不设置则执行获取操作
-	 */
-	chartFactory.elementWidgetId = function(element, widgetId)
-	{
-		element = $(element);
-		
-		if(widgetId === undefined)
-		{
-			return element.attr(chartFactory.elementAttrConst.WIDGET);
-		}
-		else
-		{
-			element.attr(chartFactory.elementAttrConst.WIDGET, widgetId);
-		}
-	};
-	
-	/**
-	 * 判断指定HTML元素是否是已渲染为图表（正在渲染或已完成渲染且未被销毁）。
-	 * 
-	 * @param element HTML元素、Jquery对象
-	 */
-	chartFactory.isRendered = function(element)
-	{
-		return ($(element).attr(chartFactory.CHART_RENDERED_ATTR_NAME) == "true");
-	};
-	
-	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.isRendered、chartBase.isRendered取代
-	/**
-	 * 判断指定HTML元素是否是已渲染为图表。
-	 * 
-	 * @param element HTML元素、Jquery对象
-	 */
-	chartFactory.isChartElement = function(element)
-	{
-		return this.isRendered(element);
-	};
-	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.isRendered、chartBase.isRendered取代
+	//----------------------------------------
+	// chartBase start
+	//----------------------------------------
 	
 	/**
 	 * 初始化图表。
@@ -564,9 +468,9 @@
 	 */
 	chartBase._initListener = function()
 	{
-		var $chart = this.elementJquery();
+		var $element = this.elementJquery();
 		
-		var listenerStr = $chart.attr(elementAttrConst.LISTENER);
+		var listenerStr = $element.attr(elementAttrConst.LISTENER);
 		if(!listenerStr)
 			listenerStr = $(document.body).attr(elementAttrConst.LISTENER);
 		
@@ -899,12 +803,16 @@
 	 */
 	chartBase.render = function()
 	{
-		if(!this.statusPreRender() && !this.statusDestroyed())
-			return false;
+		var $element = this.elementJquery();
 		
-		var $chart = this.elementJquery();
-		$chart.attr(chartFactory.CHART_RENDERED_ATTR_NAME, "true");
-		chartFactory.setThemeStyle($chart, this.theme());
+		if(chartFactory.renderedChart($element) != null)
+			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
+		
+		if(!this.statusPreRender() && !this.statusDestroyed())
+			throw new Error("Chart is not ready for render");
+		
+		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
+		chartFactory.setThemeStyle($element, this.theme());
 		
 		this.statusRendering(true);
 		
@@ -923,8 +831,6 @@
 			if(!async)
 				this.statusRendered(true);
 		}
-		
-		return true;
 	};
 	
 	/**
@@ -954,7 +860,7 @@
 	chartBase.update = function(results)
 	{
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
-			return false;
+			throw new Error("Chart is not ready for update");
 		
 		this.extValue("_updateResults", results);
 		
@@ -975,8 +881,6 @@
 			if(!async)
 				this.statusUpdated(true);
 		}
-		
-		return true;
 	};
 	
 	/**
@@ -1042,8 +946,10 @@
 	{
 		this._assertActive();
 		
+		var $element = this.elementJquery();
+		
 		this.statusDestroyed(true);
-		this.elementJquery().removeAttr(chartFactory.CHART_RENDERED_ATTR_NAME);
+		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
 		
 		var customRenderer = this.customChartRenderer();
 		
@@ -1129,14 +1035,6 @@
 			return this.plugin.chartRenderer.asyncUpdate(this, results);
 		
 		return (this.plugin.chartRenderer.asyncUpdate == true);
-	};
-	
-	/**
-	 * 图表是否已渲染（正在渲染或已完成渲染且未被销毁）。
-	 */
-	chartBase.isRendered = function()
-	{
-		return chartFactory.isRendered(this.element());
 	};
 	
 	/**
@@ -2500,8 +2398,104 @@
 	// chartBase end
 	//----------------------------------------
 	
+	/**
+	 * 获取/设置渲染上下文的属性值。
+	 * 
+	 * @param renderContext
+	 * @param attrName
+	 * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
+	 */
+	chartFactory.renderContextAttr = function(renderContext, attrName, attrValue)
+	{
+		if(attrValue === undefined)
+			return renderContext.attributes[attrName];
+		else
+			return renderContext.attributes[attrName] = attrValue;
+	};
+	
+	/**
+	 * 获取渲染上下文中的WebContext对象。
+	 * 
+	 * @param renderContext
+	 */
+	chartFactory.renderContextAttrWebContext = function(renderContext)
+	{
+		return chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.webContext);
+	};
+	
+	/**
+	 * 获取渲染上下文中的ChartTheme对象。
+	 * 
+	 * @param renderContext
+	 */
+	chartFactory.renderContextAttrChartTheme = function(renderContext)
+	{
+		return chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.chartTheme);
+	};
+	
+	/**
+	 * 将给定URL转换为web上下文路径URL。
+	 * 
+	 * @param webContext web上下文
+	 * @param url 待转换的URL
+	 */
+	chartFactory.toWebContextPathURL = function(webContext, url)
+	{
+		var contextPath = webContext.contextPath;
+		
+		if(url.indexOf("/") == 0)
+			url = contextPath + url;
+		
+		return url;
+	};
+	
+	/**
+	 * 获取/设置HTML元素上的图表部件ID（"dg-chart-widget"属性值）。
+	 *
+	 * @param element HTML元素、Jquery对象
+	 * @param widgetId 选填参数，要设置的图表部件ID，不设置则执行获取操作
+	 */
+	chartFactory.elementWidgetId = function(element, widgetId)
+	{
+		element = $(element);
+		
+		if(widgetId === undefined)
+		{
+			return element.attr(chartFactory.elementAttrConst.WIDGET);
+		}
+		else
+		{
+			element.attr(chartFactory.elementAttrConst.WIDGET, widgetId);
+		}
+	};
+	
+	/** HTML元素上已渲染的图表对象KEY */
+	chartFactory._KEY_ELEMENT_RENDERED_CHART = "_dg_rendered_chart";
+	
+	/**
+	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
+	 * 
+	 * @param element HTML元素、Jquery对象
+	 */
+	chartFactory.renderedChart = function(element)
+	{
+		return $(element).data(chartFactory._KEY_ELEMENT_RENDERED_CHART);
+	};
+	
+	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
+	/**
+	 * 判断指定HTML元素是否是已渲染为图表。
+	 * 
+	 * @param element HTML元素、Jquery对象
+	 */
+	chartFactory.isChartElement = function(element)
+	{
+		return (this.renderedChart(element) != null);
+	};
+	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
+	
 	/** 生成元素ID用的前缀 */
-	chartFactory.ELEMENT_ID_PREFIX = "DataGearClient" + new Number(new Date().getTime()).toString(16);
+	chartFactory._ELEMENT_ID_PREFIX = "DataGearClient" + new Number(new Date().getTime()).toString(16);
 	
 	/**
 	 * 执行JS代码。
@@ -2656,7 +2650,7 @@
 	 */
 	chartFactory.stylesObjToCssText = function(stylesObj)
 	{
-		var elementId = chartFactory.ELEMENT_ID_PREFIX +"StylesObjToCss";
+		var elementId = chartFactory._ELEMENT_ID_PREFIX +"StylesObjToCss";
 		
 		var element = $("#" + elementId);
 		if(element.length == 0)
@@ -2756,7 +2750,7 @@
 		//是颜色名称，则通过元素css函数转换
 		if((color.charAt(0) != '#') && (color.indexOf("(") < 0))
 		{
-			var elementId = chartFactory.ELEMENT_ID_PREFIX +"ForConvertColor";
+			var elementId = chartFactory._ELEMENT_ID_PREFIX +"ForConvertColor";
 			
 			var $colorEle = $("#"+elementId);
 			if($colorEle.length == 0)
@@ -2851,7 +2845,7 @@
 		var seq = (this._nextElementIdSequence != null ? this._nextElementIdSequence : 0);
 		this._nextElementIdSequence = seq + 1;
 		
-		return this.ELEMENT_ID_PREFIX + prefix + seq;
+		return this._ELEMENT_ID_PREFIX + prefix + seq;
 	};
 	
 	/**

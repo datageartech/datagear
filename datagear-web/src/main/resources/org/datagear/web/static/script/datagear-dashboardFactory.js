@@ -872,31 +872,6 @@
 	};
 	
 	/**
-	 * 判断指定图表、HTML元素是否是已渲染（正在渲染或已完成渲染且未被销毁）。
-	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
-	 */
-	dashboardBase.isRendered = function(chartInfo)
-	{
-		var element = chartInfo;
-		
-		var chart = this.getChart(chartInfo);
-		
-		if(chart != null)
-		{
-			return chart.isRendered();
-		}
-		else
-		{
-			//没有对应图表，则认为是HTML元素ID
-			if(typeof(element) == "string")
-				element = $("#" + element);
-			
-			return chartFactory.isRendered(element);
-		}
-	};
-	
-	/**
 	 * 获取图表索引号。
 	 * 
 	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
@@ -927,6 +902,16 @@
 		}
 		
 		return -1;
+	};
+	
+	/**
+	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
+	 * 
+	 * @param element HTML元素、Jquery对象
+	 */
+	dashboardBase.renderedChart = function(element)
+	{
+		return chartFactory.renderedChart(element);
 	};
 	
 	/**
@@ -1484,7 +1469,6 @@
 	
 	/**
 	 * 异步加载单个图表，并将其加入此看板。
-	 * 如果HTML元素已经被渲染为图表，则不加载图表而直接返回false。
 	 * 
 	 * @param element 用于渲染图表的HTML元素、Jquery对象
 	 * @param chartWidgetId 选填参数，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
@@ -1495,8 +1479,12 @@
 	{
 		element = $(element);
 		
-		if(this.isRendered(element))
-			return false;
+		if(this.renderedChart(element) != null)
+			throw new Error("The element has been rendered as chart");
+		
+		//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
+		if(this.getChart(element) != null)
+			throw new Error("There is a chart for this element");
 		
 		if(typeof(chartWidgetId) != "string")
 		{
@@ -1540,13 +1528,10 @@
 		};
 		
 		this._loadChartJson(chartWidgetId, myAjaxOptions);
-		
-		return true;
 	};
 	
 	/**
 	 * 异步加载多个图表，并将它们加入此看板。
-	 * 如果任一HTML元素已经被渲染为图表，则不加载任何图表而直接返回false。
 	 * 
 	 * @param element 用于渲染图表的HTML元素、HTML元素数组、Jquery对象
 	 * @param chartWidgetId 选填参数，要加载的图表部件ID、图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
@@ -1559,11 +1544,12 @@
 		
 		for(var i=0; i<element.length; i++)
 		{
-			if(this.isRendered(element[i]))
-			{
-				chartFactory.logWarn("The "+i+"-th element has been rendered");
-				return false;
-			}
+			if(this.renderedChart(element[i]) != null)
+				throw new Error("The "+i+"-th element has been rendered as chart");
+			
+			//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
+			if(this.getChart(element) != null)
+				throw new Error("The is a chart for the "+i+"-th element");
 		}
 		
 		if(typeof(chartWidgetId) != "string" && !$.isArray(chartWidgetId))
@@ -1627,8 +1613,6 @@
 		};
 		
 		this._loadChartJson(chartWidgetIds, myAjaxOptions);
-		
-		return true;
 	};
 	
 	/**
@@ -1649,7 +1633,9 @@
 		allElements.each(function()
 		{
 			if($(this).attr(chartFactory.elementAttrConst.WIDGET)
-				 && dashboard.getChart(this) == null && !dashboard.isRendered(this))
+				&& dashboard.renderedChart(this) == null
+				//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
+				&& dashboard.getChart(this) == null)
 			{
 				unsolved.push(this);
 			}
