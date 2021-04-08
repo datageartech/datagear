@@ -448,7 +448,7 @@
 	};
 	
 	/**
-	 * 判断指定HTML元素是否是已渲染为图表。
+	 * 判断指定HTML元素是否是已渲染为图表（正在渲染或已完成渲染且未被销毁）。
 	 * 
 	 * @param element HTML元素、Jquery对象
 	 */
@@ -1132,7 +1132,7 @@
 	};
 	
 	/**
-	 * 图表是否已渲染，即正在渲染或已完成渲染且未被销毁。
+	 * 图表是否已渲染（正在渲染或已完成渲染且未被销毁）。
 	 */
 	chartBase.isRendered = function()
 	{
@@ -1140,7 +1140,7 @@
 	};
 	
 	/**
-	 * 图表是否处于活跃可用的状态，即已完成渲染且未被销毁。
+	 * 图表是否处于活跃可用的状态（已完成渲染且未被销毁）。
 	 */
 	chartBase.isActive = function()
 	{
@@ -1609,7 +1609,8 @@
 	};
 	
 	/**
-	 * 获取表HTML元素上的图表部件ID（"dg-chart-widget"属性值）。
+	 * 获取图表HTML元素上的图表部件ID（"dg-chart-widget"属性值）。
+	 * 如果图表HTML元素上未设置过图表部件ID，将返回null。
 	 */
 	chartBase.elementWidgetId = function()
 	{
@@ -1644,6 +1645,16 @@
 	{
 		//org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
 		return (this.attributes && this.attributes.chartWidget ? this.attributes.chartWidget.id : null);
+	};
+	
+	/**
+	 * 判断此图表是否由指定ID的图表部件渲染。
+	 * 
+	 * @param chartWidgetId 图表部件ID，通常是图表元素的"dg-chart-widget"值
+	 */
+	chartBase.isInstance = function(chartWidgetId)
+	{
+		return (this.chartWidgetId() == chartWidgetId);
 	};
 	
 	/**

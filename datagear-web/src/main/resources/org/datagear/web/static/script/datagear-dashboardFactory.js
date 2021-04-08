@@ -872,7 +872,7 @@
 	};
 	
 	/**
-	 * 判断指定图表、HTML元素是否是已渲染。
+	 * 判断指定图表、HTML元素是否是已渲染（正在渲染或已完成渲染且未被销毁）。
 	 * 
 	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
@@ -1557,21 +1557,14 @@
 	{
 		element = $(element);
 		
-		var _this = this;
-		
-		var hasRendered = false;
-		element.each(function(index)
+		for(var i=0; i<element.length; i++)
 		{
-			if(_this.isRendered(this))
+			if(this.isRendered(element[i]))
 			{
-				hasRendered = true;
-				chartFactory.logWarn("The "+index+"-th element has been rendered");
+				chartFactory.logWarn("The "+i+"-th element has been rendered");
 				return false;
 			}
-		});
-		
-		if(hasRendered)
-			return false;
+		}
 		
 		if(typeof(chartWidgetId) != "string" && !$.isArray(chartWidgetId))
 		{
@@ -1612,6 +1605,8 @@
 			chartWidgetIds.push(widgetId);
 		});
 		
+		var _this = this;
+		
 		var myAjaxOptions = $.extend({}, ajaxOptions);
 		var successHandler = myAjaxOptions.success;
 		myAjaxOptions.success = function(charts, textStatus, jqXHR)
@@ -1634,6 +1629,36 @@
 		this._loadChartJson(chartWidgetIds, myAjaxOptions);
 		
 		return true;
+	};
+	
+	/**
+	 * 将页面中所有设置了"dg-chart-widget"属性，且未初始化为图表的HTML元素异步加载为图表。
+	 * 如果没有需要加载的元素，将不会执行异步请求。
+	 *
+	 * @param ajaxOptions 选填参数，参数格式可以是图表数组加载成功回调函数：function(charts){ ... }，也可以是ajax配置项：{...}。
+	 * 					  如果图表数组加载成功回调函数、ajax配置项的success函数返回false，则这些图表不会加入此看板。
+	 * @return 要异步加载的HTML元素数组
+	 */
+	dashboardBase.loadUnsolvedCharts = function(ajaxOptions)
+	{
+		var unsolved = [];
+		
+		var allElements = $("["+chartFactory.elementAttrConst.WIDGET+"]");
+		var dashboard = this;
+		
+		allElements.each(function()
+		{
+			if($(this).attr(chartFactory.elementAttrConst.WIDGET)
+				 && dashboard.getChart(this) == null && !dashboard.isRendered(this))
+			{
+				unsolved.push(this);
+			}
+		});
+		
+		if(unsolved.length > 0)
+			this.loadCharts(unsolved, ajaxOptions);
+		
+		return unsolved;
 	};
 	
 	/**
