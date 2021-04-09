@@ -265,14 +265,14 @@
 			
 			chartFactory._inflateChartThemeIf(bodyThemeObj);
 			
-			//@deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
+			// < @deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
 			if(bodyThemeObj.colorSecond)
 			{
 				bodyThemeObj.color = bodyThemeObj.colorSecond;
 				bodyThemeObj.titleColor = bodyThemeObj.color;
 				bodyThemeObj.legendColor = bodyThemeObj.colorSecond;
 			}
-			//@deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
+			// > @deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
 			
 			$.extend(true, theme, bodyThemeObj);
 		}
@@ -2482,7 +2482,7 @@
 		return $(element).data(chartFactory._KEY_ELEMENT_RENDERED_CHART);
 	};
 	
-	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
 	/**
 	 * 判断指定HTML元素是否是已渲染为图表。
 	 * 
@@ -2492,7 +2492,7 @@
 	{
 		return (this.renderedChart(element) != null);
 	};
-	//@deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
 	
 	/** 生成元素ID用的前缀 */
 	chartFactory._ELEMENT_ID_PREFIX = "DataGearClient" + new Number(new Date().getTime()).toString(16);
@@ -2928,15 +2928,15 @@
 		var areaBorderColor1 = this.getGradualColor(chartTheme, 0.5);
 		var shadowColor = this.getGradualColor(chartTheme, 0.9);
 		
-		//@deprecated 兼容1.8.1版本有ChartTheme.axisColor的结构
+		// < @deprecated 兼容1.8.1版本有ChartTheme.axisColor的结构
 		if(chartTheme.axisColor)
 			axisColor = chartTheme.axisColor;
-		//@deprecated 兼容1.8.1版本有ChartTheme.axisColor的结构
+		// > @deprecated 兼容1.8.1版本有ChartTheme.axisColor的结构
 		
-		//@deprecated 兼容1.8.1版本有ChartTheme.axisScaleLineColor的结构
+		// < @deprecated 兼容1.8.1版本有ChartTheme.axisScaleLineColor的结构
 		if(chartTheme.axisScaleLineColor)
 			axisScaleLineColor = chartTheme.axisScaleLineColor;
-		//@deprecated 兼容1.8.1版本有ChartTheme.axisScaleLineColor的结构
+		// > @deprecated 兼容1.8.1版本有ChartTheme.axisScaleLineColor的结构
 		
 		var theme =
 		{

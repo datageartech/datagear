@@ -623,10 +623,10 @@
 		if(listener)
 			listener = chartFactory.evalSilently(listener);
 		
-		//@deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
+		// < @deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
 		else if(typeof(dashboardRenderer) != "undefined")
 			listener = dashboardRenderer.listener;
-		//@deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
+		// > @deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
 		
 		if(listener)
 			this.listener(listener);
@@ -764,23 +764,55 @@
 	};
 	
 	/**
-	 * 获取图表，没有则返回undefined。
+	 * 获取指定标识的图表，没有则返回undefined。
 	 * 
 	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
-	dashboardBase.getChart = function(chartInfo)
+	dashboardBase.chartOf = function(chartInfo)
 	{
-		var index = this.getChartIndex(chartInfo);
+		var index = this.chartIndex(chartInfo);
 		
 		return (index < 0 ? undefined : this.charts[index]);
 	};
 	
 	/**
-	 * 获取所有图表数组。
+	 * 获取指定图表在看板图表数组中的索引号，返回-1表示未找到。
+	 * 
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
-	dashboardBase.getAllCharts = function()
+	dashboardBase.chartIndex = function(chartInfo)
 	{
-		return (this.charts || []);
+		return this._chartIndex(this.charts, chartInfo);
+	};
+	
+	/**
+	 * 获取图表索引，返回-1表示未找到。
+	 * 
+	 * @param charts 待查找的图表数组
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 */
+	dashboardBase._chartIndex = function(charts, chartInfo)
+	{
+		if(!charts)
+			return -1;
+		
+		//jQuery对象，取第一个元素
+		if(chartInfo instanceof jQuery)
+		{
+			chartInfo = (chartInfo.length > 0 ? chartInfo[0] : null);
+		}
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			if(charts[i] === chartInfo
+					|| charts[i].elementId === chartInfo
+					|| charts[i].id === chartInfo
+					|| charts[i].element() === chartInfo
+					|| i === chartInfo)
+				return i;
+		}
+		
+		return -1;
 	};
 	
 	/**
@@ -791,12 +823,12 @@
 	 */
 	dashboardBase.addChart = function(chart)
 	{
-		var exists = this.getChart(chart);
+		var exists = this.chartOf(chart);
 		
 		if(exists != null)
 			return false;
 		
-		exists = this.getChart(chart.elementId);
+		exists = this.chartOf(chart.elementId);
 		
 		if(exists != null)
 			return false;
@@ -819,7 +851,7 @@
 	dashboardBase.removeChart = function(chartInfo, doDestory)
 	{
 		var newCharts = (this.charts ? [].concat(this.charts) : []);
-		var index = this.getChartIndex(chartInfo, newCharts);
+		var index = this._chartIndex(newCharts, chartInfo);
 		
 		if(index < 0)
 			return undefined;
@@ -839,24 +871,13 @@
 	};
 	
 	/**
-	 * 刷新图表数据。
-	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
-	 */
-	dashboardBase.refreshData = function(chartInfo)
-	{
-		var chart = this.getChart(chartInfo);
-		chart.refreshData();
-	};
-	
-	/**
 	 * 重新调整指定图表尺寸。
 	 * 
 	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
 	 */
 	dashboardBase.resizeChart = function(chartInfo)
 	{
-		var chart = this.getChart(chartInfo);
+		var chart = this.chartOf(chartInfo);
 		chart.resize();
 	};
 	
@@ -872,36 +893,14 @@
 	};
 	
 	/**
-	 * 获取图表索引号。
+	 * 刷新图表数据。
 	 * 
 	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
-	 * @param charts 选填，查找的图表数组，如果不设置，则取this.charts
 	 */
-	dashboardBase.getChartIndex = function(chartInfo, charts)
+	dashboardBase.refreshData = function(chartInfo)
 	{
-		if(charts === undefined)
-			charts = this.charts;
-		
-		if(!charts)
-			return -1;
-		
-		//jQuery对象，取第一个元素
-		if(chartInfo instanceof jQuery)
-		{
-			chartInfo = (chartInfo.length > 0 ? chartInfo[0] : null);
-		}
-		
-		for(var i=0; i<charts.length; i++)
-		{
-			if(charts[i] === chartInfo
-					|| charts[i].elementId === chartInfo
-					|| charts[i].id === chartInfo
-					|| charts[i].element() === chartInfo
-					|| i === chartInfo)
-				return i;
-		}
-		
-		return -1;
+		var chart = this.chartOf(chartInfo);
+		chart.refreshData();
 	};
 	
 	/**
@@ -1248,7 +1247,7 @@
 			data : JSON.stringify(data),
 			success : function(resultsMap)
 			{
-				//@deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
+				// < @deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
 				if(resultsMap)
 				{
 					for(var chartId in resultsMap)
@@ -1267,7 +1266,7 @@
 						}
 					}
 				}
-				//@deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
+				//> @deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
 				
 				try
 				{
@@ -1343,7 +1342,7 @@
 		
 		for(var chartId in resultsMap)
 		{
-			var chart = this.getChart(chartId);
+			var chart = this.chartOf(chartId);
 			
 			if(!chart)
 				continue;
@@ -1483,7 +1482,7 @@
 			throw new Error("The element has been rendered as chart");
 		
 		//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
-		if(this.getChart(element) != null)
+		if(this.chartOf(element) != null)
 			throw new Error("There is a chart for this element");
 		
 		if(typeof(chartWidgetId) != "string")
@@ -1548,7 +1547,7 @@
 				throw new Error("The "+i+"-th element has been rendered as chart");
 			
 			//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
-			if(this.getChart(element) != null)
+			if(this.chartOf(element) != null)
 				throw new Error("The is a chart for the "+i+"-th element");
 		}
 		
@@ -1635,7 +1634,7 @@
 			if($(this).attr(chartFactory.elementAttrConst.WIDGET)
 				&& dashboard.renderedChart(this) == null
 				//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
-				&& dashboard.getChart(this) == null)
+				&& dashboard.chartOf(this) == null)
 			{
 				unsolved.push(this);
 			}
@@ -1786,7 +1785,7 @@
 		
 		var targets = ($.isArray(batchSet.target) ? batchSet.target : [ batchSet.target ]);
 		for(var i=0; i<targets.length; i++)
-			targetCharts[i] = this.getChart(targets[i]);
+			targetCharts[i] = this.chartOf(targets[i]);
 		
 		var map = (batchSet.data || {});
 		var hasGetValueFunc = (typeof(sourceData.getValue) == "function");
@@ -1839,6 +1838,48 @@
 		
 		return targetCharts;
 	};
+	
+	//-------------
+	// < 已弃用函数 start
+	//-------------
+	
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.chartOf取代
+	/**
+	 * 获取图表，没有则返回undefined。
+	 * 
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 */
+	dashboardBase.getChart = function(chartInfo)
+	{
+		return this.chartOf(chartInfo);
+	};
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.chartOf取代
+	
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.charts取代
+	/**
+	 * 获取所有图表数组。
+	 */
+	dashboardBase.getAllCharts = function()
+	{
+		return (this.charts || []);
+	};
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.charts取代
+	
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.chartIndex取代
+	/**
+	 * 获取图表索引号。
+	 * 
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 */
+	dashboardBase.getChartIndex = function(chartInfo)
+	{
+		return this.chartIndex(chartInfo);
+	};
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.chartIndex取代
+	
+	//-------------
+	// > 已弃用函数 end
+	//-------------
 	
 	//----------------------------------------
 	// dashboardBase end
