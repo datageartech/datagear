@@ -1460,22 +1460,6 @@
 	};
 	
 	/**
-	 * 已弃用，请使用dataSetParamValues函数。
-	 */
-	chartBase.getDataSetParamValues = function(chartDataSet)
-	{
-		return this.dataSetParamValues(chartDataSet);
-	};
-	
-	/**
-	 * 已弃用，请使用dataSetParamValues函数。
-	 */
-	chartBase.setDataSetParamValues = function(chartDataSet, paramValuesObj)
-	{
-		this.dataSetParamValues(chartDataSet, paramValuesObj);
-	};
-	
-	/**
 	 * 重置指定数据集参数值集。
 	 * 
 	 * @param chartDataSet 指定图表数据集或其索引
@@ -2393,6 +2377,33 @@
 		}
 	};
 	
+	//-------------
+	// < 已弃用函数 start
+	//-------------
+	
+	// < @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
+	/**
+	 * 获取指定图表数据集参数值对象。
+	 */
+	chartBase.getDataSetParamValues = function(chartDataSet)
+	{
+		return this.dataSetParamValues(chartDataSet);
+	};
+	// > @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
+	
+	// < @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
+	/**
+	 * 设置指定图表数据集多个参数值。
+	 */
+	chartBase.setDataSetParamValues = function(chartDataSet, paramValuesObj)
+	{
+		this.dataSetParamValues(chartDataSet, paramValuesObj);
+	};
+	// > @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
+	
+	//-------------
+	// > 已弃用函数 end
+	//-------------
 	
 	//----------------------------------------
 	// chartBase end
@@ -2481,18 +2492,6 @@
 	{
 		return $(element).data(chartFactory._KEY_ELEMENT_RENDERED_CHART);
 	};
-	
-	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
-	/**
-	 * 判断指定HTML元素是否是已渲染为图表。
-	 * 
-	 * @param element HTML元素、Jquery对象
-	 */
-	chartFactory.isChartElement = function(element)
-	{
-		return (this.renderedChart(element) != null);
-	};
-	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
 	
 	/** 生成元素ID用的前缀 */
 	chartFactory._ELEMENT_ID_PREFIX = "DataGearClient" + new Number(new Date().getTime()).toString(16);
@@ -3537,5 +3536,25 @@
 		
 		return theme;
 	};
+	
+	//-------------
+	// < 已弃用函数 start
+	//-------------
+	
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
+	/**
+	 * 判断指定HTML元素是否是已渲染为图表。
+	 * 
+	 * @param element HTML元素、Jquery对象
+	 */
+	chartFactory.isChartElement = function(element)
+	{
+		return (this.renderedChart(element) != null);
+	};
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.renderedChart取代
+	
+	//-------------
+	// > 已弃用函数 end
+	//-------------
 })
 (this);
