@@ -405,3 +405,19 @@ DataGear版本更新日志
 --v2.4.0
 -----------------------------------------
 
+新增：看板JS对象新增loadUnsolvedCharts函数，用于异步加载所有未渲染的图表；
+新增：看板JS对象新增loadCharts函数，用于异步加载多个图表；
+新增：看板JS对象新增chartIndex函数，替换已弃用的getChartIndex函数；
+新增：看板JS对象新增chartOf函数、替换已弃用的getChart函数；
+新增：看板JS对象新增renderedChart函数，用于获取HTML元素已渲染的图表对象；
+新增：图表JS对象新增elementWidgetId、chartWidgetId、isInstance函数；
+修复：修复看板嵌套首页自动跳转参数丢失的BUG；
+修复：修复processUpdateOptions可能引起图表事件原始数据不对应的BUG；
+修复：修复柱状图当名称列是数值类型时无法显示的BUG；
+改进：看板JS对象loadChart函数支持不设置chartWidgetId参数而默认从元素的dg-chart-widget属性读取；
+改进：看板JS对象异步加载图表在未找到对应图表时返回备用的图表对象；
+改进：看板JS对象refreshData、removeChart等函数的chartInfo参数支持传入Jquery对象和HTML元素；
+改进：看板内置地图添加默认编码映射；
+改进：数据集编辑页面支持调整参数和属性顺序，支持为属性设置默认值；
+改进：数据集保存操作在有重名参数或属性时给出友好错误提示；
+改进：更新内置数据库JDBC驱动为较新版本；
