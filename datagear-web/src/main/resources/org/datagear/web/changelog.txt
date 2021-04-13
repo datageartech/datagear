@@ -417,6 +417,7 @@ DataGear版本更新日志
 改进：看板JS对象loadChart函数支持不设置chartWidgetId参数而默认从元素的dg-chart-widget属性读取；
 改进：看板JS对象异步加载图表在未找到对应图表时返回备用的图表对象；
 改进：看板JS对象refreshData、removeChart等函数的chartInfo参数支持传入Jquery对象和HTML元素；
+改进：图表JS对象弃用chartDataSetsNonNull、nameNonNull、updateIntervalNonNull函数；
 改进：看板内置地图添加默认编码映射；
 改进：数据集编辑页面支持调整参数和属性顺序，支持为属性设置默认值；
 改进：数据集保存操作在有重名参数或属性时给出友好错误提示；

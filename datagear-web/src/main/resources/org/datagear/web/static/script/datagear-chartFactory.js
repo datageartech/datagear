@@ -378,9 +378,22 @@
 	 */
 	chartBase.init = function()
 	{
+		if(!this.id)
+			throw new Error("[this.id] must be defined");
+		if(!this.elementId)
+			throw new Error("[this.elementId] must be defined");
+		if(!this.renderContext)
+			throw new Error("[this.renderContext] must be defined");
+		if(!this.plugin)
+			throw new Error("[this.plugin] must be defined");
+		
 		if(this._inited == true)
 			throw new Error("Chart has been initialized");
 		this._inited = true;
+		
+		this.name = (this.name || "");
+		this.chartDataSets = (this.chartDataSets || []);
+		this.updateInterval = (this.updateInterval == null ? -1 : this.updateInterval);
 		
 		this._initBaseProperties();
 		this._initOptions();
@@ -1358,7 +1371,7 @@
 	{
 		var re = false;
 		
-		var chartDataSets = this.chartDataSetsNonNull();
+		var chartDataSets = this.chartDataSets;
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var params = chartDataSets[i].dataSet.params;
@@ -1380,7 +1393,7 @@
 	{
 		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
-		var chartDataSets = (chartDataSet ? [ chartDataSet ] : this.chartDataSetsNonNull());
+		var chartDataSets = (chartDataSet ? [ chartDataSet ] : this.chartDataSets);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1500,25 +1513,6 @@
 	};
 	
 	/**
-	 * 获取图表名称。
-	 */
-	chartBase.nameNonNull = function()
-	{
-		return (this.name || "");
-	};
-	
-	/**
-	 * 获取图表的更新间隔。
-	 */
-	chartBase.updateIntervalNonNull = function()
-	{
-		if(this.updateInterval != null)
-			return this.updateInterval;
-		
-		return -1;
-	},
-	
-	/**
 	 * 获取图表对应的图表部件ID。
 	 * 正常来说，此函数的返回值与期望渲染的图表部件ID相同（通常是chartBase.elementWidgetId()的返回值），
 	 * 当不同时，表明服务端因加载图表异常（未找到或出现错误）而使用了一个备用图表，用于在页面展示异常信息。
@@ -1569,14 +1563,6 @@
 	};
 	
 	/**
-	 * 获取所有图表数据集对象数组。
-	 */
-	chartBase.chartDataSetsNonNull = function()
-	{
-		return (this.chartDataSets || []);
-	};
-	
-	/**
 	 * 获取主件图表数据集对象数组，它们的用途是绘制图表。
 	 * 
 	 * @return []
@@ -1585,7 +1571,7 @@
 	{
 		var re = [];
 		
-		var chartDataSets = this.chartDataSetsNonNull();
+		var chartDataSets = this.chartDataSets;
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			if(chartDataSets[i].attachment)
@@ -1606,7 +1592,7 @@
 	{
 		var re = [];
 		
-		var chartDataSets = this.chartDataSetsNonNull();
+		var chartDataSets = this.chartDataSets;
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			if(chartDataSets[i].attachment)
@@ -1640,7 +1626,7 @@
 		
 		var re = undefined;
 		
-		var chartDataSets = this.chartDataSetsNonNull();
+		var chartDataSets = this.chartDataSets;
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var isAttachment = chartDataSets[i].attachment;
@@ -1783,7 +1769,7 @@
 		
 		var index = undefined;
 		
-		var chartDataSets = this.chartDataSetsNonNull();
+		var chartDataSets = this.chartDataSets;
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var isAttachment = chartDataSets[i].attachment;
@@ -2380,6 +2366,39 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartDataSets取代
+	/**
+	 * 获取所有图表数据集对象数组。
+	 */
+	chartBase.chartDataSetsNonNull = function()
+	{
+		return (this.chartDataSets || []);
+	};
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartDataSets取代
+	
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.name取代
+	/**
+	 * 获取图表名称。
+	 */
+	chartBase.nameNonNull = function()
+	{
+		return (this.name || "");
+	};
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.name取代
+	
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.updateInterval取代
+	/**
+	 * 获取图表的更新间隔。
+	 */
+	chartBase.updateIntervalNonNull = function()
+	{
+		if(this.updateInterval != null)
+			return this.updateInterval;
+		
+		return -1;
+	},
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.updateInterval取代
 	
 	// < @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
 	/**

@@ -606,6 +606,8 @@
 			throw new Error("Dashboard has been initialized");
 		this._inited = true;
 		
+		this.charts = (this.charts || []);
+		
 		this._initListener();
 		this._initForms();
 		this._initChartResizeHandler();
@@ -653,9 +655,6 @@
 	 */
 	dashboardBase._initCharts = function()
 	{
-		if(!this.charts)
-			return;
-		
 		for(var i=0; i<this.charts.length; i++)
 			this._initChart(this.charts[i]);
 	};
@@ -686,7 +685,7 @@
 		{
 			setTimeout(function()
 			{
-				var charts = (thisDashboard.charts || []);
+				var charts = thisDashboard.charts;
 				
 				for(var i =0; i<charts.length; i++)
 				{
@@ -835,8 +834,7 @@
 		
 		//这里不应限制仅能添加未渲染的图表，因为应允许已完成渲染的图表先从看板移除，后续再加入看板
 		
-		var charts = (this.charts || []);
-		this.charts = charts.concat(chart);
+		this.charts = this.charts.concat(chart);
 		
 		return true;
 	};
@@ -850,7 +848,7 @@
 	 */
 	dashboardBase.removeChart = function(chartInfo, doDestory)
 	{
-		var newCharts = (this.charts ? [].concat(this.charts) : []);
+		var newCharts = [].concat(this.charts);
 		var index = this._chartIndex(newCharts, chartInfo);
 		
 		if(index < 0)
@@ -886,10 +884,8 @@
 	 */
 	dashboardBase.resizeAllCharts = function()
 	{
-		var charts = (this.charts || []);
-		
-		for(var i=0; i<charts.length; i++)
-			charts[i].resize();
+		for(var i=0; i<this.charts.length; i++)
+			this.charts[i].resize();
 	};
 	
 	/**
@@ -1149,7 +1145,7 @@
 	dashboardBase.isWaitForUpdate = function(chart)
 	{
 		return (chart.statusRendered() || chart.statusPreUpdate()
-				|| (chart.statusUpdated() && chart.updateIntervalNonNull() > -1));
+				|| (chart.statusUpdated() && chart.updateInterval > -1));
 	};
 	
 	/**
@@ -1160,7 +1156,7 @@
 		if(this._doHandlingCharts != true)
 			return;
 		
-		var charts = (this.charts || []);
+		var charts = this.charts;
 		
 		for(var i=0; i<charts.length; i++)
 		{
@@ -1194,7 +1190,7 @@
 				}
 				else
 				{
-					var updateInterval = chart.updateIntervalNonNull();
+					var updateInterval = chart.updateInterval;
 					var prevUpdateTime = this._chartUpdateTime(chart);
 					
 					if(prevUpdateTime == null || (prevUpdateTime + updateInterval) <= time)
@@ -1861,7 +1857,7 @@
 	 */
 	dashboardBase.getAllCharts = function()
 	{
-		return (this.charts || []);
+		return this.charts;
 	};
 	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.charts取代
 	

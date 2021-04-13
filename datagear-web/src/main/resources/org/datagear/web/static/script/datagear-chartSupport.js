@@ -40,7 +40,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -196,7 +196,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -362,7 +362,7 @@
 			dgStack: stack,
 			dgAxisType: axisType,
 			
-			title: { text: chart.nameNonNull() },
+			title: { text: chart.name },
 			angleAxis: {},
 			radiusAxis: {},
 			polar: { radius: "60%" },
@@ -518,7 +518,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -532,7 +532,7 @@
 			series:
 			[
 				{
-					name: chart.nameNonNull(),
+					name: chart.name,
 					type: "pie",
 					radius: "55%",
 					center: ["50%", "60%"],
@@ -632,7 +632,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -733,7 +733,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -893,7 +893,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -1040,7 +1040,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -1247,7 +1247,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 		    tooltip:
 		    {
@@ -1497,7 +1497,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -1643,7 +1643,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -1804,7 +1804,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -2072,7 +2072,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -2203,7 +2203,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -2368,7 +2368,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -2470,7 +2470,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -2558,7 +2558,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -2751,7 +2751,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -2956,7 +2956,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -3221,7 +3221,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -3389,7 +3389,7 @@
 		options = $.extend(true,
 		{
 			title: {
-		        text: chart.nameNonNull()
+		        text: chart.name
 		    },
 			tooltip:
 			{
@@ -3654,7 +3654,7 @@
 			//标题样式
 			title:
 			{
-				"text": chart.nameNonNull(),
+				"text": chart.name,
 				"show": true,
 				"color": chartTheme.titleColor,
 				"backgroundColor": chartTheme.backgroundColor

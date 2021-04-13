@@ -1306,7 +1306,7 @@
 	{
 		var $chart = chart.elementJquery();
 		
-		var chartDataSets = chart.chartDataSetsNonNull();
+		var chartDataSets = chart.chartDataSets;
 		
 		var $panel = $(".dg-chart-setting-param-panel", $box);
 		
@@ -1438,7 +1438,7 @@
 	{
 		var $chart = chart.elementJquery();
 		
-		var chartDataSets = chart.chartDataSetsNonNull();
+		var chartDataSets = chart.chartDataSets;
 		
 		var $panel = $(".dg-chart-setting-data-panel", $box);
 		
