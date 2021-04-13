@@ -4619,10 +4619,10 @@
 		if(nullable == null)
 			nullable = false;
 		
-		var customRenderer = chart.customChartRenderer();
+		var customRenderer = chart.chartRenderer();
 		
 		if(customRenderer == null && !nullable)
-			throw new Error("Custom chart renderer undefined");
+			throw new Error("Custom chart renderer must be defined");
 		
 		return customRenderer;
 	};

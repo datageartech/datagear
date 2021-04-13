@@ -411,6 +411,7 @@ DataGear版本更新日志
 新增：看板JS对象新增chartOf函数、替换已弃用的getChart函数；
 新增：看板JS对象新增renderedChart函数，用于获取HTML元素已渲染的图表对象；
 新增：图表JS对象新增elementWidgetId、chartWidgetId、isInstance函数；
+新增：图表JS对象新增chartRenderer函数、替换已弃用的customChartRenderer函数；
 修复：修复看板嵌套首页自动跳转参数丢失的BUG；
 修复：修复processUpdateOptions可能引起图表事件原始数据不对应的BUG；
 修复：修复柱状图当名称列是数值类型时无法显示的BUG；

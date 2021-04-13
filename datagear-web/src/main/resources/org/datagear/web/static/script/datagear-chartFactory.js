@@ -35,7 +35,7 @@
  * 
  * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数，具体参考chartBase._initEventHandlers函数说明。
  * 
- * 此图表工厂支持为图表元素添加elementAttrConst.RENDERER属性来自定义、扩展图表渲染器，具体参考chartBase._initCustomChartRenderer函数说明。
+ * 此图表工厂支持为图表元素添加elementAttrConst.RENDERER属性来自定义、扩展图表渲染器，具体参考chartBase._initChartRenderer函数说明。
  * 
  * 此图表工厂要求图表插件的图表渲染器（chartRenderer）格式为：
  * {
@@ -403,7 +403,7 @@
 		this._initEchartsThemeName();
 		this._initDisableSetting();
 		this._initEventHandlers();
-		this._initCustomChartRenderer();
+		this._initChartRenderer();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
@@ -607,7 +607,7 @@
 	 * 初始化自定义图表渲染器。
 	 * 此方法从图表元素的elementAttrConst.RENDERER属性获取自定义图表渲染器。
 	 */
-	chartBase._initCustomChartRenderer = function()
+	chartBase._initChartRenderer = function()
 	{
 		var chartRenderer = this.elementJquery().attr(elementAttrConst.RENDERER);
 		
@@ -616,7 +616,7 @@
 			chartRenderer = chartFactory.evalSilently(chartRenderer);
 			
 			if(chartRenderer)
-				this.customChartRenderer(chartRenderer);
+				this.chartRenderer(chartRenderer);
 		}
 	};
 	
@@ -797,14 +797,14 @@
 	/**
 	 * 获取/设置自定义图表渲染器。
 	 * 
-	 * @param customChartRenderer 可选，要设置的自定义图表渲染器，自定义图表渲染器允许仅定义要重写的内置图表插件渲染器函数
+	 * @param chartRenderer 可选，要设置的自定义图表渲染器，自定义图表渲染器允许仅定义要重写的图表插件渲染器函数
 	 */
-	chartBase.customChartRenderer = function(customChartRenderer)
+	chartBase.chartRenderer = function(chartRenderer)
 	{
-		if(customChartRenderer === undefined)
-			return this._customChartRenderer;
+		if(chartRenderer === undefined)
+			return this._chartRenderer;
 		else
-			this._customChartRenderer = customChartRenderer;
+			this._chartRenderer = chartRenderer;
 	};
 	
 	/**
@@ -851,7 +851,7 @@
 	 */
 	chartBase.doRender = function()
 	{
-		var customRenderer = this.customChartRenderer();
+		var customRenderer = this.chartRenderer();
 		
 		if(customRenderer && customRenderer.render)
 		{
@@ -901,7 +901,7 @@
 	 */
 	chartBase.doUpdate = function(results)
 	{
-		var customRenderer = this.customChartRenderer();
+		var customRenderer = this.chartRenderer();
 		
 		if(customRenderer && customRenderer.update)
 		{
@@ -931,7 +931,7 @@
 	{
 		this._assertActive();
 
-		var customRenderer = this.customChartRenderer();
+		var customRenderer = this.chartRenderer();
 		
 		if(customRenderer && customRenderer.resize)
 		{
@@ -964,7 +964,7 @@
 		this.statusDestroyed(true);
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
 		
-		var customRenderer = this.customChartRenderer();
+		var customRenderer = this.chartRenderer();
 		
 		if(customRenderer && customRenderer.destroy)
 		{
@@ -1005,7 +1005,7 @@
 	 */
 	chartBase.isAsyncRender = function()
 	{
-		var customRenderer = this.customChartRenderer();
+		var customRenderer = this.chartRenderer();
 		
 		if(customRenderer && customRenderer.asyncRender !== undefined)
 		{
@@ -1031,7 +1031,7 @@
 	 */
 	chartBase.isAsyncUpdate = function(results)
 	{
-		var customRenderer = this.customChartRenderer();
+		var customRenderer = this.chartRenderer();
 		
 		if(customRenderer && customRenderer.asyncUpdate !== undefined)
 		{
@@ -1322,7 +1322,7 @@
 	{
 		this._assertActive();
 		
-		var customRenderer = this.customChartRenderer();
+		var customRenderer = this.chartRenderer();
 		
 		if(customRenderer && customRenderer.on)
 		{
@@ -1350,7 +1350,7 @@
 	{
 		this._assertActive();
 		
-		var customRenderer = this.customChartRenderer();
+		var customRenderer = this.chartRenderer();
 		
 		if(customRenderer && customRenderer.off)
 		{
@@ -2366,6 +2366,18 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartRenderer取代
+	/**
+	 * 获取/设置自定义图表渲染器。
+	 * 
+	 * @param customChartRenderer 可选，要设置的自定义图表渲染器，自定义图表渲染器允许仅定义要重写的内置图表插件渲染器函数
+	 */
+	chartBase.customChartRenderer = function(customChartRenderer)
+	{
+		return this.chartRenderer(customChartRenderer);
+	};
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartRenderer取代
 	
 	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartDataSets取代
 	/**
