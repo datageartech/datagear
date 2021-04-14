@@ -35,7 +35,7 @@
  * 
  * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数，具体参考chartBase._initEventHandlers函数说明。
  * 
- * 此图表工厂支持为图表元素添加elementAttrConst.RENDERER属性来自定义、扩展图表渲染器，具体参考chartBase._initChartRenderer函数说明。
+ * 此图表工厂支持为图表元素添加elementAttrConst.RENDERER属性来自定义、扩展图表渲染器，具体参考chartBase._initRenderer函数说明。
  * 
  * 此图表工厂要求图表插件的图表渲染器（chartRenderer）格式为：
  * {
@@ -403,7 +403,7 @@
 		this._initEchartsThemeName();
 		this._initDisableSetting();
 		this._initEventHandlers();
-		this._initChartRenderer();
+		this._initRenderer();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
@@ -607,16 +607,16 @@
 	 * 初始化自定义图表渲染器。
 	 * 此方法从图表元素的elementAttrConst.RENDERER属性获取自定义图表渲染器。
 	 */
-	chartBase._initChartRenderer = function()
+	chartBase._initRenderer = function()
 	{
-		var chartRenderer = this.elementJquery().attr(elementAttrConst.RENDERER);
+		var renderer = this.elementJquery().attr(elementAttrConst.RENDERER);
 		
-		if(chartRenderer)
+		if(renderer)
 		{
-			chartRenderer = chartFactory.evalSilently(chartRenderer);
+			renderer = chartFactory.evalSilently(renderer);
 			
-			if(chartRenderer)
-				this.chartRenderer(chartRenderer);
+			if(renderer)
+				this.renderer(renderer);
 		}
 	};
 	
@@ -797,14 +797,15 @@
 	/**
 	 * 获取/设置自定义图表渲染器。
 	 * 
-	 * @param chartRenderer 可选，要设置的自定义图表渲染器，自定义图表渲染器允许仅定义要重写的图表插件渲染器函数
+	 * @param renderer 可选，要设置的自定义图表渲染器，自定义图表渲染器允许仅定义要重写的图表插件渲染器函数
+	 * @returns 要获取的自定义图表渲染器，没有则返回null
 	 */
-	chartBase.chartRenderer = function(chartRenderer)
+	chartBase.renderer = function(renderer)
 	{
-		if(chartRenderer === undefined)
-			return this._chartRenderer;
+		if(renderer === undefined)
+			return this._renderer;
 		else
-			this._chartRenderer = chartRenderer;
+			this._renderer = renderer;
 	};
 	
 	/**
@@ -851,11 +852,11 @@
 	 */
 	chartBase.doRender = function()
 	{
-		var customRenderer = this.chartRenderer();
+		var renderer = this.renderer();
 		
-		if(customRenderer && customRenderer.render)
+		if(renderer && renderer.render)
 		{
-			customRenderer.render(this);
+			renderer.render(this);
 		}
 		else
 		{
@@ -901,11 +902,11 @@
 	 */
 	chartBase.doUpdate = function(results)
 	{
-		var customRenderer = this.chartRenderer();
+		var renderer = this.renderer();
 		
-		if(customRenderer && customRenderer.update)
+		if(renderer && renderer.update)
 		{
-			customRenderer.update(this, results);
+			renderer.update(this, results);
 		}
 		else
 		{
@@ -931,11 +932,11 @@
 	{
 		this._assertActive();
 
-		var customRenderer = this.chartRenderer();
+		var renderer = this.renderer();
 		
-		if(customRenderer && customRenderer.resize)
+		if(renderer && renderer.resize)
 		{
-			customRenderer.resize(this);
+			renderer.resize(this);
 		}
 		else if(this.plugin.chartRenderer.resize)
 		{
@@ -964,11 +965,11 @@
 		this.statusDestroyed(true);
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
 		
-		var customRenderer = this.chartRenderer();
+		var renderer = this.renderer();
 		
-		if(customRenderer && customRenderer.destroy)
+		if(renderer && renderer.destroy)
 		{
-			customRenderer.destroy(this);
+			renderer.destroy(this);
 		}
 		else if(this.plugin.chartRenderer.destroy)
 		{
@@ -1005,14 +1006,14 @@
 	 */
 	chartBase.isAsyncRender = function()
 	{
-		var customRenderer = this.chartRenderer();
+		var renderer = this.renderer();
 		
-		if(customRenderer && customRenderer.asyncRender !== undefined)
+		if(renderer && renderer.asyncRender !== undefined)
 		{
-			if(typeof(customRenderer.asyncRender) == "function")
-				return customRenderer.asyncRender(this);
+			if(typeof(renderer.asyncRender) == "function")
+				return renderer.asyncRender(this);
 			
-			return (customRenderer.asyncRender == true);
+			return (renderer.asyncRender == true);
 		}
 		
 		if(this.plugin.chartRenderer.asyncRender == undefined)
@@ -1031,14 +1032,14 @@
 	 */
 	chartBase.isAsyncUpdate = function(results)
 	{
-		var customRenderer = this.chartRenderer();
+		var renderer = this.renderer();
 		
-		if(customRenderer && customRenderer.asyncUpdate !== undefined)
+		if(renderer && renderer.asyncUpdate !== undefined)
 		{
-			if(typeof(customRenderer.asyncUpdate) == "function")
-				return customRenderer.asyncUpdate(this, results);
+			if(typeof(renderer.asyncUpdate) == "function")
+				return renderer.asyncUpdate(this, results);
 			
-			return (customRenderer.asyncUpdate == true);
+			return (renderer.asyncUpdate == true);
 		}
 		
 		if(this.plugin.chartRenderer.asyncUpdate == undefined)
@@ -1322,11 +1323,11 @@
 	{
 		this._assertActive();
 		
-		var customRenderer = this.chartRenderer();
+		var renderer = this.renderer();
 		
-		if(customRenderer && customRenderer.on)
+		if(renderer && renderer.on)
 		{
-			customRenderer.on(this, eventType, handler);
+			renderer.on(this, eventType, handler);
 		}
 		else if(this.plugin.chartRenderer.on)
 		{
@@ -1350,11 +1351,11 @@
 	{
 		this._assertActive();
 		
-		var customRenderer = this.chartRenderer();
+		var renderer = this.renderer();
 		
-		if(customRenderer && customRenderer.off)
+		if(renderer && renderer.off)
 		{
-			customRenderer.off(this, eventType, handler);
+			renderer.off(this, eventType, handler);
 		}
 		else if(this.plugin.chartRenderer.off)
 		{
@@ -1488,6 +1489,17 @@
 	};
 	
 	/**
+	 * 获取渲染此图表的图表部件ID。
+	 * 正常来说，此函数的返回值与期望渲染的图表部件ID相同（通常是chartBase.elementWidgetId()的返回值），
+	 * 当不同时，表明服务端因加载图表异常（未找到或出现错误）而使用了一个备用图表，用于在页面展示异常信息。
+	 */
+	chartBase.widgetId = function()
+	{
+		//org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
+		return (this.attributes && this.attributes.chartWidget ? this.attributes.chartWidget.id : null);
+	};
+	
+	/**
 	 * 获取图表HTML元素。
 	 */
 	chartBase.element = function()
@@ -1513,24 +1525,13 @@
 	};
 	
 	/**
-	 * 获取图表对应的图表部件ID。
-	 * 正常来说，此函数的返回值与期望渲染的图表部件ID相同（通常是chartBase.elementWidgetId()的返回值），
-	 * 当不同时，表明服务端因加载图表异常（未找到或出现错误）而使用了一个备用图表，用于在页面展示异常信息。
-	 */
-	chartBase.chartWidgetId = function()
-	{
-		//org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
-		return (this.attributes && this.attributes.chartWidget ? this.attributes.chartWidget.id : null);
-	};
-	
-	/**
 	 * 判断此图表是否由指定ID的图表部件渲染。
 	 * 
 	 * @param chartWidgetId 图表部件ID，通常是图表元素的"dg-chart-widget"值
 	 */
 	chartBase.isInstance = function(chartWidgetId)
 	{
-		return (this.chartWidgetId() == chartWidgetId);
+		return (this.widgetId() == chartWidgetId);
 	};
 	
 	/**
@@ -2367,7 +2368,7 @@
 	// < 已弃用函数 start
 	//-------------
 	
-	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartRenderer取代
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.renderer取代
 	/**
 	 * 获取/设置自定义图表渲染器。
 	 * 
@@ -2375,9 +2376,9 @@
 	 */
 	chartBase.customChartRenderer = function(customChartRenderer)
 	{
-		return this.chartRenderer(customChartRenderer);
+		return this.renderer(customChartRenderer);
 	};
-	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartRenderer取代
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.renderer取代
 	
 	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartDataSets取代
 	/**

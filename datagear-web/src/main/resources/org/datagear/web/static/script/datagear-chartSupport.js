@@ -4619,12 +4619,12 @@
 		if(nullable == null)
 			nullable = false;
 		
-		var customRenderer = chart.chartRenderer();
+		var renderer = chart.renderer();
 		
-		if(customRenderer == null && !nullable)
-			throw new Error("Custom chart renderer must be defined");
+		if(renderer == null && !nullable)
+			throw new Error("Chart renderer must be defined");
 		
-		return customRenderer;
+		return renderer;
 	};
 	
 	//---------------------------------------------------------
