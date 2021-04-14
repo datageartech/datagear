@@ -642,11 +642,11 @@
 	{
 		var $forms = $("form[dg-dashboard-form]", document.body);
 		
-		var _this = this;
+		var dashboard = this;
 		
 		$forms.each(function()
 		{
-			_this.renderForm(this);
+			dashboard.renderForm(this);
 		});
 	};
 	
@@ -983,7 +983,7 @@
 		if(!config)
 			config = chartFactory.evalSilently(form.attr(elementAttrConst.DASHBOARD_FORM), {});
 		
-		var _thisDashboard = this;
+		var dashboard = this;
 		var bindBatchSetName = "dataGearBatchSet";
 		
 		config = $.extend(
@@ -995,7 +995,7 @@
 				
 				if(batchSet)
 				{
-					var charts = _thisDashboard.batchSetDataSetParamValues(formData, batchSet, [ formData, thisForm ]);
+					var charts = dashboard.batchSetDataSetParamValues(formData, batchSet, [ formData, thisForm ]);
 					
 					for(var i=0; i<charts.length; i++)
 						charts[i].refreshData();
@@ -1474,6 +1474,9 @@
 	{
 		element = $(element);
 		
+		if(this._loadingChartElement(element))
+			throw new Error("The element is loading chart");
+		
 		if(this.renderedChart(element) != null)
 			throw new Error("The element has been rendered as chart");
 		
@@ -1505,13 +1508,14 @@
 			};
 		}
 		
-		var _this = this;
+		var dashboard = this;
 		
 		var myAjaxOptions = $.extend({}, ajaxOptions);
+		
 		var successHandler = myAjaxOptions.success;
 		myAjaxOptions.success = function(chart, textStatus, jqXHR)
 		{
-			_this._initLoadedChart(chart, element, chartWidgetId);
+			dashboard._initLoadedChart(chart, element, chartWidgetId);
 			
 			var re = true;
 			
@@ -1519,8 +1523,19 @@
 				re = successHandler.call(this, chart, textStatus, jqXHR);
 			
 			if(re != false)
-				_this.addChart(chart);
+				dashboard.addChart(chart);
 		};
+		
+		var completeHandler = myAjaxOptions.complete;
+		myAjaxOptions.complete = function(jqXHR, textStatus)
+		{
+			dashboard._loadingChartElement(element, false);
+			
+			if(completeHandler)
+				re = completeHandler.call(this, jqXHR, textStatus);
+		};
+		
+		this._loadingChartElement(element, true);
 		
 		this._loadChartJson(chartWidgetId, myAjaxOptions);
 	};
@@ -1539,6 +1554,9 @@
 		
 		for(var i=0; i<element.length; i++)
 		{
+			if(this._loadingChartElement(element[i]))
+				throw new Error("The "+i+"-th element is loading chart");
+			
 			if(this.renderedChart(element[i]) != null)
 				throw new Error("The "+i+"-th element has been rendered as chart");
 			
@@ -1586,14 +1604,15 @@
 			chartWidgetIds.push(widgetId);
 		});
 		
-		var _this = this;
+		var dashboard = this;
 		
 		var myAjaxOptions = $.extend({}, ajaxOptions);
+		
 		var successHandler = myAjaxOptions.success;
 		myAjaxOptions.success = function(charts, textStatus, jqXHR)
 		{
 			for(var i=0; i<charts.length; i++)
-				_this._initLoadedChart(charts[i], element[i], chartWidgetIds[i]);
+				dashboard._initLoadedChart(charts[i], element[i], chartWidgetIds[i]);
 			
 			var re = true;
 			
@@ -1603,9 +1622,20 @@
 			if(re != false)
 			{
 				for(var i=0; i<charts.length; i++)
-					_this.addChart(charts[i]);
+					dashboard.addChart(charts[i]);
 			}
 		};
+		
+		var completeHandler = myAjaxOptions.complete;
+		myAjaxOptions.complete = function(jqXHR, textStatus)
+		{
+			dashboard._loadingChartElement(element, false);
+			
+			if(completeHandler)
+				re = completeHandler.call(this, jqXHR, textStatus);
+		};
+		
+		this._loadingChartElement(element, true);
 		
 		this._loadChartJson(chartWidgetIds, myAjaxOptions);
 	};
@@ -1627,6 +1657,9 @@
 		
 		allElements.each(function()
 		{
+			if(dashboard._loadingChartElement(this))
+				return;
+			
 			if($(this).attr(chartFactory.elementAttrConst.WIDGET)
 				&& dashboard.renderedChart(this) == null
 				//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
@@ -1640,6 +1673,31 @@
 			this.loadCharts(unsolved, ajaxOptions);
 		
 		return unsolved;
+	};
+	
+	/**
+	 * 获取单个/设置多个元素是否正在加载图表。
+	 */
+	dashboardBase._loadingChartElement = function(element, set)
+	{
+		element = $(element);
+		
+		if(set === undefined)
+		{
+			return (element.attr("_datagear_loadingChart") == "true");
+		}
+		else
+		{
+			element.each(function()
+			{
+				var $this = $(this);
+				
+				if(set == true)
+					$this.attr("_datagear_loadingChart", "true");
+				else
+					$this.removeAttr("_datagear_loadingChart");
+			});
+		}
 	};
 	
 	/**
@@ -1701,10 +1759,10 @@
 		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.loadChartURL);
 		var loadChartConfig = dashboardFactory.loadChartConfig;
 		
-		var _this = this;
+		var dashboard = this;
 		
 		var data = [];
-		data[0] = { name: loadChartConfig.dashboardIdParamName, value: _this.id };
+		data[0] = { name: loadChartConfig.dashboardIdParamName, value: dashboard.id };
 		for(var i=0; i<chartWidgetIds.length; i++)
 		{
 			data.push({ name: loadChartConfig.chartWidgetIdParamName, value: chartWidgetIds[i] });
