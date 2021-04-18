@@ -2525,10 +2525,13 @@
 	/**
 	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
 	 * 
-	 * @param element HTML元素、Jquery对象
+	 * @param element HTML元素、HTML元素ID、Jquery对象
 	 */
 	chartFactory.renderedChart = function(element)
 	{
+		if(typeof(element) == "string")
+			element = "#" + element;
+		
 		return $(element).data(chartFactory._KEY_ELEMENT_RENDERED_CHART);
 	};
 	
