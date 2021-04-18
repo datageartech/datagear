@@ -387,13 +387,14 @@
 		if(!this.plugin)
 			throw new Error("[this.plugin] must be defined");
 		
-		if(this._inited == true)
-			throw new Error("Chart has been initialized");
-		this._inited = true;
+		if(this.statusRendering() || this.isActive())
+			throw new Error("Chart is not ready for init");
 		
 		this.name = (this.name || "");
 		this.chartDataSets = (this.chartDataSets || []);
 		this.updateInterval = (this.updateInterval == null ? -1 : this.updateInterval);
+		
+		this._clearExtValue();
 		
 		this._initBaseProperties();
 		this._initOptions();
@@ -990,7 +991,7 @@
 		this._destroySetting();
 		
 		//最后清空扩展属性值，因为上面逻辑可能会使用到
-		this._extValues = {};
+		this._clearExtValue();
 	};
 	
 	/**
@@ -1559,8 +1560,14 @@
 		{
 			if(!this._extValues)
 				this._extValues = {};
+			
 			this._extValues[name] = value;
 		}
+	};
+	
+	chartBase._clearExtValue = function()
+	{
+		this._extValues = {};
 	};
 	
 	/**
@@ -2513,7 +2520,7 @@
 	};
 	
 	/** HTML元素上已渲染的图表对象KEY */
-	chartFactory._KEY_ELEMENT_RENDERED_CHART = "_dg_rendered_chart";
+	chartFactory._KEY_ELEMENT_RENDERED_CHART = "_DataGearRenderedChart";
 	
 	/**
 	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
