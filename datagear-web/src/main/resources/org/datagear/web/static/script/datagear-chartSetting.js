@@ -21,13 +21,13 @@
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
 	var chartSetting = (chartFactory.chartSetting || (chartFactory.chartSetting = {}));
 	
-	//@deprecated 兼容1.8.1版本的window.chartSetting变量名，未来版本会移除
+	// < @deprecated 兼容1.8.1版本的window.chartSetting变量名，未来版本会移除
 	global.chartForm = chartSetting;
-	//@deprecated 兼容1.8.1版本的window.chartSetting变量名，未来版本会移除
+	// > @deprecated 兼容1.8.1版本的window.chartSetting变量名，未来版本会移除
 	
-	//@deprecated 兼容2.1.1版本的window.chartFactory.chartSetting变量名，未来版本会移除
+	// < @deprecated 兼容2.1.1版本的window.chartFactory.chartSetting变量名，未来版本会移除
 	chartFactory.chartForm = chartSetting;
-	//@deprecated 兼容2.1.1版本的window.chartFactory.chartSetting变量名，未来版本会移除
+	// > @deprecated 兼容2.1.1版本的window.chartFactory.chartSetting变量名，未来版本会移除
 	
 	//org.datagear.analysis.DataSetParam.DataType
 	chartSetting.DataSetParamDataType =

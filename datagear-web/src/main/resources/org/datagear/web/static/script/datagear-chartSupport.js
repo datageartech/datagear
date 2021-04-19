@@ -22,9 +22,9 @@
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
 	var chartSupport = (chartFactory.chartSupport || (chartFactory.chartSupport = {}));
 	
-	//@deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
+	// < @deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
 	global.chartSupport = chartSupport;
-	//@deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
+	// > @deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
 	
 	//折线图
 	
