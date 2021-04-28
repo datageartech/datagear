@@ -130,9 +130,11 @@ SQL工作台
 
 ### 准备单元测试环境
 
-	1. 安装 MySQL-8.0 数据库，并将`root`用户的密码设置为：`root`（或者修改`test/config/jdbc.properties`配置）
-	2. 新建测试数据库，名称取为：`dg_test`
-	3. 使用`test/sql/test-sql-script-mysql.sql`脚本初始化`dg_test`库
+1. 安装 MySQL-8.0 数据库，并将`root`用户的密码设置为：`root`（或者修改`test/config/jdbc.properties`配置）
+
+2. 新建测试数据库，名称取为：`dg_test`
+
+3. 使用`test/sql/test-sql-script-mysql.sql`脚本初始化`dg_test`库
 
 ### 执行编译命令
 
@@ -146,9 +148,11 @@ SQL工作台
 
 ## 调试
 	
-	1. 将datagear以maven工程导入至IDE工具；
-	2. 以调试模式运行datagear-web模块的：org.datagear.web.DataGearApplication
-	3. 打开浏览器，输入：http://localhost:50401
+1. 将`datagear`以maven工程导入至IDE工具
+
+2. 以调试模式运行datagear-web模块的启动类：`org.datagear.web.DataGearApplication`
+
+3. 打开浏览器，输入：`http://localhost:50401`
 	
 ## 调试注意
 
