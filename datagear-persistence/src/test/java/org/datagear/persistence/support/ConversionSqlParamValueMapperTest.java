@@ -11,6 +11,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 import org.datagear.persistence.LiteralSqlParamValue;
 import org.datagear.persistence.PersistenceTestSupport;
 import org.datagear.persistence.SqlParamValueMapperException;
@@ -33,7 +36,7 @@ public class ConversionSqlParamValueMapperTest extends PersistenceTestSupport
 	}
 
 	@Test
-	public void mapTest()
+	public void mapTest() throws Throwable
 	{
 		{
 			ConversionSqlParamValueMapper mapper = createMapper();
@@ -94,9 +97,19 @@ public class ConversionSqlParamValueMapperTest extends PersistenceTestSupport
 			}
 
 			{
+				String sqlContent = "SELECT COUNT(*) FROM T_ACCOUNT";
+
 				SqlParamValue paramValueName = mapper.map(connection, MOCK_TABLE, MOCK_COLUMN_NAME,
-						"NAME-${select 1 from T_ACCOUNT}-NAME");
-				assertEquals("NAME-1-NAME", paramValueName.getValue());
+						"NAME-${" + sqlContent + "}-NAME");
+
+				int sqlResult = -1;
+				try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sqlContent))
+				{
+					rs.next();
+					sqlResult = rs.getInt(1);
+				}
+
+				assertEquals("NAME-" + sqlResult + "-NAME", paramValueName.getValue());
 			}
 
 			{

@@ -128,11 +128,18 @@ SQL工作台
 
 ## 编译
 
-	（执行单元测试编译，需要预先配置单元测试环境）
+### 准备单元测试环境
+
+	1. 安装 MySQL-8.0 数据库，并将`root`用户的密码设置为：`root`（或者修改`test/config/jdbc.properties`配置）
+	2. 新建测试数据库，名称取为：`dg_test`
+	3. 使用`test/sql/test-sql-script-mysql.sql`脚本初始化`dg_test`库
+
+### 执行编译命令
+
 	mvn clean package
 
+或者，也可不准备单元测试环境，直接执行如下编译命令：
 
-	（不执行单元测试编译，无需预先配置单元测试环境）
 	mvn clean package -DskipTests
 
 编译完成后，将在`datagear-web/target/datagear-[version]-packages/`内生成程序包。
