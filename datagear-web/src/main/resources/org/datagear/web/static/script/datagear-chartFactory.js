@@ -839,12 +839,7 @@
 		
 		if(doRender != false)
 		{
-			var async = this.isAsyncRender();
-			
 			this.doRender();
-			
-			if(!async)
-				this.statusRendered(true);
 		}
 	};
 	
@@ -853,6 +848,8 @@
 	 */
 	chartBase.doRender = function()
 	{
+		var async = this.isAsyncRender();
+		
 		var renderer = this.renderer();
 		
 		if(renderer && renderer.render)
@@ -863,6 +860,9 @@
 		{
 			this.plugin.chartRenderer.render(this);
 		}
+		
+		if(!async)
+			this.statusRendered(true);
 	};
 	
 	/**
@@ -877,8 +877,6 @@
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
 			throw new Error("Chart is not ready for update");
 		
-		this.extValue("_updateResults", results);
-		
 		this.statusUpdating(true);
 		
 		var doUpdate = true;
@@ -889,20 +887,20 @@
 		
 		if(doUpdate != false)
 		{
-			var async = this.isAsyncUpdate(results);
-			
 			this.doUpdate(results);
-			
-			if(!async)
-				this.statusUpdated(true);
 		}
 	};
 	
 	/**
-	 * 调用图表插件的update函数，执行更新数据。
+	 * 调用底层图表渲染器的update函数，执行更新数据。
 	 */
 	chartBase.doUpdate = function(results)
 	{
+		//先保存结果，确保getUpdateResults()在渲染器的update函数作用域内可用
+		this.extValue("_updateResults", results);
+		
+		var async = this.isAsyncUpdate(results);
+		
 		var renderer = this.renderer();
 		
 		if(renderer && renderer.update)
@@ -913,6 +911,9 @@
 		{
 			this.plugin.chartRenderer.update(this, results);
 		}
+		
+		if(!async)
+			this.statusUpdated(true);
 	};
 	
 	/**
