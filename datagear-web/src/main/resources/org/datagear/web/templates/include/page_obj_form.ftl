@@ -10,7 +10,7 @@
 表单页面JS片段。
 
 依赖：
-page_js_obj.jsp
+page_js_obj.ftl
 -->
 <script type="text/javascript">
 (function(po)

@@ -10,7 +10,7 @@
 表格JS片段。
 
 依赖：
-page_js_obj.jsp
+page_js_obj.ftl
 -->
 <script type="text/javascript">
 (function(po)
@@ -61,17 +61,21 @@ page_js_obj.jsp
 	};
 	
 	/**
-	 * 集成data_page_obj_searchform_js.jsp的默认实现。
+	 * 集成data_page_obj_searchform_js.ftl的默认实现。
 	 */
 	po.search = function(searchParam)
 	{
 		po.searchParam = searchParam;
 		
+		//重置页码
+		if(po.pagingParam)
+			po.pagingParam.page = 1;
+		
 		po.refresh();
 	};
 	
 	/**
-	 * 集成page_obj_pagination.jsp的默认实现。
+	 * 集成page_obj_pagination.ftl的默认实现。
 	 */
 	po.paging = function(pagingParam)
 	{
