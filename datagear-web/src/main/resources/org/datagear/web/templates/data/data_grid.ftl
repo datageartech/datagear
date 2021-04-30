@@ -48,10 +48,11 @@ boolean readonly 是否只读操作，默认为false
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
+<#include "include/data_page_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-query">
 	<div class="head">
 		<div class="search">
-			<#include "include/data_page_obj_searchform_html.ftl">
+			<#include "include/data_page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
 			<#if selectOperation>
@@ -88,8 +89,6 @@ boolean readonly 是否只读操作，默认为false
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "include/data_page_obj.ftl">
-<#include "include/data_page_obj_searchform_js.ftl">
 <#include "../include/page_obj_pagination.ftl">
 <#include "include/data_page_obj_grid.ftl">
 <#if !readonly>

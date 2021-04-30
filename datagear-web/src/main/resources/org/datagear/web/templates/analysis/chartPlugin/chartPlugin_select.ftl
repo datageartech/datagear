@@ -17,10 +17,11 @@
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
+<#include "../../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-chartPlugin-select">
 	<div class="head">
 		<div class="search">
-			<#include "../../include/page_obj_searchform.html.ftl">
+			<#include "../../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
 			<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
@@ -42,8 +43,6 @@
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "../../include/page_js_obj.ftl">
-<#include "../../include/page_obj_searchform_js.ftl">
 <script type="text/javascript">
 (function(po)
 {

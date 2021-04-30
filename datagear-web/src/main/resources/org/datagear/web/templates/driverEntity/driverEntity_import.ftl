@@ -14,6 +14,7 @@
 <title><#include "../include/html_title_app_name.ftl"><@spring.message code='driverEntity.importDriverEntity' /></title>
 </head>
 <body>
+<#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-driverEntityImport">
 	<form id="${pageId}-form" action="${contextPath}/driverEntity/saveImport" method="POST">
 		<div class="form-head"></div>
@@ -45,7 +46,6 @@
 		</div>
 	</form>
 </div>
-<#include "../include/page_js_obj.ftl" >
 <#include "../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)

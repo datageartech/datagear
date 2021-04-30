@@ -47,6 +47,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 </title>
 </head>
 <body>
+<#include "include/data_page_obj.ftl">
 <div id="${pageId}" class="page-form">
 	<div class="head">
 	</div>
@@ -57,7 +58,6 @@ boolean batchSet 是否开启批量执行功能，默认为false
 	<div class="foot">
 	</div>
 </div>
-<#include "include/data_page_obj.ftl">
 <#include "include/data_page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)

@@ -24,10 +24,11 @@ boolean readonly 是否只读操作，默认为false
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
+<#include "../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-schema">
 	<div class="head">
 		<div class="search">
-			<#include "../include/page_obj_searchform.html.ftl">
+			<#include "../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
 			<#if selectOperation>
@@ -60,8 +61,6 @@ boolean readonly 是否只读操作，默认为false
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "../include/page_js_obj.ftl">
-<#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_grid.ftl">
 <script type="text/javascript">
 (function(po)

@@ -26,6 +26,7 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
+<#include "../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-dataexchange page-dataexport-text page-dataexport-sql">
 	<div class="head">
 		<@spring.message code='dataExport.exportSqlData' />
@@ -116,8 +117,6 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
-
-<#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_format_time.ftl" >
 <#include "include/dataExchange_js.ftl" >

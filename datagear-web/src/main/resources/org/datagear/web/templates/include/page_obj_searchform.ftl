@@ -7,7 +7,14 @@
  *
 -->
 <#--
-查询表单HTML片段。
+查询表单片段。
+
+依赖：
+page_js_obj.ftl
+
+变量：
+//查询回调函数，不允许为null，格式为：function(searchParam){}
+po.search = undefined;
 -->
 <form id="${pageId}-searchForm" class="search-form" action="#">
 	<div class="ui-widget ui-widget-content keyword-widget simple">
@@ -17,3 +24,4 @@
 	</div>
 	<input name="submit" type="submit" value="<@spring.message code='query' />" />
 </form>
+<#include "page_obj_searchform_js.ftl">

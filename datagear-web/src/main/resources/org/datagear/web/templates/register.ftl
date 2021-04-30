@@ -14,6 +14,7 @@
 <title><#include "include/html_title_app_name.ftl"><@spring.message code='register.register' /></title>
 </head>
 <body>
+<#include "include/page_js_obj.ftl" >
 <div id="${pageId}">
 	<div class="main-page-head">
 		<#include "include/html_logo.ftl">
@@ -67,7 +68,6 @@
 		</form>
 	</div>
 </div>
-<#include "include/page_js_obj.ftl" >
 <#include "include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)

@@ -15,6 +15,7 @@
 <title><#include "include/html_title_app_name.ftl"><@spring.message code='about.about' /></title>
 </head>
 <body>
+<#include "include/page_js_obj.ftl" >
 <div id="${pageId}" class="page page-about">
 	<form id="${pageId}-form">
 		<div class="form-content">
@@ -53,7 +54,6 @@
 		</div>
 	</form>
 </div>
-<#include "include/page_js_obj.ftl" >
 <#include "include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)

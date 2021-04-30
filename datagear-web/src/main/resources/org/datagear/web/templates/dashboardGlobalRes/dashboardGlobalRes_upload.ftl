@@ -21,6 +21,7 @@ readonly 是否只读操作，允许为null
 <title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body>
+<#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dashboardGlobalRes">
 	<form id="${pageId}-form" action="${contextPath}/dashboardGlobalRes/${formAction}" method="POST">
 		<div class="form-head"></div>
@@ -75,7 +76,6 @@ readonly 是否只读操作，允许为null
 		</div>
 	</form>
 </div>
-<#include "../include/page_js_obj.ftl" >
 <#include "../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)

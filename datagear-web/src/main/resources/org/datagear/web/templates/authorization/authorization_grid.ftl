@@ -23,10 +23,11 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
+<#include "../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-authorization">
 	<div class="head">
 		<div class="search">
-			<#include "../include/page_obj_searchform.html.ftl">
+			<#include "../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
 			<input name="addButton" type="button" value="<@spring.message code='add' />" />
@@ -48,8 +49,6 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "../include/page_js_obj.ftl">
-<#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_data_permission.ftl">
 <script type="text/javascript">

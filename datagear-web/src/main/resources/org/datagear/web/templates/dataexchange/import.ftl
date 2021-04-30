@@ -26,6 +26,7 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
+<#include "../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-dataexchange-type page-dataimport-type">
 	<div class="head">
 	</div>
@@ -101,8 +102,6 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
-
-<#include "../include/page_js_obj.ftl">
 <script type="text/javascript">
 (function(po)
 {

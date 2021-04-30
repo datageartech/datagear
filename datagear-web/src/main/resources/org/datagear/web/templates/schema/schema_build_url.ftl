@@ -18,6 +18,7 @@ preview 是否是预览请求，允许为null
 <title><#include "../include/html_title_app_name.ftl"><@spring.message code='schema.schemaBuildUrl' /></title>
 </head>
 <body>
+<#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-buildSchemaUrl">
 	<div id="dbUrlBuilderScriptCode" style="display: none;">
 		${scriptCode!''}
@@ -70,7 +71,6 @@ preview 是否是预览请求，允许为null
 	<div class="url-preview"></div>
 	</#if>
 </div>
-<#include "../include/page_js_obj.ftl" >
 <#include "../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)

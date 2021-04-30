@@ -10,7 +10,7 @@
 数据分析项目相关表格页：扩展数据分析项目查询参数
 
 依赖：
-page_obj_searchform_js.ftl 或者 page_obj_searchform_data_filter.ftl
+page_obj_searchform.ftl 或者 page_obj_searchform_data_filter.ftl
 -->
 <script type="text/javascript">
 (function(po)

@@ -18,6 +18,7 @@
 <title><#include "include/html_title_app_name.ftl"><@spring.message code='resetPassword.resetPassword' /></title>
 </head>
 <body>
+<#include "include/page_js_obj.ftl">
 <div id="${pageId}">
 	<div class="main-page-head main-page-head-reset-passord">
 		<#include "include/html_logo.ftl">
@@ -106,7 +107,6 @@
 		</div>
 	</div>
 </div>
-<#include "include/page_js_obj.ftl">
 <#include "include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)

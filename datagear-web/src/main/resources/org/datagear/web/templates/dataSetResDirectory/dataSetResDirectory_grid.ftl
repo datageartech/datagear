@@ -27,7 +27,7 @@ selectOperation 是否选择操作，允许为null
 <div id="${pageId}" class="page-grid page-grid-dataSetResDirectory">
 	<div class="head">
 		<div class="search search-dataSetResDirectory">
-			<#include "../include/page_obj_searchform.html.ftl">
+			<#include "../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
 			<#if selectOperation>
@@ -57,7 +57,6 @@ selectOperation 是否选择操作，允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_pagination.ftl">
 <#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_data_permission.ftl" >

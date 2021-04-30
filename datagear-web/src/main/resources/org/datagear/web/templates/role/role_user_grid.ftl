@@ -17,10 +17,11 @@
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
+<#include "../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-role-user">
 	<div class="head">
 		<div class="search">
-			<#include "../include/page_obj_searchform.html.ftl">
+			<#include "../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
 			<input name="addButton" type="button" value="<@spring.message code='add' />" />
@@ -40,9 +41,7 @@
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_pagination.ftl">
-<#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_grid.ftl">
 <script type="text/javascript">
 (function(po)

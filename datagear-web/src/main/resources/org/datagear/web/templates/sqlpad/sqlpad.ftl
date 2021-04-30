@@ -26,6 +26,7 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
+<#include "../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-sqlpad">
 	<div class="head button-operation">
 		<button id="executeSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only first" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
@@ -175,8 +176,6 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
-
-<#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_tabs.ftl" >
 <#include "../include/page_obj_format_time.ftl" >
 <#include "../include/page_obj_data_permission.ftl">

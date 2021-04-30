@@ -61,7 +61,7 @@ page_js_obj.ftl
 	};
 	
 	/**
-	 * 集成data_page_obj_searchform_js.ftl的默认实现。
+	 * 集成page_obj_searchform.ftl的默认实现。
 	 */
 	po.search = function(searchParam)
 	{
