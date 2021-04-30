@@ -38,6 +38,7 @@ po.paging = undefined;
 		{
 			pageSizeSetLabel : "<@spring.message code='confirm' />",
 			toPageLabel : "<@spring.message code='jumpto' />",
+			labelTemplate: "<@spring.message code='pagination.label' />",
 			pageSizeCookie: "PAGINATION_PAGE_SIZE",
 			pageSizeCookiePath: "${contextPath}",
 			update: function(page, pageSize, total)

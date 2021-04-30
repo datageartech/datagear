@@ -22,36 +22,34 @@
 			page: 1,
 			
 			//可选，页大小
-			pageSize : 10,
+			pageSize: 10,
 			
 			//可选，总记录数
 			total: 0,
 			
 			//可选，页大小选项
-			pageSizeOptions : [[5, 10], [20, 50], [100, 200], [500, 1000]],
+			pageSizeOptions: [[5, 10], [20, 50], [100, 200], [500, 1000]],
 			
 			//可选，页大小cookie名
-			pageSizeCookie : "pagination.pageSize",
+			pageSizeCookie: "pagination.pageSize",
 
 			//可选，页大小cookie路径
-			pageSizeCookiePath : "/",
+			pageSizeCookiePath: "/",
 			
-			pageSizeSetLabel : "确定",
+			pageSizeSetLabel: "确定",
 			
 			//可选，更新回调函数
 			//@param page 待更新的页码
 			//@param pageSize 待更新的页大小
 			//@param total 待更新的总记录数
 			//@return false，不更新组件；true，更新组件
-			update : function(page, pageSize, total){},
+			update: function(page, pageSize, total){},
 			
 			//可选，标签模版
-			labelTemplate : "<span class='ui-state-disabled'>共<span class='label-rt'>-</span>条，</span>"
-							+"<span class='ui-state-disabled'>每页<span class='label-ps'>-</span>条</span><span class='ui-icon ui-icon-triangle-1-e label-pss'></span>"
-							+"<span class='ui-state-disabled'><span class='label-cp'>-</span>/<span class='label-tp'>-</span></span>",
+			labelTemplate: "共#{total}条，每页#{pageSize}条，#{page}/#{pages}",
 			
 			//可选，跳转页按钮标签
-			toPageLabel : "跳转"
+			toPageLabel: "跳转"
 		},
 		
 		_create: function()
@@ -63,14 +61,21 @@
 			
 			var thisWidget = this;
 			
-			var label = $("<div class='label' title='' />").html(this.options.labelTemplate).appendTo(this.element);
+			var labelTemplate = "<span class='label-content'>" + this.options.labelTemplate
+				.replace(/#\{total\}/g, "<span class='label-rt'>-</span>")
+				.replace(/#\{pageSize\}/g, "<span class='label-ps'>-</span>")
+				.replace(/#\{page\}/g, "<span class='label-cp'>-</span>")
+				.replace(/#\{pages\}/g, "<span class='label-tp'>-</span>")
+				+ "</span>";
+			
+			var label = $("<div class='label' title='' />").html(labelTemplate).appendTo(this.element);
 			var pss = $("<div class='ui-widget ui-widget-content ui-corner-all page-size-set' style='position: absolute; top: 0px; left: 0px;' />").appendTo(label);
 			
 			this._createPageSizeSetConent(pss, this.options.pageSizeOptions);
 			
 			pss.hover(function(){},function(){ $(this).hide(); }).hide();
 			
-			$(".label-pss", label).click(function()
+			$(".label-ps", label).click(function()
 			{
 				var pss = $(".page-size-set", thisWidget.element);
 				

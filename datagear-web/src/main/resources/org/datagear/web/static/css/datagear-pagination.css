@@ -17,11 +17,15 @@
 .pagination .label.ui-widget-content{
 	border: none;
 }
-.pagination .label .ui-state-disabled{
-	opacity: 0.5;
+.pagination .label .label-content{
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
 }
-.pagination .label .label-pss{
+.pagination .label .label-ps{
 	cursor: pointer;
+	text-decoration: underline;
+	padding-left: 0.15em;
+	padding-right: 0.15em;
 }
 .pagination .label span{
 	padding-left: 0.1em;
