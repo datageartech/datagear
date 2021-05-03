@@ -1583,7 +1583,7 @@
 			columns.push(column);
 		}
 		
-		var results = chart.getUpdateResults();
+		var results = chart.updateResults();
 		var result = chart.resultAt(results, index);
 		var data = chart.resultDatas(result);
 		
@@ -1744,7 +1744,7 @@
 	
 	chartSetting.updateChartSettingDataTableData = function(chart, chartDataSets, index, $dataTable)
 	{
-		var results = chart.getUpdateResults();
+		var results = chart.updateResults();
 		var result = chart.resultAt(results, index);
 		var data = chart.resultDatas(result);
 		

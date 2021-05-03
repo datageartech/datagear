@@ -820,11 +820,11 @@
 	{
 		var $element = this.elementJquery();
 		
-		if(chartFactory.renderedChart($element) != null)
-			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
-		
 		if(!this.statusPreRender() && !this.statusDestroyed())
 			throw new Error("Chart is not ready for render");
+		
+		if(chartFactory.renderedChart($element) != null)
+			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
 		
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
 		chartFactory.setThemeStyle($element, this.theme());
@@ -896,8 +896,8 @@
 	 */
 	chartBase.doUpdate = function(results)
 	{
-		//先保存结果，确保getUpdateResults()在渲染器的update函数作用域内可用
-		this.extValue("_updateResults", results);
+		//先保存结果，确保updateResults()在渲染器的update函数作用域内可用
+		this.updateResults(results);
 		
 		var async = this.isAsyncUpdate(results);
 		
@@ -917,11 +917,17 @@
 	};
 	
 	/**
-	 * 获取用于此次更新图表的结果数据，没有则返回null。
+	 * 获取/设置图表此次更新的结果数据。
+	 * 
+	 * @param results 可选，要设置的更新结果数据
+	 * @returns 要获取的更新结果数据，没有则返回null
 	 */
-	chartBase.getUpdateResults = function()
+	chartBase.updateResults = function(results)
 	{
-		return this.extValue("_updateResults");
+		if(results === undefined)
+			return this.extValue("_updateResults");
+		else
+			this.extValue("_updateResults", results);
 	};
 	
 	/**
@@ -1202,7 +1208,7 @@
 	{
 		var listener = this.listener();
 		if(listener && listener.update)
-		  listener.update(this, this.getUpdateResults());
+		  listener.update(this, this.updateResults());
 	};
 	
 	/**
@@ -2264,7 +2270,7 @@
 	 */
 	chartBase.eventOriginalInfo = function(chartEvent, originalChartDataSetIndex, originalResultDataIndex)
 	{
-		var result = this.resultAt(this.getUpdateResults(), originalChartDataSetIndex);
+		var result = this.resultAt(this.updateResults(), originalChartDataSetIndex);
 		var resultDatas = (result == null ? [] : this.resultDatas(result));
 		
 		var originalData = undefined;
@@ -2375,6 +2381,16 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.4.0版本的API，将在未来版本移除，已被chartBase.updateResults取代
+	/**
+	 * 获取用于此次更新图表的结果数据，没有则返回null。
+	 */
+	chartBase.getUpdateResults = function()
+	{
+		return this.updateResults();
+	};
+	// > @deprecated 兼容2.4.0版本的API，将在未来版本移除，已被chartBase.updateResults取代
 	
 	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.renderer取代
 	/**
