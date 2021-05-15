@@ -49,7 +49,7 @@ boolean readonly 是否只读操作，默认为false
 <div class="fill-parent">
 </#if>
 <#include "include/data_page_obj.ftl">
-<div id="${pageId}" class="page-grid page-grid-query">
+<div id="${pageId}" class="page-grid page-grid-data">
 	<div class="head">
 		<div class="search">
 			<#include "include/data_page_obj_searchform.ftl">

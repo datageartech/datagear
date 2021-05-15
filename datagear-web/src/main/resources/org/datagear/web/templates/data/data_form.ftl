@@ -48,7 +48,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 </head>
 <body>
 <#include "include/data_page_obj.ftl">
-<div id="${pageId}" class="page-form">
+<div id="${pageId}" class="page-form page-form-data">
 	<div class="head">
 	</div>
 	<div class="content">
