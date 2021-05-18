@@ -201,15 +201,19 @@ page_js_obj.ftl
 		var newColumns = [ $.dataTableUtil.buildCheckCloumn("<@spring.message code='select' />") ];
 		newColumns = newColumns.concat(settings.columns);
 		
-		var orderColumn = 1;
-		for(; orderColumn < newColumns.length; orderColumn++)
+		var orderColumn = -1;
+		
+		for(var i=1; i < newColumns.length; i++)
 		{
-			var column = newColumns[orderColumn];
+			var column = newColumns[i];
 			
 			if(column.visible == false || column.orderable == false)
 				continue;
 			else
+			{
+				orderColumn = i;
 				break;
+			}
 		}
 		
 		settings = $.extend(
@@ -221,7 +225,7 @@ page_js_obj.ftl
 			"paging" : false,
 			"searching" : false,
 			"select" : { style : 'os' },
-			"order": [[orderColumn, "asc"]],
+			"order": (orderColumn > -1 ? [[orderColumn, "asc"]] : []),
 			"fixedColumns": { leftColumns: 1 },
 		    "language":
 		    {

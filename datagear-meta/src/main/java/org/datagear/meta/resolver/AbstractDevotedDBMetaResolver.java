@@ -12,6 +12,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -188,28 +189,8 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	{
 		try
 		{
-			int columnCount = resultSetMetaData.getColumnCount();
-
-			Column[] columnInfos = new Column[columnCount];
-
-			for (int i = 1; i <= columnCount; i++)
-			{
-				Column column = new Column();
-
-				String columnName = getColumnName(resultSetMetaData, i);
-
-				column.setName(columnName);
-				column.setType(resultSetMetaData.getColumnType(i));
-				column.setTypeName(resultSetMetaData.getColumnTypeName(i));
-				column.setSize(resultSetMetaData.getPrecision(i));
-				column.setDecimalDigits(resultSetMetaData.getScale(i));
-				column.setNullable(DatabaseMetaData.columnNoNulls != resultSetMetaData.isNullable(i));
-				column.setAutoincrement(resultSetMetaData.isAutoIncrement(i));
-
-				columnInfos[i - 1] = column;
-			}
-
-			return columnInfos;
+			List<Column> columns = getColumnsByResultSetMetaData(cn, resultSetMetaData);
+			return columns.toArray(new Column[columns.size()]);
 		}
 		catch (SQLException e)
 		{
@@ -540,9 +521,14 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			List<Column> columns = new ArrayList<>();
-
+			
+			boolean hasColumnInMeta = false;
+			
 			while (rs.next())
 			{
+				if(hasColumnInMeta == false)
+					hasColumnInMeta = true;
+				
 				Column column = readColumn(cn, metaData, schema, tableName, mrs);
 				column = postProcessColumn(cn, metaData, schema, tableName, column);
 				addValidColumn(columns, column);
@@ -550,7 +536,22 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 				if (count != null && columns.size() == count)
 					break;
 			}
+			
+			if(!hasColumnInMeta)
+			{
+				@JDBCCompatiblity("某些类型的表（比如Oracle的同义词），不能通过DatabaseMetaData的getColumns获取列信息，所以，这里采用查询结果集的方式再次读取列信息")
+				List<Column> columnsByQuery = getColumnsByQuery(cn, metaData, catalog, schema, tableName);
+				
+				for(int i=0,len=columnsByQuery.size(); i<len; i++)
+				{
+					Column column = postProcessColumn(cn, metaData, schema, tableName, columnsByQuery.get(i));
+					addValidColumn(columns, column);
 
+					if (count != null && columns.size() == count)
+						break;
+				}
+			}
+			
 			sortColumns(columns);
 
 			return columns.toArray(new Column[columns.size()]);
@@ -563,6 +564,61 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		{
 			JdbcUtil.closeResultSet(rs);
 		}
+	}
+	
+	protected List<Column> getColumnsByQuery(Connection cn, DatabaseMetaData metaData, String catalog, String schema,
+			String tableName) throws SQLException
+	{
+		String iq = getIdentifierQuote(cn);
+		String sql = "SELECT * FROM " + iq + tableName + iq;
+		
+		Statement st = null;
+		ResultSet rs = null;
+		
+		try
+		{
+			st = cn.createStatement();
+			st.setFetchSize(1);
+			rs = st.executeQuery(sql);
+			
+			return getColumnsByResultSetMetaData(cn, rs.getMetaData());
+		}
+		finally
+		{
+			JdbcUtil.closeResultSet(rs);
+			JdbcUtil.closeStatement(st);
+		}
+	}
+
+	protected List<Column> getColumnsByResultSetMetaData(Connection cn, ResultSetMetaData resultSetMetaData) throws SQLException
+	{
+		int columnCount = resultSetMetaData.getColumnCount();
+
+		List<Column> columns = new ArrayList<Column>(columnCount);
+
+		for (int i = 1; i <= columnCount; i++)
+		{
+			Column column = new Column();
+
+			String columnName = getColumnName(resultSetMetaData, i);
+
+			column.setName(columnName);
+			column.setType(resultSetMetaData.getColumnType(i));
+			column.setTypeName(resultSetMetaData.getColumnTypeName(i));
+			column.setSize(resultSetMetaData.getPrecision(i));
+			column.setDecimalDigits(resultSetMetaData.getScale(i));
+			column.setNullable(DatabaseMetaData.columnNoNulls != resultSetMetaData.isNullable(i));
+			column.setAutoincrement(resultSetMetaData.isAutoIncrement(i));
+
+			resolveSortable(column);
+			resolveSearchableType(column);
+
+			resolveDefaultValue(column);
+
+			columns.add(column);
+		}
+
+		return columns;
 	}
 
 	/**
@@ -633,6 +689,11 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	protected void resolveSearchableType(Connection cn, DatabaseMetaData metaData, String schema, String tableName,
 			Column column)
 	{
+		resolveSearchableType(column);
+	}
+
+	protected void resolveSearchableType(Column column)
+	{
 		SearchableType searchableType = null;
 
 		int sqlType = column.getType();
@@ -646,6 +707,11 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	@JDBCCompatiblity("某些驱动程序对有些类型不支持排序（比如Oracle对于BLOB类型）")
 	protected void resolveSortable(Connection cn, DatabaseMetaData metaData, String schema, String tableName,
 			Column column)
+	{
+		resolveSortable(column);
+	}
+
+	protected void resolveSortable(Column column)
 	{
 		int sqlType = column.getType();
 
@@ -1086,6 +1152,36 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		return schema;
 	}
 
+	/**
+	 * 获取标识符引用符。
+	 * 
+	 * @param cn
+	 * @return
+	 */
+	protected String getIdentifierQuote(Connection cn)
+	{
+		String iq = null;
+		
+		try
+		{
+			iq = cn.getMetaData().getIdentifierQuoteString();
+		}
+		catch (SQLException e)
+		{
+			
+		}
+		
+		if(iq == null || iq.isEmpty())
+		{
+			@JDBCCompatiblity("出现异常、，或者不规范的JDBC驱动返回空字符串时，使用JDBC规范规定的空格字符串")
+			String iqt = " ";
+			
+			iq = iqt;
+		}
+		
+		return iq;
+	}
+	
 	protected static final Comparator<Column> COLUMN_SORT_COMPARATOR = new Comparator<Column>()
 	{
 		@Override
