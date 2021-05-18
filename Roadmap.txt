@@ -1,9 +1,9 @@
 下一版本：
 	
 	自定义数据集结果数据格式；
-	升级SpringBoot；
 	添加更多内置图表插件；
 	系统添加缓存支持；
+	ok 升级SpringBoot至2.4.5版本；
 	ok 修复数据管理功能不支持Oracle同义词的BUG；
 	ok 修复内置Oracle驱动缺少orai18n.jar导致无法访问某些版本数据库的BUG；
 	ok 修复列表页分页组件未设置英语语言时的BUG；
