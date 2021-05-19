@@ -41,13 +41,12 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	@SuppressWarnings("unchecked")
 	private List<DataSetParam> params = Collections.EMPTY_LIST;
 
-	/** 属性数据转换格式 */
-	private DataFormat propertyDataFormat = null;
+	/** 数据格式 */
+	private DataFormat dataFormat = new DataFormat();
 
 	public AbstractDataSet()
 	{
 		super();
-		setPropertyDataFormat(new DataFormat());
 	}
 
 	public AbstractDataSet(String id, String name, List<DataSetProperty> properties)
@@ -55,7 +54,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		super(id);
 		this.name = name;
 		this.properties = properties;
-		setPropertyDataFormat(new DataFormat());
 	}
 
 	@Override
@@ -108,22 +106,28 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		return getDataNameTypeByName(this.params, name);
 	}
 
-	public DataFormat getPropertyDataFormat()
+	/**
+	 * 获取数据格式。
+	 * 
+	 * @return
+	 */
+	public DataFormat getDataFormat()
 	{
-		return propertyDataFormat;
+		return dataFormat;
 	}
 
 	/**
-	 * 设置属性数据转换格式。
+	 * 设置数据格式。
 	 * <p>
-	 * 当{@linkplain DataSetProperty#getType()}不是结果数据的原始类型，而需要进行类型转换时，需要使用数据转换格式进行转换。
+	 * 当数据集属性{@linkplain #getProperties()}的{@linkplain DataSetProperty#getType()}与底层数据源（数据库、CSV、JSON等）不匹配时，
+	 * 可设置此数据格式，用于支持类型转换。
 	 * </p>
 	 * 
-	 * @param propertyDataFormat
+	 * @param dataFormat
 	 */
-	public void setPropertyDataFormat(DataFormat propertyDataFormat)
+	public void setDataFormat(DataFormat dataFormat)
 	{
-		this.propertyDataFormat = propertyDataFormat;
+		this.dataFormat = dataFormat;
 	}
 
 	@Override
@@ -352,7 +356,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 */
 	protected DataSetPropertyValueConverter createDataSetPropertyValueConverter()
 	{
-		DataFormat dataFormat = this.propertyDataFormat;
+		DataFormat dataFormat = getDataFormat();
 		if (dataFormat == null)
 			dataFormat = new DataFormat();
 

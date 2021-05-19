@@ -26,8 +26,7 @@ public class ChartDataSet
 	private DataSet dataSet;
 
 	/** 数据集属性标记映射表 */
-	@SuppressWarnings("unchecked")
-	private Map<String, Set<String>> propertySigns = Collections.EMPTY_MAP;
+	private Map<String, Set<String>> propertySigns = Collections.emptyMap();
 
 	/** 数据集别名 */
 	private String alias = "";
@@ -36,8 +35,7 @@ public class ChartDataSet
 	private boolean attachment = false;
 
 	/** 数据集参数值映射表 */
-	@SuppressWarnings("unchecked")
-	private Map<String, Object> paramValues = Collections.EMPTY_MAP;
+	private Map<String, Object> paramValues = Collections.emptyMap();
 
 	public ChartDataSet()
 	{

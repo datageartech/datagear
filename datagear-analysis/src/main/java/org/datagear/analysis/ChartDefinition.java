@@ -41,6 +41,9 @@ public class ChartDefinition extends AbstractIdentifiable
 	/** 图表更新间隔毫秒数 */
 	private int updateInterval = -1;
 
+	/**结果数据格式*/
+	private ResultDataFormat resultDataFormat = null;
+	
 	public ChartDefinition()
 	{
 		super();
@@ -136,6 +139,26 @@ public class ChartDefinition extends AbstractIdentifiable
 		this.updateInterval = updateInterval;
 	}
 
+	/**
+	 * 获取图表数据集结果数据格式。
+	 * 
+	 * @return 返回{@code null}表示未设置
+	 */
+	public ResultDataFormat getResultDataFormat()
+	{
+		return resultDataFormat;
+	}
+
+	/**
+	 * 设置图表数据集结果数据格式。
+	 * 
+	 * @param dataFormat
+	 */
+	public void setResultDataFormat(ResultDataFormat resultDataFormat)
+	{
+		this.resultDataFormat = resultDataFormat;
+	}
+	
 	/**
 	 * 获取指定索引的默认{@linkplain DataSetResult}。
 	 * 
@@ -236,5 +259,6 @@ public class ChartDefinition extends AbstractIdentifiable
 		to.setChartDataSets(from.chartDataSets);
 		to.setAttributes(from.attributes);
 		to.setUpdateInterval(from.updateInterval);
+		to.setResultDataFormat(from.resultDataFormat);
 	}
 }
