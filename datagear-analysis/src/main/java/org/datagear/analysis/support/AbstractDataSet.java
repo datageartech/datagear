@@ -20,6 +20,7 @@ import org.datagear.analysis.DataNameType;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 
@@ -131,13 +132,14 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	@Override
-	public boolean isReady(Map<String, ?> paramValues)
+	public boolean isReady(DataSetQuery query)
 	{
 		if (!hasParam())
 			return true;
 
 		List<DataSetParam> params = getParams();
-
+		Map<String, ?> paramValues = query.getParamValues();
+		
 		for (DataSetParam param : params)
 		{
 			if (param.isRequired() && !paramValues.containsKey(param.getName()))
@@ -427,21 +429,23 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 将指定文本作为Freemarker模板解析。
 	 * <p>
 	 * 注意：即使此数据集没有定义任何参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
-	 * 用户不定义数据集参数，但却定义模板内容，之后用户自行在DataSet.getResult(Map&lt;String,?&gt;)参数映射表中传递模板内容所须的参数值。
+	 * 用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值。
 	 * </p>
 	 * 
 	 * @param text
-	 * @param paramValues
+	 * @param query
 	 * @return
 	 */
-	public String resolveAsFmkTemplate(String text, Map<String, ?> paramValues)
+	public String resolveAsFmkTemplate(String text, DataSetQuery query)
 	{
 		// if (!hasParam())
 		// return text;
 
 		if (text == null)
 			return null;
-
-		return FMK_TEMPLATE_RESOLVER.resolve(text, paramValues);
+		
+		Map<String, ?> values = query.getParamValues();
+		
+		return FMK_TEMPLATE_RESOLVER.resolve(text, values);
 	}
 }

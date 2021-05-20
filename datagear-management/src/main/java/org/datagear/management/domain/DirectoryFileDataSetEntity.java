@@ -8,8 +8,8 @@
 package org.datagear.management.domain;
 
 import java.io.File;
-import java.util.Map;
 
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.util.FileUtil;
 
@@ -119,20 +119,20 @@ public interface DirectoryFileDataSetEntity extends DataSetEntity
 	/**
 	 * 将文件名作为<code>Freemarker</code>模板解析。
 	 * <p>
-	 * 实现规则应与{@linkplain AbstractDataSet#resolveAsFmkTemplate(String, Map)}一致。
+	 * 实现规则应与{@linkplain AbstractDataSet#resolveAsFmkTemplate(String, DataSetQuery)}一致。
 	 * </p>
 	 * 
 	 * @param fileName
-	 * @param paramValues
+	 * @param query
 	 * @return
 	 */
-	String resolveFileNameAsFmkTemplate(String fileName, Map<String, ?> paramValues);
+	String resolveFileNameAsFmkTemplate(String fileName, DataSetQuery query);
 
 	FileSupport FILE_SUPPORT = new FileSupport();
 
 	class FileSupport
 	{
-		public File getFile(DirectoryFileDataSetEntity entity, Map<String, ?> paramValues) throws Throwable
+		public File getFile(DirectoryFileDataSetEntity entity, DataSetQuery query) throws Throwable
 		{
 			File file = null;
 
@@ -141,7 +141,7 @@ public interface DirectoryFileDataSetEntity extends DataSetEntity
 			else if (FILE_SOURCE_TYPE_SERVER.equals(entity.getFileSourceType()))
 			{
 				// 服务器端文件名允许参数化
-				String fileName = entity.resolveFileNameAsFmkTemplate(entity.getDataSetResFileName(), paramValues);
+				String fileName = entity.resolveFileNameAsFmkTemplate(entity.getDataSetResFileName(), query);
 
 				File directory = FileUtil.getDirectory(entity.getDataSetResDirectory().getDirectory(), false);
 				file = FileUtil.getFile(directory, fileName, false);

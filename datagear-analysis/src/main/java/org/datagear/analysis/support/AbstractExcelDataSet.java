@@ -26,8 +26,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.RangeExpResolver.IndexRange;
@@ -224,14 +224,14 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	}
 
 	@Override
-	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws DataSetException
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties)
+			throws DataSetException
 	{
 		File file = null;
 
 		try
 		{
-			file = getExcelFile(paramValues);
+			file = getExcelFile(query);
 		}
 		catch (DataSetException e)
 		{
@@ -245,9 +245,9 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 		ResolvedDataSetResult result = null;
 
 		if (isXls(file))
-			result = resolveResultForXls(paramValues, file, properties, dataSetOption);
+			result = resolveResultForXls(query, file, properties);
 		else
-			result = resolveResultForXlsx(paramValues, file, properties, dataSetOption);
+			result = resolveResultForXlsx(query, file, properties);
 
 		return result;
 	}
@@ -255,17 +255,14 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	/**
 	 * 解析{@code xls}结果。
 	 * 
-	 * @param paramValues
+	 * @param query
 	 * @param file
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
-	 * @param dataSetOption
-	 *            允许为{@code null}
-	 * @return
 	 * @throws DataSetException
 	 */
-	protected ResolvedDataSetResult resolveResultForXls(Map<String, ?> paramValues, File file,
-			List<DataSetProperty> properties, DataSetOption dataSetOption) throws DataSetException
+	protected ResolvedDataSetResult resolveResultForXls(DataSetQuery query, File file,
+			List<DataSetProperty> properties) throws DataSetException
 	{
 		POIFSFileSystem poifs = null;
 		HSSFWorkbook wb = null;
@@ -277,7 +274,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 
 			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
 
-			return resolveResultForSheet(paramValues, sheet, properties, dataSetOption);
+			return resolveResultForSheet(query, sheet, properties);
 		}
 		catch (DataSetException e)
 		{
@@ -297,17 +294,15 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	/**
 	 * 解析{@code xlsx}结果。
 	 * 
-	 * @param paramValues
+	 * @param query
 	 * @param file
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
-	 * @param dataSetOption
-	 *            允许为{@code null}
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected ResolvedDataSetResult resolveResultForXlsx(Map<String, ?> paramValues, File file,
-			List<DataSetProperty> properties, DataSetOption dataSetOption) throws DataSetException
+	protected ResolvedDataSetResult resolveResultForXlsx(DataSetQuery query, File file,
+			List<DataSetProperty> properties) throws DataSetException
 	{
 		OPCPackage pkg = null;
 		XSSFWorkbook wb = null;
@@ -319,7 +314,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 
 			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
 
-			return resolveResultForSheet(paramValues, sheet, properties, dataSetOption);
+			return resolveResultForSheet(query, sheet, properties);
 		}
 		catch (DataSetException e)
 		{
@@ -339,15 +334,14 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	/**
 	 * 解析sheet结果。
 	 * 
-	 * @param paramValues
+	 * @param query
 	 * @param sheet
 	 * @param properties    允许为{@code null}，此时会自动解析
-	 * @param dataSetOption 允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResultForSheet(Map<String, ?> paramValues, Sheet sheet,
-			List<DataSetProperty> properties, DataSetOption dataSetOption) throws Throwable
+	protected ResolvedDataSetResult resolveResultForSheet(DataSetQuery query, Sheet sheet,
+			List<DataSetProperty> properties) throws Throwable
 	{
 		List<Row> excelRows = new ArrayList<Row>();
 
@@ -355,7 +349,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 			excelRows.add(row);
 
 		List<String> rawDataPropertyNames = resolvePropertyNames(excelRows);
-		List<Map<String, Object>> rawData = resolveRawData(rawDataPropertyNames, excelRows, dataSetOption);
+		List<Map<String, Object>> rawData = resolveRawData(query, rawDataPropertyNames, excelRows);
 
 		if (properties == null || properties.isEmpty())
 			properties = resolveProperties(rawDataPropertyNames, rawData);
@@ -489,14 +483,14 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	/**
 	 * 解析原始数据。
 	 * 
+	 * @param query
 	 * @param propertyNames
 	 * @param excelRows
-	 * @param dataSetOption
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<Map<String, Object>> resolveRawData(List<String> propertyNames, List<Row> excelRows,
-			DataSetOption dataSetOption) throws Throwable
+	protected List<Map<String, Object>> resolveRawData(DataSetQuery query,
+			List<String> propertyNames, List<Row> excelRows) throws Throwable
 	{
 		List<Map<String, Object>> data = new ArrayList<>();
 
@@ -505,7 +499,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 			if (isNameRow(i) || !isDataRow(i))
 				continue;
 
-			if (isReachResultDataMaxCount(dataSetOption, data.size()))
+			if (isReachResultDataMaxCount(query, data.size()))
 				break;
 
 			Map<String, Object> row = new HashMap<>();
@@ -705,9 +699,9 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * 实现方法应该返回实例级不变的文件。
 	 * </p>
 	 * 
-	 * @param paramValues
+	 * @param query
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract File getExcelFile(Map<String, ?> paramValues) throws Throwable;
+	protected abstract File getExcelFile(DataSetQuery query) throws Throwable;
 }

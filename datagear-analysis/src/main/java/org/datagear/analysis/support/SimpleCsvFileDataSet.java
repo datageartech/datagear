@@ -9,9 +9,9 @@ package org.datagear.analysis.support;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 
 /**
  * 简单CSV文件数据集。
@@ -55,7 +55,7 @@ public class SimpleCsvFileDataSet extends AbstractCsvFileDataSet
 	}
 
 	@Override
-	protected File getCsvFile(Map<String, ?> paramValues) throws Throwable
+	protected File getCsvFile(DataSetQuery query) throws Throwable
 	{
 		return this.file;
 	}

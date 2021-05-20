@@ -10,12 +10,11 @@ package org.datagear.analysis;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Map;
 
 /**
  * 数据集属性信息。
  * <p>
- * 此类描述{@linkplain DataSet#getResult(Map)}返回的{@linkplain DataSetResult#getData()}元素的属性信息。
+ * 此类描述{@linkplain DataSet#getResult(DataSetQuery)}返回的{@linkplain DataSetResult#getData()}元素的属性信息。
  * </p>
  * 
  * @author datagear@163.com

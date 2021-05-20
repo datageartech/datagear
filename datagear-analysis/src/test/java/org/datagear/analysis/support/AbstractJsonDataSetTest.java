@@ -9,11 +9,11 @@ package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.junit.Test;
 
 /**
@@ -34,7 +34,7 @@ public class AbstractJsonDataSetTest
 
 		dataSet.setDataJsonPath("path0.path1[0].path2");
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(Collections.emptyMap(), null);
+		TemplateResolvedDataSetResult result = dataSet.resolve(new DataSetQuery());
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();

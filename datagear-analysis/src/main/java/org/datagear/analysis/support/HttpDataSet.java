@@ -34,8 +34,8 @@ import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.util.IOUtil;
@@ -323,21 +323,20 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	}
 
 	@Override
-	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues, DataSetOption dataSetOption)
+	public TemplateResolvedDataSetResult resolve(DataSetQuery query)
 			throws DataSetException
 	{
-		return resolveResult(paramValues, null, dataSetOption);
+		return resolveResult(query, null);
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws DataSetException
+	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties) throws DataSetException
 	{
 		try
 		{
-			String uri = resolveTemplateUri(paramValues);
-			String headerContent = resolveTemplateHeaderContent(paramValues);
-			String requestContent = resolveTemplateRequestContent(paramValues);
+			String uri = resolveTemplateUri(query);
+			String headerContent = resolveTemplateHeaderContent(query);
+			String requestContent = resolveTemplateRequestContent(query);
 
 			ClassicHttpRequest request = createHttpRequest(uri);
 
@@ -347,7 +346,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			JsonResponseHandler responseHandler = new JsonResponseHandler();
 			responseHandler.setProperties(properties);
 			responseHandler.setResponseDataJsonPath(getResponseDataJsonPath());
-			responseHandler.setDataSetOption(dataSetOption);
+			responseHandler.setDataSetQuery(query);
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
 
@@ -405,19 +404,19 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			throw new DataSetException("Request content type [" + this.requestContentType + "] is not supported");
 	}
 
-	protected String resolveTemplateUri(Map<String, ?> paramValues) throws Throwable
+	protected String resolveTemplateUri(DataSetQuery query) throws Throwable
 	{
-		return resolveAsFmkTemplate(this.uri, paramValues);
+		return resolveAsFmkTemplate(this.uri, query);
 	}
 
-	protected String resolveTemplateHeaderContent(Map<String, ?> paramValues) throws Throwable
+	protected String resolveTemplateHeaderContent(DataSetQuery query) throws Throwable
 	{
-		return resolveAsFmkTemplate(this.headerContent, paramValues);
+		return resolveAsFmkTemplate(this.headerContent, query);
 	}
 
-	protected String resolveTemplateRequestContent(Map<String, ?> paramValues) throws Throwable
+	protected String resolveTemplateRequestContent(DataSetQuery query) throws Throwable
 	{
-		return resolveAsFmkTemplate(this.requestContent, paramValues);
+		return resolveAsFmkTemplate(this.requestContent, query);
 	}
 
 	protected ClassicHttpRequest createHttpRequest(String uri) throws Throwable
@@ -507,7 +506,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 		private String responseDataJsonPath = "";
 
-		private DataSetOption dataSetOption = null;
+		private DataSetQuery dataSetQuery = null;
 
 		public JsonResponseHandler()
 		{
@@ -540,17 +539,16 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			this.responseDataJsonPath = responseDataJsonPath;
 		}
 
-		public DataSetOption getDataSetOption()
+		public DataSetQuery getDataSetQuery()
 		{
-			return dataSetOption;
+			return dataSetQuery;
 		}
 
-		public void setDataSetOption(DataSetOption dataSetOption)
+		public void setDataSetQuery(DataSetQuery dataSetQuery)
 		{
-			this.dataSetOption = dataSetOption;
+			this.dataSetQuery = dataSetQuery;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public ResolvedDataSetResult handleResponse(ClassicHttpResponse response) throws HttpException, IOException
 		{
@@ -575,14 +573,14 @@ public class HttpDataSet extends AbstractResolvableDataSet
 				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(reader);
 				jsonDataSet.setDataJsonPath(this.responseDataJsonPath);
 
-				return jsonDataSet.resolve(Collections.EMPTY_MAP, this.dataSetOption);
+				return jsonDataSet.resolve(this.dataSetQuery);
 			}
 			else
 			{
 				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.properties, reader);
 				jsonDataSet.setDataJsonPath(this.responseDataJsonPath);
 
-				DataSetResult result = jsonDataSet.getResult(Collections.EMPTY_MAP);
+				DataSetResult result = jsonDataSet.getResult(this.dataSetQuery);
 				return new ResolvedDataSetResult(result, this.properties);
 			}
 		}
@@ -629,7 +627,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 
 		@Override
-		protected TemplateResolvedSource<Reader> getJsonReader(Map<String, ?> paramValues) throws Throwable
+		protected TemplateResolvedSource<Reader> getJsonReader(DataSetQuery query) throws Throwable
 		{
 			return new TemplateResolvedSource<>(this.responseJsonReader);
 		}

@@ -8,11 +8,11 @@
 package org.datagear.analysis.support;
 
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 
 /**
@@ -42,7 +42,7 @@ public class ProfileDataSet extends AbstractDataSet
 	}
 
 	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
+	public DataSetResult getResult(DataSetQuery query) throws DataSetException
 	{
 		throw new UnsupportedOperationException();
 	}

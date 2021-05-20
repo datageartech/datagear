@@ -20,9 +20,9 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetProperty.DataType;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.util.IOUtil;
@@ -95,17 +95,16 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	}
 
 	@Override
-	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues, DataSetOption dataSetOption)
+	public TemplateResolvedDataSetResult resolve(DataSetQuery query)
 			throws DataSetException
 	{
-		return resolveResult(paramValues, null, dataSetOption);
+		return resolveResult(query, null);
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws DataSetException
+	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties) throws DataSetException
 	{
-		String sql = resolveAsFmkTemplate(getSql(), paramValues);
+		String sql = resolveAsFmkTemplate(getSql(), query);
 
 		Connection cn = null;
 
@@ -140,7 +139,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			try
 			{
 				ResultSet rs = qrs.getResultSet();
-				ResolvedDataSetResult result = resolveResult(cn, rs, properties, dataSetOption);
+				ResolvedDataSetResult result = resolveResult(cn, rs, query, properties);
 
 				dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(), sql);
 			}
@@ -178,17 +177,16 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	 * 
 	 * @param cn
 	 * @param rs
+	 * @param query
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
-	 * @param dataSetOption
-	 *            允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws Throwable
+	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs,
+			DataSetQuery query, List<DataSetProperty> properties) throws Throwable
 	{
-		List<Map<String, ?>> rawData = resolveRawData(cn, rs, dataSetOption);
+		List<Map<String, ?>> rawData = resolveRawData(cn, rs, query);
 
 		if (properties == null || properties.isEmpty())
 			properties = resolveProperties(cn, rs, rawData);
@@ -241,11 +239,11 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	 * 
 	 * @param cn
 	 * @param rs
-	 * @param dataSetOption
+	 * @param query
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<Map<String, ?>> resolveRawData(Connection cn, ResultSet rs, DataSetOption dataSetOption)
+	protected List<Map<String, ?>> resolveRawData(Connection cn, ResultSet rs, DataSetQuery query)
 			throws Throwable
 	{
 		List<Map<String, ?>> data = new ArrayList<>();
@@ -260,7 +258,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 		while (rs.next())
 		{
-			if (isReachResultDataMaxCount(dataSetOption, data.size()))
+			if (isReachResultDataMaxCount(query, data.size()))
 				break;
 
 			Map<String, Object> row = new HashMap<>();

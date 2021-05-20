@@ -9,12 +9,12 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Map;
 
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.AbstractDataSet;
 
@@ -138,7 +138,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			setPropertySigns(chartDataSet.getPropertySigns());
 			setAlias(chartDataSet.getAlias());
 			setAttachment(chartDataSet.isAttachment());
-			setParamValues(chartDataSet.getParamValues());
+			setQuery(chartDataSet.getQuery());
 		}
 
 		@JsonIgnore
@@ -177,7 +177,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		}
 
 		@Override
-		public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
+		public DataSetResult getResult(DataSetQuery query) throws DataSetException
 		{
 			return null;
 		}

@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * 数据集查询。
  * <p>
- * 此类用于从{@linkplain DataSet}中查询结果数据。
+ * 此类用于从{@linkplain DataSet}中查询{@linkplain DataSetResult}。
  * </p>
  * 
  * @author datagear@163.com
@@ -22,22 +22,63 @@ import java.util.Map;
 public class DataSetQuery
 {
 	/** 参数值映射表 */
-	private Map<String, Object> paramValues = Collections.emptyMap();
+	private Map<String, ?> paramValues = Collections.emptyMap();
 
 	/**结果数据格式*/
 	private ResultDataFormat resultDataFormat = null;
-	
+
+	/** 结果数据最大返回数目 */
+	private int resultDataCount = -1;
+
 	public DataSetQuery()
 	{
 		super();
 	}
 
-	public Map<String, Object> getParamValues()
+	public DataSetQuery(Map<String, ?> paramValues)
+	{
+		super();
+		this.paramValues = paramValues;
+	}
+
+	public DataSetQuery(Map<String, ?> paramValues, ResultDataFormat resultDataFormat)
+	{
+		super();
+		this.paramValues = paramValues;
+		this.resultDataFormat = resultDataFormat;
+	}
+
+	public DataSetQuery(Map<String, ?> paramValues, ResultDataFormat resultDataFormat, int resultDataCount)
+	{
+		super();
+		this.paramValues = paramValues;
+		this.resultDataFormat = resultDataFormat;
+		this.resultDataCount = resultDataCount;
+	}
+
+	public DataSetQuery(DataSetQuery query)
+	{
+		super();
+		this.paramValues = query.paramValues;
+		this.resultDataFormat = query.resultDataFormat;
+		this.resultDataCount = query.resultDataCount;
+	}
+
+	public Map<String, ?> getParamValues()
 	{
 		return paramValues;
 	}
 
-	public void setParamValues(Map<String, Object> paramValues)
+	/**
+	 * 设置参数值映射表。
+	 * <p>
+	 * 参数值映射表的关键字是{@linkplain DataSet#getParam(String)}中的{@linkplain DataSetParam#getName()}，应是符合{@linkplain DataSet#isReady(DataSetQuery)}校验的，
+	 * 参数值映射表并不要求与{@linkplain #getParams()}一一对应，通常是包含相同、或者更多的项。
+	 * </p>
+	 * 
+	 * @param paramValues
+	 */
+	public void setParamValues(Map<String, ?> paramValues)
 	{
 		this.paramValues = paramValues;
 	}
@@ -63,5 +104,87 @@ public class DataSetQuery
 	public void setResultDataFormat(ResultDataFormat resultDataFormat)
 	{
 		this.resultDataFormat = resultDataFormat;
+	}
+	
+	/**
+	 * 获取结果数据最大返回数目。
+	 * 
+	 * @return {@code <0} 表示不限定数目
+	 */
+	public int getResultDataCount()
+	{
+		return resultDataCount;
+	}
+
+	public void setResultDataCount(int resultDataCount)
+	{
+		this.resultDataCount = resultDataCount;
+	}
+
+	/**
+	 * 浅复制此对象。
+	 * 
+	 * @return
+	 */
+	public DataSetQuery copy()
+	{
+		return new DataSetQuery(this);
+	}
+
+	/**
+	 * 构建{@linkplain DataSetQuery}。
+	 * 
+	 * @return
+	 */
+	public static DataSetQuery valueOf()
+	{
+		return new DataSetQuery();
+	}
+	
+	/**
+	 * 构建{@linkplain DataSetQuery}。
+	 * 
+	 * @param paramValues
+	 * @return
+	 */
+	public static DataSetQuery valueOf(Map<String, ?> paramValues)
+	{
+		return new DataSetQuery(paramValues);
+	}
+	
+	/**
+	 * 构建{@linkplain DataSetQuery}。
+	 * 
+	 * @param paramValues
+	 * @param resultDataFormat
+	 * @return
+	 */
+	public static DataSetQuery valueOf(Map<String, ?> paramValues, ResultDataFormat resultDataFormat)
+	{
+		return new DataSetQuery(paramValues, resultDataFormat);
+	}
+	
+	/**
+	 * 构建{@linkplain DataSetQuery}。
+	 * 
+	 * @param paramValues
+	 * @param resultDataFormat
+	 * @param resultDataCount
+	 * @return
+	 */
+	public static DataSetQuery valueOf(Map<String, ?> paramValues, ResultDataFormat resultDataFormat, int resultDataCount)
+	{
+		return new DataSetQuery(paramValues, resultDataFormat, resultDataCount);
+	}
+	
+	/**
+	 * 构建{@linkplain DataSetQuery}。
+	 * 
+	 * @param query
+	 * @return
+	 */
+	public static DataSetQuery valueOf(DataSetQuery query)
+	{
+		return new DataSetQuery(query);
 	}
 }

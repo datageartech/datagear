@@ -122,12 +122,12 @@ public class Dashboard extends AbstractIdentifiable
 	 * 获取此看板指定图表ID集的数据集结果。
 	 * 
 	 * @param chartIds
-	 * @param dataSetParamValuess
+	 * @param dataSetQueries
 	 * @return
 	 * @throws DataSetException
 	 */
 	public Map<String, DataSetResult[]> getDataSetResults(Set<String> chartIds,
-			Map<String, ? extends List<? extends Map<String, ?>>> dataSetParamValuess) throws DataSetException
+			Map<String, ? extends List<? extends DataSetQuery>> dataSetQueries) throws DataSetException
 	{
 		Map<String, DataSetResult[]> resultsMap = new HashMap<>();
 
@@ -139,9 +139,9 @@ public class Dashboard extends AbstractIdentifiable
 			if (!chartIds.contains(chart.getId()))
 				continue;
 
-			List<? extends Map<String, ?>> myParamValues = dataSetParamValuess.get(chart.getId());
+			List<? extends DataSetQuery> myQuery = dataSetQueries.get(chart.getId());
 
-			DataSetResult[] results = chart.getDataSetResults(myParamValues);
+			DataSetResult[] results = chart.getDataSetResults(myQuery);
 			resultsMap.put(chart.getId(), results);
 		}
 

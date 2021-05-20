@@ -15,7 +15,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URLDecoder;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.util.IOUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -164,7 +164,7 @@ public class HttpDataSetTest
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("param", "pv");
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(paramValues, null);
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
@@ -215,7 +215,7 @@ public class HttpDataSetTest
 
 		dataSet.setRequestMethod(HttpDataSet.REQUEST_METHOD_GET);
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(Collections.emptyMap(), null);
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
@@ -232,7 +232,7 @@ public class HttpDataSetTest
 
 		dataSet.setRequestMethod(HttpDataSet.REQUEST_METHOD_POST);
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(Collections.emptyMap(), null);
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
@@ -258,7 +258,7 @@ public class HttpDataSetTest
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("param", pv1);
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(paramValues, null);
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
@@ -319,7 +319,7 @@ public class HttpDataSetTest
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("param", pv1);
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(paramValues, null);
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
@@ -379,7 +379,7 @@ public class HttpDataSetTest
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("param", pv1);
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(paramValues, null);
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
@@ -429,7 +429,7 @@ public class HttpDataSetTest
 				SERVER + "/testResponseJsonPath");
 		dataSet.setResponseDataJsonPath("path0.path1[0].path2");
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(Collections.emptyMap(), null);
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();

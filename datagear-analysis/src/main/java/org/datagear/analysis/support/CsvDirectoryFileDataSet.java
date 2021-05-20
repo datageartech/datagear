@@ -9,10 +9,10 @@ package org.datagear.analysis.support;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.util.FileUtil;
 
 /**
@@ -73,7 +73,7 @@ public class CsvDirectoryFileDataSet extends AbstractCsvFileDataSet
 	}
 
 	@Override
-	protected File getCsvFile(Map<String, ?> paramValues) throws Throwable
+	protected File getCsvFile(DataSetQuery query) throws Throwable
 	{
 		File jsonFile = FileUtil.getFile(this.directory, this.fileName);
 		return jsonFile;

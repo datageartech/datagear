@@ -19,8 +19,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.util.IOUtil;
@@ -85,21 +85,21 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	/**
 	 * 解析结果。
 	 * <p>
-	 * 如果{@linkplain #getCsvReader(Map)}返回的{@linkplain TemplateResolvedSource#hasResolvedTemplate()}，
+	 * 如果{@linkplain #getCsvReader(DataSetQuery)}返回的{@linkplain TemplateResolvedSource#hasResolvedTemplate()}，
 	 * 此方法将返回{@linkplain TemplateResolvedDataSetResult}。
 	 * </p>
 	 */
 	@Override
-	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws DataSetException
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties)
+			throws DataSetException
 	{
 		TemplateResolvedSource<Reader> reader = null;
 
 		try
 		{
-			reader = getCsvReader(paramValues);
+			reader = getCsvReader(query);
 
-			ResolvedDataSetResult result = resolveResult(reader.getSource(), properties, dataSetOption);
+			ResolvedDataSetResult result = resolveResult(query, reader.getSource(), properties);
 
 			if (reader.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
@@ -128,29 +128,29 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 * 实现方法应该返回实例级不变的输入流。
 	 * </p>
 	 * 
-	 * @param paramValues
+	 * @param query
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable;
+	protected abstract TemplateResolvedSource<Reader> getCsvReader(DataSetQuery query) throws Throwable;
 
 	/**
 	 * 解析结果。
 	 * 
+	 * @param query
 	 * @param csvReader
-	 * @param properties    允许为{@code null}，此时会自动解析
-	 * @param dataSetOption 允许为{@code null}
+	 * @param properties 允许为{@code null}，此时会自动解析
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(Reader csvReader, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws Throwable
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, Reader csvReader,
+			List<DataSetProperty> properties) throws Throwable
 	{
 		CSVParser csvParser = buildCSVParser(csvReader);
 		List<CSVRecord> csvRecords = csvParser.getRecords();
 
 		List<String> rawDataPropertyNames = resolvePropertyNames(csvRecords);
-		List<Map<String, String>> rawData = resolveRawData(rawDataPropertyNames, csvRecords, dataSetOption);
+		List<Map<String, String>> rawData = resolveRawData(query, rawDataPropertyNames, csvRecords);
 
 		if (properties == null || properties.isEmpty())
 			properties = resolveProperties(rawDataPropertyNames, rawData);
@@ -254,14 +254,14 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	/**
 	 * 解析原始数据。
 	 * 
+	 * @param query
 	 * @param propertyNames
 	 * @param csvRecords
-	 * @param dataSetOption
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<Map<String, String>> resolveRawData(List<String> propertyNames, List<CSVRecord> csvRecords,
-			DataSetOption dataSetOption) throws Throwable
+	protected List<Map<String, String>> resolveRawData(DataSetQuery query, List<String> propertyNames,
+			List<CSVRecord> csvRecords) throws Throwable
 	{
 		List<Map<String, String>> data = new ArrayList<>();
 
@@ -270,7 +270,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 			if(isNameRow(i))
 				continue;
 
-			if (isReachResultDataMaxCount(dataSetOption, data.size()))
+			if (isReachResultDataMaxCount(query, data.size()))
 				break;
 
 			Map<String, String> row = new HashMap<>();

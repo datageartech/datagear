@@ -12,12 +12,12 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.junit.Test;
@@ -44,8 +44,7 @@ public class JsonDirectoryFileDataSetTest
 		JsonDirectoryFileDataSet dataSet = new JsonDirectoryFileDataSet("a", "a", properties, DIRECTORY,
 				"JsonDirectoryFileDataSetTest-0.json");
 
-		@SuppressWarnings("unchecked")
-		DataSetResult result = dataSet.getResult(Collections.EMPTY_MAP);
+		DataSetResult result = dataSet.getResult(DataSetQuery.valueOf());
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getData();
 
@@ -93,8 +92,7 @@ public class JsonDirectoryFileDataSetTest
 		JsonDirectoryFileDataSet dataSet = new JsonDirectoryFileDataSet("a", "a", properties, DIRECTORY,
 				"JsonDirectoryFileDataSetTest-0.json");
 
-		@SuppressWarnings("unchecked")
-		DataSetResult result = dataSet.getResult(Collections.EMPTY_MAP);
+		DataSetResult result = dataSet.getResult(DataSetQuery.valueOf());
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getData();
 
@@ -138,8 +136,7 @@ public class JsonDirectoryFileDataSetTest
 		JsonDirectoryFileDataSet dataSet = new JsonDirectoryFileDataSet("a", "a", DIRECTORY,
 				"JsonDirectoryFileDataSetTest-0.json");
 
-		@SuppressWarnings("unchecked")
-		ResolvedDataSetResult result = dataSet.resolve(Collections.EMPTY_MAP, null);
+		ResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();

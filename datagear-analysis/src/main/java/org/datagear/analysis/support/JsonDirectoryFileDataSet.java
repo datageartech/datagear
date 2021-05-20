@@ -9,11 +9,11 @@ package org.datagear.analysis.support;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.util.FileUtil;
 
 /**
@@ -74,7 +74,7 @@ public class JsonDirectoryFileDataSet extends AbstractJsonFileDataSet
 	}
 
 	@Override
-	protected File getJsonFile(Map<String, ?> paramValues) throws DataSetException
+	protected File getJsonFile(DataSetQuery query) throws DataSetException
 	{
 		File jsonFile = FileUtil.getFile(this.directory, this.fileName);
 		return jsonFile;

@@ -23,11 +23,9 @@ public interface ResolvableDataSet extends DataSet
 	/**
 	 * 解析{@linkplain ResolvedDataSetResult}。
 	 * 
-	 * @param paramValues
-	 * @param dataSetOption
-	 *            设置选项，允许为{@code null}
+	 * @param query
 	 * @return
 	 * @throws DataSetException
 	 */
-	ResolvedDataSetResult resolve(Map<String, ?> paramValues, DataSetOption dataSetOption) throws DataSetException;
+	ResolvedDataSetResult resolve(DataSetQuery query) throws DataSetException;
 }

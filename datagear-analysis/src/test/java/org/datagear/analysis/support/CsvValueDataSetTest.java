@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public class CsvValueDataSetTest
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("size", 12);
 
-		DataSetResult result = dataSet.getResult(paramValues);
+		DataSetResult result = dataSet.getResult(DataSetQuery.valueOf(paramValues));
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getData();
 
@@ -80,7 +81,7 @@ public class CsvValueDataSetTest
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("size", 12);
 
-		DataSetResult result = dataSet.getResult(paramValues);
+		DataSetResult result = dataSet.getResult(DataSetQuery.valueOf(paramValues));
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getData();
 
@@ -110,7 +111,7 @@ public class CsvValueDataSetTest
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("size", 12);
 
-		TemplateResolvedDataSetResult result = dataSet.resolve(paramValues, null);
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();

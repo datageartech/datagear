@@ -9,11 +9,10 @@ package org.datagear.analysis.support;
 
 import java.io.Reader;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.util.IOUtil;
 
 /**
@@ -57,16 +56,16 @@ public class JsonValueDataSet extends AbstractJsonDataSet
 	}
 
 	@Override
-	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues, DataSetOption dataSetOption)
+	public TemplateResolvedDataSetResult resolve(DataSetQuery query)
 			throws DataSetException
 	{
-		return (TemplateResolvedDataSetResult) resolveResult(paramValues, null, dataSetOption);
+		return (TemplateResolvedDataSetResult) resolveResult(query, null);
 	}
 
 	@Override
-	protected TemplateResolvedSource<Reader> getJsonReader(Map<String, ?> paramValues) throws Throwable
+	protected TemplateResolvedSource<Reader> getJsonReader(DataSetQuery query) throws Throwable
 	{
-		String json = resolveAsFmkTemplate(this.value, paramValues);
+		String json = resolveAsFmkTemplate(this.value, query);
 		return new TemplateResolvedSource<>(IOUtil.getReader(json), json);
 	}
 }

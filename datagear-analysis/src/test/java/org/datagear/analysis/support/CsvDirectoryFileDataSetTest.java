@@ -11,11 +11,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.junit.Test;
@@ -42,8 +42,7 @@ public class CsvDirectoryFileDataSetTest
 				"CsvDirectoryFileDataSetTest-0.csv");
 		dataSet.setNameRow(1);
 
-		@SuppressWarnings("unchecked")
-		DataSetResult result = dataSet.getResult(Collections.EMPTY_MAP);
+		DataSetResult result = dataSet.getResult(new DataSetQuery());
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getData();
 
@@ -83,8 +82,7 @@ public class CsvDirectoryFileDataSetTest
 				"CsvDirectoryFileDataSetTest-0.csv");
 		dataSet.setNameRow(1);
 
-		@SuppressWarnings("unchecked")
-		ResolvedDataSetResult result = dataSet.resolve(Collections.EMPTY_MAP, null);
+		ResolvedDataSetResult result = dataSet.resolve(new DataSetQuery());
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
@@ -146,8 +144,7 @@ public class CsvDirectoryFileDataSetTest
 		CsvDirectoryFileDataSet dataSet = new CsvDirectoryFileDataSet("a", "a", DIRECTORY,
 				"CsvDirectoryFileDataSetTest-0.csv");
 
-		@SuppressWarnings("unchecked")
-		ResolvedDataSetResult result = dataSet.resolve(Collections.EMPTY_MAP, null);
+		ResolvedDataSetResult result = dataSet.resolve(new DataSetQuery());
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();

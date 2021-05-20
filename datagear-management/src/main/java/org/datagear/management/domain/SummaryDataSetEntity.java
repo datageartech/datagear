@@ -9,10 +9,10 @@ package org.datagear.management.domain;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.AbstractDataSet;
 
@@ -115,7 +115,7 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 	}
 
 	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
+	public DataSetResult getResult(DataSetQuery query) throws DataSetException
 	{
 		throw new UnsupportedOperationException();
 	}

@@ -10,9 +10,9 @@ package org.datagear.analysis.support;
 import java.io.File;
 import java.io.Reader;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.util.IOUtil;
 
 /**
@@ -55,9 +55,9 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet
 	}
 
 	@Override
-	protected TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable
+	protected TemplateResolvedSource<Reader> getCsvReader(DataSetQuery query) throws Throwable
 	{
-		File file = getCsvFile(paramValues);
+		File file = getCsvFile(query);
 		return new TemplateResolvedSource<>(IOUtil.getReader(file, this.encoding));
 	}
 
@@ -67,9 +67,9 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet
 	 * 实现方法应该返回实例级不变的文件。
 	 * </p>
 	 * 
-	 * @param paramValues
+	 * @param query
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract File getCsvFile(Map<String, ?> paramValues) throws Throwable;
+	protected abstract File getCsvFile(DataSetQuery query) throws Throwable;
 }

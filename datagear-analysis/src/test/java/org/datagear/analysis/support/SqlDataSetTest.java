@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.SimpleConnectionFactory;
@@ -76,7 +77,7 @@ public class SqlDataSetTest extends DBTestSupport
 				dataSetParamValues.put("id", Long.toString(recordId));
 				dataSetParamValues.put("name", "name-for-test");
 
-				DataSetResult dataSetResult = sqlDataSet.getResult(dataSetParamValues);
+				DataSetResult dataSetResult = sqlDataSet.getResult(DataSetQuery.valueOf(dataSetParamValues));
 
 				@SuppressWarnings("unchecked")
 				List<Map<String, ?>> datas = (List<Map<String, ?>>) dataSetResult.getData();

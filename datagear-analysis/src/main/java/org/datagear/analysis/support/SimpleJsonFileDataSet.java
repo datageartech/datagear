@@ -9,10 +9,10 @@ package org.datagear.analysis.support;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 
 /**
  * 简单JSON文件数据集。
@@ -56,7 +56,7 @@ public class SimpleJsonFileDataSet extends AbstractJsonFileDataSet
 	}
 
 	@Override
-	protected File getJsonFile(Map<String, ?> paramValues) throws DataSetException
+	protected File getJsonFile(DataSetQuery query) throws DataSetException
 	{
 		return this.file;
 	}

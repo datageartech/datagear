@@ -9,11 +9,10 @@ package org.datagear.analysis.support;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
@@ -43,53 +42,50 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	}
 
 	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
+	public DataSetResult getResult(DataSetQuery query) throws DataSetException
 	{
 		List<DataSetProperty> properties = getProperties();
 
 		if (properties == null || properties.isEmpty())
 			throw new DataSetException("[getProperties()] must not be empty");
 
-		ResolvedDataSetResult result = resolveResult(paramValues, properties, null);
+		ResolvedDataSetResult result = resolveResult(query, properties);
 
 		return result.getResult();
 	}
 
 	@Override
-	public ResolvedDataSetResult resolve(Map<String, ?> paramValues, DataSetOption dataSetOption)
+	public ResolvedDataSetResult resolve(DataSetQuery query)
 			throws DataSetException
 	{
-		return resolveResult(paramValues, null, dataSetOption);
+		return resolveResult(query, null);
 	}
 
 	/**
 	 * 解析结果。
 	 * 
-	 * @param paramValues
+	 * @param query
 	 * @param properties
 	 *            允许为{@code null}/空，此时，应自动解析并设置返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}；
 	 *            如果不为{@code null}/空，直接将{@code properties}作为解析数据依据， 使用它处理结果数据，
 	 *            并设置为返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}
-	 * @param dataSetOption
-	 *            设置选项，允许为{@code null}
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected abstract ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws DataSetException;
+	protected abstract ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties) throws DataSetException;
 
 	/**
-	 * 是否有{@linkplain DataSetOption#getResultDataMaxCount()}。
+	 * 是否有{@linkplain DataSetQuery#getResultDataCount()}。
 	 * 
-	 * @param dataSetOption 允许为{@code null}
+	 * @param query 允许为{@code null}
 	 * @return
 	 */
-	protected boolean hasResultDataMaxCount(DataSetOption dataSetOption)
+	protected boolean hasResultDataCount(DataSetQuery query)
 	{
-		if (dataSetOption == null)
+		if (query == null)
 			return false;
 
-		int maxCount = dataSetOption.getResultDataMaxCount();
+		int maxCount = query.getResultDataCount();
 
 		if (maxCount < 0)
 			return false;
@@ -98,19 +94,19 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	}
 
 	/**
-	 * 给定数目是否已到达{@linkplain DataSetOption#getResultDataMaxCount()}。
+	 * 给定数目是否已到达{@linkplain DataSetQuery#getResultDataCount()}。
 	 * 
-	 * @param dataSetOption
+	 * @param query
 	 *            允许为{@code null}
 	 * @param count
 	 * @return
 	 */
-	protected boolean isReachResultDataMaxCount(DataSetOption dataSetOption, int count)
+	protected boolean isReachResultDataMaxCount(DataSetQuery query, int count)
 	{
-		if (dataSetOption == null)
+		if (query == null)
 			return false;
 
-		int maxCount = dataSetOption.getResultDataMaxCount();
+		int maxCount = query.getResultDataCount();
 
 		if (maxCount < 0)
 			return false;
@@ -121,17 +117,16 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	/**
 	 * 计算结果数据数目。
 	 * 
-	 * @param dataSetOption
-	 *            允许为{@code null}
+	 * @param query
 	 * @param defaultCount
 	 * @return
 	 */
-	protected int evalResultDataCount(DataSetOption dataSetOption, int defaultCount)
+	protected int evalResultDataCount(DataSetQuery dataSetOption, int defaultCount)
 	{
 		if (dataSetOption == null)
 			return defaultCount;
 
-		int maxCount = dataSetOption.getResultDataMaxCount();
+		int maxCount = dataSetOption.getResultDataCount();
 
 		return (maxCount < 0 ? defaultCount : Math.min(maxCount, defaultCount));
 	}

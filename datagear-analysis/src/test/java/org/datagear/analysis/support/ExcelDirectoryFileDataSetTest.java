@@ -12,13 +12,12 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.junit.Test;
@@ -46,8 +45,7 @@ public class ExcelDirectoryFileDataSetTest
 				"ExcelDirectoryFileDataSetTest-0.xlsx");
 		dataSet.setNameRow(1);
 
-		@SuppressWarnings("unchecked")
-		DataSetResult result = dataSet.getResult(Collections.EMPTY_MAP);
+		DataSetResult result = dataSet.getResult(DataSetQuery.valueOf());
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getData();
 
@@ -98,8 +96,7 @@ public class ExcelDirectoryFileDataSetTest
 				"ExcelDirectoryFileDataSetTest-0.xlsx");
 		dataSet.setNameRow(1);
 
-		@SuppressWarnings("unchecked")
-		DataSetResult result = dataSet.getResult(Collections.EMPTY_MAP);
+		DataSetResult result = dataSet.getResult(DataSetQuery.valueOf());
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getData();
 
@@ -142,7 +139,7 @@ public class ExcelDirectoryFileDataSetTest
 				"ExcelDirectoryFileDataSetTest-0.xlsx");
 		dataSet.setNameRow(1);
 
-		ResolvedDataSetResult resolvedResult = dataSet.resolve(new HashMap<>(), null);
+		ResolvedDataSetResult resolvedResult = dataSet.resolve(DataSetQuery.valueOf());
 
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) resolvedResult.getResult().getData();
@@ -217,7 +214,7 @@ public class ExcelDirectoryFileDataSetTest
 				"ExcelDirectoryFileDataSetTest-1.xls");
 		dataSet.setNameRow(1);
 
-		ResolvedDataSetResult resolvedResult = dataSet.resolve(new HashMap<>(), null);
+		ResolvedDataSetResult resolvedResult = dataSet.resolve(DataSetQuery.valueOf());
 
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) resolvedResult.getResult().getData();
@@ -294,7 +291,7 @@ public class ExcelDirectoryFileDataSetTest
 		dataSet.setDataRowExp("2,3-");
 		dataSet.setDataColumnExp("A,C-");
 
-		ResolvedDataSetResult resolvedResult = dataSet.resolve(new HashMap<>(), null);
+		ResolvedDataSetResult resolvedResult = dataSet.resolve(DataSetQuery.valueOf());
 
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) resolvedResult.getResult().getData();

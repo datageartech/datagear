@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
@@ -96,15 +96,15 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	 * </p>
 	 */
 	@Override
-	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws DataSetException
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties)
+			throws DataSetException
 	{
 		TemplateResolvedSource<Reader> reader = null;
 		try
 		{
-			reader = getJsonReader(paramValues);
+			reader = getJsonReader(query);
 
-			ResolvedDataSetResult result = resolveResult(reader.getSource(), properties, dataSetOption);
+			ResolvedDataSetResult result = resolveResult(query, reader.getSource(), properties);
 
 			if (reader.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
@@ -133,33 +133,32 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	 * 实现方法应该返回实例级不变的输入流。
 	 * </p>
 	 * 
-	 * @param paramValues
+	 * @param query
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract TemplateResolvedSource<Reader> getJsonReader(Map<String, ?> paramValues) throws Throwable;
+	protected abstract TemplateResolvedSource<Reader> getJsonReader(DataSetQuery query) throws Throwable;
 
 	/**
 	 * 解析结果。
 	 * 
+	 * @param query
 	 * @param jsonReader
 	 *            JSON输入流
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
-	 * @param dataSetOption
-	 *            允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(Reader jsonReader, List<DataSetProperty> properties,
-			DataSetOption dataSetOption) throws Throwable
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query,
+			Reader jsonReader, List<DataSetProperty> properties) throws Throwable
 	{
 		JsonNode jsonNode = getObjectMapperNonStardand().readTree(jsonReader);
 
 		if (!isLegalResultDataJsonNode(jsonNode))
 			throw new UnsupportedJsonResultDataException("Result data must be JSON object or array");
 
-		Object rawData = resolveRawData(jsonNode, getDataJsonPath(), dataSetOption);
+		Object rawData = resolveRawData(query, jsonNode, getDataJsonPath());
 
 		if (properties == null || properties.isEmpty())
 			properties = resolveProperties(rawData);
@@ -170,14 +169,14 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	/**
 	 * 解析原始数据数据。
 	 * 
+	 * @param query
 	 * @param jsonNode      允许为{@code null}
 	 * @param dataJsonPath  允许为{@code null}
-	 * @param dataSetOption 允许为{@code null}
 	 * @return
 	 * @throws ReadJsonDataPathException
 	 * @throws Throwable
 	 */
-	protected Object resolveRawData(JsonNode jsonNode, String dataJsonPath, DataSetOption dataSetOption)
+	protected Object resolveRawData(DataSetQuery query, JsonNode jsonNode, String dataJsonPath)
 			throws ReadJsonDataPathException, Throwable
 	{
 		if (jsonNode == null)
@@ -211,7 +210,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 			}
 		}
 
-		if (data != null && hasResultDataMaxCount(dataSetOption))
+		if (data != null && hasResultDataCount(query))
 		{
 			if (data instanceof Collection<?>)
 			{
@@ -220,7 +219,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 
 				for (Object ele : collection)
 				{
-					if (isReachResultDataMaxCount(dataSetOption, dataList.size()))
+					if (isReachResultDataMaxCount(query, dataList.size()))
 						break;
 
 					dataList.add(ele);
@@ -231,7 +230,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 			else if (data instanceof Object[])
 			{
 				Object[] array = (Object[]) data;
-				Object[] dataArray = new Object[evalResultDataCount(dataSetOption, array.length)];
+				Object[] dataArray = new Object[evalResultDataCount(query, array.length)];
 
 				for (int i = 0; i < dataArray.length; i++)
 				{

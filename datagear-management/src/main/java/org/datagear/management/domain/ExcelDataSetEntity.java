@@ -10,9 +10,9 @@ package org.datagear.management.domain;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractExcelDataSet;
 import org.datagear.analysis.support.ExcelDirectoryFileDataSet;
 
@@ -215,14 +215,14 @@ public class ExcelDataSetEntity extends AbstractExcelDataSet implements Director
 	}
 
 	@Override
-	public String resolveFileNameAsFmkTemplate(String fileName, Map<String, ?> paramValues)
+	public String resolveFileNameAsFmkTemplate(String fileName, DataSetQuery query)
 	{
-		return resolveAsFmkTemplate(fileName, paramValues);
+		return resolveAsFmkTemplate(fileName, query);
 	}
 
 	@Override
-	protected File getExcelFile(Map<String, ?> paramValues) throws Throwable
+	protected File getExcelFile(DataSetQuery query) throws Throwable
 	{
-		return FILE_SUPPORT.getFile(this, paramValues);
+		return FILE_SUPPORT.getFile(this, query);
 	}
 }

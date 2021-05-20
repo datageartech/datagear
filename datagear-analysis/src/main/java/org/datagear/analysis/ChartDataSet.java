@@ -14,7 +14,7 @@ import java.util.Set;
 /**
  * 图表数据集。
  * <p>
- * 此类描述图表关联的某个{@linkplain DataSet}信息。
+ * 此类描述图表关联的某个{@linkplain DataSet}、及相关设置信息。
  * </p>
  * 
  * @author datagear@163.com
@@ -34,8 +34,8 @@ public class ChartDataSet
 	/** 是否附件数据集，不用作渲染图表 */
 	private boolean attachment = false;
 
-	/** 数据集参数值映射表 */
-	private Map<String, Object> paramValues = Collections.emptyMap();
+	/**数据集查询*/
+	private DataSetQuery query = new DataSetQuery();
 
 	public ChartDataSet()
 	{
@@ -110,14 +110,14 @@ public class ChartDataSet
 		this.attachment = attachment;
 	}
 
-	public Map<String, Object> getParamValues()
+	public DataSetQuery getQuery()
 	{
-		return paramValues;
+		return query;
 	}
 
-	public void setParamValues(Map<String, Object> paramValues)
+	public void setQuery(DataSetQuery query)
 	{
-		this.paramValues = paramValues;
+		this.query = query;
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class ChartDataSet
 	 */
 	public boolean isResultReady()
 	{
-		return this.dataSet.isReady(this.paramValues);
+		return this.dataSet.isReady(this.query);
 	}
 
 	/**
@@ -140,29 +140,30 @@ public class ChartDataSet
 	 */
 	public DataSetResult getResult()
 	{
-		return this.dataSet.getResult(this.paramValues);
+		return this.dataSet.getResult(this.query);
 	}
 
 	/**
-	 * {@linkplain #getResult(Map)}是否可用。
-	 * 
+	 * {@linkplain #getResult(DataSetQuery)}是否可用。
+	 * @param query
 	 * @return
 	 */
-	public boolean isResultReady(Map<String, ?> paramValues)
+	public boolean isResultReady(DataSetQuery query)
 	{
-		return this.dataSet.isReady(paramValues);
+		return this.dataSet.isReady(query);
 	}
 
 	/**
 	 * 获取{@linkplain #getDataSet()}的{@linkplain DataSetResult}。
 	 * </p>
-	 * 调用此方法前应该确保{@linkplain #isResultReady(Map)}返回{@code true}。
+	 * 调用此方法前应该确保{@linkplain #isResultReady(DataSetQuery)}返回{@code true}。
 	 * </p>
 	 * 
+	 * @param query
 	 * @return
 	 */
-	public DataSetResult getResult(Map<String, ?> paramValues)
+	public DataSetResult getResult(DataSetQuery query)
 	{
-		return this.dataSet.getResult(paramValues);
+		return this.dataSet.getResult(query);
 	}
 }

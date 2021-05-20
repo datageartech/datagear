@@ -10,9 +10,9 @@ package org.datagear.analysis.support;
 import java.io.File;
 import java.io.Reader;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.util.IOUtil;
 
 /**
@@ -55,9 +55,9 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 	}
 
 	@Override
-	protected TemplateResolvedSource<Reader> getJsonReader(Map<String, ?> paramValues) throws Throwable
+	protected TemplateResolvedSource<Reader> getJsonReader(DataSetQuery query) throws Throwable
 	{
-		File file = getJsonFile(paramValues);
+		File file = getJsonFile(query);
 		return new TemplateResolvedSource<>(IOUtil.getReader(file, this.encoding));
 	}
 
@@ -67,9 +67,9 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 	 * 实现方法应该返回实例级不变的文件。
 	 * </p>
 	 * 
-	 * @param paramValues
+	 * @param query
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract File getJsonFile(Map<String, ?> paramValues) throws Throwable;
+	protected abstract File getJsonFile(DataSetQuery query) throws Throwable;
 }

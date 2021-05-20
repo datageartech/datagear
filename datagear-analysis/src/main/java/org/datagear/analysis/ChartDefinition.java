@@ -168,14 +168,31 @@ public class ChartDefinition extends AbstractIdentifiable
 	 */
 	public DataSetResult getDataSetResult(int index) throws DataSetException
 	{
-		if (this.chartDataSets[index].isResultReady())
-			return this.chartDataSets[index].getResult();
-		else
+		ChartDataSet chartDataSet = this.chartDataSets[index];
+		
+		if (!chartDataSet.isResultReady())
 			return null;
+		
+		if(this.resultDataFormat == null)
+		{
+			return chartDataSet.getResult();
+		}
+		else
+		{
+			DataSetQuery query = chartDataSet.getQuery();
+			if(query == null)
+				query = DataSetQuery.valueOf();
+			else
+				query = query.copy();
+			
+			query.setResultDataFormat(this.resultDataFormat);
+			
+			return chartDataSet.getResult(query);
+		}
 	}
 
 	/**
-	 * 获取默认{@linkplain DataSetResult}数组。
+	 * 获取所有默认{@linkplain DataSetResult}数组。
 	 * 
 	 * @return 如果{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady()}为{@code false}，
 	 *         返回数组对应元素将为{@code null}。
@@ -195,46 +212,55 @@ public class ChartDefinition extends AbstractIdentifiable
 	}
 
 	/**
-	 * 获取指定索引和参数的{@linkplain DataSetResult}。
+	 * 获取指定索引的{@linkplain DataSetResult}。
 	 * 
 	 * @param index
-	 * @param dataSetParamValues
+	 * @param query
 	 *            允许为{@code null}
-	 * @return 如果{@code dataSetParamValues}为{@code null}，或者{@linkplain ChartDataSet#isResultReady(Map)}为{@code false}，将返回{@code null}。
+	 * @return 如果{@code query}为{@code null}，或者{@linkplain ChartDataSet#isResultReady(DataSetQuery)}为{@code false}，将返回{@code null}。
 	 * @throws DataSetException
 	 */
-	public DataSetResult getDataSetResult(int index, Map<String, ?> dataSetParamValues) throws DataSetException
+	public DataSetResult getDataSetResult(int index, DataSetQuery query) throws DataSetException
 	{
-		if (dataSetParamValues == null)
+		if (query == null)
 			return null;
-		else if (this.chartDataSets[index].isResultReady(dataSetParamValues))
-			return this.chartDataSets[index].getResult(dataSetParamValues);
-		else
+		
+		if(query.getResultDataFormat() == null && this.resultDataFormat != null)
+		{
+			query = query.copy();
+			query.setResultDataFormat(this.resultDataFormat);
+		}
+		
+		ChartDataSet chartDataSet = this.chartDataSets[index];
+		
+		if (!chartDataSet.isResultReady(query))
 			return null;
+		
+		return chartDataSet.getResult(query);
 	}
 
 	/**
-	 * 获取指定参数的{@linkplain DataSetResult}数组。
+	 * 获取所有{@linkplain DataSetResult}数组。
 	 * 
-	 * @param dataSetParamValuess
+	 * @param queries
 	 *            允许为{@code null}
-	 * @return 如果{@code dataSetParamValuess}指定元素为{@code null}，
-	 *         或者{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady(Map)}为{@code false}，返回数组对应元素将为{@code null}。
+	 * @return 如果{@code queries}指定元素为{@code null}，
+	 *         或者{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady(DataSetQuery)}为{@code false}，返回数组对应元素将为{@code null}。
 	 * @throws DataSetException
 	 */
-	public DataSetResult[] getDataSetResults(List<? extends Map<String, ?>> dataSetParamValuess) throws DataSetException
+	public DataSetResult[] getDataSetResults(List<? extends DataSetQuery> queries) throws DataSetException
 	{
 		if (this.chartDataSets == null || this.chartDataSets.length == 0)
 			return new DataSetResult[0];
 
 		DataSetResult[] results = new DataSetResult[this.chartDataSets.length];
 
-		int pvSize = (dataSetParamValuess == null ? 0 : dataSetParamValuess.size());
+		int pvSize = (queries == null ? 0 : queries.size());
 
 		for (int i = 0; i < this.chartDataSets.length; i++)
 		{
-			Map<String, ?> dataSetParamValues = (i >= pvSize ? null : dataSetParamValuess.get(i));
-			results[i] = getDataSetResult(i, dataSetParamValues);
+			DataSetQuery query = (i >= pvSize ? null : queries.get(i));
+			results[i] = getDataSetResult(i, query);
 		}
 
 		return results;
@@ -243,7 +269,7 @@ public class ChartDefinition extends AbstractIdentifiable
 	@Override
 	public String toString()
 	{
-		return "ChartDefinition [id=" + getId() + ", name=" + name + "]";
+		return getClass().getSimpleName() + " [id=" + getId() + ", name=" + name + "]";
 	}
 
 	/**
