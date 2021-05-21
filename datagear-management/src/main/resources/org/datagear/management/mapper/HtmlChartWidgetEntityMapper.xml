@@ -20,12 +20,12 @@
 		INSERT INTO DATAGEAR_HCW_DS
 			(
 			HCW_ID, DS_ID, DS_PROPERTY_SIGNS, DS_ALIAS, DS_ATTACHMENT,
-			DS_PARAM_VALUES, DS_ORDER
+			DS_QUERY, DS_ORDER
 			)
 		VALUES
 			(
 			#{entity.widgetId}, #{entity.dataSetId}, #{entity.propertySignsJson, jdbcType=VARCHAR}, #{entity.alias, jdbcType=VARCHAR}, #{entity.attachment, jdbcType=VARCHAR},
-			#{entity.paramValuesJson, jdbcType=VARCHAR}, #{entity.order}
+			#{entity.queryJson, jdbcType=VARCHAR}, #{entity.order}
 			)
 	</insert>
 	
@@ -74,7 +74,7 @@
 			DS_PROPERTY_SIGNS AS ${_iq_}propertySignsJson${_iq_},
 			DS_ALIAS AS ${_iq_}alias${_iq_},
 			DS_ATTACHMENT AS ${_iq_}attachment${_iq_},
-			DS_PARAM_VALUES AS ${_iq_}paramValuesJson${_iq_},
+			DS_QUERY AS ${_iq_}queryJson${_iq_},
 			DS_ORDER AS ${_iq_}order${_iq_}
 		FROM
 			DATAGEAR_HCW_DS

@@ -24,9 +24,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetOption;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.CsvValueDataSet;
@@ -766,10 +766,8 @@ public class DataSetController extends AbstractSchemaConnController
 		SchemaConnectionFactory connectionFactory = new SchemaConnectionFactory(getConnectionSource(), schema);
 		dataSet.setConnectionFactory(connectionFactory);
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
-				dataSet.getParams());
-
-		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues, preview.getDataSetOption());
+		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
+		TemplateResolvedDataSetResult result = dataSet.resolve(query);
 
 		return result;
 	}
@@ -794,10 +792,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
-				dataSet.getParams());
-
-		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues, preview.getDataSetOption());
+		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
+		TemplateResolvedDataSetResult result = dataSet.resolve(query);
 
 		return result;
 	}
@@ -816,10 +812,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
-				dataSet.getParams());
-
-		ResolvedDataSetResult result = dataSet.resolve(convertedParamValues, preview.getDataSetOption());
+		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
+		ResolvedDataSetResult result = dataSet.resolve(query);
 
 		return result;
 	}
@@ -837,10 +831,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
-				dataSet.getParams());
-
-		ResolvedDataSetResult result = dataSet.resolve(convertedParamValues, preview.getDataSetOption());
+		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
+		ResolvedDataSetResult result = dataSet.resolve(query);
 
 		return result;
 	}
@@ -856,10 +848,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
-				dataSet.getParams());
-
-		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues, preview.getDataSetOption());
+		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
+		TemplateResolvedDataSetResult result = dataSet.resolve(query);
 
 		return result;
 	}
@@ -877,10 +867,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
-				dataSet.getParams());
-
-		ResolvedDataSetResult result = dataSet.resolve(convertedParamValues, preview.getDataSetOption());
+		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
+		ResolvedDataSetResult result = dataSet.resolve(query);
 
 		return result;
 	}
@@ -898,10 +886,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setHttpClient(getDataSetEntityService().getHttpClient());
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
-				dataSet.getParams());
-
-		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues, preview.getDataSetOption());
+		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
+		TemplateResolvedDataSetResult result = dataSet.resolve(query);
 
 		return result;
 	}
@@ -1148,10 +1134,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		private T dataSet;
 
-		@SuppressWarnings("unchecked")
-		private Map<String, Object> paramValues = Collections.EMPTY_MAP;
-
-		private DataSetOption dataSetOption = null;
+		private DataSetQuery query;
 
 		public AbstractDataSetPreview()
 		{
@@ -1168,24 +1151,14 @@ public class DataSetController extends AbstractSchemaConnController
 			this.dataSet = dataSet;
 		}
 
-		public Map<String, Object> getParamValues()
+		public DataSetQuery getQuery()
 		{
-			return paramValues;
+			return query;
 		}
 
-		public void setParamValues(Map<String, Object> paramValues)
+		public void setQuery(DataSetQuery query)
 		{
-			this.paramValues = paramValues;
-		}
-
-		public DataSetOption getDataSetOption()
-		{
-			return dataSetOption;
-		}
-
-		public void setDataSetOption(DataSetOption dataSetOption)
-		{
-			this.dataSetOption = dataSetOption;
+			this.query = query;
 		}
 	}
 

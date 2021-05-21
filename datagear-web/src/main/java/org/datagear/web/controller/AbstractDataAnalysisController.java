@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +28,7 @@ import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DashboardThemeSource;
-import org.datagear.analysis.DataSetParam;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.DataSetParamValueConverter;
@@ -50,15 +49,6 @@ import org.datagear.web.util.WebUtils;
  */
 public abstract class AbstractDataAnalysisController extends AbstractController
 {
-	/** 更新看板数据请求的看板ID参数名 */
-	public static final String UPDATE_DASHBOARD_PARAM_DASHBOARD_ID = "dashboardId";
-
-	/** 更新看板数据请求的图表集参数名 */
-	public static final String UPDATE_DASHBOARD_PARAM_CHART_IDS = "chartIds";
-
-	/** 更新看板数据请求的图表集参数值的参数名 */
-	public static final String UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES = "chartsParamValues";
-
 	public static final String DASHBOARD_THEME_NAME_PARAM = "theme";
 
 	public static final String WEB_CONTEXT_CONTEXT_PATH_PARAM = "";
@@ -173,7 +163,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 		return dashboardTheme;
 	}
-
+	
 	/**
 	 * 获取看板数据。
 	 * 
@@ -181,24 +171,21 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @param response
 	 * @param model
 	 * @param webContext
-	 * @param dashboardParams
+	 * @param form
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	protected Map<String, DataSetResult[]> getDashboardData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, WebContext webContext, Map<String, ?> dashboardParams) throws Exception
+			org.springframework.ui.Model model, WebContext webContext, DashboardUpdateDataForm form) throws Exception
 	{
-		String dashboardId = (String) dashboardParams.get(UPDATE_DASHBOARD_PARAM_DASHBOARD_ID);
-		Collection<String> chartIds = (Collection<String>) dashboardParams.get(UPDATE_DASHBOARD_PARAM_CHART_IDS);
-		Map<String, ? extends List<? extends Map<String, ?>>> chartsParamValues = (Map<String, ? extends List<? extends Map<String, ?>>>) dashboardParams
-				.get(UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES);
-
+		String dashboardId = form.getDashboardId();
+		List<String> chartIds = form.getChartIds();
+		Map<String, List<DataSetQuery>> chartsQueries = form.getChartQueries();
+		
 		if (StringUtil.isEmpty(dashboardId))
 			throw new IllegalInputException();
-
+		
 		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
-
 		HtmlTplDashboard dashboard = dashboardManager.get(dashboardId);
 
 		if (dashboard == null)
@@ -208,14 +195,55 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			return dashboard.getDataSetResults();
 		else
 		{
-			if (chartsParamValues == null)
-				chartsParamValues = Collections.EMPTY_MAP;
-
 			Set<String> chartIdSet = new HashSet<>(chartIds.size());
 			chartIdSet.addAll(chartIds);
 
-			return dashboard.getDataSetResults(chartIdSet, convertChartsParamValues(dashboard, chartsParamValues));
+			return dashboard.getDataSetResults(chartIdSet, convertChartDataSetQueries(dashboard, chartsQueries));
 		}
+	}
+
+	protected Map<String, List<DataSetQuery>> convertChartDataSetQueries(Dashboard dashboard,
+			Map<String, ? extends List<? extends DataSetQuery>> chartsQueries)
+	{
+		if(chartsQueries == null)
+			return Collections.emptyMap();
+		
+		Map<String, List<DataSetQuery>> re = new HashMap<String, List<DataSetQuery>>();
+		
+		for (Map.Entry<String, ? extends List<? extends DataSetQuery>> entry : chartsQueries.entrySet())
+		{
+			String chartId = entry.getKey();
+			Chart chart = dashboard.getChart(chartId);
+			
+			if(chart == null)
+				continue;
+			
+			ChartDataSet[] chartDataSets = chart.getChartDataSets();
+
+			if (chartDataSets == null || chartDataSets.length == 0)
+			{
+				re.put(entry.getKey(), Collections.emptyList());
+			}
+			else
+			{
+				List<? extends DataSetQuery> rawQueries = chartsQueries.get(chartId);
+				List<DataSetQuery> reQueries = new ArrayList<DataSetQuery>();
+				
+				if (chartDataSets != null && chartDataSets.length > 0)
+				{
+					for(int j = 0; j<chartDataSets.length; j++)
+					{
+						DataSetQuery reQuery = rawQueries.get(j);
+						reQuery = getDataSetParamValueConverter().convert(reQuery, chartDataSets[j].getDataSet(), true);
+						reQueries.add(reQuery);
+					}
+				}
+				
+				re.put(chartId, reQueries);
+			}
+		}
+		
+		return re;
 	}
 
 	protected SessionHtmlTplDashboardManager getSessionHtmlTplDashboardManagerNotNull(HttpServletRequest request)
@@ -236,41 +264,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 		return dashboardManager;
 	}
-
-	@SuppressWarnings("unchecked")
-	protected Map<String, List<? extends Map<String, ?>>> convertChartsParamValues(Dashboard dashboard,
-			Map<String, ? extends List<? extends Map<String, ?>>> chartsParamValues)
-	{
-		if (chartsParamValues == null)
-			return Collections.EMPTY_MAP;
-
-		Map<String, List<? extends Map<String, ?>>> re = new HashMap<>();
-
-		for (Map.Entry<String, ? extends List<? extends Map<String, ?>>> entry : chartsParamValues.entrySet())
-		{
-			Chart chart = dashboard.getChart(entry.getKey());
-			ChartDataSet[] chartDataSets = chart.getChartDataSets();
-
-			if (chartDataSets == null || chartDataSets.length == 0)
-				re.put(entry.getKey(), Collections.EMPTY_LIST);
-			else
-			{
-				List<? extends Map<String, ?>> paramValuess = entry.getValue();
-				List<Map<String, ?>> converteds = new ArrayList<>();
-
-				for (int i = 0; i < chartDataSets.length; i++)
-				{
-					List<DataSetParam> dataSetParams = chartDataSets[i].getDataSet().getParams();
-					converteds.add(getDataSetParamValueConverter().convert(paramValuess.get(i), dataSetParams));
-				}
-
-				re.put(entry.getKey(), converteds);
-			}
-		}
-
-		return re;
-	}
-
+	
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
 		String heartbeatURL = "/analysis/dashboard/heartbeat";
@@ -320,6 +314,53 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 				this.htmlTplDashboards = new HashMap<>();
 
 			this.htmlTplDashboards.put(dashboard.getId(), dashboard);
+		}
+	}
+	
+	public static class DashboardUpdateDataForm
+	{
+		/**更新数据的看板ID*/
+		private String dashboardId;
+		
+		/**更新数据的图表ID*/
+		private List<String> chartIds;
+		
+		/**更新数据的图表查询*/
+		private Map<String, List<DataSetQuery>> chartQueries;
+
+		public DashboardUpdateDataForm()
+		{
+			super();
+		}
+
+		public String getDashboardId()
+		{
+			return dashboardId;
+		}
+
+		public void setDashboardId(String dashboardId)
+		{
+			this.dashboardId = dashboardId;
+		}
+
+		public List<String> getChartIds()
+		{
+			return chartIds;
+		}
+
+		public void setChartIds(List<String> chartIds)
+		{
+			this.chartIds = chartIds;
+		}
+
+		public Map<String, List<DataSetQuery>> getChartQueries()
+		{
+			return chartQueries;
+		}
+
+		public void setChartQueries(Map<String, List<DataSetQuery>> chartQueries)
+		{
+			this.chartQueries = chartQueries;
 		}
 	}
 }

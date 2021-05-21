@@ -93,16 +93,14 @@
 	//----------------------------------------
 	
 	/**
-	 * 更新看板数据配置，需与后台保持一致。
+	 * 更新看板数据配置，需与后台保持一致，具体参考：
+	 * org.datagear.web.controller.AbstractDataAnalysisController.DashboardUpdateDataForm
 	 */
 	dashboardFactory.updateDashboardConfig = (dashboardFactory.updateDashboardConfig ||
 			{
-				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_DASHBOARD_ID
 				dashboardIdParamName: "dashboardId",
-				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_CHART_IDS
 				chartIdsParamName: "chartIds",
-				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES
-				chartsParamValuesParamName: "chartsParamValues"
+				chartQueriesParamName: "chartQueries"
 			});
 	
 	/**
@@ -1442,21 +1440,23 @@
 		if(charts && charts.length)
 		{
 			var chartIds = [];
-			var chartsParamValues = {};
+			var chartQueries = {};
 			
 			for(var i=0; i<charts.length; i++)
 			{
-				chartIds[i] = charts[i].id;
-				var chartDataSets = (charts[i].chartDataSets || []);
-				var myParamValuess = [];
-				for(var j=0; j<chartDataSets.length; j++)
-					myParamValuess.push(chartDataSets[j].paramValues || {});
+				var chartId = charts[i].id;
 				
-				chartsParamValues[charts[i].id] = myParamValuess;
+				var chartDataSets = (charts[i].chartDataSets || []);
+				var myQueries = [];
+				for(var j=0; j<chartDataSets.length; j++)
+					myQueries.push(chartDataSets[j].query || {});
+				
+				chartIds[i] = chartId;				
+				chartQueries[chartId] = myQueries;
 			}
 			
 			data[updateDashboardConfig.chartIdsParamName] = chartIds;
-			data[updateDashboardConfig.chartsParamValuesParamName] = chartsParamValues;
+			data[updateDashboardConfig.chartQueriesParamName] = chartQueries;
 		}
 		
 		return data;

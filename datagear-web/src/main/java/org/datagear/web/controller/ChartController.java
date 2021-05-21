@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.ChartPluginManager;
-import org.datagear.analysis.DataSetParam;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
@@ -384,10 +384,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, DataSetResult[]> showData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestBody Map<String, ?> paramData) throws Exception
+			org.springframework.ui.Model model, @RequestBody DashboardUpdateDataForm form) throws Exception
 	{
 		WebContext webContext = createWebContext(request);
-		return getDashboardData(request, response, model, webContext, paramData);
+		return getDashboardData(request, response, model, webContext, form);
 	}
 
 	/**
@@ -478,14 +478,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		{
 			for (ChartDataSetVO vo : chartDataSetVOs)
 			{
-				List<DataSetParam> params = vo.getDataSet().getParams();
-
-				if (params != null && !params.isEmpty())
-				{
-					Map<String, Object> paramValues = getDataSetParamValueConverter().convert(vo.getParamValues(),
-							params);
-					vo.setParamValues(paramValues);
-				}
+				DataSetQuery query = vo.getQuery();
+				query = getDataSetParamValueConverter().convert(query, vo.getDataSet());
+				vo.setQuery(query);
 			}
 		}
 	}

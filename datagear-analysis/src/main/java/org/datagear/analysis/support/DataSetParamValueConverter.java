@@ -8,12 +8,14 @@
 package org.datagear.analysis.support;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataNameType;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetParam.DataType;
+import org.datagear.analysis.DataSetQuery;
 
 /**
  * {@linkplain DataSetParam}值转换器。
@@ -26,6 +28,46 @@ public class DataSetParamValueConverter extends DataValueConverter
 	public DataSetParamValueConverter()
 	{
 		super();
+	}
+	
+	/**
+	 * 将{@linkplain DataSetQuery#getParamValues()}转换为匹配{@linkplain DataSet#getParams()}类型的映射表，
+	 * 并返回一个新的{@linkplain DataSetQuery}。
+	 * 
+	 * @param query
+	 * @param dataSet
+	 * @return 当{@code query}为{@code null}时 ，将返回{@code null}
+	 */
+	public DataSetQuery convert(DataSetQuery query, DataSet dataSet)
+	{
+		return convert(query, dataSet, false);
+	}
+	
+	/**
+	 * 将{@linkplain DataSetQuery#getParamValues()}转换为匹配{@linkplain DataSet#getParams()}类型的映射表，
+	 * 并返回一个新的{@linkplain DataSetQuery}。
+	 * 
+	 * @param query 允许为{@code null}
+	 * @param dataSet
+	 * @param returnNonNull
+	 * @return 当{@code query}为{@code null}且{@code returnNonNull}为{@code false}时 ，将返回{@code null}
+	 */
+	public DataSetQuery convert(DataSetQuery query, DataSet dataSet, boolean returnNonNull)
+	{
+		if(query == null)
+		{
+			return (returnNonNull ? DataSetQuery.valueOf() : null);
+		}
+		
+		DataSetQuery reQuery = query.copy();
+		
+		Map<String, ?> reParamValues = reQuery.getParamValues();
+		List<DataSetParam> dataSetParams = dataSet.getParams();
+		
+		reParamValues = convert(reParamValues, dataSetParams);
+		reQuery.setParamValues(reParamValues);
+		
+		return reQuery;
 	}
 
 	/**

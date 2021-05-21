@@ -20,6 +20,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
@@ -313,7 +314,7 @@ public class HtmlChartWidgetEntityServiceImpl
 		chartDataSet.setPropertySigns(toPropertySigns(relation.getPropertySignsJson()));
 		chartDataSet.setAlias(relation.getAlias());
 		chartDataSet.setAttachment(relation.isAttachment());
-		chartDataSet.setParamValues(toParamValues(relation.getParamValuesJson()));
+		chartDataSet.setQuery(toDataSetQuery(relation.getQueryJson()));
 
 		return chartDataSet;
 	}
@@ -359,17 +360,17 @@ public class HtmlChartWidgetEntityServiceImpl
 		return propertySigns;
 	}
 
-	@SuppressWarnings("unchecked")
-	protected Map<String, Object> toParamValues(String json)
+	protected DataSetQuery toDataSetQuery(String json)
 	{
-		if (StringUtil.isEmpty(json))
-			return Collections.EMPTY_MAP;
+		DataSetQuery query = null;
+		
+		if (!StringUtil.isEmpty(json))
+			query = JsonSupport.parse(json, DataSetQuery.class, null);
+		
+		if (query == null)
+			query = DataSetQuery.valueOf();
 
-		Map<String, Object> paramValues = JsonSupport.parse(json, Map.class, null);
-		if (paramValues == null)
-			paramValues = Collections.EMPTY_MAP;
-
-		return paramValues;
+		return query;
 	}
 
 	protected HtmlChartPlugin getHtmlChartPlugin(String id)
@@ -394,14 +395,14 @@ public class HtmlChartWidgetEntityServiceImpl
 			ChartDataSet chartDataSet = chartDataSets[i];
 
 			String propertySignsJson = JsonSupport.generate(chartDataSet.getPropertySigns(), "");
-			String paramValuesJson = JsonSupport.generate(chartDataSet.getParamValues(), "");
+			String queryJson = JsonSupport.generate(chartDataSet.getQuery(), "");
 
 			WidgetDataSetRelation relation = new WidgetDataSetRelation(obj.getId(), chartDataSet.getDataSet().getId(),
 					i + 1);
 			relation.setPropertySignsJson(propertySignsJson);
 			relation.setAlias(chartDataSet.getAlias());
 			relation.setAttachment(chartDataSet.isAttachment());
-			relation.setParamValuesJson(paramValuesJson);
+			relation.setQueryJson(queryJson);
 
 			list.add(relation);
 		}
@@ -409,6 +410,12 @@ public class HtmlChartWidgetEntityServiceImpl
 		return list;
 	}
 
+	/**
+	 * {@linkplain ChartDataSet}持久化值类型。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
 	public static class WidgetDataSetRelation
 	{
 		private String widgetId;
@@ -421,7 +428,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		private boolean attachment;
 
-		private String paramValuesJson;
+		private String queryJson;
 
 		private int order;
 
@@ -488,14 +495,14 @@ public class HtmlChartWidgetEntityServiceImpl
 			this.attachment = attachment;
 		}
 
-		public String getParamValuesJson()
+		public String getQueryJson()
 		{
-			return paramValuesJson;
+			return queryJson;
 		}
 
-		public void setParamValuesJson(String paramValuesJson)
+		public void setQueryJson(String queryJson)
 		{
-			this.paramValuesJson = paramValuesJson;
+			this.queryJson = queryJson;
 		}
 
 		public int getOrder()

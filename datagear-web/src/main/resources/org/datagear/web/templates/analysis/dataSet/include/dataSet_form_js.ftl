@@ -643,7 +643,7 @@ po.previewOptions.url = "...";
 		$panel.position({ my : "right top", at : "left+5 top", of : po.element(".workspace-operation-wrapper")});
 	};
 	
-	po.resultDataMaxCountDefault = 100;
+	po.resultDataCountDefault = 100;
 	
 	//预览设置项
 	po.previewOptions =
@@ -654,8 +654,7 @@ po.previewOptions.url = "...";
 		data:
 		{
 			dataSet: {},
-			paramValues: {},
-			dataSetOption: { resultDataMaxCount: po.resultDataMaxCountDefault }
+			query: { resultDataCount: po.resultDataCountDefault }
 		},
 		//预览操作前置回调函数，返回false阻止
 		beforePreview: function(){},
@@ -672,9 +671,9 @@ po.previewOptions.url = "...";
 		success: function(previewResponse){}
 	};
 	
-	po.resultDataMaxCountVal = function(val)
+	po.resultDataCountVal = function(val)
 	{
-		var $input = po.element(".resultDataMaxCountInput");
+		var $input = po.element(".resultDataCountInput");
 		
 		if(val === undefined)
 		{
@@ -682,7 +681,7 @@ po.previewOptions.url = "...";
 			var validVal = val;
 			
 			if(isNaN(validVal))
-				validVal = po.resultDataMaxCountDefault;
+				validVal = po.resultDataCountDefault;
 			else if(validVal < 1)
 				validVal = 1;
 			
@@ -741,7 +740,7 @@ po.previewOptions.url = "...";
 						po.destroyPreviewResultTable();
 						
 						po.previewOptions.data.dataSet.params = po.getFormDataSetParams();
-						po.previewOptions.data.paramValues = chartFactory.chartSetting.getDataSetParamValueObj(this);
+						po.previewOptions.data.query.paramValues = chartFactory.chartSetting.getDataSetParamValueObj(this);
 						
 						po.executePreview(previewValueModified);
 					}
@@ -752,7 +751,7 @@ po.previewOptions.url = "...";
 				po.destroyPreviewResultTable();
 				
 				po.previewOptions.data.dataSet.params = [];
-				po.previewOptions.data.paramValues = {};
+				po.previewOptions.data.query.paramValues = {};
 				
 				po.executePreview(previewValueModified);
 			}
@@ -779,8 +778,8 @@ po.previewOptions.url = "...";
 				$panel.hide();
 		});
 		
-		po.resultDataMaxCountVal(po.resultDataMaxCountDefault);
-		po.element(".resultDataMaxCountInput").on("keydown", function(e)
+		po.resultDataCountVal(po.resultDataCountDefault);
+		po.element(".resultDataCountInput").on("keydown", function(e)
 		{
 			//防止提交数据集表单
 			if(e.keyCode == $.ui.keyCode.ENTER)
@@ -816,8 +815,8 @@ po.previewOptions.url = "...";
 		var table = po.previewResultTableElement();
 		var initDataTable = !$.isDatatTable(table);
 		
-		po.previewOptions.data.dataSetOption.resultDataMaxCount = po.resultDataMaxCountVal();
-
+		po.previewOptions.data.query.resultDataCount = po.resultDataCountVal();
+		
 		$.ajaxJson(
 		{
 			url : po.previewOptions.url,

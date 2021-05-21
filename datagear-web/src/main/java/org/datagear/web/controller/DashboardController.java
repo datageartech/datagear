@@ -986,16 +986,17 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @param request
 	 * @param response
 	 * @param model
-	 * @param id
+	 * @param form
+	 * @return
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, DataSetResult[]> showData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestBody Map<String, ?> paramData) throws Exception
+			org.springframework.ui.Model model, @RequestBody DashboardUpdateDataForm form) throws Exception
 	{
 		WebContext webContext = createWebContext(request);
-		return getDashboardData(request, response, model, webContext, paramData);
+		return getDashboardData(request, response, model, webContext, form);
 	}
 
 	/**

@@ -308,7 +308,7 @@
 	chartSetting.renderDataSetParamValueFormInputText = function($parent, dataSetParam, value, chartTheme)
 	{
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
-			.attr("value", (value || "")).appendTo($parent);
+			.attr("value", (value == null ? "" : value)).appendTo($parent);
 		
 		if((dataSetParam.required+"") == "true")
 			$input.attr("dg-validation-required", "true");

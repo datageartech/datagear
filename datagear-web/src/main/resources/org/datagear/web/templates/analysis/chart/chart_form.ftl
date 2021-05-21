@@ -314,7 +314,7 @@ readonly 是否只读操作，允许为null
 				"propertySigns": propertySigns,
 				"alias": alias,
 				"attachment": attachment,
-				"paramValues": paramValues
+				"query": { "paramValues": paramValues }
 			});
 		});
 		
@@ -452,7 +452,8 @@ readonly 是否只读操作，允许为null
 		{
 			var $pvButton = $("<button type='button' class='dataSetParamValueButton ui-button ui-corner-all ui-widget'><@spring.message code='chart.chartDataSet.paramValue' /></button>")
 								.appendTo($settingDiv);
-			$pvButton.data("dataSetParams", dataSet.params).data("paramValues", (chartDataSet.paramValues || {}));
+			$pvButton.data("dataSetParams", dataSet.params).data("paramValues",
+					(chartDataSet.query && chartDataSet.query.paramValues ? chartDataSet.query.paramValues : {}));
 			
 			$pvButton.click(function(event)
 			{
