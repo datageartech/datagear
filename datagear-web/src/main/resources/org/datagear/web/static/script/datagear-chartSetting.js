@@ -1344,7 +1344,7 @@
 					{
 						$("button", $panelFoot).click();
 					},
-					paramValues: chartDataSets[i].paramValues,
+					paramValues: chart.dataSetParamValues(i),
 					render: function()
 					{
 						chartSetting.getDataSetParamValueFormFoot(this).hide();
@@ -1382,7 +1382,7 @@
 					$thisButton.removeClass("dg-param-value-form-invalid");
 					
 					for(var i=0; i<paramValuess.length; i++)
-						chart.setDataSetParamValues(paramValuess[i].index, paramValuess[i].paramValues);
+						chart.dataSetParamValues(paramValuess[i].index, paramValuess[i].paramValues);
 					
 					chartSetting.closeChartSettingParamPanel(chart);
 					chart.refreshData();
@@ -1401,7 +1401,7 @@
 				var chartDataSetIndex = $(this).data("chartDataSetIndex");
 				var $form = chartSetting.getDataSetParamValueForm(this);
 				
-				chartSetting.setDataSetParamValueObj($form, chartDataSets[chartDataSetIndex].paramValues);
+				chartSetting.setDataSetParamValueObj($form, chart.dataSetParamValues(chartDataSetIndex));
 			});
 		}
 		

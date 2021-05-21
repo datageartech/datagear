@@ -393,6 +393,19 @@
 		this.name = (this.name || "");
 		this.chartDataSets = (this.chartDataSets || []);
 		this.updateInterval = (this.updateInterval == null ? -1 : this.updateInterval);
+		for(var i=0; i<this.chartDataSets.length; i++)
+		{
+			var cds = this.chartDataSets[i];
+			cds.propertySigns = (cds.propertySigns || {});
+			cds.alias = (cds.alias == null ?  "" : cds.alias);
+			cds.attachment = (cds.attachment == true ? true : false);
+			cds.query = (cds.query || {});
+			cds.query.paramValues = (cds.query.paramValues || {});
+			
+			// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+			cds.paramValues = cds.query.paramValues;
+			// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+		}
 		
 		this._clearExtValue();
 		
@@ -1411,7 +1424,7 @@
 			if(!dataSet.params || dataSet.params.length == 0)
 				continue;
 			
-			var paramValues = (chartDataSets[i].paramValues || {});
+			var paramValues = chartDataSets[i].query.paramValues;
 			
 			for(var j=0; j<dataSet.params.length; j++)
 			{
@@ -1436,27 +1449,29 @@
 	{
 		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
+		if(chartDataSet == null)
+			throw new Error("ChartDataSet not found for : " + chartDataSet);
+		
 		//参数索引
 		if(typeof(name) == "number")
 		{
 			var dataSet = chartDataSet.dataSet;
 			
 			if(!dataSet.params || dataSet.params.length <= name)
-				throw new Error("No chart data set param defined for index: "+name);
+				throw new Error("No data set param defined at index : "+name);
 			
 			name = dataSet.params[name].name;
 		}
 		
-		if(chartDataSet.paramValues == null)
-			chartDataSet.paramValues = {};
+		var paramValues = chartDataSet.query.paramValues;
 		
 		if(chartDataSet._originalParamValues == null)
-			chartDataSet._originalParamValues = $.extend({}, chartDataSet.paramValues);
+			chartDataSet._originalParamValues = $.extend({}, paramValues);
 		
 		if(value === undefined)
-			return chartDataSet.paramValues[name];
+			return paramValues[name];
 		else
-			chartDataSet.paramValues[name] = value;
+			paramValues[name] = value;
 	};
 	
 	/**
@@ -1469,16 +1484,24 @@
 	{
 		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
-		if(chartDataSet.paramValues == null)
-			chartDataSet.paramValues = {};
+		if(chartDataSet == null)
+			throw new Error("ChartDataSet not found for : " + chartDataSet);
+		
+		var paramValues = chartDataSet.query.paramValues;
 		
 		if(chartDataSet._originalParamValues == null)
-			chartDataSet._originalParamValues = $.extend({}, chartDataSet.paramValues);
+			chartDataSet._originalParamValues = $.extend({}, paramValues);
 		
 		if(paramValuesObj === undefined)
-			return chartDataSet.paramValues;
+			return paramValues;
 		else
-			chartDataSet.paramValues = paramValuesObj;
+		{
+			chartDataSet.query.paramValues = paramValuesObj;
+			
+			// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+			chartDataSet.paramValues = chartDataSet.query.paramValues;
+			// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+		}
 	};
 	
 	/**
@@ -1490,10 +1513,17 @@
 	{
 		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
+		if(chartDataSet == null)
+			throw new Error("ChartDataSet not found for : " + chartDataSet);
+		
 		if(chartDataSet._originalParamValues == null)
 			return;
 		
-		chartDataSet.paramValues = $.extend({}, chartDataSet._originalParamValues);
+		chartDataSet.query.paramValues = $.extend({}, chartDataSet._originalParamValues);
+		
+		// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+		chartDataSet.paramValues = chartDataSet.query.paramValues;
+		// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
 	};
 	
 	/**
