@@ -187,4 +187,18 @@ public class DataSetQuery
 	{
 		return new DataSetQuery(query);
 	}
+
+	/**
+	 * 拷贝。
+	 * 
+	 * @param query 允许为{@code null}
+	 * @return 如果{@code query}为{@code null}，将返回{@code new DataSetQuery()}。
+	 */
+	public static DataSetQuery copy(DataSetQuery query)
+	{
+		if(query == null)
+			return DataSetQuery.valueOf();
+		
+		return query.copy();
+	}
 }

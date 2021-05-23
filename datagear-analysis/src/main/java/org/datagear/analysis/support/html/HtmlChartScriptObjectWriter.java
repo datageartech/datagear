@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.datagear.analysis.ChartDataSet;
-import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetQuery;
@@ -107,13 +106,10 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	{
 		public HtmlChartJson(HtmlChart htmlChart, String renderContextVarName, String pluginVarName)
 		{
-			super();
-			ChartDefinition.copy(htmlChart, this);
+			super(htmlChart);
 			setChartDataSets(ChartDataSetJson.valuesOf(htmlChart.getChartDataSets()));
 			setPlugin(new RefHtmlChartPlugin(pluginVarName));
 			setRenderContext(new RefRenderContext(renderContextVarName));
-			setElementId(htmlChart.getElementId());
-			setVarName(htmlChart.getVarName());
 		}
 
 		@JsonIgnore

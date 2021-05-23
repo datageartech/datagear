@@ -21,8 +21,10 @@ import org.datagear.analysis.RenderContext;
  */
 public class HtmlChart extends Chart
 {
+	/** 图表的HTML元素ID */
 	private String elementId;
 
+	/** 图表JS变量名 */
 	private String varName;
 
 	public HtmlChart()
@@ -44,6 +46,11 @@ public class HtmlChart extends Chart
 		super(chartDefinition, plugin, renderContext);
 		this.elementId = elementId;
 		this.varName = varName;
+	}
+
+	public HtmlChart(HtmlChart chart)
+	{
+		this(chart, chart.getPlugin(), chart.getRenderContext(), chart.elementId, chart.varName);
 	}
 
 	@Override

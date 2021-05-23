@@ -19,6 +19,11 @@ public class DataFormat implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * 默认数据格式对象，它是一个不可变对象。
+	 */
+	public static final DataFormat DEFAULT_DATA_FORMAT = new DefaultDataFormat();
+
 	public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 
 	public static final String DEFAULT_TIME_FORMAT = "hh:mm:ss";
@@ -143,5 +148,43 @@ public class DataFormat implements Serializable
 		return getClass().getSimpleName() + " [dateFormat=" + dateFormat + ", timeFormat=" + timeFormat
 				+ ", timestampFormat="
 				+ timestampFormat + ", numberFormat=" + numberFormat + "]";
+	}
+
+	private static final class DefaultDataFormat extends DataFormat
+	{
+		private static final long serialVersionUID = 1L;
+
+		public DefaultDataFormat()
+		{
+			super();
+			super.setDateFormat(DEFAULT_DATE_FORMAT);
+			super.setTimeFormat(DEFAULT_TIME_FORMAT);
+			super.setTimestampFormat(DEFAULT_TIMESTAMP_FORMAT);
+			super.setNumberFormat(DEFAULT_NUMBER_FORMAT);
+		}
+
+		@Override
+		public void setDateFormat(String dateFormat)
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setTimeFormat(String timeFormat)
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setTimestampFormat(String timestampFormat)
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setNumberFormat(String numberFormat)
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 }

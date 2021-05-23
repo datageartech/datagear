@@ -56,6 +56,14 @@ public class ChartDefinition extends AbstractIdentifiable
 		this.chartDataSets = chartDataSets;
 	}
 
+	public ChartDefinition(ChartDefinition chartDefinition)
+	{
+		this(chartDefinition.getId(), chartDefinition.name, chartDefinition.chartDataSets);
+		this.attributes = chartDefinition.attributes;
+		this.updateInterval = chartDefinition.updateInterval;
+		this.resultDataFormat = chartDefinition.resultDataFormat;
+	}
+
 	public String getName()
 	{
 		return name;
@@ -179,12 +187,7 @@ public class ChartDefinition extends AbstractIdentifiable
 		}
 		else
 		{
-			DataSetQuery query = chartDataSet.getQuery();
-			if(query == null)
-				query = DataSetQuery.valueOf();
-			else
-				query = query.copy();
-			
+			DataSetQuery query = DataSetQuery.copy(chartDataSet.getQuery());
 			query.setResultDataFormat(this.resultDataFormat);
 			
 			return chartDataSet.getResult(query);
@@ -215,15 +218,14 @@ public class ChartDefinition extends AbstractIdentifiable
 	 * 获取指定索引的{@linkplain DataSetResult}。
 	 * 
 	 * @param index
-	 * @param query
-	 *            允许为{@code null}
-	 * @return 如果{@code query}为{@code null}，或者{@linkplain ChartDataSet#isResultReady(DataSetQuery)}为{@code false}，将返回{@code null}。
+	 * @param query 允许为{@code null}
+	 * @return 如果{@linkplain ChartDataSet#isResultReady(DataSetQuery)}为{@code false}，将返回{@code null}。
 	 * @throws DataSetException
 	 */
 	public DataSetResult getDataSetResult(int index, DataSetQuery query) throws DataSetException
 	{
 		if (query == null)
-			return null;
+			query = DataSetQuery.valueOf();
 		
 		if(query.getResultDataFormat() == null && this.resultDataFormat != null)
 		{
@@ -242,10 +244,8 @@ public class ChartDefinition extends AbstractIdentifiable
 	/**
 	 * 获取所有{@linkplain DataSetResult}数组。
 	 * 
-	 * @param queries
-	 *            允许为{@code null}
-	 * @return 如果{@code queries}指定元素为{@code null}，
-	 *         或者{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady(DataSetQuery)}为{@code false}，返回数组对应元素将为{@code null}。
+	 * @param queries 允许为{@code null}，或者元素为{@code null}
+	 * @return 如果{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady(DataSetQuery)}为{@code false}，返回数组对应元素将为{@code null}。
 	 * @throws DataSetException
 	 */
 	public DataSetResult[] getDataSetResults(List<? extends DataSetQuery> queries) throws DataSetException
@@ -270,21 +270,5 @@ public class ChartDefinition extends AbstractIdentifiable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [id=" + getId() + ", name=" + name + "]";
-	}
-
-	/**
-	 * 拷贝属性。
-	 * 
-	 * @param from
-	 * @param to
-	 */
-	public static void copy(ChartDefinition from, ChartDefinition to)
-	{
-		to.setId(from.getId());
-		to.setName(from.name);
-		to.setChartDataSets(from.chartDataSets);
-		to.setAttributes(from.attributes);
-		to.setUpdateInterval(from.updateInterval);
-		to.setResultDataFormat(from.resultDataFormat);
 	}
 }

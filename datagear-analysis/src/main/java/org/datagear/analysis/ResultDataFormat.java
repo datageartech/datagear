@@ -24,32 +24,32 @@ public class ResultDataFormat implements Serializable
 	/**
 	 * 格式化类型：数值，表示格式化为数值
 	 */
-	public static final String FORMAT_TYPE_NUMBER = "NUMBER";
+	public static final String TYPE_NUMBER = "NUMBER";
 
 	/**
 	 * 格式化类型：字符串，表示格式化为字符串
 	 */
-	public static final String FORMAT_TYPE_STRING = "STRING";
+	public static final String TYPE_STRING = "STRING";
 
 	/**
 	 * 格式化类型：无，表示不格式化，保持原类型
 	 */
-	public static final String FORMAT_TYPE_NONE = "NONE";
+	public static final String TYPE_NONE = "NONE";
 
-	/**日期格式化类型*/
-	private String dateFormatType = FORMAT_TYPE_NONE;
+	/** 日期格式化类型 */
+	private String dateType = TYPE_NONE;
 
 	/** 日期格式 */
 	private String dateFormat = DataFormat.DEFAULT_DATE_FORMAT;
 	
-	/**时间格式化类型*/
-	private String timeFormatType = FORMAT_TYPE_NONE;
+	/** 时间格式化类型 */
+	private String timeType = TYPE_NONE;
 
 	/** 时间格式 */
 	private String timeFormat = DataFormat.DEFAULT_TIME_FORMAT;
 
-	/**时间戳格式化类型*/
-	private String timestampFormatType = FORMAT_TYPE_NONE;
+	/** 时间戳格式化类型 */
+	private String timestampType = TYPE_NONE;
 
 	/** 时间戳格式 */
 	private String timestampFormat = DataFormat.DEFAULT_TIMESTAMP_FORMAT;
@@ -59,20 +59,21 @@ public class ResultDataFormat implements Serializable
 		super();
 	}
 
+	public String getDateType()
+	{
+		return dateType;
+	}
+
+	public void setDateType(String dateType)
+	{
+		this.dateType = dateType;
+	}
+
 	/**
-	 * 获取日期格式化类型，。
+	 * 获取当{@linkplain #getDateType()}为{@linkplain #TYPE_STRING}时的日期格式。
+	 * 
 	 * @return
 	 */
-	public String getDateFormatType()
-	{
-		return dateFormatType;
-	}
-
-	public void setDateFormatType(String dateFormatType)
-	{
-		this.dateFormatType = dateFormatType;
-	}
-
 	public String getDateFormat()
 	{
 		return dateFormat;
@@ -83,16 +84,21 @@ public class ResultDataFormat implements Serializable
 		this.dateFormat = dateFormat;
 	}
 
-	public String getTimeFormatType()
+	public String getTimeType()
 	{
-		return timeFormatType;
+		return timeType;
 	}
 
-	public void setTimeFormatType(String timeFormatType)
+	public void setTimeType(String timeType)
 	{
-		this.timeFormatType = timeFormatType;
+		this.timeType = timeType;
 	}
 
+	/**
+	 * 获取当{@linkplain #getTimeType()}为{@linkplain #TYPE_STRING}时的时间格式。
+	 * 
+	 * @return
+	 */
 	public String getTimeFormat()
 	{
 		return timeFormat;
@@ -103,16 +109,21 @@ public class ResultDataFormat implements Serializable
 		this.timeFormat = timeFormat;
 	}
 
-	public String getTimestampFormatType()
+	public String getTimestampType()
 	{
-		return timestampFormatType;
+		return timestampType;
 	}
 
-	public void setTimestampFormatType(String timestampFormatType)
+	public void setTimestampType(String timestampType)
 	{
-		this.timestampFormatType = timestampFormatType;
+		this.timestampType = timestampType;
 	}
 
+	/**
+	 * 获取当{@linkplain #getTimestampType()}为{@linkplain #TYPE_STRING}时的时间戳格式。
+	 * 
+	 * @return
+	 */
 	public String getTimestampFormat()
 	{
 		return timestampFormat;

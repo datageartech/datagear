@@ -81,8 +81,7 @@ public interface DataSet extends Identifiable
 	 * 返回结果中的数据项应已转换为与{@linkplain #getProperties()}的{@linkplain DataSetProperty#getType()}类型一致。
 	 * </p>
 	 * 
-	 * @param query
-	 *            应是已通过{@linkplain #isReady(DataSetQuery)}校验的
+	 * @param query 应是已通过{@linkplain #isReady(DataSetQuery)}校验的
 	 * @return
 	 * @throws DataSetException
 	 */

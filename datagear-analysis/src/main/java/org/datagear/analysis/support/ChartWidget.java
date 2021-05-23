@@ -83,8 +83,7 @@ public class ChartWidget extends ChartDefinition
 
 	protected ChartDefinition buildChartDefinition(RenderContext renderContext) throws RenderException
 	{
-		ChartDefinition chartDefinition = new ChartDefinition();
-		ChartDefinition.copy(this, chartDefinition);
+		ChartDefinition chartDefinition = new ChartDefinition(this);
 		chartDefinition.setId(generateChartId(renderContext));
 
 		// 添加图表对应的部件信息
