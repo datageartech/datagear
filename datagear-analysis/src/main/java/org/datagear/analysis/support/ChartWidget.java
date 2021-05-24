@@ -46,6 +46,12 @@ public class ChartWidget extends ChartDefinition
 		this.plugin = plugin;
 	}
 
+	public ChartWidget(ChartDefinition chartDefinition, ChartPlugin plugin)
+	{
+		super(chartDefinition);
+		this.plugin = plugin;
+	}
+
 	public ChartPlugin getPlugin()
 	{
 		return plugin;

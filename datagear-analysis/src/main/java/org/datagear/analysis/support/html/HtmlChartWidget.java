@@ -10,6 +10,7 @@ package org.datagear.analysis.support.html;
 import java.io.Writer;
 
 import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
@@ -35,6 +36,11 @@ public class HtmlChartWidget extends ChartWidget
 	public HtmlChartWidget(String id, String name, ChartDataSet[] chartDataSets, HtmlChartPlugin plugin)
 	{
 		super(id, name, chartDataSets, plugin);
+	}
+
+	public HtmlChartWidget(ChartDefinition chartDefinition, HtmlChartPlugin plugin)
+	{
+		super(chartDefinition, plugin);
 	}
 
 	@Override

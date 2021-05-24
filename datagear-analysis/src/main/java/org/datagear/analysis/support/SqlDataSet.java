@@ -258,7 +258,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 		while (rs.next())
 		{
-			if (isReachResultDataMaxCount(query, data.size()))
+			if (isReachResultDataCount(query, data.size()))
 				break;
 
 			Map<String, Object> row = new HashMap<>();

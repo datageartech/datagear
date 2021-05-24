@@ -101,7 +101,7 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * @param count
 	 * @return
 	 */
-	protected boolean isReachResultDataMaxCount(DataSetQuery query, int count)
+	protected boolean isReachResultDataCount(DataSetQuery query, int count)
 	{
 		if (query == null)
 			return false;

@@ -499,7 +499,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 			if (isNameRow(i) || !isDataRow(i))
 				continue;
 
-			if (isReachResultDataMaxCount(query, data.size()))
+			if (isReachResultDataCount(query, data.size()))
 				break;
 
 			Map<String, Object> row = new HashMap<>();

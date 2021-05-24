@@ -270,7 +270,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 			if(isNameRow(i))
 				continue;
 
-			if (isReachResultDataMaxCount(query, data.size()))
+			if (isReachResultDataCount(query, data.size()))
 				break;
 
 			Map<String, String> row = new HashMap<>();

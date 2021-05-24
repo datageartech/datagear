@@ -35,27 +35,6 @@ public class DataSetQuery
 		super();
 	}
 
-	public DataSetQuery(Map<String, ?> paramValues)
-	{
-		super();
-		this.paramValues = paramValues;
-	}
-
-	public DataSetQuery(Map<String, ?> paramValues, ResultDataFormat resultDataFormat)
-	{
-		super();
-		this.paramValues = paramValues;
-		this.resultDataFormat = resultDataFormat;
-	}
-
-	public DataSetQuery(Map<String, ?> paramValues, ResultDataFormat resultDataFormat, int resultDataCount)
-	{
-		super();
-		this.paramValues = paramValues;
-		this.resultDataFormat = resultDataFormat;
-		this.resultDataCount = resultDataCount;
-	}
-
 	public DataSetQuery(DataSetQuery query)
 	{
 		super();
@@ -149,7 +128,10 @@ public class DataSetQuery
 	 */
 	public static DataSetQuery valueOf(Map<String, ?> paramValues)
 	{
-		return new DataSetQuery(paramValues);
+		DataSetQuery query = new DataSetQuery();
+		query.setParamValues(paramValues);
+		
+		return query;
 	}
 	
 	/**
@@ -161,7 +143,10 @@ public class DataSetQuery
 	 */
 	public static DataSetQuery valueOf(Map<String, ?> paramValues, ResultDataFormat resultDataFormat)
 	{
-		return new DataSetQuery(paramValues, resultDataFormat);
+		DataSetQuery query = valueOf(paramValues);
+		query.setResultDataFormat(resultDataFormat);
+		
+		return query;
 	}
 	
 	/**
@@ -174,7 +159,10 @@ public class DataSetQuery
 	 */
 	public static DataSetQuery valueOf(Map<String, ?> paramValues, ResultDataFormat resultDataFormat, int resultDataCount)
 	{
-		return new DataSetQuery(paramValues, resultDataFormat, resultDataCount);
+		DataSetQuery query = valueOf(paramValues, resultDataFormat);
+		query.setResultDataCount(resultDataCount);
+		
+		return query;
 	}
 	
 	/**

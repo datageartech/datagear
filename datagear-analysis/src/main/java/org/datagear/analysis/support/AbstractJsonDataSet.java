@@ -219,7 +219,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 
 				for (Object ele : collection)
 				{
-					if (isReachResultDataMaxCount(query, dataList.size()))
+					if (isReachResultDataCount(query, dataList.size()))
 						break;
 
 					dataList.add(ele);
