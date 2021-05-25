@@ -433,7 +433,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	{
 		DataFormat dataFormat = getDataFormat();
 		if (dataFormat == null)
-			dataFormat = DataFormat.DEFAULT_DATA_FORMAT;
+			dataFormat = new DataFormat();
 
 		return new DataSetPropertyValueConverter(dataFormat);
 	}

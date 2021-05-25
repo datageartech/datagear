@@ -7,7 +7,7 @@
 
 package org.datagear.analysis;
 
-import org.datagear.analysis.support.DataFormat;
+import org.datagear.util.DateFormat;
 
 /**
  * 数据集结果数据格式。
@@ -15,7 +15,7 @@ import org.datagear.analysis.support.DataFormat;
  * @author datagear@163.com
  *
  */
-public class ResultDataFormat extends DataFormat
+public class ResultDataFormat extends DateFormat
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -43,9 +43,6 @@ public class ResultDataFormat extends DataFormat
 	/** 时间戳格式化类型 */
 	private String timestampType = TYPE_NONE;
 	
-	/**是否格式化数值*/
-	private boolean formatNumber = false;
-
 	public ResultDataFormat()
 	{
 		super();
@@ -114,22 +111,56 @@ public class ResultDataFormat extends DataFormat
 		return super.getTimestampFormat();
 	}
 
-	public boolean isFormatNumber()
-	{
-		return formatNumber;
-	}
-
-	public void setFormatNumber(boolean formatNumber)
-	{
-		this.formatNumber = formatNumber;
-	}
-
-	/**
-	 * 获取当{@linkplain #formatNumber}为{@code true}时的数值格式。
-	 */
 	@Override
-	public String getNumberFormat()
+	public int hashCode()
 	{
-		return super.getNumberFormat();
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((dateType == null) ? 0 : dateType.hashCode());
+		result = prime * result + ((timeType == null) ? 0 : timeType.hashCode());
+		result = prime * result + ((timestampType == null) ? 0 : timestampType.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ResultDataFormat other = (ResultDataFormat) obj;
+		if (dateType == null)
+		{
+			if (other.dateType != null)
+				return false;
+		}
+		else if (!dateType.equals(other.dateType))
+			return false;
+		if (timeType == null)
+		{
+			if (other.timeType != null)
+				return false;
+		}
+		else if (!timeType.equals(other.timeType))
+			return false;
+		if (timestampType == null)
+		{
+			if (other.timestampType != null)
+				return false;
+		}
+		else if (!timestampType.equals(other.timestampType))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [dateType=" + dateType
+				+ ", dateFormat=" + getDateFormat() + ", timeType=" + timeType + ", timeFormat=" + getTimeFormat()
+				+ ", timestampType=" + timestampType + ", timestampFormat=" + getTimestampFormat() + "]";
 	}
 }

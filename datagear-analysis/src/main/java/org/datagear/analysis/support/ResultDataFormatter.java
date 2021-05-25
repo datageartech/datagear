@@ -7,16 +7,15 @@
 
 package org.datagear.analysis.support;
 
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.datagear.analysis.ResultDataFormat;
 
 /**
  * {@linkplain ResultDataFormat}支持格式化类。
+ * <p>
+ * 注意：此类的{@linkplain #format(Object)}方法不是线程安全的。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -28,7 +27,6 @@ public class ResultDataFormatter
 	private SimpleDateFormat _dateFormat = null;
 	private SimpleDateFormat _timeFormat = null;
 	private SimpleDateFormat _timestampFormat = null;
-	private DecimalFormat _numberFormat = null;
 	
 	public ResultDataFormatter()
 	{
@@ -58,9 +56,6 @@ public class ResultDataFormatter
 		
 		if(ResultDataFormat.TYPE_STRING.equals(resultDataFormat.getTimestampType()))
 			this._timestampFormat = new SimpleDateFormat(resultDataFormat.getTimestampFormat());
-		
-		if(resultDataFormat.isFormatNumber())
-			this._numberFormat = new DecimalFormat(resultDataFormat.getNumberFormat());
 	}
 	
 	/**

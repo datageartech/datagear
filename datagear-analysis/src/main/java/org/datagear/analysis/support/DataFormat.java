@@ -9,37 +9,22 @@ package org.datagear.analysis.support;
 
 import java.io.Serializable;
 
+import org.datagear.util.DateFormat;
+
 /**
  * 数据格式。
  * 
  * @author datagear@163.com
  *
  */
-public class DataFormat implements Serializable
+public class DataFormat extends DateFormat implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 默认数据格式对象，它是一个不可变对象。
+	 * 默认数值格式：#.##########
 	 */
-	public static final DataFormat DEFAULT_DATA_FORMAT = new DefaultDataFormat();
-
-	public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
-
-	public static final String DEFAULT_TIME_FORMAT = "hh:mm:ss";
-
-	public static final String DEFAULT_TIMESTAMP_FORMAT = "yyyy-MM-dd hh:mm:ss";
-
 	public static final String DEFAULT_NUMBER_FORMAT = "#.##########";
-
-	/** 日期格式 */
-	private String dateFormat = DEFAULT_DATE_FORMAT;
-
-	/** 时间格式 */
-	private String timeFormat = DEFAULT_TIME_FORMAT;
-
-	/** 时间戳格式 */
-	private String timestampFormat = DEFAULT_TIMESTAMP_FORMAT;
 
 	/** 数值格式 */
 	private String numberFormat = DEFAULT_NUMBER_FORMAT;
@@ -47,36 +32,6 @@ public class DataFormat implements Serializable
 	public DataFormat()
 	{
 		super();
-	}
-
-	public String getDateFormat()
-	{
-		return dateFormat;
-	}
-
-	public void setDateFormat(String dateFormat)
-	{
-		this.dateFormat = dateFormat;
-	}
-
-	public String getTimeFormat()
-	{
-		return timeFormat;
-	}
-
-	public void setTimeFormat(String timeFormat)
-	{
-		this.timeFormat = timeFormat;
-	}
-
-	public String getTimestampFormat()
-	{
-		return timestampFormat;
-	}
-
-	public void setTimestampFormat(String timestampFormat)
-	{
-		this.timestampFormat = timestampFormat;
 	}
 
 	public String getNumberFormat()
@@ -93,11 +48,8 @@ public class DataFormat implements Serializable
 	public int hashCode()
 	{
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((dateFormat == null) ? 0 : dateFormat.hashCode());
+		int result = super.hashCode();
 		result = prime * result + ((numberFormat == null) ? 0 : numberFormat.hashCode());
-		result = prime * result + ((timeFormat == null) ? 0 : timeFormat.hashCode());
-		result = prime * result + ((timestampFormat == null) ? 0 : timestampFormat.hashCode());
 		return result;
 	}
 
@@ -106,18 +58,11 @@ public class DataFormat implements Serializable
 	{
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		DataFormat other = (DataFormat) obj;
-		if (dateFormat == null)
-		{
-			if (other.dateFormat != null)
-				return false;
-		}
-		else if (!dateFormat.equals(other.dateFormat))
-			return false;
 		if (numberFormat == null)
 		{
 			if (other.numberFormat != null)
@@ -125,66 +70,13 @@ public class DataFormat implements Serializable
 		}
 		else if (!numberFormat.equals(other.numberFormat))
 			return false;
-		if (timeFormat == null)
-		{
-			if (other.timeFormat != null)
-				return false;
-		}
-		else if (!timeFormat.equals(other.timeFormat))
-			return false;
-		if (timestampFormat == null)
-		{
-			if (other.timestampFormat != null)
-				return false;
-		}
-		else if (!timestampFormat.equals(other.timestampFormat))
-			return false;
 		return true;
 	}
 
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [dateFormat=" + dateFormat + ", timeFormat=" + timeFormat
-				+ ", timestampFormat="
-				+ timestampFormat + ", numberFormat=" + numberFormat + "]";
-	}
-
-	private static final class DefaultDataFormat extends DataFormat
-	{
-		private static final long serialVersionUID = 1L;
-
-		public DefaultDataFormat()
-		{
-			super();
-			super.setDateFormat(DEFAULT_DATE_FORMAT);
-			super.setTimeFormat(DEFAULT_TIME_FORMAT);
-			super.setTimestampFormat(DEFAULT_TIMESTAMP_FORMAT);
-			super.setNumberFormat(DEFAULT_NUMBER_FORMAT);
-		}
-
-		@Override
-		public void setDateFormat(String dateFormat)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setTimeFormat(String timeFormat)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setTimestampFormat(String timestampFormat)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setNumberFormat(String numberFormat)
-		{
-			throw new UnsupportedOperationException();
-		}
+		return getClass().getSimpleName() + " [dateFormat=" + getDateFormat() + ", timeFormat=" + getTimeFormat()
+				+ ", timestampFormat=" + getTimestampFormat() + ", numberFormat=" + numberFormat + "]";
 	}
 }
