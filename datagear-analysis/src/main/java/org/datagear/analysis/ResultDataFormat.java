@@ -7,8 +7,6 @@
 
 package org.datagear.analysis;
 
-import java.io.Serializable;
-
 import org.datagear.analysis.support.DataFormat;
 
 /**
@@ -17,7 +15,7 @@ import org.datagear.analysis.support.DataFormat;
  * @author datagear@163.com
  *
  */
-public class ResultDataFormat implements Serializable
+public class ResultDataFormat extends DataFormat
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -39,20 +37,14 @@ public class ResultDataFormat implements Serializable
 	/** 日期格式化类型 */
 	private String dateType = TYPE_NONE;
 
-	/** 日期格式 */
-	private String dateFormat = DataFormat.DEFAULT_DATE_FORMAT;
-	
 	/** 时间格式化类型 */
 	private String timeType = TYPE_NONE;
 
-	/** 时间格式 */
-	private String timeFormat = DataFormat.DEFAULT_TIME_FORMAT;
-
 	/** 时间戳格式化类型 */
 	private String timestampType = TYPE_NONE;
-
-	/** 时间戳格式 */
-	private String timestampFormat = DataFormat.DEFAULT_TIMESTAMP_FORMAT;
+	
+	/**是否格式化数值*/
+	private boolean formatNumber = false;
 
 	public ResultDataFormat()
 	{
@@ -74,14 +66,10 @@ public class ResultDataFormat implements Serializable
 	 * 
 	 * @return
 	 */
+	@Override
 	public String getDateFormat()
 	{
-		return dateFormat;
-	}
-
-	public void setDateFormat(String dateFormat)
-	{
-		this.dateFormat = dateFormat;
+		return super.getDateFormat();
 	}
 
 	public String getTimeType()
@@ -99,14 +87,10 @@ public class ResultDataFormat implements Serializable
 	 * 
 	 * @return
 	 */
+	@Override
 	public String getTimeFormat()
 	{
-		return timeFormat;
-	}
-
-	public void setTimeFormat(String timeFormat)
-	{
-		this.timeFormat = timeFormat;
+		return super.getTimeFormat();
 	}
 
 	public String getTimestampType()
@@ -124,13 +108,28 @@ public class ResultDataFormat implements Serializable
 	 * 
 	 * @return
 	 */
+	@Override
 	public String getTimestampFormat()
 	{
-		return timestampFormat;
+		return super.getTimestampFormat();
 	}
 
-	public void setTimestampFormat(String timestampFormat)
+	public boolean isFormatNumber()
 	{
-		this.timestampFormat = timestampFormat;
+		return formatNumber;
+	}
+
+	public void setFormatNumber(boolean formatNumber)
+	{
+		this.formatNumber = formatNumber;
+	}
+
+	/**
+	 * 获取当{@linkplain #formatNumber}为{@code true}时的数值格式。
+	 */
+	@Override
+	public String getNumberFormat()
+	{
+		return super.getNumberFormat();
 	}
 }

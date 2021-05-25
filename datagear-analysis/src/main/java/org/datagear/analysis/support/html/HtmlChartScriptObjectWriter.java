@@ -144,6 +144,13 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			throw new UnsupportedOperationException();
 		}
 
+		@JsonIgnore
+		@Override
+		public DataSetResult getResult()
+		{
+			throw new UnsupportedOperationException();
+		}
+
 		public static ChartDataSetJson[] valuesOf(ChartDataSet[] chartDataSets)
 		{
 			if (chartDataSets == null)

@@ -23,7 +23,7 @@ public interface ResolvableDataSet extends DataSet
 	/**
 	 * 解析{@linkplain ResolvedDataSetResult}。
 	 * 
-	 * @param query
+	 * @param query 应是已通过{@linkplain #isReady(DataSetQuery)}校验的（可能为{@code null}）
 	 * @return
 	 * @throws DataSetException
 	 */

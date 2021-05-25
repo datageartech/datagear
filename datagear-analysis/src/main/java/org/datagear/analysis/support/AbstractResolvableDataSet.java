@@ -44,6 +44,8 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	@Override
 	public DataSetResult getResult(DataSetQuery query) throws DataSetException
 	{
+		query = toNonNullDataSetQuery(query);
+
 		List<DataSetProperty> properties = getProperties();
 
 		if (properties == null || properties.isEmpty())
@@ -58,6 +60,7 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	public ResolvedDataSetResult resolve(DataSetQuery query)
 			throws DataSetException
 	{
+		query = toNonNullDataSetQuery(query);
 		return resolveResult(query, null);
 	}
 
@@ -73,61 +76,4 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * @throws DataSetException
 	 */
 	protected abstract ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties) throws DataSetException;
-
-	/**
-	 * 是否有{@linkplain DataSetQuery#getResultDataCount()}。
-	 * 
-	 * @param query 允许为{@code null}
-	 * @return
-	 */
-	protected boolean hasResultDataCount(DataSetQuery query)
-	{
-		if (query == null)
-			return false;
-
-		int maxCount = query.getResultDataCount();
-
-		if (maxCount < 0)
-			return false;
-
-		return true;
-	}
-
-	/**
-	 * 给定数目是否已到达{@linkplain DataSetQuery#getResultDataCount()}。
-	 * 
-	 * @param query
-	 *            允许为{@code null}
-	 * @param count
-	 * @return
-	 */
-	protected boolean isReachResultDataCount(DataSetQuery query, int count)
-	{
-		if (query == null)
-			return false;
-
-		int maxCount = query.getResultDataCount();
-
-		if (maxCount < 0)
-			return false;
-
-		return count >= maxCount;
-	}
-
-	/**
-	 * 计算结果数据数目。
-	 * 
-	 * @param query
-	 * @param defaultCount
-	 * @return
-	 */
-	protected int evalResultDataCount(DataSetQuery dataSetOption, int defaultCount)
-	{
-		if (dataSetOption == null)
-			return defaultCount;
-
-		int maxCount = dataSetOption.getResultDataCount();
-
-		return (maxCount < 0 ? defaultCount : Math.min(maxCount, defaultCount));
-	}
 }

@@ -163,7 +163,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		if (properties == null || properties.isEmpty())
 			properties = resolveProperties(rawData);
 
-		return resolveResult(rawData, properties);
+		return resolveResult(rawData, properties, query.getResultDataFormat());
 	}
 
 	/**
@@ -210,7 +210,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 			}
 		}
 
-		if (data != null && hasResultDataCount(query))
+		if (data != null && hasResultFetchSize(query))
 		{
 			if (data instanceof Collection<?>)
 			{
@@ -219,7 +219,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 
 				for (Object ele : collection)
 				{
-					if (isReachResultDataCount(query, dataList.size()))
+					if (isReachResultFetchSize(query, dataList.size()))
 						break;
 
 					dataList.add(ele);
@@ -230,7 +230,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 			else if (data instanceof Object[])
 			{
 				Object[] array = (Object[]) data;
-				Object[] dataArray = new Object[evalResultDataCount(query, array.length)];
+				Object[] dataArray = new Object[evalResultFetchSize(query, array.length)];
 
 				for (int i = 0; i < dataArray.length; i++)
 				{

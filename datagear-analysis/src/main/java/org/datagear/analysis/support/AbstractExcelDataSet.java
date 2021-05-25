@@ -354,7 +354,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 		if (properties == null || properties.isEmpty())
 			properties = resolveProperties(rawDataPropertyNames, rawData);
 
-		return resolveResult(rawData, properties);
+		return resolveResult(rawData, properties, query.getResultDataFormat());
 	}
 
 	/**
@@ -499,7 +499,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 			if (isNameRow(i) || !isDataRow(i))
 				continue;
 
-			if (isReachResultDataCount(query, data.size()))
+			if (isReachResultFetchSize(query, data.size()))
 				break;
 
 			Map<String, Object> row = new HashMap<>();

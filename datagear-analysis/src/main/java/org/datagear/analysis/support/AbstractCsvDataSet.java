@@ -155,7 +155,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		if (properties == null || properties.isEmpty())
 			properties = resolveProperties(rawDataPropertyNames, rawData);
 
-		return resolveResult(rawData, properties);
+		return resolveResult(rawData, properties, query.getResultDataFormat());
 	}
 
 	/**
@@ -270,7 +270,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 			if(isNameRow(i))
 				continue;
 
-			if (isReachResultDataCount(query, data.size()))
+			if (isReachResultFetchSize(query, data.size()))
 				break;
 
 			Map<String, String> row = new HashMap<>();

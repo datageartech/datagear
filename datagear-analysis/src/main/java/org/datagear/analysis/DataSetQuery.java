@@ -28,7 +28,7 @@ public class DataSetQuery
 	private ResultDataFormat resultDataFormat = null;
 
 	/** 结果数据最大返回数目 */
-	private int resultDataCount = -1;
+	private int resultFetchSize = -1;
 
 	public DataSetQuery()
 	{
@@ -40,7 +40,7 @@ public class DataSetQuery
 		super();
 		this.paramValues = query.paramValues;
 		this.resultDataFormat = query.resultDataFormat;
-		this.resultDataCount = query.resultDataCount;
+		this.resultFetchSize = query.resultFetchSize;
 	}
 
 	public Map<String, ?> getParamValues()
@@ -90,14 +90,14 @@ public class DataSetQuery
 	 * 
 	 * @return {@code <0} 表示不限定数目
 	 */
-	public int getResultDataCount()
+	public int getResultFetchSize()
 	{
-		return resultDataCount;
+		return resultFetchSize;
 	}
 
-	public void setResultDataCount(int resultDataCount)
+	public void setResultFetchSize(int resultFetchSize)
 	{
-		this.resultDataCount = resultDataCount;
+		this.resultFetchSize = resultFetchSize;
 	}
 
 	/**
@@ -154,13 +154,13 @@ public class DataSetQuery
 	 * 
 	 * @param paramValues
 	 * @param resultDataFormat
-	 * @param resultDataCount
+	 * @param resultFetchSize
 	 * @return
 	 */
-	public static DataSetQuery valueOf(Map<String, ?> paramValues, ResultDataFormat resultDataFormat, int resultDataCount)
+	public static DataSetQuery valueOf(Map<String, ?> paramValues, ResultDataFormat resultDataFormat, int resultFetchSize)
 	{
 		DataSetQuery query = valueOf(paramValues, resultDataFormat);
-		query.setResultDataCount(resultDataCount);
+		query.setResultFetchSize(resultFetchSize);
 		
 		return query;
 	}

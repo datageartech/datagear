@@ -31,7 +31,7 @@
 				</div>
 			</div>
 			<div class="result-data-max-count" title="<@spring.message code='dataSet.previewResultDataMaxCount' />">
-				<input type="text" class="resultDataCountInput ui-widget ui-widget-content ui-corner-all" />
+				<input type="text" class="resultFetchSizeInput ui-widget ui-widget-content ui-corner-all" />
 			</div>
 		</div>
 	</div>

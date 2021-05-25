@@ -643,7 +643,7 @@ po.previewOptions.url = "...";
 		$panel.position({ my : "right top", at : "left+5 top", of : po.element(".workspace-operation-wrapper")});
 	};
 	
-	po.resultDataCountDefault = 100;
+	po.resultFetchSizeDefault = 100;
 	
 	//预览设置项
 	po.previewOptions =
@@ -654,7 +654,7 @@ po.previewOptions.url = "...";
 		data:
 		{
 			dataSet: {},
-			query: { resultDataCount: po.resultDataCountDefault }
+			query: { resultFetchSize: po.resultFetchSizeDefault }
 		},
 		//预览操作前置回调函数，返回false阻止
 		beforePreview: function(){},
@@ -671,9 +671,9 @@ po.previewOptions.url = "...";
 		success: function(previewResponse){}
 	};
 	
-	po.resultDataCountVal = function(val)
+	po.resultFetchSizeVal = function(val)
 	{
-		var $input = po.element(".resultDataCountInput");
+		var $input = po.element(".resultFetchSizeInput");
 		
 		if(val === undefined)
 		{
@@ -681,7 +681,7 @@ po.previewOptions.url = "...";
 			var validVal = val;
 			
 			if(isNaN(validVal))
-				validVal = po.resultDataCountDefault;
+				validVal = po.resultFetchSizeDefault;
 			else if(validVal < 1)
 				validVal = 1;
 			
@@ -778,8 +778,8 @@ po.previewOptions.url = "...";
 				$panel.hide();
 		});
 		
-		po.resultDataCountVal(po.resultDataCountDefault);
-		po.element(".resultDataCountInput").on("keydown", function(e)
+		po.resultFetchSizeVal(po.resultFetchSizeDefault);
+		po.element(".resultFetchSizeInput").on("keydown", function(e)
 		{
 			//防止提交数据集表单
 			if(e.keyCode == $.ui.keyCode.ENTER)
@@ -815,7 +815,7 @@ po.previewOptions.url = "...";
 		var table = po.previewResultTableElement();
 		var initDataTable = !$.isDatatTable(table);
 		
-		po.previewOptions.data.query.resultDataCount = po.resultDataCountVal();
+		po.previewOptions.data.query.resultFetchSize = po.resultFetchSizeVal();
 		
 		$.ajaxJson(
 		{

@@ -70,7 +70,7 @@ public interface DataSet extends Identifiable
 	 * 通常是：{@linkplain DataSetQuery#getParamValues()}包含{@linkplain #getParams()}中的所有{@linkplain DataSetParam#isRequired()}参数值。
 	 * </p>
 	 * 
-	 * @param query
+	 * @param query 允许为{@code null}
 	 * @return
 	 */
 	boolean isReady(DataSetQuery query);
@@ -81,7 +81,7 @@ public interface DataSet extends Identifiable
 	 * 返回结果中的数据项应已转换为与{@linkplain #getProperties()}的{@linkplain DataSetProperty#getType()}类型一致。
 	 * </p>
 	 * 
-	 * @param query 应是已通过{@linkplain #isReady(DataSetQuery)}校验的
+	 * @param query 应是已通过{@linkplain #isReady(DataSetQuery)}校验的（可能为{@code null}）
 	 * @return
 	 * @throws DataSetException
 	 */

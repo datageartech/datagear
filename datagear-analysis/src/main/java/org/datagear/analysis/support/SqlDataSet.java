@@ -191,7 +191,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		if (properties == null || properties.isEmpty())
 			properties = resolveProperties(cn, rs, rawData);
 
-		return resolveResult(rawData, properties);
+		return resolveResult(rawData, properties, query.getResultDataFormat());
 	}
 
 	/**
@@ -258,7 +258,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 		while (rs.next())
 		{
-			if (isReachResultDataCount(query, data.size()))
+			if (isReachResultFetchSize(query, data.size()))
 				break;
 
 			Map<String, Object> row = new HashMap<>();

@@ -35,7 +35,7 @@ public class ChartDataSet
 	private boolean attachment = false;
 
 	/**数据集查询*/
-	private DataSetQuery query = new DataSetQuery();
+	private DataSetQuery query = null;
 
 	public ChartDataSet()
 	{

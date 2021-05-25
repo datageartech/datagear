@@ -23,6 +23,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.ResultDataFormat;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -141,8 +142,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		if (!hasParam())
 			return true;
 
-		if (query == null)
-			query = DataSetQuery.valueOf();
+		query = toNonNullDataSetQuery(query);
 
 		List<DataSetParam> params = getParams();
 		Map<String, ?> paramValues = query.getParamValues();
@@ -155,22 +155,30 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 		return true;
 	}
+	
+	/**
+	 * 转换为非{@code null}的{@linkplain DataSetQuery}。
+	 * @param query
+	 * @return
+	 */
+	protected DataSetQuery toNonNullDataSetQuery(DataSetQuery query)
+	{
+		return (query == null ? DataSetQuery.valueOf() : query);
+	}
 
 	/**
 	 * 解析结果。
 	 * 
-	 * @param cn
-	 * @param rs
 	 * @param rawData
 	 *            {@code Collection<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
 	 * @param properties
-	 * @param dataSetOption
-	 *            允许为{@code null}
+	 * @param format 允许为{@code null}
 	 * @return {@code List<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
 	 * @throws Throwable
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetProperty> properties) throws Throwable
+	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetProperty> properties,
+			ResultDataFormat format) throws Throwable
 	{
 		Object data = null;
 
@@ -182,13 +190,13 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		{
 			Collection<Map<String, ?>> rawCollection = (Collection<Map<String, ?>>) rawData;
 
-			data = convertRawData(rawCollection, properties);
+			data = convertRawDataToResult(rawCollection, properties, format);
 		}
 		else if (rawData instanceof Map<?, ?>[])
 		{
 			Map<?, ?>[] rawArray = (Map<?, ?>[]) rawData;
 			List<Map<String, ?>> rawCollection = (List) Arrays.asList(rawArray);
-			List<Map<String, Object>> dataList = convertRawData(rawCollection, properties);
+			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, properties, format);
 
 			data = dataList.toArray(new Map<?, ?>[dataList.size()]);
 		}
@@ -196,7 +204,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		{
 			Map<?, ?> rawMap = (Map<?, ?>) rawData;
 			List<Map<String, ?>> rawCollection = (List) Arrays.asList(rawMap);
-			List<Map<String, Object>> dataList = convertRawData(rawCollection, properties);
+			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, properties, format);
 
 			data = dataList.get(0);
 		}
@@ -212,11 +220,12 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 
 	 * @param rawData
 	 * @param properties
+	 * @param format 允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<Map<String, Object>> convertRawData(Collection<? extends Map<String, ?>> rawData,
-			List<DataSetProperty> properties) throws Throwable
+	protected List<Map<String, Object>> convertRawDataToResult(Collection<? extends Map<String, ?>> rawData,
+			List<DataSetProperty> properties, ResultDataFormat format) throws Throwable
 	{
 		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
 
@@ -261,6 +270,63 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		return data;
 	}
 
+	/**
+	 * 是否有{@linkplain DataSetQuery#getResultFetchSize()}。
+	 * 
+	 * @param query 允许为{@code null}
+	 * @return
+	 */
+	protected boolean hasResultFetchSize(DataSetQuery query)
+	{
+		if (query == null)
+			return false;
+
+		int maxCount = query.getResultFetchSize();
+
+		if (maxCount < 0)
+			return false;
+
+		return true;
+	}
+
+	/**
+	 * 给定数目是否已到达{@linkplain DataSetQuery#getResultFetchSize()}。
+	 * 
+	 * @param query
+	 *            允许为{@code null}
+	 * @param count
+	 * @return
+	 */
+	protected boolean isReachResultFetchSize(DataSetQuery query, int count)
+	{
+		if (query == null)
+			return false;
+
+		int maxCount = query.getResultFetchSize();
+
+		if (maxCount < 0)
+			return false;
+
+		return count >= maxCount;
+	}
+
+	/**
+	 * 计算结果数据最大数目。
+	 * 
+	 * @param query
+	 * @param defaultSize
+	 * @return
+	 */
+	protected int evalResultFetchSize(DataSetQuery dataSetOption, int defaultSize)
+	{
+		if (dataSetOption == null)
+			return defaultSize;
+
+		int maxCount = dataSetOption.getResultFetchSize();
+
+		return (maxCount < 0 ? defaultSize : Math.min(maxCount, defaultSize));
+	}
+	
 	/**
 	 * 查找与名称数组对应的{@linkplain DataSetProperty}列表。
 	 * <p>
