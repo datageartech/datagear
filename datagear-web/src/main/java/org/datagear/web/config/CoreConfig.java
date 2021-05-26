@@ -72,9 +72,10 @@ import org.datagear.management.service.impl.SchemaServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
 import org.datagear.management.service.impl.UserServiceImpl;
-import org.datagear.management.util.LiteralBooleanTypeHandler;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.management.util.dialect.MbSqlDialectBuilder;
+import org.datagear.management.util.typehandlers.DataFormatTypeHandler;
+import org.datagear.management.util.typehandlers.LiteralBooleanTypeHandler;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.meta.resolver.GenericDBMetaResolver;
 import org.datagear.persistence.DialectSource;
@@ -328,7 +329,7 @@ public class CoreConfig implements InitializingBean
 			SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
 			bean.setDataSource(this.dataSourceConfig.dataSource());
 			bean.setMapperLocations(mapperResources);
-			bean.setTypeHandlers(new TypeHandler<?>[] { new LiteralBooleanTypeHandler() });
+			bean.setTypeHandlers(new TypeHandler<?>[] { new LiteralBooleanTypeHandler(), new DataFormatTypeHandler() });
 			return bean.getObject();
 		}
 		catch (Exception e)

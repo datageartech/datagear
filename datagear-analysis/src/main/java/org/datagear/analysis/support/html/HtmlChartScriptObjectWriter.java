@@ -177,6 +177,9 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		{
 			super(dataSet.getId(), dataSet.getName(), dataSet.getProperties());
 			setParams(dataSet.getParams());
+			
+			if(dataSet instanceof AbstractDataSet)
+				setDataFormat(((AbstractDataSet) dataSet).getDataFormat());
 		}
 
 		@Override

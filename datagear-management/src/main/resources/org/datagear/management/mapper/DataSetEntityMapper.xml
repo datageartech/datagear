@@ -7,12 +7,12 @@
 		INSERT INTO DATAGEAR_DATA_SET
 			(
 				DS_ID, DS_NAME, DS_TYPE, DS_CREATE_USER_ID, DS_CREATE_TIME,
-				DS_AP_ID
+				DS_AP_ID, DS_DATA_FORMAT
 			)
 		VALUES
 			(
 				#{entity.id}, #{entity.name}, #{entity.dataSetType}, #{entity.createUser.id}, #{entity.createTime},
-				#{entity.analysisProject.id, jdbcType=VARCHAR}
+				#{entity.analysisProject.id, jdbcType=VARCHAR}, #{entity.dataFormat, jdbcType=VARCHAR}
 			)
 	</insert>
 	
@@ -132,7 +132,8 @@
 	<update id="update">
 		UPDATE DATAGEAR_DATA_SET SET
 			DS_NAME = #{entity.name},
-			DS_AP_ID = #{entity.analysisProject.id, jdbcType=VARCHAR}
+			DS_AP_ID = #{entity.analysisProject.id, jdbcType=VARCHAR},
+			DS_DATA_FORMAT = #{entity.dataFormat, jdbcType=VARCHAR}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -521,6 +522,7 @@
 			A.DS_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
 			A.DS_CREATE_TIME AS ${_iq_}createTime${_iq_},
+			A.DS_DATA_FORMAT AS ${_iq_}dataFormat${_iq_},
 			AP.*
 		FROM
 			DATAGEAR_DATA_SET A

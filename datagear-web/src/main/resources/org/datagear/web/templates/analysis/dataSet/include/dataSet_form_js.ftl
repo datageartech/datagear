@@ -59,6 +59,11 @@ po.previewOptions.url = "...";
 	{
 		return po.element("#${pageId}-dataSetPropertiesTable");
 	};
+
+	po.dataFormatPanelElement = function()
+	{
+		return po.element("#${pageId}-dataFormatPanel");
+	};
 	
 	po.calWorkspaceOperationTableHeight = function()
 	{
@@ -302,11 +307,28 @@ po.previewOptions.url = "...";
 			$.setDataTableData(dataTable, po.getFormDataSetProperties(true));
 			$.dataTableUtil.moveSelectedDown(dataTable);
 		});
+
+		po.element(".dataformat-button").click(function()
+		{
+			po.dataFormatPanelElement().toggle();
+		});
 		
 		po.dataSetPropertiesTableElement().on("click", ".input-in-table", function(event)
 		{
 			//阻止行选中
 			event.stopPropagation();
+		});
+
+		po.element().on("click", function(event)
+		{
+			var $target = $(event.target);
+			
+			var $p = po.dataFormatPanelElement();
+			if(!$p.is(":hidden"))
+			{
+				if($target.closest(".dataformat-panel, .dataformat-button").length == 0)
+					$p.hide();
+			}
 		});
 	};
 	
@@ -697,6 +719,19 @@ po.previewOptions.url = "...";
 			$input.val(val);
 	};
 	
+	po.getFormDataFormat = function()
+	{
+		var df =
+		{
+			"dateFormat": po.element("input[name='dataFormat.dateFormat']").val(),
+			"timeFormat": po.element("input[name='dataFormat.timeFormat']").val(),
+			"timestampFormat": po.element("input[name='dataFormat.timestampFormat']").val(),
+			"numberFormat": po.element("input[name='dataFormat.numberFormat']").val()
+		};
+		
+		return df;
+	};
+	
 	//获取、设置上一次预览是否成功
 	po.previewSuccess = function(success)
 	{
@@ -809,13 +844,14 @@ po.previewOptions.url = "...";
 		{
 			$(this).button("disable");
 		});
-
+		
 		po.element(".preview-result-foot").hide();
 		
 		var table = po.previewResultTableElement();
 		var initDataTable = !$.isDatatTable(table);
 		
 		po.previewOptions.data.query.resultFetchSize = po.resultFetchSizeVal();
+		po.previewOptions.data.dataSet.dataFormat = po.getFormDataFormat();
 		
 		$.ajaxJson(
 		{

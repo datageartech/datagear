@@ -5,7 +5,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-package org.datagear.management.util;
+package org.datagear.management.util.typehandlers;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

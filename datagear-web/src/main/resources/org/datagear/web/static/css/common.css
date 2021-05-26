@@ -79,24 +79,30 @@ a.link:hover{
 }
 
 /*表单*/
-form{}
-form .form-head{}
-form .form-content{}
-form .form-content .form-item{
+form,
+.form{}
+form .form-head,
+.form .form-head{}
+form .form-content,
+.form .form-content{}
+form .form-content .form-item,
+.form .form-content .form-item{
 	padding: .3em 0;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	min-width: 10em;
 }
-form .form-content .form-item .form-item-label{
+form .form-content .form-item .form-item-label,
+.form .form-content .form-item .form-item-label{
 	display: inline-block;
 	width: 20%;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-form .form-content .form-item .form-item-label label{
+form .form-content .form-item .form-item-label label,
+.form .form-content .form-item .form-item-label label{
 	white-space: nowrap;
 	overflow: hidden;
 	vertical-align: middle;
@@ -105,11 +111,15 @@ form .form-content .form-item .form-item-label label{
 	overflow: hidden;
 }
 form .form-content .form-item .form-item-label label[title],
-form .form-content .tip-label[title]{
+form .form-content .tip-label[title],
+.form .form-content .form-item .form-item-label label[title],
+.form .form-content .tip-label[title]{
 	position: relative;
 }
 form .form-content .form-item .form-item-label label[title]::after,
-form .form-content .tip-label::after{
+form .form-content .tip-label::after,
+.form .form-content .form-item .form-item-label label[title]::after,
+.form .form-content .tip-label::after{
 	content: "?";
     position: absolute;
     margin-left: 0.2em;
@@ -118,7 +128,8 @@ form .form-content .tip-label::after{
     opacity: 0.5;
 	filter: Alpha(Opacity=50);
 }
-form .form-content .form-item .form-item-value{
+form .form-content .form-item .form-item-value,
+.form .form-content .form-item .form-item-value{
 	display: inline-block;
 	width: 80%;
 	margin-left: -0.71em;/*利用左侧外边距、内边距解决元素空隙问题*/
@@ -128,99 +139,115 @@ form .form-content .form-item .form-item-value{
 	-webkit-box-sizing: border-box;
 	vertical-align: middle;
 }
-form .form-content .form-item .form-item-value .form-item-value{
+form .form-content .form-item .form-item-value .form-item-value,
+.form .form-content .form-item .form-item-value .form-item-value{
 	margin-left: 0;
 	padding-left: 0;
 }
-form .form-content .form-item .form-item-value.text-value{}
-form .form-content .form-item .form-item-value.textarea-value{}
-form .form-content .form-item .form-item-value.select-value{}
-form .form-content .form-item .form-item-value.file-value{}
-form .form-content .form-item .form-item-value.single-value{}
-form .form-content .form-item .form-item-value.multiple-value{}
 form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password],
 form .form-content .form-item .form-item-value textarea,
-form .form-content .form-item .form-item-value .input{
+form .form-content .form-item .form-item-value .input,
+.form .form-content .form-item .form-item-value input[type=text],
+.form .form-content .form-item .form-item-value input[type=password],
+.form .form-content .form-item .form-item-value textarea,
+.form .form-content .form-item .form-item-value .input{
 	margin-right: 0.3em;/*文本框与后面按钮间距*/
 	width: 50%;
 	vertical-align: middle;
 }
 form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password],
-form .form-content .form-item .form-item-value textarea{
+form .form-content .form-item .form-item-value textarea,
+.form .form-content .form-item .form-item-value input[type=text],
+.form .form-content .form-item .form-item-value input[type=password],
+.form .form-content .form-item .form-item-value textarea{
 	padding: 0.3em 0.41em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-form .form-content .form-item .form-item-value textarea{
+form .form-content .form-item .form-item-value textarea,
+.form .form-content .form-item .form-item-value textarea{
 	width: 60%;
 	height: 5em;
 }
-form .form-content .form-item .form-item-value .binary-label-input{/*二进制标签输入框*/
-}
-form .form-content .form-item label.error{
+form .form-content .form-item label.error,
+.form .form-content .form-item label.error{
 	color: red;
 	font-size: 0.9em;
 	padding-left: 0.2em;
 	white-space: nowrap;
 }
-form .form-content .form-item .form-item-value.error-newline{/*验证提示信息在新行*/
+form .form-content .form-item .form-item-value.error-newline,
+.form .form-content .form-item .form-item-value.error-newline{/*验证提示信息在新行*/
 	position: relative;
     padding-bottom: 1.4em;
 }
-form .form-content .form-item .form-item-value.error-newline label.error{
+form .form-content .form-item .form-item-value.error-newline label.error,
+.form .form-content .form-item .form-item-value.error-newline label.error{
 	position: absolute;
 	left: 0.71em;
 	bottom: 0;
 	padding-left: 0 !important;
 }
-form .form-content .form-item .form-item-value .form-item-value.error-newline label.error{
+form .form-content .form-item .form-item-value .form-item-value.error-newline label.error,
+.form .form-content .form-item .form-item-value .form-item-value.error-newline label.error{
 	left: 0;
 }
 form .form-content .form-item .form-item-value input[type=text].error,
 form .form-content .form-item .form-item-value input[type=password].error,
-form .form-content .form-item .form-item-value textarea.error{
+form .form-content .form-item .form-item-value textarea.error,
+.form .form-content .form-item .form-item-value input[type=text].error,
+.form .form-content .form-item .form-item-value input[type=password].error,
+.form .form-content .form-item .form-item-value textarea.error{
 	border: 1px solid red;
 }
-form .form-content .form-item .input-desc{
+form .form-content .form-item .input-desc,
+.form .form-content .form-item .input-desc{
 	display: inline-block;
 }
-form .form-content .form-item .input-desc-date{
-}
-form .form-content .form-item .form-item-value .form-item{
+form .form-content .form-item .form-item-value .form-item,
+.form .form-content .form-item .form-item-value .form-item{
 	width: auto;
 	display: inline-block;
 	margin-left: 2em;
 }
-form .form-content .form-item .form-item-value .form-item .form-item-label{
+form .form-content .form-item .form-item-value .form-item .form-item-label,
+.form .form-content .form-item .form-item-value .form-item .form-item-label{
 	width: auto;
 }
-form .form-content .form-item .form-item-value .form-item .form-item-label label{
+form .form-content .form-item .form-item-value .form-item .form-item-label label,
+.form .form-content .form-item .form-item-value .form-item .form-item-label label{
 	width: auto;
 }
-form .form-content .form-item .form-item-value .form-item .form-item-value{
+form .form-content .form-item .form-item-value .form-item .form-item-value,
+.form .form-content .form-item .form-item-value .form-item .form-item-value{
 	width: auto;
 	margin-left: 1em;
 }
-form .form-foot{
+form .form-foot,
+.form .form-foot{
 	text-align: center;
 	padding-top: .5em;
 }
-form .form-foot .form-operation{
+form .form-foot .form-operation,
+.form .form-foot .form-operation{
 	display: inline-block;
 }
-form .form-foot .form-operation.form-operation-batch-set{
+form .form-foot .form-operation.form-operation-batch-set,
+.form .form-foot .form-operation.form-operation-batch-set{
 	position: relative;
 	padding-right: 16px;
 }
-form .form-foot .form-operation.form-operation-batch-set .batch-set-switch{
+form .form-foot .form-operation.form-operation-batch-set .batch-set-switch,
+.form .form-foot .form-operation.form-operation-batch-set .batch-set-switch{
 	cursor: pointer;
 	opacity: 0.5;
 	filter: Alpha(Opacity=50);
 }
-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel{
+form .form-foot .form-operation.form-operation-batch-set .batch-set-panel,
+.form .form-foot .form-operation.form-operation-batch-set .batch-set-panel{
 	position: absolute;
 	left: -23em;
 	top: 0.4em;
@@ -228,31 +255,38 @@ form .form-foot .form-operation.form-operation-batch-set .batch-set-panel{
 	opacity: 0.7;
 	filter: Alpha(Opacity=70);
 }
-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel label{
+form .form-foot .form-operation.form-operation-batch-set .batch-set-panel label,
+.form .form-foot .form-operation.form-operation-batch-set .batch-set-panel label{
 	margin-left: 1em;
 	margin-right: 0.41em;
 }
-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count{
+form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count,
+.form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count{
 	width: 3em;
 }
-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count.error{
+form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count.error,
+.form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count.error{
 	color: red;
 	border-color: red;
 }
-form .form-foot .ui-button{
+form .form-foot .ui-button,
+.form .form-foot .ui-button{
 	margin-left: .5em;
 	margin-right: .5em;
 }
-form.display-block .form-content .form-item{
+form.display-block .form-content .form-item,
+.form.display-block .form-content .form-item{
 	position: relative;
 	padding-bottom: 1.4em;
 }
-form.display-block .form-content .form-item .form-item-label{
+form.display-block .form-content .form-item .form-item-label,
+.form.display-block .form-content .form-item .form-item-label{
 	display: block;
 	width: auto;
 	padding-bottom: 0.2em;
 }
-form.display-block .form-content .form-item .form-item-value{
+form.display-block .form-content .form-item .form-item-value,
+.form.display-block .form-content .form-item .form-item-value{
 	display: block;
 	width: auto;
 	margin-left: 0;
@@ -261,10 +295,15 @@ form.display-block .form-content .form-item .form-item-value{
 form.display-block .form-content .form-item .form-item-value input[type=text],
 form.display-block .form-content .form-item .form-item-value input[type=password],
 form.display-block .form-content .form-item .form-item-value textarea,
-form.display-block .form-content .form-item .form-item-value .input{
+form.display-block .form-content .form-item .form-item-value .input,
+.form.display-block .form-content .form-item .form-item-value input[type=text],
+.form.display-block .form-content .form-item .form-item-value input[type=password],
+.form.display-block .form-content .form-item .form-item-value textarea,
+.form.display-block .form-content .form-item .form-item-value .input{
 	width: 95%;
 }
-form.display-block .form-content .form-item .form-item-value label.error{
+form.display-block .form-content .form-item .form-item-value label.error,
+.form.display-block .form-content .form-item .form-item-value label.error{
 	position: absolute;
 	left: 0;
 	bottom: 0;
@@ -279,6 +318,8 @@ form.display-block .form-content .form-item .form-item-value label.error{
 .minor-panel .panel-head.ui-widget-header{
 	font-weight: normal;
 	padding-left: 0.2em;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
 }
 .minor-panel .panel-content{
 	padding: 1em 0.5em;
@@ -2498,7 +2539,7 @@ table.dataTable tbody tr td select{
 .page-form-dataSet .workspace .workspace-operation-wrapper .operation .ui-button.ui-button-icon-only,
 .page-form-dataSet .workspace .show-resolved-source-button{
 	height: 1.2em;
-	width: 2.5em;
+	width: 2.2em;
 	vertical-align: top;
 	border: 0px;
 }
@@ -2580,6 +2621,19 @@ table.dataTable tbody tr td select{
 }
 .page-form-dataSet .encoding-selectmenu-menu .ui-menu{
 	height: 10em;
+}
+.page-form-dataSet .dataformat-panel{
+	position: absolute;
+	top: 0;
+	right: 0.1em;
+	width: 80%;
+	display: none;
+}
+.page-form-dataSet .workspace .dataformat-panel .form-item .form-item-label{
+	width: 35%
+}
+.page-form-dataSet .workspace .dataformat-panel .form-item .form-item-value{
+	width: 65%;
 }
 .page-form-dataSet-Http .form-item-value-requestMethod .ui-selectmenu-button,
 .page-form-dataSet-Http .form-item-value-requestContentType .ui-selectmenu-button,
