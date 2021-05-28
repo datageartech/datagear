@@ -224,8 +224,8 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	}
 
 	@Override
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties)
-			throws DataSetException
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties) throws DataSetException
 	{
 		File file = null;
 
@@ -245,9 +245,9 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 		ResolvedDataSetResult result = null;
 
 		if (isXls(file))
-			result = resolveResultForXls(query, file, properties);
+			result = resolveResultForXls(query, file, properties, resolveProperties);
 		else
-			result = resolveResultForXlsx(query, file, properties);
+			result = resolveResultForXlsx(query, file, properties, resolveProperties);
 
 		return result;
 	}
@@ -258,11 +258,12 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * @param query
 	 * @param file
 	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
+	 *            允许为{@code null}
+	 * @param resolveProperties
 	 * @throws DataSetException
 	 */
 	protected ResolvedDataSetResult resolveResultForXls(DataSetQuery query, File file,
-			List<DataSetProperty> properties) throws DataSetException
+			List<DataSetProperty> properties, boolean resolveProperties) throws DataSetException
 	{
 		POIFSFileSystem poifs = null;
 		HSSFWorkbook wb = null;
@@ -274,7 +275,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 
 			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
 
-			return resolveResultForSheet(query, sheet, properties);
+			return resolveResultForSheet(query, sheet, properties, resolveProperties);
 		}
 		catch (DataSetException e)
 		{
@@ -297,12 +298,13 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * @param query
 	 * @param file
 	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
+	 *            允许为{@code null}
+	 * @param resolveProperties
 	 * @return
 	 * @throws DataSetException
 	 */
 	protected ResolvedDataSetResult resolveResultForXlsx(DataSetQuery query, File file,
-			List<DataSetProperty> properties) throws DataSetException
+			List<DataSetProperty> properties, boolean resolveProperties) throws DataSetException
 	{
 		OPCPackage pkg = null;
 		XSSFWorkbook wb = null;
@@ -314,7 +316,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 
 			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
 
-			return resolveResultForSheet(query, sheet, properties);
+			return resolveResultForSheet(query, sheet, properties, resolveProperties);
 		}
 		catch (DataSetException e)
 		{
@@ -336,12 +338,14 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * 
 	 * @param query
 	 * @param sheet
-	 * @param properties    允许为{@code null}，此时会自动解析
+	 * @param properties
+	 *            允许为{@code null}
+	 * @param resolveProperties
 	 * @return
 	 * @throws Throwable
 	 */
 	protected ResolvedDataSetResult resolveResultForSheet(DataSetQuery query, Sheet sheet,
-			List<DataSetProperty> properties) throws Throwable
+			List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
 	{
 		List<Row> excelRows = new ArrayList<Row>();
 
@@ -351,8 +355,12 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 		List<String> rawDataPropertyNames = resolvePropertyNames(excelRows);
 		List<Map<String, Object>> rawData = resolveRawData(query, rawDataPropertyNames, excelRows);
 
-		if (properties == null || properties.isEmpty())
-			properties = resolveProperties(rawDataPropertyNames, rawData);
+		if (resolveProperties)
+		{
+			List<DataSetProperty> resolvedProperties = resolveProperties(rawDataPropertyNames, rawData);
+			mergeDataSetProperties(resolvedProperties, properties);
+			properties = resolvedProperties;
+		}
 
 		return resolveResult(rawData, properties, query.getResultDataFormat());
 	}

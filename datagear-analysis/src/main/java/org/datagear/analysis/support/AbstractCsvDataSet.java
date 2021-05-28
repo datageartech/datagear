@@ -90,8 +90,8 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 * </p>
 	 */
 	@Override
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties)
-			throws DataSetException
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties) throws DataSetException
 	{
 		TemplateResolvedSource<Reader> reader = null;
 
@@ -99,7 +99,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		{
 			reader = getCsvReader(query);
 
-			ResolvedDataSetResult result = resolveResult(query, reader.getSource(), properties);
+			ResolvedDataSetResult result = resolveResult(query, reader.getSource(), properties, resolveProperties);
 
 			if (reader.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
@@ -139,12 +139,14 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 * 
 	 * @param query
 	 * @param csvReader
-	 * @param properties 允许为{@code null}，此时会自动解析
+	 * @param properties
+	 *            允许为{@code null}
+	 * @param resolveProperties
 	 * @return
 	 * @throws Throwable
 	 */
 	protected ResolvedDataSetResult resolveResult(DataSetQuery query, Reader csvReader,
-			List<DataSetProperty> properties) throws Throwable
+			List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
 	{
 		CSVParser csvParser = buildCSVParser(csvReader);
 		List<CSVRecord> csvRecords = csvParser.getRecords();
@@ -152,8 +154,12 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		List<String> rawDataPropertyNames = resolvePropertyNames(csvRecords);
 		List<Map<String, String>> rawData = resolveRawData(query, rawDataPropertyNames, csvRecords);
 
-		if (properties == null || properties.isEmpty())
-			properties = resolveProperties(rawDataPropertyNames, rawData);
+		if (resolveProperties)
+		{
+			List<DataSetProperty> resolvedProperties = resolveProperties(rawDataPropertyNames, rawData);
+			mergeDataSetProperties(resolvedProperties, properties);
+			properties = resolvedProperties;
+		}
 
 		return resolveResult(rawData, properties, query.getResultDataFormat());
 	}

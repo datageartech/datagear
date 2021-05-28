@@ -96,15 +96,15 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	 * </p>
 	 */
 	@Override
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties)
-			throws DataSetException
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties) throws DataSetException
 	{
 		TemplateResolvedSource<Reader> reader = null;
 		try
 		{
 			reader = getJsonReader(query);
 
-			ResolvedDataSetResult result = resolveResult(query, reader.getSource(), properties);
+			ResolvedDataSetResult result = resolveResult(query, reader.getSource(), properties, resolveProperties);
 
 			if (reader.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
@@ -146,12 +146,13 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	 * @param jsonReader
 	 *            JSON输入流
 	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
+	 *            允许为{@code null}
+	 * @param resolveProperties
 	 * @return
 	 * @throws Throwable
 	 */
 	protected ResolvedDataSetResult resolveResult(DataSetQuery query,
-			Reader jsonReader, List<DataSetProperty> properties) throws Throwable
+			Reader jsonReader, List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
 	{
 		JsonNode jsonNode = getObjectMapperNonStardand().readTree(jsonReader);
 
@@ -160,8 +161,12 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 
 		Object rawData = resolveRawData(query, jsonNode, getDataJsonPath());
 
-		if (properties == null || properties.isEmpty())
-			properties = resolveProperties(rawData);
+		if (resolveProperties)
+		{
+			List<DataSetProperty> resolvedProperties = resolveProperties(rawData);
+			mergeDataSetProperties(resolvedProperties, properties);
+			properties = resolvedProperties;
+		}
 
 		return resolveResult(rawData, properties, query.getResultDataFormat());
 	}

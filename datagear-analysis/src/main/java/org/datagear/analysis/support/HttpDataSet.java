@@ -326,11 +326,12 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	public TemplateResolvedDataSetResult resolve(DataSetQuery query)
 			throws DataSetException
 	{
-		return resolveResult(query, null);
+		return (TemplateResolvedDataSetResult) super.resolve(query);
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties) throws DataSetException
+	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties) throws DataSetException
 	{
 		try
 		{

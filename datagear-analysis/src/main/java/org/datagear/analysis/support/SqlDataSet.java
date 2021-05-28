@@ -98,11 +98,12 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	public TemplateResolvedDataSetResult resolve(DataSetQuery query)
 			throws DataSetException
 	{
-		return resolveResult(query, null);
+		return (TemplateResolvedDataSetResult) super.resolve(query);
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties) throws DataSetException
+	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties) throws DataSetException
 	{
 		String sql = resolveAsFmkTemplate(getSql(), query);
 
@@ -139,7 +140,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			try
 			{
 				ResultSet rs = qrs.getResultSet();
-				ResolvedDataSetResult result = resolveResult(cn, rs, query, properties);
+				ResolvedDataSetResult result = resolveResult(cn, rs, query, properties, resolveProperties);
 
 				dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(), sql);
 			}
@@ -179,17 +180,22 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	 * @param rs
 	 * @param query
 	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
+	 *            允许为{@code null}
+	 * @param resolveProperties
 	 * @return
 	 * @throws Throwable
 	 */
 	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs,
-			DataSetQuery query, List<DataSetProperty> properties) throws Throwable
+			DataSetQuery query, List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
 	{
 		List<Map<String, ?>> rawData = resolveRawData(cn, rs, query);
 
-		if (properties == null || properties.isEmpty())
-			properties = resolveProperties(cn, rs, rawData);
+		if (resolveProperties)
+		{
+			List<DataSetProperty> resolvedProperties = resolveProperties(cn, rs, rawData);
+			mergeDataSetProperties(resolvedProperties, properties);
+			properties = resolvedProperties;
+		}
 
 		return resolveResult(rawData, properties, query.getResultDataFormat());
 	}

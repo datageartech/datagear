@@ -852,6 +852,7 @@ po.previewOptions.url = "...";
 		
 		po.previewOptions.data.query.resultFetchSize = po.resultFetchSizeVal();
 		po.previewOptions.data.dataSet.dataFormat = po.getFormDataFormat();
+		po.previewOptions.data.dataSet.properties = po.getFormDataSetProperties();
 		
 		$.ajaxJson(
 		{

@@ -71,7 +71,7 @@ public class CsvValueDataSet extends AbstractCsvDataSet
 	public TemplateResolvedDataSetResult resolve(DataSetQuery query)
 			throws DataSetException
 	{
-		return (TemplateResolvedDataSetResult) resolveResult(query, null);
+		return (TemplateResolvedDataSetResult) super.resolve(query);
 	}
 
 	@Override

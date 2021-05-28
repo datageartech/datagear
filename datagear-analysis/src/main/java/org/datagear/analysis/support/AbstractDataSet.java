@@ -456,16 +456,31 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 */
 	protected <T extends DataNameType> T getDataNameTypeByName(List<T> list, String name)
 	{
-		if (list != null)
+		int index = getDataNameTypeIndexByName(list, name);
+		return (index < 0 ? null : list.get(index));
+	}
+
+	/**
+	 * 获取指定名称的{@linkplain DataNameType}的索引。
+	 * 
+	 * @param <T>
+	 * @param list
+	 *            允许为{@code null}
+	 * @param name
+	 * @return
+	 */
+	protected <T extends DataNameType> int getDataNameTypeIndexByName(List<T> list, String name)
+	{
+		if (list == null)
+			list = Collections.emptyList();
+
+		for (int i = 0, len = list.size(); i < len; i++)
 		{
-			for (T t : list)
-			{
-				if (t.getName().equals(name))
-					return t;
-			}
+			if (name.equals(list.get(i).getName()))
+				return i;
 		}
 
-		return null;
+		return -1;
 	}
 
 	@SuppressWarnings("unchecked")

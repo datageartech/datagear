@@ -8,6 +8,7 @@
 package org.datagear.analysis.support;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
@@ -45,13 +46,12 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	public DataSetResult getResult(DataSetQuery query) throws DataSetException
 	{
 		query = toNonNullDataSetQuery(query);
-
 		List<DataSetProperty> properties = getProperties();
 
 		if (properties == null || properties.isEmpty())
-			throw new DataSetException("[getProperties()] must not be empty");
+			throw new DataSetException("[this.getProperties()] must not be empty");
 
-		ResolvedDataSetResult result = resolveResult(query, properties);
+		ResolvedDataSetResult result = resolveResult(query, properties, false);
 
 		return result.getResult();
 	}
@@ -61,7 +61,9 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 			throws DataSetException
 	{
 		query = toNonNullDataSetQuery(query);
-		return resolveResult(query, null);
+		List<DataSetProperty> properties = getProperties();
+
+		return resolveResult(query, properties, true);
 	}
 
 	/**
@@ -69,11 +71,76 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * 
 	 * @param query
 	 * @param properties
-	 *            允许为{@code null}/空，此时，应自动解析并设置返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}；
-	 *            如果不为{@code null}/空，直接将{@code properties}作为解析数据依据， 使用它处理结果数据，
-	 *            并设置为返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}
+	 *            允许为{@code null}
+	 * @param resolveProperties
+	 *            是否从数据中解析{@linkplain DataSetProperty}，如果为{@code true}，将解析且合并{@code properties}参数，
+	 *            并设置为{@linkplain ResolvedDataSetResult#setProperties(List)}；如果为{@code false}，
+	 *            将把{@code properties}参数直接设置为{@linkplain ResolvedDataSetResult#setProperties(List)}
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected abstract ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties) throws DataSetException;
+	protected abstract ResolvedDataSetResult resolveResult(DataSetQuery query,
+			List<DataSetProperty> properties, boolean resolveProperties) throws DataSetException;
+
+	/**
+	 * 合并{@linkplain DataSetProperty}。
+	 * <p>
+	 * 将{@code merged}待合并项里的{@linkplain DataSetProperty#getType()}、{@linkplain DataSetProperty#getLabel()}、
+	 * {@linkplain DataSetProperty#getDefaultValue()}合并至{@code dataSetProperties}里的同名项，
+	 * 多余项则直接添加至{@code dataSetProperties}，另外，也会根据{@code merged}里的排序对{@code dataSetProperties}重排。
+	 * </p>
+	 * 
+	 * @param dataSetProperties
+	 *            必须是可编辑的列表
+	 * @param merged
+	 *            待合并项，允许为{@code null}
+	 * @return
+	 */
+	protected void mergeDataSetProperties(List<? extends DataSetProperty> dataSetProperties,
+			List<? extends DataSetProperty> merged)
+	{
+		if (merged == null)
+			merged = Collections.emptyList();
+
+		@SuppressWarnings("unchecked")
+		List<DataSetProperty> dps = (List<DataSetProperty>) dataSetProperties;
+
+		for (DataSetProperty dp : dps)
+		{
+			DataSetProperty mp = getDataNameTypeByName(merged, dp.getName());
+			
+			if(mp != null)
+			{
+				dp.setType(mp.getType());
+				dp.setLabel(mp.getLabel());
+				dp.setDefaultValue(mp.getDefaultValue());
+			}
+		}
+
+		for (DataSetProperty mp : merged)
+		{
+			if (getDataNameTypeByName(dps, mp.getName()) == null)
+				dps.add(mp);
+		}
+
+		final List<? extends DataSetProperty> mergedFinal = merged;
+
+		dps.sort(new Comparator<DataSetProperty>()
+		{
+			@Override
+			public int compare(DataSetProperty o1, DataSetProperty o2)
+			{
+				// 优先按照merged列表中的顺序重排
+				int o1Idx = getDataNameTypeIndexByName(mergedFinal, o1.getName());
+				int o2Idx = getDataNameTypeIndexByName(mergedFinal, o2.getName());
+
+				if (o1Idx < 0)
+					o1Idx = getDataNameTypeIndexByName(dps, o1.getName());
+				if (o2Idx < 0)
+					o2Idx = getDataNameTypeIndexByName(dps, o2.getName());
+
+				return Integer.valueOf(o1Idx).compareTo(o2Idx);
+			}
+		});
+	}
 }
