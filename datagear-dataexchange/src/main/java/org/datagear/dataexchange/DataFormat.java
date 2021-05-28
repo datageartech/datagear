@@ -10,7 +10,7 @@ package org.datagear.dataexchange;
 import java.io.Serializable;
 import java.util.Locale;
 
-import org.datagear.util.DateFormat;
+import org.datagear.util.DateNumberFormat;
 
 /**
  * 数据格式。
@@ -18,11 +18,9 @@ import org.datagear.util.DateFormat;
  * @author datagear@163.com
  *
  */
-public class DataFormat extends DateFormat implements Serializable
+public class DataFormat extends DateNumberFormat implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-
-	public static final String DEFAULT_NUMBER_FORMAT = "#.######";
 
 	public static final String BINARY_FORMAT_HEX = "Hex";
 
@@ -32,9 +30,6 @@ public class DataFormat extends DateFormat implements Serializable
 
 	/** 地区 */
 	private Locale locale = Locale.getDefault();
-
-	/** 数值格式 */
-	private String numberFormat = DEFAULT_NUMBER_FORMAT;
 
 	/** 二进制格式 */
 	private String binaryFormat = BINARY_FORMAT_HEX;
@@ -52,7 +47,7 @@ public class DataFormat extends DateFormat implements Serializable
 		setDateFormat(dateFormat);
 		setTimeFormat(timeFormat);
 		setTimestampFormat(timestampFormat);
-		this.numberFormat = numberFormat;
+		setNumberFormat(numberFormat);
 		this.binaryFormat = binaryFormat;
 	}
 
@@ -64,16 +59,6 @@ public class DataFormat extends DateFormat implements Serializable
 	public void setLocale(Locale locale)
 	{
 		this.locale = locale;
-	}
-
-	public String getNumberFormat()
-	{
-		return numberFormat;
-	}
-
-	public void setNumberFormat(String numberFormat)
-	{
-		this.numberFormat = numberFormat;
 	}
 
 	public String getBinaryFormat()
@@ -90,7 +75,8 @@ public class DataFormat extends DateFormat implements Serializable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [dateFormat=" + getDateFormat() + ", timeFormat=" + getTimeFormat()
-				+ ", timestampFormat=" + getTimestampFormat() + ", numberFormat=" + numberFormat + ", binaryFormat="
+				+ ", timestampFormat=" + getTimestampFormat() + ", numberFormat=" + getNumberFormat()
+				+ ", binaryFormat="
 				+ binaryFormat + "]";
 	}
 }
