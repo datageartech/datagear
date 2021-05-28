@@ -27,12 +27,12 @@ public class DateFormat implements Serializable
 	/**
 	 * 默认时间格式：hh:mm:ss
 	 */
-	public static final String DEFAULT_TIME_FORMAT = "hh:mm:ss";
+	public static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
 
 	/**
 	 * 默认时间戳格式：yyyy-MM-dd hh:mm:ss
 	 */
-	public static final String DEFAULT_TIMESTAMP_FORMAT = "yyyy-MM-dd hh:mm:ss";
+	public static final String DEFAULT_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 	/** 日期格式 */
 	private String dateFormat = DEFAULT_DATE_FORMAT;
