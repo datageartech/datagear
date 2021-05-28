@@ -46,7 +46,7 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 	public DataSetPropertyValueConverter(DataFormat dataFormat)
 	{
 		super();
-		setDataFormat(new DataFormat());
+		setDataFormat(dataFormat);
 	}
 
 	public DataFormat getDataFormat()

@@ -163,17 +163,16 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 解析结果。
+	 * 解析结果数据。
 	 * 
-	 * @param rawData
-	 *            {@code Collection<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
+	 * @param rawData    {@code Collection<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
 	 * @param properties
-	 * @param format 允许为{@code null}
+	 * @param format     允许为{@code null}
 	 * @return {@code List<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
 	 * @throws Throwable
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetProperty> properties,
+	protected Object resolveResultData(Object rawData, List<DataSetProperty> properties,
 			ResultDataFormat format) throws Throwable
 	{
 		Object data = null;
@@ -208,6 +207,23 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 			throw new UnsupportedOperationException(
 					"Unsupported raw data type : " + rawData.getClass().getSimpleName());
 
+		return data;
+	}
+
+	/**
+	 * 解析结果。
+	 * 
+	 * @param rawData
+	 * @param properties
+	 * @param format     允许为{@code null}
+	 * @return
+	 * @throws Throwable
+	 * @see {@link #resolveResultData(Object, List, ResultDataFormat)}
+	 */
+	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetProperty> properties,
+			ResultDataFormat format) throws Throwable
+	{
+		Object data = resolveResultData(rawData, properties, format);
 		return new ResolvedDataSetResult(new DataSetResult(data), properties);
 	}
 
