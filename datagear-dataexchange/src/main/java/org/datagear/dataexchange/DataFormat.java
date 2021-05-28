@@ -10,21 +10,17 @@ package org.datagear.dataexchange;
 import java.io.Serializable;
 import java.util.Locale;
 
+import org.datagear.util.DateFormat;
+
 /**
  * 数据格式。
  * 
  * @author datagear@163.com
  *
  */
-public class DataFormat implements Serializable
+public class DataFormat extends DateFormat implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-
-	public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
-
-	public static final String DEFAULT_TIME_FORMAT = "hh:mm:ss";
-
-	public static final String DEFAULT_TIMESTAMP_FORMAT = "yyyy-MM-dd hh:mm:ss";
 
 	public static final String DEFAULT_NUMBER_FORMAT = "#.######";
 
@@ -36,15 +32,6 @@ public class DataFormat implements Serializable
 
 	/** 地区 */
 	private Locale locale = Locale.getDefault();
-
-	/** 日期格式 */
-	private String dateFormat = DEFAULT_DATE_FORMAT;
-
-	/** 时间格式 */
-	private String timeFormat = DEFAULT_TIME_FORMAT;
-
-	/** 时间戳格式 */
-	private String timestampFormat = DEFAULT_TIMESTAMP_FORMAT;
 
 	/** 数值格式 */
 	private String numberFormat = DEFAULT_NUMBER_FORMAT;
@@ -62,9 +49,9 @@ public class DataFormat implements Serializable
 	{
 		super();
 		this.locale = locale;
-		this.dateFormat = dateFormat;
-		this.timeFormat = timeFormat;
-		this.timestampFormat = timestampFormat;
+		setDateFormat(dateFormat);
+		setTimeFormat(timeFormat);
+		setTimestampFormat(timestampFormat);
 		this.numberFormat = numberFormat;
 		this.binaryFormat = binaryFormat;
 	}
@@ -77,36 +64,6 @@ public class DataFormat implements Serializable
 	public void setLocale(Locale locale)
 	{
 		this.locale = locale;
-	}
-
-	public String getDateFormat()
-	{
-		return dateFormat;
-	}
-
-	public void setDateFormat(String dateFormat)
-	{
-		this.dateFormat = dateFormat;
-	}
-
-	public String getTimeFormat()
-	{
-		return timeFormat;
-	}
-
-	public void setTimeFormat(String timeFormat)
-	{
-		this.timeFormat = timeFormat;
-	}
-
-	public String getTimestampFormat()
-	{
-		return timestampFormat;
-	}
-
-	public void setTimestampFormat(String timestampFormat)
-	{
-		this.timestampFormat = timestampFormat;
 	}
 
 	public String getNumberFormat()
@@ -132,8 +89,8 @@ public class DataFormat implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [dateFormat=" + dateFormat + ", timeFormat=" + timeFormat
-				+ ", timestampFormat=" + timestampFormat + ", numberFormat=" + numberFormat + ", binaryFormat="
+		return getClass().getSimpleName() + " [dateFormat=" + getDateFormat() + ", timeFormat=" + getTimeFormat()
+				+ ", timestampFormat=" + getTimestampFormat() + ", numberFormat=" + numberFormat + ", binaryFormat="
 				+ binaryFormat + "]";
 	}
 }
