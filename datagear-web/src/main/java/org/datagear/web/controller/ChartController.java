@@ -23,6 +23,7 @@ import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.ResultDataFormat;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
@@ -146,6 +147,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
+		chart.setResultDataFormat(createDefaultResultDataFormat());
 		setCookieAnalysisProject(request, response, chart);
 
 		model.addAttribute("chart", chart);
@@ -168,6 +170,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			throw new RecordNotFoundException();
 
 		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
+
+		if (chart.getResultDataFormat() == null)
+			chart.setResultDataFormat(createDefaultResultDataFormat());
 
 		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
 				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
@@ -489,6 +494,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			HtmlChartWidgetEntity entity)
 	{
 		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
+	}
+
+	protected ResultDataFormat createDefaultResultDataFormat()
+	{
+		ResultDataFormat rdf = new ResultDataFormat();
+		rdf.setDateType(ResultDataFormat.TYPE_STRING);
+		rdf.setTimeType(ResultDataFormat.TYPE_STRING);
+		rdf.setTimestampType(ResultDataFormat.TYPE_STRING);
+
+		return rdf;
 	}
 
 	protected void checkSaveEntity(HtmlChartWidgetEntity chart)

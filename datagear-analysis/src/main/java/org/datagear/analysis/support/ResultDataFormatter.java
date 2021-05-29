@@ -78,11 +78,11 @@ public class ResultDataFormatter
 			}
 			else if(ResultDataFormat.TYPE_STRING.equals(type))
 			{
-				value = this._timestampFormat.format((java.sql.Timestamp)value);
+				re = this._timestampFormat.format((java.sql.Timestamp) value);
 			}
 			else if(ResultDataFormat.TYPE_NUMBER.equals(type))
 			{
-				((java.sql.Timestamp)value).getTime();
+				re = ((java.sql.Timestamp) value).getTime();
 			}
 		}
 		else if(value instanceof java.sql.Time)
@@ -95,11 +95,11 @@ public class ResultDataFormatter
 			}
 			else if(ResultDataFormat.TYPE_STRING.equals(type))
 			{
-				value = this._timeFormat.format((java.sql.Time)value);
+				re = this._timeFormat.format((java.sql.Time) value);
 			}
 			else if(ResultDataFormat.TYPE_NUMBER.equals(type))
 			{
-				((java.sql.Time)value).getTime();
+				re = ((java.sql.Time) value).getTime();
 			}
 		}
 		else if(value instanceof java.util.Date)
@@ -112,11 +112,11 @@ public class ResultDataFormatter
 			}
 			else if(ResultDataFormat.TYPE_STRING.equals(type))
 			{
-				value = this._dateFormat.format((java.util.Date)value);
+				re = this._dateFormat.format((java.util.Date) value);
 			}
 			else if(ResultDataFormat.TYPE_NUMBER.equals(type))
 			{
-				((java.util.Date)value).getTime();
+				re = ((java.util.Date) value).getTime();
 			}
 		}
 		

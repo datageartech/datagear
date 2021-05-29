@@ -16,6 +16,7 @@ readonly 是否只读操作，允许为null
 <#assign formAction=(formAction!'#')>
 <#assign readonly=(readonly!false)>
 <#assign isAdd=(formAction == 'saveAdd')>
+<#assign ResultDataFormat=statics['org.datagear.analysis.ResultDataFormat']>
 <html>
 <head>
 <#include "../../include/html_head.ftl">
@@ -62,6 +63,7 @@ readonly 是否只读操作，允许为null
 					<#if !readonly>
 					<button type="button" class="add-data-set-button"><@spring.message code='add' /></button>
 					</#if>
+					<button type="button" class="dataformat-button"><@spring.message code='chart.resultDataFormat' /></button>
 					<div class='data-sign-select-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
 						<div class="select-panel-head ui-widget-header ui-corner-all"><@spring.message code='chart.selectDataSign' /></div>
 						<div class="select-panel-content">
@@ -69,6 +71,112 @@ readonly 是否只读操作，允许为null
 							<div class="content-right ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 								<div class="data-sign-label"></div>
 								<div class="data-sign-desc"></div>
+							</div>
+						</div>
+					</div>
+					<div id="${pageId}-dataFormatPanel" class='dataformat-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+						<div class="panel-head ui-widget-header ui-corner-all">
+							<label class="tip-label" title="<@spring.message code='chart.resultDataFormat.desc' />">
+								<@spring.message code='chart.resultDataFormat' />
+							</label>
+						</div>
+						<div class="panel-content">
+							<div class="form">
+								<div class="form-content">
+									<div class="form-item">
+										<div class="form-item-label">
+											<label><@spring.message code='chart.resultDataFormat.dateType' /></label>
+										</div>
+										<div class="form-item-value">
+											<div class="resultDataFormat-dateType-radios">
+												<label for="${pageId}-resultDataFormat-dateType-0" title="">
+													<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
+												</label>
+									   			<input type="radio" id="${pageId}-resultDataFormat-dateType-0"
+									   				<#if ResultDataFormat.TYPE_STRING == chart.resultDataFormat.dateType>checked="checked"</#if>
+									   				name="resultDataFormat.dateType" value="${ResultDataFormat.TYPE_STRING}" />
+												<label for="${pageId}-resultDataFormat-dateType-1" title="">
+													<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
+												</label>
+									   			<input type="radio" id="${pageId}-resultDataFormat-dateType-1"
+									   				<#if ResultDataFormat.TYPE_NUMBER == chart.resultDataFormat.dateType>checked="checked"</#if>
+									   				name="resultDataFormat.dateType" value="${ResultDataFormat.TYPE_NUMBER}" />
+											</div>
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-item-label">
+											<label title="<@spring.message code='chart.resultDataFormat.dateFormat.desc' />">
+												<@spring.message code='chart.resultDataFormat.dateFormat' />
+											</label>
+										</div>
+										<div class="form-item-value">
+											<input name="resultDataFormat.dateFormat" type="text" value="${(chart.resultDataFormat.dateFormat)!}" class="ui-widget ui-widget-content" />
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-item-label">
+											<label><@spring.message code='chart.resultDataFormat.timeType' /></label>
+										</div>
+										<div class="form-item-value">
+											<div class="resultDataFormat-timeType-radios">
+												<label for="${pageId}-resultDataFormat-timeType-0" title="">
+													<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
+												</label>
+									   			<input type="radio" id="${pageId}-resultDataFormat-timeType-0"
+									   				<#if ResultDataFormat.TYPE_STRING == chart.resultDataFormat.timeType>checked="checked"</#if>
+									   				name="resultDataFormat.timeType" value="${ResultDataFormat.TYPE_STRING}" />
+												<label for="${pageId}-resultDataFormat-timeType-1" title="">
+													<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
+												</label>
+									   			<input type="radio" id="${pageId}-resultDataFormat-timeType-1"
+									   				<#if ResultDataFormat.TYPE_NUMBER == chart.resultDataFormat.timeType>checked="checked"</#if>
+									   				name="resultDataFormat.timeType" value="${ResultDataFormat.TYPE_NUMBER}" />
+											</div>
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-item-label">
+											<label title="<@spring.message code='chart.resultDataFormat.timeFormat.desc' />">
+												<@spring.message code='chart.resultDataFormat.timeFormat' />
+											</label>
+										</div>
+										<div class="form-item-value">
+											<input name="resultDataFormat.timeFormat" type="text" value="${(chart.resultDataFormat.timeFormat)!}" class="ui-widget ui-widget-content" />
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-item-label">
+											<label><@spring.message code='chart.resultDataFormat.timestampType' /></label>
+										</div>
+										<div class="form-item-value">
+											<div class="resultDataFormat-timestampType-radios">
+												<label for="${pageId}-resultDataFormat-timestampType-0" title="">
+													<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
+												</label>
+									   			<input type="radio" id="${pageId}-resultDataFormat-timestampType-0"
+									   				<#if ResultDataFormat.TYPE_STRING == chart.resultDataFormat.timestampType>checked="checked"</#if>
+									   				name="resultDataFormat.timestampType" value="${ResultDataFormat.TYPE_STRING}" />
+												<label for="${pageId}-resultDataFormat-timestampType-1" title="">
+													<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
+												</label>
+									   			<input type="radio" id="${pageId}-resultDataFormat-timestampType-1"
+									   				<#if ResultDataFormat.TYPE_NUMBER == chart.resultDataFormat.timestampType>checked="checked"</#if>
+									   				name="resultDataFormat.timestampType" value="${ResultDataFormat.TYPE_NUMBER}" />
+											</div>
+										</div>
+									</div>
+									<div class="form-item">
+										<div class="form-item-label">
+											<label title="<@spring.message code='chart.resultDataFormat.timestampFormat.desc' />">
+												<@spring.message code='chart.resultDataFormat.timestampFormat' />
+											</label>
+										</div>
+										<div class="form-item-value">
+											<input name="resultDataFormat.timestampFormat" type="text" value="${(chart.resultDataFormat.timestampFormat)!}" class="ui-widget ui-widget-content" />
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -126,6 +234,16 @@ readonly 是否只读操作，允许为null
 	
 	po.element("input[name='updateIntervalRadio']").checkboxradio({icon:false});
 	po.element(".updateInterval-radios").controlgroup();
+	
+	po.element("input[name='resultDataFormat.dateType']").checkboxradio({icon:false});
+	po.element("input[name='resultDataFormat.timeType']").checkboxradio({icon:false});
+	po.element("input[name='resultDataFormat.timestampType']").checkboxradio({icon:false});
+	//隐藏元素设置controlgroup组件没有圆角效果，所以这里先显示设置后再隐藏
+	po.element(".dataformat-panel").addClass("transparency").show();
+	po.element(".resultDataFormat-dateType-radios").controlgroup();
+	po.element(".resultDataFormat-timeType-radios").controlgroup();
+	po.element(".resultDataFormat-timestampType-radios").controlgroup();
+	po.element(".dataformat-panel").removeClass("transparency").hide();
 	
 	po.url = function(action)
 	{
@@ -509,6 +627,11 @@ readonly 是否只读操作，允许为null
 		</#if>
 	};
 	
+	po.element(".dataformat-button").click(function()
+	{
+		po.element("#${pageId}-dataFormatPanel").toggle();
+	});
+	
 	po.element(".add-data-set-button").click(function()
 	{
 		var options =
@@ -786,6 +909,13 @@ readonly 是否只读操作，允许为null
 		{
 			if($target.closest(".data-sign-select-panel, .sign-add-button").length == 0)
 				$ssp.hide();
+		}
+		
+		var $dfp = po.element(".dataformat-panel");
+		if(!$dfp.is(":hidden"))
+		{
+			if($target.closest(".dataformat-panel, .dataformat-button").length == 0)
+				$dfp.hide();
 		}
 	});
 	

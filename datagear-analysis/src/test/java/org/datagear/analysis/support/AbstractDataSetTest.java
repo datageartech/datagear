@@ -21,6 +21,7 @@ import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.ResultDataFormat;
 import org.junit.Test;
 
 /**
@@ -32,7 +33,7 @@ import org.junit.Test;
 public class AbstractDataSetTest
 {
 	@Test
-	public void resolveResultDataTest_defaultDataFormat() throws Throwable
+	public void resolveResultDataTest_dataFormat_default() throws Throwable
 	{
 		TestAbstractDataSet dataSet = new TestAbstractDataSet();
 
@@ -89,7 +90,7 @@ public class AbstractDataSetTest
 	}
 
 	@Test
-	public void resolveResultDataTest_customDataFormat() throws Throwable
+	public void resolveResultDataTest_dataFormat_custom() throws Throwable
 	{
 		TestAbstractDataSet dataSet = new TestAbstractDataSet();
 
@@ -150,6 +151,160 @@ public class AbstractDataSetTest
 		assertEquals(raw1.get("date"), dateFormat.format(((Date) re1.get("date"))));
 		assertEquals(raw1.get("time"), timeFormat.format(((Date) re1.get("time"))));
 		assertEquals(raw1.get("timestamp"), timestampFormat.format(((Date) re1.get("timestamp"))));
+	}
+
+	@Test
+	public void resolveResultDataTest_resultDataFormat() throws Throwable
+	{
+		TestAbstractDataSet dataSet = new TestAbstractDataSet();
+
+		List<Map<String, Object>> rawData = new ArrayList<Map<String, Object>>();
+
+		Map<String, Object> raw0 = new HashMap<String, Object>();
+		raw0.put("number", "4.1");
+		raw0.put("date", "2021-01-01");
+		raw0.put("time", "14:41:41");
+		raw0.put("timestamp", "2021-01-01 14:41:41");
+
+		Map<String, Object> raw1 = new HashMap<String, Object>();
+		raw1.put("number", "4.2");
+		raw1.put("date", "2021-01-02");
+		raw1.put("time", "14:41:42");
+		raw1.put("timestamp", "2021-01-01 14:41:42");
+
+		Collections.addAll(rawData, raw0, raw1);
+
+		List<DataSetProperty> properties = new ArrayList<DataSetProperty>();
+		{
+			DataSetProperty p0 = new DataSetProperty("number", DataSetProperty.DataType.NUMBER);
+			DataSetProperty p1 = new DataSetProperty("date", DataSetProperty.DataType.DATE);
+			DataSetProperty p2 = new DataSetProperty("time", DataSetProperty.DataType.TIME);
+			DataSetProperty p3 = new DataSetProperty("timestamp", DataSetProperty.DataType.TIMESTAMP);
+
+			Collections.addAll(properties, p0, p1, p2, p3);
+		}
+
+		// 字符串
+		{
+			ResultDataFormat resultDataFormat = new ResultDataFormat();
+			resultDataFormat.setDateType(ResultDataFormat.TYPE_STRING);
+			resultDataFormat.setTimeType(ResultDataFormat.TYPE_STRING);
+			resultDataFormat.setTimestampType(ResultDataFormat.TYPE_STRING);
+			resultDataFormat.setDateFormat("yyyy年MM月dd日");
+			resultDataFormat.setTimeFormat("HH时mm分ss秒");
+			resultDataFormat.setTimestampFormat("yyyy年MM月dd日HH时mm分ss秒");
+
+			@SuppressWarnings("unchecked")
+			List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
+					properties, resultDataFormat);
+
+			assertEquals(rawData.size(), resultData.size());
+
+			Map<String, Object> re0 = resultData.get(0);
+
+			assertEquals(raw0.get("number"), ((Double) re0.get("number")).toString());
+			assertEquals("2021年01月01日", re0.get("date"));
+			assertEquals("14时41分41秒", re0.get("time"));
+			assertEquals("2021年01月01日14时41分41秒", re0.get("timestamp"));
+
+			Map<String, Object> re1 = resultData.get(1);
+
+			assertEquals(raw1.get("number"), ((Double) re1.get("number")).toString());
+			assertEquals("2021年01月02日", re1.get("date"));
+			assertEquals("14时41分42秒", re1.get("time"));
+			assertEquals("2021年01月01日14时41分42秒", re1.get("timestamp"));
+		}
+
+		// 数值
+		{
+			ResultDataFormat resultDataFormat = new ResultDataFormat();
+			resultDataFormat.setDateType(ResultDataFormat.TYPE_NUMBER);
+			resultDataFormat.setTimeType(ResultDataFormat.TYPE_NUMBER);
+			resultDataFormat.setTimestampType(ResultDataFormat.TYPE_NUMBER);
+
+			@SuppressWarnings("unchecked")
+			List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
+					properties, resultDataFormat);
+
+			assertEquals(rawData.size(), resultData.size());
+
+			Map<String, Object> re0 = resultData.get(0);
+
+			assertEquals(raw0.get("number"), ((Double) re0.get("number")).toString());
+			assertEquals(1609430400000L, re0.get("date"));
+			assertEquals(24101000L, re0.get("time"));
+			assertEquals(1609483301000L, re0.get("timestamp"));
+
+			Map<String, Object> re1 = resultData.get(1);
+
+			assertEquals(raw1.get("number"), ((Double) re1.get("number")).toString());
+			assertEquals(1609516800000L, re1.get("date"));
+			assertEquals(24102000L, re1.get("time"));
+			assertEquals(1609483302000L, re1.get("timestamp"));
+		}
+
+		// 无
+		{
+			ResultDataFormat resultDataFormat = new ResultDataFormat();
+			resultDataFormat.setDateType(ResultDataFormat.TYPE_NONE);
+			resultDataFormat.setTimeType(ResultDataFormat.TYPE_NONE);
+			resultDataFormat.setTimestampType(ResultDataFormat.TYPE_NONE);
+
+			DataFormat dataFormat = dataSet.createDataSetPropertyValueConverter().getDataFormat();
+			SimpleDateFormat dateFormat = new SimpleDateFormat(dataFormat.getDateFormat());
+			SimpleDateFormat timeFormat = new SimpleDateFormat(dataFormat.getTimeFormat());
+			SimpleDateFormat timestampFormat = new SimpleDateFormat(dataFormat.getTimestampFormat());
+
+			@SuppressWarnings("unchecked")
+			List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
+					properties, resultDataFormat);
+
+			assertEquals(rawData.size(), resultData.size());
+
+			Map<String, Object> re0 = resultData.get(0);
+
+			assertEquals(raw0.get("number"), ((Double) re0.get("number")).toString());
+			assertEquals(raw0.get("date"), dateFormat.format(((Date) re0.get("date"))));
+			assertEquals(raw0.get("time"), timeFormat.format(((Date) re0.get("time"))));
+			assertEquals(raw0.get("timestamp"), timestampFormat.format(((Date) re0.get("timestamp"))));
+
+			Map<String, Object> re1 = resultData.get(1);
+
+			assertEquals(raw1.get("number"), ((Double) re1.get("number")).toString());
+			assertEquals(raw1.get("date"), dateFormat.format(((Date) re1.get("date"))));
+			assertEquals(raw1.get("time"), timeFormat.format(((Date) re1.get("time"))));
+			assertEquals(raw1.get("timestamp"), timestampFormat.format(((Date) re1.get("timestamp"))));
+		}
+
+		// 无
+		{
+			ResultDataFormat resultDataFormat = new ResultDataFormat();
+
+			DataFormat dataFormat = dataSet.createDataSetPropertyValueConverter().getDataFormat();
+			SimpleDateFormat dateFormat = new SimpleDateFormat(dataFormat.getDateFormat());
+			SimpleDateFormat timeFormat = new SimpleDateFormat(dataFormat.getTimeFormat());
+			SimpleDateFormat timestampFormat = new SimpleDateFormat(dataFormat.getTimestampFormat());
+
+			@SuppressWarnings("unchecked")
+			List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
+					properties, resultDataFormat);
+
+			assertEquals(rawData.size(), resultData.size());
+
+			Map<String, Object> re0 = resultData.get(0);
+
+			assertEquals(raw0.get("number"), ((Double) re0.get("number")).toString());
+			assertEquals(raw0.get("date"), dateFormat.format(((Date) re0.get("date"))));
+			assertEquals(raw0.get("time"), timeFormat.format(((Date) re0.get("time"))));
+			assertEquals(raw0.get("timestamp"), timestampFormat.format(((Date) re0.get("timestamp"))));
+
+			Map<String, Object> re1 = resultData.get(1);
+
+			assertEquals(raw1.get("number"), ((Double) re1.get("number")).toString());
+			assertEquals(raw1.get("date"), dateFormat.format(((Date) re1.get("date"))));
+			assertEquals(raw1.get("time"), timeFormat.format(((Date) re1.get("time"))));
+			assertEquals(raw1.get("timestamp"), timestampFormat.format(((Date) re1.get("timestamp"))));
+		}
 	}
 
 	private static class TestAbstractDataSet extends AbstractDataSet

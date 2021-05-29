@@ -19,6 +19,10 @@ body{
 	opacity: 0.7;
 	filter: Alpha(Opacity=70);
 }
+.transparency{
+	opacity: 0;
+	filter: Alpha(Opacity=0);
+}
 
 a.link,
 a.link:link,
@@ -2630,7 +2634,7 @@ table.dataTable tbody tr td select{
 	display: none;
 }
 .page-form-dataSet .workspace .dataformat-panel .form-item .form-item-label{
-	width: 35%
+	width: 35%;
 }
 .page-form-dataSet .workspace .dataformat-panel .form-item .form-item-value{
 	width: 65%;
@@ -2865,9 +2869,15 @@ table.dataTable tbody tr td select{
 	margin-bottom: 0.41em;
 }
 .page-form-chart .add-data-set-button{
-	vertical-align: top;
 	position: absolute;
 	left: 60%;
+	top: 0;
+	margin-left: 1em;
+}
+.page-form-chart .dataformat-button{
+	position: absolute;
+	left: 60%;
+	bottom: 1.4em;
 	margin-left: 1em;
 }
 .page-form-chart .data-set-param-value-panel{
@@ -2886,6 +2896,31 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-set-param-value-panel .data-set-param-value-panel-content .dg-dspv-form-content{
 	max-height: 14em;
 	overflow: auto;
+}
+.page-form-chart .dataformat-panel{
+	position: absolute;
+	right: 40%;
+	bottom: -0.41em;
+	width: 60%;
+	margin-right: -1rem;
+	display: none;
+}
+.page-form-chart .dataformat-panel .form-item{
+	display: block !important;
+}
+.page-form-chart .dataformat-panel .form-item .form-item-label{
+	width: 35% !important;
+}
+.page-form-chart .dataformat-panel .form-item .form-item-label label{
+	width: 95% !important;
+}
+.page-form-chart .dataformat-panel .form-item .form-item-value{
+	width: 65% !important;
+	margin-left: -0.71em !important;
+	padding-left: 0.71em !important;
+}
+.page-form-chart .dataformat-panel .form-item .form-item-value input[type=text]{
+	width: 80% !important;
 }
 
 .page-grid-chartPlugin{

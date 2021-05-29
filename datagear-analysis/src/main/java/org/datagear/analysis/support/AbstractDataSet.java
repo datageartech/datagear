@@ -240,6 +240,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 			List<DataSetProperty> properties, ResultDataFormat format) throws Throwable
 	{
 		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
+		ResultDataFormatter formatter = (format == null ? null : new ResultDataFormatter(format));
 
 		List<Map<String, Object>> data = new ArrayList<>(rawData.size());
 
@@ -272,6 +273,9 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 					value = defaultValues[j];
 				}
+
+				if (formatter != null)
+					value = formatter.format(value);
 
 				row.put(name, value);
 			}
