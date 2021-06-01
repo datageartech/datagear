@@ -7,6 +7,8 @@
 
 package org.datagear.analysis.support;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,7 +26,11 @@ import org.datagear.analysis.DataNameType;
  */
 public abstract class DataValueConverter
 {
+	/** 正则表达式：小数 */
 	public static final Pattern PATTERN_DECIMAL_NUMBER = Pattern.compile("^[^\\.]+\\.[^\\.]+$");
+
+	/** 正则表达式：整数 */
+	public static final Pattern PATTERN_INTEGER = Pattern.compile("^-?[1-9]\\d*$");
 
 	/**
 	 * 转换数据值映射表，返回一个经转换的新映射表。
@@ -214,8 +220,53 @@ public abstract class DataValueConverter
 				"Convert [" + value + "] to type [" + type + "] is not supported");
 	}
 
+	/**
+	 * 将字符串转换为日期。
+	 * <p>
+	 * 如果{@code str}不匹配{@code format}，但又匹配整数的话，将按照毫秒数转换处理。
+	 * </p>
+	 * 
+	 * @param str
+	 * @param format
+	 * @return
+	 * @throws ParseException
+	 */
+	protected java.util.Date convertToDateWithInteger(String str, SimpleDateFormat format) throws ParseException
+	{
+		if(str == null || str.isEmpty())
+			return null;
+		
+		try
+		{
+			return format.parse(str);
+		}
+		catch(ParseException e)
+		{
+			// 是整数
+			if (isIntegerString(str))
+			{
+				try
+				{
+					long time = Long.valueOf(str);
+					return new java.util.Date(time);
+				}
+				catch (NumberFormatException e1)
+				{
+					throw e;
+				}
+			}
+			else
+				throw e;
+		}
+	}
+
 	protected boolean isDecimalNumberString(String str)
 	{
 		return PATTERN_DECIMAL_NUMBER.matcher(str).matches();
+	}
+
+	protected boolean isIntegerString(String str)
+	{
+		return PATTERN_INTEGER.matcher(str).matches();
 	}
 }

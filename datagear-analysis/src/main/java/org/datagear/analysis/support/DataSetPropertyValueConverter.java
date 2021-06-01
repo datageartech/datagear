@@ -123,17 +123,17 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 			return this._numberFormat.parse(value).doubleValue();
 		else if (DataType.DATE.equals(type))
 		{
-			java.util.Date date = this._dateFormat.parse(value);
+			java.util.Date date = convertToDateWithInteger(value, this._dateFormat);
 			return new Date(date.getTime());
 		}
 		else if (DataType.TIME.equals(type))
 		{
-			java.util.Date date = this._timeFormat.parse(value);
+			java.util.Date date = convertToDateWithInteger(value, this._timeFormat);
 			return new Time(date.getTime());
 		}
 		else if (DataType.TIMESTAMP.equals(type))
 		{
-			java.util.Date date = this._timestampFormat.parse(value);
+			java.util.Date date = convertToDateWithInteger(value, this._timestampFormat);
 			return new Timestamp(date.getTime());
 		}
 		else
