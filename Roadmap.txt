@@ -2,7 +2,7 @@
 	ok 图表可自定义日期类数据格式；
 	ok 数据集预览时可自动合并页面端编辑的属性；
 	ok 自定义数据集数据格式；
-	ok 升级SpringBoot至2.4.5版本；
+	ok 升级SpringBoot至2.4.6版本；
 	ok 修复数据管理功能不支持Oracle同义词的BUG；
 	ok 修复内置Oracle驱动缺少orai18n.jar导致无法访问某些版本数据库的BUG；
 	ok 修复列表页分页组件未设置英语语言时的BUG；

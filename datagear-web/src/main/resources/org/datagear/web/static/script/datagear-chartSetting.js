@@ -345,6 +345,9 @@
 		if(defaultSelOpts && payload && payload.length == 0)
 			payload = defaultSelOpts;
 		
+		if(chartSetting.isString(payload))
+			payload = [ payload ];
+		
 		if($.isArray(payload))
 			payload = { multiple: false, options: payload };
 		
@@ -531,6 +534,9 @@
 		if(defaultSelOpts && opts && opts.length == 0)
 			opts = defaultSelOpts;
 		
+		if(chartSetting.isString(opts))
+			opts = [ opts ];
+		
 		var $inputsWrapper = $("<div class='dg-dspv-form-inputs-wrapper' />").appendTo($parent);
 		
 		for(var i=0; i<opts.length; i++)
@@ -589,6 +595,9 @@
 		
 		if(defaultSelOpts && opts && opts.length == 0)
 			opts = defaultSelOpts;
+		
+		if(chartSetting.isString(opts))
+			opts = [ opts ];
 		
 		if(value == null)
 			value = [];
@@ -826,6 +835,11 @@
 			return chartFactory.evalSilently(dataSetParam.inputPayload, defaultValue);
 		else
 			return (dataSetParam.inputPayload || defaultValue);
+	};
+	
+	chartSetting.isString = function(str)
+	{
+		return typeof(str) == "string";
 	};
 	
 	/**
