@@ -1062,6 +1062,22 @@
 	};
 	
 	/**
+	 * 获取/设置看板级的结果数据格式。
+	 * 如果某个图表的resultDataFormat()返回null，将会使用这个看板级的结果数据格式。
+	 * 设置了新的结果数据格式后，下一次图表刷新数据将采用这个新格式。
+	 * 
+	 * @param resultDataFormat 可选，要设置的结果数据格式，结构参考：org.datagear.analysis.ResultDataFormat
+	 * @returns 要获取的结果数据格式，没有则返回null
+	 */
+	dashboardBase.resultDataFormat = function(resultDataFormat)
+	{
+		if(resultDataFormat === undefined)
+			return this._resultDataFormat;
+		else
+			this._resultDataFormat = resultDataFormat;
+	};
+	
+	/**
 	 * 渲染看板。
 	 */
 	dashboardBase.render = function()
@@ -1444,12 +1460,30 @@
 			
 			for(var i=0; i<charts.length; i++)
 			{
-				var chartId = charts[i].id;
+				var chart = charts[i];
+				var chartId = chart.id;
 				
-				var chartDataSets = (charts[i].chartDataSets || []);
+				var chartDataSets = (chart.chartDataSets || []);
 				var myQueries = [];
 				for(var j=0; j<chartDataSets.length; j++)
-					myQueries.push(chartDataSets[j].query || {});
+				{
+					var myQuery = (chartDataSets[j].query || {});
+					
+					//结果数据格式优先级：查询级 > 图表级 > 看板级
+					var myRdf = myQuery.resultDataFormat;
+					if(myRdf == null)
+						myRdf = chart.resultDataFormat();
+					if(myRdf == null)
+						myRdf = this.resultDataFormat();
+					
+					if(myRdf != null)
+					{
+						myQuery = $.extend({}, myQuery);
+						myQuery.resultDataFormat = myRdf;
+					}
+					
+					myQueries.push(myQuery);
+				}
 				
 				chartIds[i] = chartId;				
 				chartQueries[chartId] = myQueries;

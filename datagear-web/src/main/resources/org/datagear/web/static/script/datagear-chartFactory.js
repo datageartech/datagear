@@ -365,8 +365,17 @@
 	 */
 	chartFactory.init = function(chart)
 	{
+		this._refactor(chart);
+		
 		$.extend(chart, this.chartBase);
 		chart.init();
+	};
+	
+	chartFactory._refactor = function(chart)
+	{
+		//chart.resultDataFormat属性与后面的chart.resultDataFormat()冲突，因此这里重构一下
+		chart._resultDataFormat = chart.resultDataFormat;
+		delete chart.resultDataFormat;
 	};
 	
 	//----------------------------------------
@@ -820,6 +829,21 @@
 			return this._renderer;
 		else
 			this._renderer = renderer;
+	};
+	
+	/**
+	 * 获取/设置结果数据格式。
+	 * 设置了新的结果数据格式后，下一次图表刷新数据将采用这个新格式。
+	 * 
+	 * @param resultDataFormat 可选，要设置的结果数据格式，结构参考：org.datagear.analysis.ResultDataFormat
+	 * @returns 要获取的结果数据格式，没有则返回null
+	 */
+	chartBase.resultDataFormat = function(resultDataFormat)
+	{
+		if(resultDataFormat === undefined)
+			return this._resultDataFormat;
+		else
+			this._resultDataFormat = resultDataFormat;
 	};
 	
 	/**

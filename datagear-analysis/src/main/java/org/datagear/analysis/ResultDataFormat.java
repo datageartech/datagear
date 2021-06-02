@@ -35,13 +35,13 @@ public class ResultDataFormat extends DateFormat
 	public static final String TYPE_NONE = "NONE";
 
 	/** 日期格式化类型 */
-	private String dateType = TYPE_NONE;
+	private String dateType = TYPE_STRING;
 
 	/** 时间格式化类型 */
-	private String timeType = TYPE_NONE;
+	private String timeType = TYPE_STRING;
 
 	/** 时间戳格式化类型 */
-	private String timestampType = TYPE_NONE;
+	private String timestampType = TYPE_STRING;
 	
 	public ResultDataFormat()
 	{

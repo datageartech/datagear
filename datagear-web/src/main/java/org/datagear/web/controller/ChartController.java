@@ -499,10 +499,6 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	protected ResultDataFormat createDefaultResultDataFormat()
 	{
 		ResultDataFormat rdf = new ResultDataFormat();
-		rdf.setDateType(ResultDataFormat.TYPE_STRING);
-		rdf.setTimeType(ResultDataFormat.TYPE_STRING);
-		rdf.setTimestampType(ResultDataFormat.TYPE_STRING);
-
 		return rdf;
 	}
 
