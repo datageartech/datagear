@@ -431,8 +431,10 @@ DataGear版本更新日志
 
 新增：图表编辑页面新增自定义日期类数据格式的功能；
 新增：数据集编辑页面新增自定义数据源格式的功能；
-新增：图表JS对象的chartDataSets元素新增query属性，替换已弃用的paramValues属性；
+新增：看板JS对象新增resultDataFormat函数，用于获取/设置看板级的结果数据格式；
+新增：图表JS对象新增resultDataFormat函数，用于获取/设置图表级的结果数据格式；
 新增：图表JS对象新增updateResults函数、替换已弃用的getUpdateResults函数；
+新增：图表JS对象的chartDataSets元素新增query属性，替换已弃用的paramValues属性；
 修复：修复数据管理功能不支持Oracle同义词的BUG；
 修复：修复内置Oracle驱动缺少orai18n.jar导致无法访问某些版本数据库的BUG；
 修复：修复数据集未正确处理24小时制日期和时间的BUG；
