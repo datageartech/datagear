@@ -147,11 +147,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
-		chart.setResultDataFormat(createDefaultResultDataFormat());
 		setCookieAnalysisProject(request, response, chart);
 
 		model.addAttribute("chart", chart);
 		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(null));
+		model.addAttribute("initResultDataFormat", createDefaultResultDataFormat());
+		model.addAttribute("enableResultDataFormat", false);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.addChart");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -171,9 +172,6 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
 
-		if (chart.getResultDataFormat() == null)
-			chart.setResultDataFormat(createDefaultResultDataFormat());
-
 		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
 				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
 				: null);
@@ -181,6 +179,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		model.addAttribute("chart", chart);
 		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(chartPluginVO));
 		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(toChartDataSetViewObjs(chart.getChartDataSets())));
+		model.addAttribute("initResultDataFormat",
+				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
+		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.editChart");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -240,6 +241,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		model.addAttribute("chart", chart);
 		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(chartPluginVO));
 		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(toChartDataSetViewObjs(chart.getChartDataSets())));
+		model.addAttribute("initResultDataFormat",
+				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
+		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.viewChart");
 		model.addAttribute(KEY_READONLY, true);
 

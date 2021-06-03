@@ -187,9 +187,6 @@ public class AbstractDataSetTest
 		// 字符串
 		{
 			ResultDataFormat resultDataFormat = new ResultDataFormat();
-			resultDataFormat.setDateType(ResultDataFormat.TYPE_STRING);
-			resultDataFormat.setTimeType(ResultDataFormat.TYPE_STRING);
-			resultDataFormat.setTimestampType(ResultDataFormat.TYPE_STRING);
 			resultDataFormat.setDateFormat("yyyy年MM月dd日");
 			resultDataFormat.setTimeFormat("HH时mm分ss秒");
 			resultDataFormat.setTimestampFormat("yyyy年MM月dd日HH时mm分ss秒");
@@ -279,6 +276,9 @@ public class AbstractDataSetTest
 		// 无
 		{
 			ResultDataFormat resultDataFormat = new ResultDataFormat();
+			resultDataFormat.setDateType(ResultDataFormat.TYPE_NONE);
+			resultDataFormat.setTimeType(ResultDataFormat.TYPE_NONE);
+			resultDataFormat.setTimestampType(ResultDataFormat.TYPE_NONE);
 
 			DataFormat dataFormat = dataSet.createDataSetPropertyValueConverter().getDataFormat();
 			SimpleDateFormat dateFormat = new SimpleDateFormat(dataFormat.getDateFormat());

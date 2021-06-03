@@ -187,7 +187,6 @@ public class MbSqlDialectBuilder
 		try
 		{
 			Class<?> dialectClass = Class.forName(dialectClassName);
-			@SuppressWarnings("deprecation")
 			MbSqlDialect dialect = (MbSqlDialect) dialectClass.newInstance();
 
 			if (StringUtil.isEmpty(dialect.getIdentifierQuote()))

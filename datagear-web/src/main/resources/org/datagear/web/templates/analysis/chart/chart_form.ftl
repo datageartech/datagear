@@ -85,6 +85,27 @@ readonly 是否只读操作，允许为null
 								<div class="form-content">
 									<div class="form-item">
 										<div class="form-item-label">
+											<label title="<@spring.message code='chart.resultDataFormatEnable.desc' />">
+												<@spring.message code='chart.resultDataFormatEnable' />
+											</label>
+										</div>
+										<div class="form-item-value">
+											<div class="resultDataFormatEnable-radios">
+												<label for="${pageId}-resultDataFormatEnable-0" title="">
+													<@spring.message code='enable' />
+												</label>
+									   			<input type="radio" id="${pageId}-resultDataFormatEnable-0" name="resultDataFormatEnable" value="true"
+									   				<#if enableResultDataFormat>checked="checked"</#if> />
+												<label for="${pageId}-resultDataFormatEnable-1" title="">
+													<@spring.message code='disable' />
+												</label>
+									   			<input type="radio" id="${pageId}-resultDataFormatEnable-1" name="resultDataFormatEnable" value="false"
+									   				<#if !enableResultDataFormat>checked="checked"</#if> />
+											</div>
+										</div>
+									</div>
+									<div class="form-item resultDataFormatEnableAware">
+										<div class="form-item-label">
 											<label><@spring.message code='chart.resultDataFormat.dateType' /></label>
 										</div>
 										<div class="form-item-value">
@@ -93,28 +114,28 @@ readonly 是否只读操作，允许为null
 													<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
 												</label>
 									   			<input type="radio" id="${pageId}-resultDataFormat-dateType-0"
-									   				<#if ResultDataFormat.TYPE_STRING == chart.resultDataFormat.dateType>checked="checked"</#if>
+									   				<#if ResultDataFormat.TYPE_STRING == initResultDataFormat.dateType>checked="checked"</#if>
 									   				name="resultDataFormat.dateType" value="${ResultDataFormat.TYPE_STRING}" />
 												<label for="${pageId}-resultDataFormat-dateType-1" title="">
 													<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
 												</label>
 									   			<input type="radio" id="${pageId}-resultDataFormat-dateType-1"
-									   				<#if ResultDataFormat.TYPE_NUMBER == chart.resultDataFormat.dateType>checked="checked"</#if>
+									   				<#if ResultDataFormat.TYPE_NUMBER == initResultDataFormat.dateType>checked="checked"</#if>
 									   				name="resultDataFormat.dateType" value="${ResultDataFormat.TYPE_NUMBER}" />
 											</div>
 										</div>
 									</div>
-									<div class="form-item">
+									<div class="form-item resultDataFormatEnableAware">
 										<div class="form-item-label">
 											<label title="<@spring.message code='chart.resultDataFormat.dateFormat.desc' />">
 												<@spring.message code='chart.resultDataFormat.dateFormat' />
 											</label>
 										</div>
 										<div class="form-item-value">
-											<input name="resultDataFormat.dateFormat" type="text" value="${(chart.resultDataFormat.dateFormat)!}" class="ui-widget ui-widget-content" />
+											<input name="resultDataFormat.dateFormat" type="text" value="${(initResultDataFormat.dateFormat)!}" class="ui-widget ui-widget-content" />
 										</div>
 									</div>
-									<div class="form-item">
+									<div class="form-item resultDataFormatEnableAware">
 										<div class="form-item-label">
 											<label><@spring.message code='chart.resultDataFormat.timeType' /></label>
 										</div>
@@ -124,28 +145,28 @@ readonly 是否只读操作，允许为null
 													<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
 												</label>
 									   			<input type="radio" id="${pageId}-resultDataFormat-timeType-0"
-									   				<#if ResultDataFormat.TYPE_STRING == chart.resultDataFormat.timeType>checked="checked"</#if>
+									   				<#if ResultDataFormat.TYPE_STRING == initResultDataFormat.timeType>checked="checked"</#if>
 									   				name="resultDataFormat.timeType" value="${ResultDataFormat.TYPE_STRING}" />
 												<label for="${pageId}-resultDataFormat-timeType-1" title="">
 													<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
 												</label>
 									   			<input type="radio" id="${pageId}-resultDataFormat-timeType-1"
-									   				<#if ResultDataFormat.TYPE_NUMBER == chart.resultDataFormat.timeType>checked="checked"</#if>
+									   				<#if ResultDataFormat.TYPE_NUMBER == initResultDataFormat.timeType>checked="checked"</#if>
 									   				name="resultDataFormat.timeType" value="${ResultDataFormat.TYPE_NUMBER}" />
 											</div>
 										</div>
 									</div>
-									<div class="form-item">
+									<div class="form-item resultDataFormatEnableAware">
 										<div class="form-item-label">
 											<label title="<@spring.message code='chart.resultDataFormat.timeFormat.desc' />">
 												<@spring.message code='chart.resultDataFormat.timeFormat' />
 											</label>
 										</div>
 										<div class="form-item-value">
-											<input name="resultDataFormat.timeFormat" type="text" value="${(chart.resultDataFormat.timeFormat)!}" class="ui-widget ui-widget-content" />
+											<input name="resultDataFormat.timeFormat" type="text" value="${(initResultDataFormat.timeFormat)!}" class="ui-widget ui-widget-content" />
 										</div>
 									</div>
-									<div class="form-item">
+									<div class="form-item resultDataFormatEnableAware">
 										<div class="form-item-label">
 											<label><@spring.message code='chart.resultDataFormat.timestampType' /></label>
 										</div>
@@ -155,25 +176,25 @@ readonly 是否只读操作，允许为null
 													<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
 												</label>
 									   			<input type="radio" id="${pageId}-resultDataFormat-timestampType-0"
-									   				<#if ResultDataFormat.TYPE_STRING == chart.resultDataFormat.timestampType>checked="checked"</#if>
+									   				<#if ResultDataFormat.TYPE_STRING == initResultDataFormat.timestampType>checked="checked"</#if>
 									   				name="resultDataFormat.timestampType" value="${ResultDataFormat.TYPE_STRING}" />
 												<label for="${pageId}-resultDataFormat-timestampType-1" title="">
 													<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
 												</label>
 									   			<input type="radio" id="${pageId}-resultDataFormat-timestampType-1"
-									   				<#if ResultDataFormat.TYPE_NUMBER == chart.resultDataFormat.timestampType>checked="checked"</#if>
+									   				<#if ResultDataFormat.TYPE_NUMBER == initResultDataFormat.timestampType>checked="checked"</#if>
 									   				name="resultDataFormat.timestampType" value="${ResultDataFormat.TYPE_NUMBER}" />
 											</div>
 										</div>
 									</div>
-									<div class="form-item">
+									<div class="form-item resultDataFormatEnableAware">
 										<div class="form-item-label">
 											<label title="<@spring.message code='chart.resultDataFormat.timestampFormat.desc' />">
 												<@spring.message code='chart.resultDataFormat.timestampFormat' />
 											</label>
 										</div>
 										<div class="form-item-value">
-											<input name="resultDataFormat.timestampFormat" type="text" value="${(chart.resultDataFormat.timestampFormat)!}" class="ui-widget ui-widget-content" />
+											<input name="resultDataFormat.timestampFormat" type="text" value="${(initResultDataFormat.timestampFormat)!}" class="ui-widget ui-widget-content" />
 										</div>
 									</div>
 								</div>
@@ -228,6 +249,9 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.chartPluginVO = <@writeJson var=chartPluginVO />;
+	po.chartDataSets = <@writeJson var=chartDataSets />;
+	
 	$.initButtons(po.element());
 	po.initAnalysisProject("${((chart.analysisProject.id)!'')?js_string?no_esc}", "${((chart.analysisProject.name)!'')?js_string?no_esc}");
 	po.element(".form-item-value-chartDataSet").height($(window).height()/5*2);
@@ -235,11 +259,13 @@ readonly 是否只读操作，允许为null
 	po.element("input[name='updateIntervalRadio']").checkboxradio({icon:false});
 	po.element(".updateInterval-radios").controlgroup();
 	
+	po.element("input[name='resultDataFormatEnable']").checkboxradio({icon:false});
 	po.element("input[name='resultDataFormat.dateType']").checkboxradio({icon:false});
 	po.element("input[name='resultDataFormat.timeType']").checkboxradio({icon:false});
 	po.element("input[name='resultDataFormat.timestampType']").checkboxradio({icon:false});
 	//隐藏元素设置controlgroup组件没有圆角效果，所以这里先显示设置后再隐藏
 	po.element(".dataformat-panel").addClass("transparency").show();
+	po.element(".resultDataFormatEnable-radios").controlgroup();
 	po.element(".resultDataFormat-dateType-radios").controlgroup();
 	po.element(".resultDataFormat-timeType-radios").controlgroup();
 	po.element(".resultDataFormat-timestampType-radios").controlgroup();
@@ -250,8 +276,31 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/analysis/chart/" + action;
 	};
 	
-	po.chartPluginVO = <@writeJson var=chartPluginVO />;
-	po.chartDataSets = <@writeJson var=chartDataSets />;
+	po.updateResultDataFormatPanelEnable = function(enable)
+	{
+		if(enable == null)
+			enable = ("true" == po.element("input[name='resultDataFormatEnable']:checked").val());
+		
+		var enableMethod = (enable ? "enable" : "disable");
+		
+		po.element("input[name='resultDataFormat.dateType']").checkboxradio(enableMethod);
+		po.element("input[name='resultDataFormat.timeType']").checkboxradio(enableMethod);
+		po.element("input[name='resultDataFormat.timestampType']").checkboxradio(enableMethod);
+		
+		po.element("input[name='resultDataFormat.dateFormat']").prop("disabled", !enable);
+		po.element("input[name='resultDataFormat.timeFormat']").prop("disabled", !enable);
+		po.element("input[name='resultDataFormat.timestampFormat']").prop("disabled", !enable);
+		
+		if(enable)
+			po.element(".resultDataFormatEnableAware").removeClass("ui-state-disabled");
+		else
+			po.element(".resultDataFormatEnableAware").addClass("ui-state-disabled");
+	};
+	
+	po.element("input[name='resultDataFormatEnable']").on("change", function()
+	{
+		po.updateResultDataFormatPanelEnable();
+	});
 	
 	po.element(".selectChartPluginButton").click(function()
 	{
@@ -872,7 +921,7 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			var data = $.formToJson(form, ["dataSignValidation", "updateIntervalRadio"]);
+			var data = $.formToJson(form, ["dataSignValidation", "updateIntervalRadio", "resultDataFormatEnable"]);
 			data["chartDataSetVOs"] = po.getFormChartDataSets();
 			
 			$.ajaxJson($(form).attr("action"),
@@ -921,6 +970,7 @@ readonly 是否只读操作，允许为null
 	
 	po.initChartPlugin(po.chartPluginVO);
 	po.initChartDataSets();
+	po.updateResultDataFormatPanelEnable();
 })
 (${pageId});
 </script>
