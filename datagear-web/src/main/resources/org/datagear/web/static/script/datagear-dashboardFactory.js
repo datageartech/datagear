@@ -1082,6 +1082,7 @@
 	 */
 	dashboardBase.render = function()
 	{
+		//只允许调用一次
 		if(this._rendered == true)
 			throw new Error("Dashboard has been rendered");
 		this._rendered = true;
@@ -1094,11 +1095,20 @@
 		
 		if(doRender != false)
 		{
-			this.startHandleCharts();
-			
-			if(listener && listener.render)
-				  listener.render(this);
+			this.doRender();
 		}
+	};
+	
+	/**
+	 * 执行看板渲染。
+	 */
+	dashboardBase.doRender = function()
+	{
+		this.startHandleCharts();
+		
+		var listener = this.listener();
+		if(listener && listener.render)
+			  listener.render(this);
 	};
 	
 	/**
