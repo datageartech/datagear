@@ -808,3 +808,9 @@ ALTER TABLE DATAGEAR_DATA_SET ADD COLUMN DS_DATA_FORMAT VARCHAR(500);
 --2021-05-29
 --图表表添加结果数据格式列
 ALTER TABLE DATAGEAR_HTML_CHART_WIDGET ADD COLUMN HCW_RD_FORMAT VARCHAR(500);
+
+
+-----------------------------------------
+--version[2.6.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
