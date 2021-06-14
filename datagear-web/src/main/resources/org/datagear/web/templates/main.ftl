@@ -378,6 +378,8 @@ ${detectNewVersionScript?no_esc}
 				{
 					"data" : function(node, callback)
 					{
+						var _this = this;
+						
 						//根节点
 						if(node.id == "#")
 						{
@@ -387,7 +389,7 @@ ${detectNewVersionScript?no_esc}
 								success: function(schemas)
 								{
 									po.schemaToJstreeNodes(schemas);
-									callback.call(this, schemas);
+									callback.call(_this, schemas);
 								}
 							});
 						}
@@ -399,7 +401,11 @@ ${detectNewVersionScript?no_esc}
 								success: function(pagingData)
 								{
 									po.toJstreeNodePagingData(node.original, pagingData);
-									callback.call(this, pagingData);
+									callback.call(_this, pagingData);
+								},
+								error: function()
+								{
+									callback.call(_this, false);
 								}
 							});
 						}
