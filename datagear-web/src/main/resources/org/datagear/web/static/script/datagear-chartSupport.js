@@ -1827,8 +1827,11 @@
 				data: [],
 				links: [],
 				legendHoverLink: true,
-                focusNodeAdjacency: true,
-				label: { position: "right" }
+				label: { position: "right" },
+				emphasis:
+				{
+					focus: "adjacency"
+				}
 			}]
 		},
 		options,
@@ -1892,8 +1895,8 @@
 			
 			for(var j=0; j<data.length; j++)
 			{
-				var sd = { name: chart.resultRowCell(data[j], snp), value: [ chart.resultRowCell(data[j], slop), chart.resultRowCell(data[j], slap) ] };
-				var td = { name: chart.resultRowCell(data[j], tnp), value: [ chart.resultRowCell(data[j], tlop), chart.resultRowCell(data[j], tlap) ] };
+				var sd = { name: chart.resultRowCell(data[j], snp), x: chart.resultRowCell(data[j], slop), y: chart.resultRowCell(data[j], slap) };
+				var td = { name: chart.resultRowCell(data[j], tnp), x: chart.resultRowCell(data[j], tlop), y: chart.resultRowCell(data[j], tlap) };
 				
 				if(sip)
 					sd.id = chart.resultRowCell(data[j], sip);
@@ -1912,7 +1915,7 @@
 				if(svp)
 				{
 					var sv = chart.resultRowCell(data[j], svp);
-					sd.value.push(sv);
+					sd.value = sv;
 					
 					min = (min == undefined ? sv : Math.min(min, sv));
 					max = (max == undefined ? sv : Math.max(max, sv));
@@ -1935,7 +1938,7 @@
 				if(tvp)
 				{
 					var tv = chart.resultRowCell(data[j], tvp);
-					td.value.push(tv);
+					td.value = tv;
 					
 					min = (min == undefined ? tv : Math.min(min, tv));
 					max = (max == undefined ? tv : Math.max(max, tv));
@@ -2018,12 +2021,11 @@
 		if(echartsEventParams.dataType == "node")
 		{
 			data[signNameMap.sourceId] = echartsData.id;
-			data[signNameMap.sourceLongitude] = echartsData.value[0];
-			data[signNameMap.sourceLatitude] = echartsData.value[1];
+			data[signNameMap.sourceLongitude] = echartsData.x;
+			data[signNameMap.sourceLatitude] = echartsData.y;
 			data[signNameMap.sourceName] = echartsData.name;
 			data[signNameMap.sourceCategory] = echartsData._categoryOrigin;
-			if(echartsData.value.length > 2)
-				data[signNameMap.sourceValue] = echartsData.value[2];
+			data[signNameMap.sourceValue] = echartsData.value;
 			
 			chart.eventData(chartEvent, data);
 			chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -2036,22 +2038,20 @@
 			var targetData = seriesData[echartsData.target];
 			
 			data[signNameMap.sourceId] = sourceData.id;
-			data[signNameMap.sourceLongitude] = sourceData.value[0];
-			data[signNameMap.sourceLatitude] = sourceData.value[1];
+			data[signNameMap.sourceLongitude] = sourceData.x;
+			data[signNameMap.sourceLatitude] = sourceData.y;
 			data[signNameMap.sourceName] = sourceData.name;
 			data[signNameMap.sourceCategory] = sourceData._categoryOrigin;
-			if(sourceData.value.length > 2)
-				data[signNameMap.sourceValue] = sourceData.value[2];
+			data[signNameMap.sourceValue] = sourceData.value;
 			
 			if(targetData)
 			{
 				data[signNameMap.targetId] = targetData.id;
-				data[signNameMap.targetLongitude] = targetData.value[0];
-				data[signNameMap.targetLatitude] = targetData.value[1];
+				data[signNameMap.targetLongitude] = targetData.x;
+				data[signNameMap.targetLatitude] = targetData.y;
 				data[signNameMap.targetName] = targetData.name;
 				data[signNameMap.targetCategory] = targetData._categoryOrigin;
-				if(targetData.value.length > 2)
-					data[signNameMap.targetValue] = targetData.value[2];
+				data[signNameMap.targetValue] = targetData.value;
 			}
 			
 			chart.eventData(chartEvent, data);
@@ -2767,7 +2767,10 @@
                 right: "16%",
                 top: "12%",
                 bottom: "12%",
-		        focusNodeAdjacency: 'allEdges'
+				emphasis:
+				{
+					focus: "adjacency"
+				}
 			}]
 		},
 		options,
@@ -2973,7 +2976,6 @@
 				data: [],
 				links: [],
 				legendHoverLink: true,
-                focusNodeAdjacency: true,
                 draggable: true,
 				label: { position: "right" },
 				roam: true,
@@ -2981,6 +2983,10 @@
                 right: "12%",
                 top: "20%",
                 bottom: "12%",
+				emphasis:
+				{
+					focus: "adjacency"
+				}
 			}]
 		},
 		options,
@@ -3237,13 +3243,17 @@
 					type: "wordCloud",
 					shape: "circle",
 					data: [],
-					"textStyle":
+					"textStyle": { "color": chartTheme.color },
+					"emphasis":
 					{
-						"normal":{},
-						"emphasis":
+						"focus": "self",
+						"textStyle":
 						{
+							//echarts-wordcloud-2.0.0版本有BUG，shadowBlur不起作用，
+							//所以这里采用fontWeight效果
+							"fontWeight": "bold",
 							"shadowBlur" : 10,
-							"shadowColor" : chartFactory.getGradualColor(chartTheme, 0.9),
+							"shadowColor" : chartFactory.getGradualColor(chartTheme, 0.9)
 						}
 					}
 				}
@@ -3329,7 +3339,7 @@
 			for(var i=0; i<seriesData.length; i++)
 			{
 				var colorIndex = parseInt((seriesData[i].value-min)/(max-min) * (colorGradients.length-1));
-				seriesData[i].textStyle = { "normal":{ "color": colorGradients[colorIndex] } };
+				seriesData[i].textStyle = { "color": colorGradients[colorIndex] };
 			}
 		}
 		

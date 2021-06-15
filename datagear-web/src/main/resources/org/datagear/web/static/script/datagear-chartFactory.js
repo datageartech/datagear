@@ -248,8 +248,8 @@
 		if(!theme.gradient)
 			theme.gradient = 10;
 		if(!theme.graphColors || theme.graphColors.length == 0)
-			theme.graphColors = ["#2EC7C9", "#B6A2DE", "#FFB980", "#97B552", "#D87A80", "#8D98B3", "#E5CF0D",
-				"#5AB1EF", "#95706D", "#DC69AA"];
+			theme.graphColors = ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#3ba272", "#fc8452",
+							"#9a60b4", "#ea7ccc", "#B6A2DE"];
 		if(!theme.graphRangeColors || theme.graphRangeColors.length == 0)
 			theme.graphRangeColors = ["#58A52D", "#FFD700", "#FF4500"];
 		
@@ -3033,7 +3033,7 @@
 	chartFactory.buildEchartsTheme = function(chartTheme)
 	{
 		var axisColor = this.getGradualColor(chartTheme, 0.8);
-		var axisScaleLineColor = this.getGradualColor(chartTheme, 0.6);
+		var axisScaleLineColor = this.getGradualColor(chartTheme, 0.4);
 		var areaColor0 = this.getGradualColor(chartTheme, 0.15);
 		var areaBorderColor0 = this.getGradualColor(chartTheme, 0.3);
 		var areaColor1 = this.getGradualColor(chartTheme, 0.25);
@@ -3066,18 +3066,21 @@
 			},
 			"line" : {
 				"itemStyle" : {
-					"normal" : {
-						"borderWidth" : 1
-					}
+					"borderWidth" : 2
 				},
 				"lineStyle" : {
-					"normal" : {
-						"width" : 2
-					}
+					"width" : 2
 				},
-				"symbolSize" : 4,
-				"symbol" : "emptyCircle",
-				"smooth" : false
+				"symbol" : "circle",
+				"symbolSize" : 8,
+				"smooth" : false,
+				"emphasis" :
+				{
+					"lineStyle" :
+					{
+						"width" : 4
+					}
+				}
 			},
 			"radar" : {
 				"name" : { "textStyle" : { "color" : chartTheme.legendColor } },
@@ -3108,6 +3111,10 @@
 					"barBorderWidth" : 0,
 					"barBorderColor" : chartTheme.borderColor
 				},
+				"label":
+				{
+					"color": chartTheme.color
+				},
 				"emphasis" : {
 					"itemStyle" : {
 						"barBorderWidth" : 0,
@@ -3123,6 +3130,10 @@
 				"itemStyle" : {
 					"borderWidth" : 0,
 					"borderColor" : chartTheme.borderColor
+				},
+				"label":
+				{
+					"color": chartTheme.color
 				},
 				"emphasis" :
 				{
@@ -3227,7 +3238,37 @@
 				}
 			},
 			"gauge" : {
-				"title" : { color : chartTheme.legendColor },
+				"title" : { "color" : chartTheme.legendColor },
+				"detail":
+				{
+					"color": chartTheme.legendColor
+				},
+				"axisLine":
+				{
+					"show": true,
+					"lineStyle":
+					{
+						"color" : [ [ 1, axisScaleLineColor ] ]
+					}
+		        },
+				"axisLabel":
+				{
+					"color" : axisColor
+				},
+				"splitLine":
+				{
+					"lineStyle":
+					{
+						"color": axisScaleLineColor
+					}
+				},
+				"axisTick":
+				{
+					"lineStyle":
+					{
+						"color": axisScaleLineColor
+					}
+				},
 				"itemStyle" : {
 					"borderColor" : chartTheme.borderColor,
 					"borderWidth" : 0
@@ -3244,10 +3285,6 @@
 			},
 			"candlestick" : {
 				"itemStyle" : {
-					"color" : chartTheme.graphColors[0],
-					"color0" : chartTheme.graphColors[1],
-					"borderColor" : chartTheme.graphColors[0],
-					"borderColor0" : chartTheme.graphColors[1],
 					"borderWidth" : 1
 				},
 				"emphasis" : {

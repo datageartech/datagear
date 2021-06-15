@@ -22,40 +22,39 @@ import org.datagear.analysis.DashboardThemeSource;
  */
 public class SimpleDashboardThemeSource implements DashboardThemeSource
 {
-//	public static final DashboardTheme THEME_LIGHT = new DashboardTheme("light", "#333", "#FFF", "#E4E4E4",
-//			new ChartTheme("lightChart", "#333", "transparent", "#FFF", "#E4E4E4", "#333", "#666",
+	// 2.5.0版本默认主题（ECharts-4.9.0）
+	// public static final DashboardTheme THEME_LIGHT = new
+	// DashboardTheme("light", "#333", "#FFF",
+	// new ChartTheme("lightChart", "#333", "transparent", "#FFF",
 //					new String[] { "#2EC7C9", "#B6A2DE", "#FFB980", "#97B552", "#D87A80", "#8D98B3", "#E5CF0D",
 //							"#5AB1EF", "#95706D", "#DC69AA" },
-//					new String[] { "#58A52D", "#FFD700", "#FF4500" },
-//					new Theme("lightChartTooltip", "#333", "#DDD", "#BBB"),
-//					new Theme("lightChartHighlight", "#FFF", "#007FFF", "#CCC")));
+	// new String[] { "#58A52D", "#FFD700", "#FF4500" }));
 //
-//	public static final DashboardTheme THEME_DARK = new DashboardTheme("dark", "#EEE", "#000", "#555",
-//			new ChartTheme("darkChart", "#EEE", "transparent", "#000", "#555", "#EEE", "#BBB",
+	// public static final DashboardTheme THEME_DARK = new
+	// DashboardTheme("dark", "#EEE", "#000",
+	// new ChartTheme("darkChart", "#EEE", "transparent", "#000",
 //					new String[] { "#00CDCD", "#91CA8C", "#EA7E53", "#24666C", "#73A373", "#019DA2", "#EEDD78",
 //							"#73B9BC", "#7289AB", "#12CDD2" },
-//					new String[] { "#58A52D", "#FFD700", "#FF4500" },
-//					new Theme("darkChartTooltip", "#EEE", "#444", "#555"),
-//					new Theme("darkChartHighlight", "#FFF", "#1E90FF", "#555")));
+	// new String[] { "#58A52D", "#FFD700", "#FF4500" }));
 //
-//	public static final DashboardTheme THEME_GREEN = new DashboardTheme("green", "#FFFFFF", "#285C00", "#72B42D",
-//			new ChartTheme("greenChart", "#FFFFFF", "transparent", "#285C00", "#72B42D", "#FFFFFF", "#DDDDDD",
+	// public static final DashboardTheme THEME_GREEN = new
+	// DashboardTheme("green", "#FFFFFF", "#285C00",
+	// new ChartTheme("greenChart", "#FFFFFF", "transparent", "#285C00",
 //					new String[] { "#2EC7C9", "#B6A2DE", "#FFB980", "#97B552", "#D87A80", "#8D98B3", "#E5CF0D",
 //							"#5AB1EF", "#95706D", "#DC69AA" },
-//					new String[] { "#58A52D", "#FFD700", "#FF4500" },
-//					new Theme("greenChartTooltip", "#FFFFFF", "#3C8009", "#72B42D"),
-//					new Theme("greenChartHighlight", "#FFF", "#1E90FF", "#555")));
+	// new String[] { "#58A52D", "#FFD700", "#FF4500" }));
 
+// 2.6.0版本主题（ECharts-5.1.2）
 	public static final DashboardTheme THEME_LIGHT = new DashboardTheme("light", "#333", "#FFF",
 			new ChartTheme("lightChart", "#333", "transparent", "#FFF",
-					new String[] { "#2EC7C9", "#B6A2DE", "#FFB980", "#97B552", "#D87A80", "#8D98B3", "#E5CF0D",
-							"#5AB1EF", "#95706D", "#DC69AA" },
+					new String[] { "#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#3ba272", "#fc8452",
+							"#9a60b4", "#ea7ccc", "#B6A2DE" },
 					new String[] { "#58A52D", "#FFD700", "#FF4500" }));
 
 	public static final DashboardTheme THEME_DARK = new DashboardTheme("dark", "#EEE", "#000",
 			new ChartTheme("darkChart", "#EEE", "transparent", "#000",
-					new String[] { "#00CDCD", "#91CA8C", "#EA7E53", "#24666C", "#73A373", "#019DA2", "#EEDD78",
-							"#73B9BC", "#7289AB", "#12CDD2" },
+					new String[] { "#73c0de", "#91cc75", "#fac858", "#ee6666", "#B6A2DE", "#3ba272", "#fc8452",
+							"#9a60b4", "#ea7ccc", "#5470c6" },
 					new String[] { "#58A52D", "#FFD700", "#FF4500" }));
 
 	public static final DashboardTheme THEME_GREEN = new DashboardTheme("green", "#FFFFFF", "#285C00",
