@@ -58830,7 +58830,24 @@
       var coordSys = seriesModel.get('coordinateSystem');
       var nodeData;
 
-      if (coordSys === 'cartesian2d' || coordSys === 'polar') {
+	  // < 升级至ECharts-5.1.2版本，关系地图报错解决方案（报错信息：Can not read property 'off' of undefined）
+	  // < 调试参考
+	  // 56825	function graphSimpleLayout(ecModel, api) {
+	  // 		从原始数据中提取坐标，生成layout
+	  // 32509	List.prototype.initData
+	  // 32643	List.prototype._initDataFromProvider
+	  // 32695	var val = this._dimValueGetter(dataItem
+	  // 		将原始数据按照维度映射至List的
+	  // 58919	GraphSeriesModel.prototype.getInitialData
+	  // 58815	createGraphFromNodeEdge
+	  // > 调试参考
+	  // < 修改原内容
+      //if (coordSys === 'cartesian2d' || coordSys === 'polar') {
+      // > 修改原内容
+      // < 修改新内容
+      if (coordSys === 'cartesian2d' || coordSys === 'polar' || coordSys === 'geo') {
+      // > 修改新内容
+      // > 升级至ECharts-5.1.2版本，关系地图报错解决方案（报错信息：Can not read property 'off' of undefined）
         nodeData = createListFromArray(nodes, seriesModel);
       } else {
         var coordSysCtor = CoordinateSystemManager.get(coordSys);

@@ -1895,8 +1895,14 @@
 			
 			for(var j=0; j<data.length; j++)
 			{
-				var sd = { name: chart.resultRowCell(data[j], snp), x: chart.resultRowCell(data[j], slop), y: chart.resultRowCell(data[j], slap) };
-				var td = { name: chart.resultRowCell(data[j], tnp), x: chart.resultRowCell(data[j], tlop), y: chart.resultRowCell(data[j], tlap) };
+				//在ECharts-4.9.0时，这里格式为：{name: ..., value:[经度值, 纬度值, 关系数值]}，是没问题的，
+				//但是升级至ECharts-5.0+后，会报错：Can not read property 'off' of undefined
+				//按照ECharts-5.0+的graph的官方配置项，这里格式应为：{name: ..., x: 经度值, y: 纬度值, value: 关系数值}
+				//但是这样仍然会报上述错误！
+				//所以这里仍恢复为采用ECharts-4.9.0时的格式，配合修改了ECharts-5.1.2的源码后，终于解决了上述问题！
+				//具体源码修改位置参考echarts-5.1.2/echarts.js的58334行
+				var sd = { name: chart.resultRowCell(data[j], snp), value: [ chart.resultRowCell(data[j], slop), chart.resultRowCell(data[j], slap) ] };
+				var td = { name: chart.resultRowCell(data[j], tnp), value: [ chart.resultRowCell(data[j], tlop), chart.resultRowCell(data[j], tlap) ] };
 				
 				if(sip)
 					sd.id = chart.resultRowCell(data[j], sip);
@@ -1915,7 +1921,7 @@
 				if(svp)
 				{
 					var sv = chart.resultRowCell(data[j], svp);
-					sd.value = sv;
+					sd.value.push(sv);
 					
 					min = (min == undefined ? sv : Math.min(min, sv));
 					max = (max == undefined ? sv : Math.max(max, sv));
@@ -1938,7 +1944,7 @@
 				if(tvp)
 				{
 					var tv = chart.resultRowCell(data[j], tvp);
-					td.value = tv;
+					td.value.push(tv);
 					
 					min = (min == undefined ? tv : Math.min(min, tv));
 					max = (max == undefined ? tv : Math.max(max, tv));
@@ -2021,11 +2027,12 @@
 		if(echartsEventParams.dataType == "node")
 		{
 			data[signNameMap.sourceId] = echartsData.id;
-			data[signNameMap.sourceLongitude] = echartsData.x;
-			data[signNameMap.sourceLatitude] = echartsData.y;
+			data[signNameMap.sourceLongitude] = echartsData.value[0];
+			data[signNameMap.sourceLatitude] = echartsData.value[1];
 			data[signNameMap.sourceName] = echartsData.name;
 			data[signNameMap.sourceCategory] = echartsData._categoryOrigin;
-			data[signNameMap.sourceValue] = echartsData.value;
+			if(echartsData.value.length > 2)
+				data[signNameMap.sourceValue] = echartsData.value[2];
 			
 			chart.eventData(chartEvent, data);
 			chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -2038,20 +2045,22 @@
 			var targetData = seriesData[echartsData.target];
 			
 			data[signNameMap.sourceId] = sourceData.id;
-			data[signNameMap.sourceLongitude] = sourceData.x;
-			data[signNameMap.sourceLatitude] = sourceData.y;
+			data[signNameMap.sourceLongitude] = sourceData.value[0];
+			data[signNameMap.sourceLatitude] = sourceData.value[1];
 			data[signNameMap.sourceName] = sourceData.name;
 			data[signNameMap.sourceCategory] = sourceData._categoryOrigin;
-			data[signNameMap.sourceValue] = sourceData.value;
+			if(sourceData.value.length > 2)
+				data[signNameMap.sourceValue] = sourceData.value[2];
 			
 			if(targetData)
 			{
 				data[signNameMap.targetId] = targetData.id;
-				data[signNameMap.targetLongitude] = targetData.x;
-				data[signNameMap.targetLatitude] = targetData.y;
+				data[signNameMap.targetLongitude] = targetData.value[0];
+				data[signNameMap.targetLatitude] = targetData.value[1];
 				data[signNameMap.targetName] = targetData.name;
 				data[signNameMap.targetCategory] = targetData._categoryOrigin;
-				data[signNameMap.targetValue] = targetData.value;
+				if(targetData.value.length > 2)
+					data[signNameMap.targetValue] = targetData.value[2];
 			}
 			
 			chart.eventData(chartEvent, data);
