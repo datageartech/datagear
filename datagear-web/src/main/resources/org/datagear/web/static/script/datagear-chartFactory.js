@@ -3032,8 +3032,8 @@
 	 */
 	chartFactory.buildEchartsTheme = function(chartTheme)
 	{
-		var axisColor = this.getGradualColor(chartTheme, 0.8);
-		var axisScaleLineColor = this.getGradualColor(chartTheme, 0.4);
+		var axisColor = this.getGradualColor(chartTheme, 0.7);
+		var axisScaleLineColor = this.getGradualColor(chartTheme, 0.35);
 		var areaColor0 = this.getGradualColor(chartTheme, 0.15);
 		var areaBorderColor0 = this.getGradualColor(chartTheme, 0.3);
 		var areaColor1 = this.getGradualColor(chartTheme, 0.25);
@@ -3248,7 +3248,7 @@
 					"show": true,
 					"lineStyle":
 					{
-						"color" : [ [ 1, axisScaleLineColor ] ]
+						"color" : [ [ 1, areaColor1 ] ]
 					}
 		        },
 				"axisLabel":
