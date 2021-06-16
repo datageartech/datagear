@@ -1828,6 +1828,10 @@
 				links: [],
 				legendHoverLink: true,
 				label: { position: "right" },
+				tooltip:
+				{
+					formatter: "{a}<br>{b}：{c}"
+				},
 				emphasis:
 				{
 					focus: "adjacency"

@@ -3301,6 +3301,10 @@
 				{
 					"color": chartTheme.color
 				},
+				"itemStyle":
+				{
+					"color": chartTheme.color
+				},
 				"lineStyle": { "color": areaBorderColor0 },
 				"emphasis" :
 				{
