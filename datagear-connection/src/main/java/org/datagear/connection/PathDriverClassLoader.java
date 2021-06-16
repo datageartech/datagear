@@ -100,8 +100,10 @@ public class PathDriverClassLoader extends URLClassLoader
 		// return parent.getResource(name);
 		// }
 
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("getResource [" + url + "] for [" + name + "] in path [" + getPath() + "]");
+		// 禁用这里的调试输出，有些驱动（MySQL驱动）会频繁自动调用此接口，刷屏日志
+		// if (LOGGER.isDebugEnabled())
+		// LOGGER.debug("getResource [" + url + "] for [" + name + "] in path ["
+		// + getPath() + "]");
 
 		return url;
 	}
