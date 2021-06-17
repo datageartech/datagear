@@ -267,7 +267,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
-		String heartbeatURL = "/analysis/dashboard/heartbeat";
+		String heartbeatURL = "/analysis/dashboard" + DashboardController.HEARTBEAT_TAIL_URL;
 		heartbeatURL = addJsessionidParam(heartbeatURL, request.getSession().getId());
 
 		webContext.addAttribute(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);

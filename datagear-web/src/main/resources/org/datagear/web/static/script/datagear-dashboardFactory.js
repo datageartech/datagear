@@ -136,6 +136,11 @@
 	dashboardFactory.HANDLE_CHART_INTERVAL_MS = 1;
 	
 	/**
+	 * 浏览器初始化到此看板工厂JS的时间戳。
+	 */
+	dashboardFactory._dashboardFactoryJsInitTime = new Date().getTime();
+	
+	/**
 	 * 初始化指定看板对象。
 	 * 
 	 * @param dashboard 看板对象
@@ -1935,6 +1940,32 @@
 		}
 		
 		return targetCharts;
+	};
+	
+	/**
+	 * 获取服务端当前日期。
+	 * 服务端当前日期 = 网页加载时的服务端日期 + (客户端当前日期 - 网页加载时客户端日期) 
+	 * 因此，返回的并不是精确的服务端当前日期，通常是偏差数十至数百毫秒。
+	 * 
+	 * @param asMillisecond 可选，是否返回毫秒数值而非Date对象，默认为：false 
+	 * @return Date对象，或者毫秒数值
+	 */
+	dashboardBase.currentServerDate = function(asMillisecond)
+	{
+		//参考org.datagear.web.controller.DashboardController.SERVERTIME_JS_VAR
+		if(global.DataGearServerTime == null)
+			throw new Error("Get current server time is not supported");
+		
+		var cct = new Date().getTime();
+		var cst = global.DataGearServerTime + (cct - dashboardFactory._dashboardFactoryJsInitTime);
+		
+		if(asMillisecond == true)
+			return cst;
+		
+		var csd = new Date();
+		csd.setTime(cst);
+		
+		return csd;
 	};
 	
 	//-------------

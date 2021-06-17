@@ -174,7 +174,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				.antMatchers("/analysis/chartPlugin/icon/*", "/analysis/chartPlugin/chartPluginManager.js",
 						"/analysis/chart/show/**", "/analysis/chart/showData", "/analysis/dashboard/show/**",
 						"/analysis/dashboard/showData", "/analysis/dashboard/loadChart",
-						"/analysis/dashboard/heartbeat")
+						"/analysis/dashboard/heartbeat",
+						"/analysis/dashboard/servertime.js")
 				.access(AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
 				// 数据源

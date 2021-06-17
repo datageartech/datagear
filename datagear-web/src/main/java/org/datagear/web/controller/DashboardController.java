@@ -49,6 +49,7 @@ import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetS
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
+import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -86,6 +87,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	/** 加载看板图表参数：图表部件ID */
 	public static final String LOAD_CHART_PARAM_CHART_WIDGET_ID = "chartWidgetId";
+
+	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
+
+	public static final String SERVERTIME_TAIL_URL = "/servertime.js";
+
+	public static final String SERVERTIME_JS_VAR = Global.PRODUCT_NAME_EN + "ServerTime";
 
 	static
 	{
@@ -1068,7 +1075,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @param dashbaordId
 	 * @throws Throwable
 	 */
-	@RequestMapping(value = "/heartbeat", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = HEARTBEAT_TAIL_URL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, Object> heartbeat(HttpServletRequest request, HttpServletResponse response) throws Throwable
 	{
@@ -1077,6 +1084,21 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		data.put("time", System.currentTimeMillis());
 
 		return data;
+	}
+
+	@RequestMapping(SERVERTIME_TAIL_URL)
+	public void serverTimeJs(HttpServletRequest request, HttpServletResponse response) throws Exception
+	{
+		response.setContentType(CONTENT_TYPE_JAVASCRIPT);
+
+		PrintWriter out = response.getWriter();
+
+		out.println("(function(global)");
+		out.println("{");
+
+		out.println("global." + SERVERTIME_JS_VAR + "=" + new java.util.Date().getTime() + ";");
+
+		out.println("})(this);");
 	}
 
 	/**

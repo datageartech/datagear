@@ -538,9 +538,9 @@ public class CoreConfig implements InitializingBean
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(resManager,
 				this.htmlChartWidgetEntityService());
 
-		bean.setHtmlTplDashboardImport(this.buildHtmlTplDashboardWidgetRenderer_dshboardImport());
+		bean.setHtmlTplDashboardImport(this.buildHtmlTplDashboardWidgetRenderer_dshboardImport(bean));
 		bean.setImportHtmlChartPluginVarNameResolver(
-				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver());
+				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver(bean));
 
 		return bean;
 	}
@@ -551,21 +551,23 @@ public class CoreConfig implements InitializingBean
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(
 				this.templateDashboardWidgetResManager(), this.htmlChartWidgetEntityService());
 
-		bean.setHtmlTplDashboardImport(this.buildHtmlTplDashboardWidgetRenderer_dshboardImport());
+		bean.setHtmlTplDashboardImport(this.buildHtmlTplDashboardWidgetRenderer_dshboardImport(bean));
 		bean.setImportHtmlChartPluginVarNameResolver(
-				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver());
+				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver(bean));
 
 		return bean;
 	}
 
-	protected HtmlTplDashboardImport buildHtmlTplDashboardWidgetRenderer_dshboardImport()
+	protected HtmlTplDashboardImport buildHtmlTplDashboardWidgetRenderer_dshboardImport(
+			HtmlTplDashboardWidgetRenderer renderer)
 	{
 		SimpleHtmlTplDashboardImport dashboardImport = new SimpleHtmlTplDashboardImport();
 
 		List<ImportItem> importItems = new ArrayList<>();
 
-		String cp = HtmlTplDashboardWidgetRenderer.DEFAULT_CONTEXT_PATH_PLACE_HOLDER;
-		String vp = HtmlTplDashboardWidgetRenderer.DEFAULT_VERSION_PLACE_HOLDER;
+		String cp = renderer.getContextPathPlaceholder();
+		String vp = renderer.getVersionPlaceholder();
+		String rp = renderer.getRandomCodePlaceholder();
 
 		String staticPrefix = cp + "/static";
 		String libPrefix = staticPrefix + "/lib";
@@ -594,6 +596,8 @@ public class CoreConfig implements InitializingBean
 				.add(ImportItem.valueOfJavaScript("chartFactory", scriptPrefix + "/datagear-chartFactory.js?v=" + vp));
 		importItems.add(ImportItem.valueOfJavaScript("dashboardFactory",
 				scriptPrefix + "/datagear-dashboardFactory.js?v=" + vp));
+		importItems.add(
+				ImportItem.valueOfJavaScript("serverTime", cp + "/analysis/dashboard/servertime.js?v=" + rp));
 		importItems
 				.add(ImportItem.valueOfJavaScript("chartSupport", scriptPrefix + "/datagear-chartSupport.js?v=" + vp));
 		importItems
@@ -606,7 +610,8 @@ public class CoreConfig implements InitializingBean
 		return dashboardImport;
 	}
 
-	protected TemplateImportHtmlChartPluginVarNameResolver buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver()
+	protected TemplateImportHtmlChartPluginVarNameResolver buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver(
+			HtmlTplDashboardWidgetRenderer renderer)
 	{
 		String pp = TemplateImportHtmlChartPluginVarNameResolver.PLACEHOLDER_CHART_PLUGIN_ID;
 

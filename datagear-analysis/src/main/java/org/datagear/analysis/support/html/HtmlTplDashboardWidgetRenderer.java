@@ -89,6 +89,8 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 	public static final String DEFAULT_VERSION_PLACE_HOLDER = "$VERSION";
 
+	public static final String DEFAULT_RANDOMCODE_VAR_PLACE_HOLDER = "$RANDOMCODE";
+
 	public static final String DEFAULT_DASHBOARD_VAR_PLACE_HOLDER = "$DASHBOARD";
 
 	public static final String DEFAULT_DASHBOARD_FACTORY_VAR = "dashboardFactory";
@@ -123,6 +125,9 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 	/** 应用版本号占位符 */
 	private String versionPlaceholder = DEFAULT_VERSION_PLACE_HOLDER;
+
+	/** 随机码占位符 */
+	private String randomCodePlaceholder = DEFAULT_RANDOMCODE_VAR_PLACE_HOLDER;
 
 	/** 扩展看板初始化脚本 */
 	private String extDashboardInitScript;
@@ -262,6 +267,16 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	public void setVersionPlaceholder(String versionPlaceholder)
 	{
 		this.versionPlaceholder = versionPlaceholder;
+	}
+
+	public String getRandomCodePlaceholder()
+	{
+		return randomCodePlaceholder;
+	}
+
+	public void setRandomCodePlaceholder(String randomCodePlaceholder)
+	{
+		this.randomCodePlaceholder = randomCodePlaceholder;
 	}
 
 	public String getExtDashboardInitScript()
@@ -869,6 +884,8 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 			if (importItems != null)
 			{
+				String randomCode = genRandomCode();
+
 				for (ImportItem impt : importItems)
 				{
 					String name = impt.getName();
@@ -878,6 +895,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 					String content = replaceContextPathPlaceholder(impt.getContent(), webContext.getContextPath());
 					content = replaceVersionPlaceholder(content, Global.VERSION);
+					content = replaceRandomCodePlaceholder(content, randomCode);
 
 					writeNewLine(out);
 					out.write(content);
@@ -1108,6 +1126,34 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 			version = "";
 
 		return str.replace(getVersionPlaceholder(), version);
+	}
+
+	/**
+	 * 替换字符串中的随机码占位符为真实的随机码。
+	 * 
+	 * @param str
+	 * @param randomCode
+	 * @return
+	 */
+	protected String replaceRandomCodePlaceholder(String str, String randomCode)
+	{
+		if (StringUtil.isEmpty(str))
+			return str;
+
+		if (randomCode == null)
+			randomCode = "";
+
+		return str.replace(getRandomCodePlaceholder(), randomCode);
+	}
+
+	/**
+	 * 生成一个随机码。
+	 * 
+	 * @return
+	 */
+	protected String genRandomCode()
+	{
+		return "rc" + Long.toHexString(System.currentTimeMillis());
 	}
 
 	/**
