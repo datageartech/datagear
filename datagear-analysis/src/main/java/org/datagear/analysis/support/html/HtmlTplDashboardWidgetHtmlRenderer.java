@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.analysis.Chart;
+import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
@@ -486,7 +487,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			chartRenderOption.setNotWriteInvoke(true);
 			chartRenderOption.setNotWritePluginObject(true);
 			chartRenderOption.setNotWriteRenderContextObject(true);
-			chartRenderOption.setRenderContextVarName(dashboard.getVarName() + ".renderContext");
+			chartRenderOption.setRenderContextVarName(dashboard.getVarName() + "." + Dashboard.PROPERTY_RENDER_CONTEXT);
 
 			chartRenderAttr.inflate(chartRenderContext, out, chartRenderOption);
 

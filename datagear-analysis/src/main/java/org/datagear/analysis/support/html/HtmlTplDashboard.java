@@ -19,6 +19,7 @@ import org.datagear.analysis.TemplateDashboard;
  */
 public class HtmlTplDashboard extends TemplateDashboard
 {
+	/** 看板JS对象变量名 */
 	private String varName;
 
 	public HtmlTplDashboard()
