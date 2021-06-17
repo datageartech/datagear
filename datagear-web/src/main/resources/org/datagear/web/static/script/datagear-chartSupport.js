@@ -1904,7 +1904,7 @@
 				//按照ECharts-5.0+的graph的官方配置项，这里格式应为：{name: ..., x: 经度值, y: 纬度值, value: 关系数值}
 				//但是这样仍然会报上述错误！
 				//所以这里仍恢复为采用ECharts-4.9.0时的格式，配合修改了ECharts-5.1.2的源码后，终于解决了上述问题！
-				//具体源码修改位置参考echarts-5.1.2/echarts.js的58334行
+				//具体源码修改位置参考echarts-5.1.2/echarts.js的58833行
 				var sd = { name: chart.resultRowCell(data[j], snp), value: [ chart.resultRowCell(data[j], slop), chart.resultRowCell(data[j], slap) ] };
 				var td = { name: chart.resultRowCell(data[j], tnp), value: [ chart.resultRowCell(data[j], tlop), chart.resultRowCell(data[j], tlap) ] };
 				
