@@ -1432,7 +1432,7 @@ table.dataTable tbody tr td select{
 }
 .search-form .keyword-widget{
 	display: inline-block;
-	width: 60%;
+	width: 70%;
 	height: 2em;
 	margin-left: 0.1em;
 	vertical-align: middle;
@@ -1444,13 +1444,14 @@ table.dataTable tbody tr td select{
 }
 .search-form .keyword-widget .keyword-input-parent{
 	position: absolute;
-	left: 18px;
+	left: 0;
 	right: 0;
 	top: 0;
 	bottom: 0;
 }
-.search-form .keyword-widget.simple .keyword-input-parent{
-	left: 0;
+.search-form.search-form-data .keyword-widget .keyword-input-parent{
+	left: 18px;
+	right: 22px;
 }
 .search-form .keyword-widget .keyword-input-parent .keyword-input{
     width: 100%;
@@ -1463,9 +1464,12 @@ table.dataTable tbody tr td select{
 	-webkit-box-sizing: border-box;
 }
 .search-form .search-condition-icon-parent{
-	position: relative;
+	position: absolute;
 	display: inline-block;
 	cursor: pointer;
+	right: 1px;
+	top: 50%;
+	margin-top: -0.7em;
 }
 .search-form .search-condition-icon{
 }
@@ -1477,11 +1481,12 @@ table.dataTable tbody tr td select{
 }
 .search-form .condition-panel-parent{
 	position: relative;
-	width: 90%;
+	width: 100%;
+	top: 0.7em;
 }
 .search-form .condition-panel-parent .condition-panel{
 	display: inline-block;
-	width: 120%;
+	width: 140%;
 	height: 14em;
 	z-index: 2;
 	margin-left: 0.1em;
@@ -1546,6 +1551,13 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	display: inline-block;
 	padding-left: 0.5em;
+	padding-top: 0.2em;
+	right: 0.1em;
+	width: 3.5em;
+	overflow: hidden;
+}
+.search-form.search-form-data-filter .keyword-widget .keyword-input-parent{
+	right: 3.7em;
 }
 .search-form .data-filter-select-wrapper .ui-selectmenu-button.ui-button{
 	width: 5em;
@@ -1553,7 +1565,9 @@ table.dataTable tbody tr td select{
 	border: none;
 	margin-left: -0.2em;
     padding: 0.2em 0.2em;
-    margin-top: 0.25em;
+    font-size: 0.8em;
+    opacity: 0.8;
+	filter: Alpha(Opacity=80);
 }
 .search-form .data-filter-select-wrapper .ui-selectmenu-button.ui-button .ui-icon{
 	float: left;

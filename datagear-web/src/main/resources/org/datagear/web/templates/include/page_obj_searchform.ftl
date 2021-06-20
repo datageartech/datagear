@@ -17,7 +17,7 @@ page_js_obj.ftl
 po.search = undefined;
 -->
 <form id="${pageId}-searchForm" class="search-form" action="#">
-	<div class="ui-widget ui-widget-content keyword-widget simple">
+	<div class="ui-widget ui-widget-content keyword-widget">
 		<div class="keyword-input-parent">
 			<input name="keyword" type="text" class="ui-widget ui-widget-content keyword-input" />
 		</div>

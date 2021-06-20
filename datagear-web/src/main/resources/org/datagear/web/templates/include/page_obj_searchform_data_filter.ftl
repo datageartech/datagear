@@ -14,20 +14,20 @@ page_js_obj.ftl
 -->
 <#assign _ssf_AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <#assign _ssf_DataPermissionEntityService=statics['org.datagear.management.service.DataPermissionEntityService']>
-<form id="${pageId}-searchForm" class="search-form" action="#">
-	<div class="ui-widget ui-widget-content keyword-widget simple">
+<form id="${pageId}-searchForm" class="search-form search-form-data-filter" action="#">
+	<div class="ui-widget ui-widget-content keyword-widget">
 		<div class="keyword-input-parent">
 			<input name="keyword" type="text" class="ui-widget ui-widget-content keyword-input" />
 		</div>
+		<div class="data-filter-select-wrapper">
+			<select id="${pageId}-dataFilter" name="${_ssf_AbstractController.DATA_FILTER_PARAM}" class="data-filter-select">
+				<option value="${_ssf_DataPermissionEntityService.DATA_FILTER_VALUE_ALL}"><@spring.message code='dataFilter.all' /></option>
+				<option value="${_ssf_DataPermissionEntityService.DATA_FILTER_VALUE_MINE}"><@spring.message code='dataFilter.mine' /></option>
+				<option value="${_ssf_DataPermissionEntityService.DATA_FILTER_VALUE_OTHER}"><@spring.message code='dataFilter.other' /></option>
+			</select>
+		</div>
 	</div>
 	<input name="submit" type="submit" value="<@spring.message code='query' />" />
-	<div class="data-filter-select-wrapper">
-	<select id="${pageId}-dataFilter" name="${_ssf_AbstractController.DATA_FILTER_PARAM}" class="data-filter-select">
-		<option value="${_ssf_DataPermissionEntityService.DATA_FILTER_VALUE_ALL}"><@spring.message code='dataFilter.all' /></option>
-		<option value="${_ssf_DataPermissionEntityService.DATA_FILTER_VALUE_MINE}"><@spring.message code='dataFilter.mine' /></option>
-		<option value="${_ssf_DataPermissionEntityService.DATA_FILTER_VALUE_OTHER}"><@spring.message code='dataFilter.other' /></option>
-	</select>
-	</div>
 </form>
 <#include "page_obj_searchform_js.ftl">
 <script type="text/javascript">
