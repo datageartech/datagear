@@ -643,7 +643,15 @@
 				{
 					name: "",
 					type: "gauge",
-					detail: {formatter: "{value}"},
+					detail: {formatter: "{value}", color: "auto"},
+			        progress:
+					{
+						show: true,
+						overlap: true,
+						roundCap: true
+			        },
+					min: 0,
+					max: 100,
 					data: [{value: 0, name: ''}]
 				}
 			]
@@ -660,24 +668,71 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
-		var chartDataSet = chart.chartDataSetFirst();
-		var result = chart.resultOf(results, chartDataSet);
+		var chartDataSets = chart.chartDataSetsMain();
 		
-		var seriesName = chart.chartDataSetName(chartDataSet);
+		var seriesName = "";
+		var seriesData = [];
+		var min = null;
+		var max = null;
 		
-		var minp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.min);
-		var maxp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.max);
-		var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var result = chart.resultOf(results, chartDataSet);
+			
+			if(min == null)
+			{
+				var minp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.min);
+				if(minp)
+				{
+					var minpv = chart.resultColumnArrays(result, minp);
+					min = chartSupport.findNonNull(minpv);
+				}
+			}
+			
+			if(max == null)
+			{
+				var maxp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.max);
+				if(maxp)
+				{
+					var maxpv = chart.resultColumnArrays(result, maxp);
+					max = chartSupport.findNonNull(maxpv);
+				}
+			}
+			
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			var vpsvs = chart.resultColumnArrays(result, vps);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				var vp = vps[j];
+				var vpvs = vpsvs[j];
+				var vpn = chart.dataSetPropertyLabel(vp);
+				var data = [];
+				for(var k=0; k<vpvs.length; k++)
+				{
+					data.push({name: vpn, value: vpvs[k]});
+				}
+				
+				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
+				
+				seriesData = seriesData.concat(data);
+			}
+			
+			if(!seriesName)
+				seriesName = dataSetName;
+		}
 		
-		var min = (chart.resultCell(result, minp) || 0);
-		var max = (chart.resultCell(result, maxp) || 100);
-		var value = (chart.resultCell(result, vp) || 0);
+		chartSupport.gaugeEvalDataTitlePosition(chart, seriesData);
 		
-		var data = [ { name: chart.dataSetPropertyLabel(vp), value: value, min: min, max: max } ];
+		if(min == null)
+			min = 0;
+		if(max == null)
+			max = 100;
 		
-		chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
-		
-		var options = { series : [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, min: min, max: max, data: data }) ] };
+		var options = { series : [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, min: min, max: max, data: seriesData }) ] };
 		
 		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
@@ -718,6 +773,44 @@
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
+	};
+	
+	chartSupport.gaugeEvalDataTitlePosition = function(chart, seriesData, colCount, initYposition, titleHeight, detailHeight)
+	{
+		if(colCount == null)
+		{
+			var len = seriesData.length;
+			if(len < 3)
+				colCount = len;
+			else if(len%3 == 0)
+				colCount = 3;
+			else if(len%2 == 0)
+				colCount = 2;
+			else
+				colCount = 3;
+		}
+		if(initYposition == null)
+			initYposition = 60;
+		if(titleHeight == null)
+			titleHeight = 14;
+		if(detailHeight == null)
+			detailHeight = 15;
+		
+		var colCenterIdx = colCount/2;
+		var xGap = 100/colCount;
+		
+		for(var i=0; i<seriesData.length; i++)
+		{
+			var row = parseInt(i/colCount);
+			var col = i%colCount;
+			
+			var x = parseInt((col - colCenterIdx) * xGap + xGap/2);
+			var yt = initYposition + row*(titleHeight + detailHeight);
+			var yd = yt + titleHeight;
+			
+			seriesData[i].title = { offsetCenter: [ x+'%', yt+"%" ] };
+			seriesData[i].detail = { offsetCenter: [ x+'%', yd+"%" ] };
+		}
 	};
 	
 	//散点图
