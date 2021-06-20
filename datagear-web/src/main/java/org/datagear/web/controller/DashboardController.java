@@ -92,7 +92,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	public static final String SERVERTIME_TAIL_URL = "/servertime.js";
 
-	public static final String SERVERTIME_JS_VAR = Global.PRODUCT_NAME_EN + "ServerTime";
+	public static final String SERVERTIME_JS_VAR = "_" + Global.PRODUCT_NAME_EN + "ServerTime";
 
 	static
 	{
