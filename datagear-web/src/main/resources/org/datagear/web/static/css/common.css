@@ -1571,7 +1571,6 @@ table.dataTable tbody tr td select{
 }
 .search-form .data-filter-select-wrapper .ui-selectmenu-button.ui-button .ui-icon{
 	float: left;
-	margin-top: 0.2em;
 }
 .search-form .data-filter-select-wrapper .ui-selectmenu-button.ui-button .ui-selectmenu-text{
 	margin-right: 0px;
