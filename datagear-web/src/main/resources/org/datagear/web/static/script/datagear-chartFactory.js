@@ -3209,7 +3209,7 @@
 					},
 					"lineStyle":
 					{
-						"color": areaColor1,
+						"color": axisColor,
 						"opacity": 0.6
 					}
 				}
