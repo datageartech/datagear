@@ -703,22 +703,20 @@
 			}
 			
 			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
-			var vpsvs = chart.resultColumnArrays(result, vps);
+			var vpsvs = chart.resultRowArrays(result, vps);
 			
-			for(var j=0; j<vps.length; j++)
+			for(var j=0; j<vpsvs.length; j++)
 			{
-				var vp = vps[j];
-				var vpvs = vpsvs[j];
-				var vpn = chart.dataSetPropertyLabel(vp);
-				var data = [];
-				for(var k=0; k<vpvs.length; k++)
+				var vRow = vpsvs[j];
+				
+				for(var k=0; k<vRow.length; k++)
 				{
-					data.push({name: vpn, value: vpvs[k]});
+					var vpn = chart.dataSetPropertyLabel(vps[k]);
+					var data = { name: vpn, value: vRow[k] };
+					chartSupport.chartDataOriginalDataIndex(data, chartDataSet, j);
+					
+					seriesData.push(data);
 				}
-				
-				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
-				
-				seriesData = seriesData.concat(data);
 			}
 			
 			if(!seriesName)
