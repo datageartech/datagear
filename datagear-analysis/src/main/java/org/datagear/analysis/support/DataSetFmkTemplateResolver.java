@@ -16,6 +16,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.datagear.util.DateNumberFormat;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -96,7 +98,7 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		configuration.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
 
 		// 数值插值设置为标准格式
-		configuration.setNumberFormat("0.########");
+		configuration.setNumberFormat(DateNumberFormat.DEFAULT_NUMBER_FORMAT);
 
 		// 由于此类的模板策略是直接使用模板作为模板名，如果此方法设置为true，
 		// 下面的NameTemplateLoader.findTemplateSource(String)的参数SQL会被加上Locale后缀导致逻辑出错，
