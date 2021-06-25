@@ -111,13 +111,6 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			setPlugin(new RefHtmlChartPlugin(pluginVarName));
 			setRenderContext(new RefRenderContext(renderContextVarName));
 		}
-
-		@JsonIgnore
-		@Override
-		public DataSetResult[] getDataSetResults() throws DataSetException
-		{
-			throw new UnsupportedOperationException();
-		}
 	}
 
 	/**
@@ -135,13 +128,6 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			setAlias(chartDataSet.getAlias());
 			setAttachment(chartDataSet.isAttachment());
 			setQuery(chartDataSet.getQuery());
-		}
-
-		@JsonIgnore
-		@Override
-		public boolean isResultReady()
-		{
-			throw new UnsupportedOperationException();
 		}
 
 		@JsonIgnore

@@ -45,7 +45,8 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	@Override
 	public DataSetResult getResult(DataSetQuery query) throws DataSetException
 	{
-		query = toNonNullDataSetQuery(query);
+		checkRequiredParamValues(query);
+
 		List<DataSetProperty> properties = getProperties();
 
 		if (properties == null || properties.isEmpty())
@@ -57,10 +58,10 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	}
 
 	@Override
-	public ResolvedDataSetResult resolve(DataSetQuery query)
-			throws DataSetException
+	public ResolvedDataSetResult resolve(DataSetQuery query) throws DataSetException
 	{
-		query = toNonNullDataSetQuery(query);
+		checkRequiredParamValues(query);
+
 		List<DataSetProperty> properties = getProperties();
 
 		return resolveResult(query, properties, true);

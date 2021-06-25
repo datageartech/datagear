@@ -29,9 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
@@ -999,11 +1000,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 */
 	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Map<String, DataSetResult[]> showData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestBody DashboardUpdateDataForm form) throws Exception
+	public ErrorMessageDashboardResult showData(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestBody DashboardQueryForm form) throws Exception
 	{
 		WebContext webContext = createWebContext(request);
-		return getDashboardData(request, response, model, webContext, form);
+		DashboardResult dashboardResult = getDashboardResult(request, response, model, webContext, form);
+
+		return new ErrorMessageDashboardResult(dashboardResult);
 	}
 
 	/**

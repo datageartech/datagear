@@ -94,13 +94,12 @@
 	
 	/**
 	 * 更新看板数据配置，需与后台保持一致，具体参考：
-	 * org.datagear.web.controller.AbstractDataAnalysisController.DashboardUpdateDataForm
+	 * org.datagear.web.controller.AbstractDataAnalysisController.DashboardQueryForm
 	 */
 	dashboardFactory.updateDashboardConfig = (dashboardFactory.updateDashboardConfig ||
 			{
 				dashboardIdParamName: "dashboardId",
-				chartIdsParamName: "chartIds",
-				chartQueriesParamName: "chartQueries"
+				dashboardQueryParamName: "dashboardQuery",
 			});
 	
 	/**
@@ -1320,23 +1319,28 @@
 			type : "POST",
 			url : url,
 			data : JSON.stringify(data),
-			success : function(resultsMap)
+			success : function(dashboardResult)
 			{
+				var chartResults = (dashboardResult.chartResults || {});
+				var chartResultErrorMessages = (dashboardResult.chartResultErrorMessages || {});
+				
 				// < @deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
-				if(resultsMap)
+				if(chartResults)
 				{
-					for(var chartId in resultsMap)
+					for(var chartId in chartResults)
 					{
-						var results = (resultsMap[chartId] || []);
-						for(var i=0; i<results.length; i++)
+						var chartResult = (chartResults[chartId] || {});
+						var dataSetResults = (chartResult ? chartResult.dataSetResults : []);
+						
+						for(var i=0; i<dataSetResults.length; i++)
 						{
-							if(results[i] && results[i].data != null)
+							if(dataSetResults[i] && dataSetResults[i].data != null)
 							{
-								var resultDatas = results[i].data;
+								var resultDatas = dataSetResults[i].data;
 								if(resultDatas != null && !$.isArray(resultDatas))
 									resultDatas = [ resultDatas ];
 								
-								results[i].datas = resultDatas;
+								dataSetResults[i].datas = resultDatas;
 							}
 						}
 					}
@@ -1345,10 +1349,20 @@
 				
 				var updateTime = new Date().getTime();
 				
+				dashboard._setUpdateTime(preUpdateCharts, updateTime);
+				
 				try
 				{
-					dashboard._setUpdateTime(preUpdateCharts, updateTime);
-					dashboard._updateCharts(resultsMap);
+					dashboard._updateCharts(chartResults);
+				}
+				catch(e)
+				{
+					chartFactory.logException(e);
+				}
+				
+				try
+				{
+					dashboard._handleChartResultErrors(chartResultErrorMessages);
 				}
 				catch(e)
 				{
@@ -1407,21 +1421,68 @@
 	};
 	
 	/**
-	 * 更新看板的图表数据。
+	 * 处理看板图表结果错误。
 	 * 
-	 * @param resultsMap 图表ID - 图表数据集结果数组
+	 * @param chartResultErrorMessages [图表ID-图表结果错误]映射表
 	 */
-	dashboardBase._updateCharts = function(resultsMap)
+	dashboardBase._handleChartResultErrors = function(chartResultErrorMessages)
 	{
-		for(var chartId in resultsMap)
+		if(!chartResultErrorMessages)
+			return;
+		
+		for(var chartId in chartResultErrorMessages)
 		{
 			var chart = this.chartOf(chartId);
 			
 			if(!chart)
 				continue;
 			
-			var results = resultsMap[chartId];
-			this._updateChart(chart, results);
+			this._handleChartResultError(chart, chartResultErrorMessages[chartId]);
+		}
+	};
+	
+	/**
+	 * 处理看板图表结果错误。
+	 * 
+	 * @param chart 图表对象
+	 * @param chartResultErrorMessage 图表结果错误信息对象
+	 */
+	dashboardBase._handleChartResultError = function(chart, chartResultErrorMessage)
+	{
+		//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
+		chart.status(chartStatusConst.UPDATE_ERROR);
+		
+		var errorType = (chartResultErrorMessage ? chartResultErrorMessage.type : "Error");
+		var errorMessage = (chartResultErrorMessage ? chartResultErrorMessage.message : "Chart result error");
+		
+		try
+		{
+			chartFactory.logException(errorType + " : " + errorMessage);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+		}
+	};
+	
+	/**
+	 * 更新看板的图表数据。
+	 * 
+	 * @param chartResults [图表ID-图表结果]映射表
+	 */
+	dashboardBase._updateCharts = function(chartResults)
+	{
+		if(!chartResults)
+			return;
+		
+		for(var chartId in chartResults)
+		{
+			var chart = this.chartOf(chartId);
+			
+			if(!chart)
+				continue;
+			
+			this._updateChart(chart, chartResults[chartId]);
 		}
 	};
 	
@@ -1429,13 +1490,15 @@
 	 * 更新指定图表。
 	 * 
 	 * @param chart 图表对象
-	 * @param results 图表数据集结果数组
+	 * @param chartResult 图表结果对象
 	 */
-	dashboardBase._updateChart = function(chart, results)
+	dashboardBase._updateChart = function(chart, chartResult)
 	{
+		var dataSetResults = (chartResult ? chartResult.dataSetResults : []);
+		
 		try
 		{
-			this._doUpdateChart(chart, results);
+			this._doUpdateChart(chart, dataSetResults);
 		}
 		catch(e)
 		{
@@ -1488,50 +1551,37 @@
 	{
 		var updateDashboardConfig = dashboardFactory.updateDashboardConfig;
 		
-		var data = {};
-		data[updateDashboardConfig.dashboardIdParamName] = this.id;
+		var dashboardQueryForm = {};
+		var dashboardQuery = { chartQueries: {}, resultDataFormat: this.resultDataFormat(), suppressChartError: true };
+		
+		dashboardQueryForm[updateDashboardConfig.dashboardIdParamName] = this.id;
+		dashboardQueryForm[updateDashboardConfig.dashboardQueryParamName] = dashboardQuery;
 		
 		if(charts && charts.length)
 		{
-			var chartIds = [];
-			var chartQueries = {};
-			
 			for(var i=0; i<charts.length; i++)
 			{
 				var chart = charts[i];
 				var chartId = chart.id;
 				
+				var chartQuery = { dataSetQueries: [], resultDataFormat: chart.resultDataFormat() };
+				
+				if(chartQuery.resultDataFormat == null)
+					chartQuery.resultDataFormat = this.resultDataFormat();
+				
 				var chartDataSets = (chart.chartDataSets || []);
-				var myQueries = [];
 				for(var j=0; j<chartDataSets.length; j++)
 				{
-					var myQuery = (chartDataSets[j].query || {});
-					
-					//结果数据格式优先级：查询级 > 图表级 > 看板级
-					var myRdf = myQuery.resultDataFormat;
-					if(myRdf == null)
-						myRdf = chart.resultDataFormat();
-					if(myRdf == null)
-						myRdf = this.resultDataFormat();
-					
-					if(myRdf != null)
-					{
-						myQuery = $.extend({}, myQuery);
-						myQuery.resultDataFormat = myRdf;
-					}
-					
-					myQueries.push(myQuery);
+					var dataSetQuery = (chartDataSets[j].query || {});
+					chartQuery.dataSetQueries.push(dataSetQuery);
 				}
 				
-				chartIds[i] = chartId;				
-				chartQueries[chartId] = myQueries;
+				dashboardQuery.chartQueries[chartId] = chartQuery;
 			}
 			
-			data[updateDashboardConfig.chartIdsParamName] = chartIds;
-			data[updateDashboardConfig.chartQueriesParamName] = chartQueries;
 		}
 		
-		return data;
+		return dashboardQueryForm;
 	};
 	
 	/**

@@ -9,13 +9,9 @@ package org.datagear.management.domain;
 
 import java.util.Date;
 
-import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartWidget;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * HTML {@linkplain ChartWidget}实体。
@@ -124,12 +120,5 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
-	}
-
-	@JsonIgnore
-	@Override
-	public DataSetResult[] getDataSetResults() throws DataSetException
-	{
-		return super.getDataSetResults();
 	}
 }

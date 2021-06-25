@@ -132,13 +132,16 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		this.dataFormat = dataFormat;
 	}
 
-	@Override
-	public boolean isReady(DataSetQuery query)
+	/**
+	 * 校验{@linkplain DataSetQuery#getParamValues()}是否有缺失的必填项。
+	 * 
+	 * @param query
+	 * @throws DataSetParamValueRequiredException
+	 */
+	protected void checkRequiredParamValues(DataSetQuery query) throws DataSetParamValueRequiredException
 	{
 		if (!hasParam())
-			return true;
-
-		query = toNonNullDataSetQuery(query);
+			return;
 
 		List<DataSetParam> params = getParams();
 		Map<String, ?> paramValues = query.getParamValues();
@@ -146,22 +149,11 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		for (DataSetParam param : params)
 		{
 			if (param.isRequired() && !paramValues.containsKey(param.getName()))
-				return false;
+				throw new DataSetParamValueRequiredException(
+						"Parameter [" + param.getName() + "] 's value is required");
 		}
-
-		return true;
 	}
 	
-	/**
-	 * 转换为非{@code null}的{@linkplain DataSetQuery}。
-	 * @param query
-	 * @return
-	 */
-	protected DataSetQuery toNonNullDataSetQuery(DataSetQuery query)
-	{
-		return (query == null ? DataSetQuery.valueOf() : query);
-	}
-
 	/**
 	 * 解析结果数据。
 	 * 

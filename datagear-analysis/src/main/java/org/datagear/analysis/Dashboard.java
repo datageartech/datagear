@@ -7,11 +7,9 @@
 
 package org.datagear.analysis;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 看板。
@@ -30,7 +28,7 @@ public class Dashboard extends AbstractIdentifiable
 
 	private DashboardWidget widget;
 
-	private List<Chart> charts;
+	private List<Chart> charts = null;
 
 	public Dashboard()
 	{
@@ -84,6 +82,12 @@ public class Dashboard extends AbstractIdentifiable
 		this.charts = charts;
 	}
 
+	/**
+	 * 获取指定ID的{@linkplain Chart}。
+	 * 
+	 * @param id
+	 * @return 返回{@code null}表示没有找到
+	 */
 	public Chart getChart(String id)
 	{
 		if (this.charts == null)
@@ -99,52 +103,59 @@ public class Dashboard extends AbstractIdentifiable
 	}
 
 	/**
-	 * 获取此看板所有图表的默认数据集结果。
+	 * 获取{@linkplain DashboardResult}。
 	 * 
-	 * @return 返回映射表的值数组元素可能为{@code null}，具体参考{@linkplain ChartDefinition#getDataSetResults()}
-	 * @throws DataSetException
-	 */
-	@SuppressWarnings("unchecked")
-	public Map<String, DataSetResult[]> getDataSetResults() throws DataSetException
-	{
-		if (this.charts == null || this.charts.isEmpty())
-			return Collections.EMPTY_MAP;
-
-		Map<String, DataSetResult[]> resultsMap = new HashMap<>();
-
-		for (Chart chart : this.charts)
-			resultsMap.put(chart.getId(), chart.getDataSetResults());
-
-		return resultsMap;
-	}
-
-	/**
-	 * 获取此看板指定图表ID集的数据集结果。
-	 * 
-	 * @param chartIds
-	 * @param dataSetQueries
+	 * @param query
 	 * @return
 	 * @throws DataSetException
 	 */
-	public Map<String, DataSetResult[]> getDataSetResults(Set<String> chartIds,
-			Map<String, ? extends List<? extends DataSetQuery>> dataSetQueries) throws DataSetException
+	public DashboardResult getResult(DashboardQuery query) throws DataSetException
 	{
-		Map<String, DataSetResult[]> resultsMap = new HashMap<>();
+		Map<String, ChartQuery> chartQueries = query.getChartQueries();
+		boolean suppressChartError = query.isSuppressChartError();
 
-		if (this.charts == null || this.charts.isEmpty())
-			return resultsMap;
+		Map<String, ChartResult> chartResults = new HashMap<String, ChartResult>(chartQueries.size());
+		Map<String, ChartResultError> chartResultErrors = new HashMap<String, ChartResultError>();
 
-		for (Chart chart : this.charts)
+		for (Map.Entry<String, ChartQuery> entry : chartQueries.entrySet())
 		{
-			if (!chartIds.contains(chart.getId()))
-				continue;
+			String chartId = entry.getKey();
+			ChartQuery chartQuery = entry.getValue();
+			Chart chart = getChart(chartId);
 
-			List<? extends DataSetQuery> myQuery = dataSetQueries.get(chart.getId());
+			if (chart == null)
+				throw new IllegalArgumentException("Chart '" + chartId + "' not found");
 
-			DataSetResult[] results = chart.getDataSetResults(myQuery);
-			resultsMap.put(chart.getId(), results);
+			if (chartQuery.getResultDataFormat() == null && query.getResultDataFormat() != null)
+			{
+				chartQuery = chartQuery.copy();
+				chartQuery.setResultDataFormat(query.getResultDataFormat());
+			}
+
+			ChartResult chartResult = null;
+
+			if (suppressChartError)
+			{
+				try
+				{
+					chartResult = chart.getResult(chartQuery);
+					chartResults.put(chartId, chartResult);
+				}
+				catch (Throwable t)
+				{
+					chartResultErrors.put(chartId, new ChartResultError(t));
+				}
+			}
+			else
+			{
+				chartResult = chart.getResult(chartQuery);
+				chartResults.put(chartId, chartResult);
+			}
 		}
 
-		return resultsMap;
+		DashboardResult dashboardResult = new DashboardResult(chartResults);
+		dashboardResult.setChartResultErrors(chartResultErrors);
+
+		return dashboardResult;
 	}
 }

@@ -121,48 +121,24 @@ public class ChartDataSet
 	}
 
 	/**
-	 * {@linkplain #getResult()}是否可用。
+	 * 使用{@linkplain #getQuery()}获取{@linkplain #getDataSet()}的{@linkplain DataSetResult}。
 	 * 
 	 * @return
+	 * @throws DataSetException
 	 */
-	public boolean isResultReady()
-	{
-		return this.dataSet.isReady(this.query);
-	}
-
-	/**
-	 * 获取{@linkplain #getDataSet()}的{@linkplain DataSetResult}。
-	 * </p>
-	 * 调用此方法前应该确保{@linkplain #isResultReady()}返回{@code true}。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	public DataSetResult getResult()
+	public DataSetResult getResult() throws DataSetException
 	{
 		return this.dataSet.getResult(this.query);
 	}
 
 	/**
-	 * {@linkplain #getResult(DataSetQuery)}是否可用。
-	 * @param query
-	 * @return
-	 */
-	public boolean isResultReady(DataSetQuery query)
-	{
-		return this.dataSet.isReady(query);
-	}
-
-	/**
 	 * 获取{@linkplain #getDataSet()}的{@linkplain DataSetResult}。
-	 * </p>
-	 * 调用此方法前应该确保{@linkplain #isResultReady(DataSetQuery)}返回{@code true}。
-	 * </p>
 	 * 
 	 * @param query
 	 * @return
+	 * @throws DataSetException
 	 */
-	public DataSetResult getResult(DataSetQuery query)
+	public DataSetResult getResult(DataSetQuery query) throws DataSetException
 	{
 		return this.dataSet.getResult(query);
 	}

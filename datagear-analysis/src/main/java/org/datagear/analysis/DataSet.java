@@ -65,23 +65,12 @@ public interface DataSet extends Identifiable
 	DataSetParam getParam(String name);
 
 	/**
-	 * 给定的{@linkplain DataSetQuery}是否可用于{@linkplain #getResult(DataSetQuery)}。
-	 * <p>
-	 * 通常是：{@linkplain DataSetQuery#getParamValues()}包含{@linkplain #getParams()}中的所有{@linkplain DataSetParam#isRequired()}参数值。
-	 * </p>
-	 * 
-	 * @param query 允许为{@code null}
-	 * @return
-	 */
-	boolean isReady(DataSetQuery query);
-
-	/**
 	 * 获取{@linkplain DataSetResult}。
 	 * <p>
 	 * 返回结果中的数据项应已转换为与{@linkplain #getProperties()}的{@linkplain DataSetProperty#getType()}类型一致。
 	 * </p>
 	 * 
-	 * @param query 应是已通过{@linkplain #isReady(DataSetQuery)}校验的（可能为{@code null}）
+	 * @param query
 	 * @return
 	 * @throws DataSetException
 	 */

@@ -19,7 +19,7 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class DataSetQuery
+public class DataSetQuery implements ResultDataFormatAware
 {
 	/** 参数值映射表 */
 	private Map<String, ?> paramValues = Collections.emptyMap();
@@ -62,11 +62,7 @@ public class DataSetQuery
 		this.paramValues = paramValues;
 	}
 	
-	/**
-	 * 获取结果数据格式。
-	 * 
-	 * @return 返回{@code null}表示未设置
-	 */
+	@Override
 	public ResultDataFormat getResultDataFormat()
 	{
 		return resultDataFormat;
@@ -80,6 +76,7 @@ public class DataSetQuery
 	 * 
 	 * @param dataFormat
 	 */
+	@Override
 	public void setResultDataFormat(ResultDataFormat resultDataFormat)
 	{
 		this.resultDataFormat = resultDataFormat;

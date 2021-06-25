@@ -12,12 +12,9 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,11 +22,13 @@ import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartQuery;
 import org.datagear.analysis.Dashboard;
+import org.datagear.analysis.DashboardQuery;
+import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DashboardThemeSource;
 import org.datagear.analysis.DataSetQuery;
-import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.DefaultRenderContext;
@@ -165,7 +164,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 	
 	/**
-	 * 获取看板数据。
+	 * 获取看板结果。
 	 * 
 	 * @param request
 	 * @param response
@@ -175,12 +174,11 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @return
 	 * @throws Exception
 	 */
-	protected Map<String, DataSetResult[]> getDashboardData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, WebContext webContext, DashboardUpdateDataForm form) throws Exception
+	protected DashboardResult getDashboardResult(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, WebContext webContext, DashboardQueryForm form) throws Exception
 	{
 		String dashboardId = form.getDashboardId();
-		List<String> chartIds = form.getChartIds();
-		Map<String, List<DataSetQuery>> chartsQueries = form.getChartQueries();
+		DashboardQuery dashboardQuery = form.getDashboardQuery();
 		
 		if (StringUtil.isEmpty(dashboardId))
 			throw new IllegalInputException();
@@ -191,59 +189,60 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (dashboard == null)
 			throw new RecordNotFoundException();
 
-		if (chartIds == null || chartIds.isEmpty())
-			return dashboard.getDataSetResults();
-		else
-		{
-			Set<String> chartIdSet = new HashSet<>(chartIds.size());
-			chartIdSet.addAll(chartIds);
+		DashboardQuery queriesConverted = convertDashboardQuery(dashboard, dashboardQuery);
 
-			return dashboard.getDataSetResults(chartIdSet, convertChartDataSetQueries(dashboard, chartsQueries));
-		}
+		return dashboard.getResult(queriesConverted);
 	}
 
-	protected Map<String, List<DataSetQuery>> convertChartDataSetQueries(Dashboard dashboard,
-			Map<String, ? extends List<? extends DataSetQuery>> chartsQueries)
+	protected DashboardQuery convertDashboardQuery(Dashboard dashboard, DashboardQuery query)
 	{
-		if(chartsQueries == null)
-			return Collections.emptyMap();
+		if (query == null)
+			return new DashboardQuery();
 		
-		Map<String, List<DataSetQuery>> re = new HashMap<String, List<DataSetQuery>>();
-		
-		for (Map.Entry<String, ? extends List<? extends DataSetQuery>> entry : chartsQueries.entrySet())
+		Map<String, ChartQuery> chartQueries = query.getChartQueries();
+		Map<String, ChartQuery> chartQueriesRe = new HashMap<String, ChartQuery>(chartQueries.size());
+
+		for (Map.Entry<String, ChartQuery> entry : chartQueries.entrySet())
 		{
 			String chartId = entry.getKey();
+			ChartQuery chartQuery = entry.getValue();
 			Chart chart = dashboard.getChart(chartId);
-			
-			if(chart == null)
-				continue;
-			
-			ChartDataSet[] chartDataSets = chart.getChartDataSets();
 
-			if (chartDataSets == null || chartDataSets.length == 0)
+			if (chart == null)
+				throw new IllegalInputException("Chart '" + chartId + "' not found");
+
+			ChartDataSet[] chartDataSets = chart.getChartDataSets();
+			List<DataSetQuery> dataSetQueries = chartQuery.getDataSetQueries();
+
+			ChartQuery chartQueryRe = null;
+
+			if (chartDataSets == null || chartDataSets.length == 0 || dataSetQueries == null
+					|| dataSetQueries.isEmpty())
 			{
-				re.put(entry.getKey(), Collections.emptyList());
+				chartQueryRe = chartQuery;
 			}
 			else
 			{
-				List<? extends DataSetQuery> rawQueries = chartsQueries.get(chartId);
-				List<DataSetQuery> reQueries = new ArrayList<DataSetQuery>();
-				
-				if (chartDataSets != null && chartDataSets.length > 0)
+				List<DataSetQuery> dataSetQueriesRe = new ArrayList<DataSetQuery>(dataSetQueries.size());
+
+				for (int j = 0; j < chartDataSets.length; j++)
 				{
-					for(int j = 0; j<chartDataSets.length; j++)
-					{
-						DataSetQuery reQuery = rawQueries.get(j);
-						reQuery = getDataSetParamValueConverter().convert(reQuery, chartDataSets[j].getDataSet(), true);
-						reQueries.add(reQuery);
-					}
+					DataSetQuery dataSetQueryRe = dataSetQueries.get(j);
+					dataSetQueryRe = getDataSetParamValueConverter().convert(dataSetQueryRe, chartDataSets[j].getDataSet(), true);
+					dataSetQueriesRe.add(dataSetQueryRe);
 				}
-				
-				re.put(chartId, reQueries);
+
+				chartQueryRe = chartQuery.copy();
+				chartQueryRe.setDataSetQueries(dataSetQueriesRe);
 			}
+
+			chartQueriesRe.put(chartId, chartQueryRe);
 		}
 		
-		return re;
+		DashboardQuery queryRe = query.copy();
+		queryRe.setChartQueries(chartQueriesRe);
+
+		return queryRe;
 	}
 
 	protected SessionHtmlTplDashboardManager getSessionHtmlTplDashboardManagerNotNull(HttpServletRequest request)
@@ -317,18 +316,19 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		}
 	}
 	
-	public static class DashboardUpdateDataForm
+	/**
+	 * 看板查询表单。
+	 *
+	 */
+	public static class DashboardQueryForm
 	{
 		/**更新数据的看板ID*/
 		private String dashboardId;
 		
-		/**更新数据的图表ID*/
-		private List<String> chartIds;
-		
-		/**更新数据的图表查询*/
-		private Map<String, List<DataSetQuery>> chartQueries;
+		/** 看板查询 */
+		private DashboardQuery dashboardQuery;
 
-		public DashboardUpdateDataForm()
+		public DashboardQueryForm()
 		{
 			super();
 		}
@@ -343,24 +343,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			this.dashboardId = dashboardId;
 		}
 
-		public List<String> getChartIds()
+		public DashboardQuery getDashboardQuery()
 		{
-			return chartIds;
+			return dashboardQuery;
 		}
 
-		public void setChartIds(List<String> chartIds)
+		public void setDashboardQuery(DashboardQuery dashboardQuery)
 		{
-			this.chartIds = chartIds;
-		}
-
-		public Map<String, List<DataSetQuery>> getChartQueries()
-		{
-			return chartQueries;
-		}
-
-		public void setChartQueries(Map<String, List<DataSetQuery>> chartQueries)
-		{
-			this.chartQueries = chartQueries;
+			this.dashboardQuery = dashboardQuery;
 		}
 	}
 }

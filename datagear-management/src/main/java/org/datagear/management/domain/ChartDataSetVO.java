@@ -43,13 +43,6 @@ public class ChartDataSetVO extends ChartDataSet
 
 	@JsonIgnore
 	@Override
-	public boolean isResultReady()
-	{
-		return super.isResultReady();
-	}
-
-	@JsonIgnore
-	@Override
 	public DataSetResult getResult()
 	{
 		return super.getResult();

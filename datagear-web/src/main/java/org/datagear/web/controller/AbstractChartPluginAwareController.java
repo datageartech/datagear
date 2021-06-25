@@ -310,13 +310,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 
 		@JsonIgnore
 		@Override
-		public boolean isResultReady()
-		{
-			return false;
-		}
-
-		@JsonIgnore
-		@Override
 		public DataSetResult getResult()
 		{
 			return null;

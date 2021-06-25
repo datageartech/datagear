@@ -7,6 +7,7 @@
 
 package org.datagear.analysis;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class ChartDefinition extends AbstractIdentifiable
+public class ChartDefinition extends AbstractIdentifiable implements ResultDataFormatAware
 {
 	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_NAME = "name";
@@ -150,8 +151,9 @@ public class ChartDefinition extends AbstractIdentifiable
 	/**
 	 * 获取图表数据集结果数据格式。
 	 * 
-	 * @return 返回{@code null}表示未设置
+	 * @return
 	 */
+	@Override
 	public ResultDataFormat getResultDataFormat()
 	{
 		return resultDataFormat;
@@ -162,108 +164,79 @@ public class ChartDefinition extends AbstractIdentifiable
 	 * 
 	 * @param dataFormat
 	 */
+	@Override
 	public void setResultDataFormat(ResultDataFormat resultDataFormat)
 	{
 		this.resultDataFormat = resultDataFormat;
 	}
 	
 	/**
-	 * 获取指定索引的默认{@linkplain DataSetResult}。
+	 * 获取{@linkplain ChartResult}。
+	 * <p>
+	 * 如果{@linkplain ChartQuery#getDataSetQuery(int)}为{@code null}，此方法将使用{@linkplain ChartDataSet#getQuery()}。
+	 * </p>
 	 * 
-	 * @param index
-	 * @return 如果{@linkplain ChartDataSet#isResultReady()}为{@code false}，将返回{@code null}。
+	 * @param query
+	 * @return
 	 * @throws DataSetException
 	 */
-	public DataSetResult getDataSetResult(int index) throws DataSetException
-	{
-		ChartDataSet chartDataSet = this.chartDataSets[index];
-		
-		if (!chartDataSet.isResultReady())
-			return null;
-		
-		if(this.resultDataFormat == null)
-		{
-			return chartDataSet.getResult();
-		}
-		else
-		{
-			DataSetQuery query = DataSetQuery.copy(chartDataSet.getQuery());
-			query.setResultDataFormat(this.resultDataFormat);
-			
-			return chartDataSet.getResult(query);
-		}
-	}
-
-	/**
-	 * 获取所有默认{@linkplain DataSetResult}数组。
-	 * 
-	 * @return 如果{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady()}为{@code false}，
-	 *         返回数组对应元素将为{@code null}。
-	 * @throws DataSetException
-	 */
-	public DataSetResult[] getDataSetResults() throws DataSetException
+	public ChartResult getResult(ChartQuery query) throws DataSetException
 	{
 		if (this.chartDataSets == null || this.chartDataSets.length == 0)
-			return new DataSetResult[0];
+			return new ChartResult(Collections.emptyList());
 
-		DataSetResult[] results = new DataSetResult[this.chartDataSets.length];
+		ChartResult chartResult = new ChartResult();
 
-		for (int i = 0; i < this.chartDataSets.length; i++)
-			results[i] = getDataSetResult(i);
-
-		return results;
-	}
-
-	/**
-	 * 获取指定索引的{@linkplain DataSetResult}。
-	 * 
-	 * @param index
-	 * @param query 允许为{@code null}
-	 * @return 如果{@linkplain ChartDataSet#isResultReady(DataSetQuery)}为{@code false}，将返回{@code null}。
-	 * @throws DataSetException
-	 */
-	public DataSetResult getDataSetResult(int index, DataSetQuery query) throws DataSetException
-	{
-		if (query == null)
-			query = DataSetQuery.valueOf();
-		
-		if(query.getResultDataFormat() == null && this.resultDataFormat != null)
-		{
-			query = query.copy();
-			query.setResultDataFormat(this.resultDataFormat);
-		}
-		
-		ChartDataSet chartDataSet = this.chartDataSets[index];
-		
-		if (!chartDataSet.isResultReady(query))
-			return null;
-		
-		return chartDataSet.getResult(query);
-	}
-
-	/**
-	 * 获取所有{@linkplain DataSetResult}数组。
-	 * 
-	 * @param queries 允许为{@code null}，或者元素为{@code null}
-	 * @return 如果{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady(DataSetQuery)}为{@code false}，返回数组对应元素将为{@code null}。
-	 * @throws DataSetException
-	 */
-	public DataSetResult[] getDataSetResults(List<? extends DataSetQuery> queries) throws DataSetException
-	{
-		if (this.chartDataSets == null || this.chartDataSets.length == 0)
-			return new DataSetResult[0];
-
-		DataSetResult[] results = new DataSetResult[this.chartDataSets.length];
-
-		int pvSize = (queries == null ? 0 : queries.size());
+		List<DataSetResult> dataSetResults = new ArrayList<DataSetResult>(this.chartDataSets.length);
 
 		for (int i = 0; i < this.chartDataSets.length; i++)
 		{
-			DataSetQuery query = (i >= pvSize ? null : queries.get(i));
-			results[i] = getDataSetResult(i, query);
+			ChartDataSet chartDataSet = this.chartDataSets[i];
+			DataSetQuery dataSetQuery = getDataSetQuery(query, chartDataSet, i);
+			DataSetResult dataSetResult = chartDataSet.getResult(dataSetQuery);
+
+			dataSetResults.add(dataSetResult);
 		}
 
-		return results;
+		chartResult.setDataSetResults(dataSetResults);
+
+		return chartResult;
+	}
+
+	/**
+	 * 获取指定{@linkplain DataSetQuery}。
+	 * 
+	 * @param chartQuery
+	 * @param chartDataSet
+	 * @param chartDataSetIdx
+	 * @return
+	 */
+	protected DataSetQuery getDataSetQuery(ChartQuery chartQuery, ChartDataSet chartDataSet, int chartDataSetIdx)
+	{
+		DataSetQuery dataSetQuery = chartQuery.getDataSetQuery(chartDataSetIdx);
+
+		if (dataSetQuery == null)
+			dataSetQuery = chartDataSet.getQuery();
+
+		if (dataSetQuery == null)
+			dataSetQuery = DataSetQuery.valueOf();
+
+		if (dataSetQuery.getResultDataFormat() == null)
+		{
+			ResultDataFormat cqrds = chartQuery.getResultDataFormat();
+			ResultDataFormat crds = getResultDataFormat();
+
+			if (cqrds != null || crds != null)
+			{
+				dataSetQuery = dataSetQuery.copy();
+				dataSetQuery.setResultDataFormat(cqrds);
+
+				if (dataSetQuery.getResultDataFormat() == null)
+					dataSetQuery.setResultDataFormat(crds);
+			}
+		}
+
+		return dataSetQuery;
 	}
 
 	@Override
