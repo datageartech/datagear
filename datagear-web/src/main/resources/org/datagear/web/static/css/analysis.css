@@ -65,10 +65,6 @@
 	margin-left: 0.2em;
 	margin-right: 0.2em;
 }
-/*轮播表格隐藏竖向滚动条*/
-.dg-chart-table.dg-chart-table-carousel .dg-chart-table-content .dataTables_scrollBody{
-	overflow-y: hidden !important;
-}
 /*设置固定列后，在某些版本浏览器固定列会出现横向滚动条，所以这里通过此样式将滚动条隐藏*/
 .dg-chart-table .dg-chart-table-content .DTFC_LeftBodyLiner,
 .dg-chart-table .dg-chart-table-content .DTFC_RightBodyLiner{
