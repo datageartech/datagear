@@ -4165,7 +4165,7 @@
 			+" }\n";
 		}
 		
-		chartFactory.createStyleSheet(styleSheetId, cssText);
+		chartFactory.createStyleSheet(styleSheetId, cssText, "beforeFirstScript");
 		
 		return true;
 	};

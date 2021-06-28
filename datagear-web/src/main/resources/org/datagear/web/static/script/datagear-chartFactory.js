@@ -2915,12 +2915,42 @@
 	 * 
 	 * @param id 样式表元素ID
 	 * @param cssText 样式文本
+	 * @param position 可选，插入位置："first"、"last"、"beforeFirstScript"（第一个<script>节点之前）、DOM（插入其前面），默认值为："last"
 	 */
-	chartFactory.createStyleSheet = function(id, cssText)
+	chartFactory.createStyleSheet = function(id, cssText, position)
 	{
+		if(!position)
+			position = "last";
+		
 	    var head = (document.head || document.getElementsByTagName("head")[0]);
 	    var style = document.createElement("style");
-	    head.appendChild(style);
+		
+		var beforeNode = null;
+		
+		if(position === "last")
+		{
+		}
+		else if(position === "first")
+		{
+			beforeNode = head.firstChild;
+		}
+		else if(position === "beforeFirstScript")
+		{
+			var childNodes = (head.childNodes || []);
+			for(var i=0; i<childNodes.length; i++)
+			{
+				if((childNodes[i].tagName || "").toLowerCase() == "script")
+				{
+					beforeNode = childNodes[i];
+					break;
+				}
+			}
+		}
+		
+		if(beforeNode)
+			head.insertBefore(style, beforeNode);
+		else
+			head.appendChild(style);
 	    
 	    style.id = id;
 	    style.type = "text/css";

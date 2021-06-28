@@ -292,7 +292,7 @@
 			+" }\n"
 			;
 		
-		chartFactory.createStyleSheet(styleId, cssText);
+		chartFactory.createStyleSheet(styleId, cssText, "beforeFirstScript");
 		
 		return true;
 	};
@@ -824,7 +824,7 @@
 			+" }\n"
 			;
 		
-		chartFactory.createStyleSheet(styleId, cssText);
+		chartFactory.createStyleSheet(styleId, cssText, "beforeFirstScript");
 		
 		return true;
 	};
@@ -1308,7 +1308,7 @@
 			+"} \n"
 			;
 		
-		chartFactory.createStyleSheet(styleId, cssText);
+		chartFactory.createStyleSheet(styleId, cssText, "beforeFirstScript");
 		
 		return true;
 	};
@@ -1751,7 +1751,7 @@
 			+" background:"+chartTheme.highlightTheme.backgroundColor+";"
 			+" }\n";
 		
-		chartFactory.createStyleSheet(styleId, cssText);
+		chartFactory.createStyleSheet(styleId, cssText, "beforeFirstScript");
 		
 		return true;
 	};
