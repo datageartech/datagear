@@ -3915,7 +3915,15 @@
 		var dataTable = table.DataTable();
 		
 		if(evalHeight)
+		{
 			chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
+		}
+		
+		if(options.carousel.enable && options.carousel.hideVerticalScrollbar != false)
+		{
+			var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
+			tableBody.css("overflow-y", "hidden");
+		}
 		
 		$(dataTable.table().body()).on("mouseenter", "tr", function()
 		{
@@ -4105,7 +4113,6 @@
 		
 		//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
 		var qualifier = "." + styleClassName + " .dg-chart-table-content";
-		var qualifierCarousel = "." + styleClassName + ".dg-chart-table-carousel .dg-chart-table-content";
 		
 		var cssText = 
 			qualifier + " table.dataTable tbody tr{"
@@ -4156,14 +4163,6 @@
 			+ " border-top-color:" + chartOptions.table.header.color+";"
 			+ " background: none;"
 			+" }\n";
-		
-		if(!chartOptions.carousel || chartOptions.carousel.hideVerticalScrollbar != false)
-		{
-			cssText +=
-			qualifierCarousel + " .dataTables_scrollBody{"
-			+ " overflow-y: hidden !important;"
-			+" }\n";
-		}
 		
 		chartFactory.createStyleSheet(styleSheetId, cssText, "beforeFirstScript");
 		
