@@ -1215,7 +1215,8 @@
 		{
 			wait = true;
 		}
-		else if(chart.statusUpdated() && chart.updateInterval > -1)
+		else if(chart.updateInterval > -1
+				&& (chart.statusUpdated() || chart.status() == chartStatusConst.UPDATE_ERROR))
 		{
 			if(currentTime == null)
 				currentTime = new Date().getTime();
@@ -1223,7 +1224,7 @@
 			var updateInterval = chart.updateInterval;
 			var prevUpdateTime = chart._updateTime();
 			
-			if(prevUpdateTime == null || (prevUpdateTime + updateInterval) <= currentTime)
+			if(prevUpdateTime == null || (currentTime - prevUpdateTime) >= updateInterval)
 				wait = true;
 		}
 		
