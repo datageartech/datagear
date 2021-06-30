@@ -646,9 +646,7 @@
 					detail: {formatter: "{value}", color: "auto"},
 			        progress:
 					{
-						show: true,
-						overlap: true,
-						roundCap: true
+						show: true
 			        },
 					min: 0,
 					max: 100,
