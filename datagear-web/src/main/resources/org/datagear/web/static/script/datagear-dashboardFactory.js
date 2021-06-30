@@ -30,6 +30,8 @@
  * 
  * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.UPDATE_GROUP属性，用于设置图表更新ajax分组。
  * 
+ * 此看板工厂扩展了图表监听器功能，支持为图表监听器添加图表更新数据出错处理函数：{ updateError: function(chart, error){ ... } }
+ * 
  * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboardBase._initForms函数说明。
  * 
  */
@@ -660,11 +662,14 @@
 		var listener = $(document.body).attr(elementAttrConst.DASHBOARD_LISTENER);
 		
 		if(listener)
+		{
 			listener = chartFactory.evalSilently(listener);
-		
+		}
 		// < @deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
 		else if(typeof(dashboardRenderer) != "undefined")
+		{
 			listener = dashboardRenderer.listener;
+		}
 		// > @deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
 		
 		if(listener)
@@ -706,9 +711,27 @@
 		
 		chartFactory.init(chart);
 		
-		//如果图表没有定义监听器，则使用代理看板监听器
-		if(!chart.listener())
+		var chartListener = chart.listener();
+		
+		//图表监听器不继承看板监听器功能，所有只有图表没有定义监听器时，才使用代理看板监听器
+		if(!chartListener)
+		{
 			chart.listener(this._getDelegateChartListener());
+		}
+		else
+		{
+			//由元素图表监听器属性生成的内部代理图表监听器，应为其添加updateError处理函数
+			if(chartListener._proxyChartListenerFromEleAttr)
+			{
+				chartListener.updateError = function(chart, error)
+				{
+					var dl = this._findListenerOfFunc("updateError");
+					
+					if(dl)
+						return dl.updateError(chart, error);
+				};
+			}
+		}
 	};
 	
 	/**
@@ -751,7 +774,9 @@
 	 *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
 	 *   onRenderChart: function(dashboard, chart){ ... },
 	 *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
-	 *   onUpdateChart: function(dashboard, chart, results){ ... }
+	 *   onUpdateChart: function(dashboard, chart, results){ ... },
+	 *   //可选，更新图表数据出错处理函数
+	 *   updateChartError: function(dashboard, chart, error){ ... }
 	 * }
 	 * 
 	 * @param listener 可选，要设置的监听器对象，没有则执行获取操作
@@ -787,6 +812,11 @@
 			chartListener.onUpdate = function(chart, results){ return listener.onUpdateChart(dashboard, chart, results); };
 		else
 			chartListener.onUpdate = undefined;
+		
+		if(listener && listener.updateChartError)
+			chartListener.updateError = function(chart, error){ return listener.updateChartError(dashboard, chart, error); };
+		else
+			chartListener.updateError = undefined;
 	};
 	
 	/**
@@ -1438,7 +1468,17 @@
 			if(!chart)
 				continue;
 			
-			this._handleChartResultError(chart, chartResultErrorMessages[chartId]);
+			try
+			{
+				//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
+				chart.status(chartStatusConst.UPDATE_ERROR);
+				
+				this._handleChartResultError(chart, chartResultErrorMessages[chartId]);
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
+			}
 		}
 	};
 	
@@ -1450,19 +1490,18 @@
 	 */
 	dashboardBase._handleChartResultError = function(chart, chartResultErrorMessage)
 	{
-		//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
-		chart.status(chartStatusConst.UPDATE_ERROR);
+		var chartListener = chart.listener();
 		
-		var errorType = (chartResultErrorMessage ? chartResultErrorMessage.type : "Error");
-		var errorMessage = (chartResultErrorMessage ? chartResultErrorMessage.message : "Chart result error");
-		
-		try
+		if(chartListener && chartListener.updateError)
 		{
-			chartFactory.logException(errorType + " : " + errorMessage);
+			chartListener.updateError(chart, chartResultErrorMessage);
 		}
-		catch(e)
+		else
 		{
-			chartFactory.logException(e);
+			var errorType = (chartResultErrorMessage ? chartResultErrorMessage.type : "Error");
+			var errorMessage = (chartResultErrorMessage ? chartResultErrorMessage.message : "Chart result error");
+			
+			chartFactory.logException(errorType + " : " + errorMessage);
 		}
 	};
 	
@@ -1483,7 +1522,17 @@
 			if(!chart)
 				continue;
 			
-			this._updateChart(chart, chartResults[chartId]);
+			try
+			{
+				this._updateChart(chart, chartResults[chartId]);
+			}
+			catch(e)
+			{
+				//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
+				chart.status(chartStatusConst.UPDATE_ERROR);
+				
+				chartFactory.logException(e);
+			}
 		}
 	};
 	
@@ -1497,28 +1546,7 @@
 	{
 		var dataSetResults = (chartResult ? chartResult.dataSetResults : []);
 		
-		try
-		{
-			this._doUpdateChart(chart, dataSetResults);
-		}
-		catch(e)
-		{
-			//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
-			chart.status(chartStatusConst.UPDATE_ERROR);
-			
-			chartFactory.logException(e);
-		}
-	};
-	
-	/**
-	 * 更新指定图表。
-	 * 
-	 * @param chart 图表对象
-	 * @param results 图表数据集结果数组
-	 */
-	dashboardBase._doUpdateChart = function(chart, results)
-	{
-		return chart.update(results);
+		chart.update(dataSetResults);
 	};
 	
 	dashboardBase._setUpdateTime = function(chart, time)

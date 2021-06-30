@@ -504,19 +504,88 @@
 	 */
 	chartBase._initListener = function()
 	{
-		var $element = this.elementJquery();
+		var globalListener = $(document.body).attr(elementAttrConst.LISTENER);
+		var localListener = this.elementJquery().attr(elementAttrConst.LISTENER);
 		
-		var listenerStr = $element.attr(elementAttrConst.LISTENER);
-		if(!listenerStr)
-			listenerStr = $(document.body).attr(elementAttrConst.LISTENER);
-		
-		if(listenerStr)
+		if(globalListener)
 		{
-			var listener = chartFactory.evalSilently(listenerStr);
+			if(!chartFactory._globalChartListener)
+			{
+				chartFactory._globalChartListener = chartFactory.evalSilently(globalListener);
+			}
 			
-			if(listener)
-				this.listener(listener);
+			globalListener = chartFactory._globalChartListener;
 		}
+		
+		if(localListener)
+		{
+			localListener = chartFactory.evalSilently(localListener);
+		}
+		
+		var myListener = null;
+		
+		if(!localListener && !globalListener)
+		{
+			myListener = null;
+		}
+		else if(!localListener)
+		{
+			myListener = globalListener;
+		}
+		else if(!globalListener)
+		{
+			myListener = localListener;
+		}
+		else
+		{
+			//实现局部图表监听器继承全局图表监听器功能
+			myListener =
+			{
+				//标识这是一个由元素图表监听器属性生成的内部代理图表监听器
+				_proxyChartListenerFromEleAttr: true,
+				_listeners: [localListener, globalListener],
+				render: function(chart)
+				{
+					var dl = this._findListenerOfFunc("render");
+					
+					if(dl)
+						return dl.render(chart);
+				},
+				update: function(chart, results)
+				{
+					var dl = this._findListenerOfFunc("update");
+					
+					if(dl)
+						return dl.update(chart, results);
+				},
+				onRender: function(chart)
+				{
+					var dl = this._findListenerOfFunc("onRender");
+					
+					if(dl)
+						return dl.onRender(chart);
+				},
+				onUpdate: function(chart, results)
+				{
+					var dl = this._findListenerOfFunc("onUpdate");
+					
+					if(dl)
+						return dl.onUpdate(chart, results);
+				},
+				_findListenerOfFunc: function(funcName)
+				{
+					for(var i=0; i<this._listeners.length; i++)
+					{
+						if(this._listeners[i] && this._listeners[i][funcName])
+							return this._listeners[i];
+					}
+					
+					return null;
+				}
+			};
+		}
+		
+		this.listener(myListener);
 	};
 	
 	/**
@@ -707,7 +776,7 @@
 	 *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
 	 *   onRender: function(chart){ ... },
 	 *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
-	 *   onUpdate: function(chart, results){ ... },
+	 *   onUpdate: function(chart, results){ ... }
 	 * }
 	 * 
 	 * @param listener 可选，要设置的监听器对象，没有则执行获取操作

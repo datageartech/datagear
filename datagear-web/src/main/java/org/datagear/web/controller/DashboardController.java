@@ -1006,7 +1006,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		WebContext webContext = createWebContext(request);
 		DashboardResult dashboardResult = getDashboardResult(request, response, model, webContext, form);
 
-		return new ErrorMessageDashboardResult(dashboardResult);
+		return new ErrorMessageDashboardResult(dashboardResult, true);
 	}
 
 	/**
