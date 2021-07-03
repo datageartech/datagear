@@ -2052,7 +2052,7 @@
 	 * @param asMillisecond 可选，是否返回毫秒数值而非Date对象，默认为：false 
 	 * @return Date对象，或者毫秒数值
 	 */
-	dashboardBase.currentServerDate = function(asMillisecond)
+	dashboardBase.serverDate = function(asMillisecond)
 	{
 		//参考org.datagear.web.controller.DashboardController.SERVERTIME_JS_VAR
 		if(global._DataGearServerTime == null)

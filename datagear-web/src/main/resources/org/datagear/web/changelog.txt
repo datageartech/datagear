@@ -448,7 +448,7 @@ DataGear版本更新日志
 --v2.6.0
 -----------------------------------------
 
-新增：看板JS对象新增currentServerDate函数，用于获取服务端当前日期；
+新增：看板JS对象新增serverDate函数，用于获取服务端当前日期；
 新增：看板监听器新增updateChartError函数，图表监听器新增updateError函数，用于自定义图表更新数据出错处理逻辑；
 新增：表格图表新增carousel.hideVerticalScrollbar配置项，用于控制轮播时是否隐藏纵向滚动条；
 修复：修复定时刷新图表的dg-chart-link和refreshData()不起作用的BUG；
