@@ -57,14 +57,6 @@ public abstract class DBTestSupport
 				JDBC_PROPERTIES.getProperty("jdbc.user"), JDBC_PROPERTIES.getProperty("jdbc.password"));
 	}
 
-	protected Connection getConnection(Properties properties) throws SQLException
-	{
-		properties.setProperty("user", JDBC_PROPERTIES.getProperty("jdbc.user"));
-		properties.setProperty("password", JDBC_PROPERTIES.getProperty("jdbc.password"));
-
-		return DriverManager.getConnection(JDBC_PROPERTIES.getProperty("jdbc.url"), properties);
-	}
-
 	protected DataSource getDataSource() throws SQLException
 	{
 		return new DataSource()

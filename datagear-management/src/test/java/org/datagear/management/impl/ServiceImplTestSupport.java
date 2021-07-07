@@ -7,7 +7,14 @@
 
 package org.datagear.management.impl;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.management.dbversion.DbVersionManager;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.management.util.dialect.MbSqlDialectBuilder;
 import org.datagear.util.test.DBTestSupport;
@@ -23,6 +30,20 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  */
 public class ServiceImplTestSupport extends DBTestSupport
 {
+	private static final DataSource DATA_SOURCE;
+
+	static
+	{
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setDriverClassName("org.apache.derby.jdbc.EmbeddedDriver");
+		dataSource.setUrl("jdbc:derby:target/test/derby;create=true");
+
+		DbVersionManager bean = new DbVersionManager(dataSource);
+		bean.upgrade();
+
+		DATA_SOURCE = dataSource;
+	}
+
 	private final SqlSessionFactory sqlSessionFactory;
 
 	private final MbSqlDialect dialect;
@@ -59,5 +80,17 @@ public class ServiceImplTestSupport extends DBTestSupport
 	public MbSqlDialect getDialect()
 	{
 		return dialect;
+	}
+
+	@Override
+	protected Connection getConnection() throws SQLException
+	{
+		return DATA_SOURCE.getConnection();
+	}
+
+	@Override
+	protected DataSource getDataSource() throws SQLException
+	{
+		return DATA_SOURCE;
 	}
 }

@@ -1,34 +1,3 @@
-CREATE TABLE DATAGEAR_USER
-(
-	USER_ID VARCHAR(50) NOT NULL,
-	USER_NAME VARCHAR(50) NOT NULL,
-	USER_PASSWORD VARCHAR(200) NOT NULL,
-	USER_REAL_NAME VARCHAR(100),
-	USER_EMAIL VARCHAR(200),
-	USER_IS_ADMIN VARCHAR(20),
-	USER_CREATE_TIME TIMESTAMP,
-	PRIMARY KEY (USER_ID),
-	UNIQUE (USER_NAME)
-);
-
-CREATE TABLE DATAGEAR_ROLE
-(
-	ROLE_ID VARCHAR(50) NOT NULL,
-	ROLE_NAME VARCHAR(100) NOT NULL,
-	ROLE_DESCRIPTION VARCHAR(200),
-	ROLE_ENABLED VARCHAR(10) NOT NULL,
-	ROLE_CREATE_TIME TIMESTAMP,
-	PRIMARY KEY (ROLE_ID)
-);
-
-CREATE TABLE DATAGEAR_ROLE_USER
-(
-	RU_ID VARCHAR(50) NOT NULL,
-	RU_ROLE_ID VARCHAR(50) NOT NULL,
-	RU_USER_ID VARCHAR(50) NOT NULL,
-	PRIMARY KEY (RU_ID)
-);
-
 CREATE TABLE T_ACCOUNT
 (
 	ID INT NOT NULL,
@@ -242,9 +211,6 @@ truncate table t_analysis_2;
 truncate table t_analysis_map;
 truncate table t_analysis_map_1;
 truncate table t_time_series;
-truncate table datagear_role_user;
-truncate table datagear_user;
-truncate table datagear_role;
 */
 
 /*
@@ -269,7 +235,4 @@ drop table t_analysis_2;
 drop table t_analysis_map;
 drop table t_analysis_map_1;
 drop table t_time_series;
-drop table datagear_role_user;
-drop table datagear_user;
-drop table datagear_role;
 */
