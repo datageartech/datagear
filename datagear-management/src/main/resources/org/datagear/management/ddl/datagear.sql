@@ -814,3 +814,9 @@ ALTER TABLE DATAGEAR_HTML_CHART_WIDGET ADD COLUMN HCW_RD_FORMAT VARCHAR(500);
 --2021-06-14
 --删除2.5.0版本中的废弃列
 ALTER TABLE DATAGEAR_HCW_DS DROP COLUMN DS_PARAM_VALUES;
+
+
+-----------------------------------------
+--version[2.7.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
