@@ -22,6 +22,7 @@ import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.NameAsTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
+import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport.ImportItem;
@@ -508,7 +509,13 @@ public class CoreConfig implements InitializingBean
 	@Bean
 	public DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager()
 	{
-		DirectoryHtmlChartPluginManager bean = new DirectoryHtmlChartPluginManager(this.chartPluginRootDirectory());
+		HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
+		htmlChartPluginLoader.setTmpDirectory(this.tempDirectory());
+
+		DirectoryHtmlChartPluginManager bean = new DirectoryHtmlChartPluginManager(this.chartPluginRootDirectory(),
+				htmlChartPluginLoader);
+		bean.setTmpDirectory(this.tempDirectory());
+
 		return bean;
 	}
 
@@ -517,6 +524,8 @@ public class CoreConfig implements InitializingBean
 	{
 		DirectoryHtmlChartPluginManagerInitializer bean = new DirectoryHtmlChartPluginManagerInitializer(
 				this.directoryHtmlChartPluginManager());
+		bean.setTmpDirectory(this.tempDirectory());
+
 		return bean;
 	}
 

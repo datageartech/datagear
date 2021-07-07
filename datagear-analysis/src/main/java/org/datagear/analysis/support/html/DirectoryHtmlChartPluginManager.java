@@ -48,9 +48,13 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryHtmlChartPluginManager.class);
 
+	/** 插件文件主目录 */
 	private File directory;
 
-	private HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
+	private HtmlChartPluginLoader htmlChartPluginLoader;
+
+	/** 临时文件目录，用于存放临时文件 */
+	private File tmpDirectory = null;
 
 	private long readCheckForReloadTimeThreashold = (LOGGER.isDebugEnabled() ? 0 : 5 * 60 * 1000);
 
@@ -65,16 +69,18 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		super();
 	}
 
-	public DirectoryHtmlChartPluginManager(File directory)
+	public DirectoryHtmlChartPluginManager(File directory, HtmlChartPluginLoader htmlChartPluginLoader)
 	{
 		super();
 		this.directory = directory;
+		this.htmlChartPluginLoader = htmlChartPluginLoader;
 	}
 
-	public DirectoryHtmlChartPluginManager(String directory)
+	public DirectoryHtmlChartPluginManager(String directory, HtmlChartPluginLoader htmlChartPluginLoader)
 	{
 		super();
 		this.directory = FileUtil.getDirectory(directory);
+		this.htmlChartPluginLoader = htmlChartPluginLoader;
 	}
 
 	public File getDirectory()
@@ -92,6 +98,11 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		this.directory = FileUtil.getDirectory(directory);
 	}
 
+	public File getTmpDirectory()
+	{
+		return tmpDirectory;
+	}
+
 	public HtmlChartPluginLoader getHtmlChartPluginLoader()
 	{
 		return htmlChartPluginLoader;
@@ -100,6 +111,16 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	public void setHtmlChartPluginLoader(HtmlChartPluginLoader htmlChartPluginLoader)
 	{
 		this.htmlChartPluginLoader = htmlChartPluginLoader;
+	}
+
+	public void setTmpDirectory(File tmpDirectory)
+	{
+		this.tmpDirectory = tmpDirectory;
+	}
+
+	public void setTmpDirectoryString(String tmpDirectory)
+	{
+		this.tmpDirectory = FileUtil.getDirectory(tmpDirectory);
 	}
 
 	public long getReadCheckForReloadTimeThreashold()
@@ -218,7 +239,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		{
 			readLock.lock();
 
-			File tmpDirectory = FileUtil.createTempDirectory();
+			File tmpDirectory = createTmpWorkDirectory();
 
 			for (String id : ids)
 			{
@@ -274,7 +295,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		}
 		else if (FileUtil.isExtension(file, "zip"))
 		{
-			File tmpDirectory = FileUtil.createTempDirectory();
+			File tmpDirectory = createTmpWorkDirectory();
 
 			IOUtil.unzip(IOUtil.getZipInputStream(file), tmpDirectory);
 
@@ -667,6 +688,14 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		}
 
 		return legal;
+	}
+
+	protected File createTmpWorkDirectory() throws IOException
+	{
+		if (this.tmpDirectory != null)
+			return FileUtil.generateUniqueDirectory(this.tmpDirectory);
+		else
+			return FileUtil.createTempDirectory();
 	}
 
 	/**

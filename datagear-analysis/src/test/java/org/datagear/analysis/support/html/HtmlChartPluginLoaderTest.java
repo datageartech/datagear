@@ -16,6 +16,7 @@ import java.util.Set;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.support.AbstractChartPluginManager;
+import org.datagear.util.FileUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,7 +28,14 @@ import org.junit.Test;
  */
 public class HtmlChartPluginLoaderTest
 {
-	private HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
+	private HtmlChartPluginLoader htmlChartPluginLoader;
+
+	public HtmlChartPluginLoaderTest()
+	{
+		super();
+		this.htmlChartPluginLoader = new HtmlChartPluginLoader();
+		this.htmlChartPluginLoader.setTmpDirectory(FileUtil.getFile("target/tmp/", true));
+	}
 
 	@Test
 	public void loadTest()

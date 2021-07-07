@@ -30,17 +30,22 @@ public class DirectoryHtmlChartPluginManagerTest
 	public DirectoryHtmlChartPluginManagerTest()
 	{
 		super();
-
 	}
 
 	@Test
 	public void uploadTest() throws Exception
 	{
 		File root = FileUtil.getFile("target/DirectoryHtmlChartPluginManagerTest/uploadTest/", true);
+		File tmpDirectory = FileUtil.getFile("target/tmp/", true);
 		File managerDirectory = FileUtil.getFile(root, "manager/", true);
 		File uploadDirectory = FileUtil.getFile(root, "upload/", true);
+
+		HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
+		htmlChartPluginLoader.setTmpDirectory(tmpDirectory);
+
 		DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager = new DirectoryHtmlChartPluginManager(
-				managerDirectory);
+				managerDirectory, htmlChartPluginLoader);
+		directoryHtmlChartPluginManager.setTmpDirectory(tmpDirectory);
 
 		FileUtil.clearDirectory(managerDirectory);
 		FileUtil.clearDirectory(uploadDirectory);

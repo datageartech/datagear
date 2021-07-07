@@ -45,12 +45,15 @@ public class DirectoryHtmlChartPluginManagerInitializer
 
 	private DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager;
 
-	private PathMatchingResourcePatternResolver _PathMatchingResourcePatternResolver;
+	/** 临时文件目录，用于存放临时文件 */
+	private File tmpDirectory = null;
+
+	private PathMatchingResourcePatternResolver _pathMatchingResourcePatternResolver;
 
 	public DirectoryHtmlChartPluginManagerInitializer()
 	{
 		super();
-		this._PathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver(
+		this._pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver(
 				DirectoryHtmlChartPluginManagerInitializer.class.getClassLoader());
 	}
 
@@ -58,7 +61,7 @@ public class DirectoryHtmlChartPluginManagerInitializer
 	{
 		super();
 		this.directoryHtmlChartPluginManager = directoryHtmlChartPluginManager;
-		this._PathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver(
+		this._pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver(
 				DirectoryHtmlChartPluginManagerInitializer.class.getClassLoader());
 	}
 
@@ -80,6 +83,16 @@ public class DirectoryHtmlChartPluginManagerInitializer
 	public void setDirectoryHtmlChartPluginManager(DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager)
 	{
 		this.directoryHtmlChartPluginManager = directoryHtmlChartPluginManager;
+	}
+
+	public File getTmpDirectory()
+	{
+		return tmpDirectory;
+	}
+
+	public void setTmpDirectory(File tmpDirectory)
+	{
+		this.tmpDirectory = tmpDirectory;
 	}
 
 	/**
@@ -112,12 +125,12 @@ public class DirectoryHtmlChartPluginManagerInitializer
 
 	protected void loadHtmlChartPlugins(String classpathPattern) throws IOException
 	{
-		Resource[] resources = this._PathMatchingResourcePatternResolver.getResources(classpathPattern);
+		Resource[] resources = this._pathMatchingResourcePatternResolver.getResources(classpathPattern);
 
 		if (resources == null || resources.length == 0)
 			return;
 
-		File tmpDirectory = FileUtil.createTempDirectory();
+		File tmpDirectory = createTmpWorkDirectory();
 
 		for (Resource resource : resources)
 		{
@@ -146,5 +159,13 @@ public class DirectoryHtmlChartPluginManagerInitializer
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Loaded the following built-in " + HtmlChartPlugin.class.getSimpleName() + "s :"
 					+ pluginIds.toString());
+	}
+
+	protected File createTmpWorkDirectory() throws IOException
+	{
+		if (this.tmpDirectory != null)
+			return FileUtil.generateUniqueDirectory(this.tmpDirectory);
+		else
+			return FileUtil.createTempDirectory();
 	}
 }

@@ -83,6 +83,9 @@ public class HtmlChartPluginLoader
 	/** 文件编码 */
 	private String encoding = IOUtil.CHARSET_UTF_8;
 
+	/** 临时文件目录，用于存放临时文件 */
+	private File tmpDirectory = null;
+
 	public HtmlChartPluginLoader()
 	{
 		super();
@@ -117,6 +120,16 @@ public class HtmlChartPluginLoader
 	public void setEncoding(String encoding)
 	{
 		this.encoding = encoding;
+	}
+
+	public File getTmpDirectory()
+	{
+		return tmpDirectory;
+	}
+
+	public void setTmpDirectory(File tmpDirectory)
+	{
+		this.tmpDirectory = tmpDirectory;
 	}
 
 	/**
@@ -309,7 +322,7 @@ public class HtmlChartPluginLoader
 				ZipInputStream zin = null;
 				try
 				{
-					directory = FileUtil.createTempDirectory();
+					directory = createTmpWorkDirectory();
 					zin = IOUtil.getZipInputStream(file);
 					IOUtil.unzip(zin, directory);
 				}
@@ -373,12 +386,9 @@ public class HtmlChartPluginLoader
 	{
 		try
 		{
-			File tmpDirectory = FileUtil.createTempDirectory();
-
+			File tmpDirectory = createTmpWorkDirectory();
 			IOUtil.unzip(in, tmpDirectory);
-
 			HtmlChartPlugin chartPlugin = loadSingleForDirectory(tmpDirectory);
-
 			FileUtil.deleteFile(tmpDirectory);
 
 			return chartPlugin;
@@ -523,5 +533,13 @@ public class HtmlChartPluginLoader
 	protected HtmlChartPlugin createHtmlChartPlugin()
 	{
 		return new HtmlChartPlugin();
+	}
+
+	protected File createTmpWorkDirectory() throws IOException
+	{
+		if (this.tmpDirectory != null)
+			return FileUtil.generateUniqueDirectory(this.tmpDirectory);
+		else
+			return FileUtil.createTempDirectory();
 	}
 }
