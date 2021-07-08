@@ -1,5 +1,8 @@
 下一版本：
 	
+	图表JS对象dataSetParamValue、dataSetParamValues、resetDataSetParamValues、
+		dataSetPropertiesOfSign、dataSetPropertyOfSign支持默认操作第一个图表数据集对象；
+	看板模板新增dashboard、chart函数自动补齐功能；
 	添加更多内置图表插件：嵌套饼图、盒须图、地图热力图、路径图；
 	数据管理高级查询功能、SQL数据集添加防注入支持；
 	数据集、图表、看板新增复制功能；
