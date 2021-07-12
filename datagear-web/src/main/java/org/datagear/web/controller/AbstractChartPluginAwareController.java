@@ -228,7 +228,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 
 	protected String resolveIconUrl(HtmlChartPlugin plugin)
 	{
-		return "/analysis/chartPlugin/icon/" + plugin.getId();
+		return "/chartPlugin/icon/" + plugin.getId();
 	}
 
 	protected ChartDataSetViewObj[] toChartDataSetViewObjs(ChartDataSet[] chartDataSets)

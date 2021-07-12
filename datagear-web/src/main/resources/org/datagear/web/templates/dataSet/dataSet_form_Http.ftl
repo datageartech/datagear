@@ -6,8 +6,8 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 formAction 表单提交action，允许为null
@@ -19,13 +19,13 @@ readonly 是否只读操作，允许为null
 <#assign HttpDataSet=statics['org.datagear.analysis.support.HttpDataSet']>
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl">
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl">
 	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.Http' />
 </title>
 </head>
 <body>
-<#include "../../include/page_js_obj.ftl" >
+<#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-Http">
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
@@ -155,7 +155,7 @@ readonly 是否只读操作，允许为null
 	</form>
 	<#include "include/dataSet_form_html_preview_pvp.ftl" >
 </div>
-<#include "../../include/page_obj_form.ftl">
+<#include "../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
 <script type="text/javascript">
 (function(po)
@@ -299,7 +299,7 @@ readonly 是否只读操作，允许为null
 			formData["requestContent"] = po.requestContentEditor.getValue();
 			formData["headerContent"] = po.headerContentEditor.getValue();
 			
-			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,
+			$.postJson("${contextPath}/dataSet/${formAction}", formData,
 			function(response)
 			{
 				po.pageParamCallAfterSave(true, response.data);

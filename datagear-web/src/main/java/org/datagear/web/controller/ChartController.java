@@ -63,7 +63,7 @@ import org.springframework.web.context.request.WebRequest;
  *
  */
 @Controller
-@RequestMapping("/analysis/chart")
+@RequestMapping("/chart")
 public class ChartController extends AbstractChartPluginAwareController implements ServletContextAware
 {
 	static
@@ -156,7 +156,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.addChart");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
-		return "/analysis/chart/chart_form";
+		return "/chart/chart_form";
 	}
 
 	@RequestMapping("/edit")
@@ -185,7 +185,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.editChart");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
-		return "/analysis/chart/chart_form";
+		return "/chart/chart_form";
 	}
 
 	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
@@ -247,7 +247,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.viewChart");
 		model.addAttribute(KEY_READONLY, true);
 
-		return "/analysis/chart/chart_form";
+		return "/chart/chart_form";
 	}
 
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
@@ -277,7 +277,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.manageChart");
 
-		return "/analysis/chart/chart_grid";
+		return "/chart/chart_grid";
 	}
 
 	@RequestMapping(value = "/select")
@@ -292,7 +292,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		model.addAttribute(KEY_SELECT_OPERATION, true);
 		setIsMultipleSelectAttribute(request, model);
 
-		return "/analysis/chart/chart_grid";
+		return "/chart/chart_grid";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
@@ -320,7 +320,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	 * @param id
 	 * @throws Exception
 	 */
-	@RequestMapping("/show/{id}/")
+	@RequestMapping("/show/{id}")
 	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("id") String id) throws Exception
 	{
@@ -451,9 +451,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		WebContext webContext = createInitWebContext(request);
 
 		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME,
-				addJsessionidParam("/analysis/chart/showData", session.getId()));
+				addJsessionidParam("/chart/showData", session.getId()));
 		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
-				addJsessionidParam("/analysis/dashboard/loadChart", session.getId()));
+				addJsessionidParam("/dashboard/loadChart", session.getId()));
 		addHeartBeatValue(request, webContext);
 
 		return webContext;

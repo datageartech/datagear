@@ -6,8 +6,8 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 formAction 表单提交action，允许为null
@@ -15,17 +15,17 @@ readonly 是否只读操作，允许为null
 -->
 <#assign formAction=(formAction!'#')>
 <#assign readonly=(readonly!false)>
-<#assign isAdd=(formAction == 'saveAddForJsonFile')>
+<#assign isAdd=(formAction == 'saveAddForCsvFile')>
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl">
-	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.JsonFile' />
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl">
+	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.CsvFile' />
 </title>
 </head>
 <body>
-<#include "../../include/page_js_obj.ftl" >
-<div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-jsonFile">
+<#include "../include/page_js_obj.ftl" >
+<div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-CsvFile">
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
@@ -33,7 +33,7 @@ readonly 是否只读操作，允许为null
 			<div class="workspace">
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dataSet.jsonFile' /></label>
+						<label><@spring.message code='dataSet.csvFile' /></label>
 					</div>
 					<div class="form-item-value form-item-value-file-input">
 						<#include "include/dataSet_form_file_input.ftl">
@@ -41,17 +41,29 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">
-						<label title="<@spring.message code='dataSet.jsonFile.dataJsonPath.desc' />">
-							<@spring.message code='dataSet.jsonFile.dataJsonPath' />
+						<label title="<@spring.message code='dataSet.csv.nameRow.desc' />">
+							<@spring.message code='dataSet.csv.nameRow' />
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
-						<input type="text" name="dataJsonPath" value="${(dataSet.dataJsonPath)!''}" class="ui-widget ui-widget-content" />
+						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" />
+						<span class="nameRow-radios">
+							<label for="${pageId}-nameRow_0">
+								<@spring.message code='dataSet.csv.nameRow.none' />
+							</label>
+				   			<input type="radio" id="${pageId}-nameRow_0" name="nameRowRadio" value="0" />
+							<label for="${pageId}-nameRow_1">
+								<@spring.message code='dataSet.csv.nameRow.assign' />
+							</label>
+				   			<input type="radio" id="${pageId}-nameRow_1" name="nameRowRadio" value="1"  />
+						</span>
+						&nbsp;
+						<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" style="width:4.1em;" />
 					</div>
 				</div>
 				<div class="form-item form-item-encoding">
 					<div class="form-item-label">
-						<label><@spring.message code='dataSet.jsonFileEncoding' /></label>
+						<label><@spring.message code='dataSet.csvFileEncoding' /></label>
 					</div>
 					<div class="form-item-value">
 						<select name="encoding">
@@ -74,8 +86,9 @@ readonly 是否只读操作，允许为null
 	</form>
 	<#include "include/dataSet_form_html_preview_pvp.ftl" >
 </div>
-<#include "../../include/page_obj_form.ftl">
+<#include "../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
+<#include "include/dataSet_form_js_nameRow.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -85,12 +98,14 @@ readonly 是否只读操作，允许为null
 	$.initButtons(po.element());
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.element("select[name='encoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
+	po.element(".nameRow-radios").controlgroup();
 	po.initWorkspaceHeight();
 	po.initWorkspaceTabs(true);
 	po.initDataSetPropertiesTable(po.dataSetProperties);
 	po.initDataSetParamsTable(po.dataSetParams);
 	po.initPreviewParamValuePanel();
-	
+	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
+
 	po.initDataSetFileInput(po.url("uploadFile"), "${((dataSet.fileSourceType)!'')?js_string?no_esc}", ${isAdd?string("true", "false")});
 	
 	po.updatePreviewOptionsData = function()
@@ -103,8 +118,8 @@ readonly 是否只读操作，允许为null
 		dataSet.dataSetResDirectory.id = po.element("input[name='dataSetResDirectory.id']").val();
 		dataSet.dataSetResDirectory.directory = po.element("input[name='dataSetResDirectory.directory']").val();
 		dataSet.dataSetResFileName = po.element("input[name='dataSetResFileName']").val();
-		dataSet.dataJsonPath = po.element("input[name='dataJsonPath']").val();
 		dataSet.encoding = po.element("select[name='encoding']").val();
+		dataSet.nameRow = po.nameRowValue();
 		
 		po.previewOptions.data.originalFileName = po.element("#${pageId}-originalFileName").val();
 	};
@@ -121,8 +136,8 @@ readonly 是否只读操作，允许为null
 		var dataSetResDirectoryId = po.element("input[name='dataSetResDirectory.id']").val();
 		var dataSetResFileName = po.element("input[name='dataSetResFileName']").val();
 		var fileName = po.element("input[name='fileName']").val();
-		var dataJsonPath = po.element("input[name='dataJsonPath']").val();
 		var encoding = po.element("select[name='encoding']").val();
+		var nameRow = po.nameRowValue();
 		
 		var pd = po.previewOptions.data.dataSet;
 		var dataSetResDirectory = (pd.dataSetResDirectory || {});
@@ -130,10 +145,11 @@ readonly 是否只读操作，允许为null
 		return (pd.fileSourceType != fileSourceType)
 				|| (po.isFileSourceTypeUpload(fileSourceType) && pd.fileName != fileName)
 				|| (po.isFileSourceTypeServer(fileSourceType) && (dataSetResDirectory.id != dataSetResDirectoryId || pd.dataSetResFileName != dataSetResFileName))
-				|| (pd.dataJsonPath != dataJsonPath) || (pd.encoding != encoding);
+				|| (pd.encoding != encoding)
+			 	|| (pd.nameRow != nameRow) ;
 	};
 	
-	po.previewOptions.url = po.url("previewJsonFile");
+	po.previewOptions.url = po.url("previewCsvFile");
 	po.previewOptions.beforePreview = function()
 	{
 		po.updatePreviewOptionsData();
@@ -168,6 +184,7 @@ readonly 是否只读操作，允许为null
 				"dataSetServerFilePreviewRequired": true,
 				"dataSetServerFilePropertiesRequired": true
 			},
+			"nameRowText": {"integer": true, "min": 1},
 		},
 		messages :
 		{
@@ -187,6 +204,11 @@ readonly 是否只读操作，允许为null
 				"dataSetServerFileNameRequired": "<@spring.message code='validation.required' />",
 				"dataSetServerFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
 				"dataSetServerFilePropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+			},
+			"nameRowText":
+			{
+				"integer": "<@spring.message code='validation.integer' />",
+				"min": "<@spring.message code='validation.min' />"
 			}
 		},
 		submitHandler : function(form)
@@ -194,10 +216,13 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
+			formData["nameRow"] = po.nameRowValue();
+			formData["nameRowRadio"] = undefined;
+			formData["nameRowText"] = undefined;
 			
 			var originalFileName = po.element("#${pageId}-originalFileName").val();
 			
-			$.postJson("${contextPath}/analysis/dataSet/${formAction}?originalFileName="+originalFileName, formData,
+			$.postJson("${contextPath}/dataSet/${formAction}?originalFileName="+originalFileName, formData,
 			function(response)
 			{
 				po.pageParamCallAfterSave(true, response.data);

@@ -80,7 +80,7 @@ import org.springframework.web.multipart.MultipartFile;
  *
  */
 @Controller
-@RequestMapping("/analysis/dashboard")
+@RequestMapping("/dashboard")
 public class DashboardController extends AbstractDataAnalysisController implements ServletContextAware
 {
 	/** 加载看板图表参数：看板ID */
@@ -223,7 +223,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
-		return "/analysis/dashboard/dashboard_form";
+		return "/dashboard/dashboard_form";
 	}
 
 	@RequestMapping("/edit")
@@ -252,7 +252,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
-		return "/analysis/dashboard/dashboard_form";
+		return "/dashboard/dashboard_form";
 	}
 
 	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
@@ -497,7 +497,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		model.addAttribute("dashboard", dashboard);
 
-		return "/analysis/dashboard/dashboard_import";
+		return "/dashboard/dashboard_import";
 	}
 
 	@RequestMapping(value = "/uploadImportFile", produces = CONTENT_TYPE_JSON)
@@ -711,7 +711,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.viewDashboard");
 		model.addAttribute(KEY_READONLY, true);
 
-		return "/analysis/dashboard/dashboard_form";
+		return "/dashboard/dashboard_form";
 	}
 
 	@RequestMapping("/export")
@@ -775,7 +775,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.manageDashboard");
 
-		return "/analysis/dashboard/dashboard_grid";
+		return "/dashboard/dashboard_grid";
 	}
 
 	@RequestMapping(value = "/select")
@@ -789,7 +789,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.selectDashboard");
 		model.addAttribute(KEY_SELECT_OPERATION, true);
 
-		return "/analysis/dashboard/dashboard_grid";
+		return "/dashboard/dashboard_grid";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
@@ -816,7 +816,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @param id
 	 * @throws Exception
 	 */
-	@RequestMapping("/show/{id}/")
+	@RequestMapping("/show/{id}")
 	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("id") String id) throws Exception
 	{
@@ -830,7 +830,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		int subPathSlashIdx = firstTemplate.indexOf(FileUtil.PATH_SEPARATOR_SLASH);
 		if (subPathSlashIdx > 0 && subPathSlashIdx < firstTemplate.length() - 1)
 		{
-			String redirectTo = WebUtils.getContextPath(request) + "/analysis/dashboard/show/" + id + "/"
+			String redirectTo = WebUtils.getContextPath(request) + "/dashboard/show/" + id + "/"
 					+ firstTemplate;
 			String qs = request.getQueryString();
 
@@ -1174,9 +1174,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		WebContext webContext = createInitWebContext(request);
 
 		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME,
-				addJsessionidParam("/analysis/dashboard/showData", session.getId()));
+				addJsessionidParam("/dashboard/showData", session.getId()));
 		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
-				addJsessionidParam("/analysis/dashboard/loadChart", session.getId()));
+				addJsessionidParam("/dashboard/loadChart", session.getId()));
 		addHeartBeatValue(request, webContext);
 
 		return webContext;

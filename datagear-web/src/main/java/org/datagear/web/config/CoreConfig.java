@@ -606,13 +606,13 @@ public class CoreConfig implements InitializingBean
 		importItems.add(ImportItem.valueOfJavaScript("dashboardFactory",
 				scriptPrefix + "/datagear-dashboardFactory.js?v=" + vp));
 		importItems.add(
-				ImportItem.valueOfJavaScript("serverTime", cp + "/analysis/dashboard/servertime.js?v=" + rp));
+				ImportItem.valueOfJavaScript("serverTime", cp + "/dashboard/servertime.js?v=" + rp));
 		importItems
 				.add(ImportItem.valueOfJavaScript("chartSupport", scriptPrefix + "/datagear-chartSupport.js?v=" + vp));
 		importItems
 				.add(ImportItem.valueOfJavaScript("chartSetting", scriptPrefix + "/datagear-chartSetting.js?v=" + vp));
 		importItems.add(ImportItem.valueOfJavaScript("chartPluginManager",
-				cp + "/analysis/chartPlugin/chartPluginManager.js?v=" + vp));
+				cp + "/chartPlugin/chartPluginManager.js?v=" + vp));
 
 		dashboardImport.setImportItems(importItems);
 

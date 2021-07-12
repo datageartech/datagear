@@ -1,6 +1,7 @@
 下一版本：
 	
-	图表JS对象新增dataSetParamValueFirst、dataSetParamValuesFirst、resetDataSetParamValuesFirst函数；
+	ok 图表JS对象新增dataSetParamValueFirst、dataSetParamValuesFirst、resetDataSetParamValuesFirst函数；
+	ok 简化图表展示链接为/chart/show/*、看板展示链接为/dashboard/show/*；
 	看板模板新增dashboard、chart函数自动补齐功能；
 	添加更多内置图表插件：嵌套饼图、盒须图、地图热力图、路径图；
 	数据管理高级查询功能、SQL数据集添加防注入支持；

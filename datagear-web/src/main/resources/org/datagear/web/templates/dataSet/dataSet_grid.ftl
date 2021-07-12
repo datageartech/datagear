@@ -6,8 +6,8 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <#assign Role=statics['org.datagear.management.domain.Role']>
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
@@ -20,19 +20,19 @@ boolean readonly 是否只读操作，默认为false
 <#assign DataSetEntity=statics['org.datagear.management.domain.DataSetEntity']>
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body class="fill-parent">
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<#include "../../include/page_js_obj.ftl">
-<#include "../../include/page_obj_opt_permission.ftl" >
+<#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj_opt_permission.ftl" >
 <div id="${pageId}" class="page-grid page-grid-dataSet">
 	<div class="head">
 		<div class="search">
-			<#include "../../include/page_obj_searchform_data_filter.ftl">
+			<#include "../include/page_obj_searchform_data_filter.ftl">
 			<#include "../include/analysisProjectAware_grid_search.ftl">
 		</div>
 		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
@@ -87,9 +87,9 @@ boolean readonly 是否只读操作，默认为false
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "../../include/page_obj_pagination.ftl">
-<#include "../../include/page_obj_grid.ftl">
-<#include "../../include/page_obj_data_permission.ftl" >
+<#include "../include/page_obj_pagination.ftl">
+<#include "../include/page_obj_grid.ftl">
+<#include "../include/page_obj_data_permission.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -124,7 +124,7 @@ boolean readonly 是否只读操作，默认为false
 	
 	po.url = function(action)
 	{
-		return "${contextPath}/analysis/dataSet/" + action;
+		return "${contextPath}/dataSet/" + action;
 	};
 
 	po.element(".add-button").click(function()

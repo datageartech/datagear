@@ -6,22 +6,22 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='chartPlugin.selectChartPlugin' /></title>
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='chartPlugin.selectChartPlugin' /></title>
 </head>
 <body class="fill-parent">
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<#include "../../include/page_js_obj.ftl">
+<#include "../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-chartPlugin-select">
 	<div class="head">
 		<div class="search">
-			<#include "../../include/page_obj_searchform.ftl">
+			<#include "../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
 			<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
@@ -172,7 +172,7 @@
 	
 	po.search = function(searchParam)
 	{
-		$.postJson("${contextPath}/analysis/chartPlugin/selectData", searchParam, function(categorizations)
+		$.postJson("${contextPath}/chartPlugin/selectData", searchParam, function(categorizations)
 		{
 			po.initChartPlugins(categorizations);
 		});

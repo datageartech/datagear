@@ -26,7 +26,7 @@ po.previewOptions.url = "...";
 {
 	po.url = function(action)
 	{
-		return "${contextPath}/analysis/dataSet/" + action;
+		return "${contextPath}/dataSet/" + action;
 	};
 	
 	po.isPreviewValueModified = function()

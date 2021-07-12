@@ -171,11 +171,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 
 				// 展示图表和看板
 				// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
-				.antMatchers("/analysis/chartPlugin/icon/*", "/analysis/chartPlugin/chartPluginManager.js",
-						"/analysis/chart/show/**", "/analysis/chart/showData", "/analysis/dashboard/show/**",
-						"/analysis/dashboard/showData", "/analysis/dashboard/loadChart",
-						"/analysis/dashboard/heartbeat",
-						"/analysis/dashboard/servertime.js")
+				.antMatchers("/chartPlugin/icon/*", "/chartPlugin/chartPluginManager.js",
+						"/chart/show/**", "/chart/showData", "/dashboard/show/**",
+						"/dashboard/showData", "/dashboard/loadChart",
+						"/dashboard/heartbeat",
+						"/dashboard/servertime.js")
+				.access(AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
+
+				// 展示图表和看板
+				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
+				.antMatchers("/analysis/chart/show/**", "/analysis/dashboard/show/**")
 				.access(AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
 				// 数据源
@@ -196,54 +201,54 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 
 				// 数据集
 				// 编辑
-				.antMatchers("/analysis/dataSet/addFor*", "/analysis/dataSet/saveAddFor*", "/analysis/dataSet/edit",
-						"/analysis/dataSet/saveEditFor*", "/analysis/dataSet/delete", "/analysis/dataSet/uploadFile")
+				.antMatchers("/dataSet/addFor*", "/dataSet/saveAddFor*", "/dataSet/edit",
+						"/dataSet/saveEditFor*", "/dataSet/delete", "/dataSet/uploadFile")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
 				// 其他
-				.antMatchers("/analysis/dataSet/**")
+				.antMatchers("/dataSet/**")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
 						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
 				// 图表
 				// 编辑
-				.antMatchers("/analysis/chart/add", "/analysis/chart/edit", "/analysis/chart/save",
-						"/analysis/chart/delete")
+				.antMatchers("/chart/add", "/chart/edit", "/chart/save",
+						"/chart/delete")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
 				// 其他
-				.antMatchers("/analysis/chart/**")
+				.antMatchers("/chart/**")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
 						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
 				// 看板
 				// 编辑
-				.antMatchers("/analysis/dashboard/add", "/analysis/dashboard/edit", "/analysis/dashboard/save",
-						"/analysis/dashboard/saveTemplateNames", "/analysis/dashboard/deleteResource",
-						"/analysis/dashboard/uploadResourceFile", "/analysis/dashboard/saveResourceFile",
-						"/analysis/dashboard/import", "/analysis/dashboard/uploadImportFile",
-						"/analysis/dashboard/saveImport", "/analysis/dashboard/delete")
+				.antMatchers("/dashboard/add", "/dashboard/edit", "/dashboard/save",
+						"/dashboard/saveTemplateNames", "/dashboard/deleteResource",
+						"/dashboard/uploadResourceFile", "/dashboard/saveResourceFile",
+						"/dashboard/import", "/dashboard/uploadImportFile",
+						"/dashboard/saveImport", "/dashboard/delete")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
 				// 其他
-				.antMatchers("/analysis/dashboard/**")
+				.antMatchers("/dashboard/**")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
 						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
 				// 数据分析项目
 				// 编辑
-				.antMatchers("/analysis/project/add", "/analysis/project/edit", "/analysis/project/save",
-						"/analysis/project/delete")
+				.antMatchers("/analysisProject/add", "/analysisProject/edit", "/analysisProject/save",
+						"/analysisProject/delete")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
 				// 其他
-				.antMatchers("/analysis/project/**")
+				.antMatchers("/analysisProject/**")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
 						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
 				// 图表插件
 				// 选择
-				.antMatchers("/analysis/chartPlugin/select", "/analysis/chartPlugin/selectData")
+				.antMatchers("/chartPlugin/select", "/chartPlugin/selectData")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
 						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 				// 管理
-				.antMatchers("/analysis/chartPlugin/**").access(AUTH_ADMIN)
+				.antMatchers("/chartPlugin/**").access(AUTH_ADMIN)
 
 				// 数据集资源
 				// 选择

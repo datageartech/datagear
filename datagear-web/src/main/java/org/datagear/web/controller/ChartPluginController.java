@@ -56,7 +56,7 @@ import org.springframework.web.multipart.MultipartFile;
  *
  */
 @Controller
-@RequestMapping("/analysis/chartPlugin")
+@RequestMapping("/chartPlugin")
 public class ChartPluginController extends AbstractChartPluginAwareController
 {
 	@Autowired
@@ -107,7 +107,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping("/upload")
 	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		return "/analysis/chartPlugin/chartPlugin_upload";
+		return "/chartPlugin/chartPlugin_upload";
 	}
 
 	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
@@ -218,7 +218,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	{
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chartPlugin.manageChartPlugin");
 
-		return "/analysis/chartPlugin/chartPlugin_grid";
+		return "/chartPlugin/chartPlugin_grid";
 	}
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
@@ -240,7 +240,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		model.addAttribute("categorizations", toWriteJsonTemplateModel(categorizations));
 
-		return "/analysis/chartPlugin/chartPlugin_select";
+		return "/chartPlugin/chartPlugin_select";
 	}
 
 	@RequestMapping(value = "/selectData", produces = CONTENT_TYPE_JSON)

@@ -78,7 +78,7 @@ import org.springframework.web.multipart.MultipartFile;
  *
  */
 @Controller
-@RequestMapping("/analysis/dataSet")
+@RequestMapping("/dataSet")
 public class DataSetController extends AbstractSchemaConnController
 {
 	static
@@ -716,7 +716,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.manageDataSet");
 
-		return "/analysis/dataSet/dataSet_grid";
+		return "/dataSet/dataSet_grid";
 	}
 
 	@RequestMapping(value = "/select")
@@ -729,7 +729,7 @@ public class DataSetController extends AbstractSchemaConnController
 		model.addAttribute(KEY_SELECT_OPERATION, true);
 		setIsMultipleSelectAttribute(request, model);
 
-		return "/analysis/dataSet/dataSet_grid";
+		return "/dataSet/dataSet_grid";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
@@ -957,7 +957,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 	protected String buildFormView(String dataSetType)
 	{
-		return "/analysis/dataSet/dataSet_form_" + dataSetType;
+		return "/dataSet/dataSet_form_" + dataSetType;
 	}
 
 	protected File getTempDataSetDirectory()

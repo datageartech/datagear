@@ -528,7 +528,7 @@ ${detectNewVersionScript?no_esc}
 				
 				$.ajax(
 				{
-					url: "${contextPath}/analysis/project/getByIdSilently?id=" + cookieId,
+					url: "${contextPath}/analysisProject/getByIdSilently?id=" + cookieId,
 					success: function(analysisProject)
 					{
 						analysisProject = (!analysisProject ? null : analysisProject);
@@ -629,7 +629,7 @@ ${detectNewVersionScript?no_esc}
 				
 				if(!loaded)
 				{
-					po.open(contextPath+"/analysis/project/select",
+					po.open(contextPath+"/analysisProject/select",
 					{
 						"target": panelContent,
 						"asDialog": false,
@@ -659,7 +659,7 @@ ${detectNewVersionScript?no_esc}
 		
 		po.element("#addAnalysisProjectButton", dap).click(function()
 		{
-			po.open(contextPath+"/analysis/project/add",
+			po.open(contextPath+"/analysisProject/add",
 			{
 				"pageParam" :
 				{
@@ -676,7 +676,7 @@ ${detectNewVersionScript?no_esc}
 			var options = {};
 			$.setGridPageHeightOption(options);
 			
-			po.open(contextPath+"/analysis/project/pagingQuery", options);
+			po.open(contextPath+"/analysisProject/pagingQuery", options);
 		});
 		
 		po.element(".analysis-project-current-reset", dap).click(function()
@@ -911,7 +911,7 @@ ${detectNewVersionScript?no_esc}
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/analysis/chartPlugin/query", options);
+					po.open(contextPath+"/chartPlugin/query", options);
 				}
 				else if($item.hasClass("system-set-personalSet"))
 				{
@@ -1551,7 +1551,7 @@ ${detectNewVersionScript?no_esc}
 				<div class="dataAnalysis-panel-content" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 					<ul>
 						<li class="item-dataset" tabId="dataAnalysis-dataSet">
-							<a href="${contextPath}/analysis/dataSet/pagingQuery">
+							<a href="${contextPath}/dataSet/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dataSet' />
 								<#if currentUser.anonymous>
 								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
@@ -1559,7 +1559,7 @@ ${detectNewVersionScript?no_esc}
 							</a>
 						</li>
 						<li class="item-chart" tabId="dataAnalysis-chart">
-							<a href="${contextPath}/analysis/chart/pagingQuery">
+							<a href="${contextPath}/chart/pagingQuery">
 								<@spring.message code='main.dataAnalysis.chart' />
 								<#if currentUser.anonymous>
 								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
@@ -1567,7 +1567,7 @@ ${detectNewVersionScript?no_esc}
 							</a>
 						</li>
 						<li class="item-dashboard" tabId="dataAnalysis-dashboard">
-							<a href="${contextPath}/analysis/dashboard/pagingQuery">
+							<a href="${contextPath}/dashboard/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dashboard' />
 								<#if currentUser.anonymous>
 								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>

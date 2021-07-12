@@ -60,7 +60,7 @@
 					
 					$.setGridPageHeightOption(options);
 					
-					po.open("${contextPath}/analysis/project/select", options);
+					po.open("${contextPath}/analysisProject/select", options);
 				}
 				else if("del" == action)
 	    		{

@@ -6,17 +6,17 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='chartPlugin.uploadChartPlugin' /></title>
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='chartPlugin.uploadChartPlugin' /></title>
 </head>
 <body>
-<#include "../../include/page_js_obj.ftl" >
+<#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-uploadChartPlugin">
-	<form id="${pageId}-form" action="${contextPath}/analysis/chartPlugin/saveUpload" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/chartPlugin/saveUpload" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="pluginFileName" value="" />
@@ -46,7 +46,7 @@
 		</div>
 	</form>
 </div>
-<#include "../../include/page_obj_form.ftl">
+<#include "../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -54,7 +54,7 @@
 
 	po.url = function(action)
 	{
-		return "${contextPath}/analysis/chartPlugin/" + action;
+		return "${contextPath}/chartPlugin/" + action;
 	};
 
 	po.chartPluginInfos = function(){ return this.element(".chart-plugin-infos"); };

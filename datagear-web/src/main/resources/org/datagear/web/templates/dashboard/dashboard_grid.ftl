@@ -6,8 +6,8 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <#assign Role=statics['org.datagear.management.domain.Role']>
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
@@ -17,19 +17,19 @@ selectOperation 是否选择操作，允许为null
 <#assign HtmlTplDashboardWidgetEntity=statics['org.datagear.management.domain.HtmlTplDashboardWidgetEntity']>
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body class="fill-parent">
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<#include "../../include/page_js_obj.ftl">
-<#include "../../include/page_obj_opt_permission.ftl" >
+<#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj_opt_permission.ftl" >
 <div id="${pageId}" class="page-grid page-grid-dashboard">
 	<div class="head">
 		<div class="search">
-			<#include "../../include/page_obj_searchform_data_filter.ftl">
+			<#include "../include/page_obj_searchform_data_filter.ftl">
 			<#include "../include/analysisProjectAware_grid_search.ftl">
 		</div>
 		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
@@ -79,9 +79,9 @@ selectOperation 是否选择操作，允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "../../include/page_obj_pagination.ftl">
-<#include "../../include/page_obj_grid.ftl">
-<#include "../../include/page_obj_data_permission.ftl" >
+<#include "../include/page_obj_pagination.ftl">
+<#include "../include/page_obj_grid.ftl">
+<#include "../include/page_obj_data_permission.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -181,7 +181,7 @@ selectOperation 是否选择操作，允许为null
 	
 	po.url = function(action)
 	{
-		return "${contextPath}/analysis/dashboard/" + action;
+		return "${contextPath}/dashboard/" + action;
 	};
 	
 	po.buildShowURL = function(id)

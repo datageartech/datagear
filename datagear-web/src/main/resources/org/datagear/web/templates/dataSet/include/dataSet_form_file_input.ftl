@@ -31,7 +31,7 @@
 		
 		<div class="row-wrapper">
 			<input type="text" name="displayName" value="${(dataSet.displayName)!''}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
-			<a id="${pageId}-uploadDownloadLink" href="${contextPath}/analysis/dataSet/downloadFile?id=${(dataSet.id)!''}" target="_blank" class="link"><@spring.message code='download' /></a>
+			<a id="${pageId}-uploadDownloadLink" href="${contextPath}/dataSet/downloadFile?id=${(dataSet.id)!''}" target="_blank" class="link"><@spring.message code='download' /></a>
 		</div>
 		
 		<#if !readonly>
@@ -71,7 +71,7 @@
 			</#if>
 			<#--
 			服务端文件允许参数化文件名，所以没法下载
-			<a id="${pageId}-serverDownloadLink" href="${contextPath}/analysis/dataSet/downloadFile?id=${(dataSet.id)!''}" target="_blank" class="link"><@spring.message code='download' /></a>
+			<a id="${pageId}-serverDownloadLink" href="${contextPath}/dataSet/downloadFile?id=${(dataSet.id)!''}" target="_blank" class="link"><@spring.message code='download' /></a>
 			-->
 		</div>
 	</div>

@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  *
  */
 @Controller
-@RequestMapping("/analysis/project")
+@RequestMapping("/analysisProject")
 public class AnalysisProjectController extends AbstractController
 {
 	static
@@ -68,7 +68,7 @@ public class AnalysisProjectController extends AbstractController
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.addAnalysisProject");
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
 
-		return "/analysis/analysisProject/analysisProject_form";
+		return "/analysisProject/analysisProject_form";
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
@@ -103,7 +103,7 @@ public class AnalysisProjectController extends AbstractController
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.editAnalysisProject");
 		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
 
-		return "/analysis/analysisProject/analysisProject_form";
+		return "/analysisProject/analysisProject_form";
 	}
 
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
@@ -135,7 +135,7 @@ public class AnalysisProjectController extends AbstractController
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.viewAnalysisProject");
 		model.addAttribute(KEY_READONLY, true);
 
-		return "/analysis/analysisProject/analysisProject_form";
+		return "/analysisProject/analysisProject_form";
 	}
 
 	@RequestMapping(value = "/getByIdSilently", produces = CONTENT_TYPE_JSON)
@@ -183,7 +183,7 @@ public class AnalysisProjectController extends AbstractController
 
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.manageAnalysisProject");
 
-		return "/analysis/analysisProject/analysisProject_grid";
+		return "/analysisProject/analysisProject_grid";
 	}
 
 	@RequestMapping(value = "/select")
@@ -196,7 +196,7 @@ public class AnalysisProjectController extends AbstractController
 		model.addAttribute(KEY_SELECT_OPERATION, true);
 		setIsMultipleSelectAttribute(request, model);
 
-		return "/analysis/analysisProject/analysisProject_grid";
+		return "/analysisProject/analysisProject_grid";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)

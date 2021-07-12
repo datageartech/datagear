@@ -6,17 +6,17 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='dashboard.importDashboard' /></title>
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='dashboard.importDashboard' /></title>
 </head>
 <body>
-<#include "../../include/page_js_obj.ftl" >
+<#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-importDashboard">
-	<form id="${pageId}-form" action="${contextPath}/analysis/dashboard/saveImport" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/dashboard/saveImport" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="dashboardFileName" value="" />
@@ -67,7 +67,7 @@
 		</div>
 	</form>
 </div>
-<#include "../../include/page_obj_form.ftl">
+<#include "../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -77,7 +77,7 @@
 	
 	po.url = function(action)
 	{
-		return "${contextPath}/analysis/dashboard/" + action;
+		return "${contextPath}/dashboard/" + action;
 	};
 	
 	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };

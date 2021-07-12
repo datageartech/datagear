@@ -6,8 +6,8 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
@@ -15,18 +15,18 @@ selectOperation 是否选择操作，允许为null
 <#assign selectOperation=(selectOperation!false)>
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body class="fill-parent">
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<#include "../../include/page_js_obj.ftl">
+<#include "../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-chartPlugin">
 	<div class="head">
 		<div class="search">
-			<#include "../../include/page_obj_searchform.ftl">
+			<#include "../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
 			<#if selectOperation>
@@ -52,7 +52,7 @@ selectOperation 是否选择操作，允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "../../include/page_obj_grid.ftl">
+<#include "../include/page_obj_grid.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -60,7 +60,7 @@ selectOperation 是否选择操作，允许为null
 	
 	po.url = function(action)
 	{
-		return "${contextPath}/analysis/chartPlugin/" + action;
+		return "${contextPath}/chartPlugin/" + action;
 	};
 
 	po.element("input[name=uploadButton]").click(function()

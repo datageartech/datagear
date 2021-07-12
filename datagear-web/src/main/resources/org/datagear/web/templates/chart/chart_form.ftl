@@ -6,8 +6,8 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 formAction 表单提交action，允许为null
@@ -19,13 +19,13 @@ readonly 是否只读操作，允许为null
 <#assign ResultDataFormat=statics['org.datagear.analysis.ResultDataFormat']>
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body>
-<#include "../../include/page_js_obj.ftl" >
+<#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-chart">
-	<form id="${pageId}-form" action="${contextPath}/analysis/chart/${formAction}" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/chart/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(chart.id)!''}" />
@@ -245,7 +245,7 @@ readonly 是否只读操作，允许为null
 		<div class="data-set-param-value-panel-content"></div>
 	</div>
 </div>
-<#include "../../include/page_obj_form.ftl">
+<#include "../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -273,7 +273,7 @@ readonly 是否只读操作，允许为null
 	
 	po.url = function(action)
 	{
-		return "${contextPath}/analysis/chart/" + action;
+		return "${contextPath}/chart/" + action;
 	};
 	
 	po.updateResultDataFormatPanelEnable = function(enable)
@@ -317,7 +317,7 @@ readonly 是否只读操作，允许为null
 		
 		$.setGridPageHeightOption(options);
 		
-		po.open("${contextPath}/analysis/chartPlugin/select", options);
+		po.open("${contextPath}/chartPlugin/select", options);
 	});
 	
 	po.element("input[name='updateIntervalRadio']").on("change", function()
@@ -699,7 +699,7 @@ readonly 是否只读操作，允许为null
 		
 		$.setGridPageHeightOption(options);
 		
-		po.open("${contextPath}/analysis/dataSet/select?multiple", options);
+		po.open("${contextPath}/dataSet/select?multiple", options);
 	});
 	
 	po.addDataSet = function(dataSets)
@@ -709,7 +709,7 @@ readonly 是否只读操作，允许为null
 		
 		var data = $.getPropertyParamString(dataSets, "id");
 		
-		$.get("${contextPath}/analysis/dataSet/getProfileDataSetByIds", data, function(dataSets)
+		$.get("${contextPath}/dataSet/getProfileDataSetByIds", data, function(dataSets)
 		{
 			var $wrapper = po.element(".data-set-wrapper");
 			

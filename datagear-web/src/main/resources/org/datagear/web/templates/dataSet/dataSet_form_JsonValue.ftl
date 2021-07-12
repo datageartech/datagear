@@ -6,8 +6,8 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/import_global.ftl">
-<#include "../../include/html_doctype.ftl">
+<#include "../include/import_global.ftl">
+<#include "../include/html_doctype.ftl">
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 formAction 表单提交action，允许为null
@@ -18,13 +18,13 @@ readonly 是否只读操作，允许为null
 <#assign isAdd=(formAction == 'saveAdd')>
 <html>
 <head>
-<#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl">
-	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.CsvValue' />
+<#include "../include/html_head.ftl">
+<title><#include "../include/html_title_app_name.ftl">
+	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.JsonValue' />
 </title>
 </head>
 <body>
-<#include "../../include/page_js_obj.ftl" >
+<#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet">
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
@@ -33,8 +33,8 @@ readonly 是否只读操作，允许为null
 			<div class="workspace">
 				<div class="form-item">
 					<div class="form-item-label">
-						<label title="<@spring.message code='dataSet.csv.desc' />">
-							<@spring.message code='dataSet.csv' />
+						<label title="<@spring.message code='dataSet.json.desc' />">
+							<@spring.message code='dataSet.json' />
 						</label>
 					</div>
 					<div class="form-item-value error-newline">
@@ -45,28 +45,6 @@ readonly 是否只读操作，允许为null
 					</div>
 				</div>
 				<#include "include/dataSet_form_html_wow.ftl" >
-			</div>
-			<div class="form-item">
-				<div class="form-item-label">
-					<label title="<@spring.message code='dataSet.csv.nameRow.desc' />">
-						<@spring.message code='dataSet.csv.nameRow' />
-					</label>
-				</div>
-				<div class="form-item-value">
-					<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" />
-					<span class="nameRow-radios">
-						<label for="${pageId}-nameRow_0">
-							<@spring.message code='dataSet.csv.nameRow.none' />
-						</label>
-			   			<input type="radio" id="${pageId}-nameRow_0" name="nameRowRadio" value="0" />
-						<label for="${pageId}-nameRow_1">
-							<@spring.message code='dataSet.csv.nameRow.assign' />
-						</label>
-			   			<input type="radio" id="${pageId}-nameRow_1" name="nameRowRadio" value="1"  />
-					</span>
-					&nbsp;
-					<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" style="width:4.1em;" />
-				</div>
 			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
@@ -79,9 +57,8 @@ readonly 是否只读操作，允许为null
 	</form>
 	<#include "include/dataSet_form_html_preview_pvp.ftl" >
 </div>
-<#include "../../include/page_obj_form.ftl">
+<#include "../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
-<#include "include/dataSet_form_js_nameRow.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -90,35 +67,35 @@ readonly 是否只读操作，允许为null
 	
 	$.initButtons(po.element());
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
-	po.element(".nameRow-radios").controlgroup();
 	po.initWorkspaceHeight();
+
+	var languageTools = ace.require("ace/ext/language_tools");
+	var JsonMode = ace.require("ace/mode/json").Mode;
+	po.jsonEditor = ace.edit("${pageId}-workspaceEditor");
+	po.jsonEditor.session.setMode(new JsonMode());
+	po.jsonEditor.setShowPrintMargin(false);
 	
-	po.csvEditor = ace.edit("${pageId}-workspaceEditor");
-	po.csvEditor.setShowPrintMargin(false);
-	
-	po.initWorkspaceEditor(po.csvEditor, po.element("textarea[name='value']").val());
+	po.initWorkspaceEditor(po.jsonEditor, po.element("textarea[name='value']").val());
 	po.initWorkspaceTabs();
 	po.getAddPropertyName = function()
 	{
-		var selectionRange = po.csvEditor.getSelectionRange();
-		return (po.csvEditor.session.getTextRange(selectionRange) || "");
+		var selectionRange = po.jsonEditor.getSelectionRange();
+		return (po.jsonEditor.session.getTextRange(selectionRange) || "");
 	};
 	po.initDataSetPropertiesTable(po.dataSetProperties);
 	po.initDataSetParamsTable(po.dataSetParams);
 	po.initPreviewParamValuePanel();
-	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
-	
+
 	po.updatePreviewOptionsData = function()
 	{
-		var value = po.csvEditor.getValue();
+		var value = po.jsonEditor.getValue();
 		
 		var dataSet = po.previewOptions.data.dataSet;
 		
 		dataSet.value = value;
-		dataSet.nameRow = po.nameRowValue();
 	};
 	
-	<#if formAction != 'saveAddForCsvValue'>
+	<#if formAction != 'saveAddForJsonValue'>
 	//编辑、查看操作应初始化为已完成预览的状态
 	po.updatePreviewOptionsData();
 	po.previewSuccess(true);
@@ -126,15 +103,14 @@ readonly 是否只读操作，允许为null
 	
 	po.isPreviewValueModified = function()
 	{
-		var value = po.csvEditor.getValue();
-		var nameRow = po.nameRowValue();
+		var value = po.jsonEditor.getValue();
 		
 		var pd = po.previewOptions.data.dataSet;
 		
-		return (pd.value != value) || (pd.nameRow != nameRow);
+		return (pd.value != value);
 	};
 	
-	po.previewOptions.url = po.url("previewCsvValue");
+	po.previewOptions.url = po.url("previewJsonValue");
 	po.previewOptions.beforePreview = function()
 	{
 		po.updatePreviewOptionsData();
@@ -150,13 +126,13 @@ readonly 是否只读操作，允许为null
 	
 	po.initPreviewOperations();
 	
-	$.validator.addMethod("dataSetCsvValueRequired", function(value, element)
+	$.validator.addMethod("dataSetJsonValueRequired", function(value, element)
 	{
-		var value = po.csvEditor.getValue();
+		var value = po.jsonEditor.getValue();
 		return value.length > 0;
 	});
 	
-	$.validator.addMethod("dataSetCsvValuePreviewRequired", function(value, element)
+	$.validator.addMethod("dataSetJsonValuePreviewRequired", function(value, element)
 	{
 		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
@@ -167,22 +143,16 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"value" : {"dataSetCsvValueRequired": true, "dataSetCsvValuePreviewRequired": true, "dataSetPropertiesRequired": true},
-			"nameRowText": {"integer": true, "min": 1},
+			"value" : {"dataSetJsonValueRequired": true, "dataSetJsonValuePreviewRequired": true, "dataSetPropertiesRequired": true}
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
 			"value" :
 			{
-				"dataSetCsvValueRequired": "<@spring.message code='validation.required' />",
-				"dataSetCsvValuePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
+				"dataSetJsonValueRequired": "<@spring.message code='validation.required' />",
+				"dataSetJsonValuePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
 				"dataSetPropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
-			},
-			"nameRowText":
-			{
-				"integer": "<@spring.message code='validation.integer' />",
-				"min": "<@spring.message code='validation.min' />"
 			}
 		},
 		submitHandler : function(form)
@@ -190,12 +160,9 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
-			formData["value"] = po.csvEditor.getValue();
-			formData["nameRow"] = po.nameRowValue();
-			formData["nameRowRadio"] = undefined;
-			formData["nameRowText"] = undefined;
+			formData["value"] = po.jsonEditor.getValue();
 			
-			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,
+			$.postJson("${contextPath}/dataSet/${formAction}", formData,
 			function(response)
 			{
 				po.pageParamCallAfterSave(true, response.data);
