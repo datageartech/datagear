@@ -1532,11 +1532,22 @@
 	};
 	
 	/**
+	 * 获取/设置指定第一个数据集单个参数值。
+	 * 
+	 * @param name 参数名、参数索引
+	 * @param value 可选，要设置的参数值，不设置则执行获取操作
+	 */
+	chartBase.dataSetParamValueFirst = function(name, value)
+	{
+		return this.dataSetParamValue(0, name, value);
+	};
+	
+	/**
 	 * 获取/设置指定数据集单个参数值。
 	 * 
 	 * @param chartDataSet 指定图表数据集对象、图表数据集索引
 	 * @param name 参数名、参数索引
-	 * @param value 要设置的参数值，不设置则执行获取操作
+	 * @param value 可选，要设置的参数值，不设置则执行获取操作
 	 */
 	chartBase.dataSetParamValue = function(chartDataSet, name, value)
 	{
@@ -1568,10 +1579,20 @@
 	};
 	
 	/**
+	 * 获取/设置第一个数据集参数值集。
+	 * 
+	 * @param paramValuesObj 可选，要设置的参数值集对象，不设置则执行获取操作
+	 */
+	chartBase.dataSetParamValuesFirst = function(paramValuesObj)
+	{
+		return this.dataSetParamValues(0, paramValuesObj);
+	};
+	
+	/**
 	 * 获取/设置指定数据集参数值集。
 	 * 
 	 * @param chartDataSet 指定图表数据集或其索引
-	 * @param paramValuesObj 要设置的参数值集对象，不设置则执行获取操作
+	 * @param paramValuesObj 可选，要设置的参数值集对象，不设置则执行获取操作
 	 */
 	chartBase.dataSetParamValues = function(chartDataSet, paramValuesObj)
 	{
@@ -1595,6 +1616,14 @@
 			chartDataSet.paramValues = chartDataSet.query.paramValues;
 			// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
 		}
+	};
+	
+	/**
+	 * 重置第一个数据集参数值集。
+	 */
+	chartBase.resetDataSetParamValuesFirst = function()
+	{
+		return this.resetDataSetParamValues(0);
 	};
 	
 	/**
