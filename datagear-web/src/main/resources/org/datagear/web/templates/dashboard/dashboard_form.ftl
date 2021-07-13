@@ -495,7 +495,27 @@ readonly 是否只读操作，允许为null
 		return "";
 	};
 	
-	po.templateEditorCompletions = [
+	po.getTemplatePrevToken = function(editor, row, column)
+	{
+		var text = editor.session.getLine(row).substring(0, column);
+		
+		//反向查找直到非空串
+		var prevRow = row;
+		while((!text || /^\s*$/.test(text)) && (prevRow--) >= 0)
+			text = editor.session.getLine(prevRow) + text;
+		
+		var tokens = text.split(/\s/);
+		
+		for(var i=tokens.length-1; i>=0; i--)
+		{
+			if(!(/^\s*$/.test(tokens[i])))
+				return tokens[i];
+		}
+		
+		return "";
+	};
+	
+	po.templateEditorCompletionsTagAttr = [
 		{name: "dg-chart-widget", value: "dg-chart-widget", caption: "",
 			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", tagNames: ["div"]},
 		{name: "dg-chart-options", value: "dg-chart-options", caption: "",
@@ -528,11 +548,93 @@ readonly 是否只读操作，允许为null
 			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-form' />", tagNames: ["form"]}
 	];
 	
+	po.templateEditorCompletionsJsFunction = [
+		//看板JS对象
+		{name: "addChart", value: "addChart(", caption: "addChart()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "chartIndex", value: "chartIndex(", caption: "chartIndex()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "chartOf", value: "chartOf(", caption: "chartOf()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "batchSetDataSetParamValues", value: "batchSetDataSetParamValues(", caption: "batchSetDataSetParamValues()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "charts", value: "charts", caption: "charts",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "doRender", value: "doRender()", caption: "doRender()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "init", value: "init()", caption: "init()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "isHandlingCharts", value: "isHandlingCharts()", caption: "isHandlingCharts()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "isWaitForRender", value: "isWaitForRender(", caption: "isWaitForRender()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "isWaitForUpdate", value: "isWaitForUpdate(", caption: "isWaitForUpdate()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "listener", value: "listener(", caption: "listener()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "loadChart", value: "loadChart(", caption: "loadChart()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "loadCharts", value: "loadCharts(", caption: "loadCharts()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "loadUnsolvedCharts", value: "loadUnsolvedCharts()", caption: "loadUnsolvedCharts()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "refreshData", value: "refreshData(", caption: "refreshData",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "removeChart", value: "removeChart(", caption: "removeChart()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "render", value: "render()", caption: "render()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "renderContext", value: "renderContext", caption: "renderContext",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "renderContextAttr", value: "renderContextAttr(", caption: "renderContextAttr()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "renderForm", value: "renderForm(", caption: "renderForm()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "renderedChart", value: "renderedChart(", caption: "renderedChart()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "resizeAllCharts", value: "resizeAllCharts()", caption: "resizeAllCharts()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "resizeChart", value: "resizeChart(", caption: "resizeChart()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "resultDataFormat", value: "resultDataFormat(", caption: "resultDataFormat()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "serverDate", value: "serverDate()", caption: "serverDate()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "startHandleCharts", value: "startHandleCharts()", caption: "startHandleCharts()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "stopHandleCharts", value: "stopHandleCharts()", caption: "stopHandleCharts()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		
+		//图表JS对象
+		{name: "autoResize", value: "autoResize(", caption: "autoResize()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"},
+		{name: "bindLinksEventHanders", value: "bindLinksEventHanders(", caption: "bindLinksEventHanders()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"},
+		{name: "chartDataSetAt", value: "chartDataSetAt(", caption: "chartDataSetAt()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"},
+		{name: "chartDataSetFirst", value: "chartDataSetFirst(", caption: "chartDataSetFirst()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"},
+		{name: "chartDataSetName", value: "chartDataSetName(", caption: "chartDataSetName()",
+			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"}
+	];
+	
 	po.templateEditorCompleters =
 	[
+		//自动补全：dg-*
 		{
 			identifierRegexps : [/[a-zA-Z_0-9\-]/],
 			getCompletions: function(editor, session, pos, prefix, callback)
+			{
+				if(prefix && prefix.indexOf("dg") == 0)
+				{
+					this._getCompletionsForTagAttr(editor, session, pos, prefix, callback);
+				}
+				else
+				{
+					callback(null, []);
+				}
+			},
+			_getCompletionsForTagAttr: function(editor, session, pos, prefix, callback)
 			{
 				var prevText = po.getTemplatePrevTagText(editor, pos.row, pos.column);
 				
@@ -543,15 +645,64 @@ readonly 是否只读操作，允许为null
 					tagName = tagName.toLowerCase();
 					
 					var completions = [];
-					for(var i=0; i<po.templateEditorCompletions.length; i++)
+					for(var i=0; i<po.templateEditorCompletionsTagAttr.length; i++)
 					{
-						var comp = po.templateEditorCompletions[i];
+						var comp = po.templateEditorCompletionsTagAttr[i];
 						
 						if(prefix && comp.name.indexOf(prefix) != 0)
 							continue;
 						
 						if(!comp.tagNames || $.inArray(tagName, comp.tagNames) > -1)
 							completions.push(comp);
+					}
+					
+					callback(null, completions);
+				}
+				else
+					callback(null, []);
+			}
+		},
+		//自动补全：dashboard.*、chart.*
+		{
+			identifierRegexps : [/[a-zA-Z_0-9\$\u00A2-\uFFFF]/],
+			getCompletions: function(editor, session, pos, prefix, callback)
+			{
+				if(prefix)
+				{
+					this._getCompletionsForFunc(editor, session, pos, prefix, callback);
+				}
+				else
+				{
+					callback(null, []);
+				}
+			},
+			_getCompletionsForFunc: function(editor, session, pos, prefix, callback)
+			{
+				var prevToken = po.getTemplatePrevToken(editor, pos.row, pos.column);
+				var jsOwner = "";
+				
+				if(prevToken)
+				{
+					// *dashboard*.*
+					if(/dashboard\S*\./g.test(prevToken))
+						jsOwner = "dashboard";
+					// *chart*.*
+					else if(/chart\S*\./g.test(prevToken))
+						jsOwner = "chart";
+				}
+				
+				if(jsOwner)
+				{
+					var completions = [];
+					for(var i=0; i<po.templateEditorCompletionsJsFunction.length; i++)
+					{
+						var comp = po.templateEditorCompletionsJsFunction[i];
+						
+						if(comp.jsOwner == jsOwner)
+						{
+							if(!prefix || comp.name.indexOf(prefix) == 0)
+								completions.push(comp);
+						}
 					}
 					
 					callback(null, completions);
