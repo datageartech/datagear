@@ -1581,36 +1581,51 @@
 	/**
 	 * 获取/设置第一个数据集参数值集。
 	 * 
-	 * @param paramValuesObj 可选，要设置的参数值集对象，不设置则执行获取操作
+	 * @param paramValues 可选，要设置的参数名/值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
 	 */
-	chartBase.dataSetParamValuesFirst = function(paramValuesObj)
+	chartBase.dataSetParamValuesFirst = function(paramValues)
 	{
-		return this.dataSetParamValues(0, paramValuesObj);
+		return this.dataSetParamValues(0, paramValues);
 	};
 	
 	/**
 	 * 获取/设置指定数据集参数值集。
 	 * 
 	 * @param chartDataSet 指定图表数据集或其索引
-	 * @param paramValuesObj 可选，要设置的参数值集对象，不设置则执行获取操作
+	 * @param paramValues 可选，要设置的参数值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
 	 */
-	chartBase.dataSetParamValues = function(chartDataSet, paramValuesObj)
+	chartBase.dataSetParamValues = function(chartDataSet, paramValues)
 	{
 		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
 		if(chartDataSet == null)
 			throw new Error("ChartDataSet not found for : " + chartDataSet);
 		
-		var paramValues = chartDataSet.query.paramValues;
+		var paramValuesCurrent = chartDataSet.query.paramValues;
 		
 		if(chartDataSet._originalParamValues == null)
-			chartDataSet._originalParamValues = $.extend({}, paramValues);
+			chartDataSet._originalParamValues = $.extend({}, paramValuesCurrent);
 		
-		if(paramValuesObj === undefined)
-			return paramValues;
+		if(paramValues === undefined)
+			return paramValuesCurrent;
 		else
 		{
-			chartDataSet.query.paramValues = paramValuesObj;
+			if($.isArray(paramValues))
+			{
+				var params = (chartDataSet.dataSet.params || []);
+				var len = Math.min(params.length, paramValues.length);
+				var paramValuesObj = {};
+				
+				for(var i=0; i<len; i++)
+				{
+					var name = params[i].name;
+					paramValuesObj[name] = paramValues[i];
+				}
+				
+				paramValues = paramValuesObj;
+			}
+			
+			chartDataSet.query.paramValues = paramValues;
 			
 			// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
 			chartDataSet.paramValues = chartDataSet.query.paramValues;
@@ -2603,9 +2618,9 @@
 	/**
 	 * 设置指定图表数据集多个参数值。
 	 */
-	chartBase.setDataSetParamValues = function(chartDataSet, paramValuesObj)
+	chartBase.setDataSetParamValues = function(chartDataSet, paramValues)
 	{
-		this.dataSetParamValues(chartDataSet, paramValuesObj);
+		this.dataSetParamValues(chartDataSet, paramValues);
 	};
 	// > @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
 	
