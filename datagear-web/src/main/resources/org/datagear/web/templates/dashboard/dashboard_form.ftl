@@ -504,15 +504,7 @@ readonly 是否只读操作，允许为null
 		while((!text || /^\s*$/.test(text)) && (prevRow--) >= 0)
 			text = editor.session.getLine(prevRow) + text;
 		
-		var tokens = text.split(/\s/);
-		
-		for(var i=tokens.length-1; i>=0; i--)
-		{
-			if(!(/^\s*$/.test(tokens[i])))
-				return tokens[i];
-		}
-		
-		return "";
+		return text;
 	};
 	
 	po.templateEditorCompletionsTagAttr = [
@@ -550,72 +542,134 @@ readonly 是否只读操作，允许为null
 	
 	po.templateEditorCompletionsJsFunction = [
 		//看板JS对象
-		{name: "addChart", value: "addChart(", caption: "addChart()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "chartIndex", value: "chartIndex(", caption: "chartIndex()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "chartOf", value: "chartOf(", caption: "chartOf()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "batchSetDataSetParamValues", value: "batchSetDataSetParamValues(", caption: "batchSetDataSetParamValues()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "charts", value: "charts", caption: "charts",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "doRender", value: "doRender()", caption: "doRender()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "init", value: "init()", caption: "init()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "isHandlingCharts", value: "isHandlingCharts()", caption: "isHandlingCharts()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "isWaitForRender", value: "isWaitForRender(", caption: "isWaitForRender()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "isWaitForUpdate", value: "isWaitForUpdate(", caption: "isWaitForUpdate()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "listener", value: "listener(", caption: "listener()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "loadChart", value: "loadChart(", caption: "loadChart()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "loadCharts", value: "loadCharts(", caption: "loadCharts()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "loadUnsolvedCharts", value: "loadUnsolvedCharts()", caption: "loadUnsolvedCharts()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "refreshData", value: "refreshData(", caption: "refreshData",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "removeChart", value: "removeChart(", caption: "removeChart()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "render", value: "render()", caption: "render()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "renderContext", value: "renderContext", caption: "renderContext",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "renderContextAttr", value: "renderContextAttr(", caption: "renderContextAttr()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "renderForm", value: "renderForm(", caption: "renderForm()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "renderedChart", value: "renderedChart(", caption: "renderedChart()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "resizeAllCharts", value: "resizeAllCharts()", caption: "resizeAllCharts()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "resizeChart", value: "resizeChart(", caption: "resizeChart()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "resultDataFormat", value: "resultDataFormat(", caption: "resultDataFormat()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "serverDate", value: "serverDate()", caption: "serverDate()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "startHandleCharts", value: "startHandleCharts()", caption: "startHandleCharts()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
-		{name: "stopHandleCharts", value: "stopHandleCharts()", caption: "stopHandleCharts()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "dashboard"},
+		{name: "addChart", value: "addChart(", caption: "addChart()", meta: "dashboard"},
+		{name: "chartIndex", value: "chartIndex(", caption: "chartIndex()", meta: "dashboard"},
+		{name: "chartOf", value: "chartOf(", caption: "chartOf()", meta: "dashboard"},
+		{name: "batchSetDataSetParamValues", value: "batchSetDataSetParamValues(", caption: "batchSetDataSetParamValues()", meta: "dashboard"},
+		{name: "charts", value: "charts", caption: "charts", meta: "dashboard"},
+		{name: "doRender", value: "doRender()", caption: "doRender()", meta: "dashboard"},
+		{name: "init", value: "init()", caption: "init()", meta: "dashboard"},
+		{name: "isHandlingCharts", value: "isHandlingCharts()", caption: "isHandlingCharts()", meta: "dashboard"},
+		{name: "isWaitForRender", value: "isWaitForRender(", caption: "isWaitForRender()", meta: "dashboard"},
+		{name: "isWaitForUpdate", value: "isWaitForUpdate(", caption: "isWaitForUpdate()", meta: "dashboard"},
+		{name: "listener", value: "listener(", caption: "listener()", meta: "dashboard"},
+		{name: "loadChart", value: "loadChart(", caption: "loadChart()", meta: "dashboard"},
+		{name: "loadCharts", value: "loadCharts(", caption: "loadCharts()", meta: "dashboard"},
+		{name: "loadUnsolvedCharts", value: "loadUnsolvedCharts()", caption: "loadUnsolvedCharts()", meta: "dashboard"},
+		{name: "refreshData", value: "refreshData(", caption: "refreshData()", meta: "dashboard"},
+		{name: "removeChart", value: "removeChart(", caption: "removeChart()", meta: "dashboard"},
+		{name: "render", value: "render()", caption: "render()", meta: "dashboard"},
+		{name: "renderContext", value: "renderContext", caption: "renderContext", meta: "dashboard"},
+		{name: "renderContextAttr", value: "renderContextAttr(", caption: "renderContextAttr()", meta: "dashboard"},
+		{name: "renderForm", value: "renderForm(", caption: "renderForm()", meta: "dashboard"},
+		{name: "renderedChart", value: "renderedChart(", caption: "renderedChart()", meta: "dashboard"},
+		{name: "resizeAllCharts", value: "resizeAllCharts()", caption: "resizeAllCharts()", meta: "dashboard"},
+		{name: "resizeChart", value: "resizeChart(", caption: "resizeChart()", meta: "dashboard"},
+		{name: "resultDataFormat", value: "resultDataFormat(", caption: "resultDataFormat()", meta: "dashboard"},
+		{name: "serverDate", value: "serverDate()", caption: "serverDate()", meta: "dashboard"},
+		{name: "startHandleCharts", value: "startHandleCharts()", caption: "startHandleCharts()", meta: "dashboard"},
+		{name: "stopHandleCharts", value: "stopHandleCharts()", caption: "stopHandleCharts()", meta: "dashboard"},
 		
 		//图表JS对象
-		{name: "autoResize", value: "autoResize(", caption: "autoResize()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"},
-		{name: "bindLinksEventHanders", value: "bindLinksEventHanders(", caption: "bindLinksEventHanders()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"},
-		{name: "chartDataSetAt", value: "chartDataSetAt(", caption: "chartDataSetAt()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"},
-		{name: "chartDataSetFirst", value: "chartDataSetFirst(", caption: "chartDataSetFirst()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"},
-		{name: "chartDataSetName", value: "chartDataSetName(", caption: "chartDataSetName()",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", jsOwner: "chart"}
+		{name: "autoResize", value: "autoResize(", caption: "autoResize()", meta: "chart"},
+		{name: "bindLinksEventHanders", value: "bindLinksEventHanders(", caption: "bindLinksEventHanders()", meta: "chart"},
+		{name: "chartDataSetAt", value: "chartDataSetAt(", caption: "chartDataSetAt()", meta: "chart"},
+		{name: "chartDataSetFirst", value: "chartDataSetFirst(", caption: "chartDataSetFirst()", meta: "chart"},
+		{name: "chartDataSetName", value: "chartDataSetName(", caption: "chartDataSetName()", meta: "chart"},
+		{name: "chartDataSets", value: "chartDataSets", caption: "chartDataSets", meta: "chart"},
+		{name: "chartDataSetsAttachment", value: "chartDataSetsAttachment()", caption: "chartDataSetsAttachment()", meta: "chart"},
+		{name: "chartDataSetsMain", value: "chartDataSetsMain()", caption: "chartDataSetsMain()", meta: "chart"},
+		{name: "dashboard", value: "dashboard", caption: "dashboard", meta: "chart"},
+		{name: "dataSetParamValue", value: "dataSetParamValue(", caption: "dataSetParamValue()", meta: "chart"},
+		{name: "dataSetParamValueFirst", value: "dataSetParamValueFirst(", caption: "dataSetParamValueFirst()", meta: "chart"},
+		{name: "dataSetParamValues", value: "dataSetParamValues(", caption: "dataSetParamValues()", meta: "chart"},
+		{name: "dataSetParamValuesFirst", value: "dataSetParamValuesFirst(", caption: "dataSetParamValuesFirst()", meta: "chart"},
+		{name: "dataSetPropertiesOfSign", value: "dataSetPropertiesOfSign(", caption: "dataSetPropertiesOfSign()", meta: "chart"},
+		{name: "dataSetPropertyLabel", value: "dataSetPropertyLabel(", caption: "dataSetPropertyLabel()", meta: "chart"},
+		{name: "dataSetPropertyOfSign", value: "dataSetPropertyOfSign(", caption: "dataSetPropertyOfSign()", meta: "chart"},
+		{name: "destroy", value: "destroy()", caption: "destroy()", meta: "chart"},
+		{name: "disableSetting", value: "disableSetting(", caption: "disableSetting()", meta: "chart"},
+		{name: "doRender", value: "doRender()", caption: "doRender()", meta: "chart"},
+		{name: "doUpdate", value: "doUpdate(", caption: "doUpdate()", meta: "chart"},
+		{name: "echartsInit", value: "echartsInit(", caption: "echartsInit()", meta: "chart"},
+		{name: "echartsInstance", value: "echartsInstance(", caption: "echartsInstance()", meta: "chart"},
+		{name: "echartsLoadMap", value: "echartsLoadMap(", caption: "echartsLoadMap()", meta: "chart"},
+		{name: "echartsMapRegistered", value: "echartsMapRegistered(", caption: "echartsMapRegistered()", meta: "chart"},
+		{name: "echartsOptions", value: "echartsOptions(", caption: "echartsOptions()", meta: "chart"},
+		{name: "echartsThemeName", value: "echartsThemeName(", caption: "echartsThemeName()", meta: "chart"},
+		{name: "element", value: "element()", caption: "element()", meta: "chart"},
+		{name: "elementId", value: "elementId", caption: "elementId", meta: "chart"},
+		{name: "elementJquery", value: "elementJquery()", caption: "elementJquery()", meta: "chart"},
+		{name: "elementWidgetId", value: "elementWidgetId()", caption: "elementWidgetId()", meta: "chart"},
+		{name: "eventBindHandlerDelegation", value: "eventBindHandlerDelegation(", caption: "eventBindHandlerDelegation()", meta: "chart"},
+		{name: "eventData", value: "eventData(", caption: "eventData()", meta: "chart"},
+		{name: "eventHandlers", value: "eventHandlers(", caption: "eventHandlers()", meta: "chart"},
+		{name: "eventNewEcharts", value: "eventNewEcharts(", caption: "eventNewEcharts()", meta: "chart"},
+		{name: "eventNewHtml", value: "eventNewHtml(", caption: "eventNewHtml()", meta: "chart"},
+		{name: "eventOriginalChartDataSetIndex", value: "eventOriginalChartDataSetIndex(", caption: "eventOriginalChartDataSetIndex()", meta: "chart"},
+		{name: "eventOriginalData", value: "eventOriginalData(", caption: "eventOriginalData()", meta: "chart"},
+		{name: "eventOriginalInfo", value: "eventOriginalInfo(", caption: "eventOriginalInfo()", meta: "chart"},
+		{name: "eventOriginalResultDataIndex", value: "eventOriginalResultDataIndex(", caption: "eventOriginalResultDataIndex()", meta: "chart"},
+		{name: "eventUnbindHandlerDelegation", value: "eventUnbindHandlerDelegation(", caption: "eventUnbindHandlerDelegation()", meta: "chart"},
+		{name: "extValue", value: "extValue(", caption: "extValue()", meta: "chart"},
+		{name: "getUpdateResults", value: "getUpdateResults()", caption: "getUpdateResults()", meta: "chart"},
+		{name: "handleChartEventLink", value: "handleChartEventLink(", caption: "handleChartEventLink()", meta: "chart"},
+		{name: "hasParamDataSet", value: "()", caption: "hasParamDataSet()", meta: "chart"},
+		{name: "id", value: "id", caption: "id", meta: "chart"},
+		{name: "init", value: "init()", caption: "init()", meta: "chart"},
+		{name: "isActive", value: "isActive()", caption: "isActive()", meta: "chart"},
+		{name: "isAsyncRender", value: "isAsyncRender()", caption: "isAsyncRender()", meta: "chart"},
+		{name: "isAsyncUpdate", value: "isAsyncUpdate()", caption: "isAsyncUpdate()", meta: "chart"},
+		{name: "isDataSetParamValueReady", value: "isDataSetParamValueReady()", caption: "isDataSetParamValueReady()", meta: "chart"},
+		{name: "isInstance", value: "isInstance(", caption: "isInstance()", meta: "chart"},
+		{name: "links", value: "links(", caption: "links()", meta: "chart"},
+		{name: "listener", value: "listener(", caption: "listener()", meta: "chart"},
+		{name: "map", value: "map(", caption: "map()", meta: "chart"},
+		{name: "mapURL", value: "mapURL(", caption: "mapURL()", meta: "chart"},
+		{name: "name", value: "name", caption: "name", meta: "chart"},
+		{name: "off", value: "off(", caption: "off()", meta: "chart"},
+		{name: "on", value: "on(", caption: "on()", meta: "chart"},
+		{name: "onClick", value: "onClick(", caption: "onClick()", meta: "chart"},
+		{name: "onDblclick", value: "onDblclick(", caption: "onDblclick()", meta: "chart"},
+		{name: "onMousedown", value: "onMousedown(", caption: "onMousedown()", meta: "chart"},
+		{name: "onMouseout", value: "onMouseout(", caption: "onMouseout()", meta: "chart"},
+		{name: "onMouseover", value: "onMouseover(", caption: "onMouseover()", meta: "chart"},
+		{name: "onMouseup", value: "onMouseup(", caption: "onMouseup()", meta: "chart"},
+		{name: "options", value: "options(", caption: "options()", meta: "chart"},
+		{name: "optionsUpdate", value: "optionsUpdate(", caption: "optionsUpdate()", meta: "chart"},
+		{name: "plugin", value: "plugin", caption: "plugin", meta: "chart"},
+		{name: "refreshData", value: "refreshData()", caption: "refreshData()", meta: "chart"},
+		{name: "render", value: "render()", caption: "render()", meta: "chart"},
+		{name: "renderContext", value: "renderContext", caption: "renderContext", meta: "chart"},
+		{name: "renderContextAttr", value: "renderContextAttr(", caption: "renderContextAttr()", meta: "chart"},
+		{name: "renderer", value: "renderer(", caption: "renderer()", meta: "chart"},
+		{name: "resetDataSetParamValues", value: "resetDataSetParamValues(", caption: "resetDataSetParamValues()", meta: "chart"},
+		{name: "resetDataSetParamValuesFirst", value: "resetDataSetParamValuesFirst()", caption: "resetDataSetParamValuesFirst()", meta: "chart"},
+		{name: "resize", value: "resize()", caption: "resize()", meta: "chart"},
+		{name: "resultAt", value: "resultAt(", caption: "resultAt()", meta: "chart"},
+		{name: "resultCell", value: "resultCell(", caption: "resultCell()", meta: "chart"},
+		{name: "resultColumnArrays", value: "resultColumnArrays(", caption: "resultColumnArrays()", meta: "chart"},
+		{name: "resultDataFormat", value: "resultDataFormat(", caption: "resultDataFormat()", meta: "chart"},
+		{name: "resultDatas", value: "resultDatas(", caption: "resultDatas()", meta: "chart"},
+		{name: "resultFirst", value: "resultFirst(", caption: "resultFirst()", meta: "chart"},
+		{name: "resultNameValueObjects", value: "resultNameValueObjects(", caption: "resultNameValueObjects()", meta: "chart"},
+		{name: "resultOf", value: "resultOf(", caption: "resultOf()", meta: "chart"},
+		{name: "resultRowArrays", value: "resultRowArrays(", caption: "resultRowArrays()", meta: "chart"},
+		{name: "resultRowCell", value: "resultRowCell(", caption: "resultRowCell()", meta: "chart"},
+		{name: "status", value: "status(", caption: "status()", meta: "chart"},
+		{name: "statusDestroyed", value: "statusDestroyed(", caption: "statusDestroyed()", meta: "chart"},
+		{name: "statusPreRender", value: "statusPreRender(", caption: "statusPreRender()", meta: "chart"},
+		{name: "statusPreUpdate", value: "statusPreUpdate(", caption: "statusPreUpdate()", meta: "chart"},
+		{name: "statusRendered", value: "statusRendered(", caption: "statusRendered()", meta: "chart"},
+		{name: "statusRendering", value: "statusRendering(", caption: "statusRendering()", meta: "chart"},
+		{name: "statusUpdated", value: "statusUpdated(", caption: "statusUpdated()", meta: "chart"},
+		{name: "statusUpdating", value: "statusUpdating(", caption: "statusUpdating()", meta: "chart"},
+		{name: "theme", value: "theme(", caption: "theme()", meta: "chart"},
+		{name: "update", value: "update(", caption: "update()", meta: "chart"},
+		{name: "updateGroup", value: "updateGroup(", caption: "updateGroup()", meta: "chart"},
+		{name: "updateInterval", value: "updateInterval", caption: "updateInterval", meta: "chart"},
+		{name: "updateResults", value: "updateResults(", caption: "updateResults()", meta: "chart"},
+		{name: "widgetId", value: "widgetId()", caption: "widgetId()", meta: "chart"}
 	];
 	
 	po.templateEditorCompleters =
@@ -625,90 +679,84 @@ readonly 是否只读操作，允许为null
 			identifierRegexps : [/[a-zA-Z_0-9\-]/],
 			getCompletions: function(editor, session, pos, prefix, callback)
 			{
+				var completions = [];
+				
 				if(prefix && prefix.indexOf("dg") == 0)
-				{
-					this._getCompletionsForTagAttr(editor, session, pos, prefix, callback);
-				}
-				else
-				{
-					callback(null, []);
-				}
+					completions = this._getCompletionsForTagAttr(editor, session, pos, prefix, callback);
+				
+				callback(null, completions);
 			},
 			_getCompletionsForTagAttr: function(editor, session, pos, prefix, callback)
 			{
-				var prevText = po.getTemplatePrevTagText(editor, pos.row, pos.column);
+				var completions = [];
 				
+				var prevText = po.getTemplatePrevTagText(editor, pos.row, pos.column);
 				var tagName = po.resolveHtmlTagName(prevText);
 				
 				if(tagName)
 				{
 					tagName = tagName.toLowerCase();
 					
-					var completions = [];
 					for(var i=0; i<po.templateEditorCompletionsTagAttr.length; i++)
 					{
 						var comp = po.templateEditorCompletionsTagAttr[i];
 						
-						if(prefix && comp.name.indexOf(prefix) != 0)
+						if(comp.name.indexOf(prefix) != 0)
 							continue;
 						
 						if(!comp.tagNames || $.inArray(tagName, comp.tagNames) > -1)
 							completions.push(comp);
 					}
-					
-					callback(null, completions);
 				}
-				else
-					callback(null, []);
+				
+				return completions;
 			}
 		},
 		//自动补全：dashboard.*、chart.*
 		{
-			identifierRegexps : [/[a-zA-Z_0-9\$\u00A2-\uFFFF]/],
+			identifierRegexps : [/[a-zA-Z]/],
 			getCompletions: function(editor, session, pos, prefix, callback)
 			{
+				var completions = [];
+				
 				if(prefix)
 				{
-					this._getCompletionsForFunc(editor, session, pos, prefix, callback);
-				}
-				else
-				{
-					callback(null, []);
-				}
-			},
-			_getCompletionsForFunc: function(editor, session, pos, prefix, callback)
-			{
-				var prevToken = po.getTemplatePrevToken(editor, pos.row, pos.column);
-				var jsOwner = "";
-				
-				if(prevToken)
-				{
-					// *dashboard*.*
-					if(/dashboard\S*\./g.test(prevToken))
-						jsOwner = "dashboard";
-					// *chart*.*
-					else if(/chart\S*\./g.test(prevToken))
-						jsOwner = "chart";
-				}
-				
-				if(jsOwner)
-				{
-					var completions = [];
-					for(var i=0; i<po.templateEditorCompletionsJsFunction.length; i++)
-					{
-						var comp = po.templateEditorCompletionsJsFunction[i];
-						
-						if(comp.jsOwner == jsOwner)
-						{
-							if(!prefix || comp.name.indexOf(prefix) == 0)
-								completions.push(comp);
-						}
-					}
+					var prevToken = po.getTemplatePrevToken(editor, pos.row, pos.column);
 					
-					callback(null, completions);
+					//以"."加可选空格结尾
+					if(prevToken && /\.\S*$/.test(prevToken))
+						completions = this._getCompletionsForFunc(editor, session, pos, prefix, callback, prevToken);
 				}
-				else
-					callback(null, []);
+				
+				callback(null, completions);
+			},
+			_getCompletionsForFunc: function(editor, session, pos, prefix, callback, prevToken)
+			{
+				var completions = [];
+				
+				var meta = "";
+				
+				//无法确定要补全的是看板还是图表对象，所以这里采用：完全匹配变量名，否则就全部提示
+				
+				// *dashboard*
+				if(/dashboard/i.test(prevToken))
+					meta = "dashboard";
+				// *chart*
+				else if(/chart/i.test(prevToken))
+					meta = "chart";
+				
+				for(var i=0; i<po.templateEditorCompletionsJsFunction.length; i++)
+				{
+					var comp = po.templateEditorCompletionsJsFunction[i];
+					
+					if(!meta || (meta && comp.meta == meta))
+					{
+						if(comp.name.indexOf(prefix) == 0)
+							completions.push(comp);
+					}
+				}
+				
+				return completions;
 			}
 		}
 	];
