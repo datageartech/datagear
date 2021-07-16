@@ -276,7 +276,7 @@
 				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
 				
 				if(stack)
-					mySeries.stack = (stackGroup ? "stack-"+i : "stack");
+					mySeries.stack = (stackGroup ? dataSetName : "stack");
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -444,7 +444,7 @@
 				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
 				
 				if(stack)
-					mySeries.stack = (stackGroup ? "stack-"+i : "stack");
+					mySeries.stack = (stackGroup ? dataSetName : "stack");
 				
 				legendData.push(legendName);
 				series.push(mySeries);
