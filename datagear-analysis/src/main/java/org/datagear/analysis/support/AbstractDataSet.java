@@ -33,8 +33,7 @@ import org.datagear.analysis.ResultDataFormat;
  */
 public abstract class AbstractDataSet extends AbstractIdentifiable implements DataSet
 {
-	/** 默认Freemarker模板解析器 */
-	public static final DataSetFmkTemplateResolver FMK_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver();
+	public static final DataSetFmkTemplateResolver GENERAL_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver();
 
 	private String name;
 
@@ -522,7 +521,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 将指定文本作为Freemarker模板解析。
+	 * 将指定文本作为模板解析。
 	 * <p>
 	 * 注意：即使此数据集没有定义任何参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
 	 * 用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值。
@@ -532,16 +531,13 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param query
 	 * @return
 	 */
-	public String resolveAsFmkTemplate(String text, DataSetQuery query)
+	protected String resolveTextAsTemplate(String text, DataSetQuery query)
 	{
-		// if (!hasParam())
-		// return text;
-
 		if (text == null)
 			return null;
 		
 		Map<String, ?> values = query.getParamValues();
 		
-		return FMK_TEMPLATE_RESOLVER.resolve(text, values);
+		return GENERAL_TEMPLATE_RESOLVER.resolve(text, values);
 	}
 }

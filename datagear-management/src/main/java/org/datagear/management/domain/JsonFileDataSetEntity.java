@@ -219,7 +219,7 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 	@Override
 	public String resolveFileNameAsFmkTemplate(String fileName, DataSetQuery query)
 	{
-		return resolveAsFmkTemplate(fileName, query);
+		return resolveTextAsTemplate(fileName, query);
 	}
 
 	@Override

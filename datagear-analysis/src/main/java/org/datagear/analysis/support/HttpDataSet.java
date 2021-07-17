@@ -33,6 +33,7 @@ import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
@@ -407,17 +408,38 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 	protected String resolveTemplateUri(DataSetQuery query) throws Throwable
 	{
-		return resolveAsFmkTemplate(this.uri, query);
+		return resolveTextAsTemplate(this.uri, query);
 	}
 
 	protected String resolveTemplateHeaderContent(DataSetQuery query) throws Throwable
 	{
-		return resolveAsFmkTemplate(this.headerContent, query);
+		return resolveJsonAsTemplate(this.headerContent, query);
 	}
 
 	protected String resolveTemplateRequestContent(DataSetQuery query) throws Throwable
 	{
-		return resolveAsFmkTemplate(this.requestContent, query);
+		return resolveJsonAsTemplate(this.requestContent, query);
+	}
+
+	/**
+	 * 将指定JSON文本作为模板解析。
+	 * <p>
+	 * 注意：即使此数据集没有定义任何参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code json}作为模板解析，因为存在如下应用场景：
+	 * 用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值。
+	 * </p>
+	 * 
+	 * @param json
+	 * @param query
+	 * @return
+	 */
+	protected String resolveJsonAsTemplate(String json, DataSetQuery query)
+	{
+		if (json == null)
+			return null;
+
+		Map<String, ?> values = query.getParamValues();
+
+		return AbstractJsonDataSet.JSON_TEMPLATE_RESOLVER.resolve(json, values);
 	}
 
 	protected ClassicHttpRequest createHttpRequest(String uri) throws Throwable

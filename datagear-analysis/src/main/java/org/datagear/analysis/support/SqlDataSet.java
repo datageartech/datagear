@@ -25,6 +25,7 @@ import org.datagear.analysis.DataSetProperty.DataType;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.fmk.SqlOutputFormat;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcSupport;
@@ -47,6 +48,9 @@ import org.slf4j.LoggerFactory;
 public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataSet.class);
+
+	public static final DataSetFmkTemplateResolver SQL_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver(
+			SqlOutputFormat.INSTANCE);
 
 	protected static final JdbcSupport JDBC_SUPPORT = new JdbcSupport();
 
@@ -105,7 +109,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
 			boolean resolveProperties) throws DataSetException
 	{
-		String sql = resolveAsFmkTemplate(getSql(), query);
+		String sql = resolveSqlAsTemplate(getSql(), query);
 
 		Connection cn = null;
 
@@ -407,5 +411,26 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected JdbcSupport getJdbcSupport()
 	{
 		return JDBC_SUPPORT;
+	}
+
+	/**
+	 * 将指定SQL文本作为模板解析。
+	 * <p>
+	 * 注意：即使此数据集没有定义任何参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code sql}作为模板解析，因为存在如下应用场景：
+	 * 用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值。
+	 * </p>
+	 * 
+	 * @param sql
+	 * @param query
+	 * @return
+	 */
+	protected String resolveSqlAsTemplate(String sql, DataSetQuery query)
+	{
+		if (sql == null)
+			return null;
+
+		Map<String, ?> values = query.getParamValues();
+
+		return SQL_TEMPLATE_RESOLVER.resolve(sql, values);
 	}
 }

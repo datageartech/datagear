@@ -28,9 +28,7 @@ import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
-import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.CsvValueDataSet;
-import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.JsonValueDataSet;
 import org.datagear.analysis.support.ProfileDataSet;
@@ -777,7 +775,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public String resolveSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody ResolveSqlParam resolveSqlParam) throws Throwable
 	{
-		return resolveFmkSource(resolveSqlParam.getSql(), resolveSqlParam.getParamValues(),
+		return resolveSqlTemplate(resolveSqlParam.getSql(), resolveSqlParam.getParamValues(),
 				resolveSqlParam.getDataSetParams());
 	}
 
@@ -965,15 +963,10 @@ public class DataSetController extends AbstractSchemaConnController
 		return FileUtil.getDirectory(this.tempDirectory, "dataSet", true);
 	}
 
-	protected String resolveFmkSource(String source, Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
+	protected String resolveSqlTemplate(String source, Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
 	{
 		Map<String, ?> converted = getDataSetParamValueConverter().convert(paramValues, dataSetParams);
-		return getDataSetFmkTemplateResolver().resolve(source, new TemplateContext(converted));
-	}
-
-	protected DataSetFmkTemplateResolver getDataSetFmkTemplateResolver()
-	{
-		return AbstractDataSet.FMK_TEMPLATE_RESOLVER;
+		return SqlDataSet.SQL_TEMPLATE_RESOLVER.resolve(source, new TemplateContext(converted));
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveSqlDataSetEntity(HttpServletRequest request,

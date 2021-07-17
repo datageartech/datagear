@@ -65,7 +65,7 @@ public class JsonValueDataSet extends AbstractJsonDataSet
 	@Override
 	protected TemplateResolvedSource<Reader> getJsonReader(DataSetQuery query) throws Throwable
 	{
-		String json = resolveAsFmkTemplate(this.value, query);
+		String json = resolveJsonAsTemplate(this.value, query);
 		return new TemplateResolvedSource<>(IOUtil.getReader(json), json);
 	}
 }

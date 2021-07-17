@@ -22,6 +22,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 import freemarker.cache.TemplateLoader;
+import freemarker.core.OutputFormat;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -44,17 +45,26 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 
 	public DataSetFmkTemplateResolver()
 	{
-		this(1000);
+		this(null, 1000);
 	}
 
-	public DataSetFmkTemplateResolver(int cacheCapacity)
+	public DataSetFmkTemplateResolver(OutputFormat outputFormat)
+	{
+		this(outputFormat, 1000);
+	}
+
+	public DataSetFmkTemplateResolver(OutputFormat outputFormat, int cacheCapacity)
 	{
 		super();
 		this.nameTemplateLoader = new NameTemplateLoader(cacheCapacity);
-		this.configuration = new Configuration(Configuration.VERSION_2_3_30);
-		this.configuration.setTemplateLoader(this.nameTemplateLoader);
-		setDataSetTemplateStandardConfig(this.configuration);
-		this.configuration.setCacheStorage(new freemarker.cache.MruCacheStorage(0, cacheCapacity));
+
+		Configuration configuration = new Configuration(Configuration.VERSION_2_3_30);
+		configuration.setCacheStorage(new freemarker.cache.MruCacheStorage(0, cacheCapacity));
+
+		if (outputFormat != null)
+		configuration.setOutputFormat(outputFormat);
+
+		setConfiguration(configuration);
 	}
 
 	public NameTemplateLoader getNameTemplateLoader()
@@ -78,10 +88,11 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 	public void setConfiguration(Configuration configuration)
 	{
 		this.configuration = configuration;
-		setDataSetTemplateStandardConfig(this.configuration);
 
 		if (this.nameTemplateLoader != null)
 			this.configuration.setTemplateLoader(this.nameTemplateLoader);
+
+		setDataSetTemplateStandardConfig(this.configuration);
 	}
 
 	/**

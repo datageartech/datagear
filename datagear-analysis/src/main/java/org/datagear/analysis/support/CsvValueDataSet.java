@@ -77,7 +77,7 @@ public class CsvValueDataSet extends AbstractCsvDataSet
 	@Override
 	protected TemplateResolvedSource<Reader> getCsvReader(DataSetQuery query) throws Throwable
 	{
-		String csv = resolveAsFmkTemplate(this.value, query);
+		String csv = resolveCsvAsTemplate(this.value, query);
 		return new TemplateResolvedSource<>(IOUtil.getReader(csv), csv);
 	}
 }
