@@ -16,7 +16,7 @@ import freemarker.template.TemplateModelException;
 /**
  * CSV输出格式。
  * <p>
- * 此类负责将CSV Freemarker模板中的字符串值转义为合法的SQL字符串。
+ * 此类负责将CSV Freemarker模板中的字符串值转义为合法的CSV字符串。
  * </p>
  * <p>
  * 转义规则如下所示：
