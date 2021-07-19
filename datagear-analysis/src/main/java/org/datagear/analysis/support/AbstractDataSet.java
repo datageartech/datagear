@@ -521,23 +521,39 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 将指定文本作为模板解析。
-	 * <p>
-	 * 注意：即使此数据集没有定义任何参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
-	 * 用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值。
-	 * </p>
+	 * 将指定文本作为通用模板解析（没有特定语境，比如：SQL、CSV、JSON）。
 	 * 
 	 * @param text
 	 * @param query
 	 * @return
 	 */
-	protected String resolveTextAsTemplate(String text, DataSetQuery query)
+	protected String resolveTextAsGeneralTemplate(String text, DataSetQuery query)
+	{
+		return resolveTextAsTemplate(GENERAL_TEMPLATE_RESOLVER, text, query);
+	}
+
+	/**
+	 * 将指定文本作为模板解析。
+	 * <p>
+	 * 注意：即使此数据集没有定义任何参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
+	 * </p>
+	 * <ol>
+	 * <li>用户编写了无需参数的模板内容；</li>
+	 * <li>用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值；</li>
+	 * </ol>
+	 * 
+	 * @param templateResolver
+	 * @param text
+	 * @param query
+	 * @return
+	 */
+	protected String resolveTextAsTemplate(TemplateResolver templateResolver, String text, DataSetQuery query)
 	{
 		if (text == null)
 			return null;
-		
+
 		Map<String, ?> values = query.getParamValues();
-		
-		return GENERAL_TEMPLATE_RESOLVER.resolve(text, values);
+
+		return templateResolver.resolve(text, new TemplateContext(values));
 	}
 }

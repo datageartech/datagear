@@ -18,7 +18,6 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
@@ -377,10 +376,6 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 
 	/**
 	 * 将指定CSV文本作为模板解析。
-	 * <p>
-	 * 注意：即使此数据集没有定义任何参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code csv}作为模板解析，因为存在如下应用场景：
-	 * 用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值。
-	 * </p>
 	 * 
 	 * @param csv
 	 * @param query
@@ -388,11 +383,6 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 */
 	protected String resolveCsvAsTemplate(String csv, DataSetQuery query)
 	{
-		if (csv == null)
-			return null;
-
-		Map<String, ?> values = query.getParamValues();
-
-		return CSV_TEMPLATE_RESOLVER.resolve(csv, values);
+		return resolveTextAsTemplate(CSV_TEMPLATE_RESOLVER, csv, query);
 	}
 }

@@ -217,7 +217,7 @@ public class ExcelDataSetEntity extends AbstractExcelDataSet implements Director
 	@Override
 	public String resolveFileNameAsFmkTemplate(String fileName, DataSetQuery query)
 	{
-		return resolveTextAsTemplate(fileName, query);
+		return resolveTextAsGeneralTemplate(fileName, query);
 	}
 
 	@Override
