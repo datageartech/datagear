@@ -744,7 +744,7 @@ readonly 是否只读操作，允许为null
 				
 				// *dashboard*
 				if(/dashboard/i.test(prevToken))
-					meta = "dashboard";
+					meta = " dashboard";
 				// *chart*
 				else if(/chart/i.test(prevToken))
 					meta = "chart";
