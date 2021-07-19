@@ -41,7 +41,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.ExtContentHtmlTitleHandler;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
@@ -973,8 +973,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			RenderContext renderContext = createHtmlRenderContext(request, response, renderAttr,
 					createWebContext(request),
 					getHtmlTplDashboardWidgetEntityService().getHtmlTplDashboardWidgetRenderer());
-			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
-					getMessage(request, "dashboard.show.htmlTitlePrefix", getMessage(request, "app.name")));
+			ExtContentHtmlTitleHandler htmlTitleHandler = new ExtContentHtmlTitleHandler(
+					getMessage(request, "dashboard.show.htmlTitleSuffix", getMessage(request, "app.name")));
+			htmlTitleHandler.setContentForEmpty(
+					getMessage(request, "dashboard.show.htmlTitleSuffixForEmpty", dashboardWidget.getName(),
+							getMessage(request, "app.name")));
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, template);

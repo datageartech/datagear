@@ -78,8 +78,7 @@ import org.datagear.util.StringUtil;
  * </p>
  * 
  * @author datagear@163.com
- *
- * @param <T>
+ * 
  */
 public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 {
@@ -1446,47 +1445,79 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		/**
 		 * 处理原始<code>&lt;title&gt;</code>内容并返回新内容。
 		 * 
-		 * @param rawTitle
+		 * @param title
 		 * @return
 		 */
-		String handle(String rawTitle);
+		String handle(String title);
 	}
 
 	/**
-	 * 为HTML标题添加前缀的{@linkplain HtmlTitleHandler}。
+	 * 添加扩展内容的{@linkplain HtmlTitleHandler}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class AddPrefixHtmlTitleHandler implements HtmlTitleHandler
+	public static class ExtContentHtmlTitleHandler implements HtmlTitleHandler
 	{
-		private String prefix;
+		/** 扩展内容 */
+		private String content = "";
 
-		public AddPrefixHtmlTitleHandler()
+		/** 当标题为空时的扩展内容 */
+		private String contentForEmpty = null;
+
+		/** 是否将内容添加为标题前缀而非后缀 */
+		private boolean prefix = false;
+
+		public ExtContentHtmlTitleHandler()
 		{
 			super();
 		}
 
-		public AddPrefixHtmlTitleHandler(String prefix)
+		public ExtContentHtmlTitleHandler(String content)
 		{
 			super();
-			this.prefix = prefix;
+			this.content = content;
 		}
 
-		public String getPrefix()
+		public String getContent()
+		{
+			return content;
+		}
+
+		public void setContent(String content)
+		{
+			this.content = content;
+		}
+
+		public String getContentForEmpty()
+		{
+			return contentForEmpty;
+		}
+
+		public void setContentForEmpty(String contentForEmpty)
+		{
+			this.contentForEmpty = contentForEmpty;
+		}
+
+		public boolean isPrefix()
 		{
 			return prefix;
 		}
 
-		public void setPrefix(String prefix)
+		public void setPrefix(boolean prefix)
 		{
 			this.prefix = prefix;
 		}
 
 		@Override
-		public String handle(String rawTitle)
+		public String handle(String title)
 		{
-			return this.prefix + rawTitle;
+			String content = this.content;
+
+			if (StringUtil.isEmpty(title) && this.contentForEmpty != null)
+				content = this.contentForEmpty;
+
+			return (prefix ? content + title : title + content);
 		}
 	}
 

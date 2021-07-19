@@ -22,7 +22,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardImport.ImportItem;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.ChartInfo;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardInfo;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.ExtContentHtmlTitleHandler;
 import org.datagear.util.IOUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -306,7 +306,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
 
-			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler("prefix-");
+			ExtContentHtmlTitleHandler htmlTitleHandler = new ExtContentHtmlTitleHandler("-suffix");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
@@ -314,7 +314,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<title>prefix-</title></head>"));
+			Assert.assertTrue(html.contains("<title>-suffix</title></head>"));
 		}
 
 		{
@@ -325,7 +325,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
 
-			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler("prefix-");
+			ExtContentHtmlTitleHandler htmlTitleHandler = new ExtContentHtmlTitleHandler("-suffix");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
@@ -333,7 +333,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<title>prefix-abc</title></head>"));
+			Assert.assertTrue(html.contains("<title>abc-suffix</title></head>"));
 			Assert.assertTrue(html.contains("<title>sdf</title>"));
 		}
 	}
