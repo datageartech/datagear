@@ -49,13 +49,15 @@ boolean readonly 是否只读操作，默认为false
 					</button>
 					<div class="add-button-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 						<ul class="add-button-list">
-							<li addURL="addForSql"><div><@spring.message code='dataSet.dataSetType.SQL' /></div></li>
+							<li addURL="addForSQL"><div><@spring.message code='dataSet.dataSetType.SQL' /></div></li>
 							<li addURL="addForCsvValue"><div><@spring.message code='dataSet.dataSetType.CsvValue' /></div></li>
 							<li addURL="addForCsvFile"><div><@spring.message code='dataSet.dataSetType.CsvFile' /></div></li>
 							<li addURL="addForExcel"><div><@spring.message code='dataSet.dataSetType.Excel' /></div></li>
 							<li addURL="addForHttp"><div><@spring.message code='dataSet.dataSetType.Http' /></div></li>
 							<li addURL="addForJsonValue"><div><@spring.message code='dataSet.dataSetType.JsonValue' /></div></li>
 							<li addURL="addForJsonFile"><div><@spring.message code='dataSet.dataSetType.JsonFile' /></div></li>
+							<li class="ui-widget-header ui-menu-divider ui-widget-content"></li>
+							<li addURL="copy"><div><@spring.message code='copy' /></div></li>
 						</ul>
 					</div>
 				</div>
@@ -106,19 +108,44 @@ boolean readonly 是否只读操作，默认为false
 			
 			var addURL = item.attr("addURL");
 			
-			po.open(po.url(addURL),
+			if(addURL == "copy")
 			{
-				width: "85%",
-				<#if selectOperation>
-				pageParam:
+				po.executeOnSelect(function(row)
 				{
-					afterSave: function(data)
+					var data = {"id" : row.id};
+					
+					po.open(po.url(addURL),
 					{
-						po.pageParamCallSelect(true, data);
+						width: "85%",
+						data : data,
+						<#if selectOperation>
+						pageParam:
+						{
+							afterSave: function(data)
+							{
+								po.pageParamCallSelect(true, data);
+							}
+						}
+						</#if>
+					});
+				});
+			}
+			else
+			{
+				po.open(po.url(addURL),
+				{
+					width: "85%",
+					<#if selectOperation>
+					pageParam:
+					{
+						afterSave: function(data)
+						{
+							po.pageParamCallSelect(true, data);
+						}
 					}
-				}
-				</#if>
-			});
+					</#if>
+				});
+			}
 		}
 	});
 	

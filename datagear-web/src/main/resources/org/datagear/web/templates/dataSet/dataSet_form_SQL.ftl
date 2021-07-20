@@ -134,7 +134,7 @@ readonly 是否只读操作，允许为null
 		po.previewOptions.data.schemaId = schemaId;
 	};
 	
-	<#if formAction != 'saveAddForSql'>
+	<#if formAction != 'saveAddForSQL'>
 	//编辑、查看操作应初始化为已完成预览的状态
 	po.updatePreviewOptionsData();
 	po.previewSuccess(true);
