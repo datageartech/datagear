@@ -35,10 +35,12 @@ import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
+import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
+import org.datagear.management.domain.DataSetResDirectory;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.ExcelDataSetEntity;
 import org.datagear.management.domain.HttpDataSetEntity;
@@ -51,11 +53,13 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
+import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -94,6 +98,9 @@ public class DataSetController extends AbstractSchemaConnController
 	private File tempDirectory;
 
 	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
+
+	@Autowired
+	private DataSetResDirectoryService dataSetResDirectoryService;
 
 	public DataSetController()
 	{
@@ -138,6 +145,16 @@ public class DataSetController extends AbstractSchemaConnController
 	public void setDataSetParamValueConverter(DataSetParamValueConverter dataSetParamValueConverter)
 	{
 		this.dataSetParamValueConverter = dataSetParamValueConverter;
+	}
+
+	public DataSetResDirectoryService getDataSetResDirectoryService()
+	{
+		return dataSetResDirectoryService;
+	}
+
+	public void setDataSetResDirectoryService(DataSetResDirectoryService dataSetResDirectoryService)
+	{
+		this.dataSetResDirectoryService = dataSetResDirectoryService;
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_SQL)
@@ -406,14 +423,69 @@ public class DataSetController extends AbstractSchemaConnController
 
 	@RequestMapping("/copy")
 	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
-			@RequestParam("id") String id)
+			@RequestParam("id") String id) throws Throwable
 	{
 		User user = WebUtils.getUser(request, response);
 
-		DataSetEntity dataSet = this.dataSetEntityService.getByIdForEdit(user, id);
+		DataSetEntity dataSet = this.dataSetEntityService.getById(user, id);
 
 		if (dataSet == null)
 			throw new RecordNotFoundException();
+
+		AnalysisProject analysisProject = dataSet.getAnalysisProject();
+		int apPermission = (analysisProject != null
+				? getAnalysisProjectService().getPermission(user, analysisProject.getId())
+				: Authorization.PERMISSION_NONE_START);
+		// 没有读权限，应置为null
+		if (!Authorization.canRead(apPermission))
+			dataSet.setAnalysisProject(null);
+
+		if (dataSet instanceof SqlDataSetEntity)
+		{
+			SqlDataSetEntity dataSetEntity = (SqlDataSetEntity) dataSet;
+			SchemaConnectionFactory connectionFactory = dataSetEntity.getConnectionFactory();
+			Schema schema = (connectionFactory == null ? null : connectionFactory.getSchema());
+			int permission = (schema != null ? getSchemaService().getPermission(user, schema.getId())
+					: Authorization.PERMISSION_NONE_START);
+
+			// 没有读权限，应置为null
+			if (!Authorization.canRead(permission))
+				dataSetEntity.setConnectionFactory(null);
+		}
+		else if (dataSet instanceof DirectoryFileDataSetEntity)
+		{
+			DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) dataSet;
+			File dataSetDirectory = dataSetEntity.getDirectory();
+			String dataSetFileName = dataSetEntity.getFileName();
+			DataSetResDirectory dataSetResDirectory = dataSetEntity.getDataSetResDirectory();
+			int permission = (dataSetResDirectory != null
+					? getDataSetResDirectoryService().getPermission(user, dataSetResDirectory.getId())
+					: Authorization.PERMISSION_NONE_START);
+
+			// 没有读权限，应置为null
+			if (!Authorization.canRead(permission))
+			{
+				dataSetEntity.setDataSetResDirectory(null);
+				dataSetEntity.setDataSetResFileName(null);
+			}
+
+			// 将上传文件拷贝至临时目录，用于执行添加操作
+			dataSetEntity.setDirectory(null);
+			dataSetEntity.setFileName(null);
+			File sourceFile = (dataSetDirectory != null && !StringUtil.isEmpty(dataSetFileName)
+					? FileUtil.getFile(dataSetDirectory, dataSetFileName)
+					: null);
+			if (sourceFile != null && sourceFile.exists())
+			{
+				File tmpFile = FileUtil.generateUniqueFile(getTempDataSetDirectory(),
+						FileUtil.getExtension(dataSetFileName));
+				String fileName = tmpFile.getName();
+				IOUtil.copy(sourceFile, tmpFile, false);
+				dataSetEntity.setFileName(fileName);
+			}
+		}
+
+		dataSet.setId(null);
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute("dataSetProperties", toWriteJsonTemplateModel(dataSet.getProperties()));
@@ -954,7 +1026,7 @@ public class DataSetController extends AbstractSchemaConnController
 		if (isEmpty(entity.getId()))
 			return false;
 
-		if (!isEmpty(originalFileName) && originalFileName.equals(fileName))
+		if (StringUtil.isEquals(originalFileName, fileName))
 			return false;
 
 		File dataSetDirectory = getDataSetEntityService().getDataSetDirectory(entity.getId());

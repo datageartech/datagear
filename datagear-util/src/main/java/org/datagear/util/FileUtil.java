@@ -134,6 +134,9 @@ public class FileUtil
 	 */
 	protected static File getFileNullable(File parent, String file, boolean createDirectory)
 	{
+		if (StringUtil.isEmpty(file))
+			throw new IllegalArgumentException("[file] must not be empty");
+
 		file = trimPath(file);
 
 		if (!createDirectory)
