@@ -74,9 +74,7 @@ public class FileUtil
 	 */
 	public static File getFile(String file)
 	{
-		file = trimPath(file);
-
-		return new File(file);
+		return getFileNullable(null, file, false);
 	}
 
 	/**
@@ -101,11 +99,7 @@ public class FileUtil
 	 */
 	public static File getFile(File parent, String file)
 	{
-		file = trimPath(file);
-
-		checkBackwardPathNoTrime(file);
-
-		return new File(parent, file);
+		return getFile(parent, file, false);
 	}
 
 	/**
@@ -119,46 +113,10 @@ public class FileUtil
 	 */
 	public static File getFile(File parent, String file, boolean createDirectory)
 	{
+		if (parent == null)
+			throw new IllegalArgumentException("[parent] must not be null");
+
 		return getFileNullable(parent, file, createDirectory);
-	}
-
-	/**
-	 * 获取文件对象。
-	 * 
-	 * @param parent
-	 *            允许为{@code null}
-	 * @param file
-	 * @param createDirectory
-	 *            是否创建自身目录和上级目录
-	 * @return
-	 */
-	protected static File getFileNullable(File parent, String file, boolean createDirectory)
-	{
-		if (StringUtil.isEmpty(file))
-			throw new IllegalArgumentException("[file] must not be empty");
-
-		file = trimPath(file);
-
-		if (!createDirectory)
-		{
-			return (parent == null ? new File(file) : new File(parent, file));
-		}
-		else
-		{
-			int spIdx = file.lastIndexOf(PATH_SEPARATOR);
-
-			if (spIdx <= 0)
-				return (parent == null ? new File(file) : new File(parent, file));
-			else if (spIdx + PATH_SEPARATOR.length() == file.length())
-				return (parent == null ? getDirectory(file, true) : getDirectory(parent, file, true));
-			else
-			{
-				String myParent = file.substring(0, spIdx);
-				File myDirectory = (parent == null ? getDirectory(myParent, true)
-						: getDirectory(parent, myParent, true));
-				return getFile(myDirectory, file.substring(spIdx + PATH_SEPARATOR.length()));
-			}
-		}
 	}
 
 	/**
@@ -185,14 +143,7 @@ public class FileUtil
 	 */
 	public static File getDirectory(String file, boolean create)
 	{
-		file = trimPath(file);
-
-		File directory = new File(file);
-
-		if (create && !directory.exists())
-			directory.mkdirs();
-
-		return directory;
+		return getDirectoryNullable(null, file, create);
 	}
 
 	/**
@@ -221,16 +172,68 @@ public class FileUtil
 	 */
 	public static File getDirectory(File parent, String file, boolean create)
 	{
+		if (parent == null)
+			throw new IllegalArgumentException("[parent] must not be null");
+
+		return getDirectoryNullable(parent, file, create);
+	}
+
+	/**
+	 * 获取指定目录下的子目录。
+	 * 
+	 * @param parent
+	 *            允许为{@code null}
+	 * @param file
+	 * @param create
+	 *            是否自动创建
+	 * @return
+	 */
+	protected static File getDirectoryNullable(File parent, String file, boolean create)
+	{
 		file = trimPath(file);
 
-		checkBackwardPathNoTrime(file);
+		if (!file.endsWith(PATH_SEPARATOR))
+			file += PATH_SEPARATOR;
 
-		File directory = new File(parent, file);
+		return getFileNullable(parent, file, create);
+	}
 
-		if (create && !directory.exists())
-			directory.mkdirs();
+	/**
+	 * 获取文件对象。
+	 * 
+	 * @param parent
+	 *            允许为{@code null}
+	 * @param file
+	 *            文件，以{@code '/'}或者{@code '\'}结尾将被认为是目录
+	 * @param createDirectory
+	 *            是否创建自身目录和上级目录
+	 * @return
+	 */
+	protected static File getFileNullable(File parent, String file, boolean createDirectory)
+	{
+		if (StringUtil.isEmpty(file))
+			throw new IllegalArgumentException("[file] must not be empty");
 
-		return directory;
+		file = trimPath(file);
+
+		// 只有限定了父级目录，才需要校验
+		if (parent != null)
+			checkBackwardPathNoTrim(file);
+
+		File reFile = (parent == null ? new File(file) : new File(parent, file));
+
+		if (createDirectory)
+		{
+			File reParent = reFile.getParentFile();
+
+			if (reParent != null && !reParent.exists())
+				reParent.mkdirs();
+
+			if (file.endsWith(PATH_SEPARATOR) && !reFile.exists())
+				reFile.mkdir();
+		}
+
+		return reFile;
 	}
 
 	/**
@@ -626,10 +629,10 @@ public class FileUtil
 		if (path == null)
 			return;
 
-		checkBackwardPathNoTrime(trimPath(path));
+		checkBackwardPathNoTrim(trimPath(path));
 	}
 
-	protected static void checkBackwardPathNoTrime(String path) throws IllegalArgumentException
+	protected static void checkBackwardPathNoTrim(String path) throws IllegalArgumentException
 	{
 		if (containsBackwardPathNoTrim(path))
 			throw new IllegalArgumentException("[../] and [..\\] is not allowed in path [" + path + "]");
