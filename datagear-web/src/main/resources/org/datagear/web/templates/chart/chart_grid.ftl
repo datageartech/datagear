@@ -42,7 +42,12 @@ boolean readonly 是否只读操作，默认为false
 			<#if readonly>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
-				<input name="addButton" type="button" value="<@spring.message code='add' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<div class="addGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
+					<input name="addButton" type="button" value="<@spring.message code='add' />" />
+					<select class="addGroupSelect">
+						<option value="copy"><@spring.message code='copy' /></option>
+					</select>
+				</div>
 				<#if !selectOperation>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
 				<div class="showGroup">
@@ -113,6 +118,45 @@ boolean readonly 是否只读操作，默认为false
 			</#if>
 		});
 	});
+
+	po.element(".addGroupSelect").selectmenu(
+	{
+		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
+		classes:
+		{
+	          "ui-selectmenu-button": "ui-button-icon-only",
+	          "ui-selectmenu-menu": "ui-widget-shadow ui-widget ui-widget-content add-group-selectmenu"
+	    },
+		select: function(event, ui)
+    	{
+    		var action = $(ui.item).attr("value");
+    		
+    		if(action == "copy")
+    		{
+    			po.executeOnSelect(function(row)
+ 				{
+    				var id = row.id;
+    				
+    				po.open(po.url("copy"),
+					{
+						width: "85%",
+						data: { id: id },
+						<#if selectOperation>
+						pageParam:
+						{
+							afterSave: function(data)
+							{
+								return po.pageParamCallSelect(true, data);
+							}
+						}
+						</#if>
+					});
+ 				});
+    		}
+    	}
+	});
+	po.element(".addGroup").controlgroup();
 	
 	po.element("input[name=editButton]").click(function()
 	{

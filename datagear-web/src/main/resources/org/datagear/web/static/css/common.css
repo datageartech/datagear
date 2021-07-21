@@ -2674,6 +2674,9 @@ table.dataTable tbody tr td select{
 	vertical-align: middle;
 	margin-left: 0.41em;
 }
+.page-grid-chart .ui-selectmenu-menu.add-group-selectmenu .ui-menu .ui-menu-item-wrapper{
+	min-width: 4.1em;
+}
 
 .page-form-chart .chart-plugin{
 	display: inline-block;

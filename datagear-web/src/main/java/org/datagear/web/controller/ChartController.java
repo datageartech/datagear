@@ -10,6 +10,7 @@ package org.datagear.web.controller;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -18,8 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DashboardResult;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.ResultDataFormat;
@@ -32,10 +35,12 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.ExtContentHtmlTitleHandler;
+import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
+import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.persistence.PagingData;
@@ -84,6 +89,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@Qualifier("chartShowHtmlTplDashboardWidgetHtmlRenderer")
 	private HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer;
 
+	@Autowired
+	private DataSetEntityService dataSetEntityService;
+
 	private ServletContext servletContext;
 
 	public ChartController()
@@ -130,6 +138,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer)
 	{
 		this.chartShowHtmlTplDashboardWidgetHtmlRenderer = chartShowHtmlTplDashboardWidgetHtmlRenderer;
+	}
+
+	public DataSetEntityService getDataSetEntityService()
+	{
+		return dataSetEntityService;
+	}
+
+	public void setDataSetEntityService(DataSetEntityService dataSetEntityService)
+	{
+		this.dataSetEntityService = dataSetEntityService;
 	}
 
 	public ServletContext getServletContext()
@@ -183,6 +201,59 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
 		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.editChart");
+		model.addAttribute(KEY_FORM_ACTION, "save");
+
+		return "/chart/chart_form";
+	}
+
+	@RequestMapping("/copy")
+	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@RequestParam("id") String id)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
+
+		if (chart == null)
+			throw new RecordNotFoundException();
+
+		ChartDataSet[] chartDataSets = chart.getChartDataSets();
+		if (chartDataSets != null)
+		{
+			List<ChartDataSet> chartDataSetsPermited = new ArrayList<ChartDataSet>(chartDataSets.length);
+
+			for (int i = 0; i < chartDataSets.length; i++)
+			{
+				ChartDataSet chartDataSet = chartDataSets[i];
+				DataSet dataSet = (chartDataSet == null ? null : chartDataSet.getDataSet());
+				int permission = (dataSet != null ? getDataSetEntityService().getPermission(user, dataSet.getId())
+						: Authorization.PERMISSION_NONE_START);
+
+				// 只添加有权限的
+				if (Authorization.canRead(permission))
+				{
+					chartDataSetsPermited.add(chartDataSet);
+				}
+			}
+
+			chartDataSets = chartDataSetsPermited.toArray(new ChartDataSet[chartDataSetsPermited.size()]);
+		}
+
+		chart.setId(null);
+	
+		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
+
+		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
+				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
+				: null);
+
+		model.addAttribute("chart", chart);
+		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(chartPluginVO));
+		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(toChartDataSetViewObjs(chartDataSets)));
+		model.addAttribute("initResultDataFormat",
+				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
+		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.addChart");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
 		return "/chart/chart_form";
