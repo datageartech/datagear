@@ -99,6 +99,12 @@ public class NameAsTemplateDashboardWidgetResManager extends AbstractTemplateDas
 	}
 
 	@Override
+	public void copyTo(String sourceId, String targetId) throws IOException
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public long lastModified(String id, String name)
 	{
 		return 0;

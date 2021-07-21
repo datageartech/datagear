@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
+import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
@@ -170,6 +171,26 @@ public abstract class AbstractController
 
 		if (isEmpty(entity.getDataSetResDirectory().getId()))
 			entity.setDataSetResDirectory(null);
+	}
+
+	/**
+	 * 如果用户对{@linkplain AnalysisProjectAwareEntity#getAnalysisProject()}没有权限，则置为{@code null}。
+	 * 
+	 * @param user
+	 * @param entity
+	 * @param service
+	 */
+	protected void setNullAnalysisProjectIfNoPermission(User user,
+			AnalysisProjectAwareEntity<?> entity, AnalysisProjectService service)
+	{
+		AnalysisProject analysisProject = entity.getAnalysisProject();
+		int apPermission = (analysisProject != null
+				? service.getPermission(user, analysisProject.getId())
+				: Authorization.PERMISSION_NONE_START);
+
+		// 没有读权限，应置为null
+		if (!Authorization.canRead(apPermission))
+			entity.setAnalysisProject(null);
 	}
 
 	/**

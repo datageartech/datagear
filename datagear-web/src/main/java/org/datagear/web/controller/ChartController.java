@@ -217,6 +217,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (chart == null)
 			throw new RecordNotFoundException();
 
+		setNullAnalysisProjectIfNoPermission(user, chart, getAnalysisProjectService());
+
 		ChartDataSet[] chartDataSets = chart.getChartDataSets();
 		if (chartDataSets != null)
 		{

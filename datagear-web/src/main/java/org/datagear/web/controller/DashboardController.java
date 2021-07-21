@@ -255,6 +255,41 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return "/dashboard/dashboard_form";
 	}
 
+	@RequestMapping("/copy")
+	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@RequestParam("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		setNullAnalysisProjectIfNoPermission(user, dashboard, getAnalysisProjectService());
+
+		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
+				.getHtmlTplDashboardWidgetRenderer();
+
+		String defaultTemplateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
+
+		model.addAttribute("dashboard", dashboard);
+		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
+		model.addAttribute("templateName", dashboard.getFirstTemplate());
+		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
+		model.addAttribute("defaultTemplateContent", defaultTemplateContent);
+		model.addAttribute("dashboardGlobalResUrlPrefix",
+				(StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix) ? "" : this.dashboardGlobalResUrlPrefix));
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
+		model.addAttribute(KEY_FORM_ACTION, "save");
+
+		model.addAttribute("copySourceId", id);
+
+		dashboard.setId(null);
+
+		return "/dashboard/dashboard_form";
+	}
+
 	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
@@ -298,6 +333,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			dashboard.setId(IDUtil.randomIdOnTime20());
 			dashboard.setCreateUser(user);
 			save = this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
+
+			if (form.hasCopySourceId())
+			{
+				TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+						.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+
+				dashboardWidgetResManager.copyTo(form.getCopySourceId(), dashboard.getId());
+			}
 		}
 		else
 		{
@@ -1285,6 +1328,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		private boolean[] resourceIsTemplates;
 
+		private String copySourceId = "";
+
 		public HtmlTplDashboardSaveForm()
 		{
 			super();
@@ -1338,6 +1383,21 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		public void setResourceIsTemplates(boolean[] resourceIsTemplates)
 		{
 			this.resourceIsTemplates = resourceIsTemplates;
+		}
+
+		public boolean hasCopySourceId()
+		{
+			return !StringUtil.isEmpty(this.copySourceId);
+		}
+
+		public String getCopySourceId()
+		{
+			return copySourceId;
+		}
+
+		public void setCopySourceId(String copySourceId)
+		{
+			this.copySourceId = copySourceId;
 		}
 	}
 }

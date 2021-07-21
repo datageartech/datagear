@@ -147,12 +147,19 @@ public interface TemplateDashboardWidgetResManager
 	void copyTo(String id, File directory) throws IOException;
 
 	/**
+	 * 将指定源{@linkplain TemplateDashboardWidget#getId()}（{@code sourceId}）的所有资源拷贝为目标{@linkplain TemplateDashboardWidget#getId()}（{@code targetId}）资源。
+	 * 
+	 * @param sourceId
+	 * @param targetId
+	 * @throws IOException
+	 */
+	void copyTo(String sourceId, String targetId) throws IOException;
+
+	/**
 	 * 获取指定资源上次修改时间。
 	 * 
-	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
-	 * @param name
-	 *            模板或者其他资源名称
+	 * @param id   {@linkplain TemplateDashboardWidget#getId()}
+	 * @param name 模板或者其他资源名称
 	 * @return
 	 */
 	long lastModified(String id, String name);

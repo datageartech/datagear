@@ -28,6 +28,7 @@ readonly 是否只读操作，允许为null
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(dashboard.id)!''}" />
+			<input type="hidden" id="${pageId}-copySourceId" value="${copySourceId!''}" />
 			<input type="hidden" name="templateEncoding" value="${(dashboard.templateEncoding)!''}" />
 			<textarea id="${pageId}-initTemplateName" style="display:none;">${templateName}</textarea>
 			<textarea id="${pageId}-initTemplateContent" style="display:none;">${templateContent!''}</textarea>
@@ -1523,6 +1524,7 @@ readonly 是否只读操作，允许为null
 			var data = po.getResourceEditorData();
 			var formData = $.formToJson(form);
 			data.dashboard = formData;
+			data.copySourceId = po.element("#${pageId}-copySourceId").val();
 			
 			var templateCount = (data.dashboard.templates == null ? 0 : data.dashboard.templates.length);
 			for(var i=0; i<data.resourceIsTemplates.length; i++)
@@ -1569,7 +1571,7 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	
-	if(po.getDashboardId())
+	if(po.getDashboardId() || po.element("#${pageId}-copySourceId").val())
 		po.element(".resize-editor-button-left").click();
 	
 	po.newResourceEditorTab(po.element("#${pageId}-initTemplateName").val(), po.element("#${pageId}-initTemplateContent").val(), true);

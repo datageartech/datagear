@@ -35,7 +35,6 @@ import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
-import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
@@ -432,13 +431,7 @@ public class DataSetController extends AbstractSchemaConnController
 		if (dataSet == null)
 			throw new RecordNotFoundException();
 
-		AnalysisProject analysisProject = dataSet.getAnalysisProject();
-		int apPermission = (analysisProject != null
-				? getAnalysisProjectService().getPermission(user, analysisProject.getId())
-				: Authorization.PERMISSION_NONE_START);
-		// 没有读权限，应置为null
-		if (!Authorization.canRead(apPermission))
-			dataSet.setAnalysisProject(null);
+		setNullAnalysisProjectIfNoPermission(user, dataSet, getAnalysisProjectService());
 
 		if (dataSet instanceof SqlDataSetEntity)
 		{

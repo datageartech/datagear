@@ -41,7 +41,9 @@ selectOperation 是否选择操作，允许为null
 					<input name="addButton" type="button" value="<@spring.message code='add' />" />
 					<select class="addGroupSelect">
 						<option value="addInNewWindow"><@spring.message code='addInNewWindow' /></option>
-						<option value="importDashboard"><@spring.message code='import' /></option>
+						<option value="copy"><@spring.message code='copy' /></option>
+						<option value="copyInNewWindow"><@spring.message code='copyInNewWindow' /></option>
+						<option value="import"><@spring.message code='import' /></option>
 					</select>
 				</div>
 				<div class="editGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
@@ -101,7 +103,18 @@ selectOperation 是否选择操作，允许为null
     		
     		if(action == "addInNewWindow")
 				po.open(po.url("add"), {target: "_blank"});
-    		else if(action == "importDashboard")
+    		else if(action == "copy" || action == "copyInNewWindow")
+    		{
+    			po.executeOnSelect(function(row)
+  				{
+    				var options = { data: { id: row.id } };
+    				if(action == "copyInNewWindow")
+    					options.target = "_blank";
+    				
+  					po.open(po.url("copy"), options);
+  				});
+    		}
+    		else if(action == "import")
     			po.open(po.url("import"));
     	}
 	});
