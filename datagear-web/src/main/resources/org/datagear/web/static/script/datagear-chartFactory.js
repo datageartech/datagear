@@ -2265,6 +2265,10 @@
 	chartBase.echartsOptions = function(options)
 	{
 		var instance = this.echartsInstance();
+		
+		if(instance == null)
+			throw new Error("Chart is not initialized as ECharts");
+		
 		instance.setOption(options);
 	};
 	
@@ -2309,12 +2313,12 @@
 	};
 	
 	/**
-	 * Echarts图表支持函数：加载指定名称的echarts地图JSON，并在完成后执行回调函数。
+	 * Echarts图表支持函数：加载并注册指定名称的echarts地图（GeoJSON、SVG），并在完成后执行回调函数。
 	 * 注意：如果地图图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate，
 	 * 并在callback中调用chart.statusRendered(true)/chart.statusUpdated(true)，具体参考此文件顶部的注释。
 	 * 
 	 * @param name echarts地图名称
-	 * @param callback 完成回调函数：function(name){ ... }
+	 * @param callback 完成回调函数：function(name, map){ ... }
 	 */
 	chartBase.echartsLoadMap = function(name, callback)
 	{
@@ -2322,13 +2326,29 @@
 		
 		var thisChart = this;
 		
-		$.getJSON(url, function(geoJson)
+		var settings =
 		{
-			echarts.registerMap(name, geoJson);
-			
-			if(callback)
-				callback.call(thisChart, name);
-		});
+			success: function(map, textStatus, jqXHR)
+			{
+				var contentType = (jqXHR.getResponseHeader("Content-Type") || "");
+				
+				//SVG地图
+				if(/svg/i.test(contentType))
+				{
+					echarts.registerMap(name, {svg: map});
+				}
+				//其他都认为是GeoJSON地图
+				else
+				{
+					echarts.registerMap(name, {geoJSON: map});
+				}
+				
+				if(callback)
+					callback.call(thisChart, name, map);
+			}
+		};
+		
+		$.ajax(url, settings);
 	};
 	
 	/**
