@@ -174,6 +174,17 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(java.io.FileNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public String handleControllerJavaIoFileNotFoundException(HttpServletRequest request, HttpServletResponse response,
+			java.io.FileNotFoundException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCodeFullName(java.io.FileNotFoundException.class),
+				exception, false);
+
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(DuplicateRecordException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handleControllerDuplicateRecordException(HttpServletRequest request, HttpServletResponse response,
@@ -568,6 +579,11 @@ public class ControllerAdvice extends AbstractController
 	protected String buildMessageCode(Class<? extends Throwable> clazz)
 	{
 		return buildMessageCode(clazz.getSimpleName());
+	}
+
+	protected String buildMessageCodeFullName(Class<? extends Throwable> clazz)
+	{
+		return buildMessageCode(clazz.getName());
 	}
 
 	@Override

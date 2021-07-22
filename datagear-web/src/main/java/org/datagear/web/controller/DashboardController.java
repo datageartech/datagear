@@ -849,7 +849,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		return pagingData;
 	}
-
+	
 	/**
 	 * 展示看板首页。
 	 * 
@@ -859,32 +859,45 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @param id
 	 * @throws Exception
 	 */
-	@RequestMapping("/show/{id}")
+	@RequestMapping({"/show/{id}/", "/show/{id}"})
 	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
-		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidget(user, id);
-
-		String firstTemplate = dashboardWidget.getFirstTemplate();
-
-		// 如果首页模板是在嵌套路径下，则应重定向到具体路径，避免页面内以相对路径引用的资源找不到
-		int subPathSlashIdx = firstTemplate.indexOf(FileUtil.PATH_SEPARATOR_SLASH);
-		if (subPathSlashIdx > 0 && subPathSlashIdx < firstTemplate.length() - 1)
+		String requestPath = resolvePathAfter(request, "");
+		String correctPath = WebUtils.getContextPath(request) + "/dashboard/show/" + id + "/";
+		
+		//如果是"/show/{id}"请求，则应跳转到"/show/{id}/"，因为看板内的超链接使用的都是相对路径，
+		//如果末尾不加"/"，将会导致这些超链接路径错误
+		if(requestPath.indexOf(correctPath) < 0)
 		{
-			String redirectTo = WebUtils.getContextPath(request) + "/dashboard/show/" + id + "/"
-					+ firstTemplate;
-			String qs = request.getQueryString();
-
-			if (!StringUtil.isEmpty(qs))
-				redirectTo = redirectTo + "?" + qs;
-
-			response.sendRedirect(redirectTo);
+			String redirectPath = appendRequestQueryString(correctPath, request);
+			response.sendRedirect(redirectPath);
 		}
 		else
 		{
-			showDashboard(request, response, model, user, dashboardWidget, firstTemplate);
+			User user = WebUtils.getUser(request, response);
+	
+			HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
+						.getHtmlTplDashboardWidget(user, id);
+	
+			if (dashboardWidget == null)
+				throw new RecordNotFoundException();
+	
+			String firstTemplate = dashboardWidget.getFirstTemplate();
+	
+			// 如果首页模板是在嵌套路径下，则应重定向到具体路径，避免页面内以相对路径引用的资源找不到
+			int subPathSlashIdx = firstTemplate.indexOf(FileUtil.PATH_SEPARATOR_SLASH);
+			if (subPathSlashIdx > 0 && subPathSlashIdx < firstTemplate.length() - 1)
+			{
+				String redirectPath = correctPath + firstTemplate;
+				redirectPath = appendRequestQueryString(redirectPath, request);
+	
+				response.sendRedirect(redirectPath);
+			}
+			else
+			{
+				showDashboard(request, response, model, user, dashboardWidget, firstTemplate);
+			}
 		}
 	}
 

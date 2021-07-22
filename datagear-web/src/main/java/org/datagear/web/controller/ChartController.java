@@ -393,14 +393,27 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	 * @param id
 	 * @throws Exception
 	 */
-	@RequestMapping("/show/{id}")
+	@RequestMapping({"/show/{id}/", "/show/{id}"})
 	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
-		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
-
-		showChart(request, response, model, user, chart);
+		String requestPath = resolvePathAfter(request, "");
+		String correctPath = WebUtils.getContextPath(request) + "/chart/show/" + id + "/";
+		
+		//如果是"/show/{id}"请求，则应跳转到"/show/{id}/"，因为看板内的超链接使用的都是相对路径，
+		//如果末尾不加"/"，将会导致这些超链接路径错误
+		if(requestPath.indexOf(correctPath) < 0)
+		{
+			String redirectPath = appendRequestQueryString(correctPath, request);
+			response.sendRedirect(redirectPath);
+		}
+		else
+		{
+			User user = WebUtils.getUser(request, response);
+			HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
+	
+			showChart(request, response, model, user, chart);
+		}
 	}
 
 	/**

@@ -792,6 +792,28 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 为指定URL添加请求的查询参数。
+	 * 
+	 * @param url
+	 * @param request
+	 * @return
+	 */
+	protected String appendRequestQueryString(String url, HttpServletRequest request)
+	{
+		String qs = request.getQueryString();
+
+		if (StringUtil.isEmpty(qs))
+			return url;
+
+		int qmIdx = url.lastIndexOf('?');
+
+		if (qmIdx < 0)
+			return url + "?" + qs;
+		else
+			return url + "&" + qs;
+	}
+
+	/**
 	 * 将文件名转换为作为响应下载文件名。
 	 * <p>
 	 * 此方法会对处理中文乱码问题。
