@@ -1241,16 +1241,26 @@
 	{
 		var wait = false;
 		
-		if(chart.statusRendered() || chart.statusPreUpdate())
+		if(currentTime == null)
+			currentTime = new Date().getTime();
+		
+		//图表正处于更新数据ajax中
+		if(chart._inUpdateAjax())
+		{
+			wait = false;
+		}
+		//图表更新ajax请求出错后，应等待一段时间后再尝试，避免频繁发送ajax请求
+		else if(chart._inUpdateAjaxErrorTime(currentTime))
+		{
+			wait = false;
+		}
+		else if(chart.statusRendered() || chart.statusPreUpdate())
 		{
 			wait = true;
 		}
 		else if(chart.updateInterval > -1
-				&& (chart.statusUpdated() || chart.status() == chartStatusConst.UPDATE_ERROR))
+					&& (chart.statusUpdated() || chart.status() == chartStatusConst.UPDATE_ERROR))
 		{
-			if(currentTime == null)
-				currentTime = new Date().getTime();
-			
 			var updateInterval = chart.updateInterval;
 			var prevUpdateTime = chart._updateTime();
 			
@@ -1295,14 +1305,6 @@
 		for(var i=0; i<charts.length; i++)
 		{
 			var chart = charts[i];
-			
-			//图表正处于更新数据ajax中
-			if(chart._inUpdateAjax())
-				continue;
-			
-			//图表更新ajax请求出错后，应等待一段时间后再尝试，避免频繁发送ajax请求
-			if(chart._inUpdateAjaxErrorTime(time))
-				continue;
 			
 			if(this.isWaitForUpdate(chart, time))
 			{
