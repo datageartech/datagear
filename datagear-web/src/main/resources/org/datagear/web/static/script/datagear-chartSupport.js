@@ -3317,6 +3317,165 @@
 		}
 	};
 	
+	//箱型图
+	
+	chartSupport.boxplotRender = function(chart, nameSign, minSign, lowerSign, medianSign, upperSign, maxSign, options)
+	{
+		chartSupport.chartSignNameMap(chart, { name: nameSign, min: minSign, lower: lowerSign,
+				median: medianSign, upper: upperSign, max: maxSign });
+		
+		var chartDataSet = chart.chartDataSetFirst();
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+		
+		options = $.extend(true,
+		{
+			title: {
+		        text: chart.name
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			legend:
+			{
+				data: []
+			},
+			xAxis:
+			{
+				name: chart.dataSetPropertyLabel(np),
+				nameGap: 5,
+				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
+				boundaryGap: true,
+				splitLine: { show: false }
+			},
+			yAxis:
+			{
+				name: "",
+				nameGap: 5,
+				type: "value"
+			},
+			series:
+			[
+				{
+					name: chart.name,
+					type: "boxplot",
+					data: []
+				}
+			]
+		},
+		options,
+		chart.options());
+		
+		options = chartSupport.processRenderOptions(chart, options);
+		
+		chart.echartsInit(options);
+	};
+	
+	chartSupport.boxplotUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
+		var isCategory = (renderOptions.xAxis.type == "category");
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		//箱型图不需要图例
+		//var legendData = [];
+		var xAxisData = [];
+		var seriesName = "";
+		var seriesData = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var result = chart.resultOf(results, chartDataSet);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vp =
+			[
+				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.min),
+				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.lower),
+				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.median),
+				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.upper),
+				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.max)
+			];
+			var data = chart.resultNameValueObjects(result, np, vp);
+			
+			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
+			
+			if(!seriesName)
+				seriesName = dataSetName;
+			seriesData = seriesData.concat(data);
+			
+			//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
+			if(isCategory)
+			{
+				if(xAxisData.length == 0)
+					xAxisData = chart.resultRowArrays(result, np);
+				else
+				{
+					var xAxisDataMy = chart.resultRowArrays(result, np);
+					chartSupport.appendDistinct(xAxisData, xAxisDataMy);
+				}
+			}
+		}
+		
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, {name: seriesName, data: seriesData}) ];
+		
+		var options = { series: series };
+		
+		if(isCategory)
+			options.xAxis = {data: xAxisData};
+		
+		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		
+		chart.echartsOptions(options);
+	};
+
+	chartSupport.boxplotResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.boxplotDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+	
+	chartSupport.boxplotOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.boxplotSetChartEventData);
+	};
+	
+	chartSupport.boxplotOff = function(chart, eventType, handler)
+	{
+		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+	};
+	
+	chartSupport.boxplotSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var echartsData = (echartsEventParams.data || {});
+		var echartsValue = (echartsData.value || []);
+		//value的第一个元素是数据索引
+		var startIdx = (echartsValue.length > 5 ? 1 : 0);
+		var data = {};
+		
+		data[signNameMap.name] = echartsData.name;
+		data[signNameMap.min] = echartsValue[startIdx];
+		data[signNameMap.lower] = echartsValue[startIdx+1];
+		data[signNameMap.median] = echartsValue[startIdx+2];
+		data[signNameMap.upper] = echartsValue[startIdx+3];
+		data[signNameMap.max] = echartsValue[startIdx+4];
+		
+		chart.eventData(chartEvent, data);
+		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
+	};
+	
 	//词云图
 	
 	chartSupport.wordcloudRender = function(chart, nameSign, valueSign, options)

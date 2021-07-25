@@ -3329,13 +3329,11 @@
 			},
 			"boxplot" : {
 				"itemStyle" : {
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
+					"color": "transparent"
 				},
 				"emphasis" : {
 					"itemStyle" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.borderColor
+						"color": "transparent"
 					}
 				}
 			},
