@@ -422,7 +422,12 @@ readonly 是否只读操作，允许为null
 		else
 			$wapper.addClass("no-icon");
 		
-		$("<div class='plugin-name' />").text(chartPluginVO.nameLabel.value).appendTo($wapper);
+		var $pluginName = $("<div class='plugin-name' />").text(chartPluginVO.nameLabel.value).appendTo($wapper);
+		if(chartPluginVO.descLabel && chartPluginVO.descLabel.value)
+		{
+			$pluginName.addClass("tip-label");
+			$pluginName.attr("title", chartPluginVO.descLabel.value);
+		}
 		
 		//更新数据标记
 		var dataSigns = (chartPluginVO.dataSigns || []);
@@ -969,6 +974,7 @@ readonly 是否只读操作，允许为null
 	});
 	
 	po.initChartPlugin(po.chartPluginVO);
+	po.element(".chart-plugin").tooltip({ classes:{ "ui-tooltip": "ui-corner-all ui-widget-shadow chart-plugin-tooltip" } });
 	po.initChartDataSets();
 	po.updateResultDataFormatPanelEnable();
 })

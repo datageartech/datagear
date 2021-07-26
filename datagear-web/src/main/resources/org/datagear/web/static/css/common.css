@@ -127,10 +127,18 @@ form .form-content .tip-label::after,
 	content: "?";
     position: absolute;
     margin-left: 0.2em;
-    font-size: 0.6em;
-    top: 0.3em;
-    opacity: 0.5;
-	filter: Alpha(Opacity=50);
+    font-size: 0.7em;
+    top: 0.4em;
+    opacity: 0.6;
+    filter: Alpha(Opacity=60);
+    width: 1em;
+    height: 1em;
+    text-align: center;
+    line-height: 1em;
+    border: border;
+    border-radius: 0.5em;
+    border-width: 1px;
+    border-style: solid;
 }
 form .form-content .form-item .form-item-value,
 .form .form-content .form-item .form-item-value{
@@ -2686,7 +2694,10 @@ table.dataTable tbody tr td select{
 	overflow: hidden;
 }
 .page-form-chart form .form-content .form-item .form-item-value .input.chart-plugin{
-	width: 40%;
+	width: 60%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .page-form-chart .chart-plugin .plugin-icon{
 	position: absolute;
@@ -2699,14 +2710,18 @@ table.dataTable tbody tr td select{
 	background-size: 100% 100%;
 }
 .page-form-chart .chart-plugin .plugin-name{
-	text-align: center;
-	position: absolute;
-	left: 70px;
-	bottom: 50%;
-	margin-bottom: -0.5em;
+    position: absolute;
+    left: 70px;
+    top: 50%;
+    margin-top: -0.5em;
+    width: 30%;
+    cursor: default;
 }
 .page-form-chart .chart-plugin.no-icon .plugin-name{
 	left: 5px;
+}
+.ui-tooltip.chart-plugin-tooltip{
+	max-width: 50%;
 }
 .page-form-chart .data-set-wrapper{
 	display: inline-block;
