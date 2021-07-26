@@ -3329,6 +3329,9 @@
 		
 		options = $.extend(true,
 		{
+			//扩展配置项，是否横向
+			dgHorizontal: false,
+			
 			title: {
 		        text: chart.name
 		    },
@@ -3366,6 +3369,13 @@
 		options,
 		chart.options());
 		
+		if(options.dgHorizontal)
+		{
+			var xAxisTmp = options.xAxis;
+			options.xAxis = options.yAxis;
+			options.yAxis = xAxisTmp;
+		}
+		
 		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
@@ -3375,13 +3385,14 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
-		var isCategory = (renderOptions.xAxis.type == "category");
+		var dgHorizontal = renderOptions.dgHorizontal;
+		var isCategory = ((dgHorizontal ? renderOptions.yAxis.type : renderOptions.xAxis.type) == "category");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
 		//箱型图不需要图例
 		//var legendData = [];
-		var xAxisData = [];
+		var axisData = [];
 		var seriesName = "";
 		var seriesData = [];
 		
@@ -3412,12 +3423,12 @@
 			//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
 			if(isCategory)
 			{
-				if(xAxisData.length == 0)
-					xAxisData = chart.resultRowArrays(result, np);
+				if(axisData.length == 0)
+					axisData = chart.resultRowArrays(result, np);
 				else
 				{
-					var xAxisDataMy = chart.resultRowArrays(result, np);
-					chartSupport.appendDistinct(xAxisData, xAxisDataMy);
+					var axisDataMy = chart.resultRowArrays(result, np);
+					chartSupport.appendDistinct(axisData, axisDataMy);
 				}
 			}
 		}
@@ -3427,7 +3438,12 @@
 		var options = { series: series };
 		
 		if(isCategory)
-			options.xAxis = {data: xAxisData};
+		{
+			if(dgHorizontal)
+				options.yAxis = {data: axisData};
+			else
+				options.xAxis = {data: axisData};
+		}
 		
 		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
