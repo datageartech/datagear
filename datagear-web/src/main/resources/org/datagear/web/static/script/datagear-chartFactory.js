@@ -2015,8 +2015,8 @@
 	 * 
 	 * @param result 数据集结果对象
 	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
-	 * @param row 行索引，可选，默认为0
-	 * @param count 获取的最多行数，可选，默认为全部
+	 * @param row 可选，行索引，默认为0
+	 * @param count 可选，获取的最多行数，默认为全部
 	 * @return properties为数组时：[[..., ...], ...]；properties非数组时：[..., ...]
 	 */
 	chartBase.resultRowArrays = function(result, properties, row, count)
@@ -2038,7 +2038,7 @@
 			for(var i=row; i< getCount; i++)
 			{
 				var rowObj = datas[i];
-				var row = [];
+				var rowVal = [];
 				
 				for(var j=0; j<properties.length; j++)
 				{
@@ -2048,10 +2048,10 @@
 					if(!name)
 						continue;
 					
-					row[j] = rowObj[name];
+					rowVal[j] = rowObj[name];
 				}
 				
-				re.push(row);
+				re.push(rowVal);
 			}
 		}
 		else
@@ -2135,59 +2135,27 @@
 	 * @param result 数据集结果对象、对象数组
 	 * @param nameProperty 名称属性对象、属性名
 	 * @param valueProperty 值属性对象、属性名、数组
-	 * @param row 行索引，以0开始，可选，默认为0
-	 * @param count 获取结果数据的最多行数，可选，默认为全部
+	 * @param row 可选，行索引，以0开始，默认为0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
 	 * @return [{name: ..., value: ...}, ...]
 	 */
 	chartBase.resultNameValueObjects = function(result, nameProperty, valueProperty, row, count)
 	{
-		var re = [];
-		
-		if(!result || !nameProperty || !valueProperty)
-			return re;
-		
-		var datas = this.resultDatas(result);
-		
-		row = (row || 0);
-		var getCount = datas.length;
-		if(count != null && count < getCount)
-			getCount = count;
-		
-		nameProperty = (nameProperty.name || nameProperty);
-		
-		if($.isArray(valueProperty))
-		{
-			for(var i=row; i< getCount; i++)
-			{
-				var name = datas[i][nameProperty];
-				var value = [];
-				
-				for(var j=0; j<valueProperty.length; j++)
-				{
-					var vn = (valueProperty[j].name || valueProperty[j]);
-					value[j] = datas[i][vn];
-				}
-				
-				re.push({ "name" : name, "value" : value });
-			}
-		}
-		else
-		{
-			valueProperty = (valueProperty.name || valueProperty);
-			
-			for(var i=row; i< getCount; i++)
-			{
-				var obj =
-				{
-					"name" : datas[i][nameProperty],
-					"value" : datas[i][valueProperty]
-				};
-				
-				re.push(obj);
-			}
-		}
-		
-		return re;
+		return this._resultNameValueObjects(result, nameProperty, valueProperty, row, count);
+	};
+	
+	/**
+	 * 获取数据集结果的值对象数组。
+	 * 
+	 * @param result 数据集结果对象、对象数组
+	 * @param valueProperty 值属性对象、属性名、数组
+	 * @param row 可选，行索引，以0开始，默认为0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
+	 * @return [{value: ...}, ...]
+	 */
+	chartBase.resultValueObjects = function(result, valueProperty, row, count)
+	{
+		return this._resultNameValueObjects(result, null, valueProperty, row, count);
 	};
 	
 	/**
@@ -2204,6 +2172,68 @@
 		var re = this.resultRowArrays(result, property, row, 1);
 		
 		return (re.length > 0 ? re[0] : undefined);
+	};
+	
+	/**
+	 * 获取数据集结果的名称/值对象数组。
+	 * 
+	 * @param result 数据集结果对象、对象数组
+	 * @param nameProperty 名称属性对象、属性名，当为null或者空字符串时，返回的对象中将没有name属性
+	 * @param valueProperty 值属性对象、属性名、数组
+	 * @param row 可选，行索引，以0开始，默认为0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
+	 * @return [{name: ..., value: ...}, ...]
+	 */
+	chartBase._resultNameValueObjects = function(result, nameProperty, valueProperty, row, count)
+	{
+		var re = [];
+		
+		var datas = this.resultDatas(result);
+		
+		row = (row || 0);
+		var getCount = datas.length;
+		if(count != null && count < getCount)
+			getCount = count;
+		
+		nameProperty = (nameProperty != null && nameProperty != "" ?
+							(nameProperty.name || nameProperty) : null);
+		
+		if($.isArray(valueProperty))
+		{
+			for(var i=row; i< getCount; i++)
+			{
+				var name = (nameProperty ? datas[i][nameProperty] : null);
+				var value = [];
+				
+				for(var j=0; j<valueProperty.length; j++)
+				{
+					var vn = (valueProperty[j].name || valueProperty[j]);
+					value[j] = datas[i][vn];
+				}
+				
+				if(nameProperty)
+					re.push({ "name" : name, "value" : value });
+				else
+					re.push({ "value" : value });
+			}
+		}
+		else
+		{
+			valueProperty = (valueProperty.name || valueProperty);
+			
+			for(var i=row; i< getCount; i++)
+			{
+				var name = (nameProperty ? datas[i][nameProperty] : null);
+				var value = datas[i][valueProperty];
+				
+				if(nameProperty)
+					re.push({ "name" : name, "value" : value });
+				else
+					re.push({ "value" : value });
+			}
+		}
+		
+		return re;
 	};
 	
 	/**

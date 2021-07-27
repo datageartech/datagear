@@ -661,6 +661,7 @@ readonly 是否只读操作，允许为null
 		{name: "chart.resultOf", value: "resultOf(", caption: "resultOf() ", meta: "chart"},
 		{name: "chart.resultRowArrays", value: "resultRowArrays(", caption: "resultRowArrays() ", meta: "chart"},
 		{name: "chart.resultRowCell", value: "resultRowCell(", caption: "resultRowCell() ", meta: "chart"},
+		{name: "chart.resultValueObjects", value: "resultValueObjects(", caption: "resultValueObjects() ", meta: "chart"},
 		{name: "chart.status", value: "status(", caption: "status() ", meta: "chart"},
 		{name: "chart.statusDestroyed", value: "statusDestroyed(", caption: "statusDestroyed() ", meta: "chart"},
 		{name: "chart.statusPreRender", value: "statusPreRender(", caption: "statusPreRender() ", meta: "chart"},
