@@ -35,10 +35,12 @@
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
-		var stack = (options && options.stack);//是否堆叠
 		
 		options = $.extend(true,
 		{
+			//扩展配置项：是否堆叠
+			stack: false,
+			
 			title: {
 		        text: chart.name
 		    },
@@ -80,12 +82,10 @@
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
 		var stack = (renderOptions && renderOptions.stack);//是否堆叠
-		var isCategory = (renderOptions.xAxis.type == "category");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
 		var legendData = [];
-		var xAxisData = [];
 		var series = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -106,7 +106,7 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
+				var mySeries = chartSupport.optionsSeries(renderOptions, series.length, {name: legendName, data: data});
 				
 				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
 				if(stack)
@@ -114,24 +114,12 @@
 				
 				legendData.push(legendName);
 				series.push(mySeries);
-				
-				//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
-				if(isCategory)
-				{
-					if(xAxisData.length == 0)
-						xAxisData = chart.resultRowArrays(result, np);
-					else
-					{
-						var xAxisDataMy = chart.resultRowArrays(result, np);
-						chartSupport.appendDistinct(xAxisData, xAxisDataMy);
-					}
-				}
 			}
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
-		if(isCategory)
-			options.xAxis = {data: xAxisData};
+		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
+		options.xAxis = {data: null};
 		
 		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
@@ -240,6 +228,7 @@
 		//是否按数据集分组堆叠
 		var stackGroup = (renderOptions.stackGroup == undefined ? true : renderOptions.stackGroup);
 		var isCategory = ((horizontal ? renderOptions.yAxis.type : renderOptions.xAxis.type) == "category");
+		isCategory = true;
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
