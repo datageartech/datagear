@@ -3319,10 +3319,11 @@
 	
 	//箱型图
 	
-	chartSupport.boxplotRender = function(chart, nameSign, minSign, lowerSign, medianSign, upperSign, maxSign, options)
+	chartSupport.boxplotRender = function(chart, nameSign, minSign, lowerSign, medianSign,
+	 			upperSign, maxSign, valueSign, options)
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, min: minSign, lower: lowerSign,
-				median: medianSign, upper: upperSign, max: maxSign });
+				median: medianSign, upper: upperSign, max: maxSign, value: valueSign });
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
@@ -3360,8 +3361,13 @@
 			series:
 			[
 				{
-					name: chart.name,
+					name: "",
 					type: "boxplot",
+					data: []
+				},
+				{
+					name: "",
+					type: "scatter",
 					data: []
 				}
 			]
@@ -3390,11 +3396,14 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		//箱型图不需要图例
-		//var legendData = [];
+		var legendData = [];
 		var axisData = [];
-		var seriesName = "";
-		var seriesData = [];
+		//箱形系列
+		var seriesNameBox = "";
+		var seriesDataBox = [];
+		//异常值系列
+		var seriesNameOutlier = "";
+		var seriesDataOutlier = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -3404,21 +3413,44 @@
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
-			var vp =
-			[
-				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.min),
-				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.lower),
-				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.median),
-				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.upper),
-				chart.dataSetPropertyOfSign(chartDataSet, signNameMap.max)
-			];
-			var data = chart.resultNameValueObjects(result, np, vp);
+			var minp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.min);
 			
-			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
-			
-			if(!seriesName)
-				seriesName = dataSetName;
-			seriesData = seriesData.concat(data);
+			//箱形数据集
+			if(minp)
+			{
+				var vp =
+				[
+					minp,
+					chart.dataSetPropertyOfSign(chartDataSet, signNameMap.lower),
+					chart.dataSetPropertyOfSign(chartDataSet, signNameMap.median),
+					chart.dataSetPropertyOfSign(chartDataSet, signNameMap.upper),
+					chart.dataSetPropertyOfSign(chartDataSet, signNameMap.max)
+				];
+				var data = chart.resultNameValueObjects(result, np, vp);
+				
+				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
+				
+				if(!seriesNameBox)
+					seriesNameBox = dataSetName;
+				seriesDataBox = seriesDataBox.concat(data);
+			}
+			//异常值数据集
+			else
+			{
+				var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+				
+				for(var j=0; j<vps.length; j++)
+				{
+					var vpsMy = (dgHorizontal ? [vps[j], np] : [np, vps[j]]);
+					var data = chart.resultValueObjects(result, vpsMy);
+					chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
+					
+					seriesDataOutlier = seriesDataOutlier.concat(data);
+				}
+				
+				if(!seriesNameOutlier)
+					seriesNameOutlier = dataSetName;
+			}
 			
 			//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
 			if(isCategory)
@@ -3433,9 +3465,21 @@
 			}
 		}
 		
-		var series = [ chartSupport.optionsSeries(renderOptions, 0, {name: seriesName, data: seriesData}) ];
+		var series = [ chartSupport.optionsSeries(renderOptions, 0, {name: seriesNameBox, data: seriesDataBox}) ];
 		
-		var options = { series: series };
+		legendData.push(seriesNameBox);
+		
+		if(seriesDataOutlier && seriesDataOutlier.length > 0)
+		{
+			var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
+			var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+			chartSupport.evalDataValueSymbolSize(seriesDataOutlier, 1, 1, symbolSizeMax, symbolSizeMin);
+			
+			series.push(chartSupport.optionsSeries(renderOptions, 1, {name: seriesNameOutlier, data: seriesDataOutlier}));
+			legendData.push(seriesNameOutlier);
+		}
+		
+		var options = { legend: {data: legendData}, series: series };
 		
 		if(isCategory)
 		{
@@ -3449,7 +3493,7 @@
 		
 		chart.echartsOptions(options);
 	};
-
+	
 	chartSupport.boxplotResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
@@ -3475,18 +3519,33 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
+		var seriesType = echartsEventParams.seriesType;
 		var echartsData = (echartsEventParams.data || {});
 		var echartsValue = (echartsData.value || []);
-		//value的第一个元素是数据索引
-		var startIdx = (echartsValue.length > 5 ? 1 : 0);
 		var data = {};
 		
-		data[signNameMap.name] = echartsData.name;
-		data[signNameMap.min] = echartsValue[startIdx];
-		data[signNameMap.lower] = echartsValue[startIdx+1];
-		data[signNameMap.median] = echartsValue[startIdx+2];
-		data[signNameMap.upper] = echartsValue[startIdx+3];
-		data[signNameMap.max] = echartsValue[startIdx+4];
+		//箱形系列
+		if(seriesType == "boxplot")
+		{
+			//value的第一个元素是数据索引
+			var startIdx = (echartsValue.length > 5 ? 1 : 0);
+			
+			data[signNameMap.name] = echartsData.name;
+			data[signNameMap.min] = echartsValue[startIdx];
+			data[signNameMap.lower] = echartsValue[startIdx+1];
+			data[signNameMap.median] = echartsValue[startIdx+2];
+			data[signNameMap.upper] = echartsValue[startIdx+3];
+			data[signNameMap.max] = echartsValue[startIdx+4];
+		}
+		//异常值系列
+		else
+		{
+			var renderOptions= chartSupport.renderOptions(chart);
+			var dgHorizontal = renderOptions.dgHorizontal;
+			
+			data[signNameMap.name] = (dgHorizontal ? echartsValue[1] : echartsValue[0]);
+			data[signNameMap.value] = (dgHorizontal ? echartsValue[0] : echartsValue[1]);
+		}
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -5395,7 +5454,7 @@
 	 * 计算最大图符元素尺寸
 	 * @param chart
 	 * @param options
-	 * @param 可选，自动获取的比率
+	 * @param ratio 可选，自动获取的比率
 	 */
 	chartSupport.evalSymbolSizeMax = function(chart, options, ratio)
 	{
@@ -5417,6 +5476,7 @@
 	 * @param chart
 	 * @param options
 	 * @param symbolSizeMax
+	 * @param ratio 可选，自动获取的比率
 	 */
 	chartSupport.evalSymbolSizeMin = function(chart, options, symbolSizeMax, ratio)
 	{
@@ -5442,6 +5502,9 @@
 		if(value == null)
 			return symbolSizeMin;
 		
+		if((maxValue-minValue) == 0)
+			return symbolSizeMin;
+		
 		var size = parseInt((value-minValue)/(maxValue-minValue)*symbolSizeMax);
 		return (size < symbolSizeMin ? symbolSizeMin : size);
 	};
@@ -5449,7 +5512,7 @@
 	/**
 	 * 计算系列数据数值的图符元素尺寸
 	 * 
-	 * @param series 系列对象：{ data: [ {value: ...}, ... ] }，或者其数组
+	 * @param series 系列对象：{ data: [ {value: ...}, ... ] }、或其数组
 	 */
 	chartSupport.evalSeriesDataValueSymbolSize = function(series, minValue, maxValue, symbolSizeMax, symbolSizeMin,
 			valuePropertyName, valueElementIndex)
@@ -5465,18 +5528,38 @@
 		
 		for(var i=0; i<series.length; i++)
 		{
-			var data = 	series[i].data;
+			chartSupport.evalDataValueSymbolSize(series[i].data, minValue, maxValue, symbolSizeMax, symbolSizeMin,
+						valuePropertyName, valueElementIndex);
+		}
+	};
+	
+	/**
+	 * 计算系列数据数值的图符元素尺寸
+	 * 
+	 * @param data 数据对象：{value: ...}、或其数组
+	 */
+	chartSupport.evalDataValueSymbolSize = function(data, minValue, maxValue, symbolSizeMax, symbolSizeMin,
+			valuePropertyName, valueElementIndex)
+	{
+		if(data == null)
+			return;
+		
+		if(valuePropertyName == null)
+			valuePropertyName = "value";
+		
+		if(!$.isArray(data))
+			data = [ data ];
+		
+		for(var i=0; i<data.length; i++)
+		{
+			var obj = 	data[i];
+			var value = obj[valuePropertyName];
 			
-			for(var j=0; j<data.length; j++)
-			{
-				var value = data[j][valuePropertyName];
-				
-				if(valueElementIndex != null)
-					value = ($.isArray(value) && valueElementIndex < value.length ? value[valueElementIndex] : null);
-				
-				data[j].symbolSize = chartSupport.evalValueSymbolSize(
-					value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
-			}
+			if(valueElementIndex != null)
+				value = ($.isArray(value) && valueElementIndex < value.length ? value[valueElementIndex] : null);
+			
+			obj.symbolSize = chartSupport.evalValueSymbolSize(
+				value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
 		}
 	};
 	
