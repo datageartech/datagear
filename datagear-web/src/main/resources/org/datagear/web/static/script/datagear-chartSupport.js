@@ -53,7 +53,7 @@
 			xAxis: {
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: false
 			},
 			yAxis: {
@@ -101,16 +101,8 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
-				//当np是数值类型时，采用{name:..., value:...}格式的数据会导致折线图不对，所以这里采用[name,value]格式
-				var data = chart.resultRowArrays(result, [ np, vps[j] ]);
-				var dataNew = [];
-				
-				for(var k=0; k<data.length; k++)
-				{
-					dataNew[k] = { value: data[k] };
-				}
-				
-				data = dataNew;
+				//使用[name,value]格式可以更好地兼容category、value、time坐标轴类型
+				var data = chart.resultValueObjects(result, [ np, vps[j] ]);
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
@@ -209,7 +201,7 @@
 			xAxis: {
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: "category",
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true
 			},
 			yAxis: {
@@ -268,8 +260,9 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
-				//当np是数值类型时，采用[name,value]格式的数据会导致柱状图无法绘制，所以这里采用{name:..., value:...}格式
-				var data = chart.resultNameValueObjects(result, np, vps[j]);
+				//使用[name,value]格式可以更好地兼容category、value、time坐标轴类型
+				var vpsMy = (horizontal ? [vps[j], np] : [np, vps[j]]);
+				var data = chart.resultValueObjects(result, vpsMy);
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
@@ -333,12 +326,14 @@
 	chartSupport.barSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
+		var horizontal = renderOptions.horizontal;
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
 		
-		data[signNameMap.name] = echartsData.name;
-		data[signNameMap.value] = echartsData.value;
+		data[signNameMap.name] = (horizontal ? echartsData.value[1] : echartsData.value[0]);
+		data[signNameMap.value] = (horizontal ? echartsData.value[0] : echartsData.value[1]);
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -382,7 +377,9 @@
 		{
 			defaultOptions.angleAxis =
 			{
-		        type: 'category',
+				//TODO 对于"value"类型会导致图形混乱，这里暂时先固定为category
+		        //type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: "category",
 		        data: []
 			};
 		}
@@ -392,7 +389,9 @@
 			{
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 20,
-		        type: 'category',
+				//TODO 对于"value"类型会导致图形混乱，这里暂时先固定为category
+		        //type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: "category",
 		        data: [],
 		        z: 10
 			};
@@ -416,7 +415,7 @@
 		var axisType = renderOptions.dgAxisType;
 		//是否按数据集分组堆叠
 		var stackGroup = renderOptions.stackGroup == undefined ? true : renderOptions.stackGroup;
-		var isCategory = true;
+		var isCategory = (renderOptions.angleAxis.type == "category" || renderOptions.radiusAxis.type == "category");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -835,7 +834,7 @@
 			xAxis: {
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis: {
@@ -995,7 +994,7 @@
 			xAxis: {
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis: {
@@ -2187,7 +2186,7 @@
 			xAxis: {
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true,
 				splitLine: {show:false},
 				data: []
@@ -2319,14 +2318,14 @@
 			xAxis: {
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: "category",
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				splitArea: { show: true },
 				data: []
 			},
 			yAxis: {
 				name: chart.dataSetPropertyLabel(vp),
 				nameGap: 5,
-				type: "category",
+				type: chartSupport.evalDataSetPropertyAxisType(chart, vp),
 				splitArea: { show: true },
 				data: []
 			},
@@ -3348,7 +3347,7 @@
 			{
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true,
 				splitLine: { show: false }
 			},
@@ -5032,6 +5031,55 @@
 		UNKNOWN: "UNKNOWN"
 	};
 	
+	//org.datagear.analysis.ResultDataFormat.TYPE_*
+	chartSupport.ResultDataFormatType =
+	{
+		//TYPE_NUMBER
+		NUMBER: "NUMBER",
+		//TYPE_STRING
+		STRING: "STRING"
+	};
+	
+	/**
+	 * 计算指定数据集属性的坐标轴类型。
+	 */
+	chartSupport.evalDataSetPropertyAxisType = function(chart, dataSetProperty)
+	{
+		var type = "category";
+		
+		if(chartSupport.isDataTypeNumber(dataSetProperty))
+		{
+			type = "value";
+		}
+		else if(chartSupport.isDataTypeAboutDate(dataSetProperty))
+		{
+			var resultDataFormat = chart.resultDataFormat();
+			if(!resultDataFormat)
+				resultDataFormat = (chart.dashboard ? chart.dashboard.resultDataFormat() : null);
+			
+			if(resultDataFormat)
+			{
+				if(chartSupport.isDataTypeDate(dataSetProperty)
+					&& resultDataFormat.dateType == chartSupport.ResultDataFormatType.NUMBER)
+				{
+					type = "time";
+				}
+				else if(chartSupport.isDataTypeTime(dataSetProperty)
+					&& resultDataFormat.timeType == chartSupport.ResultDataFormatType.NUMBER)
+				{
+					type = "time";
+				}
+				else if(chartSupport.isDataTypeTimestamp(dataSetProperty)
+					&& resultDataFormat.timestampType == chartSupport.ResultDataFormatType.NUMBER)
+				{
+					type = "time";
+				}
+			}
+		}
+		
+		return type;
+	};
+	
 	/**
 	 * 获取/设置图表渲染options。
 	 */
@@ -5140,6 +5188,44 @@
 		return (dataType == chartSupport.DataSetPropertyDataType.NUMBER
 				|| dataType == chartSupport.DataSetPropertyDataType.INTEGER
 				|| dataType == chartSupport.DataSetPropertyDataType.DECIMAL);
+	};
+	
+	/**
+	 * 指定数据集属性数据是否日期、时间、时间戳类型。
+	 */
+	chartSupport.isDataTypeAboutDate = function(dataSetProperty)
+	{
+		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
+		return (dataType == chartSupport.DataSetPropertyDataType.DATE
+				|| dataType == chartSupport.DataSetPropertyDataType.TIME
+				|| dataType == chartSupport.DataSetPropertyDataType.TIMESTAMP);
+	};
+	
+	/**
+	 * 指定数据集属性数据是否日期类型。
+	 */
+	chartSupport.isDataTypeDate = function(dataSetProperty)
+	{
+		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
+		return (dataType == chartSupport.DataSetPropertyDataType.DATE);
+	};
+	
+	/**
+	 * 指定数据集属性数据是否时间类型。
+	 */
+	chartSupport.isDataTypeTime = function(dataSetProperty)
+	{
+		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
+		return (dataType == chartSupport.DataSetPropertyDataType.TIME);
+	};
+	
+	/**
+	 * 指定数据集属性数据是否时间戳类型。
+	 */
+	chartSupport.isDataTypeTimestamp = function(dataSetProperty)
+	{
+		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
+		return (dataType == chartSupport.DataSetPropertyDataType.TIMESTAMP);
 	};
 	
 	/**
