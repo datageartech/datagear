@@ -106,7 +106,7 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
-				//使用[name,value]格式可以更好地兼容category、value、time坐标轴类型
+				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var data = chart.resultValueObjects(result, [ np, vps[j] ]);
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
@@ -226,7 +226,7 @@
 			dftOptions.xAxis = dftOptions.yAxis;
 			dftOptions.yAxis = xAxisTmp;
 			
-			//横向柱状图的yAxis.type不能为value，不然会变为竖向图形且数据不匹配
+			//横向柱状图的yAxis.type不能为value，不然会变为竖向图形
 			if(dftOptions.yAxis.type == "value")
 				dftOptions.yAxis.type = "category";
 		}
@@ -261,7 +261,7 @@
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
 				
-				//使用[name,value]格式可以更好地兼容category、value、time坐标轴类型
+				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var vpsMy = (renderOptions.dgHorizontal ? [vps[j], np] : [np, vps[j]]);
 				var data = chart.resultValueObjects(result, vpsMy);
 				
@@ -333,18 +333,22 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
+		options = $.extend(
+		{
+			//扩展配置项：是否堆叠
+			dgStack: false,
+			//扩展配置项：坐标类型：radius（径向）、angle（角度）
+			dgAxisType: "radius",
+			//是否按数据集分组堆叠
+			dgStackGroup: true
+		},
+		options);
+		
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
-		//是否堆叠
-		var stack = (options && options.dgStack);
-		//坐标类型：radius（径向）、angle（角度）
-		var axisType = (options && options.dgAxisType ? options.dgAxisType : "radius");
 		
-		var defaultOptions =
+		var dftOptions =
 		{
-			dgStack: stack,
-			dgAxisType: axisType,
-			
 			title: { text: chart.name },
 			angleAxis: {},
 			radiusAxis: {},
@@ -355,41 +359,41 @@
 			[{
 				name: "",
 				type: "bar",
-				label: { show: stack },
+				label: { show: options.dgStack },
 				coordinateSystem: 'polar',
 				data: []
 			}]
 		};
 		
-		if(axisType == "angle")
+		if(options.dgAxisType == "angle")
 		{
-			defaultOptions.angleAxis =
+			dftOptions.angleAxis =
 			{
-				//TODO 对于"value"类型会导致图形混乱，这里暂时先固定为category
-		        //type: chartSupport.evalDataSetPropertyAxisType(chart, np),
-				type: "category",
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 		        data: []
 			};
+			
+			//角度柱状图的angleAxis.type不能为value和time，不然图形会错乱
+			if(dftOptions.angleAxis.type == "value" || dftOptions.angleAxis.type == "time")
+				dftOptions.angleAxis.type = "category";
 		}
 		else
 		{
-			defaultOptions.radiusAxis =
+			dftOptions.radiusAxis =
 			{
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 20,
-				//TODO 对于"value"类型会导致图形混乱，这里暂时先固定为category
-		        //type: chartSupport.evalDataSetPropertyAxisType(chart, np),
-				type: "category",
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 		        data: [],
 		        z: 10
 			};
+			
+			//径向柱状图的radiusAxis.type不能为value，不然会变为角度图形
+			if(dftOptions.radiusAxis.type == "value")
+				dftOptions.radiusAxis.type = "category";
 		}
 		
-		options = $.extend(true,
-		defaultOptions,
-		options,
-		chart.options());
-		
+		options = $.extend(true, dftOptions, options, chart.options());
 		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
@@ -399,17 +403,13 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
-		var stack = renderOptions.dgStack;
-		var axisType = renderOptions.dgAxisType;
-		//是否按数据集分组堆叠
-		var stackGroup = renderOptions.stackGroup == undefined ? true : renderOptions.stackGroup;
-		var isCategory = (renderOptions.angleAxis.type == "category" || renderOptions.radiusAxis.type == "category");
+		var isAngleAxis = (renderOptions.dgAxisType == "angle");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
 		var legendData = [];
-		var axisData = [];
 		var series = [];
+		var axisData = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -424,37 +424,39 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
-				var data = chart.resultNameValueObjects(result, np, vps[j]);
+				var data = null;
+				
+				//角度图时使用{value: [name,value]}格式的数据会无法显示
+				if(isAngleAxis)
+					data = chart.resultNameValueObjects(result, np, vps[j]);
+				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+				else
+					data = chart.resultValueObjects(result, [np, vps[j]]);
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
+				var mySeries = chartSupport.optionsSeries(renderOptions, series.length, {name: legendName, data: data});
 				
-				if(stack)
-					mySeries.stack = (stackGroup ? dataSetName : "stack");
+				if(renderOptions.dgStack)
+					mySeries.stack = (renderOptions.dgStackGroup ? dataSetName : "stack");
 				
 				legendData.push(legendName);
 				series.push(mySeries);
 				
-				//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
-				if(isCategory)
-				{
-					if(axisData.length == 0)
-						axisData = chart.resultRowArrays(result, np);
-					else
-					{
-						var axisDataMy = chart.resultRowArrays(result, np);
-						chartSupport.appendDistinct(axisData, axisDataMy);
-					}
-				}
+				if(isAngleAxis)
+					chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 			}
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
-		if(axisType == "angle")
+		
+		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
+		//角度图必须设置angleAxis.data，不然不显示刻度
+		if(isAngleAxis)
 			options.angleAxis = {data: axisData};
+		//径向图只需置为null即可
 		else
-			options.radiusAxis = {data: axisData};
+			options.radiusAxis = {data: null};
 		
 		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
@@ -485,12 +487,21 @@
 	chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chartSupport.renderOptions(chart);
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
 		
-		data[signNameMap.name] = echartsData.name;
-		data[signNameMap.value] = echartsData.value;
+		if(renderOptions.dgAxisType == "angle")
+		{
+			data[signNameMap.name] = echartsData.name;
+			data[signNameMap.value] = echartsData.value;
+		}
+		else
+		{
+			data[signNameMap.name] = echartsData.value[0];
+			data[signNameMap.value] = echartsData.value[1];
+		}
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
