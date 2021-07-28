@@ -664,6 +664,7 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
+		
 		var chartDataSets = chart.chartDataSetsMain();
 		
 		var seriesName = "";
@@ -819,6 +820,11 @@
 		
 		options = $.extend(true,
 		{
+			//扩展配置项：最大数据标记像素数
+			dgSymbolSizeMax: undefined,
+			//扩展配置项：最小数据标记像素数
+			dgSymbolSizeMin: undefined,
+			
 			title: {
 		        text: chart.name
 		    },
@@ -841,10 +847,6 @@
 				nameGap: 5,
 				type: "value"
 			},
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最小数据标记像素数
-			symbolSizeMin: undefined,
 			series: [{
 				name: "",
 				type: "scatter",
@@ -866,10 +868,7 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		var isCategory = (renderOptions.xAxis.type == "category");
-		
 		var legendData = [];
-		var xAxisData = [];
 		var series = [];
 		
 		var min = undefined, max = undefined;
@@ -889,43 +888,30 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
-				var data = chart.resultNameValueObjects(result, np, vps[j]);
+				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+				var data = chart.resultValueObjects(result, [np, vps[j]]);
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
 				for(var k=0; k<data.length; k++)
 				{
-					min = (min == undefined ? data[k].value : Math.min(min, data[k].value));
-					max = (max == undefined ? data[k].value : Math.max(max, data[k].value));
+					var valMy = data[k].value[1];
+					min = (min == null ? valMy : Math.min(min, valMy));
+					max = (max == null ? valMy : Math.max(max, valMy));
 				}
 				
-				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, { name: legendName, data: data });
+				var mySeries = chartSupport.optionsSeries(renderOptions, series.length, { name: legendName, data: data });
 				
 				legendData.push(legendName);
 				series.push(mySeries);
-				
-				//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
-				if(isCategory)
-				{
-					if(xAxisData.length == 0)
-						xAxisData = chart.resultRowArrays(result, np);
-					else
-					{
-						var xAxisDataMy = chart.resultRowArrays(result, np);
-						chartSupport.appendDistinct(xAxisData, xAxisDataMy);
-					}
-				}
 			}
 		}
 		
-		if(min != null && max != null && max <= min)
-			max = min + 1;
-		
-		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin);
+		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 1);
 		
 		var options = { legend: {data: legendData}, series: series };
-		if(isCategory)
-			options.xAxis = {data: xAxisData};
+		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
+		options.xAxis = {data: null};
 		
 		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
@@ -960,8 +946,8 @@
 		var echartsData = echartsEventParams.data;
 		var data = {};
 		
-		data[signNameMap.name] = echartsData.name;
-		data[signNameMap.value] = echartsData.value;
+		data[signNameMap.name] = echartsData.value[0];
+		data[signNameMap.value] = echartsData.value[1];
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -979,6 +965,11 @@
 		
 		options = $.extend(true,
 		{
+			//扩展配置项：最大数据标记像素数
+			dgSymbolSizeMax: undefined,
+			//扩展配置项：最小数据标记像素数
+			dgSymbolSizeMin: undefined,
+			
 			title: {
 		        text: chart.name
 		    },
@@ -1001,10 +992,6 @@
 				nameGap: 5,
 				type: "value"
 			},
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最小数据标记像素数
-			symbolSizeMin: undefined,
 			series: [{
 				name: "",
 				type: "scatter",
@@ -1044,33 +1031,24 @@
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
 			var wp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.weight);
 			
-			var data = (wp ? chart.resultRowArrays(result, [np, vp, wp]) : chart.resultRowArrays(result, [np, vp]));
-			var dataNew = [];
+			var data = (wp ? chart.resultValueObjects(result, [np, vp, wp]) : chart.resultValueObjects(result, [np, vp]));
 			
-			for(var j=0; j<data.length; j++)
+			if(wp)
 			{
-				var dataEle = { value: data[j] };
-				
-				if(wp)
+				for(var j=0; j<data.length; j++)
 				{
-					min = (min == undefined ? data[j][2] : Math.min(min, data[j][2]));
-					max = (max == undefined ? data[j][2] : Math.max(max, data[j][2]));
+					var wv = data[j].value[2];
+					min = (min == undefined ? wv : Math.min(min, wv));
+					max = (max == undefined ? wv : Math.max(max, wv));
 				}
-				
-				dataNew[j] = dataEle;
 			}
-			
-			data = dataNew;
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
-			var mySeries = chartSupport.optionsSeries(renderOptions, i, { name: dataSetName, data: data });
+			var mySeries = chartSupport.optionsSeries(renderOptions, series.length, { name: dataSetName, data: data });
 			legendData.push(dataSetName);
 			series.push(mySeries);
 		}
-		
-		if(min != null && max != null && max <= min)
-			max = min + 1;
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
@@ -1729,6 +1707,11 @@
 		
 		options = $.extend(true,
 		{
+			//扩展配置项：最大数据标记像素数
+			dgSymbolSizeMax: undefined,
+			//扩展配置项：最小数据标记像素数
+			dgSymbolSizeMin: undefined,
+			
 			title: {
 		        text: chart.name
 		    },
@@ -1745,10 +1728,6 @@
 				roam: true,
 				map: (chart.map() || "china")
 			},
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最小数据标记像素数
-			symbolSizeMin: undefined,
 			series:
 			[
 				{
@@ -1822,9 +1801,6 @@
 			series.push(chartSupport.optionsSeries(renderOptions, i, { name: dataSetName, data: data }));
 		}
 		
-		if(min != null && max != null && max <= min)
-			max = min + 1;
-		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
 		var options = { legend: {data: legendData}, series: series };
@@ -1890,6 +1866,11 @@
 		
 		options = $.extend(true,
 		{
+			//扩展配置项：最大数据标记像素数
+			dgSymbolSizeMax: undefined,
+			//扩展配置项：最小数据标记像素数
+			dgSymbolSizeMin: undefined,
+			
 			title: {
 		        text: chart.name
 		    },
@@ -1902,10 +1883,6 @@
 				roam: true,
 				map: (chart.map() || "china")
 			},
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最大数据标记像素数
-			symbolSizeMin: undefined,
 			series: [{
 				name: "",
 				type: "graph",
@@ -2067,9 +2044,6 @@
 				seriesLinks.push(link);
 			}
 		}
-		
-		if(min != null && max != null && max <= min)
-			max = min + 1;
 		
 		var series = [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
 		
@@ -3058,6 +3032,11 @@
 		
 		options = $.extend(true,
 		{
+			//扩展配置项：最大数据标记像素数
+			dgSymbolSizeMax: undefined,
+			//扩展配置项：最小数据标记像素数
+			dgSymbolSizeMin: undefined,
+			
 			title: {
 		        text: chart.name
 		    },
@@ -3065,10 +3044,6 @@
 			{
 				trigger: "item"
 			},
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最大数据标记像素数
-			symbolSizeMin: undefined,
 			series: [{
 				name: "",
 				type: "graph",
@@ -3213,9 +3188,6 @@
 				seriesLinks.push(link);
 			}
 		}
-		
-		if(min != undefined && max != undefined && min >= max)
-			min = max - 1;
 		
 		if(min == undefined && max == undefined && symbolSizeMin < 10)
 			symbolSizeMin = 10;
@@ -5543,7 +5515,7 @@
 	 */
 	chartSupport.evalSymbolSizeMax = function(chart, options, ratio)
 	{
-		var symbolSizeMax = (options ? options.symbolSizeMax : undefined);
+		var symbolSizeMax = (options ? options.dgSymbolSizeMax : undefined);
 		ratio = (ratio == undefined ? 0.1 : ratio);
 		
 		//根据图表元素尺寸自动计算
@@ -5565,7 +5537,7 @@
 	 */
 	chartSupport.evalSymbolSizeMin = function(chart, options, symbolSizeMax, ratio)
 	{
-		var symbolSizeMin = (options ? options.symbolSizeMin : undefined);
+		var symbolSizeMin = (options ? options.dgSymbolSizeMin : undefined);
 		ratio = (ratio == undefined ? 0.125 : ratio);
 		
 		if(!symbolSizeMin)
@@ -5584,10 +5556,10 @@
 		if(symbolSizeMin == undefined)
 			symbolSizeMin = 4;
 		
-		if(value == null)
+		if(value == null || minValue == null || maxValue == null)
 			return symbolSizeMin;
 		
-		if((maxValue-minValue) == 0)
+		if((maxValue-minValue) <= 0)
 			return symbolSizeMin;
 		
 		var size = parseInt((value-minValue)/(maxValue-minValue)*symbolSizeMax);
