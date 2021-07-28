@@ -32,16 +32,21 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
+		options = $.extend(
+		{
+			//扩展配置项：是否堆叠
+			dgStack: false
+		},
+		options);
+		
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
 		options = $.extend(true,
 		{
-			//扩展配置项：是否堆叠
-			stack: false,
-			
-			title: {
+			title:
+			{
 		        text: chart.name
 		    },
 			tooltip:
@@ -81,7 +86,7 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
-		var stack = (renderOptions && renderOptions.stack);//是否堆叠
+		var dgStack = (renderOptions && renderOptions.dgStack);//是否堆叠
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -109,7 +114,7 @@
 				var mySeries = chartSupport.optionsSeries(renderOptions, series.length, {name: legendName, data: data});
 				
 				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
-				if(stack)
+				if(dgStack)
 					mySeries.stack = "stack";
 				
 				legendData.push(legendName);
@@ -167,15 +172,25 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
+		options = $.extend(
+		{
+			//扩展配置项：是否堆叠
+			dgStack: false,
+			//扩展配置项：是否横向
+			dgHorizontal: false,
+			//是否按数据集分组堆叠
+			dgStackGroup: true
+		},
+		options);
+		
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
-		var stack = (options && options.stack);//是否堆叠
-		var horizontal = (options && options.horizontal);//是否横向
 		
-		options = $.extend(true,
+		var dftOptions =
 		{
-			title: {
+			title:
+			{
 		        text: chart.name
 		    },
 			tooltip:
@@ -200,20 +215,23 @@
 			series: [{
 				name: "",
 				type: "bar",
-				label: { show: stack },
+				label: { show: options.dgStack },
 				data: []
 			}]
-		},
-		options,
-		chart.options());
+		};
 		
-		if(horizontal)
+		if(options.dgHorizontal)
 		{
-			var xAxisTmp = options.xAxis;
-			options.xAxis = options.yAxis;
-			options.yAxis = xAxisTmp;
+			var xAxisTmp = dftOptions.xAxis;
+			dftOptions.xAxis = dftOptions.yAxis;
+			dftOptions.yAxis = xAxisTmp;
+			
+			//横向柱状图的yAxis.type不能为value，不然会变为竖向图形且数据不匹配
+			if(dftOptions.yAxis.type == "value")
+				dftOptions.yAxis.type = "category";
 		}
 		
+		options = $.extend(true, dftOptions, options, chart.options());
 		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
@@ -223,17 +241,10 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
-		var stack = renderOptions.stack;//是否堆叠
-		var horizontal = renderOptions.horizontal;//是否横向
-		//是否按数据集分组堆叠
-		var stackGroup = (renderOptions.stackGroup == undefined ? true : renderOptions.stackGroup);
-		var isCategory = ((horizontal ? renderOptions.yAxis.type : renderOptions.xAxis.type) == "category");
-		isCategory = true;
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
 		var legendData = [];
-		var axisData = [];
 		var series = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -249,42 +260,30 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
+				
 				//使用[name,value]格式可以更好地兼容category、value、time坐标轴类型
-				var vpsMy = (horizontal ? [vps[j], np] : [np, vps[j]]);
+				var vpsMy = (renderOptions.dgHorizontal ? [vps[j], np] : [np, vps[j]]);
 				var data = chart.resultValueObjects(result, vpsMy);
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = chartSupport.optionsSeries(renderOptions, i*vps.length+j, {name: legendName, data: data});
+				var mySeries = chartSupport.optionsSeries(renderOptions, series.length, {name: legendName, data: data});
 				
-				if(stack)
-					mySeries.stack = (stackGroup ? dataSetName : "stack");
+				if(renderOptions.dgStack)
+					mySeries.stack = (renderOptions.dgStackGroup ? dataSetName : "stack");
 				
 				legendData.push(legendName);
 				series.push(mySeries);
-				
-				//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
-				if(isCategory)
-				{
-					if(axisData.length == 0)
-						axisData = chart.resultRowArrays(result, np);
-					else
-					{
-						var axisDataMy = chart.resultRowArrays(result, np);
-						chartSupport.appendDistinct(axisData, axisDataMy);
-					}
-				}
 			}
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
-		if(isCategory)
-		{
-			if(horizontal)
-				options.yAxis = {data: axisData};
-			else
-				options.xAxis = {data: axisData};
-		}
+		
+		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
+		if(renderOptions.dgHorizontal)
+			options.yAxis = {data: null};
+		else
+			options.xAxis = {data: null};
 		
 		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
@@ -316,13 +315,13 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
-		var horizontal = renderOptions.horizontal;
+		var dgHorizontal = renderOptions.dgHorizontal;
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
 		
-		data[signNameMap.name] = (horizontal ? echartsData.value[1] : echartsData.value[0]);
-		data[signNameMap.value] = (horizontal ? echartsData.value[0] : echartsData.value[1]);
+		data[signNameMap.name] = (dgHorizontal ? echartsData.value[1] : echartsData.value[0]);
+		data[signNameMap.value] = (dgHorizontal ? echartsData.value[0] : echartsData.value[1]);
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
