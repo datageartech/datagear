@@ -118,9 +118,9 @@ selectOperation 是否选择操作，允许为null
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
 		snColumn,
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.name' />"), "nameLabel.value"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.version' />", "version"),
 		iconColumn,
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.desc' />"), "descLabel.value"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.version' />", "version")
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.desc' />"), "descLabel.value")
 	];
 	
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
