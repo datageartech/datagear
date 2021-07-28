@@ -1862,8 +1862,6 @@
 			targetLatitude: targetLatitudeSign, targetName: targetNameSign, targetCategory: targetCategorySign,
 			targetValue: targetValueSign, map: mapSign });
 		
-		var chartDataSet = chart.chartDataSetFirst();
-		
 		options = $.extend(true,
 		{
 			//扩展配置项：最大数据标记像素数
@@ -2143,7 +2141,7 @@
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
-		options = $.extend(true,
+		var dftOptions = 
 		{
 			title: {
 		        text: chart.name
@@ -2174,10 +2172,13 @@
 				type: "k",
 				data: []
 			}]
-		},
-		options,
-		chart.options());
+		};
 		
+		//K线图的angleAxis.type不能为value和time，不然图形无法显示
+		if(dftOptions.xAxis.type == "value" || dftOptions.xAxis.type == "time")
+			dftOptions.xAxis.type = "category";
+		
+		options = $.extend(true, dftOptions, options, chart.options());
 		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
@@ -2192,6 +2193,7 @@
 		
 		var legendData = [];
 		var series = [];
+		var axisData = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -2200,7 +2202,9 @@
 			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
-			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name),
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			
+			var data = chart.resultNameValueObjects(result, np,
 					[
 						chart.dataSetPropertyOfSign(chartDataSet, signNameMap.open),
 						chart.dataSetPropertyOfSign(chartDataSet, signNameMap.close),
@@ -2210,10 +2214,14 @@
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
-			series.push(chartSupport.optionsSeries(renderOptions, i, {name: dataSetName, data: data}));
+			chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
+			
+			series.push(chartSupport.optionsSeries(renderOptions, series.length, {name: dataSetName, data: data}));
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		//不设置坐标轴数据的话将无法显示刻度标签
+		options.xAxis = { data: axisData };
 		
 		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
@@ -2274,7 +2282,7 @@
 		var chartEle = chart.elementJquery();
 		var vmItemWidth = parseInt(chartEle.height()/20);
 		
-		options = $.extend(true,
+		var dftOptions=
 		{
 			title: {
 		        text: chart.name
@@ -2322,10 +2330,15 @@
 				emphasis: { itemStyle: { shadowBlur: 5 } },
 				data: []
 			}]
-		},
-		options,
-		chart.options());
+		};
 		
+		//热力图的xAxis.type、yAxis.type不能为value和time，不然图形无法显示
+		if(dftOptions.xAxis.type == "value" || dftOptions.xAxis.type == "time")
+			dftOptions.xAxis.type = "category";
+		if(dftOptions.yAxis.type == "value" || dftOptions.yAxis.type == "time")
+			dftOptions.yAxis.type = "category";
+		
+		options = $.extend(true, dftOptions, options, chart.options());
 		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
@@ -2355,36 +2368,23 @@
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
 			var wp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.weight);
 			
-			var data = chart.resultRowArrays(result, [ np, vp, wp ]);
-			var dataNew = [];
+			var data = chart.resultValueObjects(result, [ np, vp, wp ]);
 			
 			for(var j=0; j<data.length; j++)
 			{
-				var dataEle = { value: data[j] };
-				var dw = dataEle.value[2];
+				var dw = data[j].value[2];
 				
-				chartSupport.appendDistinct(xAxisData, dataEle.value[0]);
-				chartSupport.appendDistinct(yAxisData, dataEle.value[1]);
+				chartSupport.appendDistinct(xAxisData, data[j].value[0]);
+				chartSupport.appendDistinct(yAxisData, data[j].value[1]);
 				
 				min = (min == undefined ? dw : Math.min(min, dw));
 				max = (max == undefined ? dw : Math.max(max, dw));
-				
-				dataNew[j] = dataEle;
 			}
-			
-			data = dataNew;
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
 			seriesData = seriesData.concat(data);
 		}
-		
-		if(min == undefined)
-			min = 0;
-		if(max == undefined)
-			max = 1;
-		if(max < min)
-			max = min + 1;
 		
 		var series = [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, data: seriesData }) ];
 		
@@ -2436,8 +2436,6 @@
 	chartSupport.treeRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
 	{
 		chartSupport.chartSignNameMap(chart, { id: idSign, name: nameSign, parent: parentSign, value: valueSign });
-		
-		var chartDataSet = chart.chartDataSetFirst();
 		
 		options = $.extend(true,
 		{
@@ -2539,8 +2537,6 @@
 	{
 		chartSupport.chartSignNameMap(chart, { id: idSign, name: nameSign, parent: parentSign, value: valueSign });
 		
-		var chartDataSet = chart.chartDataSetFirst();
-		
 		options = $.extend(true,
 		{
 			title: {
@@ -2626,8 +2622,6 @@
 	chartSupport.sunburstRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
 	{
 		chartSupport.chartSignNameMap(chart, { id: idSign, name: nameSign, parent: parentSign, value: valueSign });
-		
-		var chartDataSet = chart.chartDataSetFirst();
 		
 		options = $.extend(true,
 		{
@@ -2819,8 +2813,6 @@
 		chartSupport.chartSignNameMap(chart,
 				{ sourceName: sourceNameSign, sourceValue: sourceValueSign,
 					targetName: targetNameSign, targetValue: targetValueSign, value: valueSign });
-		
-		var chartDataSet = chart.chartDataSetFirst();
 		
 		options = $.extend(true,
 		{
@@ -3027,8 +3019,6 @@
 				{ sourceId: sourceIdSign, sourceName: sourceNameSign, sourceCategory: sourceCategorySign, sourceValue: sourceValueSign,
 					targetId: targetIdSign, targetName: targetNameSign, targetCategory: targetCategorySign, targetValue: targetValueSign,
 					value: valueSign });
-		
-		var chartDataSet = chart.chartDataSetFirst();
 		
 		options = $.extend(true,
 		{
@@ -3295,14 +3285,18 @@
 		chartSupport.chartSignNameMap(chart, { name: nameSign, min: minSign, lower: lowerSign,
 				median: medianSign, upper: upperSign, max: maxSign, value: valueSign });
 		
+		options = $.extend(
+		{
+			//扩展配置项：是否横向
+			dgHorizontal: false
+		},
+		options);
+		
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
-		options = $.extend(true,
+		var dftOptions =
 		{
-			//扩展配置项，是否横向
-			dgHorizontal: false,
-			
 			title: {
 		        text: chart.name
 		    },
@@ -3341,17 +3335,20 @@
 					data: []
 				}
 			]
-		},
-		options,
-		chart.options());
+		};
+		
+		//箱形图的angleAxis.type不能为value和time，不然图形无法显示
+		if(dftOptions.xAxis.type == "value" || dftOptions.xAxis.type == "time")
+			dftOptions.xAxis.type = "category";
 		
 		if(options.dgHorizontal)
 		{
-			var xAxisTmp = options.xAxis;
-			options.xAxis = options.yAxis;
-			options.yAxis = xAxisTmp;
+			var xAxisTmp = dftOptions.xAxis;
+			dftOptions.xAxis = dftOptions.yAxis;
+			dftOptions.yAxis = xAxisTmp;
 		}
 		
+		options = $.extend(true, dftOptions, options, chart.options());
 		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
@@ -3362,7 +3359,6 @@
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
 		var dgHorizontal = renderOptions.dgHorizontal;
-		var isCategory = ((dgHorizontal ? renderOptions.yAxis.type : renderOptions.xAxis.type) == "category");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -3422,17 +3418,7 @@
 					seriesNameOutlier = dataSetName;
 			}
 			
-			//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
-			if(isCategory)
-			{
-				if(axisData.length == 0)
-					axisData = chart.resultRowArrays(result, np);
-				else
-				{
-					var axisDataMy = chart.resultRowArrays(result, np);
-					chartSupport.appendDistinct(axisData, axisDataMy);
-				}
-			}
+			chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 		}
 		
 		var series = [ chartSupport.optionsSeries(renderOptions, 0, {name: seriesNameBox, data: seriesDataBox}) ];
@@ -3451,13 +3437,11 @@
 		
 		var options = { legend: {data: legendData}, series: series };
 		
-		if(isCategory)
-		{
-			if(dgHorizontal)
-				options.yAxis = {data: axisData};
-			else
-				options.xAxis = {data: axisData};
-		}
+		//需要设置坐标值，不然刻度会错乱
+		if(dgHorizontal)
+			options.yAxis = {data: axisData};
+		else
+			options.xAxis = {data: axisData};
 		
 		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
@@ -4418,7 +4402,7 @@
 		}
 		
 		for(; dataIndex<datas.length; dataIndex++)
-			var row = dataTable.row.add(datas[dataIndex]);
+			dataTable.row.add(datas[dataIndex]);
 		
 		dataTable.rows(removeRowIndexes).remove();
 		
