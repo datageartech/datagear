@@ -514,6 +514,16 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
+		options = $.extend(
+		{
+			//是否按数据集分割系列，而非仅一个系列
+			dgSplitDataSet: false,
+			//当dgSplitDataSet=true时，各系列布局：
+			//nest：嵌套；grid：网格
+			dgSeriesLayout: "nest"
+		},
+		options);
+		
 		options = $.extend(true,
 		{
 			title: {
@@ -551,12 +561,12 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chartSupport.renderOptions(chart);
+		var dgSplitDataSet = renderOptions.dgSplitDataSet;
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
 		var legendData = [];
-		var seriesName = "";
-		var seriesData = [];
+		var series = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -572,15 +582,27 @@
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
+			if(dgSplitDataSet)
+			{
+				series.push({ name: dataSetName, data: data });
+			}
+			else
+			{
+				if(series.length == 0)
+					series.push({ name: dataSetName, data: [] });
+				
+				series[0].data = series[0].data.concat(data);
+			}
+			
 			legendData = legendData.concat(npv);
-			if(!seriesName)
-				seriesName = dataSetName;
-			seriesData = seriesData.concat(data);
 		}
 		
-		var series = [ chartSupport.optionsSeries(renderOptions, 0, {name: seriesName, data: seriesData}) ];
-		
 		var options = { legend: { data: legendData }, series: series };
+		
+		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
+		
+		for(var i=0; i<options.series.length; i++)
+			options.series[i] = chartSupport.optionsSeries(renderOptions, i, options.series[i]);
 		
 		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
 		
@@ -620,6 +642,45 @@
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
+	};
+	
+	chartSupport.pieEvalSeriesLayout = function(chart, renderOptions, updateOptions)
+	{
+		if(!renderOptions.dgSplitDataSet)
+			return;
+		
+		var series = updateOptions.series;
+		var len = series.length;
+		
+		if(!len)
+			return;
+		
+		if(renderOptions.dgSeriesLayout == "nest")
+		{
+			var radiusMax = 80;
+			var radiusInner = 0;
+			//系列数=1取60，否则取30
+			var radiusOuter = (len == 1 ? 60 : 30);
+			var radiusStep = parseInt((radiusMax - radiusOuter)/len);
+			var radiusGap = parseInt(radiusStep*4/9);
+			radiusStep = radiusStep - radiusGap;
+			
+			for(var i=0; i<len; i++)
+			{
+				series[i].radius = [ radiusInner+"%", radiusOuter+"%" ];
+				
+				//不是最外圈系列标签显示在内部
+				if(i < (len - 1))
+					series[i].label = { position: "inner" };
+				
+				radiusInner = radiusOuter + radiusGap;
+				radiusOuter = radiusInner + radiusStep;
+			}
+		}
+		else if(renderOptions.dgSeriesLayout == "grid")
+		{
+			
+		}
 	};
 	
 	//仪表盘
@@ -5048,23 +5109,19 @@
 	};
 	
 	/**
-	 * 合并指定索引的series元素对象，如果索引不对，则返回前一个合并。
+	 * 将source合并至指定索引的series元素后生成一个新的对象，如果索引越界，则使用最后一个合并。
 	 */
-	chartSupport.optionsSeries = function(options, index, mergeEle)
+	chartSupport.optionsSeries = function(options, index, source)
 	{
 		var seriesLen = (options && options.series ? (options.series.length || 0) : 0);
 		
-		if(!seriesLen)
-			return {};
+		if(seriesLen <= 0)
+			return source;
 		
-		index = (index < seriesLen ? index : seriesLen - 1);
+		var indexValid = (index < seriesLen ? index : seriesLen - 1);
+		var ele = (options.series[indexValid] || {});
 		
-		var ele = (options.series[index] || {});
-		
-		if(mergeEle == undefined)
-			return ele;
-		
-		return $.extend({}, ele, mergeEle);
+		return $.extend({}, ele, source);
 	};
 	
 	/**
