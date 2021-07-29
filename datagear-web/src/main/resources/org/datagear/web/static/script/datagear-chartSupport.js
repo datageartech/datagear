@@ -220,6 +220,7 @@
 			}]
 		};
 		
+		//不能在合并其他设置项后交换轴设置项，会导致chart.options()的轴设置项颠倒
 		if(options.dgHorizontal)
 		{
 			var xAxisTmp = dftOptions.xAxis;
@@ -429,7 +430,7 @@
 				//角度图时使用{value: [name,value]}格式的数据会无法显示
 				if(isAngleAxis)
 					data = chart.resultNameValueObjects(result, np, vps[j]);
-				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+				//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				else
 					data = chart.resultValueObjects(result, [np, vps[j]]);
 				
