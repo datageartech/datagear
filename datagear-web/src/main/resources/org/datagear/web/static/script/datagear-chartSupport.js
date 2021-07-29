@@ -1799,7 +1799,7 @@
 			}
 			
 			legendData.push(dataSetName);
-			series.push(chartSupport.optionsSeries(renderOptions, i, { name: dataSetName, data: data }));
+			series.push(chartSupport.optionsSeries(renderOptions, series.length, { name: dataSetName, data: data }));
 		}
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
