@@ -32,19 +32,18 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = $.extend(
-		{
-			//扩展配置项：是否堆叠
-			dgStack: false
-		},
-		options);
-		
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
 		options = $.extend(true,
+		
+		//这里不应出现会在update中有设置的项（也不要将值设置为undefined、null，可能会影响图表内部逻辑），
+		//因为update中会把这里的设置高优先级合并
 		{
+			//扩展配置项：是否堆叠
+			dgStack: false,
+			
 			title:
 			{
 		        text: chart.name
@@ -55,7 +54,8 @@
 			},
 			legend:
 			{
-				data: []
+				//将在update中设置：
+				//data
 			},
 			xAxis: {
 				name: chart.dataSetPropertyLabel(np),
@@ -68,14 +68,18 @@
 				nameGap: 5,
 				type: "value"
 			},
-			series: [{
-				name: "",
-				type: "line",
-				data: []
-			}]
+			series:
+			[
+				{
+					type: "line"
+					
+					//将在update中设置：
+					//name
+					//data
+				}
+			]
 		},
-		options,
-		chart.options());
+		options, chart.options());
 		
 		options = chartSupport.processRenderOptions(chart, options);
 		
@@ -111,7 +115,7 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = chartSupport.optionsSeries(renderOptions, series.length, {name: legendName, data: data});
+				var mySeries = {name: legendName, data: data};
 				
 				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
 				if(dgStack)
@@ -126,7 +130,7 @@
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		options.xAxis = {data: null};
 		
-		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -172,23 +176,22 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = $.extend(
+		var chartDataSet = chart.chartDataSetFirst();
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		
+		options =$.extend(true,
+		
+		//这里不应出现会在update中有设置的项（也不要将值设置为undefined、null，可能会影响图表内部逻辑），
+		//因为update中会把这里的设置高优先级合并
 		{
 			//扩展配置项：是否堆叠
 			dgStack: false,
 			//扩展配置项：是否横向
 			dgHorizontal: false,
 			//是否按数据集分组堆叠
-			dgStackGroup: true
-		},
-		options);
-		
-		var chartDataSet = chart.chartDataSetFirst();
-		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
-		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
-		
-		var dftOptions =
-		{
+			dgStackGroup: true,
+			
 			title:
 			{
 		        text: chart.name
@@ -199,40 +202,53 @@
 			},
 			legend:
 			{
-				data: []
+				//将在update中设置：
+				//data
 			},
-			xAxis: {
+			xAxis:
+			{
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true
 			},
-			yAxis: {
+			yAxis:
+			{
 				name: (vps.length == 1 ? chart.dataSetPropertyLabel(vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
 			},
-			series: [{
-				name: "",
-				type: "bar",
-				label: { show: options.dgStack },
-				data: []
-			}]
-		};
+			series:
+			[
+				{
+					type: "bar"
+					
+					//将在update中设置：
+					//name
+					//data
+				}
+			]
+		},
+		options);
 		
 		//不能在合并其他设置项后交换轴设置项，会导致chart.options()的轴设置项颠倒
 		if(options.dgHorizontal)
 		{
-			var xAxisTmp = dftOptions.xAxis;
-			dftOptions.xAxis = dftOptions.yAxis;
-			dftOptions.yAxis = xAxisTmp;
+			var xAxisTmp = options.xAxis;
+			options.xAxis = options.yAxis;
+			options.yAxis = xAxisTmp;
 			
 			//横向柱状图的yAxis.type不能为value，不然会变为竖向图形
-			if(dftOptions.yAxis.type == "value")
-				dftOptions.yAxis.type = "category";
+			if(options.yAxis.type == "value")
+				options.yAxis.type = "category";
+		}
+		if(options.dgStack)
+		{
+			options.series[0].label = { show: true };
 		}
 		
-		options = $.extend(true, dftOptions, options, chart.options());
+		options = $.extend(true, options, chart.options());
+		
 		options = chartSupport.processRenderOptions(chart, options);
 		
 		chart.echartsInit(options);
@@ -268,7 +284,7 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = chartSupport.optionsSeries(renderOptions, series.length, {name: legendName, data: data});
+				var mySeries = {name: legendName, data: data};
 				
 				if(renderOptions.dgStack)
 					mySeries.stack = (renderOptions.dgStackGroup ? dataSetName : "stack");
@@ -286,7 +302,7 @@
 		else
 			options.xAxis = {data: null};
 		
-		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -514,19 +530,19 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = $.extend(
+		options = $.extend(true,
+		
+		//这里不应出现会在update中有设置的项（也不要将值设置为undefined、null，可能会影响图表内部逻辑），
+		//因为update中会把这里的设置高优先级合并
 		{
 			//是否按数据集分割系列，而非仅一个系列
 			dgSplitDataSet: false,
 			//当dgSplitDataSet=true时，各系列布局：
 			//nest：嵌套；grid：网格
-			dgSeriesLayout: "nest"
-		},
-		options);
-		
-		options = $.extend(true,
-		{
-			title: {
+			dgSeriesLayout: "nest",
+			
+			title:
+			{
 		        text: chart.name
 		    },
 			tooltip:
@@ -536,21 +552,23 @@
 			},
 			legend:
 			{
-				data: []
+				//将在update中设置：
+				//data
 			},
 			series:
 			[
 				{
-					name: chart.name,
-					type: "pie",
-					radius: "55%",
-					center: ["50%", "60%"],
-					data: []
+					type: "pie"
+					
+					//将在update中设置：
+					//name
+					//data
+					//center
+					//radius
 				}
 			]
 		},
-		options,
-		chart.options());
+		options, chart.options());
 		
 		options = chartSupport.processRenderOptions(chart, options);
 		
@@ -589,7 +607,7 @@
 			else
 			{
 				if(series.length == 0)
-					series.push({ name: dataSetName, data: [] });
+					series.push({ name: dataSetName, data: [], radius: "60%" });
 				
 				series[0].data = series[0].data.concat(data);
 			}
@@ -598,17 +616,12 @@
 		}
 		
 		var options = { legend: { data: legendData }, series: series };
-		
 		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
 		
-		for(var i=0; i<options.series.length; i++)
-			options.series[i] = chartSupport.optionsSeries(renderOptions, i, options.series[i]);
-		
-		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
-		
+		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		chart.echartsOptions(options);
 	};
-
+	
 	chartSupport.pieResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
@@ -5124,32 +5137,6 @@
 		return $.extend({}, ele, source);
 	};
 	
-	/**
-	 * 获取/设置选项series模板
-	 * 
-	 * @param chart 图表对象
-	 * @param options 要设置的options、要获取的series元素索引
-	 */
-	chartSupport.optionSeriesTemplate = function(chart, options)
-	{
-		//获取series数组
-		if(options == undefined)
-		{
-			return chart.extValue("chartOptionSeriesTemplate");
-		}
-		//获取series元素
-		else if(typeof(options) == "number")
-		{
-			var template = chart.extValue("chartOptionSeriesTemplate");
-			var index = (template.length > options ? options : 0);
-			
-			return (template[index] ? template[index] : {});
-		}
-		//设置series数组
-		else
-			chart.extValue("chartOptionSeriesTemplate", (options.series || []));
-	};
-	
 	//在图表渲染前处理渲染options
 	chartSupport.processRenderOptions = function(chart, renderOptions)
 	{
@@ -5165,11 +5152,35 @@
 		return renderOptions;
 	};
 	
+	//将renderOptions深读优先合并至updateOptions，然后调用renderOptions.processUpdateOptions处理updateOptions
+	chartSupport.processUpdateOptionsWithMerge = function(chart, results, renderOptions, updateOptions)
+	{
+		chartSupport.mergeRenderSeries(updateOptions, renderOptions, false);
+		
+		//已经在上面的mergeRenderSeries合并过了，这里先置空，避免重复合并，后面再恢复
+		var seriesTmp = renderOptions.series;
+		renderOptions.series = undefined;
+		
+		$.extend(true, updateOptions, renderOptions, chart.optionsUpdate());
+		
+		renderOptions.series = seriesTmp;
+		
+		if(renderOptions.processUpdateOptions)
+		{
+			var tmpOptions = renderOptions.processUpdateOptions(updateOptions, chart, results);
+			if(tmpOptions != null)
+				updateOptions = tmpOptions;
+		}
+		
+		return updateOptions;
+	};
+	
 	//在图表更新前处理更新options
 	chartSupport.processUpdateOptions = function(chart, results, renderOptions, updateOptions)
 	{
 		//先将chart.optionsUpdate()合并至updateOptions
 		var cou = chart.optionsUpdate();
+		
 		if(cou)
 			$.extend(true, updateOptions, cou);
 		
@@ -5178,6 +5189,41 @@
 			var tmpOptions = renderOptions.processUpdateOptions(updateOptions, chart, results);
 			if(tmpOptions != null)
 				updateOptions = tmpOptions;
+		}
+		
+		return updateOptions;
+	};
+	
+	/**
+	 * 将renderOptions.series深读优先合并至updateOptions.series
+	 *
+	 * @param updateOptions
+	 * @param renderOptions
+	 * @param strict 是否严格合并，当renderOptions的series没有指定索引的元素时：
+					 true 不合并元素；false 使用renderOptions的series最后一个元素合并，默认为：false 
+	 * @returns updateOptions
+	 */
+	chartSupport.mergeRenderSeries = function(updateOptions, renderOptions, strict)
+	{
+		strict = (strict == null ? false : strict);
+		
+		var updateSeries = (updateOptions ? updateOptions.series : null);
+		var renderSeries = (renderOptions ? renderOptions.series : null);
+		
+		if(!renderSeries || renderSeries.length == 0)
+			return updateOptions;
+		
+		var len = (updateSeries ? updateSeries.length : 0);
+		
+		for(var i=0; i<len; i++)
+		{
+			var srcIdx = (i >= renderSeries.length ? -1 : i);
+			
+			if(srcIdx < 0 && !strict)
+				srcIdx = renderSeries.length - 1;
+			
+			if(srcIdx >= 0)
+				updateSeries[i] = $.extend(true, updateSeries[i], renderSeries[srcIdx]);
 		}
 		
 		return updateOptions;
