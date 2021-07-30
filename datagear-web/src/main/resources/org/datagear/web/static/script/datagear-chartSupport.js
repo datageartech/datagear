@@ -36,10 +36,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
-		options = $.extend(true,
-		
-		//这里不应出现会在update中有设置的项（也不要将值设置为undefined、null，可能会影响图表内部逻辑），
-		//因为update中会把这里的设置高优先级合并
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			//扩展配置项：是否堆叠
 			dgStack: false,
@@ -79,9 +76,7 @@
 				}
 			]
 		},
-		options, chart.options());
-		
-		options = chartSupport.processRenderOptions(chart, options);
+		options);
 		
 		chart.echartsInit(options);
 	};
@@ -180,10 +175,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
-		options =$.extend(true,
-		
-		//这里不应出现会在update中有设置的项（也不要将值设置为undefined、null，可能会影响图表内部逻辑），
-		//因为update中会把这里的设置高优先级合并
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			//扩展配置项：是否堆叠
 			dgStack: false,
@@ -229,27 +221,24 @@
 				}
 			]
 		},
-		options);
-		
-		//不能在合并其他设置项后交换轴设置项，会导致chart.options()的轴设置项颠倒
-		if(options.dgHorizontal)
+		options,
+		function(options)
 		{
-			var xAxisTmp = options.xAxis;
-			options.xAxis = options.yAxis;
-			options.yAxis = xAxisTmp;
-			
-			//横向柱状图的yAxis.type不能为value，不然会变为竖向图形
-			if(options.yAxis.type == "value")
-				options.yAxis.type = "category";
-		}
-		if(options.dgStack)
-		{
-			options.series[0].label = { show: true };
-		}
-		
-		options = $.extend(true, options, chart.options());
-		
-		options = chartSupport.processRenderOptions(chart, options);
+			if(options.dgHorizontal)
+			{
+				var xAxisTmp = options.xAxis;
+				options.xAxis = options.yAxis;
+				options.yAxis = xAxisTmp;
+				
+				//横向柱状图的yAxis.type不能为value，不然会变为竖向图形
+				if(options.yAxis.type == "value")
+					options.yAxis.type = "category";
+			}
+			if(options.dgStack)
+			{
+				options.series[0].label = { show: true };
+			}
+		});
 		
 		chart.echartsInit(options);
 	};
@@ -298,9 +287,9 @@
 		
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		if(renderOptions.dgHorizontal)
-			options.yAxis = {data: null};
+			options.yAxis = { data: null };
 		else
-			options.xAxis = {data: null};
+			options.xAxis = { data: null };
 		
 		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		
@@ -350,68 +339,87 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = $.extend(
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			//扩展配置项：是否堆叠
 			dgStack: false,
 			//扩展配置项：坐标类型：radius（径向）、angle（角度）
 			dgAxisType: "radius",
 			//是否按数据集分组堆叠
-			dgStackGroup: true
-		},
-		options);
-		
-		var chartDataSet = chart.chartDataSetFirst();
-		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
-		
-		var dftOptions =
-		{
-			title: { text: chart.name },
+			dgStackGroup: true,
+			
+			title:
+			{
+				text: chart.name
+			},
 			angleAxis: {},
 			radiusAxis: {},
-			polar: { radius: "60%" },
-			tooltip: { trigger: "item" },
-			legend:{ data: [] },
+			polar:
+			{
+				radius: "60%"
+			},
+			tooltip:
+			{
+				trigger: "item"
+			},
+			legend:
+			{
+				//将在update中设置：
+				//data
+			},
 			series:
-			[{
-				name: "",
-				type: "bar",
-				label: { show: options.dgStack },
-				coordinateSystem: 'polar',
-				data: []
-			}]
-		};
-		
-		if(options.dgAxisType == "angle")
+			[
+				{
+					type: "bar",
+					coordinateSystem: 'polar'
+					
+					//将在update中设置：
+					//name
+					//data
+				}
+			]
+		},
+		options,
+		function(options)
 		{
-			dftOptions.angleAxis =
-			{
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
-		        data: []
-			};
+			var chartDataSet = chart.chartDataSetFirst();
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 			
-			//角度柱状图的angleAxis.type不能为value和time，不然图形会错乱
-			if(dftOptions.angleAxis.type == "value" || dftOptions.angleAxis.type == "time")
-				dftOptions.angleAxis.type = "category";
-		}
-		else
-		{
-			dftOptions.radiusAxis =
+			if(options.dgAxisType == "angle")
 			{
-				name: chart.dataSetPropertyLabel(np),
-				nameGap: 20,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
-		        data: [],
-		        z: 10
-			};
+				options.angleAxis =
+				{
+					type: chartSupport.evalDataSetPropertyAxisType(chart, np)
+					
+					//将在update中设置：
+					//data
+				};
+				
+				//角度柱状图的angleAxis.type不能为value和time，不然图形会错乱
+				if(options.angleAxis.type == "value" || options.angleAxis.type == "time")
+					options.angleAxis.type = "category";
+			}
+			else
+			{
+				options.radiusAxis =
+				{
+					name: chart.dataSetPropertyLabel(np),
+					nameGap: 20,
+					type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+			        z: 10
+					
+					//将在update中设置：
+					//data
+				};
+				
+				//径向柱状图的radiusAxis.type不能为value，不然会变为角度图形
+				if(options.radiusAxis.type == "value")
+					options.radiusAxis.type = "category";
+			}
 			
-			//径向柱状图的radiusAxis.type不能为value，不然会变为角度图形
-			if(dftOptions.radiusAxis.type == "value")
-				dftOptions.radiusAxis.type = "category";
-		}
-		
-		options = $.extend(true, dftOptions, options, chart.options());
-		options = chartSupport.processRenderOptions(chart, options);
+			if(options.dgStack)
+				options.series[0].label = { show: true };
+		});
 		
 		chart.echartsInit(options);
 	};
@@ -452,7 +460,7 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = chartSupport.optionsSeries(renderOptions, series.length, {name: legendName, data: data});
+				var mySeries = {name: legendName, data: data};
 				
 				if(renderOptions.dgStack)
 					mySeries.stack = (renderOptions.dgStackGroup ? dataSetName : "stack");
@@ -470,12 +478,12 @@
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		//角度图必须设置angleAxis.data，不然不显示刻度
 		if(isAngleAxis)
-			options.angleAxis = {data: axisData};
+			options.angleAxis = { data: axisData };
 		//径向图只需置为null即可
 		else
-			options.radiusAxis = {data: null};
+			options.radiusAxis = { data: null };
 		
-		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -530,10 +538,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = $.extend(true,
-		
-		//这里不应出现会在update中有设置的项（也不要将值设置为undefined、null，可能会影响图表内部逻辑），
-		//因为update中会把这里的设置高优先级合并
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			//是否按数据集分割系列，而非仅一个系列
 			dgSplitDataSet: false,
@@ -568,9 +573,7 @@
 				}
 			]
 		},
-		options, chart.options());
-		
-		options = chartSupport.processRenderOptions(chart, options);
+		options);
 		
 		chart.echartsInit(options);
 	};
@@ -702,7 +705,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { value: valueSign, min: minSign, max: maxSign });
 		
-		options = $.extend(true,
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			title: {
 		        text: chart.name
@@ -714,23 +717,22 @@
 			series:
 			[
 				{
-					name: "",
 					type: "gauge",
 					detail: {formatter: "{value}", color: "auto"},
 			        progress:
 					{
 						show: true
-			        },
-					min: 0,
-					max: 100,
-					data: [{value: 0, name: ''}]
+			        }
+					
+					//将在update中设置：
+					//name
+					//min
+					//max
+					//data
 				}
 			]
 		},
-		options,
-		chart.options());
-		
-		options = chartSupport.processRenderOptions(chart, options);
+		options);
 		
 		chart.echartsInit(options);
 	};
@@ -797,14 +799,12 @@
 		
 		chartSupport.gaugeEvalDataTitlePosition(chart, seriesData);
 		
-		if(min == null)
-			min = 0;
-		if(max == null)
-			max = 100;
+		min = (min == null ? 0 : min);
+		max = (max == null ? 100 : max);
 		
-		var options = { series : [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, min: min, max: max, data: seriesData }) ] };
+		var options = { series : [ { name: seriesName, min: min, max: max, data: seriesData } ] };
 		
-		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -893,7 +893,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
-		options = $.extend(true,
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			//扩展配置项：最大数据标记像素数
 			dgSymbolSizeMax: undefined,
@@ -909,29 +909,34 @@
 			},
 			legend:
 			{
-				data: []
+				//将在update中设置：
+				//data
 			},
-			xAxis: {
+			xAxis:
+			{
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
-			yAxis: {
+			yAxis:
+			{
 				name: chart.dataSetPropertyLabel(vp),
 				nameGap: 5,
 				type: "value"
 			},
-			series: [{
-				name: "",
-				type: "scatter",
-				data: []
-			}]
+			series:
+			[
+				{
+					type: "scatter"
+					
+					//将在update中设置：
+					//name
+					//data
+				}
+			]
 		},
-		options,
-		chart.options());
-		
-		options = chartSupport.processRenderOptions(chart, options);
+		options);
 		
 		chart.echartsInit(options);
 	};
@@ -975,7 +980,7 @@
 					max = (max == null ? valMy : Math.max(max, valMy));
 				}
 				
-				var mySeries = chartSupport.optionsSeries(renderOptions, series.length, { name: legendName, data: data });
+				var mySeries = { name: legendName, data: data };
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -988,7 +993,7 @@
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		options.xAxis = {data: null};
 		
-		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -1038,7 +1043,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
-		options = $.extend(true,
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			//扩展配置项：最大数据标记像素数
 			dgSymbolSizeMax: undefined,
@@ -1054,29 +1059,34 @@
 			},
 			legend:
 			{
-				data: []
+				//将在update中设置：
+				//data
 			},
-			xAxis: {
+			xAxis:
+			{
 				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
-			yAxis: {
+			yAxis:
+			{
 				name: chart.dataSetPropertyLabel(vp),
 				nameGap: 5,
 				type: "value"
 			},
-			series: [{
-				name: "",
-				type: "scatter",
-				data: []
-			}]
+			series:
+			[
+				{
+					type: "scatter"
+					
+					//将在update中设置：
+					//name
+					//data
+				}
+			]
 		},
-		options,
-		chart.options());
-		
-		options = chartSupport.processRenderOptions(chart, options);
+		options);
 		
 		chart.echartsInit(options);
 	};
@@ -1120,16 +1130,15 @@
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
-			var mySeries = chartSupport.optionsSeries(renderOptions, series.length, { name: dataSetName, data: data });
+			series.push({ name: dataSetName, data: data });
 			legendData.push(dataSetName);
-			series.push(mySeries);
 		}
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
 		var options = { legend: {data: legendData}, series: series };
 		
-		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -1177,9 +1186,10 @@
 	{
 		chartSupport.chartSignNameMap(chart, { item: itemSign, name: nameSign, value: valueSign, max: maxSign });
 		
-		options = $.extend(true,
+		options = chartSupport.buildRenderOptions(chart,
 		{
-			title: {
+			title:
+			{
 		        text: chart.name
 		    },
 			tooltip:
@@ -1188,25 +1198,30 @@
 			},
 			legend:
 			{
-				data: []
+				//将在update中设置：
+				//data
 			},
 			radar:
 			{
 				center: ["50%", "60%"],
 				radius: "70%",
-				nameGap: 6,
-				indicator: []
+				nameGap: 6
+				
+				//将在update中设置：
+				//indicator
 			},
-			series: [{
-				name: "",
-				type: "radar",
-				data: []
-			}]
+			series:
+			[
+				{
+					type: "radar"
+					
+					//将在update中设置：
+					//name
+					//data
+				}
+			]
 		},
-		options,
-		chart.options());
-		
-		options = chartSupport.processRenderOptions(chart, options);
+		options);
 		
 		chart.echartsInit(options);
 	};
@@ -1246,7 +1261,7 @@
 		var series = [ { data: seriesData } ];
 		var options = { legend: {data: legendData}, radar: {indicator: indicatorData}, series: series };
 		
-		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 		
@@ -1384,9 +1399,10 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = $.extend(true,
+		options = chartSupport.buildRenderOptions(chart,
 		{
-			title: {
+			title:
+			{
 		        text: chart.name
 		    },
 		    tooltip:
@@ -1396,31 +1412,31 @@
 		    },
 			legend:
 			{
-				data: []
+				//将在update中设置：
+				//data
 			},
 			series:
 			[
 				{
-		            name: "",
 		            type: "funnel",
 		            left: "10%",
 		            top: "20%",
 		            right: "10%",
 		            bottom: "10%",
-		            min: 0,
-		            max: 100,
 		            minSize: "0%",
 		            maxSize: "100%",
 		            sort: "descending",
-		            gap: 2,
-		            data: []
+		            gap: 2
+
+					//将在update中设置：
+					//name
+					//data
+					//min
+		            //max
 		        }
 			]
 		},
-		options,
-		chart.options());
-		
-		options = chartSupport.processRenderOptions(chart, options);
+		options);
 		
 		chart.echartsInit(options);
 	};
@@ -1469,11 +1485,10 @@
 				max = v;
 		}
 		
-		var series = [ chartSupport.optionsSeries(renderOptions, 0, {name: seriesName, min: min, max: max, data: seriesData }) ];
-		
+		var series = [ {name: seriesName, min: min, max: max, data: seriesData } ];
 		var options = { legend: { data: legendData }, series: series };
 		
-		options = chartSupport.processUpdateOptions(chart, results, renderOptions, options);
+		options = chartSupport.processUpdateOptionsWithMerge(chart, results, renderOptions, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -5135,6 +5150,48 @@
 		var ele = (options.series[indexValid] || {});
 		
 		return $.extend({}, ele, source);
+	};
+	
+	/**
+	 * 构建图表渲染options。
+	 * 注意： defaultOptions、builtinOptions，以及postMergeHandler处理后的渲染options中，
+	 *		 不应出现会在update函数中有设置的项（也不要将值设置为undefined、null，可能会影响图表内部逻辑），
+	 *		 因为update函数中调用的processUpdateOptionsWithMerge函数会把这里的设置高优先级合并。
+	 *
+	 * @param chart
+	 * @param defaultOptions 默认options，优先级最低
+	 * @param builtinOptions 可选，内置options，优先级高于defaultOptions
+	 * @param postMergeHandler 可选，后置合并处理函数，用于处理
+	 * @returns 图表渲染options
+	 */
+	chartSupport.buildRenderOptions = function(chart, defaultOptions, builtinOptions, postMergeHandler)
+	{
+		if(postMergeHandler === undefined && $.isFunction(builtinOptions))
+		{
+			postMergeHandler = builtinOptions;
+			builtinOptions = null;
+		}
+		
+		var renderOptions = $.extend(true, {}, defaultOptions, builtinOptions);
+		
+		if(postMergeHandler != null)
+			postMergeHandler(renderOptions, chart);
+		
+		//chart.options()是由用户设置的，优先级应高于postMergeHandler
+		renderOptions = $.extend(true, renderOptions, chart.options());
+		
+		//最后调用用户的processRenderOptions
+		if(renderOptions.processRenderOptions)
+		{
+			var tmpOptions = renderOptions.processRenderOptions(renderOptions, chart);
+			
+			if(tmpOptions != null)
+				renderOptions = tmpOptions;
+		}
+		
+		chartSupport.renderOptions(chart, renderOptions);
+		
+		return renderOptions;
 	};
 	
 	//在图表渲染前处理渲染options
