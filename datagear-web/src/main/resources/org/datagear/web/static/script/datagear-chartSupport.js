@@ -1531,128 +1531,14 @@
 	
 	//地图
 	
-	chartSupport.mapInitChart = function(chart, options)
-	{
-		//坐标系地图
-		var map = (options.geo ? options.geo.map : undefined);
-		
-		//数据系列地图
-		if(map == undefined)
-			map = (options.series && options.series.length > 0 ? options.series[0].map : undefined);
-		
-		if(!map)
-			throw new Error("[map] option must be set");
-		
-		options = chartSupport.processRenderOptions(chart, options);
-		
-		if(chart.echartsMapRegistered(map))
-		{
-			chart.echartsInit(options);
-			chart.extValue("presetMap", map);
-			
-			chart.statusRendered(true);
-		}
-		else
-		{
-			chart.echartsLoadMap(map, function()
-			{
-				chart.echartsInit(options);
-				chart.extValue("presetMap", map);
-				
-				chart.statusRendered(true);
-			});
-		}
-	};
-	
-	chartSupport.mapUpdateChart = function(chart, results, renderOptions, updateOptions)
-	{
-		var map = undefined;
-		//地图作为坐标系，而非图表series
-		var isGeo = (renderOptions.geo);
-		
-		if(isGeo)
-			map = (updateOptions.geo ? updateOptions.geo.map : undefined);
-		else
-			map = (updateOptions.series && updateOptions.series.length > 0 ? updateOptions.series[0].map : undefined);
-
-		var presetMap = chart.extValue("presetMap");
-		
-		if(!map)
-		{
-			var currentMap = chart.map();
-			
-			//通过chart.map(...)设置了新的地图
-			if(currentMap && currentMap != presetMap)
-			{
-				if(isGeo)
-				{
-					if(!updateOptions.geo)
-						updateOptions.geo = {};
-					
-					updateOptions.geo.map = currentMap;
-				}
-				else
-				{
-					if(!updateOptions.series)
-						updateOptions.series = [];
-					if(updateOptions.series.length == 0)
-						updateOptions.series[0] = {};
-					
-					updateOptions.series[0].map = currentMap;
-				}
-				
-				map = currentMap;
-			}
-		}
-		
-		//如果更新了地图，则要重置缩放比例和中心位置，避免出现某些地图无法显示的情况
-		if(map && map != presetMap)
-		{
-			if(isGeo)
-			{
-				updateOptions.geo.center = null;
-				updateOptions.geo.zoom = 1;//此项非必须
-			}
-			else
-			{
-				updateOptions.series[0].center = null;
-				updateOptions.series[0].zoom = 1;//此项非必须
-			}
-		}
-		
-		//没有更新地图、或者更新的地图已注册
-		if(!map || chart.echartsMapRegistered(map))
-		{
-			options = chartSupport.processUpdateOptions(chart, results, renderOptions, updateOptions);
-			
-			chart.echartsOptions(updateOptions);
-			
-			if(map)
-				chart.extValue("presetMap", map);
-			
-			chart.statusUpdated(true);
-		}
-		else
-		{
-			chart.echartsLoadMap(map, function()
-			{
-				options = chartSupport.processUpdateOptions(chart, results, renderOptions, updateOptions);
-				
-				chart.echartsOptions(updateOptions);
-				chart.extValue("presetMap", map);
-				
-				chart.statusUpdated(true);
-			});
-		}
-	};
-	
 	chartSupport.mapRender = function(chart, nameSign, valueSign, mapSign, options)
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, map: mapSign });
 		
-		options = $.extend(true,
+		options = chartSupport.buildRenderOptions(chart,
 		{
-			title: {
+			title:
+			{
 		        text: chart.name
 		    },
 			tooltip:
@@ -1662,8 +1548,10 @@
 			},
 			visualMap:
 			{
-				min: 0,
-				max: 100,
+				//将在update中设置：
+				//min: 0,
+				//max: 100,
+				
 				text: ["高", "低"],
 				realtime: true,
 				calculable: true
@@ -1671,20 +1559,24 @@
 			series:
 			[
 				{
-					name: "",
-					type: "map",
+					//将在update中设置：
+					//name
+					//data
+					//map
+					//这里必须设置map，不然渲染会报错，update中会特殊处理
 					map: (chart.map() || "china"),
-					label: {
+					
+					type: "map",
+					label:
+					{
 						show: true
-					},
-					data: []
+					}
 				}
 			]
 		},
-		options,
-		chart.options());
+		options);
 		
-		chartSupport.mapInitChart(chart, options);
+		chartSupport.echartsMapChartInit(chart, options);
 	};
 	
 	chartSupport.mapUpdate = function(chart, results)
@@ -1746,7 +1638,7 @@
 		if(map)
 			options.series[0].map = map;
 		
-		chartSupport.mapUpdateChart(chart, results, renderOptions, options);
+		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
 	
 	chartSupport.mapResize = function(chart)
@@ -1796,14 +1688,15 @@
 		chartSupport.chartSignNameMap(chart, { name: nameSign, longitude: longitudeSign, latitude: latitudeSign,
 			value: valueSign, map: mapSign });
 		
-		options = $.extend(true,
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			//扩展配置项：最大数据标记像素数
 			dgSymbolSizeMax: undefined,
 			//扩展配置项：最小数据标记像素数
 			dgSymbolSizeMin: undefined,
 			
-			title: {
+			title:
+			{
 		        text: chart.name
 		    },
 			tooltip:
@@ -1816,23 +1709,28 @@
 			},
 			geo:
 			{
-				roam: true,
-				map: (chart.map() || "china")
+				//将在update中设置：
+				//map
+				//这里必须设置map，不然渲染会报错，update中会特殊处理
+				map: (chart.map() || "china"),
+				
+				roam: true
 			},
 			series:
 			[
 				{
-					name: "",
+					//将在update中设置：
+					//name
+					//data
+					
 					type: "scatter",
-					coordinateSystem: "geo",
-					data: []
+					coordinateSystem: "geo"
 				}
 			]
 		},
-		options,
-		chart.options());
+		options);
 		
-		chartSupport.mapInitChart(chart, options);
+		chartSupport.echartsMapChartInit(chart, options);
 	};
 	
 	chartSupport.mapScatterUpdate = function(chart, results)
@@ -1889,7 +1787,7 @@
 			}
 			
 			legendData.push(dataSetName);
-			series.push(chartSupport.optionsSeries(renderOptions, series.length, { name: dataSetName, data: data }));
+			series.push({ name: dataSetName, data: data });
 		}
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
@@ -1899,7 +1797,7 @@
 		if(map)
 			options.geo = { map: map };
 		
-		chartSupport.mapUpdateChart(chart, results, renderOptions, options);
+		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
 	
 	chartSupport.mapScatterResize = function(chart)
@@ -1953,14 +1851,15 @@
 			targetLatitude: targetLatitudeSign, targetName: targetNameSign, targetCategory: targetCategorySign,
 			targetValue: targetValueSign, map: mapSign });
 		
-		options = $.extend(true,
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			//扩展配置项：最大数据标记像素数
 			dgSymbolSizeMax: undefined,
 			//扩展配置项：最小数据标记像素数
 			dgSymbolSizeMin: undefined,
 			
-			title: {
+			title:
+			{
 		        text: chart.name
 		    },
 			tooltip:
@@ -1969,32 +1868,40 @@
 			},
 			geo:
 			{
-				roam: true,
-				map: (chart.map() || "china")
+				//将在update中设置：
+				//map
+				//这里必须设置map，不然渲染会报错，update中会特殊处理
+				map: (chart.map() || "china"),
+				
+				roam: true
 			},
-			series: [{
-				name: "",
-				type: "graph",
-		        layout: "none",
-		        coordinateSystem: "geo",
-				data: [],
-				links: [],
-				legendHoverLink: true,
-				label: { position: "right" },
-				tooltip:
+			series:
+			[
 				{
-					formatter: "{a}<br>{b}：{c}"
-				},
-				emphasis:
-				{
-					focus: "adjacency"
+					//将在update中设置：
+					//name
+					//data
+					//links
+					
+					type: "graph",
+			        layout: "none",
+			        coordinateSystem: "geo",
+					legendHoverLink: true,
+					label: { position: "right" },
+					tooltip:
+					{
+						formatter: "{a}<br>{b}：{c}"
+					},
+					emphasis:
+					{
+						focus: "adjacency"
+					}
 				}
-			}]
+			]
 		},
-		options,
-		chart.options());
+		options);
 		
-		chartSupport.mapInitChart(chart, options);
+		chartSupport.echartsMapChartInit(chart, options);
 	};
 	
 	chartSupport.mapGraphUpdate = function(chart, results)
@@ -2134,7 +2041,7 @@
 			}
 		}
 		
-		var series = [ chartSupport.optionsSeries(renderOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
+		var series = [ { name: seriesName, categories: categories, data: seriesData, links: seriesLinks } ];
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
@@ -2143,7 +2050,7 @@
 		if(map)
 			options.geo = { map: map };
 		
-		chartSupport.mapUpdateChart(chart, results, renderOptions, options);
+		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 		
 		chart.extValue("mapGraphSeriesData", seriesData);
 	};
@@ -5179,22 +5086,6 @@
 	};
 	
 	/**
-	 * 将source合并至指定索引的series元素后生成一个新的对象，如果索引越界，则使用最后一个合并。
-	 */
-	chartSupport.optionsSeries = function(options, index, source)
-	{
-		var seriesLen = (options && options.series ? (options.series.length || 0) : 0);
-		
-		if(seriesLen <= 0)
-			return source;
-		
-		var indexValid = (index < seriesLen ? index : seriesLen - 1);
-		var ele = (options.series[indexValid] || {});
-		
-		return $.extend({}, ele, source);
-	};
-	
-	/**
 	 * 构建图表渲染options。
 	 * 注意： defaultOptions、builtinOptions，以及postMergeHandler处理后的渲染options中，
 	 *		 不应设置会在update函数中有设置的项（对于基本类型，不应出现，也不要将值设置为undefined、null，可能会影响图表内部逻辑；对于数组类型，可以不出现，也可以设置为：[]），
@@ -5808,6 +5699,116 @@
 			
 			obj.symbolSize = chartSupport.evalValueSymbolSize(
 				value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
+		}
+	};
+	
+	/**
+	 * 获取/设置ECharts地图图表的地图名option。
+	 * 注意：获取操作不会读取chart.map()
+	 *
+	 * @param chart
+	 * @param options
+	 * @param map 可选，要设置的地图名
+	 * @param isGeo 可选，是否强制为地图坐标系
+	 * @returns 获取操作时的地图名
+	 */
+	chartSupport.echartsMapChartMapOption = function(chart, options, map, isGeo)
+	{
+		if(map === true || map === false)
+		{
+			isGeo = map;
+			map = undefined;
+		}
+		
+		isGeo = (isGeo === undefined ? (options.geo != null) : isGeo);
+		
+		if(map === undefined)
+		{
+			if(map == null)
+			{
+				if(isGeo)
+					map = (options.geo ? options.geo.map : null);
+				else
+					map = (options.series && options.series.length > 0 ? options.series[0].map : null);
+			}
+			
+			return map;
+		}
+		else
+		{
+			if(isGeo)
+			{
+				if(!options.geo)
+					options.geo = {};
+				
+				options.geo.map = map;
+			}
+			else
+			{
+				if(!options.series)
+					options.series = [];
+				if(!options.series[0])
+					options.series[0] = {};
+				
+				options.series[0].map = map;
+			}
+		}
+	};
+	
+	chartSupport.echartsMapChartInit = function(chart, options)
+	{
+		var map = (chart.map() || chartSupport.echartsMapChartMapOption(chart, options));
+		
+		if(!map)
+			throw new Error("[map] option must be set");
+		
+		chartSupport.echartsMapChartMapOption(chart, options, map);
+		
+		if(chart.echartsMapRegistered(map))
+		{
+			chart.echartsInit(options);
+			chart.statusRendered(true);
+		}
+		else
+		{
+			chart.echartsLoadMap(map, function()
+			{
+				chart.echartsInit(options);
+				chart.statusRendered(true);
+			});
+		}
+	};
+	
+	chartSupport.echartsMapChartUpdate = function(chart, results, updateOptions, renderOptions)
+	{
+		var renderMap = chartSupport.echartsMapChartMapOption(chart, renderOptions);
+		var updateMap = chartSupport.echartsMapChartMapOption(chart, updateOptions);
+		
+		if(!updateMap)
+			updateMap = chart.map();
+		
+		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, function(updateOptions)
+		{
+			//buildUpdateOptions()会将地图设置为renderMap，所以这里需要再次设置为updateMap
+			if(updateMap && updateMap != renderMap)
+				chartSupport.echartsMapChartMapOption(chart, updateOptions, updateMap);
+		});
+		
+		var map = chartSupport.echartsMapChartMapOption(chart, updateOptions);;
+		
+		//更新地图未设置或者已注册
+		if(!map || chart.echartsMapRegistered(map))
+		{
+			chart.echartsOptions(updateOptions);
+			chart.statusUpdated(true);
+		}
+		else
+		{
+			chart.echartsLoadMap(map, function()
+			{
+				chart.echartsOptions(updateOptions);
+				chart.statusUpdated(true);
+			});
 		}
 	};
 	
