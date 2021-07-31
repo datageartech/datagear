@@ -612,10 +612,10 @@
 				if(series.length == 0)
 					series.push({ name: dataSetName, data: [], radius: "60%" });
 				
-				series[0].data = series[0].data.concat(data);
+				chartSupport.appendElement(series[0].data, data);
 			}
 			
-			legendData = legendData.concat(npv);
+			chartSupport.appendElement(legendData, npv);
 		}
 		
 		var options = { legend: { data: legendData }, series: series };
@@ -1469,10 +1469,10 @@
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
-			legendData = legendData.concat(npv);
+			chartSupport.appendElement(legendData, npv);
 			if(!seriesName)
 				seriesName = dataSetName;
-			seriesData = seriesData.concat(data);
+			chartSupport.appendElement(seriesData, data);
 		}
 		
 		for(var i=0; i<seriesData.length; i++)
@@ -1619,7 +1619,7 @@
 			if(!seriesName)
 				seriesName = dataSetName;
 			
-			seriesData = seriesData.concat(data);
+			chartSupport.appendElement(seriesData, data);
 			
 			if(data && data.length)
 			{
@@ -2407,7 +2407,7 @@
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
-			seriesData = seriesData.concat(data);
+			chartSupport.appendElement(seriesData, data);
 			
 			if(!seriesName)
 				seriesName = chart.chartDataSetName(chartDataSet);
@@ -3446,7 +3446,7 @@
 				
 				if(!seriesNameBox)
 					seriesNameBox = dataSetName;
-				seriesDataBox = seriesDataBox.concat(data);
+				chartSupport.appendElement(seriesDataBox, data);
 			}
 			//异常值数据集
 			else
@@ -3459,7 +3459,7 @@
 					var data = chart.resultValueObjects(result, vpsMy);
 					chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 					
-					seriesDataOutlier = seriesDataOutlier.concat(data);
+					chartSupport.appendElement(seriesDataOutlier, data);
 				}
 				
 				if(!seriesNameOutlier)
@@ -3625,7 +3625,7 @@
 				if(!toColor)
 					break;
 				
-				dgColorGradients = dgColorGradients.concat(chartFactory.evalGradualColors(fromColor, toColor, 5));
+				chartSupport.appendElement(dgColorGradients, chartFactory.evalGradualColors(fromColor, toColor, 5));
 			}
 			options.dgColorGradients = dgColorGradients;
 		});
@@ -3661,7 +3661,7 @@
 				chartSupport.chartDataOriginalDataIndex(data[j], chartDataSet, j);
 			}
 			
-			seriesData = seriesData.concat(data);
+			chartSupport.appendElement(seriesData, data);
 		}
 		
 		min = (min >= max ? max - 1 : min);
@@ -3836,7 +3836,7 @@
 				}
 			}
 			
-			seriesData = seriesData.concat(data);
+			chartSupport.appendElement(seriesData, data);
 		}
 		
 		//如果仅有一个波浪，则自动扩充
@@ -3991,8 +3991,7 @@
 			columns.push(column);
 		}
 		
-		//表格图表样式设置项
-		var options = $.extend(true,
+		options = chartSupport.buildRenderOptions(chart,
 		{
 			//标题样式
 			title:
@@ -4044,76 +4043,75 @@
 				}
 			}
 		},
-		options,
-		chart.options());
-		
-		//如果没有定义table选项，则采用全局themeBindTableOptions
-		if(options.table == null)
-			options.table = themeBindTableOptions;
-		else
+		options, null, function(options)
 		{
-			options.table = $.extend(true, {}, themeBindTableOptions, options.table);
-			options.table._chartTableStyleClassName =chartFactory.nextElementId();
-			options.table._chartTableStyleSheetId = chartFactory.nextElementId();
-		}
-		
-		//完善分页选项
-		options.paging = (options.paging != null ? options.paging : false);
-		options.info = (options.info != null ? options.info :
-								(options.paging ? true : false));
-		options.dom = (options.dom != null ? options.dom :
-								(options.paging ? "tilpr" : "t"));
-		
-		//完善轮播选项
-		if(options.carousel == null)
-		{
-			
-		}
-		else if(options.carousel === true || options.carousel === false)
-		{
-			carouselConfig.enable = options.carousel;
-		}
-		else if(typeof(options.carousel) == "number" || $.isFunction(options.carousel))
-		{
-			carouselConfig.enable = true;
-			carouselConfig.interval = options.carousel;
-		}
-		else
-		{
-			carouselConfig = $.extend(true, carouselConfig, options.carousel);
-		}
-		options.carousel = carouselConfig;
-		
-		//填充options.columns的render函数
-		for(var i=0; i<options.columns.length; i++)
-		{
-			if(options.columns[i].render == null)
+			//如果没有定义table选项，则采用全局themeBindTableOptions
+			if(options.table == null)
+				options.table = themeBindTableOptions;
+			else
 			{
-				options.columns[i].render = function(value, type, row, meta)
-				{
-					//单元格展示绘制
-					if(type == "display")
-					{
-						if(options.table.renderValue)
-						{
-							var rowIndex = meta.row;
-							var columnIndex = meta.col;
-							var name = columns[columnIndex].data;
-							
-							return options.table.renderValue(value, name,
-									rowIndex, columnIndex, row, meta);
-						}
-						else
-							return chartFactory.escapeHtml(value);
-					}
-					//其他绘制，比如排序
-					else
-						return value;
-				};
+				options.table = $.extend(true, {}, themeBindTableOptions, options.table);
+				options.table._chartTableStyleClassName =chartFactory.nextElementId();
+				options.table._chartTableStyleSheetId = chartFactory.nextElementId();
 			}
-		}
-		
-		options = chartSupport.processRenderOptions(chart, options);
+			
+			//完善分页选项
+			options.paging = (options.paging != null ? options.paging : false);
+			options.info = (options.info != null ? options.info :
+									(options.paging ? true : false));
+			options.dom = (options.dom != null ? options.dom :
+									(options.paging ? "tilpr" : "t"));
+			
+			//完善轮播选项
+			if(options.carousel == null)
+			{
+				
+			}
+			else if(options.carousel === true || options.carousel === false)
+			{
+				carouselConfig.enable = options.carousel;
+			}
+			else if(typeof(options.carousel) == "number" || $.isFunction(options.carousel))
+			{
+				carouselConfig.enable = true;
+				carouselConfig.interval = options.carousel;
+			}
+			else
+			{
+				carouselConfig = $.extend(true, carouselConfig, options.carousel);
+			}
+			
+			options.carousel = carouselConfig;
+			
+			//填充options.columns的render函数
+			for(var i=0; i<options.columns.length; i++)
+			{
+				if(options.columns[i].render == null)
+				{
+					options.columns[i].render = function(value, type, row, meta)
+					{
+						//单元格展示绘制
+						if(type == "display")
+						{
+							if(options.table.renderValue)
+							{
+								var rowIndex = meta.row;
+								var columnIndex = meta.col;
+								var name = columns[columnIndex].data;
+								
+								return options.table.renderValue(value, name,
+										rowIndex, columnIndex, row, meta);
+							}
+							else
+								return chartFactory.escapeHtml(value);
+						}
+						//其他绘制，比如排序
+						else
+							return value;
+					};
+				}
+			}
+		});
 		
 		var evalHeight = (options.scrollY == null);
 		
@@ -4213,7 +4211,7 @@
 		
 		chartSupport.tableStopCarousel(chart);
 		
-		updateOptions = chartSupport.processUpdateOptions(chart, results, renderOptions, updateOptions);
+		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, false);
 		
 		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0);
 		chartSupport.tableAdjust(chart);
@@ -4776,7 +4774,7 @@
 			}
 		}
 		
-		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions);
+		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, false);
 		
 		for(var i=0; i<updateOptions.data.length; i++)
 		{
@@ -5087,31 +5085,29 @@
 	
 	/**
 	 * 构建图表渲染options。
-	 * 注意： defaultOptions、builtinOptions，以及postMergeHandler处理后的渲染options中，
+	 * 注意： defaultOptions、builtinOptions，以及firstMergeHandler处理后的渲染options中，
 	 *		 不应设置会在update函数中有设置的项（对于基本类型，不应出现，也不要将值设置为undefined、null，可能会影响图表内部逻辑；对于数组类型，可以不出现，也可以设置为：[]），
-	 *		 因为update函数中调用的buildUpdateOptions函数会把这里的设置高优先级深度合并。
+	 *		 因为update函数中调用的buildUpdateOptions（mergeRenderOptions为true时）函数会把这里的设置高优先级深度合并。
 	 *
 	 * @param chart
 	 * @param defaultOptions 默认options，优先级最低
-	 * @param builtinOptions 可选，内置options，优先级高于defaultOptions
-	 * @param postMergeHandler 可选，后置合并处理函数，用于处理由defaultOptions、builtinOptions合并后的新options
+	 * @param builtinOptions 内置options，优先级高于defaultOptions
+	 * @param firstMergeHandler 可选，由defaultOptions、builtinOptions合并后的新渲染options处理函数
+	 * @param secondMergeHandler 可选，新渲染options合并chart.options()后的处理函数
 	 * @returns 一个新的图表渲染options
 	 */
-	chartSupport.buildRenderOptions = function(chart, defaultOptions, builtinOptions, postMergeHandler)
-	{
-		if(postMergeHandler === undefined && $.isFunction(builtinOptions))
-		{
-			postMergeHandler = builtinOptions;
-			builtinOptions = null;
-		}
-		
+	chartSupport.buildRenderOptions = function(chart, defaultOptions, builtinOptions, firstMergeHandler, secondMergeHandler)
+	{	
 		var renderOptions = $.extend(true, {}, defaultOptions, builtinOptions);
 		
-		if(postMergeHandler != null)
-			postMergeHandler(renderOptions, chart);
+		if(firstMergeHandler != null)
+			firstMergeHandler(renderOptions, chart);
 		
-		//chart.options()是由用户设置的，优先级应高于postMergeHandler
+		//chart.options()是由用户设置的，优先级应高于firstMergeHandler
 		renderOptions = $.extend(true, renderOptions, chart.options());
+		
+		if(secondMergeHandler != null)
+			secondMergeHandler(renderOptions, chart);
 		
 		//最后调用用户的processRenderOptions
 		if(renderOptions.processRenderOptions)
@@ -5130,19 +5126,34 @@
 	 * @param updateOptions 要构建的更新options，将会被修改
 	 * @param renderOptions 渲染options，将会被高优先级深度合并至updateOptions
 	 * @param postMergeHandler 可选，后置合并处理函数，用于处理合并后的updateOptions
+	 * @param mergeRenderOptions 可选，是否合并renderOptions，默认值为：true
 	 * @returns updateOptions
 	 */
-	chartSupport.buildUpdateOptions = function(chart, results, updateOptions, renderOptions, postMergeHandler)
+	chartSupport.buildUpdateOptions = function(chart, results, updateOptions, renderOptions, postMergeHandler, mergeRenderOptions)
 	{
-		chartSupport.mergeRenderSeries(updateOptions, renderOptions, false);
+		if(mergeRenderOptions === undefined && (postMergeHandler === true || postMergeHandler === false))
+		{
+			mergeRenderOptions = postMergeHandler;
+			postMergeHandler = null;
+		}
+		mergeRenderOptions = (mergeRenderOptions == null ? true : mergeRenderOptions);
 		
-		//已经在上面的mergeRenderSeries合并过了，这里先置空，避免重复合并，后面再恢复
-		var seriesTmp = renderOptions.series;
-		renderOptions.series = undefined;
-		
-		$.extend(true, updateOptions, renderOptions, chart.optionsUpdate());
-		
-		renderOptions.series = seriesTmp;
+		if(mergeRenderOptions)
+		{
+			chartSupport.mergeRenderSeries(updateOptions, renderOptions, false);
+			
+			//已经在上面的mergeRenderSeries合并过了，这里先置空，避免重复合并，后面再恢复
+			var seriesTmp = renderOptions.series;
+			renderOptions.series = undefined;
+			
+			$.extend(true, updateOptions, renderOptions, chart.optionsUpdate());
+			
+			renderOptions.series = seriesTmp;
+		}
+		else
+		{
+			$.extend(true, updateOptions, chart.optionsUpdate());
+		}
 		
 		if(postMergeHandler != null)
 			postMergeHandler(updateOptions, renderOptions, chart);
@@ -5184,40 +5195,6 @@
 			
 			if(srcIdx >= 0)
 				updateSeries[i] = $.extend(true, updateSeries[i], renderSeries[srcIdx]);
-		}
-		
-		return updateOptions;
-	};
-	
-	//在图表渲染前处理渲染options
-	chartSupport.processRenderOptions = function(chart, renderOptions)
-	{
-		if(renderOptions.processRenderOptions)
-		{
-			var tmpOptions = renderOptions.processRenderOptions(renderOptions, chart);
-			if(tmpOptions != null)
-				renderOptions = tmpOptions;
-		}
-		
-		chartSupport.renderOptions(chart, renderOptions);
-		
-		return renderOptions;
-	};
-	
-	//在图表更新前处理更新options
-	chartSupport.processUpdateOptions = function(chart, results, renderOptions, updateOptions)
-	{
-		//先将chart.optionsUpdate()合并至updateOptions
-		var cou = chart.optionsUpdate();
-		
-		if(cou)
-			$.extend(true, updateOptions, cou);
-		
-		if(renderOptions.processUpdateOptions)
-		{
-			var tmpOptions = renderOptions.processUpdateOptions(updateOptions, chart, results);
-			if(tmpOptions != null)
-				updateOptions = tmpOptions;
 		}
 		
 		return updateOptions;
@@ -5279,26 +5256,6 @@
 	{
 		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
 		return (dataType == chartSupport.DataSetPropertyDataType.TIMESTAMP);
-	};
-	
-	/**
-	 * 提取对象/对象数组的指定属性值。
-	 * 
-	 * @param source 对象、对象数组
-	 * @param propertyName 属性名
-	 * @return 输性值、属性值数组
-	 */
-	chartSupport.extractPropertyValue = function(source, propertyName)
-	{
-		if(!$.isArray(source))
-			return (source ? source[propertyName] : undefined);
-		
-		var re = [];
-		
-		for(var i=0; i<source.length; i++)
-			re[i] = source[i][propertyName];
-		
-		return re;
 	};
 	
 	/**
