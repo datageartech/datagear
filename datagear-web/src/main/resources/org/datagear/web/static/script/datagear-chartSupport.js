@@ -612,10 +612,10 @@
 				if(series.length == 0)
 					series.push({ name: dataSetName, data: [], radius: "60%" });
 				
-				chartSupport.appendElement(series[0].data, data);
+				series[0].data = series[0].data.concat(data);
 			}
 			
-			chartSupport.appendElement(legendData, npv);
+			legendData = legendData.concat(npv);
 		}
 		
 		var options = { legend: { data: legendData }, series: series };
@@ -1337,7 +1337,7 @@
 		for(var i=0; i<vv.length; i++)
 		{
 			var name = chart.dataSetPropertyLabel(vp[i]);
-			chartSupport.appendElement(legendData, name);
+			legendData.push(name);
 			
 			var myData = { name: name, value: vv[i] };
 			
@@ -1469,10 +1469,10 @@
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
-			chartSupport.appendElement(legendData, npv);
+			legendData = legendData.concat(npv);
 			if(!seriesName)
 				seriesName = dataSetName;
-			chartSupport.appendElement(seriesData, data);
+			seriesData = seriesData.concat(data);
 		}
 		
 		for(var i=0; i<seriesData.length; i++)
@@ -1619,7 +1619,7 @@
 			if(!seriesName)
 				seriesName = dataSetName;
 			
-			chartSupport.appendElement(seriesData, data);
+			seriesData = seriesData.concat(data);
 			
 			if(data && data.length)
 			{
@@ -2407,7 +2407,7 @@
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
-			chartSupport.appendElement(seriesData, data);
+			seriesData = seriesData.concat(data);
 			
 			if(!seriesName)
 				seriesName = chart.chartDataSetName(chartDataSet);
@@ -3446,7 +3446,7 @@
 				
 				if(!seriesNameBox)
 					seriesNameBox = dataSetName;
-				chartSupport.appendElement(seriesDataBox, data);
+				seriesDataBox = seriesDataBox.concat(data);
 			}
 			//异常值数据集
 			else
@@ -3459,7 +3459,7 @@
 					var data = chart.resultValueObjects(result, vpsMy);
 					chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 					
-					chartSupport.appendElement(seriesDataOutlier, data);
+					seriesDataOutlier = seriesDataOutlier.concat(data);
 				}
 				
 				if(!seriesNameOutlier)
@@ -3625,7 +3625,7 @@
 				if(!toColor)
 					break;
 				
-				chartSupport.appendElement(dgColorGradients, chartFactory.evalGradualColors(fromColor, toColor, 5));
+				dgColorGradients = dgColorGradients.concat(chartFactory.evalGradualColors(fromColor, toColor, 5));
 			}
 			options.dgColorGradients = dgColorGradients;
 		});
@@ -3661,7 +3661,7 @@
 				chartSupport.chartDataOriginalDataIndex(data[j], chartDataSet, j);
 			}
 			
-			chartSupport.appendElement(seriesData, data);
+			seriesData = seriesData.concat(data);
 		}
 		
 		min = (min >= max ? max - 1 : min);
@@ -3836,7 +3836,7 @@
 				}
 			}
 			
-			chartSupport.appendElement(seriesData, data);
+			seriesData = seriesData.concat(data);
 		}
 		
 		//如果仅有一个波浪，则自动扩充
@@ -4211,7 +4211,7 @@
 		
 		chartSupport.tableStopCarousel(chart);
 		
-		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, false);
+		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, null, false);
 		
 		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0);
 		chartSupport.tableAdjust(chart);
@@ -4774,7 +4774,7 @@
 			}
 		}
 		
-		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, false);
+		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, null, false);
 		
 		for(var i=0; i<updateOptions.data.length; i++)
 		{
@@ -5097,7 +5097,7 @@
 	 * @returns 一个新的图表渲染options
 	 */
 	chartSupport.buildRenderOptions = function(chart, defaultOptions, builtinOptions, firstMergeHandler, secondMergeHandler)
-	{	
+	{
 		var renderOptions = $.extend(true, {}, defaultOptions, builtinOptions);
 		
 		if(firstMergeHandler != null)
@@ -5119,36 +5119,37 @@
 	};
 	
 	/**
-	 * 构建图表更新options。
+	 * 构建图表更新options，并返回有修改的updateOptions。
 	 * 
 	 * @param chart
 	 * @param results
 	 * @param updateOptions 要构建的更新options，将会被修改
-	 * @param renderOptions 渲染options，将会被高优先级深度合并至updateOptions
+	 * @param renderOptions 渲染options，当renderOptions为true时，将会被高优先级深度合并至updateOptions，并且仅合并updateOptions中的同名项
 	 * @param postMergeHandler 可选，后置合并处理函数，用于处理合并后的updateOptions
 	 * @param mergeRenderOptions 可选，是否合并renderOptions，默认值为：true
+	 * @param mergeSeriesAsTemplate 可选，是否将renderOptions.series作为模板合并，默认值为：true
 	 * @returns updateOptions
 	 */
-	chartSupport.buildUpdateOptions = function(chart, results, updateOptions, renderOptions, postMergeHandler, mergeRenderOptions)
+	chartSupport.buildUpdateOptions = function(chart, results, updateOptions, renderOptions,
+									postMergeHandler, mergeRenderOptions, mergeSeriesAsTemplate)
 	{
-		if(mergeRenderOptions === undefined && (postMergeHandler === true || postMergeHandler === false))
-		{
-			mergeRenderOptions = postMergeHandler;
-			postMergeHandler = null;
-		}
 		mergeRenderOptions = (mergeRenderOptions == null ? true : mergeRenderOptions);
+		mergeSeriesAsTemplate = (mergeSeriesAsTemplate == null ? true : mergeSeriesAsTemplate);
 		
 		if(mergeRenderOptions)
 		{
-			chartSupport.mergeRenderSeries(updateOptions, renderOptions, false);
+			//提取renderOptions中的待合并项
+			var srcRenderOptions = {};
+			for(var uop in updateOptions)
+				srcRenderOptions[uop] = renderOptions[uop];
 			
-			//已经在上面的mergeRenderSeries合并过了，这里先置空，避免重复合并，后面再恢复
-			var seriesTmp = renderOptions.series;
-			renderOptions.series = undefined;
+			if(mergeSeriesAsTemplate)
+			{
+				chartSupport.mergeArrayTemplate(updateOptions.series, srcRenderOptions.series);
+				srcRenderOptions.series = undefined;
+			}
 			
-			$.extend(true, updateOptions, renderOptions, chart.optionsUpdate());
-			
-			renderOptions.series = seriesTmp;
+			$.extend(true, updateOptions, srcRenderOptions, chart.optionsUpdate());
 		}
 		else
 		{
@@ -5166,38 +5167,27 @@
 	};
 	
 	/**
-	 * 将renderOptions.series深读优先合并至updateOptions.series
+	 * 将templateArray高优先级深读合并至array，并返回array。
+	 * 当templateArray中没有array对应索引的元素时，将使用templateArray的最后一个元素合并。 
 	 *
-	 * @param updateOptions
-	 * @param renderOptions
-	 * @param strict 是否严格合并，当renderOptions的series没有指定索引的元素时：
-					 true 不合并元素；false 使用renderOptions的series最后一个元素合并，默认为：false 
-	 * @returns updateOptions
+	 * @param array
+	 * @param templateArray
+	 * @returns array
 	 */
-	chartSupport.mergeRenderSeries = function(updateOptions, renderOptions, strict)
+	chartSupport.mergeArrayTemplate = function(array, templateArray)
 	{
-		strict = (strict == null ? false : strict);
+		if(!templateArray || templateArray.length == 0)
+			return array;
 		
-		var updateSeries = (updateOptions ? updateOptions.series : null);
-		var renderSeries = (renderOptions ? renderOptions.series : null);
-		
-		if(!renderSeries || renderSeries.length == 0)
-			return updateOptions;
-		
-		var len = (updateSeries ? updateSeries.length : 0);
+		var len = (array ? array.length : 0);
 		
 		for(var i=0; i<len; i++)
 		{
-			var srcIdx = (i >= renderSeries.length ? -1 : i);
-			
-			if(srcIdx < 0 && !strict)
-				srcIdx = renderSeries.length - 1;
-			
-			if(srcIdx >= 0)
-				updateSeries[i] = $.extend(true, updateSeries[i], renderSeries[srcIdx]);
+			var srcIdx = (i >= templateArray.length ? templateArray.length - 1 : i);
+			array[i] = $.extend(true, array[i], templateArray[srcIdx]);
 		}
 		
-		return updateOptions;
+		return array;
 	};
 	
 	/**
@@ -5751,7 +5741,7 @@
 				chartSupport.echartsMapChartMapOption(chart, updateOptions, updateMap);
 		});
 		
-		var map = chartSupport.echartsMapChartMapOption(chart, updateOptions);;
+		var map = chartSupport.echartsMapChartMapOption(chart, updateOptions);
 		
 		//更新地图未设置或者已注册
 		if(!map || chart.echartsMapRegistered(map))
