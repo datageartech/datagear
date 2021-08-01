@@ -621,6 +621,8 @@ readonly 是否只读操作，允许为null
 		{name: "chart.handleChartEventLink", value: "handleChartEventLink(", caption: "handleChartEventLink() ", meta: "chart"},
 		{name: "chart.hasParamDataSet", value: "()", caption: "hasParamDataSet() ", meta: "chart"},
 		{name: "chart.id", value: "id", caption: "id ", meta: "chart"},
+		{name: "chart.inflateRenderOptions", value: "inflateRenderOptions(", caption: "inflateRenderOptions() ", meta: "chart"},
+		{name: "chart.inflateUpdateOptions", value: "inflateUpdateOptions(", caption: "inflateUpdateOptions() ", meta: "chart"},
 		{name: "chart.init", value: "init()", caption: "init() ", meta: "chart"},
 		{name: "chart.isActive", value: "isActive()", caption: "isActive() ", meta: "chart"},
 		{name: "chart.isAsyncRender", value: "isAsyncRender()", caption: "isAsyncRender() ", meta: "chart"},
