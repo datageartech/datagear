@@ -1266,7 +1266,7 @@
 		
 		chart.echartsOptions(options);
 		
-		chart.extValue("radarIndicatorData", indicatorData);
+		chartFactory.extValueBuiltin(chart, "radarIndicatorData", indicatorData);
 	};
 	
 	//行式雷达网数据处理，一行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*n
@@ -1378,7 +1378,7 @@
 		data[signNameMap.item] = echartsData.name;
 		data[signNameMap.value] = echartsData.value;
 		
-		var indicatorData = chart.extValue("radarIndicatorData");
+		var indicatorData = chartFactory.extValueBuiltin(chart, "radarIndicatorData");
 		var names = [];
 		var maxes = [];
 		for(var i=0; i<indicatorData.length; i++)
@@ -2052,7 +2052,7 @@
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 		
-		chart.extValue("mapGraphSeriesData", seriesData);
+		chartFactory.extValueBuiltin(chart, "mapGraphSeriesData", seriesData);
 	};
 	
 	chartSupport.mapGraphResize = function(chart)
@@ -2101,7 +2101,7 @@
 		//边
 		else if(echartsEventParams.dataType == "edge")
 		{
-			var seriesData = chart.extValue("mapGraphSeriesData");
+			var seriesData = chartFactory.extValueBuiltin(chart, "mapGraphSeriesData");
 			var sourceData = seriesData[echartsData.source];
 			var targetData = seriesData[echartsData.target];
 			
@@ -2980,7 +2980,7 @@
 		
 		chart.echartsOptions(options);
 		
-		chart.extValue("sankeySeriesData", seriesData);
+		chartFactory.extValueBuiltin(chart, "sankeySeriesData", seriesData);
 	};
 
 	chartSupport.sankeyResize = function(chart)
@@ -3023,7 +3023,7 @@
 		//边
 		else if(echartsEventParams.dataType == "edge")
 		{
-			var seriesData = chart.extValue("sankeySeriesData");
+			var seriesData = chartFactory.extValueBuiltin(chart, "sankeySeriesData");
 			var sourceData = seriesData[echartsData._sourceIndex];
 			var targetData = seriesData[echartsData._targetIndex];
 			
@@ -3254,7 +3254,7 @@
 		
 		chart.echartsOptions(options);
 		
-		chart.extValue("graphSeriesData", seriesData);
+		chartFactory.extValueBuiltin(chart, "graphSeriesData", seriesData);
 	};
 
 	chartSupport.graphResize = function(chart)
@@ -3300,7 +3300,7 @@
 		//边
 		else if(echartsEventParams.dataType == "edge")
 		{
-			var seriesData = chart.extValue("graphSeriesData");
+			var seriesData = chartFactory.extValueBuiltin(chart, "graphSeriesData");
 			var sourceData = seriesData[echartsData.source];
 			var targetData = seriesData[echartsData.target];
 			
@@ -4180,7 +4180,7 @@
 			});
 		}
 		
-		chart.extValue("chartTableId", tableId);
+		chartFactory.extValueBuiltin(chart, "chartTableId", tableId);
 	};
 	
 	chartSupport.tableUpdate = function(chart, results, options)
@@ -4315,7 +4315,7 @@
 	
 	chartSupport.tableGetChartDataTable = function(chart)
 	{
-		var tableId = chart.extValue("chartTableId");
+		var tableId = chartFactory.extValueBuiltin(chart, "chartTableId");
 		return $("#" + tableId, chartSupport.tableGetChartContent(chart)).DataTable();
 	};
 	
@@ -5077,33 +5077,30 @@
 	 */
 	chartSupport.renderOptions = function(chart, renderOptions)
 	{
-		if(renderOptions == undefined)
-			return (chart.extValue("renderOptions") || {});
-		else
-			chart.extValue("renderOptions", renderOptions);
+		return chartFactory.extValueBuiltin(chart, "renderOptions", renderOptions);
 	};
 	
 	/**
 	 * 构建图表渲染options。
-	 * 注意： defaultOptions、builtinOptions，以及firstMergeHandler处理后的渲染options中，
+	 * 注意： defaultOptions、builtinOptions，以及afterMergeHandlerFirst处理后的渲染options中，
 	 *		 不应设置会在update函数中有设置的项（对于基本类型，不应出现，也不要将值设置为undefined、null，可能会影响图表内部逻辑；对于数组类型，可以不出现，也可以设置为：[]），
 	 *		 因为update函数中调用的buildUpdateOptions函数会把这里的设置高优先级深度合并。
 	 *
 	 * @param chart
 	 * @param defaultOptions 默认options，优先级最低
 	 * @param builtinOptions 内置options，优先级高于defaultOptions
-	 * @param firstMergeHandler 可选，由defaultOptions、builtinOptions合并后的新渲染options处理函数
-	 * @param secondMergeHandler 可选，新渲染options合并chart.options()后的处理函数
+	 * @param afterMergeHandlerFirst 可选，由defaultOptions、builtinOptions合并后的新渲染options处理函数，格式为：function(renderOptions, chart){ ... }
+	 * @param afterMergeHandlerSecond 可选，新渲染options合并chart.options()后的处理函数，格式为：function(renderOptions, chart){ ... }
 	 * @returns 一个新的图表渲染options
 	 */
-	chartSupport.buildRenderOptions = function(chart, defaultOptions, builtinOptions, firstMergeHandler, secondMergeHandler)
+	chartSupport.buildRenderOptions = function(chart, defaultOptions, builtinOptions, afterMergeHandlerFirst, afterMergeHandlerSecond)
 	{
 		var renderOptions = $.extend(true, {}, defaultOptions, builtinOptions);
 		
-		if(firstMergeHandler != null)
-			firstMergeHandler(renderOptions, chart);
+		if(afterMergeHandlerFirst != null)
+			afterMergeHandlerFirst(renderOptions, chart);
 		
-		renderOptions = chart.inflateRenderOptions(renderOptions, secondMergeHandler);
+		renderOptions = chart.inflateRenderOptions(renderOptions, afterMergeHandlerSecond);
 		
 		chartSupport.renderOptions(chart, renderOptions);
 		
@@ -5111,17 +5108,17 @@
 	};
 	
 	/**
-	 * 构建图表更新options，并返回有修改的updateOptions。
+	 * 构建图表更新options。
 	 * 
 	 * @param chart
 	 * @param results
 	 * @param updateOptions 要构建的更新options，将会被修改
 	 * @param renderOptions 渲染options，将会被高优先级深度合并至updateOptions，并且仅合并updateOptions中的同名项
-	 * @param postMergeHandler 可选，后置合并处理函数，用于处理合并后的updateOptions
+	 * @param afterMergeHandler 可选，renderOptions合并至updateOptions后置处理函数，格式为：function(updateOptions, chart, results){ ... }
 	 * @param mergeSeriesAsTemplate 可选，是否将renderOptions.series作为模板合并，默认值为：true
 	 * @returns updateOptions
 	 */
-	chartSupport.buildUpdateOptions = function(chart, results, updateOptions, renderOptions, postMergeHandler, mergeSeriesAsTemplate)
+	chartSupport.buildUpdateOptions = function(chart, results, updateOptions, renderOptions, afterMergeHandler, mergeSeriesAsTemplate)
 	{
 		mergeSeriesAsTemplate = (mergeSeriesAsTemplate == null ? true : mergeSeriesAsTemplate);
 		
@@ -5140,7 +5137,7 @@
 			renderOptions = srcRenderOptions;
 		}
 		
-		return chart.inflateUpdateOptions(results, updateOptions, renderOptions, postMergeHandler);
+		return chart.inflateUpdateOptions(results, updateOptions, renderOptions, afterMergeHandler);
 	};
 	
 	/**
@@ -5357,10 +5354,7 @@
 	
 	chartSupport.chartSignNameMap = function(chart, signNameMap)
 	{
-		if(signNameMap == undefined)
-			return chart.extValue("signNameMap");
-		else
-			chart.extValue("signNameMap", signNameMap);
+		return chartFactory.extValueBuiltin(chart, "signNameMap", signNameMap);
 	};
 	
 	chartSupport.setChartEventOriginalDataForChartData = function(chart, chartEvent, chartData)

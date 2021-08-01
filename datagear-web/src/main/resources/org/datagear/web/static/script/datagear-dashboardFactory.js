@@ -595,26 +595,17 @@
 	
 	chartBase._updateTime = function(time)
 	{
-		if(time === undefined)
-			return this.extValue("_updateTime");
-		else
-			this.extValue("_updateTime", time);
+		return chartFactory.extValueBuiltin(this, "updateTime", time);
 	};
 	
 	chartBase._inUpdateAjax = function(inAjax)
 	{
-		if(inAjax === undefined)
-			return (this.extValue("_inUpdateAjax") == true);
-		else
-			this.extValue("_inUpdateAjax", inAjax);
+		return chartFactory.extValueBuiltin(this, "inUpdateAjax", inAjax);
 	};
 	
 	chartBase._updateAjaxErrorTime = function(time)
 	{
-		if(time === undefined)
-			return this.extValue("_updateAjaxErrorTime");
-		else
-			this.extValue("_updateAjaxErrorTime", time);
+		return chartFactory.extValueBuiltin(this, "updateAjaxErrorTime", time);
 	};
 	
 	chartBase._inUpdateAjaxErrorTime = function(time)

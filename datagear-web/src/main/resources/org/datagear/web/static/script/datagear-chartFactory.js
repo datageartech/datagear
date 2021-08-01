@@ -378,6 +378,21 @@
 		delete chart.resultDataFormat;
 	};
 	
+	/**
+	 * 获取/设置图表的内置扩展属性值。
+	 * chart.extValue()是允许用户级使用的，此函数应用于内置设置/获取操作，可避免属性名冲突。
+	 * 
+	 * @param chart 图表对象
+	 * @param name 扩展属性名
+	 * @param value 可选，要设置的扩展属性值，不设置则执行获取操作
+	 */
+	chartFactory.extValueBuiltin = function(chart, name, value)
+	{
+		name = "_DataGear_" + name;
+		
+		return chart.extValue(name, value);
+	};
+	
 	//----------------------------------------
 	// chartBase start
 	//----------------------------------------
@@ -742,10 +757,7 @@
 	 */
 	chartBase.optionsUpdate = function(options)
 	{
-		if(options === undefined)
-			return this.extValue("_optionsUpdate");
-		else
-			this.extValue("_optionsUpdate", options);
+		return chartFactory.extValueBuiltin(this, "optionsUpdate", options);
 	};
 	
 	/**
@@ -1030,10 +1042,7 @@
 	 */
 	chartBase.updateResults = function(results)
 	{
-		if(results === undefined)
-			return this.extValue("_updateResults");
-		else
-			this.extValue("_updateResults", results);
+		return chartFactory.extValueBuiltin(this, "updateResults", results);
 	};
 	
 	/**
@@ -1723,8 +1732,8 @@
 	/**
 	 * 获取/设置扩展属性值。
 	 * 
-	 * @param name 扩展名
-	 * @param value 要设置的扩展值，可选，不设置则执行获取操作
+	 * @param name 扩展属性名
+	 * @param value 要设置的扩展属性值，可选，不设置则执行获取操作
 	 */
 	chartBase.extValue = function(name, value)
 	{
@@ -2281,10 +2290,7 @@
 	 */
 	chartBase.echartsInstance = function(instance)
 	{
-		if(instance === undefined)
-			return this.extValue("_echartsInstance");
-		else
-			this.extValue("_echartsInstance", instance);
+		return chartFactory.extValueBuiltin(this, "echartsInstance", instance);
 	};
 	
 	/**
@@ -2529,11 +2535,11 @@
 	{
 		this._assertActive();
 		
-		var delegations = this.extValue("eventHandlerDelegations");
+		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegations");
 		if(delegations == null)
 		{
 			delegations = [];
-			this.extValue("eventHandlerDelegations", delegations);
+			chartFactory.extValueBuiltin(this, "eventHandlerDelegations", delegations);
 		}
 		
 		delegationBinder.bind(this, eventType, eventHandlerDelegation);
@@ -2559,7 +2565,7 @@
 			eventHanlder = undefined;
 		}
 		
-		var delegations = this.extValue("eventHandlerDelegations");
+		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegations");
 		
 		if(delegations == null)
 			return;
@@ -2591,7 +2597,7 @@
 					delegationsTmp.push(delegations[i]);
 			}
 			
-			this.extValue("eventHandlerDelegations", delegationsTmp);
+			chartFactory.extValueBuiltin(this, "eventHandlerDelegations", delegationsTmp);
 		}
 	};
 	
@@ -2636,7 +2642,7 @@
 	 * @param updateOptions 待填充的更新选项，格式为：{ ... }
 	 * @param renderOptions 图表的渲染选项，格式为：{ ... }，通常由inflateRenderOptions构建
 	 * @param beforeProcessHandler 可选，updateOptions.processUpdateOptions调用前处理函数，
-								   格式为：function(updateOptions, chart){ ... }, 默认为：undefined
+								   格式为：function(updateOptions, chart, results){ ... }, 默认为：undefined
 	 * @returns updateOptions
 	 */
 	chartBase.inflateUpdateOptions = function(results, updateOptions, renderOptions, beforeProcessHandler)
@@ -2652,7 +2658,7 @@
 		$.extend(true, updateOptions, srcRenderOptions, this.optionsUpdate());
 		
 		if(beforeProcessHandler != null)
-			beforeProcessHandler(updateOptions, this);
+			beforeProcessHandler(updateOptions, this, results);
 		
 		//最后调用用户的processUpdateOptions
 		if(updateOptions.processUpdateOptions)
