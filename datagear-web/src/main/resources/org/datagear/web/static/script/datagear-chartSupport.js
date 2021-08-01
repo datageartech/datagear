@@ -5087,7 +5087,7 @@
 	 * 构建图表渲染options。
 	 * 注意： defaultOptions、builtinOptions，以及firstMergeHandler处理后的渲染options中，
 	 *		 不应设置会在update函数中有设置的项（对于基本类型，不应出现，也不要将值设置为undefined、null，可能会影响图表内部逻辑；对于数组类型，可以不出现，也可以设置为：[]），
-	 *		 因为update函数中调用的buildUpdateOptions（mergeRenderOptions为true时）函数会把这里的设置高优先级深度合并。
+	 *		 因为update函数中调用的buildUpdateOptions函数会把这里的设置高优先级深度合并。
 	 *
 	 * @param chart
 	 * @param defaultOptions 默认options，优先级最低
@@ -5103,15 +5103,7 @@
 		if(firstMergeHandler != null)
 			firstMergeHandler(renderOptions, chart);
 		
-		//chart.options()是由用户设置的，优先级应高于firstMergeHandler
-		renderOptions = $.extend(true, renderOptions, chart.options());
-		
-		if(secondMergeHandler != null)
-			secondMergeHandler(renderOptions, chart);
-		
-		//最后调用用户的processRenderOptions
-		if(renderOptions.processRenderOptions)
-			renderOptions.processRenderOptions(renderOptions, chart);
+		renderOptions = chart.inflateRenderOptions(renderOptions, secondMergeHandler);
 		
 		chartSupport.renderOptions(chart, renderOptions);
 		
@@ -5124,67 +5116,59 @@
 	 * @param chart
 	 * @param results
 	 * @param updateOptions 要构建的更新options，将会被修改
-	 * @param renderOptions 渲染options，当renderOptions为true时，将会被高优先级深度合并至updateOptions，并且仅合并updateOptions中的同名项
+	 * @param renderOptions 渲染options，将会被高优先级深度合并至updateOptions，并且仅合并updateOptions中的同名项
 	 * @param postMergeHandler 可选，后置合并处理函数，用于处理合并后的updateOptions
-	 * @param mergeRenderOptions 可选，是否合并renderOptions，默认值为：true
 	 * @param mergeSeriesAsTemplate 可选，是否将renderOptions.series作为模板合并，默认值为：true
 	 * @returns updateOptions
 	 */
-	chartSupport.buildUpdateOptions = function(chart, results, updateOptions, renderOptions,
-									postMergeHandler, mergeRenderOptions, mergeSeriesAsTemplate)
+	chartSupport.buildUpdateOptions = function(chart, results, updateOptions, renderOptions, postMergeHandler, mergeSeriesAsTemplate)
 	{
-		mergeRenderOptions = (mergeRenderOptions == null ? true : mergeRenderOptions);
 		mergeSeriesAsTemplate = (mergeSeriesAsTemplate == null ? true : mergeSeriesAsTemplate);
 		
-		if(mergeRenderOptions)
+		if(mergeSeriesAsTemplate)
 		{
-			//提取renderOptions中的待合并项
+			//特殊合并renderOptions.series
 			var srcRenderOptions = {};
 			for(var uop in updateOptions)
 				srcRenderOptions[uop] = renderOptions[uop];
 			
-			if(mergeSeriesAsTemplate)
-			{
-				chartSupport.mergeArrayTemplate(updateOptions.series, srcRenderOptions.series);
-				srcRenderOptions.series = undefined;
-			}
+			//默认应该取第0个元素，因为它是图表的默认设置
+			var defaultMergeIndex = 0;
+			chartSupport.mergeArrayTemplate(updateOptions.series, srcRenderOptions.series, defaultMergeIndex);
 			
-			$.extend(true, updateOptions, srcRenderOptions, chart.optionsUpdate());
-		}
-		else
-		{
-			$.extend(true, updateOptions, chart.optionsUpdate());
+			srcRenderOptions.series = undefined;
+			renderOptions = srcRenderOptions;
 		}
 		
-		if(postMergeHandler != null)
-			postMergeHandler(updateOptions, renderOptions, chart);
-		
-		//最后调用用户的processUpdateOptions
-		if(renderOptions.processUpdateOptions)
-			renderOptions.processUpdateOptions(updateOptions, chart, results);
-		
-		return updateOptions;
+		return chart.inflateUpdateOptions(results, updateOptions, renderOptions, postMergeHandler);
 	};
 	
 	/**
 	 * 将templateArray高优先级深读合并至array，并返回array。
-	 * 当templateArray中没有array对应索引的元素时，将使用templateArray的最后一个元素合并。 
+	 * 如果templateArray没有array对应索引的元素，将使用templateArray中defaultMergeIndex的元素合并。
 	 *
 	 * @param array
 	 * @param templateArray
+	 * @param defaultMergeIndex 可选，越限合并索引，-1 表示不合并，默认为templateArray最后一个元素索引
 	 * @returns array
 	 */
-	chartSupport.mergeArrayTemplate = function(array, templateArray)
+	chartSupport.mergeArrayTemplate = function(array, templateArray, defaultMergeIndex)
 	{
 		if(!templateArray || templateArray.length == 0)
 			return array;
+		
+		defaultMergeIndex = (defaultMergeIndex == null ? templateArray.length - 1 : defaultMergeIndex);
+		defaultMergeIndex = (defaultMergeIndex < 0 ? -1 : defaultMergeIndex);
+		defaultMergeIndex = (defaultMergeIndex >= templateArray.length ? templateArray.length -1 : defaultMergeIndex);
 		
 		var len = (array ? array.length : 0);
 		
 		for(var i=0; i<len; i++)
 		{
-			var srcIdx = (i >= templateArray.length ? templateArray.length - 1 : i);
-			array[i] = $.extend(true, array[i], templateArray[srcIdx]);
+			var srcIdx = (i >= templateArray.length ? defaultMergeIndex : i);
+			
+			if(srcIdx > -1)
+				array[i] = $.extend(true, array[i], templateArray[srcIdx]);
 		}
 		
 		return array;

@@ -2595,6 +2595,72 @@
 		}
 	};
 	
+	/**
+	 * 填充指定图表渲染选项。
+	 * 此函数先将chart.options()高优先级深度合并至renderOptions，然后调用可选的beforeProcessHandler，
+	 * 最后，如果renderOptions中有定义processRenderOptions函数（格式为：function(renderOptions, chart){ ... }），则调用它。
+	 * 
+	 * 图表渲染器应该在其render函数中使用此函数构建图表渲染选项，以符合图表API规范。
+	 * 
+	 * @param renderOptions 待填充的渲染选项，格式为：{ ... }
+	 * @param beforeProcessHandler 可选，renderOptions.processRenderOptions调用前处理函数，
+								   格式为：function(renderOptions, chart){ ... }, 默认为：undefined
+	 * @returns renderOptions
+	 */
+	chartBase.inflateRenderOptions = function(renderOptions, beforeProcessHandler)
+	{
+		if(renderOptions == null)
+			throw new Error("[renderOptions] required");
+		
+		$.extend(true, renderOptions, this.options());
+		
+		if(beforeProcessHandler != null)
+			beforeProcessHandler(renderOptions, this);
+		
+		//最后调用用户的processRenderOptions
+		if(renderOptions.processRenderOptions)
+			renderOptions.processRenderOptions(renderOptions, this);
+		
+		return renderOptions;
+	};
+	
+	/**
+	 * 填充指定图表更新选项。
+	 * 此函数先将renderOptions中与updateOptions的同名项高优先级深度合并至updateOptions，
+	 * 然后将chart.optionsUpdate()高优先级深度合并至updateOptions，然后调用可选的beforeProcessHandler，
+	 * 最后，如果updateOptions中有定义processUpdateOptions函数（格式为：function(updateOptions, chart, results){ ... }），则调用它。
+	 * 
+	 * 图表渲染器应该在其update函数中使用此函数构建图表更新选项，以符合图表API规范。
+	 * 
+	 * @param results 
+	 * @param updateOptions 待填充的更新选项，格式为：{ ... }
+	 * @param renderOptions 图表的渲染选项，格式为：{ ... }，通常由inflateRenderOptions构建
+	 * @param beforeProcessHandler 可选，updateOptions.processUpdateOptions调用前处理函数，
+								   格式为：function(updateOptions, chart){ ... }, 默认为：undefined
+	 * @returns updateOptions
+	 */
+	chartBase.inflateUpdateOptions = function(results, updateOptions, renderOptions, beforeProcessHandler)
+	{
+		if(updateOptions == null)
+			throw new Error("[updateOptions] required");
+		
+		//提取renderOptions中的待合并项
+		var srcRenderOptions = {};
+		for(var uop in updateOptions)
+			srcRenderOptions[uop] = renderOptions[uop];
+		
+		$.extend(true, updateOptions, srcRenderOptions, this.optionsUpdate());
+		
+		if(beforeProcessHandler != null)
+			beforeProcessHandler(updateOptions, this);
+		
+		//最后调用用户的processUpdateOptions
+		if(updateOptions.processUpdateOptions)
+			updateOptions.processUpdateOptions(updateOptions, this, results);
+		
+		return updateOptions;
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
