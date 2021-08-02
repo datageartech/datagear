@@ -5640,29 +5640,18 @@
 	 *
 	 * @param chart
 	 * @param options
+	 * @param isGeo 是否GEO地图坐标系（options.geo.map）而非地图系列（series.type="map"）
 	 * @param map 可选，要设置的地图名
-	 * @param isGeo 可选，是否强制为地图坐标系
 	 * @returns 获取操作时的地图名
 	 */
-	chartSupport.echartsMapChartMapOption = function(chart, options, map, isGeo)
+	chartSupport.echartsMapChartMapOption = function(chart, options, isGeo, map)
 	{
-		if(map === true || map === false)
-		{
-			isGeo = map;
-			map = undefined;
-		}
-		
-		isGeo = (isGeo === undefined ? (options.geo != null) : isGeo);
-		
 		if(map === undefined)
 		{
-			if(map == null)
-			{
-				if(isGeo)
-					map = (options.geo ? options.geo.map : null);
-				else
-					map = (options.series && options.series.length > 0 ? options.series[0].map : null);
-			}
+			if(isGeo)
+				map = (options.geo ? options.geo.map : null);
+			else
+				map = (options.series && options.series.length > 0 ? options.series[0].map : null);
 			
 			return map;
 		}
@@ -5687,14 +5676,16 @@
 		}
 	};
 	
-	chartSupport.echartsMapChartInit = function(chart, options)
+	chartSupport.echartsMapChartInit = function(chart, options, isGeo)
 	{
-		var map = (chart.map() || chartSupport.echartsMapChartMapOption(chart, options));
+		isGeo = (isGeo === undefined ? (options.geo != null) : isGeo);
+		
+		var map = (chart.map() || chartSupport.echartsMapChartMapOption(chart, options, isGeo));
 		
 		if(!map)
 			throw new Error("[map] option must be set");
 		
-		chartSupport.echartsMapChartMapOption(chart, options, map);
+		chartSupport.echartsMapChartMapOption(chart, options, isGeo, map);
 		
 		if(chart.echartsMapRegistered(map))
 		{
@@ -5711,22 +5702,45 @@
 		}
 	};
 	
-	chartSupport.echartsMapChartUpdate = function(chart, results, updateOptions, renderOptions)
+	chartSupport.echartsMapChartUpdate = function(chart, results, updateOptions, renderOptions, isGeo)
 	{
-		var renderMap = chartSupport.echartsMapChartMapOption(chart, renderOptions);
-		var updateMap = chartSupport.echartsMapChartMapOption(chart, updateOptions);
+		isGeo = (isGeo === undefined ? (renderOptions.geo != null) : isGeo);
+		
+		var renderMap = chartSupport.echartsMapChartMapOption(chart, renderOptions, isGeo);
+		var updateMap = chartSupport.echartsMapChartMapOption(chart, updateOptions, isGeo);
+		var presetMap = chartFactory.extValueBuiltin(chart, "presetMap");
 		
 		if(!updateMap)
 			updateMap = chart.map();
+		
+		if(!updateMap)
+			updateMap = presetMap;
 		
 		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, function(updateOptions)
 		{
 			//buildUpdateOptions()会将地图设置为renderMap，所以这里需要再次设置为updateMap
 			if(updateMap && updateMap != renderMap)
-				chartSupport.echartsMapChartMapOption(chart, updateOptions, updateMap);
+			{
+				chartSupport.echartsMapChartMapOption(chart, updateOptions, isGeo, updateMap);
+				
+				//要重置缩放比例和中心位置，不然会出现些地图无法显示的情况				
+				if(isGeo)
+				{
+					updateOptions.geo.center = null;
+					updateOptions.geo.zoom = 1;//此项非必须
+				}
+				else
+				{
+					updateOptions.series[0].center = null;
+					updateOptions.series[0].zoom = 1;//此项非必须
+				}
+			}
 		});
 		
-		var map = chartSupport.echartsMapChartMapOption(chart, updateOptions);
+		var map = chartSupport.echartsMapChartMapOption(chart, updateOptions, isGeo);
+		
+		if(map)
+			chartFactory.extValueBuiltin(chart, "presetMap", map);
 		
 		//更新地图未设置或者已注册
 		if(!map || chart.echartsMapRegistered(map))
