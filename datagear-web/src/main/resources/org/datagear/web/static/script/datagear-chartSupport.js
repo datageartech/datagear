@@ -125,7 +125,10 @@
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		options.xAxis = {data: null};
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions, function(options)
+		{
+			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
+		});
 		
 		chart.echartsOptions(options);
 	};
@@ -156,10 +159,7 @@
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
 		var echartsData = echartsEventParams.data;
-		var data = {};
-		
-		data[signNameMap.name] = echartsData.value[0];
-		data[signNameMap.value] = echartsData.value[1];
+		var data = chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value);
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -291,7 +291,13 @@
 		else
 			options.xAxis = { data: null };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions, function(options)
+		{
+			if(renderOptions.dgHorizontal)
+				chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar", 1, 0);
+			else
+				chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar");
+		});
 		
 		chart.echartsOptions(options);
 	};
@@ -324,10 +330,10 @@
 		var dgHorizontal = renderOptions.dgHorizontal;
 		
 		var echartsData = echartsEventParams.data;
-		var data = {};
-		
-		data[signNameMap.name] = (dgHorizontal ? echartsData.value[1] : echartsData.value[0]);
-		data[signNameMap.value] = (dgHorizontal ? echartsData.value[0] : echartsData.value[1]);
+		var data = (dgHorizontal ?
+				chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value, 1, 0) :
+				chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value)
+			);
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -994,7 +1000,10 @@
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		options.xAxis = {data: null};
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions, function(options)
+		{
+			chartSupport.adaptValueArrayObjSeriesData(chart, options, "scatter");
+		});
 		
 		chart.echartsOptions(options);
 	};
@@ -1025,10 +1034,7 @@
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
 		var echartsData = echartsEventParams.data;
-		var data = {};
-		
-		data[signNameMap.name] = echartsData.value[0];
-		data[signNameMap.value] = echartsData.value[1];
+		var data = chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value);
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalDataForChartData(chart, chartEvent, echartsData);
@@ -5124,20 +5130,21 @@
 		
 		if(mergeSeriesAsTemplate)
 		{
-			//特殊合并renderOptions.series
-			var srcRenderOptions = {};
-			for(var uop in updateOptions)
-				srcRenderOptions[uop] = renderOptions[uop];
-			
 			//默认应该取第0个元素，因为它是图表的默认设置
 			var defaultMergeIndex = 0;
-			chartSupport.mergeArrayTemplate(updateOptions.series, srcRenderOptions.series, defaultMergeIndex);
+			chartSupport.mergeArrayTemplate(updateOptions.series, renderOptions.series, defaultMergeIndex);
 			
-			srcRenderOptions.series = undefined;
-			renderOptions = srcRenderOptions;
+			var series = renderOptions.series;
+			renderOptions.series = undefined;
+			updateOptions = chart.inflateUpdateOptions(results, updateOptions, renderOptions, afterMergeHandler);
+			renderOptions.series = series;
+			
+			return updateOptions;
 		}
-		
-		return chart.inflateUpdateOptions(results, updateOptions, renderOptions, afterMergeHandler);
+		else
+		{
+			return chart.inflateUpdateOptions(results, updateOptions, renderOptions, afterMergeHandler);
+		}
 	};
 	
 	/**
@@ -5735,6 +5742,87 @@
 				chart.statusUpdated(true);
 			});
 		}
+	};
+	
+	/**
+	 * 将值数组对象（{value: [name, value]}）格式的options.series[i].data元素适配为与options.series[i].type匹配的格式。
+	 * 比如，对于"pie"的type，应适配为名值对象：{ name: name, value: value }格式，图表才能正确显示。
+	 * 如果originalSeriesType与options.series[i].type相同，则不进行处理。
+	 * 
+	 * 某些内置图表允许修改series[i].type来自定义系列的类型，而不同类型的数据格式规范不同，所以需要适配。
+	 * 
+	 * @param chart
+	 * @param options
+	 * @param originalSeriesType
+	 * @param nameIndex 可选，name在值数组对象的索引，默认为：0
+	 * @param valueIndex 可选，value在值数组对象的索引，默认为：1
+	 */
+	chartSupport.adaptValueArrayObjSeriesData = function(chart, options, originalSeriesType, nameIndex, valueIndex)
+	{
+		nameIndex = (nameIndex == null ? 0 : nameIndex);
+		valueIndex = (valueIndex == null ? 1 : valueIndex);
+		
+		var series = (options.series || []);
+		
+		for(var i=0; i<series.length; i++)
+		{
+			var type = series[i].type;
+			
+			if(type == originalSeriesType)
+				continue;
+			
+			var seriesData = (series[i].data || []);
+			
+			//这些图表不支持值数组对象格式的数据，支持名值格式的数据，因此需要适配
+			if(type == "pie" || type == "funnel" || type == "map"
+				|| type == "wordCloud" || type == "liquidFill")
+			{
+				for(var j=0; j<seriesData.length; j++)
+				{
+					var value = (seriesData[j].value || []);
+					seriesData[j].name = value[nameIndex];
+					seriesData[j].value = value[valueIndex];
+				}
+			}
+		}
+	};
+	
+	/**
+	 * 从obj中提取名值对象。
+	 * 
+	 * @param obj 待提取的对象，格式为：{name: ..., value: ...}、{ value: [..., ...] }
+	 * @param nameProperty
+	 * @param valueProperty
+	 * @param nameIndex 可选，当obj.value是数组时，名在值数组对象的索引，默认为：0
+	 * @param valueIndex 可选，当obj.value是数组时，值在值数组对象的索引，默认为：1
+	 * @returns { nameProperty: ...,  valueProperty: ...}
+	 */
+	chartSupport.extractNameValueStyleObj = function(obj, nameProperty, valueProperty, nameIndex, valueIndex)
+	{
+		nameIndex = (nameIndex == null ? 0 : nameIndex);
+		valueIndex = (valueIndex == null ? 1 : valueIndex);
+		
+		var re = undefined;
+		
+		if(obj)
+		{
+			re = {};
+			
+			var name = obj.name;
+			var value = obj.value;
+			
+			//{ value: [..., ...] }
+			if($.isArray(value))
+			{
+				name = value[nameIndex];
+				value = value[valueIndex];
+			}
+			
+			re[nameProperty] = name;
+			re[valueProperty] = value;
+		}
+		
+		return re;
 	};
 	
 	//---------------------------------------------------------
