@@ -1987,7 +1987,7 @@
 	
 	/**
 	 * 获取数据集结果的数据对象数组。
-	 * 如果result.data是数组，则直接返回；否则，返回：[ result.data ]。
+	 * 如果数据对象是null，返回空数组：[]；如果数据对象是数组，则直接返回；否则，返回：[ 数据对象 ]。
 	 * 
 	 * @param result 数据集结果对象
 	 * @return 不会为null的数组
@@ -2001,6 +2001,20 @@
 			return result.data;
 		
 		return [ result.data ];
+	};
+	
+	/**
+	 * 获取第一个主件或者附件数据集结果的数据对象数组。
+	 * 如果数据对象是null，返回空数组：[]；如果数据对象是数组，则直接返回；否则，返回：[ 数据对象 ]。
+	 * 
+	 * @param results 数据集结果数组
+	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
+	 * @return 不会为null的数组
+	 */
+	chartBase.resultDatasFirst = function(results, attachment)
+	{
+		var result = this.resultFirst(results, attachment);
+		return this.resultDatas(result);
 	};
 	
 	/**

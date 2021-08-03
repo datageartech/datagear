@@ -659,6 +659,7 @@ readonly 是否只读操作，允许为null
 		{name: "chart.resultColumnArrays", value: "resultColumnArrays(", caption: "resultColumnArrays() ", meta: "chart"},
 		{name: "chart.resultDataFormat", value: "resultDataFormat(", caption: "resultDataFormat() ", meta: "chart"},
 		{name: "chart.resultDatas", value: "resultDatas(", caption: "resultDatas() ", meta: "chart"},
+		{name: "chart.resultDatasFirst", value: "resultDatasFirst(", caption: "resultDatasFirst() ", meta: "chart"},
 		{name: "chart.resultFirst", value: "resultFirst(", caption: "resultFirst() ", meta: "chart"},
 		{name: "chart.resultNameValueObjects", value: "resultNameValueObjects(", caption: "resultNameValueObjects() ", meta: "chart"},
 		{name: "chart.resultOf", value: "resultOf(", caption: "resultOf() ", meta: "chart"},
