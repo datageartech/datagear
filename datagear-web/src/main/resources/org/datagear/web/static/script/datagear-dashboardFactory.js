@@ -388,8 +388,10 @@
 	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，
 	 * 其中value函数的sourceValueContext参数为图表事件对象（chartEvent）对象。
 	 * 
+	 * 图表初始化时会使用图表元素的"dg-chart-link"属性值执行设置操作。
+	 * 
 	 * 图表渲染器实现相关：
-	 * 图表渲染器应实现on函数，以支持“dg-chart-link”特性。
+	 * 图表渲染器应实现on函数，以支持此特性。
 	 * 
 	 * @param links 可选，要设置的图表联动设置对象、数组，没有则执行获取操作。
 	 */
@@ -409,8 +411,10 @@
 	/**
 	 * 获取/设置图表是否自动调整大小。
 	 * 
+	 * 图表初始化时会使用图表元素的"dg-chart-auto-resize"属性值执行设置操作。
+	 * 
 	 * 图表渲染器实现相关：
-	 * 图表渲染器应实现resize函数，以支持“dg-chart-auto-resize”特性。
+	 * 图表渲染器应实现resize函数，以支持此特性。
 	 * 
 	 * @param autoResize 可选，设置为是否自动调整大小，没有则执行获取操作。
 	 */
@@ -426,6 +430,8 @@
 	 * 获取/设置图表更新分组。
 	 * 如果图表从服务端加载数据比较耗时，可以为其指定一个分组标识，让其使用单独的ajax请求加载数据。
 	 * 注意：相同分组的图表将使用同一个ajax请求。
+	 * 
+	 * 图表初始化时会使用图表元素的"dg-chart-update-group"属性值执行设置操作。
 	 * 
 	 * @param group 可选，设置更新分组，没有则执行获取操作返回非null值。
 	 */
@@ -769,6 +775,8 @@
 	 *   //可选，更新图表数据出错处理函数
 	 *   updateChartError: function(dashboard, chart, error){ ... }
 	 * }
+	 * 
+	 * 看板初始化时会使用<body>元素的"dg-dashboard-listener"属性值执行设置操作。
 	 * 
 	 * @param listener 可选，要设置的监听器对象，没有则执行获取操作
 	 */
