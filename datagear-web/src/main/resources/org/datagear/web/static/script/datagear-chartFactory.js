@@ -745,20 +745,6 @@
 	};
 	
 	/**
-	 * 获取/设置图表更新时的图表选项，格式为： { ... }
-	 * 当希望根据图表更新数据动态自定义图表选项时，可以在图表监听器的onUpdate函数中调用此函数设置更新图表选项。
-	 * 
-	 * 图表渲染器实现相关：
-	 * 图表渲染器应使用此函数获取并应用更新图表选项（在其update函数中），另参考chart.inflateUpdateOptions()。
-	 * 
-	 * @param options 可选，要设置的图表选项，没有则执行获取操作
-	 */
-	chartBase.optionsUpdate = function(options)
-	{
-		return chartFactory.extValueBuiltin(this, "optionsUpdate", options);
-	};
-	
-	/**
 	 * 获取/设置图表主题，格式参考：org.datagear.analysis.ChartTheme。
 	 * 图表初始化时会使用图表元素的"dg-chart-theme"属性值执行设置操作。
 	 * 
@@ -2686,8 +2672,7 @@
 	/**
 	 * 填充指定图表更新选项。
 	 * 
-	 * 此函数先将renderOptions中与updateOptions的同名项高优先级深度合并至updateOptions，
-	 * 然后将chart.optionsUpdate()高优先级深度合并至updateOptions，然后调用可选的beforeProcessHandler，
+	 * 此函数先将renderOptions中与updateOptions的同名项高优先级深度合并至updateOptions，然后调用可选的beforeProcessHandler，
 	 * 最后，如果renderOptions中有定义processUpdateOptions函数（格式为：function(updateOptions, chart, results){ ... }），则调用它。
 	 * 
 	 * 图表渲染器应该在其update()中使用此函数构建图表更新选项，然后使用它执行图表更新逻辑，以符合图表API规范。
@@ -2740,7 +2725,11 @@
 		for(var uop in updateOptions)
 			srcRenderOptions[uop] = renderOptions[uop];
 		
+		// < @deprecated 兼容2.6.0版本的chart.optionsUpdate()
+		// 待chart.optionsUpdate()移除后应改为：
+		// $.extend(true, updateOptions, srcRenderOptions);
 		$.extend(true, updateOptions, srcRenderOptions, this.optionsUpdate());
+		// > @deprecated 兼容2.6.0版本的chart.optionsUpdate()
 		
 		if(beforeProcessHandler != null)
 			beforeProcessHandler(updateOptions, this, results);
@@ -2755,6 +2744,22 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被renderOptions.processUpdateOptions取代（参考chart.inflateUpdateOptions()函数）
+	/**
+	 * 获取/设置图表更新时的图表选项，格式为： { ... }
+	 * 当希望根据图表更新数据动态自定义图表选项时，可以在图表监听器的onUpdate函数中调用此函数设置更新图表选项。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应使用此函数获取并应用更新图表选项（在其update函数中），另参考chart.inflateUpdateOptions()。
+	 * 
+	 * @param options 可选，要设置的图表选项，没有则执行获取操作
+	 */
+	chartBase.optionsUpdate = function(options)
+	{
+		return chartFactory.extValueBuiltin(this, "optionsUpdate", options);
+	};
+	// > @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被renderOptions.processUpdateOptions取代（参考chart.inflateUpdateOptions()函数）
 	
 	// < @deprecated 兼容2.4.0版本的API，将在未来版本移除，已被chartBase.updateResults取代
 	/**

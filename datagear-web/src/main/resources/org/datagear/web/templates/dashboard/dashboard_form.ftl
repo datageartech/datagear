@@ -643,7 +643,6 @@ readonly 是否只读操作，允许为null
 		{name: "chart.onMouseover", value: "onMouseover(", caption: "onMouseover() ", meta: "chart"},
 		{name: "chart.onMouseup", value: "onMouseup(", caption: "onMouseup() ", meta: "chart"},
 		{name: "chart.options", value: "options(", caption: "options() ", meta: "chart"},
-		{name: "chart.optionsUpdate", value: "optionsUpdate(", caption: "optionsUpdate() ", meta: "chart"},
 		{name: "chart.plugin", value: "plugin", caption: "plugin ", meta: "chart"},
 		{name: "chart.refreshData", value: "refreshData()", caption: "refreshData() ", meta: "chart"},
 		{name: "chart.render", value: "render()", caption: "render() ", meta: "chart"},
