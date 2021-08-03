@@ -649,6 +649,7 @@ readonly 是否只读操作，允许为null
 		{name: "chart.render", value: "render()", caption: "render() ", meta: "chart"},
 		{name: "chart.renderContext", value: "renderContext", caption: "renderContext ", meta: "chart"},
 		{name: "chart.renderContextAttr", value: "renderContextAttr(", caption: "renderContextAttr() ", meta: "chart"},
+		{name: "chart.renderOptions", value: "renderOptions(", caption: "renderOptions() ", meta: "chart"},
 		{name: "chart.renderer", value: "renderer(", caption: "renderer() ", meta: "chart"},
 		{name: "chart.resetDataSetParamValues", value: "resetDataSetParamValues(", caption: "resetDataSetParamValues() ", meta: "chart"},
 		{name: "chart.resetDataSetParamValuesFirst", value: "resetDataSetParamValuesFirst()", caption: "resetDataSetParamValuesFirst() ", meta: "chart"},

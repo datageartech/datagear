@@ -36,7 +36,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：是否堆叠
 			dgStack: false,
@@ -84,7 +84,7 @@
 	chartSupport.lineUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		var dgStack = (renderOptions && renderOptions.dgStack);//是否堆叠
 		
 		var chartDataSets = chart.chartDataSetsMain();
@@ -125,7 +125,7 @@
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		options.xAxis = {data: null};
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions, function(options)
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
 		});
@@ -175,7 +175,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：是否堆叠
 			dgStack: false,
@@ -246,7 +246,7 @@
 	chartSupport.barUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -291,7 +291,7 @@
 		else
 			options.xAxis = { data: null };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions, function(options)
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions, function(options)
 		{
 			if(renderOptions.dgHorizontal)
 				chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar", 1, 0);
@@ -326,7 +326,7 @@
 	chartSupport.barSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		var dgHorizontal = renderOptions.dgHorizontal;
 		
 		var echartsData = echartsEventParams.data;
@@ -345,7 +345,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：是否堆叠
 			dgStack: false,
@@ -433,7 +433,7 @@
 	chartSupport.barPolarUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		var isAngleAxis = (renderOptions.dgAxisType == "angle");
 		
 		var chartDataSets = chart.chartDataSetsMain();
@@ -489,7 +489,7 @@
 		else
 			options.radiusAxis = { data: null };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -518,7 +518,7 @@
 	chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
@@ -544,7 +544,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//是否按数据集分割系列，而非仅一个系列
 			dgSplitDataSet: false,
@@ -587,7 +587,7 @@
 	chartSupport.pieUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		var dgSplitDataSet = renderOptions.dgSplitDataSet;
 		
 		var chartDataSets = chart.chartDataSetsMain();
@@ -627,7 +627,7 @@
 		var options = { legend: { data: legendData }, series: series };
 		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -712,7 +712,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { value: valueSign, min: minSign, max: maxSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title: {
 		        text: chart.name
@@ -747,7 +747,7 @@
 	chartSupport.gaugeUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -811,7 +811,7 @@
 		
 		var options = { series : [ { name: seriesName, min: min, max: max, data: seriesData } ] };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -900,7 +900,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：最大数据标记像素数
 			dgSymbolSizeMax: undefined,
@@ -951,7 +951,7 @@
 	chartSupport.scatterUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1000,7 +1000,7 @@
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		options.xAxis = {data: null};
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions, function(options)
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "scatter");
 		});
@@ -1050,7 +1050,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：最大数据标记像素数
 			dgSymbolSizeMax: undefined,
@@ -1101,7 +1101,7 @@
 	chartSupport.scatterCoordUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1145,7 +1145,7 @@
 		
 		var options = { legend: {data: legendData}, series: series };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -1193,7 +1193,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { item: itemSign, name: nameSign, value: valueSign, max: maxSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -1236,7 +1236,7 @@
 	chartSupport.radarUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1268,7 +1268,7 @@
 		var series = [ { data: seriesData } ];
 		var options = { legend: {data: legendData}, radar: {indicator: indicatorData}, series: series };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 		
@@ -1406,7 +1406,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -1451,7 +1451,7 @@
 	chartSupport.funnelUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1495,7 +1495,7 @@
 		var series = [ {name: seriesName, min: min, max: max, data: seriesData } ];
 		var options = { legend: { data: legendData }, series: series };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -1541,7 +1541,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, map: mapSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -1588,7 +1588,7 @@
 	chartSupport.mapUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1694,7 +1694,7 @@
 		chartSupport.chartSignNameMap(chart, { name: nameSign, longitude: longitudeSign, latitude: latitudeSign,
 			value: valueSign, map: mapSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：最大数据标记像素数
 			dgSymbolSizeMax: undefined,
@@ -1742,7 +1742,7 @@
 	chartSupport.mapScatterUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1857,7 +1857,7 @@
 			targetLatitude: targetLatitudeSign, targetName: targetNameSign, targetCategory: targetCategorySign,
 			targetValue: targetValueSign, map: mapSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：最大数据标记像素数
 			dgSymbolSizeMax: undefined,
@@ -1913,7 +1913,7 @@
 	chartSupport.mapGraphUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -2145,7 +2145,7 @@
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -2202,7 +2202,7 @@
 	chartSupport.candlestickUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -2238,7 +2238,7 @@
 		//不设置坐标轴数据的话将无法显示刻度标签
 		options.xAxis = { data: axisData };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2297,7 +2297,7 @@
 		var chartEle = chart.elementJquery();
 		var vmItemWidth = parseInt(chartEle.height()/20);
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -2378,7 +2378,7 @@
 	chartSupport.heatmapUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -2424,7 +2424,7 @@
 		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
 		chartSupport.checkMinAndMax(options.visualMap);
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2470,7 +2470,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { id: idSign, name: nameSign, parent: parentSign, value: valueSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -2519,11 +2519,11 @@
 	
 	chartSupport.treeUpdate = function(chart, results)
 	{
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results) ] };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2570,7 +2570,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { id: idSign, name: nameSign, parent: parentSign, value: valueSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -2598,11 +2598,11 @@
 	
 	chartSupport.treemapUpdate = function(chart, results)
 	{
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results) ] };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2656,7 +2656,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { id: idSign, name: nameSign, parent: parentSign, value: valueSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -2684,11 +2684,11 @@
 	
 	chartSupport.sunburstUpdate = function(chart, results)
 	{
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results) ] };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2847,7 +2847,7 @@
 				{ sourceName: sourceNameSign, sourceValue: sourceValueSign,
 					targetName: targetNameSign, targetValue: targetValueSign, value: valueSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -2913,7 +2913,7 @@
 	chartSupport.sankeyUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -2982,7 +2982,7 @@
 		
 		var options = { series: [ { name: seriesName, data: seriesData, links: seriesLinks } ] };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 		
@@ -3059,7 +3059,7 @@
 					targetId: targetIdSign, targetName: targetNameSign, targetCategory: targetCategorySign, targetValue: targetValueSign,
 					value: valueSign });
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：最大数据标记像素数
 			dgSymbolSizeMax: undefined,
@@ -3113,7 +3113,7 @@
 	chartSupport.graphUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -3236,7 +3236,7 @@
 		
 		var options = { legend: {data: legendData}, series: series };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions, function(options)
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions, function(options)
 		{
 			var series0 = (options.series ? options.series[0] : null);
 			
@@ -3341,7 +3341,7 @@
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：是否横向
 			dgHorizontal: false,
@@ -3411,7 +3411,7 @@
 	chartSupport.boxplotUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		var dgHorizontal = renderOptions.dgHorizontal;
 		
 		var chartDataSets = chart.chartDataSetsMain();
@@ -3497,7 +3497,7 @@
 		else
 			options.xAxis = { data: axisData };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -3548,7 +3548,7 @@
 		//异常值系列
 		else
 		{
-			var renderOptions= chartSupport.renderOptions(chart);
+			var renderOptions= chart.renderOptions();
 			var dgHorizontal = renderOptions.dgHorizontal;
 			
 			data[signNameMap.name] = (dgHorizontal ? echartsValue[1] : echartsValue[0]);
@@ -3568,7 +3568,7 @@
 		//不支持在echarts主题中设置样式，只能在这里设置
 		var chartTheme = chart.theme();
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//扩展配置项：由低到高值域颜色映射
 			dgColorRange: chartTheme.graphRangeColors,
@@ -3642,7 +3642,7 @@
 	chartSupport.wordcloudUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -3685,7 +3685,7 @@
 		
 		var options = { series: [ {name: seriesName, data: seriesData} ] };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -3734,7 +3734,7 @@
 		//不支持在echarts主题中设置样式，只能在这里设置
 		var chartTheme = chart.theme();
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			title:
 			{
@@ -3787,7 +3787,7 @@
 	chartSupport.liquidfillUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions= chartSupport.renderOptions(chart);
+		var renderOptions= chart.renderOptions();
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -3857,7 +3857,7 @@
 		
 		var options = { series: [ {data: seriesData} ] };
 		
-		options = chartSupport.buildUpdateOptions(chart, results, options, renderOptions);
+		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -3997,7 +3997,7 @@
 			columns.push(column);
 		}
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//标题样式
 			title:
@@ -4191,7 +4191,7 @@
 	
 	chartSupport.tableUpdate = function(chart, results, options)
 	{
-		var renderOptions = chartSupport.renderOptions(chart);
+		var renderOptions = chart.renderOptions();
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		var chartEle = chart.elementJquery();
 		
@@ -4217,7 +4217,7 @@
 		
 		chartSupport.tableStopCarousel(chart);
 		
-		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, null, false);
+		updateOptions = chartSupport.inflateUpdateOptions(chart, results, updateOptions, renderOptions, null, false);
 		
 		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0);
 		chartSupport.tableAdjust(chart);
@@ -4474,12 +4474,8 @@
 	 */
 	chartSupport.tablePrepareCarousel = function(chart)
 	{
-		var renderOptions = chartSupport.renderOptions(chart);
-		var chartEle = chart.elementJquery();
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
-		var carousel = renderOptions.carousel;
-		
 		var rowCount = dataTable.rows().indexes().length;
 		
 		//空表格
@@ -4516,7 +4512,7 @@
 	 */
 	chartSupport.tableStartCarousel = function(chart)
 	{
-		var renderOptions = chartSupport.renderOptions(chart);
+		var renderOptions = chart.renderOptions();
 		var chartEle = chart.elementJquery();
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
@@ -4692,7 +4688,7 @@
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-label");
 		
-		options = chartSupport.buildRenderOptions(chart,
+		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//将在update中设置：
 			//data
@@ -4718,7 +4714,7 @@
 	chartSupport.labelUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions = chartSupport.renderOptions(chart);
+		var renderOptions = chart.renderOptions();
 		var valueFirst = renderOptions.valueFirst;
 		var showName = renderOptions.label.name.show;
 		
@@ -4780,7 +4776,7 @@
 			}
 		}
 		
-		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, null, false);
+		updateOptions = chartSupport.inflateUpdateOptions(chart, results, updateOptions, renderOptions, null, false);
 		
 		for(var i=0; i<updateOptions.data.length; i++)
 		{
@@ -5079,52 +5075,42 @@
 	};
 	
 	/**
-	 * 获取/设置图表渲染options。
-	 */
-	chartSupport.renderOptions = function(chart, renderOptions)
-	{
-		return chartFactory.extValueBuiltin(chart, "renderOptions", renderOptions);
-	};
-	
-	/**
-	 * 构建图表渲染options。
+	 * 填充图表渲染options。
 	 * 注意： defaultOptions、builtinOptions，以及afterMergeHandlerFirst处理后的渲染options中，
 	 *		 不应设置会在update函数中有设置的项（对于基本类型，不应出现，也不要将值设置为undefined、null，可能会影响图表内部逻辑；对于数组类型，可以不出现，也可以设置为：[]），
-	 *		 因为update函数中调用的buildUpdateOptions函数会把这里的设置高优先级深度合并。
+	 *		 因为update函数中调用的inflateUpdateOptions函数会把这里的设置高优先级深度合并。
 	 *
 	 * @param chart
 	 * @param defaultOptions 默认options，优先级最低
 	 * @param builtinOptions 内置options，优先级高于defaultOptions
 	 * @param afterMergeHandlerFirst 可选，由defaultOptions、builtinOptions合并后的新渲染options处理函数，格式为：function(renderOptions, chart){ ... }
-	 * @param afterMergeHandlerSecond 可选，新渲染options合并chart.options()后的处理函数，格式为：function(renderOptions, chart){ ... }
+	 * @param beforeProcessHandler
 	 * @returns 一个新的图表渲染options
 	 */
-	chartSupport.buildRenderOptions = function(chart, defaultOptions, builtinOptions, afterMergeHandlerFirst, afterMergeHandlerSecond)
+	chartSupport.inflateRenderOptions = function(chart, defaultOptions, builtinOptions,
+												afterMergeHandlerFirst, beforeProcessHandler)
 	{
 		var renderOptions = $.extend(true, {}, defaultOptions, builtinOptions);
 		
 		if(afterMergeHandlerFirst != null)
 			afterMergeHandlerFirst(renderOptions, chart);
 		
-		renderOptions = chart.inflateRenderOptions(renderOptions, afterMergeHandlerSecond);
-		
-		chartSupport.renderOptions(chart, renderOptions);
-		
-		return renderOptions;
+		return chart.inflateRenderOptions(renderOptions, beforeProcessHandler);
 	};
 	
 	/**
-	 * 构建图表更新options。
+	 * 填充图表更新options。
 	 * 
 	 * @param chart
 	 * @param results
-	 * @param updateOptions 要构建的更新options，将会被修改
-	 * @param renderOptions 渲染options，将会被高优先级深度合并至updateOptions，并且仅合并updateOptions中的同名项
-	 * @param afterMergeHandler 可选，renderOptions合并至updateOptions后置处理函数，格式为：function(updateOptions, chart, results){ ... }
+	 * @param updateOptions
+	 * @param renderOptions
+	 * @param beforeProcessHandler
 	 * @param mergeSeriesAsTemplate 可选，是否将renderOptions.series作为模板合并，默认值为：true
 	 * @returns updateOptions
 	 */
-	chartSupport.buildUpdateOptions = function(chart, results, updateOptions, renderOptions, afterMergeHandler, mergeSeriesAsTemplate)
+	chartSupport.inflateUpdateOptions = function(chart, results, updateOptions, renderOptions,
+												beforeProcessHandler, mergeSeriesAsTemplate)
 	{
 		mergeSeriesAsTemplate = (mergeSeriesAsTemplate == null ? true : mergeSeriesAsTemplate);
 		
@@ -5136,14 +5122,14 @@
 			
 			var series = renderOptions.series;
 			renderOptions.series = undefined;
-			updateOptions = chart.inflateUpdateOptions(results, updateOptions, renderOptions, afterMergeHandler);
+			updateOptions = chart.inflateUpdateOptions(results, updateOptions, renderOptions, beforeProcessHandler);
 			renderOptions.series = series;
 			
 			return updateOptions;
 		}
 		else
 		{
-			return chart.inflateUpdateOptions(results, updateOptions, renderOptions, afterMergeHandler);
+			return chart.inflateUpdateOptions(results, updateOptions, renderOptions, beforeProcessHandler);
 		}
 	};
 	
@@ -5716,9 +5702,9 @@
 		if(!updateMap)
 			updateMap = presetMap;
 		
-		updateOptions = chartSupport.buildUpdateOptions(chart, results, updateOptions, renderOptions, function(updateOptions)
+		updateOptions = chartSupport.inflateUpdateOptions(chart, results, updateOptions, renderOptions, function(updateOptions)
 		{
-			//buildUpdateOptions()会将地图设置为renderMap，所以这里需要再次设置为updateMap
+			//inflateUpdateOptions()会将地图设置为renderMap，所以这里需要再次设置为updateMap
 			if(updateMap && updateMap != renderMap)
 			{
 				chartSupport.echartsMapChartMapOption(chart, updateOptions, isGeo, updateMap);

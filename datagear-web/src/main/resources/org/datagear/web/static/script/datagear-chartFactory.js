@@ -728,8 +728,7 @@
 	};
 	
 	/**
-	 * 获取/设置初始图表选项。
-	 * 图表选项格式为：{ ... }
+	 * 获取/设置图表选项，这些选项通常用于控制图表展示、交互效果，格式为：{ ... }。
 	 * 
 	 * 图表渲染器实现相关：
 	 * 图表渲染器应使用此函数获取并应用图表选项，以支持“dg-chart-options”特性。
@@ -1976,10 +1975,10 @@
 	};
 	
 	/**
-	 * 获取数据集结果的数据对象。
+	 * 获取数据集结果的数据。
 	 * 
 	 * @param result 数据集结果对象
-	 * @return
+	 * @return result.data，没有则返回null
 	 */
 	chartBase.resultData = function(result)
 	{
@@ -2602,21 +2601,48 @@
 	};
 	
 	/**
+	 * 获取/设置图表渲染选项。
+	 * 
+	 * 图表渲染器可在其render()中使用此函保存图表渲染选项，然后在其update()中获取渲染选项。
+	 * 调用chart.inflateRenderOptions()后，会自动调用此函数设置图表渲染选项。
+	 * 
+	 * @param renderOptions 可选，要设置的渲染选项对象，通常由图表渲染器内部渲染选项、chart.options()合并而成，格式应为：{ ... }
+	 * @returns 要获取的图表渲染选项，没有则返回null
+	 */
+	chartBase.renderOptions = function(renderOptions)
+	{
+		return chartFactory.extValueBuiltin(this, "renderOptions", renderOptions);
+	};
+	
+	/**
 	 * 填充指定图表渲染选项。
+	 * 
 	 * 此函数先将chart.options()高优先级深度合并至renderOptions，然后调用可选的beforeProcessHandler，
 	 * 最后，如果renderOptions中有定义processRenderOptions函数（格式为：function(renderOptions, chart){ ... }），则调用它。
 	 * 
-	 * 图表渲染器应该在其render函数中使用此函数构建图表渲染选项，以符合图表API规范。
+	 * 此函数会调用chart.renderOptions()设置填充后的图表渲染选项。 
 	 * 
-	 * @param renderOptions 待填充的渲染选项，格式为：{ ... }
+	 * 图表渲染器应该在其render()中使用此函数构建图表渲染选项，然后使用它执行图表渲染逻辑，以符合图表API规范。
+	 * 
+	 * @param renderOptions 可选，待填充的渲染选项，通常由图表渲染器render函数内部生成，格式为：{ ... }，默认为空对象：{}
 	 * @param beforeProcessHandler 可选，renderOptions.processRenderOptions调用前处理函数，
 								   格式为：function(renderOptions, chart){ ... }, 默认为：undefined
 	 * @returns renderOptions
 	 */
 	chartBase.inflateRenderOptions = function(renderOptions, beforeProcessHandler)
 	{
+		if(arguments.length == 1)
+		{
+			//(beforeProcessHandler)
+			if($.isFunction(renderOptions))
+			{
+				beforeProcessHandler = renderOptions;
+				renderOptions = undefined;
+			}
+		}
+		
 		if(renderOptions == null)
-			throw new Error("[renderOptions] required");
+			renderOptions = {};
 		
 		$.extend(true, renderOptions, this.options());
 		
@@ -2627,28 +2653,62 @@
 		if(renderOptions.processRenderOptions)
 			renderOptions.processRenderOptions(renderOptions, this);
 		
+		this.renderOptions(renderOptions);
+		
 		return renderOptions;
 	};
 	
 	/**
 	 * 填充指定图表更新选项。
+	 * 
 	 * 此函数先将renderOptions中与updateOptions的同名项高优先级深度合并至updateOptions，
 	 * 然后将chart.optionsUpdate()高优先级深度合并至updateOptions，然后调用可选的beforeProcessHandler，
 	 * 最后，如果renderOptions中有定义processUpdateOptions函数（格式为：function(updateOptions, chart, results){ ... }），则调用它。
 	 * 
-	 * 图表渲染器应该在其update函数中使用此函数构建图表更新选项，以符合图表API规范。
+	 * 图表渲染器应该在其update()中使用此函数构建图表更新选项，然后使用它执行图表更新逻辑，以符合图表API规范。
 	 * 
-	 * @param results 
-	 * @param updateOptions 待填充的更新选项，格式为：{ ... }
-	 * @param renderOptions 图表的渲染选项，格式为：{ ... }，通常由inflateRenderOptions构建
+	 * @param results 图表更新结果
+	 * @param updateOptions 可选，待填充的更新选项，通常由图表渲染器update函数内部生成，格式为：{ ... }，默认为空对象：{}
+	 * @param renderOptions 可选，图表的渲染选项，格式为：{ ... }，默认为：chart.renderOptions()
 	 * @param beforeProcessHandler 可选，renderOptions.processUpdateOptions调用前处理函数，
 								   格式为：function(updateOptions, chart, results){ ... }, 默认为：undefined
 	 * @returns updateOptions
 	 */
 	chartBase.inflateUpdateOptions = function(results, updateOptions, renderOptions, beforeProcessHandler)
 	{
+		//(results)
+		if(arguments.length == 1)
+			;
+		else if(arguments.length == 2)
+		{
+			//(results, beforeProcessHandler)
+			if($.isFunction(updateOptions))
+			{
+				beforeProcessHandler = updateOptions;
+				updateOptions = undefined;
+				renderOptions = undefined;
+			}
+			//(results, updateOptions)
+			else
+				;
+		}
+		else if(arguments.length == 3)
+		{
+			//(results, updateOptions, beforeProcessHandler)
+			if($.isFunction(renderOptions))
+			{
+				beforeProcessHandler = renderOptions;
+				renderOptions = undefined;
+			}
+			//(results, updateOptions, renderOptions)
+			else
+				;
+		}
+		
 		if(updateOptions == null)
-			throw new Error("[updateOptions] required");
+			updateOptions = {};
+		if(renderOptions == null)
+			renderOptions = (this.renderOptions() || {});
 		
 		//提取renderOptions中的待合并项
 		var srcRenderOptions = {};
