@@ -4186,13 +4186,13 @@
 			});
 		}
 		
-		chartFactory.extValueBuiltin(chart, "chartTableId", tableId);
+		chart.internal(dataTable);
 	};
 	
 	chartSupport.tableUpdate = function(chart, results, options)
 	{
 		var renderOptions = chart.renderOptions();
-		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		var dataTable = chart.internal();
 		var chartEle = chart.elementJquery();
 		
 		var chartDataSets = chart.chartDataSetsMain();
@@ -4232,7 +4232,7 @@
 	chartSupport.tableResize = function(chart)
 	{
 		var chartContent = chartSupport.tableGetChartContent(chart);
-		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		var dataTable = chart.internal();
 		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
 		
@@ -4276,7 +4276,7 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
-		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		var dataTable = chart.internal();
 		
 		var chartData = dataTable.row(rowElement).data();
 		
@@ -4301,12 +4301,12 @@
 	{
 		bind: function(chart, eventType, delegateEventHandler)
 		{
-			var dataTable = chartSupport.tableGetChartDataTable(chart);
+			var dataTable = chart.internal();
 			$(dataTable.table().body()).on(eventType, "tr", delegateEventHandler);
 		},
 		unbind: function(chart, eventType, delegateEventHandler)
 		{
-			var dataTable = chartSupport.tableGetChartDataTable(chart);
+			var dataTable = chart.internal();
 			$(dataTable.table().body()).off(eventType, "tr", delegateEventHandler);
 		}
 	};
@@ -4317,12 +4317,6 @@
 		//因此，获取图表表格的DOM操作都应限定在".dg-chart-table-content"内
 		
 		return $(".dg-chart-table-content", chart.element());
-	};
-	
-	chartSupport.tableGetChartDataTable = function(chart)
-	{
-		var tableId = chartFactory.extValueBuiltin(chart, "chartTableId");
-		return $("#" + tableId, chartSupport.tableGetChartContent(chart)).DataTable();
 	};
 	
 	chartSupport.tableGetColumnProperties = function(chart, columnSign)
@@ -4460,7 +4454,7 @@
 	 */
 	chartSupport.tableAdjust = function(chart)
 	{
-		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		var dataTable = chart.internal();
 		
 		dataTable.columns.adjust();
 		if(dataTable.init().fixedHeader)
@@ -4475,7 +4469,7 @@
 	chartSupport.tablePrepareCarousel = function(chart)
 	{
 		var chartContent = chartSupport.tableGetChartContent(chart);
-		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		var dataTable = chart.internal();
 		var rowCount = dataTable.rows().indexes().length;
 		
 		//空表格
@@ -4515,7 +4509,7 @@
 		var renderOptions = chart.renderOptions();
 		var chartEle = chart.elementJquery();
 		var chartContent = chartSupport.tableGetChartContent(chart);
-		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		var dataTable = chart.internal();
 		
 		var rowCount = dataTable.rows().indexes().length;
 		
@@ -4692,7 +4686,7 @@
 		{
 			//将在update中设置：
 			//data
-					
+			
 			//是否标签值在前
 			"valueFirst": false,
 			"label":
@@ -4709,6 +4703,9 @@
 			}
 		},
 		options);
+		
+		//标签卡无底层组件
+		chart.internal(null);
 	};
 	
 	chartSupport.labelUpdate = function(chart, results)
@@ -5327,11 +5324,9 @@
 	 */
 	chartSupport.destroyChartEcharts = function(chart)
 	{
-		var echartsInstance = chart.echartsInstance();
-		if(echartsInstance && !echartsInstance.isDisposed())
-			echartsInstance.dispose();
-		
-		chart.echartsInstance(null);
+		var internal = chart.internal();
+		if(internal && !internal.isDisposed())
+			internal.dispose();
 	};
 	
 	/**
@@ -5339,10 +5334,9 @@
 	 */
 	chartSupport.resizeChartEcharts = function(chart)
 	{
-		var echartsInstance = chart.echartsInstance();
-		
-		if(echartsInstance)
-			echartsInstance.resize();
+		var internal = chart.internal();
+		if(internal)
+			internal.resize();
 	};
 	
 	chartSupport.chartSignNameMap = function(chart, signNameMap)
@@ -5481,11 +5475,11 @@
 	{
 		bind: function(chart, eventType, delegateEventHandler)
 		{
-			chart.echartsInstance().on(eventType, "series", delegateEventHandler);
+			chart.internal().on(eventType, "series", delegateEventHandler);
 		},
 		unbind: function(chart, eventType, delegateEventHandler)
 		{
-			chart.echartsInstance().off(eventType, delegateEventHandler);
+			chart.internal().off(eventType, delegateEventHandler);
 		}
 	};
 	

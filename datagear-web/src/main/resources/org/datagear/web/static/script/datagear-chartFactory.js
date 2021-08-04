@@ -28,7 +28,7 @@
  * 
  * 此图表工厂支持为图表元素添加elementAttrConst.MAP属性来设置地图图表的地图名。
  * 
- * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.ECHARTS_THEME属性来设置图表Echarts主题名。
+ * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.ECHARTS_THEME属性来设置图表ECharts主题名。
  * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.DISABLE_SETTING属性，用于禁用图表交互设置功能，
  * 值为"true"表示禁用，其他表示启用。
@@ -616,8 +616,8 @@
 	};
 	
 	/**
-	 * 初始化图表的echarts主题名。
-	 * 此方法依次从图表元素、<body>元素的elementAttrConst.ECHARTS_THEME属性获取echarts主题名。
+	 * 初始化图表的ECharts主题名。
+	 * 此方法依次从图表元素、<body>元素的elementAttrConst.ECHARTS_THEME属性获取ECharts主题名。
 	 */
 	chartBase._initEchartsThemeName = function()
 	{
@@ -809,15 +809,15 @@
 	};
 	
 	/**
-	 * Echarts图表支持函数：获取/设置图表的echarts主题名。
-	 * 此方法用于为echarts图表提供支持，如果不是echarts图表，则不必设置此项。
+	 * ECharts图表支持函数：获取/设置图表的ECharts主题名。
+	 * 此方法用于为ECharts图表提供支持，如果不是ECharts图表，则不必设置此项。
 	 * 
 	 * 图表初始化时会使用图表元素的"dg-echarts-theme"属性值执行设置操作。
 	 * 
 	 * 图表渲染器实现相关：
-	 * 图表渲染器应使用此函数获取并应用echarts主题。
+	 * 图表渲染器应使用此函数获取并应用ECharts主题。
 	 * 
-	 * @param themeName 可选，要设置的且已注册的echarts主题名，没有则执行获取操作
+	 * @param themeName 可选，要设置的且已注册的ECharts主题名，没有则执行获取操作
 	 */
 	chartBase.echartsThemeName = function(themeName)
 	{
@@ -1034,6 +1034,7 @@
 	
 	/**
 	 * 获取/设置图表此次更新的结果数据。
+	 * 图表更新前会自动执行设置操作（通过chartBase.doUpdate()函数）。
 	 * 
 	 * @param results 可选，要设置的更新结果数据
 	 * @returns 要获取的更新结果数据，没有则返回null
@@ -1065,9 +1066,10 @@
 		}
 		else
 		{
-			var echartsInstance = this.echartsInstance();
-			if(echartsInstance)
-				echartsInstance.resize();
+			//为ECharts图表提供默认resize支持
+			var internal = this.internal();
+			if(this._isEchartsInstance(internal))
+				internal.resize();
 		}
 	};
 	
@@ -1098,17 +1100,18 @@
 		}
 		else
 		{
-			var echartsInstance = this.echartsInstance();
-			if(echartsInstance && !echartsInstance.isDisposed())
+			//为ECharts图表提供默认destroy支持
+			var internal = this.internal();
+			if(this._isEchartsInstance(internal) && !internal.isDisposed())
 			{
-				echartsInstance.dispose();
-				this.echartsInstance(null);
+				internal.dispose();
 			}
 			
 			this.elementJquery().empty();
 		}
 		
 		this._destroySetting();
+		this.internal(null);
 		
 		//最后清空扩展属性值，因为上面逻辑可能会使用到
 		this._clearExtValue();
@@ -1717,6 +1720,21 @@
 	};
 	
 	/**
+	 * 获取/设置图表底层组件。
+	 * 图表底层组件是用于为渲染图表提供底层支持的组件，比如：ECharts实例、表格组件、DOM元素等。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应在其render()函数内部使用此函数设置底层组件。
+	 * 
+	 * @param internal 可选，要设置的底层组件，不设置则执行获取操作。
+	 * @returns 要获取的底层组件，没有则返回null
+	 */
+	chartBase.internal = function(internal)
+	{
+		return chartFactory.extValueBuiltin(this, "internal", internal);
+	};
+	
+	/**
 	 * 获取/设置图表渲染上下文的属性值。
 	 * 
 	 * @param attrName
@@ -2279,55 +2297,54 @@
 	};
 	
 	/**
-	 * Echarts图表支持函数：初始化图表的Echarts对象。
-	 * 此方法会自动应用“dg-chart-theme”、“dg-echarts-theme”。
+	 * ECharts图表支持函数：将图表初始化为ECharts图表，设置其选项。
+	 * 此方法会自动应用chartBase.theme()、chartBase.echartsThemeName()至初始化的ECharts图表。
+	 * 此方法会自动调用chartBase.internal()将初始化的ECharts实例对象设置为图表底层组件。
 	 * 
-	 * @param options echarts设置项
-	 * @return echarts实例对象
+	 * @param options 要设置的ECharts选项
+	 * @returns ECharts实例对象
 	 */
 	chartBase.echartsInit = function(options)
 	{
 		var instance = echarts.init(this.element(), this._echartsGetRegisteredThemeName());
 		instance.setOption(options);
 		
-		this.echartsInstance(instance);
+		this.internal(instance);
 		
 		return instance;
 	};
 	
 	/**
-	 * Echarts图表支持函数：获取/设置图表的Echarts实例对象。
-	 * 
-	 * @param instance 可选，要设置的echarts实例，不设置则执行获取操作
-	 */
-	chartBase.echartsInstance = function(instance)
-	{
-		return chartFactory.extValueBuiltin(this, "echartsInstance", instance);
-	};
-	
-	/**
-	 * Echarts图表支持函数：设置图表的Echarts实例的选项。
+	 * ECharts图表支持函数：设置图表的ECharts实例的选项。
 	 * 
 	 * @param options
 	 */
 	chartBase.echartsOptions = function(options)
 	{
-		var instance = this.echartsInstance();
+		var internal = this.internal();
 		
-		if(instance == null)
-			throw new Error("Chart is not initialized as ECharts");
+		if(!this._isEchartsInstance(internal))
+			throw new Error("Not ECharts chart");
 		
-		instance.setOption(options);
+		internal.setOption(options);
 	};
 	
 	/**
-	 * Echarts图表支持函数：获取用于此图表的且已注册的Echarts主题名。
+	 * 给定对象是否是ECharts实例。
+	 */
+	chartBase._isEchartsInstance = function(obj)
+	{
+		return (obj && obj.constructor && obj.constructor.name && /ECharts/i.test(obj.constructor.name));
+	};
+	
+	/**
+	 * ECharts图表支持函数：获取用于此图表的且已注册的ECharts主题名。
 	 */
 	chartBase._echartsGetRegisteredThemeName = function()
 	{
 		var themeName = this.echartsThemeName();
 		
-		//从ChartTheme构建echarts主题
+		//从ChartTheme构建ECharts主题
 		if(!themeName)
 		{
 			var chartTheme = this.theme();
@@ -2351,9 +2368,9 @@
 	};
 	
 	/**
-	 * Echarts图表支持函数：判断指定名称的echarts地图是否已经注册过而无需再加载。
+	 * ECharts图表支持函数：判断指定名称的ECharts地图是否已经注册过而无需再加载。
 	 * 
-	 * @param name echarts地图名称
+	 * @param name ECharts地图名称
 	 */
 	chartBase.echartsMapRegistered = function(name)
 	{
@@ -2361,11 +2378,11 @@
 	};
 	
 	/**
-	 * Echarts图表支持函数：加载并注册指定名称的echarts地图（GeoJSON、SVG），并在完成后执行回调函数。
+	 * ECharts图表支持函数：加载并注册指定名称的ECharts地图（GeoJSON、SVG），并在完成后执行回调函数。
 	 * 注意：如果地图图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate，
 	 * 并在callback中调用chart.statusRendered(true)/chart.statusUpdated(true)，具体参考此文件顶部的注释。
 	 * 
-	 * @param name echarts地图名称
+	 * @param name ECharts地图名称
 	 * @param callback 完成回调函数：function(name, map){ ... }
 	 */
 	chartBase.echartsLoadMap = function(name, callback)
@@ -2400,10 +2417,10 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：创建Echarts图表的事件对象。
+	 * 图表事件支持函数：创建ECharts图表的事件对象。
 	 * 
 	 * @param eventType 事件类型
-	 * @param echartsEventParams echarts事件处理函数的参数对象
+	 * @param echartsEventParams ECharts事件处理函数的参数对象
 	 */
 	chartBase.eventNewEcharts = function(eventType, echartsEventParams)
 	{
@@ -2535,7 +2552,7 @@
 	 * 图表事件支持函数：绑定图表事件处理函数代理。
 	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
-	 * 图表事件处理通常由内部组件的事件处理函数代理（比如Echarts），并在代理函数中调用图表事件处理函数。
+	 * 图表事件处理通常由内部组件的事件处理函数代理（比如ECharts），并在代理函数中调用图表事件处理函数。
 	 * 
 	 * @param eventType
 	 * @param eventHanlder 图表事件处理函数：function(chartEvent){ ... }
@@ -2746,6 +2763,18 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被chartBase.internal()取代
+	/**
+	 * ECharts图表支持函数：获取/设置图表的ECharts实例对象。
+	 * 
+	 * @param instance 可选，要设置的ECharts实例，不设置则执行获取操作
+	 */
+	chartBase.echartsInstance = function(instance)
+	{
+		return this.internal(instance);
+	};
+	// > @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被chartBase.internal()取代
 	
 	// < @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被renderOptions.processUpdateOptions取代（参考chart.inflateUpdateOptions()函数）
 	/**
@@ -3383,7 +3412,7 @@
 	};
 	
 	/**
-	 * 由图表主题构建echarts主题。
+	 * 由图表主题构建ECharts主题。
 	 * 
 	 * @param chartTheme 图表主题对象：org.datagear.analysis.ChartTheme
 	 */
