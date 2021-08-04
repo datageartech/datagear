@@ -1199,8 +1199,7 @@
 	
 	/**
 	 * 开始监视处理看板图表，循环查看它们的状态，执行相应操作：
-	 * 如果isWaitForRender(chart)，则执行chart.render()；
-	 * 如果isWaitForUpdate(chart)且图表的所有数据集参数值都齐备，则执行chart.update()。
+	 * 如果图表需要渲染，则执行chart.render()；如果图表需要更新，则执行chart.update()。
 	 */
 	dashboardBase.startHandleCharts = function()
 	{
@@ -1222,84 +1221,6 @@
 	};
 	
 	/**
-	 * 给定图表是否在等待渲染。
-	 * 等待渲染的判断条件：
-	 * chart.statusPreRender()为true。
-	 * 
-	 * @param chart 图表对象
-	 */
-	dashboardBase.isWaitForRender = function(chart)
-	{
-		return chart.statusPreRender();
-	};
-	
-	/**
-	 * 给定图表是否在等待更新数据。
-	 * 等待更新数据的判断条件：
-	 * 1. chart.statusRendered()为true
-	 *    或者
-	 *    chart.statusPreUpdate()为true
-	 *    或者
-	 *    chart.statusUpdated()为true且图表设置了定时刷新间隔、且已到了该刷新的时间；
-	 * 2. chart.isDataSetParamValueReady()为true。
-	 * 
-	 * @param chart 图表对象
-	 * @param currentTime 可选，当前时间毫秒数，默认取当前时间
-	 */
-	dashboardBase.isWaitForUpdate = function(chart, currentTime)
-	{
-		var wait = false;
-		
-		if(currentTime == null)
-			currentTime = new Date().getTime();
-		
-		//图表正处于更新数据ajax中
-		if(chart._inUpdateAjax())
-		{
-			wait = false;
-		}
-		else if(chart._inRequestRefreshData())
-		{
-			wait = true;
-		}
-		//图表更新ajax请求出错后，应等待一段时间后再尝试，避免频繁发送ajax请求
-		else if(chart._inUpdateAjaxErrorTime(currentTime))
-		{
-			wait = false;
-		}
-		else if(chart.statusRendered() || chart.statusPreUpdate())
-		{
-			wait = true;
-		}
-		else if(chart.updateInterval > -1
-					&& (chart.statusUpdated() || chart.status() == chartStatusConst.UPDATE_ERROR))
-		{
-			var updateInterval = chart.updateInterval;
-			var prevUpdateTime = chart._updateTime();
-			
-			if(prevUpdateTime == null || (currentTime - prevUpdateTime) >= updateInterval)
-				wait = true;
-		}
-		
-		if(wait && !chart.isDataSetParamValueReady())
-		{
-			//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
-			chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
-			wait = false;
-		}
-		
-		if(wait)
-		{
-			//wait为true时，图表状态可能并不符合chart.update()要求（比如chartStatusConst.UPDATE_ERROR），
-			//所以这里需要校验设置
-			if(!chart.statusRendered() && !chart.statusPreUpdate() && !chart.statusUpdated())
-				chart.statusPreUpdate(true);
-		}
-		
-		return wait;
-	};
-	
-	/**
 	 * 开始循环处理看板所有图表，根据其状态执行render或者update。
 	 */
 	dashboardBase._doHandleCharts = function()
@@ -1313,7 +1234,7 @@
 		{
 			var chart = charts[i];
 			
-			if(this.isWaitForRender(chart))
+			if(this._isWaitForRender(chart))
 				this._renderChart(chart);
 		}
 		
@@ -1324,7 +1245,7 @@
 		{
 			var chart = charts[i];
 			
-			if(this.isWaitForUpdate(chart, time))
+			if(this._isWaitForUpdate(chart, time))
 			{
 				var group = chart.updateGroup();
 				var preUpdates = preUpdateGroups[group];
@@ -1417,6 +1338,70 @@
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
 			}
 		});
+	};
+	
+	/**
+	 * 图表是否在等待渲染。
+	 */
+	dashboardBase._isWaitForRender = function(chart)
+	{
+		return chart.statusPreRender();
+	};
+	
+	/**
+	 * 给定图表是否在等待更新数据。
+	 */
+	dashboardBase._isWaitForUpdate = function(chart, currentTime)
+	{
+		var wait = false;
+		
+		if(currentTime == null)
+			currentTime = new Date().getTime();
+		
+		//图表正处于更新数据ajax中
+		if(chart._inUpdateAjax())
+		{
+			wait = false;
+		}
+		else if(chart._inRequestRefreshData())
+		{
+			wait = true;
+		}
+		//图表更新ajax请求出错后，应等待一段时间后再尝试，避免频繁发送ajax请求
+		else if(chart._inUpdateAjaxErrorTime(currentTime))
+		{
+			wait = false;
+		}
+		else if(chart.statusRendered() || chart.statusPreUpdate())
+		{
+			wait = true;
+		}
+		else if(chart.updateInterval > -1
+					&& (chart.statusUpdated() || chart.status() == chartStatusConst.UPDATE_ERROR))
+		{
+			var updateInterval = chart.updateInterval;
+			var prevUpdateTime = chart._updateTime();
+			
+			if(prevUpdateTime == null || (currentTime - prevUpdateTime) >= updateInterval)
+				wait = true;
+		}
+		
+		if(wait && !chart.isDataSetParamValueReady())
+		{
+			//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
+			chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
+			wait = false;
+		}
+		
+		if(wait)
+		{
+			//wait为true时，图表状态可能并不符合chart.update()要求（比如chartStatusConst.UPDATE_ERROR），
+			//所以这里需要校验设置
+			if(!chart.statusRendered() && !chart.statusPreUpdate() && !chart.statusUpdated())
+				chart.statusPreUpdate(true);
+		}
+		
+		return wait;
 	};
 	
 	/**
@@ -2107,6 +2092,33 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被私有函数dashboardBase._isWaitForRender取代
+	/**
+	 * 给定图表是否在等待渲染。
+	 * 等待渲染的判断条件：
+	 * chart.statusPreRender()为true。
+	 * 
+	 * @param chart 图表对象
+	 */
+	dashboardBase.isWaitForRender = function(chart)
+	{
+		return this._isWaitForRender(chart);
+	};
+	// > @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被私有函数dashboardBase._isWaitForRender取代
+	
+	// < @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被私有函数dashboardBase._isWaitForUpdate取代
+	/**
+	 * 给定图表是否在等待更新数据。
+	 * 
+	 * @param chart 图表对象
+	 * @param currentTime 可选，当前时间毫秒数，默认取当前时间
+	 */
+	dashboardBase.isWaitForUpdate = function(chart, currentTime)
+	{
+		return this._isWaitForUpdate(chart, currentTime);
+	};
+	// > @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被私有函数dashboardBase._isWaitForUpdate取代
 	
 	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被dashboardBase.chartOf取代
 	/**
