@@ -595,8 +595,13 @@
 		if(!this.isDataSetParamValueReady())
 			chartFactory.logException("Chart '"+this.elementId+"' has required but unset data set param value");
 		
-		this._updateAjaxErrorTime(null);
-		this.statusPreUpdate(true);
+		//不能使用如下方式实现，当在A图表监听器的update函数中调用参数化B图表的refreshData()时，
+		//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
+		//而导致refreshData()失效
+		//this._updateAjaxErrorTime(null);
+		//this.statusPreUpdate(true);
+		
+		this._inRequestRefreshData(true);
 	};
 	
 	chartBase._updateTime = function(time)
@@ -622,6 +627,11 @@
 			return false;
 		
 		return ((time - errorTime) <= dashboardFactory.UPDATE_AJAX_RETRY_SECONDS*1000);
+	};
+	
+	chartBase._inRequestRefreshData = function(inRequest)
+	{
+		return chartFactory.extValueBuiltin(this, "inRequestRefreshData", inRequest);
 	};
 	
 	//----------------------------------------
@@ -1248,6 +1258,10 @@
 		{
 			wait = false;
 		}
+		else if(chart._inRequestRefreshData())
+		{
+			wait = true;
+		}
 		//图表更新ajax请求出错后，应等待一段时间后再尝试，避免频繁发送ajax请求
 		else if(chart._inUpdateAjaxErrorTime(currentTime))
 		{
@@ -1267,14 +1281,19 @@
 				wait = true;
 		}
 		
+		if(wait && !chart.isDataSetParamValueReady())
+		{
+			//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
+			chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
+			wait = false;
+		}
+		
 		if(wait)
 		{
-			if(!chart.isDataSetParamValueReady())
-			{
-				//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
-				chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
-				wait = false;
-			}
+			//wait为true时，图表状态可能并不符合chart.update()要求（比如chartStatusConst.UPDATE_ERROR），
+			//所以这里需要校验设置
+			if(!chart.statusRendered() && !chart.statusPreUpdate() && !chart.statusUpdated())
+				chart.statusPreUpdate(true);
 		}
 		
 		return wait;
@@ -1381,42 +1400,20 @@
 				
 				var updateTime = new Date().getTime();
 				
-				dashboard._setUpdateTime(preUpdateCharts, updateTime);
+				dashboard._updateCharts(chartResults);
+				dashboard._handleChartResultErrors(chartResultErrorMessages);
 				
-				try
-				{
-					dashboard._updateCharts(chartResults);
-				}
-				catch(e)
-				{
-					chartFactory.logException(e);
-				}
-				
-				try
-				{
-					dashboard._handleChartResultErrors(chartResultErrorMessages);
-				}
-				catch(e)
-				{
-					chartFactory.logException(e);
-				}
-				
+				dashboard._setUpdateTime(preUpdateCharts, updateTime);				
+				dashboard._setInRequestRefreshData(preUpdateCharts, false);
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
 			},
 			error : function()
 			{
 				var updateTime = new Date().getTime();
 				
-				try
-				{
-					dashboard._setUpdateTime(preUpdateCharts, updateTime);
-					dashboard._setUpdateAjaxErrorTime(preUpdateCharts, updateTime);
-				}
-				catch(e)
-				{
-					chartFactory.logException(e);
-				}
-				
+				dashboard._setUpdateTime(preUpdateCharts, updateTime);
+				dashboard._setUpdateAjaxErrorTime(preUpdateCharts, updateTime);
+				dashboard._setInRequestRefreshData(preUpdateCharts, false);
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
 			}
 		});
@@ -1552,26 +1549,62 @@
 	
 	dashboardBase._setUpdateTime = function(chart, time)
 	{
-		chart = ($.isArray(chart) ? chart : [ chart ]);
-		
-		for(var i=0; i<chart.length; i++)
-			chart[i]._updateTime(time);
+		try
+		{
+			chart = ($.isArray(chart) ? chart : [ chart ]);
+			
+			for(var i=0; i<chart.length; i++)
+				chart[i]._updateTime(time);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+		}
 	};
 	
 	dashboardBase._setInUpdateAjax = function(chart, inAjax)
 	{
-		chart = ($.isArray(chart) ? chart : [ chart ]);
-		
-		for(var i=0; i<chart.length; i++)
-			chart[i]._inUpdateAjax(inAjax);
+		try
+		{
+			chart = ($.isArray(chart) ? chart : [ chart ]);
+			
+			for(var i=0; i<chart.length; i++)
+				chart[i]._inUpdateAjax(inAjax);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+		}
+	};
+	
+	dashboardBase._setInRequestRefreshData = function(chart, inRequest)
+	{
+		try
+		{
+			chart = ($.isArray(chart) ? chart : [ chart ]);
+			
+			for(var i=0; i<chart.length; i++)
+				chart[i]._inRequestRefreshData(inRequest);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+		}
 	};
 	
 	dashboardBase._setUpdateAjaxErrorTime = function(chart, errorTime)
 	{
-		chart = ($.isArray(chart) ? chart : [ chart ]);
-		
-		for(var i=0; i<chart.length; i++)
-			chart[i]._updateAjaxErrorTime(errorTime);
+		try
+		{
+			chart = ($.isArray(chart) ? chart : [ chart ]);
+			
+			for(var i=0; i<chart.length; i++)
+				chart[i]._updateAjaxErrorTime(errorTime);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+		}
 	};
 	
 	/**
