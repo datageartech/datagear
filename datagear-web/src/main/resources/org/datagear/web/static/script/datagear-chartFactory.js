@@ -2706,7 +2706,7 @@
 	 * 此函数先将chart.options()高优先级深度合并至renderOptions，然后调用可选的beforeProcessHandler，
 	 * 最后，如果renderOptions中有定义processRenderOptions函数（格式为：function(renderOptions, chart){ ... }），则调用它。
 	 * 
-	 * 此函数会调用chart.renderOptions()设置填充后的图表渲染选项。 
+	 * 此函数会自动调用chart.renderOptions()设置填充后的图表渲染选项。 
 	 * 
 	 * 图表渲染器应该在其render()中使用此函数构建图表渲染选项，然后使用它执行图表渲染逻辑，以符合图表API规范。
 	 * 
@@ -2735,7 +2735,7 @@
 		if(beforeProcessHandler != null)
 			beforeProcessHandler(renderOptions, this);
 		
-		//最后调用用户的processRenderOptions
+		//最后调用processRenderOptions
 		if(renderOptions.processRenderOptions)
 			renderOptions.processRenderOptions(renderOptions, this);
 		
@@ -2748,7 +2748,8 @@
 	 * 填充指定图表更新选项。
 	 * 
 	 * 此函数先将renderOptions中与updateOptions的同名项高优先级深度合并至updateOptions，然后调用可选的beforeProcessHandler，
-	 * 最后，如果renderOptions中有定义processUpdateOptions函数（格式为：function(updateOptions, chart, results){ ... }），则调用它。
+	 * 最后，如果renderOptions或者chart.renderOptions()中有定义processUpdateOptions函数（格式为：function(updateOptions, chart, results){ ... }），
+	 * 则调用它们两个的其中一个（renderOptions优先）。
 	 * 
 	 * 图表渲染器应该在其update()中使用此函数构建图表更新选项，然后使用它执行图表更新逻辑，以符合图表API规范。
 	 * 
@@ -2790,12 +2791,15 @@
 				;
 		}
 		
+		var chartRenderOptions = this.renderOptions();
+		
 		if(updateOptions == null)
 			updateOptions = {};
 		if(renderOptions == null)
-			renderOptions = (this.renderOptions() || {});
+			renderOptions = (chartRenderOptions || {});
 		
 		//提取renderOptions中的待合并项
+		//这些待合并项应该比updateOptions有更高的优先级，因为它们包含由用户定义的有最高优先级的chart.options()
 		var srcRenderOptions = {};
 		for(var uop in updateOptions)
 			srcRenderOptions[uop] = renderOptions[uop];
@@ -2809,9 +2813,17 @@
 		if(beforeProcessHandler != null)
 			beforeProcessHandler(updateOptions, this, results);
 		
-		//最后调用用户的processUpdateOptions
+		//最后调用processUpdateOptions
 		if(renderOptions.processUpdateOptions)
+		{
 			renderOptions.processUpdateOptions(updateOptions, this, results);
+		}
+		//renderOptions可能不是chartRenderOptions，此时要确保chartRenderOptions.processUpdateOptions被调用
+		else if(chartRenderOptions && renderOptions !== chartRenderOptions
+					&& chartRenderOptions.processUpdateOptions)
+		{
+			chartRenderOptions.processUpdateOptions(updateOptions, this, results);
+		}
 		
 		return updateOptions;
 	};
