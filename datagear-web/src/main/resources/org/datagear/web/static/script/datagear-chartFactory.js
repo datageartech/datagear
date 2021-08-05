@@ -192,6 +192,12 @@
 	/**图表事件的图表类型：HTML*/
 	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
 	
+	/**内置名字标识片段*/
+	chartFactory.BUILT_IN_NAME_PART = "datagear";
+	
+	/**内置名字标识片段*/
+	chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX = "_" + chartFactory.BUILT_IN_NAME_PART;
+	
 	/**
 	 * 图表使用的渲染上下文属性名。
 	 */
@@ -388,7 +394,7 @@
 	 */
 	chartFactory.extValueBuiltin = function(chart, name, value)
 	{
-		name = "_DataGear_" + name;
+		name = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX+"_" + name;
 		
 		return chart.extValue(name, value);
 	};
@@ -3015,7 +3021,7 @@
 	};
 	
 	/** HTML元素上已渲染的图表对象KEY */
-	chartFactory._KEY_ELEMENT_RENDERED_CHART = "_DataGearRenderedChart";
+	chartFactory._KEY_ELEMENT_RENDERED_CHART = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "_renderedChart";
 	
 	/**
 	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
@@ -3031,7 +3037,7 @@
 	};
 	
 	/** 生成元素ID用的前缀 */
-	chartFactory._ELEMENT_ID_PREFIX = "DataGearClient" + new Number(new Date().getTime()).toString(16);
+	chartFactory._ELEMENT_ID_PREFIX = chartFactory.BUILT_IN_NAME_PART + new Number(new Date().getTime()).toString(16);
 	
 	/**
 	 * 执行JS代码。

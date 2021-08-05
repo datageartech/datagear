@@ -5393,7 +5393,7 @@
 		chart.eventOriginalInfo(chartEvent, originalDataIndex.chartDataSetIndex, rdi);
 	};
 	
-	chartSupport.KEY_ORIGINAL_DATA_INDEX = "_DataGearOriginalDataIndex";
+	chartSupport.KEY_ORIGINAL_DATA_INDEX = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalDataIndex";
 	
 	/**
 	 * 获取/设置图表数据对象的原始数据索引对象。
