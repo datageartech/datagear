@@ -112,7 +112,7 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = {name: legendName, data: data, type: "line"};
+				var mySeries = {type: "line", name: legendName, data: data};
 				
 				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
 				if(renderOptions.dgStack)
@@ -274,7 +274,7 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = {name: legendName, data: data, type: "bar"};
+				var mySeries = {type: "bar", name: legendName, data: data};
 				
 				if(renderOptions.dgStack)
 				{
@@ -466,7 +466,7 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = {name: legendName, data: data, type: "bar", coordinateSystem: "polar"};
+				var mySeries = {type: "bar", name: legendName, data: data, coordinateSystem: "polar"};
 				
 				if(renderOptions.dgStack)
 				{
@@ -615,13 +615,13 @@
 			
 			if(dgSplitDataSet)
 			{
-				series.push({ name: dataSetName, data: data, type: "pie" });
+				series.push({ type: "pie", name: dataSetName, data: data});
 			}
 			else
 			{
 				if(series.length == 0)
 				{
-					series.push({ name: dataSetName, data: [], type: "pie", radius: "60%" });
+					series.push({ type: "pie", name: dataSetName, data: [], radius: "60%" });
 					
 					if(renderOptions.dgRing)
 						series[0].radius = ["35%", "55%"];
@@ -1881,8 +1881,8 @@
 					//links
 					
 					type: "graph",
-			        layout: "none",
 			        coordinateSystem: "geo",
+			        layout: "none",
 					tooltip:
 					{
 						formatter: "{a}<br>{b}：{c}"
@@ -2032,7 +2032,8 @@
 			}
 		}
 		
-		var series = [ { name: seriesName, categories: categories, data: seriesData, links: seriesLinks } ];
+		var series = [ { type: "graph", name: seriesName, categories: categories, data: seriesData, links: seriesLinks, 
+			        		coordinateSystem: "geo" } ];
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
@@ -2489,8 +2490,7 @@
 	                right: "16%",
 	                top: "12%",
 	                bottom: "12%",
-	                orient: "LR",
-	                expandAndCollapse: true
+	                orient: "LR"
 				}
 			]
 		},
@@ -2851,7 +2851,6 @@
 					links: [],
 					
 					type: "sankey",
-			        layout: "none",
 					left: "16%",
 	                right: "16%",
 	                top: "12%",

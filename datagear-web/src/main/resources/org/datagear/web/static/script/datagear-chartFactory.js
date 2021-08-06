@@ -3781,6 +3781,7 @@
 			},
 			"tree":
 			{
+				"expandAndCollapse": true,
 				"label":
 				{
 					"color": chartTheme.color
