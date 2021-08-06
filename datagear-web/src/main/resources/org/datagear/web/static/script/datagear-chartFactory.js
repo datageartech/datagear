@@ -3669,10 +3669,18 @@
 					{
 						"color": axisColor,
 						"opacity": 0.6
-					}
+					},
+					"focus": "adjacency"
 				}
 			},
-			"funnel" : {
+			"funnel" :
+			{
+				"left": "10%",
+	            "top": "20%",
+	            "right": "10%",
+	            "bottom": "10%",
+	            "minSize": "0%",
+	            "maxSize": "100%",
 				"label" : {
 					"color" : chartTheme.color,
 					"show": true,
@@ -3701,6 +3709,10 @@
 				{
 					"color": chartTheme.legendColor
 				},
+				"progress":
+				{
+					"show": true
+		        },
 				"axisLine":
 				{
 					"show": true,
@@ -3750,6 +3762,20 @@
 						"shadowBlur" : 10,
 						"shadowOffsetX" : 0,
 						"shadowColor" : shadowColor
+					}
+				}
+			},
+			"heatmap":
+			{
+				"label":
+				{
+					"show": true
+				},
+				"emphasis" :
+				{
+					"itemStyle" :
+					{
+						"shadowBlur" : 5
 					}
 				}
 			},
@@ -3818,7 +3844,12 @@
 					}
 				}
 			},
-			"graph" : {
+			"graph" :
+			{
+				"left": "12%",
+                "right": "12%",
+                "top": "20%",
+                "bottom": "12%",
 				"itemStyle" : {
 					"borderWidth" : 0,
 					"borderColor" : chartTheme.borderColor,
@@ -3842,7 +3873,10 @@
 					},
 					"lineStyle" : {
 						"width": 4
-					}
+					},
+					"focus": "adjacency",
+					"legendHoverLink": true,
+					"label": { "position": "right" }
 				}
 			},
 			"map" : {
@@ -3853,6 +3887,7 @@
 					"borderWidth" : 0.5
 				},
 				"label" : {
+					"show": true,
 					"color" : chartTheme.color
 				},
 				"emphasis" :

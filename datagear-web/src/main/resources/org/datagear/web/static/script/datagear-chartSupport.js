@@ -40,6 +40,10 @@
 		{
 			//扩展配置项：是否堆叠
 			dgStack: false,
+			//扩展配置项：是否平滑
+			dgSmooth: false,
+			//扩展配置项：是否面积
+			dgArea: false,
 			
 			title:
 			{
@@ -67,11 +71,10 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					
 					type: "line"
 				}
 			]
@@ -85,7 +88,6 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
-		var dgStack = (renderOptions && renderOptions.dgStack);//是否堆叠
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -110,11 +112,15 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = {name: legendName, data: data};
+				var mySeries = {name: legendName, data: data, type: "line"};
 				
 				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
-				if(dgStack)
+				if(renderOptions.dgStack)
 					mySeries.stack = "stack";
+				if(renderOptions.dgSmooth)
+					mySeries.smooth = true;
+				if(renderOptions.dgArea)
+					mySeries.areaStyle = {};
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -125,7 +131,7 @@
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		options.xAxis = {data: null};
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions, function(options)
+		options = chart.inflateUpdateOptions(results, options, renderOptions, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
 		});
@@ -212,11 +218,10 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					
 					type: "bar"
 				}
 			]
@@ -233,10 +238,6 @@
 				//横向柱状图的yAxis.type不能为value，不然会变为竖向图形
 				if(options.yAxis.type == "value")
 					options.yAxis.type = "category";
-			}
-			if(options.dgStack)
-			{
-				options.series[0].label = { show: true };
 			}
 		});
 		
@@ -273,10 +274,13 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = {name: legendName, data: data};
+				var mySeries = {name: legendName, data: data, type: "bar"};
 				
 				if(renderOptions.dgStack)
+				{
 					mySeries.stack = (renderOptions.dgStackGroup ? dataSetName : "stack");
+					mySeries.label = { show: true };
+				}
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -291,7 +295,7 @@
 		else
 			options.xAxis = { data: null };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions, function(options)
+		options = chart.inflateUpdateOptions(results, options, renderOptions, function(options)
 		{
 			if(renderOptions.dgHorizontal)
 				chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar", 1, 0);
@@ -375,13 +379,12 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					
 					type: "bar",
-					coordinateSystem: 'polar'
+					coordinateSystem: "polar"
 				}
 			]
 		},
@@ -422,9 +425,6 @@
 				if(options.radiusAxis.type == "value")
 					options.radiusAxis.type = "category";
 			}
-			
-			if(options.dgStack)
-				options.series[0].label = { show: true };
 		});
 		
 		chart.echartsInit(options);
@@ -466,10 +466,13 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				var mySeries = {name: legendName, data: data};
+				var mySeries = {name: legendName, data: data, type: "bar", coordinateSystem: "polar"};
 				
 				if(renderOptions.dgStack)
+				{
 					mySeries.stack = (renderOptions.dgStackGroup ? dataSetName : "stack");
+					mySeries.label = { show: true };
+				}
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -489,7 +492,7 @@
 		else
 			options.radiusAxis = { data: null };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -546,11 +549,15 @@
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
-			//是否按数据集分割系列，而非仅一个系列
+			//扩展配置项：是否按数据集分割系列，而非仅一个系列
 			dgSplitDataSet: false,
-			//当dgSplitDataSet=true时，各系列布局：
+			//扩展配置项：当dgSplitDataSet=true时，各系列布局：
 			//nest：嵌套；grid：网格
 			dgSeriesLayout: "nest",
+			//扩展配置项：当dgSplitDataSet=false时，是否环形图
+			dgRing: false,
+			//扩展配置项：当dgSplitDataSet=false时，是否玫瑰图
+			dgRose: false,
 			
 			title:
 			{
@@ -568,13 +575,10 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					//center
-					//radius
-					
 					type: "pie"
 				}
 			]
@@ -611,12 +615,20 @@
 			
 			if(dgSplitDataSet)
 			{
-				series.push({ name: dataSetName, data: data });
+				series.push({ name: dataSetName, data: data, type: "pie" });
 			}
 			else
 			{
 				if(series.length == 0)
-					series.push({ name: dataSetName, data: [], radius: "60%" });
+				{
+					series.push({ name: dataSetName, data: [], type: "pie", radius: "60%" });
+					
+					if(renderOptions.dgRing)
+						series[0].radius = ["35%", "55%"];
+					
+					if(renderOptions.dgRose)
+						series[0].roseType = "radius";
+				}
 				
 				series[0].data = series[0].data.concat(data);
 			}
@@ -627,7 +639,7 @@
 		var options = { legend: { data: legendData }, series: series };
 		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -723,19 +735,11 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//min
-					//max
-					//data
-					
-					type: "gauge",
-					detail: {formatter: "{value}", color: "auto"},
-			        progress:
-					{
-						show: true
-			        }
+					type: "gauge"
 				}
 			]
 		},
@@ -809,9 +813,9 @@
 		min = (min == null ? 0 : min);
 		max = (max == null ? 100 : max);
 		
-		var options = { series : [ { name: seriesName, min: min, max: max, data: seriesData } ] };
+		var options = { series : [ { type: "gauge", name: seriesName, min: min, max: max, data: seriesData } ] };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -934,11 +938,10 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					
 					type: "scatter"
 				}
 			]
@@ -987,7 +990,7 @@
 					max = (max == null ? valMy : Math.max(max, valMy));
 				}
 				
-				var mySeries = { name: legendName, data: data };
+				var mySeries = { type: "scatter", name: legendName, data: data };
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -1000,7 +1003,7 @@
 		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
 		options.xAxis = {data: null};
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions, function(options)
+		options = chart.inflateUpdateOptions(results, options, renderOptions, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "scatter");
 		});
@@ -1084,11 +1087,10 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					
 					type: "scatter"
 				}
 			]
@@ -1137,7 +1139,7 @@
 			
 			chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 			
-			series.push({ name: dataSetName, data: data });
+			series.push({ type: "scatter", name: dataSetName, data: data });
 			legendData.push(dataSetName);
 		}
 		
@@ -1145,7 +1147,7 @@
 		
 		var options = { legend: {data: legendData}, series: series };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -1219,11 +1221,10 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					
 					type: "radar"
 				}
 			]
@@ -1265,10 +1266,10 @@
 			}
 		}
 		
-		var series = [ { data: seriesData } ];
+		var series = [ { type: "radar", data: seriesData } ];
 		var options = { legend: {data: legendData}, radar: {indicator: indicatorData}, series: series };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 		
@@ -1408,6 +1409,9 @@
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
+			//扩展配置项：同series[i].sort
+			dgSort: "descending",
+			
 			title:
 			{
 		        text: chart.name
@@ -1424,22 +1428,11 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					//min
-		            //max
-					
-		            type: "funnel",
-		            left: "10%",
-		            top: "20%",
-		            right: "10%",
-		            bottom: "10%",
-		            minSize: "0%",
-		            maxSize: "100%",
-		            sort: "descending",
-		            gap: 2
+		            type: "funnel"
 		        }
 			]
 		},
@@ -1492,10 +1485,10 @@
 				max = v;
 		}
 		
-		var series = [ {name: seriesName, min: min, max: max, data: seriesData } ];
+		var series = [ {type: "funnel", name: seriesName, min: min, max: max, data: seriesData, sort: renderOptions.dgSort } ];
 		var options = { legend: { data: legendData }, series: series };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -1564,20 +1557,14 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					//map
+		            type: "map",
 					//这里必须设置map，不然渲染会报错，update中会特殊处理
-					map: (chart.map() || "china"),
-					
-					type: "map",
-					label:
-					{
-						show: true
-					}
-				}
+					map: (chart.map() || "china")
+		        }
 			]
 		},
 		options);
@@ -1638,7 +1625,12 @@
 			}
 		}
 		
-		var options = { visualMap: {min, min, max: max}, series: [ {name: seriesName, data: seriesData } ] };
+		var options =
+		{
+			visualMap: {min, min, max: max},
+			series: [ {type: "map", name: seriesName, data: seriesData } ]
+		};
+		
 		chartSupport.checkMinAndMax(options.visualMap);
 		
 		if(map)
@@ -1724,11 +1716,10 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
-					//将在update中设置：
-					//name
-					//data
-					
 					type: "scatter",
 					coordinateSystem: "geo"
 				}
@@ -1793,7 +1784,7 @@
 			}
 			
 			legendData.push(dataSetName);
-			series.push({ name: dataSetName, data: data });
+			series.push({ type: "scatter", name: dataSetName, data: data, coordinateSystem: "geo" });
 		}
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
@@ -1892,15 +1883,9 @@
 					type: "graph",
 			        layout: "none",
 			        coordinateSystem: "geo",
-					legendHoverLink: true,
-					label: { position: "right" },
 					tooltip:
 					{
 						formatter: "{a}<br>{b}：{c}"
-					},
-					emphasis:
-					{
-						focus: "adjacency"
 					}
 				}
 			]
@@ -2179,12 +2164,11 @@
 			},
 			series:
 			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
 				{
 					type: "k"
-					
-					//将在update中设置：
-					//name
-					//data
 				}
 			]
 		},
@@ -2231,14 +2215,14 @@
 			
 			chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 			
-			series.push({name: dataSetName, data: data});
+			series.push({type: "k", name: dataSetName, data: data});
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
 		//不设置坐标轴数据的话将无法显示刻度标签
 		options.xAxis = { data: axisData };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2356,9 +2340,7 @@
 					//name
 					//data
 					
-					type: "heatmap",
-					label: {show:true},
-					emphasis: { itemStyle: { shadowBlur: 5 } }
+					type: "heatmap"
 				}
 			]
 		},
@@ -2419,12 +2401,12 @@
 				seriesName = chart.chartDataSetName(chartDataSet);
 		}
 		
-		var series = [ { name: seriesName, data: seriesData } ];
+		var series = [ { type: "heatmap", name: seriesName, data: seriesData } ];
 		
 		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
 		chartSupport.checkMinAndMax(options.visualMap);
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2523,7 +2505,7 @@
 		
 		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results) ] };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2602,7 +2584,7 @@
 		
 		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results) ] };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2688,7 +2670,7 @@
 		
 		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results) ] };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -2873,11 +2855,7 @@
 					left: "16%",
 	                right: "16%",
 	                top: "12%",
-	                bottom: "12%",
-					emphasis:
-					{
-						focus: "adjacency"
-					}
+	                bottom: "12%"
 				}
 			]
 		},
@@ -2980,9 +2958,9 @@
 			}
 		}
 		
-		var options = { series: [ { name: seriesName, data: seriesData, links: seriesLinks } ] };
+		var options = { series: [ { type: "sankey", name: seriesName, data: seriesData, links: seriesLinks } ] };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 		
@@ -3090,18 +3068,8 @@
 					
 					type: "graph",
 			        layout: "force",
-					legendHoverLink: true,
 	                draggable: true,
-					label: { position: "right" },
-					roam: true,
-					left: "12%",
-	                right: "12%",
-	                top: "20%",
-	                bottom: "12%",
-					emphasis:
-					{
-						focus: "adjacency"
-					}
+					roam: true
 				}
 			]
 		},
@@ -3230,13 +3198,13 @@
 		if(min == undefined && max == undefined && symbolSizeMin < 10)
 			symbolSizeMin = 10;
 		
-		var series = [ { name: seriesName, categories: categories, data: seriesData, links: seriesLinks } ];
+		var series = [ { type: "graph", name: seriesName, categories: categories, data: seriesData, links: seriesLinks } ];
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin);
 		
 		var options = { legend: {data: legendData}, series: series };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions, function(options)
+		options = chart.inflateUpdateOptions(results, options, renderOptions, function(options)
 		{
 			var series0 = (options.series ? options.series[0] : null);
 			
@@ -3376,8 +3344,15 @@
 				nameGap: 5,
 				type: "value"
 			},
-			//将在update中设置：
-			//series: []
+			series:
+			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
+				{
+					type: "boxplot"
+				}
+			]
 		},
 		options,
 		function(options)
@@ -3437,7 +3412,7 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				series.push({ name: dataSetName, data: data, type: "boxplot" });
+				series.push({ type: "boxplot", name: dataSetName, data: data });
 				legendData.push(dataSetName);
 			}
 			//异常值数据集
@@ -3454,7 +3429,7 @@
 					
 					chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 					
-					series.push({ name: legendName, data: data, type: "scatter" });
+					series.push({ type: "scatter", name: legendName, data: data });
 					legendData.push(legendName);
 				}
 			}
@@ -3470,7 +3445,7 @@
 		else
 			options.xAxis = { data: axisData };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -3656,9 +3631,9 @@
 			}
 		}
 		
-		var options = { series: [ {name: seriesName, data: seriesData} ] };
+		var options = { series: [ {type: "wordCloud", name: seriesName, data: seriesData} ] };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -3828,9 +3803,9 @@
 			}
 		}
 		
-		var options = { series: [ {data: seriesData} ] };
+		var options = { series: [ {type: "liquidFill", data: seriesData} ] };
 		
-		options = chartSupport.inflateUpdateOptions(chart, results, options, renderOptions);
+		options = chart.inflateUpdateOptions(results, options, renderOptions);
 		
 		chart.echartsOptions(options);
 	};
@@ -4190,7 +4165,7 @@
 		
 		chartSupport.tableStopCarousel(chart);
 		
-		updateOptions = chartSupport.inflateUpdateOptions(chart, results, updateOptions, renderOptions, null, false);
+		updateOptions = chart.inflateUpdateOptions(results, updateOptions, renderOptions);
 		
 		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0);
 		chartSupport.tableAdjust(chart);
@@ -4746,7 +4721,7 @@
 			}
 		}
 		
-		updateOptions = chartSupport.inflateUpdateOptions(chart, results, updateOptions, renderOptions, null, false);
+		updateOptions = chart.inflateUpdateOptions(results, updateOptions, renderOptions);
 		
 		for(var i=0; i<updateOptions.data.length; i++)
 		{
@@ -5066,72 +5041,6 @@
 			afterMergeHandlerFirst(renderOptions, chart);
 		
 		return chart.inflateRenderOptions(renderOptions, beforeProcessHandler);
-	};
-	
-	/**
-	 * 填充图表更新options。
-	 * 
-	 * @param chart
-	 * @param results
-	 * @param updateOptions
-	 * @param renderOptions
-	 * @param beforeProcessHandler
-	 * @param mergeSeriesAsTemplate 可选，是否将renderOptions.series作为模板合并，默认值为：true
-	 * @returns updateOptions
-	 */
-	chartSupport.inflateUpdateOptions = function(chart, results, updateOptions, renderOptions,
-												beforeProcessHandler, mergeSeriesAsTemplate)
-	{
-		mergeSeriesAsTemplate = (mergeSeriesAsTemplate == null ? true : mergeSeriesAsTemplate);
-		
-		if(mergeSeriesAsTemplate)
-		{
-			//默认应该取第0个元素，因为它是图表的默认设置
-			var defaultMergeIndex = 0;
-			chartSupport.mergeArrayTemplate(updateOptions.series, renderOptions.series, defaultMergeIndex);
-			
-			var series = renderOptions.series;
-			renderOptions.series = undefined;
-			updateOptions = chart.inflateUpdateOptions(results, updateOptions, renderOptions, beforeProcessHandler);
-			renderOptions.series = series;
-			
-			return updateOptions;
-		}
-		else
-		{
-			return chart.inflateUpdateOptions(results, updateOptions, renderOptions, beforeProcessHandler);
-		}
-	};
-	
-	/**
-	 * 将templateArray高优先级深读合并至array，并返回array。
-	 * 如果templateArray没有array对应索引的元素，将使用templateArray中defaultMergeIndex的元素合并。
-	 *
-	 * @param array
-	 * @param templateArray
-	 * @param defaultMergeIndex 可选，越限合并索引，-1 表示不合并，默认为templateArray最后一个元素索引
-	 * @returns array
-	 */
-	chartSupport.mergeArrayTemplate = function(array, templateArray, defaultMergeIndex)
-	{
-		if(!templateArray || templateArray.length == 0)
-			return array;
-		
-		defaultMergeIndex = (defaultMergeIndex == null ? templateArray.length - 1 : defaultMergeIndex);
-		defaultMergeIndex = (defaultMergeIndex < 0 ? -1 : defaultMergeIndex);
-		defaultMergeIndex = (defaultMergeIndex >= templateArray.length ? templateArray.length -1 : defaultMergeIndex);
-		
-		var len = (array ? array.length : 0);
-		
-		for(var i=0; i<len; i++)
-		{
-			var srcIdx = (i >= templateArray.length ? defaultMergeIndex : i);
-			
-			if(srcIdx > -1)
-				array[i] = $.extend(true, array[i], templateArray[srcIdx]);
-		}
-		
-		return array;
 	};
 	
 	/**
@@ -5669,7 +5578,7 @@
 		if(!updateMap)
 			updateMap = presetMap;
 		
-		updateOptions = chartSupport.inflateUpdateOptions(chart, results, updateOptions, renderOptions, function(updateOptions)
+		updateOptions = chart.inflateUpdateOptions(results, updateOptions, renderOptions, function(updateOptions)
 		{
 			//inflateUpdateOptions()会将地图设置为renderMap，所以这里需要再次设置为updateMap
 			if(updateMap && updateMap != renderMap)
