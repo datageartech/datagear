@@ -3345,6 +3345,10 @@
 		{
 			//扩展配置项：是否横向
 			dgHorizontal: false,
+			//扩展配置项：最大数据标记像素数
+			dgSymbolSizeMax: undefined,
+			//扩展配置项：最小数据标记像素数
+			dgSymbolSizeMin: undefined,
 			
 			title: {
 		        text: chart.name
@@ -3372,23 +3376,8 @@
 				nameGap: 5,
 				type: "value"
 			},
-			series:
-			[
-				{
-					//将在update中设置：
-					//name
-					//data
-					
-					type: "boxplot"
-				},
-				{
-					//将在update中设置：
-					//name
-					//data
-					
-					type: "scatter"
-				}
-			]
+			//将在update中设置：
+			//series: []
 		},
 		options,
 		function(options)
@@ -3418,12 +3407,10 @@
 		
 		var legendData = [];
 		var axisData = [];
-		//箱形系列
-		var seriesNameBox = "";
-		var seriesDataBox = [];
-		//异常值系列
-		var seriesNameOutlier = "";
-		var seriesDataOutlier = [];
+		var series = [];
+		
+		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -3450,9 +3437,8 @@
 				
 				chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 				
-				if(!seriesNameBox)
-					seriesNameBox = dataSetName;
-				seriesDataBox = seriesDataBox.concat(data);
+				series.push({ name: dataSetName, data: data, type: "boxplot" });
+				legendData.push(dataSetName);
 			}
 			//异常值数据集
 			else
@@ -3461,32 +3447,19 @@
 				
 				for(var j=0; j<vps.length; j++)
 				{
+					var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
 					var vpsMy = (dgHorizontal ? [vps[j], np] : [np, vps[j]]);
 					var data = chart.resultValueObjects(result, vpsMy);
+					chartSupport.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
+					
 					chartSupport.chartDataOriginalDataIndex(data, chartDataSet);
 					
-					seriesDataOutlier = seriesDataOutlier.concat(data);
+					series.push({ name: legendName, data: data, type: "scatter" });
+					legendData.push(legendName);
 				}
-				
-				if(!seriesNameOutlier)
-					seriesNameOutlier = dataSetName;
 			}
 			
 			chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
-		}
-		
-		var series = [ {name: seriesNameBox, data: seriesDataBox} ];
-		
-		legendData.push(seriesNameBox);
-		
-		if(seriesDataOutlier && seriesDataOutlier.length > 0)
-		{
-			var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
-			var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
-			chartSupport.evalDataValueSymbolSize(seriesDataOutlier, 1, 1, symbolSizeMax, symbolSizeMin);
-			
-			series.push({name: seriesNameOutlier, data: seriesDataOutlier});
-			legendData.push(seriesNameOutlier);
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
