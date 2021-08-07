@@ -467,3 +467,25 @@ DataGear版本更新日志
 --v2.7.0
 -----------------------------------------
 
+新增：新增箱形图内置图表插件；
+新增：新增数据集、图表、看板的复制功能；
+新增：看板编辑页面新增看板和图表JS对象函数自动补全功能；
+新增：图表JS对象新增inflateRenderOptions、inflateUpdateOptions、renderOptions函数，弃用optionsUpdate函数；
+新增：图表JS对象新增internal函数，替换已弃用的echartsInstance函数；
+新增：图表JS对象新增loadMap函数，用于为加载通用图表地图提供支持；
+新增：图表JS对象新增resultValueObjects、resultDatasFirst函数；
+新增：图表JS对象新增dataSetParamValueFirst、dataSetParamValuesFirst函数；
+修复：修复在图表监听器里调用另一图表的refreshData函数有时不起作用的BUG；
+修复：修复看板、图表展示地址末尾不带'/'会导致网页未找到的BUG；
+修复：修复横向柱状图的配置项中xAxis和yAxis配置效果颠倒的BUG；
+修复：修复内置图表对于某些series配置项不起作用的BUG；
+修复：修复K线图未显示坐标轴刻度标签的BUG；
+改进：弃用看板JS对象的isWaitForRender、isWaitForUpdate函数，它们不应作为开放API；
+改进：图表元素的地图配置dg-chart-map、chart.echartsLoadMap函数支持SVG格式的地图；
+改进：图表JS对象的dataSetParamValuesFirst、dataSetParamValues函数支持设置数组类型的参数值；
+改进：简化数据集、图表、看板访问地址，移除"/analysis"地址前缀；
+改进：完善各内置图表组件对于日期类数据的坐标轴类型支持；
+改进：SQL、CSV、JSON数据集添加防注入和自动转义参数值支持；
+改进：看板展示页面标题中的"DataGear"标识由前缀改为后缀，着重显示原标题；
+改进：图表编辑页面支持悬浮提示选中图表类型的描述信息；
+改进：图表插件临时目录改为应用配置的临时目录，而非操作系统临时目录；
