@@ -3851,6 +3851,7 @@
                 "right": "12%",
                 "top": "20%",
                 "bottom": "12%",
+				"roam": true,
 				"itemStyle" : {
 					"borderWidth" : 0,
 					"borderColor" : chartTheme.borderColor,
