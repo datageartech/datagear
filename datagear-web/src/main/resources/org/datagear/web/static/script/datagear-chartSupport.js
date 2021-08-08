@@ -4685,6 +4685,10 @@
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-label");
 		
+		var labelWrapper = $(".dg-chart-label-wrapper", chartEle);
+		if(labelWrapper.length == 0)
+			 labelWrapper = $("<div class='dg-chart-label-wrapper' />").appendTo(chartEle);
+		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//将在update中设置：
@@ -4708,7 +4712,7 @@
 		options);
 		
 		//标签卡无底层组件
-		chart.internal(null);
+		chart.internal(labelWrapper[0]);
 	};
 	
 	chartSupport.labelUpdate = function(chart, results)
@@ -4720,7 +4724,7 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		var $parent = chart.elementJquery();
+		var $parent = $(chart.internal());
 		
 		$(".dg-chart-label-item", $parent).addClass("dg-chart-label-item-pending");
 		
@@ -4842,10 +4846,7 @@
 	{
 		var chartEle = chart.elementJquery();
 		chartEle.removeClass("dg-chart-label");
-		$(".dg-chart-label-item", chartEle).each(function()
-		{
-			$(this).remove();
-		});
+		$(chart.internal()).remove();
 	};
 	
 	chartSupport.labelOn = function(chart, eventType, handler)

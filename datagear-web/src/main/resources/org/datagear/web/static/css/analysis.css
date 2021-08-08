@@ -109,10 +109,17 @@
 .dg-chart-label{
 	position: relative;
 }
-.dg-chart-label .dg-chart-label-item .label-name{
+.dg-chart-label .dg-chart-label-wrapper{
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+}
+.dg-chart-label .dg-chart-label-wrapper .dg-chart-label-item .label-name{
 	text-align: center;
 }
-.dg-chart-label .dg-chart-label-item .label-value{
+.dg-chart-label .dg-chart-label-wrapper .dg-chart-label-item .label-value{
 	text-align: center;
 	font-size: 1.5em;
 	font-weight: bold;
