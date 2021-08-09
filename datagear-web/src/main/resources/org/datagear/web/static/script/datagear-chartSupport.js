@@ -4711,7 +4711,6 @@
 		},
 		options);
 		
-		//标签卡无底层组件
 		chart.internal(labelWrapper[0]);
 	};
 	
