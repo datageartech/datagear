@@ -820,3 +820,9 @@ ALTER TABLE DATAGEAR_HCW_DS DROP COLUMN DS_PARAM_VALUES;
 --version[2.7.0], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+
+
+-----------------------------------------
+--version[2.8.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
