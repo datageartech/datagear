@@ -105,16 +105,11 @@
 	filter: Alpha(Opacity=100);
 }
 
-/*标签图表*/
+/*标签卡图表*/
 .dg-chart-label{
 	position: relative;
 }
 .dg-chart-label .dg-chart-label-wrapper{
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
 }
 .dg-chart-label .dg-chart-label-wrapper .dg-chart-label-item .label-name{
 	text-align: center;
@@ -123,6 +118,12 @@
 	text-align: center;
 	font-size: 1.5em;
 	font-weight: bold;
+}
+.dg-chart-label .dg-chart-label-wrapper.dg-chart-label-inline,
+.dg-chart-label .dg-chart-label-wrapper.dg-chart-label-inline .dg-chart-label-item,
+.dg-chart-label .dg-chart-label-wrapper.dg-chart-label-inline .dg-chart-label-item .label-name,
+.dg-chart-label .dg-chart-label-wrapper.dg-chart-label-inline .dg-chart-label-item .label-value{
+	display: inline-block;
 }
 
 /*数据集参数值表单*/

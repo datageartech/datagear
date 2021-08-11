@@ -4694,22 +4694,29 @@
 			//将在update中设置：
 			//data
 			
+			//是否所有标签都行内显示
+			"inline": false,
 			//是否标签值在前
 			"valueFirst": false,
-			"label":
+			//标签名样式，这里不必添加默认样式，因为图表元素已设置
+			"name":
 			{
-				//标签名样式，这里不必添加默认样式，因为图表元素已设置
-				"name":
-				{
-					"show": true
-				},
-				//标签值样式，这里不必添加默认样式，因为图表元素已设置
-				"value":
-				{
-				}
-			}
+				"show": true
+			},
+			//标签值样式，这里不必添加默认样式，因为图表元素已设置
+			"value": {}
 		},
 		options);
+		
+		if(options.inline == true)
+			labelWrapper.addClass("dg-chart-label-inline");
+		
+		// < @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
+		if(options.label && options.label.name)
+			options.name = $.extend(true, {}, options.name, options.label.name);
+		if(options.label && options.label.value)
+			options.value = $.extend(true, {}, options.value, options.label.value);
+		// > @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
 		
 		chart.internal(labelWrapper[0]);
 	};
@@ -4719,7 +4726,7 @@
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions = chart.renderOptions();
 		var valueFirst = renderOptions.valueFirst;
-		var showName = renderOptions.label.name.show;
+		var showName = (renderOptions.name && renderOptions.name.show);
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -4798,12 +4805,16 @@
 				if(valueFirst)
 				{
 					$labelValue = $("<div class='label-value'></div>").appendTo($label);
-					chartFactory.setStyles($labelValue, renderOptions.label.value);
+					
+					if(renderOptions.value)
+						chartFactory.setStyles($labelValue, renderOptions.value);
 					
 					if(showName)
 					{
 						$labelName = $("<div class='label-name'></div>").appendTo($label);
-						chartFactory.setStyles($labelName, renderOptions.label.name);
+						
+						if(renderOptions.name)
+							chartFactory.setStyles($labelName, renderOptions.name);
 					}
 				}
 				else
@@ -4811,11 +4822,15 @@
 					if(showName)
 					{
 						$labelName = $("<div class='label-name'></div>").appendTo($label);
-						chartFactory.setStyles($labelName, renderOptions.label.name);
+						
+						if(renderOptions.name)
+							chartFactory.setStyles($labelName, renderOptions.name);
 					}
 					
 					$labelValue = $("<div class='label-value'></div>").appendTo($label);
-					chartFactory.setStyles($labelValue, renderOptions.label.value);
+					
+					if(renderOptions.value)
+						chartFactory.setStyles($labelValue, renderOptions.value);
 				}
 			}
 			else
