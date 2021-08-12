@@ -54,15 +54,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	/** 分页查询SQL尾部片段 */
 	public static final String PAGING_QUERY_FOOT_SQL = "_pagingQueryFoot";
 
-	/** {@linkplain MbSqlDialect#funcNameReplace()}的MyBatis参数名 */
-	public static final String FUNC_NAME_REPLACE = "_FUNC_REPLACE";
-
-	/** {@linkplain MbSqlDialect#funcNameModInt()}的MyBatis参数名 */
-	public static final String FUNC_NAME_MODINT = "_FUNC_MODINT";
-
-	/** {@linkplain MbSqlDialect#funcNameLength()}的MyBatis参数名 */
-	public static final String FUNC_NAME_LENGTH = "_FUNC_LENGTH";
-
 	/** {@linkplain MbSqlDialect#funcNameMax()}的MyBatis参数名 */
 	public static final String FUNC_NAME_MAX = "_FUNC_MAX";
 
@@ -452,10 +443,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected void addDialectParamsBase(Map<String, Object> param)
 	{
 		param.put(this.identifierQuoteKey, this.dialect.getIdentifierQuote());
-
-		param.put(FUNC_NAME_REPLACE, this.dialect.funcNameReplace());
-		param.put(FUNC_NAME_MODINT, this.dialect.funcNameModInt());
-		param.put(FUNC_NAME_LENGTH, this.dialect.funcNameLength());
 		param.put(FUNC_NAME_MAX, this.dialect.funcNameMax());
 	}
 

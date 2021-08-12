@@ -104,7 +104,7 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = dataPermission;
+		this.dataPermission = Authorization.trimPermission(dataPermission);
 	}
 
 	@Override

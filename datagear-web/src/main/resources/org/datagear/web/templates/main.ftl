@@ -901,11 +901,11 @@ ${detectNewVersionScript?no_esc}
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/role/pagingQuery", options);
 				}
-				else if($item.hasClass("system-set-authorization"))
+				else if($item.hasClass("system-set-schemaControl"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/authorization/${statics['org.datagear.management.domain.Schema'].AUTHORIZATION_RESOURCE_TYPE}/query", options);
+					po.open(contextPath+"/schemaControl/query", options);
 				}
 				else if($item.hasClass("system-set-chartPlugin"))
 				{
@@ -1214,7 +1214,7 @@ ${detectNewVersionScript?no_esc}
 					
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/authorization/${statics['org.datagear.management.domain.Schema'].AUTHORIZATION_RESOURCE_TYPE}/query?${statics['org.datagear.web.controller.AuthorizationController'].PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent(schemaId), options);
+					po.open(contextPath+"/authorization/${statics['org.datagear.management.domain.Schema'].AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(schemaId)+"/query", options);
 				}
 				else if($item.hasClass("schema-operation-reload"))
 				{
@@ -1436,7 +1436,7 @@ ${detectNewVersionScript?no_esc}
 					<#if currentUser.admin>
 					<li class="system-set-driverEntity"><a href="javascript:void(0);"><@spring.message code='main.manageDriverEntity' /></a></li>
 					<li class="system-set-schemaUrlBuilder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
-					<li class="system-set-authorization"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaAuth' /></a></li>
+					<li class="system-set-schemaControl"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaControl' /></a></li>
 					<li class="ui-widget-header"></li>
 					<li class="system-set-dataSetResDirectory"><a href="javascript:void(0);"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
 					<li class="system-set-chartPlugin"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>

@@ -14,17 +14,8 @@ package org.datagear.management.domain;
  *
  */
 public class Authorization extends AbstractStringIdEntity
-		implements CreateUserEntity<String>, DataPermissionEntity<String>
 {
 	private static final long serialVersionUID = 1L;
-
-	/** 授权资源类型 */
-	public static final String AUTHORIZATION_RESOURCE_TYPE = "AUTHORIZATION";
-
-	/**
-	 * 模式匹配资源类型的后缀，例如："DATA_SOURCE_PATTERN"，表示数据源资源模式匹配授权
-	 */
-	public static final String PATTERN_RESOURCE_TYPE_SUFFIX = "_PATTERN";
 
 	/** 授权主体类型：全部用户 */
 	public static final String PRINCIPAL_TYPE_ALL = "ALL";
@@ -46,8 +37,7 @@ public class Authorization extends AbstractStringIdEntity
 
 	/*------------------------------------------------------*/
 	/*
-	 * 注意：权限值范围必须在[0, 99]之间，因为commonDataPermissionSqls.xml会对权限值取模100。
-	 * 这里的权限值都留有间隔，便于各模块扩展自定义权限值。
+	 * 注意：权限值范围必须在[-99, 99]之间，这里的权限值都留有间隔，便于各模块扩展自定义权限值。
 	 */
 
 	/** 权限起始值：无 */
@@ -61,6 +51,9 @@ public class Authorization extends AbstractStringIdEntity
 
 	/** 权限起始值：删除 */
 	public static final int PERMISSION_DELETE_START = 60;
+
+	/** 最小权限值 */
+	public static final int PERMISSION_MIN = -99;
 
 	/** 最大权限值 */
 	public static final int PERMISSION_MAX = 99;
@@ -85,36 +78,26 @@ public class Authorization extends AbstractStringIdEntity
 	/** 是否启用 */
 	private boolean enabled = true;
 
-	/** 授权创建用户 */
-	private User createUser;
-
-	/** 授权资源名称 */
-	private String resourceName;
-
 	/** 授权主体名称 */
 	private String principalName;
 
 	/** 权限标签 */
 	private String permissionLabel;
 
-	/** 此记录的数据权限 */
-	private int dataPermission = PERMISSION_NOT_LOADED;
-
 	public Authorization()
 	{
 		super();
 	}
 
-	public Authorization(String resource, String resourceType, String principal, String principalType, int permission,
-			User createUser)
+	public Authorization(String id, String resource, String resourceType, String principal, String principalType,
+			int permission)
 	{
-		super();
+		super(id);
 		this.resource = resource;
 		this.resourceType = resourceType;
 		this.principal = principal;
 		this.principalType = principalType;
 		this.permission = permission;
-		this.createUser = createUser;
 	}
 
 	public String getResource()
@@ -177,28 +160,6 @@ public class Authorization extends AbstractStringIdEntity
 		this.enabled = enabled;
 	}
 
-	@Override
-	public User getCreateUser()
-	{
-		return createUser;
-	}
-
-	@Override
-	public void setCreateUser(User createUser)
-	{
-		this.createUser = createUser;
-	}
-
-	public String getResourceName()
-	{
-		return resourceName;
-	}
-
-	public void setResourceName(String resourceName)
-	{
-		this.resourceName = resourceName;
-	}
-
 	public String getPrincipalName()
 	{
 		return principalName;
@@ -220,33 +181,11 @@ public class Authorization extends AbstractStringIdEntity
 	}
 
 	@Override
-	public int getDataPermission()
-	{
-		return dataPermission;
-	}
-
-	@Override
-	public void setDataPermission(int dataPermission)
-	{
-		this.dataPermission = dataPermission;
-	}
-
-	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [id=" + getId() + ", resource=" + resource + ", resourceType="
 				+ resourceType + ", principal=" + principal + ", principalType=" + principalType + ", permission="
 				+ permission + ", enabled=" + enabled + "]";
-	}
-
-	/**
-	 * 是否是模式匹配资源类型。
-	 * 
-	 * @return
-	 */
-	public boolean isResourceTypePattern()
-	{
-		return this.resourceType != null && this.resourceType.endsWith(PATTERN_RESOURCE_TYPE_SUFFIX);
 	}
 
 	/**
@@ -356,5 +295,16 @@ public class Authorization extends AbstractStringIdEntity
 			return false;
 
 		return currentUser.getId().equals(createUserEntity.getCreateUser().getId());
+	}
+
+	/**
+	 * 整理权限数值，确保其不大于{@linkplain #PERMISSION_MAX}之间。
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static int trimPermission(int permission)
+	{
+		return permission % 100;
 	}
 }

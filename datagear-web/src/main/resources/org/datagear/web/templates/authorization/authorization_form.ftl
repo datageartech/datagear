@@ -18,18 +18,10 @@ readonly 是否只读操作，允许为null
 <#assign readonly=(readonly!false)>
 <#assign isAdd=(formAction == 'saveAdd')>
 <#assign Authorization=statics['org.datagear.management.domain.Authorization']>
-<#assign resourceTypePattern=resourceMeta.resourceType + Authorization.PATTERN_RESOURCE_TYPE_SUFFIX>
 
-<#assign resourceType=((authorization.resourceType)!resourceMeta.resourceType)>
 <#assign principalType=((authorization.principalType)!Authorization.PRINCIPAL_TYPE_USER)>
 <#assign permission=((authorization.permission)!resourceMeta.permissionMetas[0].permission)>
 <#assign enabled=(((authorization.enabled)!true)?string('true', 'false'))>
-<#assign isResourceTypePattern=(resourceType == resourceTypePattern)>
-<#if assignedResource??>
-<#assign resource=assignedResource>
-<#else>
-<#assign resource=((authorization.resource)!'')>
-</#if>
 
 <html>
 <head>
@@ -39,69 +31,13 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-authorization">
-	<form id="${pageId}-form" action="${contextPath}/authorization/${resourceMeta.resourceType}/${formAction}" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/authorization/${resourceMeta.resourceType}/${resource}/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(authorization.id)!''}" />
 			<input type="hidden" name="resource" value="${resource}" />
 			<input type="hidden" name="principal" value="${(authorization.principal)!''}" />
-			
-			<#if assignedResource??>
-				<input type="hidden" name="resourceType" value="${resourceType}" />
-			<#else>
-				<#if (resourceMeta.supportSelectResource && resourceMeta.supportPatternResource)>
-					<div class="form-item form-item-resourceType">
-						<div class="form-item-label">
-							<label><@spring.message code='${resourceMeta.authResourceTypeLabel}' /></label>
-						</div>
-						<div class="form-item-value">
-							<div class="resourceType-radios">
-								<label for="${pageId}-resourceType_0" title="<@spring.message code='${resourceMeta.authModeSelectResourceLabelDesc}' />">
-									<@spring.message code='${resourceMeta.authModeSelectResourceLabel}' />
-								</label>
-					   			<input type="radio" id="${pageId}-resourceType_0" name="resourceType" value="${resourceMeta.resourceType}" />
-								<label for="${pageId}-resourceType_1" title="<@spring.message code='${resourceMeta.authModePatternResourceLabelDesc}' />">
-									<@spring.message code='${resourceMeta.authModePatternResourceLabel}' />
-								</label>
-					   			<input type="radio" id="${pageId}-resourceType_1" name="resourceType" value="${resourceTypePattern}"  />
-				   			</div>
-						</div>
-					</div>
-				<#elseif resourceMeta.supportPatternResource>
-					<input type="hidden" name="resourceType" value="${resourceTypePattern}" />
-				<#else>
-					<input type="hidden" name="resourceType" value="${resourceType}" />
-				</#if>
-				
-				<#if resourceMeta.supportSelectResource>
-				<div class="form-item form-item-resource-name-entity">
-					<div class="form-item-label">
-						<label><@spring.message code='${resourceMeta.resouceTypeLabel}' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="text" name="resourceNameForEntity" value="${isResourceTypePattern?string('', (authorization.resourceName)!'')}" class="ui-widget ui-widget-content" readonly="readonly" />
-						<#if !readonly>
-						<button type="button" class="resource-select-button"><@spring.message code='select' /></button>
-						</#if>
-					</div>
-				</div>
-				</#if>
-				
-				<#if resourceMeta.supportPatternResource>
-				<div class="form-item form-item-resource-name-pattern">
-					<div class="form-item-label">
-						<label><@spring.message code='${resourceMeta.resouceTypeLabel}' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="text" name="resourceNameForPattern" value="${(!isResourceTypePattern)?string('', (authorization.resourceName)!'')}" class="ui-widget ui-widget-content" />
-						<#if !readonly>
-						<#--占位按钮，避免切换时界面尺寸变化-->
-						<button type="button" style="visibility: hidden; padding-left: 0; padding-right: 0; width: 1px; margin-left: -3px; margin-right: 0;">&nbsp;</button>
-						</#if>
-					</div>
-				</div>
-				</#if>
-			</#if>
+			<input type="hidden" name="resourceType" value="${resourceMeta.resourceType}" />
 			
 			<div class="form-item">
 				<div class="form-item-label">
@@ -224,27 +160,6 @@ readonly 是否只读操作，允许为null
 	
 	<#if !readonly>
 	
-	<#if resourceMeta.supportSelectResource>
-	po.element(".resource-select-button").click(function()
-	{
-		var options =
-		{
-			pageParam :
-			{
-				select : function(res)
-				{
-					po.element("input[name='resource']").val(res.${resourceMeta.selectResourceIdField});
-					po.element("input[name='resourceNameForEntity']").val(res.${resourceMeta.selectResourceNameField});
-				}
-			}
-		};
-		
-		$.setGridPageHeightOption(options);
-		
-		po.open("${contextPath}${resourceMeta.selectResourceURL}", options);
-	});
-	</#if>
-	
 	po.element(".principal-user-select-button").click(function()
 	{
 		var options =
@@ -310,13 +225,6 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			<#if assignedResource??>
-			<#else>
-				var resourceType = po.element("input[name='resourceType']:checked").val();
-				if(resourceType == '${resourceTypePattern}')
-					po.element("input[name='resource']").val(po.element("input[name='resourceNameForPattern']").val());
-			</#if>
-			
 			$(form).ajaxSubmit(
 			{
 				success : function()
@@ -330,70 +238,6 @@ readonly 是否只读操作，允许为null
 			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
-	</#if>
-	
-	<#if assignedResource??>
-	<#else>
-		<#if (resourceMeta.supportSelectResource && resourceMeta.supportPatternResource)>
-		po.element("input[name='resourceType']").on("change", function()
-		{
-			var val = $(this).val();
-			
-			var $formItemForPattern = po.element(".form-item-resource-name-pattern");
-			var $formItemForEntity = po.element(".form-item-resource-name-entity");
-			var $resourceNameForPattern = po.element("input[name='resourceNameForPattern']");
-			var $resourceNameForEntity = po.element("input[name='resourceNameForEntity']");
-			
-			if(val == '${resourceMeta.resourceType}')
-			{
-				$formItemForPattern.hide();
-				$formItemForEntity.show();
-				
-				<#if !readonly>
-				$resourceNameForPattern.rules("remove");
-				$resourceNameForEntity.rules("add",
-				{
-					"required" : true,
-					messages : {"required" : "<@spring.message code='validation.required' />"}
-				});
-				</#if>
-			}
-			else
-			{
-				$formItemForPattern.show();
-				$formItemForEntity.hide();
-				
-				<#if !readonly>
-				$resourceNameForPattern.rules("add",
-				{
-					"required" : true,
-					messages : {"required" : "<@spring.message code='validation.required' />"}
-				});
-				$resourceNameForEntity.rules("remove");
-				</#if>
-			}
-		});
-		</#if>
-		
-		<#if resourceMeta.supportSelectResource>
-			<#if !readonly>
-				po.element("input[name='resourceNameForEntity']").rules("add",
-				{
-					"required" : true,
-					messages : {"required" : "<@spring.message code='validation.required' />"}
-				});
-			</#if>
-		</#if>
-		
-		<#if resourceMeta.supportPatternResource>
-			<#if !readonly>
-				po.element("input[name='resourceNameForPattern']").rules("add",
-				{
-					"required" : true,
-					messages : {"required" : "<@spring.message code='validation.required' />"}
-				});
-			</#if>
-		</#if>
 	</#if>
 	
 	po.element("input[name='principalType']").on("change", function()
@@ -424,19 +268,14 @@ readonly 是否只读操作，允许为null
 		</#if>
 	});
 	
-	<#if assignedResource??>
-	<#else>
-	<#if (resourceMeta.supportSelectResource && resourceMeta.supportPatternResource)>
-		po.element("input[name='resourceType'][value='${resourceType}']").attr("checked", "checked").change();
-		po.element("input[name='resourceType']").checkboxradio({icon:false});
-		po.element(".resourceType-radios").controlgroup();
-	</#if>
-	</#if>
-	
 	po.element("input[name='principalType'][value='${principalType}']").attr("checked", "checked").change();
 	po.element("input[name='principalType']").checkboxradio({icon:false});
 	po.element(".principalType-radios").controlgroup();
 	
+	po.element("input[name='permission'][value='${permission}']").attr("checked", "checked");
+	po.element("input[name='permission']").checkboxradio({icon:false});
+	po.element(".permission-radios").controlgroup();
+
 	<#if !(resourceMeta.singlePermission)>
 	po.element("input[name='permission'][value='${permission}']").attr("checked", "checked");
 	po.element("input[name='permission']").checkboxradio({icon:false});
@@ -447,24 +286,6 @@ readonly 是否只读操作，允许为null
 	po.element("input[name='enabled'][value='${enabled}']").attr("checked", "checked");
 	po.element("input[name='enabled']").checkboxradio({icon:false});
 	po.element(".enabled-radios").controlgroup();
-	</#if>
-	
-	<#if assignedResource??>
-	<#else>
-	<#if (resourceMeta.supportSelectResource && resourceMeta.supportPatternResource)>
-		po.element("input[name='resourceType'][value='${resourceType}']").attr("checked", "checked").change();
-	</#if>
-	</#if>
-	
-	<#--编辑时禁设资源类型，因为管理员也可能编辑普通用户设置的授权，而它们不允许是通配符-->
-	<#if formAction == 'saveEdit'>
-		<#if assignedResource??>
-		<#else>
-		<#if (resourceMeta.supportSelectResource && resourceMeta.supportPatternResource)>
-			po.element("input[name='resourceType'][value!='${resourceType}']").attr("disabled", "disabled");
-			po.element("input[name='resourceType']").checkboxradio("refresh");
-		</#if>
-		</#if>
 	</#if>
 })
 (${pageId});

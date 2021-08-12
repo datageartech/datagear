@@ -48,8 +48,6 @@ public class AuthorizationResourceMetas
 		PermissionMeta read = PermissionMeta.valueOfRead();
 		ResourceMeta resourceMeta = new ResourceMeta(resourceType, labelKeyPrefix, PermissionMeta.valuesOf(read));
 		resourceMeta.updateResouceTypeLabel();
-		resourceMeta.setSupportSelectResource(false);
-		resourceMeta.setSupportPatternResource(false);
 		resourceMeta.setEnableSetEnable(false);
 
 		resourceMeta.setAuthManageAuthorizationLabel("authorization.default.share.manageAuthorization");
@@ -95,14 +93,6 @@ public class AuthorizationResourceMetas
 			ResourceMeta resourceMeta = new ResourceMeta(Schema.AUTHORIZATION_RESOURCE_TYPE, "schema",
 					PermissionMeta.valuesOf(read, edit, delete, none));
 			resourceMeta.updateResouceTypeLabel();
-			resourceMeta.setSupportSelectResource(true);
-			resourceMeta.setSelectResourceURL("/schema/select");
-			resourceMeta.setSelectResourceIdField(Schema.ID_PROP_NAME);
-			resourceMeta.setSelectResourceNameField(Schema.PROPERTY_TITLE);
-			resourceMeta.updateAuthModeSelectResourceLabel();
-			resourceMeta.setSupportPatternResource(true);
-			resourceMeta.updateAuthModePatternResourceLabel();
-			resourceMeta.updateAuthModePatternResourceLabelDesc();
 
 			register(resourceMeta);
 		}
@@ -135,33 +125,6 @@ public class AuthorizationResourceMetas
 		/** 资源类型标签I18N关键字 */
 		private String resouceTypeLabel = "authorization.default.resouceTypeLabel";
 
-		/** 是否支持选择资源授权 */
-		private boolean supportSelectResource = false;
-
-		/** supportSelectResource=true时必须，选择资源URL */
-		private String selectResourceURL = "";
-
-		/** supportSelectResource=true时必须，选择资源的ID字段名 */
-		private String selectResourceIdField = "";
-
-		/** supportSelectResource=true时必须，选择资源的名称字段名 */
-		private String selectResourceNameField = "";
-
-		/** 是否支持模式匹配授权 */
-		private boolean supportPatternResource = false;
-
-		/** 可选，授权模式-选择资源选项卡标签名I18N关键字 */
-		private String authModeSelectResourceLabel = "authorization.default.authModeSelectResourceLabel";
-
-		/** 可选，授权模式-选择资源选项卡标签描述I18N关键字 */
-		private String authModeSelectResourceLabelDesc = "authorization.default.authModeSelectResourceLabelDesc";
-
-		/** 可选，授权模式-模式输入选项卡标签I18N关键字 */
-		private String authModePatternResourceLabel = "authorization.default.authModePatternResourceLabel";
-
-		/** 可选，授权模式-模式输入选项卡标签描述I18N关键字 */
-		private String authModePatternResourceLabelDesc = "authorization.default.authModePatternResourceLabelDesc";
-
 		/** 是否开启设置启用/禁用功能 */
 		private boolean enableSetEnable = true;
 
@@ -184,8 +147,6 @@ public class AuthorizationResourceMetas
 		private String authPermissionLabel = "authorization.permission";
 
 		private String authEnabledLabel = "authorization.enabled";
-
-		private String authCreateUserLabel = "authorization.createUser";
 
 		public ResourceMeta()
 		{
@@ -238,96 +199,6 @@ public class AuthorizationResourceMetas
 		public void setResouceTypeLabel(String resouceTypeLabel)
 		{
 			this.resouceTypeLabel = resouceTypeLabel;
-		}
-
-		public boolean isSupportSelectResource()
-		{
-			return supportSelectResource;
-		}
-
-		public void setSupportSelectResource(boolean supportSelectResource)
-		{
-			this.supportSelectResource = supportSelectResource;
-		}
-
-		public String getSelectResourceURL()
-		{
-			return selectResourceURL;
-		}
-
-		public void setSelectResourceURL(String selectResourceURL)
-		{
-			this.selectResourceURL = selectResourceURL;
-		}
-
-		public String getSelectResourceIdField()
-		{
-			return selectResourceIdField;
-		}
-
-		public void setSelectResourceIdField(String selectResourceIdField)
-		{
-			this.selectResourceIdField = selectResourceIdField;
-		}
-
-		public String getSelectResourceNameField()
-		{
-			return selectResourceNameField;
-		}
-
-		public void setSelectResourceNameField(String selectResourceNameField)
-		{
-			this.selectResourceNameField = selectResourceNameField;
-		}
-
-		public String getAuthModeSelectResourceLabel()
-		{
-			return authModeSelectResourceLabel;
-		}
-
-		public void setAuthModeSelectResourceLabel(String authModeSelectResourceLabel)
-		{
-			this.authModeSelectResourceLabel = authModeSelectResourceLabel;
-		}
-
-		public String getAuthModeSelectResourceLabelDesc()
-		{
-			return authModeSelectResourceLabelDesc;
-		}
-
-		public void setAuthModeSelectResourceLabelDesc(String authModeSelectResourceLabelDesc)
-		{
-			this.authModeSelectResourceLabelDesc = authModeSelectResourceLabelDesc;
-		}
-
-		public boolean isSupportPatternResource()
-		{
-			return supportPatternResource;
-		}
-
-		public void setSupportPatternResource(boolean supportPatternResource)
-		{
-			this.supportPatternResource = supportPatternResource;
-		}
-
-		public String getAuthModePatternResourceLabel()
-		{
-			return authModePatternResourceLabel;
-		}
-
-		public void setAuthModePatternResourceLabel(String authModePatternResourceLabel)
-		{
-			this.authModePatternResourceLabel = authModePatternResourceLabel;
-		}
-
-		public String getAuthModePatternResourceLabelDesc()
-		{
-			return authModePatternResourceLabelDesc;
-		}
-
-		public void setAuthModePatternResourceLabelDesc(String authModePatternResourceLabelDesc)
-		{
-			this.authModePatternResourceLabelDesc = authModePatternResourceLabelDesc;
 		}
 
 		public boolean isEnableSetEnable()
@@ -440,16 +311,6 @@ public class AuthorizationResourceMetas
 			this.authEnabledLabel = authEnabledLabel;
 		}
 
-		public String getAuthCreateUserLabel()
-		{
-			return authCreateUserLabel;
-		}
-
-		public void setAuthCreateUserLabel(String authCreateUserLabel)
-		{
-			this.authCreateUserLabel = authCreateUserLabel;
-		}
-
 		/**
 		 * 是否只有一个权限。
 		 * 
@@ -465,16 +326,6 @@ public class AuthorizationResourceMetas
 			return this.permissionMetas[0];
 		}
 
-		/**
-		 * 查询、编辑操作是否必须首先设置资源。
-		 * 
-		 * @return
-		 */
-		public boolean mustAssignResource()
-		{
-			return (!this.supportSelectResource && !supportPatternResource);
-		}
-
 		public String buildLabelKey(String subKey)
 		{
 			return buildLabelKey(this.labelKeyPrefix, subKey);
@@ -483,26 +334,6 @@ public class AuthorizationResourceMetas
 		public void updateResouceTypeLabel()
 		{
 			this.resouceTypeLabel = buildLabelKey("resouceTypeLabel");
-		}
-
-		public void updateAuthModeSelectResourceLabel()
-		{
-			this.authModeSelectResourceLabel = buildLabelKey("authModeSelectResourceLabel");
-		}
-
-		public void updateAuthModeSelectResourceLabelDesc()
-		{
-			this.authModeSelectResourceLabelDesc = buildLabelKey("authModeSelectResourceLabelDesc");
-		}
-
-		public void updateAuthModePatternResourceLabel()
-		{
-			this.authModePatternResourceLabel = buildLabelKey("authModePatternResourceLabel");
-		}
-
-		public void updateAuthModePatternResourceLabelDesc()
-		{
-			this.authModePatternResourceLabelDesc = buildLabelKey("authModePatternResourceLabelDesc");
 		}
 
 		public void updateAuthManageAuthorizationLabel()
@@ -553,11 +384,6 @@ public class AuthorizationResourceMetas
 		public void updateAuthEnabledLabel()
 		{
 			this.authEnabledLabel = buildLabelKey("authEnabledLabel");
-		}
-
-		public void updateAuthCreateUserLabel()
-		{
-			this.authCreateUserLabel = buildLabelKey("authCreateUserLabel");
 		}
 
 		public static String buildLabelKey(String labelKeyPrefix, String subKey)

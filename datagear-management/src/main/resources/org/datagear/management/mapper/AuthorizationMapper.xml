@@ -7,12 +7,12 @@
 		INSERT INTO DATAGEAR_AUTHORIZATION
 			(
 			AUTH_ID, AUTH_RESOURCE, AUTH_RESOURCE_TYPE, AUTH_PRINCIPAL, AUTH_PRINCIPAL_TYPE,
-			AUTH_PERMISSION, AUTH_ENABLED, AUTH_CREATE_USER_ID
+			AUTH_PERMISSION, AUTH_ENABLED
 			)
 		VALUES
 			(
 			#{entity.id}, #{entity.resource}, #{entity.resourceType}, #{entity.principal}, #{entity.principalType},
-			#{entity.permission}, #{entity.enabled, jdbcType=VARCHAR},#{entity.createUser.id}
+			#{entity.permission}, #{entity.enabled, jdbcType=VARCHAR}
 			)
 	</insert>
 	
@@ -34,6 +34,17 @@
 			AUTH_ID = #{id}
 	</delete>
 	
+	<delete id="deleteByIdsForResource">
+		DELETE FROM DATAGEAR_AUTHORIZATION
+		WHERE
+			AUTH_RESOURCE_TYPE = #{resourceType}
+			AND AUTH_RESOURCE = #{resource}
+			AND
+			(
+				<foreach item="id" collection="ids" separator=" OR ">AUTH_ID = #{id}</foreach>
+			)
+	</delete>
+	
 	<delete id="deleteByResource">
 		DELETE FROM DATAGEAR_AUTHORIZATION
 		WHERE
@@ -53,43 +64,11 @@
 			T.${_iq_}id${_iq_} = #{id}
 	</select>
 	
-	<select id="getDataIdPermissions" resultType="org.datagear.management.domain.DataIdPermission">
-		SELECT
-			T.DATA_ID as ${_iq_}dataId${_iq_},
-			T.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
-		FROM
-			(
-				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
-				<include refid="queryViewDataPermissionId" />
-				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
-			) T
-		WHERE
-			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
-	</select>
-	
-	<select id="getDataIdPermissionForPatternSource" resultType="org.datagear.management.domain.DataIdPermission">
-		SELECT
-			T.DATA_ID as ${_iq_}dataId${_iq_},
-			T.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
-		FROM
-			(
-				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
-				SELECT
-					${placeholderId} AS DP_AUTH_DATA_ID,
-					${patternSource} AS DP_AUTH_DATA_PATTERN_SRC,
-					PLACEHOLDER_TABLE.PLACEHOLDER_COL
-				FROM
-					/*Derby没有类似from dual的语法，为了兼容其它数据库，这里采用了此种方法*/
-					(SELECT COUNT(*) AS PLACEHOLDER_COL FROM DATAGEAR_VERSION) PLACEHOLDER_TABLE
-				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
-			) T
-	</select>
-	
 	<select id="query" resultType="org.datagear.management.domain.Authorization">
 		SELECT
 			T.*
 		FROM
-			(<include refid="queryViewDataPermission" />) T
+			(<include refid="queryView" />) T
 		WHERE
 			<include refid="queryCondition" />
 		<include refid="common.queryOrder" />
@@ -99,7 +78,7 @@
 		SELECT
 			COUNT(*)
 		FROM
-			(<include refid="queryViewDataPermission" />) T
+			(<include refid="queryView" />) T
 		WHERE
 			<include refid="queryCondition" />
 	</select>
@@ -109,42 +88,12 @@
 			SELECT
 				T.*
 			FROM
-				(<include refid="queryViewDataPermission" />) T
+				(<include refid="queryView" />) T
 			WHERE
 				<include refid="queryCondition" />
 			<include refid="common.queryOrder" />
 		<include refid="common.pagingQueryFoot" />
 	</select>
-	
-	<sql id="queryViewDataPermission">
-		<choose><when test="DP_CURRENT_USER == null">
-		<include refid="queryView" />
-		</when><otherwise>
-		SELECT
-			T0.*,
-			T1.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
-		FROM
-			(<include refid="queryView" />) T0
-			INNER JOIN
-			(
-				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
-				<include refid="queryViewDataPermissionId" />
-				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
-			) T1
-		ON
-			T0.${_iq_}id${_iq_} = T1.DATA_ID
-		WHERE
-			T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION}
-		</otherwise></choose>
-	</sql>
-	
-	<sql id="queryViewDataPermissionId">
-		SELECT
-			A.AUTH_ID AS DP_AUTH_DATA_ID,
-			A.AUTH_CREATE_USER_ID AS DP_AUTH_DATA_CREATOR_ID
-		FROM
-			DATAGEAR_AUTHORIZATION A
-	</sql>
 	
 	<sql id="queryView">
 		SELECT
@@ -156,35 +105,12 @@
 			A.AUTH_PERMISSION AS ${_iq_}permission${_iq_},
 			A.AUTH_ENABLED AS ${_iq_}enabled${_iq_},
 			A.AUTH_CREATE_TIME AS ${_iq_}ceateTime${_iq_},
-			A.AUTH_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
-			A.USER_NAME AS ${_iq_}createUser.name${_iq_},
-			A.USER_REAL_NAME AS ${_iq_}createUser.realName${_iq_},
-			A.USER_IS_ADMIN AS ${_iq_}createUser.admin${_iq_},
-			A.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_},
-			<choose><when test="resourceNameQueryView != null">
-			(
-				CASE A.AUTH_RESOURCE_TYPE
-					WHEN '${resourceType}' THEN B.RESOURCE_NAME
-					WHEN '${resourceType}_PATTERN' THEN A.AUTH_RESOURCE
-					ELSE A.AUTH_RESOURCE
-				END
-			)
-			</when><otherwise>
-			A.AUTH_RESOURCE
-			</otherwise></choose>
-			AS ${_iq_}resourceName${_iq_},
 			(
 				CASE A.AUTH_PRINCIPAL_TYPE
 					WHEN 'ALL' THEN '${queryContext.principalAllLabel}'
 					WHEN 'ANONYMOUS' THEN '${queryContext.principalAnonymousLabel}'
 					WHEN 'ROLE' THEN C.ROLE_NAME
-					WHEN 'USER' THEN
-					(
-						CASE
-							WHEN D.USER_REAL_NAME IS NOT NULL THEN D.USER_REAL_NAME
-							ELSE D.USER_NAME
-						END
-					)
+					WHEN 'USER' THEN D.USER_NAME
 					ELSE A.AUTH_PRINCIPAL
 				END
 			) AS ${_iq_}principalName${_iq_},
@@ -202,13 +128,7 @@
 			</otherwise></choose>
 			 AS ${_iq_}permissionLabel${_iq_}
 		FROM
-			(<include refid="queryViewWithCreateUser" />) A
-		<if test="resourceNameQueryView != null">
-		LEFT JOIN
-			(${resourceNameQueryView}) B
-		ON
-			A.AUTH_RESOURCE_TYPE = '${resourceType}' AND A.AUTH_RESOURCE = B.RESOURCE_ID
-		</if>
+			DATAGEAR_AUTHORIZATION A
 		LEFT JOIN
 			DATAGEAR_ROLE C
 		ON
@@ -217,31 +137,19 @@
 			DATAGEAR_USER D
 		ON
 			A.AUTH_PRINCIPAL_TYPE = 'USER' AND A.AUTH_PRINCIPAL = D.USER_ID
-		<if test="resourceType != null">
 		WHERE
-			A.AUTH_RESOURCE_TYPE = '${resourceType}' OR AUTH_RESOURCE_TYPE = '${resourceType}_PATTERN'
+			1 = 1
+		<if test="queryContext.resourceType != null">
+		AND A.AUTH_RESOURCE_TYPE = '${queryContext.resourceType}'
 		</if>
-	</sql>
-	
-	<sql id="queryViewWithCreateUser">
-		SELECT
-			A.*,
-			B.USER_NAME,
-			B.USER_REAL_NAME,
-			B.USER_IS_ADMIN,
-			B.USER_CREATE_TIME
-		FROM
-			DATAGEAR_AUTHORIZATION A
-		INNER JOIN
-			DATAGEAR_USER B
-		ON
-			A.AUTH_CREATE_USER_ID = B.USER_ID
+		<if test="queryContext.resource != null">
+		AND A.AUTH_RESOURCE = '${queryContext.resource}'
+		</if>
 	</sql>
 	
 	<sql id="queryCondition">
 		1 = 1
-		<choose><when test="assignedResource != null">
-			AND ${_iq_}resource${_iq_} = #{assignedResource} AND ${_iq_}resourceType${_iq_} NOT LIKE '%_PATTERN'
+		<choose><when test="queryContext.resource != null">
 			<if test="queryKeyword != null">
 			AND  ${_iq_}principalName${_iq_} LIKE #{queryKeyword}
 			</if>
@@ -249,7 +157,7 @@
 			<if test="queryKeyword != null">
 			AND
 			(
-				${_iq_}resourceName${_iq_} LIKE #{queryKeyword} OR ${_iq_}principalName${_iq_} LIKE #{queryKeyword}
+				${_iq_}resource${_iq_} LIKE #{queryKeyword} OR ${_iq_}principalName${_iq_} LIKE #{queryKeyword}
 			)
 			</if>
 		</otherwise></choose>

@@ -267,15 +267,13 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * @param params
 	 * @param user
 	 * @param resourceType
-	 * @param resourceSupportPattern
 	 * @param resourceHasCreator
 	 */
 	protected void addDataPermissionParameters(Map<String, Object> params, User user, String resourceType,
-			boolean resourceSupportPattern, boolean resourceHasCreator)
+			boolean resourceHasCreator)
 	{
 		params.put(DATA_PERMISSION_PARAM_CURRENT_USER, user);
 		params.put(DATA_PERMISSION_PARAM_RESOURCE_TYPE, resourceType);
-		params.put(DATA_PERMISSION_PARAM_RESOURCE_SUPPORT_PATTERN, resourceSupportPattern);
 		params.put(DATA_PERMISSION_PARAM_RESOURCE_HAS_CREATOR, resourceHasCreator);
 		params.put(DATA_PERMISSION_PARAM_MIN_READ_PERMISSION, Authorization.PERMISSION_READ_START);
 		params.put(DATA_PERMISSION_PARAM_MAX_PERMISSION, Authorization.PERMISSION_MAX);

@@ -24,12 +24,6 @@ import org.datagear.management.service.impl.AbstractMybatisService;
  */
 public abstract class MbSqlDialect
 {
-	public static final String FUNC_NAME_REPLACE = "DATAGEAR_REPLACE";
-
-	public static final String FUNC_NAME_MODINT = "DATAGEAR_FUNC_MODINT";
-
-	public static final String FUNC_NAME_LENGTH = "DATAGEAR_FUNC_LENGTH";
-
 	public static final String FUNC_NAME_MAX = "MAX";
 
 	/** 标识符引用符 */
@@ -107,36 +101,6 @@ public abstract class MbSqlDialect
 	public abstract String pagingSqlFoot(int index, int fetchSize);
 
 	/**
-	 * 获取替换字符串子串的函数名。
-	 * 
-	 * @return
-	 */
-	public String funcNameReplace()
-	{
-		return FUNC_NAME_REPLACE;
-	}
-
-	/**
-	 * 获取求余函数名。
-	 * 
-	 * @return
-	 */
-	public String funcNameModInt()
-	{
-		return FUNC_NAME_MODINT;
-	}
-
-	/**
-	 * 获取求字符串长度的函数名。
-	 * 
-	 * @return
-	 */
-	public String funcNameLength()
-	{
-		return FUNC_NAME_LENGTH;
-	}
-
-	/**
 	 * 获取MAX函数名。
 	 * 
 	 * @return
@@ -184,7 +148,7 @@ public abstract class MbSqlDialect
 	{
 		return getClass().getSimpleName() + " [identifierQuote=" + getIdentifierQuote() + ", supportsPaging="
 				+ supportsPaging() + ", pagingSqlHead=" + pagingSqlHead(0, 10) + ", pagingSqlFoot="
-				+ pagingSqlFoot(0, 10) + ", funcNameReplace=" + funcNameReplace() + ", funcNameModInt="
-				+ funcNameModInt() + ", funcNameLength=" + funcNameLength() + ", funcNameMax=" + funcNameMax() + "]";
+				+ pagingSqlFoot(0, 10) + ", funcNameMax=" + funcNameMax()
+				+ "]";
 	}
 }

@@ -11,6 +11,7 @@ import java.io.Serializable;
 
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.service.ServiceContext;
+import org.datagear.util.StringUtil;
 
 /**
  * {@linkplain Authorization}查询上下文。
@@ -35,6 +36,9 @@ public class AuthorizationQueryContext implements Serializable
 
 	/** 指定查询资源类型 */
 	private String resourceType = null;
+
+	/** 指定查询资源 */
+	private String resource = null;
 
 	public AuthorizationQueryContext()
 	{
@@ -78,7 +82,7 @@ public class AuthorizationQueryContext implements Serializable
 
 	public boolean hasResourceType()
 	{
-		return (this.resourceType != null && !this.resourceType.isEmpty());
+		return !StringUtil.isEmpty(this.resourceType);
 	}
 
 	public String getResourceType()
@@ -89,6 +93,21 @@ public class AuthorizationQueryContext implements Serializable
 	public void setResourceType(String resourceType)
 	{
 		this.resourceType = resourceType;
+	}
+
+	public boolean hasResource()
+	{
+		return !StringUtil.isEmpty(this.resource);
+	}
+
+	public String getResource()
+	{
+		return resource;
+	}
+
+	public void setResource(String resource)
+	{
+		this.resource = resource;
 	}
 
 	/**

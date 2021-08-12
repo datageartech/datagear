@@ -201,7 +201,7 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = dataPermission;
+		this.dataPermission = Authorization.trimPermission(dataPermission);
 	}
 
 	@Override

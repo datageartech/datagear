@@ -15,11 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
+import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.impl.AuthorizationQueryContext;
 import org.datagear.management.service.impl.EnumValueLabel;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
-import org.datagear.util.StringUtil;
 import org.datagear.web.controller.AuthorizationResourceMetas.PermissionMeta;
 import org.datagear.web.controller.AuthorizationResourceMetas.ResourceMeta;
 import org.datagear.web.util.OperationMessage;
@@ -43,11 +43,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/authorization")
 public class AuthorizationController extends AbstractController
 {
-	/**
-	 * 指定授权资源参数，设置后，所有CRUD操作都只针对这一个资源。
-	 */
-	public static final String PARAM_ASSIGNED_RESOURCE = "assignedResource";
-
 	@Autowired
 	private AuthorizationService authorizationService;
 
@@ -66,14 +61,22 @@ public class AuthorizationController extends AbstractController
 		this.authorizationService = authorizationService;
 	}
 
-	@RequestMapping("/{resourceType}/add")
+	@RequestMapping("/{resourceType}/{resource}/add")
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
-			@PathVariable("resourceType") String resourceType)
+			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource)
 	{
 		User user = WebUtils.getUser(request, response);
 
+		checkIsAllowAuthorization(user, resourceType, resource);
+
+		Authorization authorization = new Authorization();
+		inflateResourceInfo(authorization, resourceType, resource);
+
 		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
-		setAssignedResourceAttributeIf(request, model, resourceMeta);
+
+		model.addAttribute("resourceType", resourceType);
+		model.addAttribute("resource", resource);
+		model.addAttribute("authorization", authorization);
 		model.addAttribute("user", user);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, resourceMeta.getAuthAddAuthorizationLabel());
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
@@ -81,37 +84,44 @@ public class AuthorizationController extends AbstractController
 		return "/authorization/authorization_form";
 	}
 
-	@RequestMapping(value = "/{resourceType}/saveAdd", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{resourceType}/{resource}/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType,
+			@PathVariable("resource") String resource,
 			Authorization authorization)
 	{
+		User user = WebUtils.getUser(request, response);
+
+		checkIsAllowAuthorization(user, resourceType, resource);
+
+		inflateResourceInfo(authorization, resourceType, resource);
 		checkInput(authorization);
 		setResourceMetaAttribute(model, resourceType);
 
-		User user = WebUtils.getUser(request, response);
-
 		authorization.setId(IDUtil.randomIdOnTime20());
-		authorization.setCreateUser(user);
 
-		this.authorizationService.add(user, authorization);
+		this.authorizationService.add(authorization);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/{resourceType}/edit")
+	@RequestMapping("/{resourceType}/{resource}/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
-			@PathVariable("resourceType") String resourceType, @RequestParam("id") String id)
+			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource,
+			@RequestParam("id") String id)
 	{
 		User user = WebUtils.getUser(request, response);
 
+		checkIsAllowAuthorization(user, resourceType, resource);
+
 		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
-		setAuthorizationQueryContext(request, resourceMeta);
+		setAuthorizationQueryContext(request, resourceMeta, resource);
 
-		Authorization authorization = this.authorizationService.getByIdForEdit(user, id);
+		Authorization authorization = this.authorizationService.getById(id);
 
-		setAssignedResourceAttributeIf(request, model, resourceMeta);
+		model.addAttribute("resourceType", resourceType);
+		model.addAttribute("resource", resource);
 		model.addAttribute("authorization", authorization);
 		model.addAttribute("user", user);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, resourceMeta.getAuthEditAuthorizationLabel());
@@ -120,40 +130,49 @@ public class AuthorizationController extends AbstractController
 		return "/authorization/authorization_form";
 	}
 
-	@RequestMapping(value = "/{resourceType}/saveEdit", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{resourceType}/{resource}/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType,
+			@PathVariable("resource") String resource,
 			Authorization authorization)
 	{
+		User user = WebUtils.getUser(request, response);
+
+		checkIsAllowAuthorization(user, resourceType, resource);
+
+		inflateResourceInfo(authorization, resourceType, resource);
+
 		if (isEmpty(authorization.getId()))
 			throw new IllegalInputException();
 		checkInput(authorization);
 
 		setResourceMetaAttribute(model, resourceType);
 
-		User user = WebUtils.getUser(request, response);
-
-		this.authorizationService.update(user, authorization);
+		this.authorizationService.update(authorization);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/{resourceType}/view")
+	@RequestMapping("/{resourceType}/{resource}/view")
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
-			@PathVariable("resourceType") String resourceType, @RequestParam("id") String id)
+			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource,
+			@RequestParam("id") String id)
 	{
 		User user = WebUtils.getUser(request, response);
 
-		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
-		setAuthorizationQueryContext(request, resourceMeta);
+		checkIsAllowAuthorization(user, resourceType, resource);
 
-		Authorization authorization = this.authorizationService.getById(user, id);
+		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
+		setAuthorizationQueryContext(request, resourceMeta, resource);
+
+		Authorization authorization = this.authorizationService.getById(id);
 
 		if (authorization == null)
 			throw new RecordNotFoundException();
 
-		setAssignedResourceAttributeIf(request, model, resourceMeta);
+		model.addAttribute("resourceType", resourceType);
+		model.addAttribute("resource", resource);
 		model.addAttribute("authorization", authorization);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, resourceMeta.getAuthViewAuthorizationLabel());
 		model.addAttribute(KEY_READONLY, true);
@@ -161,62 +180,68 @@ public class AuthorizationController extends AbstractController
 		return "/authorization/authorization_form";
 	}
 
-	@RequestMapping(value = "/{resourceType}/delete", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{resourceType}/{resource}/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType,
-			@RequestBody String[] ids)
+			@PathVariable("resource") String resource, @RequestBody String[] ids)
 	{
+		User user = WebUtils.getUser(request, response);
+
+		checkIsAllowAuthorization(user, resourceType, resource);
+
 		setResourceMetaAttribute(model, resourceType);
-		this.authorizationService.deleteByIds(WebUtils.getUser(request, response), ids);
+		this.authorizationService.deleteByIds(resourceType, resource, ids);
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/{resourceType}/query")
+	@RequestMapping(value = "/{resourceType}/{resource}/query")
 	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
-			@PathVariable("resourceType") String resourceType)
+			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource)
 	{
+		User user = WebUtils.getUser(request, response);
+
+		checkIsAllowAuthorization(user, resourceType, resource);
+
 		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
-		setAssignedResourceAttributeIf(request, model, resourceMeta);
+
+		model.addAttribute("resourceType", resourceType);
+		model.addAttribute("resource", resource);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, resourceMeta.getAuthManageAuthorizationLabel());
 
 		return "/authorization/authorization_grid";
 	}
 
-	@RequestMapping(value = "/{resourceType}/queryData", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{resourceType}/{resource}/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<Authorization> queryData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType,
+			@PathVariable("resource") String resource,
 			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
+		checkIsAllowAuthorization(user, resourceType, resource);
+
 		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
-		setAuthorizationQueryContext(request, resourceMeta);
-		String assignedResource = getAssignedResource(request);
+		setAuthorizationQueryContext(request, resourceMeta, resource);
 
-		List<Authorization> authorizations = null;
-
-		if (!isEmpty(assignedResource))
-			authorizations = this.authorizationService.queryForAssignedResource(user, assignedResource, pagingQuery);
-		else
-			authorizations = this.authorizationService.query(user, pagingQuery);
-
-		return authorizations;
+		return this.authorizationService.query(pagingQuery);
 	}
 
-	protected void setAssignedResourceAttributeIf(HttpServletRequest request, org.springframework.ui.Model model,
-			ResourceMeta resourceMeta)
+	protected void checkIsAllowAuthorization(User user, String resourceType, String resource)
+			throws PermissionDeniedException
 	{
-		String ap = getAssignedResource(request);
+		if (!this.authorizationService.isAllowAuthorization(user, resourceType, resource))
+			throw new PermissionDeniedException();
+	}
 
-		if (resourceMeta.mustAssignResource() && StringUtil.isEmpty(ap))
-			throw new IllegalInputException();
-
-		if (!StringUtil.isEmpty(ap))
-			model.addAttribute("assignedResource", ap);
+	protected void inflateResourceInfo(Authorization auth, String resourceType, String resource)
+	{
+		auth.setResourceType(resourceType);
+		auth.setResource(resource);
 	}
 
 	protected ResourceMeta setResourceMetaAttribute(org.springframework.ui.Model model, String resourceType)
@@ -231,17 +256,13 @@ public class AuthorizationController extends AbstractController
 		return resourceMeta;
 	}
 
-	protected String getAssignedResource(HttpServletRequest request)
-	{
-		return request.getParameter(PARAM_ASSIGNED_RESOURCE);
-	}
-
-	protected void setAuthorizationQueryContext(HttpServletRequest request, ResourceMeta resourceMeta)
+	protected void setAuthorizationQueryContext(HttpServletRequest request, ResourceMeta resourceMeta, String resource)
 	{
 		AuthorizationQueryContext context = new AuthorizationQueryContext();
 		context.setPrincipalAllLabel(getMessage(request, "authorization.principalType.ALL"));
 		context.setPrincipalAnonymousLabel(getMessage(request, "authorization.principalType.ANONYMOUS"));
 		context.setResourceType(resourceMeta.getResourceType());
+		context.setResource(resource);
 
 		PermissionMeta[] permissionMetas = resourceMeta.getPermissionMetas();
 		@SuppressWarnings("unchecked")
