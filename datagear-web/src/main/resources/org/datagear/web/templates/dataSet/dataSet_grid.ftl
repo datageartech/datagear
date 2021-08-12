@@ -185,8 +185,7 @@ boolean readonly 是否只读操作，默认为false
 			
 			var options = {};
 			$.setGridPageHeightOption(options);
-			po.open(contextPath+"/authorization/${DataSetEntity.AUTHORIZATION_RESOURCE_TYPE}/query?"
-					+"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent(row.id), options);
+			po.open(contextPath+"/authorization/${DataSetEntity.AUTHORIZATION_RESOURCE_TYPE}/" + row.id +"/query", options);
 		});
 	});
 	

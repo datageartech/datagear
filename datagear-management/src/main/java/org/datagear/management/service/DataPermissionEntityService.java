@@ -32,9 +32,6 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	/** 数据权限参数：资源类型，参考commonDataPermissionSqls.xml */
 	String DATA_PERMISSION_PARAM_RESOURCE_TYPE = "DP_RESOURCE_TYPE";
 
-	/** 数据权限参数：资源是否支持模式匹配，参考commonDataPermissionSqls.xml */
-	String DATA_PERMISSION_PARAM_RESOURCE_SUPPORT_PATTERN = "DP_RESOURCE_SUPPORT_PATTERN";
-
 	/** 数据权限参数：资源是否有创建用户，参考commonDataPermissionSqls.xml */
 	String DATA_PERMISSION_PARAM_RESOURCE_HAS_CREATOR = "DP_RESOURCE_HAS_CREATOR";
 

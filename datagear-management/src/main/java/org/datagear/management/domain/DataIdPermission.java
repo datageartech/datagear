@@ -15,7 +15,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class DataIdPermission implements Serializable
+public class DataIdPermission implements DataPermissionAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -45,13 +45,15 @@ public class DataIdPermission implements Serializable
 		this.dataId = dataId;
 	}
 
+	@Override
 	public int getDataPermission()
 	{
 		return dataPermission;
 	}
 
+	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = dataPermission;
+		this.dataPermission = Authorization.trimPermission(dataPermission);
 	}
 }

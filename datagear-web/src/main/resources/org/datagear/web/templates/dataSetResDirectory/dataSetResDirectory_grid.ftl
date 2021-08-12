@@ -123,8 +123,7 @@ selectOperation 是否选择操作，允许为null
 			
 			var options = {};
 			$.setGridPageHeightOption(options);
-			po.open(contextPath+"/authorization/${DataSetResDirectory.AUTHORIZATION_RESOURCE_TYPE}/query?"
-					+"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent(row.id), options);
+			po.open(contextPath+"/authorization/${DataSetResDirectory.AUTHORIZATION_RESOURCE_TYPE}/" + row.id +"/query", options);
 		});
 	});
 	

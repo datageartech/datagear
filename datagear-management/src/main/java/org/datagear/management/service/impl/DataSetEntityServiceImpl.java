@@ -544,7 +544,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	{
 		params.put(AnalysisProjectAwareEntity.DATA_PERMISSION_PARAM_RESOURCE_TYPE_ANALYSIS_PROJECT,
 				AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
-		addDataPermissionParameters(params, user, getResourceType(), false, true);
+		addDataPermissionParameters(params, user, getResourceType(), true);
 	}
 
 	@Override

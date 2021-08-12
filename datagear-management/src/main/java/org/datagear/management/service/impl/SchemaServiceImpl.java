@@ -162,18 +162,14 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	 */
 	protected void checkSaveUrlPermission(User user, String url) throws SaveSchemaUrlPermissionDeniedException
 	{
-		Integer permission = this.authorizationService.getPermissionForPatternSource(user, getResourceType(), url);
-
-		if (permission == null || Schema.canDeleteTableData(permission))
-			return;
-
+		// TODO 新增新建数据源URL控制功能，管理员可设置，这里判断
 		throw new SaveSchemaUrlPermissionDeniedException();
 	}
 
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
-		addDataPermissionParameters(params, user, getResourceType(), true, true);
+		addDataPermissionParameters(params, user, getResourceType(), true);
 	}
 
 	@Override

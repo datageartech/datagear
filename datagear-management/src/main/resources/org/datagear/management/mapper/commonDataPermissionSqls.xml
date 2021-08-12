@@ -4,24 +4,26 @@
 <mapper namespace="commonDataPermission">
 	
 	<!--
-		指定用户对特定资源类型数据的查询视图
+		指定用户对特定资源类型数据的查询视图（带权限值且需要程序进行100取模处理）
 		
 		使用示例：
 		<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
-		SELECT ID AS DP_AUTH_DATA_ID, NAME AS DP_AUTH_DATA_PATTERN_SRC, CREATOR_ID AS DP_AUTH_DATA_CREATOR_ID FROM TABLE_0
+		SELECT ID AS DP_AUTH_DATA_ID, CREATOR_ID AS DP_AUTH_DATA_CREATOR_ID FROM TABLE_0
+		<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
+		或者
+		<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
+		SELECT ID AS DP_AUTH_DATA_ID FROM TABLE_0
 		<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
 		
 		查询参数：
 		DP_CURRENT_USER 必填，当前查询用户，类型：org.datagear.management.domain.User
 		DP_RESOURCE_TYPE 必填，授权资源类型，类型：String
-		DP_RESOURCE_SUPPORT_PATTERN 选填，是否支持模式匹配，默认为false，类型：Boolean
 		DP_RESOURCE_HAS_CREATOR 选填，资源表是否有创建用户，默认为false，类型：Boolean
 		DP_MAX_PERMISSION 必填，最大权限值，类型：int
 		DP_UNSET_PERMISSION 选填，未设置任何权限时的默认权限值，默认为0，类型：int
 		
 		IDQV字段：
 		DP_AUTH_DATA_ID 必填，数据ID，类型：字符串
-		DP_AUTH_DATA_PATTERN_SRC 选填，DP_RESOURCE_SUPPORT_PATTERN为true时必填，用于授权模式匹配的字段，类型：字符串类型
 		DP_AUTH_DATA_CREATOR_ID 选填，DP_RESOURCE_HAS_CREATOR为true时必填，资源的创建用户ID，类型：字符串类型
 		
 		结果集：
@@ -38,7 +40,7 @@
 		</when><otherwise>
 		SELECT
 			IDPQV.DATA_ID,
-			${_FUNC_MODINT}(${_FUNC_MAX}(DISTINCT IDPQV.AUTH_PRIORITY_PERMISSION), 100) AS DATA_PERMISSION
+			${_FUNC_MAX}(DISTINCT IDPQV.AUTH_PRIORITY_PERMISSION) AS DATA_PERMISSION
 		FROM
 			(
 			SELECT
@@ -48,14 +50,12 @@
 						<if test="DP_RESOURCE_HAS_CREATOR == true">
 						/*创建用户最高权限*/
 						WHEN IDQV.DP_AUTH_DATA_CREATOR_ID IS NOT NULL AND IDQV.DP_AUTH_DATA_CREATOR_ID = '${DP_CURRENT_USER.id}'
-							THEN (9999900 + ${DP_MAX_PERMISSION})
+							THEN (90000 + ${DP_MAX_PERMISSION})
 						</if>
-						WHEN PQV.AUTH_RESOURCE_TYPE IS NULL THEN <choose><when test="DP_UNSET_PERMISSION != null">${DP_UNSET_PERMISSION}</when><otherwise>0</otherwise></choose>
-						/*次高级权限值加权，具体资源授权始终高于模式匹配授权，字符数多的模式匹配授权高于字符数少的模式匹配授权*/
-						WHEN PQV.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}_PATTERN'
-							THEN (${_FUNC_MODINT}(${_FUNC_LENGTH}(PQV.AUTH_RESOURCE)*100, 800000) + PQV.AUTH_PRIORITY_PERMISSION)
-						WHEN PQV.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}'
-							THEN (900000 + PQV.AUTH_PRIORITY_PERMISSION)
+						WHEN PQV.AUTH_RESOURCE_TYPE IS NULL
+							THEN <choose><when test="DP_UNSET_PERMISSION != null">${DP_UNSET_PERMISSION}</when><otherwise>0</otherwise></choose>
+						ELSE
+							PQV.AUTH_PRIORITY_PERMISSION
 					END
 				) AS AUTH_PRIORITY_PERMISSION
 			FROM
@@ -74,9 +74,6 @@
 				) PQV
 			ON
 				(PQV.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}' AND PQV.AUTH_RESOURCE = IDQV.DP_AUTH_DATA_ID)
-				<if test='DP_RESOURCE_SUPPORT_PATTERN != null and DP_RESOURCE_SUPPORT_PATTERN == true'>
-				OR (PQV.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}_PATTERN' AND IDQV.DP_AUTH_DATA_PATTERN_SRC LIKE ${_FUNC_REPLACE}(PQV.AUTH_RESOURCE, '*', '%'))
-				</if>
 			) IDPQV
 		GROUP BY
 			IDPQV.DATA_ID
@@ -84,7 +81,7 @@
 	</sql>
 	
 	<!--
-		指定用户对特定资源类型的权限查询视图
+		指定用户对特定资源类型的权限值（加权）查询视图
 		
 		查询参数：
 		与上述dataIdPermissionQueryViewHead一致
@@ -94,41 +91,20 @@
 			AUTH.AUTH_RESOURCE,
 			AUTH.AUTH_RESOURCE_TYPE,
 			(
-			 	/*最高级权限值加权，管理员授权始终高于普通用户授权*/
-				CASE USR.USER_IS_ADMIN
-					WHEN 'true' THEN
-						CASE AUTH.AUTH_PRINCIPAL_TYPE
-							WHEN 'ALL'       THEN (5000000 + AUTH.AUTH_PERMISSION)
-							WHEN 'ANONYMOUS' THEN (6000000 + AUTH.AUTH_PERMISSION)
-							WHEN 'ROLE'      THEN (7000000 + AUTH.AUTH_PERMISSION)
-							WHEN 'USER'      THEN (8000000 + AUTH.AUTH_PERMISSION)
-							ELSE 0
-						END
-					ELSE
-						CASE AUTH.AUTH_PRINCIPAL_TYPE
-							WHEN 'ALL'       THEN (1000000 + AUTH.AUTH_PERMISSION)
-							WHEN 'ANONYMOUS' THEN (2000000 + AUTH.AUTH_PERMISSION)
-							WHEN 'ROLE'      THEN (3000000 + AUTH.AUTH_PERMISSION)
-							WHEN 'USER'      THEN (4000000 + AUTH.AUTH_PERMISSION)
-							ELSE 0
-						END
+				/*权限值优先级加权，范围越小优先级越高*/
+				CASE AUTH.AUTH_PRINCIPAL_TYPE
+					WHEN 'ALL'       THEN (10000 + AUTH.AUTH_PERMISSION)
+					WHEN 'ANONYMOUS' THEN (20000 + AUTH.AUTH_PERMISSION)
+					WHEN 'ROLE'      THEN (30000 + AUTH.AUTH_PERMISSION)
+					WHEN 'USER'      THEN (40000 + AUTH.AUTH_PERMISSION)
+					ELSE 0
 				END
 			) AS AUTH_PRIORITY_PERMISSION
 		FROM
 			DATAGEAR_AUTHORIZATION AUTH
-		INNER JOIN
-			DATAGEAR_USER USR
-		ON
-			AUTH.AUTH_CREATE_USER_ID = USR.USER_ID
 		WHERE
 			AUTH.AUTH_ENABLED = 'true'
-			AND
-			(
-				AUTH.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}'
-				<if test='DP_RESOURCE_SUPPORT_PATTERN != null and DP_RESOURCE_SUPPORT_PATTERN == true'>
-				OR AUTH.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}_PATTERN'
-				</if>
-			)
+			AND AUTH.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}'
 			AND
 			(
 				AUTH.AUTH_PRINCIPAL_TYPE = 'ALL'

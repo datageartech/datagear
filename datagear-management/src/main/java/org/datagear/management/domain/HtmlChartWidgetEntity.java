@@ -107,7 +107,7 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = dataPermission;
+		this.dataPermission = Authorization.trimPermission(dataPermission);
 	}
 
 	@Override

@@ -13,7 +13,6 @@ String titleMessageKey 标题标签I18N关键字，不允许null
 ResourceMeta resourceMeta 资源元信息，不允许null
 -->
 <#assign AuthorizationController=statics['org.datagear.web.controller.AuthorizationController']>
-<#assign isAssignedResource=(assignedResource??)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -58,21 +57,14 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	
 	po.url = function(action)
 	{
-		return "${contextPath}/authorization/${resourceMeta.resourceType}/" + action;
+		return "${contextPath}/authorization/${resourceMeta.resourceType}/"
+				+ encodeURIComponent("${resource?js_string?no_esc}") + "/" + action;
 	};
 	
 	po.element("input[name=addButton]").click(function()
 	{
-		var data =
-		{
-			<#if assignedResource??>
-			"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource}"
-			</#if>
-		};
-		
 		po.open(po.url("add"),
 		{
-			data : data,
 			pageParam :
 			{
 				afterSave : function()
@@ -89,9 +81,6 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		{
 			var data =
 			{
-				<#if assignedResource??>
-				"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource?js_string?no_esc}",
-				</#if>
 				"id" : row.id
 			};
 			
@@ -115,9 +104,6 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		{
 			var data =
 			{
-				<#if assignedResource??>
-				"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource?js_string?no_esc}",
-				</#if>
 				"id" : row.id
 			};
 			
@@ -150,17 +136,13 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='${resourceMeta.authResourceLabel}' />"), "resourceName", ${isAssignedResource?string('true', 'false')}),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='${resourceMeta.authPrincipalLabel}' />"), "principalName"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='${resourceMeta.authPermissionLabel}' />", "permissionLabel", ${(resourceMeta.singlePermission)?string('true', 'false')}),
-		columnEnabled,
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='${resourceMeta.authCreateUserLabel}' />", "createUser.nameLabel")
+		columnEnabled
 	];
 	
 	var url = po.url("queryData");
-	<#if assignedResource??>
-	url = po.url("queryData?${AuthorizationController.PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent("${assignedResource?js_string?no_esc}"));
-	</#if>
+	
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, url);
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();

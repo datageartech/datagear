@@ -82,7 +82,7 @@ public class DataSetResDirectoryServiceImpl extends
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
-		addDataPermissionParameters(params, user, getResourceType(), false, true);
+		addDataPermissionParameters(params, user, getResourceType(), true);
 	}
 
 	@Override

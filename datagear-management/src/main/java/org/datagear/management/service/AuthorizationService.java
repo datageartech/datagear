@@ -19,8 +19,28 @@ import org.datagear.persistence.Query;
  * @author datagear@163.com
  *
  */
-public interface AuthorizationService extends DataPermissionEntityService<String, Authorization>
+public interface AuthorizationService extends EntityService<String, Authorization>
 {
+	/**
+	 * 是否允许授权操作。
+	 * 
+	 * @param user
+	 * @param resourceType
+	 * @param resource
+	 * @return
+	 */
+	boolean isAllowAuthorization(User user, String resourceType, String resource);
+
+	/**
+	 * 删除。
+	 * 
+	 * @param resourceType
+	 * @param resource
+	 * @param ids
+	 * @return
+	 */
+	int deleteByIds(String resourceType, String resource, String... ids);
+
 	/**
 	 * 删除资源授权。
 	 * 
@@ -31,25 +51,12 @@ public interface AuthorizationService extends DataPermissionEntityService<String
 	int deleteByResource(String resourceType, String... resources);
 
 	/**
-	 * 对于支持模式匹配授权的资源，获取指定模式匹配源的权限。
-	 * <p>
-	 * 返回{@code null}表示无对应的授权。
-	 * </p>
-	 * 
-	 * @param user
-	 * @param resourceType
-	 * @param patternSource
-	 * @return
-	 */
-	Integer getPermissionForPatternSource(User user, String resourceType, String patternSource);
-
-	/**
 	 * 查询指定资源的{@linkplain Authorization}。
 	 * 
 	 * @param user
-	 * @param assignedResource
+	 * @param resource
 	 * @param query
 	 * @return
 	 */
-	List<Authorization> queryForAssignedResource(User user, String assignedResource, Query query);
+	List<Authorization> queryForResource(User user, String resource, Query query);
 }

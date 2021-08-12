@@ -99,7 +99,7 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = dataPermission;
+		this.dataPermission = Authorization.trimPermission(dataPermission);
 	}
 
 	@Override

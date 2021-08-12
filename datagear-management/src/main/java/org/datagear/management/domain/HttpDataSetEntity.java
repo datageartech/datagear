@@ -102,7 +102,7 @@ public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = dataPermission;
+		this.dataPermission = Authorization.trimPermission(dataPermission);
 	}
 
 	@Override
