@@ -69,14 +69,10 @@ public class AuthorizationController extends AbstractController
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
-		Authorization authorization = new Authorization();
-		inflateResourceInfo(authorization, resourceType, resource);
-
 		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
 
 		model.addAttribute("resourceType", resourceType);
 		model.addAttribute("resource", resource);
-		model.addAttribute("authorization", authorization);
 		model.addAttribute("user", user);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, resourceMeta.getAuthAddAuthorizationLabel());
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");

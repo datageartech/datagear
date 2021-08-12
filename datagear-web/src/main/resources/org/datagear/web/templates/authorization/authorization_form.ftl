@@ -146,8 +146,6 @@ readonly 是否只读操作，允许为null
 		<div class="form-foot" style="text-align:center;">
 			<#if !readonly>
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
-			&nbsp;&nbsp;
-			<button type="button" class="reset-button"><@spring.message code='reset' /></button>
 			</#if>
 		</div>
 	</form>
@@ -196,13 +194,6 @@ readonly 是否只读操作，允许为null
 		$.setGridPageHeightOption(options);
 		
 		po.open("${contextPath}/role/select", options);
-	});
-	
-	po.element(".reset-button").click(function()
-	{
-		po.form()[0].reset();
-		po.element("input[name='resourceType']:checked").change();
-		po.element("input[name='principalType']:checked").change();
 	});
 	
 	po.form().validate(
@@ -272,10 +263,6 @@ readonly 是否只读操作，允许为null
 	po.element("input[name='principalType']").checkboxradio({icon:false});
 	po.element(".principalType-radios").controlgroup();
 	
-	po.element("input[name='permission'][value='${permission}']").attr("checked", "checked");
-	po.element("input[name='permission']").checkboxradio({icon:false});
-	po.element(".permission-radios").controlgroup();
-
 	<#if !(resourceMeta.singlePermission)>
 	po.element("input[name='permission'][value='${permission}']").attr("checked", "checked");
 	po.element("input[name='permission']").checkboxradio({icon:false});
