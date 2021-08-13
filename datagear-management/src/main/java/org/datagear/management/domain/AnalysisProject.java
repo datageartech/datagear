@@ -100,7 +100,7 @@ public class AnalysisProject extends AbstractStringIdEntity
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = Authorization.trimPermission(dataPermission);
+		this.dataPermission = dataPermission;
 	}
 
 	@Override

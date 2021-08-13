@@ -734,6 +734,7 @@ public class CoreConfig implements InitializingBean
 			resourceServices.add(this.htmlChartWidgetEntityService());
 			resourceServices.add(this.htmlTplDashboardWidgetEntityService());
 			resourceServices.add(this.analysisProjectService());
+			resourceServices.add(this.dataSetResDirectoryService());
 		}
 
 		// 处理循环依赖

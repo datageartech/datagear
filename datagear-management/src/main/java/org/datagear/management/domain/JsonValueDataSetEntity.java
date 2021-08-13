@@ -94,7 +94,7 @@ public class JsonValueDataSetEntity extends JsonValueDataSet implements DataSetE
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = Authorization.trimPermission(dataPermission);
+		this.dataPermission = dataPermission;
 	}
 
 	@Override

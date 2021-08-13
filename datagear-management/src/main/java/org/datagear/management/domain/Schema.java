@@ -184,7 +184,7 @@ public class Schema extends AbstractStringIdEntity
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = Authorization.trimPermission(dataPermission);
+		this.dataPermission = dataPermission;
 	}
 
 	/**

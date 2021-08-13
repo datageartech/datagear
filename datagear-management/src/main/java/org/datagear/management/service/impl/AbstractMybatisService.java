@@ -57,6 +57,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	/** {@linkplain MbSqlDialect#funcNameMax()}的MyBatis参数名 */
 	public static final String FUNC_NAME_MAX = "_FUNC_MAX";
 
+	/** {@linkplain MbSqlDialect#funcNameModInt()}的MyBatis参数名 */
+	public static final String FUNC_NAME_MODINT = "_FUNC_MODINT";
+
 	private MbSqlDialect dialect;
 
 	private String identifierQuoteKey = DEFAULT_IDENTIFIER_QUOTE_KEY;
@@ -444,6 +447,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	{
 		param.put(this.identifierQuoteKey, this.dialect.getIdentifierQuote());
 		param.put(FUNC_NAME_MAX, this.dialect.funcNameMax());
+		param.put(FUNC_NAME_MODINT, this.dialect.funcNameModInt());
 	}
 
 	/**

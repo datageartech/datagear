@@ -26,6 +26,8 @@ public abstract class MbSqlDialect
 {
 	public static final String FUNC_NAME_MAX = "MAX";
 
+	public static final String FUNC_NAME_MODINT = "DATAGEAR_FUNC_MODINT";
+
 	/** 标识符引用符 */
 	private String identifierQuote;
 
@@ -108,6 +110,16 @@ public abstract class MbSqlDialect
 	public String funcNameMax()
 	{
 		return FUNC_NAME_MAX;
+	}
+
+	/**
+	 * 获取求余函数名。
+	 * 
+	 * @return
+	 */
+	public String funcNameModInt()
+	{
+		return FUNC_NAME_MODINT;
 	}
 
 	/**

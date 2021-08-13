@@ -4,7 +4,7 @@
 <mapper namespace="commonDataPermission">
 	
 	<!--
-		指定用户对特定资源类型数据的查询视图（带权限值且需要程序进行100取模处理）
+		指定用户对特定资源类型数据权限查询视图
 		
 		使用示例：
 		<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
@@ -20,7 +20,7 @@
 		DP_RESOURCE_TYPE 必填，授权资源类型，类型：String
 		DP_RESOURCE_HAS_CREATOR 选填，资源表是否有创建用户，默认为false，类型：Boolean
 		DP_MAX_PERMISSION 必填，最大权限值，类型：int
-		DP_UNSET_PERMISSION 选填，未设置任何权限时的默认权限值，默认为0，类型：int
+		DP_UNSET_PERMISSION 必填，未设置任何权限时的默认权限值，类型：int
 		
 		IDQV字段：
 		DP_AUTH_DATA_ID 必填，数据ID，类型：字符串
@@ -40,7 +40,7 @@
 		</when><otherwise>
 		SELECT
 			IDPQV.DATA_ID,
-			${_FUNC_MAX}(DISTINCT IDPQV.AUTH_PRIORITY_PERMISSION) AS DATA_PERMISSION
+			${_FUNC_MODINT}(${_FUNC_MAX}(DISTINCT IDPQV.AUTH_PRIORITY_PERMISSION), 100) AS DATA_PERMISSION
 		FROM
 			(
 			SELECT
@@ -50,10 +50,11 @@
 						<if test="DP_RESOURCE_HAS_CREATOR == true">
 						/*创建用户最高权限*/
 						WHEN IDQV.DP_AUTH_DATA_CREATOR_ID IS NOT NULL AND IDQV.DP_AUTH_DATA_CREATOR_ID = '${DP_CURRENT_USER.id}'
-							THEN (90000 + ${DP_MAX_PERMISSION})
+							THEN (9000 + ${DP_MAX_PERMISSION})
 						</if>
+						/*这里不需加权，因为它级别最低，且有可能是负值*/
 						WHEN PQV.AUTH_RESOURCE_TYPE IS NULL
-							THEN <choose><when test="DP_UNSET_PERMISSION != null">${DP_UNSET_PERMISSION}</when><otherwise>0</otherwise></choose>
+							THEN ${DP_UNSET_PERMISSION}
 						ELSE
 							PQV.AUTH_PRIORITY_PERMISSION
 					END
@@ -93,11 +94,11 @@
 			(
 				/*权限值优先级加权，范围越小优先级越高*/
 				CASE AUTH.AUTH_PRINCIPAL_TYPE
-					WHEN 'ALL'       THEN (10000 + AUTH.AUTH_PERMISSION)
-					WHEN 'ANONYMOUS' THEN (20000 + AUTH.AUTH_PERMISSION)
-					WHEN 'ROLE'      THEN (30000 + AUTH.AUTH_PERMISSION)
-					WHEN 'USER'      THEN (40000 + AUTH.AUTH_PERMISSION)
-					ELSE 0
+					WHEN 'ALL'       THEN (1000 + AUTH.AUTH_PERMISSION)
+					WHEN 'ANONYMOUS' THEN (2000 + AUTH.AUTH_PERMISSION)
+					WHEN 'ROLE'      THEN (3000 + AUTH.AUTH_PERMISSION)
+					WHEN 'USER'      THEN (4000 + AUTH.AUTH_PERMISSION)
+					ELSE ${DP_UNSET_PERMISSION}
 				END
 			) AS AUTH_PRIORITY_PERMISSION
 		FROM

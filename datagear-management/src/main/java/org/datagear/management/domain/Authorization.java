@@ -36,27 +36,28 @@ public class Authorization extends AbstractStringIdEntity
 	public static final String PRINCIPAL_ANONYMOUS = "anonymous";
 
 	/*------------------------------------------------------*/
-	/*
-	 * 注意：权限值范围必须在[-99, 99]之间，这里的权限值都留有间隔，便于各模块扩展自定义权限值。
+
+	/**
+	 * 最小权限值，权限值范围必须在{@code [0, 99]}之间，因为底层SQL处理权限时会进行相关加权和取余计算，要求权限值必须在这个范围内
 	 */
+	public static final int PERMISSION_MIN = 0;
 
-	/** 权限起始值：无 */
-	public static final int PERMISSION_NONE_START = 0;
+	/**
+	 * 最大权限值，权限值范围必须在{@code [0, 99]}之间，因为底层SQL处理权限时会进行相关加权和取余计算，要求权限值必须在这个范围内
+	 */
+	public static final int PERMISSION_MAX = 99;
 
-	/** 权限起始值：只读 */
+	/** 权限起始值：无，这里的权限值都留有间隔，便于各模块扩展自定义权限值 */
+	public static final int PERMISSION_NONE_START = PERMISSION_MIN;
+
+	/** 权限起始值：只读，这里的权限值都留有间隔，便于各模块扩展自定义权限值 */
 	public static final int PERMISSION_READ_START = 20;
 
-	/** 权起始值限：编辑 */
+	/** 权起始值限：编辑，这里的权限值都留有间隔，便于各模块扩展自定义权限值 */
 	public static final int PERMISSION_EDIT_START = 40;
 
-	/** 权限起始值：删除 */
+	/** 权限起始值：删除，这里的权限值都留有间隔，便于各模块扩展自定义权限值 */
 	public static final int PERMISSION_DELETE_START = 60;
-
-	/** 最小权限值 */
-	public static final int PERMISSION_MIN = -99;
-
-	/** 最大权限值 */
-	public static final int PERMISSION_MAX = 99;
 
 	/*------------------------------------------------------*/
 
@@ -295,16 +296,5 @@ public class Authorization extends AbstractStringIdEntity
 			return false;
 
 		return currentUser.getId().equals(createUserEntity.getCreateUser().getId());
-	}
-
-	/**
-	 * 整理权限数值，确保其不大于{@linkplain #PERMISSION_MAX}之间。
-	 * 
-	 * @param permission
-	 * @return
-	 */
-	public static int trimPermission(int permission)
-	{
-		return permission % 100;
 	}
 }

@@ -94,7 +94,7 @@ public class CsvValueDataSetEntity extends CsvValueDataSet implements DataSetEnt
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = Authorization.trimPermission(dataPermission);
+		this.dataPermission = dataPermission;
 	}
 
 	@Override

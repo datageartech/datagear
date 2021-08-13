@@ -200,7 +200,7 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = Authorization.trimPermission(dataPermission);
+		this.dataPermission = dataPermission;
 	}
 
 	@Override

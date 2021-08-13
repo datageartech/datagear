@@ -279,7 +279,7 @@ public class AuthorizationController extends AbstractController
 	{
 		if (isEmpty(authorization.getResource()) || isEmpty(authorization.getResourceType())
 				|| isEmpty(authorization.getPrincipal()) || isEmpty(authorization.getPrincipalType())
-				|| authorization.getPermission() < Authorization.PERMISSION_NONE_START
+				|| authorization.getPermission() < Authorization.PERMISSION_MIN
 				|| authorization.getPermission() > Authorization.PERMISSION_MAX)
 			throw new IllegalInputException();
 	}

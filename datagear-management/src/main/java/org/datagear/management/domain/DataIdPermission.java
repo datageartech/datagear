@@ -54,6 +54,6 @@ public class DataIdPermission implements DataPermissionAware, Serializable
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = Authorization.trimPermission(dataPermission);
+		this.dataPermission = dataPermission;
 	}
 }

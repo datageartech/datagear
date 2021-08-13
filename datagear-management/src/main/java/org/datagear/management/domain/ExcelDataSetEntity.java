@@ -199,7 +199,7 @@ public class ExcelDataSetEntity extends AbstractExcelDataSet implements Director
 	@Override
 	public void setDataPermission(int dataPermission)
 	{
-		this.dataPermission = Authorization.trimPermission(dataPermission);
+		this.dataPermission = dataPermission;
 	}
 
 	@Override

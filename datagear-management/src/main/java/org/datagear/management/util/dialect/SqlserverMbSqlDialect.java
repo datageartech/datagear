@@ -44,4 +44,10 @@ public class SqlserverMbSqlDialect extends MbSqlDialect
 	{
 		return null;
 	}
+
+	@Override
+	public String funcNameModInt()
+	{
+		return DEFAULT_FUNC_PREFIX + super.funcNameModInt();
+	}
 }
