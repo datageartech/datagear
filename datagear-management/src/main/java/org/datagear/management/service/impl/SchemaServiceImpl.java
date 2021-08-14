@@ -162,8 +162,8 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	 */
 	protected void checkSaveUrlPermission(User user, String url) throws SaveSchemaUrlPermissionDeniedException
 	{
-		// TODO 新增新建数据源URL控制功能，管理员可设置，这里判断
-		throw new SaveSchemaUrlPermissionDeniedException();
+		// TODO 新增数据源管控功能，管理员可设置URL白/黑名单，只允许新建名单允许的数据源
+		// throw new SaveSchemaUrlPermissionDeniedException();
 	}
 
 	@Override
