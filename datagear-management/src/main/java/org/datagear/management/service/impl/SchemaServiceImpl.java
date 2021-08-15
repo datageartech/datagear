@@ -122,7 +122,12 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 		params.put("oldUserId", oldUserId);
 		params.put("newUserId", newUserId);
 
-		return updateMybatis("updateCreateUserId", params);
+		int count = updateMybatis("updateCreateUserId", params);
+
+		if (count > 0)
+			cacheInvalidate();
+
+		return count;
 	}
 
 	@Override
@@ -131,13 +136,18 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 		Map<String, Object> params = buildParamMap();
 		params.put("userIds", userIds);
 
-		return updateMybatis("deleteByUserId", params);
+		int count = updateMybatis("deleteByUserId", params);
+
+		if (count > 0)
+			cacheInvalidate();
+
+		return count;
 	}
 
 	@Override
 	protected Schema postProcessSelect(Schema schema)
 	{
-		if (schema != null && schema.hasDriverEntity())
+		if (schema.hasDriverEntity())
 		{
 			DriverEntity driverEntity = this.driverEntityManager.get(schema.getDriverEntity().getId());
 			schema.setDriverEntity(driverEntity);
@@ -176,5 +186,11 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	protected String getSqlNamespace()
 	{
 		return SQL_NAMESPACE;
+	}
+
+	@Override
+	protected Schema cacheCloneValue(Schema value)
+	{
+		return value.clone();
 	}
 }

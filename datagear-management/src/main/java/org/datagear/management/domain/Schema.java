@@ -187,6 +187,18 @@ public class Schema extends AbstractStringIdEntity
 		this.dataPermission = dataPermission;
 	}
 
+	@Override
+	public Schema clone()
+	{
+		Schema schema = new Schema(this.getId(), this.title, this.url, this.user, this.password);
+		schema.setCreateUser(this.createUser);
+		schema.setCreateTime(this.createTime);
+		schema.setDriverEntity(this.driverEntity);
+		schema.setDataPermission(this.dataPermission);
+
+		return schema;
+	}
+
 	/**
 	 * 清除密码属性值。
 	 * <p>

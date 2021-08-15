@@ -145,7 +145,9 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 		params.put("name", name);
 
 		User user = selectOneMybatis("getByName", params);
-		postProcessSelect(user);
+
+		if (user != null)
+			postProcessSelect(user);
 
 		return user;
 	}
@@ -177,9 +179,6 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 	@Override
 	protected User postProcessSelect(User obj)
 	{
-		if (obj == null)
-			return obj;
-
 		Set<Role> roles = this.roleService.findByUserId(obj.getId());
 		obj.setRoles(roles);
 

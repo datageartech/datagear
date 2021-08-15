@@ -409,9 +409,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	@Override
 	protected DataSetEntity postProcessSelect(DataSetEntity obj)
 	{
-		if (obj == null)
-			return null;
-
 		DataSetEntity initObj = obj;
 
 		if (DataSetEntity.DATA_SET_TYPE_SQL.equals(obj.getDataSetType()))

@@ -230,9 +230,6 @@ public class HtmlChartWidgetEntityServiceImpl
 	@Override
 	protected HtmlChartWidgetEntity postProcessSelect(HtmlChartWidgetEntity obj)
 	{
-		if (obj == null)
-			return null;
-
 		setHtmlChartPlugin(obj, false);
 		setChartDataSets(obj, false);
 

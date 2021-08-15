@@ -184,7 +184,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	protected T get(T param)
 	{
-		return get(param, buildParamMap());
+		return get(param, buildParamMap(), true);
 	}
 
 	/**
@@ -192,14 +192,17 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * 
 	 * @param id
 	 * @param params
+	 * @param postProcessSelect 是否内部执行{@linkplain #postProcessSelect(Object)}
 	 * @return
 	 */
-	protected T get(T param, Map<String, Object> params)
+	protected T get(T param, Map<String, Object> params, boolean postProcessSelect)
 	{
 		params.put("param", param);
 
 		T entity = selectOneMybatis("get", params);
-		entity = postProcessSelect(entity);
+
+		if (postProcessSelect && entity != null)
+			entity = postProcessSelect(entity);
 
 		return entity;
 	}
@@ -239,25 +242,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	{
 		addQueryParam(params, query);
 
-		List<T> list = selectListMybatis(statement, params);
-		postProcessSelects(list);
-
-		return list;
-	}
-
-	/**
-	 * 查询。
-	 * 
-	 * @param statement
-	 * @param params
-	 * @return
-	 */
-	protected List<T> query(String statement, Map<String, Object> params)
-	{
-		List<T> list = selectListMybatis(statement, params);
-		postProcessSelects(list);
-
-		return list;
+		return query(statement, params, true);
 	}
 
 	/**
@@ -313,19 +298,53 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		List<T> list = null;
 
 		if (this.dialect.supportsPaging())
-		{
-			list = selectListMybatis(statement, params);
-		}
+			list = query(statement, params, true);
 		else
-		{
-			list = selectListMybatis(statement, params, new RowBounds(startIndex, pagingData.getPageSize()));
-		}
-
-		postProcessSelects(list);
+			list = query(statement, params, new RowBounds(startIndex, pagingData.getPageSize()), true);
 
 		pagingData.setItems(list);
 
 		return pagingData;
+	}
+
+	/**
+	 * 查询。
+	 * 
+	 * @param statement
+	 * @param params
+	 * @param postProcessSelects
+	 *            是否内部执行{@linkplain #postProcessSelects(List)}
+	 * @return
+	 */
+	protected List<T> query(String statement, Map<String, Object> params, boolean postProcessSelects)
+	{
+		List<T> list = selectListMybatis(statement, params);
+
+		if (postProcessSelects)
+			postProcessSelects(list);
+
+		return list;
+	}
+
+	/**
+	 * 查询。
+	 * 
+	 * @param statement
+	 * @param params
+	 * @param rowBounds
+	 * @param postProcessSelects
+	 *            是否内部执行{@linkplain #postProcessSelects(List)}
+	 * @return
+	 */
+	protected List<T> query(String statement, Map<String, Object> params, RowBounds rowBounds,
+			boolean postProcessSelects)
+	{
+		List<T> list = selectListMybatis(statement, params, rowBounds);
+
+		if (postProcessSelects)
+			postProcessSelects(list);
+
+		return list;
 	}
 
 	/**
@@ -344,8 +363,12 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		for (int i = 0; i < list.size(); i++)
 		{
 			T ele = list.get(i);
-			ele = postProcessSelect(ele);
-			list.set(i, ele);
+
+			if (ele != null)
+			{
+				ele = postProcessSelect(ele);
+				list.set(i, ele);
+			}
 		}
 	}
 
@@ -355,7 +378,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * 默认为空方法，子类可以重写，已实现特定的查询结果处理逻辑。
 	 * </p>
 	 * 
-	 * @param obj
+	 * @param obj 不会为{@code null}
 	 * @return
 	 */
 	protected T postProcessSelect(T obj)

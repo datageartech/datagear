@@ -53,7 +53,7 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role> 
 		Map<String, Object> params = buildParamMap();
 		params.put("userId", userId);
 
-		List<Role> roles = query("findByUserId", params);
+		List<Role> roles = query("findByUserId", params, true);
 
 		set.addAll(roles);
 
