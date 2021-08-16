@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -61,6 +62,8 @@ import org.datagear.management.service.RoleUserService;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.service.UserService;
+import org.datagear.management.service.impl.AbstractMybatisDataPermissionEntityService;
+import org.datagear.management.service.impl.AbstractMybatisEntityService;
 import org.datagear.management.service.impl.AnalysisProjectServiceImpl;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
@@ -106,12 +109,16 @@ import org.datagear.web.util.TableCache;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -127,7 +134,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  */
 @Configuration
 @EnableCaching
-public class CoreConfig implements InitializingBean
+public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	public static final String NAME_CHART_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "chartShowHtmlTplDashboardWidgetHtmlRenderer";
 
@@ -137,16 +144,13 @@ public class CoreConfig implements InitializingBean
 
 	private DataSourceConfig dataSourceConfig;
 
-	private CacheConfig cacheConfig;
-
 	private Environment environment;
 
 	@Autowired
-	public CoreConfig(DataSourceConfig dataSourceConfig, CacheConfig cacheConfig, Environment environment)
+	public CoreConfig(DataSourceConfig dataSourceConfig, Environment environment)
 	{
 		super();
 		this.dataSourceConfig = dataSourceConfig;
-		this.cacheConfig = cacheConfig;
 		this.environment = environment;
 	}
 
@@ -158,16 +162,6 @@ public class CoreConfig implements InitializingBean
 	public void setDataSourceConfig(DataSourceConfig dataSourceConfig)
 	{
 		this.dataSourceConfig = dataSourceConfig;
-	}
-
-	public CacheConfig getCacheConfig()
-	{
-		return cacheConfig;
-	}
-
-	public void setCacheConfig(CacheConfig cacheConfig)
-	{
-		this.cacheConfig = cacheConfig;
 	}
 
 	public Environment getEnvironment()
@@ -477,9 +471,6 @@ public class CoreConfig implements InitializingBean
 		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.driverEntityManager(), this.authorizationService());
 
-		bean.setCache(this.cacheConfig.getEntityCacheBySimpleName(SchemaService.class));
-		bean.setPermissionCache(this.cacheConfig.getPermissionCacheBySimpleName(SchemaService.class));
-
 		return bean;
 	}
 
@@ -513,9 +504,6 @@ public class CoreConfig implements InitializingBean
 		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.connectionSource(), this.schemaService(), this.authorizationService(), this.dataSetRootDirectory(),
 				this.httpClient());
-
-		bean.setCache(this.cacheConfig.getEntityCacheBySimpleName(DataSetEntityService.class));
-		bean.setPermissionCache(this.cacheConfig.getPermissionCacheBySimpleName(DataSetEntityService.class));
 
 		return bean;
 	}
@@ -557,9 +545,6 @@ public class CoreConfig implements InitializingBean
 		HtmlChartWidgetEntityServiceImpl bean = new HtmlChartWidgetEntityServiceImpl(this.sqlSessionFactory(),
 				this.mbSqlDialect(), this.directoryHtmlChartPluginManager(), this.dataSetEntityService(),
 				this.authorizationService());
-
-		bean.setCache(this.cacheConfig.getEntityCacheBySimpleName(HtmlChartWidgetEntityService.class));
-		bean.setPermissionCache(this.cacheConfig.getPermissionCacheBySimpleName(HtmlChartWidgetEntityService.class));
 
 		return bean;
 	}
@@ -747,19 +732,37 @@ public class CoreConfig implements InitializingBean
 		return bean;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public void afterPropertiesSet() throws Exception
+	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		// 处理循环依赖
-		{
-			List<DataPermissionEntityService<?, ?>> resourceServices = this.authorizationResourceServices();
+		ApplicationContext context = event.getApplicationContext();
 
-			resourceServices.add(this.schemaService());
-			resourceServices.add(this.dataSetEntityService());
-			resourceServices.add(this.htmlChartWidgetEntityService());
-			resourceServices.add(this.htmlTplDashboardWidgetEntityService());
-			resourceServices.add(this.analysisProjectService());
-			resourceServices.add(this.dataSetResDirectoryService());
+		// 初始化this.authorizationResourceServices()
+		{
+			Map<String, DataPermissionEntityService> dataPermissionEntityServices = context
+					.getBeansOfType(DataPermissionEntityService.class);
+
+			List<DataPermissionEntityService<?, ?>> resourceServices = this.authorizationResourceServices();
+			for (DataPermissionEntityService<?, ?> dps : dataPermissionEntityServices.values())
+				resourceServices.add(dps);
+		}
+
+		// 初始化缓存
+		{
+			CacheManager cacheManager = context.getBean(CacheManager.class);
+
+			Map<String, AbstractMybatisEntityService> entityServices = context
+					.getBeansOfType(AbstractMybatisEntityService.class);
+
+			for (AbstractMybatisEntityService es : entityServices.values())
+			{
+				es.setCache(getEntityCacheBySimpleName(cacheManager, es.getClass()));
+
+				if (es instanceof AbstractMybatisDataPermissionEntityService<?, ?>)
+					((AbstractMybatisDataPermissionEntityService<?, ?>) es)
+							.setPermissionCache(getPermissionCacheBySimpleName(cacheManager, es.getClass()));
+			}
 		}
 
 		// 处理循环依赖
@@ -768,5 +771,15 @@ public class CoreConfig implements InitializingBean
 			devotedDataExchangeServices.add(this.batchDataExchangeService());
 			this.dataExchangeService().setDevotedDataExchangeServices(devotedDataExchangeServices);
 		}
+	}
+
+	protected Cache getEntityCacheBySimpleName(CacheManager cacheManager, Class<?> clazz)
+	{
+		return cacheManager.getCache(clazz.getSimpleName());
+	}
+
+	protected Cache getPermissionCacheBySimpleName(CacheManager cacheManager, Class<?> clazz)
+	{
+		return cacheManager.getCache(clazz.getSimpleName() + "Permission");
 	}
 }
