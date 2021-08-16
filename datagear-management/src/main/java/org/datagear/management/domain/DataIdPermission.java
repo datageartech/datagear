@@ -9,13 +9,15 @@ package org.datagear.management.domain;
 
 import java.io.Serializable;
 
+import org.springframework.beans.BeanUtils;
+
 /**
  * 数据ID权限。
  * 
  * @author datagear@163.com
  *
  */
-public class DataIdPermission implements DataPermissionAware, Serializable
+public class DataIdPermission implements DataPermissionAware, Serializable, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -55,5 +57,14 @@ public class DataIdPermission implements DataPermissionAware, Serializable
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	@Override
+	public DataIdPermission clone()
+	{
+		DataIdPermission entity = new DataIdPermission();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

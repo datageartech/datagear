@@ -9,8 +9,9 @@ package org.datagear.management.domain;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
+
+import org.springframework.beans.BeanUtils;
 
 /**
  * 用户实体。
@@ -18,7 +19,7 @@ import java.util.Set;
  * @author datagear@163.com
  *
  */
-public class User extends AbstractStringIdEntity
+public class User extends AbstractStringIdEntity implements CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -169,6 +170,28 @@ public class User extends AbstractStringIdEntity
 		return nameLabel;
 	}
 
+	@Override
+	public User clone()
+	{
+		User entity = new User();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
+	}
+
+	/**
+	 * 拷贝对象，排除密码。
+	 * 
+	 * @return
+	 */
+	public User cloneWithoutPassword()
+	{
+		User entity = clone();
+		entity.setPassword(null);
+
+		return entity;
+	}
+
 	/**
 	 * 是否是内置管理员账号。
 	 * 
@@ -189,28 +212,5 @@ public class User extends AbstractStringIdEntity
 	public static boolean isAdminUser(String userId)
 	{
 		return ADMIN_USER_ID.equals(userId);
-	}
-
-	/**
-	 * 拷贝对象，排除密码。
-	 * 
-	 * @param user
-	 * @return
-	 */
-	public static User copyWithoutPassword(User user)
-	{
-		User re = new User(user.getId());
-
-		re.setName(user.getName());
-		re.setRealName(user.getRealName());
-		re.setEmail(user.getEmail());
-		re.setAdmin(user.isAdmin());
-		re.setAnonymous(user.isAnonymous());
-		re.setCreateTime(user.getCreateTime());
-
-		if (user.getRoles() != null)
-			re.setRoles(new HashSet<>(user.getRoles()));
-
-		return re;
 	}
 }

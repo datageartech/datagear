@@ -15,6 +15,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractJsonFileDataSet;
 import org.datagear.analysis.support.JsonDirectoryFileDataSet;
+import org.springframework.beans.BeanUtils;
 
 /**
  * {@linkplain JsonDirectoryFileDataSet}实体。
@@ -22,7 +23,7 @@ import org.datagear.analysis.support.JsonDirectoryFileDataSet;
  * @author datagear@163.com
  *
  */
-public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements DirectoryFileDataSetEntity
+public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements DirectoryFileDataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -226,5 +227,14 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 	protected File getJsonFile(DataSetQuery query) throws Throwable
 	{
 		return FILE_SUPPORT.getFile(this, query);
+	}
+
+	@Override
+	public JsonFileDataSetEntity clone()
+	{
+		JsonFileDataSetEntity entity = new JsonFileDataSetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

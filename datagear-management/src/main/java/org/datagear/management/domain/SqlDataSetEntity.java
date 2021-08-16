@@ -13,6 +13,7 @@ import java.util.List;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.util.resource.ConnectionFactory;
+import org.springframework.beans.BeanUtils;
 
 /**
  * {@linkplain SqlDataSet}实体。
@@ -20,7 +21,7 @@ import org.datagear.util.resource.ConnectionFactory;
  * @author datagear@163.com
  *
  */
-public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
+public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -158,5 +159,14 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	public SqlDataSetEntity clone()
+	{
+		SqlDataSetEntity entity = new SqlDataSetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

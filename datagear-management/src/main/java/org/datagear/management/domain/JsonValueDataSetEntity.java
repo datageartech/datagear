@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.JsonValueDataSet;
+import org.springframework.beans.BeanUtils;
 
 /**
  * {@linkplain JsonValueDataSet}实体。
@@ -19,7 +20,7 @@ import org.datagear.analysis.support.JsonValueDataSet;
  * @author datagear@163.com
  *
  */
-public class JsonValueDataSetEntity extends JsonValueDataSet implements DataSetEntity
+public class JsonValueDataSetEntity extends JsonValueDataSet implements DataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -107,5 +108,14 @@ public class JsonValueDataSetEntity extends JsonValueDataSet implements DataSetE
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	public JsonValueDataSetEntity clone()
+	{
+		JsonValueDataSetEntity entity = new JsonValueDataSetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

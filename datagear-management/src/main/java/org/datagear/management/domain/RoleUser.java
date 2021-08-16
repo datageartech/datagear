@@ -7,13 +7,15 @@
 
 package org.datagear.management.domain;
 
+import org.springframework.beans.BeanUtils;
+
 /**
  * 角色-用户。
  * 
  * @author datagear@163.com
  *
  */
-public class RoleUser extends AbstractStringIdEntity
+public class RoleUser extends AbstractStringIdEntity implements CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -53,5 +55,14 @@ public class RoleUser extends AbstractStringIdEntity
 	public void setUser(User user)
 	{
 		this.user = user;
+	}
+
+	@Override
+	public RoleUser clone()
+	{
+		RoleUser entity = new RoleUser();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

@@ -15,6 +15,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractCsvFileDataSet;
 import org.datagear.analysis.support.CsvDirectoryFileDataSet;
+import org.springframework.beans.BeanUtils;
 
 /**
  * {@linkplain CsvDirectoryFileDataSet}实体。
@@ -22,7 +23,7 @@ import org.datagear.analysis.support.CsvDirectoryFileDataSet;
  * @author datagear@163.com
  *
  */
-public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements DirectoryFileDataSetEntity
+public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements DirectoryFileDataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -225,5 +226,14 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	protected File getCsvFile(DataSetQuery query) throws Throwable
 	{
 		return FILE_SUPPORT.getFile(this, query);
+	}
+
+	@Override
+	public CsvFileDataSetEntity clone()
+	{
+		CsvFileDataSetEntity entity = new CsvFileDataSetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

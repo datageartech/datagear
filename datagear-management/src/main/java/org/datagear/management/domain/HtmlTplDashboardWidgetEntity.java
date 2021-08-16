@@ -14,6 +14,7 @@ import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.util.StringUtil;
+import org.springframework.beans.BeanUtils;
 
 /**
  * {@linkplain HtmlTplDashboardWidget}实体。
@@ -22,7 +23,8 @@ import org.datagear.util.StringUtil;
  *
  */
 public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
-		implements CreateUserEntity<String>, DataPermissionEntity<String>, AnalysisProjectAwareEntity<String>
+		implements CreateUserEntity<String>, DataPermissionEntity<String>, AnalysisProjectAwareEntity<String>,
+		CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -176,6 +178,15 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 	public void setTemplateSplit(String template)
 	{
 		setTemplates(splitTemplates(template));
+	}
+
+	@Override
+	public HtmlTplDashboardWidgetEntity clone()
+	{
+		HtmlTplDashboardWidgetEntity entity = new HtmlTplDashboardWidgetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 
 	/**

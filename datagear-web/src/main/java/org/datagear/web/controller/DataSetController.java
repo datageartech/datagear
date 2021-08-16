@@ -178,7 +178,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
-		dataSet.setCreateUser(User.copyWithoutPassword(user));
+		dataSet.setCreateUser(user.cloneWithoutPassword());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, dataSet);
 
@@ -214,7 +214,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
-		dataSet.setCreateUser(User.copyWithoutPassword(user));
+		dataSet.setCreateUser(user.cloneWithoutPassword());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, dataSet);
 
@@ -251,7 +251,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
-		dataSet.setCreateUser(User.copyWithoutPassword(user));
+		dataSet.setCreateUser(user.cloneWithoutPassword());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, dataSet);
 
@@ -290,7 +290,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
-		dataSet.setCreateUser(User.copyWithoutPassword(user));
+		dataSet.setCreateUser(user.cloneWithoutPassword());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, dataSet);
 
@@ -329,7 +329,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
-		dataSet.setCreateUser(User.copyWithoutPassword(user));
+		dataSet.setCreateUser(user.cloneWithoutPassword());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, dataSet);
 
@@ -367,7 +367,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
-		dataSet.setCreateUser(User.copyWithoutPassword(user));
+		dataSet.setCreateUser(user.cloneWithoutPassword());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, dataSet);
 
@@ -406,7 +406,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
-		dataSet.setCreateUser(User.copyWithoutPassword(user));
+		dataSet.setCreateUser(user.cloneWithoutPassword());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, dataSet);
 

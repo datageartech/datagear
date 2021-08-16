@@ -145,7 +145,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
-	protected Schema postProcessSelect(Schema schema)
+	protected Schema postProcessGet(Schema schema)
 	{
 		if (schema.hasDriverEntity())
 		{
@@ -186,11 +186,5 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	protected String getSqlNamespace()
 	{
 		return SQL_NAMESPACE;
-	}
-
-	@Override
-	protected Schema cacheCloneValue(Schema value)
-	{
-		return value.clone();
 	}
 }

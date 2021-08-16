@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.HttpDataSet;
+import org.springframework.beans.BeanUtils;
 
 /**
  * {@linkplain HttpDataSet}实体。
@@ -20,7 +21,7 @@ import org.datagear.analysis.support.HttpDataSet;
  * @author datagear@163.com
  *
  */
-public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity
+public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -115,5 +116,14 @@ public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	public HttpDataSetEntity clone()
+	{
+		HttpDataSetEntity entity = new HttpDataSetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

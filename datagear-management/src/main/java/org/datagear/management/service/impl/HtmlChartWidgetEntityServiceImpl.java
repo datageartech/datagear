@@ -17,10 +17,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetParam;
+import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
@@ -120,15 +125,38 @@ public class HtmlChartWidgetEntityServiceImpl
 		HtmlChartWidgetEntity entity = null;
 
 		if (context.hasUser())
-			entity = getById(context.getUser(), id);
+			entity = super.getById(context.getUser(), id);
 		else
-			entity = getById(id);
+			entity = super.getById(id);
 
-		if (entity == null)
-			return null;
+		inflateHtmlChartWidgetEntity(entity, true);
 
-		setHtmlChartPlugin(entity, true);
-		setChartDataSets(entity, true);
+		return entity;
+	}
+
+	@Override
+	public HtmlChartWidgetEntity getById(User user, String id) throws PermissionDeniedException
+	{
+		HtmlChartWidgetEntity entity = super.getById(user, id);
+		inflateHtmlChartWidgetEntity(entity, false);
+
+		return entity;
+	}
+
+	@Override
+	public HtmlChartWidgetEntity getByIdForEdit(User user, String id) throws PermissionDeniedException
+	{
+		HtmlChartWidgetEntity entity = super.getByIdForEdit(user, id);
+		inflateHtmlChartWidgetEntity(entity, false);
+
+		return entity;
+	}
+
+	@Override
+	public HtmlChartWidgetEntity getById(String id)
+	{
+		HtmlChartWidgetEntity entity = super.getById(id);
+		inflateHtmlChartWidgetEntity(entity, false);
 
 		return entity;
 	}
@@ -195,6 +223,15 @@ public class HtmlChartWidgetEntityServiceImpl
 		return deleted;
 	}
 
+	@Override
+	protected HtmlChartWidgetEntity getByIdFromDB(String id, Map<String, Object> params)
+	{
+		HtmlChartWidgetEntity entity = super.getByIdFromDB(id, params);
+		setChartDataSetVOs(entity);
+
+		return entity;
+	}
+
 	protected void saveWidgetDataSetRelations(HtmlChartWidgetEntity entity)
 	{
 		Map<String, Object> delParams = buildParamMap();
@@ -217,23 +254,11 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@Override
-	protected void postProcessSelects(List<HtmlChartWidgetEntity> list)
+	protected void postProcessQuery(List<HtmlChartWidgetEntity> list)
 	{
 		// 查询操作仅用于展示，不必完全加载
-		if (list == null)
-			return;
-
 		for (HtmlChartWidgetEntity e : list)
-			setHtmlChartPlugin(e, false);
-	}
-
-	@Override
-	protected HtmlChartWidgetEntity postProcessSelect(HtmlChartWidgetEntity obj)
-	{
-		setHtmlChartPlugin(obj, false);
-		setChartDataSets(obj, false);
-
-		return obj;
+			inflateHtmlChartPlugin(e, false);
 	}
 
 	@Override
@@ -250,7 +275,52 @@ public class HtmlChartWidgetEntityServiceImpl
 		return SQL_NAMESPACE;
 	}
 
-	protected void setHtmlChartPlugin(HtmlChartWidgetEntity obj, boolean forAnalysis)
+	protected void setChartDataSetVOs(HtmlChartWidgetEntity entity)
+	{
+		Map<String, Object> sqlParams = buildParamMap();
+		sqlParams.put("widgetId", entity.getId());
+
+		List<WidgetDataSetRelation> relations = selectListMybatis("getDataSetRelations", sqlParams);
+
+		List<ChartDataSetVO> chartDataSets = new ArrayList<>(relations.size());
+
+		for (int i = 0; i < relations.size(); i++)
+		{
+			ChartDataSetVO chartDataSet = toChartDataSetVO(relations.get(i));
+
+			if (chartDataSet != null)
+				chartDataSets.add(chartDataSet);
+		}
+
+		entity.setChartDataSets(chartDataSets.toArray(new ChartDataSetVO[chartDataSets.size()]));
+	}
+
+	protected ChartDataSetVO toChartDataSetVO(WidgetDataSetRelation relation)
+	{
+		if (relation == null || StringUtil.isEmpty(relation.getDataSetId()))
+			return null;
+
+		IdDataSet dataSet = new IdDataSet(relation.getDataSetId());
+
+		ChartDataSetVO chartDataSet = new ChartDataSetVO(dataSet);
+		chartDataSet.setPropertySigns(toPropertySigns(relation.getPropertySignsJson()));
+		chartDataSet.setAlias(relation.getAlias());
+		chartDataSet.setAttachment(relation.isAttachment());
+		chartDataSet.setQuery(toDataSetQuery(relation.getQueryJson()));
+
+		return chartDataSet;
+	}
+
+	protected void inflateHtmlChartWidgetEntity(HtmlChartWidgetEntity entity, boolean forAnalysis)
+	{
+		if (entity == null)
+			return;
+
+		inflateHtmlChartPlugin(entity, forAnalysis);
+		inflateChartDataSets(entity, forAnalysis);
+	}
+
+	protected void inflateHtmlChartPlugin(HtmlChartWidgetEntity obj, boolean forAnalysis)
 	{
 		HtmlChartPlugin htmlChartPlugin = obj.getHtmlChartPlugin();
 
@@ -272,48 +342,27 @@ public class HtmlChartWidgetEntityServiceImpl
 		}
 	}
 
-	protected void setChartDataSets(HtmlChartWidgetEntity widget, boolean forAnalysis)
+	protected void inflateChartDataSets(HtmlChartWidgetEntity entity, boolean forAnalysis)
 	{
-		Map<String, Object> sqlParams = buildParamMap();
-		sqlParams.put("widgetId", widget.getId());
+		ChartDataSetVO[] chartDataSetVOs = entity.getChartDataSetVOs();
 
-		List<WidgetDataSetRelation> relations = selectListMybatis("getDataSetRelations", sqlParams);
+		if (chartDataSetVOs == null || chartDataSetVOs.length == 0)
+			return;
 
-		List<ChartDataSetVO> chartDataSets = new ArrayList<>(relations.size());
-
-		for (int i = 0; i < relations.size(); i++)
+		for (int i = 0; i < chartDataSetVOs.length; i++)
 		{
-			ChartDataSetVO chartDataSet = toChartDataSet(relations.get(i), forAnalysis);
+			ChartDataSetVO vo = chartDataSetVOs[i];
+			String dataSetId = vo.getDataSet().getId();
 
-			if (chartDataSet != null)
-				chartDataSets.add(chartDataSet);
+			DataSet dataSet = null;
+
+			if (forAnalysis)
+				dataSet = this.dataSetEntityService.getDataSet(dataSetId);
+			else
+				dataSet = this.dataSetEntityService.getById(dataSetId);
+
+			vo.setDataSet(dataSet);
 		}
-
-		widget.setChartDataSets(chartDataSets.toArray(new ChartDataSetVO[chartDataSets.size()]));
-	}
-
-	protected ChartDataSetVO toChartDataSet(WidgetDataSetRelation relation, boolean forAnalysis)
-	{
-		if (relation == null || StringUtil.isEmpty(relation.getDataSetId()))
-			return null;
-
-		DataSet dataSet = null;
-
-		if (forAnalysis)
-			dataSet = this.dataSetEntityService.getDataSet(relation.getDataSetId());
-		else
-			dataSet = this.dataSetEntityService.getById(relation.getDataSetId());
-
-		if (dataSet == null)
-			return null;
-
-		ChartDataSetVO chartDataSet = new ChartDataSetVO(dataSet);
-		chartDataSet.setPropertySigns(toPropertySigns(relation.getPropertySignsJson()));
-		chartDataSet.setAlias(relation.getAlias());
-		chartDataSet.setAttachment(relation.isAttachment());
-		chartDataSet.setQuery(toDataSetQuery(relation.getQueryJson()));
-
-		return chartDataSet;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -510,6 +559,55 @@ public class HtmlChartWidgetEntityServiceImpl
 		public void setOrder(int order)
 		{
 			this.order = order;
+		}
+	}
+
+	protected static class IdDataSet extends AbstractIdentifiable implements DataSet
+	{
+		public IdDataSet()
+		{
+			super();
+		}
+
+		public IdDataSet(String id)
+		{
+			super(id);
+		}
+
+		@Override
+		public String getName()
+		{
+			return "";
+		}
+
+		@Override
+		public List<DataSetProperty> getProperties()
+		{
+			return Collections.emptyList();
+		}
+
+		@Override
+		public DataSetProperty getProperty(String name)
+		{
+			return null;
+		}
+
+		@Override
+		public List<DataSetParam> getParams()
+		{
+			return Collections.emptyList();
+		}
+
+		@Override
+		public DataSetParam getParam(String name)
+		{
+			return null;
+		}
+
+		@Override
+		public DataSetResult getResult(DataSetQuery query) throws DataSetException
+		{
+			return null;
 		}
 	}
 }

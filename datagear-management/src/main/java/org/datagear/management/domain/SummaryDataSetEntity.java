@@ -15,6 +15,7 @@ import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.AbstractDataSet;
+import org.springframework.beans.BeanUtils;
 
 /**
  * 概要{@linkplain DataSetEntity}。
@@ -25,7 +26,7 @@ import org.datagear.analysis.support.AbstractDataSet;
  * @author datagear@163.com
  *
  */
-public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEntity
+public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -118,5 +119,14 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 	public DataSetResult getResult(DataSetQuery query) throws DataSetException
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public SummaryDataSetEntity clone()
+	{
+		SummaryDataSetEntity entity = new SummaryDataSetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

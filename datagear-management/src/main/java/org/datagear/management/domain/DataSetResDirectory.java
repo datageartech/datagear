@@ -9,6 +9,8 @@ package org.datagear.management.domain;
 
 import java.util.Date;
 
+import org.springframework.beans.BeanUtils;
+
 /**
  * 数据集资源目录实体。
  * <p>
@@ -19,7 +21,7 @@ import java.util.Date;
  *
  */
 public class DataSetResDirectory extends AbstractStringIdEntity
-		implements CreateUserEntity<String>, DataPermissionEntity<String>
+		implements CreateUserEntity<String>, DataPermissionEntity<String>, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -112,5 +114,14 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 	{
 		return getClass().getSimpleName() + " [directory=" + directory + ", desc=" + desc + ", createUser=" + createUser
 				+ ", createTime=" + createTime + ", dataPermission=" + dataPermission + "]";
+	}
+
+	@Override
+	public DataSetResDirectory clone()
+	{
+		DataSetResDirectory entity = new DataSetResDirectory();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

@@ -7,13 +7,15 @@
 
 package org.datagear.management.domain;
 
+import org.springframework.beans.BeanUtils;
+
 /**
  * 授权。
  * 
  * @author datagear@163.com
  *
  */
-public class Authorization extends AbstractStringIdEntity
+public class Authorization extends AbstractStringIdEntity implements CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -187,6 +189,15 @@ public class Authorization extends AbstractStringIdEntity
 		return getClass().getSimpleName() + " [id=" + getId() + ", resource=" + resource + ", resourceType="
 				+ resourceType + ", principal=" + principal + ", principalType=" + principalType + ", permission="
 				+ permission + ", enabled=" + enabled + "]";
+	}
+
+	@Override
+	public Authorization clone()
+	{
+		Authorization entity = new Authorization();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 
 	/**

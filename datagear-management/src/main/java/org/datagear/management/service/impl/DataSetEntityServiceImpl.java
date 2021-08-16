@@ -173,8 +173,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	{
 		ProfileDataSet profileDataSet = null;
 
-		DataSetEntity entity = getById(user, id, false);
-		inflateParamsAndProperties(entity);
+		DataSetEntity entity = getById(user, id);
 
 		profileDataSet = ProfileDataSet.valueOf(entity);
 
@@ -387,6 +386,34 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
+	protected DataSetEntity getByIdFromDB(String id, Map<String, Object> params)
+	{
+		DataSetEntity entity = super.getByIdFromDB(id, params);
+
+		if (entity == null)
+			return null;
+
+		if (DataSetEntity.DATA_SET_TYPE_SQL.equals(entity.getDataSetType()))
+			entity = getSqlDataSetEntityById(entity.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_JsonValue.equals(entity.getDataSetType()))
+			entity = getJsonValueDataSetEntityById(entity.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(entity.getDataSetType()))
+			entity = getJsonFileDataSetEntityById(entity.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_Excel.equals(entity.getDataSetType()))
+			entity = getExcelDataSetEntityById(entity.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_CsvValue.equals(entity.getDataSetType()))
+			entity = getCsvValueDataSetEntityById(entity.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_CsvFile.equals(entity.getDataSetType()))
+			entity = getCsvFileDataSetEntityById(entity.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_Http.equals(entity.getDataSetType()))
+			entity = getHttpDataSetEntityById(entity.getId());
+
+		inflateParamsAndProperties(entity);
+
+		return entity;
+	}
+
+	@Override
 	protected boolean deleteById(String id, Map<String, Object> params)
 	{
 		boolean deleted = super.deleteById(id, params);
@@ -397,44 +424,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		}
 
 		return deleted;
-	}
-
-	@Override
-	protected void postProcessSelects(List<DataSetEntity> list)
-	{
-		// XXX 查询操作仅用于展示，不必完全加载
-		// super.postProcessSelects(list);
-	}
-
-	@Override
-	protected DataSetEntity postProcessSelect(DataSetEntity obj)
-	{
-		DataSetEntity initObj = obj;
-
-		if (DataSetEntity.DATA_SET_TYPE_SQL.equals(obj.getDataSetType()))
-			obj = getSqlDataSetEntityById(obj.getId());
-		else if (DataSetEntity.DATA_SET_TYPE_JsonValue.equals(obj.getDataSetType()))
-			obj = getJsonValueDataSetEntityById(obj.getId());
-		else if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(obj.getDataSetType()))
-			obj = getJsonFileDataSetEntityById(obj.getId());
-		else if (DataSetEntity.DATA_SET_TYPE_Excel.equals(obj.getDataSetType()))
-			obj = getExcelDataSetEntityById(obj.getId());
-		else if (DataSetEntity.DATA_SET_TYPE_CsvValue.equals(obj.getDataSetType()))
-			obj = getCsvValueDataSetEntityById(obj.getId());
-		else if (DataSetEntity.DATA_SET_TYPE_CsvFile.equals(obj.getDataSetType()))
-			obj = getCsvFileDataSetEntityById(obj.getId());
-		else if (DataSetEntity.DATA_SET_TYPE_Http.equals(obj.getDataSetType()))
-			obj = getHttpDataSetEntityById(obj.getId());
-
-		if (obj == null)
-			return null;
-
-		// 这里必须设置全限值，为了效率，上述子类的底层查询并未返回全限值
-		obj.setDataPermission(initObj.getDataPermission());
-
-		inflateParamsAndProperties(obj);
-
-		return obj;
 	}
 
 	protected void inflateParamsAndProperties(DataSetEntity dataSetEntity)

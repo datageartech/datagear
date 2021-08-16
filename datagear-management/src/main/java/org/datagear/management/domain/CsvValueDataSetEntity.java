@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.CsvValueDataSet;
+import org.springframework.beans.BeanUtils;
 
 /**
  * {@linkplain CsvValueDataSet}实体。
@@ -19,7 +20,7 @@ import org.datagear.analysis.support.CsvValueDataSet;
  * @author datagear@163.com
  *
  */
-public class CsvValueDataSetEntity extends CsvValueDataSet implements DataSetEntity
+public class CsvValueDataSetEntity extends CsvValueDataSet implements DataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -107,5 +108,14 @@ public class CsvValueDataSetEntity extends CsvValueDataSet implements DataSetEnt
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	public CsvValueDataSetEntity clone()
+	{
+		CsvValueDataSetEntity entity = new CsvValueDataSetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

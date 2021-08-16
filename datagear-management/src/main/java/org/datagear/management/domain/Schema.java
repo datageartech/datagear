@@ -10,6 +10,7 @@ package org.datagear.management.domain;
 import java.util.Date;
 
 import org.datagear.connection.DriverEntity;
+import org.springframework.beans.BeanUtils;
 
 /**
  * 数据库模式实体。
@@ -18,7 +19,7 @@ import org.datagear.connection.DriverEntity;
  *
  */
 public class Schema extends AbstractStringIdEntity
-		implements CreateUserEntity<String>, DataPermissionEntity<String>, Cloneable
+		implements CreateUserEntity<String>, DataPermissionEntity<String>, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -190,13 +191,10 @@ public class Schema extends AbstractStringIdEntity
 	@Override
 	public Schema clone()
 	{
-		Schema schema = new Schema(this.getId(), this.title, this.url, this.user, this.password);
-		schema.setCreateUser(this.createUser);
-		schema.setCreateTime(this.createTime);
-		schema.setDriverEntity(this.driverEntity);
-		schema.setDataPermission(this.dataPermission);
+		Schema entity = new Schema();
+		BeanUtils.copyProperties(this, entity);
 
-		return schema;
+		return entity;
 	}
 
 	/**

@@ -22,6 +22,8 @@ import org.datagear.persistence.Query;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.support.SqlSessionDaoSupport;
+import org.springframework.cache.Cache;
+import org.springframework.cache.Cache.ValueWrapper;
 
 /**
  * 抽象基于Mybatis的服务类。
@@ -143,6 +145,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 更新。
+	 * <p>
+	 * 此方法调用底层的{@code update} SQL。
+	 * </p>
 	 * 
 	 * @param entity
 	 * @param params
@@ -184,31 +189,35 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	protected T get(T param)
 	{
-		return get(param, buildParamMap(), true);
+		T obj = get(param, buildParamMap());
+
+		if (obj != null)
+			obj = postProcessGet(obj);
+
+		return obj;
 	}
 
 	/**
 	 * 获取。
+	 * <p>
+	 * 此方法调用底层的{@code get} SQL。
+	 * </p>
 	 * 
 	 * @param id
 	 * @param params
-	 * @param postProcessSelect 是否内部执行{@linkplain #postProcessSelect(Object)}
 	 * @return
 	 */
-	protected T get(T param, Map<String, Object> params, boolean postProcessSelect)
+	protected T get(T param, Map<String, Object> params)
 	{
 		params.put("param", param);
-
-		T entity = selectOneMybatis("get", params);
-
-		if (postProcessSelect && entity != null)
-			entity = postProcessSelect(entity);
-
-		return entity;
+		return selectOneMybatis("get", params);
 	}
 
 	/**
 	 * 查询。
+	 * <p>
+	 * 此方法调用底层的{@code query} SQL。
+	 * </p>
 	 * 
 	 * @param query
 	 * @return
@@ -220,6 +229,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 查询。
+	 * <p>
+	 * 此方法调用底层的{@code query} SQL。
+	 * </p>
 	 * 
 	 * @param query
 	 * @param params
@@ -242,11 +254,18 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	{
 		addQueryParam(params, query);
 
-		return query(statement, params, true);
+		List<T> list = query(statement, params);
+
+		postProcessQuery(list);
+
+		return list;
 	}
 
 	/**
 	 * 分页查询。
+	 * <p>
+	 * 此方法调用底层的{@code pagingQuery}、{@code pagingQueryCount} SQL。
+	 * </p>
 	 * 
 	 * @param pagingQuery
 	 * @return
@@ -258,6 +277,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 分页查询。
+	 * <p>
+	 * 此方法调用底层的{@code pagingQuery}、{@code pagingQueryCount} SQL。
+	 * </p>
 	 * 
 	 * @param pagingQuery
 	 * @param params
@@ -271,7 +293,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	/**
 	 * 分页查询。
 	 * <p>
-	 * 此方法要求已定义{@code [statement]Count} SQL Mapper。例如：
+	 * 此方法要求已定义{@code [statement]Count} SQL。例如：
 	 * </p>
 	 * <p>
 	 * 如果{@code statement}为{@code "pagingQuery"}，那么必须已定义{@code "pagingQueryCount"}
@@ -298,9 +320,11 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		List<T> list = null;
 
 		if (this.dialect.supportsPaging())
-			list = query(statement, params, true);
+			list = query(statement, params);
 		else
-			list = query(statement, params, new RowBounds(startIndex, pagingData.getPageSize()), true);
+			list = query(statement, params, new RowBounds(startIndex, pagingData.getPageSize()));
+
+		postProcessQuery(list);
 
 		pagingData.setItems(list);
 
@@ -312,18 +336,11 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * 
 	 * @param statement
 	 * @param params
-	 * @param postProcessSelects
-	 *            是否内部执行{@linkplain #postProcessSelects(List)}
 	 * @return
 	 */
-	protected List<T> query(String statement, Map<String, Object> params, boolean postProcessSelects)
+	protected List<T> query(String statement, Map<String, Object> params)
 	{
-		List<T> list = selectListMybatis(statement, params);
-
-		if (postProcessSelects)
-			postProcessSelects(list);
-
-		return list;
+		return selectListMybatis(statement, params);
 	}
 
 	/**
@@ -332,56 +349,51 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * @param statement
 	 * @param params
 	 * @param rowBounds
-	 * @param postProcessSelects
-	 *            是否内部执行{@linkplain #postProcessSelects(List)}
 	 * @return
 	 */
-	protected List<T> query(String statement, Map<String, Object> params, RowBounds rowBounds,
-			boolean postProcessSelects)
+	protected List<T> query(String statement, Map<String, Object> params, RowBounds rowBounds)
 	{
-		List<T> list = selectListMybatis(statement, params, rowBounds);
-
-		if (postProcessSelects)
-			postProcessSelects(list);
-
-		return list;
+		return selectListMybatis(statement, params, rowBounds);
 	}
 
 	/**
-	 * 后置处理查询结果列表。
+	 * 后置处理查询结果列。
 	 * <p>
-	 * 此方法对每一个元素调用{@linkplain #postProcessSelect(Object)}。
+	 * {@linkplain #query(Query)}、{@linkplain #query(Query, Map)}、{@linkplain #query(String, Query, Map)}、
+	 * {@linkplain #pagingQuery(PagingQuery)}、{@linkplain #pagingQuery(PagingQuery, Map)}、{@linkplain #pagingQuery(String, PagingQuery, Map)}
+	 * 内部会调用此方法。
+	 * </p>
+	 * <p>
+	 * 子类可以重写此方法，已实现特定的查询结果处理逻辑。
+	 * </p>
+	 * <p>
+	 * 此方法的默认实现是：什么也不做
 	 * </p>
 	 * 
 	 * @param list
+	 *            不会为{@code null}
 	 */
-	protected void postProcessSelects(List<T> list)
+	protected void postProcessQuery(List<T> list)
 	{
-		if (list == null)
-			return;
-
-		for (int i = 0; i < list.size(); i++)
-		{
-			T ele = list.get(i);
-
-			if (ele != null)
-			{
-				ele = postProcessSelect(ele);
-				list.set(i, ele);
-			}
-		}
 	}
 
 	/**
-	 * 后置处理读取结果。
+	 * 后置处理获取操作结果。
 	 * <p>
-	 * 默认为空方法，子类可以重写，已实现特定的查询结果处理逻辑。
+	 * {@linkplain #get(Object, Map, boolean)}的{@code postProcessGet}为{@code true}时，其内部会调用此方法。
+	 * </p>
+	 * <p>
+	 * 子类可以重写此方法，已实现特定的获取操作结果处理逻辑。
+	 * </p>
+	 * <p>
+	 * 此方法的默认实现是：直接返回{@code obj}。
 	 * </p>
 	 * 
-	 * @param obj 不会为{@code null}
+	 * @param obj
+	 *            不会为{@code null}
 	 * @return
 	 */
-	protected T postProcessSelect(T obj)
+	protected T postProcessGet(T obj)
 	{
 		return obj;
 	}
@@ -710,6 +722,38 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected Map<String, Object> buildParamMap()
 	{
 		return new HashMap<>();
+	}
+
+	protected ValueWrapper cacheGet(Cache cache, Object key)
+	{
+		if (cache == null)
+			return null;
+
+		return cache.get(key);
+	}
+
+	protected void cachePut(Cache cache, Object key, Object value)
+	{
+		if (cache == null)
+			return;
+
+		cache.put(key, value);
+	}
+
+	protected void cacheEvict(Cache cache, Object key)
+	{
+		if (cache == null)
+			return;
+
+		cache.evict(key);
+	}
+
+	protected void cacheInvalidate(Cache cache)
+	{
+		if (cache == null)
+			return;
+
+		cache.invalidate();
 	}
 
 	/**

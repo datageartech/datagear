@@ -10,6 +10,7 @@ package org.datagear.management.domain;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetResult;
+import org.springframework.beans.BeanUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -19,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author datagear@163.com
  *
  */
-public class ChartDataSetVO extends ChartDataSet
+public class ChartDataSetVO extends ChartDataSet implements CloneableEntity
 {
 	public ChartDataSetVO()
 	{
@@ -48,4 +49,12 @@ public class ChartDataSetVO extends ChartDataSet
 		return super.getResult();
 	}
 
+	@Override
+	public ChartDataSetVO clone()
+	{
+		ChartDataSetVO entity = new ChartDataSetVO();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
+	}
 }

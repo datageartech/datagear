@@ -16,7 +16,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.management.domain.User;
 import org.datagear.util.Global;
 import org.datagear.util.version.Version;
 import org.datagear.util.version.VersionContent;
@@ -97,7 +96,7 @@ public class MainController extends AbstractController
 	public String main(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		request.setAttribute("disableRegister", this.disableRegister);
-		request.setAttribute("currentUser", User.copyWithoutPassword(WebUtils.getUser(request, response)));
+		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneWithoutPassword());
 		request.setAttribute("currentVersion", Global.VERSION);
 		resolveDetectNewVersionScript(request, response);
 

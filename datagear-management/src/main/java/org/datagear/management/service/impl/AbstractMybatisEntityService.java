@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.management.domain.CloneableEntity;
 import org.datagear.management.domain.Entity;
 import org.datagear.management.service.EntityService;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -20,6 +21,8 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.cache.Cache;
+import org.springframework.cache.Cache.ValueWrapper;
+import org.springframework.cache.support.SimpleValueWrapper;
 
 /**
  * 抽象基于Mybatis的{@linkplain EntityService}实现类。
@@ -32,8 +35,16 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 {
 	private Cache cache = null;
 	
-	/** 查询操作时缓存实体数目 */
-	private int cacheCountForQuery = 50;
+	/**
+	 * 查询操作时缓存实体数目。
+	 * <p>
+	 * 默认为{@code 0}，不缓存查询操作结果。
+	 * </p>
+	 * <p>
+	 * 谨慎设置此值，因为目前为了提高查询效率，有些服务实现类里查询返回的并不是完全的可用的实体，不能作为缓存使用（比如，未加载一对多值对象）。
+	 * </p>
+	 */
+	private int cacheCountForQuery = 0;
 
 	public AbstractMybatisEntityService()
 	{
@@ -102,7 +113,12 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	@Override
 	public T getById(ID id)
 	{
-		return getById(id, buildParamMap());
+		T entity = getById(id, buildParamMap());
+
+		if (entity != null)
+			entity = postProcessGet(entity);
+
+		return entity;
 	}
 
 	@Override
@@ -118,45 +134,47 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	/**
-	 * 获取。
+	 * 获取实体。
+	 * 
+	 * @param id
+	 * @param params
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	protected T getById(ID id, Map<String, Object> params)
+	{
+		T entity = null;
+
+		ValueWrapper entityWrapper = cacheGet(id);
+
+		if (entityWrapper != null)
+		{
+			entity = (T) entityWrapper.get();
+		}
+		else
+		{
+			entity = getByIdFromDB(id, params);
+
+			cachePut(id, entity);
+		}
+
+		return entity;
+	}
+
+	/**
+	 * 从底层数据库获取实体。
 	 * <p>
-	 * 此方法内部会执行{@linkplain #postProcessSelect(Object)}。
+	 * 此方法调用底层的{@code getById} SQL。
 	 * </p>
 	 * 
 	 * @param id
 	 * @param params
 	 * @return
 	 */
-	protected T getById(ID id, Map<String, Object> params)
+	protected T getByIdFromDB(ID id, Map<String, Object> params)
 	{
-		return getById(id, params, true);
-	}
-
-	/**
-	 * 获取。
-	 * 
-	 * @param id
-	 * @param params
-	 * @param postProcessSelect
-	 *            是否内部执行{@linkplain #postProcessSelect(Object)}
-	 * @return
-	 */
-	protected T getById(ID id, Map<String, Object> params, boolean postProcessSelect)
-	{
-		T entity = cacheGet(id);
-
-		if (entity == null)
-		{
-			params.put("id", id);
-			entity = selectOneMybatis("getById", params);
-
-			cachePut(id, entity);
-		}
-
-		if (postProcessSelect && entity != null)
-			entity = postProcessSelect(entity);
-
-		return entity;
+		params.put("id", id);
+		return selectOneMybatis("getById", params);
 	}
 
 	@Override
@@ -169,6 +187,9 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 
 	/**
 	 * 删除。
+	 * <p>
+	 * 此方法调用底层的{@code deleteById} SQL。
+	 * </p>
 	 * 
 	 * @param id
 	 * @param params
@@ -184,28 +205,21 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	@Override
-	protected List<T> query(String statement, Map<String, Object> params, boolean postProcessSelects)
+	protected List<T> query(String statement, Map<String, Object> params)
 	{
-		List<T> list = super.query(statement, params, false);
+		List<T> list = super.query(statement, params);
 
-		cachePut(list);
-
-		if (postProcessSelects)
-			postProcessSelects(list);
+		cachePutQueryResult(list);
 
 		return list;
 	}
 
 	@Override
-	protected List<T> query(String statement, Map<String, Object> params, RowBounds rowBounds,
-			boolean postProcessSelects)
+	protected List<T> query(String statement, Map<String, Object> params, RowBounds rowBounds)
 	{
-		List<T> list = super.query(statement, params, rowBounds, false);
+		List<T> list = super.query(statement, params, rowBounds);
 
-		cachePut(list);
-
-		if (postProcessSelects)
-			postProcessSelects(list);
+		cachePutQueryResult(list);
 
 		return list;
 	}
@@ -226,18 +240,52 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	/**
 	 * 拷贝缓存值。
 	 * <p>
-	 * 当从缓存中取出对象时、将对象放入缓存时，进行拷贝。
+	 * 当从缓存中取出对象时{@linkplain #cacheGet(Object)}、将对象放入缓存时{@linkplain #cachePut(Object, Entity)}，进行拷贝。
 	 * </p>
 	 * <p>
-	 * 此方法默认返回原对象，子类应根据实际情况（对象是否会被修改），决定是否需要真正拷贝。
+	 * 此方法默认是现是：如果{@code value}是{@linkplain CloneableEntity}，则返回{@linkplain CloneableEntity#clone()}，否则，返回原对象。
 	 * </p>
 	 * 
 	 * @param value
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	protected T cacheCloneValue(T value)
 	{
+		if (value instanceof CloneableEntity)
+			return (T) ((CloneableEntity) value).clone();
+
 		return value;
+	}
+
+	/**
+	 * 获取指定实体ID的缓存关键字。
+	 * 
+	 * @param id
+	 * @return
+	 */
+	protected Object toCacheKey(ID id)
+	{
+		return id;
+	}
+
+	protected ValueWrapper cacheGet(ID id)
+	{
+		if (!cacheEnabled())
+			return null;
+
+		ValueWrapper valueWrapper = cacheGet(getCache(), toCacheKey(id));
+
+		if (valueWrapper == null)
+			return null;
+
+		@SuppressWarnings("unchecked")
+		T value = (T) valueWrapper.get();
+
+		if (value != null)
+			value = cacheCloneValue(value);
+
+		return new SimpleValueWrapper(value);
 	}
 
 	protected void cachePut(ID id, T value)
@@ -248,10 +296,10 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		if (value != null)
 			value = cacheCloneValue(value);
 
-		cachePut(getCache(), value.getId(), value);
+		cachePut(getCache(), toCacheKey(id), value);
 	}
 
-	protected void cachePut(List<T> values)
+	protected void cachePutQueryResult(List<T> values)
 	{
 		if (!cacheEnabled())
 			return;
@@ -265,30 +313,17 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 			if (value != null)
 			{
 				value = cacheCloneValue(value);
-				cachePut(getCache(), value.getId(), value);
+				cachePut(getCache(), toCacheKey(value.getId()), value);
 			}
 		}
 	}
 
-	protected T cacheGet(ID key)
-	{
-		if (!cacheEnabled())
-			return null;
-
-		T value = cacheGet(getCache(), key);
-
-		if (value != null)
-			value = cacheCloneValue(value);
-
-		return value;
-	}
-
-	protected void cacheEvict(ID key)
+	protected void cacheEvict(ID id)
 	{
 		if (!cacheEnabled())
 			return;
 
-		cacheEvict(getCache(), key);
+		cacheEvict(getCache(), toCacheKey(id));
 	}
 
 	protected void cacheInvalidate()
@@ -297,38 +332,5 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 			return;
 
 		cacheInvalidate(getCache());
-	}
-
-	protected void cachePut(Cache cache, Object key, Object value)
-	{
-		if (cache == null)
-			return;
-
-		cache.put(key, value);
-	}
-
-	@SuppressWarnings("unchecked")
-	protected <TT> TT cacheGet(Cache cache, Object key)
-	{
-		if (cache == null)
-			return null;
-
-		return (TT) cache.get(key);
-	}
-
-	protected void cacheEvict(Cache cache, Object key)
-	{
-		if (cache == null)
-			return;
-
-		cache.evict(key);
-	}
-
-	protected void cacheInvalidate(Cache cache)
-	{
-		if (cache == null)
-			return;
-
-		cache.invalidate();
 	}
 }

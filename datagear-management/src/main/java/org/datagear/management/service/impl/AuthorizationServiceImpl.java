@@ -10,6 +10,7 @@ package org.datagear.management.service.impl;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataPermissionEntity;
@@ -17,9 +18,6 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.util.dialect.MbSqlDialect;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.Query;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -117,34 +115,29 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 	}
 
 	@Override
-	protected Authorization getById(String id, Map<String, Object> params, boolean postProcessSelect)
+	protected Authorization getByIdFromDB(String id, Map<String, Object> params)
 	{
 		setAuthorizationQueryContext(params);
-
-		return super.getById(id, params, postProcessSelect);
+		return super.getByIdFromDB(id, params);
 	}
 
 	@Override
-	protected List<Authorization> query(String statement, Query query, Map<String, Object> params)
+	protected List<Authorization> query(String statement, Map<String, Object> params)
 	{
 		setAuthorizationQueryContext(params);
-
-		return super.query(statement, query, params);
+		return super.query(statement, params);
 	}
 
 	@Override
-	protected PagingData<Authorization> pagingQuery(String statement, PagingQuery pagingQuery,
-			Map<String, Object> params)
+	protected List<Authorization> query(String statement, Map<String, Object> params, RowBounds rowBounds)
 	{
 		setAuthorizationQueryContext(params);
-
-		return super.pagingQuery(statement, pagingQuery, params);
+		return super.query(statement, params, rowBounds);
 	}
 
 	protected AuthorizationQueryContext setAuthorizationQueryContext(Map<String, Object> params)
 	{
 		AuthorizationQueryContext context = AuthorizationQueryContext.get();
-
 		params.put("queryContext", context);
 
 		return context;

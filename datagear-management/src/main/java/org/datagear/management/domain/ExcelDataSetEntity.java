@@ -15,6 +15,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractExcelDataSet;
 import org.datagear.analysis.support.ExcelDirectoryFileDataSet;
+import org.springframework.beans.BeanUtils;
 
 /**
  * {@linkplain ExcelDirectoryFileDataSet}实体。
@@ -22,7 +23,7 @@ import org.datagear.analysis.support.ExcelDirectoryFileDataSet;
  * @author datagear@163.com
  *
  */
-public class ExcelDataSetEntity extends AbstractExcelDataSet implements DirectoryFileDataSetEntity
+public class ExcelDataSetEntity extends AbstractExcelDataSet implements DirectoryFileDataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -224,5 +225,14 @@ public class ExcelDataSetEntity extends AbstractExcelDataSet implements Director
 	protected File getExcelFile(DataSetQuery query) throws Throwable
 	{
 		return FILE_SUPPORT.getFile(this, query);
+	}
+
+	@Override
+	public ExcelDataSetEntity clone()
+	{
+		ExcelDataSetEntity entity = new ExcelDataSetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }

@@ -108,6 +108,7 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -125,6 +126,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * @author datagear@163.com
  */
 @Configuration
+@EnableCaching
 public class CoreConfig implements InitializingBean
 {
 	public static final String NAME_CHART_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "chartShowHtmlTplDashboardWidgetHtmlRenderer";
@@ -135,13 +137,16 @@ public class CoreConfig implements InitializingBean
 
 	private DataSourceConfig dataSourceConfig;
 
+	private CacheConfig cacheConfig;
+
 	private Environment environment;
 
 	@Autowired
-	public CoreConfig(DataSourceConfig dataSourceConfig, Environment environment)
+	public CoreConfig(DataSourceConfig dataSourceConfig, CacheConfig cacheConfig, Environment environment)
 	{
 		super();
 		this.dataSourceConfig = dataSourceConfig;
+		this.cacheConfig = cacheConfig;
 		this.environment = environment;
 	}
 
@@ -153,6 +158,16 @@ public class CoreConfig implements InitializingBean
 	public void setDataSourceConfig(DataSourceConfig dataSourceConfig)
 	{
 		this.dataSourceConfig = dataSourceConfig;
+	}
+
+	public CacheConfig getCacheConfig()
+	{
+		return cacheConfig;
+	}
+
+	public void setCacheConfig(CacheConfig cacheConfig)
+	{
+		this.cacheConfig = cacheConfig;
 	}
 
 	public Environment getEnvironment()
@@ -462,6 +477,9 @@ public class CoreConfig implements InitializingBean
 		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.driverEntityManager(), this.authorizationService());
 
+		bean.setCache(this.cacheConfig.getEntityCacheBySimpleName(SchemaService.class));
+		bean.setPermissionCache(this.cacheConfig.getPermissionCacheBySimpleName(SchemaService.class));
+
 		return bean;
 	}
 
@@ -495,6 +513,10 @@ public class CoreConfig implements InitializingBean
 		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.connectionSource(), this.schemaService(), this.authorizationService(), this.dataSetRootDirectory(),
 				this.httpClient());
+
+		bean.setCache(this.cacheConfig.getEntityCacheBySimpleName(DataSetEntityService.class));
+		bean.setPermissionCache(this.cacheConfig.getPermissionCacheBySimpleName(DataSetEntityService.class));
+
 		return bean;
 	}
 
@@ -535,6 +557,9 @@ public class CoreConfig implements InitializingBean
 		HtmlChartWidgetEntityServiceImpl bean = new HtmlChartWidgetEntityServiceImpl(this.sqlSessionFactory(),
 				this.mbSqlDialect(), this.directoryHtmlChartPluginManager(), this.dataSetEntityService(),
 				this.authorizationService());
+
+		bean.setCache(this.cacheConfig.getEntityCacheBySimpleName(HtmlChartWidgetEntityService.class));
+		bean.setPermissionCache(this.cacheConfig.getPermissionCacheBySimpleName(HtmlChartWidgetEntityService.class));
 
 		return bean;
 	}

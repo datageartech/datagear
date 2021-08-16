@@ -153,7 +153,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	}
 
 	@Override
-	protected void postProcessSelects(List<HtmlTplDashboardWidgetEntity> list)
+	protected void postProcessQuery(List<HtmlTplDashboardWidgetEntity> list)
 	{
 		// XXX 查询操作仅用于展示，不必完全加载
 		// super.postProcessSelects(list);

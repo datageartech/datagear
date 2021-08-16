@@ -12,6 +12,7 @@ import java.util.Date;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartWidget;
+import org.springframework.beans.BeanUtils;
 
 /**
  * HTML {@linkplain ChartWidget}实体。
@@ -20,7 +21,8 @@ import org.datagear.analysis.support.html.HtmlChartWidget;
  *
  */
 public class HtmlChartWidgetEntity extends HtmlChartWidget
-		implements CreateUserEntity<String>, DataPermissionEntity<String>, AnalysisProjectAwareEntity<String>
+		implements CreateUserEntity<String>, DataPermissionEntity<String>, AnalysisProjectAwareEntity<String>,
+		CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -120,5 +122,28 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	public HtmlChartWidgetEntity clone()
+	{
+		HtmlChartWidgetEntity entity = new HtmlChartWidgetEntity();
+		BeanUtils.copyProperties(this, entity);
+
+		ChartDataSetVO[] chartDataSetVOs = entity.getChartDataSetVOs();
+
+		if (chartDataSetVOs != null && chartDataSetVOs.length != 0)
+		{
+			ChartDataSetVO[] cloned = new ChartDataSetVO[chartDataSetVOs.length];
+
+			for (int i = 0; i < chartDataSetVOs.length; i++)
+			{
+				cloned[i] = chartDataSetVOs[i].clone();
+			}
+
+			entity.setChartDataSetVOs(cloned);
+		}
+
+		return entity;
 	}
 }

@@ -9,8 +9,12 @@ package org.datagear.management.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
@@ -26,6 +30,8 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.cache.Cache;
+import org.springframework.cache.Cache.ValueWrapper;
 
 /**
  * 抽象基于Mybatis的{@linkplain DataPermissionEntityService}实现类。
@@ -36,6 +42,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends DataPermissionEntity<ID>>
 		extends AbstractMybatisEntityService<ID, T> implements DataPermissionEntityService<ID, T>
 {
+	private Cache permissionCache;
+
 	public AbstractMybatisDataPermissionEntityService()
 	{
 		super();
@@ -51,13 +59,23 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		super(sqlSessionTemplate, dialect);
 	}
 
+	public Cache getPermissionCache()
+	{
+		return permissionCache;
+	}
+
+	public void setPermissionCache(Cache permissionCache)
+	{
+		this.permissionCache = permissionCache;
+	}
+
 	@Override
 	public int getPermission(User user, ID id)
 	{
 		List<ID> ids = new ArrayList<>(1);
 		ids.add(id);
 
-		List<Integer> permissions = getPermissions(user, ids, PERMISSION_NOT_FOUND);
+		List<Integer> permissions = getPermissions(user, ids);
 
 		return permissions.get(0);
 	}
@@ -67,7 +85,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	{
 		List<ID> idList = Arrays.asList(ids);
 
-		List<Integer> permissions = getPermissions(user, idList, PERMISSION_NOT_FOUND);
+		List<Integer> permissions = getPermissions(user, idList);
 
 		int[] re = new int[permissions.size()];
 
@@ -138,11 +156,6 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	@Override
 	public T getById(User user, ID id) throws PermissionDeniedException
 	{
-		return getById(user, id, true);
-	}
-
-	protected T getById(User user, ID id, boolean postProcessSelect) throws PermissionDeniedException
-	{
 		int permission = getPermission(user, id);
 
 		if (!Authorization.canRead(permission))
@@ -151,7 +164,15 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user);
 
-		return getById(id, params, postProcessSelect);
+		T entity = getById(id, params);
+
+		if (entity != null)
+		{
+			entity.setDataPermission(permission);
+			entity = postProcessGet(entity);
+		}
+
+		return entity;
 	}
 
 	@Override
@@ -165,7 +186,15 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user);
 
-		return getById(id, params);
+		T entity = getById(id, params);
+
+		if (entity != null)
+		{
+			entity.setDataPermission(permission);
+			entity = postProcessGet(entity);
+		}
+
+		return entity;
 	}
 
 	@Override
@@ -214,30 +243,109 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 	/**
 	 * 获取权限列表。
+	 * <p>
+	 * 对于没有授权的，将返回{@linkplain #PERMISSION_NOT_FOUND}权限值。
+	 * </p>
 	 * 
 	 * @param user
 	 * @param ids
-	 * @param permissionForAbsence
 	 * @return
 	 */
-	protected List<Integer> getPermissions(User user, List<ID> ids, int permissionForAbsence)
+	protected List<Integer> getPermissions(User user, List<ID> ids)
 	{
+		int len = ids.size();
+
+		Map<ID, Integer> permissions = getCachedPermissions(user, ids);
+
+		List<ID> noCachedIds = Collections.emptyList();
+
+		if (permissions.isEmpty())
+			noCachedIds = ids;
+		else
+		{
+			for (int i = 0; i < len; i++)
+			{
+				ID id = ids.get(i);
+				if (!permissions.containsKey(id))
+					noCachedIds.add(id);
+			}
+		}
+
+		getPermissionsFromDB(user, noCachedIds, permissions);
+
+		List<Integer> re = new ArrayList<>(len);
+
+		for (int i = 0; i < len; i++)
+		{
+			ID id = ids.get(i);
+			Integer permission = permissions.get(id);
+
+			if (permission == null)
+				permission = PERMISSION_NOT_FOUND;
+
+			re.add(permission);
+		}
+
+		return re;
+	}
+
+	/**
+	 * 获取缓存中的权限。
+	 * 
+	 * @param user
+	 * @param ids
+	 * @return
+	 */
+	protected Map<ID, Integer> getCachedPermissions(User user, List<ID> ids)
+	{
+		Map<ID, Integer> permissions = new HashMap<ID, Integer>();
+
+		if (this.permissionCache == null)
+			return permissions;
+
+		String userId = user.getId();
+
+		for (int i = 0, len = ids.size(); i < len; i++)
+		{
+			ID id = ids.get(i);
+			Integer permission = cacheGetPermission(id, userId);
+
+			if (permission != null)
+				permissions.put(id, permission);
+		}
+
+		return permissions;
+	}
+
+	/**
+	 * 获取底层数据库的权限。
+	 * 
+	 * @param user
+	 * @param ids
+	 * @param permissions
+	 */
+	protected void getPermissionsFromDB(User user ,List<ID> ids, Map<ID, Integer> permissions)
+	{
+		if(ids.isEmpty())
+			return;
+		
+		String userId = user.getId();
+
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user);
 		params.put("ids", ids);
 
 		List<DataIdPermission> dataPermissions = selectListMybatis("getDataIdPermissions", params);
 
-		List<Integer> re = new ArrayList<>(ids.size());
-
 		for (int i = 0, len = ids.size(); i < len; i++)
 		{
 			Integer permission = null;
-			String myId = ids.get(i).toString();
+			ID id = ids.get(i);
+			String idStr = id.toString();
 
 			for (DataIdPermission p : dataPermissions)
 			{
-				if (myId.equals(p.getDataId()))
+				if (idStr.equals(p.getDataId()))
 				{
 					permission = p.getDataPermission();
 					break;
@@ -245,12 +353,52 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			}
 
 			if (permission == null)
-				permission = permissionForAbsence;
+				permission = PERMISSION_NOT_FOUND;
+			
+			permissions.put(id, permission);
 
-			re.add(permission);
+			cachePutPermission(id, userId, permission);
+		}
+	}
+
+	protected Integer cacheGetPermission(ID id, String userId)
+	{
+		if (this.permissionCache == null)
+			return null;
+
+		ValueWrapper valueWrapper = cacheGet(this.permissionCache, toPermissionCacheKey(id));
+		UserIdPermissionMap upm = (valueWrapper == null ? null : (UserIdPermissionMap) valueWrapper.get());
+
+		return (upm == null ? null : upm.getPermission(userId));
+	}
+
+	protected void cachePutPermission(ID id, String userId, int permission)
+	{
+		if (this.permissionCache == null)
+			return;
+
+		Object key = toPermissionCacheKey(id);
+
+		ValueWrapper valueWrapper = cacheGet(this.permissionCache, key);
+		UserIdPermissionMap upm = (valueWrapper == null ? null : (UserIdPermissionMap) valueWrapper.get());
+		if (upm == null)
+		{
+			upm = new UserIdPermissionMap();
+			cachePut(this.permissionCache, key, upm);
 		}
 
-		return re;
+		upm.putPermission(userId, permission);
+	}
+
+	/**
+	 * 获取指定实体ID的权限缓存关键字。
+	 * 
+	 * @param id
+	 * @return
+	 */
+	protected Object toPermissionCacheKey(ID id)
+	{
+		return id;
 	}
 
 	/**
@@ -278,5 +426,30 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		params.put(DATA_PERMISSION_PARAM_MIN_READ_PERMISSION, Authorization.PERMISSION_READ_START);
 		params.put(DATA_PERMISSION_PARAM_MAX_PERMISSION, Authorization.PERMISSION_MAX);
 		params.put(DATA_PERMISSION_PARAM_UNSET_PERMISSION, Authorization.PERMISSION_NONE_START);
+	}
+
+	protected static class UserIdPermissionMap
+	{
+		private ConcurrentMap<String, Integer> userIdPermissions = new ConcurrentHashMap<String, Integer>();
+
+		public UserIdPermissionMap()
+		{
+			super();
+		}
+
+		public Integer getPermission(String userId)
+		{
+			return this.userIdPermissions.get(userId);
+		}
+
+		public void putPermission(String userId, Integer permission)
+		{
+			this.userIdPermissions.put(userId, permission);
+		}
+
+		public void clear()
+		{
+			this.userIdPermissions.clear();
+		}
 	}
 }

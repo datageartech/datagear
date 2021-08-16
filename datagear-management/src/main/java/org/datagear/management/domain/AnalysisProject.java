@@ -9,6 +9,8 @@ package org.datagear.management.domain;
 
 import java.util.Date;
 
+import org.springframework.beans.BeanUtils;
+
 /**
  * 数据分析项目实体。
  * 
@@ -16,7 +18,7 @@ import java.util.Date;
  *
  */
 public class AnalysisProject extends AbstractStringIdEntity
-		implements CreateUserEntity<String>, DataPermissionEntity<String>
+		implements CreateUserEntity<String>, DataPermissionEntity<String>, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -108,5 +110,14 @@ public class AnalysisProject extends AbstractStringIdEntity
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", desc=" + desc + ", createUser=" + createUser
 				+ ", createTime=" + createTime + ", dataPermission=" + dataPermission + "]";
+	}
+
+	@Override
+	public AnalysisProject clone()
+	{
+		AnalysisProject entity = new AnalysisProject();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
 	}
 }
