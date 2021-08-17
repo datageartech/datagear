@@ -163,9 +163,6 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 	@Override
 	protected void postProcessQuery(List<User> list)
 	{
-		if (list == null)
-			return;
-
 		// 屏蔽查询结果密码，避免安全隐患
 		for (User user : list)
 			user.setPassword(null);

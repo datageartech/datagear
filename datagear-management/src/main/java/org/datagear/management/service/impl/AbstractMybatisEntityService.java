@@ -121,6 +121,26 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		return entity;
 	}
 
+	/**
+	 * 后置处理获取操作结果。
+	 * <p>
+	 * 子类应重写此方法，加载此实的共享属性值（有独立生命周期），因为这个实体可能是从缓存中取出的，共享属性值可能已过时。
+	 * </p>
+	 * <p>
+	 * 注意：加载此实体的私有属性值应通过重写{@linkplain #getByIdFromDB(Object, Map)}来实现，这样它们才会被加入缓存。
+	 * </p>
+	 * <p>
+	 * 此方法的默认实现是：直接返回{@code obj}。
+	 * </p>
+	 * 
+	 * @see #getById(Object) getById(Object)将在内部调用此方法
+	 */
+	@Override
+	protected T postProcessGet(T obj)
+	{
+		return super.postProcessGet(obj);
+	}
+
 	@Override
 	public List<T> query(Query query)
 	{

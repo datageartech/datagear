@@ -115,10 +115,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!Authorization.canEdit(permission))
 			throw new PermissionDeniedException();
 
-		Map<String, Object> params = buildParamMap();
-		addDataPermissionParameters(params, user);
-
-		return update(entity, params);
+		return super.update(entity);
 	}
 
 	@Override
@@ -129,10 +126,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!Authorization.canDelete(permission))
 			throw new PermissionDeniedException();
 
-		Map<String, Object> params = buildParamMap();
-		addDataPermissionParameters(params, user);
-
-		return deleteById(id, params);
+		return super.deleteById(id);
 	}
 
 	@Override
@@ -149,12 +143,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		boolean[] re = new boolean[ids.length];
 
 		for (int i = 0; i < ids.length; i++)
-		{
-			Map<String, Object> params = buildParamMap();
-			addDataPermissionParameters(params, user);
-
-			re[i] = deleteById(ids[i], params);
-		}
+			re[i] = super.deleteById(ids[i]);
 
 		return re;
 	}
@@ -167,16 +156,10 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!Authorization.canRead(permission))
 			throw new PermissionDeniedException();
 
-		Map<String, Object> params = buildParamMap();
-		addDataPermissionParameters(params, user);
-
-		T entity = getById(id, params);
+		T entity = super.getById(id);
 
 		if (entity != null)
-		{
 			entity.setDataPermission(permission);
-			entity = postProcessGet(entity);
-		}
 
 		return entity;
 	}
@@ -189,16 +172,10 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!Authorization.canEdit(permission))
 			throw new PermissionDeniedException();
 
-		Map<String, Object> params = buildParamMap();
-		addDataPermissionParameters(params, user);
-
-		T entity = getById(id, params);
+		T entity = super.getById(id);
 
 		if (entity != null)
-		{
 			entity.setDataPermission(permission);
-			entity = postProcessGet(entity);
-		}
 
 		return entity;
 	}

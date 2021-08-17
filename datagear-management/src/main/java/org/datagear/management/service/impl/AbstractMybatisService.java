@@ -183,9 +183,21 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		return (deleteMybatis("delete", params) > 0);
 	}
 
-	protected T get(T param)
+	/**
+	 * 根据参数获取对象。
+	 * <p>
+	 * 此方法调用底层的{@code getByParam} SQL。
+	 * </p>
+	 * <p>
+	 * 此方法内部会执行{@linkplain #postProcessGet(Object)}。
+	 * </p>
+	 * 
+	 * @param param
+	 * @return
+	 */
+	protected T getByParam(T param)
 	{
-		T obj = get(param, buildParamMap());
+		T obj = getByParam("getByParam", param, buildParamMap());
 
 		if (obj != null)
 			obj = postProcessGet(obj);
@@ -194,25 +206,31 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	}
 
 	/**
-	 * 获取。
+	 * 后置处理获取操作结果。
 	 * <p>
-	 * 此方法调用底层的{@code get} SQL。
+	 * 子类可以重写此方法，以实现特定的获取操作结果处理逻辑。
+	 * </p>
+	 * <p>
+	 * 此方法的默认实现是：直接返回{@code obj}。
 	 * </p>
 	 * 
-	 * @param id
-	 * @param params
+	 * @param obj
+	 *            不会为{@code null}
 	 * @return
+	 * @see #getByParam(Object)
 	 */
-	protected T get(T param, Map<String, Object> params)
+	protected T postProcessGet(T obj)
 	{
-		params.put("param", param);
-		return selectOneMybatis("get", params);
+		return obj;
 	}
 
 	/**
 	 * 查询。
 	 * <p>
 	 * 此方法调用底层的{@code query} SQL。
+	 * </p>
+	 * <p>
+	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
 	 * </p>
 	 * 
 	 * @param query
@@ -228,6 +246,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * <p>
 	 * 此方法调用底层的{@code query} SQL。
 	 * </p>
+	 * <p>
+	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
+	 * </p>
 	 * 
 	 * @param query
 	 * @param params
@@ -240,6 +261,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 查询。
+	 * <p>
+	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
+	 * </p>
 	 * 
 	 * @param statement
 	 * @param query
@@ -262,6 +286,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * <p>
 	 * 此方法调用底层的{@code pagingQuery}、{@code pagingQueryCount} SQL。
 	 * </p>
+	 * <p>
+	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
+	 * </p>
 	 * 
 	 * @param pagingQuery
 	 * @return
@@ -275,6 +302,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * 分页查询。
 	 * <p>
 	 * 此方法调用底层的{@code pagingQuery}、{@code pagingQueryCount} SQL。
+	 * </p>
+	 * <p>
+	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
 	 * </p>
 	 * 
 	 * @param pagingQuery
@@ -294,6 +324,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * <p>
 	 * 如果{@code statement}为{@code "pagingQuery"}，那么必须已定义{@code "pagingQueryCount"}
 	 * SQL Mapper。
+	 * </p>
+	 * <p>
+	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
 	 * </p>
 	 * 
 	 * @param statement
@@ -328,6 +361,42 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	}
 
 	/**
+	 * 后置处理查询结果列。
+	 * </p>
+	 * <p>
+	 * 子类可以重写此方法，已实现特定的查询结果处理逻辑。
+	 * </p>
+	 * <p>
+	 * 此方法的默认实现是：什么也不做
+	 * </p>
+	 * 
+	 * @param list
+	 *            不会为{@code null}
+	 * @see #query(Query)
+	 * @see #query(Query, Map)
+	 * @see #query(String, Query, Map)
+	 * @see #pagingQuery(PagingQuery)
+	 * @see #pagingQuery(PagingQuery, Map)
+	 * @see #pagingQuery(String, PagingQuery, Map)
+	 */
+	protected void postProcessQuery(List<T> list)
+	{
+	}
+
+	/**
+	 * 获取。
+	 * 
+	 * @param id
+	 * @param params
+	 * @return
+	 */
+	protected T getByParam(String statement, T param, Map<String, Object> params)
+	{
+		params.put("param", param);
+		return selectOneMybatis(statement, params);
+	}
+
+	/**
 	 * 查询。
 	 * 
 	 * @param statement
@@ -350,48 +419,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected List<T> query(String statement, Map<String, Object> params, RowBounds rowBounds)
 	{
 		return selectListMybatis(statement, params, rowBounds);
-	}
-
-	/**
-	 * 后置处理查询结果列。
-	 * <p>
-	 * {@linkplain #query(Query)}、{@linkplain #query(Query, Map)}、{@linkplain #query(String, Query, Map)}、
-	 * {@linkplain #pagingQuery(PagingQuery)}、{@linkplain #pagingQuery(PagingQuery, Map)}、{@linkplain #pagingQuery(String, PagingQuery, Map)}
-	 * 内部会调用此方法。
-	 * </p>
-	 * <p>
-	 * 子类可以重写此方法，已实现特定的查询结果处理逻辑。
-	 * </p>
-	 * <p>
-	 * 此方法的默认实现是：什么也不做
-	 * </p>
-	 * 
-	 * @param list
-	 *            不会为{@code null}
-	 */
-	protected void postProcessQuery(List<T> list)
-	{
-	}
-
-	/**
-	 * 后置处理获取操作结果。
-	 * <p>
-	 * {@linkplain #get(Object, Map, boolean)}的{@code postProcessGet}为{@code true}时，其内部会调用此方法。
-	 * </p>
-	 * <p>
-	 * 子类可以重写此方法，已实现特定的获取操作结果处理逻辑。
-	 * </p>
-	 * <p>
-	 * 此方法的默认实现是：直接返回{@code obj}。
-	 * </p>
-	 * 
-	 * @param obj
-	 *            不会为{@code null}
-	 * @return
-	 */
-	protected T postProcessGet(T obj)
-	{
-		return obj;
 	}
 
 	/**
