@@ -7,6 +7,7 @@
 
 package org.datagear.management.service.impl;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,6 @@ import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 import org.mybatis.spring.SqlSessionTemplate;
-import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.support.SimpleValueWrapper;
 
@@ -33,7 +33,7 @@ import org.springframework.cache.support.SimpleValueWrapper;
 public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> extends AbstractMybatisService<T>
 		implements EntityService<ID, T>
 {
-	private Cache cache = null;
+	private ServiceCache cache = null;
 	
 	/**
 	 * 查询操作时缓存实体数目。
@@ -61,12 +61,12 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		super(sqlSessionTemplate, dialect);
 	}
 
-	public Cache getCache()
+	public ServiceCache getCache()
 	{
 		return cache;
 	}
 
-	public void setCache(Cache cache)
+	public void setCache(ServiceCache cache)
 	{
 		this.cache = cache;
 	}
@@ -231,54 +231,6 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	/**
-	 * 是否开启缓存。
-	 * <p>
-	 * 子类应注意是否需要重写{@linkplain #cacheCloneEntity(Entity)}方法。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	protected boolean cacheEnabled()
-	{
-		return (getCache() != null);
-	}
-
-	/**
-	 * 克隆缓存实体。
-	 * <p>
-	 * 参考{@linkplain #cacheGet(Object)}、{@linkplain #cachePut(Object, Entity)}、{@linkplain #cachePutQueryResult(List)}。
-	 * </p>
-	 * <p>
-	 * 对于无序列化缓存（比如进程内缓存），应遵循{@linkplain CloneableEntity#clone()}规则；对于序列化缓存，则可直接返回原实体。
-	 * </p>
-	 * <p>
-	 * 此方法默认是现是：如果{@code value}是{@linkplain CloneableEntity}，则返回{@linkplain CloneableEntity#clone()}，否则，返回原对象。
-	 * </p>
-	 * 
-	 * @param value
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	protected T cacheCloneEntity(T value)
-	{
-		if (value instanceof CloneableEntity)
-			return (T) ((CloneableEntity) value).clone();
-
-		return value;
-	}
-
-	/**
-	 * 获取指定实体ID的缓存关键字。
-	 * 
-	 * @param id
-	 * @return
-	 */
-	protected Object toCacheKey(ID id)
-	{
-		return id;
-	}
-
-	/**
 	 * 从缓存中读取实体。
 	 * <p>
 	 * 此方法将使用{@linkplain #cacheCloneEntity(Entity)}返回克隆后的实体对象。
@@ -289,10 +241,10 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 */
 	protected ValueWrapper cacheGet(ID id)
 	{
-		if (!cacheEnabled())
+		if (!isCacheEnabled())
 			return null;
 
-		ValueWrapper valueWrapper = cacheGet(getCache(), toCacheKey(id));
+		ValueWrapper valueWrapper = this.cache.get(toCacheKey(id));
 
 		if (valueWrapper == null)
 			return null;
@@ -317,13 +269,13 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 */
 	protected void cachePut(ID id, T value)
 	{
-		if (!cacheEnabled())
+		if (!isCacheEnabled())
 			return;
 
 		if (value != null)
 			value = cacheCloneEntity(value);
 
-		cachePut(getCache(), toCacheKey(id), value);
+		this.cache.put(toCacheKey(id), value);
 	}
 
 	/**
@@ -336,7 +288,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 */
 	protected void cachePutQueryResult(List<T> values)
 	{
-		if (!cacheEnabled())
+		if (!isCacheEnabled())
 			return;
 
 		int count = Math.min(values.size(), this.getCacheCountForQuery());
@@ -348,24 +300,147 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 			if (value != null)
 			{
 				value = cacheCloneEntity(value);
-				cachePut(getCache(), toCacheKey(value.getId()), value);
+				this.cache.put(toCacheKey(value.getId()), value);
 			}
 		}
 	}
 
 	protected void cacheEvict(ID id)
 	{
-		if (!cacheEnabled())
+		if (!isCacheEnabled())
 			return;
 
-		cacheEvict(getCache(), toCacheKey(id));
+		this.cache.evictImmediately(toCacheKey(id));
 	}
 
 	protected void cacheInvalidate()
 	{
-		if (!cacheEnabled())
+		if (!isCacheEnabled())
 			return;
 
-		cacheInvalidate(getCache());
+		this.cache.invalidate();
+	}
+
+	protected boolean isCacheEnabled()
+	{
+		return (this.cache != null && this.cache.isEnable());
+	}
+
+	/**
+	 * 克隆缓存实体。
+	 * <p>
+	 * 参考{@linkplain #cacheGet(Object)}、{@linkplain #cachePut(Object, Entity)}、{@linkplain #cachePutQueryResult(List)}。
+	 * </p>
+	 * <p>
+	 * 如果{@linkplain #getCache()}的{@linkplain ServiceCache#isSerialized()}为{@code false}（比如进程内缓存），应遵循{@linkplain CloneableEntity#clone()}规则；
+	 * 否则，可直接返回原实体。
+	 * </p>
+	 * <p>
+	 * 此方法默认是现是：当需要克隆时，如果{@code value}是{@linkplain CloneableEntity}，则返回{@linkplain CloneableEntity#clone()}，否则，返回原对象。
+	 * </p>
+	 * <p>
+	 * 调用此方法前应确保{@linkplain #isCacheEnabled()}为{@code true}。
+	 * </p>
+	 * 
+	 * @param value
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	protected T cacheCloneEntity(T value)
+	{
+		if (this.cache.isSerialized())
+			return value;
+
+		if (value instanceof CloneableEntity)
+			return (T) ((CloneableEntity) value).clone();
+
+		return value;
+	}
+
+	/**
+	 * 获取指定实体ID的缓存关键字。
+	 * <p>
+	 * 调用此方法前应确保{@linkplain #isCacheEnabled()}为{@code true}。
+	 * </p>
+	 * 
+	 * @param id
+	 * @return
+	 */
+	protected Object toCacheKey(ID id)
+	{
+		if (this.cache.isShared())
+			return new GlobalEntityCacheKey<ID>(getSqlNamespace(), id);
+		else
+			return id;
+	}
+
+	/**
+	 * 全局实体缓存KEY。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 * @param <ID>
+	 */
+	protected static class GlobalEntityCacheKey<ID> implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private final String namespace;
+
+		private final ID id;
+
+		public GlobalEntityCacheKey(String namespace, ID id)
+		{
+			super();
+			this.namespace = namespace;
+			this.id = id;
+		}
+
+		public String getNamespace()
+		{
+			return namespace;
+		}
+
+		public ID getId()
+		{
+			return id;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((id == null) ? 0 : id.hashCode());
+			result = prime * result + ((namespace == null) ? 0 : namespace.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			GlobalEntityCacheKey<?> other = (GlobalEntityCacheKey<?>) obj;
+			if (id == null)
+			{
+				if (other.id != null)
+					return false;
+			}
+			else if (!id.equals(other.id))
+				return false;
+			if (namespace == null)
+			{
+				if (other.namespace != null)
+					return false;
+			}
+			else if (!namespace.equals(other.namespace))
+				return false;
+			return true;
+		}
 	}
 }

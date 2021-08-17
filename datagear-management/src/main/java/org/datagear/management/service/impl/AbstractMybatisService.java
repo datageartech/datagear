@@ -22,8 +22,6 @@ import org.datagear.persistence.Query;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.support.SqlSessionDaoSupport;
-import org.springframework.cache.Cache;
-import org.springframework.cache.Cache.ValueWrapper;
 
 /**
  * 抽象基于Mybatis的服务类。
@@ -722,38 +720,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected Map<String, Object> buildParamMap()
 	{
 		return new HashMap<>();
-	}
-
-	protected ValueWrapper cacheGet(Cache cache, Object key)
-	{
-		if (cache == null)
-			return null;
-
-		return cache.get(key);
-	}
-
-	protected void cachePut(Cache cache, Object key, Object value)
-	{
-		if (cache == null)
-			return;
-
-		cache.put(key, value);
-	}
-
-	protected void cacheEvict(Cache cache, Object key)
-	{
-		if (cache == null)
-			return;
-
-		cache.evict(key);
-	}
-
-	protected void cacheInvalidate(Cache cache)
-	{
-		if (cache == null)
-			return;
-
-		cache.invalidate();
 	}
 
 	/**

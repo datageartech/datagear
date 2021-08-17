@@ -7,7 +7,6 @@
 
 package org.datagear.management.service.impl;
 
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -123,22 +122,6 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	}
 
 	@Override
-	protected boolean add(HtmlTplDashboardWidgetEntity entity, Map<String, Object> params)
-	{
-		boolean success = super.add(entity, params);
-
-		return success;
-	}
-
-	@Override
-	protected boolean update(HtmlTplDashboardWidgetEntity entity, Map<String, Object> params)
-	{
-		boolean success = super.update(entity, params);
-
-		return success;
-	}
-
-	@Override
 	protected boolean deleteById(String id, Map<String, Object> params)
 	{
 		boolean deleted = super.deleteById(id, params);
@@ -150,13 +133,6 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		}
 
 		return deleted;
-	}
-
-	@Override
-	protected void postProcessQuery(List<HtmlTplDashboardWidgetEntity> list)
-	{
-		// XXX 查询操作仅用于展示，不必完全加载
-		// super.postProcessSelects(list);
 	}
 
 	@Override

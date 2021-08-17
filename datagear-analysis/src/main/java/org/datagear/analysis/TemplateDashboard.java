@@ -15,6 +15,8 @@ package org.datagear.analysis;
  */
 public class TemplateDashboard extends Dashboard
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 模板 */
 	private String template;
 

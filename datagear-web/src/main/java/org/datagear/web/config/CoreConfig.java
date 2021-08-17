@@ -55,6 +55,7 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.DataSetResDirectoryService;
+import org.datagear.management.service.EntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
@@ -73,6 +74,7 @@ import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceI
 import org.datagear.management.service.impl.RoleServiceImpl;
 import org.datagear.management.service.impl.RoleUserServiceImpl;
 import org.datagear.management.service.impl.SchemaServiceImpl;
+import org.datagear.management.service.impl.ServiceCache;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
 import org.datagear.management.service.impl.UserServiceImpl;
@@ -110,7 +112,6 @@ import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
@@ -757,11 +758,11 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 			for (AbstractMybatisEntityService es : entityServices.values())
 			{
-				es.setCache(getEntityCacheBySimpleName(cacheManager, es.getClass()));
+				es.setCache(getServiceCache(cacheManager, es.getClass()));
 
 				if (es instanceof AbstractMybatisDataPermissionEntityService<?, ?>)
 					((AbstractMybatisDataPermissionEntityService<?, ?>) es)
-							.setPermissionCache(getPermissionCacheBySimpleName(cacheManager, es.getClass()));
+							.setPermissionCache(getPermissionServiceCache(cacheManager, es.getClass()));
 			}
 		}
 
@@ -773,13 +774,27 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		}
 	}
 
-	protected Cache getEntityCacheBySimpleName(CacheManager cacheManager, Class<?> clazz)
+	@SuppressWarnings("rawtypes")
+	protected ServiceCache getServiceCache(CacheManager cacheManager,
+			Class<? extends EntityService> clazz)
 	{
-		return cacheManager.getCache(clazz.getSimpleName());
+		return getServiceCache(cacheManager, clazz.getSimpleName());
 	}
 
-	protected Cache getPermissionCacheBySimpleName(CacheManager cacheManager, Class<?> clazz)
+	@SuppressWarnings("rawtypes")
+	protected ServiceCache getPermissionServiceCache(CacheManager cacheManager,
+			Class<? extends EntityService> clazz)
 	{
-		return cacheManager.getCache(clazz.getSimpleName() + "Permission");
+		return getServiceCache(cacheManager, clazz.getSimpleName() + "Permission");
+	}
+
+	protected ServiceCache getServiceCache(CacheManager cacheManager, String name)
+	{
+		ServiceCache cache = new ServiceCache(cacheManager.getCache(name));
+
+		cache.setDisabled(environment.getProperty("service.cache.disabled", Boolean.class, false));
+		cache.setDisabled(environment.getProperty("service.cache.serialized", Boolean.class, false));
+
+		return cache;
 	}
 }
