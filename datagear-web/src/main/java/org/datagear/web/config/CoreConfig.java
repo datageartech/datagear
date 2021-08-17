@@ -55,7 +55,6 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.DataSetResDirectoryService;
-import org.datagear.management.service.EntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
@@ -74,7 +73,6 @@ import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceI
 import org.datagear.management.service.impl.RoleServiceImpl;
 import org.datagear.management.service.impl.RoleUserServiceImpl;
 import org.datagear.management.service.impl.SchemaServiceImpl;
-import org.datagear.management.service.impl.ServiceCache;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
 import org.datagear.management.service.impl.UserServiceImpl;
@@ -112,7 +110,6 @@ import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -145,13 +142,16 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 	private DataSourceConfig dataSourceConfig;
 
+	private ServiceCacheConfig serviceCacheConfig;
+
 	private Environment environment;
 
 	@Autowired
-	public CoreConfig(DataSourceConfig dataSourceConfig, Environment environment)
+	public CoreConfig(DataSourceConfig dataSourceConfig, ServiceCacheConfig serviceCacheConfig, Environment environment)
 	{
 		super();
 		this.dataSourceConfig = dataSourceConfig;
+		this.serviceCacheConfig = serviceCacheConfig;
 		this.environment = environment;
 	}
 
@@ -163,6 +163,16 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public void setDataSourceConfig(DataSourceConfig dataSourceConfig)
 	{
 		this.dataSourceConfig = dataSourceConfig;
+	}
+
+	public ServiceCacheConfig getServiceCacheConfig()
+	{
+		return serviceCacheConfig;
+	}
+
+	public void setServiceCacheConfig(ServiceCacheConfig serviceCacheConfig)
+	{
+		this.serviceCacheConfig = serviceCacheConfig;
 	}
 
 	public Environment getEnvironment()
@@ -734,68 +744,50 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		return bean;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		ApplicationContext context = event.getApplicationContext();
 
-		// 初始化this.authorizationResourceServices()
+		initAuthorizationResourceServices(context);
+		initServiceCaches(context);
+		initDevotedDataExchangeServices(context);
+	}
+
+	@SuppressWarnings("rawtypes")
+	protected void initAuthorizationResourceServices(ApplicationContext context)
+	{
+		Map<String, DataPermissionEntityService> dataPermissionEntityServices = context
+				.getBeansOfType(DataPermissionEntityService.class);
+
+		List<DataPermissionEntityService<?, ?>> resourceServices = this.authorizationResourceServices();
+		for (DataPermissionEntityService<?, ?> dps : dataPermissionEntityServices.values())
+			resourceServices.add(dps);
+	}
+
+	@SuppressWarnings("rawtypes")
+	protected void initServiceCaches(ApplicationContext context)
+	{
+		Map<String, AbstractMybatisEntityService> entityServices = context
+				.getBeansOfType(AbstractMybatisEntityService.class);
+
+		for (AbstractMybatisEntityService es : entityServices.values())
 		{
-			Map<String, DataPermissionEntityService> dataPermissionEntityServices = context
-					.getBeansOfType(DataPermissionEntityService.class);
+			es.setCache(this.serviceCacheConfig.getServiceCache(es.getClass()));
 
-			List<DataPermissionEntityService<?, ?>> resourceServices = this.authorizationResourceServices();
-			for (DataPermissionEntityService<?, ?> dps : dataPermissionEntityServices.values())
-				resourceServices.add(dps);
-		}
-
-		// 初始化缓存
-		{
-			CacheManager cacheManager = context.getBean(CacheManager.class);
-
-			Map<String, AbstractMybatisEntityService> entityServices = context
-					.getBeansOfType(AbstractMybatisEntityService.class);
-
-			for (AbstractMybatisEntityService es : entityServices.values())
+			if (es instanceof AbstractMybatisDataPermissionEntityService<?, ?>)
 			{
-				es.setCache(getServiceCache(cacheManager, es.getClass()));
-
-				if (es instanceof AbstractMybatisDataPermissionEntityService<?, ?>)
-					((AbstractMybatisDataPermissionEntityService<?, ?>) es)
-							.setPermissionCache(getPermissionServiceCache(cacheManager, es.getClass()));
+				((AbstractMybatisDataPermissionEntityService<?, ?>) es)
+						.setPermissionCache(this.serviceCacheConfig.getPermissionServiceCache(es.getClass()));
 			}
 		}
+	}
 
+	protected void initDevotedDataExchangeServices(ApplicationContext context)
+	{
 		// 处理循环依赖
-		{
-			List<DevotedDataExchangeService<?>> devotedDataExchangeServices = this.devotedDataExchangeServices();
-			devotedDataExchangeServices.add(this.batchDataExchangeService());
-			this.dataExchangeService().setDevotedDataExchangeServices(devotedDataExchangeServices);
-		}
-	}
-
-	@SuppressWarnings("rawtypes")
-	protected ServiceCache getServiceCache(CacheManager cacheManager,
-			Class<? extends EntityService> clazz)
-	{
-		return getServiceCache(cacheManager, clazz.getSimpleName());
-	}
-
-	@SuppressWarnings("rawtypes")
-	protected ServiceCache getPermissionServiceCache(CacheManager cacheManager,
-			Class<? extends EntityService> clazz)
-	{
-		return getServiceCache(cacheManager, clazz.getSimpleName() + "Permission");
-	}
-
-	protected ServiceCache getServiceCache(CacheManager cacheManager, String name)
-	{
-		ServiceCache cache = new ServiceCache(cacheManager.getCache(name));
-
-		cache.setDisabled(environment.getProperty("service.cache.disabled", Boolean.class, false));
-		cache.setDisabled(environment.getProperty("service.cache.serialized", Boolean.class, false));
-
-		return cache;
+		List<DevotedDataExchangeService<?>> devotedDataExchangeServices = this.devotedDataExchangeServices();
+		devotedDataExchangeServices.add(this.batchDataExchangeService());
+		this.dataExchangeService().setDevotedDataExchangeServices(devotedDataExchangeServices);
 	}
 }
