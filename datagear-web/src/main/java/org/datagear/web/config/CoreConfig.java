@@ -470,7 +470,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public SchemaService schemaService()
 	{
 		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
-				this.driverEntityManager(), this.authorizationService());
+				this.authorizationService(), this.driverEntityManager());
 
 		return bean;
 	}
@@ -503,7 +503,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public DataSetEntityService dataSetEntityService()
 	{
 		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
-				this.connectionSource(), this.schemaService(), this.authorizationService(), this.dataSetRootDirectory(),
+				this.authorizationService(), this.connectionSource(), this.schemaService(), this.dataSetRootDirectory(),
 				this.httpClient());
 
 		return bean;
@@ -544,8 +544,8 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public HtmlChartWidgetEntityService htmlChartWidgetEntityService()
 	{
 		HtmlChartWidgetEntityServiceImpl bean = new HtmlChartWidgetEntityServiceImpl(this.sqlSessionFactory(),
-				this.mbSqlDialect(), this.directoryHtmlChartPluginManager(), this.dataSetEntityService(),
-				this.authorizationService());
+				this.mbSqlDialect(), this.authorizationService(), this.directoryHtmlChartPluginManager(),
+				this.dataSetEntityService());
 
 		return bean;
 	}
@@ -652,8 +652,8 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService()
 	{
 		HtmlTplDashboardWidgetEntityServiceImpl bean = new HtmlTplDashboardWidgetEntityServiceImpl(
-				this.sqlSessionFactory(), this.mbSqlDialect(), this.htmlTplDashboardWidgetRenderer(),
-				this.authorizationService());
+				this.sqlSessionFactory(), this.mbSqlDialect(), this.authorizationService(),
+				this.htmlTplDashboardWidgetRenderer());
 
 		return bean;
 	}
@@ -661,7 +661,8 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public AnalysisProjectService analysisProjectService()
 	{
-		AnalysisProjectService bean = new AnalysisProjectServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
+		AnalysisProjectService bean = new AnalysisProjectServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
+				this.authorizationService());
 		return bean;
 	}
 
@@ -669,7 +670,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public DataSetResDirectoryService dataSetResDirectoryService()
 	{
 		DataSetResDirectoryService bean = new DataSetResDirectoryServiceImpl(this.sqlSessionFactory(),
-				this.mbSqlDialect());
+				this.mbSqlDialect(), this.authorizationService());
 		return bean;
 	}
 

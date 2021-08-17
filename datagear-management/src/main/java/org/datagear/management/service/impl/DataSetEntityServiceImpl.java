@@ -57,8 +57,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	private SchemaService schemaService;
 
-	private AuthorizationService authorizationService;
-
 	/** 数据集文件存储根目录 */
 	private File dataSetRootDirectory;
 
@@ -70,25 +68,25 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	public DataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
-			ConnectionSource connectionSource, SchemaService schemaService, AuthorizationService authorizationService,
+			AuthorizationService authorizationService,
+			ConnectionSource connectionSource, SchemaService schemaService,
 			File dataSetRootDirectory, HttpClient httpClient)
 	{
-		super(sqlSessionFactory, dialect);
+		super(sqlSessionFactory, dialect, authorizationService);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
-		this.authorizationService = authorizationService;
 		setDataSetRootDirectory(dataSetRootDirectory);
 		this.httpClient = httpClient;
 	}
 
 	public DataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
-			ConnectionSource connectionSource, SchemaService schemaService, AuthorizationService authorizationService,
+			AuthorizationService authorizationService,
+			ConnectionSource connectionSource, SchemaService schemaService,
 			File dataSetRootDirectory, HttpClient httpClient)
 	{
-		super(sqlSessionTemplate, dialect);
+		super(sqlSessionTemplate, dialect, authorizationService);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
-		this.authorizationService = authorizationService;
 		setDataSetRootDirectory(dataSetRootDirectory);
 		this.httpClient = httpClient;
 	}
@@ -111,16 +109,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	public void setSchemaService(SchemaService schemaService)
 	{
 		this.schemaService = schemaService;
-	}
-
-	public AuthorizationService getAuthorizationService()
-	{
-		return authorizationService;
-	}
-
-	public void setAuthorizationService(AuthorizationService authorizationService)
-	{
-		this.authorizationService = authorizationService;
 	}
 
 	public File getDataSetRootDirectory()
@@ -413,19 +401,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		return entity;
 	}
 
-	@Override
-	protected boolean deleteById(String id, Map<String, Object> params)
-	{
-		boolean deleted = super.deleteById(id, params);
-
-		if (deleted)
-		{
-			this.authorizationService.deleteByResource(SqlDataSetEntity.AUTHORIZATION_RESOURCE_TYPE, id);
-		}
-
-		return deleted;
-	}
-
 	protected void inflateParamsAndProperties(DataSetEntity dataSetEntity)
 	{
 		if (dataSetEntity == null)
@@ -528,9 +503,9 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
+		super.addDataPermissionParameters(params, user);
 		params.put(AnalysisProjectAwareEntity.DATA_PERMISSION_PARAM_RESOURCE_TYPE_ANALYSIS_PROJECT,
 				AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
-		addDataPermissionParameters(params, user, getResourceType(), true);
 	}
 
 	@Override

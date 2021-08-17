@@ -13,6 +13,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
+import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -33,14 +34,16 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 		super();
 	}
 
-	public AnalysisProjectServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
+	public AnalysisProjectServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
+			AuthorizationService authorizationService)
 	{
-		super(sqlSessionFactory, dialect);
+		super(sqlSessionFactory, dialect, authorizationService);
 	}
 
-	public AnalysisProjectServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
+	public AnalysisProjectServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
+			AuthorizationService authorizationService)
 	{
-		super(sqlSessionTemplate, dialect);
+		super(sqlSessionTemplate, dialect, authorizationService);
 	}
 
 	@Override
@@ -77,12 +80,6 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 	{
 		if (isBlank(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalArgumentException();
-	}
-
-	@Override
-	protected void addDataPermissionParameters(Map<String, Object> params, User user)
-	{
-		addDataPermissionParameters(params, user, getResourceType(), true);
 	}
 
 	@Override

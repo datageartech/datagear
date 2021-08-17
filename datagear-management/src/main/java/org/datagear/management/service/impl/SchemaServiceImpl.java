@@ -33,27 +33,25 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 
 	private DriverEntityManager driverEntityManager;
 
-	private AuthorizationService authorizationService;
-
 	public SchemaServiceImpl()
 	{
 		super();
 	}
 
 	public SchemaServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
-			DriverEntityManager driverEntityManager, AuthorizationService authorizationService)
+			AuthorizationService authorizationService,
+			DriverEntityManager driverEntityManager)
 	{
-		super(sqlSessionFactory, dialect);
+		super(sqlSessionFactory, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
-		this.authorizationService = authorizationService;
 	}
 
 	public SchemaServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
-			DriverEntityManager driverEntityManager, AuthorizationService authorizationService)
+			AuthorizationService authorizationService,
+			DriverEntityManager driverEntityManager)
 	{
-		super(sqlSessionTemplate, dialect);
+		super(sqlSessionTemplate, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
-		this.authorizationService = authorizationService;
 	}
 
 	public DriverEntityManager getDriverEntityManager()
@@ -64,16 +62,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public void setDriverEntityManager(DriverEntityManager driverEntityManager)
 	{
 		this.driverEntityManager = driverEntityManager;
-	}
-
-	public AuthorizationService getAuthorizationService()
-	{
-		return authorizationService;
-	}
-
-	public void setAuthorizationService(AuthorizationService authorizationService)
-	{
-		this.authorizationService = authorizationService;
 	}
 
 	@Override
@@ -102,17 +90,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public Schema getByStringId(User user, String id) throws PermissionDeniedException
 	{
 		return super.getById(user, id);
-	}
-
-	@Override
-	protected boolean deleteById(String id, Map<String, Object> params)
-	{
-		boolean deleted = super.deleteById(id, params);
-
-		if (deleted)
-			this.authorizationService.deleteByResource(Schema.AUTHORIZATION_RESOURCE_TYPE, id);
-
-		return deleted;
 	}
 
 	@Override
@@ -174,12 +151,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	{
 		// TODO 新增数据源管控功能，管理员可设置URL白/黑名单，只允许新建名单允许的数据源
 		// throw new SaveSchemaUrlPermissionDeniedException();
-	}
-
-	@Override
-	protected void addDataPermissionParameters(Map<String, Object> params, User user)
-	{
-		addDataPermissionParameters(params, user, getResourceType(), true);
 	}
 
 	@Override

@@ -37,27 +37,25 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 
 	private HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer;
 
-	private AuthorizationService authorizationService;
-
 	public HtmlTplDashboardWidgetEntityServiceImpl()
 	{
 		super();
 	}
 
 	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
-			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer, AuthorizationService authorizationService)
+			AuthorizationService authorizationService,
+			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer)
 	{
-		super(sqlSessionFactory, dialect);
+		super(sqlSessionFactory, dialect, authorizationService);
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
-		this.authorizationService = authorizationService;
 	}
 
 	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
-			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer, AuthorizationService authorizationService)
+			AuthorizationService authorizationService,
+			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer)
 	{
-		super(sqlSessionTemplate, dialect);
+		super(sqlSessionTemplate, dialect, authorizationService);
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
-		this.authorizationService = authorizationService;
 	}
 
 	@Override
@@ -69,16 +67,6 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	public void setHtmlTplDashboardWidgetRenderer(HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer)
 	{
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
-	}
-
-	public AuthorizationService getAuthorizationService()
-	{
-		return authorizationService;
-	}
-
-	public void setAuthorizationService(AuthorizationService authorizationService)
-	{
-		this.authorizationService = authorizationService;
 	}
 
 	@Override
@@ -127,10 +115,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		boolean deleted = super.deleteById(id, params);
 
 		if (deleted)
-		{
-			this.authorizationService.deleteByResource(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE, id);
 			this.htmlTplDashboardWidgetRenderer.getTemplateDashboardWidgetResManager().delete(id);
-		}
 
 		return deleted;
 	}
@@ -145,9 +130,9 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
+		super.addDataPermissionParameters(params, user);
 		params.put(AnalysisProjectAwareEntity.DATA_PERMISSION_PARAM_RESOURCE_TYPE_ANALYSIS_PROJECT,
 				AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
-		addDataPermissionParameters(params, user, getResourceType(), true);
 	}
 
 	@Override

@@ -60,31 +60,27 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	private DataSetEntityService dataSetEntityService;
 
-	private AuthorizationService authorizationService;
-
 	public HtmlChartWidgetEntityServiceImpl()
 	{
 		super();
 	}
 
 	public HtmlChartWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
-			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService,
-			AuthorizationService authorizationService)
+			AuthorizationService authorizationService,
+			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService)
 	{
-		super(sqlSessionFactory, dialect);
+		super(sqlSessionFactory, dialect, authorizationService);
 		this.chartPluginManager = chartPluginManager;
 		this.dataSetEntityService = dataSetEntityService;
-		this.authorizationService = authorizationService;
 	}
 
 	public HtmlChartWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
-			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService,
-			AuthorizationService authorizationService)
+			AuthorizationService authorizationService,
+			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService)
 	{
-		super(sqlSessionTemplate, dialect);
+		super(sqlSessionTemplate, dialect, authorizationService);
 		this.chartPluginManager = chartPluginManager;
 		this.dataSetEntityService = dataSetEntityService;
-		this.authorizationService = authorizationService;
 	}
 
 	public ChartPluginManager getChartPluginManager()
@@ -105,16 +101,6 @@ public class HtmlChartWidgetEntityServiceImpl
 	public void setDataSetEntityService(DataSetEntityService dataSetEntityService)
 	{
 		this.dataSetEntityService = dataSetEntityService;
-	}
-
-	public AuthorizationService getAuthorizationService()
-	{
-		return authorizationService;
-	}
-
-	public void setAuthorizationService(AuthorizationService authorizationService)
-	{
-		this.authorizationService = authorizationService;
 	}
 
 	@Override
@@ -213,17 +199,6 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@Override
-	protected boolean deleteById(String id, Map<String, Object> params)
-	{
-		boolean deleted = super.deleteById(id, params);
-
-		if (deleted)
-			this.authorizationService.deleteByResource(HtmlChartWidgetEntity.AUTHORIZATION_RESOURCE_TYPE, id);
-
-		return deleted;
-	}
-
-	@Override
 	protected HtmlChartWidgetEntity getByIdFromDB(String id, Map<String, Object> params)
 	{
 		HtmlChartWidgetEntity entity = super.getByIdFromDB(id, params);
@@ -264,9 +239,9 @@ public class HtmlChartWidgetEntityServiceImpl
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
+		super.addDataPermissionParameters(params, user);
 		params.put(AnalysisProjectAwareEntity.DATA_PERMISSION_PARAM_RESOURCE_TYPE_ANALYSIS_PROJECT,
 				AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
-		addDataPermissionParameters(params, user, getResourceType(), true);
 	}
 
 	@Override

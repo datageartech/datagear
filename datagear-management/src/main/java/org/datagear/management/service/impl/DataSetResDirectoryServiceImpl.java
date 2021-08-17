@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.DataSetResDirectory;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -33,14 +34,16 @@ public class DataSetResDirectoryServiceImpl extends
 		super();
 	}
 
-	public DataSetResDirectoryServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
+	public DataSetResDirectoryServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
+			AuthorizationService authorizationService)
 	{
-		super(sqlSessionFactory, dialect);
+		super(sqlSessionFactory, dialect, authorizationService);
 	}
 
-	public DataSetResDirectoryServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
+	public DataSetResDirectoryServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
+			AuthorizationService authorizationService)
 	{
-		super(sqlSessionTemplate, dialect);
+		super(sqlSessionTemplate, dialect, authorizationService);
 	}
 
 	@Override
@@ -77,12 +80,6 @@ public class DataSetResDirectoryServiceImpl extends
 	{
 		if (isBlank(entity.getId()) || isBlank(entity.getDirectory()))
 			throw new IllegalArgumentException();
-	}
-
-	@Override
-	protected void addDataPermissionParameters(Map<String, Object> params, User user)
-	{
-		addDataPermissionParameters(params, user, getResourceType(), true);
 	}
 
 	@Override

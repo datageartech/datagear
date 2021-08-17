@@ -22,6 +22,7 @@ import org.datagear.management.domain.DataIdPermission;
 import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectAwareEntityService;
+import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -41,6 +42,8 @@ import org.springframework.cache.Cache.ValueWrapper;
 public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends DataPermissionEntity<ID>>
 		extends AbstractMybatisEntityService<ID, T> implements DataPermissionEntityService<ID, T>
 {
+	private AuthorizationService authorizationService;
+
 	private ServiceCache permissionCache;
 
 	public AbstractMybatisDataPermissionEntityService()
@@ -48,14 +51,18 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		super();
 	}
 
-	public AbstractMybatisDataPermissionEntityService(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
+	public AbstractMybatisDataPermissionEntityService(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
+			AuthorizationService authorizationService)
 	{
 		super(sqlSessionFactory, dialect);
+		this.authorizationService = authorizationService;
 	}
 
-	public AbstractMybatisDataPermissionEntityService(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
+	public AbstractMybatisDataPermissionEntityService(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
+			AuthorizationService authorizationService)
 	{
 		super(sqlSessionTemplate, dialect);
+		this.authorizationService = authorizationService;
 	}
 
 	public ServiceCache getPermissionCache()
@@ -221,6 +228,13 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		return pagingQuery(pagingQuery, params);
 	}
 
+	@Override
+	public void permissionUpdated(String... ids)
+	{
+		for (String id : ids)
+			this.permissionCache.evictImmediately(toPermissionCacheKeyOfStr(id));
+	}
+
 	protected void setDataFilterParam(Map<String, Object> params, String dataFilter)
 	{
 		if (!StringUtil.isEmpty(dataFilter))
@@ -238,6 +252,17 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			params.put(AnalysisProjectAwareEntityService.QUERY_PARAM_ANALYSIS_PROJECT_ID, analysisProjectId);
 
 		return pagingQuery(pagingQuery, params);
+	}
+
+	@Override
+	protected boolean deleteById(ID id, Map<String, Object> params)
+	{
+		boolean deleted = super.deleteById(id, params);
+
+		if (deleted)
+			this.authorizationService.deleteByResource(getResourceType(), id.toString());
+
+		return deleted;
 	}
 
 	/**
@@ -400,8 +425,23 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 */
 	protected Object toPermissionCacheKey(ID id)
 	{
+		String idStr = (id == null ? null : id.toString());
+		return toPermissionCacheKeyOfStr(idStr);
+	}
+
+	/**
+	 * 获取指定实体ID的权限缓存关键字。
+	 * <p>
+	 * 调用此方法前应确保{@linkplain #isPermissionCacheEnabled()}为{@code true}。
+	 * </p>
+	 * 
+	 * @param id
+	 * @return
+	 */
+	protected Object toPermissionCacheKeyOfStr(String id)
+	{
 		if (this.permissionCache.isShared())
-			return new GlobalEntityCacheKey<ID>(getSqlNamespace() + "Permission", id);
+			return new GlobalEntityCacheKey<String>(getSqlNamespace() + "Permission", id);
 		else
 			return id;
 	}
@@ -413,11 +453,21 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 	/**
 	 * 添加数据权限SQL参数。
+	 * <p>
+	 * 子类可以重写此方法重新设置数据权限SQL参数。
+	 * </p>
+	 * <p>
+	 * 此方法默认实现是：调用{@linkplain #addDataPermissionParameters(Map, User, String, boolean)}，
+	 * 其中，{@code resourceType}为{@linkplain #getResourceType()}、{@code resourceHasCreator}为{@code true}。
+	 * </p>
 	 * 
 	 * @param params
 	 * @param user
 	 */
-	protected abstract void addDataPermissionParameters(Map<String, Object> params, User user);
+	protected void addDataPermissionParameters(Map<String, Object> params, User user)
+	{
+		addDataPermissionParameters(params, user, getResourceType(), true);
+	}
 
 	/**
 	 * 添加数据权限SQL参数。

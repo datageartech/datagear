@@ -63,24 +63,34 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 	}
 
 	@Override
+	public boolean add(Authorization entity)
+	{
+		boolean re = super.add(entity);
+
+		if (re)
+			permissionUpdated(entity.getResourceType(), entity.getResource());
+
+		return re;
+	}
+
+	@Override
+	public boolean deleteById(String id)
+	{
+		Authorization authorization = getById(id);
+
+		if (authorization != null)
+			permissionUpdated(authorization.getResourceType(), authorization.getResource());
+
+		return super.deleteById(id);
+	}
+
+	@Override
 	public boolean isAllowAuthorization(User user, String resourceType, String resourceId)
 	{
 		if (isEmpty(resourceId) || isEmpty(resourceType))
 			throw new IllegalArgumentException();
 
-		DataPermissionEntityService<?, ?> resourceService = null;
-
-		if (this.resourceServices != null)
-		{
-			for (DataPermissionEntityService<?, ?> rs : this.resourceServices)
-			{
-				if (resourceType.equals(rs.getResourceType()))
-				{
-					resourceService = rs;
-					break;
-				}
-			}
-		}
+		DataPermissionEntityService<?, ?> resourceService = getResourceService(resourceType);
 
 		if (resourceService == null)
 			return false;
@@ -101,7 +111,12 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 		params.put("resource", resource);
 		params.put("ids", ids);
 
-		return updateMybatis("deleteByIdsForResource", params);
+		int count = updateMybatis("deleteByIdsForResource", params);
+
+		if (count > 0)
+			permissionUpdated(resourceType, resource);
+
+		return count;
 	}
 
 	@Override
@@ -111,7 +126,12 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 		params.put("resourceType", resourceType);
 		params.put("resources", resources);
 
-		return updateMybatis("deleteByResource", params);
+		int count = updateMybatis("deleteByResource", params);
+
+		if (count > 0)
+			permissionUpdated(resourceType, resources);
+
+		return count;
 	}
 
 	@Override
@@ -141,6 +161,39 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 		params.put("queryContext", context);
 
 		return context;
+	}
+
+	protected void permissionUpdated(String resourceType, String... resources)
+	{
+		DataPermissionEntityService<?, ?> resourceService = getResourceService(resourceType);
+
+		if (resourceService != null)
+			resourceService.permissionUpdated(resources);
+	}
+
+	/**
+	 * 获取指定类型的资源服务。
+	 * 
+	 * @param resourceType
+	 * @return 可能为{@code null}
+	 */
+	protected DataPermissionEntityService<?, ?> getResourceService(String resourceType)
+	{
+		DataPermissionEntityService<?, ?> resourceService = null;
+
+		if (this.resourceServices != null)
+		{
+			for (DataPermissionEntityService<?, ?> rs : this.resourceServices)
+			{
+				if (resourceType.equals(rs.getResourceType()))
+				{
+					resourceService = rs;
+					break;
+				}
+			}
+		}
+
+		return resourceService;
 	}
 
 	@Override

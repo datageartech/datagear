@@ -147,16 +147,6 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	T getById(User user, ID id) throws PermissionDeniedException;
 
 	/**
-	 * 授权根据ID获取。
-	 * 
-	 * @param user
-	 * @param id
-	 * @return
-	 * @throws PermissionDeniedException
-	 */
-	T getByStringId(User user, String id) throws PermissionDeniedException;
-
-	/**
 	 * 授权根据ID获取，并用于编辑操作。
 	 * 
 	 * @param user
@@ -197,4 +187,24 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	 * @return
 	 */
 	PagingData<T> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter);
+
+	/**
+	 * 授权根据ID获取。
+	 * 
+	 * @param user
+	 * @param id
+	 * @return
+	 * @throws PermissionDeniedException
+	 */
+	T getByStringId(User user, String id) throws PermissionDeniedException;
+
+	/**
+	 * 指定ID的实体权限更新事件通知。
+	 * <p>
+	 * 此方法通常用于清除、或者重新加载权限缓存。
+	 * </p>
+	 * 
+	 * @param ids
+	 */
+	void permissionUpdated(String... ids);
 }
