@@ -22,6 +22,8 @@ import org.datagear.util.i18n.Label;
  */
 public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 {
+	private static final long serialVersionUID = 1L;
+
 	private String chartAttributeName;
 
 	public AttributeValueHtmlChartPlugin()

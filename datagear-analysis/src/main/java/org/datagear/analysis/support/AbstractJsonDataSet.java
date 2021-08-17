@@ -42,6 +42,8 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
  */
 public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final DataSetFmkTemplateResolver JSON_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver(
 			JsonOutputFormat.INSTANCE);
 

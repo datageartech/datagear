@@ -169,6 +169,8 @@ public class JsonChartPluginPropertiesResolverTest
 
 	private static class TestChartPlugin extends AbstractChartPlugin
 	{
+		private static final long serialVersionUID = 1L;
+
 		public TestChartPlugin()
 		{
 			super();

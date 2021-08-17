@@ -71,6 +71,8 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 	 */
 	protected static class HtmlTplDashboardJson extends HtmlTplDashboard
 	{
+		private static final long serialVersionUID = 1L;
+
 		@SuppressWarnings("unchecked")
 		public HtmlTplDashboardJson(HtmlTplDashboard dashboard, String renderContextVarName)
 		{
@@ -89,6 +91,8 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 	 */
 	protected static class TemplateDashboardWidgetJson extends HtmlTplDashboardWidget
 	{
+		private static final long serialVersionUID = 1L;
+
 		public TemplateDashboardWidgetJson(HtmlTplDashboardWidget dashboardWidget)
 		{
 			super(dashboardWidget.getId(), dashboardWidget.getTemplates(), null);

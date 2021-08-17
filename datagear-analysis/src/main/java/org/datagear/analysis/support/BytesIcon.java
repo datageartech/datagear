@@ -25,6 +25,8 @@ import org.datagear.util.IOUtil;
  */
 public class BytesIcon implements Icon
 {
+	private static final long serialVersionUID = 1L;
+
 	private String type;
 
 	private byte[] bytes;

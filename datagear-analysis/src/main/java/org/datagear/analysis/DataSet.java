@@ -7,6 +7,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public interface DataSet extends Identifiable
+public interface DataSet extends Identifiable, Serializable
 {
 	/**
 	 * 获取名称。

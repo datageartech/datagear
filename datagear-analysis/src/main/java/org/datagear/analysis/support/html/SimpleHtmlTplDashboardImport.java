@@ -7,6 +7,7 @@
 
 package org.datagear.analysis.support.html;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,8 +17,10 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public class SimpleHtmlTplDashboardImport implements HtmlTplDashboardImport
+public class SimpleHtmlTplDashboardImport implements HtmlTplDashboardImport, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private List<ImportItem> importItems = Collections.emptyList();
 
 	public SimpleHtmlTplDashboardImport()

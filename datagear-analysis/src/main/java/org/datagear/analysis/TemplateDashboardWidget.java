@@ -25,6 +25,8 @@ import org.datagear.util.StringUtil;
  */
 public abstract class TemplateDashboardWidget extends AbstractIdentifiable implements DashboardWidget
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final String DEFAULT_TEMPLATE_ENCODING = "UTF-8";
 
 	private String[] templates;

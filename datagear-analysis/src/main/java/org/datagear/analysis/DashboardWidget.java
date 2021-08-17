@@ -7,6 +7,8 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
+
 /**
  * 看板部件。
  * <p>
@@ -16,7 +18,7 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public interface DashboardWidget extends Identifiable
+public interface DashboardWidget extends Identifiable, Serializable
 {
 	/**
 	 * 渲染{@linkplain Dashboard}。

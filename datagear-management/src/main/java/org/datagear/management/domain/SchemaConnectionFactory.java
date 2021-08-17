@@ -7,6 +7,7 @@
 
 package org.datagear.management.domain;
 
+import java.io.Serializable;
 import java.sql.Connection;
 
 import org.datagear.connection.ConnectionSource;
@@ -20,9 +21,11 @@ import org.datagear.util.resource.ConnectionFactory;
  * @author datagear@163.com
  *
  */
-public class SchemaConnectionFactory extends SchemaConnectionSupport implements ConnectionFactory
+public class SchemaConnectionFactory extends SchemaConnectionSupport implements ConnectionFactory, Serializable
 {
-	private ConnectionSource connectionSource;
+	private static final long serialVersionUID = 1L;
+
+	private transient ConnectionSource connectionSource;
 
 	private Schema schema;
 

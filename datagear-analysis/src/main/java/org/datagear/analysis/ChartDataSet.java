@@ -7,6 +7,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -20,8 +21,10 @@ import java.util.Set;
  * @author datagear@163.com
  *
  */
-public class ChartDataSet
+public class ChartDataSet implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 数据集 */
 	private DataSet dataSet;
 

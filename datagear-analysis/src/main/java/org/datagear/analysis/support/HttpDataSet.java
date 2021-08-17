@@ -56,6 +56,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class HttpDataSet extends AbstractResolvableDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	protected static final Logger LOGGER = LoggerFactory.getLogger(HttpDataSet.class);
 
 	public static final String REQUEST_METHOD_GET = "GET";
@@ -91,7 +93,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	protected static final List<NameValuePair> NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON = new ArrayList<>(0);
 
 	/** HTTP客户端 */
-	private HttpClient httpClient;
+	private transient HttpClient httpClient;
 
 	/** HTTP请求地址 */
 	private String uri;
@@ -625,7 +627,9 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 	protected static class HttpResponseJsonDataSet extends AbstractJsonDataSet
 	{
-		private Reader responseJsonReader;
+		private static final long serialVersionUID = 1L;
+
+		private transient Reader responseJsonReader;
 
 		public HttpResponseJsonDataSet(Reader responseJsonReader)
 		{

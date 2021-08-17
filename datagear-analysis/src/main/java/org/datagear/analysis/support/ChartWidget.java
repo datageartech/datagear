@@ -7,6 +7,7 @@
 
 package org.datagear.analysis.support;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,8 +29,10 @@ import org.datagear.util.IDUtil;
  * @author datagear@163.com
  *
  */
-public class ChartWidget extends ChartDefinition
+public class ChartWidget extends ChartDefinition implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 图表部件渲染时的部件信息属性名 */
 	public static final String ATTR_CHART_WIDGET = "chartWidget";
 

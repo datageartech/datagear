@@ -135,6 +135,12 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 
 	/**
 	 * 获取实体。
+	 * <p>
+	 * 此方法先从缓存中获取实体，如果没有，则调用{@linkplain #getByIdFromDB(Object, Map)}从底层数据库获取。
+	 * </p>
+	 * <p>
+	 * 注意：在调用此方法获取实体后，应重新设置其引用的实体对象属性值，以保证它们是最新的。
+	 * </p>
 	 * 
 	 * @param id
 	 * @param params
@@ -227,7 +233,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	/**
 	 * 是否开启缓存。
 	 * <p>
-	 * 子类应注意是否需要重写{@linkplain #cacheCloneValue(Entity)}方法。
+	 * 子类应注意是否需要重写{@linkplain #cacheCloneEntity(Entity)}方法。
 	 * </p>
 	 * 
 	 * @return
@@ -238,9 +244,12 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	/**
-	 * 拷贝缓存值。
+	 * 克隆缓存实体。
 	 * <p>
-	 * 当从缓存中取出对象时{@linkplain #cacheGet(Object)}、将对象放入缓存时{@linkplain #cachePut(Object, Entity)}，进行拷贝。
+	 * 参考{@linkplain #cacheGet(Object)}、{@linkplain #cachePut(Object, Entity)}、{@linkplain #cachePutQueryResult(List)}。
+	 * </p>
+	 * <p>
+	 * 对于无序列化缓存（比如进程内缓存），应遵循{@linkplain CloneableEntity#clone()}规则；对于序列化缓存，则可直接返回原实体。
 	 * </p>
 	 * <p>
 	 * 此方法默认是现是：如果{@code value}是{@linkplain CloneableEntity}，则返回{@linkplain CloneableEntity#clone()}，否则，返回原对象。
@@ -250,7 +259,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected T cacheCloneValue(T value)
+	protected T cacheCloneEntity(T value)
 	{
 		if (value instanceof CloneableEntity)
 			return (T) ((CloneableEntity) value).clone();
@@ -269,6 +278,15 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		return id;
 	}
 
+	/**
+	 * 从缓存中读取实体。
+	 * <p>
+	 * 此方法将使用{@linkplain #cacheCloneEntity(Entity)}返回克隆后的实体对象。
+	 * </p>
+	 * 
+	 * @param id
+	 * @return
+	 */
 	protected ValueWrapper cacheGet(ID id)
 	{
 		if (!cacheEnabled())
@@ -283,22 +301,39 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		T value = (T) valueWrapper.get();
 
 		if (value != null)
-			value = cacheCloneValue(value);
+			value = cacheCloneEntity(value);
 
 		return new SimpleValueWrapper(value);
 	}
 
+	/**
+	 * 将实体存入缓存。
+	 * <p>
+	 * 此方法将使用{@linkplain #cacheCloneEntity(Entity)}缓存克隆后的实体对象。
+	 * </p>
+	 * 
+	 * @param id
+	 * @param value
+	 */
 	protected void cachePut(ID id, T value)
 	{
 		if (!cacheEnabled())
 			return;
 
 		if (value != null)
-			value = cacheCloneValue(value);
+			value = cacheCloneEntity(value);
 
 		cachePut(getCache(), toCacheKey(id), value);
 	}
 
+	/**
+	 * 将实体存入缓存。
+	 * <p>
+	 * 此方法将使用{@linkplain #cacheCloneEntity(Entity)}缓存克隆后的实体对象。
+	 * </p>
+	 * 
+	 * @param values
+	 */
 	protected void cachePutQueryResult(List<T> values)
 	{
 		if (!cacheEnabled())
@@ -312,7 +347,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 
 			if (value != null)
 			{
-				value = cacheCloneValue(value);
+				value = cacheCloneEntity(value);
 				cachePut(getCache(), toCacheKey(value.getId()), value);
 			}
 		}

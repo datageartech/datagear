@@ -33,6 +33,8 @@ import org.datagear.analysis.ResultDataFormat;
  */
 public abstract class AbstractDataSet extends AbstractIdentifiable implements DataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final DataSetFmkTemplateResolver GENERAL_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver();
 
 	private String name;

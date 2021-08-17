@@ -58,6 +58,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractExcelDataSet.class);
 
 	public static final String EXTENSION_XLSX = "xlsx";

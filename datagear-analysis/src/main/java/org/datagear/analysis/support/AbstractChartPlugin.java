@@ -26,6 +26,8 @@ import org.datagear.util.i18n.Label;
  */
 public abstract class AbstractChartPlugin extends AbstractIdentifiable implements ChartPlugin
 {
+	private static final long serialVersionUID = 1L;
+
 	private Label nameLabel;
 
 	private Label descLabel;

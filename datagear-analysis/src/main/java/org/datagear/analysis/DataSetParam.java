@@ -18,6 +18,8 @@ package org.datagear.analysis;
  */
 public class DataSetParam extends AbstractDataNameType
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 是否必须 */
 	private boolean required;
 

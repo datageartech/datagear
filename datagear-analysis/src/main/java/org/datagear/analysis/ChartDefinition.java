@@ -7,6 +7,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,8 +20,10 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class ChartDefinition extends AbstractIdentifiable implements ResultDataFormatAware
+public class ChartDefinition extends AbstractIdentifiable implements ResultDataFormatAware, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_CHART_DATASETS = "chartDataSets";

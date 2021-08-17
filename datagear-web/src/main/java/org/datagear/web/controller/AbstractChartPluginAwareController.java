@@ -293,6 +293,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 */
 	public static class ChartDataSetViewObj extends ChartDataSet
 	{
+		private static final long serialVersionUID = 1L;
+
 		public ChartDataSetViewObj()
 		{
 			super();

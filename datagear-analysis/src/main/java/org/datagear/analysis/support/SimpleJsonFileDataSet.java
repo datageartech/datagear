@@ -25,6 +25,8 @@ import org.datagear.analysis.DataSetQuery;
  */
 public class SimpleJsonFileDataSet extends AbstractJsonFileDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	/** JSON文件 */
 	private File file;
 

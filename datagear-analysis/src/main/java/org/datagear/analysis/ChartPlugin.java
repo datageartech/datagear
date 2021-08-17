@@ -7,6 +7,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public interface ChartPlugin extends Identifiable, Labeled
+public interface ChartPlugin extends Identifiable, Labeled, Serializable
 {
 	String PROPERTY_ID = "id";
 	String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;

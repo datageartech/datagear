@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class ChartDataSetVO extends ChartDataSet implements CloneableEntity
 {
+	private static final long serialVersionUID = 1L;
+
 	public ChartDataSetVO()
 	{
 		super();

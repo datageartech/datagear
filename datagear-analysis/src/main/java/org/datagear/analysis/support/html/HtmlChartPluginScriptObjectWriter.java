@@ -100,6 +100,8 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 */
 	protected static class HtmlChartPluginJson extends AbstractChartPlugin
 	{
+		private static final long serialVersionUID = 1L;
+
 		public HtmlChartPluginJson(HtmlChartPlugin plugin)
 		{
 			super(plugin.getId(), plugin.getNameLabel());

@@ -9,6 +9,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Serializable;
 
 /**
  * JS图表渲染器。
@@ -34,7 +35,7 @@ import java.io.Reader;
  * @author datagear@163.com
  *
  */
-public interface JsChartRenderer
+public interface JsChartRenderer extends Serializable
 {
 	/** JS图表渲染器的渲染函数名 */
 	public static final String RENDER_FUNCTION_NAME = "render";

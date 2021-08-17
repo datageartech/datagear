@@ -9,7 +9,6 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.StringReader;
 
 /**
@@ -18,7 +17,7 @@ import java.io.StringReader;
  * @author datagear@163.com
  *
  */
-public class StringJsChartRenderer implements JsChartRenderer, Serializable
+public class StringJsChartRenderer implements JsChartRenderer
 {
 	private static final long serialVersionUID = 1L;
 

@@ -9,6 +9,7 @@ package org.datagear.analysis;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 
 /**
  * 图标。
@@ -16,7 +17,7 @@ import java.io.InputStream;
  * @author datagear@163.com
  *
  */
-public interface Icon
+public interface Icon extends Serializable
 {
 	/**
 	 * 获取图标类型：{@code png}、{@code jpeg}等，未知则返回空字符串。

@@ -7,6 +7,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,14 +18,16 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class Dashboard extends AbstractIdentifiable
+public class Dashboard extends AbstractIdentifiable implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_RENDER_CONTEXT = "renderContext";
 	public static final String PROPERTY_WIDGET = "widget";
 	public static final String PROPERTY_CHARTS = "charts";
 
-	private RenderContext renderContext;
+	private transient RenderContext renderContext;
 
 	private DashboardWidget widget;
 

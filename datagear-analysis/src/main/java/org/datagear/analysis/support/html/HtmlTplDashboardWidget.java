@@ -28,7 +28,9 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
  */
 public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 {
-	private HtmlTplDashboardWidgetRenderer renderer;
+	private static final long serialVersionUID = 1L;
+
+	private transient HtmlTplDashboardWidgetRenderer renderer;
 
 	public HtmlTplDashboardWidget()
 	{

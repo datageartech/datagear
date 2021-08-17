@@ -309,6 +309,8 @@ public class AbstractDataSetTest
 
 	private static class TestAbstractDataSet extends AbstractDataSet
 	{
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public DataSetResult getResult(DataSetQuery query) throws DataSetException
 		{

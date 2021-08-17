@@ -26,6 +26,8 @@ import org.datagear.analysis.DataSetResult;
  */
 public class ProfileDataSet extends AbstractDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	public ProfileDataSet()
 	{
 	}

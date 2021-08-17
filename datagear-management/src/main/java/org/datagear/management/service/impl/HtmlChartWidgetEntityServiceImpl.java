@@ -564,6 +564,8 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	protected static class IdDataSet extends AbstractIdentifiable implements DataSet
 	{
+		private static final long serialVersionUID = 1L;
+
 		public IdDataSet()
 		{
 			super();
