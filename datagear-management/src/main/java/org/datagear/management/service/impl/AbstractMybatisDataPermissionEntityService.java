@@ -102,9 +102,9 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	}
 
 	@Override
-	public boolean add(User user, T entity) throws PermissionDeniedException
+	public void add(User user, T entity) throws PermissionDeniedException
 	{
-		return super.add(entity);
+		super.add(entity);
 	}
 
 	@Override

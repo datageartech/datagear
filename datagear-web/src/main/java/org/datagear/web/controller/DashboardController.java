@@ -326,13 +326,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (firstTemplateIndex > -1)
 			dashboard.setTemplateEncoding(resolveTemplateEncoding(resourceContents[firstTemplateIndex]));
 
-		boolean save = false;
-
 		if (isSaveAdd)
 		{
 			dashboard.setId(IDUtil.randomIdOnTime20());
 			dashboard.setCreateUser(user);
-			save = this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
+			this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
 			if (form.hasCopySourceId())
 			{
@@ -344,14 +342,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 		else
 		{
-			save = this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+			this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
 		}
 
-		if (save)
-		{
-			for (int i = 0; i < resourceNames.length; i++)
-				saveResourceContent(dashboard, resourceNames[i], resourceContents[i]);
-		}
+		for (int i = 0; i < resourceNames.length; i++)
+			saveResourceContent(dashboard, resourceNames[i], resourceContents[i]);
 
 		Map<String, Object> data = new HashMap<>();
 		data.put("id", dashboard.getId());

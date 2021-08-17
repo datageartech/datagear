@@ -29,7 +29,7 @@ public interface EntityService<ID, T extends Entity<ID>>
 	 * @param entity
 	 * @return
 	 */
-	boolean add(T entity);
+	void add(T entity);
 
 	/**
 	 * 更新。

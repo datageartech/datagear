@@ -186,35 +186,29 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
-	protected boolean add(DataSetEntity entity, Map<String, Object> params)
+	protected void add(DataSetEntity entity, Map<String, Object> params)
 	{
 		if (entity instanceof SummaryDataSetEntity)
 			throw new IllegalArgumentException();
 
-		boolean success = super.add(entity, params);
+		super.add(entity, params);
 
-		if (success)
-		{
-			if (entity instanceof SqlDataSetEntity)
-				success = addSqlDataSetEntity((SqlDataSetEntity) entity);
-			else if (entity instanceof JsonValueDataSetEntity)
-				success = addJsonValueDataSetEntity((JsonValueDataSetEntity) entity);
-			else if (entity instanceof JsonFileDataSetEntity)
-				success = addJsonFileDataSetEntity((JsonFileDataSetEntity) entity);
-			else if (entity instanceof ExcelDataSetEntity)
-				success = addExcelDataSetEntity((ExcelDataSetEntity) entity);
-			else if (entity instanceof CsvValueDataSetEntity)
-				success = addCsvValueDataSetEntity((CsvValueDataSetEntity) entity);
-			else if (entity instanceof CsvFileDataSetEntity)
-				success = addCsvFileDataSetEntity((CsvFileDataSetEntity) entity);
-			else if (entity instanceof HttpDataSetEntity)
-				success = addHttpDataSetEntity((HttpDataSetEntity) entity);
-		}
+		if (entity instanceof SqlDataSetEntity)
+			addSqlDataSetEntity((SqlDataSetEntity) entity);
+		else if (entity instanceof JsonValueDataSetEntity)
+			addJsonValueDataSetEntity((JsonValueDataSetEntity) entity);
+		else if (entity instanceof JsonFileDataSetEntity)
+			addJsonFileDataSetEntity((JsonFileDataSetEntity) entity);
+		else if (entity instanceof ExcelDataSetEntity)
+			addExcelDataSetEntity((ExcelDataSetEntity) entity);
+		else if (entity instanceof CsvValueDataSetEntity)
+			addCsvValueDataSetEntity((CsvValueDataSetEntity) entity);
+		else if (entity instanceof CsvFileDataSetEntity)
+			addCsvFileDataSetEntity((CsvFileDataSetEntity) entity);
+		else if (entity instanceof HttpDataSetEntity)
+			addHttpDataSetEntity((HttpDataSetEntity) entity);
 
-		if (success)
-			saveDataSetChildren(entity);
-
-		return success;
+		saveDataSetChildren(entity);
 	}
 
 	protected boolean addSqlDataSetEntity(SqlDataSetEntity entity)

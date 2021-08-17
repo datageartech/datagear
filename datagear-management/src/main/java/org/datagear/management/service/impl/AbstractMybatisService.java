@@ -108,9 +108,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * 
 	 * @param entity
 	 */
-	protected boolean add(T entity)
+	protected void add(T entity)
 	{
-		return add(entity, buildParamMap());
+		add(entity, buildParamMap());
 	}
 
 	/**
@@ -119,15 +119,13 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * @param entity
 	 * @param params
 	 */
-	protected boolean add(T entity, Map<String, Object> params)
+	protected void add(T entity, Map<String, Object> params)
 	{
 		checkAddInput(entity);
 
 		params.put("entity", entity);
 
 		insertMybatis("insert", params);
-
-		return true;
 	}
 
 	/**

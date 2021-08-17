@@ -177,14 +177,10 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@Override
-	protected boolean add(HtmlChartWidgetEntity entity, Map<String, Object> params)
+	protected void add(HtmlChartWidgetEntity entity, Map<String, Object> params)
 	{
-		boolean success = super.add(entity, params);
-
-		if (success)
-			saveWidgetDataSetRelations(entity);
-
-		return success;
+		super.add(entity, params);
+		saveWidgetDataSetRelations(entity);
 	}
 
 	@Override

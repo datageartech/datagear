@@ -184,6 +184,7 @@ public class UserController extends AbstractController
 		this.userService.deleteByIds(ids);
 
 		this.schemaService.deleteByUserId(ids);
+		// TODO 应该删除所有其他用户创建的数据
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}

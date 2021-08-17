@@ -82,9 +82,9 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	@Override
-	public boolean add(T entity)
+	public void add(T entity)
 	{
-		return super.add(entity);
+		super.add(entity);
 	}
 
 	@Override

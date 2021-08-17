@@ -102,7 +102,7 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	 * @return
 	 * @throws PermissionDeniedException
 	 */
-	boolean add(User user, T entity) throws PermissionDeniedException;
+	void add(User user, T entity) throws PermissionDeniedException;
 
 	/**
 	 * 授权更新。

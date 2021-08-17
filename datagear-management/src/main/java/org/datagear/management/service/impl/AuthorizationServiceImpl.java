@@ -63,14 +63,10 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 	}
 
 	@Override
-	public boolean add(Authorization entity)
+	public void add(Authorization entity)
 	{
-		boolean re = super.add(entity);
-
-		if (re)
-			permissionUpdated(entity.getResourceType(), entity.getResource());
-
-		return re;
+		super.add(entity);
+		permissionUpdated(entity.getResourceType(), entity.getResource());
 	}
 
 	@Override

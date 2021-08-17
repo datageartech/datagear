@@ -90,36 +90,31 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 	}
 
 	@Override
-	protected boolean add(User entity, Map<String, Object> params)
+	protected void add(User entity, Map<String, Object> params)
 	{
 		String password = entity.getPassword();
 
 		if (password != null && !password.isEmpty() && this.userPasswordEncoder != null)
 			entity.setPassword(this.userPasswordEncoder.encode(password));
 
-		boolean add = super.add(entity, params);
+		super.add(entity, params);
 
-		if (add)
+		RoleUser roleUser = new RoleUser(IDUtil.randomIdOnTime20(), new Role(Role.ROLE_REGISTRY, ""), entity);
+		this.roleUserService.add(roleUser);
+
+		Set<Role> roles = entity.getRoles();
+
+		if (roles != null && !roles.isEmpty())
 		{
-			RoleUser roleUser = new RoleUser(IDUtil.randomIdOnTime20(), new Role(Role.ROLE_REGISTRY, ""), entity);
-			this.roleUserService.add(roleUser);
-
-			Set<Role> roles = entity.getRoles();
-
-			if (roles != null && !roles.isEmpty())
+			for (Role role : roles)
 			{
-				for (Role role : roles)
-				{
-					if (Role.ROLE_REGISTRY.equals(role.getId()))
-						continue;
+				if (Role.ROLE_REGISTRY.equals(role.getId()))
+					continue;
 
-					RoleUser ru = new RoleUser(IDUtil.randomIdOnTime20(), role, entity);
-					this.roleUserService.add(ru);
-				}
+				RoleUser ru = new RoleUser(IDUtil.randomIdOnTime20(), role, entity);
+				this.roleUserService.add(ru);
 			}
 		}
-
-		return add;
 	}
 
 	@Override

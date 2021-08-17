@@ -71,11 +71,10 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
-	public boolean add(User user, Schema entity) throws PermissionDeniedException
+	public void add(User user, Schema entity) throws PermissionDeniedException
 	{
 		checkSaveUrlPermission(user, entity.getUrl());
-
-		return super.add(user, entity);
+		super.add(user, entity);
 	}
 
 	@Override
