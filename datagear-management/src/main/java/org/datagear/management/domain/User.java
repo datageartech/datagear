@@ -148,6 +148,14 @@ public class User extends AbstractStringIdEntity implements CloneableEntity
 	}
 
 	/**
+	 * 清空密码，将其设置为{@code null}。
+	 */
+	public void clearPassword()
+	{
+		this.setPassword(null);
+	}
+
+	/**
 	 * 获取账号名称标签。
 	 * 
 	 * @return
@@ -187,7 +195,7 @@ public class User extends AbstractStringIdEntity implements CloneableEntity
 	public User cloneWithoutPassword()
 	{
 		User entity = clone();
-		entity.setPassword(null);
+		entity.clearPassword();
 
 		return entity;
 	}

@@ -102,7 +102,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	public PagingData<HtmlTplDashboardWidgetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
 			String analysisProjectId)
 	{
-		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId);
+		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId, true);
 	}
 
 	@Override

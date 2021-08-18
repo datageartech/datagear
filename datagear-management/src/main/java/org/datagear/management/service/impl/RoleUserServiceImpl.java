@@ -90,7 +90,7 @@ public class RoleUserServiceImpl extends AbstractMybatisEntityService<String, Ro
 		Map<String, Object> param = buildParamMap();
 		param.put("role", role);
 
-		return query("queryForRole", query, param);
+		return query("queryForRole", query, param, true);
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class RoleUserServiceImpl extends AbstractMybatisEntityService<String, Ro
 		Map<String, Object> param = buildParamMap();
 		param.put("role", role);
 
-		return pagingQuery("pagingQueryForRole", query, param);
+		return pagingQuery("pagingQueryForRole", query, param, true);
 	}
 
 	@Override

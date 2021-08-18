@@ -70,7 +70,7 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 		if (isEmpty(pagingQuery.getOrders()))
 			addOrderCreateTimeDesc(params);
 
-		return pagingQuery(pagingQuery, params);
+		return pagingQuery(pagingQuery, params, true);
 	}
 
 	protected int deleteExpired(String schemaId, String userId, int maximum)

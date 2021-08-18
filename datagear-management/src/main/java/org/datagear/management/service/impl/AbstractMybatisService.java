@@ -105,6 +105,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 添加。
+	 * <p>
+	 * 此方法调用底层的{@code insert} SQL。
+	 * </p>
 	 * 
 	 * @param entity
 	 */
@@ -115,6 +118,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 添加。
+	 * <p>
+	 * 此方法调用底层的{@code insert} SQL。
+	 * </p>
 	 * 
 	 * @param entity
 	 * @param params
@@ -130,6 +136,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 更新。
+	 * <p>
+	 * 此方法调用底层的{@code update} SQL。
+	 * </p>
 	 * 
 	 * @param entity
 	 * @return
@@ -188,17 +197,18 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * <p>
 	 * 此方法调用底层的{@code getByParam} SQL。
 	 * </p>
-	 * <p>
-	 * 此方法内部会执行{@linkplain #postProcessGet(Object)}。
-	 * </p>
 	 * 
 	 * @param param
+	 * @param postProcessGet
+	 *            是否内部执行{@linkplain #postProcessGet(Object)}
 	 * @return
 	 */
-	protected T getByParam(T param)
+	protected T getByParam(T param, boolean postProcessGet)
 	{
 		T obj = getByParam("getByParam", param, buildParamMap());
-		obj = postProcessGetNullable(obj);
+
+		if (postProcessGet)
+			obj = postProcessGetNullable(obj);
 
 		return obj;
 	}
@@ -247,16 +257,15 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * <p>
 	 * 此方法调用底层的{@code query} SQL。
 	 * </p>
-	 * <p>
-	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
-	 * </p>
 	 * 
 	 * @param query
+	 * @param postProcessQuery
+	 *            是否内部执行{@linkplain #postProcessQuery(List)}
 	 * @return
 	 */
-	protected List<T> query(Query query)
+	protected List<T> query(Query query, boolean postProcessQuery)
 	{
-		return query(query, buildParamMap());
+		return query(query, buildParamMap(), postProcessQuery);
 	}
 
 	/**
@@ -264,17 +273,16 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * <p>
 	 * 此方法调用底层的{@code query} SQL。
 	 * </p>
-	 * <p>
-	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
-	 * </p>
 	 * 
 	 * @param query
 	 * @param params
+	 * @param postProcessQuery
+	 *            是否内部执行{@linkplain #postProcessQuery(List)}
 	 * @return
 	 */
-	protected List<T> query(Query query, Map<String, Object> params)
+	protected List<T> query(Query query, Map<String, Object> params, boolean postProcessQuery)
 	{
-		return query("query", query, params);
+		return query("query", query, params, postProcessQuery);
 	}
 
 	/**
@@ -286,15 +294,18 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * @param statement
 	 * @param query
 	 * @param params
+	 * @param postProcessQuery
+	 *            是否内部执行{@linkplain #postProcessQuery(List)}
 	 * @return
 	 */
-	protected List<T> query(String statement, Query query, Map<String, Object> params)
+	protected List<T> query(String statement, Query query, Map<String, Object> params, boolean postProcessQuery)
 	{
 		addQueryParam(params, query);
 
 		List<T> list = query(statement, params);
 
-		postProcessQuery(list);
+		if (postProcessQuery)
+			postProcessQuery(list);
 
 		return list;
 	}
@@ -304,16 +315,15 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * <p>
 	 * 此方法调用底层的{@code pagingQuery}、{@code pagingQueryCount} SQL。
 	 * </p>
-	 * <p>
-	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
-	 * </p>
 	 * 
 	 * @param pagingQuery
+	 * @param postProcessQuery
+	 *            是否内部执行{@linkplain #postProcessQuery(List)}
 	 * @return
 	 */
-	protected PagingData<T> pagingQuery(PagingQuery pagingQuery)
+	protected PagingData<T> pagingQuery(PagingQuery pagingQuery, boolean postProcessQuery)
 	{
-		return pagingQuery(pagingQuery, buildParamMap());
+		return pagingQuery(pagingQuery, buildParamMap(), postProcessQuery);
 	}
 
 	/**
@@ -321,17 +331,16 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * <p>
 	 * 此方法调用底层的{@code pagingQuery}、{@code pagingQueryCount} SQL。
 	 * </p>
-	 * <p>
-	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
-	 * </p>
 	 * 
 	 * @param pagingQuery
 	 * @param params
+	 * @param postProcessQuery
+	 *            是否内部执行{@linkplain #postProcessQuery(List)}
 	 * @return
 	 */
-	protected PagingData<T> pagingQuery(PagingQuery pagingQuery, Map<String, Object> params)
+	protected PagingData<T> pagingQuery(PagingQuery pagingQuery, Map<String, Object> params, boolean postProcessQuery)
 	{
-		return pagingQuery("pagingQuery", pagingQuery, params);
+		return pagingQuery("pagingQuery", pagingQuery, params, postProcessQuery);
 	}
 
 	/**
@@ -343,16 +352,16 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * 如果{@code statement}为{@code "pagingQuery"}，那么必须已定义{@code "pagingQueryCount"}
 	 * SQL Mapper。
 	 * </p>
-	 * <p>
-	 * 此方法内部会执行{@linkplain #postProcessQuery(List)}。
-	 * </p>
 	 * 
 	 * @param statement
 	 * @param pagingQuery
 	 * @param params
+	 * @param postProcessQuery
+	 *            是否内部执行{@linkplain #postProcessQuery(List)}
 	 * @return
 	 */
-	protected PagingData<T> pagingQuery(String statement, PagingQuery pagingQuery, Map<String, Object> params)
+	protected PagingData<T> pagingQuery(String statement, PagingQuery pagingQuery, Map<String, Object> params,
+			boolean postProcessQuery)
 	{
 		addQueryParam(params, pagingQuery);
 
@@ -371,7 +380,8 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		else
 			list = query(statement, params, new RowBounds(startIndex, pagingData.getPageSize()));
 
-		postProcessQuery(list);
+		if (postProcessQuery)
+			postProcessQuery(list);
 
 		pagingData.setItems(list);
 
@@ -390,12 +400,12 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * 
 	 * @param list
 	 *            不会为{@code null}
-	 * @see #query(Query)
-	 * @see #query(Query, Map)
-	 * @see #query(String, Query, Map)
-	 * @see #pagingQuery(PagingQuery)
-	 * @see #pagingQuery(PagingQuery, Map)
-	 * @see #pagingQuery(String, PagingQuery, Map)
+	 * @see #query(Query, boolean)
+	 * @see #query(Query, Map, boolean)
+	 * @see #query(String, Query, Map, boolean)
+	 * @see #pagingQuery(PagingQuery, boolean)
+	 * @see #pagingQuery(PagingQuery, Map, boolean)
+	 * @see #pagingQuery(String, PagingQuery, Map, boolean)
 	 */
 	protected void postProcessQuery(List<T> list)
 	{

@@ -132,7 +132,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 * 此方法的默认实现是：直接返回{@code obj}。
 	 * </p>
 	 * 
-	 * @see #getById(Object) getById(Object)将在内部调用此方法
+	 * @see #getById(Object) getById(Object)会在其内部调用此方法
 	 */
 	@Override
 	protected T postProcessGet(T obj)
@@ -143,13 +143,13 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	@Override
 	public List<T> query(Query query)
 	{
-		return super.query(query);
+		return super.query(query, true);
 	}
 
 	@Override
 	public PagingData<T> pagingQuery(PagingQuery pagingQuery)
 	{
-		return super.pagingQuery(pagingQuery);
+		return super.pagingQuery(pagingQuery, true);
 	}
 
 	/**

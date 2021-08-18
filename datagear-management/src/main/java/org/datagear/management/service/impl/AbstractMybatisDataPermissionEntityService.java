@@ -186,7 +186,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user);
 
-		return query(query, params);
+		return query(query, params, true);
 	}
 
 	@Override
@@ -202,7 +202,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		addDataPermissionParameters(params, user);
 		setDataFilterParam(params, dataFilter);
 
-		return pagingQuery(pagingQuery, params);
+		return pagingQuery(pagingQuery, params, true);
 	}
 
 	@Override
@@ -219,7 +219,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	}
 
 	protected PagingData<T> pagingQueryForAnalysisProjectId(User user, PagingQuery pagingQuery, String dataFilter,
-			String analysisProjectId)
+			String analysisProjectId, boolean postProcessQuery)
 	{
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user);
@@ -228,7 +228,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!StringUtil.isEmpty(analysisProjectId))
 			params.put(AnalysisProjectAwareEntityService.QUERY_PARAM_ANALYSIS_PROJECT_ID, analysisProjectId);
 
-		return pagingQuery(pagingQuery, params);
+		return pagingQuery(pagingQuery, params, postProcessQuery);
 	}
 
 	@Override

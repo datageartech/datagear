@@ -178,7 +178,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	public PagingData<DataSetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
 			String analysisProjectId)
 	{
-		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId);
+		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId, true);
 	}
 
 	@Override
