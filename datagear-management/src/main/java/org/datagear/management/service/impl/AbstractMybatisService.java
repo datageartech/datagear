@@ -198,11 +198,29 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected T getByParam(T param)
 	{
 		T obj = getByParam("getByParam", param, buildParamMap());
-
-		if (obj != null)
-			obj = postProcessGet(obj);
+		obj = postProcessGetNullable(obj);
 
 		return obj;
+	}
+
+	/**
+	 * 后置处理获取操作结果。
+	 * <p>
+	 * 如果{@code obj}为{@code null}，将直接返回{@code null}；否则返回{@linkplain #postProcessGet(Object)}。
+	 * </p>
+	 * <p>
+	 * 子类要实现特定的获取操作结果处理逻辑应重写{@linkplain #postProcessGet(Object)}。
+	 * </p>
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected T postProcessGetNullable(T obj)
+	{
+		if (obj == null)
+			return null;
+
+		return postProcessGet(obj);
 	}
 
 	/**
@@ -211,7 +229,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * 子类可以重写此方法，以实现特定的获取操作结果处理逻辑。
 	 * </p>
 	 * <p>
-	 * 此方法的默认实现是：直接返回{@code obj}。
+	 * 此方法的默认实现是：直接返回原对象。
 	 * </p>
 	 * 
 	 * @param obj

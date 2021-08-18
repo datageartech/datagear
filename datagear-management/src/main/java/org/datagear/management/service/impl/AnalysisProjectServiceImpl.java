@@ -7,8 +7,6 @@
 
 package org.datagear.management.service.impl;
 
-import java.util.Map;
-
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.User;
@@ -61,11 +59,7 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 	@Override
 	public int updateCreateUserId(String oldUserId, String newUserId)
 	{
-		Map<String, Object> params = buildParamMap();
-		params.put("oldUserId", oldUserId);
-		params.put("newUserId", newUserId);
-
-		return updateMybatis("updateCreateUserId", params);
+		return super.updateCreateUserId(oldUserId, newUserId);
 	}
 
 	@Override

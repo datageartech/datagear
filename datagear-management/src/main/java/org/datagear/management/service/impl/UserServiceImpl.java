@@ -140,9 +140,7 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 		params.put("name", name);
 
 		User user = selectOneMybatis("getByName", params);
-
-		if (user != null)
-			postProcessGet(user);
+		postProcessGetNullable(user);
 
 		return user;
 	}

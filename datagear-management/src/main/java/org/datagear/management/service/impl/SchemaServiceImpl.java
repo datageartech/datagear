@@ -94,16 +94,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	@Override
 	public int updateCreateUserId(String oldUserId, String newUserId)
 	{
-		Map<String, Object> params = buildParamMap();
-		params.put("oldUserId", oldUserId);
-		params.put("newUserId", newUserId);
-
-		int count = updateMybatis("updateCreateUserId", params);
-
-		if (count > 0)
-			cacheInvalidate();
-
-		return count;
+		return super.updateCreateUserId(oldUserId, newUserId);
 	}
 
 	@Override

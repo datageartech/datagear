@@ -15,6 +15,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.CloneableEntity;
 import org.datagear.management.domain.Entity;
+import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.management.service.EntityService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
@@ -114,9 +115,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	public T getById(ID id)
 	{
 		T entity = getById(id, buildParamMap());
-
-		if (entity != null)
-			entity = postProcessGet(entity);
+		entity = postProcessGetNullable(entity);
 
 		return entity;
 	}
@@ -248,6 +247,33 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		cachePutQueryResult(list);
 
 		return list;
+	}
+
+	/**
+	 * 更新创建用户ID。
+	 * <p>
+	 * 此方法调用底层的{@code updateCreateUserId} SQL。
+	 * </p>
+	 * <p>
+	 * 此方法主要为子类实现{@linkplain CreateUserEntityService#updateCreateUserId(String, String)}提供支持。
+	 * </p>
+	 * 
+	 * @param oldUserId
+	 * @param newUserId
+	 * @return
+	 */
+	protected int updateCreateUserId(String oldUserId, String newUserId)
+	{
+		Map<String, Object> params = buildParamMap();
+		params.put("oldUserId", oldUserId);
+		params.put("newUserId", newUserId);
+
+		int count = updateMybatis("updateCreateUserId", params);
+
+		if (count > 0)
+			cacheInvalidate();
+
+		return count;
 	}
 
 	/**

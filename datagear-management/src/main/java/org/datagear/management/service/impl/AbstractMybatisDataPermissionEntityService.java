@@ -242,6 +242,17 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		return deleted;
 	}
 
+	@Override
+	protected int updateCreateUserId(String oldUserId, String newUserId)
+	{
+		int count = super.updateCreateUserId(oldUserId, newUserId);
+
+		if (count > 0)
+			permissionCacheInvalidate();
+
+		return count;
+	}
+
 	/**
 	 * 获取权限列表。
 	 * <p>
@@ -256,7 +267,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	{
 		int len = ids.size();
 
-		Map<ID, Integer> permissions = getCachedPermissions(user, ids);
+		Map<ID, Integer> permissions = getPermissionsFromCache(user, ids);
 
 		List<ID> noCachedIds = Collections.emptyList();
 
@@ -297,7 +308,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * @param ids
 	 * @return
 	 */
-	protected Map<ID, Integer> getCachedPermissions(User user, List<ID> ids)
+	protected Map<ID, Integer> getPermissionsFromCache(User user, List<ID> ids)
 	{
 		Map<ID, Integer> permissions = new HashMap<ID, Integer>();
 
@@ -309,7 +320,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		for (int i = 0, len = ids.size(); i < len; i++)
 		{
 			ID id = ids.get(i);
-			Integer permission = cacheGetPermission(id, userId);
+			Integer permission = permissionCacheGet(id, userId);
 
 			if (permission != null)
 				permissions.put(id, permission);
@@ -358,11 +369,11 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			
 			permissions.put(id, permission);
 
-			cachePutPermission(id, userId, permission);
+			permissionCachePut(id, userId, permission);
 		}
 	}
 
-	protected Integer cacheGetPermission(ID id, String userId)
+	protected Integer permissionCacheGet(ID id, String userId)
 	{
 		if (!isPermissionCacheEnabled())
 			return null;
@@ -373,7 +384,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		return (upm == null ? null : upm.getPermission(userId));
 	}
 
-	protected void cachePutPermission(ID id, String userId, int permission)
+	protected void permissionCachePut(ID id, String userId, int permission)
 	{
 		if (!isPermissionCacheEnabled())
 			return;
@@ -389,6 +400,14 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		}
 
 		upm.putPermission(userId, permission);
+	}
+
+	protected void permissionCacheInvalidate()
+	{
+		if (!isPermissionCacheEnabled())
+			return;
+
+		this.permissionCache.invalidate();
 	}
 
 	/**
