@@ -489,7 +489,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected void addQueryParam(Map<String, Object> param, Query query)
 	{
 		String keyword = query.getKeyword();
-		String condition = query.getCondition();
+//		String condition = query.getCondition();
 		Order[] orders = query.getOrders();
 
 		param.put(QUERY_PARAM_NOT_LIKE, query.isNotLike());
@@ -502,10 +502,11 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 			param.put(QUERY_PARAM_KEYWORD, keyword);
 		}
 
-		if (condition != null && !condition.isEmpty())
-		{
-			param.put(QUERY_PARAM_CONDITION, condition);
-		}
+		// 禁用query.condition，避免SQL注入问题
+//		if (condition != null && !condition.isEmpty())
+//		{
+//			param.put(QUERY_PARAM_CONDITION, condition);
+//		}
 
 		if (orders != null && orders.length > 0)
 		{

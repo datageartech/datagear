@@ -114,6 +114,5 @@
 		<if test="queryKeyword != null">
 		AND ${_iq_}sql${_iq_} LIKE #{queryKeyword}
 		</if>
-		<include refid="common.queryCondition" />
 	</sql>
 </mapper>

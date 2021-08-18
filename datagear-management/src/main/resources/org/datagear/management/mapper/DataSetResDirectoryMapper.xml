@@ -145,7 +145,6 @@
 		)
 		</if>
 		<include refid="commonDataPermission.dataFilterCondition" />
-		<include refid="common.queryCondition" />
 	</sql>
 	
 </mapper>

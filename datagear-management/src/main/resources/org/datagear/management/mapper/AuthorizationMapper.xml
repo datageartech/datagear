@@ -161,6 +161,5 @@
 			)
 			</if>
 		</otherwise></choose>
-		<include refid="common.queryCondition" />
 	</sql>
 </mapper>

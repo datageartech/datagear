@@ -11,12 +11,6 @@
 		${_pagingQueryFoot}
 	</sql>
 	
-	<sql id="queryCondition">
-		<if test="queryCondition != null">
-		AND (${queryCondition})
-		</if>
-	</sql>
-	
 	<sql id="queryOrder">
 		<if test="queryOrder != null">
 		ORDER BY ${queryOrder}

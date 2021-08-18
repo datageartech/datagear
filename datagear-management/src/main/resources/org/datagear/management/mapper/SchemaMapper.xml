@@ -142,6 +142,5 @@
 			OR ${_iq_}createUser.realName${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
-		<include refid="common.queryCondition" />
 	</sql>
 </mapper>

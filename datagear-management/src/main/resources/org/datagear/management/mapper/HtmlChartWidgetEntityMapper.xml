@@ -215,6 +215,5 @@
 		AND ${_iq_}analysisProject.id${_iq_} = #{_analysisProjectId}
 		</if>
 		<include refid="commonDataPermission.dataFilterCondition" />
-		<include refid="common.queryCondition" />
 	</sql>
 </mapper>
