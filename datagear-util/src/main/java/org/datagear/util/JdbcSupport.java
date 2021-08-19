@@ -61,8 +61,6 @@ public class JdbcSupport
 	 */
 	public long executeCountQuery(Connection cn, Sql query) throws SQLException
 	{
-		LOGGER.debug("execute {}", query);
-
 		QueryResultSet qrs = null;
 
 		try
