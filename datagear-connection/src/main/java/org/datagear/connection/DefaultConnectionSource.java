@@ -16,26 +16,28 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.DriverConnectionFactory;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalCause;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 
 /**
  * 默认{@linkplain ConnectionSource}实现。
@@ -71,7 +73,7 @@ public class DefaultConnectionSource implements ConnectionSource
 	{
 		super();
 		this.driverEntityManager = driverEntityManager;
-		this.internalDataSourceCache = CacheBuilder.newBuilder().maximumSize(50)
+		this.internalDataSourceCache = Caffeine.newBuilder().maximumSize(50)
 				.expireAfterAccess(60 * 24, TimeUnit.MINUTES)
 				.removalListener(new DriverBasicDataSourceRemovalListener()).build();
 	}
@@ -397,10 +399,10 @@ public class DefaultConnectionSource implements ConnectionSource
 		try
 		{
 			dataSourceHolder = this.internalDataSourceCache.get(connectionIdentity,
-					new Callable<InternalDataSourceHolder>()
+					new Function<ConnectionIdentity, InternalDataSourceHolder>()
 					{
 						@Override
-						public InternalDataSourceHolder call() throws Exception
+						public InternalDataSourceHolder apply(ConnectionIdentity key)
 						{
 							DataSource dataSource = createInternalDataSource(driver, url, properties);
 							InternalDataSourceHolder holder = new InternalDataSourceHolder();
@@ -661,14 +663,13 @@ public class DefaultConnectionSource implements ConnectionSource
 			implements RemovalListener<ConnectionIdentity, InternalDataSourceHolder>
 	{
 		@Override
-		public void onRemoval(RemovalNotification<ConnectionIdentity, InternalDataSourceHolder> notification)
+		public void onRemoval(@Nullable ConnectionIdentity key, @Nullable InternalDataSourceHolder value,
+				@NonNull RemovalCause cause)
 		{
-			InternalDataSourceHolder holder = notification.getValue();
-
-			if (!holder.hasDataSource())
+			if (!value.hasDataSource())
 				return;
 
-			DataSource dataSource = holder.getDataSource();
+			DataSource dataSource = value.getDataSource();
 
 			if (!(dataSource instanceof DriverBasicDataSource))
 				throw new UnsupportedOperationException(
@@ -680,7 +681,7 @@ public class DefaultConnectionSource implements ConnectionSource
 				((DriverBasicDataSource) dataSource).close();
 
 				if (LOGGER.isDebugEnabled())
-					LOGGER.debug("Close internal data source for {}", notification.getKey());
+					LOGGER.debug("Close internal data source for {}", key);
 			}
 			catch (SQLException e)
 			{

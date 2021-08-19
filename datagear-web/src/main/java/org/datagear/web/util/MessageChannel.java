@@ -9,13 +9,12 @@ package org.datagear.web.util;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 
 /**
  * 消息通道。
@@ -32,7 +31,7 @@ public class MessageChannel
 
 	public MessageChannel()
 	{
-		this(60 * 10);
+		this(60 * 60);
 	}
 
 	public MessageChannel(int channelExpireSeconds)
@@ -40,7 +39,7 @@ public class MessageChannel
 		super();
 
 		// 消息通道只允许超时，不允许被其他情况移除
-		this._cache = CacheBuilder.newBuilder().maximumSize(Integer.MAX_VALUE)
+		this._cache = Caffeine.newBuilder().maximumSize(Integer.MAX_VALUE)
 				.expireAfterAccess(channelExpireSeconds, TimeUnit.SECONDS)
 				.build(new CacheLoader<String, LinkedBlockingQueue<Object>>()
 				{
@@ -113,7 +112,7 @@ public class MessageChannel
 		{
 			return this._cache.get(channel);
 		}
-		catch(ExecutionException e)
+		catch (Throwable e)
 		{
 			throw new MessageChannelException(e);
 		}

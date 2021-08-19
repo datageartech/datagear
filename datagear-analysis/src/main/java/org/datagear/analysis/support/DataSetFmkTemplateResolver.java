@@ -12,14 +12,13 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.datagear.util.DateNumberFormat;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 import freemarker.cache.TemplateLoader;
 import freemarker.core.OutputFormat;
@@ -175,7 +174,7 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		{
 			super();
 
-			this.nameTemplateCache = CacheBuilder.newBuilder().maximumSize(cacheCapacity)
+			this.nameTemplateCache = Caffeine.newBuilder().maximumSize(cacheCapacity)
 					.expireAfterAccess(cacheExpireSeconds, TimeUnit.SECONDS).build();
 		}
 
@@ -197,21 +196,14 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		@Override
 		public Object findTemplateSource(String name) throws IOException
 		{
-			try
+			return this.nameTemplateCache.get(name, new Function<String, NameTemplateSource>()
 			{
-				return this.nameTemplateCache.get(name, new Callable<NameTemplateSource>()
+				@Override
+				public NameTemplateSource apply(String name)
 				{
-					@Override
-					public NameTemplateSource call() throws Exception
-					{
-						return new NameTemplateSource(name, System.currentTimeMillis());
-					}
-				});
-			}
-			catch (ExecutionException e)
-			{
-				throw new IOException("find template source in cache exception", e);
-			}
+					return new NameTemplateSource(name, System.currentTimeMillis());
+				}
+			});
 		}
 
 		@Override

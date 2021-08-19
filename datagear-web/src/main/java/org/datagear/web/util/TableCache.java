@@ -16,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 import org.datagear.management.domain.Schema;
 import org.datagear.meta.Table;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * {@linkplain Table}缓存。
@@ -65,8 +65,8 @@ public class TableCache
 	 */
 	public void init()
 	{
-		this._cache = CacheBuilder.newBuilder().maximumSize(this.maximumSize)
-				.expireAfterAccess(this.expireAfterAccessMinutes * 60, TimeUnit.SECONDS).build();
+		this._cache = Caffeine.newBuilder().maximumSize(this.maximumSize)
+				.expireAfterAccess(this.expireAfterAccessMinutes, TimeUnit.MINUTES).build();
 	}
 
 	/**

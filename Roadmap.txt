@@ -9,7 +9,7 @@
 	系统添加缓存支持：
 		ok 服务层API内部引入缓存特性；
 		实现postProcessGet，加载共享属性值；
-		系统缓存统一改为Caffeine，移除Guava以减少程序包大小；
+		ok 系统缓存统一改为Caffeine，移除Guava以减少程序包大小；
 	添加更多内置图表插件：
 		嵌套饼图
 		地图热力图
