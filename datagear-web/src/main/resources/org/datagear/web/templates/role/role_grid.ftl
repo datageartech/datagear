@@ -37,7 +37,6 @@ selectOperation 是否选择操作，允许为null
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
-				<input name="editUserButton" type="button" value="<@spring.message code='role.editUser' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 			</#if>
@@ -94,21 +93,6 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 
-	po.element("input[name=editUserButton]").click(function()
-	{
-		po.executeOnSelect(function(row)
-		{
-			var options =
-			{
-				data : {"id" : row.id}
-			};
-			
-			$.setGridPageHeightOption(options);
-			
-			po.open(po.url("user/pagingQuery"), options);
-		});
-	});
-	
 	po.element("input[name=viewButton]").click(function()
 	{
 		po.executeOnSelect(function(row)

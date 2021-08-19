@@ -13,10 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.Role;
-import org.datagear.management.domain.RoleUser;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleService;
-import org.datagear.management.service.RoleUserService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
@@ -42,9 +40,6 @@ public class RoleController extends AbstractController
 	@Autowired
 	private RoleService roleService;
 
-	@Autowired
-	private RoleUserService roleUserService;
-
 	public RoleController()
 	{
 		super();
@@ -58,16 +53,6 @@ public class RoleController extends AbstractController
 	public void setRoleService(RoleService roleService)
 	{
 		this.roleService = roleService;
-	}
-
-	public RoleUserService getRoleUserService()
-	{
-		return roleUserService;
-	}
-
-	public void setRoleUserService(RoleUserService roleUserService)
-	{
-		this.roleUserService = roleUserService;
 	}
 
 	@RequestMapping("/add")
@@ -175,72 +160,6 @@ public class RoleController extends AbstractController
 
 		PagingData<Role> roles = this.roleService.pagingQuery(pagingQuery);
 		return roles;
-	}
-
-	@RequestMapping(value = "/user/pagingQuery")
-	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id)
-	{
-		Role role = this.roleService.getById(id);
-
-		if (role == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("role", role);
-
-		return "/role/role_user_grid";
-	}
-
-	@RequestMapping(value = "/user/pagingQueryData", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public PagingData<RoleUser> userPagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("roleId") String roleId, @RequestBody(required = false) PagingQuery pagingQueryParam)
-			throws Exception
-	{
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
-
-		Role role = this.roleService.getById(roleId);
-
-		if (role == null)
-			throw new RecordNotFoundException();
-
-		PagingData<RoleUser> roleUsers = this.roleUserService.pagingQueryForRole(role, pagingQuery);
-
-		return roleUsers;
-	}
-
-	@RequestMapping(value = "user/saveAdd", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> userSaveAdd(HttpServletRequest request, HttpServletResponse response,
-			RoleUsersForm roleUsersForm)
-	{
-		Role role = roleUsersForm.getRole();
-		List<User> users = roleUsersForm.getUsers();
-
-		if (isEmpty(role) || isEmpty(users))
-			throw new IllegalInputException();
-
-		RoleUser[] roleUsers = new RoleUser[users.size()];
-
-		for (int i = 0; i < users.size(); i++)
-		{
-			RoleUser roleUser = new RoleUser(IDUtil.randomIdOnTime20(), role, users.get(i));
-			roleUsers[i] = roleUser;
-		}
-
-		this.roleUserService.addIfInexistence(roleUsers);
-
-		return buildOperationMessageSaveSuccessResponseEntity(request);
-	}
-
-	@RequestMapping(value = "user/delete", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> userDelete(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody String[] roleUserIds)
-	{
-		this.roleUserService.deleteByIds(roleUserIds);
-
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
 
 	@Override

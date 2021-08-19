@@ -58,7 +58,6 @@ import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
-import org.datagear.management.service.RoleUserService;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.service.UserService;
@@ -71,7 +70,6 @@ import org.datagear.management.service.impl.DataSetResDirectoryServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.RoleServiceImpl;
-import org.datagear.management.service.impl.RoleUserServiceImpl;
 import org.datagear.management.service.impl.SchemaServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
@@ -488,8 +486,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public UserService userService()
 	{
-		UserServiceImpl bean = new UserServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
-				this.roleUserService(), this.roleService());
+		UserServiceImpl bean = new UserServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(), this.roleService());
 		bean.setUserPasswordEncoder(this.userPasswordEncoder());
 
 		return bean;
@@ -499,13 +496,6 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public RoleService roleService()
 	{
 		RoleServiceImpl bean = new RoleServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
-		return bean;
-	}
-
-	@Bean
-	public RoleUserService roleUserService()
-	{
-		RoleUserServiceImpl bean = new RoleUserServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
 		return bean;
 	}
 

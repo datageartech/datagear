@@ -16,6 +16,17 @@
 			)
 	</insert>
 	
+	<insert id="insertUserRole">
+		INSERT INTO DATAGEAR_ROLE_USER
+			(
+			RU_ID, RU_ROLE_ID, RU_USER_ID
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.roleId}, #{entity.userId}
+			)
+	</insert>
+	
 	<update id="update">
 		UPDATE DATAGEAR_USER SET
 			USER_NAME = #{entity.name},
@@ -42,6 +53,12 @@
 			USER_ID = #{id}
 	</delete>
 	
+	<delete id="deleteUserRoles">
+		DELETE FROM DATAGEAR_ROLE_USER
+		WHERE
+			RU_USER_ID = #{userId}
+	</delete>
+	
 	<select id="getById" resultType="org.datagear.management.domain.User">
 		SELECT
 			T.*
@@ -51,13 +68,22 @@
 			T.${_iq_}id${_iq_} = #{id}
 	</select>
 	
-	<select id="getByName" resultType="org.datagear.management.domain.User">
+	<select id="getIdByName" resultType="string">
 		SELECT
-			T.*
+			USER_ID
 		FROM
-			(<include refid="queryView" />) T
+			DATAGEAR_USER T
 		WHERE
-			T.${_iq_}name${_iq_} = #{name}
+			T.USER_NAME = #{name}
+	</select>
+	
+	<select id="getUserRoleIds" resultType="string">
+		SELECT
+			RU_ROLE_ID
+		FROM
+			DATAGEAR_ROLE_USER
+		WHERE
+			RU_USER_ID = #{userId}
 	</select>
 	
 	<select id="query" resultType="org.datagear.management.domain.User">

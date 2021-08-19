@@ -257,7 +257,7 @@ public class UserController extends AbstractController
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
 
-		this.userService.update(user);
+		this.userService.updateIgnoreRole(user);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}

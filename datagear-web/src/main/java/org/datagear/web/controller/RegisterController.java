@@ -164,6 +164,8 @@ public class RegisterController extends AbstractController
 				roles.add(new Role(roleId, roleId));
 		}
 
+		roles.add(new Role(Role.ROLE_REGISTRY, Role.ROLE_REGISTRY));
+
 		return roles;
 	}
 }

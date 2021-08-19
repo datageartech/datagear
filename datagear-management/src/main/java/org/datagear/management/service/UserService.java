@@ -34,6 +34,14 @@ public interface UserService extends EntityService<String, User>
 	User getByIdNoPassword(String id);
 
 	/**
+	 * 更新，但是忽略{@linkplain User#getRoles()}。
+	 * 
+	 * @param user
+	 * @return
+	 */
+	boolean updateIgnoreRole(User user);
+
+	/**
 	 * 更新用户密码。
 	 * 
 	 * @param id
