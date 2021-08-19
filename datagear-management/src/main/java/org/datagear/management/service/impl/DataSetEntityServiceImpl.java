@@ -24,22 +24,28 @@ import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
+import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.ExcelDataSetEntity;
 import org.datagear.management.domain.HttpDataSetEntity;
 import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
+import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.SummaryDataSetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
+import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
+import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
+import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -57,6 +63,12 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	private SchemaService schemaService;
 
+	private AnalysisProjectService analysisProjectService;
+
+	private UserService userService;
+
+	private DataSetResDirectoryService dataSetResDirectoryService;
+
 	/** 数据集文件存储根目录 */
 	private File dataSetRootDirectory;
 
@@ -70,11 +82,16 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	public DataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
 			ConnectionSource connectionSource, SchemaService schemaService,
+			AnalysisProjectService analysisProjectService,
+			UserService userService, DataSetResDirectoryService dataSetResDirectoryService,
 			File dataSetRootDirectory, HttpClient httpClient)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
+		this.analysisProjectService = analysisProjectService;
+		this.userService = userService;
+		this.dataSetResDirectoryService = dataSetResDirectoryService;
 		setDataSetRootDirectory(dataSetRootDirectory);
 		this.httpClient = httpClient;
 	}
@@ -82,11 +99,16 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	public DataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
 			ConnectionSource connectionSource, SchemaService schemaService,
+			AnalysisProjectService analysisProjectService,
+			UserService userService, DataSetResDirectoryService dataSetResDirectoryService,
 			File dataSetRootDirectory, HttpClient httpClient)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
+		this.analysisProjectService = analysisProjectService;
+		this.userService = userService;
+		this.dataSetResDirectoryService = dataSetResDirectoryService;
 		setDataSetRootDirectory(dataSetRootDirectory);
 		this.httpClient = httpClient;
 	}
@@ -109,6 +131,36 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	public void setSchemaService(SchemaService schemaService)
 	{
 		this.schemaService = schemaService;
+	}
+
+	public AnalysisProjectService getAnalysisProjectService()
+	{
+		return analysisProjectService;
+	}
+
+	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
+	{
+		this.analysisProjectService = analysisProjectService;
+	}
+
+	public UserService getUserService()
+	{
+		return userService;
+	}
+
+	public void setUserService(UserService userService)
+	{
+		this.userService = userService;
+	}
+
+	public DataSetResDirectoryService getDataSetResDirectoryService()
+	{
+		return dataSetResDirectoryService;
+	}
+
+	public void setDataSetResDirectoryService(DataSetResDirectoryService dataSetResDirectoryService)
+	{
+		this.dataSetResDirectoryService = dataSetResDirectoryService;
 	}
 
 	public File getDataSetRootDirectory()
@@ -146,11 +198,10 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (entity instanceof SqlDataSetEntity)
 		{
 			SqlDataSetEntity sqlDataSetEntity = (SqlDataSetEntity) entity;
-
 			SchemaConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
 
-			connectionFactory.setSchema(this.schemaService.getById(connectionFactory.getSchema().getId()));
-			connectionFactory.setConnectionSource(this.connectionSource);
+			if (connectionFactory != null)
+				connectionFactory.setConnectionSource(this.connectionSource);
 		}
 
 		return entity;
@@ -488,6 +539,30 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			entity.setHttpClient(this.httpClient);
 
 		return entity;
+	}
+
+	@Override
+	protected DataSetEntity postProcessGet(DataSetEntity obj)
+	{
+		inflateAnalysisProjectAwareEntity(obj, this.analysisProjectService);
+		inflateCreateUserEntity(obj, this.userService);
+
+		if (obj instanceof DirectoryFileDataSetEntity)
+			inflateDirectoryFileDataSetEntity((DirectoryFileDataSetEntity) obj, this.dataSetResDirectoryService);
+
+		if (obj instanceof SqlDataSetEntity)
+		{
+			SqlDataSetEntity entity = (SqlDataSetEntity) obj;
+
+			SchemaConnectionFactory connectionFactory = entity.getConnectionFactory();
+			Schema schema = (connectionFactory == null ? null : connectionFactory.getSchema());
+			String schemaId = (schema == null ? null : schema.getId());
+
+			if (!StringUtil.isEmpty(schemaId))
+				connectionFactory.setSchema(this.schemaService.getById(schemaId));
+		}
+
+		return super.postProcessGet(obj);
 	}
 
 	@Override

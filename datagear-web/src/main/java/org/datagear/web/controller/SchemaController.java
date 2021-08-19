@@ -110,7 +110,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		schema.setId(IDUtil.randomIdOnTime20());
 		schema.setCreateTime(new Date());
-		schema.setCreateUser(user.cloneWithoutPassword());
+		schema.setCreateUser(user.cloneNoPassword());
 
 		getSchemaService().add(user, schema);
 

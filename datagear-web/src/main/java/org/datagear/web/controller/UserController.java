@@ -119,7 +119,7 @@ public class UserController extends AbstractController
 
 		this.userService.add(user);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, user.cloneWithoutPassword());
+		return buildOperationMessageSaveSuccessResponseEntity(request, user.cloneNoPassword());
 	}
 
 	@RequestMapping("/edit")
@@ -157,7 +157,7 @@ public class UserController extends AbstractController
 
 		this.userService.update(user);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, user.cloneWithoutPassword());
+		return buildOperationMessageSaveSuccessResponseEntity(request, user.cloneNoPassword());
 	}
 
 	@RequestMapping("/view")

@@ -146,6 +146,15 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 	}
 
 	@Override
+	public User getByIdNoPassword(String id)
+	{
+		User user = super.getById(id);
+		user.clearPassword();
+
+		return user;
+	}
+
+	@Override
 	public boolean updatePasswordById(String id, String newPassword, boolean encrypt)
 	{
 		if (encrypt && this.userPasswordEncoder != null)

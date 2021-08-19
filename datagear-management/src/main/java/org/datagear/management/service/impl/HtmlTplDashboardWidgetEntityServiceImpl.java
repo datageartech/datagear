@@ -15,9 +15,11 @@ import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -37,6 +39,10 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 
 	private HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer;
 
+	private AnalysisProjectService analysisProjectService;
+
+	private UserService userService;
+
 	public HtmlTplDashboardWidgetEntityServiceImpl()
 	{
 		super();
@@ -44,18 +50,26 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 
 	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer)
+			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer,
+			AnalysisProjectService analysisProjectService,
+			UserService userService)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
+		this.analysisProjectService = analysisProjectService;
+		this.userService = userService;
 	}
 
 	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer)
+			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer,
+			AnalysisProjectService analysisProjectService,
+			UserService userService)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
+		this.analysisProjectService = analysisProjectService;
+		this.userService = userService;
 	}
 
 	@Override
@@ -67,6 +81,26 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	public void setHtmlTplDashboardWidgetRenderer(HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer)
 	{
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
+	}
+
+	public AnalysisProjectService getAnalysisProjectService()
+	{
+		return analysisProjectService;
+	}
+
+	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
+	{
+		this.analysisProjectService = analysisProjectService;
+	}
+
+	public UserService getUserService()
+	{
+		return userService;
+	}
+
+	public void setUserService(UserService userService)
+	{
+		this.userService = userService;
 	}
 
 	@Override
@@ -103,6 +137,15 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 			String analysisProjectId)
 	{
 		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId, true);
+	}
+
+	@Override
+	protected HtmlTplDashboardWidgetEntity postProcessGet(HtmlTplDashboardWidgetEntity obj)
+	{
+		inflateAnalysisProjectAwareEntity(obj, this.analysisProjectService);
+		inflateCreateUserEntity(obj, this.userService);
+
+		return super.postProcessGet(obj);
 	}
 
 	@Override

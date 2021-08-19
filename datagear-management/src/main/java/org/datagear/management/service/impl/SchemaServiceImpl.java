@@ -10,14 +10,15 @@ package org.datagear.management.service.impl;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
+import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
+import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -33,6 +34,8 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 
 	private DriverEntityManager driverEntityManager;
 
+	private UserService userService;
+
 	public SchemaServiceImpl()
 	{
 		super();
@@ -40,18 +43,20 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 
 	public SchemaServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			DriverEntityManager driverEntityManager)
+			DriverEntityManager driverEntityManager, UserService userService)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
+		this.userService = userService;
 	}
 
 	public SchemaServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			DriverEntityManager driverEntityManager)
+			DriverEntityManager driverEntityManager, UserService userService)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
+		this.userService = userService;
 	}
 
 	public DriverEntityManager getDriverEntityManager()
@@ -62,6 +67,16 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public void setDriverEntityManager(DriverEntityManager driverEntityManager)
 	{
 		this.driverEntityManager = driverEntityManager;
+	}
+
+	public UserService getUserService()
+	{
+		return userService;
+	}
+
+	public void setUserService(UserService userService)
+	{
+		this.userService = userService;
 	}
 
 	@Override
@@ -114,13 +129,17 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	@Override
 	protected Schema postProcessGet(Schema schema)
 	{
+		inflateCreateUserEntity(schema, this.userService);
+
 		if (schema.hasDriverEntity())
 		{
-			DriverEntity driverEntity = this.driverEntityManager.get(schema.getDriverEntity().getId());
-			schema.setDriverEntity(driverEntity);
+			String did = schema.getDriverEntity().getId();
+
+			if (!StringUtil.isEmpty(did))
+				schema.setDriverEntity(this.driverEntityManager.get(did));
 		}
 
-		return schema;
+		return super.postProcessGet(schema);
 	}
 
 	@Override

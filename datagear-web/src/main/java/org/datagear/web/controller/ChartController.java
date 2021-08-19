@@ -275,7 +275,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (isEmpty(entity.getId()))
 		{
 			entity.setId(IDUtil.randomIdOnTime20());
-			entity.setCreateUser(user.cloneWithoutPassword());
+			entity.setCreateUser(user.cloneNoPassword());
 			inflateHtmlChartWidgetEntity(entity, request);
 
 			checkSaveEntity(entity);

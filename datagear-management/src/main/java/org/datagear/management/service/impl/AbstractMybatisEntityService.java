@@ -13,14 +13,24 @@ import java.util.Map;
 
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.CloneableEntity;
+import org.datagear.management.domain.CreateUserEntity;
+import org.datagear.management.domain.DataSetResDirectory;
+import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.Entity;
+import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.CreateUserEntityService;
+import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.EntityService;
+import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
+import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.support.SimpleValueWrapper;
@@ -274,6 +284,56 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 			cacheInvalidate();
 
 		return count;
+	}
+
+	/**
+	 * 如果{@linkplain CreateUserEntity#getCreateUser()}不为空，
+	 * 则使用{@linkplain UserService#getByIdNoPassword(String)}对其进行更新。
+	 * 
+	 * @param entity  允许为{@code null}
+	 * @param service
+	 */
+	protected void inflateCreateUserEntity(CreateUserEntity<?> entity, UserService service)
+	{
+		User user = (entity == null ? null : entity.getCreateUser());
+		String userId = (user == null ? null : user.getId());
+		
+		if(!StringUtil.isEmpty(userId))
+			entity.setCreateUser(service.getByIdNoPassword(userId));
+	}
+
+	/**
+	 * 如果{@linkplain AnalysisProjectAwareEntity#getAnalysisProject()}不为空，
+	 * 则使用{@linkplain AnalysisProjectService#getById(String)}对其进行更新。
+	 * 
+	 * @param entity  允许为{@code null}
+	 * @param service
+	 */
+	protected void inflateAnalysisProjectAwareEntity(AnalysisProjectAwareEntity<?> entity,
+			AnalysisProjectService service)
+	{
+		AnalysisProject ap = (entity == null ? null : entity.getAnalysisProject());
+		String apId = (ap == null ? null : ap.getId());
+
+		if (!StringUtil.isEmpty(ap))
+			entity.setAnalysisProject(service.getById(apId));
+	}
+
+	/**
+	 * 如果{@linkplain DirectoryFileDataSetEntity#getDataSetResDirectory()}不为空，
+	 * 则使用{@linkplain DataSetResDirectoryService#getById(String)}对其进行更新。
+	 * 
+	 * @param entity  允许为{@code null}
+	 * @param service
+	 */
+	protected void inflateDirectoryFileDataSetEntity(DirectoryFileDataSetEntity entity,
+			DataSetResDirectoryService service)
+	{
+		DataSetResDirectory dsd = (entity == null ? null : entity.getDataSetResDirectory());
+		String dsdId = (dsd == null ? null : dsd.getId());
+
+		if (!StringUtil.isEmpty(dsdId))
+			entity.setDataSetResDirectory(service.getById(dsdId));
 	}
 
 	/**

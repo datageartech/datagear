@@ -13,6 +13,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -27,21 +28,35 @@ public class DataSetResDirectoryServiceImpl extends
 {
 	protected static final String SQL_NAMESPACE = DataSetResDirectory.class.getName();
 
+	private UserService userService;
+
 	public DataSetResDirectoryServiceImpl()
 	{
 		super();
 	}
 
 	public DataSetResDirectoryServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
-			AuthorizationService authorizationService)
+			AuthorizationService authorizationService, UserService userService)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
+		this.userService = userService;
 	}
 
 	public DataSetResDirectoryServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
-			AuthorizationService authorizationService)
+			AuthorizationService authorizationService, UserService userService)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
+		this.userService = userService;
+	}
+
+	public UserService getUserService()
+	{
+		return userService;
+	}
+
+	public void setUserService(UserService userService)
+	{
+		this.userService = userService;
 	}
 
 	@Override
@@ -60,6 +75,13 @@ public class DataSetResDirectoryServiceImpl extends
 	public int updateCreateUserId(String oldUserId, String newUserId)
 	{
 		return super.updateCreateUserId(oldUserId, newUserId);
+	}
+
+	@Override
+	protected DataSetResDirectory postProcessGet(DataSetResDirectory obj)
+	{
+		inflateCreateUserEntity(obj, this.userService);
+		return super.postProcessGet(obj);
 	}
 
 	@Override

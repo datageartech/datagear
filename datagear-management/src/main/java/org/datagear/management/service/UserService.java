@@ -26,6 +26,14 @@ public interface UserService extends EntityService<String, User>
 	User getByName(String name);
 
 	/**
+	 * 根据ID获取用户，其密码已被清除。
+	 * 
+	 * @param id
+	 * @return
+	 */
+	User getByIdNoPassword(String id);
+
+	/**
 	 * 更新用户密码。
 	 * 
 	 * @param id

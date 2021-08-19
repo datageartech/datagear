@@ -34,10 +34,12 @@ import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -60,6 +62,10 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	private DataSetEntityService dataSetEntityService;
 
+	private AnalysisProjectService analysisProjectService;
+
+	private UserService userService;
+
 	public HtmlChartWidgetEntityServiceImpl()
 	{
 		super();
@@ -67,20 +73,28 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	public HtmlChartWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService)
+			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService,
+			AnalysisProjectService analysisProjectService,
+			UserService userService)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
 		this.chartPluginManager = chartPluginManager;
 		this.dataSetEntityService = dataSetEntityService;
+		this.analysisProjectService = analysisProjectService;
+		this.userService = userService;
 	}
 
 	public HtmlChartWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService)
+			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService,
+			AnalysisProjectService analysisProjectService,
+			UserService userService)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.chartPluginManager = chartPluginManager;
 		this.dataSetEntityService = dataSetEntityService;
+		this.analysisProjectService = analysisProjectService;
+		this.userService = userService;
 	}
 
 	public ChartPluginManager getChartPluginManager()
@@ -101,6 +115,26 @@ public class HtmlChartWidgetEntityServiceImpl
 	public void setDataSetEntityService(DataSetEntityService dataSetEntityService)
 	{
 		this.dataSetEntityService = dataSetEntityService;
+	}
+
+	public AnalysisProjectService getAnalysisProjectService()
+	{
+		return analysisProjectService;
+	}
+
+	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
+	{
+		this.analysisProjectService = analysisProjectService;
+	}
+
+	public UserService getUserService()
+	{
+		return userService;
+	}
+
+	public void setUserService(UserService userService)
+	{
+		this.userService = userService;
 	}
 
 	@Override
@@ -197,6 +231,15 @@ public class HtmlChartWidgetEntityServiceImpl
 		setChartDataSetVOs(entity);
 
 		return entity;
+	}
+
+	@Override
+	protected HtmlChartWidgetEntity postProcessGet(HtmlChartWidgetEntity obj)
+	{
+		inflateAnalysisProjectAwareEntity(obj, this.analysisProjectService);
+		inflateCreateUserEntity(obj, this.userService);
+
+		return super.postProcessGet(obj);
 	}
 
 	protected void saveWidgetDataSetRelations(HtmlChartWidgetEntity entity)

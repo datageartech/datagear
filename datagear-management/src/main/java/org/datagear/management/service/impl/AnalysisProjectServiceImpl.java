@@ -13,6 +13,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -27,21 +28,25 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 {
 	protected static final String SQL_NAMESPACE = AnalysisProject.class.getName();
 
+	private UserService userService;
+
 	public AnalysisProjectServiceImpl()
 	{
 		super();
 	}
 
 	public AnalysisProjectServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
-			AuthorizationService authorizationService)
+			AuthorizationService authorizationService, UserService userService)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
+		this.userService = userService;
 	}
 
 	public AnalysisProjectServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
-			AuthorizationService authorizationService)
+			AuthorizationService authorizationService, UserService userService)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
+		this.userService = userService;
 	}
 
 	@Override
@@ -60,6 +65,13 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 	public int updateCreateUserId(String oldUserId, String newUserId)
 	{
 		return super.updateCreateUserId(oldUserId, newUserId);
+	}
+
+	@Override
+	protected AnalysisProject postProcessGet(AnalysisProject obj)
+	{
+		inflateCreateUserEntity(obj, this.userService);
+		return super.postProcessGet(obj);
 	}
 
 	@Override

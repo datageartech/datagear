@@ -192,7 +192,7 @@ public class User extends AbstractStringIdEntity implements CloneableEntity
 	 * 
 	 * @return
 	 */
-	public User cloneWithoutPassword()
+	public User cloneNoPassword()
 	{
 		User entity = clone();
 		entity.clearPassword();
