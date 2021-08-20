@@ -139,15 +139,15 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 * 注意：加载此实体的私有属性值应通过重写{@linkplain #getByIdFromDB(Object, Map)}来实现，这样它们才会被加入缓存。
 	 * </p>
 	 * <p>
-	 * 此方法的默认实现是：直接返回{@code obj}。
+	 * 此方法的默认实现是：直接返回{@code entity}。
 	 * </p>
 	 * 
 	 * @see #getById(Object) getById(Object)会在其内部调用此方法
 	 */
 	@Override
-	protected T postProcessGet(T obj)
+	protected T postProcessGet(T entity)
 	{
-		return super.postProcessGet(obj);
+		return super.postProcessGet(entity);
 	}
 
 	@Override
@@ -207,7 +207,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 * 
 	 * @param id
 	 * @param params
-	 * @return
+	 * @return 可能返回{@code null}
 	 */
 	protected T getByIdFromDB(ID id, Map<String, Object> params)
 	{

@@ -21,6 +21,7 @@ import org.datagear.management.service.RoleService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.util.IDUtil;
+import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -99,6 +100,9 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 
 		String id = selectOneMybatis("getIdByName", params);
 
+		if (StringUtil.isEmpty(id))
+			return null;
+
 		return getById(id);
 	}
 
@@ -106,7 +110,9 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	public User getByIdNoPassword(String id)
 	{
 		User user = getById(id);
-		user.clearPassword();
+
+		if (user != null)
+			user.clearPassword();
 
 		return user;
 	}
@@ -185,6 +191,9 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 
 	protected void saveUserRoles(User user)
 	{
+		if (user == null)
+			return;
+
 		deleteUserRoles(user.getId());
 
 		Set<Role> roles = user.getRoles();
@@ -215,6 +224,9 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	{
 		User user = super.getByIdFromDB(id, params);
 
+		if (user == null)
+			return null;
+
 		Map<String, Object> params1 = buildParamMap();
 		params1.put("userId", user.getId());
 
@@ -240,9 +252,9 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	}
 
 	@Override
-	protected User postProcessGet(User obj)
+	protected User postProcessGet(User entity)
 	{
-		Set<Role> roles = obj.getRoles();
+		Set<Role> roles = entity.getRoles();
 
 		if (roles != null && !roles.isEmpty())
 		{
@@ -254,10 +266,10 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 				addIfNonNull(rolesNew, role);
 			}
 
-			obj.setRoles(rolesNew);
+			entity.setRoles(rolesNew);
 		}
 
-		return super.postProcessGet(obj);
+		return super.postProcessGet(entity);
 	}
 
 	@Override

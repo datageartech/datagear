@@ -244,6 +244,9 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	protected void saveWidgetDataSetRelations(HtmlChartWidgetEntity entity)
 	{
+		if (entity == null)
+			return;
+
 		Map<String, Object> delParams = buildParamMap();
 		delParams.put("id", entity.getId());
 
@@ -287,6 +290,9 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	protected void setChartDataSetVOs(HtmlChartWidgetEntity entity)
 	{
+		if (entity == null)
+			return;
+
 		Map<String, Object> sqlParams = buildParamMap();
 		sqlParams.put("widgetId", entity.getId());
 
@@ -330,16 +336,19 @@ public class HtmlChartWidgetEntityServiceImpl
 		inflateChartDataSets(entity, forAnalysis);
 	}
 
-	protected void inflateHtmlChartPlugin(HtmlChartWidgetEntity obj, boolean forAnalysis)
+	protected void inflateHtmlChartPlugin(HtmlChartWidgetEntity entity, boolean forAnalysis)
 	{
-		HtmlChartPlugin htmlChartPlugin = obj.getHtmlChartPlugin();
+		if (entity == null)
+			return;
+
+		HtmlChartPlugin htmlChartPlugin = entity.getHtmlChartPlugin();
 
 		if (htmlChartPlugin != null)
 		{
 			HtmlChartPlugin full = getHtmlChartPlugin(htmlChartPlugin.getId());
 
 			if (forAnalysis)
-				obj.setHtmlChartPlugin(full);
+				entity.setHtmlChartPlugin(full);
 			else
 			{
 				if (full != null)
@@ -354,6 +363,9 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	protected void inflateChartDataSets(HtmlChartWidgetEntity entity, boolean forAnalysis)
 	{
+		if (entity == null)
+			return;
+
 		ChartDataSetVO[] chartDataSetVOs = entity.getChartDataSetVOs();
 
 		if (chartDataSetVOs == null || chartDataSetVOs.length == 0)
@@ -438,14 +450,14 @@ public class HtmlChartWidgetEntityServiceImpl
 		return (HtmlChartPlugin) this.chartPluginManager.get(id);
 	}
 
-	protected List<WidgetDataSetRelation> getWidgetDataSetRelations(HtmlChartWidgetEntity obj)
+	protected List<WidgetDataSetRelation> getWidgetDataSetRelations(HtmlChartWidgetEntity entity)
 	{
 		List<WidgetDataSetRelation> list = new ArrayList<>();
 
-		if (obj == null)
+		if (entity == null)
 			return list;
 
-		ChartDataSet[] chartDataSets = obj.getChartDataSets();
+		ChartDataSet[] chartDataSets = entity.getChartDataSets();
 
 		if (chartDataSets == null)
 			return list;
@@ -457,7 +469,8 @@ public class HtmlChartWidgetEntityServiceImpl
 			String propertySignsJson = JsonSupport.generate(chartDataSet.getPropertySigns(), "");
 			String queryJson = JsonSupport.generate(chartDataSet.getQuery(), "");
 
-			WidgetDataSetRelation relation = new WidgetDataSetRelation(obj.getId(), chartDataSet.getDataSet().getId(),
+			WidgetDataSetRelation relation = new WidgetDataSetRelation(entity.getId(),
+					chartDataSet.getDataSet().getId(),
 					i + 1);
 			relation.setPropertySignsJson(propertySignsJson);
 			relation.setAlias(chartDataSet.getAlias());

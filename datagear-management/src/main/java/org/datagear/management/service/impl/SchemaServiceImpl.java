@@ -96,7 +96,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public boolean update(User user, Schema entity) throws PermissionDeniedException
 	{
 		checkSaveUrlPermission(user, entity.getUrl());
-
 		return super.update(user, entity);
 	}
 

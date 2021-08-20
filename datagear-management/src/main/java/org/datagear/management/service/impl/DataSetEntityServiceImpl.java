@@ -587,6 +587,9 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected void saveDataSetPropertyPOs(DataSetEntity entity)
 	{
+		if (entity == null)
+			return;
+
 		Map<String, Object> delParams = buildParamMap();
 		delParams.put("dataSetId", entity.getId());
 
@@ -608,6 +611,9 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected void saveDataSetParamPOs(DataSetEntity entity)
 	{
+		if (entity == null)
+			return;
+
 		Map<String, Object> delParams = buildParamMap();
 		delParams.put("dataSetId", entity.getId());
 

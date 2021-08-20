@@ -90,9 +90,12 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 		Authorization authorization = getById(id);
 
 		if (authorization != null)
+		{
 			authorizationUpdated(authorization.getResourceType(), authorization.getResource());
+			return super.deleteById(id);
+		}
 
-		return super.deleteById(id);
+		return false;
 	}
 
 	@Override
