@@ -11,9 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleService;
-import org.datagear.management.service.RoleUserService;
 import org.datagear.management.service.impl.RoleServiceImpl;
-import org.datagear.management.service.impl.RoleUserServiceImpl;
 import org.datagear.management.service.impl.UserServiceImpl;
 import org.junit.Test;
 
@@ -30,9 +28,8 @@ public class UserServiceImplTest extends ServiceImplTestSupport
 	public UserServiceImplTest()
 	{
 		super();
-		RoleUserService roleUserService = new RoleUserServiceImpl(getSqlSessionFactory(), getDialect());
 		RoleService roleService = new RoleServiceImpl(getSqlSessionFactory(), getDialect());
-		this.userServiceImpl = new UserServiceImpl(getSqlSessionFactory(), getDialect(), roleUserService, roleService);
+		this.userServiceImpl = new UserServiceImpl(getSqlSessionFactory(), getDialect(), roleService);
 	}
 
 	@Test

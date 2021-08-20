@@ -13,6 +13,7 @@ titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
 -->
 <#assign selectOperation=(selectOperation!false)>
+<#assign isMultipleSelect=(isMultipleSelect!false)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -117,10 +118,17 @@ selectOperation 是否选择操作，允许为null
 	
 	po.element("input[name=confirmButton]").click(function()
 	{
+		<#if isMultipleSelect>
+		po.executeOnSelects(function(rows)
+		{
+			po.pageParamCallSelect(true, rows);
+		});
+		<#else>
 		po.executeOnSelect(function(row)
 		{
 			po.pageParamCallSelect(true, row);
 		});
+		</#if>
 	});
 	
 	po.initPagination();

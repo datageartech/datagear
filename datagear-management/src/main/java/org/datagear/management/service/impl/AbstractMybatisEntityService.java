@@ -178,6 +178,9 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	@SuppressWarnings("unchecked")
 	protected T getById(ID id, Map<String, Object> params)
 	{
+		if (id == null)
+			return null;
+
 		T entity = null;
 
 		ValueWrapper entityWrapper = cacheGet(id);

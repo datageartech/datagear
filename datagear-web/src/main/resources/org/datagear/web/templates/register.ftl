@@ -32,7 +32,7 @@
 						<label><@spring.message code='register.name' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="name" value="" class="ui-widget ui-widget-content" />
+						<input type="text" name="name" value="" class="ui-widget ui-widget-content" autocomplete="off" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -40,7 +40,7 @@
 						<label><@spring.message code='register.password' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="password" name="password" value="" class="ui-widget ui-widget-content" />
+						<input type="password" name="password" value="" class="ui-widget ui-widget-content" autocomplete="new-password" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -48,7 +48,7 @@
 						<label><@spring.message code='register.confirmPassword' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content" />
+						<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content" autocomplete="new-password" />
 					</div>
 				</div>
 				<div class="form-item">

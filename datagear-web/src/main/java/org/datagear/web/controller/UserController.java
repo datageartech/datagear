@@ -7,9 +7,17 @@
 
 package org.datagear.web.controller;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
@@ -89,6 +97,7 @@ public class UserController extends AbstractController
 		User user = new User();
 
 		model.addAttribute("user", user);
+		model.addAttribute("userRoles", toWriteJsonTemplateModel(toUserRolesList(user)));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.addUser");
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
 
@@ -97,9 +106,12 @@ public class UserController extends AbstractController
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response, User user,
-			@RequestParam("confirmPassword") String confirmPassword)
+	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody UserForm userForm)
 	{
+		User user = userForm.getUser();
+		String confirmPassword = userForm.getConfirmPassword();
+
 		if (isBlank(user.getName()) || isBlank(user.getPassword()))
 			throw new IllegalInputException();
 
@@ -126,9 +138,13 @@ public class UserController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = this.userService.getById(id);
+		User user = this.userService.getByIdNoPassword(id);
+
+		if (user == null)
+			throw new RecordNotFoundException();
 
 		model.addAttribute("user", user);
+		model.addAttribute("userRoles", toWriteJsonTemplateModel(toUserRolesList(user)));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.editUser");
 		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
 
@@ -138,8 +154,11 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			User user, @RequestParam("confirmPassword") String confirmPassword)
+			@RequestBody UserForm userForm)
 	{
+		User user = userForm.getUser();
+		String confirmPassword = userForm.getConfirmPassword();
+
 		if (isBlank(user.getName()))
 			throw new IllegalInputException();
 
@@ -164,12 +183,13 @@ public class UserController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = this.userService.getById(id);
+		User user = this.userService.getByIdNoPassword(id);
 
 		if (user == null)
 			throw new RecordNotFoundException();
 
 		model.addAttribute("user", user);
+		model.addAttribute("userRoles", toWriteJsonTemplateModel(toUserRolesList(user)));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.viewUser");
 		model.addAttribute(KEY_READONLY, true);
 
@@ -239,8 +259,11 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/savePersonalSet", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> savePersonalSet(HttpServletRequest request, HttpServletResponse response,
-			User user, @RequestParam("confirmPassword") String confirmPassword)
+			@RequestBody UserForm userForm)
 	{
+		User user = userForm.getUser();
+		String confirmPassword = userForm.getConfirmPassword();
+
 		if (isBlank(user.getName()) || !confirmPassword.equals(user.getPassword()))
 			throw new IllegalInputException();
 
@@ -266,5 +289,59 @@ public class UserController extends AbstractController
 	protected String buildMessageCode(String code)
 	{
 		return buildMessageCode("user", code);
+	}
+
+	protected List<Role> toUserRolesList(User user)
+	{
+		List<Role> list = new ArrayList<Role>();
+
+		Set<Role> roles = (user == null ? null : user.getRoles());
+		if (roles != null)
+			list.addAll(roles);
+
+		Collections.sort(list, new Comparator<Role>()
+		{
+			@Override
+			public int compare(Role o1, Role o2)
+			{
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+
+		return list;
+	}
+
+	public static class UserForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private User user;
+
+		private String confirmPassword;
+
+		public UserForm()
+		{
+			super();
+		}
+
+		public User getUser()
+		{
+			return user;
+		}
+
+		public void setUser(User user)
+		{
+			this.user = user;
+		}
+
+		public String getConfirmPassword()
+		{
+			return confirmPassword;
+		}
+
+		public void setConfirmPassword(String confirmPassword)
+		{
+			this.confirmPassword = confirmPassword;
+		}
 	}
 }

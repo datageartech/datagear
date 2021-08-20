@@ -164,25 +164,19 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 
 	protected void saveUserRoles(User user)
 	{
-		// TODO 完成用户编辑页面的角色编辑功能后再开启
-		boolean save = false;
+		deleteUserRoles(user.getId());
 
-		if (save)
+		Set<Role> roles = user.getRoles();
+		if (roles != null && !roles.isEmpty())
 		{
-			deleteUserRoles(user.getId());
+			Map<String, Object> params = buildParamMap();
 
-			Set<Role> roles = user.getRoles();
-			if (roles != null && !roles.isEmpty())
+			for (Role role : roles)
 			{
-				Map<String, Object> params = buildParamMap();
+				RoleUser ru = new RoleUser(IDUtil.randomIdOnTime20(), role.getId(), user.getId());
+				params.put("entity", ru);
 
-				for (Role role : roles)
-				{
-					RoleUser ru = new RoleUser(IDUtil.randomIdOnTime20(), role.getId(), user.getId());
-					params.put("entity", ru);
-
-					insertMybatis("insertUserRole", params);
-				}
+				insertMybatis("insertUserRole", params);
 			}
 		}
 	}
@@ -239,7 +233,7 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 				rolesNew.add(role);
 			}
 
-			obj.setRoles(roles);
+			obj.setRoles(rolesNew);
 		}
 
 		return super.postProcessGet(obj);

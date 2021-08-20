@@ -355,6 +355,30 @@ form.display-block .form-content .form-item .form-item-value label.error,
 	padding-bottom: 0.3em;
 }
 
+/*轻型列表*/
+.minor-list{
+	height: 10em;
+	overflow: auto;
+	padding: 0.41em 0.41em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.minor-list .minor-list-item{
+	margin-bottom: 0.3em;
+	padding: 0.3em 0.3em;
+}
+.minor-list .minor-list-item .item-content{
+	margin-left: 0.41em;
+}
+.minor-list.deletable-list .minor-list-item .item-content{
+	display: inline-block;
+}
+.minor-list.deletable-list .minor-list-item .delete-icon{
+	cursor: pointer;
+}
+
+
 /*首选操作按钮*/
 .ui-button.recommended{
 	border: 1px solid #0066ff;
@@ -1377,6 +1401,15 @@ table.dataTable tbody tr td select{
 .page-form-login{}
 .page-form-login form .form-foot.login-form-ext{
 	padding-top: 2em;
+}
+
+/*用户*/
+.page-form-user{}
+.page-form-user .user-roles{
+	display: inline-block;
+}
+.page-form-user .selectUserRoleBtn{
+	vertical-align: top;
 }
 
 /*驱动信息管理表单页*/

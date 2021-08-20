@@ -147,6 +147,7 @@ public class RoleController extends AbstractController
 	{
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "role.selectRole");
 		model.addAttribute(KEY_SELECT_OPERATION, true);
+		setIsMultipleSelectAttribute(request, model);
 
 		return "/role/role_grid";
 	}
