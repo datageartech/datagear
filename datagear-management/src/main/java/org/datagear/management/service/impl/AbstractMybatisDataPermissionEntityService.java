@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataIdPermission;
@@ -46,6 +47,11 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 	private ServiceCache permissionCache;
 
+	/**
+	 * 查询操作时缓存权限数目。
+	 */
+	private int cachePermissionCountForQuery = 10;
+
 	public AbstractMybatisDataPermissionEntityService()
 	{
 		super();
@@ -65,6 +71,16 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		this.authorizationService = authorizationService;
 	}
 
+	public AuthorizationService getAuthorizationService()
+	{
+		return authorizationService;
+	}
+
+	public void setAuthorizationService(AuthorizationService authorizationService)
+	{
+		this.authorizationService = authorizationService;
+	}
+
 	public ServiceCache getPermissionCache()
 	{
 		return permissionCache;
@@ -73,6 +89,16 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	public void setPermissionCache(ServiceCache permissionCache)
 	{
 		this.permissionCache = permissionCache;
+	}
+
+	public int getCachePermissionCountForQuery()
+	{
+		return cachePermissionCountForQuery;
+	}
+
+	public void setCachePermissionCountForQuery(int cachePermissionCountForQuery)
+	{
+		this.cachePermissionCountForQuery = cachePermissionCountForQuery;
 	}
 
 	@Override
@@ -269,6 +295,26 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		return count;
 	}
 
+	@Override
+	protected List<T> query(String statement, Map<String, Object> params)
+	{
+		List<T> list = super.query(statement, params);
+
+		permissionCachePutQueryResult(statement, params, list);
+
+		return list;
+	}
+
+	@Override
+	protected List<T> query(String statement, Map<String, Object> params, RowBounds rowBounds)
+	{
+		List<T> list = super.query(statement, params, rowBounds);
+
+		permissionCachePutQueryResult(statement, params, list);
+
+		return list;
+	}
+
 	/**
 	 * 获取权限列表。
 	 * <p>
@@ -299,7 +345,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			}
 		}
 
-		getPermissionsFromDB(user, noCachedIds, permissions);
+		getPermissionsFromDB(user, noCachedIds, permissions, true);
 
 		List<Integer> re = new ArrayList<>(len);
 
@@ -351,8 +397,9 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * @param user
 	 * @param ids
 	 * @param permissions
+	 * @param cache
 	 */
-	protected void getPermissionsFromDB(User user ,List<ID> ids, Map<ID, Integer> permissions)
+	protected void getPermissionsFromDB(User user, List<ID> ids, Map<ID, Integer> permissions, boolean cache)
 	{
 		if(ids.isEmpty())
 			return;
@@ -385,7 +432,8 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			
 			permissions.put(id, permission);
 
-			permissionCachePut(id, userId, permission);
+			if (cache)
+				permissionCachePut(id, userId, permission);
 		}
 	}
 
@@ -416,6 +464,40 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		}
 
 		upm.putPermission(userId, permission);
+	}
+
+	protected void permissionCachePutQueryResult(String statement, Map<String, Object> params, List<T> result)
+	{
+		if (params == null || result == null || this.cachePermissionCountForQuery <= 0)
+			return;
+
+		User user = (User) params.get(DATA_PERMISSION_PARAM_CURRENT_USER);
+
+		if (user == null)
+			return;
+
+		String userId = user.getId();
+
+		int count = 0;
+
+		for (T t : result)
+		{
+			if (count >= this.cachePermissionCountForQuery)
+				break;
+
+			ID id = (t == null ? null : t.getId());
+
+			if (id == null)
+				continue;
+
+			int permission = t.getDataPermission();
+
+			if (Authorization.isLegalPermission(permission))
+			{
+				permissionCachePut(id, userId, permission);
+				count++;
+			}
+		}
 	}
 
 	protected void permissionCacheInvalidate()

@@ -278,6 +278,17 @@ public class Authorization extends AbstractStringIdEntity implements CloneableEn
 	}
 
 	/**
+	 * 是否是合法的权限值，即不小于{@linkplain #PERMISSION_MIN}、且不大于{@linkplain #PERMISSION_MAX}。
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean isLegalPermission(int permission)
+	{
+		return (permission >= PERMISSION_MIN && permission <= PERMISSION_MAX);
+	}
+
+	/**
 	 * 是否可授权。
 	 * <p>
 	 * {@code currentUser}必须是用于查询{@code entity}的用户。
