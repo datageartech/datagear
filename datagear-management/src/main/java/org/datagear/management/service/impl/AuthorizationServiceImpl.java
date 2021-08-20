@@ -85,6 +85,17 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 	}
 
 	@Override
+	public boolean update(Authorization entity)
+	{
+		boolean updated = super.update(entity);
+
+		if (updated)
+			authorizationUpdated(entity.getResourceType(), entity.getResource());
+
+		return updated;
+	}
+
+	@Override
 	public boolean deleteById(String id)
 	{
 		Authorization authorization = getById(id);

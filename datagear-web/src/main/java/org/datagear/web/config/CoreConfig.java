@@ -50,6 +50,7 @@ import org.datagear.dataexchange.support.JsonDataImportService;
 import org.datagear.dataexchange.support.SqlDataExportService;
 import org.datagear.dataexchange.support.SqlDataImportService;
 import org.datagear.management.dbversion.DbVersionManager;
+import org.datagear.management.service.AnalysisProjectAuthorizationListener;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationListener;
 import org.datagear.management.service.AuthorizationService;
@@ -64,9 +65,11 @@ import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.service.impl.AbstractMybatisDataPermissionEntityService;
 import org.datagear.management.service.impl.AbstractMybatisEntityService;
+import org.datagear.management.service.impl.AnalysisProjectAuthorizationListenerAware;
 import org.datagear.management.service.impl.AnalysisProjectServiceImpl;
 import org.datagear.management.service.impl.AuthorizationListenerAware;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
+import org.datagear.management.service.impl.BundleAnalysisProjectAuthorizationListener;
 import org.datagear.management.service.impl.BundleAuthorizationListener;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
 import org.datagear.management.service.impl.DataSetResDirectoryServiceImpl;
@@ -746,6 +749,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 		initAuthorizationResourceServices(context);
 		initAuthorizationListenerAwares(context);
+		initAnalysisProjectAuthorizationListenerAwares(context);
 		initServiceCaches(context);
 		initDevotedDataExchangeServices(context);
 	}
@@ -773,6 +777,23 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		Map<String, AuthorizationListenerAware> awareMap = context.getBeansOfType(AuthorizationListenerAware.class);
 		for (AuthorizationListenerAware aware : awareMap.values())
 			aware.setAuthorizationListener(listener);
+	}
+
+	protected void initAnalysisProjectAuthorizationListenerAwares(ApplicationContext context)
+	{
+		Map<String, AnalysisProjectAuthorizationListener> listenerMap = context
+				.getBeansOfType(AnalysisProjectAuthorizationListener.class);
+		List<AnalysisProjectAuthorizationListener> listenerList = new ArrayList<AnalysisProjectAuthorizationListener>(
+				listenerMap.size());
+		listenerList.addAll(listenerMap.values());
+
+		BundleAnalysisProjectAuthorizationListener listener = new BundleAnalysisProjectAuthorizationListener(
+				listenerList);
+
+		Map<String, AnalysisProjectAuthorizationListenerAware> awareMap = context
+				.getBeansOfType(AnalysisProjectAuthorizationListenerAware.class);
+		for (AnalysisProjectAuthorizationListenerAware aware : awareMap.values())
+			aware.setAnalysisProjectAuthorizationListener(listener);
 	}
 
 	@SuppressWarnings("rawtypes")

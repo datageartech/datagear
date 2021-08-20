@@ -207,6 +207,12 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@Override
+	public void authorizationUpdated(String... analysisProjects)
+	{
+		permissionCacheInvalidate();
+	}
+
+	@Override
 	protected void add(HtmlChartWidgetEntity entity, Map<String, Object> params)
 	{
 		super.add(entity, params);

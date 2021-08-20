@@ -233,6 +233,12 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
+	public void authorizationUpdated(String... analysisProjects)
+	{
+		permissionCacheInvalidate();
+	}
+
+	@Override
 	protected void add(DataSetEntity entity, Map<String, Object> params)
 	{
 		if (entity instanceof SummaryDataSetEntity)

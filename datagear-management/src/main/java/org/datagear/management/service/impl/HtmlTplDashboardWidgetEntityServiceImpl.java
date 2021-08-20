@@ -140,6 +140,12 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	}
 
 	@Override
+	public void authorizationUpdated(String... analysisProjects)
+	{
+		permissionCacheInvalidate();
+	}
+
+	@Override
 	protected HtmlTplDashboardWidgetEntity postProcessGet(HtmlTplDashboardWidgetEntity obj)
 	{
 		inflateAnalysisProjectAwareEntity(obj, this.analysisProjectService);

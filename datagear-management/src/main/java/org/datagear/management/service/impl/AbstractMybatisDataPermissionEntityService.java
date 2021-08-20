@@ -208,11 +208,18 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	@Override
 	public void authorizationUpdated(String resourceType, String... resources)
 	{
+		authorizationUpdatedInner(resourceType, resources);
+	}
+
+	protected boolean authorizationUpdatedInner(String resourceType, String... resources)
+	{
 		if (!getResourceType().equals(resourceType))
-			return;
+			return false;
 
 		for (String res : resources)
 			this.permissionCache.evictImmediately(toPermissionCacheKeyOfStr(res));
+
+		return true;
 	}
 
 	@Override

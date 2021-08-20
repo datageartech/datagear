@@ -10,6 +10,7 @@ package org.datagear.management.service.impl;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectAuthorizationListener;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
@@ -24,11 +25,13 @@ import org.mybatis.spring.SqlSessionTemplate;
  *
  */
 public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEntityService<String, AnalysisProject>
-		implements AnalysisProjectService
+		implements AnalysisProjectService, AnalysisProjectAuthorizationListenerAware
 {
 	protected static final String SQL_NAMESPACE = AnalysisProject.class.getName();
 
 	private UserService userService;
+
+	private AnalysisProjectAuthorizationListener analysisProjectAuthorizationListener = null;
 
 	public AnalysisProjectServiceImpl()
 	{
@@ -47,6 +50,29 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.userService = userService;
+	}
+
+	public UserService getUserService()
+	{
+		return userService;
+	}
+
+	public void setUserService(UserService userService)
+	{
+		this.userService = userService;
+	}
+
+	@Override
+	public AnalysisProjectAuthorizationListener getAnalysisProjectAuthorizationListener()
+	{
+		return analysisProjectAuthorizationListener;
+	}
+
+	@Override
+	public void setAnalysisProjectAuthorizationListener(
+			AnalysisProjectAuthorizationListener analysisProjectAuthorizationListener)
+	{
+		this.analysisProjectAuthorizationListener = analysisProjectAuthorizationListener;
 	}
 
 	@Override
@@ -72,6 +98,15 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 	{
 		inflateCreateUserEntity(obj, this.userService);
 		return super.postProcessGet(obj);
+	}
+
+	@Override
+	public void authorizationUpdated(String resourceType, String... resources)
+	{
+		boolean updated = authorizationUpdatedInner(resourceType, resources);
+
+		if (updated && this.analysisProjectAuthorizationListener != null)
+			this.analysisProjectAuthorizationListener.authorizationUpdated(resources);
 	}
 
 	@Override

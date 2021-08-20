@@ -18,7 +18,7 @@ import org.datagear.persistence.PagingQuery;
  * @author datagear@163.com
  *
  */
-public interface AnalysisProjectAwareEntityService<T>
+public interface AnalysisProjectAwareEntityService<T> extends AnalysisProjectAuthorizationListener
 {
 	String QUERY_PARAM_ANALYSIS_PROJECT_ID = "_analysisProjectId";
 
