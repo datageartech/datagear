@@ -24,7 +24,8 @@ import org.datagear.persistence.Query;
  * @param <ID>
  * @param <T>
  */
-public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<ID>> extends EntityService<ID, T>
+public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<ID>>
+		extends EntityService<ID, T>, AuthorizationListener
 {
 	/** 数据权限参数：当前用户，参考commonDataPermissionSqls.xml */
 	String DATA_PERMISSION_PARAM_CURRENT_USER = "DP_CURRENT_USER";
@@ -197,14 +198,4 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	 * @throws PermissionDeniedException
 	 */
 	T getByStringId(User user, String id) throws PermissionDeniedException;
-
-	/**
-	 * 指定ID的实体权限更新事件通知。
-	 * <p>
-	 * 此方法通常用于清除、或者重新加载权限缓存。
-	 * </p>
-	 * 
-	 * @param ids
-	 */
-	void permissionUpdated(String... ids);
 }

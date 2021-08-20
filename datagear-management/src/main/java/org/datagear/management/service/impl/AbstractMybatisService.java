@@ -7,6 +7,7 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -742,6 +743,24 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected boolean isEmpty(Object obj)
 	{
 		return StringUtil.isEmpty(obj);
+	}
+
+	/**
+	 * 如果元素不为{@code null}，才将其添加至集合。
+	 * 
+	 * @param <E>
+	 * @param collection
+	 * @param element
+	 * @return
+	 */
+	protected <E> boolean addIfNonNull(Collection<E> collection, E element)
+	{
+		if (element == null)
+			return false;
+
+		collection.add(element);
+
+		return true;
 	}
 
 	/**

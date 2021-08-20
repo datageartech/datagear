@@ -206,10 +206,19 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	}
 
 	@Override
-	public void permissionUpdated(String... ids)
+	public void authorizationUpdated(String resourceType, String... resources)
 	{
-		for (String id : ids)
-			this.permissionCache.evictImmediately(toPermissionCacheKeyOfStr(id));
+		if (!getResourceType().equals(resourceType))
+			return;
+
+		for (String res : resources)
+			this.permissionCache.evictImmediately(toPermissionCacheKeyOfStr(res));
+	}
+
+	@Override
+	public void permissionUpdated()
+	{
+		this.permissionCache.invalidate();
 	}
 
 	protected void setDataFilterParam(Map<String, Object> params, String dataFilter)

@@ -15,6 +15,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AuthorizationListener;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -27,11 +28,13 @@ import org.mybatis.spring.SqlSessionTemplate;
  *
  */
 public class AuthorizationServiceImpl extends AbstractMybatisEntityService<String, Authorization>
-		implements AuthorizationService
+		implements AuthorizationService, AuthorizationListenerAware
 {
 	protected static final String SQL_NAMESPACE = Authorization.class.getName();
 
 	private List<? extends DataPermissionEntityService<?, ?>> resourceServices;
+
+	private AuthorizationListener authorizationListener = null;
 
 	public AuthorizationServiceImpl()
 	{
@@ -63,10 +66,22 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 	}
 
 	@Override
+	public AuthorizationListener getAuthorizationListener()
+	{
+		return authorizationListener;
+	}
+
+	@Override
+	public void setAuthorizationListener(AuthorizationListener authorizationListener)
+	{
+		this.authorizationListener = authorizationListener;
+	}
+
+	@Override
 	public void add(Authorization entity)
 	{
 		super.add(entity);
-		permissionUpdated(entity.getResourceType(), entity.getResource());
+		authorizationUpdated(entity.getResourceType(), entity.getResource());
 	}
 
 	@Override
@@ -75,7 +90,7 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 		Authorization authorization = getById(id);
 
 		if (authorization != null)
-			permissionUpdated(authorization.getResourceType(), authorization.getResource());
+			authorizationUpdated(authorization.getResourceType(), authorization.getResource());
 
 		return super.deleteById(id);
 	}
@@ -110,7 +125,7 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 		int count = updateMybatis("deleteByIdsForResource", params);
 
 		if (count > 0)
-			permissionUpdated(resourceType, resource);
+			authorizationUpdated(resourceType, resource);
 
 		return count;
 	}
@@ -125,7 +140,7 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 		int count = updateMybatis("deleteByResource", params);
 
 		if (count > 0)
-			permissionUpdated(resourceType, resources);
+			authorizationUpdated(resourceType, resources);
 
 		return count;
 	}
@@ -159,12 +174,10 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 		return context;
 	}
 
-	protected void permissionUpdated(String resourceType, String... resources)
+	protected void authorizationUpdated(String resourceType, String... resources)
 	{
-		DataPermissionEntityService<?, ?> resourceService = getResourceService(resourceType);
-
-		if (resourceService != null)
-			resourceService.permissionUpdated(resources);
+		if (this.authorizationListener != null)
+			this.authorizationListener.authorizationUpdated(resourceType, resources);
 	}
 
 	/**

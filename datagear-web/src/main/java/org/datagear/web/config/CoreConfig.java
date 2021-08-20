@@ -51,6 +51,7 @@ import org.datagear.dataexchange.support.SqlDataExportService;
 import org.datagear.dataexchange.support.SqlDataImportService;
 import org.datagear.management.dbversion.DbVersionManager;
 import org.datagear.management.service.AnalysisProjectService;
+import org.datagear.management.service.AuthorizationListener;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
@@ -64,7 +65,9 @@ import org.datagear.management.service.UserService;
 import org.datagear.management.service.impl.AbstractMybatisDataPermissionEntityService;
 import org.datagear.management.service.impl.AbstractMybatisEntityService;
 import org.datagear.management.service.impl.AnalysisProjectServiceImpl;
+import org.datagear.management.service.impl.AuthorizationListenerAware;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
+import org.datagear.management.service.impl.BundleAuthorizationListener;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
 import org.datagear.management.service.impl.DataSetResDirectoryServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
@@ -742,6 +745,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		ApplicationContext context = event.getApplicationContext();
 
 		initAuthorizationResourceServices(context);
+		initAuthorizationListenerAwares(context);
 		initServiceCaches(context);
 		initDevotedDataExchangeServices(context);
 	}
@@ -752,9 +756,23 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		Map<String, DataPermissionEntityService> dataPermissionEntityServices = context
 				.getBeansOfType(DataPermissionEntityService.class);
 
-		List<DataPermissionEntityService<?, ?>> resourceServices = this.authorizationResourceServices();
-		for (DataPermissionEntityService<?, ?> dps : dataPermissionEntityServices.values())
-			resourceServices.add(dps);
+		@SuppressWarnings("unchecked")
+		List<DataPermissionEntityService> resourceServices = (List) this.authorizationResourceServices();
+		resourceServices.addAll(dataPermissionEntityServices.values());
+	}
+
+	protected void initAuthorizationListenerAwares(ApplicationContext context)
+	{
+		Map<String, AuthorizationListener> listenerMap = context.getBeansOfType(AuthorizationListener.class);
+		List<AuthorizationListener> listenerList = new ArrayList<AuthorizationListener>(
+				listenerMap.size());
+		listenerList.addAll(listenerMap.values());
+
+		AuthorizationListener listener = new BundleAuthorizationListener(listenerList);
+
+		Map<String, AuthorizationListenerAware> awareMap = context.getBeansOfType(AuthorizationListenerAware.class);
+		for (AuthorizationListenerAware aware : awareMap.values())
+			aware.setAuthorizationListener(listener);
 	}
 
 	@SuppressWarnings("rawtypes")

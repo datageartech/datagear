@@ -359,6 +359,8 @@ public class HtmlChartWidgetEntityServiceImpl
 		if (chartDataSetVOs == null || chartDataSetVOs.length == 0)
 			return;
 
+		List<ChartDataSetVO> list = new ArrayList<ChartDataSetVO>(chartDataSetVOs.length);
+
 		for (int i = 0; i < chartDataSetVOs.length; i++)
 		{
 			ChartDataSetVO vo = chartDataSetVOs[i];
@@ -372,6 +374,8 @@ public class HtmlChartWidgetEntityServiceImpl
 				dataSet = this.dataSetEntityService.getById(dataSetId);
 
 			vo.setDataSet(dataSet);
+
+			addIfNonNull(list, (vo.getDataSet() == null ? null : vo));
 		}
 	}
 

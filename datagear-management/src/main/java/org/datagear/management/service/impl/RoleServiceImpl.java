@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Role;
+import org.datagear.management.service.AuthorizationListener;
 import org.datagear.management.service.DeleteBuiltinRoleDeniedException;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -24,9 +25,12 @@ import org.mybatis.spring.SqlSessionTemplate;
  * @author datagear@163.com
  *
  */
-public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role> implements RoleService
+public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role>
+		implements RoleService, AuthorizationListenerAware
 {
 	protected static final String SQL_NAMESPACE = Role.class.getName();
+
+	private AuthorizationListener authorizationListener = null;
 
 	public RoleServiceImpl()
 	{
@@ -44,6 +48,18 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role> 
 	}
 
 	@Override
+	public AuthorizationListener getAuthorizationListener()
+	{
+		return authorizationListener;
+	}
+
+	@Override
+	public void setAuthorizationListener(AuthorizationListener authorizationListener)
+	{
+		this.authorizationListener = authorizationListener;
+	}
+
+	@Override
 	public List<Role> getByIds(String... ids)
 	{
 		List<Role> roles = new ArrayList<>(ids.length);
@@ -55,12 +71,28 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role> 
 	}
 
 	@Override
+	protected boolean update(Role entity, Map<String, Object> params)
+	{
+		boolean updated = super.update(entity, params);
+
+		if (updated && this.authorizationListener != null)
+			this.authorizationListener.permissionUpdated();
+
+		return updated;
+	}
+
+	@Override
 	protected boolean deleteById(String id, Map<String, Object> params)
 	{
 		if (Role.isBuiltinRole(id))
 			throw new DeleteBuiltinRoleDeniedException(id);
 
-		return super.deleteById(id, params);
+		boolean deleted = super.deleteById(id, params);
+
+		if (deleted && this.authorizationListener != null)
+			this.authorizationListener.permissionUpdated();
+
+		return deleted;
 	}
 
 	@Override

@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AuthorizationListener;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -28,13 +29,16 @@ import org.mybatis.spring.SqlSessionTemplate;
  * @author datagear@163.com
  *
  */
-public class UserServiceImpl extends AbstractMybatisEntityService<String, User> implements UserService
+public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
+		implements UserService, AuthorizationListenerAware
 {
 	protected static final String SQL_NAMESPACE = User.class.getName();
 
 	private RoleService roleService;
 
 	private UserPasswordEncoder userPasswordEncoder = null;
+
+	private AuthorizationListener authorizationListener = null;
 
 	public UserServiceImpl()
 	{
@@ -73,6 +77,18 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 	public void setUserPasswordEncoder(UserPasswordEncoder userPasswordEncoder)
 	{
 		this.userPasswordEncoder = userPasswordEncoder;
+	}
+
+	@Override
+	public AuthorizationListener getAuthorizationListener()
+	{
+		return authorizationListener;
+	}
+
+	@Override
+	public void setAuthorizationListener(AuthorizationListener authorizationListener)
+	{
+		this.authorizationListener = authorizationListener;
 	}
 
 	@Override
@@ -148,7 +164,12 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 
 		Boolean ignoreRole = (Boolean) params.get("ignoreRole");
 		if (ignoreRole == null || !ignoreRole.booleanValue())
+		{
 			saveUserRoles(entity);
+
+			if (this.authorizationListener != null)
+				this.authorizationListener.permissionUpdated();
+		}
 
 		return updated;
 	}
@@ -230,7 +251,7 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 			for (Role role : roles)
 			{
 				role = this.roleService.getById(role.getId());
-				rolesNew.add(role);
+				addIfNonNull(rolesNew, role);
 			}
 
 			obj.setRoles(rolesNew);
