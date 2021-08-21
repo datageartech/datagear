@@ -81,6 +81,7 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 	public void add(Authorization entity)
 	{
 		super.add(entity);
+
 		authorizationUpdated(entity.getResourceType(), entity.getResource());
 	}
 
@@ -100,13 +101,12 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 	{
 		Authorization authorization = getById(id);
 
-		if (authorization != null)
-		{
-			authorizationUpdated(authorization.getResourceType(), authorization.getResource());
-			return super.deleteById(id);
-		}
+		boolean deleted = (authorization == null ? false : super.deleteById(authorization.getId()));
 
-		return false;
+		if (deleted)
+			authorizationUpdated(authorization.getResourceType(), authorization.getResource());
+
+		return deleted;
 	}
 
 	@Override
