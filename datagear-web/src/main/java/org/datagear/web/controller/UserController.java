@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.RoleService;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
 import org.datagear.persistence.PagingData;
@@ -50,6 +52,9 @@ public class UserController extends AbstractController
 	private UserService userService;
 
 	@Autowired
+	private RoleService roleService;
+
+	@Autowired
 	private SchemaService schemaService;
 
 	/** 添加用户默认角色 */
@@ -68,6 +73,16 @@ public class UserController extends AbstractController
 	public void setUserService(UserService userService)
 	{
 		this.userService = userService;
+	}
+
+	public RoleService getRoleService()
+	{
+		return roleService;
+	}
+
+	public void setRoleService(RoleService roleService)
+	{
+		this.roleService = roleService;
 	}
 
 	public SchemaService getSchemaService()
@@ -95,6 +110,16 @@ public class UserController extends AbstractController
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		User user = new User();
+
+		Set<Role> dftRoles = RegisterController.buildUserRolesForSave(this.defaultRoleAdd);
+		Set<Role> addRoles = new HashSet<Role>(dftRoles.size());
+		for (Role r : dftRoles)
+		{
+			Role role = this.roleService.getById(r.getId());
+			if (role != null)
+				addRoles.add(role);
+		}
+		user.setRoles(addRoles);
 
 		model.addAttribute("user", user);
 		model.addAttribute("userRoles", toWriteJsonTemplateModel(toUserRolesList(user)));
@@ -127,7 +152,6 @@ public class UserController extends AbstractController
 		user.setId(IDUtil.randomIdOnTime20());
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
-		user.setRoles(RegisterController.buildUserRolesForSave(this.defaultRoleAdd));
 
 		this.userService.add(user);
 
