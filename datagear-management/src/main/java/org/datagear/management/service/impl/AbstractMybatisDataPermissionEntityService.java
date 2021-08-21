@@ -50,7 +50,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	/**
 	 * 查询操作时缓存权限数目。
 	 */
-	private int cachePermissionCountForQuery = 10;
+	private int permissionCacheCountForQuery = 10;
 
 	public AbstractMybatisDataPermissionEntityService()
 	{
@@ -91,14 +91,14 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		this.permissionCache = permissionCache;
 	}
 
-	public int getCachePermissionCountForQuery()
+	public int getPermissionCacheCountForQuery()
 	{
-		return cachePermissionCountForQuery;
+		return permissionCacheCountForQuery;
 	}
 
-	public void setCachePermissionCountForQuery(int cachePermissionCountForQuery)
+	public void setPermissionCacheCountForQuery(int permissionCacheCountForQuery)
 	{
-		this.cachePermissionCountForQuery = cachePermissionCountForQuery;
+		this.permissionCacheCountForQuery = permissionCacheCountForQuery;
 	}
 
 	@Override
@@ -471,7 +471,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 	protected void permissionCachePutQueryResult(String statement, Map<String, Object> params, List<T> result)
 	{
-		if (params == null || result == null || this.cachePermissionCountForQuery <= 0)
+		if (params == null || result == null || this.permissionCacheCountForQuery <= 0)
 			return;
 
 		User user = (User) params.get(DATA_PERMISSION_PARAM_CURRENT_USER);
@@ -485,7 +485,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 		for (T t : result)
 		{
-			if (count >= this.cachePermissionCountForQuery)
+			if (count >= this.permissionCacheCountForQuery)
 				break;
 
 			ID id = (t == null ? null : t.getId());
