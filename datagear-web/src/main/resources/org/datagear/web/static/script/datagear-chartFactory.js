@@ -2587,7 +2587,7 @@
 	 */
 	chartBase.eventOriginalInfo = function(chartEvent, originalChartDataSetIndex, originalResultDataIndex)
 	{
-		//originalChartDataSetIndex是原始信息对象
+		//originalChartDataSetIndex是原始信息对象：{ chartDataSetIndex: ..., chartDataSetIndex: ... }
 		if(originalChartDataSetIndex != null && originalChartDataSetIndex.chartDataSetIndex !== undefined)
 		{
 			var resultDataIndexMy = originalChartDataSetIndex.resultDataIndex;
@@ -2850,7 +2850,7 @@
 	};
 	
 	/**
-	 * 获取/设置指定数据对象的原始信息，包括：图表ID、图表数据集索引、结果数据索引。
+	 * 获取/设置指定数据对象的原始信息属性值，包括：图表ID、图表数据集索引、结果数据索引。
 	 * 图表渲染器在构建用于渲染图表的内部数据对象时，应使用此函数设置其原始信息，以支持在后续的交互、事件处理中获取这些原始信息。
 	 * 
 	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]，当是数组时，设置操作将为每个元素单独设置原始信息
