@@ -1417,23 +1417,6 @@ table.dataTable tbody tr td select{
 }
 .page-form-driverEntity .driver-files{
 	display: inline-block;
-	height: 8em;
-	overflow: auto;
-	padding: 3px 2px;
-}
-.page-form-driverEntity .driver-files .driver-file{
-	margin-bottom: 5px;
-	padding: 2px 2px;
-	white-space: nowrap;
-	overflow: hidden;
-}
-.page-form-driverEntity .driver-files .driver-file .driver-file-icon{
-	cursor: pointer;
-	margin-right: 0.2em;
-}
-.page-form-driverEntity .driver-files .driver-file .driver-file-info{
-	white-space: nowrap;
-	overflow: hidden;
 }
 .page-form-driverEntity .driver-upload-parent{
 	display: inline-block;
@@ -1445,23 +1428,7 @@ table.dataTable tbody tr td select{
 }
 .page-form-driverEntityImport .driver-entity-infos{
 	display: inline-block;
-	height: 15em;
-	overflow: auto;
-	padding: 3px 2px;
-}
-.page-form-driverEntityImport .driver-entity-infos .driver-entity-item{
-	margin-bottom: 5px;
-	padding: 2px 2px;
-	white-space: nowrap;
-	overflow: hidden;
-}
-.page-form-driverEntityImport .driver-entity-infos .driver-entity-item .ui-icon-close{
-	cursor: pointer;
-	margin-right: 0.2em;
-}
-.page-form-driverEntityImport .driver-entity-infos .driver-entity-item .driver-entity-info{
-	white-space: nowrap;
-	overflow: hidden;
+	height: 14em;
 }
 
 /*表单页*/
@@ -2999,24 +2966,13 @@ table.dataTable tbody tr td select{
 }
 .page-form-uploadChartPlugin .chart-plugin-infos{
 	display: inline-block;
-	height: 8em;
-	overflow: auto;
-	padding: 3px 2px;
+	height: 14em;
 }
-.page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item{
-	margin-bottom: 5px;
-	padding: 4px 2px;
-	white-space: nowrap;
-	overflow: hidden;
-}
-.page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item a.plugin-icon{
+.page-form-uploadChartPlugin .chart-plugin-infos .plugin-icon{
 	display: inline-block;
-	width: 20px;
-	background-repeat: no-repeat;
+	width: 1em;
+	height: 1em;
 	background-size: 100% 100%;
-}
-.page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item .name{
-	margin-left: 0.5em;
 }
 .page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item .version{
 	margin-left: 0.3em;

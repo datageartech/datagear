@@ -37,7 +37,7 @@
 				</div>
 				<div class="form-item-value">
 					<input type="hidden" name="inputForValidate" value="" />
-					<div class="ui-widget ui-widget-content input chart-plugin-infos"></div>
+					<div class="chart-plugin-infos minor-list deletable-list input ui-widget ui-widget-content"></div>
 				</div>
 			</div>
 		</div>
@@ -72,16 +72,18 @@
 		{
 			var chartPluginInfo = chartPluginInfos[i];
 			
-			var $item = $("<div class='ui-widget ui-widget-content ui-corner-all chart-plugin-item' />")
+			var $item = $("<div class='chart-plugin-item minor-list-item ui-widget ui-widget-content ui-corner-all' />")
 				.appendTo(po.chartPluginInfos());
 			
 			if(chartPluginInfo.iconUrl)
-				$("<a class=\"plugin-icon\" style=\"background-image: url(${contextPath}/"+chartPluginInfo.iconUrl+")\">&nbsp;</a>").appendTo($item);
+				$("<span class='plugin-icon' style='background-image: url(${contextPath}"+chartPluginInfo.iconUrl+")'></span>").appendTo($item);
 			
-			$("<span class='name'></span>").text(chartPluginInfo.nameLabel.value).appendTo($item);
+			var $content = $("<div class='item-content' />").appendTo($item);
+			
+			$("<span class='name'></span>").text(chartPluginInfo.nameLabel.value).appendTo($content);
 			
 			if(chartPluginInfo.version)
-				$("<span class='version'></span>").text("(" +chartPluginInfo.version+")").appendTo($item);
+				$("<span class='version'></span>").text("(" +chartPluginInfo.version+")").appendTo($content);
 		}
 	};
 	

@@ -37,7 +37,7 @@
 				</div>
 				<div class="form-item-value">
 					<input type="hidden" name="inputForValidate" value="" />
-					<div class="ui-widget ui-widget-content input driver-entity-infos"></div>
+					<div class="driver-entity-infos minor-list deletable-list input ui-widget ui-widget-content"></div>
 				</div>
 			</div>
 		</div>
@@ -69,7 +69,7 @@
 		{
 			var driverEntity = driverEntities[i];
 			
-			var $item = $("<div class='ui-widget ui-widget-content ui-corner-all driver-entity-item' />")
+			var $item = $("<div class='driver-entity-item minor-list-item ui-widget ui-widget-content ui-corner-all' />")
 				.appendTo(po.driverEntityInfos());
 			
 			$("<input type='hidden' />").attr("name", "driverEntity.id").attr("value", driverEntity.id).appendTo($item);
@@ -77,14 +77,14 @@
 			$("<input type='hidden' />").attr("name", "driverEntity.displayName").attr("value", driverEntity.displayName).appendTo($item);
 			$("<input type='hidden' />").attr("name", "driverEntity.displayDesc").attr("value", driverEntity.displayDesc).appendTo($item);
 			
-			$("<span class='ui-icon ui-icon-close' title='<@spring.message code='delete' />' />")
+			$("<span class='delete-icon ui-icon ui-icon-close' title='<@spring.message code='delete' />' />")
 			.appendTo($item).click(function()
 			{
 				$(this).closest(".driver-entity-item").remove();
 			});
 			
 			var content = driverEntity.displayText;
-			$("<span class='driver-entity-info' />").attr("title", content).text(content)
+			$("<span class='driver-entity-info item-content' />").attr("title", content).text(content)
 			.appendTo($item);
 		}
 	};

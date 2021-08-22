@@ -40,7 +40,7 @@ readonly 是否只读操作，允许为null
 					<label title="<@spring.message code='driverEntity.driverFiles.desc' />"><@spring.message code='driverEntity.driverFiles' /></label>
 				</div>
 				<div class="form-item-value">
-					<div class="ui-widget ui-widget-content input driver-files">
+					<div class="driver-files ui-widget ui-widget-content input minor-list deletable-list">
 					</div>
 					<input type="text" name="driverFilePlaceholder" style="display:none;" />
 					<#if !readonly>
@@ -113,13 +113,13 @@ readonly 是否只读操作，允许为null
 		
 		for(var i=0; i<fileInfos.length; i++)
 		{
-			var $fileInfo = $("<div class='ui-widget ui-widget-content ui-corner-all driver-file' />")
+			var $fileInfo = $("<div class='driver-file minor-list-item ui-widget ui-widget-content ui-corner-all' />")
 				.appendTo(po.driverFiles());
 			
 			<#if !readonly>
 			$("<input type='hidden' />").attr("name", "driverLibraryName").attr("value", fileInfos[i].name).appendTo($fileInfo);
 			
-			var $deleteIcon = $("<span class='ui-icon ui-icon-close driver-file-icon' title='<@spring.message code='delete' />' />")
+			var $deleteIcon = $("<span class='driver-file-icon delete-icon ui-icon ui-icon-close' title='<@spring.message code='delete' />' />")
 				.attr("driverFile", fileInfos[i].name).appendTo($fileInfo);
 			
 			$deleteIcon.click(function()
@@ -139,7 +139,7 @@ readonly 是否只读操作，允许为null
 			});
 			</#if>
 			
-			$("<a class='driver-file-info' href='javascript:void(0);' />").attr("title", fileInfos[i].name).text(fileInfos[i].name)
+			$("<a class='driver-file-info item-content' href='javascript:void(0);' />").attr("title", fileInfos[i].name).text(fileInfos[i].name)
 				.appendTo($fileInfo)
 				.click(function()
 				{
