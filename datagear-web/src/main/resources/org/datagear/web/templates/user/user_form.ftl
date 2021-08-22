@@ -15,6 +15,7 @@ readonly 是否只读操作，允许为null
 -->
 <#assign formAction=(formAction!'#')>
 <#assign readonly=(readonly!false)>
+<#assign disableRoles=(disableRoles!false)>
 <#assign isAdd=(formAction == 'saveAdd')>
 <html>
 <head>
@@ -62,6 +63,7 @@ readonly 是否只读操作，允许为null
 					<input type="text" name="realName" value="${(user.realName)!''}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
+			<#if !disableRoles>
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='user.roles' /></label>
@@ -74,6 +76,7 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
+			</#if>
 			<#--
 			禁用新建管理员账号功能
 			<div class="form-item">
@@ -231,7 +234,9 @@ readonly 是否只读操作，允许为null
 	});
 	</#if>
 	
+	<#if !disableRoles>
 	po.renderRoles(po.userRoles);
+	</#if>
 })
 (${pageId});
 </script>

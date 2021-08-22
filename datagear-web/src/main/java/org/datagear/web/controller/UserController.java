@@ -274,6 +274,7 @@ public class UserController extends AbstractController
 			throw new RecordNotFoundException();
 
 		model.addAttribute("user", user);
+		model.addAttribute("disableRoles", true);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.personalSet");
 		model.addAttribute(KEY_FORM_ACTION, "savePersonalSet");
 
