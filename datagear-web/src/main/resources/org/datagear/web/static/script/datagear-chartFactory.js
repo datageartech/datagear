@@ -198,6 +198,9 @@
 	/**内置名字标识片段*/
 	chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX = "_" + chartFactory.BUILT_IN_NAME_PART;
 	
+	/**数据对象的原始信息属性名*/
+	chartFactory.DATA_ORIGINAL_INFO_PROP_NAME = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalInfo";
+	
 	/**
 	 * 图表使用的渲染上下文属性名。
 	 */
@@ -2579,35 +2582,47 @@
 	 * 图表事件支持函数：设置图表事件对象的原始图表数据集索引、原始数据、原始数据索引。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalChartDataSetIndex 原始图表数据集索引
-	 * @param originalResultDataIndex 原始数据索引，格式允许：数值、数值数组
+	 * @param originalChartDataSetIndex 原始图表数据集索引数值、原始信息对象（格式参考：chartBase.dataOriginalInfo函数返回值）
+	 * @param originalResultDataIndex 可选，当originalChartDataSetIndex是索引数值是必选，原始数据索引，格式允许：数值、数值数组、null
 	 */
 	chartBase.eventOriginalInfo = function(chartEvent, originalChartDataSetIndex, originalResultDataIndex)
 	{
+		//originalChartDataSetIndex是原始信息对象
+		if(originalChartDataSetIndex != null && originalChartDataSetIndex.chartDataSetIndex !== undefined)
+		{
+			var resultDataIndexMy = originalChartDataSetIndex.resultDataIndex;
+			
+			originalChartDataSetIndex = originalChartDataSetIndex.chartDataSetIndex;
+			if(originalResultDataIndex == null)
+				originalResultDataIndex = resultDataIndexMy;
+		}
+		
 		var result = this.resultAt(this.updateResults(), originalChartDataSetIndex);
-		var resultDatas = (result == null ? [] : this.resultDatas(result));
+		var resultDatas = this.resultDatas(result);
 		
 		var originalData = undefined;
 		
-		var rdi = originalResultDataIndex;
-		
-		//索引数值
-		if(typeof(rdi) == "number")
+		//可能为null
+		if(originalResultDataIndex == null)
 		{
-			originalData = resultDatas[rdi];
 		}
 		//索引数值数组
-		else if($.isArray(rdi))
+		else if($.isArray(originalResultDataIndex))
 		{
 			originalData = [];
 			
-			for(var i=0; i<rdi.length; i++)
-				originalData.push(resultDatas[rdi[i]]);
+			for(var i=0; i<originalResultDataIndex.length; i++)
+				originalData.push(resultDatas[originalResultDataIndex[i]]);
+		}
+		//索引数值
+		else
+		{
+			originalData = resultDatas[originalResultDataIndex];
 		}
 		
 		this.eventOriginalData(chartEvent, originalData);
 		this.eventOriginalChartDataSetIndex(chartEvent, originalChartDataSetIndex);
-		this.eventOriginalResultDataIndex(chartEvent, rdi);
+		this.eventOriginalResultDataIndex(chartEvent, originalResultDataIndex);
 	};
 	
 	/**
@@ -2832,6 +2847,86 @@
 		}
 		
 		return updateOptions;
+	};
+	
+	/**
+	 * 获取/设置指定数据对象的原始信息，包括：图表ID、图表数据集索引、结果数据索引。
+	 * 图表渲染器在构建用于渲染图表的内部数据对象时，应使用此函数设置其原始信息，以支持在后续的交互、事件处理中获取这些原始信息。
+	 * 
+	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]，当是数组时，设置操作将为每个元素单独设置原始信息
+	 * @param chartDataSetIndex 可选，要设置的图表数据集索引数值，图表数据集对象（自动取其索引数值）
+	 * @param resultDataIndex 可选，要设置的结果数据索引，格式为：数值、数值数组、null，默认值为：0
+	 * @param autoIncrement 可选，当data是数组且resultDataIndex是数值时，设置时是否自动递增resultDataIndex，默认值为：true
+	 * @returns 要获取的原始信息属性值(可能为null），格式为：
+	 *									{
+	 *										//图表ID
+	 *										"chartId": "...",
+	 *										//图表数据集索引数值
+	 *										"chartDataSetIndex": ...,
+	 *										//结果数据索引，格式为：数值、数值数组、null
+	 *										"resultDataIndex": ...
+	 *									}
+	 *									当data是数组时，将返回此结构的数组
+	 */
+	chartBase.dataOriginalInfo = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
+	{
+		var pname = chartFactory.DATA_ORIGINAL_INFO_PROP_NAME;
+		
+		var isArray = $.isArray(data);
+		
+		//获取
+		if(arguments.length == 1)
+		{
+			if(isArray)
+			{
+				var re = [];
+				
+				for(var i=0; i<data.length; i++)
+					re.push(data[i][pname]);
+				
+				return re;
+			}
+			else
+				return (data == null ? undefined : data[pname]);
+		}
+		//设置
+		else
+		{
+			if(data == null)
+				return;
+			
+			chartDataSetIndex = (chartDataSetIndex != null && chartDataSetIndex.index !== undefined ? chartDataSetIndex.index : chartDataSetIndex);
+			resultDataIndex = (resultDataIndex === undefined ? 0 : resultDataIndex);
+			
+			if(isArray)
+			{
+				var isNumber = (typeof(resultDataIndex) == "number");
+				autoIncrement = (autoIncrement === undefined ? isNumber : autoIncrement);
+				
+				for(var i=0; i<data.length; i++)
+				{
+					var originalInfo =
+					{
+						"chartId": this.id,
+						"chartDataSetIndex": chartDataSetIndex,
+						"resultDataIndex": (autoIncrement ? resultDataIndex + i : resultDataIndex)
+					};
+					
+					data[i][pname] = originalInfo;
+				}
+			}
+			else
+			{
+				var originalInfo =
+				{
+					"chartId": this.id,
+					"chartDataSetIndex": chartDataSetIndex,
+					"resultDataIndex": resultDataIndex
+				};
+				
+				data[pname] = originalInfo;
+			}
+		}
 	};
 	
 	//-------------

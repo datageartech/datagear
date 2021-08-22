@@ -2089,6 +2089,68 @@
 		return csd;
 	};
 	
+	/**
+	 * 获取指定数据对象的原始信息，具体参考chartBase.dataOriginalInfo函数说明。
+	 * 
+	 * @param data 数据对象，格式为：{ ... }
+	 * @param inflate 可选，是否在返回原始信息对象中填充图表对象、原始数据信息，默认值为：true
+	 * @returns 原始信息属性值(可能为null），格式为：
+	 *									{
+	 *										//图表ID
+	 *										"chartId": "...",
+	 *										//图表数据集索引数值
+	 *										"chartDataSetIndex": ...,
+	 *										//结果数据索引，格式为：数值、数值数组、null
+	 *										"resultDataIndex": ...
+	 *									}
+	 *									当data是数组时，将返回此结构的数组。
+	 *									另外，当inflate为true时，上述结构将包含额外的两个属性值：
+	 *									{
+	 *										...,
+	 *										//chartId对应的图表对象
+	 *										chart: 图表对象,
+	 *										//resultDataIndex对应的原始结果数据
+	 *										resultData: 结果数据
+	 *									}
+	 */
+	dashboardBase.dataOriginalInfo = function(data, inflate)
+	{
+		inflate = (inflate === undefined ? true : inflate);
+		
+		var pname = chartFactory.DATA_ORIGINAL_INFO_PROP_NAME;
+		var originalInfo = (data == null ? null : data[pname]);
+		
+		if(inflate && originalInfo != null)
+		{
+			//不能修改原对象
+			originalInfo = $.extend(true, {}, originalInfo);
+			
+			var chart = this.chartOf(originalInfo.chartId);
+			var resultData = undefined;
+			
+			if(chart != null && originalInfo.chartDataSetIndex != null && originalInfo.resultDataIndex != null)
+			{
+				var result = chart.resultAt(chart.updateResults(), originalInfo.chartDataSetIndex);
+				var datas = chart.resultDatas(result);
+				
+				if($.isArray(originalInfo.resultDataIndex))
+				{
+					resultData = [];
+					
+					for(var i=0; i<originalInfo.resultDataIndex.length; i++)
+						resultData[i] = datas[originalInfo.resultDataIndex[i]];
+				}
+				else
+					resultData = datas[originalInfo.resultDataIndex];
+			}
+			
+			originalInfo.chart = chart;
+			originalInfo.resultData = resultData;
+		}
+		
+		return originalInfo;
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
