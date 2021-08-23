@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import org.datagear.util.DateNumberFormat;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
@@ -38,6 +36,17 @@ import freemarker.template.TemplateException;
  */
 public class DataSetFmkTemplateResolver implements TemplateResolver
 {
+	/**
+	 * Freemarker数值输出格式：computer
+	 * <p>
+	 * 这个格式会按照计算机编程格式输出数值，即：区域无关、无分隔符、无指数格式，例如：12345678950401.12345678950401
+	 * </p>
+	 * <p>
+	 * 具体参考Freemarker文档Built-ins for numbers章节的<code>c</code>指令。
+	 * </p>
+	 */
+	public static final String FREEMARKER_NUMBER_FORMAT_COMPUTER = "computer";
+
 	private NameTemplateLoader nameTemplateLoader;
 
 	private Configuration configuration;
@@ -108,7 +117,7 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		configuration.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
 
 		// 数值插值设置为标准格式
-		configuration.setNumberFormat(DateNumberFormat.DEFAULT_NUMBER_FORMAT);
+		configuration.setNumberFormat(FREEMARKER_NUMBER_FORMAT_COMPUTER);
 
 		// 由于此类的模板策略是直接使用模板作为模板名，如果此方法设置为true，
 		// 下面的NameTemplateLoader.findTemplateSource(String)的参数SQL会被加上Locale后缀导致逻辑出错，
