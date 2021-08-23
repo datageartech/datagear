@@ -2582,7 +2582,7 @@
 	 * 图表事件支持函数：设置图表事件对象的原始图表数据集索引、原始数据、原始数据索引。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalChartDataSetIndex 原始图表数据集索引数值、原始信息对象（格式参考：chartBase.dataOriginalInfo函数返回值）
+	 * @param originalChartDataSetIndex 原始图表数据集索引数值、原始信息对象（格式参考：chartBase.originalInfo函数返回值）
 	 * @param originalResultDataIndex 可选，当originalChartDataSetIndex是索引数值是必选，原始数据索引，格式允许：数值、数值数组、null
 	 */
 	chartBase.eventOriginalInfo = function(chartEvent, originalChartDataSetIndex, originalResultDataIndex)
@@ -2868,7 +2868,7 @@
 	 *									}
 	 *									当data是数组时，将返回此结构的数组
 	 */
-	chartBase.dataOriginalInfo = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
+	chartBase.originalInfo = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
 	{
 		var pname = chartFactory.DATA_ORIGINAL_INFO_PROP_NAME;
 		

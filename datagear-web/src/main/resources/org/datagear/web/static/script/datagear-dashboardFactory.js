@@ -2090,11 +2090,11 @@
 	};
 	
 	/**
-	 * 获取指定数据对象的原始信息，具体参考chartBase.dataOriginalInfo函数说明。
+	 * 获取指定数据对象的原始信息，具体参考chartBase.originalInfo函数说明。
 	 * 
-	 * @param data 数据对象，格式为：{ ... }
+	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]
 	 * @param inflate 可选，是否在返回原始信息对象中填充图表对象、原始数据信息，默认值为：true
-	 * @returns 原始信息属性值(可能为null），格式为：
+	 * @returns 原始信息属性值(可能为null）、或其数组，格式为：
 	 *									{
 	 *										//图表ID
 	 *										"chartId": "...",
@@ -2113,42 +2113,54 @@
 	 *										resultData: 结果数据
 	 *									}
 	 */
-	dashboardBase.dataOriginalInfo = function(data, inflate)
+	dashboardBase.originalInfo = function(data, inflate)
 	{
 		inflate = (inflate === undefined ? true : inflate);
+		var isArray = $.isArray(data);
+		
+		if(!isArray)
+			data = [ data ];
+		
+		var re = [];
 		
 		var pname = chartFactory.DATA_ORIGINAL_INFO_PROP_NAME;
-		var originalInfo = (data == null ? null : data[pname]);
 		
-		if(inflate && originalInfo != null)
+		for(var i=0; i<data.length; i++)
 		{
-			//不能修改原对象
-			originalInfo = $.extend(true, {}, originalInfo);
+			var originalInfo = (data[i] == null ? null : data[i][pname]);
 			
-			var chart = this.chartOf(originalInfo.chartId);
-			var resultData = undefined;
-			
-			if(chart != null && originalInfo.chartDataSetIndex != null && originalInfo.resultDataIndex != null)
+			if(inflate && originalInfo != null)
 			{
-				var result = chart.resultAt(chart.updateResults(), originalInfo.chartDataSetIndex);
-				var datas = chart.resultDatas(result);
+				//不能修改原对象
+				originalInfo = $.extend(true, {}, originalInfo);
 				
-				if($.isArray(originalInfo.resultDataIndex))
+				var chart = this.chartOf(originalInfo.chartId);
+				var resultData = undefined;
+				
+				if(chart != null && originalInfo.chartDataSetIndex != null && originalInfo.resultDataIndex != null)
 				{
-					resultData = [];
+					var result = chart.resultAt(chart.updateResults(), originalInfo.chartDataSetIndex);
+					var datas = chart.resultDatas(result);
 					
-					for(var i=0; i<originalInfo.resultDataIndex.length; i++)
-						resultData[i] = datas[originalInfo.resultDataIndex[i]];
+					if($.isArray(originalInfo.resultDataIndex))
+					{
+						resultData = [];
+						
+						for(var j=0; j<originalInfo.resultDataIndex.length; j++)
+							resultData[j] = datas[originalInfo.resultDataIndex[j]];
+					}
+					else
+						resultData = datas[originalInfo.resultDataIndex];
 				}
-				else
-					resultData = datas[originalInfo.resultDataIndex];
+				
+				originalInfo.chart = chart;
+				originalInfo.resultData = resultData;
 			}
 			
-			originalInfo.chart = chart;
-			originalInfo.resultData = resultData;
+			re[i] = originalInfo;
 		}
 		
-		return originalInfo;
+		return (isArray ? re : re[0]);
 	};
 	
 	//-------------
