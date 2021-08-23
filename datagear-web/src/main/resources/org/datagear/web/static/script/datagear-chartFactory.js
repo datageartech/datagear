@@ -2854,7 +2854,7 @@
 	 * 图表渲染器在构建用于渲染图表的内部数据对象时，应使用此函数设置其原始信息，以支持在后续的交互、事件处理中获取这些原始信息。
 	 * 
 	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]，当是数组时，设置操作将为每个元素单独设置原始信息
-	 * @param chartDataSetIndex 可选，要设置的图表数据集索引数值，图表数据集对象（自动取其索引数值）
+	 * @param chartDataSetIndex 要设置的图表数据集索引数值，图表数据集对象（自动取其索引数值）
 	 * @param resultDataIndex 可选，要设置的结果数据索引，格式为：数值、数值数组、null，默认值为：0
 	 * @param autoIncrement 可选，当data是数组且resultDataIndex是数值时，设置时是否自动递增resultDataIndex，默认值为：true
 	 * @returns 要获取的原始信息属性值(可能为null），格式为：
@@ -2870,6 +2870,12 @@
 	 */
 	chartBase.originalInfo = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
 	{
+		if(resultDataIndex === true || resultDataIndex === false)
+		{
+			autoIncrement = resultDataIndex;
+			resultDataIndex = undefined;
+		}
+		
 		var pname = chartFactory.DATA_ORIGINAL_INFO_PROP_NAME;
 		
 		var isArray = $.isArray(data);

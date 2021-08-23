@@ -2090,7 +2090,7 @@
 	};
 	
 	/**
-	 * 获取指定数据对象的原始信息，具体参考chartBase.originalInfo函数说明。
+	 * 获取指定数据对象的原始信息属性值，这些信息是由chartBase.originalInfo函数设置过的。
 	 * 
 	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]
 	 * @param inflate 可选，是否在返回原始信息对象中填充图表对象、原始数据信息，默认值为：true
