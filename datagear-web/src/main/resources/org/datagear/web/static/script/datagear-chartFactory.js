@@ -2001,14 +2001,18 @@
 	};
 	
 	/**
-	 * 获取数据集结果的数据。
+	 * 获取/设置数据集结果对象包含的数据。
 	 * 
 	 * @param result 数据集结果对象
-	 * @return result.data，没有则返回null
+	 * @param data 可选，要设置的数据，通常是：{ ... }、[ { ... }, ... ]，不设置则执行获取操作
+	 * @return 要获取的数据集结果数据，没有则返回null
 	 */
-	chartBase.resultData = function(result)
+	chartBase.resultData = function(result, data)
 	{
-		return (result ? result.data : undefined);
+		if(data === undefined)
+			return (result ? result.data : undefined);
+		else
+			result.data = data;
 	};
 	
 	/**
