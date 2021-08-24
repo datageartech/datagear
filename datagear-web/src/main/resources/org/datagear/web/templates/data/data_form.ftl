@@ -62,7 +62,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 <script type="text/javascript">
 (function(po)
 {
-	po.data = <@writeJson var=data />;
+	po.data = <@writeJson var=data bigNumberToString=true />;
 	po.dataIsClient = ${dataIsClient?c};
 	po.readonly = ${readonly?c};
 	po.submitAction = "${submitAction?js_string?no_esc}";

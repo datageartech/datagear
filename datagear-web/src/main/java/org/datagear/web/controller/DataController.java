@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.Writer;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -109,6 +110,8 @@ public class DataController extends AbstractSchemaConnTableController
 
 	private ObjectMapper _objectMapper;
 
+	private ObjectMapper _objectMapperForBigNumberToString;
+
 	public DataController()
 	{
 		super();
@@ -184,6 +187,7 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		this.objectMapperBuilder = objectMapperBuilder;
 		this._objectMapper = this.objectMapperBuilder.build();
+		this._objectMapperForBigNumberToString = this.objectMapperBuilder.buildForBigNumberToString();
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/query")
@@ -215,8 +219,7 @@ public class DataController extends AbstractSchemaConnTableController
 	}
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/queryData", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public PagingData<Row> queryData(HttpServletRequest request, HttpServletResponse response,
+	public void queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName, @RequestBody(required = false) PagingQuery paramData)
 			throws Throwable
@@ -241,7 +244,12 @@ public class DataController extends AbstractSchemaConnTableController
 			}
 		};
 
-		return executor.execute();
+		PagingData<Row> pagingData = executor.execute();
+
+		response.setContentType(CONTENT_TYPE_JSON);
+		Writer out = response.getWriter();
+
+		this._objectMapperForBigNumberToString.writeValue(out, pagingData);
 	}
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/getQuerySql", produces = CONTENT_TYPE_JSON)

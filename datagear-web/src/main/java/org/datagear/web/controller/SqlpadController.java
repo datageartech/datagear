@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.util.StringUtil;
+import org.datagear.web.json.jackson.ObjectMapperBuilder;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionService.CommitMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.ExceptionHandleMode;
@@ -51,6 +53,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * SQL工作台控制器。
@@ -77,6 +81,10 @@ public class SqlpadController extends AbstractSchemaConnController
 	private File tempDirectory;
 
 	private int sqlResultReadActualLobRows = 3;
+
+	private ObjectMapperBuilder objectMapperBuilder;
+
+	private ObjectMapper _objectMapperForBigNumberToString;
 
 	public SqlpadController()
 	{
@@ -131,6 +139,18 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setSqlResultReadActualLobRows(int sqlResultReadActualLobRows)
 	{
 		this.sqlResultReadActualLobRows = sqlResultReadActualLobRows;
+	}
+
+	public ObjectMapperBuilder getObjectMapperBuilder()
+	{
+		return objectMapperBuilder;
+	}
+
+	@Autowired
+	public void setObjectMapperBuilder(ObjectMapperBuilder objectMapperBuilder)
+	{
+		this.objectMapperBuilder = objectMapperBuilder;
+		this._objectMapperForBigNumberToString = this.objectMapperBuilder.buildForBigNumberToString();
 	}
 
 	@RequestMapping("/{schemaId}")
@@ -222,8 +242,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	}
 
 	@RequestMapping(value = "/{schemaId}/message", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public List<Object> message(HttpServletRequest request, HttpServletResponse response,
+	public void message(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("sqlpadId") String sqlpadId,
 			@RequestParam(value = "messageCount", required = false) Integer messageCount) throws Throwable
@@ -232,13 +251,17 @@ public class SqlpadController extends AbstractSchemaConnController
 			messageCount = 50;
 		if (messageCount < 1)
 			messageCount = 1;
+		
+		List<Object> messages= this.sqlpadExecutionService.message(sqlpadId, messageCount);
 
-		return this.sqlpadExecutionService.message(sqlpadId, messageCount);
+		response.setContentType(CONTENT_TYPE_JSON);
+		Writer out = response.getWriter();
+
+		this._objectMapperForBigNumberToString.writeValue(out, messages);
 	}
 
 	@RequestMapping(value = "/{schemaId}/select", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public SqlSelectResult select(HttpServletRequest request, HttpServletResponse response,
+	public void select(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("sql") final String sql,
 			@RequestParam(value = "startRow", required = false) Integer startRow,
@@ -281,7 +304,10 @@ public class SqlpadController extends AbstractSchemaConnController
 		if (!Boolean.TRUE.equals(returnMeta))
 			result.setTable(null);
 
-		return result;
+		response.setContentType(CONTENT_TYPE_JSON);
+		Writer out = response.getWriter();
+
+		this._objectMapperForBigNumberToString.writeValue(out, result);
 	}
 
 	@RequestMapping("/{schemaId}/downloadResultField")
@@ -322,7 +348,7 @@ public class SqlpadController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/{schemaId}/sqlHistoryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public PagingData<SqlHistory> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<SqlHistory> pagingQuerySqlHistory(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			PagingQuery pagingQueryParam) throws Throwable
 	{

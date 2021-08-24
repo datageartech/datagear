@@ -55,13 +55,13 @@ public abstract class AbstractController
 {
 	public static final String RESPONSE_ENCODING = "UTF-8";
 
-	public static final String CONTENT_TYPE_JSON = "application/json;";
+	public static final String CONTENT_TYPE_JSON = "application/json";
 
-	public static final String CONTENT_TYPE_HTML = "text/html;";
+	public static final String CONTENT_TYPE_HTML = "text/html";
 
-	public static final String CONTENT_TYPE_CSS = "text/css;";
+	public static final String CONTENT_TYPE_CSS = "text/css";
 
-	public static final String CONTENT_TYPE_JAVASCRIPT = "application/javascript;";
+	public static final String CONTENT_TYPE_JAVASCRIPT = "application/javascript";
 
 	public static final String KEY_TITLE_MESSAGE_KEY = "titleMessageKey";
 

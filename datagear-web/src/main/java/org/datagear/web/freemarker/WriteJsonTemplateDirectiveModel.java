@@ -8,7 +8,6 @@
 package org.datagear.web.freemarker;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 import org.datagear.analysis.support.JsonSupport;
@@ -18,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import freemarker.core.Environment;
 import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
@@ -33,9 +33,14 @@ import freemarker.template.utility.DeepUnwrap;
  */
 public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 {
+	public static final String KEY_VAR = "var";
+	public static final String KEY_BIG_NUMBER_TO_STRING = "bigNumberToString";
+
 	private ObjectMapperBuilder objectMapperBuilder;
 
 	private ObjectMapper _objectMapper;
+
+	private ObjectMapper _objectMapperForBigNumberToString;
 
 	public WriteJsonTemplateDirectiveModel()
 	{
@@ -57,7 +62,9 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 	{
 		this.objectMapperBuilder = objectMapperBuilder;
 		this._objectMapper = this.objectMapperBuilder.build();
+		this._objectMapperForBigNumberToString = this.objectMapperBuilder.buildForBigNumberToString();
 		JsonSupport.disableAutoCloseTargetFeature(this._objectMapper);
+		JsonSupport.disableAutoCloseTargetFeature(this._objectMapperForBigNumberToString);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -65,27 +72,30 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 			throws TemplateException, IOException
 	{
-		if (params.size() != 1)
-			throw new TemplateModelException("The directive only allow one parameter.");
+		TemplateModel var = (TemplateModel)params.get(KEY_VAR);
+		TemplateBooleanModel bigNumberToStringObj = (TemplateBooleanModel) params.get(KEY_BIG_NUMBER_TO_STRING);
+		boolean bigNumberToString = (bigNumberToStringObj == null ? false : bigNumberToStringObj.getAsBoolean());
 
-		@SuppressWarnings("unchecked")
-		Collection<TemplateModel> args = ((Map<String, TemplateModel>) params).values();
+		Object obj = unwrap(var);
 
-		for (TemplateModel arg : args)
+		try
 		{
-			Object obj = unwrap(arg);
-
-			try
+			if (bigNumberToString)
+			{
+				this._objectMapperForBigNumberToString.writeValue(env.getOut(), obj);
+			}
+			else
 			{
 				this._objectMapper.writeValue(env.getOut(), obj);
 			}
-			catch (Throwable t)
-			{
-				if (t instanceof IOException)
-					throw (IOException) t;
-				else
-					throw new TemplateException(t, env);
-			}
+		}
+		catch (IOException e)
+		{
+			throw e;
+		}
+		catch (Throwable t)
+		{
+			throw new TemplateException(t, env);
 		}
 	}
 
