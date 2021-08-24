@@ -2712,6 +2712,91 @@
 	};
 	
 	/**
+	 * 图表事件支持函数：调用指定图表事件处理函数。
+	 *
+	 * @param handler 图表事件处理函数，格式为：function(chartEvent){ ... }
+	 * @param chartEvent 传递给上述handler的图表事件参数
+	 * @returns handler执行结果
+	 */
+	chartBase.eventCallHandler = function(handler, chartEvent)
+	{
+		return handler.call(this, chartEvent);
+	};
+	
+	/**
+	 * 注册指定图表事件处理函数代理。
+	 * 
+	 * @param eventType 图表事件类型
+	 * @param handler 图表事件处理函数，格式为：function(chartEvent){ ... }
+	 * @param handlerDelegation 图表事件处理函数代理
+	 * @returns 已注册的图表事件处理函数代理信息对象，格式为：{ eventType: "...", hanlder: ..., handlerDelegation: ... }
+	 */
+	chartBase.eventAddHandlerDelegation = function(eventType, handler, handlerDelegation)
+	{
+		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegationRegister");
+		if(delegations == null)
+		{
+			delegations = [];
+			chartFactory.extValueBuiltin(this, "eventHandlerDelegationRegister", delegations);
+		}
+		
+		var di = { "eventType": eventType, "hanlder": handler, "handlerDelegation": handlerDelegation };
+		delegations.push(di);
+		
+		return di;
+	};
+	
+	/**
+	 * 图表事件支持函数：删除指定图表事件处理函数代理，并返回已删除的图表事件处理函数代理信息对象数组。
+	 * 
+	 * @param eventType 图表事件类型
+	 * @param handler 可选，图表事件处理函数，格式为：function(chartEvent){ ... }
+	 * @param returns 匹配给定图表事件类型、图表事件处理函数（可选）、图表事件处理函数代理（可选）的图表事件处理函数代理信息对象数组，格式为：
+	 *						[ { eventType: "...", hanlder: ..., handlerDelegation: ... }, ... ]
+	 */
+	chartBase.eventRemoveHandlerDelegation = function(eventType, handler)
+	{
+		var re = [];
+		
+		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegationRegister");
+		if(delegations == null)
+			return re;
+		
+		var delegationsNew = [];
+		
+		for(var i=0; i<delegations.length; i++)
+		{
+			var d = delegations[i];
+			
+			var remove = (d.eventType == eventType);
+			remove = (remove ? (handler === undefined || (handler !== undefined && d.hanlder == handler)) : false);
+			
+			if(remove)
+				re.push(d);
+			else
+				delegationsNew.push(d);
+		}
+		
+		chartFactory.extValueBuiltin(this, "eventHandlerDelegationRegister", delegationsNew);
+		
+		return re;
+	};
+	
+	/**
+	 * 图表事件支持函数：解绑此ECharts图表的指定图表事件处理函数。
+	 * 
+	 * @param eventType 图表事件类型
+	 * @param handler 可选，图表事件处理函数，格式为：function(chartEvent){ ... }
+	 */
+	chartBase.eventOffEchartsHandler = function(eventType, handler)
+	{
+		var delegations = this.eventRemoveHandlerDelegation(eventType, handler);
+		
+		for(var i=0; i<delegations.length; i++)
+			chart.internal().off(delegations[i].eventType, delegations[i].handlerDelegation);
+	};
+	
+	/**
 	 * 获取/设置图表渲染选项。
 	 * 
 	 * 图表渲染器可在其render()中使用此函保存图表渲染选项，然后在其update()中获取渲染选项。

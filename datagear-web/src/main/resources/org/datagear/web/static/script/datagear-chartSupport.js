@@ -157,7 +157,7 @@
 	
 	chartSupport.lineOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.lineSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -324,7 +324,7 @@
 	
 	chartSupport.barOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.barSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -515,7 +515,7 @@
 	
 	chartSupport.barPolarOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -662,7 +662,7 @@
 	
 	chartSupport.pieOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.pieSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -838,7 +838,7 @@
 	
 	chartSupport.gaugeOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.gaugeSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -1029,7 +1029,7 @@
 	
 	chartSupport.scatterOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.scatterSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -1170,7 +1170,7 @@
 	
 	chartSupport.scatterCoordOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.scatterCoordSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -1376,7 +1376,7 @@
 	
 	chartSupport.radarOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.radarSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -1515,7 +1515,7 @@
 	
 	chartSupport.funnelOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.funnelSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -1661,7 +1661,7 @@
 	
 	chartSupport.mapOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.mapSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -1819,7 +1819,7 @@
 	
 	chartSupport.mapScatterOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.mapScatterSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -2069,7 +2069,7 @@
 	
 	chartSupport.mapGraphOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.mapGraphSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -2250,7 +2250,7 @@
 	
 	chartSupport.candlestickOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.candlestickSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -2433,7 +2433,7 @@
 	
 	chartSupport.heatmapOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.heatmapSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -2514,7 +2514,7 @@
 	
 	chartSupport.treeOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.treeSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -2651,7 +2651,7 @@
 	
 	chartSupport.treemapOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.treemapSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -2736,7 +2736,7 @@
 	
 	chartSupport.sunburstOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.sunburstSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -3004,7 +3004,7 @@
 	
 	chartSupport.sankeyOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.sankeySetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -3289,7 +3289,7 @@
 	
 	chartSupport.graphOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.graphSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -3527,7 +3527,7 @@
 	
 	chartSupport.boxplotOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.boxplotSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -3715,7 +3715,7 @@
 	
 	chartSupport.wordcloudOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.wordcloudSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -3887,7 +3887,7 @@
 	
 	chartSupport.liquidfillOff = function(chart, eventType, handler)
 	{
-		chartSupport.unbindChartEventHandlerDelegationEcharts(chart, eventType, handler);
+		chart.eventOffEchartsHandler(eventType, handler);
 	};
 	
 	chartSupport.liquidfillSetChartEventData = function(chart, chartEvent, echartsEventParams)
@@ -5308,33 +5308,16 @@
 	
 	chartSupport.bindChartEventHandlerDelegationEcharts = function(chart, eventType, chartEventHanlder, chartEventDataSetter)
 	{
-		var echartsEventHandler = function(params)
+		var eventHanlderDelegation = function(params)
 		{
 			var chartEvent = chart.eventNewEcharts(eventType, params);
 			chartEventDataSetter(chart, chartEvent, params);
-			chartEventHanlder.call(chart, chartEvent);
+			
+			chart.eventCallHandler(chartEventHanlder, chartEvent);
 		};
 		
-		chart.eventBindHandlerDelegation(eventType, chartEventHanlder, echartsEventHandler,
-				chartSupport.chartEventDelegationEventBinderEcharts);
-	};
-	
-	chartSupport.unbindChartEventHandlerDelegationEcharts = function(chart, eventType, chartEventHanlder)
-	{
-		chartSupport.unbindChartEventDelegateHandler(chart, eventType, chartEventHanlder,
-				chartSupport.chartEventDelegationEventBinderEcharts);
-	};
-	
-	chartSupport.chartEventDelegationEventBinderEcharts =
-	{
-		bind: function(chart, eventType, delegateEventHandler)
-		{
-			chart.internal().on(eventType, "series", delegateEventHandler);
-		},
-		unbind: function(chart, eventType, delegateEventHandler)
-		{
-			chart.internal().off(eventType, delegateEventHandler);
-		}
+		chart.eventAddHandlerDelegation(eventType, chartEventHanlder, eventHanlderDelegation);
+		chart.internal().on(eventType, "series", eventHanlderDelegation);
 	};
 	
 	//计算图例名
