@@ -2645,11 +2645,11 @@
 	{
 		this._assertActive();
 		
-		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegations");
+		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegationsDeprecated");
 		if(delegations == null)
 		{
 			delegations = [];
-			chartFactory.extValueBuiltin(this, "eventHandlerDelegations", delegations);
+			chartFactory.extValueBuiltin(this, "eventHandlerDelegationsDeprecated", delegations);
 		}
 		
 		delegationBinder.bind(this, eventType, eventHandlerDelegation);
@@ -2675,7 +2675,7 @@
 			eventHanlder = undefined;
 		}
 		
-		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegations");
+		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegationsDeprecated");
 		
 		if(delegations == null)
 			return;
@@ -2707,58 +2707,63 @@
 					delegationsTmp.push(delegations[i]);
 			}
 			
-			chartFactory.extValueBuiltin(this, "eventHandlerDelegations", delegationsTmp);
+			chartFactory.extValueBuiltin(this, "eventHandlerDelegationsDeprecated", delegationsTmp);
 		}
 	};
 	
 	/**
-	 * 图表事件支持函数：调用指定图表事件处理函数。
-	 *
-	 * @param handler 图表事件处理函数，格式为：function(chartEvent){ ... }
-	 * @param chartEvent 传递给上述handler的图表事件参数
-	 * @returns handler执行结果
+	 * 调用指定图表事件处理函数。
+	 * 
+	 * @param eventHanlder 图表事件处理函数，格式为：function(chartEvent){ ... }
+	 * @param chartEvent 传递给上述eventHanlder的图表事件参数
+	 * @returns eventHanlder执行结果
 	 */
-	chartBase.eventCallHandler = function(handler, chartEvent)
+	chartBase.callEventHandler = function(eventHanlder, chartEvent)
 	{
-		return handler.call(this, chartEvent);
+		return eventHanlder.call(this, chartEvent);
 	};
 	
 	/**
-	 * 注册指定图表事件处理函数代理。
+	 * 注册图表事件处理函数代理。
+	 * 图表渲染器on函数的实现逻辑通常是：先构建适配底层组件的图表事件处理函数代理（handlerDelegation），
+	 * 在代理中构建图表事件对象，然后调用图表事件处理函数（eventHanlder），此方法可以注册它们，使得在实现图表渲染器的off函数时，
+	 * 可以获取对应底层组件的图表事件处理函数代理，进而实现底层组件的解绑逻辑。
 	 * 
 	 * @param eventType 图表事件类型
-	 * @param handler 图表事件处理函数，格式为：function(chartEvent){ ... }
-	 * @param handlerDelegation 图表事件处理函数代理
-	 * @returns 已注册的图表事件处理函数代理信息对象，格式为：{ eventType: "...", hanlder: ..., handlerDelegation: ... }
+	 * @param eventHanlder 图表事件处理函数，格式为：function(chartEvent){ ... }
+	 * @param handlerDelegation 图表事件处理函数代理，通常是图表底层组件事件处理函数
+	 * @returns 已注册的图表事件处理函数代理信息对象，格式为：{ eventType: "...", eventHanlder: ..., handlerDelegation: ... }
 	 */
-	chartBase.eventAddHandlerDelegation = function(eventType, handler, handlerDelegation)
+	chartBase.registerEventHandlerDelegation = function(eventType, eventHanlder, handlerDelegation)
 	{
-		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegationRegister");
+		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegations");
 		if(delegations == null)
 		{
 			delegations = [];
-			chartFactory.extValueBuiltin(this, "eventHandlerDelegationRegister", delegations);
+			chartFactory.extValueBuiltin(this, "eventHandlerDelegations", delegations);
 		}
 		
-		var di = { "eventType": eventType, "hanlder": handler, "handlerDelegation": handlerDelegation };
+		var di = { "eventType": eventType, "eventHanlder": eventHanlder, "handlerDelegation": handlerDelegation };
 		delegations.push(di);
 		
 		return di;
 	};
 	
 	/**
-	 * 图表事件支持函数：删除指定图表事件处理函数代理，并返回已删除的图表事件处理函数代理信息对象数组。
+	 * 删除图表事件处理函数代理，并返回已删除的代理信息对象数组。
+	 * 图表渲染器off函数的实现逻辑通常是：使用此方法移除通过registerEventHandlerDelegation注册的图表事件处理函数代理信息对象，
+	 * 然后调用底层组件的事件解绑函数，解绑代理信息对象包含的handlerDelegation。
 	 * 
 	 * @param eventType 图表事件类型
-	 * @param handler 可选，图表事件处理函数，格式为：function(chartEvent){ ... }
-	 * @param returns 匹配给定图表事件类型、图表事件处理函数（可选）、图表事件处理函数代理（可选）的图表事件处理函数代理信息对象数组，格式为：
-	 *						[ { eventType: "...", hanlder: ..., handlerDelegation: ... }, ... ]
+	 * @param eventHanlder 可选，图表事件处理函数，格式为：function(chartEvent){ ... }
+	 * @param returns 匹配给定图表事件类型、图表事件处理函数（可选）的代理信息对象数组，格式为：
+	 *						[ { eventType: "...", eventHanlder: ..., handlerDelegation: ... }, ... ]
 	 */
-	chartBase.eventRemoveHandlerDelegation = function(eventType, handler)
+	chartBase.removeEventHandlerDelegation = function(eventType, eventHanlder)
 	{
 		var re = [];
 		
-		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegationRegister");
+		var delegations = chartFactory.extValueBuiltin(this, "eventHandlerDelegations");
 		if(delegations == null)
 			return re;
 		
@@ -2769,7 +2774,7 @@
 			var d = delegations[i];
 			
 			var remove = (d.eventType == eventType);
-			remove = (remove ? (handler === undefined || (handler !== undefined && d.hanlder == handler)) : false);
+			remove = (remove ? (eventHanlder === undefined || d.eventHanlder == eventHanlder) : false);
 			
 			if(remove)
 				re.push(d);
@@ -2777,23 +2782,29 @@
 				delegationsNew.push(d);
 		}
 		
-		chartFactory.extValueBuiltin(this, "eventHandlerDelegationRegister", delegationsNew);
+		chartFactory.extValueBuiltin(this, "eventHandlerDelegations", delegationsNew);
 		
 		return re;
 	};
 	
 	/**
-	 * 图表事件支持函数：解绑此ECharts图表的指定图表事件处理函数。
+	 * ECharts图表支持函数：解绑指定图表事件处理函数。
+	 * ECharts相关的图表渲染器可以在其off函数中直接调用此函数，以实现off函数功能。
 	 * 
 	 * @param eventType 图表事件类型
-	 * @param handler 可选，图表事件处理函数，格式为：function(chartEvent){ ... }
+	 * @param eventHanlder 可选，图表事件处理函数，格式为：function(chartEvent){ ... }，不设置则解绑所有此类型的图表事件处理函数
 	 */
-	chartBase.eventOffEchartsHandler = function(eventType, handler)
+	chartBase.echartsOffEventHandler = function(eventType, eventHanlder)
 	{
-		var delegations = this.eventRemoveHandlerDelegation(eventType, handler);
+		var delegations = this.removeEventHandlerDelegation(eventType, eventHanlder);
 		
-		for(var i=0; i<delegations.length; i++)
-			chart.internal().off(delegations[i].eventType, delegations[i].handlerDelegation);
+		var internal = this.internal();
+		
+		if(internal)
+		{
+			for(var i=0; i<delegations.length; i++)
+				internal.off(delegations[i].eventType, delegations[i].handlerDelegation);
+		}
 	};
 	
 	/**
