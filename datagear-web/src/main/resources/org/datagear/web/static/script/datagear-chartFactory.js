@@ -1467,7 +1467,7 @@
 			this.plugin.chartRenderer.on(this, eventType, handler);
 		}
 		else
-			throw new Error("Chart plugin ["+this.plugin.id+"] 's [chartRenderer.on] undefined");
+			throw new Error("Chart ["+this.id+"] 's [chartRenderer.on] undefined");
 	};
 	
 	/**
@@ -1494,8 +1494,13 @@
 		{
 			this.plugin.chartRenderer.off(this, eventType, handler);
 		}
+		//为ECharts图表提供默认off支持
+		else if(this._isEchartsInstance(this.internal()))
+		{
+			this.echartsOffEventHandler(eventType, handler);
+		}
 		else
-			throw new Error("Chart plugin ["+this.plugin.id+"] 's [chartRenderer.off] undefined");
+			throw new Error("Chart ["+this.id+"] 's [chartRenderer.off] undefined");
 	};
 	
 	/**
