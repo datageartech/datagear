@@ -3611,7 +3611,7 @@
 							//所以这里采用fontWeight效果
 							"fontWeight": "bold",
 							"shadowBlur" : 10,
-							"shadowColor" : chart.themeGradualColor(0.9, chartTheme)
+							"shadowColor" : chart.gradualColor(0.9, chartTheme)
 						}
 					}
 				}
@@ -3777,7 +3777,7 @@
 						itemStyle:
 						{
 							borderColor: chartTheme.borderColor,
-							shadowColor: chart.themeGradualColor(0.4, chartTheme)
+							shadowColor: chart.gradualColor(0.4, chartTheme)
 						}
 					},
 					label:
@@ -3956,7 +3956,7 @@
 					//偶数行样式
 					"odd":
 					{
-						"backgroundColor": chart.themeGradualColor(0, chartTheme)
+						"backgroundColor": chart.gradualColor(0, chartTheme)
 					},
 					//奇数行样式
 					"even":
@@ -3966,7 +3966,7 @@
 					//悬浮行样式
 					"hover":
 					{
-						"backgroundColor": chart.themeGradualColor(0.2, chartTheme)
+						"backgroundColor": chart.gradualColor(0.2, chartTheme)
 					},
 					//选中行样式
 					"selected":

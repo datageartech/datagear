@@ -760,7 +760,7 @@
 	 * 图表初始化时会使用图表元素的"dg-chart-theme"属性值执行设置操作。
 	 * 
 	 * 图表渲染器实现相关：
-	 * 图表渲染器应使用此函数获取并应用图表主题。
+	 * 图表渲染器应使用此函数获取并应用图表主题，另参考：chart.gradualColor()。
 	 * 
 	 * @param theme 可选，要设置的图表主题，没有则执行获取操作
 	 */
@@ -2972,15 +2972,21 @@
 	 * 
 	 * 图表渲染器在绘制图表时，可以使用此函数获取的颜色来设置图表配色。
 	 * 
-	 * @param factor 渐变因子，一个0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
-	 * @param chartTheme 可选，用于获取颜色的图表主题，默认为：chart.theme()
-	 * @returns 与渐变因子匹配的颜色，格式类似："#FFFFFF"
+	 * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
+	 * @param theme 可选，用于获取颜色的主题，默认为：chart.theme()
+	 * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"，如果未设置factor，将返回一个包含所有渐变颜色的数组
 	 */
-	chartBase.themeGradualColor = function(factor, chartTheme)
+	chartBase.gradualColor = function(factor, theme)
 	{
-		chartTheme = (chartTheme == null ? this.theme() : chartTheme);
+		//gradualColor(theme)
+		if(arguments.length == 1 && typeof(factor) != "number")
+		{
+			theme = factor;
+			factor = undefined;
+		}
+		theme = (theme == null ? this.theme() : theme);
 		
-		return chartFactory.getGradualColor(chartTheme, factor);
+		return chartFactory.getGradualColor(theme, factor);
 	};
 	
 	//-------------
@@ -3443,10 +3449,11 @@
 	};
 	
 	/**
-	 * 获取主题从背景色到前景色之间指定因子的渐变色。
+	 * 获取主题从背景色（actualBackgroundColor）到前景色（color）之间的渐变因子对应的颜色。
 	 * 
 	 * @param theme
-	 * @param factor 颜色因子，0-1之间的小数
+	 * @param factor 可选，渐变因子，0-1之间的小数
+	 * @returns 与上述factor对应的颜色，当未设置factor时，将返回一个包含所有渐变颜色的数组
 	 */
 	chartFactory.getGradualColor = function(theme, factor)
 	{
@@ -3458,15 +3465,20 @@
 			theme._gradualColors = gcs;
 		}
 		
-		var index = parseInt((gcs.length-1) * factor);
-		
-		if(index == 0 && factor > 0)
-			index = 1;
-		
-		if(index == gcs.length - 1 && factor < 1)
-			index == gcs.length - 2;
-		
-		return gcs[index];
+		if(factor == null)
+			return gcs;
+		else
+		{
+			var index = parseInt((gcs.length-1) * factor);
+			
+			if(index == 0 && factor > 0)
+				index = 1;
+			
+			if(index == gcs.length - 1 && factor < 1)
+				index == gcs.length - 2;
+			
+			return gcs[index];
+		}
 	};
 	
 	/**
