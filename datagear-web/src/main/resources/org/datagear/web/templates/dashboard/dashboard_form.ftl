@@ -677,6 +677,7 @@ readonly 是否只读操作，允许为null
 		{name: "chart.statusUpdated", value: "statusUpdated(", caption: "statusUpdated() ", meta: "chart"},
 		{name: "chart.statusUpdating", value: "statusUpdating(", caption: "statusUpdating() ", meta: "chart"},
 		{name: "chart.theme", value: "theme(", caption: "theme() ", meta: "chart"},
+		{name: "chart.themeGradualColor", value: "themeGradualColor(", caption: "themeGradualColor() ", meta: "chart"},
 		{name: "chart.update", value: "update(", caption: "update() ", meta: "chart"},
 		{name: "chart.updateGroup", value: "updateGroup(", caption: "updateGroup() ", meta: "chart"},
 		{name: "chart.updateInterval", value: "updateInterval", caption: "updateInterval ", meta: "chart"},
