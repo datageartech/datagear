@@ -7,6 +7,7 @@
 
 package org.datagear.web.json.jackson;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +63,7 @@ public class ObjectMapperBuilder
 	/**
 	 * 构建新{@linkplain ObjectMapper}对象。
 	 * <p>
-	 * 对于{@linkplain Long}、{@linkplain BigInteger}将序列化为字符串而非数值。
+	 * 对于{@linkplain Long}、{@linkplain BigInteger}、{@linkplain BigDecimal}将序列化为字符串而非数值。
 	 * </p>
 	 * <p>
 	 * 对于大整数，当序列化至JavaScript语境时，可能会出现精度丢失问题（超出其最大安全数），
@@ -87,6 +88,7 @@ public class ObjectMapperBuilder
 		
 		configs.add(JsonSerializerConfig.valueOf(Long.class, new LongToStringSerializer()));
 		configs.add(JsonSerializerConfig.valueOf(BigInteger.class, new BigIntegerToStringSerializer()));
+		configs.add(JsonSerializerConfig.valueOf(BigDecimal.class, new BigDecimalToStringSerializer()));
 
 		return build(configs);
 	}
