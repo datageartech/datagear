@@ -151,7 +151,7 @@
 	
 	chartSupport.lineOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.lineSetChartEventData);
 	};
 	
@@ -318,7 +318,7 @@
 	
 	chartSupport.barOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.barSetChartEventData);
 	};
 	
@@ -509,7 +509,7 @@
 	
 	chartSupport.barPolarOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.barPolarSetChartEventData);
 	};
 	
@@ -656,7 +656,7 @@
 	
 	chartSupport.pieOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.pieSetChartEventData);
 	};
 	
@@ -832,7 +832,7 @@
 
 	chartSupport.gaugeOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.gaugeSetChartEventData);
 	};
 	
@@ -1023,7 +1023,7 @@
 
 	chartSupport.scatterOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.scatterSetChartEventData);
 	};
 	
@@ -1164,7 +1164,7 @@
 	
 	chartSupport.scatterCoordOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.scatterCoordSetChartEventData);
 	};
 	
@@ -1370,7 +1370,7 @@
 	
 	chartSupport.radarOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.radarSetChartEventData);
 	};
 	
@@ -1509,7 +1509,7 @@
 
 	chartSupport.funnelOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.funnelSetChartEventData);
 	};
 	
@@ -1655,7 +1655,7 @@
 
 	chartSupport.mapOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.mapSetChartEventData);
 	};
 	
@@ -1813,7 +1813,7 @@
 
 	chartSupport.mapScatterOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.mapScatterSetChartEventData);
 	};
 	
@@ -2063,7 +2063,7 @@
 	
 	chartSupport.mapGraphOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.mapGraphSetChartEventData);
 	};
 	
@@ -2244,7 +2244,7 @@
 	
 	chartSupport.candlestickOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.candlestickSetChartEventData);
 	};
 	
@@ -2427,7 +2427,7 @@
 
 	chartSupport.heatmapOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.heatmapSetChartEventData);
 	};
 	
@@ -2508,7 +2508,7 @@
 
 	chartSupport.treeOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.treeSetChartEventData);
 	};
 	
@@ -2645,7 +2645,7 @@
 
 	chartSupport.treemapOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.treemapSetChartEventData);
 	};
 	
@@ -2730,7 +2730,7 @@
 
 	chartSupport.sunburstOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.sunburstSetChartEventData);
 	};
 	
@@ -2999,7 +2999,8 @@
 
 	chartSupport.sankeyOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, chartSupport.sankeySetChartEventData);
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
+				chartSupport.sankeySetChartEventData);
 	};
 	
 	chartSupport.sankeyOff = function(chart, eventType, handler)
@@ -3283,7 +3284,7 @@
 
 	chartSupport.graphOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.graphSetChartEventData);
 	};
 	
@@ -3521,7 +3522,7 @@
 	
 	chartSupport.boxplotOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.boxplotSetChartEventData);
 	};
 	
@@ -3709,7 +3710,7 @@
 	
 	chartSupport.wordcloudOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.wordcloudSetChartEventData);
 	};
 	
@@ -3881,7 +3882,7 @@
 	
 	chartSupport.liquidfillOn = function(chart, eventType, handler)
 	{
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
 				chartSupport.liquidfillSetChartEventData);
 	};
 	
@@ -4261,22 +4262,27 @@
 	
 	chartSupport.tableOn = function(chart, eventType, handler)
 	{
-		var htmlHandler = function(htmlEvent)
+		var handlerDelegation = function(htmlEvent)
 		{
 			var rowElement = this;
 			var chartEvent = chart.eventNewHtml(eventType, htmlEvent);
 			chartSupport.tableSetChartEventData(chart, chartEvent, htmlEvent, rowElement);
-			handler.call(chart, chartEvent);
+			
+			chart.callEventHandler(handler, chartEvent);
 		};
 		
-		chart.eventBindHandlerDelegation(eventType, handler, htmlHandler,
-				chartSupport.tableChartEventDelegationEventBinder);
+		chart.registerEventHandlerDelegation(eventType, handler, handlerDelegation);
+		$(chart.internal().table().body()).on(eventType, "tr", handlerDelegation);
 	};
 	
 	chartSupport.tableOff = function(chart, eventType, handler)
 	{
-		chart.eventUnbindHandlerDelegation(eventType, handler,
-				chartSupport.tableChartEventDelegationEventBinder);
+		var $tableBody = $(chart.internal().table().body());
+		
+		chart.removeEventHandlerDelegation(eventType, handler, function(et, eh, ehd)
+		{
+			$tableBody.off(et, "tr", ehd);
+		});
 	};
 	
 	chartSupport.tableSetChartEventData = function(chart, chartEvent, htmlEvent, rowElement)
@@ -4302,20 +4308,6 @@
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalInfo(chart, chartEvent, chartData);
-	};
-	
-	chartSupport.tableChartEventDelegationEventBinder =
-	{
-		bind: function(chart, eventType, delegateEventHandler)
-		{
-			var dataTable = chart.internal();
-			$(dataTable.table().body()).on(eventType, "tr", delegateEventHandler);
-		},
-		unbind: function(chart, eventType, delegateEventHandler)
-		{
-			var dataTable = chart.internal();
-			$(dataTable.table().body()).off(eventType, "tr", delegateEventHandler);
-		}
 	};
 	
 	chartSupport.tableGetChartContent = function(chart)
@@ -4869,22 +4861,27 @@
 	
 	chartSupport.labelOn = function(chart, eventType, handler)
 	{
-		var htmlHandler = function(htmlEvent)
+		var handlerDelegation = function(htmlEvent)
 		{
 			var $label = $(this);
 			var chartEvent = chart.eventNewHtml(eventType, htmlEvent);
 			chartSupport.labelSetChartEventData(chart, chartEvent, htmlEvent, $label);
-			handler.call(chart, chartEvent);
+			
+			chart.callEventHandler(handler, chartEvent);
 		};
 		
-		chart.eventBindHandlerDelegation(eventType, handler, htmlHandler,
-				chartSupport.labelChartEventDelegationEventBinder);
+		chart.registerEventHandlerDelegation(eventType, handler, handlerDelegation);
+		$(chart.internal()).on(eventType, ".dg-chart-label-item", handlerDelegation);
 	};
 	
 	chartSupport.labelOff = function(chart, eventType, handler)
 	{
-		chart.eventUnbindHandlerDelegation(eventType, handler,
-				chartSupport.labelChartEventDelegationEventBinder);
+		var internal = $(chart.internal());
+		
+		chart.removeEventHandlerDelegation(eventType, handler, function(et, eh, ehd)
+		{
+			internal.off(et, ".dg-chart-label-item", ehd);
+		});
 	};
 	
 	chartSupport.labelSetChartEventData = function(chart, chartEvent, htmlEvent, $label)
@@ -4903,18 +4900,6 @@
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalInfo(chart, chartEvent, chartData);
-	};
-	
-	chartSupport.labelChartEventDelegationEventBinder =
-	{
-		bind: function(chart, eventType, delegateEventHandler)
-		{
-			chart.elementJquery().on(eventType, ".dg-chart-label-item", delegateEventHandler);
-		},
-		unbind: function(chart, eventType, delegateEventHandler)
-		{
-			chart.elementJquery().off(eventType, ".dg-chart-label-item", delegateEventHandler);
-		}
 	};
 	
 	//自定义
@@ -5306,18 +5291,18 @@
 		chart.eventOriginalInfo(chartEvent, originalInfo);
 	};
 	
-	chartSupport.bindChartEventHandlerDelegationEcharts = function(chart, eventType, chartEventHanlder, chartEventDataSetter)
+	chartSupport.bindChartEventHandlerForEcharts = function(chart, eventType, eventHanlder, chartEventDataSetter)
 	{
-		var eventHanlderDelegation = function(params)
+		var hanlderDelegation = function(params)
 		{
 			var chartEvent = chart.eventNewEcharts(eventType, params);
 			chartEventDataSetter(chart, chartEvent, params);
 			
-			chart.callEventHandler(chartEventHanlder, chartEvent);
+			chart.callEventHandler(eventHanlder, chartEvent);
 		};
 		
-		chart.registerEventHandlerDelegation(eventType, chartEventHanlder, eventHanlderDelegation);
-		chart.internal().on(eventType, "series", eventHanlderDelegation);
+		chart.registerEventHandlerDelegation(eventType, eventHanlder, hanlderDelegation);
+		chart.internal().on(eventType, "series", hanlderDelegation);
 	};
 	
 	//计算图例名
