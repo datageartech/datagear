@@ -374,13 +374,13 @@
 	 */
 	chartFactory.init = function(chart)
 	{
-		this._refactor(chart);
+		this._refactorChart(chart);
 		
 		$.extend(chart, this.chartBase);
 		chart.init();
 	};
 	
-	chartFactory._refactor = function(chart)
+	chartFactory._refactorChart = function(chart)
 	{
 		//chart.resultDataFormat属性与后面的chart.resultDataFormat()冲突，因此这里重构一下
 		chart._resultDataFormat = chart.resultDataFormat;
@@ -2408,11 +2408,11 @@
 			
 			if(!chartTheme._registeredEchartsThemeName)
 			{
-				var seq = (chartFactory._registeredEchartsThemeNameSeqNext != null ?
-						chartFactory._registeredEchartsThemeNameSeqNext : 0);
-				chartFactory._registeredEchartsThemeNameSeqNext = seq + 1;
+				var seq = (chartFactory._REGISTERED_ECHARTS_THEME_NAME_SEQ != null ?
+						chartFactory._REGISTERED_ECHARTS_THEME_NAME_SEQ : 0);
+				chartFactory._REGISTERED_ECHARTS_THEME_NAME_SEQ = seq + 1;
 				
-				chartTheme._registeredEchartsThemeName = "themeNameByChartTheme-" + seq;
+				chartTheme._registeredEchartsThemeName = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "EChartsThemeByChartTheme" + seq;
 				
 				var echartsTheme = chartFactory.buildEchartsTheme(chartTheme);
 				echarts.registerTheme(chartTheme._registeredEchartsThemeName, echartsTheme);
@@ -2966,6 +2966,23 @@
 		});
 	};
 	
+	/**
+	 * 获取图表主题指定渐变因子的颜色。
+	 * 这个颜色是图表主题的实际背景色（actualBackgroundColor）与前景色（color）之间的某个颜色。
+	 * 
+	 * 图表渲染器在绘制图表时，可以使用此函数获取的颜色来设置图表配色。
+	 * 
+	 * @param factor 渐变因子，一个0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
+	 * @param chartTheme 可选，用于获取颜色的图表主题，默认为：chart.theme()
+	 * @returns 与渐变因子匹配的颜色，格式类似："#FFFFFF"
+	 */
+	chartBase.themeGradualColor = function(factor, chartTheme)
+	{
+		chartTheme = (chartTheme == null ? this.theme() : chartTheme);
+		
+		return chartFactory.getGradualColor(chartTheme, factor);
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
@@ -3426,10 +3443,10 @@
 	};
 	
 	/**
-	 * 获取主题指定因子的渐变色。
+	 * 获取主题从背景色到前景色之间指定因子的渐变色。
 	 * 
 	 * @param theme
-	 * @param factor 颜色因子，0-1之间
+	 * @param factor 颜色因子，0-1之间的小数
 	 */
 	chartFactory.getGradualColor = function(theme, factor)
 	{
@@ -3453,12 +3470,13 @@
 	};
 	
 	/**
-	 * 计算起始颜色和终止颜色之间的渐变颜色数组，数组中不包含起始颜色、但包含结束颜色。
+	 * 计算起始颜色和终止颜色之间的渐变颜色数组，数组中不包含起始颜色、也不包含结束颜色。
 	 * 
 	 * @param start 起始颜色
 	 * @param end 终止颜色
-	 * @param count 计算数目
+	 * @param count 要计算的渐变颜色数目
 	 * @param rgb true 返回"rgb(...)"格式；fasle 返回"#FFFFFF"格式，默认为false
+	 * @returns 渐变颜色数组
 	 */
 	chartFactory.evalGradualColors = function(start, end, count, rgb)
 	{
@@ -3467,7 +3485,9 @@
 		start = this.parseColor(start);
 		end = this.parseColor(end);
 		
-		for(var i=1; i<=count; i++)
+		count = count + 1;
+		
+		for(var i=1; i<count; i++)
 		{
 			var color = {};
 			
