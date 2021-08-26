@@ -32,7 +32,7 @@
 					<label><@spring.message code='about.app.version' /></label>
 				</div>
 				<div class="form-item-value">
-					${version}
+					${Global.VERSION}
 				</div>
 			</div>
 			<div class="form-item">

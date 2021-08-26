@@ -12,7 +12,9 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
@@ -29,7 +31,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/login")
 public class LoginController extends AbstractController
 {
+	@Value("${disableRegister}")
 	private boolean disableRegister = false;
+
+	@Value("${disableDetectNewVersion}")
+	private boolean disableDetectNewVersion;
 
 	public LoginController()
 	{
@@ -41,10 +47,19 @@ public class LoginController extends AbstractController
 		return disableRegister;
 	}
 
-	@Value("${disableRegister}")
 	public void setDisableRegister(boolean disableRegister)
 	{
 		this.disableRegister = disableRegister;
+	}
+
+	public boolean isDisableDetectNewVersion()
+	{
+		return disableDetectNewVersion;
+	}
+
+	public void setDisableDetectNewVersion(boolean disableDetectNewVersion)
+	{
+		this.disableDetectNewVersion = disableDetectNewVersion;
 	}
 
 	/**
@@ -53,7 +68,7 @@ public class LoginController extends AbstractController
 	 * @return
 	 */
 	@RequestMapping
-	public String login(HttpServletRequest request)
+	public String login(HttpServletRequest request, HttpServletResponse response)
 	{
 		String loginUser = (String) request.getSession()
 				.getAttribute(org.datagear.web.controller.RegisterController.SESSION_KEY_REGISTER_USER_NAME);
@@ -71,6 +86,8 @@ public class LoginController extends AbstractController
 		request.setAttribute("loginUser", loginUser);
 		request.setAttribute("authenticationFailed", (authenticationException != null));
 		request.setAttribute("disableRegister", this.disableRegister);
+		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneNoPassword());
+		setDetectNewVersionScriptAttr(request, response, this.disableDetectNewVersion);
 
 		return "/login";
 	}

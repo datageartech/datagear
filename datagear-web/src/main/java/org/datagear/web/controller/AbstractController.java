@@ -27,6 +27,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
@@ -78,6 +79,10 @@ public abstract class AbstractController
 	public static final String KEY_ANALYSIS_PROJECT_ID = "ANALYSIS_PROJECT_ID";
 
 	public static final String ERROR_PAGE_URL = "/error";
+
+	public static final String LATEST_VERSION_SCRIPT_LOCATION = Global.WEB_SITE + "/latest-version.js";
+
+	public static final String COOKIE_DETECT_NEW_VERSION_RESOLVED = "DETECT_NEW_VERSION_RESOLVED";
 
 	@Autowired
 	private ConversionService conversionService;
@@ -829,6 +834,57 @@ public abstract class AbstractController
 			String fileName) throws IOException
 	{
 		return new String(fileName.getBytes(RESPONSE_ENCODING), IOUtil.CHARSET_ISO_8859_1);
+	}
+
+	/**
+	 * 将探测新版本的JS脚本以{@code detectNewVersionScript}关键设置为：{@code HttpServletRequest#setAttribute(String, Object)}。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param disableDetectNewVersion
+	 */
+	protected void setDetectNewVersionScriptAttr(HttpServletRequest request, HttpServletResponse response,
+			boolean disableDetectNewVersion)
+	{
+		String script = buildDetectNewVersionScript(request, response, disableDetectNewVersion);
+		request.setAttribute("detectNewVersionScript", script);
+	}
+
+	/**
+	 * 构建探测新版本的JS脚本，格式为：
+	 * <p>
+	 * <code>
+	 * &lt;script src="http://www.datagear.tech/latest-version.js" type="text/javascript"&gt;&lt;/script&gt;
+	 * </code>
+	 * </p>
+	 * <p>
+	 * 如果{@code disableDetectNewVersion}为{@code true}，或者还未到达下一次探测事件，将直接返回空字符串：{@code ""}。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param disableDetectNewVersion
+	 * @return
+	 */
+	protected String buildDetectNewVersionScript(HttpServletRequest request, HttpServletResponse response,
+			boolean disableDetectNewVersion)
+	{
+		String script = "";
+
+		if (!disableDetectNewVersion)
+		{
+			String resolved = WebUtils.getCookieValue(request, COOKIE_DETECT_NEW_VERSION_RESOLVED);
+			disableDetectNewVersion = "true".equalsIgnoreCase(resolved);
+		}
+
+		if (!disableDetectNewVersion)
+		{
+			script = "<script src=\"" + LATEST_VERSION_SCRIPT_LOCATION + "\" type=\"text/javascript\"></script>";
+			// 每12小时检测一次
+			WebUtils.setCookie(request, response, COOKIE_DETECT_NEW_VERSION_RESOLVED, "true", 60 * 60 * 12);
+		}
+
+		return script;
 	}
 
 	/**

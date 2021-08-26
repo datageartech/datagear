@@ -37,10 +37,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class MainController extends AbstractController
 {
-	public static final String LATEST_VERSION_SCRIPT_LOCATION = Global.WEB_SITE + "/latest-version.js";
-
-	public static final String COOKIE_DETECT_NEW_VERSION_RESOLVED = "DETECT_NEW_VERSION_RESOLVED";
-
 	@Value("${disableRegister}")
 	private boolean disableRegister = false;
 
@@ -97,8 +93,7 @@ public class MainController extends AbstractController
 	{
 		request.setAttribute("disableRegister", this.disableRegister);
 		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneNoPassword());
-		request.setAttribute("currentVersion", Global.VERSION);
-		resolveDetectNewVersionScript(request, response);
+		setDetectNewVersionScriptAttr(request, response, this.disableDetectNewVersion);
 
 		return "/main";
 	}
@@ -106,8 +101,6 @@ public class MainController extends AbstractController
 	@RequestMapping("/about")
 	public String about(HttpServletRequest request)
 	{
-		request.setAttribute("version", Global.VERSION);
-
 		return "/about";
 	}
 
@@ -163,26 +156,5 @@ public class MainController extends AbstractController
 		Map<String, Object> map = new HashMap<>();
 		map.put("status", "ok");
 		return map;
-	}
-
-	protected void resolveDetectNewVersionScript(HttpServletRequest request, HttpServletResponse response)
-	{
-		boolean disable = this.disableDetectNewVersion;
-		String script = "";
-
-		if (!disable)
-		{
-			String resolved = WebUtils.getCookieValue(request, COOKIE_DETECT_NEW_VERSION_RESOLVED);
-			disable = "true".equalsIgnoreCase(resolved);
-		}
-
-		if (!disable)
-		{
-			script = "<script src=\"" + LATEST_VERSION_SCRIPT_LOCATION + "\" type=\"text/javascript\"></script>";
-			// 每12小时检测一次
-			WebUtils.setCookie(request, response, COOKIE_DETECT_NEW_VERSION_RESOLVED, "true", 60 * 60 * 12);
-		}
-
-		request.setAttribute("detectNewVersionScript", script);
 	}
 }

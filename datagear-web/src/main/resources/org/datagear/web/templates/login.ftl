@@ -11,6 +11,7 @@
 <html>
 <head>
 <#include "include/html_head.ftl">
+${detectNewVersionScript?no_esc}
 <title><#include "include/html_title_app_name.ftl"><@spring.message code='login.login' /></title>
 </head>
 <body>
@@ -19,6 +20,7 @@
 	<div class="main-page-head">
 		<#include "include/html_logo.ftl">
 		<div class="toolbar">
+			<#include "include/page_obj_sys_menu.ftl">
 			<#if !disableRegister>
 			<a class="link" href="${contextPath}/register"><@spring.message code='register.register' /></a>
 			</#if>
@@ -96,6 +98,8 @@
 	});
 	
 	$(".ui-dialog .ui-dialog-titlebar-close", dialog.widget).hide();
+	
+	po.initSysMenu();
 	
 	<#if authenticationFailed>
 	$(document).ready(function()
