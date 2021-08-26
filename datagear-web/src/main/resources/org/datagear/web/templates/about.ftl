@@ -48,7 +48,9 @@
 					<label><@spring.message code='about.license' /></label>
 				</div>
 				<div class="form-item-value">
-					<@spring.message code='app.license' />
+					<a href="http://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" class="link">
+						<@spring.message code='app.license' />
+					</a>
 				</div>
 			</div>
 		</div>
