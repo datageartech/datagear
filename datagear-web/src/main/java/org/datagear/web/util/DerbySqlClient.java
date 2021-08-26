@@ -23,7 +23,7 @@ import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
-import org.datagear.web.config.PropertiesConfig;
+import org.datagear.web.config.ApplicationPropertiesConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -54,7 +54,7 @@ public class DerbySqlClient extends JdbcSupport
 
 		try
 		{
-			applicationContext = new AnnotationConfigApplicationContext(PropertiesConfig.class,
+			applicationContext = new AnnotationConfigApplicationContext(ApplicationPropertiesConfig.class,
 					DerbySqlClientDataSourceConfig.class);
 
 			DataSource dataSource = applicationContext.getBean(DataSource.class);

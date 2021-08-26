@@ -54,13 +54,13 @@ import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.config.CoreConfig;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -104,8 +104,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@Autowired
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 
-	private String dashboardGlobalResUrlPrefix = null;
-
 	@Autowired
 	@Qualifier(CoreConfig.NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
 	private File dashboardGlobalResRootDirectory;
@@ -121,6 +119,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	private ServletContext servletContext;
 
+	@Autowired
+	private ApplicationProperties applicationProperties;
+
 	public DashboardController()
 	{
 		super();
@@ -135,17 +136,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService)
 	{
 		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
-	}
-
-	public String getDashboardGlobalResUrlPrefix()
-	{
-		return dashboardGlobalResUrlPrefix;
-	}
-
-	@Value("${dashboardGlobalResUrlPrefix}")
-	public void setDashboardGlobalResUrlPrefix(String dashboardGlobalResUrlPrefix)
-	{
-		this.dashboardGlobalResUrlPrefix = dashboardGlobalResUrlPrefix;
 	}
 
 	public File getDashboardGlobalResRootDirectory()
@@ -199,6 +189,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		this.servletContext = servletContext;
 	}
 
+	public ApplicationProperties getApplicationProperties()
+	{
+		return applicationProperties;
+	}
+
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	{
+		this.applicationProperties = applicationProperties;
+	}
+
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
@@ -219,7 +219,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("templateContent", templateContent);
 		model.addAttribute("defaultTemplateContent", templateContent);
 		model.addAttribute("dashboardGlobalResUrlPrefix",
-				(StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix) ? "" : this.dashboardGlobalResUrlPrefix));
+				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
+						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -248,7 +249,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute("defaultTemplateContent", defaultTemplateContent);
 		model.addAttribute("dashboardGlobalResUrlPrefix",
-				(StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix) ? "" : this.dashboardGlobalResUrlPrefix));
+				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
+						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -279,7 +281,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute("defaultTemplateContent", defaultTemplateContent);
 		model.addAttribute("dashboardGlobalResUrlPrefix",
-				(StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix) ? "" : this.dashboardGlobalResUrlPrefix));
+				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
+						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -745,7 +748,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("templateName", dashboard.getFirstTemplate());
 		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute("dashboardGlobalResUrlPrefix",
-				(StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix) ? "" : this.dashboardGlobalResUrlPrefix));
+				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
+						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.viewDashboard");
 		model.addAttribute(KEY_READONLY, true);
 
@@ -952,9 +956,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			// 其次全局资源
 			else
 			{
-				if (!StringUtil.isEmpty(this.dashboardGlobalResUrlPrefix)
-						&& resName.startsWith(this.dashboardGlobalResUrlPrefix))
-					resName = resName.substring(this.dashboardGlobalResUrlPrefix.length());
+				if (!StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix())
+						&& resName.startsWith(this.applicationProperties.getDashboardGlobalResUrlPrefix()))
+					resName = resName.substring(this.applicationProperties.getDashboardGlobalResUrlPrefix().length());
 
 				File globalRes = FileUtil.getFile(dashboardGlobalResRootDirectory, resName);
 

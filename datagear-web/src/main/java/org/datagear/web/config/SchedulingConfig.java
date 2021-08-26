@@ -11,7 +11,6 @@ import org.datagear.web.util.DirectoryCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -25,15 +24,25 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 public class SchedulingConfig
 {
+	private ApplicationProperties applicationProperties;
+
 	private CoreConfig coreConfig;
 
-	private Environment environment;
-
 	@Autowired
-	public SchedulingConfig(CoreConfig coreConfig, Environment environment)
+	public SchedulingConfig(ApplicationProperties applicationProperties, CoreConfig coreConfig)
 	{
+		this.applicationProperties = applicationProperties;
 		this.coreConfig = coreConfig;
-		this.environment = environment;
+	}
+
+	public ApplicationProperties getApplicationProperties()
+	{
+		return applicationProperties;
+	}
+
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	{
+		this.applicationProperties = applicationProperties;
 	}
 
 	public CoreConfig getCoreConfig()
@@ -46,20 +55,11 @@ public class SchedulingConfig
 		this.coreConfig = coreConfig;
 	}
 
-	public Environment getEnvironment()
-	{
-		return environment;
-	}
-
-	public void setEnvironment(Environment environment)
-	{
-		this.environment = environment;
-	}
-
 	@Bean
 	public DirectoryCleaner tempDirectoryCleaner()
 	{
-		int expiredMinutes = this.environment.getProperty("cleanTempDirectory.expiredMinutes", Integer.class);
+		int expiredMinutes = this.applicationProperties
+				.getCleanTempDirectoryExpiredMinutes();
 
 		DirectoryCleaner bean = new DirectoryCleaner(this.coreConfig.tempDirectory(), expiredMinutes);
 		return bean;

@@ -19,10 +19,10 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.UserService;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -43,16 +43,24 @@ public class RegisterController extends AbstractController
 	public static final String SESSION_KEY_REGISTER_USER_NAME = "registerSuccessUserName";
 
 	@Autowired
+	private ApplicationProperties applicationProperties;
+
+	@Autowired
 	private UserService userService;
-
-	private boolean disableRegister = false;
-
-	/** 注册用户默认角色 */
-	private String defaultRoleRegister = "";
 
 	public RegisterController()
 	{
 		super();
+	}
+
+	public ApplicationProperties getApplicationProperties()
+	{
+		return applicationProperties;
+	}
+
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	{
+		this.applicationProperties = applicationProperties;
 	}
 
 	public UserService getUserService()
@@ -65,32 +73,10 @@ public class RegisterController extends AbstractController
 		this.userService = userService;
 	}
 
-	public boolean isDisableRegister()
-	{
-		return disableRegister;
-	}
-
-	@Value("${disableRegister}")
-	public void setDisableRegister(boolean disableRegister)
-	{
-		this.disableRegister = disableRegister;
-	}
-
-	public String getDefaultRoleRegister()
-	{
-		return defaultRoleRegister;
-	}
-
-	@Value("${defaultRole.register}")
-	public void setDefaultRoleRegister(String defaultRoleRegister)
-	{
-		this.defaultRoleRegister = defaultRoleRegister;
-	}
-
 	@RequestMapping
 	public String register(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		if (this.disableRegister)
+		if (this.applicationProperties.isDisableRegister())
 		{
 			WebUtils.setOperationMessage(request,
 					buildOperationMessageFail(request, buildMessageCode("registerDisabled")));
@@ -109,7 +95,7 @@ public class RegisterController extends AbstractController
 	public ResponseEntity<OperationMessage> doRegister(HttpServletRequest request, HttpServletResponse response,
 			User user, @RequestParam("confirmPassword") String confirmPassword)
 	{
-		if (this.disableRegister)
+		if (this.applicationProperties.isDisableRegister())
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMessageCode("registerDisabled"));
 
@@ -126,7 +112,7 @@ public class RegisterController extends AbstractController
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMessageCode("userNameExists"), user.getName());
 
-		user.setRoles(buildUserRolesForSave(this.defaultRoleRegister));
+		user.setRoles(buildUserRolesForSave(this.applicationProperties.getDefaultRoleRegister()));
 
 		this.userService.add(user);
 

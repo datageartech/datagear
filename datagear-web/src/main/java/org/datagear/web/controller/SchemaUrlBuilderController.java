@@ -19,13 +19,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.support.JsonSupport;
-import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.util.DriverInfo;
-import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.DriverInfo.DefaultValue;
 import org.datagear.web.util.DriverInfo.UrlTemplate;
-import org.springframework.beans.factory.annotation.Value;
+import org.datagear.web.util.OperationMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +46,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 
 	private ServletContext servletContext;
 
+	@Autowired
 	private File schemaUrlBuilderScriptFile;
 
 	public SchemaUrlBuilderController()
@@ -73,12 +73,6 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	public void setSchemaUrlBuilderScriptFile(File schemaUrlBuilderScriptFile)
 	{
 		this.schemaUrlBuilderScriptFile = schemaUrlBuilderScriptFile;
-	}
-
-	@Value("${schemaUrlBuilderScriptFile}")
-	public void setSchemaUrlBuilderScriptFileString(String schemaUrlBuilderScriptFile)
-	{
-		this.schemaUrlBuilderScriptFile = FileUtil.getFile(schemaUrlBuilderScriptFile);
 	}
 
 	@RequestMapping("/editScriptCode")

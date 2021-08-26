@@ -92,6 +92,7 @@ import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.support.DefaultDialectSource;
 import org.datagear.persistence.support.DefaultPersistenceManager;
 import org.datagear.persistence.support.SqlSelectManager;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
@@ -122,7 +123,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -144,19 +144,30 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 	public static final String NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY = "dashboardGlobalResRootDirectory";
 
+	private ApplicationProperties applicationProperties;
+
 	private DataSourceConfig dataSourceConfig;
 
 	private ServiceCacheConfig serviceCacheConfig;
 
-	private Environment environment;
-
 	@Autowired
-	public CoreConfig(DataSourceConfig dataSourceConfig, ServiceCacheConfig serviceCacheConfig, Environment environment)
+	public CoreConfig(ApplicationProperties applicationProperties, DataSourceConfig dataSourceConfig,
+			ServiceCacheConfig serviceCacheConfig)
 	{
 		super();
+		this.applicationProperties = applicationProperties;
 		this.dataSourceConfig = dataSourceConfig;
 		this.serviceCacheConfig = serviceCacheConfig;
-		this.environment = environment;
+	}
+
+	public ApplicationProperties getApplicationProperties()
+	{
+		return applicationProperties;
+	}
+
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	{
+		this.applicationProperties = applicationProperties;
 	}
 
 	public DataSourceConfig getDataSourceConfig()
@@ -177,16 +188,6 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public void setServiceCacheConfig(ServiceCacheConfig serviceCacheConfig)
 	{
 		this.serviceCacheConfig = serviceCacheConfig;
-	}
-
-	public Environment getEnvironment()
-	{
-		return environment;
-	}
-
-	public void setEnvironment(Environment environment)
-	{
-		this.environment = environment;
 	}
 
 	@Bean
@@ -274,43 +275,49 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public File driverEntityManagerRootDirectory()
 	{
-		return createDirectory(environment.getProperty("directory.driver"), true);
+		return createDirectory(this.applicationProperties.getDirectoryDriver(), true);
 	}
 
 	@Bean
 	public File tempDirectory()
 	{
-		return createDirectory(environment.getProperty("directory.temp"), true);
+		return createDirectory(this.applicationProperties.getDirectoryTemp(), true);
 	}
 
 	@Bean
 	public File chartPluginRootDirectory()
 	{
-		return createDirectory(environment.getProperty("directory.chartPlugin"), true);
+		return createDirectory(this.applicationProperties.getDirectoryChartPlugin(), true);
 	}
 
 	@Bean
 	public File dashboardRootDirectory()
 	{
-		return createDirectory(environment.getProperty("directory.dashboard"), true);
+		return createDirectory(this.applicationProperties.getDirectoryDashboard(), true);
 	}
 
 	@Bean(NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
 	public File dashboardGlobalResRootDirectory()
 	{
-		return createDirectory(environment.getProperty("directory.dashboardGlobalRes"), true);
+		return createDirectory(this.applicationProperties.getDirectoryDashboardGlobalRes(), true);
 	}
 
 	@Bean
 	public File resetPasswordCheckFileDirectory()
 	{
-		return createDirectory(environment.getProperty("directory.resetPasswordCheckFile"), true);
+		return createDirectory(this.applicationProperties.getDirectoryResetPasswordCheckFile(), true);
 	}
 
 	@Bean
 	public File dataSetRootDirectory()
 	{
-		return createDirectory(environment.getProperty("directory.dataSet"), true);
+		return createDirectory(this.applicationProperties.getDirectoryDataSet(), true);
+	}
+
+	@Bean
+	public File schemaUrlBuilderScriptFile()
+	{
+		return FileUtil.getFile(this.applicationProperties.getSchemaUrlBuilderScriptFile());
 	}
 
 	@Bean
@@ -368,7 +375,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public MbSqlDialectBuilder mbSqlDialectBuilder()
 	{
-		String dialectName = environment.getProperty("datasourceDialect");
+		String dialectName = this.applicationProperties.getDatasourceDialect();
 
 		MbSqlDialectBuilder builder = new MbSqlDialectBuilder();
 		builder.setDialectName(dialectName);

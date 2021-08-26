@@ -14,8 +14,9 @@ import java.net.URLEncoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.WebUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.stereotype.Controller;
@@ -31,35 +32,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/login")
 public class LoginController extends AbstractController
 {
-	@Value("${disableRegister}")
-	private boolean disableRegister = false;
-
-	@Value("${disableDetectNewVersion}")
-	private boolean disableDetectNewVersion;
+	@Autowired
+	private ApplicationProperties applicationProperties;
 
 	public LoginController()
 	{
 		super();
 	}
 
-	public boolean isDisableRegister()
+	public ApplicationProperties getApplicationProperties()
 	{
-		return disableRegister;
+		return applicationProperties;
 	}
 
-	public void setDisableRegister(boolean disableRegister)
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
 	{
-		this.disableRegister = disableRegister;
-	}
-
-	public boolean isDisableDetectNewVersion()
-	{
-		return disableDetectNewVersion;
-	}
-
-	public void setDisableDetectNewVersion(boolean disableDetectNewVersion)
-	{
-		this.disableDetectNewVersion = disableDetectNewVersion;
+		this.applicationProperties = applicationProperties;
 	}
 
 	/**
@@ -85,9 +73,9 @@ public class LoginController extends AbstractController
 
 		request.setAttribute("loginUser", loginUser);
 		request.setAttribute("authenticationFailed", (authenticationException != null));
-		request.setAttribute("disableRegister", this.disableRegister);
+		request.setAttribute("disableRegister", this.applicationProperties.isDisableRegister());
 		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneNoPassword());
-		setDetectNewVersionScriptAttr(request, response, this.disableDetectNewVersion);
+		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
 
 		return "/login";
 	}

@@ -23,7 +23,6 @@ import org.datagear.web.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -92,14 +91,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 
 	private CoreConfig coreConfig;
 
-	private Environment environment;
+	private ApplicationProperties applicationProperties;
 
 	@Autowired
-	public SecurityConfig(CoreConfig coreConfig, Environment environment)
+	public SecurityConfig(ApplicationProperties applicationProperties, CoreConfig coreConfig)
 	{
 		super();
+		this.applicationProperties = applicationProperties;
 		this.coreConfig = coreConfig;
-		this.environment = environment;
+	}
+
+	public ApplicationProperties getApplicationProperties()
+	{
+		return applicationProperties;
+	}
+
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	{
+		this.applicationProperties = applicationProperties;
 	}
 
 	public CoreConfig getCoreConfig()
@@ -110,27 +119,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	public void setCoreConfig(CoreConfig coreConfig)
 	{
 		this.coreConfig = coreConfig;
-	}
-
-	public Environment getEnvironment()
-	{
-		return environment;
-	}
-
-	public void setEnvironment(Environment environment)
-	{
-		this.environment = environment;
-	}
-
-	/**
-	 * 是否禁用匿名用户使用系统。
-	 * 
-	 * @return
-	 */
-	protected boolean isDisableAnonymous()
-	{
-		String disableStr = this.environment.getProperty("disableAnonymous");
-		return (disableStr == null ? false : Boolean.TRUE.toString().equals(disableStr));
 	}
 
 	protected AuthenticationSuccessHandler getAuthenticationSuccessHandler()
@@ -156,7 +144,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
-		boolean disableAnonymous = isDisableAnonymous();
+		boolean disableAnonymous = this.applicationProperties.isDisableAnonymous();
 
 		// 默认是开启CSRF的，系统目前没有提供相关支持，因此需禁用
 		http.csrf().disable();
@@ -328,7 +316,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	{
 		String anonymousAuthKey = UUID.randomUUID().toString();
 
-		String[] anonymousRoleIds = StringUtil.split(this.environment.getProperty("defaultRole.anonymous"), ",", true);
+		String[] anonymousRoleIds = StringUtil.split(this.applicationProperties.getDefaultRoleAnonymous(), ",", true);
 		Set<String> anonymousRoleIdSet = new HashSet<>();
 		anonymousRoleIdSet.addAll(Arrays.asList(anonymousRoleIds));
 

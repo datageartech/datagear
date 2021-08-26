@@ -26,10 +26,10 @@ import org.datagear.management.service.UserService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
+import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -57,8 +57,8 @@ public class UserController extends AbstractController
 	@Autowired
 	private SchemaService schemaService;
 
-	/** 添加用户默认角色 */
-	private String defaultRoleAdd = "";
+	@Autowired
+	private ApplicationProperties applicationProperties;
 
 	public UserController()
 	{
@@ -95,15 +95,14 @@ public class UserController extends AbstractController
 		this.schemaService = schemaService;
 	}
 
-	public String getDefaultRoleAdd()
+	public ApplicationProperties getApplicationProperties()
 	{
-		return defaultRoleAdd;
+		return applicationProperties;
 	}
 
-	@Value("${defaultRole.add}")
-	public void setDefaultRoleAdd(String defaultRoleAdd)
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
 	{
-		this.defaultRoleAdd = defaultRoleAdd;
+		this.applicationProperties = applicationProperties;
 	}
 
 	@RequestMapping("/add")
@@ -111,7 +110,7 @@ public class UserController extends AbstractController
 	{
 		User user = new User();
 
-		Set<Role> dftRoles = RegisterController.buildUserRolesForSave(this.defaultRoleAdd);
+		Set<Role> dftRoles = RegisterController.buildUserRolesForSave(this.applicationProperties.getDefaultRoleAdd());
 		Set<Role> addRoles = new HashSet<Role>(dftRoles.size());
 		for (Role r : dftRoles)
 		{

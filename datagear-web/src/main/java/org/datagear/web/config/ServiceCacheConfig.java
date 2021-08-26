@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 /**
  * 服务缓存配置。
@@ -24,44 +23,18 @@ import org.springframework.core.env.Environment;
 @Configuration
 public class ServiceCacheConfig
 {
-	private Environment environment;
+	private ApplicationProperties applicationProperties;
 
 	private CacheManager serviceCacheManager;
 
-	private final boolean disabled;
-
-	private final String cacheSpec;
-
 	@Autowired
-	public ServiceCacheConfig(Environment environment)
+	public ServiceCacheConfig(ApplicationProperties applicationProperties)
 	{
 		super();
-		this.environment = environment;
-		this.disabled = this.environment.getProperty("service.cache.disabled", Boolean.class, false);
-		this.cacheSpec = this.environment.getProperty("service.cache.spec", "");
+		this.applicationProperties = applicationProperties;
 
-		if (!disabled)
+		if (!this.applicationProperties.isServiceCacheDisabled())
 			this.serviceCacheManager = createServiceCacheManager();
-	}
-
-	public Environment getEnvironment()
-	{
-		return environment;
-	}
-
-	public void setEnvironment(Environment environment)
-	{
-		this.environment = environment;
-	}
-
-	public boolean isDisabled()
-	{
-		return disabled;
-	}
-
-	public String getCacheSpec()
-	{
-		return cacheSpec;
 	}
 
 	public ServiceCache getServiceCache(Class<?> serviceClass)
@@ -78,7 +51,8 @@ public class ServiceCacheConfig
 	{
 		ServiceCache serviceCache = new ServiceCache();
 		
-		serviceCache.setDisabled(isDisabled() || this.serviceCacheManager == null);
+		serviceCache
+				.setDisabled(this.applicationProperties.isServiceCacheDisabled() || this.serviceCacheManager == null);
 		serviceCache.setSerialized(false);
 		serviceCache.setShared(false);
 		
@@ -92,8 +66,8 @@ public class ServiceCacheConfig
 	{
 		CaffeineCacheManager bean = new CaffeineCacheManager();
 
-		if (!StringUtil.isEmpty(this.cacheSpec))
-			bean.setCacheSpecification(this.cacheSpec);
+		if (!StringUtil.isEmpty(this.applicationProperties.getServiceCacheSpec()))
+			bean.setCacheSpecification(this.applicationProperties.getServiceCacheSpec());
 
 		return bean;
 	}

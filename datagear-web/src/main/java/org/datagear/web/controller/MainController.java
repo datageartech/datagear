@@ -19,10 +19,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.util.Global;
 import org.datagear.util.version.Version;
 import org.datagear.util.version.VersionContent;
+import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.ChangelogResolver;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,38 +37,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class MainController extends AbstractController
 {
-	@Value("${disableRegister}")
-	private boolean disableRegister = false;
+	@Autowired
+	private ApplicationProperties applicationProperties;
 
 	@Autowired
 	private ChangelogResolver changelogResolver;
 
-	@Value("${disableDetectNewVersion}")
-	private boolean disableDetectNewVersion;
-
 	public MainController()
 	{
 		super();
-	}
-
-	public boolean isDisableRegister()
-	{
-		return disableRegister;
-	}
-
-	public void setDisableRegister(boolean disableRegister)
-	{
-		this.disableRegister = disableRegister;
-	}
-
-	public boolean isDisableDetectNewVersion()
-	{
-		return disableDetectNewVersion;
-	}
-
-	public void setDisableDetectNewVersion(boolean disableDetectNewVersion)
-	{
-		this.disableDetectNewVersion = disableDetectNewVersion;
 	}
 
 	public ChangelogResolver getChangelogResolver()
@@ -91,9 +68,9 @@ public class MainController extends AbstractController
 	@RequestMapping({ "", "/", "/index.html" })
 	public String main(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
-		request.setAttribute("disableRegister", this.disableRegister);
+		request.setAttribute("disableRegister", this.applicationProperties.isDisableRegister());
 		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneNoPassword());
-		setDetectNewVersionScriptAttr(request, response, this.disableDetectNewVersion);
+		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
 
 		return "/main";
 	}
