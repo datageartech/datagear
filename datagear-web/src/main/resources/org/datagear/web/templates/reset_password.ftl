@@ -12,6 +12,7 @@
 <html>
 <head>
 <#include "include/html_head.ftl">
+${detectNewVersionScript?no_esc}
 <#if step.finalStep>
 <meta http-equiv="refresh" content="4;url=${contextPath}/login">
 </#if>
@@ -23,6 +24,7 @@
 	<div class="main-page-head main-page-head-reset-passord">
 		<#include "include/html_logo.ftl">
 		<div class="toolbar">
+			<#include "include/page_obj_sys_menu.ftl">
 			<a class="link" href="${contextPath}/login"><@spring.message code='resetPassword.backToLoginPage' /></a>
 			<a class="link" href="${contextPath}/"><@spring.message code='backToMainPage' /></a>
 		</div>
@@ -144,6 +146,8 @@
 			});
 		}
 	});
+
+	po.initSysMenu();
 })
 (${pageId});
 </script>

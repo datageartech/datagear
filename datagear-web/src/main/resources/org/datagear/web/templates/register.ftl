@@ -11,6 +11,7 @@
 <html>
 <head>
 <#include "include/html_head.ftl">
+${detectNewVersionScript?no_esc}
 <title><#include "include/html_title_app_name.ftl"><@spring.message code='register.register' /></title>
 </head>
 <body>
@@ -19,6 +20,7 @@
 	<div class="main-page-head">
 		<#include "include/html_logo.ftl">
 		<div class="toolbar">
+			<#include "include/page_obj_sys_menu.ftl">
 			<a class="link" href="${contextPath}/login"><@spring.message code='login.login' /></a>
 			<a class="link" href="${contextPath}/"><@spring.message code='backToMainPage' /></a>
 		</div>
@@ -122,6 +124,8 @@
 	});
 	
 	$(".ui-dialog .ui-dialog-titlebar-close", dialog.widget).hide();
+	
+	po.initSysMenu();
 })
 (${pageId});
 </script>

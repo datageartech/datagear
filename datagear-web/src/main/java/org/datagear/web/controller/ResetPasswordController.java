@@ -18,7 +18,9 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.UserService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
+import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +49,9 @@ public class ResetPasswordController extends AbstractController
 	@Autowired
 	private File resetPasswordCheckFileDirectory;
 
+	@Autowired
+	private ApplicationProperties applicationProperties;
+
 	public ResetPasswordController()
 	{
 		super();
@@ -72,8 +77,18 @@ public class ResetPasswordController extends AbstractController
 		this.resetPasswordCheckFileDirectory = resetPasswordCheckFileDirectory;
 	}
 
+	public ApplicationProperties getApplicationProperties()
+	{
+		return applicationProperties;
+	}
+
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	{
+		this.applicationProperties = applicationProperties;
+	}
+
 	@RequestMapping
-	public String resetPassword(HttpServletRequest request)
+	public String resetPassword(HttpServletRequest request, HttpServletResponse response)
 	{
 		HttpSession session = request.getSession();
 
@@ -88,6 +103,8 @@ public class ResetPasswordController extends AbstractController
 		}
 
 		request.setAttribute("step", resetPasswordStep);
+		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneNoPassword());
+		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
 
 		return "/reset_password";
 	}

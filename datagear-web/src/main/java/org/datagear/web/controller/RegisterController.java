@@ -74,7 +74,7 @@ public class RegisterController extends AbstractController
 	}
 
 	@RequestMapping
-	public String register(HttpServletRequest request, org.springframework.ui.Model model)
+	public String register(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		if (this.applicationProperties.isDisableRegister())
 		{
@@ -86,6 +86,8 @@ public class RegisterController extends AbstractController
 		User user = new User();
 
 		model.addAttribute("user", user);
+		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneNoPassword());
+		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
 
 		return "/register";
 	}
