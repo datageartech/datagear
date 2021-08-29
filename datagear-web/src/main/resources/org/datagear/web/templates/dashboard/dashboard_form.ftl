@@ -178,6 +178,9 @@ readonly 是否只读操作，允许为null
 			</#if>
 		</div>
 	</form>
+	<div class="chart-list-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+		<div class="panel-content minor-dataTable pagination-light"></div>
+	</div>
 </div>
 <#include "../include/page_obj_form.ftl">
 <#include "../include/page_obj_tabs.ftl" >
@@ -345,22 +348,47 @@ readonly 是否只读操作，允许为null
 				.text("<@spring.message code='dashboard.insertChart' />").appendTo(pc3).button()
 				.click(function()
 				{
-					var options =
+					var insertChartButton = this;
+					var chartListPanel = po.element(".chart-list-panel");
+					
+					if(chartListPanel.is(":hidden"))
 					{
-						pageParam :
+						chartListPanel.show();
+						chartListPanel.position({ my : "center top", at : "center bottom", of : insertChartButton});
+						chartListPanel.css("left", "");
+						chartListPanel.css("right", "1em");
+						
+						if(!chartListPanel.hasClass("chart-list-loaded"))
 						{
-							select : function(charts)
+							po.element(".panel-content", chartListPanel).empty();
+							
+							var options =
 							{
-								if(!$.isArray(charts))
-									charts = [charts];
-								
-								po.insertChartCode(editor, charts);
-								return true;
-							}
+								target: po.element(".panel-content", chartListPanel),
+								asDialog: false,
+								pageParam :
+								{
+									select : function(charts)
+									{
+										if(!$.isArray(charts))
+											charts = [charts];
+										
+										po.insertChartCode(editor, charts);
+										chartListPanel.hide();
+										return false;
+									}
+								},
+								success: function()
+								{
+									chartListPanel.addClass("chart-list-loaded");
+								}
+							};
+							$.setGridPageHeightOption(options);
+							po.open("${contextPath}/chart/select?multiple", options);
 						}
-					};
-					$.setGridPageHeightOption(options);
-					po.open("${contextPath}/chart/select?multiple", options);
+					}
+					else
+						chartListPanel.hide();
 				});
 		}
 		</#if>
@@ -1304,6 +1332,13 @@ readonly 是否只读操作，允许为null
 		{
 			if($target.closest(".upload-resource-panel, .uploadResBtn").length == 0)
 				$p1.hide();
+		}
+		
+		var $p2 = po.element(".chart-list-panel");
+		if(!$p2.is(":hidden"))
+		{
+			if($target.closest(".chart-list-panel, .insert-chart-button").length == 0)
+				$p2.hide();
 		}
 	});
 	

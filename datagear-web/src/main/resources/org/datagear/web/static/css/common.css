@@ -1441,7 +1441,7 @@ table.dataTable tbody tr td select{
 }
 .search-form .keyword-widget{
 	display: inline-block;
-	width: 70%;
+	width: calc(100% - 5em);
 	height: 2em;
 	margin-left: 0.1em;
 	vertical-align: middle;
@@ -2977,6 +2977,7 @@ table.dataTable tbody tr td select{
 .page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item .version{
 	margin-left: 0.3em;
 }
+
 .page-form-dashboard{
 	position: relative;
 }
@@ -2985,6 +2986,28 @@ table.dataTable tbody tr td select{
 }
 .page-form-dashboard.max-resource-editor-left form .form-content .form-item .form-item-value{
 	width: 100%;
+}
+.page-form-dashboard .chart-list-panel{
+	position: absolute;
+    z-index: 9;
+    width: 60%;
+    height: 60%;
+    display: none;
+    padding: 0 0;
+}
+.page-form-dashboard .chart-list-panel > .panel-content{
+	position: absolute;
+    left: 0.41em;
+    top: 0.41em;
+    right: 0.41em;
+    bottom: 0.41em;
+}
+.page-form-dashboard .chart-list-panel > .panel-content .dialog-content-container{
+	position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 .page-form-dashboard .resources-wrapper{
 	position: relative;
