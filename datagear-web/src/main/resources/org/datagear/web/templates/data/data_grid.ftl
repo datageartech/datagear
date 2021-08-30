@@ -20,6 +20,7 @@ boolean readonly 是否只读操作，默认为false
 <#assign titleDisplayName=(titleDisplayName!'')>
 <#assign titleDisplayDesc=(titleDisplayDesc!'')>
 <#assign selectOperation=(selectOperation!false)>
+<#assign selectPageCss=(selectOperation?string('page-grid-select',''))>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
 <#assign readonly=(readonly!false)>
 <html>
@@ -49,7 +50,7 @@ boolean readonly 是否只读操作，默认为false
 <div class="fill-parent">
 </#if>
 <#include "include/data_page_obj.ftl">
-<div id="${pageId}" class="page-grid page-grid-data">
+<div id="${pageId}" class="page-grid ${selectPageCss} page-grid-data">
 	<div class="head">
 		<div class="search">
 			<#include "include/data_page_obj_searchform.ftl">

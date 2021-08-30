@@ -1441,7 +1441,7 @@ table.dataTable tbody tr td select{
 }
 .search-form .keyword-widget{
 	display: inline-block;
-	width: calc(100% - 5em);
+	width: calc(100% - 6em);
 	height: 2em;
 	margin-left: 0.1em;
 	vertical-align: middle;
@@ -1600,14 +1600,19 @@ table.dataTable tbody tr td select{
 	padding: .25em 0;
 }
 .page-grid .head .search{
-	display: inline-block;
-	width: 40%;
+	float: left;
+	width: 35%;
+}
+.page-grid.page-grid-select .head .search{
+	width: 45%;
 }
 .page-grid .head .operation{
-	display: inline-block; 
 	float: right;
-	width: 60%;
+	width: 65%;
 	text-align: right;
+}
+.page-grid.page-grid-select .head .operation{
+	width: 55%;
 }
 .page-grid .content{
 	position: absolute;
@@ -2990,8 +2995,8 @@ table.dataTable tbody tr td select{
 .page-form-dashboard .chart-list-panel{
 	position: absolute;
     z-index: 9;
-    width: 60%;
-    height: 60%;
+    width: 70%;
+    height: 70%;
     display: none;
     padding: 0 0;
 }

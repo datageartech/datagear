@@ -15,6 +15,7 @@ selectOperation 是否选择操作，允许为null
 boolean readonly 是否只读操作，默认为false
 -->
 <#assign selectOperation=(selectOperation!false)>
+<#assign selectPageCss=(selectOperation?string('page-grid-select',''))>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
 <#assign readonly=(readonly!false)>
 <#assign DataSetEntity=statics['org.datagear.management.domain.DataSetEntity']>
@@ -29,7 +30,7 @@ boolean readonly 是否只读操作，默认为false
 </#if>
 <#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_opt_permission.ftl" >
-<div id="${pageId}" class="page-grid page-grid-dataSet">
+<div id="${pageId}" class="page-grid ${selectPageCss} page-grid-dataSet">
 	<div class="head">
 		<div class="search">
 			<#include "../include/page_obj_searchform_data_filter.ftl">

@@ -14,6 +14,7 @@ selectOperation 是否选择操作，允许为null
 boolean readonly 是否只读操作，默认为false
 -->
 <#assign selectOperation=(selectOperation!false)>
+<#assign selectPageCss=(selectOperation?string('page-grid-select',''))>
 <#assign readonly=(readonly!false)>
 <html>
 <head>
@@ -25,7 +26,7 @@ boolean readonly 是否只读操作，默认为false
 <div class="fill-parent">
 </#if>
 <#include "../include/page_js_obj.ftl">
-<div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-schema">
+<div id="${pageId}" class="page-grid ${selectPageCss} page-grid-hidden-foot page-grid-schema">
 	<div class="head">
 		<div class="search">
 			<#include "../include/page_obj_searchform.ftl">

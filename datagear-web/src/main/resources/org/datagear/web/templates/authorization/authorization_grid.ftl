@@ -12,6 +12,8 @@
 String titleMessageKey 标题标签I18N关键字，不允许null
 ResourceMeta resourceMeta 资源元信息，不允许null
 -->
+<#assign selectOperation=(selectOperation!false)>
+<#assign selectPageCss=(selectOperation?string('page-grid-select',''))>
 <#assign AuthorizationController=statics['org.datagear.web.controller.AuthorizationController']>
 <html>
 <head>
@@ -23,7 +25,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 <div class="fill-parent">
 </#if>
 <#include "../include/page_js_obj.ftl">
-<div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-authorization">
+<div id="${pageId}" class="page-grid ${selectPageCss} page-grid-hidden-foot page-grid-authorization">
 	<div class="head">
 		<div class="search">
 			<#include "../include/page_obj_searchform.ftl">

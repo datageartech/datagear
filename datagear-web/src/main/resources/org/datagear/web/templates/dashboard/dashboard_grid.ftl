@@ -14,6 +14,7 @@ titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
 -->
 <#assign selectOperation=(selectOperation!false)>
+<#assign selectPageCss=(selectOperation?string('page-grid-select',''))>
 <#assign HtmlTplDashboardWidgetEntity=statics['org.datagear.management.domain.HtmlTplDashboardWidgetEntity']>
 <html>
 <head>
@@ -26,7 +27,7 @@ selectOperation 是否选择操作，允许为null
 </#if>
 <#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_opt_permission.ftl" >
-<div id="${pageId}" class="page-grid page-grid-dashboard">
+<div id="${pageId}" class="page-grid ${selectPageCss} page-grid-dashboard">
 	<div class="head">
 		<div class="search">
 			<#include "../include/page_obj_searchform_data_filter.ftl">

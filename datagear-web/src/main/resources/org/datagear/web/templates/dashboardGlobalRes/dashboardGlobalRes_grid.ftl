@@ -13,6 +13,7 @@ titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
 -->
 <#assign selectOperation=(selectOperation!false)>
+<#assign selectPageCss=(selectOperation?string('page-grid-select',''))>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -23,7 +24,7 @@ selectOperation 是否选择操作，允许为null
 <div class="fill-parent">
 </#if>
 <#include "../include/page_js_obj.ftl">
-<div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-dashboardGlobalRes">
+<div id="${pageId}" class="page-grid ${selectPageCss} page-grid-hidden-foot page-grid-dashboardGlobalRes">
 	<div class="head">
 		<div class="search">
 			<#include "../include/page_obj_searchform.ftl">

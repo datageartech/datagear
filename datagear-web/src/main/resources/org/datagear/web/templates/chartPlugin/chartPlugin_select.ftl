@@ -8,6 +8,8 @@
 -->
 <#include "../include/import_global.ftl">
 <#include "../include/html_doctype.ftl">
+<#assign selectOperation=true>
+<#assign selectPageCss=(selectOperation?string('page-grid-select',''))>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -18,7 +20,7 @@
 <div class="fill-parent">
 </#if>
 <#include "../include/page_js_obj.ftl">
-<div id="${pageId}" class="page-grid page-grid-chartPlugin-select">
+<div id="${pageId}" class="page-grid ${selectPageCss} page-grid-chartPlugin-select">
 	<div class="head">
 		<div class="search">
 			<#include "../include/page_obj_searchform.ftl">

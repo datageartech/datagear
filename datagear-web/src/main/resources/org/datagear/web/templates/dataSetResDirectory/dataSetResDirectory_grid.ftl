@@ -13,6 +13,7 @@ titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
 -->
 <#assign selectOperation=(selectOperation!false)>
+<#assign selectPageCss=(selectOperation?string('page-grid-select',''))>
 <#assign DataSetResDirectory=statics['org.datagear.management.domain.DataSetResDirectory']>
 <html>
 <head>
@@ -24,7 +25,7 @@ selectOperation 是否选择操作，允许为null
 <div class="fill-parent">
 </#if>
 <#include "../include/page_js_obj.ftl">
-<div id="${pageId}" class="page-grid page-grid-dataSetResDirectory">
+<div id="${pageId}" class="page-grid ${selectPageCss} page-grid-dataSetResDirectory">
 	<div class="head">
 		<div class="search search-dataSetResDirectory">
 			<#include "../include/page_obj_searchform.ftl">

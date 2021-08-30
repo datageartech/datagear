@@ -13,6 +13,7 @@ titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
 -->
 <#assign selectOperation=(selectOperation!false)>
+<#assign selectPageCss=(selectOperation?string('page-grid-select',''))>
 <html>
 <head>
 <#include "../include/html_head.ftl">
