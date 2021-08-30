@@ -12,13 +12,15 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
+
 /**
- * 数据源管控。
+ * 数据源防护。
  * 
  * @author datagear@163.com
  *
  */
-public class SchemaGuard extends AbstractStringIdEntity
+public class SchemaGuard extends AbstractStringIdEntity implements CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -26,16 +28,16 @@ public class SchemaGuard extends AbstractStringIdEntity
 	private String pattern;
 
 	/** 是否允许：true 允许；false 禁止 */
-	private boolean permitted;
+	private boolean permitted = true;
 
 	/** 优先级 */
-	private int priority;
+	private int priority = 0;
 
 	/** 是否启用 */
 	private boolean enabled = true;
 
 	/** 创建时间 */
-	private Date createTime;
+	private Date createTime = new Date();
 
 	public SchemaGuard()
 	{
@@ -47,14 +49,10 @@ public class SchemaGuard extends AbstractStringIdEntity
 		super(id);
 	}
 
-	public SchemaGuard(String id, String pattern, boolean permitted, int priority)
+	public SchemaGuard(String id, String pattern)
 	{
 		super(id);
 		this.pattern = pattern;
-		this.permitted = permitted;
-		this.priority = priority;
-		this.enabled = true;
-		this.createTime = new Date();
 	}
 
 	public String getPattern()
@@ -107,12 +105,21 @@ public class SchemaGuard extends AbstractStringIdEntity
 		this.createTime = createTime;
 	}
 
+	@Override
+	public SchemaGuard clone()
+	{
+		SchemaGuard entity = new SchemaGuard();
+		BeanUtils.copyProperties(this, entity);
+
+		return entity;
+	}
+
 	/**
 	 * 将{@linkplain SchemaGuard}列表按照优先级排序，{@linkplain SchemaGuard#getPriority()}越大越靠前、{@linkplain SchemaGuard#getCreateTime()}越新越靠前。
 	 * 
 	 * @param schemaGuards
 	 */
-	public void sortByPriority(List<? extends SchemaGuard> schemaGuards)
+	public static void sortByPriority(List<? extends SchemaGuard> schemaGuards)
 	{
 		if (schemaGuards == null)
 			return;

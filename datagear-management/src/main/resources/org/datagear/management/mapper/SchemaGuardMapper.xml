@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.SchemaGuard">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_SCHEMA_GUARD
+			(
+			SG_ID, SG_PATTERN, SG_PERMITTED, SG_PRIORITY, SG_ENABLED,
+			SG_CREATE_TIME
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.pattern}, #{entity.permitted, jdbcType=VARCHAR}, #{entity.priority}, #{entity.enabled, jdbcType=VARCHAR},
+			#{entity.createTime}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_SCHEMA_GUARD SET
+			SG_PATTERN = #{entity.pattern},
+			SG_PERMITTED = #{entity.permitted, jdbcType=VARCHAR},
+			SG_PRIORITY = #{entity.priority},
+			SG_ENABLED = #{entity.enabled, jdbcType=VARCHAR}
+		WHERE
+			SG_ID = #{entity.id}
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM DATAGEAR_SCHEMA_GUARD
+		WHERE
+			SG_ID = #{id}
+	</delete>
+	
+	<select id="getById" resultType="org.datagear.management.domain.SchemaGuard">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="query" resultType="org.datagear.management.domain.SchemaGuard">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+		<include refid="common.queryOrder" />
+	</select>
+	
+	<select id="pagingQueryCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+	</select>
+	
+	<select id="pagingQuery" resultType="org.datagear.management.domain.SchemaGuard">
+		<include refid="common.pagingQueryHead" />
+			SELECT
+				T.*
+			FROM
+				(<include refid="queryView" />) T
+			WHERE
+				<include refid="queryCondition" />
+			<include refid="common.queryOrder" />
+		<include refid="common.pagingQueryFoot" />
+	</select>
+	
+	<sql id="queryView">
+		SELECT
+			A.SG_ID AS ${_iq_}id${_iq_},
+			A.SG_PATTERN AS ${_iq_}pattern${_iq_},
+			A.SG_PERMITTED AS ${_iq_}permitted${_iq_},
+			A.SG_PRIORITY AS ${_iq_}priority${_iq_},
+			A.SG_ENABLED AS ${_iq_}enabled${_iq_},
+			A.SG_CREATE_TIME AS ${_iq_}createTime${_iq_}
+		FROM
+			DATAGEAR_SCHEMA_GUARD A
+	</sql>
+	
+	<sql id="queryCondition">
+		1 = 1
+		<if test="queryKeyword != null">
+		AND
+		(
+			${_iq_}pattern${_iq_} LIKE #{queryKeyword}
+		)
+		</if>
+	</sql>
+</mapper>

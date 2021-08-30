@@ -104,7 +104,7 @@
 			A.AUTH_PRINCIPAL_TYPE AS ${_iq_}principalType${_iq_},
 			A.AUTH_PERMISSION AS ${_iq_}permission${_iq_},
 			A.AUTH_ENABLED AS ${_iq_}enabled${_iq_},
-			A.AUTH_CREATE_TIME AS ${_iq_}ceateTime${_iq_},
+			A.AUTH_CREATE_TIME AS ${_iq_}createTime${_iq_},
 			(
 				CASE A.AUTH_PRINCIPAL_TYPE
 					WHEN 'ALL' THEN '${queryContext.principalAllLabel}'

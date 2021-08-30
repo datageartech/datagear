@@ -60,6 +60,7 @@ import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
+import org.datagear.management.service.SchemaGuardService;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.service.UserService;
@@ -76,6 +77,7 @@ import org.datagear.management.service.impl.DataSetResDirectoryServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.RoleServiceImpl;
+import org.datagear.management.service.impl.SchemaGuardServiceImpl;
 import org.datagear.management.service.impl.SchemaServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
@@ -492,6 +494,14 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	{
 		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.authorizationService(), this.driverEntityManager(), this.userService());
+
+		return bean;
+	}
+
+	@Bean
+	public SchemaGuardService schemaGuardService()
+	{
+		SchemaGuardServiceImpl bean = new SchemaGuardServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
 
 		return bean;
 	}

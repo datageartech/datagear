@@ -289,6 +289,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				// 管理
 				.antMatchers("/role/**").access(AUTH_ADMIN)
 
+				// 数据源防护
+				.antMatchers("/schemaGuard/**").access(AUTH_ADMIN)
+
 				//
 				.antMatchers("/login/**", "/register/**", "/resetPassword/**").access(AUTH_ANONYMOUS)
 
