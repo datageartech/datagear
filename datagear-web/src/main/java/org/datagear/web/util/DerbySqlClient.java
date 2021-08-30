@@ -42,6 +42,14 @@ public class DerbySqlClient extends JdbcSupport
 
 	private static final String COMMAND_COLUMNS = "/c ";
 
+	private static final String COMMAND_DATAS = "/d ";
+
+	private static final String COMMAND_TABLES_UPPER = "/T";
+
+	private static final String COMMAND_COLUMNS_UPPER = "/C ";
+
+	private static final String COMMAND_DATAS_UPPER = "/D ";
+
 	public DerbySqlClient()
 	{
 		super();
@@ -74,9 +82,15 @@ public class DerbySqlClient extends JdbcSupport
 			println();
 			println("Print [" + COMMAND_TABLES + "] for listing tables, example:");
 			println(COMMAND_TABLES);
+			println(COMMAND_TABLES_UPPER);
 			println();
 			println("Print [" + COMMAND_COLUMNS + "<table-name>] for listing table columns, example:");
 			println(COMMAND_COLUMNS + "DATAGEAR_VERSION");
+			println(COMMAND_COLUMNS_UPPER + "DATAGEAR_VERSION");
+			println();
+			println("Print [" + COMMAND_DATAS + "<table-name>] for listing table data, example:");
+			println(COMMAND_DATAS + "DATAGEAR_VERSION");
+			println(COMMAND_DATAS_UPPER + "DATAGEAR_VERSION");
 			println();
 			println("Print [exit] for exit, example:");
 			println("exit");
@@ -96,17 +110,25 @@ public class DerbySqlClient extends JdbcSupport
 					scanner.close();
 					System.exit(0);
 				}
-				else if (input.equals(COMMAND_TABLES))
+				else if (input.equals(COMMAND_TABLES) || input.equals(COMMAND_TABLES_UPPER))
 				{
 					executeSql(cn, "SELECT * FROM SYS.SYSTABLES");
 				}
-				else if (input.startsWith(COMMAND_COLUMNS))
+				else if (input.startsWith(COMMAND_COLUMNS) || input.startsWith(COMMAND_COLUMNS_UPPER))
 				{
-					String tableName = input.substring(COMMAND_COLUMNS.length());
+					String tableName = input.substring(COMMAND_COLUMNS.length()).trim();
 
 					String sql = "SELECT C.* FROM SYS.SYSCOLUMNS C, SYS.SYSTABLES T "
 							+ " WHERE C.REFERENCEID = T.TABLEID AND T.TABLENAME='" + tableName
 							+ "' ORDER BY C.COLUMNNUMBER ASC";
+
+					executeSql(cn, sql);
+				}
+				else if (input.startsWith(COMMAND_DATAS) || input.startsWith(COMMAND_DATAS_UPPER))
+				{
+					String tableName = input.substring(COMMAND_DATAS.length()).trim();
+
+					String sql = "SELECT * FROM " + tableName;
 
 					executeSql(cn, sql);
 				}
