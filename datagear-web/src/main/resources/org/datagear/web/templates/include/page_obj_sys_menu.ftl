@@ -25,7 +25,7 @@ String detectNewVersionScript
 			<#if currentUser.admin>
 			<li class="system-set-driverEntity"><a href="javascript:void(0);"><@spring.message code='main.manageDriverEntity' /></a></li>
 			<li class="system-set-schemaUrlBuilder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
-			<li class="system-set-schemaControl"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaControl' /></a></li>
+			<li class="system-set-schemaGuard"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaGuard' /></a></li>
 			<li class="ui-widget-header"></li>
 			<li class="system-set-dataSetResDirectory"><a href="javascript:void(0);"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
 			<li class="system-set-chartPlugin"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>
@@ -132,11 +132,11 @@ String detectNewVersionScript
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/role/pagingQuery", options);
 				}
-				else if($item.hasClass("system-set-schemaControl"))
+				else if($item.hasClass("system-set-schemaGuard"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/schemaControl/query", options);
+					po.open(contextPath+"/schemaGuard/query", options);
 				}
 				else if($item.hasClass("system-set-chartPlugin"))
 				{
