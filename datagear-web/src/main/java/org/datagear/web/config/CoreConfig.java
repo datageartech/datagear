@@ -493,7 +493,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public SchemaService schemaService()
 	{
 		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
-				this.authorizationService(), this.driverEntityManager(), this.userService());
+				this.authorizationService(), this.driverEntityManager(), this.userService(), this.schemaGuardService());
 
 		return bean;
 	}

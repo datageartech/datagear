@@ -41,6 +41,13 @@
 			T.${_iq_}id${_iq_} = #{id}
 	</select>
 	
+	<select id="getAll" resultType="org.datagear.management.domain.SchemaGuard">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+	</select>
+	
 	<select id="query" resultType="org.datagear.management.domain.SchemaGuard">
 		SELECT
 			T.*

@@ -15,6 +15,7 @@ import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.service.SchemaGuardService;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -36,6 +37,8 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 
 	private UserService userService;
 
+	private SchemaGuardService schemaGuardService;
+
 	public SchemaServiceImpl()
 	{
 		super();
@@ -43,20 +46,22 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 
 	public SchemaServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			DriverEntityManager driverEntityManager, UserService userService)
+			DriverEntityManager driverEntityManager, UserService userService, SchemaGuardService schemaGuardService)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
 		this.userService = userService;
+		this.schemaGuardService = schemaGuardService;
 	}
 
 	public SchemaServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			DriverEntityManager driverEntityManager, UserService userService)
+			DriverEntityManager driverEntityManager, UserService userService, SchemaGuardService schemaGuardService)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
 		this.userService = userService;
+		this.schemaGuardService = schemaGuardService;
 	}
 
 	public DriverEntityManager getDriverEntityManager()
@@ -77,6 +82,16 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public void setUserService(UserService userService)
 	{
 		this.userService = userService;
+	}
+
+	public SchemaGuardService getSchemaGuardService()
+	{
+		return schemaGuardService;
+	}
+
+	public void setSchemaGuardService(SchemaGuardService schemaGuardService)
+	{
+		this.schemaGuardService = schemaGuardService;
 	}
 
 	@Override
@@ -157,8 +172,13 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	 */
 	protected void checkSaveUrlPermission(User user, String url) throws SaveSchemaUrlPermissionDeniedException
 	{
-		// TODO 新增数据源防护功能，管理员可设置URL白/黑名单，只允许新建名单允许的数据源
-		// throw new SaveSchemaUrlPermissionDeniedException();
+		if (user.isAdmin())
+			return;
+
+		if (this.schemaGuardService.isPermitted(url))
+			return;
+
+		throw new SaveSchemaUrlPermissionDeniedException();
 	}
 
 	@Override
