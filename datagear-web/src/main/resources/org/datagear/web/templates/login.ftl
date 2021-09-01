@@ -71,6 +71,7 @@ ${detectNewVersionScript?no_esc}
 	
 	var dialog=po.element(".page-form").dialog({
 		appendTo: po.element(),
+		classes: { "ui-dialog": "login-form-dialog" },
 		title: "<@spring.message code='login.login' />",
 		position: {my : "center top", at : "center top+75"},
 		resizable: false,
@@ -97,7 +98,7 @@ ${detectNewVersionScript?no_esc}
 		}
 	});
 	
-	$(".ui-dialog .ui-dialog-titlebar-close", dialog.widget).hide();
+	po.element(".login-form-dialog .ui-dialog-titlebar-close").hide();
 	
 	po.initSysMenu();
 	
