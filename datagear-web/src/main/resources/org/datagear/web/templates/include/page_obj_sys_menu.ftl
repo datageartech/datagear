@@ -19,44 +19,44 @@ User currentUser
 String detectNewVersionScript
 -->
 <ul id="systemSetMenu" class="lightweight-menu">
-	<li class="system-set-root"><span><span class="ui-icon ui-icon-gear"></span><span class="new-version-tip"></span></span>
+	<li><span><span class="ui-icon ui-icon-gear"></span><span class="new-version-tip"></span></span>
 		<ul style="display:none;" class="ui-widget-shadow">
 			<#if !currentUser.anonymous>
 			<#if currentUser.admin>
-			<li class="system-set-driverEntity"><a href="javascript:void(0);"><@spring.message code='main.manageDriverEntity' /></a></li>
-			<li class="system-set-schemaUrlBuilder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
-			<li class="system-set-schemaGuard"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaGuard' /></a></li>
+			<li menu-name="driverEntity"><a href="${contextPath}/driverEntity/query"><@spring.message code='main.manageDriverEntity' /></a></li>
+			<li menu-name="schemaUrlBuilder"><a href="${contextPath}/schemaUrlBuilder/editScriptCode"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
+			<li menu-name="schemaGuard"><a href="${contextPath}/schemaGuard/query"><@spring.message code='main.manageSchemaGuard' /></a></li>
 			<li class="ui-widget-header"></li>
-			<li class="system-set-dataSetResDirectory"><a href="javascript:void(0);"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
-			<li class="system-set-chartPlugin"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>
-			<li class="system-set-dashboardGlobalRes"><a href="javascript:void(0);"><@spring.message code='main.manageDashboardGlobalRes' /></a></li>
+			<li menu-name="dataSetResDirectory"><a href="${contextPath}/dataSetResDirectory/pagingQuery"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
+			<li menu-name="chartPlugin"><a href="${contextPath}/chartPlugin/query"><@spring.message code='main.manageChartPlugin' /></a></li>
+			<li menu-name="dashboardGlobalRes"><a href="${contextPath}/dashboardGlobalRes/query"><@spring.message code='main.manageDashboardGlobalRes' /></a></li>
 			<li class="ui-widget-header"></li>
-			<li class="system-set-user"><a href="javascript:void(0);"><@spring.message code='main.manageUser' /></a></li>
-			<li class="system-set-role"><a href="javascript:void(0);"><@spring.message code='main.manageRole' /></a></li>
+			<li menu-name="user"><a href="${contextPath}/user/pagingQuery"><@spring.message code='main.manageUser' /></a></li>
+			<li menu-name="role"><a href="${contextPath}/role/pagingQuery"><@spring.message code='main.manageRole' /></a></li>
 			</#if>
-			<li class="system-set-personalSet"><a href="javascript:void(0);"><@spring.message code='main.personalSet' /></a></li>
+			<li menu-name="personalSet"><a href="${contextPath}/user/personalSet"><@spring.message code='main.personalSet' /></a></li>
 			<li class="ui-widget-header"></li>
 			</#if>
 			<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeTheme' /></a>
 				<ul class="ui-widget-shadow">
-					<li class="theme-item" theme="${statics['org.datagear.web.util.Themes'].LIGHT}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-light"></span><@spring.message code='main.changeTheme.light' /></a></li>
-					<li class="theme-item" theme="${statics['org.datagear.web.util.Themes'].DARK}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span><@spring.message code='main.changeTheme.dark' /></a></li>
-					<li class="theme-item" theme="${statics['org.datagear.web.util.Themes'].GREEN}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span><@spring.message code='main.changeTheme.green' /></a></li>
+					<li menu-name="theme" theme="${statics['org.datagear.web.util.Themes'].LIGHT}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-light"></span><@spring.message code='main.changeTheme.light' /></a></li>
+					<li menu-name="theme" theme="${statics['org.datagear.web.util.Themes'].DARK}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span><@spring.message code='main.changeTheme.dark' /></a></li>
+					<li menu-name="theme" theme="${statics['org.datagear.web.util.Themes'].GREEN}"><a href="javascript:void(0);"><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span><@spring.message code='main.changeTheme.green' /></a></li>
 				</ul>
 			</li>
 			<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeLocale' /></a>
 				<ul class="ui-widget-shadow">
-					<li class="locale-item" locale="zh"><a href="javascript:void(0);"><@spring.message code='main.changeLocale.zh' /></a></li>
-					<li class="locale-item" locale="en"><a href="javascript:void(0);"><@spring.message code='main.changeLocale.en' /></a></li>
+					<li menu-name="locale" locale="zh"><a href="javascript:void(0);"><@spring.message code='main.changeLocale.zh' /></a></li>
+					<li menu-name="locale" locale="en"><a href="javascript:void(0);"><@spring.message code='main.changeLocale.en' /></a></li>
 				</ul>
 			</li>
 			<li><a href="javascript:void(0);"><@spring.message code='help' /><span class="new-version-tip"></span></a>
 				<ul class="ui-widget-shadow">
-					<li class="about"><a href="javascript:void(0);"><@spring.message code='main.about' /></a></li>
-					<li class="documentation"><a href="javascript:void(0);"><@spring.message code='main.documentation' /></a></li>
-					<li class="changelog"><a href="javascript:void(0);"><@spring.message code='main.changelog' /></a></li>
-					<li class="downloadLatestVersion">
-						<a href="javascript:void(0);"><@spring.message code='main.downloadLatestVersion' /><span class="new-version-tip"></span></a>
+					<li menu-name="about"><a href="${contextPath}/about"><@spring.message code='main.about' /></a></li>
+					<li menu-name="documentation"><a href="${statics['org.datagear.util.Global'].WEB_SITE}/documentation/"><@spring.message code='main.documentation' /></a></li>
+					<li menu-name="changelog"><a href="${contextPath}/changelog"><@spring.message code='main.changelog' /></a></li>
+					<li menu-name="downloadLatestVersion">
+						<a href="${statics['org.datagear.util.Global'].WEB_SITE}"><@spring.message code='main.downloadLatestVersion' /><span class="new-version-tip"></span></a>
 					</li>
 				</ul>
 			</li>
@@ -93,62 +93,31 @@ String detectNewVersionScript
 			position : {my:"right top", at: "right bottom-1"},
 			select : function(event, ui)
 			{
-				var $item = $(ui.item);
+				event.preventDefault();
 				
-				if($item.hasClass("ui-state-disabled"))
+				var $item = $(ui.item);
+				var menuName = $item.attr("menu-name");
+				
+				if(!menuName || $item.hasClass("ui-state-disabled"))
 					return;
 				
-				if($item.hasClass("system-set-schemaUrlBuilder"))
-				{
-					po.open(contextPath+"/schemaUrlBuilder/editScriptCode");
-				}
-				else if($item.hasClass("system-set-driverEntity"))
-				{
-					var options = {};
-					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/driverEntity/query", options);
-				}
-				else if($item.hasClass("system-set-user"))
+				var href = $("a", $item).attr("href");
+				
+				if(menuName == "driverEntity" || menuName == "user"
+						|| menuName == "dataSetResDirectory" || menuName == "dashboardGlobalRes"
+						|| menuName == "role" || menuName == "schemaGuard"
+						|| menuName == "chartPlugin")
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/user/pagingQuery", options);
+					po.open(href, options);
 				}
-				else if($item.hasClass("system-set-dataSetResDirectory"))
+				else if(menuName == "schemaUrlBuilder" || menuName == "personalSet"
+						|| menuName == "changelog")
 				{
-					var options = {};
-					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/dataSetResDirectory/pagingQuery", options);
+					po.open(href);
 				}
-				else if($item.hasClass("system-set-dashboardGlobalRes"))
-				{
-					var options = {};
-					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/dashboardGlobalRes/query", options);
-				}
-				else if($item.hasClass("system-set-role"))
-				{
-					var options = {};
-					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/role/pagingQuery", options);
-				}
-				else if($item.hasClass("system-set-schemaGuard"))
-				{
-					var options = {};
-					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/schemaGuard/query", options);
-				}
-				else if($item.hasClass("system-set-chartPlugin"))
-				{
-					var options = {};
-					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/chartPlugin/query", options);
-				}
-				else if($item.hasClass("system-set-personalSet"))
-				{
-					po.open(contextPath+"/user/personalSet");
-				}
-				else if($item.hasClass("theme-item"))
+				else if(menuName == "theme")
 				{
 					var theme = $item.attr("theme");
 					
@@ -158,7 +127,7 @@ String detectNewVersionScript
 							$(data[i].selector).attr(data[i].attr, data[i].value);
 					});
 				}
-				else if($item.hasClass("locale-item"))
+				else if(menuName == "locale")
 				{
 					po.confirm("<@spring.message code='main.changeLocaleConfirm' />",
 					{
@@ -173,21 +142,13 @@ String detectNewVersionScript
 						}
 					});
 				}
-				else if($item.hasClass("about"))
+				else if(menuName == "about")
 				{
-					po.open(contextPath+"/about", { width : "50%" });
+					po.open(href, { width : "50%" });
 				}
-				else if($item.hasClass("documentation"))
+				else if(menuName == "documentation" || menuName == "downloadLatestVersion")
 				{
-					window.open("${statics['org.datagear.util.Global'].WEB_SITE}/documentation/");
-				}
-				else if($item.hasClass("changelog"))
-				{
-					po.open(contextPath+"/changelog");
-				}
-				else if($item.hasClass("downloadLatestVersion"))
-				{
-					window.open("${statics['org.datagear.util.Global'].WEB_SITE}");
+					window.open(href);
 				}
 			}
 		});
