@@ -293,7 +293,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				.antMatchers("/schemaGuard/**").access(AUTH_ADMIN)
 
 				//
-				.antMatchers("/login/**", "/register/**", "/resetPassword/**").access(AUTH_ANONYMOUS)
+				.antMatchers("/login/**", "/register/**", "/resetPassword/**").permitAll()
 
 				//
 				.antMatchers("/**").access(disableAnonymous ? AUTH_USER_ADMIN : AUTH_ANONYMOUS_USER_ADMIN)
