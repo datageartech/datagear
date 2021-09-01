@@ -496,3 +496,20 @@ DataGear版本更新日志
 --v2.8.0
 -----------------------------------------
 
+移除：移除管理员专有的数据源模式匹配授权功能，简化系统数据权限设计；
+新增：新增数据源防护功能，使管理员可控制是否允许用户创建指定URL的数据源；
+新增：图表、看板JS对象新增originalInfo函数，用于获取/设置图表展示数据的原始信息；
+新增：图表JS对象新增resultData函数，用于获取/设置图表数据集结果数据；
+新增：图表JS对象新增registerEventHandlerDelegation、removeEventHandlerDelegation函数，用于为图表事件处理提供支持；
+新增：图表JS对象新增callEventHandler、echartsOffEventHandler函数，用于为图表事件处理提供支持；
+新增：图表JS对象新增gradualColor函数，用于为图表配色提供支持；
+修复：修复参数化数据集对于大数值参数可能出现精度丢失的BUG；
+修复：修复数据管理列表/编辑页面、SQL工作台查询结果对于大数值会出现精度丢失的BUG；
+修复：修复在已登录状态下打开/login地址会死循环的BUG；
+改进：用户关联角色功能改为在用户编辑页面而非角色管理页面；
+改进：系统添加缓存支持，大幅提升系统性能；
+改进：标签卡图表添加横排配置项"inline"，配置项label.name简化为name，label.value简化为value；
+改进：图表JS对象弃用eventBindHandlerDelegation、eventUnbindHandlerDelegation函数；
+改进：看板编辑页面插入图表对话框改为悬浮面板，便于多次插入图表操作；
+改进：登录页、注册页、重置密码页添加右上角系统菜单；
+改进：程序发布包配置文件中添加DataGearWorkspace配置项模板；
