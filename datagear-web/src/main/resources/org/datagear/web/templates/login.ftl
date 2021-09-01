@@ -16,7 +16,7 @@ ${detectNewVersionScript?no_esc}
 </head>
 <body>
 <#include "include/page_js_obj.ftl">
-<div id="${pageId}">
+<div id="${pageId}" class="page-login">
 	<div class="main-page-head">
 		<#include "include/html_logo.ftl">
 		<div class="toolbar">
@@ -101,6 +101,14 @@ ${detectNewVersionScript?no_esc}
 	po.element(".login-form-dialog .ui-dialog-titlebar-close").hide();
 	
 	po.initSysMenu();
+	
+	//当登录超时打开对话框时，对话框内会显示登录页面，这里调整此时的登录页布局
+	if($.isInDialog(po.element()))
+	{
+		po.element(".main-page-head").hide();
+		po.element(".login-form-dialog").css("top", "14px");
+		po.element(".login-form-dialog .ui-dialog-titlebar").hide();
+	}
 	
 	<#if authenticationFailed>
 	$(document).ready(function()

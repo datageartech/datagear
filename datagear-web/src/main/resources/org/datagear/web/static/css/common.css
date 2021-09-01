@@ -1397,9 +1397,13 @@ table.dataTable tbody tr td select{
     overflow: auto;
 }
 
-/*登录表单页*/
-.page-form-login{}
-.page-form-login form .form-foot.login-form-ext{
+/*登录页*/
+.page-login{
+	min-height: 24em;
+	position: relative;
+}
+.page-login .page-form-login{}
+.page-login .page-form-login form .form-foot.login-form-ext{
 	padding-top: 2em;
 }
 
