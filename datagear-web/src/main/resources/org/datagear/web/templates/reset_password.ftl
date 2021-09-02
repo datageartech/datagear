@@ -65,7 +65,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.checkFile' /></label>
 						</div>
 						<div class="form-item-value form-item-value-checkFile">
-							${step.checkFileTip}
+							${step.checkFileTip?no_esc}
 						</div>
 					</div>
 					<#elseif step.step == 3>
