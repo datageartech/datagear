@@ -2090,28 +2090,24 @@
 	};
 	
 	/**
-	 * 获取指定数据对象的原始信息属性值，这些信息是由chartBase.originalInfo函数设置过的。
+	 * 获取指定数据对象的原始信息，这些信息是由chartBase.originalInfo函数设置过的。
 	 * 
 	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]
 	 * @param inflate 可选，是否在返回原始信息对象中填充图表对象、原始数据信息，默认值为：true
-	 * @returns 原始信息属性值(可能为null）、或其数组，格式为：
+	 * @returns 原始信息对象(可能为null）、或其数组，格式为：
 	 *									{
 	 *										//图表ID
 	 *										"chartId": "...",
 	 *										//图表数据集索引数值
 	 *										"chartDataSetIndex": ...,
 	 *										//结果数据索引，格式为：数值、数值数组、null
-	 *										"resultDataIndex": ...
-	 *									}
-	 *									当data是数组时，将返回此结构的数组。
-	 *									另外，当inflate为true时，上述结构将包含额外的两个属性值：
-	 *									{
-	 *										...,
-	 *										//chartId对应的图表对象
+	 *										"resultDataIndex": ...,
+	 *										//当inflate为true时，chartId对应的图表对象
 	 *										chart: 图表对象,
-	 *										//resultDataIndex对应的原始结果数据
+	 *										//当inflate为true时，resultDataIndex对应的原始结果数据
 	 *										resultData: 结果数据
 	 *									}
+	 *									当data是数组时，将返回此结构的数组。
 	 */
 	dashboardBase.originalInfo = function(data, inflate)
 	{

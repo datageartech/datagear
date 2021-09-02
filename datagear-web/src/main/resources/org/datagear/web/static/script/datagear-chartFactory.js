@@ -2954,12 +2954,13 @@
 	 * 
 	 * @param eventType 图表事件类型
 	 * @param eventHanlder 可选，图表事件处理函数，格式为：function(chartEvent){ ... }，不设置则解绑所有此类型的图表事件处理函数
+	 * @returns 同chartBase.removeEventHandlerDelegation返回值
 	 */
 	chartBase.echartsOffEventHandler = function(eventType, eventHanlder)
 	{
 		var internal = this.internal();
 		
-		this.removeEventHandlerDelegation(eventType, eventHanlder, function(et, eh, ehd)
+		return this.removeEventHandlerDelegation(eventType, eventHanlder, function(et, eh, ehd)
 		{
 			if(internal)
 				internal.off(et, ehd);
