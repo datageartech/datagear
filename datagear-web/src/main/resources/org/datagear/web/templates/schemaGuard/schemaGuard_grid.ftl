@@ -38,6 +38,7 @@ selectOperation 是否选择操作，允许为null
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<input name="testButton" type="button" value="<@spring.message code='test' />" />
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 			</#if>
 		</div>
@@ -103,6 +104,11 @@ selectOperation 是否选择操作，允许为null
 				data : data
 			});
 		});
+	});
+
+	po.element("input[name=testButton]").click(function()
+	{
+		po.open(po.url("test"));
 	});
 	
 	po.element("input[name=deleteButton]").click(

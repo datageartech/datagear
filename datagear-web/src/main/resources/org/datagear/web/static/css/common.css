@@ -3303,3 +3303,11 @@ table.dataTable tbody tr td select{
 	width: 100%;
 	height: 100%;
 }
+
+.page-form-schemaGuardTest .test-url,
+.page-form-schemaGuardTest .test-result{
+	line-height: 3em;
+}
+.page-form-schemaGuardTest .test-result{
+	padding: 0.41em 1em;
+}

@@ -419,6 +419,23 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 构建操作成功消息（无消息内容）对应的{@linkplain ResponseEntity}。
+	 * <p>
+	 * 无消息内容，浏览器端不会弹出操作提示。
+	 * </p>
+	 * 
+	 * @param data
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> buildOperationMessageSuccessEmptyResponseEntity(Object data)
+	{
+		OperationMessage operationMessage = OperationMessage.valueOfSuccess("success", "");
+		operationMessage.setData(data);
+
+		return new ResponseEntity<>(operationMessage, HttpStatus.OK);
+	}
+
+	/**
 	 * 构建“保存成功”操作消息对应的{@linkplain ResponseEntity}。
 	 * 
 	 * @return

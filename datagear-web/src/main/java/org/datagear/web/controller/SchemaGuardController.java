@@ -7,6 +7,7 @@
 
 package org.datagear.web.controller;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -159,5 +160,48 @@ public class SchemaGuardController extends AbstractController
 	{
 		if (isBlank(schemaGuard.getPattern()))
 			throw new IllegalInputException();
+	}
+
+	@RequestMapping("/test")
+	public String test(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	{
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schemaGuard.testSchemaUrl");
+		model.addAttribute(KEY_FORM_ACTION, "testExecute");
+
+		return "/schemaGuard/schemaGuard_test";
+	}
+
+	@RequestMapping(value = "/testExecute", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> testExecute(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody SchemaGuardTestForm form)
+	{
+		String url = form.getUrl();
+
+		boolean permitted = this.schemaGuardService.isPermitted(url);
+
+		return buildOperationMessageSuccessEmptyResponseEntity(permitted);
+	}
+
+	public static class SchemaGuardTestForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String url;
+
+		public SchemaGuardTestForm()
+		{
+			super();
+		}
+
+		public String getUrl()
+		{
+			return url;
+		}
+
+		public void setUrl(String url)
+		{
+			this.url = url;
+		}
 	}
 }
