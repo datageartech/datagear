@@ -2498,11 +2498,10 @@
 	 */
 	chartBase.eventNewEcharts = function(eventType, echartsEventParams)
 	{
-		var thisChart = this;
 		var event =
 		{
 			"type": eventType,
-			"chart": thisChart,
+			"chart": this,
 			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS,
 			"originalEvent": echartsEventParams
 		};
@@ -2518,11 +2517,10 @@
 	 */
 	chartBase.eventNewHtml = function(eventType, htmlEvent)
 	{
-		var thisChart = this;
 		var event =
 		{
 			"type": eventType,
-			"chart": thisChart,
+			"chart": this,
 			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_HTML,
 			"originalEvent": htmlEvent
 		};
@@ -2607,27 +2605,7 @@
 		}
 		
 		var result = this.resultAt(this.updateResults(), originalChartDataSetIndex);
-		var resultDatas = this.resultDatas(result);
-		
-		var originalData = undefined;
-		
-		//可能为null
-		if(originalResultDataIndex == null)
-		{
-		}
-		//索引数值数组
-		else if($.isArray(originalResultDataIndex))
-		{
-			originalData = [];
-			
-			for(var i=0; i<originalResultDataIndex.length; i++)
-				originalData.push(resultDatas[originalResultDataIndex[i]]);
-		}
-		//索引数值
-		else
-		{
-			originalData = resultDatas[originalResultDataIndex];
-		}
+		var originalData = this.resultDataElement(result, originalResultDataIndex);
 		
 		this.eventOriginalData(chartEvent, originalData);
 		this.eventOriginalChartDataSetIndex(chartEvent, originalChartDataSetIndex);
@@ -2787,11 +2765,11 @@
 	 * @returns 要获取的原始信息属性值(可能为null），格式为：
 	 *									{
 	 *										//图表ID
-	 *										"chartId": "...",
+	 *										chartId: "...",
 	 *										//图表数据集索引数值
-	 *										"chartDataSetIndex": ...,
+	 *										chartDataSetIndex: ...,
 	 *										//结果数据索引，格式为：数值、数值数组、null
-	 *										"resultDataIndex": ...
+	 *										resultDataIndex: ...
 	 *									}
 	 *									当data是数组时，将返回此结构的数组
 	 */
@@ -2988,6 +2966,33 @@
 		theme = (theme == null ? this.theme() : theme);
 		
 		return chartFactory.getGradualColor(theme, factor);
+	};
+	
+	/**
+	 * 获取数据集结果数据指定索引的元素。
+	 * 
+	 * @param result 数据集结果对象
+	 * @param index 索引数值、数值数组
+	 * @return 数据对象、据对象数组，当result、index为null时，将返回undefined
+	 */
+	chartBase.resultDataElement = function(result, index)
+	{
+		if(result == null || result.data == null || index == null)
+			return undefined;
+		
+		var datas = this.resultDatas(result);
+		
+		if(!$.isArray(index))
+			return datas[index];
+		else
+		{
+			var re = [];
+			
+			for(var i=0; i<index.length; i++)
+				re.push(datas[index[i]]);
+			
+			return re;
+		}
 	};
 	
 	//-------------

@@ -2097,11 +2097,11 @@
 	 * @returns 原始信息对象(可能为null）、或其数组，格式为：
 	 *									{
 	 *										//图表ID
-	 *										"chartId": "...",
+	 *										chartId: "...",
 	 *										//图表数据集索引数值
-	 *										"chartDataSetIndex": ...,
+	 *										chartDataSetIndex: ...,
 	 *										//结果数据索引，格式为：数值、数值数组、null
-	 *										"resultDataIndex": ...,
+	 *										resultDataIndex: ...,
 	 *										//当inflate为true时，chartId对应的图表对象
 	 *										chart: 图表对象,
 	 *										//当inflate为true时，resultDataIndex对应的原始结果数据
@@ -2133,20 +2133,10 @@
 				var chart = this.chartOf(originalInfo.chartId);
 				var resultData = undefined;
 				
-				if(chart != null && originalInfo.chartDataSetIndex != null && originalInfo.resultDataIndex != null)
+				if(chart != null && originalInfo.chartDataSetIndex != null)
 				{
 					var result = chart.resultAt(chart.updateResults(), originalInfo.chartDataSetIndex);
-					var datas = chart.resultDatas(result);
-					
-					if($.isArray(originalInfo.resultDataIndex))
-					{
-						resultData = [];
-						
-						for(var j=0; j<originalInfo.resultDataIndex.length; j++)
-							resultData[j] = datas[originalInfo.resultDataIndex[j]];
-					}
-					else
-						resultData = datas[originalInfo.resultDataIndex];
+					resultData = chart.resultDataElement(result, originalInfo.resultDataIndex);
 				}
 				
 				originalInfo.chart = chart;
