@@ -161,7 +161,6 @@
 		chartFactory.initRenderContext(dashboard.renderContext);
 		
 		this._initOverwriteChartBase();
-		this._initChartMapURLs();
 		$.extend(dashboard, this.dashboardBase);
 		dashboard.init();
 		
@@ -196,27 +195,6 @@
 			this.bindLinksEventHanders(this.links());
 			this._postProcessRenderedSuper();
 		};
-	};
-	
-	/**
-	 * 初始化chartFactory.chartMapURLs。
-	 * 它将body元素的elementAttrConst.MAP_URLS属性值设置为自定义地图JSON地址映射表。
-	 */
-	dashboardFactory._initChartMapURLs = function()
-	{
-		for(var i=0; i<this.builtinChartMaps.length; i++)
-		{
-			var urlNames = this.builtinChartMaps[i];
-			for(var j=0; j<urlNames.names.length; j++)
-				chartFactory.chartMapURLs[urlNames.names[j]] = this.builtinChartMapBaseURL + urlNames.url;
-		}
-		
-		var mapUrls = $(document.body).attr(elementAttrConst.MAP_URLS);
-		
-		if(mapUrls)
-			mapUrls = chartFactory.evalSilently(mapUrls);
-		
-		$.extend(chartFactory.chartMapURLs, mapUrls);
 	};
 	
 	/**
@@ -655,9 +633,36 @@
 		this.charts = (this.charts || []);
 		
 		this._initListener();
+		this._initMapURLs();
 		this._initForms();
 		this._initChartResizeHandler();
 		this._initCharts();
+	};
+	
+	/**
+	 * 初始化地图URL映射表。
+	 * 它将body元素的elementAttrConst.MAP_URLS属性值设置为地图URL映射表。
+	 */
+	dashboardBase._initMapURLs = function()
+	{
+		var builtinChartMaps = dashboardFactory.builtinChartMaps;
+		var builtinChartMapBaseURL = dashboardFactory.builtinChartMapBaseURL;
+		
+		var mapURLs = {};
+		
+		for(var i=0; i<builtinChartMaps.length; i++)
+		{
+			var urlNames = builtinChartMaps[i];
+			for(var j=0; j<urlNames.names.length; j++)
+				mapURLs[urlNames.names[j]] = builtinChartMapBaseURL + urlNames.url;
+		}
+		
+		var mapURLsBody = $(document.body).attr(elementAttrConst.MAP_URLS);
+		
+		if(mapURLsBody)
+			mapURLs = $.extend(mapURLs, chartFactory.evalSilently(mapURLsBody, {}));
+		
+		this.mapURLs(mapURLs);
 	};
 	
 	/**
@@ -826,6 +831,23 @@
 			chartListener.updateError = function(chart, error){ return listener.updateChartError(dashboard, chart, error); };
 		else
 			chartListener.updateError = undefined;
+	};
+	
+	/**
+	 * 获取/设置地图URL映射表。
+	 *
+	 * @param mapURLs 可选，要设置的地图URL映射表，仅会覆盖同名的地图URL映射，格式为参考chartFactory.chartMapURLs说明
+	 * @returns 要获取的地图URL映射表
+	 */
+	dashboardBase.mapURLs = function(mapURLs)
+	{
+		if(!chartFactory.chartMapURLs)
+			chartFactory.chartMapURLs = {};
+		
+		if(mapURLs === undefined)
+			return chartFactory.chartMapURLs;
+		
+		$.extend(chartFactory.chartMapURLs, mapURLs);
 	};
 	
 	/**

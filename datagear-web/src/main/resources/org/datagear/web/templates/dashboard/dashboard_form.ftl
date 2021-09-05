@@ -587,6 +587,7 @@ readonly 是否只读操作，允许为null
 		{name: "dashboard.loadChart", value: "loadChart(", caption: "loadChart()", meta: " dashboard"},
 		{name: "dashboard.loadCharts", value: "loadCharts(", caption: "loadCharts()", meta: " dashboard"},
 		{name: "dashboard.loadUnsolvedCharts", value: "loadUnsolvedCharts()", caption: "loadUnsolvedCharts()", meta: " dashboard"},
+		{name: "dashboard.mapURLs", value: "mapURLs(", caption: "mapURLs()", meta: " dashboard"},
 		{name: "dashboard.originalInfo", value: "originalInfo(", caption: "originalInfo()", meta: " dashboard"},
 		{name: "dashboard.refreshData", value: "refreshData(", caption: "refreshData()", meta: " dashboard"},
 		{name: "dashboard.removeChart", value: "removeChart(", caption: "removeChart()", meta: " dashboard"},
