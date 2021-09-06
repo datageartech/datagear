@@ -2589,17 +2589,20 @@
 	 * 图表事件支持函数：设置图表事件对象的原始图表数据集索引、原始数据、原始数据索引。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalChartDataSetIndex 原始图表数据集索引数值、原始信息对象（格式参考：chartBase.originalInfo函数返回值）
-	 * @param originalResultDataIndex 可选，当originalChartDataSetIndex是索引数值是必选，原始数据索引，格式允许：数值、数值数组、null
+	 * @param originalInfo 原始信息对象（格式参考：chartBase.originalInfo函数返回值）、原始图表数据集索引数值
+	 * @param originalResultDataIndex 可选，当originalInfo是索引数值时的原始数据索引，格式允许：数值、数值数组、null
 	 */
-	chartBase.eventOriginalInfo = function(chartEvent, originalChartDataSetIndex, originalResultDataIndex)
+	chartBase.eventOriginalInfo = function(chartEvent, originalInfo, originalResultDataIndex)
 	{
-		//originalChartDataSetIndex是原始信息对象：{ chartDataSetIndex: ..., chartDataSetIndex: ... }
-		if(originalChartDataSetIndex != null && originalChartDataSetIndex.chartDataSetIndex !== undefined)
+		var originalChartDataSetIndex = originalInfo;
+		
+		//originalInfo是原始信息对象：{ chartDataSetIndex: ..., resultDataIndex: ... }
+		if(originalInfo && originalInfo.chartDataSetIndex !== undefined)
 		{
-			var resultDataIndexMy = originalChartDataSetIndex.resultDataIndex;
+			var resultDataIndexMy = originalInfo.resultDataIndex;
 			
-			originalChartDataSetIndex = originalChartDataSetIndex.chartDataSetIndex;
+			originalChartDataSetIndex = originalInfo.chartDataSetIndex;
+			
 			if(originalResultDataIndex == null)
 				originalResultDataIndex = resultDataIndexMy;
 		}
