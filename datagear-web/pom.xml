@@ -211,9 +211,19 @@
 							<resources>
 								<resource>
 									<directory>dist/bin</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>config/**/*</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>dist/bin</directory>
 									<filtering>true</filtering>
 									<includes>
-										<include>**/*</include>
+										<include>readme.txt</include>
+										<include>shutdown.sh</include>
+										<include>startup.bat</include>
+										<include>startup.sh</include>
 									</includes>
 								</resource>
 							</resources>
