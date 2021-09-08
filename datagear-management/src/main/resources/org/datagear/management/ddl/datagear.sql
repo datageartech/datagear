@@ -848,3 +848,9 @@ CREATE TABLE DATAGEAR_SCHEMA_GUARD
 	SG_CREATE_TIME TIMESTAMP,
 	PRIMARY KEY (SG_ID)
 );
+
+
+-----------------------------------------
+--version[2.9.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
