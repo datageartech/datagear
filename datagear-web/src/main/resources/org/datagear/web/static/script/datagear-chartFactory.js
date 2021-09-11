@@ -2391,7 +2391,7 @@
 	 */
 	chartBase._isEchartsInstance = function(obj)
 	{
-		return (obj && obj.constructor && obj.constructor.name && /ECharts/i.test(obj.constructor.name));
+		return (obj && obj.setOption && obj.isDisposed && obj.dispose && obj.off);
 	};
 	
 	/**

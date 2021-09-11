@@ -628,7 +628,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 		// JS
 		importItems.add(ImportItem.valueOfJavaScript("jquery", libPrefix + "/jquery-1.12.4/jquery-1.12.4.min.js"));
-		importItems.add(ImportItem.valueOfJavaScript("echarts", libPrefix + "/echarts-5.1.2/echarts.js"));
+		importItems.add(ImportItem.valueOfJavaScript("echarts", libPrefix + "/echarts-5.2.0/echarts.min.js"));
 		importItems.add(ImportItem.valueOfJavaScript("wordcloud",
 				libPrefix + "/echarts-wordcloud-2.0.0/echarts-wordcloud.min.js"));
 		importItems.add(ImportItem.valueOfJavaScript("liquidfill",

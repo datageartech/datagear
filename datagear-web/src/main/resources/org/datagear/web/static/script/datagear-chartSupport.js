@@ -1954,12 +1954,11 @@
 			
 			for(var j=0; j<data.length; j++)
 			{
-				//在ECharts-4.9.0时，这里格式为：{name: ..., value:[经度值, 纬度值, 关系数值]}，是没问题的，
-				//但是升级至ECharts-5.0+后，会报错：Can not read property 'off' of undefined
-				//按照ECharts-5.0+的graph的官方配置项，这里格式应为：{name: ..., x: 经度值, y: 纬度值, value: 关系数值}
-				//但是这样仍然会报上述错误！
-				//所以这里仍恢复为采用ECharts-4.9.0时的格式，配合修改了ECharts-5.1.2的源码后，终于解决了上述问题！
-				//具体源码修改位置参考echarts-5.1.2/echarts.js的58833行
+				//ECharts-4.9.0时graph官方数据格式为【名/值数组】：{name: ..., value:[经度值, 纬度值, 关系数值]}
+				//ECharts-5.0+ 时graph官方数据格式为【名/X/Y/值】：{name: ..., x: 经度值, y: 纬度值, value: 关系数值}
+				//在ECharts由4.9.0升级至5.1.2版本后，【名/值数组】、【名/X/Y/值】格式都会报错：Can not read property 'off' of undefined，
+				//在修改了源码（修改位置参考DataGear-2.8.0版本echarts-5.1.2/echarts.js的58833行）同时采用【名/值数组】格式后才解决。
+				//在ECharts由5.1.2升级至5.2.0版本后，【名/X/Y/值】格式不会报错但是显示位置不对，【名/值数组】则可以正常展示
 				var sd = { name: chart.resultRowCell(data[j], snp), value: [ chart.resultRowCell(data[j], slop), chart.resultRowCell(data[j], slap) ] };
 				var td = { name: chart.resultRowCell(data[j], tnp), value: [ chart.resultRowCell(data[j], tlop), chart.resultRowCell(data[j], tlap) ] };
 				
