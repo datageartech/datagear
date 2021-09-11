@@ -446,7 +446,7 @@ public class ControllerAdvice extends AbstractController
 			DataSetSourceParseException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(DataSetSourceParseException.class), exception, false,
-				exception.getMessage());
+				exception.getMessage(), exception.getSource());
 
 		return getErrorView(request, response);
 	}
@@ -457,7 +457,7 @@ public class ControllerAdvice extends AbstractController
 			HttpServletResponse response, SqlDataSetSqlExecutionException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetSqlExecutionException.class), exception,
-				false, exception.getMessage());
+				false, exception.getMessage(), exception.getSql());
 
 		return getErrorView(request, response);
 	}

@@ -124,7 +124,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetSourceParseException(t);
+			throw new DataSetSourceParseException(t, reader.getResolvedTemplate());
 		}
 		finally
 		{

@@ -690,7 +690,13 @@ po.previewOptions.url = "...";
 			return po.buildDataSetPropertiesColumns(previewResponse.properties);
 		},
 		//预览请求成功回调函数
-		success: function(previewResponse){}
+		success: function(previewResponse){},
+		//预览出错回调函数，返回非空字符串表明将其显示在错误信息区内
+		error: function(operationMessage, jqXHR)
+		{
+			if(operationMessage && operationMessage.data)
+				return operationMessage.data[1];
+		}
 	};
 	
 	po.resultFetchSizeVal = function(val)
@@ -845,6 +851,7 @@ po.previewOptions.url = "...";
 			$(this).button("disable");
 		});
 		
+		po.element(".preview-error-info").hide();
 		po.element(".preview-result-foot").hide();
 		
 		var table = po.previewResultTableElement();
@@ -928,9 +935,17 @@ po.previewOptions.url = "...";
 				
 				po.previewOptions.success(previewResponse);
 			},
-			error: function()
+			error: function(jqXHR)
 			{
 				po.previewSuccess(false);
+				
+				var errorInfo = po.previewOptions.error(jqXHR.responseJSON, jqXHR);
+				
+				if(errorInfo)
+				{
+					po.element(".preview-error-info textarea").val(errorInfo);
+					po.element(".preview-error-info").show();
+				}
 			},
 			complete: function()
 			{

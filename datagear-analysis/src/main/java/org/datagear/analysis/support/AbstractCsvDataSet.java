@@ -119,7 +119,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetSourceParseException(t);
+			throw new DataSetSourceParseException(t, reader.getResolvedTemplate());
 		}
 		finally
 		{

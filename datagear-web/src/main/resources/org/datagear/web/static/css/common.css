@@ -2610,6 +2610,7 @@ table.dataTable tbody tr td select{
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+	resize: none;
 }
 .page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-data-max-count{
 	float: left;
@@ -2624,6 +2625,23 @@ table.dataTable tbody tr td select{
 	bottom: 0;
 	width: 100%;
 	font-size: 0.8em;
+}
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .preview-error-info{
+	position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+	display: none;
+}
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .preview-error-info textarea{
+	width: 100%;
+	height: 100%;
+	margin: 0 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	resize: none;
 }
 .page-form-dataSet .workspace .workspace-operation-wrapper .input-in-table{
 	width: 90%!important;

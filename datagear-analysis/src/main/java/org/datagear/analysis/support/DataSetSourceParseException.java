@@ -19,6 +19,8 @@ public class DataSetSourceParseException extends DataSetException
 {
 	private static final long serialVersionUID = 1L;
 
+	private String source = null;
+
 	public DataSetSourceParseException()
 	{
 		super();
@@ -37,5 +39,21 @@ public class DataSetSourceParseException extends DataSetException
 	public DataSetSourceParseException(String message, Throwable cause)
 	{
 		super(message, cause);
+	}
+
+	public DataSetSourceParseException(Throwable cause, String source)
+	{
+		super(cause);
+		this.source = source;
+	}
+
+	public String getSource()
+	{
+		return source;
+	}
+
+	public void setSource(String source)
+	{
+		this.source = source;
 	}
 }

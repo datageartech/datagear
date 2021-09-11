@@ -335,11 +335,15 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
 			boolean resolveProperties) throws DataSetException
 	{
+		String uri = null;
+		String headerContent = null;
+		String requestContent = null;
+
 		try
 		{
-			String uri = resolveTemplateUri(query);
-			String headerContent = resolveTemplateHeaderContent(query);
-			String requestContent = resolveTemplateRequestContent(query);
+			uri = resolveTemplateUri(query);
+			headerContent = resolveTemplateHeaderContent(query);
+			requestContent = resolveTemplateRequestContent(query);
 
 			ClassicHttpRequest request = createHttpRequest(uri);
 
@@ -353,13 +357,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
 
-			String templateResult = "URI:" + System.lineSeparator() + uri //
-					+ System.lineSeparator() + "-----------------------------------------" + System.lineSeparator() //
-					+ "Request headers:" + System.lineSeparator() + headerContent //
-					+ System.lineSeparator() + "-----------------------------------------" + System.lineSeparator() //
-					+ "Request content:" + System.lineSeparator() + requestContent;
-
-			return new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(), templateResult);
+			return new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
+					buildResolvedTemplate(uri, headerContent, requestContent));
 		}
 		catch (DataSetException e)
 		{
@@ -367,8 +366,42 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetSourceParseException(t);
+			throw new DataSetSourceParseException(t, buildResolvedTemplate(uri, headerContent, requestContent));
 		}
+	}
+
+	protected String buildResolvedTemplate(String uri, String headerContent, String requestContent)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		if (!StringUtil.isEmpty(uri))
+		{
+			if (sb.length() > 0)
+				sb.append(
+						System.lineSeparator() + "-----------------------------------------" + System.lineSeparator());
+
+			sb.append("URI:" + System.lineSeparator() + uri);
+		}
+
+		if (!StringUtil.isEmpty(headerContent))
+		{
+			if (sb.length() > 0)
+				sb.append(
+						System.lineSeparator() + "-----------------------------------------" + System.lineSeparator());
+
+			sb.append("Request headers:" + System.lineSeparator() + headerContent);
+		}
+
+		if (!StringUtil.isEmpty(requestContent))
+		{
+			if (sb.length() > 0)
+				sb.append(
+						System.lineSeparator() + "-----------------------------------------" + System.lineSeparator());
+
+			sb.append("Request content:" + System.lineSeparator() + requestContent);
+		}
+
+		return sb.toString();
 	}
 
 	protected void setHttpHeaders(ClassicHttpRequest request, String headerContent) throws Throwable

@@ -37,6 +37,9 @@ DataSetEntity dataSet 允许为null
 				<input type="text" class="resultFetchSizeInput ui-widget ui-widget-content ui-corner-all" />
 			</div>
 		</div>
+		<div class="preview-error-info ui-state-error">
+			<textarea class="ui-widget ui-widget-content"></textarea>
+		</div>
 	</div>
 	<div id="${pageId}-dataSetParams" class="params-table-wrapper minor-dataTable">
 		<div class="operation">

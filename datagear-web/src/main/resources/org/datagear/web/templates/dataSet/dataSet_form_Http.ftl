@@ -264,6 +264,11 @@ readonly 是否只读操作，允许为null
 		if(!this.data.dataSet.uri)
 			return false;
 	};
+	po.previewOptions.error = function(operationMessage)
+	{
+		if(operationMessage && operationMessage.data)
+			return operationMessage.data[1];
+	};
 	
 	po.initPreviewOperations();
 	
