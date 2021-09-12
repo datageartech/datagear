@@ -103,9 +103,7 @@ readonly 是否只读操作，允许为null
 		var selectionRange = po.csvEditor.getSelectionRange();
 		return (po.csvEditor.session.getTextRange(selectionRange) || "");
 	};
-	po.initDataSetPropertiesTable(po.dataSetProperties);
-	po.initDataSetParamsTable(po.dataSetParams);
-	po.initPreviewParamValuePanel();
+	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
 	
 	po.updatePreviewOptionsData = function()
@@ -131,7 +129,8 @@ readonly 是否只读操作，允许为null
 		
 		var pd = po.previewOptions.data.dataSet;
 		
-		return (pd.value != value) || (pd.nameRow != nameRow);
+		return (pd.value != value || pd.nameRow != nameRow
+				|| po.isPreviewParamPropertyDataFormatModified());
 	};
 	
 	po.previewOptions.url = po.url("previewCsvValue");

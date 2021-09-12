@@ -199,9 +199,7 @@ readonly 是否只读操作，允许为null
 		var selectionRange = currentEditor.getSelectionRange();
 		return (currentEditor.session.getTextRange(selectionRange) || "");
 	};
-	po.initDataSetPropertiesTable(po.dataSetProperties);
-	po.initDataSetParamsTable(po.dataSetParams);
-	po.initPreviewParamValuePanel();
+	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 	
 	po.updatePreviewOptionsData = function()
 	{
@@ -245,10 +243,11 @@ readonly 是否只读操作，允许为null
 		
 		var pd = po.previewOptions.data.dataSet;
 		
-		return (pd.uri != uri) || (pd.requestMethod != requestMethod) || (pd.requestContentType != requestContentType)
+		return ((pd.uri != uri) || (pd.requestMethod != requestMethod) || (pd.requestContentType != requestContentType)
 				|| (pd.requestContentCharset != requestContentCharset) || (pd.responseContentType != responseContentType)
 				|| (pd.requestContent != requestContent) || (pd.headerContent != headerContent)
-				|| (pd.responseDataJsonPath != responseDataJsonPath);
+				|| (pd.responseDataJsonPath != responseDataJsonPath)
+				 || po.isPreviewParamPropertyDataFormatModified());
 	};
 	
 	po.previewOptions.url = po.url("previewHttp");

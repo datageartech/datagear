@@ -119,9 +119,7 @@ readonly 是否只读操作，允许为null
 		var selectionRange = po.sqlEditor.getSelectionRange();
 		return (po.sqlEditor.session.getTextRange(selectionRange) || "");
 	};
-	po.initDataSetPropertiesTable(po.dataSetProperties);
-	po.initDataSetParamsTable(po.dataSetParams);
-	po.initPreviewParamValuePanel();
+	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 
 	po.updatePreviewOptionsData = function()
 	{
@@ -147,7 +145,7 @@ readonly 是否只读操作，允许为null
 		
 		var pd = po.previewOptions.data.dataSet;
 		
-		return (pd.sql != sql) || (po.previewOptions.data.schemaId != schemaId);
+		return (pd.sql != sql || po.previewOptions.data.schemaId != schemaId || po.isPreviewParamPropertyDataFormatModified());
 	};
 	
 	po.previewOptions.url = po.url("previewSql");

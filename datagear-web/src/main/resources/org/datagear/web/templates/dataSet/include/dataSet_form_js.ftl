@@ -756,9 +756,79 @@ po.previewOptions.url = "...";
 			table.empty();
 		}
 	};
-
+	
+	po.isPreviewParamPropertyDataFormatModified = function()
+	{
+		var formParams = (po.getFormDataSetParams() || []);
+		var formProperties = (po.getFormDataSetProperties() || []);
+		var formDataFormat = (po.getFormDataFormat() || {});
+		var params = (po.previewOptions.data.dataSet.params || []);
+		var properties = (po.previewOptions.data.dataSet.properties || []);
+		var dataFormat = (po.previewOptions.data.dataSet.dataFormat || {});
+		
+		//参数数组大小必须一致，因为不一致有可能影响数据集结果
+		if(formParams.length != params.length)
+			return true;
+		
+		for(var i=0; i<formParams.length; i++)
+		{
+			var fp = formParams[i];
+			var p = null;
+			
+			for(var j=0; j<params.length; j++)
+			{
+				if(params[j].name == fp.name)
+					p = params[j];
+			}
+			
+			if(p == null || fp.name != p.name || fp.type != p.type || fp.required != p.required
+					|| fp.inputType != p.inputType || fp.inputPayload != p.inputPayload)
+			{
+				return true;
+			}
+		}
+		
+		//属性数组大小不必一致，因为不一致不一定影响数据集结果
+		for(var i=0; i<formProperties.length; i++)
+		{
+			var fp = formProperties[i];
+			var p = null;
+			
+			for(var j=0; j<properties.length; j++)
+			{
+				if(properties[j].name == fp.name)
+					p = properties[j];
+			}
+			
+			if(p == null || fp.name != p.name || fp.type != p.type || fp.defaultValue != p.defaultValue)
+			{
+				return true;
+			}
+		}
+		
+		if(formDataFormat.dateFormat != dataFormat.dateFormat || formDataFormat.timeFormat != dataFormat.timeFormat
+				|| formDataFormat.timestampFormat != dataFormat.timestampFormat || formDataFormat.numberFormat != dataFormat.numberFormat)
+		{
+			return true;
+		}
+		
+		return false;
+	};
+	
+	po.initParamPropertyDataFormat = function(params, properties)
+	{
+		po.initDataSetParamsTable(po.dataSetParams);
+		po.initDataSetPropertiesTable(po.dataSetProperties);
+		po.initPreviewParamValuePanel();
+		
+	};
+	
 	po.initPreviewOperations = function()
 	{
+		po.previewOptions.data.dataSet.params = po.getFormDataSetParams();
+		po.previewOptions.data.dataSet.properties = po.getFormDataSetProperties();
+		po.previewOptions.data.dataSet.dataFormat = po.getFormDataFormat();
+		
 		po.element(".preview-result-table-wrapper .preview-button").click(function(event)
 		{
 			var previewValueModified = po.isPreviewValueModified();
@@ -872,7 +942,10 @@ po.previewOptions.url = "...";
 				//如果工作区内容已变更才更新属性，防止上次保存后的属性被刷新
 				//属性表单内容为空也更新，比如用户删除了所有属性时
 				if(previewValueModified || !po.hasFormDataSetProperty())
+				{
 					po.updateFormDataSetProperties(previewResponse.properties);
+					po.previewOptions.data.dataSet.properties = po.getFormDataSetProperties();
+				}
 				
 				var tableData = (previewResponse.result.data || []);
 				if(!$.isArray(tableData))

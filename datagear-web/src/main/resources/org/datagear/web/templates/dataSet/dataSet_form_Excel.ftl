@@ -133,9 +133,7 @@ readonly 是否只读操作，允许为null
 	po.element("#${pageId}-forceXls-${((dataSet.forceXls)!true)?string('true', 'false')}").click();
 	po.initWorkspaceHeight();
 	po.initWorkspaceTabs(true);
-	po.initDataSetPropertiesTable(po.dataSetProperties);
-	po.initDataSetParamsTable(po.dataSetParams);
-	po.initPreviewParamValuePanel();
+	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
 
 	po.initDataSetFileInput(po.url("uploadFile"), "${((dataSet.fileSourceType)!'')?js_string?no_esc}", ${isAdd?string("true", "false")});
@@ -180,12 +178,13 @@ readonly 是否只读操作，允许为null
 		var pd = po.previewOptions.data.dataSet;
 		var dataSetResDirectory = (pd.dataSetResDirectory || {});
 		
-		return (pd.fileSourceType != fileSourceType)
-			|| (po.isFileSourceTypeUpload(fileSourceType) && pd.fileName != fileName)
-			|| (po.isFileSourceTypeServer(fileSourceType) && (dataSetResDirectory.id != dataSetResDirectoryId || pd.dataSetResFileName != dataSetResFileName))
-			|| (pd.sheetIndex != sheetIndex)
-			|| (pd.nameRow != nameRow) || (pd.dataRowExp != dataRowExp)
-			|| (pd.dataColumnExp != dataColumnExp) || (pd.forceXls != forceXls);
+		return ((pd.fileSourceType != fileSourceType)
+				|| (po.isFileSourceTypeUpload(fileSourceType) && pd.fileName != fileName)
+				|| (po.isFileSourceTypeServer(fileSourceType) && (dataSetResDirectory.id != dataSetResDirectoryId || pd.dataSetResFileName != dataSetResFileName))
+				|| (pd.sheetIndex != sheetIndex)
+				|| (pd.nameRow != nameRow) || (pd.dataRowExp != dataRowExp)
+				|| (pd.dataColumnExp != dataColumnExp) || (pd.forceXls != forceXls)
+				|| po.isPreviewParamPropertyDataFormatModified());
 	};
 	
 	po.previewOptions.url = po.url("previewExcel");
