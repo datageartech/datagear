@@ -4680,10 +4680,6 @@
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-label");
 		
-		var labelWrapper = $(".dg-chart-label-wrapper", chartEle);
-		if(labelWrapper.length == 0)
-			 labelWrapper = $("<div class='dg-chart-label-wrapper' />").appendTo(chartEle);
-		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//将在update中设置：
@@ -4691,6 +4687,9 @@
 			
 			//是否所有标签都行内显示
 			"inline": false,
+			//是否以flex布局展示标签
+			//弹性布局：true 是、居中间隔；false 否；"around" 居中间隔；"start" 左对齐；"end" 右对齐；"center" 居中；"between" 贴边间隔； 
+			"flex": false,
 			//是否标签值在前
 			"valueFirst": false,
 			//标签名样式，这里不必添加默认样式，因为图表元素已设置
@@ -4704,7 +4703,23 @@
 		options);
 		
 		if(options.inline == true)
-			labelWrapper.addClass("dg-chart-label-inline");
+			chartEle.addClass("dg-chart-label-inline");
+		
+		if(options.flex != null && options.flex != false)
+		{
+			chartEle.addClass("dg-chart-label-flex");
+			
+			if(options.flex == "start")
+				chartEle.addClass("dg-chart-label-flex-start");
+			else if(options.flex == "end")
+				chartEle.addClass("dg-chart-label-flex-end");
+			else if(options.flex == "center")
+				chartEle.addClass("dg-chart-label-flex-center");
+			else if(options.flex == "between")
+				chartEle.addClass("dg-chart-label-flex-between");
+			else
+				chartEle.addClass("dg-chart-label-flex-around");
+		}
 		
 		// < @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
 		if(options.label && options.label.name)
@@ -4713,7 +4728,7 @@
 			options.value = $.extend(true, {}, options.value, options.label.value);
 		// > @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
 		
-		chart.internal(labelWrapper[0]);
+		chart.internal(chart.element());
 	};
 	
 	chartSupport.labelUpdate = function(chart, results)
@@ -4854,8 +4869,10 @@
 	chartSupport.labelDestroy = function(chart)
 	{
 		var chartEle = chart.elementJquery();
-		chartEle.removeClass("dg-chart-label");
-		$(chart.internal()).remove();
+		chartEle.removeClass("dg-chart-label dg-chart-label-inline dg-chart-label-flex "
+								+"dg-chart-label-flex-around dg-chart-label-flex-start dg-chart-label-flex-end "
+								+"dg-chart-label-flex-center dg-chart-label-flex-between");
+		$(".dg-chart-label-item", chart.internal()).remove();
 	};
 	
 	chartSupport.labelOn = function(chart, eventType, handler)

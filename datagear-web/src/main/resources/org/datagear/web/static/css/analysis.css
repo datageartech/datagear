@@ -109,21 +109,38 @@
 .dg-chart-label{
 	position: relative;
 }
-.dg-chart-label .dg-chart-label-wrapper{
-}
-.dg-chart-label .dg-chart-label-wrapper .dg-chart-label-item .label-name{
+.dg-chart-label .dg-chart-label-item .label-name{
 	text-align: center;
 }
-.dg-chart-label .dg-chart-label-wrapper .dg-chart-label-item .label-value{
+.dg-chart-label .dg-chart-label-item .label-value{
 	text-align: center;
 	font-size: 1.5em;
 	font-weight: bold;
 }
-.dg-chart-label .dg-chart-label-wrapper.dg-chart-label-inline,
-.dg-chart-label .dg-chart-label-wrapper.dg-chart-label-inline .dg-chart-label-item,
-.dg-chart-label .dg-chart-label-wrapper.dg-chart-label-inline .dg-chart-label-item .label-name,
-.dg-chart-label .dg-chart-label-wrapper.dg-chart-label-inline .dg-chart-label-item .label-value{
+.dg-chart-label.dg-chart-label-inline .dg-chart-label-item,
+.dg-chart-label.dg-chart-label-inline .dg-chart-label-item .label-name,
+.dg-chart-label.dg-chart-label-inline .dg-chart-label-item .label-value{
 	display: inline-block;
+}
+.dg-chart-label.dg-chart-label-flex{
+	display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-around{
+    justify-content: space-around;
+}
+.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-start{
+    justify-content: flex-start;
+}
+.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-end{
+    justify-content: flex-end;
+}
+.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-center{
+    justify-content: center;
+}
+.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-between{
+    justify-content: space-between;
 }
 
 /*数据集参数值表单*/
