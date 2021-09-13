@@ -3935,10 +3935,10 @@
 			hideVerticalScrollbar: true
 		};
 		
-		var themeBindTableOptions = chartTheme._chartTableThemeBindOptions;
-		if(themeBindTableOptions == null)
+		var themeAwareOptionsAttrTable = chartTheme._chartTableThemeAwareOptionsAttrTable;
+		if(themeAwareOptionsAttrTable == null)
 		{
-			themeBindTableOptions=
+			themeAwareOptionsAttrTable=
 			{
 				//表头样式
 				"header":
@@ -3979,10 +3979,10 @@
 				renderValue: undefined
 			};
 			
-			themeBindTableOptions._chartTableStyleClassName = chartFactory.nextElementId();
-			themeBindTableOptions._chartTableStyleSheetId = chartFactory.nextElementId();
+			themeAwareOptionsAttrTable._chartTableStyleClassName = chartFactory.nextElementId();
+			themeAwareOptionsAttrTable._chartTableStyleSheetId = chartFactory.nextElementId();
 			
-			chartTheme._chartTableThemeBindOptions = themeBindTableOptions;
+			chartTheme._chartTableThemeAwareOptionsAttrTable = themeAwareOptionsAttrTable;
 		}
 		
 		var columns = [];
@@ -4015,14 +4015,14 @@
 				"backgroundColor": chartTheme.backgroundColor
 			},
 			
-			//表格，格式参考上面的themeBindTableOptions
+			//表格，格式参考上面的themeAwareOptionsAttrTable
 			table: undefined,
 			
 			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
 			carousel: undefined,
 			
-			//后置处理列函数，格式为：function(columns){ return columns; }
-			postProcessColumns: undefined,
+			//是否美化滚动条（仅支持webkit内核浏览器）
+			beautifyScrollbar: true,
 			
 			//DataTable配置项
 			"columns": columns,
@@ -4058,12 +4058,12 @@
 		},
 		options, null, function(options)
 		{
-			//如果没有定义table选项，则采用全局themeBindTableOptions
+			//如果没有定义table选项，则采用全局themeAwareOptionsAttrTable
 			if(options.table == null)
-				options.table = themeBindTableOptions;
+				options.table = themeAwareOptionsAttrTable;
 			else
 			{
-				options.table = $.extend(true, {}, themeBindTableOptions, options.table);
+				options.table = $.extend(true, {}, themeAwareOptionsAttrTable, options.table);
 				options.table._chartTableStyleClassName =chartFactory.nextElementId();
 				options.table._chartTableStyleSheetId = chartFactory.nextElementId();
 			}
@@ -4132,8 +4132,13 @@
 		if(evalHeight)
 			options.scrollY = 4;
 		
+		if(options.beautifyScrollbar)
+			chartEle.addClass("dg-chart-table-beautify-scrollbar");
+		
 		if(options.carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
+		
+		chartEle.addClass(options.table._chartTableStyleClassName);
 		
 		chartSupport.tableCreateTableStyleSheet(chart, options,
 				options.table._chartTableStyleClassName, options.table._chartTableStyleSheetId);
@@ -4251,10 +4256,14 @@
 	chartSupport.tableDestroy = function(chart)
 	{
 		var chartEle = chart.elementJquery();
+		var renderOptions = chart.renderOptions();
+		
 		chartSupport.tableStopCarousel(chart);
 		chartEle.removeClass("dg-chart-table");
 		chartEle.removeClass("dg-hide-title");
 		chartEle.removeClass("dg-chart-table-carousel");
+		chartEle.removeClass("dg-chart-table-beautify-scrollbar");
+		chartEle.removeClass(renderOptions.table._chartTableStyleClassName);
 		$(".dg-chart-table-title", chartEle).remove();
 		$(".dg-chart-table-content", chartEle).remove();
 	};
@@ -4329,13 +4338,12 @@
 	
 	chartSupport.tableCreateTableStyleSheet = function(chart, chartOptions, styleClassName, styleSheetId)
 	{
-		chart.elementJquery().addClass(styleClassName);
-		
 		if(chartFactory.isStyleSheetCreated(styleSheetId))
 			return false;
 		
 		//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
 		var qualifier = "." + styleClassName + " .dg-chart-table-content";
+		var qualifierBeautifyScrollbar = "." + styleClassName + ".dg-chart-table-beautify-scrollbar .dg-chart-table-content";
 		
 		var cssText = 
 			qualifier + " table.dataTable tbody tr{"
@@ -4385,7 +4393,26 @@
 			+qualifier + " table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span{"
 			+ " border-top-color:" + chartOptions.table.header.color+";"
 			+ " background: none;"
-			+" }\n";
+			+" }\n"
+			;
+		
+		//滚动条样式
+		if(chartOptions.beautifyScrollbar)
+		{
+			cssText +=
+			qualifierBeautifyScrollbar + " .dataTables_scrollBody::-webkit-scrollbar{"
+			+ " width: 10px;"
+			+ " height: 10px;"
+			+" }\n"
+			+qualifierBeautifyScrollbar + " .dataTables_scrollBody::-webkit-scrollbar-thumb{"
+			+ " border-radius: 10px;"
+			+ " background: "+chart.gradualColor(0.3)+";"
+			+" }\n"
+			+qualifierBeautifyScrollbar + " .dataTables_scrollBody::-webkit-scrollbar-track{"
+			+ " background: "+chart.gradualColor(0.1)+";"
+			+" }\n"
+			;
+		}
 		
 		chartFactory.createStyleSheet(styleSheetId, cssText, "beforeFirstScript");
 		
