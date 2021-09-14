@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +31,12 @@ import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DashboardThemeSource;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.SimpleDashboardQueryHandler;
+import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
-import org.datagear.analysis.support.html.HtmlTplDashboard;
+import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
@@ -167,34 +170,64 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * 获取看板结果。
 	 * 
 	 * @param request
-	 * @param response
-	 * @param model
-	 * @param webContext
 	 * @param form
+	 * @param renderer
 	 * @return
-	 * @throws Exception
 	 */
-	protected DashboardResult getDashboardResult(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, WebContext webContext, DashboardQueryForm form) throws Exception
+	protected DashboardResult getDashboardResult(HttpServletRequest request, DashboardQueryForm form,
+			HtmlTplDashboardWidgetRenderer renderer)
 	{
-		String dashboardId = form.getDashboardId();
-		DashboardQuery dashboardQuery = form.getDashboardQuery();
-		
-		if (StringUtil.isEmpty(dashboardId))
+		if (StringUtil.isEmpty(form.getDashboardId()))
 			throw new IllegalInputException();
-		
-		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
-		HtmlTplDashboard dashboard = dashboardManager.get(dashboardId);
 
-		if (dashboard == null)
-			throw new RecordNotFoundException();
+		SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
+		DashboardInfo dashboardInfo = dashboardInfoManager.get(form.getDashboardId());
 
-		DashboardQuery queriesConverted = convertDashboardQuery(dashboard, dashboardQuery);
+		if (dashboardInfo == null)
+			throw new IllegalInputException();
 
-		return dashboard.getResult(queriesConverted);
+		DashboardQuery dashboardQuery = form.getDashboardQuery();
+		Map<String, HtmlChartWidget> chartWidgets = getChartWidgets(form.getDashboardQuery(), dashboardInfo, renderer);
+
+		DashboardQuery queriesConverted = convertDashboardQuery(dashboardQuery, chartWidgets);
+
+		SimpleDashboardQueryHandler dqh = new SimpleDashboardQueryHandler(chartWidgets);
+
+		return dqh.getResult(queriesConverted);
 	}
 
-	protected DashboardQuery convertDashboardQuery(Dashboard dashboard, DashboardQuery query)
+	/**
+	 * 获取【图表ID-图表部件】映射表。
+	 * 
+	 * @param query
+	 * @param dashboardInfo
+	 * @param renderer
+	 * @return
+	 */
+	protected Map<String, HtmlChartWidget> getChartWidgets(DashboardQuery query, DashboardInfo dashboardInfo,
+			HtmlTplDashboardWidgetRenderer renderer)
+	{
+		Map<String, ChartQuery> chartQueries = query.getChartQueries();
+
+		Map<String, HtmlChartWidget> chartWidgets = new HashMap<String, HtmlChartWidget>(chartQueries.size());
+
+		for (String chartId : chartQueries.keySet())
+		{
+			String chartWidgetId = dashboardInfo.getChartWidgetId(chartId);
+
+			if (chartWidgetId == null)
+				throw new IllegalInputException("Chart '" + chartId + "' not found");
+
+			HtmlChartWidget chartWidget = renderer.getHtmlChartWidget(chartWidgetId);
+
+			chartWidgets.put(chartId, chartWidget);
+		}
+
+		return chartWidgets;
+	}
+
+	protected DashboardQuery convertDashboardQuery(DashboardQuery query,
+			Map<String, ? extends ChartWidget> chartWidgets)
 	{
 		if (query == null)
 			return new DashboardQuery();
@@ -206,12 +239,12 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		{
 			String chartId = entry.getKey();
 			ChartQuery chartQuery = entry.getValue();
-			Chart chart = dashboard.getChart(chartId);
+			ChartWidget chartWidget = chartWidgets.get(chartId);
 
-			if (chart == null)
+			if (chartWidget == null)
 				throw new IllegalInputException("Chart '" + chartId + "' not found");
 
-			ChartDataSet[] chartDataSets = chart.getChartDataSets();
+			ChartDataSet[] chartDataSets = chartWidget.getChartDataSets();
 			List<DataSetQuery> dataSetQueries = chartQuery.getDataSetQueries();
 
 			ChartQuery chartQueryRe = null;
@@ -245,25 +278,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return queryRe;
 	}
 
-	protected SessionHtmlTplDashboardManager getSessionHtmlTplDashboardManagerNotNull(HttpServletRequest request)
-	{
-		HttpSession session = request.getSession();
-
-		SessionHtmlTplDashboardManager dashboardManager = (SessionHtmlTplDashboardManager) session
-				.getAttribute(SessionHtmlTplDashboardManager.class.getName());
-
-		synchronized (session)
-		{
-			if (dashboardManager == null)
-			{
-				dashboardManager = new SessionHtmlTplDashboardManager();
-				session.setAttribute(SessionHtmlTplDashboardManager.class.getName(), dashboardManager);
-			}
-		}
-
-		return dashboardManager;
-	}
-	
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
 		String heartbeatURL = "/dashboard" + DashboardController.HEARTBEAT_TAIL_URL;
@@ -288,34 +302,25 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return WebUtils.addJsessionidParam(url, sessionId);
 	}
 
-	protected static class SessionHtmlTplDashboardManager implements Serializable
+	protected SessionDashboardInfoManager getSessionDashboardInfoManagerNotNull(HttpServletRequest request)
 	{
-		private static final long serialVersionUID = 1L;
+		HttpSession session = request.getSession();
 
-		private transient Map<String, HtmlTplDashboard> htmlTplDashboards;
+		SessionDashboardInfoManager dashboardManager = (SessionDashboardInfoManager) session
+				.getAttribute(SessionDashboardInfoManager.class.getName());
 
-		public SessionHtmlTplDashboardManager()
+		synchronized (session)
 		{
-			super();
+			if (dashboardManager == null)
+			{
+				dashboardManager = new SessionDashboardInfoManager();
+				session.setAttribute(SessionDashboardInfoManager.class.getName(), dashboardManager);
+			}
 		}
 
-		public synchronized HtmlTplDashboard get(String htmlTplDashboardId)
-		{
-			if (this.htmlTplDashboards == null)
-				return null;
-
-			return this.htmlTplDashboards.get(htmlTplDashboardId);
-		}
-
-		public synchronized void put(HtmlTplDashboard dashboard)
-		{
-			if (this.htmlTplDashboards == null)
-				this.htmlTplDashboards = new HashMap<>();
-
-			this.htmlTplDashboards.put(dashboard.getId(), dashboard);
-		}
+		return dashboardManager;
 	}
-	
+
 	/**
 	 * 看板查询表单。
 	 *
@@ -351,6 +356,98 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public void setDashboardQuery(DashboardQuery dashboardQuery)
 		{
 			this.dashboardQuery = dashboardQuery;
+		}
+	}
+
+	protected static class SessionDashboardInfoManager implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private Map<String, DashboardInfo> dashboardInfos = null;
+
+		public SessionDashboardInfoManager()
+		{
+			super();
+		}
+
+		public synchronized DashboardInfo get(String dashboardId)
+		{
+			if (this.dashboardInfos == null)
+				return null;
+
+			return this.dashboardInfos.get(dashboardId);
+		}
+
+		public synchronized void put(DashboardInfo dashboardInfo)
+		{
+			if (this.dashboardInfos == null)
+				this.dashboardInfos = new HashMap<>();
+
+			this.dashboardInfos.put(dashboardInfo.getDashboardId(), dashboardInfo);
+		}
+	}
+
+	protected static class DashboardInfo implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/**看板ID*/
+		private final String dashboardId;
+		
+		/**看板部件ID*/
+		private final String dashboardWidgetId;
+
+		/** 图表ID-图表部件ID映射表 */
+		private final Map<String, String> chartIdToChartWidgetIds = new HashMap<String, String>();
+
+		public DashboardInfo(String dashboardId, String dashboardWidgetId)
+		{
+			super();
+			this.dashboardId = dashboardId;
+			this.dashboardWidgetId = dashboardWidgetId;
+		}
+
+		public DashboardInfo(Dashboard dashboard)
+		{
+			this.dashboardId = dashboard.getId();
+			this.dashboardWidgetId = dashboard.getWidget().getId();
+
+			if (dashboard.hasChart())
+			{
+				List<Chart> charts = dashboard.getCharts();
+				for (Chart chart : charts)
+					this.chartIdToChartWidgetIds.put(chart.getId(), ChartWidget.getChartWidget(chart));
+			}
+		}
+
+		public String getDashboardId()
+		{
+			return dashboardId;
+		}
+
+		public String getDashboardWidgetId()
+		{
+			return dashboardWidgetId;
+		}
+
+		public synchronized Map<String, String> getChartIdToChartWidgetIds()
+		{
+			return Collections.unmodifiableMap(chartIdToChartWidgetIds);
+		}
+
+		public synchronized String getChartWidgetId(String chartId)
+		{
+			return this.chartIdToChartWidgetIds.get(chartId);
+		}
+
+		public synchronized void putChartWidgetId(String chartId, String chartWidgetId)
+		{
+			this.chartIdToChartWidgetIds.put(chartId, chartWidgetId);
+		}
+
+		public synchronized void putChartWidgetIds(Map<String, String> chartIdToChartWidgetIds)
+		{
+			this.chartIdToChartWidgetIds.putAll(chartIdToChartWidgetIds);
 		}
 	}
 }

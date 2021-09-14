@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.datagear.analysis.Chart;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
@@ -1037,8 +1036,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, template);
 
-			SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
-			dashboardManager.put(dashboard);
+			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
+			dashboardInfoManager.put(new DashboardInfo(dashboard));
 		}
 		finally
 		{
@@ -1061,8 +1060,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public ErrorMessageDashboardResult showData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestBody DashboardQueryForm form) throws Exception
 	{
-		WebContext webContext = createWebContext(request);
-		DashboardResult dashboardResult = getDashboardResult(request, response, model, webContext, form);
+		DashboardResult dashboardResult = getDashboardResult(request, form,
+				this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer());
 
 		return new ErrorMessageDashboardResult(dashboardResult, true);
 	}
@@ -1082,13 +1081,19 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@RequestParam(LOAD_CHART_PARAM_DASHBOARD_ID) String dashboardId,
 			@RequestParam(LOAD_CHART_PARAM_CHART_WIDGET_ID) String[] chartWidgetIds) throws Throwable
 	{
-		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
-		HtmlTplDashboard dashboard = dashboardManager.get(dashboardId);
+		User user = WebUtils.getUser(request, response);
 
-		if (dashboard == null)
+		SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
+		DashboardInfo dashboardInfo = dashboardInfoManager.get(dashboardId);
+
+		if (dashboardInfo == null)
 			throw new RecordNotFoundException();
 
-		HtmlTplDashboardWidgetEntity dashboardWidget = (HtmlTplDashboardWidgetEntity) dashboard.getWidget();
+		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidget(user, dashboardInfo.getDashboardWidgetId());
+
+		if (dashboardWidget == null)
+			throw new RecordNotFoundException();
 
 		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
@@ -1099,9 +1104,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		try
 		{
 			for (int i = 0; i < chartWidgetIds.length; i++)
-			{
 				chartWidgets[i] = dashboardWidgetRenderer.getHtmlChartWidget(chartWidgetIds[i]);
-			}
 
 			// 不缓存
 			response.setContentType(CONTENT_TYPE_JSON);
@@ -1109,14 +1112,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			HtmlChart[] charts = this.htmlChartWidgetJsonWriter.write(out, chartWidgets);
 
-			synchronized (dashboard)
-			{
-				List<Chart> dashboardCharts = dashboard.getCharts();
-				List<Chart> newCharts = (dashboardCharts == null || dashboardCharts.isEmpty() ? new ArrayList<>()
-						: new ArrayList<>(dashboardCharts));
-				newCharts.addAll(Arrays.asList(charts));
-				dashboard.setCharts(newCharts);
-			}
+			Map<String, String> chartIdToChartWidgetIds = new HashMap<String, String>();
+			for (int i = 0; i < chartWidgetIds.length; i++)
+				chartIdToChartWidgetIds.put(charts[i].getId(), chartWidgetIds[i]);
+
+			dashboardInfo.putChartWidgetIds(chartIdToChartWidgetIds);
 		}
 		finally
 		{

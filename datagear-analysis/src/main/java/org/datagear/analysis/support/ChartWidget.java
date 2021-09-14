@@ -120,4 +120,21 @@ public class ChartWidget extends ChartDefinition implements Serializable
 	{
 		return IDUtil.uuid();
 	}
+
+	/**
+	 * 获取由{@linkplain ChartWidget#render(RenderContext)}渲染的{@linkplain Chart}所关联的{@linkplain ChartWidget#getId()}。
+	 * 
+	 * @param chart
+	 * @return 可能返回{@code null}
+	 */
+	public static String getChartWidget(Chart chart)
+	{
+		if (chart == null)
+			return null;
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> chartWidgetInfo = (Map<String, Object>) chart.getAttribute(ATTR_CHART_WIDGET);
+
+		return (chartWidgetInfo == null ? null : (String) chartWidgetInfo.get(ChartWidget.PROPERTY_ID));
+	}
 }

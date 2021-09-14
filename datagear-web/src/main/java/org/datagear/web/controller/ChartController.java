@@ -481,8 +481,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public ErrorMessageDashboardResult showData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestBody DashboardQueryForm form) throws Exception
 	{
-		WebContext webContext = createWebContext(request);
-		DashboardResult dashboardResult = getDashboardResult(request, response, model, webContext, form);
+		DashboardResult dashboardResult = getDashboardResult(request, form,
+				this.chartShowHtmlTplDashboardWidgetHtmlRenderer);
 
 		return new ErrorMessageDashboardResult(dashboardResult, true);
 	}
@@ -526,8 +526,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 
-		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
-		dashboardManager.put(dashboard);
+		SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
+		dashboardInfoManager.put(new DashboardInfo(dashboard));
 	}
 
 	protected WebContext createWebContext(HttpServletRequest request)
