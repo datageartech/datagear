@@ -7,6 +7,7 @@
 
 package org.datagear.management.domain;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
@@ -220,5 +221,45 @@ public class User extends AbstractStringIdEntity implements CloneableEntity
 	public static boolean isAdminUser(String userId)
 	{
 		return ADMIN_USER_ID.equals(userId);
+	}
+
+	/**
+	 * 是否包含管理员账号。
+	 * 
+	 * @param userIds
+	 * @return
+	 */
+	public static boolean containsAdminUser(String[] userIds)
+	{
+		if (userIds == null)
+			return false;
+
+		for (String userId : userIds)
+		{
+			if (ADMIN_USER_ID.equals(userId))
+				return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * 是否包含管理员账号。
+	 * 
+	 * @param userIds
+	 * @return
+	 */
+	public static boolean containsAdminUser(Collection<String> userIds)
+	{
+		if (userIds == null)
+			return false;
+
+		for (String userId : userIds)
+		{
+			if (ADMIN_USER_ID.equals(userId))
+				return true;
+		}
+
+		return false;
 	}
 }
