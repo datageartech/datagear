@@ -50,7 +50,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException
 	{
-		mergeAnonymousUserEntities(request, response, authentication);
+		migrateAnonymousUserData(request, response, authentication);
 
 		String redirectPath = WebUtils.getContextPath(request);
 
@@ -68,7 +68,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 	 * @param response
 	 * @param loginUser
 	 */
-	protected void mergeAnonymousUserEntities(HttpServletRequest request, HttpServletResponse response,
+	protected void migrateAnonymousUserData(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication)
 	{
 		User user = WebUtils.getUser(authentication);

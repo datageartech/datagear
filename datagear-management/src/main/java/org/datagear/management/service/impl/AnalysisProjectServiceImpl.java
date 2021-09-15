@@ -94,6 +94,12 @@ public class AnalysisProjectServiceImpl extends AbstractMybatisDataPermissionEnt
 	}
 
 	@Override
+	public int updateCreateUserId(String[] oldUserIds, String newUserId)
+	{
+		return super.updateCreateUserId(oldUserIds, newUserId);
+	}
+
+	@Override
 	protected AnalysisProject postProcessGet(AnalysisProject obj)
 	{
 		inflateCreateUserEntity(obj, this.userService);

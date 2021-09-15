@@ -226,6 +226,12 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
+	public int updateCreateUserId(String[] oldUserIds, String newUserId)
+	{
+		return super.updateCreateUserId(oldUserIds, newUserId);
+	}
+
+	@Override
 	public PagingData<DataSetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
 			String analysisProjectId)
 	{

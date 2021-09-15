@@ -62,6 +62,18 @@ form .form-content .form-item .form-item-value textarea.error{
 	background-color: #f58400;
 }
 
+/*危险操作按钮*/
+.ui-button.danger, .ui-button.danger:active{
+	border: 1px solid red;
+	background-color: red;
+	color: #ffffff;
+}
+.ui-button.danger:hover, .ui-button.danger:focus{
+	border: 1px solid #ff5252;
+	background-color: #ff5252;
+	color: #ffffff;
+}
+
 /*对话框*/
 /*可保持ui-state-active状态组件样式，默认图标是灰色，这了改成白色*/
 .stated-active.ui-state-active .ui-icon, .stated-active.ui-state-active:focus .ui-icon, .stated-active.ui-state-active:hover .ui-icon{

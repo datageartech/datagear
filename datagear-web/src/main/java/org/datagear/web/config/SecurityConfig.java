@@ -21,8 +21,11 @@ import org.datagear.web.security.AuthUser;
 import org.datagear.web.security.AuthenticationSuccessHandlerImpl;
 import org.datagear.web.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -38,7 +41,7 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
  * @author datagear@163.com
  */
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter
+public class SecurityConfig extends WebSecurityConfigurerAdapter implements ApplicationListener<ContextRefreshedEvent>
 {
 	/**
 	 * 授权角色：(登录用户 或 系统管理员) 且 数据管理员
@@ -121,15 +124,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 		this.coreConfig = coreConfig;
 	}
 
-	protected AuthenticationSuccessHandler getAuthenticationSuccessHandler()
+	@Bean
+	public AuthenticationSuccessHandler authenticationSuccessHandler()
 	{
 		AuthenticationSuccessHandlerImpl bean = new AuthenticationSuccessHandlerImpl();
-
-		List<CreateUserEntityService> createUserEntityServices = Arrays.asList(this.coreConfig.schemaService(),
-				this.coreConfig.dataSetEntityService(), this.coreConfig.htmlChartWidgetEntityService(),
-				this.coreConfig.htmlTplDashboardWidgetEntityService(), this.coreConfig.analysisProjectService());
-
-		bean.setCreateUserEntityServices(createUserEntityServices);
 
 		return bean;
 	}
@@ -299,7 +297,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				.antMatchers("/**").access(disableAnonymous ? AUTH_USER_ADMIN : AUTH_ANONYMOUS_USER_ADMIN)
 
 				.and().formLogin().loginPage("/login").loginProcessingUrl("/login/doLogin").usernameParameter("name")
-				.passwordParameter("password").successHandler(getAuthenticationSuccessHandler())
+				.passwordParameter("password").successHandler(authenticationSuccessHandler())
 
 				.and().logout().logoutUrl("/logout").invalidateHttpSession(true).logoutSuccessUrl("/")
 
@@ -350,5 +348,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 		// 因此这里需要设置为允许，不然功能将无法使用
 		firewall.setAllowSemicolon(true);
 		return firewall;
+	}
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event)
+	{
+		ApplicationContext context = event.getApplicationContext();
+
+		inflateAuthenticationSuccessHandler(context);
+	}
+
+	protected void inflateAuthenticationSuccessHandler(ApplicationContext context)
+	{
+		List<CreateUserEntityService> serviceList = CoreConfig.getCreateUserEntityServices(context);
+
+		AuthenticationSuccessHandler ash = authenticationSuccessHandler();
+
+		if (ash instanceof AuthenticationSuccessHandlerImpl)
+			((AuthenticationSuccessHandlerImpl) ash).setCreateUserEntityServices(serviceList);
 	}
 }

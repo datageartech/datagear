@@ -26,7 +26,10 @@
 		UPDATE DATAGEAR_ANALYSIS_PROJECT SET
 			AP_CREATE_USER_ID = #{newUserId}
 		WHERE
-			AP_CREATE_USER_ID = #{oldUserId}
+			AP_CREATE_USER_ID IN
+			<foreach item="item" index="index" collection="oldUserIds" open="(" separator="," close=")">
+			#{item}
+			</foreach>
 	</update>
 	
 	<delete id="deleteById">

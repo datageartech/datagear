@@ -9,6 +9,7 @@ package org.datagear.web.controller;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -219,15 +220,39 @@ public class UserController extends AbstractController
 		return "/user/user_form";
 	}
 
-	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody String[] ids)
+	@RequestMapping("/delete")
+	public String delete(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@RequestParam("id") String[] ids)
 	{
-		this.userService.deleteByIds(ids);
+		if (isEmpty(ids))
+			throw new IllegalInputException();
 
-		this.schemaService.deleteByUserId(ids);
-		// TODO 应该删除所有其他用户创建的数据
+		List<User> users = this.userService.getByIdsNoPassword(ids, true);
+
+		model.addAttribute("deleteUsers", toWriteJsonTemplateModel(users));
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.deleteUser");
+		model.addAttribute(KEY_FORM_ACTION, "deleteDo");
+
+		return "/user/user_delete";
+	}
+
+	@RequestMapping(value = "/deleteDo", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> deleteDo(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody DeleteUserForm form)
+	{
+		if (isEmpty(form.getIds()) || isEmpty(form.getMigrateToId()))
+			throw new IllegalInputException();
+
+		if (Arrays.asList(form.getIds()).contains(form.getMigrateToId()))
+			throw new IllegalInputException();
+
+		User user = this.userService.getById(form.getMigrateToId());
+
+		if (user == null)
+			throw new IllegalInputException();
+
+		this.userService.deleteByIds(form.getIds(), form.getMigrateToId());
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
@@ -366,6 +391,42 @@ public class UserController extends AbstractController
 		public void setConfirmPassword(String confirmPassword)
 		{
 			this.confirmPassword = confirmPassword;
+		}
+	}
+
+	public static class DeleteUserForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 要删除的用户ID */
+		private String[] ids;
+
+		/** 数据迁移的目标用户ID */
+		private String migrateToId;
+
+		public DeleteUserForm()
+		{
+			super();
+		}
+
+		public String[] getIds()
+		{
+			return ids;
+		}
+
+		public void setIds(String[] ids)
+		{
+			this.ids = ids;
+		}
+
+		public String getMigrateToId()
+		{
+			return migrateToId;
+		}
+
+		public void setMigrateToId(String migrateToId)
+		{
+			this.migrateToId = migrateToId;
 		}
 	}
 }

@@ -7,8 +7,6 @@
 
 package org.datagear.management.service.impl;
 
-import java.util.Map;
-
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.connection.DriverEntityManager;
 import org.datagear.management.domain.Schema;
@@ -127,17 +125,9 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
-	public int deleteByUserId(String... userIds)
+	public int updateCreateUserId(String[] oldUserIds, String newUserId)
 	{
-		Map<String, Object> params = buildParamMap();
-		params.put("userIds", userIds);
-
-		int count = updateMybatis("deleteByUserId", params);
-
-		if (count > 0)
-			cacheInvalidate();
-
-		return count;
+		return super.updateCreateUserId(oldUserIds, newUserId);
 	}
 
 	@Override

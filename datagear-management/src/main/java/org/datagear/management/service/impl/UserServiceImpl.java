@@ -8,6 +8,7 @@
 package org.datagear.management.service.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationListener;
+import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -40,6 +42,8 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	private UserPasswordEncoder userPasswordEncoder = null;
 
 	private AuthorizationListener authorizationListener = null;
+
+	private List<CreateUserEntityService> createUserEntityServices = null;
 
 	public UserServiceImpl()
 	{
@@ -92,6 +96,16 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 		this.authorizationListener = authorizationListener;
 	}
 
+	public List<CreateUserEntityService> getCreateUserEntityServices()
+	{
+		return createUserEntityServices;
+	}
+
+	public void setCreateUserEntityServices(List<CreateUserEntityService> createUserEntityServices)
+	{
+		this.createUserEntityServices = createUserEntityServices;
+	}
+
 	@Override
 	public User getByName(String name)
 	{
@@ -118,6 +132,24 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	}
 
 	@Override
+	public List<User> getByIdsNoPassword(String[] ids, boolean discardNull)
+	{
+		List<User> users = new ArrayList<User>();
+
+		for (String id : ids)
+		{
+			User user = getByIdNoPassword(id);
+
+			if (user == null && discardNull)
+				continue;
+
+			users.add(user);
+		}
+
+		return users;
+	}
+
+	@Override
 	public boolean updatePasswordById(String id, String newPassword, boolean encrypt)
 	{
 		if (encrypt && this.userPasswordEncoder != null)
@@ -139,6 +171,18 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 		params.put("ignoreRole", true);
 
 		return update(user, params);
+	}
+
+	@Override
+	public void deleteByIds(String[] ids, String migrateToId)
+	{
+		if (this.createUserEntityServices != null)
+		{
+			for (CreateUserEntityService service : this.createUserEntityServices)
+				service.updateCreateUserId(ids, migrateToId);
+		}
+
+		this.deleteByIds(ids);
 	}
 
 	@Override

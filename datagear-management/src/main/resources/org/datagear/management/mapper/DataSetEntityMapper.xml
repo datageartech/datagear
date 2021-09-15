@@ -142,7 +142,10 @@
 		UPDATE DATAGEAR_DATA_SET SET
 			DS_CREATE_USER_ID = #{newUserId}
 		WHERE
-			DS_CREATE_USER_ID = #{oldUserId}
+			DS_CREATE_USER_ID  IN
+			<foreach item="item" index="index" collection="oldUserIds" open="(" separator="," close=")">
+			#{item}
+			</foreach>
 	</update>
 	
 	<update id="updateSqlDataSetEntity">

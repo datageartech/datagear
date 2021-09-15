@@ -78,6 +78,12 @@ public class DataSetResDirectoryServiceImpl extends
 	}
 
 	@Override
+	public int updateCreateUserId(String[] oldUserIds, String newUserId)
+	{
+		return super.updateCreateUserId(oldUserIds, newUserId);
+	}
+
+	@Override
 	protected DataSetResDirectory postProcessGet(DataSetResDirectory obj)
 	{
 		inflateCreateUserEntity(obj, this.userService);

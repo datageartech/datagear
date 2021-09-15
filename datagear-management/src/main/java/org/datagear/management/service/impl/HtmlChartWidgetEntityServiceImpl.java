@@ -200,6 +200,12 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@Override
+	public int updateCreateUserId(String[] oldUserIds, String newUserId)
+	{
+		return super.updateCreateUserId(oldUserIds, newUserId);
+	}
+
+	@Override
 	public PagingData<HtmlChartWidgetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
 			String analysisProjectId)
 	{

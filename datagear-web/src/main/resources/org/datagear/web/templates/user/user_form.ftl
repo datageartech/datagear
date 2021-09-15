@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(user.name)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(user.name)!''}" class="ui-widget ui-widget-content" autocomplete="off" />
 				</div>
 			</div>
 			<#if !readonly>
@@ -60,7 +60,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.realName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="realName" value="${(user.realName)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="realName" value="${(user.realName)!''}" class="ui-widget ui-widget-content" autocomplete="off" />
 				</div>
 			</div>
 			<#if !disableRoles>

@@ -288,9 +288,9 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	}
 
 	@Override
-	protected int updateCreateUserId(String oldUserId, String newUserId)
+	protected int updateCreateUserId(String[] oldUserIds, String newUserId)
 	{
-		int count = super.updateCreateUserId(oldUserId, newUserId);
+		int count = super.updateCreateUserId(oldUserIds, newUserId);
 
 		if (count > 0)
 			permissionCacheInvalidate();

@@ -17,11 +17,4 @@ import org.datagear.management.domain.Schema;
  */
 public interface SchemaService extends DataPermissionEntityService<String, Schema>, CreateUserEntityService
 {
-	/**
-	 * 删除指定用户ID的{@linkplain Schema}。
-	 * 
-	 * @param userIds
-	 * @return
-	 */
-	int deleteByUserId(String... userIds);
 }

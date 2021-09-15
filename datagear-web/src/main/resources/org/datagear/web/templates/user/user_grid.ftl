@@ -114,7 +114,12 @@ boolean readonly 是否只读操作，默认为false
 	{
 		po.executeOnSelects(function(rows)
 		{
-			po.confirmDeleteEntities(po.url("delete"), rows);
+			var data = $.getPropertyParamString(rows, "id");
+			
+			po.open(po.url("delete"),
+			{
+				data : data
+			});
 		});
 	});
 	

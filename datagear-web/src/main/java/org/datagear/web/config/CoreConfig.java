@@ -54,6 +54,7 @@ import org.datagear.management.service.AnalysisProjectAuthorizationListener;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationListener;
 import org.datagear.management.service.AuthorizationService;
+import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.DataSetResDirectoryService;
@@ -769,6 +770,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		initAnalysisProjectAuthorizationListenerAwares(context);
 		initServiceCaches(context);
 		initDevotedDataExchangeServices(context);
+		initUserServiceCreateUserEntityServices(context);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -837,5 +839,30 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		List<DevotedDataExchangeService<?>> devotedDataExchangeServices = this.devotedDataExchangeServices();
 		devotedDataExchangeServices.add(this.batchDataExchangeService());
 		this.dataExchangeService().setDevotedDataExchangeServices(devotedDataExchangeServices);
+	}
+
+	protected void initUserServiceCreateUserEntityServices(ApplicationContext context)
+	{
+		List<CreateUserEntityService> serviceList = getCreateUserEntityServices(context);
+
+		UserService userService = this.userService();
+
+		if (userService instanceof UserServiceImpl)
+			((UserServiceImpl) userService).setCreateUserEntityServices(serviceList);
+	}
+
+	/**
+	 * 获取所有{@linkplain CreateUserEntityService}实例。
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public static List<CreateUserEntityService> getCreateUserEntityServices(ApplicationContext context)
+	{
+		Map<String, CreateUserEntityService> serviceMap = context.getBeansOfType(CreateUserEntityService.class);
+		List<CreateUserEntityService> serviceList = new ArrayList<CreateUserEntityService>(serviceMap.size());
+		serviceList.addAll(serviceMap.values());
+
+		return serviceList;
 	}
 }

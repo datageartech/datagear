@@ -263,10 +263,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	/**
-	 * 更新创建用户ID。
-	 * <p>
-	 * 此方法调用底层的{@code updateCreateUserId} SQL。
-	 * </p>
+	 * 更新创建用户。
 	 * <p>
 	 * 此方法主要为子类实现{@linkplain CreateUserEntityService#updateCreateUserId(String, String)}提供支持。
 	 * </p>
@@ -274,11 +271,31 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 * @param oldUserId
 	 * @param newUserId
 	 * @return
+	 * @see #updateCreateUserId(String[], String)
 	 */
 	protected int updateCreateUserId(String oldUserId, String newUserId)
 	{
+		String[] oldUserIds = new String[] { oldUserId };
+		return updateCreateUserId(oldUserIds, newUserId);
+	}
+
+	/**
+	 * 更新创建用户。
+	 * <p>
+	 * 此方法调用底层的{@code updateCreateUserId} SQL。
+	 * </p>
+	 * <p>
+	 * 此方法主要为子类实现{@linkplain CreateUserEntityService#updateCreateUserId(String[], String)}提供支持。
+	 * </p>
+	 * 
+	 * @param oldUserIds
+	 * @param newUserId
+	 * @return
+	 */
+	protected int updateCreateUserId(String[] oldUserIds, String newUserId)
+	{
 		Map<String, Object> params = buildParamMap();
-		params.put("oldUserId", oldUserId);
+		params.put("oldUserIds", oldUserIds);
 		params.put("newUserId", newUserId);
 
 		int count = updateMybatis("updateCreateUserId", params);
@@ -293,7 +310,8 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 * 如果{@linkplain CreateUserEntity#getCreateUser()}不为空，
 	 * 则使用{@linkplain UserService#getByIdNoPassword(String)}对其进行更新。
 	 * 
-	 * @param entity  允许为{@code null}
+	 * @param entity
+	 *            允许为{@code null}
 	 * @param service
 	 */
 	protected void inflateCreateUserEntity(CreateUserEntity<?> entity, UserService service)

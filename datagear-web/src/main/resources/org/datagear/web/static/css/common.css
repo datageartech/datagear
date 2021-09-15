@@ -1415,6 +1415,9 @@ table.dataTable tbody tr td select{
 .page-form-user .selectUserRoleBtn{
 	vertical-align: top;
 }
+.page-form-user-delete .delete-users{
+	display: inline-block;
+}
 
 /*驱动信息管理表单页*/
 .page-form-driverEntity{
