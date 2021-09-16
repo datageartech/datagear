@@ -247,6 +247,10 @@ public class UserController extends AbstractController
 		if (Arrays.asList(form.getIds()).contains(form.getMigrateToId()))
 			throw new IllegalInputException();
 
+		if (User.containsAdminUser(form.getIds()))
+			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					buildMessageCode("deleteAdminUserDenied"));
+
 		User user = this.userService.getById(form.getMigrateToId());
 
 		if (user == null)
