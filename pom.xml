@@ -13,7 +13,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
-		<springboot.version>2.4.6</springboot.version>
+		<springboot.version>2.4.10</springboot.version>
 		<javax.json.version>1.0.4</javax.json.version>
 		<commons-csv.version>1.4</commons-csv.version>
 		<poi.version>3.17</poi.version>
