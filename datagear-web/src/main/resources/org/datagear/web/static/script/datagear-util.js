@@ -3469,15 +3469,25 @@
 			else
 			{
 				var rtPrefix = jqXHR.responseText.substr(0, 100);
+				var dpnValue = null;
+				
+				var dpnToken = "dg-page-name=\"";
+				var dpnStartIdx = rtPrefix.indexOf(dpnToken);
+				if(dpnStartIdx > -1)
+				{
+					dpnStartIdx = dpnStartIdx + dpnToken.length;
+					var dpnEndIdx = rtPrefix.indexOf("\"", dpnStartIdx);
+					dpnValue = (dpnEndIdx > dpnStartIdx ? rtPrefix.substring(dpnStartIdx, dpnEndIdx) : null);
+				}
 				
 				//响应为HTML操作消息的
-				if(rtPrefix.indexOf("<!--HTML_OPERATION_MESSAGE-->") >= 0)
+				if(dpnValue == "error")
 				{
 					$omp.html(jqXHR.responseText);
 					hasResponseMessage = true;
 				}
 				//当登录超时后，列表页点击【查询】按钮，ajax响应可能会重定向到登录页，这里特殊处理
-				else if(rtPrefix.indexOf("<!--LOGIN_PAGE-->") >= 0)
+				else if(dpnValue == "login")
 				{
 					var url = ajaxSettings.url;
 					
@@ -3507,6 +3517,11 @@
 		else if(thrownError)
 		{
 			$.tipError(thrownError);
+		}
+		//客户端连接出错
+		else if(event && event.type=="ajaxError")
+		{
+			$.tipError("Error");
 		}
 	};
 	

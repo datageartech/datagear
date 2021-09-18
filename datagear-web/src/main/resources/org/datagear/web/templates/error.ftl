@@ -11,10 +11,10 @@
 <#if isJsonResponse>
 <@writeJson var=operationMessage />
 <#else>
-<!--HTML_OPERATION_MESSAGE-->
 <#include "include/html_doctype.ftl">
 <html>
 <head>
+<meta dg-page-name="error" />
 <#include "include/html_head.ftl">
 <title><#include "include/html_title_app_name.ftl"><@spring.message code='error.errorOccure' /></title>
 </head>

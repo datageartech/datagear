@@ -6,11 +6,11 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<!--LOGIN_PAGE-->
 <#include "include/import_global.ftl">
 <#include "include/html_doctype.ftl">
 <html>
 <head>
+<meta dg-page-name="login" />
 <#include "include/html_head.ftl">
 ${detectNewVersionScript?no_esc}
 <title><#include "include/html_title_app_name.ftl"><@spring.message code='login.login' /></title>
