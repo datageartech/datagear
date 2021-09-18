@@ -3391,7 +3391,7 @@
 		}
 	};
 
-	$.handleAjaxOperationMessage = function(jqXHR, errorThrown)
+	$.handleAjaxOperationMessage = function(event, jqXHR, ajaxSettings, data, thrownError)
 	{
 		if(!window._showAjaxOperationMessageDetail)
 		{
@@ -3399,9 +3399,9 @@
 			{
 				$.closeTip();
 				
-				var $operationMessageParent = $("#__operationMessageParent");
+				var $omp = $("#__operationMessageParent");
 				
-				var isSuccessMessage = ("true" == $operationMessageParent.attr("success"));
+				var isSuccessMessage = ("true" == $omp.attr("success"));
 				
 				var $dialog = $("<div id='dialog-"+new Date().getTime()+"' class='operation-message-dialog'></div>").appendTo(document.body);
 				
@@ -3409,11 +3409,11 @@
 				if(!isSuccessMessage)
 					$messageDetail.addClass("ui-state-error");
 				$messageDetail.appendTo($dialog);
-				$messageDetail.html($(".message-detail", $operationMessageParent).html());
+				$messageDetail.html($(".message-detail", $omp).html());
 				
 				$._dialog($dialog,
 						{
-							title : $(".message", $operationMessageParent).text(),
+							title : $(".message", $omp).text(),
 							modal : true,
 							height: "60%",
 							position: {my: "center top", at: "center top+3"},
@@ -3436,25 +3436,24 @@
 			};
 		}
 		
-		var isSuccessMessage = (jqXHR.status == 200);
+		var $omp = $("#__operationMessageParent");
+		if($omp.length == 0)
+			$omp = $("<div id='__operationMessageParent' style='display:none;' />").appendTo(document.body);
+		
+		var isSuccessResponse = (jqXHR.status == 200);
+		var hasResponseMessage = false;
 		
 		if(jqXHR.responseText)
 		{
-			var $operationMessageParent = $("#__operationMessageParent");
-			if($operationMessageParent.length == 0)
-				$operationMessageParent = $("<div id='__operationMessageParent' style='display:none;' />").appendTo(document.body);
-			
 			var operationMessage = $.getResponseJson(jqXHR);
 			
-			var hasMessage = false;
-			
-			//操作消息的JSON响应
+			//响应为JSON操作消息的
 			if(operationMessage && operationMessage.type && operationMessage.code && operationMessage.message)
 			{
-				$operationMessageParent.empty();
+				$omp.empty();
 				
-				var $omdiv = $("<div class='operation-message "+operationMessage.type+"' />").appendTo($operationMessageParent);
-				var $mdiv = $("<div class='message' />").appendTo($omdiv).html(operationMessage.message);
+				var $omdiv = $("<div class='operation-message "+operationMessage.type+"' />").appendTo($omp);
+				$("<div class='message' />").appendTo($omdiv).html(operationMessage.message);
 				
 				if(operationMessage.detail)
 				{
@@ -3465,54 +3464,49 @@
 						$("<div />").appendTo($ddiv).html(operationMessage.detail);
 				}
 				
-				hasMessage = true;
+				hasResponseMessage = true;
 			}
 			else
 			{
-				if(isSuccessMessage)
-					hasMessage = false;
-				else
+				var rtPrefix = jqXHR.responseText.substr(0, 100);
+				
+				//响应为HTML操作消息的
+				if(rtPrefix.indexOf("<!--HTML_OPERATION_MESSAGE-->") >= 0)
 				{
-					//操作消息的HTML响应
-					$operationMessageParent.html(jqXHR.responseText);
-					hasMessage = true;
+					$omp.html(jqXHR.responseText);
+					hasResponseMessage = true;
 				}
-			}
-			
-			if(hasMessage)
-			{
-				$operationMessageParent.attr("success", isSuccessMessage);
-				var message = $(".message", $operationMessageParent).html();
-				
-				if($(".message-detail", $operationMessageParent).length > 0)
-					message += "<span class='ui-icon ui-icon-comment message-detail-icon' onclick='_showAjaxOperationMessageDetail();'></span>";
-				
-				if(isSuccessMessage)
-					$.tipSuccess(message);
-				else
-					$.tipError(message);
+				//当登录超时后，列表页点击【查询】按钮，ajax响应可能会重定向到登录页，这里特殊处理
+				else if(rtPrefix.indexOf("<!--LOGIN_PAGE-->") >= 0)
+				{
+					var url = ajaxSettings.url;
+					
+					if(url && url.indexOf("/login") < 0)
+					{
+						thrownError = "Login expired";
+						hasResponseMessage = false;
+					}
+				}
 			}
 		}
-		else
+		
+		if(hasResponseMessage)
 		{
-			if(isSuccessMessage)
-				;
+			$omp.attr("success", isSuccessResponse);
+			var message = $(".message", $omp).html();
+			
+			if($(".message-detail", $omp).length > 0)
+				message += "<span class='ui-icon ui-icon-comment message-detail-icon' onclick='_showAjaxOperationMessageDetail();'></span>";
+			
+			if(isSuccessResponse)
+				$.tipSuccess(message);
 			else
-			{
-				/* 在firefox中，cometd连接有可能会被用户操作请求中断，导致莫名其妙地弹出错误提示，因此把此处代码禁用
-				var msg = (jqXHR.statusText || "Error");
-				
-				if(errorThrown && errorThrown.message)
-				{
-					if(msg)
-						msg += " : ";
-					
-					msg += errorThrown.message;
-				}
-				
-				$.tipError(msg);
-				*/
-			}
+				$.tipError(message);
+		}
+		//客户端处理ajax响应出错
+		else if(thrownError)
+		{
+			$.tipError(thrownError);
 		}
 	};
 	
@@ -3531,12 +3525,12 @@
 	
 	$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError)
 	{
-		$.handleAjaxOperationMessage(jqXHR, thrownError);
+		$.handleAjaxOperationMessage(event, jqXHR, ajaxSettings, null, thrownError);
 	});
 	
-	$(document).ajaxSuccess(function(event, jqXHR, ajaxSettings, thrownError)
+	$(document).ajaxSuccess(function(event, jqXHR, ajaxSettings, data)
 	{
-		$.handleAjaxOperationMessage(jqXHR, thrownError);
+		$.handleAjaxOperationMessage(event, jqXHR, ajaxSettings, data, null);
 	});
 	
 	/**

@@ -11,6 +11,7 @@
 <#if isJsonResponse>
 <@writeJson var=operationMessage />
 <#else>
+<!--HTML_OPERATION_MESSAGE-->
 <#include "include/html_doctype.ftl">
 <html>
 <head>

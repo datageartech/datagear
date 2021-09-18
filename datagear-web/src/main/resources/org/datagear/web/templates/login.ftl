@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<!--LOGIN_PAGE-->
 <#include "include/import_global.ftl">
 <#include "include/html_doctype.ftl">
 <html>
