@@ -4945,6 +4945,212 @@
 		chartSupport.setChartEventOriginalInfo(chart, chartEvent, chartData);
 	};
 	
+	//下拉框
+	
+	chartSupport.selectRender = function(chart, nameSign, valueSign, options)
+	{
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		
+		var chartTheme = chart.theme();
+		
+		var chartEle = chart.elementJquery();
+		chartEle.addClass("dg-chart-select");
+		
+		options = chartSupport.inflateRenderOptions(chart,
+		{
+			//将在update中设置：
+			//下拉框数据：
+			// data:
+			// [
+			//	  {
+			//	    //选项名，可选，默认为选项值
+			//	    name: "...",
+			//	    //选项值
+			//	    value: ...,
+			//	    //是否选中，可选，默认为：false
+			//	    selected: true 或 false,
+			//	    //选项css样式，可选
+			//	    itemStyle: { ... }
+			//	  },
+			//	  ...
+			// ]
+			
+			//下拉框名称
+			name: undefined,
+			//是否多选
+			multiple: false,
+			//可见选项数目
+			size: undefined,
+			//默认选中项：null：默认；数值或其数组：选中指定索引的选项；
+			selected: undefined,
+			//前置添加的条目项，格式同data元素，或者其数组，通常用于添加默认选中项
+			prepend: undefined,
+			//select框css样式
+			selectStyle:
+			{
+				"color": chartTheme.color,
+				"background-color":  chartTheme.backgroundColor,
+				"border-color": chartTheme.borderColor
+			},
+			//option选项整体css样式，格式为：{ ... }
+			itemStyle: undefined
+		},
+		options);
+		
+		var $select = $("<select />").appendTo(chartEle);
+		
+		if(options.name)
+			$select.attr("name", options.name);
+		if(options.multiple)
+			$select.attr("multiple", "multiple");
+		if(options.size != null)
+			$select.attr("size", options.size);
+		
+		chartFactory.setStyles($select, options.selectStyle);
+		
+		chart.internal($select[0]);
+	};
+	
+	chartSupport.selectUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions = chart.renderOptions();
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		var $select = $(chart.internal());
+		
+		$select.empty();
+		
+		var selected = renderOptions.selected;
+		
+		if(selected != null && typeof(selected) == "number")
+			selected = [ selected ];
+		
+		var updateOptions = { data: [] };
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var result = chart.resultOf(results, chartDataSet);
+			
+			var nps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.name);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			var hasNps = (nps && nps.length > 0);
+			
+			if(hasNps && nps.length != vps.length)
+				throw new Error("The ["+signNameMap.name+"] sign column must be "
+						+"one-to-one with ["+signNameMap.value+"] sign column");
+			
+			var namess = (hasNps ? chart.resultRowArrays(result, nps) : []);
+			var valuess = chart.resultRowArrays(result, vps);
+			
+			for(var j=0; j<valuess.length; j++)
+			{
+				var values = valuess[j];
+				var names = (hasNps ? namess[j] : values);
+				
+				for(var k=0; k<names.length; k++)
+				{
+					var sv = { name: names[k], value: values[k] };
+					chart.originalInfo(sv, chartDataSet, j);
+					
+					updateOptions.data.push(sv);
+				}
+			}
+		}
+		
+		updateOptions = chart.inflateUpdateOptions(results, updateOptions);
+		var data = updateOptions.data;
+		
+		if(renderOptions.prepend)
+		{
+			var newData = ($.isArray(renderOptions.prepend) ? renderOptions.prepend : [ renderOptions.prepend ]);
+			data = newData.concat(data);
+		}
+		
+		for(var i=0; i<data.length; i++)
+		{
+			var optData = data[i];
+			
+			var $opt = $("<option />").attr("value", optData.value)
+				.html(optData.name ? optData.name : optData.value).appendTo($select);
+			
+			if(optData.selected || (selected != null && $.inArray(i, selected) > -1))
+				$opt.attr("selected", "selected");
+			
+			$opt.data("_dgChartSelectOptionChartData", optData);
+			
+			var itemStyle = null;
+			
+			if(renderOptions.itemStyle && optData.itemStyle)
+				itemStyle = $.extend({}, renderOptions.itemStyle, optData.itemStyle);
+			else if(renderOptions.itemStyle)
+				itemStyle = renderOptions.itemStyle;
+			else if(optData.itemStyle)
+				itemStyle = optData.itemStyle;
+			
+			if(itemStyle)
+				chartFactory.setStyles($opt, itemStyle);
+		}
+	};
+	
+	chartSupport.selectResize = function(chart)
+	{
+		
+	};
+	
+	chartSupport.selectDestroy = function(chart)
+	{
+		var chartEle = chart.elementJquery();
+		chartEle.removeClass("dg-chart-select");
+		$(chart.internal()).remove();
+	};
+	
+	chartSupport.selectOn = function(chart, eventType, handler)
+	{
+		var handlerDelegation = function(htmlEvent)
+		{
+			var $select = $(this);
+			var chartEvent = chart.eventNewHtml(eventType, htmlEvent);
+			chartSupport.selectSetChartEventData(chart, chartEvent, htmlEvent, $select);
+			
+			chart.callEventHandler(handler, chartEvent);
+		};
+		
+		chart.registerEventHandlerDelegation(eventType, handler, handlerDelegation);
+		$(chart.internal()).on(eventType, handlerDelegation);
+	};
+	
+	chartSupport.selectOff = function(chart, eventType, handler)
+	{
+		var internal = $(chart.internal());
+		
+		chart.removeEventHandlerDelegation(eventType, handler, function(et, eh, ehd)
+		{
+			internal.off(et, ehd);
+		});
+	};
+	
+	chartSupport.selectSetChartEventData = function(chart, chartEvent, htmlEvent, $select)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var chartData = $select.data("_dgChartSelectOptionChartData");
+		
+		var data = {};
+		
+		if(chartData)
+		{
+			data[signNameMap.name] = chartData.name;
+			data[signNameMap.value] = chartData.value;
+		}
+		
+		chart.eventData(chartEvent, data);
+		chartSupport.setChartEventOriginalInfo(chart, chartEvent, chartData);
+	};
+	
 	//自定义
 	
 	chartSupport.customAsyncRender = function(chart)
