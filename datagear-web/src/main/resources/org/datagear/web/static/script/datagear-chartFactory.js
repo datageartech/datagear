@@ -201,6 +201,9 @@
 	/**数据对象的原始信息属性名*/
 	chartFactory.DATA_ORIGINAL_INFO_PROP_NAME = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalInfo";
 	
+	/**关键字：图表元素样式标识*/
+	chartFactory._KEY_CHART_ELE_THEME_STYLE = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "ChartEleStyle";
+	
 	/**
 	 * 图表使用的渲染上下文属性名。
 	 */
@@ -937,7 +940,7 @@
 			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
 		
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
-		chartFactory.setThemeStyle($element, this.theme());
+		this._setChartElementThemeStyle();
 		
 		this.statusRendering(true);
 		
@@ -951,6 +954,34 @@
 		{
 			this.doRender();
 		}
+	};
+	
+	chartBase._setChartElementThemeStyle = function()
+	{
+		var styleName = chartFactory.chartThemeStyleName(this.theme(), chartFactory._KEY_CHART_ELE_THEME_STYLE,
+		function(chartTheme)
+		{
+			var so=
+			{
+				name: "",
+				value:
+				{
+					"color": chartTheme.color,
+					"background-color": chartTheme.backgroundColor,
+					"border-color": chartTheme.borderColor
+				}
+			};
+			
+			if(chartTheme.borderWidth)
+			{
+				so.value["border-width"] = chartTheme.borderWidth;
+				so.value["border-style"] = "solid";
+			}
+			
+			return so;
+		});
+		
+		this.elementJquery().addClass(styleName);
 	};
 	
 	/**
@@ -1080,7 +1111,9 @@
 		var $element = this.elementJquery();
 		
 		this.statusDestroyed(true);
+		
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
+		$element.removeClass(chartFactory.chartThemeStyleName(this.theme(), chartFactory._KEY_CHART_ELE_THEME_STYLE));
 		
 		var renderer = this.renderer();
 		
@@ -3184,6 +3217,109 @@
 	// chartBase end
 	//----------------------------------------
 	
+	chartFactory._KEY_THEME_STYLE_INFO = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleInfo";
+	
+	/**
+	 * 获取与图表主题关联的且由指定名称标识的CSS样式表的顶级类名，这个顶级类名可用于添加至HTML元素的'class'属性。
+	 * 如果CSS样式表还未创建且generator不为undefined，将创建由generator返回的CSS样式表。
+	 * 
+	 * @param chartTheme 图表主题
+	 * @param name 标识名称
+	 * @param generator 可选，CSS样式表生成器，格式为：
+	 * 					function(chartTheme, styleName){ return CSS样式表对象、CSS样式表对象数组、CSS样式字符串; }
+	 * 					或者
+	 * 					CSS样式表对象。
+	 * 					其中，CSS样式表对象格式为：
+	 * 					{
+	 * 					  //CSS样式限定类型，例如：" .success"、".success"、" .tip.success"
+	 * 					  name: "..."、["...", ...],
+	 * 					  //CSS样式属性，例如：{ 'color': 'red', 'border-color': 'blue' }
+	 * 					  value:{ CSS属性名 : CSS属性值, ... }
+	 * 					}
+	 * 					注意：如果是CSS样式字符串，应是已添加styleName顶级限定类名的，CSS样式表对象的话，则会自动添加styleName顶级限定类型。
+	 */
+	chartFactory.chartThemeStyleName = function(chartTheme, name, generator)
+	{
+		var tsnObj = chartTheme[chartFactory._KEY_THEME_STYLE_INFO];
+		if(tsnObj == null)
+			tsnObj = (chartTheme[chartFactory._KEY_THEME_STYLE_INFO] = {});
+		
+		var info = tsnObj[name];
+		
+		if(info == null)
+		{
+			info =
+			{
+				sheetId: chartFactory.nextElementId(),
+				styleName: chartFactory.nextElementId(),
+				created: false
+			};
+			
+			tsnObj[name] = info;
+		}
+		
+		if(info.created == true || generator === undefined)
+			return info.styleName;
+		
+		var cssText = "";
+		
+		if($.isFunction(generator))
+			generator = generator(chartTheme, info.styleName);
+		
+		if(generator == null)
+			;
+		else if(typeof(generator) == "string")
+			cssText = generator;
+		else
+		{
+			if(!$.isArray(generator))
+				generator = [ generator ];
+			
+			for(var i=0; i<generator.length; i++)
+			{
+				var cssName = generator[i].name;
+				var cssValue = generator[i].value;
+				
+				if(cssName == null)
+					continue;
+				
+				if(!$.isArray(cssName))
+					cssName = [ cssName ];
+				
+				for(var j=0; j<cssName.length; j++)
+				{
+					cssText += "."+info.styleName + cssName[j];
+					
+					if(j < (cssName.length - 1))
+						cssText += ",\n";
+				}
+				
+				cssText += "{\n";
+				
+				if(cssValue)
+				{
+					for(var p in cssValue)
+						cssText += p + ":" + cssValue[p]+";\n";
+				}
+				
+				cssText += "}\n";
+			}
+		}
+		
+		chartFactory.createStyleSheet(info.sheetId, cssText, "beforeFirstScript");
+		info.created = true;
+		
+		return info.styleName;
+	};
+	
+	/**
+	 * 获取指定名称的内置名称（添加内置前缀）。
+	 */
+	chartFactory.builtinName = function(name)
+	{
+		return chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + name;
+	};
+	
 	/**
 	 * 获取/设置图表的内置扩展属性值。
 	 * chart.extValue()是允许用户级使用的，此函数应用于内置设置/获取操作，可避免属性名冲突。
@@ -3194,33 +3330,8 @@
 	 */
 	chartFactory.extValueBuiltin = function(chart, name, value)
 	{
-		name = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX+"_" + name;
-		
+		name = chartFactory.builtinName(name);
 		return chart.extValue(name, value);
-	};
-	
-	/**
-	 * 获取/设置指定对象的内置属性值。
-	 * 
-	 * @param obj 对象
-	 * @param name 内置属性名
-	 * @param value 可选，要设置的内置属性值，不设置则执行获取操作
-	 */
-	chartFactory.builtinProperty = function(obj, name, value)
-	{
-		var wrapName = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "Builtin";
-		
-		var bp = (obj == null ? null : obj[wrapName]);
-		
-		if(value === undefined)
-			return (bp == null ? undefined : bp[name]);
-		else
-		{
-			if(bp == null)
-				bp = (obj[wrapName] = {});
-			
-			bp[name] = value;
-		}
 	};
 	
 	/**
@@ -3295,7 +3406,7 @@
 	};
 	
 	/** HTML元素上已渲染的图表对象KEY */
-	chartFactory._KEY_ELEMENT_RENDERED_CHART = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "_renderedChart";
+	chartFactory._KEY_ELEMENT_RENDERED_CHART = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "RenderedChart";
 	
 	/**
 	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
@@ -3412,17 +3523,6 @@
 	chartFactory.toJSONString = function(obj)
 	{
 		return JSON.stringify(obj);
-	};
-	
-	/**
-	 * 为元素设置主题样式。
-	 * 
-	 * @param element HTML元素、Jquery对象
-	 * @param theme 主题对象
-	 */
-	chartFactory.setThemeStyle = function(element, theme)
-	{
-		return this.setStyles(element, theme);
 	};
 	
 	/**

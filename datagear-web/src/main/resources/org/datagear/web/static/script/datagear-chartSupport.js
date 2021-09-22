@@ -5003,7 +5003,7 @@
 		if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
 			chartEle.addClass("dg-chart-select-fill");
 		
-		chartEle.addClass(chartSupport.selectThemeStyleClassName(chart));
+		chartEle.addClass(chartSupport.selectThemeStyleName(chart));
 		
 		var $select = $("<select class='dg-chart-select-select' />").appendTo(chartEle);
 		
@@ -5112,7 +5112,10 @@
 	chartSupport.selectDestroy = function(chart)
 	{
 		var chartEle = chart.elementJquery();
+		
 		chartEle.removeClass("dg-chart-select dg-chart-select-dropdown dg-chart-beautify-scrollbar");
+		chartEle.removeClass(chartSupport.selectThemeStyleName(chart));
+		
 		$(chart.internal()).remove();
 	};
 	
@@ -5159,46 +5162,57 @@
 		chartSupport.setChartEventOriginalInfo(chart, chartEvent, chartData);
 	};
 	
-	chartSupport.selectThemeStyleClassName = function(chart)
+	chartSupport.selectThemeStyleName = function(chart)
 	{
-		var chartTheme = chart.theme();
-		var styleSheetId = chartSupport.chartThemeStyleSheetId(chartTheme, "selectChart");
-		var styleClassName = chartSupport.chartThemeStyleClassName(chartTheme, "selectChart");
-		
-		if(chartFactory.isStyleSheetCreated(styleSheetId))
-			return styleClassName;
-		
-		var qualifier = "." + styleClassName + " .dg-chart-select-select";
-		var qualifierDropdown = "." + styleClassName + ".dg-chart-select-dropdown .dg-chart-select-select";
-		var qualifierBeautifyScrollbar = "." + styleClassName + ".dg-chart-beautify-scrollbar .dg-chart-select-select";
-		
-		var cssText =
-		
-		qualifier + "{"
-		+" color:" + chartTheme.color +";"
-		+" background-color:" + chartTheme.backgroundColor +";"
-		+" border-color:" + chartTheme.borderColor +";"
-		+"}\n"
-		+qualifierDropdown + " option{"
-		+" color:" + chartTheme.color +";"
-		+" background-color:" + chart.gradualColor(0.1) +";"
-		+"}\n"
-		+qualifierBeautifyScrollbar + "::-webkit-scrollbar{"
-		+ " width: 10px;"
-		+ " height: 10px;"
-		+" }\n"
-		+qualifierBeautifyScrollbar + "::-webkit-scrollbar-thumb{"
-		+ " border-radius: 10px;"
-		+ " background: "+chart.gradualColor(0.3)+";"
-		+" }\n"
-		+qualifierBeautifyScrollbar + "::-webkit-scrollbar-track{"
-		+ " background: "+chart.gradualColor(0.1)+";"
-		+" }\n"
-		;
-		
-		chartFactory.createStyleSheet(styleSheetId, cssText, "beforeFirstScript");
-		
-		return styleClassName;
+		return chartFactory.chartThemeStyleName(chart.theme(), chartFactory.builtinName("SelectChart"),
+		function(chartTheme)
+		{
+			var so=
+			[
+				{
+					name: " .dg-chart-select-select",
+					value:
+					{
+						"color": chartTheme.color,
+						"background-color": chartTheme.backgroundColor,
+						"border-color": chartTheme.borderColor
+					}
+				},
+				{
+					name: ".dg-chart-select-dropdown .dg-chart-select-select option",
+					value:
+					{
+						"color": chartTheme.color,
+						"background-color": chart.gradualColor(0.1)
+					}
+				},
+				{
+					name: ".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar",
+					value:
+					{
+						"width": "10px",
+						"height": "10px"
+					}
+				},
+				{
+					name: ".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar-thumb",
+					value:
+					{
+						"border-radius": "10px",
+						"background": chart.gradualColor(0.3)
+					}
+				},
+				{
+					name: ".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar-track",
+					value:
+					{
+						"background": chart.gradualColor(0.1)
+					}
+				}
+			];
+			
+			return so;
+		});
 	};
 	
 	//自定义
@@ -5938,32 +5952,6 @@
 		}
 		
 		return re;
-	};
-	
-	chartSupport.chartThemeStyleSheetId = function(chartTheme, name)
-	{
-		var styleSheetId = chartFactory.builtinProperty(chartTheme, name +"_styleSheetId");
-		
-		if(!styleSheetId)
-		{
-			styleSheetId = chartFactory.nextElementId();
-			chartFactory.builtinProperty(chartTheme, name +"_styleSheetId", styleSheetId);
-		}
-		
-		return styleSheetId;
-	};
-	
-	chartSupport.chartThemeStyleClassName = function(chartTheme, name)
-	{
-		var styleClassName = chartFactory.builtinProperty(chartTheme, name +"_styleClassName");
-		
-		if(!styleClassName)
-		{
-			styleClassName = chartFactory.nextElementId();
-			chartFactory.builtinProperty(chartTheme, name +"_styleClassName", styleClassName);
-		}
-		
-		return styleClassName;
 	};
 	
 	//---------------------------------------------------------
