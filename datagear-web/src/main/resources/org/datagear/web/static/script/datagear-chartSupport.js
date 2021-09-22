@@ -4133,7 +4133,7 @@
 			options.scrollY = 4;
 		
 		if(options.beautifyScrollbar)
-			chartEle.addClass("dg-chart-table-beautify-scrollbar");
+			chartEle.addClass("dg-chart-beautify-scrollbar");
 		
 		if(options.carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
@@ -4262,7 +4262,7 @@
 		chartEle.removeClass("dg-chart-table");
 		chartEle.removeClass("dg-hide-title");
 		chartEle.removeClass("dg-chart-table-carousel");
-		chartEle.removeClass("dg-chart-table-beautify-scrollbar");
+		chartEle.removeClass("dg-chart-beautify-scrollbar");
 		chartEle.removeClass(renderOptions.table._chartTableStyleClassName);
 		$(".dg-chart-table-title", chartEle).remove();
 		$(".dg-chart-table-content", chartEle).remove();
@@ -4343,7 +4343,7 @@
 		
 		//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
 		var qualifier = "." + styleClassName + " .dg-chart-table-content";
-		var qualifierBeautifyScrollbar = "." + styleClassName + ".dg-chart-table-beautify-scrollbar .dg-chart-table-content";
+		var qualifierBeautifyScrollbar = "." + styleClassName + ".dg-chart-beautify-scrollbar .dg-chart-table-content";
 		
 		var cssText = 
 			qualifier + " table.dataTable tbody tr{"
@@ -4394,13 +4394,7 @@
 			+ " border-top-color:" + chartOptions.table.header.color+";"
 			+ " background: none;"
 			+" }\n"
-			;
-		
-		//滚动条样式
-		if(chartOptions.beautifyScrollbar)
-		{
-			cssText +=
-			qualifierBeautifyScrollbar + " .dataTables_scrollBody::-webkit-scrollbar{"
+			+qualifierBeautifyScrollbar + " .dataTables_scrollBody::-webkit-scrollbar{"
 			+ " width: 10px;"
 			+ " height: 10px;"
 			+" }\n"
@@ -4412,7 +4406,6 @@
 			+ " background: "+chart.gradualColor(0.1)+";"
 			+" }\n"
 			;
-		}
 		
 		chartFactory.createStyleSheet(styleSheetId, cssText, "beforeFirstScript");
 		
