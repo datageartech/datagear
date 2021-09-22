@@ -4951,8 +4951,6 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		var chartTheme = chart.theme();
-		
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-select");
 		
@@ -4985,19 +4983,29 @@
 			selected: undefined,
 			//前置添加的条目项，格式同data元素，或者其数组，通常用于添加默认选中项
 			prepend: undefined,
-			//select框css样式
-			selectStyle:
-			{
-				"color": chartTheme.color,
-				"background-color":  chartTheme.backgroundColor,
-				"border-color": chartTheme.borderColor
-			},
+			//是否美化多选时的滚动条（仅支持webkit内核浏览器）
+			beautifyScrollbar: true,
+			//下拉框是否填满父元素，"auto" 当是内联框时填满；true 是；false 否
+			fillParent: "auto",
+			//select框css样式，格式为：{ ... }
+			selectStyle: undefined,
 			//option选项整体css样式，格式为：{ ... }
 			itemStyle: undefined
 		},
 		options);
 		
-		var $select = $("<select />").appendTo(chartEle);
+		var isDropdown = (!options.multiple && (options.size == null || options.size <= 1));
+		
+		if(options.beautifyScrollbar)
+			chartEle.addClass("dg-chart-beautify-scrollbar");
+		if(isDropdown)
+			chartEle.addClass("dg-chart-select-dropdown");
+		if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
+			chartEle.addClass("dg-chart-select-fill");
+		
+		chartEle.addClass(chartSupport.selectThemeStyleClassName(chart));
+		
+		var $select = $("<select class='dg-chart-select-select' />").appendTo(chartEle);
 		
 		if(options.name)
 			$select.attr("name", options.name);
@@ -5005,8 +5013,8 @@
 			$select.attr("multiple", "multiple");
 		if(options.size != null)
 			$select.attr("size", options.size);
-		
-		chartFactory.setStyles($select, options.selectStyle);
+		if(options.selectStyle)
+			chartFactory.setStyles($select, options.selectStyle);
 		
 		chart.internal($select[0]);
 	};
@@ -5104,7 +5112,7 @@
 	chartSupport.selectDestroy = function(chart)
 	{
 		var chartEle = chart.elementJquery();
-		chartEle.removeClass("dg-chart-select");
+		chartEle.removeClass("dg-chart-select dg-chart-select-dropdown dg-chart-beautify-scrollbar");
 		$(chart.internal()).remove();
 	};
 	
@@ -5149,6 +5157,48 @@
 		
 		chart.eventData(chartEvent, data);
 		chartSupport.setChartEventOriginalInfo(chart, chartEvent, chartData);
+	};
+	
+	chartSupport.selectThemeStyleClassName = function(chart)
+	{
+		var chartTheme = chart.theme();
+		var styleSheetId = chartSupport.chartThemeStyleSheetId(chartTheme, "selectChart");
+		var styleClassName = chartSupport.chartThemeStyleClassName(chartTheme, "selectChart");
+		
+		if(chartFactory.isStyleSheetCreated(styleSheetId))
+			return styleClassName;
+		
+		var qualifier = "." + styleClassName + " .dg-chart-select-select";
+		var qualifierDropdown = "." + styleClassName + ".dg-chart-select-dropdown .dg-chart-select-select";
+		var qualifierBeautifyScrollbar = "." + styleClassName + ".dg-chart-beautify-scrollbar .dg-chart-select-select";
+		
+		var cssText =
+		
+		qualifier + "{"
+		+" color:" + chartTheme.color +";"
+		+" background-color:" + chartTheme.backgroundColor +";"
+		+" border-color:" + chartTheme.borderColor +";"
+		+"}\n"
+		+qualifierDropdown + " option{"
+		+" color:" + chartTheme.color +";"
+		+" background-color:" + chart.gradualColor(0.1) +";"
+		+"}\n"
+		+qualifierBeautifyScrollbar + "::-webkit-scrollbar{"
+		+ " width: 10px;"
+		+ " height: 10px;"
+		+" }\n"
+		+qualifierBeautifyScrollbar + "::-webkit-scrollbar-thumb{"
+		+ " border-radius: 10px;"
+		+ " background: "+chart.gradualColor(0.3)+";"
+		+" }\n"
+		+qualifierBeautifyScrollbar + "::-webkit-scrollbar-track{"
+		+ " background: "+chart.gradualColor(0.1)+";"
+		+" }\n"
+		;
+		
+		chartFactory.createStyleSheet(styleSheetId, cssText, "beforeFirstScript");
+		
+		return styleClassName;
 	};
 	
 	//自定义
@@ -5888,6 +5938,32 @@
 		}
 		
 		return re;
+	};
+	
+	chartSupport.chartThemeStyleSheetId = function(chartTheme, name)
+	{
+		var styleSheetId = chartFactory.builtinProperty(chartTheme, name +"_styleSheetId");
+		
+		if(!styleSheetId)
+		{
+			styleSheetId = chartFactory.nextElementId();
+			chartFactory.builtinProperty(chartTheme, name +"_styleSheetId", styleSheetId);
+		}
+		
+		return styleSheetId;
+	};
+	
+	chartSupport.chartThemeStyleClassName = function(chartTheme, name)
+	{
+		var styleClassName = chartFactory.builtinProperty(chartTheme, name +"_styleClassName");
+		
+		if(!styleClassName)
+		{
+			styleClassName = chartFactory.nextElementId();
+			chartFactory.builtinProperty(chartTheme, name +"_styleClassName", styleClassName);
+		}
+		
+		return styleClassName;
 	};
 	
 	//---------------------------------------------------------

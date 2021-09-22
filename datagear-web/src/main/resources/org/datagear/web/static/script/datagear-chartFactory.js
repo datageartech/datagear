@@ -387,21 +387,6 @@
 		delete chart.resultDataFormat;
 	};
 	
-	/**
-	 * 获取/设置图表的内置扩展属性值。
-	 * chart.extValue()是允许用户级使用的，此函数应用于内置设置/获取操作，可避免属性名冲突。
-	 * 
-	 * @param chart 图表对象
-	 * @param name 扩展属性名
-	 * @param value 可选，要设置的扩展属性值，不设置则执行获取操作
-	 */
-	chartFactory.extValueBuiltin = function(chart, name, value)
-	{
-		name = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX+"_" + name;
-		
-		return chart.extValue(name, value);
-	};
-	
 	//----------------------------------------
 	// chartBase start
 	//----------------------------------------
@@ -3198,6 +3183,45 @@
 	//----------------------------------------
 	// chartBase end
 	//----------------------------------------
+	
+	/**
+	 * 获取/设置图表的内置扩展属性值。
+	 * chart.extValue()是允许用户级使用的，此函数应用于内置设置/获取操作，可避免属性名冲突。
+	 * 
+	 * @param chart 图表对象
+	 * @param name 扩展属性名
+	 * @param value 可选，要设置的扩展属性值，不设置则执行获取操作
+	 */
+	chartFactory.extValueBuiltin = function(chart, name, value)
+	{
+		name = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX+"_" + name;
+		
+		return chart.extValue(name, value);
+	};
+	
+	/**
+	 * 获取/设置指定对象的内置属性值。
+	 * 
+	 * @param obj 对象
+	 * @param name 内置属性名
+	 * @param value 可选，要设置的内置属性值，不设置则执行获取操作
+	 */
+	chartFactory.builtinProperty = function(obj, name, value)
+	{
+		var wrapName = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "Builtin";
+		
+		var bp = (obj == null ? null : obj[wrapName]);
+		
+		if(value === undefined)
+			return (bp == null ? undefined : bp[name]);
+		else
+		{
+			if(bp == null)
+				bp = (obj[wrapName] = {});
+			
+			bp[name] = value;
+		}
+	};
 	
 	/**
 	 * 获取/设置渲染上下文的属性值。
