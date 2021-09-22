@@ -877,6 +877,13 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 		List<String> excludes = StringUtil.splitWithTrim(importExclude, ",");
 
+		// 后台生成的样式应该放在最开头，确保页面生成的、用户自定义的css有更高优先级
+		if (!excludes.contains(this.themeImportName))
+		{
+			writeNewLine(out);
+			writeDashboardThemeStyle(renderContext, renderAttr, out, dashboard);
+		}
+
 		if (this.htmlTplDashboardImport != null)
 		{
 			List<ImportItem> importItems = this.htmlTplDashboardImport.getImportItems();
@@ -900,12 +907,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 					out.write(content);
 				}
 			}
-		}
-
-		if (!excludes.contains(this.themeImportName))
-		{
-			writeNewLine(out);
-			writeDashboardThemeStyle(renderContext, renderAttr, out, dashboard);
 		}
 	}
 
@@ -1029,7 +1030,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		writeNewLine(out);
 
 		out.write("</style>");
-		writeNewLine(out);
 
 		return true;
 	}
