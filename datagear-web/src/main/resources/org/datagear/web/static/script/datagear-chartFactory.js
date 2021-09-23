@@ -3061,7 +3061,7 @@
 	 * 					  value: { CSS属性名 : CSS属性值, ... }、"..."
 	 * 					}
 	 * @param force 可选，当指定了css时，是否强制执行设置，true 强制设置；false 只有name对应的样式表不存在时才设置，默认值为：false
-	 *
+	 * 
 	 * @returns 样式表<style>元素的ID，没有设置过则返回undefined
 	 */
 	chartBase.themeStyleSheet = function(name, css, force)

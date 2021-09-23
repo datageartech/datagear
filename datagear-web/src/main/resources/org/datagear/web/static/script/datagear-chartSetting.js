@@ -1189,7 +1189,7 @@
 		{
 			$box = $("<div class='dg-chart-setting-box' />").appendTo($chart);
 			
-			chartSetting.setChartSettingBoxStyle($box, chart.theme());
+			chartSetting.setChartSettingBoxThemeStyle(chart, $box);
 			
 			//参数
 			if(!disableSetting.param && chart.hasParamDataSet())
@@ -1253,64 +1253,73 @@
 		$(".dg-chart-setting-box", chart.elementJquery()).hide();
 	};
 	
-	chartSetting.setChartSettingBoxStyle = function($box, chartTheme)
+	chartSetting.setChartSettingBoxThemeStyle = function(chart, $box)
 	{
-		var styleClassName = chartTheme._chartSettingBoxStyleClassName;
-		if(!styleClassName)
+		chart.themeStyleSheet(chartFactory.builtinName("ChartSettingBox"), function()
 		{
-			styleClassName = chartFactory.nextElementId();
-			chartTheme._chartSettingBoxStyleClassName = styleClassName;
-		}
-		
-		$box.addClass(styleClassName);
-		
-		var styleId = (chartTheme._chartSettingBoxStyleSheetId
-				|| (chartTheme._chartSettingBoxStyleSheetId = chartFactory.nextElementId()));
-		
-		if(chartFactory.isStyleSheetCreated(styleId))
-			return false;
-		
-		var qualifier = "." + styleClassName;
-		
-		var color = chartFactory.getGradualColor(chartTheme, 1);
-		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
-		var borderColor = chartFactory.getGradualColor(chartTheme, 0.5);
-		var shadowColor = chartFactory.getGradualColor(chartTheme, 0.9);
-		
-		var cssText =
-			qualifier + ".dg-chart-setting-box .dg-chart-setting-button{"
-			+" color: "+color+";"
-			+" background: "+bgColor+";"
-			+" border-color: "+borderColor+";"
-			+"} \n"
-			+qualifier + ".dg-chart-setting-box .dg-chart-setting-button:hover{"
-			+" background: "+chartFactory.getGradualColor(chartTheme, 0.2)+";"
-			+"} \n"
-			+qualifier + ".dg-chart-setting-box .dg-chart-setting-panel{"
-			+" color: "+color+";"
-			+" background: "+bgColor+";"
-			+" border-color: "+borderColor+";"
-			+" box-shadow: 0px 0px 6px "+shadowColor+";"
-			+" -webkit-box-shadow: 0px 0px 6px "+shadowColor+";"
-			+"} \n"
-			+qualifier + ".dg-chart-setting-box .dg-chart-setting-panel .dg-chartdataset-section{"
-			+" color: "+color+";"
-			+" background: "+bgColor+";"
-			+" border-color: "+borderColor+";"
-			+"} \n"
-			+qualifier + ".dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button{"
-			+" color: "+color+";"
-			+" background: "+chartFactory.getGradualColor(chartTheme, 0.1)+";"
-			+" border-color: "+borderColor+";"
-			+"} \n"
-			+qualifier + ".dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button:hover{"
-			+" background: "+chartFactory.getGradualColor(chartTheme, 0.3)+";"
-			+"} \n"
-			;
-		
-		chartFactory.styleSheetText(styleId, cssText);
-		
-		return true;
+			var color = chart.gradualColor(1);
+			var bgColor = chart.gradualColor(0);
+			var borderColor = chart.gradualColor(0.5);
+			var shadowColor = chart.gradualColor(0.9);
+			
+			var css =
+			[
+				{
+					name: " .dg-chart-setting-box .dg-chart-setting-button",
+					value:
+					{
+						"color": color,
+						"background-color": bgColor,
+						"border-color": borderColor
+					}
+				},
+				{
+					name: " .dg-chart-setting-box .dg-chart-setting-button:hover",
+					value:
+					{
+						"background-color": chart.gradualColor(0.2)
+					}
+				},
+				{
+					name: " .dg-chart-setting-box .dg-chart-setting-panel",
+					value:
+					{
+						"color": color,
+						"background-color": bgColor,
+						"border-color": borderColor,
+						"box-shadow": "0px 0px 6px " + shadowColor,
+						"-webkit-box-shadow": "0px 0px 6px " + shadowColor
+					}
+				},
+				{
+					name: " .dg-chart-setting-box .dg-chart-setting-panel .dg-chartdataset-section",
+					value:
+					{
+						"color": color,
+						"background-color": bgColor,
+						"border-color": borderColor
+					}
+				},
+				{
+					name: " .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button",
+					value:
+					{
+						"color": color,
+						"background-color": chart.gradualColor(0.1),
+						"border-color": borderColor
+					}
+				},
+				{
+					name: " .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button:hover",
+					value:
+					{
+						"background-color": chart.gradualColor(0.3)
+					}
+				}
+			];
+			
+			return css;
+		});
 	};
 	
 	/**
@@ -1467,7 +1476,7 @@
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
 			
-			chartSetting.setChartSettingDataPanelStyle($panel, chart.theme());
+			chartSetting.setChartSettingDataPanelStyle(chart, $panel);
 			chartSetting.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent,$panelFoot);
 			
 			for(var i=0; i<chartDataSets.length; i++)
@@ -1688,72 +1697,98 @@
 		return title;
 	};
 	
-	chartSetting.setChartSettingDataPanelStyle = function($panel, chartTheme)
+	chartSetting.setChartSettingDataPanelStyle = function(chart, $panel)
 	{
-		var styleClassName = chartTheme._chartSettingDataPanelStyleClassName;
-		if(!styleClassName)
+		chart.themeStyleSheet(chartFactory.builtinName("ChartSettingDataPanel"), function()
 		{
-			styleClassName = chartFactory.nextElementId();
-			chartTheme._chartSettingDataPanelStyleClassName = styleClassName;
-		}
-		
-		$panel.addClass(styleClassName);
-		
-		var styleId = (chartTheme._chartSettingDataPanelStyleSheetId
-				|| (chartTheme._chartSettingDataPanelStyleSheetId = chartFactory.nextElementId()));
-		
-		if(chartFactory.isStyleSheetCreated(styleId))
-			return false;
-		
-		//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列
-		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
-		
-		var qualifier = "." + styleClassName;
-		
-		var cssText = 
-			qualifier + " table.dataTable tbody tr{"
-			+ " color:"+chartTheme.color+";"
-			+" }\n"
-			+qualifier + " table.dataTable thead th,\n"
-			+qualifier + " table.dataTable thead td{"
-			+" color:"+chartTheme.titleColor+";"
-			+" background:"+bgColor+";"
-			+" }\n"
-			+qualifier + " table.dataTable.stripe tbody tr.odd,\n"
-			+qualifier + " table.dataTable.display tbody tr.odd{"
-			+" background:"+chartFactory.getGradualColor(chartTheme, 0.1)+";"
-			+" } \n"
-			+qualifier + " table.dataTable.stripe tbody tr.even,\n"
-			+qualifier + " table.dataTable.display tbody tr.even{"
-			+" background:"+bgColor+";"
-			+" }\n"
-			+qualifier + " table.dataTable.hover tbody tr.hover,\n"
-			+qualifier + " table.dataTable.hover tbody tr:hover,\n"
-			+qualifier + " table.dataTable.display tbody tr:hover,\n"
-			+qualifier + " table.dataTable.hover tbody tr.hover.selected,\n"
-			+qualifier + " table.dataTable.hover tbody > tr.selected:hover,\n"
-			+qualifier + " table.dataTable.hover tbody > tr > .selected:hover,\n"
-			+qualifier + " table.dataTable.display tbody > tr.selected:hover,\n"
-			+qualifier + " table.dataTable.display tbody > tr > .selected:hover{"
-			+" background:"+chartFactory.getGradualColor(chartTheme, 0.3)+";"
-			+" }\n"
-			+qualifier + " table.dataTable tbody > tr.selected,\n"
-			+qualifier + " table.dataTable tbody > tr > .selected,\n"
-			+qualifier + " table.dataTable.stripe tbody > tr.even.selected,\n"
-			+qualifier + " table.dataTable.stripe tbody > tr.even > .selected,\n"
-			+qualifier + " table.dataTable.display tbody > tr.even.selected,\n"
-			+qualifier + " table.dataTable.display tbody > tr.even > .selected,\n"
-			+qualifier + " table.dataTable.stripe tbody > tr.odd.selected,\n"
-			+qualifier + " table.dataTable.stripe tbody > tr.odd > .selected,\n"
-			+qualifier + " table.dataTable.display tbody > tr.odd.selected,\n"
-			+qualifier + " table.dataTable.display tbody > tr.odd > .selected{"
-			+" color:"+chartTheme.highlightTheme.color+";"
-			+" background:"+chartTheme.highlightTheme.backgroundColor+";"
-			+" }\n";
-		
-		chartFactory.styleSheetText(styleId, cssText);
-		
-		return true;
+			var theme = chart.theme();
+			//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列
+			var bgColor = chart.gradualColor(0);
+			
+			var css =
+			[
+				{
+					name: " .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable tbody tr",
+					value:
+					{
+						"color": theme.color
+					}
+				},
+				{
+					name:
+					[
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable thead th",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable thead td"
+					],
+					value:
+					{
+						"color": theme.titleColor,
+						"background-color": bgColor
+					}
+				},
+				{
+					name:
+					[
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody tr.odd",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody tr.odd"
+					],
+					value:
+					{
+						"background-color": chart.gradualColor(0.1)
+					}
+				},
+				{
+					name:
+					[
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody tr.even",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody tr.even"
+					],
+					value:
+					{
+						"background-color": bgColor
+					}
+				},
+				{
+					name:
+					[
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody tr.hover",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody tr:hover",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody tr:hover",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody tr.hover.selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody > tr.selected:hover",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody > tr > .selected:hover",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.selected:hover",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr > .selected:hover"
+					],
+					value:
+					{
+						"background-color": chart.gradualColor(0.3)
+					}
+				},
+				{
+					name:
+					[
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable tbody > tr.selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable tbody > tr > .selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody > tr.even.selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody > tr.even > .selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.even.selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.even > .selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody > tr.odd.selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody > tr.odd > .selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.odd.selected",
+						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.odd > .selected"
+					],
+					value:
+					{
+						"color": theme.highlightTheme.color,
+						"background-color": theme.highlightTheme.backgroundColor
+					}
+				}
+			];
+			
+			return css;
+		});
 	};
 	
 	chartSetting.updateChartSettingDataTableData = function(chart, chartDataSets, index, $dataTable)
