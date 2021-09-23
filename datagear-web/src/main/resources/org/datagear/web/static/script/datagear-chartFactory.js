@@ -201,8 +201,8 @@
 	/**数据对象的原始信息属性名*/
 	chartFactory.DATA_ORIGINAL_INFO_PROP_NAME = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalInfo";
 	
-	/**关键字：图表元素样式标识*/
-	chartFactory._KEY_CHART_ELE_THEME_STYLE = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "ChartEleStyle";
+	/**图表主题的CSS信息属性名*/
+	chartFactory._KEY_THEME_STYLE_SHEET_INFO = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleSheetInfo";
 	
 	/**
 	 * 图表使用的渲染上下文属性名。
@@ -939,8 +939,10 @@
 		if(chartFactory.renderedChart($element) != null)
 			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
 		
+		this._createChartEleThemeCssIfNon();
+		
+		$element.addClass(this.themeStyleName());
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
-		this._setChartElementThemeStyle();
 		
 		this.statusRendering(true);
 		
@@ -956,32 +958,33 @@
 		}
 	};
 	
-	chartBase._setChartElementThemeStyle = function()
+	chartBase._createChartEleThemeCssIfNon = function()
 	{
-		var styleName = chartFactory.chartThemeStyleName(this.theme(), chartFactory._KEY_CHART_ELE_THEME_STYLE,
-		function(chartTheme)
+		var thisChart = this;
+		
+		this.themeStyleSheet(chartFactory.builtinName("ChartEleStyle"), function()
 		{
-			var so=
+			var theme = thisChart.theme();
+			
+			var css=
 			{
 				name: "",
 				value:
 				{
-					"color": chartTheme.color,
-					"background-color": chartTheme.backgroundColor,
-					"border-color": chartTheme.borderColor
+					"color": theme.color,
+					"background-color": theme.backgroundColor,
+					"border-color": theme.borderColor
 				}
 			};
 			
-			if(chartTheme.borderWidth)
+			if(theme.borderWidth)
 			{
-				so.value["border-width"] = chartTheme.borderWidth;
-				so.value["border-style"] = "solid";
+				css.value["border-width"] = theme.borderWidth;
+				css.value["border-style"] = "solid";
 			}
 			
-			return so;
+			return css;
 		});
-		
-		this.elementJquery().addClass(styleName);
 	};
 	
 	/**
@@ -1112,8 +1115,8 @@
 		
 		this.statusDestroyed(true);
 		
+		$element.removeClass(this.themeStyleName());
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
-		$element.removeClass(chartFactory.chartThemeStyleName(this.theme(), chartFactory._KEY_CHART_ELE_THEME_STYLE));
 		
 		var renderer = this.renderer();
 		
@@ -3016,6 +3019,119 @@
 		}
 	};
 	
+	/**
+	 * 获取图表主题对应的CSS类名。
+	 * 图表在渲染前，会自动为图表元素添加这个CSS类。
+	 * 
+	 * @returns CSS类名
+	 */
+	chartBase.themeStyleName = function()
+	{
+		var theme = this.theme();
+		
+		var pn = chartFactory.builtinName("StyleName");
+		var sn = theme[pn];
+		
+		if(!sn)
+			sn = (theme[pn] = chartFactory.nextElementId());
+		
+		return sn;
+	};
+	
+	/**
+	 * 获取/设置与此图表主题和指定名称关联的CSS样式表。
+	 * 设置的CSS样式都会添加chartBase.themeStyleName()函数返回的类名选择器前缀，因此只会影响使用了相同主题的图表。
+	 * 同一图表主题和名称的CSS样式表，通常仅需创建一次，因此，此函数的建议使用方式如下：
+	 * chart.themeStyleSheet("...", function(){ return ...; });
+	 * 
+	 * @param name 名称
+	 * @param css 可选，要设置的CSS，格式为：
+	 * 					function(){ return CSS样式表对象、[ CSS样式表对象, ... ] }
+	 * 					或者
+	 * 					CSS样式表对象
+	 * 					或者
+	 * 					[ CSS样式表对象, ... ]
+	 * 					其中，CSS样式表对象格式为：
+	 * 					{
+	 * 					  //CSS选择器，例如：" .success"、".success"、" .error"、[ ".success", " .error" ]
+	 * 					  name: "..."、["...", ...],
+	 * 					  //CSS属性对象、CSS属性字符串，例如：
+	 *                    //{ 'color': 'red', 'background-color': 'blue' }、
+	 *                    //"color:red;background-color:blue;"
+	 * 					  value: { CSS属性名 : CSS属性值, ... }、"..."
+	 * 					}
+	 * @param force 可选，当指定了css时，是否强制执行设置，true 强制设置；false 只有name对应的样式表不存在时才设置，默认值为：false
+	 *
+	 * @returns 样式表<style>元素的ID，没有设置过则返回undefined
+	 */
+	chartBase.themeStyleSheet = function(name, css, force)
+	{
+		var theme = this.theme();
+		
+		var infoMap = theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO];
+		if(infoMap == null)
+			infoMap = (theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO] = {});
+		
+		var styleId = infoMap[name];
+		
+		if(css === undefined)
+			return styleId;
+		
+		if(styleId && (force != true))
+			return styleId;
+		
+		var selectorPrefix = "." + this.themeStyleName();
+		var cssText = "";
+		
+		if($.isFunction(css))
+			css = css();
+		
+		if(!$.isArray(css))
+			css = [ css ];
+		
+		for(var i=0; i<css.length; i++)
+		{
+			var cssName = css[i].name;
+			var cssValue = css[i].value;
+			
+			if(cssName == null)
+				continue;
+			
+			if(!$.isArray(cssName))
+				cssName = [ cssName ];
+			
+			for(var j=0; j<cssName.length; j++)
+			{
+				cssText += selectorPrefix + cssName[j];
+				
+				if(j < (cssName.length - 1))
+					cssText += ",\n";
+			}
+			
+			cssText += "{\n";
+			
+			if(cssValue)
+			{
+				if(typeof(cssValue) == "string")
+					cssText += cssValue;
+				else
+				{
+					for(var p in cssValue)
+						cssText += p + ":" + cssValue[p]+";\n";
+				}
+			}
+			
+			cssText += "}\n";
+		}
+		
+		if(!styleId)
+			styleId = (infoMap[name] = chartFactory.nextElementId());
+		
+		chartFactory.styleSheetText(styleId, cssText);
+		
+		return styleId;
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
@@ -3216,101 +3332,6 @@
 	//----------------------------------------
 	// chartBase end
 	//----------------------------------------
-	
-	chartFactory._KEY_THEME_STYLE_INFO = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleInfo";
-	
-	/**
-	 * 获取与图表主题关联的且由指定名称标识的CSS样式表的顶级类名，这个顶级类名可用于添加至HTML元素的'class'属性。
-	 * 如果CSS样式表还未创建且generator不为undefined，将创建由generator返回的CSS样式表。
-	 * 
-	 * @param chartTheme 图表主题
-	 * @param name 标识名称
-	 * @param generator 可选，CSS样式表生成器，格式为：
-	 * 					function(chartTheme, styleName){ return CSS样式表对象、CSS样式表对象数组、CSS样式字符串; }
-	 * 					或者
-	 * 					CSS样式表对象。
-	 * 					其中，CSS样式表对象格式为：
-	 * 					{
-	 * 					  //CSS样式限定类型，例如：" .success"、".success"、" .tip.success"
-	 * 					  name: "..."、["...", ...],
-	 * 					  //CSS样式属性，例如：{ 'color': 'red', 'border-color': 'blue' }
-	 * 					  value:{ CSS属性名 : CSS属性值, ... }
-	 * 					}
-	 * 					注意：如果是CSS样式字符串，应是已添加styleName顶级限定类名的，CSS样式表对象的话，则会自动添加styleName顶级限定类型。
-	 */
-	chartFactory.chartThemeStyleName = function(chartTheme, name, generator)
-	{
-		var tsnObj = chartTheme[chartFactory._KEY_THEME_STYLE_INFO];
-		if(tsnObj == null)
-			tsnObj = (chartTheme[chartFactory._KEY_THEME_STYLE_INFO] = {});
-		
-		var info = tsnObj[name];
-		
-		if(info == null)
-		{
-			info =
-			{
-				sheetId: chartFactory.nextElementId(),
-				styleName: chartFactory.nextElementId(),
-				created: false
-			};
-			
-			tsnObj[name] = info;
-		}
-		
-		if(info.created == true || generator === undefined)
-			return info.styleName;
-		
-		var cssText = "";
-		
-		if($.isFunction(generator))
-			generator = generator(chartTheme, info.styleName);
-		
-		if(generator == null)
-			;
-		else if(typeof(generator) == "string")
-			cssText = generator;
-		else
-		{
-			if(!$.isArray(generator))
-				generator = [ generator ];
-			
-			for(var i=0; i<generator.length; i++)
-			{
-				var cssName = generator[i].name;
-				var cssValue = generator[i].value;
-				
-				if(cssName == null)
-					continue;
-				
-				if(!$.isArray(cssName))
-					cssName = [ cssName ];
-				
-				for(var j=0; j<cssName.length; j++)
-				{
-					cssText += "."+info.styleName + cssName[j];
-					
-					if(j < (cssName.length - 1))
-						cssText += ",\n";
-				}
-				
-				cssText += "{\n";
-				
-				if(cssValue)
-				{
-					for(var p in cssValue)
-						cssText += p + ":" + cssValue[p]+";\n";
-				}
-				
-				cssText += "}\n";
-			}
-		}
-		
-		chartFactory.createStyleSheet(info.sheetId, cssText, "beforeFirstScript");
-		info.created = true;
-		
-		return info.styleName;
-	};
 	
 	/**
 	 * 获取指定名称的内置名称（添加内置前缀）。
@@ -3724,55 +3745,55 @@
 	};
 	
 	/**
-	 * 创建CSS样式表。
-	 * 
-	 * @param id 样式表元素ID
-	 * @param cssText 样式文本
-	 * @param position 可选，插入位置："first"、"last"、"beforeFirstScript"（第一个<script>节点之前）、DOM（插入其前面），默认值为："last"
+	 * 设置指定ID的样式表css文本。
+	 * 如果样式表不存在，将会自动创建，且会插入<head>中的靠前位置，确保其css效果优先级低于用户定义的css。
+	 *
+	 * @param styleId 样式表元素ID
+	 * @param cssText css文本内容
 	 */
-	chartFactory.createStyleSheet = function(id, cssText, position)
+	chartFactory.styleSheetText = function(styleId, cssText)
 	{
-		if(!position)
-			position = "last";
+		var $style = $("#" + styleId);
 		
-	    var head = (document.head || document.getElementsByTagName("head")[0]);
-	    var style = document.createElement("style");
-		
-		var beforeNode = null;
-		
-		if(position === "last")
+		if($style.length > 0)
 		{
-		}
-		else if(position === "first")
-		{
-			beforeNode = head.firstChild;
-		}
-		else if(position === "beforeFirstScript")
-		{
-			var childNodes = (head.childNodes || []);
-			for(var i=0; i<childNodes.length; i++)
-			{
-				if((childNodes[i].tagName || "").toLowerCase() == "script")
-				{
-					beforeNode = childNodes[i];
-					break;
-				}
-			}
+			$style.text(cssText);
+			return;
 		}
 		
-		if(beforeNode)
-			head.insertBefore(style, beforeNode);
-		else
-			head.appendChild(style);
-	    
-	    style.id = id;
-	    style.type = "text/css";
-	    
-	    // 旧版IE
-	    if (style.styleSheet)
-	    	style.styleSheet.cssText = cssText;
-	    else
-	    	style.appendChild(document.createTextNode(cssText));
+		$style = $("<style />").attr("id", styleId)
+			.attr("dg-generated-style", "true").attr("type", "text/css").text(cssText);
+		
+		var $head = $("head:first");
+		
+		var $lastGenStyle = $("style[dg-generated-style]:last", $head);
+		
+		//后插入的优先级应高于先插入的
+		if($lastGenStyle.length > 0)
+		{
+			$lastGenStyle.after($style);
+			return;
+		}
+		
+		var $lastImport = $("[dg-import-name]:last", $head);
+		
+		//优先级应高于导入的资源
+		if($lastImport.length > 0)
+		{
+			$lastImport.after($style);
+			return;
+		}
+		
+		var $lastLink = $("link:last", $head);
+		
+		//优先级应高于link的css
+		if($lastLink.length > 0)
+		{
+			$lastLink.after($style);
+			return;
+		}
+		
+		$head.prepend($style);
 	};
 	
 	/**

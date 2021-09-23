@@ -4407,7 +4407,7 @@
 			+" }\n"
 			;
 		
-		chartFactory.createStyleSheet(styleSheetId, cssText, "beforeFirstScript");
+		chartFactory.styleSheetText(styleSheetId, cssText);
 		
 		return true;
 	};
@@ -4996,7 +4996,7 @@
 		if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
 			chartEle.addClass("dg-chart-select-fill");
 		
-		chartEle.addClass(chartSupport.selectThemeStyleName(chart));
+		chartSupport.selectThemeStyleSheet(chart);
 		
 		var $select = $("<select class='dg-chart-select-select' />").appendTo(chartEle);
 		
@@ -5107,7 +5107,6 @@
 		var chartEle = chart.elementJquery();
 		
 		chartEle.removeClass("dg-chart-select dg-chart-select-dropdown dg-chart-beautify-scrollbar");
-		chartEle.removeClass(chartSupport.selectThemeStyleName(chart));
 		
 		$(chart.internal()).remove();
 	};
@@ -5155,12 +5154,13 @@
 		chartSupport.setChartEventOriginalInfo(chart, chartEvent, chartData);
 	};
 	
-	chartSupport.selectThemeStyleName = function(chart)
+	chartSupport.selectThemeStyleSheet = function(chart)
 	{
-		return chartFactory.chartThemeStyleName(chart.theme(), chartFactory.builtinName("SelectChart"),
-		function(chartTheme)
+		chart.themeStyleSheet(chartFactory.builtinName("SelectChart"), function()
 		{
-			var so=
+			var chartTheme = chart.theme();
+			
+			var css=
 			[
 				{
 					name: " .dg-chart-select-select",
@@ -5204,7 +5204,7 @@
 				}
 			];
 			
-			return so;
+			return css;
 		});
 	};
 	
