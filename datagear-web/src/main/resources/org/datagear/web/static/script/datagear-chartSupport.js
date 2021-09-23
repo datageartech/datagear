@@ -4987,6 +4987,8 @@
 		},
 		options);
 		
+		chartSupport.selectThemeStyleSheet(chart);
+		
 		var isDropdown = (!options.multiple && (options.size == null || options.size <= 1));
 		
 		if(options.beautifyScrollbar)
@@ -4995,8 +4997,6 @@
 			chartEle.addClass("dg-chart-select-dropdown");
 		if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
 			chartEle.addClass("dg-chart-select-fill");
-		
-		chartSupport.selectThemeStyleSheet(chart);
 		
 		var $select = $("<select class='dg-chart-select-select' />").appendTo(chartEle);
 		
