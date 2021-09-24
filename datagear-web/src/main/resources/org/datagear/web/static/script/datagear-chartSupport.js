@@ -4147,7 +4147,7 @@
 			chartEle.addClass("dg-hide-title");
 		
 		var chartTitle = $("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(chartEle);
-		chartFactory.setStyles(chartTitle, options.title);
+		chartFactory.elementStyle(chartTitle, options.title);
 		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
 		var table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartContent);
 		var tableId = chart.id+"-table";
@@ -4347,19 +4347,19 @@
 		
 		var cssText = 
 			qualifier + " table.dataTable tbody tr{"
-			+ chartFactory.stylesObjToCssText(chartOptions.table.row)
+			+ chartFactory.styleToString(chartOptions.table.row)
 			+" }\n"
 			+qualifier + " table.dataTable thead th,\n"
 			+qualifier + " table.dataTable thead td{"
-			+ chartFactory.stylesObjToCssText(chartOptions.table.header)
+			+ chartFactory.styleToString(chartOptions.table.header)
 			+" }\n"
 			+qualifier + " table.dataTable.stripe tbody tr.odd,\n"
 			+qualifier + " table.dataTable.display tbody tr.odd{"
-			+ chartFactory.stylesObjToCssText(chartOptions.table.row.odd)
+			+ chartFactory.styleToString(chartOptions.table.row.odd)
 			+" }\n"
 			+qualifier + " table.dataTable.stripe tbody tr.even,\n"
 			+qualifier + " table.dataTable.display tbody tr.even{"
-			+ chartFactory.stylesObjToCssText(chartOptions.table.row.even)
+			+ chartFactory.styleToString(chartOptions.table.row.even)
 			+" }\n"
 			+qualifier + " table.dataTable.hover tbody tr.hover,\n"
 			+qualifier + " table.dataTable.hover tbody tr:hover,\n"
@@ -4369,7 +4369,7 @@
 			+qualifier + " table.dataTable.hover tbody > tr > .selected:hover,\n"
 			+qualifier + " table.dataTable.display tbody > tr.selected:hover,\n"
 			+qualifier + " table.dataTable.display tbody > tr > .selected:hover{"
-			+ chartFactory.stylesObjToCssText(chartOptions.table.row.hover)
+			+ chartFactory.styleToString(chartOptions.table.row.hover)
 			+" }\n"
 			+qualifier + " table.dataTable tbody > tr.selected,\n"
 			+qualifier + " table.dataTable tbody > tr > .selected,\n"
@@ -4381,7 +4381,7 @@
 			+qualifier + " table.dataTable.stripe tbody > tr.odd > .selected,\n"
 			+qualifier + " table.dataTable.display tbody > tr.odd.selected,\n"
 			+qualifier + " table.dataTable.display tbody > tr.odd > .selected{"
-			+ chartFactory.stylesObjToCssText(chartOptions.table.row.selected)
+			+ chartFactory.styleToString(chartOptions.table.row.selected)
 			+" }\n"
 			+qualifier + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span{"
 			+ " background:" + chartOptions.table.header.color+";"
@@ -4837,14 +4837,14 @@
 					$labelValue = $("<div class='label-value'></div>").appendTo($label);
 					
 					if(renderOptions.value)
-						chartFactory.setStyles($labelValue, renderOptions.value);
+						chartFactory.elementStyle($labelValue, renderOptions.value);
 					
 					if(showName)
 					{
 						$labelName = $("<div class='label-name'></div>").appendTo($label);
 						
 						if(renderOptions.name)
-							chartFactory.setStyles($labelName, renderOptions.name);
+							chartFactory.elementStyle($labelName, renderOptions.name);
 					}
 				}
 				else
@@ -4854,13 +4854,13 @@
 						$labelName = $("<div class='label-name'></div>").appendTo($label);
 						
 						if(renderOptions.name)
-							chartFactory.setStyles($labelName, renderOptions.name);
+							chartFactory.elementStyle($labelName, renderOptions.name);
 					}
 					
 					$labelValue = $("<div class='label-value'></div>").appendTo($label);
 					
 					if(renderOptions.value)
-						chartFactory.setStyles($labelValue, renderOptions.value);
+						chartFactory.elementStyle($labelValue, renderOptions.value);
 				}
 			}
 			else
@@ -5007,7 +5007,7 @@
 		if(options.size != null)
 			$select.attr("size", options.size);
 		if(options.selectStyle)
-			chartFactory.setStyles($select, options.selectStyle);
+			chartFactory.elementStyle($select, options.selectStyle);
 		
 		chart.internal($select[0]);
 	};
@@ -5093,7 +5093,7 @@
 				itemStyle = optData.itemStyle;
 			
 			if(itemStyle)
-				chartFactory.setStyles($opt, itemStyle);
+				chartFactory.elementStyle($opt, itemStyle);
 		}
 	};
 	

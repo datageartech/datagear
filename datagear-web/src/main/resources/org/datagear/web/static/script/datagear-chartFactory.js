@@ -3497,59 +3497,87 @@
 	};
 	
 	/**
-	 * 为元素设置样式集。
+	 * 获取/设置HTML元素的CSS样式字符串（元素的"style"属性）。
 	 * 
 	 * @param element HTML元素、Jquery对象
-	 * @param stylesObj 样式对象，格式为：{ color: "...", backgroundColor: "...", fontSize: "...", ...  }，不合法的项将被忽略
-	 * @return 旧样式集对象
+	 * @param css 可选，要设置的CSS样式，可以是字符串，或者：{ color: "...", backgroundColor: "...", "font-size": "...", ...  }
+	 * @return 要获取的CSS样式字符串
 	 */
-	chartFactory.setStyles = function(element, stylesObj)
+	chartFactory.elementStyle = function(element, css)
 	{
-		var olds = {};
+		element = $(element);
+		var myCss = element.attr("style");
 		
-		if(element.length > 0)
-			element = element[0];
+		if(css === undefined)
+			return myCss;
 		
-		if(stylesObj && element.style != undefined)
-		{
-			for(var p in stylesObj)
-			{
-				var newStyle = stylesObj[p];
-				
-				//忽略不合法的项
-				var newStyleType = typeof(newStyle);
-				if(newStyleType != "string" && newStyleType != "number")
-					continue;
-				
-				olds[p] = element.style[p];
-				element.style[p] = stylesObj[p];
-			}
-		}
+		css = chartFactory.styleToString(css);
 		
-		return olds;
+		if(myCss && css && myCss.charAt(myCss.length - 1) != ";")
+			myCss += ";";
+		
+		element.attr("style", (myCss ? myCss + css : css));
 	};
 	
 	/**
-	 * 获取样式集对象的CSS样式文本。
+	 * 将指定CSS样式对象转换为CSS字符串。
+	 * CSS样式对象中不合法的属性名将被转换为合法属性名，比如："backgroundColor"将被转换为"background-color"。
+	 * 另外，非字符串、数值型的属性值将被忽略。
 	 * 
-	 * @param stylesObj 样式对象，格式为：{ color: "...", backgroundColor: "...", fontSize: "...", ...  }，不合法的项将被忽略
-	 * @return CSS样式文本，格式为："color: red; background-color: red; font-size: 1px;"
+	 * @param css CSS样式对象、CSS字符串，格式为：{ color: "...", backgroundColor: "...", "font-size": "...", ...  }、"..."
+	 * @return CSS属性字符串，例如："color:red; background-color:red; font-size:1px;"
 	 */
-	chartFactory.stylesObjToCssText = function(stylesObj)
+	chartFactory.styleToString = function(css)
 	{
-		var elementId = chartFactory._ELEMENT_ID_PREFIX +"StylesObjToCss";
+		if(!css)
+			return "";
 		
-		var element = $("#" + elementId);
-		if(element.length == 0)
+		if(typeof(css) == "string")
+			return css;
+		
+		var re = "";
+		
+		for(var name in css)
 		{
-			var parent = $("<div style='display:none;position:absolute;left:0;bottom:0;width:0;height:0;z-index:-999;' />").appendTo(document.body);
-			element = $("<div />").attr("id", elementId).appendTo(parent);
+			var value = css[name];
+			var valueType = typeof(value);
+			
+			if(valueType != "string" && valueType != "number")
+				continue;
+			
+			name = chartFactory._toLegalStyleName(name);
+			
+			if(re.length > 0)
+				re += " ";
+			
+			re += name + ":" + value + ";";
 		}
 		
-		element.attr("style", "");
-		chartFactory.setStyles(element, stylesObj);
+		return re;
+	};
+	
+	/**
+	 * 将指定名称转换为合法的CSS样式属性名
+	 * 例如："backgroundColor" 将被转换为 "background-color"
+	 */
+	chartFactory._toLegalStyleName = function(name)
+	{
+		var re = "";
 		
-		return (element.attr("style") || "");
+		for(var i=0; i<name.length; i++)
+		{
+			var c = name.charAt(i);
+			
+			if(c >= 'A' && c <= 'Z')
+			{
+				re += "-";
+				re += c.toLowerCase();
+			}
+			else
+				re += c;
+		}
+		
+		return re;
 	};
 	
 	chartFactory._KEY_GRADUAL_COLORS = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "GradualColors";
