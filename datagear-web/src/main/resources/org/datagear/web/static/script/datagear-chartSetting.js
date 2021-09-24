@@ -256,10 +256,10 @@
 		
 		var qualifier = "." + styleClassName;
 		
-		var color = chartFactory.getGradualColor(chartTheme, 1);
-		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
-		var borderColor = chartFactory.getGradualColor(chartTheme, 0.5);
-		var hoverColor = chartFactory.getGradualColor(chartTheme, 0.3);
+		var color = chartFactory.gradualColor(chartTheme, 1);
+		var bgColor = chartFactory.gradualColor(chartTheme, 0);
+		var borderColor = chartFactory.gradualColor(chartTheme, 0.5);
+		var hoverColor = chartFactory.gradualColor(chartTheme, 0.3);
 		
 		var cssText =
 			qualifier + ".dg-dspv-form{"
@@ -281,14 +281,14 @@
 			+qualifier + ".dg-dspv-form input[type=submit],\n"
 			+qualifier + ".dg-dspv-form .button{"
 			+" color: "+color+";"
-			+" background: "+chartFactory.getGradualColor(chartTheme, 0.1)+";"
+			+" background: "+chartFactory.gradualColor(chartTheme, 0.1)+";"
 			+" border-color: "+borderColor+";"
 			+"}\n"
 			+qualifier + ".dg-dspv-form button:hover,\n"
 			+qualifier + ".dg-dspv-form input[type=button]:hover,\n"
 			+qualifier + ".dg-dspv-form input[type=submit]:hover,\n"
 			+qualifier + ".dg-dspv-form .button:hover{"
-			+" background: "+chartFactory.getGradualColor(chartTheme, 0.3)+";"
+			+" background: "+chartFactory.gradualColor(chartTheme, 0.3)+";"
 			+" }\n"
 			;
 		
@@ -744,11 +744,11 @@
 		if(chartFactory.isStyleSheetCreated(styleId))
 			return false;
 		
-		var color = chartFactory.getGradualColor(chartTheme, 1);
-		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
-		var borderColor = chartFactory.getGradualColor(chartTheme, 0.3);
-		var shadowColor = chartFactory.getGradualColor(chartTheme, 0.9);
-		var hoverColor = chartFactory.getGradualColor(chartTheme, 0.3);
+		var color = chartFactory.gradualColor(chartTheme, 1);
+		var bgColor = chartFactory.gradualColor(chartTheme, 0);
+		var borderColor = chartFactory.gradualColor(chartTheme, 0.3);
+		var shadowColor = chartFactory.gradualColor(chartTheme, 0.9);
+		var hoverColor = chartFactory.gradualColor(chartTheme, 0.3);
 		
 		var cssText =
 			//主体

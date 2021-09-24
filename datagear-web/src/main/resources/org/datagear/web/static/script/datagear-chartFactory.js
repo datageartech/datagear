@@ -204,6 +204,9 @@
 	/**图表主题的CSS信息属性名*/
 	chartFactory._KEY_THEME_STYLE_SHEET_INFO = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleSheetInfo";
 	
+	/** 关键字：注册得ECharts主题名 */
+	chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "RegisteredEchartsThemeName";
+	
 	/**
 	 * 图表使用的渲染上下文属性名。
 	 */
@@ -318,10 +321,10 @@
 		if(theme.color && theme.actualBackgroundColor)
 		{
 			if(!theme.legendColor)
-				theme.legendColor = chartFactory.getGradualColor(theme, 0.8);
+				theme.legendColor = chartFactory.gradualColor(theme, 0.8);
 			
 			if(!theme.borderColor)
-				theme.borderColor = chartFactory.getGradualColor(theme, 0.3);
+				theme.borderColor = chartFactory.gradualColor(theme, 0.3);
 			
 			if(!theme.tooltipTheme)
 			{
@@ -329,9 +332,9 @@
 				{
 					name: "tooltipTheme",
 					color: theme.actualBackgroundColor,
-					backgroundColor: chartFactory.getGradualColor(theme, 0.7),
-					actualBackgroundColor: chartFactory.getGradualColor(theme, 0.7),
-					borderColor: chartFactory.getGradualColor(theme, 0.9),
+					backgroundColor: chartFactory.gradualColor(theme, 0.7),
+					actualBackgroundColor: chartFactory.gradualColor(theme, 0.7),
+					borderColor: chartFactory.gradualColor(theme, 0.9),
 					borderWidth: 1,
 					gradient: theme.gradient
 				};
@@ -345,9 +348,9 @@
 				{
 					name: "highlightTheme",
 					color: theme.actualBackgroundColor,
-					backgroundColor: chartFactory.getGradualColor(theme, 0.8),
-					actualBackgroundColor: chartFactory.getGradualColor(theme, 0.8),
-					borderColor: chartFactory.getGradualColor(theme, 1),
+					backgroundColor: chartFactory.gradualColor(theme, 0.8),
+					actualBackgroundColor: chartFactory.gradualColor(theme, 0.8),
+					borderColor: chartFactory.gradualColor(theme, 1),
 					borderWidth: 1,
 					gradient: theme.gradient
 				};
@@ -2425,21 +2428,16 @@
 		//从ChartTheme构建ECharts主题
 		if(!themeName)
 		{
-			var chartTheme = this.theme();
+			var theme = this.theme();
+			themeName = theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME];
 			
-			if(!chartTheme._registeredEchartsThemeName)
+			if(!themeName)
 			{
-				var seq = (chartFactory._REGISTERED_ECHARTS_THEME_NAME_SEQ != null ?
-						chartFactory._REGISTERED_ECHARTS_THEME_NAME_SEQ : 0);
-				chartFactory._REGISTERED_ECHARTS_THEME_NAME_SEQ = seq + 1;
+				themeName = (theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME] = chartFactory.nextElementId());
 				
-				chartTheme._registeredEchartsThemeName = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "EChartsThemeByChartTheme" + seq;
-				
-				var echartsTheme = chartFactory.buildEchartsTheme(chartTheme);
-				echarts.registerTheme(chartTheme._registeredEchartsThemeName, echartsTheme);
+				var echartsTheme = chartFactory.buildEchartsTheme(theme);
+				echarts.registerTheme(themeName, echartsTheme);
 			}
-			
-			themeName = chartTheme._registeredEchartsThemeName;
 		}
 		
 	    return themeName;
@@ -2989,7 +2987,7 @@
 		}
 		theme = (theme == null ? this.theme() : theme);
 		
-		return chartFactory.getGradualColor(theme, factor);
+		return chartFactory.gradualColor(theme, factor);
 	};
 	
 	/**
@@ -3523,21 +3521,24 @@
 		return (element.attr("style") || "");
 	};
 	
+	chartFactory._KEY_GRADUAL_COLORS = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "GradualColors";
+	
 	/**
 	 * 获取主题从背景色（actualBackgroundColor）到前景色（color）之间的渐变因子对应的颜色。
+	 * 这个颜色是实际背景色（actualBackgroundColor）与前景色（color）之间的某个颜色。
 	 * 
-	 * @param theme
-	 * @param factor 可选，渐变因子，0-1之间的小数
-	 * @returns 与上述factor对应的颜色，当未设置factor时，将返回一个包含所有渐变颜色的数组
+	 * @param theme 主题对象，格式为：{ color: "...", actualBackgroundColor: "..." }
+	 * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
+	 * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"，如果未设置factor，将返回一个包含所有渐变颜色的数组
 	 */
-	chartFactory.getGradualColor = function(theme, factor)
+	chartFactory.gradualColor = function(theme, factor)
 	{
-		var gcs = theme._gradualColors;
+		var gcs = theme[chartFactory._KEY_GRADUAL_COLORS];
 		
 		if(!gcs || gcs.length == 0)
 		{
 			gcs = this.evalGradualColors(theme.actualBackgroundColor, theme.color, (theme.gradient || 10));
-			theme._gradualColors = gcs;
+			theme[chartFactory._KEY_GRADUAL_COLORS] = gcs;
 		}
 		
 		if(factor == null)
@@ -3817,13 +3818,13 @@
 	 */
 	chartFactory.buildEchartsTheme = function(chartTheme)
 	{
-		var axisColor = this.getGradualColor(chartTheme, 0.7);
-		var axisScaleLineColor = this.getGradualColor(chartTheme, 0.35);
-		var areaColor0 = this.getGradualColor(chartTheme, 0.15);
-		var areaBorderColor0 = this.getGradualColor(chartTheme, 0.3);
-		var areaColor1 = this.getGradualColor(chartTheme, 0.25);
-		var areaBorderColor1 = this.getGradualColor(chartTheme, 0.5);
-		var shadowColor = this.getGradualColor(chartTheme, 0.9);
+		var axisColor = chartFactory.gradualColor(chartTheme, 0.7);
+		var axisScaleLineColor = chartFactory.gradualColor(chartTheme, 0.35);
+		var areaColor0 = chartFactory.gradualColor(chartTheme, 0.15);
+		var areaBorderColor0 = chartFactory.gradualColor(chartTheme, 0.3);
+		var areaColor1 = chartFactory.gradualColor(chartTheme, 0.25);
+		var areaBorderColor1 = chartFactory.gradualColor(chartTheme, 0.5);
+		var shadowColor = chartFactory.gradualColor(chartTheme, 0.9);
 		
 		// < @deprecated 兼容1.8.1版本有ChartTheme.axisColor的结构
 		if(chartTheme.axisColor)
