@@ -965,7 +965,7 @@
 	{
 		var thisChart = this;
 		
-		this.themeStyleSheet(chartFactory.builtinName("ChartEleStyle"), function()
+		this.themeStyleSheet(chartFactory.builtinName("ChartEle"), function()
 		{
 			var theme = thisChart.theme();
 			
@@ -3027,7 +3027,7 @@
 	{
 		var theme = this.theme();
 		
-		var pn = chartFactory.builtinName("StyleName");
+		var pn = chartFactory.builtinName("ChartEleStyleName");
 		var sn = theme[pn];
 		
 		if(!sn)
@@ -3762,6 +3762,7 @@
 	
 	/**
 	 * 生成一个新的页面元素ID。
+	 * 这个ID仅包含[a-z]、[A-Z]、[0-9]，且以字母开头。
 	 *
 	 * @param prefix 可选，ID前缀
 	 */

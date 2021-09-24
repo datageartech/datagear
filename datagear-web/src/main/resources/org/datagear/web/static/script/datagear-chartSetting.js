@@ -115,7 +115,10 @@
 		
 		//创建表单样式表
 		if(options.chartTheme)
-			chartSetting.setDataSetParamValueFormStyle($form, options.chartTheme);
+		{
+			var styleName = chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme);
+			$form.addClass(styleName);
+		}
 		
 		var $head = $(".dg-dspv-form-head", $form);
 		var $content = $(".dg-dspv-form-content", $form);
@@ -237,64 +240,85 @@
 		return formEle;
 	};
 	
-	chartSetting.setDataSetParamValueFormStyle = function($form, chartTheme)
+	chartSetting.dataSetParamValueFormThemeStyle = function(chartTheme)
 	{
-		var styleClassName = chartTheme._dataSetParamValueFormStyleClassName;
-		if(!styleClassName)
+		var styleNameKey = chartFactory.builtinName("DataSetParamValueFormStyleName");
+		var styleName = chartTheme[styleNameKey];
+		
+		if(styleName)
+			return styleName;
+		
+		styleName = (chartTheme[styleNameKey] = chartFactory.nextElementId());
+		
+		chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinName("DataSetParamValueForm"), function()
 		{
-			styleClassName = chartFactory.nextElementId();
-			chartTheme._dataSetParamValueFormStyleClassName = styleClassName;
-		}
+			var color = chartFactory.gradualColor(chartTheme, 1);
+			var bgColor = chartFactory.gradualColor(chartTheme, 0);
+			var borderColor = chartFactory.gradualColor(chartTheme, 0.5);
+			
+			var cssPrefix = "." + styleName + ".dg-dspv-form";
+			
+			var css =
+			[
+				{
+					name: cssPrefix,
+					value:
+					{
+						"color": color,
+						"background-color": bgColor,
+						"border-color": borderColor
+					}
+				},
+				{
+					name:
+					[
+						cssPrefix + " .dg-dspv-form-item-value input",
+						cssPrefix + " .dg-dspv-form-item-value textarea",
+						cssPrefix + " .dg-dspv-form-item-value select",
+						cssPrefix + " .dg-dspv-form-item-value select option",
+						cssPrefix + " .dg-dspv-form-item-value .input"
+					],
+					value:
+					{
+						"color": color,
+						"background-color": bgColor,
+						"border-color": borderColor
+					}
+				},
+				{
+					name:
+					[
+						cssPrefix + " button",
+						cssPrefix + " input[type=button]",
+						cssPrefix + " input[type=submit]",
+						cssPrefix + " .button"
+					],
+					value:
+					{
+						"color": color,
+						"background-color": chartFactory.gradualColor(chartTheme, 0.1),
+						"border-color": borderColor
+					}
+				},
+				{
+					name:
+					[
+						cssPrefix + " button:hover",
+						cssPrefix + " input[type=button]:hover",
+						cssPrefix + " input[type=submit]:hover",
+						cssPrefix + " .button:hover"
+					],
+					value:
+					{
+						"background-color": chartFactory.gradualColor(chartTheme, 0.3)
+					}
+				}
+			];
+			
+			return css;
+		});
 		
-		$form.addClass(styleClassName);
-		
-		var styleId = (chartTheme._dataSetParamValueFormStyleSheetId
-				|| (chartTheme._dataSetParamValueFormStyleSheetId = chartFactory.nextElementId()));
-		
-		if(chartFactory.isStyleSheetCreated(styleId))
-			return false;
-		
-		var qualifier = "." + styleClassName;
-		
-		var color = chartFactory.gradualColor(chartTheme, 1);
-		var bgColor = chartFactory.gradualColor(chartTheme, 0);
-		var borderColor = chartFactory.gradualColor(chartTheme, 0.5);
-		var hoverColor = chartFactory.gradualColor(chartTheme, 0.3);
-		
-		var cssText =
-			qualifier + ".dg-dspv-form{"
-			+" color: "+color+";"
-			+" background: "+bgColor+";"
-			+" border-color: "+borderColor+";"
-			+" }\n"
-			+qualifier + ".dg-dspv-form .dg-dspv-form-item-value input,\n"
-			+qualifier + ".dg-dspv-form .dg-dspv-form-item-value textarea,\n"
-			+qualifier + ".dg-dspv-form .dg-dspv-form-item-value select,\n"
-			+qualifier + ".dg-dspv-form .dg-dspv-form-item-value select option,\n"
-			+qualifier + ".dg-dspv-form .dg-dspv-form-item-value .input{"
-			+" color: "+color+";"
-			+" background: "+bgColor+";"
-			+" border-color: "+borderColor+";"
-			+" }\n"
-			+qualifier + ".dg-dspv-form button,\n"
-			+qualifier + ".dg-dspv-form input[type=button],\n"
-			+qualifier + ".dg-dspv-form input[type=submit],\n"
-			+qualifier + ".dg-dspv-form .button{"
-			+" color: "+color+";"
-			+" background: "+chartFactory.gradualColor(chartTheme, 0.1)+";"
-			+" border-color: "+borderColor+";"
-			+"}\n"
-			+qualifier + ".dg-dspv-form button:hover,\n"
-			+qualifier + ".dg-dspv-form input[type=button]:hover,\n"
-			+qualifier + ".dg-dspv-form input[type=submit]:hover,\n"
-			+qualifier + ".dg-dspv-form .button:hover{"
-			+" background: "+chartFactory.gradualColor(chartTheme, 0.3)+";"
-			+" }\n"
-			;
-		
-		chartFactory.styleSheetText(styleId, cssText);
-		
-		return true;
+		return styleName;
 	};
 	
 	/**
@@ -657,6 +681,8 @@
 			$input.attr("dg-validation-number", "true");
 	};
 	
+	chartSetting._DATETIME_PICKER_ROOT_ID = chartFactory.BUILT_IN_NAME_PART + "DatetimepickerRoot";
+	
 	chartSetting.datetimepicker = function($input, datetimepickerOptions, chartTheme)
 	{
 		//在这里检查并重写，避免依赖加载顺序
@@ -668,22 +694,24 @@
 			chartSetting._datetimepickerSetLocale = true;
 		}
 		
+		var $rootWrapper = $("#" + chartSetting._DATETIME_PICKER_ROOT_ID);
+		if($rootWrapper.length < 1)
+			$rootWrapper = $("<div />").attr("id", chartSetting._DATETIME_PICKER_ROOT_ID).appendTo(document.body);
+		
+		var wrapperId = chartFactory.nextElementId();
+		var $wrapper = $("<div />").attr("id", wrapperId).appendTo($rootWrapper);
+		
 		if(chartTheme)
 		{
-			var containerId = (chartTheme._datetimepickerContainerId
-					|| (chartTheme._datetimepickerContainerId = chartFactory.nextElementId()));
-			var container = document.getElementById(containerId);
-			if(!container)
-				container = $("<div class='dg-dspv-datetimepicker-container' />").attr("id", containerId).appendTo(document.body);
-			
-			chartSetting.datetimepickerSetStyle("#"+containerId, chartTheme);
+			var styleName = chartSetting.datetimepickerThemeStyle(chartTheme);
+			$wrapper.addClass(styleName);
 		}
 		
 		datetimepickerOptions = $.extend(
 		{
-			//inline应该为false，为true的话下面的datetimepickerSetStyle函数创建的样式将不起作用
+			//inline应该为false，为true的话下面的datetimepickerThemeStyle函数创建的样式将不起作用
 			inline: false,
-			parentID: (chartTheme ? "#"+containerId : document.body),
+			parentID: "#"+wrapperId,
 			i18n: chartSetting.datetimepickerI18n
 		},
 		datetimepickerOptions);
@@ -694,7 +722,7 @@
 		{
 			//显示确定按钮，用于直接选中默认年份
 			datetimepickerOptions.showApplyButton = true;
-			datetimepickerOptions.onGenerate = function(currentValue,$input)
+			datetimepickerOptions.onGenerate = function(currentValue, $input)
 			{
 				var yearPickerInited = $(this).attr("yearPickerInited");
 				if(!yearPickerInited)
@@ -731,102 +759,165 @@
 	};
 	
 	/**
-	 * 创建与指定图表主题匹配的datetimepicker组件样式表。
+	 * 获取或创建与指定图表主题匹配的datetimepicker组件样式表，并返回CSS类名。
 	 * 
-	 * @param parentSelector datetimepicker组件所在的父元素CSS选择器
 	 * @param chartTheme
 	 */
-	chartSetting.datetimepickerSetStyle = function(parentSelector, chartTheme)
+	chartSetting.datetimepickerThemeStyle = function(chartTheme)
 	{
-		var styleId = (chartTheme._datetimepickerStyleSheetId
-				|| (chartTheme._datetimepickerStyleSheetId = chartFactory.nextElementId()));
+		var styleNameKey = chartFactory.builtinName("DatetimepickerStyleName");
+		var styleName = chartTheme[styleNameKey];
 		
-		if(chartFactory.isStyleSheetCreated(styleId))
-			return false;
+		if(styleName)
+			return styleName;
 		
-		var color = chartFactory.gradualColor(chartTheme, 1);
-		var bgColor = chartFactory.gradualColor(chartTheme, 0);
-		var borderColor = chartFactory.gradualColor(chartTheme, 0.3);
-		var shadowColor = chartFactory.gradualColor(chartTheme, 0.9);
-		var hoverColor = chartFactory.gradualColor(chartTheme, 0.3);
+		styleName = (chartTheme[styleNameKey] = chartFactory.nextElementId());
 		
-		var cssText =
-			//主体
-			parentSelector + " .xdsoft_datetimepicker{"
-			+" color: "+color+";"
-			+" background: "+bgColor+";"
-			+" border-color: "+borderColor+";"
-			+" box-shadow: 0px 0px 6px "+shadowColor+";"
-			+" -webkit-box-shadow: 0px 0px 6px "+shadowColor+";"
-			+" }\n"
-			//前景色
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td,\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar th{"
-			+" color: "+color+";"
-			+" }\n"
-			//按钮
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label i,\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_next,\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_prev,\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_today_button{"
-			+" color:"+color+";"
-			+" }\n"
-			//年、月
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label{"
-			+" background: "+bgColor+";"
-			+" }\n"
-			//年、月下拉框
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select{"
-			+" color: "+color+";"
-			+" background: "+bgColor+";"
-			+" border-color: "+borderColor+";"
-			+" box-shadow: 0px 0px 6px "+shadowColor+";"
-			+" -webkit-box-shadow: 0px 0px 6px "+shadowColor+";"
-			+" }\n"
-			//时间框
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{"
-			+" border-color: "+borderColor+";"
-			+" }\n"
-			//时间条目
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{"
-			+" color: "+color+";"
-			+" border-color: "+borderColor+";"
-			+" }\n"
-			//悬停
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td:hover,\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div:hover,\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover{"
-			+" color: "+color+" !important;"
-			+" background: "+hoverColor+" !important;"
-			+" }\n"
-			//今天
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today{"
-			+" color: "+color+";"
-			+" font-weight: bold;"
-			+" }\n"
-			//选中
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_default,\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current,\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current,\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option.xdsoft_current{"
-			+" color: "+chartTheme.highlightTheme.color+";"
-			+" background: "+chartTheme.highlightTheme.backgroundColor+";"
-			+" box-shadow: none;"
-			+" -webkit-box-shadow: none;"
-			+" }\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year{"
-			+" color: "+color+";"
-			+" background: "+bgColor+";"
-			+" border: 1px solid "+borderColor+" !important;"
-			+" }\n"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year:hover{"
-			+" background: "+hoverColor+";"
-			+" }\n"
-			;
+		chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinName("Datetimepicker"), function()
+		{
+			var color = chartFactory.gradualColor(chartTheme, 1);
+			var bgColor = chartFactory.gradualColor(chartTheme, 0);
+			var borderColor = chartFactory.gradualColor(chartTheme, 0.3);
+			var shadowColor = chartFactory.gradualColor(chartTheme, 0.9);
+			var hoverColor = chartFactory.gradualColor(chartTheme, 0.3);
+			
+			var cssPrefix = "." + styleName + " .xdsoft_datetimepicker";
+			
+			var css =
+			[
+				//主体
+				{
+					name: cssPrefix,
+					value:
+					{
+						"color": color,
+						"background": bgColor,
+						"border-color": borderColor,
+						"box-shadow": "0px 0px 6px " + shadowColor,
+						"-webkit-box-shadow": "0px 0px 6px " + shadowColor
+					}
+				},
+				//前景色
+				{
+					name: [ cssPrefix + " .xdsoft_calendar td", cssPrefix + " .xdsoft_calendar th" ],
+					value:
+					{
+						"color": color
+					}
+				},
+				//按钮
+				{
+					name:
+					[
+						cssPrefix + " .xdsoft_label i",
+						cssPrefix + " .xdsoft_next",
+						cssPrefix + " .xdsoft_prev",
+						cssPrefix + " .xdsoft_today_button"
+					],
+					value:
+					{
+						"color": color
+					}
+				},
+				//年、月
+				{
+					name: cssPrefix + " .xdsoft_label",
+					value:
+					{
+						"background": bgColor
+					}
+				},
+				//年、月下拉框
+				{
+					name: cssPrefix + " .xdsoft_label>.xdsoft_select",
+					value:
+					{
+						"color": color,
+						"background": bgColor,
+						"border-color": borderColor,
+						"box-shadow": "0px 0px 6px " + shadowColor,
+						"-webkit-box-shadow": "0px 0px 6px " + shadowColor
+					}
+				},
+				//时间框
+				{
+					name: cssPrefix + " .xdsoft_timepicker .xdsoft_time_box",
+					value:
+					{
+						"border-color": borderColor
+					}
+				},
+				//时间条目
+				{
+					name: cssPrefix + " .xdsoft_timepicker .xdsoft_time_box>div>div",
+					value:
+					{
+						"color": color,
+						"border-color": borderColor
+					}
+				},
+				//悬停
+				{
+					name:
+					[
+						cssPrefix + " .xdsoft_calendar td:hover",
+						cssPrefix + " .xdsoft_timepicker .xdsoft_time_box>div>div:hover",
+						cssPrefix + " .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover"
+					],
+					value:
+					{
+						"color": color + " !important",
+						"background": hoverColor + " !important"
+					}
+				},
+				//今天
+				{
+					name: cssPrefix + " .xdsoft_calendar td.xdsoft_today",
+					value:
+					{
+						"color": color,
+						"font-weight": "bold"
+					}
+				},
+				//选中
+				{
+					name:
+					[
+						cssPrefix + " .xdsoft_calendar td.xdsoft_default",
+						cssPrefix + " .xdsoft_calendar td.xdsoft_current",
+						cssPrefix + " .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current",
+						cssPrefix + " .xdsoft_label>.xdsoft_select>div>.xdsoft_option.xdsoft_current"
+					],
+					value:
+					{
+						"color": chartTheme.highlightTheme.color,
+						"background": chartTheme.highlightTheme.backgroundColor,
+						"box-shadow": "none",
+						"-webkit-box-shadow": "none"
+					}
+				},
+				{
+					name: cssPrefix + " .xdsoft_save_selected.xdsoft_save_selected_year",
+					value:
+					{
+						"color": color,
+						"background": bgColor,
+						"border": "1px solid "+borderColor+" !important"
+					}
+				},
+				{
+					name: cssPrefix + " .xdsoft_save_selected.xdsoft_save_selected_year:hover",
+					value:
+					{
+						"background": hoverColor
+					}
+				}
+			];
+			
+			return css;
+		});
 		
-		chartFactory.styleSheetText(styleId, cssText);
-		
-		return true;
+		return styleName;
 	};
 	
 	chartSetting.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
@@ -1476,7 +1567,7 @@
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
 			
-			chartSetting.setChartSettingDataPanelStyle(chart, $panel);
+			chartSetting.setChartSettingDataPanelThemeStyle(chart, $panel);
 			chartSetting.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent,$panelFoot);
 			
 			for(var i=0; i<chartDataSets.length; i++)
@@ -1697,7 +1788,7 @@
 		return title;
 	};
 	
-	chartSetting.setChartSettingDataPanelStyle = function(chart, $panel)
+	chartSetting.setChartSettingDataPanelThemeStyle = function(chart, $panel)
 	{
 		chart.themeStyleSheet(chartFactory.builtinName("ChartSettingDataPanel"), function()
 		{
@@ -1705,10 +1796,12 @@
 			//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列
 			var bgColor = chart.gradualColor(0);
 			
+			var cssPrefix = " .dg-chart-setting-box .dg-chart-setting-data-panel";
+			
 			var css =
 			[
 				{
-					name: " .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable tbody tr",
+					name: cssPrefix + " table.dataTable tbody tr",
 					value:
 					{
 						"color": theme.color
@@ -1717,8 +1810,8 @@
 				{
 					name:
 					[
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable thead th",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable thead td"
+						cssPrefix + " table.dataTable thead th",
+						cssPrefix + " table.dataTable thead td"
 					],
 					value:
 					{
@@ -1729,8 +1822,8 @@
 				{
 					name:
 					[
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody tr.odd",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody tr.odd"
+						cssPrefix + " table.dataTable.stripe tbody tr.odd",
+						cssPrefix + " table.dataTable.display tbody tr.odd"
 					],
 					value:
 					{
@@ -1740,8 +1833,8 @@
 				{
 					name:
 					[
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody tr.even",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody tr.even"
+						cssPrefix + " table.dataTable.stripe tbody tr.even",
+						cssPrefix + " table.dataTable.display tbody tr.even"
 					],
 					value:
 					{
@@ -1751,14 +1844,14 @@
 				{
 					name:
 					[
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody tr.hover",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody tr:hover",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody tr:hover",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody tr.hover.selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody > tr.selected:hover",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.hover tbody > tr > .selected:hover",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.selected:hover",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr > .selected:hover"
+						cssPrefix + " table.dataTable.hover tbody tr.hover",
+						cssPrefix + " table.dataTable.hover tbody tr:hover",
+						cssPrefix + " table.dataTable.display tbody tr:hover",
+						cssPrefix + " table.dataTable.hover tbody tr.hover.selected",
+						cssPrefix + " table.dataTable.hover tbody > tr.selected:hover",
+						cssPrefix + " table.dataTable.hover tbody > tr > .selected:hover",
+						cssPrefix + " table.dataTable.display tbody > tr.selected:hover",
+						cssPrefix + " table.dataTable.display tbody > tr > .selected:hover"
 					],
 					value:
 					{
@@ -1768,16 +1861,16 @@
 				{
 					name:
 					[
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable tbody > tr.selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable tbody > tr > .selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody > tr.even.selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody > tr.even > .selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.even.selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.even > .selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody > tr.odd.selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.stripe tbody > tr.odd > .selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.odd.selected",
-						" .dg-chart-setting-box .dg-chart-setting-data-panel table.dataTable.display tbody > tr.odd > .selected"
+						cssPrefix + " table.dataTable tbody > tr.selected",
+						cssPrefix + " table.dataTable tbody > tr > .selected",
+						cssPrefix + " table.dataTable.stripe tbody > tr.even.selected",
+						cssPrefix + " table.dataTable.stripe tbody > tr.even > .selected",
+						cssPrefix + " table.dataTable.display tbody > tr.even.selected",
+						cssPrefix + " table.dataTable.display tbody > tr.even > .selected",
+						cssPrefix + " table.dataTable.stripe tbody > tr.odd.selected",
+						cssPrefix + " table.dataTable.stripe tbody > tr.odd > .selected",
+						cssPrefix + " table.dataTable.display tbody > tr.odd.selected",
+						cssPrefix + " table.dataTable.display tbody > tr.odd > .selected"
 					],
 					value:
 					{
