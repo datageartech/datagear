@@ -3043,22 +3043,8 @@
 	 * chart.themeStyleSheet("...", function(){ return ...; });
 	 * 
 	 * @param name 名称
-	 * @param css 可选，要设置的CSS，格式为：
-	 * 					function(){ return CSS样式表对象、[ CSS样式表对象, ... ] }
-	 * 					或者
-	 * 					CSS样式表对象
-	 * 					或者
-	 * 					[ CSS样式表对象, ... ]
-	 * 					其中，CSS样式表对象格式为：
-	 * 					{
-	 * 					  //CSS选择器，例如：" .success"、".success"、" .error"、[ ".success", " .error" ]
-	 * 					  name: "..."、["...", ...],
-	 * 					  //CSS属性对象、CSS属性字符串，例如：
-	 *                    //{ 'color': 'red', 'background-color': 'blue' }、
-	 *                    //"color:red;background-color:blue;"
-	 * 					  value: { CSS属性名 : CSS属性值, ... }、"..."
-	 * 					}
-	 * @param force 可选，当指定了css时，是否强制执行设置，true 强制设置；false 只有name对应的样式表不存在时才设置，默认值为：false
+	 * @param css 可选，参考chartFactory.themeStyleSheet()的css参数
+	 * @param force 可选，参考chartFactory.themeStyleSheet()的force参数
 	 * 
 	 * @returns 样式表<style>元素的ID，没有设置过则返回undefined
 	 */
@@ -3066,68 +3052,13 @@
 	{
 		var theme = this.theme();
 		
-		var infoMap = theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO];
-		if(infoMap == null)
-			infoMap = (theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO] = {});
-		
-		var styleId = infoMap[name];
-		
-		if(css === undefined)
-			return styleId;
-		
-		if(styleId && (force != true))
-			return styleId;
-		
-		var selectorPrefix = "." + this.themeStyleName();
-		var cssText = "";
-		
-		if($.isFunction(css))
-			css = css();
-		
-		if(!$.isArray(css))
-			css = [ css ];
-		
-		for(var i=0; i<css.length; i++)
+		if(arguments.length == 1)
+			return chartFactory.themeStyleSheet(theme, name);
+		else
 		{
-			var cssName = css[i].name;
-			var cssValue = css[i].value;
-			
-			if(cssName == null)
-				continue;
-			
-			if(!$.isArray(cssName))
-				cssName = [ cssName ];
-			
-			for(var j=0; j<cssName.length; j++)
-			{
-				cssText += selectorPrefix + cssName[j];
-				
-				if(j < (cssName.length - 1))
-					cssText += ",\n";
-			}
-			
-			cssText += "{\n";
-			
-			if(cssValue)
-			{
-				if(typeof(cssValue) == "string")
-					cssText += cssValue;
-				else
-				{
-					for(var p in cssValue)
-						cssText += p + ":" + cssValue[p]+";\n";
-				}
-			}
-			
-			cssText += "}\n";
+			var cssNamePrefix = "." + this.themeStyleName();
+			return chartFactory.themeStyleSheet(theme, name, css, cssNamePrefix, force);
 		}
-		
-		if(!styleId)
-			styleId = (infoMap[name] = chartFactory.nextElementId());
-		
-		chartFactory.styleSheetText(styleId, cssText);
-		
-		return styleId;
 	};
 	
 	//-------------
@@ -3330,6 +3261,105 @@
 	//----------------------------------------
 	// chartBase end
 	//----------------------------------------
+	
+	/**
+	 * 获取/设置与指定主题和名称关联的CSS样式表。
+	 * 同一主题和名称的CSS样式表，通常仅需创建一次，因此，此函数的建议使用方式如下：
+	 * chartFactory.themeStyleSheet({ ... }, "...", function(){ return ...; }, "...");
+	 *
+	 * @param theme 主题对象，格式为：{ ... } 
+	 * @param name 名称
+	 * @param css 可选，要设置的CSS，格式为：
+	 * 					function(){ return CSS样式表对象、[ CSS样式表对象, ... ] }
+	 * 					或者
+	 * 					CSS样式表对象
+	 * 					或者
+	 * 					[ CSS样式表对象, ... ]
+	 * 					其中，CSS样式表对象格式为：
+	 * 					{
+	 * 					  //CSS选择器，例如：" .success"、".success"、" .error"、[ ".success", " .error" ]
+	 * 					  name: "..."、["...", ...],
+	 * 					  //CSS属性对象、CSS属性字符串，例如：
+	 *                    //{ 'color': 'red', 'background-color': 'blue' }、
+	 *                    //"color:red;background-color:blue;"
+	 * 					  value: { CSS属性名 : CSS属性值, ... }、"..."
+	 * 					}
+	 * @param cssNamePrefix 可选，当指定了css时，设置统一得CSS选择器前缀
+	 * @param force 可选，当指定了css时，是否强制执行设置，true 强制设置；false 只有name对应的样式表不存在时才设置，默认值为：false
+	 * 
+	 * @returns 样式表<style>元素的ID，没有设置过则返回undefined
+	 */
+	chartFactory.themeStyleSheet = function(theme, name, css, cssNamePrefix, force)
+	{
+		//(theme, name, css, true)、(theme, name, css, false)
+		if(force === undefined && (cssNamePrefix === true || cssNamePrefix === false))
+		{
+			force = cssNamePrefix;
+			cssNamePrefix = undefined;
+		}
+		
+		var infoMap = theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO];
+		if(infoMap == null)
+			infoMap = (theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO] = {});
+		
+		var styleId = infoMap[name];
+		
+		if(css === undefined)
+			return styleId;
+		
+		if(styleId && (force != true))
+			return styleId;
+		
+		var cssText = "";
+		
+		if($.isFunction(css))
+			css = css();
+		
+		if(!$.isArray(css))
+			css = [ css ];
+		
+		for(var i=0; i<css.length; i++)
+		{
+			var cssName = css[i].name;
+			var cssValue = css[i].value;
+			
+			if(cssName == null)
+				continue;
+			
+			if(!$.isArray(cssName))
+				cssName = [ cssName ];
+			
+			for(var j=0; j<cssName.length; j++)
+			{
+				cssText += (cssNamePrefix ? cssNamePrefix + cssName[j] : cssName[j]);
+				
+				if(j < (cssName.length - 1))
+					cssText += ",\n";
+			}
+			
+			cssText += "{\n";
+			
+			if(cssValue)
+			{
+				if(typeof(cssValue) == "string")
+					cssText += cssValue;
+				else
+				{
+					for(var p in cssValue)
+						cssText += p + ":" + cssValue[p]+";\n";
+				}
+			}
+			
+			cssText += "}\n";
+		}
+		
+		if(!styleId)
+			styleId = (infoMap[name] = chartFactory.nextElementId());
+		
+		chartFactory.styleSheetText(styleId, cssText);
+		
+		return styleId;
+	};
 	
 	/**
 	 * 获取指定名称的内置名称（添加内置前缀）。
