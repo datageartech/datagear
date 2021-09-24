@@ -193,19 +193,19 @@
 	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
 	
 	/**内置名字标识片段*/
-	chartFactory.BUILT_IN_NAME_PART = "datagear";
+	chartFactory._BUILT_IN_NAME_PART = "datagear";
 	
 	/**内置名字标识片段*/
-	chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX = "_" + chartFactory.BUILT_IN_NAME_PART;
+	chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX = "_" + chartFactory._BUILT_IN_NAME_PART;
 	
 	/**数据对象的原始信息属性名*/
-	chartFactory.DATA_ORIGINAL_INFO_PROP_NAME = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalInfo";
+	chartFactory._DATA_ORIGINAL_INFO_PROP_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalInfo";
 	
 	/**图表主题的CSS信息属性名*/
-	chartFactory._KEY_THEME_STYLE_SHEET_INFO = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleSheetInfo";
+	chartFactory._KEY_THEME_STYLE_SHEET_INFO = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleSheetInfo";
 	
 	/** 关键字：注册得ECharts主题名 */
-	chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "RegisteredEchartsThemeName";
+	chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "RegisteredEchartsThemeName";
 	
 	/**
 	 * 图表使用的渲染上下文属性名。
@@ -965,7 +965,7 @@
 	{
 		var thisChart = this;
 		
-		this.themeStyleSheet(chartFactory.builtinName("ChartEle"), function()
+		this.themeStyleSheet(chartFactory.builtinPropName("ChartEle"), function()
 		{
 			var theme = thisChart.theme();
 			
@@ -2803,7 +2803,7 @@
 			resultDataIndex = undefined;
 		}
 		
-		var pname = chartFactory.DATA_ORIGINAL_INFO_PROP_NAME;
+		var pname = chartFactory._DATA_ORIGINAL_INFO_PROP_NAME;
 		
 		var isArray = $.isArray(data);
 		
@@ -3027,7 +3027,7 @@
 	{
 		var theme = this.theme();
 		
-		var pn = chartFactory.builtinName("ChartEleStyleName");
+		var pn = chartFactory.builtinPropName("ChartEleStyleName");
 		var sn = theme[pn];
 		
 		if(!sn)
@@ -3362,11 +3362,12 @@
 	};
 	
 	/**
-	 * 获取指定名称的内置名称（添加内置前缀）。
+	 * 获取内置属性名（添加内置前缀）。
+	 * 内置属性名以'_'开头。
 	 */
-	chartFactory.builtinName = function(name)
+	chartFactory.builtinPropName = function(name)
 	{
-		return chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + name;
+		return chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + name;
 	};
 	
 	/**
@@ -3379,7 +3380,7 @@
 	 */
 	chartFactory.extValueBuiltin = function(chart, name, value)
 	{
-		name = chartFactory.builtinName(name);
+		name = chartFactory.builtinPropName(name);
 		return chart.extValue(name, value);
 	};
 	
@@ -3455,7 +3456,7 @@
 	};
 	
 	/** HTML元素上已渲染的图表对象KEY */
-	chartFactory._KEY_ELEMENT_RENDERED_CHART = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "RenderedChart";
+	chartFactory._KEY_ELEMENT_RENDERED_CHART = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "RenderedChart";
 	
 	/**
 	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
@@ -3471,7 +3472,7 @@
 	};
 	
 	/** 生成元素ID用的前缀 */
-	chartFactory._ELEMENT_ID_PREFIX = chartFactory.BUILT_IN_NAME_PART + new Number(new Date().getTime()).toString(16);
+	chartFactory._ELEMENT_ID_PREFIX = chartFactory._BUILT_IN_NAME_PART + new Number(new Date().getTime()).toString(16);
 	
 	/**
 	 * 执行JS代码。
@@ -3551,7 +3552,7 @@
 		return (element.attr("style") || "");
 	};
 	
-	chartFactory._KEY_GRADUAL_COLORS = chartFactory.BUILT_IN_NAME_UNDERSCORE_PREFIX + "GradualColors";
+	chartFactory._KEY_GRADUAL_COLORS = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "GradualColors";
 	
 	/**
 	 * 获取主题从背景色（actualBackgroundColor）到前景色（color）之间的渐变因子对应的颜色。

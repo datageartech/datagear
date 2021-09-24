@@ -242,7 +242,7 @@
 	
 	chartSetting.dataSetParamValueFormThemeStyle = function(chartTheme)
 	{
-		var styleNameKey = chartFactory.builtinName("DataSetParamValueFormStyleName");
+		var styleNameKey = chartFactory.builtinPropName("DataSetParamValueFormStyleName");
 		var styleName = chartTheme[styleNameKey];
 		
 		if(styleName)
@@ -250,7 +250,7 @@
 		
 		styleName = (chartTheme[styleNameKey] = chartFactory.nextElementId());
 		
-		chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinName("DataSetParamValueForm"), function()
+		chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("DataSetParamValueForm"), function()
 		{
 			var color = chartFactory.gradualColor(chartTheme, 1);
 			var bgColor = chartFactory.gradualColor(chartTheme, 0);
@@ -681,7 +681,7 @@
 			$input.attr("dg-validation-number", "true");
 	};
 	
-	chartSetting._DATETIME_PICKER_ROOT_ID = chartFactory.BUILT_IN_NAME_PART + "DatetimepickerRoot";
+	chartSetting._DATETIME_PICKER_ROOT_ID = chartFactory._BUILT_IN_NAME_PART + "DatetimepickerRoot";
 	
 	chartSetting.datetimepicker = function($input, datetimepickerOptions, chartTheme)
 	{
@@ -765,7 +765,7 @@
 	 */
 	chartSetting.datetimepickerThemeStyle = function(chartTheme)
 	{
-		var styleNameKey = chartFactory.builtinName("DatetimepickerStyleName");
+		var styleNameKey = chartFactory.builtinPropName("DatetimepickerStyleName");
 		var styleName = chartTheme[styleNameKey];
 		
 		if(styleName)
@@ -773,7 +773,7 @@
 		
 		styleName = (chartTheme[styleNameKey] = chartFactory.nextElementId());
 		
-		chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinName("Datetimepicker"), function()
+		chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("Datetimepicker"), function()
 		{
 			var color = chartFactory.gradualColor(chartTheme, 1);
 			var bgColor = chartFactory.gradualColor(chartTheme, 0);
@@ -1346,7 +1346,7 @@
 	
 	chartSetting.setChartSettingBoxThemeStyle = function(chart, $box)
 	{
-		chart.themeStyleSheet(chartFactory.builtinName("ChartSettingBox"), function()
+		chart.themeStyleSheet(chartFactory.builtinPropName("ChartSettingBox"), function()
 		{
 			var color = chart.gradualColor(1);
 			var bgColor = chart.gradualColor(0);
@@ -1790,7 +1790,7 @@
 	
 	chartSetting.setChartSettingDataPanelThemeStyle = function(chart, $panel)
 	{
-		chart.themeStyleSheet(chartFactory.builtinName("ChartSettingDataPanel"), function()
+		chart.themeStyleSheet(chartFactory.builtinPropName("ChartSettingDataPanel"), function()
 		{
 			var theme = chart.theme();
 			//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列

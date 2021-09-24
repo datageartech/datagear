@@ -5156,7 +5156,7 @@
 	
 	chartSupport.selectThemeStyleSheet = function(chart)
 	{
-		chart.themeStyleSheet(chartFactory.builtinName("SelectChart"), function()
+		chart.themeStyleSheet(chartFactory.builtinPropName("SelectChart"), function()
 		{
 			var chartTheme = chart.theme();
 			
