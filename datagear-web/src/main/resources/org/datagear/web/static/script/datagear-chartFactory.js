@@ -3280,7 +3280,7 @@
 	 * 					  //CSS选择器，例如：" .success"、".success"、" .error"、[ ".success", " .error" ]
 	 * 					  name: "..."、["...", ...],
 	 * 					  //CSS属性对象、CSS属性字符串，例如：
-	 *                    //{ 'color': 'red', 'background-color': 'blue' }、
+	 *                    //{ "color": "red", "background-color": "blue", borderColor: "red" }、
 	 *                    //"color:red;background-color:blue;"
 	 * 					  value: { CSS属性名 : CSS属性值, ... }、"..."
 	 * 					}
@@ -3338,19 +3338,8 @@
 			}
 			
 			cssText += "{\n";
-			
-			if(cssValue)
-			{
-				if(typeof(cssValue) == "string")
-					cssText += cssValue;
-				else
-				{
-					for(var p in cssValue)
-						cssText += p + ":" + cssValue[p]+";\n";
-				}
-			}
-			
-			cssText += "}\n";
+			cssText += chartFactory.styleToString(cssValue, "\n");
+			cssText += "\n}\n";
 		}
 		
 		if(!styleId)
@@ -3525,15 +3514,18 @@
 	 * 另外，非字符串、数值型的属性值将被忽略。
 	 * 
 	 * @param css CSS样式对象、CSS字符串，格式为：{ color: "...", backgroundColor: "...", "font-size": "...", ...  }、"..."
+	 * @param separator 可选，分隔符，默认为空格：" "
 	 * @return CSS属性字符串，例如："color:red; background-color:red; font-size:1px;"
 	 */
-	chartFactory.styleToString = function(css)
+	chartFactory.styleToString = function(css, separator)
 	{
 		if(!css)
 			return "";
 		
 		if(typeof(css) == "string")
 			return css;
+		
+		separator = (separator == null ? " " : separator);
 		
 		var re = "";
 		
@@ -3548,7 +3540,7 @@
 			name = chartFactory._toLegalStyleName(name);
 			
 			if(re.length > 0)
-				re += " ";
+				re += separator;
 			
 			re += name + ":" + value + ";";
 		}
