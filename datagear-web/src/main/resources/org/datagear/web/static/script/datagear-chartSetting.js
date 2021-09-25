@@ -83,6 +83,7 @@
 	 * @param options 渲染配置项，格式为：
 	 * 			{
 	 *              chartTheme: {...}              //可选，用于支持渲染表单样式的图表主题
+	 *              inChartElement: false,          //可选，要渲染的表单是否处于图表元素内	 
 	 * 				submit: function(formData){},  //可选，提交处理函数
 	 * 				paramValues: {...},     	   //可选，初始参数值
 	 * 				readonly: false,			   //可选，是否只读
@@ -98,6 +99,7 @@
 	{
 		options = $.extend(
 		{
+			inChartElement: false,
 			submitText: chartSetting.labels.confirm,
 			labelColon: chartSetting.labels.colon,
 			readonly: false,
@@ -115,7 +117,12 @@
 		
 		//创建表单样式表
 		if(options.chartTheme)
-			$form.addClass(chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme));
+		{
+			if(options.inChartElement)
+				chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme, true);
+			else
+				$form.addClass(chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme), false);
+		}
 		
 		var $head = $(".dg-dspv-form-head", $form);
 		var $content = $(".dg-dspv-form-content", $form);
@@ -237,7 +244,7 @@
 		return formEle;
 	};
 	
-	chartSetting.dataSetParamValueFormThemeStyle = function(chartTheme)
+	chartSetting.dataSetParamValueFormThemeStyle = function(chartTheme, isSubStyle)
 	{
 		return chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("DataSetParamValueForm"), function()
 		{
@@ -245,7 +252,7 @@
 			var bgColor = chartFactory.gradualColor(chartTheme, 0);
 			var borderColor = chartFactory.gradualColor(chartTheme, 0.5);
 			
-			var cssPrefix = ".dg-dspv-form";
+			var cssPrefix = (isSubStyle ? " " : "") + ".dg-dspv-form";
 			
 			var css =
 			[
@@ -1428,6 +1435,7 @@
 				chartSetting.renderDataSetParamValueForm($content, params,
 				{
 					chartTheme: chart.theme(),
+					inChartElement: true,
 					submit: function()
 					{
 						$("button", $panelFoot).click();

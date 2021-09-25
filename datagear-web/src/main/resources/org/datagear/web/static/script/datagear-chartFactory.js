@@ -963,12 +963,10 @@
 	
 	chartBase._createChartEleThemeCssIfNon = function()
 	{
-		var thisChart = this;
+		var theme = this.theme();
 		
 		this.themeStyleSheet(chartFactory.builtinPropName("ChartEle"), function()
 		{
-			var theme = thisChart.theme();
-			
 			var css=
 			{
 				name: "",
@@ -3018,46 +3016,54 @@
 	};
 	
 	/**
-	 * 获取此图表主题对应的CSS类名。
-	 * 图表在渲染前，会自动为图表元素添加这个CSS类。
+	 * 获取主题对应的CSS类名。
+	 * 这个CSS类名是全局唯一的，可添加至HTML元素的"class"属性。
+	 *
+	 * 图表在渲染前会自动为其图表元素（chart.element()）添加图表主题（chart.theme()）对应的CSS类型。
 	 * 
-	 * @returns 全局唯一的CSS类名，不会为null
+	 * @param theme 可选，主题对象，格式为：{ ... }，默认为：chart.theme()
+	 * @returns CSS类名，不会为null
 	 */
-	chartBase.themeStyleName = function()
+	chartBase.themeStyleName = function(theme)
 	{
-		var theme = this.theme();
-		
-		var pn = chartFactory.builtinPropName("StyleName");
-		var sn = theme[pn];
-		
-		if(!sn)
-			sn = (theme[pn] = chartFactory.nextElementId());
-		
-		return sn;
+		theme = (theme == null ? this.theme() : theme);
+		return chartFactory.themeStyleName(theme);
 	};
 	
 	/**
-	 * 判断/设置与此图表主题和指定名称关联的CSS样式表。
-	 * 设置的CSS样式都会添加chartBase.themeStyleName()函数返回的类名选择器前缀，因此只会影响此图表和使用了相同主题的图表。
-	 * 同一图表主题和名称的CSS样式表，通常仅需创建一次，因此，此函数的建议使用方式如下：
-	 * chart.themeStyleSheet("...", function(){ return ...; });
+	 * 判断/设置与指定主题和名称关联的CSS样式表，详细参考chartFactory.themeStyleSheet()函数说明。
 	 * 
-	 * @param name 名称
-	 * @param css 可选，参考chartFactory.themeStyleSheet()的css参数
-	 * @param force 可选，参考chartFactory.themeStyleSheet()的force参数
+	 * @param theme 可选，参考chartFactory.themeStyleSheet()的theme参数，默认为：chart.theme()
+	 * @param name 参考chartFactory.themeStyleSheet()的name参数
+	 * @param css 参考chartFactory.themeStyleSheet()的css参数
+	 * @param force 参考chartFactory.themeStyleSheet()的force参数
 	 * 
-	 * @returns 判断操作结果：true 已设置过；false 未设置过
+	 * @returns 参考chartFactory.themeStyleSheet()的返回值
 	 */
-	chartBase.themeStyleSheet = function(name, css, force)
+	chartBase.themeStyleSheet = function(theme, name, css, force)
 	{
-		var theme = this.theme();
-		
-		if(arguments.length > 1)
+		//(name)
+		if(arguments.length == 1)
 		{
-			chartFactory.themeStyleSheet(theme, name, css, this.themeStyleName(), force);
+			name = theme;
+			theme = this.theme();
 		}
-		else
-			return (chartFactory.themeStyleSheet(theme, name) != null);
+		else if(arguments.length > 1)
+		{
+			//(name, ...)
+			if(typeof(theme) == "string")
+			{
+				force = css;
+				css = name;
+				name = theme;
+				theme = this.theme();
+			}
+			//(theme, ...)
+			else
+				;
+		}
+		
+		return chartFactory.themeStyleSheet(theme, name, css, force);
 	};
 	
 	//-------------
@@ -3262,11 +3268,38 @@
 	//----------------------------------------
 	
 	/**
-	 * 获取/设置与指定主题和名称关联的CSS样式表。
+	 * 获取指定主题对象对应的CSS类名。
+	 * 这个CSS类名是全局唯一的，可添加至HTML元素的"class"属性。
+	 * 
+	 * @param theme 主题对象，格式为：{ ... }
+	 * @returns CSS类名，不会为null
+	 */
+	chartFactory.themeStyleName = function(theme)
+	{
+		var pn = chartFactory.builtinPropName("StyleName");
+		var sn = theme[pn];
+		
+		if(!sn)
+			sn = (theme[pn] = chartFactory.nextElementId());
+		
+		return sn;
+	};
+	
+	/**
+	 * 判断/设置与指定主题和名称关联的CSS样式表。
+	 * 对于设置操作，最终生成的样式表都会添加chartFactory.themeStyleName(theme)CSS类名选择器前缀，
+	 * 确保样式表只会影响添加了chartFactory.themeStyleName(theme)样式类的HTML元素。
+	 * 
 	 * 同一主题和名称的CSS样式表，通常仅需创建一次，因此，当需要为某个HTML元素应用与主题相关的样式表时，通常使用方式如下：
-	 * var styleName = chartFactory.themeStyleSheet({ ... }, "...", function(){ return ...; });
+	 * 
+	 * var styleName = chartFactory.themeStyleSheet(theme, "myName", function(){ return CSS样式表对象、数组; });
 	 * $(element).addClass(styleName);
-	 *
+	 * 
+	 * 或者
+	 * 
+	 * if(!chartFactory.themeStyleSheet(theme, "myName"))
+	 *   $(element).addClass(chartFactory.themeStyleSheet(theme, "myName", CSS样式表对象、数组));
+	 * 
 	 * @param theme 主题对象，格式为：{ ... } 
 	 * @param name 名称
 	 * @param css 可选，要设置的CSS，格式为：
@@ -3285,20 +3318,11 @@
 	 *                    //"color:red;background-color:blue;"
 	 * 					  value: { CSS属性名 : CSS属性值, ... }、"..."
 	 * 					}
-	 * @param styleName 可选，限定CSS类名，最终生成的样式都会添加这个限定CSS类名选择器，如果不设置，将会自动生成一个
 	 * @param force 可选，当指定了css时，是否强制执行设置，true 强制设置；false 只有name对应的样式表不存在时才设置，默认值为：false
-	 * 
-	 * @returns styleName，返回undefined表示还没有设置过，同一主题和名称始终返回相同的styleName
+	 * @returns 判断操作：true 已设置过；false 未设置过；设置操作：theme主题对应的CSS类名，即chartFactory.themeStyleName(theme)的返回值
 	 */
-	chartFactory.themeStyleSheet = function(theme, name, css, styleName, force)
+	chartFactory.themeStyleSheet = function(theme, name, css, force)
 	{
-		//(theme, name, css, true)、(theme, name, css, false)
-		if(force === undefined && (styleName === true || styleName === false))
-		{
-			force = styleName;
-			styleName = undefined;
-		}
-		
 		var infoMap = theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO];
 		if(infoMap == null)
 			infoMap = (theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO] = {});
@@ -3306,19 +3330,15 @@
 		var info = infoMap[name];
 		
 		if(css === undefined)
-			return (info ? info.styleName : undefined);
+			return (info != null);
+		
+		var styleName = chartFactory.themeStyleName(theme);
 		
 		if(info && (force != true))
-			return info.styleName;
+			return styleName;
 		
 		if(info == null)
 			info = (infoMap[name] = { styleId: chartFactory.nextElementId() });
-		
-		//styleName允许空字符串
-		if(styleName != null)
-			info.styleName = styleName;
-		else
-			styleName = (info.styleName != null ? info.styleName : (info.styleName = chartFactory.nextElementId()));
 		
 		var cssText = "";
 		
@@ -3546,7 +3566,7 @@
 			if(valueType != "string" && valueType != "number")
 				continue;
 			
-			name = chartFactory._toLegalStyleName(name);
+			name = chartFactory.toLegalStyleName(name);
 			
 			if(re.length > 0)
 				re += separator;
@@ -3561,7 +3581,7 @@
 	 * 将指定名称转换为合法的CSS样式属性名
 	 * 例如："backgroundColor" 将被转换为 "background-color"
 	 */
-	chartFactory._toLegalStyleName = function(name)
+	chartFactory.toLegalStyleName = function(name)
 	{
 		var re = "";
 		
