@@ -246,7 +246,8 @@
 	
 	chartSetting.dataSetParamValueFormThemeStyle = function(chartTheme, isSubStyle)
 	{
-		return chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("DataSetParamValueForm"), function()
+		var name = chartFactory.builtinPropName("DataSetParamValueForm" + (isSubStyle ? "SubYes" : "SubNo"));
+		return chartFactory.themeStyleSheet(chartTheme, name, function()
 		{
 			var color = chartFactory.gradualColor(chartTheme, 1);
 			var bgColor = chartFactory.gradualColor(chartTheme, 0);
