@@ -115,10 +115,7 @@
 		
 		//创建表单样式表
 		if(options.chartTheme)
-		{
-			var styleName = chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme);
-			$form.addClass(styleName);
-		}
+			$form.addClass(chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme));
 		
 		var $head = $(".dg-dspv-form-head", $form);
 		var $content = $(".dg-dspv-form-content", $form);
@@ -242,21 +239,13 @@
 	
 	chartSetting.dataSetParamValueFormThemeStyle = function(chartTheme)
 	{
-		var styleNameKey = chartFactory.builtinPropName("DataSetParamValueFormStyleName");
-		var styleName = chartTheme[styleNameKey];
-		
-		if(styleName)
-			return styleName;
-		
-		styleName = (chartTheme[styleNameKey] = chartFactory.nextElementId());
-		
-		chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("DataSetParamValueForm"), function()
+		return chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("DataSetParamValueForm"), function()
 		{
 			var color = chartFactory.gradualColor(chartTheme, 1);
 			var bgColor = chartFactory.gradualColor(chartTheme, 0);
 			var borderColor = chartFactory.gradualColor(chartTheme, 0.5);
 			
-			var cssPrefix = "." + styleName + ".dg-dspv-form";
+			var cssPrefix = ".dg-dspv-form";
 			
 			var css =
 			[
@@ -317,8 +306,6 @@
 			
 			return css;
 		});
-		
-		return styleName;
 	};
 	
 	/**
@@ -702,10 +689,7 @@
 		var $wrapper = $("<div />").attr("id", wrapperId).appendTo($rootWrapper);
 		
 		if(chartTheme)
-		{
-			var styleName = chartSetting.datetimepickerThemeStyle(chartTheme);
-			$wrapper.addClass(styleName);
-		}
+			$wrapper.addClass(chartSetting.datetimepickerThemeStyle(chartTheme));
 		
 		datetimepickerOptions = $.extend(
 		{
@@ -765,15 +749,7 @@
 	 */
 	chartSetting.datetimepickerThemeStyle = function(chartTheme)
 	{
-		var styleNameKey = chartFactory.builtinPropName("DatetimepickerStyleName");
-		var styleName = chartTheme[styleNameKey];
-		
-		if(styleName)
-			return styleName;
-		
-		styleName = (chartTheme[styleNameKey] = chartFactory.nextElementId());
-		
-		chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("Datetimepicker"), function()
+		return chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("Datetimepicker"), function()
 		{
 			var color = chartFactory.gradualColor(chartTheme, 1);
 			var bgColor = chartFactory.gradualColor(chartTheme, 0);
@@ -781,7 +757,7 @@
 			var shadowColor = chartFactory.gradualColor(chartTheme, 0.9);
 			var hoverColor = chartFactory.gradualColor(chartTheme, 0.3);
 			
-			var cssPrefix = "." + styleName + " .xdsoft_datetimepicker";
+			var cssPrefix = " .xdsoft_datetimepicker";
 			
 			var css =
 			[
@@ -916,8 +892,6 @@
 			
 			return css;
 		});
-		
-		return styleName;
 	};
 	
 	chartSetting.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
