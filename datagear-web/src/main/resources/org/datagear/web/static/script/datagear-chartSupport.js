@@ -5139,15 +5139,26 @@
 	chartSupport.selectSetChartEventData = function(chart, chartEvent, htmlEvent, $select)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions = chart.renderOptions();
 		
-		var chartData = $select.data("_dgChartSelectOptionChartData");
+		var $selectedOptions = $("option:selected", $select);
+		var chartData = [];
+		var data = [];
 		
-		var data = {};
-		
-		if(chartData)
+		for(var i=0; i<$selectedOptions.length; i++)
 		{
-			data[signNameMap.name] = chartData.name;
-			data[signNameMap.value] = chartData.value;
+			chartData.push($($selectedOptions[i]).data("_dgChartSelectOptionChartData"));
+			
+			var datai = (data[i] = {});
+			datai[signNameMap.name] = chartData[i].name;
+			datai[signNameMap.value] = chartData[i].value;
+		}
+		
+		//单选
+		if(!renderOptions.multiple)
+		{
+			chartData = (chartData.length > 0 ? chartData[0] : null);
+			data = (data.length > 0 ? data[0] : null);
 		}
 		
 		chart.eventData(chartEvent, data);
