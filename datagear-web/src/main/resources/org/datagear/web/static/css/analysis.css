@@ -7,6 +7,17 @@
 
 @CHARSET "UTF-8";
 
+/*图表展示页面的图表元素样式*/
+.dg-chart-fill-parent{
+	position: absolute !important;
+	left: 0 !important;
+	top: 0 !important;
+	right: 0 !important;
+	bottom: 0 !important;
+	width: 100% !important;
+	height: 100% !important;
+}
+
 /*表格图表*/
 .dg-chart-table{
 	position: relative;
