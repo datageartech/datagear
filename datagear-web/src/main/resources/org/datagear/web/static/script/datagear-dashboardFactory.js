@@ -2174,7 +2174,7 @@
 						for(var j=0; j<chartDataSetIndex.length; j++)
 						{
 							var result = chart.resultAt(chart.updateResults(), chartDataSetIndex[j]);
-							resultData[j] = chart.resultDataElement(result, resultDataIndex[j]);
+							resultData[j] = chart.resultDataElement(result, (resultDataIndex ? resultDataIndex[j] : null));
 						}
 					}
 					else
