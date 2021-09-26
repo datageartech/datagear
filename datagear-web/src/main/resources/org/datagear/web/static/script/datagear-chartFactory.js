@@ -2547,9 +2547,13 @@
 	
 	/**
 	 * 图表事件支持函数：获取/设置图表事件对象的数据（chartEvent.data）。
+	 *
+	 * 对于图表插件关联的图表渲染器，构建的图表事件数据应该以数据标记作为数据属性：
+	 * { 数据标记名 : 数据值, ... }
+	 * 使得图表事件数据的格式是固定的，便于事件处理函数读取。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param data 可选，要设置的数据对象，绘制图表条目的数据对象：{ 数据标记名 : 数据值, ... }
+	 * @param data 可选，要设置的数据，通常是由绘制图表条目的数据转换而得，通常格式为：{ ... }、[ { ... }, ... ]
 	 */
 	chartBase.eventData = function(chartEvent, data)
 	{
@@ -2560,24 +2564,10 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：获取/设置图表事件对象的原始数据（chartEvent.originalData）。
+	 * 图表事件支持函数：获取/设置图表事件对象对应的原始图表数据集索引（chartEvent.originalChartDataSetIndex）。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalData 可选，要设置的原始数据，绘制图表条目的原始数据集结果数据，可以是单个数据对象、数据对象数组
-	 */
-	chartBase.eventOriginalData = function(chartEvent, originalData)
-	{
-		if(originalData === undefined)
-			return chartEvent["originalData"];
-		else
-			chartEvent["originalData"] = originalData;
-	};
-	
-	/**
-	 * 图表事件支持函数：获取/设置图表事件对象的原始数据对应的图表数据集索引（chartEvent.originalChartDataSetIndex）。
-	 * 
-	 * @param chartEvent 图表事件对象
-	 * @param originalChartDataSetIndex 可选，要设置的图表数据集索引数值
+	 * @param originalChartDataSetIndex 可选，要设置的图表数据集索引，格式为：数值、数值数组
 	 */
 	chartBase.eventOriginalChartDataSetIndex = function(chartEvent, originalChartDataSetIndex)
 	{
@@ -2588,11 +2578,14 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：获取/设置图表事件对象的原始数据在数据集结果数据中的索引（（chartEvent.originalResultDataIndex））。
+	 * 图表事件支持函数：获取/设置图表事件对象对应的原始数据集结果数据中索引（（chartEvent.originalResultDataIndex））。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalResultDataIndex 可选，要设置的结果数据索引，当chartEvent.originalData为单个对象时，应是单个索引值；
-	 * 									当chartEvent.originalData为对象数组时，应是与之对应的索引值数组
+	 * @param originalResultDataIndex 可选，要设置的结果数据索引，格式为：
+	 *                                当chartEvent.originalChartDataSetIndex是数值时：
+	 *                                数值、数值数组
+	 *                                当chartEvent.originalChartDataSetIndex是数值数组时：
+	 *                                数组（元素可能为数值、数值数组）
 	 */
 	chartBase.eventOriginalResultDataIndex = function(chartEvent, originalResultDataIndex)
 	{
@@ -2603,33 +2596,93 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：设置图表事件对象的原始图表数据集索引、原始数据、原始数据索引。
+	 * 图表事件支持函数：获取/设置图表事件对象的原始数据（chartEvent.originalData）。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalInfo 原始信息对象（格式参考：chartBase.originalInfo函数返回值）、原始图表数据集索引数值
-	 * @param originalResultDataIndex 可选，当originalInfo是索引数值时的原始数据索引，格式允许：数值、数值数组、null
+	 * @param originalData 可选，要设置的原始数据，绘制图表条目的原始数据集结果数据，格式为：
+	 *                     当chartEvent.originalChartDataSetIndex是数值时：
+	 *                     { ... }、[ { ... }, ... ]
+	 *                     当chartEvent.originalChartDataSetIndex是数值数组时：
+	 *                     [ ... ]，其中元素可能为对象、对象数组
+	 */
+	chartBase.eventOriginalData = function(chartEvent, originalData)
+	{
+		if(originalData === undefined)
+			return chartEvent["originalData"];
+		else
+			chartEvent["originalData"] = originalData;
+	};
+	
+	/**
+	 * 图表事件支持函数：设置图表事件对象的原始图表数据集索引、原始数据、原始结果数据索引。
+	 * 
+	 * @param chartEvent 图表事件对象
+	 * @param originalInfo 图表数据对象、数组，或者原始信息对象、数组（格式参考：chartBase.originalInfo函数返回值），或者原始图表数据集索引数值（用于兼容旧版API）
+	 * @param originalResultDataIndex 可选，当originalInfo是索引数值时的原始数据索引，格式可以是：数值、数值数组
 	 */
 	chartBase.eventOriginalInfo = function(chartEvent, originalInfo, originalResultDataIndex)
 	{
-		var originalChartDataSetIndex = originalInfo;
+		var ocdsi = undefined;
+		var ordi = undefined;
+		var odata = undefined;
 		
-		//originalInfo是原始信息对象：{ chartDataSetIndex: ..., resultDataIndex: ... }
-		if(originalInfo && originalInfo.chartDataSetIndex !== undefined)
+		var updateResults = this.updateResults();
+		
+		if(typeof(originalInfo) == "number")
 		{
-			var resultDataIndexMy = originalInfo.resultDataIndex;
+			ocdsi = originalInfo;
+			ordi = originalResultDataIndex;
 			
-			originalChartDataSetIndex = originalInfo.chartDataSetIndex;
+			odata = this.resultDataElement(this.resultAt(updateResults, ocdsi), ordi);
+		}
+		else
+		{
+			var isArray = $.isArray(originalInfo);
 			
-			if(originalResultDataIndex == null)
-				originalResultDataIndex = resultDataIndexMy;
+			if(!isArray)
+				originalInfo = [ originalInfo ];
+			
+			ocdsi = [];
+			ordi = [];
+			odata = [];
+			
+			for(var i=0; i<originalInfo.length; i++)
+			{
+				//先认为是图表数据对象
+				var myOi = this.originalInfo(originalInfo[i]);
+				if(!myOi)
+					myOi = originalInfo[i];
+				
+				var myOcdsi = myOi.chartDataSetIndex;
+				var myOrdi = myOi.resultDataIndex;
+				
+				ocdsi[i] = myOcdsi;
+				ordi[i] = myOrdi;
+				
+				if($.isArray(myOcdsi))
+				{
+					odata[i] = [];
+					
+					for(var j=0; j<myOcdsi.length; j++)
+						odata[i][j] = this.resultDataElement(this.resultAt(updateResults, myOcdsi[j]), myOrdi[j]);
+				}
+				else
+				{
+					odata[i] = this.resultDataElement(this.resultAt(updateResults, myOcdsi), myOrdi);
+				}
+			}
+			
+			if(!isArray)
+			{
+				ocdsi = ocdsi[0];
+				ordi = ordi[0];
+				odata = odata[0];
+			}
 		}
 		
-		var result = this.resultAt(this.updateResults(), originalChartDataSetIndex);
-		var originalData = this.resultDataElement(result, originalResultDataIndex);
-		
-		this.eventOriginalData(chartEvent, originalData);
-		this.eventOriginalChartDataSetIndex(chartEvent, originalChartDataSetIndex);
-		this.eventOriginalResultDataIndex(chartEvent, originalResultDataIndex);
+		this.eventOriginalChartDataSetIndex(chartEvent, ocdsi);
+		this.eventOriginalResultDataIndex(chartEvent, ordi);
+		this.eventOriginalData(chartEvent, odata);
 	};
 	
 	/**
@@ -2779,36 +2832,43 @@
 	 * 图表渲染器在构建用于渲染图表的内部数据对象时，应使用此函数设置其原始信息，以支持在后续的交互、事件处理中获取这些原始信息。
 	 * 
 	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]，当是数组时，设置操作将为每个元素单独设置原始信息
-	 * @param chartDataSetIndex 要设置的图表数据集索引数值，图表数据集对象（自动取其索引数值）
-	 * @param resultDataIndex 可选，要设置的结果数据索引，格式为：数值、数值数组、null，默认值为：0
-	 * @param autoIncrement 可选，当data是数组且resultDataIndex是数值时，设置时是否自动递增resultDataIndex，默认值为：true
+	 * @param chartDataSetIndex 要设置的图表数据集索引数值、图表数据集对象（自动取其索引数值），或者它们的数组
+	 * @param resultDataIndex 可选，要设置的结果数据索引，格式为：
+	 *                        当chartDataSetIndex不是数组时：
+	 *                        数值、数值数组
+	 *                        当chartDataSetIndex是数组时：
+	 *                        数值，表示chartDataSetIndex数组每个元素的结果数据索引都是此数值
+	 *                        数组（元素可以是数值、数值数组），表示chartDataSetIndex数组每个元素的结果数据索引是此数组对应位置的元素
+	 *                        默认值为：0
+	 * @param autoIncrement 可选，当data是数组时：
+	 *                      当chartDataSetIndex不是数组且resultDataIndex是数值时，设置时是否自动递增resultDataIndex；
+	 *                      当chartDataSetIndex是数组且其元素对应位置的结果数据索引是数值时，是否自动递增这个结果数据索引是数值。
+	 *                      默认值为：true
 	 * @returns 要获取的原始信息属性值(可能为null），格式为：
 	 *									{
 	 *										//图表ID
 	 *										chartId: "...",
-	 *										//图表数据集索引数值
+	 *										//图表数据集索引数值、数值数组
 	 *										chartDataSetIndex: ...,
-	 *										//结果数据索引，格式为：数值、数值数组、null
+	 *										//结果数据索引，格式为：
+	 *                                      //当chartDataSetIndex不是数组时：
+	 *                                      //数值、数值数组
+	 *                                      //当chartDataSetIndex是数组时：
+	 *                                      //数组（元素可能是数值、数值数组）
 	 *										resultDataIndex: ...
 	 *									}
 	 *									当data是数组时，将返回此结构的数组
 	 */
 	chartBase.originalInfo = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
 	{
-		if(resultDataIndex === true || resultDataIndex === false)
-		{
-			autoIncrement = resultDataIndex;
-			resultDataIndex = undefined;
-		}
-		
 		var pname = chartFactory._DATA_ORIGINAL_INFO_PROP_NAME;
 		
-		var isArray = $.isArray(data);
+		var isDataArray = $.isArray(data);
 		
 		//获取
 		if(arguments.length == 1)
 		{
-			if(isArray)
+			if(isDataArray)
 			{
 				var re = [];
 				
@@ -2826,22 +2886,99 @@
 			if(data == null)
 				return;
 			
-			chartDataSetIndex = (chartDataSetIndex != null && chartDataSetIndex.index !== undefined ? chartDataSetIndex.index : chartDataSetIndex);
+			//(data, chartDataSetIndex, true)、(data, chartDataSetIndex, false)
+			if(resultDataIndex === true || resultDataIndex === false)
+			{
+				autoIncrement = resultDataIndex;
+				resultDataIndex = undefined;
+			}
+			
 			resultDataIndex = (resultDataIndex === undefined ? 0 : resultDataIndex);
 			
-			if(isArray)
+			var isCdsiArray = $.isArray(chartDataSetIndex);
+			
+			if(isCdsiArray)
 			{
-				var isNumber = (typeof(resultDataIndex) == "number");
-				autoIncrement = (autoIncrement === undefined ? isNumber : autoIncrement);
+				var cdsiNew = [];
+				
+				for(var i=0; i<chartDataSetIndex.length; i++)
+				{
+					cdsiNew[i] = (chartDataSetIndex[i] != null && chartDataSetIndex[i].index !== undefined ?
+									chartDataSetIndex[i].index : chartDataSetIndex[i]);
+				}
+				
+				chartDataSetIndex = cdsiNew;
+				
+				if(!$.isArray(resultDataIndex))
+				{
+					var rdiNew = [];
+					
+					for(var i=0; i<chartDataSetIndex.length; i++)
+						rdiNew[i] = resultDataIndex;
+					
+					resultDataIndex = rdiNew;
+				}
+			}
+			else
+			{
+				chartDataSetIndex = (chartDataSetIndex != null && chartDataSetIndex.index !== undefined ?
+										chartDataSetIndex.index : chartDataSetIndex);
+			}
+			
+			if(isDataArray)
+			{
+				autoIncrement = (autoIncrement === undefined ? true : autoIncrement);
+				var isRdiNumber = (typeof(resultDataIndex) == "number");
+				
+				var needAutoIncrementEle = (autoIncrement == true && $.isArray(resultDataIndex));
+				if(needAutoIncrementEle == true)
+				{
+					needAutoIncrementEle = false;
+					
+					//任一元素是数值的话，才需要自增处理
+					for(var i=0; i<resultDataIndex.length; i++)
+					{
+						if(typeof(resultDataIndex[i]) == "number")
+						{
+							needAutoIncrementEle = true;
+							break;
+						}
+					}
+				}
 				
 				for(var i=0; i<data.length; i++)
 				{
 					var originalInfo =
 					{
 						"chartId": this.id,
-						"chartDataSetIndex": chartDataSetIndex,
-						"resultDataIndex": (autoIncrement ? resultDataIndex + i : resultDataIndex)
+						"chartDataSetIndex": chartDataSetIndex
 					};
+					
+					if(!autoIncrement)
+					{
+						originalInfo["resultDataIndex"] = resultDataIndex;
+					}
+					else
+					{
+						var resultDataIndexMy = resultDataIndex;
+						
+						if(isRdiNumber)
+						{
+							resultDataIndexMy = resultDataIndex + i;
+						}
+						else if(needAutoIncrementEle)
+						{
+							resultDataIndexMy = [];
+							for(var j=0; j<resultDataIndex.length; j++)
+							{
+								resultDataIndexMy[j] = resultDataIndex[j];
+								if(typeof(resultDataIndexMy[j]) == "number")
+									resultDataIndexMy[j] = resultDataIndexMy[j] + i;
+							}
+						}
+						
+						originalInfo["resultDataIndex"] = resultDataIndexMy;
+					}
 					
 					data[i][pname] = originalInfo;
 				}

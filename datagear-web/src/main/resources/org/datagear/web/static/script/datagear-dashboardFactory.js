@@ -2120,13 +2120,21 @@
 	 *									{
 	 *										//图表ID
 	 *										chartId: "...",
-	 *										//图表数据集索引数值
+	 *										//图表数据集索引数值、数值数组
 	 *										chartDataSetIndex: ...,
-	 *										//结果数据索引，格式为：数值、数值数组、null
+	 *										//结果数据索引，格式为：
+	 *                                      //当chartDataSetIndex不是数组时：
+	 *                                      //数值、数值数组
+	 *                                      //当chartDataSetIndex是数组时：
+	 *                                      //数组（元素可能是数值、数值数组）
 	 *										resultDataIndex: ...,
 	 *										//当inflate为true时，chartId对应的图表对象
 	 *										chart: 图表对象,
-	 *										//当inflate为true时，resultDataIndex对应的原始结果数据
+	 *										//当inflate为true时，resultDataIndex对应的原始结果数据，格式为：
+	 *                                      //当chartDataSetIndex不是数组时：
+	 *                                      //对象、对象数组
+	 *                                      //当chartDataSetIndex是数组时：
+	 *                                      //数组（元素可能是对象、对象数组）
 	 *										resultData: 结果数据
 	 *									}
 	 *									当data是数组时，将返回此结构的数组。
@@ -2151,14 +2159,29 @@
 			{
 				//不能修改原对象
 				originalInfo = $.extend(true, {}, originalInfo);
+				var chartDataSetIndex = originalInfo.chartDataSetIndex;
+				var resultDataIndex = originalInfo.resultDataIndex;
 				
 				var chart = this.chartOf(originalInfo.chartId);
 				var resultData = undefined;
 				
-				if(chart != null && originalInfo.chartDataSetIndex != null)
+				if(chart != null && chartDataSetIndex != null)
 				{
-					var result = chart.resultAt(chart.updateResults(), originalInfo.chartDataSetIndex);
-					resultData = chart.resultDataElement(result, originalInfo.resultDataIndex);
+					if($.isArray(chartDataSetIndex))
+					{
+						resultData = [];
+						
+						for(var j=0; j<chartDataSetIndex.length; j++)
+						{
+							var result = chart.resultAt(chart.updateResults(), chartDataSetIndex[j]);
+							resultData[j] = chart.resultDataElement(result, resultDataIndex[j]);
+						}
+					}
+					else
+					{
+						var result = chart.resultAt(chart.updateResults(), chartDataSetIndex);
+						resultData = chart.resultDataElement(result, resultDataIndex);
+					}
 				}
 				
 				originalInfo.chart = chart;
