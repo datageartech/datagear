@@ -4703,27 +4703,72 @@
 		options = chartSupport.inflateRenderOptions(chart,
 		{
 			//将在update中设置：
-			//data
+			//标签卡数据：
+			// data:
+			// [
+			//	  {
+			//	    //可选，标签名，默认为选项值
+			//	    name: "...",
+			//	    //标签值
+			//	    value: ...,
+			//	    //可选，标签条目元素css样式
+			//	    itemStyle: { ... },
+			//	    //可选，标签名元素css样式
+			//	    nameStyle: { ... },
+			//	    //可选，标签值元素css样式
+			//	    valueStyle: { ... }
+			//	  },
+			//	  ...
+			// ]
 			
-			//是否所有标签都行内显示
-			"inline": false,
+			//标签条目、标签名、标签值是否都行内显示
+			inline: false,
 			//是否以flex布局展示标签
 			//弹性布局：true 是、居中间隔；false 否；"around" 居中间隔；"start" 左对齐；"end" 右对齐；"center" 居中；"between" 贴边间隔； 
-			"flex": false,
+			flex: false,
 			//是否标签值在前
-			"valueFirst": false,
-			//标签名样式，这里不必添加默认样式，因为图表元素已设置
-			"name":
-			{
-				"show": true
-			},
-			//标签值样式，这里不必添加默认样式，因为图表元素已设置
-			"value": {}
+			valueFirst: false,
+			//是否隐藏标签名
+			hideName: false,
+			//标签条目元素公用css样式，格式为：{ ... }
+			itemStyle: undefined,
+			 //标签名元素公用css样式，格式为：{ ... }
+			nameStyle: undefined,
+			//标签值元素公用css样式，格式为：{ ... }
+			valueStyle: undefined
 		},
 		options);
 		
+		// < @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
+		if(options.label && options.label.name)
+			options.name = options.label.name;
+		if(options.label && options.label.value)
+			options.value = options.label.value;
+		options.label = undefined;
+		// > @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
+		
+		// < @deprecated 兼容2.8.0版本的{name:{ show:true|false, ... }, value:{...}}配置项结构，未来版本会移除
+		if(options.name)
+		{
+			if(options.name.show !== undefined)
+			{
+				options.hideName = !options.name.show;
+				options.name.show == undefined;
+			}
+			options.nameStyle = options.name;
+		}
+		options.name = undefined;
+		
+		if(options.value)
+			options.valueStyle = options.value;
+		options.value = undefined;
+		// > @deprecated 兼容2.8.0版本的{name:{ show:true|false, ... }, value:{...}}配置项结构，未来版本会移除
+		
 		if(options.inline == true)
 			chartEle.addClass("dg-chart-label-inline");
+		
+		if(options.hideName == true)
+			chartEle.addClass("dg-hide-name");
 		
 		if(options.flex != null && options.flex != false)
 		{
@@ -4741,13 +4786,6 @@
 				chartEle.addClass("dg-chart-label-flex-around");
 		}
 		
-		// < @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
-		if(options.label && options.label.name)
-			options.name = $.extend(true, {}, options.name, options.label.name);
-		if(options.label && options.label.value)
-			options.value = $.extend(true, {}, options.value, options.label.value);
-		// > @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
-		
 		chart.internal(chart.element());
 	};
 	
@@ -4756,7 +4794,6 @@
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions = chart.renderOptions();
 		var valueFirst = renderOptions.valueFirst;
-		var showName = (renderOptions.name && renderOptions.name.show);
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -4774,44 +4811,33 @@
 			
 			var nps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.name);
 			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
-			var npsNone = (nps==null || nps.length==0);
+			var hasNps = (nps && nps.length > 0);
 			
-			if(!npsNone && nps.length!=vps.length)
+			if(hasNps && nps.length != vps.length)
 				throw new Error("The ["+signNameMap.name+"] sign column must be "
 						+"one-to-one with ["+signNameMap.value+"] sign column");
 			
-			if(npsNone)
+			var namess = (hasNps ? chart.resultRowArrays(result, nps) : []);
+			var valuess = chart.resultRowArrays(result, vps);
+			
+			var vpNames = [];
+			if(!hasNps)
 			{
-				var ras = chart.resultRowArrays(result, vps);
-				for(var j=0; j<ras.length; j++)
-				{
-					var ra = ras[j];
-					for(var k=0; k<ra.length; k++)
-					{
-						var sv = { name: chart.dataSetPropertyLabel(vps[k]), value: ra[k] };
-						chart.originalInfo(sv, chartDataSet, j);
-						
-						updateOptions.data.push(sv);
-					}
-				}
+				for(var j=0; j<vps.length; j++)
+					vpNames[j] = chart.dataSetPropertyLabel(vps[j]);
 			}
-			else
+			
+			for(var j=0; j<valuess.length; j++)
 			{
-				var namess = chart.resultRowArrays(result, nps);
-				var valuess = chart.resultRowArrays(result, vps);
+				var values = valuess[j];
+				var names = (hasNps ? namess[j] : vpNames);
 				
-				for(var j=0; j<namess.length; j++)
+				for(var k=0; k<names.length; k++)
 				{
-					var names = namess[j];
-					var values = valuess[j];
+					var sv = { name: names[k], value: values[k] };
+					chart.originalInfo(sv, chartDataSet, j);
 					
-					for(var k=0; k<names.length; k++)
-					{
-						var sv = { name: names[k], value: values[k] };
-						chart.originalInfo(sv, chartDataSet, j);
-						
-						updateOptions.data.push(sv);
-					}
+					updateOptions.data.push(sv);
 				}
 			}
 		}
@@ -4835,32 +4861,12 @@
 				if(valueFirst)
 				{
 					$labelValue = $("<div class='label-value'></div>").appendTo($label);
-					
-					if(renderOptions.value)
-						chartFactory.elementStyle($labelValue, renderOptions.value);
-					
-					if(showName)
-					{
-						$labelName = $("<div class='label-name'></div>").appendTo($label);
-						
-						if(renderOptions.name)
-							chartFactory.elementStyle($labelName, renderOptions.name);
-					}
+					$labelName = $("<div class='label-name'></div>").appendTo($label);
 				}
 				else
 				{
-					if(showName)
-					{
-						$labelName = $("<div class='label-name'></div>").appendTo($label);
-						
-						if(renderOptions.name)
-							chartFactory.elementStyle($labelName, renderOptions.name);
-					}
-					
+					$labelName = $("<div class='label-name'></div>").appendTo($label);
 					$labelValue = $("<div class='label-value'></div>").appendTo($label);
-					
-					if(renderOptions.value)
-						chartFactory.elementStyle($labelValue, renderOptions.value);
 				}
 			}
 			else
@@ -4871,11 +4877,21 @@
 				$label.removeClass("dg-chart-label-item-pending");
 			}
 			
-			if(showName)
-				$labelName.html(labelData.name);
+			$labelName.html(labelData.name);
 			$labelValue.html(labelData.value);
-			
 			$label.data("_dgChartLabelChartData", labelData);
+			
+			var itemStyle = chartSupport.evalLocalPlainObj(labelData.itemStyle, renderOptions.itemStyle);
+			if(itemStyle)
+				chartFactory.elementStyle($label, itemStyle);
+			
+			var nameStyle = chartSupport.evalLocalPlainObj(labelData.nameStyle, renderOptions.nameStyle);
+			if(nameStyle)
+				chartFactory.elementStyle($labelName, nameStyle);
+			
+			var valueStyle = chartSupport.evalLocalPlainObj(labelData.valueStyle, renderOptions.valueStyle);
+			if(valueStyle)
+				chartFactory.elementStyle($labelValue, valueStyle);
 		}
 		
 		$(".dg-chart-label-item-pending", $parent).remove();
@@ -4889,7 +4905,7 @@
 	chartSupport.labelDestroy = function(chart)
 	{
 		var chartEle = chart.elementJquery();
-		chartEle.removeClass("dg-chart-label dg-chart-label-inline dg-chart-label-flex "
+		chartEle.removeClass("dg-chart-label dg-chart-label-inline dg-hide-name dg-chart-label-flex "
 								+"dg-chart-label-flex-around dg-chart-label-flex-start dg-chart-label-flex-end "
 								+"dg-chart-label-flex-center dg-chart-label-flex-between");
 		$(".dg-chart-label-item", chart.internal()).remove();
@@ -4982,7 +4998,7 @@
 			fillParent: "auto",
 			//select框css样式，格式为：{ ... }
 			selectStyle: undefined,
-			//option选项整体css样式，格式为：{ ... }
+			//option选项公用css样式，格式为：{ ... }
 			itemStyle: undefined
 		},
 		options);
@@ -5083,15 +5099,7 @@
 			
 			$opt.data("_dgChartSelectOptionChartData", optData);
 			
-			var itemStyle = null;
-			
-			if(renderOptions.itemStyle && optData.itemStyle)
-				itemStyle = $.extend({}, renderOptions.itemStyle, optData.itemStyle);
-			else if(renderOptions.itemStyle)
-				itemStyle = renderOptions.itemStyle;
-			else if(optData.itemStyle)
-				itemStyle = optData.itemStyle;
-			
+			var itemStyle = chartSupport.evalLocalPlainObj(optData.itemStyle, renderOptions.itemStyle);
 			if(itemStyle)
 				chartFactory.elementStyle($opt, itemStyle);
 		}
@@ -5948,6 +5956,20 @@
 			re[nameProperty] = name;
 			re[valueProperty] = value;
 		}
+		
+		return re;
+	};
+	
+	chartSupport.evalLocalPlainObj = function(localPlainObj, publicPlainObj)
+	{
+		var re = null;
+		
+		if(localPlainObj && publicPlainObj)
+			re = $.extend({}, publicPlainObj, localPlainObj);
+		else if(publicPlainObj)
+			re = publicPlainObj;
+		else if(localPlainObj)
+			re = localPlainObj;
 		
 		return re;
 	};

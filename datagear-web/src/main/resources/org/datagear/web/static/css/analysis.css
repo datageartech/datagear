@@ -120,6 +120,10 @@
 
 /*标签卡图表*/
 .dg-chart-label{}
+.dg-chart-label.dg-hide-name .label-name,
+.dg-chart-label .dg-hide-name .label-name{
+	display: none !important;/*防止被dg-chart-label-inline样式覆盖*/
+}
 .dg-chart-label .dg-chart-label-item .label-name{
 	text-align: center;
 }
