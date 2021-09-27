@@ -3142,7 +3142,7 @@
 	chartBase.resultDataElement = function(result, index)
 	{
 		if(result == null || result.data == null || index == null)
-			return null;
+			return undefined;
 		
 		var datas = this.resultDatas(result);
 		
