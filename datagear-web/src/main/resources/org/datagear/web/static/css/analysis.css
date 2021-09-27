@@ -8,7 +8,7 @@
 @CHARSET "UTF-8";
 
 /*图表展示页面的图表元素样式*/
-.dg-chart-fill-parent{
+.dg-chart-for-show-chart{
 	position: absolute !important;
 	left: 0 !important;
 	top: 0 !important;
@@ -18,10 +18,12 @@
 	height: 100% !important;
 }
 
-/*表格图表*/
-.dg-chart-table{
+.dg-position-relative{
 	position: relative;
 }
+
+/*表格图表*/
+.dg-chart-table{}
 .dg-chart-table .dg-chart-table-title{
 	position: absolute;
 	left: 0;
@@ -117,9 +119,7 @@
 }
 
 /*标签卡图表*/
-.dg-chart-label{
-	position: relative;
-}
+.dg-chart-label{}
 .dg-chart-label .dg-chart-label-item .label-name{
 	text-align: center;
 }
@@ -156,20 +156,9 @@
 
 /*下拉框图表*/
 .dg-chart-select{}
-.dg-chart-select.dg-chart-select-fill{
-	position: relative;
-}
-.dg-chart-select.dg-chart-select-fill .dg-chart-select-select{
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
+.dg-chart-select .dg-chart-select-select.dg-fill-parent{
 	width: 100%;
 	height: 100%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
 }
 
 /*数据集参数值表单*/

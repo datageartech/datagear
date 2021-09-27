@@ -207,6 +207,9 @@
 	/** 关键字：注册得ECharts主题名 */
 	chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "RegisteredEchartsThemeName";
 	
+	/** 关键字：可作为定位父元素的样式类名 */
+	chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE = "dg-position-relative";
+	
 	/**
 	 * 图表使用的渲染上下文属性名。
 	 */
@@ -944,6 +947,11 @@
 		
 		this._createChartEleThemeCssIfNon();
 		
+		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
+		var position = $element.css("position");
+		if(!position || position == "static")
+			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
+		
 		$element.addClass(this.themeStyleName());
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
 		
@@ -1117,6 +1125,7 @@
 		this.statusDestroyed(true);
 		
 		$element.removeClass(this.themeStyleName());
+		$element.removeClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
 		
 		var renderer = this.renderer();
@@ -3636,7 +3645,7 @@
 	
 	/**
 	 * 获取/设置HTML元素上的图表部件ID（"dg-chart-widget"属性值）。
-	 *
+	 * 
 	 * @param element HTML元素、Jquery对象
 	 * @param widgetId 选填参数，要设置的图表部件ID，不设置则执行获取操作
 	 */

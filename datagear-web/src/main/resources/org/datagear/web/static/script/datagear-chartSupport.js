@@ -4995,8 +4995,6 @@
 			chartEle.addClass("dg-chart-beautify-scrollbar");
 		if(isDropdown)
 			chartEle.addClass("dg-chart-select-dropdown");
-		if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
-			chartEle.addClass("dg-chart-select-fill");
 		
 		var $select = $("<select class='dg-chart-select-select' />").appendTo(chartEle);
 		
@@ -5006,6 +5004,8 @@
 			$select.attr("multiple", "multiple");
 		if(options.size != null)
 			$select.attr("size", options.size);
+		if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
+			$select.addClass("dg-fill-parent");
 		if(options.selectStyle)
 			chartFactory.elementStyle($select, options.selectStyle);
 		
