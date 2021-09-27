@@ -4202,6 +4202,11 @@
 						"borderWidth" : 0,
 						"borderColor" : chartTheme.borderColor
 					}
+				},
+				"emptyCircleStyle":
+				{
+					"color": areaColor0,
+					"borderColor": areaBorderColor0
 				}
 			},
 			"scatter" : {
