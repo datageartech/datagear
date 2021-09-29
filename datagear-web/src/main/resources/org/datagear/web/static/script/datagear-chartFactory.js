@@ -3256,6 +3256,64 @@
 		return chartFactory.themeStyleSheet(theme, name, css, force);
 	};
 	
+	/**
+	 * 获取/设置HTML元素的CSS样式字符串（元素的"style"属性）。
+	 * 
+	 * 使用方式：
+	 * chart.elementStyle(element)
+	 * chart.elementStyle(element, "color:red;font-size:1.5em")
+	 * chart.elementStyle(element, {border:"1px solid red"}, "color:red;font-size:1.5em")
+	 * chart.elementStyle(element, "color:red;font-size:1.5em", {border:"1px solid red"}, "background:blue")
+	 * chart.elementStyle(element, ["color:red;font-size:1.5em", {border:"1px solid red"}], "background:blue")
+	 * 
+	 * @param element HTML元素、Jquery对象
+	 * @param css 可选，要设置的CSS样式，格式为：
+	 *            字符串，例如："color:red;font-size:1.5em"
+	 *            CSS属性对象，例如：{ color: "...", backgroundColor: "...", "font-size": "...", ...  }
+	 *            数组，元素可以是字符串、CSS属性对象
+	 *            或者是上述格式的变长参数
+	 * @return 要获取的CSS样式字符串
+	 */
+	chartBase.elementStyle = function(element, css)
+	{
+		element = $(element);
+		
+		if(css === undefined)
+			return element.attr("style");
+		
+		var cssText = "";
+		
+		var cssArray = [];
+		
+		for(var i=1; i<arguments.length; i++)
+		{
+			var cssi = arguments[i];
+			
+			if(!cssi)
+				continue;
+			
+			cssArray = cssArray.concat(cssi);
+		}
+		
+		for(var i=0; i<cssArray.length; i++)
+		{
+			var cssi = cssArray[i];
+			var cssiText = "";
+			
+			if(cssi)
+			{
+				cssiText = chartFactory.styleToString(cssi);
+				
+				if(cssiText && cssText && cssText.charAt(cssText.length - 1) != ";")
+					cssText += ";" + cssiText;
+				else
+					cssText += cssiText;
+			}
+		}
+		
+		element.attr("style", cssText);
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
@@ -3702,29 +3760,6 @@
 		}
 		
 		return (re || defaultValue);
-	};
-	
-	/**
-	 * 获取/设置HTML元素的CSS样式字符串（元素的"style"属性）。
-	 * 
-	 * @param element HTML元素、Jquery对象
-	 * @param css 可选，要设置的CSS样式，可以是字符串，或者：{ color: "...", backgroundColor: "...", "font-size": "...", ...  }
-	 * @return 要获取的CSS样式字符串
-	 */
-	chartFactory.elementStyle = function(element, css)
-	{
-		element = $(element);
-		var myCss = element.attr("style");
-		
-		if(css === undefined)
-			return myCss;
-		
-		css = chartFactory.styleToString(css);
-		
-		if(myCss && css && myCss.charAt(myCss.length - 1) != ";")
-			myCss += ";";
-		
-		element.attr("style", (myCss ? myCss + css : css));
 	};
 	
 	/**

@@ -4147,7 +4147,7 @@
 			chartEle.addClass("dg-hide-title");
 		
 		var chartTitle = $("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(chartEle);
-		chartFactory.elementStyle(chartTitle, options.title);
+		chart.elementStyle(chartTitle, options.title);
 		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
 		var table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartContent);
 		var tableId = chart.id+"-table";
@@ -4883,15 +4883,15 @@
 			
 			var itemStyle = chartSupport.evalLocalPlainObj(labelData.itemStyle, renderOptions.itemStyle);
 			if(itemStyle)
-				chartFactory.elementStyle($label, itemStyle);
+				chart.elementStyle($label, itemStyle);
 			
 			var nameStyle = chartSupport.evalLocalPlainObj(labelData.nameStyle, renderOptions.nameStyle);
 			if(nameStyle)
-				chartFactory.elementStyle($labelName, nameStyle);
+				chart.elementStyle($labelName, nameStyle);
 			
 			var valueStyle = chartSupport.evalLocalPlainObj(labelData.valueStyle, renderOptions.valueStyle);
 			if(valueStyle)
-				chartFactory.elementStyle($labelValue, valueStyle);
+				chart.elementStyle($labelValue, valueStyle);
 		}
 		
 		$(".dg-chart-label-item-pending", $parent).remove();
@@ -5023,7 +5023,7 @@
 		if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
 			$select.addClass("dg-fill-parent");
 		if(options.selectStyle)
-			chartFactory.elementStyle($select, options.selectStyle);
+			chart.elementStyle($select, options.selectStyle);
 		
 		chart.internal($select[0]);
 	};
@@ -5101,7 +5101,7 @@
 			
 			var itemStyle = chartSupport.evalLocalPlainObj(optData.itemStyle, renderOptions.itemStyle);
 			if(itemStyle)
-				chartFactory.elementStyle($opt, itemStyle);
+				chart.elementStyle($opt, itemStyle);
 		}
 	};
 	
