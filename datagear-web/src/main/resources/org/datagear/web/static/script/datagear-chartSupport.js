@@ -4347,19 +4347,19 @@
 		
 		var cssText = 
 			qualifier + " table.dataTable tbody tr{"
-			+ chartFactory.styleToString(chartOptions.table.row)
+			+ chart.styleString(chartOptions.table.row)
 			+" }\n"
 			+qualifier + " table.dataTable thead th,\n"
 			+qualifier + " table.dataTable thead td{"
-			+ chartFactory.styleToString(chartOptions.table.header)
+			+ chart.styleString(chartOptions.table.header)
 			+" }\n"
 			+qualifier + " table.dataTable.stripe tbody tr.odd,\n"
 			+qualifier + " table.dataTable.display tbody tr.odd{"
-			+ chartFactory.styleToString(chartOptions.table.row.odd)
+			+ chart.styleString(chartOptions.table.row.odd)
 			+" }\n"
 			+qualifier + " table.dataTable.stripe tbody tr.even,\n"
 			+qualifier + " table.dataTable.display tbody tr.even{"
-			+ chartFactory.styleToString(chartOptions.table.row.even)
+			+ chart.styleString(chartOptions.table.row.even)
 			+" }\n"
 			+qualifier + " table.dataTable.hover tbody tr.hover,\n"
 			+qualifier + " table.dataTable.hover tbody tr:hover,\n"
@@ -4369,7 +4369,7 @@
 			+qualifier + " table.dataTable.hover tbody > tr > .selected:hover,\n"
 			+qualifier + " table.dataTable.display tbody > tr.selected:hover,\n"
 			+qualifier + " table.dataTable.display tbody > tr > .selected:hover{"
-			+ chartFactory.styleToString(chartOptions.table.row.hover)
+			+ chart.styleString(chartOptions.table.row.hover)
 			+" }\n"
 			+qualifier + " table.dataTable tbody > tr.selected,\n"
 			+qualifier + " table.dataTable tbody > tr > .selected,\n"
@@ -4381,7 +4381,7 @@
 			+qualifier + " table.dataTable.stripe tbody > tr.odd > .selected,\n"
 			+qualifier + " table.dataTable.display tbody > tr.odd.selected,\n"
 			+qualifier + " table.dataTable.display tbody > tr.odd > .selected{"
-			+ chartFactory.styleToString(chartOptions.table.row.selected)
+			+ chart.styleString(chartOptions.table.row.selected)
 			+" }\n"
 			+qualifier + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span{"
 			+ " background:" + chartOptions.table.header.color+";"

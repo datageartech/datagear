@@ -3257,35 +3257,23 @@
 	};
 	
 	/**
-	 * 获取/设置HTML元素的CSS样式字符串（元素的"style"属性）。
-	 * 
-	 * 使用方式：
-	 * chart.elementStyle(element)
-	 * chart.elementStyle(element, "color:red;font-size:1.5em")
-	 * chart.elementStyle(element, {border:"1px solid red"}, "color:red;font-size:1.5em")
-	 * chart.elementStyle(element, "color:red;font-size:1.5em", {border:"1px solid red"}, "background:blue")
-	 * chart.elementStyle(element, ["color:red;font-size:1.5em", {border:"1px solid red"}], "background:blue")
-	 * 
-	 * @param element HTML元素、Jquery对象
-	 * @param css 可选，要设置的CSS样式，格式为：
-	 *            字符串，例如："color:red;font-size:1.5em"
-	 *            CSS属性对象，例如：{ color: "...", backgroundColor: "...", "font-size": "...", ...  }
-	 *            数组，元素可以是字符串、CSS属性对象
-	 *            或者是上述格式的变长参数
-	 * @return 要获取的CSS样式字符串
+	 * 获取/设置HTML元素的CSS样式字符串（元素的style属性）。
+	 * 具体参考chartFactory.elementStyle()函数。
 	 */
 	chartBase.elementStyle = function(element, css)
 	{
-		element = $(element);
-		
-		if(css === undefined)
-			return element.attr("style");
-		
-		var cssText = "";
-		
+		return chartFactory.elementStyle(element, css);
+	};
+	
+	/**
+	 * 拼接CSS样式字符串。
+	 * 具体参考chartFactory.styleString()函数。
+	 */
+	chartBase.styleString = function(css)
+	{
 		var cssArray = [];
 		
-		for(var i=1; i<arguments.length; i++)
+		for(var i=0; i<arguments.length; i++)
 		{
 			var cssi = arguments[i];
 			
@@ -3295,23 +3283,7 @@
 			cssArray = cssArray.concat(cssi);
 		}
 		
-		for(var i=0; i<cssArray.length; i++)
-		{
-			var cssi = cssArray[i];
-			var cssiText = "";
-			
-			if(cssi)
-			{
-				cssiText = chartFactory.styleToString(cssi);
-				
-				if(cssiText && cssText && cssText.charAt(cssText.length - 1) != ";")
-					cssText += ";" + cssiText;
-				else
-					cssText += cssiText;
-			}
-		}
-		
-		element.attr("style", cssText);
+		return chartFactory.styleString(cssArray);
 	};
 	
 	//-------------
@@ -3618,13 +3590,118 @@
 			}
 			
 			cssText += "{\n";
-			cssText += chartFactory.styleToString(cssValue, "\n");
+			cssText += chartFactory.styleString(cssValue);
 			cssText += "\n}\n";
 		}
 		
 		chartFactory.styleSheetText(info.styleId, cssText);
 		
 		return styleName;
+	};
+	
+	/**
+	 * 获取/设置HTML元素的CSS样式字符串（元素的style属性）。
+	 * 
+	 * 使用方式：
+	 * chartFactory.elementStyle(element)
+	 * chartFactory.elementStyle(element, "color:red;font-size:1.5em")
+	 * chartFactory.elementStyle(element, {border:"1px solid red"}, "color:red;font-size:1.5em")
+	 * chartFactory.elementStyle(element, "color:red;font-size:1.5em", {border:"1px solid red"}, "background:blue")
+	 * chartFactory.elementStyle(element, ["color:red;font-size:1.5em", {border:"1px solid red"}], "background:blue")
+	 * 
+	 * @param element HTML元素、Jquery对象
+	 * @param css 可选，要设置的CSS样式，格式为：同chartBase.styleString()函数参数
+	 * @return 要获取的CSS样式字符串
+	 */
+	chartFactory.elementStyle = function(element, css)
+	{
+		element = $(element);
+		
+		if(css === undefined)
+			return element.attr("style");
+		
+		var cssArray = [];
+		
+		for(var i=1; i<arguments.length; i++)
+		{
+			var cssi = arguments[i];
+			
+			if(!cssi)
+				continue;
+			
+			cssArray = cssArray.concat(cssi);
+		}
+		
+		var cssText = chartFactory.styleString(cssArray);
+		
+		element.attr("style", cssText);
+	};
+	
+	/**
+	 * 拼接CSS样式字符串。
+	 * 
+	 * 使用方式：
+	 * chartFactory.styleString({color:"red", border:"1px solid red"})
+	 * chartFactory.styleString({border:"1px solid red", padding:"1em 1em"}, "color:red;font-size:1.5em")
+	 * chartFactory.styleString("color:red;font-size:1.5em", {border:"1px solid red", padding:"1em 1em"}, "background:blue")
+	 * chartFactory.styleString(["color:red;font-size:1.5em", {border:"1px solid red", padding:"1em 1em"}], "background:blue")
+	 * 
+	 * @param css 要拼接的CSS样式，格式为：
+	 *            字符串，例如："color:red;font-size:1.5em"
+	 *            CSS属性对象，例如：{ color: "...", backgroundColor: "...", "font-size": "...", ...  }，
+	 *            不合法的属性名将被转换为合法属性名，比如："backgroundColor"将被转换为"background-color"，另外，非字符串、数值、布尔型的属性值将被忽略
+	 *            数组，元素可以是字符串、CSS属性对象
+	 *            或者是上述格式的变长参数
+	 * @return 拼接后的CSS样式字符串，例如："color:red;background-color:red;font-size:1px;"
+	 */
+	chartFactory.styleString = function(css)
+	{
+		var cssText = "";
+		
+		var cssArray = [];
+		
+		for(var i=0; i<arguments.length; i++)
+		{
+			var cssi = arguments[i];
+			
+			if(!cssi)
+				continue;
+			
+			cssArray = cssArray.concat(cssi);
+		}
+		
+		for(var i=0; i<cssArray.length; i++)
+		{
+			var cssi = cssArray[i];
+			var cssiText = "";
+			
+			if(!cssi)
+				continue;
+				
+			if(typeof(cssi) == "string")
+				cssiText = cssi;
+			else
+			{
+				for(var name in cssi)
+				{
+					var value = cssi[name];
+					var valueType = typeof(value);
+					
+					if(valueType == "string" || valueType == "number" || valueType == "boolean")
+					{
+						name = chartFactory.toLegalStyleName(name);
+						cssiText += name + ":" + value + ";";
+					}
+				}
+			}
+			
+			if(cssiText && cssText && cssText.charAt(cssText.length - 1) != ";")
+				cssText += ";" + cssiText;
+			else
+				cssText += cssiText;
+		}
+		
+		return cssText;
 	};
 	
 	/**
@@ -3760,46 +3837,6 @@
 		}
 		
 		return (re || defaultValue);
-	};
-	
-	/**
-	 * 将指定CSS样式对象转换为CSS字符串。
-	 * CSS样式对象中不合法的属性名将被转换为合法属性名，比如："backgroundColor"将被转换为"background-color"。
-	 * 另外，非字符串、数值型的属性值将被忽略。
-	 * 
-	 * @param css CSS样式对象、CSS字符串，格式为：{ color: "...", backgroundColor: "...", "font-size": "...", ...  }、"..."
-	 * @param separator 可选，分隔符，默认为空格：" "
-	 * @return CSS属性字符串，例如："color:red; background-color:red; font-size:1px;"
-	 */
-	chartFactory.styleToString = function(css, separator)
-	{
-		if(!css)
-			return "";
-		
-		if(typeof(css) == "string")
-			return css;
-		
-		separator = (separator == null ? " " : separator);
-		
-		var re = "";
-		
-		for(var name in css)
-		{
-			var value = css[name];
-			var valueType = typeof(value);
-			
-			if(valueType != "string" && valueType != "number")
-				continue;
-			
-			name = chartFactory.toLegalStyleName(name);
-			
-			if(re.length > 0)
-				re += separator;
-			
-			re += name + ":" + value + ";";
-		}
-		
-		return re;
 	};
 	
 	/**
