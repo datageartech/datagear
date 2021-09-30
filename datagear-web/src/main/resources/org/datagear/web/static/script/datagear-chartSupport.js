@@ -4057,7 +4057,6 @@
 		if(options.table)
 		{
 			var tableStyle = $.extend(true, {}, options.table);
-			
 			delete tableStyle.renderValue;
 			
 			if(!$.isEmptyObject(tableStyle))
@@ -4319,192 +4318,183 @@
 	
 	chartSupport.tableThemeStyleSheet = function(chart, options)
 	{
-		chart.themeStyleSheet(chartFactory.builtinPropName("TableChart"), function()
-		{
-			return chartSupport.tableThemeStyleSheetHandler(chart);
-		});
+		var name = chartFactory.builtinPropName("TableChart");
+		var isLocalStyle = (options.tableStyle != null);
 		
-		if(options.tableStyle)
+		if(isLocalStyle)
 		{
-			var name = chartFactory.nextElementId();
+			name = chartFactory.nextElementId();
 			chart.elementJquery().addClass(name);
 			chart.extValue(chartFactory.builtinPropName("TableChartLocalStyleName"), name);
+		}
+		
+		chart.themeStyleSheet(name, function()
+		{
+			var theme = chart.theme();
 			
-			chart.themeStyleSheet(name, function()
+			var tableStyle =
 			{
-				return chartSupport.tableThemeStyleSheetHandler(chart, name, options.tableStyle);
-			});
-		}
-	};
-	
-	chartSupport.tableThemeStyleSheetHandler = function(chart, localStyleName, tableStyle)
-	{
-		var theme = chart.theme();
-		
-		var themeTableStyle =
-		{
-			head:
+				head:
+				{
+					"color": theme.titleColor,
+					"background": theme.backgroundColor
+				},
+				row:
+				{
+					"color": theme.color
+				},
+				rowOdd:
+				{
+					"background": chart.gradualColor(0)
+				},
+				rowEven:
+				{
+					"background": theme.backgroundColor
+				},
+				rowHover:
+				{
+					"background": chart.gradualColor(0.2)
+				},
+				rowSelected:
+				{
+					"color": theme.highlightTheme.color,
+					"background": theme.highlightTheme.backgroundColor
+				}
+			};
+			
+			if(isLocalStyle)
+				tableStyle = $.extend(true, tableStyle, options.tableStyle);
+			
+			var headColor = tableStyle.head.color;
+			
+			//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
+			var qualifier = (isLocalStyle ? "." + name : "") + " .dg-chart-table-content";
+			var qualifierBsb = (isLocalStyle ? "." + name : "")
+						+ ".dg-chart-beautify-scrollbar .dg-chart-table-content";
+			
+			var css=
+			[
+				{
+					name: qualifier + " table.dataTable tbody tr",
+					value: chart.styleString(tableStyle.row)
+				},
+				{
+					name:
+					[
+						qualifier + " table.dataTable thead th",
+						qualifier + " table.dataTable thead td"
+					],
+					value: chart.styleString(tableStyle.head)
+				},
+				{
+					name:
+					[
+						qualifier + " table.dataTable.stripe tbody tr.odd",
+						qualifier + " table.dataTable.display tbody tr.odd"
+					],
+					value: chart.styleString(tableStyle.rowOdd)
+				},
+				{
+					name:
+					[
+						qualifier + " table.dataTable.stripe tbody tr.even",
+						qualifier + " table.dataTable.display tbody tr.even"
+					],
+					value: chart.styleString(tableStyle.rowEven)
+				},
+				{
+					name:
+					[
+						qualifier + " table.dataTable.hover tbody tr.hover",
+						qualifier + " table.dataTable.hover tbody tr:hover",
+						qualifier + " table.dataTable.display tbody tr:hover",
+						qualifier + " table.dataTable.hover tbody tr.hover.selected",
+						qualifier + " table.dataTable.hover tbody > tr.selected:hover",
+						qualifier + " table.dataTable.hover tbody > tr > .selected:hover",
+						qualifier + " table.dataTable.display tbody > tr.selected:hover",
+						qualifier + " table.dataTable.display tbody > tr > .selected:hover"
+					],
+					value: chart.styleString(tableStyle.rowHover)
+				},
+				{
+					name:
+					[
+						qualifier + " table.dataTable tbody > tr.selected",
+						qualifier + " table.dataTable tbody > tr > .selected",
+						qualifier + " table.dataTable.stripe tbody > tr.even.selected",
+						qualifier + " table.dataTable.stripe tbody > tr.even > .selected",
+						qualifier + " table.dataTable.display tbody > tr.even.selected",
+						qualifier + " table.dataTable.display tbody > tr.even > .selected",
+						qualifier + " table.dataTable.stripe tbody > tr.odd.selected",
+						qualifier + " table.dataTable.stripe tbody > tr.odd > .selected",
+						qualifier + " table.dataTable.display tbody > tr.odd.selected",
+						qualifier + " table.dataTable.display tbody > tr.odd > .selected"
+					],
+					value: chart.styleString(tableStyle.rowSelected)
+				},
+				{
+					name: qualifier + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span",
+					value:
+					{
+						"background": headColor
+					}
+				},
+				{
+					name: qualifier + " table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span",
+					value:
+					{
+						"border-bottom-color": headColor,
+						"background": "none"
+					}
+				},
+				{
+					name: qualifier + " table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span",
+					value:
+					{
+						"border-top-color": headColor,
+						"background": "none"
+					}
+				},
+				{
+					name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar",
+					value:
+					{
+						"width": "10px",
+						"height": "10px"
+					}
+				},
+				{
+					name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-thumb",
+					value:
+					{
+						"border-radius": "10px",
+						"background": chart.gradualColor(0.3)
+					}
+				},
+				{
+					name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-track",
+					value:
+					{
+						"background": chart.gradualColor(0.1)
+					}
+				}
+			];
+			
+			if(!isLocalStyle)
 			{
-				"color": theme.titleColor,
-				"background": theme.backgroundColor
-			},
-			row:
-			{
-				"color": theme.color
-			},
-			rowOdd:
-			{
-				"background": chart.gradualColor(0)
-			},
-			rowEven:
-			{
-				"background": theme.backgroundColor
-			},
-			rowHover:
-			{
-				"background": chart.gradualColor(0.2)
-			},
-			rowSelected:
-			{
-				"color": theme.highlightTheme.color,
-				"background": theme.highlightTheme.backgroundColor
+				css.push(
+				{
+					name: " .dg-chart-table-title",
+					value:
+					{
+						"color": theme.color,
+						"background-color": theme.backgroundColor
+					}
+				});
 			}
-		};
-		
-		if(localStyleName)
-			tableStyle = $.extend(true, {}, themeTableStyle, tableStyle);
-		else
-			tableStyle = themeTableStyle;
-		
-		var headColor = tableStyle.head.color;
-		
-		//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
-		var qualifier = (localStyleName ? "." + localStyleName : "") + " .dg-chart-table-content";
-		var qualifierBsb = (localStyleName ? "." + localStyleName : "")
-					+ ".dg-chart-beautify-scrollbar .dg-chart-table-content";
-		
-		var css=
-		[
-			{
-				name: qualifier + " table.dataTable tbody tr",
-				value: chart.styleString(tableStyle.row)
-			},
-			{
-				name:
-				[
-					qualifier + " table.dataTable thead th",
-					qualifier + " table.dataTable thead td"
-				],
-				value: chart.styleString(tableStyle.head)
-			},
-			{
-				name:
-				[
-					qualifier + " table.dataTable.stripe tbody tr.odd",
-					qualifier + " table.dataTable.display tbody tr.odd"
-				],
-				value: chart.styleString(tableStyle.rowOdd)
-			},
-			{
-				name:
-				[
-					qualifier + " table.dataTable.stripe tbody tr.even",
-					qualifier + " table.dataTable.display tbody tr.even"
-				],
-				value: chart.styleString(tableStyle.rowEven)
-			},
-			{
-				name:
-				[
-					qualifier + " table.dataTable.hover tbody tr.hover",
-					qualifier + " table.dataTable.hover tbody tr:hover",
-					qualifier + " table.dataTable.display tbody tr:hover",
-					qualifier + " table.dataTable.hover tbody tr.hover.selected",
-					qualifier + " table.dataTable.hover tbody > tr.selected:hover",
-					qualifier + " table.dataTable.hover tbody > tr > .selected:hover",
-					qualifier + " table.dataTable.display tbody > tr.selected:hover",
-					qualifier + " table.dataTable.display tbody > tr > .selected:hover"
-				],
-				value: chart.styleString(tableStyle.rowHover)
-			},
-			{
-				name:
-				[
-					qualifier + " table.dataTable tbody > tr.selected",
-					qualifier + " table.dataTable tbody > tr > .selected",
-					qualifier + " table.dataTable.stripe tbody > tr.even.selected",
-					qualifier + " table.dataTable.stripe tbody > tr.even > .selected",
-					qualifier + " table.dataTable.display tbody > tr.even.selected",
-					qualifier + " table.dataTable.display tbody > tr.even > .selected",
-					qualifier + " table.dataTable.stripe tbody > tr.odd.selected",
-					qualifier + " table.dataTable.stripe tbody > tr.odd > .selected",
-					qualifier + " table.dataTable.display tbody > tr.odd.selected",
-					qualifier + " table.dataTable.display tbody > tr.odd > .selected"
-				],
-				value: chart.styleString(tableStyle.rowSelected)
-			},
-			{
-				name: qualifier + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span",
-				value:
-				{
-					"background": headColor
-				}
-			},
-			{
-				name: qualifier + " table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span",
-				value:
-				{
-					"border-bottom-color": headColor,
-					"background": "none"
-				}
-			},
-			{
-				name: qualifier + " table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span",
-				value:
-				{
-					"border-top-color": headColor,
-					"background": "none"
-				}
-			},
-			{
-				name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar",
-				value:
-				{
-					"width": "10px",
-					"height": "10px"
-				}
-			},
-			{
-				name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-thumb",
-				value:
-				{
-					"border-radius": "10px",
-					"background": chart.gradualColor(0.3)
-				}
-			},
-			{
-				name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-track",
-				value:
-				{
-					"background": chart.gradualColor(0.1)
-				}
-			}
-		];
-		
-		if(!localStyleName)
-		{
-			css.push(
-			{
-				name: " .dg-chart-table-title",
-				value:
-				{
-					"color": theme.color,
-					"background-color": theme.backgroundColor
-				}
-			});
-		}
-		
-		return css;
+			
+			return css;
+		});
 	};
 	
 	chartSupport.tableEvalDataTableBodyHeight = function($chartContent, dataTable)
