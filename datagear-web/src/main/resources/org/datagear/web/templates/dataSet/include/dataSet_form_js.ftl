@@ -145,7 +145,7 @@ po.previewOptions.url = "...";
 				{
 					var dataTable = po.dataSetParamsTableElement().DataTable();
 					dataTable.columns.adjust();
-					dataTable.fixedColumns().relayout();
+					$.dataTableUtil.fixedColumnsRelayout(dataTable);
 				}
 				else if(ui.newPanel.hasClass("properties-table-wrapper"))
 				{
@@ -154,7 +154,7 @@ po.previewOptions.url = "...";
 					
 					var dataTable = po.dataSetPropertiesTableElement().DataTable();
 					dataTable.columns.adjust();
-					dataTable.fixedColumns().relayout();
+					$.dataTableUtil.fixedColumnsRelayout(dataTable);
 				}
 			}
 		});

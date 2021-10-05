@@ -132,42 +132,46 @@ form .form-content .form-item .form-item-value textarea.error{
 }
 
 /*Datatables*/
-table.dataTable tbody tr {
+table.dataTable tbody tr,
+table.dataTable tbody tr td {
 	background-color: #000000;
 }
 table.dataTable.stripe tbody tr.odd,
-table.dataTable.display tbody tr.odd {
+table.dataTable.stripe tbody tr.odd td {
 	background-color: #1d1d1d;
 }
 table.dataTable.hover tbody tr.hover,
-table.dataTable.hover tbody tr:hover,
-table.dataTable.display tbody tr:hover {
+table.dataTable.hover tbody tr.hover td {
 	background-color: #303030;
 }
+table.dataTable tbody tr.selected,
+table.dataTable tbody tr.selected td,
+table.dataTable.stripe tbody tr.odd.selected,
+table.dataTable.stripe tbody tr.odd.selected td,
 table.dataTable.hover tbody tr.hover.selected,
-table.dataTable tbody > tr.selected,
-table.dataTable tbody > tr > .selected,
-table.dataTable.stripe tbody > tr.odd.selected,
-table.dataTable.stripe tbody > tr.odd > .selected,
-table.dataTable.display tbody > tr.odd.selected,
-table.dataTable.display tbody > tr.odd > .selected,
-table.dataTable.hover tbody > tr.selected:hover,
-table.dataTable.hover tbody > tr > .selected:hover,
-table.dataTable.display tbody > tr.selected:hover,
-table.dataTable.display tbody > tr > .selected:hover {
+table.dataTable.hover tbody tr.hover.selected td {
 	background-color: #f58400;
 	color: #ffffff;
+}
+table.dataTable tbody tr td.selected,
+table.dataTable.stripe tbody tr.odd td.selected,
+table.dataTable.hover tbody tr.hover td.selected,
+table.dataTable tbody tr.selected td.selected,
+table.dataTable.stripe tbody tr.odd.selected td.selected,
+table.dataTable.hover tbody tr.hover.selected td.selected {
+	background-color: #FFB90F;
+	color: #333333;
 }
 table.dataTable tbody tr.selected .checkbox .ui-icon{
 	background-image: url(jquery-ui-1.12.1/images/ui-icons_ffffff_256x240.png);
 }
-table.dataTable tbody > tr > .selected,
-table.dataTable.stripe tbody > tr.odd > .selected,
-table.dataTable.display tbody > tr.odd > .selected,
-table.dataTable.hover tbody > tr > .selected:hover,
-table.dataTable.display tbody > tr > .selected:hover {
-	background-color: #FFB90F;
-	color: #333333;
+/*DataTables-1.11.3版本内置CSS这里不能适配Jquery-UI的样式类，所以这里重新设置，应为ui-state-default的背景色*/
+table.dataTable th{
+	background-color: #555555 !important;
+}
+.dataTables_wrapper .dtfc-right-top-blocker{
+	background-color: #555555 !important;
+	border-top-color: #555555 !important;
 }
 
 /*jquery-steps*/

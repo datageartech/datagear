@@ -226,7 +226,7 @@ page_js_obj.ftl
 			"searching" : false,
 			"select" : { style : 'os' },
 			"order": (orderColumn > -1 ? [[orderColumn, "asc"]] : []),
-			"fixedColumns": { leftColumns: 1 },
+			"fixedColumns": { left: 1 },
 		    "language":
 		    {
 				"emptyTable": "<@spring.message code='dataTables.noData' />",

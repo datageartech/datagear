@@ -1487,15 +1487,16 @@
 				
 				if(height != null)
 				{
+					height = height + "px";
 					var tableParent = $(dataTable.table().body()).parent().parent();
-					tableParent.height(height);
+					tableParent.css("height", height);
+					tableParent.css("max-height", height);
 				}
 				
 				if(adjustWidth)
 					dataTable.columns.adjust();
 				
-				if(dataTable.init().fixedColumns)
-					dataTable.fixedColumns().relayout();
+				$.dataTableUtil.fixedColumnsRelayout(dataTable);
 			}
 		},
 		
@@ -2120,11 +2121,8 @@
 				}
 			});
 			
-			var settins = dataTable.settings();
-			
 			//不加这一行，对话框中的初始空数据客户端表格添加记录后表头“选择”点击不起作用
-			if(settins.fixedColumns)
-				dataTable.fixedColumns().relayout();
+			$.dataTableUtil.fixedColumnsRelayout(dataTable);
 			
 			//行选中框
 			$(dataTable.table().body()).on("click", ".column-check", function(event)
@@ -2380,6 +2378,12 @@
 		{
 			var $tableParent = $(dataTable.table().body()).parent().parent();
 			return $tableParent;
+		},
+		
+		fixedColumnsRelayout: function(dataTable)
+		{
+			//if(dataTable.init().fixedColumns)
+			//	dataTable.fixedColumns().relayout();
 		}
 	});
 	

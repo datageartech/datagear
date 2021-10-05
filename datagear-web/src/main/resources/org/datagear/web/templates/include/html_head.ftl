@@ -16,9 +16,9 @@ var contextPath="${contextPath}";
 </script>
 <link id="css_jquery_ui" href="${contextPath}/static/theme/<@spring.theme code='theme' />/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="stylesheet" />
 <link id="css_jquery_ui_theme" href="${contextPath}/static/theme/<@spring.theme code='theme' />/jquery-ui-1.12.1/jquery-ui.theme.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/lib/jquery.layout-1.4.0/css/jquery.layout.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/jquery.layout-1.9.0/css/layout-default.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/jstree-3.3.7/themes/default/style.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/lib/DataTables-1.10.18/css/datatables.min.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/DataTables-1.11.3/css/datatables.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/jQuery-File-Upload-9.21.0/css/jquery.fileupload.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/jquery.steps-1.1.0/css/jquery.steps.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css" type="text/css" rel="stylesheet" />
@@ -29,11 +29,11 @@ var contextPath="${contextPath}";
 <link id="css_ace" href="${contextPath}/static/theme/<@spring.theme code='theme' />/ace-21.02.19/ace.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link id="css_common" href="${contextPath}/static/theme/<@spring.theme code='theme' />/common.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 
-<script src="${contextPath}/static/lib/jquery-1.12.4/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/jquery-3.6.0/jquery-3.6.0.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/jquery.layout-1.4.0/js/jquery.layout.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/jquery.layout-1.9.0/js/jquery.layout_and_plugins.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jstree-3.3.7/jstree.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/DataTables-1.10.18/js/datatables.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/DataTables-1.11.3/js/datatables.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery.form-3.51.0/jquery.form.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jQuery-File-Upload-9.21.0/js/jquery.iframe-transport.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jQuery-File-Upload-9.21.0/js/jquery.fileupload.js" type="text/javascript"></script>
