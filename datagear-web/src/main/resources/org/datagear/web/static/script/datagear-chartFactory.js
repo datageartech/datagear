@@ -4277,8 +4277,8 @@
 				},
 				"emptyCircleStyle":
 				{
-					"color": areaColor0,
-					"borderColor": areaBorderColor0
+					"color": chartFactory.gradualColor(chartTheme, 0),
+					"borderColor": chartFactory.gradualColor(chartTheme, 0.1)
 				}
 			},
 			"scatter" : {
