@@ -148,6 +148,7 @@ boolean readonly 是否只读操作，默认为false
 	];
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
 	po.initDataTable(tableSettings);
+	po.bindResizeDataTable();
 })
 (${pageId});
 </script>

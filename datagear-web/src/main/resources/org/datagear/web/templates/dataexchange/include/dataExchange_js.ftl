@@ -77,7 +77,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	
 	po.adjustDataTable = function()
 	{
-		po.getSubDataExchangeDataTable().columns.adjust();
+		$.dataTableUtil.adjustColumn(po.getSubDataExchangeDataTable());
 		$.updateDataTableHeight(po.elementTable(), po.calTableHeight());
 	};
 

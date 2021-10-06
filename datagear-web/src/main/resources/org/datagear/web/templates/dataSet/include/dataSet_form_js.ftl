@@ -144,8 +144,7 @@ po.previewOptions.url = "...";
 				else if(ui.newPanel.hasClass("params-table-wrapper"))
 				{
 					var dataTable = po.dataSetParamsTableElement().DataTable();
-					dataTable.columns.adjust();
-					$.dataTableUtil.fixedColumnsRelayout(dataTable);
+					$.dataTableUtil.adjustColumn(dataTable);
 				}
 				else if(ui.newPanel.hasClass("properties-table-wrapper"))
 				{
@@ -153,8 +152,7 @@ po.previewOptions.url = "...";
 						ui.newTab.removeClass("ui-state-highlight");
 					
 					var dataTable = po.dataSetPropertiesTableElement().DataTable();
-					dataTable.columns.adjust();
-					$.dataTableUtil.fixedColumnsRelayout(dataTable);
+					$.dataTableUtil.adjustColumn(dataTable);
 				}
 			}
 		});
