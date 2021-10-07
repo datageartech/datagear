@@ -4334,7 +4334,7 @@
 				head:
 				{
 					"color": theme.titleColor,
-					"background": theme.backgroundColor
+					"background-color": theme.backgroundColor
 				},
 				row:
 				{
@@ -4342,25 +4342,32 @@
 				},
 				rowOdd:
 				{
-					"background": chart.gradualColor(0)
+					"background-color": chart.gradualColor(0)
 				},
 				rowEven:
 				{
-					"background": theme.backgroundColor
+					"background-color": theme.backgroundColor
 				},
 				rowHover:
 				{
-					"background": chart.gradualColor(0.2)
+					"background-color": chart.gradualColor(0.2)
 				},
 				rowSelected:
 				{
 					"color": theme.highlightTheme.color,
-					"background": theme.highlightTheme.backgroundColor
+					"background-color": theme.highlightTheme.backgroundColor
 				}
 			};
 			
 			if(isLocalStyle)
 				tableStyle = $.extend(true, tableStyle, options.tableStyle);
+			
+			var headBgColor = (tableStyle.head["background-color"] ? tableStyle.head["background-color"] + "" : null);
+			if(headBgColor && headBgColor.indexOf("!important") < 0)
+			{
+				headBgColor += " !important";
+				tableStyle.head["background-color"] = headBgColor;
+			}
 			
 			var headColor = tableStyle.head.color;
 			
@@ -4372,10 +4379,6 @@
 			var css=
 			[
 				{
-					name: qualifier + " table.dataTable tbody tr",
-					value: chart.styleString(tableStyle.row)
-				},
-				{
 					name:
 					[
 						qualifier + " table.dataTable thead th",
@@ -4386,8 +4389,16 @@
 				{
 					name:
 					[
+						qualifier + " table.dataTable tbody tr",
+						qualifier + " table.dataTable tbody tr td",
+					],
+					value: chart.styleString(tableStyle.row)
+				},
+				{
+					name:
+					[
 						qualifier + " table.dataTable.stripe tbody tr.odd",
-						qualifier + " table.dataTable.display tbody tr.odd"
+						qualifier + " table.dataTable.stripe tbody tr.odd td"
 					],
 					value: chart.styleString(tableStyle.rowOdd)
 				},
@@ -4395,7 +4406,7 @@
 					name:
 					[
 						qualifier + " table.dataTable.stripe tbody tr.even",
-						qualifier + " table.dataTable.display tbody tr.even"
+						qualifier + " table.dataTable.stripe tbody tr.even td"
 					],
 					value: chart.styleString(tableStyle.rowEven)
 				},
@@ -4403,29 +4414,21 @@
 					name:
 					[
 						qualifier + " table.dataTable.hover tbody tr.hover",
-						qualifier + " table.dataTable.hover tbody tr:hover",
-						qualifier + " table.dataTable.display tbody tr:hover",
-						qualifier + " table.dataTable.hover tbody tr.hover.selected",
-						qualifier + " table.dataTable.hover tbody > tr.selected:hover",
-						qualifier + " table.dataTable.hover tbody > tr > .selected:hover",
-						qualifier + " table.dataTable.display tbody > tr.selected:hover",
-						qualifier + " table.dataTable.display tbody > tr > .selected:hover"
+						qualifier + " table.dataTable.hover tbody tr.hover td"
 					],
 					value: chart.styleString(tableStyle.rowHover)
 				},
 				{
 					name:
 					[
-						qualifier + " table.dataTable tbody > tr.selected",
-						qualifier + " table.dataTable tbody > tr > .selected",
-						qualifier + " table.dataTable.stripe tbody > tr.even.selected",
-						qualifier + " table.dataTable.stripe tbody > tr.even > .selected",
-						qualifier + " table.dataTable.display tbody > tr.even.selected",
-						qualifier + " table.dataTable.display tbody > tr.even > .selected",
-						qualifier + " table.dataTable.stripe tbody > tr.odd.selected",
-						qualifier + " table.dataTable.stripe tbody > tr.odd > .selected",
-						qualifier + " table.dataTable.display tbody > tr.odd.selected",
-						qualifier + " table.dataTable.display tbody > tr.odd > .selected"
+						qualifier + " table.dataTable tbody tr.selected",
+						qualifier + " table.dataTable tbody tr.selected td",
+						qualifier + " table.dataTable.stripe tbody tr.odd.selected",
+						qualifier + " table.dataTable.stripe tbody tr.odd.selected td",
+						qualifier + " table.dataTable.stripe tbody tr.even.selected",
+						qualifier + " table.dataTable.stripe tbody tr.even.selected td",
+						qualifier + " table.dataTable.hover tbody tr.hover.selected",
+						qualifier + " table.dataTable.hover tbody tr.hover.selected td"
 					],
 					value: chart.styleString(tableStyle.rowSelected)
 				},
