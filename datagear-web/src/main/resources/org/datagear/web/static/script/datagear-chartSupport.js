@@ -4213,7 +4213,7 @@
 		updateOptions = chart.inflateUpdateOptions(results, updateOptions);
 		
 		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0);
-		chartSupport.tableAdjust(chart);
+		chartSupport.tableAdjustColumn(chart.internal());
 		
 		if(renderOptions.carousel.enable)
 		{
@@ -4228,10 +4228,7 @@
 		var dataTable = chart.internal();
 		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
-		
-		dataTable.columns.adjust();
-		if(dataTable.init().fixedColumns)
-			dataTable.fixedColumns().relayout();
+		chartSupport.tableAdjustColumn(dataTable);
 	};
 	
 	chartSupport.tableDestroy = function(chart)
@@ -4508,6 +4505,7 @@
 		var fixedColumnContainer = tableBody.closest(".DTFC_ScrollWrapper");
 		var tableBodyHeight = chartContentHeight - tableHeaderHeight;
 		tableBody.css("height", tableBodyHeight);
+		tableBody.css("max-height", tableBodyHeight);
 		fixedColumnContainer.css("height", tableBody.parent().height());
 		
 		containerHeight = container.outerHeight(true);
@@ -4517,6 +4515,7 @@
 		{
 			tableBodyHeight = tableBodyHeight - (containerHeight - chartContentHeight);
 			tableBody.css("height", tableBodyHeight);
+			tableBody.css("max-height", tableBodyHeight);
 			fixedColumnContainer.css("height", tableBody.parent().height());
 		}
 	};
@@ -4555,17 +4554,20 @@
 	 * 调整图表表格。
 	 * 当表格隐藏显示、位置调整、数据变更后，可能会出现表头、固定列错位的情况，需要重新调整。
 	 */
-	chartSupport.tableAdjust = function(chart)
+	chartSupport.tableAdjustColumn = function(dataTable)
 	{
-		var dataTable = chart.internal();
-		
 		dataTable.columns.adjust();
-		if(dataTable.init().fixedHeader)
+		
+		var initOptions = dataTable.init();
+		
+		if(initOptions.fixedHeader)
 			dataTable.fixedHeader.adjust();
-		if(dataTable.init().fixedColumns)
-			dataTable.fixedColumns().relayout();
+		
+		/*
+		if(initOptions.fixedColumns)
+			dataTable.fixedColumns.relayout();
+		*/
 	};
-	
 	/**
 	 * 表格准备轮播。
 	 */

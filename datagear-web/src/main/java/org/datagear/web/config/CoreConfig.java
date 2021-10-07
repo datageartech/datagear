@@ -622,20 +622,21 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 		// CSS
 		importItems.add(
-				ImportItem.valueOfLinkCss("dataTableStyle", libPrefix + "/DataTables-1.10.18/css/datatables.min.css"));
+				ImportItem.valueOfLinkCss("dataTableStyle",
+						libPrefix + "/DataTables-1.11.3/css-chart/datatables.min.css"));
 		importItems.add(ImportItem.valueOfLinkCss("datetimepickerStyle",
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
 		importItems.add(ImportItem.valueOfLinkCss("dashboardStyle", cssPrefix + "/analysis.css?v=" + vp));
 
 		// JS
-		importItems.add(ImportItem.valueOfJavaScript("jquery", libPrefix + "/jquery-1.12.4/jquery-1.12.4.min.js"));
+		importItems.add(ImportItem.valueOfJavaScript("jquery", libPrefix + "/jquery-3.6.0/jquery-3.6.0.min.js"));
 		importItems.add(ImportItem.valueOfJavaScript("echarts", libPrefix + "/echarts-5.2.0/echarts.min.js"));
 		importItems.add(ImportItem.valueOfJavaScript("wordcloud",
 				libPrefix + "/echarts-wordcloud-2.0.0/echarts-wordcloud.min.js"));
 		importItems.add(ImportItem.valueOfJavaScript("liquidfill",
 				libPrefix + "/echarts-liquidfill-3.0.0/echarts-liquidfill.min.js"));
 		importItems
-				.add(ImportItem.valueOfJavaScript("dataTable", libPrefix + "/DataTables-1.10.18/js/datatables.min.js"));
+				.add(ImportItem.valueOfJavaScript("dataTable", libPrefix + "/DataTables-1.11.3/js/datatables.min.js"));
 		importItems.add(ImportItem.valueOfJavaScript("datetimepicker",
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
 		importItems

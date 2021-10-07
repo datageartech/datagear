@@ -1589,9 +1589,7 @@
 			var tableId = $(this).data("chartDataTableId");
 			var dataTable = $("#"+tableId, this).DataTable();
 			
-			dataTable.columns.adjust();
-			dataTable.fixedHeader.adjust();
-			dataTable.fixedColumns().relayout();
+			chartSetting.adjustColumn(dataTable);
 		});
 	};
 	
@@ -1647,7 +1645,7 @@
 		{
 			title: chartSetting.labels.serialNumber,
 			orderable: false,
-			data: "",
+			data: null,
 			width: "4em",
 			render: function(value, type, row, meta)
 			{
@@ -1941,6 +1939,21 @@
 		$panel.css("left", position.left);
 		$panel.css("top", position.top);
 		$panel.css("right", "unset");
+	};
+	
+	chartSetting.adjustColumn = function(dataTable)
+	{
+		dataTable.columns.adjust();
+		
+		var initOptions = dataTable.init();
+		
+		if(initOptions.fixedHeader)
+			dataTable.fixedHeader.adjust();
+		
+		/*
+		if(initOptions.fixedColumns)
+			dataTable.fixedColumns.relayout();
+		*/
 	};
 })
 (this);
