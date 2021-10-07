@@ -623,7 +623,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		// CSS
 		importItems.add(
 				ImportItem.valueOfLinkCss("dataTableStyle",
-						libPrefix + "/DataTables-1.11.3-chart/css/datatables.min.css"));
+						libPrefix + "/DataTables-1.11.3/css/datatables.min.css"));
 		importItems.add(ImportItem.valueOfLinkCss("datetimepickerStyle",
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
 		importItems.add(ImportItem.valueOfLinkCss("dashboardStyle", cssPrefix + "/analysis.css?v=" + vp));
@@ -637,7 +637,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 				libPrefix + "/echarts-liquidfill-3.0.0/echarts-liquidfill.min.js"));
 		importItems
 				.add(ImportItem.valueOfJavaScript("dataTable",
-						libPrefix + "/DataTables-1.11.3-chart/js/datatables.min.js"));
+						libPrefix + "/DataTables-1.11.3/js/datatables.min.js"));
 		importItems.add(ImportItem.valueOfJavaScript("datetimepicker",
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
 		importItems
