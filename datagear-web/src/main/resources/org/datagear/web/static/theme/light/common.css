@@ -165,13 +165,9 @@ table.dataTable.hover tbody tr.hover.selected td.selected {
 table.dataTable tbody tr.selected .checkbox .ui-icon{
 	background-image: url(jquery-ui-1.12.1/images/ui-icons_444444_256x240.png);
 }
-/*DataTables-1.11.3版本内置CSS这里不能适配Jquery-UI的样式类，所以这里重新设置，应为ui-state-default的背景色*/
+/*DataTables-1.11.3版本内置jquery-ui CSS这里有问题，所以这里重新设置，应为ui-state-default的背景色*/
 table.dataTable th{
 	background-color: #f6f6f6 !important;
-}
-.dataTables_wrapper .dtfc-right-top-blocker{
-	background-color: #f6f6f6 !important;
-	border-top-color: #f6f6f6 !important;
 }
 
 /*jquery-steps*/
