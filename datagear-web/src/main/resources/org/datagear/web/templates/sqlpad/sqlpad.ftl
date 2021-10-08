@@ -800,8 +800,8 @@ Schema schema 数据库，不允许为null
 		
 		var newDtColumns = [
 			{
-				title : "<@spring.message code='rowNumber' />", data : "", defaultContent: "",
-				render : po.renderRowNumberColumn, className : "column-row-number", width : "5em"
+				title: "<@spring.message code='rowNumber' />", data: null, defaultContent: "",
+				render: po.renderRowNumberColumn, className: "column-row-number", width: "5em"
 			}
 		];
 		newDtColumns = newDtColumns.concat(dtColumns);

@@ -4441,6 +4441,21 @@
 					}
 				},
 				{
+					name: qualifier + " .dataTables_wrapper .dataTables_length select",
+					value:
+					{
+						color: theme.color
+					}
+				},
+				{
+					name: qualifier + " .dataTables_wrapper .dataTables_length select option",
+					value:
+					{
+						color: theme.color,
+						"background-color": chart.gradualColor(0)
+					}
+				},
+				{
 					name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar",
 					value:
 					{

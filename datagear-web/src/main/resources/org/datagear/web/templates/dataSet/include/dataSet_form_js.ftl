@@ -955,8 +955,8 @@ po.previewOptions.url = "...";
 					
 					var newColumns = [
 						{
-							title : "<@spring.message code='rowNumber' />", data : "", defaultContent: "",
-							render : po.renderRowNumberColumn, className : "column-row-number", width : "3em"
+							title: "<@spring.message code='rowNumber' />", data: null, defaultContent: "",
+							render: po.renderRowNumberColumn, className: "column-row-number", width: "3em"
 						}
 					];
 					newColumns = newColumns.concat(columns);
@@ -1042,7 +1042,6 @@ po.previewOptions.url = "...";
 	{
 		dataSetProperties = (dataSetProperties || []);
 		
-		var firstColumnIndex = null;
 		var columns = [];
 		for(var i=0; i<dataSetProperties.length; i++)
 		{
@@ -1053,10 +1052,8 @@ po.previewOptions.url = "...";
 				//因为其中可能包含特殊字符（比如：'.'），而导致值无法展示
 				data: function(row, type, setValue, meta)
 				{
-					//XXX DataTables-1.10.18这里有BUG，meta.col初值为1而非0，所以这里特殊处理
-					if(firstColumnIndex == null)
-						firstColumnIndex = meta.col;
-					var colIndex = (firstColumnIndex == 1 ? meta.col - 1 : meta.col);
+					//第0列被序号列占用，所以这里要减1
+					var colIndex = (meta.col - 1);
 					
 					var name = dataSetProperties[colIndex].name;
 					
