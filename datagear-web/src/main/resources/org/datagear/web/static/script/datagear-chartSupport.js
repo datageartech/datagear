@@ -4369,12 +4369,9 @@
 			if(isLocalStyle)
 				tableStyle = $.extend(true, tableStyle, options.tableStyle);
 			
-			var headBgColor = (tableStyle.head["background-color"] ? tableStyle.head["background-color"] + "" : null);
-			if(headBgColor && headBgColor.indexOf("!important") < 0)
-			{
-				headBgColor += " !important";
-				tableStyle.head["background-color"] = headBgColor;
-			}
+			//DataTable内置CSS这里添加了"!important"，这里也必须添加才能起作用
+			tableStyle.head["background-color"] = chartSupport.cssValueImportant(tableStyle.head["background-color"]);
+			tableStyle.head["background"] = chartSupport.cssValueImportant(tableStyle.head["background"]);
 			
 			var headColor = tableStyle.head.color;
 			
@@ -6069,6 +6066,19 @@
 			re = localPlainObj;
 		
 		return re;
+	};
+	
+	chartSupport.cssValueImportant = function(cssValue)
+	{
+		if(!cssValue)
+			return cssValue;
+		
+		cssValue = (typeof(cssValue) == "string" ? cssValue : cssValue.toString());
+		
+		if(cssValue.indexOf("!important") < 0)
+			cssValue += " !important";
+		
+		return cssValue;
 	};
 	
 	//---------------------------------------------------------
