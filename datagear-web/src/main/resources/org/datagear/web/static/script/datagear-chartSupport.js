@@ -4350,7 +4350,8 @@
 			if(isLocalStyle)
 				tableStyle = $.extend(true, tableStyle, options.tableStyle);
 			
-			//DataTable内置CSS这里添加了"!important"，这里也必须添加才能起作用
+			//DataTable内置背景CSS添加了"!important"，这里也必须添加才能起作用
+			tableStyle.head["backgroundColor"] = chartSupport.cssValueImportant(tableStyle.head["backgroundColor"]);
 			tableStyle.head["background-color"] = chartSupport.cssValueImportant(tableStyle.head["background-color"]);
 			tableStyle.head["background"] = chartSupport.cssValueImportant(tableStyle.head["background"]);
 			
