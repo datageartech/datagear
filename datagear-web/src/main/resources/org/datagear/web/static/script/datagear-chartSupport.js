@@ -4083,9 +4083,16 @@
 		//填充options.columns的render函数
 		for(var i=0; i<options.columns.length; i++)
 		{
-			if(options.columns[i].render == null)
+			var column = options.columns[i];
+			
+			//DataTables-1.10.18是允许column.data为""的，升级至1.11.3后则会有一个警告弹出框，
+			//这里设置defaultContent可以解决此问题
+			if(column.data == "" && column.defaultContent == null)
+				column.defaultContent = "";
+			
+			if(column.render == null)
 			{
-				options.columns[i].render = function(value, type, row, meta)
+				column.render = function(value, type, row, meta)
 				{
 					//单元格展示绘制
 					if(type == "display")
