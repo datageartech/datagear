@@ -1646,11 +1646,8 @@
 			title: chartSetting.labels.serialNumber,
 			orderable: false,
 			data: null,
-			width: "4em",
-			render: function(value, type, row, meta)
-			{
-				return "";
-			}
+			defaultContent: "",
+			width: "4em"
 		});
 		
 		for(var i=0; i<signProperties.length; i++)
@@ -1715,27 +1712,6 @@
 		
 		table.dataTable(tableOptions);
 		
-		var dataTable = table.DataTable();
-		
-		//固定选择列后hover效果默认不能同步，需要自己实现
-		if(tableOptions.fixedColumns)
-		{
-			$(dataTable.table().body()).on("mouseover mouseout", "tr",
-			function(event)
-			{
-				var rowIndex = $(this).index() + 1;
-				var $tableContainer = $(dataTable.table().container());
-				
-				$(".dataTable", $tableContainer).each(function()
-				{
-					if(event.type == "mouseover")
-						$("tr:eq("+rowIndex+")", this).addClass("hover");
-					else
-						$("tr:eq("+rowIndex+")", this).removeClass("hover");
-				});
-			});
-		}
-		
 		return tableId;
 	};
 	
@@ -1782,13 +1758,6 @@
 			var css =
 			[
 				{
-					name: cssPrefix + " table.dataTable tbody tr",
-					value:
-					{
-						"color": theme.color
-					}
-				},
-				{
 					name:
 					[
 						cssPrefix + " table.dataTable thead th",
@@ -1797,14 +1766,25 @@
 					value:
 					{
 						"color": theme.titleColor,
-						"background-color": bgColor
+						"background-color": bgColor + " !important"
+					}
+				},
+				{
+					name:
+					[
+						cssPrefix + " table.dataTable tbody tr",
+						cssPrefix + " table.dataTable tbody tr td",
+					],
+					value:
+					{
+						"color": theme.color
 					}
 				},
 				{
 					name:
 					[
 						cssPrefix + " table.dataTable.stripe tbody tr.odd",
-						cssPrefix + " table.dataTable.display tbody tr.odd"
+						cssPrefix + " table.dataTable.stripe tbody tr.odd td"
 					],
 					value:
 					{
@@ -1815,7 +1795,7 @@
 					name:
 					[
 						cssPrefix + " table.dataTable.stripe tbody tr.even",
-						cssPrefix + " table.dataTable.display tbody tr.even"
+						cssPrefix + " table.dataTable.stripe tbody tr.even td"
 					],
 					value:
 					{
@@ -1825,14 +1805,8 @@
 				{
 					name:
 					[
-						cssPrefix + " table.dataTable.hover tbody tr.hover",
 						cssPrefix + " table.dataTable.hover tbody tr:hover",
-						cssPrefix + " table.dataTable.display tbody tr:hover",
-						cssPrefix + " table.dataTable.hover tbody tr.hover.selected",
-						cssPrefix + " table.dataTable.hover tbody > tr.selected:hover",
-						cssPrefix + " table.dataTable.hover tbody > tr > .selected:hover",
-						cssPrefix + " table.dataTable.display tbody > tr.selected:hover",
-						cssPrefix + " table.dataTable.display tbody > tr > .selected:hover"
+						cssPrefix + " table.dataTable.hover tbody tr:hover td"
 					],
 					value:
 					{
@@ -1842,16 +1816,14 @@
 				{
 					name:
 					[
-						cssPrefix + " table.dataTable tbody > tr.selected",
-						cssPrefix + " table.dataTable tbody > tr > .selected",
-						cssPrefix + " table.dataTable.stripe tbody > tr.even.selected",
-						cssPrefix + " table.dataTable.stripe tbody > tr.even > .selected",
-						cssPrefix + " table.dataTable.display tbody > tr.even.selected",
-						cssPrefix + " table.dataTable.display tbody > tr.even > .selected",
-						cssPrefix + " table.dataTable.stripe tbody > tr.odd.selected",
-						cssPrefix + " table.dataTable.stripe tbody > tr.odd > .selected",
-						cssPrefix + " table.dataTable.display tbody > tr.odd.selected",
-						cssPrefix + " table.dataTable.display tbody > tr.odd > .selected"
+						cssPrefix + " table.dataTable tbody tr.selected",
+						cssPrefix + " table.dataTable tbody tr.selected td",
+						cssPrefix + " table.dataTable.stripe tbody tr.odd.selected",
+						cssPrefix + " table.dataTable.stripe tbody tr.odd.selected td",
+						cssPrefix + " table.dataTable.stripe tbody tr.even.selected",
+						cssPrefix + " table.dataTable.stripe tbody tr.even.selected td",
+						cssPrefix + " table.dataTable.hover tbody tr:hover.selected",
+						cssPrefix + " table.dataTable.hover tbody tr:hover.selected td"
 					],
 					value:
 					{

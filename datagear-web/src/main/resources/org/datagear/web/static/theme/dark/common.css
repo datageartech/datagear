@@ -140,25 +140,25 @@ table.dataTable.stripe tbody tr.odd,
 table.dataTable.stripe tbody tr.odd td {
 	background-color: #1d1d1d;
 }
-table.dataTable.hover tbody tr.hover,
-table.dataTable.hover tbody tr.hover td {
+table.dataTable.hover tbody tr:hover,
+table.dataTable.hover tbody tr:hover td {
 	background-color: #303030;
 }
 table.dataTable tbody tr.selected,
 table.dataTable tbody tr.selected td,
 table.dataTable.stripe tbody tr.odd.selected,
 table.dataTable.stripe tbody tr.odd.selected td,
-table.dataTable.hover tbody tr.hover.selected,
-table.dataTable.hover tbody tr.hover.selected td {
+table.dataTable.hover tbody tr:hover.selected,
+table.dataTable.hover tbody tr:hover.selected td {
 	background-color: #f58400;
 	color: #ffffff;
 }
 table.dataTable tbody tr td.selected,
 table.dataTable.stripe tbody tr.odd td.selected,
-table.dataTable.hover tbody tr.hover td.selected,
+table.dataTable.hover tbody tr:hover td.selected,
 table.dataTable tbody tr.selected td.selected,
 table.dataTable.stripe tbody tr.odd.selected td.selected,
-table.dataTable.hover tbody tr.hover.selected td.selected {
+table.dataTable.hover tbody tr:hover.selected td.selected {
 	background-color: #FFB90F;
 	color: #333333;
 }

@@ -4054,7 +4054,7 @@
 		// > @deprecated 兼容2.8.0版本的{title:{color:"..."}}配置项结构，未来版本会移除
 		
 		// < @deprecated 兼容2.8.0版本的{table:{header:{},row:{color:'red',odd:{...},even:{...},hover:{...},selected:{...}}}}配置项结构，未来版本会移除
-		if(options.table)
+		if(options.table && !options.tableStyle)
 		{
 			var tableStyle = $.extend(true, {}, options.table);
 			delete tableStyle.renderValue;
@@ -4166,25 +4166,6 @@
 			if(options.carousel.pauseOnHover && options.carousel.enable)
 				chartSupport.tableStartCarousel(chart);
 		});
-		
-		//固定选择列后hover效果默认不能同步，需要自己实现
-		if(options.fixedColumns)
-		{
-			$(dataTable.table().body()).on("mouseover mouseout", "tr",
-			function(event)
-			{
-				var rowIndex = $(this).index() + 1;
-				var $tableContainer = $(dataTable.table().container());
-				
-				$(".dataTable", $tableContainer).each(function()
-				{
-					if(event.type == "mouseover")
-						$("tr:eq("+rowIndex+")", this).addClass("hover");
-					else
-						$("tr:eq("+rowIndex+")", this).removeClass("hover");
-				});
-			});
-		}
 		
 		chart.internal(dataTable);
 	};
@@ -4417,8 +4398,8 @@
 				{
 					name:
 					[
-						qualifier + " table.dataTable.hover tbody tr.hover",
-						qualifier + " table.dataTable.hover tbody tr.hover td"
+						qualifier + " table.dataTable.hover tbody tr:hover",
+						qualifier + " table.dataTable.hover tbody tr:hover td"
 					],
 					value: chart.styleString(tableStyle.rowHover)
 				},
@@ -4431,8 +4412,8 @@
 						qualifier + " table.dataTable.stripe tbody tr.odd.selected td",
 						qualifier + " table.dataTable.stripe tbody tr.even.selected",
 						qualifier + " table.dataTable.stripe tbody tr.even.selected td",
-						qualifier + " table.dataTable.hover tbody tr.hover.selected",
-						qualifier + " table.dataTable.hover tbody tr.hover.selected td"
+						qualifier + " table.dataTable.hover tbody tr:hover.selected",
+						qualifier + " table.dataTable.hover tbody tr:hover.selected td"
 					],
 					value: chart.styleString(tableStyle.rowSelected)
 				},

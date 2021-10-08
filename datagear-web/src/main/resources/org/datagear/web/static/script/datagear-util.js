@@ -2174,38 +2174,7 @@
 						dataTable.row($tr).select();
 					}
 				}
-			})
-			//固定选择列后hover效果默认不能同步，需要自己实现
-			.on("mouseover mouseout", ".column-check",
-			function(event)
-			{
-				var $tableContainer = $(dataTable.table().container());
-				var rowIndex = $(this).parent().index() + 1;
-				
-				$(".dataTable", $tableContainer).each(function()
-				{
-					if(event.type == "mouseover")
-						$("tr:eq("+rowIndex+")", this).addClass("hover");
-					else
-						$("tr:eq("+rowIndex+")", this).removeClass("hover");
-				});
 			});
-			
-			//固定选择列后hover效果默认不能同步，需要自己实现
-			$(dataTable.table().body()).on("mouseover mouseout", "tr",
-			function(event)
-			{
-				var rowIndex = $(this).index() + 1;
-				var $tableContainer = $(dataTable.table().container());
-				
-				$(".dataTable", $tableContainer).each(function()
-				{
-					if(event.type == "mouseover")
-						$("tr:eq("+rowIndex+")", this).addClass("hover");
-					else
-						$("tr:eq("+rowIndex+")", this).removeClass("hover");
-				});
-			}); 
 		},
 		
 		executeOnSelect: function(dataTable, illegalTip, callback)
