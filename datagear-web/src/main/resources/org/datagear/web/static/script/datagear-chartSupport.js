@@ -4457,10 +4457,14 @@
 					}
 				},
 				{
-					name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-track",
+					name:
+					[
+						qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-track",
+						qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-corner"
+					],
 					value:
 					{
-						"background": chart.gradualColor(0.1)
+						"background": theme.backgroundColor
 					}
 				}
 			];
@@ -5252,7 +5256,7 @@
 	{
 		chart.themeStyleSheet(chartFactory.builtinPropName("SelectChart"), function()
 		{
-			var chartTheme = chart.theme();
+			var theme = chart.theme();
 			
 			var css=
 			[
@@ -5260,16 +5264,16 @@
 					name: " .dg-chart-select-select",
 					value:
 					{
-						"color": chartTheme.color,
-						"background-color": chartTheme.backgroundColor,
-						"border-color": chartTheme.borderColor
+						"color": theme.color,
+						"background-color": theme.backgroundColor,
+						"border-color": theme.borderColor
 					}
 				},
 				{
 					name: ".dg-chart-select-dropdown .dg-chart-select-select option",
 					value:
 					{
-						"color": chartTheme.color,
+						"color": theme.color,
 						"background-color": chart.gradualColor(0.1)
 					}
 				},
@@ -5290,10 +5294,14 @@
 					}
 				},
 				{
-					name: ".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar-track",
+					name:
+					[
+						".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar-track",
+						".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar-corner"
+					],
 					value:
 					{
-						"background": chart.gradualColor(0.1)
+						"background": theme.backgroundColor
 					}
 				}
 			];
