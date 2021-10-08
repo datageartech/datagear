@@ -184,8 +184,7 @@ data_page_obj_edit_grid_html.ftl
 	
 	po.getEditGridInitDatas = function(dataTable)
 	{
-		var editTableDatas = $.makeArray(dataTable.data());
-		return po.removeCheckColumnProperty(editTableDatas);
+		return $.makeArray(dataTable.data());
 	};
 	
 	po.initEditGridDataTable = function($editTable, dataTable)
@@ -1002,7 +1001,7 @@ data_page_obj_edit_grid_html.ftl
 			{
 				"updateOrigins" : $.meta.uniqueRecordData(po.editGridMetaTable, updateOrigins),
 				"updateTargets" : $.meta.removeLabeledValueFeature(updateTargets),
-				"adds" : po.removeCheckColumnProperty($.meta.removeLabeledValueFeature(adds)),
+				"adds" : $.meta.removeLabeledValueFeature(adds),
 				"deletes" : $.meta.uniqueRecordData(po.editGridMetaTable, deletes)
 			},
 			"beforeSend" : function()

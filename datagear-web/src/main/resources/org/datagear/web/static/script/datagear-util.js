@@ -2064,34 +2064,17 @@
 			return nameOrder;
 		},
 		
-		TABLE_CHECK_COLUMN_NAME: "___DATA_GEAR_CHECK_COLUMN",
-		
-		removeCheckColumnProperty: function(data)
-		{
-			if(!data)
-				return data;
-			
-			var datas = ($.isArray(data) ? data : [data]);
-			
-			for(var i=0; i<datas.length; i++)
-			{
-				var ele = datas[i];
-				for(var p in ele)
-				{
-					if(p == $.dataTableUtil.TABLE_CHECK_COLUMN_NAME)
-						delete ele[p];
-				}
-			}
-			
-			return data;
-		},
-		
 		buildCheckCloumn: function(title)
 		{
 			var column=
 			{
-				title : title, data : $.dataTableUtil.TABLE_CHECK_COLUMN_NAME,
-				defaultContent: "", width : "3em", orderable : false, render : $.dataTableUtil.renderCheckColumn, className : "column-check"
+				title : title,
+				data : null,
+				defaultContent: "",
+				width : "3em",
+				orderable : false,
+				render : $.dataTableUtil.renderCheckColumn,
+				className : "column-check"
 			};
 			
 			return column;
