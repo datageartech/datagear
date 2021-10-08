@@ -28,6 +28,14 @@ textarea:focus{
 	box-shadow: 0px 0px 4px 0px #b3b3b3;
 }
 
+*::-webkit-scrollbar-thumb{
+	background: #444;
+}
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner{
+	background: #000;
+}
+
 /*表单*/
 form .form-content .form-item label.error{
 	color: red;
