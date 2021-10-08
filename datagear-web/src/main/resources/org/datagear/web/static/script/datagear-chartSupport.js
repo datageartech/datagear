@@ -4467,8 +4467,8 @@
 					name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-thumb",
 					value:
 					{
-						"border-radius": "10px",
-						"background": chart.gradualColor(0.3)
+						"border-radius": "4px",
+						"background": chart.gradualColor(0.2)
 					}
 				},
 				{
@@ -5299,8 +5299,8 @@
 					name: ".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar-thumb",
 					value:
 					{
-						"border-radius": "10px",
-						"background": chart.gradualColor(0.3)
+						"border-radius": "4px",
+						"background": chart.gradualColor(0.2)
 					}
 				},
 				{
