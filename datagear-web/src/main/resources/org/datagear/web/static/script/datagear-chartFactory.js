@@ -3534,7 +3534,7 @@
 	 * 					  //注意：前面加空格表示子元素、不加则表示元素本身
 	 * 					  name: "..."、["...", ...],
 	 * 					  //CSS属性对象、CSS属性字符串，例如：
-	 *                    //{ "color": "red", "background-color": "blue", borderColor: "red" }、
+	 *                    //{ "color": "red", "background-color": "blue", "border-color": "red" }、
 	 *                    //"color:red;background-color:blue;"
 	 * 					  value: { CSS属性名 : CSS属性值, ... }、"..."
 	 * 					}
@@ -3648,8 +3648,7 @@
 	 * 
 	 * @param css 要拼接的CSS样式，格式为：
 	 *            字符串，例如："color:red;font-size:1.5em"
-	 *            CSS属性对象，例如：{ color: "...", backgroundColor: "...", "font-size": "...", ...  }，
-	 *            不合法的属性名将被转换为合法属性名，比如："backgroundColor"将被转换为"background-color"，另外，非字符串、数值、布尔型的属性值将被忽略
+	 *            CSS属性对象，例如：{ color: "...", "backgroundColor": "...", "font-size": "...", ...  }，
 	 *            数组，元素可以是字符串、CSS属性对象
 	 *            或者是上述格式的变长参数
 	 * @return 拼接后的CSS样式字符串，例如："color:red;background-color:red;font-size:1px;"
@@ -3677,7 +3676,7 @@
 			
 			if(!cssi)
 				continue;
-				
+			
 			if(typeof(cssi) == "string")
 				cssiText = cssi;
 			else
@@ -3689,7 +3688,10 @@
 					
 					if(valueType == "string" || valueType == "number" || valueType == "boolean")
 					{
+						// < @deprecated 兼容2.8.0版本的相关驼峰命名的功能，将在未来版本移除
 						name = chartFactory.toLegalStyleName(name);
+						// > @deprecated 兼容2.8.0版本的相关驼峰命名的功能，将在未来版本移除
+						
 						cssiText += name + ":" + value + ";";
 					}
 				}

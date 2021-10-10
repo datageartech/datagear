@@ -4381,6 +4381,7 @@
 			{
 				var optionTableStyle = options.tableStyle;
 				
+				// < @deprecated 兼容2.8.0版本的驼峰命名CSS，将在未来版本移除
 				//需要先转换可能的驼峰CSS命名，不然extend后的CSS可能重名而优先级混乱
 				optionTableStyle = $.extend(true, {}, optionTableStyle);
 				optionTableStyle.table = chartSupport.toLegalStyleNameObj(optionTableStyle.table);
@@ -4402,6 +4403,7 @@
 					optionTableStyle.body.cellHover = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellHover);
 					optionTableStyle.body.cellSelected = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellSelected);
 				}
+				// > @deprecated 兼容2.8.0版本的驼峰命名CSS，将在未来版本移除
 				
 				tableStyle = $.extend(true, tableStyle, optionTableStyle);
 			}
