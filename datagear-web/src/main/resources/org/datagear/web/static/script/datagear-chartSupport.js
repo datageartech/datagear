@@ -3962,7 +3962,16 @@
 			},
 			//标题样式，格式为：{ color:'red', 'background-color':'blue' }
 			titleStyle: undefined,
-			//表格样式，格式为：{ head:{...}, row:{...}, rowOdd:{}, rowEven: {}, rowHover:{...}, rowSelected:{...} }
+			//表格样式，格式为：
+			//{
+			//	table: {...},
+			//	head: { row: {...}, cell: {...} },
+			//	body:
+			//	{
+			//		row: {...}, rowOdd: {}, rowEven: {}, rowHover: {...}, rowSelected: {...},
+			//		cell: {...}, cellOdd: {}, cellEven: {}, cellHover: {...}, cellSelected: {...}
+			//	}
+			//}
 			tableStyle: undefined,
 			//自定义单元格渲染函数，格式为：function(value, name, rowIndex, columnIndex, row, meta){ return ...; }
 			renderCell: undefined,
@@ -4054,25 +4063,29 @@
 		// > @deprecated 兼容2.8.0版本的{title:{color:"..."}}配置项结构，未来版本会移除
 		
 		// < @deprecated 兼容2.8.0版本的{table:{header:{},row:{color:'red',odd:{...},even:{...},hover:{...},selected:{...}}}}配置项结构，未来版本会移除
-		if(options.table)
+		if(options.table && !options.tableStyle)
 		{
 			var tableStyle = $.extend(true, {}, options.table);
 			delete tableStyle.renderValue;
 			
-			if(!$.isEmptyObject(tableStyle))
+			if(tableStyle.header || tableStyle.row)
 			{
-				tableStyle.head = tableStyle.header;
+				tableStyle.head = { row: tableStyle.header };
 				delete tableStyle.header;
+				
 				if(tableStyle.row)
 				{
-					tableStyle.rowOdd = tableStyle.row.odd;
-					delete tableStyle.row.odd;
-					tableStyle.rowEven = tableStyle.row.even;
-					delete tableStyle.row.even;
-					tableStyle.rowHover = tableStyle.row.hover;
-					delete tableStyle.row.hover;
-					tableStyle.rowSelected = tableStyle.row.selected;
-					delete tableStyle.row.selected;
+					tableStyle.body = { row: tableStyle.row };
+					delete tableStyle.row;
+					
+					tableStyle.body.rowOdd = tableStyle.body.row.odd;
+					tableStyle.body.rowEven = tableStyle.body.row.even;
+					tableStyle.body.rowHover = tableStyle.body.row.hover;
+					tableStyle.body.rowSelected = tableStyle.body.row.selected;
+					delete tableStyle.body.row.odd;
+					delete tableStyle.body.row.even;
+					delete tableStyle.body.row.hover;
+					delete tableStyle.body.row.selected;
 				}
 				
 				options.tableStyle = tableStyle;
@@ -4332,40 +4345,57 @@
 		{
 			var theme = chart.theme();
 			
+			//行应该使用实际背景色，因为backgroundColor可能是透明的，当使用它设置固定列时，
+			//横向滚动时固定列无法遮挡其他滚动列
+			var rowBgColor = theme.actualBackgroundColor;
+			
 			var tableStyle =
 			{
+				table: {},
 				head:
 				{
-					"color": theme.titleColor,
-					"background": theme.backgroundColor
+					row:
+					{
+						"color": theme.titleColor,
+						"background-color": rowBgColor
+					},
+					cell: {}
 				},
-				row:
+				body:
 				{
-					"color": theme.color
-				},
-				rowOdd:
-				{
-					"background": chart.gradualColor(0)
-				},
-				rowEven:
-				{
-					"background": theme.backgroundColor
-				},
-				rowHover:
-				{
-					"background": chart.gradualColor(0.2)
-				},
-				rowSelected:
-				{
-					"color": theme.highlightTheme.color,
-					"background": theme.highlightTheme.backgroundColor
+					row:
+					{
+						"color": theme.color
+					},
+					rowOdd:
+					{
+						"background-color": chart.gradualColor(0)
+					},
+					rowEven:
+					{
+						"background-color": rowBgColor
+					},
+					rowHover:
+					{
+						"background-color": chart.gradualColor(0.2)
+					},
+					rowSelected:
+					{
+						"color": theme.highlightTheme.color,
+						"background-color": theme.highlightTheme.backgroundColor
+					},
+					cell: {},
+					cellOdd: {},
+					cellEven: {},
+					cellHover: {},
+					cellSelected: {}
 				}
 			};
 			
 			if(isLocalStyle)
 				tableStyle = $.extend(true, tableStyle, options.tableStyle);
 			
-			var headColor = tableStyle.head.color;
+			var headCellColor = (tableStyle.head.cell.color || tableStyle.head.row.color);
 			
 			//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
 			var qualifier = (isLocalStyle ? "." + name : "") + " .dg-chart-table-content";
@@ -4375,75 +4405,95 @@
 			var css=
 			[
 				{
+					name: qualifier + " table.dataTable",
+					value: chart.styleString(tableStyle.table)
+				},
+				{
+					name: qualifier + " table.dataTable thead tr",
+					value: chart.styleString(tableStyle.head.row)
+				},
+				{
+					name:
+					[
+						qualifier + " table.dataTable thead tr th",
+						qualifier + " table.dataTable thead tr td"
+					],
+					value: chart.styleString(tableStyle.head.cell)
+				},
+				{
 					name: qualifier + " table.dataTable tbody tr",
-					value: chart.styleString(tableStyle.row)
+					value: chart.styleString(tableStyle.body.row)
 				},
 				{
-					name:
-					[
-						qualifier + " table.dataTable thead th",
-						qualifier + " table.dataTable thead td"
-					],
-					value: chart.styleString(tableStyle.head)
+					name: qualifier + " table.dataTable tbody tr td",
+					value: chart.styleString(tableStyle.body.cell)
 				},
 				{
-					name:
-					[
-						qualifier + " table.dataTable.stripe tbody tr.odd",
-						qualifier + " table.dataTable.display tbody tr.odd"
-					],
-					value: chart.styleString(tableStyle.rowOdd)
+					name: qualifier + " table.dataTable.stripe tbody tr.odd",
+					value: chart.styleString(tableStyle.body.rowOdd)
 				},
 				{
-					name:
-					[
-						qualifier + " table.dataTable.stripe tbody tr.even",
-						qualifier + " table.dataTable.display tbody tr.even"
-					],
-					value: chart.styleString(tableStyle.rowEven)
+					name: qualifier + " table.dataTable.stripe tbody tr.odd td",
+					value: chart.styleString(tableStyle.body.cellOdd)
+				},
+				{
+					name: qualifier + " table.dataTable.stripe tbody tr.even",
+					value: chart.styleString(tableStyle.body.rowEven)
+				},
+				{
+					name: qualifier + " table.dataTable.stripe tbody tr.even td",
+					value: chart.styleString(tableStyle.body.cellEven)
 				},
 				{
 					name:
 					[
 						qualifier + " table.dataTable.hover tbody tr.hover",
-						qualifier + " table.dataTable.hover tbody tr:hover",
-						qualifier + " table.dataTable.display tbody tr:hover",
-						qualifier + " table.dataTable.hover tbody tr.hover.selected",
-						qualifier + " table.dataTable.hover tbody > tr.selected:hover",
-						qualifier + " table.dataTable.hover tbody > tr > .selected:hover",
-						qualifier + " table.dataTable.display tbody > tr.selected:hover",
-						qualifier + " table.dataTable.display tbody > tr > .selected:hover"
+						qualifier + " table.dataTable.hover tbody tr:hover"
 					],
-					value: chart.styleString(tableStyle.rowHover)
+					value: chart.styleString(tableStyle.body.rowHover)
 				},
 				{
 					name:
 					[
-						qualifier + " table.dataTable tbody > tr.selected",
-						qualifier + " table.dataTable tbody > tr > .selected",
-						qualifier + " table.dataTable.stripe tbody > tr.even.selected",
-						qualifier + " table.dataTable.stripe tbody > tr.even > .selected",
-						qualifier + " table.dataTable.display tbody > tr.even.selected",
-						qualifier + " table.dataTable.display tbody > tr.even > .selected",
-						qualifier + " table.dataTable.stripe tbody > tr.odd.selected",
-						qualifier + " table.dataTable.stripe tbody > tr.odd > .selected",
-						qualifier + " table.dataTable.display tbody > tr.odd.selected",
-						qualifier + " table.dataTable.display tbody > tr.odd > .selected"
+						qualifier + " table.dataTable.hover tbody tr.hover td",
+						qualifier + " table.dataTable.hover tbody tr:hover td"
 					],
-					value: chart.styleString(tableStyle.rowSelected)
+					value: chart.styleString(tableStyle.body.cellHover)
+				},
+				{
+					name:
+					[
+						qualifier + " table.dataTable tbody tr.selected",
+						qualifier + " table.dataTable.stripe tbody tr.even.selected",
+						qualifier + " table.dataTable.stripe tbody tr.odd.selected",
+						qualifier + " table.dataTable.hover tbody tr.hover.selected",
+						qualifier + " table.dataTable.hover tbody tr:hover.selected"
+					],
+					value: chart.styleString(tableStyle.body.rowSelected)
+				},
+				{
+					name:
+					[
+						qualifier + " table.dataTable tbody tr.selected td",
+						qualifier + " table.dataTable.stripe tbody tr.even.selected td",
+						qualifier + " table.dataTable.stripe tbody tr.odd.selected td",
+						qualifier + " table.dataTable.hover tbody tr.hover.selected td",
+						qualifier + " table.dataTable.hover tbody tr:hover.selected td"
+					],
+					value: chart.styleString(tableStyle.body.cellSelected)
 				},
 				{
 					name: qualifier + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span",
 					value:
 					{
-						"background": headColor
+						"background": headCellColor
 					}
 				},
 				{
 					name: qualifier + " table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span",
 					value:
 					{
-						"border-bottom-color": headColor,
+						"border-bottom-color": headCellColor,
 						"background": "none"
 					}
 				},
@@ -4451,7 +4501,7 @@
 					name: qualifier + " table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span",
 					value:
 					{
-						"border-top-color": headColor,
+						"border-top-color": headCellColor,
 						"background": "none"
 					}
 				},
