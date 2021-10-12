@@ -175,3 +175,11 @@ SQL工作台
 	UPDATE DATAGEAR_VERSION SET VERSION_VALUE='2.2.0'
 
 系统自带了一个可用于为内置数据库执行SQL语句的简单工具类`org.datagear.web.util.DerbySqlClient`，可以在IDE中直接运行。注意：运行前需要先停止DataGear程序。
+
+## License
+
+Copyright 2018-2021 datagear.tech
+
+Licensed under the LGPLv3 license:
+
+[http://www.gnu.org/licenses/lgpl-3.0.html](http://www.gnu.org/licenses/lgpl-3.0.html)
