@@ -714,7 +714,7 @@
 			return array;
 		},
 		
-		_convertKeyForArrayObj(obj, keyForArray)
+		_convertKeyForArrayObj: function(obj, keyForArray)
 		{
 			if(!$.isPlainObject(obj))
 				return obj;
@@ -1487,15 +1487,14 @@
 				
 				if(height != null)
 				{
+					height = height + "px";
 					var tableParent = $(dataTable.table().body()).parent().parent();
-					tableParent.height(height);
+					tableParent.css("height", height);
+					tableParent.css("max-height", height);
 				}
 				
 				if(adjustWidth)
-					dataTable.columns.adjust();
-				
-				if(dataTable.init().fixedColumns)
-					dataTable.fixedColumns().relayout();
+					$.dataTableUtil.adjustColumn(dataTable);
 			}
 		},
 		
@@ -2065,34 +2064,17 @@
 			return nameOrder;
 		},
 		
-		TABLE_CHECK_COLUMN_NAME: "___DATA_GEAR_CHECK_COLUMN",
-		
-		removeCheckColumnProperty: function(data)
-		{
-			if(!data)
-				return data;
-			
-			var datas = ($.isArray(data) ? data : [data]);
-			
-			for(var i=0; i<datas.length; i++)
-			{
-				var ele = datas[i];
-				for(var p in ele)
-				{
-					if(p == $.dataTableUtil.TABLE_CHECK_COLUMN_NAME)
-						delete ele[p];
-				}
-			}
-			
-			return data;
-		},
-		
 		buildCheckCloumn: function(title)
 		{
 			var column=
 			{
-				title : title, data : $.dataTableUtil.TABLE_CHECK_COLUMN_NAME,
-				defaultContent: "", width : "3em", orderable : false, render : $.dataTableUtil.renderCheckColumn, className : "column-check"
+				title : title,
+				data : null,
+				defaultContent: "",
+				width : "3em",
+				orderable : false,
+				render : $.dataTableUtil.renderCheckColumn,
+				className : "column-check"
 			};
 			
 			return column;
@@ -2120,11 +2102,8 @@
 				}
 			});
 			
-			var settins = dataTable.settings();
-			
 			//不加这一行，对话框中的初始空数据客户端表格添加记录后表头“选择”点击不起作用
-			if(settins.fixedColumns)
-				dataTable.fixedColumns().relayout();
+			$.dataTableUtil.adjustColumn(dataTable);
 			
 			//行选中框
 			$(dataTable.table().body()).on("click", ".column-check", function(event)
@@ -2195,38 +2174,7 @@
 						dataTable.row($tr).select();
 					}
 				}
-			})
-			//固定选择列后hover效果默认不能同步，需要自己实现
-			.on("mouseover mouseout", ".column-check",
-			function(event)
-			{
-				var $tableContainer = $(dataTable.table().container());
-				var rowIndex = $(this).parent().index() + 1;
-				
-				$(".dataTable", $tableContainer).each(function()
-				{
-					if(event.type == "mouseover")
-						$("tr:eq("+rowIndex+")", this).addClass("hover");
-					else
-						$("tr:eq("+rowIndex+")", this).removeClass("hover");
-				});
 			});
-			
-			//固定选择列后hover效果默认不能同步，需要自己实现
-			$(dataTable.table().body()).on("mouseover mouseout", "tr",
-			function(event)
-			{
-				var rowIndex = $(this).index() + 1;
-				var $tableContainer = $(dataTable.table().container());
-				
-				$(".dataTable", $tableContainer).each(function()
-				{
-					if(event.type == "mouseover")
-						$("tr:eq("+rowIndex+")", this).addClass("hover");
-					else
-						$("tr:eq("+rowIndex+")", this).removeClass("hover");
-				});
-			}); 
 		},
 		
 		executeOnSelect: function(dataTable, illegalTip, callback)
@@ -2380,6 +2328,21 @@
 		{
 			var $tableParent = $(dataTable.table().body()).parent().parent();
 			return $tableParent;
+		},
+		
+		adjustColumn: function(dataTable)
+		{
+			dataTable.columns.adjust();
+			
+			var initOptions = dataTable.init();
+			
+			if(initOptions.fixedHeader)
+				dataTable.fixedHeader.adjust();
+			
+			/*
+			if(initOptions.fixedColumns)
+				dataTable.fixedColumns.relayout();
+			*/
 		}
 	});
 	

@@ -28,6 +28,14 @@ textarea:focus{
 	box-shadow: 0px 0px 4px 0px #b2b2b2;
 }
 
+*::-webkit-scrollbar-thumb{
+	background: #DDD;
+}
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner{
+	background: #ffffff;
+}
+
 /*表单*/
 form .form-content .form-item label.error{
 	color: red;
@@ -132,42 +140,42 @@ form .form-content .form-item .form-item-value textarea.error{
 }
 
 /*Datatables*/
-table.dataTable tbody tr {
+table.dataTable tbody tr,
+table.dataTable tbody tr td {
 	background-color: #ffffff;
 }
 table.dataTable.stripe tbody tr.odd,
-table.dataTable.display tbody tr.odd {
+table.dataTable.stripe tbody tr.odd td {
 	background-color: #f9f9f9;
 }
-table.dataTable.hover tbody tr.hover,
 table.dataTable.hover tbody tr:hover,
-table.dataTable.display tbody tr:hover {
+table.dataTable.hover tbody tr:hover td {
 	background-color: #f2f2f2;
 }
-table.dataTable.hover tbody tr.hover.selected,
-table.dataTable tbody > tr.selected,
-table.dataTable tbody > tr > .selected,
-table.dataTable.stripe tbody > tr.odd.selected,
-table.dataTable.stripe tbody > tr.odd > .selected,
-table.dataTable.display tbody > tr.odd.selected,
-table.dataTable.display tbody > tr.odd > .selected,
-table.dataTable.hover tbody > tr.selected:hover,
-table.dataTable.hover tbody > tr > .selected:hover,
-table.dataTable.display tbody > tr.selected:hover,
-table.dataTable.display tbody > tr > .selected:hover {
+table.dataTable tbody tr.selected,
+table.dataTable tbody tr.selected td,
+table.dataTable.stripe tbody tr.odd.selected,
+table.dataTable.stripe tbody tr.odd.selected td,
+table.dataTable.hover tbody tr:hover.selected,
+table.dataTable.hover tbody tr:hover.selected td {
 	background-color: #007FFF;
 	color: #ffffff;
+}
+table.dataTable tbody tr td.selected,
+table.dataTable.stripe tbody tr.odd td.selected,
+table.dataTable.hover tbody tr:hover td.selected,
+table.dataTable tbody tr.selected td.selected,
+table.dataTable.stripe tbody tr.odd.selected td.selected,
+table.dataTable.hover tbody tr:hover.selected td.selected {
+	background-color: #FFD700;
+	color: #333333;
 }
 table.dataTable tbody tr.selected .checkbox .ui-icon{
 	background-image: url(jquery-ui-1.12.1/images/ui-icons_444444_256x240.png);
 }
-table.dataTable tbody > tr > .selected,
-table.dataTable.stripe tbody > tr.odd > .selected,
-table.dataTable.display tbody > tr.odd > .selected,
-table.dataTable.hover tbody > tr > .selected:hover,
-table.dataTable.display tbody > tr > .selected:hover {
-	background-color: #FFD700;
-	color: #333333;
+/*DataTables-1.11.3版本内置jquery-ui CSS这里有问题，所以这里重新设置，应为ui-state-default的背景色*/
+table.dataTable th{
+	background-color: #f6f6f6 !important;
 }
 
 /*jquery-steps*/

@@ -185,13 +185,6 @@ page_js_obj.ftl
 		return po.buildDataTableSettings(settings);
 	};
 	
-	po.removeCheckColumnProperty = function(data)
-	{
-		return $.dataTableUtil.removeCheckColumnProperty(data);
-	};
-	
-	po.TABLE_CHECK_COLUMN_NAME = $.dataTableUtil.TABLE_CHECK_COLUMN_NAME;
-	
 	/**
 	 * 构建表格选项。
 	 * @param settings 必选，选项
@@ -226,7 +219,7 @@ page_js_obj.ftl
 			"searching" : false,
 			"select" : { style : 'os' },
 			"order": (orderColumn > -1 ? [[orderColumn, "asc"]] : []),
-			"fixedColumns": { leftColumns: 1 },
+			"fixedColumns": { left: 1 },
 		    "language":
 		    {
 				"emptyTable": "<@spring.message code='dataTables.noData' />",

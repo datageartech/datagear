@@ -36,6 +36,14 @@ a.link:hover{
 	text-decoration: none;
 }
 
+*::-webkit-scrollbar{
+	width: 12px;
+	height: 12px;
+}
+*::-webkit-scrollbar-thumb{
+	border-radius: 4px;
+}
+
 *:focus{
 	outline: none;
 }
@@ -615,6 +623,11 @@ table.dataTable.no-footer{
 table.dataTable thead th,
 table.dataTable tfoot th{
 	font-weight: normal;
+}
+/*DataTables-1.11.3版本内置的jquery-ui CSS标题右上角会多一个白线，这里设置不可见*/
+.dataTables_wrapper .dtfc-right-top-blocker{
+	opacity: 0;
+	filter: Alpha(Opacity=0);
 }
 table.dataTable thead .keyword-search-column{
 	font-weight: bold;

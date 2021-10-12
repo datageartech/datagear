@@ -184,8 +184,7 @@ data_page_obj_edit_grid_html.ftl
 	
 	po.getEditGridInitDatas = function(dataTable)
 	{
-		var editTableDatas = $.makeArray(dataTable.data());
-		return po.removeCheckColumnProperty(editTableDatas);
+		return $.makeArray(dataTable.data());
 	};
 	
 	po.initEditGridDataTable = function($editTable, dataTable)
@@ -363,7 +362,7 @@ data_page_obj_edit_grid_html.ftl
 		var $tableContainer = $(dataTable.table().container());
 		$tableContainer.show();
 		//不加此行，窗口有resize后列宽不对
-		dataTable.columns.adjust();
+		$.dataTableUtil.adjustColumn(dataTable);
 		
 		var $headOperation = po.element(".head .operation");
 		
@@ -778,7 +777,7 @@ data_page_obj_edit_grid_html.ftl
 		
 		//新值可能会影响单元格宽度，因此需要重设列宽
 		if(storeCellIndexes.length > 0)
-			editDataTable.columns.adjust();
+			$.dataTableUtil.adjustColumn(editDataTable);
 		
 		//保存后的下一次选中单元格操作触发编辑
 		po.editCellOnSelect = true;
@@ -836,7 +835,7 @@ data_page_obj_edit_grid_html.ftl
 			{
 				//统一绘制，效率更高
 				editCells.draw();
-				editDataTable.columns.adjust();
+				$.dataTableUtil.adjustColumn(editDataTable);
 			}
 			
 			//删除新建行
@@ -1002,7 +1001,7 @@ data_page_obj_edit_grid_html.ftl
 			{
 				"updateOrigins" : $.meta.uniqueRecordData(po.editGridMetaTable, updateOrigins),
 				"updateTargets" : $.meta.removeLabeledValueFeature(updateTargets),
-				"adds" : po.removeCheckColumnProperty($.meta.removeLabeledValueFeature(adds)),
+				"adds" : $.meta.removeLabeledValueFeature(adds),
 				"deletes" : $.meta.uniqueRecordData(po.editGridMetaTable, deletes)
 			},
 			"beforeSend" : function()

@@ -4096,9 +4096,16 @@
 		//填充options.columns的render函数
 		for(var i=0; i<options.columns.length; i++)
 		{
-			if(options.columns[i].render == null)
+			var column = options.columns[i];
+			
+			//DataTables-1.10.18是允许column.data为""的，升级至1.11.3后则会有一个警告弹出框，
+			//这里设置defaultContent可以解决此问题
+			if(column.data == "" && column.defaultContent == null)
+				column.defaultContent = "";
+			
+			if(column.render == null)
 			{
-				options.columns[i].render = function(value, type, row, meta)
+				column.render = function(value, type, row, meta)
 				{
 					//单元格展示绘制
 					if(type == "display")
@@ -4173,25 +4180,6 @@
 				chartSupport.tableStartCarousel(chart);
 		});
 		
-		//固定选择列后hover效果默认不能同步，需要自己实现
-		if(options.fixedColumns)
-		{
-			$(dataTable.table().body()).on("mouseover mouseout", "tr",
-			function(event)
-			{
-				var rowIndex = $(this).index() + 1;
-				var $tableContainer = $(dataTable.table().container());
-				
-				$(".dataTable", $tableContainer).each(function()
-				{
-					if(event.type == "mouseover")
-						$("tr:eq("+rowIndex+")", this).addClass("hover");
-					else
-						$("tr:eq("+rowIndex+")", this).removeClass("hover");
-				});
-			});
-		}
-		
 		chart.internal(dataTable);
 	};
 	
@@ -4226,7 +4214,7 @@
 		updateOptions = chart.inflateUpdateOptions(results, updateOptions);
 		
 		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0);
-		chartSupport.tableAdjust(chart);
+		chartSupport.tableAdjustColumn(chart.internal());
 		
 		if(renderOptions.carousel.enable)
 		{
@@ -4241,10 +4229,7 @@
 		var dataTable = chart.internal();
 		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
-		
-		dataTable.columns.adjust();
-		if(dataTable.init().fixedColumns)
-			dataTable.fixedColumns().relayout();
+		chartSupport.tableAdjustColumn(dataTable);
 	};
 	
 	chartSupport.tableDestroy = function(chart)
@@ -4393,9 +4378,48 @@
 			};
 			
 			if(isLocalStyle)
-				tableStyle = $.extend(true, tableStyle, options.tableStyle);
+			{
+				var optionTableStyle = options.tableStyle;
+				
+				// < @deprecated 兼容2.8.0版本的驼峰命名CSS，将在未来版本移除
+				//需要先转换可能的驼峰CSS命名，不然extend后的CSS可能重名而优先级混乱
+				optionTableStyle = $.extend(true, {}, optionTableStyle);
+				optionTableStyle.table = chartSupport.toLegalStyleNameObj(optionTableStyle.table);
+				if(optionTableStyle.head)
+				{
+					optionTableStyle.head.row = chartSupport.toLegalStyleNameObj(optionTableStyle.head.row);
+					optionTableStyle.head.cell = chartSupport.toLegalStyleNameObj(optionTableStyle.head.cell);
+				}
+				if(optionTableStyle.body)
+				{
+					optionTableStyle.body.row = chartSupport.toLegalStyleNameObj(optionTableStyle.body.row);
+					optionTableStyle.body.rowOdd = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowOdd);
+					optionTableStyle.body.rowEven = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowEven);
+					optionTableStyle.body.rowHover = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowHover);
+					optionTableStyle.body.rowSelected = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowSelected);
+					optionTableStyle.body.cell = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cell);
+					optionTableStyle.body.cellOdd = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellOdd);
+					optionTableStyle.body.cellEven = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellEven);
+					optionTableStyle.body.cellHover = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellHover);
+					optionTableStyle.body.cellSelected = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellSelected);
+				}
+				// > @deprecated 兼容2.8.0版本的驼峰命名CSS，将在未来版本移除
+				
+				tableStyle = $.extend(true, tableStyle, optionTableStyle);
+			}
 			
-			var headCellColor = (tableStyle.head.cell.color || tableStyle.head.row.color);
+			//DataTable-1.11.3内置表头背景CSS添加了"!important"，这里也必须添加才能起作用
+			chartSupport.tableCopyStyleBackground(tableStyle.head.row, tableStyle.head.row, true, true);
+			
+			//DataTable-1.11.3的固定列采用的sticky特性，导致单元格必须设置背景不然会变透明
+			chartSupport.tableCopyStyleBackground(tableStyle.head.row, tableStyle.head.cell, false, true);
+			chartSupport.tableCopyStyleBackground(tableStyle.body.row, tableStyle.body.cell);
+			chartSupport.tableCopyStyleBackground(tableStyle.body.rowOdd, tableStyle.body.cellOdd);
+			chartSupport.tableCopyStyleBackground(tableStyle.body.rowEven, tableStyle.body.cellEven);
+			chartSupport.tableCopyStyleBackground(tableStyle.body.rowHover, tableStyle.body.cellHover);
+			chartSupport.tableCopyStyleBackground(tableStyle.body.rowSelected, tableStyle.body.cellSelected);
+			
+			var headColor = (tableStyle.head.cell.color ? tableStyle.head.cell.color : tableStyle.head.row.color);
 			
 			//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
 			var qualifier = (isLocalStyle ? "." + name : "") + " .dg-chart-table-content";
@@ -4445,28 +4469,19 @@
 					value: chart.styleString(tableStyle.body.cellEven)
 				},
 				{
-					name:
-					[
-						qualifier + " table.dataTable.hover tbody tr.hover",
-						qualifier + " table.dataTable.hover tbody tr:hover"
-					],
+					name: qualifier + " table.dataTable.hover tbody tr:hover",
 					value: chart.styleString(tableStyle.body.rowHover)
 				},
 				{
-					name:
-					[
-						qualifier + " table.dataTable.hover tbody tr.hover td",
-						qualifier + " table.dataTable.hover tbody tr:hover td"
-					],
+					name: qualifier + " table.dataTable.hover tbody tr:hover td",
 					value: chart.styleString(tableStyle.body.cellHover)
 				},
 				{
 					name:
 					[
 						qualifier + " table.dataTable tbody tr.selected",
-						qualifier + " table.dataTable.stripe tbody tr.even.selected",
 						qualifier + " table.dataTable.stripe tbody tr.odd.selected",
-						qualifier + " table.dataTable.hover tbody tr.hover.selected",
+						qualifier + " table.dataTable.stripe tbody tr.even.selected",
 						qualifier + " table.dataTable.hover tbody tr:hover.selected"
 					],
 					value: chart.styleString(tableStyle.body.rowSelected)
@@ -4475,9 +4490,8 @@
 					name:
 					[
 						qualifier + " table.dataTable tbody tr.selected td",
-						qualifier + " table.dataTable.stripe tbody tr.even.selected td",
 						qualifier + " table.dataTable.stripe tbody tr.odd.selected td",
-						qualifier + " table.dataTable.hover tbody tr.hover.selected td",
+						qualifier + " table.dataTable.stripe tbody tr.even.selected td",
 						qualifier + " table.dataTable.hover tbody tr:hover.selected td"
 					],
 					value: chart.styleString(tableStyle.body.cellSelected)
@@ -4486,14 +4500,14 @@
 					name: qualifier + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span",
 					value:
 					{
-						"background": headCellColor
+						"background": headColor
 					}
 				},
 				{
 					name: qualifier + " table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span",
 					value:
 					{
-						"border-bottom-color": headCellColor,
+						"border-bottom-color": headColor,
 						"background": "none"
 					}
 				},
@@ -4501,8 +4515,23 @@
 					name: qualifier + " table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span",
 					value:
 					{
-						"border-top-color": headCellColor,
+						"border-top-color": headColor,
 						"background": "none"
+					}
+				},
+				{
+					name: qualifier + " .dataTables_wrapper .dataTables_length select",
+					value:
+					{
+						color: theme.color
+					}
+				},
+				{
+					name: qualifier + " .dataTables_wrapper .dataTables_length select option",
+					value:
+					{
+						color: theme.color,
+						"background-color": chart.gradualColor(0)
 					}
 				},
 				{
@@ -4551,6 +4580,18 @@
 		});
 	};
 	
+	chartSupport.tableCopyStyleBackground = function(from, to, force, important)
+	{
+		force = (force == null ? false : force);
+		important = (important == null ? false : important);
+		
+		if(from["background-color"] && (force || !to["background-color"]))
+			to["background-color"] = (important ? chartSupport.cssValueImportant(from["background-color"]) : from["background-color"]);
+		
+		if(from["background"] && (force || !to["background"]))
+			to["background"] = (important ? chartSupport.cssValueImportant(from["background"]) : from["background"]);
+	};
+	
 	chartSupport.tableEvalDataTableBodyHeight = function($chartContent, dataTable)
 	{
 		var chartContentHeight = $chartContent.height();
@@ -4562,6 +4603,7 @@
 		var fixedColumnContainer = tableBody.closest(".DTFC_ScrollWrapper");
 		var tableBodyHeight = chartContentHeight - tableHeaderHeight;
 		tableBody.css("height", tableBodyHeight);
+		tableBody.css("max-height", tableBodyHeight);
 		fixedColumnContainer.css("height", tableBody.parent().height());
 		
 		containerHeight = container.outerHeight(true);
@@ -4571,6 +4613,7 @@
 		{
 			tableBodyHeight = tableBodyHeight - (containerHeight - chartContentHeight);
 			tableBody.css("height", tableBodyHeight);
+			tableBody.css("max-height", tableBodyHeight);
 			fixedColumnContainer.css("height", tableBody.parent().height());
 		}
 	};
@@ -4609,17 +4652,20 @@
 	 * 调整图表表格。
 	 * 当表格隐藏显示、位置调整、数据变更后，可能会出现表头、固定列错位的情况，需要重新调整。
 	 */
-	chartSupport.tableAdjust = function(chart)
+	chartSupport.tableAdjustColumn = function(dataTable)
 	{
-		var dataTable = chart.internal();
-		
 		dataTable.columns.adjust();
-		if(dataTable.init().fixedHeader)
+		
+		var initOptions = dataTable.init();
+		
+		if(initOptions.fixedHeader)
 			dataTable.fixedHeader.adjust();
-		if(dataTable.init().fixedColumns)
-			dataTable.fixedColumns().relayout();
+		
+		/*
+		if(initOptions.fixedColumns)
+			dataTable.fixedColumns.relayout();
+		*/
 	};
-	
 	/**
 	 * 表格准备轮播。
 	 */
@@ -6113,6 +6159,37 @@
 			re = publicPlainObj;
 		else if(localPlainObj)
 			re = localPlainObj;
+		
+		return re;
+	};
+	
+	chartSupport.cssValueImportant = function(cssValue)
+	{
+		if(!cssValue)
+			return cssValue;
+		
+		cssValue = (typeof(cssValue) == "string" ? cssValue : cssValue.toString());
+		
+		if(cssValue.indexOf("!important") < 0)
+			cssValue += " !important";
+		
+		return cssValue;
+	};
+	
+	chartSupport.toLegalStyleNameObj = function(obj)
+	{
+		if(!obj)
+			return obj;
+			
+		var re = {};
+		
+		for(var p in obj)
+		{
+			var name = chartFactory.toLegalStyleName(p);
+			var value = obj[p];
+			
+			re[name] = value;
+		}
 		
 		return re;
 	};
