@@ -854,3 +854,9 @@ CREATE TABLE DATAGEAR_SCHEMA_GUARD
 --version[2.9.0], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+
+
+-----------------------------------------
+--version[2.10.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
