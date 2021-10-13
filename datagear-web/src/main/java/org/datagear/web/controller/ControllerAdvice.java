@@ -543,8 +543,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleDataIntegrityViolationException(HttpServletRequest request, HttpServletResponse response,
 			DataIntegrityViolationException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DataIntegrityViolationException.class), exception,
-				false);
+		setOperationMessageForThrowableNoArg(request, buildMessageCode(DataIntegrityViolationException.class),
+				exception, false, true);
 
 		return getErrorView(request, response);
 	}
@@ -562,10 +562,22 @@ public class ControllerAdvice extends AbstractController
 	protected void setOperationMessageForThrowable(HttpServletRequest request, String messageCode, Throwable throwable,
 			boolean traceException, Object... messageArgs)
 	{
+		setOperationMessageForThrowable(request, messageCode, throwable, traceException, false, messageArgs);
+	}
+
+	protected void setOperationMessageForThrowableNoArg(HttpServletRequest request, String messageCode,
+			Throwable throwable, boolean traceException, boolean logException)
+	{
+		setOperationMessageForThrowable(request, messageCode, throwable, traceException, logException, new Object[0]);
+	}
+
+	protected void setOperationMessageForThrowable(HttpServletRequest request, String messageCode, Throwable throwable,
+			boolean traceException, boolean logException, Object... messageArgs)
+	{
 		super.setOperationMessageForThrowable(request, messageCode, throwable, traceException, messageArgs);
 
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Operation cause error: ", throwable);
+		if (logException || LOGGER.isDebugEnabled())
+			LOGGER.error("Operation cause error: ", throwable);
 	}
 
 	protected void setOperationMessageForInternalServerError(HttpServletRequest request, String messageCode,
