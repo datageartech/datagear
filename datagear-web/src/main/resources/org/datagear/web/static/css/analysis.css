@@ -338,6 +338,11 @@
 .dg-chart-setting-box .dg-chart-setting-panel .DTFC_RightBodyLiner{
 	overflow-x: hidden;
 }
+/*DataTables-1.11.3版本内置的jquery-ui CSS标题右上角会多一个白线，这里设置不可见*/
+.dg-chart-setting-box .dataTables_wrapper .dtfc-right-top-blocker{
+	opacity: 0;
+	filter: Alpha(Opacity=0);
+}
 
 /*datetimepicker组件扩展样式*/
 .xdsoft_datetimepicker .xdsoft_calendar td,

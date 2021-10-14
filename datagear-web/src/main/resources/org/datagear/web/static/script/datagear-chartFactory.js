@@ -192,6 +192,15 @@
 	/**图表事件的图表类型：HTML*/
 	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
 	
+	/** 内置图表选项：是否美化滚动条 */
+	chartFactory.OPTION_BEAUTIFY_SCROLLBAR = "beautifyScrollbar";
+	
+	/** 内置图表选项：处理图表渲染选项 */
+	chartFactory.OPTION_PROCESS_RENDER_OPTIONS = "processRenderOptions";
+	
+	/** 内置图表选项：处理图表更新选项 */
+	chartFactory.OPTION_PROCESS_UPDATE_OPTIONS = "processUpdateOptions";
+	
 	/**内置名字标识片段*/
 	chartFactory._BUILT_IN_NAME_PART = "datagear";
 	
@@ -945,7 +954,7 @@
 		if(chartFactory.renderedChart($element) != null)
 			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
 		
-		this._createChartEleThemeCssIfNon();
+		this._createChartThemeCssIfNon();
 		
 		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
 		var position = $element.css("position");
@@ -953,7 +962,14 @@
 			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
 		
 		$element.addClass(this.themeStyleName());
+		
+		var options = this.options();
+		if(options && options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
+			$element.addClass("dg-chart-beautify-scrollbar");
+		
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
+		
+		
 		
 		this.statusRendering(true);
 		
@@ -969,27 +985,67 @@
 		}
 	};
 	
-	chartBase._createChartEleThemeCssIfNon = function()
+	chartBase._createChartThemeCssIfNon = function()
 	{
 		var theme = this.theme();
+		var thumbBgColor = this.gradualColor(0.2);
 		
-		this.themeStyleSheet(chartFactory.builtinPropName("ChartEle"), function()
+		this.themeStyleSheet(chartFactory.builtinPropName("Chart"), function()
 		{
 			var css=
-			{
-				name: "",
-				value:
+			[
 				{
-					"color": theme.color,
-					"background-color": theme.backgroundColor,
-					"border-color": theme.borderColor
+					name: "",
+					value:
+					{
+						"color": theme.color,
+						"background-color": theme.backgroundColor,
+						"border-color": theme.borderColor
+					}
+				},
+				{
+					name:
+					[
+						".dg-chart-beautify-scrollbar::-webkit-scrollbar",
+						".dg-chart-beautify-scrollbar *::-webkit-scrollbar"
+					],
+					value:
+					{
+						"width": "10px",
+						"height": "10px"
+					}
+				},
+				{
+					name:
+					[
+						".dg-chart-beautify-scrollbar::-webkit-scrollbar-thumb",
+						".dg-chart-beautify-scrollbar *::-webkit-scrollbar-thumb"
+					],
+					value:
+					{
+						"border-radius": "4px",
+						"background": thumbBgColor
+					}
+				},
+				{
+					name:
+					[
+						".dg-chart-beautify-scrollbar::-webkit-scrollbar-track",
+						".dg-chart-beautify-scrollbar::-webkit-scrollbar-corner",
+						".dg-chart-beautify-scrollbar *::-webkit-scrollbar-track",
+						".dg-chart-beautify-scrollbar *::-webkit-scrollbar-corner"
+					],
+					value:
+					{
+						"background": theme.backgroundColor
+					}
 				}
-			};
+			];
 			
 			if(theme.borderWidth)
 			{
-				css.value["border-width"] = theme.borderWidth;
-				css.value["border-style"] = "solid";
+				css[0].value["border-width"] = theme.borderWidth;
+				css[0].value["border-style"] = "solid";
 			}
 			
 			return css;
@@ -1126,6 +1182,7 @@
 		
 		$element.removeClass(this.themeStyleName());
 		$element.removeClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
+		$element.removeClass("dg-chart-beautify-scrollbar");
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
 		
 		var renderer = this.renderer();
@@ -2751,8 +2808,8 @@
 			beforeProcessHandler(renderOptions, this);
 		
 		//最后调用processRenderOptions
-		if(renderOptions.processRenderOptions)
-			renderOptions.processRenderOptions(renderOptions, this);
+		if(renderOptions[chartFactory.OPTION_PROCESS_RENDER_OPTIONS])
+			renderOptions[chartFactory.OPTION_PROCESS_RENDER_OPTIONS](renderOptions, this);
 		
 		this.renderOptions(renderOptions);
 		
@@ -2829,15 +2886,15 @@
 			beforeProcessHandler(updateOptions, this, results);
 		
 		//最后调用processUpdateOptions
-		if(renderOptions.processUpdateOptions)
+		if(renderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS])
 		{
-			renderOptions.processUpdateOptions(updateOptions, this, results);
+			renderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS](updateOptions, this, results);
 		}
 		//renderOptions可能不是chartRenderOptions，此时要确保chartRenderOptions.processUpdateOptions被调用
 		else if(chartRenderOptions && renderOptions !== chartRenderOptions
-					&& chartRenderOptions.processUpdateOptions)
+					&& chartRenderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS])
 		{
-			chartRenderOptions.processUpdateOptions(updateOptions, this, results);
+			chartRenderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS](updateOptions, this, results);
 		}
 		
 		return updateOptions;

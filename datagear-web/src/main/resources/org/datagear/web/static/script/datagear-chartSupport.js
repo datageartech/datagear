@@ -3977,8 +3977,6 @@
 			renderCell: undefined,
 			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
 			carousel: undefined,
-			//是否美化滚动条（仅支持webkit内核浏览器）
-			beautifyScrollbar: true,
 			
 			//DataTable配置项
 			"columns": columns,
@@ -4135,9 +4133,6 @@
 			options.scrollY = 4;
 		
 		chartSupport.tableThemeStyleSheet(chart, options);
-		
-		if(options.beautifyScrollbar)
-			chartEle.addClass("dg-chart-beautify-scrollbar");
 		
 		if(options.carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
@@ -4532,33 +4527,6 @@
 					{
 						color: theme.color,
 						"background-color": chart.gradualColor(0)
-					}
-				},
-				{
-					name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar",
-					value:
-					{
-						"width": "10px",
-						"height": "10px"
-					}
-				},
-				{
-					name: qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-thumb",
-					value:
-					{
-						"border-radius": "4px",
-						"background": chart.gradualColor(0.2)
-					}
-				},
-				{
-					name:
-					[
-						qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-track",
-						qualifierBsb + " .dataTables_scrollBody::-webkit-scrollbar-corner"
-					],
-					value:
-					{
-						"background": theme.backgroundColor
 					}
 				}
 			];
@@ -5177,8 +5145,6 @@
 			selected: undefined,
 			//前置添加的条目项，格式同data元素，或者其数组，通常用于添加默认选中项
 			prepend: undefined,
-			//是否美化多选时的滚动条（仅支持webkit内核浏览器）
-			beautifyScrollbar: true,
 			//下拉框是否填满父元素，"auto" 当是内联框时填满；true 是；false 否
 			fillParent: "auto",
 			//select框css样式，格式为：{ ... }
@@ -5192,8 +5158,6 @@
 		
 		var isDropdown = (!options.multiple && (options.size == null || options.size <= 1));
 		
-		if(options.beautifyScrollbar)
-			chartEle.addClass("dg-chart-beautify-scrollbar");
 		if(isDropdown)
 			chartEle.addClass("dg-chart-select-dropdown");
 		
@@ -5381,33 +5345,6 @@
 					{
 						"color": theme.color,
 						"background-color": chart.gradualColor(0.1)
-					}
-				},
-				{
-					name: ".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar",
-					value:
-					{
-						"width": "10px",
-						"height": "10px"
-					}
-				},
-				{
-					name: ".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar-thumb",
-					value:
-					{
-						"border-radius": "4px",
-						"background": chart.gradualColor(0.2)
-					}
-				},
-				{
-					name:
-					[
-						".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar-track",
-						".dg-chart-beautify-scrollbar .dg-chart-select-select::-webkit-scrollbar-corner"
-					],
-					value:
-					{
-						"background": theme.backgroundColor
 					}
 				}
 			];
