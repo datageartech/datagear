@@ -7,6 +7,7 @@
 
 package org.datagear.web.controller;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,8 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -95,11 +96,14 @@ public class RegisterController extends AbstractController
 	@RequestMapping(value = "/doRegister", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> doRegister(HttpServletRequest request, HttpServletResponse response,
-			User user, @RequestParam("confirmPassword") String confirmPassword)
+			@RequestBody RegisterForm form)
 	{
 		if (this.applicationProperties.isDisableRegister())
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMessageCode("registerDisabled"));
+
+		User user = form.getUser();
+		String confirmPassword = form.getConfirmPassword();
 
 		if (isBlank(user.getName()) || isBlank(user.getPassword()) || isBlank(confirmPassword)
 				|| !confirmPassword.equals(user.getPassword()))
@@ -155,5 +159,39 @@ public class RegisterController extends AbstractController
 		roles.add(new Role(Role.ROLE_REGISTRY, Role.ROLE_REGISTRY));
 
 		return roles;
+	}
+
+	public static class RegisterForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private User user;
+
+		private String confirmPassword;
+
+		public RegisterForm()
+		{
+			super();
+		}
+
+		public User getUser()
+		{
+			return user;
+		}
+
+		public void setUser(User user)
+		{
+			this.user = user;
+		}
+
+		public String getConfirmPassword()
+		{
+			return confirmPassword;
+		}
+
+		public void setConfirmPassword(String confirmPassword)
+		{
+			this.confirmPassword = confirmPassword;
+		}
 	}
 }

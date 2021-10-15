@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -170,8 +171,10 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/saveUpload", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveUpload(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("pluginFileName") String pluginFileName) throws Exception
+			@RequestBody saveUploadForm form) throws Exception
 	{
+		String pluginFileName = form.getPluginFileName();
+
 		if (StringUtil.isEmpty(pluginFileName))
 			throw new IllegalInputException();
 
@@ -352,5 +355,27 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		}
 
 		out.println("})(this);");
+	}
+
+	public static class saveUploadForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String pluginFileName;
+
+		public saveUploadForm()
+		{
+			super();
+		}
+
+		public String getPluginFileName()
+		{
+			return pluginFileName;
+		}
+
+		public void setPluginFileName(String pluginFileName)
+		{
+			this.pluginFileName = pluginFileName;
+		}
 	}
 }

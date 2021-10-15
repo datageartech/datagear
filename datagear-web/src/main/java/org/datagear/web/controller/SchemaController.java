@@ -101,7 +101,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/saveadd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			Schema schema)
+			@RequestBody Schema schema)
 	{
 		User user = WebUtils.getUser(request, response);
 
@@ -138,7 +138,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/saveedit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			Schema schema)
+			@RequestBody Schema schema)
 	{
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
@@ -232,7 +232,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/testConnection", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> testConnection(HttpServletRequest request, HttpServletResponse response,
-			Schema schema) throws Exception
+			@RequestBody Schema schema) throws Exception
 	{
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();

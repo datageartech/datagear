@@ -109,7 +109,7 @@ readonly 是否只读操作，允许为null
 		{
 			po.element("textarea[name='resourceContent']").val(po.resourceEditor.getValue());
 			
-			$(form).ajaxSubmit(
+			$(form).ajaxSubmitJson(
 			{
 				success : function(operationMessage)
 				{

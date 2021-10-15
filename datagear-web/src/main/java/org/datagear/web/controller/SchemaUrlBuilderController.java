@@ -10,6 +10,7 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -86,8 +88,10 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	@RequestMapping(value = "/saveScriptCode", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveScriptCode(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(value = "scriptCode", required = false) String scriptCode) throws IOException
+			@RequestBody SaveScriptCodeForm form) throws IOException
 	{
+		String scriptCode = form.getScriptCode();
+
 		saveCustomScript(scriptCode);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
@@ -216,6 +220,28 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 		public void setDbType(String dbType)
 		{
 			this.dbType = dbType;
+		}
+	}
+
+	public static class SaveScriptCodeForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String scriptCode;
+
+		public SaveScriptCodeForm()
+		{
+			super();
+		}
+
+		public String getScriptCode()
+		{
+			return scriptCode;
+		}
+
+		public void setScriptCode(String scriptCode)
+		{
+			this.scriptCode = scriptCode;
 		}
 	}
 }

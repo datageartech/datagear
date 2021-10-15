@@ -216,8 +216,9 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			$(form).ajaxSubmitJson(
 			{
+				ignore: ["principalNameUser", "principalNameRole", "principalNameAnonymous", "principalNameAll"],
 				success : function()
 				{
 					po.pageParamCallAfterSave(true);

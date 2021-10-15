@@ -85,7 +85,7 @@ public class AuthorizationController extends AbstractController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType,
 			@PathVariable("resource") String resource,
-			Authorization authorization)
+			@RequestBody Authorization authorization)
 	{
 		User user = WebUtils.getUser(request, response);
 
@@ -131,7 +131,7 @@ public class AuthorizationController extends AbstractController
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType,
 			@PathVariable("resource") String resource,
-			Authorization authorization)
+			@RequestBody Authorization authorization)
 	{
 		User user = WebUtils.getUser(request, response);
 

@@ -10,6 +10,7 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -133,10 +134,12 @@ public class DriverEntityController extends AbstractController
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			DriverEntity driverEntity,
-			@RequestParam(value = "driverLibraryName", required = false) String[] driverLibraryFileNames)
+			@RequestBody DriverEntitySaveForm form)
 			throws Exception
 	{
+		DriverEntity driverEntity = form.getDriverEntity();
+		String[] driverLibraryFileNames = form.getDriverLibraryFileNames();
+
 		if (isBlank(driverEntity.getId()) || isBlank(driverEntity.getDriverClassName()))
 			throw new IllegalInputException();
 
@@ -228,9 +231,15 @@ public class DriverEntityController extends AbstractController
 	@RequestMapping(value = "/saveImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("importId") String importId, @RequestParam("driverEntity.id") String[] driverEntityIds)
+			@RequestBody DriverEntitySaveImportForm form)
 			throws Exception
 	{
+		String importId = form.getImportId();
+		String[] driverEntityIds = form.getDriverEntityIds();
+
+		if (isEmpty(importId) || isNull(driverEntityIds))
+			throw new IllegalInputException();
+
 		File directory = getTempImportDirectory(importId, false);
 		File importFile = FileUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
 
@@ -281,8 +290,10 @@ public class DriverEntityController extends AbstractController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			DriverEntity driverEntity)
+			@RequestBody DriverEntitySaveForm form)
 	{
+		DriverEntity driverEntity = form.getDriverEntity();
+
 		if (isBlank(driverEntity.getId()) || isBlank(driverEntity.getDriverClassName()))
 			throw new IllegalInputException();
 
@@ -584,5 +595,72 @@ public class DriverEntityController extends AbstractController
 						return new String[] { t.getDisplayName(), t.getDriverClassName(), t.getDisplayDesc() };
 					}
 				});
+	}
+
+	public static class DriverEntitySaveForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private DriverEntity driverEntity;
+
+		private String[] driverLibraryFileNames = null;
+
+		public DriverEntitySaveForm()
+		{
+			super();
+		}
+
+		public DriverEntity getDriverEntity()
+		{
+			return driverEntity;
+		}
+
+		public void setDriverEntity(DriverEntity driverEntity)
+		{
+			this.driverEntity = driverEntity;
+		}
+
+		public String[] getDriverLibraryFileNames()
+		{
+			return driverLibraryFileNames;
+		}
+
+		public void setDriverLibraryFileNames(String[] driverLibraryFileNames)
+		{
+			this.driverLibraryFileNames = driverLibraryFileNames;
+		}
+	}
+
+	public static class DriverEntitySaveImportForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String importId;
+		private String[] driverEntityIds;
+
+		public DriverEntitySaveImportForm()
+		{
+			super();
+		}
+
+		public String getImportId()
+		{
+			return importId;
+		}
+
+		public void setImportId(String importId)
+		{
+			this.importId = importId;
+		}
+
+		public String[] getDriverEntityIds()
+		{
+			return driverEntityIds;
+		}
+
+		public void setDriverEntityIds(String[] driverEntityIds)
+		{
+			this.driverEntityIds = driverEntityIds;
+		}
 	}
 }

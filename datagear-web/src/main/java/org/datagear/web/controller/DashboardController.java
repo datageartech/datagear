@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -672,17 +673,17 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/saveImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("name") String name, @RequestParam("template") String template,
-			@RequestParam("dashboardFileName") String dashboardFileName,
-			@RequestParam(name = "analysisProject.id", required = false) String analysisProjectId,
-			@RequestParam(name = "analysisProject.name", required = false) String analysisProjectName) throws Exception
+			@RequestBody SaveImportForm form) throws Exception
 	{
-		File uploadDirectory = FileUtil.getDirectory(this.tempDirectory, dashboardFileName, false);
+		if (isEmpty(form.getName()) || isEmpty(form.getTemplate()) || isEmpty(form.getDashboardFileName()))
+			throw new IllegalInputException();
+
+		File uploadDirectory = FileUtil.getDirectory(this.tempDirectory, form.getDashboardFileName(), false);
 
 		if (!uploadDirectory.exists())
 			throw new IllegalInputException();
 
-		String[] templates = HtmlTplDashboardWidgetEntity.splitTemplates(template);
+		String[] templates = HtmlTplDashboardWidgetEntity.splitTemplates(form.getTemplate());
 
 		if (isEmpty(templates))
 			throw new IllegalInputException();
@@ -701,17 +702,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		User user = WebUtils.getUser(request, response);
 
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
-		dashboard.setTemplateSplit(template);
+		dashboard.setTemplateSplit(form.getTemplate());
 		dashboard.setTemplateEncoding(templateEncoding);
-		dashboard.setName(name);
+		dashboard.setName(form.getName());
 
-		if (!isEmpty(analysisProjectId))
-		{
-			AnalysisProject analysisProject = new AnalysisProject();
-			analysisProject.setId(analysisProjectId);
-			analysisProject.setName(analysisProjectName);
-			dashboard.setAnalysisProject(analysisProject);
-		}
+		if (!isEmpty(form.getAnalysisProject()))
+			dashboard.setAnalysisProject(form.getAnalysisProject());
 
 		if (isBlank(dashboard.getName()) || isEmpty(dashboard.getTemplates()))
 			throw new IllegalInputException();
@@ -1410,6 +1406,61 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		public void setCopySourceId(String copySourceId)
 		{
 			this.copySourceId = copySourceId;
+		}
+	}
+
+	public static class SaveImportForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String name;
+		private String template;
+		private String dashboardFileName;
+		private AnalysisProject analysisProject;
+
+		public SaveImportForm()
+		{
+			super();
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public String getTemplate()
+		{
+			return template;
+		}
+
+		public void setTemplate(String template)
+		{
+			this.template = template;
+		}
+
+		public String getDashboardFileName()
+		{
+			return dashboardFileName;
+		}
+
+		public void setDashboardFileName(String dashboardFileName)
+		{
+			this.dashboardFileName = dashboardFileName;
+		}
+
+		public AnalysisProject getAnalysisProject()
+		{
+			return analysisProject;
+		}
+
+		public void setAnalysisProject(AnalysisProject analysisProject)
+		{
+			this.analysisProject = analysisProject;
 		}
 	}
 }

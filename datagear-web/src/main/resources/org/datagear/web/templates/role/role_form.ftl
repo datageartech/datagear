@@ -51,9 +51,9 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<div class="roleEnabled-radios">
 					<label for="${pageId}-roleEnabledYes"><@spring.message code='yes' /></label>
-		   			<input type="radio" id="${pageId}-roleEnabledYes" name="enabled" value="1" <#if (role.enabled)!false>checked="checked"</#if> />
+		   			<input type="radio" id="${pageId}-roleEnabledYes" name="enabled" value="true" <#if (role.enabled)!false>checked="checked"</#if> />
 					<label for="${pageId}-roleEnabledNo"><@spring.message code='no' /></label>
-		   			<input type="radio" id="${pageId}-roleEnabledNo" name="enabled" value="0" <#if !((role.enabled)!false)>checked="checked"</#if> />
+		   			<input type="radio" id="${pageId}-roleEnabledNo" name="enabled" value="false" <#if !((role.enabled)!false)>checked="checked"</#if> />
 		   			</div>
 				</div>
 			</div>
@@ -93,7 +93,7 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			$(form).ajaxSubmitJson(
 			{
 				success : function(operationMessage)
 				{

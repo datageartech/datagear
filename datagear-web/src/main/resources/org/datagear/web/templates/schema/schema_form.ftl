@@ -221,7 +221,7 @@ readonly 是否只读操作，允许为null
 			if(po._STATE_TEST_CONNECTION == true)
 				$form.attr("action", "${contextPath}/schema/testConnection");
 			
-			$form.ajaxSubmit(
+			$form.ajaxSubmitJson(
 			{
 				success : function(operationMessage)
 				{

@@ -76,7 +76,7 @@
 	{
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			$(form).ajaxSubmitJson(
 			{
 				success : function(response)
 				{

@@ -72,10 +72,7 @@
 			var $item = $("<div class='driver-entity-item minor-list-item ui-widget ui-widget-content ui-corner-all' />")
 				.appendTo(po.driverEntityInfos());
 			
-			$("<input type='hidden' />").attr("name", "driverEntity.id").attr("value", driverEntity.id).appendTo($item);
-			$("<input type='hidden' />").attr("name", "driverEntity.driverClassName").attr("value", driverEntity.driverClassName).appendTo($item);
-			$("<input type='hidden' />").attr("name", "driverEntity.displayName").attr("value", driverEntity.displayName).appendTo($item);
-			$("<input type='hidden' />").attr("name", "driverEntity.displayDesc").attr("value", driverEntity.displayDesc).appendTo($item);
+			$("<input type='hidden' />").attr("name", "driverEntityIds[]").attr("value", driverEntity.id).appendTo($item);
 			
 			$("<span class='delete-icon ui-icon ui-icon-close' title='<@spring.message code='delete' />' />")
 			.appendTo($item).click(function()
@@ -112,7 +109,7 @@
 	$.validator.addMethod("importDriverEntityRequired", function(value, element)
 	{
 		var thisForm = $(element).closest("form");
-		var $driverEntityId = $("input[name='driverEntity.id']", thisForm);
+		var $driverEntityId = $("input[name='driverEntityIds[]']", thisForm);
 		
 		return $driverEntityId.length > 0;
 	});
@@ -130,8 +127,9 @@
 		},
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			$(form).ajaxSubmitJson(
 			{
+				ignore: "inputForValidate",
 				success : function()
 				{
 					po.pageParamCallAfterSave(true);

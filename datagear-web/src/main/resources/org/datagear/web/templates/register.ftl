@@ -109,8 +109,17 @@ ${detectNewVersionScript?no_esc}
 		},
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			$(form).ajaxSubmitJson(
 			{
+				handleData: function(data)
+				{
+					var newData = {};
+					newData.user = data;
+					newData.confirmPassword = data.confirmPassword;
+					data.confirmPassword = undefined;
+					
+					return newData;
+				},
 				success : function()
 				{
 					window.location.href="${contextPath}/register/success";

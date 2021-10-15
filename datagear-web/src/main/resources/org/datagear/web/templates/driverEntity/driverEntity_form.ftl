@@ -117,7 +117,7 @@ readonly 是否只读操作，允许为null
 				.appendTo(po.driverFiles());
 			
 			<#if !readonly>
-			$("<input type='hidden' />").attr("name", "driverLibraryName").attr("value", fileInfos[i].name).appendTo($fileInfo);
+			$("<input type='hidden' />").attr("name", "driverLibraryName[]").attr("value", fileInfos[i].name).appendTo($fileInfo);
 			
 			var $deleteIcon = $("<span class='driver-file-icon delete-icon ui-icon ui-icon-close' title='<@spring.message code='delete' />' />")
 				.attr("driverFile", fileInfos[i].name).appendTo($fileInfo);
@@ -200,7 +200,7 @@ readonly 是否只读操作，允许为null
 
 	$.validator.addMethod("driverFileRequired", function(value, element)
 	{
-		var $df = po.element("input[name='driverLibraryName']");
+		var $df = po.element("input[name='driverLibraryName[]']");
 		return ($df.length > 0);
 	});
 	
@@ -221,8 +221,18 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			$(form).ajaxSubmitJson(
 			{
+				ignore: "driverFilePlaceholder",
+				handleData: function(data)
+				{
+					var newData = {};
+					newData.driverEntity = data;
+					newData.driverLibraryFileNames = data.driverLibraryName;
+					data.driverLibraryName = undefined;
+					
+					return newData;
+				},
 				success : function()
 				{
 					po.pageParamCallAfterSave(true);

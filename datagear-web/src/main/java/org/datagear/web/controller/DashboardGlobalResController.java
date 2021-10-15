@@ -216,18 +216,20 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(value = "initSavePath", required = false) String initSavePath,
-			@RequestParam("savePath") String savePath, @RequestParam("resourceContent") String resourceContent)
+			@RequestBody DashboardGlobalResSaveForm form)
 			throws Exception
 	{
-		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, savePath);
+		if(isEmpty(form.getSavePath()))
+			throw new IllegalInputException();
+		
+		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, form.getSavePath());
 
 		Reader in = null;
 		Writer out = null;
 
 		try
 		{
-			in = IOUtil.getReader(resourceContent);
+			in = IOUtil.getReader(form.getResourceContent());
 			out = IOUtil.getWriter(file, IOUtil.CHARSET_UTF_8);
 
 			IOUtil.write(in, out);
@@ -238,9 +240,9 @@ public class DashboardGlobalResController extends AbstractController implements 
 			IOUtil.close(out);
 		}
 
-		if (!StringUtil.isEmpty(initSavePath) && !initSavePath.equalsIgnoreCase(savePath))
+		if (!StringUtil.isEmpty(form.getInitSavePath()) && !form.getInitSavePath().equalsIgnoreCase(form.getSavePath()))
 		{
-			File initFile = FileUtil.getFile(this.dashboardGlobalResRootDirectory, initSavePath);
+			File initFile = FileUtil.getFile(this.dashboardGlobalResRootDirectory, form.getInitSavePath());
 			FileUtil.deleteFile(initFile);
 		}
 
@@ -525,6 +527,50 @@ public class DashboardGlobalResController extends AbstractController implements 
 		public void setPath(String path)
 		{
 			this.path = path;
+		}
+	}
+
+	public static class DashboardGlobalResSaveForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String savePath;
+		private String resourceContent = "";
+		private String initSavePath = null;
+
+		public DashboardGlobalResSaveForm()
+		{
+			super();
+		}
+
+		public String getSavePath()
+		{
+			return savePath;
+		}
+
+		public void setSavePath(String savePath)
+		{
+			this.savePath = savePath;
+		}
+
+		public String getResourceContent()
+		{
+			return resourceContent;
+		}
+
+		public void setResourceContent(String resourceContent)
+		{
+			this.resourceContent = resourceContent;
+		}
+
+		public String getInitSavePath()
+		{
+			return initSavePath;
+		}
+
+		public void setInitSavePath(String initSavePath)
+		{
+			this.initSavePath = initSavePath;
 		}
 	}
 }

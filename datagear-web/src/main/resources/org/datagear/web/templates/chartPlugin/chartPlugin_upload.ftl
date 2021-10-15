@@ -129,8 +129,9 @@
 		},
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			$(form).ajaxSubmitJson(
 			{
+				ignore: "inputForValidate",
 				success : function()
 				{
 					po.pageParamCallAfterSave(true);

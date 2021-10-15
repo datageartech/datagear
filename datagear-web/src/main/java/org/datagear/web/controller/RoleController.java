@@ -69,7 +69,8 @@ public class RoleController extends AbstractController
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response, Role role)
+	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody Role role)
 	{
 		if (isBlank(role.getName()))
 			throw new IllegalInputException();
@@ -97,7 +98,7 @@ public class RoleController extends AbstractController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			Role role)
+			@RequestBody Role role)
 	{
 		if (isBlank(role.getName()))
 			throw new IllegalInputException();
