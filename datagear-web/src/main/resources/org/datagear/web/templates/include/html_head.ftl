@@ -54,7 +54,6 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/datagear-pagination.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-meta.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-util.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-jquery-override.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-tableform.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-schema-url-builder.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-chartFactory.js?v=${_hh_Version}" type="text/javascript"></script>

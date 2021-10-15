@@ -1,10 +1,10 @@
 下一版本：
 	
 	dataexchange模块的POI库升级至5.0版本；
-	前后端数据通讯改为统一采用JSON，移除datagear-jquery-override.js；
 	压缩/解压库改为统一采用Apache Commons Compress，解决ZIP中文乱码问题
 		看板导入ZIP存在中文文件名出错BUG；
 	图表编辑设置数据标记时，对于没有标记的不必保存至数据库，避免存储长度溢出；
+	ok 前后端数据通讯改为统一采用JSON，移除datagear-jquery-override.js；
 	ok ECharts升级至5.2.1版本；
 	ok JQuery升级至3.6.0版本；
 	ok DataTables表格组件升级至1.11.3版本；
