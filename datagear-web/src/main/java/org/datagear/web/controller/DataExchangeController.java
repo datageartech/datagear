@@ -1906,7 +1906,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class AbstractFileBatchDataExchangeForm implements Serializable
+	public static class AbstractFileBatchDataExchangeForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -1965,7 +1965,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 	}
 
 	public static class AbstractFileBatchDataImportForm extends AbstractFileBatchDataExchangeForm
-			implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -2014,7 +2013,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class TextValueFileBatchDataImportForm extends AbstractFileBatchDataImportForm implements Serializable
+	public static class TextValueFileBatchDataImportForm extends AbstractFileBatchDataImportForm
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -2078,7 +2077,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class SqlFileBatchDataImportForm extends AbstractFileBatchDataImportForm implements Serializable
+	public static class SqlFileBatchDataImportForm extends AbstractFileBatchDataImportForm
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -2100,7 +2099,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class TextFileBatchDataExportForm extends AbstractFileBatchDataExchangeForm implements Serializable
+	public static class TextFileBatchDataExportForm extends AbstractFileBatchDataExchangeForm
 	{
 		private static final long serialVersionUID = 1L;
 

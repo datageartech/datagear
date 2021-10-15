@@ -7,7 +7,6 @@
 
 package org.datagear.web.controller;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -161,7 +160,7 @@ public class RegisterController extends AbstractController
 		return roles;
 	}
 
-	public static class RegisterForm implements Serializable
+	public static class RegisterForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 

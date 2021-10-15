@@ -7,7 +7,6 @@
 
 package org.datagear.web.controller;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -183,7 +182,7 @@ public class SchemaGuardController extends AbstractController
 		return buildOperationMessageSuccessEmptyResponseEntity(permitted);
 	}
 
-	public static class SchemaGuardTestForm implements Serializable
+	public static class SchemaGuardTestForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 

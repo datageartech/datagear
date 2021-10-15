@@ -49,6 +49,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -263,12 +264,18 @@ public class SqlpadController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/select", produces = CONTENT_TYPE_JSON)
 	public void select(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("sql") final String sql,
-			@RequestParam(value = "startRow", required = false) Integer startRow,
-			@RequestParam(value = "fetchSize", required = false) Integer fetchSize,
-			@RequestParam(value = "returnMeta", required = false) Boolean returnMeta) throws Throwable
+			@RequestBody SqlpadSelectForm form) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
+		
+		String sqlpadId = form.getSqlpadId();
+		final String sql = form.getSql();
+		Integer startRow = form.getStartRow();
+		Integer fetchSize = form.getFetchSize();
+		Boolean returnMeta = form.getReturnMeta();
+		
+		if (isEmpty(sqlpadId) || isEmpty(sql))
+			throw new IllegalInputException();
 
 		if (startRow == null)
 			startRow = 1;
@@ -350,7 +357,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	@ResponseBody
 	public PagingData<SqlHistory> pagingQuerySqlHistory(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			PagingQuery pagingQueryParam) throws Throwable
+			@RequestBody PagingQuery pagingQueryParam) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
@@ -612,6 +619,72 @@ public class SqlpadController extends AbstractSchemaConnController
 		{
 			File directory = FileUtil.getDirectory(parent, sqlpadId);
 			return new SqlpadFileDirectory(directory);
+		}
+	}
+
+	public static class SqlpadSelectForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String sqlpadId;
+		private String sql;
+		private Integer startRow;
+		private Integer fetchSize;
+		private Boolean returnMeta;
+
+		public SqlpadSelectForm()
+		{
+			super();
+		}
+
+		public String getSqlpadId()
+		{
+			return sqlpadId;
+		}
+
+		public void setSqlpadId(String sqlpadId)
+		{
+			this.sqlpadId = sqlpadId;
+		}
+
+		public String getSql()
+		{
+			return sql;
+		}
+
+		public void setSql(String sql)
+		{
+			this.sql = sql;
+		}
+
+		public Integer getStartRow()
+		{
+			return startRow;
+		}
+
+		public void setStartRow(Integer startRow)
+		{
+			this.startRow = startRow;
+		}
+
+		public Integer getFetchSize()
+		{
+			return fetchSize;
+		}
+
+		public void setFetchSize(Integer fetchSize)
+		{
+			this.fetchSize = fetchSize;
+		}
+
+		public Boolean getReturnMeta()
+		{
+			return returnMeta;
+		}
+
+		public void setReturnMeta(Boolean returnMeta)
+		{
+			this.returnMeta = returnMeta;
 		}
 	}
 }

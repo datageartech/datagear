@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -434,7 +433,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		}
 	}
 
-	public static class DashboardGlobalResUploadForm implements Serializable
+	public static class DashboardGlobalResUploadForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -501,7 +500,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		}
 	}
 
-	public static class DashboardGlobalResItem implements Serializable
+	public static class DashboardGlobalResItem implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -530,7 +529,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		}
 	}
 
-	public static class DashboardGlobalResSaveForm implements Serializable
+	public static class DashboardGlobalResSaveForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 

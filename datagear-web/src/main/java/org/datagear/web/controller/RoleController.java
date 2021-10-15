@@ -170,8 +170,10 @@ public class RoleController extends AbstractController
 		return buildMessageCode("role", code);
 	}
 
-	public static class RoleUsersForm
+	public static class RoleUsersForm implements ControllerForm
 	{
+		private static final long serialVersionUID = 1L;
+
 		private Role role;
 		private List<User> users;
 

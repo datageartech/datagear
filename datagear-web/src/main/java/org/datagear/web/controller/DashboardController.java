@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1326,8 +1325,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 
-	public static class HtmlTplDashboardSaveForm
+	public static class HtmlTplDashboardSaveForm implements ControllerForm
 	{
+		private static final long serialVersionUID = 1L;
+
 		private HtmlTplDashboardWidgetEntity dashboard;
 
 		private String[] resourceNames;
@@ -1409,7 +1410,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 	}
 
-	public static class SaveImportForm implements Serializable
+	public static class SaveImportForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 

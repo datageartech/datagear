@@ -10,7 +10,6 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -597,7 +596,7 @@ public class DriverEntityController extends AbstractController
 				});
 	}
 
-	public static class DriverEntitySaveForm implements Serializable
+	public static class DriverEntitySaveForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -631,7 +630,7 @@ public class DriverEntityController extends AbstractController
 		}
 	}
 
-	public static class DriverEntitySaveImportForm implements Serializable
+	public static class DriverEntitySaveImportForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 

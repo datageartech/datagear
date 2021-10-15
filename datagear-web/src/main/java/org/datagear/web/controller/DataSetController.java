@@ -1213,8 +1213,10 @@ public class DataSetController extends AbstractSchemaConnController
 		return null;
 	}
 
-	public static class AbstractDataSetPreview<T extends DataSet>
+	public static class AbstractDataSetPreview<T extends DataSet> implements ControllerForm
 	{
+		private static final long serialVersionUID = 1L;
+
 		private T dataSet;
 
 		private DataSetQuery query;
@@ -1247,6 +1249,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class SqlDataSetPreview extends AbstractDataSetPreview<SqlDataSet>
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String schemaId;
 
 		public SqlDataSetPreview()
@@ -1267,6 +1271,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class JsonValueDataSetPreview extends AbstractDataSetPreview<JsonValueDataSet>
 	{
+		private static final long serialVersionUID = 1L;
+
 		public JsonValueDataSetPreview()
 		{
 			super();
@@ -1275,6 +1281,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class JsonFileDataSetEntityPreview extends AbstractDataSetPreview<JsonFileDataSetEntity>
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String originalFileName;
 
 		public JsonFileDataSetEntityPreview()
@@ -1295,6 +1303,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class ExcelDataSetEntityPreview extends AbstractDataSetPreview<ExcelDataSetEntity>
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String originalFileName;
 
 		public ExcelDataSetEntityPreview()
@@ -1315,6 +1325,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class CsvValueDataSetPreview extends AbstractDataSetPreview<CsvValueDataSet>
 	{
+		private static final long serialVersionUID = 1L;
+
 		public CsvValueDataSetPreview()
 		{
 			super();
@@ -1323,6 +1335,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class CsvFileDataSetEntityPreview extends AbstractDataSetPreview<CsvFileDataSetEntity>
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String originalFileName;
 
 		public CsvFileDataSetEntityPreview()
@@ -1343,14 +1357,18 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class HttpDataSetEntityPreview extends AbstractDataSetPreview<HttpDataSetEntity>
 	{
+		private static final long serialVersionUID = 1L;
+
 		public HttpDataSetEntityPreview()
 		{
 			super();
 		}
 	}
 
-	public static class ResolveSqlParam
+	public static class ResolveSqlParam implements ControllerForm
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String sql;
 
 		@SuppressWarnings("unchecked")

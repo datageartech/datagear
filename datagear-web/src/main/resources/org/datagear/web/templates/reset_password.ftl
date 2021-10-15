@@ -137,7 +137,7 @@ ${detectNewVersionScript?no_esc}
 		},
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			$(form).ajaxSubmitJson(
 			{
 				success : function()
 				{

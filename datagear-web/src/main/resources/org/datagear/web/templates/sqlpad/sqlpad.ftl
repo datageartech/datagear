@@ -678,7 +678,6 @@ Schema schema 数据库，不允许为null
 	    $("<input name='sqlpadId' type='hidden' />").val(po.sqlpadId).appendTo(form);
 	    $("<textarea name='sql' />").val(sql).appendTo(form);
 	    $("<input name='startRow' type='hidden' />").val(sqlSelectResult.nextStartRow).appendTo(form);
-	    $("<input name='fetchSize' type='hidden' />").val(sqlSelectResult.fetchSize).appendTo(form);
 
 	    if(sqlSelectResult.rows == null || sqlSelectResult.rows.length < sqlSelectResult.fetchSize)
 	    {
@@ -699,18 +698,18 @@ Schema schema 数据库，不允许为null
 		    	po.element("#moreSqlResultTabButton").button("disable");
 		    	po.element("#refreshSqlResultTabButton").button("disable");
 		    	
-		    	$this.ajaxSubmit(
+		    	$this.ajaxSubmitJson(
 	   			{
-	   				beforeSerialize: function($form, options)
+	   				handleData: function(data)
 	   				{
 	   					var fetchSize = po.getResultsetFetchSize(po.element("#settingForm"));
-	   					$("input[name='fetchSize']", $form).val(fetchSize);
+	   					data.fetchSize = fetchSize;
 	   				},
-	   				success : function(sqlSelectResult, statusText, xhr, $form)
+	   				success : function(sqlSelectResult, statusText, xhr)
 	   				{
-	   					$("input[name='startRow']", $form).val(sqlSelectResult.nextStartRow);
+	   					$("input[name='startRow']", $this).val(sqlSelectResult.nextStartRow);
 	   					
-	   					var tabId = $form.attr("tab-id");
+	   					var tabId = $this.attr("tab-id");
 	   					var tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
 	   					
 	   					var dataTable = po.element("#" + po.getSqlResultTabPanelTableId(tabId), tabPanel).DataTable();
@@ -719,12 +718,12 @@ Schema schema 数据库，不允许为null
 	   					
 	   					if(sqlSelectResult.rows.length < sqlSelectResult.fetchSize)
 	   					{
-	   						$form.attr("no-more-data", "1");
+	   						$this.attr("no-more-data", "1");
 	   						$(".no-more-data-flag", tabPanel).show();
 	   					}
 	   					else
 	   					{
-	   						$form.attr("no-more-data", "0");
+	   						$this.attr("no-more-data", "0");
 	   						$(".no-more-data-flag", tabPanel).hide();
 	   					}
 	   				},
@@ -1082,49 +1081,56 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
-	po.element("#viewSqlHistorySearchForm").ajaxForm(
+	po.element("#viewSqlHistorySearchForm").submit(function()
 	{
-		success : function(pagingData, statusText, xhr, $form)
+		var $form = $(this);
+		
+		$form.ajaxSubmitJson(
 		{
-			var sqlHistories = pagingData.items;
-			
-			if(pagingData.page >= pagingData.pages)
-				po.element("#sqlHistoryLoadMoreButton").button("disable");
-			else
-				po.element("#sqlHistoryLoadMoreButton").button("enable");
-			
-			var retainData = ($form.attr("retain-data") != null);
-			if(retainData)
-				$form.removeAttr("retain-data");
-			
-			var $hl = po.element(".sql-history-list");
-			
-			if(!retainData)
-				$hl.empty();
-			
-			for(var i=0; i<sqlHistories.length; i++)
+			success : function(pagingData)
 			{
-				var sqlHistory = sqlHistories[i];
+				var sqlHistories = pagingData.items;
 				
-				if(i > 0 || pagingData.page > 1)
-					$("<div class='sql-item-separator ui-widget ui-widget-content' />").appendTo($hl);
+				if(pagingData.page >= pagingData.pages)
+					po.element("#sqlHistoryLoadMoreButton").button("disable");
+				else
+					po.element("#sqlHistoryLoadMoreButton").button("enable");
 				
-				var $item = $("<div class='sql-item' />").appendTo($hl);
-				$("<div class='sql-date' />").text(sqlHistory.createTime).appendTo($item);
-				$("<div class='sql-content' />").text(sqlHistory.sql).appendTo($item);
+				var retainData = ($form.attr("retain-data") != null);
+				if(retainData)
+					$form.removeAttr("retain-data");
 				
-				$item.draggable(
+				var $hl = po.element(".sql-history-list");
+				
+				if(!retainData)
+					$hl.empty();
+				
+				for(var i=0; i<sqlHistories.length; i++)
 				{
-					helper: "clone",
-					distance: 50,
-					classes:
+					var sqlHistory = sqlHistories[i];
+					
+					if(i > 0 || pagingData.page > 1)
+						$("<div class='sql-item-separator ui-widget ui-widget-content' />").appendTo($hl);
+					
+					var $item = $("<div class='sql-item' />").appendTo($hl);
+					$("<div class='sql-date' />").text(sqlHistory.createTime).appendTo($item);
+					$("<div class='sql-content' />").text(sqlHistory.sql).appendTo($item);
+					
+					$item.draggable(
 					{
-						"ui-draggable" : "sql-draggable",
-						"ui-draggable-dragging" : "ui-widget ui-widget-content ui-corner-all ui-widget-shadow sql-draggable-helper ui-front"
-					}
-				});
+						helper: "clone",
+						distance: 50,
+						classes:
+						{
+							"ui-draggable" : "sql-draggable",
+							"ui-draggable-dragging" : "ui-widget ui-widget-content ui-corner-all ui-widget-shadow sql-draggable-helper ui-front"
+						}
+					});
+				}
 			}
-		}
+		});
+		
+		return false;
 	});
 	
 	po.element(".sql-history-list").on("click", ".sql-item", function()

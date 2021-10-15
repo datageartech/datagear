@@ -7,7 +7,6 @@
 
 package org.datagear.web.controller;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -364,7 +363,7 @@ public class UserController extends AbstractController
 		return list;
 	}
 
-	public static class UserForm implements Serializable
+	public static class UserForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -398,7 +397,7 @@ public class UserController extends AbstractController
 		}
 	}
 
-	public static class DeleteUserForm implements Serializable
+	public static class DeleteUserForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 

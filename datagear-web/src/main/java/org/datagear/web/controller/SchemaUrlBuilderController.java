@@ -10,7 +10,6 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -223,7 +222,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 		}
 	}
 
-	public static class SaveScriptCodeForm implements Serializable
+	public static class SaveScriptCodeForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 

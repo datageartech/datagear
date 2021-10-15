@@ -25,8 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -112,8 +112,13 @@ public class ResetPasswordController extends AbstractController
 	@RequestMapping(value = "fillUserInfo", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> fillUserInfo(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("username") String username)
+			@RequestBody FillUserInfoForm form)
 	{
+		String username = form.getUsername();
+
+		if (isEmpty(username))
+			throw new IllegalInputException();
+
 		ResetPasswordStep resetPasswordStep = getResetPasswordStep(request);
 
 		if (isEmpty(resetPasswordStep))
@@ -160,8 +165,14 @@ public class ResetPasswordController extends AbstractController
 	@RequestMapping(value = "setNewPassword", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> setNewPassword(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("password") String password, @RequestParam("confirmPassword") String confirmPassword)
+			@RequestBody SetNewPasswordForm form)
 	{
+		String password = form.getPassword();
+		String confirmPassword = form.getConfirmPassword();
+
+		if (isEmpty(password) || isEmpty(confirmPassword))
+			throw new IllegalInputException();
+
 		if (!password.equals(confirmPassword))
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMessageCode("confirmPasswordError"));
@@ -393,6 +404,62 @@ public class ResetPasswordController extends AbstractController
 		public boolean isFinalStep()
 		{
 			return this.step == total;
+		}
+	}
+
+	public static class FillUserInfoForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String username;
+
+		public FillUserInfoForm()
+		{
+			super();
+		}
+
+		public String getUsername()
+		{
+			return username;
+		}
+
+		public void setUsername(String username)
+		{
+			this.username = username;
+		}
+	}
+
+	public static class SetNewPasswordForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String password;
+
+		private String confirmPassword;
+
+		public SetNewPasswordForm()
+		{
+			super();
+		}
+
+		public String getPassword()
+		{
+			return password;
+		}
+
+		public void setPassword(String password)
+		{
+			this.password = password;
+		}
+
+		public String getConfirmPassword()
+		{
+			return confirmPassword;
+		}
+
+		public void setConfirmPassword(String confirmPassword)
+		{
+			this.confirmPassword = confirmPassword;
 		}
 	}
 }
