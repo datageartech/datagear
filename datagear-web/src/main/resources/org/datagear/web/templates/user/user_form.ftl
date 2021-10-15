@@ -204,23 +204,24 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			var data = $.formToJson(form);
-			
-			var confirmPassword = data.confirmPassword;
-			data.confirmPassword = undefined;
-			
-			var roleIds = (data.roleIds || []);
-			var roles = [];
-			for(var i=0; i<roleIds.length; i++)
+			$(form).ajaxSubmitJson(
 			{
-				roles[i] = { "id": roleIds[i] };
-			}
-			data.roles = roles;
-			data.roleIds = undefined;
-			
-			$.ajaxJson($(form).attr("action"),
-			{
-				data: { "user": data, "confirmPassword": confirmPassword },
+				handleData: function(data)
+				{
+					var confirmPassword = data.confirmPassword;
+					data.confirmPassword = undefined;
+					
+					var roleIds = (data.roleIds || []);
+					var roles = [];
+					for(var i=0; i<roleIds.length; i++)
+					{
+						roles[i] = { "id": roleIds[i] };
+					}
+					data.roles = roles;
+					data.roleIds = undefined;
+					
+					return { "user": data, "confirmPassword": confirmPassword };
+				},
 				success : function(response)
 				{
 					po.pageParamCallAfterSave(true, response.data);

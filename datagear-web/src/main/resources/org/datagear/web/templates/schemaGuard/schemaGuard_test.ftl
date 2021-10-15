@@ -82,16 +82,13 @@ formAction 表单提交action，允许为null
 		},
 		submitHandler : function(form)
 		{
-			var data = $.formToJson(form);
-			
-			$.ajaxJson($(form).attr("action"),
+			$(form).ajaxSubmitJson(
 			{
-				data: data,
-				success : function(response)
+				success : function(response, textStatus, jqXHR, formData)
 				{
 					var permitted = response.data;
 					
-					po.element(".test-url").text(data.url);
+					po.element(".test-url").text(formData.url);
 					
 					if(permitted)
 						po.element(".test-result").removeClass("denied ui-state-error").addClass("permitted ui-state-default")

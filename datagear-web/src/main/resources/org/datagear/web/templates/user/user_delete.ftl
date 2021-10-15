@@ -147,11 +147,9 @@ formAction 表单提交action，允许为null
 		},
 		submitHandler : function(form)
 		{
-			var data = $.formToJson(form, ["deleteUserPlaceholder", "migrateUserName"]);
-			
-			$.ajaxJson($(form).attr("action"),
+			$(form).ajaxSubmitJson(
 			{
-				data: data,
+				ignore: ["deleteUserPlaceholder", "migrateUserName"],
 				success : function(response)
 				{
 					po.pageParamCallAfterSave(true, response.data);

@@ -1566,29 +1566,31 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			var data = po.getResourceEditorData();
-			var formData = $.formToJson(form);
-			data.dashboard = formData;
-			data.copySourceId = po.element("#${pageId}-copySourceId").val();
-			
-			var templateCount = (data.dashboard.templates == null ? 0 : data.dashboard.templates.length);
-			for(var i=0; i<data.resourceIsTemplates.length; i++)
+			$(form).ajaxSubmitJson(
 			{
-				if(data.resourceIsTemplates[i] == "true")
-					templateCount++;
-			}
-			
-			if(templateCount == 0)
-			{
-				$.tipInfo("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
-				po.showAfterSave = false;
-				
-				return;
-			}
-			
-			$.ajaxJson($(form).attr("action"),
-			{
-				data: data,
+				handleData: function(data)
+				{
+					var newData = po.getResourceEditorData();
+					newData.dashboard = data;
+					newData.copySourceId = po.element("#${pageId}-copySourceId").val();
+					
+					var templateCount = (newData.dashboard.templates == null ? 0 : newData.dashboard.templates.length);
+					for(var i=0; i<newData.resourceIsTemplates.length; i++)
+					{
+						if(newData.resourceIsTemplates[i] == "true")
+							templateCount++;
+					}
+					
+					if(templateCount == 0)
+					{
+						$.tipInfo("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
+						po.showAfterSave = false;
+						
+						return false;
+					}
+					
+					return newData;
+				},
 				success : function(response)
 				{
 					var isSaveAdd = !po.getDashboardId();

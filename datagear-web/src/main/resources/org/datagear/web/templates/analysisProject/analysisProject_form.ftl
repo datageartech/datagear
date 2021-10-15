@@ -76,11 +76,8 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			var data = $.formToJson(form);
-			
-			$.ajaxJson($(form).attr("action"),
+			$(form).ajaxSubmitJson(
 			{
-				data: data,
 				success : function(response)
 				{
 					po.pageParamCallAfterSave(true, response.data);

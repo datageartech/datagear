@@ -576,9 +576,9 @@
 		/**
 		 * 表单数据转JSON对象。
 		 * @param form 表单元素、表单JQuery对象、名称/值对象数组，名称支持“a.b[0].c”、“a.b[]”格式的属性路径
-		 * @param ignores 忽略的表单项名称，可选
+		 * @param ignore 可选，忽略的表单输入项名称，格式为：字符串、字符串数组
 		 */
-		formToJson: function(form, ignores)
+		formToJson: function(form, ignore)
 		{
 			var $form = $(form);
 			
@@ -587,11 +587,14 @@
 			var json = {};
 			var KeyForArray = $.uid("__KEY_FOR_ARRAY_");
 			
+			if(ignore != null)
+				ignore = ($.isArray(ignore) ? ignore : [ ignore ]);
+			
 			$(array).each(function(indexInArray)
 			{
 				var name = this.name;
 				
-				if(ignores && ignores.length > 0 && $.inArray(name, ignores) >= 0)
+				if(ignore && $.inArray(name, ignore) >= 0)
 					return;
 				
 				var value = this.value;
@@ -1729,7 +1732,7 @@
 		 */
 		ajaxJson: function(url, options)
 		{
-			if(options == undefined)
+			if(options === undefined)
 			{
 				options = url;
 				options.contentType = $.CONTENT_TYPE_JSON;
@@ -3680,5 +3683,77 @@
 			$.ajax(ajaxOptions);
 		}
 	};
+})
+(jQuery);
+
+(function($, undefined)
+{
+	$.fn.extend(
+	{
+		/**
+		 * JSON数据格式的表单ajax提交。
+		 * 
+		 * @param options 选项，格式为：
+		 * 			{
+						//可选，提交URL，默认为form的action
+						url: "...",
+						//可选，忽略的表单输入项名称，格式为：字符串、字符串数组
+						ignore: ...,
+						//可选，表单JSON数据处理回调函数，返回false将阻止表单提交
+						handleData: function(data, form){ ... 或者 return ... },
+						//可选，成功回调函数
+						success: function(responseData, textStatus, jqXHR, formData){ ... },
+						//可选，错误回调函数
+						error: function(jqXHR, textStatus, errorThrown, formData){ ... },
+						//其他$.ajax选项
+						...
+		 * 			}
+		 */
+		ajaxSubmitJson: function(options)
+		{
+			options = (options || {});
+			
+			var $form = $(this);
+			var data = $.formToJson(this, options.ignore);
+			
+			options = $.extend(
+			{
+				url: $form.attr("action"),
+				data: data
+			},
+			options);
+			
+			if(options.success)
+			{
+				var _success = options.success;
+				options.success = function(responseData, textStatus, jqXHR)
+				{
+					return _success.call(this, responseData, textStatus, jqXHR, data);
+				};
+			}
+			
+			if(options.error)
+			{
+				var _error = options.error;
+				options.error = function(jqXHR, textStatus, errorThrown)
+				{
+					return _error.call(this, jqXHR, textStatus, errorThrown, data);
+				};
+			}
+			
+			if(options.handleData)
+			{
+				var newData = options.handleData(options.data, this);
+				
+				if(newData === false)
+					return;
+				
+				if(newData !== undefined)
+					options.data = newData;
+			}
+			
+			$.ajaxJson(options);
+		}
+	});
 })
 (jQuery);

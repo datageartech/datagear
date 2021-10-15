@@ -241,15 +241,10 @@ dataExchange_js.ftl
 				return;
 			
 			po.dataExchangeTaskClient.start();
-			
 			po.resetAllSubDataExchangeStatus();
 			
-			var $form = $(this);
-			var data = $.formToJson($form);
-			
-			$.ajaxJson($form.attr("action"),
+			$(this).ajaxSubmitJson(
 			{
-				data: data,
 				success: function()
 				{
 					if(!po.isDataExchangePageStatus("finish"))

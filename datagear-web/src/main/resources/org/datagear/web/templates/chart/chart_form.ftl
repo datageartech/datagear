@@ -926,12 +926,13 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			var data = $.formToJson(form, ["dataSignValidation", "updateIntervalRadio", "resultDataFormatEnable"]);
-			data["chartDataSetVOs"] = po.getFormChartDataSets();
-			
-			$.ajaxJson($(form).attr("action"),
+			$(form).ajaxSubmitJson(
 			{
-				data: data,
+				ignore: ["dataSignValidation", "updateIntervalRadio", "resultDataFormatEnable"],
+				handleData: function(data)
+				{
+					data["chartDataSetVOs"] = po.getFormChartDataSets();
+				},
 				success : function(response)
 				{
 					var chart = response.data;
