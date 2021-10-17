@@ -21,7 +21,7 @@
 	{
 		"selector" : "#css_common",
 		"attr" : "href",
-		"value" : "${contextPath}/static/theme/<@spring.theme code='theme' />/common.css"
+		"value" : "${contextPath}/static/theme/<@spring.theme code='theme' />/style.css"
 	},
 	{
 		"selector" : "#css_ace",
