@@ -14,8 +14,8 @@
  * 
  * 运行时依赖:
  *   jquery.js
- *   datagear-chartFactory.js
- *   datagear-chartSetting.js
+ *   chartFactory.js
+ *   chartSetting.js
  * 
  * 
  * 此看板工厂支持为<body>元素添加elementAttrConst.DASHBOARD_LISTENER属性，用于指定看板监听器JS对象名，

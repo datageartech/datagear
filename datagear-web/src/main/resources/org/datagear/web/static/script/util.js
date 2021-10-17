@@ -11,7 +11,7 @@
  * 依赖:
  * jquery.js
  * jquery-ui.js
- * datagear-meta.js
+ * tableMeta.js
  */
 
 (function($, undefined)
@@ -860,7 +860,7 @@
 			if(text == null)
 				return "";
 			
-			return $.meta.escapeHtml(text);
+			return $.tableMeta.escapeHtml(text);
 		},
 		
 		/**
@@ -947,12 +947,12 @@
 			{
 				var column = columns[i];
 				
-				var disable = !$.meta.supportsColumn(column);
-				var isKeywordSearchCol = (i < options.keywordQueryColumnCount && $.meta.isKeywordSearchColumn(column));
+				var disable = !$.tableMeta.supportsColumn(column);
+				var isKeywordSearchCol = (i < options.keywordQueryColumnCount && $.tableMeta.isKeywordSearchColumn(column));
 				
 				dtColumns.push(
 				{
-					title: $.meta.displayInfoHtml(column, "a", (isKeywordSearchCol ? "keyword-search-column" : "")),
+					title: $.tableMeta.displayInfoHtml(column, "a", (isKeywordSearchCol ? "keyword-search-column" : "")),
 					data: $.escapeColumnNameForDataTable(column.name),
 					columnIndex: i,
 					columnName: column.name,
@@ -964,9 +964,9 @@
 						var _this = meta.settings.aoColumns[meta.col];
 						
 						var columnIndex = _this.columnIndex;
-						var column = $.meta.column(table, columnIndex);
+						var column = $.tableMeta.column(table, columnIndex);
 						
-						renderValue = $.meta.labelOfLabeledValue(data);
+						renderValue = $.tableMeta.labelOfLabeledValue(data);
 						renderValue = (renderValue == undefined ? data : renderValue);
 						renderValue = $.truncateIf(renderValue, "...", _this.options.stringDisplayThreshold);
 						renderValue = $.escapeHtml(renderValue);

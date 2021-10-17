@@ -15,7 +15,7 @@
  * 运行时依赖:
  *   jquery.js
  *   echarts.js
- *   datagear-chartSetting.js
+ *   chartSetting.js
  * 
  * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.OPTIONS属性来设置图表选项，格式为：

@@ -46,7 +46,7 @@ po.dataIsClient = true;
 	
 	po.selectColumnValue = function(table, column, value)
 	{
-		var importKey = $.meta.columnImportKey(table, column);
+		var importKey = $.tableMeta.columnImportKey(table, column);
 		if(!importKey)
 			return;
 		
@@ -58,7 +58,7 @@ po.dataIsClient = true;
 			{
 				select : function(data)
 				{
-					var myobj = $.meta.fromImportKeyPrimary(importKey, data);
+					var myobj = $.tableMeta.fromImportKeyPrimary(importKey, data);
 					$(thisForm).tableform("data", myobj, true);
 				}
 			}
@@ -69,12 +69,12 @@ po.dataIsClient = true;
 	
 	po.viewColumnValue = function(table, column, value)
 	{
-		var importKey = $.meta.columnImportKey(table, column);
+		var importKey = $.tableMeta.columnImportKey(table, column);
 		if(!importKey)
 			return;
 		
 		var myobj = $(this).tableform("data");
-		var pobj = $.meta.toImportKeyPrimary(importKey, myobj);
+		var pobj = $.tableMeta.toImportKeyPrimary(importKey, myobj);
 		var options =
 		{
 			contentType: $.CONTENT_TYPE_JSON,
@@ -91,15 +91,15 @@ po.dataIsClient = true;
 		var url;
 		var options = {target: "_file"};
 		
-		if($.meta.isBinaryColumnValueFile(value))
+		if($.tableMeta.isBinaryColumnValueFile(value))
 		{
-			url = $.addParam("${contextPath}/data/downloadFile", "file", $.meta.binaryColumnValueFileContent(value));
+			url = $.addParam("${contextPath}/data/downloadFile", "file", $.tableMeta.binaryColumnValueFileContent(value));
 			po.open(url, options);
 		}
 		else if(po.data && !po.dataIsClient)
 		{
 			url = po.url("downloadColumnValue");
-			options.data = { data: $.toJsonString($.meta.uniqueRecordData(table, po.data)), columnName: column.name };
+			options.data = { data: $.toJsonString($.tableMeta.uniqueRecordData(table, po.data)), columnName: column.name };
 			po.open(url, options);
 		}
 	};

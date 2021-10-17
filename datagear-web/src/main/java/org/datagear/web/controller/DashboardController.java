@@ -90,8 +90,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
 
-	public static final String SERVERTIME_TAIL_URL = "/servertime.js";
-
 	public static final String SERVERTIME_JS_VAR = "_" + Global.PRODUCT_NAME_EN + "ServerTime";
 
 	static
@@ -1142,7 +1140,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return data;
 	}
 
-	@RequestMapping(SERVERTIME_TAIL_URL)
+	@RequestMapping("/serverTime.js")
 	public void serverTimeJs(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		response.setContentType(CONTENT_TYPE_JAVASCRIPT);

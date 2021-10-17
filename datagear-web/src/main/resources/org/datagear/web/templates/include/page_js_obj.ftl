@@ -57,7 +57,7 @@ var ${pageId} =
 	
 	/**
 	 * 打开给定URL的页面。
-	 * 具体参数说明参考datagear-util.js中$.open。
+	 * 具体参数说明参考util.js中$.open。
 	 */
 	open : function(url, options)
 	{
@@ -173,7 +173,7 @@ var ${pageId} =
 	/**
 	 * 打开确认对话框。
 	 * @param content 显示内容
-	 * @param options 参数选项，参考datagear-util.js的$.confirm(...)函数说明
+	 * @param options 参数选项，参考util.js的$.confirm(...)函数说明
 	 */
 	confirm : function(content, options)
 	{

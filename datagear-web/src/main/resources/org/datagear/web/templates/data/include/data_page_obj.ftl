@@ -52,7 +52,7 @@
 				tableName = this.tableName;
 			}
 			
-			$.meta.on(this.schemaId, tableName, callback);
+			$.tableMeta.on(this.schemaId, tableName, callback);
 		},
 		
 		/**

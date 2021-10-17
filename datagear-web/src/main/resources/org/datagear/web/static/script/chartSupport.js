@@ -15,7 +15,7 @@
  * 运行时依赖:
  *   jquery.js
  *   echarts.js
- *   datagear-chartFactory.js
+ *   chartFactory.js
  */
 (function(global)
 {

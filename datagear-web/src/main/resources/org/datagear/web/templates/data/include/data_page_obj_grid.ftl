@@ -32,13 +32,13 @@ int keywordQueryColumnCount
 		if(!value)
 			return false;
 		
-		if($.meta.isBinaryColumn(column) && po.binaryPlaceholder == value)
+		if($.tableMeta.isBinaryColumn(column) && po.binaryPlaceholder == value)
 			return true;
 		
-		if($.meta.isClobColumn(column) && po.clobPlaceholder == value)
+		if($.tableMeta.isClobColumn(column) && po.clobPlaceholder == value)
 			return true;
 		
-		if($.meta.isSqlxmlColumn(column) && po.sqlXmlPlaceholder == value)
+		if($.tableMeta.isSqlxmlColumn(column) && po.sqlXmlPlaceholder == value)
 			return true;
 		
 		return false;

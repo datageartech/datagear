@@ -13,7 +13,7 @@
  */
 (function($, undefined)
 {
-	var $meta = ($.meta || ($.meta = {}));
+	var $meta = ($.tableMeta || ($.tableMeta = {}));
 
 	if(!$meta.schemaTableCache)
 		$meta.schemaTableCache = {};

@@ -50,10 +50,10 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/ace-21.02.19/ext-language_tools.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/clipboard-2.0.4/clipboard.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-meta.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-util.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-tableform.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-schema-url-builder.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-chartFactory.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-chartSetting.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/tableMeta.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/util.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/tableform.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/schemaUrlBuilder.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/chartFactory.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/chartSetting.js?v=${_hh_Version}" type="text/javascript"></script>
 </#if>

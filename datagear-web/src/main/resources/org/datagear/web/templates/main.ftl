@@ -1037,7 +1037,7 @@ ${detectNewVersionScript?no_esc}
 				        	var tableName = selNode.original.name;
 				        	
 				        	var tooltipId;
-				        	$.meta.load(schemaId, tableName,
+				        	$.tableMeta.load(schemaId, tableName,
 				    	    {
 				        		beforeSend : function beforeSend(XHR)
 				        		{

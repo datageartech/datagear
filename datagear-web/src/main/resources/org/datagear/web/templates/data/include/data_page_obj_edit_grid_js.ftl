@@ -247,7 +247,7 @@ data_page_obj_edit_grid_html.ftl
 			{
 				po.editCellOnSelect = true;
 				
-				var rowData = $.meta.instance(po.editGridMetaTable);
+				var rowData = $.tableMeta.instance(po.editGridMetaTable);
 				
 				var editDataTable = po.elementEditTable().DataTable();
 				var row = editDataTable.row.add(rowData);
@@ -419,7 +419,7 @@ data_page_obj_edit_grid_html.ftl
 		if(!columnValue)
 			return false;
 		
-		var re = ($.meta.isClobColumn(column) || $.meta.isSqlxmlColumn(column));
+		var re = ($.tableMeta.isClobColumn(column) || $.tableMeta.isSqlxmlColumn(column));
 		
 		if(re && po.isClientDataRow(editDataTable, cellIndex.row))
 			re =  false;
@@ -474,7 +474,7 @@ data_page_obj_edit_grid_html.ftl
 		
 		for(var columnName in columnNameCellIndexes)
 		{
-			var column = $.meta.column(table, columnName);
+			var column = $.tableMeta.column(table, columnName);
 			
 			var myIndexes = columnNameCellIndexes[columnName];
 			var myIndex0 = myIndexes[0];
@@ -507,7 +507,7 @@ data_page_obj_edit_grid_html.ftl
 				}
 				
 				if(allColumnValueEquals)
-					$.meta.columnValue(data.formData, columnName, columnValue0);
+					$.tableMeta.columnValue(data.formData, columnName, columnValue0);
 			}
 		}
 		
@@ -522,7 +522,7 @@ data_page_obj_edit_grid_html.ftl
 		{
 			"type" : "POST",
 			"url" : po.url("getColumnValuess"),
-			"data" : { "datas" : $.meta.uniqueRecordData(po.editGridMetaTable, needFetchRowDatas), "columnNamess" : needFetchColumnNamess },
+			"data" : { "datas" : $.tableMeta.uniqueRecordData(po.editGridMetaTable, needFetchRowDatas), "columnNamess" : needFetchColumnNamess },
 			"success" : function(columnValueFetchedss)
 			{
 				if(columnValueFetchedss)
@@ -546,8 +546,8 @@ data_page_obj_edit_grid_html.ftl
 								{
 									var needFetchColumnName = needFetchColumnNames[j];
 									
-									$.meta.columnValue(data.formData, needFetchColumnName, columnValueFetched);
-									$.meta.columnValue(needFetchRowData, needFetchColumnName, columnValueFetched);
+									$.tableMeta.columnValue(data.formData, needFetchColumnName, columnValueFetched);
+									$.tableMeta.columnValue(needFetchRowData, needFetchColumnName, columnValueFetched);
 									
 									var myColumn = $.getDataTableColumn(settings, needFetchColumnName);
 									var myCell = editDataTable.cell({ "row" : needFetchRow, "column" : myColumn });
@@ -722,15 +722,15 @@ data_page_obj_edit_grid_html.ftl
 		for(var columnName in columnNameCellIndexes)
 		{
 			var myIndexes = columnNameCellIndexes[columnName];
-			var column = $.meta.column(po.editGridMetaTable, columnName);
-			var columnValue = $.meta.columnValue(data, column.name);
+			var column = $.tableMeta.column(po.editGridMetaTable, columnName);
+			var columnValue = $.tableMeta.columnValue(data, column.name);
 			
 			for(var i=0; i<myIndexes.length; i++)
 			{
 				var index = myIndexes[i];
 				
 				var originalRowData = po.originalRowData(editDataTable, index.row);
-				var originalCellValue = $.meta.columnValue(originalRowData, column);
+				var originalCellValue = $.tableMeta.columnValue(originalRowData, column);
 				var myColumnValue = columnValue;
 				
 				var changed = true;
@@ -739,8 +739,8 @@ data_page_obj_edit_grid_html.ftl
 					changed = false;
 				else
 				{
-					if($.meta.isLabeledValue(myColumnValue))
-						myColumnValue = $.meta.valueOfLabeledValue(myColumnValue);
+					if($.tableMeta.isLabeledValue(myColumnValue))
+						myColumnValue = $.tableMeta.valueOfLabeledValue(myColumnValue);
 					
 					if(myColumnValue == originalCellValue)
 						changed = false;
@@ -821,7 +821,7 @@ data_page_obj_edit_grid_html.ftl
 				if(originalRowData)
 				{
 					var columnName = $.getDataTableCellName(settings, index);
-					var originalCellValue = $.meta.columnValue(originalRowData, columnName);
+					var originalCellValue = $.tableMeta.columnValue(originalRowData, columnName);
 					this.data((originalCellValue == undefined ? null : originalCellValue));
 				}
 				
@@ -999,10 +999,10 @@ data_page_obj_edit_grid_html.ftl
 			"url" : po.url("savess"),
 			"data" :
 			{
-				"updateOrigins" : $.meta.uniqueRecordData(po.editGridMetaTable, updateOrigins),
-				"updateTargets" : $.meta.removeLabeledValueFeature(updateTargets),
-				"adds" : $.meta.removeLabeledValueFeature(adds),
-				"deletes" : $.meta.uniqueRecordData(po.editGridMetaTable, deletes)
+				"updateOrigins" : $.tableMeta.uniqueRecordData(po.editGridMetaTable, updateOrigins),
+				"updateTargets" : $.tableMeta.removeLabeledValueFeature(updateTargets),
+				"adds" : $.tableMeta.removeLabeledValueFeature(adds),
+				"deletes" : $.tableMeta.uniqueRecordData(po.editGridMetaTable, deletes)
 			},
 			"beforeSend" : function()
 			{

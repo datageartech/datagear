@@ -641,15 +641,15 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		importItems.add(ImportItem.valueOfJavaScript("datetimepicker",
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
 		importItems
-				.add(ImportItem.valueOfJavaScript("chartFactory", scriptPrefix + "/datagear-chartFactory.js?v=" + vp));
+				.add(ImportItem.valueOfJavaScript("chartFactory", scriptPrefix + "/chartFactory.js?v=" + vp));
 		importItems.add(ImportItem.valueOfJavaScript("dashboardFactory",
-				scriptPrefix + "/datagear-dashboardFactory.js?v=" + vp));
+				scriptPrefix + "/dashboardFactory.js?v=" + vp));
 		importItems.add(
-				ImportItem.valueOfJavaScript("serverTime", cp + "/dashboard/servertime.js?v=" + rp));
+				ImportItem.valueOfJavaScript("serverTime", cp + "/dashboard/serverTime.js?v=" + rp));
 		importItems
-				.add(ImportItem.valueOfJavaScript("chartSupport", scriptPrefix + "/datagear-chartSupport.js?v=" + vp));
+				.add(ImportItem.valueOfJavaScript("chartSupport", scriptPrefix + "/chartSupport.js?v=" + vp));
 		importItems
-				.add(ImportItem.valueOfJavaScript("chartSetting", scriptPrefix + "/datagear-chartSetting.js?v=" + vp));
+				.add(ImportItem.valueOfJavaScript("chartSetting", scriptPrefix + "/chartSetting.js?v=" + vp));
 		importItems.add(ImportItem.valueOfJavaScript("chartPluginManager",
 				cp + "/chartPlugin/chartPluginManager.js?v=" + vp));
 

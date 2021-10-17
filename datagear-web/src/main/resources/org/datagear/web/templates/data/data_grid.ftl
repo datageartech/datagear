@@ -147,7 +147,7 @@ boolean readonly 是否只读操作，默认为false
 		{
 			po.executeOnSelect(function(row)
 			{
-				var data = $.meta.uniqueRecordData(table, row);
+				var data = $.tableMeta.uniqueRecordData(table, row);
 				
 				po.open(po.url("edit"),
 				{
@@ -167,7 +167,7 @@ boolean readonly 是否只读操作，默认为false
 				{
 					"confirm" : function()
 					{
-						var data = $.meta.uniqueRecordData(table, rows);
+						var data = $.tableMeta.uniqueRecordData(table, rows);
 						
 						po.ajaxSubmitForHandleDuplication(po.url("delete"), data, "<@spring.message code='delete.continueIgnoreDuplicationTemplate' />",
 						{
@@ -204,7 +204,7 @@ boolean readonly 是否只读操作，默认为false
 		{
 			po.executeOnSelect(function(row)
 			{
-				var data = $.meta.uniqueRecordData(table, row);
+				var data = $.tableMeta.uniqueRecordData(table, row);
 				
 				po.open(po.url("view"),
 				{

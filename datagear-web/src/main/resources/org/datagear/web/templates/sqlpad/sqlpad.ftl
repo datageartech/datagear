@@ -776,7 +776,7 @@ Schema schema 数据库，不允许为null
 						if(!data)
 							return renderValue;
 						
-						if($.meta.isBinaryColumn(column))
+						if($.tableMeta.isBinaryColumn(column))
 						{
 							if(rowIndex < po.sqlResultReadActualBinaryRows)
 							{

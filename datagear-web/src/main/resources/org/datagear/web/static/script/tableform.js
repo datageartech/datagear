@@ -11,8 +11,8 @@
  * jquery.js
  * jquery-ui.js
  * jquery.fileupload.js
- * datagear-meta.js
- * datagear-util.js
+ * tableMeta.js
+ * util.js
  * jquery.validate.js
  */
 (function($, undefined)
@@ -153,7 +153,7 @@
 			var options=this.options;
 			var table=options.table;
 			
-			options.data =  $.meta.instance(table, options.data);
+			options.data =  $.tableMeta.instance(table, options.data);
 			
 			this.element.attr("action", options.action);
 			
@@ -234,7 +234,7 @@
 						continue;
 					
 					var columnValue = columnWidget.getValue();
-					$.meta.columnValue(data, columnName, columnValue);
+					$.tableMeta.columnValue(data, columnName, columnValue);
 				}
 				
 				return data;
@@ -250,7 +250,7 @@
 					if(this._isIgnoreColumnName(column) || !columnWidget)
 						continue;
 					
-					var columnValue = $.meta.columnValue(data, columnName);
+					var columnValue = $.tableMeta.columnValue(data, columnName);
 					
 					if(setPartial == true && columnValue == undefined)
 						continue;
@@ -279,7 +279,7 @@
 			}
 			else
 			{
-				var column = $.meta.column(this.options.table, columnName);
+				var column = $.tableMeta.column(this.options.table, columnName);
 				
 				if(this._isIgnoreColumnName(column) || !columnWidget)
 					return;
@@ -453,14 +453,14 @@
 				//即使labelTitle与columnName一样也显示描述，因为columnName可能超长而无法在label内容中完全显示
 				$label.attr("title", (column.comment || columnName))
 				
-				if(!$.meta.supportsColumn(column))
+				if(!$.tableMeta.supportsColumn(column))
 				{
 					$label.addClass("ui-state-disabled");
 					$("<input type='text' />").addClass("ui-state-disabled").appendTo(valuediv);
 					continue;
 				}
 				
-				var columnValue = $.meta.columnValue(data, columnName);
+				var columnValue = $.tableMeta.columnValue(data, columnName);
 				
 				var columnWidget = (_this._columnWidgets[columnName] =
 				{
@@ -478,11 +478,11 @@
 					active : function(){}
 				});
 				
-				var columnImportKey = $.meta.columnImportKey(table, column);
+				var columnImportKey = $.tableMeta.columnImportKey(table, column);
 				
 				if(columnImportKey)
 					this._renderImportKeyColumnFormElement(column, columnValue, itemdiv, labeldiv, valuediv, columnWidget, columnImportKey);
-				else if($.meta.isBinaryColumn(column))
+				else if($.tableMeta.isBinaryColumn(column))
 					this._renderBinaryFormElement(column, columnValue, itemdiv, labeldiv, valuediv, columnWidget);
 				else
 					this._renderSimpleInputFormElement(column, columnValue, itemdiv, labeldiv, valuediv, columnWidget);
@@ -574,7 +574,7 @@
 			
 			var textElement;
 			
-			if(column.size && column.size > options.asTextareaLength && $.meta.isTextColumn(column))
+			if(column.size && column.size > options.asTextareaLength && $.tableMeta.isTextColumn(column))
 			{
 				valuediv.addClass("textarea-value");
 				
@@ -596,11 +596,11 @@
 			
 			if(!options.readonly)
 			{
-				if($.meta.isDateColumn(column))
+				if($.tableMeta.isDateColumn(column))
 					dateFormat = options.dateFormat;
-				else if($.meta.isTimeColumn(column))
+				else if($.tableMeta.isTimeColumn(column))
 					dateFormat = options.timeFormat;
-				else if($.meta.isTimestampColumn(column))
+				else if($.tableMeta.isTimestampColumn(column))
 					dateFormat = options.timestampFormat;
 			}
 			
@@ -656,7 +656,7 @@
 					.html(options.labels.downloadFile)
 					.appendTo(valuediv);
 				
-				if(!$.meta.valueOfLabeledValue(columnValue))
+				if(!$.tableMeta.valueOfLabeledValue(columnValue))
 					fileDownloadButton.attr("disabled", true);
 				
 				fileDownloadButton.button();
@@ -695,7 +695,7 @@
 						var columnValue = this.__columnValue;
 						var columnWidget = _this._columnWidgets[columnName];
 						
-						columnWidget.setValue($.meta.toLabeledValue($.meta.binaryColumnValueFilePrefix + serverFileInfo.name, clientFileName), true);
+						columnWidget.setValue($.tableMeta.toLabeledValue($.tableMeta.binaryColumnValueFilePrefix + serverFileInfo.name, clientFileName), true);
 						
 						$.fileuploadsuccessHandlerForUploadInfo(fileInfoDiv);
 						
@@ -745,7 +745,7 @@
 						
 			    		if("download" == action)
 			    		{
-			    			var value = $.meta.valueOfLabeledValue(myColumnInfo.columnValue);
+			    			var value = $.tableMeta.valueOfLabeledValue(myColumnInfo.columnValue);
 			    			if(value)
 			    				_this.options.downloadColumnValue.call(_this.element, table, myColumnInfo.column,
 										myColumnInfo.columnValue);
@@ -772,23 +772,23 @@
 				if(!labelVal)
 					return "";
 				
-				if($.meta.isBinaryColumnValueHex(labelVal) || $.meta.isBinaryColumnValueBase64(labelVal))
+				if($.tableMeta.isBinaryColumnValueHex(labelVal) || $.tableMeta.isBinaryColumnValueBase64(labelVal))
 					return labelVal;
 				
 				var hiddenVal = $(this.binaryHiddenInput).val();
 				
 				if(options.binaryFileReturnLabeledValue && hiddenVal && labelVal && hiddenVal != labelVal)
-					return $.meta.toLabeledValue(hiddenVal, labelVal);
+					return $.tableMeta.toLabeledValue(hiddenVal, labelVal);
 				
 				return hiddenVal;
 			};
 			columnWidget.setValue = function(value, retainFileInfo)
 			{
-				if(value && !$.meta.isLabeledValue(value))
-					value = $.meta.toLabeledValue(value, value);
+				if(value && !$.tableMeta.isLabeledValue(value))
+					value = $.tableMeta.toLabeledValue(value, value);
 				
-				var label = $.meta.labelOfLabeledValue(value);
-				value = ($.meta.valueOfLabeledValue(value) || "");
+				var label = $.tableMeta.labelOfLabeledValue(value);
+				value = ($.tableMeta.valueOfLabeledValue(value) || "");
 				
 				$(this.binaryHiddenInput).val(value);
 				$(this.binaryLabelInput).val(label ? label : value);
@@ -878,7 +878,7 @@
 		
 		_getColumnInfo : function(columnName)
 		{
-			var column = $.meta.column(this.options.table, columnName);
+			var column = $.tableMeta.column(this.options.table, columnName);
 			var columnWidget = this._columnWidgets[columnName];
 			var columnValue = columnWidget.getValue();
 			
@@ -905,7 +905,7 @@
 		 */
 		_addValidatorRequired : function(column, inputName)
 		{
-			if($.meta.isRequiredColumn(column))
+			if($.tableMeta.isRequiredColumn(column))
 			{
 				this._addValidator(inputName, "required", this.options.labels.validation.required);
 				return true;
