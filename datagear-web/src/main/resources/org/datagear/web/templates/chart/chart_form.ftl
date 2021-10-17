@@ -477,7 +477,11 @@ readonly 是否只读操作，允许为null
 					signValues.push($(this).val());
 				});
 				
-				propertySigns[signName] = signValues;
+				//没有标记的不必保存，避免存储长度溢出
+				if(signValues.length > 0)
+				{
+					propertySigns[signName] = signValues;
+				}
 			});
 			
 			re.push(
