@@ -34,8 +34,9 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.util.SAXHelper;
+import org.apache.poi.util.XMLHelper;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.StylesTable;
@@ -186,7 +187,7 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 	{
 		InputSource sheetSource = new InputSource(sheetInputStream);
 
-		XMLReader sheetParser = SAXHelper.newXMLReader();
+		XMLReader sheetParser = XMLHelper.newXMLReader();
 		ContentHandler handler = new XlsxSheetHandler(dataExchange, importContext, cn, stylesTable, sharedStringsTable,
 				sheetName, sheetIndex);
 		sheetParser.setContentHandler(handler);
@@ -734,14 +735,14 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 				{
 					String sstIndex = this._cellContents.toString();
 					int idx = Integer.parseInt(sstIndex);
-					XSSFRichTextString rtss = new XSSFRichTextString(sharedStringsTable.getEntryAt(idx));
+					RichTextString rtss = sharedStringsTable.getItemAt(idx);
 
 					value = rtss.toString();
 				}
 				else
 				{
 					int idx = Integer.parseInt(this._cellContents.toString());
-					value = sharedStringsTable.getEntryAt(idx);
+					value = sharedStringsTable.getItemAt(idx);
 				}
 
 				if (this._rowIndex == 0)

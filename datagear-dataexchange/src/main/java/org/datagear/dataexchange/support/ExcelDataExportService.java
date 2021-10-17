@@ -20,7 +20,6 @@ import java.util.List;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -126,8 +125,6 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 					Column column = columns.get(i);
 
 					Cell cell = titleRow.createCell(i);
-
-					cell.setCellType(CellType.STRING);
 					cell.setCellValue(column.getName());
 				}
 
@@ -203,16 +200,14 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 
 		if (value == null)
 		{
-			cell.setCellType(CellType.BLANK);
+			cell.setBlank();
 		}
 		else if (value instanceof String)
 		{
-			cell.setCellType(CellType.STRING);
 			cell.setCellValue((String) value);
 		}
 		else if (value instanceof BigDecimal || value instanceof BigInteger)
 		{
-			cell.setCellType(CellType.STRING);
 			cell.setCellValue(value.toString());
 		}
 		else if (value instanceof Number)
@@ -221,12 +216,10 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 
 			if (dataFormatContext.isPureNumberPattern())
 			{
-				cell.setCellType(CellType.NUMERIC);
 				cell.setCellValue(number.doubleValue());
 			}
 			else
 			{
-				cell.setCellType(CellType.STRING);
 				cell.setCellStyle(exportContext.getDateCellStyle(workbook, creationHelper));
 
 				if (value instanceof Double || value instanceof Float)
@@ -239,42 +232,35 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 		{
 			if (dataFormatContext.isPureDatePattern())
 			{
-				cell.setCellType(CellType.NUMERIC);
 				cell.setCellStyle(exportContext.getDateCellStyle(workbook, creationHelper));
 				cell.setCellValue((Date) value);
 			}
 			else
 			{
-				cell.setCellType(CellType.STRING);
 				cell.setCellStyle(exportContext.getDateCellStyle(workbook, creationHelper));
 				cell.setCellValue(dataFormatContext.formatDate((Date) value));
 			}
 		}
 		else if (value instanceof Time)
 		{
-			cell.setCellType(CellType.STRING);
 			cell.setCellStyle(exportContext.getTimeCellStyle(workbook, creationHelper));
 			cell.setCellValue(dataFormatContext.formatTime((Time) value));
 		}
 		else if (value instanceof Timestamp)
 		{
-			cell.setCellType(CellType.STRING);
 			cell.setCellStyle(exportContext.getTimestampCellStyle(workbook, creationHelper));
 			cell.setCellValue(dataFormatContext.formatTimestamp((Timestamp) value));
 		}
 		else if (value instanceof Boolean)
 		{
-			cell.setCellType(CellType.BOOLEAN);
 			cell.setCellValue((Boolean) value);
 		}
 		else if (value instanceof byte[])
 		{
-			cell.setCellType(CellType.STRING);
 			cell.setCellValue(dataFormatContext.formatBytes((byte[]) value));
 		}
 		else
 		{
-			cell.setCellType(CellType.STRING);
 			cell.setCellValue(value.toString());
 		}
 	}
