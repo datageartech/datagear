@@ -547,27 +547,6 @@
 			return re;
 		},
 		
-		/**
-		 * 给对象属性名加前缀，并返回新对象。
-		 * 
-		 * @param obj
-		 * @param prefix
-		 */
-		namePrefix : function(obj, prefix)
-		{
-			if(! prefix)
-				return obj;
-			
-			var re = {};
-			
-			for(var name in obj)
-			{
-				re [prefix + name] = obj[name];
-			}
-			
-			return re;
-		},
-		
 		toJsonString: function(obj)
 		{
 			return JSON.stringify(obj);
@@ -758,33 +737,6 @@
 		},
 		
 		/**
-		 * 拷贝对象。
-		 * 
-		 * @param obj 对象、对象数组
-		 * @param names 仅拷贝的属性名/数组，可选
-		 */
-		copyObject: function(obj, names)
-		{
-			var isArray = $.isArray(obj);
-			var array = (isArray? obj : [obj]);
-			if(names)
-				names = ($.isArray(names) ? names : [names]);
-			
-			var re=[];
-			for(var i=0; i<array.length; i++)
-			{
-				re[i] = {};
-				for(var p in array[i])
-				{
-					if(!names || $.inArray(p, names) >= 0)
-						re[i][p] = array[i][p];
-				}
-			}
-			
-			return (isArray? re : re[0]);
-		},
-		
-		/**
 		 * 获取对象/对象数组指定名称属性值。
 		 * 
 		 * @param obj 对象、对象数组
@@ -843,32 +795,6 @@
 		},
 		
 		/**
-		 * 给URL添加参数字符串。
-		 */
-		addParamString : function(url, param)
-		{
-			var f = (url.indexOf('?') < 0 ? "?" : "&" );
-			return url + f + param;
-		},
-		
-		/**
-		 * 将字符串数组转换为参数字符串。
-		 */
-		toParamString : function(paramName, strArray)
-		{
-			var re = "";
-			
-			for(var i=0; i<strArray.length; i++)
-			{
-				if(i > 0)
-					re += "&";
-				re += paramName + "=" + encodeURIComponent(strArray[i]);
-			}
-			
-			return re;
-		},
-		
-		/**
 		 * 获取对象或者对象数组的属性值参数字符串，例如：“id=1&id=2&id=3”
 		 * 
 		 * @param objOrArray
@@ -901,40 +827,6 @@
 			}
 			
 			return re;
-		},
-
-		/**
-		 * 获取对象或者对象数组的属性值参数对象，对象格式为：{ name : "...", value : "..."}
-		 * 
-		 * @param objOrArray
-		 * @param propertyName
-		 * @param paramName 可选，参数名
-		 */
-		getPropertyParamObjArray : function(objOrArray, propertyName, paramName)
-		{
-			if(!paramName)
-				paramName = propertyName;
-			
-			var re = [];
-			
-			var isArray = $.isArray(objOrArray);
-			
-			if(!isArray)
-				objOrArray = [objOrArray];
-			
-			for(var i=0; i<objOrArray.length; i++)
-			{
-				var ele = objOrArray[i];
-				
-				var pv = (ele ? ele[propertyName] : null);
-				
-				if(pv == undefined || pv == null)
-					pv = "";
-				
-				re[i] = { name : paramName, value : pv };
-			}
-			
-			return (isArray ? re : re[0]);
 		},
 		
 		/**
