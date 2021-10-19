@@ -201,24 +201,6 @@
 	/** 内置图表选项：处理图表更新选项 */
 	chartFactory.OPTION_PROCESS_UPDATE_OPTIONS = "processUpdateOptions";
 	
-	/**内置名字标识片段*/
-	chartFactory._BUILT_IN_NAME_PART = "datagear";
-	
-	/**内置名字标识片段*/
-	chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX = "_" + chartFactory._BUILT_IN_NAME_PART;
-	
-	/**数据对象的原始信息属性名*/
-	chartFactory._DATA_ORIGINAL_INFO_PROP_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalInfo";
-	
-	/**图表主题的CSS信息属性名*/
-	chartFactory._KEY_THEME_STYLE_SHEET_INFO = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleSheetInfo";
-	
-	/** 关键字：注册得ECharts主题名 */
-	chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "RegisteredEchartsThemeName";
-	
-	/** 关键字：可作为定位父元素的样式类名 */
-	chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE = "dg-position-relative";
-	
 	/**
 	 * 图表使用的渲染上下文属性名。
 	 */
@@ -247,148 +229,31 @@
 	};
 	
 	/**
-	 * 初始化渲染上下文中的图表主题。
-	 * 初始渲染上下文中允许不设置图表主题，或者仅设置部分属性，比如前景色、背景色，此方法则初始化其他必要的属性。
-	 * 
-	 * 注意：此方法应在初始化任意图表前且body已加载后调用，因为它也会从body的elementAttrConst.THEME读取用户设置的图表主题。
-	 * 
-	 * @param renderContext 渲染上下文
-	 */
-	chartFactory._initChartTheme = function(renderContext)
-	{
-		var theme = chartFactory.renderContextAttrChartTheme(renderContext);
-		
-		if(!theme)
-		{
-			theme = {};
-			chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.chartTheme, theme);
-		}
-		
-		if(!theme.name)
-			theme.name = "chartTheme";
-		if(!theme.color)
-			theme.color = "#333";
-		if(!theme.backgroundColor)
-			theme.backgroundColor = "transparent";
-		if(!theme.actualBackgroundColor)
-			theme.actualBackgroundColor = "#FFF";
-		if(!theme.gradient)
-			theme.gradient = 10;
-		if(!theme.graphColors || theme.graphColors.length == 0)
-			theme.graphColors = ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#3ba272", "#fc8452",
-							"#9a60b4", "#ea7ccc", "#B6A2DE"];
-		if(!theme.graphRangeColors || theme.graphRangeColors.length == 0)
-			theme.graphRangeColors = ["#58A52D", "#FFD700", "#FF4500"];
-		
-		chartFactory._initChartThemeActualBackgroundColorIf(theme);
-		
-		var bodyThemeValue = $(document.body).attr(elementAttrConst.THEME);
-		if(bodyThemeValue)
-		{
-			var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
-			chartFactory._initChartThemeActualBackgroundColorIf(bodyThemeObj);
-			
-			chartFactory._GLOBAL_RAW_CHART_THEME = $.extend(true, {}, theme, bodyThemeObj);
-			
-			chartFactory._inflateChartThemeIf(bodyThemeObj);
-			
-			// < @deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
-			if(bodyThemeObj.colorSecond)
-			{
-				bodyThemeObj.color = bodyThemeObj.colorSecond;
-				bodyThemeObj.titleColor = bodyThemeObj.color;
-				bodyThemeObj.legendColor = bodyThemeObj.colorSecond;
-			}
-			// > @deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
-			
-			$.extend(true, theme, bodyThemeObj);
-		}
-		
-		if(!chartFactory._GLOBAL_RAW_CHART_THEME)
-			chartFactory._GLOBAL_RAW_CHART_THEME = $.extend(true, {}, theme);
-		
-		chartFactory._inflateChartThemeIf(theme);
-	};
-	
-	/**
-	 * 初始化图表主题的实际背景色。
-	 */
-	chartFactory._initChartThemeActualBackgroundColorIf = function(theme)
-	{
-		//如果设置了非透明backgroundColor，那么也应同时设置actualBackgroundColor
-		if(theme.backgroundColor && theme.backgroundColor != "transparent")
-		{
-			theme.actualBackgroundColor = theme.backgroundColor;
-			return true;
-		}
-		
-		return false;
-	};
-	
-	/**
-	 * 如果图表主题已具备了生成其他配色的条件（color、actualBackgroundColor已设置），则尝试生成它们。
-	 */
-	chartFactory._inflateChartThemeIf = function(theme)
-	{
-		if(theme.color && theme.actualBackgroundColor)
-		{
-			if(!theme.legendColor)
-				theme.legendColor = chartFactory.gradualColor(theme, 0.8);
-			
-			if(!theme.borderColor)
-				theme.borderColor = chartFactory.gradualColor(theme, 0.3);
-			
-			if(!theme.tooltipTheme)
-			{
-				var tooltipTheme =
-				{
-					name: "tooltipTheme",
-					color: theme.actualBackgroundColor,
-					backgroundColor: chartFactory.gradualColor(theme, 0.7),
-					actualBackgroundColor: chartFactory.gradualColor(theme, 0.7),
-					borderColor: chartFactory.gradualColor(theme, 0.9),
-					borderWidth: 1,
-					gradient: theme.gradient
-				};
-				
-				theme.tooltipTheme = tooltipTheme;
-			}
-			
-			if(!theme.highlightTheme)
-			{
-				var highlightTheme =
-				{
-					name: "highlightTheme",
-					color: theme.actualBackgroundColor,
-					backgroundColor: chartFactory.gradualColor(theme, 0.8),
-					actualBackgroundColor: chartFactory.gradualColor(theme, 0.8),
-					borderColor: chartFactory.gradualColor(theme, 1),
-					borderWidth: 1,
-					gradient: theme.gradient
-				};
-				
-				theme.highlightTheme = highlightTheme;
-			}
-		}
-		
-		if(theme.color)
-		{
-			if(!theme.titleColor)
-				theme.titleColor = theme.color;
-			
-			if(!theme.legendColor)
-				theme.legendColor = theme.color;
-		}
-		
-		if(theme.borderWidth && !theme.borderStyle)
-			theme.borderStyle = "solid";
-	};
-	
-	/**
 	 * 初始化指定图表对象。
-	 * 初始化前应确保chart.renderContext中包含chartFactory.renderContextAttrs必须的属性值。
+	 * 初始化前应确保已调用chartFactory.initRenderContext(chart.renderContext)。
 	 * 
-	 * @param chart 图表对象
+	 * @param chart 基本图表对象，格式应为：
+	 *				{
+	 *				  //唯一ID
+	 *				  id: "...",
+	 *				  //HTML元素ID
+	 *				  elementId: "...",
+	 *				  //渲染上下文
+	 *				  renderContext: {...},
+	 *				  //图表插件
+	 *				  plugin: {...},
+	 *				  //可选，名称
+	 *				  name: "...",
+	 *				  //可选，图表数据集数组
+	 *				  chartDataSets: [...],
+	 *				  //可选，更新间隔
+	 *				  updateInterval: 数值,
+	 *				  //可选，图表结果数据格式
+	 *				  resultDataFormat: {...},
+	 *				  //图表属性
+	 *				  attributes: {chartWidget: {id: "...", ..}, ...}
+	 *				}
+	 *				具体结构参考：org.datagear.analysis.support.html.HtmlChart
 	 */
 	chartFactory.init = function(chart)
 	{
@@ -3857,9 +3722,6 @@
 		}
 	};
 	
-	/** HTML元素上已渲染的图表对象KEY */
-	chartFactory._KEY_ELEMENT_RENDERED_CHART = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "RenderedChart";
-	
 	/**
 	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
 	 * 
@@ -3872,9 +3734,6 @@
 		
 		return $(element).data(chartFactory._KEY_ELEMENT_RENDERED_CHART);
 	};
-	
-	/** 生成元素ID用的前缀 */
-	chartFactory._ELEMENT_ID_PREFIX = chartFactory._BUILT_IN_NAME_PART + new Number(new Date().getTime()).toString(16);
 	
 	/**
 	 * 执行JS代码。
@@ -3921,8 +3780,6 @@
 		
 		return re;
 	};
-	
-	chartFactory._KEY_GRADUAL_COLORS = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "GradualColors";
 	
 	/**
 	 * 获取主题从背景色（actualBackgroundColor）到前景色（color）之间的渐变因子对应的颜色。
@@ -4211,6 +4068,171 @@
 			else if(console.info)
 				console.info(exception);
 		}
+	};
+	
+	/**内置名字标识片段*/
+	chartFactory._BUILT_IN_NAME_PART = "datagear";
+	
+	/**内置名字标识片段*/
+	chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX = "_" + chartFactory._BUILT_IN_NAME_PART;
+	
+	/**数据对象的原始信息属性名*/
+	chartFactory._DATA_ORIGINAL_INFO_PROP_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalInfo";
+	
+	/**图表主题的CSS信息属性名*/
+	chartFactory._KEY_THEME_STYLE_SHEET_INFO = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleSheetInfo";
+	
+	/** 关键字：注册得ECharts主题名 */
+	chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "RegisteredEchartsThemeName";
+	
+	/** 关键字：可作为定位父元素的样式类名 */
+	chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE = "dg-position-relative";
+	
+	/** HTML元素上已渲染的图表对象KEY */
+	chartFactory._KEY_ELEMENT_RENDERED_CHART = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "RenderedChart";
+	
+	/** 生成元素ID用的前缀 */
+	chartFactory._ELEMENT_ID_PREFIX = chartFactory._BUILT_IN_NAME_PART + new Number(new Date().getTime()).toString(16);
+	
+	/** 关键字：渐变色数组 */
+	chartFactory._KEY_GRADUAL_COLORS = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "GradualColors";
+	
+	/**
+	 * 初始化渲染上下文中的图表主题。
+	 * 初始渲染上下文中允许不设置图表主题，或者仅设置部分属性，比如前景色、背景色，此方法则初始化其他必要的属性。
+	 * 
+	 * 注意：此方法应在初始化任意图表前且body已加载后调用，因为它也会从body的elementAttrConst.THEME读取用户设置的图表主题。
+	 * 
+	 * @param renderContext 渲染上下文
+	 */
+	chartFactory._initChartTheme = function(renderContext)
+	{
+		var theme = chartFactory.renderContextAttrChartTheme(renderContext);
+		
+		if(!theme)
+		{
+			theme = {};
+			chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.chartTheme, theme);
+		}
+		
+		if(!theme.name)
+			theme.name = "chartTheme";
+		if(!theme.color)
+			theme.color = "#333";
+		if(!theme.backgroundColor)
+			theme.backgroundColor = "transparent";
+		if(!theme.actualBackgroundColor)
+			theme.actualBackgroundColor = "#FFF";
+		if(!theme.gradient)
+			theme.gradient = 10;
+		if(!theme.graphColors || theme.graphColors.length == 0)
+			theme.graphColors = ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#3ba272", "#fc8452",
+							"#9a60b4", "#ea7ccc", "#B6A2DE"];
+		if(!theme.graphRangeColors || theme.graphRangeColors.length == 0)
+			theme.graphRangeColors = ["#58A52D", "#FFD700", "#FF4500"];
+		
+		chartFactory._initChartThemeActualBackgroundColorIf(theme);
+		
+		var bodyThemeValue = $(document.body).attr(elementAttrConst.THEME);
+		if(bodyThemeValue)
+		{
+			var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
+			chartFactory._initChartThemeActualBackgroundColorIf(bodyThemeObj);
+			
+			chartFactory._GLOBAL_RAW_CHART_THEME = $.extend(true, {}, theme, bodyThemeObj);
+			
+			chartFactory._inflateChartThemeIf(bodyThemeObj);
+			
+			// < @deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
+			if(bodyThemeObj.colorSecond)
+			{
+				bodyThemeObj.color = bodyThemeObj.colorSecond;
+				bodyThemeObj.titleColor = bodyThemeObj.color;
+				bodyThemeObj.legendColor = bodyThemeObj.colorSecond;
+			}
+			// > @deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
+			
+			$.extend(true, theme, bodyThemeObj);
+		}
+		
+		if(!chartFactory._GLOBAL_RAW_CHART_THEME)
+			chartFactory._GLOBAL_RAW_CHART_THEME = $.extend(true, {}, theme);
+		
+		chartFactory._inflateChartThemeIf(theme);
+	};
+	
+	/**
+	 * 初始化图表主题的实际背景色。
+	 */
+	chartFactory._initChartThemeActualBackgroundColorIf = function(theme)
+	{
+		//如果设置了非透明backgroundColor，那么也应同时设置actualBackgroundColor
+		if(theme.backgroundColor && theme.backgroundColor != "transparent")
+		{
+			theme.actualBackgroundColor = theme.backgroundColor;
+			return true;
+		}
+		
+		return false;
+	};
+	
+	/**
+	 * 如果图表主题已具备了生成其他配色的条件（color、actualBackgroundColor已设置），则尝试生成它们。
+	 */
+	chartFactory._inflateChartThemeIf = function(theme)
+	{
+		if(theme.color && theme.actualBackgroundColor)
+		{
+			if(!theme.legendColor)
+				theme.legendColor = chartFactory.gradualColor(theme, 0.8);
+			
+			if(!theme.borderColor)
+				theme.borderColor = chartFactory.gradualColor(theme, 0.3);
+			
+			if(!theme.tooltipTheme)
+			{
+				var tooltipTheme =
+				{
+					name: "tooltipTheme",
+					color: theme.actualBackgroundColor,
+					backgroundColor: chartFactory.gradualColor(theme, 0.7),
+					actualBackgroundColor: chartFactory.gradualColor(theme, 0.7),
+					borderColor: chartFactory.gradualColor(theme, 0.9),
+					borderWidth: 1,
+					gradient: theme.gradient
+				};
+				
+				theme.tooltipTheme = tooltipTheme;
+			}
+			
+			if(!theme.highlightTheme)
+			{
+				var highlightTheme =
+				{
+					name: "highlightTheme",
+					color: theme.actualBackgroundColor,
+					backgroundColor: chartFactory.gradualColor(theme, 0.8),
+					actualBackgroundColor: chartFactory.gradualColor(theme, 0.8),
+					borderColor: chartFactory.gradualColor(theme, 1),
+					borderWidth: 1,
+					gradient: theme.gradient
+				};
+				
+				theme.highlightTheme = highlightTheme;
+			}
+		}
+		
+		if(theme.color)
+		{
+			if(!theme.titleColor)
+				theme.titleColor = theme.color;
+			
+			if(!theme.legendColor)
+				theme.legendColor = theme.color;
+		}
+		
+		if(theme.borderWidth && !theme.borderStyle)
+			theme.borderStyle = "solid";
 	};
 	
 	/**
