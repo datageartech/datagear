@@ -39,6 +39,11 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	public static final DataSetFmkTemplateResolver CSV_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver(
 			CsvOutputFormat.INSTANCE);
 
+	/**
+	 * CSV解析器。
+	 */
+	public static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT.builder().setIgnoreSurroundingSpaces(true).build();
+
 	/** 作为名称行的行号 */
 	private int nameRow = -1;
 
@@ -373,7 +378,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 */
 	protected CSVParser buildCSVParser(Reader reader) throws Throwable
 	{
-		return CSVFormat.DEFAULT.withIgnoreSurroundingSpaces().parse(reader);
+		return CSV_FORMAT.parse(reader);
 	}
 
 	/**
