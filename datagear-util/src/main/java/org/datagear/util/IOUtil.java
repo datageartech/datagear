@@ -492,18 +492,21 @@ public class IOUtil
 	 */
 	public static ZipInputStream getZipInputStream(InputStream in)
 	{
-		return getZipInputStream(in, IOUtil.CHARSET_UTF_8);
+		return getZipInputStream(in, CHARSET_UTF_8);
 	}
 
 	/**
 	 * 获取ZIP输入流。
 	 * 
 	 * @param in
-	 * @param charset
+	 * @param charset 允许为{@code null}、{@code ""}
 	 * @return
 	 */
 	public static ZipInputStream getZipInputStream(InputStream in, String charset)
 	{
+		if (StringUtil.isEmpty(charset))
+			charset = CHARSET_UTF_8;
+
 		return getZipInputStream(in, Charset.forName(charset));
 	}
 
@@ -511,11 +514,14 @@ public class IOUtil
 	 * 获取ZIP输入流。
 	 * 
 	 * @param in
-	 * @param charset
+	 * @param charset 允许为{@code null}
 	 * @return
 	 */
 	public static ZipInputStream getZipInputStream(InputStream in, Charset charset)
 	{
+		if (charset == null)
+			charset = Charset.forName(CHARSET_UTF_8);
+
 		ZipInputStream zin = new ZipInputStream(in, charset);
 
 		return zin;
@@ -540,7 +546,7 @@ public class IOUtil
 	 * 获取ZIP输入流。
 	 * 
 	 * @param file
-	 * @param charset
+	 * @param charset 允许为{@code null}、{@code ""}
 	 * @return
 	 * @throws FileNotFoundException
 	 */
@@ -553,7 +559,7 @@ public class IOUtil
 	 * 获取ZIP输入流。
 	 * 
 	 * @param file
-	 * @param charset
+	 * @param charset 允许为{@code null}
 	 * @return
 	 * @throws FileNotFoundException
 	 */
@@ -581,7 +587,7 @@ public class IOUtil
 	 * 获取ZIP输入流。
 	 * 
 	 * @param file
-	 * @param charset
+	 * @param charset 允许为{@code null}、{@code ""}
 	 * @return
 	 * @throws FileNotFoundException
 	 */
@@ -594,7 +600,7 @@ public class IOUtil
 	 * 获取ZIP输入流。
 	 * 
 	 * @param file
-	 * @param charset
+	 * @param charset 允许为{@code null}
 	 * @return
 	 * @throws FileNotFoundException
 	 */
@@ -614,18 +620,21 @@ public class IOUtil
 	 */
 	public static ZipOutputStream getZipOutputStream(OutputStream out)
 	{
-		return getZipOutputStream(out, IOUtil.CHARSET_UTF_8);
+		return getZipOutputStream(out, CHARSET_UTF_8);
 	}
 
 	/**
 	 * 获取ZIP输出流。
 	 * 
 	 * @param out
-	 * @param charset
+	 * @param charset 允许为{@code null}、{@code ""}
 	 * @return
 	 */
 	public static ZipOutputStream getZipOutputStream(OutputStream out, String charset)
 	{
+		if (StringUtil.isEmpty(charset))
+			charset = CHARSET_UTF_8;
+
 		return getZipOutputStream(out, Charset.forName(charset));
 	}
 
@@ -633,11 +642,14 @@ public class IOUtil
 	 * 获取ZIP输出流。
 	 * 
 	 * @param out
-	 * @param charset
+	 * @param charset 允许为{@code null}
 	 * @return
 	 */
 	public static ZipOutputStream getZipOutputStream(OutputStream out, Charset charset)
 	{
+		if (charset == null)
+			charset = Charset.forName(CHARSET_UTF_8);
+
 		return new ZipOutputStream(out, charset);
 	}
 
@@ -660,7 +672,7 @@ public class IOUtil
 	 * 获取ZIP输出流。
 	 * 
 	 * @param file
-	 * @param charset
+	 * @param charset 允许为{@code null}、{@code ""}
 	 * @return
 	 * @throws FileNotFoundException
 	 */
@@ -673,7 +685,7 @@ public class IOUtil
 	 * 获取ZIP输出流。
 	 * 
 	 * @param file
-	 * @param charset
+	 * @param charset 允许为{@code null}
 	 * @return
 	 * @throws FileNotFoundException
 	 */
@@ -703,7 +715,7 @@ public class IOUtil
 	 * 获取ZIP输出流。
 	 * 
 	 * @param file
-	 * @param charset
+	 * @param charset 允许为{@code null}、{@code ""}
 	 * @par
 	 * @return
 	 * @throws FileNotFoundException
@@ -717,7 +729,7 @@ public class IOUtil
 	 * 获取ZIP输出流。
 	 * 
 	 * @param file
-	 * @param charset
+	 * @param charset 允许为{@code null}
 	 * @par
 	 * @return
 	 * @throws FileNotFoundException

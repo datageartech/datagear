@@ -3430,6 +3430,11 @@ table.dataTable tbody tr td select{
 	height: 2em;
 }
 
+.page-form-importDashboard{}
+.page-form-importDashboard .encoding-selectmenu-menu .ui-menu{
+	height: 6em;
+}
+
 .page-form.page-form-dashboardGlobalResContent{}
 .page-form.page-form-dashboardGlobalResContent .resource-editor-wrapper{
 	display: inline-block;

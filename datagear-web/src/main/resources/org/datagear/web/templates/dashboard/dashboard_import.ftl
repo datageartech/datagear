@@ -36,6 +36,20 @@
 				<#assign readonly=false>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
+			<div class="form-item form-item-encoding">
+				<div class="form-item-label">
+					<label title="<@spring.message code='dashboard.import.fileEncoding.desc' />">
+						<@spring.message code='dashboard.import.fileEncoding' />
+					</label>
+				</div>
+				<div class="form-item-value">
+					<select name="fileEncoding">
+						<#list availableCharsetNames as item>
+						<option value="${item}" <#if item == fileEncodingDefault>selected="selected"</#if>>${item}</option>
+						</#list>
+					</select>
+				</div>
+			</div>
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.name' /></label>
@@ -74,6 +88,7 @@
 	$.initButtons(po.element());
 	po.element(".fileinput-button").button();
 	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");
+	po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	
 	po.url = function(action)
 	{

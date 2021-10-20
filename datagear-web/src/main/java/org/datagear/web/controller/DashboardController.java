@@ -534,6 +534,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		setCookieAnalysisProject(request, response, dashboard);
 
 		model.addAttribute("dashboard", dashboard);
+		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		model.addAttribute("fileEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		return "/dashboard/dashboard_import";
 	}
@@ -541,7 +543,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/uploadImportFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, Object> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("file") MultipartFile multipartFile) throws Exception
+			@RequestParam("file") MultipartFile multipartFile,
+			@RequestParam(name = "fileEncoding", required = false) String fileEncoding) throws Exception
 	{
 		String dasboardName = "";
 		String dashboardFileName = "";
@@ -553,7 +556,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (FileUtil.isExtension(fileName, "zip"))
 		{
-			ZipInputStream in = IOUtil.getZipInputStream(multipartFile.getInputStream());
+			ZipInputStream in = IOUtil.getZipInputStream(multipartFile.getInputStream(), fileEncoding);
 			try
 			{
 				IOUtil.unzip(in, dashboardDirectory);
