@@ -253,7 +253,7 @@
 	 *				  //图表属性
 	 *				  attributes: {chartWidget: {id: "...", ..}, ...}
 	 *				}
-	 *				具体结构参考：org.datagear.analysis.support.html.HtmlChart
+	 *				另参考：org.datagear.analysis.support.html.HtmlChart
 	 */
 	chartFactory.init = function(chart)
 	{
@@ -280,16 +280,16 @@
 	chartBase.init = function()
 	{
 		if(!this.id)
-			throw new Error("[this.id] must be defined");
+			throw new Error("[chart.id] required");
 		if(!this.elementId)
-			throw new Error("[this.elementId] must be defined");
+			throw new Error("[chart.elementId] required");
 		if(!this.renderContext)
-			throw new Error("[this.renderContext] must be defined");
+			throw new Error("[chart.renderContext] required");
 		if(!this.plugin)
-			throw new Error("[this.plugin] must be defined");
+			throw new Error("[chart.plugin] required");
 		
 		if(this.statusRendering() || this.isActive())
-			throw new Error("Chart is not ready for init");
+			throw new Error("Chart is illegal state for init");
 		
 		this.name = (this.name || "");
 		this.chartDataSets = (this.chartDataSets || []);
@@ -814,7 +814,7 @@
 		var $element = this.elementJquery();
 		
 		if(!this.statusPreRender() && !this.statusDestroyed())
-			throw new Error("Chart is not ready for render");
+			throw new Error("Chart is illegal state for render");
 		
 		if(chartFactory.renderedChart($element) != null)
 			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
@@ -949,7 +949,7 @@
 	chartBase.update = function(results)
 	{
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
-			throw new Error("Chart is not ready for update");
+			throw new Error("Chart is illegal state for update");
 		
 		this.statusUpdating(true);
 		

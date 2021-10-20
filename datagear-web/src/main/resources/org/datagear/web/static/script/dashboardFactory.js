@@ -139,41 +139,33 @@
 	/**
 	 * 浏览器初始化到此看板工厂JS的时间戳。
 	 */
-	dashboardFactory._dashboardFactoryJsInitTime = new Date().getTime();
+	dashboardFactory.LOAD_TIME = new Date().getTime();
 	
 	/**
 	 * 初始化指定看板对象。
 	 * 
-	 * @param dashboard 看板对象
+	 * @param dashboard 看板对象，格式应为：
+	 *				{
+	 *				  //唯一ID
+	 *				  id: "...",
+	 *				  //渲染上下文
+	 *				  renderContext: {...},
+	 *				  //可选，图表元信息，参考chartFactory.Chart函数的chartMeta参数说明
+	 *				  charts: [ 图表元信息, ... ]
+	 *				}
+	 *				另参考：org.datagear.analysis.Dashboard
 	 */
 	dashboardFactory.init = function(dashboard)
 	{
-		//如果未设置图表主题，则采用看板主题里定义的图表主题
-		if(chartFactory.renderContextAttr(dashboard.renderContext,
-				chartFactory.renderContextAttrs.chartTheme) == null)
-		{
-			var dashboardTheme = chartFactory.renderContextAttr(dashboard.renderContext,
-					dashboardFactory.renderContextAttrs.dashboardTheme);
-			chartFactory.renderContextAttr(dashboard.renderContext,
-					chartFactory.renderContextAttrs.chartTheme, dashboardTheme.chartTheme);
-		}
+		dashboardFactory._initOverwriteChartBaseIfNot();
+		dashboardFactory._initRenderContextIfNot(dashboard.renderContext);
+		dashboardFactory._initStartHeartBeatIfNot(dashboard.renderContext);
 		
-		chartFactory.initRenderContext(dashboard.renderContext);
-		
-		this._initOverwriteChartBase();
 		$.extend(dashboard, this.dashboardBase);
 		dashboard.init();
-		
-		//开启心跳，避免会话超时
-		var webContext = chartFactory.renderContextAttrWebContext(dashboard.renderContext);
-		var heartbeatURL = chartFactory.toWebContextPathURL(webContext, webContext.attributes.heartbeatURL);
-		this.startHeartBeat(heartbeatURL);
 	};
 	
-	/**
-	 * 重写chartFactory.chartBase的部分逻辑。
-	 */
-	dashboardFactory._initOverwriteChartBase = function()
+	dashboardFactory._initOverwriteChartBaseIfNot = function()
 	{
 		//此方法不能重复执行，这里确保只执行一次
 		if(chartBase._initSuper != null)
@@ -195,6 +187,38 @@
 			this.bindLinksEventHanders(this.links());
 			this._postProcessRenderedSuper();
 		};
+	};
+	
+	dashboardFactory._initRenderContextIfNot = function(renderContext)
+	{
+		//如果未设置图表主题，则采用看板主题里定义的图表主题
+		if(chartFactory.renderContextAttr(renderContext,
+				chartFactory.renderContextAttrs.chartTheme) == null)
+		{
+			var dashboardTheme = chartFactory.renderContextAttr(renderContext,
+					dashboardFactory.renderContextAttrs.dashboardTheme);
+			chartFactory.renderContextAttr(renderContext,
+					chartFactory.renderContextAttrs.chartTheme, dashboardTheme.chartTheme);
+		}
+		
+		if(!renderContext._initByChartFactory)
+		{
+			chartFactory.initRenderContext(renderContext);
+			renderContext._initByChartFactory = true;
+		}
+	};
+	
+	dashboardFactory._initStartHeartBeatIfNot = function(renderContext)
+	{
+		if(dashboardFactory._initStartHeartBeat)
+			return;
+		
+		//开启心跳，避免会话超时
+		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
+		var heartbeatURL = chartFactory.toWebContextPathURL(webContext, webContext.attributes.heartbeatURL);
+		this.startHeartBeat(heartbeatURL);
+		
+		dashboardFactory._initStartHeartBeat = true;
 	};
 	
 	/**
@@ -626,6 +650,11 @@
 	 */
 	dashboardBase.init = function()
 	{
+		if(!this.id)
+			throw new Error("[dashboard.id] required");
+		if(!this.renderContext)
+			throw new Error("[dashboard.renderContext] required");
+		
 		if(this._inited == true)
 			throw new Error("Dashboard has been initialized");
 		this._inited = true;
@@ -2100,7 +2129,7 @@
 			throw new Error("Get current server time is not supported");
 		
 		var cct = new Date().getTime();
-		var cst = global._DataGearServerTime + (cct - dashboardFactory._dashboardFactoryJsInitTime);
+		var cst = global._DataGearServerTime + (cct - dashboardFactory.LOAD_TIME);
 		
 		if(asMillisecond == true)
 			return cst;
