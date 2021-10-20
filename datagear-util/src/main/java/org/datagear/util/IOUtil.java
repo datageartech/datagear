@@ -483,19 +483,49 @@ public class IOUtil
 
 	/**
 	 * 获取ZIP输入流。
+	 * <p>
+	 * ZIP内的文件名将使用{@code UTF-8}编码。
+	 * </p>
 	 * 
 	 * @param in
 	 * @return
 	 */
 	public static ZipInputStream getZipInputStream(InputStream in)
 	{
-		ZipInputStream zin = new ZipInputStream(in);
+		return getZipInputStream(in, IOUtil.CHARSET_UTF_8);
+	}
+
+	/**
+	 * 获取ZIP输入流。
+	 * 
+	 * @param in
+	 * @param charset
+	 * @return
+	 */
+	public static ZipInputStream getZipInputStream(InputStream in, String charset)
+	{
+		return getZipInputStream(in, Charset.forName(charset));
+	}
+
+	/**
+	 * 获取ZIP输入流。
+	 * 
+	 * @param in
+	 * @param charset
+	 * @return
+	 */
+	public static ZipInputStream getZipInputStream(InputStream in, Charset charset)
+	{
+		ZipInputStream zin = new ZipInputStream(in, charset);
 
 		return zin;
 	}
 
 	/**
 	 * 获取ZIP输入流。
+	 * <p>
+	 * ZIP内的文件名将使用{@code UTF-8}编码。
+	 * </p>
 	 * 
 	 * @param file
 	 * @return
@@ -503,13 +533,40 @@ public class IOUtil
 	 */
 	public static ZipInputStream getZipInputStream(File file) throws FileNotFoundException
 	{
-		ZipInputStream in = new ZipInputStream(getInputStream(file));
-
-		return in;
+		return getZipInputStream(getInputStream(file));
 	}
 
 	/**
 	 * 获取ZIP输入流。
+	 * 
+	 * @param file
+	 * @param charset
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static ZipInputStream getZipInputStream(File file, String charset) throws FileNotFoundException
+	{
+		return getZipInputStream(getInputStream(file), charset);
+	}
+
+	/**
+	 * 获取ZIP输入流。
+	 * 
+	 * @param file
+	 * @param charset
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static ZipInputStream getZipInputStream(File file, Charset charset) throws FileNotFoundException
+	{
+		return getZipInputStream(getInputStream(file), charset);
+	}
+
+	/**
+	 * 获取ZIP输入流。
+	 * <p>
+	 * ZIP内的文件名将使用{@code UTF-8}编码。
+	 * </p>
 	 * 
 	 * @param file
 	 * @return
@@ -517,26 +574,78 @@ public class IOUtil
 	 */
 	public static ZipInputStream getZipInputStream(String file) throws FileNotFoundException
 	{
-		ZipInputStream in = new ZipInputStream(getInputStream(file));
+		return getZipInputStream(getInputStream(file));
+	}
 
-		return in;
+	/**
+	 * 获取ZIP输入流。
+	 * 
+	 * @param file
+	 * @param charset
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static ZipInputStream getZipInputStream(String file, String charset) throws FileNotFoundException
+	{
+		return getZipInputStream(getInputStream(file), charset);
+	}
+
+	/**
+	 * 获取ZIP输入流。
+	 * 
+	 * @param file
+	 * @param charset
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static ZipInputStream getZipInputStream(String file, Charset charset) throws FileNotFoundException
+	{
+		return getZipInputStream(getInputStream(file), charset);
 	}
 
 	/**
 	 * 获取ZIP输出流。
+	 * <p>
+	 * ZIP内的文件名将使用{@code UTF-8}编码。
+	 * </p>
 	 * 
 	 * @param out
 	 * @return
 	 */
 	public static ZipOutputStream getZipOutputStream(OutputStream out)
 	{
-		ZipOutputStream zout = new ZipOutputStream(out);
-
-		return zout;
+		return getZipOutputStream(out, IOUtil.CHARSET_UTF_8);
 	}
 
 	/**
 	 * 获取ZIP输出流。
+	 * 
+	 * @param out
+	 * @param charset
+	 * @return
+	 */
+	public static ZipOutputStream getZipOutputStream(OutputStream out, String charset)
+	{
+		return getZipOutputStream(out, Charset.forName(charset));
+	}
+
+	/**
+	 * 获取ZIP输出流。
+	 * 
+	 * @param out
+	 * @param charset
+	 * @return
+	 */
+	public static ZipOutputStream getZipOutputStream(OutputStream out, Charset charset)
+	{
+		return new ZipOutputStream(out, charset);
+	}
+
+	/**
+	 * 获取ZIP输出流。
+	 * <p>
+	 * ZIP内的文件名将使用{@code UTF-8}编码。
+	 * </p>
 	 * 
 	 * @param file
 	 * @return
@@ -544,13 +653,40 @@ public class IOUtil
 	 */
 	public static ZipOutputStream getZipOutputStream(File file) throws FileNotFoundException
 	{
-		ZipOutputStream out = new ZipOutputStream(getOutputStream(file));
-
-		return out;
+		return getZipOutputStream(getOutputStream(file));
 	}
 
 	/**
 	 * 获取ZIP输出流。
+	 * 
+	 * @param file
+	 * @param charset
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static ZipOutputStream getZipOutputStream(File file, String charset) throws FileNotFoundException
+	{
+		return getZipOutputStream(getOutputStream(file), charset);
+	}
+
+	/**
+	 * 获取ZIP输出流。
+	 * 
+	 * @param file
+	 * @param charset
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static ZipOutputStream getZipOutputStream(File file, Charset charset) throws FileNotFoundException
+	{
+		return getZipOutputStream(getOutputStream(file), charset);
+	}
+
+	/**
+	 * 获取ZIP输出流。
+	 * <p>
+	 * ZIP内的文件名将使用{@code UTF-8}编码。
+	 * </p>
 	 * 
 	 * @param file
 	 * @return
@@ -561,6 +697,34 @@ public class IOUtil
 		ZipOutputStream out = new ZipOutputStream(getOutputStream(file));
 
 		return out;
+	}
+
+	/**
+	 * 获取ZIP输出流。
+	 * 
+	 * @param file
+	 * @param charset
+	 * @par
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static ZipOutputStream getZipOutputStream(String file, String charset) throws FileNotFoundException
+	{
+		return getZipOutputStream(getOutputStream(file), charset);
+	}
+
+	/**
+	 * 获取ZIP输出流。
+	 * 
+	 * @param file
+	 * @param charset
+	 * @par
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static ZipOutputStream getZipOutputStream(String file, Charset charset) throws FileNotFoundException
+	{
+		return getZipOutputStream(getOutputStream(file), charset);
 	}
 
 	/**
