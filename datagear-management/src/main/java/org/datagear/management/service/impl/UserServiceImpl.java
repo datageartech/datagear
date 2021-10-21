@@ -121,6 +121,17 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	}
 
 	@Override
+	public User getByNameNoPassword(String name)
+	{
+		User user = getByName(name);
+
+		if (user != null)
+			user.clearPassword();
+
+		return user;
+	}
+
+	@Override
 	public User getByIdNoPassword(String id)
 	{
 		User user = getById(id);

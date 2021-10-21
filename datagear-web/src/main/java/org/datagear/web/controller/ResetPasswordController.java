@@ -124,7 +124,7 @@ public class ResetPasswordController extends AbstractController
 		if (isEmpty(resetPasswordStep))
 			return buildResetPasswordStepNotInSessionResponseEntity(request);
 
-		User user = this.userService.getByName(username);
+		User user = this.userService.getByNameNoPassword(username);
 
 		if (user == null)
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,

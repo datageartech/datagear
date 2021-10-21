@@ -142,7 +142,7 @@ public class UserController extends AbstractController
 		if (isBlank(confirmPassword) || !confirmPassword.equals(user.getPassword()))
 			throw new IllegalInputException();
 
-		User namedUser = this.userService.getByName(user.getName());
+		User namedUser = this.userService.getByNameNoPassword(user.getName());
 
 		if (namedUser != null)
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
@@ -188,7 +188,7 @@ public class UserController extends AbstractController
 		if (!confirmPassword.equals(user.getPassword()))
 			throw new IllegalInputException();
 
-		User namedUser = this.userService.getByName(user.getName());
+		User namedUser = this.userService.getByNameNoPassword(user.getName());
 
 		if (namedUser != null && !namedUser.getId().equals(user.getId()))
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
@@ -323,7 +323,7 @@ public class UserController extends AbstractController
 
 		user.setId(operator.getId());
 
-		User namedUser = this.userService.getByName(user.getName());
+		User namedUser = this.userService.getByNameNoPassword(user.getName());
 
 		if (namedUser != null && !namedUser.getId().equals(user.getId()))
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,

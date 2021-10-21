@@ -113,7 +113,7 @@ public class RegisterController extends AbstractController
 		user.setAnonymous(false);
 		user.setCreateTime(new Date());
 
-		if (this.userService.getByName(user.getName()) != null)
+		if (this.userService.getByNameNoPassword(user.getName()) != null)
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMessageCode("userNameExists"), user.getName());
 
