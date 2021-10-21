@@ -2388,7 +2388,7 @@ table.dataTable tbody tr td select{
 }
 .page-dataexchange .form-item-progress .ui-progressbar{
 	display: inline-block;
-    width: 35%;
+    width: 25%;
     vertical-align: middle;
 }
 .page-dataexchange .form-item-progress .progress-percent{
@@ -2411,13 +2411,13 @@ table.dataTable tbody tr td select{
 .page-dataexchange .form-item-table .file-encoding-wrapper{
 	position: absolute;
 	top : -2.5em;
-	right: 10em;
+	right: 8em;
 }
 .page-dataexchange .form-item-table .file-encoding-wrapper .file-encoding-label{
 	padding-right: 0.5em;
 }
 .page-dataexchange .form-item-table .file-encoding-wrapper .ui-selectmenu-button.ui-button{
-	width: 8em;
+	width: 6em;
 }
 .page-dataexchange .file-encoding-selectmenu-menu .ui-menu{
 	max-height: 20em;

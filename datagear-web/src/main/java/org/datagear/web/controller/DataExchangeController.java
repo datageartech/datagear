@@ -216,6 +216,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+		springModel.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		return "/dataexchange/import_csv";
 	}
@@ -350,6 +351,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+		springModel.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		return "/dataexchange/import_sql";
 	}
@@ -467,6 +469,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+		springModel.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		return "/dataexchange/import_json";
 	}
@@ -609,6 +612,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+		springModel.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		return "/dataexchange/import_excel";
 	}
@@ -1927,6 +1933,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		private String fileEncoding;
 
+		private String zipFileNameEncoding = "";
+
 		public AbstractFileBatchDataExchangeForm()
 		{
 			super();
@@ -1970,6 +1978,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setFileEncoding(String fileEncoding)
 		{
 			this.fileEncoding = fileEncoding;
+		}
+
+		public String getZipFileNameEncoding()
+		{
+			return zipFileNameEncoding;
+		}
+
+		public void setZipFileNameEncoding(String zipFileNameEncoding)
+		{
+			this.zipFileNameEncoding = zipFileNameEncoding;
 		}
 	}
 

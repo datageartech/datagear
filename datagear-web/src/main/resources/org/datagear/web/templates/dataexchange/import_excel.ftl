@@ -79,14 +79,18 @@ Schema schema 数据库，不允许为null
 				<div>
 					<div class="form-item form-item-table-head form-item-upload page-status-aware-show edit-status-show">
 						<div class="form-item-value">
+							<!--
 							<label><@spring.message code='dataImport.uploadExcelDataFile' /></label>
+							-->
 							<div class="fileinput-button ui-widget ui-button ui-corner-all" upload-action="excel/uploadImportFile" title="<@spring.message code='dataImport.uploadExcelDataFile.desc' />"><@spring.message code='add' /><input type="file"></div>
 							<div class="upload-file-info"></div>
 						</div>
 					</div>
 					<div class="form-item form-item-table-head form-item-progress page-status-aware-show exchange-status-show finish-status-show">
 						<div class="form-item-value">
+							<!--
 							<label><@spring.message code='dataImport.importProgress' /></label>
+							-->
 							<div id="${pageId}-progress"></div>
 							<div id="${pageId}-progress-percent" class="progress-percent"></div>
 						</div>
@@ -96,18 +100,29 @@ Schema schema 数据库，不允许为null
 							<button type="button" class="table-delete-item-button page-status-aware-show edit-status-show"><@spring.message code='delete' /></button>
 							<button type="button" class="table-cancel-import-button page-status-aware-show exchange-status-show"><@spring.message code='cancel' /></button>
 						</div>
-						<#--
 						<div class="file-encoding-wrapper">
-							<span class="file-encoding-label page-status-aware-enable edit-status-enable">
+							<#-- Excel不需设置文件编码
+							<label class="file-encoding-label page-status-aware-enable edit-status-enable">
 								<@spring.message code='dataImport.importFileEncoding' />
-							</span>
+							</label>
 							<select name="fileEncoding">
 								<#list availableCharsetNames as item>
 								<option value="${item}" <#if item == defaultCharsetName>selected="selected"</#if>>${item}</option>
 								</#list>
 							</select>
+							-->
+							
+							<label class="file-encoding-label page-status-aware-enable edit-status-enable tip-label"
+									title="<@spring.message code='dataImport.importZipFileNameEncoding.desc' />">
+								<@spring.message code='dataImport.importZipFileNameEncoding' />
+							</label>
+							&nbsp;
+							<select name="zipFileNameEncoding">
+								<#list availableCharsetNames as item>
+								<option value="${item}" <#if item == zipFileNameEncodingDefault>selected="selected"</#if>>${item}</option>
+								</#list>
+							</select>
 						</div>
-						-->
 						<div class="table-wrapper minor-dataTable">
 							<table id="${pageId}-table" width="100%" class="hover stripe"></table>
 						</div>

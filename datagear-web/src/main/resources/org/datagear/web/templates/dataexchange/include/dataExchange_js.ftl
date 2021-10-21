@@ -233,13 +233,24 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		po.element(".page-status-aware-show."+status+"-status-show").show();
 		po.element(".page-status-aware-enable."+status+"-status-enable").removeClass("ui-state-disabled");
 		
+		var $zfne = po.element("select[name='zipFileNameEncoding']");
+		
 		if("edit" == status)
 		{
 			po.element("select[name='fileEncoding']").selectmenu("enable");
+			
+			if($zfne.length > 0)
+				$zfne.selectmenu("enable");
+			
 			po.setDataExchangeProgress(0);
 		}
 		else
+		{
 			po.element("select[name='fileEncoding']").selectmenu("disable");
+
+			if($zfne.length > 0)
+				$zfne.selectmenu("disable");
+		}
 		
 		po.currentDataExchangePageStatus = status;
 		
