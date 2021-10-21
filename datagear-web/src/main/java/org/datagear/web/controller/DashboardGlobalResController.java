@@ -32,6 +32,7 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.config.CoreConfig;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -114,6 +115,9 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@RequestMapping("/upload")
 	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
 	{
+		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		model.addAttribute("fileEncodingDefault", IOUtil.CHARSET_UTF_8);
+
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardGlobalRes.uploadDashboardGlobalRes");
 		model.addAttribute(KEY_FORM_ACTION, "saveUpload");
 
@@ -141,7 +145,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 
 			try
 			{
-				in = IOUtil.getZipInputStream(file);
+				in = IOUtil.getZipInputStream(file, form.getFileEncoding());
 				IOUtil.unzip(in, parent);
 			}
 			finally
@@ -256,6 +260,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 
 		if (StringUtil.isEmpty(path))
 			throw new FileNotFoundException(path);
+
+		path = WebUtils.decodeURL(path);
 
 		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path);
 
@@ -447,6 +453,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 		/** 存储路径 */
 		private String savePath = "";
 
+		private String fileEncoding;
+
 		public DashboardGlobalResUploadForm()
 		{
 			super();
@@ -497,6 +505,16 @@ public class DashboardGlobalResController extends AbstractController implements 
 		public void setSavePath(String savePath)
 		{
 			this.savePath = savePath;
+		}
+
+		public String getFileEncoding()
+		{
+			return fileEncoding;
+		}
+
+		public void setFileEncoding(String fileEncoding)
+		{
+			this.fileEncoding = fileEncoding;
 		}
 	}
 

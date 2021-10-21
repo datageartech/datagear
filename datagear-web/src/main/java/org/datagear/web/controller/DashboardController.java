@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -920,8 +919,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (StringUtil.isEmpty(resName))
 			throw new FileNotFoundException(resName);
 
-		// 处理可能的中文资源名
-		resName = URLDecoder.decode(resName, IOUtil.CHARSET_UTF_8);
+		resName = WebUtils.decodeURL(resName);
 
 		if (entity.isTemplate(resName))
 		{
@@ -1416,8 +1414,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		private static final long serialVersionUID = 1L;
 
 		private String name;
+
 		private String template;
+
 		private String dashboardFileName;
+
+		private String fileEncoding;
+
 		private AnalysisProject analysisProject;
 
 		public SaveImportForm()
@@ -1453,6 +1456,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		public void setDashboardFileName(String dashboardFileName)
 		{
 			this.dashboardFileName = dashboardFileName;
+		}
+
+		public String getFileEncoding()
+		{
+			return fileEncoding;
+		}
+
+		public void setFileEncoding(String fileEncoding)
+		{
+			this.fileEncoding = fileEncoding;
 		}
 
 		public AnalysisProject getAnalysisProject()

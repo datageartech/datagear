@@ -8,7 +8,6 @@
 package org.datagear.web.controller;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -114,7 +113,7 @@ public class LoginController extends AbstractController
 
 		try
 		{
-			return URLDecoder.decode(username, "UTF-8");
+			return WebUtils.decodeURL(username);
 		}
 		catch (UnsupportedEncodingException e)
 		{

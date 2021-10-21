@@ -7,6 +7,8 @@
 
 package org.datagear.web.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
 import org.datagear.util.IDUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.security.AuthUser;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -540,5 +543,23 @@ public class WebUtils
 	public static String addJsessionidParam(String url, String sessionId)
 	{
 		return url + ";" + PARAM_JSESSIONID + "=" + sessionId;
+	}
+
+	/**
+	 * 解码URL。
+	 * <p>
+	 * URL中的非ASCII字符会被浏览器编码，应使用此方法解码，可解决中文URL问题。
+	 * </p>
+	 * 
+	 * @param url
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String decodeURL(String url) throws UnsupportedEncodingException
+	{
+		if (url == null)
+			return null;
+
+		return URLDecoder.decode(url, IOUtil.CHARSET_UTF_8);
 	}
 }

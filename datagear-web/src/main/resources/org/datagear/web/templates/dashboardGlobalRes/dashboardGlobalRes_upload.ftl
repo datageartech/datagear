@@ -68,6 +68,27 @@ readonly 是否只读操作，允许为null
 					</div>
 				</div>
 			</div>
+			<div class="form-item form-item-encoding">
+				<div class="form-item-label">
+					<label title="<@spring.message code='dashboardGlobalRes.upload.fileEncoding.desc' />">
+						<@spring.message code='dashboardGlobalRes.upload.fileEncoding' />
+					</label>
+				</div>
+				<div class="form-item-value">
+					<select name="fileEncoding">
+						<#list availableCharsetNames as item>
+						<option value="${item}" <#if item == fileEncodingDefault>selected="selected"</#if>>${item}</option>
+						</#list>
+					</select>
+				</div>
+			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+				</div>
+				<div class="form-item-value minor">
+					<@spring.message code='dashboardGlobalRes.upload.notice' />
+				</div>
+			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
 			<#if !readonly>
@@ -83,6 +104,7 @@ readonly 是否只读操作，允许为null
 	$.initButtons(po.element());
 	po.element("input[name='autoUnzip']").checkboxradio({icon:false});
 	po.element(".autoUnzip-radios").controlgroup();
+	po.element("select[name='fileEncoding']").selectmenu({ appendTo: po.element(), position: {my: "left bottom", at: "left top"}, classes: { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	
 	po.isZipExtention = function(resName)
 	{

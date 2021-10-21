@@ -1,7 +1,6 @@
 下一版本：
 	
-	压缩/解压库改为统一采用Apache Commons Compress，解决ZIP中文乱码问题
-		看板导入ZIP存在中文文件名出错BUG；
+	ok 修复看板导入ZIP文件名有中文有时会报错的BUG；
 	ok POI库升级至4.1.2版本；
 	ok 图表保存时，不保存没有设置的数据标记，避免存储长度溢出；
 	ok 前后端数据通讯改为统一采用JSON，移除datagear-jquery-override.js；
