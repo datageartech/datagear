@@ -534,7 +534,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		model.addAttribute("dashboard", dashboard);
 		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		model.addAttribute("fileEncodingDefault", IOUtil.CHARSET_UTF_8);
+		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		return "/dashboard/dashboard_import";
 	}
@@ -543,7 +543,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@ResponseBody
 	public Map<String, Object> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") MultipartFile multipartFile,
-			@RequestParam(name = "fileEncoding", required = false) String fileEncoding) throws Exception
+			@RequestParam(name = "zipFileNameEncoding", required = false) String zipFileNameEncoding) throws Exception
 	{
 		String dasboardName = "";
 		String dashboardFileName = "";
@@ -555,7 +555,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (FileUtil.isExtension(fileName, "zip"))
 		{
-			ZipInputStream in = IOUtil.getZipInputStream(multipartFile.getInputStream(), fileEncoding);
+			ZipInputStream in = IOUtil.getZipInputStream(multipartFile.getInputStream(), zipFileNameEncoding);
 			try
 			{
 				IOUtil.unzip(in, dashboardDirectory);
@@ -1419,7 +1419,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		private String dashboardFileName;
 
-		private String fileEncoding;
+		private String zipFileNameEncoding;
 
 		private AnalysisProject analysisProject;
 
@@ -1458,14 +1458,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			this.dashboardFileName = dashboardFileName;
 		}
 
-		public String getFileEncoding()
+		public String getZipFileNameEncoding()
 		{
-			return fileEncoding;
+			return zipFileNameEncoding;
 		}
 
-		public void setFileEncoding(String fileEncoding)
+		public void setZipFileNameEncoding(String zipFileNameEncoding)
 		{
-			this.fileEncoding = fileEncoding;
+			this.zipFileNameEncoding = zipFileNameEncoding;
 		}
 
 		public AnalysisProject getAnalysisProject()

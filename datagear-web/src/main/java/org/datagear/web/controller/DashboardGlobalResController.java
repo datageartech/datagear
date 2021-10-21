@@ -116,7 +116,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		model.addAttribute("fileEncodingDefault", IOUtil.CHARSET_UTF_8);
+		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardGlobalRes.uploadDashboardGlobalRes");
 		model.addAttribute(KEY_FORM_ACTION, "saveUpload");
@@ -145,7 +145,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 
 			try
 			{
-				in = IOUtil.getZipInputStream(file, form.getFileEncoding());
+				in = IOUtil.getZipInputStream(file, form.getZipFileNameEncoding());
 				IOUtil.unzip(in, parent);
 			}
 			finally
@@ -453,7 +453,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		/** 存储路径 */
 		private String savePath = "";
 
-		private String fileEncoding;
+		private String zipFileNameEncoding;
 
 		public DashboardGlobalResUploadForm()
 		{
@@ -507,14 +507,14 @@ public class DashboardGlobalResController extends AbstractController implements 
 			this.savePath = savePath;
 		}
 
-		public String getFileEncoding()
+		public String getZipFileNameEncoding()
 		{
-			return fileEncoding;
+			return zipFileNameEncoding;
 		}
 
-		public void setFileEncoding(String fileEncoding)
+		public void setZipFileNameEncoding(String zipFileNameEncoding)
 		{
-			this.fileEncoding = fileEncoding;
+			this.zipFileNameEncoding = zipFileNameEncoding;
 		}
 	}
 

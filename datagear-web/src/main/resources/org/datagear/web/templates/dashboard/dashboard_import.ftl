@@ -38,14 +38,14 @@
 			</div>
 			<div class="form-item form-item-encoding">
 				<div class="form-item-label">
-					<label title="<@spring.message code='dashboard.import.fileEncoding.desc' />">
-						<@spring.message code='dashboard.import.fileEncoding' />
+					<label title="<@spring.message code='dashboard.import.zipFileNameEncoding.desc' />">
+						<@spring.message code='dashboard.import.zipFileNameEncoding' />
 					</label>
 				</div>
 				<div class="form-item-value">
-					<select name="fileEncoding">
+					<select name="zipFileNameEncoding">
 						<#list availableCharsetNames as item>
-						<option value="${item}" <#if item == fileEncodingDefault>selected="selected"</#if>>${item}</option>
+						<option value="${item}" <#if item == zipFileNameEncodingDefault>selected="selected"</#if>>${item}</option>
 						</#list>
 					</select>
 				</div>
@@ -88,7 +88,7 @@
 	$.initButtons(po.element());
 	po.element(".fileinput-button").button();
 	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");
-	po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
+	po.element("select[name='zipFileNameEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	
 	po.url = function(action)
 	{

@@ -224,9 +224,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public List<DataImportFileInfo> imptCsvUploadFile(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			@RequestParam("file") MultipartFile multipartFile) throws Exception
+			@RequestParam("file") MultipartFile multipartFile,
+			@RequestParam(value = "zipFileNameEncoding", required = false) String zipFileNameEncoding)
+			throws Exception
 	{
-		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, new CsvFileFilger());
+		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, zipFileNameEncoding,
+				new CsvFileFilter());
 	}
 
 	@RequestMapping(value = "/{schemaId}/import/csv/doImport", produces = CONTENT_TYPE_JSON)
@@ -355,9 +358,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public List<DataImportFileInfo> imptSqlUploadFile(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			@RequestParam("file") MultipartFile multipartFile) throws Exception
+			@RequestParam("file") MultipartFile multipartFile,
+			@RequestParam(value = "zipFileNameEncoding", required = false) String zipFileNameEncoding) throws Exception
 	{
-		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, new SqlFileFilger());
+		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, zipFileNameEncoding,
+				new SqlFileFilter());
 	}
 
 	@RequestMapping(value = "/{schemaId}/import/sql/doImport", produces = CONTENT_TYPE_JSON)
@@ -470,9 +475,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public List<DataImportFileInfo> imptJsonUploadFile(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			@RequestParam("file") MultipartFile multipartFile) throws Exception
+			@RequestParam("file") MultipartFile multipartFile,
+			@RequestParam(value = "zipFileNameEncoding", required = false) String zipFileNameEncoding) throws Exception
 	{
-		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, new JsonFileFilger());
+		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, zipFileNameEncoding,
+				new JsonFileFilter());
 	}
 
 	@RequestMapping(value = "/{schemaId}/import/json/doImport", produces = CONTENT_TYPE_JSON)
@@ -610,9 +617,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public List<DataImportFileInfo> imptExcelUploadFile(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			@RequestParam("file") MultipartFile multipartFile) throws Exception
+			@RequestParam("file") MultipartFile multipartFile,
+			@RequestParam(value = "zipFileNameEncoding", required = false) String zipFileNameEncoding) throws Exception
 	{
-		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, new ExcelFileFilger());
+		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, zipFileNameEncoding,
+				new ExcelFileFilter());
 	}
 
 	@RequestMapping(value = "/{schemaId}/import/excel/doImport", produces = CONTENT_TYPE_JSON)
@@ -1460,7 +1469,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	}
 
 	protected List<DataImportFileInfo> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
-			String schemaId, String dataExchangeId, MultipartFile multipartFile, FileFilter fileFilter) throws Exception
+			String schemaId, String dataExchangeId, MultipartFile multipartFile, String zipFileNameEncoding,
+			FileFilter fileFilter) throws Exception
 	{
 		List<DataImportFileInfo> fileInfos = new ArrayList<>();
 
@@ -1480,8 +1490,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 			try
 			{
-				in = new ZipInputStream(multipartFile.getInputStream());
-				// TODO ZIP中存在中文名文件时解压会报错
+				in = IOUtil.getZipInputStream(multipartFile.getInputStream(), zipFileNameEncoding);
 				IOUtil.unzip(in, unzipDirectory);
 			}
 			finally
@@ -1833,9 +1842,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	protected static class CsvFileFilger implements FileFilter
+	protected static class CsvFileFilter implements FileFilter
 	{
-		public CsvFileFilger()
+		public CsvFileFilter()
 		{
 			super();
 		}
@@ -1850,9 +1859,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	protected static class SqlFileFilger implements FileFilter
+	protected static class SqlFileFilter implements FileFilter
 	{
-		public SqlFileFilger()
+		public SqlFileFilter()
 		{
 			super();
 		}
@@ -1867,9 +1876,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	protected static class JsonFileFilger implements FileFilter
+	protected static class JsonFileFilter implements FileFilter
 	{
-		public JsonFileFilger()
+		public JsonFileFilter()
 		{
 			super();
 		}
@@ -1888,9 +1897,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	protected static class ExcelFileFilger implements FileFilter
+	protected static class ExcelFileFilter implements FileFilter
 	{
-		public ExcelFileFilger()
+		public ExcelFileFilter()
 		{
 			super();
 		}
