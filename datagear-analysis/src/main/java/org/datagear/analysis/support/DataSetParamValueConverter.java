@@ -33,6 +33,15 @@ public class DataSetParamValueConverter extends DataValueConverter
 	/**
 	 * 将{@linkplain DataSetQuery#getParamValues()}转换为匹配{@linkplain DataSet#getParams()}类型的映射表，
 	 * 并返回一个新的{@linkplain DataSetQuery}。
+	 * <p>
+	 * 如果{@linkplain DataSetQuery#getParamValues()}中有未在{@linkplain DataSet#getParams()}中定义的项，
+	 * 那么它将原样写入返回的{@linkplain DataSetQuery}。
+	 * </p>
+	 * <p>
+	 * 因为对于支持<code>Freemarker</code>的{@linkplain DataSet}实现类（比如：{@linkplain SqlDataSet}），
+	 * 存在不定义{@linkplain DataSet#getParams()}而传递参数给内部<code>Freemarker</code>模板的应用场景，
+	 * 也会存在传递系统上下文变量的场景（比如传递系统当前用户）。
+	 * </p>
 	 * 
 	 * @param query
 	 * @param dataSet
@@ -46,11 +55,21 @@ public class DataSetParamValueConverter extends DataValueConverter
 	/**
 	 * 将{@linkplain DataSetQuery#getParamValues()}转换为匹配{@linkplain DataSet#getParams()}类型的映射表，
 	 * 并返回一个新的{@linkplain DataSetQuery}。
+	 * <p>
+	 * 如果{@linkplain DataSetQuery#getParamValues()}中有未在{@linkplain DataSet#getParams()}中定义的项，
+	 * 那么它将原样写入返回的{@linkplain DataSetQuery}。
+	 * </p>
+	 * <p>
+	 * 因为对于支持<code>Freemarker</code>的{@linkplain DataSet}实现类（比如：{@linkplain SqlDataSet}），
+	 * 存在不定义{@linkplain DataSet#getParams()}而传递参数给内部<code>Freemarker</code>模板的应用场景，
+	 * 也会存在传递系统上下文变量的场景（比如传递系统当前用户）。
+	 * </p>
 	 * 
-	 * @param query 允许为{@code null}
+	 * @param query         允许为{@code null}
 	 * @param dataSet
 	 * @param returnNonNull
-	 * @return 当{@code query}为{@code null}且{@code returnNonNull}为{@code false}时 ，将返回{@code null}
+	 * @return 当{@code query}为{@code null}且{@code returnNonNull}为{@code false}时
+	 *         ，将返回{@code null}
 	 */
 	public DataSetQuery convert(DataSetQuery query, DataSet dataSet, boolean returnNonNull)
 	{
@@ -73,9 +92,12 @@ public class DataSetParamValueConverter extends DataValueConverter
 	/**
 	 * 转换参数值映射表，返回一个经转换的新映射表。
 	 * <p>
-	 * 注意，此方法必须遵循如下规则：如果{@code paramValues}中有未在{@code dataSetParams}中定义的项，那么它应原样写入返回映射表中。
-	 * 因为：对于支持<code>Freemarker</code>的{@linkplain DataSet}实现类（比如：{@linkplain SqlDataSet}），
-	 * 存在不定义{@linkplain DataSet#getParams()}而传递参数给内部<code>Freemarker</code>模板的应用场景。
+	 * 如果{@code paramValues}中有未在{@code dataSetParams}中定义的项，那么它将原样写入返回映射表中。
+	 * </p>
+	 * <p>
+	 * 因为对于支持<code>Freemarker</code>的{@linkplain DataSet}实现类（比如：{@linkplain SqlDataSet}），
+	 * 存在不定义{@linkplain DataSet#getParams()}而传递参数给内部<code>Freemarker</code>模板的应用场景，
+	 * 也会存在传递系统上下文变量的场景（比如传递系统当前用户）。
 	 * </p>
 	 */
 	@Override

@@ -12,7 +12,9 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,8 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.HtmlTitleHandler;
+import org.datagear.management.domain.Role;
+import org.datagear.management.domain.User;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.WebUtils;
 
@@ -62,25 +66,43 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX = "DG_";
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain WebContext}
+	 * 看板内置渲染上下文属性名：{@linkplain WebContext}。
+	 * <p>
+	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
+	 * </p>
 	 */
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 			+ "WEB_CONTEXT";
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain DashboardTheme}
+	 * 看板内置渲染上下文属性名：{@linkplain DashboardTheme}。
+	 * <p>
+	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
+	 * </p>
 	 */
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 			+ "DASHBOARD_THEME";
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain ChartTheme}
+	 * 看板内置渲染上下文属性名：{@linkplain ChartTheme}。
+	 * <p>
+	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
+	 * </p>
 	 */
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 			+ "CHART_THEME";
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain HtmlTitleHandler}
+	 * 看板内置渲染上下文属性名：{@linkplain User}。
+	 * <p>
+	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
+	 * </p>
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "USER";
+
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain HtmlTitleHandler}。
 	 */
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_TITLE_HANDLER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 			+ "HTML_TITLE_HANDLER";
@@ -136,13 +158,32 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 		Writer out = response.getWriter();
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
+		User user = WebUtils.getUser(request, response).cloneNoPassword();
+
+		inflateRenderContext(renderContext, renderAttr, out, webContext, dashboardTheme, user);
+
+		return renderContext;
+	}
+
+	/**
+	 * 填充{@linkplain RenderContext}的规范属性。
+	 * 
+	 * @param renderContext
+	 * @param renderAttr
+	 * @param out
+	 * @param webContext
+	 * @param dashboardTheme
+	 * @param user
+	 */
+	protected void inflateRenderContext(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
+			WebContext webContext, DashboardTheme dashboardTheme, User user)
+	{
 		renderAttr.inflate(renderContext, out, webContext, dashboardTheme);
+		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, AnalysisUser.valueOf(user));
 
 		renderAttr.setIgnoreRenderAttrs(renderContext,
 				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getHtmlTitleHandlerName(),
 						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
-
-		return renderContext;
 	}
 
 	protected HtmlTplDashboardRenderAttr createHtmlTplDashboardRenderAttr()
@@ -209,11 +250,13 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * 获取看板结果。
 	 * 
 	 * @param request
+	 * @param response
 	 * @param form
 	 * @param renderer
 	 * @return
 	 */
-	protected DashboardResult getDashboardResult(HttpServletRequest request, DashboardQueryForm form,
+	protected DashboardResult getDashboardResult(HttpServletRequest request, HttpServletResponse response,
+			DashboardQueryForm form,
 			HtmlTplDashboardWidgetRenderer renderer)
 	{
 		if (StringUtil.isEmpty(form.getDashboardId()))
@@ -225,10 +268,12 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (dashboardInfo == null)
 			throw new IllegalInputException();
 
+		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser(request, response));
+
 		DashboardQuery dashboardQuery = form.getDashboardQuery();
 		Map<String, HtmlChartWidget> chartWidgets = getChartWidgets(form.getDashboardQuery(), dashboardInfo, renderer);
 
-		DashboardQuery queriesConverted = convertDashboardQuery(dashboardQuery, chartWidgets);
+		DashboardQuery queriesConverted = convertDashboardQuery(dashboardQuery, chartWidgets, analysisUser);
 
 		SimpleDashboardQueryHandler dqh = new SimpleDashboardQueryHandler(chartWidgets);
 
@@ -266,7 +311,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	protected DashboardQuery convertDashboardQuery(DashboardQuery query,
-			Map<String, ? extends ChartWidget> chartWidgets)
+			Map<String, ? extends ChartWidget> chartWidgets, AnalysisUser analysisUser)
 	{
 		if (query == null)
 			return new DashboardQuery();
@@ -301,6 +346,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 				{
 					DataSetQuery dataSetQueryRe = dataSetQueries.get(j);
 					dataSetQueryRe = getDataSetParamValueConverter().convert(dataSetQueryRe, chartDataSets[j].getDataSet(), true);
+					analysisUser.setParamValue(dataSetQueryRe);
+
 					dataSetQueriesRe.add(dataSetQueryRe);
 				}
 
@@ -487,6 +534,331 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public synchronized void putChartWidgetIds(Map<String, String> chartIdToChartWidgetIds)
 		{
 			this.chartIdToChartWidgetIds.putAll(chartIdToChartWidgetIds);
+		}
+	}
+
+	/**
+	 * 数据分析用户。
+	 * <p>
+	 * 看板展示页面渲染上下文中的当前用户。
+	 * </p>
+	 * <p>
+	 * 这里不直接使用{@linkplain User}，因为数据分析用户不应因{@linkplain User}的改变而改变。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class AnalysisUser implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * 内置数据集参数：当前用户。
+		 * <p>
+		 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的数据集中，重构它将导致这些数据集执行出错。
+		 * </p>
+		 */
+		public static final String DATA_SET_PARAM_NAME_CURRENT_USER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+				+ "USER";
+
+		/** ID */
+		private String id;
+
+		/** 用户名 */
+		private String name;
+
+		/** 姓名 */
+		private String realName;
+
+		/** 是否管理员 */
+		private boolean admin = false;
+
+		/** 是否是匿名用户 */
+		private boolean anonymous = false;
+
+		/** 此模式的创建时间 */
+		private Date createTime;
+
+		/** 角色集 */
+		private List<AnalysisRole> roles = Collections.emptyList();
+
+		public AnalysisUser(String id, String name, String realName, boolean admin, boolean anonymous, Date createTime,
+				List<AnalysisRole> roles)
+		{
+			super();
+			this.id = id;
+			this.name = name;
+			this.realName = realName;
+			this.admin = admin;
+			this.anonymous = anonymous;
+			this.createTime = createTime;
+			this.roles = roles;
+		}
+
+		public AnalysisUser(User user)
+		{
+			this(user.getId(), user.getName(), user.getRealName(), user.isAdmin(), user.isAnonymous(),
+					user.getCreateTime(), AnalysisRole.valueOf(user.getRoles()));
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public void setId(String id)
+		{
+			this.id = id;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public String getRealName()
+		{
+			return realName;
+		}
+
+		public void setRealName(String realName)
+		{
+			this.realName = realName;
+		}
+
+		public boolean isAdmin()
+		{
+			return admin;
+		}
+
+		public void setAdmin(boolean admin)
+		{
+			this.admin = admin;
+		}
+
+		public boolean isAnonymous()
+		{
+			return anonymous;
+		}
+
+		public void setAnonymous(boolean anonymous)
+		{
+			this.anonymous = anonymous;
+		}
+
+		public Date getCreateTime()
+		{
+			return createTime;
+		}
+
+		public void setCreateTime(Date createTime)
+		{
+			this.createTime = createTime;
+		}
+
+		public List<AnalysisRole> getRoles()
+		{
+			return roles;
+		}
+
+		public void setRoles(List<AnalysisRole> roles)
+		{
+			this.roles = roles;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((id == null) ? 0 : id.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			AnalysisUser other = (AnalysisUser) obj;
+			if (id == null)
+			{
+				if (other.id != null)
+					return false;
+			}
+			else if (!id.equals(other.id))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [id=" + id + ", name=" + name + ", realName=" + realName + ", admin="
+					+ admin
+					+ ", anonymous=" + anonymous + ", createTime=" + createTime + ", roles=" + roles + "]";
+		}
+
+		/**
+		 * 构建{@linkplain AnalysisUser}。
+		 * 
+		 * @param user
+		 * @return
+		 */
+		public static AnalysisUser valueOf(User user)
+		{
+			return new AnalysisUser(user);
+		}
+
+		/**
+		 * 将此对象加入{@linkplain DataSetQuery#getParamValues()}。
+		 * 
+		 * @param dataSetQuery
+		 */
+		public void setParamValue(DataSetQuery dataSetQuery)
+		{
+			dataSetQuery.setParamValue(DATA_SET_PARAM_NAME_CURRENT_USER, this);
+		}
+
+		/**
+		 * 将此对象作为参数加入指定映射表。
+		 * 
+		 * @param paramValues
+		 */
+		@SuppressWarnings("unchecked")
+		public void setParamValue(Map<String, ?> paramValues)
+		{
+			((Map<String, Object>) paramValues).put(DATA_SET_PARAM_NAME_CURRENT_USER, this);
+		}
+	}
+
+	/**
+	 * 数据分析角色。
+	 * <p>
+	 * 这里不直接使用{@linkplain Role}，因为数据分析角色不应因{@linkplain Role}的改变而改变。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class AnalysisRole implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** ID */
+		private String id;
+
+		/** 名称 */
+		private String name;
+
+		/** 是否启用 */
+		private boolean enabled = true;
+
+		public AnalysisRole(String id, String name, boolean enabled)
+		{
+			super();
+			this.id = id;
+			this.name = name;
+			this.enabled = enabled;
+		}
+
+		public AnalysisRole(Role role)
+		{
+			this(role.getId(), role.getName(), role.isEnabled());
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public void setId(String id)
+		{
+			this.id = id;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public boolean isEnabled()
+		{
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled)
+		{
+			this.enabled = enabled;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((id == null) ? 0 : id.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			AnalysisRole other = (AnalysisRole) obj;
+			if (id == null)
+			{
+				if (other.id != null)
+					return false;
+			}
+			else if (!id.equals(other.id))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [id=" + id + ", name=" + name + ", enabled=" + enabled + "]";
+		}
+
+		/**
+		 * 构建{@linkplain AnalysisRole}列表。
+		 * 
+		 * @param roles 允许为{@code null}
+		 * @return 不会为{@code null}
+		 */
+		public static List<AnalysisRole> valueOf(Collection<Role> roles)
+		{
+			if (roles == null)
+				return Collections.emptyList();
+
+			List<AnalysisRole> analysisRoles = new ArrayList<AnalysisRole>(roles.size());
+
+			for (Role role : roles)
+				analysisRoles.add(new AnalysisRole(role));
+
+			return analysisRoles;
 		}
 	}
 }

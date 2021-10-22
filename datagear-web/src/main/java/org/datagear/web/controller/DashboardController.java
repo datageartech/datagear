@@ -1054,7 +1054,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public ErrorMessageDashboardResult showData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestBody DashboardQueryForm form) throws Exception
 	{
-		DashboardResult dashboardResult = getDashboardResult(request, form,
+		DashboardResult dashboardResult = getDashboardResult(request, response, form,
 				this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer());
 
 		return new ErrorMessageDashboardResult(dashboardResult, true);

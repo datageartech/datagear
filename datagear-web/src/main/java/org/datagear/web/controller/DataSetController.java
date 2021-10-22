@@ -59,6 +59,7 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.web.controller.AbstractDataAnalysisController.AnalysisUser;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -854,10 +855,9 @@ public class DataSetController extends AbstractSchemaConnController
 		SchemaConnectionFactory connectionFactory = new SchemaConnectionFactory(getConnectionSource(), schema);
 		dataSet.setConnectionFactory(connectionFactory);
 
-		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
-		TemplateResolvedDataSetResult result = dataSet.resolve(query);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
-		return result;
+		return dataSet.resolve(query);
 	}
 
 	@RequestMapping(value = "/resolveSql", produces = CONTENT_TYPE_HTML)
@@ -865,7 +865,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public String resolveSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody ResolveSqlParam resolveSqlParam) throws Throwable
 	{
-		return resolveSqlTemplate(resolveSqlParam.getSql(), resolveSqlParam.getParamValues(),
+		return resolveSqlTemplate(request, response, resolveSqlParam.getSql(), resolveSqlParam.getParamValues(),
 				resolveSqlParam.getDataSetParams());
 	}
 
@@ -880,10 +880,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
-		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
-		TemplateResolvedDataSetResult result = dataSet.resolve(query);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
-		return result;
+		return dataSet.resolve(query);
 	}
 
 	@RequestMapping(value = "/previewJsonFile", produces = CONTENT_TYPE_JSON)
@@ -900,10 +899,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
-		ResolvedDataSetResult result = dataSet.resolve(query);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
-		return result;
+		return dataSet.resolve(query);
 	}
 
 	@RequestMapping(value = "/previewExcel", produces = CONTENT_TYPE_JSON)
@@ -919,10 +917,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
-		ResolvedDataSetResult result = dataSet.resolve(query);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
-		return result;
+		return dataSet.resolve(query);
 	}
 
 	@RequestMapping(value = "/previewCsvValue", produces = CONTENT_TYPE_JSON)
@@ -936,10 +933,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
-		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
-		TemplateResolvedDataSetResult result = dataSet.resolve(query);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
-		return result;
+		return dataSet.resolve(query);
 	}
 
 	@RequestMapping(value = "/previewCsvFile", produces = CONTENT_TYPE_JSON)
@@ -955,10 +951,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
-		ResolvedDataSetResult result = dataSet.resolve(query);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
-		return result;
+		return dataSet.resolve(query);
 	}
 
 	@RequestMapping(value = "/previewHttp", produces = CONTENT_TYPE_JSON)
@@ -974,10 +969,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setHttpClient(getDataSetEntityService().getHttpClient());
 
-		DataSetQuery query = getDataSetParamValueConverter().convert(preview.getQuery(), dataSet);
-		TemplateResolvedDataSetResult result = dataSet.resolve(query);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
-		return result;
+		return dataSet.resolve(query);
 	}
 
 	/**
@@ -1053,10 +1047,26 @@ public class DataSetController extends AbstractSchemaConnController
 		return FileUtil.getDirectory(this.tempDirectory, "dataSet", true);
 	}
 
-	protected String resolveSqlTemplate(String source, Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
+	protected String resolveSqlTemplate(HttpServletRequest request, HttpServletResponse response, String source,
+			Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
 	{
+		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser(request, response));
+
 		Map<String, ?> converted = getDataSetParamValueConverter().convert(paramValues, dataSetParams);
+		analysisUser.setParamValue(converted);
+
 		return SqlDataSet.SQL_TEMPLATE_RESOLVER.resolve(source, new TemplateContext(converted));
+	}
+
+	protected DataSetQuery convertDataSetQuery(HttpServletRequest request, HttpServletResponse response,
+			DataSetQuery dataSetQuery, DataSet dataSet)
+	{
+		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser(request, response));
+
+		DataSetQuery re = getDataSetParamValueConverter().convert(dataSetQuery, dataSet);
+		analysisUser.setParamValue(re);
+
+		return re;
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveSqlDataSetEntity(HttpServletRequest request,

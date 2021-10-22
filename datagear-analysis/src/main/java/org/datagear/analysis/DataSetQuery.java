@@ -8,7 +8,7 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,7 +25,7 @@ public class DataSetQuery implements ResultDataFormatAware, Serializable
 	private static final long serialVersionUID = 1L;
 
 	/** 参数值映射表 */
-	private Map<String, ?> paramValues = Collections.emptyMap();
+	private Map<String, Object> paramValues = new HashMap<String, Object>();
 
 	/**结果数据格式*/
 	private ResultDataFormat resultDataFormat = null;
@@ -41,7 +41,7 @@ public class DataSetQuery implements ResultDataFormatAware, Serializable
 	public DataSetQuery(DataSetQuery query)
 	{
 		super();
-		this.paramValues = query.paramValues;
+		setParamValues(query.getParamValues());
 		this.resultDataFormat = query.resultDataFormat;
 		this.resultFetchSize = query.resultFetchSize;
 	}
@@ -54,6 +54,9 @@ public class DataSetQuery implements ResultDataFormatAware, Serializable
 	/**
 	 * 设置参数值映射表。
 	 * <p>
+	 * 将{@code paramValues}全部放入{@linkplain #getParamValues()}。
+	 * </p>
+	 * <p>
 	 * 参数值映射表的关键字是{@linkplain DataSet#getParam(String)}中的{@linkplain DataSetParam#getName()}，应是符合{@linkplain DataSet#isReady(DataSetQuery)}校验的，
 	 * 参数值映射表并不要求与{@linkplain #getParams()}一一对应，通常是包含相同、或者更多的项。
 	 * </p>
@@ -62,7 +65,10 @@ public class DataSetQuery implements ResultDataFormatAware, Serializable
 	 */
 	public void setParamValues(Map<String, ?> paramValues)
 	{
-		this.paramValues = paramValues;
+		if (paramValues == null)
+			return;
+
+		this.paramValues.putAll(paramValues);
 	}
 	
 	@Override
@@ -98,6 +104,44 @@ public class DataSetQuery implements ResultDataFormatAware, Serializable
 	public void setResultFetchSize(int resultFetchSize)
 	{
 		this.resultFetchSize = resultFetchSize;
+	}
+
+	/**
+	 * 设置参数。
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	public void setParamValue(String name, Object value)
+	{
+		this.paramValues.put(name, value);
+	}
+
+	/**
+	 * 获取参数。
+	 * 
+	 * @param <T>
+	 * @param name
+	 * @param value
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getParamValue(String name, Object value)
+	{
+		return (T) this.paramValues.get(name);
+	}
+
+	/**
+	 * 删除参数。
+	 * 
+	 * @param <T>
+	 * @param name
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T removeParamValue(String name)
+	{
+		return (T) this.paramValues.remove(name);
 	}
 
 	/**
