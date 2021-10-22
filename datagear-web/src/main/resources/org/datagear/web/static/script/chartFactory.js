@@ -95,12 +95,16 @@
 {
 	/**图表工厂*/
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
+	
 	/**图表对象基类*/
 	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
+	
 	/**图表状态常量*/
 	var chartStatusConst = (chartFactory.chartStatusConst || (chartFactory.chartStatusConst = {}));
+	
 	/**HTML元素属性常量*/
 	var elementAttrConst = (chartFactory.elementAttrConst || (chartFactory.elementAttrConst = {}));
+	
 	/**
 	 * 图表地图映射表。
 	 * 地图类图表的地图名称与其地图数据地址映射表，用于为chartBase.mapURL函数提供支持。
@@ -121,7 +125,10 @@
 	 * }
 	 */
 	var chartMapURLs = (chartFactory.chartMapURLs || (chartFactory.chartMapURLs = {}));
-
+	
+	/** 渲染上下文属性名常量 */
+	var renderContextAttrConst = (chartFactory.renderContextAttrConst || (chartFactory.renderContextAttrConst = {}));
+	
 	//----------------------------------------
 	// chartStatusConst开始
 	//----------------------------------------
@@ -186,6 +193,22 @@
 	// elementAttrConst结束
 	//----------------------------------------
 	
+	//----------------------------------------
+	// renderContextAttrConst开始
+	//----------------------------------------
+	
+	//必须，Web上下文，同：
+	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT
+	renderContextAttrConst.webContext = "DG_WEB_CONTEXT";
+	
+	//可选，图表主题，同：
+	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME
+	renderContextAttrConst.chartTheme = "DG_CHART_THEME";
+	
+	//----------------------------------------
+	// renderContextAttrConst结束
+	//----------------------------------------
+	
 	/**图表事件的图表类型：ECharts*/
 	chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS = "echarts";
 	
@@ -202,17 +225,6 @@
 	chartFactory.OPTION_PROCESS_UPDATE_OPTIONS = "processUpdateOptions";
 	
 	/**
-	 * 图表使用的渲染上下文属性名。
-	 */
-	chartFactory.renderContextAttrs =
-	{
-		//可选，图表主题，org.datagear.analysis.ChartTheme
-		chartTheme: "chartTheme",
-		//必须，Web上下文，org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext
-		webContext: "webContext"
-	};
-	
-	/**
 	 * 初始化渲染上下文。
 	 * 注意：此方法应在初始化任意图表前且body已加载后调用。
 	 * 
@@ -220,10 +232,10 @@
 	 */
 	chartFactory.initRenderContext = function(renderContext)
 	{
-		var webContext = chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.webContext);
+		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
 		
 		if(webContext == null)
-			throw new Error("The render context attribute ["+chartFactory.renderContextAttrs.webContext+"] must be set");
+			throw new Error("The render context attribute ["+renderContextAttrConst.webContext+"] must be set");
 		
 		chartFactory._initChartTheme(renderContext);
 	};
@@ -368,7 +380,7 @@
 	chartBase._initTheme = function()
 	{
 		var globalRawTheme = chartFactory._GLOBAL_RAW_CHART_THEME;
-		var globalTheme = this.renderContextAttr(chartFactory.renderContextAttrs.chartTheme);
+		var globalTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
 		
 		if(!globalTheme || !globalRawTheme)
 			throw new Error("chartFactory.initRenderContext() must be called first");
@@ -3667,23 +3679,25 @@
 	};
 	
 	/**
-	 * 获取渲染上下文中的WebContext对象。
+	 * 获取/设置渲染上下文中的WebContext对象。
 	 * 
 	 * @param renderContext
+	 * @param webContext 可选，要设置的WebContext
 	 */
-	chartFactory.renderContextAttrWebContext = function(renderContext)
+	chartFactory.renderContextAttrWebContext = function(renderContext, webContext)
 	{
-		return chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.webContext);
+		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.webContext, webContext);
 	};
 	
 	/**
-	 * 获取渲染上下文中的ChartTheme对象。
+	 * 获取/设置渲染上下文中的ChartTheme对象。
 	 * 
 	 * @param renderContext
+	 * @param chartTheme 可选，要设置的ChartTheme
 	 */
-	chartFactory.renderContextAttrChartTheme = function(renderContext)
+	chartFactory.renderContextAttrChartTheme = function(renderContext, chartTheme)
 	{
-		return chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.chartTheme);
+		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.chartTheme, chartTheme);
 	};
 	
 	/**
@@ -4112,7 +4126,7 @@
 		if(!theme)
 		{
 			theme = {};
-			chartFactory.renderContextAttr(renderContext, chartFactory.renderContextAttrs.chartTheme, theme);
+			chartFactory.renderContextAttrChartTheme(renderContext, theme);
 		}
 		
 		if(!theme.name)

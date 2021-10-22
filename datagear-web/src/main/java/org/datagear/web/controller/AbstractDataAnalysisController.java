@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSession;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartQuery;
+import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardQuery;
 import org.datagear.analysis.DashboardResult;
@@ -40,6 +41,7 @@ import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.HtmlTitleHandler;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.WebUtils;
 
@@ -51,9 +53,42 @@ import org.datagear.web.util.WebUtils;
  */
 public abstract class AbstractDataAnalysisController extends AbstractController
 {
-	public static final String DASHBOARD_THEME_NAME_PARAM = "theme";
+	/**
+	 * 看板内置渲染上下文属性名前缀。
+	 * <p>
+	 * 由于看板展示URL的请求参数会添加至渲染上下文属性中，为了避免名字冲突，所有内置属性名都应采用此前缀。
+	 * </p>
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX = "DG_";
 
-	public static final String WEB_CONTEXT_CONTEXT_PATH_PARAM = "";
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain WebContext}
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "WEB_CONTEXT";
+
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain DashboardTheme}
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "DASHBOARD_THEME";
+
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain ChartTheme}
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "CHART_THEME";
+
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain HtmlTitleHandler}
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_TITLE_HANDLER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "HTML_TITLE_HANDLER";
+
+	/**
+	 * 看板展示URL的系统主题请求参数名。
+	 */
+	public static final String DASHBOARD_THEME_NAME_PARAM = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX + "THEME";
 
 	/** 看板更新数据URL名 */
 	public static final String DASHBOARD_UPDATE_URL_NAME = "updateDashboardURL";
@@ -113,6 +148,10 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected HtmlTplDashboardRenderAttr createHtmlTplDashboardRenderAttr()
 	{
 		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+		renderAttr.setWebContextName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT);
+		renderAttr.setDashboardThemeName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME);
+		renderAttr.setHtmlTitleHandlerName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_TITLE_HANDLER);
+
 		return renderAttr;
 	}
 

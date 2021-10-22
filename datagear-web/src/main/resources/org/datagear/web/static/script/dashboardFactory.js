@@ -39,15 +39,22 @@
 {
 	/**图表工厂*/
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
+	
 	/**图表对象基类*/
 	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
+	
 	/**图表状态常量*/
 	var chartStatusConst = (chartFactory.chartStatusConst || (chartFactory.chartStatusConst = {}));
+	
 	/**HTML元素属性常量*/
 	var elementAttrConst = (chartFactory.elementAttrConst || (chartFactory.elementAttrConst = {}));
 	
+	/** 渲染上下文属性名常量 */
+	var renderContextAttrConst = (chartFactory.renderContextAttrConst || (chartFactory.renderContextAttrConst = {}));
+	
 	/**看板工厂*/
 	var dashboardFactory = (global.dashboardFactory || (global.dashboardFactory = {}));
+	
 	/**看板对象基类*/
 	var dashboardBase = (dashboardFactory.dashboardBase || (dashboardFactory.dashboardBase = {}));
 	
@@ -94,6 +101,18 @@
 	// elementAttrConst结束
 	//----------------------------------------
 	
+	//----------------------------------------
+	// renderContextAttrConst开始
+	//----------------------------------------
+	
+	//可选，看板主题，同：
+	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME
+	renderContextAttrConst.dashboardTheme = "DG_DASHBOARD_THEME";
+	
+	//----------------------------------------
+	// renderContextAttrConst结束
+	//----------------------------------------
+	
 	/**
 	 * 更新看板数据配置，需与后台保持一致，具体参考：
 	 * org.datagear.web.controller.AbstractDataAnalysisController.DashboardQueryForm
@@ -114,17 +133,6 @@
 				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_WIDGET_ID
 				chartWidgetIdParamName: "chartWidgetId"
 			});
-
-	/**
-	 * 看板使用的渲染上下文属性名。
-	 */
-	dashboardFactory.renderContextAttrs =
-	{
-		//必须，看板主题，org.datagear.analysis.DashboardTheme
-		dashboardTheme: "dashboardTheme",
-		//必须，Web上下文，org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext
-		webContext: "webContext"
-	};
 	
 	/**
 	 * 更新图表数据ajax请求的重试秒数，当更新图表数据ajax请求出错后，会在过这些秒后重试请求。
@@ -191,15 +199,20 @@
 	
 	dashboardFactory._initRenderContextIfNot = function(renderContext)
 	{
+		var dashboardTheme = chartFactory.renderContextAttr(renderContext, renderContextAttrConst.dashboardTheme);
+		
 		//如果未设置图表主题，则采用看板主题里定义的图表主题
-		if(chartFactory.renderContextAttr(renderContext,
-				chartFactory.renderContextAttrs.chartTheme) == null)
-		{
-			var dashboardTheme = chartFactory.renderContextAttr(renderContext,
-					dashboardFactory.renderContextAttrs.dashboardTheme);
-			chartFactory.renderContextAttr(renderContext,
-					chartFactory.renderContextAttrs.chartTheme, dashboardTheme.chartTheme);
-		}
+		if(chartFactory.renderContextAttrChartTheme(renderContext) == null)
+			chartFactory.renderContextAttrChartTheme(renderContext, (dashboardTheme ? dashboardTheme.chartTheme : null));
+		
+		// < @deprecated 兼容2.9.0版本的渲染上下文属性：webContext、dashboardTheme、chartTheme，将在未来版本移除，已被新名称取代
+		if(chartFactory.renderContextAttr(renderContext, "webContext") == null)
+			chartFactory.renderContextAttr(renderContext, "webContext", chartFactory.renderContextAttrWebContext(renderContext));
+		if(chartFactory.renderContextAttr(renderContext, "dashboardTheme") == null)
+			chartFactory.renderContextAttr(renderContext, "dashboardTheme", dashboardTheme);
+		if(chartFactory.renderContextAttr(renderContext, "chartTheme") == null)
+			chartFactory.renderContextAttr(renderContext, "chartTheme", chartFactory.renderContextAttrChartTheme(renderContext));
+		// > @deprecated 兼容2.9.0版本的渲染上下文属性：webContext、dashboardTheme、chartTheme，将在未来版本移除，已被新名称取代
 		
 		if(!renderContext._initByChartFactory)
 		{
@@ -1183,9 +1196,7 @@
 			form.data(bindBatchSetName, batchSet);
 		
 		config.paramValues = defaultValues;
-		
-		var dashboardTheme = this.renderContextAttr(dashboardFactory.renderContextAttrs.dashboardTheme);
-		config.chartTheme = dashboardTheme.chartTheme;
+		config.chartTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
 		
 		chartFactory.chartSetting.renderDataSetParamValueForm(form, items, config);
 	};
