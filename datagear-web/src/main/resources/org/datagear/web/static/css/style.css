@@ -2729,6 +2729,7 @@ table.dataTable tbody tr td select{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	resize: none;
+	white-space: nowrap;
 }
 .page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-data-max-count{
 	float: left;
@@ -2760,6 +2761,7 @@ table.dataTable tbody tr td select{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	resize: none;
+	white-space: nowrap;
 }
 .page-form-dataSet .workspace .workspace-operation-wrapper .input-in-table{
 	width: 90%!important;

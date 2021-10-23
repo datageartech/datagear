@@ -1050,23 +1050,28 @@ public class DataSetController extends AbstractSchemaConnController
 	protected String resolveSqlTemplate(HttpServletRequest request, HttpServletResponse response, String source,
 			Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
 	{
-		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser(request, response));
-
 		Map<String, ?> converted = getDataSetParamValueConverter().convert(paramValues, dataSetParams);
-		analysisUser.setParamValue(converted);
 
-		return SqlDataSet.SQL_TEMPLATE_RESOLVER.resolve(source, new TemplateContext(converted));
+		DataSetQuery dataSetQuery = DataSetQuery.valueOf(converted);
+		setAnalysisUserParamValue(request, response, dataSetQuery);
+
+		return SqlDataSet.SQL_TEMPLATE_RESOLVER.resolve(source, new TemplateContext(dataSetQuery.getParamValues()));
 	}
 
 	protected DataSetQuery convertDataSetQuery(HttpServletRequest request, HttpServletResponse response,
 			DataSetQuery dataSetQuery, DataSet dataSet)
 	{
-		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser(request, response));
-
 		DataSetQuery re = getDataSetParamValueConverter().convert(dataSetQuery, dataSet);
-		analysisUser.setParamValue(re);
+		setAnalysisUserParamValue(request, response, re);
 
 		return re;
+	}
+
+	protected void setAnalysisUserParamValue(HttpServletRequest request, HttpServletResponse response,
+			DataSetQuery dataSetQuery)
+	{
+		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser(request, response));
+		analysisUser.setParamValue(dataSetQuery);
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveSqlDataSetEntity(HttpServletRequest request,

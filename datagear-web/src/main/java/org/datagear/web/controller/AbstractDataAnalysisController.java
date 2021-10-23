@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +31,7 @@ import org.datagear.analysis.DashboardQuery;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DashboardThemeSource;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.SimpleDashboardQueryHandler;
@@ -316,6 +316,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (query == null)
 			return new DashboardQuery();
 		
+		List<String> analysisRoleNames = AnalysisUser.getRoleNames(analysisUser);
+
 		Map<String, ChartQuery> chartQueries = query.getChartQueries();
 		Map<String, ChartQuery> chartQueriesRe = new HashMap<String, ChartQuery>(chartQueries.size());
 
@@ -346,7 +348,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 				{
 					DataSetQuery dataSetQueryRe = dataSetQueries.get(j);
 					dataSetQueryRe = getDataSetParamValueConverter().convert(dataSetQueryRe, chartDataSets[j].getDataSet(), true);
-					analysisUser.setParamValue(dataSetQueryRe);
+					analysisUser.setParamValue(dataSetQueryRe, analysisRoleNames);
 
 					dataSetQueriesRe.add(dataSetQueryRe);
 				}
@@ -562,6 +564,19 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public static final String DATA_SET_PARAM_NAME_CURRENT_USER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 				+ "USER";
 
+		/**
+		 * 内置数据集参数：当前角色名集。
+		 * <p>
+		 * 在数据集的参数化语境内，虽然可以通过{@code DG_USERS.ROLES}获取角色名集，但是语法较为繁琐，
+		 * 考虑到角色名集可能使用较频繁，所以单独定义。
+		 * </p>
+		 * <p>
+		 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的数据集中，重构它将导致这些数据集执行出错。
+		 * </p>
+		 */
+		public static final String DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+				+ "ROLE_NAMES";
+
 		/** ID */
 		private String id;
 
@@ -577,13 +592,10 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		/** 是否是匿名用户 */
 		private boolean anonymous = false;
 
-		/** 此模式的创建时间 */
-		private Date createTime;
-
 		/** 角色集 */
 		private List<AnalysisRole> roles = Collections.emptyList();
 
-		public AnalysisUser(String id, String name, String realName, boolean admin, boolean anonymous, Date createTime,
+		public AnalysisUser(String id, String name, String realName, boolean admin, boolean anonymous,
 				List<AnalysisRole> roles)
 		{
 			super();
@@ -592,14 +604,13 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			this.realName = realName;
 			this.admin = admin;
 			this.anonymous = anonymous;
-			this.createTime = createTime;
 			this.roles = roles;
 		}
 
 		public AnalysisUser(User user)
 		{
 			this(user.getId(), user.getName(), user.getRealName(), user.isAdmin(), user.isAnonymous(),
-					user.getCreateTime(), AnalysisRole.valueOf(user.getRoles()));
+					AnalysisRole.valueOf(user.getRoles()));
 		}
 
 		public String getId()
@@ -652,16 +663,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			this.anonymous = anonymous;
 		}
 
-		public Date getCreateTime()
-		{
-			return createTime;
-		}
-
-		public void setCreateTime(Date createTime)
-		{
-			this.createTime = createTime;
-		}
-
 		public List<AnalysisRole> getRoles()
 		{
 			return roles;
@@ -705,8 +706,60 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public String toString()
 		{
 			return getClass().getSimpleName() + " [id=" + id + ", name=" + name + ", realName=" + realName + ", admin="
-					+ admin
-					+ ", anonymous=" + anonymous + ", createTime=" + createTime + ", roles=" + roles + "]";
+					+ admin + ", anonymous=" + anonymous + ", roles=" + roles + "]";
+		}
+
+		/**
+		 * 将此{@linkplain AnalysisUser}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_USER}名、
+		 * {@linkplain AnalysisUser#getRoleNames()}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES}
+		 * 名加入{@linkplain DataSetQuery#getParamValues()}。
+		 * <p>
+		 * 使得参数化数据集{@linkplain DataSet#getResult(DataSetQuery)}可支持根据当前数据分析用户、角色返回不同的数据。
+		 * </p>
+		 * 
+		 * @param dataSetQuery
+		 */
+		public void setParamValue(DataSetQuery dataSetQuery)
+		{
+			setParamValue(dataSetQuery, getRoleNames(this));
+		}
+
+		/**
+		 * 将此{@linkplain AnalysisUser}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_USER}名、
+		 * {@code analysisRoleNames}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES}
+		 * 名加入{@linkplain DataSetQuery#getParamValues()}。
+		 * <p>
+		 * 使得参数化数据集{@linkplain DataSet#getResult(DataSetQuery)}可支持根据当前数据分析用户、角色返回不同的数据。
+		 * </p>
+		 * 
+		 * @param dataSetQuery
+		 * @param analysisRoleNames
+		 */
+		public void setParamValue(DataSetQuery dataSetQuery, List<String> analysisRoleNames)
+		{
+			if (analysisRoleNames == null)
+				throw new IllegalArgumentException("[analysisRoleNames] required");
+
+			dataSetQuery.setParamValue(DATA_SET_PARAM_NAME_CURRENT_USER, this);
+			dataSetQuery.setParamValue(DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES, analysisRoleNames);
+		}
+
+		/**
+		 * 获取{@linkplain AnalysisUser#getRoles()}列表的{@linkplain AnalysisRole#getName()}列表。
+		 * 
+		 * @return 不会为{@code null}
+		 */
+		public static List<String> getRoleNames(AnalysisUser analysisUser)
+		{
+			List<String> roleNames = new ArrayList<String>();
+
+			if (analysisUser.roles != null)
+			{
+				for (AnalysisRole role : analysisUser.roles)
+					roleNames.add(role.getName());
+			}
+
+			return roleNames;
 		}
 
 		/**
@@ -718,27 +771,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public static AnalysisUser valueOf(User user)
 		{
 			return new AnalysisUser(user);
-		}
-
-		/**
-		 * 将此对象加入{@linkplain DataSetQuery#getParamValues()}。
-		 * 
-		 * @param dataSetQuery
-		 */
-		public void setParamValue(DataSetQuery dataSetQuery)
-		{
-			dataSetQuery.setParamValue(DATA_SET_PARAM_NAME_CURRENT_USER, this);
-		}
-
-		/**
-		 * 将此对象作为参数加入指定映射表。
-		 * 
-		 * @param paramValues
-		 */
-		@SuppressWarnings("unchecked")
-		public void setParamValue(Map<String, ?> paramValues)
-		{
-			((Map<String, Object>) paramValues).put(DATA_SET_PARAM_NAME_CURRENT_USER, this);
 		}
 	}
 
