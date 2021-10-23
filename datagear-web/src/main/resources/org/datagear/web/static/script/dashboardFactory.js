@@ -905,7 +905,7 @@
 	/**
 	 * 获取指定标识的图表，没有则返回undefined。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
 	 */
 	dashboardBase.chartOf = function(chartInfo)
 	{
@@ -917,7 +917,7 @@
 	/**
 	 * 获取指定图表在看板图表数组中的索引号，返回-1表示未找到。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
 	 */
 	dashboardBase.chartIndex = function(chartInfo)
 	{
@@ -928,7 +928,7 @@
 	 * 获取图表索引，返回-1表示未找到。
 	 * 
 	 * @param charts 待查找的图表数组
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
 	 */
 	dashboardBase._chartIndex = function(charts, chartInfo)
 	{
@@ -982,7 +982,7 @@
 	/**
 	 * 删除图表。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
 	 * @param doDestory 选填参数，是否销毁图表，默认为true
 	 * @return 移除的图表对象，或者图表未找到时为undefined
 	 */
@@ -1011,7 +1011,7 @@
 	/**
 	 * 重新调整指定图表尺寸。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
 	 */
 	dashboardBase.resizeChart = function(chartInfo)
 	{
@@ -1031,7 +1031,7 @@
 	/**
 	 * 刷新图表数据。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
 	 */
 	dashboardBase.refreshData = function(chartInfo)
 	{
@@ -2269,7 +2269,7 @@
 	/**
 	 * 获取图表，没有则返回undefined。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
 	 */
 	dashboardBase.getChart = function(chartInfo)
 	{
@@ -2291,7 +2291,7 @@
 	/**
 	 * 获取图表索引号。
 	 * 
-	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID
+	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
 	 */
 	dashboardBase.getChartIndex = function(chartInfo)
 	{
