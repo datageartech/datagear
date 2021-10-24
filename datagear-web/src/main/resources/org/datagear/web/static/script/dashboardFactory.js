@@ -109,6 +109,10 @@
 	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME
 	renderContextAttrConst.dashboardTheme = "DG_DASHBOARD_THEME";
 	
+	//可选，看板主题，同：
+	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER
+	renderContextAttrConst.user = "DG_USER";
+	
 	//----------------------------------------
 	// renderContextAttrConst结束
 	//----------------------------------------
@@ -2232,6 +2236,21 @@
 		}
 		
 		return (isArray ? re : re[0]);
+	};
+	
+	/**
+	 * 获取当前用户信息。
+	 * 
+	 * @returns 用户信息，格式参考：org.datagear.web.controller.AbstractDataAnalysisController.AnalysisUser
+	 */
+	dashboardBase.user = function()
+	{
+		var user = this.renderContextAttr(renderContextAttrConst.user);
+		
+		if(user == null)
+			throw new Error("Get user is not supported");
+		
+		return user;
 	};
 	
 	//-------------
