@@ -602,6 +602,7 @@ readonly 是否只读操作，允许为null
 		{name: "dashboard.serverDate", value: "serverDate()", caption: "serverDate()", meta: " dashboard"},
 		{name: "dashboard.startHandleCharts", value: "startHandleCharts()", caption: "startHandleCharts()", meta: " dashboard"},
 		{name: "dashboard.stopHandleCharts", value: "stopHandleCharts()", caption: "stopHandleCharts()", meta: " dashboard"},
+		{name: "dashboard.user", value: "user()", caption: "user()", meta: " dashboard"},
 		
 		//图表JS对象
 		{name: "chart.autoResize", value: "autoResize(", caption: "autoResize() ", meta: "chart"},
@@ -634,6 +635,7 @@ readonly 是否只读操作，允许为null
 		{name: "chart.element", value: "element()", caption: "element() ", meta: "chart"},
 		{name: "chart.elementId", value: "elementId", caption: "elementId ", meta: "chart"},
 		{name: "chart.elementJquery", value: "elementJquery()", caption: "elementJquery() ", meta: "chart"},
+		{name: "chart.elementStyle", value: "elementStyle(", caption: "elementStyle() ", meta: "chart"},
 		{name: "chart.elementWidgetId", value: "elementWidgetId()", caption: "elementWidgetId() ", meta: "chart"},
 		{name: "chart.eventData", value: "eventData(", caption: "eventData() ", meta: "chart"},
 		{name: "chart.eventHandlers", value: "eventHandlers(", caption: "eventHandlers() ", meta: "chart"},
@@ -707,7 +709,10 @@ readonly 是否只读操作，允许为null
 		{name: "chart.statusRendering", value: "statusRendering(", caption: "statusRendering() ", meta: "chart"},
 		{name: "chart.statusUpdated", value: "statusUpdated(", caption: "statusUpdated() ", meta: "chart"},
 		{name: "chart.statusUpdating", value: "statusUpdating(", caption: "statusUpdating() ", meta: "chart"},
+		{name: "chart.styleString", value: "styleString(", caption: "styleString() ", meta: "chart"},
 		{name: "chart.theme", value: "theme(", caption: "theme() ", meta: "chart"},
+		{name: "chart.themeStyleName", value: "themeStyleName()", caption: "themeStyleName() ", meta: "chart"},
+		{name: "chart.themeStyleSheet", value: "themeStyleSheet(", caption: "themeStyleSheet() ", meta: "chart"},
 		{name: "chart.update", value: "update(", caption: "update() ", meta: "chart"},
 		{name: "chart.updateGroup", value: "updateGroup(", caption: "updateGroup() ", meta: "chart"},
 		{name: "chart.updateInterval", value: "updateInterval", caption: "updateInterval ", meta: "chart"},
