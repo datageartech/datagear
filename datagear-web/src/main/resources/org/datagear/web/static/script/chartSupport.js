@@ -5539,18 +5539,63 @@
 	 * @param defaultOptions 默认options，优先级最低
 	 * @param builtinOptions 内置options，优先级高于defaultOptions
 	 * @param afterMergeHandlerFirst 可选，由defaultOptions、builtinOptions合并后的新渲染options处理函数，格式为：function(renderOptions, chart){ ... }
-	 * @param beforeProcessHandler
+	 * @param beforeProcessHandler 可选
+	 * @param seriesFirstAsTemplate 可选，是否使用defaultOptions和builtinOptions合并后的series[0]作为series后续元素的模板，true 是；false 否。默认值为：true 
 	 * @returns 一个新的图表渲染options
 	 */
 	chartSupport.inflateRenderOptions = function(chart, defaultOptions, builtinOptions,
-												afterMergeHandlerFirst, beforeProcessHandler)
+												afterMergeHandlerFirst, beforeProcessHandler, seriesFirstAsTemplate)
 	{
+		if(arguments.length == 4)
+		{
+			// (chart, defaultOptions, builtinOptions, seriesFirstAsTemplate)
+			if(afterMergeHandlerFirst === true || afterMergeHandlerFirst === false)
+			{
+				seriesFirstAsTemplate = afterMergeHandlerFirst;
+				afterMergeHandlerFirst = null;
+			}
+		}
+		else if(arguments.length == 5)
+		{
+			// (chart, defaultOptions, builtinOptions, afterMergeHandlerFirst, seriesFirstAsTemplate)
+			if(beforeProcessHandler === true || beforeProcessHandler === false)
+			{
+				seriesFirstAsTemplate = beforeProcessHandler;
+				beforeProcessHandler = null;
+			}
+		}
+		
+		seriesFirstAsTemplate = (seriesFirstAsTemplate == null ? true : seriesFirstAsTemplate);
+		
 		var renderOptions = $.extend(true, {}, defaultOptions, builtinOptions);
 		
 		if(afterMergeHandlerFirst != null)
 			afterMergeHandlerFirst(renderOptions, chart);
 		
-		return chart.inflateRenderOptions(renderOptions, beforeProcessHandler);
+		var newBeforeProcessHandler = beforeProcessHandler;
+		
+		//使用series[0]作为series后续元素的模板，避免"dg-chart-options"中必须为series每个元素设置type等基础信息
+		if(seriesFirstAsTemplate)
+		{
+			var series0 = (renderOptions.series && renderOptions.series[0] ?
+							$.extend(true, {}, renderOptions.series[0]) : null);
+			
+			if(series0)
+			{
+				newBeforeProcessHandler = function(renderOptions, chart)
+				{
+					var series = renderOptions.series;
+					
+					for(var i=1; i<series.length; i++)
+						series[i] = $.extend(true, {}, series0, series[i]);
+					
+					if(beforeProcessHandler)
+						beforeProcessHandler(renderOptions, chart);
+				};
+			}
+		}
+		
+		return chart.inflateRenderOptions(renderOptions, newBeforeProcessHandler);
 	};
 	
 	/**
