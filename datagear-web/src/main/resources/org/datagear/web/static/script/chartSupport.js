@@ -898,6 +898,66 @@
 	
 	chartSupport.scatterRender = function(chart, nameSign, valueSign, options)
 	{
+		chartSupport._scatterRender(chart, nameSign, valueSign, options, "scatter");
+	};
+	
+	chartSupport.scatterUpdate = function(chart, results)
+	{
+		chartSupport._scatterUpdate(chart, results);
+	};
+
+	chartSupport.scatterResize = function(chart)
+	{
+		chartSupport._scatterResize(chart);
+	};
+	
+	chartSupport.scatterDestroy = function(chart)
+	{
+		chartSupport._scatterDestroy(chart);
+	};
+
+	chartSupport.scatterOn = function(chart, eventType, handler)
+	{
+		chartSupport._scatterOn(chart, eventType, handler);
+	};
+	
+	chartSupport.scatterOff = function(chart, eventType, handler)
+	{
+		chartSupport._scatterOff(chart, eventType, handler);
+	};
+	
+	chartSupport.scatterRippleRender = function(chart, nameSign, valueSign, options)
+	{
+		chartSupport._scatterRender(chart, nameSign, valueSign, options, "effectScatter");
+	};
+	
+	chartSupport.scatterRippleUpdate = function(chart, results)
+	{
+		chartSupport._scatterUpdate(chart, results);
+	};
+
+	chartSupport.scatterRippleResize = function(chart)
+	{
+		chartSupport._scatterResize(chart);
+	};
+	
+	chartSupport.scatterRippleDestroy = function(chart)
+	{
+		chartSupport._scatterDestroy(chart);
+	};
+
+	chartSupport.scatterRippleOn = function(chart, eventType, handler)
+	{
+		chartSupport._scatterOn(chart, eventType, handler);
+	};
+	
+	chartSupport.scatterRippleOff = function(chart, eventType, handler)
+	{
+		chartSupport._scatterOff(chart, eventType, handler);
+	};
+	
+	chartSupport._scatterRender = function(chart, nameSign, valueSign, options, scatterType)
+	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
 		var chartDataSet = chart.chartDataSetFirst();
@@ -942,19 +1002,22 @@
 				//{}
 				//设初值以免渲染报错
 				{
-					type: "scatter"
+					type: scatterType
 				}
 			]
 		},
 		options);
 		
+		chartFactory.extValueBuiltin(chart, "scatterType", scatterType);
+		
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.scatterUpdate = function(chart, results)
+	chartSupport._scatterUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
+		var scatterType = chartFactory.extValueBuiltin(chart, "scatterType");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -990,7 +1053,7 @@
 					max = (max == null ? valMy : Math.max(max, valMy));
 				}
 				
-				var mySeries = { type: "scatter", name: legendName, data: data };
+				var mySeries = { type: scatterType, name: legendName, data: data };
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -1011,28 +1074,28 @@
 		chart.echartsOptions(options);
 	};
 
-	chartSupport.scatterResize = function(chart)
+	chartSupport._scatterResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
 	};
 	
-	chartSupport.scatterDestroy = function(chart)
+	chartSupport._scatterDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
 	};
 
-	chartSupport.scatterOn = function(chart, eventType, handler)
+	chartSupport._scatterOn = function(chart, eventType, handler)
 	{
 		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
-				chartSupport.scatterSetChartEventData);
+				chartSupport._scatterSetChartEventData);
 	};
 	
-	chartSupport.scatterOff = function(chart, eventType, handler)
+	chartSupport._scatterOff = function(chart, eventType, handler)
 	{
 		chart.echartsOffEventHandler(eventType, handler);
 	};
 	
-	chartSupport.scatterSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	chartSupport._scatterSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
@@ -1046,6 +1109,66 @@
 	//坐标散点图
 	
 	chartSupport.scatterCoordRender = function(chart, nameSign, valueSign, weightSign, options)
+	{
+		chartSupport._scatterCoordRender(chart, nameSign, valueSign, weightSign, options, "scatter");
+	};
+	
+	chartSupport.scatterCoordUpdate = function(chart, results)
+	{
+		chartSupport._scatterCoordUpdate(chart, results);
+	};
+	
+	chartSupport.scatterCoordResize = function(chart)
+	{
+		chartSupport._scatterCoordResize(chart);
+	};
+	
+	chartSupport.scatterCoordDestroy = function(chart)
+	{
+		chartSupport._scatterCoordDestroy(chart);
+	};
+	
+	chartSupport.scatterCoordOn = function(chart, eventType, handler)
+	{
+		chartSupport._scatterCoordOn(chart, eventType, handler);
+	};
+	
+	chartSupport.scatterCoordOff = function(chart, eventType, handler)
+	{
+		chartSupport._scatterCoordOff(chart, eventType, handler);
+	};
+	
+	chartSupport.scatterCoordRippleRender = function(chart, nameSign, valueSign, weightSign, options)
+	{
+		chartSupport._scatterCoordRender(chart, nameSign, valueSign, weightSign, options, "effectScatter");
+	};
+	
+	chartSupport.scatterCoordRippleUpdate = function(chart, results)
+	{
+		chartSupport._scatterCoordUpdate(chart, results);
+	};
+	
+	chartSupport.scatterCoordRippleResize = function(chart)
+	{
+		chartSupport._scatterCoordResize(chart);
+	};
+	
+	chartSupport.scatterCoordRippleDestroy = function(chart)
+	{
+		chartSupport._scatterCoordDestroy(chart);
+	};
+	
+	chartSupport.scatterCoordRippleOn = function(chart, eventType, handler)
+	{
+		chartSupport._scatterCoordOn(chart, eventType, handler);
+	};
+	
+	chartSupport.scatterCoordRippleOff = function(chart, eventType, handler)
+	{
+		chartSupport._scatterCoordOff(chart, eventType, handler);
+	};
+	
+	chartSupport._scatterCoordRender = function(chart, nameSign, valueSign, weightSign, options, scatterType)
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, weight: weightSign });
 		
@@ -1091,19 +1214,22 @@
 				//{}
 				//设初值以免渲染报错
 				{
-					type: "scatter"
+					type: scatterType
 				}
 			]
 		},
 		options);
 		
+		chartFactory.extValueBuiltin(chart, "scatterType", scatterType);
+		
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.scatterCoordUpdate = function(chart, results)
+	chartSupport._scatterCoordUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
+		var scatterType = chartFactory.extValueBuiltin(chart, "scatterType");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1139,7 +1265,7 @@
 			
 			chart.originalInfo(data, chartDataSet);
 			
-			series.push({ type: "scatter", name: dataSetName, data: data });
+			series.push({ type: scatterType, name: dataSetName, data: data });
 			legendData.push(dataSetName);
 		}
 		
@@ -1152,28 +1278,28 @@
 		chart.echartsOptions(options);
 	};
 	
-	chartSupport.scatterCoordResize = function(chart)
+	chartSupport._scatterCoordResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
 	};
 	
-	chartSupport.scatterCoordDestroy = function(chart)
+	chartSupport._scatterCoordDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
 	};
 	
-	chartSupport.scatterCoordOn = function(chart, eventType, handler)
+	chartSupport._scatterCoordOn = function(chart, eventType, handler)
 	{
 		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
-				chartSupport.scatterCoordSetChartEventData);
+				chartSupport._scatterCoordSetChartEventData);
 	};
 	
-	chartSupport.scatterCoordOff = function(chart, eventType, handler)
+	chartSupport._scatterCoordOff = function(chart, eventType, handler)
 	{
 		chart.echartsOffEventHandler(eventType, handler);
 	};
 	
-	chartSupport.scatterCoordSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	chartSupport._scatterCoordSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
