@@ -6014,7 +6014,7 @@
 	chartSupport.evalSymbolSizeMax = function(chart, options, ratio)
 	{
 		var symbolSizeMax = (options ? options.dgSymbolSizeMax : undefined);
-		ratio = (ratio == undefined ? 0.1 : ratio);
+		ratio = (ratio == undefined ? 0.08 : ratio);
 		
 		//根据图表元素尺寸自动计算
 		if(!symbolSizeMax)
@@ -6036,7 +6036,7 @@
 	chartSupport.evalSymbolSizeMin = function(chart, options, symbolSizeMax, ratio)
 	{
 		var symbolSizeMin = (options ? options.dgSymbolSizeMin : undefined);
-		ratio = (ratio == undefined ? 0.125 : ratio);
+		ratio = (ratio == undefined ? 0.15 : ratio);
 		
 		if(!symbolSizeMin)
 		{
