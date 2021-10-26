@@ -1813,6 +1813,69 @@
 	
 	chartSupport.mapScatterRender = function(chart, nameSign, longitudeSign, latitudeSign, valueSign, mapSign, options)
 	{
+		chartSupport._mapScatterRender(chart, nameSign, longitudeSign, latitudeSign, 
+										valueSign, mapSign, options, "scatter");
+	};
+	
+	chartSupport.mapScatterUpdate = function(chart, results)
+	{
+		chartSupport._mapScatterUpdate(chart, results);
+	};
+	
+	chartSupport.mapScatterResize = function(chart)
+	{
+		chartSupport._mapScatterResize(chart);
+	};
+	
+	chartSupport.mapScatterDestroy = function(chart)
+	{
+		chartSupport._mapScatterDestroy(chart);
+	};
+	
+	chartSupport.mapScatterOn = function(chart, eventType, handler)
+	{
+		chartSupport._mapScatterOn(chart, eventType, handler);
+	};
+	
+	chartSupport.mapScatterOff = function(chart, eventType, handler)
+	{
+		chartSupport._mapScatterOff(chart, eventType, handler);
+	};
+	
+	chartSupport.mapScatterRippleRender = function(chart, nameSign, longitudeSign, latitudeSign, valueSign, mapSign, options)
+	{
+		chartSupport._mapScatterRender(chart, nameSign, longitudeSign, latitudeSign, 
+										valueSign, mapSign, options, "effectScatter");
+	};
+	
+	chartSupport.mapScatterRippleUpdate = function(chart, results)
+	{
+		chartSupport._mapScatterUpdate(chart, results);
+	};
+	
+	chartSupport.mapScatterRippleResize = function(chart)
+	{
+		chartSupport._mapScatterResize(chart);
+	};
+	
+	chartSupport.mapScatterRippleDestroy = function(chart)
+	{
+		chartSupport._mapScatterDestroy(chart);
+	};
+	
+	chartSupport.mapScatterRippleOn = function(chart, eventType, handler)
+	{
+		chartSupport._mapScatterOn(chart, eventType, handler);
+	};
+	
+	chartSupport.mapScatterRippleOff = function(chart, eventType, handler)
+	{
+		chartSupport._mapScatterOff(chart, eventType, handler);
+	};
+	
+	chartSupport._mapScatterRender = function(chart, nameSign, longitudeSign, latitudeSign, valueSign, mapSign,
+												options, scatterType)
+	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, longitude: longitudeSign, latitude: latitudeSign,
 			value: valueSign, map: mapSign });
 		
@@ -1850,20 +1913,23 @@
 				//{}
 				//设初值以免渲染报错
 				{
-					type: "scatter",
+					type: scatterType,
 					coordinateSystem: "geo"
 				}
 			]
 		},
 		options);
 		
+		chartFactory.extValueBuiltin(chart, "scatterType", scatterType);
+		
 		chartSupport.echartsMapChartInit(chart, options);
 	};
 	
-	chartSupport.mapScatterUpdate = function(chart, results)
+	chartSupport._mapScatterUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
+		var scatterType = chartFactory.extValueBuiltin(chart, "scatterType");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1914,7 +1980,7 @@
 			}
 			
 			legendData.push(dataSetName);
-			series.push({ type: "scatter", name: dataSetName, data: data, coordinateSystem: "geo" });
+			series.push({ type: scatterType, name: dataSetName, data: data, coordinateSystem: "geo" });
 		}
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
@@ -1927,28 +1993,28 @@
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
 	
-	chartSupport.mapScatterResize = function(chart)
+	chartSupport._mapScatterResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
 	};
 	
-	chartSupport.mapScatterDestroy = function(chart)
+	chartSupport._mapScatterDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
 	};
 
-	chartSupport.mapScatterOn = function(chart, eventType, handler)
+	chartSupport._mapScatterOn = function(chart, eventType, handler)
 	{
 		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
-				chartSupport.mapScatterSetChartEventData);
+				chartSupport._mapScatterSetChartEventData);
 	};
 	
-	chartSupport.mapScatterOff = function(chart, eventType, handler)
+	chartSupport._mapScatterOff = function(chart, eventType, handler)
 	{
 		chart.echartsOffEventHandler(eventType, handler);
 	};
 	
-	chartSupport.mapScatterSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	chartSupport._mapScatterSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
