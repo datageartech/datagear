@@ -4393,6 +4393,24 @@
 					}
 				}
 			},
+			"effectScatter":
+			{
+				"itemStyle" : {
+					"borderWidth" : 0,
+					"borderColor" : chartTheme.borderColor,
+					"shadowBlur" : 0,
+					"shadowColor" : shadowColor
+				},
+				"emphasis" : {
+					"itemStyle" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.borderColor,
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : shadowColor
+					}
+				}
+			},
 			"boxplot" : {
 				"itemStyle" : {
 					"color": "transparent"

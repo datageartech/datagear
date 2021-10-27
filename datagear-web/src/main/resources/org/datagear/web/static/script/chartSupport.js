@@ -1025,8 +1025,8 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
-		var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, scatterType);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, scatterType);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1237,8 +1237,8 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
-		var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, scatterType);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, scatterType);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1938,8 +1938,8 @@
 		var map = undefined;
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
-		var symbolSizeMin = chartSupport.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, scatterType);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, scatterType);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -6005,6 +6005,19 @@
 		return legendName;
 	};
 	
+	chartSupport.evalSymbolSizeMaxForScatter = function(chart, options, scatterType)
+	{
+		//涟漪效果会是散点显得很大，所以这里稍作调整
+		var ratio = (scatterType == "effectScatter" ? 0.06 : undefined);
+		return chartSupport.evalSymbolSizeMax(chart, options, ratio);
+	};
+	
+	chartSupport.evalSymbolSizeMinForScatter = function(chart, options, symbolSizeMax, scatterType)
+	{
+		//最小涟漪散点不必调整
+		return chartSupport.evalSymbolSizeMin(chart, options, symbolSizeMax, null);
+	};
+	
 	/**
 	 * 计算最大图符元素尺寸
 	 * @param chart
@@ -6014,7 +6027,7 @@
 	chartSupport.evalSymbolSizeMax = function(chart, options, ratio)
 	{
 		var symbolSizeMax = (options ? options.dgSymbolSizeMax : undefined);
-		ratio = (ratio == undefined ? 0.08 : ratio);
+		ratio = (ratio == null ? 0.08 : ratio);
 		
 		//根据图表元素尺寸自动计算
 		if(!symbolSizeMax)
@@ -6036,7 +6049,7 @@
 	chartSupport.evalSymbolSizeMin = function(chart, options, symbolSizeMax, ratio)
 	{
 		var symbolSizeMin = (options ? options.dgSymbolSizeMin : undefined);
-		ratio = (ratio == undefined ? 0.15 : ratio);
+		ratio = (ratio == null ? 0.15 : ratio);
 		
 		if(!symbolSizeMin)
 		{
