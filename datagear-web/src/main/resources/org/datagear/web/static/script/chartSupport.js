@@ -4098,6 +4098,155 @@
 		chart.eventOriginalInfo(chartEvent, echartsData);
 	};
 	
+	//平行坐标系
+	
+	chartSupport.parallelRender = function(chart, valueSign, options)
+	{
+		chartSupport.chartSignNameMap(chart, { value: valueSign });
+		
+		var parallelAxis = [];
+		var propertyNames = [];
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var vps = chart.dataSetPropertiesOfSign(chartDataSets[i], valueSign);
+			//如果没有标记，则使用全部属性
+			if(!vps || vps.length == 0)
+				vps = (chartDataSets[i] && chartDataSets[i].dataSet ? (chartDataSets[i].dataSet.properties || []) : []);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				var vp = vps[j];
+				var pn = vp.name;
+				
+				if(chartSupport.findInArray(propertyNames, pn) < 0)
+				{
+					propertyNames.push(pn);
+					parallelAxis.push(
+					{
+						dim: parallelAxis.length,
+						name: chart.dataSetPropertyLabel(vp),
+						type: chartSupport.evalDataSetPropertyAxisType(chart, vp),
+						dgPropertyName: pn
+					});
+				}
+			}
+		}
+		
+		options = chartSupport.inflateRenderOptions(chart,
+		{
+			dgPropertyNames: propertyNames,
+			
+			title:
+			{
+		        text: chart.name
+		    },
+			tooltip:
+			{
+				trigger: "axis"
+			},
+			legend:
+			{
+				//将在update中设置：
+				//data
+			},
+			parallelAxis:  parallelAxis,
+			series:
+			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
+				{
+					type: "parallel"
+				}
+			]
+		},
+		options);
+		
+		chart.echartsInit(options);
+	};
+	
+	chartSupport.parallelUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions = chart.renderOptions();
+		var propertyNames = renderOptions.dgPropertyNames;
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		var legendData = [];
+		var series = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var result = chart.resultOf(results, chartDataSet);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
+				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+				var data = chart.resultValueObjects(result, [ np, vps[j] ]);
+				
+				chart.originalInfo(data, chartDataSet);
+				
+				var mySeries = {type: "line", name: legendName, data: data};
+				
+				legendData.push(legendName);
+				series.push(mySeries);
+			}
+		}
+		
+		var options = { legend: {data: legendData}, series: series };
+		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
+		options.xAxis = {data: null};
+		
+		options = chart.inflateUpdateOptions(results, options, function(options)
+		{
+			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
+		});
+		
+		chart.echartsOptions(options);
+	};
+	
+	chartSupport.parallelResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.parallelDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+	
+	chartSupport.parallelOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
+				chartSupport.parallelSetChartEventData);
+	};
+	
+	chartSupport.parallelOff = function(chart, eventType, handler)
+	{
+		chart.echartsOffEventHandler(eventType, handler);
+	};
+	
+	chartSupport.parallelSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var echartsData = echartsEventParams.data;
+		var data = chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value);
+		
+		chart.eventData(chartEvent, data);
+		chart.eventOriginalInfo(chartEvent, echartsData);
+	};
+	
 	//表格
 	
 	chartSupport.tableRender = function(chart, columnSign, options)
@@ -5907,6 +6056,30 @@
 		}
 		
 		return (isArray ? indexes : indexes[0]);
+	};
+	
+	/**
+	 * 在数组中查找元素，返回其索引
+	 * 
+	 * @param array
+	 * @param value
+	 * @param propertyName 当数组元素是对象类型时，用于指定判断重复的属性名
+	 * @returns 索引数值，-1 表示无
+	 */
+	chartSupport.findInArray = function(array, value, propertyName)
+	{
+		for(var i=0; i<array.length; i++)
+		{
+			var ae = array[i];
+			
+			if(propertyName != null)
+				ae = (ae ? ae[propertyName] : null);
+			
+			if(ae == value)
+				return i;
+		}
+		
+		return -1;
 	};
 	
 	/**
