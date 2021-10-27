@@ -1272,6 +1272,8 @@
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
 		var options = { legend: {data: legendData}, series: series };
+		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
+		options.xAxis = {data: null};
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
