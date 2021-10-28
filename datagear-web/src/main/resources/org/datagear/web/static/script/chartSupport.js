@@ -1763,7 +1763,7 @@
 			series: [ {type: "map", name: seriesName, data: seriesData } ]
 		};
 		
-		chartSupport.checkMinAndMax(options.visualMap);
+		chartSupport.trimNumberRange(options.visualMap);
 		
 		if(map)
 			options.series[0].map = map;
@@ -2601,7 +2601,7 @@
 		var series = [ { type: "heatmap", name: seriesName, data: seriesData } ];
 		
 		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
-		chartSupport.checkMinAndMax(options.visualMap);
+		chartSupport.trimNumberRange(options.visualMap);
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
@@ -4314,6 +4314,11 @@
 			{
 				pa.min = undefined;
 				pa.max = undefined;
+			}
+			//多系列ECharts不会自动计算，需要手动计算
+			else
+			{
+				chartSupport.trimNumberRange(pa);
 			}
 		}
 	};
@@ -6160,13 +6165,10 @@
 	};
 	
 	/**
-	 * 校正对象的"min"、"max"属性值。
+	 * 校正obj.min、obj.max值，使得obj.min始终小于obj.max且都不为null。
 	 */
-	chartSupport.checkMinAndMax = function(obj, defaultMin, defaultMax)
+	chartSupport.trimNumberRange = function(obj, defaultMin, defaultMax)
 	{
-		if(!obj)
-			return;
-		
 		if(defaultMin == null)
 			defaultMin = 0;
 		if(defaultMax == null)
@@ -6177,10 +6179,25 @@
 			obj.min = defaultMin;
 			obj.max = defaultMax;
 		}
-		else if(obj.min == null || obj.min >= obj.max)
-			obj.min = obj.max - 1;
-		else if(obj.max == null || obj.max <= obj.min)
-			obj.max = obj.min + 1;
+		else if(obj.min == null)
+		{
+			obj.min = obj.max - Math.abs(obj.max)/2;
+		}
+		else if(obj.max == null)
+		{
+			obj.max = obj.min + Math.abs(obj.min)/2;
+		}
+		
+		if(obj.min == obj.max)
+			obj.max = obj.min + Math.abs(obj.min)/2;
+		else if(obj.min > obj.max)
+		{
+			var min = obj.min;
+			obj.min = obj.max;
+			obj.max = min;
+		}
+		
+		return obj;
 	};
 	
 	/**
