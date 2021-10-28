@@ -4100,58 +4100,29 @@
 	
 	//平行坐标系
 	
-	chartSupport.parallelRender = function(chart, valueSign, options)
+	chartSupport.parallelRender = function(chart, nameSign, valueSign, categorySign, options)
 	{
-		chartSupport.chartSignNameMap(chart, { value: valueSign });
-		
-		var parallelAxis = [];
-		var propertyNames = [];
-		
-		var chartDataSets = chart.chartDataSetsMain();
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			var vps = chart.dataSetPropertiesOfSign(chartDataSets[i], valueSign);
-			//如果没有标记，则使用全部属性
-			if(!vps || vps.length == 0)
-				vps = (chartDataSets[i] && chartDataSets[i].dataSet ? (chartDataSets[i].dataSet.properties || []) : []);
-			
-			for(var j=0; j<vps.length; j++)
-			{
-				var vp = vps[j];
-				var pn = vp.name;
-				
-				if(chartSupport.findInArray(propertyNames, pn) < 0)
-				{
-					propertyNames.push(pn);
-					parallelAxis.push(
-					{
-						dim: parallelAxis.length,
-						name: chart.dataSetPropertyLabel(vp),
-						type: chartSupport.evalDataSetPropertyAxisType(chart, vp),
-						dgPropertyName: pn
-					});
-				}
-			}
-		}
+		//name 可选，一条平行线名称
+		//value 必选，可多选，平行线指标
+		//category 可选，平行线类别
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, category: categorySign });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
-			dgPropertyNames: propertyNames,
-			
 			title:
 			{
 		        text: chart.name
 		    },
 			tooltip:
 			{
-				trigger: "axis"
+				show: true
 			},
 			legend:
 			{
 				//将在update中设置：
 				//data
 			},
-			parallelAxis:  parallelAxis,
+			parallelAxis:  [],
 			series:
 			[
 				//将在update中设置：
@@ -4170,47 +4141,129 @@
 	chartSupport.parallelUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		var renderOptions = chart.renderOptions();
-		var propertyNames = renderOptions.dgPropertyNames;
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		var legendData = [];
-		var series = [];
+		var parallelAxis = [];
+		var valueProperties = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var vps = chart.dataSetPropertiesOfSign(chartDataSets[i], signNameMap.value);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				var vp = vps[j];
+				
+				if(chartSupport.findInArray(valueProperties, vp.name, "name") < 0)
+				{
+					valueProperties.push(vp);
+					parallelAxis.push(
+					{
+						dim: parallelAxis.length,
+						name: chart.dataSetPropertyLabel(vp),
+						type: chartSupport.evalDataSetPropertyAxisType(chart, vp)
+					});
+				}
+			}
+		}
+		
+		var categoryNames = [];
+		var categoryDatasMap = {};
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			
 			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.category);
 			
-			for(var j=0; j<vps.length; j++)
+			var data = [];
+			
+			if(np)
+				data = chart.resultNameValueObjects(result, np, valueProperties);
+			else
+				data = chart.resultValueObjects(result, valueProperties);
+			
+			chart.originalInfo(data, chartDataSet);
+			
+			if(cp)
 			{
-				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
-				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var data = chart.resultValueObjects(result, [ np, vps[j] ]);
+				var cpv = chart.resultColumnArrays(result, cp);
 				
-				chart.originalInfo(data, chartDataSet);
+				for(var j=0; j<cpv.length; j++)
+				{
+					var categoryName = cpv[j];
+					var dataRow = data[j];
+					dataRow[signNameMap.category] = categoryName;
+					
+					chartSupport.appendDistinct(categoryNames, categoryName);
+					
+					var categoryDatas = (categoryDatasMap[categoryName] || (categoryDatasMap[categoryName] = []));
+					chartSupport.appendElement(categoryDatas, dataRow);
+				}
+			}
+			else
+			{
+				var categoryName = dataSetName;
+				chartSupport.appendDistinct(categoryNames, categoryName);
 				
-				var mySeries = {type: "line", name: legendName, data: data};
+				var categoryDatas = (categoryDatasMap[categoryName] || (categoryDatasMap[categoryName] = []));
+				chartSupport.appendElement(categoryDatas, data);
+			}
+			
+			//设置每个坐标系的min、max、data
+			for(var j=0; j<data.length; j++)
+			{
+				var vs = (data[j].value || []);
 				
-				legendData.push(legendName);
-				series.push(mySeries);
+				for(var k=0; k<parallelAxis.length; k++)
+				{
+					var paxis = parallelAxis[k];
+					var pv = vs[k];
+					
+					if(paxis.type == "category")
+					{
+						paxis.data = (paxis.data || (paxis.data = []));
+						if(pv != null)
+							chartSupport.appendDistinct(paxis.data, pv);
+					}
+					else
+					{
+						//设置min、max，不然当多系列时不能自动识别，可能导致某些线飞离
+						if(paxis.min == null)
+							paxis.min = pv;
+						else if(paxis.min > pv)
+							paxis.min = pv;
+						
+						if(paxis.max == null)
+							paxis.max = pv;
+						else if(paxis.max < pv)
+							paxis.max = pv;
+					}
+				}
 			}
 		}
 		
-		var options = { legend: {data: legendData}, series: series };
-		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
-		options.xAxis = {data: null};
+		var series = [];
 		
-		options = chart.inflateUpdateOptions(results, options, function(options)
+		for(var i=0; i<categoryNames.length; i++)
 		{
-			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
-		});
+			series[i] =
+			{
+				type: "parallel",
+				name: categoryNames[i],
+				data: categoryDatasMap[categoryNames[i]]
+			};
+		}
+		
+		var options = { legend: {data: categoryNames}, parallelAxis: parallelAxis, series: series };
+		
+		chartSupport.parallelTrimAxisMinMax(options);
+		
+		options = chart.inflateUpdateOptions(results, options);
 		
 		chart.echartsOptions(options);
 	};
@@ -4245,6 +4298,24 @@
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalInfo(chartEvent, echartsData);
+	};
+	
+	chartSupport.parallelTrimAxisMinMax = function(options)
+	{
+		var parallelAxis = (options.parallelAxis || []);
+		var series = (options.series || []);
+		
+		for(var i=0; i<parallelAxis.length; i++)
+		{
+			var pa = parallelAxis[i];
+			
+			//单系列ECharts会自动计算min、max，这里不必设置
+			if(series.length < 2)
+			{
+				pa.min = undefined;
+				pa.max = undefined;
+			}
+		}
 	};
 	
 	//表格
@@ -6018,10 +6089,10 @@
 	 * 
 	 * @param sourceArray
 	 * @param append 追加元素、数组，可以是基本类型、对象类型
-	 * @param distinctPropertyName 当是对象类型时，用于指定判断重复的属性名
+	 * @param propertyName 当是对象类型时，用于指定判断重复的属性名
 	 * @returns 追加的或重复元素的索引、或者索引数组
 	 */
-	chartSupport.appendDistinct = function(sourceArray, append, distinctPropertyName)
+	chartSupport.appendDistinct = function(sourceArray, append, propertyName)
 	{
 		var isArray = $.isArray(append);
 		
@@ -6032,19 +6103,8 @@
 		
 		for(var i=0; i<append.length; i++)
 		{
-			var av = (distinctPropertyName != undefined ? append[i][distinctPropertyName] : append[i]);
-			var foundIdx = -1;
-			
-			for(var j=0; j<sourceArray.length; j++)
-			{
-				var sv = (distinctPropertyName != undefined ? sourceArray[j][distinctPropertyName] : sourceArray[j]);
-				
-				if(sv == av)
-				{
-					foundIdx = j;
-					break;
-				}
-			}
+			var av = (propertyName != null && append[i] ? append[i][propertyName] : append[i]);
+			var foundIdx = chartSupport.findInArray(sourceArray, av, propertyName);
 			
 			if(foundIdx > -1)
 				indexes[i] = foundIdx;
@@ -6542,7 +6602,7 @@
 	{
 		if(!obj)
 			return obj;
-			
+		
 		var re = {};
 		
 		for(var p in obj)

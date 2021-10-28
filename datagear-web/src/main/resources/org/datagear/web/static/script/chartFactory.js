@@ -4422,14 +4422,16 @@
 				}
 			},
 			"parallel" : {
-				"itemStyle" : {
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
+				"top": "15%",
+				"lineStyle" : {
+					"shadowBlur" : 0,
+					"shadowColor" : shadowColor
 				},
 				"emphasis" : {
-					"itemStyle" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.borderColor
+					"lineStyle" : {
+						"shadowBlur" : 4,
+						"shadowOffsetX" : 0,
+						"shadowColor" : shadowColor
 					}
 				}
 			},
