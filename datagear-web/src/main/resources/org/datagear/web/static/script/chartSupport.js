@@ -4141,33 +4141,10 @@
 	chartSupport.parallelUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var parallelAxis = chartSupport.parallelEvalParallelAxis(chart);
+		var valuePropertyNamess = chartSupport.parallelEvalValuePropertyNamess(chart, parallelAxis);
 		
 		var chartDataSets = chart.chartDataSetsMain();
-		
-		var parallelAxis = [];
-		var valueProperties = [];
-		
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			var vps = chart.dataSetPropertiesOfSign(chartDataSets[i], signNameMap.value);
-			
-			for(var j=0; j<vps.length; j++)
-			{
-				var vp = vps[j];
-				
-				if(chartSupport.findInArray(valueProperties, vp.name, "name") < 0)
-				{
-					valueProperties.push(vp);
-					parallelAxis.push(
-					{
-						dim: parallelAxis.length,
-						name: chart.dataSetPropertyLabel(vp),
-						type: chartSupport.evalDataSetPropertyAxisType(chart, vp)
-					});
-				}
-			}
-		}
-		
 		var categoryNames = [];
 		var categoryDatasMap = {};
 		
@@ -4178,14 +4155,15 @@
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vps = valuePropertyNamess[i];
 			var cp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.category);
 			
 			var data = [];
 			
 			if(np)
-				data = chart.resultNameValueObjects(result, np, valueProperties);
+				data = chart.resultNameValueObjects(result, np, vps);
 			else
-				data = chart.resultValueObjects(result, valueProperties);
+				data = chart.resultValueObjects(result, vps);
 			
 			chart.originalInfo(data, chartDataSet);
 			
@@ -4232,16 +4210,19 @@
 					}
 					else
 					{
-						//设置min、max，不然当多系列时不能自动识别，可能导致某些线飞离
-						if(paxis.min == null)
-							paxis.min = pv;
-						else if(paxis.min > pv)
-							paxis.min = pv;
-						
-						if(paxis.max == null)
-							paxis.max = pv;
-						else if(paxis.max < pv)
-							paxis.max = pv;
+						if(pv != null)
+						{
+							//设置min、max，不然当多系列时不能自动识别，可能导致某些线飞离
+							if(paxis.min == null)
+								paxis.min = pv;
+							else if(paxis.min > pv)
+								paxis.min = pv;
+							
+							if(paxis.max == null)
+								paxis.max = pv;
+							else if(paxis.max < pv)
+								paxis.max = pv;
+						}
 					}
 				}
 			}
@@ -4298,6 +4279,68 @@
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalInfo(chartEvent, echartsData);
+	};
+	
+	chartSupport.parallelEvalParallelAxis = function(chart)
+	{
+		var parallelAxis = [];
+		
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var vps = chart.dataSetPropertiesOfSign(chartDataSets[i], signNameMap.value);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				//使用label而非vp.name作为坐标轴名，因为label是可编辑得，使得用户可以合并拆分dim
+				var axisName = chart.dataSetPropertyLabel(vps[j]);
+				
+				if(chartSupport.findInArray(parallelAxis, axisName, "name") < 0)
+				{
+					parallelAxis.push(
+					{
+						dim: parallelAxis.length,
+						name: axisName,
+						type: chartSupport.evalDataSetPropertyAxisType(chart, vps[j])
+					});
+				}
+			}
+		}
+		
+		return parallelAxis;
+	};
+	
+	chartSupport.parallelEvalValuePropertyNamess = function(chart, parallelAxis)
+	{
+		var valuePropertyNamess = [];
+		
+		var placeholderName = chartFactory.builtinPropName("DataPropNamePlaceholder");
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var valuePropertyNames = [];
+			
+			var vps = chart.dataSetPropertiesOfSign(chartDataSets[i], signNameMap.value);
+			
+			for(var j=0; j<parallelAxis.length; j++)
+			{
+				var idx = chartSupport.findInArray(vps, parallelAxis[j].name,
+							function(vp)
+							{
+								return chart.dataSetPropertyLabel(vp);
+							});
+				
+				valuePropertyNames[j] = (idx < 0 ? placeholderName : vps[idx].name);
+			}
+			
+			valuePropertyNamess[i] = valuePropertyNames;
+		}
+		
+		return valuePropertyNamess;
 	};
 	
 	chartSupport.parallelTrimAxisMinMax = function(options)
@@ -6128,17 +6171,24 @@
 	 * 
 	 * @param array
 	 * @param value
-	 * @param propertyName 当数组元素是对象类型时，用于指定判断重复的属性名
+	 * @param propertyName 当数组元素是对象类型时，用于指定判断属性名，格式为："..."、function(ele){ return ... }
 	 * @returns 索引数值，-1 表示无
 	 */
 	chartSupport.findInArray = function(array, value, propertyName)
 	{
+		var isPnFunction = (propertyName && $.isFunction(propertyName));
+		
 		for(var i=0; i<array.length; i++)
 		{
 			var ae = array[i];
 			
 			if(propertyName != null)
-				ae = (ae ? ae[propertyName] : null);
+			{
+				if(isPnFunction)
+					ae = (ae ? propertyName(ae) : null);
+				else
+					ae = (ae ? ae[propertyName] : null);
+			}
 			
 			if(ae == value)
 				return i;
