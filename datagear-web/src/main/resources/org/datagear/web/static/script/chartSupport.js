@@ -4175,7 +4175,7 @@
 				{
 					var categoryName = cpv[j];
 					var dataRow = data[j];
-					dataRow[signNameMap.category] = categoryName;
+					dataRow["_dgParallelCategory"] = categoryName;
 					
 					chartSupport.appendDistinct(categoryNames, categoryName);
 					
@@ -4275,7 +4275,16 @@
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
 		var echartsData = echartsEventParams.data;
-		var data = chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value);
+		
+		var data = undefined;
+		
+		if(echartsData)
+		{
+			data = {};
+			data[signNameMap.name] = echartsData.name;
+			data[signNameMap.value] = echartsData.value;
+			data[signNameMap.category] = echartsData["_dgParallelCategory"];
+		}
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalInfo(chartEvent, echartsData);
