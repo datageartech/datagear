@@ -178,7 +178,7 @@ readonly 是否只读操作，允许为null
 			</#if>
 		</div>
 	</form>
-	<div class="chart-list-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+	<div class="chart-list-panel togglable-table-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 		<div class="panel-content minor-dataTable pagination-light"></div>
 	</div>
 </div>
@@ -386,9 +386,16 @@ readonly 是否只读操作，允许为null
 							$.setGridPageHeightOption(options);
 							po.open("${contextPath}/chart/select?multiple", options);
 						}
+						else
+						{
+							$.callPanelShowCallback(chartListPanel);
+						}
 					}
 					else
+					{
 						chartListPanel.hide();
+						$.setResizeDataTableWhenShow(chartListPanel);
+					}
 				});
 		}
 		</#if>
