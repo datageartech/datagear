@@ -4109,6 +4109,9 @@
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
+			//扩展配置项：是否平滑
+			dgSmooth: false,
+			
 			title:
 			{
 		        text: chart.name
@@ -4141,6 +4144,7 @@
 	chartSupport.parallelUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
 		var parallelAxis = chartSupport.parallelEvalParallelAxis(chart);
 		var valuePropertyNamess = chartSupport.parallelEvalValuePropertyNamess(chart, parallelAxis);
 		
@@ -4238,6 +4242,9 @@
 				name: categoryNames[i],
 				data: categoryDatasMap[categoryNames[i]]
 			};
+			
+			if(renderOptions.dgSmooth)
+				series[i].smooth = true;
 		}
 		
 		var options = { legend: {data: categoryNames}, parallelAxis: parallelAxis, series: series };
