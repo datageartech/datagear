@@ -1262,8 +1262,8 @@
 				for(var j=0; j<data.length; j++)
 				{
 					var wv = data[j].value[2];
-					min = (min == undefined ? wv : Math.min(min, wv));
-					max = (max == undefined ? wv : Math.max(max, wv));
+					min = (min == null ? wv : Math.min(min, wv));
+					max = (max == null ? wv : Math.max(max, wv));
 				}
 			}
 			
@@ -1755,8 +1755,8 @@
 				for(var j=0; j<data.length; j++)
 				{
 					var val = data[j].value;
-					min = (min == undefined ? val : Math.min(min, val));
-					max = (max == undefined ? val : Math.max(max, val));
+					min = (min == null ? val : Math.min(min, val));
+					max = (max == null ? val : Math.max(max, val));
 				}
 			}
 		}
@@ -1980,8 +1980,8 @@
 				{
 					var dv = data[j].value;
 					
-					min = (min == undefined ? dv[2] : Math.min(min, dv[2]));
-					max = (max == undefined ? dv[2] : Math.max(max, dv[2]));
+					min = (min == null ? dv[2] : Math.min(min, dv[2]));
+					max = (max == null ? dv[2] : Math.max(max, dv[2]));
 				}
 			}
 			
@@ -2179,8 +2179,8 @@
 					var sv = chart.resultRowCell(data[j], svp);
 					sd.value.push(sv);
 					
-					min = (min == undefined ? sv : Math.min(min, sv));
-					max = (max == undefined ? sv : Math.max(max, sv));
+					min = (min == null ? sv : Math.min(min, sv));
+					max = (max == null ? sv : Math.max(max, sv));
 				}
 				
 				if(tip)
@@ -2202,8 +2202,8 @@
 					var tv = chart.resultRowCell(data[j], tvp);
 					td.value.push(tv);
 					
-					min = (min == undefined ? tv : Math.min(min, tv));
-					max = (max == undefined ? tv : Math.max(max, tv));
+					min = (min == null ? tv : Math.min(min, tv));
+					max = (max == null ? tv : Math.max(max, tv));
 				}
 				
 				var sidx = chartSupport.appendDistinct(seriesData, sd, (sip ? "id" : "name"));
@@ -2590,8 +2590,8 @@
 				chartSupport.appendDistinct(xAxisData, data[j].value[0]);
 				chartSupport.appendDistinct(yAxisData, data[j].value[1]);
 				
-				min = (min == undefined ? dw : Math.min(min, dw));
-				max = (max == undefined ? dw : Math.max(max, dw));
+				min = (min == null ? dw : Math.min(min, dw));
+				max = (max == null ? dw : Math.max(max, dw));
 			}
 			
 			chart.originalInfo(data, chartDataSet);
@@ -3398,8 +3398,8 @@
 				{
 					sd.value = chart.resultRowCell(data[j], svp);
 					
-					min = (min == undefined ? sd.value : Math.min(min, sd.value));
-					max = (max == undefined ? sd.value : Math.max(max, sd.value));
+					min = (min == null ? sd.value : Math.min(min, sd.value));
+					max = (max == null ? sd.value : Math.max(max, sd.value));
 				}
 				
 				if(tip)
@@ -3420,8 +3420,8 @@
 				{
 					td.value = chart.resultRowCell(data[j], tvp);
 					
-					min = (min == undefined ? td.value : Math.min(min, td.value));
-					max = (max == undefined ? td.value : Math.max(max, td.value));
+					min = (min == null ? td.value : Math.min(min, td.value));
+					max = (max == null ? td.value : Math.max(max, td.value));
 				}
 				
 				var sidx = chartSupport.appendDistinct(seriesData, sd, (sip ? "id" : "name"));
@@ -3454,7 +3454,7 @@
 			}
 		}
 		
-		if(min == undefined && max == undefined && symbolSizeMin < 10)
+		if(min == null && max == null && symbolSizeMin < 10)
 			symbolSizeMin = 10;
 		
 		var series = [ { type: "graph", name: seriesName, categories: categories, data: seriesData, links: seriesLinks } ];
@@ -3866,8 +3866,8 @@
 			
 			for(var j=0; j<data.length; j++)
 			{
-				min = (min == undefined ? data[j].value : Math.min(min, data[j].value));
-				max = (max == undefined ? data[j].value : Math.max(max, data[j].value));
+				min = (min == null ? data[j].value : Math.min(min, data[j].value));
+				max = (max == null ? data[j].value : Math.max(max, data[j].value));
 				
 				chart.originalInfo(data[j], chartDataSet, j);
 			}
@@ -5388,7 +5388,7 @@
 			if(options.name.show !== undefined)
 			{
 				options.hideName = !options.name.show;
-				options.name.show == undefined;
+				options.name.show = undefined;
 			}
 			options.nameStyle = options.name;
 		}
@@ -6386,7 +6386,7 @@
 	//计算数值的图符元素尺寸
 	chartSupport.evalValueSymbolSize = function(value, minValue, maxValue, symbolSizeMax, symbolSizeMin)
 	{
-		if(symbolSizeMin == undefined)
+		if(symbolSizeMin == null)
 			symbolSizeMin = 4;
 		
 		if(value == null || minValue == null || maxValue == null)
