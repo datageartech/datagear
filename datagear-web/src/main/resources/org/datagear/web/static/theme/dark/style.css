@@ -28,6 +28,13 @@ textarea:focus{
 	box-shadow: 0px 0px 4px 0px #b3b3b3;
 }
 
+*::-webkit-input-placeholder{
+  color: #666;
+}
+*::-moz-placeholder{
+  color: #666;
+}
+
 *::-webkit-scrollbar-thumb{
 	background: #363636;
 }

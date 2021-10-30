@@ -462,14 +462,15 @@ readonly 是否只读操作，允许为null
 		{
 			var dataSetId = po.element(".chartDataSetId", this).val();
 			var propertySigns = {};
+			var propertyAliases = {};
 			var alias = po.element(".chartDataSetAlias", this).val();
 			var attachment = po.element(".chartDataSetAttachment", this).prop("checked");
 			var dataSetParams = (po.element(".dataSetParamValueButton", this).data("dataSetParams") || []);
 			var paramValues = (po.element(".dataSetParamValueButton", this).data("paramValues") || {});
 			
-			po.element(".item-signs-item", this).each(function()
+			po.element(".item-props-p", this).each(function()
 			{
-				var signName = po.element(".chartDataSetPropertySignName", this).val();
+				var propertyName = po.element(".chartDataSetPropertyName", this).val();
 				var signValues = [];
 				
 				po.element(".chartDataSetPropertySignValue", this).each(function()
@@ -479,9 +480,11 @@ readonly 是否只读操作，允许为null
 				
 				//没有标记的不必保存，避免存储长度溢出
 				if(signValues.length > 0)
-				{
-					propertySigns[signName] = signValues;
-				}
+					propertySigns[propertyName] = signValues;
+				
+				var propertyAlias = po.element(".chartDataSetPropertyAlias", this).val();
+				if(propertyAlias)
+					propertyAliases[propertyName] = propertyAlias;
 			});
 			
 			re.push(
@@ -489,6 +492,7 @@ readonly 是否只读操作，允许为null
 				"summaryDataSetEntity": { "id": dataSetId, "params": dataSetParams },
 				"propertySigns": propertySigns,
 				"alias": alias,
+				"propertyAliases": propertyAliases,
 				"attachment": attachment,
 				"query": { "paramValues": paramValues }
 			});
@@ -552,6 +556,7 @@ readonly 是否只读操作，允许为null
 	{
 		var dataSet = chartDataSet.dataSet;
 		var propertySigns = (chartDataSet.propertySigns || {});
+		var propertyAliases = (chartDataSet.propertyAliases || {});
 		var dataSetProperties = (dataSet.properties || []);
 		
 		var $item = $("<div class='data-set-item ui-widget ui-widget-content ui-corner-all' />").appendTo($parent);
@@ -564,24 +569,29 @@ readonly 是否只读操作，允许为null
 			.attr("title", "<@spring.message code='delete' />").appendTo($head);
 		</#if>
 		
-		var $signs = $("<div class='item-signs' />").appendTo($item);
+		var $dsProps = $("<div class='item-props' />").appendTo($item);
 		for(var i=0; i<dataSetProperties.length; i++)
 		{
 			var dsp = dataSetProperties[i];
 			
-			var $signItem = $("<div class='item-signs-item' />").appendTo($signs);
+			var $dsProp = $("<div class='item-props-p' />").appendTo($dsProps);
 			
-			var $name = $("<div class='sign-item-name' />")
-				.text(dsp.name)
-				.attr("title", (dsp.label || ""))
-				.appendTo($signItem);
+			var $name = $("<div class='prop-name' />");
+			$name.append("<span class='ui-icon ui-icon-bullet'></span>");
+			$("<span />").text(dsp.name + (dsp.label ? " (" +dsp.label+")" : "")).appendTo($name);
+			$name.appendTo($dsProp);
 			
-			$("<input type='hidden' class='chartDataSetPropertySignName' />").val(dsp.name).appendTo($name);
+			$("<input type='hidden' class='chartDataSetPropertyName' />").val(dsp.name).appendTo($name);
 			
-			var $valuesWrapper = $("<div class='sign-item-values-wrapper ui-widget ui-widget-content ui-corner-all' />")
-				.appendTo($signItem);
+			var $propSigns = $("<div class='prop-signs' />").appendTo($dsProp);
 			
-			var $values = $("<div class='sign-item-values' />").appendTo($valuesWrapper);
+			$("<div class='tip-label' />").attr("title", "<@spring.message code='chart.chartDataSet.dataSign.desc' />")
+				.html("<@spring.message code='chart.chartDataSet.dataSign' />").appendTo($propSigns);
+			
+			var $signsWrapper = $("<div class='signs-wrapper ui-widget ui-widget-content ui-corner-all' />")
+				.appendTo($propSigns);
+			
+			var $values = $("<div class='sign-values' />").appendTo($signsWrapper);
 			
 			var mySigns = propertySigns[dsp.name];
 			if(chartPlugin && chartPlugin.dataSigns && mySigns)
@@ -601,15 +611,25 @@ readonly 是否只读操作，允许为null
 			<#if !readonly>
 			$("<button type='button' class='sign-add-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'> </span></button>")
 				.attr("title", "<@spring.message code='chart.addDataSign' />")
-				.appendTo($valuesWrapper);
+				.appendTo($signsWrapper);
 			</#if>
+			
+			var $propertyAlias = $("<div class='prop-alias' />");
+			$("<div class='tip-label' />").attr("title", "<@spring.message code='chart.chartDataSet.propertyAlias.desc' />")
+				.html("<@spring.message code='alias' />").appendTo($propertyAlias);
+			$("<input type='text' class='chartDataSetPropertyAlias ui-widget ui-widget-content ui-corner-all' />")
+				.attr("placeholder", (propertyAliases[dsp.name] ? dsp.name : (dsp.label ? dsp.label : dsp.name)))
+				.val(propertyAliases[dsp.name] || "")
+				.appendTo($propertyAlias);
+			$propertyAlias.appendTo($dsProp);
 		}
 		
 		var $settingDiv = $("<div class='item-setting ui-widget ui-widget-content' />").appendTo($item);
 		var $aliasSetting = $("<div class='setting-item' />").appendTo($settingDiv);
-		$("<label class='tip-label' />").html("<@spring.message code='chart.chartDataSet.alias' />")
+		$("<label class='tip-label' />").html("<@spring.message code='alias' />")
 			.attr("title", "<@spring.message code='chart.chartDataSet.alias.desc' />").appendTo($aliasSetting);
-		$("<input type='text' class='chartDataSetAlias ui-widget ui-widget-content' />")
+		$("<input type='text' class='chartDataSetAlias ui-widget ui-widget-content ui-corner-all' />")
+			.attr("placeholder", dataSet.name)
 			.attr("value", (chartDataSet.alias || "")).appendTo($aliasSetting);
 		
 		var $attachment = $("<div class='setting-item' />").appendTo($settingDiv);
@@ -744,7 +764,7 @@ readonly 是否只读操作，允许为null
 		var chartPlugin = po.getCurrentChartPlugin();
 		var dataSigns = (chartPlugin ? (chartPlugin.dataSigns || []) : []);
 		
-		var $itemSigns = $this.closest(".item-signs");
+		var $itemSigns = $this.closest(".item-props");
 		var $panel = po.element(".data-sign-select-panel");
 		var $contentLeft = po.element(".content-left", $panel);
 		var $contentRight = po.element(".content-right", $panel);
@@ -786,7 +806,7 @@ readonly 是否只读操作，允许为null
 		$panel.show();
 		$panel.position({ my : "left center", at : "right+10 center", of : $this});
 		
-		po._currentPropertySignItemParent = $(".sign-item-values", $this.closest(".item-signs-item"));
+		po._currentPropertySignItemParent = $(".sign-values", $this.closest(".item-props-p"));
 	})
 	.on("click", ".sign-value-delete-icon", function()
 	{
@@ -804,7 +824,7 @@ readonly 是否只读操作，允许为null
 			return;
 		
 		po.addPropertySignItem(po._currentPropertySignItemParent, $this.val(), $this.text());
-		po.updatePropertySignButtonEnable($this, po._currentPropertySignItemParent.closest(".item-signs"));
+		po.updatePropertySignButtonEnable($this, po._currentPropertySignItemParent.closest(".item-props"));
 		
 		po.element(".data-sign-select-panel").hide();
 	});
@@ -861,7 +881,7 @@ readonly 是否只读操作，允许为null
 		for(var i=0; i<$chartDataSetItems.length; i++)
 		{
 			var $chartDataSetItem = $($chartDataSetItems[i]);
-			var $itemSigns = $(".item-signs" , $chartDataSetItem);
+			var $itemSigns = $(".item-props" , $chartDataSetItem);
 			
 			if(po.element(".chartDataSetAttachment", $chartDataSetItem).prop("checked"))
 				continue;

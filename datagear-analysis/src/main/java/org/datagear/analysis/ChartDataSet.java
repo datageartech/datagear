@@ -37,6 +37,9 @@ public class ChartDataSet implements Serializable
 	/** 是否附件数据集，不用作渲染图表 */
 	private boolean attachment = false;
 
+	/** 数据集属性别名映射表 */
+	private Map<String, String> propertyAliases = Collections.emptyMap();
+
 	/**数据集查询*/
 	private DataSetQuery query = null;
 
@@ -111,6 +114,16 @@ public class ChartDataSet implements Serializable
 	public void setAttachment(boolean attachment)
 	{
 		this.attachment = attachment;
+	}
+
+	public Map<String, String> getPropertyAliases()
+	{
+		return propertyAliases;
+	}
+
+	public void setPropertyAliases(Map<String, String> propertyAliases)
+	{
+		this.propertyAliases = propertyAliases;
 	}
 
 	public DataSetQuery getQuery()

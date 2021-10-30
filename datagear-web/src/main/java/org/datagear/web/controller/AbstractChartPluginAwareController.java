@@ -308,6 +308,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			setAlias(chartDataSet.getAlias());
 			setAttachment(chartDataSet.isAttachment());
 			setQuery(chartDataSet.getQuery());
+			setPropertyAliases(chartDataSet.getPropertyAliases());
 		}
 
 		@JsonIgnore

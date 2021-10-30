@@ -335,6 +335,7 @@ public class HtmlChartWidgetEntityServiceImpl
 		chartDataSet.setAlias(relation.getAlias());
 		chartDataSet.setAttachment(relation.isAttachment());
 		chartDataSet.setQuery(toDataSetQuery(relation.getQueryJson()));
+		chartDataSet.setPropertyAliases(toPropertyAliases(relation.getPropertyAliasesJson()));
 
 		return chartDataSet;
 	}
@@ -444,6 +445,20 @@ public class HtmlChartWidgetEntityServiceImpl
 		return propertySigns;
 	}
 
+	@SuppressWarnings("unchecked")
+	protected Map<String, String> toPropertyAliases(String json)
+	{
+		if (StringUtil.isEmpty(json))
+			return Collections.EMPTY_MAP;
+
+		Map<String, String> aliases = JsonSupport.parse(json, Map.class, null);
+
+		if (aliases == null)
+			aliases = Collections.EMPTY_MAP;
+
+		return aliases;
+	}
+
 	protected DataSetQuery toDataSetQuery(String json)
 	{
 		DataSetQuery query = null;
@@ -480,6 +495,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 			String propertySignsJson = JsonSupport.generate(chartDataSet.getPropertySigns(), "");
 			String queryJson = JsonSupport.generate(chartDataSet.getQuery(), "");
+			String propertyAliasesJson = JsonSupport.generate(chartDataSet.getPropertyAliases(), "");
 
 			WidgetDataSetRelation relation = new WidgetDataSetRelation(entity.getId(),
 					chartDataSet.getDataSet().getId(),
@@ -488,6 +504,7 @@ public class HtmlChartWidgetEntityServiceImpl
 			relation.setAlias(chartDataSet.getAlias());
 			relation.setAttachment(chartDataSet.isAttachment());
 			relation.setQueryJson(queryJson);
+			relation.setPropertyAliasesJson(propertyAliasesJson);
 
 			list.add(relation);
 		}
@@ -514,6 +531,8 @@ public class HtmlChartWidgetEntityServiceImpl
 		private boolean attachment;
 
 		private String queryJson;
+
+		private String propertyAliasesJson;
 
 		private int order;
 
@@ -588,6 +607,16 @@ public class HtmlChartWidgetEntityServiceImpl
 		public void setQueryJson(String queryJson)
 		{
 			this.queryJson = queryJson;
+		}
+
+		public String getPropertyAliasesJson()
+		{
+			return propertyAliasesJson;
+		}
+
+		public void setPropertyAliasesJson(String propertyAliasesJson)
+		{
+			this.propertyAliasesJson = propertyAliasesJson;
 		}
 
 		public int getOrder()
