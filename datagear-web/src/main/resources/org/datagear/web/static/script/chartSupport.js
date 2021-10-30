@@ -44,6 +44,8 @@
 			dgSmooth: false,
 			//扩展配置项：是否面积
 			dgArea: false,
+			//扩展配置项，阶梯：true, false, "start", "middle", "end"
+			dgStep: false,
 			
 			title:
 			{
@@ -121,6 +123,8 @@
 					mySeries.smooth = true;
 				if(renderOptions.dgArea)
 					mySeries.areaStyle = {};
+				if(renderOptions.dgStep != false)
+					mySeries.step = renderOptions.dgStep;
 				
 				legendData.push(legendName);
 				series.push(mySeries);
