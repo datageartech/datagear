@@ -68,6 +68,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${schemaUrlBuilderScriptFile}")
 	private String schemaUrlBuilderScriptFile;
 
+	/** 已载入过的图表插件上次修改时间信息存储文件 */
+	@Value("${builtinChartPluginLastModifiedFile}")
+	private String builtinChartPluginLastModifiedFile;
+
 	/** 是否禁用匿名用户 */
 	@Value("${disableAnonymous}")
 	private boolean disableAnonymous;
@@ -241,6 +245,16 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setSchemaUrlBuilderScriptFile(String schemaUrlBuilderScriptFile)
 	{
 		this.schemaUrlBuilderScriptFile = schemaUrlBuilderScriptFile;
+	}
+
+	public String getBuiltinChartPluginLastModifiedFile()
+	{
+		return builtinChartPluginLastModifiedFile;
+	}
+
+	public void setBuiltinChartPluginLastModifiedFile(String builtinChartPluginLastModifiedFile)
+	{
+		this.builtinChartPluginLastModifiedFile = builtinChartPluginLastModifiedFile;
 	}
 
 	public boolean isDisableAnonymous()

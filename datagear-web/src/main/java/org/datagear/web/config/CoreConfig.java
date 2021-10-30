@@ -324,6 +324,12 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	}
 
 	@Bean
+	public File builtinChartPluginLastModifiedFile()
+	{
+		return FileUtil.getFile(this.applicationProperties.getBuiltinChartPluginLastModifiedFile());
+	}
+
+	@Bean
 	public CloseableHttpClient httpClient()
 	{
 		return HttpClients.createDefault();
@@ -560,8 +566,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public DirectoryHtmlChartPluginManagerInitializer directoryHtmlChartPluginManagerInitializer()
 	{
 		DirectoryHtmlChartPluginManagerInitializer bean = new DirectoryHtmlChartPluginManagerInitializer(
-				this.directoryHtmlChartPluginManager());
-		bean.setTmpDirectory(this.tempDirectory());
+				this.directoryHtmlChartPluginManager(), this.tempDirectory(), this.builtinChartPluginLastModifiedFile());
 
 		return bean;
 	}
