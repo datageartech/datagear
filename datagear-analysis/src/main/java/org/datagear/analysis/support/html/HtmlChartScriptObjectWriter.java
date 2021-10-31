@@ -132,6 +132,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			setAlias(chartDataSet.getAlias());
 			setAttachment(chartDataSet.isAttachment());
 			setQuery(chartDataSet.getQuery());
+			setPropertyAliases(chartDataSet.getPropertyAliases());
 		}
 
 		@JsonIgnore

@@ -1907,16 +1907,30 @@
 	
 	/**
 	 * 获取数据集属性标签，它不会返回null。
-	 * 
+	 *  
+	 * @param chartDataSet 可选，图表数据集
 	 * @param dataSetProperty
 	 * @return "..."
 	 */
-	chartBase.dataSetPropertyLabel = function(dataSetProperty)
+	chartBase.dataSetPropertyLabel = function(chartDataSet, dataSetProperty)
 	{
+		//(dataSetProperty)
+		if(arguments.length == 1)
+		{
+			dataSetProperty = chartDataSet;
+			chartDataSet = null;
+		}
+		
 		if(!dataSetProperty)
 			return "";
 		
-		var label = (dataSetProperty.label ||  dataSetProperty.name);
+		var label = null;
+		
+		if(chartDataSet != null)
+			label = (chartDataSet.propertyAliases ? chartDataSet.propertyAliases[dataSetProperty.name] : null);
+		
+		if(label == null)
+			label = (dataSetProperty.label ||  dataSetProperty.name);
 		
 		return (label || "");
 	};

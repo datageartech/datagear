@@ -61,13 +61,13 @@
 				//data
 			},
 			xAxis: {
-				name: chart.dataSetPropertyLabel(np),
+				name: chart.dataSetPropertyLabel(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: false
 			},
 			yAxis: {
-				name: (vps.length == 1 ? chart.dataSetPropertyLabel(vps[0]) : ""),
+				name: (vps.length == 1 ? chart.dataSetPropertyLabel(chartDataSet, vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
 			},
@@ -108,7 +108,7 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var data = chart.resultValueObjects(result, [ np, vps[j] ]);
 				
@@ -209,14 +209,14 @@
 			},
 			xAxis:
 			{
-				name: chart.dataSetPropertyLabel(np),
+				name: chart.dataSetPropertyLabel(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true
 			},
 			yAxis:
 			{
-				name: (vps.length == 1 ? chart.dataSetPropertyLabel(vps[0]) : ""),
+				name: (vps.length == 1 ? chart.dataSetPropertyLabel(chartDataSet, vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
 			},
@@ -270,7 +270,7 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
 				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var vpsMy = (renderOptions.dgHorizontal ? [vps[j], np] : [np, vps[j]]);
@@ -416,7 +416,7 @@
 			{
 				options.radiusAxis =
 				{
-					name: chart.dataSetPropertyLabel(np),
+					name: chart.dataSetPropertyLabel(chartDataSet, np),
 					nameGap: 20,
 					type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 			        z: 10
@@ -458,7 +458,7 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
 				var data = null;
 				
 				//角度图时使用{value: [name,value]}格式的数据会无法显示
@@ -800,7 +800,7 @@
 				
 				for(var k=0; k<vRow.length; k++)
 				{
-					var vpn = chart.dataSetPropertyLabel(vps[k]);
+					var vpn = chart.dataSetPropertyLabel(chartDataSet,vps[k]);
 					var data = { name: vpn, value: vRow[k] };
 					chart.originalInfo(data, chartDataSet, j);
 					
@@ -989,14 +989,14 @@
 			},
 			xAxis:
 			{
-				name: chart.dataSetPropertyLabel(np),
+				name: chart.dataSetPropertyLabel(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis:
 			{
-				name: chart.dataSetPropertyLabel(vp),
+				name: chart.dataSetPropertyLabel(chartDataSet, vp),
 				nameGap: 5,
 				type: "value"
 			},
@@ -1044,7 +1044,7 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var data = chart.resultValueObjects(result, [np, vps[j]]);
 				
@@ -1201,14 +1201,14 @@
 			},
 			xAxis:
 			{
-				name: chart.dataSetPropertyLabel(np),
+				name: chart.dataSetPropertyLabel(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis:
 			{
-				name: chart.dataSetPropertyLabel(vp),
+				name: chart.dataSetPropertyLabel(chartDataSet, vp),
 				nameGap: 5,
 				type: "value"
 			},
@@ -1479,7 +1479,7 @@
 		
 		for(var i=0; i<vv.length; i++)
 		{
-			var name = chart.dataSetPropertyLabel(vp[i]);
+			var name = chart.dataSetPropertyLabel(chartDataSet, vp[i]);
 			legendData.push(name);
 			
 			var myData = { name: name, value: vv[i] };
@@ -2352,7 +2352,7 @@
 				//将在update中设置：
 				//data
 				
-				name: chart.dataSetPropertyLabel(np),
+				name: chart.dataSetPropertyLabel(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true,
@@ -2505,7 +2505,7 @@
 				//将在update中设置：
 				//data
 				
-				name: chart.dataSetPropertyLabel(np),
+				name: chart.dataSetPropertyLabel(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				splitArea: { show: true }
@@ -2515,7 +2515,7 @@
 				//将在update中设置：
 				//data
 				
-				name: chart.dataSetPropertyLabel(vp),
+				name: chart.dataSetPropertyLabel(chartDataSet, vp),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, vp),
 				splitArea: { show: true }
@@ -3589,7 +3589,7 @@
 			},
 			xAxis:
 			{
-				name: chart.dataSetPropertyLabel(np),
+				name: chart.dataSetPropertyLabel(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true,
@@ -3679,7 +3679,7 @@
 				
 				for(var j=0; j<vps.length; j++)
 				{
-					var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, i, dataSetName, vps, j);
+					var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
 					var vpsMy = (dgHorizontal ? [vps[j], np] : [np, vps[j]]);
 					var data = chart.resultValueObjects(result, vpsMy);
 					chartSupport.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
@@ -4022,7 +4022,7 @@
 					var ra = ras[j];
 					for(var k=0; k<ra.length; k++)
 					{
-						var sv = { name: chart.dataSetPropertyLabel(vps[k]), value: ra[k] };
+						var sv = { name: chart.dataSetPropertyLabel(chartDataSet, vps[k]), value: ra[k] };
 						chart.originalInfo(sv, chartDataSet, j);
 						data.push(sv);
 					}
@@ -4310,12 +4310,13 @@
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
-			var vps = chart.dataSetPropertiesOfSign(chartDataSets[i], signNameMap.value);
+			var chartDataSet = chartDataSets[i];
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				//使用label而非vp.name作为坐标轴名，因为label是可编辑得，使得用户可以合并拆分dim
-				var axisName = chart.dataSetPropertyLabel(vps[j]);
+				//使用label而非vps[j].name作为坐标轴名，因为label是可编辑得，使得用户可以自定义坐标轴
+				var axisName = chart.dataSetPropertyLabel(chartDataSet, vps[j]);
 				
 				if(chartSupport.findInArray(parallelAxis, axisName, "name") < 0)
 				{
@@ -4342,16 +4343,17 @@
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
+			var chartDataSet = chartDataSets[i];
 			var valuePropertyNames = [];
 			
-			var vps = chart.dataSetPropertiesOfSign(chartDataSets[i], signNameMap.value);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
 			
 			for(var j=0; j<parallelAxis.length; j++)
 			{
 				var idx = chartSupport.findInArray(vps, parallelAxis[j].name,
 							function(vp)
 							{
-								return chart.dataSetPropertyLabel(vp);
+								return chart.dataSetPropertyLabel(chartDataSet, vp);
 							});
 				
 				valuePropertyNames[j] = (idx < 0 ? placeholderName : vps[idx].name);
@@ -4417,12 +4419,13 @@
 		
 		var columns = [];
 		
-		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
+		var chartDataSet = chart.chartDataSetFirst();
+		var cps = chartSupport.tableGetColumnProperties(chart, chartDataSet, columnSign);
 		for(var i=0; i<cps.length; i++)
 		{
 			var column =
 			{
-				title: chart.dataSetPropertyLabel(cps[i]),
+				title: chart.dataSetPropertyLabel(chartDataSet, cps[i]),
 				data: cps[i].name,
 				defaultContent: "",
 				orderable: true,
@@ -4762,7 +4765,8 @@
 		{
 			var columnData = [];
 			
-			var cps = chartSupport.tableGetColumnProperties(chart, signNameMap.column);
+			var chartDataSet = chart.chartDataSetFirst();
+			var cps = chartSupport.tableGetColumnProperties(chart, chartDataSet, signNameMap.column);
 			for(var i=0; i<cps.length; i++)
 				columnData[i] = chartData[cps[i].name];
 			
@@ -4781,9 +4785,8 @@
 		return $(".dg-chart-table-content", chart.element());
 	};
 	
-	chartSupport.tableGetColumnProperties = function(chart, columnSign)
+	chartSupport.tableGetColumnProperties = function(chart, chartDataSet, columnSign)
 	{
-		var chartDataSet = chart.chartDataSetFirst();
 		var cps = chart.dataSetPropertiesOfSign(chartDataSet, columnSign);
 		if(!cps || cps.length == 0)
 			cps =(chartDataSet && chartDataSet.dataSet ? (chartDataSet.dataSet.properties || []) : []);
@@ -5459,7 +5462,7 @@
 			if(!hasNps)
 			{
 				for(var j=0; j<vps.length; j++)
-					vpNames[j] = chart.dataSetPropertyLabel(vps[j]);
+					vpNames[j] = chart.dataSetPropertyLabel(chartDataSet, vps[j]);
 			}
 			
 			for(var j=0; j<valuess.length; j++)
@@ -6310,18 +6313,18 @@
 	};
 	
 	//计算图例名
-	chartSupport.legendNameForMultipleSeries = function(chart, chartDataSets, chartDataSetIdx, chartDataSetName,
+	chartSupport.legendNameForMultipleSeries = function(chart, chartDataSets, chartDataSet, chartDataSetIdx, chartDataSetName,
 					seriesProperties, seriesPropertyIdx)
 	{
 		var legendName = chartDataSetName;
 		
 		if(chartDataSets.length > 1 && seriesProperties.length > 1)
 		{
-			legendName = chartDataSetName +"-" + chart.dataSetPropertyLabel(seriesProperties[seriesPropertyIdx]);
+			legendName = chartDataSetName +"-" + chart.dataSetPropertyLabel(chartDataSet, seriesProperties[seriesPropertyIdx]);
 		}
 		else if(seriesProperties.length > 1)
 		{
-			legendName = chart.dataSetPropertyLabel(seriesProperties[seriesPropertyIdx]);
+			legendName = chart.dataSetPropertyLabel(chartDataSet, seriesProperties[seriesPropertyIdx]);
 		}
 		
 		return legendName;
