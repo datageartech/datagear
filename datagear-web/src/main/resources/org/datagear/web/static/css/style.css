@@ -231,17 +231,17 @@ form .form-content .tip-label[title],
 	position: relative;
 }
 form .form-content .form-item .form-item-label label[title]::after,
-form .form-content .tip-label::after,
+form .form-content .tip-label[title]::after,
 .form .form-content .form-item .form-item-label label[title]::after,
-.form .form-content .tip-label::after{
+.form .form-content .tip-label[title]::after{
 	content: "?";
     position: absolute;
-    margin-left: 0.2em;
+    margin-left: 0.1em;
     font-size: 0.7em;
     top: 50%;
     margin-top: -0.6em;
-    opacity: 0.6;
-    filter: Alpha(Opacity=60);
+    opacity: 0.4;
+    filter: Alpha(Opacity=40);
     width: 1em;
     height: 1em;
     text-align: center;
@@ -486,6 +486,34 @@ form.display-block .form-content .form-item .form-item-value label.error,
 }
 .minor-list.deletable-list .minor-list-item .delete-icon{
 	cursor: pointer;
+}
+
+/*标签-值条目*/
+.item-lv{
+	display: flex;
+	align-items: center;
+	padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+.item-lv .item-lv-l,
+.item-lv.item-lv37 .item-lv-l{
+	width: 30%;
+}
+.item-lv .item-lv-v,
+.item-lv.item-lv37 .item-lv-v{
+	width: 70%;
+}
+.item-lv.item-lv28 .item-lv-l{
+	width: 20%;
+}
+.item-lv.item-lv28 .item-lv-v{
+	width: 80%;
+}
+.item-lv.item-lv46 .item-lv-l{
+	width: 40%;
+}
+.item-lv.item-lv46 .item-lv-v{
+	width: 60%;
 }
 
 /*首选操作按钮*/
@@ -2897,7 +2925,7 @@ table.dataTable tbody tr td select{
 	padding: 0.2em 0.2em;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-setting{
-	padding: 0.4em 0.2em;
+	padding: 0.41em 0.41em;
 	margin-top: 0.5em;
 	border-top-width: 1px;
 	border-left-width: 0;
@@ -2905,30 +2933,11 @@ table.dataTable tbody tr td select{
 	border-bottom-width: 0;
 	position: relative;
 }
-.page-form-chart .data-set-wrapper .data-set-item .item-setting .setting-item{
-	padding-top: 0.2em;
-	padding-bottom: 0.2em;
-}
-.page-form-chart .data-set-wrapper .data-set-item .item-setting .setting-item > label{
-	display: inline-block;
-	padding-left: 1em;
-	width: 25%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-}
-.page-form-chart .data-set-wrapper .data-set-item .item-setting .setting-item > input,
-.page-form-chart .data-set-wrapper .data-set-item .item-setting .setting-item > .input{
-	width: 50% !important;
+.page-form-chart .data-set-wrapper .data-set-item .item-setting .item-setting-alias input{
+	width: 100% !important;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-setting .ui-checkboxradio-label.ui-button{
 	padding: 0.2em 1em;
-}
-.page-form-chart .data-set-wrapper .data-set-item .item-setting .dataSetParamValueButton{
-	position: absolute;
-	right: 0.1em;
-	top: 0.6em;
-	border: 0;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-props{
 	margin-top: 0.3em;
@@ -2947,7 +2956,7 @@ table.dataTable tbody tr td select{
 	-webkit-box-sizing: border-box;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-props .item-props-p .prop-signs{
-	margin-left: 2em;
+	margin-left: 1.4em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -2996,8 +3005,7 @@ table.dataTable tbody tr td select{
     padding: 0.4em 0.5em;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-props .item-props-p .prop-alias{
-	margin-left: 2em;
-    padding-top: 0.3em;
+	margin-left: 1.4em;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-props .item-props-p .prop-alias input{
 	width: 100% !important;

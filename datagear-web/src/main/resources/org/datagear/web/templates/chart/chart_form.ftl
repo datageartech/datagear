@@ -241,7 +241,7 @@ readonly 是否只读操作，允许为null
 		</div>
 	</form>
 	<div class="data-set-param-value-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<div class="ui-widget-header ui-corner-all"><@spring.message code='chart.setDataSetParamValue' /></div>
+		<div class="ui-widget-header ui-corner-all"><@spring.message code='chart.chartDataSet.paramValue' /></div>
 		<div class="data-set-param-value-panel-content"></div>
 	</div>
 </div>
@@ -583,12 +583,12 @@ readonly 是否只读操作，允许为null
 			
 			$("<input type='hidden' class='chartDataSetPropertyName' />").val(dsp.name).appendTo($name);
 			
-			var $propSigns = $("<div class='prop-signs' />").appendTo($dsProp);
+			var $propSigns = $("<div class='prop-signs item-lv' />").appendTo($dsProp);
 			
-			$("<div class='tip-label' />").attr("title", "<@spring.message code='chart.chartDataSet.dataSign.desc' />")
+			$("<div class='tip-label item-lv-l' />").attr("title", "<@spring.message code='chart.chartDataSet.dataSign.desc' />")
 				.html("<@spring.message code='chart.chartDataSet.dataSign' />").appendTo($propSigns);
 			
-			var $signsWrapper = $("<div class='signs-wrapper ui-widget ui-widget-content ui-corner-all' />")
+			var $signsWrapper = $("<div class='signs-wrapper item-lv-v ui-widget ui-widget-content ui-corner-all' />")
 				.appendTo($propSigns);
 			
 			var $values = $("<div class='sign-values' />").appendTo($signsWrapper);
@@ -614,29 +614,32 @@ readonly 是否只读操作，允许为null
 				.appendTo($signsWrapper);
 			</#if>
 			
-			var $propertyAlias = $("<div class='prop-alias' />");
-			$("<div class='tip-label' />").attr("title", "<@spring.message code='chart.chartDataSet.propertyAlias.desc' />")
+			var $propertyAlias = $("<div class='prop-alias item-lv' />");
+			$("<div class='tip-label item-lv-l' />").attr("title", "<@spring.message code='chart.chartDataSet.propertyAlias.desc' />")
 				.html("<@spring.message code='alias' />").appendTo($propertyAlias);
+			var $aliasInputWrapper = $("<div class='item-lv-v' />").appendTo($propertyAlias);
 			$("<input type='text' class='chartDataSetPropertyAlias ui-widget ui-widget-content ui-corner-all' />")
 				.attr("placeholder", (propertyAliases[dsp.name] ? dsp.name : (dsp.label ? dsp.label : dsp.name)))
 				.val(propertyAliases[dsp.name] || "")
-				.appendTo($propertyAlias);
+				.appendTo($aliasInputWrapper);
 			$propertyAlias.appendTo($dsProp);
 		}
 		
 		var $settingDiv = $("<div class='item-setting ui-widget ui-widget-content' />").appendTo($item);
-		var $aliasSetting = $("<div class='setting-item' />").appendTo($settingDiv);
-		$("<label class='tip-label' />").html("<@spring.message code='alias' />")
+		var $aliasSetting = $("<div class='item-setting-alias item-lv' />").appendTo($settingDiv);
+		$("<div class='tip-label item-lv-l' />").html("<@spring.message code='alias' />")
 			.attr("title", "<@spring.message code='chart.chartDataSet.alias.desc' />").appendTo($aliasSetting);
+		var $asInputWrapper = $("<div class='item-lv-v' />").appendTo($aliasSetting);
 		$("<input type='text' class='chartDataSetAlias ui-widget ui-widget-content ui-corner-all' />")
 			.attr("placeholder", dataSet.name)
-			.attr("value", (chartDataSet.alias || "")).appendTo($aliasSetting);
+			.attr("value", (chartDataSet.alias || "")).appendTo($asInputWrapper);
 		
-		var $attachment = $("<div class='setting-item' />").appendTo($settingDiv);
+		var $attachment = $("<div class='item-lv' />").appendTo($settingDiv);
 		var atchChkId = "${pageId}-attachmentChk-" + (po.chartDataSetAttachmentIdSeq++);
-		$("<label class='tip-label' />").html("<@spring.message code='chart.chartDataSet.attachment' />")
+		$("<div class='tip-label item-lv-l' />").html("<@spring.message code='chart.chartDataSet.attachment' />")
 			.attr("title", "<@spring.message code='chart.chartDataSet.attachment.desc' />").appendTo($attachment);
-		var $chkWrapper = $("<span class='input' />").appendTo($attachment);
+		var $atchInputWrapper = $("<div class='item-lv-v' />").appendTo($attachment);
+		var $chkWrapper = $("<span class='input' />").appendTo($atchInputWrapper);
 		$("<label />").attr("for", atchChkId).html("").appendTo($chkWrapper);
 		var $atchChk = $("<input type='checkbox' class='chartDataSetAttachment ui-widget ui-widget-content' />")
 			.attr("id", atchChkId).attr("value", "true")
@@ -646,8 +649,13 @@ readonly 是否只读操作，允许为null
 		
 		if(dataSet.params && dataSet.params.length > 0)
 		{
-			var $pvButton = $("<button type='button' class='dataSetParamValueButton ui-button ui-corner-all ui-widget'><@spring.message code='chart.chartDataSet.paramValue' /></button>")
-								.appendTo($settingDiv);
+			var $pvBtnItem = $("<div class='item-lv' />").appendTo($settingDiv);
+			$("<div class='tip-label item-lv-l' />").html("参数")
+				.attr("title", "<@spring.message code='chart.chartDataSet.paramValue' />").appendTo($pvBtnItem);
+			var $pvBtnWrapper = $("<div class='item-lv-v' />").appendTo($pvBtnItem);
+			var $pvButton = $("<button type='button' class='dataSetParamValueButton ui-button ui-corner-all ui-widget'></button>")
+					.html("<#if readonly><@spring.message code='view' /><#else><@spring.message code='edit' /></#if>")
+					.appendTo($pvBtnWrapper);
 			$pvButton.data("dataSetParams", dataSet.params).data("paramValues",
 					(chartDataSet.query && chartDataSet.query.paramValues ? chartDataSet.query.paramValues : {}));
 			
