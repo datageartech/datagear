@@ -6,6 +6,7 @@
 		ok 阶梯折线图
 		ok 平行坐标系图
 		ok 涟漪散点图
+	ECharts升级至5.2.2版本；
 	ok 图表JS对象的chartDataSetName函数重构为dataSetAlias、dataSetPropertyLabel函数重构为dataSetPropertyAlias；
 	ok 看板展示页面渲染上下文添加DG_USER内置属性，用于获取当前用户信息；
 	ok 数据集查询后台添加DG_USER,DG_ROLE_NAMES内置参数，使数据集参数化语境可获取当前用户信息；	
@@ -13,12 +14,10 @@
 	ok POI库升级至4.1.2版本；
 	ok 图表保存时，不保存没有设置的数据标记，避免存储长度溢出；
 	ok 前后端数据通讯改为统一采用JSON，移除datagear-jquery-override.js；
-	ok ECharts升级至5.2.1版本；
 	ok JQuery升级至3.6.0版本；
 	ok DataTables表格组件升级至1.11.3版本；
 	
 待定：
-	折线图、柱状图、散点图等添加类别数据标记，同类别的数据将会至于同一系列；
 	改进表格轮播性能，解决轮播卡顿问题；
 	看板图表新增导出数据功能；
 	共享看板支持设置密码；
