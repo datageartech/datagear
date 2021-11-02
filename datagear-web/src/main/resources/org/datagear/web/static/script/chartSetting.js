@@ -1870,7 +1870,7 @@
 	
 	chartSetting.evalChartDataSetPanelTitle = function(chart, chartDataSets, index)
 	{
-		var title = (chartDataSets.length > 1 ? (index+1)+". " : "") + chart.chartDataSetName(chartDataSets[index]);
+		var title = (chartDataSets.length > 1 ? (index+1)+". " : "") + chart.dataSetAlias(chartDataSets[index]);
 		if(title != chartDataSets[index].dataSet.name)
 			title += " ("+chartDataSets[index].dataSet.name+")";
 		

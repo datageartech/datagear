@@ -1828,24 +1828,6 @@
 	};
 	
 	/**
-	 * 获取指定图表数据集对象名称，它不会返回null。
-	 * 
-	 * @param chartDataSet 图表数据集对象
-	 */
-	chartBase.chartDataSetName = function(chartDataSet)
-	{
-		if(!chartDataSet)
-			return "";
-		
-		if(chartDataSet.alias)
-			return chartDataSet.alias;
-		
-		var dataSet = (chartDataSet.dataSet || chartDataSet);
-		
-		return (dataSet ? (dataSet.name || "") : "");
-	};
-	
-	/**
 	 * 获取指定标记的第一个数据集属性，没有则返回undefined。
 	 * 
 	 * @param chartDataSet 图表数据集对象
@@ -3234,9 +3216,41 @@
 		return chartFactory.styleString(cssArray);
 	};
 	
+	/**
+	 * 获取数据集别名，它不会返回null。
+	 * 
+	 * @param chartDataSet 图表数据集
+	 * @returns 别名字符串
+	 * @since 2.10.0
+	 */
+	chartBase.dataSetAlias = function(chartDataSet)
+	{
+		if(!chartDataSet)
+			return "";
+		
+		if(chartDataSet.alias)
+			return chartDataSet.alias;
+		
+		var dataSet = (chartDataSet.dataSet || chartDataSet);
+		
+		return (dataSet ? (dataSet.name || "") : "");
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetAlias()取代
+	/**
+	 * 获取指定图表数据集对象名称，它不会返回null。
+	 * 
+	 * @param chartDataSet 图表数据集对象
+	 */
+	chartBase.chartDataSetName = function(chartDataSet)
+	{
+		return this.dataSetAlias(chartDataSet);
+	};
+	// > @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetAlias()取代
 	
 	// < @deprecated 兼容2.7.0版本的API，将在未来版本移除，已被chartBase.registerEventHandlerDelegation()取代
 	/**

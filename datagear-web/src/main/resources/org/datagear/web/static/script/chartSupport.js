@@ -100,7 +100,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -262,7 +262,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -450,7 +450,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -607,7 +607,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -768,7 +768,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			if(min == null)
@@ -1036,7 +1036,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -1248,7 +1248,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -1594,7 +1594,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -1725,7 +1725,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			//取任一不为空的地图名列值
@@ -1951,7 +1951,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			//取任一不为空的地图名列值
@@ -2133,7 +2133,7 @@
 			}
 			
 			if(!seriesName)
-				seriesName = chart.chartDataSetName(chartDataSet);
+				seriesName = chart.dataSetAlias(chartDataSet);
 			
 			var sip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceId);
 			var slop = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceLongitude);
@@ -2400,7 +2400,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -2599,7 +2599,7 @@
 			seriesData = seriesData.concat(data);
 			
 			if(!seriesName)
-				seriesName = chart.chartDataSetName(chartDataSet);
+				seriesName = chart.dataSetAlias(chartDataSet);
 		}
 		
 		var series = [ { type: "heatmap", name: seriesName, data: seriesData } ];
@@ -2970,7 +2970,7 @@
 			var result = chart.resultOf(results, chartDataSet);
 			
 			if(!seriesName)
-				seriesName = chart.chartDataSetName(chartDataSet);
+				seriesName = chart.dataSetAlias(chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
 			var ip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.id);
@@ -3122,7 +3122,7 @@
 			var result = chart.resultOf(results, chartDataSet);
 			
 			if(!seriesName)
-				seriesName = chart.chartDataSetName(chartDataSet);
+				seriesName = chart.dataSetAlias(chartDataSet);
 			
 			var snp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceName);
 			var svp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceValue);
@@ -3361,7 +3361,7 @@
 			var result = chart.resultOf(results, chartDataSet);
 			
 			if(!seriesName)
-				seriesName = chart.chartDataSetName(chartDataSet);
+				seriesName = chart.dataSetAlias(chartDataSet);
 			
 			var sip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceId);
 			var snp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceName);
@@ -3648,7 +3648,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -4159,7 +4159,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.chartDataSetName(chartDataSet);
+			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -6313,14 +6313,14 @@
 	};
 	
 	//计算图例名
-	chartSupport.legendNameForMultipleSeries = function(chart, chartDataSets, chartDataSet, chartDataSetIdx, chartDataSetName,
+	chartSupport.legendNameForMultipleSeries = function(chart, chartDataSets, chartDataSet, chartDataSetIdx, dataSetName,
 					seriesProperties, seriesPropertyIdx)
 	{
-		var legendName = chartDataSetName;
+		var legendName = dataSetName;
 		
 		if(chartDataSets.length > 1 && seriesProperties.length > 1)
 		{
-			legendName = chartDataSetName +"-" + chart.dataSetPropertyLabel(chartDataSet, seriesProperties[seriesPropertyIdx]);
+			legendName = dataSetName +"-" + chart.dataSetPropertyLabel(chartDataSet, seriesProperties[seriesPropertyIdx]);
 		}
 		else if(seriesProperties.length > 1)
 		{
