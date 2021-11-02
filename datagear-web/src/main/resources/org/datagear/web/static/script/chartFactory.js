@@ -3240,7 +3240,7 @@
 	 * 获取指定名称的数据集属性，没有则返回undefined。
 	 * 
 	 * @param chartDataSet 图表数据集、数据集
-	 * @param name 数据集属性名、索引数值
+	 * @param name 数据集属性名
 	 * @return 数据集属性
 	 * @since 2.10.0
 	 */
@@ -3260,7 +3260,7 @@
 		
 		for(var i=0; i<properties.length; i++)
 		{
-			if(i === name || properties[i].name == name)
+			if(properties[i].name == name)
 				return properties[i];
 		}
 		
