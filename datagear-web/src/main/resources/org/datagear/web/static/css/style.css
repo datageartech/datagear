@@ -239,14 +239,13 @@ form .form-content .tip-label[title]::after,
     margin-left: 0.1em;
     font-size: 0.7em;
     top: 50%;
-    margin-top: -0.6em;
+    margin-top: -0.4em;
     opacity: 0.4;
     filter: Alpha(Opacity=40);
     width: 1em;
     height: 1em;
     text-align: center;
     line-height: 1em;
-    border: border;
     border-radius: 0.5em;
     border-width: 1px;
     border-style: solid;
