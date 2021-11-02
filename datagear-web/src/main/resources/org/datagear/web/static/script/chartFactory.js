@@ -1888,36 +1888,6 @@
 	};
 	
 	/**
-	 * 获取数据集属性标签，它不会返回null。
-	 *  
-	 * @param chartDataSet 可选，图表数据集
-	 * @param dataSetProperty
-	 * @return "..."
-	 */
-	chartBase.dataSetPropertyLabel = function(chartDataSet, dataSetProperty)
-	{
-		//(dataSetProperty)
-		if(arguments.length == 1)
-		{
-			dataSetProperty = chartDataSet;
-			chartDataSet = null;
-		}
-		
-		if(!dataSetProperty)
-			return "";
-		
-		var label = null;
-		
-		if(chartDataSet != null)
-			label = (chartDataSet.propertyAliases ? chartDataSet.propertyAliases[dataSetProperty.name] : null);
-		
-		if(label == null)
-			label = (dataSetProperty.label ||  dataSetProperty.name);
-		
-		return (label || "");
-	};
-	
-	/**
 	 * 返回指定索引的数据集结果，没有则返回undefined。
 	 * 
 	 * @param results
@@ -3249,10 +3219,10 @@
 		var properties = null;
 		
 		//图表数据集
-		if(chartDataSet && chartDataSet.dataSet !== undefined)
+		if(chartDataSet && chartDataSet.dataSet != null)
 			properties = chartDataSet.dataSet.properties;
 		//数据集
-		else if(chartDataSet && chartDataSet.properties !== undefined)
+		else if(chartDataSet && chartDataSet.properties != null)
 			properties = chartDataSet.properties;
 		
 		if(!properties)
@@ -3267,9 +3237,52 @@
 		return undefined;
 	};
 	
+	/**
+	 * 获取数据集属性别名，它不会返回null。
+	 *  
+	 * @param chartDataSet 图表数据集
+	 * @param dataSetProperty 数据集属性、属性名
+	 * @return 
+	 * @since 2.10.0
+	 */
+	chartBase.dataSetPropertyAlias = function(chartDataSet, dataSetProperty)
+	{
+		if(typeof(dataSetProperty) == "string")
+			dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
+		
+		if(!dataSetProperty)
+			return "";
+		
+		var alias =  (chartDataSet && chartDataSet.propertyAliases ?
+						chartDataSet.propertyAliases[dataSetProperty.name] : null);
+		
+		if(!alias)
+			alias = (dataSetProperty.alias ||  dataSetProperty.name);
+		
+		return (alias || "");
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetPropertyAlias()取代
+	/**
+	 * 获取数据集属性标签，它不会返回null。
+	 *  
+	 * @param dataSetProperty
+	 * @return "..."
+	 */
+	chartBase.dataSetPropertyLabel = function(dataSetProperty)
+	{
+		if(!dataSetProperty)
+			return "";
+		
+		var label = (dataSetProperty.label ||  dataSetProperty.name);
+		
+		return (label || "");
+	};
+	// > @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetPropertyAlias()取代
 	
 	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetAlias()取代
 	/**

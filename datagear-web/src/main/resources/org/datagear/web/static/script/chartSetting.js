@@ -1654,7 +1654,7 @@
 		{
 			var column =
 			{
-				title: chartSetting.evalChartDataSetDataTableColumnTitle(chart, signProperties[i], propertySigns, dataSigns),
+				title: chartSetting.evalChartDataSetDataTableColumnTitle(chart, chartDataSet, signProperties[i], propertySigns, dataSigns),
 				data: signProperties[i].name,
 				defaultContent: "",
 				orderable: false,
@@ -1715,9 +1715,9 @@
 		return tableId;
 	};
 	
-	chartSetting.evalChartDataSetDataTableColumnTitle = function(chart, dataSetProperty, propertySigns, dataSigns)
+	chartSetting.evalChartDataSetDataTableColumnTitle = function(chart, chartDataSet, dataSetProperty, propertySigns, dataSigns)
 	{
-		var title = chart.dataSetPropertyLabel(dataSetProperty);
+		var title = chart.dataSetPropertyAlias(chartDataSet, dataSetProperty);
 		
 		var name = dataSetProperty.name;
 		var signs = propertySigns[name];

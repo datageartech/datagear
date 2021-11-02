@@ -61,13 +61,13 @@
 				//data
 			},
 			xAxis: {
-				name: chart.dataSetPropertyLabel(chartDataSet, np),
+				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: false
 			},
 			yAxis: {
-				name: (vps.length == 1 ? chart.dataSetPropertyLabel(chartDataSet, vps[0]) : ""),
+				name: (vps.length == 1 ? chart.dataSetPropertyAlias(chartDataSet, vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
 			},
@@ -209,14 +209,14 @@
 			},
 			xAxis:
 			{
-				name: chart.dataSetPropertyLabel(chartDataSet, np),
+				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true
 			},
 			yAxis:
 			{
-				name: (vps.length == 1 ? chart.dataSetPropertyLabel(chartDataSet, vps[0]) : ""),
+				name: (vps.length == 1 ? chart.dataSetPropertyAlias(chartDataSet, vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
 			},
@@ -416,7 +416,7 @@
 			{
 				options.radiusAxis =
 				{
-					name: chart.dataSetPropertyLabel(chartDataSet, np),
+					name: chart.dataSetPropertyAlias(chartDataSet, np),
 					nameGap: 20,
 					type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 			        z: 10
@@ -800,7 +800,7 @@
 				
 				for(var k=0; k<vRow.length; k++)
 				{
-					var vpn = chart.dataSetPropertyLabel(chartDataSet,vps[k]);
+					var vpn = chart.dataSetPropertyAlias(chartDataSet,vps[k]);
 					var data = { name: vpn, value: vRow[k] };
 					chart.originalInfo(data, chartDataSet, j);
 					
@@ -989,14 +989,14 @@
 			},
 			xAxis:
 			{
-				name: chart.dataSetPropertyLabel(chartDataSet, np),
+				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis:
 			{
-				name: chart.dataSetPropertyLabel(chartDataSet, vp),
+				name: chart.dataSetPropertyAlias(chartDataSet, vp),
 				nameGap: 5,
 				type: "value"
 			},
@@ -1201,14 +1201,14 @@
 			},
 			xAxis:
 			{
-				name: chart.dataSetPropertyLabel(chartDataSet, np),
+				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis:
 			{
-				name: chart.dataSetPropertyLabel(chartDataSet, vp),
+				name: chart.dataSetPropertyAlias(chartDataSet, vp),
 				nameGap: 5,
 				type: "value"
 			},
@@ -1479,7 +1479,7 @@
 		
 		for(var i=0; i<vv.length; i++)
 		{
-			var name = chart.dataSetPropertyLabel(chartDataSet, vp[i]);
+			var name = chart.dataSetPropertyAlias(chartDataSet, vp[i]);
 			legendData.push(name);
 			
 			var myData = { name: name, value: vv[i] };
@@ -2352,7 +2352,7 @@
 				//将在update中设置：
 				//data
 				
-				name: chart.dataSetPropertyLabel(chartDataSet, np),
+				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true,
@@ -2505,7 +2505,7 @@
 				//将在update中设置：
 				//data
 				
-				name: chart.dataSetPropertyLabel(chartDataSet, np),
+				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				splitArea: { show: true }
@@ -2515,7 +2515,7 @@
 				//将在update中设置：
 				//data
 				
-				name: chart.dataSetPropertyLabel(chartDataSet, vp),
+				name: chart.dataSetPropertyAlias(chartDataSet, vp),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, vp),
 				splitArea: { show: true }
@@ -3589,7 +3589,7 @@
 			},
 			xAxis:
 			{
-				name: chart.dataSetPropertyLabel(chartDataSet, np),
+				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
 				boundaryGap: true,
@@ -4022,7 +4022,7 @@
 					var ra = ras[j];
 					for(var k=0; k<ra.length; k++)
 					{
-						var sv = { name: chart.dataSetPropertyLabel(chartDataSet, vps[k]), value: ra[k] };
+						var sv = { name: chart.dataSetPropertyAlias(chartDataSet, vps[k]), value: ra[k] };
 						chart.originalInfo(sv, chartDataSet, j);
 						data.push(sv);
 					}
@@ -4316,7 +4316,7 @@
 			for(var j=0; j<vps.length; j++)
 			{
 				//使用label而非vps[j].name作为坐标轴名，因为label是可编辑得，使得用户可以自定义坐标轴
-				var axisName = chart.dataSetPropertyLabel(chartDataSet, vps[j]);
+				var axisName = chart.dataSetPropertyAlias(chartDataSet, vps[j]);
 				
 				if(chartSupport.findInArray(parallelAxis, axisName, "name") < 0)
 				{
@@ -4353,7 +4353,7 @@
 				var idx = chartSupport.findInArray(vps, parallelAxis[j].name,
 							function(vp)
 							{
-								return chart.dataSetPropertyLabel(chartDataSet, vp);
+								return chart.dataSetPropertyAlias(chartDataSet, vp);
 							});
 				
 				valuePropertyNames[j] = (idx < 0 ? placeholderName : vps[idx].name);
@@ -4425,7 +4425,7 @@
 		{
 			var column =
 			{
-				title: chart.dataSetPropertyLabel(chartDataSet, cps[i]),
+				title: chart.dataSetPropertyAlias(chartDataSet, cps[i]),
 				data: cps[i].name,
 				defaultContent: "",
 				orderable: true,
@@ -5462,7 +5462,7 @@
 			if(!hasNps)
 			{
 				for(var j=0; j<vps.length; j++)
-					vpNames[j] = chart.dataSetPropertyLabel(chartDataSet, vps[j]);
+					vpNames[j] = chart.dataSetPropertyAlias(chartDataSet, vps[j]);
 			}
 			
 			for(var j=0; j<valuess.length; j++)
@@ -6320,11 +6320,11 @@
 		
 		if(chartDataSets.length > 1 && seriesProperties.length > 1)
 		{
-			legendName = dataSetName +"-" + chart.dataSetPropertyLabel(chartDataSet, seriesProperties[seriesPropertyIdx]);
+			legendName = dataSetName +"-" + chart.dataSetPropertyAlias(chartDataSet, seriesProperties[seriesPropertyIdx]);
 		}
 		else if(seriesProperties.length > 1)
 		{
-			legendName = chart.dataSetPropertyLabel(chartDataSet, seriesProperties[seriesPropertyIdx]);
+			legendName = chart.dataSetPropertyAlias(chartDataSet, seriesProperties[seriesPropertyIdx]);
 		}
 		
 		return legendName;
