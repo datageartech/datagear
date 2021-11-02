@@ -3236,6 +3236,37 @@
 		return (dataSet ? (dataSet.name || "") : "");
 	};
 	
+	/**
+	 * 获取指定名称的数据集属性，没有则返回undefined。
+	 * 
+	 * @param chartDataSet 图表数据集、数据集
+	 * @param name 数据集属性名、索引数值
+	 * @return 数据集属性
+	 * @since 2.10.0
+	 */
+	chartBase.dataSetProperty = function(chartDataSet, name)
+	{
+		var properties = null;
+		
+		//图表数据集
+		if(chartDataSet && chartDataSet.dataSet !== undefined)
+			properties = chartDataSet.dataSet.properties;
+		//数据集
+		else if(chartDataSet && chartDataSet.properties !== undefined)
+			properties = chartDataSet.properties;
+		
+		if(!properties)
+			return undefined;
+		
+		for(var i=0; i<properties.length; i++)
+		{
+			if(i === name || properties[i].name == name)
+				return properties[i];
+		}
+		
+		return undefined;
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
