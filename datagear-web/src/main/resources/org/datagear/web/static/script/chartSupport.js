@@ -4538,7 +4538,7 @@
 		{
 			var titleStyle = $.extend(true, {}, options.title);
 			delete titleStyle.show;
-			delete titleStyle.name;
+			delete titleStyle.text;
 			
 			if(!$.isEmptyObject(titleStyle))
 				options.titleStyle = titleStyle;
