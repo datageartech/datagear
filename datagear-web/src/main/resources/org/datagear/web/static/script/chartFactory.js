@@ -3211,7 +3211,7 @@
 	 * 
 	 * @param chartDataSet 图表数据集、数据集
 	 * @param name 数据集属性名
-	 * @return 数据集属性
+	 * @returns 数据集属性
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetProperty = function(chartDataSet, name)
@@ -3238,11 +3238,65 @@
 	};
 	
 	/**
+	 * 获取数据集属性数组。
+	 * 当chartDataSet是图表数据集时，返回数组默认将会依据其属性排序值重新排序。
+	 * 
+	 * @param chartDataSet 图表数据集、数据集
+	 * @param sort 当chartDataSet是图表数据集时，是否依据其propertyOrders对返回结果进行重排序，true 是；false 否。默认值为：true
+	 * @returns 数据集属性数组
+	 * @since 2.10.0
+	 */
+	chartBase.dataSetProperties = function(chartDataSet, sort)
+	{
+		sort = (sort === undefined ? true : sort);
+		
+		var properties = null;
+		var isDataSet = (chartDataSet && chartDataSet.properties != null);
+		
+		if(isDataSet)
+			properties = chartDataSet.properties;
+		else
+			properties = (chartDataSet && chartDataSet.dataSet ? chartDataSet.dataSet.properties : null);
+		
+		properties = (properties || []);
+		
+		if(isDataSet || !sort)
+			return properties;
+		
+		var propertyOrders = (chartDataSet ? chartDataSet.propertyOrders : null);
+		
+		if(!propertyOrders)
+			return properties;
+		
+		var pos = [];
+		
+		for(var i=0; i<properties.length; i++)
+		{
+			var p = properties[i];
+			var order = (propertyOrders[p.name] != null ? propertyOrders[p.name] : i);
+			
+			pos[i] = { property: p, order: order };
+		}
+		
+		pos.sort(function(a, b)
+		{
+			return (a.order - b.order);
+		});
+		
+		var re = [];
+		
+		for(var i=0; i<pos.length; i++)
+			re[i] = pos[i].property;
+		
+		return re;
+	};
+	
+	/**
 	 * 获取数据集属性别名，它不会返回null。
-	 *  
+	 * 
 	 * @param chartDataSet 图表数据集
 	 * @param dataSetProperty 数据集属性、属性名
-	 * @return 
+	 * @returns 
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetPropertyAlias = function(chartDataSet, dataSetProperty)
@@ -3257,7 +3311,7 @@
 						chartDataSet.propertyAliases[dataSetProperty.name] : null);
 		
 		if(!alias)
-			alias = (dataSetProperty.alias ||  dataSetProperty.name);
+			alias = (dataSetProperty.label ||  dataSetProperty.name);
 		
 		return (alias || "");
 	};
@@ -3271,7 +3325,7 @@
 	 * 获取数据集属性标签，它不会返回null。
 	 *  
 	 * @param dataSetProperty
-	 * @return "..."
+	 * @returns "..."
 	 */
 	chartBase.dataSetPropertyLabel = function(dataSetProperty)
 	{
