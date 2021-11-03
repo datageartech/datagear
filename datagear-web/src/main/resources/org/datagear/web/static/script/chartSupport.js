@@ -4789,7 +4789,7 @@
 	{
 		var cps = chart.dataSetPropertiesOfSign(chartDataSet, columnSign);
 		if(!cps || cps.length == 0)
-			cps =(chartDataSet && chartDataSet.dataSet ? (chartDataSet.dataSet.properties || []) : []);
+			cps = chart.dataSetProperties(chartDataSet);
 		
 		return cps;
 	};

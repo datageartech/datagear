@@ -636,7 +636,7 @@ readonly 是否只读操作，允许为null
 				.html("<@spring.message code='chart.chartDataSet.propertyOrder' />").appendTo($propertyOrder);
 			var $orderInputWrapper = $("<div class='item-lv-v' />").appendTo($propertyOrder);
 			$("<input type='text' class='chartDataSetPropertyOrder ui-widget ui-widget-content ui-corner-all' />")
-				.attr("placeholder", i).val(propertyOrders[dsp.name] || "")
+				.attr("placeholder", i).val(propertyOrders[dsp.name] != null ? propertyOrders[dsp.name] : "")
 				.appendTo($orderInputWrapper);
 			$propertyOrder.appendTo($dsProp);
 		}

@@ -626,6 +626,7 @@ readonly 是否只读操作，允许为null
 		{name: "chart.dataSetParamValueFirst", value: "dataSetParamValueFirst(", caption: "dataSetParamValueFirst() ", meta: "chart"},
 		{name: "chart.dataSetParamValues", value: "dataSetParamValues(", caption: "dataSetParamValues() ", meta: "chart"},
 		{name: "chart.dataSetParamValuesFirst", value: "dataSetParamValuesFirst(", caption: "dataSetParamValuesFirst() ", meta: "chart"},
+		{name: "chart.dataSetProperties", value: "dataSetProperties(", caption: "dataSetProperties() ", meta: "chart"},
 		{name: "chart.dataSetPropertiesOfSign", value: "dataSetPropertiesOfSign(", caption: "dataSetPropertiesOfSign() ", meta: "chart"},
 		{name: "chart.dataSetProperty", value: "dataSetProperty(", caption: "dataSetProperty() ", meta: "chart"},
 		{name: "chart.dataSetPropertyAlias", value: "dataSetPropertyAlias(", caption: "dataSetPropertyAlias() ", meta: "chart"},

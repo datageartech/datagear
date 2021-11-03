@@ -1619,7 +1619,7 @@
 	chartSetting.initChartDataSetDataTable = function(chart, chartDataSets, index, $parent)
 	{
 		var chartDataSet = chartDataSets[index];
-		var dataSetProperties = (chartDataSet.dataSet.properties || []);
+		var dataSetProperties = chart.dataSetProperties(chartDataSet);
 		var propertySigns = (chartDataSet.propertySigns || {});
 		var dataSigns = (chart.plugin && chart.plugin.dataSigns ? chart.plugin.dataSigns : []);
 		var signProperties = [];
