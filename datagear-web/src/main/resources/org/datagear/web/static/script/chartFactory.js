@@ -1836,27 +1836,36 @@
 	 */
 	chartBase.dataSetPropertyOfSign = function(chartDataSet, dataSign)
 	{
-		var properties = this.dataSetPropertiesOfSign(chartDataSet, dataSign);
+		var properties = this.dataSetProperties(chartDataSet, false);
+		var re = this.dataSetPropertiesOfSign(chartDataSet, properties, dataSign);
 		
-		return (properties.length > 0 ? properties[0] : undefined);
+		return (re.length > 0 ? re[0] : undefined);
 	};
 	
 	/**
 	 * 获取指定标记的数据集属性数组。
 	 * 
 	 * @param chartDataSet 图表数据集对象
+	 * @param dataSetProperties 可选，待筛选的数据集属性数组，默认为chartBase.dataSetProperties(chartDataSet)。
 	 * @param dataSign 数据标记对象、标记名称
 	 * @return [...]
 	 */
-	chartBase.dataSetPropertiesOfSign = function(chartDataSet, dataSign)
+	chartBase.dataSetPropertiesOfSign = function(chartDataSet, dataSetProperties, dataSign)
 	{
+		//(chartDataSet, dataSign)，兼容2.9.0版本的API
+		if(arguments.length == 2)
+		{
+			dataSign = dataSetProperties;
+			dataSetProperties = null;
+		}
+		
 		var re = [];
 		
-		if(!chartDataSet || !chartDataSet.dataSet || !dataSign)
+		if(!chartDataSet || !dataSign)
 			return re;
 		
+		dataSetProperties = (dataSetProperties || this.dataSetProperties(chartDataSet));
 		dataSign = (dataSign.name || dataSign);
-		var dataSetProperties = (chartDataSet.dataSet.properties || []);
 		var propertySigns = (chartDataSet.propertySigns || {});
 		
 		var signPropertyNames = [];
