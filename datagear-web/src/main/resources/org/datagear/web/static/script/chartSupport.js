@@ -4315,7 +4315,7 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				//使用label而非vps[j].name作为坐标轴名，因为label是可编辑得，使得用户可以自定义坐标轴
+				//使用alias而非name作为坐标轴名，因为alias是可编辑得，使得用户可以自定义坐标轴
 				var axisName = chart.dataSetPropertyAlias(chartDataSet, vps[j]);
 				
 				if(chartSupport.findInArray(parallelAxis, axisName, "name") < 0)

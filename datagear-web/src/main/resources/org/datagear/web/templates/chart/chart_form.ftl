@@ -463,12 +463,13 @@ readonly 是否只读操作，允许为null
 			var dataSetId = po.element(".chartDataSetId", this).val();
 			var propertySigns = {};
 			var propertyAliases = {};
+			var propertyOrders = {};
 			var alias = po.element(".chartDataSetAlias", this).val();
 			var attachment = po.element(".chartDataSetAttachment", this).prop("checked");
 			var dataSetParams = (po.element(".dataSetParamValueButton", this).data("dataSetParams") || []);
 			var paramValues = (po.element(".dataSetParamValueButton", this).data("paramValues") || {});
 			
-			po.element(".item-props-p", this).each(function()
+			po.element(".item-props-p", this).each(function(eleIdx)
 			{
 				var propertyName = po.element(".chartDataSetPropertyName", this).val();
 				var signValues = [];
@@ -485,6 +486,11 @@ readonly 是否只读操作，允许为null
 				var propertyAlias = po.element(".chartDataSetPropertyAlias", this).val();
 				if(propertyAlias)
 					propertyAliases[propertyName] = propertyAlias;
+				
+				var propertyOrder = po.element(".chartDataSetPropertyOrder", this).val();
+				propertyOrder = (propertyOrder ? parseInt(propertyOrder) : null);
+				if(propertyOrder != null && !isNaN(propertyOrder))
+					propertyOrders[propertyName] = propertyOrder;
 			});
 			
 			re.push(
@@ -493,6 +499,7 @@ readonly 是否只读操作，允许为null
 				"propertySigns": propertySigns,
 				"alias": alias,
 				"propertyAliases": propertyAliases,
+				"propertyOrders": propertyOrders,
 				"attachment": attachment,
 				"query": { "paramValues": paramValues }
 			});
@@ -557,6 +564,7 @@ readonly 是否只读操作，允许为null
 		var dataSet = chartDataSet.dataSet;
 		var propertySigns = (chartDataSet.propertySigns || {});
 		var propertyAliases = (chartDataSet.propertyAliases || {});
+		var propertyOrders = (chartDataSet.propertyOrders || {});
 		var dataSetProperties = (dataSet.properties || []);
 		
 		var $item = $("<div class='data-set-item ui-widget ui-widget-content ui-corner-all' />").appendTo($parent);
@@ -619,10 +627,18 @@ readonly 是否只读操作，允许为null
 				.html("<@spring.message code='alias' />").appendTo($propertyAlias);
 			var $aliasInputWrapper = $("<div class='item-lv-v' />").appendTo($propertyAlias);
 			$("<input type='text' class='chartDataSetPropertyAlias ui-widget ui-widget-content ui-corner-all' />")
-				.attr("placeholder", (propertyAliases[dsp.name] ? dsp.name : (dsp.label ? dsp.label : dsp.name)))
-				.val(propertyAliases[dsp.name] || "")
+				.attr("placeholder", (dsp.label ? dsp.label : dsp.name)).val(propertyAliases[dsp.name] || "")
 				.appendTo($aliasInputWrapper);
 			$propertyAlias.appendTo($dsProp);
+			
+			var $propertyOrder = $("<div class='prop-order item-lv' />");
+			$("<div class='tip-label item-lv-l' />").attr("title", "<@spring.message code='chart.chartDataSet.propertyOrder.desc' />")
+				.html("<@spring.message code='chart.chartDataSet.propertyOrder' />").appendTo($propertyOrder);
+			var $orderInputWrapper = $("<div class='item-lv-v' />").appendTo($propertyOrder);
+			$("<input type='text' class='chartDataSetPropertyOrder ui-widget ui-widget-content ui-corner-all' />")
+				.attr("placeholder", i).val(propertyOrders[dsp.name] || "")
+				.appendTo($orderInputWrapper);
+			$propertyOrder.appendTo($dsProp);
 		}
 		
 		var $settingDiv = $("<div class='item-setting ui-widget ui-widget-content' />").appendTo($item);

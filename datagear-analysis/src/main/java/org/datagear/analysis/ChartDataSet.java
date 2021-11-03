@@ -43,6 +43,9 @@ public class ChartDataSet implements Serializable
 	/** 数据集属性别名映射表 */
 	private Map<String, String> propertyAliases = Collections.emptyMap();
 
+	/** 数据集属性排序 */
+	private Map<String, ? extends Number> propertyOrders = Collections.emptyMap();
+
 	public ChartDataSet()
 	{
 		super();
@@ -134,6 +137,16 @@ public class ChartDataSet implements Serializable
 	public void setPropertyAliases(Map<String, String> propertyAliases)
 	{
 		this.propertyAliases = propertyAliases;
+	}
+
+	public Map<String, ? extends Number> getPropertyOrders()
+	{
+		return propertyOrders;
+	}
+
+	public void setPropertyOrders(Map<String, ? extends Number> propertyOrders)
+	{
+		this.propertyOrders = propertyOrders;
 	}
 
 	/**

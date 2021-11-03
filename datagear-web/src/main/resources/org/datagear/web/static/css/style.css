@@ -3003,10 +3003,12 @@ table.dataTable tbody tr td select{
     border: 0px;
     padding: 0.4em 0.5em;
 }
-.page-form-chart .data-set-wrapper .data-set-item .item-props .item-props-p .prop-alias{
+.page-form-chart .data-set-wrapper .data-set-item .item-props .item-props-p .prop-alias,
+.page-form-chart .data-set-wrapper .data-set-item .item-props .item-props-p .prop-order{
 	margin-left: 1.4em;
 }
-.page-form-chart .data-set-wrapper .data-set-item .item-props .item-props-p .prop-alias input{
+.page-form-chart .data-set-wrapper .data-set-item .item-props .item-props-p .prop-alias input,
+.page-form-chart .data-set-wrapper .data-set-item .item-props .item-props-p .prop-order input{
 	width: 100% !important;
 }
 .page-form-chart .data-sign-select-panel{
