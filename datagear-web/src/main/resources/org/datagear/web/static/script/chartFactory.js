@@ -3217,14 +3217,14 @@
 	};
 	
 	/**
-	 * 获取指定名称的数据集属性，没有则返回undefined。
+	 * 获取指定标识的数据集属性。
 	 * 
 	 * @param chartDataSet 图表数据集、数据集
-	 * @param name 数据集属性名、属性索引数值
-	 * @returns 数据集属性
+	 * @param info 数据集属性标识，可以是属性名、属性索引
+	 * @returns 数据集属性，没有找到则返回undefined
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetProperty = function(chartDataSet, name)
+	chartBase.dataSetProperty = function(chartDataSet, info)
 	{
 		var properties = null;
 		
@@ -3238,12 +3238,12 @@
 		if(!properties)
 			return undefined;
 		
-		if(chartFactory.isNumber(name))
-			return properties[name];
+		if(chartFactory.isNumber(info))
+			return properties[info];
 		
 		for(var i=0; i<properties.length; i++)
 		{
-			if(properties[i].name == name)
+			if(properties[i].name == info)
 				return properties[i];
 		}
 		
@@ -3252,7 +3252,10 @@
 	
 	/**
 	 * 获取数据集属性数组。
-	 * 当chartDataSet是图表数据集时，返回数组默认将会依据其属性排序值重新排序。
+	 * 返回数组排序遵循如下规则：
+	 * 排序值越小越靠前；
+	 * 属性默认具有与其索引相同的排序值；
+	 * 当两个属性具有相同排序值时，设置了propertyOrders中排序值的那个属性靠前排（前置插入），否则，属性索引小的那个靠前排。
 	 * 
 	 * @param chartDataSet 图表数据集、数据集
 	 * @param sort 可选，当chartDataSet是图表数据集时，是否依据其propertyOrders对返回结果进行重排序，true 是；false 否。默认值为：true
@@ -3286,14 +3289,28 @@
 		for(var i=0; i<properties.length; i++)
 		{
 			var p = properties[i];
-			var order = (propertyOrders[p.name] != null ? propertyOrders[p.name] : i);
-			
-			pos[i] = { property: p, order: order };
+			pos[i] = { property: p, order: propertyOrders[p.name], index: i };
 		}
 		
 		pos.sort(function(a, b)
 		{
-			return (a.order - b.order);
+			var oa = (a.order != null ? a.order : a.index);
+			var ob = (b.order != null ? b.order : b.index);
+			
+			var re = (oa - ob);
+			
+			if(re == 0)
+			{
+				//上面逻辑已保证这里不会出现(a.order == null && b.order == null)的情况
+				if(a.order == null)
+					re = 1;
+				else if(b.order == null)
+					re = -1;
+				else
+					re = a.index - b.index;
+			}
+			
+			return re;
 		});
 		
 		var re = [];
@@ -3305,7 +3322,7 @@
 	};
 	
 	/**
-	 * 获取数据集属性别名，它不会返回null。
+	 * 获取/设置数据集属性别名。
 	 * 
 	 * @param chartDataSet 图表数据集
 	 * @param dataSetProperty 数据集属性、属性名、属性索引
@@ -3337,6 +3354,39 @@
 				chartDataSet.propertyAliases = {};
 			
 			chartDataSet.propertyAliases[dataSetProperty.name] = alias;
+		}
+	};
+	
+	/**
+	 * 获取/设置数据集属性排序值。
+	 * 
+	 * @param chartDataSet 图表数据集
+	 * @param dataSetProperty 数据集属性、属性名、属性索引
+	 * @param order 可选，要设置的排序数值，不设置则执行获取操作
+	 * @returns 要获取的排序数值，没有设置过则返回null
+	 * @since 2.10.0
+	 */
+	chartBase.dataSetPropertyOrder = function(chartDataSet, dataSetProperty, order)
+	{
+		if(chartFactory.isStringOrNumber(dataSetProperty))
+			dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
+		
+		if(order === undefined)
+		{
+			if(!dataSetProperty)
+				return undefined;
+			
+			order =  (chartDataSet && chartDataSet.propertyOrders ?
+							chartDataSet.propertyOrders[dataSetProperty.name] : undefined);
+			
+			return order;
+		}
+		else
+		{
+			if(!chartDataSet.propertyOrders)
+				chartDataSet.propertyOrders = {};
+			
+			chartDataSet.propertyOrders[dataSetProperty.name] = order;
 		}
 	};
 	
