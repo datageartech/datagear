@@ -3189,30 +3189,38 @@
 	};
 	
 	/**
-	 * 获取数据集别名，它不会返回null。
+	 * 获取/设置数据集别名。
 	 * 
 	 * @param chartDataSet 图表数据集
-	 * @returns 别名字符串
+	 * @param alias 可选，要设置的别名，不设置则执行获取操作
+	 * @returns 要获取的别名，不会为null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetAlias = function(chartDataSet)
+	chartBase.dataSetAlias = function(chartDataSet, alias)
 	{
-		if(!chartDataSet)
-			return "";
-		
-		if(chartDataSet.alias)
-			return chartDataSet.alias;
-		
-		var dataSet = (chartDataSet.dataSet || chartDataSet);
-		
-		return (dataSet ? (dataSet.name || "") : "");
+		if(alias === undefined)
+		{
+			if(!chartDataSet)
+				return "";
+			
+			if(chartDataSet.alias)
+				return chartDataSet.alias;
+			
+			var dataSet = (chartDataSet.dataSet || chartDataSet);
+			
+			return (dataSet ? (dataSet.name || "") : "");
+		}
+		else
+		{
+			chartDataSet.alias = alias;
+		}
 	};
 	
 	/**
 	 * 获取指定名称的数据集属性，没有则返回undefined。
 	 * 
 	 * @param chartDataSet 图表数据集、数据集
-	 * @param name 数据集属性名
+	 * @param name 数据集属性名、属性索引数值
 	 * @returns 数据集属性
 	 * @since 2.10.0
 	 */
@@ -3229,6 +3237,9 @@
 		
 		if(!properties)
 			return undefined;
+		
+		if(chartFactory.isNumber(name))
+			return properties[name];
 		
 		for(var i=0; i<properties.length; i++)
 		{
@@ -3297,25 +3308,36 @@
 	 * 获取数据集属性别名，它不会返回null。
 	 * 
 	 * @param chartDataSet 图表数据集
-	 * @param dataSetProperty 数据集属性、属性名
-	 * @returns 
+	 * @param dataSetProperty 数据集属性、属性名、属性索引
+	 * @param alias 可选，要设置的别名，不设置则执行获取操作
+	 * @returns 要获取的别名，不会为null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetPropertyAlias = function(chartDataSet, dataSetProperty)
+	chartBase.dataSetPropertyAlias = function(chartDataSet, dataSetProperty, alias)
 	{
-		if(typeof(dataSetProperty) == "string")
+		if(chartFactory.isStringOrNumber(dataSetProperty))
 			dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
 		
-		if(!dataSetProperty)
-			return "";
-		
-		var alias =  (chartDataSet && chartDataSet.propertyAliases ?
-						chartDataSet.propertyAliases[dataSetProperty.name] : null);
-		
-		if(!alias)
-			alias = (dataSetProperty.label ||  dataSetProperty.name);
-		
-		return (alias || "");
+		if(alias === undefined)
+		{
+			if(!dataSetProperty)
+				return "";
+			
+			alias =  (chartDataSet && chartDataSet.propertyAliases ?
+							chartDataSet.propertyAliases[dataSetProperty.name] : null);
+			
+			if(!alias)
+				alias = (dataSetProperty.label ||  dataSetProperty.name);
+			
+			return (alias || "");
+		}
+		else
+		{
+			if(!chartDataSet.propertyAliases)
+				chartDataSet.propertyAliases = {};
+			
+			chartDataSet.propertyAliases[dataSetProperty.name] = alias;
+		}
 	};
 	
 	//-------------
@@ -4210,6 +4232,22 @@
 			else if(console.info)
 				console.info(exception);
 		}
+	};
+	
+	chartFactory.isString = function(v)
+	{
+		return (typeof(v) == "string");
+	};
+	
+	chartFactory.isNumber = function(v)
+	{
+		return (typeof(v) == "number");
+	};
+	
+	chartFactory.isStringOrNumber = function(v)
+	{
+		var type = typeof(v);
+		return (type == "string" || type == "number");
 	};
 	
 	/**内置名字标识片段*/
