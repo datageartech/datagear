@@ -1828,7 +1828,7 @@
 	};
 	
 	/**
-	 * 获取指定标记的第一个数据集属性，没有则返回undefined。
+	 * 获取指定标记的数据集属性，没有则返回undefined。
 	 * 
 	 * @param chartDataSet 图表数据集对象
 	 * @param dataSign 数据标记对象、标记名称
@@ -1836,35 +1836,28 @@
 	 */
 	chartBase.dataSetPropertyOfSign = function(chartDataSet, dataSign)
 	{
-		var properties = this.dataSetProperties(chartDataSet, false);
-		var re = this.dataSetPropertiesOfSign(chartDataSet, properties, dataSign);
-		
-		return (re.length > 0 ? re[0] : undefined);
+		var properties = this.dataSetPropertiesOfSign(chartDataSet, dataSign, false);
+		return (properties.length > 0 ? properties[0] : undefined);
 	};
 	
 	/**
 	 * 获取指定标记的数据集属性数组。
 	 * 
 	 * @param chartDataSet 图表数据集对象
-	 * @param dataSetProperties 可选，待筛选的数据集属性数组，默认为chartBase.dataSetProperties(chartDataSet)。
 	 * @param dataSign 数据标记对象、标记名称
+	 * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @return [...]
 	 */
-	chartBase.dataSetPropertiesOfSign = function(chartDataSet, dataSetProperties, dataSign)
+	chartBase.dataSetPropertiesOfSign = function(chartDataSet, dataSign, sort)
 	{
-		//(chartDataSet, dataSign)，兼容2.9.0版本的API
-		if(arguments.length == 2)
-		{
-			dataSign = dataSetProperties;
-			dataSetProperties = null;
-		}
+		sort = (sort === undefined ? true : sort);
 		
 		var re = [];
 		
 		if(!chartDataSet || !dataSign)
 			return re;
 		
-		dataSetProperties = (dataSetProperties || this.dataSetProperties(chartDataSet));
+		dataSetProperties = this.dataSetProperties(chartDataSet, sort);
 		dataSign = (dataSign.name || dataSign);
 		var propertySigns = (chartDataSet.propertySigns || {});
 		
@@ -3251,7 +3244,7 @@
 	 * 当chartDataSet是图表数据集时，返回数组默认将会依据其属性排序值重新排序。
 	 * 
 	 * @param chartDataSet 图表数据集、数据集
-	 * @param sort 当chartDataSet是图表数据集时，是否依据其propertyOrders对返回结果进行重排序，true 是；false 否。默认值为：true
+	 * @param sort 可选，当chartDataSet是图表数据集时，是否依据其propertyOrders对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @returns 数据集属性数组
 	 * @since 2.10.0
 	 */
