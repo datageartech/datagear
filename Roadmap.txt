@@ -6,11 +6,10 @@
 		ok 阶梯折线图
 		ok 平行坐标系图
 		ok 涟漪散点图
-	图表编辑页面数据集调整顺序方式由拖拽改为上/下按钮，拖拽很不好操作；
 	ECharts升级至5.2.2版本；
+	ok 图表编辑页面调整数据集顺序操作由拖拽方式改为更方便的上移/下移按钮方式；
 	ok 图表编辑页面新增数据集属性别名设置功能，用于设置其在图表展示时的名称；
 	ok 图表编辑页面新增数据集属性排序设置功能，用于设置其在图表展示时的顺序；
-	ok 图表JS对象的chartDataSetName函数重构为dataSetAlias、dataSetPropertyLabel函数重构为dataSetPropertyAlias；
 	ok 看板展示页面渲染上下文添加DG_USER内置属性，用于获取当前用户信息；
 	ok 数据集查询后台添加DG_USER,DG_ROLE_NAMES内置参数，使数据集参数化语境可获取当前用户信息；	
 	ok 修复看板导入ZIP文件名有中文有时会报错的BUG；

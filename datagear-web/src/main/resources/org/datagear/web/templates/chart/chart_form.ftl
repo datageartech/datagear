@@ -572,9 +572,18 @@ readonly 是否只读操作，允许为null
 		
 		var $head = $("<div class='item-head ui-widget-header ui-corner-all' />").appendTo($item);
 		$("<span class='data-set-name' />").text(dataSet.name).appendTo($head);
+		
 		<#if !readonly>
-		$("<div class='delete-icon''><span class=' ui-icon ui-icon-close'>&nbsp;</span></div>")
-			.attr("title", "<@spring.message code='delete' />").appendTo($head);
+		var $optIconWrapper = $("<div class='opt-icons' />").appendTo($head);
+		
+		$("<div class='sort-up-icon opt-icon ui-state-default ui-corner-all'><span class='ui-icon ui-icon-arrowthick-1-n'>&nbsp;</span></div>")
+		.attr("title", "<@spring.message code='moveUp' />").appendTo($optIconWrapper);
+		
+		$("<div class='sort-down-icon opt-icon ui-state-default ui-corner-all'><span class='ui-icon ui-icon-arrowthick-1-s'>&nbsp;</span></div>")
+		.attr("title", "<@spring.message code='moveDown' />").appendTo($optIconWrapper);
+		
+		$("<div class='delete-icon opt-icon ui-state-default ui-corner-all'><span class='ui-icon ui-icon-close'>&nbsp;</span></div>")
+			.attr("title", "<@spring.message code='delete' />").appendTo($optIconWrapper);
 		</#if>
 		
 		var $dsProps = $("<div class='item-props' />").appendTo($item);
@@ -777,9 +786,26 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".data-sign-select-panel").draggable({ handle : ".select-panel-head" });
 	
-	po.element(".data-set-wrapper").on("click", ".delete-icon", function()
+	po.element(".data-set-wrapper")
+	.on("click", ".delete-icon", function()
 	{
 		$(this).closest(".data-set-item").remove();
+	})
+	.on("click", ".sort-up-icon", function()
+	{
+		var $myItem = $(this).closest(".data-set-item");
+		var $prevItem = $myItem.prev();
+		
+		if($prevItem.length > 0)
+			$myItem.insertBefore($prevItem);
+	})
+	.on("click", ".sort-down-icon", function()
+	{
+		var $myItem = $(this).closest(".data-set-item");
+		var $nextItem = $myItem.next();
+		
+		if($nextItem.length > 0)
+			$myItem.insertAfter($nextItem);
 	})
 	.on("click", ".sign-add-button", function()
 	{
@@ -873,8 +899,6 @@ readonly 是否只读操作，允许为null
 			}
 		}
 	};
-	
-	po.element(".data-set-wrapper").sortable({ handle: ".item-head" });
 	
 	po.previewAfterSave = false;
 	

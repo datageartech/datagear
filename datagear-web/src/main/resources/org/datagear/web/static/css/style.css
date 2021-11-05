@@ -2916,9 +2916,18 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-set-wrapper .data-set-item:first-child{
 	margin-top: 0;
 }
-.page-form-chart .data-set-wrapper .data-set-item .delete-icon{
+.page-form-chart .data-set-wrapper .data-set-item .opt-icons{
 	float: right;
+}
+.page-form-chart .data-set-wrapper .data-set-item .opt-icon{
+	display: inline-block;
 	cursor: pointer;
+	margin-left: 0.3em;
+	padding-left: 0.14em;
+	padding-right: 0.14em;
+}
+.page-form-chart .data-set-wrapper .data-set-item .opt-icon.delete-icon{
+	margin-left: 1em;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-head{
 	padding: 0.2em 0.2em;
