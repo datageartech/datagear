@@ -1265,7 +1265,7 @@
 			chartSetting.setChartSettingBoxThemeStyle(chart, $box);
 			
 			//参数
-			if(!disableSetting.param && chart.hasParamDataSet())
+			if(!disableSetting.param && chart.hasDataSetParam())
 			{
 				var $button = $("<button type='button' class='dg-chart-setting-button dg-chart-setting-param-button' />")
 						.html(chartSetting.labels.param).appendTo($box);

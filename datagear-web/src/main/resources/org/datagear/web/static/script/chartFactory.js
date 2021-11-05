@@ -1469,33 +1469,13 @@
 	};
 	
 	/**
-	 * 判断此图表是否有参数化数据集。
-	 */
-	chartBase.hasParamDataSet = function()
-	{
-		var re = false;
-		
-		var chartDataSets = this.chartDataSets;
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			var params = chartDataSets[i].dataSet.params;
-			re = (params && params.length > 0);
-			
-			if(re)
-				break;
-		}
-		
-		return re;
-	};
-	
-	/**
 	 * 图表的所有/指定数据集参数值是否齐备。
 	 * 
-	 * @param chartDataSet 指定图表数据集或其索引，如果不设置，则取所有
+	 * @param chartDataSet 可选，图表数据集、索引，默认为所有
 	 */
 	chartBase.isDataSetParamValueReady = function(chartDataSet)
 	{
-		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
 		var chartDataSets = (chartDataSet ? [ chartDataSet ] : this.chartDataSets);
 		
@@ -1540,7 +1520,7 @@
 	 */
 	chartBase.dataSetParamValue = function(chartDataSet, name, value)
 	{
-		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
 		if(chartDataSet == null)
 			throw new Error("ChartDataSet not found for : " + chartDataSet);
@@ -1585,7 +1565,7 @@
 	 */
 	chartBase.dataSetParamValues = function(chartDataSet, paramValues)
 	{
-		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
 		if(chartDataSet == null)
 			throw new Error("ChartDataSet not found for : " + chartDataSet);
@@ -1637,7 +1617,7 @@
 	 */
 	chartBase.resetDataSetParamValues = function(chartDataSet)
 	{
-		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
 		if(chartDataSet == null)
 			throw new Error("ChartDataSet not found for : " + chartDataSet);
@@ -1830,7 +1810,7 @@
 	/**
 	 * 获取指定标记的数据集属性，没有则返回undefined。
 	 * 
-	 * @param chartDataSet 图表数据集对象
+	 * @param chartDataSet 图表数据集、索引
 	 * @param dataSign 数据标记对象、标记名称
 	 * @return {...}、undefined
 	 */
@@ -1843,13 +1823,14 @@
 	/**
 	 * 获取指定标记的数据集属性数组。
 	 * 
-	 * @param chartDataSet 图表数据集对象
+	 * @param chartDataSet 图表数据集、索引
 	 * @param dataSign 数据标记对象、标记名称
 	 * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @return [...]
 	 */
 	chartBase.dataSetPropertiesOfSign = function(chartDataSet, dataSign, sort)
 	{
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
 		sort = (sort === undefined ? true : sort);
 		
 		var re = [];
@@ -3233,7 +3214,6 @@
 	chartBase.dataSetProperties = function(chartDataSet, sort)
 	{
 		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
-		
 		sort = (sort === undefined ? true : sort);
 		
 		var properties = null;
@@ -3439,9 +3419,38 @@
 		return undefined;
 	};
 	
+	/**
+	 * 判断是否有数据集参数。
+	 * 
+	 * @since 2.10.0
+	 */
+	chartBase.hasDataSetParam = function()
+	{
+		var chartDataSets = this.chartDataSets;
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var params = chartDataSets[i].dataSet.params;
+			
+			if(params && params.length > 0)
+				return true;
+		}
+		
+		return false;
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.hasDataSetParam()取代
+	/**
+	 * 判断此图表是否有参数化数据集。
+	 */
+	chartBase.hasParamDataSet = function()
+	{
+		return this.hasDataSetParam();
+	};
+	// > @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.hasDataSetParam()取代
 	
 	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetPropertyAlias()取代
 	/**
@@ -4306,7 +4315,7 @@
 	 */
 	chartFactory.logException = function(exception)
 	{
-		if(typeof console != "undefined")
+		if(typeof(console) != "undefined")
 		{
 			if(console.error)
 				console.error(exception);
@@ -4324,7 +4333,7 @@
 	 */
 	chartFactory.logWarn = function(exception)
 	{
-		if(typeof console != "undefined")
+		if(typeof(console) != "undefined")
 		{
 			if(console.warn)
 				console.warn(exception);

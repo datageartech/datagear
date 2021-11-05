@@ -660,7 +660,7 @@ readonly 是否只读操作，允许为null
 		{name: "chart.extValue", value: "extValue(", caption: "extValue() ", meta: "chart"},
 		{name: "chart.gradualColor", value: "gradualColor(", caption: "gradualColor() ", meta: "chart"},
 		{name: "chart.handleChartEventLink", value: "handleChartEventLink(", caption: "handleChartEventLink() ", meta: "chart"},
-		{name: "chart.hasParamDataSet", value: "()", caption: "hasParamDataSet() ", meta: "chart"},
+		{name: "chart.hasDataSetParam", value: "hasDataSetParam()", caption: "hasDataSetParam() ", meta: "chart"},
 		{name: "chart.id", value: "id", caption: "id ", meta: "chart"},
 		{name: "chart.inflateRenderOptions", value: "inflateRenderOptions(", caption: "inflateRenderOptions() ", meta: "chart"},
 		{name: "chart.inflateUpdateOptions", value: "inflateUpdateOptions(", caption: "inflateUpdateOptions() ", meta: "chart"},
