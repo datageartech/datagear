@@ -1423,7 +1423,7 @@
 			
 			for(var i=0; i<chartDataSets.length; i++)
 			{
-				var params = chartDataSets[i].dataSet.params;
+				var params = chart.dataSetParams(chartDataSets[i]);
 				
 				if(!params || params.length == 0)
 					continue;

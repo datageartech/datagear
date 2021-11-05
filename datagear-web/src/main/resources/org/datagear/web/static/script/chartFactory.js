@@ -3191,13 +3191,15 @@
 	/**
 	 * 获取/设置数据集别名。
 	 * 
-	 * @param chartDataSet 图表数据集
+	 * @param chartDataSet 图表数据集、图表数据集索引数值
 	 * @param alias 可选，要设置的别名，不设置则执行获取操作
 	 * @returns 要获取的别名，不会为null
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetAlias = function(chartDataSet, alias)
 	{
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
 		if(alias === undefined)
 		{
 			if(!chartDataSet)
@@ -3217,57 +3219,25 @@
 	};
 	
 	/**
-	 * 获取指定标识的数据集属性。
-	 * 
-	 * @param chartDataSet 图表数据集、数据集
-	 * @param info 数据集属性标识，可以是属性名、属性索引
-	 * @returns 数据集属性，没有找到则返回undefined
-	 * @since 2.10.0
-	 */
-	chartBase.dataSetProperty = function(chartDataSet, info)
-	{
-		var properties = null;
-		
-		//图表数据集
-		if(chartDataSet && chartDataSet.dataSet != null)
-			properties = chartDataSet.dataSet.properties;
-		//数据集
-		else if(chartDataSet && chartDataSet.properties != null)
-			properties = chartDataSet.properties;
-		
-		if(!properties)
-			return undefined;
-		
-		if(chartFactory.isNumber(info))
-			return properties[info];
-		
-		for(var i=0; i<properties.length; i++)
-		{
-			if(properties[i].name == info)
-				return properties[i];
-		}
-		
-		return undefined;
-	};
-	
-	/**
 	 * 获取数据集属性数组。
 	 * 返回数组排序遵循如下规则：
 	 * 排序值越小越靠前；
 	 * 属性默认具有与其索引相同的排序值；
 	 * 当两个属性具有相同排序值时，设置了propertyOrders中排序值的那个属性靠前排（前置插入），否则，属性索引小的那个靠前排。
 	 * 
-	 * @param chartDataSet 图表数据集、数据集
+	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
 	 * @param sort 可选，当chartDataSet是图表数据集时，是否依据其propertyOrders对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @returns 数据集属性数组
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetProperties = function(chartDataSet, sort)
 	{
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
 		sort = (sort === undefined ? true : sort);
 		
 		var properties = null;
-		var isDataSet = (chartDataSet && chartDataSet.properties != null);
+		var isDataSet = (chartDataSet && chartDataSet.properties !== undefined);
 		
 		if(isDataSet)
 			properties = chartDataSet.properties;
@@ -3322,9 +3292,36 @@
 	};
 	
 	/**
+	 * 获取指定标识的数据集属性。
+	 * 
+	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
+	 * @param info 数据集属性标识，可以是属性名、属性索引
+	 * @returns 数据集属性，没有找到则返回undefined
+	 * @since 2.10.0
+	 */
+	chartBase.dataSetProperty = function(chartDataSet, info)
+	{
+		var properties = this.dataSetProperties(chartDataSet, false);
+		
+		if(!properties)
+			return undefined;
+		
+		if(chartFactory.isNumber(info))
+			return properties[info];
+		
+		for(var i=0; i<properties.length; i++)
+		{
+			if(properties[i].name == info)
+				return properties[i];
+		}
+		
+		return undefined;
+	};
+	
+	/**
 	 * 获取/设置数据集属性别名。
 	 * 
-	 * @param chartDataSet 图表数据集
+	 * @param chartDataSet 图表数据集、图表数据集索引数值
 	 * @param dataSetProperty 数据集属性、属性名、属性索引
 	 * @param alias 可选，要设置的别名，不设置则执行获取操作
 	 * @returns 要获取的别名，不会为null
@@ -3332,6 +3329,8 @@
 	 */
 	chartBase.dataSetPropertyAlias = function(chartDataSet, dataSetProperty, alias)
 	{
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
 		if(chartFactory.isStringOrNumber(dataSetProperty))
 			dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
 		
@@ -3360,7 +3359,7 @@
 	/**
 	 * 获取/设置数据集属性排序值。
 	 * 
-	 * @param chartDataSet 图表数据集
+	 * @param chartDataSet 图表数据集、图表数据集索引数值
 	 * @param dataSetProperty 数据集属性、属性名、属性索引
 	 * @param order 可选，要设置的排序数值，不设置则执行获取操作
 	 * @returns 要获取的排序数值，没有设置过则返回null
@@ -3368,6 +3367,8 @@
 	 */
 	chartBase.dataSetPropertyOrder = function(chartDataSet, dataSetProperty, order)
 	{
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
 		if(chartFactory.isStringOrNumber(dataSetProperty))
 			dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
 		
@@ -3388,6 +3389,54 @@
 			
 			chartDataSet.propertyOrders[dataSetProperty.name] = order;
 		}
+	};
+	
+	/**
+	 * 获取数据集参数数组。
+	 * 
+	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
+	 * @returns 数据集参数数组
+	 * @since 2.10.0
+	 */
+	chartBase.dataSetParams = function(chartDataSet)
+	{
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		var params = null;
+		
+		if(chartDataSet && chartDataSet.params !== undefined)
+			params = chartDataSet.params;
+		else
+			params = (chartDataSet && chartDataSet.dataSet ? chartDataSet.dataSet.params : null);
+		
+		return (params || []);
+	};
+	
+	/**
+	 * 获取指定标识的数据集参数。
+	 * 
+	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
+	 * @param info 数据集参数标识，可以是参数名、参数索引
+	 * @returns 数据集参数，没有找到则返回undefined
+	 * @since 2.10.0
+	 */
+	chartBase.dataSetParam = function(chartDataSet, info)
+	{
+		var params = this.dataSetParams(chartDataSet);
+		
+		if(!params)
+			return undefined;
+		
+		if(chartFactory.isNumber(info))
+			return params[info];
+		
+		for(var i=0; i<params.length; i++)
+		{
+			if(params[i].name == info)
+				return params[i];
+		}
+		
+		return undefined;
 	};
 	
 	//-------------
