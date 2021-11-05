@@ -675,8 +675,8 @@ readonly 是否只读操作，允许为null
 		if(dataSet.params && dataSet.params.length > 0)
 		{
 			var $pvBtnItem = $("<div class='item-lv' />").appendTo($settingDiv);
-			$("<div class='tip-label item-lv-l' />").html("参数")
-				.attr("title", "<@spring.message code='chart.chartDataSet.paramValue' />").appendTo($pvBtnItem);
+			$("<div class='tip-label item-lv-l' />").html("<@spring.message code='parameter' />")
+				.attr("title", "<@spring.message code='chart.chartDataSet.paramValue.desc' />").appendTo($pvBtnItem);
 			var $pvBtnWrapper = $("<div class='item-lv-v' />").appendTo($pvBtnItem);
 			var $pvButton = $("<button type='button' class='dataSetParamValueButton ui-button ui-corner-all ui-widget'></button>")
 					.html("<#if readonly><@spring.message code='view' /><#else><@spring.message code='edit' /></#if>")
