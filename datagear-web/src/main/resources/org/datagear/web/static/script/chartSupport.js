@@ -4315,20 +4315,43 @@
 			
 			for(var j=0; j<vps.length; j++)
 			{
+				var vp = vps[j];
 				//使用alias而非name作为坐标轴名，因为alias是可编辑得，使得用户可以自定义坐标轴
-				var axisName = chart.dataSetPropertyAlias(chartDataSet, vps[j]);
+				var axisName = chart.dataSetPropertyAlias(chartDataSet, vp);
 				
 				if(chartSupport.findInArray(parallelAxis, axisName, "name") < 0)
 				{
-					parallelAxis.push(
+					var axis =
 					{
-						dim: parallelAxis.length,
 						name: axisName,
-						type: chartSupport.evalDataSetPropertyAxisType(chart, vps[j])
-					});
+						type: chartSupport.evalDataSetPropertyAxisType(chart, vp)
+					};
+					
+					if(i == 0)
+						parallelAxis.push(axis);
+					else
+					{
+						//后续数据集属性按照order插入到parallelAxis的适当位置，
+						//使得在多数据集情况时，也可自由调整坐标轴的顺序
+						var order = chart.dataSetPropertyOrder(chartDataSet, vp);
+						if(order != null)
+						{
+							if(order < 0)
+								parallelAxis.unshift(axis);
+							else if(order >= 0 && order < parallelAxis.length)
+								parallelAxis.splice(order, 0, axis);
+							else
+								parallelAxis.push(axis);
+						}
+						else
+							parallelAxis.push(axis);
+					}
 				}
 			}
 		}
+		
+		for(var i=0; i<parallelAxis.length; i++)
+			parallelAxis[i].dim = i;
 		
 		return parallelAxis;
 	};
