@@ -2322,6 +2322,172 @@
 		}
 	};
 	
+	//路径地图
+	
+	chartSupport.mapLinesRender = function(chart, nameSign, longitudeSign, latitudeSign, mapSign, options)
+	{
+		//name 可选，路径名称，同一名称的坐标组成一条路径，如果不选，整个数据集组成一条路径
+		//longitude 路径经度
+		//latitude 路径纬度
+		//map 可选，地图名
+		chartSupport.chartSignNameMap(chart, { name: nameSign, longitude: longitudeSign, latitude: latitudeSign,
+			map: mapSign });
+		
+		options = chartSupport.inflateRenderOptions(chart,
+		{
+			title:
+			{
+		        text: chart.name
+		    },
+			geo:
+			{
+				//将在update中设置：
+				//map
+				//这里必须设置map，不然渲染会报错，update中会特殊处理
+				map: (chart.map() || "china"),
+				
+				roam: true
+			},
+			series:
+			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
+				{
+					type: "lines",
+					coordinateSystem: "geo",
+					polyline: true
+				}
+			]
+		},
+		options);
+		
+		chartSupport.echartsMapChartInit(chart, options);
+	};
+	
+	chartSupport.mapLinesUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		var legendData = [];
+		var series = [];
+		var map = undefined;
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var result = chart.resultOf(results, chartDataSet);
+			
+			//取任一不为空的地图名列值
+			if(!map)
+			{
+				var mp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.map);
+				if(mp)
+				{
+					var maps = chart.resultColumnArrays(result, mp);
+					map = chartSupport.findNonNull(maps);
+				}
+			}
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var lop = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.longitude);
+			var lap = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.latitude);
+			
+			var data = null;
+			if(np)
+			{
+				//同名称的是一条路径
+				
+				var names = [];
+				var nameCoords = {};
+				
+				data = chart.resultNameValueObjects(result, np, [lop, lap]);
+				
+				for(var j=0; j<data.length; j++)
+				{
+					var dj = data[j];
+					var name = dj.name;
+					var coords = nameCoords[name];
+					
+					if(!coords)
+					{
+						names.push(name);
+						coords = (nameCoords[name] = []);
+					}
+					
+					coords.push(dj.value);
+				}
+				
+				data = [];
+				
+				for(var j=0; j<names.length; j++)
+					data[j] = { name: names[j], coords: nameCoords[names[j]] };
+			}
+			else
+			{
+				//整个数据集是一条路径
+				data = chart.resultRowArrays(result, [lop, lap]);
+				data = [ { name: dataSetName, coords: data } ];
+			}
+			
+			//TODO
+			//chart.originalInfo(data, chartDataSet);
+			
+			legendData.push(dataSetName);
+			series.push({ name: dataSetName, data: data, type: "lines", coordinateSystem: "geo", polyline: true });
+		}
+		
+		var options = { legend: {data: legendData}, series: series };
+		
+		if(map)
+			options.geo = { map: map };
+		
+		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
+	};
+	
+	chartSupport.mapLinesResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.mapLinesDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+
+	chartSupport.mapLinesOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
+				chartSupport.mapLinesSetChartEventData);
+	};
+	
+	chartSupport.mapLinesOff = function(chart, eventType, handler)
+	{
+		chart.echartsOffEventHandler(eventType, handler);
+	};
+	
+	chartSupport.mapLinesSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var echartsData = echartsEventParams.data;
+		
+		var data = {};
+		
+		data[signNameMap.name] = echartsData.name;
+		data[signNameMap.longitude] = echartsData.value[0];
+		data[signNameMap.latitude] = echartsData.value[1];
+		if(echartsData.value.length > 2)
+			data[signNameMap.value] = echartsData.value[2];
+		
+		chart.eventData(chartEvent, data);
+		chart.eventOriginalInfo(chartEvent, echartsData);
+	};
 	
 	//K线图
 	
