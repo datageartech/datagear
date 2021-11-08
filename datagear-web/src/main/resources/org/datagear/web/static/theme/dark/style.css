@@ -300,3 +300,8 @@ table.dataTable th,
 	border: 1px solid #59b4d4 !important;
     background: #0078a3 !important;
 }
+
+/*LOGO*/
+.main-page-head .logo .logo-content{
+	background-image: url(../../img/logo/full-210x50/logo-red-white.png);
+}

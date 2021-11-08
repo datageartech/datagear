@@ -1150,10 +1150,19 @@ table.dataTable tbody tr td select{
 	margin-top: 0.1em;
 }
 .main-page-head .logo .logo-content{
-	font-size: small;
-	font-weight: bold;
-	opacity: 0.7;
-	filter: Alpha(Opacity=70);
+	display: inline-block;
+	opacity: 1;
+	filter: Alpha(Opacity=100);
+    width: 84px;
+    height: 20px;
+    background-size: 100% 100%;
+    font-weight: bold;
+    font-size: 0.9em;
+    /*text-indent: -100px;*/
+}
+.main-page-head .logo .logo-content:hover{
+	opacity: 0.9;
+	filter: Alpha(Opacity=90);
 }
 .main-page-head .toolbar{
 	float: right;
