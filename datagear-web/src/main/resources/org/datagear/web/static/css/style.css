@@ -1134,11 +1134,8 @@ table.dataTable tbody tr td select{
 	border-bottom-width: 0;
 }
 .main-page-head{
-	display: inline-block;
-	width: 100%;
-	height: 1.6em;
-	padding-top: 1px;
-	padding-bottom: 1px;
+	height: 25px;
+	line-height: 24px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -1147,7 +1144,6 @@ table.dataTable tbody tr td select{
 	float: left;
     vertical-align: middle;
 	margin-left: 0.1em;
-	margin-top: 0.1em;
 }
 .main-page-head .logo .logo-content{
 	display: inline-block;
@@ -1169,16 +1165,25 @@ table.dataTable tbody tr td select{
 	text-align: right;
 	vertical-align: middle;
 	margin-right: 0.2em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 /**系统设置图标*/
 .main-page-head .toolbar #systemSetMenu{
 	float:left;
 	margin-right: 0.5em;
+	width: 20px;
+	height: 20px;
+	padding-top: 1px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .main-page-head .toolbar #systemSetMenu > li,
 .main-page-head .toolbar #systemSetMenu > li > .ui-menu-item-wrapper{
-	width: 1.3em;
-	height: 1.3em;
+	width: 20px;
+	height: 20px;
 }
 .main-page-head .toolbar #systemSetMenu > li > .ui-menu-item-wrapper .ui-icon{
 	left: 0px;
@@ -1207,7 +1212,7 @@ table.dataTable tbody tr td select{
 }
 .main-page-content{
 	position: absolute;
-	top: 1.6em;
+	top: 25px;
 	left: 0px;
 	right: 0px;
 	bottom: 0px;
