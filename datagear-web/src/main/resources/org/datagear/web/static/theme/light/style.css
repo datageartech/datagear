@@ -177,7 +177,8 @@ table.dataTable.hover tbody tr:hover.selected td.selected {
 	background-color: #FFD700;
 	color: #333333;
 }
-table.dataTable tbody tr.selected .checkbox .ui-icon{
+table.dataTable tbody tr.selected .checkbox .ui-icon,
+table.dataTable thead .keyword-search-column::after{
 	background-image: url(jquery-ui-1.12.1/images/ui-icons_444444_256x240.png);
 }
 table.dataTable th,
@@ -303,5 +304,5 @@ table.dataTable th,
 
 /*LOGO*/
 .main-page-head .logo .logo-content{
-	background-image: url(../../img/logo/full-210x50/logo-red.png);
+	background-image: url(../../img/logo/full-210x50/logo-red-lightblack.png);
 }

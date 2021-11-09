@@ -739,8 +739,27 @@ form.display-block .form-content .form-item .form-item-value label.error,
 }
 
 /*Datatables*/
-.dataTable th, .dataTable tr {   
+table.dataTable thead th,
+table.dataTable thead td{
+	padding: 8px 18px;
+}
+.dataTable th, .dataTable tr {
     white-space: nowrap !important;  
+}
+table.dataTable thead th.ui-state-default,
+table.dataTable tfoot th.ui-state-default{
+    border-width: 0;
+    text-align: left;
+    padding-left: 8px;
+    font-weight: bold;
+    border-bottom-width: 1px;
+}
+table.dataTable thead th div.DataTables_sort_wrapper span{
+	position: static;
+    top: 50%;
+    margin-top: -4px;
+    opacity: 0.6;
+    filter: Alpha(Opacity=60);
 }
 .dataTables_wrapper .ui-toolbar{
 	display: none;
@@ -759,16 +778,26 @@ table.dataTable tfoot th{
 }
 table.dataTable thead .keyword-search-column{
 	font-weight: bold;
+	position: relative;
+	padding-right: 16px;
+}
+table.dataTable thead .keyword-search-column::after{
+	content: " ";
+	position: absolute;
+    top: 50%;
+    margin-top: -7px;
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+    filter: Alpha(Opacity=60);
+    background-position: -160px -112px;
 }
 table.dataTable .column-check{
-	text-align: center;
-	padding-left: 0.8em;
-	padding-right: 0.8em;
+	position: relative;
 	-webkit-user-select:none;
 	-moz-user-select:none;
 	-ms-user-select:none;
 	user-select:none;
-	position: relative;
 }
 table.dataTable thead tr .column-check{
 	cursor: pointer;
