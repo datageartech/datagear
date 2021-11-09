@@ -4493,6 +4493,9 @@
 						type: chartSupport.evalDataSetPropertyAxisType(chart, vp)
 					};
 					
+					parallelAxis.push(axis);
+					
+					/*禁用跨数据集排序，增加了排序概念的复杂性（因为其他图表都不支持），也不太有必要（数据集本身有排序支持）
 					if(i == 0)
 						parallelAxis.push(axis);
 					else
@@ -4512,6 +4515,7 @@
 						else
 							parallelAxis.push(axis);
 					}
+					*/
 				}
 			}
 		}
