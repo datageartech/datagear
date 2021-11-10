@@ -1730,14 +1730,7 @@
 			
 			//取任一不为空的地图名列值
 			if(!map)
-			{
-				var mp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.map);
-				if(mp)
-				{
-					var maps = chart.resultColumnArrays(result, mp);
-					map = chartSupport.findNonNull(maps);
-				}
-			}
+				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, chartDataSet, result, signNameMap.map);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
@@ -1956,14 +1949,7 @@
 			
 			//取任一不为空的地图名列值
 			if(!map)
-			{
-				var mp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.map);
-				if(mp)
-				{
-					var maps = chart.resultColumnArrays(result, mp);
-					map = chartSupport.findNonNull(maps);
-				}
-			}
+				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, chartDataSet, result, signNameMap.map);
 			
 			var lop = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.longitude);
 			var lap = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.latitude);
@@ -2123,14 +2109,7 @@
 			
 			//取任一不为空的地图名列值
 			if(!map)
-			{
-				var mp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.map);
-				if(mp)
-				{
-					var maps = chart.resultColumnArrays(result, mp);
-					map = chartSupport.findNonNull(maps);
-				}
-			}
+				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, chartDataSet, result, signNameMap.map);
 			
 			if(!seriesName)
 				seriesName = chart.dataSetAlias(chartDataSet);
@@ -2385,14 +2364,7 @@
 			
 			//取任一不为空的地图名列值
 			if(!map)
-			{
-				var mp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.map);
-				if(mp)
-				{
-					var maps = chart.resultColumnArrays(result, mp);
-					map = chartSupport.findNonNull(maps);
-				}
-			}
+				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, chartDataSet, result, signNameMap.map);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
 			var lop = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.longitude);
@@ -2478,12 +2450,6 @@
 		var echartsData = echartsEventParams.data;
 		
 		var data = {};
-		
-		data[signNameMap.name] = echartsData.name;
-		data[signNameMap.longitude] = echartsData.value[0];
-		data[signNameMap.latitude] = echartsData.value[1];
-		if(echartsData.value.length > 2)
-			data[signNameMap.value] = echartsData.value[2];
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalInfo(chartEvent, echartsData);
@@ -6431,6 +6397,23 @@
 	};
 	
 	/**
+	 * 查找数组中第一个不为空的元素值，如果未找到，则返回undefined。
+	 */
+	chartSupport.findNonEmpty = function(array)
+	{
+		if(!array)
+			return undefined;
+		
+		for(var i=0; i<array.length; i++)
+		{
+			if(array[i] != null && array[i] != "")
+				return array[i];
+		}
+		
+		return undefined;
+	};
+	
+	/**
 	 * 校正obj.min、obj.max值，使得obj.min始终小于obj.max且都不为null。
 	 */
 	chartSupport.trimNumberRange = function(obj, defaultMin, defaultMax)
@@ -6647,6 +6630,22 @@
 			obj.symbolSize = chartSupport.evalValueSymbolSize(
 				value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
 		}
+	};
+	
+	/**
+	 * 从数据集结果中读取第一个不为空的数据标记数据值。
+	 */
+	chartSupport.resultFirstNonEmptyValueOfSign = function(chart, chartDataSet, result, valueSign)
+	{
+		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+		
+		if(vp)
+		{
+			var values = chart.resultColumnArrays(result, vp);
+			return chartSupport.findNonEmpty(values);
+		}
+		
+		return undefined;
 	};
 	
 	/**

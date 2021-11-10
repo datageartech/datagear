@@ -4977,26 +4977,17 @@
 			{
 				"lineStyle":
 				{
-					"width": 1
+					"width": 2
 				},
 				"emphasis":
 				{
 					"lineStyle":
 					{
-						"shadowBlur" : 6,
+						"shadowBlur" : 4,
 						"shadowOffsetX" : 0,
 						"shadowColor" : shadowColor
 					}
-				},
-				"effect":
-				{
-					"show": true,
-            		"constantSpeed": 20,
-            		"trailLength": 0.1,
-            		"symbol": "arrow",
-					"symbolSize": 4
-				},
-          		zlevel: 1
+				}
 			},
 			"geo" : {
 				"itemStyle" : {
