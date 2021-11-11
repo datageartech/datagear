@@ -2376,7 +2376,7 @@
 				//同名称的是一条路径
 				
 				var names = [];
-				var nameCoords = {};
+				var coordsInfos = {};
 				
 				data = chart.resultNameValueObjects(result, np, [lop, lap]);
 				
@@ -2384,31 +2384,38 @@
 				{
 					var dj = data[j];
 					var name = dj.name;
-					var coords = nameCoords[name];
+					var coordsInfo = coordsInfos[name];
 					
-					if(!coords)
+					if(!coordsInfo)
 					{
 						names.push(name);
-						coords = (nameCoords[name] = []);
+						coordsInfo = (coordsInfos[name] = { coords: [], originalDataIndexes: [] });
 					}
 					
-					coords.push(dj.value);
+					coordsInfo.coords.push(dj.value);
+					coordsInfo.originalDataIndexes.push(j);
 				}
 				
 				data = [];
 				
 				for(var j=0; j<names.length; j++)
-					data[j] = { name: names[j], coords: nameCoords[names[j]] };
+				{
+					var name = names[j];
+					data[j] = { name: name, coords: coordsInfos[name].coords };
+					chart.originalInfo(data[j], chartDataSet, coordsInfos[name].originalDataIndexes);
+				}
 			}
 			else
 			{
 				//整个数据集是一条路径
 				data = chart.resultRowArrays(result, [lop, lap]);
+				var originalDataIndexes = [];
+				for(var j=0;j<data.length; j++)
+					originalDataIndexes[j] = j;
+				
 				data = [ { name: dataSetName, coords: data } ];
+				chart.originalInfo(data[0], chartDataSet, originalDataIndexes);
 			}
-			
-			//TODO
-			//chart.originalInfo(data, chartDataSet);
 			
 			legendData.push(dataSetName);
 			series.push({ name: dataSetName, data: data, type: "lines", coordinateSystem: "geo", polyline: true });
@@ -2431,7 +2438,7 @@
 	{
 		chartSupport.destroyChartEcharts(chart);
 	};
-
+	
 	chartSupport.mapLinesOn = function(chart, eventType, handler)
 	{
 		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
@@ -2450,6 +2457,17 @@
 		var echartsData = echartsEventParams.data;
 		
 		var data = {};
+		data[signNameMap.name] = echartsData.name;
+		var dataLongitude = (data[signNameMap.longitude] = []);
+		var dataLatitude = (data[signNameMap.latitude] = []);
+		
+		var coords = (echartsData.coords || []);
+		for(var i=0; i<coords.length; i++)
+		{
+			var coord = coords[i];
+			dataLongitude.push(coord[0]);
+			dataLatitude.push(coord[1]);
+		}
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalInfo(chartEvent, echartsData);
