@@ -1967,7 +1967,7 @@
 	};
 	
 	/**
-	 * 获取数据集结果的行对象指定属性值。
+	 * 获取数据集结果数据的行对象指定属性值。
 	 * 
 	 * @param rowObj 行对象
 	 * @param property 属性对象、属性名
@@ -1982,7 +1982,7 @@
 	};
 	
 	/**
-	 * 将数据集结果的行对象按照指定properties顺序转换为行值数组。
+	 * 将数据集结果数据的行对象按照指定properties顺序转换为行值数组。
 	 * 
 	 * @param result 数据集结果对象
 	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
@@ -2043,7 +2043,7 @@
 	};
 	
 	/**
-	 * 将数据集结果的行对象按照指定properties顺序转换为列值数组。
+	 * 将数据集结果数据的行对象按照指定properties顺序转换为列值数组。
 	 * 
 	 * @param result 数据集结果对象
 	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
@@ -2101,7 +2101,7 @@
 	};
 	
 	/**
-	 * 获取数据集结果的名称/值对象数组。
+	 * 获取数据集结果数据的名称/值对象数组。
 	 * 
 	 * @param result 数据集结果对象、对象数组
 	 * @param nameProperty 名称属性对象、属性名
@@ -2112,11 +2112,12 @@
 	 */
 	chartBase.resultNameValueObjects = function(result, nameProperty, valueProperty, row, count)
 	{
-		return this._resultNameValueObjects(result, nameProperty, valueProperty, row, count);
+		var propertyMap ={ "name": nameProperty, "value": valueProperty };
+		return this.resultMapObjects(result, propertyMap, row, count);
 	};
 	
 	/**
-	 * 获取数据集结果的值对象数组。
+	 * 获取数据集结果数据的值对象数组。
 	 * 
 	 * @param result 数据集结果对象、对象数组
 	 * @param valueProperty 值属性对象、属性名、数组
@@ -2126,11 +2127,12 @@
 	 */
 	chartBase.resultValueObjects = function(result, valueProperty, row, count)
 	{
-		return this._resultNameValueObjects(result, null, valueProperty, row, count);
+		var propertyMap ={ "value": valueProperty };
+		return this.resultMapObjects(result, propertyMap, row, count);
 	};
 	
 	/**
-	 * 获取数据集结果指定属性、指定行的单元格值，没有则返回undefined。
+	 * 获取数据集结果数据指定属性、指定行的单元格值，没有则返回undefined。
 	 * 
 	 * @param result 数据集结果对象
 	 * @param property 数据集属性对象、属性名
@@ -2143,68 +2145,6 @@
 		var re = this.resultRowArrays(result, property, row, 1);
 		
 		return (re.length > 0 ? re[0] : undefined);
-	};
-	
-	/**
-	 * 获取数据集结果的名称/值对象数组。
-	 * 
-	 * @param result 数据集结果对象、对象数组
-	 * @param nameProperty 名称属性对象、属性名，当为null或者空字符串时，返回的对象中将没有name属性
-	 * @param valueProperty 值属性对象、属性名、数组
-	 * @param row 可选，行索引，以0开始，默认为0
-	 * @param count 可选，获取结果数据的最多行数，默认为全部
-	 * @return [{name: ..., value: ...}, ...]
-	 */
-	chartBase._resultNameValueObjects = function(result, nameProperty, valueProperty, row, count)
-	{
-		var re = [];
-		
-		var datas = this.resultDatas(result);
-		
-		row = (row || 0);
-		var getCount = datas.length;
-		if(count != null && count < getCount)
-			getCount = count;
-		
-		nameProperty = (nameProperty != null && nameProperty != "" ?
-							(nameProperty.name || nameProperty) : null);
-		
-		if($.isArray(valueProperty))
-		{
-			for(var i=row; i< getCount; i++)
-			{
-				var name = (nameProperty ? datas[i][nameProperty] : null);
-				var value = [];
-				
-				for(var j=0; j<valueProperty.length; j++)
-				{
-					var vn = (valueProperty[j].name || valueProperty[j]);
-					value[j] = datas[i][vn];
-				}
-				
-				if(nameProperty)
-					re.push({ "name" : name, "value" : value });
-				else
-					re.push({ "value" : value });
-			}
-		}
-		else
-		{
-			valueProperty = (valueProperty.name || valueProperty);
-			
-			for(var i=row; i< getCount; i++)
-			{
-				var name = (nameProperty ? datas[i][nameProperty] : null);
-				var value = datas[i][valueProperty];
-				
-				if(nameProperty)
-					re.push({ "name" : name, "value" : value });
-				else
-					re.push({ "value" : value });
-			}
-		}
-		
-		return re;
 	};
 	
 	/**
@@ -3436,6 +3376,61 @@
 		}
 		
 		return false;
+	};
+	
+	/**
+	 * 获取数据集结果数据经属性映射后的对象数组。
+	 * 
+	 * @param result 数据集结果对象、对象数组
+	 * @param propertyMap 返回对象属性映射表，格式为：{ 返回对象属性名: 数据集结果数据属性对象、属性名、属性数组、属性名数组 }
+	 * @param row 可选，行索引，以0开始，默认为0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
+	 * @return [{"...": ..., "...": ...}, ...]
+	 * @since 2.10.0
+	 */
+	chartBase.resultMapObjects = function(result, propertyMap, row, count)
+	{
+		var re = [];
+		
+		var datas = this.resultDatas(result);
+		row = (row == null ? 0 : row);
+		count = (count == null ? datas.length : (count < datas.length ? count : datas.length));
+		
+		var propIsArray = {};
+		for(var opn in propertyMap)
+			propIsArray[opn] = $.isArray(propertyMap[opn]);
+		
+		for(var i=row; i<count; i++)
+		{
+			var di = datas[i];
+			var obj = (di == null ? null : {});
+			
+			for(var opn in propertyMap)
+			{
+				var dp = propertyMap[opn];
+				
+				if(dp == null){}
+				else if(propIsArray[opn])
+				{
+					obj[opn] = [];
+					
+					for(var j=0; j<dp.length; j++)
+					{
+						var dpn = (dp[j].name || dp[j]);
+						obj[opn][j] = di[dpn];
+					}
+				}
+				else
+				{
+					var dpn = (dp.name || dp);
+					obj[opn] = di[dpn];
+				}
+			}
+			
+			re.push(obj);
+		}
+		
+		return re;
 	};
 	
 	//-------------
