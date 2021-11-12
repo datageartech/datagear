@@ -1808,7 +1808,7 @@
 		chart.eventOriginalInfo(chartEvent, echartsData);
 	};
 	
-	//散点值地图
+	//地图散点图
 	
 	chartSupport.mapScatterRender = function(chart, nameSign, longitudeSign, latitudeSign, valueSign, mapSign, options)
 	{
@@ -2024,7 +2024,7 @@
 		chart.eventOriginalInfo(chartEvent, echartsData);
 	};
 	
-	//关系地图
+	//地图关系图
 	
 	chartSupport.mapGraphRender = function(chart, sourceIdSign, sourceLongitudeSign, sourceLatitudeSign, sourceNameSign, sourceCategorySign, sourceValueSign,
 			targetIdSign, targetLongitudeSign, targetLatitudeSign, targetNameSign, targetCategorySign, targetValueSign, mapSign, options)
@@ -2301,7 +2301,7 @@
 		}
 	};
 	
-	//路径地图
+	//地图路径图
 	
 	chartSupport.mapLinesRender = function(chart, nameSign, longitudeSign, latitudeSign, mapSign, options)
 	{
@@ -2451,6 +2451,186 @@
 	};
 	
 	chartSupport.mapLinesSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var echartsData = echartsEventParams.data;
+		
+		var data = {};
+		data[signNameMap.name] = echartsData.name;
+		var dataLongitude = (data[signNameMap.longitude] = []);
+		var dataLatitude = (data[signNameMap.latitude] = []);
+		
+		var coords = (echartsData.coords || []);
+		for(var i=0; i<coords.length; i++)
+		{
+			var coord = coords[i];
+			dataLongitude.push(coord[0]);
+			dataLatitude.push(coord[1]);
+		}
+		
+		chart.eventData(chartEvent, data);
+		chart.eventOriginalInfo(chartEvent, echartsData);
+	};
+	
+	//地图飞线图
+	
+	chartSupport.mapFlylineRender = function(chart, nameSign, sourceLongitudeSign, sourceLatitudeSign,
+			targetLongitudeSign, targetLatitudeSign, categorySign, mapSign, options)
+	{
+		//name 飞线名
+		//sourceLongitude 源点经度
+		//sourceLatitude 源点纬度
+		//targetLongitude 终点经度
+		//targetLatitude 终点纬度
+		//category 类别，可选，同一类别的绘制于同一系列
+		//map 地图名，可选
+		chartSupport.chartSignNameMap(chart, { name: nameSign, sourceLongitude: sourceLongitudeSign,
+			sourceLatitude: sourceLatitudeSign, targetLongitude: targetLongitudeSign, targetLatitude: targetLatitudeSign,
+			category: categorySign, map: mapSign });
+		
+		options = chartSupport.inflateRenderOptions(chart,
+		{
+			title:
+			{
+		        text: chart.name
+		    },
+			legend:
+			{
+				//将在update中设置：
+				//data
+			},
+			geo:
+			{
+				//将在update中设置：
+				//map
+				//这里必须设置map，不然渲染会报错，update中会特殊处理
+				map: (chart.map() || "china"),
+				
+				roam: true
+			},
+			series:
+			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
+				{
+					type: "lines",
+					coordinateSystem: "geo",
+					polyline: false
+				}
+			]
+		},
+		options);
+		
+		chartSupport.echartsMapChartInit(chart, options);
+	};
+	
+	chartSupport.mapFlylineUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		var categoryNames = [];
+		var categoryDatasMap = {};
+		var map = undefined;
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var result = chart.resultOf(results, chartDataSet);
+			
+			//取任一不为空的地图名列值
+			if(!map)
+				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, chartDataSet, result, signNameMap.map);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vps = [
+						chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceLongitude),
+						chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceLatitude),
+						chart.dataSetPropertyOfSign(chartDataSet, signNameMap.targetLongitude),
+						chart.dataSetPropertyOfSign(chartDataSet, signNameMap.targetLatitude),
+					];
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.category);
+			
+			var propertyMap = { "name": np, "coords": vps };
+			if(cp)
+			{
+				var categoryPropertyName = chartFactory.builtinPropName("Category");
+				propertyMap[categoryPropertyName] = cp;
+			}
+			
+			var data = chart.resultMapObjects(result, propertyMap);
+			
+			for(var j=0; j<data.length; j++)
+			{
+				var coords = data[j].coords;
+				data[j].coords = [[coords[0], coords[1]], [coords[2], coords[3]]];
+			}
+			
+			chart.originalInfo(data, chartDataSet);
+			
+			chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data,
+							(propertyMap[categoryPropertyName] ? categoryPropertyName : null), dataSetName);
+		}
+		
+		var series = [];
+		
+		for(var i=0; i<categoryNames.length; i++)
+		{
+			series[i] =
+			{
+				name: categoryNames[i],
+				data: categoryDatasMap[categoryNames[i]],
+				type: "lines",
+				coordinateSystem: "geo",
+				polyline: false,
+				effect:
+				{
+					show: true,
+					symbol: "arrow",
+					symbolSize: 5,
+					trailLength: 0
+				},
+				lineStyle:
+				{
+					curveness: 0.2
+				}
+			};
+		}
+		
+		var options = { legend: {data: categoryNames}, series: series };
+		
+		if(map)
+			options.geo = { map: map };
+		
+		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
+	};
+	
+	chartSupport.mapFlylineResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.mapFlylineDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+	
+	chartSupport.mapFlylineOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
+				chartSupport.mapFlylineSetChartEventData);
+	};
+	
+	chartSupport.mapFlylineOff = function(chart, eventType, handler)
+	{
+		chart.echartsOffEventHandler(eventType, handler);
+	};
+	
+	chartSupport.mapFlylineSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
@@ -4312,43 +4492,20 @@
 			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
-			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
-			var vps = valuePropertyNamess[i];
-			var cp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.category);
+			var categoryPropertyName = chartFactory.builtinPropName("Category");
+			var propertyMap =
+			{
+				"name": chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name),
+				"value": valuePropertyNamess[i]
+			};
+			propertyMap[categoryPropertyName] = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.category);
 			
-			var data = [];
-			
-			if(np)
-				data = chart.resultNameValueObjects(result, np, vps);
-			else
-				data = chart.resultValueObjects(result, vps);
+			var data = chart.resultMapObjects(result, propertyMap);
 			
 			chart.originalInfo(data, chartDataSet);
 			
-			if(cp)
-			{
-				var cpv = chart.resultColumnArrays(result, cp);
-				
-				for(var j=0; j<cpv.length; j++)
-				{
-					var categoryName = cpv[j];
-					var dataRow = data[j];
-					dataRow["_dgParallelCategory"] = categoryName;
-					
-					chartSupport.appendDistinct(categoryNames, categoryName);
-					
-					var categoryDatas = (categoryDatasMap[categoryName] || (categoryDatasMap[categoryName] = []));
-					chartSupport.appendElement(categoryDatas, dataRow);
-				}
-			}
-			else
-			{
-				var categoryName = dataSetName;
-				chartSupport.appendDistinct(categoryNames, categoryName);
-				
-				var categoryDatas = (categoryDatasMap[categoryName] || (categoryDatasMap[categoryName] = []));
-				chartSupport.appendElement(categoryDatas, data);
-			}
+			chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data,
+							(propertyMap[categoryPropertyName] ? categoryPropertyName : null), dataSetName);
 			
 			//设置每个坐标系的min、max、data
 			for(var j=0; j<data.length; j++)
@@ -4441,10 +4598,12 @@
 		
 		if(echartsData)
 		{
+			var categoryPropertyName = chartFactory.builtinPropName("Category");
+			
 			data = {};
 			data[signNameMap.name] = echartsData.name;
 			data[signNameMap.value] = echartsData.value;
-			data[signNameMap.category] = echartsData["_dgParallelCategory"];
+			data[signNameMap.category] = echartsData[categoryPropertyName];
 		}
 		
 		chart.eventData(chartEvent, data);
@@ -6647,6 +6806,32 @@
 			
 			obj.symbolSize = chartSupport.evalValueSymbolSize(
 				value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
+		}
+	};
+	
+	chartSupport.splitDataToCategory = function(categoryNames, categoryDatasMap, data,
+				categoryPropertyName, defaultCategoryName)
+	{
+		if(categoryPropertyName)
+		{
+			for(var i=0; i<data.length; i++)
+			{
+				var di = data[i];
+				var categoryName = (di == null ? "" : (di[categoryPropertyName] || ""));
+				
+				chartSupport.appendDistinct(categoryNames, categoryName);
+				
+				var categoryDatas = (categoryDatasMap[categoryName] || (categoryDatasMap[categoryName] = []));
+				chartSupport.appendElement(categoryDatas, di);
+			}
+		}
+		else
+		{
+			var categoryName = defaultCategoryName;
+			chartSupport.appendDistinct(categoryNames, categoryName);
+			
+			var categoryDatas = (categoryDatasMap[categoryName] || (categoryDatasMap[categoryName] = []));
+			chartSupport.appendElement(categoryDatas, data);
 		}
 	};
 	
