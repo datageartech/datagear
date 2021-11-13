@@ -2633,20 +2633,23 @@
 	chartSupport.mapFlylineSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var echartsData = echartsEventParams.data;
+		var data = undefined;
 		
-		var data = {};
-		data[signNameMap.name] = echartsData.name;
-		var dataLongitude = (data[signNameMap.longitude] = []);
-		var dataLatitude = (data[signNameMap.latitude] = []);
-		
-		var coords = (echartsData.coords || []);
-		for(var i=0; i<coords.length; i++)
+		if(echartsData)
 		{
-			var coord = coords[i];
-			dataLongitude.push(coord[0]);
-			dataLatitude.push(coord[1]);
+			var coords = (echartsData.coords || []);
+			var coords0 = (coords[0] || []);
+			var coords1 = (coords[1] || []);
+			var categoryPropertyName = chartFactory.builtinPropName("Category");
+			
+			data={};
+			data[signNameMap.name] = echartsData.name;
+			data[signNameMap.sourceLongitude] = coords0[0];
+			data[signNameMap.sourceLatitude] = coords0[1];
+			data[signNameMap.targetLongitude] = coords1[0];
+			data[signNameMap.targetLatitude] = coords1[1];
+			data[signNameMap.category] = echartsData[categoryPropertyName];
 		}
 		
 		chart.eventData(chartEvent, data);
