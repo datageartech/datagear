@@ -4636,7 +4636,8 @@
 					var axis =
 					{
 						name: axisName,
-						type: chartSupport.evalDataSetPropertyAxisType(chart, vp)
+						type: chartSupport.evalDataSetPropertyAxisType(chart, vp),
+						nameGap: 5
 					};
 					
 					parallelAxis.push(axis);

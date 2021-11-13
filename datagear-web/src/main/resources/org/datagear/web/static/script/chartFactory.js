@@ -4692,7 +4692,7 @@
 			},
 			"parallel" : {
 				"left": "10%",
-	            "top": "15%",
+	            "top": "24%",
 	            "right": "10%",
 	            "bottom": "10%",
 				"lineStyle" : {
