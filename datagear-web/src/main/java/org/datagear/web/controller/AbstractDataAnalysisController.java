@@ -316,7 +316,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (query == null)
 			return new DashboardQuery();
 		
-		List<String> analysisRoleNames = AnalysisUser.getRoleNames(analysisUser);
+		List<String> analysisRoleNames = analysisUser.getEnabledRoleNames();
 
 		Map<String, ChartQuery> chartQueries = query.getChartQueries();
 		Map<String, ChartQuery> chartQueriesRe = new HashMap<String, ChartQuery>(chartQueries.size());
@@ -711,7 +711,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 		/**
 		 * 将此{@linkplain AnalysisUser}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_USER}名、
-		 * {@linkplain AnalysisUser#getRoleNames()}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES}
+		 * {@linkplain #getEnabledRoleNames(AnalysisUser)}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES}
 		 * 名加入{@linkplain DataSetQuery#getParamValues()}。
 		 * <p>
 		 * 使得参数化数据集{@linkplain DataSet#getResult(DataSetQuery)}可支持根据当前数据分析用户、角色返回不同的数据。
@@ -721,7 +721,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		 */
 		public void setParamValue(DataSetQuery dataSetQuery)
 		{
-			setParamValue(dataSetQuery, getRoleNames(this));
+			setParamValue(dataSetQuery, getEnabledRoleNames());
 		}
 
 		/**
@@ -745,18 +745,21 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		}
 
 		/**
-		 * 获取{@linkplain AnalysisUser#getRoles()}列表的{@linkplain AnalysisRole#getName()}列表。
+		 * 获取{@linkplain AnalysisUser#getRoles()}列表中已启用的{@linkplain AnalysisRole#getName()}列表。
 		 * 
 		 * @return 不会为{@code null}
 		 */
-		public static List<String> getRoleNames(AnalysisUser analysisUser)
+		public List<String> getEnabledRoleNames()
 		{
 			List<String> roleNames = new ArrayList<String>();
 
-			if (analysisUser.roles != null)
+			if (this.roles != null)
 			{
-				for (AnalysisRole role : analysisUser.roles)
-					roleNames.add(role.getName());
+				for (AnalysisRole role : this.roles)
+				{
+					if (role.isEnabled())
+						roleNames.add(role.getName());
+				}
 			}
 
 			return roleNames;
