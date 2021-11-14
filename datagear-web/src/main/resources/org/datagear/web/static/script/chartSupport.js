@@ -2495,6 +2495,10 @@
 			{
 		        text: chart.name
 		    },
+			tooltip:
+			{
+				
+			},
 			legend:
 			{
 				//将在update中设置：
