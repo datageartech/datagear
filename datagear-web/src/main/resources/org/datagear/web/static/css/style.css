@@ -1165,35 +1165,34 @@ table.dataTable tbody tr td select{
 .main-page-head{
 	height: 25px;
 	line-height: 24px;
+	position: relative;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
 .main-page-head .logo{
-	float: left;
-    vertical-align: middle;
-	margin-left: 0.1em;
-}
-.main-page-head .logo .logo-content{
-	display: inline-block;
+	position: absolute;
+	left: 2px;
+	top: 2px;
 	opacity: 1;
 	filter: Alpha(Opacity=100);
     width: 84px;
     height: 20px;
+    line-height: 20px;
     background-size: 100% 100%;
     font-weight: bold;
     font-size: 0.9em;
-    /*text-indent: -100px;*/
+    /*图片LOGO时开启
+    text-indent: -50em;
+    */
 }
-.main-page-head .logo .logo-content:hover{
+.main-page-head .logo:hover{
 	opacity: 0.9;
 	filter: Alpha(Opacity=90);
 }
 .main-page-head .toolbar{
-	float: right;
-	text-align: right;
-	vertical-align: middle;
-	margin-right: 0.2em;
+	position: absolute;
+	right: 2px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
