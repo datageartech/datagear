@@ -304,7 +304,5 @@ table.dataTable th,
 
 /*LOGO*/
 .main-page-head .logo{
-	/*图片LOGO时开启
-	background-image: url(../../img/logo/full-210x50/logo-lightred-white.png);
-	*/
+	background-image: url(../../image/logo/full-210x50/logo-lightred-white.png);
 }

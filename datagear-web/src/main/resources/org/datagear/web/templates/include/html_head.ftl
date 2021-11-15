@@ -14,9 +14,7 @@
 <script type="text/javascript">
 var contextPath="${contextPath}";
 </script>
-<!--图片LOGO时开启
-<link href="${contextPath}/static/img/logo/icon-80x80/logo-red.png" type="images/x-icon" rel="shortcut icon" />
--->
+<link href="${contextPath}/static/image/logo/icon-80x80/logo-red.png" type="images/x-icon" rel="shortcut icon" />
 <link id="css_jquery_ui" href="${contextPath}/static/theme/<@spring.theme code='theme' />/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="stylesheet" />
 <link id="css_jquery_ui_theme" href="${contextPath}/static/theme/<@spring.theme code='theme' />/jquery-ui-1.12.1/jquery-ui.theme.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/jquery.layout-1.9.0/css/layout-default.min.css" type="text/css" rel="stylesheet" />

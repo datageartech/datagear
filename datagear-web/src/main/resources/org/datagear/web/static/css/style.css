@@ -1182,9 +1182,7 @@ table.dataTable tbody tr td select{
     background-size: 100% 100%;
     font-weight: bold;
     font-size: 0.9em;
-    /*图片LOGO时开启
     text-indent: -50em;
-    */
 }
 .main-page-head .logo:hover{
 	opacity: 0.9;
