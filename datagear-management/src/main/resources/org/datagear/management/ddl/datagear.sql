@@ -869,3 +869,9 @@ ALTER TABLE DATAGEAR_HCW_DS ADD COLUMN DS_PROPERTY_ALIASES VARCHAR(1000);
 
 --添加图表数据集属性排序列
 ALTER TABLE DATAGEAR_HCW_DS ADD COLUMN DS_PROPERTY_ORDERS VARCHAR(500);
+
+
+-----------------------------------------
+--version[2.11.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
