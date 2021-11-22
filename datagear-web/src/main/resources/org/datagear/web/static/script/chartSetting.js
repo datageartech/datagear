@@ -63,15 +63,6 @@
 		serialNumber: "序号"
 	});
 	
-	//datetimepicker组件I18N配置
-	chartSetting.datetimepickerI18n = (chartSetting.datetimepickerI18n ||
-	{
-		zh:
-		{
-			months: ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"]
-		}
-	});
-	
 	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
 	chartSetting.disableDateAwareInputAutocomplete = (chartSetting.disableDateAwareInputAutocomplete || true);
 	
@@ -412,9 +403,9 @@
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
 	 * 或者
-	 * "{ ... }"  //datetimepicker配置选项JSON字符串，数据集定义功能时
+	 * "{ format: '...Y...m...d...' }"、"{ format: '...Y...' }"（仅年份选择）  //数据集定义功能时
 	 * 或者
-	 * { ... }    //datetimepicker配置选项对象，看板表单功能时
+	 * { format: '...Y...m...d...' }、{ format: '...Y...' }（仅年份选择）      //看板表单功能时
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -443,7 +434,7 @@
 		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartSetting.datetimepicker($input, options, chartTheme);
+		chartSetting.renderDatetimePicker($input, options, chartTheme);
 	};
 	
 	/**
@@ -452,9 +443,9 @@
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
 	 * 或者
-	 * "{ ... }"  //datetimepicker配置选项JSON字符串，数据集定义功能时
+	 * "{ format: '...H...i...s...' }"  //数据集定义功能时
 	 * 或者
-	 * { ... }    //datetimepicker配置选项对象，看板表单功能时
+	 * { format: '...H...i...s...' }    //看板表单功能时
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -484,7 +475,7 @@
 		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartSetting.datetimepicker($input, options, chartTheme);
+		chartSetting.renderDatetimePicker($input, options, chartTheme);
 	};
 	
 	/**
@@ -493,9 +484,9 @@
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
 	 * 或者
-	 * "{ ... }"  //datetimepicker配置选项JSON字符串，数据集定义功能时
+	 * "{ format: '...Y...m...d...H...i...s...' }"  //数据集定义功能时
 	 * 或者
-	 * { ... }    //datetimepicker配置选项对象，看板表单功能时
+	 * { format: '...Y...m...d...H...i...s...' }    //看板表单功能时
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -524,7 +515,7 @@
 		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartSetting.datetimepicker($input, options, chartTheme);
+		chartSetting.renderDatetimePicker($input, options, chartTheme);
 	};
 	
 	/**
@@ -676,22 +667,19 @@
 			$input.attr("dg-validation-number", "true");
 	};
 	
-	chartSetting._DATETIME_PICKER_ROOT_ID = chartFactory._BUILT_IN_NAME_PART + "DatetimepickerRoot";
-	
-	chartSetting.datetimepicker = function($input, datetimepickerOptions, chartTheme)
+	chartSetting.renderDatetimePicker = function($input, options, chartTheme)
 	{
 		//在这里检查并重写，避免依赖加载顺序
-		global.overwriteDateFormatter_parseDate();
-		
-		if(chartSetting._datetimepickerSetLocale !== true)
+		if(!chartSetting._datetimepickerInited)
 		{
-			$.datetimepicker.setLocale('zh');
-			chartSetting._datetimepickerSetLocale = true;
+			chartSetting.datetimepickerInit();
+			chartSetting._datetimepickerInited = true;
 		}
 		
-		var $rootWrapper = $("#" + chartSetting._DATETIME_PICKER_ROOT_ID);
+		var rootWrapperId = chartFactory._BUILT_IN_NAME_PART + "DatetimepickerRoot";
+		var $rootWrapper = $("#" + rootWrapperId);
 		if($rootWrapper.length < 1)
-			$rootWrapper = $("<div />").attr("id", chartSetting._DATETIME_PICKER_ROOT_ID).appendTo(document.body);
+			$rootWrapper = $("<div />").attr("id", rootWrapperId).appendTo(document.body);
 		
 		var wrapperId = chartFactory.nextElementId();
 		var $wrapper = $("<div />").attr("id", wrapperId).appendTo($rootWrapper);
@@ -699,22 +687,24 @@
 		if(chartTheme)
 			$wrapper.addClass(chartSetting.datetimepickerThemeStyle(chartTheme));
 		
-		datetimepickerOptions = $.extend(
+		options = $.extend(
 		{
 			//inline应该为false，为true的话下面的datetimepickerThemeStyle函数创建的样式将不起作用
 			inline: false,
 			parentID: "#"+wrapperId,
-			i18n: chartSetting.datetimepickerI18n
+			i18n:
+			{
+				zh: { months: ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"] }
+			}
 		},
-		datetimepickerOptions);
+		options);
 		
-		//初始化为年份选择器
-		var isOnlySelectYear = ("Y" == datetimepickerOptions.format || "y" == datetimepickerOptions.format);
-		if(isOnlySelectYear)
+		//年份选择器
+		if("Y" == options.format || "y" == options.format)
 		{
 			//显示确定按钮，用于直接选中默认年份
-			datetimepickerOptions.showApplyButton = true;
-			datetimepickerOptions.onGenerate = function(currentValue, $input)
+			options.showApplyButton = true;
+			options.onGenerate = function(currentValue, $input)
 			{
 				var yearPickerInited = $(this).attr("yearPickerInited");
 				if(!yearPickerInited)
@@ -731,7 +721,7 @@
 						.addClass("xdsoft_save_selected_year ui-button ui-corner-all").html(chartSetting.labels.confirm);
 				}
 			};
-			datetimepickerOptions.onShow = function(currentValue,$input)
+			options.onShow = function(currentValue,$input)
 			{
 				if(!$input.val())
 				{
@@ -740,14 +730,32 @@
 					$input.val("");
 				}
 			};
-			datetimepickerOptions.onChangeYear = function(currentValue,$input)
+			options.onChangeYear = function(currentValue,$input)
 			{
 				this.setOptions({value: currentValue});
 				$(".xdsoft_save_selected", this).click();
 			};
 		}
 		
-		$input.datetimepicker(datetimepickerOptions);
+		$input.datetimepicker(options);
+	};
+	
+	chartSetting.datetimepickerInit = function()
+	{
+		$.datetimepicker.setLocale('zh');
+		//$.datetimepicker.setDateFormatter(chartSetting.datetimepickerDateFormatter);
+	};
+	
+	chartSetting.datetimepickerDateFormatter =
+	{
+		parseDate: function(date, format)
+		{
+			//TODO
+		},
+		formatDate: function (date, format)
+		{
+			//TODO
+		}
 	};
 	
 	/**
