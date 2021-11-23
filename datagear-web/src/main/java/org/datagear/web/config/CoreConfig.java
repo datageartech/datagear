@@ -627,9 +627,9 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 		// CSS
 		importItems.add(
-				ImportItem.valueOfLinkCss("dataTableStyle",
+				ImportItem.valueOfLinkCss("dataTable",
 						libPrefix + "/DataTables-1.11.3/css/datatables.min.css"));
-		importItems.add(ImportItem.valueOfLinkCss("datetimepickerStyle",
+		importItems.add(ImportItem.valueOfLinkCss("datetimepicker",
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
 		importItems.add(ImportItem.valueOfLinkCss("dashboardStyle", cssPrefix + "/analysis.css?v=" + vp));
 
