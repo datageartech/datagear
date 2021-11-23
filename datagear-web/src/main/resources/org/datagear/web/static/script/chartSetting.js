@@ -403,9 +403,9 @@
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
 	 * 或者
-	 * "{ format: '...Y...m...d...' }"、"{ format: '...Y...' }"（仅年份选择）  //数据集定义功能时
+	 * "{ format: '...Y|y...m...d...' }"、"{ format: '...Y|y...' }"（仅年份选择）  //数据集定义功能时
 	 * 或者
-	 * { format: '...Y...m...d...' }、{ format: '...Y...' }（仅年份选择）      //看板表单功能时
+	 * { format: '...Y|y...m...d...' }、{ format: '...Y|y...' }（仅年份选择）      //看板表单功能时
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -443,9 +443,9 @@
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
 	 * 或者
-	 * "{ format: '...H...i...s...' }"  //数据集定义功能时
+	 * "{ format: '...H|h...i...s...' }"  //数据集定义功能时
 	 * 或者
-	 * { format: '...H...i...s...' }    //看板表单功能时
+	 * { format: '...H|h...i...s...' }    //看板表单功能时
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -484,9 +484,16 @@
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
 	 * 或者
-	 * "{ format: '...Y...m...d...H...i...s...' }"  //数据集定义功能时
+	 * "{ format: '...Y|y...m...d...H|h...i...s...' }"  //数据集定义功能时
 	 * 或者
-	 * { format: '...Y...m...d...H...i...s...' }    //看板表单功能时
+	 * { format: '...Y|y...m...d...H|h...i...s...' }    //看板表单功能时
+	 *
+	 * Y|y ：年份，四位长度，不足补0
+	 * m   ：月份，两位长度，不足补0
+	 * d   ：日，两位长度，不足补0
+	 * H|h ：时，两位长度，不足补0
+	 * i   ：分，两位长度，不足补0
+	 * s   ：秒，两位长度，不足补0
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -743,19 +750,158 @@
 	chartSetting.datetimepickerInit = function()
 	{
 		$.datetimepicker.setLocale('zh');
-		//$.datetimepicker.setDateFormatter(chartSetting.datetimepickerDateFormatter);
+		$.datetimepicker.setDateFormatter(chartSetting.datetimepickerDateFormatter);
 	};
 	
+	//默认$.datetimepicker的DateFormatter有缺陷，支持格式有限，且对于"ymd"格式无法解析，所以这里重写
 	chartSetting.datetimepickerDateFormatter =
 	{
 		parseDate: function(date, format)
 		{
-			//TODO
+			date = (date || "");
+			
+			var dateObj=
+			{
+				y: 0, m: 1, d: 1,
+				h: 0, i: 0, s: 0
+			};
+			
+			format = this._parseFormat(format);
+			
+			var idx = 0;
+			for(var j=0; j<format.length; j++)
+			{
+				var fmt = format[j];
+				
+				if(fmt == 'Y' || fmt == 'y')
+					idx = this._readAndParseSet(date, idx, 4, dateObj, "y");
+				else if(fmt == 'm')
+					idx = this._readAndParseSet(date, idx, 2, dateObj, "m");
+				else if(fmt == 'd')
+					idx = this._readAndParseSet(date, idx, 2, dateObj, "d");
+				else if(fmt == 'H' || fmt == 'h')
+					idx = this._readAndParseSet(date, idx, 2, dateObj, "h");
+				else if(fmt == 'i')
+					idx = this._readAndParseSet(date, idx, 2, dateObj, "i");
+				else if(fmt == 's')
+					idx = this._readAndParseSet(date, idx, 2, dateObj, "s");
+				else
+					idx += fmt.length;
+			}
+			
+			return new Date(dateObj.y, dateObj.m - 1, dateObj.d, dateObj.h, dateObj.i, dateObj.s, 0);
 		},
 		formatDate: function (date, format)
 		{
-			//TODO
-		}
+			var re = "";
+			
+			var y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate(),
+				h = date.getHours(), i = date.getMinutes(), s = date.getSeconds();
+			
+			format = this._parseFormat(format);
+			
+			for(var j=0; j<format.length; j++)
+			{
+				var fmt = format[j];
+				
+				if(fmt == 'Y' || fmt == 'y')
+					re += this._paddingLeftZero(y, 4);
+				else if(fmt == 'm')
+					re += this._paddingLeftZero(m, 2);
+				else if(fmt == 'd')
+					re += this._paddingLeftZero(d, 2);
+				else if(fmt == 'H' || fmt == 'h')
+					re += this._paddingLeftZero(h, 2);
+				else if(fmt == 'i')
+					re += this._paddingLeftZero(i, 2);
+				else if(fmt == 's')
+					re += this._paddingLeftZero(s, 2);
+				else
+					re += fmt;
+			}
+			
+			return re;
+		},
+		_parseFormat: function(format)
+		{
+			format = (format || "");
+			
+			if(this._formatArrayCache[format])
+				return this._formatArrayCache[format];
+			
+			var re = [];
+			
+			var tmp = "";
+			for(var i=0; i<format.length; i++)
+			{
+				var c = format[i];
+				
+				if(c == 'Y' || c == 'y' || c == 'm' || c == 'd'
+					 || c == 'H' || c == 'h' || c == 'i' || c == 's')
+				{
+					if(tmp)
+					{
+						re.push(tmp);
+						tmp = "";
+					}
+					
+					re.push(c);
+				}
+				else
+					tmp += c;
+			}
+			
+			if(tmp)
+				re.push(tmp);
+			
+			this._formatArrayCache[format] = re;
+			
+			return re;
+		},
+		_readAndParseSet: function(str, index, maxCount, obj, propName)
+		{
+			index = (index == null ? 0 : index);
+			endIdx = (index + maxCount > str.length ? str.length : index + maxCount);
+			
+			var sub = "";
+			
+			for(; index<endIdx; index++)
+			{
+				var c = str[index];
+				
+				if(c >= '0' && c <= '9')
+				{
+					if(sub == '0')
+					{
+						if(c == '0')
+							;
+						else
+							sub = c;
+					}
+					else
+						sub += c;
+				}
+				else
+				{
+					break;
+				}
+			}
+			
+			if(sub)
+				obj[propName] = parseInt(sub);
+			
+			return index;
+		},
+		_paddingLeftZero: function(number, length)
+		{
+			var re = number + "";
+			
+			while(re.length < length)
+				re = "0" + re;
+			
+			return re;
+		},
+		_formatArrayCache:{}
 	};
 	
 	/**
@@ -1935,140 +2081,5 @@
 			dataTable.fixedColumns.relayout();
 		*/
 	};
-})
-(this);
-
-(function(global)
-{
-	global.overwriteDateFormatter_parseDate = function()
-	{
-		if(global._overwriteDateFormatter_parseDate == true)
-			return;
-		
-		global._overwriteDateFormatter_parseDate = true;
-		
-		//重写datetimepicker的DateFormatter.prototype.parseDate函数，
-		//解决当options配置为仅选择年份（{format:'Y'}）时，选择完毕后输入框blur后，年份会被重置的的BUG
-		DateFormatter.prototype.parseDate = function(e, r) {
-	        var n, a, u, i, s, o, c, f, l, h, d = this, g = !1, m = !1, p = d.dateSettings, y = {
-	            date: null,
-	            year: null,
-	            month: null,
-	            day: null,
-	            hour: 0,
-	            min: 0,
-	            sec: 0
-	        };
-	        if (!e)
-	            return null;
-	        if (e instanceof Date)
-	            return e;
-	        if ("U" === r)
-	            return u = parseInt(e),
-	            u ? new Date(1e3 * u) : e;
-	        switch (typeof e) {
-	        case "number":
-	            return new Date(e);
-	        case "string":
-	            break;
-	        default:
-	            return null
-	        }
-	        if (n = r.match(d.validParts),
-	        !n || 0 === n.length)
-	            throw new Error("Invalid date format definition.");
-	        for (a = e.replace(d.separators, "\x00").split("\x00"),
-	        u = 0; u < a.length; u++)
-	            switch (i = a[u],
-	            s = parseInt(i),
-	            n[u]) {
-	            case "y":
-	            case "Y":
-	                if (!s)
-	                    return null;
-	                l = i.length,
-	                y.year = 2 === l ? parseInt((70 > s ? "20" : "19") + i) : s,
-	                g = !0;
-	                break;
-	            case "m":
-	            case "n":
-	            case "M":
-	            case "F":
-	                if (isNaN(s)) {
-	                    if (o = d.getMonth(i),
-	                    !(o > 0))
-	                        return null;
-	                    y.month = o
-	                } else {
-	                    if (!(s >= 1 && 12 >= s))
-	                        return null;
-	                    y.month = s
-	                }
-	                g = !0;
-	                break;
-	            case "d":
-	            case "j":
-	                if (!(s >= 1 && 31 >= s))
-	                    return null;
-	                y.day = s,
-	                g = !0;
-	                break;
-	            case "g":
-	            case "h":
-	                if (c = n.indexOf("a") > -1 ? n.indexOf("a") : n.indexOf("A") > -1 ? n.indexOf("A") : -1,
-	                h = a[c],
-	                c > -1)
-	                    f = t(h, p.meridiem[0]) ? 0 : t(h, p.meridiem[1]) ? 12 : -1,
-	                    s >= 1 && 12 >= s && f > -1 ? y.hour = s + f - 1 : s >= 0 && 23 >= s && (y.hour = s);
-	                else {
-	                    if (!(s >= 0 && 23 >= s))
-	                        return null;
-	                    y.hour = s
-	                }
-	                m = !0;
-	                break;
-	            case "G":
-	            case "H":
-	                if (!(s >= 0 && 23 >= s))
-	                    return null;
-	                y.hour = s,
-	                m = !0;
-	                break;
-	            case "i":
-	                if (!(s >= 0 && 59 >= s))
-	                    return null;
-	                y.min = s,
-	                m = !0;
-	                break;
-	            case "s":
-	                if (!(s >= 0 && 59 >= s))
-	                    return null;
-	                y.sec = s,
-	                m = !0
-	            }
-	        
-	        //----添加的内容
-	        //如果选择了年份，检查并设置月份、日的初值，使下面的：
-	        //if (g === !0 && y.year && y.month && y.day)
-	        //逻辑可以执行到
-	        if (g === !0 && y.year)
-	        {
-	        	if(!y.month)
-	        		y.month = 1;
-	        	if(!y.day)
-	        		y.day = 1;
-	        }
-	        //----添加的内容
-	        
-	        if (g === !0 && y.year && y.month && y.day)
-	            y.date = new Date(y.year,y.month - 1,y.day,y.hour,y.min,y.sec,0);
-	        else {
-	            if (m !== !0)
-	                return null;
-	            y.date = new Date(0,0,0,y.hour,y.min,y.sec,0)
-	        }
-	        return y.date
-	    };
-	}
 })
 (this);
