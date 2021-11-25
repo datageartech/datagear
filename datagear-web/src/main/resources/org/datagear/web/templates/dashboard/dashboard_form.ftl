@@ -103,6 +103,8 @@ readonly 是否只读操作，允许为null
 										</#if>
 									</div>
 								</div>
+								<div class="resource-list-template"></div>
+								<div class="resource-list-divider ui-widget ui-widget-content"></div>
 								<div class="resource-list-content"></div>
 								<div class='add-resource-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
 									<div class="addResPanelHead panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
@@ -217,7 +219,7 @@ readonly 是否只读操作，允许为null
 				if(newPanel.hasClass("content-unloaded"))
 				{
 					newPanel.removeClass("content-unloaded");
-					po.refreshResourceGlobalList();
+					po.refreshResourceListGlobal();
 				}
 			}
 		}
@@ -827,18 +829,22 @@ readonly 是否只读操作，允许为null
 		return  po.element("input[name='id']").val();
 	};
 	
-	po.getSelectedResourceItem = function()
+	po.getSelectedResourceName = function()
 	{
-		var $resources = po.elementResListLocal(".resource-list-content");
-		return $("> .resource-item.ui-state-active", $resources);
-	};
-	
-	po.getSelectedResourceName = function($res)
-	{
-		if(!$res)
-			$res = po.getSelectedResourceItem();
+		var $template = po.elementResListLocal(".resource-list-template > .resource-item.ui-state-active");
 		
-		return $res.attr("resource-name");
+		if($template.length > 0)
+			return $template.attr("resource-name");
+		else
+		{
+			var tree = po.elementResListLocal(".resource-list-content").jstree(true);
+			var sel = tree.get_selected(true);
+			
+			if(sel && sel.length > 0)
+				return sel[0].original.fullPath;
+			else
+				return "";
+		}
 	};
 	
 	po.concatSelectedResDirectory = function(resName)
@@ -900,45 +906,47 @@ readonly 是否只读操作，允许为null
 		return -1;
 	};
 	
-	po.refreshResourceList = function()
+	po.refreshResourceTree = function($tree, resourceNames)
+	{
+		var tree = $.jstree.reference($tree);
+		if(tree != null)
+			tree.destroy();
+		
+		var data = $.toPathNodeTree(resourceNames, { nameProperty: "text", childrenProperty: "children"});
+		$tree.jstree({core: {data: data, check_callback: true, themes: {dots:false, icons: true}}});
+	};
+	
+	po.refreshResourceListLocal = function()
 	{
 		var id = po.getDashboardId();
 		
 		if(!id)
 			return;
 		
+		var $templates = po.elementResListLocal(".resource-list-template");
 		var $resources = po.elementResListLocal(".resource-list-content");
-		$resources.empty();
+		
+		$templates.empty();
 		
 		$.get(po.url("listResources?id="+id), function(resources)
 		{
 			if(!resources)
 				return;
 			
-			var templateCount = 0;
 			for(var i=0; i<po.templates.length; i++)
 			{
 				for(var j=0; j<resources.length; j++)
 				{
 					if(po.templates[i] == resources[j])
-					{
-						po.addDashboardResourceItemTemplate($resources, resources[j]);
-						templateCount++;
-					}
+						po.addDashboardResourceItemTemplate($templates, resources[j]);
 				}
 			}
 			
-			if(templateCount > 0)
-				$resources.append($("<div class='resource-item-divider ui-widget ui-widget-content'></div>"));
-			
-			for(var i=0; i<resources.length; i++)
-				po.addDashboardResourceItem($resources, resources[i]);
-			
-			$resources.selectable("refresh");
+			po.refreshResourceTree($resources, resources);
 		});
 	};
 	
-	po.elementResListLocal(".resource-list-content").selectable
+	po.elementResListLocal(".resource-list-template").selectable
 	(
 		{
 			classes: {"ui-selected": "ui-state-active"},
@@ -1061,9 +1069,7 @@ readonly 是否只读操作，允许为null
 		if(!po.checkDashboardSaved())
 			return;
 		
-		var $parent = po.elementResListLocal(".resource-list-content");
-		var $res = $("> .resource-item.ui-state-active", $parent);
-		var resName = $res.attr("resource-name");
+		var resName = po.getSelectedResourceName();
 		
 		if(!resName)
 			return;
@@ -1140,7 +1146,7 @@ readonly 是否只读操作，允许为null
 		$.post(po.url("saveResourceFile"), {"id": id, "resourceFilePath": resourceFilePath, "resourceName": resourceName},
 		function()
 		{
-			po.refreshResourceList();
+			po.refreshResourceListLocal();
 			po.elementResListLocal(".upload-resource-panel").hide();
 		});
 	});
@@ -1203,7 +1209,7 @@ readonly 是否只读操作，允许为null
 		if(!po.checkDashboardSaved())
 			return;
 		
-		var $parent = po.elementResListLocal(".resource-list-content");
+		var $parent = po.elementResListLocal(".resource-list-template");
 		var $res = $("> .resource-item.ui-state-active", $parent);
 		
 		if(!po.isTemplateResourceItem($res))
@@ -1263,7 +1269,7 @@ readonly 是否只读操作，允许为null
 			success : function(response)
 			{
 				po.templates = response.data.templates;
-				po.refreshResourceList();
+				po.refreshResourceListLocal();
 				
 				if(success)
 					success();
@@ -1281,7 +1287,7 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		po.refreshResourceList();
+		po.refreshResourceListLocal();
 	});
 	
 	po.elementResListLocal(".deleteResBtn").click(function()
@@ -1294,8 +1300,7 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		var $res = po.getSelectedResourceItem();
-		var name = po.getSelectedResourceName($res);
+		var name = po.getSelectedResourceName();
 		
 		if(!name)
 			return;
@@ -1307,7 +1312,7 @@ readonly 是否只读操作，允许为null
 				$.post(po.url("deleteResource"), {"id": id, "name" : name},
 				function(response)
 				{
-					po.refreshResourceList();
+					po.refreshResourceListLocal();
 				});
 			}
 		});
@@ -1375,7 +1380,7 @@ readonly 是否只读操作，允许为null
 	po.elementResListGlobal(".search-button").click(function(e)
 	{
 		var keyword = po.elementResListGlobal(".search-input").val();
-		po.refreshResourceGlobalList(keyword);
+		po.refreshResourceListGlobal(keyword);
 	});
 	
 	po.elementResListGlobal(".viewResButton").click(function(e)
@@ -1434,9 +1439,10 @@ readonly 是否只读操作，允许为null
 	
 	po.elementResListGlobal(".refreshResListBtn").click(function()
 	{
-		po.refreshResourceGlobalList();
+		po.refreshResourceListGlobal();
 	});
 
+	/*
 	po.elementResListGlobal(".resource-list-content").selectable
 	(
 		{
@@ -1454,8 +1460,9 @@ readonly 是否只读操作，允许为null
 		var $this = $(this);
 		$this.removeClass("ui-state-default");
 	});
+	*/
 	
-	po.refreshResourceGlobalList = function(searchKeyword)
+	po.refreshResourceListGlobal = function(searchKeyword)
 	{
 		var $resources = po.elementResListGlobal(".resource-list-content");
 		$resources.empty();
@@ -1470,10 +1477,12 @@ readonly 是否只读操作，允许为null
 				return;
 			}
 			
-			for(var i=0; i<resources.length; i++)
-				po.addDashboardResourceItem($resources, po.dashboardGlobalResUrlPrefix + resources[i].path);
+			var resNames = [];
 			
-			$resources.selectable("refresh");
+			for(var i=0; i<resources.length; i++)
+				resNames[i] = po.dashboardGlobalResUrlPrefix + resources[i].path
+			
+			po.refreshResourceTree($resources, resNames);
 		});
 	};
 	
@@ -1622,7 +1631,7 @@ readonly 是否只读操作，允许为null
 					
 					var close = po.pageParamCallAfterSave(false);
 					if(!close)
-						po.refreshResourceList();
+						po.refreshResourceListLocal();
 				},
 				complete: function()
 				{
@@ -1640,7 +1649,7 @@ readonly 是否只读操作，允许为null
 		po.element(".resize-editor-button-left").click();
 	
 	po.newResourceEditorTab(po.element("#${pageId}-initTemplateName").val(), po.element("#${pageId}-initTemplateContent").val(), true);
-	po.refreshResourceList();
+	po.refreshResourceListLocal();
 })
 (${pageId});
 </script>

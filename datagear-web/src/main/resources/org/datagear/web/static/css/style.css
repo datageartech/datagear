@@ -3385,13 +3385,48 @@ table.dataTable tbody tr td select{
 	margin-right: 0;
 	vertical-align: top;
 }
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-content{
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-template{
 	position: absolute;
 	left: 0.2em;
 	right: 0.2em;
 	top: 2.2em;
+	height: 20%;
+	overflow: auto;
+}
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-divider{
+	position: absolute;
+	left: 0.2em;
+	right: 0.2em;
+	top: 20%;
+	height: 0.1em;
+	margin-top: 2.4em;
+	overflow: hidden;
+	border-top-width: 0px;
+	border-left-width: 0px;
+	border-right-width: 0px;
+}
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-content{
+	position: absolute;
+	left: 0.2em;
+	right: 0.2em;
+	top: 20%;
+	margin-top: 2.8em;
 	bottom: 0.2em;
 	overflow: auto;
+}
+.page-form-dashboard .resources-wrapper .resource-list-wrapper.resource-list-global-wrapper .resource-list-content{
+	top: 2.2em;
+	margin-top: 0;
+}
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-content.jstree-default .jstree-anchor > .jstree-icon,
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-content.jstree-default .jstree-leaf > .jstree-ocl{
+	display: none;
+}
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-content.jstree-default .jstree-anchor{
+	margin-left: 20px;
+}
+.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-content.jstree-default .jstree-leaf .jstree-anchor{
+	margin-left: 18px;
 }
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-none{
 	font-weight: bold;
@@ -3406,15 +3441,6 @@ table.dataTable tbody tr td select{
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-item.ui-state-default,
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-item.ui-state-active{
 	border: 0px;
-}
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-item-divider{
-	display: inline-block;
-	width: 100%;
-	height: 3px;
-	margin-bottom: 3px;
-	border-top-width: 0px;
-	border-left-width: 0px;
-	border-right-width: 0px;
 }
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .add-resource-panel,
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel{
