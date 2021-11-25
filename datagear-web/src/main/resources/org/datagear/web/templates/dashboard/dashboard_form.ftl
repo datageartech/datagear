@@ -83,11 +83,11 @@ readonly 是否只读操作，允许为null
 										<#if !readonly>
 										<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editResource.desc' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
 										<button type='button' class='uploadResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
-										<button type='button' class='deleteResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.deleteResource' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='copyResNameButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
 										<div class="resource-more-button-wrapper">
 											<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
 											<div class="resource-more-button-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow">
-												<button type='button' class='copyResNameButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
+												<button type='button' class='deleteResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.deleteResource' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='viewResButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.viewResource' />"><span class='ui-icon ui-icon-extlink'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='asTemplateBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='asNormalResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
@@ -829,50 +829,53 @@ readonly 是否只读操作，允许为null
 		return  po.element("input[name='id']").val();
 	};
 	
-	po.getSelectedResourceName = function()
+	po.getSelectedResourceNameForTree = function($tree)
+	{
+		var tree = $tree.jstree(true);
+		var sel = tree.get_selected(true);
+		
+		if(sel && sel.length > 0)
+			return sel[0].original.fullPath;
+		else
+			return undefined;
+	};
+	
+	po.deselectResourceNameForTree = function($tree)
+	{
+		var tree = $tree.jstree(true);
+		var sel = tree.get_selected();
+		tree.deselect_node(sel);
+	};
+	
+	po.getSelectedResourceNameForTemplate = function()
 	{
 		var $template = po.elementResListLocal(".resource-list-template > .resource-item.ui-state-active");
 		
 		if($template.length > 0)
 			return $template.attr("resource-name");
-		else
-		{
-			var tree = po.elementResListLocal(".resource-list-content").jstree(true);
-			var sel = tree.get_selected(true);
-			
-			if(sel && sel.length > 0)
-				return sel[0].original.fullPath;
-			else
-				return "";
-		}
-	};
-	
-	po.concatSelectedResDirectory = function(resName)
-	{
-		var currentRes = po.getSelectedResourceName();
-		if(currentRes)
-		{
-			var lastChar = currentRes.charAt(currentRes.length - 1);
-			if(lastChar == "/")
-				;
-			else
-				currentRes = "";
-		}
-		else
-			currentRes = "";
 		
-		return currentRes + resName;
+		return undefined;
 	};
 	
-	po.addDashboardResourceItem = function($parent, resourceName)
+	po.deselectResourceNameForSelectable = function()
 	{
-		var $res = $("<div class='resource-item'></div>").attr("resource-name", resourceName).text(resourceName);
-		$parent.append($res);
+		var $template = po.elementResListLocal(".resource-list-template > .resource-item.ui-state-active");
+		$template.removeClass("ui-state-active");
+	};
+	
+	po.getSelectedResourceName = function()
+	{
+		var resName = po.getSelectedResourceNameForTemplate();
+		
+		if(resName)
+			return resName;
+		else
+			return po.getSelectedResourceNameForTree(po.elementResListLocal(".resource-list-content"));
 	};
 	
 	po.addDashboardResourceItemTemplate = function($parent, templateName, prepend)
 	{
-		var $res = $("<div class='resource-item resource-item-template'></div>").attr("resource-name", templateName).text(templateName);
+		var $res = $("<div class='resource-item resource-item-template ui-corner-all'></div>").attr("resource-name", templateName).text(templateName);
 		$res.prepend($("<span class='ui-icon ui-icon-contact'></span>").attr("title", "<@spring.message code='dashboard.dashboardTemplateResource' />"));
 		$("<input type='hidden' name='templates[]' />").attr("value", templateName).appendTo($res);
 		
@@ -886,11 +889,6 @@ readonly 是否只读操作，允许为null
 			else
 				last.after($res);
 		}
-	};
-	
-	po.isTemplateResourceItem = function($res)
-	{
-		return $res.hasClass("resource-item-template");
 	};
 	
 	po.getTemplateIndex = function(templateName, templates)
@@ -943,16 +941,27 @@ readonly 是否只读操作，允许为null
 			}
 			
 			po.refreshResourceTree($resources, resources);
+			$resources
+			.bind("select_node.jstree", function()
+			{
+				po.deselectResourceNameForSelectable();
+			})
+			.bind("select_all.jstree", function()
+			{
+				po.deselectResourceNameForSelectable();
+			});
 		});
 	};
 	
 	po.elementResListLocal(".resource-list-template").selectable
-	(
+	({
+		classes: {"ui-selected": "ui-state-active"},
+		filter: ".resource-item",
+		selected: function()
 		{
-			classes: {"ui-selected": "ui-state-active"},
-			filter: ".resource-item"
+			po.deselectResourceNameForTree(po.elementResListLocal(".resource-list-content"));
 		}
-	)
+	})
 	.on("mouseenter", ".resource-item", function()
 	{
 		var $this = $(this);
@@ -1004,7 +1013,6 @@ readonly 是否只读操作，允许为null
 	}
 	
 	po.elementResListLocal(".add-resource-panel").draggable({ handle : ".addResPanelHead" });
-	
 	po.elementResListLocal(".upload-resource-panel").draggable({ handle : ".uploadResPanelHead" });
 	
 	po.elementResListLocal(".resource-more-button-wrapper").hover(
@@ -1029,7 +1037,7 @@ readonly 是否只读操作，允许为null
 		
 		return true;
 	};
-
+	
 	po.elementResListLocal(".addResBtn").click(function()
 	{
 		po.elementResListLocal(".addResNameInput").val("");
@@ -1051,8 +1059,6 @@ readonly 是否只读操作，允许为null
 		var name = po.elementResListLocal(".addResNameInput").val();
 		if(!name)
 			return;
-		
-		name = po.concatSelectedResDirectory(name);
 		
 		var content = "";
 		var isHtml = $.isHtmlFile(name);
@@ -1174,13 +1180,7 @@ readonly 是否只读操作，允许为null
 		if(!po.checkDashboardSaved())
 			return;
 		
-		var $parent = po.elementResListLocal(".resource-list-content");
-		var $res = $("> .resource-item.ui-state-active", $parent);
-		
-		if(po.isTemplateResourceItem($res))
-			return;
-		
-		var resName = $res.attr("resource-name");
+		var resName = po.getSelectedResourceNameForTree(po.elementResListLocal(".resource-list-content"));
 		
 		if(!resName)
 			return;
@@ -1191,7 +1191,7 @@ readonly 是否只读操作，允许为null
 	 		return;
 		}
 		
-		var $templates = $(".resource-item-template", $parent);
+		var $templates = po.elementResListLocal(".resource-item-template");
 		for(var i=0; i<$templates.length; i++)
 		{
 			if($($templates[i]).attr("resource-name") == resName)
@@ -1209,14 +1209,8 @@ readonly 是否只读操作，允许为null
 		if(!po.checkDashboardSaved())
 			return;
 		
-		var $parent = po.elementResListLocal(".resource-list-template");
-		var $res = $("> .resource-item.ui-state-active", $parent);
+		var resName = po.getSelectedResourceNameForTemplate();
 		
-		if(!po.isTemplateResourceItem($res))
-			return;
-		
-		var resName = $res.attr("resource-name");
-
 		if(!resName)
 			return;
 		
@@ -1233,13 +1227,7 @@ readonly 是否只读操作，允许为null
 		if(!po.checkDashboardSaved())
 			return;
 		
-		var $parent = po.elementResListLocal(".resource-list-content");
-		var $res = $("> .resource-item.ui-state-active", $parent);
-		
-		if(!po.isTemplateResourceItem($res))
-			return;
-		
-		var resName = $res.attr("resource-name");
+		var resName = po.getSelectedResourceNameForTemplate();
 		
 		if(!resName)
 			return;
@@ -1326,7 +1314,7 @@ readonly 是否只读操作，允许为null
 		paramName : "file",
 		success : function(uploadResult, textStatus, jqXHR)
 		{
-			po.elementResListLocal(".uploadResNameInput").val(po.concatSelectedResDirectory(uploadResult.fileName));
+			po.elementResListLocal(".uploadResNameInput").val(uploadResult.fileName);
 			po.elementResListLocal(".uploadResFilePath").val(uploadResult.uploadFilePath);
 			
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
@@ -1400,6 +1388,20 @@ readonly 是否只读操作，允许为null
 		
 		window.open(po.showUrl(id) + path);
 	});
+
+	po.elementResListGlobal(".refreshResListBtn").click(function()
+	{
+		var id = po.getDashboardId();
+		
+		if(!id)
+		{
+			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			return;
+		}
+		
+		var keyword = po.elementResListGlobal(".search-input").val();
+		po.refreshResourceListGlobal(keyword);
+	});
 	
 	var copyResGlobalNameButton = po.elementResListGlobal(".copyResNameButton");
 	if(copyResGlobalNameButton.length > 0)
@@ -1423,66 +1425,31 @@ readonly 是否只读操作，允许为null
 		});
 	}
 	
-	po.getSelectedResourceGlobalName = function($res)
+	po.getSelectedResourceGlobalName = function()
 	{
-		if(!$res)
-			$res = po.getSelectedResourceGlobalItem();
-		
-		return $res.attr("resource-name");
+		return po.getSelectedResourceNameForTree(po.elementResListGlobal(".resource-list-content"));
 	};
-	
-	po.getSelectedResourceGlobalItem = function()
-	{
-		var $resources = po.elementResListGlobal(".resource-list-content");
-		return $("> .resource-item.ui-state-active", $resources);
-	};
-	
-	po.elementResListGlobal(".refreshResListBtn").click(function()
-	{
-		po.refreshResourceListGlobal();
-	});
-
-	/*
-	po.elementResListGlobal(".resource-list-content").selectable
-	(
-		{
-			classes: {"ui-selected": "ui-state-active"},
-			filter: ".resource-item"
-		}
-	)
-	.on("mouseenter", ".resource-item", function()
-	{
-		var $this = $(this);
-		$this.addClass("ui-state-default");
-	})
-	.on("mouseleave", ".resource-item", function()
-	{
-		var $this = $(this);
-		$this.removeClass("ui-state-default");
-	});
-	*/
 	
 	po.refreshResourceListGlobal = function(searchKeyword)
 	{
 		var $resources = po.elementResListGlobal(".resource-list-content");
-		$resources.empty();
 		
-		var data = { "keyword": searchKeyword };
-		
-		$.postJson("${contextPath}/dashboardGlobalRes/queryData", data, function(resources)
+		$.postJson("${contextPath}/dashboardGlobalRes/queryData", { "keyword": searchKeyword }, function(resources)
 		{
 			if(!resources || resources.length == 0)
 			{
+				$resources.empty();
 				$resources.html("<div class='resource-none ui-state-disabled'><@spring.message code='none' /></div>");
-				return;
 			}
-			
-			var resNames = [];
-			
-			for(var i=0; i<resources.length; i++)
-				resNames[i] = po.dashboardGlobalResUrlPrefix + resources[i].path
-			
-			po.refreshResourceTree($resources, resNames);
+			else
+			{
+				var resNames = [];
+				
+				for(var i=0; i<resources.length; i++)
+					resNames[i] = po.dashboardGlobalResUrlPrefix + resources[i].path
+				
+				po.refreshResourceTree($resources, resNames);
+			}
 		});
 	};
 	

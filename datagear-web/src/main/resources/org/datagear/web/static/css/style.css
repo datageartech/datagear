@@ -3446,7 +3446,7 @@ table.dataTable tbody tr td select{
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel{
 	position: absolute;
 	display: none;
-	width: 120%;
+	width: 200%;
 	right: 0px;
 	top: 1.8em;
 }
