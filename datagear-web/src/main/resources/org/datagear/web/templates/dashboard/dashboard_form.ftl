@@ -901,6 +901,11 @@ readonly 是否只读操作，允许为null
 		return -1;
 	};
 	
+	po.isResourceNameDirectroy = function(resName)
+	{
+		return (resName && resName.charAt(resName.length - 1) == '/');
+	};
+	
 	po.resourceNamesToTreeData = function(resourceNames, idPrefix)
 	{
 		if(idPrefix == null)
@@ -1067,7 +1072,11 @@ readonly 是否只读操作，允许为null
 	
 	po.elementResListLocal(".addResBtn").click(function()
 	{
-		po.elementResListLocal(".addResNameInput").val("");
+		var initVal = po.getSelectedResourceName();
+		if(!po.isResourceNameDirectroy(initVal))
+			initVal = "";
+		
+		po.elementResListLocal(".addResNameInput").val(initVal);
 		po.elementResListLocal(".add-resource-panel").show();
 	});
 	
@@ -1086,6 +1095,12 @@ readonly 是否只读操作，允许为null
 		var name = po.elementResListLocal(".addResNameInput").val();
 		if(!name)
 			return;
+		
+		if(po.isResourceNameDirectroy(name))
+		{
+			$.tipInfo("<@spring.message code='dashboard.illegalSaveAddResourceName' />");
+			return;
+		}
 		
 		var content = "";
 		var isHtml = $.isHtmlFile(name);
@@ -1341,7 +1356,11 @@ readonly 是否只读操作，允许为null
 		paramName : "file",
 		success : function(uploadResult, textStatus, jqXHR)
 		{
-			po.elementResListLocal(".uploadResNameInput").val(uploadResult.fileName);
+			var parent = po.getSelectedResourceName();
+			if(!po.isResourceNameDirectroy(parent))
+				parent = "";
+			
+			po.elementResListLocal(".uploadResNameInput").val(parent + uploadResult.fileName);
 			po.elementResListLocal(".uploadResFilePath").val(uploadResult.uploadFilePath);
 			
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
