@@ -77,18 +77,18 @@ readonly 是否只读操作，允许为null
 									<#if !readonly>
 									<div class="resource-button-wrapper rbw-left">
 										<button type='button' class='addResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource.desc' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='uploadResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
 									</div>
 									</#if>
 									<div class="resource-button-wrapper rbw-right">
 										<#if !readonly>
 										<button type='button' class='editResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editResource.desc' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
-										<button type='button' class='uploadResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
 										<button type='button' class='copyResNameButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='viewResButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.viewResource' />"><span class='ui-icon ui-icon-extlink'></span><span class='ui-button-icon-space'></span></button>
 										<div class="resource-more-button-wrapper">
 											<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
 											<div class="resource-more-button-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow">
 												<button type='button' class='deleteResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.deleteResource' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
-												<button type='button' class='viewResButton resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.viewResource' />"><span class='ui-icon ui-icon-extlink'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='asTemplateBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='asNormalResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
 												<button type='button' class='asFirstTemplateBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-home'></span><span class='ui-button-icon-space'></span></button>
@@ -149,7 +149,7 @@ readonly 是否只读操作，允许为null
 									</div>
 								</div>
 							</div>
-							<div id="${pageId}-resourceListGlobal" class="resource-list-wrapper resource-list-global-wrapper content-unloaded ui-widget ui-widget-content ui-corner-all">
+							<div id="${pageId}-resourceListGlobal" class="resource-list-wrapper resource-list-global-wrapper ui-widget ui-widget-content ui-corner-all">
 								<div class="resource-list-head ui-widget ui-widget-content">
 									<div class="resource-button-wrapper rbw-left">
 										<div class="search-group ui-widget ui-widget-content ui-corner-all">
@@ -165,7 +165,10 @@ readonly 是否只读操作，允许为null
 										<button type='button' class='refreshResListBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.refreshResource' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
 									</div>
 								</div>
-								<div class="resource-list-content"></div>
+								<div class="resource-list-global-prefix ui-state-default">${dashboardGlobalResUrlPrefix}</div>
+								<div class='resource-none ui-state-disabled'><@spring.message code='none' /></div>
+								<div class="resource-list-content">
+								</div>
 							</div>
 						</div>
 					</div>
@@ -215,13 +218,7 @@ readonly 是否只读操作，允许为null
 			var newPanel = $(ui.newPanel);
 			
 			if(newTab.hasClass("nav-item-global"))
-			{
-				if(newPanel.hasClass("content-unloaded"))
-				{
-					newPanel.removeClass("content-unloaded");
-					po.refreshResourceListGlobal();
-				}
-			}
+				po.initResListGlobalIfNon();
 		}
 	});
 	
@@ -904,14 +901,20 @@ readonly 是否只读操作，允许为null
 		return -1;
 	};
 	
-	po.refreshResourceTree = function($tree, resourceNames)
+	po.resourceNamesToTreeData = function(resourceNames, idPrefix)
 	{
-		var tree = $.jstree.reference($tree);
-		if(tree != null)
-			tree.destroy();
+		if(idPrefix == null)
+			idPrefix = "";
 		
-		var data = $.toPathNodeTree(resourceNames, { nameProperty: "text", childrenProperty: "children"});
-		$tree.jstree({core: {data: data, check_callback: true, themes: {dots:false, icons: true}}});
+		return $.toPathTree(resourceNames,
+				{
+					nameProperty: "text", childrenProperty: "children",
+					fullPathProperty: "fullPath",
+					created: function(node)
+					{
+						node.id = idPrefix + node.fullPath;
+					}
+				});
 	};
 	
 	po.refreshResourceListLocal = function()
@@ -921,36 +924,7 @@ readonly 是否只读操作，允许为null
 		if(!id)
 			return;
 		
-		var $templates = po.elementResListLocal(".resource-list-template");
-		var $resources = po.elementResListLocal(".resource-list-content");
-		
-		$templates.empty();
-		
-		$.get(po.url("listResources?id="+id), function(resources)
-		{
-			if(!resources)
-				return;
-			
-			for(var i=0; i<po.templates.length; i++)
-			{
-				for(var j=0; j<resources.length; j++)
-				{
-					if(po.templates[i] == resources[j])
-						po.addDashboardResourceItemTemplate($templates, resources[j]);
-				}
-			}
-			
-			po.refreshResourceTree($resources, resources);
-			$resources
-			.bind("select_node.jstree", function()
-			{
-				po.deselectResourceNameForSelectable();
-			})
-			.bind("select_all.jstree", function()
-			{
-				po.deselectResourceNameForSelectable();
-			});
-		});
+		po.elementResListLocal(".resource-list-content").jstree(true).refresh(true);
 	};
 	
 	po.elementResListLocal(".resource-list-template").selectable
@@ -971,6 +945,59 @@ readonly 是否只读操作，允许为null
 	{
 		var $this = $(this);
 		$this.removeClass("ui-state-default");
+	});
+	
+	po.elementResListLocal(".resource-list-content").jstree(
+	{
+		core:
+		{
+			data: function(node, callback)
+			{
+				var _this = this;
+				
+				//根节点
+				if(node.id == "#")
+				{
+					var id = po.getDashboardId();
+					
+					if(!id)
+					{
+						callback.call(_this, []);
+						return;
+					}
+					
+					$.get(po.url("listResources?id="+id), function(resources)
+					{
+						resources = (resources || []);
+						
+						var $templates = po.elementResListLocal(".resource-list-template");
+						$templates.empty();
+						
+						for(var i=0; i<po.templates.length; i++)
+						{
+							for(var j=0; j<resources.length; j++)
+							{
+								if(po.templates[i] == resources[j])
+									po.addDashboardResourceItemTemplate($templates, resources[j]);
+							}
+						}
+						
+						var treeData = po.resourceNamesToTreeData(resources, "resLocal-");
+						callback.call(_this, treeData);
+					});
+				}
+			},
+			check_callback: true,
+			themes: {dots:false, icons: true}
+		}
+	})
+	.bind("select_node.jstree", function()
+	{
+		po.deselectResourceNameForSelectable();
+	})
+	.bind("select_all.jstree", function()
+	{
+		po.deselectResourceNameForSelectable();
 	});
 	
 	po.element(".resize-editor-button-left").click(function()
@@ -1355,6 +1382,62 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	
+	po.initResListGlobalIfNon = function()
+	{
+		var $tree = po.elementResListGlobal(".resource-list-content");
+		var tree = $.jstree.reference($tree);
+		
+		if(tree != null)
+			return;
+		
+		$tree.jstree(
+		{
+			core:
+			{
+				data: function(node, callback)
+				{
+					var _this = this;
+					
+					//根节点
+					if(node.id == "#")
+					{
+						var keyword = po.elementResListGlobal(".search-input").val();
+						
+						$.postJson("${contextPath}/dashboardGlobalRes/queryData", { "keyword": keyword }, function(resources)
+						{
+							resources = (resources || []);
+							
+							if(!resources || resources.length == 0)
+							{
+								po.elementResListGlobal(".resource-none").show();
+								po.elementResListGlobal(".resource-list-content").hide();
+							}
+							else
+							{
+								po.elementResListGlobal(".resource-none").hide();
+								po.elementResListGlobal(".resource-list-content").show();
+							}
+							
+							var resNames = [];
+							for(var i=0; i<resources.length; i++)
+								resNames[i] = resources[i].path;
+							
+							var treeData = po.resourceNamesToTreeData(resNames, "resGlobal-");
+							callback.call(_this, treeData);
+						});
+					}
+				},
+				check_callback: true,
+				themes: {dots:false, icons: true}
+			}
+		});
+	};
+	
+	po.refreshResourceListGlobal = function()
+	{
+		po.elementResListGlobal(".resource-list-content").jstree(true).refresh(true);
+	};
+	
 	po.elementResListGlobal(".search-input").on("keydown", function(e)
 	{
 		if(e.keyCode == $.ui.keyCode.ENTER)
@@ -1367,8 +1450,7 @@ readonly 是否只读操作，允许为null
 	
 	po.elementResListGlobal(".search-button").click(function(e)
 	{
-		var keyword = po.elementResListGlobal(".search-input").val();
-		po.refreshResourceListGlobal(keyword);
+		po.refreshResourceListGlobal();
 	});
 	
 	po.elementResListGlobal(".viewResButton").click(function(e)
@@ -1391,16 +1473,7 @@ readonly 是否只读操作，允许为null
 
 	po.elementResListGlobal(".refreshResListBtn").click(function()
 	{
-		var id = po.getDashboardId();
-		
-		if(!id)
-		{
-			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
-			return;
-		}
-		
-		var keyword = po.elementResListGlobal(".search-input").val();
-		po.refreshResourceListGlobal(keyword);
+		po.refreshResourceListGlobal();
 	});
 	
 	var copyResGlobalNameButton = po.elementResListGlobal(".copyResNameButton");
@@ -1427,30 +1500,12 @@ readonly 是否只读操作，允许为null
 	
 	po.getSelectedResourceGlobalName = function()
 	{
-		return po.getSelectedResourceNameForTree(po.elementResListGlobal(".resource-list-content"));
-	};
-	
-	po.refreshResourceListGlobal = function(searchKeyword)
-	{
-		var $resources = po.elementResListGlobal(".resource-list-content");
+		var name = po.getSelectedResourceNameForTree(po.elementResListGlobal(".resource-list-content"));
 		
-		$.postJson("${contextPath}/dashboardGlobalRes/queryData", { "keyword": searchKeyword }, function(resources)
-		{
-			if(!resources || resources.length == 0)
-			{
-				$resources.empty();
-				$resources.html("<div class='resource-none ui-state-disabled'><@spring.message code='none' /></div>");
-			}
-			else
-			{
-				var resNames = [];
-				
-				for(var i=0; i<resources.length; i++)
-					resNames[i] = po.dashboardGlobalResUrlPrefix + resources[i].path
-				
-				po.refreshResourceTree($resources, resNames);
-			}
-		});
+		if(name)
+			name = po.dashboardGlobalResUrlPrefix + name;
+		
+		return name;
 	};
 	
 	po.insertChartCode = function(editor, charts)
@@ -1616,7 +1671,6 @@ readonly 是否只读操作，允许为null
 		po.element(".resize-editor-button-left").click();
 	
 	po.newResourceEditorTab(po.element("#${pageId}-initTemplateName").val(), po.element("#${pageId}-initTemplateContent").val(), true);
-	po.refreshResourceListLocal();
 })
 (${pageId});
 </script>

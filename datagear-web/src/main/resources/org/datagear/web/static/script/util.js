@@ -915,10 +915,11 @@
 		 *				  nameProperty: "name",
 		 *				  childrenProperty: "children",
 		 *				  fullPathProperty: "fullPath",
-		 *				  keepSeparator: true
+		 *				  keepSeparator: true,
+		 *				  created: function(node){ ... }
 		 *				}
 		 */
-		toPathNodeTree: function(strs, options)
+		toPathTree: function(strs, options)
 		{
 			strs = (strs || []);
 			options = $.extend(
@@ -926,7 +927,8 @@
 				nameProperty: "name",
 				childrenProperty: "children",
 				fullPathProperty: "fullPath",
-				keepSeparator: true
+				keepSeparator: true,
+				created: undefined
 			},
 			options);
 			
@@ -950,6 +952,9 @@
 							var p = {};
 							p[options.nameProperty] = ni;
 							p[options.fullPathProperty] = strs[i];
+							if(options.created)
+								options.created(p);
+							
 							parent.push(p);
 						}
 					}
@@ -961,6 +966,9 @@
 							p[options.nameProperty] = ni;
 							p[options.fullPathProperty] = $.concatPathArray(nodes, 0, j+1);
 							p[options.childrenProperty] = [];
+							if(options.created)
+								options.created(p);
+								
 							parent.push(p);
 							parent = p[options.childrenProperty];
 						}

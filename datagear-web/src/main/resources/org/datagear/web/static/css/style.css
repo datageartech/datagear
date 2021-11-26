@@ -3414,8 +3414,14 @@ table.dataTable tbody tr td select{
 	bottom: 0.2em;
 	overflow: auto;
 }
+.page-form-dashboard .resources-wrapper .resource-list-wrapper.resource-list-global-wrapper .resource-list-global-prefix{
+	height: 2em;
+    line-height: 2em;
+    padding-left: 0.4em;
+    border: 0;
+}
 .page-form-dashboard .resources-wrapper .resource-list-wrapper.resource-list-global-wrapper .resource-list-content{
-	top: 2.2em;
+	top: 4em;
 	margin-top: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-list-content.jstree-default .jstree-anchor > .jstree-icon,
