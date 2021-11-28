@@ -1,5 +1,7 @@
 下一版本：
 	添加更多内置图表插件：主题河流图、地图热力图；
+	图表JS对象新增dataSetPropertySign()函数，用于获取/设置数据集属性数据标记；
+	chart.echartsInit()、chart.echartsOptions()扩展函数参数；
 	ok 更新内置中国地图；
 	ok 看板编辑页面资源列表改为树形结构展示；
 	
