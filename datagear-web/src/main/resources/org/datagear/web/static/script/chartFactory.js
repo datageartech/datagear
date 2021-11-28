@@ -2213,11 +2213,12 @@
 	 * 此方法会自动调用chartBase.internal()将初始化的ECharts实例对象设置为图表底层组件。
 	 * 
 	 * @param options 要设置的ECharts选项
+	 * @param opts 可选，ECharts的init函数附加参数，具体参考ECharts.init()函数的opts参数
 	 * @returns ECharts实例对象
 	 */
-	chartBase.echartsInit = function(options)
+	chartBase.echartsInit = function(options, opts)
 	{
-		var instance = echarts.init(this.element(), this._echartsGetRegisteredThemeName());
+		var instance = echarts.init(this.element(), this._echartsGetRegisteredThemeName(), opts);
 		instance.setOption(options);
 		
 		this.internal(instance);
