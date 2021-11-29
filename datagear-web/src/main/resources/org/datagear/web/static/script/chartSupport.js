@@ -57,10 +57,12 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
 			xAxis: {
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
@@ -77,6 +79,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "line"
 				}
 			]
@@ -114,7 +117,7 @@
 				
 				chart.originalInfo(data, chartDataSet);
 				
-				var mySeries = {type: "line", name: legendName, data: data};
+				var mySeries = {id: series.length, type: "line", name: legendName, data: data};
 				
 				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
 				if(renderOptions.dgStack)
@@ -131,16 +134,15 @@
 			}
 		}
 		
-		var options = { legend: {data: legendData}, series: series };
-		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
-		options.xAxis = {data: null};
+		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+		var options = { legend: { id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
 		});
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.lineResize = function(chart)
@@ -204,11 +206,13 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
 			xAxis:
 			{
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
@@ -216,6 +220,7 @@
 			},
 			yAxis:
 			{
+				id: 0,
 				name: (vps.length == 1 ? chart.dataSetPropertyAlias(chartDataSet, vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
@@ -226,6 +231,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "bar"
 				}
 			]
@@ -278,7 +284,7 @@
 				
 				chart.originalInfo(data, chartDataSet);
 				
-				var mySeries = {type: "bar", name: legendName, data: data};
+				var mySeries = {id: series.length, type: "bar", name: legendName, data: data};
 				
 				if(renderOptions.dgStack)
 				{
@@ -291,13 +297,13 @@
 			}
 		}
 		
-		var options = { legend: {data: legendData}, series: series };
+		var options = { legend: {id: 0, data: legendData}, series: series };
 		
-		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
+		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		if(renderOptions.dgHorizontal)
-			options.yAxis = { data: null };
+			options.yAxis = { id: 0 };
 		else
-			options.xAxis = { data: null };
+			options.xAxis = { id: 0 };
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -307,7 +313,7 @@
 				chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar");
 		});
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.barResize = function(chart)
@@ -366,10 +372,11 @@
 			{
 				text: chart.name
 			},
-			angleAxis: {},
-			radiusAxis: {},
+			angleAxis: {id: 0},
+			radiusAxis: {id: 0},
 			polar:
 			{
+				id: 0,
 				radius: "60%"
 			},
 			tooltip:
@@ -378,6 +385,7 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
@@ -387,6 +395,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "bar",
 					coordinateSystem: "polar"
 				}
@@ -402,6 +411,7 @@
 			{
 				options.angleAxis =
 				{
+					id: 0,
 					type: chartSupport.evalDataSetPropertyAxisType(chart, np)
 					
 					//将在update中设置：
@@ -416,6 +426,7 @@
 			{
 				options.radiusAxis =
 				{
+					id: 0,
 					name: chart.dataSetPropertyAlias(chartDataSet, np),
 					nameGap: 20,
 					type: chartSupport.evalDataSetPropertyAxisType(chart, np),
@@ -470,7 +481,7 @@
 				
 				chart.originalInfo(data, chartDataSet);
 				
-				var mySeries = {type: "bar", name: legendName, data: data, coordinateSystem: "polar"};
+				var mySeries = {id: series.length, type: "bar", name: legendName, data: data, coordinateSystem: "polar"};
 				
 				if(renderOptions.dgStack)
 				{
@@ -481,24 +492,23 @@
 				legendData.push(legendName);
 				series.push(mySeries);
 				
-				if(isAngleAxis)
-					chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
+				chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 			}
 		}
 		
-		var options = { legend: {data: legendData}, series: series };
+		var options = { legend: {id: 0, data: legendData}, series: series };
 		
-		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
-		//角度图必须设置angleAxis.data，不然不显示刻度
+		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+		//这里必须设置data，不然不显示刻度
 		if(isAngleAxis)
-			options.angleAxis = { data: axisData };
-		//径向图只需置为null即可
+			options.angleAxis = { id: 0, data: axisData };
+		//这里必须设置data，不然报错
 		else
-			options.radiusAxis = { data: null };
+			options.radiusAxis = { id: 0, data: axisData };
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.barPolarResize = function(chart)
@@ -574,6 +584,7 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
@@ -583,6 +594,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "pie"
 				}
 			]
@@ -619,13 +631,13 @@
 			
 			if(dgSplitDataSet)
 			{
-				series.push({ type: "pie", name: dataSetName, data: data});
+				series.push({ id: series.length, type: "pie", name: dataSetName, data: data});
 			}
 			else
 			{
 				if(series.length == 0)
 				{
-					series.push({ type: "pie", name: dataSetName, data: [], radius: "60%" });
+					series.push({ id: series.length, type: "pie", name: dataSetName, data: [], radius: "60%" });
 					
 					if(renderOptions.dgRing)
 						series[0].radius = ["35%", "55%"];
@@ -640,12 +652,12 @@
 			legendData = legendData.concat(npv);
 		}
 		
-		var options = { legend: { data: legendData }, series: series };
+		var options = { legend: { id: 0, data: legendData }, series: series };
 		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.pieResize = function(chart)
@@ -743,6 +755,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "gauge"
 				}
 			]
@@ -817,11 +830,11 @@
 		min = (min == null ? 0 : min);
 		max = (max == null ? 100 : max);
 		
-		var options = { series : [ { type: "gauge", name: seriesName, min: min, max: max, data: seriesData } ] };
+		var options = { series : [ { id: 0, type: "gauge", name: seriesName, min: min, max: max, data: seriesData } ] };
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 
 	chartSupport.gaugeResize = function(chart)
@@ -984,11 +997,13 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
 			xAxis:
 			{
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
@@ -996,6 +1011,7 @@
 			},
 			yAxis:
 			{
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, vp),
 				nameGap: 5,
 				type: "value"
@@ -1006,6 +1022,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: scatterType
 				}
 			]
@@ -1057,7 +1074,7 @@
 					max = (max == null ? valMy : Math.max(max, valMy));
 				}
 				
-				var mySeries = { type: scatterType, name: legendName, data: data };
+				var mySeries = { id: series.length, type: scatterType, name: legendName, data: data };
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -1066,18 +1083,17 @@
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 1);
 		
-		var options = { legend: {data: legendData}, series: series };
-		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
-		options.xAxis = {data: null};
+		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "scatter");
 		});
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
-
+	
 	chartSupport._scatterResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
@@ -1196,11 +1212,13 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
 			xAxis:
 			{
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
@@ -1208,6 +1226,7 @@
 			},
 			yAxis:
 			{
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, vp),
 				nameGap: 5,
 				type: "value"
@@ -1218,6 +1237,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: scatterType
 				}
 			]
@@ -1269,19 +1289,18 @@
 			
 			chart.originalInfo(data, chartDataSet);
 			
-			series.push({ type: scatterType, name: dataSetName, data: data });
+			series.push({ id: series.length, type: scatterType, name: dataSetName, data: data });
 			legendData.push(dataSetName);
 		}
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
-		var options = { legend: {data: legendData}, series: series };
-		//需要明确重置轴坐标值，不然图表刷新有数据变化时，轴坐标不能自动更新
-		options.xAxis = {data: null};
+		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport._scatterCoordResize = function(chart)
@@ -1339,17 +1358,18 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
 			radar:
 			{
-				//将在update中设置：
-				//indicator
-				
+				id: 0,
 				center: ["50%", "60%"],
 				radius: "70%",
-				nameGap: 6
+				nameGap: 6,
+				//将在update中设置：
+				//indicator
 			},
 			series:
 			[
@@ -1357,6 +1377,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "radar"
 				}
 			]
@@ -1398,12 +1419,12 @@
 			}
 		}
 		
-		var series = [ { type: "radar", data: seriesData } ];
-		var options = { legend: {data: legendData}, radar: {indicator: indicatorData}, series: series };
+		var series = [ { id: 0, type: "radar", data: seriesData } ];
+		var options = { legend: {id: 0, data: legendData}, radar: {id: 0, indicator: indicatorData}, series: series };
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 		
 		chartFactory.extValueBuiltin(chart, "radarIndicatorData", indicatorData);
 	};
@@ -1559,6 +1580,7 @@
 		    },
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
@@ -1568,6 +1590,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 		            type: "funnel"
 		        }
 			]
@@ -1621,12 +1644,12 @@
 				max = v;
 		}
 		
-		var series = [ {type: "funnel", name: seriesName, min: min, max: max, data: seriesData, sort: renderOptions.dgSort } ];
-		var options = { legend: { data: legendData }, series: series };
+		var series = [ {id: 0, type: "funnel", name: seriesName, min: min, max: max, data: seriesData, sort: renderOptions.dgSort } ];
+		var options = { legend: { id: 0, data: legendData }, series: series };
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 
 	chartSupport.funnelResize = function(chart)
@@ -1683,13 +1706,14 @@
 			},
 			visualMap:
 			{
-				//将在update中设置：
-				//min: 0,
-				//max: 100,
-				
+				id: 0,
 				text: ["高", "低"],
 				realtime: true,
-				calculable: true
+				calculable: true,
+				
+				//将在update中设置：
+				//min: 0,
+				//max: 100
 			},
 			series:
 			[
@@ -1697,6 +1721,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 		            type: "map",
 					//这里必须设置map，不然渲染会报错，update中会特殊处理
 					map: (chart.map() || "china")
@@ -1756,8 +1781,8 @@
 		
 		var options =
 		{
-			visualMap: {min, min, max: max},
-			series: [ {type: "map", name: seriesName, data: seriesData } ]
+			visualMap: {id: 0, min, min, max: max},
+			series: [ {id: 0, type: "map", name: seriesName, data: seriesData } ]
 		};
 		
 		chartSupport.trimNumberRange(options.visualMap);
@@ -1897,14 +1922,20 @@
 					return params.name + "<br/>" + params.value[2];
 				}
 			},
+			legend:
+			{
+				id: 0,
+				//将在update中设置：
+				//data
+			},
 			geo:
 			{
+				id: 0,
+				roam: true,
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || "china"),
-				
-				roam: true
+				map: (chart.map() || "china")
 			},
 			series:
 			[
@@ -1912,6 +1943,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: scatterType,
 					coordinateSystem: "geo"
 				}
@@ -1972,15 +2004,15 @@
 			}
 			
 			legendData.push(dataSetName);
-			series.push({ type: scatterType, name: dataSetName, data: data, coordinateSystem: "geo" });
+			series.push({ id: series.length, type: scatterType, name: dataSetName, data: data, coordinateSystem: "geo" });
 		}
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
-		var options = { legend: {data: legendData}, series: series };
+		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		if(map)
-			options.geo = { map: map };
+			options.geo = { id: 0, map: map };
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -2051,14 +2083,20 @@
 			{
 				trigger: "item"
 			},
+			legend:
+			{
+				id: 0,
+				//将在update中设置：
+				//data
+			},
 			geo:
 			{
+				id: 0,
+				roam: true,
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || "china"),
-				
-				roam: true
+				map: (chart.map() || "china")
 			},
 			series:
 			[
@@ -2068,6 +2106,7 @@
 					//data
 					//links
 					
+					id: 0,
 					type: "graph",
 			        coordinateSystem: "geo",
 			        layout: "none",
@@ -2212,15 +2251,15 @@
 			}
 		}
 		
-		var series = [ { type: "graph", name: seriesName, categories: categories, data: seriesData, links: seriesLinks, 
+		var series = [ { id: 0, type: "graph", name: seriesName, categories: categories, data: seriesData, links: seriesLinks, 
 			        		coordinateSystem: "geo" } ];
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
-		var options = { legend: {data: legendData}, series: series };
+		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		if(map)
-			options.geo = { map: map };
+			options.geo = { id: 0, map: map };
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 		
@@ -2318,14 +2357,20 @@
 			{
 		        text: chart.name
 		    },
+			legend:
+			{
+				id: 0,
+				//将在update中设置：
+				//data
+			},
 			geo:
 			{
+				id: 0,
+				roam: true,
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || "china"),
-				
-				roam: true
+				map: (chart.map() || "china")
 			},
 			series:
 			[
@@ -2333,6 +2378,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "lines",
 					coordinateSystem: "geo",
 					polyline: true
@@ -2418,13 +2464,13 @@
 			}
 			
 			legendData.push(dataSetName);
-			series.push({ name: dataSetName, data: data, type: "lines", coordinateSystem: "geo", polyline: true });
+			series.push({ id: series.length, name: dataSetName, data: data, type: "lines", coordinateSystem: "geo", polyline: true });
 		}
 		
-		var options = { legend: {data: legendData}, series: series };
+		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		if(map)
-			options.geo = { map: map };
+			options.geo = { id: 0, map: map };
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -2501,17 +2547,18 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
 			geo:
 			{
+				id: 0,
+				roam: true,
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || "china"),
-				
-				roam: true
+				map: (chart.map() || "china")
 			},
 			series:
 			[
@@ -2519,6 +2566,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "lines",
 					coordinateSystem: "geo",
 					polyline: false
@@ -2586,6 +2634,7 @@
 		{
 			series[i] =
 			{
+				id: series.length,
 				name: categoryNames[i],
 				data: categoryDatasMap[categoryNames[i]],
 				type: "lines",
@@ -2605,10 +2654,10 @@
 			};
 		}
 		
-		var options = { legend: {data: categoryNames}, series: series };
+		var options = { legend: {id: 0, data: categoryNames}, series: series };
 		
 		if(map)
-			options.geo = { map: map };
+			options.geo = { id: 0, map: map };
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -2681,6 +2730,7 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
@@ -2689,6 +2739,7 @@
 				//将在update中设置：
 				//data
 				
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
@@ -2697,6 +2748,7 @@
 			},
 			yAxis:
 			{
+				id: 0,
 				name: "",
 				nameGap: 5,
 				type: "value"
@@ -2707,6 +2759,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "k"
 				}
 			]
@@ -2754,16 +2807,15 @@
 			
 			chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 			
-			series.push({type: "k", name: dataSetName, data: data});
+			series.push({id: series.length, type: "k", name: dataSetName, data: data});
 		}
 		
-		var options = { legend: {data: legendData}, series: series };
-		//不设置坐标轴数据的话将无法显示刻度标签
-		options.xAxis = { data: axisData };
+		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0, data: axisData } };
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.candlestickResize = function(chart)
@@ -2836,12 +2888,14 @@
 			},
 			legend:
 			{
+				id: 0,
 			},
 			xAxis:
 			{
 				//将在update中设置：
 				//data
 				
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
@@ -2852,6 +2906,7 @@
 				//将在update中设置：
 				//data
 				
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, vp),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, vp),
@@ -2863,6 +2918,7 @@
 				//min
 				//max
 				
+				id: 0,
 				text: ["高", "低"],
 				realtime: true,
 				calculable: true,
@@ -2878,6 +2934,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "heatmap"
 				}
 			]
@@ -2939,14 +2996,15 @@
 				seriesName = chart.dataSetAlias(chartDataSet);
 		}
 		
-		var series = [ { type: "heatmap", name: seriesName, data: seriesData } ];
+		var series = [ { id: 0, type: "heatmap", name: seriesName, data: seriesData } ];
 		
-		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
+		var options = { xAxis: { id: 0, data: xAxisData }, yAxis: { id: 0, data: yAxisData },
+						visualMap: {id: 0, min: min, max: max}, series: series };
 		chartSupport.trimNumberRange(options.visualMap);
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.heatmapResize = function(chart)
@@ -3009,6 +3067,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "tree"
 				}
 			]
@@ -3022,12 +3081,12 @@
 	{
 		var renderOptions= chart.renderOptions();
 		
-		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { type: "tree" }) ] };
+		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { id: 0, type: "tree" }) ] };
 		chartSupport.treeInflateUpdateOptions(chart, options, renderOptions);
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.treeResize = function(chart)
@@ -3147,6 +3206,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "treemap"
 				}
 			]
@@ -3160,11 +3220,10 @@
 	{
 		var renderOptions= chart.renderOptions();
 		
-		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { type: "treemap" }) ] };
-		
+		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { id: 0, type: "treemap" }) ] };
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 
 	chartSupport.treemapResize = function(chart)
@@ -3232,6 +3291,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "sunburst"
 				}
 			]
@@ -3245,11 +3305,10 @@
 	{
 		var renderOptions= chart.renderOptions();
 		
-		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { type: "sunburst" }) ] };
-		
+		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { id: 0, type: "sunburst" }) ] };
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 
 	chartSupport.sunburstResize = function(chart)
@@ -3429,6 +3488,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "sankey",
 					//这里必须设置data、links，不然渲染会报错
 					data: [],
@@ -3511,16 +3571,15 @@
 			}
 		}
 		
-		var options = { series: [ { type: "sankey", name: seriesName, data: seriesData, links: seriesLinks } ] };
+		var options = { series: [ { id: 0, type: "sankey", name: seriesName, data: seriesData, links: seriesLinks } ] };
 		chartSupport.sankeyInflateUpdateOptions(chart, options, renderOptions);
-		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
-		
 		chartFactory.extValueBuiltin(chart, "sankeySeriesData", seriesData);
+		
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
-
+	
 	chartSupport.sankeyResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
@@ -3656,6 +3715,7 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
@@ -3665,6 +3725,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "graph"
 				}
 			]
@@ -3794,16 +3855,15 @@
 		if(min == null && max == null && symbolSizeMin < 10)
 			symbolSizeMin = 10;
 		
-		var series = [ { type: "graph", name: seriesName, categories: categories, data: seriesData, links: seriesLinks } ];
-		var options = { legend: {data: legendData}, series: series };
+		var series = [ { id: 0, type: "graph", name: seriesName, categories: categories, data: seriesData, links: seriesLinks } ];
 		
+		var options = { legend: {id: 0, data: legendData}, series: series };
 		chartSupport.graphInflateUpdateOptions(chart, options, min, max, symbolSizeMax, symbolSizeMin, renderOptions);
-		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
-		
 		chartFactory.extValueBuiltin(chart, "graphSeriesData", seriesData);
+		
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 
 	chartSupport.graphResize = function(chart)
@@ -3921,11 +3981,13 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
 			xAxis:
 			{
+				id: 0,
 				name: chart.dataSetPropertyAlias(chartDataSet, np),
 				nameGap: 5,
 				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
@@ -3934,6 +3996,7 @@
 			},
 			yAxis:
 			{
+				id: 0,
 				name: "",
 				nameGap: 5,
 				type: "value"
@@ -3944,6 +4007,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "boxplot"
 				}
 			]
@@ -4006,7 +4070,7 @@
 				
 				chart.originalInfo(data, chartDataSet);
 				
-				series.push({ type: "boxplot", name: dataSetName, data: data });
+				series.push({ id: series.length, type: "boxplot", name: dataSetName, data: data });
 				legendData.push(dataSetName);
 			}
 			//异常值数据集
@@ -4023,7 +4087,7 @@
 					
 					chart.originalInfo(data, chartDataSet);
 					
-					series.push({ type: "scatter", name: legendName, data: data });
+					series.push({ id: series.length, type: "scatter", name: legendName, data: data });
 					legendData.push(legendName);
 				}
 			}
@@ -4031,17 +4095,17 @@
 			chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 		}
 		
-		var options = { legend: {data: legendData}, series: series };
+		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		//需要设置坐标值，不然刻度会错乱
 		if(dgHorizontal)
-			options.yAxis = { data: axisData };
+			options.yAxis = { id: 0, data: axisData };
 		else
-			options.xAxis = { data: axisData };
+			options.xAxis = { id: 0, data: axisData };
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.boxplotResize = function(chart)
@@ -4133,6 +4197,7 @@
 					//这里必须设置data，不然渲染会报错
 					data: [],
 					
+					id: 0,
 					type: "wordCloud",
 					shape: "circle",
 					"textStyle": { "color": chartTheme.color },
@@ -4225,11 +4290,11 @@
 			}
 		}
 		
-		var options = { series: [ {type: "wordCloud", name: seriesName, data: seriesData} ] };
+		var options = { series: [ {id: 0, type: "wordCloud", name: seriesName, data: seriesData} ] };
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.wordcloudResize = function(chart)
@@ -4299,6 +4364,7 @@
 					//这里必须设置data，不然渲染会报错
 					data: [],
 					
+					id: 0,
 					type: "liquidFill",
 					radius: "75%",
 					color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
@@ -4397,11 +4463,10 @@
 			}
 		}
 		
-		var options = { series: [ {type: "liquidFill", data: seriesData, shape: renderOptions.dgShape } ] };
-		
+		var options = { series: [ {id: 0, type: "liquidFill", data: seriesData, shape: renderOptions.dgShape } ] };
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.liquidfillResize = function(chart)
@@ -4463,6 +4528,7 @@
 			},
 			legend:
 			{
+				id: 0,
 				//将在update中设置：
 				//data
 			},
@@ -4473,6 +4539,7 @@
 				//{}
 				//设初值以免渲染报错
 				{
+					id: 0,
 					type: "parallel"
 				}
 			]
@@ -4556,6 +4623,7 @@
 		{
 			series[i] =
 			{
+				id: series.length,
 				type: "parallel",
 				name: categoryNames[i],
 				data: categoryDatasMap[categoryNames[i]]
@@ -4565,13 +4633,12 @@
 				series[i].smooth = true;
 		}
 		
-		var options = { legend: {data: categoryNames}, parallelAxis: parallelAxis, series: series };
+		var options = { legend: {id: 0, data: categoryNames}, parallelAxis: parallelAxis, series: series };
 		
 		chartSupport.parallelTrimAxisMinMax(options);
-		
 		options = chart.inflateUpdateOptions(results, options);
 		
-		chart.echartsOptions(options);
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
 	
 	chartSupport.parallelResize = function(chart)
@@ -4672,7 +4739,10 @@
 		}
 		
 		for(var i=0; i<parallelAxis.length; i++)
+		{
+			parallelAxis[i].id = i;
 			parallelAxis[i].dim = i;
+		}
 		
 		return parallelAxis;
 	};
@@ -6970,14 +7040,14 @@
 		//更新地图未设置或者已注册
 		if(!map || chart.echartsMapRegistered(map))
 		{
-			chart.echartsOptions(updateOptions);
+			chartSupport.echartsOptionsReplaceMerge(chart, updateOptions);
 			chart.statusUpdated(true);
 		}
 		else
 		{
 			chart.echartsLoadMap(map, function()
 			{
-				chart.echartsOptions(updateOptions);
+				chartSupport.echartsOptionsReplaceMerge(chart, updateOptions);
 				chart.statusUpdated(true);
 			});
 		}
@@ -7107,6 +7177,23 @@
 		}
 		
 		return re;
+	};
+	
+	chartSupport.echartsOptionsReplaceMerge = function(chart, options, replaceMerge)
+	{
+		if(replaceMerge == null)
+		{
+			replaceMerge = [];
+			for(var p in options)
+				replaceMerge.push(p);
+		}
+		
+		var opts =
+		{
+			replaceMerge: replaceMerge
+		};
+		
+		chart.echartsOptions(options, opts);
 	};
 	
 	//---------------------------------------------------------
