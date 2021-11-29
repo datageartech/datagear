@@ -3266,25 +3266,29 @@
 	{
 		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
-		if(chartFactory.isStringOrNumber(dataSetProperty))
-			dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
+		var name = null;
+		
+		if(chartFactory.isString(dataSetProperty))
+			name = dataSetProperty;
+		else
+		{
+			if(chartFactory.isNumber(dataSetProperty))
+				dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
+			
+			name = (dataSetProperty ? dataSetProperty.name : null);
+		}
 		
 		if(order === undefined)
 		{
-			if(!dataSetProperty)
-				return undefined;
-			
-			order =  (chartDataSet && chartDataSet.propertyOrders ?
-							chartDataSet.propertyOrders[dataSetProperty.name] : undefined);
-			
-			return order;
+			return (chartDataSet && chartDataSet.propertyOrders ?
+							chartDataSet.propertyOrders[name] : undefined);
 		}
 		else
 		{
 			if(!chartDataSet.propertyOrders)
 				chartDataSet.propertyOrders = {};
 			
-			chartDataSet.propertyOrders[dataSetProperty.name] = order;
+			chartDataSet.propertyOrders[name] = order;
 		}
 	};
 	
@@ -3437,6 +3441,84 @@
 		}
 		
 	    return themeName;
+	};
+	
+	/**
+	 * 获取/设置指定数据集属性标记。
+	 * 
+	 * @param chartDataSet 图表数据集、图表数据集索引数值
+	 * @param dataSetProperty 数据集属性、属性名、属性索引
+	 * @param sign 可选，要设置的数据标记名称字符串、字符串数组、null，不设置则执行获取操作
+	 * @returns 要获取的标记名字符串数组，没有设置过则返回null
+	 * @since 2.11.0
+	 */
+	chartBase.dataSetPropertySign = function(chartDataSet, dataSetProperty, sign)
+	{
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		var name = null;
+		
+		if(chartFactory.isString(dataSetProperty))
+			name = dataSetProperty;
+		else
+		{
+			if(chartFactory.isNumber(dataSetProperty))
+				dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
+			
+			name = (dataSetProperty ? dataSetProperty.name : null);
+		}
+		
+		if(sign === undefined)
+		{
+			return (chartDataSet && chartDataSet.propertySigns ?
+							chartDataSet.propertySigns[name] : undefined);
+		}
+		else
+		{
+			if(!chartDataSet.propertySigns)
+				chartDataSet.propertySigns = {};
+			
+			if(sign != null && !$.isArray(sign))
+				sign = [ sign ];
+			
+			chartDataSet.propertySigns[name] = sign;
+		}
+	};
+	
+	/**
+	 * 获取/设置数据集属性标记映射表。
+	 * 
+	 * @param chartDataSet 图表数据集、图表数据集索引数值
+	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集属性名: 标记名字符串、标记名字符串数组、null, ... }，不设置则执行获取操作
+	 * @returns 要获取的标记映射表，格式为：{ 数据集属性名: 标记名字符串数组、null, ... }
+	 * @since 2.11.0
+	 */
+	chartBase.dataSetPropertySigns = function(chartDataSet, signs)
+	{
+		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		if(signs === undefined)
+		{
+			return (chartDataSet ? chartDataSet.propertySigns : {});
+		}
+		else
+		{
+			var trimSigns = {};
+			
+			if(signs)
+			{
+				for(var p in signs)
+				{
+					var ps = signs[p];
+					if(ps != null && !$.isArray(ps))
+						ps = [ ps ];
+					
+					trimSigns[p] = ps;
+				}
+			}
+			
+			chartDataSet.propertySigns = trimSigns;
+		}
 	};
 	
 	//-------------
