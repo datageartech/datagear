@@ -2230,15 +2230,16 @@
 	 * ECharts图表支持函数：设置图表的ECharts实例的选项。
 	 * 
 	 * @param options
+	 * @param opts 可选，ECharts的setOption函数附加参数，具体参考ECharts.setOption()函数的opts参数
 	 */
-	chartBase.echartsOptions = function(options)
+	chartBase.echartsOptions = function(options, opts)
 	{
 		var internal = this.internal();
 		
 		if(!this._isEchartsInstance(internal))
 			throw new Error("Not ECharts chart");
 		
-		internal.setOption(options);
+		internal.setOption(options, opts);
 	};
 	
 	/**
