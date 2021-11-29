@@ -2209,7 +2209,7 @@
 	
 	/**
 	 * ECharts图表支持函数：将图表初始化为ECharts图表，设置其选项。
-	 * 此方法会自动应用chartBase.theme()、chartBase.echartsThemeName()至初始化的ECharts图表。
+	 * 此方法会自动应用chartBase.echartsGetThemeName()至初始化的ECharts图表。
 	 * 此方法会自动调用chartBase.internal()将初始化的ECharts实例对象设置为图表底层组件。
 	 * 
 	 * @param options 要设置的ECharts选项
@@ -2218,7 +2218,7 @@
 	 */
 	chartBase.echartsInit = function(options, opts)
 	{
-		var instance = echarts.init(this.element(), this._echartsGetRegisteredThemeName(), opts);
+		var instance = echarts.init(this.element(), this.echartsGetThemeName(), opts);
 		instance.setOption(options);
 		
 		this.internal(instance);
@@ -2248,31 +2248,6 @@
 	chartBase._isEchartsInstance = function(obj)
 	{
 		return (obj && obj.setOption && obj.isDisposed && obj.dispose && obj.off);
-	};
-	
-	/**
-	 * ECharts图表支持函数：获取用于此图表的且已注册的ECharts主题名。
-	 */
-	chartBase._echartsGetRegisteredThemeName = function()
-	{
-		var themeName = this.echartsThemeName();
-		
-		//从ChartTheme构建ECharts主题
-		if(!themeName)
-		{
-			var theme = this.theme();
-			themeName = theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME];
-			
-			if(!themeName)
-			{
-				themeName = (theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME] = chartFactory.nextElementId());
-				
-				var echartsTheme = chartFactory.buildEchartsTheme(theme);
-				echarts.registerTheme(themeName, echartsTheme);
-			}
-		}
-		
-	    return themeName;
 	};
 	
 	/**
@@ -3433,6 +3408,35 @@
 		}
 		
 		return re;
+	};
+	
+	/**
+	 * ECharts图表支持函数：获取可用于此图表的且已注册的ECharts主题名。
+	 * 此方法优先返回chartBase.echartsThemeName()函数的结果，
+	 * 当其为null时，则使用chartBase.theme()构建和注册ECharts主题（仅第一次），并返回注册后的主题名。
+	 * 
+	 * @since 2.11.0
+	 */
+	chartBase.echartsGetThemeName = function()
+	{
+		var themeName = this.echartsThemeName();
+		
+		//从ChartTheme构建ECharts主题
+		if(!themeName)
+		{
+			var theme = this.theme();
+			themeName = theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME];
+			
+			if(!themeName)
+			{
+				themeName = (theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME] = chartFactory.nextElementId());
+				
+				var echartsTheme = chartFactory.buildEchartsTheme(theme);
+				echarts.registerTheme(themeName, echartsTheme);
+			}
+		}
+		
+	    return themeName;
 	};
 	
 	//-------------
