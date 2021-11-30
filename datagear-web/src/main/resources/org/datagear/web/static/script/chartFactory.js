@@ -3515,12 +3515,14 @@
 	 * 
 	 * @param chartDataSet 图表数据集、图表数据集索引数值
 	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集属性名: 数据标记对象、对象数组，或者名称字符串、字符串数组，或者null, ... }，不设置则执行获取操作
+	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
 	 * @returns 要获取的标记映射表，格式为：{ 数据集属性名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetPropertySigns = function(chartDataSet, signs)
+	chartBase.dataSetPropertySigns = function(chartDataSet, signs, increment)
 	{
 		chartDataSet = this._chartDataSetOf(chartDataSet);
+		increment = (increment == null ? true : increment);
 		
 		if(signs === undefined)
 		{
@@ -3539,7 +3541,13 @@
 				}
 			}
 			
-			chartDataSet.propertySigns = trimSigns;
+			if(!chartDataSet.propertySigns || !increment)
+				chartDataSet.propertySigns = trimSigns;
+			else
+			{
+				for(var p in trimSigns)
+					chartDataSet.propertySigns[p] = trimSigns[p];
+			}
 		}
 	};
 	
