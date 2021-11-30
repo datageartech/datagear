@@ -3448,11 +3448,11 @@
 	 * 
 	 * @param chartDataSet 图表数据集、图表数据集索引数值
 	 * @param dataSetProperty 数据集属性、属性名、属性索引
-	 * @param sign 可选，要设置的数据标记名称字符串、字符串数组、null，不设置则执行获取操作
+	 * @param dataSign 可选，要设置的数据标记对象、对象数组，或者名称字符串、字符串数组，或者null，不设置则执行获取操作
 	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetPropertySign = function(chartDataSet, dataSetProperty, sign)
+	chartBase.dataSetPropertySign = function(chartDataSet, dataSetProperty, dataSign)
 	{
 		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
@@ -3468,7 +3468,7 @@
 			name = (dataSetProperty ? dataSetProperty.name : null);
 		}
 		
-		if(sign === undefined)
+		if(dataSign === undefined)
 		{
 			return (chartDataSet.propertySigns ?
 							chartDataSet.propertySigns[name] : undefined);
@@ -3478,10 +3478,8 @@
 			if(!chartDataSet.propertySigns)
 				chartDataSet.propertySigns = {};
 			
-			if(sign != null && !$.isArray(sign))
-				sign = [ sign ];
-			
-			chartDataSet.propertySigns[name] = sign;
+			dataSign = this._trimDataSetPropertySign(dataSign);
+			chartDataSet.propertySigns[name] = dataSign;
 		}
 	};
 	
@@ -3489,8 +3487,8 @@
 	 * 获取/设置数据集属性标记映射表。
 	 * 
 	 * @param chartDataSet 图表数据集、图表数据集索引数值
-	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集属性名: 标记名字符串、标记名字符串数组, ... }，不设置则执行获取操作
-	 * @returns 要获取的标记映射表，格式为：{ 数据集属性名: 标记名字符串数组、null, ... }
+	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集属性名: 数据标记对象、对象数组，或者名称字符串、字符串数组，或者null, ... }，不设置则执行获取操作
+	 * @returns 要获取的标记映射表，格式为：{ 数据集属性名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 2.11.0
 	 */
 	chartBase.dataSetPropertySigns = function(chartDataSet, signs)
@@ -3509,17 +3507,34 @@
 			{
 				for(var p in signs)
 				{
-					var ps = signs[p];
-					
-					if(ps != null && !$.isArray(ps))
-						ps = [ ps ];
-					
+					var ps = this._trimDataSetPropertySign(signs[p]);
 					trimSigns[p] = ps;
 				}
 			}
 			
 			chartDataSet.propertySigns = trimSigns;
 		}
+	};
+	
+	chartBase._trimDataSetPropertySign = function(dataSign)
+	{
+		if(dataSign == null)
+			return null;
+		
+		if(!$.isArray(dataSign))
+			dataSign = [ dataSign ];
+		
+		var signNames = [];
+		
+		for(var i=0; i<dataSign.length; i++)
+		{
+			var signName = (dataSign[i] && dataSign[i].name !== undefined ? dataSign[i].name : dataSign[i]);
+			
+			if(signName != null)
+				signNames.push(signName);
+		}
+		
+		return signNames;
 	};
 	
 	//-------------

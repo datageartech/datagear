@@ -1774,7 +1774,7 @@
 	{
 		var chartDataSet = chartDataSets[index];
 		var dataSetProperties = chart.dataSetProperties(chartDataSet);
-		var propertySigns = (chartDataSet.propertySigns || {});
+		var propertySigns = (chart.dataSetPropertySigns(chartDataSet) || {});
 		var dataSigns = (chart.plugin && chart.plugin.dataSigns ? chart.plugin.dataSigns : []);
 		var signProperties = [];
 		
