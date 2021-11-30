@@ -1475,7 +1475,7 @@
 	 */
 	chartBase.isDataSetParamValueReady = function(chartDataSet)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet, true);
 		
 		var chartDataSets = (chartDataSet ? [ chartDataSet ] : this.chartDataSets);
 		
@@ -1500,6 +1500,18 @@
 		return true;
 	};
 	
+	chartBase._chartDataSetOf = function(chartDataSet, nullable)
+	{
+		nullable = (nullable == null ? false : nullable);
+		
+		var re = (chartFactory.isNumber(chartDataSet) ? this.chartDataSetAt(chartDataSet) : chartDataSet);
+		
+		if(!nullable && re == null)
+			throw new Error("ChartDataSet not found for : " + chartDataSet);
+		
+		return re;
+	};
+	
 	/**
 	 * 获取/设置指定第一个数据集单个参数值。
 	 * 
@@ -1520,10 +1532,7 @@
 	 */
 	chartBase.dataSetParamValue = function(chartDataSet, name, value)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
-		
-		if(chartDataSet == null)
-			throw new Error("ChartDataSet not found for : " + chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
 		//参数索引
 		if(typeof(name) == "number")
@@ -1565,10 +1574,7 @@
 	 */
 	chartBase.dataSetParamValues = function(chartDataSet, paramValues)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
-		
-		if(chartDataSet == null)
-			throw new Error("ChartDataSet not found for : " + chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
 		var paramValuesCurrent = chartDataSet.query.paramValues;
 		
@@ -1617,10 +1623,7 @@
 	 */
 	chartBase.resetDataSetParamValues = function(chartDataSet)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
-		
-		if(chartDataSet == null)
-			throw new Error("ChartDataSet not found for : " + chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
 		if(chartDataSet._originalParamValues == null)
 			return;
@@ -1830,12 +1833,12 @@
 	 */
 	chartBase.dataSetPropertiesOfSign = function(chartDataSet, dataSign, sort)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		sort = (sort === undefined ? true : sort);
 		
 		var re = [];
 		
-		if(!chartDataSet || !dataSign)
+		if(!dataSign)
 			return re;
 		
 		dataSetProperties = this.dataSetProperties(chartDataSet, sort);
@@ -3096,13 +3099,10 @@
 	 */
 	chartBase.dataSetAlias = function(chartDataSet, alias)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
 		if(alias === undefined)
 		{
-			if(!chartDataSet)
-				return "";
-			
 			if(chartDataSet.alias)
 				return chartDataSet.alias;
 			
@@ -3130,23 +3130,23 @@
 	 */
 	chartBase.dataSetProperties = function(chartDataSet, sort)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		sort = (sort === undefined ? true : sort);
 		
 		var properties = null;
-		var isDataSet = (chartDataSet && chartDataSet.properties !== undefined);
+		var isDataSet = (chartDataSet.properties !== undefined);
 		
 		if(isDataSet)
 			properties = chartDataSet.properties;
 		else
-			properties = (chartDataSet && chartDataSet.dataSet ? chartDataSet.dataSet.properties : null);
+			properties = (chartDataSet.dataSet ? chartDataSet.dataSet.properties : null);
 		
 		properties = (properties || []);
 		
 		if(isDataSet || !sort)
 			return properties;
 		
-		var propertyOrders = (chartDataSet ? chartDataSet.propertyOrders : null);
+		var propertyOrders = chartDataSet.propertyOrders;
 		
 		if(!propertyOrders)
 			return properties;
@@ -3226,7 +3226,7 @@
 	 */
 	chartBase.dataSetPropertyAlias = function(chartDataSet, dataSetProperty, alias)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
 		if(chartFactory.isStringOrNumber(dataSetProperty))
 			dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
@@ -3236,7 +3236,7 @@
 			if(!dataSetProperty)
 				return "";
 			
-			alias =  (chartDataSet && chartDataSet.propertyAliases ?
+			alias =  (chartDataSet.propertyAliases ?
 							chartDataSet.propertyAliases[dataSetProperty.name] : null);
 			
 			if(!alias)
@@ -3264,7 +3264,7 @@
 	 */
 	chartBase.dataSetPropertyOrder = function(chartDataSet, dataSetProperty, order)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
 		var name = null;
 		
@@ -3280,7 +3280,7 @@
 		
 		if(order === undefined)
 		{
-			return (chartDataSet && chartDataSet.propertyOrders ?
+			return (chartDataSet.propertyOrders ?
 							chartDataSet.propertyOrders[name] : undefined);
 		}
 		else
@@ -3301,14 +3301,14 @@
 	 */
 	chartBase.dataSetParams = function(chartDataSet)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
 		var params = null;
 		
-		if(chartDataSet && chartDataSet.params !== undefined)
+		if(chartDataSet.params !== undefined)
 			params = chartDataSet.params;
 		else
-			params = (chartDataSet && chartDataSet.dataSet ? chartDataSet.dataSet.params : null);
+			params = (chartDataSet.dataSet ? chartDataSet.dataSet.params : null);
 		
 		return (params || []);
 	};
@@ -3449,12 +3449,12 @@
 	 * @param chartDataSet 图表数据集、图表数据集索引数值
 	 * @param dataSetProperty 数据集属性、属性名、属性索引
 	 * @param sign 可选，要设置的数据标记名称字符串、字符串数组、null，不设置则执行获取操作
-	 * @returns 要获取的标记名字符串数组，没有设置过则返回null
+	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
 	 */
 	chartBase.dataSetPropertySign = function(chartDataSet, dataSetProperty, sign)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
 		var name = null;
 		
@@ -3470,7 +3470,7 @@
 		
 		if(sign === undefined)
 		{
-			return (chartDataSet && chartDataSet.propertySigns ?
+			return (chartDataSet.propertySigns ?
 							chartDataSet.propertySigns[name] : undefined);
 		}
 		else
@@ -3489,17 +3489,17 @@
 	 * 获取/设置数据集属性标记映射表。
 	 * 
 	 * @param chartDataSet 图表数据集、图表数据集索引数值
-	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集属性名: 标记名字符串、标记名字符串数组、null, ... }，不设置则执行获取操作
+	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集属性名: 标记名字符串、标记名字符串数组, ... }，不设置则执行获取操作
 	 * @returns 要获取的标记映射表，格式为：{ 数据集属性名: 标记名字符串数组、null, ... }
 	 * @since 2.11.0
 	 */
 	chartBase.dataSetPropertySigns = function(chartDataSet, signs)
 	{
-		chartDataSet = (chartFactory.isNumber(chartDataSet) ? this.chartDataSets[chartDataSet] : chartDataSet);
+		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
 		if(signs === undefined)
 		{
-			return (chartDataSet ? chartDataSet.propertySigns : {});
+			return (chartDataSet.propertySigns || {});
 		}
 		else
 		{
@@ -3510,6 +3510,7 @@
 				for(var p in signs)
 				{
 					var ps = signs[p];
+					
 					if(ps != null && !$.isArray(ps))
 						ps = [ ps ];
 					

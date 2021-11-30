@@ -6488,6 +6488,10 @@
 					for(var i=1; i<series.length; i++)
 						series[i] = $.extend(true, {}, series0, series[i]);
 					
+					//必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
+					for(var i=0; i<series.length; i++)
+						series[i].id = i;
+					
 					if(beforeProcessHandler)
 						beforeProcessHandler(renderOptions, chart);
 				};
