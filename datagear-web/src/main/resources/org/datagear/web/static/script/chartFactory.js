@@ -1815,11 +1815,12 @@
 	 * 
 	 * @param chartDataSet 图表数据集、索引
 	 * @param dataSign 数据标记对象、标记名称
+	 * @param nonEmpty 可选，参考chartBase.dataSetPropertiesOfSign的nonEmpty参数
 	 * @return {...}、undefined
 	 */
-	chartBase.dataSetPropertyOfSign = function(chartDataSet, dataSign)
+	chartBase.dataSetPropertyOfSign = function(chartDataSet, dataSign, nonEmpty)
 	{
-		var properties = this.dataSetPropertiesOfSign(chartDataSet, dataSign, false);
+		var properties = this.dataSetPropertiesOfSign(chartDataSet, dataSign, false, nonEmpty);
 		return (properties.length > 0 ? properties[0] : undefined);
 	};
 	
@@ -1829,20 +1830,24 @@
 	 * @param chartDataSet 图表数据集、索引
 	 * @param dataSign 数据标记对象、标记名称
 	 * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
+	 * @param nonEmpty 可选（设置时需指定sort参数），是否要求返回数组非空并且在为空时抛出异常，
+	 * 					   "auto" 依据dataSign的required判断，为true则要求非空，否则不要求；
+	 * 					   true 要求非空；false 不要求非空。默认为："auto"。
 	 * @return [...]
 	 */
-	chartBase.dataSetPropertiesOfSign = function(chartDataSet, dataSign, sort)
+	chartBase.dataSetPropertiesOfSign = function(chartDataSet, dataSign, sort, nonEmpty)
 	{
 		chartDataSet = this._chartDataSetOf(chartDataSet);
 		sort = (sort === undefined ? true : sort);
+		nonEmpty = (nonEmpty == null ? "auto" : nonEmpty);
 		
 		var re = [];
 		
-		if(!dataSign)
+		if(dataSign == null)
 			return re;
 		
 		dataSetProperties = this.dataSetProperties(chartDataSet, sort);
-		dataSign = (dataSign.name || dataSign);
+		var dataSignName = (chartFactory.isString(dataSign) ? dataSign : dataSign.name);
 		var propertySigns = (chartDataSet.propertySigns || {});
 		
 		var signPropertyNames = [];
@@ -1853,7 +1858,7 @@
 			
 			for(var i=0; i<mySigns.length; i++)
 			{
-				if(mySigns[i] == dataSign || mySigns[i].name == dataSign)
+				if(mySigns[i] == dataSignName)
 				{
 					signPropertyNames.push(pname);
 					break;
@@ -1870,7 +1875,29 @@
 			}
 		}
 		
+		if(nonEmpty == "auto")
+		{
+			var dataSignObj = (chartFactory.isString(dataSign) ? this._dataSignOfName(dataSign) : dataSign);
+			nonEmpty = (dataSignObj ? dataSignObj.required : false);
+		}
+		
+		if(nonEmpty && re.length == 0)
+			throw new Error("Data set property with '"+dataSignName+"' sign must be set");
+		
 		return re;
+	};
+	
+	chartBase._dataSignOfName = function(dataSignName)
+	{
+		var dataSigns = (this.plugin && this.plugin.dataSigns ? this.plugin.dataSigns : []);
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			if(dataSigns[i] && dataSigns[i].name == dataSignName)
+				return dataSigns[i];
+		}
+		
+		return undefined;
 	};
 	
 	/**

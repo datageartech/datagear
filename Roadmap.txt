@@ -1,6 +1,6 @@
 下一版本：
 	添加更多内置图表插件：主题河流图、地图热力图；
-	图表JS对象的dataSetPropertiesOfSign()、dataSetPropertyOfSign()函数新增是否required控制参数；
+	ok 图表JS对象的dataSetPropertiesOfSign()、dataSetPropertyOfSign()函数添加nonEmpty控制参数；
 	ok 图表JS对象新增dataSetPropertySign()、dataSetPropertySigns()函数，用于获取/设置数据集属性数据标记；
 	ok 内置ECharts图表采用replaceMerge模式更新图表，解决刷新操作存在无法删除系列的BUG；
 	ok chart.echartsInit()、chart.echartsOptions()扩展函数参数；
