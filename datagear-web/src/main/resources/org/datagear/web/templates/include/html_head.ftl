@@ -23,6 +23,10 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/lib/jQuery-File-Upload-9.21.0/css/jquery.fileupload.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/jquery.steps-1.1.0/css/jquery.steps.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css" type="text/css" rel="stylesheet" />
+
+<link href="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.css" type="text/css" rel="stylesheet" />
+
 <link href="${contextPath}/static/css/ace-21.02.19/ace.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/style.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/analysis.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
@@ -49,6 +53,16 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/ace-21.02.19/mode-javascript.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/ace-21.02.19/mode-css.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/ace-21.02.19/ext-language_tools.js" type="text/javascript"></script>
+
+<script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/search/searchcursor.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/xml/xml.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/css/css.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/htmlmixed/htmlmixed.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/javascript/javascript.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/sql/sql.js" type="text/javascript"></script>
+
 <script src="${contextPath}/static/lib/clipboard-2.0.4/clipboard.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/tableMeta.js?v=${_hh_Version}" type="text/javascript"></script>

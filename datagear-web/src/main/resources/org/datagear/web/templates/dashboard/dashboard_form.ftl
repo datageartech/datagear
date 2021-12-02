@@ -281,62 +281,48 @@ readonly 是否只读操作，允许为null
     	$("<input type='hidden' class='resourceIsTemplate' />").val(isTemplate).appendTo(pc0);
     	
     	var pc1 = $("<div class='editor-wrapper ui-widget ui-widget-content' />").appendTo(tabPane);
-		var pc2 = $("<div class='resource-editor' />").attr("id", $.uid("resourceEditor")).appendTo(pc1);
+		var pc2 = $("<div class='resource-editor code-editor' />").attr("id", $.uid("resourceEditor")).appendTo(pc1);
+		var pc2Dom = pc2[0];
 		
-		var editor = ace.edit(pc2.attr("id"));
-		editor.setShowPrintMargin(false);
-		
-		ace.require("ace/ext/language_tools");
+		var codeEditor;
+		var codeEditorOptions = { value: content, lineNumbers: true, readOnly: ${readonly?string("true","false")} };
 		
 		if($.isHtmlFile(name))
 		{
-			var HtmlMode = ace.require("ace/mode/html").Mode;
-			editor.session.setMode(new HtmlMode());
+			codeEditorOptions.mode = "htmlmixed";
 		}
 		else if($.isJsFile(name))
 		{
-			var JsMode = ace.require("ace/mode/javascript").Mode;
-			editor.session.setMode(new JsMode());
+			codeEditorOptions.mode = "javascript";
 		}
 		else if($.isCssFile(name))
 		{
-			var CssMode = ace.require("ace/mode/css").Mode;
-			editor.session.setMode(new CssMode());
+			codeEditorOptions.mode = "css";
 		}
+		
+		codeEditor = CodeMirror(pc2Dom, codeEditorOptions);
+		codeEditor.focus();
 		
 		if(isTemplate)
 		{
-			editor.setOptions(
+			<#--
+			codeEditor.setOptions(
 			{
 				enableBasicAutocompletion: po.templateEditorCompleters,
 				enableLiveAutocompletion: po.templateEditorCompleters
 			});
-		}
-		
-		var cursor = {row: 0, column: 0};
-		editor.session.insert(cursor, content);
-		
-		if(isTemplate)
-		{
-			//光标移至"</body>"之前，便于用户直接编辑
-			var found = editor.find("</body>",{backwards: true, wrap: false, caseSensitive: false, wholeWord: false, regExp: false}, true);
-			if(found && found.start && found.start.row > 0)
+			-->
+			
+			//光标移至"</body>"的上一行，便于用户直接输入内容
+			var cursor = codeEditor.getSearchCursor("</body>");
+			if(cursor.findNext())
 			{
-				cursor = {row: found.start.row-1, column: 1000};
-				var selection = editor.session.getSelection();
-				selection.clearSelection();
+				var cursorFrom = cursor.from();
+				codeEditor.getDoc().setCursor({ line: cursorFrom.line-1, ch: 0 });
 			}
-			//滚动到底部
-			editor.session.setScrollTop(99999);
 		}
 		
-		editor.moveCursorToPosition(cursor);
-		editor.focus();
-		<#if readonly>
-		editor.setReadOnly(true);
-		</#if>
-		
-		tabPane.data("resourceEditorInstance", editor);
+		tabPane.data("resourceEditorInstance", codeEditor);
 		
 		var pc3 = $("<div class='editor-operation-wrapper' />").appendTo(tabPane);
 		
@@ -372,7 +358,7 @@ readonly 是否只读操作，允许为null
 										if(!$.isArray(charts))
 											charts = [charts];
 										
-										po.insertChartCode(editor, charts);
+										po.insertChartCode(codeEditor, charts);
 										chartListPanel.hide();
 										return false;
 									}
@@ -427,10 +413,10 @@ readonly 是否只读操作，允许为null
 					var prevSearchText = $this.data("prevSearchText");
 					
 					if(text == prevSearchText)
-						editor.findNext(searchOptions, true);
+						codeEditor.findNext(searchOptions, true);
 					else
 					{
-						editor.find(text, searchOptions, true);
+						codeEditor.find(text, searchOptions, true);
 						$this.data("prevSearchText", text);
 					}
 				});

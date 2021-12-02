@@ -192,6 +192,11 @@ a.link:hover{
 	display: none;
 }
 
+/*代码编辑器*/
+.code-editor .CodeMirror{
+	height: 100%;
+}
+
 /*表单*/
 form,
 .form{}
