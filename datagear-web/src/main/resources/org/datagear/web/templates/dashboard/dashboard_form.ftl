@@ -311,10 +311,31 @@ readonly 是否只读操作，允许为null
 		}
 		
 		codeEditor = po.createCodeEditor(pc2Dom, codeEditorOptions);
-		codeEditor.focus();
 		
-		if(isTemplate)
+		if(isTemplate && !codeEditorOptions.readOnly)
 		{
+			codeEditor.on("change", function(codeEditor, changeObj)
+			{
+				var doc = codeEditor.getDoc();
+				var cursor = doc.getCursor();
+				var token = codeEditor.getTokenAt(cursor);
+				console.log("token : ");
+				console.dir(token);
+				console.log("changeObj : ");
+				console.dir(changeObj);
+				
+				codeEditor.showHint(
+				{
+					hint: function(codeEditor, callback)
+					{
+						return
+						{
+							list: ['a', 'b']
+						};
+					}
+				});
+			});
+			
 			<#--
 			codeEditor.setOptions(
 			{
@@ -456,6 +477,8 @@ readonly 是否只读操作，允许为null
 	    po.resourceEditorTabs.tabs("refresh");
     	po.resourceEditorTabs.tabs( "option", "active",  tab.index());
     	po.refreshTabsNavForHidden(po.resourceEditorTabs, tabsNav);
+    	
+    	codeEditor.focus();
 	};
 	
 	po.resourceEditorTabs.tabs(
