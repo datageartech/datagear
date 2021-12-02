@@ -189,6 +189,7 @@ readonly 是否只读操作，允许为null
 </div>
 <#include "../include/page_obj_form.ftl">
 <#include "../include/page_obj_tabs.ftl" >
+<#include "../include/page_obj_codeEditor.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -300,7 +301,7 @@ readonly 是否只读操作，允许为null
 			codeEditorOptions.mode = "css";
 		}
 		
-		codeEditor = CodeMirror(pc2Dom, codeEditorOptions);
+		codeEditor = po.createCodeEditor(pc2Dom, codeEditorOptions);
 		codeEditor.focus();
 		
 		if(isTemplate)
@@ -408,16 +409,26 @@ readonly 是否只读操作，允许为null
 					if(!text)
 						return;
 					
-					var searchOptions = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
-					
 					var prevSearchText = $this.data("prevSearchText");
+					var cursor = $this.data("prevSearchCursor");
+					var doc = codeEditor.getDoc();
 					
-					if(text == prevSearchText)
-						codeEditor.findNext(searchOptions, true);
+					if(!cursor || text != prevSearchText)
+					{
+						cursor = codeEditor.getSearchCursor(text);
+						$this.data("prevSearchCursor", cursor);
+						$this.data("prevSearchText", text)
+					}
+					
+					codeEditor.focus();
+					
+					if(cursor.findNext())
+						doc.setSelection(cursor.from(), cursor.to());
 					else
 					{
-						codeEditor.find(text, searchOptions, true);
-						$this.data("prevSearchText", text);
+						//从头搜索
+						$this.data("prevSearchCursor", null);
+						$this.click();
 					}
 				});
 		

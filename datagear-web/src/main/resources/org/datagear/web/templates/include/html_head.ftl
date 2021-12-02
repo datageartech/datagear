@@ -31,6 +31,7 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/css/style.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/analysis.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link id="css_ace" href="${contextPath}/static/theme/<@spring.theme code='theme' />/ace-21.02.19/ace.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
+<link id="css_codemirror" href="${contextPath}/static/theme/<@spring.theme code='theme' />/codemirror-5.64.0/custom.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link id="css_common" href="${contextPath}/static/theme/<@spring.theme code='theme' />/style.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 
 <script src="${contextPath}/static/lib/jquery-3.6.0/jquery-3.6.0.min.js" type="text/javascript"></script>

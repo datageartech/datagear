@@ -124,7 +124,14 @@ String detectNewVersionScript
 					$.getJSON(contextPath+"/changeThemeData?theme="+theme, function(data)
 					{
 						for(var i=0; i<data.length; i++)
-							$(data[i].selector).attr(data[i].attr, data[i].value);
+						{
+							var di = data[i];
+							
+							if(di.type == "css")
+								$(di.selector).attr(di.attr, di.value);
+							else if(di.type == "var")
+								window[di.name] = di.value;
+						}
 					});
 				}
 				else if(menuName == "locale")
