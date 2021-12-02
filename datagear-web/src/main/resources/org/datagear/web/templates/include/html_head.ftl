@@ -58,6 +58,10 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/search/searchcursor.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/xml-fold.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/matchbrackets.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/matchtags.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/closetag.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/mode/xml/xml.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/mode/css/css.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/mode/htmlmixed/htmlmixed.js" type="text/javascript"></script>

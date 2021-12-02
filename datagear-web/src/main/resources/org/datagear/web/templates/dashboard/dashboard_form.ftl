@@ -286,7 +286,16 @@ readonly 是否只读操作，允许为null
 		var pc2Dom = pc2[0];
 		
 		var codeEditor;
-		var codeEditorOptions = { value: content, lineNumbers: true, readOnly: ${readonly?string("true","false")} };
+		var codeEditorOptions =
+		{
+			value: content,
+			lineNumbers: true,
+			smartIndent: false,
+			matchBrackets: true,
+			matchTags: true,
+			autoCloseTags: true,
+			readOnly: ${readonly?string("true","false")}
+		};
 		
 		if($.isHtmlFile(name))
 		{
@@ -505,14 +514,16 @@ readonly 是否只读操作，允许为null
 		return (idx < 0 ? text : text.substr(idx));
 	};
 	
-	po.getTemplatePrevTagText = function(editor, row, column)
+	po.getTemplatePrevTagText = function(codeEditor, cursor)
 	{
-		var text = editor.session.getLine(row).substring(0, column);
+		var doc = codeEditor.getDoc();
+		
+		var text = doc.getLine(cursor.line).substring(0, cursor.ch);
 		
 		//反向查找直到'>'或'<'
-		var prevRow = row;
+		var prevRow = cursor.line;
 		while((!text || !(/[<>]/g.test(text))) && (prevRow--) >= 0)
-			text = editor.session.getLine(prevRow) + text;
+			text = doc.getLine(prevRow) + text;
 		
 		return po.getLastTagText(text);
 	};
@@ -527,14 +538,14 @@ readonly 是否只读操作，允许为null
 		return "";
 	};
 	
-	po.getTemplatePrevToken = function(editor, row, column)
+	po.getTemplatePrevToken = function(codeEditor, row, column)
 	{
-		var text = editor.session.getLine(row).substring(0, column);
+		var text = codeEditor.session.getLine(row).substring(0, column);
 		
 		//反向查找直到非空串
 		var prevRow = row;
 		while((!text || /^\s*$/.test(text)) && (prevRow--) >= 0)
-			text = editor.session.getLine(prevRow) + text;
+			text = codeEditor.session.getLine(prevRow) + text;
 		
 		return text;
 	};
@@ -737,20 +748,20 @@ readonly 是否只读操作，允许为null
 		//自动补全：dg-*
 		{
 			identifierRegexps : [/[a-zA-Z_0-9\-]/],
-			getCompletions: function(editor, session, pos, prefix, callback)
+			getCompletions: function(codeEditor, session, pos, prefix, callback)
 			{
 				var completions = [];
 				
 				if(prefix && prefix.indexOf("dg") == 0)
-					completions = this._getCompletionsForTagAttr(editor, session, pos, prefix, callback);
+					completions = this._getCompletionsForTagAttr(codeEditor, session, pos, prefix, callback);
 				
 				callback(null, completions);
 			},
-			_getCompletionsForTagAttr: function(editor, session, pos, prefix, callback)
+			_getCompletionsForTagAttr: function(codeEditor, session, pos, prefix, callback)
 			{
 				var completions = [];
 				
-				var prevText = po.getTemplatePrevTagText(editor, pos.row, pos.column);
+				var prevText = po.getTemplatePrevTagText(codeEditor, pos.row, pos.column);
 				var tagName = po.resolveHtmlTagName(prevText);
 				
 				if(tagName)
@@ -775,22 +786,22 @@ readonly 是否只读操作，允许为null
 		//自动补全：dashboard.*、chart.*
 		{
 			identifierRegexps : [/[a-zA-Z]/],
-			getCompletions: function(editor, session, pos, prefix, callback)
+			getCompletions: function(codeEditor, session, pos, prefix, callback)
 			{
 				var completions = [];
 				
 				if(prefix)
 				{
-					var prevToken = po.getTemplatePrevToken(editor, pos.row, pos.column);
+					var prevToken = po.getTemplatePrevToken(codeEditor, pos.row, pos.column);
 					
 					//以"."加可选空格结尾
 					if(prevToken && /\.\S*$/.test(prevToken))
-						completions = this._getCompletionsForFunc(editor, session, pos, prefix, callback, prevToken);
+						completions = this._getCompletionsForFunc(codeEditor, session, pos, prefix, callback, prevToken);
 				}
 				
 				callback(null, completions);
 			},
-			_getCompletionsForFunc: function(editor, session, pos, prefix, callback, prevToken)
+			_getCompletionsForFunc: function(codeEditor, session, pos, prefix, callback, prevToken)
 			{
 				var completions = [];
 				
@@ -1527,12 +1538,13 @@ readonly 是否只读操作，允许为null
 		return name;
 	};
 	
-	po.insertChartCode = function(editor, charts)
+	po.insertChartCode = function(codeEditor, charts)
 	{
 		if(!charts || !charts.length)
 			return;
 		
-		var cursor = editor.getCursorPosition();
+		var doc = codeEditor.getDoc();
+		var cursor = doc.getCursor();
 		
 		//如果body上没有定义dg-dashboard样式，则图表元素也不必添加dg-chart样式，比如导入的看板
 		var setDashboardTheme = true;
@@ -1544,7 +1556,7 @@ readonly 是否只读操作，允许为null
 			var chartId = charts[0].id;
 			var chartName = charts[0].name;
 			
-			var text = po.getTemplatePrevTagText(editor, cursor.row, cursor.column);
+			var text = po.getTemplatePrevTagText(codeEditor, cursor);
 			
 			// =
 			if(/=\s*$/g.test(text))
@@ -1557,29 +1569,30 @@ readonly 是否只读操作，允许为null
 				code = " dg-chart-widget=\""+chartId+"\"";
 			else
 			{
-				setDashboardTheme = po.isCodeHasDefaultThemeClass(editor, cursor);
+				setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
 				code = "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
 			}
 		}
 		else
 		{
-			setDashboardTheme = po.isCodeHasDefaultThemeClass(editor, cursor);
+			setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
 			for(var i=0; i<charts.length; i++)
 				code += "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+charts[i].id+"\"><!--"+charts[i].name+"--></div>\n";
 		}
 		
-		editor.moveCursorToPosition(cursor);
-		editor.session.insert(cursor, code);
-		editor.focus();
+		doc.replaceRange(code, cursor);
+		codeEditor.focus();
 	};
 	
-	po.isCodeHasDefaultThemeClass = function(editor, cursor)
+	po.isCodeHasDefaultThemeClass = function(codeEditor, cursor)
 	{
-		var row = cursor.row;
+		var doc = codeEditor.getDoc();
+		
+		var row = cursor.line;
 		var text = "";
 		while(row >= 0)
 		{
-			text = editor.session.getLine(row);
+			text = doc.getLine(row);
 			
 			if(text && /["'\s]dg-dashboard["'\s]/g.test(text))
 				return true;
@@ -1603,11 +1616,11 @@ readonly 是否只读操作，允许为null
 		po.element(".resource-editor-tab-pane").each(function()
 		{
 			var tp = $(this);
-			var editor = tp.data("resourceEditorInstance");
+			var codeEditor = tp.data("resourceEditorInstance");
 			
 			data.resourceNames.push($(".resourceName", tp).val());
 			data.resourceIsTemplates.push($(".resourceIsTemplate", tp).val());
-			data.resourceContents.push(editor.getValue());
+			data.resourceContents.push(codeEditor.getValue());
 		});
 		
 		return data;
