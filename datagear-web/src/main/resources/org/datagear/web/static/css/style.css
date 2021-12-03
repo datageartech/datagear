@@ -196,6 +196,11 @@ a.link:hover{
 .code-editor .CodeMirror{
 	height: 100%;
 }
+.CodeMirror-hints .code-completion-comment{
+	padding-left: 1em;
+    opacity: 0.4;
+    filter: Alpha(Opacity=40);
+}
 
 /*表单*/
 form,

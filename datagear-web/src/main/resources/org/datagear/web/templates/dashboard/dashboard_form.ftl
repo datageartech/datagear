@@ -314,8 +314,7 @@ readonly 是否只读操作，允许为null
 		{
 			codeEditorOptions.hintOptions =
 			{
-				hint: po.codeEditorHintHandler,
-				completeSingle: true
+				hint: po.codeEditorHintHandler
 			};
 		}
 		
@@ -473,12 +472,15 @@ readonly 是否只读操作，允许为null
 		var token = (codeEditor.getTokenAt(cursor) || {});
 		var tokenString = (token ? token.string : "");
 		
-		//"dg-*"的HTML元素属性
-		if("xml" == mode.name && "attribute" == token.type && /^dg\-/i.test(tokenString))
+		//"dg*"的HTML元素属性
+		if("xml" == mode.name && "attribute" == token.type && /^dg/i.test(tokenString))
 		{
+			var myTagToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "tag");
+			var myCategory = (myTagToken ? myTagToken.string : null);
+			
 			var completions =
 			{
-				list: po.findCompletionList(po.codeEditorCompletionsTagAttr, tokenString),
+				list: po.findCompletionList(po.codeEditorCompletionsTagAttr, tokenString, myCategory),
 				from: CodeMirror.Pos(cursor.line, token.start),
 				to: CodeMirror.Pos(cursor.line, token.end)
 			};
@@ -486,15 +488,30 @@ readonly 是否只读操作，允许为null
 			return completions;
 		}
 		//javascript函数
-		else if("javascript" == mode.name && "property" == token.type)
+		else if("javascript" == mode.name && (tokenString == "." || "property" == token.type))
 		{
+			var myVarToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "variable");
+			var myCategory = (myVarToken ? myVarToken.string : "");
 			
+			//无法确定要补全的是看板还是图表对象，所以这里采用：完全匹配变量名，否则就全部提示
+			// *dashboard*
+			if(/dashboard/i.test(myCategory))
+				myCategory = "dashboard";
+			// *chart*
+			else if(/chart/i.test(myCategory))
+				myCategory = "chart";
+			else
+				myCategory = null;
+			
+			var completions =
+			{
+				list: po.findCompletionList(po.codeEditorCompletionsJsFunction, (tokenString == "." ? "" : tokenString), myCategory),
+				from: CodeMirror.Pos(cursor.line, (tokenString == "." ? token.start + 1 : token.start)),
+				to: CodeMirror.Pos(cursor.line, token.end)
+			};
+			
+			return completions;
 		}
-		
-		console.log("Mode : ");
-		console.dir(mode);
-		console.log("token : ");
-		console.dir(token);
 	};
 	
 	po.resourceEditorTabs.tabs(
@@ -567,308 +584,265 @@ readonly 是否只读操作，允许为null
 		return po.getLastTagText(text);
 	};
 	
-	po.resolveHtmlTagName = function(text)
+	po.insertChartCode = function(codeEditor, charts)
 	{
-		var re = text.match(/<\S*/);
+		if(!charts || !charts.length)
+			return;
 		
-		if(re)
-			return re[0].substr(1);
+		var doc = codeEditor.getDoc();
+		var cursor = doc.getCursor();
 		
-		return "";
+		//如果body上没有定义dg-dashboard样式，则图表元素也不必添加dg-chart样式，比如导入的看板
+		var setDashboardTheme = true;
+		
+		var code = "";
+		
+		if(charts.length == 1)
+		{
+			var chartId = charts[0].id;
+			var chartName = charts[0].name;
+			
+			var text = po.getTemplatePrevTagText(codeEditor, cursor);
+			
+			// =
+			if(/=\s*$/g.test(text))
+				code = "\"" + chartId + "\"";
+			// =" 或 ='
+			else if(/=\s*['"]$/g.test(text))
+				code = chartId;
+			// <...
+			else if(/<[^>]*$/g.test(text))
+				code = " dg-chart-widget=\""+chartId+"\"";
+			else
+			{
+				setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
+				code = "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
+			}
+		}
+		else
+		{
+			setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
+			for(var i=0; i<charts.length; i++)
+				code += "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+charts[i].id+"\"><!--"+charts[i].name+"--></div>\n";
+		}
+		
+		doc.replaceRange(code, cursor);
+		codeEditor.focus();
 	};
 	
-	po.getTemplatePrevToken = function(codeEditor, row, column)
+	po.isCodeHasDefaultThemeClass = function(codeEditor, cursor)
 	{
-		var text = codeEditor.session.getLine(row).substring(0, column);
+		var doc = codeEditor.getDoc();
 		
-		//反向查找直到非空串
-		var prevRow = row;
-		while((!text || /^\s*$/.test(text)) && (prevRow--) >= 0)
-			text = codeEditor.session.getLine(prevRow) + text;
+		var row = cursor.line;
+		var text = "";
+		while(row >= 0)
+		{
+			text = doc.getLine(row);
+			
+			if(text && /["'\s]dg-dashboard["'\s]/g.test(text))
+				return true;
+			
+			if(/<body/gi.test(text))
+				break;
+			
+			row--;
+		}
 		
-		return text;
+		return false;
 	};
-
-	po.codeEditorCompletionsTagAttr = [
-		{name: "dg-chart-widget",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", categories: ["div"]},
-		{name: "dg-chart-options",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-options' />", categories: ["body","div"]},
-		{name: "dg-chart-theme",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-theme' />", categories: ["body", "div"]},
-		{name: "dg-chart-map",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map' />", categories: ["div"]},
-		{name: "dg-chart-link",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-link' />", categories: ["div"]},
+	
+	po.codeEditorCompletionsTagAttr =
+	[
 		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"true\"",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-auto-resize' />", categories: ["body", "div"]},
 		{name: "dg-chart-disable-setting",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-setting' />", categories: ["body", "div"]},
-		{name: "dg-chart-on-",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-on-' />", categories: ["div"]},
-		{name: "dg-chart-map-urls",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map-urls' />", categories: ["body"]},
+		{name: "dg-chart-link",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-link' />", categories: ["div"]},
 		{name: "dg-chart-listener",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-listener' />", categories: ["body", "div"]},
+		{name: "dg-chart-map",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map' />", categories: ["div"]},
+		{name: "dg-chart-map-urls",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map-urls' />", categories: ["body"]},
+		{name: "dg-chart-on-",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-on-' />", categories: ["div"]},
+		{name: "dg-chart-options",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-options' />", categories: ["body","div"]},
 		{name: "dg-chart-renderer",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-renderer' />", categories: ["div"]},
+		{name: "dg-chart-theme",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-theme' />", categories: ["body", "div"]},
 		{name: "dg-chart-update-group",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-update-group' />", categories: ["body", "div"]},
-		{name: "dg-echarts-theme",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", categories: ["body", "div"]},
+		{name: "dg-chart-widget",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", categories: ["div"]},
+		{name: "dg-dashboard-form",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-form' />", categories: ["form"]},
 		{name: "dg-dashboard-listener",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-listener' />", categories: ["body"]},
-		{name: "dg-dashboard-form",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-form' />", categories: ["form"]}
+		{name: "dg-dashboard-var",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-var' />", categories: ["html"]},
+		{name: "dg-echarts-theme",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", categories: ["body", "div"]},
 	];
 	
-	po.templateEditorCompletionsJsFunction = [
-		
-		//caption相同的话，补全列表里只会显示第一个，为了解决看板、图表同名函数的问题，
-		//所以name里加了限定名，看板meta统一加头空格，图表caption统一加尾空格，这样补全列表可以对齐
-		
+	po.codeEditorCompletionsJsFunction =
+	[
 		//看板JS对象
-		{name: "dashboard.addChart", value: "addChart(", caption: "addChart()", meta: " dashboard"},
-		{name: "dashboard.chartIndex", value: "chartIndex(", caption: "chartIndex()", meta: " dashboard"},
-		{name: "dashboard.chartOf", value: "chartOf(", caption: "chartOf()", meta: " dashboard"},
-		{name: "dashboard.batchSetDataSetParamValues", value: "batchSetDataSetParamValues(", caption: "batchSetDataSetParamValues()", meta: " dashboard"},
-		{name: "dashboard.charts", value: "charts", caption: "charts", meta: " dashboard"},
-		{name: "dashboard.doRender", value: "doRender()", caption: "doRender()", meta: " dashboard"},
-		{name: "dashboard.init", value: "init()", caption: "init()", meta: " dashboard"},
-		{name: "dashboard.isHandlingCharts", value: "isHandlingCharts()", caption: "isHandlingCharts()", meta: " dashboard"},
-		{name: "dashboard.listener", value: "listener(", caption: "listener()", meta: " dashboard"},
-		{name: "dashboard.loadChart", value: "loadChart(", caption: "loadChart()", meta: " dashboard"},
-		{name: "dashboard.loadCharts", value: "loadCharts(", caption: "loadCharts()", meta: " dashboard"},
-		{name: "dashboard.loadUnsolvedCharts", value: "loadUnsolvedCharts()", caption: "loadUnsolvedCharts()", meta: " dashboard"},
-		{name: "dashboard.mapURLs", value: "mapURLs(", caption: "mapURLs()", meta: " dashboard"},
-		{name: "dashboard.originalInfo", value: "originalInfo(", caption: "originalInfo()", meta: " dashboard"},
-		{name: "dashboard.refreshData", value: "refreshData(", caption: "refreshData()", meta: " dashboard"},
-		{name: "dashboard.removeChart", value: "removeChart(", caption: "removeChart()", meta: " dashboard"},
-		{name: "dashboard.render", value: "render()", caption: "render()", meta: " dashboard"},
-		{name: "dashboard.renderContext", value: "renderContext", caption: "renderContext", meta: " dashboard"},
-		{name: "dashboard.renderContextAttr", value: "renderContextAttr(", caption: "renderContextAttr()", meta: " dashboard"},
-		{name: "dashboard.renderForm", value: "renderForm(", caption: "renderForm()", meta: " dashboard"},
-		{name: "dashboard.renderedChart", value: "renderedChart(", caption: "renderedChart()", meta: " dashboard"},
-		{name: "dashboard.resizeAllCharts", value: "resizeAllCharts()", caption: "resizeAllCharts()", meta: " dashboard"},
-		{name: "dashboard.resizeChart", value: "resizeChart(", caption: "resizeChart()", meta: " dashboard"},
-		{name: "dashboard.resultDataFormat", value: "resultDataFormat(", caption: "resultDataFormat()", meta: " dashboard"},
-		{name: "dashboard.serverDate", value: "serverDate()", caption: "serverDate()", meta: " dashboard"},
-		{name: "dashboard.startHandleCharts", value: "startHandleCharts()", caption: "startHandleCharts()", meta: " dashboard"},
-		{name: "dashboard.stopHandleCharts", value: "stopHandleCharts()", caption: "stopHandleCharts()", meta: " dashboard"},
-		{name: "dashboard.user", value: "user()", caption: "user()", meta: " dashboard"},
+		{name: "addChart", value: "addChart(", displayName: "addChart()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "chartIndex", value: "chartIndex(", displayName: "chartIndex()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "chartOf", value: "chartOf(", displayName: "chartOf()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "batchSetDataSetParamValues", value: "batchSetDataSetParamValues(", displayName: "batchSetDataSetParamValues()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "charts", value: "charts", displayName: "charts", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "doRender", value: "doRender()", displayName: "doRender()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "init", value: "init()", displayName: "init()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "isHandlingCharts", value: "isHandlingCharts()", displayName: "isHandlingCharts()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "listener", value: "listener(", displayName: "listener()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "loadChart", value: "loadChart(", displayName: "loadChart()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "loadCharts", value: "loadCharts(", displayName: "loadCharts()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "loadUnsolvedCharts", value: "loadUnsolvedCharts()", displayName: "loadUnsolvedCharts()", displayComment: "dashboard", categories: ["dashboard"], categories: ["dashboard"]},
+		{name: "mapURLs", value: "mapURLs(", displayName: "mapURLs()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "originalInfo", value: "originalInfo(", displayName: "originalInfo()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "refreshData", value: "refreshData(", displayName: "refreshData()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "removeChart", value: "removeChart(", displayName: "removeChart()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "render", value: "render()", displayName: "render()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "renderContext", value: "renderContext", displayName: "renderContext", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "renderContextAttr", value: "renderContextAttr(", displayName: "renderContextAttr()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "renderForm", value: "renderForm(", displayName: "renderForm()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "renderedChart", value: "renderedChart(", displayName: "renderedChart()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "resizeAllCharts", value: "resizeAllCharts()", displayName: "resizeAllCharts()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "resizeChart", value: "resizeChart(", displayName: "resizeChart()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "resultDataFormat", value: "resultDataFormat(", displayName: "resultDataFormat()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "serverDate", value: "serverDate()", displayName: "serverDate()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "startHandleCharts", value: "startHandleCharts()", displayName: "startHandleCharts()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "stopHandleCharts", value: "stopHandleCharts()", displayName: "stopHandleCharts()", displayComment: "dashboard", categories: ["dashboard"]},
+		{name: "user", value: "user()", displayName: "user()", displayComment: "dashboard", categories: ["dashboard"]},
 		
 		//图表JS对象
-		{name: "chart.autoResize", value: "autoResize(", caption: "autoResize() ", meta: "chart"},
-		{name: "chart.bindLinksEventHanders", value: "bindLinksEventHanders(", caption: "bindLinksEventHanders() ", meta: "chart"},
-		{name: "chart.callEventHandler", value: "callEventHandler(", caption: "callEventHandler() ", meta: "chart"},
-		{name: "chart.chartDataSetAt", value: "chartDataSetAt(", caption: "chartDataSetAt() ", meta: "chart"},
-		{name: "chart.chartDataSetFirst", value: "chartDataSetFirst(", caption: "chartDataSetFirst() ", meta: "chart"},
-		{name: "chart.chartDataSets", value: "chartDataSets", caption: "chartDataSets ", meta: "chart"},
-		{name: "chart.chartDataSetsAttachment", value: "chartDataSetsAttachment()", caption: "chartDataSetsAttachment() ", meta: "chart"},
-		{name: "chart.chartDataSetsMain", value: "chartDataSetsMain()", caption: "chartDataSetsMain() ", meta: "chart"},
-		{name: "chart.dashboard", value: "dashboard", caption: "dashboard ", meta: "chart"},
-		{name: "chart.dataSetAlias", value: "dataSetAlias(", caption: "dataSetAlias() ", meta: "chart"},
-		{name: "chart.dataSetParam", value: "dataSetParam(", caption: "dataSetParam() ", meta: "chart"},
-		{name: "chart.dataSetParamValue", value: "dataSetParamValue(", caption: "dataSetParamValue() ", meta: "chart"},
-		{name: "chart.dataSetParamValueFirst", value: "dataSetParamValueFirst(", caption: "dataSetParamValueFirst() ", meta: "chart"},
-		{name: "chart.dataSetParamValues", value: "dataSetParamValues(", caption: "dataSetParamValues() ", meta: "chart"},
-		{name: "chart.dataSetParamValuesFirst", value: "dataSetParamValuesFirst(", caption: "dataSetParamValuesFirst() ", meta: "chart"},
-		{name: "chart.dataSetParams", value: "dataSetParams(", caption: "dataSetParams() ", meta: "chart"},
-		{name: "chart.dataSetProperties", value: "dataSetProperties(", caption: "dataSetProperties() ", meta: "chart"},
-		{name: "chart.dataSetPropertiesOfSign", value: "dataSetPropertiesOfSign(", caption: "dataSetPropertiesOfSign() ", meta: "chart"},
-		{name: "chart.dataSetProperty", value: "dataSetProperty(", caption: "dataSetProperty() ", meta: "chart"},
-		{name: "chart.dataSetPropertyAlias", value: "dataSetPropertyAlias(", caption: "dataSetPropertyAlias() ", meta: "chart"},
-		{name: "chart.dataSetPropertyOfSign", value: "dataSetPropertyOfSign(", caption: "dataSetPropertyOfSign() ", meta: "chart"},
-		{name: "chart.dataSetPropertyOrder", value: "dataSetPropertyOrder(", caption: "dataSetPropertyOrder() ", meta: "chart"},
-		{name: "chart.dataSetPropertySign", value: "dataSetPropertySign(", caption: "dataSetPropertySign() ", meta: "chart"},
-		{name: "chart.dataSetPropertySigns", value: "dataSetPropertySigns(", caption: "dataSetPropertySigns() ", meta: "chart"},
-		{name: "chart.destroy", value: "destroy()", caption: "destroy() ", meta: "chart"},
-		{name: "chart.disableSetting", value: "disableSetting(", caption: "disableSetting() ", meta: "chart"},
-		{name: "chart.doRender", value: "doRender()", caption: "doRender() ", meta: "chart"},
-		{name: "chart.doUpdate", value: "doUpdate(", caption: "doUpdate() ", meta: "chart"},
-		{name: "chart.echartsGetThemeName", value: "echartsGetThemeName()", caption: "echartsGetThemeName() ", meta: "chart"},
-		{name: "chart.echartsInit", value: "echartsInit(", caption: "echartsInit() ", meta: "chart"},
-		{name: "chart.echartsLoadMap", value: "echartsLoadMap(", caption: "echartsLoadMap() ", meta: "chart"},
-		{name: "chart.echartsMapRegistered", value: "echartsMapRegistered(", caption: "echartsMapRegistered() ", meta: "chart"},
-		{name: "chart.echartsOffEventHandler", value: "echartsOffEventHandler(", caption: "echartsOffEventHandler() ", meta: "chart"},
-		{name: "chart.echartsOptions", value: "echartsOptions(", caption: "echartsOptions() ", meta: "chart"},
-		{name: "chart.echartsThemeName", value: "echartsThemeName(", caption: "echartsThemeName() ", meta: "chart"},
-		{name: "chart.element", value: "element()", caption: "element() ", meta: "chart"},
-		{name: "chart.elementId", value: "elementId", caption: "elementId ", meta: "chart"},
-		{name: "chart.elementJquery", value: "elementJquery()", caption: "elementJquery() ", meta: "chart"},
-		{name: "chart.elementStyle", value: "elementStyle(", caption: "elementStyle() ", meta: "chart"},
-		{name: "chart.elementWidgetId", value: "elementWidgetId()", caption: "elementWidgetId() ", meta: "chart"},
-		{name: "chart.eventData", value: "eventData(", caption: "eventData() ", meta: "chart"},
-		{name: "chart.eventHandlers", value: "eventHandlers(", caption: "eventHandlers() ", meta: "chart"},
-		{name: "chart.eventNewEcharts", value: "eventNewEcharts(", caption: "eventNewEcharts() ", meta: "chart"},
-		{name: "chart.eventNewHtml", value: "eventNewHtml(", caption: "eventNewHtml() ", meta: "chart"},
-		{name: "chart.eventOriginalChartDataSetIndex", value: "eventOriginalChartDataSetIndex(", caption: "eventOriginalChartDataSetIndex() ", meta: "chart"},
-		{name: "chart.eventOriginalData", value: "eventOriginalData(", caption: "eventOriginalData() ", meta: "chart"},
-		{name: "chart.eventOriginalInfo", value: "eventOriginalInfo(", caption: "eventOriginalInfo() ", meta: "chart"},
-		{name: "chart.eventOriginalResultDataIndex", value: "eventOriginalResultDataIndex(", caption: "eventOriginalResultDataIndex() ", meta: "chart"},
-		{name: "chart.extValue", value: "extValue(", caption: "extValue() ", meta: "chart"},
-		{name: "chart.gradualColor", value: "gradualColor(", caption: "gradualColor() ", meta: "chart"},
-		{name: "chart.handleChartEventLink", value: "handleChartEventLink(", caption: "handleChartEventLink() ", meta: "chart"},
-		{name: "chart.hasDataSetParam", value: "hasDataSetParam()", caption: "hasDataSetParam() ", meta: "chart"},
-		{name: "chart.id", value: "id", caption: "id ", meta: "chart"},
-		{name: "chart.inflateRenderOptions", value: "inflateRenderOptions(", caption: "inflateRenderOptions() ", meta: "chart"},
-		{name: "chart.inflateUpdateOptions", value: "inflateUpdateOptions(", caption: "inflateUpdateOptions() ", meta: "chart"},
-		{name: "chart.init", value: "init()", caption: "init() ", meta: "chart"},
-		{name: "chart.internal", value: "internal()", caption: "internal( ", meta: "chart"},
-		{name: "chart.isActive", value: "isActive()", caption: "isActive() ", meta: "chart"},
-		{name: "chart.isAsyncRender", value: "isAsyncRender()", caption: "isAsyncRender() ", meta: "chart"},
-		{name: "chart.isAsyncUpdate", value: "isAsyncUpdate()", caption: "isAsyncUpdate() ", meta: "chart"},
-		{name: "chart.isDataSetParamValueReady", value: "isDataSetParamValueReady()", caption: "isDataSetParamValueReady() ", meta: "chart"},
-		{name: "chart.isInstance", value: "isInstance(", caption: "isInstance() ", meta: "chart"},
-		{name: "chart.links", value: "links(", caption: "links() ", meta: "chart"},
-		{name: "chart.listener", value: "listener(", caption: "listener() ", meta: "chart"},
-		{name: "chart.loadMap", value: "loadMap(", caption: "loadMap() ", meta: "chart"},
-		{name: "chart.map", value: "map(", caption: "map() ", meta: "chart"},
-		{name: "chart.mapURL", value: "mapURL(", caption: "mapURL() ", meta: "chart"},
-		{name: "chart.name", value: "name", caption: "name ", meta: "chart"},
-		{name: "chart.off", value: "off(", caption: "off() ", meta: "chart"},
-		{name: "chart.on", value: "on(", caption: "on() ", meta: "chart"},
-		{name: "chart.onClick", value: "onClick(", caption: "onClick() ", meta: "chart"},
-		{name: "chart.onDblclick", value: "onDblclick(", caption: "onDblclick() ", meta: "chart"},
-		{name: "chart.onMousedown", value: "onMousedown(", caption: "onMousedown() ", meta: "chart"},
-		{name: "chart.onMouseout", value: "onMouseout(", caption: "onMouseout() ", meta: "chart"},
-		{name: "chart.onMouseover", value: "onMouseover(", caption: "onMouseover() ", meta: "chart"},
-		{name: "chart.onMouseup", value: "onMouseup(", caption: "onMouseup() ", meta: "chart"},
-		{name: "chart.options", value: "options(", caption: "options() ", meta: "chart"},
-		{name: "chart.originalInfo", value: "originalInfo(", caption: "originalInfo() ", meta: "chart"},
-		{name: "chart.plugin", value: "plugin", caption: "plugin ", meta: "chart"},
-		{name: "chart.refreshData", value: "refreshData()", caption: "refreshData() ", meta: "chart"},
-		{name: "chart.registerEventHandlerDelegation", value: "registerEventHandlerDelegation(", caption: "registerEventHandlerDelegation() ", meta: "chart"},
-		{name: "chart.removeEventHandlerDelegation", value: "removeEventHandlerDelegation(", caption: "removeEventHandlerDelegation() ", meta: "chart"},
-		{name: "chart.render", value: "render()", caption: "render() ", meta: "chart"},
-		{name: "chart.renderContext", value: "renderContext", caption: "renderContext ", meta: "chart"},
-		{name: "chart.renderContextAttr", value: "renderContextAttr(", caption: "renderContextAttr() ", meta: "chart"},
-		{name: "chart.renderOptions", value: "renderOptions(", caption: "renderOptions() ", meta: "chart"},
-		{name: "chart.renderer", value: "renderer(", caption: "renderer() ", meta: "chart"},
-		{name: "chart.resetDataSetParamValues", value: "resetDataSetParamValues(", caption: "resetDataSetParamValues() ", meta: "chart"},
-		{name: "chart.resetDataSetParamValuesFirst", value: "resetDataSetParamValuesFirst()", caption: "resetDataSetParamValuesFirst() ", meta: "chart"},
-		{name: "chart.resize", value: "resize()", caption: "resize() ", meta: "chart"},
-		{name: "chart.resultAt", value: "resultAt(", caption: "resultAt() ", meta: "chart"},
-		{name: "chart.resultCell", value: "resultCell(", caption: "resultCell() ", meta: "chart"},
-		{name: "chart.resultColumnArrays", value: "resultColumnArrays(", caption: "resultColumnArrays() ", meta: "chart"},
-		{name: "chart.resultData", value: "resultData(", caption: "resultData() ", meta: "chart"},
-		{name: "chart.resultDataElement", value: "resultDataElement(", caption: "resultDataElement() ", meta: "chart"},
-		{name: "chart.resultDataFormat", value: "resultDataFormat(", caption: "resultDataFormat() ", meta: "chart"},
-		{name: "chart.resultDatas", value: "resultDatas(", caption: "resultDatas() ", meta: "chart"},
-		{name: "chart.resultDatasFirst", value: "resultDatasFirst(", caption: "resultDatasFirst() ", meta: "chart"},
-		{name: "chart.resultFirst", value: "resultFirst(", caption: "resultFirst() ", meta: "chart"},
-		{name: "chart.resultMapObjects", value: "resultMapObjects(", caption: "resultMapObjects() ", meta: "chart"},
-		{name: "chart.resultNameValueObjects", value: "resultNameValueObjects(", caption: "resultNameValueObjects() ", meta: "chart"},
-		{name: "chart.resultOf", value: "resultOf(", caption: "resultOf() ", meta: "chart"},
-		{name: "chart.resultRowArrays", value: "resultRowArrays(", caption: "resultRowArrays() ", meta: "chart"},
-		{name: "chart.resultRowCell", value: "resultRowCell(", caption: "resultRowCell() ", meta: "chart"},
-		{name: "chart.resultValueObjects", value: "resultValueObjects(", caption: "resultValueObjects() ", meta: "chart"},
-		{name: "chart.status", value: "status(", caption: "status() ", meta: "chart"},
-		{name: "chart.statusDestroyed", value: "statusDestroyed(", caption: "statusDestroyed() ", meta: "chart"},
-		{name: "chart.statusPreRender", value: "statusPreRender(", caption: "statusPreRender() ", meta: "chart"},
-		{name: "chart.statusPreUpdate", value: "statusPreUpdate(", caption: "statusPreUpdate() ", meta: "chart"},
-		{name: "chart.statusRendered", value: "statusRendered(", caption: "statusRendered() ", meta: "chart"},
-		{name: "chart.statusRendering", value: "statusRendering(", caption: "statusRendering() ", meta: "chart"},
-		{name: "chart.statusUpdated", value: "statusUpdated(", caption: "statusUpdated() ", meta: "chart"},
-		{name: "chart.statusUpdating", value: "statusUpdating(", caption: "statusUpdating() ", meta: "chart"},
-		{name: "chart.styleString", value: "styleString(", caption: "styleString() ", meta: "chart"},
-		{name: "chart.theme", value: "theme(", caption: "theme() ", meta: "chart"},
-		{name: "chart.themeStyleName", value: "themeStyleName()", caption: "themeStyleName() ", meta: "chart"},
-		{name: "chart.themeStyleSheet", value: "themeStyleSheet(", caption: "themeStyleSheet() ", meta: "chart"},
-		{name: "chart.update", value: "update(", caption: "update() ", meta: "chart"},
-		{name: "chart.updateGroup", value: "updateGroup(", caption: "updateGroup() ", meta: "chart"},
-		{name: "chart.updateInterval", value: "updateInterval", caption: "updateInterval ", meta: "chart"},
-		{name: "chart.updateResults", value: "updateResults(", caption: "updateResults() ", meta: "chart"},
-		{name: "chart.widgetId", value: "widgetId()", caption: "widgetId() ", meta: "chart"}
-	];
-	
-	po.templateEditorCompleters =
-	[
-		//自动补全：dg-*
-		{
-			identifierRegexps : [/[a-zA-Z_0-9\-]/],
-			getCompletions: function(codeEditor, session, pos, prefix, callback)
-			{
-				var completions = [];
-				
-				if(prefix && prefix.indexOf("dg") == 0)
-					completions = this._getCompletionsForTagAttr(codeEditor, session, pos, prefix, callback);
-				
-				callback(null, completions);
-			},
-			_getCompletionsForTagAttr: function(codeEditor, session, pos, prefix, callback)
-			{
-				var completions = [];
-				
-				var prevText = po.getTemplatePrevTagText(codeEditor, pos.row, pos.column);
-				var tagName = po.resolveHtmlTagName(prevText);
-				
-				if(tagName)
-				{
-					tagName = tagName.toLowerCase();
-					
-					for(var i=0; i<po.codeEditorCompletionsTagAttr.length; i++)
-					{
-						var comp = po.codeEditorCompletionsTagAttr[i];
-						
-						if(comp.name.indexOf(prefix) != 0)
-							continue;
-						
-						if(!comp.tagNames || $.inArray(tagName, comp.tagNames) > -1)
-							completions.push(comp);
-					}
-				}
-				
-				return completions;
-			}
-		},
-		//自动补全：dashboard.*、chart.*
-		{
-			identifierRegexps : [/[a-zA-Z]/],
-			getCompletions: function(codeEditor, session, pos, prefix, callback)
-			{
-				var completions = [];
-				
-				if(prefix)
-				{
-					var prevToken = po.getTemplatePrevToken(codeEditor, pos.row, pos.column);
-					
-					//以"."加可选空格结尾
-					if(prevToken && /\.\S*$/.test(prevToken))
-						completions = this._getCompletionsForFunc(codeEditor, session, pos, prefix, callback, prevToken);
-				}
-				
-				callback(null, completions);
-			},
-			_getCompletionsForFunc: function(codeEditor, session, pos, prefix, callback, prevToken)
-			{
-				var completions = [];
-				
-				var meta = "";
-				
-				//无法确定要补全的是看板还是图表对象，所以这里采用：完全匹配变量名，否则就全部提示
-				
-				// *dashboard*
-				if(/dashboard/i.test(prevToken))
-					meta = " dashboard";
-				// *chart*
-				else if(/chart/i.test(prevToken))
-					meta = "chart";
-				
-				for(var i=0; i<po.templateEditorCompletionsJsFunction.length; i++)
-				{
-					var comp = po.templateEditorCompletionsJsFunction[i];
-					
-					if(!meta || (meta && comp.meta == meta))
-					{
-						if(comp.value.indexOf(prefix) == 0)
-							completions.push(comp);
-					}
-				}
-				
-				return completions;
-			}
-		}
+		{name: "autoResize", value: "autoResize(", displayName: "autoResize() ", displayComment: "chart", categories: ["chart"], categories: ["chart"]},
+		{name: "bindLinksEventHanders", value: "bindLinksEventHanders(", displayName: "bindLinksEventHanders() ", displayComment: "chart", categories: ["chart"]},
+		{name: "callEventHandler", value: "callEventHandler(", displayName: "callEventHandler() ", displayComment: "chart", categories: ["chart"]},
+		{name: "chartDataSetAt", value: "chartDataSetAt(", displayName: "chartDataSetAt() ", displayComment: "chart", categories: ["chart"]},
+		{name: "chartDataSetFirst", value: "chartDataSetFirst(", displayName: "chartDataSetFirst() ", displayComment: "chart", categories: ["chart"]},
+		{name: "chartDataSets", value: "chartDataSets", displayName: "chartDataSets ", displayComment: "chart", categories: ["chart"]},
+		{name: "chartDataSetsAttachment", value: "chartDataSetsAttachment()", displayName: "chartDataSetsAttachment() ", displayComment: "chart", categories: ["chart"]},
+		{name: "chartDataSetsMain", value: "chartDataSetsMain()", displayName: "chartDataSetsMain() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dashboard", value: "dashboard", displayName: "dashboard ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetAlias", value: "dataSetAlias(", displayName: "dataSetAlias() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetParam", value: "dataSetParam(", displayName: "dataSetParam() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetParamValue", value: "dataSetParamValue(", displayName: "dataSetParamValue() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetParamValueFirst", value: "dataSetParamValueFirst(", displayName: "dataSetParamValueFirst() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetParamValues", value: "dataSetParamValues(", displayName: "dataSetParamValues() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetParamValuesFirst", value: "dataSetParamValuesFirst(", displayName: "dataSetParamValuesFirst() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetParams", value: "dataSetParams(", displayName: "dataSetParams() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetProperties", value: "dataSetProperties(", displayName: "dataSetProperties() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetPropertiesOfSign", value: "dataSetPropertiesOfSign(", displayName: "dataSetPropertiesOfSign() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetProperty", value: "dataSetProperty(", displayName: "dataSetProperty() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetPropertyAlias", value: "dataSetPropertyAlias(", displayName: "dataSetPropertyAlias() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetPropertyOfSign", value: "dataSetPropertyOfSign(", displayName: "dataSetPropertyOfSign() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetPropertyOrder", value: "dataSetPropertyOrder(", displayName: "dataSetPropertyOrder() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetPropertySign", value: "dataSetPropertySign(", displayName: "dataSetPropertySign() ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetPropertySigns", value: "dataSetPropertySigns(", displayName: "dataSetPropertySigns() ", displayComment: "chart", categories: ["chart"]},
+		{name: "destroy", value: "destroy()", displayName: "destroy() ", displayComment: "chart", categories: ["chart"]},
+		{name: "disableSetting", value: "disableSetting(", displayName: "disableSetting() ", displayComment: "chart", categories: ["chart"]},
+		{name: "doRender", value: "doRender()", displayName: "doRender() ", displayComment: "chart", categories: ["chart"]},
+		{name: "doUpdate", value: "doUpdate(", displayName: "doUpdate() ", displayComment: "chart", categories: ["chart"]},
+		{name: "echartsGetThemeName", value: "echartsGetThemeName()", displayName: "echartsGetThemeName() ", displayComment: "chart", categories: ["chart"]},
+		{name: "echartsInit", value: "echartsInit(", displayName: "echartsInit() ", displayComment: "chart", categories: ["chart"]},
+		{name: "echartsLoadMap", value: "echartsLoadMap(", displayName: "echartsLoadMap() ", displayComment: "chart", categories: ["chart"]},
+		{name: "echartsMapRegistered", value: "echartsMapRegistered(", displayName: "echartsMapRegistered() ", displayComment: "chart", categories: ["chart"]},
+		{name: "echartsOffEventHandler", value: "echartsOffEventHandler(", displayName: "echartsOffEventHandler() ", displayComment: "chart", categories: ["chart"]},
+		{name: "echartsOptions", value: "echartsOptions(", displayName: "echartsOptions() ", displayComment: "chart", categories: ["chart"]},
+		{name: "echartsThemeName", value: "echartsThemeName(", displayName: "echartsThemeName() ", displayComment: "chart", categories: ["chart"]},
+		{name: "element", value: "element()", displayName: "element() ", displayComment: "chart", categories: ["chart"]},
+		{name: "elementId", value: "elementId", displayName: "elementId ", displayComment: "chart", categories: ["chart"]},
+		{name: "elementJquery", value: "elementJquery()", displayName: "elementJquery() ", displayComment: "chart", categories: ["chart"]},
+		{name: "elementStyle", value: "elementStyle(", displayName: "elementStyle() ", displayComment: "chart", categories: ["chart"]},
+		{name: "elementWidgetId", value: "elementWidgetId()", displayName: "elementWidgetId() ", displayComment: "chart", categories: ["chart"]},
+		{name: "eventData", value: "eventData(", displayName: "eventData() ", displayComment: "chart", categories: ["chart"]},
+		{name: "eventHandlers", value: "eventHandlers(", displayName: "eventHandlers() ", displayComment: "chart", categories: ["chart"]},
+		{name: "eventNewEcharts", value: "eventNewEcharts(", displayName: "eventNewEcharts() ", displayComment: "chart", categories: ["chart"]},
+		{name: "eventNewHtml", value: "eventNewHtml(", displayName: "eventNewHtml() ", displayComment: "chart", categories: ["chart"]},
+		{name: "eventOriginalChartDataSetIndex", value: "eventOriginalChartDataSetIndex(", displayName: "eventOriginalChartDataSetIndex() ", displayComment: "chart", categories: ["chart"]},
+		{name: "eventOriginalData", value: "eventOriginalData(", displayName: "eventOriginalData() ", displayComment: "chart", categories: ["chart"]},
+		{name: "eventOriginalInfo", value: "eventOriginalInfo(", displayName: "eventOriginalInfo() ", displayComment: "chart", categories: ["chart"]},
+		{name: "eventOriginalResultDataIndex", value: "eventOriginalResultDataIndex(", displayName: "eventOriginalResultDataIndex() ", displayComment: "chart", categories: ["chart"]},
+		{name: "extValue", value: "extValue(", displayName: "extValue() ", displayComment: "chart", categories: ["chart"]},
+		{name: "gradualColor", value: "gradualColor(", displayName: "gradualColor() ", displayComment: "chart", categories: ["chart"]},
+		{name: "handleChartEventLink", value: "handleChartEventLink(", displayName: "handleChartEventLink() ", displayComment: "chart", categories: ["chart"]},
+		{name: "hasDataSetParam", value: "hasDataSetParam()", displayName: "hasDataSetParam() ", displayComment: "chart", categories: ["chart"]},
+		{name: "id", value: "id", displayName: "id ", displayComment: "chart", categories: ["chart"]},
+		{name: "inflateRenderOptions", value: "inflateRenderOptions(", displayName: "inflateRenderOptions() ", displayComment: "chart", categories: ["chart"]},
+		{name: "inflateUpdateOptions", value: "inflateUpdateOptions(", displayName: "inflateUpdateOptions() ", displayComment: "chart", categories: ["chart"]},
+		{name: "init", value: "init()", displayName: "init() ", displayComment: "chart", categories: ["chart"]},
+		{name: "internal", value: "internal()", displayName: "internal( ", displayComment: "chart", categories: ["chart"]},
+		{name: "isActive", value: "isActive()", displayName: "isActive() ", displayComment: "chart", categories: ["chart"]},
+		{name: "isAsyncRender", value: "isAsyncRender()", displayName: "isAsyncRender() ", displayComment: "chart", categories: ["chart"]},
+		{name: "isAsyncUpdate", value: "isAsyncUpdate()", displayName: "isAsyncUpdate() ", displayComment: "chart", categories: ["chart"]},
+		{name: "isDataSetParamValueReady", value: "isDataSetParamValueReady()", displayName: "isDataSetParamValueReady() ", displayComment: "chart", categories: ["chart"]},
+		{name: "isInstance", value: "isInstance(", displayName: "isInstance() ", displayComment: "chart", categories: ["chart"]},
+		{name: "links", value: "links(", displayName: "links() ", displayComment: "chart", categories: ["chart"]},
+		{name: "listener", value: "listener(", displayName: "listener() ", displayComment: "chart", categories: ["chart"]},
+		{name: "loadMap", value: "loadMap(", displayName: "loadMap() ", displayComment: "chart", categories: ["chart"]},
+		{name: "map", value: "map(", displayName: "map() ", displayComment: "chart", categories: ["chart"]},
+		{name: "mapURL", value: "mapURL(", displayName: "mapURL() ", displayComment: "chart", categories: ["chart"]},
+		{name: "name", value: "name", displayName: "name ", displayComment: "chart", categories: ["chart"]},
+		{name: "off", value: "off(", displayName: "off() ", displayComment: "chart", categories: ["chart"]},
+		{name: "on", value: "on(", displayName: "on() ", displayComment: "chart", categories: ["chart"]},
+		{name: "onClick", value: "onClick(", displayName: "onClick() ", displayComment: "chart", categories: ["chart"]},
+		{name: "onDblclick", value: "onDblclick(", displayName: "onDblclick() ", displayComment: "chart", categories: ["chart"]},
+		{name: "onMousedown", value: "onMousedown(", displayName: "onMousedown() ", displayComment: "chart", categories: ["chart"]},
+		{name: "onMouseout", value: "onMouseout(", displayName: "onMouseout() ", displayComment: "chart", categories: ["chart"]},
+		{name: "onMouseover", value: "onMouseover(", displayName: "onMouseover() ", displayComment: "chart", categories: ["chart"]},
+		{name: "onMouseup", value: "onMouseup(", displayName: "onMouseup() ", displayComment: "chart", categories: ["chart"]},
+		{name: "options", value: "options(", displayName: "options() ", displayComment: "chart", categories: ["chart"]},
+		{name: "originalInfo", value: "originalInfo(", displayName: "originalInfo() ", displayComment: "chart", categories: ["chart"]},
+		{name: "plugin", value: "plugin", displayName: "plugin ", displayComment: "chart", categories: ["chart"]},
+		{name: "refreshData", value: "refreshData()", displayName: "refreshData() ", displayComment: "chart", categories: ["chart"]},
+		{name: "registerEventHandlerDelegation", value: "registerEventHandlerDelegation(", displayName: "registerEventHandlerDelegation() ", displayComment: "chart", categories: ["chart"]},
+		{name: "removeEventHandlerDelegation", value: "removeEventHandlerDelegation(", displayName: "removeEventHandlerDelegation() ", displayComment: "chart", categories: ["chart"]},
+		{name: "render", value: "render()", displayName: "render() ", displayComment: "chart", categories: ["chart"]},
+		{name: "renderContext", value: "renderContext", displayName: "renderContext ", displayComment: "chart", categories: ["chart"]},
+		{name: "renderContextAttr", value: "renderContextAttr(", displayName: "renderContextAttr() ", displayComment: "chart", categories: ["chart"]},
+		{name: "renderOptions", value: "renderOptions(", displayName: "renderOptions() ", displayComment: "chart", categories: ["chart"]},
+		{name: "renderer", value: "renderer(", displayName: "renderer() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resetDataSetParamValues", value: "resetDataSetParamValues(", displayName: "resetDataSetParamValues() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resetDataSetParamValuesFirst", value: "resetDataSetParamValuesFirst()", displayName: "resetDataSetParamValuesFirst() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resize", value: "resize()", displayName: "resize() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultAt", value: "resultAt(", displayName: "resultAt() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultCell", value: "resultCell(", displayName: "resultCell() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultColumnArrays", value: "resultColumnArrays(", displayName: "resultColumnArrays() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultData", value: "resultData(", displayName: "resultData() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultDataElement", value: "resultDataElement(", displayName: "resultDataElement() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultDataFormat", value: "resultDataFormat(", displayName: "resultDataFormat() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultDatas", value: "resultDatas(", displayName: "resultDatas() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultDatasFirst", value: "resultDatasFirst(", displayName: "resultDatasFirst() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultFirst", value: "resultFirst(", displayName: "resultFirst() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultMapObjects", value: "resultMapObjects(", displayName: "resultMapObjects() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultNameValueObjects", value: "resultNameValueObjects(", displayName: "resultNameValueObjects() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultOf", value: "resultOf(", displayName: "resultOf() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultRowArrays", value: "resultRowArrays(", displayName: "resultRowArrays() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultRowCell", value: "resultRowCell(", displayName: "resultRowCell() ", displayComment: "chart", categories: ["chart"]},
+		{name: "resultValueObjects", value: "resultValueObjects(", displayName: "resultValueObjects() ", displayComment: "chart", categories: ["chart"]},
+		{name: "status", value: "status(", displayName: "status() ", displayComment: "chart", categories: ["chart"]},
+		{name: "statusDestroyed", value: "statusDestroyed(", displayName: "statusDestroyed() ", displayComment: "chart", categories: ["chart"]},
+		{name: "statusPreRender", value: "statusPreRender(", displayName: "statusPreRender() ", displayComment: "chart", categories: ["chart"]},
+		{name: "statusPreUpdate", value: "statusPreUpdate(", displayName: "statusPreUpdate() ", displayComment: "chart", categories: ["chart"]},
+		{name: "statusRendered", value: "statusRendered(", displayName: "statusRendered() ", displayComment: "chart", categories: ["chart"]},
+		{name: "statusRendering", value: "statusRendering(", displayName: "statusRendering() ", displayComment: "chart", categories: ["chart"]},
+		{name: "statusUpdated", value: "statusUpdated(", displayName: "statusUpdated() ", displayComment: "chart", categories: ["chart"]},
+		{name: "statusUpdating", value: "statusUpdating(", displayName: "statusUpdating() ", displayComment: "chart", categories: ["chart"]},
+		{name: "styleString", value: "styleString(", displayName: "styleString() ", displayComment: "chart", categories: ["chart"]},
+		{name: "theme", value: "theme(", displayName: "theme() ", displayComment: "chart", categories: ["chart"]},
+		{name: "themeStyleName", value: "themeStyleName()", displayName: "themeStyleName() ", displayComment: "chart", categories: ["chart"]},
+		{name: "themeStyleSheet", value: "themeStyleSheet(", displayName: "themeStyleSheet() ", displayComment: "chart", categories: ["chart"]},
+		{name: "update", value: "update(", displayName: "update() ", displayComment: "chart", categories: ["chart"]},
+		{name: "updateGroup", value: "updateGroup(", displayName: "updateGroup() ", displayComment: "chart", categories: ["chart"]},
+		{name: "updateInterval", value: "updateInterval", displayName: "updateInterval ", displayComment: "chart", categories: ["chart"]},
+		{name: "updateResults", value: "updateResults(", displayName: "updateResults() ", displayComment: "chart", categories: ["chart"]},
+		{name: "widgetId", value: "widgetId()", displayName: "widgetId() ", displayComment: "chart", categories: ["chart"]}
 	];
 	
 	po.getDashboardId = function()
@@ -1575,74 +1549,6 @@ readonly 是否只读操作，允许为null
 			name = po.dashboardGlobalResUrlPrefix + name;
 		
 		return name;
-	};
-	
-	po.insertChartCode = function(codeEditor, charts)
-	{
-		if(!charts || !charts.length)
-			return;
-		
-		var doc = codeEditor.getDoc();
-		var cursor = doc.getCursor();
-		
-		//如果body上没有定义dg-dashboard样式，则图表元素也不必添加dg-chart样式，比如导入的看板
-		var setDashboardTheme = true;
-		
-		var code = "";
-		
-		if(charts.length == 1)
-		{
-			var chartId = charts[0].id;
-			var chartName = charts[0].name;
-			
-			var text = po.getTemplatePrevTagText(codeEditor, cursor);
-			
-			// =
-			if(/=\s*$/g.test(text))
-				code = "\"" + chartId + "\"";
-			// =" 或 ='
-			else if(/=\s*['"]$/g.test(text))
-				code = chartId;
-			// <...
-			else if(/<[^>]*$/g.test(text))
-				code = " dg-chart-widget=\""+chartId+"\"";
-			else
-			{
-				setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
-				code = "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
-			}
-		}
-		else
-		{
-			setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
-			for(var i=0; i<charts.length; i++)
-				code += "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+charts[i].id+"\"><!--"+charts[i].name+"--></div>\n";
-		}
-		
-		doc.replaceRange(code, cursor);
-		codeEditor.focus();
-	};
-	
-	po.isCodeHasDefaultThemeClass = function(codeEditor, cursor)
-	{
-		var doc = codeEditor.getDoc();
-		
-		var row = cursor.line;
-		var text = "";
-		while(row >= 0)
-		{
-			text = doc.getLine(row);
-			
-			if(text && /["'\s]dg-dashboard["'\s]/g.test(text))
-				return true;
-			
-			if(/<body/gi.test(text))
-				break;
-			
-			row--;
-		}
-		
-		return false;
 	};
 	
 	po.getResourceEditorData = function()
