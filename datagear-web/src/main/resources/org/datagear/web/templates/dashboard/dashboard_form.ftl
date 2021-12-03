@@ -310,39 +310,23 @@ readonly 是否只读操作，允许为null
 			codeEditorOptions.mode = "css";
 		}
 		
+		if(isTemplate && !codeEditorOptions.readOnly)
+		{
+			codeEditorOptions.hintOptions =
+			{
+				hint: po.codeEditorHintHandler,
+				completeSingle: true
+			};
+		}
+		
 		codeEditor = po.createCodeEditor(pc2Dom, codeEditorOptions);
 		
 		if(isTemplate && !codeEditorOptions.readOnly)
 		{
 			codeEditor.on("change", function(codeEditor, changeObj)
 			{
-				var doc = codeEditor.getDoc();
-				var cursor = doc.getCursor();
-				var token = codeEditor.getTokenAt(cursor);
-				console.log("token : ");
-				console.dir(token);
-				console.log("changeObj : ");
-				console.dir(changeObj);
-				
-				codeEditor.showHint(
-				{
-					hint: function(codeEditor, callback)
-					{
-						return
-						{
-							list: ['a', 'b']
-						};
-					}
-				});
+				codeEditor.showHint();
 			});
-			
-			<#--
-			codeEditor.setOptions(
-			{
-				enableBasicAutocompletion: po.templateEditorCompleters,
-				enableLiveAutocompletion: po.templateEditorCompleters
-			});
-			-->
 			
 			//光标移至"</body>"的上一行，便于用户直接输入内容
 			var cursor = codeEditor.getSearchCursor("</body>");
@@ -481,6 +465,38 @@ readonly 是否只读操作，允许为null
     	codeEditor.focus();
 	};
 	
+	po.codeEditorHintHandler = function(codeEditor)
+	{
+		var doc = codeEditor.getDoc();
+		var cursor = doc.getCursor();
+		var mode = (codeEditor.getModeAt(cursor) || {});
+		var token = (codeEditor.getTokenAt(cursor) || {});
+		var tokenString = (token ? token.string : "");
+		
+		//"dg-*"的HTML元素属性
+		if("xml" == mode.name && "attribute" == token.type && /^dg\-/i.test(tokenString))
+		{
+			var completions =
+			{
+				list: po.findCompletionList(po.codeEditorCompletionsTagAttr, tokenString),
+				from: CodeMirror.Pos(cursor.line, token.start),
+				to: CodeMirror.Pos(cursor.line, token.end)
+			};
+			
+			return completions;
+		}
+		//javascript函数
+		else if("javascript" == mode.name && "property" == token.type)
+		{
+			
+		}
+		
+		console.log("Mode : ");
+		console.dir(mode);
+		console.log("token : ");
+		console.dir(token);
+	};
+	
 	po.resourceEditorTabs.tabs(
 	{
 		event: "click",
@@ -572,38 +588,38 @@ readonly 是否只读操作，允许为null
 		
 		return text;
 	};
-	
-	po.templateEditorCompletionsTagAttr = [
-		{name: "dg-chart-widget", value: "dg-chart-widget", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", tagNames: ["div"]},
-		{name: "dg-chart-options", value: "dg-chart-options", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-options' />", tagNames: ["body","div"]},
-		{name: "dg-chart-theme", value: "dg-chart-theme", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-theme' />", tagNames: ["body", "div"]},
-		{name: "dg-chart-map", value: "dg-chart-map", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map' />", tagNames: ["div"]},
-		{name: "dg-chart-link", value: "dg-chart-link", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-link' />", tagNames: ["div"]},
-		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"true\"", caption: "dg-chart-aut..ize",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-auto-resize' />", tagNames: ["body", "div"]},
-		{name: "dg-chart-disable-setting", value: "dg-chart-disable-setting", caption: "dg-chart-dis..ing",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-setting' />", tagNames: ["body", "div"]},
-		{name: "dg-chart-on-", value: "dg-chart-on-", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-on-' />", tagNames: ["div"]},
-		{name: "dg-chart-map-urls", value: "dg-chart-map-urls", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map-urls' />", tagNames: ["body"]},
-		{name: "dg-chart-listener", value: "dg-chart-listener", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-listener' />", tagNames: ["body", "div"]},
-		{name: "dg-chart-renderer", value: "dg-chart-renderer", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-renderer' />", tagNames: ["div"]},
-		{name: "dg-chart-update-group", value: "dg-chart-update-group", caption: "dg-chart-upd...oup",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-update-group' />", tagNames: ["body", "div"]},
-		{name: "dg-echarts-theme", value: "dg-echarts-theme", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", tagNames: ["body", "div"]},
-		{name: "dg-dashboard-listener", value: "dg-dashboard-listener", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-listener' />", tagNames: ["body"]},
-		{name: "dg-dashboard-form", value: "dg-dashboard-form", caption: "",
-			meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-form' />", tagNames: ["form"]}
+
+	po.codeEditorCompletionsTagAttr = [
+		{name: "dg-chart-widget",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", categories: ["div"]},
+		{name: "dg-chart-options",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-options' />", categories: ["body","div"]},
+		{name: "dg-chart-theme",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-theme' />", categories: ["body", "div"]},
+		{name: "dg-chart-map",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map' />", categories: ["div"]},
+		{name: "dg-chart-link",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-link' />", categories: ["div"]},
+		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"true\"",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-auto-resize' />", categories: ["body", "div"]},
+		{name: "dg-chart-disable-setting",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-setting' />", categories: ["body", "div"]},
+		{name: "dg-chart-on-",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-on-' />", categories: ["div"]},
+		{name: "dg-chart-map-urls",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map-urls' />", categories: ["body"]},
+		{name: "dg-chart-listener",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-listener' />", categories: ["body", "div"]},
+		{name: "dg-chart-renderer",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-renderer' />", categories: ["div"]},
+		{name: "dg-chart-update-group",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-update-group' />", categories: ["body", "div"]},
+		{name: "dg-echarts-theme",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", categories: ["body", "div"]},
+		{name: "dg-dashboard-listener",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-listener' />", categories: ["body"]},
+		{name: "dg-dashboard-form",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-form' />", categories: ["form"]}
 	];
 	
 	po.templateEditorCompletionsJsFunction = [
@@ -791,9 +807,9 @@ readonly 是否只读操作，允许为null
 				{
 					tagName = tagName.toLowerCase();
 					
-					for(var i=0; i<po.templateEditorCompletionsTagAttr.length; i++)
+					for(var i=0; i<po.codeEditorCompletionsTagAttr.length; i++)
 					{
-						var comp = po.templateEditorCompletionsTagAttr[i];
+						var comp = po.codeEditorCompletionsTagAttr[i];
 						
 						if(comp.name.indexOf(prefix) != 0)
 							continue;
