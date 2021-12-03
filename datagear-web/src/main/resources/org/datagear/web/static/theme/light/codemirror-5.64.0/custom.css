@@ -31,12 +31,16 @@
 .cm-s-custom .CodeMirror-matchingbracket { outline:1px solid grey; color:black !important; }
 
 .CodeMirror-hints.custom {
-  font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
-  color: #616569;
-  background-color: #ebf3fd !important;
+  background-color: #fff !important;
+  border: 1px solid #dddddd;
+  color: #333333;
+  -webkit-box-shadow: 0px 0px 5px #666666;
+  box-shadow: 0px 0px 5px #666666;
 }
-
+.CodeMirror-hints.custom .CodeMirror-hint{
+	color: #333333;
+}
 .CodeMirror-hints.custom .CodeMirror-hint-active {
-  background-color: #a2b8c9 !important;
-  color: #5c6065 !important;
+  background-color: #ededed !important;
+  color: #333333 !important;
 }

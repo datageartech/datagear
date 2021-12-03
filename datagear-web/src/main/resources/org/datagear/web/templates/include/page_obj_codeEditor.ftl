@@ -27,8 +27,8 @@ page_js_obj.ftl
 		if(options.hintOptions)
 			options.hintOptions.completeSingle = false;
 		
-		if(options.hintOptions)
-			options.hintOptions.closeOnUnfocus = false;
+		//if(options.hintOptions)
+		//	options.hintOptions.closeOnUnfocus = false;
 		
 		return CodeMirror(dom, options);
 	};
