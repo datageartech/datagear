@@ -106,28 +106,21 @@ po.previewOptions.url = "...";
 		po.element(".form-content").css("max-height", formContentHeight+"px");
 	};
 	
-	po.initWorkspaceEditor = function(editor, initValue)
+	po.initWorkspaceEditor = function(dom, options)
 	{
-		if(initValue == null)
-			initValue = "";
+		options.readOnly = ${readonly?string("true","false")};
 		
-		var cursor = editor.getCursorPosition();
-		editor.session.insert(cursor, initValue);
-		editor.commands.addCommand(
+		if(!options.extraKeys)
+			options.extraKeys = {};
+		
+		options.extraKeys["Ctrl-Enter"] = function(editor)
 		{
-		    name: 'previewCommand',
-		    bindKey: "Ctrl-ENTER",
-		    exec: function(editor)
-		    {
-		    	var $operationWrapper = po.element(".workspace-operation-wrapper");
-	    		$operationWrapper.tabs("option", "active", 0);
-	    		po.element(".preview-button").click();
-		    }
-		});
+			var $operationWrapper = po.element(".workspace-operation-wrapper");
+    		$operationWrapper.tabs("option", "active", 0);
+    		po.element(".preview-button").click();
+		};
 		
-		<#if readonly>
-		editor.setReadOnly(true);
-		</#if>
+		return po.createCodeEditor(dom, options);
 	};
 	
 	po.initWorkspaceTabs = function(disableParams)

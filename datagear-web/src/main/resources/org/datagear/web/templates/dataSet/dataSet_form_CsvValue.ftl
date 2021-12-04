@@ -40,7 +40,7 @@ readonly 是否只读操作，允许为null
 					<div class="form-item-value error-newline">
 						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''}</textarea>
 						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
-							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
+							<div id="${pageId}-workspaceEditor" class="workspace-editor code-editor"></div>
 						</div>
 					</div>
 				</div>
@@ -82,6 +82,7 @@ readonly 是否只读操作，允许为null
 <#include "../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
 <#include "include/dataSet_form_js_nameRow.ftl">
+<#include "../include/page_obj_codeEditor.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -93,22 +94,22 @@ readonly 是否只读操作，允许为null
 	po.element(".nameRow-radios").controlgroup();
 	po.initWorkspaceHeight();
 	
-	po.csvEditor = ace.edit("${pageId}-workspaceEditor");
-	po.csvEditor.setShowPrintMargin(false);
+	po.csvEditor = po.initWorkspaceEditor(po.element("#${pageId}-workspaceEditor"),
+	{
+		value: po.element("textarea[name='value']").val()
+	});
 	
-	po.initWorkspaceEditor(po.csvEditor, po.element("textarea[name='value']").val());
 	po.initWorkspaceTabs();
 	po.getAddPropertyName = function()
 	{
-		var selectionRange = po.csvEditor.getSelectionRange();
-		return (po.csvEditor.session.getTextRange(selectionRange) || "");
+		return po.getCodeEditorValueSelText(po.csvEditor);
 	};
 	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
 	
 	po.updatePreviewOptionsData = function()
 	{
-		var value = po.csvEditor.getValue();
+		var value = po.getCodeEditorValue(po.csvEditor);
 		
 		var dataSet = po.previewOptions.data.dataSet;
 		
@@ -124,7 +125,7 @@ readonly 是否只读操作，允许为null
 	
 	po.isPreviewValueModified = function()
 	{
-		var value = po.csvEditor.getValue();
+		var value = po.getCodeEditorValue(po.csvEditor);
 		var nameRow = po.nameRowValue();
 		
 		var pd = po.previewOptions.data.dataSet;
@@ -151,7 +152,7 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetCsvValueRequired", function(value, element)
 	{
-		var value = po.csvEditor.getValue();
+		var value = po.getCodeEditorValue(po.csvEditor);
 		return value.length > 0;
 	});
 	
@@ -189,7 +190,7 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
-			formData["value"] = po.csvEditor.getValue();
+			formData["value"] = po.getCodeEditorValue(po.csvEditor);
 			formData["nameRow"] = po.nameRowValue();
 			formData["nameRowRadio"] = undefined;
 			formData["nameRowText"] = undefined;

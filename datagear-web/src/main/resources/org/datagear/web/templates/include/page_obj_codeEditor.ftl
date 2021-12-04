@@ -18,9 +18,18 @@ page_js_obj.ftl
 {
 	po.createCodeEditor = function(dom, options)
 	{
+		dom = $(dom)[0];
+		
 		options = (options || {});
+		
 		//采用系统切换主题功能模式
 		options.theme = "custom";
+		
+		if(options.lineNumbers == null)
+			options.lineNumbers = true;
+		
+		if(options.smartIndent == null)
+			options.smartIndent = false;
 		
 		//强制禁用completeSingle选项，因为系统的代码编辑器hint都是在change事件中触发的
 		//如果这里为true，将会hint死循环，且会导致退格操作无效
@@ -31,6 +40,17 @@ page_js_obj.ftl
 		//	options.hintOptions.closeOnUnfocus = false;
 		
 		return CodeMirror(dom, options);
+	};
+	
+	po.getCodeEditorValue = function(codeEditor)
+	{
+		return codeEditor.getValue();
+	};
+	
+	po.getCodeEditorValueSelText = function(codeEditor)
+	{
+		var doc = codeEditor.getDoc();
+		return (doc.getSelection() || "");
 	};
 	
 	//查找补全列表

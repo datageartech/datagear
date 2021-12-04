@@ -40,7 +40,7 @@ readonly 是否只读操作，允许为null
 					<div class="form-item-value error-newline">
 						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''}</textarea>
 						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
-							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
+							<div id="${pageId}-workspaceEditor" class="workspace-editor code-editor"></div>
 						</div>
 					</div>
 				</div>
@@ -59,6 +59,7 @@ readonly 是否只读操作，允许为null
 </div>
 <#include "../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
+<#include "../include/page_obj_codeEditor.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -68,25 +69,23 @@ readonly 是否只读操作，允许为null
 	$.initButtons(po.element());
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.initWorkspaceHeight();
-
-	var languageTools = ace.require("ace/ext/language_tools");
-	var JsonMode = ace.require("ace/mode/json").Mode;
-	po.jsonEditor = ace.edit("${pageId}-workspaceEditor");
-	po.jsonEditor.session.setMode(new JsonMode());
-	po.jsonEditor.setShowPrintMargin(false);
 	
-	po.initWorkspaceEditor(po.jsonEditor, po.element("textarea[name='value']").val());
+	po.jsonEditor = po.initWorkspaceEditor(po.element("#${pageId}-workspaceEditor"),
+	{
+		value: po.element("textarea[name='value']").val(),
+		mode: {name: "javascript", json: true}
+	});
+	
 	po.initWorkspaceTabs();
 	po.getAddPropertyName = function()
 	{
-		var selectionRange = po.jsonEditor.getSelectionRange();
-		return (po.jsonEditor.session.getTextRange(selectionRange) || "");
+		return po.getCodeEditorValueSelText(po.jsonEditor);
 	};
 	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 
 	po.updatePreviewOptionsData = function()
 	{
-		var value = po.jsonEditor.getValue();
+		var value = po.getCodeEditorValue(po.jsonEditor);
 		
 		var dataSet = po.previewOptions.data.dataSet;
 		
@@ -101,7 +100,7 @@ readonly 是否只读操作，允许为null
 	
 	po.isPreviewValueModified = function()
 	{
-		var value = po.jsonEditor.getValue();
+		var value = po.getCodeEditorValue(po.jsonEditor);
 		
 		var pd = po.previewOptions.data.dataSet;
 		
@@ -126,7 +125,7 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetJsonValueRequired", function(value, element)
 	{
-		var value = po.jsonEditor.getValue();
+		var value = po.getCodeEditorValue(po.jsonEditor);
 		return value.length > 0;
 	});
 	
@@ -158,7 +157,7 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
-			formData["value"] = po.jsonEditor.getValue();
+			formData["value"] = po.getCodeEditorValue(po.jsonEditor);
 			
 			$.postJson("${contextPath}/dataSet/${formAction}", formData,
 			function(response)

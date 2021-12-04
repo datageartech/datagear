@@ -11,6 +11,7 @@ SQL编辑器JS片段。
 
 依赖：
 page_js_obj.ftl
+page_obj_codeEditor.ftl
 
 变量：
 //数据源ID，不允许为null
@@ -19,14 +20,12 @@ po.getSqlEditorSchemaId
 <script type="text/javascript">
 (function(po)
 {
-	//SQL编辑器，调用po.initSqlEditor()后初始化
-	po.sqlEditor = undefined;
-	
-	po.getSqlEditorSchemaId = function(){ return undefined; };
-	
-	po.getSqlEditorElementId = function()
+	po.initSqlEditor = function(dom, options)
 	{
-		return "${pageId}-sql-editor";
+		options = (options || {});
+		options.mode = "sql";
+		
+		return po.initWorkspaceEditor(dom, options);
 	};
 	
 	po.getSqlEditorAutocompleteAjaxOptions = function(autocompleteInfo)
@@ -125,22 +124,6 @@ po.getSqlEditorSchemaId
 		}
 		else
 			callback(null, []);
-	};
-	
-	po.initSqlEditor = function()
-	{
-		var languageTools = ace.require("ace/ext/language_tools");
-		var SqlMode = ace.require("ace/mode/sql").Mode;
-		po.sqlEditor = ace.edit(po.getSqlEditorElementId());
-		po.sqlEditor.session.setMode(new SqlMode());
-		po.sqlEditor.setShowPrintMargin(false);
-		po.sqlEditor.setOptions(
-		{
-			enableBasicAutocompletion: po.sqlEditorCompleters,
-			enableLiveAutocompletion: po.sqlEditorCompleters
-		});
-		
-		return po.sqlEditor;
 	};
 })
 (${pageId});

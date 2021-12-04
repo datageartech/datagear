@@ -283,14 +283,11 @@ readonly 是否只读操作，允许为null
     	
     	var pc1 = $("<div class='editor-wrapper ui-widget ui-widget-content' />").appendTo(tabPane);
 		var pc2 = $("<div class='resource-editor code-editor' />").attr("id", $.uid("resourceEditor")).appendTo(pc1);
-		var pc2Dom = pc2[0];
 		
 		var codeEditor;
 		var codeEditorOptions =
 		{
 			value: content,
-			lineNumbers: true,
-			smartIndent: false,
 			matchBrackets: true,
 			matchTags: true,
 			autoCloseTags: true,
@@ -318,7 +315,7 @@ readonly 是否只读操作，允许为null
 			};
 		}
 		
-		codeEditor = po.createCodeEditor(pc2Dom, codeEditorOptions);
+		codeEditor = po.createCodeEditor(pc2, codeEditorOptions);
 		
 		if(isTemplate && !codeEditorOptions.readOnly)
 		{
@@ -1565,7 +1562,7 @@ readonly 是否只读操作，允许为null
 			
 			data.resourceNames.push($(".resourceName", tp).val());
 			data.resourceIsTemplates.push($(".resourceIsTemplate", tp).val());
-			data.resourceContents.push(codeEditor.getValue());
+			data.resourceContents.push(po.getCodeEditorValue(codeEditor));
 		});
 		
 		return data;
