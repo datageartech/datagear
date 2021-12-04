@@ -108,7 +108,8 @@ po.previewOptions.url = "...";
 	
 	po.initWorkspaceEditor = function(dom, options)
 	{
-		options.readOnly = ${readonly?string("true","false")};
+		if(options.readOnly == null)
+			options.readOnly = ${readonly?string("true","false")};
 		
 		if(!options.extraKeys)
 			options.extraKeys = {};

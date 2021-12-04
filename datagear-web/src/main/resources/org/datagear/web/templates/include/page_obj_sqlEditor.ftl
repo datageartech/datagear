@@ -25,7 +25,27 @@ po.getSqlEditorSchemaId
 		options = (options || {});
 		options.mode = "sql";
 		
+		if(!options.readOnly)
+		{
+			options.hintOptions = (options.hintOptions || {});
+			options.hintOptions.hint = po.sqlEditorHintHandler;
+		}
+		
 		return po.initWorkspaceEditor(dom, options);
+	};
+	
+	po.sqlEditorHintHandler = function(codeEditor)
+	{
+		var doc = codeEditor.getDoc();
+		var cursor = doc.getCursor();
+		var mode = (codeEditor.getModeAt(cursor) || {});
+		var token = (codeEditor.getTokenAt(cursor) || {});
+		var tokenString = (token ? token.string : "");
+		
+		var hintInfo = po.resolveSqlHintInfo(codeEditor, doc, cursor, token);
+		
+		console.log("hintInfo :");
+		console.dir(hintInfo);
 	};
 	
 	po.getSqlEditorAutocompleteAjaxOptions = function(autocompleteInfo)
@@ -125,6 +145,161 @@ po.getSqlEditorSchemaId
 		else
 			callback(null, []);
 	};
+	
+	po.resolveSqlHintInfo = function(codeEditor, doc, cursor, cursorToken)
+	{
+		var info = null;
+		
+		var cursorTokenString = $.trim(cursorToken.string || "");
+		
+		var tokenInfo = null;
+		var cursorTmp = cursor;
+		var cursorTokenTmp = cursorToken;
+		
+		while((tokenInfo = po.findPrevTokenInfoOfType(codeEditor, doc, cursorTmp, cursorTokenTmp, "keyword")) != null)
+		{
+			var keywordToken = tokenInfo.token;
+			var keyword = (keywordToken.string || "").toUpperCase();
+			
+			if(po.sqlKeywords.all[keyword])
+			{
+				if(po.sqlKeywords.nextIsTable[keyword])
+					info = { type: "table", namePrefix: cursorTokenString };
+				else if(po.sqlKeywords.nextIsColumn[keyword])
+					info = { type: "column" };
+				
+				break;
+			}
+			
+			cursorTmp = CodeMirror.Pos(tokenInfo.line, keywordToken.start);
+			cursorTokenTmp = keywordToken;
+		}
+		
+		//查找表名
+		if(info && info.type == "column" && tokenInfo)
+		{
+			var cursorTokenStrings = cursorTokenString.split(".");
+			info.namePrefix = (cursorTokenStrings.length > 1 ? cursorTokenStrings[1] : cursorTokenStrings[0]);
+			info.tableName = (cursorTokenStrings.length > 1 ? cursorTokenStrings[0] : null);
+			
+			//向上直到SQL语句开头
+			while(tokenInfo != null)
+			{
+				var myToken = tokenInfo.token;
+				var myString = (myToken.string || "").toUpperCase();
+				
+				if(po.sqlKeywords.start[myString])
+					break;
+				
+				tokenInfo = po.findPrevTokenInfoOfType(codeEditor, doc, CodeMirror.Pos(tokenInfo.line, myToken.start), myToken, "keyword");
+			}
+			
+			//向下查找表名的前置关键字token
+			while(tokenInfo != null)
+			{
+				var myToken = tokenInfo.token;
+				var myString = (myToken.string || "").toUpperCase();
+				
+				if(po.sqlKeywords.nextIsTable[myString])
+					break;
+				
+				tokenInfo = po.findNextTokenInfoOfType(codeEditor, doc, CodeMirror.Pos(tokenInfo.line, myToken.start), myToken, "keyword");
+			}
+			
+			//向下解析表名
+			if(tokenInfo)
+			{
+				var prevTokenType = null, prevTokenString = null;
+				var prevPrevTokenType = null, prevPrevTokenString = null;
+				tokenInfo = po.findNextTokenInfo(codeEditor, doc, CodeMirror.Pos(tokenInfo.line, tokenInfo.token.start), tokenInfo.token,
+				function(token)
+				{
+					//如果有括号，说明是复杂语句，暂不解析
+					if(token.type == "bracket")
+						return true;
+					
+					var myString = ($.trim(token.string) || "");
+					
+					if(!myString)
+						return false;
+					
+					//表名token的type是null
+					if(token.type == null)
+					{
+						//如果没有表别名，则使用第一个作为表名
+						if(!info.tableName)
+						{
+							info.tableName = myString;
+							return true;
+						}
+						else
+						{
+							//判断是否表别名
+							if(myString == info.tableName)
+							{
+								//表名 AS 别名
+								if(prevTokenType == "keyword" && /as/i.test(prevTokenString)
+										&& prevPrevTokenType == null && prevPrevTokenString)
+								{
+									info.tableName = prevPrevTokenString;
+								}
+								//表名 别名
+								else if(prevTokenType == null && prevTokenString)
+								{
+									info.tableName = prevTokenString;
+								}
+								
+								return true;
+							}
+						}
+					}
+					
+					prevPrevTokenType = prevTokenType;
+					prevPrevTokenString = prevTokenString;
+					prevTokenType = token.type;
+					prevTokenString = myString;
+				});
+			}
+		}
+		
+		return info;
+	};
+	
+	po.sqlKeywords =
+	{
+		//全部，会由下面关键字合并而得
+		all: {},
+		
+		//SQL语句开始关键字*（必须大写）
+		start:
+		{
+			"SELECT" : true, "INSERT" : true, "UPDATE" : true, "DELETE" : true,
+			"ALTER" : true, "DROP" : true, "CREATE" : true, "REPLACE" : true, "MERGE" : true,
+			"GRANT" : true
+		},
+		
+		//下一个Token是表名（必须大写）
+		nextIsTable:
+		{
+			"FROM" : true,
+			"JOIN" : true,
+			"UPDATE" : true,
+			"INTO" : true,
+			"TABLE" : true
+		},
+		
+		//下一个Token是列名（必须大写）
+		nextIsColumn:
+		{
+			"SELECT" : true,
+			"WHERE" : true,
+			"ON" : true,
+			"BY" : true,
+			"SET" : true
+		}
+	};
+	
+	po.sqlKeywords.all = $.extend(po.sqlKeywords.all, po.sqlKeywords.start, po.sqlKeywords.nextIsTable, po.sqlKeywords.nextIsColumn);
 })
 (${pageId});
 </script>

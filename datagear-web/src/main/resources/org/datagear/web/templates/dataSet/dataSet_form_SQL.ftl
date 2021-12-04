@@ -112,7 +112,8 @@ readonly 是否只读操作，允许为null
 	po.getSqlEditorSchemaId = function(){ return po.getDataSetSchemaId(); };
 	po.sqlEditor = po.initSqlEditor(po.element("#${pageId}-workspaceEditor"),
 	{
-		value: po.element("textarea[name='sql']").val()
+		value: po.element("textarea[name='sql']").val(),
+		readOnly: ${readonly?string("true","false")}
 	});
 	
 	po.initWorkspaceTabs();

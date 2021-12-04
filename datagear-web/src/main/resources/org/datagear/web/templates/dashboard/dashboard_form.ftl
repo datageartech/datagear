@@ -319,11 +319,6 @@ readonly 是否只读操作，允许为null
 		
 		if(isTemplate && !codeEditorOptions.readOnly)
 		{
-			codeEditor.on("change", function(codeEditor, changeObj)
-			{
-				codeEditor.showHint();
-			});
-			
 			//光标移至"</body>"的上一行，便于用户直接输入内容
 			var cursor = codeEditor.getSearchCursor("</body>");
 			if(cursor.findNext())
@@ -467,7 +462,7 @@ readonly 是否只读操作，允许为null
 		var cursor = doc.getCursor();
 		var mode = (codeEditor.getModeAt(cursor) || {});
 		var token = (codeEditor.getTokenAt(cursor) || {});
-		var tokenString = (token ? token.string : "");
+		var tokenString = (token ? $.trim(token.string) : "");
 		
 		//"dg*"的HTML元素属性
 		if("xml" == mode.name && "attribute" == token.type && /^dg/i.test(tokenString))

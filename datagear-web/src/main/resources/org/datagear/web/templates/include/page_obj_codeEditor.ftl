@@ -31,7 +31,7 @@ page_js_obj.ftl
 		if(options.smartIndent == null)
 			options.smartIndent = false;
 		
-		//强制禁用completeSingle选项，因为系统的代码编辑器hint都是在change事件中触发的
+		//强制禁用completeSingle选项，因为编辑器hint都是在下面的change事件中触发的
 		//如果这里为true，将会hint死循环，且会导致退格操作无效
 		if(options.hintOptions)
 			options.hintOptions.completeSingle = false;
@@ -39,7 +39,23 @@ page_js_obj.ftl
 		//if(options.hintOptions)
 		//	options.hintOptions.closeOnUnfocus = false;
 		
-		return CodeMirror(dom, options);
+		var codeEditor = CodeMirror(dom, options);
+		
+		if(options.hintOptions && !options.readOnly)
+		{
+			codeEditor.on("change", function(codeEditor, changeObj)
+			{
+				var cursor = codeEditor.getDoc().getCursor();
+				console.log("cursor :");
+				console.dir(cursor);
+				console.log("token :");
+				console.dir(codeEditor.getTokenAt(cursor));
+				
+				codeEditor.showHint();
+			});
+		}
+		
+		return codeEditor;
 	};
 	
 	po.getCodeEditorValue = function(codeEditor)
@@ -99,6 +115,17 @@ page_js_obj.ftl
 	
 	po.findPrevTokenOfType = function(codeEditor, doc, cursor, cursorToken, tokenType)
 	{
+		var tokenInfo = po.findPrevTokenInfoOfType(codeEditor, doc, cursor, cursorToken, tokenType);
+		return (tokenInfo ? tokenInfo.token : undefined);
+	};
+	
+	po.findPrevTokenInfoOfType = function(codeEditor, doc, cursor, cursorToken, tokenType)
+	{
+		return po.findPrevTokenInfo(codeEditor, doc, cursor, cursorToken, function(token){ return (token.type == tokenType); });
+	};
+	
+	po.findPrevTokenInfo = function(codeEditor, doc, cursor, cursorToken, predicate)
+	{
 		doc = (doc ? doc : codeEditor.getDoc());
 		cursor = (cursor ? cursor : doc.getCursor());
 		cursorToken = (cursorToken ? cursorToken : (codeEditor.getTokenAt(cursor) || {}));
@@ -106,16 +133,47 @@ page_js_obj.ftl
 		
 		for(var line=cursor.line; line >=minLine; line--)
 		{
-			var tokens = codeEditor.getLineTokens(cursor.line);
-			for(var i=0; i<tokens.length; i++)
+			var tokens = codeEditor.getLineTokens(line);
+			for(var i=tokens.length-1; i>=0; i--)
 			{
 				var token = tokens[i];
 				
 				if(line == cursor.line && token.start >= cursorToken.start)
-					break;
+					continue;
 				
-				if(token.type == tokenType)
-					return token;
+				if(predicate(token) == true)
+					return { token: token, line: line };
+			}
+		}
+		
+		return null;
+	};
+	
+	po.findNextTokenInfoOfType = function(codeEditor, doc, cursor, cursorToken, tokenType)
+	{
+		return po.findNextTokenInfo(codeEditor, doc, cursor, cursorToken, function(token){ return (token.type == tokenType); });
+	};
+	
+	po.findNextTokenInfo = function(codeEditor, doc, cursor, cursorToken, predicate)
+	{
+		doc = (doc ? doc : codeEditor.getDoc());
+		var lastLine = doc.lastLine();
+		cursor = (cursor ? cursor : doc.getCursor());
+		cursorToken = (cursorToken ? cursorToken : (codeEditor.getTokenAt(cursor) || {}));
+		var maxLine = (cursor.line+100 >= lastLine ? lastLine : cursor.line+100);
+		
+		for(var line=cursor.line; line <=lastLine; line++)
+		{
+			var tokens = codeEditor.getLineTokens(line);
+			for(var i=0; i<tokens.length; i++)
+			{
+				var token = tokens[i];
+				
+				if(line == cursor.line && token.start <= cursorToken.start)
+					continue;
+				
+				if(predicate(token) == true)
+					return { token: token, line: line };
 			}
 		}
 		
