@@ -20,6 +20,16 @@ po.getSqlEditorSchemaId
 <script type="text/javascript">
 (function(po)
 {
+	//SQL提示缓存
+	po.sqlHintCache =
+	{
+		//表名 -> 列名
+		tableColumnCompletions: {},
+		tableNameCompletions: [],
+		tableNameCompletionsLoaded: false,
+		ajaxRunning: false
+	};
+	
 	po.initSqlEditor = function(dom, options)
 	{
 		options = (options || {});
@@ -29,23 +39,154 @@ po.getSqlEditorSchemaId
 		{
 			options.hintOptions = (options.hintOptions || {});
 			options.hintOptions.hint = po.sqlEditorHintHandler;
+			options.hintOptions.hint.async = true;
 		}
 		
 		return po.initWorkspaceEditor(dom, options);
 	};
 	
-	po.sqlEditorHintHandler = function(codeEditor)
+	po.sqlEditorHintHandler = function(codeEditor, callback)
 	{
 		var doc = codeEditor.getDoc();
 		var cursor = doc.getCursor();
 		var mode = (codeEditor.getModeAt(cursor) || {});
 		var token = (codeEditor.getTokenAt(cursor) || {});
-		var tokenString = (token ? token.string : "");
+		
+		//关键字token不应提示
+		//回车、空格等空白token也不提示，因为显得过于干扰
+		if(token.type == "keyword" || /^\s*$/.test(token.string))
+		{
+			callback();
+			return;
+		}
 		
 		var hintInfo = po.resolveSqlHintInfo(codeEditor, doc, cursor, token);
 		
 		console.log("hintInfo :");
 		console.dir(hintInfo);
+		
+		if(!hintInfo)
+		{
+			callback();
+			return;
+		}
+		
+		var namePrefix = hintInfo.namePrefix;
+		
+		if(hintInfo.type == "table")
+		{
+			if(po.sqlHintCache.tableNameCompletionsLoaded)
+			{
+				var completions =
+				{
+					list: po.findCompletionList(po.sqlHintCache.tableNameCompletions, namePrefix),
+					from: CodeMirror.Pos(cursor.line, (namePrefix ? token.start : token.end)),
+					to: CodeMirror.Pos(cursor.line, token.end)
+				};
+				
+				callback(completions);
+			}
+			else
+			{
+				if(po.sqlHintCache.ajaxRunning)
+					callback();
+				else
+				{
+					po.sqlHintCache.ajaxRunning = true;
+					
+					$.ajax(
+					{
+						type : "POST",
+						url: "${contextPath}/sqlEditor/"+po.getSqlEditorSchemaId()+"/findTableNames",
+						success: function(names)
+						{
+							names = (names || []);
+							
+							var tableNameCompletions = [];
+							
+							for(var i=0; i<names.length; i++)
+								tableNameCompletions[i] = { name: names[i] };
+							
+							po.sqlHintCache.tableNameCompletions = tableNameCompletions;
+							po.sqlHintCache.tableNameCompletionsLoaded = true;
+							
+							var completions =
+							{
+								list: po.findCompletionList(po.sqlHintCache.tableNameCompletions, namePrefix),
+								from: CodeMirror.Pos(cursor.line, (namePrefix ? token.start : token.end)),
+								to: CodeMirror.Pos(cursor.line, token.end)
+							};
+							
+							callback(completions);
+							po.sqlHintCache.ajaxRunning = false;
+						},
+						error: function()
+						{
+							callback();
+							po.sqlHintCache.ajaxRunning = false;
+						}
+					});
+				}
+			}
+		}
+		else if(hintInfo.type == "column" && hintInfo.tableName)
+		{
+			if(po.sqlHintCache.tableColumnCompletions[hintInfo.tableName])
+			{
+				var completions =
+				{
+					list: po.findCompletionList(po.sqlHintCache.tableColumnCompletions[hintInfo.tableName], namePrefix),
+					from: CodeMirror.Pos(cursor.line, (namePrefix ? token.start : token.end)),
+					to: CodeMirror.Pos(cursor.line, token.end)
+				};
+				
+				callback(completions);
+			}
+			else
+			{
+				if(po.sqlHintCache.ajaxRunning)
+					callback();
+				else
+				{
+					po.sqlHintCache.ajaxRunning = true;
+					
+					$.ajax(
+					{
+						type : "POST",
+						url: "${contextPath}/sqlEditor/"+po.getSqlEditorSchemaId()+"/findColumnNames",
+						data: { table: hintInfo.tableName },
+						success: function(names)
+						{
+							names = (names || []);
+							
+							var columnCompletions = [];
+							
+							for(var i=0; i<names.length; i++)
+								columnCompletions[i] = { name: names[i], displayComment: hintInfo.tableName };
+							
+							po.sqlHintCache.tableColumnCompletions[hintInfo.tableName] = columnCompletions;
+							
+							var completions =
+							{
+								list: po.findCompletionList(po.sqlHintCache.tableColumnCompletions[hintInfo.tableName], namePrefix),
+								from: CodeMirror.Pos(cursor.line, (namePrefix ? token.start : token.end)),
+								to: CodeMirror.Pos(cursor.line, token.end)
+							};
+							
+							callback(completions);
+							po.sqlHintCache.ajaxRunning = false;
+						},
+						error: function()
+						{
+							callback();
+							po.sqlHintCache.ajaxRunning = false;
+						}
+					});
+				}
+			}
+		}
+		else
+			callback();
 	};
 	
 	po.getSqlEditorAutocompleteAjaxOptions = function(autocompleteInfo)
@@ -150,7 +291,7 @@ po.getSqlEditorSchemaId
 	{
 		var info = null;
 		
-		var cursorTokenString = $.trim(cursorToken.string || "");
+		var cursorTokenString = ($.trim(cursorToken.string) || "");
 		
 		var tokenInfo = null;
 		var cursorTmp = cursor;
@@ -164,7 +305,7 @@ po.getSqlEditorSchemaId
 			if(po.sqlKeywords.all[keyword])
 			{
 				if(po.sqlKeywords.nextIsTable[keyword])
-					info = { type: "table", namePrefix: cursorTokenString };
+					info = { type: "table", namePrefix: (po.isNormalSqlNameTokenType(cursorToken.type) ? ($.trim(cursorToken.string) || "") : "") };
 				else if(po.sqlKeywords.nextIsColumn[keyword])
 					info = { type: "column" };
 				
@@ -178,9 +319,14 @@ po.getSqlEditorSchemaId
 		//查找表名
 		if(info && info.type == "column" && tokenInfo)
 		{
-			var cursorTokenStrings = cursorTokenString.split(".");
-			info.namePrefix = (cursorTokenStrings.length > 1 ? cursorTokenStrings[1] : cursorTokenStrings[0]);
-			info.tableName = (cursorTokenStrings.length > 1 ? cursorTokenStrings[0] : null);
+			var columnInfoStr = po.resolveSqlColumnInfoString(codeEditor, doc, cursor, cursorToken);
+			
+			if(columnInfoStr)
+			{
+				var columnInfoStrs = columnInfoStr.split(".");
+				info.namePrefix = (columnInfoStrs.length > 1 ? columnInfoStrs[1] : columnInfoStrs[0]);
+				info.tableName = (columnInfoStrs.length > 1 ? columnInfoStrs[0] : null);
+			}
 			
 			//向上直到SQL语句开头
 			while(tokenInfo != null)
@@ -223,8 +369,7 @@ po.getSqlEditorSchemaId
 					if(!myString)
 						return false;
 					
-					//表名token的type是null
-					if(token.type == null)
+					if(po.isNormalSqlNameTokenType(token.type))
 					{
 						//如果没有表别名，则使用第一个作为表名
 						if(!info.tableName)
@@ -239,12 +384,12 @@ po.getSqlEditorSchemaId
 							{
 								//表名 AS 别名
 								if(prevTokenType == "keyword" && /as/i.test(prevTokenString)
-										&& prevPrevTokenType == null && prevPrevTokenString)
+										&& po.isNormalSqlNameTokenType(prevPrevTokenType) && prevPrevTokenString)
 								{
 									info.tableName = prevPrevTokenString;
 								}
 								//表名 别名
-								else if(prevTokenType == null && prevTokenString)
+								else if(po.isNormalSqlNameTokenType(prevTokenType) && prevTokenString)
 								{
 									info.tableName = prevTokenString;
 								}
@@ -263,6 +408,42 @@ po.getSqlEditorSchemaId
 		}
 		
 		return info;
+	};
+	
+	po.resolveSqlColumnInfoString = function(codeEditor, doc, cursor, cursorToken)
+	{
+		var columnInfoString = "";
+		
+		if(po.isSqlColumnInputStringPart(cursorToken))
+		{
+			columnInfoString = cursorToken.string;
+			
+			po.findPrevTokenInfo(codeEditor, doc, cursor, cursorToken, function(token)
+			{
+				if(po.isSqlColumnInputStringPart(token))
+					columnInfoString = token.string + columnInfoString;
+				else
+					return true;
+			});
+		}
+		
+		return columnInfoString;
+	};
+	
+	po.isSqlColumnInputStringPart = function(cursorToken)
+	{
+		var str = cursorToken.string;
+		
+		//","、"("、"空白" 不是列相关输入字符串
+		if(/^[\(\,]$/.test(str) || /^\s*$/.test(str))
+			return false;
+		
+		return true;
+	};
+	
+	po.isNormalSqlNameTokenType = function(tokenType)
+	{
+		return (tokenType == null);
 	};
 	
 	po.sqlKeywords =
