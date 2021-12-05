@@ -231,6 +231,8 @@ Schema schema 数据库，不允许为null
 			var draggable = ui.draggable;
 			var dropText = "";
 			
+			var cursor = po.sqlEditor.getDoc().getCursor();
+			
 			if(draggable.hasClass("table-draggable"))
 			{
 				dropText = ui.draggable.text();
