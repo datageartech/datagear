@@ -29,12 +29,6 @@
 	},
 	{
 		"type": "css",
-		"selector" : "#css_ace",
-		"attr" : "href",
-		"value" : "${contextPath}/static/theme/<@spring.theme code='theme' />/ace-21.02.19/ace.css?v=${_td_Version}"
-	},
-	{
-		"type": "css",
 		"selector" : "#css_codemirror",
 		"attr" : "href",
 		"value" : "${contextPath}/static/theme/<@spring.theme code='theme' />/codemirror-5.64.0/custom.css?v=${_td_Version}"
