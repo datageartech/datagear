@@ -285,27 +285,16 @@ readonly 是否只读操作，允许为null
 		var pc2 = $("<div class='resource-editor code-editor' />").attr("id", $.uid("resourceEditor")).appendTo(pc1);
 		
 		var codeEditor;
+		
 		var codeEditorOptions =
 		{
 			value: content,
 			matchBrackets: true,
 			matchTags: true,
 			autoCloseTags: true,
-			readOnly: ${readonly?string("true","false")}
+			readOnly: ${readonly?string("true","false")},
+			mode: po.evalCodeModeByName(name)
 		};
-		
-		if($.isHtmlFile(name))
-		{
-			codeEditorOptions.mode = "htmlmixed";
-		}
-		else if($.isJsFile(name))
-		{
-			codeEditorOptions.mode = "javascript";
-		}
-		else if($.isCssFile(name))
-		{
-			codeEditorOptions.mode = "css";
-		}
 		
 		if(isTemplate && !codeEditorOptions.readOnly)
 		{

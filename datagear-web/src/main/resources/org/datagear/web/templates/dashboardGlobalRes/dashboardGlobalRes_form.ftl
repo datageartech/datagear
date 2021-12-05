@@ -46,7 +46,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<textarea name="resourceContent" style="display:none;">${resourceContent!''}</textarea>
 					<div class="resource-editor-wrapper ui-widget ui-widget-content">
-						<div id="${pageId}-resourceEditor" class="resource-editor"></div>
+						<div id="${pageId}-resourceEditor" class="resource-editor code-editor"></div>
 					</div>
 				</div>
 			</div>
@@ -59,6 +59,7 @@ readonly 是否只读操作，允许为null
 	</form>
 </div>
 <#include "../include/page_obj_form.ftl">
+<#include "../include/page_obj_codeEditor.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -67,33 +68,19 @@ readonly 是否只读操作，允许为null
 	po.element(".resource-editor-wrapper").height($(window).height()*5/9);
 	
 	var resourcePath = po.element("input[name='savePath']").val();
-	po.resourceEditor = ace.edit("${pageId}-resourceEditor");
-	po.resourceEditor.setShowPrintMargin(false);
-	ace.require("ace/ext/language_tools");
-	if($.isHtmlFile(resourcePath))
-	{
-		var HtmlMode = ace.require("ace/mode/html").Mode;
-		po.resourceEditor.session.setMode(new HtmlMode());
-	}
-	else if($.isJsFile(resourcePath))
-	{
-		var JsMode = ace.require("ace/mode/javascript").Mode;
-		po.resourceEditor.session.setMode(new JsMode());
-	}
-	else if($.isCssFile(resourcePath))
-	{
-		var CssMode = ace.require("ace/mode/css").Mode;
-		po.resourceEditor.session.setMode(new CssMode());
-	}
 	
-	var cursor = {row: 0, column: 0};
-	po.resourceEditor.session.insert(cursor, po.element("textarea[name='resourceContent']").val());
+	var resourceEditorOptions =
+	{
+		value: po.element("textarea[name='resourceContent']").val(),
+		matchBrackets: true,
+		matchTags: true,
+		autoCloseTags: true,
+		readOnly: ${readonly?string("true","false")},
+		mode: po.evalCodeModeByName(resourcePath)
+	};
 	
-	po.resourceEditor.moveCursorToPosition(cursor);
+	po.resourceEditor = po.createCodeEditor(po.element("#${pageId}-resourceEditor"), resourceEditorOptions);
 	po.resourceEditor.focus();
-	<#if readonly>
-	po.resourceEditor.setReadOnly(true);
-	</#if>
 	
 	po.form().validate(
 	{
@@ -107,7 +94,7 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			po.element("textarea[name='resourceContent']").val(po.resourceEditor.getValue());
+			po.element("textarea[name='resourceContent']").val(po.getCodeText(po.resourceEditor));
 			
 			$(form).ajaxSubmitJson(
 			{

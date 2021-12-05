@@ -36,8 +36,8 @@ page_js_obj.ftl
 		if(options.hintOptions)
 			options.hintOptions.completeSingle = false;
 		
-		//if(options.hintOptions)
-		//	options.hintOptions.closeOnUnfocus = false;
+		if(options.hintOptions)
+			options.hintOptions.closeOnUnfocus = false;
 		
 		var codeEditor = CodeMirror(dom, options);
 		
@@ -50,6 +50,20 @@ page_js_obj.ftl
 		}
 		
 		return codeEditor;
+	};
+	
+	po.evalCodeModeByName = function(name)
+	{
+		var mode = undefined;
+		
+		if($.isHtmlFile(name))
+			mode = "htmlmixed";
+		else if($.isJsFile(name))
+			mode = "javascript";
+		else if($.isCssFile(name))
+			mode = "css";
+		
+		return mode;
 	};
 	
 	po.getCodeText = function(codeEditor)

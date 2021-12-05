@@ -196,6 +196,10 @@ a.link:hover{
 .code-editor .CodeMirror{
 	height: 100%;
 }
+.CodeMirror-hints{
+	/*防止在弹出对话框中的提示被遮挡*/
+	z-index: 999999;
+}
 .CodeMirror-hints .code-completion-comment{
 	padding-left: 1em;
     opacity: 0.4;
