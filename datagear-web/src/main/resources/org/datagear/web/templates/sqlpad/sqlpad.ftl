@@ -120,7 +120,7 @@ Schema schema 数据库，不允许为null
 	<div class="content ui-widget ui-widget-content">
 		<div class="content-editor">
 			<div class="content-edit-content">
-				<div id="${pageId}-sql-editor" class="sql-editor">${initSql!''}</div>
+				<div id="${pageId}-sql-editor" class="sql-editor code-editor"></div>
 			</div>
 		</div>
 		<div class="content-result">
@@ -180,6 +180,7 @@ Schema schema 数据库，不允许为null
 <#include "../include/page_obj_format_time.ftl" >
 <#include "../include/page_obj_data_permission.ftl">
 <#include "../include/page_obj_data_permission_ds_table.ftl">
+<#include "../include/page_obj_codeEditor.ftl" >
 <#include "../include/page_obj_sqlEditor.ftl">
 <script type="text/javascript">
 (function(po)
@@ -207,9 +208,18 @@ Schema schema 数据库，不允许为null
 		);
 	
 	po.getSqlEditorSchemaId = function(){ return po.schemaId; };
-	po.initSqlEditor();
+	po.sqlEditor = po.createSqlEditor(po.element("#${pageId}-sql-editor"),
+	{
+		value: "${(initSql!'')?js_string?no_esc}",
+		extraKeys:
+		{
+			"Ctrl-Enter": function()
+			{
+				po.element("#executeSqlButton").click();
+			}
+		}
+	});
 	po.sqlEditor.focus();
-	po.sqlEditor.navigateFileEnd();
 	
 	//数据库表条目、SQL历史拖入自动插入SQL
 	$.enableTableNodeDraggable = true;
@@ -220,13 +230,12 @@ Schema schema 数据库，不允许为null
 		{
 			var draggable = ui.draggable;
 			var dropText = "";
-			var cursor = po.sqlEditor.getCursorPosition();
 			
 			if(draggable.hasClass("table-draggable"))
 			{
 				dropText = ui.draggable.text();
 				
-				if(cursor.column == 0)
+				if(cursor.ch == 0)
 					dropText = "SELECT * FROM " +dropText;
 			}
 			else if(draggable.hasClass("sql-draggable"))
@@ -239,9 +248,7 @@ Schema schema 数据库，不允许为null
 				var delimiter = po.getSqlDelimiter();
 				dropText += delimiter + "\n";
 				
-				po.sqlEditor.moveCursorToPosition(cursor);
-				po.sqlEditor.session.insert(cursor, dropText);
-				
+				po.insertCodeText(po.sqlEditor, dropText);
 				po.sqlEditor.focus();
 			}
 		}
@@ -249,16 +256,6 @@ Schema schema 数据库，不允许为null
 	
 	//当前在执行的SQL语句数
 	po.executingSqlCount = -1;
-	
-	po.sqlEditor.commands.addCommand(
-	{
-	    name: 'executeCommand',
-	    bindKey: "Ctrl-ENTER",
-	    exec: function(editor)
-	    {
-	    	po.element("#executeSqlButton").click();
-	    }
-	});
 	
 	$.resizableStopPropagation(po.element(".content-editor"),
 	{
@@ -276,7 +273,6 @@ Schema schema 数据库，不允许为null
 			ui.element.css("height", editorHeightPercent);
 			$(".content-result", parent).css("height", resultHeightpercent);
 			
-			po.sqlEditor.resize();
 			po.resizeSqlResultTabPanelDataTable();
 		}
 	});
@@ -330,10 +326,8 @@ Schema schema 数据库，不允许为null
 		
 		$sqlValue.click(function()
 		{
-			po.sqlEditor.gotoLine(sqlStatement.startRow);
-			var selection = po.sqlEditor.session.getSelection();
-			var range = new ace.Range(sqlStatement.startRow, sqlStatement.startColumn, sqlStatement.endRow, sqlStatement.endColumn);
-			selection.setSelectionRange(range, true);
+			po.sqlEditor.setSelection({line: sqlStatement.startRow, ch: sqlStatement.startColumn},
+					{line: sqlStatement.endRow, ch: sqlStatement.endColumn});
 		});
 		
 		<#assign messageArgs=['"+(sqlStatement.startRow+1)+"', '"+sqlStatement.startColumn+"', '"+(sqlStatement.endRow+1)+"', '"+sqlStatement.endColumn+"'] />
@@ -925,19 +919,11 @@ Schema schema 数据库，不允许为null
 		}
 		else
 		{
-			var editor = po.sqlEditor;
+			var selInfo = po.getSelectedCodeInfo(po.sqlEditor);
 			
-			var selectionRange = editor.getSelectionRange();
-			var sql = editor.session.getTextRange(selectionRange);
-			var sqlStartRow = selectionRange.start.row;
-			var sqlStartColumn = selectionRange.start.column;
-			
-			if(!sql)
-			{
-				sql = editor.getValue();
-				sqlStartRow = 0;
-				sqlStartColumn = 0;
-			}
+			var sql = (selInfo.text ? selInfo.text : po.getCodeText(po.sqlEditor));
+			var sqlStartRow = (selInfo.text && selInfo.from ? selInfo.from.line : po.sqlEditor.getDoc().firstLine());
+			var sqlStartColumn = (selInfo.text && selInfo.from ? selInfo.from.ch : 0);
 			
 			if(!sql)
 				return;
@@ -1051,13 +1037,13 @@ Schema schema 数据库，不允许为null
 		
 		if(delimiter)
 		{
-			var cursor = po.sqlEditor.selection.getCursor();
-			
 			var text = "";
 			
-			if(cursor.column == 0)
+			var cursor = po.sqlEditor.getDoc().getCursor();
+			
+			if(cursor.ch == 0)
 			{
-				if(cursor.row != 0)
+				if(cursor.line != 0)
 					text += "\n";
 			}
 			else
@@ -1065,7 +1051,7 @@ Schema schema 数据库，不允许为null
 			
 			text += "--@DELIMITER "+delimiter+"\n";
 			
-			po.sqlEditor.insert(text);
+			po.insertCodeText(po.sqlEditor, text);
 		}
 		
 		po.sqlEditor.focus();
@@ -1076,7 +1062,7 @@ Schema schema 数据库，不允许为null
 		var delimiter = po.getSqlDelimiter();
 		
 		if(delimiter)
-			po.sqlEditor.insert(delimiter+"\n");
+			po.insertCodeText(po.sqlEditor, delimiter+"\n");
 		
 		po.sqlEditor.focus();
 	});
@@ -1173,11 +1159,7 @@ Schema schema 数据库，不允许为null
 		if(!sql)
 			return;
 		
-		var cursor = po.sqlEditor.getCursorPosition();
-		
-		po.sqlEditor.moveCursorToPosition(cursor);
-		po.sqlEditor.session.insert(cursor, sql);
-		
+		po.insertCodeText(po.sqlEditor, sql);
 		po.sqlEditor.focus();
 	});
 	

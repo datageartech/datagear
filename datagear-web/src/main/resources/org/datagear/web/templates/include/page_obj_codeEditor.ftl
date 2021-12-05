@@ -63,6 +63,30 @@ page_js_obj.ftl
 		return (doc.getSelection() || "");
 	};
 	
+	po.getSelectedCodeInfo = function(codeEditor)
+	{
+		var doc = codeEditor.getDoc();
+		var selCodes = doc.getSelections();
+		var selRanges = doc.listSelections();
+		
+		var selText = (selCodes && selCodes[0] ? (selCodes[0] || "") : "");
+		var from = (selRanges && selRanges[0] ? selRanges[0].anchor : null);
+		var to = (selRanges && selRanges[0] ? selRanges[0].head : null);
+		
+		if(from && to)
+		{
+			var swap = ((from.line > to.line) || (from.line == to.line && from.ch > to.ch));
+			if(swap)
+			{
+				var fromTmp = from;
+				from = to;
+				to = fromTmp;
+			}
+		}
+		
+		return { text: selText, from: from, to: to };
+	};
+	
 	po.insertCodeText = function(codeEditor, cursor, text)
 	{
 		//(codeEditor, text)
