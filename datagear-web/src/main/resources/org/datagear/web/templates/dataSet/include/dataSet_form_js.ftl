@@ -106,7 +106,7 @@ po.previewOptions.url = "...";
 		po.element(".form-content").css("max-height", formContentHeight+"px");
 	};
 	
-	po.initWorkspaceEditor = function(dom, options)
+	po.createWorkspaceEditor = function(dom, options)
 	{
 		if(options.readOnly == null)
 			options.readOnly = ${readonly?string("true","false")};

@@ -70,7 +70,7 @@ readonly 是否只读操作，允许为null
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.initWorkspaceHeight();
 	
-	po.jsonEditor = po.initWorkspaceEditor(po.element("#${pageId}-workspaceEditor"),
+	po.jsonEditor = po.createWorkspaceEditor(po.element("#${pageId}-workspaceEditor"),
 	{
 		value: po.element("textarea[name='value']").val(),
 		mode: {name: "javascript", json: true}
@@ -79,13 +79,13 @@ readonly 是否只读操作，允许为null
 	po.initWorkspaceTabs();
 	po.getAddPropertyName = function()
 	{
-		return po.getCodeEditorValueSelText(po.jsonEditor);
+		return po.getSelectedCodeText(po.jsonEditor);
 	};
 	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 
 	po.updatePreviewOptionsData = function()
 	{
-		var value = po.getCodeEditorValue(po.jsonEditor);
+		var value = po.getCodeText(po.jsonEditor);
 		
 		var dataSet = po.previewOptions.data.dataSet;
 		
@@ -100,7 +100,7 @@ readonly 是否只读操作，允许为null
 	
 	po.isPreviewValueModified = function()
 	{
-		var value = po.getCodeEditorValue(po.jsonEditor);
+		var value = po.getCodeText(po.jsonEditor);
 		
 		var pd = po.previewOptions.data.dataSet;
 		
@@ -125,7 +125,7 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetJsonValueRequired", function(value, element)
 	{
-		var value = po.getCodeEditorValue(po.jsonEditor);
+		var value = po.getCodeText(po.jsonEditor);
 		return value.length > 0;
 	});
 	
@@ -157,7 +157,7 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
-			formData["value"] = po.getCodeEditorValue(po.jsonEditor);
+			formData["value"] = po.getCodeText(po.jsonEditor);
 			
 			$.postJson("${contextPath}/dataSet/${formAction}", formData,
 			function(response)

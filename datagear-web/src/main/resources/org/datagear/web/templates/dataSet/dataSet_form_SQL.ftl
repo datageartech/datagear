@@ -110,23 +110,25 @@ readonly 是否只读操作，允许为null
 	});
 	
 	po.getSqlEditorSchemaId = function(){ return po.getDataSetSchemaId(); };
-	po.sqlEditor = po.initSqlEditor(po.element("#${pageId}-workspaceEditor"),
-	{
-		value: po.element("textarea[name='sql']").val(),
-		readOnly: ${readonly?string("true","false")}
-	});
+	po.sqlEditor = po.createWorkspaceEditor(po.element("#${pageId}-workspaceEditor"),
+			po.inflateSqlEditorOptions(
+			{
+				value: po.element("textarea[name='sql']").val(),
+				readOnly: ${readonly?string("true","false")}
+			})
+	);
 	
 	po.initWorkspaceTabs();
 	po.getAddPropertyName = function()
 	{
-		return po.getCodeEditorValueSelText(po.sqlEditor);
+		return po.getSelectedCodeText(po.sqlEditor);
 	};
 	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 
 	po.updatePreviewOptionsData = function()
 	{
 		var schemaId = po.getDataSetSchemaId();
-		var sql = po.getCodeEditorValue(po.sqlEditor);
+		var sql = po.getCodeText(po.sqlEditor);
 		
 		var dataSet = po.previewOptions.data.dataSet;
 		
@@ -143,7 +145,7 @@ readonly 是否只读操作，允许为null
 	po.isPreviewValueModified = function()
 	{
 		var schemaId = po.getDataSetSchemaId();
-		var sql = po.getCodeEditorValue(po.sqlEditor);
+		var sql = po.getCodeText(po.sqlEditor);
 		
 		var pd = po.previewOptions.data.dataSet;
 		
@@ -169,7 +171,7 @@ readonly 是否只读操作，允许为null
 	po.element(".preview-result-table-wrapper .export-button").click(function(event)
 	{
 		var schemaId = po.getDataSetSchemaId();
-		var sql = po.getCodeEditorValue(po.sqlEditor);
+		var sql = po.getCodeText(po.sqlEditor);
 		
 		if(!schemaId || !sql)
 			return;
@@ -211,7 +213,7 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetSqlRequired", function(value, element)
 	{
-		var sql = po.getCodeEditorValue(po.sqlEditor);
+		var sql = po.getCodeText(po.sqlEditor);
 		return sql.length > 0;
 	});
 	
@@ -245,7 +247,7 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
-			formData["sql"] = po.getCodeEditorValue(po.sqlEditor);
+			formData["sql"] = po.getCodeText(po.sqlEditor);
 			
 			$.postJson("${contextPath}/dataSet/${formAction}", formData,
 			function(response)

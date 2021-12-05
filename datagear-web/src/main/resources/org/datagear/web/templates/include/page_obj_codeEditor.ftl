@@ -45,12 +45,6 @@ page_js_obj.ftl
 		{
 			codeEditor.on("change", function(codeEditor, changeObj)
 			{
-				var cursor = codeEditor.getDoc().getCursor();
-				console.log("cursor :");
-				console.dir(cursor);
-				console.log("token :");
-				console.dir(codeEditor.getTokenAt(cursor));
-				
 				codeEditor.showHint();
 			});
 		}
@@ -58,15 +52,30 @@ page_js_obj.ftl
 		return codeEditor;
 	};
 	
-	po.getCodeEditorValue = function(codeEditor)
+	po.getCodeText = function(codeEditor)
 	{
 		return codeEditor.getValue();
 	};
 	
-	po.getCodeEditorValueSelText = function(codeEditor)
+	po.getSelectedCodeText = function(codeEditor)
 	{
 		var doc = codeEditor.getDoc();
 		return (doc.getSelection() || "");
+	};
+	
+	po.insertCodeText = function(codeEditor, cursor, text)
+	{
+		//(codeEditor, text)
+		if(arguments.length == 2)
+		{
+			text = cursor;
+			cursor = undefined;
+		}
+		
+		var doc = codeEditor.getDoc();
+		cursor = (cursor == null ? doc.getCursor() : cursor);
+		
+		doc.replaceRange(text, cursor);
 	};
 	
 	//查找补全列表

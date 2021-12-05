@@ -618,7 +618,7 @@ readonly 是否只读操作，允许为null
 				code += "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+charts[i].id+"\"><!--"+charts[i].name+"--></div>\n";
 		}
 		
-		doc.replaceRange(code, cursor);
+		po.insertCodeText(codeEditor, cursor, code);
 		codeEditor.focus();
 	};
 	
@@ -1557,7 +1557,7 @@ readonly 是否只读操作，允许为null
 			
 			data.resourceNames.push($(".resourceName", tp).val());
 			data.resourceIsTemplates.push($(".resourceIsTemplate", tp).val());
-			data.resourceContents.push(po.getCodeEditorValue(codeEditor));
+			data.resourceContents.push(po.getCodeText(codeEditor));
 		});
 		
 		return data;

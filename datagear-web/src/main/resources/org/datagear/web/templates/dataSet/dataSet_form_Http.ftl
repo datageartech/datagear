@@ -124,10 +124,10 @@ readonly 是否只读操作，允许为null
 								<li class="editor-headerContent"><a href="#${pageId}-editor-headerContent"><@spring.message code='dataSet.http.headerContent' /></a></li>
 							</ul>
 							<div id="${pageId}-editor-requestContent" class="workspace-editor-wrapper ui-widget ui-widget-content">
-								<div id="${pageId}-workspaceEditor-requestContent" class="workspace-editor"></div>
+								<div id="${pageId}-workspaceEditor-requestContent" class="workspace-editor code-editor"></div>
 							</div>
 							<div id="${pageId}-editor-headerContent" class="workspace-editor-wrapper ui-widget ui-widget-content">
-								<div id="${pageId}-workspaceEditor-headerContent" class="workspace-editor"></div>
+								<div id="${pageId}-workspaceEditor-headerContent" class="workspace-editor code-editor"></div>
 							</div>
 						</div>
 					</div>
@@ -157,6 +157,7 @@ readonly 是否只读操作，允许为null
 </div>
 <#include "../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
+<#include "../include/page_obj_codeEditor.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -170,35 +171,40 @@ readonly 是否只读操作，允许为null
 	po.element("select[name='requestContentCharset']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	po.element("select[name='responseContentType']").selectmenu({ appendTo : po.element() });
 	po.initWorkspaceHeight();
-	po.element(".workspace-editor-tabs").tabs();
+	po.element(".workspace-editor-tabs").tabs(
+	{
+		activate: function(event, ui)
+		{
+			var newTab = $(ui.newTab);
+			
+			if(newTab.hasClass("editor-requestContent"))
+				po.requestContentEditor.refresh();
+			else if(newTab.hasClass("editor-headerContent"))
+				po.headerContentEditor.refresh();
+		}
+	});
 	var workspaceEditorGapHeight = po.element(".workspace-editor-nav").outerHeight(true) + 4;
 	po.element(".workspace-editor-tabs").height(po.element(".workspace-editor-wrapper").height() - po.element(".form-item-responseDataJsonPath").outerHeight(true));
 	po.element(".workspace-editor-wrapper").height(po.element(".workspace-editor-tabs").height() - workspaceEditorGapHeight);
-	
-	var languageTools = ace.require("ace/ext/language_tools");
-	var JsonMode = ace.require("ace/mode/json").Mode;
-	po.requestContentEditor = ace.edit("${pageId}-workspaceEditor-requestContent");
-	po.requestContentEditor.session.setMode(new JsonMode());
-	po.requestContentEditor.setShowPrintMargin(false);
-	po.headerContentEditor = ace.edit("${pageId}-workspaceEditor-headerContent");
-	po.headerContentEditor.session.setMode(new JsonMode());
-	po.headerContentEditor.setShowPrintMargin(false);
-	
-	po.initWorkspaceEditor(po.requestContentEditor, po.element("textarea[name='requestContent']").val());
-	po.initWorkspaceEditor(po.headerContentEditor, po.element("textarea[name='headerContent']").val());
-	po.initWorkspaceTabs();
+
+	po.requestContentEditor = po.createWorkspaceEditor(po.element("#${pageId}-workspaceEditor-requestContent"),
+	{
+		value: po.element("textarea[name='requestContent']").val(),
+		mode: {name: "javascript", json: true}
+	});
+	po.headerContentEditor = po.createWorkspaceEditor(po.element("#${pageId}-workspaceEditor-headerContent"),
+	{
+		value: po.element("textarea[name='headerContent']").val(),
+		mode: {name: "javascript", json: true}
+	});
 	po.getAddPropertyName = function()
 	{
-		var currentEditor = null;
-		
-		if(po.element(".workspace-editor-tabs").tabs("option", "active") == 0)
-			currentEditor = po.requestContentEditor;
-		else
-			currentEditor = po.headerContentEditor;
-		
-		var selectionRange = currentEditor.getSelectionRange();
-		return (currentEditor.session.getTextRange(selectionRange) || "");
+		var currentEditor = 
+			(po.element(".workspace-editor-tabs").tabs("option", "active") == 0 ? po.requestContentEditor : po.headerContentEditor);
+		return po.getSelectedCodeText(currentEditor);
 	};
+	
+	po.initWorkspaceTabs();
 	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 	
 	po.updatePreviewOptionsData = function()
@@ -208,8 +214,8 @@ readonly 是否只读操作，允许为null
 		var requestContentType = po.element("select[name='requestContentType']").val();
 		var requestContentCharset = po.element("select[name='requestContentCharset']").val();
 		var responseContentType = po.element("select[name='responseContentType']").val();
-		var requestContent = po.requestContentEditor.getValue();
-		var headerContent = po.headerContentEditor.getValue();
+		var requestContent = po.getCodeText(po.requestContentEditor);
+		var headerContent = po.getCodeText(po.headerContentEditor);
 		var responseDataJsonPath = po.element("input[name='responseDataJsonPath']").val();
 		
 		var dataSet = po.previewOptions.data.dataSet;
@@ -237,8 +243,8 @@ readonly 是否只读操作，允许为null
 		var requestContentType = po.element("select[name='requestContentType']").val();
 		var requestContentCharset = po.element("select[name='requestContentCharset']").val();
 		var responseContentType = po.element("select[name='responseContentType']").val();
-		var requestContent = po.requestContentEditor.getValue();
-		var headerContent = po.headerContentEditor.getValue();
+		var requestContent = po.getCodeText(po.requestContentEditor);
+		var headerContent = po.getCodeText(po.headerContentEditor);
 		var responseDataJsonPath = po.element("input[name='responseDataJsonPath']").val();
 		
 		var pd = po.previewOptions.data.dataSet;
@@ -300,8 +306,8 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
-			formData["requestContent"] = po.requestContentEditor.getValue();
-			formData["headerContent"] = po.headerContentEditor.getValue();
+			formData["requestContent"] = po.getCodeText(po.requestContentEditor);
+			formData["headerContent"] = po.getCodeText(po.headerContentEditor);
 			
 			$.postJson("${contextPath}/dataSet/${formAction}", formData,
 			function(response)
