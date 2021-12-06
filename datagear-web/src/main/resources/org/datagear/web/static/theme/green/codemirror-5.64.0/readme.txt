@@ -15,14 +15,16 @@
 .CodeMirror-hints.custom {
   background: #285c00 !important;
 	border: 1px solid #45930b;
-    color: #e3e3e3 !important;
+    color: #FFFACD !important;
     -webkit-box-shadow: 0px 0px 6px #cccccc;
     box-shadow: 0px 0px 6px #cccccc;
 }
 .CodeMirror-hints.custom .CodeMirror-hint{
-	color: #e3e3e3;
+	color: #FFFACD;
 }
 .CodeMirror-hints.custom .CodeMirror-hint-active {
   background-color: #459e05 !important;
-  color: #e3e3e3 !important;
+  color: #FFFACD !important;
 }
+
+.cm-s-custom  { font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;}
