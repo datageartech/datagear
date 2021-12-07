@@ -15,7 +15,7 @@ readonly 是否只读操作，允许为null
 -->
 <#assign formAction=(formAction!'#')>
 <#assign readonly=(readonly!false)>
-<#assign isAdd=(formAction == 'saveAdd')>
+<#assign isAdd=(formAction == 'saveAddForCsvValue')>
 <html>
 <head>
 <#include "../include/html_head.ftl">

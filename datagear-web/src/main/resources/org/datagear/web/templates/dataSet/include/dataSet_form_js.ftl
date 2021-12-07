@@ -812,7 +812,48 @@ po.previewOptions.url = "...";
 		po.initDataSetParamsTable(po.dataSetParams);
 		po.initDataSetPropertiesTable(po.dataSetProperties);
 		po.initPreviewParamValuePanel();
+	};
+	
+	po.buildPreviewOptionsDataSetProperties = function()
+	{
+		var isAddOperation = (po.isAddOperation != null ? po.isAddOperation : ("${isAdd?string('true', 'false')}" == "true"));
 		
+		if(!isAddOperation)
+			return po.getFormDataSetProperties();
+		
+		var re = [];
+		
+		var formDataSetProperties = po.getFormDataSetProperties(true);
+		
+		//添加操作时，对于由后台之前预览生成的属性且未修改的不必再传递至后台参考
+		var prevGenDataSetProperties = (po.prevGenDataSetProperties || []);
+		for(var i=0; i<formDataSetProperties.length; i++)
+		{
+			var fdsp = formDataSetProperties[i];
+			
+			//手动添加属性必须加入
+			if(fdsp.manual)
+			{
+				fdsp.manual = undefined;
+				re.push(fdsp);
+			}
+			else
+			{
+				var gdsp = (prevGenDataSetProperties[i] || {});
+				var fdspType = (fdsp.type || ""), fdspLabel = (fdsp.label || ""), fdspDefaultValue = (fdsp.defaultValue || "");
+				var gdspType = (gdsp.type || ""), gdspLabel = (gdsp.label || ""), gdspDefaultValue = (gdsp.defaultValue || "");
+				
+				//顺序调整、字段修改了则应加入
+				if(fdsp.name != gdsp.name || fdspType != gdspType ||  fdspLabel != gdspLabel
+						|| fdspDefaultValue != gdspDefaultValue)
+				{
+					fdsp.manual = undefined;
+					re.push(fdsp);
+				}
+			}
+		}
+		
+		return re;
 	};
 	
 	po.initPreviewOperations = function()
@@ -921,7 +962,7 @@ po.previewOptions.url = "...";
 		
 		po.previewOptions.data.query.resultFetchSize = po.resultFetchSizeVal();
 		po.previewOptions.data.dataSet.dataFormat = po.getFormDataFormat();
-		po.previewOptions.data.dataSet.properties = po.getFormDataSetProperties();
+		po.previewOptions.data.dataSet.properties = po. buildPreviewOptionsDataSetProperties();
 		
 		$.ajaxJson(
 		{
@@ -930,6 +971,8 @@ po.previewOptions.url = "...";
 			success : function(previewResponse)
 			{
 				po.previewSuccess(true);
+				
+				po.prevGenDataSetProperties = $.extend(true, [], previewResponse.properties);
 				
 				//如果工作区内容已变更才更新属性，防止上次保存后的属性被刷新
 				//属性表单内容为空也更新，比如用户删除了所有属性时

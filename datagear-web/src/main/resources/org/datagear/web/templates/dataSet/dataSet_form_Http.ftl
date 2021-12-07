@@ -15,7 +15,7 @@ readonly 是否只读操作，允许为null
 -->
 <#assign formAction=(formAction!'#')>
 <#assign readonly=(readonly!false)>
-<#assign isAdd=(formAction == 'saveAdd')>
+<#assign isAdd=(formAction == 'saveAddForHttp')>
 <#assign HttpDataSet=statics['org.datagear.analysis.support.HttpDataSet']>
 <html>
 <head>
