@@ -16,6 +16,9 @@ page_js_obj.ftl
 <script type="text/javascript">
 (function(po)
 {
+	//停止输入这些毫秒数后才进行提示，避免干扰用户输入
+	po.codeEditorHintingDelay = 500;
+	
 	po.createCodeEditor = function(dom, options)
 	{
 		dom = $(dom)[0];
@@ -32,12 +35,12 @@ page_js_obj.ftl
 			options.smartIndent = false;
 		
 		//强制禁用completeSingle选项，因为编辑器hint都是在下面的change事件中触发的
-		//如果这里为true，将会hint死循环，且会导致退格操作无效
+		//如果这里为true，可能会导致hint死循环，且会导致退格操作无效
 		if(options.hintOptions)
 			options.hintOptions.completeSingle = false;
 		
-		//if(options.hintOptions)
-		//	options.hintOptions.closeOnUnfocus = false;
+		if(options.hintOptions)
+			options.hintOptions.closeOnUnfocus = false;
 		
 		var codeEditor = CodeMirror(dom, options);
 		
@@ -45,7 +48,15 @@ page_js_obj.ftl
 		{
 			codeEditor.on("change", function(codeEditor, changeObj)
 			{
-				codeEditor.showHint();
+				if(codeEditor._timeoutIdForHinting != null)
+					clearTimeout(codeEditor._timeoutIdForHinting);
+				
+				codeEditor._timeoutIdForHinting = setTimeout(function()
+				{
+					codeEditor.showHint();
+					codeEditor._timeoutIdForHinting = null;
+				},
+				po.codeEditorHintingDelay);
 			});
 		}
 		

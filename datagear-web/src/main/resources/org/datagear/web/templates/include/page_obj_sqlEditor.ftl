@@ -59,8 +59,7 @@ po.getSqlEditorSchemaId
 		var token = (codeEditor.getTokenAt(cursor) || {});
 		
 		//关键字token不应提示
-		//回车、空格等空白token也不提示，因为显得过于干扰
-		if(token.type == "keyword" || /^\s*$/.test(token.string))
+		if(token.type == "keyword")
 		{
 			callback();
 			return;
