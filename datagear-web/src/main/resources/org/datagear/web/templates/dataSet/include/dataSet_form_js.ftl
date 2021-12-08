@@ -369,16 +369,7 @@ po.previewOptions.url = "...";
 		//添加后台自动解析的属性
 		for(var i=0; i<dataSetProperties.length; i++)
 		{
-			var prev = null;
-			
-			for(var j=0; j<prevProperties.length; j++)
-			{
-				if(dataSetProperties[i].name == prevProperties[j].name)
-				{
-					prev = prevProperties[j];
-					break;
-				}
-			}
+			var prev = $.findInArray(prevProperties, dataSetProperties[i].name, "name", true);
 			
 			//添加同名的旧属性，因为用户可能已编辑；否则，添加新属性
 			if(prev != null)
@@ -392,18 +383,8 @@ po.previewOptions.url = "...";
 		{
 			if(prevProperties[i].manual == true)
 			{
-				var exists = false;
-				
-				for(var j=0; j<updateProperties.length; j++)
-				{
-					if(prevProperties[i].name == updateProperties[j].name)
-					{
-						exists = true;
-						break;
-					}
-				}
-				
-				if(!exists)
+				var exists = $.findInArray(updateProperties, prevProperties[i].name, "name", true);
+				if(exists == null)
 					updateProperties.push(prevProperties[i]);
 			}
 		}
@@ -765,13 +746,7 @@ po.previewOptions.url = "...";
 		for(var i=0; i<formParams.length; i++)
 		{
 			var fp = formParams[i];
-			var p = null;
-			
-			for(var j=0; j<params.length; j++)
-			{
-				if(params[j].name == fp.name)
-					p = params[j];
-			}
+			var p = $.findInArray(params, fp.name, "name", true);
 			
 			if(p == null || fp.name != p.name || fp.type != p.type || fp.required != p.required
 					|| fp.inputType != p.inputType || fp.inputPayload != p.inputPayload)
@@ -784,13 +759,7 @@ po.previewOptions.url = "...";
 		for(var i=0; i<formProperties.length; i++)
 		{
 			var fp = formProperties[i];
-			var p = null;
-			
-			for(var j=0; j<properties.length; j++)
-			{
-				if(properties[j].name == fp.name)
-					p = properties[j];
-			}
+			var p = $.findInArray(properties, fp.name, "name", true);
 			
 			if(p == null || fp.name != p.name || fp.type != p.type || fp.defaultValue != p.defaultValue)
 			{
@@ -818,14 +787,16 @@ po.previewOptions.url = "...";
 	{
 		var isAddOperation = (po.isAddOperation != null ? po.isAddOperation : ("${isAdd?string('true', 'false')}" == "true"));
 		
+		//编辑操作无法区分已保存的属性是否是用户手动添加的，所以应全部返回
 		if(!isAddOperation)
 			return po.getFormDataSetProperties();
 		
 		var re = [];
 		
 		var formDataSetProperties = po.getFormDataSetProperties(true);
+		var canReturnEmpty = true;
 		
-		//添加操作时，对于由后台之前预览生成的属性且未修改的不必再传递至后台参考
+		//对于添加操作时，如果没有手动添加属性，也没有对后台生成的属性做过修改，则可以返回空数组；否则，应全部返回
 		var prevGenDataSetProperties = (po.prevGenDataSetProperties || []);
 		for(var i=0; i<formDataSetProperties.length; i++)
 		{
@@ -834,8 +805,8 @@ po.previewOptions.url = "...";
 			//手动添加属性必须加入
 			if(fdsp.manual)
 			{
-				fdsp.manual = undefined;
-				re.push(fdsp);
+				canReturnEmpty = false;
+				break;
 			}
 			else
 			{
@@ -847,11 +818,14 @@ po.previewOptions.url = "...";
 				if(fdsp.name != gdsp.name || fdspType != gdspType ||  fdspLabel != gdspLabel
 						|| fdspDefaultValue != gdspDefaultValue)
 				{
-					fdsp.manual = undefined;
-					re.push(fdsp);
+					canReturnEmpty = false;
+					break;
 				}
 			}
 		}
+		
+		if(!canReturnEmpty)
+			re = po.getFormDataSetProperties();
 		
 		return re;
 	};
@@ -974,7 +948,7 @@ po.previewOptions.url = "...";
 				
 				po.prevGenDataSetProperties = $.extend(true, [], previewResponse.properties);
 				
-				//如果工作区内容已变更才更新属性，防止上次保存后的属性被刷新
+				//工作区内容有变更才更新属性，防止用户添加的属性输入框被刷新
 				//属性表单内容为空也更新，比如用户删除了所有属性时
 				if(previewValueModified || !po.hasFormDataSetProperty())
 				{

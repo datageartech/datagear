@@ -1012,25 +1012,33 @@
 		 * 查找数组，返回查找索引，-1表示未找到。
 		 * @param array
 		 * @param value 要查找的值
-		 * @param property 可选，要匹配的数组元素对象属性名 
+		 * @param property 可选，字符串，要匹配的数组元素对象属性名
+		 * @param returnElement 可选，布尔值，是否返回找到的元素而非索引，默认为false
 		 */
-		findInArray: function(array, value, property)
+		findInArray: function(array, value, property, returnElement)
 		{
+			//(array, value, true|false)
+			if(arguments.length == 3 && (property === true || property === false))
+			{
+				returnElement = property;
+				property = undefined;
+			}
+			
 			if(!array)
-				return -1;
+				return (returnElement ? undefined : -1);
 			
 			for(var i=0; i<array.length; i++)
 			{
-				var ele = array[i];
+				var eleVal = array[i];
 				
 				if(property != null)
-					ele = (ele != null ? ele[property] : null);
+					eleVal = (eleVal != null ? eleVal[property] : null);
 				
-				if(ele == value)
-					return i;
+				if(eleVal == value)
+					return ((returnElement ? array[i] : i));
 			}
 			
-			return -1;
+			return (returnElement ? undefined : -1);
 		},
 		
 		/**
