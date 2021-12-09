@@ -17,7 +17,11 @@
 	width: 100% !important;
 	height: 100% !important;
 }
-
+.dg-chart-for-indication{
+	/*为图表元素设置最小尺寸，避免看板中插入图表元素时由于没设尺寸无法显示的问题*/
+	min-width: 5px;
+	min-height: 5px;
+}
 .dg-position-relative{
 	position: relative;
 }

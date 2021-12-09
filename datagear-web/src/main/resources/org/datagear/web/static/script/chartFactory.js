@@ -224,6 +224,9 @@
 	/** 内置图表选项：处理图表更新选项 */
 	chartFactory.OPTION_PROCESS_UPDATE_OPTIONS = "processUpdateOptions";
 	
+	/** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
+	chartFactory.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
+	
 	/**
 	 * 初始化渲染上下文。
 	 * 注意：此方法应在初始化任意图表前且body已加载后调用。
@@ -830,6 +833,8 @@
 		
 		if(chartFactory.renderedChart($element) != null)
 			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
+			
+		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
 		
 		this._createChartThemeCssIfNon();
 		
@@ -845,8 +850,6 @@
 			$element.addClass("dg-chart-beautify-scrollbar");
 		
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
-		
-		
 		
 		this.statusRendering(true);
 		
@@ -1060,6 +1063,7 @@
 		$element.removeClass(this.themeStyleName());
 		$element.removeClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
 		$element.removeClass("dg-chart-beautify-scrollbar");
+		$element.removeClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
 		
 		var renderer = this.renderer();
