@@ -234,9 +234,9 @@ readonly 是否只读操作，允许为null
 		</div>
 		<div class="form-foot" style="text-align:center;">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			&nbsp;&nbsp;
-			<button type="button" name="saveAndShow"><@spring.message code='chart.saveAndShow' /></button>
+			<button id="saveAndShowChart" type="button"><@spring.message code='chart.saveAndShow' /></button>
 			</#if>
 		</div>
 	</form>
@@ -902,10 +902,10 @@ readonly 是否只读操作，允许为null
 	
 	po.previewAfterSave = false;
 	
-	po.element("button[name=saveAndShow]").click(function()
+	po.element("button[id=saveAndShowChart]").click(function()
 	{
 		po.previewAfterSave = true;
-		po.element("input[type='submit']").click();
+		po.form().submit();
 	});
 	
 	$.validator.addMethod("dataSignValidationRequired", function(value, element)
