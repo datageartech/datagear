@@ -959,12 +959,15 @@
 	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此方法才会执行。
 	 * 
-	 * @param results 图表数据集结果
+	 * @param results 可选，图表数据集结果，如果不设置，将使用this.updateResults()的返回值
 	 */
 	chartBase.update = function(results)
 	{
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
 			throw new Error("Chart is illegal state for update");
+		
+		if(arguments.length == 0)
+			results = this.updateResults();
 		
 		this.statusUpdating(true);
 		
