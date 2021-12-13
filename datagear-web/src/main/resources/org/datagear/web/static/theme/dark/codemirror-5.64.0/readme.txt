@@ -23,5 +23,7 @@
   background-color: #444 !important;
   color: #FFDEAD !important;
 }
-
 .cm-s-custom  { font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;}
+.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler{
+	background-color: #000;
+}
