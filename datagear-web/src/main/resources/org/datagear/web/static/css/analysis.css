@@ -19,8 +19,8 @@
 }
 .dg-chart-for-indication{
 	/*为图表元素设置最小尺寸，避免看板中插入图表元素时由于没设尺寸无法显示的问题*/
-	min-width: 5px;
-	min-height: 5px;
+	min-width: 10px;
+	min-height: 10px;
 }
 .dg-position-relative{
 	position: relative;
@@ -413,15 +413,15 @@
 	-o-transform:rotate(90deg);
 }
 .xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year{
-width: auto;
-padding: 0.3em 1em;
-margin-top: 3px;
-margin-right: 0.6em;
-float: right;
-border-bottom-right-radius: 3px;
-border-bottom-left-radius: 3px;
-border-top-right-radius: 3px;
-border-top-left-radius: 3px;
+	width: auto;
+	padding: 0.3em 1em;
+	margin-top: 3px;
+	margin-right: 0.6em;
+	float: right;
+	border-bottom-right-radius: 3px;
+	border-bottom-left-radius: 3px;
+	border-top-right-radius: 3px;
+	border-top-left-radius: 3px;
 }
 
 /*看板表单*/
