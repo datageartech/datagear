@@ -33,14 +33,14 @@
 .CodeMirror-hints.custom {
   background-color: #fff !important;
   border: 1px solid #dddddd;
-  color: #000080;
+  color: #000;
   -webkit-box-shadow: 0px 0px 5px #666666;
   box-shadow: 0px 0px 5px #666666;
 }
 .CodeMirror-hints.custom .CodeMirror-hint{
-	color: #000080;
+	color: #000;
 }
 .CodeMirror-hints.custom .CodeMirror-hint-active {
   background-color: #ededed !important;
-  color: #000080 !important;
+  color: #000 !important;
 }
