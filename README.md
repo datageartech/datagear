@@ -14,7 +14,7 @@ DataGear是一款开源免费的数据可视化分析平台，可自由制作任
 
 系统基于Spring Boot、Jquery、ECharts等技术开发。
 
-## [DataGear 2.10.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
+## [DataGear 2.11.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
 ## [DataGear 大屏看板模板，持续更新中...](https://gitee.com/datagear/DataGearDashboardTemplate)
 
