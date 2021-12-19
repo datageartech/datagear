@@ -33,6 +33,8 @@ import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.html.CharsetTagListener;
+import org.datagear.util.html.HtmlFilter;
 
 /**
  * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
@@ -159,6 +161,8 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 	/** 换行符 */
 	private String newLine = HtmlChartPlugin.HTML_NEW_LINE;
+
+	private HtmlFilter htmlFilter = new HtmlFilter();
 
 	public HtmlTplDashboardWidgetRenderer()
 	{
@@ -389,6 +393,16 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		this.newLine = newLine;
 	}
 
+	public HtmlFilter getHtmlFilter()
+	{
+		return htmlFilter;
+	}
+
+	public void setHtmlFilter(HtmlFilter htmlFilter)
+	{
+		this.htmlFilter = htmlFilter;
+	}
+
 	/**
 	 * 解析HTML输入流的字符集，如果解析不到，则返回{@code null}。
 	 * 
@@ -420,76 +434,10 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	 */
 	public String resolveCharset(Reader in) throws IOException
 	{
-		String charset = null;
+		CharsetTagListener tl = new CharsetTagListener(true);
+		this.htmlFilter.filter(in, tl);
 
-		StringBuilder nameCache = createStringBuilder();
-
-		int c = -1;
-		while ((c = in.read()) > -1)
-		{
-			if (charset != null)
-				break;
-
-			if (c == '<')
-			{
-				clear(nameCache);
-
-				int last = readHtmlTagName(in, nameCache);
-				String tagName = nameCache.toString();
-
-				// </head
-				if ("/head".equalsIgnoreCase(tagName))
-					break;
-				// <meta
-				else if ("meta".equalsIgnoreCase(tagName))
-				{
-					StringBuilder cache = createStringBuilder();
-					StringBuilder valueCache = createStringBuilder();
-
-					for (;;)
-					{
-						clear(nameCache);
-						clear(valueCache);
-
-						last = resolveHtmlTagAttr(in, last, cache, nameCache, valueCache);
-
-						String name = toString(nameCache);
-						String value = toString(valueCache);
-
-						if ("charset".equalsIgnoreCase(name))
-						{
-							charset = value;
-							break;
-						}
-						else if ("content".equalsIgnoreCase(name))
-						{
-							String valueLower = value.toLowerCase();
-							String charsetToken = "charset=";
-							int charsetTokenIdx = valueLower.indexOf(charsetToken);
-							if (charsetTokenIdx > -1)
-							{
-								charset = value.substring(charsetTokenIdx + charsetToken.length());
-								break;
-							}
-						}
-
-						if (isHtmlTagEnd(last))
-							break;
-					}
-				}
-				// <!--
-				else if (tagName.startsWith("!--"))
-				{
-					// 空注释
-					if (isReadHtmlTagEmptyComment(tagName, last))
-						;
-					else
-						skipHtmlComment(in, null);
-				}
-			}
-		}
-
-		return charset;
+		return tl.getCharset();
 	}
 
 	/**

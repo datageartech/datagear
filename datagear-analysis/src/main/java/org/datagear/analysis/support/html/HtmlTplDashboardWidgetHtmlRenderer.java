@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.Dashboard;
@@ -22,6 +23,7 @@ import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.html.DefaultTagListener;
 
 /**
  * 使用原生HTML网页作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
@@ -764,6 +766,132 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 		if (isValidReadChar(last))
 			out.write(last);
+	}
+
+	protected class DashboardTagListener extends DefaultTagListener
+	{
+		private final RenderContext renderContext;
+		private final HtmlTplDashboardRenderAttr renderAttr;
+		private final HtmlTplDashboard dashboard;
+		private final DashboardInfo dashboardInfo;
+
+		private boolean htmlTagResolved = false;
+		private boolean inHeadTag = false;
+		private boolean dashboardImportWritten = false;
+		private boolean titleTagHandled = false;
+		private boolean inBodyTag = false;
+
+		public DashboardTagListener(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+				HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
+		{
+			super();
+			this.renderContext = renderContext;
+			this.renderAttr = renderAttr;
+			this.dashboard = dashboard;
+			this.dashboardInfo = dashboardInfo;
+		}
+
+		public RenderContext getRenderContext()
+		{
+			return renderContext;
+		}
+
+		public HtmlTplDashboardRenderAttr getRenderAttr()
+		{
+			return renderAttr;
+		}
+
+		public HtmlTplDashboard getDashboard()
+		{
+			return dashboard;
+		}
+
+		public DashboardInfo getDashboardInfo()
+		{
+			return dashboardInfo;
+		}
+
+		@Override
+		public void beforeTagStart(Reader in, Writer out, String tagName) throws IOException
+		{
+		}
+
+		@Override
+		public boolean isResolveTagAttrs(Reader in, Writer out, String tagName)
+		{
+			return "html".equalsIgnoreCase(tagName)
+					|| HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName.equalsIgnoreCase(tagName);
+		}
+
+		@Override
+		public void beforeTagEnd(Reader in, Writer out, String tagName, String tagEnd, Map<String, String> attrs)
+				throws IOException
+		{
+			if (!this.htmlTagResolved && "html".equalsIgnoreCase(tagName))
+			{
+				for (Map.Entry<String, String> entry : attrs.entrySet())
+				{
+					String name = entry.getKey();
+
+					if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardVar.equalsIgnoreCase(name))
+					{
+						dashboardInfo.setDashboardFactoryVar(entry.getValue());
+					}
+					else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardFactory
+							.equalsIgnoreCase(name))
+					{
+						dashboardInfo.setDashboardFactoryVar(entry.getValue());
+					}
+					else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardImportExclude
+							.equalsIgnoreCase(name))
+					{
+						dashboardInfo.setImportExclude(entry.getValue());
+					}
+				}
+
+				this.htmlTagResolved = true;
+			}
+			else if (!this.titleTagHandled && "/head".equalsIgnoreCase(tagName))
+			{
+				HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
+				if (htmlTitleHandler != null)
+				{
+					String titleContent = htmlTitleHandler.handle("");
+
+					out.write("<title>");
+					out.write(titleContent);
+					out.write("</title>");
+				}
+
+				this.titleTagHandled = true;
+			}
+			else if (HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName.equalsIgnoreCase(tagName))
+			{
+
+			}
+		}
+
+		@Override
+		public boolean afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
+		{
+			if ("head".equalsIgnoreCase(tagName))
+			{
+				if (!this.dashboardImportWritten)
+				{
+					writeDashboardImport(this.renderContext, this.renderAttr, out, this.dashboard, this.dashboardInfo);
+					this.dashboardImportWritten = true;
+				}
+
+				this.inHeadTag = (!"/>".equals(tagEnd));
+			}
+			else if (this.inHeadTag && "/head".equalsIgnoreCase(tagName))
+			{
+				this.inHeadTag = false;
+			}
+
+			return false;
+		}
+
 	}
 
 	protected static class DashboardInfo
