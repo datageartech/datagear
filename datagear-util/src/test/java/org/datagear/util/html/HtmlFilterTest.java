@@ -86,6 +86,8 @@ public class HtmlFilterTest
 					+ "\n"
 					+ "<div p0=v0 p1 p2 = v2>sdf</div>"
 					+ "\n"
+					+ "<script />"
+					+ "\n"
 					+ "<>"
 					+ "\n"
 					+ "</>"
@@ -101,7 +103,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.filter(in, out, emptyFilterContext());
+			htmlFilter.filter(in, out);
 
 			assertEquals(html, out.toString());
 		}
@@ -161,6 +163,14 @@ public class HtmlFilterTest
 					+ "\n"
 					+ "<div p0=v0 p1 p2 = v2>sdf</div>"
 					+ "\n"
+					+ "<script/>"
+					+ "\n"
+					+ "<script p0=v0/>"
+					+ "\n"
+					+ "<script />"
+					+ "\n"
+					+ "<script p0=v0 />"
+					+ "\n"
 					+ "<>"
 					+ "\n"
 					+ "</>"
@@ -176,7 +186,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.filter(in, out, tagAwareFilterContext());
+			htmlFilter.filter(in, out, TEST_TAG_LISTENER);
 
 			String expected = "[bts]<html lang='zh'[bte]>[ate]"
 					+ "\n"
@@ -228,6 +238,14 @@ public class HtmlFilterTest
 					+ "\n"
 					+ "[bts]<div p0=v0 p1 p2 = v2[bte]>[ate]sdf[bts]</div[bte]>[ate]"
 					+ "\n"
+					+ "[bts]<script[bte]/>[ate]"
+					+ "\n"
+					+ "[bts]<script p0=v0[bte]/>[ate]"
+					+ "\n"
+					+ "[bts]<script [bte]/>[ate]"
+					+ "\n"
+					+ "[bts]<script p0=v0 [bte]/>[ate]"
+					+ "\n"
 					+ "[bts]<[bte]>[ate]"
 					+ "\n"
 					+ "[bts]</[bte]>[ate]"
@@ -241,6 +259,35 @@ public class HtmlFilterTest
 					+ "[bts]</html[bte]>[ate]";
 
 			assertEquals(expected, out.toString());
+		}
+	}
+
+	@Test
+	public void filterTest_aborted() throws IOException
+	{
+		{
+			String html = "<html><head><meta charset=\"UTF-8\"></head><body></body></html>";
+
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			CharsetTagListener tagListener = new CharsetTagListener(true);
+			htmlFilter.filter(in, out, tagListener);
+
+			assertEquals("<html><head><meta charset=\"UTF-8\">", out.toString());
+			assertEquals("UTF-8", tagListener.getCharset());
+		}
+		{
+			String html = "<html><head><meta content=\"text/html; charset=UTF-8\"></head><body></body></html>";
+
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			CharsetTagListener tagListener = new CharsetTagListener(true);
+			htmlFilter.filter(in, out, tagListener);
+
+			assertEquals("<html><head><meta content=\"text/html; charset=UTF-8\">", out.toString());
+			assertEquals("UTF-8", tagListener.getCharset());
 		}
 	}
 
@@ -445,7 +492,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, tagAwareFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.writeAfterTag(in, out, tagListenerFilterContext(), tagName.toString(), nameAfter);
 				assertEquals("[bts]<div[bte]", out.toString());
 			}
 
@@ -456,7 +503,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, tagAwareFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.writeAfterTag(in, out, tagListenerFilterContext(), tagName.toString(), nameAfter);
 				assertEquals("[bts]<div[bte]>[ate]", out.toString());
 			}
 
@@ -467,7 +514,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, tagAwareFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.writeAfterTag(in, out, tagListenerFilterContext(), tagName.toString(), nameAfter);
 				assertEquals("[bts]<div[bte]/>[ate]", out.toString());
 			}
 
@@ -478,7 +525,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, tagAwareFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.writeAfterTag(in, out, tagListenerFilterContext(), tagName.toString(), nameAfter);
 				assertEquals("[bts]<div p0=v0 [bte]>[ate]", out.toString());
 			}
 		}
@@ -694,7 +741,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, tagAwareFilterContext());
+			htmlFilter.writeAfterScriptCloseTag(in, out, tagListenerFilterContext());
 			assertEquals("<div> <span></span> [bts]</script[bte]>[ate]", out.toString());
 		}
 	}
@@ -704,12 +751,12 @@ public class HtmlFilterTest
 		return new FilterContext();
 	}
 
-	protected FilterContext tagAwareFilterContext()
+	protected FilterContext tagListenerFilterContext()
 	{
-		return new FilterContext(TEST_FILTER_TAG_AWARE);
+		return new FilterContext(TEST_TAG_LISTENER);
 	}
 
-	protected static FilterTagAware TEST_FILTER_TAG_AWARE = new DefaultFilterTagAware()
+	protected static TagListener TEST_TAG_LISTENER = new DefaultTagListener()
 	{
 		@Override
 		public void beforeTagStart(Reader in, Writer out, String tagName) throws IOException
@@ -725,9 +772,10 @@ public class HtmlFilterTest
 		}
 
 		@Override
-		public void afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
+		public boolean afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
 		{
 			out.write("[ate]");
+			return false;
 		}
 	};
 }

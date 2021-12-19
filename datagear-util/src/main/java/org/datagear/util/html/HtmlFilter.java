@@ -57,12 +57,12 @@ public class HtmlFilter
 	 * 
 	 * @param htmlReader
 	 * @param htmlWriter
-	 * @param filterTagAware 允许为{@code null}
+	 * @param tagListener 允许为{@code null}
 	 * @throws IOException
 	 */
-	public void filter(Reader htmlReader, Writer htmlWriter, FilterTagAware filterTagAware) throws IOException
+	public void filter(Reader htmlReader, Writer htmlWriter, TagListener tagListener) throws IOException
 	{
-		filter(htmlReader, htmlWriter, new FilterContext(filterTagAware));
+		filter(htmlReader, htmlWriter, new FilterContext(tagListener));
 	}
 
 	/**
@@ -103,6 +103,9 @@ public class HtmlFilter
 						writeAfterScriptCloseTag(in, out, context);
 					}
 				}
+
+				if (context.isAborted())
+					break;
 			}
 			else
 				out.write(c);
@@ -326,6 +329,7 @@ public class HtmlFilter
 			{
 				tagAttrs = context.availableTagAttrs();
 				tagEnd = writeUntilTagEnd(in, out, context, tagName, tagAttrs);
+				tagAttrs = Collections.unmodifiableMap(tagAttrs);
 			}
 			else
 			{
@@ -698,13 +702,13 @@ public class HtmlFilter
 	 * @param context
 	 * @param tagName
 	 * @throws IOException
-	 * @see {@linkplain FilterTagAware#beforeTagStart(Reader, Writer, String)}
+	 * @see {@linkplain TagListener#beforeTagStart(Reader, Writer, String)}
 	 */
 	protected void beforeWriteTagStart(Reader in, Writer out, FilterContext context, String tagName) throws IOException
 	{
-		FilterTagAware ta = context.getFilterTagAware();
-		if (ta != null)
-			ta.beforeTagStart(in, out, tagName);
+		TagListener tl = context.getTagListener();
+		if (tl != null)
+			tl.beforeTagStart(in, out, tagName);
 	}
 
 	/**
@@ -715,12 +719,12 @@ public class HtmlFilter
 	 * @param context
 	 * @param tagName
 	 * @return
-	 * @see {@linkplain FilterTagAware#isResolveTagAttrs(String)}
+	 * @see {@linkplain TagListener#isResolveTagAttrs(String)}
 	 */
 	protected boolean isResolveTagAttrs(Reader in, Writer out, FilterContext context, String tagName)
 	{
-		FilterTagAware ta = context.getFilterTagAware();
-		return (ta != null ? ta.isResolveTagAttrs(in, out, tagName) : false);
+		TagListener tl = context.getTagListener();
+		return (tl != null ? tl.isResolveTagAttrs(in, out, tagName) : false);
 	}
 
 	/**
@@ -733,15 +737,15 @@ public class HtmlFilter
 	 * @param tagEnd
 	 * @param attrs
 	 * @throws IOException
-	 * @see {@linkplain FilterTagAware#beforeTagEnd(Reader, Writer, String, String, Map)}
+	 * @see {@linkplain TagListener#beforeTagEnd(Reader, Writer, String, String, Map)}
 	 */
 	protected void beforeWriteTagEnd(Reader in, Writer out, FilterContext context, String tagName, String tagEnd,
 			Map<String, String> attrs)
 			throws IOException
 	{
-		FilterTagAware ta = context.getFilterTagAware();
-		if (ta != null)
-			ta.beforeTagEnd(in, out, tagName, tagEnd, attrs);
+		TagListener tl = context.getTagListener();
+		if (tl != null)
+			tl.beforeTagEnd(in, out, tagName, tagEnd, attrs);
 	}
 
 	/**
@@ -753,14 +757,19 @@ public class HtmlFilter
 	 * @param tagName
 	 * @param tagEnd
 	 * @throws IOException
-	 * @see {@linkplain FilterTagAware#afterTagEnd(Reader, Writer, String, String)}
+	 * @see {@linkplain TagListener#afterTagEnd(Reader, Writer, String, String)}
 	 */
 	protected void afterWriteTagEnd(Reader in, Writer out, FilterContext context, String tagName, String tagEnd)
 			throws IOException
 	{
-		FilterTagAware ta = context.getFilterTagAware();
-		if (ta != null)
-			ta.afterTagEnd(in, out, tagName, tagEnd);
+		TagListener tl = context.getTagListener();
+		if (tl != null)
+		{
+			boolean aborted = tl.afterTagEnd(in, out, tagName, tagEnd);
+
+			if (aborted && !context.isAborted())
+				context.setAborted(aborted);
+		}
 	}
 
 	/**
@@ -926,7 +935,9 @@ public class HtmlFilter
 
 	protected static class FilterContext
 	{
-		private FilterTagAware filterTagAware = null;
+		private TagListener tagListener = null;
+
+		private boolean aborted = false;
 
 		private Map<String, String> prevTagAttrs = new HashMap<String, String>();
 
@@ -939,26 +950,36 @@ public class HtmlFilter
 
 		/**
 		 * 
-		 * @param filterTagAware 允许为{@code null}
+		 * @param tagListener 允许为{@code null}
 		 */
-		public FilterContext(FilterTagAware filterTagAware)
+		public FilterContext(TagListener tagListener)
 		{
 			super();
-			this.filterTagAware = filterTagAware;
+			this.tagListener = tagListener;
 		}
 
 		/**
 		 * 
 		 * @return 可能为{@code null}
 		 */
-		public FilterTagAware getFilterTagAware()
+		public TagListener getTagListener()
 		{
-			return filterTagAware;
+			return tagListener;
 		}
 
-		public void setFilterTagAware(FilterTagAware filterTagAware)
+		public void setTagListener(TagListener tagListener)
 		{
-			this.filterTagAware = filterTagAware;
+			this.tagListener = tagListener;
+		}
+
+		public boolean isAborted()
+		{
+			return aborted;
+		}
+
+		public void setAborted(boolean aborted)
+		{
+			this.aborted = aborted;
 		}
 
 		/**

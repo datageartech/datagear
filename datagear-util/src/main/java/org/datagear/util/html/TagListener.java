@@ -13,12 +13,12 @@ import java.io.Writer;
 import java.util.Map;
 
 /**
- * 过滤HTML标签监视器。
+ * HTML标签监听器。
  * 
  * @author datagear@163.com
  *
  */
-public interface FilterTagAware
+public interface TagListener
 {
 	/**
 	 * 标签起始符（{@code '<'}）写入输出流前置处理函数。
@@ -76,7 +76,8 @@ public interface FilterTagAware
 	 * @param tagName 标签名，可能为：{@code "..."}、{@code "/..."}、{@code ""}、{@code "/"}
 	 *                详细参考{@linkplain HtmlFilter#readTagName(Reader, StringBuilder)}
 	 * @param tagEnd  标签结束符，可能为：{@code ">"}、{@code "/>"}
+	 * @return 是否中止过滤，{@code true} 是；{@code false} 否
 	 * @throws IOException
 	 */
-	void afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException;
+	boolean afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException;
 }

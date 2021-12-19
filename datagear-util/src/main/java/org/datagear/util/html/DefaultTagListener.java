@@ -13,15 +13,15 @@ import java.io.Writer;
 import java.util.Map;
 
 /**
- * 默认{@linkplain FilterTagAware}。
+ * 默认{@linkplain TagListener}。
  * <p>
- * 它的{@linkplain #isResolveTagAttrs(String)}始终返回{@code false}，其他方法则什么也不做。
+ * 它的{@linkplain #isResolveTagAttrs(String)}、{@linkplain #afterTagEnd(Reader, Writer, String, String)}始终返回{@code false}，其他方法则什么也不做。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class DefaultFilterTagAware implements FilterTagAware
+public class DefaultTagListener implements TagListener
 {
 	@Override
 	public void beforeTagStart(Reader in, Writer out, String tagName) throws IOException
@@ -41,7 +41,8 @@ public class DefaultFilterTagAware implements FilterTagAware
 	}
 
 	@Override
-	public void afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
+	public boolean afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
 	{
+		return false;
 	}
 }
