@@ -56,6 +56,17 @@ public class HtmlFilter
 	 * 执行过滤。
 	 * 
 	 * @param htmlReader
+	 * @throws IOException
+	 */
+	public void filter(Reader htmlReader) throws IOException
+	{
+		filter(htmlReader, NopWriter.NOP_WRITER, new FilterContext());
+	}
+
+	/**
+	 * 执行过滤。
+	 * 
+	 * @param htmlReader
 	 * @param htmlWriter
 	 * @param tagListener 允许为{@code null}
 	 * @throws IOException
@@ -67,6 +78,19 @@ public class HtmlFilter
 
 	/**
 	 * 执行过滤。
+	 * 
+	 * @param htmlReader
+	 * @param tagListener 允许为{@code null}
+	 * @throws IOException
+	 */
+	public void filter(Reader htmlReader, TagListener tagListener) throws IOException
+	{
+		filter(htmlReader, NopWriter.NOP_WRITER, new FilterContext(tagListener));
+	}
+
+	/**
+	 * 执行过滤。
+	 * 
 	 * @param htmlReader
 	 * @param htmlWriter
 	 * @param context

@@ -110,7 +110,7 @@ public class HtmlFilterTest
 	}
 
 	@Test
-	public void filterTest_htmlReader_htmlWriter_filterTagAware() throws IOException
+	public void filterTest_htmlReader_htmlWriter_tagListener() throws IOException
 	{
 		{
 			String html = "<html lang='zh'>"
@@ -259,6 +259,29 @@ public class HtmlFilterTest
 					+ "[bts]</html[bte]>[ate]";
 
 			assertEquals(expected, out.toString());
+		}
+	}
+
+	@Test
+	public void filterTest_htmlReader() throws IOException
+	{
+		{
+			String html = "<html><head><meta charset='UTF-8'></head><body></body></html>";
+			StringReader in = new StringReader(html);
+			htmlFilter.filter(in);
+		}
+	}
+
+	@Test
+	public void filterTest_htmlReader_tagListener() throws IOException
+	{
+		{
+			String html = "<html><head><meta charset='UTF-8'></head><body></body></html>";
+			CharsetTagListener tl = new CharsetTagListener();
+			StringReader in = new StringReader(html);
+			htmlFilter.filter(in, tl);
+
+			assertEquals("UTF-8", tl.getCharset());
 		}
 	}
 
