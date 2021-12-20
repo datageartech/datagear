@@ -9,6 +9,7 @@ package org.datagear.web.controller;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -512,21 +513,31 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 						new String[] { id }, "dg-chart-disable-setting=\"false\""),
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer);
 
-		String responseEncoding = dashboardWidget.getTemplateEncoding();
-		response.setCharacterEncoding(responseEncoding);
-		response.setContentType(CONTENT_TYPE_HTML);
+		Writer out = null;
 
-		HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
-		RenderContext renderContext = createHtmlRenderContext(request, response, renderAttr, createWebContext(request),
-				getChartShowHtmlTplDashboardWidgetHtmlRenderer());
-		DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
-				getMessage(request, "chart.show.htmlTitleSuffix", getMessage(request, "app.name")));
-		renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+		try
+		{
+			String responseEncoding = dashboardWidget.getTemplateEncoding();
+			response.setCharacterEncoding(responseEncoding);
+			response.setContentType(CONTENT_TYPE_HTML);
+			out = IOUtil.getBufferedWriter(response.getWriter());
 
-		HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
+			HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
+			RenderContext renderContext = createHtmlRenderContext(request, response, out, renderAttr,
+					createWebContext(request), getChartShowHtmlTplDashboardWidgetHtmlRenderer());
+			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
+					getMessage(request, "chart.show.htmlTitleSuffix", getMessage(request, "app.name")));
+			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
-		SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
-		dashboardInfoManager.put(new DashboardInfo(dashboard));
+			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
+
+			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
+			dashboardInfoManager.put(new DashboardInfo(dashboard));
+		}
+		finally
+		{
+			IOUtil.close(out);
+		}
 	}
 
 	protected WebContext createWebContext(HttpServletRequest request)

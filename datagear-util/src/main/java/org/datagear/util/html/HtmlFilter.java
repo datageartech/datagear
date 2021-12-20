@@ -7,14 +7,10 @@
 
 package org.datagear.util.html;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +31,31 @@ import java.util.Map;
  */
 public class HtmlFilter
 {
+	/**
+	 * 标签起始符：{@code <}
+	 */
+	public static final char TAG_START_CHAR = '<';
+
+	/**
+	 * 标签起始符：{@code <}
+	 */
+	public static final String TAG_START_STR = "<";
+
+	/**
+	 * 标签结束符：{@code >}
+	 */
+	public static final char TAG_END_CHAR = '>';
+
+	/**
+	 * 标签结束符：{@code >}
+	 */
+	public static final String TAG_END_STR = ">";
+
+	/**
+	 * 自关闭标签结束符：{@code />}
+	 */
+	public static final String TAG_END_STR_SELF_CLOSE = "/>";
+
 	public HtmlFilter()
 	{
 		super();
@@ -43,70 +64,42 @@ public class HtmlFilter
 	/**
 	 * 执行过滤。
 	 * 
-	 * @param htmlReader
-	 * @param htmlWriter
+	 * @param in
+	 *            HTML输入流
 	 * @throws IOException
 	 */
-	public void filter(Reader htmlReader, Writer htmlWriter) throws IOException
+	public void filter(Reader in) throws IOException
 	{
-		filter(htmlReader, htmlWriter, new FilterContext());
+		filter(in, new DefaultFilterHandler(NopWriter.NOP_WRITER));
 	}
 
 	/**
 	 * 执行过滤。
 	 * 
-	 * @param htmlReader
+	 * @param in
+	 *            HTML输入流
+	 * @param out
+	 *            HTML输出流
 	 * @throws IOException
 	 */
-	public void filter(Reader htmlReader) throws IOException
+	public void filter(Reader in, Writer out) throws IOException
 	{
-		filter(htmlReader, NopWriter.NOP_WRITER, new FilterContext());
+		filter(in, new DefaultFilterHandler(out));
 	}
 
 	/**
 	 * 执行过滤。
 	 * 
-	 * @param htmlReader
-	 * @param htmlWriter
-	 * @param tagListener 允许为{@code null}
+	 * @param in
+	 * @param handler
 	 * @throws IOException
 	 */
-	public void filter(Reader htmlReader, Writer htmlWriter, TagListener tagListener) throws IOException
+	public void filter(Reader in, FilterHandler handler) throws IOException
 	{
-		filter(htmlReader, htmlWriter, new FilterContext(tagListener));
-	}
-
-	/**
-	 * 执行过滤。
-	 * 
-	 * @param htmlReader
-	 * @param tagListener 允许为{@code null}
-	 * @throws IOException
-	 */
-	public void filter(Reader htmlReader, TagListener tagListener) throws IOException
-	{
-		filter(htmlReader, NopWriter.NOP_WRITER, new FilterContext(tagListener));
-	}
-
-	/**
-	 * 执行过滤。
-	 * 
-	 * @param htmlReader
-	 * @param htmlWriter
-	 * @param context
-	 * @throws IOException
-	 */
-	protected void filter(Reader htmlReader, Writer htmlWriter, FilterContext context) throws IOException
-	{
-		BufferedReader in = (htmlReader instanceof BufferedReader ? (BufferedReader) htmlReader
-				: new BufferedReader(htmlReader));
-		BufferedWriter out = (htmlWriter instanceof BufferedWriter ? (BufferedWriter) htmlWriter
-				: new BufferedWriter(htmlWriter));
-
 		int c = -1;
 		while ((c = in.read()) > -1)
 		{
-			if (c == '<')
+			if (c == TAG_START_CHAR)
 			{
 				StringBuilder tagNameSb = createStringBuilder();
 				String afterTagName = readTagName(in, tagNameSb);
@@ -115,27 +108,25 @@ public class HtmlFilter
 				// <!--
 				if (tagName.startsWith("!--"))
 				{
-					writeAfterHtmlComment(in, out, context, tagName, afterTagName);
+					filterAfterHtmlComment(in, handler, tagName, afterTagName);
 				}
 				else
 				{
-					String tagEnd = writeAfterTag(in, out, context, tagName, afterTagName);
+					String tagEnd = filterAfterTag(in, handler, tagName, afterTagName);
 
 					// "<script..."且非"<script.../>"
-					if (!"/>".equals(tagEnd) && tagName.equalsIgnoreCase("script"))
+					if (!TAG_END_STR_SELF_CLOSE.equals(tagEnd) && tagName.equalsIgnoreCase("script"))
 					{
-						writeAfterScriptCloseTag(in, out, context);
+						filterAfterScriptCloseTag(in, handler);
 					}
 				}
 
-				if (context.isAborted())
+				if (handler.isAborted())
 					break;
 			}
 			else
-				out.write(c);
+				handler.write(c);
 		}
-
-		out.flush();
 	}
 
 	/**
@@ -208,7 +199,7 @@ public class HtmlFilter
 		int c = -1;
 		while ((c = in.read()) > -1)
 		{
-			if (isWhitespace(c) || c == '>')
+			if (isWhitespace(c) || c == TAG_END_CHAR)
 			{
 				next = codePointToString(c);
 				break;
@@ -217,15 +208,15 @@ public class HtmlFilter
 			{
 				int c0 = in.read();
 
-				if (c0 == '>')
+				if (c0 == TAG_END_CHAR)
 				{
 					if (isEmpty(tagName))
 					{
 						appendChar(tagName, c);
-						next = ">";
+						next = TAG_END_STR;
 					}
 					else
-						next = "/>";
+						next = TAG_END_STR_SELF_CLOSE;
 
 					break;
 				}
@@ -253,53 +244,51 @@ public class HtmlFilter
 	 * 写完HTML注释结束符（{@code -->}）后停止。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 * @param tagName
 	 * @param afterTagName
 	 * @throws IOException
 	 */
-	protected void writeAfterHtmlComment(Reader in, Writer out, FilterContext context, String tagName,
+	protected void filterAfterHtmlComment(Reader in, FilterHandler handler, String tagName,
 			String afterTagName) throws IOException
 	{
-		out.write('<');
-		out.write(tagName);
-		writeIfNonNull(out, afterTagName);
+		handler.write(TAG_START_CHAR);
+		handler.write(tagName);
+		writeIfNonNull(handler, afterTagName);
 
 		// <!---->
 		// <!--comment-->
-		if (">".equals(afterTagName) && tagName.length() >= "!----".length() && tagName.endsWith("--"))
+		if (TAG_END_STR.equals(afterTagName) && tagName.length() >= "!----".length() && tagName.endsWith("--"))
 			;
 		else
-			writeAfterHtmlComment(in, out, context);
+			filterAfterHtmlComment(in, handler);
 	}
 
 	/**
 	 * 写完HTML注释结束符（{@code -->}）后停止。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 * @throws IOException
 	 */
-	protected void writeAfterHtmlComment(Reader in, Writer out, FilterContext context) throws IOException
+	protected void filterAfterHtmlComment(Reader in, FilterHandler handler) throws IOException
 	{
 		int c = -1;
 		while ((c = in.read()) > -1)
 		{
-			out.write(c);
+			handler.write(c);
 
 			if (c == '-')
 			{
 				c = in.read();
-				writeIfValid(out, c);
+				writeIfValid(handler, c);
 
 				if (c == '-')
 				{
 					c = in.read();
-					writeIfValid(out, c);
+					writeIfValid(handler, c);
 
-					if (c == '>')
+					if (c == TAG_END_CHAR)
 						break;
 				}
 			}
@@ -310,62 +299,61 @@ public class HtmlFilter
 	 * 写完标签结束符（{@code ">"}、{@code "/>"}）后停止。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 * @param tagName
 	 * @param afterTagName 参考{@linkplain #readTagName(Reader, StringBuilder)}的返回值
 	 * @return 标签结束符，可能为：{@code ">"}、{@code "/>"}、{@code null}
 	 * @throws IOException
 	 */
-	protected String writeAfterTag(Reader in, Writer out, FilterContext context, String tagName, String afterTagName)
+	protected String filterAfterTag(Reader in, FilterHandler handler, String tagName, String afterTagName)
 			throws IOException
 	{
-		beforeWriteTagStart(in, out, context, tagName);
+		handler.beforeWriteTagStart(in, tagName);
 
-		out.write('<');
+		handler.write(TAG_START_CHAR);
 
 		Map<String, String> tagAttrs = Collections.emptyMap();
 
 		if (afterTagName == null)
 		{
-			out.write(tagName);
-			beforeWriteTagEnd(in, out, context, tagName, null, tagAttrs);
+			handler.write(tagName);
+			handler.beforeWriteTagEnd(in, tagName, null, tagAttrs);
 
 			return afterTagName;
 		}
-		else if (afterTagName.equals(">") || afterTagName.equals("/>"))
+		else if (afterTagName.equals(TAG_END_STR) || afterTagName.equals(TAG_END_STR_SELF_CLOSE))
 		{
-			out.write(tagName);
-			beforeWriteTagEnd(in, out, context, tagName, afterTagName, tagAttrs);
-			out.write(afterTagName);
-			afterWriteTagEnd(in, out, context, tagName, afterTagName);
+			handler.write(tagName);
+			handler.beforeWriteTagEnd(in, tagName, afterTagName, tagAttrs);
+			handler.write(afterTagName);
+			handler.afterWriteTagEnd(in, tagName, afterTagName);
 
 			return afterTagName;
 		}
 		else
 		{
-			out.write(tagName);
-			out.write(afterTagName);
+			handler.write(tagName);
+			handler.write(afterTagName);
 
 			String tagEnd = null;
 
-			if (isResolveTagAttrs(in, out, context, tagName))
+			if (handler.isResolveTagAttrs(in, tagName))
 			{
-				tagAttrs = context.availableTagAttrs();
-				tagEnd = writeUntilTagEnd(in, out, context, tagName, tagAttrs);
+				tagAttrs = handler.availableTagAttrs();
+				tagEnd = filterUntilTagEnd(in, handler, tagName, tagAttrs);
 				tagAttrs = Collections.unmodifiableMap(tagAttrs);
 			}
 			else
 			{
-				tagEnd = writeUntilTagEnd(in, out, context, tagName);
+				tagEnd = filterUntilTagEnd(in, handler, tagName);
 			}
 
-			beforeWriteTagEnd(in, out, context, tagName, tagEnd, tagAttrs);
+			handler.beforeWriteTagEnd(in, tagName, tagEnd, tagAttrs);
 
 			if (tagEnd != null)
 			{
-				out.write(tagEnd);
-				afterWriteTagEnd(in, out, context, tagName, tagEnd);
+				handler.write(tagEnd);
+				handler.afterWriteTagEnd(in, tagName, tagEnd);
 			}
 
 			return tagEnd;
@@ -376,52 +364,51 @@ public class HtmlFilter
 	 * 写到标签结束符时停止。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 * @param tagName
 	 * @return 未写入输出流的标签结束符：{@code ">"}、{@code "/>"}、{@code null}
 	 * @throws IOException
 	 */
-	protected String writeUntilTagEnd(Reader in, Writer out, FilterContext context, String tagName) throws IOException
+	protected String filterUntilTagEnd(Reader in, FilterHandler handler, String tagName) throws IOException
 	{
 		String tagEnd = null;
 
 		int c = -1;
 		while ((c = in.read()) > -1)
 		{
-			if (c == '>')
+			if (c == TAG_END_CHAR)
 			{
 				tagEnd = codePointToString(c);
 				break;
 			}
 			else if (c == '\'' || c == '"')
 			{
-				out.write(c);
-				writeAfterQuote(in, out, context, c, -1);
+				handler.write(c);
+				filterAfterQuote(in, handler, c, -1);
 			}
 			else if (c == '/')
 			{
 				int c0 = in.read();
 
-				if (c0 == '>')
+				if (c0 == TAG_END_CHAR)
 				{
-					tagEnd = "/>";
+					tagEnd = TAG_END_STR_SELF_CLOSE;
 					break;
 				}
 				else if (isWhitespace(c0))
 				{
-					out.write(c);
-					out.write(c0);
+					handler.write(c);
+					handler.write(c0);
 				}
 				else
 				{
-					out.write(c);
-					writeIfValid(out, c0);
+					handler.write(c);
+					writeIfValid(handler, c0);
 				}
 			}
 			else
 			{
-				out.write(c);
+				handler.write(c);
 			}
 		}
 
@@ -432,33 +419,32 @@ public class HtmlFilter
 	 * 写到标签结束符时停止。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 * @param tagName
 	 * @param tagAttrs
 	 * @return 未写入输出流的标签结束符：{@code ">"}、{@code "/>"}、{@code null}
 	 * @throws IOException
 	 */
-	protected String writeUntilTagEnd(Reader in, Writer out, FilterContext context, String tagName,
+	protected String filterUntilTagEnd(Reader in, FilterHandler handler, String tagName,
 			Map<String, String> tagAttrs) throws IOException
 	{
 		String tagEnd = null;
 
-		List<String> tagAttrTokens = context.availableTagAttrTokens();
+		List<String> tagAttrTokens = handler.availableTagAttrTokens();
 		StringBuilder token = createStringBuilder();
 
 		int c = -1;
 
 		while ((c = in.read()) > -1)
 		{
-			if (c == '>')
+			if (c == TAG_END_CHAR)
 			{
 				tagEnd = codePointToString(c);
 				break;
 			}
 			if (isWhitespace(c))
 			{
-				out.write(c);
+				handler.write(c);
 
 				if (isNotEmpty(token))
 				{
@@ -468,7 +454,7 @@ public class HtmlFilter
 			}
 			else if (c == '=')
 			{
-				out.write(c);
+				handler.write(c);
 
 				if (isNotEmpty(token))
 				{
@@ -483,15 +469,15 @@ public class HtmlFilter
 			{
 				int c0 = in.read();
 
-				if (c0 == '>')
+				if (c0 == TAG_END_CHAR)
 				{
-					tagEnd = "/>";
+					tagEnd = TAG_END_STR_SELF_CLOSE;
 					break;
 				}
 				else if (isWhitespace(c0))
 				{
-					out.write(c);
-					out.write(c0);
+					handler.write(c);
+					handler.write(c0);
 
 					appendChar(token, c);
 					tagAttrTokens.add(token.toString());
@@ -499,8 +485,8 @@ public class HtmlFilter
 				}
 				else
 				{
-					out.write(c);
-					writeIfValid(out, c0);
+					handler.write(c);
+					writeIfValid(handler, c0);
 
 					appendChar(token, c);
 					appendCharIfValid(token, c0);
@@ -508,14 +494,14 @@ public class HtmlFilter
 			}
 			else if (c == '\'' || c == '"')
 			{
-				out.write(c);
+				handler.write(c);
 				appendChar(token, c);
 
-				writeAfterQuote(in, out, context, c, -1, token);
+				filterAfterQuote(in, handler, c, -1, token);
 			}
 			else
 			{
-				out.write(c);
+				handler.write(c);
 				appendChar(token, c);
 			}
 		}
@@ -556,10 +542,9 @@ public class HtmlFilter
 	 * 写完"&lt;/script&gt;"后停止。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 */
-	protected void writeAfterScriptCloseTag(Reader in, Writer out, FilterContext context) throws IOException
+	protected void filterAfterScriptCloseTag(Reader in, FilterHandler handler) throws IOException
 	{
 		int c = -1;
 		while ((c = in.read()) > -1)
@@ -567,28 +552,28 @@ public class HtmlFilter
 			// 字符串
 			if (c == '\'' || c == '"' || c == '`')
 			{
-				out.write(c);
-				writeAfterQuote(in, out, context, c, '\\');
+				handler.write(c);
+				filterAfterQuote(in, handler, c, '\\');
 			}
 			else if (c == '/')
 			{
-				out.write(c);
+				handler.write(c);
 
 				int c0 = in.read();
-				writeIfValid(out, c0);
+				writeIfValid(handler, c0);
 
 				// 行注释
 				if (c0 == '/')
 				{
-					writeAfterLineComment(in, out, context);
+					filterAfterLineComment(in, handler);
 				}
 				// 块注释
 				else if (c0 == '*')
 				{
-					writeAfterBlockComment(in, out, context);
+					filterAfterBlockComment(in, handler);
 				}
 			}
-			else if (c == '<')
+			else if (c == TAG_START_CHAR)
 			{
 				StringBuilder tagNameSb = createStringBuilder();
 				String afterTagName = readTagName(in, tagNameSb);
@@ -596,18 +581,18 @@ public class HtmlFilter
 
 				if ("/script".equalsIgnoreCase(tagName))
 				{
-					writeAfterTag(in, out, context, tagName, afterTagName);
+					filterAfterTag(in, handler, tagName, afterTagName);
 					break;
 				}
 				else
 				{
-					out.write(c);
-					out.write(tagName);
-					writeIfNonNull(out, afterTagName);
+					handler.write(c);
+					handler.write(tagName);
+					writeIfNonNull(handler, afterTagName);
 				}
 			}
 			else
-				out.write(c);
+				handler.write(c);
 		}
 	}
 
@@ -615,17 +600,16 @@ public class HtmlFilter
 	 * 写完行注释后停止。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 * @throws IOException
 	 */
-	protected void writeAfterLineComment(Reader in, Writer out, FilterContext context) throws IOException
+	protected void filterAfterLineComment(Reader in, FilterHandler handler) throws IOException
 	{
 		int c = -1;
 
 		while ((c = in.read()) > -1)
 		{
-			out.write(c);
+			handler.write(c);
 
 			if (c == '\n' || c == '\r')
 				break;
@@ -636,22 +620,20 @@ public class HtmlFilter
 	 * 写完块注释后停止。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 * @throws IOException
 	 */
-	protected void writeAfterBlockComment(Reader in, Writer out, FilterContext context) throws IOException
+	protected void filterAfterBlockComment(Reader in, FilterHandler handler) throws IOException
 	{
 		int c = -1;
-
 		while ((c = in.read()) > -1)
 		{
-			out.write(c);
+			handler.write(c);
 
 			if (c == '*')
 			{
 				int c0 = in.read();
-				writeIfValid(out, c0);
+				writeIfValid(handler, c0);
 
 				if (c0 == '/')
 					break;
@@ -663,22 +645,21 @@ public class HtmlFilter
 	 * 写完引号后停止（比如：{@code "}、{@code '}）。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 * @param quoteChar
 	 * @throws IOException
 	 */
-	protected void writeAfterQuote(Reader in, Writer out, FilterContext context, int quoteChar, int escapeChar)
+	protected void filterAfterQuote(Reader in, FilterHandler handler, int quoteChar, int escapeChar)
 			throws IOException
 	{
 		int c = -1;
 
 		while ((c = in.read()) > -1)
 		{
-			out.write(c);
+			handler.write(c);
 
 			if(c == escapeChar)
-				writeIfValid(out, in.read());
+				writeIfValid(handler, in.read());
 			else if (c == quoteChar)
 			{
 				break;
@@ -690,109 +671,30 @@ public class HtmlFilter
 	 * 写完引号后停止（比如：{@code "}、{@code '}）。
 	 * 
 	 * @param in
-	 * @param out
-	 * @param context
+	 * @param handler
 	 * @param quoteChar
 	 * @throws IOException
 	 */
-	protected void writeAfterQuote(Reader in, Writer out, FilterContext context, int quoteChar, int escapeChar,
+	protected void filterAfterQuote(Reader in, FilterHandler handler, int quoteChar, int escapeChar,
 			StringBuilder sb) throws IOException
 	{
 		int c = -1;
 
 		while ((c = in.read()) > -1)
 		{
-			out.write(c);
+			handler.write(c);
 			appendChar(sb, c);
 
 			if (c == escapeChar)
 			{
 				int c0 = in.read();
-				writeIfValid(out, c0);
+				writeIfValid(handler, c0);
 				appendCharIfValid(sb, c0);
 			}
 			else if (c == quoteChar)
 			{
 				break;
 			}
-		}
-	}
-
-	/**
-	 * 标签起始符（{@code '<'}）写入输出流前置处理函数。
-	 * 
-	 * @param in
-	 * @param out
-	 * @param context
-	 * @param tagName
-	 * @throws IOException
-	 * @see {@linkplain TagListener#beforeTagStart(Reader, Writer, String)}
-	 */
-	protected void beforeWriteTagStart(Reader in, Writer out, FilterContext context, String tagName) throws IOException
-	{
-		TagListener tl = context.getTagListener();
-		if (tl != null)
-			tl.beforeTagStart(in, out, tagName);
-	}
-
-	/**
-	 * 是否解析指定标签的属性集。
-	 * 
-	 * @param in
-	 * @param out
-	 * @param context
-	 * @param tagName
-	 * @return
-	 * @see {@linkplain TagListener#isResolveTagAttrs(String)}
-	 */
-	protected boolean isResolveTagAttrs(Reader in, Writer out, FilterContext context, String tagName)
-	{
-		TagListener tl = context.getTagListener();
-		return (tl != null ? tl.isResolveTagAttrs(in, out, tagName) : false);
-	}
-
-	/**
-	 * 标签结束符写入输出流前置处理函数。
-	 * 
-	 * @param in
-	 * @param out
-	 * @param context
-	 * @param tagName
-	 * @param tagEnd
-	 * @param attrs
-	 * @throws IOException
-	 * @see {@linkplain TagListener#beforeTagEnd(Reader, Writer, String, String, Map)}
-	 */
-	protected void beforeWriteTagEnd(Reader in, Writer out, FilterContext context, String tagName, String tagEnd,
-			Map<String, String> attrs)
-			throws IOException
-	{
-		TagListener tl = context.getTagListener();
-		if (tl != null)
-			tl.beforeTagEnd(in, out, tagName, tagEnd, attrs);
-	}
-
-	/**
-	 * 标签结束符写入输出流后置处理函数。
-	 * 
-	 * @param in
-	 * @param out
-	 * @param context
-	 * @param tagName
-	 * @param tagEnd
-	 * @throws IOException
-	 * @see {@linkplain TagListener#afterTagEnd(Reader, Writer, String, String)}
-	 */
-	protected void afterWriteTagEnd(Reader in, Writer out, FilterContext context, String tagName, String tagEnd)
-			throws IOException
-	{
-		TagListener tl = context.getTagListener();
-		if (tl != null)
-		{
-			boolean aborted = tl.afterTagEnd(in, out, tagName, tagEnd);
-
-			if (aborted && !context.isAborted())
-				context.setAborted(aborted);
 		}
 	}
 
@@ -822,27 +724,28 @@ public class HtmlFilter
 	/**
 	 * 仅在 {@code c > -1} 时写入。
 	 * 
-	 * @param out
 	 * @param c
 	 * @throws IOException
 	 */
-	public void writeIfValid(Writer out, int c) throws IOException
+	public void writeIfValid(FilterHandler handler, int c) throws IOException
 	{
 		if (c > -1)
-			out.write(c);
+			handler.write(c);
 	}
 
 	/**
 	 * 仅在 {@code str != null} 时写入。
+	 * <p>
+	 * 它内部调用{@linkplain #write(String)}。
+	 * </p>
 	 * 
-	 * @param out
 	 * @param str
 	 * @throws IOException
 	 */
-	public void writeIfNonNull(Writer out, String str) throws IOException
+	public void writeIfNonNull(FilterHandler handler, String str) throws IOException
 	{
 		if (str != null)
-			out.write(str);
+			handler.write(str);
 	}
 
 	/**
@@ -877,17 +780,6 @@ public class HtmlFilter
 		}
 		else
 			return str;
-	}
-
-	/**
-	 * 给定标签名是否是关闭标签名，即：以{@code '/'}字符开头。
-	 * 
-	 * @param tagName
-	 * @return
-	 */
-	public boolean isCloseTagName(String tagName)
-	{
-		return (tagName != null && tagName.length() > 0 && tagName.charAt(0) == '/');
 	}
 
 	/**
@@ -955,81 +847,5 @@ public class HtmlFilter
 	public StringBuilder createStringBuilder()
 	{
 		return new StringBuilder();
-	}
-
-	protected static class FilterContext
-	{
-		private TagListener tagListener = null;
-
-		private boolean aborted = false;
-
-		private Map<String, String> prevTagAttrs = new HashMap<String, String>();
-
-		private List<String> prevTagAttrTokens = new ArrayList<String>();
-
-		public FilterContext()
-		{
-			super();
-		}
-
-		/**
-		 * 
-		 * @param tagListener 允许为{@code null}
-		 */
-		public FilterContext(TagListener tagListener)
-		{
-			super();
-			this.tagListener = tagListener;
-		}
-
-		/**
-		 * 
-		 * @return 可能为{@code null}
-		 */
-		public TagListener getTagListener()
-		{
-			return tagListener;
-		}
-
-		public void setTagListener(TagListener tagListener)
-		{
-			this.tagListener = tagListener;
-		}
-
-		public boolean isAborted()
-		{
-			return aborted;
-		}
-
-		public void setAborted(boolean aborted)
-		{
-			this.aborted = aborted;
-		}
-
-		/**
-		 * 获取一个可用与存储新标签属性的映射表。
-		 * 
-		 * @return
-		 */
-		public Map<String, String> availableTagAttrs()
-		{
-			if (!this.prevTagAttrs.isEmpty())
-				this.prevTagAttrs = new HashMap<String, String>();
-
-			return this.prevTagAttrs;
-		}
-
-		/**
-		 * 获取一个可用与存储新标签属性Token的列表。
-		 * 
-		 * @return
-		 */
-		public List<String> availableTagAttrTokens()
-		{
-			if (!this.prevTagAttrTokens.isEmpty())
-				this.prevTagAttrTokens = new ArrayList<String>();
-
-			return this.prevTagAttrTokens;
-		}
 	}
 }

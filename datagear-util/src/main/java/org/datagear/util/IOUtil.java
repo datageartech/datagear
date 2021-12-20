@@ -7,6 +7,8 @@
 
 package org.datagear.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -393,6 +395,17 @@ public class IOUtil
 	}
 
 	/**
+	 * 获取{@linkplain BufferedReader}。
+	 * 
+	 * @param reader
+	 * @return
+	 */
+	public static BufferedReader getBufferedReader(Reader reader)
+	{
+		return (reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader));
+	}
+
+	/**
 	 * 获取输出流。
 	 * 
 	 * @param file
@@ -434,6 +447,17 @@ public class IOUtil
 	}
 
 	/**
+	 * 获取{@linkplain BufferedWriter}。
+	 * 
+	 * @param writer
+	 * @return
+	 */
+	public static BufferedWriter getBufferedWriter(Writer writer)
+	{
+		return (writer instanceof BufferedWriter ? (BufferedWriter) writer : new BufferedWriter(writer));
+	}
+
+	/**
 	 * 获取文件输入流。
 	 * 
 	 * @param file
@@ -458,6 +482,17 @@ public class IOUtil
 	}
 
 	/**
+	 * 获取{@linkplain BufferedInputStream}。
+	 * 
+	 * @param in
+	 * @return
+	 */
+	public static BufferedInputStream getBufferedInputStream(InputStream in)
+	{
+		return (in instanceof BufferedInputStream ? (BufferedInputStream) in : new BufferedInputStream(in));
+	}
+
+	/**
 	 * 获取文件输出流。
 	 * 
 	 * @param file
@@ -479,6 +514,17 @@ public class IOUtil
 	public static OutputStream getOutputStream(String file) throws FileNotFoundException
 	{
 		return new FileOutputStream(new File(file));
+	}
+
+	/**
+	 * 获取{@linkplain BufferedOutputStream}。
+	 * 
+	 * @param out
+	 * @return
+	 */
+	public static BufferedOutputStream getBufferedOutputStream(OutputStream out)
+	{
+		return (out instanceof BufferedOutputStream ? (BufferedOutputStream) out : new BufferedOutputStream(out));
 	}
 
 	/**

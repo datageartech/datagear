@@ -341,11 +341,10 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 		/**
 		 * 返回要追加的标题内容。
 		 * 
-		 * @param generated
-		 *            {@code <title></title>}标签是否是自动生成的，因为原始HTML中没有定义
+		 * @param title
 		 * @return
 		 */
-		String suffix(boolean generated);
+		String suffix(String title);
 	}
 
 	/**
@@ -358,7 +357,7 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	{
 		private String suffix = "";
 
-		private String suffixForGenerated = "";
+		private String suffixForBlank = "";
 
 		public DefaultHtmlTitleHandler()
 		{
@@ -371,11 +370,11 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 			this.suffix = suffix;
 		}
 
-		public DefaultHtmlTitleHandler(String suffix, String suffixForGenerated)
+		public DefaultHtmlTitleHandler(String suffix, String suffixForBlank)
 		{
 			super();
 			this.suffix = suffix;
-			this.suffixForGenerated = suffixForGenerated;
+			this.suffixForBlank = suffixForBlank;
 		}
 
 		public String getSuffix()
@@ -388,23 +387,23 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 			this.suffix = suffix;
 		}
 
-		public String getSuffixForGenerated()
+		public String getSuffixForBlank()
 		{
-			return suffixForGenerated;
+			return suffixForBlank;
 		}
 
-		public void setSuffixForGenerated(String suffixForGenerated)
+		public void setSuffixForBlank(String suffixForBlank)
 		{
-			this.suffixForGenerated = suffixForGenerated;
+			this.suffixForBlank = suffixForBlank;
 		}
 
 		@Override
-		public String suffix(boolean generated)
+		public String suffix(String title)
 		{
 			String suffix = this.suffix;
 
-			if (generated && !StringUtil.isEmpty(this.suffixForGenerated))
-				suffix = this.suffixForGenerated;
+			if (StringUtil.isBlank(title) && !StringUtil.isEmpty(this.suffixForBlank))
+				suffix = this.suffixForBlank;
 
 			return suffix;
 		}

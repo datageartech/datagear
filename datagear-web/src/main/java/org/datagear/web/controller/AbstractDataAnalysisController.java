@@ -151,16 +151,15 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	protected RenderContext createHtmlRenderContext(HttpServletRequest request, HttpServletResponse response,
-			HtmlTplDashboardRenderAttr renderAttr, WebContext webContext,
+			Writer responseWriter, HtmlTplDashboardRenderAttr renderAttr, WebContext webContext,
 			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer) throws IOException
 	{
 		RenderContext renderContext = new DefaultRenderContext(resolveParamValues(request));
 
-		Writer out = response.getWriter();
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
 		User user = WebUtils.getUser(request, response).cloneNoPassword();
 
-		inflateRenderContext(renderContext, renderAttr, out, webContext, dashboardTheme, user);
+		inflateRenderContext(renderContext, renderAttr, responseWriter, webContext, dashboardTheme, user);
 
 		return renderContext;
 	}

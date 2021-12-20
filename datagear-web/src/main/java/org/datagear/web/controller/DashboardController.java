@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -969,7 +970,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			if (in != null)
 			{
-				OutputStream out = response.getOutputStream();
+				in = IOUtil.getBufferedInputStream(in);
+				OutputStream out = IOUtil.getBufferedOutputStream(response.getOutputStream());
 
 				try
 				{
@@ -1004,6 +1006,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
 
+		Writer out = null;
+
 		try
 		{
 			TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
@@ -1016,9 +1020,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			response.setCharacterEncoding(responseEncoding);
 			response.setContentType(CONTENT_TYPE_HTML);
+			out = IOUtil.getBufferedWriter(response.getWriter());
 
 			HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
-			RenderContext renderContext = createHtmlRenderContext(request, response, renderAttr,
+			RenderContext renderContext = createHtmlRenderContext(request, response, out, renderAttr,
 					createWebContext(request),
 					getHtmlTplDashboardWidgetEntityService().getHtmlTplDashboardWidgetRenderer());
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
@@ -1034,6 +1039,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 		finally
 		{
+			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
 	}

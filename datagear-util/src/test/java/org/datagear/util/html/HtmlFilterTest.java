@@ -19,7 +19,6 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.datagear.util.html.HtmlFilter.FilterContext;
 import org.junit.Test;
 
 /**
@@ -186,7 +185,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.filter(in, out, TEST_TAG_LISTENER);
+			htmlFilter.filter(in, newTestFilterHandler(out));
 
 			String expected = "[bts]<html lang='zh'[bte]>[ate]"
 					+ "\n"
@@ -277,11 +276,11 @@ public class HtmlFilterTest
 	{
 		{
 			String html = "<html><head><meta charset='UTF-8'></head><body></body></html>";
-			CharsetTagListener tl = new CharsetTagListener();
+			CharsetFilterHandler handler = new CharsetFilterHandler();
 			StringReader in = new StringReader(html);
-			htmlFilter.filter(in, tl);
+			htmlFilter.filter(in, handler);
 
-			assertEquals("UTF-8", tl.getCharset());
+			assertEquals("UTF-8", handler.getCharset());
 		}
 	}
 
@@ -294,11 +293,11 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler handler = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, handler);
 
 			assertEquals("<html><head><meta charset=\"UTF-8\">", out.toString());
-			assertEquals("UTF-8", tagListener.getCharset());
+			assertEquals("UTF-8", handler.getCharset());
 		}
 		{
 			String html = "<html><head><meta content=\"text/html; charset=UTF-8\"></head><body></body></html>";
@@ -306,11 +305,11 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler handler = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, handler);
 
 			assertEquals("<html><head><meta content=\"text/html; charset=UTF-8\">", out.toString());
-			assertEquals("UTF-8", tagListener.getCharset());
+			assertEquals("UTF-8", handler.getCharset());
 		}
 	}
 
@@ -400,7 +399,7 @@ public class HtmlFilterTest
 	}
 
 	@Test
-	public void writeAfterHtmlCommentTest() throws IOException
+	public void filterAfterHtmlCommentTest() throws IOException
 	{
 		{
 			String html = "!---->";
@@ -409,7 +408,7 @@ public class HtmlFilterTest
 			StringBuilder tagName = new StringBuilder();
 			String nameAfter = htmlFilter.readTagName(in, tagName);
 
-			htmlFilter.writeAfterHtmlComment(in, out, emptyFilterContext(), tagName.toString(), nameAfter);
+			htmlFilter.filterAfterHtmlComment(in, newFilterContext(out), tagName.toString(), nameAfter);
 			assertEquals("<!---->", out.toString());
 		}
 
@@ -420,7 +419,7 @@ public class HtmlFilterTest
 			StringBuilder tagName = new StringBuilder();
 			String nameAfter = htmlFilter.readTagName(in, tagName);
 
-			htmlFilter.writeAfterHtmlComment(in, out, emptyFilterContext(), tagName.toString(), nameAfter);
+			htmlFilter.filterAfterHtmlComment(in, newFilterContext(out), tagName.toString(), nameAfter);
 			assertEquals("<!-- comment -->", out.toString());
 		}
 
@@ -431,7 +430,7 @@ public class HtmlFilterTest
 			StringBuilder tagName = new StringBuilder();
 			String nameAfter = htmlFilter.readTagName(in, tagName);
 
-			htmlFilter.writeAfterHtmlComment(in, out, emptyFilterContext(), tagName.toString(), nameAfter);
+			htmlFilter.filterAfterHtmlComment(in, newFilterContext(out), tagName.toString(), nameAfter);
 			assertEquals("<!-- <div></div> -->", out.toString());
 		}
 
@@ -442,7 +441,7 @@ public class HtmlFilterTest
 			StringBuilder tagName = new StringBuilder();
 			String nameAfter = htmlFilter.readTagName(in, tagName);
 
-			htmlFilter.writeAfterHtmlComment(in, out, emptyFilterContext(), tagName.toString(), nameAfter);
+			htmlFilter.filterAfterHtmlComment(in, newFilterContext(out), tagName.toString(), nameAfter);
 			assertEquals("<!---->", out.toString());
 		}
 
@@ -453,13 +452,13 @@ public class HtmlFilterTest
 			StringBuilder tagName = new StringBuilder();
 			String nameAfter = htmlFilter.readTagName(in, tagName);
 
-			htmlFilter.writeAfterHtmlComment(in, out, emptyFilterContext(), tagName.toString(), nameAfter);
+			htmlFilter.filterAfterHtmlComment(in, newFilterContext(out), tagName.toString(), nameAfter);
 			assertEquals("<!----<after>", out.toString());
 		}
 	}
 
 	@Test
-	public void writeAfterTagTest() throws IOException
+	public void filterAfterTagTest() throws IOException
 	{
 		{
 			{
@@ -469,7 +468,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, emptyFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.filterAfterTag(in, newFilterContext(out), tagName.toString(), nameAfter);
 				assertEquals("<div", out.toString());
 			}
 
@@ -480,7 +479,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, emptyFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.filterAfterTag(in, newFilterContext(out), tagName.toString(), nameAfter);
 				assertEquals("<div>", out.toString());
 			}
 
@@ -491,7 +490,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, emptyFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.filterAfterTag(in, newFilterContext(out), tagName.toString(), nameAfter);
 				assertEquals("<div/>", out.toString());
 			}
 
@@ -502,7 +501,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, emptyFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.filterAfterTag(in, newFilterContext(out), tagName.toString(), nameAfter);
 				assertEquals("<div p0=v0 >", out.toString());
 			}
 		}
@@ -515,7 +514,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, tagListenerFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.filterAfterTag(in, newTestFilterHandler(out), tagName.toString(), nameAfter);
 				assertEquals("[bts]<div[bte]", out.toString());
 			}
 
@@ -526,7 +525,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, tagListenerFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.filterAfterTag(in, newTestFilterHandler(out), tagName.toString(), nameAfter);
 				assertEquals("[bts]<div[bte]>[ate]", out.toString());
 			}
 
@@ -537,7 +536,7 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, tagListenerFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.filterAfterTag(in, newTestFilterHandler(out), tagName.toString(), nameAfter);
 				assertEquals("[bts]<div[bte]/>[ate]", out.toString());
 			}
 
@@ -548,20 +547,20 @@ public class HtmlFilterTest
 				StringBuilder tagName = new StringBuilder();
 				String nameAfter = htmlFilter.readTagName(in, tagName);
 
-				htmlFilter.writeAfterTag(in, out, tagListenerFilterContext(), tagName.toString(), nameAfter);
+				htmlFilter.filterAfterTag(in, newTestFilterHandler(out), tagName.toString(), nameAfter);
 				assertEquals("[bts]<div p0=v0 [bte]>[ate]", out.toString());
 			}
 		}
 	}
 
 	@Test
-	public void writeUntilTagEndTest() throws IOException
+	public void filterUntilTagEndTest() throws IOException
 	{
 		{
 			String html = ">";
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "");
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "");
 
 			assertEquals("", out.toString());
 			assertEquals(">", tagEnd);
@@ -570,7 +569,7 @@ public class HtmlFilterTest
 			String html = "p0='v0' p1='v1>' p2=\"p2>\">";
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "");
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "");
 
 			assertEquals("p0='v0' p1='v1>' p2=\"p2>\"", out.toString());
 			assertEquals(">", tagEnd);
@@ -579,7 +578,7 @@ public class HtmlFilterTest
 			String html = "p0='>";
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "");
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "");
 
 			assertEquals("p0='>", out.toString());
 			assertNull(tagEnd);
@@ -588,7 +587,7 @@ public class HtmlFilterTest
 			String html = "p0=\">";
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "");
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "");
 
 			assertEquals("p0=\">", out.toString());
 			assertNull(tagEnd);
@@ -597,7 +596,7 @@ public class HtmlFilterTest
 			String html = "/>";
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "");
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "");
 
 			assertEquals("", out.toString());
 			assertEquals("/>", tagEnd);
@@ -606,7 +605,7 @@ public class HtmlFilterTest
 			String html = " />";
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "");
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "");
 
 			assertEquals(" ", out.toString());
 			assertEquals("/>", tagEnd);
@@ -614,14 +613,14 @@ public class HtmlFilterTest
 	}
 
 	@Test
-	public void writeUntilTagEndTest_tagAttrs() throws IOException
+	public void filterUntilTagEndTest_tagAttrs() throws IOException
 	{
 		{
 			String html = ">";
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 			Map<String, String> tagAttrs = new HashMap<String, String>();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "", tagAttrs);
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "", tagAttrs);
 
 			assertEquals("", out.toString());
 			assertEquals(">", tagEnd);
@@ -632,7 +631,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 			Map<String, String> tagAttrs = new HashMap<String, String>();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "", tagAttrs);
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "", tagAttrs);
 
 			assertEquals("p0=v0 p1='v1>' p2=\"v2>\" p3 p4 = v4 p5 = 'v5' ", out.toString());
 			assertEquals(">", tagEnd);
@@ -649,7 +648,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 			Map<String, String> tagAttrs = new HashMap<String, String>();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "", tagAttrs);
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "", tagAttrs);
 
 			assertEquals("p0='>", out.toString());
 			assertNull(tagEnd);
@@ -661,7 +660,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 			Map<String, String> tagAttrs = new HashMap<String, String>();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "", tagAttrs);
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "", tagAttrs);
 
 			assertEquals("p0=\">", out.toString());
 			assertNull(tagEnd);
@@ -673,7 +672,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 			Map<String, String> tagAttrs = new HashMap<String, String>();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "", tagAttrs);
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "", tagAttrs);
 
 			assertEquals("", out.toString());
 			assertEquals("/>", tagEnd);
@@ -684,7 +683,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 			Map<String, String> tagAttrs = new HashMap<String, String>();
-			String tagEnd = htmlFilter.writeUntilTagEnd(in, out, emptyFilterContext(), "", tagAttrs);
+			String tagEnd = htmlFilter.filterUntilTagEnd(in, newFilterContext(out), "", tagAttrs);
 
 			assertEquals(" ", out.toString());
 			assertEquals("/>", tagEnd);
@@ -693,14 +692,14 @@ public class HtmlFilterTest
 	}
 
 	@Test
-	public void writeAfterScriptCloseTagTest() throws IOException
+	public void filterAfterScriptCloseTagTest() throws IOException
 	{
 		{
 			String html = "</script>";
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, emptyFilterContext());
+			htmlFilter.filterAfterScriptCloseTag(in, newFilterContext(out));
 			assertEquals("</script>", out.toString());
 		}
 		{
@@ -708,7 +707,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, emptyFilterContext());
+			htmlFilter.filterAfterScriptCloseTag(in, newFilterContext(out));
 			assertEquals("</script>", out.toString());
 		}
 		{
@@ -716,7 +715,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, emptyFilterContext());
+			htmlFilter.filterAfterScriptCloseTag(in, newFilterContext(out));
 			assertEquals("'</script>' </script>", out.toString());
 		}
 		{
@@ -724,7 +723,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, emptyFilterContext());
+			htmlFilter.filterAfterScriptCloseTag(in, newFilterContext(out));
 			assertEquals("\"</script>\" </script>", out.toString());
 		}
 		{
@@ -732,7 +731,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, emptyFilterContext());
+			htmlFilter.filterAfterScriptCloseTag(in, newFilterContext(out));
 			assertEquals("`</script>` </script>", out.toString());
 		}
 		{
@@ -740,7 +739,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, emptyFilterContext());
+			htmlFilter.filterAfterScriptCloseTag(in, newFilterContext(out));
 			assertEquals("//comment </script> \n </script>", out.toString());
 		}
 		{
@@ -748,7 +747,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, emptyFilterContext());
+			htmlFilter.filterAfterScriptCloseTag(in, newFilterContext(out));
 			assertEquals("/*comment </script> \n </script> \n comment*/ </script>", out.toString());
 		}
 		{
@@ -756,7 +755,7 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, emptyFilterContext());
+			htmlFilter.filterAfterScriptCloseTag(in, newFilterContext(out));
 			assertEquals("<div> <span></span> </script>", out.toString());
 		}
 		{
@@ -764,41 +763,45 @@ public class HtmlFilterTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			htmlFilter.writeAfterScriptCloseTag(in, out, tagListenerFilterContext());
+			htmlFilter.filterAfterScriptCloseTag(in, newTestFilterHandler(out));
 			assertEquals("<div> <span></span> [bts]</script[bte]>[ate]", out.toString());
 		}
 	}
 
-	protected FilterContext emptyFilterContext()
+	protected FilterHandler newFilterContext(Writer out)
 	{
-		return new FilterContext();
+		return new DefaultFilterHandler(out);
 	}
 
-	protected FilterContext tagListenerFilterContext()
+	protected FilterHandler newTestFilterHandler(Writer out)
 	{
-		return new FilterContext(TEST_TAG_LISTENER);
+		return new TestFilterHandler(out);
 	}
-
-	protected static TagListener TEST_TAG_LISTENER = new DefaultTagListener()
+	
+	protected static class TestFilterHandler extends DefaultFilterHandler
 	{
-		@Override
-		public void beforeTagStart(Reader in, Writer out, String tagName) throws IOException
+		public TestFilterHandler(Writer out)
 		{
-			out.write("[bts]");
+			super(out);
 		}
 
 		@Override
-		public void beforeTagEnd(Reader in, Writer out, String tagName, String tagEnd,
+		public void beforeWriteTagStart(Reader in, String tagName) throws IOException
+		{
+			write("[bts]");
+		}
+
+		@Override
+		public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd,
 				Map<String, String> attrs) throws IOException
 		{
-			out.write("[bte]");
+			write("[bte]");
 		}
 
 		@Override
-		public boolean afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
+		public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
 		{
-			out.write("[ate]");
-			return false;
-		}
+			write("[ate]");
+		}	
 	};
 }

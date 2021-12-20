@@ -299,6 +299,27 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 		// 处理标题
 		{
+			String template = "<html><head><title>abc</title></head><body><title>sdf</title></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+			StringWriter out = new StringWriter();
+			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+
+			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix");
+			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+
+			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertTrue(html.contains("<title>abc-suffix</title></head>"));
+			Assert.assertTrue(html.contains("<title>sdf</title>"));
+		}
+
+		// 处理标题：没有<title></title>标签
+		{
 			String template = "<html><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
@@ -317,15 +338,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains("<title>-suffix</title></head>"));
 		}
 
+		// 处理标题：没有<title></title>标签
 		{
-			String template = "<html><head><title>abc</title></head><body><title>sdf</title></body></html>";
+			String template = "<html><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
 			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
 
-			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix");
+			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
@@ -333,8 +355,47 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<title>abc-suffix</title></head>"));
-			Assert.assertTrue(html.contains("<title>sdf</title>"));
+			Assert.assertTrue(html.contains("<title>generated</title></head>"));
+		}
+
+		// 处理标题：<title/>
+		{
+			String template = "<html><head><title/></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+			StringWriter out = new StringWriter();
+			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+
+			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
+			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+
+			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertTrue(html.contains("<title/><title>generated</title></head>"));
+		}
+
+		// 处理标题：没有</title>
+		{
+			String template = "<html><head><title></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+			StringWriter out = new StringWriter();
+			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+
+			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
+			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+
+			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertTrue(html.contains("<title><title>generated</title></head>"));
 		}
 	}
 

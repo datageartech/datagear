@@ -13,8 +13,7 @@ import java.io.Writer;
 /**
  * 空{@linkplain Writer}。
  * <p>
- * 它不执行任何实际的写操作，
- * 当{@linkplain HtmlFilter#filter(java.io.Reader, Writer)}、{@linkplain HtmlFilter#filter(java.io.Reader, Writer, TagListener)}不需要写操作时，可以使用此类替代。
+ * 它不执行任何实际的写操作，可用于构建无输出的{@linkplain FilterHandler}。
  * </p>
  * 
  * @author datagear@163.com

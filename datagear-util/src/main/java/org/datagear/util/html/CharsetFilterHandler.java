@@ -13,7 +13,7 @@ import java.io.Writer;
 import java.util.Map;
 
 /**
- * 解析HTML字符集的{@linkplain TagListener}。
+ * 解析HTML字符集的{@linkplain FilterHandler}。
  * <p>
  * 此类从HTML的<code>&lt;head&gt;...&lt;/head&gt;</code>标签中的 <br>
  * <code>&lt;meta charset=字符集&gt;</code><br>
@@ -22,16 +22,13 @@ import java.util.Map;
  * 中解析字符集。
  * </p>
  * <p>
- * 在调用完{@linkplain HtmlFilter#filter(Reader, Writer, TagListener)}后，可通过{@linkplain #getCharset()}获取解析的字符集。
- * </p>
- * <p>
  * {@linkplain #setAbortIfResolved(boolean)}可设置解析到字符集后中止处理。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class CharsetTagListener extends DefaultTagListener
+public class CharsetFilterHandler extends DefaultFilterHandler
 {
 	/** 是否解析了字符集后中止 */
 	private boolean abortIfResolved = false;
@@ -39,14 +36,20 @@ public class CharsetTagListener extends DefaultTagListener
 	/** 解析的字符集 */
 	private String charset = null;
 
-	public CharsetTagListener()
+	public CharsetFilterHandler()
 	{
-		super();
+		this(NopWriter.NOP_WRITER);
+		this.abortIfResolved = true;
 	}
 
-	public CharsetTagListener(boolean abortIfResolved)
+	public CharsetFilterHandler(Writer out)
 	{
-		super();
+		super(out);
+	}
+
+	public CharsetFilterHandler(Writer out, boolean abortIfResolved)
+	{
+		super(out);
 		this.abortIfResolved = abortIfResolved;
 	}
 
@@ -71,14 +74,14 @@ public class CharsetTagListener extends DefaultTagListener
 	}
 
 	@Override
-	public boolean isResolveTagAttrs(Reader in, Writer out, String tagName)
+	public boolean isResolveTagAttrs(Reader in, String tagName)
 	{
 		return equalsIgnoreCase(tagName, "meta");
 	}
 
 	@Override
-	public void beforeTagEnd(Reader in, Writer out, String tagName, String tagEnd,
-			Map<String, String> attrs) throws IOException
+	public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
+			throws IOException
 	{
 		if (equalsIgnoreCase(tagName, "meta"))
 		{
@@ -116,11 +119,9 @@ public class CharsetTagListener extends DefaultTagListener
 	}
 
 	@Override
-	public boolean afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
+	public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
 	{
-		if (abortIfResolved && (this.charset != null || equalsIgnoreCase(tagName, "/head")))
-			return true;
-		else
-			return false;
+		if (this.abortIfResolved && (this.charset != null || equalsIgnoreCase(tagName, "/head")))
+			setAborted(true);
 	}
 }

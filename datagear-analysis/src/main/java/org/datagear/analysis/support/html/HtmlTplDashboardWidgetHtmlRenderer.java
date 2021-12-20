@@ -24,7 +24,7 @@ import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOpt
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.util.html.DefaultTagListener;
+import org.datagear.util.html.DefaultFilterHandler;
 
 /**
  * 使用原生HTML网页作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
@@ -258,17 +258,19 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	protected DashboardInfo renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			HtmlTplDashboard dashboard, Reader in) throws Exception
 	{
-		Writer out = renderAttr.getHtmlWriterNonNull(renderContext);
 		DashboardInfo dashboardInfo = new DashboardInfo();
 
-		DashboardTagListener tl = new DashboardTagListener(renderContext, renderAttr, dashboard, dashboardInfo);
-		getHtmlFilter().filter(in, out, tl);
+		DashboardFilterHandler filterHandler = new DashboardFilterHandler(
+				renderAttr.getHtmlWriterNonNull(renderContext), renderContext, renderAttr, dashboard,
+				dashboardInfo);
+		getHtmlFilter().filter(in, filterHandler);
 
 		return dashboardInfo;
 	}
 
-	protected void writeHtmlTplDashboardScript(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-			Writer out, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo) throws IOException
+	protected void writeHtmlTplDashboardScript(Writer out, RenderContext renderContext,
+			HtmlTplDashboardRenderAttr renderAttr, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
+			throws IOException
 	{
 		String globalDashboardVar = dashboardInfo.getDashboardVar();
 		if (StringUtil.isEmpty(globalDashboardVar))
@@ -363,7 +365,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		return list;
 	}
 
-	protected class DashboardTagListener extends DefaultTagListener
+	protected class DashboardFilterHandler extends DefaultFilterHandler
 	{
 		private final RenderContext renderContext;
 		private final HtmlTplDashboardRenderAttr renderAttr;
@@ -375,11 +377,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		private boolean dashboardImportWritten = false;
 		private boolean titleTagHandled = false;
 		private boolean dashboardScriptWritten = false;
+		private boolean inTitleTag = false;
+		private StringBuilder titleTagContent = new StringBuilder();
 
-		public DashboardTagListener(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+		public DashboardFilterHandler(Writer out, RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 				HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
 		{
-			super();
+			super(out);
 			this.renderContext = renderContext;
 			this.renderAttr = renderAttr;
 			this.dashboard = dashboard;
@@ -407,20 +411,50 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 
 		@Override
-		public void beforeTagStart(Reader in, Writer out, String tagName) throws IOException
+		public void write(char c) throws IOException
 		{
+			super.write(c);
+
+			if (this.inTitleTag)
+				this.titleTagContent.append(c);
+		}
+
+		@Override
+		public void write(int c) throws IOException
+		{
+			super.write(c);
+
+			if (this.inTitleTag)
+				this.titleTagContent.appendCodePoint(c);
+		}
+
+		@Override
+		public void write(String str) throws IOException
+		{
+			super.write(str);
+
+			if (this.inTitleTag)
+				this.titleTagContent.append(str);
+		}
+
+		@Override
+		public void beforeWriteTagStart(Reader in, String tagName) throws IOException
+		{
+			if (this.inTitleTag && (equalsIgnoreCase(tagName, "/title") || equalsIgnoreCase(tagName, "/head")
+					|| equalsIgnoreCase(tagName, "body")))
+				this.inTitleTag = false;
+
 			// </title>前插入标题后缀
 			if (!this.titleTagHandled && equalsIgnoreCase(tagName, "/title"))
 			{
 				HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
 				if (htmlTitleHandler != null)
 				{
-					String titleContent = htmlTitleHandler.suffix(false);
-					out.write(titleContent);
+					String titleContent = htmlTitleHandler.suffix(this.titleTagContent.toString());
+					write(titleContent);
 				}
 
 				this.titleTagHandled = true;
-
 				return;
 			}
 
@@ -430,13 +464,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
 				if (htmlTitleHandler != null)
 				{
-					out.write("<title>");
-					out.write(htmlTitleHandler.suffix(true));
-					out.write("</title>");
+					write("<title>");
+					write(htmlTitleHandler.suffix(""));
+					write("</title>");
 				}
 
 				this.titleTagHandled = true;
-
 				return;
 			}
 
@@ -445,32 +478,31 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			{
 				if (!this.dashboardScriptWritten)
 				{
-					writeHtmlTplDashboardScript(this.renderContext, this.renderAttr, out, this.dashboard,
+					writeHtmlTplDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
 							this.dashboardInfo);
 					this.dashboardScriptWritten = true;
 				}
 
-				inBodyTag = false;
-
+				this.inBodyTag = false;
 				return;
 			}
 		}
 
 		@Override
-		public boolean isResolveTagAttrs(Reader in, Writer out, String tagName)
+		public boolean isResolveTagAttrs(Reader in, String tagName)
 		{
 			return (this.inBodyTag && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
 					|| (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"));
 		}
 
 		@Override
-		public void beforeTagEnd(Reader in, Writer out, String tagName, String tagEnd, Map<String, String> attrs)
+		public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
 				throws IOException
 		{
 			// 解析<body></body>内的图表元素
 			if (this.inBodyTag && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
 			{
-				resolveChartTagAttr(out, attrs);
+				resolveChartTagAttr(attrs);
 				return;
 			}
 
@@ -478,34 +510,38 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			if (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"))
 			{
 				resolveHtmlTagAttr(attrs);
-				this.htmlTagResolved = true;
 
+				this.htmlTagResolved = true;
 				return;
 			}
 		}
 
 		@Override
-		public boolean afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
+		public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
 		{
 			// <head>后插入看板导入库
 			if (!this.dashboardImportWritten && equalsIgnoreCase(tagName, "head"))
 			{
-				writeDashboardImport(this.renderContext, this.renderAttr, out, this.dashboard,
+				writeDashboardImport(getOut(), this.renderContext, this.renderAttr, this.dashboard,
 						this.dashboardInfo.getImportExclude());
-				this.dashboardImportWritten = true;
 
-				return false;
+				this.dashboardImportWritten = true;
+				return;
 			}
 			
 			// 判断是否在<body></body>标签之间
-			if (!inBodyTag && equalsIgnoreCase(tagName, "body"))
+			if (!this.inBodyTag && equalsIgnoreCase(tagName, "body"))
 			{
-				inBodyTag = !isSelfCloseTagEnd(tagEnd);
-
-				return false;
+				this.inBodyTag = !isSelfCloseTagEnd(tagEnd);
+				return;
 			}
 
-			return false;
+			// 判断是否在<body></body>标签之间
+			if (!this.inTitleTag && equalsIgnoreCase(tagName, "title"))
+			{
+				this.inTitleTag = !isSelfCloseTagEnd(tagEnd);
+				return;
+			}
 		}
 
 		protected void resolveHtmlTagAttr(Map<String, String> attrs)
@@ -529,7 +565,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			}
 		}
 
-		protected void resolveChartTagAttr(Writer out, Map<String, String> attrs) throws IOException
+		protected void resolveChartTagAttr(Map<String, String> attrs) throws IOException
 		{
 			String chartWidget = null;
 			String elementId = null;
@@ -562,7 +598,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				elementId = renderAttr.genChartElementId(Integer.toString(dashboardInfo.getChartInfos().size()));
 				chartInfo.setElementId(elementId);
 
-				out.write(" id=\"" + elementId + "\" ");
+				write(" id=\"" + elementId + "\" ");
 			}
 
 			dashboardInfo.addChartInfo(chartInfo);

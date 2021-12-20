@@ -17,12 +17,12 @@ import java.io.StringWriter;
 import org.junit.Test;
 
 /**
- * {@linkplain CharsetTagListener}单元测试用例。
+ * {@linkplain CharsetFilterHandler}单元测试用例。
  * 
  * @author datagear@163.com
  *
  */
-public class CharsetTagListenerTest
+public class CharsetFilterHandlerTest
 {
 	@Test
 	public void test() throws IOException
@@ -35,8 +35,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -46,8 +46,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -57,8 +57,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -68,8 +68,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -79,8 +79,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -90,8 +90,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -101,8 +101,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -112,8 +112,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -123,8 +123,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -134,8 +134,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertEquals("UTF-8", tagListener.getCharset());
 		}
@@ -145,8 +145,8 @@ public class CharsetTagListenerTest
 			StringReader in = new StringReader(html);
 			StringWriter out = new StringWriter();
 
-			CharsetTagListener tagListener = new CharsetTagListener(true);
-			htmlFilter.filter(in, out, tagListener);
+			CharsetFilterHandler tagListener = new CharsetFilterHandler(out, true);
+			htmlFilter.filter(in, tagListener);
 
 			assertNull(tagListener.getCharset());
 		}

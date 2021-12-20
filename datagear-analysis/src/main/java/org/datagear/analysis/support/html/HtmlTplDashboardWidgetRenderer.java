@@ -33,7 +33,7 @@ import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.util.html.CharsetTagListener;
+import org.datagear.util.html.CharsetFilterHandler;
 import org.datagear.util.html.HtmlFilter;
 
 /**
@@ -434,7 +434,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	 */
 	public String resolveCharset(Reader in) throws IOException
 	{
-		CharsetTagListener tl = new CharsetTagListener(true);
+		CharsetFilterHandler tl = new CharsetFilterHandler();
 		this.htmlFilter.filter(in, tl);
 
 		return tl.getCharset();
@@ -551,7 +551,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		if (reader == null)
 			reader = IOUtil.getReader("");
 
-		return reader;
+		return IOUtil.getBufferedReader(reader);
 	}
 
 	protected Writer getResourceWriter(HtmlTplDashboardWidget dashboardWidget, String template) throws IOException
@@ -811,14 +811,14 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	/**
 	 * 写看板导入项。
 	 * 
+	 * @param out
 	 * @param renderContext
 	 * @param renderAttr
-	 * @param out
 	 * @param dashboard
 	 * @param importExclude
 	 * @throws IOException
 	 */
-	protected void writeDashboardImport(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
+	protected void writeDashboardImport(Writer out, RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			HtmlTplDashboard dashboard, String importExclude) throws IOException
 	{
 		WebContext webContext = renderAttr.getWebContext(renderContext);
