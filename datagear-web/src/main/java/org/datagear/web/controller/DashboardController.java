@@ -36,10 +36,10 @@ import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.ExtContentHtmlTitleHandler;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
@@ -1021,9 +1021,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			RenderContext renderContext = createHtmlRenderContext(request, response, renderAttr,
 					createWebContext(request),
 					getHtmlTplDashboardWidgetEntityService().getHtmlTplDashboardWidgetRenderer());
-			ExtContentHtmlTitleHandler htmlTitleHandler = new ExtContentHtmlTitleHandler(
-					getMessage(request, "dashboard.show.htmlTitleSuffix", getMessage(request, "app.name")));
-			htmlTitleHandler.setContentForEmpty(
+			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
+					getMessage(request, "dashboard.show.htmlTitleSuffix", getMessage(request, "app.name")),
 					getMessage(request, "dashboard.show.htmlTitleSuffixForEmpty", dashboardWidget.getName(),
 							getMessage(request, "app.name")));
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);

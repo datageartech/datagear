@@ -21,6 +21,7 @@ import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.DefaultTagListener;
@@ -258,176 +259,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			HtmlTplDashboard dashboard, Reader in) throws Exception
 	{
 		Writer out = renderAttr.getHtmlWriterNonNull(renderContext);
-
-		HtmlTitleHandler htmlTitleHandler = renderAttr.getHtmlTitleHandler(renderContext);
-
-		boolean resolvedDashboardInfo = false;
-		boolean wroteDashboardImport = false;
-		boolean wroteDashboardScript = false;
-		boolean inHeadTag = false;
-		boolean handledTitle = false;
-		boolean inBodyTag = false;
-
 		DashboardInfo dashboardInfo = new DashboardInfo();
 
-		StringBuilder nameCache = createStringBuilder();
-		StringBuilder valueCache = createStringBuilder();
-		StringBuilder tagContentCache = createStringBuilder();
-
-		int c = -1;
-		while ((c = in.read()) > -1)
-		{
-			if (c == '<')
-			{
-				clear(nameCache);
-
-				int last = readHtmlTagName(in, nameCache);
-				String tagName = nameCache.toString();
-
-				// <html
-				if (this.dashboardSetTagName.equalsIgnoreCase(tagName))
-				{
-					appendResolvedTagInfo(out, c, tagName, last);
-
-					if (last == '>' || resolvedDashboardInfo)
-						;
-					else
-					{
-						clear(nameCache);
-						clear(valueCache);
-						clear(tagContentCache);
-
-						last = resolveDashboardInfo(in, last, tagContentCache, nameCache, valueCache, dashboardInfo);
-
-						resolvedDashboardInfo = true;
-
-						append(out, tagContentCache);
-					}
-				}
-				// <head
-				else if ("head".equalsIgnoreCase(tagName))
-				{
-					inHeadTag = true;
-
-					appendResolvedTagInfo(out, c, tagName, last);
-					if (last != '>')
-						readToTagEnd(in, out);
-
-					if (!wroteDashboardImport)
-						writeDashboardImport(renderContext, renderAttr, out, dashboard, dashboardInfo);
-				}
-				// <title
-				else if (inHeadTag && "title".equalsIgnoreCase(tagName))
-				{
-					appendResolvedTagInfo(out, c, tagName, last);
-
-					if (last != '>')
-						readToTagEnd(in, out);
-
-					clear(nameCache);
-					last = readToTagStart(in, nameCache);
-
-					if (htmlTitleHandler != null)
-					{
-						String titleContent = htmlTitleHandler.handle(nameCache.toString());
-
-						out.write(titleContent);
-						appendIfValid(out, last);
-					}
-					else
-					{
-						append(out, nameCache);
-						appendIfValid(out, last);
-					}
-
-					handledTitle = true;
-				}
-				// </head
-				else if ("/head".equalsIgnoreCase(tagName))
-				{
-					if (!handledTitle)
-					{
-						if (htmlTitleHandler != null)
-						{
-							String titleContent = htmlTitleHandler.handle("");
-
-							out.write("<title>");
-							out.write(titleContent);
-							out.write("</title>");
-						}
-
-						handledTitle = true;
-					}
-
-					appendResolvedTagInfo(out, c, tagName, last);
-					inHeadTag = false;
-				}
-				// <body
-				else if ("body".equalsIgnoreCase(tagName))
-				{
-					inBodyTag = true;
-
-					appendResolvedTagInfo(out, c, tagName, last);
-				}
-				// <div
-				else if (inBodyTag && this.chartTagName.equalsIgnoreCase(tagName))
-				{
-					appendResolvedTagInfo(out, c, tagName, last);
-
-					if (last == '>')
-						;
-					else
-					{
-						clear(nameCache);
-						clear(valueCache);
-						clear(tagContentCache);
-
-						last = resolveDashboardChartInfo(renderContext, renderAttr, dashboard, in, last,
-								tagContentCache, nameCache, valueCache, dashboardInfo);
-
-						append(out, tagContentCache);
-					}
-				}
-				// </body
-				else if ("/body".equalsIgnoreCase(tagName))
-				{
-					inBodyTag = false;
-
-					if (!wroteDashboardScript)
-					{
-						writeHtmlTplDashboardScript(renderContext, renderAttr, out, dashboard, dashboardInfo);
-						wroteDashboardScript = true;
-					}
-
-					appendResolvedTagInfo(out, c, tagName, last);
-				}
-				// <!--
-				else if (tagName.startsWith("!--"))
-				{
-					appendResolvedTagInfo(out, c, tagName, last);
-
-					// 空注释
-					if (isReadHtmlTagEmptyComment(tagName, last))
-						;
-					else
-						skipHtmlComment(in, out);
-				}
-				else
-				{
-					appendResolvedTagInfo(out, c, tagName, last);
-				}
-			}
-			else
-				out.write(c);
-		}
+		DashboardTagListener tl = new DashboardTagListener(renderContext, renderAttr, dashboard, dashboardInfo);
+		getHtmlFilter().filter(in, out, tl);
 
 		return dashboardInfo;
-	}
-
-	protected void writeDashboardImport(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
-			HtmlTplDashboard dashboard, DashboardInfo dashboardInfo) throws IOException
-	{
-		writeDashboardImport(renderContext, renderAttr, out, dashboard, dashboardInfo.getImportExclude());
 	}
 
 	protected void writeHtmlTplDashboardScript(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
@@ -526,248 +363,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		return list;
 	}
 
-	/**
-	 * 解析{@linkplain DashboardInfo}。
-	 * 
-	 * @param in
-	 * @param last
-	 * @param cache
-	 * @param attrName
-	 * @param attrValue
-	 * @param dashboardInfo
-	 * @return
-	 * @throws IOException
-	 */
-	protected int resolveDashboardInfo(Reader in, int last, StringBuilder cache, StringBuilder attrName,
-			StringBuilder attrValue, DashboardInfo dashboardInfo) throws IOException
-	{
-		int c = -1;
-		for (;;)
-		{
-			c = resolveHtmlTagAttr(in, last, cache, attrName, attrValue);
-
-			String attrNameStr = toString(attrName);
-			String attrValueStr = toString(attrValue);
-
-			if (this.attrNameDashboardVar.equalsIgnoreCase(attrNameStr))
-			{
-				dashboardInfo.setDashboardVar(attrValueStr);
-			}
-			else if (this.attrNameDashboardFactory.equalsIgnoreCase(attrNameStr))
-			{
-				dashboardInfo.setDashboardFactoryVar(attrValueStr);
-			}
-			else if (this.attrNameDashboardImportExclude.equalsIgnoreCase(attrNameStr))
-			{
-				dashboardInfo.setImportExclude(attrValueStr);
-			}
-
-			clear(attrName);
-			clear(attrValue);
-
-			if (isHtmlTagEnd(c))
-			{
-				break;
-			}
-		}
-
-		return c;
-	}
-
-	protected int resolveDashboardChartInfo(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-			HtmlTplDashboard dashboard, Reader in, int last, StringBuilder cache, StringBuilder attrName,
-			StringBuilder attrValue, DashboardInfo dashboardInfo) throws IOException
-	{
-		ChartInfo chartInfo = null;
-
-		for (;;)
-		{
-			last = resolveHtmlTagAttr(in, last, cache, attrName, attrValue);
-
-			String attrNameStr = attrName.toString();
-
-			if (this.attrNameChartWidget.equalsIgnoreCase(attrNameStr))
-			{
-				if (chartInfo == null)
-					chartInfo = new ChartInfo();
-
-				chartInfo.setWidgetId(attrValue.toString().trim());
-			}
-			else if ("id".equalsIgnoreCase(attrNameStr))
-			{
-				if (chartInfo == null)
-					chartInfo = new ChartInfo();
-
-				chartInfo.setElementId(attrValue.toString().trim());
-			}
-
-			clear(attrName);
-			clear(attrValue);
-
-			if (isHtmlTagEnd(last))
-				break;
-		}
-
-		if (chartInfo != null && StringUtil.isEmpty(chartInfo.getWidgetId()))
-			chartInfo = null;
-
-		// 元素没有定义“id”属性
-		if (chartInfo != null && StringUtil.isEmpty(chartInfo.getElementId()))
-		{
-			int chartIndex = dashboardInfo.getChartInfos().size();
-			String elementId = renderAttr.genChartElementId(Integer.toString(chartIndex));
-
-			chartInfo.setElementId(elementId);
-
-			int insertIdx = findInsertAttrIndex(cache);
-			cache.insert(insertIdx, " id=\"" + elementId + "\" ");
-		}
-
-		if (chartInfo != null)
-			dashboardInfo.addChartInfo(chartInfo);
-
-		return last;
-	}
-
-	/**
-	 * 查找可以插入属性的位置。
-	 * 
-	 * @param sb
-	 * @return
-	 */
-	protected int findInsertAttrIndex(StringBuilder sb)
-	{
-		int i = sb.length() - 1;
-		for (; i >= 0; i--)
-		{
-			int c = sb.charAt(i);
-
-			if (isWhitespace(c))
-				continue;
-			else if (c != '>' && c != '/')
-			{
-				i = i + 1;
-				break;
-			}
-		}
-
-		return i;
-	}
-
-	/**
-	 * 读取到“{@code <}”。
-	 * 
-	 * @param in
-	 * @param out
-	 * @return &lt;、-1，这个字符不会写入{@code out}
-	 * @throws IOException
-	 */
-	protected int readToTagStart(Reader in, StringBuilder out) throws IOException
-	{
-		int c = -1;
-
-		while ((c = in.read()) > -1)
-		{
-			if (c == '<')
-				break;
-
-			appendChar(out, c);
-		}
-
-		return c;
-	}
-
-	/**
-	 * 读取到“{@code >}”。
-	 * 
-	 * @param in
-	 * @param out
-	 * @return >、-1
-	 * @throws IOException
-	 */
-	protected int readToTagEnd(Reader in, Writer out) throws IOException
-	{
-		int c = -1;
-
-		while ((c = in.read()) > -1)
-		{
-			out.write(c);
-
-			if (c == '>')
-				break;
-		}
-
-		return c;
-	}
-
-	/**
-	 * 读取到“{@code >}”。
-	 * 
-	 * @param in
-	 * @param out
-	 * @return &gt;、-1
-	 * @throws IOException
-	 */
-	protected int readToTagEnd(Reader in, StringBuilder out) throws IOException
-	{
-		int c = -1;
-
-		while ((c = in.read()) > -1)
-		{
-			appendChar(out, c);
-
-			if (c == '>')
-				break;
-		}
-
-		return c;
-	}
-
-	/**
-	 * 写入HTML标签属性。
-	 * 
-	 * @param out
-	 * @param name
-	 * @param value
-	 * @throws IOException
-	 */
-	protected void appendHtmlAttr(Writer out, StringBuilder name, StringBuilder value) throws IOException
-	{
-		appendHtmlAttr(out, name.toString(), value.toString());
-	}
-
-	/**
-	 * 写入HTML标签属性。
-	 * 
-	 * @param out
-	 * @param name
-	 * @param value
-	 * @throws IOException
-	 */
-	protected void appendHtmlAttr(Writer out, String name, String value) throws IOException
-	{
-		if (name.isEmpty() && value.isEmpty())
-			return;
-
-		out.write(' ');
-		out.write(name);
-
-		if (!StringUtil.isEmpty(value))
-		{
-			out.write('=');
-			out.write(value);
-		}
-	}
-
-	protected void appendResolvedTagInfo(Writer out, int tagChar, String tagName, int last) throws IOException
-	{
-		out.write(tagChar);
-		out.write(tagName);
-
-		if (isValidReadChar(last))
-			out.write(last);
-	}
-
 	protected class DashboardTagListener extends DefaultTagListener
 	{
 		private final RenderContext renderContext;
@@ -776,10 +371,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		private final DashboardInfo dashboardInfo;
 
 		private boolean htmlTagResolved = false;
-		private boolean inHeadTag = false;
+		private boolean inBodyTag = false;
 		private boolean dashboardImportWritten = false;
 		private boolean titleTagHandled = false;
-		private boolean inBodyTag = false;
+		private boolean dashboardScriptWritten = false;
 
 		public DashboardTagListener(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 				HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
@@ -814,84 +409,164 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		@Override
 		public void beforeTagStart(Reader in, Writer out, String tagName) throws IOException
 		{
+			// </title>前插入标题后缀
+			if (!this.titleTagHandled && equalsIgnoreCase(tagName, "/title"))
+			{
+				HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
+				if (htmlTitleHandler != null)
+				{
+					String titleContent = htmlTitleHandler.suffix(false);
+					out.write(titleContent);
+				}
+
+				this.titleTagHandled = true;
+
+				return;
+			}
+
+			// </head>前插入<title></title>
+			if (!this.titleTagHandled && equalsIgnoreCase(tagName, "/head"))
+			{
+				HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
+				if (htmlTitleHandler != null)
+				{
+					out.write("<title>");
+					out.write(htmlTitleHandler.suffix(true));
+					out.write("</title>");
+				}
+
+				this.titleTagHandled = true;
+
+				return;
+			}
+
+			// 写看板脚本
+			if (this.inBodyTag && equalsIgnoreCase(tagName, "/body"))
+			{
+				if (!this.dashboardScriptWritten)
+				{
+					writeHtmlTplDashboardScript(this.renderContext, this.renderAttr, out, this.dashboard,
+							this.dashboardInfo);
+					this.dashboardScriptWritten = true;
+				}
+
+				inBodyTag = false;
+
+				return;
+			}
 		}
 
 		@Override
 		public boolean isResolveTagAttrs(Reader in, Writer out, String tagName)
 		{
-			return "html".equalsIgnoreCase(tagName)
-					|| HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName.equalsIgnoreCase(tagName);
+			return (this.inBodyTag && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
+					|| (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"));
 		}
 
 		@Override
 		public void beforeTagEnd(Reader in, Writer out, String tagName, String tagEnd, Map<String, String> attrs)
 				throws IOException
 		{
-			if (!this.htmlTagResolved && "html".equalsIgnoreCase(tagName))
+			// 解析<body></body>内的图表元素
+			if (this.inBodyTag && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
 			{
-				for (Map.Entry<String, String> entry : attrs.entrySet())
-				{
-					String name = entry.getKey();
+				resolveChartTagAttr(out, attrs);
+				return;
+			}
 
-					if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardVar.equalsIgnoreCase(name))
-					{
-						dashboardInfo.setDashboardFactoryVar(entry.getValue());
-					}
-					else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardFactory
-							.equalsIgnoreCase(name))
-					{
-						dashboardInfo.setDashboardFactoryVar(entry.getValue());
-					}
-					else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardImportExclude
-							.equalsIgnoreCase(name))
-					{
-						dashboardInfo.setImportExclude(entry.getValue());
-					}
-				}
-
+			// 解析<html>标签上的看板属性
+			if (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"))
+			{
+				resolveHtmlTagAttr(attrs);
 				this.htmlTagResolved = true;
-			}
-			else if (!this.titleTagHandled && "/head".equalsIgnoreCase(tagName))
-			{
-				HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
-				if (htmlTitleHandler != null)
-				{
-					String titleContent = htmlTitleHandler.handle("");
 
-					out.write("<title>");
-					out.write(titleContent);
-					out.write("</title>");
-				}
-
-				this.titleTagHandled = true;
-			}
-			else if (HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName.equalsIgnoreCase(tagName))
-			{
-
+				return;
 			}
 		}
 
 		@Override
 		public boolean afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
 		{
-			if ("head".equalsIgnoreCase(tagName))
+			// <head>后插入看板导入库
+			if (!this.dashboardImportWritten && equalsIgnoreCase(tagName, "head"))
 			{
-				if (!this.dashboardImportWritten)
-				{
-					writeDashboardImport(this.renderContext, this.renderAttr, out, this.dashboard, this.dashboardInfo);
-					this.dashboardImportWritten = true;
-				}
+				writeDashboardImport(this.renderContext, this.renderAttr, out, this.dashboard,
+						this.dashboardInfo.getImportExclude());
+				this.dashboardImportWritten = true;
 
-				this.inHeadTag = (!"/>".equals(tagEnd));
+				return false;
 			}
-			else if (this.inHeadTag && "/head".equalsIgnoreCase(tagName))
+			
+			// 判断是否在<body></body>标签之间
+			if (!inBodyTag && equalsIgnoreCase(tagName, "body"))
 			{
-				this.inHeadTag = false;
+				inBodyTag = !isSelfCloseTagEnd(tagEnd);
+
+				return false;
 			}
 
 			return false;
 		}
 
+		protected void resolveHtmlTagAttr(Map<String, String> attrs)
+		{
+			for (Map.Entry<String, String> entry : attrs.entrySet())
+			{
+				String name = entry.getKey();
+
+				if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardVar.equalsIgnoreCase(name))
+				{
+					this.dashboardInfo.setDashboardVar(trim(entry.getValue()));
+				}
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardFactory.equalsIgnoreCase(name))
+				{
+					this.dashboardInfo.setDashboardFactoryVar(trim(entry.getValue()));
+				}
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardImportExclude.equalsIgnoreCase(name))
+				{
+					this.dashboardInfo.setImportExclude(trim(entry.getValue()));
+				}
+			}
+		}
+
+		protected void resolveChartTagAttr(Writer out, Map<String, String> attrs) throws IOException
+		{
+			String chartWidget = null;
+			String elementId = null;
+
+			for (Map.Entry<String, String> entry : attrs.entrySet())
+			{
+				String name = entry.getKey();
+
+				// 浏览器端解析时同名属性会取第一个，所以这里也应如此
+
+				if (chartWidget == null
+						&& HtmlTplDashboardWidgetHtmlRenderer.this.attrNameChartWidget.equalsIgnoreCase(name))
+				{
+					chartWidget = trim(entry.getValue());
+				}
+				else if (elementId == null && equalsIgnoreCase(name, "id"))
+				{
+					elementId = trim(entry.getValue());
+				}
+			}
+
+			if (StringUtil.isEmpty(chartWidget))
+				return;
+
+			ChartInfo chartInfo = new ChartInfo(chartWidget, elementId);
+
+			// 元素没有定义“id”属性，应自动插入
+			if (StringUtil.isEmpty(chartInfo.getElementId()))
+			{
+				elementId = renderAttr.genChartElementId(Integer.toString(dashboardInfo.getChartInfos().size()));
+				chartInfo.setElementId(elementId);
+
+				out.write(" id=\"" + elementId + "\" ");
+			}
+
+			dashboardInfo.addChartInfo(chartInfo);
+		}
 	}
 
 	protected static class DashboardInfo

@@ -30,10 +30,10 @@ import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.ExtContentHtmlTitleHandler;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
@@ -519,7 +519,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
 		RenderContext renderContext = createHtmlRenderContext(request, response, renderAttr, createWebContext(request),
 				getChartShowHtmlTplDashboardWidgetHtmlRenderer());
-		ExtContentHtmlTitleHandler htmlTitleHandler = new ExtContentHtmlTitleHandler(
+		DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
 				getMessage(request, "chart.show.htmlTitleSuffix", getMessage(request, "app.name")));
 		renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 

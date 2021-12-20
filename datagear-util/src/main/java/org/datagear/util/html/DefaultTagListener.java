@@ -62,4 +62,27 @@ public class DefaultTagListener implements TagListener
 		else
 			return str0.equalsIgnoreCase(str1);
 	}
+
+	/**
+	 * 是否是自关闭标签结束符：{@code />}
+	 * 
+	 * @param tagEnd
+	 * @return
+	 */
+	protected boolean isSelfCloseTagEnd(String tagEnd)
+	{
+		return "/>".equals(tagEnd);
+	}
+
+	/**
+	 * 删除字符串首位空格。
+	 * 
+	 * @param str
+	 *            允许为{@code null}
+	 * @return
+	 */
+	protected String trim(String str)
+	{
+		return (str == null ? null : str.trim());
+	}
 }

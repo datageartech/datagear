@@ -14,7 +14,7 @@ import java.util.Map;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.HtmlTitleHandler;
+import org.datagear.util.StringUtil;
 
 /**
  * {@linkplain HtmlTplDashboard}渲染上下文属性定义类。
@@ -327,6 +327,86 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 		public String toString()
 		{
 			return getClass().getSimpleName() + " [contextPath=" + contextPath + ", attributes=" + attributes + "]";
+		}
+	}
+
+	/**
+	 * HTML的<code>&lt;title&gt;&lt;/title&gt;</code>处理器。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static interface HtmlTitleHandler
+	{
+		/**
+		 * 返回要追加的标题内容。
+		 * 
+		 * @param generated
+		 *            {@code <title></title>}标签是否是自动生成的，因为原始HTML中没有定义
+		 * @return
+		 */
+		String suffix(boolean generated);
+	}
+
+	/**
+	 * 默认{@linkplain HtmlTitleHandler}。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class DefaultHtmlTitleHandler implements HtmlTitleHandler
+	{
+		private String suffix = "";
+
+		private String suffixForGenerated = "";
+
+		public DefaultHtmlTitleHandler()
+		{
+			super();
+		}
+
+		public DefaultHtmlTitleHandler(String suffix)
+		{
+			super();
+			this.suffix = suffix;
+		}
+
+		public DefaultHtmlTitleHandler(String suffix, String suffixForGenerated)
+		{
+			super();
+			this.suffix = suffix;
+			this.suffixForGenerated = suffixForGenerated;
+		}
+
+		public String getSuffix()
+		{
+			return suffix;
+		}
+
+		public void setSuffix(String suffix)
+		{
+			this.suffix = suffix;
+		}
+
+		public String getSuffixForGenerated()
+		{
+			return suffixForGenerated;
+		}
+
+		public void setSuffixForGenerated(String suffixForGenerated)
+		{
+			this.suffixForGenerated = suffixForGenerated;
+		}
+
+		@Override
+		public String suffix(boolean generated)
+		{
+			String suffix = this.suffix;
+
+			if (generated && !StringUtil.isEmpty(this.suffixForGenerated))
+				suffix = this.suffixForGenerated;
+
+			return suffix;
 		}
 	}
 }

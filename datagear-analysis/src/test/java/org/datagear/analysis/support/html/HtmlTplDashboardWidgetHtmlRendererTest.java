@@ -19,10 +19,10 @@ import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport.ImportItem;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.ChartInfo;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardInfo;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.ExtContentHtmlTitleHandler;
 import org.datagear.util.IOUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -290,7 +290,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains("<div   id=element_6    dg-chart-widget=chartwidget_6  />"));
 			Assert.assertTrue(html.contains("<div   id=element_7    dg-chart-widget=chartwidget_7  /  >"));
 			Assert.assertTrue(
-					html.contains("<div     dg-chart-widget=chartwidget_8 id=\"DataGearChartElement7\"     /  >"));
+					html.contains("<div     dg-chart-widget=chartwidget_8    /   id=\"DataGearChartElement7\" >"));
 			Assert.assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"DataGearChartElement8\" />"));
 			Assert.assertTrue(html.contains("<div     dg-chart-widget='' />"));
 			Assert.assertTrue(html.contains("<div     dg-chart-widget=\"\"  />"));
@@ -306,7 +306,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
 
-			ExtContentHtmlTitleHandler htmlTitleHandler = new ExtContentHtmlTitleHandler("-suffix");
+			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
@@ -325,7 +325,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
 
-			ExtContentHtmlTitleHandler htmlTitleHandler = new ExtContentHtmlTitleHandler("-suffix");
+			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
