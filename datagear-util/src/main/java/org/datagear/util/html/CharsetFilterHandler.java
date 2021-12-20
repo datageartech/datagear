@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * 解析HTML字符集的{@linkplain FilterHandler}。
  * <p>
- * 此类从HTML的<code>&lt;head&gt;...&lt;/head&gt;</code>标签中的 <br>
+ * 此类从HTML的<code>&lt;head&gt;...&lt;/head&gt;</code>标签中 <br>
  * <code>&lt;meta charset=字符集&gt;</code><br>
  * 或者<br>
  * <code>&lt;meta content="...; charset=字符集; ..."&gt;</code><br>
@@ -35,6 +35,8 @@ public class CharsetFilterHandler extends DefaultFilterHandler
 
 	/** 解析的字符集 */
 	private String charset = null;
+
+	private boolean _aborted = false;
 
 	public CharsetFilterHandler()
 	{
@@ -74,6 +76,12 @@ public class CharsetFilterHandler extends DefaultFilterHandler
 	}
 
 	@Override
+	public boolean isAborted()
+	{
+		return this._aborted;
+	}
+
+	@Override
 	public boolean isResolveTagAttrs(Reader in, String tagName)
 	{
 		return equalsIgnoreCase(tagName, "meta");
@@ -83,45 +91,58 @@ public class CharsetFilterHandler extends DefaultFilterHandler
 	public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
 			throws IOException
 	{
-		if (equalsIgnoreCase(tagName, "meta"))
-		{
-			for(Map.Entry<String, String> entry : attrs.entrySet())
-			{
-				String name = entry.getKey();
-				
-				if (equalsIgnoreCase(name, "charset"))
-				{
-					this.charset = entry.getValue();
-					break;
-				}
-				else if (equalsIgnoreCase(name, "content"))
-				{
-					String value = entry.getValue();
-
-					if (value != null)
-					{
-						String valueLower = value.toLowerCase();
-						String token = "charset=";
-						int tokenIdx = valueLower.indexOf(token);
-						if (tokenIdx > -1)
-						{
-							this.charset = value.substring(tokenIdx + token.length());
-							int stopIdx = this.charset.indexOf(';');
-							if (stopIdx > 0)
-								this.charset = this.charset.substring(0, stopIdx);
-
-							break;
-						}
-					}
-				}
-			}
-		}
+		if (this.charset == null && equalsIgnoreCase(tagName, "meta"))
+			this.charset = resolveCharset(attrs);
 	}
 
 	@Override
 	public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
 	{
 		if (this.abortIfResolved && (this.charset != null || equalsIgnoreCase(tagName, "/head")))
-			setAborted(true);
+			this._aborted = true;
+	}
+
+	/**
+	 * 从属性集中解析字符集。
+	 * 
+	 * @param attrs
+	 * @return 字符集字符串、{@code null}
+	 */
+	protected String resolveCharset(Map<String, String> attrs)
+	{
+		String charset = null;
+
+		for (Map.Entry<String, String> entry : attrs.entrySet())
+		{
+			String name = entry.getKey();
+
+			if (equalsIgnoreCase(name, "charset"))
+			{
+				charset = entry.getValue();
+				break;
+			}
+			else if (equalsIgnoreCase(name, "content"))
+			{
+				String value = entry.getValue();
+
+				if (value != null)
+				{
+					String valueLower = value.toLowerCase();
+					String token = "charset=";
+					int tokenIdx = valueLower.indexOf(token);
+					if (tokenIdx > -1)
+					{
+						charset = value.substring(tokenIdx + token.length());
+						int stopIdx = charset.indexOf(';');
+						if (stopIdx > 0)
+							charset = charset.substring(0, stopIdx);
+
+						break;
+					}
+				}
+			}
+		}
+
+		return charset;
 	}
 }

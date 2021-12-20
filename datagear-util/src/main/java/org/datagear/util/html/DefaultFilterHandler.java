@@ -17,6 +17,9 @@ import java.util.Map;
 
 /**
  * 默认{@linkplain FilterHandler}。
+ * <p>
+ * 此类将{@linkplain HtmlFilter}处理的HTML输入流写入{@linkplain #getOut()}，其他什么也不做。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -24,8 +27,6 @@ import java.util.Map;
 public class DefaultFilterHandler implements FilterHandler
 {
 	private Writer out;
-
-	private boolean aborted = false;
 
 	private Map<String, String> prevTagAttrs = new HashMap<String, String>();
 
@@ -56,12 +57,7 @@ public class DefaultFilterHandler implements FilterHandler
 	@Override
 	public boolean isAborted()
 	{
-		return aborted;
-	}
-
-	public void setAborted(boolean aborted)
-	{
-		this.aborted = aborted;
+		return false;
 	}
 
 	@Override

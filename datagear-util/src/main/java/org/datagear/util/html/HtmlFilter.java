@@ -25,6 +25,21 @@ import java.util.Map;
  * <li>HTML注释（"&lt;!----&gt;"）不会被解析为标签</li>
  * <li>"&lt;script&gt;...&lt;/script&gt;"之间的内容不会解析为标签，而是按照JS脚本文本处理</li>
  * </ul>
+ * <p>
+ * 使用示例：
+ * </p>
+ * <code>
+ * <pre>
+ * HtmlFilter hf = new HtmlFilter();
+ * 
+ * Reader in = ...;
+ * Writer out = ...;
+ * hf.filter(in, new DefaultFilterHandler(out));
+ * </pre>
+ * </code>
+ * <p>
+ * 此类是线程安全的。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -63,6 +78,9 @@ public class HtmlFilter
 
 	/**
 	 * 执行过滤。
+	 * <p>
+	 * 注意：此方法执行完后，不会关闭输入/输出流。
+	 * </p>
 	 * 
 	 * @param in
 	 *            HTML输入流
@@ -75,6 +93,9 @@ public class HtmlFilter
 
 	/**
 	 * 执行过滤。
+	 * <p>
+	 * 注意：此方法执行完后，不会关闭输入/输出流。
+	 * </p>
 	 * 
 	 * @param in
 	 *            HTML输入流
@@ -89,6 +110,9 @@ public class HtmlFilter
 
 	/**
 	 * 执行过滤。
+	 * <p>
+	 * 注意：此方法执行完后，不会关闭输入/输出流。
+	 * </p>
 	 * 
 	 * @param in
 	 * @param handler
