@@ -446,15 +446,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			{
 				// 确保看板脚本前已写完看板导入库，比如没有定义<head></head>
 				if (!this.dashboardImportWritten)
-				{
-					writeDashboardImport(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-							this.dashboardInfo.getImportExclude());
-					this.dashboardImportWritten = true;
-				}
+					writeDashboardImportWithSet();
 
-				writeHtmlTplDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-						this.dashboardInfo);
-				this.dashboardScriptWritten = true;
+				writeHtmlTplDashboardScriptWithSet();
 			}
 
 			// 处理标题
@@ -548,9 +542,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			if (!this.dashboardImportWritten && !isSelfCloseTagEnd(tagEnd)
 					&& (equalsIgnoreCase(tagName, "head") || equalsIgnoreCase(tagName, "body")))
 			{
-				writeDashboardImport(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-						this.dashboardInfo.getImportExclude());
-				this.dashboardImportWritten = true;
+				writeDashboardImportWithSet();
 			}
 
 			// 如果</body>前没写（没有定义</body>），则在</html>后写看板脚本
@@ -558,16 +550,26 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			{
 				// 确保看板脚本前已写完看板导入库，比如没有定义<head></head>、<body></body>
 				if (!this.dashboardImportWritten)
-				{
-					writeDashboardImport(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-							this.dashboardInfo.getImportExclude());
-					this.dashboardImportWritten = true;
-				}
+					writeDashboardImportWithSet();
 
-				writeHtmlTplDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-						this.dashboardInfo);
-				this.dashboardScriptWritten = true;
+				writeHtmlTplDashboardScriptWithSet();
 			}
+		}
+
+		protected void writeDashboardImportWithSet() throws IOException
+		{
+			writeDashboardImport(getOut(), this.renderContext, this.renderAttr, this.dashboard,
+					this.dashboardInfo.getImportExclude());
+
+			this.dashboardImportWritten = true;
+		}
+
+		protected void writeHtmlTplDashboardScriptWithSet() throws IOException
+		{
+			writeHtmlTplDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
+					this.dashboardInfo);
+
+			this.dashboardScriptWritten = true;
 		}
 
 		protected void resolveHtmlTagAttr(Map<String, String> attrs)

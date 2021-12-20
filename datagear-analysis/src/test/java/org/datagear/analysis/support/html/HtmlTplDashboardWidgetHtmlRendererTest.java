@@ -414,7 +414,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			Assert.assertTrue(html.contains("<html><body>" + this.renderer.getNewLine() + "<style"));
 			Assert.assertTrue(html.contains("</script>" + this.renderer.getNewLine() + "</body></html>"));
-			Assert.assertTrue(html.contains("DataGearDashboardTmp.render();"));
+			Assert.assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
+			Assert.assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
 		}
 
 		// 没有<body></body>
@@ -434,7 +435,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains("<html><head>" + this.renderer.getNewLine() + "<style"));
 			Assert.assertTrue(html.contains(
 					"<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"></head></html><script type=\"text/javascript\">"));
-			Assert.assertTrue(html.contains("DataGearDashboardTmp.render();"));
+			Assert.assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
+			Assert.assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
 			Assert.assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
 		}
 
@@ -455,7 +457,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains("</html>" + this.renderer.getNewLine() + "<style"));
 			Assert.assertTrue(html.contains(
 					"<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"><script type=\"text/javascript\">"));
-			Assert.assertTrue(html.contains("DataGearDashboardTmp.render();"));
+			Assert.assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
+			Assert.assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
 			Assert.assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
 		}
 	}
@@ -465,6 +468,24 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		HtmlTplDashboardWidget dashboardWidget = new HtmlTplDashboardWidget("widget01", "index.html", this.renderer);
 
 		return dashboardWidget;
+	}
+
+	protected int countOf(String src, String sub)
+	{
+		int c = 0;
+
+		int idx = -1;
+		while (true)
+		{
+			idx = src.indexOf(sub, (idx < 0 ? 0 : idx + sub.length()));
+
+			if (idx < 0)
+				break;
+			else
+				c++;
+		}
+
+		return c;
 	}
 
 	protected String getHtmlWithPrint(StringWriter out)
