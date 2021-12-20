@@ -73,25 +73,25 @@ public class CharsetTagListener extends DefaultTagListener
 	@Override
 	public boolean isResolveTagAttrs(Reader in, Writer out, String tagName)
 	{
-		return "meta".equalsIgnoreCase(tagName);
+		return equalsIgnoreCase(tagName, "meta");
 	}
 
 	@Override
 	public void beforeTagEnd(Reader in, Writer out, String tagName, String tagEnd,
 			Map<String, String> attrs) throws IOException
 	{
-		if ("meta".equalsIgnoreCase(tagName))
+		if (equalsIgnoreCase(tagName, "meta"))
 		{
 			for(Map.Entry<String, String> entry : attrs.entrySet())
 			{
 				String name = entry.getKey();
 				
-				if("charset".equalsIgnoreCase(name))
+				if (equalsIgnoreCase(name, "charset"))
 				{
 					this.charset = entry.getValue();
 					break;
 				}
-				else if ("content".equalsIgnoreCase(name))
+				else if (equalsIgnoreCase(name, "content"))
 				{
 					String value = entry.getValue();
 
@@ -118,7 +118,7 @@ public class CharsetTagListener extends DefaultTagListener
 	@Override
 	public boolean afterTagEnd(Reader in, Writer out, String tagName, String tagEnd) throws IOException
 	{
-		if (abortIfResolved && (this.charset != null || "/head".equalsIgnoreCase(tagName)))
+		if (abortIfResolved && (this.charset != null || equalsIgnoreCase(tagName, "/head")))
 			return true;
 		else
 			return false;

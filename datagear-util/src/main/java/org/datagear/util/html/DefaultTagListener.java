@@ -45,4 +45,21 @@ public class DefaultTagListener implements TagListener
 	{
 		return false;
 	}
+
+	/**
+	 * 是否忽略大小写相等。
+	 * 
+	 * @param str0
+	 *            允许为{@code null}
+	 * @param str1
+	 *            允许为{@code null}
+	 * @return
+	 */
+	protected boolean equalsIgnoreCase(String str0, String str1)
+	{
+		if (str0 == null)
+			return (str1 == null);
+		else
+			return str0.equalsIgnoreCase(str1);
+	}
 }
