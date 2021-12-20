@@ -373,11 +373,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		private final DashboardInfo dashboardInfo;
 
 		private boolean htmlTagResolved = false;
+		private boolean inHeadTag = false;
+		private boolean inTitleTag = false;
+		private boolean titleTagHandled = false;
 		private boolean inBodyTag = false;
 		private boolean dashboardImportWritten = false;
-		private boolean titleTagHandled = false;
 		private boolean dashboardScriptWritten = false;
-		private boolean inTitleTag = false;
 		private StringBuilder titleTagContent = new StringBuilder();
 
 		public DashboardFilterHandler(Writer out, RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
@@ -440,51 +441,65 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		@Override
 		public void beforeWriteTagStart(Reader in, String tagName) throws IOException
 		{
-			if (this.inTitleTag && (equalsIgnoreCase(tagName, "/title") || equalsIgnoreCase(tagName, "/head")
-					|| equalsIgnoreCase(tagName, "body")))
+			// </body>前写看板脚本
+			if (!this.dashboardScriptWritten && this.inBodyTag && equalsIgnoreCase(tagName, "/body"))
+			{
+				// 确保看板脚本前已写完看板导入库，比如没有定义<head></head>
+				if (!this.dashboardImportWritten)
+				{
+					writeDashboardImport(getOut(), this.renderContext, this.renderAttr, this.dashboard,
+							this.dashboardInfo.getImportExclude());
+					this.dashboardImportWritten = true;
+				}
+
+				writeHtmlTplDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
+						this.dashboardInfo);
+				this.dashboardScriptWritten = true;
+			}
+
+			// 处理标题
+			if (!this.titleTagHandled && this.inHeadTag)
+			{
+				// 优先</title>前插入标题后缀
+				if (equalsIgnoreCase(tagName, "/title"))
+				{
+					HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
+					if (htmlTitleHandler != null)
+					{
+						String titleContent = htmlTitleHandler.suffix(this.titleTagContent.toString());
+						write(titleContent);
+					}
+					
+					this.titleTagHandled = true;
+				}
+				// 其次</head>前插入<title></title>
+				else if(equalsIgnoreCase(tagName, "/head"))
+				{
+					HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
+					if (htmlTitleHandler != null)
+					{
+						write("<title>");
+						write(htmlTitleHandler.suffix(""));
+						write("</title>");
+					}
+
+					this.titleTagHandled = true;
+				}
+			}
+
+			if (this.inHeadTag && !this.inBodyTag && equalsIgnoreCase(tagName, "/head"))
+			{
+				this.inHeadTag = false;
 				this.inTitleTag = false;
-
-			// </title>前插入标题后缀
-			if (!this.titleTagHandled && equalsIgnoreCase(tagName, "/title"))
-			{
-				HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
-				if (htmlTitleHandler != null)
-				{
-					String titleContent = htmlTitleHandler.suffix(this.titleTagContent.toString());
-					write(titleContent);
-				}
-
-				this.titleTagHandled = true;
-				return;
 			}
-
-			// </head>前插入<title></title>
-			if (!this.titleTagHandled && equalsIgnoreCase(tagName, "/head"))
+			else if (!this.inHeadTag && this.inBodyTag && equalsIgnoreCase(tagName, "/body"))
 			{
-				HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
-				if (htmlTitleHandler != null)
-				{
-					write("<title>");
-					write(htmlTitleHandler.suffix(""));
-					write("</title>");
-				}
-
-				this.titleTagHandled = true;
-				return;
-			}
-
-			// 写看板脚本
-			if (this.inBodyTag && equalsIgnoreCase(tagName, "/body"))
-			{
-				if (!this.dashboardScriptWritten)
-				{
-					writeHtmlTplDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-							this.dashboardInfo);
-					this.dashboardScriptWritten = true;
-				}
-
 				this.inBodyTag = false;
-				return;
+				this.inTitleTag = false;
+			}
+			else if (this.inHeadTag && this.inTitleTag && equalsIgnoreCase(tagName, "/title"))
+			{
+				this.inTitleTag = false;
 			}
 		}
 
@@ -503,44 +518,55 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			if (this.inBodyTag && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
 			{
 				resolveChartTagAttr(attrs);
-				return;
 			}
-
 			// 解析<html>标签上的看板属性
-			if (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"))
+			else if (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"))
 			{
 				resolveHtmlTagAttr(attrs);
-
 				this.htmlTagResolved = true;
-				return;
 			}
 		}
 
 		@Override
 		public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
 		{
-			// <head>后插入看板导入库
-			if (!this.dashboardImportWritten && equalsIgnoreCase(tagName, "head"))
+			if (!this.inHeadTag && !this.inBodyTag && equalsIgnoreCase(tagName, "head"))
+			{
+				this.inHeadTag = !isSelfCloseTagEnd(tagEnd);
+			}
+			else if (!this.inHeadTag && !this.inBodyTag && equalsIgnoreCase(tagName, "body"))
+			{
+				this.inBodyTag = !isSelfCloseTagEnd(tagEnd);
+				this.inTitleTag = false;
+			}
+			else if (this.inHeadTag && !this.inTitleTag && equalsIgnoreCase(tagName, "title"))
+			{
+				this.inTitleTag = !isSelfCloseTagEnd(tagEnd);
+			}
+
+			// 优先<head>后，其次<body>后（当没有定义<head>时）插入看板导入库
+			if (!this.dashboardImportWritten && !isSelfCloseTagEnd(tagEnd)
+					&& (equalsIgnoreCase(tagName, "head") || equalsIgnoreCase(tagName, "body")))
 			{
 				writeDashboardImport(getOut(), this.renderContext, this.renderAttr, this.dashboard,
 						this.dashboardInfo.getImportExclude());
-
 				this.dashboardImportWritten = true;
-				return;
-			}
-			
-			// 判断是否在<body></body>标签之间
-			if (!this.inBodyTag && equalsIgnoreCase(tagName, "body"))
-			{
-				this.inBodyTag = !isSelfCloseTagEnd(tagEnd);
-				return;
 			}
 
-			// 判断是否在<body></body>标签之间
-			if (!this.inTitleTag && equalsIgnoreCase(tagName, "title"))
+			// 如果</body>前没写（没有定义</body>），则在</html>后写看板脚本
+			if (!this.dashboardScriptWritten && !inHeadTag && !this.inBodyTag && equalsIgnoreCase(tagName, "/html"))
 			{
-				this.inTitleTag = !isSelfCloseTagEnd(tagEnd);
-				return;
+				// 确保看板脚本前已写完看板导入库，比如没有定义<head></head>、<body></body>
+				if (!this.dashboardImportWritten)
+				{
+					writeDashboardImport(getOut(), this.renderContext, this.renderAttr, this.dashboard,
+							this.dashboardInfo.getImportExclude());
+					this.dashboardImportWritten = true;
+				}
+
+				writeHtmlTplDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
+						this.dashboardInfo);
+				this.dashboardScriptWritten = true;
 			}
 		}
 

@@ -397,6 +397,67 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			Assert.assertTrue(html.contains("<title><title>generated</title></head>"));
 		}
+
+		// 没有<head></head>
+		{
+			String template = "<html><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+			StringWriter out = new StringWriter();
+			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+
+			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertTrue(html.contains("<html><body>" + this.renderer.getNewLine() + "<style"));
+			Assert.assertTrue(html.contains("</script>" + this.renderer.getNewLine() + "</body></html>"));
+			Assert.assertTrue(html.contains("DataGearDashboardTmp.render();"));
+		}
+
+		// 没有<body></body>
+		{
+			String template = "<html><head></head></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+			StringWriter out = new StringWriter();
+			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+
+			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertTrue(html.contains("<html><head>" + this.renderer.getNewLine() + "<style"));
+			Assert.assertTrue(html.contains(
+					"<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"></head></html><script type=\"text/javascript\">"));
+			Assert.assertTrue(html.contains("DataGearDashboardTmp.render();"));
+			Assert.assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
+		}
+
+		// <html></html>
+		{
+			String template = "<html></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+			StringWriter out = new StringWriter();
+			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+
+			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertTrue(html.contains("</html>" + this.renderer.getNewLine() + "<style"));
+			Assert.assertTrue(html.contains(
+					"<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"><script type=\"text/javascript\">"));
+			Assert.assertTrue(html.contains("DataGearDashboardTmp.render();"));
+			Assert.assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
+		}
 	}
 
 	protected HtmlTplDashboardWidget createHtmlTplDashboardWidget()
