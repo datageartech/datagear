@@ -980,6 +980,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				finally
 				{
 					IOUtil.close(in);
+					IOUtil.close(out);
 				}
 			}
 			else
