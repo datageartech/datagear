@@ -206,7 +206,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 		if (!file.exists())
 			throw new RecordNotFoundException();
 
-		String resourceContent = IOUtil.readString(IOUtil.getInputStream(file), IOUtil.CHARSET_UTF_8, true);
+		String resourceContent = IOUtil.readString(IOUtil.getBufferedInputStream(IOUtil.getInputStream(file)),
+				IOUtil.CHARSET_UTF_8, true);
 
 		model.addAttribute("resourcePath", path);
 		model.addAttribute("resourceContent", resourceContent);
@@ -278,15 +279,18 @@ public class DashboardGlobalResController extends AbstractController implements 
 
 		if (in != null)
 		{
-			OutputStream out = response.getOutputStream();
+			OutputStream out = null;
 
 			try
 			{
+				in = IOUtil.getBufferedInputStream(in);
+				out =IOUtil.getBufferedOutputStream(response.getOutputStream());
 				IOUtil.write(in, out);
 			}
 			finally
 			{
 				IOUtil.close(in);
+				IOUtil.close(out);
 			}
 		}
 		else
