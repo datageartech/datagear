@@ -24,6 +24,7 @@ import java.util.Map;
  * <li>标签结束符："&gt;"、"/&gt;"</li>
  * <li>HTML注释（"&lt;!----&gt;"）不会被解析为标签</li>
  * <li>"&lt;script&gt;...&lt;/script&gt;"之间的内容不会解析为标签，而是按照JS脚本文本处理</li>
+ * <li>"&lt;style&gt;...&lt;/style&gt;"之间的内容不会解析为标签，而是按照CSS文本处理</li>
  * </ul>
  * <p>
  * 使用示例：
@@ -120,6 +121,8 @@ public class HtmlFilter
 	 */
 	public void filter(Reader in, FilterHandler handler) throws IOException
 	{
+		handler.beforeWrite(in);
+
 		int c = -1;
 		while ((c = in.read()) > -1)
 		{
@@ -138,10 +141,13 @@ public class HtmlFilter
 				{
 					String tagEnd = filterAfterTag(in, handler, tagName, afterTagName);
 
-					// "<script..."且非"<script.../>"
-					if (!TAG_END_STR_SELF_CLOSE.equals(tagEnd) && tagName.equalsIgnoreCase("script"))
+					if (!TAG_END_STR_SELF_CLOSE.equals(tagEnd))
 					{
-						filterAfterScriptCloseTag(in, handler);
+						// <script></script>、<style></style>之间按照普通文本解析
+						if ("script".equalsIgnoreCase(tagName))
+							filterAfterScriptCloseTag(in, handler);
+						else if ("style".equalsIgnoreCase(tagName))
+							filterAfterStyleCloseTag(in, handler);
 					}
 				}
 
@@ -151,6 +157,8 @@ public class HtmlFilter
 			else
 				handler.write(c);
 		}
+
+		handler.afterWrite(in);
 	}
 
 	/**
@@ -604,6 +612,64 @@ public class HtmlFilter
 				String tagName = tagNameSb.toString();
 
 				if ("/script".equalsIgnoreCase(tagName))
+				{
+					filterAfterTag(in, handler, tagName, afterTagName);
+					break;
+				}
+				else
+				{
+					handler.write(c);
+					handler.write(tagName);
+					writeIfNonNull(handler, afterTagName);
+				}
+			}
+			else
+				handler.write(c);
+		}
+	}
+
+	/**
+	 * 写完"&lt;/style&gt;"后停止。
+	 * 
+	 * @param in
+	 * @param handler
+	 */
+	protected void filterAfterStyleCloseTag(Reader in, FilterHandler handler) throws IOException
+	{
+		int c = -1;
+		while ((c = in.read()) > -1)
+		{
+			// 字符串
+			if (c == '\'' || c == '"')
+			{
+				handler.write(c);
+				filterAfterQuote(in, handler, c, '\\');
+			}
+			else if (c == '/')
+			{
+				handler.write(c);
+
+				int c0 = in.read();
+				writeIfValid(handler, c0);
+
+				// 行注释
+				if (c0 == '/')
+				{
+					filterAfterLineComment(in, handler);
+				}
+				// 块注释
+				else if (c0 == '*')
+				{
+					filterAfterBlockComment(in, handler);
+				}
+			}
+			else if (c == TAG_START_CHAR)
+			{
+				StringBuilder tagNameSb = createStringBuilder();
+				String afterTagName = readTagName(in, tagNameSb);
+				String tagName = tagNameSb.toString();
+
+				if ("/style".equalsIgnoreCase(tagName))
 				{
 					filterAfterTag(in, handler, tagName, afterTagName);
 					break;

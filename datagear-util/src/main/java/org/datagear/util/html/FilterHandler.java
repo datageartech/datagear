@@ -70,6 +70,14 @@ public interface FilterHandler
 	public boolean isAborted();
 
 	/**
+	 * 开始写入前置处理函数。
+	 * 
+	 * @param in
+	 * @throws IOException
+	 */
+	void beforeWrite(Reader in) throws IOException;
+
+	/**
 	 * 标签起始符（{@code '<'}）写入前置处理函数。
 	 * 
 	 * @param in
@@ -122,4 +130,13 @@ public interface FilterHandler
 	 * @throws IOException
 	 */
 	void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException;
+
+	/**
+	 * 完成写入后置处理函数，包括{@linkplain #isAborted()}的情形。
+	 * 
+	 * @param in
+	 * @throws IOException
+	 */
+	void afterWrite(Reader in) throws IOException;
+
 }

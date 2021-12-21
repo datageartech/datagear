@@ -32,7 +32,17 @@ public class HtmlFilterTest
 	private HtmlFilter htmlFilter = new HtmlFilter();
 
 	@Test
-	public void filterTest_htmlReader_htmlWriter() throws IOException
+	public void filterTest_Reader() throws IOException
+	{
+		{
+			String html = "<html><head><meta charset='UTF-8'></head><body></body></html>";
+			StringReader in = new StringReader(html);
+			htmlFilter.filter(in);
+		}
+	}
+
+	@Test
+	public void filterTest_Reader_Writer() throws IOException
 	{
 		{
 			String html = "<html lang='zh'>"
@@ -109,7 +119,7 @@ public class HtmlFilterTest
 	}
 
 	@Test
-	public void filterTest_htmlReader_htmlWriter_tagListener() throws IOException
+	public void filterTest_Reader_FilterHandler() throws IOException
 	{
 		{
 			String html = "<html lang='zh'>"
@@ -262,17 +272,7 @@ public class HtmlFilterTest
 	}
 
 	@Test
-	public void filterTest_htmlReader() throws IOException
-	{
-		{
-			String html = "<html><head><meta charset='UTF-8'></head><body></body></html>";
-			StringReader in = new StringReader(html);
-			htmlFilter.filter(in);
-		}
-	}
-
-	@Test
-	public void filterTest_htmlReader_tagListener() throws IOException
+	public void filterTest_Reader_CharsetFilterHandler() throws IOException
 	{
 		{
 			String html = "<html><head><meta charset='UTF-8'></head><body></body></html>";
@@ -281,6 +281,20 @@ public class HtmlFilterTest
 			htmlFilter.filter(in, handler);
 
 			assertEquals("UTF-8", handler.getCharset());
+		}
+	}
+
+	@Test
+	public void filterTest_Reader_TestBeforeAfterWriteFilterHandler() throws IOException
+	{
+		{
+			String html = "<html><head><></head><body></body></html>";
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+			TestBeforeAfterWriteFilterHandler handler = new TestBeforeAfterWriteFilterHandler(out);
+			htmlFilter.filter(in, handler);
+
+			assertEquals("[b]<html><head><></head><body></body></html>[a]", out.toString());
 		}
 	}
 
@@ -768,6 +782,75 @@ public class HtmlFilterTest
 		}
 	}
 
+	@Test
+	public void filterAfterStyleCloseTagTest() throws IOException
+	{
+		{
+			String html = "</style>";
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			htmlFilter.filterAfterStyleCloseTag(in, newFilterContext(out));
+			assertEquals("</style>", out.toString());
+		}
+		{
+			String html = "</style>after";
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			htmlFilter.filterAfterStyleCloseTag(in, newFilterContext(out));
+			assertEquals("</style>", out.toString());
+		}
+		{
+			String html = "'</style>' </style>after";
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			htmlFilter.filterAfterStyleCloseTag(in, newFilterContext(out));
+			assertEquals("'</style>' </style>", out.toString());
+		}
+		{
+			String html = "\"</style>\" </style>after";
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			htmlFilter.filterAfterStyleCloseTag(in, newFilterContext(out));
+			assertEquals("\"</style>\" </style>", out.toString());
+		}
+		{
+			String html = "//comment </style> \n </style>after";
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			htmlFilter.filterAfterStyleCloseTag(in, newFilterContext(out));
+			assertEquals("//comment </style> \n </style>", out.toString());
+		}
+		{
+			String html = "/*comment </style> \n </style> \n comment*/ </style>after";
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			htmlFilter.filterAfterStyleCloseTag(in, newFilterContext(out));
+			assertEquals("/*comment </style> \n </style> \n comment*/ </style>", out.toString());
+		}
+		{
+			String html = "<div> <span></span> </style>after";
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			htmlFilter.filterAfterStyleCloseTag(in, newFilterContext(out));
+			assertEquals("<div> <span></span> </style>", out.toString());
+		}
+		{
+			String html = "<div> <span></span> </style>after";
+			StringReader in = new StringReader(html);
+			StringWriter out = new StringWriter();
+
+			htmlFilter.filterAfterStyleCloseTag(in, newTestFilterHandler(out));
+			assertEquals("<div> <span></span> [bts]</style[bte]>[ate]", out.toString());
+		}
+	}
+
 	protected FilterHandler newFilterContext(Writer out)
 	{
 		return new DefaultFilterHandler(out);
@@ -803,5 +886,25 @@ public class HtmlFilterTest
 		{
 			write("[ate]");
 		}	
+	};
+
+	protected static class TestBeforeAfterWriteFilterHandler extends DefaultFilterHandler
+	{
+		public TestBeforeAfterWriteFilterHandler(Writer out)
+		{
+			super(out);
+		}
+
+		@Override
+		public void beforeWrite(Reader in) throws IOException
+		{
+			write("[b]");
+		}
+
+		@Override
+		public void afterWrite(Reader in) throws IOException
+		{
+			write("[a]");
+		}
 	};
 }

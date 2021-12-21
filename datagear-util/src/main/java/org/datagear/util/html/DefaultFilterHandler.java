@@ -97,6 +97,11 @@ public class DefaultFilterHandler implements FilterHandler
 	}
 
 	@Override
+	public void beforeWrite(Reader in) throws IOException
+	{
+	}
+
+	@Override
 	public void beforeWriteTagStart(Reader in, String tagName) throws IOException
 	{
 	}
@@ -115,6 +120,11 @@ public class DefaultFilterHandler implements FilterHandler
 
 	@Override
 	public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
+	{
+	}
+
+	@Override
+	public void afterWrite(Reader in) throws IOException
 	{
 	}
 
