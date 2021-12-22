@@ -9,7 +9,6 @@ package org.datagear.util.html;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -75,38 +74,6 @@ public class HtmlFilter
 	public HtmlFilter()
 	{
 		super();
-	}
-
-	/**
-	 * 执行过滤。
-	 * <p>
-	 * 注意：此方法执行完后，不会关闭输入/输出流。
-	 * </p>
-	 * 
-	 * @param in
-	 *            HTML输入流
-	 * @throws IOException
-	 */
-	public void filter(Reader in) throws IOException
-	{
-		filter(in, new DefaultFilterHandler(NopWriter.NOP_WRITER));
-	}
-
-	/**
-	 * 执行过滤。
-	 * <p>
-	 * 注意：此方法执行完后，不会关闭输入/输出流。
-	 * </p>
-	 * 
-	 * @param in
-	 *            HTML输入流
-	 * @param out
-	 *            HTML输出流
-	 * @throws IOException
-	 */
-	public void filter(Reader in, Writer out) throws IOException
-	{
-		filter(in, new DefaultFilterHandler(out));
 	}
 
 	/**

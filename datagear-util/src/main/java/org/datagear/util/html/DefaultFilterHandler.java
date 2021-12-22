@@ -33,10 +33,18 @@ public class DefaultFilterHandler implements FilterHandler
 	private List<String> prevTagAttrTokens = new ArrayList<String>();
 
 	/**
-	 * 创建HTML过滤上下文。
+	 * 使用{@linkplain NopWriter}创建{@linkplain DefaultFilterHandler}。
+	 */
+	public DefaultFilterHandler()
+	{
+		super();
+		this.out = NopWriter.NOP_WRITER;
+	}
+
+	/**
+	 * 创建{@linkplain DefaultFilterHandler}。
 	 * 
-	 * @param out
-	 *            输出流
+	 * @param out 输出流
 	 */
 	public DefaultFilterHandler(Writer out)
 	{

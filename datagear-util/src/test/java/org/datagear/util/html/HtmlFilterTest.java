@@ -32,93 +32,6 @@ public class HtmlFilterTest
 	private HtmlFilter htmlFilter = new HtmlFilter();
 
 	@Test
-	public void filterTest_Reader() throws IOException
-	{
-		{
-			String html = "<html><head><meta charset='UTF-8'></head><body></body></html>";
-			StringReader in = new StringReader(html);
-			htmlFilter.filter(in);
-		}
-	}
-
-	@Test
-	public void filterTest_Reader_Writer() throws IOException
-	{
-		{
-			String html = "<html lang='zh'>"
-					+ "\n"
-					+ "<head>"
-					+ "\n"
-					+ "<title>title</title>"
-					+ "\n"
-					+ "<link href=\"...\">"
-					+ "\n"
-					+ "<script type='text/javascript' href=\"v\"></script>"
-					+ "\n"
-					+ "<script type='text/javascript'>"
-					+ "\n"
-					+ "\n"
-					+ "  // line-comment <div></div> <script> </script>"
-					+ "\n"
-					+ "  var str='<div></div> </script>'; "
-					+ "  /* block comment "
-					+ "  <div></div> <script> </script>"
-					+ "\n"
-					+ "  <div></div> <script> </script>"
-					+ "  */"
-					+ "\n"
-					+ "\n"
-					+ "</script>"
-					+ "\n"
-					+ "</head>"
-					+ "\n"
-					+ "<body p0 p1 = v1 p2='v2' p3=\"v3\" p4 p5 = v5 >"
-					+ "\n"
-					+ "<!---->"
-					+ "\n"
-					+ "<!--comment-->"
-					+ "\n"
-					+ "<!-- comment -->"
-					+ "\n"
-					+ "<!--"
-					+ "\n"
-					+ " comment "
-					+ "\n"
-					+ " <div>comment</div>"
-					+ " -->"
-					+ "\n"
-					+ "<input name='name' value=\"value\">"
-					+ "\n"
-					+ "<input name='name' value=\"value\"/>"
-					+ "\n"
-					+ "<input name='name' value=\"value\" />"
-					+ "\n"
-					+ "<div p0=v0 p1 p2 = v2>sdf</div>"
-					+ "\n"
-					+ "<script />"
-					+ "\n"
-					+ "<>"
-					+ "\n"
-					+ "</>"
-					+ "\n"
-					+ "< />"
-					+ "\n"
-					+ "</ >"
-					+ "\n"
-					+ "</body>"
-					+ "\n"
-					+ "</html>";
-
-			StringReader in = new StringReader(html);
-			StringWriter out = new StringWriter();
-
-			htmlFilter.filter(in, out);
-
-			assertEquals(html, out.toString());
-		}
-	}
-
-	@Test
 	public void filterTest_Reader_FilterHandler() throws IOException
 	{
 		{
@@ -144,8 +57,21 @@ public class HtmlFilterTest
 					+ "  <div></div> <script> </script>"
 					+ "  */"
 					+ "\n"
-					+ "\n"
 					+ "</script>"
+					+ "\n"
+					+ "<style type=\"text/css\">"
+					+ "\n"
+					+ ".a{ color: 'red' }"
+					+ "\n"
+					+ "// line- comment <div></div> <style> </style>"
+					+ "\n"
+					+ "  /* block comment "
+					+ "  <div></div> <style> </style>"
+					+ "\n"
+					+ "  <div></div> <style> </style>"
+					+ "  */"
+					+ "\n"
+					+ "</style>"
 					+ "\n"
 					+ "</head>"
 					+ "\n"
@@ -219,8 +145,21 @@ public class HtmlFilterTest
 					+ "  <div></div> <script> </script>"
 					+ "  */"
 					+ "\n"
-					+ "\n"
 					+ "[bts]</script[bte]>[ate]"
+					+ "\n"
+					+ "[bts]<style type=\"text/css\"[bte]>[ate]"
+					+ "\n"
+					+ ".a{ color: 'red' }"
+					+ "\n"
+					+ "// line- comment <div></div> <style> </style>"
+					+ "\n"
+					+ "  /* block comment "
+					+ "  <div></div> <style> </style>"
+					+ "\n"
+					+ "  <div></div> <style> </style>"
+					+ "  */"
+					+ "\n"
+					+ "[bts]</style[bte]>[ate]"
 					+ "\n"
 					+ "[bts]</head[bte]>[ate]"
 					+ "\n"
