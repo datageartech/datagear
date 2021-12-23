@@ -82,7 +82,7 @@ import org.datagear.util.html.HtmlFilter;
  * @author datagear@163.com
  * 
  */
-public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
+public abstract class HtmlTplDashboardWidgetRenderer
 {
 	public static final String DASHBOARD_IMPORT_ITEM_NAME_ATTR = "dg-import-name";
 
