@@ -241,14 +241,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	}
 
 	@Override
-	protected void renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+	protected void renderDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			HtmlTplDashboard dashboard) throws Throwable
 	{
 		Reader in = getResourceReaderNonNull(dashboard.getWidget(), dashboard.getTemplate());
 
 		try
 		{
-			renderHtmlTplDashboard(renderContext, renderAttr, dashboard, in);
+			renderDashboard(renderContext, renderAttr, dashboard, in);
 		}
 		finally
 		{
@@ -256,7 +256,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 	}
 
-	protected DashboardInfo renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+	protected DashboardInfo renderDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			HtmlTplDashboard dashboard, Reader in) throws Exception
 	{
 		DashboardInfo dashboardInfo = new DashboardInfo();
@@ -272,7 +272,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		return dashboardInfo;
 	}
 
-	protected void writeHtmlTplDashboardScript(Writer out, RenderContext renderContext,
+	protected void writeDashboardScript(Writer out, RenderContext renderContext,
 			HtmlTplDashboardRenderAttr renderAttr, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
 			throws IOException
 	{
@@ -292,17 +292,17 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		out.write("(function(){");
 		writeNewLine(out);
 
-		writeHtmlTplDashboardJSVar(renderContext, renderAttr, out, dashboard, tmp0RenderContextVarName);
+		writeDashboardJsVar(renderContext, renderAttr, out, dashboard, tmp0RenderContextVarName);
 
-		writeHtmlChartScripts(renderContext, renderAttr, out, dashboard, dashboardInfo);
-		writeHtmlTplDashboardJSInit(renderContext, renderAttr, out, dashboard, tmp1RenderContextVarName);
-		writeHtmlTplDashboardJSFactoryInit(renderContext, renderAttr, out, dashboard,
+		writeChartScripts(renderContext, renderAttr, out, dashboard, dashboardInfo);
+		writeDashboardJsInit(renderContext, renderAttr, out, dashboard, tmp1RenderContextVarName);
+		writeDashboardJsFactoryInit(renderContext, renderAttr, out, dashboard,
 				dashboardInfo.getDashboardFactoryVar());
 
 		out.write("window." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
 
-		writeHtmlTplDashboardJSRender(renderContext, renderAttr, out, dashboard);
+		writeDashboardJsRender(renderContext, renderAttr, out, dashboard);
 
 		out.write("})();");
 		writeNewLine(out);
@@ -311,7 +311,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		writeNewLine(out);
 	}
 
-	protected void writeHtmlChartScripts(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
+	protected void writeChartScripts(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
 			HtmlTplDashboard dashboard, DashboardInfo dashboardInfo) throws IOException
 	{
 		List<Chart> charts = dashboard.getCharts();
@@ -324,8 +324,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		List<ChartInfo> chartInfos = dashboardInfo.getChartInfos();
 		if (chartInfos != null)
 		{
-			List<HtmlChartWidget> chartWidgets = getHtmlChartWidgets(chartInfos);
-			List<String> chartPluginVarNames = writeHtmlChartPluginScriptsResolveImport(renderContext, renderAttr, out,
+			List<HtmlChartWidget> chartWidgets = getChartWidgets(chartInfos);
+			List<String> chartPluginVarNames = writeChartPluginScriptsResolveImport(renderContext, renderAttr, out,
 					chartWidgets);
 
 			RenderContext chartRenderContext = new DefaultRenderContext(renderContext);
@@ -350,13 +350,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				chartRenderOption.setPluginVarName(chartPluginVarNames.get(i));
 				chartRenderOption.setChartVarName(chartRenderAttr.genChartVarName(Integer.toString(i)));
 
-				HtmlChart chart = writeHtmlChart(chartRenderContext, chartWidget);
+				HtmlChart chart = writeChart(chartRenderContext, chartWidget);
 				charts.add(chart);
 			}
 		}
 	}
 
-	protected List<HtmlChartWidget> getHtmlChartWidgets(List<ChartInfo> chartInfos)
+	protected List<HtmlChartWidget> getChartWidgets(List<ChartInfo> chartInfos)
 	{
 		List<HtmlChartWidget> list = new ArrayList<>();
 
@@ -553,7 +553,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 		protected void writeHtmlTplDashboardScriptWithSet() throws IOException
 		{
-			writeHtmlTplDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
+			writeDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
 					this.dashboardInfo);
 
 			this.dashboardScriptWritten = true;

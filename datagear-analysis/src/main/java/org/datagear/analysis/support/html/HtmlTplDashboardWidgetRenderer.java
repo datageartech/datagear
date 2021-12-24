@@ -27,7 +27,6 @@ import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.html.HtmlTplDashboardImport.ImportItem;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
@@ -66,18 +65,6 @@ import org.datagear.util.html.HtmlFilter;
  * <p>
  * 子类在调用此方法时可以传入自定义JS看板工厂对象的变量名，默认为{@linkplain #getDefaultDashboardFactoryVar()}。
  * </p>
- * <p>
- * 此类的{@linkplain #getHtmlTplDashboardImport()}的{@linkplain ImportItem#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
- * 在渲染时，占位符会被替换为{@linkplain HtmlTplDashboardRenderAttr#getWebContext(RenderContext)}的{@linkplain WebContext#getContextPath()}。
- * </p>
- * <p>
- * 此类的{@linkplain #getHtmlTplDashboardImport()}的{@linkplain ImportItem#getContent()}可以包含{@linkplain #getVersionPlaceholder()}占位符，
- * 在渲染时，占位符会被替换为{@linkplain Global#VERSION}（可用于支持版本更新时浏览器缓存更新）。
- * </p>
- * <p>
- * 此类的{@linkplain #getHtmlTplDashboardImport()}可以包含{@linkplain #getDashboardVarPlaceholder()}占位符，
- * 在渲染时，占位符会被替换为实际的{@linkplain HtmlTplDashboard#getVarName()}。
- * </p>
  * 
  * @author datagear@163.com
  * 
@@ -85,14 +72,6 @@ import org.datagear.util.html.HtmlFilter;
 public abstract class HtmlTplDashboardWidgetRenderer
 {
 	public static final String DASHBOARD_IMPORT_ITEM_NAME_ATTR = "dg-import-name";
-
-	public static final String DEFAULT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
-
-	public static final String DEFAULT_VERSION_PLACE_HOLDER = "$VERSION";
-
-	public static final String DEFAULT_RANDOMCODE_VAR_PLACE_HOLDER = "$RANDOMCODE";
-
-	public static final String DEFAULT_DASHBOARD_VAR_PLACE_HOLDER = "$DASHBOARD";
 
 	public static final String DEFAULT_DASHBOARD_FACTORY_VAR = "dashboardFactory";
 
@@ -117,24 +96,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	private AttributeValueHtmlChartPlugin htmlChartPluginForGetWidgetException = new AttributeValueHtmlChartPlugin(
 			Global.PRODUCT_NAME_EN + "HtmlChartPluginForGetWidgetException",
 			Global.PRODUCT_NAME_EN + "HtmlChartPluginForGetWidgetExceptionMsg");
-
-	/** 导入项 */
-	private HtmlTplDashboardImport htmlTplDashboardImport;
-
-	/** 上下文路径占位符 */
-	private String contextPathPlaceholder = DEFAULT_CONTEXT_PATH_PLACE_HOLDER;
-
-	/** 应用版本号占位符 */
-	private String versionPlaceholder = DEFAULT_VERSION_PLACE_HOLDER;
-
-	/** 随机码占位符 */
-	private String randomCodePlaceholder = DEFAULT_RANDOMCODE_VAR_PLACE_HOLDER;
-
-	/** 扩展看板初始化脚本 */
-	private String extDashboardInitScript;
-
-	/** 看板变量占位符 */
-	private String dashboardVarPlaceholder = DEFAULT_DASHBOARD_VAR_PLACE_HOLDER;
 
 	/** 默认JS看板工厂变量名 */
 	private String defaultDashboardFactoryVar = DEFAULT_DASHBOARD_FACTORY_VAR;
@@ -240,66 +201,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			AttributeValueHtmlChartPlugin htmlChartPluginForGetWidgetException)
 	{
 		this.htmlChartPluginForGetWidgetException = htmlChartPluginForGetWidgetException;
-	}
-
-	public HtmlTplDashboardImport getHtmlTplDashboardImport()
-	{
-		return htmlTplDashboardImport;
-	}
-
-	public void setHtmlTplDashboardImport(HtmlTplDashboardImport htmlTplDashboardImport)
-	{
-		this.htmlTplDashboardImport = htmlTplDashboardImport;
-	}
-
-	public String getContextPathPlaceholder()
-	{
-		return contextPathPlaceholder;
-	}
-
-	public void setContextPathPlaceholder(String contextPathPlaceholder)
-	{
-		this.contextPathPlaceholder = contextPathPlaceholder;
-	}
-
-	public String getVersionPlaceholder()
-	{
-		return versionPlaceholder;
-	}
-
-	public void setVersionPlaceholder(String versionPlaceholder)
-	{
-		this.versionPlaceholder = versionPlaceholder;
-	}
-
-	public String getRandomCodePlaceholder()
-	{
-		return randomCodePlaceholder;
-	}
-
-	public void setRandomCodePlaceholder(String randomCodePlaceholder)
-	{
-		this.randomCodePlaceholder = randomCodePlaceholder;
-	}
-
-	public String getExtDashboardInitScript()
-	{
-		return extDashboardInitScript;
-	}
-
-	public void setExtDashboardInitScript(String extDashboardInitScript)
-	{
-		this.extDashboardInitScript = extDashboardInitScript;
-	}
-
-	public String getDashboardVarPlaceholder()
-	{
-		return dashboardVarPlaceholder;
-	}
-
-	public void setDashboardVarPlaceholder(String dashboardVarPlaceholder)
-	{
-		this.dashboardVarPlaceholder = dashboardVarPlaceholder;
 	}
 
 	public String getDefaultDashboardFactoryVar()
@@ -469,11 +370,11 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	{
 		HtmlTplDashboardRenderAttr renderAttr = getHtmlTplDashboardRenderAttrNonNull(renderContext);
 
-		HtmlTplDashboard dashboard = createHtmlTplDashboard(renderContext, dashboardWidget, template);
+		HtmlTplDashboard dashboard = createDashboard(renderContext, dashboardWidget, template);
 
 		try
 		{
-			renderHtmlTplDashboard(renderContext, renderAttr, dashboard);
+			renderDashboard(renderContext, renderAttr, dashboard);
 		}
 		catch (RenderException e)
 		{
@@ -567,7 +468,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @param dashboard
 	 * @throws Throwable
 	 */
-	protected abstract void renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+	protected abstract void renderDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			HtmlTplDashboard dashboard) throws Throwable;
 
 	/**
@@ -672,7 +573,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @param tmpRenderContextVarName
 	 * @throws IOException
 	 */
-	protected void writeHtmlTplDashboardJSVar(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+	protected void writeDashboardJsVar(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			Writer out, HtmlTplDashboard dashboard, String tmpRenderContextVarName) throws IOException
 	{
 		if (StringUtil.isEmpty(dashboard.getVarName()))
@@ -704,7 +605,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @param tmpRenderContextVarName
 	 * @throws IOException
 	 */
-	protected void writeHtmlTplDashboardJSInit(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+	protected void writeDashboardJsInit(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			Writer out, HtmlTplDashboard dashboard, String tmpRenderContextVarName) throws IOException
 	{
 		String varName = dashboard.getVarName();
@@ -713,7 +614,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			throw new IllegalArgumentException();
 
 		getHtmlRenderContextScriptObjectWriter().write(out, renderContext, tmpRenderContextVarName,
-				getHtmlRenderContextIgnoreAttrs(renderContext, renderAttr, out, dashboard));
+				getRenderContextIgnoreAttrs(renderContext, renderAttr, out, dashboard));
 		out.write(varName + "." + Dashboard.PROPERTY_RENDER_CONTEXT + "." + RenderContext.PROPERTY_ATTRIBUTES + " = "
 				+ tmpRenderContextVarName + "." + RenderContext.PROPERTY_ATTRIBUTES + ";");
 		writeNewLine(out);
@@ -731,15 +632,9 @@ public abstract class HtmlTplDashboardWidgetRenderer
 				writeNewLine(out);
 			}
 		}
-
-		if (!StringUtil.isEmpty(this.extDashboardInitScript))
-		{
-			out.write(replaceDashboardVarPlaceholder(this.extDashboardInitScript, varName));
-			writeNewLine(out);
-		}
 	}
 
-	protected Collection<String> getHtmlRenderContextIgnoreAttrs(RenderContext renderContext,
+	protected Collection<String> getRenderContextIgnoreAttrs(RenderContext renderContext,
 			HtmlTplDashboardRenderAttr renderAttr, Writer out, HtmlTplDashboard dashboard)
 	{
 		Collection<String> ignores = renderAttr.getIgnoreRenderAttrs(renderContext);
@@ -764,7 +659,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 *            如果为{@code null}，则使用{@linkplain #getDefaultDashboardFactoryVar()}
 	 * @throws IOException
 	 */
-	protected void writeHtmlTplDashboardJSFactoryInit(RenderContext renderContext,
+	protected void writeDashboardJsFactoryInit(RenderContext renderContext,
 			HtmlTplDashboardRenderAttr renderAttr, Writer out, HtmlTplDashboard dashboard, String dashboardFactoryVar)
 			throws IOException
 	{
@@ -796,7 +691,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @param dashboard
 	 * @throws IOException
 	 */
-	protected void writeHtmlTplDashboardJSRender(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+	protected void writeDashboardJsRender(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			Writer out, HtmlTplDashboard dashboard) throws IOException
 	{
 		String varName = dashboard.getVarName();
@@ -809,7 +704,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	}
 
 	/**
-	 * 写看板导入项。
+	 * 写{@linkplain HtmlTplDashboard}导入项。
 	 * 
 	 * @param out
 	 * @param renderContext
@@ -821,8 +716,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	protected void writeDashboardImport(Writer out, RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			HtmlTplDashboard dashboard, String importExclude) throws IOException
 	{
-		WebContext webContext = renderAttr.getWebContext(renderContext);
-
 		List<String> excludes = StringUtil.splitWithTrim(importExclude, ",");
 
 		// 后台生成的样式应该放在最开头，确保页面生成的、用户自定义的css有更高优先级
@@ -832,28 +725,21 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			writeDashboardThemeStyle(renderContext, renderAttr, out, dashboard);
 		}
 
-		if (this.htmlTplDashboardImport != null)
+		List<HtmlTplDashboardImport> importList = renderAttr.getImportList(renderContext);
+
+		if (importList != null)
 		{
-			List<ImportItem> importItems = this.htmlTplDashboardImport.getImportItems();
-
-			if (importItems != null)
+			for (HtmlTplDashboardImport impt : importList)
 			{
-				String randomCode = genRandomCode();
+				String name = impt.getName();
 
-				for (ImportItem impt : importItems)
-				{
-					String name = impt.getName();
+				if (excludes.contains(name))
+					continue;
 
-					if (excludes.contains(name))
-						continue;
+				String content = impt.getContent();
 
-					String content = replaceContextPathPlaceholder(impt.getContent(), webContext.getContextPath());
-					content = replaceVersionPlaceholder(content, Global.VERSION);
-					content = replaceRandomCodePlaceholder(content, randomCode);
-
-					writeNewLine(out);
-					out.write(content);
-				}
+				writeNewLine(out);
+				out.write(content);
 			}
 		}
 	}
@@ -872,12 +758,12 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @return
 	 * @throws IOException
 	 */
-	protected List<String> writeHtmlChartPluginScriptsResolveImport(RenderContext renderContext,
+	protected List<String> writeChartPluginScriptsResolveImport(RenderContext renderContext,
 			HtmlTplDashboardRenderAttr renderAttr, Writer out, List<HtmlChartWidget> htmlChartWidgets)
 			throws IOException
 	{
 		if (this.importHtmlChartPluginVarNameResolver == null)
-			return writeHtmlChartPluginScripts(renderContext, renderAttr, out, htmlChartWidgets);
+			return writeChartPluginScripts(renderContext, renderAttr, out, htmlChartWidgets);
 
 		List<String> pluginVarNames = new ArrayList<>(htmlChartWidgets.size());
 
@@ -900,7 +786,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @return
 	 * @throws IOException
 	 */
-	protected List<String> writeHtmlChartPluginScripts(RenderContext renderContext,
+	protected List<String> writeChartPluginScripts(RenderContext renderContext,
 			HtmlTplDashboardRenderAttr renderAttr, Writer out, List<HtmlChartWidget> htmlChartWidgets)
 			throws IOException
 	{
@@ -944,7 +830,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @param chartWidget
 	 * @return
 	 */
-	protected HtmlChart writeHtmlChart(RenderContext renderContext, HtmlChartWidget chartWidget) throws RenderException
+	protected HtmlChart writeChart(RenderContext renderContext, HtmlChartWidget chartWidget) throws RenderException
 	{
 		return chartWidget.render(renderContext);
 	}
@@ -1040,85 +926,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	}
 
 	/**
-	 * 替换字符串中的上下文占位符为真实的上下文。
-	 * 
-	 * @param str
-	 * @param contextPath
-	 * @return
-	 */
-	protected String replaceContextPathPlaceholder(String str, String contextPath)
-	{
-		if (StringUtil.isEmpty(str))
-			return str;
-
-		if (contextPath == null)
-			contextPath = "";
-
-		return str.replace(getContextPathPlaceholder(), contextPath);
-	}
-
-	/**
-	 * 替换字符串中的版本占位符为真实的版本。
-	 * 
-	 * @param str
-	 * @param version
-	 * @return
-	 */
-	protected String replaceVersionPlaceholder(String str, String version)
-	{
-		if (StringUtil.isEmpty(str))
-			return str;
-
-		if (version == null)
-			version = "";
-
-		return str.replace(getVersionPlaceholder(), version);
-	}
-
-	/**
-	 * 替换字符串中的随机码占位符为真实的随机码。
-	 * 
-	 * @param str
-	 * @param randomCode
-	 * @return
-	 */
-	protected String replaceRandomCodePlaceholder(String str, String randomCode)
-	{
-		if (StringUtil.isEmpty(str))
-			return str;
-
-		if (randomCode == null)
-			randomCode = "";
-
-		return str.replace(getRandomCodePlaceholder(), randomCode);
-	}
-
-	/**
-	 * 生成一个随机码。
-	 * 
-	 * @return
-	 */
-	protected String genRandomCode()
-	{
-		return "rc" + Long.toHexString(System.currentTimeMillis());
-	}
-
-	/**
-	 * 替换字符串中的看板变量名占位符为真实的看板变量名。
-	 * 
-	 * @param str
-	 * @param dashboardVar
-	 * @return
-	 */
-	protected String replaceDashboardVarPlaceholder(String str, String dashboardVar)
-	{
-		if (StringUtil.isEmpty(str))
-			return str;
-
-		return str.replace(getDashboardVarPlaceholder(), dashboardVar);
-	}
-
-	/**
 	 * 写脚本开始标签。
 	 * 
 	 * @param out
@@ -1159,8 +966,8 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @param template
 	 * @return
 	 */
-	protected HtmlTplDashboard createHtmlTplDashboard(RenderContext renderContext,
-			HtmlTplDashboardWidget dashboardWidget, String template)
+	protected HtmlTplDashboard createDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
+			String template)
 	{
 		HtmlTplDashboard dashboard = new HtmlTplDashboard();
 

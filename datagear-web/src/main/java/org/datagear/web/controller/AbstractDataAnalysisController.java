@@ -40,12 +40,14 @@ import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlChartWidget;
+import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
+import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.WebUtils;
 
@@ -156,10 +158,11 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	{
 		RenderContext renderContext = new DefaultRenderContext(resolveParamValues(request));
 
+		List<HtmlTplDashboardImport> importList = buildHtmlTplDashboardImports(request);
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
 		User user = WebUtils.getUser(request, response).cloneNoPassword();
 
-		inflateRenderContext(renderContext, renderAttr, responseWriter, webContext, dashboardTheme, user);
+		inflateRenderContext(renderContext, renderAttr, responseWriter, importList, webContext, dashboardTheme, user);
 
 		return renderContext;
 	}
@@ -170,18 +173,20 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @param renderContext
 	 * @param renderAttr
 	 * @param out
+	 * @param importList
 	 * @param webContext
 	 * @param dashboardTheme
 	 * @param user
 	 */
 	protected void inflateRenderContext(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
-			WebContext webContext, DashboardTheme dashboardTheme, User user)
+			List<HtmlTplDashboardImport> importList, WebContext webContext, DashboardTheme dashboardTheme, User user)
 	{
-		renderAttr.inflate(renderContext, out, webContext, dashboardTheme);
+		renderAttr.inflate(renderContext, out, importList, webContext, dashboardTheme);
 		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, AnalysisUser.valueOf(user));
 
 		renderAttr.setIgnoreRenderAttrs(renderContext,
-				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getHtmlTitleHandlerName(),
+				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getImportListName(),
+						renderAttr.getHtmlTitleHandlerName(),
 						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
 	}
 
@@ -193,6 +198,59 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		renderAttr.setHtmlTitleHandlerName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_TITLE_HANDLER);
 
 		return renderAttr;
+	}
+
+	/**
+	 * 构建看板导入列表。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardImports(HttpServletRequest request)
+	{
+		List<HtmlTplDashboardImport> impts = new ArrayList<>();
+
+		String contextPath = WebUtils.getContextPath(request);
+		String rp = "rc" + Long.toHexString(System.currentTimeMillis());
+
+		String staticPrefix = contextPath + "/static";
+		String libPrefix = staticPrefix + "/lib";
+		String cssPrefix = staticPrefix + "/css";
+		String scriptPrefix = staticPrefix + "/script";
+
+		// CSS
+		impts.add(HtmlTplDashboardImport.valueOfLinkCss("dataTable",
+						libPrefix + "/DataTables-1.11.3/css/datatables.min.css"));
+		impts.add(HtmlTplDashboardImport.valueOfLinkCss("datetimepicker",
+				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
+		impts.add(HtmlTplDashboardImport.valueOfLinkCss("dashboardStyle",
+				cssPrefix + "/analysis.css?v=" + Global.VERSION));
+
+		// JS
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("jquery", libPrefix + "/jquery-3.6.0/jquery-3.6.0.min.js"));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("echarts", libPrefix + "/echarts-5.2.2/echarts.min.js"));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("wordcloud",
+				libPrefix + "/echarts-wordcloud-2.0.0/echarts-wordcloud.min.js"));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("liquidfill",
+				libPrefix + "/echarts-liquidfill-3.0.0/echarts-liquidfill.min.js"));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("dataTable",
+						libPrefix + "/DataTables-1.11.3/js/datatables.min.js"));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("datetimepicker",
+				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("chartFactory",
+						scriptPrefix + "/chartFactory.js?v=" + Global.VERSION));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("dashboardFactory",
+				scriptPrefix + "/dashboardFactory.js?v=" + Global.VERSION));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("serverTime",
+						contextPath + "/dashboard/serverTime.js?v=" + rp));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("chartSupport",
+						scriptPrefix + "/chartSupport.js?v=" + Global.VERSION));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("chartSetting",
+						scriptPrefix + "/chartSetting.js?v=" + Global.VERSION));
+		impts.add(HtmlTplDashboardImport.valueOfJavaScript("chartPluginManager",
+				contextPath + "/chartPlugin/chartPluginManager.js?v=" + Global.VERSION));
+
+		return impts;
 	}
 
 	/**

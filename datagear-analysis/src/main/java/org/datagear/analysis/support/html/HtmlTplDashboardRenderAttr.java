@@ -9,6 +9,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DashboardTheme;
@@ -31,6 +32,9 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	 */
 	public static final String ATTR_NAME = HtmlTplDashboardRenderAttr.class.getName();
 
+	/** 属性名：导入项列表 */
+	private String importListName = "importList";
+
 	/** 属性名：Web上下文 */
 	private String webContextName = "webContext";
 
@@ -43,6 +47,16 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	public HtmlTplDashboardRenderAttr()
 	{
 		super();
+	}
+
+	public String getImportListName()
+	{
+		return importListName;
+	}
+
+	public void setImportListName(String importListName)
+	{
+		this.importListName = importListName;
 	}
 
 	public String getWebContextName()
@@ -73,6 +87,55 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	public void setHtmlTitleHandlerName(String htmlTitleHandlerName)
 	{
 		this.htmlTitleHandlerName = htmlTitleHandlerName;
+	}
+
+	/**
+	 * 获取{@linkplain HtmlTplDashboardImport}列表。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public List<HtmlTplDashboardImport> getImportListNonNull(RenderContext renderContext)
+	{
+		List<HtmlTplDashboardImport> importList = getImportList(renderContext);
+
+		if (importList == null)
+			throw new RenderException("The [" + this.importListName + "] attribute must be set");
+
+		return importList;
+	}
+
+	/**
+	 * 获取{@linkplain HtmlTplDashboardImport}列表，没有则返回{@code null}。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public List<HtmlTplDashboardImport> getImportList(RenderContext renderContext)
+	{
+		return renderContext.getAttribute(this.importListName);
+	}
+
+	/**
+	 * 设置{@linkplain HtmlTplDashboardImport}列表。
+	 * 
+	 * @param renderContext
+	 * @param renderStyle
+	 */
+	public void setImportList(RenderContext renderContext, List<HtmlTplDashboardImport> webContext)
+	{
+		renderContext.setAttribute(this.importListName, webContext);
+	}
+
+	/**
+	 * 移除{@linkplain HtmlTplDashboardImport}列表。
+	 * 
+	 * @param renderContext
+	 * @return 移除对象
+	 */
+	public List<HtmlTplDashboardImport> removeImportList(RenderContext renderContext)
+	{
+		return renderContext.removeAttribute(this.importListName);
 	}
 
 	/**
@@ -211,13 +274,15 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	 * 
 	 * @param renderContext
 	 * @param htmlWriter
+	 * @param importList
 	 * @param webContext
 	 * @param dashboardTheme
 	 */
-	public void inflate(RenderContext renderContext, Writer htmlWriter, WebContext webContext,
-			DashboardTheme dashboardTheme)
+	public void inflate(RenderContext renderContext, Writer htmlWriter, List<HtmlTplDashboardImport> importList,
+			WebContext webContext, DashboardTheme dashboardTheme)
 	{
 		HtmlTplDashboardRenderAttr.set(renderContext, this);
+		setImportList(renderContext, importList);
 		setHtmlWriter(renderContext, htmlWriter);
 		setWebContext(renderContext, webContext);
 		setDashboardTheme(renderContext, dashboardTheme);

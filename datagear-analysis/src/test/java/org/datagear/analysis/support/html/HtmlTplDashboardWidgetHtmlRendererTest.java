@@ -8,6 +8,7 @@
 package org.datagear.analysis.support.html;
 
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,6 @@ import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
-import org.datagear.analysis.support.html.HtmlTplDashboardImport.ImportItem;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.ChartInfo;
@@ -59,14 +59,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);
 
-		List<ImportItem> dashboardImports = new ArrayList<>();
-		dashboardImports.add(new ImportItem("jquery", IMPORT_CONTENT_JQUERY));
-		dashboardImports.add(new ImportItem("util", IMPORT_CONTENT_UTIL));
-		dashboardImports.add(new ImportItem("theme", IMPORT_CONTENT_THEME));
-		dashboardImports.add(new ImportItem("style", IMPORT_CONTENT_STYLE));
-
 		this.renderer = new HtmlTplDashboardWidgetHtmlRenderer(resManager, chartWidgetSource);
-		this.renderer.setHtmlTplDashboardImport(new SimpleHtmlTplDashboardImport(dashboardImports));
 	}
 
 	@Test
@@ -75,9 +68,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
 
 		RenderContext renderContext = new DefaultRenderContext();
-		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 		StringWriter out = new StringWriter();
-		renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+		buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 		HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 
@@ -87,7 +79,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	}
 
 	@Test
-	public void renderHtmlTplDashboardTest() throws Exception
+	public void renderDashboardTest() throws Exception
 	{
 		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
 
@@ -97,13 +89,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					+ " dg-dashboard-import-exclude=\"jquery\"><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard,
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
 					IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
@@ -126,13 +117,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					+ " dg-dashboard-import-exclude=jquery><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard,
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
 					IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
@@ -155,13 +145,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					+ " dg-dashboard-import-exclude='jquery'><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard,
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
 					IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
@@ -184,13 +173,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					+ " dg-dashboard-import-exclude='jquery,theme, style'><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard,
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
 					IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
@@ -212,13 +200,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard,
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
 					IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
@@ -258,13 +245,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					+ HtmlChartPlugin.HTML_NEW_LINE + "</body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard,
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
 					IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
@@ -302,15 +288,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html><head><title>abc</title></head><body><title>sdf</title></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 
@@ -323,15 +308,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 
@@ -343,15 +327,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 
@@ -363,15 +346,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html><head><title/></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 
@@ -383,15 +365,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html><head><title></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 
@@ -403,12 +384,11 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 
@@ -423,12 +403,11 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html><head></head></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 
@@ -445,12 +424,11 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
-			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext(""), SimpleDashboardThemeSource.THEME_LIGHT);
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderHtmlTplDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 
@@ -461,6 +439,27 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
 			Assert.assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
 		}
+	}
+
+	protected HtmlTplDashboardRenderAttr buildHtmlTplDashboardRenderAttr(RenderContext renderContext, Writer out)
+	{
+		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+		renderAttr.inflate(renderContext, out, buildImportList(), new WebContext(""),
+				SimpleDashboardThemeSource.THEME_LIGHT);
+
+		return renderAttr;
+	}
+
+	protected List<HtmlTplDashboardImport> buildImportList()
+	{
+		List<HtmlTplDashboardImport> list = new ArrayList<>();
+
+		list.add(HtmlTplDashboardImport.valueOf("jquery", IMPORT_CONTENT_JQUERY));
+		list.add(HtmlTplDashboardImport.valueOf("util", IMPORT_CONTENT_UTIL));
+		list.add(HtmlTplDashboardImport.valueOf("theme", IMPORT_CONTENT_THEME));
+		list.add(HtmlTplDashboardImport.valueOf("style", IMPORT_CONTENT_STYLE));
+
+		return list;
 	}
 
 	protected HtmlTplDashboardWidget createHtmlTplDashboardWidget()
