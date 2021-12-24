@@ -52,6 +52,7 @@ public class DefaultFilterHandler implements FilterHandler
 		this.out = out;
 	}
 
+	@Override
 	public Writer getOut()
 	{
 		return out;
@@ -66,24 +67,6 @@ public class DefaultFilterHandler implements FilterHandler
 	public boolean isAborted()
 	{
 		return false;
-	}
-
-	@Override
-	public void write(char c) throws IOException
-	{
-		this.out.write(c);
-	}
-
-	@Override
-	public void write(int c) throws IOException
-	{
-		this.out.write(c);
-	}
-
-	@Override
-	public void write(String str) throws IOException
-	{
-		this.out.write(str);
 	}
 
 	@Override
@@ -134,6 +117,39 @@ public class DefaultFilterHandler implements FilterHandler
 	@Override
 	public void afterWrite(Reader in) throws IOException
 	{
+	}
+
+	/**
+	 * 向{@linkplain #getOut()}中写入字符。
+	 * 
+	 * @param c
+	 * @throws IOException
+	 */
+	public void write(char c) throws IOException
+	{
+		this.out.write(c);
+	}
+
+	/**
+	 * 向{@linkplain #getOut()}中写入字符。
+	 * 
+	 * @param c
+	 * @throws IOException
+	 */
+	public void write(int c) throws IOException
+	{
+		this.out.write(c);
+	}
+
+	/**
+	 * 向{@linkplain #getOut()}中写入字符串。
+	 * 
+	 * @param str
+	 * @throws IOException
+	 */
+	public void write(String str) throws IOException
+	{
+		this.out.write(str);
 	}
 
 	/**

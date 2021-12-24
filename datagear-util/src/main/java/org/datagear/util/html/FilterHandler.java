@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * HTML过滤处理器。
+ * HTML过滤处理器，用于处理{@linkplain HtmlFilter}过滤的HTML内容。
  * 
  * @author datagear@163.com
  *
@@ -22,42 +22,31 @@ import java.util.Map;
 public interface FilterHandler
 {
 	/**
-	 * 写入从HTML输入流中读取的字符。
+	 * 获取HTML输出流。
+	 * <p>
+	 * 这个输出流将用于输出过滤的HTML内容。
+	 * </p>
+	 * <p>
+	 * 如果不需要输出，可以返回{@linkplain NopWriter}。
+	 * </p>
 	 * 
-	 * @param c
-	 * @throws IOException
+	 * @return
 	 */
-	public void write(char c) throws IOException;
-
-	/**
-	 * 写入从HTML输入流中读取的字符。
-	 * 
-	 * @param c
-	 * @throws IOException
-	 */
-	public void write(int c) throws IOException;
-
-	/**
-	 * 写入从HTML输入流中读取的字符串。
-	 * 
-	 * @param str
-	 * @throws IOException
-	 */
-	public void write(String str) throws IOException;
+	Writer getOut();
 
 	/**
 	 * 获取一个可用于存储新标签属性的映射表。
 	 * 
 	 * @return
 	 */
-	public Map<String, String> availableTagAttrs();
+	Map<String, String> availableTagAttrs();
 
 	/**
 	 * 获取一个可用于存储新标签属性Token的列表。
 	 * 
 	 * @return
 	 */
-	public List<String> availableTagAttrTokens();
+	List<String> availableTagAttrTokens();
 
 	/**
 	 * 是否中止过滤。
@@ -67,7 +56,7 @@ public interface FilterHandler
 	 * 
 	 * @return
 	 */
-	public boolean isAborted();
+	boolean isAborted();
 
 	/**
 	 * 开始写入前置处理函数。

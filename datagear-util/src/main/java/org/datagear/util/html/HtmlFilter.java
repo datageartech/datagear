@@ -9,6 +9,7 @@ package org.datagear.util.html;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +91,9 @@ public class HtmlFilter
 	{
 		handler.beforeWrite(in);
 
+		Writer out = handler.getOut();
 		int c = -1;
+
 		while ((c = in.read()) > -1)
 		{
 			if (c == TAG_START_CHAR)
@@ -122,7 +125,7 @@ public class HtmlFilter
 					break;
 			}
 			else
-				handler.write(c);
+				out.write(c);
 		}
 
 		handler.afterWrite(in);
@@ -251,9 +254,11 @@ public class HtmlFilter
 	protected void filterAfterHtmlComment(Reader in, FilterHandler handler, String tagName,
 			String afterTagName) throws IOException
 	{
-		handler.write(TAG_START_CHAR);
-		handler.write(tagName);
-		writeIfNonNull(handler, afterTagName);
+		Writer out = handler.getOut();
+
+		out.write(TAG_START_CHAR);
+		out.write(tagName);
+		writeIfNonNull(out, afterTagName);
 
 		// <!---->
 		// <!--comment-->
@@ -272,20 +277,22 @@ public class HtmlFilter
 	 */
 	protected void filterAfterHtmlComment(Reader in, FilterHandler handler) throws IOException
 	{
+		Writer out = handler.getOut();
 		int c = -1;
+
 		while ((c = in.read()) > -1)
 		{
-			handler.write(c);
+			out.write(c);
 
 			if (c == '-')
 			{
 				c = in.read();
-				writeIfValid(handler, c);
+				writeIfValid(out, c);
 
 				if (c == '-')
 				{
 					c = in.read();
-					writeIfValid(handler, c);
+					writeIfValid(out, c);
 
 					if (c == TAG_END_CHAR)
 						break;
@@ -307,32 +314,34 @@ public class HtmlFilter
 	protected String filterAfterTag(Reader in, FilterHandler handler, String tagName, String afterTagName)
 			throws IOException
 	{
+		Writer out = handler.getOut();
+
 		handler.beforeWriteTagStart(in, tagName);
 
-		handler.write(TAG_START_CHAR);
+		out.write(TAG_START_CHAR);
 
 		Map<String, String> tagAttrs = Collections.emptyMap();
 
 		if (afterTagName == null)
 		{
-			handler.write(tagName);
+			out.write(tagName);
 			handler.beforeWriteTagEnd(in, tagName, null, tagAttrs);
 
 			return afterTagName;
 		}
 		else if (afterTagName.equals(TAG_END_STR) || afterTagName.equals(TAG_END_STR_SELF_CLOSE))
 		{
-			handler.write(tagName);
+			out.write(tagName);
 			handler.beforeWriteTagEnd(in, tagName, afterTagName, tagAttrs);
-			handler.write(afterTagName);
+			out.write(afterTagName);
 			handler.afterWriteTagEnd(in, tagName, afterTagName);
 
 			return afterTagName;
 		}
 		else
 		{
-			handler.write(tagName);
-			handler.write(afterTagName);
+			out.write(tagName);
+			out.write(afterTagName);
 
 			String tagEnd = null;
 
@@ -351,7 +360,7 @@ public class HtmlFilter
 
 			if (tagEnd != null)
 			{
-				handler.write(tagEnd);
+				out.write(tagEnd);
 				handler.afterWriteTagEnd(in, tagName, tagEnd);
 			}
 
@@ -372,7 +381,9 @@ public class HtmlFilter
 	{
 		String tagEnd = null;
 
+		Writer out = handler.getOut();
 		int c = -1;
+
 		while ((c = in.read()) > -1)
 		{
 			if (c == TAG_END_CHAR)
@@ -382,8 +393,8 @@ public class HtmlFilter
 			}
 			else if (c == '\'' || c == '"')
 			{
-				handler.write(c);
-				filterAfterQuote(in, handler, c, -1);
+				out.write(c);
+				writeAfterQuote(in, out, c, -1);
 			}
 			else if (c == '/')
 			{
@@ -396,18 +407,18 @@ public class HtmlFilter
 				}
 				else if (isWhitespace(c0))
 				{
-					handler.write(c);
-					handler.write(c0);
+					out.write(c);
+					out.write(c0);
 				}
 				else
 				{
-					handler.write(c);
-					writeIfValid(handler, c0);
+					out.write(c);
+					writeIfValid(out, c0);
 				}
 			}
 			else
 			{
-				handler.write(c);
+				out.write(c);
 			}
 		}
 
@@ -432,6 +443,7 @@ public class HtmlFilter
 		List<String> tagAttrTokens = handler.availableTagAttrTokens();
 		StringBuilder token = createStringBuilder();
 
+		Writer out = handler.getOut();
 		int c = -1;
 
 		while ((c = in.read()) > -1)
@@ -443,7 +455,7 @@ public class HtmlFilter
 			}
 			if (isWhitespace(c))
 			{
-				handler.write(c);
+				out.write(c);
 
 				if (isNotEmpty(token))
 				{
@@ -453,7 +465,7 @@ public class HtmlFilter
 			}
 			else if (c == '=')
 			{
-				handler.write(c);
+				out.write(c);
 
 				if (isNotEmpty(token))
 				{
@@ -475,8 +487,8 @@ public class HtmlFilter
 				}
 				else if (isWhitespace(c0))
 				{
-					handler.write(c);
-					handler.write(c0);
+					out.write(c);
+					out.write(c0);
 
 					appendChar(token, c);
 					tagAttrTokens.add(token.toString());
@@ -484,8 +496,8 @@ public class HtmlFilter
 				}
 				else
 				{
-					handler.write(c);
-					writeIfValid(handler, c0);
+					out.write(c);
+					writeIfValid(out, c0);
 
 					appendChar(token, c);
 					appendCharIfValid(token, c0);
@@ -493,14 +505,14 @@ public class HtmlFilter
 			}
 			else if (c == '\'' || c == '"')
 			{
-				handler.write(c);
+				out.write(c);
 				appendChar(token, c);
 
-				filterAfterQuote(in, handler, c, -1, token);
+				writeAfterQuote(in, out, c, -1, token);
 			}
 			else
 			{
-				handler.write(c);
+				out.write(c);
 				appendChar(token, c);
 			}
 		}
@@ -545,31 +557,33 @@ public class HtmlFilter
 	 */
 	protected void filterAfterScriptCloseTag(Reader in, FilterHandler handler) throws IOException
 	{
+		Writer out = handler.getOut();
 		int c = -1;
+
 		while ((c = in.read()) > -1)
 		{
 			// 字符串
 			if (c == '\'' || c == '"' || c == '`')
 			{
-				handler.write(c);
-				filterAfterQuote(in, handler, c, '\\');
+				out.write(c);
+				writeAfterQuote(in, out, c, '\\');
 			}
 			else if (c == '/')
 			{
-				handler.write(c);
+				out.write(c);
 
 				int c0 = in.read();
-				writeIfValid(handler, c0);
+				writeIfValid(out, c0);
 
 				// 行注释
 				if (c0 == '/')
 				{
-					filterAfterLineComment(in, handler);
+					writeAfterLineComment(in, out);
 				}
 				// 块注释
 				else if (c0 == '*')
 				{
-					filterAfterBlockComment(in, handler);
+					writeAfterBlockComment(in, out);
 				}
 			}
 			else if (c == TAG_START_CHAR)
@@ -585,13 +599,13 @@ public class HtmlFilter
 				}
 				else
 				{
-					handler.write(c);
-					handler.write(tagName);
-					writeIfNonNull(handler, afterTagName);
+					out.write(c);
+					out.write(tagName);
+					writeIfNonNull(out, afterTagName);
 				}
 			}
 			else
-				handler.write(c);
+				out.write(c);
 		}
 	}
 
@@ -603,31 +617,33 @@ public class HtmlFilter
 	 */
 	protected void filterAfterStyleCloseTag(Reader in, FilterHandler handler) throws IOException
 	{
+		Writer out = handler.getOut();
 		int c = -1;
+
 		while ((c = in.read()) > -1)
 		{
 			// 字符串
 			if (c == '\'' || c == '"')
 			{
-				handler.write(c);
-				filterAfterQuote(in, handler, c, '\\');
+				out.write(c);
+				writeAfterQuote(in, out, c, '\\');
 			}
 			else if (c == '/')
 			{
-				handler.write(c);
+				out.write(c);
 
 				int c0 = in.read();
-				writeIfValid(handler, c0);
+				writeIfValid(out, c0);
 
 				// 行注释
 				if (c0 == '/')
 				{
-					filterAfterLineComment(in, handler);
+					writeAfterLineComment(in, out);
 				}
 				// 块注释
 				else if (c0 == '*')
 				{
-					filterAfterBlockComment(in, handler);
+					writeAfterBlockComment(in, out);
 				}
 			}
 			else if (c == TAG_START_CHAR)
@@ -643,13 +659,13 @@ public class HtmlFilter
 				}
 				else
 				{
-					handler.write(c);
-					handler.write(tagName);
-					writeIfNonNull(handler, afterTagName);
+					out.write(c);
+					out.write(tagName);
+					writeIfNonNull(out, afterTagName);
 				}
 			}
 			else
-				handler.write(c);
+				out.write(c);
 		}
 	}
 
@@ -657,16 +673,16 @@ public class HtmlFilter
 	 * 写完行注释后停止。
 	 * 
 	 * @param in
-	 * @param handler
+	 * @param out
 	 * @throws IOException
 	 */
-	protected void filterAfterLineComment(Reader in, FilterHandler handler) throws IOException
+	protected void writeAfterLineComment(Reader in, Writer out) throws IOException
 	{
 		int c = -1;
 
 		while ((c = in.read()) > -1)
 		{
-			handler.write(c);
+			out.write(c);
 
 			if (c == '\n' || c == '\r')
 				break;
@@ -677,20 +693,20 @@ public class HtmlFilter
 	 * 写完块注释后停止。
 	 * 
 	 * @param in
-	 * @param handler
+	 * @param out
 	 * @throws IOException
 	 */
-	protected void filterAfterBlockComment(Reader in, FilterHandler handler) throws IOException
+	protected void writeAfterBlockComment(Reader in, Writer out) throws IOException
 	{
 		int c = -1;
 		while ((c = in.read()) > -1)
 		{
-			handler.write(c);
+			out.write(c);
 
 			if (c == '*')
 			{
 				int c0 = in.read();
-				writeIfValid(handler, c0);
+				writeIfValid(out, c0);
 
 				if (c0 == '/')
 					break;
@@ -702,21 +718,21 @@ public class HtmlFilter
 	 * 写完引号后停止（比如：{@code "}、{@code '}）。
 	 * 
 	 * @param in
-	 * @param handler
+	 * @param out
 	 * @param quoteChar
 	 * @throws IOException
 	 */
-	protected void filterAfterQuote(Reader in, FilterHandler handler, int quoteChar, int escapeChar)
+	protected void writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar)
 			throws IOException
 	{
 		int c = -1;
 
 		while ((c = in.read()) > -1)
 		{
-			handler.write(c);
+			out.write(c);
 
 			if(c == escapeChar)
-				writeIfValid(handler, in.read());
+				writeIfValid(out, in.read());
 			else if (c == quoteChar)
 			{
 				break;
@@ -725,27 +741,29 @@ public class HtmlFilter
 	}
 
 	/**
-	 * 写完引号后停止（比如：{@code "}、{@code '}）。
+	 * 写完引号后停止（比如：{@code "}、{@code '}），并将写入内容复制至{@code sb}。
 	 * 
 	 * @param in
-	 * @param handler
+	 * @param out
 	 * @param quoteChar
+	 * @param escapeChar
+	 * @param sb
 	 * @throws IOException
 	 */
-	protected void filterAfterQuote(Reader in, FilterHandler handler, int quoteChar, int escapeChar,
+	protected void writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar,
 			StringBuilder sb) throws IOException
 	{
 		int c = -1;
 
 		while ((c = in.read()) > -1)
 		{
-			handler.write(c);
+			out.write(c);
 			appendChar(sb, c);
 
 			if (c == escapeChar)
 			{
 				int c0 = in.read();
-				writeIfValid(handler, c0);
+				writeIfValid(out, c0);
 				appendCharIfValid(sb, c0);
 			}
 			else if (c == quoteChar)
@@ -781,28 +799,27 @@ public class HtmlFilter
 	/**
 	 * 仅在 {@code c > -1} 时写入。
 	 * 
+	 * @param out
 	 * @param c
 	 * @throws IOException
 	 */
-	public void writeIfValid(FilterHandler handler, int c) throws IOException
+	public void writeIfValid(Writer out, int c) throws IOException
 	{
 		if (c > -1)
-			handler.write(c);
+			out.write(c);
 	}
 
 	/**
 	 * 仅在 {@code str != null} 时写入。
-	 * <p>
-	 * 它内部调用{@linkplain #write(String)}。
-	 * </p>
 	 * 
+	 * @param out
 	 * @param str
 	 * @throws IOException
 	 */
-	public void writeIfNonNull(FilterHandler handler, String str) throws IOException
+	public void writeIfNonNull(Writer out, String str) throws IOException
 	{
 		if (str != null)
-			handler.write(str);
+			out.write(str);
 	}
 
 	/**

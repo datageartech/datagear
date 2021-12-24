@@ -38,6 +38,10 @@ public class CharsetFilterHandler extends DefaultFilterHandler
 
 	private boolean _aborted = false;
 
+	/**
+	 * 创建{@linkplain CharsetFilterHandler}，{@linkplain #getOut()}为{@linkplain NopWriter}，
+	 * {@linkplain #isAbortIfResolved()}为{@code true}
+	 */
 	public CharsetFilterHandler()
 	{
 		this(NopWriter.NOP_WRITER);

@@ -25,6 +25,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHa
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.DefaultFilterHandler;
+import org.datagear.util.html.StringBuilderCopyWriter;
 
 /**
  * 使用原生HTML网页作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
@@ -260,8 +261,11 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	{
 		DashboardInfo dashboardInfo = new DashboardInfo();
 
+		StringBuilderCopyWriter out = new StringBuilderCopyWriter(renderAttr.getHtmlWriterNonNull(renderContext),
+				false);
+
 		DashboardFilterHandler filterHandler = new DashboardFilterHandler(
-				renderAttr.getHtmlWriterNonNull(renderContext), renderContext, renderAttr, dashboard,
+				out, renderContext, renderAttr, dashboard,
 				dashboardInfo);
 		getHtmlFilter().filter(in, filterHandler);
 
@@ -379,10 +383,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		private boolean inBodyTag = false;
 		private boolean dashboardImportWritten = false;
 		private boolean dashboardScriptWritten = false;
-		private StringBuilder titleTagContent = new StringBuilder();
 
-		public DashboardFilterHandler(Writer out, RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-				HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
+		public DashboardFilterHandler(StringBuilderCopyWriter out, RenderContext renderContext,
+				HtmlTplDashboardRenderAttr renderAttr, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
 		{
 			super(out);
 			this.renderContext = renderContext;
@@ -412,33 +415,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 
 		@Override
-		public void write(char c) throws IOException
-		{
-			super.write(c);
-
-			if (this.inTitleTag)
-				this.titleTagContent.append(c);
-		}
-
-		@Override
-		public void write(int c) throws IOException
-		{
-			super.write(c);
-
-			if (this.inTitleTag)
-				this.titleTagContent.appendCodePoint(c);
-		}
-
-		@Override
-		public void write(String str) throws IOException
-		{
-			super.write(str);
-
-			if (this.inTitleTag)
-				this.titleTagContent.append(str);
-		}
-
-		@Override
 		public void beforeWriteTagStart(Reader in, String tagName) throws IOException
 		{
 			// </body>前写看板脚本
@@ -460,7 +436,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 					HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
 					if (htmlTitleHandler != null)
 					{
-						String titleContent = htmlTitleHandler.suffix(this.titleTagContent.toString());
+						String titleContent = this.getStringBuilderCopyWriter().getCopyOut().toString();
+						titleContent = htmlTitleHandler.suffix(titleContent);
 						write(titleContent);
 					}
 					
@@ -485,15 +462,18 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			{
 				this.inHeadTag = false;
 				this.inTitleTag = false;
+				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
 			}
 			else if (!this.inHeadTag && this.inBodyTag && equalsIgnoreCase(tagName, "/body"))
 			{
 				this.inBodyTag = false;
 				this.inTitleTag = false;
+				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
 			}
 			else if (this.inHeadTag && this.inTitleTag && equalsIgnoreCase(tagName, "/title"))
 			{
 				this.inTitleTag = false;
+				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
 			}
 		}
 
@@ -532,10 +512,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			{
 				this.inBodyTag = !isSelfCloseTagEnd(tagEnd);
 				this.inTitleTag = false;
+				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
 			}
 			else if (this.inHeadTag && !this.inTitleTag && equalsIgnoreCase(tagName, "title"))
 			{
 				this.inTitleTag = !isSelfCloseTagEnd(tagEnd);
+				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
 			}
 
 			// 优先<head>后，其次<body>后（当没有定义<head>时）插入看板导入库
@@ -554,6 +536,11 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 				writeHtmlTplDashboardScriptWithSet();
 			}
+		}
+
+		protected StringBuilderCopyWriter getStringBuilderCopyWriter()
+		{
+			return (StringBuilderCopyWriter)getOut();
 		}
 
 		protected void writeDashboardImportWithSet() throws IOException
