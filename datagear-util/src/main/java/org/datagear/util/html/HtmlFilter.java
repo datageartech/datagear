@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.util.TextParserSupport;
+
 /**
  * HTML过滤器，过滤和处理HTML标签。
  * <p>
@@ -45,7 +47,7 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class HtmlFilter
+public class HtmlFilter extends TextParserSupport
 {
 	/**
 	 * 标签起始符：{@code <}
@@ -563,7 +565,7 @@ public class HtmlFilter
 		while ((c = in.read()) > -1)
 		{
 			// 字符串
-			if (c == '\'' || c == '"' || c == '`')
+			if (isJsQuote(c))
 			{
 				out.write(c);
 				writeAfterQuote(in, out, c, '\\');
@@ -667,259 +669,5 @@ public class HtmlFilter
 			else
 				out.write(c);
 		}
-	}
-
-	/**
-	 * 写完行注释后停止。
-	 * 
-	 * @param in
-	 * @param out
-	 * @throws IOException
-	 */
-	protected void writeAfterLineComment(Reader in, Writer out) throws IOException
-	{
-		int c = -1;
-
-		while ((c = in.read()) > -1)
-		{
-			out.write(c);
-
-			if (c == '\n' || c == '\r')
-				break;
-		}
-	}
-
-	/**
-	 * 写完块注释后停止。
-	 * 
-	 * @param in
-	 * @param out
-	 * @throws IOException
-	 */
-	protected void writeAfterBlockComment(Reader in, Writer out) throws IOException
-	{
-		int c = -1;
-		while ((c = in.read()) > -1)
-		{
-			out.write(c);
-
-			if (c == '*')
-			{
-				int c0 = in.read();
-				writeIfValid(out, c0);
-
-				if (c0 == '/')
-					break;
-			}
-		}
-	}
-
-	/**
-	 * 写完引号后停止（比如：{@code "}、{@code '}）。
-	 * 
-	 * @param in
-	 * @param out
-	 * @param quoteChar
-	 * @throws IOException
-	 */
-	protected void writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar)
-			throws IOException
-	{
-		int c = -1;
-
-		while ((c = in.read()) > -1)
-		{
-			out.write(c);
-
-			if(c == escapeChar)
-				writeIfValid(out, in.read());
-			else if (c == quoteChar)
-			{
-				break;
-			}
-		}
-	}
-
-	/**
-	 * 写完引号后停止（比如：{@code "}、{@code '}），并将写入内容复制至{@code sb}。
-	 * 
-	 * @param in
-	 * @param out
-	 * @param quoteChar
-	 * @param escapeChar
-	 * @param sb
-	 * @throws IOException
-	 */
-	protected void writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar,
-			StringBuilder sb) throws IOException
-	{
-		int c = -1;
-
-		while ((c = in.read()) > -1)
-		{
-			out.write(c);
-			appendChar(sb, c);
-
-			if (c == escapeChar)
-			{
-				int c0 = in.read();
-				writeIfValid(out, c0);
-				appendCharIfValid(sb, c0);
-			}
-			else if (c == quoteChar)
-			{
-				break;
-			}
-		}
-	}
-
-	/**
-	 * 追加字符。
-	 * 
-	 * @param sb
-	 * @param c
-	 */
-	public void appendChar(StringBuilder sb, int c)
-	{
-		sb.appendCodePoint(c);
-	}
-
-	/**
-	 * 追加字符。
-	 * 
-	 * @param sb
-	 * @param c
-	 */
-	public void appendCharIfValid(StringBuilder sb, int c)
-	{
-		if (c > -1)
-			sb.appendCodePoint(c);
-	}
-
-	/**
-	 * 仅在 {@code c > -1} 时写入。
-	 * 
-	 * @param out
-	 * @param c
-	 * @throws IOException
-	 */
-	public void writeIfValid(Writer out, int c) throws IOException
-	{
-		if (c > -1)
-			out.write(c);
-	}
-
-	/**
-	 * 仅在 {@code str != null} 时写入。
-	 * 
-	 * @param out
-	 * @param str
-	 * @throws IOException
-	 */
-	public void writeIfNonNull(Writer out, String str) throws IOException
-	{
-		if (str != null)
-			out.write(str);
-	}
-
-	/**
-	 * 删除字符串的首尾引号。
-	 * 
-	 * @param str
-	 * @return
-	 */
-	public String deleteQuote(String str)
-	{
-		if (str == null)
-			return str;
-
-		int len = str.length();
-
-		if (len < 2)
-			return str;
-
-		if (str.charAt(0) == '\'')
-		{
-			if (str.charAt(len - 1) == '\'')
-				return str.substring(1, len - 1);
-			else
-				return str;
-		}
-		else if (str.charAt(0) == '"')
-		{
-			if (str.charAt(len - 1) == '"')
-				return str.substring(1, len - 1);
-			else
-				return str;
-		}
-		else
-			return str;
-	}
-
-	/**
-	 * 是否空格字符。
-	 * 
-	 * @param c
-	 * @return
-	 */
-	public boolean isWhitespace(int c)
-	{
-		return Character.isWhitespace(c);
-	}
-
-	/**
-	 * 码点转换为字符串。
-	 * 
-	 * @param codePoint
-	 * @return
-	 */
-	public String codePointToString(int codePoint)
-	{
-		return new String(Character.toChars(codePoint));
-	}
-
-	/**
-	 * {@linkplain StringBuilder}是否为空。
-	 * 
-	 * @param sb
-	 * @return
-	 */
-	public boolean isEmpty(StringBuilder sb)
-	{
-		return (sb == null || sb.length() == 0);
-	}
-
-	/**
-	 * {@linkplain StringBuilder}是否不为空。
-	 * 
-	 * @param sb
-	 * @return
-	 */
-	public boolean isNotEmpty(StringBuilder sb)
-	{
-		return (sb != null && sb.length() > 0);
-	}
-
-	/**
-	 * 清除{@linkplain StringBuilder}。
-	 * 
-	 * @param sb
-	 */
-	public void clear(StringBuilder sb)
-	{
-		if (sb == null || isEmpty(sb))
-			return;
-
-		sb.delete(0, sb.length());
-	}
-
-	/**
-	 * 创建{@linkplain StringBuilder}。
-	 * 
-	 * @return
-	 */
-	public StringBuilder createStringBuilder()
-	{
-		return new StringBuilder();
 	}
 }

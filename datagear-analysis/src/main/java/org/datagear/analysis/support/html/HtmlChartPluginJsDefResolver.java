@@ -10,8 +10,11 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.Writer;
 
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringBuilderWriter;
+import org.datagear.util.TextParserSupport;
 
 /**
  * {@linkplain HtmlChartPlugin}的JS定义格式解析器。
@@ -102,108 +105,100 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 	 */
 	public JsDefContent resolve(Reader reader) throws IOException
 	{
-		StringBuilder jsonBuilder = new StringBuilder();
-		StringBuilder chartRendererBuilder = new StringBuilder();
+		StringBuilderWriter jsonOut = new StringBuilderWriter();
+		StringBuilderWriter chartRendererOut = new StringBuilderWriter();
 
-		resolveJsDefContent(reader, jsonBuilder, chartRendererBuilder);
+		resolveJsDefContent(reader, jsonOut, chartRendererOut);
 
-		return new JsDefContent(jsonBuilder.toString(), chartRendererBuilder.toString());
+		return new JsDefContent(jsonOut.getString(), chartRendererOut.getString());
 	}
 
-	protected void resolveJsDefContent(Reader in, StringBuilder jsonBuilder, StringBuilder chartRendererBuilder)
-			throws IOException
+	protected void resolveJsDefContent(Reader in, Writer jsonOut, Writer chartRendererOut) throws IOException
 	{
-		StringBuilder token = createStringBuilder();
+		StringBuilder prevToken = new StringBuilder();
+		boolean chartRendererResolved = false;
 
-		int c = in.read();
-		while (c > -1)
+		int c = -1;
+		while ((c = in.read()) > -1)
 		{
-			appendChar(jsonBuilder, c);
+			jsonOut.write(c);
 
-			if (isWhitespace(c))
+			if (!chartRendererResolved)
 			{
-				c = in.read();
-			}
-			else if (c == ':')
-			{
-				String tokenStr = token.toString();
-				clear(token);
-
-				if (tokenStr.equals(HtmlChartPlugin.PROPERTY_CHART_RENDERER) || tokenStr.equals(PROPERTY_CHART_RENDERER_DQ)
-						|| tokenStr.equals(PROPERTY_CHART_RENDERER_SQ))
+				// 字符串
+				if (isJsQuote(c))
 				{
-					readChartRendererObjectContent(in, chartRendererBuilder);
-					jsonBuilder.append("{}");
+					prevToken = availableStringBuilder(prevToken);
+					appendChar(prevToken, c);
+
+					writeAfterQuote(in, jsonOut, c, '\\', prevToken);
 				}
-
-				c = in.read();
-			}
-			else if (c == '{' || c == ',')
-			{
-				clear(token);
-				c = in.read();
-			}
-			// 注释
-			else if (c == '/')
-			{
-				c = in.read();
-
-				if (c == '/')
+				else if (c == '{' || c == ',')
 				{
-					appendChar(jsonBuilder, c);
-					c = skipLineComment(in, jsonBuilder, false);
+					prevToken = availableStringBuilder(prevToken);
 				}
-				else if (c == '*')
+				else if (c == '/')
 				{
-					appendChar(jsonBuilder, c);
-					c = skipBlockComment(in, jsonBuilder, false);
+					int c0 = in.read();
+					writeIfValid(jsonOut, c0);
+
+					// 行注释
+					if (c0 == '/')
+					{
+						writeAfterLineComment(in, jsonOut);
+					}
+					// 块注释
+					else if (c0 == '*')
+					{
+						writeAfterBlockComment(in, jsonOut);
+					}
+					else
+					{
+						appendChar(prevToken, c);
+						appendCharIfValid(prevToken, c0);
+					}
+				}
+				else if (c == ':')
+				{
+					String prevStr = prevToken.toString();
+
+					if (prevStr.equals(HtmlChartPlugin.PROPERTY_CHART_RENDERER)
+							|| prevStr.equals(PROPERTY_CHART_RENDERER_DQ) || prevStr.equals(PROPERTY_CHART_RENDERER_SQ))
+					{
+						writeAfterJsObject(in, chartRendererOut, false);
+						jsonOut.append("{}");
+						chartRendererResolved = true;
+					}
 				}
 				else
 				{
-					appendChar(token, '/');
-					appendCharIfValid(token, c);
+					if (!isWhitespace(c))
+						appendChar(prevToken, c);
 				}
-			}
-			// 字符串
-			else if (c == '\'' || c == '"')
-			{
-				appendChar(token, c);
-				c = readQuoted(in, token, c);
-
-				jsonBuilder.append(token.substring(1));
-			}
-			else
-			{
-				appendChar(token, c);
-				c = in.read();
 			}
 		}
 	}
 
 	/**
-	 * 从<code>{</code>之前的位置开始读取{@linkplain JsChartRendererer}内容。
-	 * <p>
-	 * 读取停止位置为：<code>}</code>
-	 * </p>
+	 * 写完下一个JavaScript对象后停止。
 	 * 
 	 * @param in
-	 * @param chartRendererBuilder
+	 * @param out
+	 * @param leftBraceWrote
 	 * @throws IOException
 	 */
-	protected void readChartRendererObjectContent(Reader in, StringBuilder chartRendererBuilder) throws IOException
+	protected void writeAfterJsObject(Reader in, Writer out, boolean leftBraceWrote) throws IOException
 	{
-		int qcount = 0;
+		int qcount = (leftBraceWrote ? 1 : 0);
+		int c = -1;
 
-		int c = in.read();
-
-		while (c > -1)
+		while ((c = in.read()) > -1)
 		{
-			appendChar(chartRendererBuilder, c);
+			out.write(c);
 
 			if (c == '{')
 			{
 				qcount++;
-				c = in.read();
 			}
 			else if (c == '}')
 			{
@@ -211,33 +206,28 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 
 				if (qcount == 0)
 					break;
-				else
-					c = in.read();
 			}
 			// 字符串
-			else if (c == '\'' || c == '"')
+			else if (isJsQuote(c))
 			{
-				c = readQuoted(in, chartRendererBuilder, c);
+				writeAfterQuote(in, out, c, '\\');
 			}
 			// 注释
 			else if (c == '/')
 			{
-				c = in.read();
+				int c0 = in.read();
+				writeIfValid(out, c0);
 
 				// 行注释
-				if (c == '/')
+				if (c0 == '/')
 				{
-					appendChar(chartRendererBuilder, c);
-					c = skipLineComment(in, chartRendererBuilder, false);
+					writeAfterLineComment(in, out);
 				}
 				else if (c == '*')
 				{
-					appendChar(chartRendererBuilder, c);
-					c = skipBlockComment(in, chartRendererBuilder, false);
+					writeAfterBlockComment(in, out);
 				}
 			}
-			else
-				c = in.read();
 		}
 	}
 
