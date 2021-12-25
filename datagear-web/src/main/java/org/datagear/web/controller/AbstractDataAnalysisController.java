@@ -68,7 +68,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX = "DG_";
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain WebContext}。
+	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setWebContextName(String)}。
 	 * <p>
 	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
 	 * </p>
@@ -77,7 +77,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			+ "WEB_CONTEXT";
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain DashboardTheme}。
+	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setDashboardThemeName(String)}。
 	 * <p>
 	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
 	 * </p>
@@ -104,10 +104,34 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			+ "USER";
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain HtmlTitleHandler}。
+	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setHtmlTitleHandlerName(String)}。
 	 */
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_TITLE_HANDLER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 			+ "HTML_TITLE_HANDLER";
+
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setImportListName(String)}。
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_IMPORT_LIST = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "IMPORT_LIST";
+
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setHtmlWriterName(String)}。
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_WRITER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "HTML_WRITER";
+
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setLocaleName(String)}。
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_LOCALE = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "LOCALE";
+
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setIgnoreRenderAttrsName(String)}。
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_IGNORE = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "IGNORE_RENDER_ATTRS_NAME";
 
 	/**
 	 * 看板展示URL的系统主题请求参数名。
@@ -153,46 +177,34 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	protected RenderContext createHtmlRenderContext(HttpServletRequest request, HttpServletResponse response,
-			Writer responseWriter, HtmlTplDashboardRenderAttr renderAttr, WebContext webContext,
-			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer) throws IOException
+			Writer responseWriter, WebContext webContext, HtmlTitleHandler htmlTitleHandler) throws IOException
 	{
 		RenderContext renderContext = new DefaultRenderContext(resolveParamValues(request));
+
+		HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
 
 		List<HtmlTplDashboardImport> importList = buildHtmlTplDashboardImports(request);
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
 		User user = WebUtils.getUser(request, response).cloneNoPassword();
 
-		inflateRenderContext(renderContext, renderAttr, responseWriter, importList, webContext, dashboardTheme, user);
-
-		return renderContext;
-	}
-
-	/**
-	 * 填充{@linkplain RenderContext}的规范属性。
-	 * 
-	 * @param renderContext
-	 * @param renderAttr
-	 * @param out
-	 * @param importList
-	 * @param webContext
-	 * @param dashboardTheme
-	 * @param user
-	 */
-	protected void inflateRenderContext(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
-			List<HtmlTplDashboardImport> importList, WebContext webContext, DashboardTheme dashboardTheme, User user)
-	{
-		renderAttr.inflate(renderContext, out, importList, webContext, dashboardTheme);
+		renderAttr.inflate(renderContext, responseWriter, importList, webContext, dashboardTheme);
 		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, AnalysisUser.valueOf(user));
-
+		renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 		renderAttr.setIgnoreRenderAttrs(renderContext,
 				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getImportListName(),
 						renderAttr.getHtmlTitleHandlerName(),
 						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
+
+		return renderContext;
 	}
 
 	protected HtmlTplDashboardRenderAttr createHtmlTplDashboardRenderAttr()
 	{
 		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
+		renderAttr.setHtmlWriterName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_WRITER);
+		renderAttr.setLocaleName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_LOCALE);
+		renderAttr.setIgnoreRenderAttrsName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_IGNORE);
+		renderAttr.setImportListName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_IMPORT_LIST);
 		renderAttr.setWebContextName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT);
 		renderAttr.setDashboardThemeName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME);
 		renderAttr.setHtmlTitleHandlerName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_TITLE_HANDLER);
