@@ -9,7 +9,7 @@ package org.datagear.web.controller;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -518,15 +518,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		String htmlTitle = chart.getName();
 		HtmlTplDashboardWidget dashboardWidget = buildHtmlTplDashboardWidget(id);
 
-		StringReader templateIn = IOUtil
-				.getReader(this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
-						"dg-chart-for-show-chart", null,
-						new String[] { id }, "dg-chart-disable-setting=\"false\""));
-
+		Reader templateIn = null;
 		Writer out = null;
 
 		try
 		{
+			templateIn = IOUtil
+					.getReader(this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
+							"dg-chart-for-show-chart", null,
+							new String[] { id }, "dg-chart-disable-setting=\"false\""));
+
 			String responseEncoding = dashboardWidget.getTemplateEncoding();
 			response.setCharacterEncoding(responseEncoding);
 			response.setContentType(CONTENT_TYPE_HTML);
@@ -537,13 +538,15 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			RenderContext renderContext = createHtmlRenderContext(request, response, out,
 					createWebContext(request), htmlTitleHandler);
 
-			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, templateIn);
+			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, dashboardWidget.getFirstTemplate(),
+					templateIn);
 
 			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
 			dashboardInfoManager.put(new DashboardInfo(dashboard));
 		}
 		finally
 		{
+			IOUtil.close(templateIn);
 			IOUtil.close(out);
 		}
 	}

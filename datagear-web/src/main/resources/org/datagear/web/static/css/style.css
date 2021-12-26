@@ -3261,21 +3261,8 @@ table.dataTable tbody tr td select{
     padding: 0 0;
     padding-top: 0.2em;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name{
-	font-size: 0.9em;
-}
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name .name-label{
-	margin-right: 0.8em;
-}
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name .name-input{
-	width: 41%;
-	border: 0;
-}
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .form-item-value-resource-name label.error{
-	position: inherit;
-    left: inherit;
-    bottom: inherit;
-    padding-left: inherit !important;
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-tab-pane .resource-name-wrapper{
+	display: none;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-wrapper{
 	position: absolute;
@@ -3284,17 +3271,37 @@ table.dataTable tbody tr td select{
 	top: 2.6em;
 	bottom: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor,
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-visual{
 	position: absolute;
 	left: 0;
 	right: 0;
 	top: 0;
 	bottom: 0;
 }
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-visual{
+	width: 100%;
+	height: 100%;
+	border-width: 0px;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .hide-editor{
+	opacity: 0;
+	filter: Alpha(Opacity=0);
+	z-index: 0;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .show-editor{
+	opacity: 100;
+	filter: Alpha(Opacity=10);
+	z-index: 1;
+}
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper{
 	position: absolute;
-	top: 0;
+	top: 0.1em;
 	right: 0;
+	font-size: 0.9em;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .switch-resource-editor-group{
+	margin-right: 2em;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .insert-chart-button{
 	margin-right: 1em;
@@ -3501,6 +3508,15 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	top: 0.5em;
 	right: 0.5em;
+}
+.page-dashboard-edit-tpl-v{}
+.page-dashboard-edit-tpl-v .show-iframe{
+	width: 100%;
+	height: 100%;
+	border-width: 0;
+}
+.page-dashboard-edit-tpl-v .source-iframe{
+	display: none;
 }
 
 .page-form .form-item-analysisProjectAware{

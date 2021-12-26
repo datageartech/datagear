@@ -186,6 +186,11 @@ readonly 是否只读操作，允许为null
 	<div class="chart-list-panel togglable-table-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 		<div class="panel-content minor-dataTable pagination-light"></div>
 	</div>
+	<form id="${pageId}-editTemplateVisualForm" action="${contextPath}/dashboard/editTemplateVisual" method="POST" style="display:none;">
+		<input type="hidden" name="id" value="" />
+		<input type="hidden" name="template" value="" />
+		<textarea name="templateContent"></textarea>
+	</form>
 </div>
 <#include "../include/page_obj_form.ftl">
 <#include "../include/page_obj_tabs.ftl" >
@@ -270,19 +275,20 @@ readonly 是否只读操作，允许为null
 		var tabsNav = po.getTabsNav(po.resourceEditorTabs);
 		var tabId = $.uid("resourceEditorTabPane");
     	var tab = $(po.resourceEditorTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, $.escapeHtml(label)))
-    		.attr("id", $.uid("resourceEditorTab")).attr("resourceName", name).appendTo(tabsNav);
+    		.attr("id", $.uid("resourceEditorTab")).attr("resourceName", name).attr("title", name).appendTo(tabsNav);
     	
     	var panePrevEle = $(".resource-editor-tab-pane", po.resourceEditorTabs).last();
     	if(panePrevEle.length == 0)
     		panePrevEle = $(".resource-editor-tab-nav", po.resourceEditorTabs);
     	var tabPane = $("<div id='"+tabId+"' class='resource-editor-tab-pane' />").insertAfter(panePrevEle);
-    	var pc0 = $("<div class='form-item-value form-item-value-resource-name' />").appendTo(tabPane);
-    	$("<label class='name-label'></label>").html("<@spring.message code='name' />").appendTo(pc0);
-    	$("<input type='text' class='resourceName name-input ui-widget ui-widget-content' readonly='readonly' />").val(name).appendTo(pc0);
-    	$("<input type='hidden' class='resourceIsTemplate' />").val(isTemplate).appendTo(pc0);
+    	var resNameWrapper = $("<div class='resource-name-wrapper' />").appendTo(tabPane);
+    	$("<label class='name-label'></label>").html("<@spring.message code='name' />").appendTo(resNameWrapper);
+    	$("<input type='text' class='resourceName name-input ui-widget ui-widget-content' readonly='readonly' />").val(name).appendTo(resNameWrapper);
+    	$("<input type='hidden' class='resourceIsTemplate' />").val(isTemplate).appendTo(resNameWrapper);
     	
-    	var pc1 = $("<div class='editor-wrapper ui-widget ui-widget-content' />").appendTo(tabPane);
-		var pc2 = $("<div class='resource-editor code-editor' />").attr("id", $.uid("resourceEditor")).appendTo(pc1);
+		var editorOptWrapper = $("<div class='editor-operation-wrapper' />").appendTo(tabPane);
+    	var editorWrapper = $("<div class='editor-wrapper ui-widget ui-widget-content' />").appendTo(tabPane);
+		var editorDiv = $("<div class='resource-editor code-editor' />").attr("id", $.uid("resourceEditor")).appendTo(editorWrapper);
 		
 		var codeEditor;
 		
@@ -304,7 +310,7 @@ readonly 是否只读操作，允许为null
 			};
 		}
 		
-		codeEditor = po.createCodeEditor(pc2, codeEditorOptions);
+		codeEditor = po.createCodeEditor(editorDiv, codeEditorOptions);
 		
 		if(isTemplate && !codeEditorOptions.readOnly)
 		{
@@ -319,13 +325,47 @@ readonly 是否只读操作，允许为null
 		
 		tabPane.data("resourceEditorInstance", codeEditor);
 		
-		var pc3 = $("<div class='editor-operation-wrapper' />").appendTo(tabPane);
-		
 		<#if !readonly>
 		if(isTemplate)
 		{
+			var editorVisualIframeId = $.uid("resourceEditorVisual");
+			var editorVisualIframe = $("<iframe class='resource-editor-visual' />").attr("name", editorVisualIframeId)
+				.attr("id", editorVisualIframeId).appendTo(editorWrapper);
+			
+			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorOptWrapper);
+			$("<button type='button'></button>").text("源码编辑").appendTo(editorSwitchGroup).button().click(function()
+			{
+				editorDiv.removeClass("hide-editor").addClass("show-editor");
+				editorVisualIframe.removeClass("show-editor").addClass("hide-editor");
+			});
+			$("<button type='button'></button>").text("拖拽编辑").appendTo(editorSwitchGroup).button().click(function()
+			{
+				var evDashboardId = po.getDashboardId();
+				
+				if(!evDashboardId)
+				{
+					$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+					return;
+				}
+				
+				var evTemplateName = $("input.resourceName", resNameWrapper).val();
+				var evTemplateContent = po.getCodeText(codeEditor);
+				
+				editorDiv.removeClass("show-editor").addClass("hide-editor");
+				editorVisualIframe.removeClass("hide-editor").addClass("show-editor");
+				
+				var submitForm = po.element("#${pageId}-editTemplateVisualForm");
+				submitForm.attr("target", editorVisualIframe.attr("name"));
+				$("input[name='id']", submitForm).val(evDashboardId);
+				$("input[name='template']", submitForm).val(evTemplateName);
+				$("textarea[name='templateContent']", submitForm).val(evTemplateContent);
+				
+				submitForm.submit();
+			});
+			editorSwitchGroup.controlgroup();
+			
 			var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
-				.text("<@spring.message code='dashboard.insertChart' />").appendTo(pc3).button()
+				.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorOptWrapper).button()
 				.click(function()
 				{
 					var insertChartButton = this;
@@ -379,7 +419,7 @@ readonly 是否只读操作，允许为null
 		}
 		</#if>
 		
-		var searchGroup = $("<div class='search-group ui-widget ui-widget-content ui-corner-all' />").appendTo(pc3);
+		var searchGroup = $("<div class='search-group ui-widget ui-widget-content ui-corner-all' />").appendTo(editorOptWrapper);
 		var searchInput = $("<input type='text' class='search-input ui-widget ui-widget-content' />").appendTo(searchGroup)
 				.on("keydown", function(e)
 				{

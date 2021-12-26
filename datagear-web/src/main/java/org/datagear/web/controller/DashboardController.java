@@ -844,6 +844,30 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return pagingData;
 	}
 	
+	@RequestMapping("/editTemplateVisual")
+	public String editTemplateVisual(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model,
+			@RequestParam("id") String id, @RequestParam("template") String template,
+			@RequestParam("templateContent") String templateContent) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		Map<String, String> templateContents = new HashMap<String, String>();
+		templateContents.put("sourceContent", templateContent);
+		templateContents.put("showContent", templateContent);
+
+		model.addAttribute("template", template);
+		model.addAttribute("templateContents", templateContents);
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editTemplateVisual");
+
+		return "/dashboard/dashboard_template_visual";
+	}
+
 	/**
 	 * 展示看板首页。
 	 * 
@@ -952,7 +976,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			{
 				if (!StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix())
 						&& resName.startsWith(this.applicationProperties.getDashboardGlobalResUrlPrefix()))
+				{
 					resName = resName.substring(this.applicationProperties.getDashboardGlobalResUrlPrefix().length());
+				}
 
 				File globalRes = FileUtil.getFile(dashboardGlobalResRootDirectory, resName);
 
@@ -994,7 +1020,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @param request
 	 * @param response
 	 * @param model
-	 * @param id
+	 * @param user
+	 * @param dashboardWidget
+	 * @param template
 	 * @throws Exception
 	 */
 	protected void showDashboard(HttpServletRequest request, HttpServletResponse response,
@@ -1011,13 +1039,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		try
 		{
-			TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-					.getTemplateDashboardWidgetResManager();
-
 			String responseEncoding = dashboardWidget.getTemplateEncoding();
 
 			if (StringUtil.isEmpty(responseEncoding))
-				responseEncoding = dashboardWidgetResManager.getDefaultEncoding();
+				responseEncoding = this.htmlTplDashboardWidgetEntityService
+						.getTemplateDashboardWidgetResManager().getDefaultEncoding();
 
 			response.setCharacterEncoding(responseEncoding);
 			response.setContentType(CONTENT_TYPE_HTML);
