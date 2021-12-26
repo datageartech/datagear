@@ -444,8 +444,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	protected HtmlTplDashboardRenderAttr buildHtmlTplDashboardRenderAttr(RenderContext renderContext, Writer out)
 	{
 		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
-		renderAttr.inflate(renderContext, out, buildImportList(), new WebContext(""),
-				SimpleDashboardThemeSource.THEME_LIGHT);
+		renderAttr.inflate(renderContext, out);
+		renderAttr.setWebContext(renderContext, new WebContext(""));
+		renderAttr.setDashboardTheme(renderContext, SimpleDashboardThemeSource.THEME_LIGHT);
+		renderAttr.setImportList(renderContext, buildImportList());
 
 		return renderAttr;
 	}

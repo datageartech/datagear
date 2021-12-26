@@ -12,7 +12,6 @@ import java.io.Writer;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.TemplateDashboardWidget;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 
 /**
  * HTML {@linkplain TemplateDashboardWidget}。
@@ -20,7 +19,8 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
  * 此类将看板代码（HTML、JavaScript）输出至{@linkplain HtmlTplDashboardRenderAttr#getHtmlWriter(RenderContext)}。
  * </p>
  * <p>
- * 注意：此类{@linkplain #render(RenderContext)}、{@linkplain #render(RenderContext, String)}的{@linkplain RenderContext}必须符合{@linkplain HtmlTplDashboardRenderAttr#inflate(RenderContext, Writer, WebContext)}规范。
+ * 注意：此类{@linkplain #render(RenderContext)}、{@linkplain #render(RenderContext, String)}的{@linkplain RenderContext}
+ * 必须符合{@linkplain HtmlTplDashboardRenderAttr#inflate(RenderContext, Writer)}规范。
  * </p>
  * 
  * @author datagear@163.com

@@ -128,6 +128,9 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 		this.templates = list.toArray(new String[list.size()]);
 	}
 
+	/**
+	 * 渲染{@linkplain #getFirstTemplate()}模板所表示的{@linkplain TemplateDashboard}。
+	 */
 	@Override
 	public TemplateDashboard render(RenderContext renderContext) throws RenderException
 	{
@@ -140,14 +143,13 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	}
 
 	/**
-	 * 渲染指定名称模板。
+	 * 渲染指定名称模板所表示的{@linkplain TemplateDashboard}。
 	 * 
 	 * @param renderContext
 	 * @param template
 	 * @return
 	 * @throws RenderException
-	 * @throws IllegalArgumentException
-	 *             {@code template}不是模板时
+	 * @throws IllegalArgumentException {@code template}不是模板时
 	 */
 	public TemplateDashboard render(RenderContext renderContext, String template)
 			throws RenderException, IllegalArgumentException

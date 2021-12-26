@@ -90,22 +90,6 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	}
 
 	/**
-	 * 获取{@linkplain HtmlTplDashboardImport}列表。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public List<HtmlTplDashboardImport> getImportListNonNull(RenderContext renderContext)
-	{
-		List<HtmlTplDashboardImport> importList = getImportList(renderContext);
-
-		if (importList == null)
-			throw new RenderException("The [" + this.importListName + "] attribute must be set");
-
-		return importList;
-	}
-
-	/**
 	 * 获取{@linkplain HtmlTplDashboardImport}列表，没有则返回{@code null}。
 	 * 
 	 * @param renderContext
@@ -139,22 +123,6 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	}
 
 	/**
-	 * 获取{@linkplain WebContext}。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public WebContext getWebContextNonNull(RenderContext renderContext)
-	{
-		WebContext webContext = getWebContext(renderContext);
-
-		if (webContext == null)
-			throw new RenderException("The [" + this.webContextName + "] attribute must be set");
-
-		return webContext;
-	}
-
-	/**
 	 * 获取{@linkplain WebContext}，没有则返回{@code null}。
 	 * 
 	 * @param renderContext
@@ -185,22 +153,6 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	public WebContext removeWebContext(RenderContext renderContext)
 	{
 		return renderContext.removeAttribute(this.webContextName);
-	}
-
-	/**
-	 * 获取{@linkplain DashboardTheme}。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public DashboardTheme getDashboardThemeNonNull(RenderContext renderContext)
-	{
-		DashboardTheme dashboardTheme = renderContext.getAttribute(this.dashboardThemeName);
-
-		if (dashboardTheme == null)
-			throw new RenderException("The [" + this.dashboardThemeName + "] attribute must be set");
-
-		return dashboardTheme;
 	}
 
 	/**
@@ -274,18 +226,11 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	 * 
 	 * @param renderContext
 	 * @param htmlWriter
-	 * @param importList
-	 * @param webContext
-	 * @param dashboardTheme
 	 */
-	public void inflate(RenderContext renderContext, Writer htmlWriter, List<HtmlTplDashboardImport> importList,
-			WebContext webContext, DashboardTheme dashboardTheme)
+	public void inflate(RenderContext renderContext, Writer htmlWriter)
 	{
 		HtmlTplDashboardRenderAttr.set(renderContext, this);
-		setImportList(renderContext, importList);
 		setHtmlWriter(renderContext, htmlWriter);
-		setWebContext(renderContext, webContext);
-		setDashboardTheme(renderContext, dashboardTheme);
 	}
 
 	/**

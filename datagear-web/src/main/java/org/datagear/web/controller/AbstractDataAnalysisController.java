@@ -187,15 +187,27 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
 		User user = WebUtils.getUser(request, response).cloneNoPassword();
 
-		renderAttr.inflate(renderContext, responseWriter, importList, webContext, dashboardTheme);
-		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, AnalysisUser.valueOf(user));
+		inflateHtmlRenderContext(request, renderContext, renderAttr, responseWriter, webContext, dashboardTheme,
+				importList, htmlTitleHandler, AnalysisUser.valueOf(user));
+
+		return renderContext;
+	}
+
+	protected void inflateHtmlRenderContext(HttpServletRequest request, RenderContext renderContext,
+			HtmlTplDashboardRenderAttr renderAttr, Writer responseWriter, WebContext webContext,
+			DashboardTheme dashboardTheme, List<HtmlTplDashboardImport> importList, HtmlTitleHandler htmlTitleHandler,
+			AnalysisUser analysisUser)
+	{
+		renderAttr.inflate(renderContext, responseWriter);
+		renderAttr.setWebContext(renderContext, webContext);
+		renderAttr.setImportList(renderContext, importList);
+		renderAttr.setDashboardTheme(renderContext, dashboardTheme);
+		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, analysisUser);
 		renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 		renderAttr.setIgnoreRenderAttrs(renderContext,
 				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getImportListName(),
 						renderAttr.getHtmlTitleHandlerName(),
 						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
-
-		return renderContext;
 	}
 
 	protected HtmlTplDashboardRenderAttr createHtmlTplDashboardRenderAttr()

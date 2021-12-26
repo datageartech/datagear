@@ -27,7 +27,6 @@ import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
@@ -38,7 +37,8 @@ import org.datagear.util.html.HtmlFilter;
 /**
  * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 注意：此类{@linkplain #render(RenderContext, HtmlTplDashboardWidget, String)}的{@linkplain RenderContext}必须符合{@linkplain HtmlTplDashboardRenderAttr#inflate(RenderContext, Writer, WebContext)}规范。
+ * 注意：此类{@linkplain #render(RenderContext, HtmlTplDashboardWidget, String)}的{@linkplain RenderContext}
+ * 必须符合{@linkplain HtmlTplDashboardRenderAttr#inflate(RenderContext, Writer)}规范。
  * </p>
  * <p>
  * 此类的{@linkplain #writeHtmlTplDashboardJSFactoryInit(Writer, HtmlTplDashboard, String)}方法的JS看板渲染逻辑为：
@@ -847,7 +847,10 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	protected boolean writeDashboardThemeStyle(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
 			Writer out, HtmlTplDashboard dashboard) throws IOException
 	{
-		DashboardTheme dashboardTheme = renderAttr.getDashboardThemeNonNull(renderContext);
+		DashboardTheme dashboardTheme = renderAttr.getDashboardTheme(renderContext);
+
+		if (dashboardTheme == null)
+			return false;
 
 		out.write("<style type='text/css' " + DASHBOARD_IMPORT_ITEM_NAME_ATTR + "='" + this.themeImportName + "'>");
 		writeNewLine(out);
@@ -903,26 +906,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 			writeNewLine(out);
 		}
-	}
-
-	/**
-	 * 写填充父元素样式属性。
-	 * 
-	 * @param out
-	 * @throws IOException
-	 */
-	protected void writeStyleAttrsFillParent(Writer out) throws IOException
-	{
-		out.write("  position: absolute;");
-		writeNewLine(out);
-		out.write("  top: 0px;");
-		writeNewLine(out);
-		out.write("  bottom: 0px;");
-		writeNewLine(out);
-		out.write("  left: 0px;");
-		writeNewLine(out);
-		out.write("  right: 0px;");
-		writeNewLine(out);
 	}
 
 	/**
