@@ -17,21 +17,16 @@ import java.util.Map;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
-import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.DefaultFilterHandler;
 import org.datagear.util.html.StringBuilderCopyWriter;
 
 /**
  * 使用原生HTML网页作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
- * <p>
- * 此类可渲染由{@linkplain TemplateDashboardWidgetResManager}管理模板资源的{@linkplain HtmlTplDashboardWidget}。
- * </p>
  * <p>
  * 支持的模板格式如下：
  * </p>
@@ -109,10 +104,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		super();
 	}
 
-	public HtmlTplDashboardWidgetHtmlRenderer(TemplateDashboardWidgetResManager templateDashboardWidgetResManager,
-			ChartWidgetSource chartWidgetSource)
+	public HtmlTplDashboardWidgetHtmlRenderer(ChartWidgetSource chartWidgetSource)
 	{
-		super(templateDashboardWidgetResManager, chartWidgetSource);
+		super(chartWidgetSource);
 	}
 
 	public String getDashboardSetTagName()
@@ -241,23 +235,18 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	}
 
 	@Override
-	protected void renderDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-			HtmlTplDashboard dashboard) throws Throwable
+	protected HtmlTplDashboard renderDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
+			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr) throws Throwable
 	{
-		Reader in = getResourceReaderNonNull(dashboard.getWidget(), dashboard.getTemplate());
+		HtmlTplDashboard dashboard = createDashboard(renderContext, dashboardWidget, template);
 
-		try
-		{
-			renderDashboard(renderContext, renderAttr, dashboard, in);
-		}
-		finally
-		{
-			IOUtil.close(in);
-		}
+		renderDashboard(renderContext, dashboard, template, templateIn, renderAttr);
+
+		return dashboard;
 	}
 
-	protected DashboardInfo renderDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-			HtmlTplDashboard dashboard, Reader in) throws Exception
+	protected DashboardInfo renderDashboard(RenderContext renderContext, HtmlTplDashboard dashboard,
+			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr) throws Throwable
 	{
 		DashboardInfo dashboardInfo = new DashboardInfo();
 
@@ -265,9 +254,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				false);
 
 		DashboardFilterHandler filterHandler = new DashboardFilterHandler(
-				out, renderContext, renderAttr, dashboard,
-				dashboardInfo);
-		getHtmlFilter().filter(in, filterHandler);
+				out, renderContext, renderAttr, dashboard, dashboardInfo);
+		getHtmlFilter().filter(templateIn, filterHandler);
 
 		return dashboardInfo;
 	}

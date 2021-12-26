@@ -7,7 +7,6 @@
 
 package org.datagear.analysis.support.html;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -23,7 +22,6 @@ import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
@@ -83,8 +81,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
 
-	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
-
 	private ChartWidgetSource chartWidgetSource;
 
 	private HtmlRenderContextScriptObjectWriter htmlRenderContextScriptObjectWriter = new HtmlRenderContextScriptObjectWriter();
@@ -130,23 +126,10 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		super();
 	}
 
-	public HtmlTplDashboardWidgetRenderer(TemplateDashboardWidgetResManager templateDashboardWidgetResManager,
-			ChartWidgetSource chartWidgetSource)
+	public HtmlTplDashboardWidgetRenderer(ChartWidgetSource chartWidgetSource)
 	{
 		super();
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
 		this.chartWidgetSource = chartWidgetSource;
-	}
-
-	public TemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager()
-	{
-		return templateDashboardWidgetResManager;
-	}
-
-	public void setTemplateDashboardWidgetResManager(
-			TemplateDashboardWidgetResManager templateDashboardWidgetResManager)
-	{
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
 	}
 
 	public ChartWidgetSource getChartWidgetSource()
@@ -357,24 +340,23 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	}
 
 	/**
-	 * 渲染{@linkplain Dashboard}。
+	 * 渲染{@linkplain HtmlTplDashboard}。
 	 * 
 	 * @param renderContext
 	 * @param dashboardWidget
-	 * @param template
+	 * @param template        {@code dashboardWidget}的{@linkplain HtmlTplDashboardWidget#getTemplates()}其中之一模板
+	 * @param templateIn      模板输入流
 	 * @return
 	 * @throws RenderException
 	 */
-	public HtmlTplDashboard render(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget, String template)
-			throws RenderException
+	public HtmlTplDashboard render(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget, String template,
+			Reader templateIn) throws RenderException
 	{
-		HtmlTplDashboardRenderAttr renderAttr = getHtmlTplDashboardRenderAttrNonNull(renderContext);
-
-		HtmlTplDashboard dashboard = createDashboard(renderContext, dashboardWidget, template);
+		HtmlTplDashboardRenderAttr renderAttr = HtmlTplDashboardRenderAttr.getNonNull(renderContext);
 
 		try
 		{
-			renderDashboard(renderContext, renderAttr, dashboard);
+			return renderDashboard(renderContext, dashboardWidget, template, templateIn, renderAttr);
 		}
 		catch (RenderException e)
 		{
@@ -384,92 +366,22 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		{
 			throw new RenderException(t);
 		}
-
-		return dashboard;
-	}
-
-	protected HtmlTplDashboardRenderAttr getHtmlTplDashboardRenderAttrNonNull(RenderContext renderContext)
-	{
-		return HtmlTplDashboardRenderAttr.getNonNull(renderContext);
-	}
-
-	/**
-	 * 读取指定{@linkplain HtmlTplDashboardWidget}的资源内容。
-	 * <p>
-	 * 如果资源不存在，将返回空字符串。
-	 * </p>
-	 * 
-	 * @param dashboardWidget
-	 * @param name
-	 * @return
-	 * @throws IOException
-	 */
-	public String readResourceContent(HtmlTplDashboardWidget dashboardWidget, String name) throws IOException
-	{
-		Reader reader = getResourceReaderNonNull(dashboardWidget, name);
-
-		return IOUtil.readString(reader, true);
-	}
-
-	/**
-	 * 保存指定{@linkplain HtmlTplDashboardWidget}的资源内容。
-	 * 
-	 * @param dashboardWidget
-	 * @param name
-	 * @param content
-	 * @throws IOException
-	 */
-	public void saveResourceContent(HtmlTplDashboardWidget dashboardWidget, String name, String content)
-			throws IOException
-	{
-		Writer writer = null;
-
-		try
-		{
-			writer = getResourceWriter(dashboardWidget, name);
-			writer.write(content);
-		}
-		finally
-		{
-			IOUtil.close(writer);
-		}
-	}
-
-	protected Reader getResourceReaderNonNull(HtmlTplDashboardWidget dashboardWidget, String name) throws IOException
-	{
-		TemplateDashboardWidgetResManager rm = getTemplateDashboardWidgetResManager();
-
-		Reader reader = null;
-
-		try
-		{
-			reader = rm.getReader(dashboardWidget, name);
-		}
-		catch (FileNotFoundException e)
-		{
-		}
-
-		if (reader == null)
-			reader = IOUtil.getReader("");
-
-		return IOUtil.getBufferedReader(reader);
-	}
-
-	protected Writer getResourceWriter(HtmlTplDashboardWidget dashboardWidget, String template) throws IOException
-	{
-		return getTemplateDashboardWidgetResManager().getWriter(dashboardWidget, template);
 	}
 
 	/**
 	 * 渲染{@linkplain HtmlTplDashboard}。
 	 * 
 	 * @param renderContext
+	 * @param dashboardWidget
+	 * @param template
+	 * @param templateIn
 	 * @param renderAttr
-	 * @param dashboard
+	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract void renderDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-			HtmlTplDashboard dashboard) throws Throwable;
+	protected abstract HtmlTplDashboard renderDashboard(RenderContext renderContext,
+			HtmlTplDashboardWidget dashboardWidget, String template, Reader templateIn,
+			HtmlTplDashboardRenderAttr renderAttr) throws Throwable;
 
 	/**
 	 * 生成基本的模板内容。

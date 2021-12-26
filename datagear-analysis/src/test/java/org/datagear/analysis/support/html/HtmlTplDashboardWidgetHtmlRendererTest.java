@@ -37,6 +37,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 {
 	private HtmlTplDashboardWidgetHtmlRenderer renderer;
 
+	private TemplateDashboardWidgetResManager resManager;
+
+	protected static final String TEMPLATE_NAME = "index.html";
+
 	protected static final String IMPORT_CONTENT_JQUERY = "<script type=\"text/javascript\" src=\"jquery.js\"></script>";
 
 	protected static final String IMPORT_CONTENT_UTIL = "<script type=\"text/javascript\" src=\"util.js\"></script>";
@@ -54,12 +58,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		HtmlChartWidget htmlChartWidget = new HtmlChartWidget("chart-widget-01", "chart-widget-01",
 				ChartDefinition.EMPTY_CHART_DATA_SET, chartPlugin);
 
-		TemplateDashboardWidgetResManager resManager = new FileTemplateDashboardWidgetResManager(
+		this.resManager = new FileTemplateDashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/html");
 
-		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);
-
-		this.renderer = new HtmlTplDashboardWidgetHtmlRenderer(resManager, chartWidgetSource);
+		this.renderer = new HtmlTplDashboardWidgetHtmlRenderer(new SimpleChartWidgetSource(htmlChartWidget));
 	}
 
 	@Test
@@ -79,7 +81,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	}
 
 	@Test
-	public void renderDashboardTest() throws Exception
+	public void renderDashboardTest() throws Throwable
 	{
 		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
 
@@ -94,8 +96,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
-					IOUtil.getReader(template));
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -122,8 +124,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
-					IOUtil.getReader(template));
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -150,8 +152,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
-					IOUtil.getReader(template));
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -178,8 +180,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
-					IOUtil.getReader(template));
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -205,8 +207,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
-					IOUtil.getReader(template));
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -250,8 +252,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 
-			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, renderAttr, dashboard,
-					IOUtil.getReader(template));
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -295,7 +297,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -315,7 +319,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -334,7 +340,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -353,7 +361,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -372,7 +382,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -388,7 +400,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -407,7 +421,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -428,7 +444,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
-			this.renderer.renderDashboard(renderContext, renderAttr, dashboard, IOUtil.getReader(template));
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
 
 			String html = getHtmlWithPrint(out);
 
@@ -466,8 +484,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 	protected HtmlTplDashboardWidget createHtmlTplDashboardWidget()
 	{
-		HtmlTplDashboardWidget dashboardWidget = new HtmlTplDashboardWidget("widget01", "index.html", this.renderer);
-
+		HtmlTplDashboardWidget dashboardWidget = new HtmlTplDashboardWidget("widget01", TEMPLATE_NAME, this.renderer,
+				this.resManager);
 		return dashboardWidget;
 	}
 

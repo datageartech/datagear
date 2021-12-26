@@ -8,6 +8,7 @@
 package org.datagear.web.controller;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -334,7 +335,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			if (form.hasCopySourceId())
 			{
 				TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-						.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+						.getTemplateDashboardWidgetResManager();
 
 				dashboardWidgetResManager.copyTo(form.getCopySourceId(), dashboard.getId());
 			}
@@ -424,7 +425,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			return new ArrayList<>(0);
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+				.getTemplateDashboardWidgetResManager();
 
 		List<String> resources = dashboardWidgetResManager.list(dashboard.getId());
 
@@ -447,7 +448,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new RecordNotFoundException();
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+				.getTemplateDashboardWidgetResManager();
 
 		dashboardWidgetResManager.delete(id, name);
 
@@ -505,7 +506,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new IllegalInputException();
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+				.getTemplateDashboardWidgetResManager();
 
 		InputStream in = null;
 		OutputStream out = null;
@@ -719,7 +720,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+				.getTemplateDashboardWidgetResManager();
 
 		dashboardWidgetResManager.copyFrom(dashboard.getId(), uploadDirectory);
 
@@ -762,7 +763,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new RecordNotFoundException();
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+				.getTemplateDashboardWidgetResManager();
 
 		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 		dashboardWidgetResManager.copyTo(dashboard.getId(), tmpDirectory);
@@ -933,7 +934,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			InputStream in = null;
 
 			TemplateDashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
-					.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+					.getTemplateDashboardWidgetResManager();
 
 			// 优先本地资源
 			if (resManager.exists(id, resName))
@@ -1011,7 +1012,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		try
 		{
 			TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-					.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+					.getTemplateDashboardWidgetResManager();
 
 			String responseEncoding = dashboardWidget.getTemplateEncoding();
 
@@ -1245,19 +1246,69 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new IllegalInputException();
 	}
 
-	protected String readResourceContent(HtmlTplDashboardWidgetEntity widget, String templateName) throws IOException
+	/**
+	 * 读取指定资源内容。
+	 * <p>
+	 * 如果资源不存在，将返回空字符串。
+	 * </p>
+	 * @param widget
+	 * @param name
+	 * @return
+	 * @throws IOException
+	 */
+	protected String readResourceContent(HtmlTplDashboardWidgetEntity widget, String name) throws IOException
 	{
-		String templateContent = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer()
-				.readResourceContent(widget, templateName);
-
-		return templateContent;
+		Reader reader = getResourceReaderNonNull(widget, name);
+		return IOUtil.readString(reader, true);
 	}
 
+	/**
+	 * 保存指定资源内容。
+	 * 
+	 * @param widget
+	 * @param name
+	 * @param content
+	 * @throws IOException
+	 */
 	protected void saveResourceContent(HtmlTplDashboardWidgetEntity widget, String name, String content)
 			throws IOException
 	{
-		this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer().saveResourceContent(widget, name,
-				content);
+		Writer writer = null;
+
+		try
+		{
+			writer = getResourceWriter(widget, name);
+			writer.write(content);
+		}
+		finally
+		{
+			IOUtil.close(writer);
+		}
+	}
+
+	protected Reader getResourceReaderNonNull(HtmlTplDashboardWidget widget, String name) throws IOException
+	{
+		Reader reader = null;
+
+		try
+		{
+			reader = this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager().getReader(widget,
+					name);
+		}
+		catch(FileNotFoundException e)
+		{
+		}
+
+		if (reader == null)
+			reader = IOUtil.getReader("");
+
+		return IOUtil.getBufferedReader(reader);
+	}
+
+	protected Writer getResourceWriter(HtmlTplDashboardWidget widget, String template) throws IOException
+	{
+		return IOUtil.getBufferedWriter(this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager()
+				.getWriter(widget, template));
 	}
 
 	protected String[] mergeTemplates(String[] templates, String[] resourceNames, boolean[] resourceIsTemplates)

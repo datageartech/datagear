@@ -6,6 +6,7 @@
  */
 package org.datagear.analysis;
 
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,6 +144,43 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	}
 
 	/**
+	 * 渲染{@linkplain #getFirstTemplate()}模板所表示的{@linkplain TemplateDashboard}。
+	 * 
+	 * @param renderContext
+	 * @param templateIn    {@linkplain #getFirstTemplate()}模板的输入流
+	 * @return
+	 * @throws RenderException
+	 */
+	public TemplateDashboard render(RenderContext renderContext, Reader templateIn) throws RenderException
+	{
+		String template = getFirstTemplate();
+
+		if (StringUtil.isEmpty(template))
+			throw new IllegalArgumentException();
+
+		return renderTemplate(renderContext, template, templateIn);
+	}
+
+	/**
+	 * 渲染指定名称模板所表示的{@linkplain TemplateDashboard}。
+	 * 
+	 * @param renderContext
+	 * @param template
+	 * @param templateIn    {@code template}模板的输入流
+	 * @return
+	 * @throws RenderException
+	 * @throws IllegalArgumentException {@code template}不是模板时
+	 */
+	public TemplateDashboard render(RenderContext renderContext, String template, Reader templateIn)
+			throws RenderException, IllegalArgumentException
+	{
+		if (!isTemplate(template))
+			throw new IllegalArgumentException("[" + template + "] is not template");
+
+		return renderTemplate(renderContext, template, templateIn);
+	}
+
+	/**
 	 * 渲染指定名称模板所表示的{@linkplain TemplateDashboard}。
 	 * 
 	 * @param renderContext
@@ -160,6 +198,7 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 		return renderTemplate(renderContext, template);
 	}
 
+
 	/**
 	 * 渲染指定名称模板。
 	 * 
@@ -169,5 +208,17 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	 * @throws RenderException
 	 */
 	protected abstract TemplateDashboard renderTemplate(RenderContext renderContext, String template)
+			throws RenderException;
+
+	/**
+	 * 渲染指定名称模板。
+	 * 
+	 * @param renderContext
+	 * @param template
+	 * @param templateIn
+	 * @return
+	 * @throws RenderException
+	 */
+	protected abstract TemplateDashboard renderTemplate(RenderContext renderContext, String template, Reader templateIn)
 			throws RenderException;
 }

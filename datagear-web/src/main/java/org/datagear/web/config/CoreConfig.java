@@ -21,12 +21,10 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
-import org.datagear.analysis.support.NameAsTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.TemplateImportHtmlChartPluginVarNameResolver;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.DefaultConnectionSource;
@@ -138,10 +136,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableCaching
 public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 {
-	public static final String NAME_CHART_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "chartShowHtmlTplDashboardWidgetHtmlRenderer";
-
-	public static final String NAME_DASHBOARD_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "htmlTplDashboardWidgetRenderer";
-
 	public static final String NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY = "dashboardGlobalResRootDirectory";
 
 	private ApplicationProperties applicationProperties;
@@ -539,14 +533,6 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	}
 
 	@Bean
-	public FileTemplateDashboardWidgetResManager templateDashboardWidgetResManager()
-	{
-		FileTemplateDashboardWidgetResManager bean = new FileTemplateDashboardWidgetResManager(
-				this.dashboardRootDirectory());
-		return bean;
-	}
-
-	@Bean
 	public DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager()
 	{
 		HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
@@ -578,41 +564,33 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		return bean;
 	}
 
-	@Bean(NAME_CHART_SHOW_HtmlTplDashboardWidgetHtmlRenderer)
-	public HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer()
+	@Bean
+	public TemplateDashboardWidgetResManager templateDashboardWidgetResManager()
 	{
-		TemplateDashboardWidgetResManager resManager = new NameAsTemplateDashboardWidgetResManager();
-
-		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(resManager,
-				this.htmlChartWidgetEntityService());
-
-		bean.setImportHtmlChartPluginVarNameResolver(
-				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver(bean));
-
+		FileTemplateDashboardWidgetResManager bean = new FileTemplateDashboardWidgetResManager(
+				this.dashboardRootDirectory());
 		return bean;
 	}
 
-	@Bean(NAME_DASHBOARD_SHOW_HtmlTplDashboardWidgetHtmlRenderer)
+	@Bean
 	public HtmlTplDashboardWidgetHtmlRenderer htmlTplDashboardWidgetRenderer()
 	{
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(
-				this.templateDashboardWidgetResManager(), this.htmlChartWidgetEntityService());
+				this.htmlChartWidgetEntityService());
 
-		bean.setImportHtmlChartPluginVarNameResolver(
-				this.buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver(bean));
+		bean.setImportHtmlChartPluginVarNameResolver(this.templateImportHtmlChartPluginVarNameResolver());
 
 		return bean;
 	}
 
-	protected TemplateImportHtmlChartPluginVarNameResolver buildHtmlTplDashboardWidgetRendererd_importHtmlChartPluginVarNameResolver(
-			HtmlTplDashboardWidgetRenderer renderer)
+	@Bean
+	public TemplateImportHtmlChartPluginVarNameResolver templateImportHtmlChartPluginVarNameResolver()
 	{
-		String pp = TemplateImportHtmlChartPluginVarNameResolver.PLACEHOLDER_CHART_PLUGIN_ID;
+		TemplateImportHtmlChartPluginVarNameResolver bean = new TemplateImportHtmlChartPluginVarNameResolver(
+				"chartFactory.chartPluginManager.get('"
+						+ TemplateImportHtmlChartPluginVarNameResolver.PLACEHOLDER_CHART_PLUGIN_ID + "')");
 
-		TemplateImportHtmlChartPluginVarNameResolver resolver = new TemplateImportHtmlChartPluginVarNameResolver(
-				"chartFactory.chartPluginManager.get('" + pp + "')");
-
-		return resolver;
+		return bean;
 	}
 
 	@Bean
@@ -627,7 +605,8 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	{
 		HtmlTplDashboardWidgetEntityServiceImpl bean = new HtmlTplDashboardWidgetEntityServiceImpl(
 				this.sqlSessionFactory(), this.mbSqlDialect(), this.authorizationService(),
-				this.htmlTplDashboardWidgetRenderer(), this.analysisProjectService(), this.userService());
+				this.htmlTplDashboardWidgetRenderer(), this.templateDashboardWidgetResManager(),
+				this.analysisProjectService(), this.userService());
 
 		return bean;
 	}

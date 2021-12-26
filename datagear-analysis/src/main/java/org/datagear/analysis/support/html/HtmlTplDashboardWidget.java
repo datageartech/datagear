@@ -7,11 +7,16 @@
 
 package org.datagear.analysis.support.html;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.TemplateDashboardWidget;
+import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.util.IOUtil;
 
 /**
  * HTML {@linkplain TemplateDashboardWidget}。
@@ -32,21 +37,27 @@ public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 
 	private transient HtmlTplDashboardWidgetRenderer renderer;
 
+	private transient TemplateDashboardWidgetResManager resManager;
+
 	public HtmlTplDashboardWidget()
 	{
 		super();
 	}
 
-	public HtmlTplDashboardWidget(String id, String template, HtmlTplDashboardWidgetRenderer renderer)
+	public HtmlTplDashboardWidget(String id, String template, HtmlTplDashboardWidgetRenderer renderer,
+			TemplateDashboardWidgetResManager resManager)
 	{
 		super(id, template);
 		this.renderer = renderer;
+		this.resManager = resManager;
 	}
 
-	public HtmlTplDashboardWidget(String id, String[] templates, HtmlTplDashboardWidgetRenderer renderer)
+	public HtmlTplDashboardWidget(String id, String[] templates, HtmlTplDashboardWidgetRenderer renderer,
+			TemplateDashboardWidgetResManager resManager)
 	{
 		super(id, templates);
 		this.renderer = renderer;
+		this.resManager = resManager;
 	}
 
 	public HtmlTplDashboardWidgetRenderer getRenderer()
@@ -59,10 +70,33 @@ public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 		this.renderer = renderer;
 	}
 
+	public TemplateDashboardWidgetResManager getResManager()
+	{
+		return resManager;
+	}
+
+	public void setResManager(TemplateDashboardWidgetResManager resManager)
+	{
+		this.resManager = resManager;
+	}
+
 	@Override
 	public HtmlTplDashboard render(RenderContext renderContext) throws RenderException
 	{
 		return (HtmlTplDashboard) super.render(renderContext);
+	}
+
+	@Override
+	public HtmlTplDashboard render(RenderContext renderContext, Reader templateIn) throws RenderException
+	{
+		return (HtmlTplDashboard) super.render(renderContext, templateIn);
+	}
+
+	@Override
+	public HtmlTplDashboard render(RenderContext renderContext, String template, Reader templateIn)
+			throws RenderException, IllegalArgumentException
+	{
+		return (HtmlTplDashboard) super.render(renderContext, template, templateIn);
 	}
 
 	@Override
@@ -75,6 +109,45 @@ public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 	@Override
 	protected HtmlTplDashboard renderTemplate(RenderContext renderContext, String template) throws RenderException
 	{
-		return this.renderer.render(renderContext, this, template);
+		Reader templateIn = null;
+
+		try
+		{
+			templateIn = getResourceReaderNonNull(template);
+			return renderTemplate(renderContext, template, templateIn);
+		}
+		catch(IOException e)
+		{
+			throw new RenderException(e);
+		}
+		finally
+		{
+			IOUtil.close(templateIn);
+		}
+	}
+
+	@Override
+	protected HtmlTplDashboard renderTemplate(RenderContext renderContext, String template, Reader templateIn)
+			throws RenderException
+	{
+		return this.renderer.render(renderContext, this, template, templateIn);
+	}
+
+	protected Reader getResourceReaderNonNull(String name) throws IOException
+	{
+		Reader reader = null;
+
+		try
+		{
+			reader = this.resManager.getReader(this, name);
+		}
+		catch(FileNotFoundException e)
+		{
+		}
+
+		if (reader == null)
+			reader = IOUtil.getReader("");
+
+		return IOUtil.getBufferedReader(reader);
 	}
 }

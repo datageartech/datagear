@@ -337,8 +337,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @return
 	 */
 	protected DashboardResult getDashboardResult(HttpServletRequest request, HttpServletResponse response,
-			DashboardQueryForm form,
-			HtmlTplDashboardWidgetRenderer renderer)
+			DashboardQueryForm form, HtmlTplDashboardWidgetRenderer renderer)
 	{
 		if (StringUtil.isEmpty(form.getDashboardId()))
 			throw new IllegalInputException();

@@ -9,6 +9,7 @@ package org.datagear.web.controller;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,6 @@ import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,8 +85,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	private ChartPluginManager chartPluginManager;
 
 	@Autowired
-	@Qualifier("chartShowHtmlTplDashboardWidgetHtmlRenderer")
-	private HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer;
+	private HtmlTplDashboardWidgetHtmlRenderer htmlTplDashboardWidgetHtmlRenderer;
+
+	@Autowired
+	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
 
 	@Autowired
 	private DataSetEntityService dataSetEntityService;
@@ -128,15 +130,26 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		this.chartPluginManager = chartPluginManager;
 	}
 
-	public HtmlTplDashboardWidgetHtmlRenderer getChartShowHtmlTplDashboardWidgetHtmlRenderer()
+	public HtmlTplDashboardWidgetHtmlRenderer getHtmlTplDashboardWidgetHtmlRenderer()
 	{
-		return chartShowHtmlTplDashboardWidgetHtmlRenderer;
+		return htmlTplDashboardWidgetHtmlRenderer;
 	}
 
-	public void setChartShowHtmlTplDashboardWidgetHtmlRenderer(
-			HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer)
+	public void setHtmlTplDashboardWidgetHtmlRenderer(
+			HtmlTplDashboardWidgetHtmlRenderer htmlTplDashboardWidgetHtmlRenderer)
 	{
-		this.chartShowHtmlTplDashboardWidgetHtmlRenderer = chartShowHtmlTplDashboardWidgetHtmlRenderer;
+		this.htmlTplDashboardWidgetHtmlRenderer = htmlTplDashboardWidgetHtmlRenderer;
+	}
+
+	public TemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager()
+	{
+		return templateDashboardWidgetResManager;
+	}
+
+	public void setTemplateDashboardWidgetResManager(
+			TemplateDashboardWidgetResManager templateDashboardWidgetResManager)
+	{
+		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
 	}
 
 	public DataSetEntityService getDataSetEntityService()
@@ -443,16 +456,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			// 处理可能的中文资源名
 			resName = WebUtils.decodeURL(resName);
 
-			TemplateDashboardWidgetResManager resManager = this.chartShowHtmlTplDashboardWidgetHtmlRenderer
-					.getTemplateDashboardWidgetResManager();
-
 			setContentTypeByName(request, response, servletContext, resName);
 
-			long lastModified = resManager.lastModified(id, resName);
+			long lastModified = this.templateDashboardWidgetResManager.lastModified(id, resName);
 			if (webRequest.checkNotModified(lastModified))
 				return;
 
-			InputStream in = resManager.getInputStream(id, resName);
+			InputStream in = this.templateDashboardWidgetResManager.getInputStream(id, resName);
 			OutputStream out = response.getOutputStream();
 
 			try
@@ -481,7 +491,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			org.springframework.ui.Model model, @RequestBody DashboardQueryForm form) throws Exception
 	{
 		DashboardResult dashboardResult = getDashboardResult(request, response, form,
-				this.chartShowHtmlTplDashboardWidgetHtmlRenderer);
+				this.htmlTplDashboardWidgetHtmlRenderer);
 
 		return new ErrorMessageDashboardResult(dashboardResult, true);
 	}
@@ -506,11 +516,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		String id = chart.getId();
 
 		String htmlTitle = chart.getName();
-		HtmlTplDashboardWidget dashboardWidget = new HtmlTplDashboardWidget(id,
-				this.chartShowHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
+		HtmlTplDashboardWidget dashboardWidget = buildHtmlTplDashboardWidget(id);
+
+		StringReader templateIn = IOUtil
+				.getReader(this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
 						"dg-chart-for-show-chart", null,
-						new String[] { id }, "dg-chart-disable-setting=\"false\""),
-				this.chartShowHtmlTplDashboardWidgetHtmlRenderer);
+						new String[] { id }, "dg-chart-disable-setting=\"false\""));
 
 		Writer out = null;
 
@@ -526,7 +537,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			RenderContext renderContext = createHtmlRenderContext(request, response, out,
 					createWebContext(request), htmlTitleHandler);
 
-			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
+			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, templateIn);
 
 			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
 			dashboardInfoManager.put(new DashboardInfo(dashboard));
@@ -535,6 +546,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		{
 			IOUtil.close(out);
 		}
+	}
+
+	protected HtmlTplDashboardWidget buildHtmlTplDashboardWidget(String chartId)
+	{
+		return new HtmlTplDashboardWidget(chartId, "index.html",
+				this.htmlTplDashboardWidgetHtmlRenderer, this.templateDashboardWidgetResManager);
 	}
 
 	protected WebContext createWebContext(HttpServletRequest request)
