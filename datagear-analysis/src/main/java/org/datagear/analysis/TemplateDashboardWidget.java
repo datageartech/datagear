@@ -10,12 +10,10 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.datagear.util.StringUtil;
-
 /**
  * 模板看板部件。
  * <p>
- * 它可在{@linkplain RenderContext}中渲染自己的模板（{@linkplain #getTemplates()}）所描述的{@linkplain Dashboard}。
+ * 它可在{@linkplain RenderContext}中渲染其模板名称（{@linkplain #getTemplates()}）所描述的{@linkplain Dashboard}。
  * </p>
  * <p>
  * 此类的{@linkplain #render(RenderContext)}渲染{@linkplain #getFirstTemplate()}模板。
@@ -30,6 +28,7 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 
 	public static final String DEFAULT_TEMPLATE_ENCODING = "UTF-8";
 
+	/** 模板名称集 */
 	private String[] templates;
 
 	private String templateEncoding = DEFAULT_TEMPLATE_ENCODING;
@@ -66,11 +65,12 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	}
 
 	/**
-	 * 获取第一个模板。
+	 * 获取第一个模板名称。
 	 * 
 	 * @return
+	 * @throws IllegalStateException 当没有任何模板时抛出此异常
 	 */
-	public String getFirstTemplate()
+	public String getFirstTemplate() throws IllegalStateException
 	{
 		if (getTemplateCount() < 1)
 			throw new IllegalStateException();
@@ -79,9 +79,9 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	}
 
 	/**
-	 * 判断是否是模板。
+	 * 判断是否是模板名称。
 	 * 
-	 * @param template
+	 * @param template 模板名称
 	 * @return
 	 */
 	public boolean isTemplate(String template)
@@ -99,7 +99,7 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	}
 
 	/**
-	 * 获取模板数目。
+	 * 获取模板名称数目。
 	 * 
 	 * @return
 	 */
@@ -109,7 +109,7 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	}
 
 	/**
-	 * 移除指定模板。
+	 * 移除指定模板名称。
 	 * 
 	 * @param template
 	 */
@@ -130,64 +130,23 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	}
 
 	/**
-	 * 渲染{@linkplain #getFirstTemplate()}模板所表示的{@linkplain TemplateDashboard}。
+	 * 渲染{@linkplain #getFirstTemplate()}的{@linkplain TemplateDashboard}。
 	 */
 	@Override
 	public TemplateDashboard render(RenderContext renderContext) throws RenderException
 	{
 		String template = getFirstTemplate();
-
-		if (StringUtil.isEmpty(template))
-			throw new IllegalArgumentException();
-
 		return renderTemplate(renderContext, template);
 	}
 
 	/**
-	 * 渲染{@linkplain #getFirstTemplate()}模板所表示的{@linkplain TemplateDashboard}。
+	 * 渲染指定模板名称的{@linkplain TemplateDashboard}。
 	 * 
 	 * @param renderContext
-	 * @param templateIn    {@linkplain #getFirstTemplate()}模板的输入流
+	 * @param template      模板名称，应是{@linkplain #isTemplate(String)}为{@code true}
 	 * @return
 	 * @throws RenderException
-	 */
-	public TemplateDashboard render(RenderContext renderContext, Reader templateIn) throws RenderException
-	{
-		String template = getFirstTemplate();
-
-		if (StringUtil.isEmpty(template))
-			throw new IllegalArgumentException();
-
-		return renderTemplate(renderContext, template, templateIn);
-	}
-
-	/**
-	 * 渲染指定名称模板所表示的{@linkplain TemplateDashboard}。
-	 * 
-	 * @param renderContext
-	 * @param template
-	 * @param templateIn    {@code template}模板的输入流
-	 * @return
-	 * @throws RenderException
-	 * @throws IllegalArgumentException {@code template}不是模板时
-	 */
-	public TemplateDashboard render(RenderContext renderContext, String template, Reader templateIn)
-			throws RenderException, IllegalArgumentException
-	{
-		if (!isTemplate(template))
-			throw new IllegalArgumentException("[" + template + "] is not template");
-
-		return renderTemplate(renderContext, template, templateIn);
-	}
-
-	/**
-	 * 渲染指定名称模板所表示的{@linkplain TemplateDashboard}。
-	 * 
-	 * @param renderContext
-	 * @param template
-	 * @return
-	 * @throws RenderException
-	 * @throws IllegalArgumentException {@code template}不是模板时
+	 * @throws IllegalArgumentException {@code template}不是模板名称时
 	 */
 	public TemplateDashboard render(RenderContext renderContext, String template)
 			throws RenderException, IllegalArgumentException
@@ -198,6 +157,23 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 		return renderTemplate(renderContext, template);
 	}
 
+	/**
+	 * 渲染指定模板名称的{@linkplain TemplateDashboard}。
+	 * <p>
+	 * 模板名称不必是{@linkplain #isTemplate(String)}为{@code true}的，通常用于支持渲染即时看板。
+	 * </p>
+	 * 
+	 * @param renderContext
+	 * @param template      模板名称，{@linkplain #isTemplate(String)}不必为{@code true}
+	 * @param templateIn    {@code template}模板的输入流
+	 * @return
+	 * @throws RenderException
+	 */
+	public TemplateDashboard render(RenderContext renderContext, String template, Reader templateIn)
+			throws RenderException
+	{
+		return renderTemplate(renderContext, template, templateIn);
+	}
 
 	/**
 	 * 渲染指定名称模板。

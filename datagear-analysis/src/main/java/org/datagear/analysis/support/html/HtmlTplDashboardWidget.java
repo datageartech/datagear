@@ -7,7 +7,6 @@
 
 package org.datagear.analysis.support.html;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -87,12 +86,6 @@ public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 	}
 
 	@Override
-	public HtmlTplDashboard render(RenderContext renderContext, Reader templateIn) throws RenderException
-	{
-		return (HtmlTplDashboard) super.render(renderContext, templateIn);
-	}
-
-	@Override
 	public HtmlTplDashboard render(RenderContext renderContext, String template, Reader templateIn)
 			throws RenderException, IllegalArgumentException
 	{
@@ -113,7 +106,7 @@ public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 
 		try
 		{
-			templateIn = getResourceReaderNonNull(template);
+			templateIn = getResourceReader(template);
 			return renderTemplate(renderContext, template, templateIn);
 		}
 		catch(IOException e)
@@ -133,21 +126,8 @@ public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 		return this.renderer.render(renderContext, this, template, templateIn);
 	}
 
-	protected Reader getResourceReaderNonNull(String name) throws IOException
+	protected Reader getResourceReader(String name) throws IOException
 	{
-		Reader reader = null;
-
-		try
-		{
-			reader = this.resManager.getReader(this, name);
-		}
-		catch(FileNotFoundException e)
-		{
-		}
-
-		if (reader == null)
-			reader = IOUtil.getReader("");
-
-		return IOUtil.getBufferedReader(reader);
+		return IOUtil.getBufferedReader(this.resManager.getReader(this, name));
 	}
 }
