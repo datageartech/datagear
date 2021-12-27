@@ -265,6 +265,21 @@ readonly 是否只读操作，允许为null
 		iframe = $(iframe)[0];
 		return (iframe.contentDocument || iframe.contentWindow.document);
 	};
+
+	po.evalTopWindowSize = function()
+	{
+		var topWindow = window;
+		while(topWindow.parent  && topWindow.parent != topWindow)
+			topWindow = topWindow.parent;
+		
+		var size =
+		{
+			width: $(topWindow).width(),
+			height: $(topWindow).height()
+		};
+		
+		return size;
+	};
 	
 	po.resourceEditorTabTemplate = "<li class='resource-editor-tab' style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
 		+"<div class='tab-operation'>"
@@ -295,6 +310,8 @@ readonly 是否只读操作，允许为null
     	$("<input type='hidden' class='resourceIsTemplate' />").val(isTemplate).appendTo(resNameWrapper);
     	
 		var editorOptWrapper = $("<div class='editor-operation-wrapper' />").appendTo(tabPane);
+		var editorLeftOptWrapper = $("<div class='operation-left' />").appendTo(editorOptWrapper);
+		var editorRightOptWrapper = $("<div class='operation-right' />").appendTo(editorOptWrapper);
     	var editorWrapper = $("<div class='editor-wrapper ui-widget ui-widget-content' />").appendTo(tabPane);
 		var editorDiv = $("<div class='resource-editor code-editor' />").attr("id", $.uid("resourceEditor")).appendTo(editorWrapper);
 		
@@ -336,20 +353,32 @@ readonly 是否只读操作，允许为null
 		<#if !readonly>
 		if(isTemplate)
 		{
-			var editorVisualSrcId = $.uid("editorVisualSrc");
-			var editorVisualSrcIfm = $("<iframe class='tpl-editor-visual-src' />").attr("name", editorVisualSrcId)
-				.attr("id", editorVisualSrcId).appendTo(editorWrapper);
+			var visualEditorDiv = $("<div class='tpl-visual-editor-wrapper' />").appendTo(editorWrapper);
 			
-			var editorVisualShowId = $.uid("editorVisualShow");
-			var editorVisualShowIfm = $("<iframe class='tpl-editor-visual-show' />").attr("name", editorVisualShowId)
-				.attr("id", editorVisualShowId).appendTo(editorWrapper);
+			var visualSrcEditorId = $.uid("visualSrcEditor");
+			var visualSrcEditorIfm = $("<iframe class='tpl-visual-src-editor-ifm' />").attr("name", visualSrcEditorId)
+				.attr("id", visualSrcEditorId).appendTo(visualEditorDiv);
 			
-			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorOptWrapper);
+			var visualShowEditorId = $.uid("editorVisualShow");
+			var visualShowEditorIfm = $("<iframe class='tpl-visual-show-editor-ifm' />").attr("name", visualShowEditorId)
+				.attr("id", visualShowEditorId).appendTo(visualEditorDiv);
+			
+			var topWindowSize = po.evalTopWindowSize();
+			visualShowEditorIfm.css("width", topWindowSize.width);
+			visualShowEditorIfm.css("height", topWindowSize.height);
+			
+			//加载完再显示，避免闪屏
+			visualShowEditorIfm.on("load", function()
+			{
+				$(this).removeClass("hide-editor").addClass("show-editor");
+			});
+			
+			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorLeftOptWrapper);
 			$("<button type='button'></button>").text("<@spring.message code='dashboard.editOnSource' />")
 			.appendTo(editorSwitchGroup).button().click(function()
 			{
 				editorDiv.removeClass("hide-editor").addClass("show-editor");
-				editorVisualShowIfm.removeClass("show-editor").addClass("hide-editor");
+				visualShowEditorIfm.removeClass("show-editor").addClass("hide-editor");
 			});
 			$("<button type='button'></button>").text("<@spring.message code='dashboard.editOnVisual' />")
 			.appendTo(editorSwitchGroup).button().click(function()
@@ -362,15 +391,16 @@ readonly 是否只读操作，允许为null
 					return;
 				}
 				
+				visualShowEditorIfm.addClass("hide-editor");
+				
 				var evTemplateName = $("input.resourceName", resNameWrapper).val();
 				var evTemplateContent = po.getCodeText(codeEditor);
 				
 				editorDiv.removeClass("show-editor").addClass("hide-editor");
-				editorVisualShowIfm.removeClass("hide-editor").addClass("show-editor");
 				
 				var tplEditVisualShowForm = po.element("#${pageId}-tplEditVisualShowForm");
 				tplEditVisualShowForm.attr("action", po.showUrl(evDashboardId, evTemplateName));
-				tplEditVisualShowForm.attr("target", editorVisualShowIfm.attr("name"));
+				tplEditVisualShowForm.attr("target", visualShowEditorIfm.attr("name"));
 				$("textarea[name='DG_TEMPLATE_CONTENT']", tplEditVisualShowForm).val(evTemplateContent);
 				
 				tplEditVisualShowForm.submit();
@@ -378,7 +408,7 @@ readonly 是否只读操作，允许为null
 			editorSwitchGroup.controlgroup();
 			
 			var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
-				.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorOptWrapper).button()
+				.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorRightOptWrapper).button()
 				.click(function()
 				{
 					var insertChartButton = this;
@@ -432,7 +462,7 @@ readonly 是否只读操作，允许为null
 		}
 		</#if>
 		
-		var searchGroup = $("<div class='search-group ui-widget ui-widget-content ui-corner-all' />").appendTo(editorOptWrapper);
+		var searchGroup = $("<div class='search-group ui-widget ui-widget-content ui-corner-all' />").appendTo(editorRightOptWrapper);
 		var searchInput = $("<input type='text' class='search-input ui-widget ui-widget-content' />").appendTo(searchGroup)
 				.on("keydown", function(e)
 				{
