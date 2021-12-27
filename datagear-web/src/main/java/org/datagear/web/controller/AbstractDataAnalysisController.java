@@ -134,9 +134,15 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			+ "IGNORE_RENDER_ATTRS_NAME";
 
 	/**
-	 * 看板展示URL的系统主题请求参数名。
+	 * 看板展示URL的请求参数名：系统主题。
 	 */
-	public static final String DASHBOARD_THEME_NAME_PARAM = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX + "THEME";
+	public static final String DASHBOARD_SHOW_PARAM_THEME_NAME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX + "THEME";
+
+	/**
+	 * 看板展示URL的请求参数名：自定义模板内容。仅用于可视化编辑看板模板功能。
+	 */
+	public static final String DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "TEMPLATE_CONTENT";
 
 	/** 看板更新数据URL名 */
 	public static final String DASHBOARD_UPDATE_URL_NAME = "updateDashboardURL";
@@ -179,7 +185,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected RenderContext createHtmlRenderContext(HttpServletRequest request, HttpServletResponse response,
 			Writer responseWriter, WebContext webContext, HtmlTitleHandler htmlTitleHandler) throws IOException
 	{
-		RenderContext renderContext = new DefaultRenderContext(resolveParamValues(request));
+		RenderContext renderContext = new DefaultRenderContext(resolveDashboardShowParamValues(request));
 
 		HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
 
@@ -290,7 +296,13 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return webContext;
 	}
 
-	protected Map<String, ?> resolveParamValues(HttpServletRequest request)
+	/**
+	 * 解析看板展示请求参数映射表。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected Map<String, ?> resolveDashboardShowParamValues(HttpServletRequest request)
 	{
 		Map<String, Object> paramValues = new HashMap<>();
 
@@ -310,12 +322,15 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 				paramValues.put(name, values);
 		}
 
+		// 移除自定义模板内容参数，它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错
+		paramValues.remove(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
+
 		return paramValues;
 	}
 
 	protected DashboardTheme resolveDashboardTheme(HttpServletRequest request)
 	{
-		String theme = request.getParameter(DASHBOARD_THEME_NAME_PARAM);
+		String theme = request.getParameter(DASHBOARD_SHOW_PARAM_THEME_NAME);
 
 		if (StringUtil.isEmpty(theme))
 			theme = WebUtils.getTheme(request);

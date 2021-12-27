@@ -186,10 +186,11 @@ readonly 是否只读操作，允许为null
 	<div class="chart-list-panel togglable-table-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 		<div class="panel-content minor-dataTable pagination-light"></div>
 	</div>
-	<form id="${pageId}-editTemplateVisualForm" action="${contextPath}/dashboard/editTemplateVisual" method="POST" style="display:none;">
-		<input type="hidden" name="id" value="" />
-		<input type="hidden" name="template" value="" />
-		<textarea name="templateContent"></textarea>
+	<form id="${pageId}-tplEditVisualShowForm" action="#" method="POST" style="display:none;">
+		<textarea name="DG_TEMPLATE_CONTENT"></textarea>
+	</form>
+	<form id="${pageId}-tplEditVisualSrcForm" action="#" method="POST" style="display:none;">
+		<textarea name="DG_TEMPLATE_CONTENT"></textarea>
 	</form>
 </div>
 <#include "../include/page_obj_form.ftl">
@@ -253,9 +254,16 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/dashboard/" + action;
 	};
 	
-	po.showUrl = function(dashboardId)
+	po.showUrl = function(dashboardId, resName)
 	{
-		return po.url("show/"+dashboardId+"/");
+		resName = (resName == null ? "" : resName);
+		return po.url("show/"+dashboardId+"/" + resName);
+	};
+	
+	po.iframeDocument = function(iframe)
+	{
+		iframe = $(iframe)[0];
+		return (iframe.contentDocument || iframe.contentWindow.document);
 	};
 	
 	po.resourceEditorTabTemplate = "<li class='resource-editor-tab' style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
@@ -328,17 +336,23 @@ readonly 是否只读操作，允许为null
 		<#if !readonly>
 		if(isTemplate)
 		{
-			var editorVisualIframeId = $.uid("resourceEditorVisual");
-			var editorVisualIframe = $("<iframe class='resource-editor-visual' />").attr("name", editorVisualIframeId)
-				.attr("id", editorVisualIframeId).appendTo(editorWrapper);
+			var editorVisualSrcId = $.uid("editorVisualSrc");
+			var editorVisualSrcIfm = $("<iframe class='tpl-editor-visual-src' />").attr("name", editorVisualSrcId)
+				.attr("id", editorVisualSrcId).appendTo(editorWrapper);
+			
+			var editorVisualShowId = $.uid("editorVisualShow");
+			var editorVisualShowIfm = $("<iframe class='tpl-editor-visual-show' />").attr("name", editorVisualShowId)
+				.attr("id", editorVisualShowId).appendTo(editorWrapper);
 			
 			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorOptWrapper);
-			$("<button type='button'></button>").text("源码编辑").appendTo(editorSwitchGroup).button().click(function()
+			$("<button type='button'></button>").text("<@spring.message code='dashboard.editOnSource' />")
+			.appendTo(editorSwitchGroup).button().click(function()
 			{
 				editorDiv.removeClass("hide-editor").addClass("show-editor");
-				editorVisualIframe.removeClass("show-editor").addClass("hide-editor");
+				editorVisualShowIfm.removeClass("show-editor").addClass("hide-editor");
 			});
-			$("<button type='button'></button>").text("拖拽编辑").appendTo(editorSwitchGroup).button().click(function()
+			$("<button type='button'></button>").text("<@spring.message code='dashboard.editOnVisual' />")
+			.appendTo(editorSwitchGroup).button().click(function()
 			{
 				var evDashboardId = po.getDashboardId();
 				
@@ -352,15 +366,14 @@ readonly 是否只读操作，允许为null
 				var evTemplateContent = po.getCodeText(codeEditor);
 				
 				editorDiv.removeClass("show-editor").addClass("hide-editor");
-				editorVisualIframe.removeClass("hide-editor").addClass("show-editor");
+				editorVisualShowIfm.removeClass("hide-editor").addClass("show-editor");
 				
-				var submitForm = po.element("#${pageId}-editTemplateVisualForm");
-				submitForm.attr("target", editorVisualIframe.attr("name"));
-				$("input[name='id']", submitForm).val(evDashboardId);
-				$("input[name='template']", submitForm).val(evTemplateName);
-				$("textarea[name='templateContent']", submitForm).val(evTemplateContent);
+				var tplEditVisualShowForm = po.element("#${pageId}-tplEditVisualShowForm");
+				tplEditVisualShowForm.attr("action", po.showUrl(evDashboardId, evTemplateName));
+				tplEditVisualShowForm.attr("target", editorVisualShowIfm.attr("name"));
+				$("textarea[name='DG_TEMPLATE_CONTENT']", tplEditVisualShowForm).val(evTemplateContent);
 				
-				submitForm.submit();
+				tplEditVisualShowForm.submit();
 			});
 			editorSwitchGroup.controlgroup();
 			
@@ -1258,7 +1271,7 @@ readonly 是否只读操作，允许为null
 		if(!path)
 			return;
 		
-		window.open(po.showUrl(id) + path);
+		window.open(po.showUrl(id, path));
 	});
 	
 	po.elementResListLocal(".asTemplateBtn").click(function()
@@ -1531,7 +1544,7 @@ readonly 是否只读操作，允许为null
 		if(!path)
 			return;
 		
-		window.open(po.showUrl(id) + path);
+		window.open(po.showUrl(id, path));
 	});
 
 	po.elementResListGlobal(".refreshResListBtn").click(function()

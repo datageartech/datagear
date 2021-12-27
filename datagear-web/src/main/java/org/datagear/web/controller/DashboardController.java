@@ -844,30 +844,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return pagingData;
 	}
 	
-	@RequestMapping("/editTemplateVisual")
-	public String editTemplateVisual(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model,
-			@RequestParam("id") String id, @RequestParam("template") String template,
-			@RequestParam("templateContent") String templateContent) throws Exception
-	{
-		User user = WebUtils.getUser(request, response);
-
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
-
-		Map<String, String> templateContents = new HashMap<String, String>();
-		templateContents.put("sourceContent", templateContent);
-		templateContents.put("showContent", templateContent);
-
-		model.addAttribute("template", template);
-		model.addAttribute("templateContents", templateContents);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editTemplateVisual");
-
-		return "/dashboard/dashboard_template_visual";
-	}
-
 	/**
 	 * 展示看板首页。
 	 * 
@@ -949,7 +925,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (entity.isTemplate(resName))
 		{
 			HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
-					.getHtmlTplDashboardWidget(user, id);
+						.getHtmlTplDashboardWidget(user, id);
 
 			showDashboard(request, response, model, user, dashboardWidget, resName);
 		}
@@ -1032,9 +1008,18 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
 
-		// 确保看板创建用户对看板模板内定义的图表有权限
-		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
+		User createUser = dashboardWidget.getCreateUser();
 
+		String templateContent = null;
+
+		// 仅允许看板创建者自定义看板模板内容
+		if (user.getId().equals(createUser != null ? createUser.getId() : null))
+			templateContent = request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
+
+		// 确保看板创建用户对看板模板内定义的图表有权限
+		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(createUser));
+
+		Reader templateContentIn = (templateContent == null ? null : IOUtil.getReader(templateContent));
 		Writer out = null;
 
 		try
@@ -1056,13 +1041,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			RenderContext renderContext = createHtmlRenderContext(request, response, out,
 					createWebContext(request), htmlTitleHandler);
 
-			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, template);
+			HtmlTplDashboard dashboard = (templateContentIn != null
+					? dashboardWidget.render(renderContext, template, templateContentIn)
+					: dashboardWidget.render(renderContext, template));
 
 			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
 			dashboardInfoManager.put(new DashboardInfo(dashboard));
 		}
 		finally
 		{
+			IOUtil.close(templateContentIn);
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}

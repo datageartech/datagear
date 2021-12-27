@@ -3272,16 +3272,20 @@ table.dataTable tbody tr td select{
 	bottom: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor,
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-visual{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-editor-visual-show{
 	position: absolute;
 	left: 0;
 	right: 0;
 	top: 0;
 	bottom: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor-visual{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-editor-visual-show{
 	width: 100%;
 	height: 100%;
+	border-width: 0px;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-editor-visual-src{
+	display: none;
 	border-width: 0px;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .hide-editor{
@@ -3296,9 +3300,11 @@ table.dataTable tbody tr td select{
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper{
 	position: absolute;
-	top: 0.1em;
+	left: 0;
 	right: 0;
+	top: 0.1em;
 	font-size: 0.9em;
+	text-align: right;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .switch-resource-editor-group{
 	margin-right: 2em;
@@ -3508,15 +3514,6 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	top: 0.5em;
 	right: 0.5em;
-}
-.page-dashboard-edit-tpl-v{}
-.page-dashboard-edit-tpl-v .show-iframe{
-	width: 100%;
-	height: 100%;
-	border-width: 0;
-}
-.page-dashboard-edit-tpl-v .source-iframe{
-	display: none;
 }
 
 .page-form .form-item-analysisProjectAware{
