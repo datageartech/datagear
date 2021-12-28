@@ -279,6 +279,21 @@ readonly 是否只读操作，允许为null
 		return size;
 	};
 	
+	//设置可视编辑iframe的尺寸，使其适配父元素尺寸而不会出现滚动条
+	po.setVisualEditorIframeScale = function($iframeWrapper, $iframe)
+	{
+		var ww = $iframeWrapper.width(), wh = $iframeWrapper.height();
+		var iw = $iframe.width(), ih = $iframe.height();
+		
+		if(iw <= ww && ih <= wh)
+			return;
+		
+		var borderError = 2;
+		var scaleX = (ww-borderError)/iw, scaleY = (wh-borderError)/ih;
+		$iframe.css("transform-origin", "0 0");
+		$iframe.css("transform", "scale("+Math.min(scaleX, scaleY)+")");
+	};
+	
 	po.resourceEditorTabTemplate = "<li class='resource-editor-tab' style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
 		+"<div class='tab-operation'>"
 		+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
@@ -313,6 +328,7 @@ readonly 是否只读操作，允许为null
 			var templateName = po.element(".resource-name-wrapper input.resourceName", $tabPane).val();
 			var templateContent = po.getCodeText(codeEditor);
 			visualEditorIfm.data("codeChangeFlag", codeEditor.changeGeneration());
+			visualEditorIfm.data("loading-template", true);
 			
 			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
 			visualEditorIfm.addClass("hide-editor");
@@ -392,19 +408,25 @@ readonly 是否只读操作，允许为null
 		{
 			var visualEditorDiv = $("<div class='tpl-visual-editor-wrapper' />").appendTo(editorWrapper);
 			
-			var visualEditorId = $.uid("editorVisualShow");
-			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm' />").attr("name", visualEditorId)
+			var visualEditorId = $.uid("visualEditor");
+			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm hide-editor' />").attr("name", visualEditorId)
 				.attr("id", visualEditorId).appendTo(visualEditorDiv);
+			
+			//加载完再显示，避免闪屏
+			visualEditorIfm.on("load", function()
+			{
+				if($(this).data("loading-template"))
+				{
+					$(this).removeClass("hide-editor").addClass("show-editor");
+					$(this).data("loading-template", null);
+				}
+			});
 			
 			var topWindowSize = po.evalTopWindowSize();
 			visualEditorIfm.css("width", topWindowSize.width);
 			visualEditorIfm.css("height", topWindowSize.height);
 			
-			//加载完再显示，避免闪屏
-			visualEditorIfm.on("load", function()
-			{
-				$(this).removeClass("hide-editor").addClass("show-editor");
-			});
+			po.setVisualEditorIframeScale(visualEditorDiv, visualEditorIfm);
 			
 			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorLeftOptWrapper);
 			$("<button type='button'></button>").text("<@spring.message code='dashboard.editOnSource' />")
