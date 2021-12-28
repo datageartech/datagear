@@ -890,7 +890,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			}
 			else
 			{
-				showDashboard(request, response, model, user, dashboardWidget, firstTemplate);
+				showDashboard(request, response, model, user, dashboardWidget, firstTemplate,
+						isDashboardShowForEdit(request, dashboardWidget, user));
 			}
 		}
 	}
@@ -921,13 +922,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new FileNotFoundException(resName);
 
 		resName = WebUtils.decodeURL(resName);
+		boolean isShowForEdit = isDashboardShowForEdit(request, entity, user);
 
-		if (entity.isTemplate(resName))
+		if (entity.isTemplate(resName) || isShowForEdit)
 		{
 			HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 						.getHtmlTplDashboardWidget(user, id);
 
-			showDashboard(request, response, model, user, dashboardWidget, resName);
+			showDashboard(request, response, model, user, dashboardWidget, resName, isShowForEdit);
 		}
 		else
 		{
@@ -1003,18 +1005,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 */
 	protected void showDashboard(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, User user, HtmlTplDashboardWidgetEntity dashboardWidget,
-			String template) throws Exception
+			String template, boolean isShowForEdit) throws Exception
 	{
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
 
 		User createUser = dashboardWidget.getCreateUser();
 
-		String templateContent = null;
-
-		// 仅在编辑操作时、且仅允许看板创建者自定义看板模板内容
-		if (isDashboardShowForEdit(request) && user.getId().equals(createUser != null ? createUser.getId() : null))
-			templateContent = request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
+		String templateContent = (isShowForEdit
+				? templateContent = request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT)
+				: null);
 
 		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(createUser));
@@ -1054,6 +1054,17 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
+	}
+
+	protected boolean isDashboardShowForEdit(HttpServletRequest request, HtmlTplDashboardWidgetEntity dashboardWidget,
+			User user)
+	{
+		User createUser = dashboardWidget.getCreateUser();
+		String editTemplate = request.getParameter(DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE);
+
+		// 有编辑模板请求参数、且当前用户是看板创建者
+		return (("true".equalsIgnoreCase(editTemplate) || "1".equals(editTemplate))
+				&& user.getId().equals(createUser != null ? createUser.getId() : null));
 	}
 
 	/**

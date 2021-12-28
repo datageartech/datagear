@@ -339,12 +339,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return paramValues;
 	}
 
-	protected boolean isDashboardShowForEdit(HttpServletRequest request)
-	{
-		String editTemplate = request.getParameter(DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE);
-		return ("true".equalsIgnoreCase(editTemplate) || "1".equals(editTemplate));
-	}
-
 	protected DashboardTheme resolveDashboardTheme(HttpServletRequest request)
 	{
 		String theme = request.getParameter(DASHBOARD_SHOW_PARAM_THEME_NAME);
