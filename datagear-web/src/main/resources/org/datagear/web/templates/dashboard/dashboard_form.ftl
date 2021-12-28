@@ -186,10 +186,7 @@ readonly 是否只读操作，允许为null
 	<div class="chart-list-panel togglable-table-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 		<div class="panel-content minor-dataTable pagination-light"></div>
 	</div>
-	<form id="${pageId}-tplEditVisualShowForm" action="#" method="POST" style="display:none;">
-		<textarea name="DG_TEMPLATE_CONTENT"></textarea>
-	</form>
-	<form id="${pageId}-tplEditVisualSrcForm" action="#" method="POST" style="display:none;">
+	<form id="${pageId}-tplEditVisualForm" action="#" method="POST" style="display:none;">
 		<textarea name="DG_TEMPLATE_CONTENT"></textarea>
 	</form>
 </div>
@@ -288,6 +285,45 @@ readonly 是否只读操作，允许为null
 		+"</div>"
 		+"</li>";
 	
+	//切换至可是编辑模式
+	po.editOnVisual = function($tabPane)
+	{
+		var dashboardId = po.getDashboardId();
+		
+		if(!dashboardId)
+		{
+			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			return;
+		}
+		
+		var codeEditorDiv = po.element(".code-editor", $tabPane);
+		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
+		var visualShowEditorIfm = po.element(".tpl-visual-show-editor-ifm", $tabPane);
+		var changeFlag = visualShowEditorIfm.data("codeChangeFlag");
+		
+		//没有修改
+		if(changeFlag != null && codeEditor.isClean(changeFlag))
+		{
+			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
+			visualShowEditorIfm.removeClass("hide-editor").addClass("show-editor");
+		}
+		else
+		{
+			var templateName = po.element(".resource-name-wrapper input.resourceName", $tabPane).val();
+			var templateContent = po.getCodeText(codeEditor);
+			visualShowEditorIfm.data("codeChangeFlag", codeEditor.changeGeneration());
+			
+			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
+			visualShowEditorIfm.addClass("hide-editor");
+			
+			var form = po.element("#${pageId}-tplEditVisualForm");
+			form.attr("action", po.showUrl(dashboardId, templateName));
+			form.attr("target", visualShowEditorIfm.attr("name"));
+			$("textarea[name='DG_TEMPLATE_CONTENT']", form).val(templateContent);
+			form.submit();
+		}
+	};
+	
 	po.newResourceEditorTab = function(name, content, isTemplate)
 	{
 		var label = name;
@@ -348,7 +384,7 @@ readonly 是否只读操作，允许为null
 			}
 		}
 		
-		tabPane.data("resourceEditorInstance", codeEditor);
+		editorDiv.data("resourceEditorInstance", codeEditor);
 		
 		<#if !readonly>
 		if(isTemplate)
@@ -383,27 +419,7 @@ readonly 是否只读操作，允许为null
 			$("<button type='button'></button>").text("<@spring.message code='dashboard.editOnVisual' />")
 			.appendTo(editorSwitchGroup).button().click(function()
 			{
-				var evDashboardId = po.getDashboardId();
-				
-				if(!evDashboardId)
-				{
-					$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
-					return;
-				}
-				
-				visualShowEditorIfm.addClass("hide-editor");
-				
-				var evTemplateName = $("input.resourceName", resNameWrapper).val();
-				var evTemplateContent = po.getCodeText(codeEditor);
-				
-				editorDiv.removeClass("show-editor").addClass("hide-editor");
-				
-				var tplEditVisualShowForm = po.element("#${pageId}-tplEditVisualShowForm");
-				tplEditVisualShowForm.attr("action", po.showUrl(evDashboardId, evTemplateName));
-				tplEditVisualShowForm.attr("target", visualShowEditorIfm.attr("name"));
-				$("textarea[name='DG_TEMPLATE_CONTENT']", tplEditVisualShowForm).val(evTemplateContent);
-				
-				tplEditVisualShowForm.submit();
+				po.editOnVisual(tabPane);
 			});
 			editorSwitchGroup.controlgroup();
 			
@@ -1624,7 +1640,9 @@ readonly 是否只读操作，允许为null
 		po.element(".resource-editor-tab-pane").each(function()
 		{
 			var tp = $(this);
-			var codeEditor = tp.data("resourceEditorInstance");
+			
+			var codeEditorDiv = po.element(".code-editor", tp);
+			var codeEditor = codeEditorDiv.data("resourceEditorInstance");
 			
 			data.resourceNames.push($(".resourceName", tp).val());
 			data.resourceIsTemplates.push($(".resourceIsTemplate", tp).val());
