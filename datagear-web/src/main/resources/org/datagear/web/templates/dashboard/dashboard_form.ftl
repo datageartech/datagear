@@ -187,6 +187,7 @@ readonly 是否只读操作，允许为null
 		<div class="panel-content minor-dataTable pagination-light"></div>
 	</div>
 	<form id="${pageId}-tplEditVisualForm" action="#" method="POST" style="display:none;">
+		<input type="hidden" name="DG_EDIT_TEMPLATE" value="true" />
 		<textarea name="DG_TEMPLATE_CONTENT"></textarea>
 	</form>
 </div>
@@ -298,27 +299,27 @@ readonly 是否只读操作，允许为null
 		
 		var codeEditorDiv = po.element(".code-editor", $tabPane);
 		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
-		var visualShowEditorIfm = po.element(".tpl-visual-show-editor-ifm", $tabPane);
-		var changeFlag = visualShowEditorIfm.data("codeChangeFlag");
+		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
+		var changeFlag = visualEditorIfm.data("codeChangeFlag");
 		
 		//没有修改
 		if(changeFlag != null && codeEditor.isClean(changeFlag))
 		{
 			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
-			visualShowEditorIfm.removeClass("hide-editor").addClass("show-editor");
+			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
 		}
 		else
 		{
 			var templateName = po.element(".resource-name-wrapper input.resourceName", $tabPane).val();
 			var templateContent = po.getCodeText(codeEditor);
-			visualShowEditorIfm.data("codeChangeFlag", codeEditor.changeGeneration());
+			visualEditorIfm.data("codeChangeFlag", codeEditor.changeGeneration());
 			
 			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
-			visualShowEditorIfm.addClass("hide-editor");
+			visualEditorIfm.addClass("hide-editor");
 			
 			var form = po.element("#${pageId}-tplEditVisualForm");
 			form.attr("action", po.showUrl(dashboardId, templateName));
-			form.attr("target", visualShowEditorIfm.attr("name"));
+			form.attr("target", visualEditorIfm.attr("name"));
 			$("textarea[name='DG_TEMPLATE_CONTENT']", form).val(templateContent);
 			form.submit();
 		}
@@ -391,20 +392,16 @@ readonly 是否只读操作，允许为null
 		{
 			var visualEditorDiv = $("<div class='tpl-visual-editor-wrapper' />").appendTo(editorWrapper);
 			
-			var visualSrcEditorId = $.uid("visualSrcEditor");
-			var visualSrcEditorIfm = $("<iframe class='tpl-visual-src-editor-ifm' />").attr("name", visualSrcEditorId)
-				.attr("id", visualSrcEditorId).appendTo(visualEditorDiv);
-			
-			var visualShowEditorId = $.uid("editorVisualShow");
-			var visualShowEditorIfm = $("<iframe class='tpl-visual-show-editor-ifm' />").attr("name", visualShowEditorId)
-				.attr("id", visualShowEditorId).appendTo(visualEditorDiv);
+			var visualEditorId = $.uid("editorVisualShow");
+			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm' />").attr("name", visualEditorId)
+				.attr("id", visualEditorId).appendTo(visualEditorDiv);
 			
 			var topWindowSize = po.evalTopWindowSize();
-			visualShowEditorIfm.css("width", topWindowSize.width);
-			visualShowEditorIfm.css("height", topWindowSize.height);
+			visualEditorIfm.css("width", topWindowSize.width);
+			visualEditorIfm.css("height", topWindowSize.height);
 			
 			//加载完再显示，避免闪屏
-			visualShowEditorIfm.on("load", function()
+			visualEditorIfm.on("load", function()
 			{
 				$(this).removeClass("hide-editor").addClass("show-editor");
 			});
@@ -414,7 +411,7 @@ readonly 是否只读操作，允许为null
 			.appendTo(editorSwitchGroup).button().click(function()
 			{
 				editorDiv.removeClass("hide-editor").addClass("show-editor");
-				visualShowEditorIfm.removeClass("show-editor").addClass("hide-editor");
+				visualEditorIfm.removeClass("show-editor").addClass("hide-editor");
 			});
 			$("<button type='button'></button>").text("<@spring.message code='dashboard.editOnVisual' />")
 			.appendTo(editorSwitchGroup).button().click(function()

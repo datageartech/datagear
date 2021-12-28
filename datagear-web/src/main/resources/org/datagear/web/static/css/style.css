@@ -3282,16 +3282,12 @@ table.dataTable tbody tr td select{
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-wrapper{
 	overflow: auto;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-wrapper .tpl-visual-show-editor-ifm{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-wrapper .tpl-visual-editor-ifm{
 	position: absolute;
 	left: 0;
 	right: 0;
 	width: 100%;
 	height: 100%;
-	border-width: 0;
-}
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-wrapper .tpl-visual-src-editor-ifm{
-	display: none;
 	border-width: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .hide-editor{

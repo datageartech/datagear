@@ -139,6 +139,12 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String DASHBOARD_SHOW_PARAM_THEME_NAME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX + "THEME";
 
 	/**
+	 * 看板展示URL的请求参数名：编辑模板。仅用于可视化编辑看板模板功能。
+	 */
+	public static final String DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "EDIT_TEMPLATE";
+
+	/**
 	 * 看板展示URL的请求参数名：自定义模板内容。仅用于可视化编辑看板模板功能。
 	 */
 	public static final String DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
@@ -322,10 +328,21 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 				paramValues.put(name, values);
 		}
 
-		// 移除自定义模板内容参数，它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错
-		paramValues.remove(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
+		// 转义自定义模板内容参数，它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错，需转义为："<\/script>"
+		String templateContent = (String) paramValues.get(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
+		if (templateContent != null)
+		{
+			templateContent = templateContent.replace("</", "<\\/");
+			paramValues.put(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT, templateContent);
+		}
 
 		return paramValues;
+	}
+
+	protected boolean isDashboardShowForEdit(HttpServletRequest request)
+	{
+		String editTemplate = request.getParameter(DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE);
+		return ("true".equalsIgnoreCase(editTemplate) || "1".equals(editTemplate));
 	}
 
 	protected DashboardTheme resolveDashboardTheme(HttpServletRequest request)

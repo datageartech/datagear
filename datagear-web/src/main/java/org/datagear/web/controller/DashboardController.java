@@ -1012,8 +1012,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		String templateContent = null;
 
-		// 仅允许看板创建者自定义看板模板内容
-		if (user.getId().equals(createUser != null ? createUser.getId() : null))
+		// 仅在编辑操作时、且仅允许看板创建者自定义看板模板内容
+		if (isDashboardShowForEdit(request) && user.getId().equals(createUser != null ? createUser.getId() : null))
 			templateContent = request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
 
 		// 确保看板创建用户对看板模板内定义的图表有权限
