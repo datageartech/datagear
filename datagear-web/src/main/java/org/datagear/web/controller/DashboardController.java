@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +55,8 @@ import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.html.HeadBodyAwareFilterHandler;
+import org.datagear.util.html.HtmlFilter;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.config.CoreConfig;
 import org.datagear.web.util.OperationMessage;
@@ -92,6 +96,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	public static final String SERVERTIME_JS_VAR = "_" + Global.PRODUCT_NAME_EN + "ServerTime";
 
+	/**
+	 * 看板内的静态元素ID（模板中定义的元素而非展示时生成的）属性名。
+	 */
+	public static final String DASHBOARD_STATIC_ELEMENT_ID = HtmlTplDashboardWidgetRenderer.DASHBOARD_ELEMENT_ATTR_PREFIX
+			+ "static-id";
+
 	static
 	{
 		AuthorizationResourceMetas.registerForShare(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE,
@@ -118,6 +128,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	@Autowired
 	private ApplicationProperties applicationProperties;
+
+	@Autowired
+	private HtmlFilter htmlFilter;
 
 	public DashboardController()
 	{
@@ -194,6 +207,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public void setApplicationProperties(ApplicationProperties applicationProperties)
 	{
 		this.applicationProperties = applicationProperties;
+	}
+
+	public HtmlFilter getHtmlFilter()
+	{
+		return htmlFilter;
+	}
+
+	public void setHtmlFilter(HtmlFilter htmlFilter)
+	{
+		this.htmlFilter = htmlFilter;
 	}
 
 	@RequestMapping("/add")
@@ -1012,9 +1035,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		User createUser = dashboardWidget.getCreateUser();
 
-		String templateContent = (isShowForEdit
-				? templateContent = request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT)
-				: null);
+		String templateContent = (isShowForEdit ? request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT) : null);
+		templateContent = buildShowForEditTemplateContent(templateContent);
 
 		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(createUser));
@@ -1041,6 +1063,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			RenderContext renderContext = createHtmlRenderContext(request, response, out,
 					createWebContext(request), htmlTitleHandler);
 
+			if (templateContent != null)
+			{
+				renderContext.setAttribute(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT,
+						escapeTemplateContentForRenderContext(templateContent));
+			}
+
 			HtmlTplDashboard dashboard = (templateContentIn != null
 					? dashboardWidget.render(renderContext, template, templateContentIn)
 					: dashboardWidget.render(renderContext, template));
@@ -1054,6 +1082,51 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
+	}
+	
+	protected String buildShowForEditTemplateContent(String templateContent) throws IOException
+	{
+		if (templateContent == null)
+			return templateContent;
+
+		String staticIdPrefix = Long.toHexString(System.currentTimeMillis());
+
+		StringReader rawHtml = null;
+		StringWriter showForEditHtml = null;
+
+		try
+		{
+			rawHtml = IOUtil.getReader(templateContent);
+			showForEditHtml = new StringWriter(templateContent.length());
+
+			DashboardShowForEditFilterHandler fh = new DashboardShowForEditFilterHandler(showForEditHtml,
+					staticIdPrefix);
+			this.htmlFilter.filter(rawHtml, fh);
+		}
+		finally
+		{
+			IOUtil.close(rawHtml);
+			IOUtil.close(showForEditHtml);
+		}
+
+		return showForEditHtml.toString();
+	}
+
+	/**
+	 * 转义要放入{@linkplain RenderContext}的看板模板内容。
+	 * <p>
+	 * 它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错，需转义为："<\/script>"。
+	 * </p>
+	 * 
+	 * @param templateContent
+	 * @return
+	 */
+	protected String escapeTemplateContentForRenderContext(String templateContent)
+	{
+		if (templateContent == null)
+			return templateContent;
+
+		return templateContent.replace("</", "<\\/");
 	}
 
 	protected boolean isDashboardShowForEdit(HttpServletRequest request, HtmlTplDashboardWidgetEntity dashboardWidget,
@@ -1554,6 +1627,47 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		public void setAnalysisProject(AnalysisProject analysisProject)
 		{
 			this.analysisProject = analysisProject;
+		}
+	}
+
+	/**
+	 * 看板可视编辑时的模板内容过滤处理器。
+	 * <p>
+	 * 它为模板内<code>&lt;body&gt;</code>与<code>&lt;/body&gt;</code>之间的所有元素添加<code>dg-static-id</code>属性。
+	 * </p>
+	 * <p>
+	 * 一是表明元素是模板内的静态元素（（模板中定义的元素而非展示时生成的）），二是为其提供唯一的扩展标识，用于为前端模板代码同步提供支持。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class DashboardShowForEditFilterHandler extends HeadBodyAwareFilterHandler
+	{
+		private final String staticIdPrefix;
+
+		private int staticIdSequence = 0;
+
+		public DashboardShowForEditFilterHandler(Writer out, String staticIdPrefix)
+		{
+			super(out);
+			this.staticIdPrefix = staticIdPrefix;
+		}
+
+		public String getStaticIdPrefix()
+		{
+			return staticIdPrefix;
+		}
+
+		@Override
+		public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
+				throws IOException
+		{
+			if (this.isInBodyTag() && !isCloseTagName(tagName))
+			{
+				write(" " + DASHBOARD_STATIC_ELEMENT_ID + "=\"" + this.staticIdPrefix + (this.staticIdSequence++)
+						+ "\" ");
+			}
 		}
 	}
 }

@@ -328,16 +328,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 				paramValues.put(name, values);
 		}
 
-		// 转义自定义模板内容参数，它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错，需转义为："<\/script>"
-		String templateContent = (String) paramValues.get(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
-		if (templateContent != null)
-		{
-			templateContent = templateContent.replace("</", "<\\/");
-			paramValues.put(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT, templateContent);
-		}
-
 		return paramValues;
 	}
+
 
 	protected DashboardTheme resolveDashboardTheme(HttpServletRequest request)
 	{
@@ -404,13 +397,11 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		for (String chartId : chartQueries.keySet())
 		{
 			String chartWidgetId = dashboardInfo.getChartWidgetId(chartId);
-
-			if (chartWidgetId == null)
-				throw new IllegalInputException("Chart '" + chartId + "' not found");
-
 			HtmlChartWidget chartWidget = renderer.getHtmlChartWidget(chartWidgetId);
 
-			chartWidgets.put(chartId, chartWidget);
+			// 忽略未找到的ChartWidget
+			if (chartWidget != null)
+				chartWidgets.put(chartId, chartWidget);
 		}
 
 		return chartWidgets;
@@ -433,37 +424,39 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			ChartQuery chartQuery = entry.getValue();
 			ChartWidget chartWidget = chartWidgets.get(chartId);
 
-			if (chartWidget == null)
-				throw new IllegalInputException("Chart '" + chartId + "' not found");
-
-			ChartDataSet[] chartDataSets = chartWidget.getChartDataSets();
-			List<DataSetQuery> dataSetQueries = chartQuery.getDataSetQueries();
-
-			ChartQuery chartQueryRe = null;
-
-			if (chartDataSets == null || chartDataSets.length == 0 || dataSetQueries == null
-					|| dataSetQueries.isEmpty())
+			// 忽略未找到的ChartWidget
+			if (chartWidget != null)
 			{
-				chartQueryRe = chartQuery;
-			}
-			else
-			{
-				List<DataSetQuery> dataSetQueriesRe = new ArrayList<DataSetQuery>(dataSetQueries.size());
+				ChartDataSet[] chartDataSets = chartWidget.getChartDataSets();
+				List<DataSetQuery> dataSetQueries = chartQuery.getDataSetQueries();
 
-				for (int j = 0; j < chartDataSets.length; j++)
+				ChartQuery chartQueryRe = null;
+
+				if (chartDataSets == null || chartDataSets.length == 0 || dataSetQueries == null
+						|| dataSetQueries.isEmpty())
 				{
-					DataSetQuery dataSetQueryRe = dataSetQueries.get(j);
-					dataSetQueryRe = getDataSetParamValueConverter().convert(dataSetQueryRe, chartDataSets[j].getDataSet(), true);
-					analysisUser.setParamValue(dataSetQueryRe, analysisRoleNames);
+					chartQueryRe = chartQuery;
+				}
+				else
+				{
+					List<DataSetQuery> dataSetQueriesRe = new ArrayList<DataSetQuery>(dataSetQueries.size());
 
-					dataSetQueriesRe.add(dataSetQueryRe);
+					for (int j = 0; j < chartDataSets.length; j++)
+					{
+						DataSetQuery dataSetQueryRe = dataSetQueries.get(j);
+						dataSetQueryRe = getDataSetParamValueConverter().convert(dataSetQueryRe,
+								chartDataSets[j].getDataSet(), true);
+						analysisUser.setParamValue(dataSetQueryRe, analysisRoleNames);
+
+						dataSetQueriesRe.add(dataSetQueryRe);
+					}
+
+					chartQueryRe = chartQuery.copy();
+					chartQueryRe.setDataSetQueries(dataSetQueriesRe);
 				}
 
-				chartQueryRe = chartQuery.copy();
-				chartQueryRe.setDataSetQueries(dataSetQueriesRe);
+				chartQueriesRe.put(chartId, chartQueryRe);
 			}
-
-			chartQueriesRe.put(chartId, chartQueryRe);
 		}
 		
 		DashboardQuery queryRe = query.copy();

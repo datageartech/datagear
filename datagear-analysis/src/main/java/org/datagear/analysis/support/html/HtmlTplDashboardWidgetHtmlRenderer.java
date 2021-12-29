@@ -73,13 +73,15 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	public static final String DEFAULT_CHART_TAG_NAME = "div";
 
-	public static final String DEFAULT_ATTR_NAME_DASHBOARD_VAR = "dg-dashboard-var";
+	public static final String DEFAULT_ATTR_NAME_DASHBOARD_VAR = DASHBOARD_ELEMENT_ATTR_PREFIX + "dashboard-var";
 
-	public static final String DEFAULT_ATTR_NAME_DASHBOARD_FACTORY = "dg-dashboard-factory";
+	public static final String DEFAULT_ATTR_NAME_DASHBOARD_FACTORY = DASHBOARD_ELEMENT_ATTR_PREFIX
+			+ "dashboard-factory";
 
-	public static final String DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE = "dg-dashboard-import-exclude";
+	public static final String DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE = DASHBOARD_ELEMENT_ATTR_PREFIX
+			+ "dashboard-import-exclude";
 
-	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = "dg-chart-widget";
+	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-widget";
 
 	/** 看板设置标签名 */
 	private String dashboardSetTagName = DEFAULT_DASHBOARD_SET_TAG_NAME;

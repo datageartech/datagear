@@ -92,6 +92,7 @@ import org.datagear.persistence.support.DefaultPersistenceManager;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.html.HtmlFilter;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
@@ -469,6 +470,13 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public UserPasswordEncoder userPasswordEncoder()
 	{
 		UserPasswordEncoderImpl bean = new UserPasswordEncoderImpl(this.passwordEncoder());
+		return bean;
+	}
+
+	@Bean
+	public HtmlFilter htmlFilter()
+	{
+		HtmlFilter bean = new HtmlFilter();
 		return bean;
 	}
 

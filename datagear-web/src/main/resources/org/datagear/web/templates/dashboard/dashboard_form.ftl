@@ -288,7 +288,7 @@ readonly 是否只读操作，允许为null
 		if(iw <= ww && ih <= wh)
 			return;
 		
-		var borderError = 2;
+		var borderError = 5;
 		var scaleX = (ww-borderError)/iw, scaleY = (wh-borderError)/ih;
 		$iframe.css("transform-origin", "0 0");
 		$iframe.css("transform", "scale("+Math.min(scaleX, scaleY)+")");
@@ -409,8 +409,8 @@ readonly 是否只读操作，允许为null
 			var visualEditorDiv = $("<div class='tpl-visual-editor-wrapper' />").appendTo(editorWrapper);
 			
 			var visualEditorId = $.uid("visualEditor");
-			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm hide-editor' />").attr("name", visualEditorId)
-				.attr("id", visualEditorId).appendTo(visualEditorDiv);
+			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm hide-editor ui-widget-shadow' />")
+				.attr("name", visualEditorId).attr("id", visualEditorId).appendTo(visualEditorDiv);
 			
 			//加载完再显示，避免闪屏
 			visualEditorIfm.on("load", function()

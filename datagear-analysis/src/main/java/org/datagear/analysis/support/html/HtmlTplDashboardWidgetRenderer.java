@@ -69,15 +69,17 @@ import org.datagear.util.html.HtmlFilter;
  */
 public abstract class HtmlTplDashboardWidgetRenderer
 {
-	public static final String DASHBOARD_IMPORT_ITEM_NAME_ATTR = "dg-import-name";
+	public static final String DASHBOARD_ELEMENT_ATTR_PREFIX = "dg-";
+
+	public static final String DASHBOARD_IMPORT_ITEM_NAME_ATTR = DASHBOARD_ELEMENT_ATTR_PREFIX + "import-name";
 
 	public static final String DEFAULT_DASHBOARD_FACTORY_VAR = "dashboardFactory";
 
 	public static final String DEFAULT_THEME_IMPORT_NAME = "dashboardThemeStyle";
 
-	public static final String DEFAULT_DASHBOARD_STYLE_NAME = "dg-dashboard";
+	public static final String DEFAULT_DASHBOARD_STYLE_NAME = DASHBOARD_ELEMENT_ATTR_PREFIX + "dashboard";
 
-	public static final String DEFAULT_CHART_STYLE_NAME = "dg-chart";
+	public static final String DEFAULT_CHART_STYLE_NAME = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart";
 
 	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
 
