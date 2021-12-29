@@ -22,7 +22,7 @@ import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
 import org.datagear.util.StringUtil;
-import org.datagear.util.html.DefaultFilterHandler;
+import org.datagear.util.html.HeadBodyAwareFilterHandler;
 import org.datagear.util.html.StringBuilderCopyWriter;
 
 /**
@@ -357,7 +357,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		return list;
 	}
 
-	protected class DashboardFilterHandler extends DefaultFilterHandler
+	protected class DashboardFilterHandler extends HeadBodyAwareFilterHandler
 	{
 		private final RenderContext renderContext;
 		private final HtmlTplDashboardRenderAttr renderAttr;
@@ -365,10 +365,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		private final DashboardInfo dashboardInfo;
 
 		private boolean htmlTagResolved = false;
-		private boolean inHeadTag = false;
 		private boolean inTitleTag = false;
 		private boolean titleTagHandled = false;
-		private boolean inBodyTag = false;
 		private boolean dashboardImportWritten = false;
 		private boolean dashboardScriptWritten = false;
 
@@ -406,7 +404,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		public void beforeWriteTagStart(Reader in, String tagName) throws IOException
 		{
 			// </body>前写看板脚本
-			if (!this.dashboardScriptWritten && this.inBodyTag && equalsIgnoreCase(tagName, "/body"))
+			if (!this.dashboardScriptWritten && this.isInBodyTag() && equalsIgnoreCase(tagName, "/body"))
 			{
 				// 确保看板脚本前已写完看板导入库，比如没有定义<head></head>
 				if (!this.dashboardImportWritten)
@@ -416,7 +414,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			}
 
 			// 处理标题
-			if (!this.titleTagHandled && this.inHeadTag)
+			if (!this.titleTagHandled && this.isInHeadTag())
 			{
 				// 优先</title>前插入标题后缀
 				if (equalsIgnoreCase(tagName, "/title"))
@@ -446,19 +444,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				}
 			}
 
-			if (this.inHeadTag && !this.inBodyTag && equalsIgnoreCase(tagName, "/head"))
-			{
-				this.inHeadTag = false;
-				this.inTitleTag = false;
-				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
-			}
-			else if (!this.inHeadTag && this.inBodyTag && equalsIgnoreCase(tagName, "/body"))
-			{
-				this.inBodyTag = false;
-				this.inTitleTag = false;
-				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
-			}
-			else if (this.inHeadTag && this.inTitleTag && equalsIgnoreCase(tagName, "/title"))
+			super.beforeWriteTagStart(in, tagName);
+			if (this.isInHeadTag() && this.inTitleTag && equalsIgnoreCase(tagName, "/title"))
 			{
 				this.inTitleTag = false;
 				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
@@ -468,7 +455,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		@Override
 		public boolean isResolveTagAttrs(Reader in, String tagName)
 		{
-			return (this.inBodyTag && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
+			return (this.isInBodyTag()
+					&& equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
 					|| (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"));
 		}
 
@@ -477,7 +465,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				throws IOException
 		{
 			// 解析<body></body>内的图表元素
-			if (this.inBodyTag && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
+			if (this.isInBodyTag() && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
 			{
 				resolveChartTagAttr(attrs);
 			}
@@ -492,17 +480,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		@Override
 		public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
 		{
-			if (!this.inHeadTag && !this.inBodyTag && equalsIgnoreCase(tagName, "head"))
-			{
-				this.inHeadTag = !isSelfCloseTagEnd(tagEnd);
-			}
-			else if (!this.inHeadTag && !this.inBodyTag && equalsIgnoreCase(tagName, "body"))
-			{
-				this.inBodyTag = !isSelfCloseTagEnd(tagEnd);
-				this.inTitleTag = false;
-				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
-			}
-			else if (this.inHeadTag && !this.inTitleTag && equalsIgnoreCase(tagName, "title"))
+			super.afterWriteTagEnd(in, tagName, tagEnd);
+			if (this.isInHeadTag() && !this.inTitleTag && equalsIgnoreCase(tagName, "title"))
 			{
 				this.inTitleTag = !isSelfCloseTagEnd(tagEnd);
 				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
@@ -516,7 +495,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			}
 
 			// 如果</body>前没写（没有定义</body>），则在</html>后写看板脚本
-			if (!this.dashboardScriptWritten && !inHeadTag && !this.inBodyTag && equalsIgnoreCase(tagName, "/html"))
+			if (!this.dashboardScriptWritten && !this.isInHeadTag() && !this.isInBodyTag()
+					&& equalsIgnoreCase(tagName, "/html"))
 			{
 				// 确保看板脚本前已写完看板导入库，比如没有定义<head></head>、<body></body>
 				if (!this.dashboardImportWritten)
@@ -524,6 +504,20 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 				writeHtmlTplDashboardScriptWithSet();
 			}
+		}
+
+		@Override
+		protected void onSetInHeadTag(boolean in)
+		{
+			if (!in)
+				this.getStringBuilderCopyWriter().setCopy(false);
+		}
+
+		@Override
+		protected void onSetInBodyTag(boolean in)
+		{
+			if (in)
+				this.getStringBuilderCopyWriter().setCopy(false);
 		}
 
 		protected StringBuilderCopyWriter getStringBuilderCopyWriter()
