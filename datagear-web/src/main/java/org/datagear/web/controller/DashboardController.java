@@ -41,6 +41,7 @@ import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
+import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
@@ -1071,12 +1072,19 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			response.setContentType(CONTENT_TYPE_HTML);
 			out = IOUtil.getBufferedWriter(response.getWriter());
 
+			List<HtmlTplDashboardImport> importList = buildHtmlTplDashboardImports(request);
+			if (isShowForEdit)
+			{
+				importList.add(HtmlTplDashboardImport.valueOfJavaScript("dashboardEditor",
+						WebUtils.getContextPath(request) + "/static/script/dashboardEditor.js?v=" + Global.VERSION));
+			}
+
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
 					getMessage(request, "dashboard.show.htmlTitleSuffix", getMessage(request, "app.name")),
 					getMessage(request, "dashboard.show.htmlTitleSuffixForEmpty", dashboardWidget.getName(),
 							getMessage(request, "app.name")));
 			RenderContext renderContext = createHtmlRenderContext(request, response, out,
-					createWebContext(request), htmlTitleHandler);
+					createWebContext(request), importList, htmlTitleHandler);
 
 			if (isShowForEdit)
 			{

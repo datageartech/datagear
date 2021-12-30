@@ -257,10 +257,9 @@ readonly 是否只读操作，允许为null
 		resName = (resName == null ? "" : resName);
 		return po.url("show/"+dashboardId+"/" + resName);
 	};
-	
-	po.iframeDocument = function(iframe)
+
+	po.iframeWindow = function(iframe)
 	{
-		iframe = $(iframe)[0];
 		return (iframe.contentDocument || iframe.contentWindow.document);
 	};
 
@@ -317,21 +316,18 @@ readonly 是否只读操作，允许为null
 		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
 		var changeFlag = visualEditorIfm.data("codeChangeFlag");
 		
+		codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
+		visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
+		
 		//没有修改
 		if(changeFlag != null && codeEditor.isClean(changeFlag))
 		{
-			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
-			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
 		}
 		else
 		{
 			var templateName = po.element(".resource-name-wrapper input.resourceName", $tabPane).val();
 			var templateContent = po.getCodeText(codeEditor);
 			visualEditorIfm.data("codeChangeFlag", codeEditor.changeGeneration());
-			visualEditorIfm.data("loading-template", true);
-			
-			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
-			visualEditorIfm.addClass("hide-editor");
 			
 			var form = po.element("#${pageId}-tplEditVisualForm");
 			form.attr("action", po.showUrl(dashboardId, templateName));
@@ -413,6 +409,7 @@ readonly 是否只读操作，允许为null
 				.attr("name", visualEditorId).attr("id", visualEditorId).appendTo(visualEditorDiv);
 			
 			//加载完再显示，避免闪屏
+			/*
 			visualEditorIfm.on("load", function()
 			{
 				if($(this).data("loading-template"))
@@ -421,6 +418,7 @@ readonly 是否只读操作，允许为null
 					$(this).data("loading-template", null);
 				}
 			});
+			*/
 			
 			var topWindowSize = po.evalTopWindowSize();
 			visualEditorIfm.css("width", topWindowSize.width);
