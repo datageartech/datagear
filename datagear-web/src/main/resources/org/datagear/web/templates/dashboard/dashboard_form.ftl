@@ -278,6 +278,18 @@ readonly 是否只读操作，允许为null
 		return size;
 	};
 	
+	po.iframeWindow = function($iframe)
+	{
+		$iframe = $iframe[0];
+		return $iframe.contentWindow;
+	};
+	
+	po.iframeDocument = function($iframe)
+	{
+		$iframe = $iframe[0];
+		return ($iframe.contentDocument || $iframe.contentWindow.document);
+	};
+	
 	//设置可视编辑iframe的尺寸，使其适配父元素尺寸而不会出现滚动条
 	po.setVisualEditorIframeScale = function($iframeWrapper, $iframe)
 	{
@@ -316,15 +328,19 @@ readonly 是否只读操作，允许为null
 		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
 		var changeFlag = visualEditorIfm.data("codeChangeFlag");
 		
-		codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
-		visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
-		
 		//没有修改
 		if(changeFlag != null && codeEditor.isClean(changeFlag))
 		{
+			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
+			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
 		}
 		else
 		{
+			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
+			//清空iframe后再显示，防止闪屏
+			po.iframeDocument(visualEditorIfm).write("");
+			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
+			
 			var templateName = po.element(".resource-name-wrapper input.resourceName", $tabPane).val();
 			var templateContent = po.getCodeText(codeEditor);
 			visualEditorIfm.data("codeChangeFlag", codeEditor.changeGeneration());
@@ -408,18 +424,6 @@ readonly 是否只读操作，允许为null
 			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm hide-editor ui-widget-shadow' />")
 				.attr("name", visualEditorId).attr("id", visualEditorId).appendTo(visualEditorDiv);
 			
-			//加载完再显示，避免闪屏
-			/*
-			visualEditorIfm.on("load", function()
-			{
-				if($(this).data("loading-template"))
-				{
-					$(this).removeClass("hide-editor").addClass("show-editor");
-					$(this).data("loading-template", null);
-				}
-			});
-			*/
-			
 			var topWindowSize = po.evalTopWindowSize();
 			visualEditorIfm.css("width", topWindowSize.width);
 			visualEditorIfm.css("height", topWindowSize.height);
@@ -464,12 +468,12 @@ readonly 是否只读操作，允许为null
 								asDialog: false,
 								pageParam :
 								{
-									select : function(charts)
+									select : function(chartWidgets)
 									{
-										if(!$.isArray(charts))
-											charts = [charts];
+										if(!$.isArray(chartWidgets))
+											chartWidgets = [chartWidgets];
 										
-										po.insertChartCode(codeEditor, charts);
+										po.insertChart(tabPane, chartWidgets);
 										chartListPanel.hide();
 										return false;
 									}
@@ -678,6 +682,24 @@ readonly 是否只读操作，允许为null
 			text = doc.getLine(prevRow) + text;
 		
 		return po.getLastTagText(text);
+	};
+	
+	po.insertChart = function($tabPane, chartWidgets)
+	{
+		var codeEditorDiv = po.element(".code-editor", $tabPane);
+		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
+		
+		if(codeEditorDiv.hasClass("show-editor"))
+		{
+			var codeEditor = codeEditorDiv.data("resourceEditorInstance");
+			po.insertChartCode(codeEditor, chartWidgets);
+		}
+		else if(visualEditorIfm.hasClass("show-editor"))
+		{
+			ifmWindow = po.iframeWindow(visualEditorIfm);
+			var dashboardEditor = ifmWindow.dashboardFactory.dashboardEditor;
+			dashboardEditor.insertChart(chartWidgets);
+		}
 	};
 	
 	po.insertChartCode = function(codeEditor, charts)

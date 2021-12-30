@@ -30,25 +30,49 @@
 	dashboardFactory.init = function(dashboard)
 	{
 		dashboardFactory._initSuperByDashboardEditor(dashboard);
-		editor.init(dashboard);
+		editor.dashboard = dashboard;
+		editor.init();
 	};
 	
 	/**
 	 * 初始化可视编辑器。
 	 */
-	editor.init = function(dashboard)
+	editor.init = function()
 	{
+		var dashboard = this.dashboard;
+		
 		var editHtmlInfo = dashboard.renderContextAttr(editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
-		this.editHtmlIframe(dashboard, editHtmlInfo.editHtml);
+		this._editHtmlIframe(editHtmlInfo.editHtml);
+	};
+	
+	editor.insertChart = function(chartWidgets)
+	{
+		if(!chartWidgets || chartWidgets.length == 0)
+			return;
+		
+		if(!$.isArray(chartWidgets))
+			chartWidgets = [ chartWidgets ];
+		
+		var iframeDoc = this._iframeDocument();
+		
+		for(var i=0; i<chartWidgets.length; i++)
+		{
+			var chartWidget = chartWidgets[i];
+			
+			$("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id).appendTo(document.body);
+			$("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id).appendTo(iframeDoc.body);
+		}
+		
+		this.dashboard.loadUnsolvedCharts();
 	};
 	
 	/**
 	 * 获取编辑HTML的iframe对象，也可设置其编辑HTML。
 	 */
-	editor.editHtmlIframe = function(dashboard, editHtml)
+	editor._editHtmlIframe = function(editHtml)
 	{
-		var id = (this.editHtmlIframeId != null ? this.editHtmlIframeId
-					: (this.editHtmlIframeId = chartFactory.nextElementId()));
+		var id = (this._editHtmlIframeId != null ? this._editHtmlIframeId
+					: (this._editHtmlIframeId = chartFactory.nextElementId()));
 		
 		var iframe = $("#" + id);
 		
@@ -64,7 +88,7 @@
 		{
 			editHtml = editHtml.replaceAll("<\\/", "</");
 			
-			var iframeDoc = editor.iframeDocument(iframe);
+			var iframeDoc = this._iframeDocument(iframe);
 			iframeDoc.write(editHtml);
 		}
 		
@@ -74,12 +98,13 @@
 	/**
 	 * 获取iframe的document对象。
 	 */
-	editor.iframeDocument = function(iframe)
+	editor._iframeDocument = function(iframe)
 	{
+		iframe = (iframe == null ? this._editHtmlIframe() : iframe);
 		return (iframe.contentDocument || iframe.contentWindow.document);
 	};
 	
-	editor.evalTopWindowSize = function()
+	editor._evalTopWindowSize = function()
 	{
 		var topWindow = window;
 		while(topWindow.parent  && topWindow.parent != topWindow)
