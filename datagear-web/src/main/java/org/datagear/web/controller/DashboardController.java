@@ -14,11 +14,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -55,10 +57,15 @@ import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.html.DefaultFilterHandler;
 import org.datagear.util.html.HeadBodyAwareFilterHandler;
 import org.datagear.util.html.HtmlFilter;
+import org.datagear.util.html.RedirectWriter;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.config.CoreConfig;
+import org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlFilterHandler;
+import org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlInfo;
+import org.datagear.web.controller.DashboardController.DashboardShowForEdit.ShowHtmlFilterHandler;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -101,6 +108,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 */
 	public static final String DASHBOARD_STATIC_ELEMENT_ID = HtmlTplDashboardWidgetRenderer.DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "static-id";
+
+	/**
+	 * 看板内置渲染上下文属性名：{@linkplain EditHtmlInfo}。
+	 */
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "EDIT_HTML_INFO";
 
 	static
 	{
@@ -1035,13 +1048,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		User createUser = dashboardWidget.getCreateUser();
 
-		String templateContent = (isShowForEdit ? request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT) : null);
-		templateContent = buildShowForEditTemplateContent(templateContent);
+		String showHtml = (isShowForEdit
+				? buildShowForEditShowHtml(request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT))
+				: "");
+		EditHtmlInfo editHtmlInfo = (isShowForEdit ? buildShowForEditEditHtmlInfo(showHtml) : null);
 
 		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(createUser));
 
-		Reader templateContentIn = (templateContent == null ? null : IOUtil.getReader(templateContent));
+		Reader showHtmlIn = (isShowForEdit ? IOUtil.getReader(showHtml) : null);
 		Writer out = null;
 
 		try
@@ -1063,14 +1078,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			RenderContext renderContext = createHtmlRenderContext(request, response, out,
 					createWebContext(request), htmlTitleHandler);
 
-			if (templateContent != null)
+			if (isShowForEdit)
 			{
-				renderContext.setAttribute(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT,
-						escapeTemplateContentForRenderContext(templateContent));
+				renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO, editHtmlInfo);
+				// 移除参数中的模板内容，一是它不应该传入页面，二是它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错
+				renderContext.removeAttribute(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
 			}
 
-			HtmlTplDashboard dashboard = (templateContentIn != null
-					? dashboardWidget.render(renderContext, template, templateContentIn)
+			HtmlTplDashboard dashboard = (showHtmlIn != null
+					? dashboardWidget.render(renderContext, template, showHtmlIn)
 					: dashboardWidget.render(renderContext, template));
 
 			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
@@ -1078,55 +1094,73 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 		finally
 		{
-			IOUtil.close(templateContentIn);
+			IOUtil.close(showHtmlIn);
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
 	}
 	
-	protected String buildShowForEditTemplateContent(String templateContent) throws IOException
+	protected String buildShowForEditShowHtml(String templateContent) throws IOException
 	{
-		if (templateContent == null)
-			return templateContent;
+		String showHtml = "";
 
-		String staticIdPrefix = Long.toHexString(System.currentTimeMillis());
-
-		StringReader rawHtml = null;
-		StringWriter showForEditHtml = null;
-
-		try
+		if (templateContent != null)
 		{
-			rawHtml = IOUtil.getReader(templateContent);
-			showForEditHtml = new StringWriter(templateContent.length());
+			String staticIdPrefix = Long.toHexString(System.currentTimeMillis());
 
-			DashboardShowForEditFilterHandler fh = new DashboardShowForEditFilterHandler(showForEditHtml,
-					staticIdPrefix);
-			this.htmlFilter.filter(rawHtml, fh);
-		}
-		finally
-		{
-			IOUtil.close(rawHtml);
-			IOUtil.close(showForEditHtml);
+			StringReader in = null;
+			StringWriter out = null;
+
+			try
+			{
+				in = IOUtil.getReader(templateContent);
+				out = new StringWriter(templateContent.length());
+
+				ShowHtmlFilterHandler fh = new ShowHtmlFilterHandler(out, staticIdPrefix);
+				this.htmlFilter.filter(in, fh);
+
+				showHtml = out.toString();
+			}
+			finally
+			{
+				IOUtil.close(in);
+				IOUtil.close(out);
+			}
 		}
 
-		return showForEditHtml.toString();
+		return showHtml;
 	}
 
-	/**
-	 * 转义要放入{@linkplain RenderContext}的看板模板内容。
-	 * <p>
-	 * 它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错，需转义为："<\/script>"。
-	 * </p>
-	 * 
-	 * @param templateContent
-	 * @return
-	 */
-	protected String escapeTemplateContentForRenderContext(String templateContent)
+	protected EditHtmlInfo buildShowForEditEditHtmlInfo(String showHtml) throws IOException
 	{
-		if (templateContent == null)
-			return templateContent;
+		String editHtml = "";
+		Map<String, String> placeholderSources = Collections.emptyMap();
 
-		return templateContent.replace("</", "<\\/");
+		if (showHtml != null)
+		{
+			StringReader in = null;
+			StringWriter out = null;
+
+			try
+			{
+				in = IOUtil.getReader(showHtml);
+				out = new StringWriter(showHtml.length());
+
+				EditHtmlFilterHandler fh = new EditHtmlFilterHandler(out);
+				this.htmlFilter.filter(in, fh);
+
+				editHtml = out.toString();
+				placeholderSources = fh.getPlaceholderSources();
+			}
+			finally
+			{
+				IOUtil.close(in);
+				IOUtil.close(out);
+			}
+		}
+
+		return new EditHtmlInfo(escapeDashboardRenderContextAttrValue(editHtml),
+				escapeDashboardRenderContextAttrValue(placeholderSources));
 	}
 
 	protected boolean isDashboardShowForEdit(HttpServletRequest request, HtmlTplDashboardWidgetEntity dashboardWidget,
@@ -1631,42 +1665,211 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	}
 
 	/**
-	 * 看板可视编辑时的模板内容过滤处理器。
+	 * 看板可视编辑支持类。
 	 * <p>
-	 * 它为模板内<code>&lt;body&gt;</code>与<code>&lt;/body&gt;</code>之间的所有元素添加<code>dg-static-id</code>属性。
+	 * 看板可视编辑的基本思路是：
 	 * </p>
 	 * <p>
-	 * 一是表明元素是模板内的静态元素（（模板中定义的元素而非展示时生成的）），二是为其提供唯一的扩展标识，用于为前端模板代码同步提供支持。
+	 * 1.
+	 * 基于看板HTML模板，生成【展示HTML】（参考{@linkplain ShowHtmlFilterHandler}）、【编辑HTML】（参考{@linkplain EditHtmlFilterHandler}），
+	 * 【展示HTML】在插入【可视编辑JS库】后，渲染为可视编辑交互页面，【编辑HTML】传入可视编辑交互页面的{@linkplain RenderContext}；
+	 * </p>
+	 * <p>
+	 * 2.
+	 * 【可视编辑JS库】将【编辑HTML】渲染至一个隔离的iframe中，将所有交互页面中HTML元素的变更同步至隔离iframe中的对应HTML元素。
+	 * </p>
+	 * <p>
+	 * 3. 【可视编辑JS库】读取和转换隔离iframe中的HTML，生成【结果HTML】，即是可视编辑最终的看板HTML模板代码。
 	 * </p>
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class DashboardShowForEditFilterHandler extends HeadBodyAwareFilterHandler
+	public static class DashboardShowForEdit
 	{
-		private final String staticIdPrefix;
-
-		private int staticIdSequence = 0;
-
-		public DashboardShowForEditFilterHandler(Writer out, String staticIdPrefix)
+		/**
+		 * 看板可视编辑时的【展示HTML】过滤处理器。
+		 * <p>
+		 * 它为HTML模板内<code>&lt;body&gt;</code>与<code>&lt;/body&gt;</code>之间的所有元素添加<code>dg-static-id</code>属性。
+		 * </p>
+		 * <p>
+		 * 一是添加静态元素标识（HTML模板中定义的元素而非展示时动态生成），二是定义唯一的扩展标识，用于为前端【可视编辑JS库】的HTML元素同步功能提供支持。
+		 * </p>
+		 * 
+		 * @author datagear@163.com
+		 *
+		 */
+		public static class ShowHtmlFilterHandler extends HeadBodyAwareFilterHandler
 		{
-			super(out);
-			this.staticIdPrefix = staticIdPrefix;
-		}
+			private final String staticIdPrefix;
 
-		public String getStaticIdPrefix()
-		{
-			return staticIdPrefix;
-		}
+			private int staticIdSequence = 0;
 
-		@Override
-		public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
-				throws IOException
-		{
-			if (this.isInBodyTag() && !isCloseTagName(tagName))
+			public ShowHtmlFilterHandler(Writer out, String staticIdPrefix)
 			{
-				write(" " + DASHBOARD_STATIC_ELEMENT_ID + "=\"" + this.staticIdPrefix + (this.staticIdSequence++)
-						+ "\" ");
+				super(out);
+				this.staticIdPrefix = staticIdPrefix;
+			}
+
+			public String getStaticIdPrefix()
+			{
+				return staticIdPrefix;
+			}
+
+			@Override
+			public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
+					throws IOException
+			{
+				if (this.isInBodyTag() && !isCloseTagName(tagName))
+				{
+					write(" " + DASHBOARD_STATIC_ELEMENT_ID + "=\"" + this.staticIdPrefix + (this.staticIdSequence++)
+							+ "\" ");
+				}
+			}
+		}
+
+		/**
+		 * 看板可视编辑时的【编辑HTML】过滤处理器。
+		 * <p>
+		 * 它把HTML模板中可能会在前端渲染时改变HTML文档结构的<br>
+		 * <code>
+		 * &lt;link&gt;...&lt;/link&gt;<br>
+		 * &lt;style&gt;...&lt;/style&gt;<br>
+		 * &lt;script&gt;...&lt;/script&gt;
+		 * </code><br>
+		 * 标签替换为注释占位符。
+		 * </p>
+		 * <p>
+		 * 例如，将:<br>
+		 * <code>
+		 * &lt;script&gt;...&lt;/script&gt;
+		 * </code><br>
+		 * 替换为：<br>
+		 * <code>
+		 * &lt;--dg-placeholder-0--&gt;
+		 * </code>
+		 * </p>
+		 * <p>
+		 * 此举的目的是：防止【编辑HTML】在隔离iframe中渲染后生成动态DOM，导致【可视编辑JS库】生成的【结果HTML】被污染。
+		 * </p>
+		 * 
+		 * @author datagear@163.com
+		 *
+		 */
+		public static class EditHtmlFilterHandler extends DefaultFilterHandler
+		{
+			private static final String PLACEHOLDER_PREFIX = HtmlTplDashboardWidgetRenderer.DASHBOARD_ELEMENT_ATTR_PREFIX
+					+ "placeholder-";
+
+			private final Map<String, String> placeholderSources = new HashMap<String, String>();
+
+			private int placeholderSequence = 0;
+
+			private String currentPlaceholderKey;
+
+			public EditHtmlFilterHandler(Writer out)
+			{
+				super(new RedirectWriter(out, new StringWriter(), false));
+			}
+
+			public Map<String, String> getPlaceholderSources()
+			{
+				return placeholderSources;
+			}
+
+			@Override
+			public void beforeWriteTagStart(Reader in, String tagName) throws IOException
+			{
+				RedirectWriter out = getRedirectOut();
+
+				if (!out.isRedirect())
+				{
+					// 将这些标签写入变向输出流
+					if ("link".equalsIgnoreCase(tagName) || "style".equalsIgnoreCase(tagName)
+							|| "script".equalsIgnoreCase(tagName))
+					{
+						this.currentPlaceholderKey = nextPlaceholderKey();
+						out.getOut().write(this.currentPlaceholderKey);
+
+						out.setRedirect(true);
+					}
+				}
+			}
+
+			@Override
+			public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
+			{
+				RedirectWriter out = getRedirectOut();
+
+				if (out.isRedirect())
+				{
+					// 从变向输出流中读取占位内容
+					if ("/link".equalsIgnoreCase(tagName) || "/style".equalsIgnoreCase(tagName)
+							|| "/script".equalsIgnoreCase(tagName)
+							|| (isSelfCloseTagEnd(tagEnd) && ("link".equalsIgnoreCase(tagName)
+									|| "style".equalsIgnoreCase(tagName) || "script".equalsIgnoreCase(tagName))))
+					{
+						String placeholderValue = ((StringWriter) out.getRedirectOut()).toString();
+						this.placeholderSources.put(this.currentPlaceholderKey, placeholderValue);
+
+						out.setRedirectOut(new StringWriter());
+						out.setRedirect(false);
+					}
+				}
+			}
+
+			protected String nextPlaceholderKey()
+			{
+				return "<!--" + PLACEHOLDER_PREFIX + (this.placeholderSequence++) + "-->";
+			}
+
+			protected RedirectWriter getRedirectOut()
+			{
+				return (RedirectWriter) super.getOut();
+			}
+		}
+
+		/**
+		 * 【编辑HTML】信息。
+		 * 
+		 * @author datagear@163.com
+		 *
+		 */
+		public static class EditHtmlInfo implements Serializable
+		{
+			private static final long serialVersionUID = 1L;
+
+			/** 编辑HTML */
+			private String editHtml;
+
+			/** 编辑HTML中的占位符原内容映射表 */
+			private Map<String, String> placeholderSources;
+
+			public EditHtmlInfo(String editHtml, Map<String, String> placeholderSources)
+			{
+				super();
+				this.editHtml = editHtml;
+				this.placeholderSources = placeholderSources;
+			}
+
+			public String getEditHtml()
+			{
+				return editHtml;
+			}
+
+			public void setEditHtml(String editHtml)
+			{
+				this.editHtml = editHtml;
+			}
+
+			public Map<String, String> getPlaceholderSources()
+			{
+				return placeholderSources;
+			}
+
+			public void setPlaceholderSources(Map<String, String> placeholderSources)
+			{
+				this.placeholderSources = placeholderSources;
 			}
 		}
 	}

@@ -331,6 +331,41 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return paramValues;
 	}
 
+	/**
+	 * 转义要放入{@linkplain RenderContext}的看板模板内容。
+	 * <p>
+	 * 它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错，需转义为："<\/script>"。
+	 * </p>
+	 * 
+	 * @param templateContent
+	 * @return
+	 */
+	protected Map<String, String> escapeDashboardRenderContextAttrValue(Map<String, String> value)
+	{
+		if (value == null || value.isEmpty())
+			return value;
+
+		Map<String, String> re = new HashMap<String, String>(value.size());
+
+		for (Map.Entry<String, String> entry : value.entrySet())
+			re.put(entry.getKey(), escapeDashboardRenderContextAttrValue(entry.getValue()));
+
+		return re;
+	}
+
+	/**
+	 * 转义要放入{@linkplain RenderContext}的看板模板内容。
+	 * <p>
+	 * 它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错，需转义为："<\/script>"。
+	 * </p>
+	 * 
+	 * @param templateContent
+	 * @return
+	 */
+	protected String escapeDashboardRenderContextAttrValue(String value)
+	{
+		return (value == null ? null : value.replace("</", "<\\/"));
+	}
 
 	protected DashboardTheme resolveDashboardTheme(HttpServletRequest request)
 	{
