@@ -10,10 +10,10 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.io.Writer;
 
 import org.datagear.util.IOUtil;
-import org.datagear.util.StringBuilderWriter;
 import org.datagear.util.TextParserSupport;
 
 /**
@@ -105,12 +105,12 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 	 */
 	public JsDefContent resolve(Reader reader) throws IOException
 	{
-		StringBuilderWriter jsonOut = new StringBuilderWriter();
-		StringBuilderWriter chartRendererOut = new StringBuilderWriter();
+		StringWriter jsonOut = new StringWriter();
+		StringWriter chartRendererOut = new StringWriter();
 
 		resolveJsDefContent(reader, jsonOut, chartRendererOut);
 
-		return new JsDefContent(jsonOut.getString(), chartRendererOut.getString());
+		return new JsDefContent(jsonOut.toString(), chartRendererOut.toString());
 	}
 
 	protected void resolveJsDefContent(Reader in, Writer jsonOut, Writer chartRendererOut) throws IOException
