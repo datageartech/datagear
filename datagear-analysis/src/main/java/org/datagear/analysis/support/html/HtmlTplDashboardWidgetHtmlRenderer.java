@@ -9,6 +9,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,8 @@ import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
 import org.datagear.util.StringUtil;
+import org.datagear.util.html.CopyWriter;
 import org.datagear.util.html.HeadBodyAwareFilterHandler;
-import org.datagear.util.html.StringBuilderCopyWriter;
 
 /**
  * 使用原生HTML网页作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
@@ -252,11 +253,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	{
 		DashboardInfo dashboardInfo = new DashboardInfo();
 
-		StringBuilderCopyWriter out = new StringBuilderCopyWriter(renderAttr.getHtmlWriterNonNull(renderContext),
-				false);
-
 		DashboardFilterHandler filterHandler = new DashboardFilterHandler(
-				out, renderContext, renderAttr, dashboard, dashboardInfo);
+				renderAttr.getHtmlWriterNonNull(renderContext), renderContext, renderAttr, dashboard, dashboardInfo);
 		getHtmlFilter().filter(templateIn, filterHandler);
 
 		return dashboardInfo;
@@ -372,10 +370,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		private boolean dashboardImportWritten = false;
 		private boolean dashboardScriptWritten = false;
 
-		public DashboardFilterHandler(StringBuilderCopyWriter out, RenderContext renderContext,
+		public DashboardFilterHandler(Writer out, RenderContext renderContext,
 				HtmlTplDashboardRenderAttr renderAttr, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
 		{
-			super(out);
+			super(new CopyWriter(out, new StringWriter(), false));
 			this.renderContext = renderContext;
 			this.renderAttr = renderAttr;
 			this.dashboard = dashboard;
@@ -424,7 +422,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 					HtmlTitleHandler htmlTitleHandler = this.renderAttr.getHtmlTitleHandler(this.renderContext);
 					if (htmlTitleHandler != null)
 					{
-						String titleContent = this.getStringBuilderCopyWriter().getCopyOut().toString();
+						String titleContent = ((StringWriter) this.getCopyWriter().getCopyOut()).toString();
 						titleContent = htmlTitleHandler.suffix(titleContent);
 						write(titleContent);
 					}
@@ -450,7 +448,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			if (this.isInHeadTag() && this.inTitleTag && equalsIgnoreCase(tagName, "/title"))
 			{
 				this.inTitleTag = false;
-				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
+				this.getCopyWriter().setCopy(this.inTitleTag);
 			}
 		}
 
@@ -486,7 +484,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			if (this.isInHeadTag() && !this.inTitleTag && equalsIgnoreCase(tagName, "title"))
 			{
 				this.inTitleTag = !isSelfCloseTagEnd(tagEnd);
-				this.getStringBuilderCopyWriter().setCopy(this.inTitleTag);
+				this.getCopyWriter().setCopy(this.inTitleTag);
 			}
 
 			// 优先<head>后，其次<body>后（当没有定义<head>时）插入看板导入库
@@ -512,19 +510,19 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		protected void onSetInHeadTag(boolean in)
 		{
 			if (!in)
-				this.getStringBuilderCopyWriter().setCopy(false);
+				this.getCopyWriter().setCopy(false);
 		}
 
 		@Override
 		protected void onSetInBodyTag(boolean in)
 		{
 			if (in)
-				this.getStringBuilderCopyWriter().setCopy(false);
+				this.getCopyWriter().setCopy(false);
 		}
 
-		protected StringBuilderCopyWriter getStringBuilderCopyWriter()
+		protected CopyWriter getCopyWriter()
 		{
-			return (StringBuilderCopyWriter)getOut();
+			return (CopyWriter)getOut();
 		}
 
 		protected void writeDashboardImportWithSet() throws IOException

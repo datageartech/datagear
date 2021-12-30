@@ -82,6 +82,10 @@ public class HtmlFilter extends TextParserSupport
 	/**
 	 * 执行过滤。
 	 * <p>
+	 * 在过滤完成后执行{@linkplain FilterHandler#getOut()}的{@linkplain Writer#flush()
+	 * flush()}方法。
+	 * </p>
+	 * <p>
 	 * 注意：此方法执行完后，不会关闭输入/输出流。
 	 * </p>
 	 * 
@@ -90,6 +94,24 @@ public class HtmlFilter extends TextParserSupport
 	 * @throws IOException
 	 */
 	public void filter(Reader in, FilterHandler handler) throws IOException
+	{
+		this.filter(in, handler, true);
+	}
+
+	/**
+	 * 执行过滤。
+	 * <p>
+	 * 注意：此方法执行完后，不会关闭输入/输出流。
+	 * </p>
+	 * 
+	 * @param in
+	 * @param handler
+	 * @param flush
+	 *            是否在过滤完成后执行{@linkplain FilterHandler#getOut()}的{@linkplain Writer#flush()
+	 *            flush()}方法
+	 * @throws IOException
+	 */
+	public void filter(Reader in, FilterHandler handler, boolean flush) throws IOException
 	{
 		handler.beforeWrite(in);
 
@@ -131,6 +153,9 @@ public class HtmlFilter extends TextParserSupport
 		}
 
 		handler.afterWrite(in);
+
+		if (flush)
+			out.flush();
 	}
 
 	/**

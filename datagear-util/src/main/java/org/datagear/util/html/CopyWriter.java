@@ -11,36 +11,35 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * 基于{@linkplain StringBuilder}的输出复制{@linkplain Writer}。
+ * 复制输出流。
  * <p>
- * 写入{@linkplain Writer}的内容可同时写入{@linkplain StringBuilder}。
+ * 通过{@linkplain #setCopy(boolean)}可控制写入{@linkplain #getOut()}的内容可同时写入{@linkplain #getCopyOut()}。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class StringBuilderCopyWriter extends Writer
+public class CopyWriter extends Writer
 {
 	private Writer out;
 
-	private StringBuilder copyOut = new StringBuilder();
+	private Writer copyOut;
 
-	private boolean copy = true;
+	private boolean copy;
 
-	/**
-	 * 创建{@linkplain StringBuilderCopyWriter}，{@linkplain #isCopy()}为{@code true}
-	 * 
-	 * @param out
-	 */
-	public StringBuilderCopyWriter(Writer out)
-	{
-		this(out, true);
-	}
-
-	public StringBuilderCopyWriter(Writer out, boolean copy)
+	public CopyWriter(Writer out, Writer copyOut, boolean copy)
 	{
 		super();
 		this.out = out;
+		this.copyOut = copyOut;
+		this.copy = copy;
+	}
+
+	public CopyWriter(Writer out, Writer copyOut, boolean copy, Object lock)
+	{
+		super(lock);
+		this.out = out;
+		this.copyOut = copyOut;
 		this.copy = copy;
 	}
 
@@ -67,24 +66,14 @@ public class StringBuilderCopyWriter extends Writer
 	 * 
 	 * @return
 	 */
-	public StringBuilder getCopyOut()
+	public Writer getCopyOut()
 	{
 		return copyOut;
 	}
 
-	public void setCopyOut(StringBuilder copyOut)
+	public void setCopyOut(Writer copyOut)
 	{
 		this.copyOut = copyOut;
-	}
-
-	/**
-	 * 获取复制输出内容。
-	 * 
-	 * @return
-	 */
-	public String getCopyString()
-	{
-		return this.copyOut.toString();
 	}
 
 	/**
@@ -111,18 +100,20 @@ public class StringBuilderCopyWriter extends Writer
 		this.out.write(cbuf, off, len);
 
 		if (this.copy)
-			this.copyOut.append(cbuf, off, len);
+			this.copyOut.write(cbuf, off, len);
 	}
 
 	@Override
 	public void flush() throws IOException
 	{
 		this.out.flush();
+		this.copyOut.flush();
 	}
 
 	@Override
 	public void close() throws IOException
 	{
 		this.out.close();
+		this.copyOut.close();
 	}
 }
