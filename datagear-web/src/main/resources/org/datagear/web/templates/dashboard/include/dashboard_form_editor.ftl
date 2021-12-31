@@ -255,6 +255,8 @@
 		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
 		var changeFlag = codeEditorDiv.data("changeFlag");
 		
+		//初次由源码模式切换至可视编辑模式后，changeFlag会是1，
+		//但此时是不需要同步的，所以这里手动设置为1
 		if(changeFlag == null)
 			changeFlag = 1;
 		
