@@ -64,8 +64,8 @@ import org.datagear.util.html.HtmlFilter;
 import org.datagear.util.html.RedirectWriter;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.config.CoreConfig;
-import org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlFilterHandler;
 import org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlInfo;
+import org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlInfoFilterHandler;
 import org.datagear.web.controller.DashboardController.DashboardShowForEdit.ShowHtmlFilterHandler;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -103,12 +103,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
 
 	public static final String SERVERTIME_JS_VAR = "_" + Global.PRODUCT_NAME_EN + "ServerTime";
-
-	/**
-	 * 看板内的静态元素ID（模板中定义的元素而非展示时生成的）属性名。
-	 */
-	public static final String DASHBOARD_STATIC_ELEMENT_ID = HtmlTplDashboardWidgetRenderer.DASHBOARD_ELEMENT_ATTR_PREFIX
-			+ "static-id";
 
 	/**
 	 * 看板内置渲染上下文属性名：{@linkplain EditHtmlInfo}。
@@ -1114,7 +1108,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (templateContent != null)
 		{
-			String staticIdPrefix = Long.toHexString(System.currentTimeMillis());
+			// 加一个"s"前缀与前端dashboardEditor.js中的"c"前缀区分
+			String staticIdPrefix = "s" + Long.toHexString(System.currentTimeMillis());
 
 			StringReader in = null;
 			StringWriter out = null;
@@ -1149,12 +1144,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (showHtml != null)
 		{
 			StringReader in = null;
-			EditHtmlFilterHandler fh = null;
+			EditHtmlInfoFilterHandler fh = null;
 
 			try
 			{
 				in = IOUtil.getReader(showHtml);
-				fh = new EditHtmlFilterHandler();
+				fh = new EditHtmlInfoFilterHandler();
 
 				this.htmlFilter.filter(in, fh);
 			}
@@ -1680,18 +1675,28 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * <p>
 	 * 看板可视编辑的基本思路是：
 	 * </p>
-	 * <p>
-	 * 1.
-	 * 基于看板HTML模板，生成【展示HTML】（参考{@linkplain ShowHtmlFilterHandler}）、【编辑HTML】（参考{@linkplain EditHtmlFilterHandler}），
-	 * 【展示HTML】在插入【可视编辑JS库】后，渲染为可视编辑交互页面，【编辑HTML】传入可视编辑交互页面的{@linkplain RenderContext}；
-	 * </p>
-	 * <p>
-	 * 2.
-	 * 【可视编辑JS库】将【编辑HTML】渲染至一个隔离的iframe中，将所有交互页面中HTML元素的变更同步至隔离iframe中的对应HTML元素。
-	 * </p>
-	 * <p>
-	 * 3. 【可视编辑JS库】读取和转换隔离iframe中的HTML，生成【结果HTML】，即是可视编辑最终的看板HTML模板代码。
-	 * </p>
+	 * <ol>
+	 * <li>
+	 * 读取原始看板HTML模板，为其<code>&lt;body&gt;&lt;/body&gt;</code>中的所有元素添加<code>dg-visual-edit-id</code>属性，
+	 * 生成【展示HTML】（参考{@linkplain ShowHtmlFilterHandler}）。</li>
+	 * <li>读取【展示HTML】，生成【编辑HTML信息】（参考{@linkplain EditHtmlInfoFilterHandler}），
+	 * 【编辑HTML信息】由四部分组成：<br>
+	 * 【body前】、【body体】、【body后】、【占位标签源映射表】，<br>
+	 * 其中：<br>
+	 * 【body前】是【展示HTML】的<code>&lt;body&gt;</code>前片段；<br>
+	 * 【body体】是【展示HTML】的<code>&lt;body&gt;&lt;/body&gt;</code>体片段，且是已进行【占位标签替换】的；<br>
+	 * 【body后】是【展示HTML】的<code>&lt;/body&gt;</code>后片段；<br>
+	 * 【占位标签源映射表】存储【body体】中占位标签的原始标签信息。<br>
+	 * 【占位标签替换】是将【展示HTML】的<code>&lt;body&gt;&lt;/body&gt;</code>体中的在渲染时会影响DOM结构的标签（<code>link, style, script</code>）替换为
+	 * <code>&lt;--dg-placeholder-i--&gt;</code>注释标签。</li>
+	 * <li>
+	 * 在【展示HTML】中插入【可视编辑JS库】、在其{@linkplain RenderContext}插入【编辑HTML信息】，渲染为【可视编辑效果页面】。
+	 * </li>
+	 * <li>在【可视编辑效果页面】中，【可视编辑JS库】将【编辑HTML信息】的【body体】渲染至一个隔离iframe中。</li>
+	 * <li>【可视编辑JS库】将所有【可视编辑效果页面】中的可视编辑操作同步至隔离iframe中的相同<code>dg-visual-edit-id</code>的HTML元素。</li>
+	 * <li>【可视编辑JS库】读取隔离iframe中的<code>&lt;body&gt;&lt;/body&gt;</code>体HTML，使用【编辑HTML信息】中的【占位标签源映射表】进行还原，
+	 * 使用【body前】、【body后】进行拼接，生成可视编辑结果HTML。</li>
+	 * </ol>
 	 * 
 	 * @author datagear@163.com
 	 *
@@ -1699,13 +1704,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public static class DashboardShowForEdit
 	{
 		/**
-		 * 看板可视编辑时的【展示HTML】过滤处理器。
-		 * <p>
-		 * 它为HTML模板内<code>&lt;body&gt;</code>与<code>&lt;/body&gt;</code>之间的所有元素添加<code>dg-static-id</code>属性。
-		 * </p>
-		 * <p>
-		 * 一是添加静态元素标识（HTML模板中定义的元素而非展示时动态生成），二是定义唯一的扩展标识，用于为前端【可视编辑JS库】的HTML元素同步功能提供支持。
-		 * </p>
+		 * 看板可视编辑时的内元素可视编辑ID属性名。
+		 */
+		public static final String ELEMENT_ATTR_VISUAL_EDIT_ID = HtmlTplDashboardWidgetRenderer.DASHBOARD_ELEMENT_ATTR_PREFIX
+				+ "visual-edit-id";
+
+		/**
+		 * 【展示HTML】过滤处理器。
 		 * 
 		 * @author datagear@163.com
 		 *
@@ -1733,47 +1738,19 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			{
 				if (this.isInBodyTag() && !isCloseTagName(tagName))
 				{
-					write(" " + DASHBOARD_STATIC_ELEMENT_ID + "=\"" + this.staticIdPrefix + (this.staticIdSequence++)
+					write(" " + ELEMENT_ATTR_VISUAL_EDIT_ID + "=\"" + this.staticIdPrefix + (this.staticIdSequence++)
 							+ "\" ");
 				}
 			}
 		}
 
 		/**
-		 * 看板可视编辑时的【编辑HTML】过滤处理器。
-		 * <p>
-		 * 它将HTML拆分为三段输出：<code>&lt;body&gt;</code>前、<code>&lt;body&gt;...&lt;/body&gt;</code>体、<code>&lt;/body&gt;</code>后。
-		 * </p>
-		 * <p>
-		 * 因为前端可视编辑时只会修改<code>&lt;body&gt;...&lt;/body&gt;</code>体，为了简化前端拼接和尽量还原【结果HTML】，所以这里分三段输出。
-		 * </p>
-		 * <p>
-		 * 另外，它把输出中可能会在前端渲染时改变HTML文档结构的<br>
-		 * <code>
-		 * &lt;link&gt;...&lt;/link&gt;<br>
-		 * &lt;style&gt;...&lt;/style&gt;<br>
-		 * &lt;script&gt;...&lt;/script&gt;
-		 * </code><br>
-		 * 标签替换为注释占位符。
-		 * </p>
-		 * <p>
-		 * 例如，将:<br>
-		 * <code>
-		 * &lt;script&gt;...&lt;/script&gt;
-		 * </code><br>
-		 * 替换为：<br>
-		 * <code>
-		 * &lt;--dg-placeholder-0--&gt;
-		 * </code>
-		 * </p>
-		 * <p>
-		 * 此举的目的是：防止【编辑HTML】在隔离iframe中渲染后生成动态DOM，导致【可视编辑JS库】生成的【结果HTML】被污染。
-		 * </p>
+		 * 【编辑HTML信息】过滤处理器。
 		 * 
 		 * @author datagear@163.com
 		 *
 		 */
-		public static class EditHtmlFilterHandler extends DefaultFilterHandler
+		public static class EditHtmlInfoFilterHandler extends DefaultFilterHandler
 		{
 			private static final String PLACEHOLDER_PREFIX = HtmlTplDashboardWidgetRenderer.DASHBOARD_ELEMENT_ATTR_PREFIX
 					+ "placeholder-";
@@ -1784,10 +1761,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			private String currentPlaceholderKey;
 
-			public EditHtmlFilterHandler()
+			public EditHtmlInfoFilterHandler()
 			{
-				super(new EditHtmlWriter(new StringWriter(), new StringWriter(), new StringWriter(), new StringWriter(),
-						false, EditHtmlWriter.OUT_STATUS_BEFORE_BODY));
+				super(new EditHtmlInfoWriter(new StringWriter(), new StringWriter(), new StringWriter(), new StringWriter(),
+						false));
 			}
 
 			public String getBeforeBodyHtml()
@@ -1813,13 +1790,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@Override
 			public void beforeWriteTagStart(Reader in, String tagName) throws IOException
 			{
-				EditHtmlWriter out = getEditHtmlWriter();
+				EditHtmlInfoWriter out = getEditHtmlWriter();
 
 				// 设置<body> 写入out.getBodyOut()
-				if (EditHtmlWriter.OUT_STATUS_BEFORE_BODY == out.getOutStatus() && "body".equalsIgnoreCase(tagName))
-					out.setOutStatus(EditHtmlWriter.OUT_STATUS_BODY);
+				if (out.isOutStatusBeforeBody() && "body".equalsIgnoreCase(tagName))
+					out.setOutStatus(EditHtmlInfoWriter.OUT_STATUS_BODY);
 
-				if (!out.isRedirect())
+				if (out.isOutStatusBody() && !out.isRedirect())
 				{
 					// 将这些标签写入变向输出流
 					if ("link".equalsIgnoreCase(tagName) || "style".equalsIgnoreCase(tagName)
@@ -1836,9 +1813,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@Override
 			public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
 			{
-				EditHtmlWriter out = getEditHtmlWriter();
+				EditHtmlInfoWriter out = getEditHtmlWriter();
 
-				if (out.isRedirect())
+				if (out.isOutStatusBody() && out.isRedirect())
 				{
 					// 从变向输出流中读取占位内容
 					if ("/link".equalsIgnoreCase(tagName) || "/style".equalsIgnoreCase(tagName)
@@ -1855,9 +1832,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				}
 
 				// 设置</body>后写入out.getAfterBodyOut()
-				if (EditHtmlWriter.OUT_STATUS_BODY == out.getOutStatus() && ("/body".equalsIgnoreCase(tagName)
+				if (out.isOutStatusBody() && ("/body".equalsIgnoreCase(tagName)
 						|| "body".equalsIgnoreCase(tagName) && isSelfCloseTagEnd(tagEnd)))
-					out.setOutStatus(EditHtmlWriter.OUT_STATUS_AFTER_BODY);
+					out.setOutStatus(EditHtmlInfoWriter.OUT_STATUS_AFTER_BODY);
 			}
 
 			protected String nextPlaceholderKey()
@@ -1865,59 +1842,54 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				return "<!--" + PLACEHOLDER_PREFIX + (this.placeholderSequence++) + "-->";
 			}
 
-			protected EditHtmlWriter getEditHtmlWriter()
+			protected EditHtmlInfoWriter getEditHtmlWriter()
 			{
-				return (EditHtmlWriter) super.getOut();
+				return (EditHtmlInfoWriter) super.getOut();
 			}
 		}
 
 		/**
-		 * 看板可视编辑时的【编辑HTML】输出流。
-		 * <p>
-		 * 它可将HTML拆分为三段输出。
-		 * </p>
+		 * 【编辑HTML信息】输出流。
 		 * 
 		 * @author datagear@163.com
 		 *
 		 */
-		public static class EditHtmlWriter extends RedirectWriter
+		public static class EditHtmlInfoWriter extends RedirectWriter
 		{
 			/** 输出至{@linkplain #getBeforeBodyOut()} */
-			public static final int OUT_STATUS_BEFORE_BODY = -1;
+			public static final int OUT_STATUS_BEFORE_BODY = 0;
 
 			/** 输出至{@linkplain #getBodyOut()} */
-			public static final int OUT_STATUS_BODY = 0;
+			public static final int OUT_STATUS_BODY = OUT_STATUS_BEFORE_BODY + 1;
 
 			/** 输出至{@linkplain #getAfterBodyOut()} */
-			public static final int OUT_STATUS_AFTER_BODY = 1;
+			public static final int OUT_STATUS_AFTER_BODY = OUT_STATUS_BODY + 1;
 
 			private Writer bodyOut;
 
 			private Writer afterBodyOut;
 
-			private int outStatus;
+			private int outStatus = OUT_STATUS_BEFORE_BODY - 1;
 
-			public EditHtmlWriter()
+			public EditHtmlInfoWriter()
 			{
 				super();
 			}
 
-			public EditHtmlWriter(Writer beforeBodyOut, Writer bodyOut, Writer afterBodyOut, Writer redirectOut,
-					boolean redirect, int outStatus)
+			public EditHtmlInfoWriter(Writer beforeBodyOut, Writer bodyOut, Writer afterBodyOut, Writer redirectOut,
+					boolean redirect)
 			{
 				super(beforeBodyOut, redirectOut, redirect);
 				this.bodyOut = bodyOut;
 				this.afterBodyOut = afterBodyOut;
-				this.outStatus = outStatus;
 			}
 
-			public EditHtmlWriter(Writer beforeBodyOut, Writer bodyOut, Writer afterBodyOut, Writer redirectOut,
-					boolean redirect, Object lock, int outStatus)
+			public EditHtmlInfoWriter(Writer beforeBodyOut, Writer bodyOut, Writer afterBodyOut, Writer redirectOut,
+					boolean redirect, Object lock)
 			{
 				super(beforeBodyOut, redirectOut, redirect, lock);
 				this.bodyOut = bodyOut;
 				this.afterBodyOut = afterBodyOut;
-				this.outStatus = outStatus;
 			}
 
 			public Writer getBeforeBodyOut()
@@ -1960,16 +1932,31 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				this.outStatus = outStatus;
 			}
 
+			public boolean isOutStatusBeforeBody()
+			{
+				return (OUT_STATUS_BEFORE_BODY >= this.outStatus);
+			}
+
+			public boolean isOutStatusBody()
+			{
+				return (OUT_STATUS_BODY >= this.outStatus && this.outStatus > OUT_STATUS_BEFORE_BODY);
+			}
+
+			public boolean isOutStatusAfterBody()
+			{
+				return (OUT_STATUS_AFTER_BODY >= this.outStatus && this.outStatus > OUT_STATUS_BODY);
+			}
+
 			@Override
 			public void write(char[] cbuf, int off, int len) throws IOException
 			{
 				if(isRedirect())
 					getRedirectOut().write(cbuf, off, len);
-				else if (OUT_STATUS_BEFORE_BODY == this.outStatus)
+				else if (isOutStatusBeforeBody())
 					getBeforeBodyOut().write(cbuf, off, len);
-				else if (OUT_STATUS_BODY == this.outStatus)
+				else if (isOutStatusBody())
 					getBodyOut().write(cbuf, off, len);
-				else if (OUT_STATUS_AFTER_BODY == this.outStatus)
+				else if (isOutStatusAfterBody())
 					getAfterBodyOut().write(cbuf, off, len);
 				else
 					throw new IllegalStateException();
@@ -1993,7 +1980,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 
 		/**
-		 * 【编辑HTML】信息。
+		 * 【编辑HTML信息】。
 		 * 
 		 * @author datagear@163.com
 		 *
@@ -2003,21 +1990,21 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			private static final long serialVersionUID = 1L;
 
 			/**
-			 * <code>&lt;body&gt;</code>前HTML
+			 * 【body前】HTML
 			 */
 			private String beforeBodyHtml = "";
 
 			/**
-			 * <code>&lt;body&gt;...&lt;/body&gt;</code>体HTML
+			 * 【body体】HTML
 			 */
 			private String bodyHtml = "";
 
 			/**
-			 * <code>&lt;/body&gt;</code>后HTML
+			 * 【body后】HTML
 			 */
 			private String afterBodyHtml = "";
 
-			/** 编辑HTML中的占位符原内容映射表 */
+			/** 【占位标签源映射表】 */
 			private Map<String, String> placeholderSources;
 
 			public EditHtmlInfo(String beforeBodyHtml, String bodyHtml, String afterBodyHtml,

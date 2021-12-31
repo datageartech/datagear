@@ -253,13 +253,24 @@
 		var codeEditorDiv = po.element(".code-editor", $tabPane);
 		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
 		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
+		var changeFlag = codeEditorDiv.data("changeFlag");
+		
+		if(changeFlag == null)
+			changeFlag = 1;
+		
+		var dashboardEditor = po.dashboardEditorVisual($tabPane);
+		
+		//有修改
+		if(dashboardEditor && dashboardEditor.isChanged(changeFlag))
+		{
+			po.setCodeText(codeEditor, dashboardEditor.editedHtml());
+
+			visualEditorIfm.data("changeFlag", codeEditor.changeGeneration());
+			codeEditorDiv.data("changeFlag", dashboardEditor.changeFlag());
+		}
 		
 		visualEditorIfm.removeClass("show-editor").addClass("hide-editor");
 		codeEditorDiv.removeClass("hide-editor").addClass("show-editor");
-		
-		var dashboardEditor = po.dashboardEditorVisual($tabPane);
-		if(dashboardEditor)
-			po.setCodeText(codeEditor, dashboardEditor.editedHtml());
 	};
 	
 	//切换至可视编辑模式
@@ -276,7 +287,7 @@
 		var codeEditorDiv = po.element(".code-editor", $tabPane);
 		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
 		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
-		var changeFlag = visualEditorIfm.data("codeChangeFlag");
+		var changeFlag = visualEditorIfm.data("changeFlag");
 		
 		//没有修改
 		if(changeFlag != null && codeEditor.isClean(changeFlag))
@@ -293,7 +304,9 @@
 			
 			var templateName = po.element(".resource-name-wrapper input.resourceName", $tabPane).val();
 			var templateContent = po.getCodeText(codeEditor);
-			visualEditorIfm.data("codeChangeFlag", codeEditor.changeGeneration());
+			
+			visualEditorIfm.data("changeFlag", codeEditor.changeGeneration());
+			codeEditorDiv.data("changeFlag", null);
 			
 			var form = po.element("#${pageId}-tplEditVisualForm");
 			form.attr("action", po.showUrl(dashboardId, templateName));

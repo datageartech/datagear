@@ -26,6 +26,11 @@
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO";
 	
+	//参考org.datagear.web.controller.DashboardController.DashboardShowForEdit.ELEMENT_ATTR_VISUAL_EDIT_ID
+	editor.ELEMENT_ATTR_VISUAL_EDIT_ID = "dg-visual-edit-id";
+	
+	editor.DG_VISUAL_EDIT_ID_PREFIX = "c" + new Number(new Date().getTime()).toString(16);
+	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
 	{
@@ -41,8 +46,8 @@
 	{
 		var editHtmlInfo = this._editHtmlInfo();
 		
-		//只使用bodyHTML，因为渲染ifarme页面时beforeBodyHtml、afterBodyHtml如果有不合规的元素，
-		//可能会被渲染至<body></body>内，导致【结果HTML】还原不匹配
+		//只使用bodyHtml，因为渲染ifarme页面时beforeBodyHtml、afterBodyHtml如果有不合规的元素，
+		//可能会被渲染至<body></body>内，导致【结果HTML】还原不对
 		var editHtml = "<html><head></head>" + editHtmlInfo.bodyHtml + "</html>";
 		this._editHtmlIframe(editHtml);
 	};
@@ -61,9 +66,18 @@
 		{
 			var chartWidget = chartWidgets[i];
 			
-			$("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id).appendTo(document.body);
-			$("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id).appendTo(iframeDoc.body);
+			var dgStaticId = this._nextVisualEditId();
+			
+			var vdiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
+				.attr(this.ELEMENT_ATTR_VISUAL_EDIT_ID, dgStaticId).appendTo(document.body);
+			vdiv.after("\n");
+			
+			var sdiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
+				.attr(this.ELEMENT_ATTR_VISUAL_EDIT_ID, dgStaticId).appendTo(iframeDoc.body);
+			sdiv.after("\n");
 		}
+		
+		this.changeFlag(true);
 		
 		this.dashboard.loadUnsolvedCharts();
 	};
@@ -72,16 +86,50 @@
 	editor.editedHtml = function()
 	{
 		var editHtmlInfo = this._editHtmlInfo();
-		var editedHtml = editHtmlInfo.beforeBodyHtml + this._editBodyHtml() + editHtmlInfo.afterBodyHtml;
+		var bodyHtml = this._editBodyHtml();
 		
+		//将占位标签还原为原始标签
 		var placeholderSources = (editHtmlInfo.placeholderSources || {});
 		for(var placeholder in placeholderSources)
 		{
 			var source = placeholderSources[placeholder];
-			editedHtml = editedHtml.replace(placeholder, source);
+			bodyHtml = bodyHtml.replace(placeholder, source);
 		}
 		
+		//删除dg-visual-edit-id属性
+		var veidRegex = /\s?dg\-visual\-edit\-id\=["'][^"']*["']\s*>/gi;
+		bodyHtml = bodyHtml.replace(veidRegex, ">");
+		
+		var editedHtml = editHtmlInfo.beforeBodyHtml + bodyHtml + editHtmlInfo.afterBodyHtml;
 		return this._unescapeEditHtml(editedHtml);
+	};
+	
+	editor.isChanged = function(changeFlag)
+	{
+		return (this.changeFlag() != changeFlag);
+	};
+	
+	editor.changeFlag = function(set)
+	{
+		if(this._changeFlag == null)
+			this._changeFlag = 0;
+		
+		if(set == true)
+		{
+			this._changeFlag++;
+		}
+		else
+		{
+			return this._changeFlag;
+		}
+	};
+	
+	editor._nextVisualEditId = function()
+	{
+		var seq = (this._nextVisualEditIdSequence != null ? this._nextVisualEditIdSequence : 0);
+		this._nextVisualEditIdSequence = seq + 1;
+		
+		return this.DG_VISUAL_EDIT_ID_PREFIX + seq;
 	};
 	
 	//获取编辑HTML的<body>...</body>内容
@@ -128,6 +176,8 @@
 			
 			var iframeDoc = this._iframeDocument(iframe);
 			iframeDoc.write(editHtml);
+			
+			this.changeFlag(true);
 		}
 		
 		return iframe;
