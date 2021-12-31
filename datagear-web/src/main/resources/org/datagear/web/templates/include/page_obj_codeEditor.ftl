@@ -79,7 +79,14 @@ page_js_obj.ftl
 	
 	po.getCodeText = function(codeEditor)
 	{
-		return codeEditor.getValue();
+		var doc = codeEditor.getDoc();
+		return doc.getValue();
+	};
+
+	po.setCodeText = function(codeEditor, text)
+	{
+		var doc = codeEditor.getDoc();
+		doc.setValue(text || "");
 	};
 	
 	po.getSelectedCodeText = function(codeEditor)

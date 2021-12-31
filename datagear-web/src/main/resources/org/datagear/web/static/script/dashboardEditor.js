@@ -39,10 +39,12 @@
 	 */
 	editor.init = function()
 	{
-		var dashboard = this.dashboard;
+		var editHtmlInfo = this._editHtmlInfo();
 		
-		var editHtmlInfo = dashboard.renderContextAttr(editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
-		this._editHtmlIframe(editHtmlInfo.editHtml);
+		//只使用bodyHTML，因为渲染ifarme页面时beforeBodyHtml、afterBodyHtml如果有不合规的元素，
+		//可能会被渲染至<body></body>内，导致【结果HTML】还原不匹配
+		var editHtml = "<html><head></head>" + editHtmlInfo.bodyHtml + "</html>";
+		this._editHtmlIframe(editHtml);
 	};
 	
 	editor.insertChart = function(chartWidgets)
@@ -66,6 +68,42 @@
 		this.dashboard.loadUnsolvedCharts();
 	};
 	
+	//获取当前编辑HTML
+	editor.editedHtml = function()
+	{
+		var editHtmlInfo = this._editHtmlInfo();
+		var editedHtml = editHtmlInfo.beforeBodyHtml + this._editBodyHtml() + editHtmlInfo.afterBodyHtml;
+		
+		var placeholderSources = (editHtmlInfo.placeholderSources || {});
+		for(var placeholder in placeholderSources)
+		{
+			var source = placeholderSources[placeholder];
+			editedHtml = editedHtml.replace(placeholder, source);
+		}
+		
+		return this._unescapeEditHtml(editedHtml);
+	};
+	
+	//获取编辑HTML的<body>...</body>内容
+	editor._editBodyHtml = function()
+	{
+		var iframeDoc = this._iframeDocument();
+		return $(iframeDoc.body).prop("outerHTML");
+	};
+	
+	//获取编辑HTML信息
+	//结构参考：org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlInfo
+	editor._editHtmlInfo = function()
+	{
+		return this.dashboard.renderContextAttr(editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
+	};
+	
+	//反转义编辑HTML（转义操作由后台执行）
+	editor._unescapeEditHtml = function(editHtml)
+	{
+		return (editHtml ? editHtml.replaceAll("<\\/", "</") : editHtml);
+	};
+	
 	/**
 	 * 获取编辑HTML的iframe对象，也可设置其编辑HTML。
 	 */
@@ -86,7 +124,7 @@
 		
 		if(editHtml != null)
 		{
-			editHtml = editHtml.replaceAll("<\\/", "</");
+			editHtml = this._unescapeEditHtml(editHtml);
 			
 			var iframeDoc = this._iframeDocument(iframe);
 			iframeDoc.write(editHtml);

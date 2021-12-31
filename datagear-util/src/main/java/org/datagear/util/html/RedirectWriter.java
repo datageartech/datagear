@@ -27,6 +27,11 @@ public class RedirectWriter extends Writer
 
 	private boolean redirect;
 
+	public RedirectWriter()
+	{
+		super();
+	}
+
 	public RedirectWriter(Writer out, Writer redirectOut, boolean redirect)
 	{
 		super();

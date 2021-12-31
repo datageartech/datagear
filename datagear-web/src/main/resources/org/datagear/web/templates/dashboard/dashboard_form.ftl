@@ -199,6 +199,7 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.readonly = "${readonly?string('true','false')}" == "true";
 	po.templates = <@writeJson var=templates />;
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	

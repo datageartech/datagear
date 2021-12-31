@@ -7,263 +7,11 @@
  *
 -->
 <#--
-看板表单资源功能片段
+看板表单代码编辑器功能片段
 -->
 <script type="text/javascript">
 (function(po)
 {
-	po.evalTopWindowSize = function()
-	{
-		var topWindow = window;
-		while(topWindow.parent  && topWindow.parent != topWindow)
-			topWindow = topWindow.parent;
-		
-		var size =
-		{
-			width: $(topWindow).width(),
-			height: $(topWindow).height()
-		};
-		
-		return size;
-	};
-	
-	po.iframeWindow = function($iframe)
-	{
-		$iframe = $iframe[0];
-		return $iframe.contentWindow;
-	};
-	
-	po.iframeDocument = function($iframe)
-	{
-		$iframe = $iframe[0];
-		return ($iframe.contentDocument || $iframe.contentWindow.document);
-	};
-	
-	//设置可视编辑iframe的尺寸，使其适配父元素尺寸而不会出现滚动条
-	po.setVisualEditorIframeScale = function($iframeWrapper, $iframe)
-	{
-		var ww = $iframeWrapper.width(), wh = $iframeWrapper.height();
-		var iw = $iframe.width(), ih = $iframe.height();
-		
-		if(iw <= ww && ih <= wh)
-			return;
-		
-		var borderError = 5;
-		var scaleX = (ww-borderError)/iw, scaleY = (wh-borderError)/ih;
-		$iframe.css("transform-origin", "0 0");
-		$iframe.css("transform", "scale("+Math.min(scaleX, scaleY)+")");
-	};
-	
-	//切换至可是编辑模式
-	po.editOnVisual = function($tabPane)
-	{
-		var dashboardId = po.getDashboardId();
-		
-		if(!dashboardId)
-		{
-			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
-			return;
-		}
-		
-		var codeEditorDiv = po.element(".code-editor", $tabPane);
-		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
-		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
-		var changeFlag = visualEditorIfm.data("codeChangeFlag");
-		
-		//没有修改
-		if(changeFlag != null && codeEditor.isClean(changeFlag))
-		{
-			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
-			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
-		}
-		else
-		{
-			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
-			//清空iframe后再显示，防止闪屏
-			po.iframeDocument(visualEditorIfm).write("");
-			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
-			
-			var templateName = po.element(".resource-name-wrapper input.resourceName", $tabPane).val();
-			var templateContent = po.getCodeText(codeEditor);
-			visualEditorIfm.data("codeChangeFlag", codeEditor.changeGeneration());
-			
-			var form = po.element("#${pageId}-tplEditVisualForm");
-			form.attr("action", po.showUrl(dashboardId, templateName));
-			form.attr("target", visualEditorIfm.attr("name"));
-			$("textarea[name='DG_TEMPLATE_CONTENT']", form).val(templateContent);
-			form.submit();
-		}
-	};
-	
-	po.codeEditorHintHandler = function(codeEditor)
-	{
-		var doc = codeEditor.getDoc();
-		var cursor = doc.getCursor();
-		var mode = (codeEditor.getModeAt(cursor) || {});
-		var token = (codeEditor.getTokenAt(cursor) || {});
-		var tokenString = (token ? $.trim(token.string) : "");
-		
-		//"dg*"的HTML元素属性
-		if("xml" == mode.name && "attribute" == token.type && /^dg/i.test(tokenString))
-		{
-			var myTagToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "tag");
-			var myCategory = (myTagToken ? myTagToken.string : null);
-			
-			var completions =
-			{
-				list: po.findCompletionList(po.codeEditorCompletionsTagAttr, tokenString, myCategory),
-				from: CodeMirror.Pos(cursor.line, token.start),
-				to: CodeMirror.Pos(cursor.line, token.end)
-			};
-			
-			return completions;
-		}
-		//javascript函数
-		else if("javascript" == mode.name && (tokenString == "." || "property" == token.type))
-		{
-			var myVarToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "variable");
-			var myCategory = (myVarToken ? myVarToken.string : "");
-			
-			//无法确定要补全的是看板还是图表对象，所以这里采用：完全匹配变量名，否则就全部提示
-			// *dashboard*
-			if(/dashboard/i.test(myCategory))
-				myCategory = "dashboard";
-			// *chart*
-			else if(/chart/i.test(myCategory))
-				myCategory = "chart";
-			else
-				myCategory = null;
-			
-			var completions =
-			{
-				list: po.findCompletionList(po.codeEditorCompletionsJsFunction, (tokenString == "." ? "" : tokenString), myCategory),
-				from: CodeMirror.Pos(cursor.line, (tokenString == "." ? token.start + 1 : token.start)),
-				to: CodeMirror.Pos(cursor.line, token.end)
-			};
-			
-			return completions;
-		}
-	};
-
-	po.getLastTagText = function(text)
-	{
-		if(!text)
-			return text;
-		
-		var idx = -1;
-		for(var i=text.length-1;i>=0;i--)
-		{
-			var c = text.charAt(i);
-			if(c == '>' || c == '<')
-			{
-				idx = i;
-				break;
-			}
-		}
-		
-		return (idx < 0 ? text : text.substr(idx));
-	};
-	
-	po.getTemplatePrevTagText = function(codeEditor, cursor)
-	{
-		var doc = codeEditor.getDoc();
-		
-		var text = doc.getLine(cursor.line).substring(0, cursor.ch);
-		
-		//反向查找直到'>'或'<'
-		var prevRow = cursor.line;
-		while((!text || !(/[<>]/g.test(text))) && (prevRow--) >= 0)
-			text = doc.getLine(prevRow) + text;
-		
-		return po.getLastTagText(text);
-	};
-
-	po.insertChart = function($tabPane, chartWidgets)
-	{
-		var codeEditorDiv = po.element(".code-editor", $tabPane);
-		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
-		
-		if(codeEditorDiv.hasClass("show-editor"))
-		{
-			var codeEditor = codeEditorDiv.data("resourceEditorInstance");
-			po.insertChartCode(codeEditor, chartWidgets);
-		}
-		else if(visualEditorIfm.hasClass("show-editor"))
-		{
-			ifmWindow = po.iframeWindow(visualEditorIfm);
-			var dashboardEditor = ifmWindow.dashboardFactory.dashboardEditor;
-			dashboardEditor.insertChart(chartWidgets);
-		}
-	};
-	
-	po.insertChartCode = function(codeEditor, charts)
-	{
-		if(!charts || !charts.length)
-			return;
-		
-		var doc = codeEditor.getDoc();
-		var cursor = doc.getCursor();
-		
-		//如果body上没有定义dg-dashboard样式，则图表元素也不必添加dg-chart样式，比如导入的看板
-		var setDashboardTheme = true;
-		
-		var code = "";
-		
-		if(charts.length == 1)
-		{
-			var chartId = charts[0].id;
-			var chartName = charts[0].name;
-			
-			var text = po.getTemplatePrevTagText(codeEditor, cursor);
-			
-			// =
-			if(/=\s*$/g.test(text))
-				code = "\"" + chartId + "\"";
-			// =" 或 ='
-			else if(/=\s*['"]$/g.test(text))
-				code = chartId;
-			// <...
-			else if(/<[^>]*$/g.test(text))
-				code = " dg-chart-widget=\""+chartId+"\"";
-			else
-			{
-				setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
-				code = "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
-			}
-		}
-		else
-		{
-			setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
-			for(var i=0; i<charts.length; i++)
-				code += "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+charts[i].id+"\"><!--"+charts[i].name+"--></div>\n";
-		}
-		
-		po.insertCodeText(codeEditor, cursor, code);
-		codeEditor.focus();
-	};
-	
-	po.isCodeHasDefaultThemeClass = function(codeEditor, cursor)
-	{
-		var doc = codeEditor.getDoc();
-		
-		var row = cursor.line;
-		var text = "";
-		while(row >= 0)
-		{
-			text = doc.getLine(row);
-			
-			if(text && /["'\s]dg-dashboard["'\s]/g.test(text))
-				return true;
-			
-			if(/<body/gi.test(text))
-				break;
-			
-			row--;
-		}
-		
-		return false;
-	};
-	
 	po.codeEditorCompletionsTagAttr =
 	[
 		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"true\"",
@@ -457,6 +205,510 @@
 		{name: "widgetId", value: "widgetId()", displayName: "widgetId() ", displayComment: "chart", categories: ["chart"]}
 	];
 	
+	po.evalTopWindowSize = function()
+	{
+		var topWindow = window;
+		while(topWindow.parent  && topWindow.parent != topWindow)
+			topWindow = topWindow.parent;
+		
+		var size =
+		{
+			width: $(topWindow).width(),
+			height: $(topWindow).height()
+		};
+		
+		return size;
+	};
+	
+	po.iframeWindow = function($iframe)
+	{
+		$iframe = $iframe[0];
+		return $iframe.contentWindow;
+	};
+	
+	po.iframeDocument = function($iframe)
+	{
+		$iframe = $iframe[0];
+		return ($iframe.contentDocument || $iframe.contentWindow.document);
+	};
+	
+	//设置可视编辑iframe的尺寸，使其适配父元素尺寸而不会出现滚动条
+	po.setVisualEditorIframeScale = function($iframeWrapper, $iframe)
+	{
+		var ww = $iframeWrapper.width(), wh = $iframeWrapper.height();
+		var iw = $iframe.width(), ih = $iframe.height();
+		
+		if(iw <= ww && ih <= wh)
+			return;
+		
+		var borderError = 5;
+		var scaleX = (ww-borderError)/iw, scaleY = (wh-borderError)/ih;
+		$iframe.css("transform-origin", "0 0");
+		$iframe.css("transform", "scale("+Math.min(scaleX, scaleY)+")");
+	};
+	
+	//切换至源码编辑模式
+	po.editOnCode = function($tabPane)
+	{
+		var codeEditorDiv = po.element(".code-editor", $tabPane);
+		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
+		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
+		
+		visualEditorIfm.removeClass("show-editor").addClass("hide-editor");
+		codeEditorDiv.removeClass("hide-editor").addClass("show-editor");
+		
+		var dashboardEditor = po.dashboardEditorVisual($tabPane);
+		if(dashboardEditor)
+			po.setCodeText(codeEditor, dashboardEditor.editedHtml());
+	};
+	
+	//切换至可视编辑模式
+	po.editOnVisual = function($tabPane)
+	{
+		var dashboardId = po.getDashboardId();
+		
+		if(!dashboardId)
+		{
+			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			return;
+		}
+		
+		var codeEditorDiv = po.element(".code-editor", $tabPane);
+		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
+		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
+		var changeFlag = visualEditorIfm.data("codeChangeFlag");
+		
+		//没有修改
+		if(changeFlag != null && codeEditor.isClean(changeFlag))
+		{
+			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
+			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
+		}
+		else
+		{
+			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
+			//清空iframe后再显示，防止闪屏
+			po.iframeDocument(visualEditorIfm).write("");
+			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
+			
+			var templateName = po.element(".resource-name-wrapper input.resourceName", $tabPane).val();
+			var templateContent = po.getCodeText(codeEditor);
+			visualEditorIfm.data("codeChangeFlag", codeEditor.changeGeneration());
+			
+			var form = po.element("#${pageId}-tplEditVisualForm");
+			form.attr("action", po.showUrl(dashboardId, templateName));
+			form.attr("target", visualEditorIfm.attr("name"));
+			$("textarea[name='DG_TEMPLATE_CONTENT']", form).val(templateContent);
+			form.submit();
+		}
+	};
+	
+	po.codeEditorHintHandler = function(codeEditor)
+	{
+		var doc = codeEditor.getDoc();
+		var cursor = doc.getCursor();
+		var mode = (codeEditor.getModeAt(cursor) || {});
+		var token = (codeEditor.getTokenAt(cursor) || {});
+		var tokenString = (token ? $.trim(token.string) : "");
+		
+		//"dg*"的HTML元素属性
+		if("xml" == mode.name && "attribute" == token.type && /^dg/i.test(tokenString))
+		{
+			var myTagToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "tag");
+			var myCategory = (myTagToken ? myTagToken.string : null);
+			
+			var completions =
+			{
+				list: po.findCompletionList(po.codeEditorCompletionsTagAttr, tokenString, myCategory),
+				from: CodeMirror.Pos(cursor.line, token.start),
+				to: CodeMirror.Pos(cursor.line, token.end)
+			};
+			
+			return completions;
+		}
+		//javascript函数
+		else if("javascript" == mode.name && (tokenString == "." || "property" == token.type))
+		{
+			var myVarToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "variable");
+			var myCategory = (myVarToken ? myVarToken.string : "");
+			
+			//无法确定要补全的是看板还是图表对象，所以这里采用：完全匹配变量名，否则就全部提示
+			// *dashboard*
+			if(/dashboard/i.test(myCategory))
+				myCategory = "dashboard";
+			// *chart*
+			else if(/chart/i.test(myCategory))
+				myCategory = "chart";
+			else
+				myCategory = null;
+			
+			var completions =
+			{
+				list: po.findCompletionList(po.codeEditorCompletionsJsFunction, (tokenString == "." ? "" : tokenString), myCategory),
+				from: CodeMirror.Pos(cursor.line, (tokenString == "." ? token.start + 1 : token.start)),
+				to: CodeMirror.Pos(cursor.line, token.end)
+			};
+			
+			return completions;
+		}
+	};
+
+	po.getLastTagText = function(text)
+	{
+		if(!text)
+			return text;
+		
+		var idx = -1;
+		for(var i=text.length-1;i>=0;i--)
+		{
+			var c = text.charAt(i);
+			if(c == '>' || c == '<')
+			{
+				idx = i;
+				break;
+			}
+		}
+		
+		return (idx < 0 ? text : text.substr(idx));
+	};
+	
+	po.getTemplatePrevTagText = function(codeEditor, cursor)
+	{
+		var doc = codeEditor.getDoc();
+		
+		var text = doc.getLine(cursor.line).substring(0, cursor.ch);
+		
+		//反向查找直到'>'或'<'
+		var prevRow = cursor.line;
+		while((!text || !(/[<>]/g.test(text))) && (prevRow--) >= 0)
+			text = doc.getLine(prevRow) + text;
+		
+		return po.getLastTagText(text);
+	};
+	
+	po.dashboardEditorVisual = function($tabPane)
+	{
+		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
+		var ifmWindow = po.iframeWindow(visualEditorIfm);
+		
+		return (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
+	};
+	
+	po.insertChart = function($tabPane, chartWidgets)
+	{
+		var codeEditorDiv = po.element(".code-editor", $tabPane);
+		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", $tabPane);
+		
+		if(codeEditorDiv.hasClass("show-editor"))
+		{
+			var codeEditor = codeEditorDiv.data("resourceEditorInstance");
+			po.insertChartCode(codeEditor, chartWidgets);
+		}
+		else if(visualEditorIfm.hasClass("show-editor"))
+		{
+			var dashboardEditor = po.dashboardEditorVisual($tabPane);
+			if(dashboardEditor)
+				dashboardEditor.insertChart(chartWidgets);
+		}
+	};
+	
+	po.insertChartCode = function(codeEditor, charts)
+	{
+		if(!charts || !charts.length)
+			return;
+		
+		var doc = codeEditor.getDoc();
+		var cursor = doc.getCursor();
+		
+		//如果body上没有定义dg-dashboard样式，则图表元素也不必添加dg-chart样式，比如导入的看板
+		var setDashboardTheme = true;
+		
+		var code = "";
+		
+		if(charts.length == 1)
+		{
+			var chartId = charts[0].id;
+			var chartName = charts[0].name;
+			
+			var text = po.getTemplatePrevTagText(codeEditor, cursor);
+			
+			// =
+			if(/=\s*$/g.test(text))
+				code = "\"" + chartId + "\"";
+			// =" 或 ='
+			else if(/=\s*['"]$/g.test(text))
+				code = chartId;
+			// <...
+			else if(/<[^>]*$/g.test(text))
+				code = " dg-chart-widget=\""+chartId+"\"";
+			else
+			{
+				setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
+				code = "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
+			}
+		}
+		else
+		{
+			setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
+			for(var i=0; i<charts.length; i++)
+				code += "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+charts[i].id+"\"><!--"+charts[i].name+"--></div>\n";
+		}
+		
+		po.insertCodeText(codeEditor, cursor, code);
+		codeEditor.focus();
+	};
+	
+	po.isCodeHasDefaultThemeClass = function(codeEditor, cursor)
+	{
+		var doc = codeEditor.getDoc();
+		
+		var row = cursor.line;
+		var text = "";
+		while(row >= 0)
+		{
+			text = doc.getLine(row);
+			
+			if(text && /["'\s]dg-dashboard["'\s]/g.test(text))
+				return true;
+			
+			if(/<body/gi.test(text))
+				break;
+			
+			row--;
+		}
+		
+		return false;
+	};
+	
+	po.getResourceEditorData = function()
+	{
+		var data = {};
+		data.resourceNames=[];
+		data.resourceContents=[];
+		data.resourceIsTemplates=[];
+		
+		po.element(".resource-editor-tab-pane").each(function()
+		{
+			var tp = $(this);
+			
+			var codeEditorDiv = po.element(".code-editor", tp);
+			var codeEditor = codeEditorDiv.data("resourceEditorInstance");
+			
+			data.resourceNames.push($(".resourceName", tp).val());
+			data.resourceIsTemplates.push($(".resourceIsTemplate", tp).val());
+			data.resourceContents.push(po.getCodeText(codeEditor));
+		});
+		
+		return data;
+	};
+	
+	po.newResourceEditorTab = function(name, content, isTemplate)
+	{
+		var label = name;
+		var labelMaxLen = 5 + 3 + 10;
+		if(label.length > labelMaxLen)
+			label = name.substr(0, 5) +"..." + name.substr(label.length - 10);
+		
+		var tabsNav = po.getTabsNav(po.resourceEditorTabs());
+		var tabId = $.uid("resourceEditorTabPane");
+    	var tab = $(po.resourceEditorTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, $.escapeHtml(label)))
+    		.attr("id", $.uid("resourceEditorTab")).attr("resourceName", name).attr("title", name).appendTo(tabsNav);
+    	
+    	var panePrevEle = $(".resource-editor-tab-pane", po.resourceEditorTabs()).last();
+    	if(panePrevEle.length == 0)
+    		panePrevEle = $(".resource-editor-tab-nav", po.resourceEditorTabs());
+    	var tabPane = $("<div id='"+tabId+"' class='resource-editor-tab-pane' />").insertAfter(panePrevEle);
+    	var resNameWrapper = $("<div class='resource-name-wrapper' />").appendTo(tabPane);
+    	$("<label class='name-label'></label>").html("<@spring.message code='name' />").appendTo(resNameWrapper);
+    	$("<input type='text' class='resourceName name-input ui-widget ui-widget-content' readonly='readonly' />").val(name).appendTo(resNameWrapper);
+    	$("<input type='hidden' class='resourceIsTemplate' />").val(isTemplate).appendTo(resNameWrapper);
+    	
+		var editorOptWrapper = $("<div class='editor-operation-wrapper' />").appendTo(tabPane);
+		var editorLeftOptWrapper = $("<div class='operation-left' />").appendTo(editorOptWrapper);
+		var editorRightOptWrapper = $("<div class='operation-right' />").appendTo(editorOptWrapper);
+    	var editorWrapper = $("<div class='editor-wrapper ui-widget ui-widget-content' />").appendTo(tabPane);
+		var editorDiv = $("<div class='resource-editor code-editor' />").attr("id", $.uid("resourceEditor")).appendTo(editorWrapper);
+		
+		var codeEditor;
+		
+		var codeEditorOptions =
+		{
+			value: content,
+			matchBrackets: true,
+			matchTags: true,
+			autoCloseTags: true,
+			readOnly: po.readonly,
+			mode: po.evalCodeModeByName(name)
+		};
+		
+		if(isTemplate && !codeEditorOptions.readOnly)
+		{
+			codeEditorOptions.hintOptions =
+			{
+				hint: po.codeEditorHintHandler
+			};
+		}
+		
+		codeEditor = po.createCodeEditor(editorDiv, codeEditorOptions);
+		
+		if(isTemplate && !codeEditorOptions.readOnly)
+		{
+			//光标移至"</body>"的上一行，便于用户直接输入内容
+			var cursor = codeEditor.getSearchCursor("</body>");
+			if(cursor.findNext())
+			{
+				var cursorFrom = cursor.from();
+				codeEditor.getDoc().setCursor({ line: cursorFrom.line-1, ch: 0 });
+			}
+		}
+		
+		editorDiv.data("resourceEditorInstance", codeEditor);
+		
+		if(!po.readonly && isTemplate)
+		{
+			var visualEditorDiv = $("<div class='tpl-visual-editor-wrapper' />").appendTo(editorWrapper);
+			
+			var visualEditorId = $.uid("visualEditor");
+			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm hide-editor ui-widget-shadow' />")
+				.attr("name", visualEditorId).attr("id", visualEditorId).appendTo(visualEditorDiv);
+			
+			var topWindowSize = po.evalTopWindowSize();
+			visualEditorIfm.css("width", topWindowSize.width);
+			visualEditorIfm.css("height", topWindowSize.height);
+			
+			po.setVisualEditorIframeScale(visualEditorDiv, visualEditorIfm);
+			
+			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorLeftOptWrapper);
+			$("<button type='button'></button>").text("<@spring.message code='dashboard.editOnSource' />")
+			.appendTo(editorSwitchGroup).button().click(function()
+			{
+				po.editOnCode(tabPane);
+			});
+			$("<button type='button'></button>").text("<@spring.message code='dashboard.editOnVisual' />")
+			.appendTo(editorSwitchGroup).button().click(function()
+			{
+				po.editOnVisual(tabPane);
+			});
+			editorSwitchGroup.controlgroup();
+			
+			var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
+				.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorRightOptWrapper).button()
+				.click(function()
+				{
+					var insertChartButton = this;
+					var chartListPanel = po.element(".chart-list-panel");
+					
+					if(chartListPanel.is(":hidden"))
+					{
+						chartListPanel.show();
+						chartListPanel.position({ my : "center top", at : "center bottom", of : insertChartButton});
+						chartListPanel.css("left", "");
+						chartListPanel.css("right", "1em");
+						
+						if(!chartListPanel.hasClass("chart-list-loaded"))
+						{
+							po.element(".panel-content", chartListPanel).empty();
+							
+							var options =
+							{
+								target: po.element(".panel-content", chartListPanel),
+								asDialog: false,
+								pageParam :
+								{
+									select : function(chartWidgets)
+									{
+										if(!$.isArray(chartWidgets))
+											chartWidgets = [chartWidgets];
+										
+										po.insertChart(tabPane, chartWidgets);
+										chartListPanel.hide();
+										return false;
+									}
+								},
+								success: function()
+								{
+									chartListPanel.addClass("chart-list-loaded");
+								}
+							};
+							$.setGridPageHeightOption(options);
+							po.open("${contextPath}/chart/select?multiple", options);
+						}
+						else
+						{
+							$.callPanelShowCallback(chartListPanel);
+						}
+					}
+					else
+					{
+						chartListPanel.hide();
+					}
+				});
+		}
+		
+		var searchGroup = $("<div class='search-group ui-widget ui-widget-content ui-corner-all' />").appendTo(editorRightOptWrapper);
+		var searchInput = $("<input type='text' class='search-input ui-widget ui-widget-content' />").appendTo(searchGroup)
+				.on("keydown", function(e)
+				{
+					if(e.keyCode == $.ui.keyCode.ENTER)
+					{
+						po.element(".search-button", tabPane).click();
+						//防止提交表单
+						return false;
+					}
+				});
+		var searchButton = $("<button type='button' class='search-button ui-button ui-corner-all ui-widget ui-button-icon-only'>"
+				+"<span class='ui-icon ui-icon-search'></span><span class='ui-button-icon-space'></span>Search</button>")
+				.appendTo(searchGroup)
+				.click(function()
+				{
+					var $this = $(this);
+					
+					var text = po.element(".search-input", tabPane).val();
+					
+					if(!text)
+						return;
+					
+					var prevSearchText = $this.data("prevSearchText");
+					var cursor = $this.data("prevSearchCursor");
+					var doc = codeEditor.getDoc();
+					
+					if(!cursor || text != prevSearchText)
+					{
+						cursor = codeEditor.getSearchCursor(text);
+						$this.data("prevSearchCursor", cursor);
+						$this.data("prevSearchText", text)
+					}
+					
+					codeEditor.focus();
+					
+					if(cursor.findNext())
+						doc.setSelection(cursor.from(), cursor.to());
+					else
+					{
+						//从头搜索
+						$this.data("prevSearchCursor", null);
+						$this.click();
+					}
+				});
+		
+   	    $(".tab-operation .ui-icon-close", tab).click(function()
+   	    {
+   	    	var tab = $(this).parent().parent();
+   	    	po.closeTab(po.resourceEditorTabs(), tabsNav, tab);
+   	    });
+   	    
+   	    $(".tab-operation .tabs-more-operation-button", tab).click(function()
+   	    {
+   	    	var tab = $(this).parent().parent();
+   	    	po.showTabMoreOperationMenu(po.resourceEditorTabs(), tabsNav, tab, $(this));
+   	    });
+		
+	    po.resourceEditorTabs().tabs("refresh");
+    	po.resourceEditorTabs().tabs( "option", "active",  tab.index());
+    	po.refreshTabsNavForHidden(po.resourceEditorTabs(), tabsNav);
+    	
+    	codeEditor.focus();
+	};
 })
 (${pageId});
 </script>

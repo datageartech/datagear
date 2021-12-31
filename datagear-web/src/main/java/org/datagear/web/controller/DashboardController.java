@@ -1141,33 +1141,36 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	protected EditHtmlInfo buildShowForEditEditHtmlInfo(String showHtml) throws IOException
 	{
-		String editHtml = "";
+		String beforeBodyHtml = "";
+		String bodyHtml = "";
+		String afterBodyHtml = "";
 		Map<String, String> placeholderSources = Collections.emptyMap();
 
 		if (showHtml != null)
 		{
 			StringReader in = null;
-			StringWriter out = null;
+			EditHtmlFilterHandler fh = null;
 
 			try
 			{
 				in = IOUtil.getReader(showHtml);
-				out = new StringWriter(showHtml.length());
+				fh = new EditHtmlFilterHandler();
 
-				EditHtmlFilterHandler fh = new EditHtmlFilterHandler(out);
 				this.htmlFilter.filter(in, fh);
-
-				editHtml = out.toString();
-				placeholderSources = fh.getPlaceholderSources();
 			}
 			finally
 			{
 				IOUtil.close(in);
-				IOUtil.close(out);
 			}
+
+			beforeBodyHtml = fh.getBeforeBodyHtml();
+			bodyHtml = fh.getBodyHtml();
+			afterBodyHtml = fh.getAfterBodyHtml();
+			placeholderSources = fh.getPlaceholderSources();
 		}
 
-		return new EditHtmlInfo(escapeDashboardRenderContextAttrValue(editHtml),
+		return new EditHtmlInfo(escapeDashboardRenderContextAttrValue(beforeBodyHtml),
+				escapeDashboardRenderContextAttrValue(bodyHtml), escapeDashboardRenderContextAttrValue(afterBodyHtml),
 				escapeDashboardRenderContextAttrValue(placeholderSources));
 	}
 
@@ -1739,7 +1742,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		/**
 		 * 看板可视编辑时的【编辑HTML】过滤处理器。
 		 * <p>
-		 * 它把HTML模板中可能会在前端渲染时改变HTML文档结构的<br>
+		 * 它将HTML拆分为三段输出：<code>&lt;body&gt;</code>前、<code>&lt;body&gt;...&lt;/body&gt;</code>体、<code>&lt;/body&gt;</code>后。
+		 * </p>
+		 * <p>
+		 * 因为前端可视编辑时只会修改<code>&lt;body&gt;...&lt;/body&gt;</code>体，为了简化前端拼接和尽量还原【结果HTML】，所以这里分三段输出。
+		 * </p>
+		 * <p>
+		 * 另外，它把输出中可能会在前端渲染时改变HTML文档结构的<br>
 		 * <code>
 		 * &lt;link&gt;...&lt;/link&gt;<br>
 		 * &lt;style&gt;...&lt;/style&gt;<br>
@@ -1775,9 +1784,25 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			private String currentPlaceholderKey;
 
-			public EditHtmlFilterHandler(Writer out)
+			public EditHtmlFilterHandler()
 			{
-				super(new RedirectWriter(out, new StringWriter(), false));
+				super(new EditHtmlWriter(new StringWriter(), new StringWriter(), new StringWriter(), new StringWriter(),
+						false, EditHtmlWriter.OUT_STATUS_BEFORE_BODY));
+			}
+
+			public String getBeforeBodyHtml()
+			{
+				return getEditHtmlWriter().getBeforeBodyOut().toString();
+			}
+
+			public String getBodyHtml()
+			{
+				return getEditHtmlWriter().getBodyOut().toString();
+			}
+
+			public String getAfterBodyHtml()
+			{
+				return getEditHtmlWriter().getAfterBodyOut().toString();
 			}
 
 			public Map<String, String> getPlaceholderSources()
@@ -1788,7 +1813,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@Override
 			public void beforeWriteTagStart(Reader in, String tagName) throws IOException
 			{
-				RedirectWriter out = getRedirectOut();
+				EditHtmlWriter out = getEditHtmlWriter();
+
+				// 设置<body> 写入out.getBodyOut()
+				if (EditHtmlWriter.OUT_STATUS_BEFORE_BODY == out.getOutStatus() && "body".equalsIgnoreCase(tagName))
+					out.setOutStatus(EditHtmlWriter.OUT_STATUS_BODY);
 
 				if (!out.isRedirect())
 				{
@@ -1797,7 +1826,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 							|| "script".equalsIgnoreCase(tagName))
 					{
 						this.currentPlaceholderKey = nextPlaceholderKey();
-						out.getOut().write(this.currentPlaceholderKey);
+						out.write(this.currentPlaceholderKey);
 
 						out.setRedirect(true);
 					}
@@ -1807,7 +1836,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@Override
 			public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
 			{
-				RedirectWriter out = getRedirectOut();
+				EditHtmlWriter out = getEditHtmlWriter();
 
 				if (out.isRedirect())
 				{
@@ -1824,6 +1853,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 						out.setRedirect(false);
 					}
 				}
+
+				// 设置</body>后写入out.getAfterBodyOut()
+				if (EditHtmlWriter.OUT_STATUS_BODY == out.getOutStatus() && ("/body".equalsIgnoreCase(tagName)
+						|| "body".equalsIgnoreCase(tagName) && isSelfCloseTagEnd(tagEnd)))
+					out.setOutStatus(EditHtmlWriter.OUT_STATUS_AFTER_BODY);
 			}
 
 			protected String nextPlaceholderKey()
@@ -1831,9 +1865,130 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				return "<!--" + PLACEHOLDER_PREFIX + (this.placeholderSequence++) + "-->";
 			}
 
-			protected RedirectWriter getRedirectOut()
+			protected EditHtmlWriter getEditHtmlWriter()
 			{
-				return (RedirectWriter) super.getOut();
+				return (EditHtmlWriter) super.getOut();
+			}
+		}
+
+		/**
+		 * 看板可视编辑时的【编辑HTML】输出流。
+		 * <p>
+		 * 它可将HTML拆分为三段输出。
+		 * </p>
+		 * 
+		 * @author datagear@163.com
+		 *
+		 */
+		public static class EditHtmlWriter extends RedirectWriter
+		{
+			/** 输出至{@linkplain #getBeforeBodyOut()} */
+			public static final int OUT_STATUS_BEFORE_BODY = -1;
+
+			/** 输出至{@linkplain #getBodyOut()} */
+			public static final int OUT_STATUS_BODY = 0;
+
+			/** 输出至{@linkplain #getAfterBodyOut()} */
+			public static final int OUT_STATUS_AFTER_BODY = 1;
+
+			private Writer bodyOut;
+
+			private Writer afterBodyOut;
+
+			private int outStatus;
+
+			public EditHtmlWriter()
+			{
+				super();
+			}
+
+			public EditHtmlWriter(Writer beforeBodyOut, Writer bodyOut, Writer afterBodyOut, Writer redirectOut,
+					boolean redirect, int outStatus)
+			{
+				super(beforeBodyOut, redirectOut, redirect);
+				this.bodyOut = bodyOut;
+				this.afterBodyOut = afterBodyOut;
+				this.outStatus = outStatus;
+			}
+
+			public EditHtmlWriter(Writer beforeBodyOut, Writer bodyOut, Writer afterBodyOut, Writer redirectOut,
+					boolean redirect, Object lock, int outStatus)
+			{
+				super(beforeBodyOut, redirectOut, redirect, lock);
+				this.bodyOut = bodyOut;
+				this.afterBodyOut = afterBodyOut;
+				this.outStatus = outStatus;
+			}
+
+			public Writer getBeforeBodyOut()
+			{
+				return super.getOut();
+			}
+
+			public void setBeforeBodyOut(Writer beforeBodyOut)
+			{
+				super.setOut(beforeBodyOut);
+			}
+
+			public Writer getBodyOut()
+			{
+				return bodyOut;
+			}
+
+			public void setBodyOut(Writer bodyOut)
+			{
+				this.bodyOut = bodyOut;
+			}
+
+			public Writer getAfterBodyOut()
+			{
+				return afterBodyOut;
+			}
+
+			public void setAfterBodyOut(Writer afterBodyOut)
+			{
+				this.afterBodyOut = afterBodyOut;
+			}
+
+			public int getOutStatus()
+			{
+				return outStatus;
+			}
+
+			public void setOutStatus(int outStatus)
+			{
+				this.outStatus = outStatus;
+			}
+
+			@Override
+			public void write(char[] cbuf, int off, int len) throws IOException
+			{
+				if(isRedirect())
+					getRedirectOut().write(cbuf, off, len);
+				else if (OUT_STATUS_BEFORE_BODY == this.outStatus)
+					getBeforeBodyOut().write(cbuf, off, len);
+				else if (OUT_STATUS_BODY == this.outStatus)
+					getBodyOut().write(cbuf, off, len);
+				else if (OUT_STATUS_AFTER_BODY == this.outStatus)
+					getAfterBodyOut().write(cbuf, off, len);
+				else
+					throw new IllegalStateException();
+			}
+
+			@Override
+			public void flush() throws IOException
+			{
+				super.flush();
+				this.bodyOut.flush();
+				this.afterBodyOut.flush();
+			}
+
+			@Override
+			public void close() throws IOException
+			{
+				super.close();
+				this.bodyOut.close();
+				this.afterBodyOut.close();
 			}
 		}
 
@@ -1847,27 +2002,62 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		{
 			private static final long serialVersionUID = 1L;
 
-			/** 编辑HTML */
-			private String editHtml;
+			/**
+			 * <code>&lt;body&gt;</code>前HTML
+			 */
+			private String beforeBodyHtml = "";
+
+			/**
+			 * <code>&lt;body&gt;...&lt;/body&gt;</code>体HTML
+			 */
+			private String bodyHtml = "";
+
+			/**
+			 * <code>&lt;/body&gt;</code>后HTML
+			 */
+			private String afterBodyHtml = "";
 
 			/** 编辑HTML中的占位符原内容映射表 */
 			private Map<String, String> placeholderSources;
 
-			public EditHtmlInfo(String editHtml, Map<String, String> placeholderSources)
+			public EditHtmlInfo(String beforeBodyHtml, String bodyHtml, String afterBodyHtml,
+					Map<String, String> placeholderSources)
 			{
 				super();
-				this.editHtml = editHtml;
+				this.beforeBodyHtml = beforeBodyHtml;
+				this.bodyHtml = bodyHtml;
+				this.afterBodyHtml = afterBodyHtml;
 				this.placeholderSources = placeholderSources;
 			}
 
-			public String getEditHtml()
+			public String getBeforeBodyHtml()
 			{
-				return editHtml;
+				return beforeBodyHtml;
 			}
 
-			public void setEditHtml(String editHtml)
+			public void setBeforeBodyHtml(String beforeBodyHtml)
 			{
-				this.editHtml = editHtml;
+				this.beforeBodyHtml = beforeBodyHtml;
+			}
+
+			public String getBodyHtml()
+			{
+				return bodyHtml;
+			}
+
+			public void setBodyHtml(String bodyHtml)
+			{
+				this.bodyHtml = bodyHtml;
+			}
+
+			public String getAfterBodyHtml()
+			{
+				return afterBodyHtml;
+			}
+
+			public void setAfterBodyHtml(String afterBodyHtml)
+			{
+				this.afterBodyHtml = afterBodyHtml;
 			}
 
 			public Map<String, String> getPlaceholderSources()
