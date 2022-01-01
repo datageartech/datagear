@@ -24,25 +24,33 @@
 	var editor = (dashboardFactory.dashboardEditor || (dashboardFactory.dashboardEditor = {}));
 	
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
-	editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO";
+	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
 	
 	//参考org.datagear.web.controller.DashboardController.DashboardShowForEdit.ELEMENT_ATTR_VISUAL_EDIT_ID
-	editor.ELEMENT_ATTR_VISUAL_EDIT_ID = "dg-visual-edit-id";
+	var ELEMENT_ATTR_VISUAL_EDIT_ID = (editor.ELEMENT_ATTR_VISUAL_EDIT_ID = "dg-visual-edit-id");
 	
-	editor.DG_VISUAL_EDIT_ID_PREFIX = "c" + new Number(new Date().getTime()).toString(16);
+	var DG_VISUAL_EDIT_ID_PREFIX = (editor.DG_VISUAL_EDIT_ID_PREFIX = "c" + new Number(new Date().getTime()).toString(16));
 	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
 	{
 		dashboardFactory._initSuperByDashboardEditor(dashboard);
-		editor.dashboard = dashboard;
-		editor.init();
+		editor.init(dashboard);
 	};
 	
 	/**
 	 * 初始化可视编辑器。
 	 */
-	editor.init = function()
+	editor.init = function(dashboard)
+	{
+		this.dashboard = dashboard;
+		
+		this._initEditHtmlIframe();
+		this._initInteraction();
+	};
+	
+	//初始化编辑HTML的iframe
+	editor._initEditHtmlIframe = function()
 	{
 		var editHtmlInfo = this._editHtmlInfo();
 		
@@ -52,34 +60,25 @@
 		this._editHtmlIframe(editHtml);
 	};
 	
-	editor.insertChart = function(chartWidgets)
+	//初始化交互控制
+	editor._initInteraction = function()
 	{
-		if(!chartWidgets || chartWidgets.length == 0)
-			return;
+		$(document.body).addClass("dg-show-ve");
 		
-		if(!$.isArray(chartWidgets))
-			chartWidgets = [ chartWidgets ];
-		
-		var iframeDoc = this._iframeDocument();
-		
-		for(var i=0; i<chartWidgets.length; i++)
+		$(document.body).on("click", "["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]", function(event)
 		{
-			var chartWidget = chartWidgets[i];
+			var $this = $(this);
 			
-			var dgStaticId = this._nextVisualEditId();
+			if($this.hasClass("dg-show-ve-selected"))
+				$this.removeClass("dg-show-ve-selected");
+			else
+			{
+				$(".dg-show-ve-selected").removeClass("dg-show-ve-selected");
+				$(this).addClass("dg-show-ve-selected");
+			}
 			
-			var vdiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
-				.attr(this.ELEMENT_ATTR_VISUAL_EDIT_ID, dgStaticId).appendTo(document.body);
-			vdiv.after("\n");
-			
-			var sdiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
-				.attr(this.ELEMENT_ATTR_VISUAL_EDIT_ID, dgStaticId).appendTo(iframeDoc.body);
-			sdiv.after("\n");
-		}
-		
-		this.changeFlag(true);
-		
-		this.dashboard.loadUnsolvedCharts();
+			event.stopPropagation();
+		});
 	};
 	
 	//获取当前编辑HTML
@@ -104,11 +103,13 @@
 		return this._unescapeEditHtml(editedHtml);
 	};
 	
+	//是否在指定changeFlag后有修改
 	editor.isChanged = function(changeFlag)
 	{
 		return (this.changeFlag() != changeFlag);
 	};
 	
+	//获取当前修改标识
 	editor.changeFlag = function(set)
 	{
 		if(this._changeFlag == null)
@@ -124,12 +125,70 @@
 		}
 	};
 	
+	editor.insertChart = function(chartWidgets)
+	{
+		if(!chartWidgets || chartWidgets.length == 0)
+			return;
+		
+		if(!$.isArray(chartWidgets))
+			chartWidgets = [ chartWidgets ];
+		
+		var iframeDoc = this._iframeDocument();
+		
+		for(var i=0; i<chartWidgets.length; i++)
+		{
+			var chartWidget = chartWidgets[i];
+			
+			var dgStaticId = this._nextVisualEditId();
+			
+			var vdiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
+				.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, dgStaticId).appendTo(document.body);
+			vdiv.after("\n");
+			
+			var sdiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
+				.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, dgStaticId).appendTo(iframeDoc.body);
+			sdiv.after("\n");
+		}
+		
+		this.changeFlag(true);
+		
+		this.dashboard.loadUnsolvedCharts();
+	};
+	
+	editor.deleteSelected = function()
+	{
+		var selected = this._getSelected();
+		var iframeEle = this._getIframeEle(selected);
+		
+		selected.remove();
+		iframeEle.remove();
+		
+		this.changeFlag(true);
+	};
+	
+	editor._getSelected = function()
+	{
+		return $(".dg-show-ve-selected");
+	};
+	
+	editor._getIframeEle = function($ele)
+	{
+		var eid = (this._getVisualEditId($ele) || "");
+		var iframeDoc = this._iframeDocument();
+		return $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+eid+"']", iframeDoc.body);
+	};
+	
+	editor._getVisualEditId = function($ele)
+	{
+		return $ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID);
+	};
+	
 	editor._nextVisualEditId = function()
 	{
 		var seq = (this._nextVisualEditIdSequence != null ? this._nextVisualEditIdSequence : 0);
 		this._nextVisualEditIdSequence = seq + 1;
 		
-		return this.DG_VISUAL_EDIT_ID_PREFIX + seq;
+		return DG_VISUAL_EDIT_ID_PREFIX + seq;
 	};
 	
 	//获取编辑HTML的<body>...</body>内容
@@ -143,7 +202,7 @@
 	//结构参考：org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlInfo
 	editor._editHtmlInfo = function()
 	{
-		return this.dashboard.renderContextAttr(editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
+		return this.dashboard.renderContextAttr(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
 	};
 	
 	//反转义编辑HTML（转义操作由后台执行）

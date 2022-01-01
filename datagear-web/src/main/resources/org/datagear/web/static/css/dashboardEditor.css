@@ -1,0 +1,18 @@
+/*
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ */
+
+@CHARSET "UTF-8";
+
+/*看板可视编辑页面样式*/
+
+.dg-show-ve{}
+.dg-show-ve .dg-show-ve-selected{
+	border: 1px dotted;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}

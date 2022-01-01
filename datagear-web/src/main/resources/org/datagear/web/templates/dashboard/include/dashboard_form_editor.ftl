@@ -735,14 +735,23 @@
 		
 		editorRightOptWrapper = $("<div class='visual-editor-operation operation-right' />").appendTo(editorOptWrapper);
 		
-		var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
-				.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorRightOptWrapper).button()
-				.click(function()
-				{
-					po.toggleInsertChartListPannel(tabPane, this);
-				});
+		$("<button type='button' class='insert-chart-button' />")
+			.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorRightOptWrapper).button()
+			.click(function()
+			{
+				po.toggleInsertChartListPannel(tabPane, this);
+			});
+		
+		$("<button type='button' class='delete-ele-button' />")
+		.text("<@spring.message code='delete' />").appendTo(editorRightOptWrapper).button()
+		.click(function()
+		{
+			var dashboardEditor = po.dashboardEditorVisual(tabPane);
+			if(dashboardEditor)
+				dashboardEditor.deleteSelected();
+		});
 	};
-
+	
 	po.insertVisualEditorChart = function(tabPane, chartWidgets)
 	{
 		var dashboardEditor = po.dashboardEditorVisual(tabPane);

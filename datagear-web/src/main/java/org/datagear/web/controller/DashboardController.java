@@ -1069,6 +1069,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			List<HtmlTplDashboardImport> importList = buildHtmlTplDashboardImports(request);
 			if (isShowForEdit)
 			{
+				importList.add(HtmlTplDashboardImport.valueOfLinkCss("dashboardEditorStyle",
+						WebUtils.getContextPath(request) + "/static/css/dashboardEditor.css?v=" + Global.VERSION));
 				importList.add(HtmlTplDashboardImport.valueOfJavaScript("dashboardEditor",
 						WebUtils.getContextPath(request) + "/static/script/dashboardEditor.js?v=" + Global.VERSION));
 			}
