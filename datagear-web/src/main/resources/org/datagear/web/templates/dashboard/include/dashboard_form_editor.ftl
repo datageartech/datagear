@@ -264,14 +264,35 @@
 		
 		po.element(".resource-editor-tab-pane").each(function()
 		{
-			var tp = $(this);
+			var tabPane = $(this);
 			
-			var codeEditorDiv = po.element(".code-editor", tp);
+			var resourceName = po.element(".resourceName", tabPane).val();
+			var isTemplate = po.element(".resourceIsTemplate", tabPane).val();
+			var resourceContent = "";
+			
+			var codeEditorDiv = po.element(".code-editor", tabPane);
 			var codeEditor = codeEditorDiv.data("resourceEditorInstance");
 			
-			data.resourceNames.push($(".resourceName", tp).val());
-			data.resourceIsTemplates.push($(".resourceIsTemplate", tp).val());
-			data.resourceContents.push(po.getCodeText(codeEditor));
+			if(isTemplate)
+			{
+				var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+				if(visualEditorIfm.hasClass("show-editor"))
+				{
+					var dashboardEditor = po.dashboardEditorVisual(tabPane);
+					resourceContent = (dashboardEditor ? dashboardEditor.editedHtml() : "");
+				}
+				
+				if(!resourceContent)
+					resourceContent = po.getCodeText(codeEditor);
+			}
+			else
+			{
+				resourceContent = po.getCodeText(codeEditor);
+			}
+			
+			data.resourceNames.push(resourceName);
+			data.resourceIsTemplates.push(isTemplate);
+			data.resourceContents.push(resourceContent);
 		});
 		
 		return data;
