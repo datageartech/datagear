@@ -46,7 +46,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.dashboardResource' /></label>
 				</div>
-				<div class="form-item-value error-newline form-item-value-resources">
+				<div class="form-item-value form-item-value-resources">
 					<div class="resources-wrapper">
 						<div id="${pageId}-resourceEditorTabs" class="resource-editor-tabs minor-tabs">
 							<ul class="resource-editor-tab-nav always-show">

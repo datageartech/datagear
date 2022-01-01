@@ -549,12 +549,12 @@
 	po.resizeResourcesWorkspace = function()
 	{
 		if(po.isInDialog())
-			po.element(".form-item-value-resources").height($(window).height()*5/9);
+			po.element(".form-item-value-resources").height($(window).height()*3/5);
 		else
 		{
+			var gapHeight = 20;
 			var th = $(window).height() - po.element(".form-item-analysisProjectAware").outerHeight(true);
-			th = th - po.element(".form-foot").outerHeight(true);
-			th = th - 50;
+			th = th - po.element(".form-foot").outerHeight(true) - gapHeight;
 			po.element(".form-item-value-resources").height(th);
 		}
 	};
