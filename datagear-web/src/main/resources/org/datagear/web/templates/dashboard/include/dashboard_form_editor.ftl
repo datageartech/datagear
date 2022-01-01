@@ -267,7 +267,7 @@
 			var tabPane = $(this);
 			
 			var resourceName = po.element(".resourceName", tabPane).val();
-			var isTemplate = po.element(".resourceIsTemplate", tabPane).val();
+			var isTemplate = (po.element(".resourceIsTemplate", tabPane).val() == "true");
 			var resourceContent = "";
 			
 			var codeEditorDiv = po.element(".code-editor", tabPane);
@@ -395,6 +395,7 @@
 		}
 		else
 		{
+			po.initCodeEditorOperationIfNon(tabPane);
 			codeEditor.focus();
 		}
 		
@@ -562,7 +563,7 @@
 		
 		editorRightOptWrapper = $("<div class='code-editor-operation operation-right' />").appendTo(editorOptWrapper)
 		
-		if(!po.readonly)
+		if(!po.readonly && (po.element(".resourceIsTemplate", tabPane).val() == "true"))
 		{
 			var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
 				.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorRightOptWrapper).button()
