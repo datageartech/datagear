@@ -3268,7 +3268,7 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	left: 0;
 	right: 0;
-	top: 2.6em;
+	top: 2.1em;
 	bottom: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .resource-editor,
@@ -3308,6 +3308,11 @@ table.dataTable tbody tr td select{
 	font-size: 0.9em;
 	text-align: right;
 }
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper button.ui-button,
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .opt-button{
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+}
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .operation-left{
 	position: absolute;
 	left: 0;
@@ -3329,8 +3334,8 @@ table.dataTable tbody tr td select{
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .code-editor-operation .search-group .search-input{
 	width: 6em !important;
-	margin-top: 0.5px;
-	border-width: 0;
+    border-width: 0;
+    height: 1.8em;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .code-editor-operation .search-group .search-button{
 	border-width: 0;

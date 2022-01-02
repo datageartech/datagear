@@ -15,7 +15,6 @@ readonly 是否只读操作，允许为null
 -->
 <#assign formAction=(formAction!'#')>
 <#assign readonly=(readonly!false)>
-<#assign isAdd=(formAction == 'saveAdd')>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -199,7 +198,8 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	po.readonly = "${readonly?string('true','false')}" == "true";
+	po.readonly = ("${readonly?string('true','false')}" == "true");
+	po.isAdd = (po.element("input[name='id']", po.form()).val() == "");
 	po.templates = <@writeJson var=templates />;
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	
@@ -295,7 +295,7 @@ readonly 是否只读操作，允许为null
 					var templateCount = (newData.dashboard.templates == null ? 0 : newData.dashboard.templates.length);
 					for(var i=0; i<newData.resourceIsTemplates.length; i++)
 					{
-						if(newData.resourceIsTemplates[i] == "true")
+						if(newData.resourceIsTemplates[i] == true || newData.resourceIsTemplates[i] == "true")
 							templateCount++;
 					}
 					

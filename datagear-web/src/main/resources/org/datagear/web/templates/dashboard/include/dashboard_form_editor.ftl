@@ -367,31 +367,29 @@
 			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm hide-editor ui-widget-shadow' />")
 				.attr("name", visualEditorId).attr("id", visualEditorId).appendTo(visualEditorDiv);
 			
-			if(!po.readonly)
-			{
-				var topWindowSize = po.evalTopWindowSize();
-				visualEditorIfm.css("width", topWindowSize.width);
-				visualEditorIfm.css("height", topWindowSize.height);
-				
-				po.setVisualEditorIframeScale(visualEditorDiv, visualEditorIfm);
-				
-				var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorLeftOptWrapper);
-				$("<button type='button' class='switchToCodeEditorBtn'></button>").text("<@spring.message code='dashboard.switchToCodeEditor' />")
-				.appendTo(editorSwitchGroup).button().click(function()
-				{
-					po.switchToCodeEditor(tabPane);
-				});
-				
-				$("<button type='button' class='switchToVisualEditorBtn'></button>").text("<@spring.message code='dashboard.switchToVisualEditor' />")
-				.appendTo(editorSwitchGroup).button().click(function()
-				{
-					po.switchToVisualEditor(tabPane);
-				});
-				
-				editorSwitchGroup.controlgroup();
-			}
+			var topWindowSize = po.evalTopWindowSize();
+			visualEditorIfm.css("width", topWindowSize.width);
+			visualEditorIfm.css("height", topWindowSize.height);
 			
-			po.switchToCodeEditor(tabPane);
+			po.setVisualEditorIframeScale(visualEditorDiv, visualEditorIfm);
+			
+			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorLeftOptWrapper);
+			$("<button type='button' class='switchToCodeEditorBtn'></button>").text("<@spring.message code='dashboard.switchToCodeEditor' />")
+			.appendTo(editorSwitchGroup).button().click(function()
+			{
+				po.switchToCodeEditor(tabPane);
+			});
+			$("<button type='button' class='switchToVisualEditorBtn'></button>").text("<@spring.message code='dashboard.switchToVisualEditor' />")
+			.appendTo(editorSwitchGroup).button().click(function()
+			{
+				po.switchToVisualEditor(tabPane);
+			});
+			editorSwitchGroup.controlgroup();
+			
+			if(po.readonly)
+				po.switchToVisualEditor(tabPane);
+			else
+				po.switchToCodeEditor(tabPane);
 		}
 		else
 		{
@@ -540,7 +538,6 @@
 			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
 			
 			var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
-			var templateContent = po.getCodeText(codeEditor);
 			
 			visualEditorIfm.data("changeFlag", codeEditor.changeGeneration());
 			codeEditorDiv.data("changeFlag", null);
@@ -548,7 +545,8 @@
 			var form = po.element("#${pageId}-tplEditVisualForm");
 			form.attr("action", po.showUrl(dashboardId, templateName));
 			form.attr("target", visualEditorIfm.attr("name"));
-			$("textarea[name='DG_TEMPLATE_CONTENT']", form).val(templateContent);
+			$("input[name='DG_EDIT_TEMPLATE']", form).val(po.readonly ? "false" : "true");
+			$("textarea[name='DG_TEMPLATE_CONTENT']", form).val(po.readonly ? "" : po.getCodeText(codeEditor));
 			form.submit();
 		}
 	};
@@ -727,6 +725,9 @@
 	
 	po.initVisualEditorOperationIfNon = function(tabPane)
 	{
+		if(po.readonly)
+			return false;
+		
 		var editorOptWrapper = po.element(".editor-operation-wrapper", tabPane);
 		var editorRightOptWrapper = po.element(".visual-editor-operation", editorOptWrapper);
 		
@@ -818,7 +819,7 @@
 	
 	po.buildVisualEditorInsertMenuItems = function($parent, insertType)
 	{
-		var ul = $("<ul />");
+		var ul = $("<ul class=' ui-widget-shadow' />");
 		$("<li insertOperation='insertChart' insertType='"+insertType+"' />").html("<div>图表</div>").appendTo(ul);
 		ul.appendTo($parent);
 	};
