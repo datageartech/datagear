@@ -13,7 +13,7 @@ import java.util.Date;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.StringUtil;
 import org.springframework.beans.BeanUtils;
 
@@ -56,7 +56,7 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 		this.createTime = new Date();
 	}
 
-	public HtmlTplDashboardWidgetEntity(String id, String template, HtmlTplDashboardWidgetHtmlRenderer renderer,
+	public HtmlTplDashboardWidgetEntity(String id, String template, HtmlTplDashboardWidgetRenderer renderer,
 			TemplateDashboardWidgetResManager resManager,
 			String name, User createUser)
 	{

@@ -105,13 +105,13 @@
 					//根节点
 					if(node.id == "#")
 					{
-						var id = po.getDashboardId();
-						
-						if(!id)
+						if(po.checkDashboardUnSaved(false))
 						{
 							callback.call(_this, []);
 							return;
 						}
+						
+						var id = po.getDashboardId();
 						
 						$.get(po.url("listResources?id="+id), function(resources)
 						{
@@ -247,7 +247,7 @@
 		
 		po.elementResListLocal(".editResBtn").click(function()
 		{
-			if(!po.checkDashboardSaved())
+			if(po.checkDashboardUnSaved())
 				return;
 			
 			var resName = po.getSelectedResourceName();
@@ -288,13 +288,8 @@
 		
 		po.elementResListLocal(".uploadResBtn").click(function()
 		{
-			var id = po.getDashboardId();
-			
-			if(!id)
-			{
-				$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			if(po.checkDashboardUnSaved())
 				return;
-			}
 			
 			po.elementResListLocal(".uploadResNameInput").val("");
 			po.elementResListLocal(".uploadResFilePath").val("");
@@ -334,14 +329,10 @@
 		
 		po.elementResListLocal(".viewResButton").click(function(e)
 		{
-			var id = po.getDashboardId();
-			
-			if(!id)
-			{
-				$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			if(po.checkDashboardUnSaved())
 				return;
-			}
 			
+			var id = po.getDashboardId();
 			var path = po.getSelectedResourceName();
 			
 			if(!path)
@@ -352,7 +343,7 @@
 		
 		po.elementResListLocal(".asTemplateBtn").click(function()
 		{
-			if(!po.checkDashboardSaved())
+			if(po.checkDashboardUnSaved())
 				return;
 			
 			var resName = po.getSelectedResourceNameForTree(po.elementResListLocal(".resource-list-content"));
@@ -381,7 +372,7 @@
 		
 		po.elementResListLocal(".asNormalResBtn").click(function()
 		{
-			if(!po.checkDashboardSaved())
+			if(po.checkDashboardUnSaved())
 				return;
 			
 			var resName = po.getSelectedResourceNameForTemplate();
@@ -399,7 +390,7 @@
 		
 		po.elementResListLocal(".asFirstTemplateBtn").click(function()
 		{
-			if(!po.checkDashboardSaved())
+			if(po.checkDashboardUnSaved())
 				return;
 			
 			var resName = po.getSelectedResourceNameForTemplate();
@@ -418,27 +409,18 @@
 
 		po.elementResListLocal(".refreshResListBtn").click(function()
 		{
-			var id = po.getDashboardId();
-			
-			if(!id)
-			{
-				$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			if(po.checkDashboardUnSaved())
 				return;
-			}
 			
 			po.refreshResourceListLocal();
 		});
 		
 		po.elementResListLocal(".deleteResBtn").click(function()
 		{
-			var id = po.getDashboardId();
-			
-			if(!id)
-			{
-				$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			if(po.checkDashboardUnSaved())
 				return;
-			}
 			
+			var id = po.getDashboardId();
 			var name = po.getSelectedResourceName();
 			
 			if(!name)
@@ -501,14 +483,10 @@
 		
 		po.elementResListGlobal(".viewResButton").click(function(e)
 		{
-			var id = po.getDashboardId();
-			
-			if(!id)
-			{
-				$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			if(po.checkDashboardUnSaved())
 				return;
-			}
 			
+			var id = po.getDashboardId();
 			var path = po.getSelectedResourceGlobalName();
 			
 			if(!path)
@@ -694,9 +672,7 @@
 	
 	po.refreshResourceListLocal = function()
 	{
-		var id = po.getDashboardId();
-		
-		if(!id)
+		if(po.checkDashboardUnSaved(false))
 			return;
 		
 		po.elementResListLocal(".resource-list-content").jstree(true).refresh(true);

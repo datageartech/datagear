@@ -43,6 +43,7 @@ public interface HtmlTplDashboardWidgetEntityService
 	 * @param user
 	 * @param id
 	 * @return
+	 * @throws PermissionDeniedException
 	 */
-	HtmlTplDashboardWidgetEntity getHtmlTplDashboardWidget(User user, String id);
+	HtmlTplDashboardWidgetEntity getHtmlTplDashboardWidget(User user, String id) throws PermissionDeniedException;
 }

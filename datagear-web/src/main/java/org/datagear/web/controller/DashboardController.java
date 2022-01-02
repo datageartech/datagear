@@ -52,6 +52,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
+import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
 import org.datagear.util.Global;
@@ -233,6 +234,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
 		setCookieAnalysisProject(request, response, dashboard);
 
+		dashboard.setId(IDUtil.randomIdOnTime20());
 		dashboard.setTemplates(new String[0]);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 
@@ -251,6 +253,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
+		model.addAttribute("isAdd", true);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -335,7 +338,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		User user = WebUtils.getUser(request, response);
 
 		HtmlTplDashboardWidgetEntity dashboard = form.getDashboard();
-		boolean isSaveAdd = isEmpty(dashboard.getId());
 
 		String[] templates = dashboard.getTemplates();
 		String[] resourceNames = form.getResourceNames();
@@ -349,7 +351,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setTemplates(templates);
 		trimAnalysisProjectAwareEntityForSave(dashboard);
 
-		if (isBlank(dashboard.getName()) || isEmpty(templates) || (isSaveAdd && isEmpty(resourceNames)))
+		if (isEmpty(dashboard.getId()) || isBlank(dashboard.getName())
+				|| isEmpty(templates) || (form.isSaveAdd() && isEmpty(resourceNames)))
 			throw new IllegalInputException();
 
 		// 如果编辑了首页模板，则应重新解析编码
@@ -357,9 +360,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (firstTemplateIndex > -1)
 			dashboard.setTemplateEncoding(resolveTemplateEncoding(resourceContents[firstTemplateIndex]));
 
-		if (isSaveAdd)
+		if (form.isSaveAdd())
 		{
-			dashboard.setId(IDUtil.randomIdOnTime20());
 			dashboard.setCreateUser(user);
 			this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
@@ -901,22 +903,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		else
 		{
 			User user = WebUtils.getUser(request, response);
-	
-			HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
-						.getHtmlTplDashboardWidget(user, id);
-	
-			if (dashboardWidget == null)
-				throw new RecordNotFoundException();
-	
+			HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(user, id);
 			String firstTemplate = dashboardWidget.getFirstTemplate();
-	
+
 			// 如果首页模板是在嵌套路径下，则应重定向到具体路径，避免页面内以相对路径引用的资源找不到
 			int subPathSlashIdx = firstTemplate.indexOf(FileUtil.PATH_SEPARATOR_SLASH);
 			if (subPathSlashIdx > 0 && subPathSlashIdx < firstTemplate.length() - 1)
 			{
 				String redirectPath = correctPath + firstTemplate;
 				redirectPath = appendRequestQueryString(redirectPath, request);
-	
 				response.sendRedirect(redirectPath);
 			}
 			else
@@ -942,24 +937,17 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-		HtmlTplDashboardWidgetEntity entity = this.htmlTplDashboardWidgetEntityService.getById(user, id);
-
-		if (entity == null)
-			throw new RecordNotFoundException();
-
+		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(user, id);
 		String resName = resolvePathAfter(request, "/show/" + id + "/");
 
 		if (StringUtil.isEmpty(resName))
 			throw new FileNotFoundException(resName);
 
 		resName = WebUtils.decodeURL(resName);
-		boolean isShowForEdit = isDashboardShowForEdit(request, entity, user);
+		boolean isShowForEdit = isDashboardShowForEdit(request, dashboardWidget, user);
 
-		if (entity.isTemplate(resName) || isShowForEdit)
+		if (dashboardWidget.isTemplate(resName) || isShowForEdit)
 		{
-			HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
-						.getHtmlTplDashboardWidget(user, id);
-
 			showDashboard(request, response, model, user, dashboardWidget, resName, isShowForEdit);
 		}
 		else
@@ -1038,9 +1026,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			org.springframework.ui.Model model, User user, HtmlTplDashboardWidgetEntity dashboardWidget,
 			String template, boolean isShowForEdit) throws Exception
 	{
-		if (dashboardWidget == null)
-			throw new RecordNotFoundException();
-
 		User createUser = dashboardWidget.getCreateUser();
 
 		String showHtml = (isShowForEdit
@@ -1103,6 +1088,41 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 	}
 	
+	/**
+	 * 获取看板展示操作时使用的看板部件。
+	 * <p>
+	 * 此方法不会返回{@code null}，如果不存在，此方法返回一个仿造看板部件，以解决展示操作时看板部件必须已存在的问题。
+	 * </p>
+	 * 
+	 * @param currentUser
+	 * @param id
+	 * @return
+	 */
+	protected HtmlTplDashboardWidgetEntity getHtmlTplDashboardWidgetEntityForShow(User currentUser, String id)
+	{
+		if (StringUtil.isEmpty(id))
+			throw new IllegalInputException();
+
+		HtmlTplDashboardWidgetEntity dashboardWidget = null;
+
+		try
+		{
+			dashboardWidget = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidget(currentUser, id);
+		}
+		catch(PermissionDeniedException t)
+		{
+		}
+
+		if (dashboardWidget == null)
+		{
+			dashboardWidget = new HtmlTplDashboardWidgetEntity(id, HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0],
+					this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer(),
+					this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager(), id, currentUser);
+		}
+
+		return dashboardWidget;
+	}
+
 	protected String buildShowForEditShowHtml(String templateContent) throws IOException
 	{
 		String showHtml = "";
@@ -1225,11 +1245,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboardInfo == null)
 			throw new RecordNotFoundException();
 
-		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidget(user, dashboardInfo.getDashboardWidgetId());
-
-		if (dashboardWidget == null)
-			throw new RecordNotFoundException();
+		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(user,
+				dashboardInfo.getDashboardWidgetId());
 
 		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
@@ -1530,6 +1547,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		private String copySourceId = "";
 
+		private boolean saveAdd = false;
+
 		public HtmlTplDashboardSaveForm()
 		{
 			super();
@@ -1598,6 +1617,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		public void setCopySourceId(String copySourceId)
 		{
 			this.copySourceId = copySourceId;
+		}
+
+		public boolean isSaveAdd()
+		{
+			return saveAdd;
+		}
+
+		public void setSaveAdd(boolean saveAdd)
+		{
+			this.saveAdd = saveAdd;
 		}
 	}
 

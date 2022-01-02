@@ -374,22 +374,19 @@
 			po.setVisualEditorIframeScale(visualEditorDiv, visualEditorIfm);
 			
 			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorLeftOptWrapper);
-			$("<button type='button' class='switchToCodeEditorBtn'></button>").text("<@spring.message code='dashboard.switchToCodeEditor' />")
-			.appendTo(editorSwitchGroup).button().click(function()
-			{
-				po.switchToCodeEditor(tabPane);
-			});
 			$("<button type='button' class='switchToVisualEditorBtn'></button>").text("<@spring.message code='dashboard.switchToVisualEditor' />")
 			.appendTo(editorSwitchGroup).button().click(function()
 			{
 				po.switchToVisualEditor(tabPane);
 			});
+			$("<button type='button' class='switchToCodeEditorBtn'></button>").text("<@spring.message code='dashboard.switchToCodeEditor' />")
+			.appendTo(editorSwitchGroup).button().click(function()
+			{
+				po.switchToCodeEditor(tabPane);
+			});
 			editorSwitchGroup.controlgroup();
 			
-			if(po.readonly)
-				po.switchToVisualEditor(tabPane);
-			else
-				po.switchToCodeEditor(tabPane);
+			po.switchToVisualEditor(tabPane);
 		}
 		else
 		{
@@ -505,12 +502,6 @@
 	po.switchToVisualEditor = function(tabPane)
 	{
 		var dashboardId = po.getDashboardId();
-		
-		if(!dashboardId)
-		{
-			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
-			return;
-		}
 		
 		po.initVisualEditorOperationIfNon(tabPane);
 		

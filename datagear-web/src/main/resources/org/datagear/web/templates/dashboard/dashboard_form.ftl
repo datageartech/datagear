@@ -15,6 +15,7 @@ readonly 是否只读操作，允许为null
 -->
 <#assign formAction=(formAction!'#')>
 <#assign readonly=(readonly!false)>
+<#assign isAdd=(isAdd!false)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -199,7 +200,8 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	po.readonly = ("${readonly?string('true','false')}" == "true");
-	po.isAdd = (po.element("input[name='id']", po.form()).val() == "");
+	po.isAdd = ("${isAdd?string('true','false')}" == "true");
+	po.isUnsavedAdd = (po.isAdd ? true : false);
 	po.templates = <@writeJson var=templates />;
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	
@@ -221,18 +223,20 @@ readonly 是否只读操作，允许为null
 	{
 		return  po.element("input[name='id']").val();
 	};
-	
-	po.checkDashboardSaved = function()
+
+	po.checkDashboardUnSaved = function(tip)
 	{
-		var id = po.getDashboardId();
+		tip = (tip == null ? true : tip);
 		
-		if(!id)
+		if(po.isUnsavedAdd)
 		{
-			$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
-			return false;
+			if(tip)
+				$.tipInfo("<@spring.message code='dashboard.pleaseSaveDashboardFirst' />");
+			
+			return true;
 		}
 		
-		return true;
+		return false;
 	};
 	
 	po.fileUploadInfo = function(){ return this.elementResListLocal(".upload-file-info"); };
@@ -291,6 +295,7 @@ readonly 是否只读操作，允许为null
 					var newData = po.getResourceEditorData();
 					newData.dashboard = data;
 					newData.copySourceId = po.element("#${pageId}-copySourceId").val();
+					newData.saveAdd = po.isUnsavedAdd;
 					
 					var templateCount = (newData.dashboard.templates == null ? 0 : newData.dashboard.templates.length);
 					for(var i=0; i<newData.resourceIsTemplates.length; i++)
@@ -311,10 +316,9 @@ readonly 是否只读操作，允许为null
 				},
 				success : function(response)
 				{
-					var isSaveAdd = !po.getDashboardId();
+					po.isUnsavedAdd = false;
 					
 					var dashboard = response.data;
-					po.element("input[name='id']").val(dashboard.id);
 					po.templates = dashboard.templates;
 					
 					if(po.showAfterSave)
@@ -338,7 +342,7 @@ readonly 是否只读操作，允许为null
 	
 	po.initResourcesWorkspace();
 	
-	if(po.getDashboardId() || po.element("#${pageId}-copySourceId").val())
+	if(!po.isAdd || po.element("#${pageId}-copySourceId").val())
 		po.element(".resize-editor-button-left").click();
 	
 	po.newResourceEditorTab(po.element("#${pageId}-initTemplateName").val(), po.element("#${pageId}-initTemplateContent").val(), true);
