@@ -11,8 +11,9 @@
 
 .dg-show-ve{}
 .dg-show-ve .dg-show-ve-selected{
-	border: 1px dotted;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
+	border-width: 1px !important;
+	border-style: dashed !important;
+	box-sizing: border-box !important;
+	-moz-box-sizing: border-box !important;
+	-webkit-box-sizing: border-box !important;
 }

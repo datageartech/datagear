@@ -3316,21 +3316,32 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	right: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .insert-chart-button{
-	margin-right: 1em;
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .operation-right > *{
+	display: inline-block;
+	margin-right: 0.5em;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .search-group{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .operation-right > *:last-child{
+	margin-right: 0;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .code-editor-operation .search-group{
 	display: inline-block;
 	padding-left: 1px;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .search-group .search-input{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .code-editor-operation .search-group .search-input{
 	width: 6em !important;
 	margin-top: 0.5px;
 	border-width: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .search-group .search-button{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .code-editor-operation .search-group .search-button{
 	border-width: 0;
 	margin-right: 0;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .visual-editor-operation .insert-menu{
+	position: absolute;
+	display: none;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .visual-editor-operation .insert-menu *{
+	white-space: nowrap;
 }
 .page-form-dashboard .resources-wrapper .resource-list-tabs{
 	position: absolute;

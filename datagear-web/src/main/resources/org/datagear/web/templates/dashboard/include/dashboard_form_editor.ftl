@@ -735,12 +735,38 @@
 		
 		editorRightOptWrapper = $("<div class='visual-editor-operation operation-right' />").appendTo(editorOptWrapper);
 		
-		$("<button type='button' class='insert-chart-button' />")
-			.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorRightOptWrapper).button()
-			.click(function()
+		var insertGroup = $("<div class='insert-group' />").appendTo(editorRightOptWrapper)
+			.hover(
+				function()
+				{
+					po.element(".insert-menu", this).show().position({ my : "right top", at : "right bottom", of : this});
+				},
+				function()
+				{
+					po.element(".insert-menu", this).hide();
+				});
+		$("<button type='button' />").text("插入").appendTo(insertGroup).button();
+		
+		var insertMenu = $("<ul class='insert-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
+		var insertItemAfter = $("<li />").html("<div>外部后置</div>").appendTo(insertMenu);
+		po.buildVisualEditorInsertMenuItems(insertItemAfter, "after");
+		var insertItemBefore = $("<li />").html("<div>外部前置</div>").appendTo(insertMenu);
+		po.buildVisualEditorInsertMenuItems(insertItemBefore, "before");
+		var insertItemAppend = $("<li />").html("<div>内部后置</div>").appendTo(insertMenu);
+		po.buildVisualEditorInsertMenuItems(insertItemAppend, "append");
+		var insertItemPrepend = $("<li />").html("<div>内部前置</div>").appendTo(insertMenu);
+		po.buildVisualEditorInsertMenuItems(insertItemPrepend, "prepend");
+		insertMenu.appendTo(insertGroup).menu(
+		{
+			select: function(event, ui)
 			{
-				po.toggleInsertChartListPannel(tabPane, this);
-			});
+				var item = ui.item;
+				var insertType = item.attr("insert-type");
+				
+				po.visualEditInsertType = insertType;
+				po.toggleInsertChartListPannel(tabPane, insertGroup);
+			}
+		});
 		
 		$("<button type='button' class='delete-ele-button' />")
 		.text("<@spring.message code='delete' />").appendTo(editorRightOptWrapper).button()
@@ -752,11 +778,18 @@
 		});
 	};
 	
+	po.buildVisualEditorInsertMenuItems = function($parent, insertType)
+	{
+		var ul = $("<ul />");
+		$("<li insert-type='"+insertType+"' />").html("<div>图表</div>").appendTo(ul);
+		ul.appendTo($parent);
+	};
+	
 	po.insertVisualEditorChart = function(tabPane, chartWidgets)
 	{
 		var dashboardEditor = po.dashboardEditorVisual(tabPane);
 		if(dashboardEditor)
-			dashboardEditor.insertChart(chartWidgets);
+			dashboardEditor.insertChart(chartWidgets, po.visualEditInsertType);
 	};
 	
 	po.toggleInsertChartListPannel = function(tabPane, insertChartButton)

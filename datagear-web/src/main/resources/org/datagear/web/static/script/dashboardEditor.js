@@ -45,8 +45,19 @@
 	{
 		this.dashboard = dashboard;
 		
+		this._initStyle();
 		this._initEditHtmlIframe();
 		this._initInteraction();
+	};
+	
+	//初始化样式
+	editor._initStyle = function()
+	{
+		chartFactory.styleSheetText("dg-show-ve-style",
+			"\n"
+			+ ".dg-show-ve .dg-show-ve-selected{\n"
+			+ "  border-color: " + $(document.body).css("color") + " !important;"
+			+ "\n}\n");
 	};
 	
 	//初始化编辑HTML的iframe
@@ -57,7 +68,7 @@
 		//只使用bodyHtml，因为渲染ifarme页面时beforeBodyHtml、afterBodyHtml如果有不合规的元素，
 		//可能会被渲染至<body></body>内，导致【结果HTML】还原不对
 		var editHtml = "<html><head></head>" + editHtmlInfo.bodyHtml + "</html>";
-		this._editHtmlIframe(editHtml);
+		this._editIframe(editHtml);
 	};
 	
 	//初始化交互控制
@@ -85,21 +96,21 @@
 	editor.editedHtml = function()
 	{
 		var editHtmlInfo = this._editHtmlInfo();
-		var bodyHtml = this._editBodyHtml();
+		var editBodyHtml = this._editBodyHtml();
 		
 		//将占位标签还原为原始标签
 		var placeholderSources = (editHtmlInfo.placeholderSources || {});
 		for(var placeholder in placeholderSources)
 		{
 			var source = placeholderSources[placeholder];
-			bodyHtml = bodyHtml.replace(placeholder, source);
+			editBodyHtml = editBodyHtml.replace(placeholder, source);
 		}
 		
 		//删除dg-visual-edit-id属性
 		var veidRegex = /\s?dg\-visual\-edit\-id\=["'][^"']*["']\s*>/gi;
-		bodyHtml = bodyHtml.replace(veidRegex, ">");
+		editBodyHtml = editBodyHtml.replace(veidRegex, ">");
 		
-		var editedHtml = editHtmlInfo.beforeBodyHtml + bodyHtml + editHtmlInfo.afterBodyHtml;
+		var editedHtml = editHtmlInfo.beforeBodyHtml + editBodyHtml + editHtmlInfo.afterBodyHtml;
 		return this._unescapeEditHtml(editedHtml);
 	};
 	
@@ -125,29 +136,28 @@
 		}
 	};
 	
-	editor.insertChart = function(chartWidgets)
+	/**
+	 * 插入图表。
+	 * 
+	 * @param chartWidgets 要插入的图表部件对象、数组
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertChart = function(chartWidgets, insertType, refEle)
 	{
 		if(!chartWidgets || chartWidgets.length == 0)
 			return;
 		
-		if(!$.isArray(chartWidgets))
-			chartWidgets = [ chartWidgets ];
-		
-		var iframeDoc = this._iframeDocument();
+		chartWidgets = (!$.isArray(chartWidgets) ? [ chartWidgets ] : chartWidgets);
 		
 		for(var i=0; i<chartWidgets.length; i++)
 		{
 			var chartWidget = chartWidgets[i];
 			
-			var dgStaticId = this._nextVisualEditId();
+			var chartDiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
+				.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, this._nextVisualEditId()).html("<!--"+chartWidget.name+"-->");
 			
-			var vdiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
-				.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, dgStaticId).appendTo(document.body);
-			vdiv.after("\n");
-			
-			var sdiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
-				.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, dgStaticId).appendTo(iframeDoc.body);
-			sdiv.after("\n");
+			this.insertElement(chartDiv, insertType, refEle);
 		}
 		
 		this.changeFlag(true);
@@ -155,10 +165,76 @@
 		this.dashboard.loadUnsolvedCharts();
 	};
 	
+	/**
+	 * 插入元素。
+	 * 
+	 * @param insertEle 要插入的jq元素、文本
+	 * @param insertType 可选，插入类型："after"、"before"、"append"、"prepend"，默认为："after"
+	 * @param refEle 插入参照元素，默认为：当前选中元素，或者<body>
+	 * @param sync 可选，是否将插入操作同步至编辑iframe中，默认为：true
+	 */
+	editor.insertElement = function(insertEle, insertType, refEle, sync)
+	{
+		refEle = (!refEle ? (this._getSelected()) : refEle);
+		refEle = (refEle == null || refEle.length == 0 ? $(document.body) : refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		sync = (sync == null ? true : sync);
+		
+		this._insertElement(refEle, insertEle, insertType);
+		
+		if(sync)
+		{
+			var editEle = this._editElement(refEle);
+			var insertEleClone = (chartFactory.isString(insertEle) ? insertEle : insertEle.clone());
+			this._insertElement(editEle, insertEleClone, insertType);
+		}
+	};
+	
+	editor._insertElement = function(refEle, insertEle, insertType)
+	{
+		if(insertType == "after")
+		{
+			refEle.after(insertEle);
+			refEle.after("\n");
+		}
+		else if(insertType == "before")
+		{
+			refEle.before(insertEle);
+			refEle.before("\n");
+		}
+		else if(insertType == "append")
+		{
+			refEle.append(insertEle);
+			refEle.append("\n");
+		}
+		else if(insertType == "prepend")
+		{
+			refEle.prepend(insertEle);
+			refEle.prepend("\n");
+		}
+	};
+	
+	editor._trimInsertType = function(refEle, insertType)
+	{
+		insertType = (!insertType ? "after" : insertType);
+		insertType = (insertType == "after" || insertType == "before"
+						|| insertType == "append" || insertType == "prepend" ? insertType : "after");
+		
+		if(refEle.is("body"))
+		{
+			if(insertType == "after")
+				insertType = "append";
+			else if(insertType == "before")
+				insertType = "prepend";
+		}
+		
+		return insertType;
+	};
+	
 	editor.deleteSelected = function()
 	{
 		var selected = this._getSelected();
-		var iframeEle = this._getIframeEle(selected);
+		var iframeEle = this._editElement(selected);
 		
 		selected.remove();
 		iframeEle.remove();
@@ -169,13 +245,6 @@
 	editor._getSelected = function()
 	{
 		return $(".dg-show-ve-selected");
-	};
-	
-	editor._getIframeEle = function($ele)
-	{
-		var eid = (this._getVisualEditId($ele) || "");
-		var iframeDoc = this._iframeDocument();
-		return $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+eid+"']", iframeDoc.body);
 	};
 	
 	editor._getVisualEditId = function($ele)
@@ -189,13 +258,6 @@
 		this._nextVisualEditIdSequence = seq + 1;
 		
 		return DG_VISUAL_EDIT_ID_PREFIX + seq;
-	};
-	
-	//获取编辑HTML的<body>...</body>内容
-	editor._editBodyHtml = function()
-	{
-		var iframeDoc = this._iframeDocument();
-		return $(iframeDoc.body).prop("outerHTML");
 	};
 	
 	//获取编辑HTML信息
@@ -212,12 +274,12 @@
 	};
 	
 	/**
-	 * 获取编辑HTML的iframe对象，也可设置其编辑HTML。
+	 * 获取编辑iframe，也可设置其HTML。
 	 */
-	editor._editHtmlIframe = function(editHtml)
+	editor._editIframe = function(editHtml)
 	{
-		var id = (this._editHtmlIframeId != null ? this._editHtmlIframeId
-					: (this._editHtmlIframeId = chartFactory.nextElementId()));
+		var id = (this._editIframeId != null ? this._editIframeId
+					: (this._editIframeId = chartFactory.nextElementId()));
 		
 		var iframe = $("#" + id);
 		
@@ -232,9 +294,7 @@
 		if(editHtml != null)
 		{
 			editHtml = this._unescapeEditHtml(editHtml);
-			
-			var iframeDoc = this._iframeDocument(iframe);
-			iframeDoc.write(editHtml);
+			this._editDocument(iframe).write(editHtml);
 			
 			this.changeFlag(true);
 		}
@@ -243,12 +303,36 @@
 	};
 	
 	/**
-	 * 获取iframe的document对象。
+	 * 获取编辑iframe的document对象。
 	 */
-	editor._iframeDocument = function(iframe)
+	editor._editDocument = function(iframe)
 	{
-		iframe = (iframe == null ? this._editHtmlIframe() : iframe);
+		iframe = (iframe == null ? this._editIframe() : iframe);
+		
 		return (iframe.contentDocument || iframe.contentWindow.document);
+	};
+	
+	//获取编辑HTML的<body>...</body>内容
+	editor._editBodyHtml = function()
+	{
+		var editDoc = this._editDocument();
+		return $(editDoc.body).prop("outerHTML");
+	};
+	
+	/**
+	 * 获取编辑iframe中的元素。
+	 * 
+	 * @param $ele 展示元素
+	 */
+	editor._editElement = function($ele)
+	{
+		var editDoc = this._editDocument();
+		
+		if($ele.is("body"))
+			return $(editDoc.body);
+		
+		var editId = (this._getVisualEditId($ele) || "");
+		return $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']", editDoc.body);
 	};
 	
 	editor._evalTopWindowSize = function()

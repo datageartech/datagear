@@ -258,7 +258,7 @@ readonly 是否只读操作，允许为null
 		var $p2 = po.element(".chart-list-panel");
 		if(!$p2.is(":hidden"))
 		{
-			if($target.closest(".chart-list-panel, .insert-chart-button").length == 0)
+			if($target.closest(".chart-list-panel, .insert-group").length == 0)
 				$p2.hide();
 		}
 	});
