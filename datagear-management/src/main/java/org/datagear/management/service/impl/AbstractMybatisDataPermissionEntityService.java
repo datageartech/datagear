@@ -9,7 +9,6 @@ package org.datagear.management.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -334,7 +333,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 		Map<ID, Integer> permissions = getPermissionsFromCache(user, ids);
 
-		List<ID> noCachedIds = Collections.emptyList();
+		List<ID> noCachedIds = null;
 
 		if (permissions.isEmpty())
 			noCachedIds = ids;
@@ -343,12 +342,20 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			for (int i = 0; i < len; i++)
 			{
 				ID id = ids.get(i);
-				if (!permissions.containsKey(id))
+				Integer permission = permissions.get(id);
+
+				if (permission == null)
+				{
+					if (noCachedIds == null)
+						noCachedIds = new ArrayList<ID>(len);
+
 					noCachedIds.add(id);
+				}
 			}
 		}
 
-		getPermissionsFromDB(user, noCachedIds, permissions, true);
+		if (noCachedIds != null)
+			getPermissionsFromDB(user, noCachedIds, permissions, true);
 
 		List<Integer> re = new ArrayList<>(len);
 
@@ -435,7 +442,8 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			
 			permissions.put(id, permission);
 
-			if (cache)
+			// PERMISSION_NOT_FOUND权限不应加入缓存，因为可能在缓存之后插入了相同id的记录，导致缓存错误
+			if (cache && permission.intValue() != PERMISSION_NOT_FOUND)
 				permissionCachePut(id, userId, permission);
 		}
 	}
