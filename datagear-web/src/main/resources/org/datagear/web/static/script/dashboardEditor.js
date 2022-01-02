@@ -194,12 +194,12 @@
 	};
 	
 	/**
-	 * 设置或替换图表。
+	 * 绑定或替换图表。
 	 * 
-	 * @param chartWidget 要设置的新图表部件对象
-	 * @param chartEle 可选，要设置的图表元素，默认为：当前选中图表元素
+	 * @param chartWidget 要绑定的新图表部件对象
+	 * @param chartEle 可选，要绑定的图表元素，默认为：当前选中图表元素
 	 */
-	editor.setChart = function(chartWidget, chartEle)
+	editor.bindChart = function(chartWidget, chartEle)
 	{
 		if(!chartWidget)
 			return;
@@ -219,6 +219,23 @@
 		
 		this.setElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET, chartWidget.id);
 		this.dashboard.loadChart(chartEle);
+	};
+	
+	/**
+	 * 解绑图表。
+	 * 
+	 * @param chartEle 可选，要解绑的图表元素，默认为：当前选中图表元素
+	 */
+	editor.unbindChart = function(chartEle)
+	{
+		chartEle = this._refElement(chartEle);
+		
+		if(this.dashboard.renderedChart(chartEle))
+		{
+			this.dashboard.removeChart(chartEle);
+		}
+		
+		this.removeElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET);
 	};
 	
 	/**
@@ -265,6 +282,28 @@
 		{
 			var editEle = this._editElement(ele);
 			editEle.attr(name, value);
+		}
+		
+		this.changeFlag(true);
+	};
+	
+	/**
+	 * 删除元素属性。
+	 *
+	 * @param ele
+	 * @param name
+	 * @param sync 可选，是否将设置操作同步至编辑iframe中，默认为：true
+	 */
+	editor.removeElementAttr = function(ele, name, sync)
+	{
+		sync = (sync == null ? true : sync);
+		
+		ele.removeAttr(name);
+		
+		if(sync)
+		{
+			var editEle = this._editElement(ele);
+			editEle.removeAttr(name);
 		}
 		
 		this.changeFlag(true);

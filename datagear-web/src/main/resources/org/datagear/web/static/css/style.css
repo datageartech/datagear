@@ -3336,12 +3336,12 @@ table.dataTable tbody tr td select{
 	border-width: 0;
 	margin-right: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .visual-editor-operation .insert-menu{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .visual-editor-operation .operation-menu{
 	position: absolute;
 	display: none;
 	text-align: left;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .visual-editor-operation .insert-menu *{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .visual-editor-operation .operation-menu *{
 	white-space: nowrap;
 }
 .page-form-dashboard .resources-wrapper .resource-list-tabs{

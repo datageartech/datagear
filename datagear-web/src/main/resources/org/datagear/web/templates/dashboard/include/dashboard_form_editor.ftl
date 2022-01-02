@@ -747,7 +747,7 @@
 				});
 		$("<button type='button' />").text("插入").appendTo(insertGroup).button();
 		
-		var insertMenu = $("<ul class='insert-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
+		var insertMenu = $("<ul class='insert-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
 		var insertItemAfter = $("<li />").html("<div>外部后置</div>").appendTo(insertMenu);
 		po.buildVisualEditorInsertMenuItems(insertItemAfter, "after");
 		var insertItemBefore = $("<li />").html("<div>外部前置</div>").appendTo(insertMenu);
@@ -757,7 +757,7 @@
 		var insertItemPrepend = $("<li />").html("<div>内部前置</div>").appendTo(insertMenu);
 		po.buildVisualEditorInsertMenuItems(insertItemPrepend, "prepend");
 		$("<li class='ui-menu-divider' />").appendTo(insertMenu);
-		$("<li insertOperation='replaceChart' />").html("<div>设置/替换图表</div>").appendTo(insertMenu);
+		$("<li insertOperation='bindChart' />").html("<div>绑定/替换图表</div>").appendTo(insertMenu);
 		insertMenu.appendTo(insertGroup).menu(
 		{
 			select: function(event, ui)
@@ -769,20 +769,50 @@
 				po.insertOperationForVisualEdit = insertOperation;
 				po.insertTypeForVisualEdit = insertType;
 				
-				if(insertOperation == "insertChart" || insertOperation == "replaceChart")
+				if(insertOperation == "insertChart" || insertOperation == "bindChart")
 				{
 					po.toggleInsertChartListPannel(tabPane, insertGroup);
 				}
 			}
 		});
+
+		var deleteGroup = $("<div class='delete-group' />").appendTo(editorRightOptWrapper)
+			.hover(
+				function()
+				{
+					po.element(".delete-menu", this).show().position({ my : "right top", at : "right bottom", of : this});
+				},
+				function()
+				{
+					po.element(".delete-menu", this).hide();
+				});
+		$("<button type='button' />").text("<@spring.message code='delete' />").appendTo(deleteGroup).button();
 		
-		$("<button type='button' class='delete-ele-button' />")
-		.text("<@spring.message code='delete' />").appendTo(editorRightOptWrapper).button()
-		.click(function()
+		var deleteMenu = $("<ul class='delete-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
+		$("<li deleteOperation='deleteElement' />").html("<div>删除元素</div>").appendTo(deleteMenu);
+		$("<li class='ui-menu-divider' />").appendTo(deleteMenu);
+		$("<li deleteOperation='unbindChart' />").html("<div>解绑图表</div>").appendTo(deleteMenu);
+		deleteMenu.appendTo(deleteGroup).menu(
 		{
-			var dashboardEditor = po.dashboardEditorVisual(tabPane);
-			if(dashboardEditor)
-				dashboardEditor.deleteSelected();
+			select: function(event, ui)
+			{
+				var item = ui.item;
+				var deleteOperation = item.attr("deleteOperation");
+				po.deleteOperationForVisualEdit = deleteOperation;
+				
+				var dashboardEditor = po.dashboardEditorVisual(tabPane);
+				if(dashboardEditor)
+				{
+					if(deleteOperation == "deleteElement")
+					{
+						dashboardEditor.deleteSelected();
+					}
+					else if(deleteOperation == "unbindChart")
+					{
+						dashboardEditor.unbindChart();
+					}
+				}
+			}
 		});
 	};
 	
@@ -802,9 +832,9 @@
 			{
 				dashboardEditor.insertChart(chartWidgets, po.insertTypeForVisualEdit);
 			}
-			else if(po.insertOperationForVisualEdit == "replaceChart")
+			else if(po.insertOperationForVisualEdit == "bindChart")
 			{
-				dashboardEditor.setChart((chartWidgets ? chartWidgets[0] : null));
+				dashboardEditor.bindChart((chartWidgets ? chartWidgets[0] : null));
 			}
 		}
 	};
