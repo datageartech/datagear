@@ -22,6 +22,10 @@
 	/**看板工厂*/
 	var dashboardFactory = (global.dashboardFactory || (global.dashboardFactory = {}));
 	var editor = (dashboardFactory.dashboardEditor || (dashboardFactory.dashboardEditor = {}));
+	var i18n = (editor.i18n || (editor.i18n = {}));
+	
+	i18n.insertInsideOnChartEleIsIllegal = "图表元素内不允许再插入图表元素";
+	i18n.selectElementForSetChart = "请选择要设置/替换的图表元素";
 	
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
@@ -106,9 +110,13 @@
 			editBodyHtml = editBodyHtml.replace(placeholder, source);
 		}
 		
-		//删除dg-visual-edit-id属性
-		var veidRegex = /\s?dg\-visual\-edit\-id\=["'][^"']*["']\s*>/gi;
-		editBodyHtml = editBodyHtml.replace(veidRegex, ">");
+		//删除末尾的：" dg-visual-edit-id='...'>"
+		var eidRegex0 = /\s?dg\-visual\-edit\-id\=["'][^"']*["']\s*>/gi;
+		editBodyHtml = editBodyHtml.replace(eidRegex0, ">");
+		
+		//删除中间的：" dg-visual-edit-id='...'"
+		var eidRegex1 = /\s?dg\-visual\-edit\-id\=["'][^"']*["']/gi;
+		editBodyHtml = editBodyHtml.replace(eidRegex1, "");
 		
 		var editedHtml = editHtmlInfo.beforeBodyHtml + editBodyHtml + editHtmlInfo.afterBodyHtml;
 		return this._unescapeEditHtml(editedHtml);
@@ -136,6 +144,18 @@
 		}
 	};
 	
+	//提示信息
+	editor.tipInfo = function(msg)
+	{
+		alert(msg);
+	};
+	
+	//提示错误
+	editor.tipError = function(msg)
+	{
+		alert(msg);
+	};
+	
 	/**
 	 * 插入图表。
 	 * 
@@ -150,6 +170,16 @@
 		
 		chartWidgets = (!$.isArray(chartWidgets) ? [ chartWidgets ] : chartWidgets);
 		
+		refEle = this._refElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		//图表元素内部不允许再插入图表元素
+		if(this.dashboard.renderedChart(refEle) && (insertType == "append" || insertType == "prepend"))
+		{
+			this.tipError(i18n.insertInsideOnChartEleIsIllegal);
+			return;
+		}
+		
 		for(var i=0; i<chartWidgets.length; i++)
 		{
 			var chartWidget = chartWidgets[i];
@@ -160,9 +190,35 @@
 			this.insertElement(chartDiv, insertType, refEle);
 		}
 		
-		this.changeFlag(true);
-		
 		this.dashboard.loadUnsolvedCharts();
+	};
+	
+	/**
+	 * 设置或替换图表。
+	 * 
+	 * @param chartWidget 要设置的新图表部件对象
+	 * @param chartEle 可选，要设置的图表元素，默认为：当前选中图表元素
+	 */
+	editor.setChart = function(chartWidget, chartEle)
+	{
+		if(!chartWidget)
+			return;
+		
+		chartEle = this._refElement(chartEle);
+		
+		if(!chartEle || chartEle.is("body"))
+		{
+			this.tipError(i18n.selectElementForSetChart);
+			return;
+		}
+		
+		if(this.dashboard.renderedChart(chartEle))
+		{
+			this.dashboard.removeChart(chartEle);
+		}
+		
+		this.setElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET, chartWidget.id);
+		this.dashboard.loadChart(chartEle);
 	};
 	
 	/**
@@ -175,8 +231,7 @@
 	 */
 	editor.insertElement = function(insertEle, insertType, refEle, sync)
 	{
-		refEle = (!refEle ? (this._getSelected()) : refEle);
-		refEle = (refEle == null || refEle.length == 0 ? $(document.body) : refEle);
+		refEle = this._refElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		sync = (sync == null ? true : sync);
 		
@@ -188,6 +243,39 @@
 			var insertEleClone = (chartFactory.isString(insertEle) ? insertEle : insertEle.clone());
 			this._insertElement(editEle, insertEleClone, insertType);
 		}
+		
+		this.changeFlag(true);
+	};
+	
+	/**
+	 * 设置元素属性。
+	 *
+	 * @param ele
+	 * @param name
+	 * @param value
+	 * @param sync 可选，是否将设置操作同步至编辑iframe中，默认为：true
+	 */
+	editor.setElementAttr = function(ele, name, value, sync)
+	{
+		sync = (sync == null ? true : sync);
+		
+		ele.attr(name, value);
+		
+		if(sync)
+		{
+			var editEle = this._editElement(ele);
+			editEle.attr(name, value);
+		}
+		
+		this.changeFlag(true);
+	};
+	
+	editor._refElement = function(refEle)
+	{
+		refEle = (!refEle ? (this._getSelected()) : refEle);
+		refEle = (refEle == null || refEle.length == 0 ? $(document.body) : refEle);
+		
+		return refEle;
 	};
 	
 	editor._insertElement = function(refEle, insertEle, insertType)
@@ -349,6 +437,5 @@
 		
 		return size;
 	};
-	
 })
 (this);

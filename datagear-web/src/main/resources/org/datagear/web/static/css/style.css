@@ -3339,6 +3339,7 @@ table.dataTable tbody tr td select{
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .visual-editor-operation .insert-menu{
 	position: absolute;
 	display: none;
+	text-align: left;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .visual-editor-operation .insert-menu *{
 	white-space: nowrap;

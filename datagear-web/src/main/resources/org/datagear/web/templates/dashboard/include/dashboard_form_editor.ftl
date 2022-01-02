@@ -756,15 +756,23 @@
 		po.buildVisualEditorInsertMenuItems(insertItemAppend, "append");
 		var insertItemPrepend = $("<li />").html("<div>内部前置</div>").appendTo(insertMenu);
 		po.buildVisualEditorInsertMenuItems(insertItemPrepend, "prepend");
+		$("<li class='ui-menu-divider' />").appendTo(insertMenu);
+		$("<li insertOperation='replaceChart' />").html("<div>设置/替换图表</div>").appendTo(insertMenu);
 		insertMenu.appendTo(insertGroup).menu(
 		{
 			select: function(event, ui)
 			{
 				var item = ui.item;
-				var insertType = item.attr("insert-type");
+				var insertOperation = item.attr("insertOperation");
+				var insertType = item.attr("insertType");
 				
-				po.visualEditInsertType = insertType;
-				po.toggleInsertChartListPannel(tabPane, insertGroup);
+				po.insertOperationForVisualEdit = insertOperation;
+				po.insertTypeForVisualEdit = insertType;
+				
+				if(insertOperation == "insertChart" || insertOperation == "replaceChart")
+				{
+					po.toggleInsertChartListPannel(tabPane, insertGroup);
+				}
 			}
 		});
 		
@@ -781,7 +789,7 @@
 	po.buildVisualEditorInsertMenuItems = function($parent, insertType)
 	{
 		var ul = $("<ul />");
-		$("<li insert-type='"+insertType+"' />").html("<div>图表</div>").appendTo(ul);
+		$("<li insertOperation='insertChart' insertType='"+insertType+"' />").html("<div>图表</div>").appendTo(ul);
 		ul.appendTo($parent);
 	};
 	
@@ -789,7 +797,16 @@
 	{
 		var dashboardEditor = po.dashboardEditorVisual(tabPane);
 		if(dashboardEditor)
-			dashboardEditor.insertChart(chartWidgets, po.visualEditInsertType);
+		{
+			if(po.insertOperationForVisualEdit == "insertChart")
+			{
+				dashboardEditor.insertChart(chartWidgets, po.insertTypeForVisualEdit);
+			}
+			else if(po.insertOperationForVisualEdit == "replaceChart")
+			{
+				dashboardEditor.setChart((chartWidgets ? chartWidgets[0] : null));
+			}
+		}
 	};
 	
 	po.toggleInsertChartListPannel = function(tabPane, insertChartButton)
