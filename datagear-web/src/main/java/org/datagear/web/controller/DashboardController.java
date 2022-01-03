@@ -316,10 +316,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
+		model.addAttribute("isAdd", true);
 
 		model.addAttribute("copySourceId", id);
 
-		dashboard.setId(null);
+		dashboard.setId(IDUtil.randomIdOnTime20());
 
 		return "/dashboard/dashboard_form";
 	}

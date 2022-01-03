@@ -297,6 +297,10 @@ readonly 是否只读操作，允许为null
 					newData.copySourceId = po.element("#${pageId}-copySourceId").val();
 					newData.saveAdd = po.isUnsavedAdd;
 					
+					//首次复制保存时，需要把templates这里手动加入，不然会丢失
+					if(newData.copySourceId && newData.saveAdd)
+						newData.dashboard.templates = po.templates;
+					
 					var templateCount = (newData.dashboard.templates == null ? 0 : newData.dashboard.templates.length);
 					for(var i=0; i<newData.resourceIsTemplates.length; i++)
 					{
