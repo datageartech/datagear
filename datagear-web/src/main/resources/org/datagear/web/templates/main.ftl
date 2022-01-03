@@ -48,8 +48,7 @@ ${detectNewVersionScript?no_esc}
 	{
 		tabLabel = $.truncateIf($.trim(tabLabel), "..", 20);
 		
-		var mainTabsNav = po.getTabsNav(po.mainTabs);
-		var tab = po.getTabsTabByTabId(po.mainTabs, mainTabsNav, tabId);
+		var tab = po.tabsGetTabById(po.mainTabs, tabId);
 		
 	    if(tab.length > 0)
 	    {
@@ -64,11 +63,12 @@ ${detectNewVersionScript?no_esc}
 				url : url, 
 	    		success:function(data)
 		    	{
+	    			var mainTabsNav = po.tabsGetNav(po.mainTabs);
 	    			mainTabsNav.show();
 		    		
-	    			tab = po.getTabsTabByTabId(po.mainTabs, mainTabsNav, tabId);
+	    			tab = po.tabsGetTabById(po.mainTabs, tabId);
 	    			
-		    		var tabPanel = po.getTabsTabPanelByTabId(po.mainTabs, tabId);
+		    		var tabPanel = po.tabsGetPaneByTabId(po.mainTabs, tabId);
 		    		
 		    		//防止双击导致创建两次而引起界面错乱
 		    		if(tab.length == 0)
@@ -101,15 +101,13 @@ ${detectNewVersionScript?no_esc}
 		    	    
 		    	    $(".tab-operation .ui-icon-close", tab).click(function()
 		    	    {
-		    	    	po.closeTab(po.mainTabs, mainTabsNav, $(this).parent().parent());
+		    	    	po.tabsCloseTab(po.mainTabs, $(this).parent().parent());
 		    	    });
 		    	    
 		    	    $(".tab-operation .tabs-more-operation-button", tab).click(function()
 		    	    {
 		    	    	var tab = $(this).parent().parent();
-		    	    	var tabId = po.getTabsTabId(po.mainTabs, mainTabsNav, tab);
-		    	    	
-		    	    	var menu = po.showTabMoreOperationMenu(po.mainTabs, mainTabsNav, tab, $(this));
+		    	    	var menu = po.tabsShowMoreOptMenu(po.mainTabs, tab, $(this));
 		    	    	
 		    	    	menu.attr("tab-url", tab.attr("tab-url"))
 		    	    		.attr("schema-id", tab.attr("schema-id"));
@@ -1251,9 +1249,9 @@ ${detectNewVersionScript?no_esc}
 				var $this = $(this);
 				var newTab = $(ui.newTab);
 				var newPanel = $(ui.newPanel);
-				var tabsNav = po.getTabsNav($this);
+				var tabsNav = po.tabsGetNav($this);
 				
-				po.refreshTabsNavForHidden($this, tabsNav, newTab);
+				po.tabsRefreshNavForHidden($this, newTab);
 				
 				$(".category-bar", tabsNav).removeClass("ui-state-active");
 				
@@ -1265,9 +1263,9 @@ ${detectNewVersionScript?no_esc}
 			}
 		});
 		
-		po.getTabsNav(po.mainTabs).hide();
+		po.tabsGetNav(po.mainTabs).hide();
 		
-		po.getTabsTabMoreOperationMenu(po.mainTabs).menu(
+		po.tabsGetTabMoreOptMenu(po.mainTabs).menu(
 		{
 			select: function(event, ui)
 			{
@@ -1280,22 +1278,22 @@ ${detectNewVersionScript?no_esc}
 					window.open(tabUrl);
 				}
 				else
-					po.handleTabMoreOperationMenuSelect($this, item, po.mainTabs);
+					po.tabsHandleMoreOptMenuSelect($this, item, po.mainTabs);
 				
-				po.getTabsTabMoreOperationMenuWrapper(po.mainTabs).hide();
+				po.tabsGetTabMoreOptMenuWrapper(po.mainTabs).hide();
 			}
 		});
 		
-		po.getTabsMoreTabMenu(po.mainTabs).menu(
+		po.tabsGetMoreTabMenu(po.mainTabs).menu(
 		{
 			select: function(event, ui)
 			{
-				po.handleTabsMoreTabMenuSelect($(this), ui.item, po.mainTabs);
-		    	po.getTabsMoreTabMenuWrapper(po.mainTabs).hide();
+				po.tabsHandleMoreTabMenuSelect($(this), ui.item, po.mainTabs);
+		    	po.tabsGetMoreTabMenuWrapper(po.mainTabs).hide();
 			}
 		});
 		
-		po.bindTabsMenuHiddenEvent(po.mainTabs);
+		po.tabsBindMenuHiddenEvent(po.mainTabs);
 	});
 })
 (${pageId});

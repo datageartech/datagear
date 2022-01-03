@@ -15,42 +15,18 @@ page_js_obj.ftl
 <script type="text/javascript">
 (function(po)
 {
-	po.getTabsNav = function($tabs)
+	po.tabsGetNav = function($tabs)
 	{
 		return $("> .ui-tabs-nav", $tabs);
 	};
 	
-	po.getTabCount = function($tabs, $tabsNav)
+	po.tabsGetTabCount = function($tabs)
 	{
-		$tabsNav = ($tabsNav == null || $tabsNav.length == 0 ? po.getTabsNav($tabs) : $tabsNav);
-		
+		var $tabsNav = po.tabsGetNav($tabs);
 		return $("> li.ui-tabs-tab", $tabsNav).length;
 	};
 	
-	po.getTabsTabByTabId = function($tabs, $tabsNav, tabId)
-	{
-		var $a = $("a.ui-tabs-anchor[href='#"+tabId+"']", $tabsNav);
-		return $a.parent();
-	};
-	
-	po.getActiveTab = function($tabs, $tabsNav)
-	{
-		$tabsNav = ($tabsNav == null || $tabsNav.length == 0 ? po.getTabsNav($tabs) : $tabsNav);
-		
-		return $("> li.ui-tabs-tab.ui-state-active", $tabsNav);
-	};
-	
-	po.getActiveTabPane = function($tabs, $tabsNav)
-	{
-		$tabsNav = ($tabsNav == null || $tabsNav.length == 0 ? po.getTabsNav($tabs) : $tabsNav);
-		
-		var tab = po.getActiveTab($tabs, $tabsNav);
-		var tabId = po.getTabsTabId($tabs, $tabsNav, tab);
-		
-		return po.getTabsTabPanelByTabId($tabs, tabId);
-	};
-	
-	po.getTabsTabId = function($tabs, $tabsNav, $tab)
+	po.tabsGetTabId = function($tabs, $tab)
 	{
 		var tabId = $("> a.ui-tabs-anchor", $tab).attr("href");
 		
@@ -60,43 +36,65 @@ page_js_obj.ftl
 		return tabId;
 	};
 	
-	po.getTabsTabPanelByTabId = function($tabs, tabId)
+	po.tabsGetPaneByTabId = function($tabs, tabId)
 	{
 		return $("> #"+tabId, $tabs);
 	};
 	
-	po.getTabsTabMoreOperationMenuWrapper = function($tabs)
+	po.tabsGetTabById = function($tabs, tabId)
+	{
+		var $tabsNav = po.tabsGetNav($tabs);
+		var $a = $("a.ui-tabs-anchor[href='#"+tabId+"']", $tabsNav);
+		return $a.parent();
+	};
+	
+	po.tabsGetActiveTab = function($tabs)
+	{
+		var $tabsNav = po.tabsGetNav($tabs);
+		return $("> li.ui-tabs-tab.ui-state-active", $tabsNav);
+	};
+	
+	po.tabsGetActivePane = function($tabs)
+	{
+		var tab = po.tabsGetActiveTab($tabs);
+		var tabId = po.tabsGetTabId($tabs, tab);
+		
+		return po.tabsGetPaneByTabId($tabs, tabId);
+	};
+	
+	po.tabsGetTabMoreOptMenuWrapper = function($tabs)
 	{
 		return $("> .tabs-more-operation-menu-wrapper", $tabs);
 	};
 	
-	po.getTabsTabMoreOperationMenu = function($tabs)
+	po.tabsGetTabMoreOptMenu = function($tabs)
 	{
-		var wrapper = po.getTabsTabMoreOperationMenuWrapper($tabs);
+		var wrapper = po.tabsGetTabMoreOptMenuWrapper($tabs);
 		return $("> .tabs-more-operation-menu", wrapper);
 	};
 	
-	po.getTabsMoreTabMenuWrapper = function($tabs)
+	po.tabsGetMoreTabMenuWrapper = function($tabs)
 	{
 		return $("> .tabs-more-tab-menu-wrapper", $tabs);
 	};
 	
-	po.getTabsMoreTabMenu = function($tabs)
+	po.tabsGetMoreTabMenu = function($tabs)
 	{
-		var wrapper = po.getTabsMoreTabMenuWrapper($tabs);
+		var wrapper = po.tabsGetMoreTabMenuWrapper($tabs);
 		return $("> .tabs-more-tab-menu", wrapper);
 	};
 	
-	po.closeTab = function($tabs, $tabsNav, $tab)
+	po.tabsCloseTab = function($tabs, $tab)
 	{
-		var tabId = po.getTabsTabId($tabs, $tabsNav, $tab);
+		var $tabsNav = po.tabsGetNav($tabs);
+		var tabId = po.tabsGetTabId($tabs, $tab);
     	
-		po.getTabsTabPanelByTabId($tabs, tabId).remove();
+		po.tabsGetPaneByTabId($tabs, tabId).remove();
     	$tab.remove();
     	
     	$tabs.tabs("refresh");
     	
-    	po.refreshTabsNavForHidden($tabs, $tabsNav);
+    	po.tabsRefreshNavForHidden($tabs);
     	
 		if($("> li.ui-tabs-tab", $tabsNav).length == 0)
 		{
@@ -105,12 +103,12 @@ page_js_obj.ftl
 		}
 	};
 	
-	po.showTabMoreOperationMenu = function($tabs, $tabsNav, $tab, $positionOf)
+	po.tabsShowMoreOptMenu = function($tabs, $tab, $positionOf)
 	{
-		var menuWrapper = po.getTabsTabMoreOperationMenuWrapper($tabs);
+		var menuWrapper = po.tabsGetTabMoreOptMenuWrapper($tabs);
 		var menu = $("> ul", menuWrapper);
 		
-		var tabId = po.getTabsTabId($tabs, $tabsNav, $tab);
+		var tabId = po.tabsGetTabId($tabs, $tab);
 		menu.attr("tab-id", tabId);
 		
 		menuWrapper.show().css("left", "0px").css("top", "0px")
@@ -136,12 +134,12 @@ page_js_obj.ftl
     	return menu;
 	};
 	
-	po.handleTabMoreOperationMenuSelect = function($menu, $menuItem, $tabs)
+	po.tabsHandleMoreOptMenuSelect = function($menu, $menuItem, $tabs)
 	{
 		var tabId = $menu.attr("tab-id");
 		
-		var tabsNav = po.getTabsNav($tabs);
-		var tab = po.getTabsTabByTabId($tabs, tabsNav, tabId);
+		var tabsNav = po.tabsGetNav($tabs);
+		var tab = po.tabsGetTabById($tabs, tabId);
 		
 		if($menuItem.hasClass("tab-operation-close-left"))
 		{
@@ -151,9 +149,9 @@ page_js_obj.ftl
 				
 				if(!prev.hasClass("not-closable"))
 				{
-					var preTabId = po.getTabsTabId($tabs, tabsNav, prev);
+					var preTabId = po.tabsGetTabId($tabs, prev);
 					
-					po.getTabsTabPanelByTabId($tabs, preTabId).remove();
+					po.tabsGetPaneByTabId($tabs, preTabId).remove();
 					prev.remove();
 				}
 			});
@@ -168,9 +166,9 @@ page_js_obj.ftl
 				
 				if(!next.hasClass("not-closable"))
 				{
-					var nextTabId = po.getTabsTabId($tabs, tabsNav, next);
+					var nextTabId = po.tabsGetTabId($tabs, next);
 					
-					po.getTabsTabPanelByTabId($tabs, nextTabId).remove();
+					po.tabsGetPaneByTabId($tabs, nextTabId).remove();
 					next.remove();
 				}
 			});
@@ -188,9 +186,9 @@ page_js_obj.ftl
 				
 				if(!li.hasClass("not-closable"))
 				{
-					var tabId = po.getTabsTabId($tabs, tabsNav, li);
+					var tabId = po.tabsGetTabId($tabs, li);
 					
-					po.getTabsTabPanelByTabId($tabs, tabId).remove();
+					po.tabsGetPaneByTabId($tabs, tabId).remove();
 					li.remove();
 				}
 			});
@@ -205,9 +203,9 @@ page_js_obj.ftl
 				
 				if(!li.hasClass("not-closable"))
 				{
-					var tabId = po.getTabsTabId($tabs, tabsNav, li);
+					var tabId = po.tabsGetTabId($tabs, li);
 	
-					po.getTabsTabPanelByTabId($tabs, tabId).remove();
+					po.tabsGetPaneByTabId($tabs, tabId).remove();
 					li.remove();
 				}
 			});
@@ -215,7 +213,7 @@ page_js_obj.ftl
 			$tabs.tabs("refresh");
 		}
 		
-    	po.refreshTabsNavForHidden($tabs, tabsNav);
+    	po.tabsRefreshNavForHidden($tabs);
     	
 		if($("> li.ui-tabs-tab", tabsNav).length == 0)
 		{
@@ -224,8 +222,9 @@ page_js_obj.ftl
 		}
 	};
 	
-	po.refreshTabsNavForHidden = function($tabs, $tabsNav, $activeTab)
+	po.tabsRefreshNavForHidden = function($tabs, $activeTab)
 	{
+		var $tabsNav = po.tabsGetNav($tabs);
 		if($activeTab == undefined)
 			$activeTab = $("> li.ui-tabs-active", $tabsNav);
 		
@@ -248,7 +247,7 @@ page_js_obj.ftl
 		
 		var showHiddenButton = $("> .tabs-more-tab-button", $tabs);
 		
-		if(po.getTabsHiddens($tabs, $tabsNav).length > 0)
+		if(po.tabsGetHideTabs($tabs).length > 0)
 		{
 			if(showHiddenButton.length == 0)
 			{
@@ -260,9 +259,9 @@ page_js_obj.ftl
 					var $this= $(this);
 					
 					var $tabs = $this.parent();
-					var tabsNav = po.getTabsNav($tabs);
+					var tabsNav = po.tabsGetNav($tabs);
 					
-					var hiddens = po.getTabsHiddens($tabs, $tabsNav);
+					var hiddens = po.tabsGetHideTabs($tabs);
 					
 					var menuWrapper = $("> .tabs-more-tab-menu-wrapper", $tabs);
 					var menu = $("> .tabs-more-tab-menu", menuWrapper);
@@ -291,8 +290,9 @@ page_js_obj.ftl
 			showHiddenButton.hide();
 	};
 	
-	po.getTabsHiddens = function($tabs, $tabsNav)
+	po.tabsGetHideTabs = function($tabs)
 	{
+		var $tabsNav = po.tabsGetNav($tabs);
 		var tabsNavHeight = $tabsNav.height();
 		
 		var hiddens = [];
@@ -308,22 +308,22 @@ page_js_obj.ftl
 		return hiddens;
 	};
 	
-	po.handleTabsMoreTabMenuSelect = function($menu, $menuItem, $tabs)
+	po.tabsHandleMoreTabMenuSelect = function($menu, $menuItem, $tabs)
 	{
 		var navItemId = $menuItem.attr("nav-item-id");
 		
-		var tabsNav = po.getTabsNav($tabs);
+		var tabsNav = po.tabsGetNav($tabs);
 		
 		var myIndex = po.element("> li[id='"+navItemId+"']", tabsNav).index();
 		$tabs.tabs("option", "active",  myIndex);
 	};
 	
-	po.bindTabsMenuHiddenEvent = function($tabs)
+	po.tabsBindMenuHiddenEvent = function($tabs)
 	{
 		$(document.body).click(function(e)
 		{
-			var moreOperationMenuWrapper = po.getTabsTabMoreOperationMenuWrapper($tabs);
-			var moreTabMenuWrapper = po.getTabsMoreTabMenuWrapper($tabs);
+			var moreOperationMenuWrapper = po.tabsGetTabMoreOptMenuWrapper($tabs);
+			var moreTabMenuWrapper = po.tabsGetMoreTabMenuWrapper($tabs);
 			
 			var moreOperationMenuWrapperHidden = moreOperationMenuWrapper.is(":hidden");
 			var moreTabMenuWrapperHidden = moreTabMenuWrapper.is("hidden");

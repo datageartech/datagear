@@ -41,34 +41,33 @@
 				var $this = $(this);
 				var newTab = $(ui.newTab);
 				var newPanel = $(ui.newPanel);
-				var tabsNav = po.getTabsNav($this);
 				
-				po.refreshTabsNavForHidden($this, tabsNav, newTab);
+				po.tabsRefreshNavForHidden($this, newTab);
 			}
 		});
 		
-		po.getTabsTabMoreOperationMenu(po.resourceEditorTabs()).menu(
+		po.tabsGetTabMoreOptMenu(po.resourceEditorTabs()).menu(
 		{
 			select: function(event, ui)
 			{
 				var $this = $(this);
 				var item = ui.item;
 				
-				po.handleTabMoreOperationMenuSelect($this, item, po.resourceEditorTabs());
-				po.getTabsTabMoreOperationMenuWrapper(po.resourceEditorTabs()).hide();
+				po.tabsHandleMoreOptMenuSelect($this, item, po.resourceEditorTabs());
+				po.tabsGetTabMoreOptMenuWrapper(po.resourceEditorTabs()).hide();
 			}
 		});
 		
-		po.getTabsMoreTabMenu(po.resourceEditorTabs()).menu(
+		po.tabsGetMoreTabMenu(po.resourceEditorTabs()).menu(
 		{
 			select: function(event, ui)
 			{
-				po.handleTabsMoreTabMenuSelect($(this), ui.item, po.resourceEditorTabs());
-		    	po.getTabsMoreTabMenuWrapper(po.resourceEditorTabs()).hide();
+				po.tabsHandleMoreTabMenuSelect($(this), ui.item, po.resourceEditorTabs());
+		    	po.tabsGetMoreTabMenuWrapper(po.resourceEditorTabs()).hide();
 			}
 		});
 		
-		po.bindTabsMenuHiddenEvent(po.resourceEditorTabs());
+		po.tabsBindMenuHiddenEvent(po.resourceEditorTabs());
 		
 		//初始化模板列表
 		
@@ -262,8 +261,8 @@
 		 	}
 		 	
 		 	var editIndex = -1;
-		 	var tabsNav = po.getTabsNav(po.resourceEditorTabs());
-		 	$(".resource-editor-tab", tabsNav).each(function(index)
+		 	$(".resource-editor-tab", po.tabsGetNav(po.resourceEditorTabs()))
+		 	.each(function(index)
 		 	{
 		 		if($(this).attr("resourceName") == resName)
 		 		{

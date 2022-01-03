@@ -417,8 +417,7 @@ Schema schema 数据库，不允许为null
 						var tabId = $this.attr("tab-id");
 						var sql = $this.data("sql");
 						
-						var tabsNav = po.getTabsNav(po.sqlResultTabs);
-						var tab  = po.getTabsTabByTabId(po.sqlResultTabs, tabsNav, tabId);
+						var tab  = po.tabsGetTabById(po.sqlResultTabs, tabId);
 						
 						if(tab.length == 0)
 						{
@@ -426,7 +425,7 @@ Schema schema 数据库，不允许为null
 							return;
 						}
 						
-						var tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
+						var tabPanel = po.tabsGetPaneByTabId(po.sqlResultTabs, tabId);
 						var tabForm = po.element("#" + po.getSqlResultTabPanelFormId(tabId), tabPanel);
 						var tabSql = $("textarea[name='sql']", tabForm).val();
 						
@@ -614,13 +613,12 @@ Schema schema 数据库，不允许为null
 	
 	po.renderSqlResultTab = function(tabId, sql, sqlSelectResult, active)
 	{
-		var tabsNav = po.getTabsNav(po.sqlResultTabs);
-		var tab = po.getTabsTabByTabId(po.sqlResultTabs, tabsNav, tabId);
+		var tab = po.tabsGetTabById(po.sqlResultTabs, tabId);
 		var tabPanel = null;
 		
 		if(tab.length > 0)
 	    {
-			tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
+			tabPanel = po.tabsGetPaneByTabId(po.sqlResultTabs, tabId);
 			tabPanel.empty();
 	    }
 	    else
@@ -630,21 +628,19 @@ Schema schema 数据库，不允许为null
 	    	var tabLabel = "<@spring.messageArgs code='sqlpad.selectResultWithIndex' args=messageArgs />";
 	    	
 	    	tab = $(po.sqlResultTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel)).attr("id", $.uid("sqlResult-tab-"))
-	    		.appendTo(tabsNav);
+	    		.appendTo(po.tabsGetNav(po.sqlResultTabs));
 	    	
 	    	tabPanel = $("<div id='"+tabId+"' class='sql-result-tab-panel' />").appendTo(po.sqlResultTabs);
 	    	
     	    $(".tab-operation .ui-icon-close", tab).click(function()
     	    {
-    	    	po.closeTab(po.sqlResultTabs, tabsNav, $(this).parent().parent());
+    	    	po.tabsCloseTab(po.sqlResultTabs, $(this).parent().parent());
     	    });
     	    
     	    $(".tab-operation .tabs-more-operation-button", tab).click(function()
     	    {
     	    	var tab = $(this).parent().parent();
-    	    	var tabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, tab);
-    	    	
-    	    	var menu = po.showTabMoreOperationMenu(po.sqlResultTabs, tabsNav, tab, $(this));
+    	    	po.tabsShowMoreOptMenu(po.sqlResultTabs, tab, $(this));
     	    });
 	    }
 		
@@ -655,7 +651,7 @@ Schema schema 数据库，不允许为null
 	    else
 	    {
 	    	$.setResizeDataTableWhenShow(tabPanel);
-	    	po.refreshTabsNavForHidden(po.sqlResultTabs, tabsNav);
+	    	po.tabsRefreshNavForHidden(po.sqlResultTabs);
 	    }
 	    
 		var table = $("<table width='100%' class='hover stripe'></table>").attr("id", po.getSqlResultTabPanelTableId(tabId)).appendTo(tabPanel);
@@ -706,7 +702,7 @@ Schema schema 数据库，不允许为null
 	   					$("input[name='startRow']", $this).val(sqlSelectResult.nextStartRow);
 	   					
 	   					var tabId = $this.attr("tab-id");
-	   					var tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
+	   					var tabPanel = po.tabsGetPaneByTabId(po.sqlResultTabs, tabId);
 	   					
 	   					var dataTable = po.element("#" + po.getSqlResultTabPanelTableId(tabId), tabPanel).DataTable();
 	   					
@@ -738,7 +734,7 @@ Schema schema 数据库，不允许为null
 	po.calSqlResultTableHeight = function(tabIdOrTabPanel)
 	{
 		if(typeof(tabIdOrTabPanel) == "string")
-			tabIdOrTabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabIdOrTabPanel);
+			tabIdOrTabPanel = po.tabsGetPaneByTabId(po.sqlResultTabs, tabIdOrTabPanel);
 		
 		return tabIdOrTabPanel.height() - 37;
 	};
@@ -831,7 +827,7 @@ Schema schema 数据库，不允许为null
 	
 	po.getNextSqlResultNameSeq = function()
 	{
-		if(po.getTabCount(po.sqlResultTabs, po.getTabsNav(po.sqlResultTabs)) == 1)
+		if(po.tabsGetTabCount(po.sqlResultTabs) == 1)
 			po.nextSqlResultNameSeq = null;
 		
 		var seq = (po.nextSqlResultNameSeq == null ? 1 : po.nextSqlResultNameSeq);
@@ -1278,9 +1274,8 @@ Schema schema 数据库，不允许为null
 	
 	po.element("#moreSqlResultTabButton").click(function()
 	{
-		var tabsNav = po.getTabsNav(po.sqlResultTabs);
-		var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
-		var activeTabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+		var activeTab = po.tabsGetActiveTab(po.sqlResultTabs);
+		var activeTabId = po.tabsGetTabId(po.sqlResultTabs, activeTab);
 		var activeTabFormId = po.getSqlResultTabPanelFormId(activeTabId);
 		var activeTabForm = po.element("#" + activeTabFormId);
 		
@@ -1289,9 +1284,8 @@ Schema schema 数据库，不允许为null
 	
 	po.element("#refreshSqlResultTabButton").click(function()
 	{
-		var tabsNav = po.getTabsNav(po.sqlResultTabs);
-		var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
-		var activeTabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+		var activeTab = po.tabsGetActiveTab(po.sqlResultTabs);
+		var activeTabId = po.tabsGetTabId(po.sqlResultTabs, activeTab);
 		var activeTabFormId = po.getSqlResultTabPanelFormId(activeTabId);
 		var activeTabForm = po.element("#" + activeTabFormId);
 		
@@ -1303,12 +1297,11 @@ Schema schema 数据库，不允许为null
 
 	po.element("#exportSqlResultTabButton").click(function()
 	{
-		var tabsNav = po.getTabsNav(po.sqlResultTabs);
-		var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
+		var activeTab = po.tabsGetActiveTab(po.sqlResultTabs);
 		
 		if(activeTab.hasClass("sql-result-tab"))
 		{
-			var tabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+			var tabId = po.tabsGetTabId(po.sqlResultTabs, activeTab);
 			var tabFormId = po.getSqlResultTabPanelFormId(tabId);
 			var tabForm = po.element("#" + tabId);
 			var sql = $("textarea[name='sql']", tabForm).val();
@@ -1331,12 +1324,11 @@ Schema schema 数据库，不允许为null
 			return;
 		}
 		
-		var tabsNav = po.getTabsNav(po.sqlResultTabs);
-		var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
+		var activeTab = po.tabsGetActiveTab(po.sqlResultTabs);
 		
 		if(activeTab.hasClass("sql-result-tab"))
 		{
-			var tabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+			var tabId = po.tabsGetTabId(po.sqlResultTabs, activeTab);
 			var tabFormId = po.getSqlResultTabPanelFormId(tabId);
 			var tabForm = po.element("#" + tabId);
 			var sql = $("textarea[name='sql']", tabForm).val();
@@ -1350,8 +1342,6 @@ Schema schema 数据库，不允许为null
 	{
 		var $this = $(this);
 		
-		var tabsNav = po.getTabsNav(po.sqlResultTabs);
-		
 		if($this.hasClass("ui-state-active"))
 		{
 			$this.removeAttr("lock-tab-id");
@@ -1359,11 +1349,11 @@ Schema schema 数据库，不允许为null
 		}
 		else
 		{
-			var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
+			var activeTab = po.tabsGetActiveTab(po.sqlResultTabs);
 			
 			if(activeTab.hasClass("sql-result-tab"))
 			{
-				var tabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+				var tabId = po.tabsGetTabId(po.sqlResultTabs, activeTab);
 				
 				$this.attr("lock-tab-id", tabId);
 				$this.addClass("ui-state-active");
@@ -1439,9 +1429,8 @@ Schema schema 数据库，不允许为null
 			var $this = $(this);
 			var newTab = $(ui.newTab);
 			var newPanel = $(ui.newPanel);
-			var tabsNav = po.getTabsNav($this);
 			
-			po.refreshTabsNavForHidden($this, tabsNav, newTab);
+			po.tabsRefreshNavForHidden($this, newTab);
 			
 			var resultOperations = po.element(".result-operations");
 			
@@ -1451,7 +1440,7 @@ Schema schema 数据库，不允许为null
 				$(".sql-result-buttons", resultOperations).show();
 				
 				var lockSqlResultTabButton = po.element("#lockSqlResultTabButton");
-				var newTabId = po.getTabsTabId($this, tabsNav, newTab);
+				var newTabId = po.tabsGetTabId($this, newTab);
 				
 				if(newTabId == lockSqlResultTabButton.attr("lock-tab-id"))
 					lockSqlResultTabButton.addClass("ui-state-active");
@@ -1468,24 +1457,24 @@ Schema schema 数据库，不允许为null
 		}
 	});
 	
-	po.getTabsTabMoreOperationMenu(po.sqlResultTabs).menu(
+	po.tabsGetTabMoreOptMenu(po.sqlResultTabs).menu(
 	{
 		select: function(event, ui)
 		{
 			var $this = $(this);
 			var item = ui.item;
 			
-			po.handleTabMoreOperationMenuSelect($this, item, po.sqlResultTabs);
-			po.getTabsTabMoreOperationMenuWrapper(po.sqlResultTabs).hide();
+			po.tabsHandleMoreOptMenuSelect($this, item, po.sqlResultTabs);
+			po.tabsGetTabMoreOptMenuWrapper(po.sqlResultTabs).hide();
 		}
 	});
 	
-	po.getTabsMoreTabMenu(po.sqlResultTabs).menu(
+	po.tabsGetMoreTabMenu(po.sqlResultTabs).menu(
 	{
 		select: function(event, ui)
 		{
-			po.handleTabsMoreTabMenuSelect($(this), ui.item, po.sqlResultTabs);
-	    	po.getTabsMoreTabMenuWrapper(po.sqlResultTabs).hide();
+			po.tabsHandleMoreTabMenuSelect($(this), ui.item, po.sqlResultTabs);
+	    	po.tabsGetMoreTabMenuWrapper(po.sqlResultTabs).hide();
 		}
 	});
 	
@@ -1496,7 +1485,7 @@ Schema schema 数据库，不允许为null
 	po.element("#viewSqlStatementPanel").hide();
 	po.element("#viewLongTextResultPanel").hide();
 	
-	po.bindTabsMenuHiddenEvent(po.sqlResultTabs);
+	po.tabsBindMenuHiddenEvent(po.sqlResultTabs);
 })
 (${pageId});
 </script>

@@ -312,10 +312,10 @@
 		if(label.length > labelMaxLen)
 			label = name.substr(0, 5) +"..." + name.substr(label.length - 10);
 		
-		var tabsNav = po.getTabsNav(po.resourceEditorTabs());
 		var tabId = $.uid("resourceEditorTabPane");
     	var tab = $(tabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, $.escapeHtml(label)))
-    		.attr("id", $.uid("resourceEditorTab")).attr("resourceName", name).attr("title", name).appendTo(tabsNav);
+    		.attr("id", $.uid("resourceEditorTab")).attr("resourceName", name).attr("title", name)
+    		.appendTo(po.tabsGetNav(po.resourceEditorTabs()));
     	
     	var panePrevEle = $(".resource-editor-tab-pane", po.resourceEditorTabs()).last();
     	if(panePrevEle.length == 0)
@@ -404,18 +404,18 @@
    	    $(".tab-operation .ui-icon-close", tab).click(function()
    	    {
    	    	var tab = $(this).parent().parent();
-   	    	po.closeTab(po.resourceEditorTabs(), tabsNav, tab);
+   	    	po.tabsCloseTab(po.resourceEditorTabs(), tab);
    	    });
    	    
    	    $(".tab-operation .tabs-more-operation-button", tab).click(function()
    	    {
    	    	var tab = $(this).parent().parent();
-   	    	po.showTabMoreOperationMenu(po.resourceEditorTabs(), tabsNav, tab, $(this));
+   	    	po.tabsShowMoreOptMenu(po.resourceEditorTabs(), tab, $(this));
    	    });
 		
 	    po.resourceEditorTabs().tabs("refresh");
     	po.resourceEditorTabs().tabs( "option", "active",  tab.index());
-    	po.refreshTabsNavForHidden(po.resourceEditorTabs(), tabsNav);
+    	po.tabsRefreshNavForHidden(po.resourceEditorTabs());
 	};
 
 	po.codeEditorHintHandler = function(codeEditor)
@@ -891,7 +891,7 @@
 	
 	po.insertEditorChart = function(chartWidgets)
 	{
-		var tabPane = po.getActiveTabPane(po.resourceEditorTabs());
+		var tabPane = po.tabsGetActivePane(po.resourceEditorTabs());
 		var codeEditorDiv = po.element(".code-editor", tabPane);
 		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
 		
