@@ -183,13 +183,29 @@ readonly 是否只读操作，允许为null
 			</#if>
 		</div>
 	</form>
-	<div class="chart-list-panel togglable-table-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+	<div class="chart-list-panel togglable-table-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<div class="panel-content minor-dataTable pagination-light"></div>
 	</div>
 	<form id="${pageId}-tplEditVisualForm" action="#" method="POST" style="display:none;">
 		<input type="hidden" name="DG_EDIT_TEMPLATE" value="true" />
 		<textarea name="DG_TEMPLATE_CONTENT"></textarea>
 	</form>
+	<div class="ve-edit-ele-text-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<form action="#" method="POST">
+			<div class="panel-head ui-widget-header ui-corner-all">编辑内容</div>
+			<div class="panel-content">
+				<div class="content-item">
+					<div class="label-wrapper">
+						<label>内容</label>
+					</div>
+					<input type="text" value="" class="ui-widget ui-widget-content" />
+				</div>
+			</div>
+			<div class="panel-foot">
+				<button type="submit"><@spring.message code='confirm' /></button>
+			</div>
+		</form>
+	</div>
 </div>
 <#include "../include/page_obj_form.ftl">
 <#include "../include/page_obj_tabs.ftl" >
@@ -264,6 +280,13 @@ readonly 是否只读操作，允许为null
 		{
 			if($target.closest(".chart-list-panel, .insert-group").length == 0)
 				$p2.hide();
+		}
+		
+		var $p3 = po.element(".ve-edit-ele-text-panel");
+		if(!$p3.is(":hidden"))
+		{
+			if($target.closest(".ve-edit-ele-text-panel, .edit-group").length == 0)
+				$p3.hide();
 		}
 	});
 	
@@ -345,6 +368,7 @@ readonly 是否只读操作，允许为null
 	});
 	
 	po.initResourcesWorkspace();
+	po.initEditorElements();
 	
 	po.element(".resize-editor-button-left").click();
 	po.newResourceEditorTab(po.element("#${pageId}-initTemplateName").val(), po.element("#${pageId}-initTemplateContent").val(), true);

@@ -26,6 +26,7 @@
 	
 	i18n.insertInsideOnChartEleIsIllegal = "图表元素内不允许再插入图表元素";
 	i18n.selectElementForSetChart = "请选择要设置/替换的图表元素";
+	i18n.notEditTextElement = "只可编辑纯文本元素";
 	
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
@@ -217,7 +218,7 @@
 			this.dashboard.removeChart(chartEle);
 		}
 		
-		this.setElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET, chartWidget.id);
+		this._setElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET, chartWidget.id);
 		this.dashboard.loadChart(chartEle);
 	};
 	
@@ -235,7 +236,7 @@
 			this.dashboard.removeChart(chartEle);
 		}
 		
-		this.removeElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET);
+		this._removeElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET);
 	};
 	
 	/**
@@ -265,14 +266,74 @@
 	};
 	
 	/**
-	 * 设置元素属性。
+	 * 是否是可编辑文本的元素，即元素内没有子元素、且不是<body>元素。
 	 *
-	 * @param ele
-	 * @param name
-	 * @param value
-	 * @param sync 可选，是否将设置操作同步至编辑iframe中，默认为：true
+	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.setElementAttr = function(ele, name, value, sync)
+	editor.isEditTextElement = function(ele)
+	{
+		refEle = this._refElement(ele);
+		
+		if(refEle.is("body"))
+			return false;
+			
+		var firstChild = $("> *:first-child", refEle);
+		
+		if(firstChild.length == 0)
+			return true;
+		
+		return false;
+	};
+	
+	/**
+	 * 获取元素文本内容。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.getElementText = function(ele)
+	{
+		ele = this._refElement(ele);
+		return $.trim(ele.text());
+	};
+	
+	/**
+	 * 设置元素文本内容。
+	 * 
+	 * @param text 要设置的文本内容
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.setElementText = function(text, ele)
+	{
+		ele = this._refElement(ele);
+		
+		if(!this.isEditTextElement(ele))
+		{
+			this.tipError(i18n.notEditTextElement);
+			return;
+		}
+		
+		this._setElementText(ele, text);
+	};
+	
+	//设置元素文本内容
+	editor._setElementText = function(ele, text, sync)
+	{
+		text = (text || "");
+		sync = (sync == null ? true : sync);
+		
+		ele.text(text);
+		
+		if(sync)
+		{
+			var editEle = this._editElement(ele);
+			editEle.text(text);
+		}
+		
+		this.changeFlag(true);
+	};
+	
+	//设置元素属性
+	editor._setElementAttr = function(ele, name, value, sync)
 	{
 		sync = (sync == null ? true : sync);
 		
@@ -287,14 +348,8 @@
 		this.changeFlag(true);
 	};
 	
-	/**
-	 * 删除元素属性。
-	 *
-	 * @param ele
-	 * @param name
-	 * @param sync 可选，是否将设置操作同步至编辑iframe中，默认为：true
-	 */
-	editor.removeElementAttr = function(ele, name, sync)
+	//删除元素属性
+	editor._removeElementAttr = function(ele, name, sync)
 	{
 		sync = (sync == null ? true : sync);
 		

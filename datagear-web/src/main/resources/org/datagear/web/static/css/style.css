@@ -475,6 +475,10 @@ form.display-block .form-content .form-item .form-item-value label.error,
 .minor-panel .panel-content .content-item input[type=password],
 .minor-panel .panel-content .content-item .input{
 	width: 90% !important;
+	padding: 0.3em 0.41em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .minor-panel .panel-foot{
 	text-align: center;
@@ -3538,6 +3542,11 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	top: 0.5em;
 	right: 0.5em;
+}
+.page-form-dashboard .ve-edit-ele-text-panel{
+	position: absolute;
+    width: 30%;
+    display: none;
 }
 
 .page-form .form-item-analysisProjectAware{

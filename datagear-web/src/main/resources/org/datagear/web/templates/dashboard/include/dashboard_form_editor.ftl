@@ -12,6 +12,27 @@
 <script type="text/javascript">
 (function(po)
 {
+	po.initEditorElements = function()
+	{
+		//初始化可视编辑元素文本内容面板
+		var veeetPanel = po.element(".ve-edit-ele-text-panel");
+		var veeetForm = po.element("form", veeetPanel);
+		veeetForm.submit(function()
+		{
+			veeetPanel.hide();
+			
+			var tabPane = po.tabsGetActivePane(po.resourceEditorTabs());
+			var dashboardEditor = po.dashboardEditorVisual(tabPane);
+			if(dashboardEditor)
+			{
+				var text = po.element("input[type='text']", veeetPanel).val();
+				dashboardEditor.setElementText(text);
+			}
+			
+			return false;
+		});
+	};
+	
 	po.codeEditorCompletionsTagAttr =
 	[
 		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"true\"",
@@ -775,7 +796,45 @@
 				}
 			}
 		});
-
+		
+		var editGroup = $("<div class='edit-group' />").appendTo(editorRightOptWrapper)
+			.hover(
+				function()
+				{
+					po.element(".edit-menu", this).show().position({ my : "right top", at : "right bottom", of : this});
+				},
+				function()
+				{
+					po.element(".edit-menu", this).hide();
+				});
+		$("<button type='button' />").text("<@spring.message code='edit' />").appendTo(editGroup).button();
+		
+		var editMenu = $("<ul class='edit-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
+		$("<li editOperation='editStyle' />").html("<div>样式</div>").appendTo(editMenu);
+		$("<li editOperation='editContent' />").html("<div>内容</div>").appendTo(editMenu);
+		editMenu.appendTo(editGroup).menu(
+		{
+			select: function(event, ui)
+			{
+				var item = ui.item;
+				var editOperation = item.attr("editOperation");
+				po.editOperationForVisualEdit = editOperation;
+				
+				var dashboardEditor = po.dashboardEditorVisual(tabPane);
+				if(dashboardEditor)
+				{
+					if(editOperation == "editStyle")
+					{
+						
+					}
+					else if(editOperation == "editContent")
+					{
+						po.visualEditorEditEleText(dashboardEditor, editGroup);
+					}
+				}
+			}
+		});
+		
 		var deleteGroup = $("<div class='delete-group' />").appendTo(editorRightOptWrapper)
 			.hover(
 				function()
@@ -821,6 +880,21 @@
 		var ul = $("<ul class=' ui-widget-shadow' />");
 		$("<li insertOperation='insertChart' insertType='"+insertType+"' />").html("<div>图表</div>").appendTo(ul);
 		ul.appendTo($parent);
+	};
+	
+	po.visualEditorEditEleText = function(dashboardEditor, alignTo)
+	{
+		if(!dashboardEditor.isEditTextElement())
+		{
+			$.tipInfo("只可编辑纯文本元素");
+			return;
+		}
+		
+		var text = dashboardEditor.getElementText();
+		
+		var panel = po.element(".ve-edit-ele-text-panel");
+		po.element("input[type='text']", panel).val(text);
+		panel.show().position({ my : "right top", at : "right bottom", of : alignTo});
 	};
 	
 	po.insertVisualEditorChart = function(tabPane, chartWidgets)
