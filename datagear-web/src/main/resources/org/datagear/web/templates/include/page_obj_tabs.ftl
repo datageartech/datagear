@@ -22,6 +22,8 @@ page_js_obj.ftl
 	
 	po.getTabCount = function($tabs, $tabsNav)
 	{
+		$tabsNav = ($tabsNav == null || $tabsNav.length == 0 ? po.getTabsNav($tabs) : $tabsNav);
+		
 		return $("> li.ui-tabs-tab", $tabsNav).length;
 	};
 	
@@ -33,7 +35,19 @@ page_js_obj.ftl
 	
 	po.getActiveTab = function($tabs, $tabsNav)
 	{
+		$tabsNav = ($tabsNav == null || $tabsNav.length == 0 ? po.getTabsNav($tabs) : $tabsNav);
+		
 		return $("> li.ui-tabs-tab.ui-state-active", $tabsNav);
+	};
+	
+	po.getActiveTabPane = function($tabs, $tabsNav)
+	{
+		$tabsNav = ($tabsNav == null || $tabsNav.length == 0 ? po.getTabsNav($tabs) : $tabsNav);
+		
+		var tab = po.getActiveTab($tabs, $tabsNav);
+		var tabId = po.getTabsTabId($tabs, $tabsNav, tab);
+		
+		return po.getTabsTabPanelByTabId($tabs, tabId);
 	};
 	
 	po.getTabsTabId = function($tabs, $tabsNav, $tab)

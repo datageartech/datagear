@@ -300,6 +300,13 @@
 	
 	po.newResourceEditorTab = function(name, content, isTemplate)
 	{
+		tabTemplate = "<li class='resource-editor-tab' style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
+			+"<div class='tab-operation'>"
+			+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
+			+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'><span class='ui-icon ui-icon-caret-1-e'></span></div>"
+			+"</div>"
+			+"</li>";
+		
 		var label = name;
 		var labelMaxLen = 5 + 3 + 10;
 		if(label.length > labelMaxLen)
@@ -307,7 +314,7 @@
 		
 		var tabsNav = po.getTabsNav(po.resourceEditorTabs());
 		var tabId = $.uid("resourceEditorTabPane");
-    	var tab = $(po.resourceEditorTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, $.escapeHtml(label)))
+    	var tab = $(tabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, $.escapeHtml(label)))
     		.attr("id", $.uid("resourceEditorTab")).attr("resourceName", name).attr("title", name).appendTo(tabsNav);
     	
     	var panePrevEle = $(".resource-editor-tab-pane", po.resourceEditorTabs()).last();
@@ -558,7 +565,7 @@
 				.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorRightOptWrapper).button()
 				.click(function()
 				{
-					po.toggleInsertChartListPannel(tabPane, this);
+					po.toggleInsertChartListPannel(this);
 				});
 		}
 		
@@ -763,7 +770,7 @@
 				
 				if(insertOperation == "insertChart" || insertOperation == "bindChart")
 				{
-					po.toggleInsertChartListPannel(tabPane, insertGroup);
+					po.toggleInsertChartListPannel(insertGroup);
 				}
 			}
 		});
@@ -831,7 +838,7 @@
 		}
 	};
 	
-	po.toggleInsertChartListPannel = function(tabPane, insertChartButton)
+	po.toggleInsertChartListPannel = function(insertChartButton)
 	{
 		var chartListPanel = po.element(".chart-list-panel");
 		
@@ -857,8 +864,9 @@
 							if(!$.isArray(chartWidgets))
 								chartWidgets = [chartWidgets];
 							
-							po.insertChart(tabPane, chartWidgets);
+							po.insertEditorChart(chartWidgets);
 							chartListPanel.hide();
+							
 							return false;
 						}
 					},
@@ -881,8 +889,9 @@
 		}
 	};
 	
-	po.insertChart = function(tabPane, chartWidgets)
+	po.insertEditorChart = function(chartWidgets)
 	{
+		var tabPane = po.getActiveTabPane(po.resourceEditorTabs());
 		var codeEditorDiv = po.element(".code-editor", tabPane);
 		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
 		

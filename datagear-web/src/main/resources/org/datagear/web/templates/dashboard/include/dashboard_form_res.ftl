@@ -567,13 +567,6 @@
 			return $(selector, rlg);
 	};
 
-	po.resourceEditorTabTemplate = "<li class='resource-editor-tab' style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
-		+"<div class='tab-operation'>"
-		+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
-		+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'><span class='ui-icon ui-icon-caret-1-e'></span></div>"
-		+"</div>"
-		+"</li>";
-	
 	po.getSelectedResourceNameForTree = function($tree)
 	{
 		var tree = $tree.jstree(true);
