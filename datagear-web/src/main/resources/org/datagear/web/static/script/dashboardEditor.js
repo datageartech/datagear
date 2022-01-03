@@ -24,9 +24,9 @@
 	var editor = (dashboardFactory.dashboardEditor || (dashboardFactory.dashboardEditor = {}));
 	var i18n = (editor.i18n || (editor.i18n = {}));
 	
-	i18n.insertInsideOnChartEleIsIllegal = "图表元素内不允许再插入图表元素";
+	i18n.appendOnChartEleIsIllegal = "图表元素内不允许再插入图表元素";
 	i18n.selectElementForSetChart = "请选择要设置/替换的图表元素";
-	i18n.notEditTextElement = "只可编辑纯文本元素";
+	i18n.canEditOnlyTextElement = "仅可编辑纯文本元素";
 	
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
@@ -151,12 +151,6 @@
 		alert(msg);
 	};
 	
-	//提示错误
-	editor.tipError = function(msg)
-	{
-		alert(msg);
-	};
-	
 	/**
 	 * 插入图表。
 	 * 
@@ -177,7 +171,7 @@
 		//图表元素内部不允许再插入图表元素
 		if(this.dashboard.renderedChart(refEle) && (insertType == "append" || insertType == "prepend"))
 		{
-			this.tipError(i18n.insertInsideOnChartEleIsIllegal);
+			this.tipInfo(i18n.appendOnChartEleIsIllegal);
 			return;
 		}
 		
@@ -209,7 +203,7 @@
 		
 		if(!chartEle || chartEle.is("body"))
 		{
-			this.tipError(i18n.selectElementForSetChart);
+			this.tipInfo(i18n.selectElementForSetChart);
 			return;
 		}
 		
@@ -308,7 +302,7 @@
 		
 		if(!this.isEditTextElement(ele))
 		{
-			this.tipError(i18n.notEditTextElement);
+			this.tipInfo(i18n.canEditOnlyTextElement);
 			return;
 		}
 		

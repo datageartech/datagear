@@ -192,11 +192,13 @@ readonly 是否只读操作，允许为null
 	</form>
 	<div class="ve-edit-ele-text-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<form action="#" method="POST">
-			<div class="panel-head ui-widget-header ui-corner-all">编辑内容</div>
+			<div class="panel-head ui-widget-header ui-corner-all">
+				<@spring.message code='dashboard.visualEditor.editContent' />
+			</div>
 			<div class="panel-content">
 				<div class="content-item">
 					<div class="label-wrapper">
-						<label>内容</label>
+						<label><@spring.message code='dashboard.visualEditor.content' /></label>
 					</div>
 					<input type="text" value="" class="ui-widget ui-widget-content" />
 				</div>
@@ -367,8 +369,8 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	
-	po.initResourcesWorkspace();
-	po.initEditorElements();
+	po.initDashboardResources();
+	po.initDashboardEditors();
 	
 	po.element(".resize-editor-button-left").click();
 	po.newResourceEditorTab(po.element("#${pageId}-initTemplateName").val(), po.element("#${pageId}-initTemplateContent").val(), true);

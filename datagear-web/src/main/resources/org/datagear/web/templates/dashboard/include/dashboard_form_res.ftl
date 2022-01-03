@@ -12,7 +12,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	po.initResourcesWorkspace = function()
+	po.initDashboardResources = function()
 	{
 		po.resizeResourcesWorkspace();
 		

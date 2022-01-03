@@ -12,7 +12,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	po.initEditorElements = function()
+	po.initDashboardEditors = function()
 	{
 		//初始化可视编辑元素文本内容面板
 		var veeetPanel = po.element(".ve-edit-ele-text-panel");
@@ -273,7 +273,22 @@
 		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
 		var ifmWindow = po.iframeWindow(visualEditorIfm);
 		
-		return (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
+		var dashboardEditor = (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
+		
+		if(dashboardEditor && !dashboardEditor.OVERWRITE_I18N_AND_TIP)
+		{
+			dashboardEditor.OVERWRITE_I18N_AND_TIP = true;
+			
+			dashboardEditor.i18n.appendOnChartEleIsIllegal="<@spring.message code='dashboard.opt.tip.appendOnChartEleIsIllegal' />";
+			dashboardEditor.i18n.selectElementForSetChart="<@spring.message code='dashboard.opt.tip.selectElementForSetChart' />";
+			dashboardEditor.i18n.canEditOnlyTextElement="<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />";
+			dashboardEditor.tipInfo = function(msg)
+			{
+				$.tipInfo(msg);
+			};
+		}
+		
+		return dashboardEditor;
 	};
 	
 	po.getResourceEditorData = function()
@@ -766,19 +781,19 @@
 				{
 					po.element(".insert-menu", this).hide();
 				});
-		$("<button type='button' />").text("插入").appendTo(insertGroup).button();
+		$("<button type='button' />").text("<@spring.message code='insert' />").appendTo(insertGroup).button();
 		
 		var insertMenu = $("<ul class='insert-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		var insertItemAfter = $("<li />").html("<div>外部后置</div>").appendTo(insertMenu);
-		po.buildVisualEditorInsertMenuItems(insertItemAfter, "after");
-		var insertItemBefore = $("<li />").html("<div>外部前置</div>").appendTo(insertMenu);
-		po.buildVisualEditorInsertMenuItems(insertItemBefore, "before");
-		var insertItemAppend = $("<li />").html("<div>内部后置</div>").appendTo(insertMenu);
-		po.buildVisualEditorInsertMenuItems(insertItemAppend, "append");
-		var insertItemPrepend = $("<li />").html("<div>内部前置</div>").appendTo(insertMenu);
-		po.buildVisualEditorInsertMenuItems(insertItemPrepend, "prepend");
+		$("<li insertOperation='bindChart' />").html("<div><@spring.message code='dashboard.opt.insert.bindOrReplaceChart' /></div>").appendTo(insertMenu);
 		$("<li class='ui-menu-divider' />").appendTo(insertMenu);
-		$("<li insertOperation='bindChart' />").html("<div>绑定/替换图表</div>").appendTo(insertMenu);
+		var insertItemAfter = $("<li />").html("<div><@spring.message code='dashboard.opt.insert.after' /></div>").appendTo(insertMenu);
+		po.buildVisualEditorInsertMenuItems(insertItemAfter, "after");
+		var insertItemBefore = $("<li />").html("<div><@spring.message code='dashboard.opt.insert.before' /></div>").appendTo(insertMenu);
+		po.buildVisualEditorInsertMenuItems(insertItemBefore, "before");
+		var insertItemAppend = $("<li />").html("<div><@spring.message code='dashboard.opt.insert.append' /></div>").appendTo(insertMenu);
+		po.buildVisualEditorInsertMenuItems(insertItemAppend, "append");
+		var insertItemPrepend = $("<li />").html("<div><@spring.message code='dashboard.opt.insert.prepend' /></div>").appendTo(insertMenu);
+		po.buildVisualEditorInsertMenuItems(insertItemPrepend, "prepend");
 		insertMenu.appendTo(insertGroup).menu(
 		{
 			select: function(event, ui)
@@ -810,8 +825,8 @@
 		$("<button type='button' />").text("<@spring.message code='edit' />").appendTo(editGroup).button();
 		
 		var editMenu = $("<ul class='edit-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li editOperation='editStyle' />").html("<div>样式</div>").appendTo(editMenu);
-		$("<li editOperation='editContent' />").html("<div>内容</div>").appendTo(editMenu);
+		$("<li editOperation='editStyle' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
+		$("<li editOperation='editContent' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
 		editMenu.appendTo(editGroup).menu(
 		{
 			select: function(event, ui)
@@ -829,7 +844,15 @@
 					}
 					else if(editOperation == "editContent")
 					{
-						po.visualEditorEditEleText(dashboardEditor, editGroup);
+						if(!dashboardEditor.isEditTextElement())
+						{
+							$.tipInfo("<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />");
+							return;
+						}
+						
+						var panel = po.element(".ve-edit-ele-text-panel");
+						po.element("input[type='text']", panel).val(dashboardEditor.getElementText());
+						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 				}
 			}
@@ -848,9 +871,9 @@
 		$("<button type='button' />").text("<@spring.message code='delete' />").appendTo(deleteGroup).button();
 		
 		var deleteMenu = $("<ul class='delete-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li deleteOperation='deleteElement' />").html("<div>删除元素</div>").appendTo(deleteMenu);
+		$("<li deleteOperation='unbindChart' />").html("<div><@spring.message code='dashboard.opt.delete.unbindChart' /></div>").appendTo(deleteMenu);
 		$("<li class='ui-menu-divider' />").appendTo(deleteMenu);
-		$("<li deleteOperation='unbindChart' />").html("<div>解绑图表</div>").appendTo(deleteMenu);
+		$("<li deleteOperation='deleteElement' />").html("<div><@spring.message code='dashboard.opt.delete.element' /></div>").appendTo(deleteMenu);
 		deleteMenu.appendTo(deleteGroup).menu(
 		{
 			select: function(event, ui)
@@ -878,23 +901,9 @@
 	po.buildVisualEditorInsertMenuItems = function($parent, insertType)
 	{
 		var ul = $("<ul class=' ui-widget-shadow' />");
-		$("<li insertOperation='insertChart' insertType='"+insertType+"' />").html("<div>图表</div>").appendTo(ul);
+		$("<li insertOperation='insertChart' insertType='"+insertType+"' />")
+			.html("<div><@spring.message code='dashboard.opt.insertType.chart' /></div>").appendTo(ul);
 		ul.appendTo($parent);
-	};
-	
-	po.visualEditorEditEleText = function(dashboardEditor, alignTo)
-	{
-		if(!dashboardEditor.isEditTextElement())
-		{
-			$.tipInfo("只可编辑纯文本元素");
-			return;
-		}
-		
-		var text = dashboardEditor.getElementText();
-		
-		var panel = po.element(".ve-edit-ele-text-panel");
-		po.element("input[type='text']", panel).val(text);
-		panel.show().position({ my : "right top", at : "right bottom", of : alignTo});
 	};
 	
 	po.insertVisualEditorChart = function(tabPane, chartWidgets)
