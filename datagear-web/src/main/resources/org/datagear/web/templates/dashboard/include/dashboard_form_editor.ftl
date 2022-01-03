@@ -561,8 +561,9 @@
 		
 		if(!po.readonly && (po.element(".resourceIsTemplate", tabPane).val() == "true"))
 		{
+			var insertGroup = $("<div class='insert-group' />").appendTo(editorRightOptWrapper);
 			var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
-				.text("<@spring.message code='dashboard.insertChart' />").appendTo(editorRightOptWrapper).button()
+				.text("<@spring.message code='dashboard.insertChart' />").appendTo(insertGroup).button()
 				.click(function()
 				{
 					po.toggleInsertChartListPannel(this);

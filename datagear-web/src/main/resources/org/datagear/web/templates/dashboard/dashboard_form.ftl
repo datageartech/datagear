@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboard.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(dashboard.name)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(dashboard.name)!''}" placeholder="<@spring.message code='dashboard.name' />" class="ui-widget ui-widget-content" />
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
@@ -342,9 +342,7 @@ readonly 是否只读操作，允许为null
 	
 	po.initResourcesWorkspace();
 	
-	if(!po.isAdd || po.element("#${pageId}-copySourceId").val())
-		po.element(".resize-editor-button-left").click();
-	
+	po.element(".resize-editor-button-left").click();
 	po.newResourceEditorTab(po.element("#${pageId}-initTemplateName").val(), po.element("#${pageId}-initTemplateContent").val(), true);
 })
 (${pageId});
