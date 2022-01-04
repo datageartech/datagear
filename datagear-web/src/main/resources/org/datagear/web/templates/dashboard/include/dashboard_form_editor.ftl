@@ -16,6 +16,7 @@
 	{
 		//初始化可视编辑元素文本内容面板
 		var veeetPanel = po.element(".ve-edit-ele-text-panel");
+		veeetPanel.draggable({ handle : ".panel-head" });
 		var veeetForm = po.element("form", veeetPanel);
 		veeetForm.submit(function()
 		{
@@ -25,7 +26,7 @@
 			var dashboardEditor = po.dashboardEditorVisual(tabPane);
 			if(dashboardEditor)
 			{
-				var text = po.element("input[type='text']", veeetPanel).val();
+				var text = po.element("input[name='content']", veeetPanel).val();
 				dashboardEditor.setElementText(text);
 			}
 			
@@ -597,7 +598,7 @@
 		
 		if(!po.readonly && (po.element(".resourceIsTemplate", tabPane).val() == "true"))
 		{
-			var insertGroup = $("<div class='insert-group' />").appendTo(editorRightOptWrapper);
+			var insertGroup = $("<div class='insert-group' auto-close-prevent='chart-list-panel' />").appendTo(editorRightOptWrapper);
 			var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
 				.text("<@spring.message code='dashboard.insertChart' />").appendTo(insertGroup).button()
 				.click(function()
@@ -771,11 +772,12 @@
 		
 		editorRightOptWrapper = $("<div class='visual-editor-operation operation-right' />").appendTo(editorOptWrapper);
 		
-		var insertGroup = $("<div class='insert-group' />").appendTo(editorRightOptWrapper)
+		var insertGroup = $("<div class='insert-group' auto-close-prevent='chart-list-panel' />").appendTo(editorRightOptWrapper)
 			.hover(
 				function()
 				{
-					po.element(".insert-menu", this).show().position({ my : "right top", at : "right bottom", of : this});
+					po.element(".insert-menu", this).show()
+						.position({ my : "right top", at : "right bottom", of : this});
 				},
 				function()
 				{
@@ -826,7 +828,7 @@
 		
 		var editMenu = $("<ul class='edit-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
 		$("<li editOperation='editStyle' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
-		$("<li editOperation='editContent' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
+		$("<li editOperation='editContent' auto-close-prevent='ve-edit-ele-text-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
 		editMenu.appendTo(editGroup).menu(
 		{
 			select: function(event, ui)
@@ -851,8 +853,8 @@
 						}
 						
 						var panel = po.element(".ve-edit-ele-text-panel");
-						po.element("input[type='text']", panel).val(dashboardEditor.getElementText());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
+						po.element("input[name='content']", panel).val(dashboardEditor.getElementText()).focus();
 					}
 				}
 			}

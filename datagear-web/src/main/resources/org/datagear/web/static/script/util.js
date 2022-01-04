@@ -2765,6 +2765,40 @@
 			}
 			
 			$.ajaxJson(options);
+		},
+		
+		/**
+		 * 点击元素自动关闭其内部的".auto-close-panel"面板。
+		 * 元素内的其他子元素可以添加"auto-close-prevent"属性，声明点击它时阻止关闭的面板id、样式类名。
+		 */
+		autoCloseSubPanel: function()
+		{
+			$(this).on("click", function(event)
+			{
+				var $thisEle = $(this);
+				var $target = $(event.target);
+				var $targetClosest = null;
+				
+				$(".auto-close-panel", this).each(function()
+				{
+					var panel = $(this);
+					
+					if(!panel.is(":hidden"))
+					{
+						if($targetClosest == null)
+							$targetClosest = $target.closest(".auto-close-panel, [auto-close-prevent]", $thisEle);
+						
+						if($targetClosest.is(panel[0]))
+							return;
+						
+						var prevent = $targetClosest.attr("auto-close-prevent");
+						if(prevent && (prevent == panel.attr("id") || panel.hasClass(prevent)))
+							return;
+						
+						panel.hide();
+					}
+				});
+			});
 		}
 	});
 })

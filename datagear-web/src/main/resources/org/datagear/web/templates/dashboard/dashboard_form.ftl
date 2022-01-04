@@ -76,8 +76,8 @@ readonly 是否只读操作，允许为null
 								<div class="resource-list-head ui-widget ui-widget-content">
 									<#if !readonly>
 									<div class="resource-button-wrapper rbw-left">
-										<button type='button' class='addResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource.desc' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
-										<button type='button' class='uploadResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' auto-close-prevent="add-resource-panel" class='addResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource.desc' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' auto-close-prevent="upload-resource-panel" class='uploadResBtn resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.uploadResource' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
 									</div>
 									</#if>
 									<div class="resource-button-wrapper rbw-right">
@@ -106,48 +106,6 @@ readonly 是否只读操作，允许为null
 								<div class="resource-list-template"></div>
 								<div class="resource-list-divider ui-widget ui-widget-content"></div>
 								<div class="resource-list-content"></div>
-								<div class='add-resource-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-									<div class="addResPanelHead panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
-									<div class="panel-content">
-										<div class="content-item">
-											<div class="label-wrapper">
-												<label title="<@spring.message code='dashboard.addResource.name.desc' />" class="tip-label">
-													<@spring.message code='dashboard.addResource.name' />
-												</label>
-											</div>
-											<input type="text" value="" class="addResNameInput ui-widget ui-widget-content" />
-										</div>
-									</div>
-									<div class="panel-foot">
-										<button type="button" class="saveAddResBtn"><@spring.message code='confirm' /></button>
-									</div>
-								</div>
-								<div class='upload-resource-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-									<div class="uploadResPanelHead panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.uploadResource' /></div>
-									<div class="panel-content">
-										<div class="content-item">
-											<div class="label-wrapper">
-												<label><@spring.message code='dashboard.uploadResource.select' /></label>
-											</div>
-											<div class="fileinput-button ui-button ui-corner-all ui-widget">
-												<@spring.message code='select' /><input type="file" class="ignore">
-											</div>
-											<div class="upload-file-info"></div>
-										</div>
-										<div class="content-item">
-											<div class="label-wrapper">
-												<label title="<@spring.message code='dashboard.uploadResource.savePath.desc' />" class="tip-label">
-													<@spring.message code='dashboard.uploadResource.savePath' />
-												</label>
-											</div>
-											<input type="text" value="" class="uploadResNameInput ui-widget ui-widget-content" />
-											<input type="hidden" value="" class="uploadResFilePath" />
-										</div>
-									</div>
-									<div class="panel-foot">
-										<button type="button" class="saveUploadResourceButton"><@spring.message code='confirm' /></button>
-									</div>
-								</div>
 							</div>
 							<div id="${pageId}-resourceListGlobal" class="resource-list-wrapper resource-list-global-wrapper ui-widget ui-widget-content ui-corner-all">
 								<div class="resource-list-head ui-widget ui-widget-content">
@@ -183,14 +141,60 @@ readonly 是否只读操作，允许为null
 			</#if>
 		</div>
 	</form>
-	<div class="chart-list-panel togglable-table-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<div class="panel-content minor-dataTable pagination-light"></div>
-	</div>
 	<form id="${pageId}-tplEditVisualForm" action="#" method="POST" style="display:none;">
 		<input type="hidden" name="DG_EDIT_TEMPLATE" value="true" />
 		<textarea name="DG_TEMPLATE_CONTENT"></textarea>
 	</form>
-	<div class="ve-edit-ele-text-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+	<div class="chart-list-panel auto-close-panel togglable-table-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<div class="panel-content minor-dataTable pagination-light"></div>
+	</div>
+	<div class='add-resource-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+		<form action="#" method="POST">
+			<div class="panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
+			<div class="panel-content">
+				<div class="content-item">
+					<div class="label-wrapper">
+						<label title="<@spring.message code='dashboard.addResource.name.desc' />" class="tip-label">
+							<@spring.message code='dashboard.addResource.name' />
+						</label>
+					</div>
+					<input type="text" name="addResName" value="" class="ui-widget ui-widget-content" />
+				</div>
+			</div>
+			<div class="panel-foot">
+				<button type="submit"><@spring.message code='confirm' /></button>
+			</div>
+		</form>
+	</div>
+	<div class='upload-resource-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front'>
+		<form action="#" method="POST">
+			<div class="panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.uploadResource' /></div>
+			<div class="panel-content">
+				<div class="content-item">
+					<div class="label-wrapper">
+						<label><@spring.message code='dashboard.uploadResource.select' /></label>
+					</div>
+					<div class="fileinput-button ui-button ui-corner-all ui-widget">
+						<@spring.message code='select' /><input type="file" class="ignore">
+					</div>
+					<div class="upload-file-info"></div>
+				</div>
+				<div class="content-item">
+					<div class="label-wrapper">
+						<label title="<@spring.message code='dashboard.uploadResource.savePath.desc' />" class="tip-label">
+							<@spring.message code='dashboard.uploadResource.savePath' />
+						</label>
+					</div>
+					<input type="text" name="uploadResName" value="" class="ui-widget ui-widget-content" />
+					<input type="hidden"name="uploadResFilePath"  value="" />
+				</div>
+			</div>
+			<div class="panel-foot">
+				<button type="submit"><@spring.message code='confirm' /></button>
+			</div>
+		</form>
+	</div>
+	<div class="ve-edit-ele-text-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<form action="#" method="POST">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.visualEditor.editContent' />
@@ -200,7 +204,7 @@ readonly 是否只读操作，允许为null
 					<div class="label-wrapper">
 						<label><@spring.message code='dashboard.visualEditor.content' /></label>
 					</div>
-					<input type="text" value="" class="ui-widget ui-widget-content" />
+					<input type="text" name="content" value="" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="panel-foot">
@@ -224,6 +228,8 @@ readonly 是否只读操作，允许为null
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	
 	$.initButtons(po.element());
+	po.element().autoCloseSubPanel();
+	po.showAfterSave = false;
 	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");
 	
 	po.url = function(action)
@@ -256,43 +262,6 @@ readonly 是否只读操作，允许为null
 		
 		return false;
 	};
-	
-	po.fileUploadInfo = function(){ return this.elementResListLocal(".upload-file-info"); };
-	
-	po.element().on("click", function(event)
-	{
-		var $target = $(event.target);
-		
-		var $p0 = po.elementResListLocal(".add-resource-panel");
-		if(!$p0.is(":hidden"))
-		{
-			if($target.closest(".add-resource-panel, .addResBtn").length == 0)
-				$p0.hide();
-		}
-		
-		var $p1 = po.elementResListLocal(".upload-resource-panel");
-		if(!$p1.is(":hidden"))
-		{
-			if($target.closest(".upload-resource-panel, .uploadResBtn").length == 0)
-				$p1.hide();
-		}
-		
-		var $p2 = po.element(".chart-list-panel");
-		if(!$p2.is(":hidden"))
-		{
-			if($target.closest(".chart-list-panel, .insert-group").length == 0)
-				$p2.hide();
-		}
-		
-		var $p3 = po.element(".ve-edit-ele-text-panel");
-		if(!$p3.is(":hidden"))
-		{
-			if($target.closest(".ve-edit-ele-text-panel, .edit-group").length == 0)
-				$p3.hide();
-		}
-	});
-	
-	po.showAfterSave = false;
 	
 	po.element("button[id='saveAndShowDashboard']").click(function()
 	{

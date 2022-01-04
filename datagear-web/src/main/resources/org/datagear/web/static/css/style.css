@@ -3507,15 +3507,13 @@ table.dataTable tbody tr td select{
 .page-form-dashboard .resources-wrapper .resource-list-wrapper .resource-item.ui-state-active{
 	border: 0px;
 }
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .add-resource-panel,
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel{
+.page-form-dashboard .add-resource-panel,
+.page-form-dashboard .upload-resource-panel{
 	position: absolute;
 	display: none;
-	width: 200%;
-	right: 0px;
-	top: 1.8em;
+	width: 30%;
 }
-.page-form-dashboard .resources-wrapper .resource-list-wrapper .upload-resource-panel .upload-file-info{
+.page-form-dashboard .upload-resource-panel .upload-file-info{
 	display: block;
 	margin-left: 0;
 	height: 1.2em;

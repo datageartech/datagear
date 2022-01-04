@@ -189,8 +189,90 @@
 			});
 		}
 		
-		po.elementResListLocal(".add-resource-panel").draggable({ handle : ".addResPanelHead" });
-		po.elementResListLocal(".upload-resource-panel").draggable({ handle : ".uploadResPanelHead" });
+		//初始化添加资源面板
+		
+		var addResPanel = po.element(".add-resource-panel");
+		addResPanel.draggable({ handle : ".panel-head" });
+		po.element("form", addResPanel).submit(function()
+		{
+			var name = po.element("input[name='addResName']", this).val();
+			if(!name)
+				return false;
+			
+			if(po.isResourceNameDirectroy(name))
+			{
+				$.tipInfo("<@spring.message code='dashboard.illegalSaveAddResourceName' />");
+				return false;
+			}
+			
+			var content = "";
+			var isHtml = $.isHtmlFile(name);
+			
+			if(isHtml)
+				content = po.element("#${pageId}-defaultTemplateContent").val();
+			
+			po.newResourceEditorTab(name, content, isHtml);
+			po.element(".add-resource-panel").hide();
+			
+			return false;
+		});
+		
+		//初始化上传资源面板
+		
+		var uploadResPanel = po.element(".upload-resource-panel");
+		uploadResPanel.draggable({ handle : ".panel-head" });
+		po.element("form", uploadResPanel).submit(function()
+		{
+			if(po.checkDashboardUnSaved())
+				return false;
+			
+			var panel = po.element(".upload-resource-panel");
+			
+			var id = po.getDashboardId();
+			var resourceName = po.element("input[name='uploadResName']", panel).val();
+			var resourceFilePath = po.element("input[name='uploadResFilePath']", panel).val();
+			
+			if(!id || !resourceName || !resourceFilePath)
+				return false;
+			
+			$.post(po.url("saveResourceFile"), {"id": id, "resourceName": resourceName, "resourceFilePath": resourceFilePath},
+			function()
+			{
+				po.refreshResourceListLocal();
+				panel.hide();
+			});
+			
+			return false;
+		});
+		
+		po.element(".fileinput-button", uploadResPanel).fileupload(
+		{
+			url : po.url("uploadResourceFile"),
+			paramName : "file",
+			success : function(uploadResult, textStatus, jqXHR)
+			{
+				var parent = po.getSelectedResourceName();
+				if(!po.isResourceNameDirectroy(parent))
+					parent = "";
+
+				var panel = po.element(".upload-resource-panel");
+				
+				po.element("input[name='uploadResName']", panel).val(parent + uploadResult.fileName);
+				po.element("input[name='uploadResFilePath']", panel).val(uploadResult.uploadFilePath);
+				
+				$.fileuploadsuccessHandlerForUploadInfo(po.element(".upload-file-info", panel), false);
+			}
+		})
+		.bind('fileuploadadd', function (e, data)
+		{
+			var panel = po.element(".upload-resource-panel");
+			$.fileuploadaddHandlerForUploadInfo(e, data, po.element(".upload-file-info", panel));
+		})
+		.bind('fileuploadprogressall', function (e, data)
+		{
+			var panel = po.element(".upload-resource-panel");
+			$.fileuploadprogressallHandlerForUploadInfo(e, data, po.element(".upload-file-info", panel));
+		});
 		
 		po.elementResListLocal(".resource-more-button-wrapper").hover(
 		function()
@@ -208,40 +290,11 @@
 			if(!po.isResourceNameDirectroy(initVal))
 				initVal = "";
 			
-			po.elementResListLocal(".addResNameInput").val(initVal);
-			po.elementResListLocal(".add-resource-panel").show();
-		});
-		
-		po.elementResListLocal(".addResNameInput").on("keydown", function(e)
-		{
-			if(e.keyCode == $.ui.keyCode.ENTER)
-			{
-				po.elementResListLocal(".saveAddResBtn").click();
-				//防止提交表单
-				return false;
-			}
-		});
-		
-		po.elementResListLocal(".saveAddResBtn").click(function()
-		{
-			var name = po.elementResListLocal(".addResNameInput").val();
-			if(!name)
-				return;
+			var panel = po.element(".add-resource-panel");
 			
-			if(po.isResourceNameDirectroy(name))
-			{
-				$.tipInfo("<@spring.message code='dashboard.illegalSaveAddResourceName' />");
-				return;
-			}
-			
-			var content = "";
-			var isHtml = $.isHtmlFile(name);
-			
-			if(isHtml)
-				content = po.element("#${pageId}-defaultTemplateContent").val();
-			
-			po.newResourceEditorTab(name, content, isHtml);
-			po.elementResListLocal(".add-resource-panel").hide();
+			panel.show()
+				.position({ my : "right top", at : "right bottom", of : this});
+			po.element("input[name='addResName']", panel).val(initVal).focus();
 		});
 		
 		po.elementResListLocal(".editResBtn").click(function()
@@ -290,40 +343,14 @@
 			if(po.checkDashboardUnSaved())
 				return;
 			
-			po.elementResListLocal(".uploadResNameInput").val("");
-			po.elementResListLocal(".uploadResFilePath").val("");
-			po.elementResListLocal(".upload-file-info").text("");
+			var panel = po.element(".upload-resource-panel");
 			
-			var $panel = po.elementResListLocal(".upload-resource-panel");
-			$panel.show();
-			//$panel.position({ my : "right top", at : "right+20 bottom+3", of : this});
-		});
-
-		po.elementResListLocal(".uploadResNameInput").on("keydown", function(e)
-		{
-			if(e.keyCode == $.ui.keyCode.ENTER)
-			{
-				po.elementResListLocal(".saveUploadResourceButton").click();
-				//防止提交表单
-				return false;
-			}
-		});
-		
-		po.elementResListLocal(".saveUploadResourceButton").click(function()
-		{
-			var id = po.getDashboardId();
-			var resourceFilePath = po.elementResListLocal(".uploadResFilePath").val();
-			var resourceName = po.elementResListLocal(".uploadResNameInput").val();
+			po.element("input[name='uploadResName']", panel).val("");
+			po.element("input[name='uploadResFilePath']", panel).val("");
+			po.element(".upload-file-info", panel).text("");
 			
-			if(!id || !resourceFilePath || !resourceName)
-				return;
-			
-			$.post(po.url("saveResourceFile"), {"id": id, "resourceFilePath": resourceFilePath, "resourceName": resourceName},
-			function()
-			{
-				po.refreshResourceListLocal();
-				po.elementResListLocal(".upload-resource-panel").hide();
-			});
+			panel.show()
+				.position({ my : "right top", at : "right bottom", of : this});
 		});
 		
 		po.elementResListLocal(".viewResButton").click(function(e)
@@ -437,31 +464,6 @@
 				}
 			});
 		});
-
-		po.elementResListLocal(".fileinput-button").fileupload(
-		{
-			url : po.url("uploadResourceFile"),
-			paramName : "file",
-			success : function(uploadResult, textStatus, jqXHR)
-			{
-				var parent = po.getSelectedResourceName();
-				if(!po.isResourceNameDirectroy(parent))
-					parent = "";
-				
-				po.elementResListLocal(".uploadResNameInput").val(parent + uploadResult.fileName);
-				po.elementResListLocal(".uploadResFilePath").val(uploadResult.uploadFilePath);
-				
-				$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			}
-		})
-		.bind('fileuploadadd', function (e, data)
-		{
-			$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-		})
-		.bind('fileuploadprogressall', function (e, data)
-		{
-			$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
-		});
 		
 		//初始化全局资源操作
 
@@ -545,7 +547,7 @@
 	{
 		return po.element(".resource-list-tabs");
 	};
-
+	
 	po.elementResListLocal = function(selector)
 	{
 		var rll = po.element(".resource-list-local-wrapper");
