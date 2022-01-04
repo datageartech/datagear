@@ -24,7 +24,7 @@
 	var editor = (dashboardFactory.dashboardEditor || (dashboardFactory.dashboardEditor = {}));
 	var i18n = (editor.i18n || (editor.i18n = {}));
 	
-	i18n.appendOnChartEleIsIllegal = "图表元素内不允许再插入图表元素";
+	i18n.insertInsideChartOnChartEleDenied = "图表元素内不允许再插入图表元素";
 	i18n.selectElementForSetChart = "请选择要设置/替换的图表元素";
 	i18n.canEditOnlyTextElement = "仅可编辑纯文本元素";
 	
@@ -152,6 +152,24 @@
 	};
 	
 	/**
+	 * 判断元素是否允许插入图表。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.canInsertChart = function(insertType, refEle)
+	{
+		refEle = this._refElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		//图表元素内部不允许再插入图表元素
+		if(this.dashboard.renderedChart(refEle) && (insertType == "append" || insertType == "prepend"))
+			return false;
+		else
+			return true;
+	};
+	
+	/**
 	 * 插入图表。
 	 * 
 	 * @param chartWidgets 要插入的图表部件对象、数组
@@ -169,9 +187,9 @@
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		//图表元素内部不允许再插入图表元素
-		if(this.dashboard.renderedChart(refEle) && (insertType == "append" || insertType == "prepend"))
+		if(!this.canInsertChart(insertType, refEle))
 		{
-			this.tipInfo(i18n.appendOnChartEleIsIllegal);
+			this.tipInfo(i18n.insertInsideChartOnChartEleDenied);
 			return;
 		}
 		
@@ -309,6 +327,26 @@
 		this._setElementText(ele, text);
 	};
 	
+	/**
+	 * 删除元素。
+	 *
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.deleteElement = function(ele)
+	{
+		ele = this._refElement(ele);
+		
+		if(ele.is("body"))
+			return false;
+		
+		var iframeEle = this._editElement(ele);
+		
+		ele.remove();
+		iframeEle.remove();
+		
+		this.changeFlag(true);
+	};
+	
 	//设置元素文本内容
 	editor._setElementText = function(ele, text, sync)
 	{
@@ -405,17 +443,6 @@
 		}
 		
 		return insertType;
-	};
-	
-	editor.deleteSelected = function()
-	{
-		var selected = this._getSelected();
-		var iframeEle = this._editElement(selected);
-		
-		selected.remove();
-		iframeEle.remove();
-		
-		this.changeFlag(true);
 	};
 	
 	editor._getSelected = function()

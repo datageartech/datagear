@@ -280,7 +280,7 @@
 		{
 			dashboardEditor.OVERWRITE_I18N_AND_TIP = true;
 			
-			dashboardEditor.i18n.appendOnChartEleIsIllegal="<@spring.message code='dashboard.opt.tip.appendOnChartEleIsIllegal' />";
+			dashboardEditor.i18n.insertInsideChartOnChartEleDenied="<@spring.message code='dashboard.opt.tip.insertInsideChartOnChartEleDenied' />";
 			dashboardEditor.i18n.selectElementForSetChart="<@spring.message code='dashboard.opt.tip.selectElementForSetChart' />";
 			dashboardEditor.i18n.canEditOnlyTextElement="<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />";
 			dashboardEditor.tipInfo = function(msg)
@@ -809,6 +809,17 @@
 				
 				if(insertOperation == "insertChart" || insertOperation == "bindChart")
 				{
+					var dashboardEditor = po.dashboardEditorVisual(tabPane);
+					if(dashboardEditor && !dashboardEditor.canInsertChart(insertType))
+					{
+						$.tipInfo(dashboardEditor.i18n.insertInsideChartOnChartEleDenied);
+						return;
+					}
+					
+					po.toggleInsertChartListPannel(insertGroup);
+				}
+				else if(insertOperation == "bindChart")
+				{
 					po.toggleInsertChartListPannel(insertGroup);
 				}
 			}
@@ -889,7 +900,7 @@
 				{
 					if(deleteOperation == "deleteElement")
 					{
-						dashboardEditor.deleteSelected();
+						dashboardEditor.deleteElement();
 					}
 					else if(deleteOperation == "unbindChart")
 					{
