@@ -26,8 +26,8 @@ DataSetEntity dataSet 允许为null
 		<table id="${pageId}-previewResultTable" width='100%' class='hover stripe'></table>
 		<div class="preview-result-foot">
 			<div class="result-resolved-source">
-				<button type="button" class="show-resolved-source-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.showResolvedSource' />"><span class="ui-button-icon ui-icon ui-icon-comment"></span><span class="ui-button-icon-space"> </span><@spring.message code='dataSet.showResolvedSource' /></button>
-				<div class="result-resolved-source-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+				<button type="button" auto-close-prevent="result-resolved-source-panel" class="show-resolved-source-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.showResolvedSource' />"><span class="ui-button-icon ui-icon ui-icon-comment"></span><span class="ui-button-icon-space"> </span><@spring.message code='dataSet.showResolvedSource' /></button>
+				<div class="result-resolved-source-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 					<div class="result-resolved-source-panel-content">
 						<textarea class="ui-widget ui-widget-content"></textarea>
 					</div>
@@ -60,11 +60,11 @@ DataSetEntity dataSet 允许为null
 			<button type="button" class="down-property-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='moveDown' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='moveDown' /></button>
 			<button type="button" class="del-property-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
 			&nbsp;
-			<button type="button" class="dataformat-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='setting' />"><span class="ui-button-icon ui-icon ui-icon-gear"></span><span class="ui-button-icon-space"> </span><@spring.message code='setting' /></button>
+			<button type="button" auto-close-prevent="dataformat-panel" class="dataformat-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='setting' />"><span class="ui-button-icon ui-icon ui-icon-gear"></span><span class="ui-button-icon-space"> </span><@spring.message code='setting' /></button>
 			</#if>
 		</div>
 		<table id="${pageId}-dataSetPropertiesTable" class='hover stripe'></table>
-		<div id="${pageId}-dataFormatPanel" class='dataformat-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+		<div id="${pageId}-dataFormatPanel" class='dataformat-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<label class="tip-label" title="<@spring.message code='dataSet.setDataSourceFormat.desc' />">
 					<@spring.message code='dataSet.setDataSourceFormat' />

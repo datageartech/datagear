@@ -681,18 +681,6 @@ ${detectNewVersionScript?no_esc}
 			$.analysisProjectContext.value(null);
 		});
 		
-		po.element().on("click", function(event)
-		{
-			var $p = po.element(".analysis-project-list-panel", dap);
-			if(!$p.is(":hidden"))
-			{
-				var $target = $(event.target);
-				
-				if($target.closest(".analysis-project-current-value, .analysis-project-list-panel").length == 0)
-					$p.hide();
-			}
-		});
-		
 		$.analysisProjectContext.init(function()
 		{
 			var pc = po.element(".dataAnalysis-panel-content", dap);
@@ -768,6 +756,8 @@ ${detectNewVersionScript?no_esc}
 	
 	$(document).ready(function()
 	{
+		po.element().autoCloseSubPanel(".analysis-project-list-panel");
+		
 		//需要先初始化导航栏，以计算左侧布局宽度
 		po.element("#${pageId}-nav").tabs(
 		{
@@ -1362,7 +1352,7 @@ ${detectNewVersionScript?no_esc}
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
 				<div class="dataAnalysis-panel-head" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 					<div class="analysis-project-current ui-widget ui-widget-content ui-corner-all">
-						<div class="analysis-project-current-value" title="<@spring.message code='main.analysisProject.currentValue' />"></div>
+						<div class="analysis-project-current-value" auto-close-prevent="analysis-project-list-panel" title="<@spring.message code='main.analysisProject.currentValue' />"></div>
 						<div class="analysis-project-current-reset ui-button-icon-only" title="<@spring.message code='main.analysisProject.currentValue.clear' />">
 							<span class="ui-icon ui-icon-cancel"></span>
 						</div>
@@ -1373,7 +1363,7 @@ ${detectNewVersionScript?no_esc}
 							<button id="manageAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only manage-analysis-project-button" title="<@spring.message code='main.analysisProject.manage' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='manage' /></button>
 						</div>
 					</div>
-					<div class="analysis-project-list-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+					<div class="analysis-project-list-panel minor-panel auto-close-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 						<div class="analysis-project-list-panel-head"></div>
 						<div class="analysis-project-list-panel-content minor-dataTable pagination-light"></div>
 					</div>

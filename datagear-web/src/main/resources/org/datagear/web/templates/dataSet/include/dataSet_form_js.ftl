@@ -310,18 +310,6 @@ po.previewOptions.url = "...";
 			//阻止行选中
 			event.stopPropagation();
 		});
-
-		po.element().on("click", function(event)
-		{
-			var $target = $(event.target);
-			
-			var $p = po.dataFormatPanelElement();
-			if(!$p.is(":hidden"))
-			{
-				if($target.closest(".dataformat-panel, .dataformat-button").length == 0)
-					$p.hide();
-			}
-		});
 	};
 	
 	po.hasFormDataSetProperty = function()
@@ -596,18 +584,6 @@ po.previewOptions.url = "...";
 	po.initPreviewParamValuePanel = function()
 	{
 		po.element(".preview-param-value-panel").draggable({ handle : ".ui-widget-header" });
-		
-		$(po.element()).on("click", function(event)
-		{
-			var $target = $(event.target);
-			
-			var $pvp = po.element(".preview-param-value-panel");
-			if(!$pvp.is(":hidden"))
-			{
-				if($target.closest(".preview-param-value-panel").length == 0)
-					$pvp.hide();
-			}
-		});
 	}
 	
 	po.showDataSetParamValuePanel = function(formOptions)
@@ -902,18 +878,6 @@ po.previewOptions.url = "...";
 			//防止提交数据集表单
 			if(e.keyCode == $.ui.keyCode.ENTER)
 				return false;
-		});
-		
-		$(po.element()).on("click", function(event)
-		{
-			var $target = $(event.target);
-			
-			var $panel = po.element(".result-resolved-source-panel");
-			if(!$panel.is(":hidden"))
-			{
-				if($target.closest(".result-resolved-source").length == 0)
-					$panel.hide();
-			}
 		});
 	};
 	

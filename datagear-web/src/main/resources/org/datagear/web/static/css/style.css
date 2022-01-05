@@ -2861,17 +2861,10 @@ table.dataTable tbody tr td select{
 .page-form-dataSet .preview-param-value-panel{
 	position: absolute;
 	display: none;
-	padding: 0.5em 0.5em;
 	max-height: 80%;
 	min-width: 30%;
 	max-width: 60%;
 	overflow: auto;
-}
-.page-form-dataSet .preview-param-value-panel .ui-widget-header{
-	padding: 0.3em 0.1em;
-}
-.page-form-dataSet .preview-param-value-panel .preview-param-value-panel-content{
-	padding-top: 0.41em;
 }
 .page-form-dataSet .preview-param-value-panel .preview-param-value-panel-content .dg-dspv-form-content{
 	max-height: 14em;
@@ -3085,12 +3078,8 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-sign-select-panel{
 	position: absolute;
 	display: none;
-	padding: 0.3em 0.3em;
 	width: 40%;
 	height: 100%;
-}
-.page-form-chart .data-sign-select-panel .select-panel-head{
-	padding: 0.3em 0.1em;
 }
 .page-form-chart .data-sign-select-panel .select-panel-content{
 	position: absolute;
@@ -3146,15 +3135,8 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-set-param-value-panel{
 	position: absolute;
 	display: none;
-	padding: 0.5em 0.5em;
 	max-height: 80%;
 	overflow: auto;
-}
-.page-form-chart .data-set-param-value-panel .ui-widget-header{
-	padding: 0.3em 0.1em;
-}
-.page-form-chart .data-set-param-value-panel .data-set-param-value-panel-content{
-	padding-top: 0.41em;
 }
 .page-form-chart .data-set-param-value-panel .data-set-param-value-panel-content .dg-dspv-form-content{
 	max-height: 14em;

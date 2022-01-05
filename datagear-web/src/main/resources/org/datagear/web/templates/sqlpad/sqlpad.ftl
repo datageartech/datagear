@@ -47,8 +47,8 @@ Schema schema 数据库，不允许为null
 		<div class="button-divider ui-widget ui-widget-content"></div>
 		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearEditSql' /></button>
 		<div class="setting-wrapper">
-			<button id="settingButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.setting' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.setting' /></button>
-			<div class="setting-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+			<button id="settingButton" auto-close-prevent="setting-panel" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.setting' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.setting' /></button>
+			<div class="setting-panel auto-close-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 				<form id="settingForm" method="POST" action="#">
 					<div class="form-content">
 						<div class="form-item">
@@ -88,8 +88,8 @@ Schema schema 数据库，不允许为null
 			</div>
 		</div>
 		<div class="view-sql-history-wrapper">
-			<button id="viewSqlHistoryButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.viewSqlHistory' />"><span class="ui-button-icon ui-icon ui-icon-clock"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.viewSqlHistory' /></button>
-			<div class="view-sql-history-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+			<button id="viewSqlHistoryButton" auto-close-prevent="view-sql-history-panel" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.viewSqlHistory' />"><span class="ui-button-icon ui-icon ui-icon-clock"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.viewSqlHistory' /></button>
+			<div class="view-sql-history-panel auto-close-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 				<div class="sql-history-head">
 					<form id="viewSqlHistorySearchForm" method="POST" action="${contextPath}/sqlpad/${schema.id}/sqlHistoryData" class="sql-history-search-form">
 						<input type="hidden" name="page" value="1" />
@@ -142,7 +142,7 @@ Schema schema 数据库，不允许为null
 					<ul class="tabs-more-tab-menu">
 					</ul>
 				</div>
-				<div id="viewLongTextResultPanel" class="view-long-text-result-panel ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow">
+				<div id="viewLongTextResultPanel" class="view-long-text-result-panel auto-close-panel ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow">
 					<textarea class="long-text-content ui-widget ui-widget-content"></textarea>
 				</div>
 			</div>
@@ -156,11 +156,11 @@ Schema schema 数据库，不允许为null
 					<button id="refreshSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
 					<button id="exportSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.exportSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-ne"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.exportSqlResult' /></button>
 					&nbsp;&nbsp;
-					<button id="viewSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.viewSqlStatement' />"><span class="ui-button-icon ui-icon ui-icon-lightbulb"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.viewSqlStatement' /></button>
+					<button id="viewSqlResultTabButton" auto-close-prevent="view-sql-statement-panel" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.viewSqlStatement' />"><span class="ui-button-icon ui-icon ui-icon-lightbulb"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.viewSqlStatement' /></button>
 					<button id="lockSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.lockSqlResultTab' />"><span class="ui-button-icon ui-icon ui-icon-locked"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.lockSqlResultTab' /></button>
 				</div>
 			</div>
-			<div id="viewSqlStatementPanel" class="view-sql-statement-panel ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow">
+			<div id="viewSqlStatementPanel" class="view-sql-statement-panel auto-close-panel ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow">
 				<textarea class="sql-content ui-widget ui-widget-content"></textarea>
 			</div>
 		</div>
@@ -194,6 +194,7 @@ Schema schema 数据库，不允许为null
 	po.sqlResultTabs = po.element("#${pageId}-sqlResultTabs");
 	
 	$.initButtons(po.element(".head, .result-operations"));
+	po.element().autoCloseSubPanel();
 	po.element("#sqlCommitModeSet").buttonset();
 	po.element("#sqlExceptionHandleModeSet").buttonset();
 	
@@ -780,7 +781,7 @@ Schema schema 数据库，不允许为null
 						}
 						else if(data != renderValue)
 						{
-							return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' class='view-sql-result-long-text-link'>"
+							return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' auto-close-prevent='view-long-text-result-panel' class='view-sql-result-long-text-link'>"
 									+ renderValue
 									+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
 						}
@@ -1380,39 +1381,6 @@ Schema schema 数据库，不允许为null
 		errorPlacement : function(error, element)
 		{
 			error.appendTo(element.closest(".form-item-value"));
-		}
-	});
-	
-	$(document.body).on("click", function(event)
-	{
-		var $target = $(event.target);
-
-		var $vhp = po.element(".view-sql-history-panel");
-		if(!$vhp.is(":hidden"))
-		{
-			if($target.closest(po.element(".view-sql-history-wrapper")).length == 0)
-				$vhp.hide();
-		}
-		
-		var $sp = po.element(".setting-panel");
-		if(!$sp.is(":hidden"))
-		{
-			if($target.closest(po.element(".setting-wrapper")).length == 0)
-				$sp.hide();
-		}
-		
-		var $vsp = po.element("#viewSqlStatementPanel");
-		if(!$vsp.is(":hidden"))
-		{
-			if($target.closest("#viewSqlStatementPanel, #viewSqlResultTabButton").length == 0)
-				$vsp.hide();
-		}
-		
-		var $vltp = po.element("#viewLongTextResultPanel");
-		if(!$vltp.is(":hidden"))
-		{
-			if($target.closest("#viewLongTextResultPanel, .view-sql-result-long-text-link").length == 0)
-				$vltp.hide();
 		}
 	});
 	

@@ -61,12 +61,12 @@
 			</div>
 			<input type="text" name="dataSetResFileName" value="${(dataSet.dataSetResFileName)!''}" class="ui-widget ui-widget-content" />
 			<#if !readonly>
-			<button type="button" class="selectServerFileBtn ui-button-icon-only">
+			<button type="button" auto-close-prevent="server-file-list-panel" class="selectServerFileBtn ui-button-icon-only">
 				<span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span>
 				<@spring.message code='select' />
 			</button>
-			<div class="server-file-list-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-				<div class="server-file-list-content">sdf</div>
+			<div class="server-file-list-panel auto-close-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+				<div class="server-file-list-content"></div>
 			</div>
 			</#if>
 			<#--
@@ -217,18 +217,6 @@
 		.on("mouseleave", ".server-file-item", function()
 		{
 			$(this).removeClass("ui-state-active");
-		});
-		
-		po.element().on("click", function(event)
-		{
-			var $p = po.element(".server-file-list-panel");
-			if(!$p.is(":hidden"))
-			{
-				var $target = $(event.target);
-				
-				if($target.closest(".selectServerFileBtn, .server-file-list-panel").length == 0)
-					$p.hide();
-			}
 		});
 		
 		var height = po.element(".fileSourceType-wrapper").outerHeight(true);

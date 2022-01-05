@@ -63,10 +63,10 @@ readonly 是否只读操作，允许为null
 					<#if !readonly>
 					<button type="button" class="add-data-set-button"><@spring.message code='add' /></button>
 					</#if>
-					<button type="button" class="dataformat-button"><@spring.message code='chart.resultDataFormat' /></button>
-					<div class='data-sign-select-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-						<div class="select-panel-head ui-widget-header ui-corner-all"><@spring.message code='chart.selectDataSign' /></div>
-						<div class="select-panel-content">
+					<button type="button" auto-close-prevent="dataformat-panel" class="dataformat-button"><@spring.message code='chart.resultDataFormat' /></button>
+					<div class='data-sign-select-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+						<div class="select-panel-head panel-head ui-widget-header ui-corner-all"><@spring.message code='chart.selectDataSign' /></div>
+						<div class="select-panel-content panel-content">
 							<div class="content-left"></div>
 							<div class="content-right ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 								<div class="data-sign-label"></div>
@@ -74,7 +74,7 @@ readonly 是否只读操作，允许为null
 							</div>
 						</div>
 					</div>
-					<div id="${pageId}-dataFormatPanel" class='dataformat-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+					<div id="${pageId}-dataFormatPanel" class='dataformat-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
 						<div class="panel-head ui-widget-header ui-corner-all">
 							<label class="tip-label" title="<@spring.message code='chart.resultDataFormat.desc' />">
 								<@spring.message code='chart.resultDataFormat' />
@@ -240,9 +240,9 @@ readonly 是否只读操作，允许为null
 			</#if>
 		</div>
 	</form>
-	<div class="data-set-param-value-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<div class="ui-widget-header ui-corner-all"><@spring.message code='chart.chartDataSet.paramValue' /></div>
-		<div class="data-set-param-value-panel-content"></div>
+	<div class="data-set-param-value-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<div class="panel-head ui-widget-header ui-corner-all"><@spring.message code='chart.chartDataSet.paramValue' /></div>
+		<div class="data-set-param-value-panel-content panel-content"></div>
 	</div>
 </div>
 <#include "../include/page_obj_form.ftl">
@@ -253,6 +253,7 @@ readonly 是否只读操作，允许为null
 	po.chartDataSets = <@writeJson var=chartDataSets />;
 	
 	$.initButtons(po.element());
+	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((chart.analysisProject.id)!'')?js_string?no_esc}", "${((chart.analysisProject.name)!'')?js_string?no_esc}");
 	po.element(".form-item-value-chartDataSet").height($(window).height()/5*2);
 	
@@ -533,18 +534,6 @@ readonly 是否只读操作，允许为null
 		$panel.position({ my : "left center", at : "right top", of : $paramValueButton});
 	};
 	
-	$(po.element()).on("click", function(event)
-	{
-		var $target = $(event.target);
-		
-		var $pvp = po.element(".data-set-param-value-panel");
-		if(!$pvp.is(":hidden"))
-		{
-			if($target.closest(".data-set-param-value-panel, .dataSetParamValueButton").length == 0)
-				$pvp.hide();
-		}
-	});
-	
 	po.initChartDataSets = function()
 	{
 		if(!po.chartDataSets)
@@ -626,7 +615,7 @@ readonly 是否只读操作，允许为null
 			}
 			
 			<#if !readonly>
-			$("<button type='button' class='sign-add-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'> </span></button>")
+			$("<button type='button' auto-close-prevent='data-sign-select-panel' class='sign-add-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'> </span></button>")
 				.attr("title", "<@spring.message code='chart.addDataSign' />")
 				.appendTo($signsWrapper);
 			</#if>
@@ -678,7 +667,7 @@ readonly 是否只读操作，允许为null
 			$("<div class='tip-label item-lv-l' />").html("<@spring.message code='parameter' />")
 				.attr("title", "<@spring.message code='chart.chartDataSet.paramValue.desc' />").appendTo($pvBtnItem);
 			var $pvBtnWrapper = $("<div class='item-lv-v' />").appendTo($pvBtnItem);
-			var $pvButton = $("<button type='button' class='dataSetParamValueButton ui-button ui-corner-all ui-widget'></button>")
+			var $pvButton = $("<button type='button' auto-close-prevent='data-set-param-value-panel' class='dataSetParamValueButton ui-button ui-corner-all ui-widget'></button>")
 					.html("<#if readonly><@spring.message code='view' /><#else><@spring.message code='edit' /></#if>")
 					.appendTo($pvBtnWrapper);
 			$pvButton.data("dataSetParams", dataSet.params).data("paramValues",
@@ -1024,25 +1013,6 @@ readonly 是否只读操作，允许为null
 		errorPlacement : function(error, element)
 		{
 			error.appendTo(element.closest(".form-item-value"));
-		}
-	});
-	
-	po.element().on("click", function(event)
-	{
-		var $target = $(event.target);
-
-		var $ssp = po.element(".data-sign-select-panel");
-		if(!$ssp.is(":hidden"))
-		{
-			if($target.closest(".data-sign-select-panel, .sign-add-button").length == 0)
-				$ssp.hide();
-		}
-		
-		var $dfp = po.element(".dataformat-panel");
-		if(!$dfp.is(":hidden"))
-		{
-			if($target.closest(".dataformat-panel, .dataformat-button").length == 0)
-				$dfp.hide();
 		}
 	});
 	

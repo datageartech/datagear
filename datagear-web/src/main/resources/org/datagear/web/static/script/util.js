@@ -2770,16 +2770,20 @@
 		/**
 		 * 点击元素自动关闭其内部的".auto-close-panel"面板。
 		 * 元素内的其他子元素可以添加"auto-close-prevent"属性，声明点击它时阻止关闭的面板id、样式类名。
+		 *
+		 * @param panelSelector 面板选择器，默认为：".auto-close-panel"
 		 */
-		autoCloseSubPanel: function()
+		autoCloseSubPanel: function(panelSelector)
 		{
+			panelSelector = (panelSelector ? panelSelector : ".auto-close-panel");
+			
 			$(this).on("click", function(event)
 			{
 				var $thisEle = $(this);
 				var $target = $(event.target);
 				var $targetClosest = null;
 				
-				$(".auto-close-panel", this).each(function()
+				$(panelSelector, this).each(function()
 				{
 					var panel = $(this);
 					
