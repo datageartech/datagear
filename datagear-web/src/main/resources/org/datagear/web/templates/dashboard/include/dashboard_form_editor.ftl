@@ -15,19 +15,42 @@
 	po.initDashboardEditors = function()
 	{
 		//初始化可视编辑元素文本内容面板
-		var veeetPanel = po.element(".ve-edit-ele-text-panel");
-		veeetPanel.draggable({ handle : ".panel-head" });
-		var veeetForm = po.element("form", veeetPanel);
-		veeetForm.submit(function()
+		var veContentPanel = po.element(".veditor-content-panel");
+		veContentPanel.draggable({ handle: ".panel-head" });
+		var veContentForm = po.element("form", veContentPanel);
+		veContentForm.submit(function()
 		{
-			veeetPanel.hide();
+			veContentPanel.hide();
 			
 			var tabPane = po.tabsGetActivePane(po.resourceEditorTabs());
 			var dashboardEditor = po.dashboardEditorVisual(tabPane);
 			if(dashboardEditor)
 			{
-				var text = po.element("input[name='content']", veeetPanel).val();
+				var text = po.element("input[name='content']", veContentPanel).val();
 				dashboardEditor.setElementText(text);
+			}
+			
+			return false;
+		});
+		
+		//初始化可视编辑样式面板
+		var veStylePanel = po.element(".veditor-style-panel");
+		veStylePanel.draggable({ handle: ".panel-head" });
+		var veStyleForm = po.element("form", veStylePanel);
+		veStyleForm.submit(function()
+		{
+			veStylePanel.hide();
+			
+			var tabPane = po.tabsGetActivePane(po.resourceEditorTabs());
+			var dashboardEditor = po.dashboardEditorVisual(tabPane);
+			if(dashboardEditor)
+			{
+				var styleObj = $.formToJson(this);
+				
+				if(po.editOperationForVisualEdit == "editStyle")
+					dashboardEditor.setElementStyle(styleObj);
+				else if(po.editOperationForVisualEdit == "editGlobalStyle")
+					dashboardEditor.setGlobalStyle(styleObj);
 			}
 			
 			return false;
@@ -283,6 +306,8 @@
 			dashboardEditor.i18n.insertInsideChartOnChartEleDenied="<@spring.message code='dashboard.opt.tip.insertInsideChartOnChartEleDenied' />";
 			dashboardEditor.i18n.selectElementForSetChart="<@spring.message code='dashboard.opt.tip.selectElementForSetChart' />";
 			dashboardEditor.i18n.canEditOnlyTextElement="<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />";
+			dashboardEditor.i18n.selectedElementRequired="<@spring.message code='dashboard.opt.tip.selectedElementRequired' />";
+			dashboardEditor.i18n.selectedNotChartElement="<@spring.message code='dashboard.opt.tip.selectedNotChartElement' />";
 			dashboardEditor.tipInfo = function(msg)
 			{
 				$.tipInfo(msg);
@@ -786,8 +811,6 @@
 		$("<button type='button' />").text("<@spring.message code='insert' />").appendTo(insertGroup).button();
 		
 		var insertMenu = $("<ul class='insert-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li insertOperation='bindChart' />").html("<div><@spring.message code='dashboard.opt.insert.bindOrReplaceChart' /></div>").appendTo(insertMenu);
-		$("<li class='ui-menu-divider' />").appendTo(insertMenu);
 		var insertItemAfter = $("<li />").html("<div><@spring.message code='dashboard.opt.insert.after' /></div>").appendTo(insertMenu);
 		po.buildVisualEditorInsertMenuItems(insertItemAfter, "after");
 		var insertItemBefore = $("<li />").html("<div><@spring.message code='dashboard.opt.insert.before' /></div>").appendTo(insertMenu);
@@ -796,6 +819,8 @@
 		po.buildVisualEditorInsertMenuItems(insertItemAppend, "append");
 		var insertItemPrepend = $("<li />").html("<div><@spring.message code='dashboard.opt.insert.prepend' /></div>").appendTo(insertMenu);
 		po.buildVisualEditorInsertMenuItems(insertItemPrepend, "prepend");
+		$("<li class='ui-menu-divider' />").appendTo(insertMenu);
+		$("<li insertOperation='bindChart' />").html("<div><@spring.message code='dashboard.opt.insert.bindOrReplaceChart' /></div>").appendTo(insertMenu);
 		insertMenu.appendTo(insertGroup).menu(
 		{
 			select: function(event, ui)
@@ -838,8 +863,12 @@
 		$("<button type='button' />").text("<@spring.message code='edit' />").appendTo(editGroup).button();
 		
 		var editMenu = $("<ul class='edit-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li editOperation='editStyle' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
-		$("<li editOperation='editContent' auto-close-prevent='ve-edit-ele-text-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
+		$("<li editOperation='editGlobalChartTheme' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartTheme' /></div>").appendTo(editMenu);
+		$("<li editOperation='editGlobalStyle' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalStyle' /></div>").appendTo(editMenu);
+		$("<li class='ui-menu-divider' />").appendTo(editMenu);
+		$("<li editOperation='editChartTheme' />").html("<div><@spring.message code='dashboard.opt.edit.chartTheme' /></div>").appendTo(editMenu);
+		$("<li editOperation='editStyle' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
+		$("<li editOperation='editContent' auto-close-prevent='veditor-content-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
 		editMenu.appendTo(editGroup).menu(
 		{
 			select: function(event, ui)
@@ -853,17 +882,35 @@
 				{
 					if(editOperation == "editStyle")
 					{
+						if(!dashboardEditor.hasSelectedElement())
+						{
+							$.tipInfo(dashboardEditor.i18n.selectedElementRequired);
+							return;
+						}
 						
+						var panel = po.element(".veditor-style-panel");
+						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
+					}
+					else if(editOperation == "editGlobalStyle")
+					{
+						var panel = po.element(".veditor-style-panel");
+						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 					else if(editOperation == "editContent")
 					{
+						if(!dashboardEditor.hasSelectedElement())
+						{
+							$.tipInfo(dashboardEditor.i18n.selectedElementRequired);
+							return;
+						}
+						
 						if(!dashboardEditor.isEditTextElement())
 						{
 							$.tipInfo("<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />");
 							return;
 						}
 						
-						var panel = po.element(".ve-edit-ele-text-panel");
+						var panel = po.element(".veditor-content-panel");
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 						po.element("input[name='content']", panel).val(dashboardEditor.getElementText()).focus();
 					}
@@ -884,9 +931,8 @@
 		$("<button type='button' />").text("<@spring.message code='delete' />").appendTo(deleteGroup).button();
 		
 		var deleteMenu = $("<ul class='delete-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li deleteOperation='unbindChart' />").html("<div><@spring.message code='dashboard.opt.delete.unbindChart' /></div>").appendTo(deleteMenu);
-		$("<li class='ui-menu-divider' />").appendTo(deleteMenu);
 		$("<li deleteOperation='deleteElement' />").html("<div><@spring.message code='dashboard.opt.delete.element' /></div>").appendTo(deleteMenu);
+		$("<li deleteOperation='unbindChart' />").html("<div><@spring.message code='dashboard.opt.delete.unbindChart' /></div>").appendTo(deleteMenu);
 		deleteMenu.appendTo(deleteGroup).menu(
 		{
 			select: function(event, ui)

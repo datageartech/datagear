@@ -27,6 +27,8 @@
 	i18n.insertInsideChartOnChartEleDenied = "图表元素内不允许再插入图表元素";
 	i18n.selectElementForSetChart = "请选择要设置/替换的图表元素";
 	i18n.canEditOnlyTextElement = "仅可编辑纯文本元素";
+	i18n.selectedElementRequired = "请选择要操作的元素";
+	i18n.selectedNotChartElement = "选定元素不是图表元素";
 	
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
@@ -170,6 +172,15 @@
 	};
 	
 	/**
+	 * 是否有选中元素。
+	 */
+	editor.hasSelectedElement = function()
+	{
+		var ele = this._refElement(null, true);
+		return !this._isEmptyElement(ele);
+	};
+	
+	/**
 	 * 插入图表。
 	 * 
 	 * @param chartWidgets 要插入的图表部件对象、数组
@@ -241,13 +252,21 @@
 	 */
 	editor.unbindChart = function(chartEle)
 	{
-		chartEle = this._refElement(chartEle);
+		chartEle = this._refElement(chartEle, true);
 		
-		if(this.dashboard.renderedChart(chartEle))
+		if(this._isEmptyElement(chartEle))
 		{
-			this.dashboard.removeChart(chartEle);
+			this.tipInfo(i18n.selectedElementRequired);
+			return false;
 		}
 		
+		if(!this.dashboard.renderedChart(chartEle))
+		{
+			this.tipInfo(i18n.selectedNotChartElement);
+			return false;
+		}
+		
+		this.dashboard.removeChart(chartEle);
 		this._removeElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET);
 	};
 	
@@ -316,12 +335,18 @@
 	 */
 	editor.setElementText = function(text, ele)
 	{
-		ele = this._refElement(ele);
+		ele = this._refElement(ele, true);
+		
+		if(this._isEmptyElement(ele))
+		{
+			this.tipInfo(i18n.selectedElementRequired);
+			return false;
+		}
 		
 		if(!this.isEditTextElement(ele))
 		{
 			this.tipInfo(i18n.canEditOnlyTextElement);
-			return;
+			return false;
 		}
 		
 		this._setElementText(ele, text);
@@ -334,15 +359,63 @@
 	 */
 	editor.deleteElement = function(ele)
 	{
-		ele = this._refElement(ele);
+		ele = this._refElement(ele, true);
 		
-		if(ele.is("body"))
+		if(this._isEmptyElement(ele))
+		{
+			this.tipInfo(i18n.selectedElementRequired);
 			return false;
+		}
 		
 		var iframeEle = this._editElement(ele);
 		
 		ele.remove();
 		iframeEle.remove();
+		
+		this.changeFlag(true);
+	};
+	
+	/**
+	 * 设置元素样式。
+	 * 
+	 * @param styleObj 要设置的样式对象，格式为：{ 'color': '...', 'background-color': '...' }
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.setElementStyle = function(styleObj, ele)
+	{
+		ele = this._refElement(ele, true);
+		
+		if(this._isEmptyElement(ele))
+		{
+			this.tipInfo(i18n.selectedElementRequired);
+			return false;
+		}
+		
+		this._setElementStyle(ele, styleObj);
+	};
+	
+	/**
+	 * 设置全局样式（body）。
+	 * 
+	 * @param styleObj 要设置的样式对象，格式为：{ 'color': '...', 'background-color': '...' }
+	 */
+	editor.setGlobalStyle = function(styleObj)
+	{
+		this._setElementStyle($(document.body), styleObj);
+	};
+	
+	editor._setElementStyle = function(ele, styleObj, sync)
+	{
+		styleObj = (styleObj || {});
+		sync = (sync == null ? true : sync);
+		
+		chartFactory.elementStyle(ele, styleObj);
+		
+		if(sync)
+		{
+			var editEle = this._editElement(ele);
+			chartFactory.elementStyle(editEle, styleObj);
+		}
 		
 		this.changeFlag(true);
 	};
@@ -396,10 +469,14 @@
 		this.changeFlag(true);
 	};
 	
-	editor._refElement = function(refEle)
+	editor._refElement = function(refEle, excludeBody)
 	{
-		refEle = (!refEle ? (this._getSelected()) : refEle);
-		refEle = (refEle == null || refEle.length == 0 ? $(document.body) : refEle);
+		excludeBody = (excludeBody == null ? false : excludeBody);
+		
+		refEle = (this._isEmptyElement(refEle) ? this._getSelected() : refEle);
+		
+		if(!excludeBody)
+			refEle = (this._isEmptyElement(refEle) ? $(document.body) : refEle);
 		
 		return refEle;
 	};
@@ -448,6 +525,11 @@
 	editor._getSelected = function()
 	{
 		return $(".dg-show-ve-selected");
+	};
+	
+	editor._isEmptyElement = function(ele)
+	{
+		return (ele == null || ele.length == 0);
 	};
 	
 	editor._getVisualEditId = function($ele)

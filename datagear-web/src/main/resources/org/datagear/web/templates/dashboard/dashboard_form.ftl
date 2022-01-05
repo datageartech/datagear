@@ -24,7 +24,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dashboard">
-	<form id="${pageId}-form" action="${contextPath}/dashboard/${formAction}" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/dashboard/${formAction}" method="POST" class="dashboard-form">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(dashboard.id)!''}" />
@@ -194,20 +194,48 @@ readonly 是否只读操作，允许为null
 			</div>
 		</form>
 	</div>
-	<div class="ve-edit-ele-text-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+	<div class="veditor-content-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<form action="#" method="POST">
 			<div class="panel-head ui-widget-header ui-corner-all">
-				<@spring.message code='dashboard.visualEditor.editContent' />
+				<@spring.message code='dashboard.veditor.editContent' />
 			</div>
 			<div class="panel-content">
 				<div class="content-item">
 					<div class="label-wrapper">
-						<label><@spring.message code='dashboard.visualEditor.content' /></label>
+						<label><@spring.message code='dashboard.veditor.editContent.content' /></label>
 					</div>
 					<input type="text" name="content" value="" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="panel-foot">
+				<button type="submit"><@spring.message code='confirm' /></button>
+			</div>
+		</form>
+	</div>
+	<div class="veditor-style-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<form action="#" method="POST">
+			<div class="panel-head ui-widget-header ui-corner-all">
+				<@spring.message code='dashboard.veditor.editStyle' />
+			</div>
+			<div class="panel-content form-content">
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editStyle.color' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editStyle.bgColor' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="background-color" class="ui-widget ui-widget-content" size="100" />
+					</div>
+				</div>
+			</div>
+			<div class="panel-foot form-foot">
 				<button type="submit"><@spring.message code='confirm' /></button>
 			</div>
 		</form>

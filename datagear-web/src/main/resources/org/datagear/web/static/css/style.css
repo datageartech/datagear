@@ -3194,10 +3194,10 @@ table.dataTable tbody tr td select{
 .page-form-dashboard{
 	position: relative;
 }
-.page-form-dashboard.max-resource-editor-left form .form-content .form-item .form-item-label{
+.page-form-dashboard.max-resource-editor-left form.dashboard-form .form-content .form-item .form-item-label{
 	width: 0;
 }
-.page-form-dashboard.max-resource-editor-left form .form-content .form-item .form-item-value{
+.page-form-dashboard.max-resource-editor-left form.dashboard-form .form-content .form-item .form-item-value{
 	width: 100%;
 }
 .page-form-dashboard .chart-list-panel{
@@ -3523,7 +3523,9 @@ table.dataTable tbody tr td select{
 	top: 0.5em;
 	right: 0.5em;
 }
-.page-form-dashboard .ve-edit-ele-text-panel{
+.page-form-dashboard .veditor-content-panel,
+.page-form-dashboard .veditor-style-panel
+{
 	position: absolute;
     width: 30%;
     display: none;
