@@ -39,23 +39,23 @@ readonly 是否只读操作，允许为null
 						<#include "include/dataSet_form_file_input.ftl">
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item error-newline">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.excel.sheetIndex.desc' />">
 							<@spring.message code='dataSet.excel.sheetIndex' />
 						</label>
 					</div>
-					<div class="form-item-value error-newline">
+					<div class="form-item-value">
 						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''}" class="ui-widget ui-widget-content" style="width:41%;" />
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item error-newline">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.excel.nameRow.desc' />">
 							<@spring.message code='dataSet.excel.nameRow' />
 						</label>
 					</div>
-					<div class="form-item-value error-newline">
+					<div class="form-item-value">
 						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" />
 						<span class="nameRow-radios">
 							<label for="${pageId}-nameRow_0">
@@ -71,23 +71,23 @@ readonly 是否只读操作，允许为null
 						<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" style="width:4.1em;" />
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item error-newline">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.excel.dataRowExp.desc' />">
 							<@spring.message code='dataSet.excel.dataRowExp' />
 						</label>
 					</div>
-					<div class="form-item-value error-newline">
+					<div class="form-item-value">
 						<input type="text" name="dataRowExp" value="${(dataSet.dataRowExp)!''}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item error-newline">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.excel.dataColumnExp.desc' />">
 							<@spring.message code='dataSet.excel.dataColumnExp' />
 						</label>
 					</div>
-					<div class="form-item-value error-newline">
+					<div class="form-item-value">
 						<input type="text" name="dataColumnExp" value="${(dataSet.dataColumnExp)!''}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>

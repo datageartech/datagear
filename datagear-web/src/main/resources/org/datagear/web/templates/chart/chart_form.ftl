@@ -50,20 +50,22 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
-			<div class="form-item">
+			<div class="form-item error-newline">
 				<div class="form-item-label">
 					<label title="<@spring.message code='chart.chartDataSets.desc' />">
 						<@spring.message code='chart.chartDataSets' />
 					</label>
 				</div>
-				<div class="form-item-value error-newline form-item-value-chartDataSet">
+				<div class="form-item-value form-item-value-chartDataSet">
 					<input type="text" name="dataSignValidation" style="display: none" />
-					<div class="data-set-wrapper ui-widget ui-widget-content">
+					<div class="data-set-wrapper input ui-widget ui-widget-content">
 					</div>
-					<#if !readonly>
-					<button type="button" class="add-data-set-button"><@spring.message code='add' /></button>
-					</#if>
-					<button type="button" auto-close-prevent="dataformat-panel" class="dataformat-button"><@spring.message code='chart.resultDataFormat' /></button>
+					<div class="data-set-opt">
+						<#if !readonly>
+						<button type="button" class="add-data-set-button"><@spring.message code='add' /></button>
+						</#if>
+						<button type="button" auto-close-prevent="dataformat-panel" class="dataformat-button"><@spring.message code='chart.resultDataFormat' /></button>
+					</div>
 					<div class='data-sign-select-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
 						<div class="select-panel-head panel-head ui-widget-header ui-corner-all"><@spring.message code='chart.selectDataSign' /></div>
 						<div class="select-panel-content panel-content">
@@ -71,133 +73,6 @@ readonly 是否只读操作，允许为null
 							<div class="content-right ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 								<div class="data-sign-label"></div>
 								<div class="data-sign-desc"></div>
-							</div>
-						</div>
-					</div>
-					<div id="${pageId}-dataFormatPanel" class='dataformat-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-						<div class="panel-head ui-widget-header ui-corner-all">
-							<label class="tip-label" title="<@spring.message code='chart.resultDataFormat.desc' />">
-								<@spring.message code='chart.resultDataFormat' />
-							</label>
-						</div>
-						<div class="panel-content">
-							<div class="form">
-								<div class="form-content">
-									<div class="form-item">
-										<div class="form-item-label">
-											<label title="<@spring.message code='chart.resultDataFormatEnable.desc' />">
-												<@spring.message code='chart.resultDataFormatEnable' />
-											</label>
-										</div>
-										<div class="form-item-value">
-											<div class="resultDataFormatEnable-radios">
-												<label for="${pageId}-resultDataFormatEnable-0" title="">
-													<@spring.message code='enable' />
-												</label>
-									   			<input type="radio" id="${pageId}-resultDataFormatEnable-0" name="resultDataFormatEnable" value="true"
-									   				<#if enableResultDataFormat>checked="checked"</#if> />
-												<label for="${pageId}-resultDataFormatEnable-1" title="">
-													<@spring.message code='disable' />
-												</label>
-									   			<input type="radio" id="${pageId}-resultDataFormatEnable-1" name="resultDataFormatEnable" value="false"
-									   				<#if !enableResultDataFormat>checked="checked"</#if> />
-											</div>
-										</div>
-									</div>
-									<div class="form-item resultDataFormatEnableAware">
-										<div class="form-item-label">
-											<label><@spring.message code='chart.resultDataFormat.dateType' /></label>
-										</div>
-										<div class="form-item-value">
-											<div class="resultDataFormat-dateType-radios">
-												<label for="${pageId}-resultDataFormat-dateType-0" title="">
-													<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
-												</label>
-									   			<input type="radio" id="${pageId}-resultDataFormat-dateType-0"
-									   				<#if ResultDataFormat.TYPE_STRING == initResultDataFormat.dateType>checked="checked"</#if>
-									   				name="resultDataFormat.dateType" value="${ResultDataFormat.TYPE_STRING}" />
-												<label for="${pageId}-resultDataFormat-dateType-1" title="">
-													<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
-												</label>
-									   			<input type="radio" id="${pageId}-resultDataFormat-dateType-1"
-									   				<#if ResultDataFormat.TYPE_NUMBER == initResultDataFormat.dateType>checked="checked"</#if>
-									   				name="resultDataFormat.dateType" value="${ResultDataFormat.TYPE_NUMBER}" />
-											</div>
-										</div>
-									</div>
-									<div class="form-item resultDataFormatEnableAware">
-										<div class="form-item-label">
-											<label title="<@spring.message code='chart.resultDataFormat.dateFormat.desc' />">
-												<@spring.message code='chart.resultDataFormat.dateFormat' />
-											</label>
-										</div>
-										<div class="form-item-value">
-											<input name="resultDataFormat.dateFormat" type="text" value="${(initResultDataFormat.dateFormat)!}" class="ui-widget ui-widget-content" />
-										</div>
-									</div>
-									<div class="form-item resultDataFormatEnableAware">
-										<div class="form-item-label">
-											<label><@spring.message code='chart.resultDataFormat.timeType' /></label>
-										</div>
-										<div class="form-item-value">
-											<div class="resultDataFormat-timeType-radios">
-												<label for="${pageId}-resultDataFormat-timeType-0" title="">
-													<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
-												</label>
-									   			<input type="radio" id="${pageId}-resultDataFormat-timeType-0"
-									   				<#if ResultDataFormat.TYPE_STRING == initResultDataFormat.timeType>checked="checked"</#if>
-									   				name="resultDataFormat.timeType" value="${ResultDataFormat.TYPE_STRING}" />
-												<label for="${pageId}-resultDataFormat-timeType-1" title="">
-													<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
-												</label>
-									   			<input type="radio" id="${pageId}-resultDataFormat-timeType-1"
-									   				<#if ResultDataFormat.TYPE_NUMBER == initResultDataFormat.timeType>checked="checked"</#if>
-									   				name="resultDataFormat.timeType" value="${ResultDataFormat.TYPE_NUMBER}" />
-											</div>
-										</div>
-									</div>
-									<div class="form-item resultDataFormatEnableAware">
-										<div class="form-item-label">
-											<label title="<@spring.message code='chart.resultDataFormat.timeFormat.desc' />">
-												<@spring.message code='chart.resultDataFormat.timeFormat' />
-											</label>
-										</div>
-										<div class="form-item-value">
-											<input name="resultDataFormat.timeFormat" type="text" value="${(initResultDataFormat.timeFormat)!}" class="ui-widget ui-widget-content" />
-										</div>
-									</div>
-									<div class="form-item resultDataFormatEnableAware">
-										<div class="form-item-label">
-											<label><@spring.message code='chart.resultDataFormat.timestampType' /></label>
-										</div>
-										<div class="form-item-value">
-											<div class="resultDataFormat-timestampType-radios">
-												<label for="${pageId}-resultDataFormat-timestampType-0" title="">
-													<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
-												</label>
-									   			<input type="radio" id="${pageId}-resultDataFormat-timestampType-0"
-									   				<#if ResultDataFormat.TYPE_STRING == initResultDataFormat.timestampType>checked="checked"</#if>
-									   				name="resultDataFormat.timestampType" value="${ResultDataFormat.TYPE_STRING}" />
-												<label for="${pageId}-resultDataFormat-timestampType-1" title="">
-													<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
-												</label>
-									   			<input type="radio" id="${pageId}-resultDataFormat-timestampType-1"
-									   				<#if ResultDataFormat.TYPE_NUMBER == initResultDataFormat.timestampType>checked="checked"</#if>
-									   				name="resultDataFormat.timestampType" value="${ResultDataFormat.TYPE_NUMBER}" />
-											</div>
-										</div>
-									</div>
-									<div class="form-item resultDataFormatEnableAware">
-										<div class="form-item-label">
-											<label title="<@spring.message code='chart.resultDataFormat.timestampFormat.desc' />">
-												<@spring.message code='chart.resultDataFormat.timestampFormat' />
-											</label>
-										</div>
-										<div class="form-item-value">
-											<input name="resultDataFormat.timestampFormat" type="text" value="${(initResultDataFormat.timestampFormat)!}" class="ui-widget ui-widget-content" />
-										</div>
-									</div>
-								</div>
 							</div>
 						</div>
 					</div>
@@ -238,6 +113,133 @@ readonly 是否只读操作，允许为null
 			&nbsp;&nbsp;
 			<button id="saveAndShowChart" type="button"><@spring.message code='chart.saveAndShow' /></button>
 			</#if>
+		</div>
+		<div id="${pageId}-dataFormatPanel" class='dataformat-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+			<div class="panel-head ui-widget-header ui-corner-all">
+				<label class="tip-label" title="<@spring.message code='chart.resultDataFormat.desc' />">
+					<@spring.message code='chart.resultDataFormat' />
+				</label>
+			</div>
+			<div class="panel-content">
+				<div class="form display-37">
+					<div class="form-content">
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='chart.resultDataFormatEnable.desc' />">
+									<@spring.message code='chart.resultDataFormatEnable' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<div class="resultDataFormatEnable-radios">
+									<label for="${pageId}-resultDataFormatEnable-0" title="">
+										<@spring.message code='enable' />
+									</label>
+						   			<input type="radio" id="${pageId}-resultDataFormatEnable-0" name="resultDataFormatEnable" value="true"
+						   				<#if enableResultDataFormat>checked="checked"</#if> />
+									<label for="${pageId}-resultDataFormatEnable-1" title="">
+										<@spring.message code='disable' />
+									</label>
+						   			<input type="radio" id="${pageId}-resultDataFormatEnable-1" name="resultDataFormatEnable" value="false"
+						   				<#if !enableResultDataFormat>checked="checked"</#if> />
+								</div>
+							</div>
+						</div>
+						<div class="form-item resultDataFormatEnableAware">
+							<div class="form-item-label">
+								<label><@spring.message code='chart.resultDataFormat.dateType' /></label>
+							</div>
+							<div class="form-item-value">
+								<div class="resultDataFormat-dateType-radios">
+									<label for="${pageId}-resultDataFormat-dateType-0" title="">
+										<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
+									</label>
+						   			<input type="radio" id="${pageId}-resultDataFormat-dateType-0"
+						   				<#if ResultDataFormat.TYPE_STRING == initResultDataFormat.dateType>checked="checked"</#if>
+						   				name="resultDataFormat.dateType" value="${ResultDataFormat.TYPE_STRING}" />
+									<label for="${pageId}-resultDataFormat-dateType-1" title="">
+										<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
+									</label>
+						   			<input type="radio" id="${pageId}-resultDataFormat-dateType-1"
+						   				<#if ResultDataFormat.TYPE_NUMBER == initResultDataFormat.dateType>checked="checked"</#if>
+						   				name="resultDataFormat.dateType" value="${ResultDataFormat.TYPE_NUMBER}" />
+								</div>
+							</div>
+						</div>
+						<div class="form-item resultDataFormatEnableAware">
+							<div class="form-item-label">
+								<label title="<@spring.message code='chart.resultDataFormat.dateFormat.desc' />">
+									<@spring.message code='chart.resultDataFormat.dateFormat' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input name="resultDataFormat.dateFormat" type="text" value="${(initResultDataFormat.dateFormat)!}" class="ui-widget ui-widget-content" />
+							</div>
+						</div>
+						<div class="form-item resultDataFormatEnableAware">
+							<div class="form-item-label">
+								<label><@spring.message code='chart.resultDataFormat.timeType' /></label>
+							</div>
+							<div class="form-item-value">
+								<div class="resultDataFormat-timeType-radios">
+									<label for="${pageId}-resultDataFormat-timeType-0" title="">
+										<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
+									</label>
+						   			<input type="radio" id="${pageId}-resultDataFormat-timeType-0"
+						   				<#if ResultDataFormat.TYPE_STRING == initResultDataFormat.timeType>checked="checked"</#if>
+						   				name="resultDataFormat.timeType" value="${ResultDataFormat.TYPE_STRING}" />
+									<label for="${pageId}-resultDataFormat-timeType-1" title="">
+										<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
+									</label>
+						   			<input type="radio" id="${pageId}-resultDataFormat-timeType-1"
+						   				<#if ResultDataFormat.TYPE_NUMBER == initResultDataFormat.timeType>checked="checked"</#if>
+						   				name="resultDataFormat.timeType" value="${ResultDataFormat.TYPE_NUMBER}" />
+								</div>
+							</div>
+						</div>
+						<div class="form-item resultDataFormatEnableAware">
+							<div class="form-item-label">
+								<label title="<@spring.message code='chart.resultDataFormat.timeFormat.desc' />">
+									<@spring.message code='chart.resultDataFormat.timeFormat' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input name="resultDataFormat.timeFormat" type="text" value="${(initResultDataFormat.timeFormat)!}" class="ui-widget ui-widget-content" />
+							</div>
+						</div>
+						<div class="form-item resultDataFormatEnableAware">
+							<div class="form-item-label">
+								<label><@spring.message code='chart.resultDataFormat.timestampType' /></label>
+							</div>
+							<div class="form-item-value">
+								<div class="resultDataFormat-timestampType-radios">
+									<label for="${pageId}-resultDataFormat-timestampType-0" title="">
+										<@spring.message code='chart.resultDataFormat.TYPE_STRING' />
+									</label>
+						   			<input type="radio" id="${pageId}-resultDataFormat-timestampType-0"
+						   				<#if ResultDataFormat.TYPE_STRING == initResultDataFormat.timestampType>checked="checked"</#if>
+						   				name="resultDataFormat.timestampType" value="${ResultDataFormat.TYPE_STRING}" />
+									<label for="${pageId}-resultDataFormat-timestampType-1" title="">
+										<@spring.message code='chart.resultDataFormat.TYPE_NUMBER' />
+									</label>
+						   			<input type="radio" id="${pageId}-resultDataFormat-timestampType-1"
+						   				<#if ResultDataFormat.TYPE_NUMBER == initResultDataFormat.timestampType>checked="checked"</#if>
+						   				name="resultDataFormat.timestampType" value="${ResultDataFormat.TYPE_NUMBER}" />
+								</div>
+							</div>
+						</div>
+						<div class="form-item resultDataFormatEnableAware">
+							<div class="form-item-label">
+								<label title="<@spring.message code='chart.resultDataFormat.timestampFormat.desc' />">
+									<@spring.message code='chart.resultDataFormat.timestampFormat' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input name="resultDataFormat.timestampFormat" type="text" value="${(initResultDataFormat.timestampFormat)!}" class="ui-widget ui-widget-content" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</form>
 	<div class="data-set-param-value-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
@@ -729,8 +731,18 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".dataformat-button").click(function()
 	{
-		po.element("#${pageId}-dataFormatPanel").toggle();
+		var panel = po.element("#${pageId}-dataFormatPanel");
+		
+		if(panel.is(":hidden"))
+		{
+			panel.show();
+			panel.position({ my : "right bottom+50", at : "left bottom", of : this});
+		}
+		else
+			panel.hide();
 	});
+	
+	po.element("#${pageId}-dataFormatPanel").draggable({ handle : ".ui-widget-header" });
 	
 	po.element(".add-data-set-button").click(function()
 	{

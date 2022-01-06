@@ -9,12 +9,9 @@
 <#--
 数据分析项目相关表单页：所属数据分析项目选择框
 -->
-<div class="form-item form-item-analysisProject">
-	<div class="form-item-label">
-		<label><@spring.message code='analysisProject.ownerAnalysisProject' /></label>
-	</div>
+<div class="form-item-analysisProject form-item display-37">
 	<div class="form-item-value">
-		<input type="text" name="analysisProject.name" value="" class="ui-widget ui-widget-content" readonly="readonly" />
+		<input type="text" name="analysisProject.name" value="" placeholder="<@spring.message code='analysisProject.ownerAnalysisProject' />" class="ui-widget ui-widget-content" readonly="readonly" />
 		<input type="hidden" name="analysisProject.id" value="" />
 		<#if !readonly>
 		<ul class="analysisProjectActionSelect lightweight-menu">

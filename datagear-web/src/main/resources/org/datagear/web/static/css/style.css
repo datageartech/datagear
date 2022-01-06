@@ -210,31 +210,74 @@ a.link:hover{
     filter: Alpha(Opacity=60);
 }
 
+/*标签-值条目*/
+.item-lv{
+	display: flex;
+	align-items: center;
+	padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+.item-lv .item-lv-l,
+.item-lv .item-lv-v{
+	white-space: nowrap;
+}
+.item-lv .item-lv-l,
+.item-lv.item-lv37 .item-lv-l{
+	width: 30%;
+}
+.item-lv .item-lv-v,
+.item-lv.item-lv37 .item-lv-v{
+	width: 70%;
+}
+.item-lv.item-lv28 .item-lv-l{
+	width: 20%;
+}
+.item-lv.item-lv28 .item-lv-v{
+	width: 80%;
+}
+.item-lv.item-lv46 .item-lv-l{
+	width: 40%;
+}
+.item-lv.item-lv46 .item-lv-v{
+	width: 60%;
+}
+.item-lv.inline{
+	display: inline-block;
+}
+.item-lv.inline .item-lv-l{
+	display: inline-block;
+	width: auto;
+	vertical-align: middle;
+	margin-right: 0.5em;
+}
+.item-lv.inline .item-lv-v{
+	display: inline-block;
+	width: auto;
+	vertical-align: middle;
+}
+
 /*表单*/
-form,
-.form{}
-form .form-head,
-.form .form-head{}
-form .form-content,
-.form .form-content{}
-form .form-content .form-item,
-.form .form-content .form-item{
+form, .form{}
+form .form-head, .form .form-head{}
+form .form-content, .form .form-content{}
+form .form-item, .form .form-item{
+	display: flex;
+	align-items: center;
 	padding: .3em 0;
+	min-width: 10em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	min-width: 10em;
 }
-form .form-content .form-item .form-item-label,
-.form .form-content .form-item .form-item-label{
-	display: inline-block;
+form .form-item .form-item-label,
+.form .form-item .form-item-label{
 	width: 20%;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-form .form-content .form-item .form-item-label label,
-.form .form-content .form-item .form-item-label label{
+form .form-item .form-item-label label,
+.form .form-item .form-item-label label{
 	white-space: nowrap;
 	overflow: hidden;
 	vertical-align: middle;
@@ -242,15 +285,15 @@ form .form-content .form-item .form-item-label label,
 	width: 95%;
 	overflow: hidden;
 }
-form .form-content .form-item .form-item-label label[title],
+form .form-item .form-item-label label[title],
 form .form-content .tip-label[title],
-.form .form-content .form-item .form-item-label label[title],
+.form .form-item .form-item-label label[title],
 .form .form-content .tip-label[title]{
 	position: relative;
 }
-form .form-content .form-item .form-item-label label[title]::after,
+form .form-item .form-item-label label[title]::after,
 form .form-content .tip-label[title]::after,
-.form .form-content .form-item .form-item-label label[title]::after,
+.form .form-item .form-item-label label[title]::after,
 .form .form-content .tip-label[title]::after{
 	content: "?";
     position: absolute;
@@ -268,186 +311,170 @@ form .form-content .tip-label[title]::after,
     border-width: 1px;
     border-style: solid;
 }
-form .form-content .form-item .form-item-value,
-.form .form-content .form-item .form-item-value{
-	display: inline-block;
+form .form-item .form-item-value,
+.form .form-item .form-item-value{
 	width: 80%;
-	margin-left: -0.71em;/*利用左侧外边距、内边距解决元素空隙问题*/
-	padding-left: 0.71em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	vertical-align: middle;
 }
-form .form-content .form-item .form-item-value .form-item-value,
-.form .form-content .form-item .form-item-value .form-item-value{
-	margin-left: 0;
-	padding-left: 0;
-}
-form .form-content .form-item .form-item-value input[type=text],
-form .form-content .form-item .form-item-value input[type=password],
-form .form-content .form-item .form-item-value textarea,
-form .form-content .form-item .form-item-value .input,
-.form .form-content .form-item .form-item-value input[type=text],
-.form .form-content .form-item .form-item-value input[type=password],
-.form .form-content .form-item .form-item-value textarea,
-.form .form-content .form-item .form-item-value .input{
-	margin-right: 0.3em;/*文本框与后面按钮间距*/
+form .form-item .form-item-value input[type=text],
+form .form-item .form-item-value input[type=password],
+form .form-item .form-item-value textarea,
+form .form-item .form-item-value .input,
+.form .form-item .form-item-value input[type=text],
+.form .form-item .form-item-value input[type=password],
+.form .form-item .form-item-value textarea,
+.form .form-item .form-item-value .input{
+	display: inline-block;
 	width: 50%;
 	vertical-align: middle;
-}
-form .form-content .form-item .form-item-value input[type=text],
-form .form-content .form-item .form-item-value input[type=password],
-form .form-content .form-item .form-item-value textarea,
-.form .form-content .form-item .form-item-value input[type=text],
-.form .form-content .form-item .form-item-value input[type=password],
-.form .form-content .form-item .form-item-value textarea{
 	padding: 0.3em 0.41em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-form .form-content .form-item .form-item-value textarea,
-.form .form-content .form-item .form-item-value textarea{
+form .form-item .form-item-value > *,
+.form .form-item .form-item-value > *{
+	margin-right: 0.3em;
+}
+form .form-item .form-item-value > *:last-child,
+.form .form-item .form-item-value > *:last-child{
+	margin-right: 0;
+}
+form .form-item .form-item-value textarea,
+.form .form-item .form-item-value textarea{
 	width: 60%;
 	height: 5em;
 }
-form .form-content .form-item label.error,
-.form .form-content .form-item label.error{
+form .form-item .form-item-value .item-lv,
+.form .form-item .form-item-value .item-lv{
+	margin-left: 2em;
+}
+form .form-item label.error,
+.form .form-item label.error{
 	color: red;
 	font-size: 0.9em;
 	padding-left: 0.2em;
 	white-space: nowrap;
 }
-form .form-content .form-item .form-item-value.error-newline,
-.form .form-content .form-item .form-item-value.error-newline{/*验证提示信息在新行*/
+form .form-item.error-newline .form-item-label,
+.form .form-item.error-newline .form-item-label{
+    padding-bottom: 1.4em;
+}
+form .form-item.error-newline .form-item-value,
+form .form-item .form-item-value.error-newline,
+.form .form-item.error-newline .form-item-value,
+.form .form-item .form-item-value.error-newline{
 	position: relative;
     padding-bottom: 1.4em;
 }
-form .form-content .form-item .form-item-value.error-newline label.error,
-.form .form-content .form-item .form-item-value.error-newline label.error{
+form .form-item.error-newline .form-item-value label.error,
+form .form-item .form-item-value.error-newline label.error,
+.form .form-item.error-newline .form-item-value label.error,
+.form .form-item .form-item-value.error-newline label.error{
 	position: absolute;
-	left: 0.71em;
+	left: 0;
 	bottom: 0;
 	padding-left: 0 !important;
 }
-form .form-content .form-item .form-item-value .form-item-value.error-newline label.error,
-.form .form-content .form-item .form-item-value .form-item-value.error-newline label.error{
-	left: 0;
-}
-form .form-content .form-item .form-item-value input[type=text].error,
-form .form-content .form-item .form-item-value input[type=password].error,
-form .form-content .form-item .form-item-value textarea.error,
-.form .form-content .form-item .form-item-value input[type=text].error,
-.form .form-content .form-item .form-item-value input[type=password].error,
-.form .form-content .form-item .form-item-value textarea.error{
+form .form-item .form-item-value input[type=text].error,
+form .form-item .form-item-value input[type=password].error,
+form .form-item .form-item-value textarea.error,
+form .form-item .form-item-value .input.error,
+.form .form-item .form-item-value input[type=text].error,
+.form .form-item .form-item-value input[type=password].error,
+.form .form-item .form-item-value textarea.error,
+.form .form-item .form-item-value .input.error{
 	border: 1px solid red;
 }
-form .form-content .form-item .input-desc,
-.form .form-content .form-item .input-desc{
+form .form-item .input-desc,
+.form .form-item .input-desc{
 	display: inline-block;
-}
-form .form-content .form-item .form-item-value .form-item,
-.form .form-content .form-item .form-item-value .form-item{
-	width: auto;
-	display: inline-block;
-	margin-left: 2em;
-}
-form .form-content .form-item .form-item-value .form-item .form-item-label,
-.form .form-content .form-item .form-item-value .form-item .form-item-label{
-	width: auto;
-}
-form .form-content .form-item .form-item-value .form-item .form-item-label label,
-.form .form-content .form-item .form-item-value .form-item .form-item-label label{
-	width: auto;
-}
-form .form-content .form-item .form-item-value .form-item .form-item-value,
-.form .form-content .form-item .form-item-value .form-item .form-item-value{
-	width: auto;
-	margin-left: 1em;
 }
 form .form-foot,
 .form .form-foot{
 	text-align: center;
 	padding-top: .5em;
 }
-form .form-foot .form-operation,
-.form .form-foot .form-operation{
-	display: inline-block;
-}
-form .form-foot .form-operation.form-operation-batch-set,
-.form .form-foot .form-operation.form-operation-batch-set{
-	position: relative;
-	padding-right: 16px;
-}
-form .form-foot .form-operation.form-operation-batch-set .batch-set-switch,
-.form .form-foot .form-operation.form-operation-batch-set .batch-set-switch{
-	cursor: pointer;
-	opacity: 0.5;
-	filter: Alpha(Opacity=50);
-}
-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel,
-.form .form-foot .form-operation.form-operation-batch-set .batch-set-panel{
-	position: absolute;
-	left: -23em;
-	top: 0.4em;
-	display: inline-block;
-	opacity: 0.7;
-	filter: Alpha(Opacity=70);
-}
-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel label,
-.form .form-foot .form-operation.form-operation-batch-set .batch-set-panel label{
-	margin-left: 1em;
-	margin-right: 0.41em;
-}
-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count,
-.form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count{
-	width: 3em;
-}
-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count.error,
-.form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count.error{
-	color: red;
-	border-color: red;
-}
 form .form-foot .ui-button,
 .form .form-foot .ui-button{
 	margin-left: .5em;
 	margin-right: .5em;
 }
-form.display-block .form-content .form-item,
-.form.display-block .form-content .form-item{
+/*标签、值分行*/
+form.display-block .form-item,
+.form.display-block .form-item{
+	display: block;
 	position: relative;
 	padding-bottom: 1.4em;
 }
-form.display-block .form-content .form-item .form-item-label,
-.form.display-block .form-content .form-item .form-item-label{
+form.display-block .form-item .form-item-label,
+.form.display-block .form-item .form-item-label{
 	display: block;
-	width: auto;
+	width: 100%;
 	padding-bottom: 0.2em;
 }
-form.display-block .form-content .form-item .form-item-value,
-.form.display-block .form-content .form-item .form-item-value{
+form.display-block .form-item .form-item-value,
+.form.display-block .form-item .form-item-value{
 	display: block;
-	width: auto;
-	margin-left: 0;
-	padding-left: 0;
+	width: 100%;
 }
-form.display-block .form-content .form-item .form-item-value input[type=text],
-form.display-block .form-content .form-item .form-item-value input[type=password],
-form.display-block .form-content .form-item .form-item-value textarea,
-form.display-block .form-content .form-item .form-item-value .input,
-.form.display-block .form-content .form-item .form-item-value input[type=text],
-.form.display-block .form-content .form-item .form-item-value input[type=password],
-.form.display-block .form-content .form-item .form-item-value textarea,
-.form.display-block .form-content .form-item .form-item-value .input{
+form.display-block .form-item .form-item-value input[type=text],
+form.display-block .form-item .form-item-value input[type=password],
+form.display-block .form-item .form-item-value textarea,
+form.display-block .form-item .form-item-value .input,
+.form.display-block .form-item .form-item-value input[type=text],
+.form.display-block .form-item .form-item-value input[type=password],
+.form.display-block .form-item .form-item-value textarea,
+.form.display-block .form-item .form-item-value .input{
 	width: 95%;
 }
-form.display-block .form-content .form-item .form-item-value label.error,
-.form.display-block .form-content .form-item .form-item-value label.error{
+form.display-block .form-item .form-item-value label.error,
+.form.display-block .form-item .form-item-value label.error{
 	position: absolute;
 	left: 0;
 	bottom: 0;
 	padding-left: 0 !important;
+}
+/*标签、值行内3:7*/
+form.display-37 .form-item .form-item-label,
+form .form-item.display-37 .form-item-label,
+.form.display-37 .form-item .form-item-label,
+.form .form-item.display-37 .form-item-label{
+	width: 30%;
+}
+form.display-37 .form-item .form-item-value,
+form .form-item.display-37 .form-item-value,
+.form.display-37 .form-item .form-item-value,
+.form .form-item.display-37 .form-item-value{
+	width: 70%;
+}
+/*标签、值行内4:6*/
+form.display-46 .form-item .form-item-label,
+form .form-item.display-46 .form-item-label,
+.form.display-46 .form-item .form-item-label,
+.form .form-item.display-46 .form-item-label{
+	width: 40%;
+}
+form.display-46 .form-item .form-item-value,
+form .form-item.display-46 .form-item-value,
+.form.display-46 .form-item .form-item-value,
+.form .form-item.display-46 .form-item-value{
+	width: 60%;
+}
+/*标签、值行内5:5*/
+form.display-55 .form-item .form-item-label,
+form .form-item.display-55 .form-item-label,
+.form.display-55 .form-item .form-item-label,
+.form .form-item.display-55 .form-item-label{
+	width: 50%;
+}
+form.display-55 .form-item .form-item-value,
+form .form-item.display-55 .form-item-value,
+.form.display-55 .form-item .form-item-value,
+.form .form-item.display-55 .form-item-value{
+	width: 50%;
 }
 
 /*轻型面板*/
@@ -507,34 +534,6 @@ form.display-block .form-content .form-item .form-item-value label.error,
 }
 .minor-list.deletable-list .minor-list-item .delete-icon{
 	cursor: pointer;
-}
-
-/*标签-值条目*/
-.item-lv{
-	display: flex;
-	align-items: center;
-	padding-top: 0.2em;
-    padding-bottom: 0.2em;
-}
-.item-lv .item-lv-l,
-.item-lv.item-lv37 .item-lv-l{
-	width: 30%;
-}
-.item-lv .item-lv-v,
-.item-lv.item-lv37 .item-lv-v{
-	width: 70%;
-}
-.item-lv.item-lv28 .item-lv-l{
-	width: 20%;
-}
-.item-lv.item-lv28 .item-lv-v{
-	width: 80%;
-}
-.item-lv.item-lv46 .item-lv-l{
-	width: 40%;
-}
-.item-lv.item-lv46 .item-lv-v{
-	width: 60%;
 }
 
 /*首选操作按钮*/
@@ -943,6 +942,39 @@ table.dataTable tbody tr td select{
 	border-radius: 3px;
 }
 
+/*数据源的数据表的表单*/
+form.table-form .form-foot .form-operation{
+	display: inline-block;
+}
+form.table-form .form-foot .form-operation.form-operation-batch-set{
+	position: relative;
+	padding-right: 16px;
+}
+form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-switch{
+	cursor: pointer;
+	opacity: 0.5;
+	filter: Alpha(Opacity=50);
+}
+form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel{
+	position: absolute;
+	left: -23em;
+	top: 0.4em;
+	display: inline-block;
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+}
+form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel label{
+	margin-left: 1em;
+	margin-right: 0.41em;
+}
+form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count{
+	width: 3em;
+}
+form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count.error{
+	color: red;
+	border-color: red;
+}
+
 /*编辑表格表单页面*/
 .page-edit-grid-form{
 	position: absolute;
@@ -986,19 +1018,19 @@ table.dataTable tbody tr td select{
 .page-edit-grid-form .form-panel form .upload-file-info .upload-percent{
 	margin-right: 0;
 }
-.page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-label{
+.page-edit-grid-form .form-panel form.hide-form-label .form-item .form-item-label{
 	display: none;
 }
-.page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value{
+.page-edit-grid-form .form-panel form.hide-form-label .form-item .form-item-value{
 	margin-left: 0;
 }
-.page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value{
+.page-edit-grid-form .form-panel form.hide-form-label .form-item .form-item-value{
 	width: 100%;
 }
-.page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value.text-value input[type='text']{
+.page-edit-grid-form .form-panel form.hide-form-label .form-item .form-item-value.text-value input[type='text']{
 	width: 60%;
 }
-.page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value.textarea-value textarea{
+.page-edit-grid-form .form-panel form.hide-form-label .form-item .form-item-value.textarea-value textarea{
 	width: 70%;
 }
 
@@ -1917,10 +1949,10 @@ table.dataTable tbody tr td select{
 	padding-left: 2em;
 	padding-right: 2em;
 }
-.page-form-schemaUrlBuilder form .form-content .form-item .form-item-value textarea{
+.page-form-schemaUrlBuilder form .form-item .form-item-value textarea{
 	vertical-align: top;
 }
-.page-form-schemaUrlBuilder form .form-content .form-item .form-item-value textarea.script-code-textarea{
+.page-form-schemaUrlBuilder form .form-item .form-item-value textarea.script-code-textarea{
 	height: 22em;
 }
 .page-form-schemaUrlBuilder .script-code-note{
@@ -1980,11 +2012,11 @@ table.dataTable tbody tr td select{
 	font-weight: bold;
 }
 
-.page-changelog form .form-content .form-item .form-item-label{
+.page-changelog form .form-item .form-item-label{
 	text-align: center;
 	width: 15%;
 }
-.page-changelog form .form-content .form-item-version{
+.page-changelog form .form-item-version{
 	font-weight: bold;
 }
 .page-changelog .changelog-content{
@@ -2164,10 +2196,10 @@ table.dataTable tbody tr td select{
 	text-align: left;
 	padding: 0.41em 1em;
 }
-.page-sqlpad .head .setting-wrapper .setting-panel form .form-content .form-item .form-item-label{
+.page-sqlpad .head .setting-wrapper .setting-panel form .form-item .form-item-label{
 	width: 35%;
 }
-.page-sqlpad .head .setting-wrapper .setting-panel form .form-content .form-item .form-item-value{
+.page-sqlpad .head .setting-wrapper .setting-panel form .form-item .form-item-value{
 	width: auto;
 }
 .page-sqlpad .head .setting-wrapper .setting-panel .ui-checkboxradio-icon{
@@ -2391,11 +2423,11 @@ table.dataTable tbody tr td select{
 	padding-bottom: 1em;
 	padding-left: 10%;
 }
-.page-dataexchange-type form .form-content .form-item{
+.page-dataexchange-type form .form-item{
 	padding-top: 0.5em;
 	padding-bottom: 0.5em;
 }
-.page-dataexchange-type form .form-content .form-item .input-desc{
+.page-dataexchange-type form .form-item .input-desc{
 	margin-left: 1em;
 }
 .page-dataexchange-type form .ui-checkboxradio-label{
@@ -2456,7 +2488,7 @@ table.dataTable tbody tr td select{
 	bottom: 0.2em;
 	height: 3em;
 }
-.page-dataexchange form .form-content .form-item.form-item-binaryFormat .form-item-value input[type=text]{
+.page-dataexchange form .form-item.form-item-binaryFormat .form-item-value input[type=text]{
 	display:inline-block;
 	width:30%;
 }
@@ -2696,10 +2728,6 @@ table.dataTable tbody tr td select{
 .page-form-dataSet .form-content{
 	overflow: auto;
 }
-.page-form-dataSet .workspace .form-item .form-item-label{
-	vertical-align:top;
-	margin-top: 0.2em;
-}
 .page-form-dataSet .workspace .form-item .form-item-value{
 	width: 39%;
 }
@@ -2922,11 +2950,8 @@ table.dataTable tbody tr td select{
 	position: relative;
 	overflow: hidden;
 }
-.page-form-chart form .form-content .form-item .form-item-value .input.chart-plugin{
-	width: 60%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
+.page-form-chart .chart-plugin{
+	width: 60% !important;
 }
 .page-form-chart .chart-plugin .plugin-icon{
 	position: absolute;
@@ -2952,15 +2977,11 @@ table.dataTable tbody tr td select{
 	max-width: 50%;
 }
 .page-form-chart .data-set-wrapper{
-	display: inline-block;
-	width: 60%;
+	width: 60% !important;
 	height: 100%;
 	min-height: 10em;
-	padding: 0.41em 0.41em;
 	overflow: auto;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
+	vertical-align: top;
 }
 .page-form-chart .data-set-wrapper .data-set-item{
 	padding: 0.41em 0.41em;
@@ -3120,17 +3141,24 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-sign-select-panel .select-panel-content .data-sign-item{
 	margin-bottom: 0.41em;
 }
+.page-form-chart .form-item-value-chartDataSet .data-set-opt{
+	display: inline-block;
+	height: 100%;
+	min-height: 10em;
+	position: relative;
+	vertical-align: top;
+}
 .page-form-chart .add-data-set-button{
 	position: absolute;
-	left: 60%;
+	left: 0;
 	top: 0;
-	margin-left: 1em;
+	white-space: nowrap;
 }
 .page-form-chart .dataformat-button{
 	position: absolute;
-	left: 60%;
-	bottom: 1.4em;
-	margin-left: 1em;
+	left: 0;
+	bottom: 0;
+	white-space: nowrap;
 }
 .page-form-chart .data-set-param-value-panel{
 	position: absolute;
@@ -3144,28 +3172,8 @@ table.dataTable tbody tr td select{
 }
 .page-form-chart .dataformat-panel{
 	position: absolute;
-	right: 40%;
-	bottom: -2.41em;
-	width: 60%;
-	margin-right: -1rem;
+	width: 50%;
 	display: none;
-}
-.page-form-chart .dataformat-panel .form-item{
-	display: block !important;
-}
-.page-form-chart .dataformat-panel .form-item .form-item-label{
-	width: 35% !important;
-}
-.page-form-chart .dataformat-panel .form-item .form-item-label label{
-	width: 95% !important;
-}
-.page-form-chart .dataformat-panel .form-item .form-item-value{
-	width: 65% !important;
-	margin-left: -0.71em !important;
-	padding-left: 0.71em !important;
-}
-.page-form-chart .dataformat-panel .form-item .form-item-value input[type=text]{
-	width: 80% !important;
 }
 
 .page-grid-chartPlugin{
@@ -3194,10 +3202,10 @@ table.dataTable tbody tr td select{
 .page-form-dashboard{
 	position: relative;
 }
-.page-form-dashboard.max-resource-editor-left form.dashboard-form .form-content .form-item .form-item-label{
+.page-form-dashboard.max-resource-editor-left form.dashboard-form .form-item .form-item-label{
 	width: 0;
 }
-.page-form-dashboard.max-resource-editor-left form.dashboard-form .form-content .form-item .form-item-value{
+.page-form-dashboard.max-resource-editor-left form.dashboard-form .form-item .form-item-value{
 	width: 100%;
 }
 .page-form-dashboard .chart-list-panel{
@@ -3504,10 +3512,10 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	display: inline-block;
 	z-index: 10;
-	bottom: -0.5em;
+	bottom: -0.8em;
 }
 .page-form-dashboard .form-item-value-resources .resize-editor-wrapper.resize-left{
-	left: -0.6em;
+	left: 0;
 }
 .page-form-dashboard .form-item-value-resources .resize-editor-wrapper.resize-right{
 	right: -0.6em;
@@ -3541,33 +3549,22 @@ table.dataTable tbody tr td select{
 	width: 60% !important;
 }
 .page-form .form-item-analysisProjectAware .form-item-analysisProject{
-	display: inline-block !important;
 	min-width: unset !important;
 	position: absolute;
 	right: 0;
 	top: -0.1em;
 }
-.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-label{
-	width: auto !important;
-	margin-right: 1em;
-}
-.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-label label{
-	width: 100%;
-}
 .page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value{
-	display: inline-block !important;
-	width: 13em !important;
-	position: relative;
+	width: 12.5em !important;
 }
 .page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value input{
 	width: 10em !important;
 }
-.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect{
+.page-form .form-item-analysisProjectAware .analysisProjectActionSelect{
 	position: absolute;
-    right: 0.1em;
 }
-.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect .analysis-project-menu-root,
-.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect .analysis-project-menu-root > .ui-menu-item-wrapper{
+.page-form .form-item-analysisProjectAware .analysisProjectActionSelect .analysis-project-menu-root,
+.page-form .form-item-analysisProjectAware .analysisProjectActionSelect .analysis-project-menu-root > .ui-menu-item-wrapper{
 	width: 1.7em;
 	height: 2em;
 }

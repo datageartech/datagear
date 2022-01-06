@@ -39,13 +39,13 @@ readonly 是否只读操作，允许为null
 						<#include "include/dataSet_form_file_input.ftl">
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item error-newline">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.jsonFile.dataJsonPath.desc' />">
 							<@spring.message code='dataSet.jsonFile.dataJsonPath' />
 						</label>
 					</div>
-					<div class="form-item-value error-newline">
+					<div class="form-item-value">
 						<input type="text" name="dataJsonPath" value="${(dataSet.dataJsonPath)!''}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>

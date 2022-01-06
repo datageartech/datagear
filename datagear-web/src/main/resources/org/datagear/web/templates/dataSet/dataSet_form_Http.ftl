@@ -40,11 +40,11 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<input type="text" name="uri" value="${(dataSet.uri)!''}" class="ui-widget ui-widget-content" />
 					
-					<div class="form-item" style="margin-left: 0;" title="<@spring.message code='dataSet.http.requestMethod' />">
-						<div class="form-item-label" style="display: none;">
+					<div class="item-lv inline" title="<@spring.message code='dataSet.http.requestMethod' />">
+						<div class="item-lv-l" style="display: none;">
 							<label><@spring.message code='dataSet.http.requestMethod' /></label>
 						</div>
-						<div class="form-item-value form-item-value-requestMethod">
+						<div class="form-item-value-requestMethod item-lv-v">
 							<select name="requestMethod">
 								<option value="${HttpDataSet.REQUEST_METHOD_GET}" <#if HttpDataSet.REQUEST_METHOD_GET == dataSet.requestMethod>selected="selected"</#if>>
 									<@spring.message code='dataSet.http.requestMethod.GET' />
@@ -82,11 +82,11 @@ readonly 是否只读操作，允许为null
 						</option>
 					</select>
 					
-					<div class="form-item">
-						<div class="form-item-label">
+					<div class="item-lv inline">
+						<div class="item-lv-l">
 							<label><@spring.message code='dataSet.http.requestContentCharset' /></label>
 						</div>
-						<div class="form-item-value form-item-value-requestContentCharset">
+						<div class="item-lv-v form-item-value-requestContentCharset">
 							<select name="requestContentCharset">
 								<#list availableCharsetNames as item>
 								<option value="${item}" <#if item == dataSet.requestContentCharset>selected="selected"</#if>>${item}</option>
@@ -109,13 +109,13 @@ readonly 是否只读操作，允许为null
 						</select>
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item error-newline">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.http.request.desc' />">
 							<@spring.message code='dataSet.http.request' />
 						</label>
 					</div>
-					<div class="form-item-value error-newline">
+					<div class="form-item-value">
 						<textarea name="requestContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.requestContent)!''}</textarea>
 						<textarea name="headerContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.headerContent)!''}</textarea>
 						<div class="workspace-editor-tabs light-tabs">
@@ -132,13 +132,13 @@ readonly 是否只读操作，允许为null
 						</div>
 					</div>
 				</div>
-				<div class="form-item form-item-responseDataJsonPath">
+				<div class="form-item-responseDataJsonPath form-item error-newline">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.http.responseDataJsonPath.desc' />">
 							<@spring.message code='dataSet.http.responseDataJsonPath' />
 						</label>
 					</div>
-					<div class="form-item-value error-newline">
+					<div class="form-item-value">
 						<input type="text" name="responseDataJsonPath" value="${(dataSet.responseDataJsonPath)!''}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>

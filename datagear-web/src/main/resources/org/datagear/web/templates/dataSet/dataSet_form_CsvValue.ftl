@@ -31,13 +31,13 @@ readonly 是否只读操作，允许为null
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">
 			<div class="workspace">
-				<div class="form-item">
+				<div class="form-item error-newline">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.csv.desc' />">
 							<@spring.message code='dataSet.csv' />
 						</label>
 					</div>
-					<div class="form-item-value error-newline">
+					<div class="form-item-value">
 						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''}</textarea>
 						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 							<div id="${pageId}-workspaceEditor" class="workspace-editor code-editor"></div>
