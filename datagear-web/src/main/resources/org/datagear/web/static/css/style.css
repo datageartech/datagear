@@ -3202,6 +3202,9 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form-dashboard{
 	position: relative;
 }
+.page-form-dashboard.max-resource-editor-left form.dashboard-form .form-item{
+	padding-left: 1px;
+}
 .page-form-dashboard.max-resource-editor-left form.dashboard-form .form-item .form-item-label{
 	width: 0;
 }

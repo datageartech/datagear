@@ -43,7 +43,7 @@ formAction 表单提交action，允许为null
 				</div>
 			</div>
 		</div>
-		<div class="form-foot" style="text-align:center;">
+		<div class="form-foot">
 			<input type="submit" value="<@spring.message code='test' />" class="recommended" />
 		</div>
 	</form>

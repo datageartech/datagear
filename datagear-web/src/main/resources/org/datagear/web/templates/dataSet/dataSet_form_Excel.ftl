@@ -107,7 +107,7 @@ readonly 是否只读操作，允许为null
 				<#include "include/dataSet_form_html_wow.ftl" >
 			</div>
 		</div>
-		<div class="form-foot" style="text-align:center;">
+		<div class="form-foot">
 			<#if !readonly>
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
 			<#else>

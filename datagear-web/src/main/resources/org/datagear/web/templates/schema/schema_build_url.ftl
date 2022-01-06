@@ -63,7 +63,7 @@ preview 是否是预览请求，允许为null
 				</div>
 			</div>
 		</div>
-		<div class="form-foot" style="text-align:center;">
+		<div class="form-foot">
 			<input type="submit" value="<@spring.message code='confirm' />" class="recommended" />
 		</div>
 	</form>

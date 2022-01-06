@@ -49,10 +49,8 @@ ${detectNewVersionScript?no_esc}
 					</div>
 				</div>
 			</div>
-			<div class="form-foot" style="text-align:center;">
+			<div class="form-foot">
 				<input type="submit" class="recommended" value="<@spring.message code='login.login' />" />
-				&nbsp;&nbsp;
-				<input type="reset" value="<@spring.message code='reset' />" />
 			</div>
 			<div class="form-foot small-text login-form-ext" style="text-align:right;">
 				<label for="remember-me-checkbox"><@spring.message code='login.rememberMe' /></label>

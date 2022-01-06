@@ -101,7 +101,7 @@ ${detectNewVersionScript?no_esc}
 					</div>
 					</#if>
 				</div>
-				<div class="form-foot" style="text-align:center;">
+				<div class="form-foot">
 					<input type="button" id="restartResetPassword" value="<@spring.message code='restart' />" <#if step.firstStep>disabled="disabled"</#if> />
 					<input type="submit" value="<@spring.message code='resetPassword.next' />" <#if step.finalStep>disabled="disabled"<#else>class="recommended"</#if> />
 				</div>

@@ -133,10 +133,9 @@ readonly 是否只读操作，允许为null
 				</div>
 			</div>
 		</div>
-		<div class="form-foot" style="text-align:center;">
+		<div class="form-foot">
 			<#if !readonly>
 			<button type="submit" class="recommended"><@spring.message code='save' /></button>
-			&nbsp;&nbsp;
 			<button id="saveAndShowDashboard" type="button"><@spring.message code='dashboard.saveAndShow' /></button>
 			</#if>
 		</div>
