@@ -340,13 +340,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		HtmlTplDashboardWidgetEntity dashboard = form.getDashboard();
 
-		String[] templates = dashboard.getTemplates();
-		String[] resourceNames = form.getResourceNames();
+		String[] templates = trimResourceNames(dashboard.getTemplates());
+		String[] resourceNames = trimResourceNames(form.getResourceNames());
 		String[] resourceContents = form.getResourceContents();
 		boolean[] resourceIsTemplates = form.getResourceIsTemplates();
-
-		trimResourceNames(templates);
-		trimResourceNames(resourceNames);
 
 		templates = mergeTemplates(templates, resourceNames, resourceIsTemplates);
 		dashboard.setTemplates(templates);
@@ -408,19 +405,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (widget == null)
 			throw new RecordNotFoundException();
 
-		trimResourceNames(templates);
+		templates = trimResourceNames(templates);
 		widget.setTemplates(templates);
 
 		this.htmlTplDashboardWidgetEntityService.update(user, widget);
 
-		Map<String, Object> data = new HashMap<>();
-		data.put("id", id);
-		data.put("templates", templates);
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(data);
-
-		return responseEntity;
+		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, templates);
+		return buildOperationMessageSaveSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/getResourceContent", produces = CONTENT_TYPE_JSON)
@@ -486,7 +477,17 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		dashboardWidgetResManager.delete(id, name);
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		String[] templates = dashboard.getTemplates();
+		String[] newTemplates = mergeTemplates(templates, name, false);
+
+		if (!Arrays.equals(templates, newTemplates))
+		{
+			dashboard.setTemplates(newTemplates);
+			this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+		}
+
+		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
+		return buildOperationMessageSaveSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/uploadResourceFile", produces = CONTENT_TYPE_JSON)
@@ -521,9 +522,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return results;
 	}
 
-	@RequestMapping(value = "/saveResourceFile", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveUploadResourceFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveResourceFile(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> saveUploadResourceFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") String id, @RequestParam("resourceFilePath") String resourceFilePath,
 			@RequestParam("resourceName") String resourceName) throws Exception
 	{
@@ -559,6 +560,45 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
+	}
+
+	@RequestMapping(value = "/saveResourceContent", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveResourceContent(HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam("id") String id, @RequestParam("resourceName") String resourceName,
+			@RequestParam("resourceContent") String resourceContent,
+			@RequestParam(value = "isTemplate", required = false) Boolean isTemplate) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		resourceName = trimResourceName(resourceName);
+		
+		boolean templatesChanged = false;
+		boolean resourceExists = this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager()
+				.exists(id, resourceName);
+		
+		saveResourceContent(dashboard, resourceName, resourceContent);
+
+		String[] templates = dashboard.getTemplates();
+		String[] newTemplates = mergeTemplates(templates, resourceName, Boolean.TRUE.equals(isTemplate));
+		templatesChanged = !Arrays.equals(templates, newTemplates);
+
+		if (templatesChanged)
+		{
+			dashboard.setTemplates(newTemplates);
+			this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+		}
+
+		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
+		data.put("templatesChanged", templatesChanged);
+		data.put("resourceExists", resourceExists);
+		return buildOperationMessageSaveSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping("/import")
@@ -1316,6 +1356,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		out.println("})(this);");
 	}
 
+	protected Map<String, Object> buildDashboardIdTemplatesHashMap(String id, String[] templates)
+	{
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("id", id);
+		map.put("templates", templates);
+
+		return map;
+	}
+
 	/**
 	 * 解析HTML模板的字符编码。
 	 * 
@@ -1434,7 +1483,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		try
 		{
-			writer = getResourceWriter(widget, name);
+			writer = IOUtil.getBufferedWriter(this.htmlTplDashboardWidgetEntityService
+					.getTemplateDashboardWidgetResManager().getWriter(widget, name));
 			writer.write(content);
 		}
 		finally
@@ -1462,15 +1512,31 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return IOUtil.getBufferedReader(reader);
 	}
 
-	protected Writer getResourceWriter(HtmlTplDashboardWidget widget, String template) throws IOException
+	/**
+	 * 合并模板。
+	 * 
+	 * @param templates          原模板数组，允许为{@code null}
+	 * @param resourceName
+	 * @param resourceIsTemplate
+	 * @return
+	 */
+	protected String[] mergeTemplates(String[] templates, String resourceName, boolean resourceIsTemplate)
 	{
-		return IOUtil.getBufferedWriter(this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager()
-				.getWriter(widget, template));
+		return mergeTemplates(templates, new String[] { resourceName }, new boolean[] { resourceIsTemplate });
 	}
 
+	/**
+	 * 合并模板。
+	 * 
+	 * @param templates           原模板数组，允许为{@code null}
+	 * @param resourceNames
+	 * @param resourceIsTemplates
+	 * @return
+	 */
 	protected String[] mergeTemplates(String[] templates, String[] resourceNames, boolean[] resourceIsTemplates)
 	{
 		List<String> ts = new ArrayList<>();
+
 		if (templates != null)
 			ts.addAll(Arrays.asList(templates));
 
@@ -1478,8 +1544,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		for (int i = 0; i < resourceNames.length; i++)
 		{
-			if (resourceIsTemplates[i] && !ts.contains(resourceNames[i]))
+			boolean contains = ts.contains(resourceNames[i]);
+
+			if (resourceIsTemplates[i] && !contains)
 				ts.add(resourceNames[i]);
+			else if (!resourceIsTemplates[i] && contains)
+				ts.remove(resourceNames[i]);
 		}
 
 		if (autoFirstTemplate)
@@ -1507,13 +1577,17 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return ts.toArray(new String[ts.size()]);
 	}
 
-	protected void trimResourceNames(String[] resourceNames)
+	protected String[] trimResourceNames(String[] resourceNames)
 	{
 		if (resourceNames == null)
-			return;
+			return new String[0];
+
+		String[] rns = new String[resourceNames.length];
 
 		for (int i = 0; i < resourceNames.length; i++)
-			resourceNames[i] = trimResourceName(resourceNames[i]);
+			rns[i] = trimResourceName(resourceNames[i]);
+
+		return rns;
 	}
 
 	protected String trimResourceName(String resourceName)

@@ -326,38 +326,77 @@
 		
 		po.element(".resource-editor-tab-pane").each(function()
 		{
-			var tabPane = $(this);
+			var d = po.getSingleResourceEditorData(this);
 			
-			var resourceName = po.element(".resourceName", tabPane).val();
-			var isTemplate = (po.element(".resourceIsTemplate", tabPane).val() == "true");
-			var resourceContent = "";
-			
-			var codeEditorDiv = po.element(".code-editor", tabPane);
-			var codeEditor = codeEditorDiv.data("resourceEditorInstance");
-			
-			if(isTemplate)
-			{
-				var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
-				if(visualEditorIfm.hasClass("show-editor"))
-				{
-					var dashboardEditor = po.dashboardEditorVisual(tabPane);
-					resourceContent = (dashboardEditor ? dashboardEditor.editedHtml() : "");
-				}
-				
-				if(!resourceContent)
-					resourceContent = po.getCodeText(codeEditor);
-			}
-			else
-			{
-				resourceContent = po.getCodeText(codeEditor);
-			}
-			
-			data.resourceNames.push(resourceName);
-			data.resourceIsTemplates.push(isTemplate);
-			data.resourceContents.push(resourceContent);
+			data.resourceNames.push(d.resourceName);
+			data.resourceIsTemplates.push(d.isTemplate);
+			data.resourceContents.push(d.resourceContent);
 		});
 		
 		return data;
+	};
+	
+	po.getSingleResourceEditorData = function(tabPane)
+	{
+		tabPane = $(tabPane);
+		
+		var resourceName = po.element(".resourceName", tabPane).val();
+		var isTemplate = (po.element(".resourceIsTemplate", tabPane).val() == "true");
+		var resourceContent = "";
+		
+		var codeEditorDiv = po.element(".code-editor", tabPane);
+		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
+		
+		if(isTemplate)
+		{
+			var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+			if(visualEditorIfm.hasClass("show-editor"))
+			{
+				var dashboardEditor = po.dashboardEditorVisual(tabPane);
+				resourceContent = (dashboardEditor ? dashboardEditor.editedHtml() : "");
+			}
+			
+			if(!resourceContent)
+				resourceContent = po.getCodeText(codeEditor);
+		}
+		else
+		{
+			resourceContent = po.getCodeText(codeEditor);
+		}
+		
+		var data =
+		{
+			resourceName: resourceName,
+			isTemplate: isTemplate,
+			resourceContent: resourceContent
+		};
+		
+		return data;
+	};
+	
+	po.saveResourceEditorContent = function(tabPane)
+	{
+		if(po.checkDashboardUnSaved())
+			return;
+		
+		var d = po.getSingleResourceEditorData(tabPane);
+		
+		$.post(
+				po.url("saveResourceContent"),
+				{
+					"id": po.getDashboardId(),
+					"resourceName": d.resourceName,
+					"resourceContent": d.resourceContent,
+					"isTemplate": d.isTemplate
+				},
+				function(response)
+				{
+					if(response.data.templatesChanged || !response.data.resourceExists)
+					{
+						po.templates = response.data.templates;
+						po.refreshResourceListLocal();
+					}
+				});
 	};
 	
 	po.newResourceEditorTab = function(name, content, isTemplate)
@@ -624,15 +663,24 @@
 		
 		editorRightOptWrapper = $("<div class='code-editor-operation operation-right' />").appendTo(editorOptWrapper)
 		
-		if(!po.readonly && (po.element(".resourceIsTemplate", tabPane).val() == "true"))
+		if(!po.readonly)
 		{
-			var insertGroup = $("<div class='insert-group' auto-close-prevent='chart-list-panel' />").appendTo(editorRightOptWrapper);
-			var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
-				.text("<@spring.message code='dashboard.insertChart' />").appendTo(insertGroup).button()
-				.click(function()
-				{
-					po.toggleInsertChartListPannel(this);
-				});
+			if(po.element(".resourceIsTemplate", tabPane).val() == "true")
+			{
+				var insertGroup = $("<div class='insert-group' auto-close-prevent='chart-list-panel' />").appendTo(editorRightOptWrapper);
+				var insertChartBtn = $("<button type='button' class='insert-chart-button' />")
+					.text("<@spring.message code='dashboard.insertChart' />").appendTo(insertGroup).button()
+					.click(function()
+					{
+						po.toggleInsertChartListPannel(this);
+					});
+			}
+			
+			$("<button type='button' />").text("<@spring.message code='save' />").appendTo(editorRightOptWrapper).button()
+			.click(function()
+			{
+				po.saveResourceEditorContent(tabPane);
+			});
 		}
 		
 		var searchGroup = $("<div class='search-group ui-widget ui-widget-content ui-corner-all' />").appendTo(editorRightOptWrapper);
@@ -971,6 +1019,12 @@
 				var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
 				po.loadVisualEditorIframe(visualEditorIfm, templateName, (po.readonly ? "" : dashboardEditor.editedHtml()));
 			}
+		});
+		
+		$("<button type='button' />").text("<@spring.message code='save' />").appendTo(editorRightOptWrapper).button()
+		.click(function()
+		{
+			po.saveResourceEditorContent(tabPane);
 		});
 	};
 	

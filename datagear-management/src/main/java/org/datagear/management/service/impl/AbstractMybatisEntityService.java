@@ -317,6 +317,11 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	protected void inflateCreateUserEntity(CreateUserEntity<?> entity, UserService service)
 	{
 		User user = (entity == null ? null : entity.getCreateUser());
+
+		// 匿名用户应直接返回，不然下面会将其置为null
+		if (user != null && user.isAnonymous())
+			return;
+
 		String userId = (user == null ? null : user.getId());
 		
 		if(!StringUtil.isEmpty(userId))

@@ -235,7 +235,8 @@
 			if(!id || !resourceName || !resourceFilePath)
 				return false;
 			
-			$.post(po.url("saveResourceFile"), {"id": id, "resourceName": resourceName, "resourceFilePath": resourceFilePath},
+			$.post(po.url("saveUploadResourceFile"),
+			{"id": id, "resourceName": resourceName, "resourceFilePath": resourceFilePath},
 			function()
 			{
 				po.refreshResourceListLocal();
@@ -459,6 +460,7 @@
 					$.post(po.url("deleteResource"), {"id": id, "name" : name},
 					function(response)
 					{
+						po.templates = response.data.templates;
 						po.refreshResourceListLocal();
 					});
 				}

@@ -209,7 +209,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				// 编辑
 				.antMatchers("/dashboard/add", "/dashboard/edit", "/dashboard/save",
 						"/dashboard/saveTemplateNames", "/dashboard/deleteResource",
-						"/dashboard/uploadResourceFile", "/dashboard/saveResourceFile",
+						"/dashboard/uploadResourceFile", "/dashboard/saveUploadResourceFile",
+						"/dashboard/saveResourceContent",
 						"/dashboard/import", "/dashboard/uploadImportFile",
 						"/dashboard/saveImport", "/dashboard/delete")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
