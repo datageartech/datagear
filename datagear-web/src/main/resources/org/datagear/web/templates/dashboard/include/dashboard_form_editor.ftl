@@ -570,8 +570,6 @@
 	//切换至可视编辑模式
 	po.switchToVisualEditor = function(tabPane)
 	{
-		var dashboardId = po.getDashboardId();
-		
 		po.initVisualEditorOperationIfNon(tabPane);
 		
 		po.element(".switchToCodeEditorBtn", tabPane).removeClass("ui-state-active");
@@ -597,18 +595,23 @@
 			po.iframeDocument(visualEditorIfm).write("");
 			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
 			
-			var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
-			
 			visualEditorIfm.data("changeFlag", codeEditor.changeGeneration());
 			codeEditorDiv.data("changeFlag", null);
 			
-			var form = po.element("#${pageId}-tplEditVisualForm");
-			form.attr("action", po.showUrl(dashboardId, templateName));
-			form.attr("target", visualEditorIfm.attr("name"));
-			$("input[name='DG_EDIT_TEMPLATE']", form).val(po.readonly ? "false" : "true");
-			$("textarea[name='DG_TEMPLATE_CONTENT']", form).val(po.readonly ? "" : po.getCodeText(codeEditor));
-			form.submit();
+			var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
+			po.loadVisualEditorIframe(visualEditorIfm, templateName, (po.readonly ? "" : po.getCodeText(codeEditor)));
 		}
+	};
+	
+	po.loadVisualEditorIframe = function(visualEditorIfm, templateName, templateContent)
+	{
+		var dashboardId = po.getDashboardId();
+		var form = po.element("#${pageId}-tplEditVisualForm");
+		form.attr("action", po.showUrl(dashboardId, templateName));
+		form.attr("target", visualEditorIfm.attr("name"));
+		$("input[name='DG_EDIT_TEMPLATE']", form).val(po.readonly ? "false" : "true");
+		$("textarea[name='DG_TEMPLATE_CONTENT']", form).val(templateContent);
+		form.submit();
 	};
 	
 	po.initCodeEditorOperationIfNon = function(tabPane)
@@ -953,6 +956,20 @@
 						dashboardEditor.unbindChart();
 					}
 				}
+			}
+		});
+		
+		$("<button type='button' />").text("<@spring.message code='refresh' />")
+		.attr("title", "<@spring.message code='dashboard.opt.refresh.desc' />")
+		.appendTo(editorRightOptWrapper).button()
+		.click(function()
+		{
+			var dashboardEditor = po.dashboardEditorVisual(tabPane);
+			if(dashboardEditor)
+			{
+				var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+				var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
+				po.loadVisualEditorIframe(visualEditorIfm, templateName, (po.readonly ? "" : dashboardEditor.editedHtml()));
 			}
 		});
 	};

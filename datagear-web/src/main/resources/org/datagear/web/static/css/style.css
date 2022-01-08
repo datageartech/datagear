@@ -3318,10 +3318,12 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	position: absolute;
 	right: 0;
 }
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .operation-left > *,
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .operation-right > *{
 	display: inline-block;
 	margin-right: 0.5em;
 }
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .operation-left > *:last-child,
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .editor-operation-wrapper .operation-right > *:last-child{
 	margin-right: 0;
 }
