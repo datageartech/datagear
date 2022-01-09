@@ -154,30 +154,24 @@
 	};
 	
 	/**
-	 * 判断元素是否允许插入图表。
+	 * 校验insertChart操作。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考insertChart函数的insertType参数
+	 * @param refEle 可选，参考insertChart函数的refEle参数
 	 */
-	editor.canInsertChart = function(insertType, refEle)
+	editor.checkInsertChart = function(insertType, refEle)
 	{
 		refEle = this._refElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		//图表元素内部不允许再插入图表元素
 		if(this.dashboard.renderedChart(refEle) && (insertType == "append" || insertType == "prepend"))
+		{
+			this.tipInfo(i18n.insertInsideChartOnChartEleDenied);
 			return false;
+		}
 		else
 			return true;
-	};
-	
-	/**
-	 * 是否有选中元素。
-	 */
-	editor.hasSelectedElement = function()
-	{
-		var ele = this._refElement(null, true);
-		return !this._isEmptyElement(ele);
 	};
 	
 	/**
@@ -198,11 +192,8 @@
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		//图表元素内部不允许再插入图表元素
-		if(!this.canInsertChart(insertType, refEle))
-		{
-			this.tipInfo(i18n.insertInsideChartOnChartEleDenied);
+		if(!this.checkInsertChart(insertType, refEle))
 			return;
-		}
 		
 		for(var i=0; i<chartWidgets.length; i++)
 		{
@@ -218,56 +209,80 @@
 	};
 	
 	/**
+	 * 校验bindChart操作。
+	 *
+	 * @param ele 可选，要绑定的图表元素，默认为：当前选中图表元素
+	 */
+	editor.checkBindChart = function(ele)
+	{
+		ele = this._refElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		return true;
+	};
+	
+	/**
 	 * 绑定或替换图表。
 	 * 
 	 * @param chartWidget 要绑定的新图表部件对象
-	 * @param chartEle 可选，要绑定的图表元素，默认为：当前选中图表元素
+	 * @param ele 可选，要绑定的图表元素，默认为：当前选中图表元素
 	 */
-	editor.bindChart = function(chartWidget, chartEle)
+	editor.bindChart = function(chartWidget, ele)
 	{
 		if(!chartWidget)
 			return;
 		
-		chartEle = this._refElement(chartEle);
+		ele = this._refElement(ele, true);
 		
-		if(!chartEle || chartEle.is("body"))
-		{
-			this.tipInfo(i18n.selectElementForSetChart);
+		if(!this.checkBindChart(ele))
 			return;
-		}
 		
-		if(this.dashboard.renderedChart(chartEle))
+		if(this.dashboard.renderedChart(ele))
 		{
-			this.dashboard.removeChart(chartEle);
+			this.dashboard.removeChart(ele);
 		}
 		
-		this._setElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET, chartWidget.id);
-		this.dashboard.loadChart(chartEle);
+		this._setElementAttr(ele, chartFactory.elementAttrConst.WIDGET, chartWidget.id);
+		this.dashboard.loadChart(ele);
 	};
 	
 	/**
-	 * 解绑图表。
-	 * 
-	 * @param chartEle 可选，要解绑的图表元素，默认为：当前选中图表元素
+	 * 校验unbindChart操作。
+	 *
+	 * @param ele 可选，要解绑的图表元素，默认为：当前选中图表元素
 	 */
-	editor.unbindChart = function(chartEle)
+	editor.checkUnbindChart = function(ele)
 	{
-		chartEle = this._refElement(chartEle, true);
+		ele = this._refElement(ele, true);
 		
-		if(this._isEmptyElement(chartEle))
-		{
-			this.tipInfo(i18n.selectedElementRequired);
+		if(!this._checkNotEmptyElement(ele))
 			return false;
-		}
 		
-		if(!this.dashboard.renderedChart(chartEle))
+		if(!this.dashboard.renderedChart(ele))
 		{
 			this.tipInfo(i18n.selectedNotChartElement);
 			return false;
 		}
 		
-		this.dashboard.removeChart(chartEle);
-		this._removeElementAttr(chartEle, chartFactory.elementAttrConst.WIDGET);
+		return true;
+	};
+	
+	/**
+	 * 解绑图表。
+	 * 
+	 * @param ele 可选，要解绑的图表元素，默认为：当前选中图表元素
+	 */
+	editor.unbindChart = function(ele)
+	{
+		ele = this._refElement(ele, true);
+		
+		if(!this.checkUnbindChart(ele))
+			return;
+		
+		this.dashboard.removeChart(ele);
+		this._removeElementAttr(ele, chartFactory.elementAttrConst.WIDGET);
 	};
 	
 	/**
@@ -297,26 +312,6 @@
 	};
 	
 	/**
-	 * 是否是可编辑文本的元素，即元素内没有子元素、且不是<body>元素。
-	 *
-	 * @param ele 可选，元素，默认为：当前选中元素
-	 */
-	editor.isEditTextElement = function(ele)
-	{
-		refEle = this._refElement(ele);
-		
-		if(refEle.is("body"))
-			return false;
-			
-		var firstChild = $("> *:first-child", refEle);
-		
-		if(firstChild.length == 0)
-			return true;
-		
-		return false;
-	};
-	
-	/**
 	 * 获取元素文本内容。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
@@ -325,6 +320,29 @@
 	{
 		ele = this._refElement(ele);
 		return $.trim(ele.text());
+	};
+	
+	/**
+	 * 校验setElementText操作。
+	 *
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkSetElementText = function(ele)
+	{
+		ele = this._refElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		var firstChild = $("> *:first-child", ele);
+		
+		if(firstChild.length > 0)
+		{
+			this.tipInfo(i18n.canEditOnlyTextElement);
+			return false;
+		}
+		
+		return true;
 	};
 	
 	/**
@@ -337,35 +355,38 @@
 	{
 		ele = this._refElement(ele, true);
 		
-		if(this._isEmptyElement(ele))
-		{
-			this.tipInfo(i18n.selectedElementRequired);
-			return false;
-		}
-		
-		if(!this.isEditTextElement(ele))
-		{
-			this.tipInfo(i18n.canEditOnlyTextElement);
-			return false;
-		}
+		if(!this.checkSetElementText(ele))
+			return;
 		
 		this._setElementText(ele, text);
 	};
 	
 	/**
+	 * 校验deleteElement操作。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkDeleteElement = function(ele)
+	{
+		ele = this._refElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		return true;
+	};
+	
+	/**
 	 * 删除元素。
-	 *
+	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
 	editor.deleteElement = function(ele)
 	{
 		ele = this._refElement(ele, true);
 		
-		if(this._isEmptyElement(ele))
-		{
-			this.tipInfo(i18n.selectedElementRequired);
-			return false;
-		}
+		if(!this.checkDeleteElement(ele))
+			return;
 		
 		var iframeEle = this._editElement(ele);
 		
@@ -373,6 +394,21 @@
 		iframeEle.remove();
 		
 		this.changeFlag(true);
+	};
+	
+	/**
+	 * 校验setElementStyle操作。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkSetElementStyle = function(ele)
+	{
+		ele = this._refElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		return true;
 	};
 	
 	/**
@@ -385,11 +421,8 @@
 	{
 		ele = this._refElement(ele, true);
 		
-		if(this._isEmptyElement(ele))
-		{
-			this.tipInfo(i18n.selectedElementRequired);
-			return false;
-		}
+		if(!this.checkSetElementStyle(ele))
+			return;
 		
 		this._setElementStyle(ele, styleObj);
 	};
@@ -405,6 +438,29 @@
 	};
 	
 	/**
+	 * 校验setElementChartTheme操作。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkSetElementChartTheme = function(ele)
+	{
+		ele = this._refElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		
+		if(!chart)
+		{
+			this.tipInfo(i18n.selectedNotChartElement);
+			return false;
+		}
+		
+		return true;
+	};
+	
+	/**
 	 * 设置元素图表主题。
 	 * 
 	 * @param chartTheme 要设置的图表主题对象，格式为：{ 'color': '...', 'backgroundColor': '...', ... }
@@ -414,19 +470,10 @@
 	{
 		ele = this._refElement(ele, true);
 		
-		if(this._isEmptyElement(ele))
-		{
-			this.tipInfo(i18n.selectedElementRequired);
-			return false;
-		}
+		if(!this.checkSetElementChartTheme(ele))
+			return;
 		
 		var chart = this.dashboard.renderedChart(ele);
-		
-		if(!chart)
-		{
-			this.tipInfo(i18n.selectedNotChartElement);
-			return false;
-		}
 		
 		this._setElementChartTheme(ele, chartTheme);
 		
@@ -442,6 +489,22 @@
 	editor.setGlobalChartTheme = function(chartTheme)
 	{
 		this._setElementChartTheme($(document.body), chartTheme);
+	};
+	
+	/**
+	 * 校验元素不为空。
+	 *
+	 * @param ele
+	 */
+	editor._checkNotEmptyElement = function(ele)
+	{
+		if(this._isEmptyElement(ele))
+		{
+			this.tipInfo(i18n.selectedElementRequired);
+			return false;
+		}
+		
+		return true;
 	};
 	
 	editor._setElementChartTheme = function(ele, chartTheme, sync)
@@ -535,11 +598,16 @@
 		this.changeFlag(true);
 	};
 	
+	editor._getSelectedElement = function()
+	{
+		return $(".dg-show-ve-selected");
+	};
+	
 	editor._refElement = function(refEle, excludeBody)
 	{
 		excludeBody = (excludeBody == null ? false : excludeBody);
 		
-		refEle = (this._isEmptyElement(refEle) ? this._getSelected() : refEle);
+		refEle = (this._isEmptyElement(refEle) ? this._getSelectedElement() : refEle);
 		
 		if(!excludeBody)
 			refEle = (this._isEmptyElement(refEle) ? $(document.body) : refEle);
@@ -586,11 +654,6 @@
 		}
 		
 		return insertType;
-	};
-	
-	editor._getSelected = function()
-	{
-		return $(".dg-show-ve-selected");
 	};
 	
 	editor._isEmptyElement = function(ele)

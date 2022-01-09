@@ -906,19 +906,20 @@
 				po.insertOperationForVisualEdit = insertOperation;
 				po.insertTypeForVisualEdit = insertType;
 				
-				if(insertOperation == "insertChart" || insertOperation == "bindChart")
+				var dashboardEditor = po.dashboardEditorVisual(tabPane);
+				
+				if(insertOperation == "insertChart")
 				{
-					var dashboardEditor = po.dashboardEditorVisual(tabPane);
-					if(dashboardEditor && !dashboardEditor.canInsertChart(insertType))
-					{
-						$.tipInfo(dashboardEditor.i18n.insertInsideChartOnChartEleDenied);
+					if(dashboardEditor && !dashboardEditor.checkInsertChart(insertType))
 						return;
-					}
 					
 					po.toggleInsertChartListPannel(insertGroup);
 				}
 				else if(insertOperation == "bindChart")
 				{
+					if(dashboardEditor && !dashboardEditor.checkBindChart())
+						return;
+					
 					po.toggleInsertChartListPannel(insertGroup);
 				}
 			}
@@ -956,11 +957,8 @@
 				{
 					if(editOperation == "editChartTheme")
 					{
-						if(!dashboardEditor.hasSelectedElement())
-						{
-							$.tipInfo(dashboardEditor.i18n.selectedElementRequired);
+						if(!dashboardEditor.checkSetElementChartTheme())
 							return;
-						}
 						
 						var panel = po.element(".veditor-chartTheme-panel");
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
@@ -972,11 +970,8 @@
 					}
 					else if(editOperation == "editStyle")
 					{
-						if(!dashboardEditor.hasSelectedElement())
-						{
-							$.tipInfo(dashboardEditor.i18n.selectedElementRequired);
+						if(!dashboardEditor.checkSetElementStyle())
 							return;
-						}
 						
 						var panel = po.element(".veditor-style-panel");
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
@@ -988,17 +983,8 @@
 					}
 					else if(editOperation == "editContent")
 					{
-						if(!dashboardEditor.hasSelectedElement())
-						{
-							$.tipInfo(dashboardEditor.i18n.selectedElementRequired);
+						if(!dashboardEditor.checkSetElementText())
 							return;
-						}
-						
-						if(!dashboardEditor.isEditTextElement())
-						{
-							$.tipInfo("<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />");
-							return;
-						}
 						
 						var panel = po.element(".veditor-content-panel");
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
