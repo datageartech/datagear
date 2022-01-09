@@ -489,6 +489,15 @@
 	editor.setGlobalChartTheme = function(chartTheme)
 	{
 		this._setElementChartTheme($(document.body), chartTheme);
+		
+		var charts = (this.dashboard.charts || []);
+		for(var i=0; i<charts.length; i++)
+		{
+			var chart = charts[i];
+			
+			chart.destroy();
+			chart.init();
+		}
 	};
 	
 	/**
