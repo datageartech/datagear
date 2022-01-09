@@ -212,7 +212,7 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-style-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST">
+		<form action="#" method="POST" class="display-46">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.editStyle' />
 			</div>
@@ -231,6 +231,82 @@ readonly 是否只读操作，允许为null
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="background-color" class="ui-widget ui-widget-content" size="100" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editStyle.bgImage' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="background-image" class="ui-widget ui-widget-content" size="200" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editStyle.fontSize' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="font-size" class="ui-widget ui-widget-content" size="100" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editStyle.textAlign' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="text-align" class="ui-widget ui-widget-content" size="100" />
+					</div>
+				</div>
+			</div>
+			<div class="panel-foot form-foot">
+				<button type="submit"><@spring.message code='confirm' /></button>
+			</div>
+		</form>
+	</div>
+	<div class="veditor-chartTheme-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<form action="#" method="POST" class="display-46">
+			<div class="panel-head ui-widget-header ui-corner-all">
+				<@spring.message code='dashboard.veditor.editChartTheme' />
+			</div>
+			<div class="panel-content form-content">
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editChartTheme.color' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editChartTheme.bgColor' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="backgroundColor" class="ui-widget ui-widget-content" size="100" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editChartTheme.actualBgColor' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="actualBackgroundColor" class="ui-widget ui-widget-content" size="100" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editChartTheme.graphColors' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="graphColors" class="ui-widget ui-widget-content" size="100" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editChartTheme.graphRangeColors' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="graphRangeColors" class="ui-widget ui-widget-content" size="100" />
 					</div>
 				</div>
 			</div>

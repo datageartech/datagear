@@ -3537,10 +3537,10 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	right: 0.5em;
 }
 .page-form-dashboard .veditor-content-panel,
-.page-form-dashboard .veditor-style-panel
-{
+.page-form-dashboard .veditor-style-panel,
+.page-form-dashboard .veditor-chartTheme-panel{
 	position: absolute;
-    width: 30%;
+    width: 35%;
     display: none;
 }
 

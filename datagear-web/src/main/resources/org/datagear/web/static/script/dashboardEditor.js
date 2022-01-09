@@ -404,6 +404,72 @@
 		this._setElementStyle($(document.body), styleObj);
 	};
 	
+	/**
+	 * 设置元素图表主题。
+	 * 
+	 * @param chartTheme 要设置的图表主题对象，格式为：{ 'color': '...', 'backgroundColor': '...', ... }
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.setElementChartTheme = function(chartTheme, ele)
+	{
+		ele = this._refElement(ele, true);
+		
+		if(this._isEmptyElement(ele))
+		{
+			this.tipInfo(i18n.selectedElementRequired);
+			return false;
+		}
+		
+		var chart = this.dashboard.renderedChart(ele);
+		
+		if(!chart)
+		{
+			this.tipInfo(i18n.selectedNotChartElement);
+			return false;
+		}
+		
+		this._setElementChartTheme(ele, chartTheme);
+		
+		chart.destroy();
+		chart.init();
+	};
+	
+	/**
+	 * 设置全局图表主题。
+	 * 
+	 * @param chartTheme 要设置的图表主题对象，格式为：{ 'color': '...', 'backgroundColor': '...', ... }
+	 */
+	editor.setGlobalChartTheme = function(chartTheme)
+	{
+		this._setElementChartTheme($(document.body), chartTheme);
+	};
+	
+	editor._setElementChartTheme = function(ele, chartTheme, sync)
+	{
+		chartTheme = $.extend(true, {}, chartTheme); 
+		
+		if(chartFactory.isString(chartTheme.graphColors))
+			chartTheme.graphColors = this._spitIgnoreEmpty(chartTheme.graphColors);
+		if(chartFactory.isString(chartTheme.graphRangeColors))
+			chartTheme.graphRangeColors = this._spitIgnoreEmpty(chartTheme.graphRangeColors);
+		
+		var trim = {};
+		
+		for(var p in chartTheme)
+		{
+			var v = chartTheme[p];
+			
+			if(v == null)
+				;
+			else if(chartFactory.isString(v) && v != "")
+				trim[p] = v;
+			else if($.isArray(v) && v.length > 0)
+				trim[p] = v;
+		}
+		
+		this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, this._serializeForAttrValue(trim), sync);
+	};
+	
 	editor._setElementStyle = function(ele, styleObj, sync)
 	{
 		styleObj = (styleObj || {});
@@ -556,6 +622,84 @@
 	editor._unescapeEditHtml = function(editHtml)
 	{
 		return (editHtml ? editHtml.replaceAll("<\\/", "</") : editHtml);
+	};
+	
+	editor._spitIgnoreEmpty = function(str, splitter)
+	{
+		splitter = (splitter ? splitter : ",");
+		
+		var ary = [];
+		
+		if(!str)
+			return ary;
+		
+		ary = str.split(splitter);
+		
+		var re = [];
+		
+		for(var i=0; i<ary.length; i++)
+		{
+			var ele = $.trim(ary[i]);
+			if(ele)
+				re.push(ele);
+		}
+		
+		return re;
+	};
+	
+	editor._serializeForAttrValue = function(obj)
+	{
+		if(obj === undefined)
+			return "undefined";
+		else if(obj == null)
+			return  "null";
+		
+		var type = $.type(obj);
+		
+		if(type == "string")
+			return "'" + obj.replace(/\'/g, "\\'") + "'";
+		else if(type == "number")
+			return obj.toString();
+		else if(type == "boolean")
+			return obj.toString();
+		else if(type == 'date')
+			return obj.getTime().toString();
+		else if(type == 'array')
+		{
+			var str = "[";
+			
+			for(var i=0; i<obj.length; i++)
+			{
+				if(i > 0)
+					str += ",";
+					
+				str += this._serializeForAttrValue(obj[i]);
+			}
+			
+			str += "]";
+			
+			return str;
+		}
+		else if(type == "object")
+		{
+			var str = "{";
+			
+			for(var p in obj)
+			{
+				if(str != "{")
+					str += ",";
+				
+				var v = obj[p];
+				
+				str += this._serializeForAttrValue(p) + ":" + this._serializeForAttrValue(v);
+			}
+			
+			str += "}";
+			
+			return str;
+		}
+		else
+			return obj.toString();
 	};
 	
 	/**
