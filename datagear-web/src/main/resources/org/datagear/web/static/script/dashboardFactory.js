@@ -170,7 +170,6 @@
 	dashboardFactory.init = function(dashboard)
 	{
 		dashboardFactory._initOverwriteChartBaseIfNot();
-		dashboardFactory._initRenderContextIfNot(dashboard.renderContext);
 		dashboardFactory._initStartHeartBeatIfNot(dashboard.renderContext);
 		
 		$.extend(dashboard, this.dashboardBase);
@@ -199,30 +198,6 @@
 			this.bindLinksEventHanders(this.links());
 			this._postProcessRenderedSuper();
 		};
-	};
-	
-	dashboardFactory._initRenderContextIfNot = function(renderContext)
-	{
-		var dashboardTheme = chartFactory.renderContextAttr(renderContext, renderContextAttrConst.dashboardTheme);
-		
-		//如果未设置图表主题，则采用看板主题里定义的图表主题
-		if(chartFactory.renderContextAttrChartTheme(renderContext) == null)
-			chartFactory.renderContextAttrChartTheme(renderContext, (dashboardTheme ? dashboardTheme.chartTheme : null));
-		
-		// < @deprecated 兼容2.9.0版本的渲染上下文属性：webContext、dashboardTheme、chartTheme，将在未来版本移除，已被新名称取代
-		if(chartFactory.renderContextAttr(renderContext, "webContext") == null)
-			chartFactory.renderContextAttr(renderContext, "webContext", chartFactory.renderContextAttrWebContext(renderContext));
-		if(chartFactory.renderContextAttr(renderContext, "dashboardTheme") == null)
-			chartFactory.renderContextAttr(renderContext, "dashboardTheme", dashboardTheme);
-		if(chartFactory.renderContextAttr(renderContext, "chartTheme") == null)
-			chartFactory.renderContextAttr(renderContext, "chartTheme", chartFactory.renderContextAttrChartTheme(renderContext));
-		// > @deprecated 兼容2.9.0版本的渲染上下文属性：webContext、dashboardTheme、chartTheme，将在未来版本移除，已被新名称取代
-		
-		if(!renderContext._initByChartFactory)
-		{
-			chartFactory.initRenderContext(renderContext);
-			renderContext._initByChartFactory = true;
-		}
 	};
 	
 	dashboardFactory._initStartHeartBeatIfNot = function(renderContext)
@@ -678,11 +653,30 @@
 		
 		this.charts = (this.charts || []);
 		
+		this._initRenderContext();
 		this._initListener();
 		this._initMapURLs();
 		this._initForms();
 		this._initChartResizeHandler();
 		this._initCharts();
+	};
+	
+	/**
+	 * 初始化渲染上下文。
+	 */
+	dashboardBase._initRenderContext = function()
+	{
+		var dashboardTheme = this.renderContextAttr(renderContextAttrConst.dashboardTheme);
+		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
+		var chartTheme = (dashboardTheme ? dashboardTheme.chartTheme : null);
+		
+		chartFactory.initRenderContext(this.renderContext, webContext, chartTheme);
+		
+		// < @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
+		this.renderContextAttr("dashboardTheme", dashboardTheme);
+		this.renderContextAttr("webContext", chartFactory.renderContextAttrWebContext(this.renderContext));
+		this.renderContextAttr("chartTheme", chartFactory.renderContextAttrChartTheme(this.renderContext));
+		// > @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
 	};
 	
 	/**

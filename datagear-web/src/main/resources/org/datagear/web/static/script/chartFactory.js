@@ -229,23 +229,32 @@
 	
 	/**
 	 * 初始化渲染上下文。
-	 * 注意：此方法应在初始化任意图表前且body已加载后调用。
+	 * 将webContext直接存入渲染上下文；复制chartTheme，填充相关属性后存入渲染上下文。
+	 * 之后，可以通过:
+	 * chartFactory.renderContextAttrWebContext(renderContext)
+	 * chartFactory.renderContextAttrChartTheme(renderContext)
+	 * 获取它们。
 	 * 
-	 * @param renderContext 渲染上下文
+	 * 注意：此方法应在初始化任意图表前（chartFactory.init()函数调用前）且body已加载后调用。
+	 * 
+	 * @param renderContext
+	 * @param webContext Web上下文
+	 * @param chartTheme 可选，初始图表主题
 	 */
-	chartFactory.initRenderContext = function(renderContext)
+	chartFactory.initRenderContext = function(renderContext, webContext, chartTheme)
 	{
-		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
+		if(!webContext)
+			throw new Error("[webContext] required");
 		
-		if(webContext == null)
-			throw new Error("The render context attribute ["+renderContextAttrConst.webContext+"] must be set");
+		chartTheme = chartFactory._initGlobalChartTheme(chartTheme);
 		
-		chartFactory._initChartTheme(renderContext);
+		chartFactory.renderContextAttrWebContext(renderContext, webContext);
+		chartFactory.renderContextAttrChartTheme(renderContext, chartTheme);
 	};
 	
 	/**
 	 * 初始化指定图表对象。
-	 * 初始化前应确保已调用chartFactory.initRenderContext(chart.renderContext)。
+	 * 初始化前应确保已调用chartFactory.initRenderContext()。
 	 * 
 	 * @param chart 基本图表对象，格式应为：
 	 *				{
@@ -382,8 +391,8 @@
 	 */
 	chartBase._initTheme = function()
 	{
-		var globalRawTheme = chartFactory._GLOBAL_RAW_CHART_THEME;
 		var globalTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
+		var globalRawTheme = globalTheme._GLOBAL_RAW_CHART_THEME;
 		
 		if(!globalTheme || !globalRawTheme)
 			throw new Error("chartFactory.initRenderContext() must be called first");
@@ -393,7 +402,7 @@
 		if(eleThemeValue)
 		{
 			var eleThemeObj = chartFactory.evalSilently(eleThemeValue, {});
-			chartFactory._initChartThemeActualBackgroundColorIf(eleThemeObj);
+			chartFactory._inflateActualBackgroundColor(eleThemeObj);
 			chartFactory._inflateChartThemeIf(eleThemeObj);
 			
 			var eleTheme = $.extend(true, {}, globalRawTheme, eleThemeObj);
@@ -4527,23 +4536,21 @@
 	chartFactory._KEY_GRADUAL_COLORS = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "GradualColors";
 	
 	/**
-	 * 初始化渲染上下文中的图表主题。
-	 * 初始渲染上下文中允许不设置图表主题，或者仅设置部分属性，比如前景色、背景色，此方法则初始化其他必要的属性。
-	 * 
-	 * 注意：此方法应在初始化任意图表前且body已加载后调用，因为它也会从body的elementAttrConst.THEME读取用户设置的图表主题。
-	 * 
-	 * @param renderContext 渲染上下文
+	 * 初始化全局图表主题。
+	 * 基于初始图表主题、<body>的elementAttrConst.THEME属性值初始化全局图表主题。
+	 *
+	 * @param chartTheme 可选，初始图表主题，默认为：{}
+	 * @returns 一个新的图表主题
 	 */
-	chartFactory._initChartTheme = function(renderContext)
+	chartFactory._initGlobalChartTheme = function(chartTheme)
 	{
-		var theme = chartFactory.renderContextAttrChartTheme(renderContext);
+		var theme = $.extend(true, {}, chartTheme);
 		
-		if(!theme)
-		{
-			theme = {};
-			chartFactory.renderContextAttrChartTheme(renderContext, theme);
-		}
+		chartFactory._inflateActualBackgroundColor(theme);
 		
+		var globalRawTheme = null;
+		
+		//默认值
 		if(!theme.name)
 			theme.name = "chartTheme";
 		if(!theme.color)
@@ -4560,15 +4567,15 @@
 		if(!theme.graphRangeColors || theme.graphRangeColors.length == 0)
 			theme.graphRangeColors = ["#58A52D", "#FFD700", "#FF4500"];
 		
-		chartFactory._initChartThemeActualBackgroundColorIf(theme);
+		chartFactory._inflateActualBackgroundColor(theme);
 		
 		var bodyThemeValue = $(document.body).attr(elementAttrConst.THEME);
 		if(bodyThemeValue)
 		{
 			var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
-			chartFactory._initChartThemeActualBackgroundColorIf(bodyThemeObj);
+			chartFactory._inflateActualBackgroundColor(bodyThemeObj);
 			
-			chartFactory._GLOBAL_RAW_CHART_THEME = $.extend(true, {}, theme, bodyThemeObj);
+			globalRawTheme = $.extend(true, {}, theme, bodyThemeObj);
 			
 			chartFactory._inflateChartThemeIf(bodyThemeObj);
 			
@@ -4584,16 +4591,17 @@
 			$.extend(true, theme, bodyThemeObj);
 		}
 		
-		if(!chartFactory._GLOBAL_RAW_CHART_THEME)
-			chartFactory._GLOBAL_RAW_CHART_THEME = $.extend(true, {}, theme);
+		if(globalRawTheme == null)
+			globalRawTheme = $.extend(true, {}, theme);
+		
+		theme._GLOBAL_RAW_CHART_THEME = globalRawTheme;
 		
 		chartFactory._inflateChartThemeIf(theme);
+		
+		return theme;
 	};
 	
-	/**
-	 * 初始化图表主题的实际背景色。
-	 */
-	chartFactory._initChartThemeActualBackgroundColorIf = function(theme)
+	chartFactory._inflateActualBackgroundColor = function(theme)
 	{
 		//如果设置了非透明backgroundColor，那么也应同时设置actualBackgroundColor
 		if(theme.backgroundColor && theme.backgroundColor != "transparent")
@@ -4605,9 +4613,7 @@
 		return false;
 	};
 	
-	/**
-	 * 如果图表主题已具备了生成其他配色的条件（color、actualBackgroundColor已设置），则尝试生成它们。
-	 */
+	//如果图表主题已具备了生成其他配色的条件（color、actualBackgroundColor已设置），则尝试生成它们。
 	chartFactory._inflateChartThemeIf = function(theme)
 	{
 		if(theme.color && theme.actualBackgroundColor)
