@@ -605,6 +605,7 @@ po.previewOptions.url = "...";
 		},
 		formOptions);
 		
+		chartFactory.chartSetting.removeDatetimePickerRoot();
 		$panelContent.empty();
 		
 		chartFactory.chartSetting.renderDataSetParamValueForm($panelContent,

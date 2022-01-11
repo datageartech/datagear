@@ -102,7 +102,7 @@
 		var paramValues = (options.paramValues || {});
 		var InputType = chartSetting.DataSetParamInputType;
 		
-		var $form = ($parent.is("form") ? $parent : $("<form />").appendTo($parent));
+		var $form = ($parent.is("form") ? $parent : $("<form dg-generate-ele='true' />").appendTo($parent));
 		
 		$form.addClass("dg-dspv-form");
 		
@@ -112,7 +112,11 @@
 			if(options.inChartElement)
 				chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme, true);
 			else
-				$form.addClass(chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme), false);
+			{
+				var themeStyleName = chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme, false);
+				$form.addClass(themeStyleName);
+				$form.data("dgDspvFormThemeClassName", themeStyleName);
+			}
 		}
 		
 		var $head = $(".dg-dspv-form-head", $form);
@@ -154,43 +158,43 @@
 				//图表编辑保存时会将dsp传输至后台而进行类型转换，如果赋值，则会报错
 				
 				if(dsp.inputType == InputType.RADIO)
-					chartSetting.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value, options.chartTheme, defaultSelOpts);
+					chartSetting.renderDataSetParamValueFormInputRadio($form, $valueDiv, dsp, value, options.chartTheme, defaultSelOpts);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartSetting.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value, options.chartTheme, defaultSelOpts);
+					chartSetting.renderDataSetParamValueFormInputCheckbox($form, $valueDiv, dsp, value, options.chartTheme, defaultSelOpts);
 				else
-					chartSetting.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value, options.chartTheme, defaultSelOpts);
+					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options.chartTheme, defaultSelOpts);
 			}
 			else if(dsp.type == chartSetting.DataSetParamDataType.STRING)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					chartSetting.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.DATE)
-					chartSetting.renderDataSetParamValueFormInputDate($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputDate($form, $valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.TIME)
-					chartSetting.renderDataSetParamValueFormInputTime($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputTime($form, $valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.DATETIME)
-					chartSetting.renderDataSetParamValueFormInputDateTime($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputDateTime($form, $valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.RADIO)
-					chartSetting.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputRadio($form, $valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartSetting.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputCheckbox($form, $valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					chartSetting.renderDataSetParamValueFormInputTextarea($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputTextarea($form, $valueDiv, dsp, value, options.chartTheme);
 				else
-					chartSetting.renderDataSetParamValueFormInputText($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputText($form, $valueDiv, dsp, value, options.chartTheme);
 			}
 			else if(dsp.type == chartSetting.DataSetParamDataType.NUMBER)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					chartSetting.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.RADIO)
-					chartSetting.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputRadio($form, $valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartSetting.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputCheckbox($form, $valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					chartSetting.renderDataSetParamValueFormInputTextarea($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputTextarea($form, $valueDiv, dsp, value, options.chartTheme);
 				else
-					chartSetting.renderDataSetParamValueFormInputText($valueDiv, dsp, value, options.chartTheme);
+					chartSetting.renderDataSetParamValueFormInputText($form, $valueDiv, dsp, value, options.chartTheme);
 			}
 		}
 		
@@ -233,6 +237,42 @@
 			options.render.call(formEle, formEle);
 		
 		return formEle;
+	};
+	
+	/**
+	 * 销毁数据集参数值表单。
+	 * 
+	 * @param ancestor 渲染数据集参数值的<form>表单元素，或者它的祖先元素（其所有内部数据集参数值表单都会被销毁）。
+	 */
+	chartSetting.destroyDataSetParamValueForm = function(ancestor)
+	{
+		var $form = (ancestor.is("form") ? ancestor : $("form.dg-dspv-form", ancestor));
+		
+		$form.each(function()
+		{
+			var thisForm = $(this);
+			var isGenerated = thisForm.attr("dg-generate-ele");
+			
+			if(isGenerated)
+				chartFactory.removeElementWithDerived(this);
+			else
+			{
+				thisForm.removeClass("dg-dspv-form");
+				var themeStyleName = thisForm.data("dgDspvFormThemeClassName");
+				if(themeStyleName)
+					thisForm.removeClass(themeStyleName);
+				
+				var des = chartFactory.derivedElements(this);
+				if(des)
+				{
+					chartFactory.removeElementWithDerived($(des));
+					chartFactory.derivedElements(this, null);
+				}
+				
+				thisForm.unbind("submit");
+				thisForm.empty();
+			}
+		});
 	};
 	
 	chartSetting.dataSetParamValueFormThemeStyle = function(chartTheme, isSubStyle)
@@ -310,12 +350,13 @@
 	/**
 	 * 渲染输入项：文本框
 	 * 
-	 * @param $parent
+	 * @param $form
+	 * @param $parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
 	 */
-	chartSetting.renderDataSetParamValueFormInputText = function($parent, dataSetParam, value, chartTheme)
+	chartSetting.renderDataSetParamValueFormInputText = function($form, $parent, dataSetParam, value, chartTheme)
 	{
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value == null ? "" : value)).appendTo($parent);
@@ -342,13 +383,14 @@
 	 * 其中，待选项名值对象格式允许为：
 	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
-	 * @param $parent
+	 * @param $form
+	 * @param $parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
 	 * @param defaultSelOpts 可选，默认下拉框选项集
 	 */
-	chartSetting.renderDataSetParamValueFormInputSelect = function($parent, dataSetParam, value, chartTheme, defaultSelOpts)
+	chartSetting.renderDataSetParamValueFormInputSelect = function($form, $parent, dataSetParam, value, chartTheme, defaultSelOpts)
 	{
 		var payload = chartSetting.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -407,12 +449,13 @@
 	 * 或者
 	 * { format: '...Y|y...m...d...' }、{ format: '...Y|y...' }（仅年份选择）      //看板表单功能时
 	 * 
-	 * @param $parent
+	 * @param $form
+	 * @param $parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
 	 */
-	chartSetting.renderDataSetParamValueFormInputDate = function($parent, dataSetParam, value, chartTheme)
+	chartSetting.renderDataSetParamValueFormInputDate = function($form, $parent, dataSetParam, value, chartTheme)
 	{
 		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
 		options = $.extend(
@@ -434,7 +477,8 @@
 		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartSetting.renderDatetimePicker($input, options, chartTheme);
+		var $wrapper = chartSetting.renderDatetimePicker($input, options, chartTheme);
+		chartFactory.derivedElements($form, $wrapper);
 	};
 	
 	/**
@@ -447,12 +491,13 @@
 	 * 或者
 	 * { format: '...H|h...i...s...' }    //看板表单功能时
 	 * 
-	 * @param $parent
+	 * @param $form
+	 * @param $parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
 	 */
-	chartSetting.renderDataSetParamValueFormInputTime = function($parent, dataSetParam, value, chartTheme)
+	chartSetting.renderDataSetParamValueFormInputTime = function($form, $parent, dataSetParam, value, chartTheme)
 	{
 		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
 		options = $.extend(
@@ -475,7 +520,8 @@
 		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartSetting.renderDatetimePicker($input, options, chartTheme);
+		var $wrapper = chartSetting.renderDatetimePicker($input, options, chartTheme);
+		chartFactory.derivedElements($form, $wrapper);
 	};
 	
 	/**
@@ -495,12 +541,13 @@
 	 * i   ：分，两位长度，不足补0
 	 * s   ：秒，两位长度，不足补0
 	 * 
-	 * @param $parent
+	 * @param $form
+	 * @param $parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
 	 */
-	chartSetting.renderDataSetParamValueFormInputDateTime = function($parent, dataSetParam, value, chartTheme)
+	chartSetting.renderDataSetParamValueFormInputDateTime = function($form, $parent, dataSetParam, value, chartTheme)
 	{
 		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
 		options = $.extend(
@@ -522,7 +569,8 @@
 		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartSetting.renderDatetimePicker($input, options, chartTheme);
+		var $wrapper = chartSetting.renderDatetimePicker($input, options, chartTheme);
+		chartFactory.derivedElements($form, $wrapper);
 	};
 	
 	/**
@@ -538,13 +586,14 @@
 	 * 其中，待选项名值对象格式允许为：
 	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
-	 * @param $parent
+	 * @param $form
+	 * @param $parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
 	 * @param defaultSelOpts 可选，默认单选框选项集
 	 */
-	chartSetting.renderDataSetParamValueFormInputRadio = function($parent, dataSetParam, value, chartTheme, defaultSelOpts)
+	chartSetting.renderDataSetParamValueFormInputRadio = function($form, $parent, dataSetParam, value, chartTheme, defaultSelOpts)
 	{
 		var opts = chartSetting.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -600,13 +649,14 @@
 	 * 其中，待选项名值对象格式允许为：
 	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
-	 * @param $parent
+	 * @param $form
+	 * @param $parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选，值、值数组
 	 * @param chartTheme 可选
 	 * @param defaultSelOpts 可选，默认复选框选项集
 	 */
-	chartSetting.renderDataSetParamValueFormInputCheckbox = function($parent, dataSetParam, value, chartTheme, defaultSelOpts)
+	chartSetting.renderDataSetParamValueFormInputCheckbox = function($form, $parent, dataSetParam, value, chartTheme, defaultSelOpts)
 	{
 		var opts = chartSetting.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -657,12 +707,13 @@
 	/**
 	 * 渲染输入项：文本域
 	 * 
-	 * @param $parent
+	 * @param $form
+	 * @param $parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
 	 */
-	chartSetting.renderDataSetParamValueFormInputTextarea = function($parent, dataSetParam, value, chartTheme)
+	chartSetting.renderDataSetParamValueFormInputTextarea = function($form, $parent, dataSetParam, value, chartTheme)
 	{
 		var $input = $("<textarea class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.text(value || "").appendTo($parent);
@@ -674,6 +725,18 @@
 			$input.attr("dg-validation-number", "true");
 	};
 	
+	/**
+	 * 移除日期选择器组件root容器元素。
+	 */
+	chartSetting.removeDatetimePickerRoot = function()
+	{
+		var rootWrapperId = chartFactory._BUILT_IN_NAME_PART + "DatetimepickerRoot";
+		$("#" + rootWrapperId).remove();
+	};
+	
+	/**
+	 * 渲染日期选择器组件。
+	 */
 	chartSetting.renderDatetimePicker = function($input, options, chartTheme)
 	{
 		//在这里检查并重写，避免依赖加载顺序
@@ -753,6 +816,8 @@
 		}
 		
 		$input.datetimepicker(options);
+		
+		return $wrapper;
 	};
 	
 	chartSetting.datetimepickerInit = function()
@@ -1410,7 +1475,10 @@
 		if(mouseleaveHandler)
 			$chart.off("mouseleave", mouseleaveHandler);
 		
-		$(".dg-chart-setting-box", $chart).remove();
+		var $box = $(".dg-chart-setting-box", $chart);
+		
+		chartSetting.destroyDataSetParamValueForm($box);
+		$box.remove();
 	};
 	
 	chartSetting.showChartSettingBox = function(chart)

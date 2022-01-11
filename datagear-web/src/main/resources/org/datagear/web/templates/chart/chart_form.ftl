@@ -526,6 +526,7 @@ readonly 是否只读操作，允许为null
 		},
 		formOptions);
 		
+		chartFactory.chartSetting.removeDatetimePickerRoot();
 		$panelContent.empty();
 		
 		chartFactory.chartSetting.renderDataSetParamValueForm($panelContent,

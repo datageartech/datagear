@@ -1117,6 +1117,11 @@
 		$element.removeClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
 		
+		//应在这里先销毁图表元素内部创建的元素，
+		//因为renderer.destroy()可能会清空图表元素（比如echarts.dispose()函数）
+		this._destroySetting();
+		this._destroyThemeStyleSheet();
+		
 		var renderer = this.renderer();
 		
 		if(renderer && renderer.destroy)
@@ -1139,8 +1144,6 @@
 			this.elementJquery().empty();
 		}
 		
-		this._destroySetting();
-		this._destroyThemeStyleSheet();
 		this.internal(null);
 		
 		//最后清空扩展属性值，因为上面逻辑可能会使用到
@@ -4499,6 +4502,64 @@
 		this._nextElementIdSequence = seq + 1;
 		
 		return this._ELEMENT_ID_PREFIX + prefix + seq;
+	};
+	
+	/**
+	 * 获取/设置父元素的派生子元素DOM数组，派生子元素并不是父元素的直接子孙元素，但是从属于父元素生命周期，随父元素创建，也应随父元素删除。
+	 *
+	 * @param parent 父DOM元素、JQ对象
+	 * @param derived 可选，要设置的派生子元素DOM、DOM数组、JQ对象、null
+	 * @param append 可选，当执行设置操作时，是否追加而非覆盖，默认为：true
+	 */
+	chartFactory.derivedElements = function(parent, derived, append)
+	{
+		parent = $(parent);
+		
+		var name = chartFactory.builtinPropName("derivedElements");
+		
+		if(derived === undefined)
+			return parent.data(name);
+		
+		append = (append == null ? true : append);
+		
+		if(derived == null)
+			parent.removeData(name);
+		else
+		{
+			derived = $(derived);
+			
+			var des = parent.data(name);
+			if(des == null || !append)
+			{
+				des = [];
+				parent.data(name, des);
+			}
+			
+			derived.each(function()
+			{
+				des.push(this);
+			});
+		}
+	};
+	
+	/**
+	 * 删除元素，同时删除通过chartFactory.derivedElements()设置的派生子元素。
+	 * 
+	 * @param ele 要删除的DOM元素、DOM元素数组、JQ对象
+	 */
+	chartFactory.removeElementWithDerived = function(ele)
+	{
+		ele = $(ele);
+		
+		ele.each(function()
+		{
+			var des = (chartFactory.derivedElements(this) || []);
+			
+			for(var i=0; i<des.length; i++)
+				chartFactory.removeElementWithDerived(des[i]);
+			
+			$(this).remove();
+		});
 	};
 	
 	/**
