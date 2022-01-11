@@ -961,8 +961,16 @@
 			
 			if(theme.borderWidth)
 			{
-				css[0].value["border-width"] = theme.borderWidth;
-				css[0].value["border-style"] = "solid";
+				//边框宽度和样式应该限定图表元素本身，而非其它也使用了相同样式类名的元素
+				css.push(
+				{
+					name: "."+chartFactory.CHART_STYLE_NAME_FOR_INDICATION,
+					value:
+					{
+						"border-width": theme.borderWidth,
+						"border-style": "solid"
+					}
+				});
 			}
 			
 			return css;

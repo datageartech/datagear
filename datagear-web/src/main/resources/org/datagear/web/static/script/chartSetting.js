@@ -683,13 +683,21 @@
 			chartSetting._datetimepickerInited = true;
 		}
 		
+		var noSizeCss =
+			 "width:0 !important;"
+			+"height:0 !important;"
+			+"padding:0 0 !important;"
+			+"margin:0 0 !important;"
+			+"border:0 !important;"
+			+"border-width:0 !important;";
+		
 		var rootWrapperId = chartFactory._BUILT_IN_NAME_PART + "DatetimepickerRoot";
 		var $rootWrapper = $("#" + rootWrapperId);
 		if($rootWrapper.length < 1)
-			$rootWrapper = $("<div />").attr("id", rootWrapperId).appendTo(document.body);
+			$rootWrapper = $("<div style='"+noSizeCss+"' />").attr("id", rootWrapperId).appendTo(document.body);
 		
 		var wrapperId = chartFactory.nextElementId();
-		var $wrapper = $("<div />").attr("id", wrapperId).appendTo($rootWrapper);
+		var $wrapper = $("<div style='"+noSizeCss+"' />").attr("id", wrapperId).appendTo($rootWrapper);
 		
 		if(chartTheme)
 			$wrapper.addClass(chartSetting.datetimepickerThemeStyle(chartTheme));
