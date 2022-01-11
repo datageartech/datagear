@@ -300,6 +300,9 @@
 	
 	/**
 	 * 初始化图表。
+	 * 此函数在图表生命周期内仅允许调用一次。 
+	 * 
+	 * 注意：此函数内不应执行渲染相关逻辑，而应仅执行初始化图表属性的相关逻辑，且允许在chart.destroy()再次执行。
 	 */
 	chartBase.init = function()
 	{
@@ -426,6 +429,9 @@
 			
 			var eleTheme = $.extend(true, {}, globalRawTheme, eleThemeObj);
 			chartFactory._inflateChartThemeIf(eleTheme);
+			
+			//将主题标识为局部主题
+			eleTheme._IS_LOCAL_CHART_THEME=true;
 			
 			this.theme(eleTheme);
 		}
@@ -847,7 +853,10 @@
 	
 	/**
 	 * 渲染图表。
+	 * 此函数在图表生命周期内仅允许调用一次。 
+	 * 
 	 * 注意：只有this.statusPreRender()或者statusDestroyed()为true，此方法才会执行。
+	 * 
 	 * 注意：
 	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
 	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
@@ -984,7 +993,10 @@
 	
 	/**
 	 * 更新图表。
+	 * 此函数在图表生命周期内允许被调用多次。 
+	 *
 	 * 注意：此函数在图表渲染完成后才可调用。
+	 * 
 	 * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此方法才会执行。
 	 * 
 	 * @param results 可选，图表数据集结果，如果不设置，将使用this.updateResults()的返回值
@@ -1120,6 +1132,7 @@
 		}
 		
 		this._destroySetting();
+		this._destroyThemeStyleSheet();
 		this.internal(null);
 		
 		//最后清空扩展属性值，因为上面逻辑可能会使用到
@@ -1127,11 +1140,23 @@
 	};
 	
 	/**
+	 * 销毁图表主题关联创建的样式表。
+	 */
+	chartBase._destroyThemeStyleSheet = function()
+	{
+		var theme = this.theme();
+		
+		if(theme && theme._IS_LOCAL_CHART_THEME)
+			chartFactory.destroyThemeStyleSheet(theme);
+	};
+	
+	/**
 	 * 销毁图表交互设置。
 	 */
 	chartBase._destroySetting = function()
 	{
-		chartFactory.chartSetting.unbindChartSettingPanelEvent(this);
+		if(chartFactory.chartSetting && chartFactory.chartSetting.unbindChartSettingPanelEvent)
+			chartFactory.chartSetting.unbindChartSettingPanelEvent(this);
 	};
 	
 	/**
@@ -1267,7 +1292,8 @@
 	 */
 	chartBase._renderSetting = function()
 	{
-		chartFactory.chartSetting.bindChartSettingPanelEvent(this);
+		if(chartFactory.chartSetting && chartFactory.chartSetting.bindChartSettingPanelEvent)
+			chartFactory.chartSetting.bindChartSettingPanelEvent(this);
 	};
 	
 	/**
@@ -3881,7 +3907,7 @@
 	 * if(!chartFactory.themeStyleSheet(theme, "myName"))
 	 *   $(element).addClass(chartFactory.themeStyleSheet(theme, "myName", CSS样式表对象、数组));
 	 * 
-	 * @param theme 主题对象，格式为：{ ... } 
+	 * @param theme 主题对象，格式为：{ ... }
 	 * @param name 名称
 	 * @param css 可选，要设置的CSS，格式为：
 	 * 					function(){ return CSS样式表对象、[ CSS样式表对象, ... ] }
@@ -3958,6 +3984,27 @@
 		chartFactory.styleSheetText(info.styleId, cssText);
 		
 		return styleName;
+	};
+	
+	/**
+	 * 销毁主题关联创建的样式表。
+	 */
+	chartFactory.destroyThemeStyleSheet = function(theme)
+	{
+		if(!theme)
+			return;
+		
+		var infoMap = (theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO] || {});
+		theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO] = null;
+		
+		for(var name in infoMap)
+		{
+			var info = infoMap[name];
+			var styleId = (info ? info.styleId : null);
+			
+			if(styleId)
+				$("#" + styleId).remove();
+		}
 	};
 	
 	/**

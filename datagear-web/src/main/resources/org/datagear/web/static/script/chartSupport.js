@@ -5212,10 +5212,15 @@
 	{
 		var name = chartFactory.builtinPropName("TableChart");
 		var isLocalStyle = (options.tableStyle != null);
+		var forceUpdate = false;
 		
 		if(isLocalStyle)
 		{
-			name = chartFactory.nextElementId();
+			//这里不应使用随机数，因为在图表多次destroy再init后，会导致残留无法销毁的样式表DOM
+			name = "tableStyle" + chart.id;
+			//需强制为每次都更新样式表，因为绑定的图表主题可能是全局主题
+			forceUpdate = true;
+			
 			chart.elementJquery().addClass(name);
 			chart.extValue(chartFactory.builtinPropName("TableChartLocalStyleName"), name);
 		}
@@ -5317,8 +5322,6 @@
 			
 			//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
 			var qualifier = (isLocalStyle ? "." + name : "") + " .dg-chart-table-content";
-			var qualifierBsb = (isLocalStyle ? "." + name : "")
-						+ ".dg-chart-beautify-scrollbar .dg-chart-table-content";
 			
 			var css=
 			[
@@ -5444,7 +5447,8 @@
 			}
 			
 			return css;
-		});
+		},
+		forceUpdate);
 	};
 	
 	chartSupport.tableCopyStyleBackground = function(from, to, force, important)
