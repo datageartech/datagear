@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.RenderContext;
@@ -895,9 +896,19 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	public static interface ImportHtmlChartPluginVarNameResolver
 	{
 		/**
-		 * 获取引入变量名。
+		 * 获取引入变量名，可以是任意JS字符串。
 		 * <p>
-		 * 例如：<code>"chartPluginManager.get('...')"</code>
+		 * 例如：
+		 * </p>
+		 * <p>
+		 * <code>
+		 * "chartPluginManager.get(\"...\")"
+		 * </code>
+		 * </p>
+		 * <p>
+		 * <code>
+		 * "{\"id\": \"...\"}"
+		 * </code>
 		 * </p>
 		 * 
 		 * @param chartWidget
@@ -906,38 +917,27 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		String resolve(HtmlChartWidget chartWidget);
 	}
 
-	public static class TemplateImportHtmlChartPluginVarNameResolver implements ImportHtmlChartPluginVarNameResolver
+	/**
+	 * 返回插件ID JSON字符串的{@linkplain ImportHtmlChartPluginVarNameResolver}。
+	 * <p>
+	 * 返回格式：
+	 * </p>
+	 * <p>
+	 * <code>
+	 * "{\"id\": \"...\"}"
+	 * </code>
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class IdJsonImportHtmlChartPluginVarNameResolver implements ImportHtmlChartPluginVarNameResolver
 	{
-		public static final String PLACEHOLDER_CHART_PLUGIN_ID = "$CHART_PLUGIN_ID";
-
-		private String template;
-
-		public TemplateImportHtmlChartPluginVarNameResolver()
-		{
-			super();
-		}
-
-		public TemplateImportHtmlChartPluginVarNameResolver(String template)
-		{
-			super();
-			this.template = template;
-		}
-
-		public String getTemplate()
-		{
-			return template;
-		}
-
-		public void setTemplate(String template)
-		{
-			this.template = template;
-		}
-
 		@Override
 		public String resolve(HtmlChartWidget chartWidget)
 		{
-			String chartPluginId = chartWidget.getPlugin().getId();
-			return this.template.replace(PLACEHOLDER_CHART_PLUGIN_ID, chartPluginId);
+			String pluginId = chartWidget.getPlugin().getId();
+			return "{\"" + ChartPlugin.PROPERTY_ID + "\":" + StringUtil.toJavaScriptString(pluginId) + "}";
 		}
 	}
 }

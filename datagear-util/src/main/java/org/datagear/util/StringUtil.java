@@ -254,17 +254,33 @@ public class StringUtil
 	}
 
 	/**
-	 * 转换为JavaScript语法的字符串。
+	 * 转换为JavaScript字符串，首尾将添加双引号。
 	 * 
 	 * @param s
 	 * @return
 	 */
-	public static String escapeJavaScriptStringValue(String s)
+	public static String toJavaScriptString(String s)
+	{
+		return toJavaScriptString(s, true);
+	}
+
+	/**
+	 * 转换为JavaScript字符串。
+	 * 
+	 * @param s
+	 * @param quote
+	 *            是否首位添加双引号
+	 * @return
+	 */
+	public static String toJavaScriptString(String s, boolean quote)
 	{
 		if (s == null)
-			return "";
+			return "null";
 
 		StringBuilder sb = new StringBuilder();
+
+		if (quote)
+			sb.append("\"");
 
 		char[] cs = s.toCharArray();
 
@@ -285,6 +301,9 @@ public class StringUtil
 			else
 				sb.append(c);
 		}
+
+		if (quote)
+			sb.append("\"");
 
 		return sb.toString();
 	}

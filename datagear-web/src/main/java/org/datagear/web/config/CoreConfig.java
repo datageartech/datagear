@@ -25,7 +25,7 @@ import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.TemplateImportHtmlChartPluginVarNameResolver;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.IdJsonImportHtmlChartPluginVarNameResolver;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.DefaultConnectionSource;
 import org.datagear.connection.GenericPropertiesProcessor;
@@ -586,18 +586,15 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(
 				this.htmlChartWidgetEntityService());
 
-		bean.setImportHtmlChartPluginVarNameResolver(this.templateImportHtmlChartPluginVarNameResolver());
+		bean.setImportHtmlChartPluginVarNameResolver(this.idJsonImportHtmlChartPluginVarNameResolver());
 
 		return bean;
 	}
 
 	@Bean
-	public TemplateImportHtmlChartPluginVarNameResolver templateImportHtmlChartPluginVarNameResolver()
+	public IdJsonImportHtmlChartPluginVarNameResolver idJsonImportHtmlChartPluginVarNameResolver()
 	{
-		TemplateImportHtmlChartPluginVarNameResolver bean = new TemplateImportHtmlChartPluginVarNameResolver(
-				"chartFactory.chartPluginManager.get('"
-						+ TemplateImportHtmlChartPluginVarNameResolver.PLACEHOLDER_CHART_PLUGIN_ID + "')");
-
+		IdJsonImportHtmlChartPluginVarNameResolver bean = new IdJsonImportHtmlChartPluginVarNameResolver();
 		return bean;
 	}
 

@@ -335,6 +335,7 @@
 		this._clearExtValue();
 		
 		this._initBaseProperties();
+		this._initPlugin();
 		this._initOptions();
 		this._initTheme();
 		this._initListener();
@@ -358,6 +359,24 @@
 		for(var i=0; i<this.chartDataSets.length; i++)
 		{
 			this.chartDataSets[i].index = i;
+		}
+	};
+	
+	/**
+	 * 初始化图表插件。
+	 */
+	chartBase._initPlugin = function()
+	{
+		var plugin = this.plugin;
+		
+		//初始化可能由后台构建的仅包含id的plugin
+		if(!plugin.chartRenderer)
+		{
+			if(!chartFactory.chartPluginManager || !chartFactory.chartPluginManager.get)
+				throw new Error("[chartFactory.chartPluginManager.get] required");
+			
+			plugin = chartFactory.chartPluginManager.get(plugin.id);
+			this.plugin = plugin;
 		}
 	};
 	

@@ -349,8 +349,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 			this.htmlChartPluginScriptObjectWriter.write(out, plugin, pluginVar);
 
-			out.println("chartPluginManager.plugins[\"" + WebUtils.escapeJavaScriptStringValue(plugin.getId())
-					+ "\"] = " + pluginVar + ";");
+			out.println("chartPluginManager.plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
+					+ pluginVar + ";");
 		}
 
 		out.println("})(this);");

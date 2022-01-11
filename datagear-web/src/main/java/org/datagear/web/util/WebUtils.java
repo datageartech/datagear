@@ -495,42 +495,6 @@ public class WebUtils
 	}
 
 	/**
-	 * 转换为JavaScript语法的字符串。
-	 * 
-	 * @param s
-	 * @return
-	 */
-	public static String escapeJavaScriptStringValue(String s)
-	{
-		if (s == null)
-			return "";
-
-		StringBuilder sb = new StringBuilder();
-
-		char[] cs = s.toCharArray();
-
-		for (char c : cs)
-		{
-			if (c == '\\')
-				sb.append("\\\\");
-			else if (c == '\'')
-				sb.append("\\\'");
-			else if (c == '"')
-				sb.append("\\\"");
-			else if (c == '\t')
-				sb.append("\\\t");
-			else if (c == '\n')
-				sb.append("\\\n");
-			else if (c == '\r')
-				sb.append("\\\r");
-			else
-				sb.append(c);
-		}
-
-		return sb.toString();
-	}
-
-	/**
 	 * 为指定URL添加{@linkplain #PARAM_JSESSIONID}参数。
 	 * <p>
 	 * 当要保持会话而客户端不支持cookie时，应使用此方法为URL添加会话ID参数。

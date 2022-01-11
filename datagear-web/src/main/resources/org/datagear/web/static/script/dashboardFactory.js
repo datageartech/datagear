@@ -1952,7 +1952,6 @@
 		}
 		
 		chart.elementId = elementId;
-		chart.plugin = chartFactory.chartPluginManager.get(chart.plugin.id);
 		this._initChart(chart);
 	};
 	

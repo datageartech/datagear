@@ -64,8 +64,8 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 				+ "		var attributes = (chart." + HtmlChart.PROPERTY_CHART_ATTRIBUTES + " || {});"
 				+ HtmlChartPlugin.HTML_NEW_LINE
 				//
-				+ "		element.innerHTML=attributes['" + StringUtil.escapeJavaScriptStringValue(valueChartParamName)
-				+ "'];" + HtmlChartPlugin.HTML_NEW_LINE
+				+ "		element.innerHTML=attributes[" + StringUtil.toJavaScriptString(valueChartParamName) + "];"
+				+ HtmlChartPlugin.HTML_NEW_LINE
 
 				//
 				+ "	}," + HtmlChartPlugin.HTML_NEW_LINE

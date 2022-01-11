@@ -17,6 +17,7 @@ import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
+import org.datagear.util.StringUtil;
 
 /**
  * {@linkplain HtmlChartWidget} JSON输出流。
@@ -165,47 +166,7 @@ public class HtmlChartWidgetJsonWriter
 
 	protected String genPluginVarName(HtmlChartWidget chartWidget)
 	{
-		return "{\"id\": " + escapeJsonStringValue(chartWidget.getPlugin().getId()) + "}";
-	}
-
-	/**
-	 * 转换为JSON语法的字符串值。
-	 * 
-	 * @param s
-	 * @return
-	 */
-	protected String escapeJsonStringValue(String s)
-	{
-		if (s == null)
-			return "null";
-
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("\"");
-
-		char[] cs = s.toCharArray();
-
-		for (char c : cs)
-		{
-			if (c == '\\')
-				sb.append("\\\\");
-			else if (c == '\'')
-				sb.append("\\\'");
-			else if (c == '"')
-				sb.append("\\\"");
-			else if (c == '\t')
-				sb.append("\\\t");
-			else if (c == '\n')
-				sb.append("\\\n");
-			else if (c == '\r')
-				sb.append("\\\r");
-			else
-				sb.append(c);
-		}
-
-		sb.append("\"");
-
-		return sb.toString();
+		return "{\"id\": " + StringUtil.toJavaScriptString(chartWidget.getPlugin().getId()) + "}";
 	}
 
 	/**
