@@ -62,7 +62,7 @@
 	{
 		chartFactory.styleSheetText("dg-show-ve-style",
 			"\n"
-			+ ".dg-show-ve .dg-show-ve-selected{\n"
+			+ ".dg-show-ve .dg-show-ve-selected-b{\n"
 			+ "  border-color: " + $(document.body).css("color") + " !important;"
 			+ "\n}\n");
 	};
@@ -83,16 +83,27 @@
 	{
 		$(document.body).addClass("dg-show-ve");
 		
-		$(document.body).on("click", "["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]", function(event)
+		$(document.body).on("click", function(event)
 		{
-			var $this = $(this);
+			var target = $(event.target);
+			var veEle = (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) ? target :
+								target.closest("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]"));
 			
-			if($this.hasClass("dg-show-ve-selected"))
-				$this.removeClass("dg-show-ve-selected");
-			else
+			if(veEle.length == 0)
 			{
 				$(".dg-show-ve-selected").removeClass("dg-show-ve-selected");
-				$(this).addClass("dg-show-ve-selected");
+			}
+			else
+			{
+				if(veEle.hasClass("dg-show-ve-selected"))
+				{
+					//再次点击选中元素，不取消选中
+				}
+				else
+				{
+					$(".dg-show-ve-selected").removeClass("dg-show-ve-selected");
+					editor._selectElement(veEle);
+				}
 			}
 		});
 	};
@@ -386,6 +397,8 @@
 		if(!this.checkDeleteElement(ele))
 			return;
 		
+		//TODO 如果元素内包含图表元素，应先销毁它们
+		
 		var iframeEle = this._editElement(ele);
 		
 		ele.remove();
@@ -655,6 +668,28 @@
 		}
 		
 		return insertType;
+	};
+	
+	editor._selectElement = function($ele)
+	{
+		$ele.each(function()
+		{
+			var $thisEle = $(this);
+			$thisEle.addClass("dg-show-ve-selected");
+			var offset = $thisEle.offset();
+			var width = $thisEle.width();
+			var height = $thisEle.height();
+			
+			var bl = $("<div class='dg-show-ve-selected-b dg-show-ve-selected-bl' />").appendTo(document.body);
+			var bt = $("<div class='dg-show-ve-selected-b dg-show-ve-selected-bt' />").appendTo(document.body);
+			var br = $("<div class='dg-show-ve-selected-b dg-show-ve-selected-br' />").appendTo(document.body);
+			var bb = $("<div class='dg-show-ve-selected-b dg-show-ve-selected-bb' />").appendTo(document.body);
+			
+			bl.offset(offset).height(height);
+			bt.offset(offset).width(width);
+			br.offset({ left: offset.left+width, top: offset.top }).height(height);
+			bb.offset({ left: offset.left, top: offset.top+height }).width(width);
+		});
 	};
 	
 	editor._isEmptyElement = function(ele)
