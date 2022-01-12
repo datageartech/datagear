@@ -441,7 +441,33 @@
 	 */
 	editor.setGlobalStyle = function(styleObj)
 	{
+		var syncChartTheme = (styleObj.syncChartTheme == true || styleObj.syncChartTheme =="true");
+		styleObj = $.extend({}, styleObj);
+		styleObj.syncChartTheme = undefined;
+		
 		this._setElementStyle($(document.body), styleObj);
+		
+		if(syncChartTheme)
+		{
+			var color = styleObj.color;
+			var bgColor = styleObj['background-color'];
+			var bgImage = styleObj['background-image'];
+			
+			if(color || bgColor)
+			{
+				//TODO 这里应读取当前全局图表主题
+				var chartTheme = {};
+				
+				if(color)
+					chartTheme.color = color;
+				if(bgColor)
+					chartTheme.backgroundColor = bgColor;
+				if(bgImage && bgColor && bgColor != "transparent")
+					chartTheme.actualBackgroundColor = bgColor;
+				
+				this.setGlobalChartTheme(chartTheme);
+			}
+		}
 		
 		if(styleObj.color)
 		{

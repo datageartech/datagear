@@ -257,7 +257,7 @@ readonly 是否只读操作，允许为null
 						<input type="text" name="text-align" class="ui-widget ui-widget-content" size="100" />
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item form-item-syncChartTheme">
 					<div class="form-item-label">
 						<label><@spring.message code='dashboard.veditor.editStyle.syncChartTheme' /></label>
 					</div>

@@ -958,6 +958,7 @@
 					if(editOperation == "editGlobalStyle")
 					{
 						var panel = po.element(".veditor-style-panel");
+						po.element(".form-item-syncChartTheme" ,panel).show();
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 					else if(editOperation == "editGlobalChartTheme")
@@ -971,6 +972,12 @@
 							return;
 						
 						var panel = po.element(".veditor-style-panel");
+						
+						if(dashboardEditor.isSelectedChartElement())
+							po.element(".form-item-syncChartTheme" ,panel).show();
+						else
+							po.element(".form-item-syncChartTheme" ,panel).hide();
+						
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 					else if(editOperation == "editContent")
