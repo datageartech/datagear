@@ -11,23 +11,9 @@
 
 .dg-show-ve{}
 .dg-show-ve .dg-show-ve-selected{
-	/*不要对选中元素添加任何css，避免影响原始元素样式*/
-}
-.dg-show-ve .dg-show-ve-selected-b{
-	position: absolute;
-	padding: 0 0 !important;
-	margin: 0 0 !important;
 	border-width: 2px !important;
 	border-style: dashed !important;
 	box-sizing: border-box !important;
 	-moz-box-sizing: border-box !important;
 	-webkit-box-sizing: border-box !important;
-}
-.dg-show-ve .dg-show-ve-selected-bl,
-.dg-show-ve .dg-show-ve-selected-br{
-	width: 2px !important;
-}
-.dg-show-ve .dg-show-ve-selected-bt,
-.dg-show-ve .dg-show-ve-selected-bb{
-	height: 2px !important;
 }

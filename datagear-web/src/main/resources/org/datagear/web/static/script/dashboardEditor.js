@@ -57,14 +57,10 @@
 		this._initInteraction();
 	};
 	
-	//初始化样式
+	///初始化样式。
 	editor._initStyle = function()
 	{
-		chartFactory.styleSheetText("dg-show-ve-style",
-			"\n"
-			+ ".dg-show-ve .dg-show-ve-selected-b{\n"
-			+ "  border-color: " + $(document.body).css("color") + " !important;"
-			+ "\n}\n");
+		this._setStyle();
 	};
 	
 	//初始化编辑HTML的iframe
@@ -91,17 +87,17 @@
 			
 			if(veEle.length == 0)
 			{
-				$(".dg-show-ve-selected").removeClass("dg-show-ve-selected");
+				editor._deselectAllElement();
 			}
 			else
 			{
-				if(veEle.hasClass("dg-show-ve-selected"))
+				if(editor._isSelectedElement(veEle))
 				{
 					//再次点击选中元素，不取消选中
 				}
 				else
 				{
-					$(".dg-show-ve-selected").removeClass("dg-show-ve-selected");
+					editor._deselectAllElement();
 					editor._selectElement(veEle);
 				}
 			}
@@ -446,6 +442,23 @@
 	editor.setGlobalStyle = function(styleObj)
 	{
 		this._setElementStyle($(document.body), styleObj);
+		
+		if(styleObj.color)
+		{
+			this._setStyle(
+			{
+				selectedBorderColor: styleObj.color
+			});
+		}
+	};
+	
+	/**
+	 * 选中元素是否是图表元素。
+	 */
+	editor.isSelectedChartElement = function()
+	{
+		var ele = this._refElement(ele, true);
+		return (this.dashboard.renderedChart(ele) != null);
 	};
 	
 	/**
@@ -612,16 +625,11 @@
 		this.changeFlag(true);
 	};
 	
-	editor._getSelectedElement = function()
-	{
-		return $(".dg-show-ve-selected");
-	};
-	
 	editor._refElement = function(refEle, excludeBody)
 	{
 		excludeBody = (excludeBody == null ? false : excludeBody);
 		
-		refEle = (this._isEmptyElement(refEle) ? this._getSelectedElement() : refEle);
+		refEle = (this._isEmptyElement(refEle) ? this._selectedElement() : refEle);
 		
 		if(!excludeBody)
 			refEle = (this._isEmptyElement(refEle) ? $(document.body) : refEle);
@@ -670,26 +678,29 @@
 		return insertType;
 	};
 	
+	editor._selectedElement = function()
+	{
+		return $(".dg-show-ve-selected");
+	};
+	
+	editor._isSelectedElement = function($ele)
+	{
+		return $ele.hasClass("dg-show-ve-selected");
+	};
+	
 	editor._selectElement = function($ele)
 	{
-		$ele.each(function()
-		{
-			var $thisEle = $(this);
-			$thisEle.addClass("dg-show-ve-selected");
-			var offset = $thisEle.offset();
-			var width = $thisEle.width();
-			var height = $thisEle.height();
-			
-			var bl = $("<div class='dg-show-ve-selected-b dg-show-ve-selected-bl' />").appendTo(document.body);
-			var bt = $("<div class='dg-show-ve-selected-b dg-show-ve-selected-bt' />").appendTo(document.body);
-			var br = $("<div class='dg-show-ve-selected-b dg-show-ve-selected-br' />").appendTo(document.body);
-			var bb = $("<div class='dg-show-ve-selected-b dg-show-ve-selected-bb' />").appendTo(document.body);
-			
-			bl.offset(offset).height(height);
-			bt.offset(offset).width(width);
-			br.offset({ left: offset.left+width, top: offset.top }).height(height);
-			bb.offset({ left: offset.left, top: offset.top+height }).width(width);
-		});
+		$ele.addClass("dg-show-ve-selected");
+	};
+	
+	editor._deselectElement = function($ele)
+	{
+		$ele.removeClass("dg-show-ve-selected");
+	};
+	
+	editor._deselectAllElement = function()
+	{
+		$(".dg-show-ve-selected").removeClass("dg-show-ve-selected");
 	};
 	
 	editor._isEmptyElement = function(ele)
@@ -708,6 +719,26 @@
 		this._nextVisualEditIdSequence = seq + 1;
 		
 		return DG_VISUAL_EDIT_ID_PREFIX + seq;
+	};
+	
+	/**
+	 * 设置编辑页面样式。
+	 *
+	 * @param options 可选，格式为：{ selectedBorderColor: "..." }
+	 */
+	editor._setStyle = function(options)
+	{
+		options = $.extend(
+		{
+			selectedBorderColor: $(document.body).css("color")
+		},
+		options);
+		
+		chartFactory.styleSheetText("dg-show-ve-style",
+			"\n"
+			+ ".dg-show-ve .dg-show-ve-selected{\n"
+			+ "  border-color: " + options.selectedBorderColor + " !important;"
+			+ "\n}\n");
 	};
 	
 	//获取编辑HTML信息
