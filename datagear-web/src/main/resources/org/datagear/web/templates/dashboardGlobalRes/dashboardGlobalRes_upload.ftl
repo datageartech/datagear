@@ -102,8 +102,7 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	po.element("input[name='autoUnzip']").checkboxradio({icon:false});
-	po.element(".autoUnzip-radios").controlgroup();
+	po.element(".autoUnzip-radios").checkboxradiogroup();
 	po.element("select[name='zipFileNameEncoding']").selectmenu({ appendTo: po.element(), position: {my: "left bottom", at: "left top"}, classes: { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	
 	po.isZipExtention = function(resName)

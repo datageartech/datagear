@@ -89,11 +89,8 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	po.element("input[name='permitted']").checkboxradio({icon:false});
-	po.element(".schemaGuardPermitted-radios").controlgroup();
-
-	po.element("input[name='enabled']").checkboxradio({icon:false});
-	po.element(".schemaGuardEnabled-radios").controlgroup();
+	po.element(".schemaGuardPermitted-radios").checkboxradiogroup();
+	po.element(".schemaGuardEnabled-radios").checkboxradiogroup();
 	
 	po.url = function(action)
 	{

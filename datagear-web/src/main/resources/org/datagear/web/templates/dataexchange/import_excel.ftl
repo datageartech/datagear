@@ -46,7 +46,7 @@ Schema schema 数据库，不允许为null
 							<label for="${pageId}-ignoreInexistentColumn-0"><@spring.message code='yes' /></label>
 							<input id="${pageId}-ignoreInexistentColumn-0" type="radio" name="importOption.ignoreInexistentColumn" value="true" />
 							<label for="${pageId}-ignoreInexistentColumn-1"><@spring.message code='no' /></label>
-							<input id="${pageId}-ignoreInexistentColumn-1" type="radio" name="importOption.ignoreInexistentColumn" value="false" />
+							<input id="${pageId}-ignoreInexistentColumn-1" type="radio" name="importOption.ignoreInexistentColumn" value="false" checked="checked" />
 							</div>
 						</div>
 					</div>
@@ -57,7 +57,7 @@ Schema schema 数据库，不允许为null
 								<label for="${pageId}-nullForIllegalColumnValue-0"><@spring.message code='yes' /></label>
 								<input id="${pageId}-nullForIllegalColumnValue-0" type="radio" name="importOption.nullForIllegalColumnValue" value="true" />
 								<label for="${pageId}-nullForIllegalColumnValue-1"><@spring.message code='no' /></label>
-								<input id="${pageId}-nullForIllegalColumnValue-1" type="radio" name="importOption.nullForIllegalColumnValue" value="false" />
+								<input id="${pageId}-nullForIllegalColumnValue-1" type="radio" name="importOption.nullForIllegalColumnValue" value="false" checked="checked" />
 							</div>
 						</div>
 					</div>
@@ -160,11 +160,8 @@ Schema schema 数据库，不允许为null
 	
 	po.initDataImportExcelUIs = function()
 	{
-		po.element("#${pageId}-ignoreInexistentColumn").buttonset();
-		po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
-		
-		po.element("#${pageId}-ignoreInexistentColumn-1").click();
-		po.element("#${pageId}-nullForIllegalColumnValue-1").click();
+		po.element("#${pageId}-ignoreInexistentColumn").checkboxradiogroup();
+		po.element("#${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
 	};
 	
 	po.dataImportTableColumns.splice(3, 0,

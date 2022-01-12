@@ -70,8 +70,7 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	po.element("input[name='enabled']").checkboxradio({icon:false});
-	po.element(".roleEnabled-radios").controlgroup();
+	po.element(".roleEnabled-radios").checkboxradiogroup();
 	
 	po.url = function(action)
 	{

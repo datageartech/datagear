@@ -53,8 +53,10 @@ ${detectNewVersionScript?no_esc}
 				<input type="submit" class="recommended" value="<@spring.message code='login.login' />" />
 			</div>
 			<div class="form-foot small-text login-form-ext" style="text-align:right;">
-				<label for="remember-me-checkbox"><@spring.message code='login.rememberMe' /></label>
-	   			<input type="checkbox" id="remember-me-checkbox" name="rememberMe" value="1" />
+				<div class="remember-me-group">
+					<label for="remember-me-checkbox"><@spring.message code='login.rememberMe' /></label>
+		   			<input type="checkbox" id="remember-me-checkbox" name="rememberMe" value="1" />
+	   			</div>
 	   			<a class="link" href="${contextPath}/resetPassword"><@spring.message code='login.fogetPassword' /></a>
 			</div>
 		</form>
@@ -66,7 +68,7 @@ ${detectNewVersionScript?no_esc}
 {
 	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
 	$.initButtons(po.element());
-	$("input[name=rememberMe]", po.element()).checkboxradio({icon:true});
+	po.element(".remember-me-group").checkboxradiogroup({icon:true});
 	
 	var dialog=po.element(".page-form").dialog({
 		appendTo: po.element(),

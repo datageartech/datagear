@@ -211,7 +211,7 @@ dataExchange_js.ftl
 	po.initDataExportUIs = function()
 	{
 		$.initButtons(po.element());
-		po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
+		po.element("#${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
 		po.element("#${pageId}-add-group-select").selectmenu(
 		{
 			classes : {"ui-selectmenu-button": "ui-button-icon-only ui-corner-right"},

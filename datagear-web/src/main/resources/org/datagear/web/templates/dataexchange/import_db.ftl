@@ -35,11 +35,12 @@ Schema schema 数据库，不允许为null
 			<div class="steps">
 				<h3>选择数据类型</h3>
 				<section>
-					<label for="${pageId}-dataType-0">CSV</label>
-					<input id="${pageId}-dataType-0" type="radio" name="dataType" value="csv" />
-					
-					<label for="${pageId}-dataType-1">XML</label>
-					<input id="${pageId}-dataType-1" type="radio" name="dataType" value="xml" />
+					<div class="importDataType">
+						<label for="${pageId}-dataType-0">CSV</label>
+						<input id="${pageId}-dataType-0" type="radio" name="dataType" value="csv" />
+						<label for="${pageId}-dataType-1">XML</label>
+						<input id="${pageId}-dataType-1" type="radio" name="dataType" value="xml" />
+					</div>
 				</section>
 				<h3>上传数据</h3>
 				<section>
@@ -60,7 +61,7 @@ Schema schema 数据库，不允许为null
 	po.schemaId = "${schema.id}";
 	po.form = po.element("#${pageId}-form");
 	
-	po.element("input[name=dataType]").checkboxradio({icon:true});
+	po.element(".importDataType").checkboxradiogroup();
 	
 	po.element(".steps").steps(
 	{

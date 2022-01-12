@@ -74,8 +74,6 @@ ${detectNewVersionScript?no_esc}
 {
 	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
 	$.initButtons(po.element());
-	//元素设置了“checked='checked'”后icon显示有问题，这里先隐藏
-	$("input[type=checkbox]", po.element()).checkboxradio({icon:false});
 	
 	var dialog=po.element(".page-form").dialog({
 		appendTo: po.element(),

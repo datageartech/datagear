@@ -257,6 +257,19 @@ readonly 是否只读操作，允许为null
 						<input type="text" name="text-align" class="ui-widget ui-widget-content" size="100" />
 					</div>
 				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editStyle.syncChartTheme' /></label>
+					</div>
+					<div class="form-item-value">
+						<div id="${pageId}-syncChartTheme">
+							<input type="radio" id="${pageId}-syncChartTheme-true" name="syncChartTheme" value="true" checked="checked" />
+							<label for="${pageId}-syncChartTheme-true"><@spring.message code='yes' /></label>
+							<input type="radio" id="${pageId}-syncChartTheme-false" name="syncChartTheme" value="false" />
+							<label for="${pageId}-syncChartTheme-false"><@spring.message code='no' /></label>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="panel-foot form-foot">
 				<button type="submit"><@spring.message code='confirm' /></button>
@@ -331,6 +344,7 @@ readonly 是否只读操作，允许为null
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	
 	$.initButtons(po.element());
+	po.element("#${pageId}-syncChartTheme").checkboxradiogroup();
 	po.element().autoCloseSubPanel();
 	po.showAfterSave = false;
 	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");

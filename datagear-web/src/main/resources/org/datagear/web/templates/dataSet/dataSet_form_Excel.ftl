@@ -96,11 +96,12 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dataSet.excel.forceXls' /></label>
 					</div>
 					<div class="form-item-value no-padding-bottom">
+						<#assign forceXls=(dataSet.forceXls)!true>
 						<div id="${pageId}-forceXls">
 							<label for="${pageId}-forceXls-true"><@spring.message code='yes' /></label>
-							<input id="${pageId}-forceXls-true" type="radio" name="forceXls" value="true" />
+							<input id="${pageId}-forceXls-true" type="radio" name="forceXls" value="true" <#if forceXls>checked="checked"</#if> />
 							<label for="${pageId}-forceXls-false"><@spring.message code='no' /></label>
-							<input id="${pageId}-forceXls-false" type="radio" name="forceXls" value="false" />
+							<input id="${pageId}-forceXls-false" type="radio" name="forceXls" value="false" <#if !forceXls>checked="checked"</#if> />
 						</div>
 					</div>
 				</div>
@@ -129,9 +130,8 @@ readonly 是否只读操作，允许为null
 	$.initButtons(po.element());
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
-	po.element(".nameRow-radios").controlgroup();
-	po.element("#${pageId}-forceXls").buttonset();
-	po.element("#${pageId}-forceXls-${((dataSet.forceXls)!true)?string('true', 'false')}").click();
+	po.element(".nameRow-radios").checkboxradiogroup();
+	po.element("#${pageId}-forceXls").checkboxradiogroup();
 	po.initWorkspaceHeight();
 	po.initWorkspaceTabs(true);
 	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);

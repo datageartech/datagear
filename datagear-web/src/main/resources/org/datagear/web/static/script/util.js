@@ -2703,6 +2703,33 @@
 	$.fn.extend(
 	{
 		/**
+		 * 单选、复选框controlgroup，元素应是一个包含单选或复选框的上级元素。
+		 * 
+		 * @param options 可选，checkboxradio、controlgroup组件的组合选项
+		 */
+		checkboxradiogroup: function(options)
+		{
+			options = (options || {});
+			//默认隐藏图标
+			if(options.icon == null)
+				options.icon = false;
+			
+			var $this = $(this);
+			
+			//隐藏时初始化的controlgroup在显示时无法圆角，这里可以解决此问题
+			$("label:first", $this).addClass("ui-corner-left");
+			$("label:last", $this).addClass("ui-corner-right");
+			
+			$("input", $this).checkboxradio(options);
+			var widget = $this.controlgroup(options);
+			
+			//隐藏时初始化的checkboxradio，带有checked="checked"的元素，在显示后取消选择样式不对，这里可以解决此问题
+			$(".ui-checkboxradio-icon.ui-state-hover").removeClass("ui-state-hover");
+			
+			return widget;
+		},
+		
+		/**
 		 * JSON数据格式的表单ajax提交。
 		 * 
 		 * @param options 选项，格式为：

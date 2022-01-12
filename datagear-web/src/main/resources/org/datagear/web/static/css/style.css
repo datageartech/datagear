@@ -594,9 +594,6 @@ form .form-item.display-55 .form-item-value,
 .ui-menu .ui-menu-item-wrapper{
 	padding: .4em 1em;/*菜单条目扩大*/
 }
-.ui-controlgroup.ui-controlgroup-horizontal{
-	padding-left: 1px;/*横向边框重叠*/
-}
 .ui-controlgroup.ui-controlgroup-horizontal .ui-controlgroup-item{
 	margin-left: -1px;/*横向边框重叠*/
 }
@@ -2108,6 +2105,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 }
 .page-sqlpad .head .view-sql-history-wrapper .view-sql-history-panel{
 	position: absolute;
+	display: none;
 	right: 0.1em;
 	top: 1.2em;
 	width: 1000%;
@@ -2190,6 +2188,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 }
 .page-sqlpad .head .setting-wrapper .setting-panel{
 	position: absolute;
+	display: none;
 	right: 0.1em;
 	top: 1.2em;
 	width: 1000%;
@@ -2201,9 +2200,6 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 }
 .page-sqlpad .head .setting-wrapper .setting-panel form .form-item .form-item-value{
 	width: auto;
-}
-.page-sqlpad .head .setting-wrapper .setting-panel .ui-checkboxradio-icon{
-	display: none;
 }
 .page-sqlpad .content{
 	position: absolute;
@@ -2371,6 +2367,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 }
 .page-sqlpad .view-sql-statement-panel{
 	position: absolute;
+	display: none;
 	left: 0;
 	top: 0;
 	width: 40%;
@@ -2387,6 +2384,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 }
 .page-sqlpad .view-long-text-result-panel{
 	position: absolute;
+	display: none;
 	left: 0;
 	top: 0;
 	width: 40%;

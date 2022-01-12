@@ -46,7 +46,7 @@ Schema schema 数据库，不允许为null
 							<label for="${pageId}-ignoreInexistentColumn-0"><@spring.message code='yes' /></label>
 							<input id="${pageId}-ignoreInexistentColumn-0" type="radio" name="importOption.ignoreInexistentColumn" value="true" />
 							<label for="${pageId}-ignoreInexistentColumn-1"><@spring.message code='no' /></label>
-							<input id="${pageId}-ignoreInexistentColumn-1" type="radio" name="importOption.ignoreInexistentColumn" value="false" />
+							<input id="${pageId}-ignoreInexistentColumn-1" type="radio" name="importOption.ignoreInexistentColumn" value="false" checked="checked" />
 							</div>
 						</div>
 					</div>
@@ -57,7 +57,7 @@ Schema schema 数据库，不允许为null
 								<label for="${pageId}-nullForIllegalColumnValue-0"><@spring.message code='yes' /></label>
 								<input id="${pageId}-nullForIllegalColumnValue-0" type="radio" name="importOption.nullForIllegalColumnValue" value="true" />
 								<label for="${pageId}-nullForIllegalColumnValue-1"><@spring.message code='no' /></label>
-								<input id="${pageId}-nullForIllegalColumnValue-1" type="radio" name="importOption.nullForIllegalColumnValue" value="false" />
+								<input id="${pageId}-nullForIllegalColumnValue-1" type="radio" name="importOption.nullForIllegalColumnValue" value="false" checked="checked" />
 							</div>
 						</div>
 					</div>
@@ -79,7 +79,7 @@ Schema schema 数据库，不允许为null
 						<div class="form-item-value">
 							<div id="${pageId}-importFileFormat">
 								<label for="${pageId}-importFileFormat-0" title="<@spring.message code='dataExchange.JsonDataFormat.TABLE_OBJECT.desc' />"><@spring.message code='dataExchange.JsonDataFormat.TABLE_OBJECT' /></label>
-								<input id="${pageId}-importFileFormat-0" type="radio" name="importOption.jsonDataFormat" value="TABLE_OBJECT" />
+								<input id="${pageId}-importFileFormat-0" type="radio" name="importOption.jsonDataFormat" value="TABLE_OBJECT" checked="checked" />
 								<label for="${pageId}-importFileFormat-1" title="<@spring.message code='dataExchange.JsonDataFormat.ROW_ARRAY.desc' />"><@spring.message code='dataExchange.JsonDataFormat.ROW_ARRAY' /></label>
 								<input id="${pageId}-importFileFormat-1" type="radio" name="importOption.jsonDataFormat" value="ROW_ARRAY" />
 							</div>
@@ -175,11 +175,8 @@ Schema schema 数据库，不允许为null
 	
 	po.initDataImportJsonUIs = function()
 	{
-		po.element("#${pageId}-ignoreInexistentColumn").buttonset();
-		po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
-		
-		po.element("#${pageId}-ignoreInexistentColumn-1").click();
-		po.element("#${pageId}-nullForIllegalColumnValue-1").click();
+		po.element("#${pageId}-ignoreInexistentColumn").checkboxradiogroup();
+		po.element("#${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
 	};
 
 	po.onStepChangedSuper = po.onStepChanged;
@@ -226,8 +223,7 @@ Schema schema 数据库，不允许为null
 	po.initDataImportSteps();
 	po.initDataExchangeUIs();
 	po.initDataImportUIs();
-	po.element("#${pageId}-importFileFormat").buttonset();
-	po.element("#${pageId}-importFileFormat-0").click();
+	po.element("#${pageId}-importFileFormat").checkboxradiogroup();
 	po.initDataImportJsonUIs();
 	po.initDataImportDataTable();
 	po.initDataExchangeActions();

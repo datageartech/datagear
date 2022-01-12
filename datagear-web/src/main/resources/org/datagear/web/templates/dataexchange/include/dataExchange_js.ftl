@@ -461,7 +461,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	
 	po.initDataExchangeUIs = function()
 	{
-		po.element("#${pageId}-binaryFormat").buttonset();
+		po.element("#${pageId}-binaryFormat").controlgroup();
 		po.element(".binaryFormatSetButton").click(function()
 		{
 			po.element("input[name='dataFormat.binaryFormat']").val($(this).attr("value"));

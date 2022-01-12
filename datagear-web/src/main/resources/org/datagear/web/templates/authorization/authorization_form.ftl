@@ -261,19 +261,16 @@ readonly 是否只读操作，允许为null
 	});
 	
 	po.element("input[name='principalType'][value='${principalType}']").attr("checked", "checked").change();
-	po.element("input[name='principalType']").checkboxradio({icon:false});
-	po.element(".principalType-radios").controlgroup();
+	po.element(".principalType-radios").checkboxradiogroup();
 	
 	<#if !(resourceMeta.singlePermission)>
 	po.element("input[name='permission'][value='${permission}']").attr("checked", "checked");
-	po.element("input[name='permission']").checkboxradio({icon:false});
-	po.element(".permission-radios").controlgroup();
+	po.element(".permission-radios").checkboxradiogroup();
 	</#if>
 	
 	<#if resourceMeta.enableSetEnable>
 	po.element("input[name='enabled'][value='${enabled}']").attr("checked", "checked");
-	po.element("input[name='enabled']").checkboxradio({icon:false});
-	po.element(".enabled-radios").controlgroup();
+	po.element(".enabled-radios").checkboxradiogroup();
 	</#if>
 })
 (${pageId});

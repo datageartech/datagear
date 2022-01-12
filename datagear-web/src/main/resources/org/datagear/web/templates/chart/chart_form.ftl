@@ -258,20 +258,12 @@ readonly 是否只读操作，允许为null
 	po.initAnalysisProject("${((chart.analysisProject.id)!'')?js_string?no_esc}", "${((chart.analysisProject.name)!'')?js_string?no_esc}");
 	po.element(".form-item-value-chartDataSet").height($(window).height()/5*2);
 	
-	po.element("input[name='updateIntervalRadio']").checkboxradio({icon:false});
-	po.element(".updateInterval-radios").controlgroup();
+	po.element(".updateInterval-radios").checkboxradiogroup();
 	
-	po.element("input[name='resultDataFormatEnable']").checkboxradio({icon:false});
-	po.element("input[name='resultDataFormat.dateType']").checkboxradio({icon:false});
-	po.element("input[name='resultDataFormat.timeType']").checkboxradio({icon:false});
-	po.element("input[name='resultDataFormat.timestampType']").checkboxradio({icon:false});
-	//隐藏元素设置controlgroup组件没有圆角效果，所以这里先显示设置后再隐藏
-	po.element(".dataformat-panel").addClass("transparency").show();
-	po.element(".resultDataFormatEnable-radios").controlgroup();
-	po.element(".resultDataFormat-dateType-radios").controlgroup();
-	po.element(".resultDataFormat-timeType-radios").controlgroup();
-	po.element(".resultDataFormat-timestampType-radios").controlgroup();
-	po.element(".dataformat-panel").removeClass("transparency").hide();
+	po.element(".resultDataFormatEnable-radios").checkboxradiogroup();
+	po.element(".resultDataFormat-dateType-radios").checkboxradiogroup();
+	po.element(".resultDataFormat-timeType-radios").checkboxradiogroup();
+	po.element(".resultDataFormat-timestampType-radios").checkboxradiogroup();
 	
 	po.url = function(action)
 	{
@@ -285,9 +277,9 @@ readonly 是否只读操作，允许为null
 		
 		var enableMethod = (enable ? "enable" : "disable");
 		
-		po.element("input[name='resultDataFormat.dateType']").checkboxradio(enableMethod);
-		po.element("input[name='resultDataFormat.timeType']").checkboxradio(enableMethod);
-		po.element("input[name='resultDataFormat.timestampType']").checkboxradio(enableMethod);
+		po.element(".resultDataFormat-dateType-radios").controlgroup(enableMethod);
+		po.element(".resultDataFormat-timeType-radios").controlgroup(enableMethod);
+		po.element(".resultDataFormat-timestampType-radios").controlgroup(enableMethod);
 		
 		po.element("input[name='resultDataFormat.dateFormat']").prop("disabled", !enable);
 		po.element("input[name='resultDataFormat.timeFormat']").prop("disabled", !enable);
@@ -655,13 +647,11 @@ readonly 是否只读操作，允许为null
 		$("<div class='tip-label item-lv-l' />").html("<@spring.message code='chart.chartDataSet.attachment' />")
 			.attr("title", "<@spring.message code='chart.chartDataSet.attachment.desc' />").appendTo($attachment);
 		var $atchInputWrapper = $("<div class='item-lv-v' />").appendTo($attachment);
-		var $chkWrapper = $("<span class='input' />").appendTo($atchInputWrapper);
+		var $chkWrapper = $("<div />").appendTo($atchInputWrapper);
 		$("<label />").attr("for", atchChkId).html("").appendTo($chkWrapper);
 		var $atchChk = $("<input type='checkbox' class='chartDataSetAttachment ui-widget ui-widget-content' />")
-			.attr("id", atchChkId).attr("value", "true")
-			.appendTo($chkWrapper).checkboxradio();
-		
-		$atchChk.prop("checked", chartDataSet.attachment).checkboxradio("refresh");
+			.attr("id", atchChkId).attr("value", "true").prop("checked", chartDataSet.attachment).appendTo($chkWrapper);
+		$chkWrapper.checkboxradiogroup({icon:true});
 		
 		if(dataSet.params && dataSet.params.length > 0)
 		{

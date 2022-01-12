@@ -195,8 +195,8 @@ Schema schema 数据库，不允许为null
 	
 	$.initButtons(po.element(".head, .result-operations"));
 	po.element().autoCloseSubPanel();
-	po.element("#sqlCommitModeSet").buttonset();
-	po.element("#sqlExceptionHandleModeSet").buttonset();
+	po.element("#sqlCommitModeSet").checkboxradiogroup();
+	po.element("#sqlExceptionHandleModeSet").checkboxradiogroup();
 	
 	po.sqlpadTaskClient = new $.TaskClient("${contextPath}/sqlpad/"+po.schemaId+"/message",
 			function(message)
@@ -1242,7 +1242,7 @@ Schema schema 数据库，不允许为null
 			$rollbackExceptionHandle.attr("disabled", "disabled");
 			if($rollbackExceptionHandle.is(":checked"))
 				po.element("input[name='sqlExceptionHandleMode'][value='ABORT']").prop("checked", true);
-			po.element("#sqlExceptionHandleModeSet").buttonset("refresh");
+			po.element("#sqlExceptionHandleModeSet").controlgroup("refresh");
 		}
 		else
 		{
@@ -1250,7 +1250,7 @@ Schema schema 数据库，不允许为null
 			//po.element("#rollbackSqlButton").button("disable");
 			
 			po.element("input[name='sqlExceptionHandleMode'][value='ROLLBACK']").removeAttr("disabled");
-			po.element("#sqlExceptionHandleModeSet").buttonset("refresh");
+			po.element("#sqlExceptionHandleModeSet").controlgroup("refresh");
 		}
 	});
 	
@@ -1447,11 +1447,7 @@ Schema schema 数据库，不允许为null
 	});
 	
 	po.element("input[name='sqlCommitMode'][value='AUTO']").click();
-	po.element(".view-sql-history-panel").hide();
-	po.element(".setting-panel").hide();
 	po.element(".result-operations .sql-result-buttons").hide();
-	po.element("#viewSqlStatementPanel").hide();
-	po.element("#viewLongTextResultPanel").hide();
 	
 	po.tabsBindMenuHiddenEvent(po.sqlResultTabs);
 })

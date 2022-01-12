@@ -1130,7 +1130,7 @@ data_page_obj_edit_grid_html.ftl
 		var $editGridSwitch = po.elementEditGridSwitch();
 		//XXX 某些浏览器在刷新页面后会记住选中状态(比如火狐)，这回导致页面逻辑出错，所以这里需要重置
 		$editGridSwitch.prop("checked", false);
-		$editGridSwitch.checkboxradio({icon : true}).change(function(event)
+		$editGridSwitch.checkboxradio({icon:true}).change(function(event)
 		{
 			var $thisCheckbox = $(this);
 			

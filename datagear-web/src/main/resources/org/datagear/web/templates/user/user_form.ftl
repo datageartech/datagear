@@ -111,8 +111,7 @@ readonly 是否只读操作，允许为null
 	
 	<#--
 	禁用新建管理员账号功能
-	po.element("input[name='admin']").checkboxradio({icon:false});
-	po.element(".user-admin-radios").controlgroup();
+	po.element(".user-admin-radios").checkboxradiogroup();
 	-->
 	
 	po.url = function(action)
