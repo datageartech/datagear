@@ -253,8 +253,7 @@
 	};
 	
 	/**
-	 * 初始化指定图表对象。
-	 * 初始化前应确保已调用chartFactory.initRenderContext()。
+	 * 初始化原始图表对象，为其添加图表API，但不调用chart.init()函数。
 	 * 
 	 * @param chart 基本图表对象，格式应为：
 	 *				{
@@ -282,9 +281,7 @@
 	chartFactory.init = function(chart)
 	{
 		this._refactorChart(chart);
-		
 		$.extend(chart, this.chartBase);
-		chart.init();
 	};
 	
 	chartFactory._refactorChart = function(chart)
@@ -302,6 +299,7 @@
 	 * 初始化图表。
 	 * 此函数在图表生命周期内仅允许调用一次。 
 	 * 
+	 * 注意：初始化图表前应确保已调用chartFactory.initRenderContext()。
 	 * 注意：此函数内不应执行渲染相关逻辑，而应仅执行初始化图表属性的相关逻辑，且允许在chart.destroy()再次执行。
 	 */
 	chartBase.init = function()
@@ -1105,7 +1103,8 @@
 	 */
 	chartBase.destroy = function()
 	{
-		this._assertActive();
+		if(this.statusDestroyed())
+			return;
 		
 		var $element = this.elementJquery();
 		

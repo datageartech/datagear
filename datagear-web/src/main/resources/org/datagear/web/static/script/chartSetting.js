@@ -102,7 +102,7 @@
 		var paramValues = (options.paramValues || {});
 		var InputType = chartSetting.DataSetParamInputType;
 		
-		var $form = ($parent.is("form") ? $parent : $("<form dg-generate-ele='true' />").appendTo($parent));
+		var $form = ($parent.is("form") ? $parent : $("<form dg-generated-ele='true' />").appendTo($parent));
 		
 		$form.addClass("dg-dspv-form");
 		
@@ -246,12 +246,14 @@
 	 */
 	chartSetting.destroyDataSetParamValueForm = function(ancestor)
 	{
+		ancestor = $(ancestor);
+		
 		var $form = (ancestor.is("form") ? ancestor : $("form.dg-dspv-form", ancestor));
 		
 		$form.each(function()
 		{
 			var thisForm = $(this);
-			var isGenerated = thisForm.attr("dg-generate-ele");
+			var isGenerated = thisForm.attr("dg-generated-ele");
 			
 			if(isGenerated)
 				chartFactory.removeElementWithDerived(this);
@@ -269,7 +271,7 @@
 					chartFactory.derivedElements(this, null);
 				}
 				
-				thisForm.unbind("submit");
+				thisForm.off("submit");
 				thisForm.empty();
 			}
 		});

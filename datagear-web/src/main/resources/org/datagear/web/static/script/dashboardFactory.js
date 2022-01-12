@@ -32,7 +32,7 @@
  * 
  * 此看板工厂扩展了图表监听器功能，支持为图表监听器添加图表更新数据出错处理函数：{ updateError: function(chart, error){ ... } }
  * 
- * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboardBase._initForms函数说明。
+ * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboardBase._renderForms函数说明。
  * 
  */
 (function(global)
@@ -54,6 +54,9 @@
 	
 	/**看板工厂*/
 	var dashboardFactory = (global.dashboardFactory || (global.dashboardFactory = {}));
+	
+	/**看板状态常量*/
+	var dashboardStatusConst = (dashboardFactory.dashboardStatusConst || (dashboardFactory.dashboardStatusConst = {}));
 	
 	/**看板对象基类*/
 	var dashboardBase = (dashboardFactory.dashboardBase || (dashboardFactory.dashboardBase = {}));
@@ -117,6 +120,29 @@
 	// renderContextAttrConst结束
 	//----------------------------------------
 	
+	//----------------------------------------
+	// dashboardStatusConst开始
+	//----------------------------------------
+	
+	/**看板状态：完成init*/
+	dashboardStatusConst.INITED = "INITED";
+	
+	/**看板状态：正在render*/
+	dashboardStatusConst.RENDERING = "RENDERING";
+	
+	/**看板状态：完成render*/
+	dashboardStatusConst.RENDERED = "RENDERED";
+	
+	/**看板状态：完成render*/
+	dashboardStatusConst.RENDERED = "RENDERED";
+	
+	/**看板状态：已销毁*/
+	dashboardStatusConst.DESTROYED = "DESTROYED";
+	
+	//----------------------------------------
+	// dashboardStatusConst结束
+	//----------------------------------------
+	
 	/**
 	 * 更新看板数据配置，需与后台保持一致，具体参考：
 	 * org.datagear.web.controller.AbstractDataAnalysisController.DashboardQueryForm
@@ -154,7 +180,7 @@
 	dashboardFactory.LOAD_TIME = new Date().getTime();
 	
 	/**
-	 * 初始化指定看板对象。
+	 * 初始化原始看板对象，为其添加看板API，可选调用dashboard.init()函数。
 	 * 
 	 * @param dashboard 看板对象，格式应为：
 	 *				{
@@ -166,14 +192,23 @@
 	 *				  charts: [ 图表元信息, ... ]
 	 *				}
 	 *				另参考：org.datagear.analysis.Dashboard
+	 * @param instanceInit 可选，是否调用dashboard.init()函数，默认为：true
 	 */
-	dashboardFactory.init = function(dashboard)
+	dashboardFactory.init = function(dashboard, instanceInit)
 	{
+		instanceInit = (instanceInit == null ? true : instanceInit);
+		
 		dashboardFactory._initOverwriteChartBaseIfNot();
 		dashboardFactory._initStartHeartBeatIfNot(dashboard.renderContext);
 		
 		$.extend(dashboard, this.dashboardBase);
-		dashboard.init();
+		
+		var charts = (dashboard.charts || []);
+		for(var i=0; i<charts.length; i++)
+			chartFactory.init(charts[i]);
+		
+		if(instanceInit)
+			dashboard.init();
 	};
 	
 	dashboardFactory._initOverwriteChartBaseIfNot = function()
@@ -639,6 +674,13 @@
 	
 	/**
 	 * 初始化看板。
+	 * 
+	 * 此函数在看板生命周期内仅允许调用一次，在看板destroy后可重新调用。
+	 * 
+	 * 看板生命周期：
+	 * dashboard.init()     初始化
+	 * dashboard.render()   渲染
+	 * dashboard.destroy()  销毁
 	 */
 	dashboardBase.init = function()
 	{
@@ -647,18 +689,46 @@
 		if(!this.renderContext)
 			throw new Error("[dashboard.renderContext] required");
 		
-		if(this._inited == true)
-			throw new Error("Dashboard has been initialized");
-		this._inited = true;
+		if(this._isInitialized())
+			throw new Error("Dashboard is illegal state for init");
 		
 		this.charts = (this.charts || []);
 		
 		this._initRenderContext();
 		this._initListener();
 		this._initMapURLs();
-		this._initForms();
 		this._initChartResizeHandler();
 		this._initCharts();
+		
+		this._status = dashboardStatusConst.INITED;
+	};
+	
+	/**
+	 * 看板是否已完成初始化但未销毁。
+	 */
+	dashboardBase._isInitialized = function()
+	{
+		return (this._status == dashboardStatusConst.INITED
+				 || this._status == dashboardStatusConst.RENDERING
+				 || this._status == dashboardStatusConst.RENDERED);
+	};
+	
+	/**
+	 * 校验看板已完成初始化。
+	 */
+	dashboardBase._assertInitialized = function()
+	{
+		if(!this._isInitialized())
+			throw new Error("Dashboard not initialized");
+	};
+	
+	/**
+	 * 校验看板已完成render。
+	 */
+	dashboardBase._assertRendered = function()
+	{
+		if(this._status != dashboardStatusConst.RENDERED)
+			throw new Error("Dashboard not rendered");
 	};
 	
 	/**
@@ -729,22 +799,6 @@
 	};
 	
 	/**
-	 * 初始化看板表单。
-	 * 它将看板页面内的所有<form dg-dashboard-form="...">元素构建为看板表单。
-	 */
-	dashboardBase._initForms = function()
-	{
-		var $forms = $("form[dg-dashboard-form]", document.body);
-		
-		var dashboard = this;
-		
-		$forms.each(function()
-		{
-			dashboard.renderForm(this);
-		});
-	};
-	
-	/**
 	 * 初始化看板的所有图表。
 	 */
 	dashboardBase._initCharts = function()
@@ -761,7 +815,7 @@
 		chart.renderContext = this.renderContext;
 		chart.dashboard = this;
 		
-		chartFactory.init(chart);
+		chart.init();
 		
 		var chartListener = chart.listener();
 		
@@ -791,9 +845,14 @@
 	 */
 	dashboardBase._initChartResizeHandler = function()
 	{
-		var thisDashboard = this;
+		var $window = $(window);
 		
-		$(window).resize(function()
+		//解绑之前的，确保此函数可重复调用
+		if(this._windowResizeHandler)
+			$window.off("resize", this._windowResizeHandler);
+		
+		var thisDashboard = this;
+		this._windowResizeHandler = function()
 		{
 			setTimeout(function()
 			{
@@ -808,7 +867,9 @@
 				}
 			},
 			100);
-		});
+		};
+		
+		$window.on("resize", this._windowResizeHandler);
 	};
 	
 	/**
@@ -1001,11 +1062,6 @@
 		return removeds[0];
 	};
 	
-	dashboardBase._destroyChart = function(chart)
-	{
-		chart.destroy();
-	};
-	
 	/**
 	 * 重新调整指定图表尺寸。
 	 * 
@@ -1013,6 +1069,8 @@
 	 */
 	dashboardBase.resizeChart = function(chartInfo)
 	{
+		this._assertRendered();
+		
 		var chart = this.chartOf(chartInfo);
 		chart.resize();
 	};
@@ -1022,6 +1080,8 @@
 	 */
 	dashboardBase.resizeAllCharts = function()
 	{
+		this._assertRendered();
+		
 		for(var i=0; i<this.charts.length; i++)
 			this.charts[i].resize();
 	};
@@ -1033,6 +1093,8 @@
 	 */
 	dashboardBase.refreshData = function(chartInfo)
 	{
+		this._assertRendered();
+		
 		var chart = this.chartOf(chartInfo);
 		chart.refreshData();
 	};
@@ -1114,6 +1176,8 @@
 	 */
 	dashboardBase.renderForm = function(form, config)
 	{
+		this._assertInitialized();
+		
 		form = $(form);
 		
 		form.addClass("dg-dashboard-form");
@@ -1217,13 +1281,23 @@
 	
 	/**
 	 * 渲染看板。
+	 * 如果看板还未执行初始化，此函数内部会先执行dashboard.init()函数，确保生命周期完整。
+	 *
+	 * 此函数在看板生命周期内仅允许调用一次，在看板destroy后可重新调用。 
 	 */
 	dashboardBase.render = function()
 	{
-		//只允许调用一次
-		if(this._rendered == true)
-			throw new Error("Dashboard has been rendered");
-		this._rendered = true;
+		if(this._status == dashboardStatusConst.RENDERING
+				|| this._status == dashboardStatusConst.RENDERED)
+		{
+			throw new Error("Dashboard is illegal state for render");
+		}
+		
+		//如果还未执行初始化，则应先执行，确保生命周期完整
+		if(this._status != dashboardStatusConst.INITED)
+			this.init();
+		
+		this._status = dashboardStatusConst.RENDERING;
 		
 		var doRender = true;
 		
@@ -1242,11 +1316,32 @@
 	 */
 	dashboardBase.doRender = function()
 	{
+		if(this._status != dashboardStatusConst.RENDERING)
+			throw new Error("Dashboard is illegal state for doRender");
+		
+		this._renderForms();
 		this.startHandleCharts();
+		
+		this._status = dashboardStatusConst.RENDERED;
 		
 		var listener = this.listener();
 		if(listener && listener.render)
 			  listener.render(this);
+	};
+	
+	/**
+	 * 渲染你看板表单。
+	 * 它将看板页面内的所有<form dg-dashboard-form="...">元素渲染为看板表单。
+	 */
+	dashboardBase._renderForms = function()
+	{
+		var $forms = $("form[dg-dashboard-form]", document.body);
+		
+		var dashboard = this;
+		$forms.each(function()
+		{
+			dashboard.renderForm(this);
+		});
 	};
 	
 	/**
@@ -1263,6 +1358,8 @@
 	 */
 	dashboardBase.startHandleCharts = function()
 	{
+		this._assertInitialized();
+		
 		if(this._doHandlingCharts == true)
 			return false;
 		
@@ -1686,7 +1783,6 @@
 				
 				dashboardQuery.chartQueries[chartId] = chartQuery;
 			}
-			
 		}
 		
 		return dashboardQueryForm;
@@ -1702,6 +1798,8 @@
 	 */
 	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
+		this._assertInitialized();
+		
 		element = $(element);
 		
 		if(this._loadingChartElement(element))
@@ -1780,6 +1878,8 @@
 	 */
 	dashboardBase.loadCharts = function(element, chartWidgetId, ajaxOptions)
 	{
+		this._assertInitialized();
+		
 		element = $(element);
 		
 		for(var i=0; i<element.length; i++)
@@ -1880,6 +1980,8 @@
 	 */
 	dashboardBase.loadUnsolvedCharts = function(ajaxOptions)
 	{
+		this._assertInitialized();
+		
 		var unsolved = [];
 		
 		var allElements = $("["+chartFactory.elementAttrConst.WIDGET+"]");
@@ -1950,8 +2052,9 @@
 			elementId = chartFactory.nextElementId();
 			element.attr("id", elementId);
 		}
-		
 		chart.elementId = elementId;
+		
+		chartFactory.init(chart);
 		this._initChart(chart);
 	};
 	
@@ -2062,6 +2165,8 @@
 	 */
 	dashboardBase.batchSetDataSetParamValues = function(sourceData, batchSet, sourceValueContext)
 	{
+		this._assertInitialized();
+		
 		sourceValueContext = (sourceValueContext === undefined ? sourceData : sourceValueContext);
 		
 		var targetCharts = [];
@@ -2244,6 +2349,52 @@
 			throw new Error("Get user is not supported");
 		
 		return user;
+	};
+	
+	/**
+	 * 销毁看板。
+	 * 销毁后，可以重新调用dashboard.init()、dashboard.render()函数。
+	 */
+	dashboardBase.destroy = function()
+	{
+		if(this._status == dashboardStatusConst.DESTROYED)
+			return;
+		
+		this._status = dashboardStatusConst.DESTROYED;
+		
+		this.stopHandleCharts();
+		this._destroyCharts();
+		this._destroyForms();
+	};
+	
+	dashboardBase._destroyCharts = function()
+	{
+		var charts = (this.charts || []);
+		
+		for(var i=0; i<charts.length; i++)
+			this._destroyChart(charts[i]);
+	};
+	
+	dashboardBase._destroyChart = function(chart)
+	{
+		try
+		{
+			chart.destroy();
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+		}
+	};
+	
+	dashboardBase._destroyForms = function()
+	{
+		var $forms = $("form[dg-dashboard-form]", document.body);
+		
+		$forms.each(function()
+		{
+			chartFactory.chartSetting.destroyDataSetParamValueForm(this);
+		});
 	};
 	
 	//-------------
