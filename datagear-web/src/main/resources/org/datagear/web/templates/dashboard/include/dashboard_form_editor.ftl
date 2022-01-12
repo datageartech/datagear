@@ -938,12 +938,12 @@
 		$("<button type='button' />").text("<@spring.message code='edit' />").appendTo(editGroup).button();
 		
 		var editMenu = $("<ul class='edit-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li editOperation='editGlobalChartTheme' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartTheme' /></div>").appendTo(editMenu);
 		$("<li editOperation='editGlobalStyle' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalStyle' /></div>").appendTo(editMenu);
+		$("<li editOperation='editGlobalChartTheme' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartTheme' /></div>").appendTo(editMenu);
 		$("<li class='ui-menu-divider' />").appendTo(editMenu);
-		$("<li editOperation='editChartTheme' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartTheme' /></div>").appendTo(editMenu);
 		$("<li editOperation='editStyle' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
 		$("<li editOperation='editContent' auto-close-prevent='veditor-content-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
+		$("<li editOperation='editChartTheme' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartTheme' /></div>").appendTo(editMenu);
 		editMenu.appendTo(editGroup).menu(
 		{
 			select: function(event, ui)
@@ -955,12 +955,9 @@
 				var dashboardEditor = po.dashboardEditorVisual(tabPane);
 				if(dashboardEditor)
 				{
-					if(editOperation == "editChartTheme")
+					if(editOperation == "editGlobalStyle")
 					{
-						if(!dashboardEditor.checkSetElementChartTheme())
-							return;
-						
-						var panel = po.element(".veditor-chartTheme-panel");
+						var panel = po.element(".veditor-style-panel");
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 					else if(editOperation == "editGlobalChartTheme")
@@ -976,11 +973,6 @@
 						var panel = po.element(".veditor-style-panel");
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
-					else if(editOperation == "editGlobalStyle")
-					{
-						var panel = po.element(".veditor-style-panel");
-						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
-					}
 					else if(editOperation == "editContent")
 					{
 						if(!dashboardEditor.checkSetElementText())
@@ -989,6 +981,14 @@
 						var panel = po.element(".veditor-content-panel");
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 						po.element("input[name='content']", panel).val(dashboardEditor.getElementText()).focus();
+					}
+					else if(editOperation == "editChartTheme")
+					{
+						if(!dashboardEditor.checkSetElementChartTheme())
+							return;
+						
+						var panel = po.element(".veditor-chartTheme-panel");
+						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 				}
 			}

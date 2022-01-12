@@ -94,8 +94,6 @@
 				$(".dg-show-ve-selected").removeClass("dg-show-ve-selected");
 				$(this).addClass("dg-show-ve-selected");
 			}
-			
-			event.stopPropagation();
 		});
 	};
 	
@@ -490,14 +488,8 @@
 	{
 		this._setElementChartTheme($(document.body), chartTheme);
 		
-		var charts = (this.dashboard.charts || []);
-		for(var i=0; i<charts.length; i++)
-		{
-			var chart = charts[i];
-			
-			chart.destroy();
-			chart.init();
-		}
+		this.dashboard.destroy();
+		this.dashboard.render();
 	};
 	
 	/**
