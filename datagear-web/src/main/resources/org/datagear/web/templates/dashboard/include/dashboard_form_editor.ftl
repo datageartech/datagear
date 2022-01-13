@@ -1052,7 +1052,7 @@
 		{
 			if(po.insertOperationForVisualEdit == "insertChart")
 			{
-				dashboardEditor.insertChart(chartWidgets, po.insertTypeForVisualEdit);
+				dashboardEditor.insertChart(chartWidgets, po.insertTypeForVisualEdit, po.defaultInsertChartEleStyle);
 			}
 			else if(po.insertOperationForVisualEdit == "bindChart")
 			{

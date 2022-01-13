@@ -181,9 +181,10 @@
 	 * 
 	 * @param chartWidgets 要插入的图表部件对象、数组
 	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param styleStr 可选，元素样式字符串
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
-	editor.insertChart = function(chartWidgets, insertType, refEle)
+	editor.insertChart = function(chartWidgets, insertType, styleStr, refEle)
 	{
 		if(!chartWidgets || chartWidgets.length == 0)
 			return;
@@ -201,8 +202,15 @@
 		{
 			var chartWidget = chartWidgets[i];
 			
-			var chartDiv = $("<div class='dg-chart' />").attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
-				.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, this._nextVisualEditId()).html("<!--"+chartWidget.name+"-->");
+			var chartDiv = $("<div />");
+			
+			//先设style，与源码模式一致
+			if(styleStr)
+				chartDiv.attr("style", styleStr);
+			
+			chartDiv.attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
+				.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, this._nextVisualEditId())
+				.html("<!--"+chartWidget.name+"-->");
 			
 			this.insertElement(chartDiv, insertType, refEle);
 		}
