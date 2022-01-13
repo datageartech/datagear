@@ -874,8 +874,7 @@
 		this._createChartThemeCssIfNon();
 		
 		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
-		var position = $element.css("position");
-		if(!position || position == "static")
+		if(chartFactory.isStaticPosition($element))
 			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
 		
 		$element.addClass(this.themeStyleName());
@@ -4559,6 +4558,23 @@
 			
 			$(this).remove();
 		});
+	};
+	
+	/**
+	 * 元素是否是"position:static"的。
+	 */
+	chartFactory.isStaticPosition = function(ele)
+	{
+		ele = $(ele);
+		
+		var p = ele.css("position");
+		
+		if(!p || p == "static")
+			return true;
+		else if(p == "inherit")
+			return this.isStaticPosition(ele.parent());
+		else
+			return false;
 	};
 	
 	/**

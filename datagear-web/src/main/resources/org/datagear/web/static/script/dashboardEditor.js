@@ -176,15 +176,17 @@
 			return true;
 	};
 	
+	//插入图表元素时的默认元素样式
+	editor.defaultInsertChartEleStyle = "";
+	
 	/**
 	 * 插入图表。
 	 * 
 	 * @param chartWidgets 要插入的图表部件对象、数组
 	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param styleStr 可选，元素样式字符串
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
-	editor.insertChart = function(chartWidgets, insertType, styleStr, refEle)
+	editor.insertChart = function(chartWidgets, insertType, refEle)
 	{
 		if(!chartWidgets || chartWidgets.length == 0)
 			return;
@@ -197,6 +199,13 @@
 		//图表元素内部不允许再插入图表元素
 		if(!this.checkInsertChart(insertType, refEle))
 			return;
+		
+		var styleStr = "";
+		
+		if(chartFactory.isStaticPosition(refEle))
+			styleStr = this.defaultInsertChartEleStyle;
+		else
+			styleStr = "position:absolute;left:0;top:0;right:0;bottom:0;width:100%;height:100%;";
 		
 		for(var i=0; i<chartWidgets.length; i++)
 		{

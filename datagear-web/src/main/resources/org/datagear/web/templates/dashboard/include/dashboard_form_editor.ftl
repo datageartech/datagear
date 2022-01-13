@@ -322,9 +322,9 @@
 		
 		var dashboardEditor = (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
 		
-		if(dashboardEditor && !dashboardEditor.OVERWRITE_I18N_AND_TIP)
+		if(dashboardEditor && !dashboardEditor._OVERWRITE_BY_CONTEXT)
 		{
-			dashboardEditor.OVERWRITE_I18N_AND_TIP = true;
+			dashboardEditor._OVERWRITE_BY_CONTEXT = true;
 			
 			dashboardEditor.i18n.insertInsideChartOnChartEleDenied="<@spring.message code='dashboard.opt.tip.insertInsideChartOnChartEleDenied' />";
 			dashboardEditor.i18n.selectElementForSetChart="<@spring.message code='dashboard.opt.tip.selectElementForSetChart' />";
@@ -335,6 +335,8 @@
 			{
 				$.tipInfo(msg);
 			};
+			
+			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
 		}
 		
 		return dashboardEditor;
@@ -1052,7 +1054,7 @@
 		{
 			if(po.insertOperationForVisualEdit == "insertChart")
 			{
-				dashboardEditor.insertChart(chartWidgets, po.insertTypeForVisualEdit, po.defaultInsertChartEleStyle);
+				dashboardEditor.insertChart(chartWidgets, po.insertTypeForVisualEdit);
 			}
 			else if(po.insertOperationForVisualEdit == "bindChart")
 			{
