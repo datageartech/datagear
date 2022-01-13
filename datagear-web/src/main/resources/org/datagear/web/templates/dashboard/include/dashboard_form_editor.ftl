@@ -754,7 +754,9 @@
 					}
 				});
 	};
-
+	
+	po.defaultInsertChartEleStyle = "display:inline-block;width:200px;height:200px;";
+	
 	po.insertCodeEditorChart = function(tabPane, chartWidgets)
 	{
 		if(!chartWidgets || !chartWidgets.length)
@@ -765,8 +767,7 @@
 		var doc = codeEditor.getDoc();
 		var cursor = doc.getCursor();
 		
-		//如果body上没有定义dg-dashboard样式，则图表元素也不必添加dg-chart样式，比如导入的看板
-		var setDashboardTheme = true;
+		var dftSize = po.defaultInsertChartSize;
 		
 		var code = "";
 		
@@ -788,15 +789,13 @@
 				code = " dg-chart-widget=\""+chartId+"\"";
 			else
 			{
-				setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
-				code = "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
+				code = "<div style=\""+po.defaultInsertChartEleStyle+"\" dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
 			}
 		}
 		else
 		{
-			setDashboardTheme = po.isCodeHasDefaultThemeClass(codeEditor, cursor);
 			for(var i=0; i<chartWidgets.length; i++)
-				code += "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+chartWidgets[i].id+"\"><!--"+chartWidgets[i].name+"--></div>\n";
+				code += "<div style=\""+po.defaultInsertChartEleStyle+"\" dg-chart-widget=\""+chartWidgets[i].id+"\"><!--"+chartWidgets[i].name+"--></div>\n";
 		}
 		
 		po.insertCodeText(codeEditor, cursor, code);
@@ -834,28 +833,6 @@
 			text = doc.getLine(prevRow) + text;
 		
 		return po.getLastTagText(text);
-	};
-	
-	po.isCodeHasDefaultThemeClass = function(codeEditor, cursor)
-	{
-		var doc = codeEditor.getDoc();
-		
-		var row = cursor.line;
-		var text = "";
-		while(row >= 0)
-		{
-			text = doc.getLine(row);
-			
-			if(text && /["'\s]dg-dashboard["'\s]/g.test(text))
-				return true;
-			
-			if(/<body/gi.test(text))
-				break;
-			
-			row--;
-		}
-		
-		return false;
 	};
 	
 	po.initVisualEditorOperationIfNon = function(tabPane)

@@ -175,7 +175,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	@Override
 	public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
 	{
-		return simpleTemplateContent(htmlCharset, "", "", "", chartWidgetId, "");
+		return simpleTemplateContent(htmlCharset, "", "", chartWidgetId, "");
 	}
 
 	/**
@@ -185,15 +185,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * @param htmlTitle
 	 * @param customChartEleStyleName
 	 *            自定义图表元素样式类名，允许为{@code null}
-	 * @param customChartCssAttrs
-	 *            自定义图表样式属性，允许为{@code null}
 	 * @param chartWidgetId
 	 * @param chartEleAttrs
 	 *            图表元素属性，允许为{@code null}
 	 * @return
 	 */
 	public String simpleTemplateContent(String htmlCharset, String htmlTitle, String customChartEleStyleName,
-			String customChartCssAttrs,
 			String[] chartWidgetId, String chartEleAttrs)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -203,32 +200,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		sb.append("<head>\n");
 		sb.append("<meta charset=\"" + htmlCharset + "\">\n");
 		sb.append("<title>" + htmlTitle + "</title>\n");
-		sb.append("<style type=\"text/css\">\n");
-		sb.append("." + getDashboardStyleName() + "{\n");
-		sb.append("  position: absolute;\n");
-		sb.append("  left: 0px;\n");
-		sb.append("  right: 0px;\n");
-		sb.append("  top: 0px;\n");
-		sb.append("  bottom: 0px;\n");
-		sb.append("}\n");
-		sb.append("." + getChartStyleName() + "{\n");
-		sb.append("  display: inline-block;\n");
-		sb.append("  width: 300px;\n");
-		sb.append("  height: 300px;\n");
-
-		if (!StringUtil.isEmpty(customChartCssAttrs))
-			sb.append(customChartCssAttrs);
-
-		sb.append("}\n");
-		sb.append("</style>\n");
 		sb.append("</head>\n");
-		sb.append("<body class=\"" + getDashboardStyleName() + "\">\n");
+		sb.append("<body>\n");
 		sb.append("\n");
 
 		for (String cwi : chartWidgetId)
-			sb.append("  <div class=\"" + getChartStyleName()
-					+ (StringUtil.isEmpty(customChartEleStyleName) ? "" : " " + customChartEleStyleName) + "\" "
-					+ getAttrNameChartWidget() + "=\"" + cwi + "\" "
+			sb.append("  <div class=\"" + (StringUtil.isEmpty(customChartEleStyleName) ? "" : customChartEleStyleName)
+					+ "\" " + getAttrNameChartWidget() + "=\"" + cwi + "\" "
 					+ (StringUtil.isEmpty(chartEleAttrs) ? "" : chartEleAttrs) + "></div>\n");
 
 		sb.append("</body>\n");

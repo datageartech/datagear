@@ -524,9 +524,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		try
 		{
 			templateIn = IOUtil
-					.getReader(this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
-							"dg-chart-for-show-chart", null,
-							new String[] { id }, "dg-chart-disable-setting=\"false\""));
+					.getReader(this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent(IOUtil.CHARSET_UTF_8,
+							htmlTitle, "dg-chart-for-show-chart", new String[] { id },
+							"dg-chart-disable-setting=\"false\""));
 
 			String responseEncoding = dashboardWidget.getTemplateEncoding();
 			response.setCharacterEncoding(responseEncoding);
