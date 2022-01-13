@@ -22,7 +22,7 @@
 		{
 			veContentPanel.hide();
 			
-			var tabPane = po.tabsGetActivePane(po.resourceEditorTabs());
+			var tabPane = po.getActiveResEditorTabPane();
 			var dashboardEditor = po.dashboardEditorVisual(tabPane);
 			if(dashboardEditor)
 			{
@@ -41,7 +41,7 @@
 		{
 			veStylePanel.hide();
 			
-			var tabPane = po.tabsGetActivePane(po.resourceEditorTabs());
+			var tabPane = po.getActiveResEditorTabPane();
 			var dashboardEditor = po.dashboardEditorVisual(tabPane);
 			if(dashboardEditor)
 			{
@@ -64,7 +64,7 @@
 		{
 			veChartThemePanel.hide();
 			
-			var tabPane = po.tabsGetActivePane(po.resourceEditorTabs());
+			var tabPane = po.getActiveResEditorTabPane();
 			var dashboardEditor = po.dashboardEditorVisual(tabPane);
 			if(dashboardEditor)
 			{
@@ -273,6 +273,11 @@
 		{name: "widgetId", value: "widgetId()", displayName: "widgetId() ", displayComment: "chart", categories: ["chart"]}
 	];
 	
+	po.getActiveResEditorTabPane = function()
+	{
+		return po.tabsGetActivePane(po.resourceEditorTabs());
+	};
+	
 	po.evalTopWindowSize = function()
 	{
 		var topWindow = window;
@@ -361,40 +366,45 @@
 		return data;
 	};
 	
-	po.getSingleResourceEditorData = function(tabPane)
+	po.getSingleResourceEditorData = function(tabPane, returnResourceContent)
 	{
 		tabPane = $(tabPane);
+		returnResourceContent = (returnResourceContent == null ? true : returnResourceContent);
 		
 		var resourceName = po.element(".resourceName", tabPane).val();
 		var isTemplate = (po.element(".resourceIsTemplate", tabPane).val() == "true");
-		var resourceContent = "";
-		
-		var codeEditorDiv = po.element(".code-editor", tabPane);
-		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
-		
-		if(isTemplate)
-		{
-			var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
-			if(visualEditorIfm.hasClass("show-editor"))
-			{
-				var dashboardEditor = po.dashboardEditorVisual(tabPane);
-				resourceContent = (dashboardEditor ? dashboardEditor.editedHtml() : "");
-			}
-			
-			if(!resourceContent)
-				resourceContent = po.getCodeText(codeEditor);
-		}
-		else
-		{
-			resourceContent = po.getCodeText(codeEditor);
-		}
 		
 		var data =
 		{
 			resourceName: resourceName,
-			isTemplate: isTemplate,
-			resourceContent: resourceContent
+			isTemplate: isTemplate
 		};
+		
+		if(returnResourceContent)
+		{
+			var resourceContent = "";
+			var codeEditorDiv = po.element(".code-editor", tabPane);
+			var codeEditor = codeEditorDiv.data("resourceEditorInstance");
+			
+			if(isTemplate)
+			{
+				var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+				if(visualEditorIfm.hasClass("show-editor"))
+				{
+					var dashboardEditor = po.dashboardEditorVisual(tabPane);
+					resourceContent = (dashboardEditor ? dashboardEditor.editedHtml() : "");
+				}
+				
+				if(!resourceContent)
+					resourceContent = po.getCodeText(codeEditor);
+			}
+			else
+			{
+				resourceContent = po.getCodeText(codeEditor);
+			}
+			
+			data.resourceContent = resourceContent;
+		}
 		
 		return data;
 	};
@@ -1116,7 +1126,7 @@
 	
 	po.insertEditorChart = function(chartWidgets)
 	{
-		var tabPane = po.tabsGetActivePane(po.resourceEditorTabs());
+		var tabPane = po.getActiveResEditorTabPane();
 		var codeEditorDiv = po.element(".code-editor", tabPane);
 		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
 		

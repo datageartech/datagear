@@ -357,7 +357,16 @@ readonly 是否只读操作，允许为null
 	po.showUrl = function(dashboardId, resName)
 	{
 		resName = (resName == null ? "" : resName);
-		return po.url("show/"+dashboardId+"/" + resName);
+		
+		if(!resName)
+		{
+			return po.url("show/"+dashboardId+"/");
+		}
+		else
+		{
+			var path = $.concatPathArray(["show/"+dashboardId, resName]);
+			return po.url(path);
+		}
 	};
 	
 	po.getDashboardId = function()
@@ -437,7 +446,15 @@ readonly 是否只读操作，允许为null
 					po.templates = dashboard.templates;
 					
 					if(po.showAfterSave)
-						window.open(po.showUrl(dashboard.id), dashboard.id);
+					{
+						var editorTabPane = po.getActiveResEditorTabPane();
+						var editorData = po.getSingleResourceEditorData(editorTabPane, false);
+						
+						if(editorData.isTemplate)
+							window.open(po.showUrl(dashboard.id, editorData.resourceName), dashboard.id);
+						else
+							window.open(po.showUrl(dashboard.id), dashboard.id);
+					}
 					
 					var close = po.pageParamCallAfterSave(false);
 					if(!close)
