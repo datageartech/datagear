@@ -67,11 +67,8 @@
 	editor._initEditHtmlIframe = function()
 	{
 		var editHtmlInfo = this._editHtmlInfo();
-		
-		//只使用bodyHtml，因为渲染ifarme页面时beforeBodyHtml、afterBodyHtml如果有不合规的元素，
-		//可能会被渲染至<body></body>内，导致【结果HTML】还原不对
-		var editHtml = "<html><head></head>" + editHtmlInfo.bodyHtml + "</html>";
-		this._editIframe(editHtml);
+		var editBodyHtml = this._unescapeEditHtml(editHtmlInfo.bodyHtml);
+		this._editIframe(editBodyHtml);
 	};
 	
 	//初始化交互控制
@@ -860,8 +857,13 @@
 	
 	/**
 	 * 获取编辑iframe，也可设置其HTML。
+	 * 
+	 * 这里的editBodyHtml应只使用"<body>...</body>"，因为渲染iframe页面时，如果"<body>"前、"</body>"后里有不合规的元素，
+	 * 可能会被渲染至<body></body>内，导致【结果HTML】还原不对。
+	 * 
+	 * @param editBodyHtml 
 	 */
-	editor._editIframe = function(editHtml)
+	editor._editIframe = function(editBodyHtml)
 	{
 		var id = (this._editIframeId != null ? this._editIframeId
 					: (this._editIframeId = chartFactory.nextElementId()));
@@ -876,15 +878,43 @@
 		
 		iframe = iframe[0];
 		
-		if(editHtml != null)
+		if(editBodyHtml != null)
 		{
-			editHtml = this._unescapeEditHtml(editHtml);
-			this._editDocument(iframe).write(editHtml);
+			//使用这种方式会导致浏览器一至处于加载中的状态，所以改为后面的方式
+			//this._editDocument(iframe).write("<html><head></head>" + editBodyHtml + "</html>");
+			
+			var editIframeBodyHtml = this._toEditIframeBodyHtml(editBodyHtml);
+			var editDoc = this._editDocument();
+			$(editDoc.body).html(editIframeBodyHtml);
 			
 			this.changeFlag(true);
 		}
 		
 		return iframe;
+	};
+	
+	//将"<body>...</body>"转换为"<div>...</div>"，使得可以直接使用：$(document.body).html("...");
+	editor._toEditIframeBodyHtml = function(editBodyHtml)
+	{
+		var startTagRegex = /^\s*<body/i;
+		var endTagRegex = /\/body>\s*$/i;
+		
+		var editIframeBodyHtml = editBodyHtml.replace(startTagRegex, "<div");
+		editIframeBodyHtml = editIframeBodyHtml.replace(endTagRegex, "/div>");
+		
+		return editIframeBodyHtml;
+	};
+	
+	//将由editor._toEditIframeBodyHtml()转换的"<div>...</div>"恢复为"<body>...</body>"
+	editor._fromEditIframeBodyHtml = function(editIframeBodyHtml)
+	{
+		var startTagRegex = /^\s*<div/i;
+		var endTagRegex = /\/div>\s*$/i;
+		
+		var editBodyHtml = editIframeBodyHtml.replace(startTagRegex, "<body");
+		editBodyHtml = editBodyHtml.replace(endTagRegex, "/body>");
+		
+		return editBodyHtml;
 	};
 	
 	/**
@@ -901,7 +931,9 @@
 	editor._editBodyHtml = function()
 	{
 		var editDoc = this._editDocument();
-		return $(editDoc.body).prop("outerHTML");
+		var editIframeBodyHtml = $(editDoc.body).html();
+		
+		return this._fromEditIframeBodyHtml(editIframeBodyHtml);
 	};
 	
 	/**
@@ -914,7 +946,10 @@
 		var editDoc = this._editDocument();
 		
 		if($ele.is("body"))
-			return $(editDoc.body);
+		{
+			// <body>被转换为了<div>，参考editor._toEditIframeBodyHtml()函数
+			return $("> div", editDoc.body);
+		}
 		
 		var editId = (this._getVisualEditId($ele) || "");
 		return $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']", editDoc.body);

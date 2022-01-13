@@ -4293,7 +4293,7 @@
 		
 		if(!gcs || gcs.length == 0)
 		{
-			gcs = this.evalGradualColors(theme.actualBackgroundColor, theme.color, (theme.gradient || 10));
+			gcs = this.evalGradualColors(theme.actualBackgroundColor, theme.color, (theme.gradient || 20));
 			theme[chartFactory._KEY_GRADUAL_COLORS] = gcs;
 		}
 		
@@ -4694,7 +4694,7 @@
 		if(!theme.actualBackgroundColor)
 			theme.actualBackgroundColor = "#FFF";
 		if(!theme.gradient)
-			theme.gradient = 10;
+			theme.gradient = 20;
 		if(!theme.graphColors || theme.graphColors.length == 0)
 			theme.graphColors = ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#3ba272", "#fc8452",
 							"#9a60b4", "#ea7ccc", "#B6A2DE"];
@@ -4753,7 +4753,7 @@
 		if(theme.color && theme.actualBackgroundColor)
 		{
 			if(!theme.legendColor)
-				theme.legendColor = chartFactory.gradualColor(theme, 0.8);
+				theme.legendColor = chartFactory.gradualColor(theme, 0.9);
 			
 			if(!theme.borderColor)
 				theme.borderColor = chartFactory.gradualColor(theme, 0.3);
