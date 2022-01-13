@@ -60,7 +60,7 @@
 	///初始化样式。
 	editor._initStyle = function()
 	{
-		this._setStyle();
+		this._setPageStyle();
 	};
 	
 	//初始化编辑HTML的iframe
@@ -156,6 +156,17 @@
 	};
 	
 	/**
+	 * 是否是图表元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.isChartElement = function(ele)
+	{
+		ele = this._refElement(ele);
+		return (this.dashboard.renderedChart(ele) != null);
+	};
+	
+	/**
 	 * 校验insertChart操作。
 	 * 
 	 * @param insertType 可选，参考insertChart函数的insertType参数
@@ -167,7 +178,7 @@
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		//图表元素内部不允许再插入图表元素
-		if(this.dashboard.renderedChart(refEle) && (insertType == "append" || insertType == "prepend"))
+		if(this.isChartElement(refEle) && (insertType == "append" || insertType == "prepend"))
 		{
 			this.tipInfo(i18n.insertInsideChartOnChartEleDenied);
 			return false;
@@ -258,7 +269,7 @@
 		if(!this.checkBindChart(ele))
 			return;
 		
-		if(this.dashboard.renderedChart(ele))
+		if(this.isChartElement(ele))
 		{
 			this.dashboard.removeChart(ele);
 		}
@@ -279,7 +290,7 @@
 		if(!this._checkNotEmptyElement(ele))
 			return false;
 		
-		if(!this.dashboard.renderedChart(ele))
+		if(!this.isChartElement(ele))
 		{
 			this.tipInfo(i18n.selectedNotChartElement);
 			return false;
@@ -445,7 +456,15 @@
 		if(!this.checkSetElementStyle(ele))
 			return;
 		
-		this._setElementStyle(ele, styleObj);
+		var so = this._spitStyleAndOption(styleObj);
+		
+		this._setElementStyle(ele, so.style);
+		
+		if(so.option.syncChartTheme && this.isChartElement(ele))
+		{
+			var chartTheme = this._evalElementChartThemeWithStyleObj(ele, so.style);
+			this.setElementChartTheme(chartTheme, ele);
+		}
 	};
 	
 	/**
@@ -455,50 +474,75 @@
 	 */
 	editor.setGlobalStyle = function(styleObj)
 	{
-		var syncChartTheme = (styleObj.syncChartTheme == true || styleObj.syncChartTheme =="true");
-		styleObj = $.extend({}, styleObj);
-		styleObj.syncChartTheme = undefined;
+		var so = this._spitStyleAndOption(styleObj);
 		
-		this._setElementStyle($(document.body), styleObj);
+		this._setElementStyle($(document.body), so.style);
 		
-		if(syncChartTheme)
+		if(so.style.color)
 		{
-			var color = styleObj.color;
-			var bgColor = styleObj['background-color'];
-			var bgImage = styleObj['background-image'];
-			
-			if(color || bgColor)
+			this._setPageStyle(
 			{
-				//TODO 这里应读取当前全局图表主题
-				var chartTheme = {};
-				
-				if(color)
-					chartTheme.color = color;
-				if(bgColor)
-					chartTheme.backgroundColor = bgColor;
-				if(bgImage && bgColor && bgColor != "transparent")
-					chartTheme.actualBackgroundColor = bgColor;
-				
-				this.setGlobalChartTheme(chartTheme);
-			}
+				selectedBorderColor: so.style.color
+			});
 		}
 		
-		if(styleObj.color)
+		if(so.option.syncChartTheme)
 		{
-			this._setStyle(
-			{
-				selectedBorderColor: styleObj.color
-			});
+			var chartTheme = this._evalElementChartThemeWithStyleObj($(document.body), so.style);
+			this.setGlobalChartTheme(chartTheme);
 		}
 	};
 	
-	/**
-	 * 选中元素是否是图表元素。
-	 */
-	editor.isSelectedChartElement = function()
+	editor._spitStyleAndOption = function(styleObj)
 	{
-		var ele = this._refElement(ele, true);
-		return (this.dashboard.renderedChart(ele) != null);
+		var optionObj =
+		{
+			syncChartTheme: (styleObj.syncChartTheme == true || styleObj.syncChartTheme == "true")
+		};
+		
+		var plainStyleObj = $.extend({}, styleObj);
+		plainStyleObj.syncChartTheme = undefined;
+		
+		var re =
+		{
+			style: plainStyleObj,
+			option: optionObj
+		};
+		
+		return re;
+	};
+	
+	editor._evalElementChartThemeWithStyleObj = function(ele, styleObj)
+	{
+		var nowTheme = this._getElementChartTheme(ele);
+		var styleTheme = {};
+		
+		var color = styleObj.color;
+		var bgColor = styleObj['background-color'];
+		var bgImage = styleObj['background-image'];
+		
+		if(color || bgColor)
+		{
+			if(color)
+				styleTheme.color = color;
+			if(bgColor)
+				styleTheme.backgroundColor = bgColor;
+			if(bgImage && bgColor && bgColor != "transparent")
+				styleTheme.actualBackgroundColor = bgColor;
+		}
+		
+		if(!nowTheme)
+		{
+			return styleTheme;
+		}
+		else
+		{
+			nowTheme.color = (styleTheme.color ? styleTheme.color : undefined);
+			nowTheme.backgroundColor = (styleTheme.backgroundColor ? styleTheme.backgroundColor : undefined);
+			nowTheme.actualBackgroundColor = (styleTheme.actualBackgroundColor ? styleTheme.actualBackgroundColor : undefined);
+			
+			return nowTheme;
+		}
 	};
 	
 	/**
@@ -574,6 +618,16 @@
 		return true;
 	};
 	
+	editor._getElementChartTheme = function(ele)
+	{
+		var themeStr = ele.attr(chartFactory.elementAttrConst.THEME);
+		
+		if(!themeStr)
+			return null;
+		
+		return chartFactory.evalSilently(themeStr, {});
+	};
+	
 	editor._setElementChartTheme = function(ele, chartTheme, sync)
 	{
 		chartTheme = $.extend(true, {}, chartTheme); 
@@ -597,7 +651,12 @@
 				trim[p] = v;
 		}
 		
-		this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, this._serializeForAttrValue(trim), sync);
+		var attrValue = this._serializeForAttrValue(trim);
+		
+		if(attrValue == "{}")
+			this._removeElementAttr(ele, chartFactory.elementAttrConst.THEME);
+		else
+			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, attrValue, sync);
 	};
 	
 	editor._setElementStyle = function(ele, styleObj, sync)
@@ -766,7 +825,7 @@
 	 *
 	 * @param options 可选，格式为：{ selectedBorderColor: "..." }
 	 */
-	editor._setStyle = function(options)
+	editor._setPageStyle = function(options)
 	{
 		options = $.extend(
 		{
@@ -819,10 +878,8 @@
 	
 	editor._serializeForAttrValue = function(obj)
 	{
-		if(obj === undefined)
-			return "undefined";
-		else if(obj == null)
-			return  "null";
+		if(obj == null)
+			return null;
 		
 		var type = $.type(obj);
 		
@@ -842,7 +899,7 @@
 			{
 				if(i > 0)
 					str += ",";
-					
+				
 				str += this._serializeForAttrValue(obj[i]);
 			}
 			
@@ -859,9 +916,10 @@
 				if(str != "{")
 					str += ",";
 				
-				var v = obj[p];
+				var v = this._serializeForAttrValue(obj[p]);
 				
-				str += this._serializeForAttrValue(p) + ":" + this._serializeForAttrValue(v);
+				if(v != null)
+					str += this._serializeForAttrValue(p) + ":" + v;
 			}
 			
 			str += "}";

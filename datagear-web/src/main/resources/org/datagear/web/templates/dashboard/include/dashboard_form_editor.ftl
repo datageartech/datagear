@@ -952,7 +952,7 @@
 						
 						var panel = po.element(".veditor-style-panel");
 						
-						if(dashboardEditor.isSelectedChartElement())
+						if(dashboardEditor.isChartElement())
 							po.element(".form-item-syncChartTheme" ,panel).show();
 						else
 							po.element(".form-item-syncChartTheme" ,panel).hide();
