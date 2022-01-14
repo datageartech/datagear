@@ -468,6 +468,17 @@
 	};
 	
 	/**
+	 * 获取元素样式对象。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.getElementStyle = function(ele)
+	{
+		ele = this._refElement(ele, true);
+		return this._getElementStyleObj(ele);
+	};
+	
+	/**
 	 * 设置全局样式（body）。
 	 * 
 	 * @param styleObj 要设置的样式对象，格式为：{ 'color': '...', 'background-color': '...' }
@@ -491,6 +502,14 @@
 			var chartTheme = this._evalElementChartThemeWithStyleObj($(document.body), so.style);
 			this.setGlobalChartTheme(chartTheme);
 		}
+	};
+	
+	/**
+	 * 获取全局样式对象（body）。
+	 */
+	editor.getGlobalStyle = function()
+	{
+		return this._getElementStyleObj($(document.body));
 	};
 	
 	editor._spitStyleAndOption = function(styleObj)
@@ -683,15 +702,59 @@
 		styleObj = (styleObj || {});
 		sync = (sync == null ? true : sync);
 		
-		chartFactory.elementStyle(ele, styleObj);
+		this._setElementStyleNoSync(ele, styleObj);
 		
 		if(sync)
 		{
 			var editEle = this._editElement(ele);
-			chartFactory.elementStyle(editEle, styleObj);
+			this._setElementStyleNoSync(editEle, styleObj);
 		}
 		
 		this.changeFlag(true);
+	};
+	
+	editor._setElementStyleNoSync = function(ele, styleObj)
+	{
+		//这里不能采用整体设置"style"属性的方式，因为"style"属性可能有很多不支持编辑的、或者动态生成的css属性，
+		//它们应该被保留，且不能同步至对应的编辑元素上
+		
+		var nowStyleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele) || "");
+		
+		for(var name in styleObj)
+		{
+			var value = styleObj[name];
+			
+			if(value == null || value == "")
+				delete nowStyleObj[name];
+			else
+				nowStyleObj[name] = value;
+		}
+		
+		chartFactory.elementStyle(ele, nowStyleObj);
+	};
+	
+	editor._getElementStyleObj = function(ele)
+	{
+		var newStyleObj = {};
+		
+		var styleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele));
+		
+		for(var p in styleObj)
+		{
+			if(this._editableElementStyles[p] && styleObj[p])
+				newStyleObj[p] = styleObj[p];
+		}
+		
+		return newStyleObj;
+	};
+	
+	editor._editableElementStyles =
+	{
+		"color": true,
+		"background-color": true,
+		"background-image": true,
+		"font-size": true,
+		"text-align": true
 	};
 	
 	//设置元素文本内容

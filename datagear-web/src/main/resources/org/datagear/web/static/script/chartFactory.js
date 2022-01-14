@@ -4124,6 +4124,34 @@
 	};
 	
 	/**
+	 * 将css字符串转换为对象。
+	 */
+	chartFactory.styleStringToObj = function(styleStr)
+	{
+		var re = {};
+		
+		if(styleStr)
+		{
+			var strs = styleStr.split(";");
+			for(var i=0; i<strs.length; i++)
+			{
+				var str = $.trim(strs[i]);
+				if(str)
+				{
+					var nv = str.split(":");
+					var n = $.trim(nv[0] || "");
+					var v = $.trim(nv[1] || "");
+					
+					if(n)
+						re[n] = v;
+				}
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
 	 * 获取内置属性名（添加内置前缀）。
 	 * 内置属性名以'_'开头。
 	 */

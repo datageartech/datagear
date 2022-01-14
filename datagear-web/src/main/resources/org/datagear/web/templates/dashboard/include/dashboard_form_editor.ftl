@@ -962,12 +962,13 @@
 					{
 						var panel = po.element(".veditor-style-panel");
 						po.element(".form-item-syncChartTheme" ,panel).show();
+						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getGlobalStyle());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 					else if(editOperation == "editGlobalChartTheme")
 					{
 						var panel = po.element(".veditor-chartTheme-panel");
-						po.setChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
+						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 					else if(editOperation == "editStyle")
@@ -982,6 +983,7 @@
 						else
 							po.element(".form-item-syncChartTheme" ,panel).hide();
 						
+						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getElementStyle());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 					else if(editOperation == "editContent")
@@ -999,7 +1001,7 @@
 							return;
 						
 						var panel = po.element(".veditor-chartTheme-panel");
-						po.setChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
+						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 				}
@@ -1065,7 +1067,13 @@
 		});
 	};
 	
-	po.setChartThemeFormValue = function($form, chartTheme)
+	po.setVeditorStyleFormValue = function($form, styleObj)
+	{
+		styleObj = $.extend({ syncChartTheme: true }, styleObj);
+		$.jsonToForm($form, styleObj);
+	};
+	
+	po.setVeditorChartThemeFormValue = function($form, chartTheme)
 	{
 		$.jsonToForm($form, chartTheme,
 		{
