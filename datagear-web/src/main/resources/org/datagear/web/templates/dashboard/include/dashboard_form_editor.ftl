@@ -1067,16 +1067,6 @@
 	
 	po.setChartThemeFormValue = function($form, chartTheme)
 	{
-		chartTheme = $.extend(
-		{
-			color: null,
-			backgroundColor: null,
-			actualBackgroundColor: null,
-			graphColors: null,
-			graphRangeColors: null
-		},
-		chartTheme);
-		
 		$.jsonToForm($form, chartTheme,
 		{
 			handlers:

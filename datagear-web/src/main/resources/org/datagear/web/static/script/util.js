@@ -765,7 +765,11 @@
 			},
 			options);
 			
-			$._jsonToFormInner(form, (json || {}), "", options);
+			//json中可能只包含部分数据，这里先构建包含所有输入项名的基础对象，确保下面能处理到所有输入项
+			var base = $._jsonToFormBaseJson(form);
+			json = $.extend(base, json);
+			
+			$._jsonToFormInner(form, json, "", options);
 		},
 		
 		/**
@@ -792,6 +796,23 @@
 			return false;
 		},
 		
+		_jsonToFormBaseJson: function(form)
+		{
+			var base = {};
+			
+			$(":input[name]", form).each(function()
+			{
+				var name = $(this).attr("name");
+				if(name)
+				{
+					name = $.splitPropertyPath(name)[0];
+					base[name] = undefined;
+				}
+			});
+			
+			return base;
+		},
+		
 		_jsonToFormInner: function(form, value, path, options)
 		{
 			if(options.handlers[path])
@@ -805,7 +826,7 @@
 			var isArray = (!isPlainObj && $.isArray(value));
 			var maybeArray = (value == null || isArray);
 			
-			var input = $("[name='"+path+"']", form);
+			var input = $(":input[name='"+path+"']", form);
 			
 			if(input.length == 0)
 			{
@@ -818,7 +839,7 @@
 				}
 				
 				if(maybeArray)
-					input = $("[name='"+path+"[]']", form);
+					input = $(":input[name='"+path+"[]']", form);
 				
 				if(input.length == 0 && isArray)
 				{
