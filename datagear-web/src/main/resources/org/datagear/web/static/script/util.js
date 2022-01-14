@@ -553,9 +553,51 @@
 		},
 		
 		/**
-		 * 表单数据转JSON对象。
-		 * @param form 表单元素、表单JQuery对象、名称/值对象数组，名称支持“a.b[0].c”、“a.b[]”格式的属性路径
-		 * @param ignore 可选，忽略的表单输入项名称，格式为：字符串、字符串数组
+		 * 表单输入项转JSON对象。
+		 * 转换规则：
+		 * 基本：
+		 * 名         值
+		 * a         v
+		 * 转换为
+		 * {a: "v"}
+		 * 
+		 * 嵌套：
+		 * 名         值
+		 * a.b       v
+		 * 转换为
+		 * {a: {b: "v"}}
+		 * 
+		 * 数组：
+		 * 名         值
+		 * a         v0
+		 * a         v1
+		 * 转换为
+		 * {a: ["v0", "v1"]}
+		 * 
+		 * 数组：
+		 * 名        值
+		 * a[]       v
+		 * 转换为
+		 * {a: ["v"]}
+		 * 
+		 * 数组：
+		 * 名         值
+		 * a.b       v0
+		 * a.b       v1
+		 * 转换为
+		 * {a: {b: ["v0", "v1"]}}
+		 * 
+		 * 数组：
+		 * 名         值
+		 * a.b[0].c  v0
+		 * a.b[0].d  v1
+		 * a.b[1].e  v2
+		 * a.b[1].f  v3
+		 * 转换为
+		 * {a: {b: [{c: "v0", d: "v1"}, {e: "v2", f: "v3"}]}}
+		 * 
+		 * @param form 表单元素、表单JQ对象、名称/值对象数组
+		 * @param ignore 可选，忽略的表单输入项名称，格式为：字符串、字符串数组，默认为：null
 		 */
 		formToJson: function(form, ignore)
 		{
@@ -564,7 +606,7 @@
 			var array = ($form.is("form") ? $form.serializeArray() : form);
 			
 			var json = {};
-			var KeyForArray = $.uid("__KEY_FOR_ARRAY_");
+			var KeyForArray = $.uid("_keyForArray");
 			
 			if(ignore != null)
 				ignore = ($.isArray(ignore) ? ignore : [ ignore ]);
@@ -648,7 +690,217 @@
 			
 			return $._convertKeyForArrayObj(json, KeyForArray);
 		},
-
+		
+		_convertKeyForArrayObj: function(obj, keyForArray)
+		{
+			if(!$.isPlainObject(obj))
+				return obj;
+			
+			var isArrayObj = obj[keyForArray];
+			var ps = (isArrayObj ? [] : undefined);
+			
+			for(var p in obj)
+			{
+				if(p == keyForArray)
+					continue;
+				
+				if(isArrayObj)
+					ps.push(p);
+				
+				obj[p] = $._convertKeyForArrayObj(obj[p], keyForArray);
+			}
+			
+			if(!isArrayObj)
+				return obj;
+			
+			ps.sort(function(a, b)
+			{
+				if(a.length > b.length)
+					return 1;
+				else if(a.length < b.length)
+					return -1;
+				else
+					return (a < b ? -1 : 1);
+			});
+			
+			var re = [];
+			
+			for(var i=0; i<ps.length; i++)
+				re.push(obj[ps[i]]);
+			
+			return re;
+		},
+		
+		/**
+		 * 将json数据填充至form内的输入项。
+		 * 
+		 * @param form 表单元素、JQ对象
+		 * @param json 要填充的json数据对象，格式必须为：{...}，支持嵌套属性
+		 * @param options 可选，填充选项，格式为：
+		 *					{
+		 *					  //可选，转换原始值为输入框值
+		 *					  serialize: function(form, name, value){ return ""; },
+		 *					  //可选，自定义填充处理函数
+		 *					  handlers:
+		 *					  {
+		 *					    //name 输入项名
+		 *					    //value 输入项值
+		 *					    //返回false表示它只进行了预处理，而没有填充输入项值，由内置逻辑继续填充
+		 *					    name: function(form, value){  }
+		 *					  }
+		 *					}
+		 */
+		jsonToForm: function(form, json, options)
+		{
+			options = $.extends(
+			{
+				serialize: function(form, name, value)
+				{
+					if($.isPlainObject(value) || $.isArray(value))
+						return JSON.stringify(value);
+					else
+						return (value == null ? "" : value.toString());
+				},
+				handlers: []
+			},
+			options);
+			
+			$._jsonToFormInner(form, (json || {}), "", options);
+		},
+		
+		_jsonToFormInner: function(form, value, path, options)
+		{
+			if(options.handlers[path])
+			{
+				var fullHandled = options.handlers[path].call(options.handlers, form, value);
+				if(fullHandled !== false)
+					return;
+			}
+			
+			var isPlainObj = $.isPlainObject(value);
+			var isArray = (!isPlainObj && $.isArray(value));
+			var maybeArray = (value == null || isArray);
+			
+			var input = $("[name='"+path+"']", form);
+			
+			if(input.length == 0)
+			{
+				if(isPlainObj)
+				{
+					for(var name in value)
+						$._jsonToFormInner(form, value[name], (path ? path+"."+name : name), options);
+					
+					return;
+				}
+				
+				if(maybeArray)
+					input = $("[name='"+path+"[]']", form);
+				
+				if(input.length == 0 && isArray)
+				{
+					for(var i=0; i<value.length; i++)
+						$._jsonToFormInner(form, value[i], path+"["+i+"]", options);
+					
+					return;
+				}
+			}
+			
+			if(input.length == 0)
+				return;
+			
+			var inputType = (input.attr("type") || "text").toLowerCase();
+			var inputName = input.attr("name");
+			var values = (value == null ? [] : (isArray ? value : [ value ]));
+			
+			//textarea的inputType也是"text"
+			if(inputType == "text")
+			{
+				input.each(function(i)
+				{
+					var myVal = options.serialize(form, inputName, values[i]);
+					$(this).val(myVal);
+				});
+			}
+			else if(inputType == "radio")
+			{
+				var myVal = options.serialize(form, inputName, values[0]);
+				
+				input.each(function()
+				{
+					var $this = $(this);
+					var checked = ($this.attr("value") == myVal);
+					$this.prop("checked", checked);
+				});
+			}
+			else if(inputType == "checkbox")
+			{
+				input.each(function(i)
+				{
+					var $this = $(this);
+					var myVal = options.serialize(form, inputName, values[i]);
+					var checked = ($this.attr("value") == myVal);
+					$this.prop("checked", checked);
+				});
+			}
+			else if(inputType == "select")
+			{
+				var multiple = input.attr("multiple");
+				var val0 = (multiple ? undefined : options.serialize(form, inputName, values[0]));
+				
+				$("option", input).each(function(i)
+				{
+					var $this = $(this);
+					var myVal = (multiple ? options.serialize(form, inputName, values[i]) : val0);
+					var checked = ($this.attr("value") == myVal);
+					$this.prop("checked", checked);
+				});
+			}
+			else
+				throw new Error("Unknown input type :" + inputType);
+		},
+		
+		/**
+		 * 将对象转换为属性路径映射表。
+		 * 
+		 * @param json
+		 * @param flattenArray 可选，是否转换数组，默认为：true
+		 * @returns { ... }, 不会为null
+		 */
+		jsonToPropertyPathMap: function(json, flattenArray)
+		{
+			flattenArray = (flattenArray == null ? true : flattenArray);
+			
+			var map = {};
+			$._jsonToPropertyPathMap(map, json, "", flattenArray);
+			return map;
+		},
+		
+		_jsonToPropertyPathMap: function(map, json, parentPath, flattenArray)
+		{
+			parentPath = (parentPath == null ? "" : parentPath);
+			
+			if($.isArray(json))
+			{
+				if(flattenArray)
+				{
+					for(var i=0; i<json.length; i++)
+						$._jsonToPropertyPathMap(map, json[i], parentPath+"["+i+"]", true);
+				}
+				else
+				{
+					parentPath = parentPath +"[]";
+					map[parentPath] = json;
+				}
+			}
+			else if($.isPlainObject(json))
+			{
+				for(var p in json)
+					$._jsonToPropertyPathMap(map, json[p], parentPath+"."+p, flattenArray);
+			}
+			else
+				map[parentPath] = json;
+		},
+		
 		/**
 		 * 拆分属性路径字符串为数组。
 		 * @str 属性路径字符串，格式为："a.b[0].c"，拆分为：["a", "b", "[0]", "c"]
@@ -694,46 +946,6 @@
 				array.push(ele);
 			
 			return array;
-		},
-		
-		_convertKeyForArrayObj: function(obj, keyForArray)
-		{
-			if(!$.isPlainObject(obj))
-				return obj;
-			
-			var isArrayObj = obj[keyForArray];
-			var ps = (isArrayObj ? [] : undefined);
-			
-			for(var p in obj)
-			{
-				if(p == keyForArray)
-					continue;
-				
-				if(isArrayObj)
-					ps.push(p);
-				
-				obj[p] = $._convertKeyForArrayObj(obj[p], keyForArray);
-			}
-			
-			if(!isArrayObj)
-				return obj;
-			
-			ps.sort(function(a, b)
-			{
-				if(a.length > b.length)
-					return 1;
-				else if(a.length < b.length)
-					return -1;
-				else
-					return (a < b ? -1 : 1);
-			});
-			
-			var re = [];
-			
-			for(var i=0; i<ps.length; i++)
-				re.push(obj[ps[i]]);
-			
-			return re;
 		},
 		
 		/**
