@@ -78,6 +78,20 @@
 			
 			return false;
 		});
+		veChartThemeForm.on("click", ".del-color-btn", function(event)
+		{
+			$(this).parent().remove();
+			//阻止冒泡，不然会触发$.fn.autoCloseSubPanel函数关闭面板
+			event.stopPropagation();
+		});
+		veChartThemeForm.on("click", ".addGraphColorsBtn", function()
+		{
+			po.addChartThemeFormGraphColorsItem(po.element(".graphColorsInput", veChartThemeForm));
+		});
+		veChartThemeForm.on("click", ".addGraphRangeColorsBtn", function()
+		{
+			po.addChartThemeFormGraphRangeColorsItem(po.element(".graphRangeColorsInput", veChartThemeForm));
+		});
 	};
 	
 	po.codeEditorCompletionsTagAttr =
@@ -953,6 +967,7 @@
 					else if(editOperation == "editGlobalChartTheme")
 					{
 						var panel = po.element(".veditor-chartTheme-panel");
+						po.setChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 					else if(editOperation == "editStyle")
@@ -984,6 +999,7 @@
 							return;
 						
 						var panel = po.element(".veditor-chartTheme-panel");
+						po.setChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
 				}
@@ -1047,6 +1063,54 @@
 		{
 			po.saveResourceEditorContent(tabPane);
 		});
+	};
+	
+	po.setChartThemeFormValue = function($form, chartTheme)
+	{
+		chartTheme = $.extend(
+		{
+			color: null,
+			backgroundColor: null,
+			actualBackgroundColor: null,
+			graphColors: null,
+			graphRangeColors: null
+		},
+		chartTheme);
+		
+		$.jsonToForm($form, chartTheme,
+		{
+			handlers:
+			{
+				"graphColors": function(form, value)
+				{
+					return $.jsonToFormArrayHandler(form, value, ".graphColorsInput", function(wrapper)
+					{
+						po.addChartThemeFormGraphColorsItem(wrapper);
+					});
+				},
+				"graphRangeColors": function(form, value)
+				{
+					return $.jsonToFormArrayHandler(form, value, ".graphRangeColorsInput", function(wrapper)
+					{
+						po.addChartThemeFormGraphRangeColorsItem(wrapper);
+					});
+				}
+			}
+		});
+	};
+	
+	po.addChartThemeFormGraphColorsItem = function(wrapper)
+	{
+		$("<div class='input-value-item'><input type='text' name='graphColors[]' class='ui-widget ui-widget-content' size='100' />"
+			+"&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
+			+"</div>").appendTo(wrapper);
+	};
+	
+	po.addChartThemeFormGraphRangeColorsItem = function(wrapper)
+	{
+		$("<div class='input-value-item'><input type='text' name='graphRangeColors[]' class='ui-widget ui-widget-content' size='100' />"
+			+"&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
+			+"</div>").appendTo(wrapper);
 	};
 	
 	po.buildVisualEditorInsertMenuItems = function($parent, insertType)

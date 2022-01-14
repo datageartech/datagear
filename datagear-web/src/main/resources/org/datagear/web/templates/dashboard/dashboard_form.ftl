@@ -193,7 +193,7 @@ readonly 是否只读操作，允许为null
 			</div>
 		</form>
 	</div>
-	<div class="veditor-content-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+	<div class="veditor-content-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<form action="#" method="POST">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.editContent' />
@@ -211,7 +211,7 @@ readonly 是否只读操作，允许为null
 			</div>
 		</form>
 	</div>
-	<div class="veditor-style-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+	<div class="veditor-style-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<form action="#" method="POST" class="display-46">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.editStyle' />
@@ -276,7 +276,7 @@ readonly 是否只读操作，允许为null
 			</div>
 		</form>
 	</div>
-	<div class="veditor-chartTheme-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+	<div class="veditor-chartTheme-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<form action="#" method="POST" class="display-46">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.editChartTheme' />
@@ -311,7 +311,8 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.editChartTheme.graphColors' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="graphColors" class="ui-widget ui-widget-content" size="100" />
+						<div class="graphColorsInput"></div>
+						<button type="button" class='addGraphColorsBtn small-button ui-button-icon-only'><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span>&nbsp;</button>
 					</div>
 				</div>
 				<div class="form-item">
@@ -319,7 +320,8 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.editChartTheme.graphRangeColors' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="graphRangeColors" class="ui-widget ui-widget-content" size="100" />
+						<div class="graphRangeColorsInput"></div>
+						<button type="button" class='addGraphRangeColorsBtn small-button ui-button-icon-only'><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span>&nbsp;</button>
 					</div>
 				</div>
 			</div>

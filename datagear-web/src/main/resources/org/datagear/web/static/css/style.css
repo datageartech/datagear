@@ -536,6 +536,16 @@ form .form-item.display-55 .form-item-value,
 	cursor: pointer;
 }
 
+/*小按钮*/
+.ui-button.small-button{
+	padding: 0.3em 0.3em;
+	border: 0;
+}
+.ui-button.small-button.ui-button-icon-only{
+	width: 1.5em;
+	height: 1.5em;
+}
+
 /*首选操作按钮*/
 .ui-button.recommended{
 	border: 1px solid #0066ff;
@@ -3534,12 +3544,17 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	top: 0.5em;
 	right: 0.5em;
 }
-.page-form-dashboard .veditor-content-panel,
-.page-form-dashboard .veditor-style-panel,
-.page-form-dashboard .veditor-chartTheme-panel{
+.page-form-dashboard .veditor-panel{
 	position: absolute;
     width: 35%;
     display: none;
+}
+.page-form-dashboard .veditor-panel .panel-content{
+	min-height: 5em;
+    overflow: auto;
+}
+.page-form-dashboard .veditor-panel .panel-content .input-value-item{
+	padding: 0.1em 0.1em;
 }
 
 .page-form .form-item-analysisProjectAware{

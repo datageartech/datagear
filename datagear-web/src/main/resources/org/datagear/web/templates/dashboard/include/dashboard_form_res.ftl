@@ -529,15 +529,20 @@
 	
 	po.resizeResourcesWorkspace = function()
 	{
+		var height;
+		
 		if(po.isInDialog())
-			po.element(".form-item-value-resources").height($(window).height()*3/5);
+			height = $(window).height()*3/5;
 		else
 		{
 			var gapHeight = 20;
 			var th = $(window).height() - po.element(".form-item-analysisProjectAware").outerHeight(true);
 			th = th - po.element(".form-foot").outerHeight(true) - gapHeight;
-			po.element(".form-item-value-resources").height(th);
+			height = th;
 		}
+		
+		po.element(".form-item-value-resources").height(height);
+		po.element(".veditor-panel .panel-content").css("max-height", height-200);
 	};
 	
 	po.resourceEditorTabs = function()

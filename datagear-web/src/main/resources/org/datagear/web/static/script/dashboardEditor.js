@@ -590,6 +590,17 @@
 	};
 	
 	/**
+	 * 获取元素图表主题。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.getElementChartTheme = function(ele)
+	{
+		ele = this._refElement(ele, true);
+		return this._getElementChartTheme(ele);
+	};
+	
+	/**
 	 * 设置全局图表主题。
 	 * 
 	 * @param chartTheme 要设置的图表主题对象，格式为：{ 'color': '...', 'backgroundColor': '...', ... }
@@ -600,6 +611,14 @@
 		
 		this.dashboard.destroy();
 		this.dashboard.render();
+	};
+	
+	/**
+	 * 获取全局图表主题。
+	 */
+	editor.getGlobalChartTheme = function()
+	{
+		return this._getElementChartTheme($(document.body));
 	};
 	
 	/**
@@ -881,7 +900,7 @@
 		if(obj == null)
 			return null;
 		
-		var type = $.type(obj);
+		var type = typeof(obj);
 		
 		if(type == "string")
 			return "'" + obj.replace(/\'/g, "\\'") + "'";
@@ -889,9 +908,7 @@
 			return obj.toString();
 		else if(type == "boolean")
 			return obj.toString();
-		else if(type == 'date')
-			return obj.getTime().toString();
-		else if(type == 'array')
+		else if($.isArray(obj))
 		{
 			var str = "[";
 			
@@ -907,7 +924,7 @@
 			
 			return str;
 		}
-		else if(type == "object")
+		else if($.isPlainObject(obj))
 		{
 			var str = "{";
 			

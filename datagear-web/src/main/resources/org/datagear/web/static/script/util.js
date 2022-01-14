@@ -752,7 +752,7 @@
 		 */
 		jsonToForm: function(form, json, options)
 		{
-			options = $.extends(
+			options = $.extend(
 			{
 				serialize: function(form, name, value)
 				{
@@ -766,6 +766,30 @@
 			options);
 			
 			$._jsonToFormInner(form, (json || {}), "", options);
+		},
+		
+		/**
+		 * 构建可用于$.jsonToForm()的自定义数组填充处理函数。
+		 */
+		jsonToFormArrayHandler: function(form, value, wrapperSelector, addItemHandler)
+		{
+			var wrapper = $(wrapperSelector, form);
+			var items = $("> *", wrapper);
+			var valueLen = (!value ? 0 : value.length);
+			
+			items.each(function(i)
+			{
+				if(i >= valueLen)
+					$(this).remove();
+			});
+			
+			var addCount = (valueLen - items.length);
+			for(var i=0; i<addCount; i++)
+			{
+				addItemHandler(wrapper, i, addCount);
+			}
+			
+			return false;
 		},
 		
 		_jsonToFormInner: function(form, value, path, options)
