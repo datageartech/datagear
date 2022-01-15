@@ -212,17 +212,25 @@
 			return;
 		
 		var styleStr = "";
+		var insertParentEle = null;
 		
-		if(chartFactory.isStaticPosition(refEle))
+		if(refEle.is("body"))
+			insertParentEle = refEle;
+		else if("after" == insertType || "before" == insertType)
+			insertParentEle = refEle.parent();
+		else
+			insertParentEle = refEle;
+		
+		if(chartFactory.isStaticPosition(insertParentEle) || insertParentEle.is("body"))
 			styleStr = this.defaultInsertChartEleStyle;
 		else
-			styleStr = "position:absolute;left:0;top:0;right:0;bottom:0;width:100%;height:100%;";
+			styleStr = "position:absolute;left:0;top:0;right:0;bottom:0;";
 		
 		for(var i=0; i<chartWidgets.length; i++)
 		{
 			var chartWidget = chartWidgets[i];
 			
-			var chartDiv = $("<div />");
+			var chartDiv = $("<div></div>");
 			
 			//先设style，与源码模式一致
 			if(styleStr)
@@ -727,7 +735,16 @@
 			if(value == null || value == "")
 				delete nowStyleObj[name];
 			else
+			{
+				if(name == "background-image")
+				{
+					//不是"url(...)"格式
+					if(/^url\(/i.test(value) != true)
+						value = "url(" + value +")"
+				}
+				
 				nowStyleObj[name] = value;
+			}
 		}
 		
 		if($.isEmptyObject(nowStyleObj))
@@ -742,6 +759,19 @@
 		
 		var styleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele));
 		
+		//先处理复合css，因为它们应是低优先级
+		for(var p in styleObj)
+		{
+			if(p == "inset")
+			{
+				this._resolveSetStyleInset(newStyleObj, styleObj[p]);
+			}
+			else if(p == "background")
+			{
+				this._resolveSetStyleBackground(newStyleObj, styleObj[p]);
+			}
+		}
+		
 		for(var p in styleObj)
 		{
 			if(this._editableElementStyles[p] && styleObj[p])
@@ -749,6 +779,88 @@
 		}
 		
 		return newStyleObj;
+	};
+	
+	//将css的background属性转换为background-color、background-image等属性
+	editor._resolveSetStyleBackground = function(styleObj, background)
+	{
+		if(!background)
+			return;
+		
+		var ary = background.split(" ");
+		var beforePositionSizeSplitter = true;
+		var bgPositionCount = 0, bgSizeCount = 0;
+		
+		for(var i=0; i<ary.length; i++)
+		{
+			var v = ary[i];
+			
+			// "background-position / background-size"
+			if("/" == v)
+			{
+				beforePositionSizeSplitter = false;
+			}
+			else if(/^url\(/i.test(v))
+			{
+				styleObj["background-image"] = v;
+			}
+			else if(/^(\#|rgb)/.test(v))
+			{
+				styleObj["background-color"] = v;
+			}
+			else if(/^(no\-repeat|repeat|repeat\-x|repeat\-y)$/i.test(v))
+			{
+				styleObj["background-repeat"] = v;
+			}
+			else if(beforePositionSizeSplitter && bgPositionCount < 2 && (/^(left|right|top|bottom|center)$/i.test(v) || /^\d/.test(v)))
+			{
+				styleObj["background-position"] = (bgPositionCount == 0 ? v : styleObj["background-position"]+" "+v);
+				bgPositionCount++;
+			}
+			else if(!beforePositionSizeSplitter && bgSizeCount < 2 && (/^(auto|cover|contain)$/i.test(v) || /^\d/.test(v)))
+			{
+				styleObj["background-size"] = (bgSizeCount == 0 ? v : styleObj["background-size"]+" "+v);
+				bgSizeCount++;
+			}
+			// 颜色单词
+			else if(i == 0 && !styleObj["background-color"] && /^[a-zA-Z]/.test(v))
+			{
+				styleObj["background-color"] = v;
+			}
+		}
+	};
+	
+	//将css的inset属性转换为top、left、right、bottom属性
+	editor._resolveSetStyleInset = function(styleObj, inset)
+	{
+		if(!inset)
+			return;
+		
+		var ary = inset.split(" ");
+		
+		if(ary.length == 0)
+			return;
+		
+		if(ary.length == 1)
+		{
+			ary[1] = ary[0];
+			ary[2] = ary[0];
+			ary[3] = ary[0];
+		}
+		else if(ary.length == 2)
+		{
+			ary[2] = ary[0];
+			ary[3] = ary[1];
+		}
+		else if(ary.length == 3)
+		{
+			ary[3] = ary[1];
+		}
+		
+		styleObj["top"] = ary[0];
+		styleObj["right"] = ary[1];
+		styleObj["bottom"] = ary[2];
+		styleObj["left"] = ary[3];
 	};
 	
 	editor._editableElementStyles =
@@ -766,6 +878,8 @@
 		"position": true,
 		"left": true,
 		"top": true,
+		"right": true,
+		"bottom": true,
 		"font-size": true,
 		"font-weight": true,
 		"text-align": true
@@ -1041,7 +1155,7 @@
 		
 		if(iframe.length == 0)
 		{
-			iframe = $("<iframe class='dg-edit-html-ifm' style='display:none;' />")
+			iframe = $("<iframe class='dg-edit-html-ifm' style='display:none;'></iframe>")
 				.attr("name", id).attr("id", id).appendTo(document.body);
 		}
 		

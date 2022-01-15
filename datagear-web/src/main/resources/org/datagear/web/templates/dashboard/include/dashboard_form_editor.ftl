@@ -795,7 +795,7 @@
 				});
 	};
 	
-	po.defaultInsertChartEleStyle = "display:inline-block;width:200px;height:200px;";
+	po.defaultInsertChartEleStyle = "display:inline-block;width:300px;height:300px;";
 	
 	po.insertCodeEditorChart = function(tabPane, chartWidgets)
 	{
