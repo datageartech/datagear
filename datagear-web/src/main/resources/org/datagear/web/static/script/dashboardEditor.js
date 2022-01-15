@@ -730,7 +730,10 @@
 				nowStyleObj[name] = value;
 		}
 		
-		chartFactory.elementStyle(ele, nowStyleObj);
+		if($.isEmptyObject(nowStyleObj))
+			ele.removeAttr("style");
+		else
+			chartFactory.elementStyle(ele, nowStyleObj);
 	};
 	
 	editor._getElementStyleObj = function(ele)
@@ -753,7 +756,18 @@
 		"color": true,
 		"background-color": true,
 		"background-image": true,
+		"background-position": true,
+		"background-size": true,
+		"background-repeat": true,
+		"width": true,
+		"height": true,
+		"padding": true,
+		"margin": true,
+		"position": true,
+		"left": true,
+		"top": true,
 		"font-size": true,
+		"font-weight": true,
 		"text-align": true
 	};
 	

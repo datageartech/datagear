@@ -272,9 +272,14 @@ form .form-item, .form .form-item{
 form .form-item .form-item-label,
 .form .form-item .form-item-label{
 	width: 20%;
+	padding: 0.3em 0;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+}
+form .form-item .form-item-label.align-top,
+.form .form-item .form-item-label.align-top{
+	align-self: baseline;
 }
 form .form-item .form-item-label label,
 .form .form-item .form-item-label label{
@@ -333,6 +338,16 @@ form .form-item .form-item-value .input,
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+}
+form .form-item .form-item-value input[type=text].width-9,
+form .form-item .form-item-value input[type=password].width-9,
+form .form-item .form-item-value textarea.width-9,
+form .form-item .form-item-value .input.width-9,
+.form .form-item .form-item-value input[type=text].width-9,
+.form .form-item .form-item-value input[type=password].width-9,
+.form .form-item .form-item-value textarea.width-9,
+.form .form-item .form-item-value .input.width-9{
+	width: 90%;
 }
 form .form-item .form-item-value > *,
 .form .form-item .form-item-value > *{
@@ -538,10 +553,13 @@ form .form-item.display-55 .form-item-value,
 
 /*小按钮*/
 .ui-button.small-button{
-	padding: 0.3em 0.3em;
+	padding: 0.3em 0.5em;
+}
+.ui-button.no-border{
 	border: 0;
 }
 .ui-button.small-button.ui-button-icon-only{
+	padding: 0.3em 0.3em;
 	width: 1.5em;
 	height: 1.5em;
 }
@@ -3546,15 +3564,36 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 }
 .page-form-dashboard .veditor-panel{
 	position: absolute;
-    width: 35%;
+    width: 40%;
     display: none;
 }
 .page-form-dashboard .veditor-panel .panel-content{
 	min-height: 5em;
     overflow: auto;
 }
+.page-form-dashboard .veditor-panel .helper-opt{
+	margin-top: 0.3em;
+	font-size: 0.9em;
+}
 .page-form-dashboard .veditor-panel .panel-content .input-value-item{
 	padding: 0.1em 0.1em;
+}
+.page-form-dashboard .veditor-style-panel .minor-tabs.ui-tabs .ui-tabs-nav{
+	border-bottom: 0;
+}
+.page-form-dashboard .veditor-style-panel .style-tabs{
+	position: relative;
+}
+.page-form-dashboard .veditor-style-panel .style-tabs .style-tab-pane{
+    position: absolute;
+    top: 1.7em;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+}
+.page-form-dashboard .veditor-style-panel .form-item-syncChartTheme{
+	margin-top: 0.8em;
 }
 
 .page-form .form-item-analysisProjectAware{

@@ -2987,6 +2987,25 @@
 		},
 		
 		/**
+		 * controlgroup组件支持类。
+		 * 
+		 * @param options 可选，controlgroup组件的选项
+		 */
+		controlgroupwrapper: function(options)
+		{
+			options = (options || {});
+			
+			var $this = $(this);
+			var widget = $this.controlgroup(options);
+			
+			//隐藏时初始化的controlgroup在显示时无法圆角，这里可以解决此问题
+			$(":first", $this).addClass("ui-corner-left");
+			$(":last", $this).addClass("ui-corner-right");
+			
+			return widget;
+		},
+		
+		/**
 		 * JSON数据格式的表单ajax提交。
 		 * 
 		 * @param options 选项，格式为：

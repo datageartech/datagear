@@ -55,6 +55,13 @@
 			
 			return false;
 		});
+		po.element(".style-tabs", veStyleForm).tabs();
+		po.element(".styleBgPositionBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleBgSizeBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleBgRepeatBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".stylePositionBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleFontWeightBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleTextAlignBtnGroup", veStyleForm).controlgroupwrapper();
 		
 		//初始化可视编辑图表主题面板
 		var veChartThemePanel = po.element(".veditor-chartTheme-panel");
@@ -91,6 +98,13 @@
 		veChartThemeForm.on("click", ".addGraphRangeColorsBtn", function()
 		{
 			po.addChartThemeFormGraphRangeColorsItem(po.element(".graphRangeColorsInput", veChartThemeForm));
+		});
+		
+		po.element(".veditor-panel .form-item-value .help-src").click(function()
+		{
+			var $this = $(this);
+			var helpValue = ($this.attr("help-value") || "");
+			po.element(".help-target", $this.closest(".form-item-value")).val(helpValue);
 		});
 	};
 	
@@ -961,13 +975,18 @@
 					if(editOperation == "editGlobalStyle")
 					{
 						var panel = po.element(".veditor-style-panel");
+						po.element(".editStyleTitle", panel).hide();
+						po.element(".editGlobalStyleTitle", panel).show();
 						po.element(".form-item-syncChartTheme" ,panel).show();
 						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getGlobalStyle());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
+						po.resizeVisualEditorStylePanel(panel);
 					}
 					else if(editOperation == "editGlobalChartTheme")
 					{
 						var panel = po.element(".veditor-chartTheme-panel");
+						po.element(".editChartThemeTitle", panel).hide();
+						po.element(".editGlobalChartThemeTitle", panel).show();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
@@ -977,7 +996,9 @@
 							return;
 						
 						var panel = po.element(".veditor-style-panel");
-						
+
+						po.element(".editStyleTitle", panel).show();
+						po.element(".editGlobalStyleTitle", panel).hide();
 						if(dashboardEditor.isChartElement())
 							po.element(".form-item-syncChartTheme" ,panel).show();
 						else
@@ -985,6 +1006,7 @@
 						
 						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getElementStyle());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
+						po.resizeVisualEditorStylePanel(panel);
 					}
 					else if(editOperation == "editContent")
 					{
@@ -1001,6 +1023,8 @@
 							return;
 						
 						var panel = po.element(".veditor-chartTheme-panel");
+						po.element(".editChartThemeTitle", panel).show();
+						po.element(".editGlobalChartThemeTitle", panel).hide();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
 						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
 					}
@@ -1065,6 +1089,17 @@
 		{
 			po.saveResourceEditorContent(tabPane);
 		});
+	};
+	
+	po.resizeVisualEditorStylePanel = function(panel)
+	{
+		var panelContent = po.element(".panel-content", panel);
+		var syncChartThemeItem = po.element(".form-item-syncChartTheme", panelContent);
+		
+		var styleTabsHeight = panelContent.height();
+		if(!syncChartThemeItem.is(":hidden"))
+			styleTabsHeight = styleTabsHeight - syncChartThemeItem.outerHeight(true);
+		po.element(".style-tabs", panelContent).css("height", styleTabsHeight);
 	};
 	
 	po.setVeditorStyleFormValue = function($form, styleObj)

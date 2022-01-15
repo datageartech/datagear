@@ -194,7 +194,7 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-content-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST">
+		<form action="#" method="POST" class="display-37">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.editContent' />
 			</div>
@@ -212,49 +212,249 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-style-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-46">
+		<form action="#" method="POST" class="display-37">
 			<div class="panel-head ui-widget-header ui-corner-all">
-				<@spring.message code='dashboard.veditor.editStyle' />
+				<div class="editStyleTitle">
+					<@spring.message code='dashboard.veditor.editStyle' />
+				</div>
+				<div class="editGlobalStyleTitle">
+					<@spring.message code='dashboard.veditor.editGlobalStyle' />
+				</div>
 			</div>
 			<div class="panel-content form-content">
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editStyle.color' /></label>
+				<div class="style-tabs minor-tabs">
+					<ul class="style-tabs-nav">
+						<li><a href="#${pageId}-styleTabsPaneColor"><@spring.message code='dashboard.veditor.editStyle.category.color' /></a></li>
+						<li><a href="#${pageId}-styleTabsPaneSize"><@spring.message code='dashboard.veditor.editStyle.category.size' /></a></li>
+						<li><a href="#${pageId}-styleTabsPaneFont"><@spring.message code='dashboard.veditor.editStyle.category.font' /></a></li>
+					</ul>
+					<div id="${pageId}-styleTabsPaneColor" class="style-tab-pane ui-widget ui-widget-content">
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.color' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.bgColor' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="background-color" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.bgImage' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="background-image" class="width-9 ui-widget ui-widget-content" size="200" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label><@spring.message code='dashboard.veditor.editStyle.bgSize' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="background-size" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleBgSizeBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="100% 100%">
+										<@spring.message code='dashboard.veditor.editStyle.bgSize.fill' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="">
+										<@spring.message code='dashboard.veditor.editStyle.bgSize.oirgin' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label><@spring.message code='dashboard.veditor.editStyle.bgRepeat' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="background-repeat" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleBgRepeatBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="no-repeat">
+										<@spring.message code='dashboard.veditor.editStyle.bgRepeat.no-repeat' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat">
+										<@spring.message code='dashboard.veditor.editStyle.bgRepeat.repeat' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat-x">
+										<@spring.message code='dashboard.veditor.editStyle.bgRepeat.repeat-x' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat-y">
+										<@spring.message code='dashboard.veditor.editStyle.bgRepeat.repeat-y' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label><@spring.message code='dashboard.veditor.editStyle.bgPosition' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="background-position" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleBgPositionBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="center center">
+										<@spring.message code='dashboard.veditor.editStyle.bgPosition.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="left top">
+										<@spring.message code='dashboard.veditor.editStyle.bgPosition.leftTop' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="right top">
+										<@spring.message code='dashboard.veditor.editStyle.bgPosition.rightTop' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="left bottom">
+										<@spring.message code='dashboard.veditor.editStyle.bgPosition.leftBottom' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="right bottom">
+										<@spring.message code='dashboard.veditor.editStyle.bgPosition.rightBottom' />
+									</button>
+								</div>
+							</div>
+						</div>
 					</div>
-					<div class="form-item-value">
-						<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
+					<div id="${pageId}-styleTabsPaneSize" class="style-tab-pane ui-widget ui-widget-content">
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.width' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="width" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.height' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="height" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.padding' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="padding" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.margin' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="margin" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label><@spring.message code='dashboard.veditor.editStyle.position' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="position" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="stylePositionBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="">
+										<@spring.message code='dashboard.veditor.editStyle.position.no' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="absolute">
+										<@spring.message code='dashboard.veditor.editStyle.position.absolute' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="relative">
+										<@spring.message code='dashboard.veditor.editStyle.position.relative' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="fixed">
+										<@spring.message code='dashboard.veditor.editStyle.position.fixed' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.left' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="left" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.top' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="top" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.right' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="right" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.bottom' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="bottom" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
 					</div>
-				</div>
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editStyle.bgColor' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="text" name="background-color" class="ui-widget ui-widget-content" size="100" />
-					</div>
-				</div>
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editStyle.bgImage' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="text" name="background-image" class="ui-widget ui-widget-content" size="200" />
-					</div>
-				</div>
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editStyle.fontSize' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="text" name="font-size" class="ui-widget ui-widget-content" size="100" />
-					</div>
-				</div>
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editStyle.textAlign' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="text" name="text-align" class="ui-widget ui-widget-content" size="100" />
+					<div id="${pageId}-styleTabsPaneFont" class="style-tab-pane ui-widget ui-widget-content">
+						<div class="form-item">
+							<div class="form-item-label">
+								<label><@spring.message code='dashboard.veditor.editStyle.fontSize' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="font-size" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label><@spring.message code='dashboard.veditor.editStyle.fontWeight' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="font-weight" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleFontWeightBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="normal">
+										<@spring.message code='dashboard.veditor.editStyle.fontWeight.normal' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="bold">
+										<@spring.message code='dashboard.veditor.editStyle.fontWeight.bold' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label><@spring.message code='dashboard.veditor.editStyle.textAlign' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="text-align" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleTextAlignBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="left">
+										<@spring.message code='dashboard.veditor.editStyle.textAlign.left' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="center">
+										<@spring.message code='dashboard.veditor.editStyle.textAlign.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="right">
+										<@spring.message code='dashboard.veditor.editStyle.textAlign.right' />
+									</button>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="form-item form-item-syncChartTheme">
@@ -277,9 +477,14 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-chartTheme-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-46">
+		<form action="#" method="POST" class="display-37">
 			<div class="panel-head ui-widget-header ui-corner-all">
-				<@spring.message code='dashboard.veditor.editChartTheme' />
+				<div class="editChartThemeTitle">
+					<@spring.message code='dashboard.veditor.editChartTheme' />
+				</div>
+				<div class="editGlobalChartThemeTitle">
+					<@spring.message code='dashboard.veditor.editGlobalChartTheme' />
+				</div>
 			</div>
 			<div class="panel-content form-content">
 				<div class="form-item">
