@@ -470,7 +470,7 @@
 		
 		if(so.option.syncChartTheme && this.isChartElement(ele))
 		{
-			var chartTheme = this._evalElementChartThemeWithStyleObj(ele, so.style);
+			var chartTheme = this._evalElementChartThemeByStyleObj(ele, so.style);
 			this.setElementChartTheme(chartTheme, ele);
 		}
 	};
@@ -507,7 +507,7 @@
 		
 		if(so.option.syncChartTheme)
 		{
-			var chartTheme = this._evalElementChartThemeWithStyleObj($(document.body), so.style);
+			var chartTheme = this._evalElementChartThemeByStyleObj($(document.body), so.style);
 			this.setGlobalChartTheme(chartTheme);
 		}
 	};
@@ -539,22 +539,25 @@
 		return re;
 	};
 	
-	editor._evalElementChartThemeWithStyleObj = function(ele, styleObj)
+	editor._evalElementChartThemeByStyleObj = function(ele, styleObj)
 	{
 		var nowTheme = this._getElementChartTheme(ele);
 		var styleTheme = {};
 		
 		var color = styleObj.color;
 		var bgColor = styleObj['background-color'];
-		var bgImage = styleObj['background-image'];
 		
 		if(color || bgColor)
 		{
 			if(color)
 				styleTheme.color = color;
-			if(bgColor)
+			
+			//只有之前设置了图表背景色且不是透明的才需要同步
+			if(bgColor && nowTheme && nowTheme.backgroundColor
+					&& nowTheme.backgroundColor != "transparent")
 				styleTheme.backgroundColor = bgColor;
-			if(bgImage && bgColor && bgColor != "transparent")
+			
+			if(bgColor && bgColor != "transparent")
 				styleTheme.actualBackgroundColor = bgColor;
 		}
 		

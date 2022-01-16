@@ -4733,6 +4733,7 @@
 			theme.name = "chartTheme";
 		if(!theme.color)
 			theme.color = "#333";
+		//默认背景色应始终是"transparent"，使得图表背景由其所在元素决定
 		if(!theme.backgroundColor)
 			theme.backgroundColor = "transparent";
 		if(!theme.actualBackgroundColor)
