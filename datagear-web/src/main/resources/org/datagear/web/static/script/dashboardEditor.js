@@ -36,7 +36,9 @@
 	//参考org.datagear.web.controller.DashboardController.DashboardShowForEdit.ELEMENT_ATTR_VISUAL_EDIT_ID
 	var ELEMENT_ATTR_VISUAL_EDIT_ID = (editor.ELEMENT_ATTR_VISUAL_EDIT_ID = "dg-visual-edit-id");
 	
-	var DG_VISUAL_EDIT_ID_PREFIX = (editor.DG_VISUAL_EDIT_ID_PREFIX = "c" + new Number(new Date().getTime()).toString(16));
+	var ELEMENT_CLASS_SELECTED = (editor.ELEMENT_CLASS_SELECTED = "dg-show-ve-selected");
+	
+	var ELEMENT_CLASS_NEW_INSERT = (editor.ELEMENT_CLASS_NEW_INSERT = "dg-show-ve-new-insert");
 	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
@@ -78,6 +80,8 @@
 		
 		$(document.body).on("click", function(event)
 		{
+			editor._removeElementClassNewInsert();
+			
 			var target = $(event.target);
 			var veEle = (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) ? target :
 								target.closest("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]"));
@@ -167,6 +171,33 @@
 	};
 	
 	/**
+	 * 校验insertDiv操作。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.checkInsertDiv = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 插入div元素。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertDiv = function(insertType, refEle)
+	{
+		var div = $("<div></div>");
+		
+		//设置默认尺寸，不然不能显示
+		div.attr("style", "height:3em;");
+		
+		this.insertElement(div, insertType, refEle);
+	};
+	
+	/**
 	 * 校验insertChart操作。
 	 * 
 	 * @param insertType 可选，参考insertChart函数的insertType参数
@@ -237,8 +268,7 @@
 				chartDiv.attr("style", styleStr);
 			
 			chartDiv.attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
-				.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, this._nextVisualEditId())
-				.html("<!--"+chartWidget.name+"-->");
+						.html("<!--"+chartWidget.name+"-->");
 			
 			this.insertElement(chartDiv, insertType, refEle);
 		}
@@ -326,7 +356,7 @@
 	/**
 	 * 插入元素。
 	 * 
-	 * @param insertEle 要插入的jq元素、文本
+	 * @param insertEle 要插入的jq元素、HTML文本，不要使用"<div />"的格式，可能导致编辑HTML代码格式不对
 	 * @param insertType 可选，插入类型："after"、"before"、"append"、"prepend"，默认为："after"
 	 * @param refEle 插入参照元素，默认为：当前选中元素，或者<body>
 	 * @param sync 可选，是否将插入操作同步至编辑iframe中，默认为：true
@@ -337,14 +367,22 @@
 		insertType = this._trimInsertType(refEle, insertType);
 		sync = (sync == null ? true : sync);
 		
+		if(chartFactory.isString(insertEle))
+			insertEle = $(insertEle);
+		
+		insertEle.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, this._nextVisualEditId());
+		
 		this._insertElement(refEle, insertEle, insertType);
 		
 		if(sync)
 		{
 			var editEle = this._editElement(refEle);
-			var insertEleClone = (chartFactory.isString(insertEle) ? insertEle : insertEle.clone());
+			var insertEleClone = insertEle.clone();
 			this._insertElement(editEle, insertEleClone, insertType);
 		}
+		
+		insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
+		this._hasElementClassNewInsert = true;
 		
 		this.changeFlag(true);
 	};
@@ -993,27 +1031,36 @@
 	
 	editor._selectedElement = function()
 	{
-		return $(".dg-show-ve-selected");
+		return $("."+ELEMENT_CLASS_SELECTED);
 	};
 	
 	editor._isSelectedElement = function($ele)
 	{
-		return $ele.hasClass("dg-show-ve-selected");
+		return $ele.hasClass(ELEMENT_CLASS_SELECTED);
 	};
 	
 	editor._selectElement = function($ele)
 	{
-		$ele.addClass("dg-show-ve-selected");
+		$ele.addClass(ELEMENT_CLASS_SELECTED);
 	};
 	
 	editor._deselectElement = function($ele)
 	{
-		$ele.removeClass("dg-show-ve-selected");
+		$ele.removeClass(ELEMENT_CLASS_SELECTED);
 	};
 	
 	editor._deselectAllElement = function()
 	{
-		$(".dg-show-ve-selected").removeClass("dg-show-ve-selected");
+		$("."+ELEMENT_CLASS_SELECTED).removeClass(ELEMENT_CLASS_SELECTED);
+	};
+	
+	editor._removeElementClassNewInsert = function()
+	{
+		if(this._hasElementClassNewInsert)
+		{
+			$("."+ELEMENT_CLASS_NEW_INSERT).removeClass(ELEMENT_CLASS_NEW_INSERT);
+			this._hasElementClassNewInsert = false;
+		}
 	};
 	
 	editor._isEmptyElement = function(ele)
@@ -1028,10 +1075,7 @@
 	
 	editor._nextVisualEditId = function()
 	{
-		var seq = (this._nextVisualEditIdSequence != null ? this._nextVisualEditIdSequence : 0);
-		this._nextVisualEditIdSequence = seq + 1;
-		
-		return DG_VISUAL_EDIT_ID_PREFIX + seq;
+		return chartFactory.uid();
 	};
 	
 	/**

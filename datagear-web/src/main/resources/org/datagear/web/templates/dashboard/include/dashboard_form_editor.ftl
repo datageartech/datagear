@@ -926,16 +926,26 @@
 				
 				var dashboardEditor = po.dashboardEditorVisual(tabPane);
 				
-				if(insertOperation == "insertChart")
+				if(!dashboardEditor)
+					return;
+				
+				if(insertOperation == "insertDiv")
 				{
-					if(dashboardEditor && !dashboardEditor.checkInsertChart(insertType))
+					if(!dashboardEditor.checkInsertDiv(insertType))
+						return;
+					
+					dashboardEditor.insertDiv(insertType);
+				}
+				else if(insertOperation == "insertChart")
+				{
+					if(!dashboardEditor.checkInsertChart(insertType))
 						return;
 					
 					po.toggleInsertChartListPannel(insertGroup);
 				}
 				else if(insertOperation == "bindChart")
 				{
-					if(dashboardEditor && !dashboardEditor.checkBindChart())
+					if(!dashboardEditor.checkBindChart())
 						return;
 					
 					po.toggleInsertChartListPannel(insertGroup);
@@ -1149,9 +1159,14 @@
 	
 	po.buildVisualEditorInsertMenuItems = function($parent, insertType)
 	{
-		var ul = $("<ul class=' ui-widget-shadow' />");
+		var ul = $("<ul class='ui-widget-shadow' />");
+		
+		$("<li insertOperation='insertDiv' insertType='"+insertType+"' />")
+			.html("<div><@spring.message code='dashboard.opt.insertType.div' /></div>").appendTo(ul);
+		
 		$("<li insertOperation='insertChart' insertType='"+insertType+"' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.chart' /></div>").appendTo(ul);
+		
 		ul.appendTo($parent);
 	};
 	
