@@ -328,6 +328,29 @@ readonly 是否只读操作，允许为null
 					</div>
 					<div id="${pageId}-styleTabsPaneSize" class="style-tab-pane ui-widget ui-widget-content">
 						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label><@spring.message code='dashboard.veditor.editStyle.display' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="display" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleDisplayBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="block">
+										<@spring.message code='dashboard.veditor.editStyle.display.block' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="inline-block">
+										<@spring.message code='dashboard.veditor.editStyle.display.inline-block' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="inline">
+										<@spring.message code='dashboard.veditor.editStyle.display.inline' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="flex">
+										<@spring.message code='dashboard.veditor.editStyle.display.flex' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
 							<div class="form-item-label">
 								<label><@spring.message code='dashboard.veditor.editStyle.width' /></label>
 							</div>
@@ -367,8 +390,8 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="position" class="help-target ui-widget ui-widget-content" size="100" />
 								<br>
 								<div class="stylePositionBtnGroup helper-opt">
-									<button type="button" class="help-src small-button" help-value="">
-										<@spring.message code='dashboard.veditor.editStyle.position.no' />
+									<button type="button" class="help-src small-button" help-value="static">
+										<@spring.message code='dashboard.veditor.editStyle.position.static' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="absolute">
 										<@spring.message code='dashboard.veditor.editStyle.position.absolute' />

@@ -874,6 +874,7 @@
 		"background-position": true,
 		"background-size": true,
 		"background-repeat": true,
+		"display": true,
 		"width": true,
 		"height": true,
 		"padding": true,

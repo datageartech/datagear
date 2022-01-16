@@ -59,6 +59,7 @@
 		po.element(".styleBgPositionBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleBgSizeBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleBgRepeatBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleDisplayBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".stylePositionBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleFontWeightBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleTextAlignBtnGroup", veStyleForm).controlgroupwrapper();
