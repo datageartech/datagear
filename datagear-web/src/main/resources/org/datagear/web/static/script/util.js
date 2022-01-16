@@ -542,7 +542,7 @@
 		 */
 		uid : function(prefix)
 		{
-			if($._uid_seq >= Number.MAX_VALUE)
+			if($._uid_seq >= Number.MAX_SAFE_INTEGER)
 			{
 				$._uid_seq = null;
 				$._uid_time = null;

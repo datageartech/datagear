@@ -4520,7 +4520,7 @@
 	 */
 	chartFactory.uid = function()
 	{
-		if(this._uid_seq >= Number.MAX_VALUE)
+		if(this._uid_seq >= Number.MAX_SAFE_INTEGER)
 		{
 			this._uid_seq = null;
 			this._uid_time = null;
