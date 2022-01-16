@@ -618,7 +618,7 @@
 			if(optVal == null)
 				optVal = opt;
 			
-			var eleId = chartFactory.nextElementId();
+			var eleId = chartFactory.uid();
 			
 			var $wrapper = $("<div class='dg-dspv-form-radio-wrapper' />").appendTo($inputsWrapper);
 			
@@ -686,7 +686,7 @@
 			if(optVal == null)
 				optVal = opt;
 			
-			var eleId = chartFactory.nextElementId();
+			var eleId = chartFactory.uid();
 			
 			var $wrapper = $("<div class='dg-dspv-form-checkbox-wrapper' />").appendTo($inputsWrapper);
 			
@@ -761,7 +761,7 @@
 		if($rootWrapper.length < 1)
 			$rootWrapper = $("<div style='"+noSizeCss+"' />").attr("id", rootWrapperId).appendTo(document.body);
 		
-		var wrapperId = chartFactory.nextElementId();
+		var wrapperId = chartFactory.uid();
 		var $wrapper = $("<div style='"+noSizeCss+"' />").attr("id", wrapperId).appendTo($rootWrapper);
 		
 		if(chartTheme)
@@ -1939,7 +1939,7 @@
 		};
 		
 		var table = $("<table width='100%' class='hover stripe dataTableClassForFixedColumnAncestor'></table>").appendTo($parent);
-		var tableId = chartFactory.nextElementId("Table");
+		var tableId = chartFactory.uid();
 		table.attr("id", tableId);
 		
 		table.dataTable(tableOptions);

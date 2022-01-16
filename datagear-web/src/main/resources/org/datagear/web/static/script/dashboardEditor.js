@@ -1149,7 +1149,7 @@
 	editor._editIframe = function(editBodyHtml)
 	{
 		var id = (this._editIframeId != null ? this._editIframeId
-					: (this._editIframeId = chartFactory.nextElementId()));
+					: (this._editIframeId = chartFactory.uid()));
 		
 		var iframe = $("#" + id);
 		

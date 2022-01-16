@@ -2049,7 +2049,7 @@
 		var elementId = element.attr("id");
 		if(!elementId)
 		{
-			elementId = chartFactory.nextElementId();
+			elementId = chartFactory.uid();
 			element.attr("id", elementId);
 		}
 		chart.elementId = elementId;

@@ -3530,7 +3530,7 @@
 			
 			if(!themeName)
 			{
-				themeName = (theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME] = chartFactory.nextElementId());
+				themeName = (theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME] = chartFactory.uid());
 				
 				var echartsTheme = chartFactory.buildEchartsTheme(theme);
 				echarts.registerTheme(themeName, echartsTheme);
@@ -3896,7 +3896,7 @@
 		var sn = theme[pn];
 		
 		if(!sn)
-			sn = (theme[pn] = chartFactory.nextElementId());
+			sn = (theme[pn] = chartFactory.uid());
 		
 		return sn;
 	};
@@ -3954,7 +3954,7 @@
 			return styleName;
 		
 		if(info == null)
-			info = (infoMap[name] = { styleId: chartFactory.nextElementId() });
+			info = (infoMap[name] = { styleId: chartFactory.uid() });
 		
 		var cssText = "";
 		
@@ -4401,7 +4401,8 @@
 		//是颜色名称，则通过元素css函数转换
 		if((color.charAt(0) != '#') && (color.indexOf("(") < 0))
 		{
-			var elementId = chartFactory._ELEMENT_ID_PREFIX +"ForConvertColor";
+			var elementId = (chartFactory._ELEMENT_ID_FOR_CVT_COLOR == null ?
+								(chartFactory._ELEMENT_ID_FOR_CVT_COLOR = chartFactory.uid()) : chartFactory._ELEMENT_ID_FOR_CVT_COLOR);
 			
 			var $colorEle = $("#"+elementId);
 			if($colorEle.length == 0)
@@ -4516,18 +4517,20 @@
 	/**
 	 * 生成一个新的页面元素ID。
 	 * 这个ID仅包含[a-z]、[A-Z]、[0-9]，且以字母开头。
-	 *
-	 * @param prefix 可选，ID前缀
 	 */
-	chartFactory.nextElementId = function(prefix)
+	chartFactory.uid = function()
 	{
-		if(prefix == null)
-			prefix = "";
+		if(this._uid_seq >= Number.MAX_VALUE)
+		{
+			this._uid_seq = null;
+			this._uid_time = null;
+		}
 		
-		var seq = (this._nextElementIdSequence != null ? this._nextElementIdSequence : 0);
-		this._nextElementIdSequence = seq + 1;
+		var seq = (this._uid_seq == null ? (this._uid_seq = 0) : this._uid_seq);
+		var time = (this._uid_time == null ? (this._uid_time = new Date().getTime().toString(16)) : this._uid_time);
+		this._uid_seq++;
 		
-		return this._ELEMENT_ID_PREFIX + prefix + seq;
+		return this._BUILT_IN_NAME_PART + time + seq;
 	};
 	
 	/**
@@ -4706,9 +4709,6 @@
 	
 	/** HTML元素上已渲染的图表对象KEY */
 	chartFactory._KEY_ELEMENT_RENDERED_CHART = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "RenderedChart";
-	
-	/** 生成元素ID用的前缀 */
-	chartFactory._ELEMENT_ID_PREFIX = chartFactory._BUILT_IN_NAME_PART + new Number(new Date().getTime()).toString(16);
 	
 	/** 关键字：渐变色数组 */
 	chartFactory._KEY_GRADUAL_COLORS = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "GradualColors";

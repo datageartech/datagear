@@ -542,9 +542,17 @@
 		 */
 		uid : function(prefix)
 		{
-			var re=(prefix ? prefix : "id") + new Date().getTime();
+			if($._uid_seq >= Number.MAX_VALUE)
+			{
+				$._uid_seq = null;
+				$._uid_time = null;
+			}
 			
-			return re;
+			var seq = ($._uid_seq == null ? ($._uid_seq = 0) : $._uid_seq);
+			var time = ($._uid_time == null ? ($._uid_time = new Date().getTime().toString(16)) : $._uid_time);
+			$._uid_seq++;
+			
+			return (prefix ? prefix : "uid") + time + seq;
 		},
 		
 		toJsonString: function(obj)
