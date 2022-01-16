@@ -264,7 +264,13 @@ readonly 是否只读操作，允许为null
 									<button type="button" class="help-src small-button" help-value="100% 100%">
 										<@spring.message code='dashboard.veditor.editStyle.bgSize.fill' />
 									</button>
-									<button type="button" class="help-src small-button" help-value="">
+									<button type="button" class="help-src small-button" help-value="100% auto">
+										<@spring.message code='dashboard.veditor.editStyle.bgSize.fill-x' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="auto 100%">
+										<@spring.message code='dashboard.veditor.editStyle.bgSize.fill-y' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="auto auto">
 										<@spring.message code='dashboard.veditor.editStyle.bgSize.oirgin' />
 									</button>
 								</div>
