@@ -340,11 +340,16 @@
 		var ww = $iframeWrapper.width(), wh = $iframeWrapper.height();
 		var iw = $iframe.width(), ih = $iframe.height();
 		
+		//下面的计算只有$iframe在$iframeWrapper中是绝对定位的才准确
+		var rightGap = 5, bottomGap = 5;
+		var ileft = parseInt($iframe.css("left")), itop = parseInt($iframe.css("top"));
+		ww = ww - ileft - rightGap;
+		wh = wh - itop - bottomGap;
+		
 		if(iw <= ww && ih <= wh)
 			return;
 		
-		var borderError = 5;
-		var scaleX = (ww-borderError)/iw, scaleY = (wh-borderError)/ih;
+		var scaleX = ww/iw, scaleY = wh/ih;
 		$iframe.css("transform-origin", "0 0");
 		$iframe.css("transform", "scale("+Math.min(scaleX, scaleY)+")");
 	};

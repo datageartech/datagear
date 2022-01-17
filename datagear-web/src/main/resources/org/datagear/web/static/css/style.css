@@ -3307,10 +3307,10 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-wrapper .tpl-visual-editor-ifm{
 	position: absolute;
-	left: 0;
-	right: 0;
-	width: 100%;
-	height: 100%;
+	left: 0.5em;
+	top: 1.5em;
+	width: 80%;
+	height: 80%;
 	border-width: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .hide-editor{
