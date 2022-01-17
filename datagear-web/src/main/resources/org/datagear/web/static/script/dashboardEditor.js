@@ -29,6 +29,10 @@
 	i18n.canEditOnlyTextElement = "仅可编辑纯文本元素";
 	i18n.selectedElementRequired = "请选择要操作的元素";
 	i18n.selectedNotChartElement = "选定元素不是图表元素";
+	i18n.noSelectableNextElement="没有可选择的下一个元素";
+	i18n.noSelectablePrevElement="没有可选择的上一个元素";
+	i18n.noSelectableChildElement="没有可选择的子元素";
+	i18n.noSelectableParentElement="没有可选择的父元素";
 	
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
@@ -157,6 +161,166 @@
 	editor.tipInfo = function(msg)
 	{
 		alert(msg);
+	};
+	
+	/**
+	 * 选择下一个可编辑元素。
+	 * 如果元素时<body>，将选中其第一个可编辑子元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
+	 */
+	editor.selectNextElement = function(ele)
+	{
+		this._removeElementClassNewInsert();
+		
+		ele = this._refElement(ele);
+		
+		if(ele.is("body"))
+		{
+			this.selectFirstChildElement(ele);
+			return;
+		}
+		
+		var target = ele;
+		while((target = target.next()))
+		{
+			if(target.length == 0
+				|| (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) && !target.is("script,style") && !target.is(":hidden")))
+			{
+				break;
+			}
+		}
+		
+		if(target.length == 0)
+		{
+			this.tipInfo(i18n.noSelectableNextElement);
+			return;
+		}
+		
+		this._deselectAllElement();
+		this._selectElement(target);
+	};
+	
+	/**
+	 * 选择前一个可编辑元素。
+	 * 如果元素时<body>，将选中其第一个可编辑子元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
+	 */
+	editor.selectPrevElement = function(ele)
+	{
+		this._removeElementClassNewInsert();
+		
+		ele = this._refElement(ele);
+		
+		if(ele.is("body"))
+		{
+			this.selectFirstChildElement(ele);
+			return;
+		}
+		
+		var target = ele;
+		while((target = target.prev()))
+		{
+			if(target.length == 0
+				|| (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) && !target.is("script,style") && !target.is(":hidden")))
+			{
+				break;
+			}
+		}
+		
+		if(target.length == 0)
+		{
+			this.tipInfo(i18n.noSelectablePrevElement);
+			return;
+		}
+		
+		this._deselectAllElement();
+		this._selectElement(target);
+	};
+	
+	/**
+	 * 选择第一个可编辑子元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
+	 */
+	editor.selectFirstChildElement = function(ele)
+	{
+		this._removeElementClassNewInsert();
+		
+		ele = this._refElement(ele);
+		var firstChild = $("> *:first", ele);
+		
+		var target = firstChild;
+		while(true)
+		{
+			if(target.length == 0
+				|| (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) && !target.is("script,style") && !target.is(":hidden")))
+			{
+				break;
+			}
+			
+			target = target.next();
+		}
+		
+		if(target.length == 0)
+		{
+			this.tipInfo(i18n.noSelectableChildElement);
+			return;
+		}
+		
+		this._deselectAllElement();
+		this._selectElement(target);
+	};
+	
+	/**
+	 * 选择可编辑上级元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
+	 */
+	editor.selectParentElement = function(ele)
+	{
+		this._removeElementClassNewInsert();
+		
+		ele = this._refElement(ele);
+		
+		if(ele.is("body"))
+		{
+			this.tipInfo(i18n.noSelectableParentElement);
+			return;
+		}
+		
+		var target = ele;
+		while((target = target.parent()))
+		{
+			if(target.length == 0 || target.is("body")
+				|| (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) && !target.is("script,style") && !target.is(":hidden")))
+			{
+				break;
+			}
+		}
+		
+		if(target.is("body") || target.length == 0)
+		{
+			this.tipInfo(i18n.noSelectableParentElement);
+			return;
+		}
+		
+		this._deselectAllElement();
+		this._selectElement(target);
+	};
+	
+	/**
+	 * 取消选择元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
+	 */
+	editor.deselectElement = function(ele)
+	{
+		this._removeElementClassNewInsert();
+		
+		ele = this._refElement(ele);
+		this._deselectElement(ele);
 	};
 	
 	/**

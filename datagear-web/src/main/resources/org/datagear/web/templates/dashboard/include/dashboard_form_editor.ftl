@@ -893,6 +893,61 @@
 			return false;
 		
 		editorRightOptWrapper = $("<div class='visual-editor-operation operation-right' />").appendTo(editorOptWrapper);
+
+		var selectGroup = $("<div class='select-group' />").appendTo(editorRightOptWrapper)
+			.hover(
+				function()
+				{
+					po.element(".select-menu", this).show()
+						.position({ my : "right top", at : "right bottom", of : this});
+				},
+				function()
+				{
+					po.element(".select-menu", this).hide();
+				});
+		$("<button type='button' />").text("<@spring.message code='select' />").appendTo(selectGroup).button();
+		
+		var selectMenu = $("<ul class='select-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
+		$("<li selectOperation='next' />").html("<div><@spring.message code='dashboard.opt.select.next' /></div>").appendTo(selectMenu);
+		$("<li selectOperation='prev' />").html("<div><@spring.message code='dashboard.opt.select.prev' /></div>").appendTo(selectMenu);
+		$("<li selectOperation='firstChild' />").html("<div><@spring.message code='dashboard.opt.select.firstChild' /></div>").appendTo(selectMenu);
+		$("<li selectOperation='parent' />").html("<div><@spring.message code='dashboard.opt.select.parent' /></div>").appendTo(selectMenu);
+		$("<li class='ui-menu-divider' />").appendTo(selectMenu);
+		$("<li selectOperation='deselect' />").html("<div><@spring.message code='dashboard.opt.select.deselect' /></div>").appendTo(selectMenu);
+		selectMenu.appendTo(selectGroup).menu(
+		{
+			select: function(event, ui)
+			{
+				var item = ui.item;
+				var selectOperation = item.attr("selectOperation");
+				
+				var dashboardEditor = po.dashboardEditorVisual(tabPane);
+				
+				if(!dashboardEditor)
+					return;
+				
+				if(selectOperation == "next")
+				{
+					dashboardEditor.selectNextElement();
+				}
+				else if(selectOperation == "prev")
+				{
+					dashboardEditor.selectPrevElement();
+				}
+				else if(selectOperation == "firstChild")
+				{
+					dashboardEditor.selectFirstChildElement();
+				}
+				else if(selectOperation == "parent")
+				{
+					dashboardEditor.selectParentElement();
+				}
+				else if(selectOperation == "deselect")
+				{
+					dashboardEditor.deselectElement();
+				}
+			}
+		});
 		
 		var insertGroup = $("<div class='insert-group' auto-close-prevent='chart-list-panel' />").appendTo(editorRightOptWrapper)
 			.hover(
