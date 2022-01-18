@@ -96,9 +96,13 @@
 			}
 			else
 			{
-				if(editor._isSelectedElement(veEle))
+				if(veEle.is(":hidden"))
 				{
-					//再次点击选中元素，不取消选中
+					editor._deselectAllElement();
+				}
+				else if(editor._isSelectedElement(veEle))
+				{
+					//再次点击选中元素，不取消选择
 				}
 				else
 				{
@@ -168,18 +172,26 @@
 	 * 如果元素时<body>，将选中其第一个可编辑子元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
+	 * @param tip 可选，未选择时是否给出提示，默认为：true
+	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectNextElement = function(ele)
+	editor.selectNextElement = function(ele, tip)
 	{
+		//(true)、(false)
+		if(arguments.length == 1 && (ele === true || ele === false))
+		{
+			tip = ele;
+			ele = undefined;
+		}
+		
+		tip = (tip == null ? true : tip);
+		
 		this._removeElementClassNewInsert();
 		
 		ele = this._refElement(ele);
 		
 		if(ele.is("body"))
-		{
-			this.selectFirstChildElement(ele);
-			return;
-		}
+			return this.selectFirstChildElement(ele, tip);
 		
 		var target = ele;
 		while((target = target.next()))
@@ -193,12 +205,15 @@
 		
 		if(target.length == 0)
 		{
-			this.tipInfo(i18n.noSelectableNextElement);
-			return;
+			if(tip)
+				this.tipInfo(i18n.noSelectableNextElement);
+			
+			return false;
 		}
 		
 		this._deselectAllElement();
 		this._selectElement(target);
+		return true;
 	};
 	
 	/**
@@ -206,18 +221,26 @@
 	 * 如果元素时<body>，将选中其第一个可编辑子元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
+	 * @param tip 可选，未选择时是否给出提示，默认为：true
+	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectPrevElement = function(ele)
+	editor.selectPrevElement = function(ele, tip)
 	{
+		//(true)、(false)
+		if(arguments.length == 1 && (ele === true || ele === false))
+		{
+			tip = ele;
+			ele = undefined;
+		}
+		
+		tip = (tip == null ? true : tip);
+		
 		this._removeElementClassNewInsert();
 		
 		ele = this._refElement(ele);
 		
 		if(ele.is("body"))
-		{
-			this.selectFirstChildElement(ele);
-			return;
-		}
+			return this.selectFirstChildElement(ele, tip);
 		
 		var target = ele;
 		while((target = target.prev()))
@@ -231,21 +254,34 @@
 		
 		if(target.length == 0)
 		{
-			this.tipInfo(i18n.noSelectablePrevElement);
-			return;
+			if(tip)
+				this.tipInfo(i18n.noSelectablePrevElement);
+			return false;
 		}
 		
 		this._deselectAllElement();
 		this._selectElement(target);
+		return true;
 	};
 	
 	/**
 	 * 选择第一个可编辑子元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
+	 * @param tip 可选，未选择时是否给出提示，默认为：true
+	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectFirstChildElement = function(ele)
+	editor.selectFirstChildElement = function(ele, tip)
 	{
+		//(true)、(false)
+		if(arguments.length == 1 && (ele === true || ele === false))
+		{
+			tip = ele;
+			ele = undefined;
+		}
+		
+		tip = (tip == null ? true : tip);
+		
 		this._removeElementClassNewInsert();
 		
 		ele = this._refElement(ele);
@@ -265,29 +301,43 @@
 		
 		if(target.length == 0)
 		{
-			this.tipInfo(i18n.noSelectableChildElement);
-			return;
+			if(tip)
+				this.tipInfo(i18n.noSelectableChildElement);
+			return false;
 		}
 		
 		this._deselectAllElement();
 		this._selectElement(target);
+		return true;
 	};
 	
 	/**
 	 * 选择可编辑上级元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
+	 * @param tip 可选，未选择时是否给出提示，默认为：true
+	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectParentElement = function(ele)
+	editor.selectParentElement = function(ele, tip)
 	{
+		//(true)、(false)
+		if(arguments.length == 1 && (ele === true || ele === false))
+		{
+			tip = ele;
+			ele = undefined;
+		}
+		
+		tip = (tip == null ? true : tip);
+		
 		this._removeElementClassNewInsert();
 		
 		ele = this._refElement(ele);
 		
 		if(ele.is("body"))
 		{
-			this.tipInfo(i18n.noSelectableParentElement);
-			return;
+			if(tip)
+				this.tipInfo(i18n.noSelectableParentElement);
+			return false;
 		}
 		
 		var target = ele;
@@ -302,12 +352,14 @@
 		
 		if(target.is("body") || target.length == 0)
 		{
-			this.tipInfo(i18n.noSelectableParentElement);
+			if(tip)
+				this.tipInfo(i18n.noSelectableParentElement);
 			return;
 		}
 		
 		this._deselectAllElement();
 		this._selectElement(target);
+		return true;
 	};
 	
 	/**
