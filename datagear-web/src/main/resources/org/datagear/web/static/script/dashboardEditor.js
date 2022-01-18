@@ -188,7 +188,7 @@
 		
 		this._removeElementClassNewInsert();
 		
-		ele = this._refElement(ele);
+		ele = this._currentElement(ele);
 		
 		if(ele.is("body"))
 			return this.selectFirstChildElement(ele, tip);
@@ -237,7 +237,7 @@
 		
 		this._removeElementClassNewInsert();
 		
-		ele = this._refElement(ele);
+		ele = this._currentElement(ele);
 		
 		if(ele.is("body"))
 			return this.selectFirstChildElement(ele, tip);
@@ -284,7 +284,7 @@
 		
 		this._removeElementClassNewInsert();
 		
-		ele = this._refElement(ele);
+		ele = this._currentElement(ele);
 		var firstChild = $("> *:first", ele);
 		
 		var target = firstChild;
@@ -331,7 +331,7 @@
 		
 		this._removeElementClassNewInsert();
 		
-		ele = this._refElement(ele);
+		ele = this._currentElement(ele);
 		
 		if(ele.is("body"))
 		{
@@ -371,7 +371,7 @@
 	{
 		this._removeElementClassNewInsert();
 		
-		ele = this._refElement(ele);
+		ele = this._currentElement(ele);
 		this._deselectElement(ele);
 	};
 	
@@ -382,7 +382,7 @@
 	 */
 	editor.isChartElement = function(ele)
 	{
-		ele = this._refElement(ele);
+		ele = this._currentElement(ele);
 		return (this.dashboard.renderedChart(ele) != null);
 	};
 	
@@ -421,7 +421,7 @@
 	 */
 	editor.checkInsertChart = function(insertType, refEle)
 	{
-		refEle = this._refElement(refEle);
+		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		//图表元素内部不允许再插入图表元素
@@ -451,7 +451,7 @@
 		
 		chartWidgets = (!$.isArray(chartWidgets) ? [ chartWidgets ] : chartWidgets);
 		
-		refEle = this._refElement(refEle);
+		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		//图表元素内部不允许再插入图表元素
@@ -499,7 +499,7 @@
 	 */
 	editor.checkBindChart = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this._checkNotEmptyElement(ele))
 			return false;
@@ -518,7 +518,7 @@
 		if(!chartWidget)
 			return;
 		
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this.checkBindChart(ele))
 			return;
@@ -539,7 +539,7 @@
 	 */
 	editor.checkUnbindChart = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this._checkNotEmptyElement(ele))
 			return false;
@@ -560,7 +560,7 @@
 	 */
 	editor.unbindChart = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this.checkUnbindChart(ele))
 			return;
@@ -579,7 +579,7 @@
 	 */
 	editor.insertElement = function(insertEle, insertType, refEle, sync)
 	{
-		refEle = this._refElement(refEle);
+		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		sync = (sync == null ? true : sync);
 		
@@ -610,7 +610,7 @@
 	 */
 	editor.getElementText = function(ele)
 	{
-		ele = this._refElement(ele);
+		ele = this._editElement(this._currentElement(ele));
 		return $.trim(ele.text());
 	};
 	
@@ -621,7 +621,7 @@
 	 */
 	editor.checkSetElementText = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this._checkNotEmptyElement(ele))
 			return false;
@@ -645,7 +645,7 @@
 	 */
 	editor.setElementText = function(text, ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementText(ele))
 			return;
@@ -660,7 +660,7 @@
 	 */
 	editor.checkDeleteElement = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this._checkNotEmptyElement(ele))
 			return false;
@@ -675,7 +675,7 @@
 	 */
 	editor.deleteElement = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this.checkDeleteElement(ele))
 			return;
@@ -697,7 +697,7 @@
 	 */
 	editor.checkSetElementStyle = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this._checkNotEmptyElement(ele))
 			return false;
@@ -713,7 +713,7 @@
 	 */
 	editor.setElementStyle = function(styleObj, ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementStyle(ele))
 			return;
@@ -736,7 +736,7 @@
 	 */
 	editor.getElementStyle = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._editElement(this._currentElement(ele, true));
 		return this._getElementStyleObj(ele);
 	};
 	
@@ -771,7 +771,8 @@
 	 */
 	editor.getGlobalStyle = function()
 	{
-		return this._getElementStyleObj($(document.body));
+		var ele = this._editElement($(document.body));
+		return this._getElementStyleObj(ele);
 	};
 	
 	editor._spitStyleAndOption = function(styleObj)
@@ -836,7 +837,7 @@
 	 */
 	editor.checkSetElementChartTheme = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this._checkNotEmptyElement(ele))
 			return false;
@@ -860,7 +861,7 @@
 	 */
 	editor.setElementChartTheme = function(chartTheme, ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementChartTheme(ele))
 			return;
@@ -880,7 +881,7 @@
 	 */
 	editor.getElementChartTheme = function(ele)
 	{
-		ele = this._refElement(ele, true);
+		ele = this._editElement(this._currentElement(ele, true));
 		return this._getElementChartTheme(ele);
 	};
 	
@@ -902,7 +903,8 @@
 	 */
 	editor.getGlobalChartTheme = function()
 	{
-		return this._getElementChartTheme($(document.body));
+		var ele = this._editElement($(document.body));
+		return this._getElementChartTheme(ele);
 	};
 	
 	/**
@@ -1192,16 +1194,16 @@
 		this.changeFlag(true);
 	};
 	
-	editor._refElement = function(refEle, excludeBody)
+	editor._currentElement = function(currentEle, excludeBody)
 	{
 		excludeBody = (excludeBody == null ? false : excludeBody);
 		
-		refEle = (this._isEmptyElement(refEle) ? this._selectedElement() : refEle);
+		currentEle = (this._isEmptyElement(currentEle) ? this._selectedElement() : currentEle);
 		
 		if(!excludeBody)
-			refEle = (this._isEmptyElement(refEle) ? $(document.body) : refEle);
+			currentEle = (this._isEmptyElement(currentEle) ? $(document.body) : currentEle);
 		
-		return refEle;
+		return currentEle;
 	};
 	
 	editor._insertElement = function(refEle, insertEle, insertType)
