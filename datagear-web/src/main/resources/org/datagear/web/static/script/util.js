@@ -3457,5 +3457,116 @@
 			return page;
 		}
 	});
+	
+	//列表调色板
+	$.widget("datagear.listpalllet",
+	{
+		options:
+		{
+			//颜色指示器DOM元素
+			indicatorEle: undefined,
+			//可选，组件父元素，默认为：document.body
+			container: undefined,
+			//可选，定位
+			position: "absolute"
+		},
+		
+		_create: function()
+		{
+			var triggerEle = this._getTriggerEle();
+			var thisWidgetObj = this;
+			var clickHandler = function()
+			{
+				thisWidgetObj.show();
+			};
+			triggerEle.data("listpallletHandler", clickHandler);
+			triggerEle.on("click", clickHandler);
+		},
+		
+		show: function()
+		{
+			var widgetEle = this._getWidgetEle();
+			if(widgetEle.length == 0)
+				widgetEle = this._render();
+			
+			widgetEle.show().position({ my : "center top", at : "center bottom+2", of : this._getTriggerEle()});
+		},
+		
+		hide: function()
+		{
+			this._getWidgetEle().hide();
+		},
+		
+		_render: function()
+		{
+			var base = [ "00", "33", "66", "99", "CC", "FF" ];
+			
+			var container = (this.options.container ? $(this.options.container) : document.body);
+			var $widget = $("<div class='listpalllet ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front' />")
+								.attr("id", (this._widgetId = $.uid()))
+								.css("position", this.options.position).css("display", "none").appendTo(container);
+			var $row = null;
+			var count = 0;
+			for(var i=0; i<base.length; i++)
+			{
+				for(var j=0; j<base.length; j++)
+				{
+					for(var k=0; k<base.length; k++)
+					{
+						var color = "#" + base[i] + base[j] + base[k];
+						
+						if(count%(base.length*3) == 0)
+							$row = $("<div class='color-row' />").appendTo($widget);
+						
+						$("<div class='color-cell ui-widget ui-widget-content' />")
+							.attr("color-value", color).css("background-color",color)
+							.attr("title", color).appendTo($row);
+						
+						count++;
+					}
+				}
+			}
+			
+			var thisWidgetObj = this;
+			
+			$widget.on("click", ".color-cell", function()
+			{
+				thisWidgetObj.element.val($(this).attr("color-value"));
+				thisWidgetObj.hide();
+			});
+			
+			$widget.on("mouseover", ".color-cell", function()
+			{
+				$(this).addClass("color-cell-hover");
+			})
+			.on("mouseout", ".color-cell", function()
+			{
+				$(this).removeClass("color-cell-hover");
+			});
+			
+			return $widget;
+		},
+		
+		_getTriggerEle: function()
+		{
+			if(this.options.indicatorEle)
+				return $(this.options.indicatorEle);
+			else
+				return this.element;
+		},
+		
+		_getWidgetEle: function()
+		{
+			return $("#"+this._widgetId, this.options.container);
+		},
+		
+		_destroy: function()
+		{
+			var triggerEle = this._getTriggerEle();
+			triggerEle.off("click", triggerEle.data("listpallletHandler"));
+			
+			this._getWidgetEle().remove();
+		}
+	});
 })
 (jQuery);

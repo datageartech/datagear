@@ -63,6 +63,8 @@
 		po.element(".stylePositionBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleFontWeightBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleTextAlignBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element("input[name='color']", veStyleForm).listpalllet();
+		po.element("input[name='background-color']", veStyleForm).listpalllet();
 		
 		//初始化可视编辑图表主题面板
 		var veChartThemePanel = po.element(".veditor-chartTheme-panel");

@@ -192,6 +192,25 @@ a.link:hover{
 	display: none;
 }
 
+.listpalllet{
+	display: inline-block;
+	padding: 0.3em 0.3em;
+}
+.listpalllet .color-row{
+	height: 1em;
+}
+.listpalllet .color-cell{
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.listpalllet .color-cell-hover{
+	border-width: 2px !important;
+}
+
 /*代码编辑器*/
 .code-editor .CodeMirror{
 	height: 100%;
