@@ -96,7 +96,7 @@
 			}
 			else
 			{
-				if(veEle.is(":hidden"))
+				if(!editor._isSelectableElement(veEle))
 				{
 					editor._deselectAllElement();
 				}
@@ -196,8 +196,7 @@
 		var target = ele;
 		while((target = target.next()))
 		{
-			if(target.length == 0
-				|| (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) && !target.is("script,style") && !target.is(":hidden")))
+			if(target.length == 0 || this._isSelectableElement(target))
 			{
 				break;
 			}
@@ -245,8 +244,7 @@
 		var target = ele;
 		while((target = target.prev()))
 		{
-			if(target.length == 0
-				|| (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) && !target.is("script,style") && !target.is(":hidden")))
+			if(target.length == 0 || this._isSelectableElement(target))
 			{
 				break;
 			}
@@ -290,8 +288,7 @@
 		var target = firstChild;
 		while(true)
 		{
-			if(target.length == 0
-				|| (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) && !target.is("script,style") && !target.is(":hidden")))
+			if(target.length == 0 || this._isSelectableElement(target))
 			{
 				break;
 			}
@@ -343,8 +340,7 @@
 		var target = ele;
 		while((target = target.parent()))
 		{
-			if(target.length == 0 || target.is("body")
-				|| (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) && !target.is("script,style") && !target.is(":hidden")))
+			if(target.length == 0 || target.is("body") || this._isSelectableElement(target))
 			{
 				break;
 			}
@@ -373,6 +369,32 @@
 		
 		ele = this._currentElement(ele);
 		this._deselectElement(ele);
+	};
+	
+	editor._isSelectableElement = function($ele)
+	{
+		if(!$ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID))
+			return false;
+		
+		var tagName = ($ele[0].tagName || "").toLowerCase();
+		
+		if(tagName == "")
+			return false;
+		
+		if(tagName == "body")
+			return false;
+		
+		if(tagName == "script" || tagName == "style")
+			return false;
+		
+		//自定义标签（Web Components）
+		if(tagName.indexOf("-") > 0)
+			return false;
+		
+		if($ele.is(":hidden"))
+			return false;
+		
+		return true;
 	};
 	
 	/**
