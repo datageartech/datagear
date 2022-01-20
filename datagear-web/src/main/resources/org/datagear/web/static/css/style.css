@@ -207,8 +207,18 @@ a.link:hover{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.listpalllet .color-cell-hover{
-	border-width: 2px !important;
+.listpalllet .color-cell.ui-state-hover{
+	border: 1px solid;
+}
+.listpalllet .color-cell.ui-state-active{
+	border: 2px solid;
+}
+.listpallet-indicator{
+	display: inline-block;
+	width: 1.2em;
+	height: 1.2em;
+	vertical-align: middle;
+	cursor: pointer;
 }
 
 /*代码编辑器*/
@@ -523,7 +533,7 @@ form .form-item.display-55 .form-item-value,
 	padding-bottom: 0.2em;
 }
 .minor-panel .panel-content{
-	padding: 1em 0.5em;
+	padding: 1em 0.5em 0.5em 0.5em;
 }
 .minor-panel .panel-content .content-item{
 	padding-top: 0.2em;

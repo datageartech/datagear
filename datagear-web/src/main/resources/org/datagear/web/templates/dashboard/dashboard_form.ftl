@@ -235,6 +235,7 @@ readonly 是否只读操作，允许为null
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
+								<div class="color-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 							</div>
 						</div>
 						<div class="form-item">
@@ -243,6 +244,7 @@ readonly 是否只读操作，允许为null
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="background-color" class="ui-widget ui-widget-content" size="100" />
+								<div class="bgcolor-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 							</div>
 						</div>
 						<div class="form-item">
@@ -522,6 +524,7 @@ readonly 是否只读操作，允许为null
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
+						<div class="color-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 					</div>
 				</div>
 				<div class="form-item">
@@ -530,6 +533,7 @@ readonly 是否只读操作，允许为null
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="backgroundColor" class="ui-widget ui-widget-content" size="100" />
+						<div class="bgcolor-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 					</div>
 				</div>
 				<div class="form-item">
@@ -538,6 +542,7 @@ readonly 是否只读操作，允许为null
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="actualBackgroundColor" class="ui-widget ui-widget-content" size="100" />
+						<div class="actbgcolor-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 					</div>
 				</div>
 				<div class="form-item">

@@ -43,6 +43,11 @@ textarea:focus{
 	background: #285c00;
 }
 
+.listpalllet .color-cell.ui-state-hover,
+.listpalllet .color-cell.ui-state-active{
+	border-color: #ffffff !important;
+}
+
 /*表单*/
 form .form-content .form-item label.error{
 	color: red;

@@ -63,8 +63,20 @@
 		po.element(".stylePositionBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleFontWeightBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleTextAlignBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element("input[name='color']", veStyleForm).listpalllet();
-		po.element("input[name='background-color']", veStyleForm).listpalllet();
+		po.element("input[name='color']", veStyleForm).listpalllet(
+		{
+			indicator: po.element(".color-indicator", veStyleForm),
+			container: po.element("input[name='color']", veStyleForm).parent(),
+			position: "fixed",
+			autoCloseContext: po.element()
+		});
+		po.element("input[name='background-color']", veStyleForm).listpalllet(
+		{
+			indicator: po.element(".bgcolor-indicator", veStyleForm),
+			container: po.element("input[name='background-color']", veStyleForm).parent(),
+			position: "fixed",
+			autoCloseContext: po.element()
+		});
 		
 		//初始化可视编辑图表主题面板
 		var veChartThemePanel = po.element(".veditor-chartTheme-panel");
@@ -87,6 +99,27 @@
 			}
 			
 			return false;
+		});
+		po.element("input[name='color']", veChartThemeForm).listpalllet(
+		{
+			indicator: po.element(".color-indicator", veChartThemeForm),
+			container: po.element("input[name='color']", veChartThemeForm).parent(),
+			position: "fixed",
+			autoCloseContext: po.element()
+		});
+		po.element("input[name='backgroundColor']", veChartThemeForm).listpalllet(
+		{
+			indicator: po.element(".bgcolor-indicator", veChartThemeForm),
+			container: po.element("input[name='backgroundColor']", veChartThemeForm).parent(),
+			position: "fixed",
+			autoCloseContext: po.element()
+		});
+		po.element("input[name='actualBackgroundColor']", veChartThemeForm).listpalllet(
+		{
+			indicator: po.element(".actbgcolor-indicator", veChartThemeForm),
+			container: po.element("input[name='actualBackgroundColor']", veChartThemeForm).parent(),
+			position: "fixed",
+			autoCloseContext: po.element()
 		});
 		veChartThemeForm.on("click", ".del-color-btn", function(event)
 		{
@@ -1178,7 +1211,22 @@
 	po.setVeditorStyleFormValue = function($form, styleObj)
 	{
 		styleObj = $.extend({ syncChartTheme: true }, styleObj);
-		$.jsonToForm($form, styleObj);
+		$.jsonToForm($form, styleObj,
+		{
+			handlers:
+			{
+				"color": function(form, value)
+				{
+					po.element(".color-indicator", form).css("background-color", (value||""));
+					return false;
+				},
+				"background-color": function(form, value)
+				{
+					po.element(".bgcolor-indicator", form).css("background-color", (value||""));
+					return false;
+				}
+			}
+		});
 	};
 	
 	po.setVeditorChartThemeFormValue = function($form, chartTheme)
@@ -1187,6 +1235,21 @@
 		{
 			handlers:
 			{
+				"color": function(form, value)
+				{
+					po.element(".color-indicator", form).css("background-color", (value||""));
+					return false;
+				},
+				"backgroundColor": function(form, value)
+				{
+					po.element(".bgcolor-indicator", form).css("background-color", (value||""));
+					return false;
+				},
+				"actualBackgroundColor": function(form, value)
+				{
+					po.element(".actbgcolor-indicator", form).css("background-color", (value||""));
+					return false;
+				},
 				"graphColors": function(form, value)
 				{
 					return $.jsonToFormArrayHandler(form, value, ".graphColorsInput", function(wrapper)

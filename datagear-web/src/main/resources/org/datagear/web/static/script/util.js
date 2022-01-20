@@ -3463,24 +3463,40 @@
 	{
 		options:
 		{
-			//颜色指示器DOM元素
-			indicatorEle: undefined,
+			//颜色指示器元素
+			indicator: undefined,
 			//可选，组件父元素，默认为：document.body
 			container: undefined,
+			//可选，点击后自动隐藏此组件的上下文元素，默认为：document.body
+			autoCloseContext: undefined,
 			//可选，定位
 			position: "absolute"
 		},
 		
 		_create: function()
 		{
-			var triggerEle = this._getTriggerEle();
+			this._widgetId = $.uid();
+			this._refElementClass = "ref"+this._widgetId;
+			
+			this.element.addClass(this._refElementClass);
+			if(this.options.indicator)
+				$(this.options.indicator).addClass(this._refElementClass);
+			
 			var thisWidgetObj = this;
-			var clickHandler = function()
+			this._showEventHandler = function()
 			{
 				thisWidgetObj.show();
 			};
-			triggerEle.data("listpallletHandler", clickHandler);
-			triggerEle.on("click", clickHandler);
+			this._hideEventHandler = function(event)
+			{
+				var $target = $(event.target);
+				
+				if($target.closest("." + thisWidgetObj._refElementClass).length == 0)
+					thisWidgetObj.hide();
+			};
+			
+			this._getTriggerEle().on("click", this._showEventHandler);
+			this._getAutoCloseContext().on("click", this._hideEventHandler);
 		},
 		
 		show: function()
@@ -3489,7 +3505,21 @@
 			if(widgetEle.length == 0)
 				widgetEle = this._render();
 			
-			widgetEle.show().position({ my : "center top", at : "center bottom+2", of : this._getTriggerEle()});
+			var initColor = this.element.val();
+			if(initColor)
+			{
+				$(".color-cell.ui-state-active", widgetEle).removeClass("ui-state-active");
+				$(".color-cell", widgetEle).each(function()
+				{
+					if($(this).attr("color-value") == initColor)
+					{
+						$(this).addClass("ui-state-active");
+						return false;
+					}
+				});
+			}
+			
+			widgetEle.show().position({ my : "left top", at : "left bottom+2", of : this._getTriggerEle()});
 		},
 		
 		hide: function()
@@ -3503,7 +3533,7 @@
 			
 			var container = (this.options.container ? $(this.options.container) : document.body);
 			var $widget = $("<div class='listpalllet ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front' />")
-								.attr("id", (this._widgetId = $.uid()))
+								.attr("id", this._widgetId).addClass(this._refElementClass)
 								.css("position", this.options.position).css("display", "none").appendTo(container);
 			var $row = null;
 			var count = 0;
@@ -3531,26 +3561,36 @@
 			
 			$widget.on("click", ".color-cell", function()
 			{
-				thisWidgetObj.element.val($(this).attr("color-value"));
+				var colorValue = $(this).attr("color-value");
+				
+				thisWidgetObj.element.val(colorValue);
+				if(thisWidgetObj.options.indicator)
+					$(thisWidgetObj.options.indicator).css("background-color", colorValue);
+				
 				thisWidgetObj.hide();
 			});
 			
 			$widget.on("mouseover", ".color-cell", function()
 			{
-				$(this).addClass("color-cell-hover");
+				$(this).addClass("ui-state-hover");
 			})
 			.on("mouseout", ".color-cell", function()
 			{
-				$(this).removeClass("color-cell-hover");
+				$(this).removeClass("ui-state-hover");
 			});
 			
 			return $widget;
 		},
 		
+		_getAutoCloseContext: function()
+		{
+			return $(this.options.autoCloseContext || document.body);
+		},
+		
 		_getTriggerEle: function()
 		{
-			if(this.options.indicatorEle)
-				return $(this.options.indicatorEle);
+			if(this.options.indicator)
+				return $(this.options.indicator);
 			else
 				return this.element;
 		},
@@ -3562,8 +3602,12 @@
 		
 		_destroy: function()
 		{
-			var triggerEle = this._getTriggerEle();
-			triggerEle.off("click", triggerEle.data("listpallletHandler"));
+			this.element.removeClass(this._refElementClass);
+			if(this.options.indicator)
+				$(this.options.indicator).removeClass(this._refElementClass);
+			
+			this._getTriggerEle().off("click", this._showEventHandler);
+			this._getAutoCloseContext().off("click", this._hideEventHandler);
 			
 			this._getWidgetEle().remove();
 		}
