@@ -378,14 +378,6 @@ form .form-item .form-item-value .input.width-9,
 .form .form-item .form-item-value .input.width-9{
 	width: 90%;
 }
-form .form-item .form-item-value > *,
-.form .form-item .form-item-value > *{
-	margin-right: 0.3em;
-}
-form .form-item .form-item-value > *:last-child,
-.form .form-item .form-item-value > *:last-child{
-	margin-right: 0;
-}
 form .form-item .form-item-value textarea,
 .form .form-item .form-item-value textarea{
 	width: 60%;

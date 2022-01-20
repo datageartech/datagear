@@ -798,7 +798,7 @@
 			var addCount = (valueLen - items.length);
 			for(var i=0; i<addCount; i++)
 			{
-				addItemHandler(wrapper, i, addCount);
+				addItemHandler(wrapper, value[i], i, addCount);
 			}
 			
 			return false;

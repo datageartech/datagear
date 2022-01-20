@@ -123,7 +123,9 @@
 		});
 		veChartThemeForm.on("click", ".del-color-btn", function(event)
 		{
-			$(this).parent().remove();
+			var $parent = $(this).parent();
+			po.element("input[type='text']", $parent).listpalllet("destroy");
+			$parent.remove();
 			//阻止冒泡，不然会触发$.fn.autoCloseSubPanel函数关闭面板
 			event.stopPropagation();
 		});
@@ -1253,17 +1255,31 @@
 				},
 				"graphColors": function(form, value)
 				{
-					return $.jsonToFormArrayHandler(form, value, ".graphColorsInput", function(wrapper)
+					var re = $.jsonToFormArrayHandler(form, value, ".graphColorsInput", function(wrapper)
 					{
 						po.addChartThemeFormGraphColorsItem(wrapper);
 					});
+					
+					po.element(".graphColorsInput .listpallet-indicator", form).each(function(i)
+					{
+						$(this).css("background-color", (value[i] || ""));
+					});
+					
+					return re;
 				},
 				"graphRangeColors": function(form, value)
 				{
-					return $.jsonToFormArrayHandler(form, value, ".graphRangeColorsInput", function(wrapper)
+					var re = $.jsonToFormArrayHandler(form, value, ".graphRangeColorsInput", function(wrapper)
 					{
 						po.addChartThemeFormGraphRangeColorsItem(wrapper);
 					});
+					
+					po.element(".graphRangeColorsInput .listpallet-indicator", form).each(function(i)
+					{
+						$(this).css("background-color", (value[i] || ""));
+					});
+					
+					return re;
 				}
 			}
 		});
@@ -1271,16 +1287,38 @@
 	
 	po.addChartThemeFormGraphColorsItem = function(wrapper)
 	{
-		$("<div class='input-value-item'><input type='text' name='graphColors[]' class='ui-widget ui-widget-content' size='100' />"
-			+"&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
+		var id = $.uid();
+		$("<div id='"+id+"' class='input-value-item'><input type='text' name='graphColors[]' class='ui-widget ui-widget-content' size='100' />"
+			+"&nbsp;<div class='listpallet-indicator ui-widget ui-widget-content ui-corner-all'></div>"
+			+"&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
 			+"</div>").appendTo(wrapper);
+		
+		var inputItem = po.element("#"+id, wrapper);
+		po.element("input[name='graphColors[]']", inputItem).listpalllet(
+		{
+			indicator: po.element(".listpallet-indicator", inputItem),
+			container: inputItem,
+			position: "fixed",
+			autoCloseContext: po.element()
+		});
 	};
 	
 	po.addChartThemeFormGraphRangeColorsItem = function(wrapper)
 	{
-		$("<div class='input-value-item'><input type='text' name='graphRangeColors[]' class='ui-widget ui-widget-content' size='100' />"
-			+"&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
+		var id = $.uid();
+		$("<div id='"+id+"' class='input-value-item'><input type='text' name='graphRangeColors[]' class='ui-widget ui-widget-content' size='100' />"
+			+"&nbsp;<div class='listpallet-indicator ui-widget ui-widget-content ui-corner-all'></div>"
+			+"&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
 			+"</div>").appendTo(wrapper);
+		
+		var inputItem = po.element("#"+id, wrapper);
+		po.element("input[name='graphRangeColors[]']", inputItem).listpalllet(
+		{
+			indicator: po.element(".listpallet-indicator", inputItem),
+			container: inputItem,
+			position: "fixed",
+			autoCloseContext: po.element()
+		});
 	};
 	
 	po.buildVisualEditorInsertMenuItems = function($parent, insertType)
