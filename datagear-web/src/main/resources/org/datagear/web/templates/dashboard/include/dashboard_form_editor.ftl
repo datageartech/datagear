@@ -586,19 +586,20 @@
 			po.setVisualEditorIframeScale(visualEditorDiv, visualEditorIfm);
 			
 			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorLeftOptWrapper);
-			$("<button type='button' class='switchToVisualEditorBtn'></button>").text("<@spring.message code='dashboard.switchToVisualEditor' />")
-			.appendTo(editorSwitchGroup).button().click(function()
-			{
-				po.switchToVisualEditor(tabPane);
-			});
 			$("<button type='button' class='switchToCodeEditorBtn'></button>").text("<@spring.message code='dashboard.switchToCodeEditor' />")
 			.appendTo(editorSwitchGroup).button().click(function()
 			{
 				po.switchToCodeEditor(tabPane);
 			});
+			$("<button type='button' class='switchToVisualEditorBtn'></button>").text("<@spring.message code='dashboard.switchToVisualEditor' />")
+			.appendTo(editorSwitchGroup).button().click(function()
+			{
+				po.switchToVisualEditor(tabPane);
+			});
 			editorSwitchGroup.controlgroup();
 			
-			po.switchToVisualEditor(tabPane);
+			//默认打开源码模式，因为如果默认为可视模式，如果页面中有导致死循环的代码，将会导致永远无法再次打开看板编辑页面
+			po.switchToCodeEditor(tabPane);
 		}
 		else
 		{
