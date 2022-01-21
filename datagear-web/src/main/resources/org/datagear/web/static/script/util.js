@@ -781,9 +781,17 @@
 		},
 		
 		/**
-		 * 构建可用于$.jsonToForm()的自定义数组填充处理函数。
+		 * 可用于$.jsonToForm()的自定义数组填充支持函数。
+		 * 
+		 * @param form 表单元素
+		 * @param value 值数组，可能为null
+		 * @param wrapperSelector 表单内用于添加数组元素输入项条目的容器元素选择器
+		 * @param addItemHandler 添加数组元素输入项条目的处理函数，格式为：function(wrapper, index, addTotal){ ... }，
+		 *						 要添加的数组元素输入项必须直接位于wrapper元素内
+		 * @param removeItemHandler 可选，删除数组元素输入项条目的处理函数，格式为：function(wrapper, item){}，
+		 *						    默认为：删除item DOM元素
 		 */
-		jsonToFormArrayHandler: function(form, value, wrapperSelector, addItemHandler)
+		jsonToFormArrayHandler: function(form, value, wrapperSelector, addItemHandler, removeItemHandler)
 		{
 			var wrapper = $(wrapperSelector, form);
 			var items = $("> *", wrapper);
@@ -792,7 +800,12 @@
 			items.each(function(i)
 			{
 				if(i >= valueLen)
-					$(this).remove();
+				{
+					if(removeItemHandler)
+						removeItemHandler(wrapper, $(this));
+					else
+						$(this).remove();
+				}
 			});
 			
 			var addCount = (valueLen - items.length);

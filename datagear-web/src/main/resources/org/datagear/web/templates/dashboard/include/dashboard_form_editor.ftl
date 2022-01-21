@@ -1258,6 +1258,11 @@
 					var re = $.jsonToFormArrayHandler(form, value, ".graphColorsInput", function(wrapper)
 					{
 						po.addChartThemeFormGraphColorsItem(wrapper);
+					},
+					function(wrapper, item)
+					{
+						po.element("input[type='text']", item).listpalllet("destroy");
+						item.remove();
 					});
 					
 					po.element(".graphColorsInput .listpallet-indicator", form).each(function(i)
@@ -1272,6 +1277,11 @@
 					var re = $.jsonToFormArrayHandler(form, value, ".graphRangeColorsInput", function(wrapper)
 					{
 						po.addChartThemeFormGraphRangeColorsItem(wrapper);
+					},
+					function(wrapper, item)
+					{
+						po.element("input[type='text']", item).listpalllet("destroy");
+						item.remove();
 					});
 					
 					po.element(".graphRangeColorsInput .listpallet-indicator", form).each(function(i)
