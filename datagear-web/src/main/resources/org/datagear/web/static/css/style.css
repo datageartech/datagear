@@ -320,15 +320,15 @@ form .form-item .form-item-label label,
 	overflow: hidden;
 }
 form .form-item .form-item-label label[title],
-form .form-content .tip-label[title],
+form .tip-label[title],
 .form .form-item .form-item-label label[title],
-.form .form-content .tip-label[title]{
+.form .tip-label[title]{
 	position: relative;
 }
 form .form-item .form-item-label label[title]::after,
-form .form-content .tip-label[title]::after,
+form .tip-label[title]::after,
 .form .form-item .form-item-label label[title]::after,
-.form .form-content .tip-label[title]::after{
+.form .tip-label[title]::after{
 	content: "?";
     position: absolute;
     margin-left: 0.1em;
