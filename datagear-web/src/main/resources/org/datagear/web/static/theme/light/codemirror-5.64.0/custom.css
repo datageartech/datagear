@@ -28,7 +28,7 @@
 .cm-s-custom  { font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;}
 
 
-.cm-s-custom .CodeMirror-matchingbracket { outline:1px solid grey; color:black !important; }
+.cm-s-custom .CodeMirror-matchingbracket { outline:1px solid #CCC; color:black !important; }
 
 .CodeMirror-hints.custom {
   background-color: #fff !important;

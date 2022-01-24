@@ -31,3 +31,10 @@
   background-color: #ededed !important;
   color: #000 !important;
 }
+
+3.
+.cm-s-custom .CodeMirror-matchingbracket { outline:1px solid grey; color:black !important; }
+
+替换为
+
+.cm-s-custom .CodeMirror-matchingbracket { outline:1px solid #CCC; color:black !important; }
