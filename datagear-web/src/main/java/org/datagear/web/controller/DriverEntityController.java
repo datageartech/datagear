@@ -554,8 +554,7 @@ public class DriverEntityController extends AbstractController
 
 	protected File getTempDriverLibraryFile(File tempDriverLibraryDirectory, String fileName)
 	{
-		File tempFile = new File(tempDriverLibraryDirectory, fileName);
-
+		File tempFile = FileUtil.getFile(tempDriverLibraryDirectory, fileName);
 		return tempFile;
 	}
 
