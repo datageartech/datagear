@@ -647,6 +647,8 @@
 			var binaryLabelInput = $("<input type='text' class='ui-widget ui-widget-content binary-label-input' />").attr("name", labelInputName)
 				.val("").attr("__columnName", columnName).appendTo(valuediv);
 			
+			valuediv.append("&nbsp;");
+			
 			var fileDownloadButton = null;
 			var fileInput = null;
 			
@@ -820,6 +822,8 @@
 			
 			var textinput=$("<input type='text' class='ui-widget ui-widget-content' />").attr("name", columnName)
 							.attr("value", (columnValue || "")).appendTo(valuediv);
+			
+			valuediv.append("&nbsp;");
 			
 			var buttonElement=$("<input type='button' />").attr("__columnName", columnName);
 			
