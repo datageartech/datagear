@@ -13,6 +13,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import org.datagear.util.FileUtil;
+
 /**
  * 文件夹工厂。
  * 
@@ -124,7 +126,7 @@ public class DirectoryFactory
 	 */
 	public void init() throws IOException
 	{
-		this.directory = new File(this.directoryName);
+		this.directory = FileUtil.getFile(this.directoryName);
 
 		if (this.createIfInexistence && !this.directory.exists())
 			this.directory.mkdirs();
@@ -133,7 +135,7 @@ public class DirectoryFactory
 		{
 			for (FileContent fileContent : this.initFileContents)
 			{
-				File file = new File(this.directory, fileContent.getName());
+				File file = FileUtil.getFile(this.directory, fileContent.getName());
 
 				if (this.forceInitFileContents || (!this.forceInitFileContents && !file.exists()))
 					writeToFile(file, fileContent.getContent(), fileContent.getEncoding());

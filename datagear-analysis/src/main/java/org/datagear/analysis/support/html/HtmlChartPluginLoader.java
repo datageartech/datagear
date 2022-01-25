@@ -143,7 +143,7 @@ public class HtmlChartPluginLoader
 		if (!directory.exists())
 			return false;
 
-		File pluginFile = new File(directory, FILE_NAME_PLUGIN);
+		File pluginFile = FileUtil.getFile(directory, FILE_NAME_PLUGIN);
 
 		return (pluginFile.exists());
 	}
@@ -408,7 +408,7 @@ public class HtmlChartPluginLoader
 	 */
 	protected HtmlChartPlugin loadSingleForDirectory(File directory) throws HtmlChartPluginLoadException
 	{
-		File chartFile = new File(directory, FILE_NAME_PLUGIN);
+		File chartFile = FileUtil.getFile(directory, FILE_NAME_PLUGIN);
 
 		if (!chartFile.exists())
 			return null;

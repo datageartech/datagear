@@ -20,6 +20,7 @@ import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.DataexchangeTestSupport;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.ValueDataImportOption;
+import org.datagear.util.FileUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.SimpleConnectionFactory;
 import org.junit.Assert;
@@ -260,7 +261,7 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 		if (!classpath.startsWith("/"))
 			classpath = "/" + classpath;
 
-		File file = new File("src/test/resources" + classpath);
+		File file = FileUtil.getFile("src/test/resources" + classpath);
 
 		return file;
 	}

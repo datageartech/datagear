@@ -478,7 +478,7 @@ public class IOUtil
 	 */
 	public static InputStream getInputStream(String file) throws FileNotFoundException
 	{
-		return new FileInputStream(new File(file));
+		return new FileInputStream(FileUtil.getFile(file));
 	}
 
 	/**
@@ -513,7 +513,7 @@ public class IOUtil
 	 */
 	public static OutputStream getOutputStream(String file) throws FileNotFoundException
 	{
-		return new FileOutputStream(new File(file));
+		return new FileOutputStream(FileUtil.getFile(file));
 	}
 
 	/**
@@ -801,7 +801,7 @@ public class IOUtil
 
 		while ((zipEntry = zipInputStream.getNextEntry()) != null)
 		{
-			File my = new File(directory, zipEntry.getName());
+			File my = FileUtil.getFile(directory, zipEntry.getName());
 
 			if (zipEntry.isDirectory())
 			{
@@ -856,7 +856,7 @@ public class IOUtil
 			if (children != null)
 			{
 				for (File child : children)
-					copy(child, new File(targetDirectory, child.getName()), false);
+					copy(child, FileUtil.getFile(targetDirectory, child.getName()), false);
 			}
 		}
 		else

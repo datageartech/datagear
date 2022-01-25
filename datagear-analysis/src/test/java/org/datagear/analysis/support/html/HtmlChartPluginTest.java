@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
+import org.datagear.util.FileUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -67,7 +68,7 @@ public class HtmlChartPluginTest
 
 	public static HtmlChartPlugin createHtmlChartPlugin() throws Exception
 	{
-		File directory = new File("src/test/resources/org/datagear/analysis/support/html/HtmlChartPluginTest");
+		File directory = FileUtil.getFile("src/test/resources/org/datagear/analysis/support/html/HtmlChartPluginTest");
 
 		HtmlChartPlugin htmlChartPlugin = new HtmlChartPluginLoader().load(directory);
 

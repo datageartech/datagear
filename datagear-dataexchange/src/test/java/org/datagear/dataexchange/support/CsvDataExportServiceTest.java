@@ -26,6 +26,7 @@ import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.TableQuery;
 import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dataexchange.ValueDataImportOption;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.ClasspathReaderResourceFactory;
@@ -90,7 +91,7 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 		DataFormat dataFormat = new DataFormat();
 		dataFormat.setBinaryFormat("0x${Hex}");
 
-		File outFile = new File("target/CsvDataExportServiceTest.csv");
+		File outFile = FileUtil.getFile("target/CsvDataExportServiceTest.csv");
 
 		Connection cn = null;
 		Writer writer = null;

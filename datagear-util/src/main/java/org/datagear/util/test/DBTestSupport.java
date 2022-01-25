@@ -20,6 +20,8 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import org.datagear.util.FileUtil;
+
 /**
  * 数据库测试支持类。
  * 
@@ -32,9 +34,9 @@ public abstract class DBTestSupport
 
 	static
 	{
-		File jdbcConfigFile = new File("test/config/jdbc.properties");
+		File jdbcConfigFile = FileUtil.getFile("test/config/jdbc.properties");
 		if (!jdbcConfigFile.exists())
-			jdbcConfigFile = new File("../test/config/jdbc.properties");
+			jdbcConfigFile = FileUtil.getFile("../test/config/jdbc.properties");
 
 		try
 		{

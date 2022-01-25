@@ -20,6 +20,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.util.FileUtil;
 import org.junit.Test;
 
 /**
@@ -30,7 +31,7 @@ import org.junit.Test;
  */
 public class ExcelDirectoryFileDataSetTest
 {
-	private static final File DIRECTORY = new File("src/test/resources/org/datagear/analysis/support/");
+	private static final File DIRECTORY = FileUtil.getFile("src/test/resources/org/datagear/analysis/support/");
 
 	@Test
 	public void getResultTest_xlsx()

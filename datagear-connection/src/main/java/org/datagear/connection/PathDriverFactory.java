@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import java.util.List;
 
+import org.datagear.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ public class PathDriverFactory
 
 	public PathDriverFactory(String path)
 	{
-		this(new File(path));
+		this(FileUtil.getFile(path));
 	}
 
 	public PathDriverFactory(File path)

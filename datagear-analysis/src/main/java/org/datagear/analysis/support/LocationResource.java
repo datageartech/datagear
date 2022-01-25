@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 
+import org.datagear.util.FileUtil;
+
 /**
  * 位置资源。
  * 
@@ -88,9 +90,9 @@ public class LocationResource implements Serializable
 
 	protected File getLocationFile(String fileLocation)
 	{
-		location = location.substring(PREFIX_FILE.length());
+		fileLocation = fileLocation.substring(PREFIX_FILE.length());
 
-		File file = new File(location);
+		File file = FileUtil.getFile(fileLocation);
 
 		return file;
 	}

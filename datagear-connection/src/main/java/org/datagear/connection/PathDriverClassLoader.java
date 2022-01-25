@@ -48,7 +48,7 @@ public class PathDriverClassLoader extends URLClassLoader
 
 	public PathDriverClassLoader(String path)
 	{
-		this(new File(path), null);
+		this(FileUtil.getFile(path), null);
 	}
 
 	public PathDriverClassLoader(File path)
@@ -58,7 +58,7 @@ public class PathDriverClassLoader extends URLClassLoader
 
 	public PathDriverClassLoader(String path, ClassLoader parent)
 	{
-		this(new File(path), parent);
+		this(FileUtil.getFile(path), parent);
 	}
 
 	public PathDriverClassLoader(File path, ClassLoader parent)

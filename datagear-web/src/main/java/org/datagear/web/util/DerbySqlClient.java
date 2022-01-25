@@ -7,7 +7,6 @@
 
 package org.datagear.web.util;
 
-import java.io.File;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -18,6 +17,7 @@ import java.util.Scanner;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
@@ -142,7 +142,7 @@ public class DerbySqlClient extends JdbcSupport
 
 					try
 					{
-						reader = IOUtil.getReader(new File(filePath), "UTF-8");
+						reader = IOUtil.getReader(FileUtil.getFile(filePath), "UTF-8");
 						SqlScriptParser sqlScriptParser = new SqlScriptParser(reader);
 						SqlStatement sql = null;
 

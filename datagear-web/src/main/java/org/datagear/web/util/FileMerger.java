@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Scanner;
 
+import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
@@ -43,7 +44,7 @@ public class FileMerger
 
 		File[] children = directory.listFiles();
 
-		File toFile = new File(directory, toFileName);
+		File toFile = FileUtil.getFile(directory, toFileName);
 
 		OutputStream out = null;
 
@@ -89,7 +90,7 @@ public class FileMerger
 
 			if (!StringUtil.isEmpty(input))
 			{
-				directory = new File(input);
+				directory = FileUtil.getFile(input);
 				if (!directory.exists() || !directory.isDirectory())
 					directory = null;
 			}

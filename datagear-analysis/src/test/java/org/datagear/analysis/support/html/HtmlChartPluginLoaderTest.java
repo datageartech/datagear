@@ -40,7 +40,7 @@ public class HtmlChartPluginLoaderTest
 	@Test
 	public void loadTest()
 	{
-		File directory = new File(
+		File directory = FileUtil.getFile(
 				"src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin01");
 
 		HtmlChartPlugin plugin = this.htmlChartPluginLoader.load(directory);
@@ -50,7 +50,7 @@ public class HtmlChartPluginLoaderTest
 	@Test
 	public void loadZipTest()
 	{
-		File file = new File(
+		File file = FileUtil.getFile(
 				"src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin03.zip");
 
 		HtmlChartPlugin plugin = this.htmlChartPluginLoader.loadZip(file);
@@ -60,7 +60,8 @@ public class HtmlChartPluginLoaderTest
 	@Test
 	public void loadsTest()
 	{
-		File directory = new File("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders");
+		File directory = FileUtil
+				.getFile("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders");
 
 		Set<HtmlChartPlugin> plugins = this.htmlChartPluginLoader.loads(directory);
 

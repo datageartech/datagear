@@ -68,7 +68,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 	public AbstractFileDriverEntityManager(String rootDirectory, String driverEntityInfoFileName)
 	{
-		this(new File(rootDirectory), driverEntityInfoFileName);
+		this(FileUtil.getDirectory(rootDirectory), driverEntityInfoFileName);
 	}
 
 	public AbstractFileDriverEntityManager(File rootDirectory, String driverEntityInfoFileName)
@@ -110,7 +110,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 	public File getDriverEntityInfoFile()
 	{
-		return new File(this.rootDirectory, this.driverEntityInfoFileName);
+		return FileUtil.getFile(this.rootDirectory, this.driverEntityInfoFileName);
 	}
 
 	/**
@@ -254,7 +254,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		for (int i = 0; i < libraryName.length; i++)
 		{
 			String ln = libraryName[i];
-			File file = new File(directory, ln);
+			File file = FileUtil.getFile(directory, ln);
 
 			deleted[i] = FileUtil.deleteFile(file);
 		}
@@ -917,7 +917,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	protected File getDriverLibraryFile(String driverEntityId, String driverLibraryFileName)
 	{
 		File path = getDriverLibraryDirectory(driverEntityId, true);
-		File file = new File(path, driverLibraryFileName);
+		File file = FileUtil.getFile(path, driverLibraryFileName);
 
 		return file;
 	}
@@ -970,7 +970,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 */
 	protected File getFileInRootDirectory(String fileName)
 	{
-		return new File(this.rootDirectory, fileName);
+		return FileUtil.getFile(this.rootDirectory, fileName);
 	}
 
 	protected static class PathDriverFactoryInfo

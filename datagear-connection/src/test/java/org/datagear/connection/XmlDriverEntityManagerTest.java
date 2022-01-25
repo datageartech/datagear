@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.junit.After;
 import org.junit.Assert;
@@ -254,7 +255,7 @@ public class XmlDriverEntityManagerTest
 
 			assertEquals(classLoader, unmodifiedClassLoader);
 
-			File modifiedFile = new File(driverEntityManager.getRootDirectory(), "mysql/modified.txt");
+			File modifiedFile = FileUtil.getFile(driverEntityManager.getRootDirectory(), "mysql/modified.txt");
 			Writer writer = null;
 			try
 			{
@@ -287,7 +288,7 @@ public class XmlDriverEntityManagerTest
 		String zipFilePath = "target/exportToZipTest.zip";
 		String zipFilePathFiltered = "target/exportToZipTestFiltered.zip";
 
-		new File(zipFilePath).delete();
+		FileUtil.getFile(zipFilePath).delete();
 
 		List<DriverEntity> expected = null;
 		List<DriverEntity> expectedFiltered = new ArrayList<DriverEntity>();
@@ -304,7 +305,7 @@ public class XmlDriverEntityManagerTest
 				driverEntityManager.exportToZip(out);
 				IOUtil.close(out);
 
-				Assert.assertTrue(new File(zipFilePath).exists());
+				Assert.assertTrue(FileUtil.getFile(zipFilePath).exists());
 			}
 
 			{
@@ -312,7 +313,7 @@ public class XmlDriverEntityManagerTest
 				driverEntityManager.exportToZip(out, "mysql", "oracle");
 				IOUtil.close(out);
 
-				Assert.assertTrue(new File(zipFilePathFiltered).exists());
+				Assert.assertTrue(FileUtil.getFile(zipFilePathFiltered).exists());
 
 				expectedFiltered.add(driverEntityManager.get("mysql"));
 				expectedFiltered.add(driverEntityManager.get("oracle"));
@@ -347,7 +348,7 @@ public class XmlDriverEntityManagerTest
 	{
 		String zipFilePath = "target/readDriverEntitiesFromZip.zip";
 
-		new File(zipFilePath).delete();
+		FileUtil.getFile(zipFilePath).delete();
 
 		List<DriverEntity> expected = null;
 
