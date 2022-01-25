@@ -525,7 +525,7 @@ form .form-item.display-55 .form-item-value,
 	padding-bottom: 0.2em;
 }
 .minor-panel .panel-content{
-	padding: 1em 0.5em 0.5em 0.5em;
+	padding: 0.8em 0.5em 0.5em 0.5em;
 }
 .minor-panel .panel-content .content-item{
 	padding-top: 0.2em;
@@ -3614,7 +3614,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
     overflow: auto;
 }
 .page-form-dashboard .veditor-style-panel .form-item-syncChartTheme{
-	margin-top: 0.8em;
+	padding-top: 0.6em;
 }
 
 .page-form .form-item-analysisProjectAware{

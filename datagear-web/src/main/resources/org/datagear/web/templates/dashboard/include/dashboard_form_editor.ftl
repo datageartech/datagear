@@ -77,6 +77,7 @@
 			position: "fixed",
 			autoCloseContext: po.element()
 		});
+		po.element("#${pageId}-syncChartTheme", veStyleForm).checkboxradiogroup({classes:{"ui-checkboxradio-label": "small-button"}});
 		
 		//初始化可视编辑图表主题面板
 		var veChartThemePanel = po.element(".veditor-chartTheme-panel");
@@ -1092,7 +1093,7 @@
 						po.element(".editGlobalStyleTitle", panel).show();
 						po.element(".form-item-syncChartTheme" ,panel).show();
 						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getGlobalStyle());
-						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
+						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
 						po.resizeVisualEditorStylePanel(panel);
 					}
 					else if(editOperation == "editGlobalChartTheme")
@@ -1101,7 +1102,7 @@
 						po.element(".editChartThemeTitle", panel).hide();
 						po.element(".editGlobalChartThemeTitle", panel).show();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
-						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
+						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
 					}
 					else if(editOperation == "editStyle")
 					{
@@ -1118,7 +1119,7 @@
 							po.element(".form-item-syncChartTheme" ,panel).hide();
 						
 						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getElementStyle());
-						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
+						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
 						po.resizeVisualEditorStylePanel(panel);
 					}
 					else if(editOperation == "editContent")
@@ -1127,7 +1128,7 @@
 							return;
 						
 						var panel = po.element(".veditor-content-panel");
-						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
+						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
 						po.element("input[name='content']", panel).val(dashboardEditor.getElementText()).focus();
 					}
 					else if(editOperation == "editChartTheme")
@@ -1139,7 +1140,7 @@
 						po.element(".editChartThemeTitle", panel).show();
 						po.element(".editGlobalChartThemeTitle", panel).hide();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
-						panel.show().position({ my : "right top", at : "right bottom", of : editGroup});
+						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
 					}
 				}
 			}

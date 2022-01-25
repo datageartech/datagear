@@ -161,7 +161,7 @@ readonly 是否只读操作，允许为null
 				</div>
 			</div>
 			<div class="panel-foot">
-				<button type="submit"><@spring.message code='confirm' /></button>
+				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
 			</div>
 		</form>
 	</div>
@@ -189,7 +189,7 @@ readonly 是否只读操作，允许为null
 				</div>
 			</div>
 			<div class="panel-foot">
-				<button type="submit"><@spring.message code='confirm' /></button>
+				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
 			</div>
 		</form>
 	</div>
@@ -207,7 +207,7 @@ readonly 是否只读操作，允许为null
 				</div>
 			</div>
 			<div class="panel-foot">
-				<button type="submit"><@spring.message code='confirm' /></button>
+				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
 			</div>
 		</form>
 	</div>
@@ -503,7 +503,7 @@ readonly 是否只读操作，允许为null
 				</div>
 			</div>
 			<div class="panel-foot form-foot">
-				<button type="submit"><@spring.message code='confirm' /></button>
+				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
 			</div>
 		</form>
 	</div>
@@ -565,7 +565,7 @@ readonly 是否只读操作，允许为null
 				</div>
 			</div>
 			<div class="panel-foot form-foot">
-				<button type="submit"><@spring.message code='confirm' /></button>
+				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
 			</div>
 		</form>
 	</div>
@@ -585,7 +585,6 @@ readonly 是否只读操作，允许为null
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	
 	$.initButtons(po.element());
-	po.element("#${pageId}-syncChartTheme").checkboxradiogroup();
 	po.element().autoCloseSubPanel();
 	po.showAfterSave = false;
 	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");
