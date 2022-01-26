@@ -1348,7 +1348,7 @@
 	//反转义编辑HTML（转义操作由后台执行）
 	editor._unescapeEditHtml = function(editHtml)
 	{
-		return (editHtml ? editHtml.replaceAll("<\\/", "</") : editHtml);
+		return (editHtml ? editHtml.replace(/<\\\//g, "</") : editHtml);
 	};
 	
 	editor._spitIgnoreEmpty = function(str, splitter)
