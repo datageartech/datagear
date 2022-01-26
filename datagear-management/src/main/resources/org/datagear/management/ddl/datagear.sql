@@ -881,3 +881,9 @@ ALTER TABLE DATAGEAR_HCW_DS ADD COLUMN DS_PROPERTY_ORDERS VARCHAR(500);
 --version[2.12.0], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+
+
+-----------------------------------------
+--version[2.13.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
