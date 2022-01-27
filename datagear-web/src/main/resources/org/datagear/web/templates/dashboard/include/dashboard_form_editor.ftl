@@ -139,6 +139,28 @@
 			po.addChartThemeFormGraphRangeColorsItem(po.element(".graphRangeColorsInput", veChartThemeForm));
 		});
 		
+		var veSettingPanel = po.element(".veditor-setting-panel");
+		veSettingPanel.draggable({ handle: ".panel-head" });
+		var veSettingForm = po.element("form", veSettingPanel);
+		veSettingForm.submit(function()
+		{
+			veSettingPanel.hide();
+			
+			var setting = $.formToJson(this);
+			var ifmWidth = (setting.width ? parseInt(setting.width) : -1);
+			var ifmHeight = (setting.height ? parseInt(setting.height) : -1);
+			
+			var tabPane = po.getActiveResEditorTabPane();
+			var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+			
+			if(ifmWidth > 0)
+				visualEditorIfm.css("width", ifmWidth);
+			if(ifmHeight > 0)
+				visualEditorIfm.css("height", ifmHeight);
+			
+			return false;
+		});
+		
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
 			var $this = $(this);
@@ -1182,6 +1204,15 @@
 					}
 				}
 			}
+		});
+		
+		$("<button type='button' auto-close-prevent='veditor-setting-panel' />")
+		.text("<@spring.message code='setting' />")
+		.appendTo(editorRightOptWrapper).button()
+		.click(function()
+		{
+			var panel = po.element(".veditor-setting-panel");
+			panel.show().position({ my: "center top", at: "left bottom", of : this});
 		});
 		
 		$("<button type='button' />").text("<@spring.message code='refresh' />")
