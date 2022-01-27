@@ -488,6 +488,14 @@ readonly 是否只读操作，允许为null
 						</div>
 					</div>
 				</div>
+				<div class="form-item form-item-className">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.editStyle.className' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="className" class="ui-widget ui-widget-content" size="200" />
+					</div>
+				</div>
 				<div class="form-item form-item-syncChartTheme">
 					<div class="form-item-label">
 						<label><@spring.message code='dashboard.veditor.editStyle.syncChartTheme' /></label>

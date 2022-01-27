@@ -1213,6 +1213,7 @@
 		var styleTabsHeight = panelContent.height();
 		if(!syncChartThemeItem.is(":hidden"))
 			styleTabsHeight = styleTabsHeight - syncChartThemeItem.outerHeight(true);
+		styleTabsHeight = styleTabsHeight - po.element(".form-item-className", panelContent).outerHeight(true);
 		po.element(".style-tabs", panelContent).css("height", styleTabsHeight);
 	};
 	

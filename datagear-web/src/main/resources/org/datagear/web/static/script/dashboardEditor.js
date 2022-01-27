@@ -743,6 +743,7 @@
 		var so = this._spitStyleAndOption(styleObj);
 		
 		this._setElementStyle(ele, so.style);
+		this._setElementClass(ele, so.option.className);
 		
 		if(so.option.syncChartTheme && this.isChartElement(ele))
 		{
@@ -770,8 +771,10 @@
 	editor.setGlobalStyle = function(styleObj)
 	{
 		var so = this._spitStyleAndOption(styleObj);
+		var body = $(document.body);
 		
-		this._setElementStyle($(document.body), so.style);
+		this._setElementStyle(body, so.style);
+		this._setElementClass(body, so.option.className);
 		
 		if(so.style.color)
 		{
@@ -801,11 +804,13 @@
 	{
 		var optionObj =
 		{
-			syncChartTheme: (styleObj.syncChartTheme == true || styleObj.syncChartTheme == "true")
+			syncChartTheme: (styleObj.syncChartTheme == true || styleObj.syncChartTheme == "true"),
+			className: styleObj.className
 		};
 		
 		var plainStyleObj = $.extend({}, styleObj);
 		plainStyleObj.syncChartTheme = undefined;
+		plainStyleObj.className = undefined;
 		
 		var re =
 		{
@@ -1002,6 +1007,32 @@
 		this.changeFlag(true);
 	};
 	
+	editor._setElementClass = function(ele, className, sync)
+	{
+		className = (className || "");
+		sync = (sync == null ? true : sync);
+		
+		var editEle = this._editElement(ele);
+		var removeClassName = editEle.attr("class");
+		
+		if(removeClassName)
+			ele.removeClass(removeClassName);
+		if(sync)
+		{
+			if(!className)
+				editEle.removeAttr("class");
+			else
+				editEle.removeClass(removeClassName);
+		}
+		
+		if(className)
+		{
+			ele.addClass(className);
+			if(sync)
+				editEle.addClass(className);
+		}
+	};
+	
 	editor._setElementStyleNoSync = function(ele, styleObj)
 	{
 		//这里不能采用整体设置"style"属性的方式，因为"style"属性可能有很多不支持编辑的、或者动态生成的css属性，
@@ -1058,6 +1089,8 @@
 			if(this._editableElementStyles[p] && styleObj[p])
 				newStyleObj[p] = styleObj[p];
 		}
+		
+		newStyleObj.className = (ele.attr("class") || "");
 		
 		return newStyleObj;
 	};
