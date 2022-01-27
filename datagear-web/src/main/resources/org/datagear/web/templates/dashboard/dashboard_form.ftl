@@ -604,7 +604,18 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.setting.scale' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="scale" class="ui-widget ui-widget-content" size="100" />
+						<div class="setting-scale-wrapper">
+							<input type="radio" id="${pageId}-settingScale-auto" name="scale" value="auto" checked="checked" />
+							<label for="${pageId}-settingScale-auto"><@spring.message code='dashboard.veditor.setting.scale.auto' /></label>
+							<input type="radio" id="${pageId}-settingScale-100" name="scale" value="100" />
+							<label for="${pageId}-settingScale-100">100%</label>
+							<input type="radio" id="${pageId}-settingScale-75" name="scale" value="75" />
+							<label for="${pageId}-settingScale-75">75%</label>
+							<input type="radio" id="${pageId}-settingScale-50" name="scale" value="50" />
+							<label for="${pageId}-settingScale-50">50%</label>
+							<input type="radio" id="${pageId}-settingScale-25" name="scale" value="25" />
+							<label for="${pageId}-settingScale-25">25%</label>
+						</div>
 					</div>
 				</div>
 			</div>

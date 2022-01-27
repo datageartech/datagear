@@ -147,8 +147,9 @@
 			veSettingPanel.hide();
 			
 			var setting = $.formToJson(this);
-			var ifmWidth = (setting.width ? parseInt(setting.width) : -1);
-			var ifmHeight = (setting.height ? parseInt(setting.height) : -1);
+			var topWindowSize = po.evalTopWindowSize();
+			var ifmWidth = (setting.width ? parseInt(setting.width) : topWindowSize.width);
+			var ifmHeight = (setting.height ? parseInt(setting.height) : topWindowSize.height);
 			
 			var tabPane = po.getActiveResEditorTabPane();
 			var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
@@ -158,8 +159,11 @@
 			if(ifmHeight > 0)
 				visualEditorIfm.css("height", ifmHeight);
 			
+			po.setVisualEditorIframeScale(visualEditorIfm, setting.scale);
+			
 			return false;
 		});
+		po.element(".setting-scale-wrapper", veSettingForm).checkboxradiogroup({classes:{"ui-checkboxradio-label": "small-button"}});
 		
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
@@ -395,23 +399,35 @@
 	};
 	
 	//设置可视编辑iframe的尺寸，使其适配父元素尺寸而不会出现滚动条
-	po.setVisualEditorIframeScale = function($iframeWrapper, $iframe)
+	po.setVisualEditorIframeScale = function($iframe, scale)
 	{
-		var ww = $iframeWrapper.width(), wh = $iframeWrapper.height();
-		var iw = $iframe.width(), ih = $iframe.height();
+		scale = (scale == null || scale <= 0 ? "auto" : scale);
 		
-		//下面的计算只有$iframe在$iframeWrapper中是绝对定位的才准确
-		var rightGap = 5, bottomGap = 5;
-		var ileft = parseInt($iframe.css("left")), itop = parseInt($iframe.css("top"));
-		ww = ww - ileft - rightGap;
-		wh = wh - itop - bottomGap;
+		$iframe.data("veIframeScale", scale);
 		
-		if(iw <= ww && ih <= wh)
-			return;
+		if(scale == "auto")
+		{
+			var $iframeWrapper = $iframe.closest(".tpl-visual-editor-wrapper");
+			var ww = $iframeWrapper.width(), wh = $iframeWrapper.height();
+			var iw = $iframe.width(), ih = $iframe.height();
+			
+			//下面的计算只有$iframe在$iframeWrapper中是绝对定位的才准确
+			var rightGap = 5, bottomGap = 5;
+			var ileft = parseInt($iframe.css("left")), itop = parseInt($iframe.css("top"));
+			ww = ww - ileft - rightGap;
+			wh = wh - itop - bottomGap;
+			
+			if(iw <= ww && ih <= wh)
+				return;
+			
+			var scaleX = ww/iw, scaleY = wh/ih;
+			scale = Math.min(scaleX, scaleY);
+		}
+		else
+			scale = scale/100;
 		
-		var scaleX = ww/iw, scaleY = wh/ih;
 		$iframe.css("transform-origin", "0 0");
-		$iframe.css("transform", "scale("+Math.min(scaleX, scaleY)+")");
+		$iframe.css("transform", "scale("+scale+")");
 	};
 	
 	po.dashboardEditorVisual = function(tabPane)
@@ -612,7 +628,7 @@
 			visualEditorIfm.css("width", topWindowSize.width);
 			visualEditorIfm.css("height", topWindowSize.height);
 			
-			po.setVisualEditorIframeScale(visualEditorDiv, visualEditorIfm);
+			po.setVisualEditorIframeScale(visualEditorIfm);
 			
 			var editorSwitchGroup = $("<div class='switch-resource-editor-group' />").appendTo(editorLeftOptWrapper);
 			$("<button type='button' class='switchToCodeEditorBtn'></button>").text("<@spring.message code='dashboard.switchToCodeEditor' />")
@@ -1212,6 +1228,13 @@
 		.click(function()
 		{
 			var panel = po.element(".veditor-setting-panel");
+			var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+			$.jsonToForm(po.element("form", panel),
+			{
+				width: parseInt(visualEditorIfm.css("width")),
+				height: parseInt(visualEditorIfm.css("height")),
+				scale: visualEditorIfm.data("veIframeScale")
+			});
 			panel.show().position({ my: "center top", at: "left bottom", of : this});
 		});
 		

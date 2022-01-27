@@ -525,7 +525,7 @@ form .form-item.display-55 .form-item-value,
 	padding-bottom: 0.2em;
 }
 .minor-panel .panel-content{
-	padding: 0.8em 0.5em 0.5em 0.5em;
+	padding: 0.8em 0.8em;
 }
 .minor-panel .panel-content .content-item{
 	padding-top: 0.2em;
@@ -3324,7 +3324,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	bottom: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-wrapper{
-	overflow: auto;
+	overflow: scroll;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-wrapper .tpl-visual-editor-ifm{
 	position: absolute;
