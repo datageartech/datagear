@@ -454,6 +454,11 @@
 			{
 				$.tipInfo(msg);
 			};
+			dashboardEditor.clickCallback = function()
+			{
+				//关闭可能已显示的面板
+				po.element().click();
+			};
 			
 			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
 		}

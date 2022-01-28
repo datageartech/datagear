@@ -110,6 +110,9 @@
 					editor._selectElement(veEle);
 				}
 			}
+			
+			if(editor.clickCallback)
+				editor.clickCallback(event);
 		});
 	};
 	
@@ -165,6 +168,12 @@
 	editor.tipInfo = function(msg)
 	{
 		alert(msg);
+	};
+	
+	//页面点击回调函数，格式为：function(event){}
+	editor.clickCallback = function(event)
+	{
+		
 	};
 	
 	/**
