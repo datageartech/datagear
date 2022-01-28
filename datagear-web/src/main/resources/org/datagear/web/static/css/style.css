@@ -334,7 +334,7 @@ form .tip-label[title]::after,
     margin-left: 0.1em;
     font-size: 0.7em;
     top: 50%;
-    margin-top: -0.4em;
+    margin-top: -0.5em;
     opacity: 0.4;
     filter: Alpha(Opacity=40);
     width: 1em;

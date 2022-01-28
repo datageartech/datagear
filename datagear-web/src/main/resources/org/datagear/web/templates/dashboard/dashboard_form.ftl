@@ -231,7 +231,9 @@ readonly 是否只读操作，允许为null
 					<div id="${pageId}-styleTabsPaneColor" class="style-tab-pane ui-widget ui-widget-content">
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.color' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.color.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.color' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
@@ -240,7 +242,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.bgColor' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.bgColor.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.bgColor' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="background-color" class="ui-widget ui-widget-content" size="100" />
@@ -249,7 +253,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.bgImage' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.bgImage.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.bgImage' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="background-image" class="width-9 ui-widget ui-widget-content" size="200" />
@@ -354,7 +360,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.width' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.width.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.width' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="width" class="ui-widget ui-widget-content" size="100" />
@@ -362,7 +370,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.height' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.height.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.height' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="height" class="ui-widget ui-widget-content" size="100" />
@@ -370,7 +380,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.padding' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.padding.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.padding' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="padding" class="ui-widget ui-widget-content" size="100" />
@@ -378,7 +390,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.margin' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.margin.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.margin' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="margin" class="ui-widget ui-widget-content" size="100" />
@@ -409,7 +423,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.left' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.left.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.left' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="left" class="ui-widget ui-widget-content" size="100" />
@@ -417,7 +433,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.top' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.top.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.top' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="top" class="ui-widget ui-widget-content" size="100" />
@@ -425,7 +443,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.right' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.right.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.right' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="right" class="ui-widget ui-widget-content" size="100" />
@@ -433,7 +453,9 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.bottom' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.bottom.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.bottom' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="bottom" class="ui-widget ui-widget-content" size="100" />
@@ -443,7 +465,9 @@ readonly 是否只读操作，允许为null
 					<div id="${pageId}-styleTabsPaneFont" class="style-tab-pane ui-widget ui-widget-content">
 						<div class="form-item">
 							<div class="form-item-label">
-								<label><@spring.message code='dashboard.veditor.editStyle.fontSize' /></label>
+								<label title="<@spring.message code='dashboard.veditor.editStyle.fontSize.desc' />">
+									<@spring.message code='dashboard.veditor.editStyle.fontSize' />
+								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="font-size" class="ui-widget ui-widget-content" size="100" />
