@@ -613,6 +613,7 @@ readonly 是否只读操作，允许为null
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="width" class="ui-widget ui-widget-content" size="100" />
+						<span>px</span>
 					</div>
 				</div>
 				<div class="form-item">
@@ -621,6 +622,7 @@ readonly 是否只读操作，允许为null
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="height" class="ui-widget ui-widget-content" size="100" />
+						<span>px</span>
 					</div>
 				</div>
 				<div class="form-item">
