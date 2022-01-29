@@ -545,8 +545,8 @@
 			
 			if(isTemplate)
 			{
-				var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
-				if(visualEditorIfm.hasClass("show-editor"))
+				var veIfmWrapper = po.element(".tpl-visual-editor-wrapper", tabPane);
+				if(veIfmWrapper.hasClass("show-editor"))
 				{
 					var dashboardEditor = po.visualDashboardEditor(tabPane);
 					resourceContent = (dashboardEditor ? dashboardEditor.editedHtml() : "");
@@ -1542,13 +1542,13 @@
 	{
 		var tabPane = po.getActiveResEditorTabPane();
 		var codeEditorDiv = po.element(".code-editor", tabPane);
-		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+		var veIfmWrapper = po.element(".tpl-visual-editor-wrapper", tabPane);
 		
 		if(codeEditorDiv.hasClass("show-editor"))
 		{
 			po.insertCodeEditorChart(tabPane, chartWidgets);
 		}
-		else if(visualEditorIfm.hasClass("show-editor"))
+		else if(veIfmWrapper.hasClass("show-editor"))
 		{
 			po.insertVisualEditorChart(tabPane, chartWidgets);
 		}
