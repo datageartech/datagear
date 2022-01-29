@@ -407,7 +407,7 @@
 		
 		if(scale == "auto")
 		{
-			var $iframeWrapper = $iframe.closest(".tpl-visual-editor-wrapper");
+			var $iframeWrapper = $iframe.parent();
 			var ww = $iframeWrapper.width(), wh = $iframeWrapper.height();
 			var iw = $iframe.width(), ih = $iframe.height();
 			
@@ -430,7 +430,7 @@
 		$iframe.css("transform", "scale("+scale+")");
 	};
 	
-	po.initVisualDashboardEditor = function(visualEditorIfm)
+	po.initVisualDashboardEditor = function(ifmWrapper, visualEditorIfm)
 	{
 		visualEditorIfm = $(visualEditorIfm);
 		var ifmWindow = po.iframeWindow(visualEditorIfm);
@@ -457,6 +457,38 @@
 			{
 				//关闭可能已显示的面板
 				po.element().click();
+			};
+			dashboardEditor.selectElementCallback = function(ele)
+			{
+				var elePathWrapper = po.element(".tpl-ve-ele-path-wrapper", ifmWrapper);
+				var elePathEle = po.element(".tpl-ve-ele-path", elePathWrapper);
+				elePathEle.empty();
+				var elePath = this.getElementPath(ele);
+				
+				for(var i=0; i<elePath.length; i++)
+				{
+					var ep = elePath[i];
+					var eleInfo = ep.tagName;
+					if(ep.id)
+						eleInfo += "#"+ep.id;
+					if(ep.className)
+						eleInfo += "."+ep.className;
+					
+					if(i > 0)
+						$("<span class='info-separator ui-state-disabled' />").text(">").appendTo(elePathEle);
+					
+					$("<span class='ele-info' />").text($.truncateIf(eleInfo, "...", ep.tagName.length+20))
+						.attr("visualEditId", (ep.visualEditId || "")).attr("title", eleInfo).appendTo(elePathEle);
+				}
+				
+				var elePathWrapperWidth = elePathWrapper.width();
+				var elePathEleWidth = elePathEle.outerWidth(true);
+				elePathEle.css("margin-left", (elePathEleWidth > elePathWrapperWidth ? (elePathWrapperWidth - elePathEleWidth) : 0)+"px");
+			};
+			dashboardEditor.deselectAllElementCallback = function()
+			{
+				var elePathWrapper = po.element(".tpl-ve-ele-path", ifmWrapper);
+				elePathWrapper.empty();
 			};
 			
 			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
@@ -629,16 +661,30 @@
 		
 		if(isTemplate)
 		{
-			var visualEditorDiv = $("<div class='tpl-visual-editor-wrapper' />").appendTo(editorWrapper);
+			var visualEditorDiv = $("<div class='tpl-visual-editor-wrapper hide-editor' />").appendTo(editorWrapper);
+			
+			var elePathWrapper = $("<div class='tpl-ve-ele-path-wrapper'></div>")
+									.appendTo(visualEditorDiv);
+			$("<div class='tpl-ve-ele-path' />").on("click", ".ele-info", function()
+			{
+				var visualEditId = $(this).attr("visualEditId");
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				
+				if(dashboardEditor)
+					dashboardEditor.selectElement(visualEditId);
+			})
+			.appendTo(elePathWrapper);
+			
+			var visualEditorIfmWrapper = $("<div class='tpl-visual-editor-ifm-wrapper' />").appendTo(visualEditorDiv);
 			
 			var visualEditorId = $.uid("visualEditor");
-			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm hide-editor ui-widget-shadow' />")
+			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm ui-widget-shadow' />")
 				.attr("name", visualEditorId).attr("id", visualEditorId)
 				.on("load", function()
 				{
-					po.initVisualDashboardEditor(this);
+					po.initVisualDashboardEditor(visualEditorDiv, this);
 				})
-				.appendTo(visualEditorDiv);
+				.appendTo(visualEditorIfmWrapper);
 			
 			var topWindowSize = po.evalTopWindowSize();
 			visualEditorIfm.css("width", topWindowSize.width);
@@ -747,7 +793,7 @@
 		
 		var codeEditorDiv = po.element(".code-editor", tabPane);
 		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
-		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+		var veIfmWrapper = po.element(".tpl-visual-editor-wrapper", tabPane);
 		var changeFlag = codeEditorDiv.data("changeFlag");
 		
 		//初次由源码模式切换至可视编辑模式后，changeFlag会是1，
@@ -762,11 +808,11 @@
 		{
 			po.setCodeText(codeEditor, dashboardEditor.editedHtml());
 
-			visualEditorIfm.data("changeFlag", codeEditor.changeGeneration());
+			veIfmWrapper.data("changeFlag", codeEditor.changeGeneration());
 			codeEditorDiv.data("changeFlag", dashboardEditor.changeFlag());
 		}
 		
-		visualEditorIfm.removeClass("show-editor").addClass("hide-editor");
+		veIfmWrapper.removeClass("show-editor").addClass("hide-editor");
 		codeEditorDiv.removeClass("hide-editor").addClass("show-editor");
 		
     	codeEditor.focus();
@@ -784,32 +830,37 @@
 		
 		var codeEditorDiv = po.element(".code-editor", tabPane);
 		var codeEditor = codeEditorDiv.data("resourceEditorInstance");
-		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
-		var changeFlag = visualEditorIfm.data("changeFlag");
+		var veIfmWrapper = po.element(".tpl-visual-editor-wrapper", tabPane);
+		var changeFlag = veIfmWrapper.data("changeFlag");
 		
 		//没有修改
 		if(changeFlag != null && codeEditor.isClean(changeFlag))
 		{
 			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
-			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
+			veIfmWrapper.removeClass("hide-editor").addClass("show-editor");
 		}
 		else
 		{
+			var veIfm = po.element(".tpl-visual-editor-ifm", veIfmWrapper);
+			
 			codeEditorDiv.removeClass("show-editor").addClass("hide-editor");
 			//清空iframe后再显示，防止闪屏
-			po.iframeDocument(visualEditorIfm).write("");
-			visualEditorIfm.removeClass("hide-editor").addClass("show-editor");
+			po.iframeDocument(veIfm).write("");
+			veIfmWrapper.removeClass("hide-editor").addClass("show-editor");
 			
-			visualEditorIfm.data("changeFlag", codeEditor.changeGeneration());
+			veIfmWrapper.data("changeFlag", codeEditor.changeGeneration());
 			codeEditorDiv.data("changeFlag", null);
 			
 			var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
-			po.loadVisualEditorIframe(visualEditorIfm, templateName, (po.readonly ? "" : po.getCodeText(codeEditor)));
+			po.loadVisualEditorIframe(veIfm, templateName, (po.readonly ? "" : po.getCodeText(codeEditor)));
 		}
 	};
 	
 	po.loadVisualEditorIframe = function(visualEditorIfm, templateName, templateContent)
 	{
+		var veIfmWrapper = visualEditorIfm.closest(".tpl-visual-editor-wrapper");
+		po.element(".tpl-ve-ele-path", veIfmWrapper).empty();
+		
 		var dashboardId = po.getDashboardId();
 		var form = po.element("#${pageId}-tplEditVisualForm");
 		form.attr("action", po.showUrl(dashboardId, templateName));

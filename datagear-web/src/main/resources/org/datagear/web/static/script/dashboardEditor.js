@@ -177,7 +177,44 @@
 	};
 	
 	/**
-	 * 选择下一个可编辑元素。
+	 * 选择元素回调函数。
+	 * 
+	 * @param ele 已选择的DOM元素
+	 */
+	editor.selectElementCallback = function(ele)
+	{
+		
+	};
+	
+	//取消选择所有元素回调函数
+	editor.deselectAllElementCallback = function()
+	{
+		
+	};
+	
+	/**
+	 * 选中指定元素。
+	 * 
+	 * @param visualEditId 元素可编辑ID
+	 * @returns true 已选择，false 未选择
+	 */
+	editor.selectElement = function(visualEditId)
+	{
+		var ele = $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+visualEditId+"']");
+		
+		this._deselectAllElement();
+		
+		if(ele.length > 0)
+		{
+			this._selectElement($(ele[0]));
+			return true;
+		}
+		
+		return false;
+	};
+	
+	/**
+	 * 选中下一个可编辑元素。
 	 * 如果元素时<body>，将选中其第一个可编辑子元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
@@ -225,7 +262,7 @@
 	};
 	
 	/**
-	 * 选择前一个可编辑元素。
+	 * 选中前一个可编辑元素。
 	 * 如果元素时<body>，将选中其第一个可编辑子元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
@@ -272,7 +309,7 @@
 	};
 	
 	/**
-	 * 选择第一个可编辑子元素。
+	 * 选中第一个可编辑子元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
 	 * @param tip 可选，未选择时是否给出提示，默认为：true
@@ -318,7 +355,7 @@
 	};
 	
 	/**
-	 * 选择可编辑上级元素。
+	 * 选中可编辑上级元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
 	 * @param tip 可选，未选择时是否给出提示，默认为：true
@@ -368,7 +405,7 @@
 	};
 	
 	/**
-	 * 取消选择元素。
+	 * 取消选中元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
 	 */
@@ -376,8 +413,7 @@
 	{
 		this._removeElementClassNewInsert();
 		
-		ele = this._currentElement(ele);
-		this._deselectElement(ele);
+		this._deselectAllElement();
 	};
 	
 	editor._isSelectableElement = function($ele)
@@ -1324,6 +1360,9 @@
 	editor._selectElement = function($ele)
 	{
 		$ele.addClass(ELEMENT_CLASS_SELECTED);
+		
+		if(this.selectElementCallback)
+			this.selectElementCallback($ele[0]);
 	};
 	
 	editor._deselectElement = function($ele)
@@ -1334,6 +1373,9 @@
 	editor._deselectAllElement = function()
 	{
 		$("."+ELEMENT_CLASS_SELECTED).removeClass(ELEMENT_CLASS_SELECTED);
+		
+		if(this.deselectAllElementCallback)
+			this.deselectAllElementCallback();
 	};
 	
 	editor._removeElementClassNewInsert = function()
@@ -1581,6 +1623,45 @@
 		};
 		
 		return size;
+	};
+	
+	/**
+	 * 获取元素节点路径信息。
+	 */
+	editor.getElementPath = function(ele)
+	{
+		ele = $(ele);
+		
+		var paths = [];
+		
+		while(true)
+		{
+			if(ele.length == 0)
+				break;
+			
+			var isBody =  ele.is("body");
+			
+			if(!this._isSelectableElement(ele) && !isBody)
+				continue;
+			
+			var editEle = this._editElement(ele);
+			
+			paths.push(
+			{
+				"tagName": (ele[0].tagName || "").toLowerCase(),
+				"selected": this._isSelectedElement(ele),
+				"id": editEle.attr("id"),
+				"className": editEle.attr("class"),
+				"visualEditId": editEle.attr(ELEMENT_ATTR_VISUAL_EDIT_ID)
+			});
+			
+			if(isBody)
+				break;
+			else
+				ele = ele.parent();
+		}
+		
+		return paths.reverse();
 	};
 })
 (this);

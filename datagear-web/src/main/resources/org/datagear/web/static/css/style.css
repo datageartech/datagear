@@ -3323,16 +3323,47 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	top: 0;
 	bottom: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-wrapper{
-	overflow: scroll;
-}
-.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-wrapper .tpl-visual-editor-ifm{
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-ve-ele-path-wrapper{
 	position: absolute;
 	left: 0.5em;
-	top: 1.5em;
-	width: 80%;
-	height: 80%;
-	border-width: 0;
+	top: 0;
+	right: 5em;
+	z-index: 2;
+    border-width: 0;
+	overflow: hidden;
+	opacity: 0.8;
+	filter: Alpha(Opacity=80);
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-ve-ele-path{
+	display: inline-block;
+	white-space: nowrap;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-ve-ele-path .info-separator,
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-ve-ele-path .ele-info{
+	font-size: 0.8em;
+	padding: 0 0.2em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-ve-ele-path .ele-info{
+	cursor: pointer;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-ifm-wrapper{
+	position: absolute;
+    left: 0;
+    top: 1.5em;
+	right: 0;
+	bottom: 0;
+	overflow: scroll;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tabs .tpl-visual-editor-ifm{
+	position: absolute;
+	left: 0.5em;
+	top: 0.3em;
+    width: 80%;
+    height: 80%;
+    border-width: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tabs .hide-editor{
 	opacity: 0;
