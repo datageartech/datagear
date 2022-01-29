@@ -477,7 +477,7 @@
 					if(i > 0)
 						$("<span class='info-separator ui-state-disabled' />").text(">").appendTo(elePathEle);
 					
-					$("<span class='ele-info' />").text($.truncateIf(eleInfo, "...", ep.tagName.length+20))
+					$("<span class='ele-info' />").text($.truncateIf(eleInfo, "...", ep.tagName.length+27))
 						.attr("visualEditId", (ep.visualEditId || "")).attr("title", eleInfo).appendTo(elePathEle);
 				}
 				
