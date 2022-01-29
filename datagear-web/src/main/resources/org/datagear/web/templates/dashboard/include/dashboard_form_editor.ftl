@@ -23,7 +23,7 @@
 			veContentPanel.hide();
 			
 			var tabPane = po.getActiveResEditorTabPane();
-			var dashboardEditor = po.dashboardEditorVisual(tabPane);
+			var dashboardEditor = po.visualDashboardEditor(tabPane);
 			if(dashboardEditor)
 			{
 				var text = po.element("input[name='content']", veContentPanel).val();
@@ -42,7 +42,7 @@
 			veStylePanel.hide();
 			
 			var tabPane = po.getActiveResEditorTabPane();
-			var dashboardEditor = po.dashboardEditorVisual(tabPane);
+			var dashboardEditor = po.visualDashboardEditor(tabPane);
 			if(dashboardEditor)
 			{
 				var styleObj = $.formToJson(this);
@@ -88,7 +88,7 @@
 			veChartThemePanel.hide();
 			
 			var tabPane = po.getActiveResEditorTabPane();
-			var dashboardEditor = po.dashboardEditorVisual(tabPane);
+			var dashboardEditor = po.visualDashboardEditor(tabPane);
 			if(dashboardEditor)
 			{
 				var chartThemeObj = $.formToJson(this);
@@ -430,11 +430,10 @@
 		$iframe.css("transform", "scale("+scale+")");
 	};
 	
-	po.dashboardEditorVisual = function(tabPane)
+	po.initVisualDashboardEditor = function(visualEditorIfm)
 	{
-		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+		visualEditorIfm = $(visualEditorIfm);
 		var ifmWindow = po.iframeWindow(visualEditorIfm);
-		
 		var dashboardEditor = (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
 		
 		if(dashboardEditor && !dashboardEditor._OVERWRITE_BY_CONTEXT)
@@ -462,6 +461,13 @@
 			
 			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
 		}
+	};
+	
+	po.visualDashboardEditor = function(tabPane)
+	{
+		var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+		var ifmWindow = po.iframeWindow(visualEditorIfm);
+		var dashboardEditor = (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
 		
 		return dashboardEditor;
 	};
@@ -510,7 +516,7 @@
 				var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
 				if(visualEditorIfm.hasClass("show-editor"))
 				{
-					var dashboardEditor = po.dashboardEditorVisual(tabPane);
+					var dashboardEditor = po.visualDashboardEditor(tabPane);
 					resourceContent = (dashboardEditor ? dashboardEditor.editedHtml() : "");
 				}
 				
@@ -627,7 +633,12 @@
 			
 			var visualEditorId = $.uid("visualEditor");
 			var visualEditorIfm = $("<iframe class='tpl-visual-editor-ifm hide-editor ui-widget-shadow' />")
-				.attr("name", visualEditorId).attr("id", visualEditorId).appendTo(visualEditorDiv);
+				.attr("name", visualEditorId).attr("id", visualEditorId)
+				.on("load", function()
+				{
+					po.initVisualDashboardEditor(this);
+				})
+				.appendTo(visualEditorDiv);
 			
 			var topWindowSize = po.evalTopWindowSize();
 			visualEditorIfm.css("width", topWindowSize.width);
@@ -744,7 +755,7 @@
 		if(changeFlag == null)
 			changeFlag = 1;
 		
-		var dashboardEditor = po.dashboardEditorVisual(tabPane);
+		var dashboardEditor = po.visualDashboardEditor(tabPane);
 		
 		//有修改
 		if(dashboardEditor && dashboardEditor.isChanged(changeFlag))
@@ -1007,7 +1018,7 @@
 				var item = ui.item;
 				var selectOperation = item.attr("selectOperation");
 				
-				var dashboardEditor = po.dashboardEditorVisual(tabPane);
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				
 				if(!dashboardEditor)
 					return;
@@ -1070,7 +1081,7 @@
 				po.insertOperationForVisualEdit = insertOperation;
 				po.insertTypeForVisualEdit = insertType;
 				
-				var dashboardEditor = po.dashboardEditorVisual(tabPane);
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				
 				if(!dashboardEditor)
 					return;
@@ -1126,7 +1137,7 @@
 				var editOperation = item.attr("editOperation");
 				po.editOperationForVisualEdit = editOperation;
 				
-				var dashboardEditor = po.dashboardEditorVisual(tabPane);
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				if(dashboardEditor)
 				{
 					if(editOperation == "editGlobalStyle")
@@ -1212,7 +1223,7 @@
 				var deleteOperation = item.attr("deleteOperation");
 				po.deleteOperationForVisualEdit = deleteOperation;
 				
-				var dashboardEditor = po.dashboardEditorVisual(tabPane);
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				if(dashboardEditor)
 				{
 					if(deleteOperation == "deleteElement")
@@ -1248,7 +1259,7 @@
 		.appendTo(editorRightOptWrapper).button()
 		.click(function()
 		{
-			var dashboardEditor = po.dashboardEditorVisual(tabPane);
+			var dashboardEditor = po.visualDashboardEditor(tabPane);
 			if(dashboardEditor)
 			{
 				var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
@@ -1411,7 +1422,7 @@
 	
 	po.insertVisualEditorChart = function(tabPane, chartWidgets)
 	{
-		var dashboardEditor = po.dashboardEditorVisual(tabPane);
+		var dashboardEditor = po.visualDashboardEditor(tabPane);
 		if(dashboardEditor)
 		{
 			if(po.insertOperationForVisualEdit == "insertChart")
