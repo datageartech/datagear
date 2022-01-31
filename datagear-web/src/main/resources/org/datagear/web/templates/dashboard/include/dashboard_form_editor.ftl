@@ -138,13 +138,13 @@
 		{
 			po.addChartThemeFormGraphRangeColorsItem(po.element(".graphRangeColorsInput", veChartThemeForm));
 		});
-		
-		var veSettingPanel = po.element(".veditor-setting-panel");
-		veSettingPanel.draggable({ handle: ".panel-head" });
-		var veSettingForm = po.element("form", veSettingPanel);
-		veSettingForm.submit(function()
+
+		var veDashboardSizePanel = po.element(".veditor-dashboardSize-panel");
+		veDashboardSizePanel.draggable({ handle: ".panel-head" });
+		var veDashboardSizeForm = po.element("form", veDashboardSizePanel);
+		veDashboardSizeForm.submit(function()
 		{
-			veSettingPanel.hide();
+			veDashboardSizePanel.hide();
 			
 			var setting = $.formToJson(this);
 			var topWindowSize = po.evalTopWindowSize();
@@ -163,7 +163,7 @@
 			
 			return false;
 		});
-		po.element(".setting-scale-wrapper", veSettingForm).checkboxradiogroup({classes:{"ui-checkboxradio-label": "small-button"}});
+		po.element(".setting-scale-wrapper", veDashboardSizeForm).checkboxradiogroup({classes:{"ui-checkboxradio-label": "small-button"}});
 		
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
@@ -889,7 +889,7 @@
 					.text("<@spring.message code='dashboard.insertChart' />").appendTo(insertGroup).button()
 					.click(function()
 					{
-						po.toggleInsertChartListPannel(this);
+						po.toggleInsertChartListPannel(editorOptWrapper);
 					});
 			}
 			
@@ -1149,14 +1149,14 @@
 					if(!dashboardEditor.checkInsertChart(insertType))
 						return;
 					
-					po.toggleInsertChartListPannel(insertGroup);
+					po.toggleInsertChartListPannel(editorOptWrapper);
 				}
 				else if(insertOperation == "bindChart")
 				{
 					if(!dashboardEditor.checkBindChart())
 						return;
 					
-					po.toggleInsertChartListPannel(insertGroup);
+					po.toggleInsertChartListPannel(editorOptWrapper);
 				}
 			}
 		});
@@ -1198,7 +1198,7 @@
 						po.element(".editGlobalStyleTitle", panel).show();
 						po.element(".form-item-syncChartTheme" ,panel).show();
 						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getGlobalStyle());
-						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
+						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorStylePanel(panel);
 					}
 					else if(editOperation == "editGlobalChartTheme")
@@ -1207,7 +1207,7 @@
 						po.element(".editChartThemeTitle", panel).hide();
 						po.element(".editGlobalChartThemeTitle", panel).show();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
-						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
+						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					}
 					else if(editOperation == "editStyle")
 					{
@@ -1224,7 +1224,7 @@
 							po.element(".form-item-syncChartTheme" ,panel).hide();
 						
 						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getElementStyle());
-						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
+						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorStylePanel(panel);
 					}
 					else if(editOperation == "editContent")
@@ -1233,7 +1233,7 @@
 							return;
 						
 						var panel = po.element(".veditor-content-panel");
-						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
+						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.element("input[name='content']", panel).val(dashboardEditor.getElementText()).focus();
 					}
 					else if(editOperation == "editChartTheme")
@@ -1245,7 +1245,7 @@
 						po.element(".editChartThemeTitle", panel).show();
 						po.element(".editGlobalChartThemeTitle", panel).hide();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
-						panel.show().position({ my: "center top", at: "left bottom", of : editGroup});
+						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					}
 				}
 			}
@@ -1289,40 +1289,57 @@
 			}
 		});
 		
-		$("<button type='button' auto-close-prevent='veditor-setting-panel' />")
-		.text("<@spring.message code='setting' />")
-		.appendTo(editorRightOptWrapper).button()
-		.click(function()
-		{
-			var panel = po.element(".veditor-setting-panel");
-			var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
-			$.jsonToForm(po.element("form", panel),
-			{
-				width: parseInt(visualEditorIfm.css("width")),
-				height: parseInt(visualEditorIfm.css("height")),
-				scale: visualEditorIfm.data("veIframeScale")
-			});
-			panel.show().position({ my: "center top", at: "left bottom", of : this});
-		});
-		
-		$("<button type='button' />").text("<@spring.message code='refresh' />")
-		.attr("title", "<@spring.message code='dashboard.opt.refresh.desc' />")
-		.appendTo(editorRightOptWrapper).button()
-		.click(function()
-		{
-			var dashboardEditor = po.visualDashboardEditor(tabPane);
-			if(dashboardEditor)
-			{
-				var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
-				var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
-				po.loadVisualEditorIframe(visualEditorIfm, templateName, (po.readonly ? "" : dashboardEditor.editedHtml()));
-			}
-		});
-		
 		$("<button type='button' />").text("<@spring.message code='save' />").appendTo(editorRightOptWrapper).button()
 		.click(function()
 		{
 			po.saveResourceEditorContent(tabPane);
+		});
+
+		var moreGroup = $("<div class='more-group' />").appendTo(editorRightOptWrapper)
+			.hover(
+				function()
+				{
+					po.element(".more-menu", this).show().position({ my : "right top", at : "right bottom", of : this});
+				},
+				function()
+				{
+					po.element(".more-menu", this).hide();
+				});
+		$("<button type='button' />").text("<@spring.message code='dashboard.opt.more' />").appendTo(moreGroup).button();
+
+		var moreMenu = $("<ul class='more-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
+		$("<li moreOperation='dashboardSize' auto-close-prevent='veditor-dashboardSize-panel' />").html("<div><@spring.message code='dashboard.opt.dashboardSize' /></div>").appendTo(moreMenu);
+		$("<li moreOperation='refresh' />").html("<div><@spring.message code='refresh' /></div>").appendTo(moreMenu);
+		moreMenu.appendTo(moreGroup).menu(
+		{
+			select: function(event, ui)
+			{
+				var item = ui.item;
+				var moreOperation = item.attr("moreOperation");
+				
+				if(moreOperation == "dashboardSize")
+				{
+					var panel = po.element(".veditor-dashboardSize-panel");
+					var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+					$.jsonToForm(po.element("form", panel),
+					{
+						width: parseInt(visualEditorIfm.css("width")),
+						height: parseInt(visualEditorIfm.css("height")),
+						scale: visualEditorIfm.data("veIframeScale")
+					});
+					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+				}
+				else if(moreOperation == "refresh")
+				{
+					var dashboardEditor = po.visualDashboardEditor(tabPane);
+					if(dashboardEditor)
+					{
+						var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+						var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
+						po.loadVisualEditorIframe(visualEditorIfm, templateName, (po.readonly ? "" : dashboardEditor.editedHtml()));
+					}
+				}
+			}
 		});
 	};
 	
@@ -1487,16 +1504,14 @@
 		}
 	};
 	
-	po.toggleInsertChartListPannel = function(insertChartButton)
+	po.toggleInsertChartListPannel = function(eleForPosition)
 	{
 		var chartListPanel = po.element(".chart-list-panel");
 		
 		if(chartListPanel.is(":hidden"))
 		{
 			chartListPanel.show();
-			chartListPanel.position({ my : "center top", at : "center bottom", of : insertChartButton});
-			chartListPanel.css("left", "");
-			chartListPanel.css("right", "1em");
+			chartListPanel.position({ my : "right top", at : "right bottom", of : eleForPosition});
 			
 			if(!chartListPanel.hasClass("chart-list-loaded"))
 			{

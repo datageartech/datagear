@@ -601,15 +601,15 @@ readonly 是否只读操作，允许为null
 			</div>
 		</form>
 	</div>
-	<div class="veditor-setting-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+	<div class="veditor-dashboardSize-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<form action="#" method="POST" class="display-37">
 			<div class="panel-head ui-widget-header ui-corner-all">
-				<@spring.message code='dashboard.veditor.setting' />
+				<@spring.message code='dashboard.veditor.dashboardSize' />
 			</div>
 			<div class="panel-content form-content">
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.setting.width' /></label>
+						<label><@spring.message code='dashboard.veditor.dashboardSize.width' /></label>
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="width" class="ui-widget ui-widget-content" size="100" />
@@ -618,7 +618,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.setting.height' /></label>
+						<label><@spring.message code='dashboard.veditor.dashboardSize.height' /></label>
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="height" class="ui-widget ui-widget-content" size="100" />
@@ -627,12 +627,12 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.setting.scale' /></label>
+						<label><@spring.message code='dashboard.veditor.dashboardSize.scale' /></label>
 					</div>
 					<div class="form-item-value">
 						<div class="setting-scale-wrapper">
 							<input type="radio" id="${pageId}-settingScale-auto" name="scale" value="auto" checked="checked" />
-							<label for="${pageId}-settingScale-auto"><@spring.message code='dashboard.veditor.setting.scale.auto' /></label>
+							<label for="${pageId}-settingScale-auto"><@spring.message code='dashboard.veditor.dashboardSize.scale.auto' /></label>
 							<input type="radio" id="${pageId}-settingScale-100" name="scale" value="100" />
 							<label for="${pageId}-settingScale-100">100%</label>
 							<input type="radio" id="${pageId}-settingScale-75" name="scale" value="75" />
