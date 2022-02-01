@@ -84,6 +84,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-widget";
 
+	public static final String ATTR_NAME_CHART_AUTO_RESIZE = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-auto-resize";
+
 	/** 看板设置标签名 */
 	private String dashboardSetTagName = DEFAULT_DASHBOARD_SET_TAG_NAME;
 
@@ -201,7 +203,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		sb.append("<meta charset=\"" + htmlCharset + "\">\n");
 		sb.append("<title>" + htmlTitle + "</title>\n");
 		sb.append("</head>\n");
-		sb.append("<body>\n");
+		sb.append("<body " + ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\">\n");
 		sb.append("\n");
 
 		for (String cwi : chartWidgetId)
