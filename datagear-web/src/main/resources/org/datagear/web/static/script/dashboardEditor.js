@@ -472,10 +472,23 @@
 	 */
 	editor.insertDiv = function(insertType, refEle)
 	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		//不能使用"<div />"，生成的源码格式不对
 		var div = $("<div></div>");
 		
-		//设置默认尺寸，不然不能显示
-		div.attr("style", "height:3em;");
+		var styleStr = "";
+		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		
+		if(insertParentEle.is("body"))
+			styleStr = "display:block;height:3em;";
+		else if(chartFactory.isStaticPosition(insertParentEle))
+			styleStr = "display:block;width:50%;height:3em;";
+		else
+			styleStr = "position:absolute;left:0;top:0;width:50%;height:100%;";
+		
+		div.attr("style", styleStr);
 		
 		this.insertElement(div, insertType, refEle);
 	};
@@ -526,14 +539,7 @@
 			return;
 		
 		var styleStr = "";
-		var insertParentEle = null;
-		
-		if(refEle.is("body"))
-			insertParentEle = refEle;
-		else if("after" == insertType || "before" == insertType)
-			insertParentEle = refEle.parent();
-		else
-			insertParentEle = refEle;
+		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
 		if(chartFactory.isStaticPosition(insertParentEle) || insertParentEle.is("body"))
 			styleStr = this.defaultInsertChartEleStyle;
@@ -557,6 +563,20 @@
 		}
 		
 		this.dashboard.loadUnsolvedCharts();
+	};
+	
+	editor._getInsertParentElement = function(refEle, insertType)
+	{
+		var insertParentEle = null;
+		
+		if(refEle.is("body"))
+			insertParentEle = refEle;
+		else if("after" == insertType || "before" == insertType)
+			insertParentEle = refEle.parent();
+		else
+			insertParentEle = refEle;
+		
+		return insertParentEle;
 	};
 	
 	/**
@@ -1522,7 +1542,8 @@
 			"\n"
 			+ ".dg-show-ve .dg-show-ve-selected{\n"
 			+ "  border-color: " + options.selectedBorderColor + " !important;"
-			+ "\n}\n");
+			+ "\n}"
+			+"\n");
 	};
 	
 	//获取编辑HTML信息
