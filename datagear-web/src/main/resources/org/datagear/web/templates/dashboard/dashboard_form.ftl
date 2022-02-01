@@ -650,6 +650,31 @@ readonly 是否只读操作，允许为null
 			</div>
 		</form>
 	</div>
+	<div class="veditor-chartOptions-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<form action="#" method="POST" class="display-block">
+			<div class="panel-head ui-widget-header ui-corner-all">
+				<div class="chartOptionsTitle">
+				<@spring.message code='dashboard.veditor.chartOptions' />
+				</div>
+				<div class="globalChartOptionsTitle">
+				<@spring.message code='dashboard.veditor.globalChartOptions' />
+				</div>
+			</div>
+			<div class="panel-content form-content">
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.chartOptions.options' /></label>
+					</div>
+					<div class="form-item-value">
+						<textarea name="options" class="ui-widget ui-widget-content"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="panel-foot">
+				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
+			</div>
+		</form>
+	</div>
 </div>
 <#include "../include/page_obj_form.ftl">
 <#include "../include/page_obj_tabs.ftl" >

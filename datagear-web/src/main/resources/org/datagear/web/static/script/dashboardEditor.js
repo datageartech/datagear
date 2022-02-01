@@ -980,6 +980,109 @@
 	};
 	
 	/**
+	 * 校验setElementChartOptions操作。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkSetElementChartOptions = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		
+		if(!chart)
+		{
+			this.tipInfo(i18n.selectedNotChartElement);
+			return false;
+		}
+		
+		return true;
+	};
+	
+	/**
+	 * 设置元素图表选项。
+	 * 
+	 * @param chartOptions 要设置的图表选项对象、字符串，格式为：{ ... }、"{ ... }"
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.setElementChartOptions = function(chartOptions, ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this.checkSetElementChartOptions(ele))
+			return;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		
+		this._setElementChartOptions(ele, chartOptions);
+		
+		chart.destroy();
+		chart.init();
+	};
+	
+	/**
+	 * 获取元素图表选项。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 * @oaram asString 可选，是否以字符串形式返回，默认为：true
+	 */
+	editor.getElementChartOptions = function(ele, asString)
+	{
+		ele = this._editElement(this._currentElement(ele, true));
+		asString = (asString == null ? true : asString);
+		
+		return this._getElementChartOptions(ele);
+	};
+	
+	/**
+	 * 设置全局图表选项。
+	 * 
+	 * @param chartOptions 要设置的全局图表选项对象、字符串，格式为：{ ... }、"{ ... }"
+	 */
+	editor.setGlobalChartOptions = function(chartOptions)
+	{
+		this._setElementChartOptions($(document.body), chartOptions);
+		
+		this.dashboard.destroy();
+		this.dashboard.render();
+	};
+	
+	/**
+	 * 获取全局图表选项。
+	 * 
+	 * @oaram asString 可选，是否以字符串形式返回，默认为：true
+	 */
+	editor.getGlobalChartOptions = function(asString)
+	{
+		asString = (asString == null ? true : asString);
+		
+		var ele = this._editElement($(document.body));
+		return this._getElementChartOptions(ele);
+	};
+	
+	editor._setElementChartOptions = function(ele, chartOptions, sync)
+	{
+		if(chartFactory.isString(chartOptions))
+			chartOptions = chartFactory.evalSilently(chartOptions, {});
+		
+		var attrValue = this._serializeForAttrValue(chartOptions);
+		
+		if(!attrValue || attrValue == "{}")
+			this._removeElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, sync);
+		else
+			this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, attrValue, sync);
+	};
+	
+	editor._getElementChartOptions = function(ele)
+	{
+		var optionsStr = ele.attr(chartFactory.elementAttrConst.OPTIONS);
+		return optionsStr;
+	};
+	
+	/**
 	 * 校验元素不为空。
 	 *
 	 * @param ele
@@ -1031,7 +1134,7 @@
 		var attrValue = this._serializeForAttrValue(trim);
 		
 		if(attrValue == "{}")
-			this._removeElementAttr(ele, chartFactory.elementAttrConst.THEME);
+			this._removeElementAttr(ele, chartFactory.elementAttrConst.THEME, sync);
 		else
 			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, attrValue, sync);
 	};

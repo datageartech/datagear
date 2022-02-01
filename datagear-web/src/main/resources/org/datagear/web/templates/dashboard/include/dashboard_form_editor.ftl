@@ -138,7 +138,8 @@
 		{
 			po.addChartThemeFormGraphRangeColorsItem(po.element(".graphRangeColorsInput", veChartThemeForm));
 		});
-
+		
+		//初始化看板尺寸面板
 		var veDashboardSizePanel = po.element(".veditor-dashboardSize-panel");
 		veDashboardSizePanel.draggable({ handle: ".panel-head" });
 		var veDashboardSizeForm = po.element("form", veDashboardSizePanel);
@@ -164,6 +165,30 @@
 			return false;
 		});
 		po.element(".setting-scale-wrapper", veDashboardSizeForm).checkboxradiogroup({classes:{"ui-checkboxradio-label": "small-button"}});
+		
+		//初始化图表选项面板
+		var veChartOptionsPanel = po.element(".veditor-chartOptions-panel");
+		veChartOptionsPanel.draggable({ handle: ".panel-head" });
+		var veChartOptionsForm = po.element("form", veChartOptionsPanel);
+		veChartOptionsForm.submit(function()
+		{
+			veChartOptionsPanel.hide();
+			
+			var tabPane = po.getActiveResEditorTabPane();
+			var dashboardEditor = po.visualDashboardEditor(tabPane);
+			if(dashboardEditor)
+			{
+				var chartOptionsObj = $.formToJson(this);
+				var chartOptionsStr = (chartOptionsObj ? chartOptionsObj.options : "");
+				
+				if(po.editOperationForVisualEdit == "editChartOptions")
+					dashboardEditor.setElementChartOptions(chartOptionsStr);
+				else if(po.editOperationForVisualEdit == "editGlobalChartOptions")
+					dashboardEditor.setGlobalChartOptions(chartOptionsStr);
+			}
+			
+			return false;
+		});
 		
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
@@ -1176,10 +1201,12 @@
 		var editMenu = $("<ul class='edit-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
 		$("<li editOperation='editGlobalStyle' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalStyle' /></div>").appendTo(editMenu);
 		$("<li editOperation='editGlobalChartTheme' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartTheme' /></div>").appendTo(editMenu);
+		$("<li editOperation='editGlobalChartOptions' auto-close-prevent='veditor-chartOptions-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartOptions' /></div>").appendTo(editMenu);
 		$("<li class='ui-menu-divider' />").appendTo(editMenu);
 		$("<li editOperation='editStyle' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
 		$("<li editOperation='editContent' auto-close-prevent='veditor-content-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
 		$("<li editOperation='editChartTheme' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartTheme' /></div>").appendTo(editMenu);
+		$("<li editOperation='editChartOptions' auto-close-prevent='veditor-chartOptions-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartOptions' /></div>").appendTo(editMenu);
 		editMenu.appendTo(editGroup).menu(
 		{
 			select: function(event, ui)
@@ -1207,6 +1234,14 @@
 						po.element(".editChartThemeTitle", panel).hide();
 						po.element(".editGlobalChartThemeTitle", panel).show();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
+						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					}
+					else if(editOperation == "editGlobalChartOptions")
+					{
+						var panel = po.element(".veditor-chartOptions-panel");
+						po.element(".chartOptionsTitle", panel).hide();
+						po.element(".globalChartOptionsTitle", panel).show();
+						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getGlobalChartOptions());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					}
 					else if(editOperation == "editStyle")
@@ -1245,6 +1280,17 @@
 						po.element(".editChartThemeTitle", panel).show();
 						po.element(".editGlobalChartThemeTitle", panel).hide();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
+						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					}
+					else if(editOperation == "editChartOptions")
+					{
+						if(!dashboardEditor.checkSetElementChartOptions())
+							return;
+						
+						var panel = po.element(".veditor-chartOptions-panel");
+						po.element(".chartOptionsTitle", panel).show();
+						po.element(".globalChartOptionsTitle", panel).hide();
+						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getElementChartOptions());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					}
 				}
@@ -1437,6 +1483,12 @@
 				}
 			}
 		});
+	};
+
+	po.setVeditorChartOptionsFormValue = function($form, chartOptionsStr)
+	{
+		var formJson = { "options": (chartOptionsStr || "") };
+		$.jsonToForm($form, formJson);
 	};
 	
 	po.addChartThemeFormGraphColorsItem = function(wrapper)
