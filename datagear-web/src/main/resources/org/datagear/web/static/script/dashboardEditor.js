@@ -767,9 +767,14 @@
 		if(!this.checkDeleteElement(ele))
 			return;
 		
-		//TODO 如果元素内包含图表元素，应先销毁它们
-		
 		var iframeEle = this._editElement(ele);
+		
+		//应先删除元素包含的所有图表
+		var chartElements = this._getSubChartElements(ele);
+		chartElements.each(function()
+		{
+			editor.dashboard.removeChart(this);
+		});
 		
 		ele.remove();
 		iframeEle.remove();
@@ -824,7 +829,7 @@
 		}
 		else
 		{
-			var chartElements = this._getChartElements(ele);
+			var chartElements = this._getSubChartElements(ele);
 			chartElements.each(function()
 			{
 				var renderedChart = editor.dashboard.renderedChart(this);
@@ -1498,7 +1503,7 @@
 		return insertType;
 	};
 	
-	editor._getChartElements = function(parent)
+	editor._getSubChartElements = function(parent)
 	{
 		return $("["+chartFactory.elementAttrConst.WIDGET+"]", parent);
 	};
