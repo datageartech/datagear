@@ -481,12 +481,13 @@
 		var styleStr = "";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
+		//body子元素默认设置为布局容器样式
 		if(insertParentEle.is("body"))
-			styleStr = "height:3em;";
-		else if(chartFactory.isStaticPosition(insertParentEle))
-			styleStr = "width:50%;height:3em;";
+			styleStr = "display:flex;height:3em;";
 		else
-			styleStr = "position:absolute;left:0;top:0;width:50%;height:100%;";
+			styleStr = "display:inline-block;width:50%;height:100%;";
+		
+		styleStr += "box-sizing:border-box;";
 		
 		div.attr("style", styleStr);
 		
@@ -541,10 +542,10 @@
 		var styleStr = "";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
-		if(chartFactory.isStaticPosition(insertParentEle) || insertParentEle.is("body"))
+		if(insertParentEle.is("body"))
 			styleStr = this.defaultInsertChartEleStyle;
 		else
-			styleStr = "position:absolute;left:0;top:0;right:0;bottom:0;";
+			styleStr = "display:inline-block;width:100%;height:100%;";
 		
 		for(var i=0; i<chartWidgets.length; i++)
 		{

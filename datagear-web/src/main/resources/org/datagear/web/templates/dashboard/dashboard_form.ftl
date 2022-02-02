@@ -337,29 +337,6 @@ readonly 是否只读操作，允许为null
 					<div id="${pageId}-styleTabsPaneSize" class="style-tab-pane ui-widget ui-widget-content">
 						<div class="form-item">
 							<div class="form-item-label align-top">
-								<label><@spring.message code='dashboard.veditor.style.position' /></label>
-							</div>
-							<div class="form-item-value">
-								<input type="text" name="position" class="help-target ui-widget ui-widget-content" size="100" />
-								<br>
-								<div class="stylePositionBtnGroup helper-opt">
-									<button type="button" class="help-src small-button" help-value="absolute">
-										<@spring.message code='dashboard.veditor.style.position.absolute' />
-									</button>
-									<button type="button" class="help-src small-button" help-value="relative">
-										<@spring.message code='dashboard.veditor.style.position.relative' />
-									</button>
-									<button type="button" class="help-src small-button" help-value="fixed">
-										<@spring.message code='dashboard.veditor.style.position.fixed' />
-									</button>
-									<button type="button" class="help-src small-button" help-value="static">
-										<@spring.message code='dashboard.veditor.style.position.static' />
-									</button>
-								</div>
-							</div>
-						</div>
-						<div class="form-item">
-							<div class="form-item-label align-top">
 								<label><@spring.message code='dashboard.veditor.style.display' /></label>
 							</div>
 							<div class="form-item-value">
@@ -368,6 +345,9 @@ readonly 是否只读操作，允许为null
 								<div class="styleDisplayBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex">
 										<@spring.message code='dashboard.veditor.style.display.flex' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="inline-flex">
+										<@spring.message code='dashboard.veditor.style.display.inline-flex' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="block">
 										<@spring.message code='dashboard.veditor.style.display.block' />
@@ -399,6 +379,49 @@ readonly 是否只读操作，允许为null
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="height" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.padding.desc' />">
+									<@spring.message code='dashboard.veditor.style.padding' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="padding" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.margin.desc' />">
+									<@spring.message code='dashboard.veditor.style.margin' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="margin" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label><@spring.message code='dashboard.veditor.style.position' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="position" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="stylePositionBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="absolute">
+										<@spring.message code='dashboard.veditor.style.position.absolute' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="relative">
+										<@spring.message code='dashboard.veditor.style.position.relative' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="fixed">
+										<@spring.message code='dashboard.veditor.style.position.fixed' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="static">
+										<@spring.message code='dashboard.veditor.style.position.static' />
+									</button>
+								</div>
 							</div>
 						</div>
 						<div class="form-item">
@@ -439,26 +462,6 @@ readonly 是否只读操作，允许为null
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="bottom" class="ui-widget ui-widget-content" size="100" />
-							</div>
-						</div>
-						<div class="form-item">
-							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.style.padding.desc' />">
-									<@spring.message code='dashboard.veditor.style.padding' />
-								</label>
-							</div>
-							<div class="form-item-value">
-								<input type="text" name="padding" class="ui-widget ui-widget-content" size="100" />
-							</div>
-						</div>
-						<div class="form-item">
-							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.style.margin.desc' />">
-									<@spring.message code='dashboard.veditor.style.margin' />
-								</label>
-							</div>
-							<div class="form-item-value">
-								<input type="text" name="margin" class="ui-widget ui-widget-content" size="100" />
 							</div>
 						</div>
 					</div>
