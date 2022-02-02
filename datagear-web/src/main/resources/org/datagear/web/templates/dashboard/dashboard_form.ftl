@@ -196,12 +196,12 @@ readonly 是否只读操作，允许为null
 	<div class="veditor-content-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<form action="#" method="POST" class="display-37">
 			<div class="panel-head ui-widget-header ui-corner-all">
-				<@spring.message code='dashboard.veditor.editContent' />
+				<@spring.message code='dashboard.veditor.content' />
 			</div>
 			<div class="panel-content">
 				<div class="content-item">
 					<div class="label-wrapper">
-						<label><@spring.message code='dashboard.veditor.editContent.content' /></label>
+						<label><@spring.message code='dashboard.veditor.content.content' /></label>
 					</div>
 					<input type="text" name="content" value="" class="ui-widget ui-widget-content" />
 				</div>
@@ -215,24 +215,24 @@ readonly 是否只读操作，允许为null
 		<form action="#" method="POST" class="display-37">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<div class="editStyleTitle">
-					<@spring.message code='dashboard.veditor.editStyle' />
+					<@spring.message code='dashboard.veditor.style' />
 				</div>
 				<div class="editGlobalStyleTitle">
-					<@spring.message code='dashboard.veditor.editGlobalStyle' />
+					<@spring.message code='dashboard.veditor.globalStyle' />
 				</div>
 			</div>
 			<div class="panel-content form-content">
 				<div class="style-tabs minor-tabs">
 					<ul class="style-tabs-nav">
-						<li><a href="#${pageId}-styleTabsPaneColor"><@spring.message code='dashboard.veditor.editStyle.category.color' /></a></li>
-						<li><a href="#${pageId}-styleTabsPaneSize"><@spring.message code='dashboard.veditor.editStyle.category.size' /></a></li>
-						<li><a href="#${pageId}-styleTabsPaneFont"><@spring.message code='dashboard.veditor.editStyle.category.font' /></a></li>
+						<li><a href="#${pageId}-styleTabsPaneColor"><@spring.message code='dashboard.veditor.styleCategory.color' /></a></li>
+						<li><a href="#${pageId}-styleTabsPaneSize"><@spring.message code='dashboard.veditor.styleCategory.size' /></a></li>
+						<li><a href="#${pageId}-styleTabsPaneFont"><@spring.message code='dashboard.veditor.styleCategory.font' /></a></li>
 					</ul>
 					<div id="${pageId}-styleTabsPaneColor" class="style-tab-pane ui-widget ui-widget-content">
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.color.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.color' />
+								<label title="<@spring.message code='dashboard.veditor.style.color.desc' />">
+									<@spring.message code='dashboard.veditor.style.color' />
 								</label>
 							</div>
 							<div class="form-item-value">
@@ -242,8 +242,8 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.bgColor.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.bgColor' />
+								<label title="<@spring.message code='dashboard.veditor.style.bgColor.desc' />">
+									<@spring.message code='dashboard.veditor.style.bgColor' />
 								</label>
 							</div>
 							<div class="form-item-value">
@@ -253,8 +253,8 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.bgImage.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.bgImage' />
+								<label title="<@spring.message code='dashboard.veditor.style.bgImage.desc' />">
+									<@spring.message code='dashboard.veditor.style.bgImage' />
 								</label>
 							</div>
 							<div class="form-item-value">
@@ -263,72 +263,72 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label align-top">
-								<label><@spring.message code='dashboard.veditor.editStyle.bgSize' /></label>
+								<label><@spring.message code='dashboard.veditor.style.bgSize' /></label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="background-size" class="help-target ui-widget ui-widget-content" size="200" />
 								<br>
 								<div class="styleBgSizeBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="100% 100%">
-										<@spring.message code='dashboard.veditor.editStyle.bgSize.fill' />
+										<@spring.message code='dashboard.veditor.style.bgSize.fill' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="100% auto">
-										<@spring.message code='dashboard.veditor.editStyle.bgSize.fill-x' />
+										<@spring.message code='dashboard.veditor.style.bgSize.fill-x' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="auto 100%">
-										<@spring.message code='dashboard.veditor.editStyle.bgSize.fill-y' />
+										<@spring.message code='dashboard.veditor.style.bgSize.fill-y' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="auto auto">
-										<@spring.message code='dashboard.veditor.editStyle.bgSize.oirgin' />
+										<@spring.message code='dashboard.veditor.style.bgSize.oirgin' />
 									</button>
 								</div>
 							</div>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label align-top">
-								<label><@spring.message code='dashboard.veditor.editStyle.bgRepeat' /></label>
+								<label><@spring.message code='dashboard.veditor.style.bgRepeat' /></label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="background-repeat" class="help-target ui-widget ui-widget-content" size="200" />
 								<br>
 								<div class="styleBgRepeatBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="no-repeat">
-										<@spring.message code='dashboard.veditor.editStyle.bgRepeat.no-repeat' />
+										<@spring.message code='dashboard.veditor.style.bgRepeat.no-repeat' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="repeat">
-										<@spring.message code='dashboard.veditor.editStyle.bgRepeat.repeat' />
+										<@spring.message code='dashboard.veditor.style.bgRepeat.repeat' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="repeat-x">
-										<@spring.message code='dashboard.veditor.editStyle.bgRepeat.repeat-x' />
+										<@spring.message code='dashboard.veditor.style.bgRepeat.repeat-x' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="repeat-y">
-										<@spring.message code='dashboard.veditor.editStyle.bgRepeat.repeat-y' />
+										<@spring.message code='dashboard.veditor.style.bgRepeat.repeat-y' />
 									</button>
 								</div>
 							</div>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label align-top">
-								<label><@spring.message code='dashboard.veditor.editStyle.bgPosition' /></label>
+								<label><@spring.message code='dashboard.veditor.style.bgPosition' /></label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="background-position" class="help-target ui-widget ui-widget-content" size="200" />
 								<br>
 								<div class="styleBgPositionBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="center center">
-										<@spring.message code='dashboard.veditor.editStyle.bgPosition.center' />
+										<@spring.message code='dashboard.veditor.style.bgPosition.center' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="left top">
-										<@spring.message code='dashboard.veditor.editStyle.bgPosition.leftTop' />
+										<@spring.message code='dashboard.veditor.style.bgPosition.leftTop' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="right top">
-										<@spring.message code='dashboard.veditor.editStyle.bgPosition.rightTop' />
+										<@spring.message code='dashboard.veditor.style.bgPosition.rightTop' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="left bottom">
-										<@spring.message code='dashboard.veditor.editStyle.bgPosition.leftBottom' />
+										<@spring.message code='dashboard.veditor.style.bgPosition.leftBottom' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="right bottom">
-										<@spring.message code='dashboard.veditor.editStyle.bgPosition.rightBottom' />
+										<@spring.message code='dashboard.veditor.style.bgPosition.rightBottom' />
 									</button>
 								</div>
 							</div>
@@ -337,31 +337,54 @@ readonly 是否只读操作，允许为null
 					<div id="${pageId}-styleTabsPaneSize" class="style-tab-pane ui-widget ui-widget-content">
 						<div class="form-item">
 							<div class="form-item-label align-top">
-								<label><@spring.message code='dashboard.veditor.editStyle.display' /></label>
+								<label><@spring.message code='dashboard.veditor.style.position' /></label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="position" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="stylePositionBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="absolute">
+										<@spring.message code='dashboard.veditor.style.position.absolute' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="relative">
+										<@spring.message code='dashboard.veditor.style.position.relative' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="fixed">
+										<@spring.message code='dashboard.veditor.style.position.fixed' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="static">
+										<@spring.message code='dashboard.veditor.style.position.static' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label><@spring.message code='dashboard.veditor.style.display' /></label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="display" class="help-target ui-widget ui-widget-content" size="100" />
 								<br>
 								<div class="styleDisplayBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="flex">
+										<@spring.message code='dashboard.veditor.style.display.flex' />
+									</button>
 									<button type="button" class="help-src small-button" help-value="block">
-										<@spring.message code='dashboard.veditor.editStyle.display.block' />
+										<@spring.message code='dashboard.veditor.style.display.block' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="inline-block">
-										<@spring.message code='dashboard.veditor.editStyle.display.inline-block' />
+										<@spring.message code='dashboard.veditor.style.display.inline-block' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="inline">
-										<@spring.message code='dashboard.veditor.editStyle.display.inline' />
-									</button>
-									<button type="button" class="help-src small-button" help-value="flex">
-										<@spring.message code='dashboard.veditor.editStyle.display.flex' />
+										<@spring.message code='dashboard.veditor.style.display.inline' />
 									</button>
 								</div>
 							</div>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.width.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.width' />
+								<label title="<@spring.message code='dashboard.veditor.style.width.desc' />">
+									<@spring.message code='dashboard.veditor.style.width' />
 								</label>
 							</div>
 							<div class="form-item-value">
@@ -370,8 +393,8 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.height.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.height' />
+								<label title="<@spring.message code='dashboard.veditor.style.height.desc' />">
+									<@spring.message code='dashboard.veditor.style.height' />
 								</label>
 							</div>
 							<div class="form-item-value">
@@ -380,51 +403,8 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.padding.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.padding' />
-								</label>
-							</div>
-							<div class="form-item-value">
-								<input type="text" name="padding" class="ui-widget ui-widget-content" size="100" />
-							</div>
-						</div>
-						<div class="form-item">
-							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.margin.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.margin' />
-								</label>
-							</div>
-							<div class="form-item-value">
-								<input type="text" name="margin" class="ui-widget ui-widget-content" size="100" />
-							</div>
-						</div>
-						<div class="form-item">
-							<div class="form-item-label align-top">
-								<label><@spring.message code='dashboard.veditor.editStyle.position' /></label>
-							</div>
-							<div class="form-item-value">
-								<input type="text" name="position" class="help-target ui-widget ui-widget-content" size="100" />
-								<br>
-								<div class="stylePositionBtnGroup helper-opt">
-									<button type="button" class="help-src small-button" help-value="static">
-										<@spring.message code='dashboard.veditor.editStyle.position.static' />
-									</button>
-									<button type="button" class="help-src small-button" help-value="absolute">
-										<@spring.message code='dashboard.veditor.editStyle.position.absolute' />
-									</button>
-									<button type="button" class="help-src small-button" help-value="relative">
-										<@spring.message code='dashboard.veditor.editStyle.position.relative' />
-									</button>
-									<button type="button" class="help-src small-button" help-value="fixed">
-										<@spring.message code='dashboard.veditor.editStyle.position.fixed' />
-									</button>
-								</div>
-							</div>
-						</div>
-						<div class="form-item">
-							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.left.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.left' />
+								<label title="<@spring.message code='dashboard.veditor.style.left.desc' />">
+									<@spring.message code='dashboard.veditor.style.left' />
 								</label>
 							</div>
 							<div class="form-item-value">
@@ -433,8 +413,8 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.top.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.top' />
+								<label title="<@spring.message code='dashboard.veditor.style.top.desc' />">
+									<@spring.message code='dashboard.veditor.style.top' />
 								</label>
 							</div>
 							<div class="form-item-value">
@@ -443,8 +423,8 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.right.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.right' />
+								<label title="<@spring.message code='dashboard.veditor.style.right.desc' />">
+									<@spring.message code='dashboard.veditor.style.right' />
 								</label>
 							</div>
 							<div class="form-item-value">
@@ -453,20 +433,40 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.bottom.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.bottom' />
+								<label title="<@spring.message code='dashboard.veditor.style.bottom.desc' />">
+									<@spring.message code='dashboard.veditor.style.bottom' />
 								</label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="bottom" class="ui-widget ui-widget-content" size="100" />
 							</div>
 						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.padding.desc' />">
+									<@spring.message code='dashboard.veditor.style.padding' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="padding" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.margin.desc' />">
+									<@spring.message code='dashboard.veditor.style.margin' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="margin" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
 					</div>
 					<div id="${pageId}-styleTabsPaneFont" class="style-tab-pane ui-widget ui-widget-content">
 						<div class="form-item">
 							<div class="form-item-label">
-								<label title="<@spring.message code='dashboard.veditor.editStyle.fontSize.desc' />">
-									<@spring.message code='dashboard.veditor.editStyle.fontSize' />
+								<label title="<@spring.message code='dashboard.veditor.style.fontSize.desc' />">
+									<@spring.message code='dashboard.veditor.style.fontSize' />
 								</label>
 							</div>
 							<div class="form-item-value">
@@ -475,37 +475,37 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div class="form-item">
 							<div class="form-item-label align-top">
-								<label><@spring.message code='dashboard.veditor.editStyle.fontWeight' /></label>
+								<label><@spring.message code='dashboard.veditor.style.fontWeight' /></label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="font-weight" class="help-target ui-widget ui-widget-content" size="100" />
 								<br>
 								<div class="styleFontWeightBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="normal">
-										<@spring.message code='dashboard.veditor.editStyle.fontWeight.normal' />
+										<@spring.message code='dashboard.veditor.style.fontWeight.normal' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="bold">
-										<@spring.message code='dashboard.veditor.editStyle.fontWeight.bold' />
+										<@spring.message code='dashboard.veditor.style.fontWeight.bold' />
 									</button>
 								</div>
 							</div>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label align-top">
-								<label><@spring.message code='dashboard.veditor.editStyle.textAlign' /></label>
+								<label><@spring.message code='dashboard.veditor.style.textAlign' /></label>
 							</div>
 							<div class="form-item-value">
 								<input type="text" name="text-align" class="help-target ui-widget ui-widget-content" size="100" />
 								<br>
 								<div class="styleTextAlignBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="left">
-										<@spring.message code='dashboard.veditor.editStyle.textAlign.left' />
+										<@spring.message code='dashboard.veditor.style.textAlign.left' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="center">
-										<@spring.message code='dashboard.veditor.editStyle.textAlign.center' />
+										<@spring.message code='dashboard.veditor.style.textAlign.center' />
 									</button>
 									<button type="button" class="help-src small-button" help-value="right">
-										<@spring.message code='dashboard.veditor.editStyle.textAlign.right' />
+										<@spring.message code='dashboard.veditor.style.textAlign.right' />
 									</button>
 								</div>
 							</div>
@@ -514,7 +514,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item form-item-className">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editStyle.className' /></label>
+						<label><@spring.message code='dashboard.veditor.style.className' /></label>
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="className" class="ui-widget ui-widget-content" size="200" />
@@ -522,7 +522,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item form-item-syncChartTheme">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editStyle.syncChartTheme' /></label>
+						<label><@spring.message code='dashboard.veditor.style.syncChartTheme' /></label>
 					</div>
 					<div class="form-item-value">
 						<div id="${pageId}-syncChartTheme">
@@ -543,16 +543,16 @@ readonly 是否只读操作，允许为null
 		<form action="#" method="POST" class="display-37">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<div class="editChartThemeTitle">
-					<@spring.message code='dashboard.veditor.editChartTheme' />
+					<@spring.message code='dashboard.veditor.chartTheme' />
 				</div>
 				<div class="editGlobalChartThemeTitle">
-					<@spring.message code='dashboard.veditor.editGlobalChartTheme' />
+					<@spring.message code='dashboard.veditor.globalChartTheme' />
 				</div>
 			</div>
 			<div class="panel-content form-content">
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editChartTheme.color' /></label>
+						<label><@spring.message code='dashboard.veditor.chartTheme.color' /></label>
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
@@ -561,7 +561,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editChartTheme.bgColor' /></label>
+						<label><@spring.message code='dashboard.veditor.chartTheme.bgColor' /></label>
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="backgroundColor" class="ui-widget ui-widget-content" size="100" />
@@ -570,7 +570,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editChartTheme.actualBgColor' /></label>
+						<label><@spring.message code='dashboard.veditor.chartTheme.actualBgColor' /></label>
 					</div>
 					<div class="form-item-value">
 						<input type="text" name="actualBackgroundColor" class="ui-widget ui-widget-content" size="100" />
@@ -579,7 +579,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editChartTheme.graphColors' /></label>
+						<label><@spring.message code='dashboard.veditor.chartTheme.graphColors' /></label>
 					</div>
 					<div class="form-item-value">
 						<div class="graphColorsInput"></div>
@@ -588,7 +588,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.editChartTheme.graphRangeColors' /></label>
+						<label><@spring.message code='dashboard.veditor.chartTheme.graphRangeColors' /></label>
 					</div>
 					<div class="form-item-value">
 						<div class="graphRangeColorsInput"></div>

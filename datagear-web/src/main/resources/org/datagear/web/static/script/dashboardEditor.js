@@ -482,9 +482,9 @@
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
 		if(insertParentEle.is("body"))
-			styleStr = "display:block;height:3em;";
+			styleStr = "height:3em;";
 		else if(chartFactory.isStaticPosition(insertParentEle))
-			styleStr = "display:block;width:50%;height:3em;";
+			styleStr = "width:50%;height:3em;";
 		else
 			styleStr = "position:absolute;left:0;top:0;width:50%;height:100%;";
 		
