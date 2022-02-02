@@ -481,9 +481,8 @@
 		var styleStr = "";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
-		//body子元素默认设置为布局容器样式
 		if(insertParentEle.is("body"))
-			styleStr = "display:flex;height:3em;";
+			styleStr = "height:3em;";
 		else
 			styleStr = "display:inline-block;width:50%;height:100%;";
 		
@@ -811,11 +810,39 @@
 		this._setElementStyle(ele, so.style);
 		this._setElementClass(ele, so.option.className);
 		
-		if(so.option.syncChartTheme && this.isChartElement(ele))
+		var renderedChart = this.dashboard.renderedChart(ele);
+		
+		if(renderedChart)
 		{
-			var chartTheme = this._evalElementChartThemeByStyleObj(ele, so.style);
-			this.setElementChartTheme(chartTheme, ele);
+			if(so.option.syncChartTheme)
+			{
+				var chartTheme = this._evalElementChartThemeByStyleObj(ele, so.style);
+				this.setElementChartTheme(chartTheme, ele);
+			}
+			else
+				this._resizeChart(renderedChart);
 		}
+		else
+		{
+			var chartElements = this._getChartElements(ele);
+			chartElements.each(function()
+			{
+				var renderedChart = editor.dashboard.renderedChart(this);
+				editor._resizeChart(renderedChart);
+			});
+		}
+	};
+	
+	editor._resizeChart = function(chart)
+	{
+		if(!chart)
+			return;
+		
+		try
+		{
+			chart.resize();
+		}
+		catch(e){}
 	};
 	
 	/**
@@ -1469,6 +1496,11 @@
 		}
 		
 		return insertType;
+	};
+	
+	editor._getChartElements = function(parent)
+	{
+		return $("["+chartFactory.elementAttrConst.WIDGET+"]", parent);
 	};
 	
 	editor._selectedElement = function()
