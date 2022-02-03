@@ -767,7 +767,8 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		if (dashboardTheme == null)
 			return false;
 
-		out.write("<style type='text/css' " + DASHBOARD_IMPORT_ITEM_NAME_ATTR + "='" + this.themeImportName + "'>");
+		out.write(
+				"<style type=\"text/css\" " + DASHBOARD_IMPORT_ITEM_NAME_ATTR + "=\"" + this.themeImportName + "\">");
 		writeNewLine(out);
 		out.write("." + this.dashboardStyleName + "{");
 		writeNewLine(out);
