@@ -896,6 +896,10 @@
 					var $this = $(this);
 					var checked = ($this.attr("value") == myVal);
 					$this.prop("checked", checked);
+					
+					var eleWidget = $this.data("ui-checkboxradio");
+					if(eleWidget)
+						eleWidget.refresh();
 				});
 			}
 			else if(inputType == "checkbox")
@@ -906,6 +910,10 @@
 					var myVal = options.serialize(form, inputName, values[i]);
 					var checked = ($this.attr("value") == myVal);
 					$this.prop("checked", checked);
+					
+					var eleWidget = $this.data("ui-checkboxradio");
+					if(eleWidget)
+						eleWidget.refresh();
 				});
 			}
 			else if(inputType == "select")
@@ -920,6 +928,10 @@
 					var checked = ($this.attr("value") == myVal);
 					$this.prop("checked", checked);
 				});
+				
+				var eleWidget = $this.data("ui-selectmenu");
+				if(eleWidget)
+					eleWidget.refresh();
 			}
 			else
 				throw new Error("Unknown input type :" + inputType);
