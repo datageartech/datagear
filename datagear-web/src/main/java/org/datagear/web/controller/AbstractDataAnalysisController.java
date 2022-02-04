@@ -139,6 +139,11 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String DASHBOARD_SHOW_PARAM_THEME_NAME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX + "THEME";
 
 	/**
+	 * 看板展示URL的请求参数值：自动设置系统主题。
+	 */
+	public static final String DASHBOARD_SHOW_PARAM_VALUE_AUTO_THEME = "auto";
+
+	/**
 	 * 看板展示URL的请求参数名：编辑模板。仅用于可视化编辑看板模板功能。
 	 */
 	public static final String DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
@@ -365,14 +370,22 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return (value == null ? null : value.replace("</", "<\\/"));
 	}
 
+	/**
+	 * 解析看板展示主题。
+	 * 
+	 * @param request
+	 * @return
+	 */
 	protected DashboardTheme resolveDashboardTheme(HttpServletRequest request)
 	{
 		String theme = request.getParameter(DASHBOARD_SHOW_PARAM_THEME_NAME);
 
-		if (StringUtil.isEmpty(theme))
+		// 只有参数明确了自动设置看板展示主题才执行，因为看板展示主题应由制作者决定，不应随当前系统主题而改变
+		if (DASHBOARD_SHOW_PARAM_VALUE_AUTO_THEME.equalsIgnoreCase(theme))
 			theme = WebUtils.getTheme(request);
 
-		DashboardTheme dashboardTheme = this.dashboardThemeSource.getDashboardTheme(theme);
+		DashboardTheme dashboardTheme = (theme == null ? null : this.dashboardThemeSource.getDashboardTheme(theme));
+
 		if (dashboardTheme == null)
 			dashboardTheme = this.dashboardThemeSource.getDashboardTheme();
 
