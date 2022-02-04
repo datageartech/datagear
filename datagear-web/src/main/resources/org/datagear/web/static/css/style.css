@@ -3361,6 +3361,8 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
     width: 80%;
     height: 80%;
     border-width: 0;
+    /*应将初始背景设为浏览器默认背景*/
+	background: #FFF;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .hide-editor{
 	opacity: 0;
