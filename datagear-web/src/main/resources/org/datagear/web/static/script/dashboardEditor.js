@@ -681,7 +681,7 @@
 		{
 			var editEle = this._editElement(refEle);
 			var insertEleClone = insertEle.clone();
-			this._insertElement(editEle, insertEleClone, insertType);
+			this._insertElement(editEle, insertEleClone, insertType, true);
 		}
 		
 		insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
@@ -1462,27 +1462,51 @@
 		return currentEle;
 	};
 	
-	editor._insertElement = function(refEle, insertEle, insertType)
+	editor._insertElement = function(refEle, insertEle, insertType, format)
 	{
+		format = (format == null ? false : format);
+		
 		if(insertType == "after")
 		{
 			refEle.after(insertEle);
-			refEle.after("\n");
+			
+			if(format)
+				refEle.after("\n");
 		}
 		else if(insertType == "before")
 		{
 			refEle.before(insertEle);
-			refEle.before("\n");
+			
+			if(format)
+				refEle.before("\n");
 		}
 		else if(insertType == "append")
 		{
+			if(format)
+			{
+				var innerHtml = refEle.prop("innerHTML");
+				if(!innerHtml || innerHtml.charAt(innerHtml.length-1) != '\n')
+					refEle.append("\n");
+			}
+			
 			refEle.append(insertEle);
-			refEle.append("\n");
+			
+			if(format)
+				refEle.append("\n");
 		}
 		else if(insertType == "prepend")
 		{
+			if(format)
+			{
+				var innerHtml = refEle.prop("innerHTML");
+				if(!innerHtml || innerHtml.charAt(0) != '\n')
+					refEle.prepend("\n");
+			}
+			
 			refEle.prepend(insertEle);
-			refEle.prepend("\n");
+			
+			if(format)
+				refEle.prepend("\n");
 		}
 	};
 	
