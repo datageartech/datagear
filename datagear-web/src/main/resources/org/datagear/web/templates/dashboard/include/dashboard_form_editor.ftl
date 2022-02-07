@@ -1363,6 +1363,7 @@
 
 		var moreMenu = $("<ul class='more-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
 		$("<li moreOperation='dashboardSize' auto-close-prevent='veditor-dashboardSize-panel' />").html("<div><@spring.message code='dashboard.opt.dashboardSize' /></div>").appendTo(moreMenu);
+		$("<li moreOperation='eleBoundary' />").html("<div><@spring.message code='dashboard.opt.eleBoundary' /></div>").appendTo(moreMenu);
 		$("<li moreOperation='refresh' />").html("<div><@spring.message code='refresh' /></div>").appendTo(moreMenu);
 		moreMenu.appendTo(moreGroup).menu(
 		{
@@ -1382,6 +1383,15 @@
 						scale: visualEditorIfm.data("veIframeScale")
 					});
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+				}
+				else if(moreOperation == "eleBoundary")
+				{
+					var dashboardEditor = po.visualDashboardEditor(tabPane);
+					
+					if(!dashboardEditor)
+						return;
+					
+					dashboardEditor.enableElementBoundary(!dashboardEditor.enableElementBoundary());
 				}
 				else if(moreOperation == "refresh")
 				{

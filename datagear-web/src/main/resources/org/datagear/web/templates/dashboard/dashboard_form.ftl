@@ -539,12 +539,14 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="bottom" class="ui-widget ui-widget-content" size="100" />
 							</div>
 						</div>
+						<!--
 						<div class="ui-widget-header">
 							<@spring.message code='dashboard.veditor.styleSubType.flexContainer' />
 						</div>
 						<div class="ui-widget-header">
 							<@spring.message code='dashboard.veditor.styleSubType.flexItem' />
 						</div>
+						-->
 					</div>
 					<div id="${pageId}-styleTabsPaneFont" class="style-tab-pane ui-widget ui-widget-content">
 						<div class="form-item">

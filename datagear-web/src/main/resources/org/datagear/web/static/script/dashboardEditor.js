@@ -37,12 +37,16 @@
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
 	
+	var BODY_CLASS_VISUAL_EDITOR = (editor.BODY_CLASS_VISUAL_EDITOR = "dg-show-ve");
+	
 	//参考org.datagear.web.controller.DashboardController.DashboardShowForEdit.ELEMENT_ATTR_VISUAL_EDIT_ID
 	var ELEMENT_ATTR_VISUAL_EDIT_ID = (editor.ELEMENT_ATTR_VISUAL_EDIT_ID = "dg-visual-edit-id");
 	
 	var ELEMENT_CLASS_SELECTED = (editor.ELEMENT_CLASS_SELECTED = "dg-show-ve-selected");
 	
 	var ELEMENT_CLASS_NEW_INSERT = (editor.ELEMENT_CLASS_NEW_INSERT = "dg-show-ve-new-insert");
+	
+	var BODY_CLASS_ELEMENT_BOUNDARY = (editor.BODY_CLASS_ELEMENT_BOUNDARY = "dg-show-ve-boundary");
 	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
@@ -80,7 +84,7 @@
 	//初始化交互控制
 	editor._initInteraction = function()
 	{
-		$(document.body).addClass("dg-show-ve");
+		$(document.body).addClass(BODY_CLASS_VISUAL_EDITOR);
 		
 		$(document.body).on("click", function(event)
 		{
@@ -190,6 +194,25 @@
 	editor.deselectAllElementCallback = function()
 	{
 		
+	};
+	
+	/**
+	 * 获取/设置元素边界线启用禁用/状态。
+	 *
+	 * @param enable 可选，true 启用；false 禁用。
+	 * @returns 是否已启用 
+	 */
+	editor.enableElementBoundary = function(enable)
+	{
+		var body = $(document.body);
+		
+		if(arguments.length == 0)
+			return body.hasClass(BODY_CLASS_ELEMENT_BOUNDARY);
+		
+		if(enable)
+			body.addClass(BODY_CLASS_ELEMENT_BOUNDARY);
+		else
+			body.removeClass(BODY_CLASS_ELEMENT_BOUNDARY);
 	};
 	
 	/**
@@ -1606,12 +1629,18 @@
 		options);
 		
 		chartFactory.styleSheetText("dg-show-ve-style",
-			"\n"
-			+ ".dg-show-ve .dg-show-ve-selected{\n"
+			  "\n"
+			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" *["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]{\n"
+			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ";"
+			+ "\n}"
+			+ "\n"
+			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_SELECTED+",\n"
+			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_SELECTED+"{\n"
 			+ "  box-shadow: inset 0 0 2px 2px " + options.selectedBorderColor + ";"
 			+ "\n}"
-			+"\n"
-			+ ".dg-show-ve .dg-show-ve-new-insert{\n"
+			+ "\n"
+			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_NEW_INSERT+",\n"
+			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_NEW_INSERT+"{\n"
 			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ";"
 			+ "\n}");
 	};

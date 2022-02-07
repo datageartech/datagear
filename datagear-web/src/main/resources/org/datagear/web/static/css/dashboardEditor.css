@@ -10,6 +10,6 @@
 /*看板可视编辑页面样式*/
 
 .dg-show-ve{}
-.dg-show-ve .dg-show-ve-selected,
-.dg-show-ve .dg-show-ve-new-insert{
-}
+.dg-show-ve .dg-show-ve-selected{}
+.dg-show-ve .dg-show-ve-new-insert{}
+.dg-show-ve.dg-show-ve-boundary{}
