@@ -1758,12 +1758,14 @@
 		
 		if(editBodyHtml != null)
 		{
-			//使用这种方式会导致浏览器一至处于加载中的状态，所以改为后面的方式
-			//this._editDocument(iframe).write("<html><head></head>" + editBodyHtml + "</html>");
-			
 			var editIframeBodyHtml = this._toEditIframeBodyHtml(editBodyHtml);
+			
 			var editDoc = this._editDocument();
-			$(editDoc.body).html(editIframeBodyHtml);
+			editDoc.open();
+			editDoc.write("<!DOCTYPE html><html><head></head><body>");
+			editDoc.write(editIframeBodyHtml);
+			editDoc.write("</body></html>");
+			editDoc.close();
 			
 			this.changeFlag(true);
 		}
