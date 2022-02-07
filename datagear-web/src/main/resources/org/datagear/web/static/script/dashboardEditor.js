@@ -1608,9 +1608,12 @@
 		chartFactory.styleSheetText("dg-show-ve-style",
 			"\n"
 			+ ".dg-show-ve .dg-show-ve-selected{\n"
-			+ "  border-color: " + options.selectedBorderColor + " !important;"
+			+ "  box-shadow: inset 0 0 2px 2px " + options.selectedBorderColor + ";"
 			+ "\n}"
-			+"\n");
+			+"\n"
+			+ ".dg-show-ve .dg-show-ve-new-insert{\n"
+			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ";"
+			+ "\n}");
 	};
 	
 	//获取编辑HTML信息

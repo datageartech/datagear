@@ -12,12 +12,4 @@
 .dg-show-ve{}
 .dg-show-ve .dg-show-ve-selected,
 .dg-show-ve .dg-show-ve-new-insert{
-	border-width: 2px !important;
-	border-style: dashed !important;
-	box-sizing: border-box !important;
-	-moz-box-sizing: border-box !important;
-	-webkit-box-sizing: border-box !important;
-}
-.dg-show-ve .dg-show-ve-new-insert{
-	border-width: 1px !important;
 }
