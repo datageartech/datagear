@@ -340,13 +340,22 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dashboard.veditor.styleSubType.border' />
 						</div>
 						<div class="form-item">
-							<div class="form-item-label">
+							<div class="form-item-label align-top">
 								<label title="<@spring.message code='dashboard.veditor.style.borderWidth.desc' />">
 									<@spring.message code='dashboard.veditor.style.borderWidth' />
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="border-width" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="border-width" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleBorderWidthBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="1px">
+										<@spring.message code='dashboard.veditor.style.borderWidth.1px' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="2px">
+										<@spring.message code='dashboard.veditor.style.borderWidth.2px' />
+									</button>
+								</div>
 							</div>
 						</div>
 						<div class="form-item">
@@ -361,7 +370,7 @@ readonly 是否只读操作，允许为null
 							</div>
 						</div>
 						<div class="form-item">
-							<div class="form-item-label">
+							<div class="form-item-label align-top">
 								<label>
 									<@spring.message code='dashboard.veditor.style.borderStyle' />
 								</label>
