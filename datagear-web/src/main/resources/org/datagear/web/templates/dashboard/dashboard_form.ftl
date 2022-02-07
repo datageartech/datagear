@@ -251,6 +251,9 @@ readonly 是否只读操作，允许为null
 								<div class="bgcolor-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 							</div>
 						</div>
+						<div class="ui-widget-header">
+							<@spring.message code='dashboard.veditor.styleSubType.bgImage' />
+						</div>
 						<div class="form-item">
 							<div class="form-item-label">
 								<label title="<@spring.message code='dashboard.veditor.style.bgImage.desc' />">
@@ -333,8 +336,77 @@ readonly 是否只读操作，允许为null
 								</div>
 							</div>
 						</div>
+						<div class="ui-widget-header">
+							<@spring.message code='dashboard.veditor.styleSubType.border' />
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.borderWidth.desc' />">
+									<@spring.message code='dashboard.veditor.style.borderWidth' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="border-width" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.borderColor.desc' />">
+									<@spring.message code='dashboard.veditor.style.borderColor' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="border-color" class="ui-widget ui-widget-content" size="200" />
+								<div class="border-color-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label>
+									<@spring.message code='dashboard.veditor.style.borderStyle' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="border-style" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleBorderStyleBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="solid">
+										<@spring.message code='dashboard.veditor.style.borderStyle.solid' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="dotted">
+										<@spring.message code='dashboard.veditor.style.borderStyle.dotted' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="dashed">
+										<@spring.message code='dashboard.veditor.style.borderStyle.dashed' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.borderRadius.desc' />">
+									<@spring.message code='dashboard.veditor.style.borderRadius' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="border-radius" class="ui-widget ui-widget-content" size="200" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.boxShadow.desc' />">
+									<@spring.message code='dashboard.veditor.style.boxShadow' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="box-shadow" class="ui-widget ui-widget-content" size="200" />
+							</div>
+						</div>
 					</div>
 					<div id="${pageId}-styleTabsPaneSize" class="style-tab-pane ui-widget ui-widget-content">
+						<div class="ui-widget-header">
+							<@spring.message code='dashboard.veditor.styleSubType.display' />
+						</div>
 						<div class="form-item">
 							<div class="form-item-label align-top">
 								<label><@spring.message code='dashboard.veditor.style.display' /></label>
@@ -401,6 +473,9 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="margin" class="ui-widget ui-widget-content" size="100" />
 							</div>
 						</div>
+						<div class="ui-widget-header">
+							<@spring.message code='dashboard.veditor.styleSubType.position' />
+						</div>
 						<div class="form-item">
 							<div class="form-item-label align-top">
 								<label><@spring.message code='dashboard.veditor.style.position' /></label>
@@ -463,6 +538,12 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="bottom" class="ui-widget ui-widget-content" size="100" />
 							</div>
+						</div>
+						<div class="ui-widget-header">
+							<@spring.message code='dashboard.veditor.styleSubType.flexContainer' />
+						</div>
+						<div class="ui-widget-header">
+							<@spring.message code='dashboard.veditor.styleSubType.flexItem' />
 						</div>
 					</div>
 					<div id="${pageId}-styleTabsPaneFont" class="style-tab-pane ui-widget ui-widget-content">

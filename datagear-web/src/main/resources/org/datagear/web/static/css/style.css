@@ -518,8 +518,7 @@ form .form-item.display-55 .form-item-value,
 	padding: 0.3em 0.3em;
 }
 .minor-panel .panel-head,
-.minor-panel .panel-head.ui-widget-header{
-	font-weight: normal;
+.minor-panel .ui-widget-header{
 	padding-left: 0.2em;
 	padding-top: 0.2em;
 	padding-bottom: 0.2em;
@@ -3646,6 +3645,9 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 }
 .page-form-dashboard .veditor-style-panel .form-item-className{
 	padding-top: 0.6em;
+}
+.page-form-dashboard .veditor-style-panel .style-tab-pane .ui-widget-header:not(:first-child){
+	margin-top: 0.6em;
 }
 
 .page-form .form-item-analysisProjectAware{

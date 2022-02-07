@@ -59,6 +59,7 @@
 		po.element(".styleBgPositionBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleBgSizeBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleBgRepeatBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleBorderStyleBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleDisplayBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".stylePositionBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleFontWeightBtnGroup", veStyleForm).controlgroupwrapper();
@@ -74,6 +75,13 @@
 		{
 			indicator: po.element(".bgcolor-indicator", veStyleForm),
 			container: po.element("input[name='background-color']", veStyleForm).parent(),
+			position: "fixed",
+			autoCloseContext: po.element()
+		});
+		po.element("input[name='border-color']", veStyleForm).listpalllet(
+		{
+			indicator: po.element(".border-color-indicator", veStyleForm),
+			container: po.element("input[name='border-color']", veStyleForm).parent(),
 			position: "fixed",
 			autoCloseContext: po.element()
 		});
@@ -1416,6 +1424,11 @@
 				"background-color": function(form, value)
 				{
 					po.element(".bgcolor-indicator", form).css("background-color", (value||""));
+					return false;
+				},
+				"border-color": function(form, value)
+				{
+					po.element(".border-color-indicator", form).css("background-color", (value||""));
 					return false;
 				}
 			}
