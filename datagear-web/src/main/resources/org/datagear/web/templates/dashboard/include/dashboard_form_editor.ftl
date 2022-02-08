@@ -61,6 +61,7 @@
 		po.element(".styleBgRepeatBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleBorderWidthBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleBorderStyleBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleBorderRadiusBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleDisplayBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleBoxSizingBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".stylePositionBtnGroup", veStyleForm).controlgroupwrapper();

@@ -352,8 +352,11 @@ readonly 是否只读操作，允许为null
 									<button type="button" class="help-src small-button" help-value="1px">
 										<@spring.message code='dashboard.veditor.style.borderWidth.1px' />
 									</button>
-									<button type="button" class="help-src small-button" help-value="2px">
-										<@spring.message code='dashboard.veditor.style.borderWidth.2px' />
+									<button type="button" class="help-src small-button" help-value="3px">
+										<@spring.message code='dashboard.veditor.style.borderWidth.3px' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="5px">
+										<@spring.message code='dashboard.veditor.style.borderWidth.5px' />
 									</button>
 								</div>
 							</div>
@@ -392,13 +395,25 @@ readonly 是否只读操作，允许为null
 							</div>
 						</div>
 						<div class="form-item">
-							<div class="form-item-label">
+							<div class="form-item-label align-top">
 								<label title="<@spring.message code='dashboard.veditor.style.borderRadius.desc' />">
 									<@spring.message code='dashboard.veditor.style.borderRadius' />
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="border-radius" class="ui-widget ui-widget-content" size="200" />
+								<input type="text" name="border-radius" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleBorderRadiusBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="3px">
+										<@spring.message code='dashboard.veditor.style.borderRadius.3px' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="5px">
+										<@spring.message code='dashboard.veditor.style.borderRadius.5px' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="10px">
+										<@spring.message code='dashboard.veditor.style.borderRadius.10px' />
+									</button>
+								</div>
 							</div>
 						</div>
 						<div class="form-item">
