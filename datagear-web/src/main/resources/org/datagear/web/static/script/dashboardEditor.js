@@ -1647,7 +1647,7 @@
 			+ "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_SELECTED+",\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_SELECTED+"{\n"
-			+ "  box-shadow: inset 0 0 2px 2px " + options.selectedBorderColor + ";"
+			+ "  box-shadow: inset 0 0 2px 2px " + options.selectedBorderColor + " !important;"
 			+ "\n}"
 			+ "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_NEW_INSERT+",\n"
