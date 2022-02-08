@@ -64,6 +64,12 @@
 		po.element(".styleDisplayBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleBoxSizingBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".stylePositionBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleFlexDirectionBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleFlexWrapBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleJustifyContentBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleAlignItemsBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleAlignContentBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleAlignSelfBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleFontWeightBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleTextAlignBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element("input[name='color']", veStyleForm).listpalllet(

@@ -505,11 +505,9 @@
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
 		if(insertParentEle.is("body"))
-			styleStr = "height:3em;";
+			styleStr = "width:100%;height:100px;";
 		else
-			styleStr = "display:inline-block;width:50%;height:100%;";
-		
-		styleStr += "box-sizing:border-box;";
+			styleStr = "width:100px;height:100px;";
 		
 		div.attr("style", styleStr);
 		
@@ -1425,6 +1423,17 @@
 		"top": true,
 		"right": true,
 		"bottom": true,
+		"flex-direction": true,
+		"flex-wrap": true,
+		"justify-content": true,
+		"align-items": true,
+		"order": true,
+		"flex-grow": true,
+		"flex-shrink": true,
+		"flex-basis": true,
+		"align-self": true,
+		"align-content": true,
+		"font-family": true,
 		"font-size": true,
 		"font-weight": true,
 		"text-align": true

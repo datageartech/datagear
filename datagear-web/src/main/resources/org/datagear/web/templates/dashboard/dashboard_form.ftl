@@ -567,16 +567,229 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="bottom" class="ui-widget ui-widget-content" size="100" />
 							</div>
 						</div>
-						<!--
 						<div class="ui-widget-header">
 							<@spring.message code='dashboard.veditor.styleSubType.flexContainer' />
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.flexDirection' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="flex-direction" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleFlexDirectionBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="row">
+										<@spring.message code='dashboard.veditor.style.flexDirection.row' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="row-reverse">
+										<@spring.message code='dashboard.veditor.style.flexDirection.row-reverse' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="column">
+										<@spring.message code='dashboard.veditor.style.flexDirection.column' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="column-reverse">
+										<@spring.message code='dashboard.veditor.style.flexDirection.column-reverse' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.flexWrap' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="flex-wrap" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleFlexWrapBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="nowrap">
+										<@spring.message code='dashboard.veditor.style.flexWrap.nowrap' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="wrap">
+										<@spring.message code='dashboard.veditor.style.flexWrap.wrap' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="wrap-reverse">
+										<@spring.message code='dashboard.veditor.style.flexWrap.wrap-reverse' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.justifyContent' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="justify-content" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleJustifyContentBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="flex-start">
+										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="flex-end">
+										<@spring.message code='dashboard.veditor.style.flexAligns.flex-end' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="center">
+										<@spring.message code='dashboard.veditor.style.flexAligns.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-between">
+										<@spring.message code='dashboard.veditor.style.flexAligns.space-between' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-around">
+										<@spring.message code='dashboard.veditor.style.flexAligns.space-around' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.alignItems' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="align-items" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleAlignItemsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="flex-start">
+										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="flex-end">
+										<@spring.message code='dashboard.veditor.style.flexAligns.flex-end' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="center">
+										<@spring.message code='dashboard.veditor.style.flexAligns.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="baseline">
+										<@spring.message code='dashboard.veditor.style.flexAligns.baseline' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="stretch">
+										<@spring.message code='dashboard.veditor.style.flexAligns.stretch' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.alignContent' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="align-content" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleAlignContentBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="flex-start">
+										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="flex-end">
+										<@spring.message code='dashboard.veditor.style.flexAligns.flex-end' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="center">
+										<@spring.message code='dashboard.veditor.style.flexAligns.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-between">
+										<@spring.message code='dashboard.veditor.style.flexAligns.space-between' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-around">
+										<@spring.message code='dashboard.veditor.style.flexAligns.space-around' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="stretch">
+										<@spring.message code='dashboard.veditor.style.flexAligns.stretch' />
+									</button>
+								</div>
+							</div>
 						</div>
 						<div class="ui-widget-header">
 							<@spring.message code='dashboard.veditor.styleSubType.flexItem' />
 						</div>
-						-->
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.order.desc' />">
+									<@spring.message code='dashboard.veditor.style.order' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="order" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.flexGrow.desc' />">
+									<@spring.message code='dashboard.veditor.style.flexGrow' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="flex-grow" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.flexShrink.desc' />">
+									<@spring.message code='dashboard.veditor.style.flexShrink' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="flex-shrink" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.flexBasis.desc' />">
+									<@spring.message code='dashboard.veditor.style.flexBasis' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="flex-basis" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.alignSelf' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="align-self" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleAlignSelfBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="flex-start">
+										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="flex-end">
+										<@spring.message code='dashboard.veditor.style.flexAligns.flex-end' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="center">
+										<@spring.message code='dashboard.veditor.style.flexAligns.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="baseline">
+										<@spring.message code='dashboard.veditor.style.flexAligns.baseline' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="stretch">
+										<@spring.message code='dashboard.veditor.style.flexAligns.stretch' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="auto">
+										<@spring.message code='dashboard.veditor.style.flexAligns.auto' />
+									</button>
+								</div>
+							</div>
+						</div>
 					</div>
 					<div id="${pageId}-styleTabsPaneFont" class="style-tab-pane ui-widget ui-widget-content">
+						<div class="form-item">
+							<div class="form-item-label">
+								<label>
+									<@spring.message code='dashboard.veditor.style.fontFamily' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="font-family" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
 						<div class="form-item">
 							<div class="form-item-label">
 								<label title="<@spring.message code='dashboard.veditor.style.fontSize.desc' />">
