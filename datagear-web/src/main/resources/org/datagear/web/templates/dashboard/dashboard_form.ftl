@@ -482,6 +482,25 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="margin" class="ui-widget ui-widget-content" size="100" />
 							</div>
 						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.boxSizing' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="box-sizing" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleBoxSizingBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="border-box">
+										<@spring.message code='dashboard.veditor.style.boxSizing.border-box' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="content-box">
+										<@spring.message code='dashboard.veditor.style.boxSizing.content-box' />
+									</button>
+								</div>
+							</div>
+						</div>
 						<div class="ui-widget-header">
 							<@spring.message code='dashboard.veditor.styleSubType.position' />
 						</div>

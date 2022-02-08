@@ -1419,6 +1419,7 @@
 		"height": true,
 		"padding": true,
 		"margin": true,
+		"box-sizing": true,
 		"position": true,
 		"left": true,
 		"top": true,
