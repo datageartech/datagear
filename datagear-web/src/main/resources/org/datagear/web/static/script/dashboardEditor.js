@@ -1423,6 +1423,7 @@
 		"top": true,
 		"right": true,
 		"bottom": true,
+		"z-index": true,
 		"flex-direction": true,
 		"flex-wrap": true,
 		"justify-content": true,

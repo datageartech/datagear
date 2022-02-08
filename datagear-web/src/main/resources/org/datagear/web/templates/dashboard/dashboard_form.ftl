@@ -567,6 +567,16 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="bottom" class="ui-widget ui-widget-content" size="100" />
 							</div>
 						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.zindex.desc' />">
+									<@spring.message code='dashboard.veditor.style.zindex' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="z-index" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
 						<div class="ui-widget-header">
 							<@spring.message code='dashboard.veditor.styleSubType.flexContainer' />
 						</div>
