@@ -866,7 +866,7 @@
 						chart.resize();
 				}
 			},
-			100);
+			300);
 		};
 		
 		$window.on("resize", this._windowResizeHandler);

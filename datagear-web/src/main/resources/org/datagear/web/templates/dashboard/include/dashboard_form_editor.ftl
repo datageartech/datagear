@@ -71,6 +71,10 @@
 		po.element(".styleAlignItemsBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleAlignContentBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleAlignSelfBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleGridTemplateColumnsBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleGridTemplateRowsBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleGridAutoFlowBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleJustifyItemsBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleFontWeightBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleTextAlignBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element("input[name='color']", veStyleForm).listpalllet(

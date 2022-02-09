@@ -565,7 +565,7 @@
 		if(insertParentEle.is("body"))
 			styleStr = this.defaultInsertChartEleStyle;
 		else
-			styleStr = "display:inline-block;width:100%;height:100%;";
+			styleStr = "width:100%;height:100%;";
 		
 		for(var i=0; i<chartWidgets.length; i++)
 		{
@@ -1434,6 +1434,13 @@
 		"flex-basis": true,
 		"align-self": true,
 		"align-content": true,
+		"grid-template-columns": true,
+		"grid-template-rows": true,
+		"grid-column-gap": true,
+		"grid-row-gap": true,
+		"grid-template-areas": true,
+		"grid-auto-flow": true,
+		"justify-items": true,
 		"font-family": true,
 		"font-size": true,
 		"font-weight": true,

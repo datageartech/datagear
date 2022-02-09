@@ -439,6 +439,12 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="display" class="help-target ui-widget ui-widget-content" size="100" />
 								<br>
 								<div class="styleDisplayBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="grid">
+										<@spring.message code='dashboard.veditor.style.display.grid' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="inline-grid">
+										<@spring.message code='dashboard.veditor.style.display.inline-grid' />
+									</button>
 									<button type="button" class="help-src small-button" help-value="flex">
 										<@spring.message code='dashboard.veditor.style.display.flex' />
 									</button>
@@ -591,6 +597,141 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="z-index" class="ui-widget ui-widget-content" size="100" />
 							</div>
+						</div>
+						<div class="ui-widget-header">
+							<@spring.message code='dashboard.veditor.styleSubType.gridContainer' />
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label title="<@spring.message code='dashboard.veditor.style.gridTemplateColumns.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridTemplateColumns' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="grid-template-columns" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleGridTemplateColumnsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="repeat(2, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.2c' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(3, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.3c' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(4, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.4c' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(5, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.5c' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label title="<@spring.message code='dashboard.veditor.style.gridTemplateRows.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridTemplateRows' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="grid-template-rows" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleGridTemplateRowsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="repeat(2, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.2r' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(3, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.3r' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(4, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.4r' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(5, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.5r' />
+									</button>
+								</div>
+							</div>
+						</div><div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.gridColumnGap.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridColumnGap' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="grid-column-gap" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.gridRowGap.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridRowGap' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="grid-row-gap" class="ui-widget ui-widget-content" size="100" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label">
+								<label title="<@spring.message code='dashboard.veditor.style.gridTemplateAreas.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridTemplateAreas' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="grid-template-areas" class="ui-widget ui-widget-content" size="300" />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.gridAutoFlow' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="grid-auto-flow" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleGridAutoFlowBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="row">
+										<@spring.message code='dashboard.veditor.style.gridAutoFlow.row' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="column">
+										<@spring.message code='dashboard.veditor.style.gridAutoFlow.column' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="row dense">
+										<@spring.message code='dashboard.veditor.style.gridAutoFlow.rowDense' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="column dense">
+										<@spring.message code='dashboard.veditor.style.gridAutoFlow.columnDense' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.justifyItems' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="justify-items" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleJustifyItemsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="start">
+										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="end">
+										<@spring.message code='dashboard.veditor.style.gridAligns.end' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="center">
+										<@spring.message code='dashboard.veditor.style.gridAligns.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="stretch">
+										<@spring.message code='dashboard.veditor.style.gridAligns.stretch' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="ui-widget-header">
+							<@spring.message code='dashboard.veditor.styleSubType.gridItem' />
 						</div>
 						<div class="ui-widget-header">
 							<@spring.message code='dashboard.veditor.styleSubType.flexContainer' />
