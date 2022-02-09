@@ -730,6 +730,149 @@ readonly 是否只读操作，允许为null
 								</div>
 							</div>
 						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.alignItemsGrid' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="align-items-grid" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleAlignItemsGridBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="start">
+										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="end">
+										<@spring.message code='dashboard.veditor.style.gridAligns.end' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="center">
+										<@spring.message code='dashboard.veditor.style.gridAligns.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="stretch">
+										<@spring.message code='dashboard.veditor.style.gridAligns.stretch' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.justifyContentGrid' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="justify-content-grid" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleJustifyContentGridBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="start">
+										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="end">
+										<@spring.message code='dashboard.veditor.style.gridAligns.end' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="center">
+										<@spring.message code='dashboard.veditor.style.gridAligns.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="stretch">
+										<@spring.message code='dashboard.veditor.style.gridAligns.stretch' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-around">
+										<@spring.message code='dashboard.veditor.style.gridAligns.space-around' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-between">
+										<@spring.message code='dashboard.veditor.style.gridAligns.space-between' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-evenly">
+										<@spring.message code='dashboard.veditor.style.gridAligns.space-evenly' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label>
+									<@spring.message code='dashboard.veditor.style.alignContentGrid' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="align-content-grid" class="help-target ui-widget ui-widget-content" size="100" />
+								<br>
+								<div class="styleAlignContentGridBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="start">
+										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="end">
+										<@spring.message code='dashboard.veditor.style.gridAligns.end' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="center">
+										<@spring.message code='dashboard.veditor.style.gridAligns.center' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="stretch">
+										<@spring.message code='dashboard.veditor.style.gridAligns.stretch' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-around">
+										<@spring.message code='dashboard.veditor.style.gridAligns.space-around' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-between">
+										<@spring.message code='dashboard.veditor.style.gridAligns.space-between' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="space-evenly">
+										<@spring.message code='dashboard.veditor.style.gridAligns.space-evenly' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label title="<@spring.message code='dashboard.veditor.style.gridTemplateColumns.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridAutoColumns' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="grid-auto-columns" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleGridAutoColumnsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="repeat(2, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.2c' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(3, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.3c' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(4, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.4c' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(5, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.5c' />
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label align-top">
+								<label title="<@spring.message code='dashboard.veditor.style.gridTemplateColumns.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridAutoRows' />
+								</label>
+							</div>
+							<div class="form-item-value">
+								<input type="text" name="grid-auto-rows" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleGridAutoRowsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="repeat(2, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.2r' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(3, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.3r' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(4, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.4r' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="repeat(5, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.5r' />
+									</button>
+								</div>
+							</div>
+						</div>
 						<div class="ui-widget-header">
 							<@spring.message code='dashboard.veditor.styleSubType.gridItem' />
 						</div>
@@ -786,13 +929,13 @@ readonly 是否只读操作，允许为null
 						<div class="form-item">
 							<div class="form-item-label align-top">
 								<label>
-									<@spring.message code='dashboard.veditor.style.justifyContent' />
+									<@spring.message code='dashboard.veditor.style.justifyContentFlex' />
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="justify-content" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="justify-content-flex" class="help-target ui-widget ui-widget-content" size="100" />
 								<br>
-								<div class="styleJustifyContentBtnGroup helper-opt">
+								<div class="styleJustifyContentFlexBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
 										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
 									</button>
@@ -814,13 +957,13 @@ readonly 是否只读操作，允许为null
 						<div class="form-item">
 							<div class="form-item-label align-top">
 								<label>
-									<@spring.message code='dashboard.veditor.style.alignItems' />
+									<@spring.message code='dashboard.veditor.style.alignItemsFlex' />
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="align-items" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="align-items-flex" class="help-target ui-widget ui-widget-content" size="100" />
 								<br>
-								<div class="styleAlignItemsBtnGroup helper-opt">
+								<div class="styleAlignItemsFlexBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
 										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
 									</button>
@@ -842,13 +985,13 @@ readonly 是否只读操作，允许为null
 						<div class="form-item">
 							<div class="form-item-label align-top">
 								<label>
-									<@spring.message code='dashboard.veditor.style.alignContent' />
+									<@spring.message code='dashboard.veditor.style.alignContentFlex' />
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="align-content" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="align-content-flex" class="help-target ui-widget ui-widget-content" size="100" />
 								<br>
-								<div class="styleAlignContentBtnGroup helper-opt">
+								<div class="styleAlignContentFlexBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
 										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
 									</button>
