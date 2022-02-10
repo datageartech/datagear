@@ -20,14 +20,21 @@
 		var veContentForm = po.element("form", veContentPanel);
 		veContentForm.submit(function()
 		{
-			veContentPanel.hide();
-			
-			var tabPane = po.getActiveResEditorTabPane();
-			var dashboardEditor = po.visualDashboardEditor(tabPane);
-			if(dashboardEditor)
+			try
 			{
-				var text = po.element("input[name='content']", veContentPanel).val();
-				dashboardEditor.setElementText(text);
+				veContentPanel.hide();
+				
+				var tabPane = po.getActiveResEditorTabPane();
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				if(dashboardEditor)
+				{
+					var text = po.element("input[name='content']", veContentPanel).val();
+					dashboardEditor.setElementText(text);
+				}
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
 			}
 			
 			return false;
@@ -39,45 +46,52 @@
 		var veStyleForm = po.element("form", veStylePanel);
 		veStyleForm.submit(function()
 		{
-			veStylePanel.hide();
-			
-			var tabPane = po.getActiveResEditorTabPane();
-			var dashboardEditor = po.visualDashboardEditor(tabPane);
-			if(dashboardEditor)
+			try
 			{
-				var styleObj = $.formToJson(this);
+				veStylePanel.hide();
 				
-				if(po.isDisplayGrid(styleObj.display))
+				var tabPane = po.getActiveResEditorTabPane();
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				if(dashboardEditor)
 				{
-					styleObj['align-items'] = styleObj['align-items-grid'];
-					styleObj['justify-content'] = styleObj['justify-content-grid'];
-					styleObj['align-content'] = styleObj['align-content-grid'];
+					var styleObj = $.formToJson(this);
+					
+					if(po.isDisplayGrid(styleObj.display))
+					{
+						styleObj['align-items'] = styleObj['align-items-grid'];
+						styleObj['justify-content'] = styleObj['justify-content-grid'];
+						styleObj['align-content'] = styleObj['align-content-grid'];
+					}
+					else if(po.isDisplayFlex(styleObj.display))
+					{
+						styleObj['align-items'] = styleObj['align-items-flex'];
+						styleObj['justify-content'] = styleObj['justify-content-flex'];
+						styleObj['align-content'] = styleObj['align-content-flex'];
+					}
+					
+					if(dashboardEditor.isGridItemElement())
+						styleObj['align-self'] = styleObj['align-self-grid'];
+					else if(dashboardEditor.isFlexItemElement())
+						styleObj['align-self'] = styleObj['align-self-flex'];
+					
+					styleObj['align-items-grid']=null;
+					styleObj['justify-content-grid']=null;
+					styleObj['align-content-grid']=null;
+					styleObj['align-self-grid']=null;
+					styleObj['align-items-flex']=null;
+					styleObj['justify-content-flex']=null;
+					styleObj['align-content-flex']=null;
+					styleObj['align-self-flex']=null;
+					
+					if(po.editOperationForVisualEdit == "editStyle")
+						dashboardEditor.setElementStyle(styleObj);
+					else if(po.editOperationForVisualEdit == "editGlobalStyle")
+						dashboardEditor.setGlobalStyle(styleObj);
 				}
-				else if(po.isDisplayFlex(styleObj.display))
-				{
-					styleObj['align-items'] = styleObj['align-items-flex'];
-					styleObj['justify-content'] = styleObj['justify-content-flex'];
-					styleObj['align-content'] = styleObj['align-content-flex'];
-				}
-				
-				if(dashboardEditor.isGridItemElement())
-					styleObj['align-self'] = styleObj['align-self-grid'];
-				else if(dashboardEditor.isFlexItemElement())
-					styleObj['align-self'] = styleObj['align-self-flex'];
-				
-				styleObj['align-items-grid']=null;
-				styleObj['justify-content-grid']=null;
-				styleObj['align-content-grid']=null;
-				styleObj['align-self-grid']=null;
-				styleObj['align-items-flex']=null;
-				styleObj['justify-content-flex']=null;
-				styleObj['align-content-flex']=null;
-				styleObj['align-self-flex']=null;
-				
-				if(po.editOperationForVisualEdit == "editStyle")
-					dashboardEditor.setElementStyle(styleObj);
-				else if(po.editOperationForVisualEdit == "editGlobalStyle")
-					dashboardEditor.setGlobalStyle(styleObj);
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
 			}
 			
 			return false;
@@ -140,18 +154,25 @@
 		var veChartThemeForm = po.element("form", veChartThemePanel);
 		veChartThemeForm.submit(function()
 		{
-			veChartThemePanel.hide();
-			
-			var tabPane = po.getActiveResEditorTabPane();
-			var dashboardEditor = po.visualDashboardEditor(tabPane);
-			if(dashboardEditor)
+			try
 			{
-				var chartThemeObj = $.formToJson(this);
+				veChartThemePanel.hide();
 				
-				if(po.editOperationForVisualEdit == "editChartTheme")
-					dashboardEditor.setElementChartTheme(chartThemeObj);
-				else if(po.editOperationForVisualEdit == "editGlobalChartTheme")
-					dashboardEditor.setGlobalChartTheme(chartThemeObj);
+				var tabPane = po.getActiveResEditorTabPane();
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				if(dashboardEditor)
+				{
+					var chartThemeObj = $.formToJson(this);
+					
+					if(po.editOperationForVisualEdit == "editChartTheme")
+						dashboardEditor.setElementChartTheme(chartThemeObj);
+					else if(po.editOperationForVisualEdit == "editGlobalChartTheme")
+						dashboardEditor.setGlobalChartTheme(chartThemeObj);
+				}
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
 			}
 			
 			return false;
@@ -200,22 +221,29 @@
 		var veDashboardSizeForm = po.element("form", veDashboardSizePanel);
 		veDashboardSizeForm.submit(function()
 		{
-			veDashboardSizePanel.hide();
-			
-			var setting = $.formToJson(this);
-			var topWindowSize = po.evalTopWindowSize();
-			var ifmWidth = (setting.width ? parseInt(setting.width) : topWindowSize.width);
-			var ifmHeight = (setting.height ? parseInt(setting.height) : topWindowSize.height);
-			
-			var tabPane = po.getActiveResEditorTabPane();
-			var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
-			
-			if(ifmWidth > 0)
-				visualEditorIfm.css("width", ifmWidth);
-			if(ifmHeight > 0)
-				visualEditorIfm.css("height", ifmHeight);
-			
-			po.setVisualEditorIframeScale(visualEditorIfm, setting.scale);
+			try
+			{
+				veDashboardSizePanel.hide();
+				
+				var setting = $.formToJson(this);
+				var topWindowSize = po.evalTopWindowSize();
+				var ifmWidth = (setting.width ? parseInt(setting.width) : topWindowSize.width);
+				var ifmHeight = (setting.height ? parseInt(setting.height) : topWindowSize.height);
+				
+				var tabPane = po.getActiveResEditorTabPane();
+				var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+				
+				if(ifmWidth > 0)
+					visualEditorIfm.css("width", ifmWidth);
+				if(ifmHeight > 0)
+					visualEditorIfm.css("height", ifmHeight);
+				
+				po.setVisualEditorIframeScale(visualEditorIfm, setting.scale);
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
+			}
 			
 			return false;
 		});
@@ -227,19 +255,26 @@
 		var veChartOptionsForm = po.element("form", veChartOptionsPanel);
 		veChartOptionsForm.submit(function()
 		{
-			veChartOptionsPanel.hide();
-			
-			var tabPane = po.getActiveResEditorTabPane();
-			var dashboardEditor = po.visualDashboardEditor(tabPane);
-			if(dashboardEditor)
+			try
 			{
-				var chartOptionsObj = $.formToJson(this);
-				var chartOptionsStr = (chartOptionsObj ? chartOptionsObj.options : "");
+				veChartOptionsPanel.hide();
 				
-				if(po.editOperationForVisualEdit == "editChartOptions")
-					dashboardEditor.setElementChartOptions(chartOptionsStr);
-				else if(po.editOperationForVisualEdit == "editGlobalChartOptions")
-					dashboardEditor.setGlobalChartOptions(chartOptionsStr);
+				var tabPane = po.getActiveResEditorTabPane();
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				if(dashboardEditor)
+				{
+					var chartOptionsObj = $.formToJson(this);
+					var chartOptionsStr = (chartOptionsObj ? chartOptionsObj.options : "");
+					
+					if(po.editOperationForVisualEdit == "editChartOptions")
+						dashboardEditor.setElementChartOptions(chartOptionsStr);
+					else if(po.editOperationForVisualEdit == "editGlobalChartOptions")
+						dashboardEditor.setGlobalChartOptions(chartOptionsStr);
+				}
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
 			}
 			
 			return false;
