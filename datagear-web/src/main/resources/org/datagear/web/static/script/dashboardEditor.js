@@ -477,6 +477,34 @@
 	};
 	
 	/**
+	 * 是否是网格布局条目元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.isGridItemElement = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		var parent = ele.parent();
+		var display = (parent.css("display") || "");
+		
+		return /^(grid|inline-grid)$/i.test(display);
+	};
+	
+	/**
+	 * 是否是弹性布局条目元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.isFlexItemElement = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		var parent = ele.parent();
+		var display = (parent.css("display") || "");
+		
+		return /^(flex|inline-flex)$/i.test(display);
+	};
+	
+	/**
 	 * 校验insertDiv操作。
 	 * 
 	 * @param insertType 可选，参考insertElement函数的insertType参数
@@ -1441,6 +1469,12 @@
 		"grid-template-areas": true,
 		"grid-auto-flow": true,
 		"justify-items": true,
+		"grid-column-start": true,
+		"grid-column-end": true,
+		"grid-row-start": true,
+		"grid-row-end": true,
+		"grid-area": true,
+		"justify-self": true,
 		"font-family": true,
 		"font-size": true,
 		"font-weight": true,

@@ -60,12 +60,19 @@
 					styleObj['align-content'] = styleObj['align-content-flex'];
 				}
 				
+				if(dashboardEditor.isGridItemElement())
+					styleObj['align-self'] = styleObj['align-self-grid'];
+				else if(dashboardEditor.isFlexItemElement())
+					styleObj['align-self'] = styleObj['align-self-flex'];
+				
 				styleObj['align-items-grid']=null;
 				styleObj['justify-content-grid']=null;
 				styleObj['align-content-grid']=null;
+				styleObj['align-self-grid']=null;
 				styleObj['align-items-flex']=null;
 				styleObj['justify-content-flex']=null;
 				styleObj['align-content-flex']=null;
+				styleObj['align-self-flex']=null;
 				
 				if(po.editOperationForVisualEdit == "editStyle")
 					dashboardEditor.setElementStyle(styleObj);
@@ -90,7 +97,7 @@
 		po.element(".styleJustifyContentFlexBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleAlignItemsFlexBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleAlignContentFlexBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleAlignSelfBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleAlignSelfFlexBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleGridTemplateColumnsBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleGridTemplateRowsBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleGridAutoFlowBtnGroup", veStyleForm).controlgroupwrapper();
@@ -100,6 +107,8 @@
 		po.element(".styleAlignContentGridBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleGridAutoColumnsBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleGridAutoRowsBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleJustifySelfBtnGroup", veStyleForm).controlgroupwrapper();
+		po.element(".styleAlignSelfGridBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleFontWeightBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element(".styleTextAlignBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element("input[name='color']", veStyleForm).listpalllet(
@@ -1304,7 +1313,10 @@
 						else
 							po.element(".form-item-syncChartTheme" ,panel).hide();
 						
-						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getElementStyle());
+						var elementStyleObj = dashboardEditor.getElementStyle();
+						elementStyleObj.isGridItemElement = dashboardEditor.isGridItemElement();
+						elementStyleObj.isFlexItemElement = dashboardEditor.isFlexItemElement();
+						po.setVeditorStyleFormValue(po.element("form", panel), elementStyleObj);
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorStylePanel(panel);
 					}
@@ -1473,6 +1485,11 @@
 			styleObj['justify-content-flex'] = styleObj['justify-content'];
 			styleObj['align-content-flex'] = styleObj['align-content'];
 		}
+		
+		if(styleObj.isGridItemElement)
+			styleObj['align-self-grid'] = styleObj['align-self'];
+		else if(styleObj.isFlexItemElement)
+			styleObj['align-self-flex'] = styleObj['align-self'];
 		
 		$.jsonToForm($form, styleObj,
 		{
