@@ -730,7 +730,7 @@
 		{
 			var editEle = this._editElement(refEle);
 			var insertEleClone = insertEle.clone();
-			this._insertElement(editEle, insertEleClone, insertType, true);
+			this._insertElement(editEle, insertEleClone, insertType);
 		}
 		
 		insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
@@ -1542,51 +1542,39 @@
 		return currentEle;
 	};
 	
-	editor._insertElement = function(refEle, insertEle, insertType, format)
+	editor._insertElement = function(refEle, insertEle, insertType)
 	{
-		format = (format == null ? false : format);
-		
 		if(insertType == "after")
 		{
 			refEle.after(insertEle);
 			
-			if(format)
-				refEle.after("\n");
+			refEle.after("\n");
 		}
 		else if(insertType == "before")
 		{
 			refEle.before(insertEle);
 			
-			if(format)
-				refEle.before("\n");
+			refEle.before("\n");
 		}
 		else if(insertType == "append")
 		{
-			if(format)
-			{
-				var innerHtml = refEle.prop("innerHTML");
-				if(!innerHtml || innerHtml.charAt(innerHtml.length-1) != '\n')
-					refEle.append("\n");
-			}
+			var innerHtml = refEle.prop("innerHTML");
+			if(!innerHtml || innerHtml.charAt(innerHtml.length-1) != '\n')
+				refEle.append("\n");
 			
 			refEle.append(insertEle);
 			
-			if(format)
-				refEle.append("\n");
+			refEle.append("\n");
 		}
 		else if(insertType == "prepend")
 		{
-			if(format)
-			{
-				var innerHtml = refEle.prop("innerHTML");
-				if(!innerHtml || innerHtml.charAt(0) != '\n')
-					refEle.prepend("\n");
-			}
+			var innerHtml = refEle.prop("innerHTML");
+			if(!innerHtml || innerHtml.charAt(0) != '\n')
+				refEle.prepend("\n");
 			
 			refEle.prepend(insertEle);
 			
-			if(format)
-				refEle.prepend("\n");
+			refEle.prepend("\n");
 		}
 	};
 	
