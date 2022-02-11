@@ -280,6 +280,36 @@
 			return false;
 		});
 		
+		//初始化插入网格布局面板
+		var veGridLayoutPanel = po.element(".veditor-gridLayout-panel");
+		veGridLayoutPanel.draggable({ handle: ".panel-head" });
+		var veGridLayoutForm = po.element("form", veGridLayoutPanel);
+		veGridLayoutForm.submit(function()
+		{
+			try
+			{
+				veGridLayoutPanel.hide();
+				
+				var tabPane = po.getActiveResEditorTabPane();
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				if(dashboardEditor)
+				{
+					var gridLayoutObj = $.formToJson(this);
+					var rows = parseInt(gridLayoutObj.rows);
+					var columns = parseInt(gridLayoutObj.columns);
+					dashboardEditor.insertGridLayout(rows, columns, po.insertTypeForVisualEdit);
+				}
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
+			}
+			
+			return false;
+		});
+		po.element(".gridLayoutRowsBtnGroup", veGridLayoutForm).controlgroupwrapper();
+		po.element(".gridLayoutColumnsBtnGroup", veGridLayoutForm).controlgroupwrapper();
+		
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
 			var $this = $(this);
@@ -1252,7 +1282,15 @@
 				if(!dashboardEditor)
 					return;
 				
-				if(insertOperation == "insertDiv")
+				if(insertOperation == "insertGridLayout")
+				{
+					if(!dashboardEditor.checkInsertGridLayout(insertType))
+						return;
+					
+					var panel = po.element(".veditor-gridLayout-panel");
+					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+				}
+				else if(insertOperation == "insertDiv")
 				{
 					if(!dashboardEditor.checkInsertDiv(insertType))
 						return;
@@ -1657,6 +1695,9 @@
 	po.buildVisualEditorInsertMenuItems = function($parent, insertType)
 	{
 		var ul = $("<ul class='ui-widget-shadow' />");
+		
+		$("<li insertOperation='insertGridLayout' insertType='"+insertType+"' auto-close-prevent='veditor-gridLayout-panel' />")
+			.html("<div><@spring.message code='dashboard.opt.insertType.gridLayout' /></div>").appendTo(ul);
 		
 		$("<li insertOperation='insertDiv' insertType='"+insertType+"' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.div' /></div>").appendTo(ul);

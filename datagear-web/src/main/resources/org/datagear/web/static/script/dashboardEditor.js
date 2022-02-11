@@ -505,6 +505,54 @@
 	};
 	
 	/**
+	 * 校验网格布局元素。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.checkInsertGridLayout = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 插入网格布局元素。
+	 * 
+	 * @param rows 网格行数
+	 * @param columns 网格列数
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertGridLayout = function(rows, columns, insertType, refEle)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		//不能使用"<div />"，生成的源码格式不对
+		var div = $("<div></div>");
+		
+		var styleStr = "display:grid;";
+		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		
+		if(insertParentEle.is("body"))
+			styleStr += "width:100%;height:300px;";
+		else
+			styleStr += "width:100%;height:100%;";
+		
+		styleStr += "grid-template-columns:repeat("+columns+", 1fr);grid-template-rows:repeat("+rows+", 1fr);";
+		
+		div.attr("style", styleStr);
+		
+		for(var i=0; i<rows; i++)
+		{
+			for(var j=0; j<columns; j++)
+				this._insertElement(div, $("<div></div>"), "append");
+		}
+		
+		this.insertElement(div, insertType, refEle);
+	};
+	
+	/**
 	 * 校验insertDiv操作。
 	 * 
 	 * @param insertType 可选，参考insertElement函数的insertType参数
@@ -722,7 +770,7 @@
 		if(chartFactory.isString(insertEle))
 			insertEle = $(insertEle);
 		
-		insertEle.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, this._nextVisualEditId());
+		this._addVisualEditIdAttr(insertEle);
 		
 		this._insertElement(refEle, insertEle, insertType);
 		
@@ -734,6 +782,8 @@
 		}
 		
 		insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
+		$("*", insertEle).addClass(ELEMENT_CLASS_NEW_INSERT);
+		
 		this._hasElementClassNewInsert = true;
 		
 		this.changeFlag(true);
@@ -1469,6 +1519,8 @@
 		"grid-template-areas": true,
 		"grid-auto-flow": true,
 		"justify-items": true,
+		"grid-auto-columns": true,
+		"grid-auto-rows": true,
 		"grid-column-start": true,
 		"grid-column-end": true,
 		"grid-row-start": true,
@@ -1540,6 +1592,21 @@
 			currentEle = (this._isEmptyElement(currentEle) ? $(document.body) : currentEle);
 		
 		return currentEle;
+	};
+	
+	editor._addVisualEditIdAttr = function($ele)
+	{
+		$ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, this._nextVisualEditId());
+		
+		var children = $ele.children();
+		
+		if(children.length < 1)
+			return;
+			
+		children.each(function()
+		{
+			editor._addVisualEditIdAttr($(this));
+		});
 	};
 	
 	editor._insertElement = function(refEle, insertEle, insertType)

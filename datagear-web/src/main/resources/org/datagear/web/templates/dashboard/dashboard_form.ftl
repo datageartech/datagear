@@ -611,6 +611,9 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="grid-template-columns" class="help-target ui-widget ui-widget-content" size="200" />
 								<br>
 								<div class="styleGridTemplateColumnsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.1c' />
+									</button>
 									<button type="button" class="help-src small-button" help-value="repeat(2, 1fr)">
 										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.2c' />
 									</button>
@@ -636,6 +639,9 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="grid-template-rows" class="help-target ui-widget ui-widget-content" size="200" />
 								<br>
 								<div class="styleGridTemplateRowsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.1r' />
+									</button>
 									<button type="button" class="help-src small-button" help-value="repeat(2, 1fr)">
 										<@spring.message code='dashboard.veditor.style.gridTemplateRows.2r' />
 									</button>
@@ -650,7 +656,8 @@ readonly 是否只读操作，允许为null
 									</button>
 								</div>
 							</div>
-						</div><div class="form-item">
+						</div>
+						<div class="form-item">
 							<div class="form-item-label">
 								<label title="<@spring.message code='dashboard.veditor.style.gridColumnGap.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridColumnGap' />
@@ -833,6 +840,9 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="grid-auto-columns" class="help-target ui-widget ui-widget-content" size="200" />
 								<br>
 								<div class="styleGridAutoColumnsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.1c' />
+									</button>
 									<button type="button" class="help-src small-button" help-value="repeat(2, 1fr)">
 										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.2c' />
 									</button>
@@ -858,6 +868,9 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="grid-auto-rows" class="help-target ui-widget ui-widget-content" size="200" />
 								<br>
 								<div class="styleGridAutoRowsBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
+										<@spring.message code='dashboard.veditor.style.gridTemplateRows.1r' />
+									</button>
 									<button type="button" class="help-src small-button" help-value="repeat(2, 1fr)">
 										<@spring.message code='dashboard.veditor.style.gridTemplateRows.2r' />
 									</button>
@@ -1403,6 +1416,70 @@ readonly 是否只读操作，允许为null
 					</div>
 					<div class="form-item-value">
 						<textarea name="options" class="ui-widget ui-widget-content"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="panel-foot">
+				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
+			</div>
+		</form>
+	</div>
+	<div class="veditor-gridLayout-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<form action="#" method="POST" class="display-37">
+			<div class="panel-head ui-widget-header ui-corner-all">
+				<@spring.message code='dashboard.veditor.gridLayout' />
+			</div>
+			<div class="panel-content form-content">
+				<div class="form-item">
+					<div class="form-item-label align-top">
+						<label><@spring.message code='dashboard.veditor.gridLayout.rows' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="rows" class="help-target ui-widget ui-widget-content" size="50" />
+						<br>
+						<div class="gridLayoutRowsBtnGroup helper-opt">
+							<button type="button" class="help-src small-button" help-value="1">
+								<@spring.message code='dashboard.veditor.gridLayout.rows.1r' />
+							</button>
+							<button type="button" class="help-src small-button" help-value="2">
+								<@spring.message code='dashboard.veditor.gridLayout.rows.2r' />
+							</button>
+							<button type="button" class="help-src small-button" help-value="3">
+								<@spring.message code='dashboard.veditor.gridLayout.rows.3r' />
+							</button>
+							<button type="button" class="help-src small-button" help-value="4">
+								<@spring.message code='dashboard.veditor.gridLayout.rows.4r' />
+							</button>
+							<button type="button" class="help-src small-button" help-value="5">
+								<@spring.message code='dashboard.veditor.gridLayout.rows.5r' />
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label align-top">
+						<label><@spring.message code='dashboard.veditor.gridLayout.columns' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="columns" class="help-target ui-widget ui-widget-content" size="50" />
+						<br>
+						<div class="gridLayoutColumnsBtnGroup helper-opt">
+							<button type="button" class="help-src small-button" help-value="1">
+								<@spring.message code='dashboard.veditor.gridLayout.columns.1c' />
+							</button>
+							<button type="button" class="help-src small-button" help-value="2">
+								<@spring.message code='dashboard.veditor.gridLayout.columns.2c' />
+							</button>
+							<button type="button" class="help-src small-button" help-value="3">
+								<@spring.message code='dashboard.veditor.gridLayout.columns.3c' />
+							</button>
+							<button type="button" class="help-src small-button" help-value="4">
+								<@spring.message code='dashboard.veditor.gridLayout.columns.4c' />
+							</button>
+							<button type="button" class="help-src small-button" help-value="5">
+								<@spring.message code='dashboard.veditor.gridLayout.columns.5c' />
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
