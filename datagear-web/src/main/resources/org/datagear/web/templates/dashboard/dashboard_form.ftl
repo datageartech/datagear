@@ -251,7 +251,7 @@ readonly 是否只读操作，允许为null
 								<div class="bgcolor-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 							</div>
 						</div>
-						<div class="ui-widget-header">
+						<div class="ui-widget-header ui-corner-all">
 							<@spring.message code='dashboard.veditor.styleSubType.bgImage' />
 						</div>
 						<div class="form-item">
@@ -336,7 +336,7 @@ readonly 是否只读操作，允许为null
 								</div>
 							</div>
 						</div>
-						<div class="ui-widget-header">
+						<div class="ui-widget-header ui-corner-all">
 							<@spring.message code='dashboard.veditor.styleSubType.border' />
 						</div>
 						<div class="form-item">
@@ -452,7 +452,7 @@ readonly 是否只读操作，允许为null
 						</div>
 					</div>
 					<div id="${pageId}-styleTabsPaneSize" class="style-tab-pane ui-widget ui-widget-content">
-						<div class="ui-widget-header">
+						<div class="ui-widget-header ui-corner-all">
 							<@spring.message code='dashboard.veditor.styleSubType.display' />
 						</div>
 						<div class="form-item">
@@ -546,7 +546,7 @@ readonly 是否只读操作，允许为null
 								</div>
 							</div>
 						</div>
-						<div class="ui-widget-header">
+						<div class="ui-widget-header ui-corner-all">
 							<@spring.message code='dashboard.veditor.styleSubType.position' />
 						</div>
 						<div class="form-item">
@@ -622,8 +622,10 @@ readonly 是否只读操作，允许为null
 								<input type="text" name="z-index" class="ui-widget ui-widget-content" size="100" />
 							</div>
 						</div>
-						<div class="ui-widget-header">
-							<@spring.message code='dashboard.veditor.styleSubType.gridContainer' />
+						<div class="ui-widget-header ui-corner-all">
+							<label class="tip-label" title="<@spring.message code='dashboard.veditor.styleSubType.gridContainer.desc' />">
+								<@spring.message code='dashboard.veditor.styleSubType.gridContainer' />
+							</label>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label align-top">
@@ -910,8 +912,10 @@ readonly 是否只读操作，允许为null
 								</div>
 							</div>
 						</div>
-						<div class="ui-widget-header">
-							<@spring.message code='dashboard.veditor.styleSubType.gridItem' />
+						<div class="ui-widget-header ui-corner-all">
+							<label class="tip-label" title="<@spring.message code='dashboard.veditor.styleSubType.gridItem.desc' />">
+								<@spring.message code='dashboard.veditor.styleSubType.gridItem' />
+							</label>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
@@ -1013,8 +1017,10 @@ readonly 是否只读操作，允许为null
 								</div>
 							</div>
 						</div>
-						<div class="ui-widget-header">
-							<@spring.message code='dashboard.veditor.styleSubType.flexContainer' />
+						<div class="ui-widget-header ui-corner-all">
+							<label class="tip-label" title="<@spring.message code='dashboard.veditor.styleSubType.flexContainer.desc' />">
+								<@spring.message code='dashboard.veditor.styleSubType.flexContainer' />
+							</label>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label align-top">
@@ -1150,8 +1156,10 @@ readonly 是否只读操作，允许为null
 								</div>
 							</div>
 						</div>
-						<div class="ui-widget-header">
-							<@spring.message code='dashboard.veditor.styleSubType.flexItem' />
+						<div class="ui-widget-header ui-corner-all">
+							<label class="tip-label" title="<@spring.message code='dashboard.veditor.styleSubType.flexItem.desc' />">
+								<@spring.message code='dashboard.veditor.styleSubType.flexItem' />
+							</label>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label">
