@@ -413,17 +413,41 @@ readonly 是否只读操作，允许为null
 									<button type="button" class="help-src small-button" help-value="10px">
 										<@spring.message code='dashboard.veditor.style.borderRadius.10px' />
 									</button>
+									<button type="button" class="help-src small-button" help-value="30px">
+										<@spring.message code='dashboard.veditor.style.borderRadius.30px' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="50px">
+										<@spring.message code='dashboard.veditor.style.borderRadius.50px' />
+									</button>
 								</div>
 							</div>
 						</div>
 						<div class="form-item">
-							<div class="form-item-label">
+							<div class="form-item-label align-top">
 								<label title="<@spring.message code='dashboard.veditor.style.boxShadow.desc' />">
 									<@spring.message code='dashboard.veditor.style.boxShadow' />
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="box-shadow" class="ui-widget ui-widget-content" size="200" />
+								<input type="text" name="box-shadow" class="help-target ui-widget ui-widget-content" size="200" />
+								<br>
+								<div class="styleBoxShadowBtnGroup helper-opt">
+									<button type="button" class="help-src small-button" help-value="0px 0px 6px 4px #666">
+										<@spring.message code='dashboard.veditor.style.boxShadow.around' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="-4px -4px 6px 4px #666">
+										<@spring.message code='dashboard.veditor.style.boxShadow.lt' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="4px -4px 6px 4px #666">
+										<@spring.message code='dashboard.veditor.style.boxShadow.rt' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="4px 4px 6px 4px #666">
+										<@spring.message code='dashboard.veditor.style.boxShadow.rb' />
+									</button>
+									<button type="button" class="help-src small-button" help-value="-4px 4px 6px 4px #666">
+										<@spring.message code='dashboard.veditor.style.boxShadow.lb' />
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
