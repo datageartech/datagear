@@ -73,6 +73,12 @@
 				</div>
 				<div class="form-item-value minor">
 					<@spring.message code='dashboard.import.notice' />
+					<br>
+					<@spring.message code='dashboard.import.notice.1' />
+					<br>
+					<@spring.message code='dashboard.import.notice.2' />
+					<br>
+					<@spring.message code='dashboard.import.notice.3' />
 				</div>
 			</div>
 		</div>
