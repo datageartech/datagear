@@ -298,7 +298,7 @@
 					var gridLayoutObj = $.formToJson(this);
 					var rows = parseInt(gridLayoutObj.rows);
 					var columns = parseInt(gridLayoutObj.columns);
-					dashboardEditor.insertGridLayout(rows, columns, po.insertTypeForVisualEdit);
+					dashboardEditor.insertGridLayout(rows, columns, (gridLayoutObj.fillParent == "true"), po.insertTypeForVisualEdit);
 				}
 			}
 			catch(e)
@@ -310,6 +310,7 @@
 		});
 		po.element(".gridLayoutRowsBtnGroup", veGridLayoutForm).controlgroupwrapper();
 		po.element(".gridLayoutColumnsBtnGroup", veGridLayoutForm).controlgroupwrapper();
+		po.element(".gridLayoutFillParentCheckbox", veGridLayoutForm).checkboxradiogroup();
 		
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
@@ -1288,8 +1289,14 @@
 					if(!dashboardEditor.checkInsertGridLayout(insertType))
 						return;
 					
+					var canFillParent = dashboardEditor.canInsertFillParentGridLayout(insertType);
+					
 					var panel = po.element(".veditor-gridLayout-panel");
-					$.jsonToForm(po.element("form", panel), {});
+					if(canFillParent)
+						po.element(".form-item-gridLayoutFillParent", panel).show();
+					else
+						po.element(".form-item-gridLayoutFillParent", panel).hide();
+					$.jsonToForm(po.element("form", panel), { fillParent: canFillParent });
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 				}
 				else if(insertOperation == "insertDiv")

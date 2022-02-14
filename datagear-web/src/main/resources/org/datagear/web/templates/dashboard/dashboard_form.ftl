@@ -1514,6 +1514,21 @@ readonly 是否只读操作，允许为null
 						</div>
 					</div>
 				</div>
+				<div class="form-item form-item-gridLayoutFillParent">
+					<div class="form-item-label">
+						<label title="<@spring.message code='dashboard.veditor.gridLayout.fillParent.desc' />">
+							<@spring.message code='dashboard.veditor.gridLayout.fillParent' />
+						</label>
+					</div>
+					<div class="form-item-value">
+						<div class="gridLayoutFillParentCheckbox">
+							<input type="radio" id="${pageId}-gridLayoutFillParentCheckbox-true" name="fillParent" value="true" />
+							<label for="${pageId}-gridLayoutFillParentCheckbox-true"><@spring.message code='yes' /></label>
+							<input type="radio" id="${pageId}-gridLayoutFillParentCheckbox-false" name="fillParent" value="false" checked="checked" />
+							<label for="${pageId}-gridLayoutFillParentCheckbox-false"><@spring.message code='no' /></label>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="panel-foot">
 				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>

@@ -216,6 +216,15 @@
 	};
 	
 	/**
+	 * 是否未选中任何元素。
+	 */
+	editor.isNonSelectedElement = function()
+	{
+		var selected = this._selectedElement();
+		return (selected.length == 0);
+	};
+	
+	/**
 	 * 选中指定元素。
 	 * 
 	 * @param visualEditId 元素可编辑ID
@@ -516,14 +525,42 @@
 	};
 	
 	/**
+	 * 是否可以插入填满父元素的网格布局元素。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.canInsertFillParentGridLayout = function(insertType, refEle)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		
+		if(!insertParentEle.is("body"))
+			return false;
+		
+		var canInsert = true;
+		
+		//只有还未插入任何可选择元素时，才可以插入填满父容器元素
+		insertParentEle.children().each(function()
+		{
+			if(editor._isSelectableElement($(this)))
+				canInsert = false;
+		});
+		
+		return canInsert;
+	};
+	
+	/**
 	 * 插入网格布局元素。
 	 * 
 	 * @param rows 网格行数
 	 * @param columns 网格列数
+	 * @param fillParent 是否填满父元素
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
-	editor.insertGridLayout = function(rows, columns, insertType, refEle)
+	editor.insertGridLayout = function(rows, columns, fillParent, insertType, refEle)
 	{
 		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
@@ -534,7 +571,9 @@
 		var styleStr = "display:grid;";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
-		if(insertParentEle.is("body"))
+		if(fillParent)
+			styleStr += "position:absolute;left:0;top:0;right:0;bottom:0;";
+		else if(insertParentEle.is("body"))
 			styleStr += "width:100%;height:300px;";
 		else
 			styleStr += "width:100%;height:100%;";
@@ -1743,7 +1782,7 @@
 			+ "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_SELECTED+",\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_SELECTED+"{\n"
-			+ "  box-shadow: inset 0 0 2px 2px " + options.selectedBorderColor + " !important;"
+			+ "  box-shadow: inset 0 0 3px 3px " + options.selectedBorderColor + " !important;"
 			+ "\n}"
 			+ "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_NEW_INSERT+",\n"
