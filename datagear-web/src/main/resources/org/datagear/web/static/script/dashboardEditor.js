@@ -48,6 +48,8 @@
 	
 	var BODY_CLASS_ELEMENT_BOUNDARY = (editor.BODY_CLASS_ELEMENT_BOUNDARY = "dg-show-ve-boundary");
 	
+	var INSERT_ELE_FORMAT_FLAG = (editor.INSERT_ELE_FORMAT_FLAG = "<!--dg-format-flag-->");
+	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
 	{
@@ -141,6 +143,14 @@
 		//删除中间的：" dg-visual-edit-id='...'"
 		var eidRegex1 = /\s?dg\-visual\-edit\-id\=["'][^"']*["']/gi;
 		editBodyHtml = editBodyHtml.replace(eidRegex1, "");
+		
+		//删除插入元素后又删除元素遗留的多余格式符
+		var insertFormatRegex0 = /\n\<\!\-\-dg\-format\-flag\-\-\>\n\s*(\n\<\!\-\-dg\-format\-flag\-\-\>\n)+/gi;
+		editBodyHtml = editBodyHtml.replace(insertFormatRegex0, "\n");
+		
+		//删除插入元素时的格式符
+		var insertFormatRegex1 = /\n\<\!\-\-dg\-format\-flag\-\-\>\n/gi;
+		editBodyHtml = editBodyHtml.replace(insertFormatRegex1, "\n");
 		
 		var editedHtml = editHtmlInfo.beforeBodyHtml + editBodyHtml + editHtmlInfo.afterBodyHtml;
 		return this._unescapeEditHtml(editedHtml);
@@ -1654,33 +1664,33 @@
 		{
 			refEle.after(insertEle);
 			
-			refEle.after("\n");
+			refEle.after("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
 		}
 		else if(insertType == "before")
 		{
 			refEle.before(insertEle);
 			
-			refEle.before("\n");
+			refEle.before("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
 		}
 		else if(insertType == "append")
 		{
 			var innerHtml = refEle.prop("innerHTML");
 			if(!innerHtml || innerHtml.charAt(innerHtml.length-1) != '\n')
-				refEle.append("\n");
+				refEle.append("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
 			
 			refEle.append(insertEle);
 			
-			refEle.append("\n");
+			refEle.append("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
 		}
 		else if(insertType == "prepend")
 		{
 			var innerHtml = refEle.prop("innerHTML");
 			if(!innerHtml || innerHtml.charAt(0) != '\n')
-				refEle.prepend("\n");
+				refEle.prepend("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
 			
 			refEle.prepend(insertEle);
 			
-			refEle.prepend("\n");
+			refEle.prepend("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
 		}
 	};
 	
