@@ -1289,6 +1289,7 @@
 						return;
 					
 					var panel = po.element(".veditor-gridLayout-panel");
+					$.jsonToForm(po.element("form", panel), {});
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 				}
 				else if(insertOperation == "insertDiv")
