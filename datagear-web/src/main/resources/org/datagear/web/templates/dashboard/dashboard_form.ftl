@@ -194,19 +194,21 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-content-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-37">
+		<form action="#" method="POST" class="display-block">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.content' />
 			</div>
-			<div class="panel-content">
-				<div class="content-item">
-					<div class="label-wrapper">
+			<div class="panel-content form-content">
+				<div class="form-item">
+					<div class="form-item-label">
 						<label><@spring.message code='dashboard.veditor.content.content' /></label>
 					</div>
-					<input type="text" name="content" value="" class="ui-widget ui-widget-content" />
+					<div class="form-item-value">
+						<textarea name="content" class="width-9 ui-widget ui-widget-content"></textarea>
+					</div>
 				</div>
 			</div>
-			<div class="panel-foot">
+			<div class="panel-foot form-foot">
 				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
 			</div>
 		</form>

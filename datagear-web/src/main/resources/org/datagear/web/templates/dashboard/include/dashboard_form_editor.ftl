@@ -28,7 +28,7 @@
 				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				if(dashboardEditor)
 				{
-					var text = po.element("input[name='content']", veContentPanel).val();
+					var text = po.element("textarea[name='content']", veContentPanel).val();
 					dashboardEditor.setElementText(text);
 				}
 			}
@@ -1341,9 +1341,9 @@
 		$("<li editOperation='editGlobalChartOptions' auto-close-prevent='veditor-chartOptions-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartOptions' /></div>").appendTo(editMenu);
 		$("<li class='ui-menu-divider' />").appendTo(editMenu);
 		$("<li editOperation='editStyle' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
-		$("<li editOperation='editContent' auto-close-prevent='veditor-content-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
 		$("<li editOperation='editChartTheme' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartTheme' /></div>").appendTo(editMenu);
 		$("<li editOperation='editChartOptions' auto-close-prevent='veditor-chartOptions-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartOptions' /></div>").appendTo(editMenu);
+		$("<li editOperation='editContent' auto-close-prevent='veditor-content-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
 		editMenu.appendTo(editGroup).menu(
 		{
 			select: function(event, ui)
@@ -1396,15 +1396,6 @@
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorStylePanel(panel);
 					}
-					else if(editOperation == "editContent")
-					{
-						if(!dashboardEditor.checkSetElementText())
-							return;
-						
-						var panel = po.element(".veditor-content-panel");
-						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
-						po.element("input[name='content']", panel).val(dashboardEditor.getElementText()).focus();
-					}
 					else if(editOperation == "editChartTheme")
 					{
 						if(!dashboardEditor.checkSetElementChartTheme())
@@ -1426,6 +1417,15 @@
 						po.element(".globalChartOptionsTitle", panel).hide();
 						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getElementChartOptions());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					}
+					else if(editOperation == "editContent")
+					{
+						if(!dashboardEditor.checkSetElementText())
+							return;
+						
+						var panel = po.element(".veditor-content-panel");
+						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+						po.element("textarea[name='content']", panel).val(dashboardEditor.getElementText()).focus();
 					}
 				}
 			}
