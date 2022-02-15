@@ -980,8 +980,17 @@
 			var chartElements = this._getSubChartElements(ele);
 			chartElements.each(function()
 			{
-				var renderedChart = editor.dashboard.renderedChart(this);
-				editor._resizeChart(renderedChart);
+				if(so.option.syncChartTheme)
+				{
+					var thisEle = $(this);
+					var chartTheme = editor._evalElementChartThemeByStyleObj(thisEle, so.style);
+					editor.setElementChartTheme(chartTheme, thisEle);
+				}
+				else
+				{
+					var renderedChart = editor.dashboard.renderedChart(this);
+					editor._resizeChart(renderedChart);
+				}
 			});
 		}
 	};

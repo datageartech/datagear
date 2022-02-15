@@ -1360,7 +1360,6 @@
 						var panel = po.element(".veditor-style-panel");
 						po.element(".editStyleTitle", panel).hide();
 						po.element(".editGlobalStyleTitle", panel).show();
-						po.element(".form-item-syncChartTheme" ,panel).show();
 						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getGlobalStyle());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorStylePanel(panel);
@@ -1390,11 +1389,6 @@
 
 						po.element(".editStyleTitle", panel).show();
 						po.element(".editGlobalStyleTitle", panel).hide();
-						if(dashboardEditor.isChartElement())
-							po.element(".form-item-syncChartTheme" ,panel).show();
-						else
-							po.element(".form-item-syncChartTheme" ,panel).hide();
-						
 						var elementStyleObj = dashboardEditor.getElementStyle();
 						elementStyleObj.isGridItemElement = dashboardEditor.isGridItemElement();
 						elementStyleObj.isFlexItemElement = dashboardEditor.isFlexItemElement();
@@ -1542,12 +1536,11 @@
 	po.resizeVisualEditorStylePanel = function(panel)
 	{
 		var panelContent = po.element(".panel-content", panel);
-		var syncChartThemeItem = po.element(".form-item-syncChartTheme", panelContent);
 		
 		var styleTabsHeight = panelContent.height();
-		if(!syncChartThemeItem.is(":hidden"))
-			styleTabsHeight = styleTabsHeight - syncChartThemeItem.outerHeight(true);
+		styleTabsHeight = styleTabsHeight - po.element(".form-item-syncChartTheme", panelContent).outerHeight(true);
 		styleTabsHeight = styleTabsHeight - po.element(".form-item-className", panelContent).outerHeight(true);
+		
 		po.element(".style-tabs", panelContent).css("height", styleTabsHeight);
 	};
 	

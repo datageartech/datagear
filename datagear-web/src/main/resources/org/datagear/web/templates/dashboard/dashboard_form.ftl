@@ -1303,7 +1303,9 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item form-item-syncChartTheme">
 					<div class="form-item-label">
-						<label><@spring.message code='dashboard.veditor.style.syncChartTheme' /></label>
+						<label title="<@spring.message code='dashboard.veditor.style.syncChartTheme.desc' />">
+							<@spring.message code='dashboard.veditor.style.syncChartTheme' />
+						</label>
 					</div>
 					<div class="form-item-value">
 						<div id="${pageId}-syncChartTheme">
