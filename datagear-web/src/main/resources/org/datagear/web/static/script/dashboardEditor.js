@@ -954,8 +954,8 @@
 		var iframeEle = this._editElement(ele);
 		
 		//应先删除元素包含的所有图表
-		var chartElements = this._getSubChartElements(ele);
-		chartElements.each(function()
+		var chartEles = this._getChartElements(ele);
+		chartEles.each(function()
 		{
 			editor.dashboard.removeChart(this);
 		});
@@ -999,36 +999,21 @@
 		this._setElementStyle(ele, so.style);
 		this._setElementClass(ele, so.option.className);
 		
-		var renderedChart = this.dashboard.renderedChart(ele);
-		
-		if(renderedChart)
+		var chartEles = this._getChartElements(ele);
+		chartEles.each(function()
 		{
 			if(so.option.syncChartTheme)
 			{
-				var chartTheme = this._evalElementChartThemeByStyleObj(ele, so.style);
-				this.setElementChartTheme(chartTheme, ele);
+				var thisEle = $(this);
+				var chartTheme = editor._evalElementChartThemeByStyleObj(thisEle, so.style);
+				editor.setElementChartTheme(chartTheme, thisEle);
 			}
 			else
-				this._resizeChart(renderedChart);
-		}
-		else
-		{
-			var chartElements = this._getSubChartElements(ele);
-			chartElements.each(function()
 			{
-				if(so.option.syncChartTheme)
-				{
-					var thisEle = $(this);
-					var chartTheme = editor._evalElementChartThemeByStyleObj(thisEle, so.style);
-					editor.setElementChartTheme(chartTheme, thisEle);
-				}
-				else
-				{
-					var renderedChart = editor.dashboard.renderedChart(this);
-					editor._resizeChart(renderedChart);
-				}
-			});
-		}
+				var renderedChart = editor.dashboard.renderedChart(this);
+				editor._resizeChart(renderedChart);
+			}
+		});
 	};
 	
 	editor._resizeChart = function(chart)
@@ -1756,9 +1741,20 @@
 		return insertType;
 	};
 	
-	editor._getSubChartElements = function(parent)
+	//获取元素本身、子孙元素中所有的图表元素
+	editor._getChartElements = function(ele)
 	{
-		return $("["+chartFactory.elementAttrConst.WIDGET+"]", parent);
+		var chartEles = [];
+		
+		if(ele.attr(chartFactory.elementAttrConst.WIDGET))
+			chartEles.push(ele[0]);
+		
+		$("["+chartFactory.elementAttrConst.WIDGET+"]", ele).each(function()
+		{
+			chartEles.push(this);
+		});
+		
+		return $(chartEles);
 	};
 	
 	editor._selectedElement = function()
@@ -1832,17 +1828,17 @@
 		chartFactory.styleSheetText("dg-show-ve-style",
 			  "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" *["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]{\n"
-			+ "  box-shadow: 0 0 1px 1px " + options.selectedBorderColor + ";"
+			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ";"
 			+ "\n}"
 			+ "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_SELECTED+",\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_SELECTED+"{\n"
-			+ "  box-shadow: 0 0 3px 3px " + options.selectedBorderColor + " !important;"
+			+ "  box-shadow: inset 0 0 3px 3px " + options.selectedBorderColor + " !important;"
 			+ "\n}"
 			+ "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_NEW_INSERT+",\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_NEW_INSERT+"{\n"
-			+ "  box-shadow: 0 0 1px 1px " + options.selectedBorderColor + ";"
+			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ";"
 			+ "\n}");
 	};
 	
