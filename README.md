@@ -30,7 +30,7 @@ DataGear是一款开源免费的数据可视化分析平台，可自由制作任
 <br>图表可聚合绑定多个不同格式的数据集，轻松定义同比、环比数据图表，内置折线图、柱状图、饼图、地图、雷达图、漏斗图、散点图、K线图、桑基图等60+开箱即用的图表，并且支持自定义图表配置项，支持编写和上传自定义图表插件
 
 - 自由开放的数据看板
-<br>数据看板采用原生的HTML网页作为模板，支持导入任意HTML网页，支持使用Javascript、CSS等web前端技术自由编辑看板源码，也支持以可视化方式设置看板布局和样式，内置丰富的API，可制作图表联动、数据钻取、异步加载、交互表单等个性化的数据看板
+<br>数据看板采用原生的HTML网页作为模板，支持导入任意HTML网页，支持使用JavaScript、CSS等web前端技术自由编辑看板源码，也支持以可视化方式设置看板布局和样式，内置丰富的API，可制作图表联动、数据钻取、异步加载、交互表单等个性化的数据看板
 
 ## 架构图
 
@@ -78,7 +78,11 @@ SQL工作台
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/chart-interaction.png](https://gitee.com/datagear/datagear/raw/master/screenshot/chart-interaction.png)
 
-看板
+看板-可视编辑模式
+
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-visual-mode.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-visual-mode.gif)
+
+看板展示
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/template-002-dg.png](https://gitee.com/datagear/datagear/raw/master/screenshot/template-002-dg.png)
 
@@ -86,23 +90,23 @@ SQL工作台
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/template-006-dg.png](https://gitee.com/datagear/datagear/raw/master/screenshot/template-006-dg.png)
 
-看板-图表联动
+看板展示-图表联动
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-link.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-link.gif)
 
-看板-时序图表
+看板展示-时序图表
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-time-series-chart.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-time-series-chart.gif)
 
-看板-钻取
+看板展示-钻取
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-hierarchy.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-hierarchy.gif)
 
-看板-表单
+看板展示-表单
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-form.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-form.gif)
 
-看板-联动异步加载图表
+看板展示-联动异步加载图表
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif)
 
