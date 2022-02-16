@@ -23,7 +23,7 @@ DataGear是一款开源免费的数据可视化分析平台，可自由制作任
 - 友好的数据源接入
 <br>支持运行时接入任意提供JDBC驱动的数据库，包括MySQL、Oracle、PostgreSQL、SQL Server等关系数据库，以及Elasticsearch、ClickHouse、Hive等大数据引擎
 
-- 灵活易用的数据集
+- 多样动态的数据集
 <br>支持创建SQL、CSV、Excel、HTTP接口、JSON数据集，并可设置为动态的参数化数据集，可定义文本框、下拉框、日期框、时间框等类型的数据集参数，灵活筛选满足不同业务需求的数据
 
 - 强大丰富的数据图表
