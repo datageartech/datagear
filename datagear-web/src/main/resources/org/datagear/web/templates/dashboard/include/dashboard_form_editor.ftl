@@ -312,6 +312,32 @@
 		po.element(".gridLayoutColumnsBtnGroup", veGridLayoutForm).controlgroupwrapper();
 		po.element(".gridLayoutFillParentCheckbox", veGridLayoutForm).checkboxradiogroup();
 		
+		//初始化插入图片面板
+		var veImagePanel = po.element(".veditor-image-panel");
+		veImagePanel.draggable({ handle: ".panel-head" });
+		var veImageForm = po.element("form", veImagePanel);
+		veImageForm.submit(function()
+		{
+			try
+			{
+				veImagePanel.hide();
+				
+				var tabPane = po.getActiveResEditorTabPane();
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				if(dashboardEditor)
+				{
+					var imageObj = $.formToJson(this);
+					dashboardEditor.insertImage(imageObj);
+				}
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
+			}
+			
+			return false;
+		});
+		
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
 			var $this = $(this);
@@ -1306,6 +1332,15 @@
 					
 					dashboardEditor.insertDiv(insertType);
 				}
+				else if(insertOperation == "insertImage")
+				{
+					if(!dashboardEditor.checkInsertImage(insertType))
+						return;
+					
+					var panel = po.element(".veditor-image-panel");
+					$.jsonToForm(po.element("form", panel), {});
+					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+				}
 				else if(insertOperation == "insertChart")
 				{
 					if(!dashboardEditor.checkInsertChart(insertType))
@@ -1445,6 +1480,7 @@
 		
 		var deleteMenu = $("<ul class='delete-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
 		$("<li deleteOperation='deleteElement' />").html("<div><@spring.message code='dashboard.opt.delete.element' /></div>").appendTo(deleteMenu);
+		$("<li class='ui-menu-divider' />").appendTo(deleteMenu);
 		$("<li deleteOperation='unbindChart' />").html("<div><@spring.message code='dashboard.opt.delete.unbindChart' /></div>").appendTo(deleteMenu);
 		deleteMenu.appendTo(deleteGroup).menu(
 		{
@@ -1703,6 +1739,11 @@
 		
 		$("<li insertOperation='insertDiv' insertType='"+insertType+"' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.div' /></div>").appendTo(ul);
+		
+		$("<li insertOperation='insertImage' insertType='"+insertType+"' auto-close-prevent='veditor-image-panel' />")
+			.html("<div><@spring.message code='dashboard.opt.insertType.image' /></div>").appendTo(ul);
+		
+		$("<li class='ui-menu-divider' />").appendTo(ul);
 		
 		$("<li insertOperation='insertChart' insertType='"+insertType+"' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.chart' /></div>").appendTo(ul);

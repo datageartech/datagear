@@ -640,6 +640,42 @@
 	};
 	
 	/**
+	 * 校验insertImage操作。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.checkInsertImage = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 插入图片元素。
+	 * 
+	 * @param image 图片设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertImage = function(image, insertType, refEle)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		var img = $("<img>");
+		
+		var styleStr = "";
+		styleStr += (image.width ? "width:"+image.width+";" : "");
+		styleStr += (image.height ? "height:"+image.height+";" : "");
+		
+		img.attr("src", (image.src || ""));
+		if(styleStr)
+			img.attr("style", styleStr);
+		
+		this.insertElement(img, insertType, refEle);
+	};
+	
+	/**
 	 * 校验insertChart操作。
 	 * 
 	 * @param insertType 可选，参考insertChart函数的insertType参数
@@ -1796,17 +1832,17 @@
 		chartFactory.styleSheetText("dg-show-ve-style",
 			  "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" *["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]{\n"
-			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ";"
+			+ "  box-shadow: 0 0 1px 1px " + options.selectedBorderColor + ";"
 			+ "\n}"
 			+ "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_SELECTED+",\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_SELECTED+"{\n"
-			+ "  box-shadow: inset 0 0 3px 3px " + options.selectedBorderColor + " !important;"
+			+ "  box-shadow: 0 0 3px 3px " + options.selectedBorderColor + " !important;"
 			+ "\n}"
 			+ "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_NEW_INSERT+",\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_NEW_INSERT+"{\n"
-			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ";"
+			+ "  box-shadow: 0 0 1px 1px " + options.selectedBorderColor + ";"
 			+ "\n}");
 	};
 	
