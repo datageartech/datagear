@@ -1140,24 +1140,11 @@
 	 */
 	editor.checkSetElementChartTheme = function(ele)
 	{
-		ele = this._currentElement(ele, true);
-		
-		if(!this._checkNotEmptyElement(ele))
-			return false;
-		
-		var chart = this.dashboard.renderedChart(ele);
-		
-		if(!chart)
-		{
-			this.tipInfo(i18n.selectedNotChartElement);
-			return false;
-		}
-		
 		return true;
 	};
 	
 	/**
-	 * 设置元素图表主题。
+	 * 设置元素或其所有子图表元素的图表主题。
 	 * 
 	 * @param chartTheme 要设置的图表主题对象，格式为：{ 'color': '...', 'backgroundColor': '...', ... }
 	 * @param ele 可选，元素，默认为：当前选中元素
@@ -1169,12 +1156,16 @@
 		if(!this.checkSetElementChartTheme(ele))
 			return;
 		
-		var chart = this.dashboard.renderedChart(ele);
-		
-		this._setElementChartTheme(ele, chartTheme);
-		
-		chart.destroy();
-		chart.init();
+		var chartEles = this._getChartElements(ele);
+		chartEles.each(function()
+		{
+			var thisEle = $(this);
+			
+			editor._setElementChartTheme(thisEle, chartTheme);
+			var chart = editor.dashboard.renderedChart(thisEle);
+			chart.destroy();
+			chart.init();
+		});
 	};
 	
 	/**
@@ -1217,24 +1208,11 @@
 	 */
 	editor.checkSetElementChartOptions = function(ele)
 	{
-		ele = this._currentElement(ele, true);
-		
-		if(!this._checkNotEmptyElement(ele))
-			return false;
-		
-		var chart = this.dashboard.renderedChart(ele);
-		
-		if(!chart)
-		{
-			this.tipInfo(i18n.selectedNotChartElement);
-			return false;
-		}
-		
 		return true;
 	};
 	
 	/**
-	 * 设置元素图表选项。
+	 * 设置元素或其所有子图表元素的图表选项。
 	 * 
 	 * @param chartOptions 要设置的图表选项对象、字符串，格式为：{ ... }、"{ ... }"
 	 * @param ele 可选，元素，默认为：当前选中元素
@@ -1246,12 +1224,16 @@
 		if(!this.checkSetElementChartOptions(ele))
 			return;
 		
-		var chart = this.dashboard.renderedChart(ele);
-		
-		this._setElementChartOptions(ele, chartOptions);
-		
-		chart.destroy();
-		chart.init();
+		var chartEles = this._getChartElements(ele);
+		chartEles.each(function()
+		{
+			var thisEle = $(this);
+			
+			editor._setElementChartOptions(thisEle, chartOptions);
+			var chart = editor.dashboard.renderedChart(thisEle);
+			chart.destroy();
+			chart.init();
+		});
 	};
 	
 	/**
