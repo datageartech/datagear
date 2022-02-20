@@ -676,6 +676,74 @@
 	};
 	
 	/**
+	 * 校验insertHyperlink操作。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.checkInsertHyperlink = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 插入超链接元素。
+	 * 
+	 * @param hyperlink 超链接设置，格式为：{ content: "...", href: "...", target: "..." }
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertHyperlink = function(hyperlink, insertType, refEle)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		var a = $("<a></a>");
+		
+		a.html(hyperlink.content || "");
+		a.attr("href", (hyperlink.href || ""));
+		a.attr("target", (hyperlink.target || "_self"))
+		
+		this.insertElement(a, insertType, refEle);
+	};
+	
+	/**
+	 * 校验insertVideo操作。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.checkInsertVideo = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 插入视频元素。
+	 * 
+	 * @param video 视频设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertVideo = function(video, insertType, refEle)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		var ele = $("<video controls=\"controls\"></video>");
+		
+		var styleStr = "";
+		styleStr += (video.width ? "width:"+video.width+";" : "");
+		styleStr += (video.height ? "height:"+video.height+";" : "");
+		
+		ele.attr("src", (video.src || ""));
+		if(styleStr)
+			ele.attr("style", styleStr);
+		
+		this.insertElement(ele, insertType, refEle);
+	};
+	
+	/**
 	 * 校验insertChart操作。
 	 * 
 	 * @param insertType 可选，参考insertChart函数的insertType参数

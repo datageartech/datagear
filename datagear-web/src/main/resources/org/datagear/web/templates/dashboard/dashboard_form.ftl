@@ -1581,6 +1581,57 @@ readonly 是否只读操作，允许为null
 			</div>
 		</form>
 	</div>
+	<div class="veditor-hyperlink-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<form action="#" method="POST" class="display-37">
+			<div class="panel-head ui-widget-header ui-corner-all">
+				<@spring.message code='dashboard.veditor.hyperlink' />
+			</div>
+			<div class="panel-content form-content">
+				<div class="form-item">
+					<div class="form-item-label">
+						<label title="<@spring.message code='dashboard.veditor.hyperlink.href.desc' />">
+							<@spring.message code='dashboard.veditor.hyperlink.href' />
+						</label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="href" class="ui-widget ui-widget-content" size="200" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label>
+							<@spring.message code='dashboard.veditor.hyperlink.content' />
+						</label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="content" class="width-9 ui-widget ui-widget-content" size="200" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label align-top">
+						<label>
+							<@spring.message code='dashboard.veditor.hyperlink.target' />
+						</label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="target" class="help-target ui-widget ui-widget-content" size="50" />
+						<br>
+						<div class="hyperlinkTargetBtnGroup helper-opt">
+							<button type="button" class="help-src small-button" help-value="_blank">
+								<@spring.message code='dashboard.veditor.hyperlink.target._blank' />
+							</button>
+							<button type="button" class="help-src small-button" help-value="_self">
+								<@spring.message code='dashboard.veditor.hyperlink.target._self' />
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="panel-foot">
+				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
+			</div>
+		</form>
+	</div>
 </div>
 <#include "../include/page_obj_form.ftl">
 <#include "../include/page_obj_tabs.ftl" >

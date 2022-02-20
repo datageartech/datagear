@@ -338,6 +338,33 @@
 			return false;
 		});
 		
+		//初始化插入超链接面板
+		var veHyperlinkPanel = po.element(".veditor-hyperlink-panel");
+		veHyperlinkPanel.draggable({ handle: ".panel-head" });
+		var veHyperlinkForm = po.element("form", veHyperlinkPanel);
+		veHyperlinkForm.submit(function()
+		{
+			try
+			{
+				veHyperlinkPanel.hide();
+				
+				var tabPane = po.getActiveResEditorTabPane();
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				if(dashboardEditor)
+				{
+					var hyperlinkObj = $.formToJson(this);
+					dashboardEditor.insertHyperlink(hyperlinkObj);
+				}
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
+			}
+			
+			return false;
+		});
+		po.element(".hyperlinkTargetBtnGroup", veHyperlinkForm).controlgroupwrapper();
+		
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
 			var $this = $(this);
@@ -1341,6 +1368,15 @@
 					$.jsonToForm(po.element("form", panel), {});
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 				}
+				else if(insertOperation == "insertHyperlink")
+				{
+					if(!dashboardEditor.checkInsertHyperlink(insertType))
+						return;
+					
+					var panel = po.element(".veditor-hyperlink-panel");
+					$.jsonToForm(po.element("form", panel), {});
+					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+				}
 				else if(insertOperation == "insertChart")
 				{
 					if(!dashboardEditor.checkInsertChart(insertType))
@@ -1742,6 +1778,9 @@
 		
 		$("<li insertOperation='insertImage' insertType='"+insertType+"' auto-close-prevent='veditor-image-panel' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.image' /></div>").appendTo(ul);
+
+		$("<li insertOperation='insertHyperlink' insertType='"+insertType+"' auto-close-prevent='veditor-hyperlink-panel' />")
+			.html("<div><@spring.message code='dashboard.opt.insertType.hyperlink' /></div>").appendTo(ul);
 		
 		$("<li class='ui-menu-divider' />").appendTo(ul);
 		
