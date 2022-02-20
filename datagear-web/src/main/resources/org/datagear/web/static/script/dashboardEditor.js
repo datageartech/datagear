@@ -120,6 +120,11 @@
 			if(editor.clickCallback)
 				editor.clickCallback(event);
 		});
+		
+		$(window).on("beforeunload", function()
+		{
+			editor.beforeunloadCallback();
+		});
 	};
 	
 	//获取当前编辑HTML
@@ -202,6 +207,12 @@
 	
 	//取消选择所有元素回调函数
 	editor.deselectAllElementCallback = function()
+	{
+		
+	};
+	
+	//页面卸载前回调函数，比如：保存编辑HTML
+	editor.beforeunloadCallback = function()
 	{
 		
 	};
@@ -700,7 +711,7 @@
 		
 		var a = $("<a></a>");
 		
-		a.html(hyperlink.content || "");
+		a.html(hyperlink.content || hyperlink.href || "");
 		a.attr("href", (hyperlink.href || ""));
 		a.attr("target", (hyperlink.target || "_self"))
 		

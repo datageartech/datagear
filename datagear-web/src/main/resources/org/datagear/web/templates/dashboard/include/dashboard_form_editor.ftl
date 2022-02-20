@@ -327,7 +327,7 @@
 				if(dashboardEditor)
 				{
 					var imageObj = $.formToJson(this);
-					dashboardEditor.insertImage(imageObj);
+					dashboardEditor.insertImage(imageObj, po.insertTypeForVisualEdit);
 				}
 			}
 			catch(e)
@@ -353,7 +353,7 @@
 				if(dashboardEditor)
 				{
 					var hyperlinkObj = $.formToJson(this);
-					dashboardEditor.insertHyperlink(hyperlinkObj);
+					dashboardEditor.insertHyperlink(hyperlinkObj, po.insertTypeForVisualEdit);
 				}
 			}
 			catch(e)
@@ -380,7 +380,7 @@
 				if(dashboardEditor)
 				{
 					var videoObj = $.formToJson(this);
-					dashboardEditor.insertVideo(videoObj);
+					dashboardEditor.insertVideo(videoObj, po.insertTypeForVisualEdit);
 				}
 			}
 			catch(e)
@@ -713,8 +713,14 @@
 			};
 			dashboardEditor.deselectAllElementCallback = function()
 			{
-				var elePathWrapper = po.element(".tpl-ve-ele-path", ifmWrapper);
-				elePathWrapper.empty();
+				po.element(".tpl-ve-ele-path", ifmWrapper).empty();
+			};
+			dashboardEditor.beforeunloadCallback = function()
+			{
+				po.element(".tpl-ve-ele-path", ifmWrapper).empty();
+				
+				//保存编辑HTML，用于刷新操作恢复编辑页面
+				visualEditorIfm.data("iframeEditedHtml", this.editedHtml());
 			};
 			
 			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
@@ -1628,13 +1634,25 @@
 				}
 				else if(moreOperation == "refresh")
 				{
+					var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+					var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
+					var editedHtml = null;
+					
 					var dashboardEditor = po.visualDashboardEditor(tabPane);
 					if(dashboardEditor)
+						editedHtml = dashboardEditor.editedHtml();
+					if(!editedHtml)
+						editedHtml = visualEditorIfm.data("iframeEditedHtml");
+					if(!editedHtml)
 					{
-						var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
-						var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
-						po.loadVisualEditorIframe(visualEditorIfm, templateName, (po.readonly ? "" : dashboardEditor.editedHtml()));
+						var codeEditorDiv = po.element(".code-editor", tabPane);
+						var codeEditor = codeEditorDiv.data("resourceEditorInstance");
+						editedHtml = po.getCodeText(codeEditor);
 					}
+					if(!editedHtml)
+						editedHtml = "";
+					
+					po.loadVisualEditorIframe(visualEditorIfm, templateName, editedHtml);
 				}
 			}
 		});
