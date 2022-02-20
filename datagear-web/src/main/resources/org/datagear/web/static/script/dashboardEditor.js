@@ -713,7 +713,8 @@
 		
 		a.html(hyperlink.content || hyperlink.href || "");
 		a.attr("href", (hyperlink.href || ""));
-		a.attr("target", (hyperlink.target || "_self"))
+		if(hyperlink.target)
+			a.attr("target", hyperlink.target)
 		
 		this.insertElement(a, insertType, refEle);
 	};
