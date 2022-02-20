@@ -364,6 +364,32 @@
 			return false;
 		});
 		po.element(".hyperlinkTargetBtnGroup", veHyperlinkForm).controlgroupwrapper();
+
+		//初始化插入视频面板
+		var veVideoPanel = po.element(".veditor-video-panel");
+		veVideoPanel.draggable({ handle: ".panel-head" });
+		var veVideoForm = po.element("form", veVideoPanel);
+		veVideoForm.submit(function()
+		{
+			try
+			{
+				veVideoPanel.hide();
+				
+				var tabPane = po.getActiveResEditorTabPane();
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				if(dashboardEditor)
+				{
+					var videoObj = $.formToJson(this);
+					dashboardEditor.insertVideo(videoObj);
+				}
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
+			}
+			
+			return false;
+		});
 		
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
@@ -1377,6 +1403,15 @@
 					$.jsonToForm(po.element("form", panel), {});
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 				}
+				else if(insertOperation == "insertVideo")
+				{
+					if(!dashboardEditor.checkInsertVideo(insertType))
+						return;
+					
+					var panel = po.element(".veditor-video-panel");
+					$.jsonToForm(po.element("form", panel), {});
+					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+				}
 				else if(insertOperation == "insertChart")
 				{
 					if(!dashboardEditor.checkInsertChart(insertType))
@@ -1778,9 +1813,12 @@
 		
 		$("<li insertOperation='insertImage' insertType='"+insertType+"' auto-close-prevent='veditor-image-panel' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.image' /></div>").appendTo(ul);
-
+		
 		$("<li insertOperation='insertHyperlink' insertType='"+insertType+"' auto-close-prevent='veditor-hyperlink-panel' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.hyperlink' /></div>").appendTo(ul);
+		
+		$("<li insertOperation='insertVideo' insertType='"+insertType+"' auto-close-prevent='veditor-video-panel' />")
+			.html("<div><@spring.message code='dashboard.opt.insertType.video' /></div>").appendTo(ul);
 		
 		$("<li class='ui-menu-divider' />").appendTo(ul);
 		
