@@ -62,21 +62,9 @@ QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[11283
 
 ## 界面
 
-数据管理
-
-![https://gitee.com/datagear/datagear/raw/master/screenshot/datamanage.png](https://gitee.com/datagear/datagear/raw/master/screenshot/datamanage.png)
-
-SQL工作台
-
-![https://gitee.com/datagear/datagear/raw/master/screenshot/sqlpad.png](https://gitee.com/datagear/datagear/raw/master/screenshot/sqlpad.png)
-
-图表
+图表类型
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/chart.png](https://gitee.com/datagear/datagear/raw/master/screenshot/chart.png)
-
-图表-数据集参数
-
-![https://gitee.com/datagear/datagear/raw/master/screenshot/chart-interaction.png](https://gitee.com/datagear/datagear/raw/master/screenshot/chart-interaction.png)
 
 看板-可视编辑模式
 
