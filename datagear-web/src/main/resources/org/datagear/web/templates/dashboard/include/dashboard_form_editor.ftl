@@ -714,6 +714,7 @@
 			dashboardEditor.deselectAllElementCallback = function()
 			{
 				po.element(".tpl-ve-ele-path", ifmWrapper).empty();
+				visualEditorIfm.data("selectedElementVeId", "");
 			};
 			dashboardEditor.beforeunloadCallback = function()
 			{
@@ -721,6 +722,12 @@
 				
 				//保存编辑HTML，用于刷新操作恢复编辑页面
 				visualEditorIfm.data("iframeEditedHtml", this.editedHtml());
+			};
+			dashboardEditor.documentReadyCallback = function()
+			{
+				var enableEb = visualEditorIfm.data("enableElementBoundary");
+				dashboardEditor.enableElementBoundary(enableEb);
+				//XXX 无法恢复选中状态，因为每次重新加载后可视编辑ID会重新生成
 			};
 			
 			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
@@ -1630,7 +1637,11 @@
 					if(!dashboardEditor)
 						return;
 					
-					dashboardEditor.enableElementBoundary(!dashboardEditor.enableElementBoundary());
+					var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
+					var enableEb = !dashboardEditor.enableElementBoundary();
+					
+					dashboardEditor.enableElementBoundary(enableEb);
+					visualEditorIfm.data("enableElementBoundary", enableEb);
 				}
 				else if(moreOperation == "refresh")
 				{

@@ -86,44 +86,49 @@
 	//初始化交互控制
 	editor._initInteraction = function()
 	{
-		$(document.body).addClass(BODY_CLASS_VISUAL_EDITOR);
-		
-		$(document.body).on("click", function(event)
+		$(function()
 		{
-			editor._removeElementClassNewInsert();
+			$(document.body).addClass(BODY_CLASS_VISUAL_EDITOR);
 			
-			var target = $(event.target);
-			var veEle = (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) ? target :
-								target.closest("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]"));
-			
-			if(veEle.length == 0)
+			$(document.body).on("click", function(event)
 			{
-				editor._deselectAllElement();
-			}
-			else
-			{
-				if(!editor._isSelectableElement(veEle))
+				editor._removeElementClassNewInsert();
+				
+				var target = $(event.target);
+				var veEle = (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) ? target :
+									target.closest("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]"));
+				
+				if(veEle.length == 0)
 				{
 					editor._deselectAllElement();
-				}
-				else if(editor._isSelectedElement(veEle))
-				{
-					//再次点击选中元素，不取消选择
 				}
 				else
 				{
-					editor._deselectAllElement();
-					editor._selectElement(veEle);
+					if(!editor._isSelectableElement(veEle))
+					{
+						editor._deselectAllElement();
+					}
+					else if(editor._isSelectedElement(veEle))
+					{
+						//再次点击选中元素，不取消选择
+					}
+					else
+					{
+						editor._deselectAllElement();
+						editor._selectElement(veEle);
+					}
 				}
-			}
+				
+				if(editor.clickCallback)
+					editor.clickCallback(event);
+			});
 			
-			if(editor.clickCallback)
-				editor.clickCallback(event);
-		});
-		
-		$(window).on("beforeunload", function()
-		{
-			editor.beforeunloadCallback();
+			$(window).on("beforeunload", function()
+			{
+				editor.beforeunloadCallback();
+			});
+			
+			editor.documentReadyCallback();
 		});
 	};
 	
@@ -217,6 +222,12 @@
 		
 	};
 	
+	//页面文档载入完成回调函数
+	editor.documentReadyCallback = function()
+	{
+		
+	};
+	
 	/**
 	 * 获取/设置元素边界线启用禁用/状态。
 	 *
@@ -243,6 +254,17 @@
 	{
 		var selected = this._selectedElement();
 		return (selected.length == 0);
+	};
+	
+	/**
+	 * 获取元素的可视编辑ID。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.getElementVisualEditId = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		return this._getVisualEditId(ele);
 	};
 	
 	/**
@@ -1732,7 +1754,7 @@
 		if(!excludeBody)
 			currentEle = (this._isEmptyElement(currentEle) ? $(document.body) : currentEle);
 		
-		return currentEle;
+		return $(currentEle);
 	};
 	
 	editor._addVisualEditIdAttr = function($ele)
