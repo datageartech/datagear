@@ -21,7 +21,7 @@ public final class Global
 	}
 
 	/** 当前版本号 */
-	public static final String VERSION = "2.13.0";
+	public static final String VERSION = "3.0.0";
 
 	/** 中文产品名称 */
 	public static final String PRODUCT_NAME_ZH = "数据齿轮";
