@@ -37,7 +37,7 @@
 				</div>
 				<div class="form-item-value">
 					<input type="hidden" name="inputForValidate" value="" />
-					<div class="driver-entity-infos minor-list deletable-list input ui-widget ui-widget-content"></div>
+					<div class="driver-entity-infos minor-list deletable-list input ui-widget ui-widget-content ui-corner-all"></div>
 				</div>
 			</div>
 		</div>

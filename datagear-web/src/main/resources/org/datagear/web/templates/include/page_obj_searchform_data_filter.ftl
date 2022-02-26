@@ -15,9 +15,9 @@ page_js_obj.ftl
 <#assign _ssf_AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <#assign _ssf_DataPermissionEntityService=statics['org.datagear.management.service.DataPermissionEntityService']>
 <form id="${pageId}-searchForm" class="search-form search-form-data-filter" action="#">
-	<div class="ui-widget ui-widget-content keyword-widget">
-		<div class="keyword-input-parent">
-			<input name="keyword" type="text" class="ui-widget ui-widget-content keyword-input" />
+	<div class="ui-widget ui-widget-content ui-corner-all keyword-widget">
+		<div class="keyword-input-parent ui-corner-all">
+			<input name="keyword" type="text" class="ui-widget ui-widget-content ui-corner-all keyword-input" />
 		</div>
 		<div class="data-filter-select-wrapper">
 			<select id="${pageId}-dataFilter" name="${_ssf_AbstractController.DATA_FILTER_PARAM}" class="data-filter-select">

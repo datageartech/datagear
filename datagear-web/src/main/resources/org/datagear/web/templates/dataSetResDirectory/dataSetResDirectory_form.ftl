@@ -35,7 +35,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="directory" value="${(dataSetResDirectory.directory)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="directory" value="${(dataSetResDirectory.directory)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -43,7 +43,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSetResDirectory.desc' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="desc" class="ui-widget ui-widget-content">${(dataSetResDirectory.desc)!''}</textarea>
+					<textarea name="desc" class="ui-widget ui-widget-content ui-corner-all">${(dataSetResDirectory.desc)!''}</textarea>
 				</div>
 			</div>
 		</div>

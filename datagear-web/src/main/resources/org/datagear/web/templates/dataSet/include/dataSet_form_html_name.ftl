@@ -15,7 +15,7 @@
 		<label><@spring.message code='dataSet.name' /></label>
 	</div>
 	<div class="form-item-value form-item-value-name">
-		<input type="text" name="name" value="${(dataSet.name)!''}" class="ui-widget ui-widget-content" />
+		<input type="text" name="name" value="${(dataSet.name)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 	</div>
 	<#include "../../include/analysisProjectAware_form_select.ftl" >
 </div>

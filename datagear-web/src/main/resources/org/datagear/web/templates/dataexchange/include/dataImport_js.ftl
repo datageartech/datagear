@@ -69,7 +69,7 @@ dataExchange_js.ftl
 			data : "number",
 			render : function(data, type, row, meta)
 			{
-				return $.escapeHtml(data) + "<input type='hidden' name='numbers[]' value='"+$.escapeHtml(data)+"' class='table-number-input ui-widget ui-widget-content' style='width:90%' />";
+				return $.escapeHtml(data) + "<input type='hidden' name='numbers[]' value='"+$.escapeHtml(data)+"' class='table-number-input ui-widget ui-widget-content ui-corner-all' style='width:90%' />";
 			},
 			defaultContent: "",
 			width : "10%"
@@ -100,7 +100,7 @@ dataExchange_js.ftl
 			{
 				return "<input type='text' name='dependentNumbers[]' value='"+$.escapeHtml(data)+"' "
 						+ (po.dependentNumberInputPlaceholder ? "placeholder='"+$.escapeHtml(po.dependentNumberInputPlaceholder)+"'" : "")
-						+ " class='table-dependent-number-input ui-widget ui-widget-content' style='width:90%' />";
+						+ " class='table-dependent-number-input ui-widget ui-widget-content ui-corner-all' style='width:90%' />";
 			},
 			defaultContent: "",
 			width : "10%"

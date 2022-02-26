@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="savePath" value="${resourcePath}" class="ui-widget ui-widget-content" />
+					<input type="text" name="savePath" value="${resourcePath}" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -45,7 +45,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item-value">
 					<textarea name="resourceContent" style="display:none;">${resourceContent!''}</textarea>
-					<div class="resource-editor-wrapper ui-widget ui-widget-content">
+					<div class="resource-editor-wrapper ui-widget ui-widget-content ui-corner-all">
 						<div id="${pageId}-resourceEditor" class="resource-editor code-editor"></div>
 					</div>
 				</div>

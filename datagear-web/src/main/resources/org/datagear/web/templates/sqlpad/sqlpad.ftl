@@ -73,14 +73,14 @@ Schema schema 数据库，不允许为null
 						<div class="form-item">
 							<div class="form-item-label"><label><@spring.message code='sqlpad.overTimeThreashold' /></label></div>
 							<div class="form-item-value">
-								<input type="text" name="overTimeThreashold" value="10" class="ui-widget ui-widget-content" style="width:4em;" title="<@spring.message code='sqlpad.overTimeThreashold.desc' />" />
+								<input type="text" name="overTimeThreashold" value="10" class="ui-widget ui-widget-content ui-corner-all" style="width:4em;" title="<@spring.message code='sqlpad.overTimeThreashold.desc' />" />
 								<@spring.message code='sqlpad.overTimeThreashold.unit' />
 							</div>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label"><label><@spring.message code='sqlpad.resultsetFetchSize' /></label></div>
 							<div class="form-item-value">
-								<input type="text" name="resultsetFetchSize" value="20" class="ui-widget ui-widget-content" style="width:4em;" title="<@spring.message code='sqlpad.resultsetFetchSize.desc' />" />
+								<input type="text" name="resultsetFetchSize" value="20" class="ui-widget ui-widget-content ui-corner-all" style="width:4em;" title="<@spring.message code='sqlpad.resultsetFetchSize.desc' />" />
 							</div>
 						</div>
 					</div>
@@ -97,7 +97,7 @@ Schema schema 数据库，不允许为null
 						<div class="form-content">
 							<div class="form-item">
 								<div class="form-item-value">
-									<input type="text" name="keyword" value="" class="ui-widget ui-widget-content" maxlength="50" />
+									<input type="text" name="keyword" value="" class="ui-widget ui-widget-content ui-corner-all" maxlength="50" />
 									<button type="submit"><@spring.message code='query' /></button>
 								</div>
 							</div>
@@ -108,7 +108,7 @@ Schema schema 数据库，不允许为null
 						<button id="copySqlHistoryToClipbordButton"  title="<@spring.message code='sqlpad.copySqlHistoryToClipbord' />"><@spring.message code='copy' /></button>
 					</div>
 				</div>
-				<div class="sql-history-list ui-widget ui-widget-content">
+				<div class="sql-history-list ui-widget ui-widget-content ui-corner-all">
 				</div>
 				<div class="sql-history-foot">
 					<button id="sqlHistoryLoadMoreButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='loadMore' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='loadMore' /></button>
@@ -117,7 +117,7 @@ Schema schema 数据库，不允许为null
 			</div>
 		</div>
 	</div>
-	<div class="content ui-widget ui-widget-content">
+	<div class="content ui-widget ui-widget-content ui-corner-all">
 		<div class="content-editor">
 			<div class="content-edit-content">
 				<div id="${pageId}-sql-editor" class="sql-editor code-editor"></div>
@@ -143,7 +143,7 @@ Schema schema 数据库，不允许为null
 					</ul>
 				</div>
 				<div id="viewLongTextResultPanel" class="view-long-text-result-panel auto-close-panel ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow">
-					<textarea class="long-text-content ui-widget ui-widget-content"></textarea>
+					<textarea class="long-text-content ui-widget ui-widget-content ui-corner-all"></textarea>
 				</div>
 			</div>
 			<div class="result-operations button-operation">
@@ -161,7 +161,7 @@ Schema schema 数据库，不允许为null
 				</div>
 			</div>
 			<div id="viewSqlStatementPanel" class="view-sql-statement-panel auto-close-panel ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow">
-				<textarea class="sql-content ui-widget ui-widget-content"></textarea>
+				<textarea class="sql-content ui-widget ui-widget-content ui-corner-all"></textarea>
 			</div>
 		</div>
 	</div>

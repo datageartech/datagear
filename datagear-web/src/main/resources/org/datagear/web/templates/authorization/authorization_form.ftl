@@ -62,7 +62,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='${resourceMeta.authPrincipalLabel}' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="principalNameUser" value="${(Authorization.PRINCIPAL_TYPE_USER!=principalType)?string('', (authorization.principalName)!'')}" class="ui-widget ui-widget-content" readonly="readonly" />
+					<input type="text" name="principalNameUser" value="${(Authorization.PRINCIPAL_TYPE_USER!=principalType)?string('', (authorization.principalName)!'')}" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 					<#if !readonly>
 					<button type="button" class="principal-user-select-button"><@spring.message code='select' /></button>
 					</#if>
@@ -73,7 +73,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='${resourceMeta.authPrincipalLabel}' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="principalNameRole" value="${(Authorization.PRINCIPAL_TYPE_ROLE!=principalType)?string('', (authorization.principalName)!'')}" class="ui-widget ui-widget-content" readonly="readonly" />
+					<input type="text" name="principalNameRole" value="${(Authorization.PRINCIPAL_TYPE_ROLE!=principalType)?string('', (authorization.principalName)!'')}" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 					<#if !readonly>
 					<button type="button" class="principal-role-select-button"><@spring.message code='select' /></button>
 					</#if>
@@ -84,7 +84,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='${resourceMeta.authPrincipalLabel}' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="principalNameAnonymous" value="<@spring.message code='authorization.principalType.ANONYMOUS' />" class="ui-widget ui-widget-content" readonly="readonly" />
+					<input type="text" name="principalNameAnonymous" value="<@spring.message code='authorization.principalType.ANONYMOUS' />" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 					<#if !readonly>
 					<#--占位按钮，避免切换时界面尺寸变化-->
 					<button type="button" style="visibility: hidden; padding-left: 0; padding-right: 0; width: 1px; margin-left: -3px; margin-right: 0;">&nbsp;</button>
@@ -96,7 +96,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='${resourceMeta.authPrincipalLabel}' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="principalNameAll" value="<@spring.message code='authorization.principalType.ALL' />" class="ui-widget ui-widget-content" readonly="readonly" />
+					<input type="text" name="principalNameAll" value="<@spring.message code='authorization.principalType.ALL' />" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 					<#if !readonly>
 					<#--占位按钮，避免切换时界面尺寸变化-->
 					<button type="button" style="visibility: hidden; padding-left: 0; padding-right: 0; width: 1px; margin-left: -3px; margin-right: 0;">&nbsp;</button>

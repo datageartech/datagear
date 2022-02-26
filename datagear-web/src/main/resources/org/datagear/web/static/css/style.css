@@ -368,6 +368,26 @@ form .form-item .form-item-value .input,
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
+form.input-width-7 .form-item .form-item-value input[type=text],
+form.input-width-7 .form-item .form-item-value input[type=password],
+form.input-width-7 .form-item .form-item-value textarea,
+form.input-width-7 .form-item .form-item-value .input,
+.form.input-width-7 .form-item .form-item-value input[type=text],
+.form.input-width-7 .form-item .form-item-value input[type=password],
+.form.input-width-7 .form-item .form-item-value textarea,
+.form.input-width-7 .form-item .form-item-value .input{
+	width: 70%;
+}
+form.input-width-9 .form-item .form-item-value input[type=text],
+form.input-width-9 .form-item .form-item-value input[type=password],
+form.input-width-9 .form-item .form-item-value textarea,
+form.input-width-9 .form-item .form-item-value .input,
+.form.input-width-9 .form-item .form-item-value input[type=text],
+.form.input-width-9 .form-item .form-item-value input[type=password],
+.form.input-width-9 .form-item .form-item-value textarea,
+.form.input-width-9 .form-item .form-item-value .input{
+	width: 90%;
+}
 form .form-item .form-item-value input[type=text].width-9,
 form .form-item .form-item-value input[type=password].width-9,
 form .form-item .form-item-value textarea.width-9,

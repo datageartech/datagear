@@ -144,7 +144,7 @@ dataExchange_js.ftl
 					data = "";
 				
 				return "<input type='hidden' name='subDataExchangeIds[]' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
-						+ "<textarea name='queries[]' class='query-input input-in-table ui-widget ui-widget-content' style='width:90%'>"+$.escapeHtml(data)+"</textarea>";
+						+ "<textarea name='queries[]' class='query-input input-in-table ui-widget ui-widget-content ui-corner-all' style='width:90%'>"+$.escapeHtml(data)+"</textarea>";
 			},
 			defaultContent: "",
 			width : "50%",
@@ -157,7 +157,7 @@ dataExchange_js.ftl
 				if(!data)
 					data = "";
 				
-				return "<input type='text' name='fileNames[]' value='"+$.escapeHtml(data)+"' class='file-name-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
+				return "<input type='text' name='fileNames[]' value='"+$.escapeHtml(data)+"' class='file-name-input input-in-table ui-widget ui-widget-content ui-corner-all' style='width:90%' />";
 			},
 			defaultContent: "",
 			width : "20%"

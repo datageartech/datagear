@@ -33,7 +33,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='analysisProject.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(analysisProject.name)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(analysisProject.name)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -41,7 +41,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='analysisProject.desc' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="desc" class="ui-widget ui-widget-content">${(analysisProject.desc)!''}</textarea>
+					<textarea name="desc" class="ui-widget ui-widget-content ui-corner-all">${(analysisProject.desc)!''}</textarea>
 				</div>
 			</div>
 		</div>

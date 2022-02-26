@@ -35,7 +35,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="pattern" value="${(schemaGuard.pattern)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="pattern" value="${(schemaGuard.pattern)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -60,7 +60,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="priority" class="ui-widget ui-widget-content" value="${(schemaGuard.priority)!''}" />
+					<input type="text" name="priority" class="ui-widget ui-widget-content ui-corner-all" value="${(schemaGuard.priority)!''}" />
 				</div>
 			</div>
 			<div class="form-item">

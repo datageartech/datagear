@@ -17,9 +17,9 @@ page_js_obj.ftl
 po.search = undefined;
 -->
 <form id="${pageId}-searchForm" class="search-form" action="#">
-	<div class="ui-widget ui-widget-content keyword-widget">
-		<div class="keyword-input-parent">
-			<input name="keyword" type="text" class="ui-widget ui-widget-content keyword-input" />
+	<div class="keyword-widget ui-widget ui-widget-content ui-corner-all">
+		<div class="keyword-input-parent ui-corner-all">
+			<input name="keyword" type="text" class="keyword-input ui-widget ui-widget-content ui-corner-all" />
 		</div>
 	</div>
 	<input name="submit" type="submit" value="<@spring.message code='query' />" />

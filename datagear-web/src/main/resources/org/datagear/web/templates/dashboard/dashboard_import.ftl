@@ -55,7 +55,7 @@
 					<label><@spring.message code='dashboard.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -65,7 +65,7 @@
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="template" value="" class="ui-widget ui-widget-content" />
+					<input type="text" name="template" value="" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">

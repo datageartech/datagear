@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(user.name)!''}" class="ui-widget ui-widget-content" autocomplete="off" />
+					<input type="text" name="name" value="${(user.name)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
 				</div>
 			</div>
 			<#if !readonly>
@@ -43,7 +43,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.password' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="password" value="" class="ui-widget ui-widget-content" autocomplete="new-password" />
+					<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -51,7 +51,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.confirmPassword' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content" autocomplete="new-password" />
+					<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 				</div>
 			</div>
 			</#if>
@@ -60,7 +60,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.realName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="realName" value="${(user.realName)!''}" class="ui-widget ui-widget-content" autocomplete="off" />
+					<input type="text" name="realName" value="${(user.realName)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
 				</div>
 			</div>
 			<#if !disableRoles>
@@ -69,7 +69,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.roles' /></label>
 				</div>
 				<div class="form-item-value">
-					<div class="user-roles ui-widget ui-widget-content input minor-list deletable-list">
+					<div class="user-roles ui-widget ui-widget-content ui-corner-all input minor-list deletable-list">
 					</div>
 					<#if !readonly>
 						<button class="selectUserRoleBtn" type="button"><@spring.message code='select' /></button>

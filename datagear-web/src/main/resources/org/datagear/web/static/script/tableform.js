@@ -578,14 +578,14 @@
 			{
 				valuediv.addClass("textarea-value");
 				
-				textElement = $("<textarea class='ui-widget ui-widget-content' />").attr("name", columnName)
+				textElement = $("<textarea class='ui-widget ui-widget-content ui-corner-all' />").attr("name", columnName)
 					.text((columnValue == undefined || columnValue == null) ? "" : columnValue);
 			}
 			else
 			{
 				valuediv.addClass("text-value");
 				
-				textElement = $("<input type='text' class='ui-widget ui-widget-content' />").attr("name", columnName)
+				textElement = $("<input type='text' class='ui-widget ui-widget-content ui-corner-all' />").attr("name", columnName)
 					.val((columnValue == undefined || columnValue == null) ? "" : columnValue);
 			}
 			
@@ -644,7 +644,7 @@
 			var binaryHiddenInput = $("<input type='hidden' />").attr("name", columnName)
 				.val("").appendTo(valuediv);
 			
-			var binaryLabelInput = $("<input type='text' class='ui-widget ui-widget-content binary-label-input' />").attr("name", labelInputName)
+			var binaryLabelInput = $("<input type='text' class='ui-widget ui-widget-content ui-corner-all binary-label-input' />").attr("name", labelInputName)
 				.val("").attr("__columnName", columnName).appendTo(valuediv);
 			
 			valuediv.append("&nbsp;");
@@ -820,7 +820,7 @@
 			var table = options.table;
 			var columnName = column.name;
 			
-			var textinput=$("<input type='text' class='ui-widget ui-widget-content' />").attr("name", columnName)
+			var textinput=$("<input type='text' class='ui-widget ui-widget-content ui-corner-all' />").attr("name", columnName)
 							.attr("value", (columnValue || "")).appendTo(valuediv);
 			
 			valuediv.append("&nbsp;");

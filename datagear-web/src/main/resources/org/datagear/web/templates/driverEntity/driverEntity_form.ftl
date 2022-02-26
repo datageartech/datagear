@@ -32,7 +32,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='driverEntity.displayName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="displayName" value="${(driverEntity.displayName)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="displayName" value="${(driverEntity.displayName)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -40,7 +40,7 @@ readonly 是否只读操作，允许为null
 					<label title="<@spring.message code='driverEntity.driverFiles.desc' />"><@spring.message code='driverEntity.driverFiles' /></label>
 				</div>
 				<div class="form-item-value">
-					<div class="driver-files ui-widget ui-widget-content input minor-list deletable-list">
+					<div class="driver-files ui-widget ui-widget-content ui-corner-all input minor-list deletable-list">
 					</div>
 					<input type="text" name="driverFilePlaceholder" style="display:none;" />
 					<#if !readonly>
@@ -67,7 +67,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="driverClassName" value="${(driverEntity.driverClassName)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="driverClassName" value="${(driverEntity.driverClassName)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -75,7 +75,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='driverEntity.displayDesc' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="displayDesc" class="ui-widget ui-widget-content">${(driverEntity.displayDescMore)!''}</textarea>
+					<textarea name="displayDesc" class="ui-widget ui-widget-content ui-corner-all">${(driverEntity.displayDescMore)!''}</textarea>
 				</div>
 			</div>
 		</div>

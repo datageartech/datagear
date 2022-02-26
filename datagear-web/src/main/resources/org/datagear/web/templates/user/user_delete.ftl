@@ -29,7 +29,7 @@ formAction 表单提交action，允许为null
 					<label><@spring.message code='user.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<div class="delete-users ui-widget ui-widget-content input minor-list deletable-list">
+					<div class="delete-users ui-widget ui-widget-content ui-corner-all input minor-list deletable-list">
 					</div>
 					<input type="text" name="deleteUserPlaceholder" style="display:none;" />
 				</div>
@@ -41,7 +41,7 @@ formAction 表单提交action，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="migrateUserName" value="" class="ui-widget ui-widget-content" readonly="readonly" />
+					<input type="text" name="migrateUserName" value="" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 					<input type="hidden" name="migrateToId" value="" />
 					<button class="selectUserBtn" type="button"><@spring.message code='select' /></button>
 				</div>

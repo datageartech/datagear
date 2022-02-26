@@ -196,7 +196,7 @@ po.previewOptions.url = "...";
 					{
 						var manual = row.manual;
 						return "<input type='text' value='"+$.escapeHtml(data)+"'"
-							+" class='dataSetPropertyName input-in-table "+(manual ? "manual" : "readonly")+" ui-widget ui-widget-content'"
+							+" class='dataSetPropertyName input-in-table "+(manual ? "manual" : "readonly")+" ui-widget ui-widget-content ui-corner-all'"
 							+" "+(manual ? "" : "readonly='readonly'")+" />";
 					},
 					width: "8em",
@@ -210,7 +210,7 @@ po.previewOptions.url = "...";
 					{
 						data = (data || "${PropertyDataType.STRING}");
 						
-						return "<select class='dataSetPropertyType input-in-table ui-widget ui-widget-content'>"
+						return "<select class='dataSetPropertyType input-in-table ui-widget ui-widget-content ui-corner-all'>"
 								+"<option value='${PropertyDataType.STRING}' "+(data == "${PropertyDataType.STRING}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.STRING' /></option>"
 								+"<option value='${PropertyDataType.NUMBER}' "+(data == "${PropertyDataType.NUMBER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.NUMBER' /></option>"
 								+"<option value='${PropertyDataType.INTEGER}' "+(data == "${PropertyDataType.INTEGER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.INTEGER' /></option>"
@@ -231,7 +231,7 @@ po.previewOptions.url = "...";
 					data: "label",
 					render: function(data, type, row, meta)
 					{
-						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyLabel input-in-table ui-widget ui-widget-content' />";
+						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyLabel input-in-table ui-widget ui-widget-content ui-corner-all' />";
 					},
 					width: "8em",
 					defaultContent: "",
@@ -242,7 +242,7 @@ po.previewOptions.url = "...";
 					data: "defaultValue",
 					render: function(data, type, row, meta)
 					{
-						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyDefaultValue input-in-table ui-widget ui-widget-content' />";
+						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyDefaultValue input-in-table ui-widget ui-widget-content ui-corner-all' />";
 					},
 					width: "6em",
 					defaultContent: "",
@@ -400,7 +400,7 @@ po.previewOptions.url = "...";
 					data: "name",
 					render: function(data, type, row, meta)
 					{
-						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamName input-in-table ui-widget ui-widget-content' />";
+						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamName input-in-table ui-widget ui-widget-content ui-corner-all' />";
 					},
 					width: "8em",
 					defaultContent: "",
@@ -413,7 +413,7 @@ po.previewOptions.url = "...";
 					{
 						data = (data || "${ParamDataType.STRING}");
 						
-						return "<select class='dataSetParamType input-in-table ui-widget ui-widget-content'>"
+						return "<select class='dataSetParamType input-in-table ui-widget ui-widget-content ui-corner-all'>"
 								+"<option value='${ParamDataType.STRING}' "+(data == "${ParamDataType.STRING}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.STRING' /></option>"
 								+"<option value='${ParamDataType.NUMBER}' "+(data == "${ParamDataType.NUMBER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.NUMBER' /></option>"
 								+"<option value='${ParamDataType.BOOLEAN}' "+(data == "${ParamDataType.BOOLEAN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.BOOLEAN' /></option>"
@@ -430,7 +430,7 @@ po.previewOptions.url = "...";
 					{
 						data = data + "";
 						
-						return "<select class='dataSetParamRequired input-in-table ui-widget ui-widget-content'>"
+						return "<select class='dataSetParamRequired input-in-table ui-widget ui-widget-content ui-corner-all'>"
 								+"<option value='true' "+(data != "false" ? "selected='selected'" : "")+"><@spring.message code='yes' /></option>"
 								+"<option value='false' "+(data == "false" ? "selected='selected'" : "")+"><@spring.message code='no' /></option>"
 								+"</select>";
@@ -444,7 +444,7 @@ po.previewOptions.url = "...";
 					data: "desc",
 					render: function(data, type, row, meta)
 					{
-						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamDesc input-in-table ui-widget ui-widget-content' />";
+						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamDesc input-in-table ui-widget ui-widget-content ui-corner-all' />";
 					},
 					width: "6em",
 					defaultContent: "",
@@ -457,7 +457,7 @@ po.previewOptions.url = "...";
 					{
 						data = (data || "${ParamInputType.TEXT}");
 						
-						return "<select class='dataSetParamInputType input-in-table ui-widget ui-widget-content'>"
+						return "<select class='dataSetParamInputType input-in-table ui-widget ui-widget-content ui-corner-all'>"
 								+"<option value='${ParamInputType.TEXT}' "+(data == "${ParamInputType.TEXT}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TEXT' /></option>"
 								+"<option value='${ParamInputType.SELECT}' "+(data == "${ParamInputType.SELECT}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.SELECT' /></option>"
 								+"<option value='${ParamInputType.DATE}' "+(data == "${ParamInputType.DATE}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.DATE' /></option>"
@@ -477,7 +477,7 @@ po.previewOptions.url = "...";
 					data: "inputPayload",
 					render: function(data, type, row, meta)
 					{
-						return "<textarea class='dataSetParamInputPayload input-in-table ui-widget ui-widget-content' style='height:2em;'>"+$.escapeHtml(data)+"</textarea>";
+						return "<textarea class='dataSetParamInputPayload input-in-table ui-widget ui-widget-content ui-corner-all' style='height:2em;'>"+$.escapeHtml(data)+"</textarea>";
 					},
 					width: "20em",
 					defaultContent: "",
@@ -599,7 +599,7 @@ po.previewOptions.url = "...";
 			paramValues: chartFactory.chartSetting.getDataSetParamValueObj(chartFactory.chartSetting.getDataSetParamValueForm($panel)),
 			render: function()
 			{
-				$("select, input, textarea", this).addClass("ui-widget ui-widget-content");
+				$("select, input, textarea", this).addClass("ui-widget ui-widget-content ui-corner-all");
 				$("button", this).addClass("ui-button ui-corner-all ui-widget");
 			}
 		},

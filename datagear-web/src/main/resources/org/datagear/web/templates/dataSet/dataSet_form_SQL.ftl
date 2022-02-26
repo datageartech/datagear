@@ -35,8 +35,8 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSet.dataSource' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="shmConFactory.schema.title" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.title)!''}" readonly="readonly" />
-					<input type="hidden" name="shmConFactory.schema.id" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.id)!''}" />
+					<input type="text" name="shmConFactory.schema.title" class="ui-widget ui-widget-content ui-corner-all" value="${(dataSet.connectionFactory.schema.title)!''}" readonly="readonly" />
+					<input type="hidden" name="shmConFactory.schema.id" class="ui-widget ui-widget-content ui-corner-all" value="${(dataSet.connectionFactory.schema.id)!''}" />
 					<#if !readonly>
 					<button type="button" class="select-schema-button"><@spring.message code='select' /></button>
 					</#if>
@@ -50,8 +50,8 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''}</textarea>
-						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
+						<textarea name="sql" class="ui-widget ui-widget-content ui-corner-all" style="display:none;">${(dataSet.sql)!''}</textarea>
+						<div class="workspace-editor-wrapper ui-widget ui-widget-content ui-corner-all">
 							<div id="${pageId}-workspaceEditor" class="workspace-editor code-editor"></div>
 						</div>
 					</div>

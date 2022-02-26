@@ -48,7 +48,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.username' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="text" name="username" value="" class="ui-widget ui-widget-content" />
+							<input type="text" name="username" value="" class="ui-widget ui-widget-content ui-corner-all" />
 						</div>
 					</div>
 					<#elseif step.step == 2>
@@ -57,7 +57,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.username' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="text" value="${(step.user.name)!''}" class="ui-widget ui-widget-content" readonly="readonly" />
+							<input type="text" value="${(step.user.name)!''}" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 						</div>
 					</div>
 					<div class="form-item">
@@ -74,7 +74,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.username' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="text" value="${(step.user.name)!''}" class="ui-widget ui-widget-content" readonly="readonly" />
+							<input type="text" value="${(step.user.name)!''}" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 						</div>
 					</div>
 					<div class="form-item">
@@ -82,7 +82,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.password' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="password" name="password" value="" class="ui-widget ui-widget-content" />
+							<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" />
 						</div>
 					</div>
 					<div class="form-item">
@@ -90,7 +90,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.confirmPassword' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content" />
+							<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content ui-corner-all" />
 						</div>
 					</div>
 					<#elseif step.finalStep>

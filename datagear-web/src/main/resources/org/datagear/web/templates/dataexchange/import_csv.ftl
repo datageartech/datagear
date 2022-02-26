@@ -168,7 +168,7 @@ Schema schema 数据库，不允许为null
 		data : "tableName",
 		render : function(data, type, row, meta)
 		{
-			return "<input type='text' name='tableNames[]' value='"+$.escapeHtml(data)+"' class='table-name-input ui-widget ui-widget-content' style='width:90%' />";
+			return "<input type='text' name='tableNames[]' value='"+$.escapeHtml(data)+"' class='table-name-input ui-widget ui-widget-content ui-corner-all' style='width:90%' />";
 		},
 		defaultContent: "",
 		width : "20%"

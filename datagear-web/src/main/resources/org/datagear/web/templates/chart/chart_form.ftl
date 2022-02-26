@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='chart.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(chart.name)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(chart.name)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
@@ -43,7 +43,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='chart.htmlChartPlugin' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="htmlChartPlugin.id" class="ui-widget ui-widget-content" value="${(chart.htmlChartPlugin.id)!''}" style="display:none" />
+					<input type="text" name="htmlChartPlugin.id" class="ui-widget ui-widget-content ui-corner-all" value="${(chart.htmlChartPlugin.id)!''}" style="display:none" />
 					<div class="chart-plugin input ui-widget ui-widget-content"></div>
 					<#if !readonly>
 					<button class="selectChartPluginButton" type="button"><@spring.message code='select' /></button>
@@ -58,7 +58,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item-value form-item-value-chartDataSet">
 					<input type="text" name="dataSignValidation" style="display: none" />
-					<div class="data-set-wrapper input ui-widget ui-widget-content">
+					<div class="data-set-wrapper input ui-widget ui-widget-content ui-corner-all">
 					</div>
 					<div class="data-set-opt">
 						<#if !readonly>
@@ -101,7 +101,7 @@ readonly 是否只读操作，允许为null
 					</div>
 					&nbsp;
 					<span class="updateInterval-wrapper">
-						<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'}" class="ui-widget ui-widget-content" style="width:7em;" />
+						<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'}" class="ui-widget ui-widget-content ui-corner-all" style="width:7em;" />
 						<span><@spring.message code='chart.updateIntervalUnit' /></span>
 					</span>
 				</div>
@@ -171,7 +171,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input name="resultDataFormat.dateFormat" type="text" value="${(initResultDataFormat.dateFormat)!}" class="ui-widget ui-widget-content" />
+								<input name="resultDataFormat.dateFormat" type="text" value="${(initResultDataFormat.dateFormat)!}" class="ui-widget ui-widget-content ui-corner-all" />
 							</div>
 						</div>
 						<div class="form-item resultDataFormatEnableAware">
@@ -202,7 +202,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input name="resultDataFormat.timeFormat" type="text" value="${(initResultDataFormat.timeFormat)!}" class="ui-widget ui-widget-content" />
+								<input name="resultDataFormat.timeFormat" type="text" value="${(initResultDataFormat.timeFormat)!}" class="ui-widget ui-widget-content ui-corner-all" />
 							</div>
 						</div>
 						<div class="form-item resultDataFormatEnableAware">
@@ -233,7 +233,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input name="resultDataFormat.timestampFormat" type="text" value="${(initResultDataFormat.timestampFormat)!}" class="ui-widget ui-widget-content" />
+								<input name="resultDataFormat.timestampFormat" type="text" value="${(initResultDataFormat.timestampFormat)!}" class="ui-widget ui-widget-content ui-corner-all" />
 							</div>
 						</div>
 					</div>
@@ -678,7 +678,7 @@ readonly 是否只读操作，允许为null
 					readonly: <#if readonly>true<#else>false</#if>,
 					render: function()
 					{
-						$("select, input, textarea", this).addClass("ui-widget ui-widget-content");
+						$("select, input, textarea", this).addClass("ui-widget ui-widget-content ui-corner-all");
 						$("button", this).addClass("ui-button ui-corner-all ui-widget");
 						
 						<#if !readonly>

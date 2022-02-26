@@ -34,7 +34,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='register.name' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="name" value="" class="ui-widget ui-widget-content" autocomplete="off" />
+						<input type="text" name="name" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -42,7 +42,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='register.password' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="password" name="password" value="" class="ui-widget ui-widget-content" autocomplete="new-password" />
+						<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -50,7 +50,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='register.confirmPassword' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content" autocomplete="new-password" />
+						<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -58,7 +58,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='register.realName' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="realName" value="" class="ui-widget ui-widget-content" />
+						<input type="text" name="realName" value="" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 			</div>

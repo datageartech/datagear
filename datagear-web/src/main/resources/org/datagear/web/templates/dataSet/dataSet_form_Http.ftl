@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="uri" value="${(dataSet.uri)!''}" class="ui-widget ui-widget-content" />
+					<input type="text" name="uri" value="${(dataSet.uri)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 					
 					<div class="item-lv inline" title="<@spring.message code='dataSet.http.requestMethod' />">
 						<div class="item-lv-l" style="display: none;">
@@ -116,17 +116,17 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<textarea name="requestContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.requestContent)!''}</textarea>
-						<textarea name="headerContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.headerContent)!''}</textarea>
+						<textarea name="requestContent" class="ui-widget ui-widget-content ui-corner-all" style="display:none;">${(dataSet.requestContent)!''}</textarea>
+						<textarea name="headerContent" class="ui-widget ui-widget-content ui-corner-all" style="display:none;">${(dataSet.headerContent)!''}</textarea>
 						<div class="workspace-editor-tabs light-tabs">
 							<ul class="workspace-editor-nav">
 								<li class="editor-requestContent"><a href="#${pageId}-editor-requestContent"><@spring.message code='dataSet.http.requestContent' /></a></li>
 								<li class="editor-headerContent"><a href="#${pageId}-editor-headerContent"><@spring.message code='dataSet.http.headerContent' /></a></li>
 							</ul>
-							<div id="${pageId}-editor-requestContent" class="workspace-editor-wrapper ui-widget ui-widget-content">
+							<div id="${pageId}-editor-requestContent" class="workspace-editor-wrapper ui-widget ui-widget-content ui-corner-all">
 								<div id="${pageId}-workspaceEditor-requestContent" class="workspace-editor code-editor"></div>
 							</div>
-							<div id="${pageId}-editor-headerContent" class="workspace-editor-wrapper ui-widget ui-widget-content">
+							<div id="${pageId}-editor-headerContent" class="workspace-editor-wrapper ui-widget ui-widget-content ui-corner-all">
 								<div id="${pageId}-workspaceEditor-headerContent" class="workspace-editor code-editor"></div>
 							</div>
 						</div>
@@ -139,7 +139,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="responseDataJsonPath" value="${(dataSet.responseDataJsonPath)!''}" class="ui-widget ui-widget-content" />
+						<input type="text" name="responseDataJsonPath" value="${(dataSet.responseDataJsonPath)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 				<#include "include/dataSet_form_html_wow.ftl" >

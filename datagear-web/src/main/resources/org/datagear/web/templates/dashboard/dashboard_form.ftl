@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboard.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(dashboard.name)!''}" placeholder="<@spring.message code='dashboard.name' />" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="${(dashboard.name)!''}" placeholder="<@spring.message code='dashboard.name' />" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
@@ -157,7 +157,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dashboard.addResource.name' />
 						</label>
 					</div>
-					<input type="text" name="addResName" value="" class="ui-widget ui-widget-content" />
+					<input type="text" name="addResName" value="" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="panel-foot">
@@ -184,7 +184,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dashboard.uploadResource.savePath' />
 						</label>
 					</div>
-					<input type="text" name="uploadResName" value="" class="ui-widget ui-widget-content" />
+					<input type="text" name="uploadResName" value="" class="ui-widget ui-widget-content ui-corner-all" />
 					<input type="hidden"name="uploadResFilePath"  value="" />
 				</div>
 			</div>
@@ -204,7 +204,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.content.content' /></label>
 					</div>
 					<div class="form-item-value">
-						<textarea name="content" class="width-9 ui-widget ui-widget-content"></textarea>
+						<textarea name="content" class="width-9 ui-widget ui-widget-content ui-corner-all"></textarea>
 					</div>
 				</div>
 			</div>
@@ -214,7 +214,7 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-style-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-37">
+		<form action="#" method="POST" class="display-37 input-width-7">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<div class="editStyleTitle">
 					<@spring.message code='dashboard.veditor.style' />
@@ -238,7 +238,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="color" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 								<div class="color-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 							</div>
 						</div>
@@ -249,7 +249,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="background-color" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="background-color" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 								<div class="bgcolor-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 							</div>
 						</div>
@@ -263,7 +263,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="background-image" class="width-9 ui-widget ui-widget-content" size="200" />
+								<input type="text" name="background-image" class="width-9 ui-widget ui-widget-content ui-corner-all" size="200" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -271,7 +271,7 @@ readonly 是否只读操作，允许为null
 								<label><@spring.message code='dashboard.veditor.style.bgSize' /></label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="background-size" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="background-size" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleBgSizeBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="100% 100%">
@@ -294,7 +294,7 @@ readonly 是否只读操作，允许为null
 								<label><@spring.message code='dashboard.veditor.style.bgRepeat' /></label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="background-repeat" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="background-repeat" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleBgRepeatBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="no-repeat">
@@ -317,7 +317,7 @@ readonly 是否只读操作，允许为null
 								<label><@spring.message code='dashboard.veditor.style.bgPosition' /></label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="background-position" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="background-position" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleBgPositionBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="center center">
@@ -348,7 +348,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="border-width" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="border-width" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleBorderWidthBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="1px">
@@ -370,7 +370,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="border-color" class="ui-widget ui-widget-content" size="200" />
+								<input type="text" name="border-color" class="ui-widget ui-widget-content ui-corner-all" size="200" />
 								<div class="border-color-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 							</div>
 						</div>
@@ -381,7 +381,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="border-style" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="border-style" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleBorderStyleBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="solid">
@@ -403,7 +403,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="border-radius" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="border-radius" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleBorderRadiusBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="3px">
@@ -431,7 +431,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="box-shadow" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="box-shadow" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleBoxShadowBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="0px 0px 6px 4px #666">
@@ -462,7 +462,7 @@ readonly 是否只读操作，允许为null
 								<label><@spring.message code='dashboard.veditor.style.display' /></label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="display" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="display" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleDisplayBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="grid">
@@ -496,7 +496,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="width" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="width" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -506,7 +506,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="height" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="height" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -516,7 +516,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="padding" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="padding" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -526,7 +526,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="margin" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="margin" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -536,7 +536,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="box-sizing" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="box-sizing" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleBoxSizingBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="border-box">
@@ -556,7 +556,7 @@ readonly 是否只读操作，允许为null
 								<label><@spring.message code='dashboard.veditor.style.position' /></label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="position" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="position" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="stylePositionBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="absolute">
@@ -581,7 +581,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="left" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="left" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -591,7 +591,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="top" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="top" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -601,7 +601,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="right" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="right" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -611,7 +611,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="bottom" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="bottom" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -621,7 +621,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="z-index" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="z-index" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="ui-widget-header ui-corner-all">
@@ -636,7 +636,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-template-rows" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="grid-template-rows" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleGridTemplateRowsBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
@@ -664,7 +664,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-template-columns" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="grid-template-columns" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleGridTemplateColumnsBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
@@ -692,7 +692,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-row-gap" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="grid-row-gap" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -702,7 +702,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-column-gap" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="grid-column-gap" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -712,7 +712,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-template-areas" class="ui-widget ui-widget-content" size="300" />
+								<input type="text" name="grid-template-areas" class="ui-widget ui-widget-content ui-corner-all" size="300" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -722,7 +722,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-auto-flow" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="grid-auto-flow" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleGridAutoFlowBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="row">
@@ -747,7 +747,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="justify-items" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="justify-items" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleJustifyItemsBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
@@ -772,7 +772,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="align-items-grid" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="align-items-grid" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleAlignItemsGridBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
@@ -797,7 +797,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="justify-content-grid" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="justify-content-grid" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleJustifyContentGridBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
@@ -831,7 +831,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="align-content-grid" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="align-content-grid" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleAlignContentGridBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
@@ -865,7 +865,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-auto-rows" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="grid-auto-rows" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleGridAutoRowsBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
@@ -893,7 +893,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-auto-columns" class="help-target ui-widget ui-widget-content" size="200" />
+								<input type="text" name="grid-auto-columns" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
 								<div class="styleGridAutoColumnsBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
@@ -926,7 +926,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-row-start" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="grid-row-start" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -936,7 +936,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-row-end" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="grid-row-end" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -946,7 +946,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-column-start" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="grid-column-start" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -956,7 +956,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-column-end" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="grid-column-end" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -966,7 +966,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="grid-area" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="grid-area" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -976,7 +976,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="justify-self" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="justify-self" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleJustifySelfBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
@@ -1001,7 +1001,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="align-self-grid" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="align-self-grid" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleAlignSelfGridBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
@@ -1031,7 +1031,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="flex-direction" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="flex-direction" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleFlexDirectionBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="row">
@@ -1056,7 +1056,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="flex-wrap" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="flex-wrap" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleFlexWrapBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="nowrap">
@@ -1078,7 +1078,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="justify-content-flex" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="justify-content-flex" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleJustifyContentFlexBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
@@ -1106,7 +1106,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="align-items-flex" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="align-items-flex" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleAlignItemsFlexBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
@@ -1134,7 +1134,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="align-content-flex" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="align-content-flex" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleAlignContentFlexBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
@@ -1170,7 +1170,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="order" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="order" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -1180,7 +1180,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="flex-grow" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="flex-grow" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -1190,7 +1190,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="flex-shrink" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="flex-shrink" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -1200,7 +1200,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="flex-basis" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="flex-basis" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -1210,7 +1210,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="align-self-flex" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="align-self-flex" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleAlignSelfFlexBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
@@ -1243,7 +1243,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="font-family" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="font-family" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -1253,7 +1253,7 @@ readonly 是否只读操作，允许为null
 								</label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="font-size" class="ui-widget ui-widget-content" size="100" />
+								<input type="text" name="font-size" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 							</div>
 						</div>
 						<div class="form-item">
@@ -1261,7 +1261,7 @@ readonly 是否只读操作，允许为null
 								<label><@spring.message code='dashboard.veditor.style.fontWeight' /></label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="font-weight" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="font-weight" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleFontWeightBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="normal">
@@ -1278,7 +1278,7 @@ readonly 是否只读操作，允许为null
 								<label><@spring.message code='dashboard.veditor.style.textAlign' /></label>
 							</div>
 							<div class="form-item-value">
-								<input type="text" name="text-align" class="help-target ui-widget ui-widget-content" size="100" />
+								<input type="text" name="text-align" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
 								<div class="styleTextAlignBtnGroup helper-opt">
 									<button type="button" class="help-src small-button" help-value="left">
@@ -1300,7 +1300,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.style.className' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="className" class="ui-widget ui-widget-content" size="200" />
+						<input type="text" name="className" class="ui-widget ui-widget-content ui-corner-all" size="200" />
 					</div>
 				</div>
 				<div class="form-item form-item-syncChartTheme">
@@ -1325,7 +1325,7 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-chartTheme-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-37">
+		<form action="#" method="POST" class="display-37 input-width-7">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<div class="editChartThemeTitle">
 					<@spring.message code='dashboard.veditor.chartTheme' />
@@ -1340,7 +1340,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.chartTheme.color' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="color" class="ui-widget ui-widget-content" size="100" />
+						<input type="text" name="color" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 						<div class="color-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 					</div>
 				</div>
@@ -1349,7 +1349,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.chartTheme.bgColor' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="backgroundColor" class="ui-widget ui-widget-content" size="100" />
+						<input type="text" name="backgroundColor" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 						<div class="bgcolor-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 					</div>
 				</div>
@@ -1358,7 +1358,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.chartTheme.actualBgColor' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="actualBackgroundColor" class="ui-widget ui-widget-content" size="100" />
+						<input type="text" name="actualBackgroundColor" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 						<div class="actbgcolor-indicator listpallet-indicator ui-widget ui-widget-content ui-corner-all"></div>
 					</div>
 				</div>
@@ -1387,7 +1387,7 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-dashboardSize-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-37">
+		<form action="#" method="POST" class="display-37 input-width-7">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.dashboardSize' />
 			</div>
@@ -1397,7 +1397,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.dashboardSize.width' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="width" class="ui-widget ui-widget-content" size="100" />
+						<input type="text" name="width" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 						<span>px</span>
 					</div>
 				</div>
@@ -1406,7 +1406,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.dashboardSize.height' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="height" class="ui-widget ui-widget-content" size="100" />
+						<input type="text" name="height" class="ui-widget ui-widget-content ui-corner-all" size="100" />
 						<span>px</span>
 					</div>
 				</div>
@@ -1451,7 +1451,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.chartOptions.options' /></label>
 					</div>
 					<div class="form-item-value">
-						<textarea name="options" class="ui-widget ui-widget-content"></textarea>
+						<textarea name="options" class="ui-widget ui-widget-content ui-corner-all"></textarea>
 					</div>
 				</div>
 			</div>
@@ -1461,7 +1461,7 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-gridLayout-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-37">
+		<form action="#" method="POST" class="display-37 input-width-7">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.gridLayout' />
 			</div>
@@ -1471,7 +1471,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.gridLayout.rows' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="rows" class="help-target ui-widget ui-widget-content" size="50" />
+						<input type="text" name="rows" class="help-target ui-widget ui-widget-content ui-corner-all" size="50" />
 						<br>
 						<div class="gridLayoutRowsBtnGroup helper-opt">
 							<button type="button" class="help-src small-button" help-value="1">
@@ -1497,7 +1497,7 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.gridLayout.columns' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="columns" class="help-target ui-widget ui-widget-content" size="50" />
+						<input type="text" name="columns" class="help-target ui-widget ui-widget-content ui-corner-all" size="50" />
 						<br>
 						<div class="gridLayoutColumnsBtnGroup helper-opt">
 							<button type="button" class="help-src small-button" help-value="1">
@@ -1540,7 +1540,7 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-image-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-37">
+		<form action="#" method="POST" class="display-37 input-width-7">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.image' />
 			</div>
@@ -1552,7 +1552,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="src" class="width-9 ui-widget ui-widget-content" size="200" />
+						<input type="text" name="src" class="width-9 ui-widget ui-widget-content ui-corner-all" size="200" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -1562,7 +1562,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="width" class="ui-widget ui-widget-content" size="50" />
+						<input type="text" name="width" class="ui-widget ui-widget-content ui-corner-all" size="50" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -1572,7 +1572,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="height" class="ui-widget ui-widget-content" size="50" />
+						<input type="text" name="height" class="ui-widget ui-widget-content ui-corner-all" size="50" />
 					</div>
 				</div>
 			</div>
@@ -1582,7 +1582,7 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-hyperlink-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-37">
+		<form action="#" method="POST" class="display-37 input-width-7">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.hyperlink' />
 			</div>
@@ -1594,7 +1594,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="href" class="ui-widget ui-widget-content" size="200" />
+						<input type="text" name="href" class="ui-widget ui-widget-content ui-corner-all" size="200" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -1604,7 +1604,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="content" class="width-9 ui-widget ui-widget-content" size="200" />
+						<input type="text" name="content" class="width-9 ui-widget ui-widget-content ui-corner-all" size="200" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -1614,7 +1614,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="target" class="help-target ui-widget ui-widget-content" size="50" />
+						<input type="text" name="target" class="help-target ui-widget ui-widget-content ui-corner-all" size="50" />
 						<br>
 						<div class="hyperlinkTargetBtnGroup helper-opt">
 							<button type="button" class="help-src small-button" help-value="_blank">
@@ -1633,7 +1633,7 @@ readonly 是否只读操作，允许为null
 		</form>
 	</div>
 	<div class="veditor-video-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<form action="#" method="POST" class="display-37">
+		<form action="#" method="POST" class="display-37 input-width-7">
 			<div class="panel-head ui-widget-header ui-corner-all">
 				<@spring.message code='dashboard.veditor.video' />
 			</div>
@@ -1645,7 +1645,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="src" class="width-9 ui-widget ui-widget-content" size="200" />
+						<input type="text" name="src" class="width-9 ui-widget ui-widget-content ui-corner-all" size="200" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -1655,7 +1655,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="width" class="ui-widget ui-widget-content" size="50" />
+						<input type="text" name="width" class="ui-widget ui-widget-content ui-corner-all" size="50" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -1665,7 +1665,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="height" class="ui-widget ui-widget-content" size="50" />
+						<input type="text" name="height" class="ui-widget ui-widget-content ui-corner-all" size="50" />
 					</div>
 				</div>
 			</div>

@@ -29,7 +29,7 @@ DataSetEntity dataSet 允许为null
 				<button type="button" auto-close-prevent="result-resolved-source-panel" class="show-resolved-source-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.showResolvedSource' />"><span class="ui-button-icon ui-icon ui-icon-comment"></span><span class="ui-button-icon-space"> </span><@spring.message code='dataSet.showResolvedSource' /></button>
 				<div class="result-resolved-source-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 					<div class="result-resolved-source-panel-content">
-						<textarea class="ui-widget ui-widget-content"></textarea>
+						<textarea class="ui-widget ui-widget-content ui-corner-all"></textarea>
 					</div>
 				</div>
 			</div>
@@ -38,7 +38,7 @@ DataSetEntity dataSet 允许为null
 			</div>
 		</div>
 		<div class="preview-error-info ui-state-error">
-			<textarea class="ui-widget ui-widget-content"></textarea>
+			<textarea class="ui-widget ui-widget-content ui-corner-all"></textarea>
 		</div>
 	</div>
 	<div id="${pageId}-dataSetParams" class="params-table-wrapper minor-dataTable">
@@ -76,25 +76,25 @@ DataSetEntity dataSet 允许为null
 						<div class="form-item">
 							<div class="form-item-label"><@spring.message code='dataSet.dataFormat.dateFormat' /></div>
 							<div class="form-item-value">
-								<input name="dataFormat.dateFormat" type="text" value="${(dataSet.dataFormat.dateFormat)!}" class="ui-widget ui-widget-content" />
+								<input name="dataFormat.dateFormat" type="text" value="${(dataSet.dataFormat.dateFormat)!}" class="ui-widget ui-widget-content ui-corner-all" />
 							</div>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label"><@spring.message code='dataSet.dataFormat.timeFormat' /></div>
 							<div class="form-item-value">
-								<input name="dataFormat.timeFormat" type="text" value="${(dataSet.dataFormat.timeFormat)!}" class="ui-widget ui-widget-content" />
+								<input name="dataFormat.timeFormat" type="text" value="${(dataSet.dataFormat.timeFormat)!}" class="ui-widget ui-widget-content ui-corner-all" />
 							</div>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label"><@spring.message code='dataSet.dataFormat.timestampFormat' /></div>
 							<div class="form-item-value">
-								<input name="dataFormat.timestampFormat" type="text" value="${(dataSet.dataFormat.timestampFormat)!}" class="ui-widget ui-widget-content" />
+								<input name="dataFormat.timestampFormat" type="text" value="${(dataSet.dataFormat.timestampFormat)!}" class="ui-widget ui-widget-content ui-corner-all" />
 							</div>
 						</div>
 						<div class="form-item">
 							<div class="form-item-label"><@spring.message code='dataSet.dataFormat.numberFormat' /></div>
 							<div class="form-item-value">
-								<input name="dataFormat.numberFormat" type="text" value="${(dataSet.dataFormat.numberFormat)!}" class="ui-widget ui-widget-content" />
+								<input name="dataFormat.numberFormat" type="text" value="${(dataSet.dataFormat.numberFormat)!}" class="ui-widget ui-widget-content ui-corner-all" />
 							</div>
 						</div>
 					</div>

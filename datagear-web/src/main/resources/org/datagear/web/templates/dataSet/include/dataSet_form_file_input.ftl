@@ -30,7 +30,7 @@
 		<input type="hidden" name="fileName" value="${(dataSet.fileName)!''}" />
 		
 		<div class="row-wrapper">
-			<input type="text" name="displayName" value="${(dataSet.displayName)!''}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
+			<input type="text" name="displayName" value="${(dataSet.displayName)!''}" class="file-display-name ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 			<a id="${pageId}-uploadDownloadLink" href="${contextPath}/dataSet/downloadFile?id=${(dataSet.id)!''}" target="_blank" class="link"><@spring.message code='download' /></a>
 		</div>
 		
@@ -50,7 +50,7 @@
 			<div class="label">
 				<label title="<@spring.message code='dataSet.serverDirectory.desc' />" class="tip-label"><@spring.message code='dataSet.serverDirectory' /></label>
 			</div>
-			<input type="text" name="dataSetResDirectory.directory" value="${(dataSet.dataSetResDirectory.directory)!''}" class="ui-widget ui-widget-content" readonly="readonly" />
+			<input type="text" name="dataSetResDirectory.directory" value="${(dataSet.dataSetResDirectory.directory)!''}" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 			<#if !readonly>
 			<button type="button" class="selectServerDirectoryBtn"><@spring.message code='select' /></button>
 			</#if>
@@ -59,7 +59,7 @@
 			<div class="label">
 				<label title="<@spring.message code='dataSet.dataSetResFileName.desc' />" class="tip-label"><@spring.message code='dataSet.fileInDirectory' /></label>
 			</div>
-			<input type="text" name="dataSetResFileName" value="${(dataSet.dataSetResFileName)!''}" class="ui-widget ui-widget-content" />
+			<input type="text" name="dataSetResFileName" value="${(dataSet.dataSetResFileName)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 			<#if !readonly>
 			<button type="button" auto-close-prevent="server-file-list-panel" class="selectServerFileBtn ui-button-icon-only">
 				<span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span>

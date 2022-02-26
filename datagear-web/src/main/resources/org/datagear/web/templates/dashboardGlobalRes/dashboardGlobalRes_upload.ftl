@@ -46,7 +46,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="savePath" class="ui-widget ui-widget-content" />
+					<input type="text" name="savePath" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">

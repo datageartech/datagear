@@ -46,7 +46,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''}" class="ui-widget ui-widget-content" style="width:41%;" />
+						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''}" class="ui-widget ui-widget-content ui-corner-all" style="width:41%;" />
 					</div>
 				</div>
 				<div class="form-item error-newline">
@@ -56,7 +56,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" />
+						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 						<span class="nameRow-radios">
 							<label for="${pageId}-nameRow_0">
 								<@spring.message code='dataSet.excel.nameRow.none' />
@@ -68,7 +68,7 @@ readonly 是否只读操作，允许为null
 				   			<input type="radio" id="${pageId}-nameRow_1" name="nameRowRadio" value="1"  />
 						</span>
 						&nbsp;
-						<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content" style="width:4.1em;" />
+						<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''}" class="ui-widget ui-widget-content ui-corner-all" style="width:4.1em;" />
 					</div>
 				</div>
 				<div class="form-item error-newline">
@@ -78,7 +78,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="dataRowExp" value="${(dataSet.dataRowExp)!''}" class="ui-widget ui-widget-content" />
+						<input type="text" name="dataRowExp" value="${(dataSet.dataRowExp)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 				<div class="form-item error-newline">
@@ -88,7 +88,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="dataColumnExp" value="${(dataSet.dataColumnExp)!''}" class="ui-widget ui-widget-content" />
+						<input type="text" name="dataColumnExp" value="${(dataSet.dataColumnExp)!''}" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 				<div class="form-item">

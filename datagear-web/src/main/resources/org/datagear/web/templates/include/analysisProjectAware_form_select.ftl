@@ -11,7 +11,7 @@
 -->
 <div class="form-item-analysisProject form-item display-37">
 	<div class="form-item-value">
-		<input type="text" name="analysisProject.name" value="" placeholder="<@spring.message code='analysisProject.ownerAnalysisProject' />" class="ui-widget ui-widget-content" readonly="readonly" />
+		<input type="text" name="analysisProject.name" value="" placeholder="<@spring.message code='analysisProject.ownerAnalysisProject' />" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 		<input type="hidden" name="analysisProject.id" value="" />
 		<#if !readonly>
 		<ul class="analysisProjectActionSelect lightweight-menu">

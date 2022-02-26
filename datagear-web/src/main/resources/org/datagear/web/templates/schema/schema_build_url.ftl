@@ -43,7 +43,7 @@ preview 是否是预览请求，允许为null
 					<label><@spring.message code='schema.url.host' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="host" value="" class="ui-widget ui-widget-content" />
+					<input type="text" name="host" value="" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -51,7 +51,7 @@ preview 是否是预览请求，允许为null
 					<label><@spring.message code='schema.url.port' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="port" value="" class="ui-widget ui-widget-content" />
+					<input type="text" name="port" value="" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -59,7 +59,7 @@ preview 是否是预览请求，允许为null
 					<label><@spring.message code='schema.url.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="" class="ui-widget ui-widget-content" />
+					<input type="text" name="name" value="" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 		</div>
@@ -166,7 +166,7 @@ preview 是否是预览请求，允许为null
 			"classes" :
 			{
 				"ui-selectmenu-button" : "schema-build-url-dbtype-select ",
-				"ui-selectmenu-menu" : "schema-build-url-dbtype-selectmenu ui-widget ui-widget-content ui-widget-shadow"
+				"ui-selectmenu-menu" : "schema-build-url-dbtype-selectmenu ui-widget ui-widget-content ui-corner-all ui-widget-shadow"
 			},
 			change : function(event, ui)
 			{

@@ -856,12 +856,12 @@
     	var tabPane = $("<div id='"+tabId+"' class='resource-editor-tab-pane' />").insertAfter(panePrevEle);
     	var resNameWrapper = $("<div class='resource-name-wrapper' />").appendTo(tabPane);
     	$("<label class='name-label'></label>").html("<@spring.message code='name' />").appendTo(resNameWrapper);
-    	$("<input type='text' class='resourceName name-input ui-widget ui-widget-content' readonly='readonly' />").val(name).appendTo(resNameWrapper);
+    	$("<input type='text' class='resourceName name-input ui-widget ui-widget-content ui-corner-all' readonly='readonly' />").val(name).appendTo(resNameWrapper);
     	$("<input type='hidden' class='resourceIsTemplate' />").val(isTemplate).appendTo(resNameWrapper);
     	
 		var editorOptWrapper = $("<div class='editor-operation-wrapper' />").appendTo(tabPane);
 		var editorLeftOptWrapper = $("<div class='operation-left' />").appendTo(editorOptWrapper);
-    	var editorWrapper = $("<div class='editor-wrapper ui-widget ui-widget-content' />").appendTo(tabPane);
+    	var editorWrapper = $("<div class='editor-wrapper ui-widget ui-widget-content ui-corner-all' />").appendTo(tabPane);
 		var editorDiv = $("<div class='resource-editor code-editor' />").attr("id", $.uid("resourceEditor")).appendTo(editorWrapper);
 		
 		var codeEditor;
@@ -1141,7 +1141,7 @@
 		}
 		
 		var searchGroup = $("<div class='search-group ui-widget ui-widget-content ui-corner-all' />").appendTo(editorRightOptWrapper);
-		var searchInput = $("<input type='text' class='search-input ui-widget ui-widget-content' />").appendTo(searchGroup)
+		var searchInput = $("<input type='text' class='search-input ui-widget ui-widget-content ui-corner-all' />").appendTo(searchGroup)
 				.on("keydown", function(e)
 				{
 					if(e.keyCode == $.ui.keyCode.ENTER)
@@ -1795,7 +1795,7 @@
 	po.addChartThemeFormGraphColorsItem = function(wrapper)
 	{
 		var id = $.uid();
-		$("<div id='"+id+"' class='input-value-item'><input type='text' name='graphColors[]' class='ui-widget ui-widget-content' size='100' />"
+		$("<div id='"+id+"' class='input-value-item'><input type='text' name='graphColors[]' class='ui-widget ui-widget-content ui-corner-all' size='100' />"
 			+"&nbsp;<div class='listpallet-indicator ui-widget ui-widget-content ui-corner-all'></div>"
 			+"&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
 			+"</div>").appendTo(wrapper);
@@ -1813,7 +1813,7 @@
 	po.addChartThemeFormGraphRangeColorsItem = function(wrapper)
 	{
 		var id = $.uid();
-		$("<div id='"+id+"' class='input-value-item'><input type='text' name='graphRangeColors[]' class='ui-widget ui-widget-content' size='100' />"
+		$("<div id='"+id+"' class='input-value-item'><input type='text' name='graphRangeColors[]' class='ui-widget ui-widget-content ui-corner-all' size='100' />"
 			+"&nbsp;<div class='listpallet-indicator ui-widget ui-widget-content ui-corner-all'></div>"
 			+"&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
 			+"</div>").appendTo(wrapper);

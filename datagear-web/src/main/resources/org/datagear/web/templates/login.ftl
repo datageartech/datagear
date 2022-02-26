@@ -37,7 +37,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='login.username' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="name" value="${loginUser}" class="ui-widget ui-widget-content" />
+						<input type="text" name="name" value="${loginUser}" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -45,7 +45,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='login.password' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="password" name="password" value="" class="ui-widget ui-widget-content" />
+						<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 			</div>

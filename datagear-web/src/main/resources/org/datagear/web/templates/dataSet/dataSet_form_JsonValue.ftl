@@ -38,8 +38,8 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''}</textarea>
-						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
+						<textarea name="value" class="ui-widget ui-widget-content ui-corner-all" style="display:none;">${(dataSet.value)!''}</textarea>
+						<div class="workspace-editor-wrapper ui-widget ui-widget-content ui-corner-all">
 							<div id="${pageId}-workspaceEditor" class="workspace-editor code-editor"></div>
 						</div>
 					</div>

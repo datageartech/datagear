@@ -19,20 +19,20 @@ po.search = undefined;
 po.conditionAutocompleteSource = undefined;
 -->
 <form id="${pageId}-searchForm" class="search-form search-form-data" action="#" tabindex="0">
-	<div class="ui-widget ui-widget-content keyword-widget">
-		<span class="ui-icon like-switch-icon ui-icon-radio-off" title="<@spring.message code='data.likeTitle' />"></span><div class="keyword-input-parent"><input name="keyword" type="text" class="ui-widget ui-widget-content keyword-input" tabindex="2" title="<@spring.message code='data.keywordTitle' />" /></div>
+	<div class="ui-widget ui-widget-content ui-corner-all keyword-widget">
+		<span class="ui-icon like-switch-icon ui-icon-radio-off" title="<@spring.message code='data.likeTitle' />"></span><div class="keyword-input-parent"><input name="keyword" type="text" class="ui-widget ui-widget-content ui-corner-all keyword-input" tabindex="2" title="<@spring.message code='data.keywordTitle' />" /></div>
 		<input type="hidden" name="notLike" value="" />
 		<div class="search-condition-icon-parent" title="<@spring.message code='data.conditionPanelWithShortcut' />">
 			<span class="ui-icon ui-icon-caret-1-s search-condition-icon"></span>
 			<span class="ui-icon ui-icon-bullet search-condition-icon-tip"></span>
 		</div>
 		<div class="condition-panel-parent">
-			<div class="ui-widget ui-widget-content ui-widget-shadow condition-panel" tabindex="0">
+			<div class="ui-widget ui-widget-content ui-corner-all ui-widget-shadow condition-panel" tabindex="0">
 				<div class="ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle condition-panel-title-bar">
 					<span class="ui-icon ui-icon-arrowthickstop-1-n condition-panel-resetpos-icon" title="<@spring.message code='restoration' />"></span>
 				</div>
 				<div class="condition-parent">
-					<textarea name="condition" tabindex="5" class="ui-widget ui-widget-content" title="<@spring.message code='data.conditionTitle' />"></textarea>
+					<textarea name="condition" tabindex="5" class="ui-widget ui-widget-content ui-corner-all" title="<@spring.message code='data.conditionTitle' />"></textarea>
 				</div>
 				<div class="condition-action">
 					<span class="ui-icon ui-icon-trash condition-panel-clear-icon" title="<@spring.message code='data.clearWithShortcut' />"></span>
