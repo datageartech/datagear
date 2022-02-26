@@ -719,15 +719,16 @@
 			dashboardEditor.beforeunloadCallback = function()
 			{
 				po.element(".tpl-ve-ele-path", ifmWrapper).empty();
-				
-				//保存编辑HTML，用于刷新操作恢复编辑页面
-				visualEditorIfm.data("iframeEditedHtml", this.editedHtml());
+				//保存编辑HTML、变更状态，用于刷新操作后恢复页面状态
+				visualEditorIfm.data("veEditedHtml", this.editedHtml());
+				visualEditorIfm.data("veEnableElementBoundary", this.enableElementBoundary());
+				visualEditorIfm.data("veChangeFlag", this.changeFlag());
 			};
 			dashboardEditor.documentReadyCallback = function()
 			{
-				var enableEb = visualEditorIfm.data("enableElementBoundary");
-				dashboardEditor.enableElementBoundary(enableEb);
-				//XXX 无法恢复选中状态，因为每次重新加载后可视编辑ID会重新生成
+				dashboardEditor.enableElementBoundary(visualEditorIfm.data("veEnableElementBoundary"));
+				dashboardEditor.changeFlag(visualEditorIfm.data("veChangeFlag"));
+				//XXX 这里无法恢复选中状态，因为每次重新加载后可视编辑ID会重新生成
 			};
 			
 			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
@@ -1638,10 +1639,7 @@
 						return;
 					
 					var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
-					var enableEb = !dashboardEditor.enableElementBoundary();
-					
-					dashboardEditor.enableElementBoundary(enableEb);
-					visualEditorIfm.data("enableElementBoundary", enableEb);
+					dashboardEditor.enableElementBoundary(!dashboardEditor.enableElementBoundary());
 				}
 				else if(moreOperation == "refresh")
 				{
@@ -1653,7 +1651,7 @@
 					if(dashboardEditor)
 						editedHtml = dashboardEditor.editedHtml();
 					if(!editedHtml)
-						editedHtml = visualEditorIfm.data("iframeEditedHtml");
+						editedHtml = visualEditorIfm.data("veEditedHtml");
 					if(!editedHtml)
 					{
 						var codeEditorDiv = po.element(".code-editor", tabPane);

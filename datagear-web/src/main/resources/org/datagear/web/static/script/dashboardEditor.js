@@ -166,13 +166,21 @@
 		return this._unescapeEditHtml(editedHtml);
 	};
 	
-	//是否在指定changeFlag后有修改
+	/**
+	 * 是否在指定changeFlag后有修改。
+	 *
+	 * @param changeFlag 待比较的变更标识
+	 */
 	editor.isChanged = function(changeFlag)
 	{
 		return (this.changeFlag() != changeFlag);
 	};
 	
-	//获取当前修改标识
+	/**
+	 * 获取/设置变更标识。
+	 *
+	 * @param set 可选，要设置的变更标识，格式为：true 自增，数值 设置明确值
+	 */
 	editor.changeFlag = function(set)
 	{
 		if(this._changeFlag == null)
@@ -181,6 +189,10 @@
 		if(set == true)
 		{
 			this._changeFlag++;
+		}
+		else if(chartFactory.isNumber(set))
+		{
+			this._changeFlag = set;
 		}
 		else
 		{
