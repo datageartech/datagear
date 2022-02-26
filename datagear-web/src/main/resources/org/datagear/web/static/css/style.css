@@ -2590,6 +2590,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	right: 0;
 }
 .page-dataexchange .form-item-table .table-wrapper{
+	width: 100%;
 }
 .page-dataexchange .minor-dataTable table.dataTable thead th, .minor-dataTable table.dataTable thead td{
 	font-size: medium;
