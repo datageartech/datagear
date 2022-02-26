@@ -1316,7 +1316,7 @@
 	/**
 	 * 设置元素或其所有子图表元素的图表选项。
 	 * 
-	 * @param chartOptions 要设置的图表选项对象、字符串，格式为：{ ... }、"{ ... }"
+	 * @param chartOptions 要设置的图表选项对象、字符串，格式为：{ ... }、"{ ... }"、"变量名"
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
 	editor.setElementChartOptions = function(chartOptions, ele)
@@ -1339,7 +1339,7 @@
 	};
 	
 	/**
-	 * 获取元素图表选项。
+	 * 获取元素图表选项的字符串格式。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 * @oaram asString 可选，是否以字符串形式返回，默认为：true
@@ -1355,7 +1355,7 @@
 	/**
 	 * 设置全局图表选项。
 	 * 
-	 * @param chartOptions 要设置的全局图表选项对象、字符串，格式为：{ ... }、"{ ... }"
+	 * @param chartOptions 要设置的全局图表选项对象、字符串，格式为：{ ... }、"{ ... }"、"变量名"
 	 */
 	editor.setGlobalChartOptions = function(chartOptions)
 	{
@@ -1366,7 +1366,7 @@
 	};
 	
 	/**
-	 * 获取全局图表选项。
+	 * 获取全局图表选项的字符串格式。
 	 * 
 	 * @oaram asString 可选，是否以字符串形式返回，默认为：true
 	 */
@@ -1380,15 +1380,33 @@
 	
 	editor._setElementChartOptions = function(ele, chartOptions, sync)
 	{
-		if(chartFactory.isString(chartOptions))
-			chartOptions = chartFactory.evalSilently(chartOptions, {});
-		
-		var attrValue = this._serializeForAttrValue(chartOptions);
-		
-		if(!attrValue || attrValue == "{}")
+		if(!chartOptions)
+		{
 			this._removeElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, sync);
+			return;
+		}
+		
+		var attrValue = "";
+		
+		if(chartFactory.isString(chartOptions))
+		{
+			if(this._isJsonString(chartOptions))
+			{
+				chartOptions = chartFactory.evalSilently(chartOptions, {});
+				attrValue = this._serializeForAttrValue(chartOptions);
+			}
+			else
+			{
+				//chartOptions允许是某个图表选项对象的变量名
+				attrValue = chartOptions;
+			}
+		}
 		else
-			this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, attrValue, sync);
+			attrValue = this._serializeForAttrValue(chartOptions);
+		
+		attrValue = (attrValue ? attrValue : "{}");
+		
+		this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, attrValue, sync);
 	};
 	
 	editor._getElementChartOptions = function(ele)
@@ -2129,6 +2147,12 @@
 		};
 		
 		return size;
+	};
+	
+	editor._isJsonString = function(str)
+	{
+		//以'{'或'['开头
+		return (chartFactory.isString(str) && /^\s*[\{\[]/.test(str));
 	};
 	
 	/**
