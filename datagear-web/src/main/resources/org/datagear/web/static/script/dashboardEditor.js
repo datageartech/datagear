@@ -100,13 +100,13 @@
 				
 				if(veEle.length == 0)
 				{
-					editor._deselectAllElement();
+					editor.deselectElement();
 				}
 				else
 				{
 					if(!editor._isSelectableElement(veEle))
 					{
-						editor._deselectAllElement();
+						editor.deselectElement();
 					}
 					else if(editor._isSelectedElement(veEle))
 					{
@@ -114,8 +114,7 @@
 					}
 					else
 					{
-						editor._deselectAllElement();
-						editor._selectElement(veEle);
+						editor.selectElement(veEle);
 					}
 				}
 				
@@ -215,15 +214,19 @@
 	/**
 	 * 选择元素回调函数。
 	 * 
-	 * @param ele 已选择的DOM元素
+	 * @param ele JQ元素
 	 */
 	editor.selectElementCallback = function(ele)
 	{
 		
 	};
 	
-	//取消选择所有元素回调函数
-	editor.deselectAllElementCallback = function()
+	/**
+	 * 取消选择元素回调函数。
+	 * 
+	 * @param ele JQ元素
+	 */
+	editor.deselectElementCallback = function(ele)
 	{
 		
 	};
@@ -282,22 +285,51 @@
 	/**
 	 * 选中指定元素。
 	 * 
-	 * @param visualEditId 元素可编辑ID
+	 * @param eleOrVisualEditId 元素、元素可编辑ID
 	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectElement = function(visualEditId)
+	editor.selectElement = function(eleOrVisualEditId)
 	{
-		var ele = $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+visualEditId+"']");
+		var ele = eleOrVisualEditId;
 		
-		this._deselectAllElement();
+		if(chartFactory.isString(ele))
+			ele = $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+ele+"']");
+		
+		this._removeElementClassNewInsert();
+		
+		this.deselectElement();
 		
 		if(ele.length > 0)
 		{
-			this._selectElement($(ele[0]));
+			this._selectElement(ele);
+			
+			if(this.selectElementCallback)
+				this.selectElementCallback(ele);
+			
 			return true;
 		}
 		
 		return false;
+	};
+	
+	/**
+	 * 取消选中元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.deselectElement = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		this._removeElementClassNewInsert();
+		
+		if(ele.length > 0)
+		{
+			this._deselectElement(ele);
+			
+			if(this.deselectElementCallback)
+				this.deselectElementCallback(ele);
+		}
 	};
 	
 	/**
@@ -343,9 +375,7 @@
 			return false;
 		}
 		
-		this._deselectAllElement();
-		this._selectElement(target);
-		return true;
+		return this.selectElement(target);
 	};
 	
 	/**
@@ -390,9 +420,7 @@
 			return false;
 		}
 		
-		this._deselectAllElement();
-		this._selectElement(target);
-		return true;
+		return this.selectElement(target);
 	};
 	
 	/**
@@ -436,9 +464,7 @@
 			return false;
 		}
 		
-		this._deselectAllElement();
-		this._selectElement(target);
-		return true;
+		return this.selectElement(target);
 	};
 	
 	/**
@@ -486,21 +512,7 @@
 			return;
 		}
 		
-		this._deselectAllElement();
-		this._selectElement(target);
-		return true;
-	};
-	
-	/**
-	 * 取消选中元素。
-	 * 
-	 * @param ele 可选，元素，默认为：当前选中元素、或者<body>元素
-	 */
-	editor.deselectElement = function(ele)
-	{
-		this._removeElementClassNewInsert();
-		
-		this._deselectAllElement();
+		return this.selectElement(target);
 	};
 	
 	editor._isSelectableElement = function($ele)
@@ -1073,6 +1085,9 @@
 		{
 			editor.dashboard.removeChart(this);
 		});
+		
+		var selEle = (this._isSelectedElement(ele) ? ele : this._selectedElement(ele));
+		this.deselectElement(selEle);
 		
 		ele.remove();
 		iframeEle.remove();
@@ -1871,9 +1886,12 @@
 		return $(chartEles);
 	};
 	
-	editor._selectedElement = function()
+	editor._selectedElement = function(context)
 	{
-		return $("."+ELEMENT_CLASS_SELECTED);
+		if(context == null)
+			return $("."+ELEMENT_CLASS_SELECTED);
+		else
+			return $("."+ELEMENT_CLASS_SELECTED, context);
 	};
 	
 	editor._isSelectedElement = function($ele)
@@ -1884,22 +1902,11 @@
 	editor._selectElement = function($ele)
 	{
 		$ele.addClass(ELEMENT_CLASS_SELECTED);
-		
-		if(this.selectElementCallback)
-			this.selectElementCallback($ele[0]);
 	};
 	
 	editor._deselectElement = function($ele)
 	{
 		$ele.removeClass(ELEMENT_CLASS_SELECTED);
-	};
-	
-	editor._deselectAllElement = function()
-	{
-		$("."+ELEMENT_CLASS_SELECTED).removeClass(ELEMENT_CLASS_SELECTED);
-		
-		if(this.deselectAllElementCallback)
-			this.deselectAllElementCallback();
 	};
 	
 	editor._removeElementClassNewInsert = function()

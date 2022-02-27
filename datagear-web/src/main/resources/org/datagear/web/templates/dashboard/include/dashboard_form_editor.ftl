@@ -714,7 +714,7 @@
 				var elePathEleWidth = elePathEle.outerWidth(true);
 				elePathEle.css("margin-left", (elePathEleWidth > elePathWrapperWidth ? (elePathWrapperWidth - elePathEleWidth) : 0)+"px");
 			};
-			dashboardEditor.deselectAllElementCallback = function()
+			dashboardEditor.deselectElementCallback = function()
 			{
 				po.element(".tpl-ve-ele-path", ifmWrapper).empty();
 				visualEditorIfm.data("selectedElementVeId", "");
