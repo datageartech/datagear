@@ -772,5 +772,3 @@
 })
 (${pageId});
 </script>
-</body>
-</html>
