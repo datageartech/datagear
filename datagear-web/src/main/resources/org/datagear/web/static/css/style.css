@@ -3283,12 +3283,11 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
     width: 60%;
     height: 70%;
     display: none;
-    padding: 0 0;
 }
 .page-form-dashboard .chart-list-panel > .panel-content{
 	position: absolute;
     left: 0.41em;
-    top: 0.41em;
+    top: 2.5em;
     right: 0.41em;
     bottom: 0.41em;
 }

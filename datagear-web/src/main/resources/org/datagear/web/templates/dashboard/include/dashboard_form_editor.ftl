@@ -14,6 +14,9 @@
 {
 	po.initDashboardEditors = function()
 	{
+		var chartListPanel = po.element(".chart-list-panel");
+		chartListPanel.draggable({ handle: ".panel-head" });
+		
 		//初始化可视编辑元素文本内容面板
 		var veContentPanel = po.element(".veditor-content-panel");
 		veContentPanel.draggable({ handle: ".panel-head" });

@@ -145,6 +145,7 @@ readonly 是否只读操作，允许为null
 		<textarea name="DG_TEMPLATE_CONTENT"></textarea>
 	</form>
 	<div class="chart-list-panel auto-close-panel togglable-table-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<div class="panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.chartList' /></div>
 		<div class="panel-content minor-dataTable pagination-light"></div>
 	</div>
 	<div class='add-resource-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
