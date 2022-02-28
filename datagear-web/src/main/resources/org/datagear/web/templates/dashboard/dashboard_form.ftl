@@ -1452,7 +1452,9 @@ readonly 是否只读操作，允许为null
 						<label><@spring.message code='dashboard.veditor.chartOptions.options' /></label>
 					</div>
 					<div class="form-item-value">
-						<textarea name="options" class="ui-widget ui-widget-content ui-corner-all"></textarea>
+						<div class="chartOptions-editor-wrapper ui-widget ui-widget-content ui-corner-all">
+							<div id="${pageId}ChartOptionsEditor" class="chartOptions-editor code-editor"></div>
+						</div>
 					</div>
 				</div>
 			</div>

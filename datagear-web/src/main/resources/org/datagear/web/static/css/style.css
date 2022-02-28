@@ -3669,6 +3669,10 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form-dashboard .veditor-style-panel .style-tab-pane .ui-widget-header:not(:first-child){
 	margin-top: 0.6em;
 }
+.page-form-dashboard .veditor-chartOptions-panel .chartOptions-editor{
+	width: 100%;
+	height: 100%;
+}
 
 .page-form .form-item-analysisProjectAware{
 	position: relative;

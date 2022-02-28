@@ -258,6 +258,14 @@
 		var veChartOptionsPanel = po.element(".veditor-chartOptions-panel");
 		veChartOptionsPanel.draggable({ handle: ".panel-head" });
 		var veChartOptionsForm = po.element("form", veChartOptionsPanel);
+		var veChartOptionsEditorOptions =
+		{
+			value: "",
+			matchBrackets: true,
+			mode: {name: "javascript", json: true}
+		};
+		po.element(".chartOptions-editor-wrapper", veChartOptionsForm).data("chartOptionsCodeEditor",
+				po.createCodeEditor(po.element("#${pageId}ChartOptionsEditor", veChartOptionsForm), veChartOptionsEditorOptions));
 		veChartOptionsForm.submit(function()
 		{
 			try
@@ -268,8 +276,8 @@
 				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				if(dashboardEditor)
 				{
-					var chartOptionsObj = $.formToJson(this);
-					var chartOptionsStr = (chartOptionsObj ? chartOptionsObj.options : "");
+					var coEditor = po.element(".chartOptions-editor-wrapper", this).data("chartOptionsCodeEditor");
+					var chartOptionsStr = po.getCodeText(coEditor);
 					
 					if(po.veOperation == "editChartOptions")
 						dashboardEditor.setElementChartOptions(chartOptionsStr);
@@ -1335,6 +1343,7 @@
 						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getGlobalChartOptions());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
+						po.resizeVisualEditorChartOptionsPanel(tabPane, panel);
 					}
 					else if(veOperation == "editStyle")
 					{
@@ -1376,6 +1385,7 @@
 						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getElementChartOptions());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
+						po.resizeVisualEditorChartOptionsPanel(tabPane, panel);
 					}
 					else if(veOperation == "editContent")
 					{
@@ -1585,6 +1595,16 @@
 		po.element(".style-tabs", panelContent).css("height", styleTabsHeight);
 	};
 	
+	po.resizeVisualEditorChartOptionsPanel = function(tabPane, panel)
+	{
+		var panelContent = po.element(".panel-content", panel);
+		var textareaHeight = parseInt(panelContent.css("max-height")) - po.element(".form-item-label", panelContent).outerHeight()*3;
+		var chartOptionsEditorWrapper = po.element(".chartOptions-editor-wrapper", panelContent);
+		
+		chartOptionsEditorWrapper.css("height", textareaHeight);
+		chartOptionsEditorWrapper.data("chartOptionsCodeEditor").refresh();
+	};
+	
 	po.setVeditorStyleFormValue = function($form, styleObj)
 	{
 		styleObj = $.extend({ syncChartTheme: true }, styleObj);
@@ -1695,8 +1715,16 @@
 
 	po.setVeditorChartOptionsFormValue = function($form, chartOptionsStr)
 	{
-		var formJson = { "options": (chartOptionsStr || "") };
-		$.jsonToForm($form, formJson);
+		if(chartOptionsStr && /^\s*[\{\[]/.test(chartOptionsStr))
+		{
+			var obj = chartFactory.evalSilently(chartOptionsStr, chartOptionsStr);
+			
+			if(!chartFactory.isString(obj))
+				chartOptionsStr = JSON.stringify(obj, null, 4);
+		}
+		
+		var coEditor = po.element(".chartOptions-editor-wrapper", $form).data("chartOptionsCodeEditor");
+		po.setCodeText(coEditor, (chartOptionsStr || ""));
 	};
 	
 	po.addChartThemeFormGraphColorsItem = function(wrapper)
