@@ -542,8 +542,6 @@
 		}
 		
 		po.element(".form-item-value-resources").height(height);
-		po.element(".veditor-panel .panel-content").css("max-height", height-180);
-		po.element(".veditor-style-panel .panel-content").css("height", height-180);
 	};
 	
 	po.resourceEditorTabs = function()

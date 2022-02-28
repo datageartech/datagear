@@ -781,7 +781,7 @@
     	po.resourceEditorTabs().tabs( "option", "active",  tab.index());
     	po.tabsRefreshNavForHidden(po.resourceEditorTabs());
 	};
-
+	
 	po.codeEditorHintHandler = function(codeEditor)
 	{
 		var doc = codeEditor.getDoc();
@@ -1202,6 +1202,7 @@
 						po.element(".form-item-gridLayoutFillParent", panel).hide();
 					$.jsonToForm(po.element("form", panel), { fillParent: canFillParent });
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					po.resizeVisualEditorPanel(tabPane, panel);
 				}
 				else if(insertOperation == "insertDiv")
 				{
@@ -1218,6 +1219,7 @@
 					var panel = po.element(".veditor-image-panel");
 					$.jsonToForm(po.element("form", panel), {});
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					po.resizeVisualEditorPanel(tabPane, panel);
 				}
 				else if(insertOperation == "insertHyperlink")
 				{
@@ -1227,6 +1229,7 @@
 					var panel = po.element(".veditor-hyperlink-panel");
 					$.jsonToForm(po.element("form", panel), {});
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					po.resizeVisualEditorPanel(tabPane, panel);
 				}
 				else if(insertOperation == "insertVideo")
 				{
@@ -1236,6 +1239,7 @@
 					var panel = po.element(".veditor-video-panel");
 					$.jsonToForm(po.element("form", panel), {});
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					po.resizeVisualEditorPanel(tabPane, panel);
 				}
 				else if(insertOperation == "insertChart")
 				{
@@ -1293,7 +1297,8 @@
 						po.element(".editGlobalStyleTitle", panel).show();
 						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getGlobalStyle());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
-						po.resizeVisualEditorStylePanel(panel);
+						po.resizeVisualEditorPanel(tabPane, panel);
+						po.resizeVisualEditorStylePanel(tabPane, panel);
 					}
 					else if(editOperation == "editGlobalChartTheme")
 					{
@@ -1302,6 +1307,7 @@
 						po.element(".editGlobalChartThemeTitle", panel).show();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+						po.resizeVisualEditorPanel(tabPane, panel);
 					}
 					else if(editOperation == "editGlobalChartOptions")
 					{
@@ -1310,6 +1316,7 @@
 						po.element(".globalChartOptionsTitle", panel).show();
 						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getGlobalChartOptions());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+						po.resizeVisualEditorPanel(tabPane, panel);
 					}
 					else if(editOperation == "editStyle")
 					{
@@ -1325,7 +1332,8 @@
 						elementStyleObj.isFlexItemElement = dashboardEditor.isFlexItemElement();
 						po.setVeditorStyleFormValue(po.element("form", panel), elementStyleObj);
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
-						po.resizeVisualEditorStylePanel(panel);
+						po.resizeVisualEditorPanel(tabPane, panel);
+						po.resizeVisualEditorStylePanel(tabPane, panel);
 					}
 					else if(editOperation == "editChartTheme")
 					{
@@ -1337,6 +1345,7 @@
 						po.element(".editGlobalChartThemeTitle", panel).hide();
 						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+						po.resizeVisualEditorPanel(tabPane, panel);
 					}
 					else if(editOperation == "editChartOptions")
 					{
@@ -1348,6 +1357,7 @@
 						po.element(".globalChartOptionsTitle", panel).hide();
 						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getElementChartOptions());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+						po.resizeVisualEditorPanel(tabPane, panel);
 					}
 					else if(editOperation == "editContent")
 					{
@@ -1356,6 +1366,7 @@
 						
 						var panel = po.element(".veditor-content-panel");
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+						po.resizeVisualEditorPanel(tabPane, panel);
 						po.element("textarea[name='content']", panel).val(dashboardEditor.getElementText()).focus();
 					}
 				}
@@ -1441,6 +1452,7 @@
 						scale: visualEditorIfm.data("veIframeScale")
 					});
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					po.resizeVisualEditorPanel(tabPane, panel);
 				}
 				else if(moreOperation == "eleBoundary")
 				{
@@ -1478,9 +1490,20 @@
 		});
 	};
 	
-	po.resizeVisualEditorStylePanel = function(panel)
+	po.resizeVisualEditorPanel = function(tabPane, panel)
+	{
+		var vePanelContentHeight = tabPane.height();
+		vePanelContentHeight = vePanelContentHeight - po.element(".panel-head", panel).outerHeight(true);
+		vePanelContentHeight = vePanelContentHeight - po.element(".panel-foot", panel).outerHeight(true);
+		vePanelContentHeight = vePanelContentHeight - 20;//减去间隙高度
+		
+		po.element(".panel-content", panel).css("max-height", vePanelContentHeight);
+	};
+	
+	po.resizeVisualEditorStylePanel = function(tabPane, panel)
 	{
 		var panelContent = po.element(".panel-content", panel);
+		panelContent.css("height", panelContent.css("max-height"));
 		
 		var styleTabsHeight = panelContent.height();
 		styleTabsHeight = styleTabsHeight - po.element(".form-item-syncChartTheme", panelContent).outerHeight(true);

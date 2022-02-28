@@ -44,7 +44,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item-value">
 					<input type="text" name="htmlChartPlugin.id" class="ui-widget ui-widget-content ui-corner-all" value="${(chart.htmlChartPlugin.id)!''}" style="display:none" />
-					<div class="chart-plugin input ui-widget ui-widget-content"></div>
+					<div class="chart-plugin input ui-widget ui-widget-content ui-corner-all"></div>
 					<#if !readonly>
 					<button class="selectChartPluginButton" type="button"><@spring.message code='select' /></button>
 					</#if>
