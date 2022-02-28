@@ -3424,9 +3424,6 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper .operation-right > *:last-child{
 	margin-right: 0;
 }
-.page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper .operation-right .execute-quick-opt{
-	margin-right: 2em;
-}
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .code-editor-operation .search-group{
 	display: inline-block;
 	padding-left: 1px;

@@ -399,7 +399,9 @@
 		{
 			var $this = $(this);
 			var helpValue = ($this.attr("help-value") || "");
-			po.element(".help-target", $this.closest(".form-item-value")).val(helpValue);
+			var helpTarget = po.element(".help-target", $this.closest(".form-item-value"));
+			helpTarget.val(helpValue);
+			helpTarget.focus();
 		});
 	};
 	

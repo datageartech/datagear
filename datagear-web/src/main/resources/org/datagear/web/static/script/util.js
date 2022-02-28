@@ -3495,7 +3495,9 @@
 			//可选，点击后自动隐藏此组件的上下文元素，默认为：document.body
 			autoCloseContext: undefined,
 			//可选，定位
-			position: "absolute"
+			position: "absolute",
+			//设置颜色后自动焦点至元素
+			autoFocus: true
 		},
 		
 		_create: function()
@@ -3593,6 +3595,9 @@
 					$(thisWidgetObj.options.indicator).css("background-color", colorValue);
 				
 				thisWidgetObj.hide();
+				
+				if(thisWidgetObj.options.autoFocus)
+					thisWidgetObj.element.focus();
 			});
 			
 			$widget.on("mouseover", ".color-cell", function()
