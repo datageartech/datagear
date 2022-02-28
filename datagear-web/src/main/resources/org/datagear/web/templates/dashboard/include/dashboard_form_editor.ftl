@@ -1402,11 +1402,23 @@
 				{
 					if(deleteOperation == "deleteElement")
 					{
-						dashboardEditor.deleteElement();
+						po.confirm("<@spring.message code='dashboard.opt.delete.element.confirm' />",
+						{
+							confirm: function()
+							{
+								dashboardEditor.deleteElement();
+							}
+						});
 					}
 					else if(deleteOperation == "unbindChart")
 					{
-						dashboardEditor.unbindChart();
+						po.confirm("<@spring.message code='dashboard.opt.delete.unbindChart.confirm' />",
+						{
+							confirm: function()
+							{
+								dashboardEditor.unbindChart();
+							}
+						});
 					}
 				}
 			}
