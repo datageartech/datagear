@@ -3328,7 +3328,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	position: absolute;
 	left: 0;
 	right: 0;
-	top: 2.1em;
+	top: 2rem;
 	bottom: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .resource-editor,
@@ -3398,7 +3398,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	left: 0;
 	right: 0;
 	top: 0;
-	height: 2em;
+	height: 2rem;
 	border-width: 0;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper button.ui-button,
@@ -3408,12 +3408,12 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper .operation-left{
 	position: absolute;
 	left: 2px;
-	font-size: 0.9em;
+	font-size: 0.9rem;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper .operation-right{
 	position: absolute;
 	right: 1px;
-	font-size: 0.9em;
+	font-size: 0.9rem;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper .operation-left > *,
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper .operation-right > *{
@@ -3423,6 +3423,9 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper .operation-left > *:last-child,
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper .operation-right > *:last-child{
 	margin-right: 0;
+}
+.page-form-dashboard .resources-wrapper .resource-editor-tab-pane .editor-operation-wrapper .operation-right .execute-quick-opt{
+	margin-right: 2em;
 }
 .page-form-dashboard .resources-wrapper .resource-editor-tab-pane .code-editor-operation .search-group{
 	display: inline-block;

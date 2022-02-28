@@ -87,9 +87,9 @@
 					styleObj['align-content-flex']=null;
 					styleObj['align-self-flex']=null;
 					
-					if(po.editOperationForVisualEdit == "editStyle")
+					if(po.veOperation == "editStyle")
 						dashboardEditor.setElementStyle(styleObj);
-					else if(po.editOperationForVisualEdit == "editGlobalStyle")
+					else if(po.veOperation == "editGlobalStyle")
 						dashboardEditor.setGlobalStyle(styleObj);
 				}
 			}
@@ -169,9 +169,9 @@
 				{
 					var chartThemeObj = $.formToJson(this);
 					
-					if(po.editOperationForVisualEdit == "editChartTheme")
+					if(po.veOperation == "editChartTheme")
 						dashboardEditor.setElementChartTheme(chartThemeObj);
-					else if(po.editOperationForVisualEdit == "editGlobalChartTheme")
+					else if(po.veOperation == "editGlobalChartTheme")
 						dashboardEditor.setGlobalChartTheme(chartThemeObj);
 				}
 			}
@@ -271,9 +271,9 @@
 					var chartOptionsObj = $.formToJson(this);
 					var chartOptionsStr = (chartOptionsObj ? chartOptionsObj.options : "");
 					
-					if(po.editOperationForVisualEdit == "editChartOptions")
+					if(po.veOperation == "editChartOptions")
 						dashboardEditor.setElementChartOptions(chartOptionsStr);
-					else if(po.editOperationForVisualEdit == "editGlobalChartOptions")
+					else if(po.veOperation == "editGlobalChartOptions")
 						dashboardEditor.setGlobalChartOptions(chartOptionsStr);
 				}
 			}
@@ -302,7 +302,7 @@
 					var gridLayoutObj = $.formToJson(this);
 					var rows = parseInt(gridLayoutObj.rows);
 					var columns = parseInt(gridLayoutObj.columns);
-					dashboardEditor.insertGridLayout(rows, columns, (gridLayoutObj.fillParent == "true"), po.insertTypeForVisualEdit);
+					dashboardEditor.insertGridLayout(rows, columns, (gridLayoutObj.fillParent == "true"), po.veOperationInsertType);
 				}
 			}
 			catch(e)
@@ -331,7 +331,7 @@
 				if(dashboardEditor)
 				{
 					var imageObj = $.formToJson(this);
-					dashboardEditor.insertImage(imageObj, po.insertTypeForVisualEdit);
+					dashboardEditor.insertImage(imageObj, po.veOperationInsertType);
 				}
 			}
 			catch(e)
@@ -357,7 +357,7 @@
 				if(dashboardEditor)
 				{
 					var hyperlinkObj = $.formToJson(this);
-					dashboardEditor.insertHyperlink(hyperlinkObj, po.insertTypeForVisualEdit);
+					dashboardEditor.insertHyperlink(hyperlinkObj, po.veOperationInsertType);
 				}
 			}
 			catch(e)
@@ -384,7 +384,7 @@
 				if(dashboardEditor)
 				{
 					var videoObj = $.formToJson(this);
-					dashboardEditor.insertVideo(videoObj, po.insertTypeForVisualEdit);
+					dashboardEditor.insertVideo(videoObj, po.veOperationInsertType);
 				}
 			}
 			catch(e)
@@ -1092,8 +1092,24 @@
 			return false;
 		
 		editorRightOptWrapper = $("<div class='visual-editor-operation operation-right' />").appendTo(editorOptWrapper);
-
-		var selectGroup = $("<div class='select-group' />").appendTo(editorRightOptWrapper)
+		
+		$("<button type='button' class='execute-quick-opt' />")
+		.text("<@spring.message code='dashboard.opt.quickOpt' />")
+		.attr("title", "<@spring.message code='dashboard.opt.quickOpt' />")
+		.appendTo(editorRightOptWrapper).button()
+		.click(function(event)
+		{
+			if(!po.veQuickOptId)
+				return;
+			
+			event.stopPropagation();
+			
+			po.element(".quick-opt[quick-opt-id='"+po.veQuickOptId+"']", editorRightOptWrapper).click();
+		})
+		.button("disable")
+		.tooltip({ "classes": {"ui-tooltip": "ui-corner-all ui-widget-shadow"}, position: { my: "center bottom-5", at: "center top" } });
+		
+		var selectGroup = $("<div class='select-group opt-group' />").appendTo(editorRightOptWrapper)
 			.hover(
 				function()
 				{
@@ -1107,48 +1123,49 @@
 		$("<button type='button' />").text("<@spring.message code='select' />").appendTo(selectGroup).button();
 		
 		var selectMenu = $("<ul class='select-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li selectOperation='next' />").html("<div><@spring.message code='dashboard.opt.select.next' /></div>").appendTo(selectMenu);
-		$("<li selectOperation='prev' />").html("<div><@spring.message code='dashboard.opt.select.prev' /></div>").appendTo(selectMenu);
-		$("<li selectOperation='firstChild' />").html("<div><@spring.message code='dashboard.opt.select.firstChild' /></div>").appendTo(selectMenu);
-		$("<li selectOperation='parent' />").html("<div><@spring.message code='dashboard.opt.select.parent' /></div>").appendTo(selectMenu);
+		$("<li veOperation='selectNext' />").html("<div><@spring.message code='dashboard.opt.select.next' /></div>").appendTo(selectMenu);
+		$("<li veOperation='selectPrev' />").html("<div><@spring.message code='dashboard.opt.select.prev' /></div>").appendTo(selectMenu);
+		$("<li veOperation='selectFirstChild' />").html("<div><@spring.message code='dashboard.opt.select.firstChild' /></div>").appendTo(selectMenu);
+		$("<li veOperation='selectParent' />").html("<div><@spring.message code='dashboard.opt.select.parent' /></div>").appendTo(selectMenu);
 		$("<li class='ui-menu-divider' />").appendTo(selectMenu);
-		$("<li selectOperation='deselect' />").html("<div><@spring.message code='dashboard.opt.select.deselect' /></div>").appendTo(selectMenu);
+		$("<li veOperation='selectDeselect' />").html("<div><@spring.message code='dashboard.opt.select.deselect' /></div>").appendTo(selectMenu);
 		selectMenu.appendTo(selectGroup).menu(
 		{
 			select: function(event, ui)
 			{
 				var item = ui.item;
-				var selectOperation = item.attr("selectOperation");
+				var veOperation = item.attr("veOperation");
+				po.veOperation = veOperation;
 				
 				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				
 				if(!dashboardEditor)
 					return;
 				
-				if(selectOperation == "next")
+				if(veOperation == "selectNext")
 				{
 					dashboardEditor.selectNextElement();
 				}
-				else if(selectOperation == "prev")
+				else if(veOperation == "selectPrev")
 				{
 					dashboardEditor.selectPrevElement();
 				}
-				else if(selectOperation == "firstChild")
+				else if(veOperation == "selectFirstChild")
 				{
 					dashboardEditor.selectFirstChildElement();
 				}
-				else if(selectOperation == "parent")
+				else if(veOperation == "selectParent")
 				{
 					dashboardEditor.selectParentElement();
 				}
-				else if(selectOperation == "deselect")
+				else if(veOperation == "selectDeselect")
 				{
 					dashboardEditor.deselectElement();
 				}
 			}
 		});
 		
-		var insertGroup = $("<div class='insert-group' auto-close-prevent='chart-list-panel' />").appendTo(editorRightOptWrapper)
+		var insertGroup = $("<div class='insert-group opt-group' auto-close-prevent='chart-list-panel' />").appendTo(editorRightOptWrapper)
 			.hover(
 				function()
 				{
@@ -1171,24 +1188,23 @@
 		var insertItemPrepend = $("<li />").html("<div><@spring.message code='dashboard.opt.insert.prepend' /></div>").appendTo(insertMenu);
 		po.buildVisualEditorInsertMenuItems(insertItemPrepend, "prepend");
 		$("<li class='ui-menu-divider' />").appendTo(insertMenu);
-		$("<li insertOperation='bindChart' />").html("<div><@spring.message code='dashboard.opt.insert.bindOrReplaceChart' /></div>").appendTo(insertMenu);
+		$("<li veOperation='bindChart' class='quick-opt' />").html("<div><@spring.message code='dashboard.opt.insert.bindOrReplaceChart' /></div>").appendTo(insertMenu);
 		insertMenu.appendTo(insertGroup).menu(
 		{
 			select: function(event, ui)
 			{
 				var item = ui.item;
-				var insertOperation = item.attr("insertOperation");
+				var veOperation = item.attr("veOperation");
+				po.veOperation = veOperation;
 				var insertType = item.attr("insertType");
-				
-				po.insertOperationForVisualEdit = insertOperation;
-				po.insertTypeForVisualEdit = insertType;
+				po.veOperationInsertType = insertType;
 				
 				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				
 				if(!dashboardEditor)
 					return;
 				
-				if(insertOperation == "insertGridLayout")
+				if(veOperation == "insertGridLayout")
 				{
 					if(!dashboardEditor.checkInsertGridLayout(insertType))
 						return;
@@ -1204,14 +1220,14 @@
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					po.resizeVisualEditorPanel(tabPane, panel);
 				}
-				else if(insertOperation == "insertDiv")
+				else if(veOperation == "insertDiv")
 				{
 					if(!dashboardEditor.checkInsertDiv(insertType))
 						return;
 					
 					dashboardEditor.insertDiv(insertType);
 				}
-				else if(insertOperation == "insertImage")
+				else if(veOperation == "insertImage")
 				{
 					if(!dashboardEditor.checkInsertImage(insertType))
 						return;
@@ -1221,7 +1237,7 @@
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					po.resizeVisualEditorPanel(tabPane, panel);
 				}
-				else if(insertOperation == "insertHyperlink")
+				else if(veOperation == "insertHyperlink")
 				{
 					if(!dashboardEditor.checkInsertHyperlink(insertType))
 						return;
@@ -1231,7 +1247,7 @@
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					po.resizeVisualEditorPanel(tabPane, panel);
 				}
-				else if(insertOperation == "insertVideo")
+				else if(veOperation == "insertVideo")
 				{
 					if(!dashboardEditor.checkInsertVideo(insertType))
 						return;
@@ -1241,14 +1257,14 @@
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					po.resizeVisualEditorPanel(tabPane, panel);
 				}
-				else if(insertOperation == "insertChart")
+				else if(veOperation == "insertChart")
 				{
 					if(!dashboardEditor.checkInsertChart(insertType))
 						return;
 					
 					po.toggleInsertChartListPannel(editorOptWrapper);
 				}
-				else if(insertOperation == "bindChart")
+				else if(veOperation == "bindChart")
 				{
 					if(!dashboardEditor.checkBindChart())
 						return;
@@ -1258,7 +1274,7 @@
 			}
 		});
 		
-		var editGroup = $("<div class='edit-group' />").appendTo(editorRightOptWrapper)
+		var editGroup = $("<div class='edit-group opt-group' />").appendTo(editorRightOptWrapper)
 			.hover(
 				function()
 				{
@@ -1271,26 +1287,26 @@
 		$("<button type='button' />").text("<@spring.message code='edit' />").appendTo(editGroup).button();
 		
 		var editMenu = $("<ul class='edit-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li editOperation='editGlobalStyle' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalStyle' /></div>").appendTo(editMenu);
-		$("<li editOperation='editGlobalChartTheme' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartTheme' /></div>").appendTo(editMenu);
-		$("<li editOperation='editGlobalChartOptions' auto-close-prevent='veditor-chartOptions-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartOptions' /></div>").appendTo(editMenu);
+		$("<li veOperation='editGlobalStyle' class='quick-opt' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalStyle' /></div>").appendTo(editMenu);
+		$("<li veOperation='editGlobalChartTheme' class='quick-opt' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartTheme' /></div>").appendTo(editMenu);
+		$("<li veOperation='editGlobalChartOptions' class='quick-opt' auto-close-prevent='veditor-chartOptions-panel' />").html("<div><@spring.message code='dashboard.opt.edit.globalChartOptions' /></div>").appendTo(editMenu);
 		$("<li class='ui-menu-divider' />").appendTo(editMenu);
-		$("<li editOperation='editStyle' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
-		$("<li editOperation='editChartTheme' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartTheme' /></div>").appendTo(editMenu);
-		$("<li editOperation='editChartOptions' auto-close-prevent='veditor-chartOptions-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartOptions' /></div>").appendTo(editMenu);
-		$("<li editOperation='editContent' auto-close-prevent='veditor-content-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
+		$("<li veOperation='editStyle' class='quick-opt' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
+		$("<li veOperation='editChartTheme' class='quick-opt' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartTheme' /></div>").appendTo(editMenu);
+		$("<li veOperation='editChartOptions' class='quick-opt' auto-close-prevent='veditor-chartOptions-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartOptions' /></div>").appendTo(editMenu);
+		$("<li veOperation='editContent' class='quick-opt' auto-close-prevent='veditor-content-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
 		editMenu.appendTo(editGroup).menu(
 		{
 			select: function(event, ui)
 			{
 				var item = ui.item;
-				var editOperation = item.attr("editOperation");
-				po.editOperationForVisualEdit = editOperation;
+				var veOperation = item.attr("veOperation");
+				po.veOperation = veOperation;
 				
 				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				if(dashboardEditor)
 				{
-					if(editOperation == "editGlobalStyle")
+					if(veOperation == "editGlobalStyle")
 					{
 						var panel = po.element(".veditor-style-panel");
 						po.element(".editStyleTitle", panel).hide();
@@ -1300,7 +1316,7 @@
 						po.resizeVisualEditorPanel(tabPane, panel);
 						po.resizeVisualEditorStylePanel(tabPane, panel);
 					}
-					else if(editOperation == "editGlobalChartTheme")
+					else if(veOperation == "editGlobalChartTheme")
 					{
 						var panel = po.element(".veditor-chartTheme-panel");
 						po.element(".editChartThemeTitle", panel).hide();
@@ -1309,7 +1325,7 @@
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
 					}
-					else if(editOperation == "editGlobalChartOptions")
+					else if(veOperation == "editGlobalChartOptions")
 					{
 						var panel = po.element(".veditor-chartOptions-panel");
 						po.element(".chartOptionsTitle", panel).hide();
@@ -1318,7 +1334,7 @@
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
 					}
-					else if(editOperation == "editStyle")
+					else if(veOperation == "editStyle")
 					{
 						if(!dashboardEditor.checkSetElementStyle())
 							return;
@@ -1335,7 +1351,7 @@
 						po.resizeVisualEditorPanel(tabPane, panel);
 						po.resizeVisualEditorStylePanel(tabPane, panel);
 					}
-					else if(editOperation == "editChartTheme")
+					else if(veOperation == "editChartTheme")
 					{
 						if(!dashboardEditor.checkSetElementChartTheme())
 							return;
@@ -1347,7 +1363,7 @@
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
 					}
-					else if(editOperation == "editChartOptions")
+					else if(veOperation == "editChartOptions")
 					{
 						if(!dashboardEditor.checkSetElementChartOptions())
 							return;
@@ -1359,7 +1375,7 @@
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
 					}
-					else if(editOperation == "editContent")
+					else if(veOperation == "editContent")
 					{
 						if(!dashboardEditor.checkSetElementText())
 							return;
@@ -1373,7 +1389,7 @@
 			}
 		});
 		
-		var deleteGroup = $("<div class='delete-group' />").appendTo(editorRightOptWrapper)
+		var deleteGroup = $("<div class='delete-group opt-group' />").appendTo(editorRightOptWrapper)
 			.hover(
 				function()
 				{
@@ -1386,21 +1402,21 @@
 		$("<button type='button' />").text("<@spring.message code='delete' />").appendTo(deleteGroup).button();
 		
 		var deleteMenu = $("<ul class='delete-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li deleteOperation='deleteElement' />").html("<div><@spring.message code='dashboard.opt.delete.element' /></div>").appendTo(deleteMenu);
+		$("<li veOperation='deleteElement' class='quick-opt' />").html("<div><@spring.message code='dashboard.opt.delete.element' /></div>").appendTo(deleteMenu);
 		$("<li class='ui-menu-divider' />").appendTo(deleteMenu);
-		$("<li deleteOperation='unbindChart' />").html("<div><@spring.message code='dashboard.opt.delete.unbindChart' /></div>").appendTo(deleteMenu);
+		$("<li veOperation='unbindChart' class='quick-opt' />").html("<div><@spring.message code='dashboard.opt.delete.unbindChart' /></div>").appendTo(deleteMenu);
 		deleteMenu.appendTo(deleteGroup).menu(
 		{
 			select: function(event, ui)
 			{
 				var item = ui.item;
-				var deleteOperation = item.attr("deleteOperation");
-				po.deleteOperationForVisualEdit = deleteOperation;
+				var veOperation = item.attr("veOperation");
+				po.veOperation = veOperation;
 				
 				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				if(dashboardEditor)
 				{
-					if(deleteOperation == "deleteElement")
+					if(veOperation == "deleteElement")
 					{
 						po.confirm("<@spring.message code='dashboard.opt.delete.element.confirm' />",
 						{
@@ -1410,7 +1426,7 @@
 							}
 						});
 					}
-					else if(deleteOperation == "unbindChart")
+					else if(veOperation == "unbindChart")
 					{
 						po.confirm("<@spring.message code='dashboard.opt.delete.unbindChart.confirm' />",
 						{
@@ -1427,10 +1443,11 @@
 		$("<button type='button' />").text("<@spring.message code='save' />").appendTo(editorRightOptWrapper).button()
 		.click(function()
 		{
+			po.veOperation = "save";
 			po.saveResourceEditorContent(tabPane);
 		});
-
-		var moreGroup = $("<div class='more-group' />").appendTo(editorRightOptWrapper)
+		
+		var moreGroup = $("<div class='more-group opt-group' />").appendTo(editorRightOptWrapper)
 			.hover(
 				function()
 				{
@@ -1441,19 +1458,20 @@
 					po.element(".more-menu", this).hide();
 				});
 		$("<button type='button' />").text("<@spring.message code='dashboard.opt.more' />").appendTo(moreGroup).button();
-
+		
 		var moreMenu = $("<ul class='more-menu operation-menu ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow' />");
-		$("<li moreOperation='dashboardSize' auto-close-prevent='veditor-dashboardSize-panel' />").html("<div><@spring.message code='dashboard.opt.dashboardSize' /></div>").appendTo(moreMenu);
-		$("<li moreOperation='eleBoundary' />").html("<div><@spring.message code='dashboard.opt.eleBoundary' /></div>").appendTo(moreMenu);
-		$("<li moreOperation='refresh' />").html("<div><@spring.message code='refresh' /></div>").appendTo(moreMenu);
+		$("<li veOperation='dashboardSize' auto-close-prevent='veditor-dashboardSize-panel' />").html("<div><@spring.message code='dashboard.opt.dashboardSize' /></div>").appendTo(moreMenu);
+		$("<li veOperation='eleBoundary' />").html("<div><@spring.message code='dashboard.opt.eleBoundary' /></div>").appendTo(moreMenu);
+		$("<li veOperation='refresh' />").html("<div><@spring.message code='refresh' /></div>").appendTo(moreMenu);
 		moreMenu.appendTo(moreGroup).menu(
 		{
 			select: function(event, ui)
 			{
 				var item = ui.item;
-				var moreOperation = item.attr("moreOperation");
+				var veOperation = item.attr("veOperation");
+				po.veOperation = veOperation;
 				
-				if(moreOperation == "dashboardSize")
+				if(veOperation == "dashboardSize")
 				{
 					var panel = po.element(".veditor-dashboardSize-panel");
 					var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
@@ -1466,7 +1484,7 @@
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					po.resizeVisualEditorPanel(tabPane, panel);
 				}
-				else if(moreOperation == "eleBoundary")
+				else if(veOperation == "eleBoundary")
 				{
 					var dashboardEditor = po.visualDashboardEditor(tabPane);
 					
@@ -1476,7 +1494,7 @@
 					var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
 					dashboardEditor.enableElementBoundary(!dashboardEditor.enableElementBoundary());
 				}
-				else if(moreOperation == "refresh")
+				else if(veOperation == "refresh")
 				{
 					var visualEditorIfm = po.element(".tpl-visual-editor-ifm", tabPane);
 					var templateName = po.element(".resource-name-wrapper input.resourceName", tabPane).val();
@@ -1500,6 +1518,47 @@
 				}
 			}
 		});
+		
+		po.element(".quick-opt", editorRightOptWrapper).each(function()
+		{
+			$(this).attr("quick-opt-id", $.uid());
+		})
+		.click(function()
+		{
+			var quickOptBtn = po.element(".execute-quick-opt", editorRightOptWrapper);
+			if(!quickOptBtn.data("quick-opt-enabled"))
+			{
+				quickOptBtn.button("enable");
+				quickOptBtn.data("quick-opt-enabled", true);
+			}
+			
+			quickOptBtn.attr("title", po.evalVeOptNamePath($(this)));
+			
+			po.veQuickOptId = $(this).attr("quick-opt-id");
+		});
+	};
+	
+	po.evalVeOptNamePath = function(optItem)
+	{
+		var name = "";
+		
+		while(!optItem.is(".opt-group, body"))
+		{
+			var myText = $("> .ui-menu-item-wrapper:first", optItem).text();
+			if(myText)
+				name = (name ? myText + " - "+name : myText);
+			
+			optItem = optItem.parent();
+		}
+		
+		if(optItem.is(".opt-group"))
+		{
+			var myText = $("> button:first", optItem).text();
+			if(myText)
+				name = (name ? myText + " - "+name : myText);
+		}
+		
+		return name;
 	};
 	
 	po.resizeVisualEditorPanel = function(tabPane, panel)
@@ -1678,24 +1737,24 @@
 	{
 		var ul = $("<ul class='ui-widget-shadow' />");
 		
-		$("<li insertOperation='insertGridLayout' insertType='"+insertType+"' auto-close-prevent='veditor-gridLayout-panel' />")
+		$("<li veOperation='insertGridLayout' insertType='"+insertType+"' class='quick-opt' auto-close-prevent='veditor-gridLayout-panel' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.gridLayout' /></div>").appendTo(ul);
 		
-		$("<li insertOperation='insertDiv' insertType='"+insertType+"' />")
+		$("<li veOperation='insertDiv' insertType='"+insertType+"' class='quick-opt' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.div' /></div>").appendTo(ul);
 		
-		$("<li insertOperation='insertImage' insertType='"+insertType+"' auto-close-prevent='veditor-image-panel' />")
+		$("<li veOperation='insertImage' insertType='"+insertType+"' class='quick-opt' auto-close-prevent='veditor-image-panel' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.image' /></div>").appendTo(ul);
 		
-		$("<li insertOperation='insertHyperlink' insertType='"+insertType+"' auto-close-prevent='veditor-hyperlink-panel' />")
+		$("<li veOperation='insertHyperlink' insertType='"+insertType+"' class='quick-opt' auto-close-prevent='veditor-hyperlink-panel' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.hyperlink' /></div>").appendTo(ul);
 		
-		$("<li insertOperation='insertVideo' insertType='"+insertType+"' auto-close-prevent='veditor-video-panel' />")
+		$("<li veOperation='insertVideo' insertType='"+insertType+"' class='quick-opt' auto-close-prevent='veditor-video-panel' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.video' /></div>").appendTo(ul);
 		
 		$("<li class='ui-menu-divider' />").appendTo(ul);
 		
-		$("<li insertOperation='insertChart' insertType='"+insertType+"' />")
+		$("<li veOperation='insertChart' insertType='"+insertType+"' class='quick-opt' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.chart' /></div>").appendTo(ul);
 		
 		ul.appendTo($parent);
@@ -1706,11 +1765,11 @@
 		var dashboardEditor = po.visualDashboardEditor(tabPane);
 		if(dashboardEditor)
 		{
-			if(po.insertOperationForVisualEdit == "insertChart")
+			if(po.veOperation == "insertChart")
 			{
-				dashboardEditor.insertChart(chartWidgets, po.insertTypeForVisualEdit);
+				dashboardEditor.insertChart(chartWidgets, po.veOperationInsertType);
 			}
-			else if(po.insertOperationForVisualEdit == "bindChart")
+			else if(po.veOperation == "bindChart")
 			{
 				dashboardEditor.bindChart((chartWidgets ? chartWidgets[0] : null));
 			}
