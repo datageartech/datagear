@@ -540,14 +540,15 @@
 				visualEditorIfm.data("veEnableElementBoundary", this.enableElementBoundary());
 				visualEditorIfm.data("veChangeFlag", this.changeFlag());
 			};
-			dashboardEditor.documentReadyCallback = function()
-			{
-				dashboardEditor.enableElementBoundary(visualEditorIfm.data("veEnableElementBoundary"));
-				dashboardEditor.changeFlag(visualEditorIfm.data("veChangeFlag"));
-				//XXX 这里无法恢复选中状态，因为每次重新加载后可视编辑ID会重新生成
-			};
 			
 			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
+		}
+		
+		if(dashboardEditor)
+		{
+			dashboardEditor.enableElementBoundary(visualEditorIfm.data("veEnableElementBoundary"));
+			dashboardEditor.changeFlag(visualEditorIfm.data("veChangeFlag"));
+			//XXX 这里无法恢复选中状态，因为每次重新加载后可视编辑ID会重新生成
 		}
 	};
 	
