@@ -1436,23 +1436,29 @@
 				{
 					if(veOperation == "deleteElement")
 					{
-						po.confirm("<@spring.message code='dashboard.opt.delete.element.confirm' />",
+						if(dashboardEditor.checkDeleteElement())
 						{
-							confirm: function()
+							po.confirm("<@spring.message code='dashboard.opt.delete.element.confirm' />",
 							{
-								dashboardEditor.deleteElement();
-							}
-						});
+								confirm: function()
+								{
+									dashboardEditor.deleteElement();
+								}
+							});
+						}
 					}
 					else if(veOperation == "unbindChart")
 					{
-						po.confirm("<@spring.message code='dashboard.opt.delete.unbindChart.confirm' />",
+						if(dashboardEditor.checkUnbindChart())
 						{
-							confirm: function()
+							po.confirm("<@spring.message code='dashboard.opt.delete.unbindChart.confirm' />",
 							{
-								dashboardEditor.unbindChart();
-							}
-						});
+								confirm: function()
+								{
+									dashboardEditor.unbindChart();
+								}
+							});
+						}
 					}
 				}
 			}
