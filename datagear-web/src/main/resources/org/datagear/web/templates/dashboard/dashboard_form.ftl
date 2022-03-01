@@ -1677,6 +1677,26 @@ readonly 是否只读操作，允许为null
 			</div>
 		</form>
 	</div>
+	<div class="veditor-label-panel veditor-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<form action="#" method="POST" class="display-block">
+			<div class="panel-head ui-widget-header ui-corner-all">
+				<@spring.message code='dashboard.veditor.label' />
+			</div>
+			<div class="panel-content form-content">
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dashboard.veditor.label.content' /></label>
+					</div>
+					<div class="form-item-value">
+						<textarea name="content" class="width-9 ui-widget ui-widget-content ui-corner-all"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="panel-foot form-foot">
+				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
+			</div>
+		</form>
+	</div>
 </div>
 <#include "../include/page_obj_form.ftl">
 <#include "../include/page_obj_tabs.ftl" >

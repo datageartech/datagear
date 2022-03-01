@@ -371,6 +371,32 @@
 			return false;
 		});
 		
+		//初始化插入文本标签面板
+		var veLabelPanel = po.element(".veditor-label-panel");
+		veLabelPanel.draggable({ handle: ".panel-head" });
+		var veLabelForm = po.element("form", veLabelPanel);
+		veLabelForm.submit(function()
+		{
+			try
+			{
+				veLabelPanel.hide();
+				
+				var tabPane = po.getActiveResEditorTabPane();
+				var dashboardEditor = po.visualDashboardEditor(tabPane);
+				if(dashboardEditor)
+				{
+					var labelObj = $.formToJson(this);
+					dashboardEditor.insertLabel(labelObj, po.veOperationInsertType);
+				}
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
+			}
+			
+			return false;
+		});
+		
 		po.element(".veditor-panel  .helper-opt").controlgroupwrapper();
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
@@ -1206,6 +1232,16 @@
 					
 					dashboardEditor.insertDiv(insertType);
 				}
+				else if(veOperation == "insertLabel")
+				{
+					if(!dashboardEditor.checkInsertLabel(insertType))
+						return;
+					
+					var panel = po.element(".veditor-label-panel");
+					$.jsonToForm(po.element("form", panel), {});
+					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					po.resizeVisualEditorPanel(tabPane, panel);
+				}
 				else if(veOperation == "insertImage")
 				{
 					if(!dashboardEditor.checkInsertImage(insertType))
@@ -1754,6 +1790,9 @@
 		
 		$("<li veOperation='insertDiv' insertType='"+insertType+"' class='quick-opt' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.div' /></div>").appendTo(ul);
+		
+		$("<li veOperation='insertLabel' insertType='"+insertType+"' class='quick-opt' auto-close-prevent='veditor-label-panel' />")
+			.html("<div><@spring.message code='dashboard.opt.insertType.label' /></div>").appendTo(ul);
 		
 		$("<li veOperation='insertImage' insertType='"+insertType+"' class='quick-opt' auto-close-prevent='veditor-image-panel' />")
 			.html("<div><@spring.message code='dashboard.opt.insertType.image' /></div>").appendTo(ul);

@@ -802,6 +802,35 @@
 	};
 	
 	/**
+	 * 校验insertLabel操作。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.checkInsertLabel = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 插入标签元素。
+	 * 
+	 * @param label 标签设置，格式为：{ content: "" }
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertLabel = function(label, insertType, refEle)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		var ele = $("<label></label>");
+		ele.html(label.content || "");
+		
+		this.insertElement(ele, insertType, refEle);
+	};
+	
+	/**
 	 * 校验insertChart操作。
 	 * 
 	 * @param insertType 可选，参考insertChart函数的insertType参数
