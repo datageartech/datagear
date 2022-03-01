@@ -274,7 +274,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="background-size" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleBgSizeBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="100% 100%">
 										<@spring.message code='dashboard.veditor.style.bgSize.fill' />
 									</button>
@@ -297,7 +297,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="background-repeat" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleBgRepeatBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="no-repeat">
 										<@spring.message code='dashboard.veditor.style.bgRepeat.no-repeat' />
 									</button>
@@ -320,7 +320,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="background-position" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleBgPositionBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="center center">
 										<@spring.message code='dashboard.veditor.style.bgPosition.center' />
 									</button>
@@ -351,7 +351,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="border-width" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleBorderWidthBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="1px">
 										<@spring.message code='dashboard.veditor.style.borderWidth.1px' />
 									</button>
@@ -384,7 +384,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="border-style" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleBorderStyleBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="solid">
 										<@spring.message code='dashboard.veditor.style.borderStyle.solid' />
 									</button>
@@ -406,7 +406,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="border-radius" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleBorderRadiusBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="3px">
 										<@spring.message code='dashboard.veditor.style.borderRadius.3px' />
 									</button>
@@ -434,7 +434,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="box-shadow" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleBoxShadowBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="0px 0px 6px 4px #666">
 										<@spring.message code='dashboard.veditor.style.boxShadow.around' />
 									</button>
@@ -465,7 +465,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="display" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleDisplayBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="grid">
 										<@spring.message code='dashboard.veditor.style.display.grid' />
 									</button>
@@ -539,7 +539,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="box-sizing" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleBoxSizingBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="border-box">
 										<@spring.message code='dashboard.veditor.style.boxSizing.border-box' />
 									</button>
@@ -559,7 +559,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="position" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="stylePositionBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="absolute">
 										<@spring.message code='dashboard.veditor.style.position.absolute' />
 									</button>
@@ -639,7 +639,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="grid-template-rows" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleGridTemplateRowsBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
 										<@spring.message code='dashboard.veditor.style.gridTemplateRows.1r' />
 									</button>
@@ -667,7 +667,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="grid-template-columns" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleGridTemplateColumnsBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
 										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.1c' />
 									</button>
@@ -725,7 +725,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="grid-auto-flow" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleGridAutoFlowBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="row">
 										<@spring.message code='dashboard.veditor.style.gridAutoFlow.row' />
 									</button>
@@ -750,7 +750,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="justify-items" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleJustifyItemsBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
 										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
 									</button>
@@ -775,7 +775,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="align-items-grid" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleAlignItemsGridBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
 										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
 									</button>
@@ -800,7 +800,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="justify-content-grid" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleJustifyContentGridBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
 										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
 									</button>
@@ -834,7 +834,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="align-content-grid" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleAlignContentGridBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
 										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
 									</button>
@@ -868,7 +868,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="grid-auto-rows" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleGridAutoRowsBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
 										<@spring.message code='dashboard.veditor.style.gridTemplateRows.1r' />
 									</button>
@@ -896,7 +896,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="grid-auto-columns" class="help-target ui-widget ui-widget-content ui-corner-all" size="200" />
 								<br>
-								<div class="styleGridAutoColumnsBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="repeat(1, 1fr)">
 										<@spring.message code='dashboard.veditor.style.gridTemplateColumns.1c' />
 									</button>
@@ -979,7 +979,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="justify-self" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleJustifySelfBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
 										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
 									</button>
@@ -1004,7 +1004,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="align-self-grid" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleAlignSelfGridBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="start">
 										<@spring.message code='dashboard.veditor.style.gridAligns.start' />
 									</button>
@@ -1034,7 +1034,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="flex-direction" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleFlexDirectionBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="row">
 										<@spring.message code='dashboard.veditor.style.flexDirection.row' />
 									</button>
@@ -1059,7 +1059,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="flex-wrap" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleFlexWrapBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="nowrap">
 										<@spring.message code='dashboard.veditor.style.flexWrap.nowrap' />
 									</button>
@@ -1081,7 +1081,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="justify-content-flex" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleJustifyContentFlexBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
 										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
 									</button>
@@ -1109,7 +1109,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="align-items-flex" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleAlignItemsFlexBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
 										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
 									</button>
@@ -1137,7 +1137,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="align-content-flex" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleAlignContentFlexBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
 										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
 									</button>
@@ -1213,7 +1213,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="align-self-flex" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleAlignSelfFlexBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="flex-start">
 										<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
 									</button>
@@ -1264,7 +1264,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="font-weight" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleFontWeightBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="normal">
 										<@spring.message code='dashboard.veditor.style.fontWeight.normal' />
 									</button>
@@ -1281,7 +1281,7 @@ readonly 是否只读操作，允许为null
 							<div class="form-item-value">
 								<input type="text" name="text-align" class="help-target ui-widget ui-widget-content ui-corner-all" size="100" />
 								<br>
-								<div class="styleTextAlignBtnGroup helper-opt">
+								<div class="helper-opt">
 									<button type="button" class="help-src small-button" help-value="left">
 										<@spring.message code='dashboard.veditor.style.textAlign.left' />
 									</button>
@@ -1476,7 +1476,7 @@ readonly 是否只读操作，允许为null
 					<div class="form-item-value">
 						<input type="text" name="rows" class="help-target ui-widget ui-widget-content ui-corner-all" size="50" />
 						<br>
-						<div class="gridLayoutRowsBtnGroup helper-opt">
+						<div class="helper-opt">
 							<button type="button" class="help-src small-button" help-value="1">
 								<@spring.message code='dashboard.veditor.gridLayout.rows.1r' />
 							</button>
@@ -1502,7 +1502,7 @@ readonly 是否只读操作，允许为null
 					<div class="form-item-value">
 						<input type="text" name="columns" class="help-target ui-widget ui-widget-content ui-corner-all" size="50" />
 						<br>
-						<div class="gridLayoutColumnsBtnGroup helper-opt">
+						<div class="helper-opt">
 							<button type="button" class="help-src small-button" help-value="1">
 								<@spring.message code='dashboard.veditor.gridLayout.columns.1c' />
 							</button>
@@ -1619,7 +1619,7 @@ readonly 是否只读操作，允许为null
 					<div class="form-item-value">
 						<input type="text" name="target" class="help-target ui-widget ui-widget-content ui-corner-all" size="50" />
 						<br>
-						<div class="hyperlinkTargetBtnGroup helper-opt">
+						<div class="helper-opt">
 							<button type="button" class="help-src small-button" help-value="_blank">
 								<@spring.message code='dashboard.veditor.hyperlink.target._blank' />
 							</button>

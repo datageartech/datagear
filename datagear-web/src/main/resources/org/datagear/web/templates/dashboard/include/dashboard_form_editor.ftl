@@ -101,35 +101,6 @@
 			return false;
 		});
 		po.element(".style-tabs", veStyleForm).tabs();
-		po.element(".styleBgPositionBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleBgSizeBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleBgRepeatBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleBorderWidthBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleBorderStyleBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleBorderRadiusBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleBoxShadowBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleDisplayBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleBoxSizingBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".stylePositionBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleFlexDirectionBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleFlexWrapBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleJustifyContentFlexBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleAlignItemsFlexBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleAlignContentFlexBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleAlignSelfFlexBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleGridTemplateColumnsBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleGridTemplateRowsBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleGridAutoFlowBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleJustifyItemsBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleAlignItemsGridBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleJustifyContentGridBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleAlignContentGridBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleGridAutoColumnsBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleGridAutoRowsBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleJustifySelfBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleAlignSelfGridBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleFontWeightBtnGroup", veStyleForm).controlgroupwrapper();
-		po.element(".styleTextAlignBtnGroup", veStyleForm).controlgroupwrapper();
 		po.element("input[name='color']", veStyleForm).listpalllet(
 		{
 			indicator: po.element(".color-indicator", veStyleForm),
@@ -320,8 +291,6 @@
 			
 			return false;
 		});
-		po.element(".gridLayoutRowsBtnGroup", veGridLayoutForm).controlgroupwrapper();
-		po.element(".gridLayoutColumnsBtnGroup", veGridLayoutForm).controlgroupwrapper();
 		po.element(".gridLayoutFillParentCheckbox", veGridLayoutForm).checkboxradiogroup();
 		
 		//初始化插入图片面板
@@ -375,8 +344,7 @@
 			
 			return false;
 		});
-		po.element(".hyperlinkTargetBtnGroup", veHyperlinkForm).controlgroupwrapper();
-
+		
 		//初始化插入视频面板
 		var veVideoPanel = po.element(".veditor-video-panel");
 		veVideoPanel.draggable({ handle: ".panel-head" });
@@ -403,6 +371,7 @@
 			return false;
 		});
 		
+		po.element(".veditor-panel  .helper-opt").controlgroupwrapper();
 		po.element(".veditor-panel .form-item-value .help-src").click(function()
 		{
 			var $this = $(this);
@@ -1321,29 +1290,29 @@
 						var panel = po.element(".veditor-style-panel");
 						po.element(".editStyleTitle", panel).hide();
 						po.element(".editGlobalStyleTitle", panel).show();
-						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getGlobalStyle());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
 						po.resizeVisualEditorStylePanel(tabPane, panel);
+						po.setVeditorStyleFormValue(po.element("form", panel), dashboardEditor.getGlobalStyle());
 					}
 					else if(veOperation == "editGlobalChartTheme")
 					{
 						var panel = po.element(".veditor-chartTheme-panel");
 						po.element(".editChartThemeTitle", panel).hide();
 						po.element(".editGlobalChartThemeTitle", panel).show();
-						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
+						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getGlobalChartTheme());
 					}
 					else if(veOperation == "editGlobalChartOptions")
 					{
 						var panel = po.element(".veditor-chartOptions-panel");
 						po.element(".chartOptionsTitle", panel).hide();
 						po.element(".globalChartOptionsTitle", panel).show();
-						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getGlobalChartOptions());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
 						po.resizeVisualEditorChartOptionsPanel(tabPane, panel);
+						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getGlobalChartOptions());
 					}
 					else if(veOperation == "editStyle")
 					{
@@ -1357,10 +1326,10 @@
 						var elementStyleObj = dashboardEditor.getElementStyle();
 						elementStyleObj.isGridItemElement = dashboardEditor.isGridItemElement();
 						elementStyleObj.isFlexItemElement = dashboardEditor.isFlexItemElement();
-						po.setVeditorStyleFormValue(po.element("form", panel), elementStyleObj);
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
 						po.resizeVisualEditorStylePanel(tabPane, panel);
+						po.setVeditorStyleFormValue(po.element("form", panel), elementStyleObj);
 					}
 					else if(veOperation == "editChartTheme")
 					{
@@ -1370,9 +1339,9 @@
 						var panel = po.element(".veditor-chartTheme-panel");
 						po.element(".editChartThemeTitle", panel).show();
 						po.element(".editGlobalChartThemeTitle", panel).hide();
-						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
+						po.setVeditorChartThemeFormValue(po.element("form", panel), dashboardEditor.getElementChartTheme());
 					}
 					else if(veOperation == "editChartOptions")
 					{
@@ -1382,10 +1351,10 @@
 						var panel = po.element(".veditor-chartOptions-panel");
 						po.element(".chartOptionsTitle", panel).show();
 						po.element(".globalChartOptionsTitle", panel).hide();
-						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getElementChartOptions());
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
 						po.resizeVisualEditorChartOptionsPanel(tabPane, panel);
+						po.setVeditorChartOptionsFormValue(po.element("form", panel), dashboardEditor.getElementChartOptions());
 					}
 					else if(veOperation == "editContent")
 					{
@@ -1575,6 +1544,10 @@
 	
 	po.resizeVisualEditorPanel = function(tabPane, panel)
 	{
+		if(panel.data("resizeVisualEditorPanel"))
+			return;
+		panel.data("resizeVisualEditorPanel", true);
+		
 		var vePanelContentHeight = tabPane.height();
 		vePanelContentHeight = vePanelContentHeight - po.element(".panel-head", panel).outerHeight(true);
 		vePanelContentHeight = vePanelContentHeight - po.element(".panel-foot", panel).outerHeight(true);
@@ -1585,6 +1558,10 @@
 	
 	po.resizeVisualEditorStylePanel = function(tabPane, panel)
 	{
+		if(panel.data("resizeVisualEditorStylePanel"))
+			return;
+		panel.data("resizeVisualEditorStylePanel", true);
+		
 		var panelContent = po.element(".panel-content", panel);
 		panelContent.css("height", panelContent.css("max-height"));
 		
@@ -1597,6 +1574,10 @@
 	
 	po.resizeVisualEditorChartOptionsPanel = function(tabPane, panel)
 	{
+		if(panel.data("resizeVisualEditorChartOptionsPanel"))
+			return;
+		panel.data("resizeVisualEditorChartOptionsPanel", true);
+		
 		var panelContent = po.element(".panel-content", panel);
 		var textareaHeight = parseInt(panelContent.css("max-height")) - po.element(".form-item-label", panelContent).outerHeight()*3;
 		var chartOptionsEditorWrapper = po.element(".chartOptions-editor-wrapper", panelContent);
@@ -1720,11 +1701,12 @@
 			var obj = chartFactory.evalSilently(chartOptionsStr, chartOptionsStr);
 			
 			if(!chartFactory.isString(obj))
-				chartOptionsStr = JSON.stringify(obj, null, 4);
+				chartOptionsStr = JSON.stringify(obj, null, '\t');
 		}
 		
 		var coEditor = po.element(".chartOptions-editor-wrapper", $form).data("chartOptionsCodeEditor");
 		po.setCodeText(coEditor, (chartOptionsStr || ""));
+		coEditor.focus();
 	};
 	
 	po.addChartThemeFormGraphColorsItem = function(wrapper)
