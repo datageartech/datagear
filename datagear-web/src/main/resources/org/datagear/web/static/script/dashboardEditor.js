@@ -33,6 +33,10 @@
 	i18n.noSelectablePrevElement="没有可选择的上一个元素";
 	i18n.noSelectableChildElement="没有可选择的子元素";
 	i18n.noSelectableParentElement="没有可选择的父元素";
+	i18n.imgEleRequired = "不是图片元素";
+	i18n.hyperlinkEleRequired = "不是超链接元素";
+	i18n.videoEleRequired = "不是视频元素";
+	i18n.labelEleRequired = "不是文本标签元素";
 	
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
@@ -126,8 +130,6 @@
 			{
 				editor.beforeunloadCallback();
 			});
-			
-			editor.documentReadyCallback();
 		});
 	};
 	
@@ -233,12 +235,6 @@
 	
 	//页面卸载前回调函数，比如：保存编辑HTML
 	editor.beforeunloadCallback = function()
-	{
-		
-	};
-	
-	//页面文档载入完成回调函数
-	editor.documentReadyCallback = function()
 	{
 		
 	};
@@ -710,26 +706,77 @@
 	/**
 	 * 插入图片元素。
 	 * 
-	 * @param image 图片设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param imgAttr 图片设置，格式为：{ src: "", width: ..., height: ... }
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
-	editor.insertImage = function(image, insertType, refEle)
+	editor.insertImage = function(imgAttr, insertType, refEle)
 	{
 		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		var img = $("<img>");
 		
-		var styleStr = "";
-		styleStr += (image.width ? "width:"+image.width+";" : "");
-		styleStr += (image.height ? "height:"+image.height+";" : "");
-		
-		img.attr("src", (image.src || ""));
-		if(styleStr)
-			img.attr("style", styleStr);
-		
 		this.insertElement(img, insertType, refEle);
+		this.setImageAttr(imgAttr, img);
+	};
+	
+	/**
+	 * 元素是否是图片。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.isImage = function(ele)
+	{
+		ele = this._currentElement(ele);
+		return ele.is("img");
+	};
+	
+	/**
+	 * 获取图片元素属性。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.getImageAttr = function(ele)
+	{
+		ele = this._currentElement(ele);
+		
+		var attrObj = {};
+		
+		if(!this.isImage(ele))
+			return attrObj;
+		
+		ele = this._editElement(ele);
+		
+		var eleStyle = this.getElementStyle(ele);
+		
+		attrObj.src = (ele.attr("src") || "");
+		attrObj.width = eleStyle.width;
+		attrObj.height = eleStyle.height;
+		
+		return attrObj;
+	};
+	
+	/**
+	 * 设置图片元素属性。
+	 * 
+	 * @param imgAttr 图片设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.setImageAttr = function(imgAttr, ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this.isImage(ele))
+		{
+			this.tipInfo(i18n.imgEleRequired);
+			return;
+		}
+		
+		var eleStyle = { width: imgAttr.width, height: imgAttr.height };
+		
+		this._setElementAttr(ele, "src", (imgAttr.src || ""));
+		this._setElementStyle(ele, eleStyle);
 	};
 	
 	/**
@@ -746,23 +793,77 @@
 	/**
 	 * 插入超链接元素。
 	 * 
-	 * @param hyperlink 超链接设置，格式为：{ content: "...", href: "...", target: "..." }
+	 * @param hyperlinkAttr 超链接设置，格式为：{ content: "...", href: "...", target: "..." }
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
-	editor.insertHyperlink = function(hyperlink, insertType, refEle)
+	editor.insertHyperlink = function(hyperlinkAttr, insertType, refEle)
 	{
 		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		var a = $("<a></a>");
 		
-		a.html(hyperlink.content || hyperlink.href || "");
-		a.attr("href", (hyperlink.href || ""));
-		if(hyperlink.target)
-			a.attr("target", hyperlink.target)
-		
 		this.insertElement(a, insertType, refEle);
+		this.setHyperlinkAttr(hyperlinkAttr, a);
+	};
+	
+	/**
+	 * 元素是否是超链接。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.isHyperlink = function(ele)
+	{
+		ele = this._currentElement(ele);
+		return ele.is("a");
+	};
+	
+	/**
+	 * 获取超链接元素属性。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.getHyperlinkAttr = function(ele)
+	{
+		ele = this._currentElement(ele);
+		
+		var attrObj = {};
+		
+		if(!this.isHyperlink(ele))
+			return attrObj;
+		
+		ele = this._editElement(ele);
+		
+		attrObj.content = $.trim(ele.html());
+		attrObj.href = (ele.attr("href") || "");
+		attrObj.target = (ele.attr("target") || "");
+		
+		return attrObj;
+	};
+	
+	/**
+	 * 设置超链接元素属性。
+	 * 
+	 * @param hyperlinkAttr 超链接设置，格式为：{ content: "...", href: "...", target: "..." }
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.setHyperlinkAttr = function(hyperlinkAttr, ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this.isHyperlink(ele))
+		{
+			this.tipInfo(i18n.hyperlinkEleRequired);
+			return;
+		}
+		
+		this._setElementText(ele, (hyperlinkAttr.content || hyperlinkAttr.href || ""));
+		this._setElementAttr(ele, "href", (hyperlinkAttr.href || ""));
+		if(hyperlinkAttr.target)
+			this._setElementAttr(ele, "target", hyperlinkAttr.target);
+		else
+			this._removeElementAttr(ele, "target");
 	};
 	
 	/**
@@ -779,26 +880,77 @@
 	/**
 	 * 插入视频元素。
 	 * 
-	 * @param video 视频设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param videoAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
-	editor.insertVideo = function(video, insertType, refEle)
+	editor.insertVideo = function(videoAttr, insertType, refEle)
 	{
 		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		var ele = $("<video controls=\"controls\"></video>");
 		
-		var styleStr = "";
-		styleStr += (video.width ? "width:"+video.width+";" : "");
-		styleStr += (video.height ? "height:"+video.height+";" : "");
-		
-		ele.attr("src", (video.src || ""));
-		if(styleStr)
-			ele.attr("style", styleStr);
-		
 		this.insertElement(ele, insertType, refEle);
+		this.setVideoAttr(videoAttr, ele);
+	};
+	
+	/**
+	 * 是否是视频元素。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.isVideo = function(ele)
+	{
+		ele = this._currentElement(ele);
+		return ele.is("video");
+	};
+	
+	/**
+	 * 获取视频元素属性。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.getVideoAttr = function(ele)
+	{
+		ele = this._currentElement(ele);
+		
+		var attrObj = {};
+		
+		if(!this.isVideo(ele))
+			return attrObj;
+		
+		ele = this._editElement(ele);
+		
+		var eleStyle = this.getElementStyle(ele);
+		
+		attrObj.src = (ele.attr("src") || "");
+		attrObj.width = eleStyle.width;
+		attrObj.height = eleStyle.height;
+		
+		return attrObj;
+	};
+	
+	/**
+	 * 设置视频元素属性。
+	 * 
+	 * @param videoAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.setVideoAttr = function(videoAttr, ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this.isVideo(ele))
+		{
+			this.tipInfo(i18n.videoEleRequired);
+			return;
+		}
+		
+		var eleStyle = { width: videoAttr.width, height: videoAttr.height };
+		
+		this._setElementAttr(ele, "src", (videoAttr.src || ""));
+		this._setElementStyle(ele, eleStyle);
 	};
 	
 	/**
@@ -815,19 +967,70 @@
 	/**
 	 * 插入标签元素。
 	 * 
-	 * @param label 标签设置，格式为：{ content: "" }
+	 * @param labelAttr 标签设置，格式为：{ content: "" }
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
-	editor.insertLabel = function(label, insertType, refEle)
+	editor.insertLabel = function(labelAttr, insertType, refEle)
 	{
 		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		var ele = $("<label></label>");
-		ele.html(label.content || "");
+		ele.html(labelAttr.content || "");
 		
 		this.insertElement(ele, insertType, refEle);
+	};
+	
+	/**
+	 * 是否是标签元素。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.isLabel = function(ele)
+	{
+		ele = this._currentElement(ele);
+		return ele.is("label");
+	};
+	
+	/**
+	 * 获取标签元素属性。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.getLabelAttr = function(ele)
+	{
+		ele = this._currentElement(ele);
+		
+		var attrObj = {};
+		
+		if(!this.isLabel(ele))
+			return attrObj;
+		
+		ele = this._editElement(ele);
+		
+		attrObj.content = $.trim(ele.html());
+		
+		return attrObj;
+	};
+	
+	/**
+	 * 设置标签元素属性。
+	 * 
+	 * @param labelAttr 标签设置，格式为：{ content: "..." }
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.setLabelAttr = function(labelAttr, ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this.isLabel(ele))
+		{
+			this.tipInfo(i18n.labelEleRequired);
+			return;
+		}
+		
+		this._setElementText(ele, (labelAttr.content || ""));
 	};
 	
 	/**

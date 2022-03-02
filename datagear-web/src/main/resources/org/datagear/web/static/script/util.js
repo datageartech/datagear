@@ -3132,8 +3132,17 @@
 							return;
 						
 						var prevent = $targetClosest.attr("auto-close-prevent");
-						if(prevent && (prevent == panel.attr("id") || panel.hasClass(prevent)))
-							return;
+						if(prevent)
+						{
+							var prevents = prevent.split(" ");
+							var panelId = panel.attr("id");
+							
+							for(var pri=0; pri<prevents.length; pri++)
+							{
+								if(prevents[pri] == panelId || panel.hasClass(prevents[pri]))
+									return;
+							}
+						}
 						
 						panel.hide();
 					}

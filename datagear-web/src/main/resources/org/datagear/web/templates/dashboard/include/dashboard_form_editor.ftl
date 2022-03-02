@@ -308,7 +308,11 @@
 				if(dashboardEditor)
 				{
 					var imageObj = $.formToJson(this);
-					dashboardEditor.insertImage(imageObj, po.veOperationInsertType);
+					
+					if(po.veOperationEditEleAttr)
+						dashboardEditor.setImageAttr(imageObj);
+					else
+						dashboardEditor.insertImage(imageObj, po.veOperationInsertType);
 				}
 			}
 			catch(e)
@@ -334,7 +338,11 @@
 				if(dashboardEditor)
 				{
 					var hyperlinkObj = $.formToJson(this);
-					dashboardEditor.insertHyperlink(hyperlinkObj, po.veOperationInsertType);
+					
+					if(po.veOperationEditEleAttr)
+						dashboardEditor.setHyperlinkAttr(hyperlinkObj);
+					else
+						dashboardEditor.insertHyperlink(hyperlinkObj, po.veOperationInsertType);
 				}
 			}
 			catch(e)
@@ -360,7 +368,11 @@
 				if(dashboardEditor)
 				{
 					var videoObj = $.formToJson(this);
-					dashboardEditor.insertVideo(videoObj, po.veOperationInsertType);
+					
+					if(po.veOperationEditEleAttr)
+						dashboardEditor.setVideoAttr(videoObj);
+					else
+						dashboardEditor.insertVideo(videoObj, po.veOperationInsertType);
 				}
 			}
 			catch(e)
@@ -386,7 +398,11 @@
 				if(dashboardEditor)
 				{
 					var labelObj = $.formToJson(this);
-					dashboardEditor.insertLabel(labelObj, po.veOperationInsertType);
+					
+					if(po.veOperationEditEleAttr)
+						dashboardEditor.setLabelAttr(labelObj);
+					else
+						dashboardEditor.insertLabel(labelObj, po.veOperationInsertType);
 				}
 			}
 			catch(e)
@@ -491,6 +507,10 @@
 			dashboardEditor.i18n.noSelectablePrevElement="<@spring.message code='dashboard.opt.tip.noSelectablePrevElement' />";
 			dashboardEditor.i18n.noSelectableChildElement="<@spring.message code='dashboard.opt.tip.noSelectableChildElement' />";
 			dashboardEditor.i18n.noSelectableParentElement="<@spring.message code='dashboard.opt.tip.noSelectableParentElement' />";
+			dashboardEditor.i18n.imgEleRequired = "<@spring.message code='dashboard.opt.tip.imgEleRequired' />";
+			dashboardEditor.i18n.hyperlinkEleRequired = "<@spring.message code='dashboard.opt.tip.hyperlinkEleRequired' />";
+			dashboardEditor.i18n.videoEleRequired = "<@spring.message code='dashboard.opt.tip.videoEleRequired' />";
+			dashboardEditor.i18n.labelEleRequired = "<@spring.message code='dashboard.opt.tip.labelEleRequired' />";
 			dashboardEditor.tipInfo = function(msg)
 			{
 				$.tipInfo(msg);
@@ -1204,6 +1224,7 @@
 				po.veOperation = veOperation;
 				var insertType = item.attr("insertType");
 				po.veOperationInsertType = insertType;
+				po.veOperationEditEleAttr = false;
 				
 				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				
@@ -1233,16 +1254,6 @@
 					
 					dashboardEditor.insertDiv(insertType);
 				}
-				else if(veOperation == "insertLabel")
-				{
-					if(!dashboardEditor.checkInsertLabel(insertType))
-						return;
-					
-					var panel = po.element(".veditor-label-panel");
-					$.jsonToForm(po.element("form", panel), {});
-					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
-					po.resizeVisualEditorPanel(tabPane, panel);
-				}
 				else if(veOperation == "insertImage")
 				{
 					if(!dashboardEditor.checkInsertImage(insertType))
@@ -1269,6 +1280,16 @@
 						return;
 					
 					var panel = po.element(".veditor-video-panel");
+					$.jsonToForm(po.element("form", panel), {});
+					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+					po.resizeVisualEditorPanel(tabPane, panel);
+				}
+				else if(veOperation == "insertLabel")
+				{
+					if(!dashboardEditor.checkInsertLabel(insertType))
+						return;
+					
+					var panel = po.element(".veditor-label-panel");
 					$.jsonToForm(po.element("form", panel), {});
 					panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 					po.resizeVisualEditorPanel(tabPane, panel);
@@ -1310,6 +1331,7 @@
 		$("<li veOperation='editStyle' class='quick-opt' auto-close-prevent='veditor-style-panel' />").html("<div><@spring.message code='dashboard.opt.edit.style' /></div>").appendTo(editMenu);
 		$("<li veOperation='editChartTheme' class='quick-opt' auto-close-prevent='veditor-chartTheme-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartTheme' /></div>").appendTo(editMenu);
 		$("<li veOperation='editChartOptions' class='quick-opt' auto-close-prevent='veditor-chartOptions-panel' />").html("<div><@spring.message code='dashboard.opt.edit.chartOptions' /></div>").appendTo(editMenu);
+		$("<li veOperation='editEleAttr' class='quick-opt' auto-close-prevent='veditor-panel' />").html("<div><@spring.message code='dashboard.opt.edit.eleAttr' /></div>").appendTo(editMenu);
 		$("<li veOperation='editContent' class='quick-opt' auto-close-prevent='veditor-content-panel' />").html("<div><@spring.message code='dashboard.opt.edit.content' /></div>").appendTo(editMenu);
 		editMenu.appendTo(editGroup).menu(
 		{
@@ -1402,6 +1424,42 @@
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
 						po.element("textarea[name='content']", panel).val(dashboardEditor.getElementText()).focus();
+					}
+					else if(veOperation == "editEleAttr")
+					{
+						po.element(".veditor-panel").hide();
+						
+						var panel = null;
+						
+						if(dashboardEditor.isImage())
+						{
+							panel = po.element(".veditor-image-panel");
+							$.jsonToForm(po.element("form", panel), dashboardEditor.getImageAttr());
+						}
+						else if(dashboardEditor.isHyperlink())
+						{
+							panel = po.element(".veditor-hyperlink-panel");
+							$.jsonToForm(po.element("form", panel), dashboardEditor.getHyperlinkAttr());
+						}
+						else if(dashboardEditor.isVideo())
+						{
+							panel = po.element(".veditor-video-panel");
+							$.jsonToForm(po.element("form", panel), dashboardEditor.getVideoAttr());
+						}
+						else if(dashboardEditor.isLabel())
+						{
+							panel = po.element(".veditor-label-panel");
+							$.jsonToForm(po.element("form", panel), dashboardEditor.getLabelAttr());
+						}
+						else
+							$.tipInfo("<@spring.message code='dashboard.opt.edit.eleAttr.eleRequired' />");
+						
+						if(panel)
+						{
+							po.veOperationEditEleAttr = true;
+							panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
+							po.resizeVisualEditorPanel(tabPane, panel);
+						}
 					}
 				}
 			}
