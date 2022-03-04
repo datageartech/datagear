@@ -58,6 +58,13 @@ public class DbVersionManager extends AbstractVersionContentReader
 	/** 数据库SQL文件中版本号注释结尾标识 */
 	public static final String VERSION_LINE_SUFFIX = "]";
 
+	/**
+	 * 低于此版本将不支持自动升级。
+	 * 在3.0.0版本，整理了历届版本的SQL变更记录，合并为2.13.0版本SQL（详见：org/datagear/management/ddl/datagear.sql），
+	 * 因此，低于2.13.0版本的程序，必须先下载2.13.0版程序，使数据库自动升级至2.13.0版本，然后再下载高于2.13.0版本的程序，才能正确自动升级。
+	 */
+	public static final Version UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN = Version.valueOf("2.13.0");
+
 	public static final String DEFAULT_VERSION_TABLE_NAME = "DATAGEAR_VERSION";
 
 	private String sqlScriptLocation = SQL_SCRIPT_RESOURCE;
@@ -196,6 +203,17 @@ public class DbVersionManager extends AbstractVersionContentReader
 			if (LOGGER.isWarnEnabled())
 				LOGGER.warn("The database may not be initialized, the current version will be set to [" + current
 						+ "] for full upgrade", e);
+		}
+
+		// 自动升级不兼容的版本
+		if (current.isHigherThan(Version.ZERO_VERSION) && current.isLowerThan(UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN))
+		{
+			throw new DbVersionManagerException("Upgrade lower than " + Global.PRODUCT_NAME_EN + "-"
+					+ UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString() + " NOT support, you MUST run "
+					+ Global.PRODUCT_NAME_EN + "-" + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
+					+ " for upgrading version to " + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
+					+ " first, then shutdown it, then run " + Global.PRODUCT_NAME_EN + "-"
+					+ Global.VERSION);
 		}
 
 		if (LOGGER.isInfoEnabled())
