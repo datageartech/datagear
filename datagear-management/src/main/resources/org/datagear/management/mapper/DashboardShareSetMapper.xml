@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.DashboardShareSet">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_DASHBOARD_SHARE_SET
+			(
+			DBSS_ID, DBSS_ENABLE_PASSWORD, DBSS_PASSWORD
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.enablePassword, jdbcType=VARCHAR}, #{entity.password}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_DASHBOARD_SHARE_SET SET
+			DBSS_ENABLE_PASSWORD = #{entity.enablePassword, jdbcType=VARCHAR},
+			DBSS_PASSWORD = #{entity.password}
+		WHERE
+			DBSS_ID = #{entity.id}
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM DATAGEAR_DASHBOARD_SHARE_SET
+		WHERE
+			DBSS_ID = #{id}
+	</delete>
+	
+	<select id="getById" resultType="org.datagear.management.domain.DashboardShareSet">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="query" resultType="org.datagear.management.domain.DashboardShareSet">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+		<include refid="common.queryOrder" />
+	</select>
+	
+	<select id="pagingQueryCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+	</select>
+	
+	<select id="pagingQuery" resultType="org.datagear.management.domain.DashboardShareSet">
+		<include refid="common.pagingQueryHead" />
+			SELECT
+				T.*
+			FROM
+				(<include refid="queryView" />) T
+			WHERE
+				<include refid="queryCondition" />
+			<include refid="common.queryOrder" />
+		<include refid="common.pagingQueryFoot" />
+	</select>
+	
+	<sql id="queryView">
+		SELECT
+			T.DBSS_ID AS ${_iq_}id${_iq_},
+			T.DBSS_ENABLE_PASSWORD AS ${_iq_}enablePassword${_iq_},
+			T.DBSS_PASSWORD AS ${_iq_}password${_iq_}
+		FROM
+			DATAGEAR_DASHBOARD_SHARE_SET T
+	</sql>
+	
+	<sql id="queryCondition">
+		1 = 1
+	</sql>
+</mapper>

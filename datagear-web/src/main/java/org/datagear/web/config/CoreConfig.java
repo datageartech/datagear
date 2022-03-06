@@ -50,6 +50,7 @@ import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationListener;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.CreateUserEntityService;
+import org.datagear.management.service.DashboardShareSetService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.DataSetResDirectoryService;
@@ -68,6 +69,8 @@ import org.datagear.management.service.impl.AuthorizationListenerAware;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
 import org.datagear.management.service.impl.BundleAnalysisProjectAuthorizationListener;
 import org.datagear.management.service.impl.BundleAuthorizationListener;
+import org.datagear.management.service.impl.DashboardSharePasswordCrypto;
+import org.datagear.management.service.impl.DashboardShareSetServiceImpl;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
 import org.datagear.management.service.impl.DataSetResDirectoryServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
@@ -106,6 +109,7 @@ import org.datagear.web.json.jackson.ObjectMapperBuilder.JsonSerializerConfig;
 import org.datagear.web.security.UserPasswordEncoderImpl;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.util.ChangelogResolver;
+import org.datagear.web.util.DashboardSharePasswordCryptoImpl;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.SqlDriverChecker;
@@ -613,6 +617,21 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 				this.htmlTplDashboardWidgetRenderer(), this.templateDashboardWidgetResManager(),
 				this.analysisProjectService(), this.userService());
 
+		return bean;
+	}
+
+	@Bean
+	public DashboardShareSetService dashboardShareSetService()
+	{
+		DashboardShareSetService bean = new DashboardShareSetServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
+				this.dashboardSharePasswordCrypto());
+		return bean;
+	}
+
+	@Bean
+	public DashboardSharePasswordCrypto dashboardSharePasswordCrypto()
+	{
+		DashboardSharePasswordCrypto bean = new DashboardSharePasswordCryptoImpl();
 		return bean;
 	}
 

@@ -61,7 +61,12 @@ selectOperation 是否选择操作，允许为null
 					<button type="button" class="copyShowURLDelegation" style="display:none;">&nbsp;</button>
 				</div>
 				<#if !(currentUser.anonymous)>
-				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<div class="shareGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
+					<button type="button" class="shareButton"><@spring.message code='share' /></button>
+					<select class="shareGroupSelect">
+						<option value="shareSet"><@spring.message code='dashboard.shareSet' /></option>
+					</select>
+				</div>
 				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<input name="exportButton" type="button" value="<@spring.message code='export' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
@@ -189,6 +194,31 @@ selectOperation 是否选择操作，允许为null
 		});
 	}
 	
+	po.element(".shareGroupSelect").selectmenu(
+	{
+		appendTo: po.element(),
+		position: { my: "right top", at: "right bottom+2" },
+		classes:
+		{
+	          "ui-selectmenu-button": "ui-button-icon-only",
+	          "ui-selectmenu-menu": "ui-widget-shadow ui-widget ui-widget-content"
+	    },
+		select: function(event, ui)
+    	{
+    		var action = $(ui.item).attr("value");
+    		
+    		if(action == "shareSet")
+    		{
+    			po.executeOnSelect(function(row)
+  				{
+    				var options = { data: { id: row.id } };
+  					po.open(po.url("shareSet"), options);
+  				});
+    		}
+    	}
+	});
+	po.element(".shareGroup").controlgroup();
+	
 	po.initDataFilter();
 	
 	po.currentUser = <@writeJson var=currentUser />;
@@ -230,7 +260,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=shareButton]").click(function()
+	po.element(".shareButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{

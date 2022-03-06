@@ -47,9 +47,11 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.DashboardShareSet;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
+import org.datagear.management.service.DashboardShareSetService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
@@ -111,6 +113,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 			+ "EDIT_HTML_INFO";
 
+	/**
+	 * 看板分享密码占位。
+	 */
+	public static final String DASHBOARD_SHARE_SET_PASSWORD_PLACEHOLDER = "DSP-PLACEHOLDER-"
+			+ IDUtil.randomIdOnTime20();
+
 	static
 	{
 		AuthorizationResourceMetas.registerForShare(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE,
@@ -126,6 +134,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	@Autowired
 	private AnalysisProjectService analysisProjectService;
+
+	@Autowired
+	private DashboardShareSetService dashboardShareSetService;
 
 	@Autowired
 	private HtmlChartWidgetJsonWriter htmlChartWidgetJsonWriter;
@@ -175,6 +186,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
 	{
 		this.analysisProjectService = analysisProjectService;
+	}
+
+	public DashboardShareSetService getDashboardShareSetService()
+	{
+		return dashboardShareSetService;
+	}
+
+	public void setDashboardShareSetService(DashboardShareSetService dashboardShareSetService)
+	{
+		this.dashboardShareSetService = dashboardShareSetService;
 	}
 
 	public HtmlChartWidgetJsonWriter getHtmlChartWidgetJsonWriter()
@@ -918,6 +939,48 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return pagingData;
 	}
 	
+	@RequestMapping("/shareSet")
+	public String shareSet(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@RequestParam("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		DashboardShareSet dashboardShareSet = this.dashboardShareSetService.getById(id);
+
+		model.addAttribute("dashboard", dashboard);
+		model.addAttribute("dashboardShareSet", dashboardShareSet);
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardShareSet.dashboardShareSet");
+		model.addAttribute(KEY_FORM_ACTION, "saveShareSet");
+
+		return "/dashboard/dashboard_share_set";
+	}
+
+	@RequestMapping(value = "/saveShareSet", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveShareSet(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody DashboardShareSetForm form) throws Exception
+	{
+		if (isEmpty(form.getId()))
+			throw new IllegalInputException();
+
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user,
+				form.getId());
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		this.dashboardShareSetService.save(form);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request);
+	}
+
 	/**
 	 * 展示看板首页。
 	 * 
@@ -2161,6 +2224,29 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			{
 				this.placeholderSources = placeholderSources;
 			}
+		}
+	}
+
+	public static class DashboardShareSetForm extends DashboardShareSet implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 确认密码 */
+		private String confirmPassword = "";
+
+		public DashboardShareSetForm()
+		{
+			super();
+		}
+
+		public String getConfirmPassword()
+		{
+			return confirmPassword;
+		}
+
+		public void setConfirmPassword(String confirmPassword)
+		{
+			this.confirmPassword = confirmPassword;
 		}
 	}
 }
