@@ -952,6 +952,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		DashboardShareSet dashboardShareSet = this.dashboardShareSetService.getById(id);
 
+		if (dashboardShareSet == null)
+		{
+			dashboardShareSet = new DashboardShareSet();
+			dashboardShareSet.setEnablePassword(false);
+			dashboardShareSet.setAnonymousPassword(false);
+		}
+
 		model.addAttribute("dashboard", dashboard);
 		model.addAttribute("dashboardShareSet", dashboardShareSet);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardShareSet.dashboardShareSet");
@@ -963,7 +970,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/saveShareSet", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveShareSet(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DashboardShareSetForm form) throws Exception
+			@RequestBody DashboardShareSet form) throws Exception
 	{
 		if (isEmpty(form.getId()))
 			throw new IllegalInputException();
@@ -2224,29 +2231,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			{
 				this.placeholderSources = placeholderSources;
 			}
-		}
-	}
-
-	public static class DashboardShareSetForm extends DashboardShareSet implements ControllerForm
-	{
-		private static final long serialVersionUID = 1L;
-
-		/** 确认密码 */
-		private String confirmPassword = "";
-
-		public DashboardShareSetForm()
-		{
-			super();
-		}
-
-		public String getConfirmPassword()
-		{
-			return confirmPassword;
-		}
-
-		public void setConfirmPassword(String confirmPassword)
-		{
-			this.confirmPassword = confirmPassword;
 		}
 	}
 }

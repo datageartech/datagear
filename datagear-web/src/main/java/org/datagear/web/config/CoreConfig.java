@@ -130,6 +130,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
@@ -631,7 +633,11 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public DashboardSharePasswordCrypto dashboardSharePasswordCrypto()
 	{
-		DashboardSharePasswordCrypto bean = new DashboardSharePasswordCryptoImpl();
+		TextEncryptor textEncryptor = Encryptors.text(
+				this.applicationProperties.getDashboardSharePasswordCryptoSecretKey(),
+				this.applicationProperties.getDashboardSharePasswordCryptoSalt());
+
+		DashboardSharePasswordCrypto bean = new DashboardSharePasswordCryptoImpl(textEncryptor);
 		return bean;
 	}
 

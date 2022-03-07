@@ -19,8 +19,11 @@ public class DashboardShareSet extends AbstractStringIdEntity implements Cloneab
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 是否弃用分享密码 */
+	/** 是否启用分享密码 */
 	private boolean enablePassword = false;
+
+	/** 仅匿名用户需要输入分享密码 */
+	private boolean anonymousPassword = false;
 
 	/** 分享密码 */
 	private String password = "";
@@ -43,6 +46,16 @@ public class DashboardShareSet extends AbstractStringIdEntity implements Cloneab
 	public void setEnablePassword(boolean enablePassword)
 	{
 		this.enablePassword = enablePassword;
+	}
+
+	public boolean isAnonymousPassword()
+	{
+		return anonymousPassword;
+	}
+
+	public void setAnonymousPassword(boolean anonymousPassword)
+	{
+		this.anonymousPassword = anonymousPassword;
 	}
 
 	/**

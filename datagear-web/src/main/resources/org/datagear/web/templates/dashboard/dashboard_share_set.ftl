@@ -40,20 +40,36 @@ readonly 是否只读操作，允许为null
 		   			</div>
 				</div>
 			</div>
-			<div class="form-item">
+			<div class="form-item enablePasswordAware">
+				<div class="form-item-label">
+					<label title="<@spring.message code='dashboardShareSet.anonymousPassword.desc' />">
+						<@spring.message code='dashboardShareSet.anonymousPassword' />
+					</label>
+				</div>
+				<div class="form-item-value">
+					<div class="anonymousPasswordRadios">
+					<label for="${pageId}-anonymousPassword-yes"><@spring.message code='yes' /></label>
+		   			<input type="radio" id="${pageId}-anonymousPassword-yes" name="anonymousPassword" value="true" <#if (dashboardShareSet.anonymousPassword)!false>checked="checked"</#if> />
+					<label for="${pageId}-anonymousPassword-no"><@spring.message code='no' /></label>
+		   			<input type="radio" id="${pageId}-anonymousPassword-no" name="anonymousPassword" value="false" <#if !((dashboardShareSet.anonymousPassword)!false)>checked="checked"</#if> />
+		   			</div>
+				</div>
+			</div>
+			<div class="form-item enablePasswordAware">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboardShareSet.password' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="password" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
+					<input type="password" name="password" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="new-password" />
+					<button class="togglePasswordBtn" type="button"><@spring.message code='show' /></button>
 				</div>
 			</div>
-			<div class="form-item">
+			<div class="form-item form-item-confirmPassword enablePasswordAware">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboardShareSet.confirmPassword' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="confirmPassword" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
+					<input type="password" name="confirmPassword" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="new-password" />
 				</div>
 			</div>
 		</div>
@@ -70,6 +86,7 @@ readonly 是否只读操作，允许为null
 {
 	$.initButtons(po.element());
 	po.element(".enablePasswordRadios").checkboxradiogroup();
+	po.element(".anonymousPasswordRadios").checkboxradiogroup();
 	
 	po.url = function(action)
 	{
@@ -78,6 +95,38 @@ readonly 是否只读操作，允许为null
 	
 	//保存无需刷新列表
 	po.refreshParent = null;
+	
+	po.element("input[name='enablePassword']").on("click", function()
+	{
+		var enablePassword = (po.element("input[name='enablePassword']:checked").val() == "true");
+		if(enablePassword)
+			po.element(".enablePasswordAware").removeClass("ui-state-disabled");
+		else
+			po.element(".enablePasswordAware").addClass("ui-state-disabled");
+	});
+	po.element("input[name='enablePassword']:checked").click();
+	
+	po.element(".togglePasswordBtn").click(function()
+	{
+		var psdInput = po.element("input[name='password']");
+		var confirmPsdInput = po.element("input[name='confirmPassword']");
+		var isShow = (psdInput.attr("type") == "text");
+		
+		if(!isShow)
+		{
+			psdInput.attr("type", "text");
+			confirmPsdInput.attr("type", "text");
+			po.element(".form-item-confirmPassword").hide();
+			$(this).text("<@spring.message code='hide' />");
+		}
+		else
+		{
+			psdInput.attr("type", "password");
+			confirmPsdInput.attr("type", "password");
+			po.element(".form-item-confirmPassword").show();
+			$(this).text("<@spring.message code='show' />");
+		}
+	});
 	
 	<#if !readonly>
 	po.form().validate(
@@ -94,6 +143,10 @@ readonly 是否只读操作，允许为null
 		{
 			$(form).ajaxSubmitJson(
 			{
+				handleData: function(data)
+				{
+					data.confirmPassword = undefined;
+				},
 				success : function(operationMessage)
 				{
 					po.pageParamCallAfterSave(true, operationMessage.data);

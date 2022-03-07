@@ -4,28 +4,31 @@
 <mapper namespace="org.datagear.management.domain.DashboardShareSet">
 
 	<insert id="insert">
-		INSERT INTO DATAGEAR_DASHBOARD_SHARE_SET
+		INSERT INTO DATAGEAR_DB_SHARE_SET
 			(
-			DBSS_ID, DBSS_ENABLE_PASSWORD, DBSS_PASSWORD
+			DSS_ID, DSS_ENABLE_PSD,
+			DSS_ANONYMOUS_PSD, DSS_PSD
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.enablePassword, jdbcType=VARCHAR}, #{entity.password}
+			#{entity.id}, #{entity.enablePassword, jdbcType=VARCHAR},
+			#{entity.anonymousPassword, jdbcType=VARCHAR}, #{entity.password}
 			)
 	</insert>
 	
 	<update id="update">
-		UPDATE DATAGEAR_DASHBOARD_SHARE_SET SET
-			DBSS_ENABLE_PASSWORD = #{entity.enablePassword, jdbcType=VARCHAR},
-			DBSS_PASSWORD = #{entity.password}
+		UPDATE DATAGEAR_DB_SHARE_SET SET
+			DSS_ENABLE_PSD = #{entity.enablePassword, jdbcType=VARCHAR},
+			DSS_ANONYMOUS_PSD = #{entity.anonymousPassword, jdbcType=VARCHAR},
+			DSS_PSD = #{entity.password}
 		WHERE
-			DBSS_ID = #{entity.id}
+			DSS_ID = #{entity.id}
 	</update>
 	
 	<delete id="deleteById">
-		DELETE FROM DATAGEAR_DASHBOARD_SHARE_SET
+		DELETE FROM DATAGEAR_DB_SHARE_SET
 		WHERE
-			DBSS_ID = #{id}
+			DSS_ID = #{id}
 	</delete>
 	
 	<select id="getById" resultType="org.datagear.management.domain.DashboardShareSet">
@@ -70,11 +73,12 @@
 	
 	<sql id="queryView">
 		SELECT
-			T.DBSS_ID AS ${_iq_}id${_iq_},
-			T.DBSS_ENABLE_PASSWORD AS ${_iq_}enablePassword${_iq_},
-			T.DBSS_PASSWORD AS ${_iq_}password${_iq_}
+			T.DSS_ID AS ${_iq_}id${_iq_},
+			T.DSS_ENABLE_PSD AS ${_iq_}enablePassword${_iq_},
+			T.DSS_ANONYMOUS_PSD AS ${_iq_}anonymousPassword${_iq_},
+			T.DSS_PSD AS ${_iq_}password${_iq_}
 		FROM
-			DATAGEAR_DASHBOARD_SHARE_SET T
+			DATAGEAR_DB_SHARE_SET T
 	</sql>
 	
 	<sql id="queryCondition">

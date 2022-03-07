@@ -132,6 +132,14 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${service.cache.spec}")
 	private String serviceCacheSpec;
 
+	/** 看板分享密码加密密钥 */
+	@Value("${dashboardSharePassword.crypto.secretKey}")
+	private String dashboardSharePasswordCryptoSecretKey;
+
+	/** 看板分享密码加密盐值 */
+	@Value("${dashboardSharePassword.crypto.salt}")
+	private String dashboardSharePasswordCryptoSalt;
+
 	public ApplicationProperties()
 	{
 		super();
@@ -405,5 +413,25 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setServiceCacheSpec(String serviceCacheSpec)
 	{
 		this.serviceCacheSpec = serviceCacheSpec;
+	}
+
+	public String getDashboardSharePasswordCryptoSecretKey()
+	{
+		return dashboardSharePasswordCryptoSecretKey;
+	}
+
+	public void setDashboardSharePasswordCryptoSecretKey(String dashboardSharePasswordCryptoSecretKey)
+	{
+		this.dashboardSharePasswordCryptoSecretKey = dashboardSharePasswordCryptoSecretKey;
+	}
+
+	public String getDashboardSharePasswordCryptoSalt()
+	{
+		return dashboardSharePasswordCryptoSalt;
+	}
+
+	public void setDashboardSharePasswordCryptoSalt(String dashboardSharePasswordCryptoSalt)
+	{
+		this.dashboardSharePasswordCryptoSalt = dashboardSharePasswordCryptoSalt;
 	}
 }
