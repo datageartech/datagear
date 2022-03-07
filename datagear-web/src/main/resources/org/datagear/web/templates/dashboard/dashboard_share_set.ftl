@@ -23,7 +23,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dashboard-share-set">
-	<form id="${pageId}-form" action="${contextPath}/dashboard/${formAction}" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/dashboard/${formAction}" method="POST" autocomplete="off">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(dashboard.id)!''}" />
@@ -60,7 +60,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboardShareSet.password' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="password" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="new-password" />
+					<input type="password" name="password" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="off" />
 					<button class="togglePasswordBtn" type="button"><@spring.message code='show' /></button>
 				</div>
 			</div>
@@ -69,7 +69,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboardShareSet.confirmPassword' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="confirmPassword" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="new-password" />
+					<input type="password" name="confirmPassword" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="off" />
 				</div>
 			</div>
 		</div>
