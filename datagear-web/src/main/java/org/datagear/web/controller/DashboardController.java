@@ -1224,17 +1224,22 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		{
 			// 可视编辑模式时的新增操作
 			if (isDashboardShowForEditParam(request))
-			{
-				dashboardWidget = new HtmlTplDashboardWidgetEntity(id,
-						HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0],
-						this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer(),
-						this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager(), id, user);
-
-				dashboardWidget.setDataPermission(Authorization.PERMISSION_EDIT_START);
-			}
+				dashboardWidget = createMockHtmlTplDashboardWidgetEntity(id, user);
 			else
 				throw new RecordNotFoundException();
 		}
+
+		return dashboardWidget;
+	}
+
+	protected HtmlTplDashboardWidgetEntity createMockHtmlTplDashboardWidgetEntity(String id, User createUser)
+	{
+		HtmlTplDashboardWidgetEntity dashboardWidget = new HtmlTplDashboardWidgetEntity(id,
+				HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0],
+				this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer(),
+				this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager(), id, createUser);
+
+		dashboardWidget.setDataPermission(Authorization.PERMISSION_EDIT_START);
 
 		return dashboardWidget;
 	}
@@ -1364,8 +1369,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboardInfo == null)
 			throw new RecordNotFoundException();
 
-		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user,
-				dashboardInfo.getDashboardWidgetId());
+		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidget(user, dashboardInfo.getDashboardWidgetId());
+
+		// 新建看板的可视编辑模式时还没有看板部件，这里需mock一个保证逻辑正确
+		if (dashboardWidget == null)
+			dashboardWidget = createMockHtmlTplDashboardWidgetEntity(dashboardInfo.getDashboardWidgetId(), user);
 
 		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
