@@ -47,6 +47,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DashboardShareSet;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
@@ -54,7 +55,6 @@ import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DashboardShareSetService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
-import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
 import org.datagear.util.Global;
@@ -1014,7 +1014,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		else
 		{
 			User user = WebUtils.getUser(request, response);
-			HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(user, id);
+			HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user, id);
 			String firstTemplate = dashboardWidget.getFirstTemplate();
 
 			// 如果首页模板是在嵌套路径下，则应重定向到具体路径，避免页面内以相对路径引用的资源找不到
@@ -1028,7 +1028,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			else
 			{
 				showDashboard(request, response, model, user, dashboardWidget, firstTemplate,
-						isDashboardShowForEdit(request, dashboardWidget, user));
+						isDashboardShowForEditRequest(request, dashboardWidget));
 			}
 		}
 	}
@@ -1048,14 +1048,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(user, id);
+
+		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user, id);
 		String resName = resolvePathAfter(request, "/show/" + id + "/");
 
 		if (StringUtil.isEmpty(resName))
 			throw new FileNotFoundException(resName);
 
 		resName = WebUtils.decodeURL(resName);
-		boolean isShowForEdit = isDashboardShowForEdit(request, dashboardWidget, user);
+		boolean isShowForEdit = isDashboardShowForEditRequest(request, dashboardWidget);
 
 		if (dashboardWidget.isTemplate(resName) || isShowForEdit)
 		{
@@ -1131,6 +1132,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @param user
 	 * @param dashboardWidget
 	 * @param template
+	 * @param isShowForEdit
 	 * @throws Exception
 	 */
 	protected void showDashboard(HttpServletRequest request, HttpServletResponse response,
@@ -1202,33 +1204,34 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	/**
 	 * 获取看板展示操作时使用的看板部件。
 	 * <p>
-	 * 此方法不会返回{@code null}，如果不存在，此方法返回一个仿造看板部件，以解决展示操作时看板部件必须已存在的问题。
+	 * 如果不存在，此方法返回一个仿造看板部件，以解决展示操作时看板部件必须已存在的问题（当可视编辑模式时的新建看板操作）。
 	 * </p>
 	 * 
-	 * @param currentUser
+	 * @param request
+	 * @param user
 	 * @param id
 	 * @return
 	 */
-	protected HtmlTplDashboardWidgetEntity getHtmlTplDashboardWidgetEntityForShow(User currentUser, String id)
+	protected HtmlTplDashboardWidgetEntity getHtmlTplDashboardWidgetEntityForShow(HttpServletRequest request,
+			User user, String id)
 	{
 		if (StringUtil.isEmpty(id))
 			throw new IllegalInputException();
 
-		HtmlTplDashboardWidgetEntity dashboardWidget = null;
-
-		try
-		{
-			dashboardWidget = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidget(currentUser, id);
-		}
-		catch(PermissionDeniedException t)
-		{
-		}
+		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidget(user, id);
 
 		if (dashboardWidget == null)
 		{
-			dashboardWidget = new HtmlTplDashboardWidgetEntity(id, HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0],
-					this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer(),
-					this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager(), id, currentUser);
+			// 可视编辑模式时的新增操作
+			if (isDashboardShowForEditParam(request))
+			{
+				dashboardWidget = new HtmlTplDashboardWidgetEntity(id,
+						HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0],
+						this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer(),
+						this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager(), id, user);
+			}
+			else
+				throw new RecordNotFoundException();
 		}
 
 		return dashboardWidget;
@@ -1301,15 +1304,18 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				escapeDashboardRenderContextAttrValue(placeholderSources));
 	}
 
-	protected boolean isDashboardShowForEdit(HttpServletRequest request, HtmlTplDashboardWidgetEntity dashboardWidget,
-			User user)
+	protected boolean isDashboardShowForEditParam(HttpServletRequest request)
 	{
-		User createUser = dashboardWidget.getCreateUser();
 		String editTemplate = request.getParameter(DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE);
+		// 有编辑模板请求参数
+		return (("true".equalsIgnoreCase(editTemplate) || "1".equals(editTemplate)));
+	}
 
-		// 有编辑模板请求参数、且当前用户是看板创建者
-		return (("true".equalsIgnoreCase(editTemplate) || "1".equals(editTemplate))
-				&& user.getId().equals(createUser != null ? createUser.getId() : null));
+	protected boolean isDashboardShowForEditRequest(HttpServletRequest request,
+			HtmlTplDashboardWidgetEntity dashboardWidget)
+	{
+		// 有编辑模板请求参数、且有编辑权限
+		return (isDashboardShowForEditParam(request) && Authorization.canEdit(dashboardWidget.getDataPermission()));
 	}
 
 	/**
@@ -1356,7 +1362,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboardInfo == null)
 			throw new RecordNotFoundException();
 
-		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(user,
+		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user,
 				dashboardInfo.getDashboardWidgetId());
 
 		// 确保看板创建用户对看板模板内定义的图表有权限

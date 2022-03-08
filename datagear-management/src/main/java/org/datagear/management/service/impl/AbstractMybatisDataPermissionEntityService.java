@@ -178,6 +178,9 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	{
 		int permission = getPermission(user, id);
 
+		if (PERMISSION_NOT_FOUND == permission)
+			return null;
+
 		if (!Authorization.canRead(permission))
 			throw new PermissionDeniedException();
 
@@ -193,6 +196,9 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	public T getByIdForEdit(User user, ID id) throws PermissionDeniedException
 	{
 		int permission = getPermission(user, id);
+
+		if (PERMISSION_NOT_FOUND == permission)
+			return null;
 
 		if (!Authorization.canEdit(permission))
 			throw new PermissionDeniedException();
@@ -320,7 +326,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	/**
 	 * 获取权限列表。
 	 * <p>
-	 * 对于没有授权的，将返回{@linkplain #PERMISSION_NOT_FOUND}权限值。
+	 * 如果指定ID的记录不存在，对应权限值将返回{@linkplain #PERMISSION_NOT_FOUND}权限值。
 	 * </p>
 	 * 
 	 * @param user

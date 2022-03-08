@@ -138,6 +138,9 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 
 	/**
 	 * 授权根据ID获取。
+	 * <p>
+	 * 记录未找到将返回{@code null}，没有读权限则抛出{@linkplain PermissionDeniedException}。
+	 * </p>
 	 * 
 	 * @param user
 	 *            操作用户
@@ -149,6 +152,9 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 
 	/**
 	 * 授权根据ID获取，并用于编辑操作。
+	 * <p>
+	 * 记录未找到将返回{@code null}，没有编辑权限则抛出{@linkplain PermissionDeniedException}。
+	 * </p>
 	 * 
 	 * @param user
 	 *            操作用户
