@@ -1229,6 +1229,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 						HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0],
 						this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer(),
 						this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager(), id, user);
+
+				dashboardWidget.setDataPermission(Authorization.PERMISSION_EDIT_START);
 			}
 			else
 				throw new RecordNotFoundException();
