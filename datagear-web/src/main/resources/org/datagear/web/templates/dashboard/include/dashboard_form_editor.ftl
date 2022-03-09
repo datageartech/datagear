@@ -279,9 +279,7 @@
 				if(dashboardEditor)
 				{
 					var gridLayoutObj = $.formToJson(this);
-					var rows = parseInt(gridLayoutObj.rows);
-					var columns = parseInt(gridLayoutObj.columns);
-					dashboardEditor.insertGridLayout(rows, columns, (gridLayoutObj.fillParent == "true"), po.veOperationInsertType);
+					dashboardEditor.insertGridLayout(gridLayoutObj, po.veOperationInsertType);
 				}
 			}
 			catch(e)

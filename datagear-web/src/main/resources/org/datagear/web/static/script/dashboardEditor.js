@@ -617,16 +617,17 @@
 	/**
 	 * 插入网格布局元素。
 	 * 
-	 * @param rows 网格行数
-	 * @param columns 网格列数
-	 * @param fillParent 是否填满父元素
+	 * @param gridAttr 网格设置，格式为：{ rows: 数值或数值字符串, columns: 数值或数值字符串, fillParent: 布尔值或布尔值字符串 }
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
-	editor.insertGridLayout = function(rows, columns, fillParent, insertType, refEle)
+	editor.insertGridLayout = function(gridAttr, insertType, refEle)
 	{
 		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
+		
+		var rows = (!chartFactory.isNumber(gridAttr.rows) ? parseInt(gridAttr.rows) : gridAttr.rows);
+		var columns = (!chartFactory.isNumber(gridAttr.columns) ? parseInt(gridAttr.columns) : gridAttr.columns);
 		
 		//不能使用"<div />"，生成的源码格式不对
 		var div = $("<div></div>");
@@ -634,14 +635,17 @@
 		var styleStr = "display:grid;";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
-		if(fillParent)
+		if(gridAttr.fillParent === "true" || gridAttr.fillParent === true)
 			styleStr += "position:absolute;left:0;top:0;right:0;bottom:0;";
 		else if(insertParentEle.is("body"))
 			styleStr += "width:100%;height:300px;";
 		else
 			styleStr += "width:100%;height:100%;";
 		
-		styleStr += "grid-template-columns:repeat("+columns+", 1fr);grid-template-rows:repeat("+rows+", 1fr);";
+		if(rows > 0)
+			styleStr += "grid-template-rows:repeat("+rows+", 1fr);";
+		if(columns > 0)
+			styleStr += "grid-template-columns:repeat("+columns+", 1fr);";
 		
 		div.attr("style", styleStr);
 		
