@@ -161,7 +161,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 						"/chart/show/**", "/chart/showData", "/dashboard/show/**",
 						"/dashboard/showData", "/dashboard/loadChart",
 						"/dashboard/heartbeat",
-						"/dashboard/serverTime.js")
+						"/dashboard/serverTime.js", "/dashboard/auth/**")
 				.access(AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
 				// 展示图表和看板

@@ -55,6 +55,7 @@ import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DashboardShareSetService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
+import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
 import org.datagear.util.Global;
@@ -118,6 +119,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 */
 	public static final String DASHBOARD_SHARE_SET_PASSWORD_PLACEHOLDER = "DSP-PLACEHOLDER-"
 			+ IDUtil.randomIdOnTime20();
+
+	public static final String DASHBOARD_SHOW_AUTH_PARAM_NAME = "name";
 
 	static
 	{
@@ -989,6 +992,71 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	}
 
 	/**
+	 * 看板展示认证页面。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param id
+	 *            看板ID
+	 * @param name
+	 *            重定向的看板资源名，允许为{@code null}，格式为："abc.html"、"def/def.js"、"detail/detail.html?param=0"
+	 * @throws Exception
+	 */
+	@RequestMapping("/auth/{id}")
+	public String showAuth(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@PathVariable("id") String id,
+			@RequestParam(value = DASHBOARD_SHOW_AUTH_PARAM_NAME, required = false) String name) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidget(user, id);
+
+		if (dashboardWidget == null)
+			throw new RecordNotFoundException();
+
+		if (!StringUtil.isEmpty(name))
+			name = WebUtils.decodeURL(name);
+
+		String redirectPath = WebUtils.getContextPath(request) + "/dashboard/show/" + id + "/";
+		if (!StringUtil.isEmpty(name))
+			redirectPath = FileUtil.concatPath(redirectPath, name, FileUtil.PATH_SEPARATOR_SLASH, false);
+
+		boolean authed = isShowAuthed(request, user, dashboardWidget);
+
+		model.addAttribute("id", id);
+		model.addAttribute("name", (name == null ? "" : name));
+		model.addAttribute("redirectPath", redirectPath);
+		model.addAttribute("authed", authed);
+		model.addAttribute("dashboardWidget", dashboardWidget);
+
+		return "/dashboard/dashboard_show_auth";
+	}
+
+	protected boolean isShowAuthed(HttpServletRequest request, User user, HtmlTplDashboardWidgetEntity dashboardWidget)
+	{
+		boolean authed = false;
+
+		// 有编辑权限，无需认证，应直接跳转
+		if (Authorization.canEdit(dashboardWidget.getDataPermission()))
+			authed = true;
+
+		return authed;
+	}
+
+	protected String buildShowAuthUrlForShowRequest(HttpServletRequest request, String id, String resName)
+			throws Exception
+	{
+		resName = appendRequestQueryString((resName == null ? "" : resName), request);
+
+		String authPath = WebUtils.getContextPath(request) + "/dashboard/auth/" + id + "/";
+		if (!StringUtil.isEmpty(resName))
+			authPath += "?" + DASHBOARD_SHOW_AUTH_PARAM_NAME + "=" + WebUtils.encodeURL(resName);
+
+		return authPath;
+	}
+
+	/**
 	 * 展示看板首页。
 	 * 
 	 * @param request
@@ -1015,6 +1083,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		{
 			User user = WebUtils.getUser(request, response);
 			HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user, id);
+
+			if (!isShowAuthed(request, user, dashboardWidget))
+			{
+				String authPath = buildShowAuthUrlForShowRequest(request, id, "");
+				response.sendRedirect(authPath);
+				return;
+			}
+
 			String firstTemplate = dashboardWidget.getFirstTemplate();
 
 			// 如果首页模板是在嵌套路径下，则应重定向到具体路径，避免页面内以相对路径引用的资源找不到
@@ -1056,6 +1132,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new FileNotFoundException(resName);
 
 		resName = WebUtils.decodeURL(resName);
+
+		if (!isShowAuthed(request, user, dashboardWidget))
+		{
+			String authPath = buildShowAuthUrlForShowRequest(request, id, resName);
+			response.sendRedirect(authPath);
+			return;
+		}
+
 		boolean isShowForEdit = isDashboardShowForEditRequest(request, dashboardWidget);
 
 		if (dashboardWidget.isTemplate(resName) || isShowForEdit)
@@ -1204,16 +1288,20 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	/**
 	 * 获取看板展示操作时使用的看板部件。
 	 * <p>
-	 * 如果不存在，此方法返回一个仿造看板部件，以解决展示操作时看板部件必须已存在的问题（当可视编辑模式时的新建看板操作）。
+	 * 如果是可视编辑请求，且记录不存在，此方法返回一个仿造看板部件，以解决展示操作时看板部件必须已存在的问题（当可视编辑模式时的新建看板操作）。
 	 * </p>
 	 * 
 	 * @param request
 	 * @param user
 	 * @param id
 	 * @return
+	 * @throws PermissionDeniedException
+	 *             没有权限时
+	 * @throws RecordNotFoundException
+	 *             记录不存在时
 	 */
 	protected HtmlTplDashboardWidgetEntity getHtmlTplDashboardWidgetEntityForShow(HttpServletRequest request,
-			User user, String id)
+			User user, String id) throws PermissionDeniedException, RecordNotFoundException
 	{
 		if (StringUtil.isEmpty(id))
 			throw new IllegalInputException();

@@ -9,6 +9,7 @@ package org.datagear.web.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -525,5 +526,20 @@ public class WebUtils
 			return null;
 
 		return URLDecoder.decode(url, IOUtil.CHARSET_UTF_8);
+	}
+
+	/**
+	 * 编码URL。
+	 * 
+	 * @param url
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String encodeURL(String url) throws UnsupportedEncodingException
+	{
+		if (url == null)
+			return null;
+
+		return URLEncoder.encode(url, IOUtil.CHARSET_UTF_8);
 	}
 }

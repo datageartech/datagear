@@ -514,8 +514,25 @@ public class FileUtil
 	 */
 	public static String concatPath(String parent, String child, String separator)
 	{
-		checkBackwardPath(parent);
-		checkBackwardPath(child);
+		return concatPath(parent, child, separator, true);
+	}
+
+	/**
+	 * 连接路径。
+	 * 
+	 * @param parent
+	 * @param child
+	 * @param separator
+	 * @param checkBackwardPath
+	 * @return
+	 */
+	public static String concatPath(String parent, String child, String separator, boolean checkBackwardPath)
+	{
+		if (checkBackwardPath)
+		{
+			checkBackwardPath(parent);
+			checkBackwardPath(child);
+		}
 
 		parent = trimPath(parent, separator);
 		child = trimPath(child, separator);

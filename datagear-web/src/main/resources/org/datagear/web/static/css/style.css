@@ -3729,3 +3729,36 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form-schemaGuardTest .test-result{
 	padding: 0.41em 1em;
 }
+
+.page-dashboard-show-auth{}
+.page-dashboard-show-auth .page-form{
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 30px;
+	bottom: 25%;
+	min-height: 10em;
+	display: flex;
+	align-items: center;
+    justify-content: center;
+}
+.page-dashboard-show-auth .page-form form{
+	display: inline-block;
+	width: 25rem;
+}
+.page-dashboard-show-auth .page-form .form-content .form-item-label{
+	text-align: center;
+}
+.page-dashboard-show-auth .page-form .form-content .form-item-label label{
+	padding: 0.8em 0;
+	width: 100% !important;
+}
+.page-dashboard-show-auth .page-form .form-content .form-item-value input{
+	line-height: 1.8em;
+	text-align: center;
+	width: 100% !important;
+}
+.page-dashboard-show-auth .page-form .form-foot button{
+	padding-left: 2em;
+	padding-right: 2em;
+}
