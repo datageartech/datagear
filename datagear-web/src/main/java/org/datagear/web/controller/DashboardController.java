@@ -1029,19 +1029,85 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("redirectPath", redirectPath);
 		model.addAttribute("authed", authed);
 		model.addAttribute("dashboardWidget", dashboardWidget);
+		model.addAttribute("currentUser", user.cloneNoPassword());
 
 		return "/dashboard/dashboard_show_auth";
 	}
 
+	/**
+	 * 看板展示认证校验。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param form
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/authcheck", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> showAuthCheck(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestBody ShowAuthCheckForm form) throws Exception
+	{
+		if (isEmpty(form.getId()) || form.getPassword() == null)
+			throw new IllegalInputException();
+
+		User user = WebUtils.getUser(request, response);
+		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidget(user, form.getId());
+
+		if (dashboardWidget == null)
+			throw new RecordNotFoundException();
+
+		ResponseEntity<OperationMessage> responseEntity = null;
+
+		DashboardShareSet dashboardShareSet = this.dashboardShareSetService.getById(dashboardWidget.getId());
+
+		if (dashboardShareSet == null || !dashboardShareSet.isEnablePassword())
+		{
+			responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+					ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
+		}
+		else if (form.getPassword().equals(dashboardShareSet.getPassword()))
+		{
+			getSessionDashboardShowAuthCheckManager(request, true).put(dashboardWidget.getId(), true);
+
+			responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+					ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
+		}
+		else
+		{
+			responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+					ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_FAIL));
+		}
+
+		return responseEntity;
+	}
+
+	/**
+	 * 看板展示请求是否已通过密码验证。
+	 * 
+	 * @param request
+	 * @param user
+	 * @param dashboardWidget
+	 * @return
+	 */
 	protected boolean isShowAuthed(HttpServletRequest request, User user, HtmlTplDashboardWidgetEntity dashboardWidget)
 	{
-		boolean authed = false;
-
-		// 有编辑权限，无需认证，应直接跳转
+		// 有编辑权限，无需认证
 		if (Authorization.canEdit(dashboardWidget.getDataPermission()))
-			authed = true;
+			return true;
 
-		return authed;
+		DashboardShareSet dashboardShareSet = this.dashboardShareSetService.getById(dashboardWidget.getId());
+
+		if (dashboardShareSet == null || !dashboardShareSet.isEnablePassword())
+			return true;
+
+		if (dashboardShareSet.isAnonymousPassword() && !user.isAnonymous())
+			return true;
+
+		SessionDashboardShowAuthCheckManager manager = getSessionDashboardShowAuthCheckManager(request, false);
+
+		return (manager == null ? false : manager.get(dashboardWidget.getId()));
 	}
 
 	protected String buildShowAuthUrlForShowRequest(HttpServletRequest request, String id, String resName)
@@ -1054,6 +1120,29 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			authPath += "?" + DASHBOARD_SHOW_AUTH_PARAM_NAME + "=" + WebUtils.encodeURL(resName);
 
 		return authPath;
+	}
+
+	protected SessionDashboardShowAuthCheckManager getSessionDashboardShowAuthCheckManager(HttpServletRequest request,
+			boolean nonNull)
+	{
+		HttpSession session = request.getSession();
+
+		SessionDashboardShowAuthCheckManager manager = (SessionDashboardShowAuthCheckManager) session
+				.getAttribute(SessionDashboardShowAuthCheckManager.class.getName());
+
+		if (!nonNull)
+			return manager;
+
+		synchronized (session)
+		{
+			if (manager == null)
+			{
+				manager = new SessionDashboardShowAuthCheckManager();
+				session.setAttribute(SessionDashboardShowAuthCheckManager.class.getName(), manager);
+			}
+		}
+
+		return manager;
 	}
 
 	/**
@@ -2336,6 +2425,103 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			{
 				this.placeholderSources = placeholderSources;
 			}
+		}
+	}
+
+	public static class ShowAuthCheckForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String id;
+
+		private String password;
+
+		public ShowAuthCheckForm()
+		{
+			super();
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public void setId(String id)
+		{
+			this.id = id;
+		}
+
+		public String getPassword()
+		{
+			return password;
+		}
+
+		public void setPassword(String password)
+		{
+			this.password = password;
+		}
+	}
+
+	public static class ShowAuthCheckResponse implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 验证通过 */
+		public static final String TYPE_SUCCESS = "success";
+
+		/** 验证未通过 */
+		public static final String TYPE_FAIL = "fail";
+
+		/** 校验结果类型 */
+		private String type;
+
+		public ShowAuthCheckResponse(String type)
+		{
+			super();
+			this.type = type;
+		}
+
+		public String getType()
+		{
+			return type;
+		}
+
+		public void setType(String type)
+		{
+			this.type = type;
+		}
+
+		public static ShowAuthCheckResponse valueOf(String type)
+		{
+			return new ShowAuthCheckResponse(type);
+		}
+	}
+
+	public static class SessionDashboardShowAuthCheckManager implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private Map<String, Boolean> showAuthCheckInfos = null;
+
+		public SessionDashboardShowAuthCheckManager()
+		{
+			super();
+		}
+
+		public synchronized boolean get(String dashboardId)
+		{
+			if (this.showAuthCheckInfos == null)
+				return false;
+
+			return Boolean.TRUE.equals(this.showAuthCheckInfos.get(dashboardId));
+		}
+
+		public synchronized void put(String dashboardId, boolean authed)
+		{
+			if (this.showAuthCheckInfos == null)
+				this.showAuthCheckInfos = new HashMap<>();
+
+			this.showAuthCheckInfos.put(dashboardId, authed);
 		}
 	}
 }

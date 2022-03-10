@@ -11,6 +11,9 @@
 <html>
 <head>
 <#include "../include/html_head.ftl">
+<#if authed>
+<meta http-equiv="refresh" content="3;url=${redirectPath}">
+</#if>
 <title><#include "../include/html_title_app_name.ftl"><@spring.message code='dashboard.showAuth' /></title>
 </head>
 <body>
@@ -18,27 +21,43 @@
 <div id="${pageId}" class="page-dashboard-show-auth">
 	<div class="main-page-head">
 		<#include "../include/html_logo.ftl">
+		<div class="toolbar">
+			<#if !currentUser.anonymous>
+			<div class="user-name">
+			${currentUser.nameLabel}
+			</div>
+			</#if>
+		</div>
 	</div>
 	<div class="page-form page-form-dashboard-show-auth">
-		<form id="${pageId}-form" action="#" method="POST" class="display-block" autocomplete="off">
-			<div class="form-head"></div>
-			<div class="form-content">
-				<input type="hidden" name="id" value="${id!''}" />
-				<input type="hidden" name="name" value="${name!''}" />
+		<#if authed>
+			<div class="authed">
 				<input type="hidden" name="redirectPath" value="${redirectPath!''}" />
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='dashboard.showAuth.password' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="off" autofocus="autofocus" />
+				<span class="ui-icon ui-icon-check"></span>
+				<#assign messageArgs=['#'] />
+				<@spring.messageArgs code='dashboard.showAuth.authed' args=messageArgs />
+			</div>
+		<#else>
+			<form id="${pageId}-form" action="${contextPath}/dashboard/authcheck" method="POST" class="display-block" autocomplete="off">
+				<div class="form-head"></div>
+				<div class="form-content">
+					<input type="hidden" name="id" value="${id!''}" />
+					<input type="hidden" name="name" value="${name!''}" />
+					<input type="hidden" name="redirectPath" value="${redirectPath!''}" />
+					<div class="form-item">
+						<div class="form-item-label">
+							<label><@spring.message code='dashboard.showAuth.password' /></label>
+						</div>
+						<div class="form-item-value">
+							<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="off" autofocus="autofocus" />
+						</div>
 					</div>
 				</div>
-			</div>
-			<div class="form-foot">
-				<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
-			</div>
-		</form>
+				<div class="form-foot">
+					<button type="submit" class="recommended"><@spring.message code='confirm' /></button>
+				</div>
+			</form>
+		</#if>
 	</div>
 </div>
 <#include "../include/page_obj_form.ftl">
@@ -46,6 +65,10 @@
 (function(po)
 {
 	$.initButtons(po.element());
+	
+	<#if authed>
+	po.element(".authed a").attr("href", po.element(".authed input[name='redirectPath']").val());
+	</#if>
 	
 	po.form().validate(
 	{
@@ -57,11 +80,23 @@
 			{
 				handleData: function(data)
 				{
-					data.confirmPassword = undefined;
+					var newData = { id: data.id, password: data.password };
+					return newData;
 				},
 				success : function(operationMessage)
 				{
-					po.pageParamCallAfterSave(true, operationMessage.data);
+					var responseData = (operationMessage.data || {});
+					
+					if(responseData.type == "success")
+					{
+						window.location.href = po.element("input[name='redirectPath']").val();
+					}
+					else if(responseData.type == "fail")
+					{
+						po.element("input[name='password']").focus();
+						$.tipError("密码错误");
+					}
+						
 				}
 			});
 		},
