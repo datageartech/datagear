@@ -40,17 +40,16 @@
 			</div>
 		<#else>
 			<form id="${pageId}-form" action="${contextPath}/dashboard/authcheck" method="POST" class="display-block" autocomplete="off">
-				<div class="form-head"></div>
+				<div class="form-head">
+					<@spring.message code='dashboard.showAuth.dashboardNameQuoteLeft' /><a href="${redirectPath!''}" class="link dashboard-name">${dashboardNameMask!''}</a><@spring.message code='dashboard.showAuth.dashboardNameQuoteRight' />
+				</div>
 				<div class="form-content">
 					<input type="hidden" name="id" value="${id!''}" />
 					<input type="hidden" name="name" value="${name!''}" />
 					<input type="hidden" name="redirectPath" value="${redirectPath!''}" />
 					<div class="form-item">
 						<div class="form-item-label">
-							<label>
-								<#assign messageArgs=[dashboardNameMask] />
-								<@spring.messageArgs code='dashboard.showAuth.password' args=messageArgs />
-							</label>
+							<label><@spring.message code='dashboard.showAuth.password' /></label>
 						</div>
 						<div class="form-item-value">
 							<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="off" autofocus="autofocus" />

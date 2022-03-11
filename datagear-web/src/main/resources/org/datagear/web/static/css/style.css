@@ -3736,7 +3736,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	left: 0;
 	right: 0;
 	top: 30px;
-	bottom: 25%;
+	bottom: 30%;
 	min-height: 10em;
 	display: flex;
 	align-items: center;
@@ -3745,6 +3745,13 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-dashboard-show-auth .page-form form{
 	display: inline-block;
 	width: 25rem;
+}
+.page-dashboard-show-auth .page-form .form-head{
+	text-align: center;
+}
+.page-dashboard-show-auth .page-form .form-head .dashboard-name{
+	padding-left: 0.2em;
+	padding-right: 0.2em;
 }
 .page-dashboard-show-auth .page-form .form-content .form-item-label{
 	text-align: center;
