@@ -1029,6 +1029,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("redirectPath", redirectPath);
 		model.addAttribute("authed", authed);
 		model.addAttribute("dashboardWidget", dashboardWidget);
+		model.addAttribute("dashboardNameMask", StringUtil.mask(dashboardWidget.getName(), 2, 2, 6));
 		model.addAttribute("currentUser", user.cloneNoPassword());
 
 		return "/dashboard/dashboard_show_auth";
@@ -1067,17 +1068,21 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
 					ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
 		}
-		else if (form.getPassword().equals(dashboardShareSet.getPassword()))
-		{
-			getSessionDashboardShowAuthCheckManager(request, true).put(dashboardWidget.getId(), true);
-
-			responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
-					ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
-		}
 		else
 		{
-			responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
-					ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_FAIL));
+			SessionDashboardShowAuthCheckManager manager = getSessionDashboardShowAuthCheckManager(request, true);
+
+			if (form.getPassword().equals(dashboardShareSet.getPassword()))
+			{
+				manager.setAuthed(dashboardWidget.getId(), true);
+				responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
+			}
+			else
+			{
+				responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_FAIL));
+			}
 		}
 
 		return responseEntity;
@@ -1107,7 +1112,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		SessionDashboardShowAuthCheckManager manager = getSessionDashboardShowAuthCheckManager(request, false);
 
-		return (manager == null ? false : manager.get(dashboardWidget.getId()));
+		return (manager == null ? false : manager.isAuthed(dashboardWidget.getId()));
 	}
 
 	protected String buildShowAuthUrlForShowRequest(HttpServletRequest request, String id, String resName)
@@ -2508,7 +2513,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			super();
 		}
 
-		public synchronized boolean get(String dashboardId)
+		public synchronized boolean isAuthed(String dashboardId)
 		{
 			if (this.showAuthCheckInfos == null)
 				return false;
@@ -2516,7 +2521,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			return Boolean.TRUE.equals(this.showAuthCheckInfos.get(dashboardId));
 		}
 
-		public synchronized void put(String dashboardId, boolean authed)
+		public synchronized void setAuthed(String dashboardId, boolean authed)
 		{
 			if (this.showAuthCheckInfos == null)
 				this.showAuthCheckInfos = new HashMap<>();

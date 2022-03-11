@@ -359,4 +359,47 @@ public class StringUtil
 
 		return -1;
 	}
+
+	/**
+	 * 脱敏处理字符串，生成类似{@code "abc****def"}的字符串。
+	 * 
+	 * @param str
+	 * @param prefixCount
+	 * @param suffixCount
+	 * @param maskCount
+	 * @return
+	 */
+	public static String mask(String str, int prefixCount, int suffixCount, int maskCount)
+	{
+		prefixCount = (prefixCount < 0 ? 0 : prefixCount);
+		suffixCount = (suffixCount < 0 ? 0 : suffixCount);
+		maskCount = (maskCount < 0 ? 0 : maskCount);
+
+		String prefix = "", suffix = "";
+
+		int len = (str == null ? 0 : str.length());
+
+		if (prefixCount == 0 || len == 0)
+			prefix = "";
+		else if (len > prefixCount)
+			prefix = str.substring(0, prefixCount);
+		else
+			prefix = str;
+
+		if (suffixCount == 0 || len == 0)
+			suffix = "";
+		else if (len >= (prefixCount + suffixCount))
+			suffix = str.substring(len - suffixCount);
+		else if (len > prefixCount)
+			suffix = str.substring(prefixCount);
+		else
+			suffix = "";
+
+		StringBuilder sb = new StringBuilder(prefix);
+		for (int i = 0; i < maskCount; i++)
+			sb.append("*");
+		sb.append(suffix);
+
+		return sb.toString();
+	}
 }

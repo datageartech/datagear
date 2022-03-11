@@ -22,6 +22,7 @@
 	<div class="main-page-head">
 		<#include "../include/html_logo.ftl">
 		<div class="toolbar">
+			<#include "../include/page_obj_sys_menu.ftl">
 			<#if !currentUser.anonymous>
 			<div class="user-name">
 			${currentUser.nameLabel}
@@ -46,7 +47,10 @@
 					<input type="hidden" name="redirectPath" value="${redirectPath!''}" />
 					<div class="form-item">
 						<div class="form-item-label">
-							<label><@spring.message code='dashboard.showAuth.password' /></label>
+							<label>
+								<#assign messageArgs=[dashboardNameMask] />
+								<@spring.messageArgs code='dashboard.showAuth.password' args=messageArgs />
+							</label>
 						</div>
 						<div class="form-item-value">
 							<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="off" autofocus="autofocus" />
@@ -69,6 +73,8 @@
 	<#if authed>
 	po.element(".authed a").attr("href", po.element(".authed input[name='redirectPath']").val());
 	</#if>
+
+	po.initSysMenu();
 	
 	po.form().validate(
 	{
@@ -94,9 +100,8 @@
 					else if(responseData.type == "fail")
 					{
 						po.element("input[name='password']").focus();
-						$.tipError("密码错误");
+						$.tipError("<@spring.message code='dashboard.showAuth.incorrectPassword' />");
 					}
-						
 				}
 			});
 		},
