@@ -8,6 +8,7 @@
 package org.datagear.analysis.support;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -354,11 +355,12 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 		for (Row row : sheet)
 			excelRows.add(row);
 
-		List<String> rawDataPropertyNames = resolvePropertyNames(excelRows);
-		List<Map<String, Object>> rawData = resolveRawData(query, rawDataPropertyNames, excelRows);
+		List<ExcelPropertyInfo> rawDataPropertyInfos = resolvePropertyInfos(excelRows);
+		List<Map<String, Object>> rawData = resolveRawData(query, rawDataPropertyInfos, excelRows);
 
 		if (resolveProperties)
 		{
+			List<String> rawDataPropertyNames = toPropertyNames(rawDataPropertyInfos);
 			List<DataSetProperty> resolvedProperties = resolveProperties(rawDataPropertyNames, rawData);
 			mergeDataSetProperties(resolvedProperties, properties);
 			properties = resolvedProperties;
@@ -368,16 +370,15 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	}
 
 	/**
-	 * 解析数据属性名列表。
+	 * 解析数据属性信息列表。
 	 * 
 	 * @param excelRows
 	 * @return
 	 * @throws Throwable
 	 */
-	@SuppressWarnings("unused")
-	protected List<String> resolvePropertyNames(List<Row> excelRows) throws Throwable
+	protected List<ExcelPropertyInfo> resolvePropertyInfos(List<Row> excelRows) throws Throwable
 	{
-		List<String> propertyNames = null;
+		List<ExcelPropertyInfo> propertyInfos = null;
 
 		for (int i = 0, len = excelRows.size(); i < len; i++)
 		{
@@ -385,50 +386,51 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 
 			if (isNameRow(i))
 			{
-				propertyNames = new ArrayList<String>();
+				propertyInfos = new ArrayList<ExcelPropertyInfo>();
 
-				int colIdx = 0;
-				for (Cell cell : row)
+				short minColIdx = row.getFirstCellNum(), maxColIdx = row.getLastCellNum();
+				for (short colIdx = minColIdx; colIdx < maxColIdx; colIdx++)
 				{
 					if (isDataColumn(colIdx))
 					{
 						String name = null;
 
-						try
+						Cell cell = row.getCell(colIdx);
+
+						if (cell != null)
 						{
-							name = cell.getStringCellValue();
-						}
-						catch(Throwable t)
-						{
+							try
+							{
+								name = cell.getStringCellValue();
+							}
+							catch(Throwable t)
+							{
+							}
 						}
 
 						if (StringUtil.isEmpty(name))
 							name = CellReference.convertNumToColString(colIdx);
 
-						propertyNames.add(name);
+						propertyInfos.add(new ExcelPropertyInfo(name, colIdx));
 					}
-
-					colIdx++;
 				}
 
 				break;
 			}
 			else if (isDataRow(i))
 			{
-				if (propertyNames == null)
+				if (propertyInfos == null)
 				{
-					propertyNames = new ArrayList<String>();
+					propertyInfos = new ArrayList<ExcelPropertyInfo>();
 
-					int colIdx = 0;
-					for (Cell cell : row)
+					short minColIdx = row.getFirstCellNum(), maxColIdx = row.getLastCellNum();
+					for (short colIdx = minColIdx; colIdx < maxColIdx; colIdx++)
 					{
 						if (isDataColumn(colIdx))
 						{
 							String name = CellReference.convertNumToColString(colIdx);
-							propertyNames.add(name);
+							propertyInfos.add(new ExcelPropertyInfo(name, colIdx));
 						}
-
-						colIdx++;
 					}
 				}
 
@@ -437,10 +439,10 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 			}
 		}
 
-		if (propertyNames == null)
-			propertyNames = Collections.emptyList();
+		if (propertyInfos == null)
+			propertyInfos = Collections.emptyList();
 
-		return propertyNames;
+		return propertyInfos;
 	}
 
 	/**
@@ -494,15 +496,17 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * 解析原始数据。
 	 * 
 	 * @param query
-	 * @param propertyNames
+	 * @param propertyInfos
 	 * @param excelRows
 	 * @return
 	 * @throws Throwable
 	 */
 	protected List<Map<String, Object>> resolveRawData(DataSetQuery query,
-			List<String> propertyNames, List<Row> excelRows) throws Throwable
+			List<ExcelPropertyInfo> propertyInfos, List<Row> excelRows) throws Throwable
 	{
 		List<Map<String, Object>> data = new ArrayList<>();
+
+		Map<Short, String> cellNumPropertyNames = toCellNumPropertyNames(propertyInfos);
 
 		for (int i = 0, len = excelRows.size(); i < len; i++)
 		{
@@ -515,21 +519,17 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 			Map<String, Object> row = new HashMap<>();
 
 			Row excelRow = excelRows.get(i);
-			int colIdx = 0;
-			int dataColIdx = 0;
-			for (Cell cell : excelRow)
+
+			short minColIdx = excelRow.getFirstCellNum(), maxColIdx = excelRow.getLastCellNum();
+			for (short colIdx = minColIdx; colIdx < maxColIdx; colIdx++)
 			{
 				if (isDataColumn(colIdx))
 				{
-					String name = propertyNames.get(dataColIdx);
+					Cell cell = excelRow.getCell(colIdx);
+					String name = cellNumPropertyNames.get(colIdx);
 					Object value = resolveCellValue(cell);
-
 					row.put(name, value);
-
-					dataColIdx++;
 				}
-
-				colIdx++;
 			}
 
 			data.add(row);
@@ -538,16 +538,39 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 		return data;
 	}
 
+	protected Map<Short, String> toCellNumPropertyNames(List<ExcelPropertyInfo> propertyInfos)
+	{
+		Map<Short, String> re = new HashMap<Short, String>();
+
+		for (ExcelPropertyInfo epi : propertyInfos)
+			re.put(epi.getCellIdx(), epi.getName());
+
+		return re;
+	}
+
+	protected List<String> toPropertyNames(List<ExcelPropertyInfo> propertyInfos)
+	{
+		List<String> re = new ArrayList<String>(propertyInfos.size());
+
+		for (ExcelPropertyInfo epi : propertyInfos)
+			re.add(epi.getName());
+
+		return re;
+	}
+
 	/**
 	 * 解析单元格属性值。
 	 * 
-	 * @param cell
+	 * @param cell 允许为{@code null}
 	 * @return
 	 * @throws DataSetSourceParseException
 	 * @throws DataSetException
 	 */
 	protected Object resolveCellValue(Cell cell) throws DataSetSourceParseException, DataSetException
 	{
+		if (cell == null)
+			return null;
+
 		CellType cellType = cell.getCellType();
 
 		Object cellValue = null;
@@ -714,4 +737,34 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * @throws Throwable
 	 */
 	protected abstract File getExcelFile(DataSetQuery query) throws Throwable;
+
+	protected static class ExcelPropertyInfo implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 属性名 */
+		private final String name;
+
+		/**
+		 * 单元格序号，介于{@linkplain Row#getFirstCellNum()}和{@linkplain Row#getLastCellNum()}之间
+		 */
+		private final short cellIdx;
+
+		public ExcelPropertyInfo(String name, short cellIdx)
+		{
+			super();
+			this.name = name;
+			this.cellIdx = cellIdx;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public short getCellIdx()
+		{
+			return cellIdx;
+		}
+	}
 }

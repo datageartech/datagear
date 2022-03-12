@@ -350,4 +350,68 @@ public class ExcelDirectoryFileDataSetTest
 			}
 		}
 	}
+
+	@Test
+	public void resolveTest_containsEmptyCell()
+	{
+		ExcelDirectoryFileDataSet dataSet = new ExcelDirectoryFileDataSet("a", "a", DIRECTORY,
+				"ExcelDirectoryFileDataSetTest-2.xls");
+		dataSet.setNameRow(1);
+
+		ResolvedDataSetResult resolvedResult = dataSet.resolve(DataSetQuery.valueOf());
+
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> data = (List<Map<String, Object>>) resolvedResult.getResult().getData();
+		List<DataSetProperty> properties = resolvedResult.getProperties();
+
+		{
+			assertEquals(3, properties.size());
+
+			{
+				DataSetProperty property = properties.get(0);
+				assertEquals("a", property.getName());
+				assertEquals(DataSetProperty.DataType.DECIMAL, property.getType());
+			}
+
+			{
+				DataSetProperty property = properties.get(1);
+				assertEquals("b", property.getName());
+				assertEquals(DataSetProperty.DataType.DECIMAL, property.getType());
+			}
+
+			{
+				DataSetProperty property = properties.get(2);
+				assertEquals("c", property.getName());
+				assertEquals(DataSetProperty.DataType.DECIMAL, property.getType());
+			}
+		}
+
+		{
+			assertEquals(3, data.size());
+
+			{
+				Map<String, Object> row = data.get(0);
+
+				assertEquals(1, ((Number) row.get("a")).intValue());
+				assertEquals(2, ((Number) row.get("b")).intValue());
+				assertEquals(null, row.get("c"));
+			}
+
+			{
+				Map<String, Object> row = data.get(1);
+
+				assertEquals(3, ((Number) row.get("a")).intValue());
+				assertEquals(null, row.get("b"));
+				assertEquals(4, ((Number) row.get("c")).intValue());
+			}
+
+			{
+				Map<String, Object> row = data.get(2);
+
+				assertEquals(5, ((Number) row.get("a")).intValue());
+				assertEquals(6, ((Number) row.get("b")).intValue());
+				assertEquals(7, ((Number) row.get("c")).intValue());
+			}
+		}
+	}
 }
