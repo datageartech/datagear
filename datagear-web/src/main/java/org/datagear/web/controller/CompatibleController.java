@@ -38,7 +38,7 @@ public class CompatibleController extends AbstractController
 	 * @deprecated 兼容2.6.0版本的图表展示功能URL，因为展示链接可能已被被外部系统iframe嵌入，为了降低升级风险，这里做兼容支持，将在未来版本移除
 	 */
 	@Deprecated
-	@RequestMapping("/analysis/chart/show/**/*")
+	@RequestMapping("/analysis/chart/show/**")
 	public void showChart(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model) throws Exception
 	{
@@ -59,7 +59,7 @@ public class CompatibleController extends AbstractController
 	 * @deprecated 兼容2.6.0版本的看板展示功能URL，因为展示链接可能已被被外部系统iframe嵌入，为了降低升级风险，这里做兼容支持，将在未来版本移除
 	 */
 	@Deprecated
-	@RequestMapping("/analysis/dashboard/show/**/*")
+	@RequestMapping("/analysis/dashboard/show/**")
 	public void showDashboard(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 			throws Exception

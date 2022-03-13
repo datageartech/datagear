@@ -438,7 +438,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	 * @param id
 	 * @throws Exception
 	 */
-	@RequestMapping("/show/{id}/**/*")
+	@RequestMapping("/show/{id}/**")
 	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
 	{

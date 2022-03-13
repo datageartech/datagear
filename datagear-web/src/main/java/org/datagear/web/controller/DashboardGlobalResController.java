@@ -253,7 +253,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/view/**/*")
+	@RequestMapping("/view/**")
 	public void view(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			org.springframework.ui.Model model) throws Exception
 	{
