@@ -36,8 +36,7 @@ public class DbVersionManagerTest
 			VersionContent versionContent = versionContents.get(0);
 			List<String> contents = versionContent.getContents();
 
-			Assert.assertEquals(Version.valueOf("1.0.0"), versionContent.getVersion());
-			Assert.assertEquals(4, contents.size());
+			Assert.assertEquals(Version.valueOf("2.13.0"), versionContent.getVersion());
 
 			Assert.assertTrue(contents.get(0).startsWith("CREATE TABLE DATAGEAR_VERSION"));
 			Assert.assertTrue(contents.get(0).endsWith(")"));
@@ -45,11 +44,18 @@ public class DbVersionManagerTest
 			Assert.assertTrue(contents.get(1).startsWith("CREATE TABLE DATAGEAR_USER"));
 			Assert.assertTrue(contents.get(1).endsWith(")"));
 
-			Assert.assertTrue(contents.get(2).startsWith("INSERT INTO DATAGEAR_USER"));
-			Assert.assertTrue(contents.get(2).endsWith("CURRENT_TIMESTAMP)"));
+			Assert.assertTrue(contents.get(contents.size() - 1).startsWith("CREATE FUNCTION DATAGEAR_FUNC_MODINT"));
+			Assert.assertTrue(contents.get(contents.size() - 1).endsWith(".modInt'"));
+		}
 
-			Assert.assertTrue(contents.get(3).startsWith("CREATE TABLE DATAGEAR_SCHEMA"));
-			Assert.assertTrue(contents.get(3).endsWith(")"));
+		{
+			VersionContent versionContent = versionContents.get(1);
+			List<String> contents = versionContent.getContents();
+
+			Assert.assertEquals(Version.valueOf("3.0.0"), versionContent.getVersion());
+
+			Assert.assertTrue(contents.get(0).startsWith("CREATE TABLE DATAGEAR_DB_SHARE_SET"));
+			Assert.assertTrue(contents.get(0).endsWith(")"));
 		}
 	}
 }
