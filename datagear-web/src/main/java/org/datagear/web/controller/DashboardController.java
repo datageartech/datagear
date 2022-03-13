@@ -2623,6 +2623,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			else
 			{
 				aci.offerFailedDate();
+				aci.pollFailedDate(this.authFailThreshold);
 			}
 		}
 
