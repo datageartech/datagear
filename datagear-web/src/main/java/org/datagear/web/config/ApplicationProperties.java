@@ -140,6 +140,14 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${dashboardSharePassword.crypto.salt}")
 	private String dashboardSharePasswordCryptoSalt;
 
+	/** 看板访问密码允许填错次数 */
+	@Value("${dashboardSharePassword.authFailThreshold}")
+	private int dashboardSharePasswordAuthFailThreshold;
+
+	/** 看板访问密码允许填错次数的限定分钟数 */
+	@Value("${dashboardSharePassword.authFailPastMinutes}")
+	private int dashboardSharePasswordAuthFailPastMinutes;
+
 	public ApplicationProperties()
 	{
 		super();
@@ -433,5 +441,25 @@ public abstract class ApplicationProperties implements Serializable
 	public void setDashboardSharePasswordCryptoSalt(String dashboardSharePasswordCryptoSalt)
 	{
 		this.dashboardSharePasswordCryptoSalt = dashboardSharePasswordCryptoSalt;
+	}
+
+	public int getDashboardSharePasswordAuthFailThreshold()
+	{
+		return dashboardSharePasswordAuthFailThreshold;
+	}
+
+	public void setDashboardSharePasswordAuthFailThreshold(int dashboardSharePasswordAuthFailThreshold)
+	{
+		this.dashboardSharePasswordAuthFailThreshold = dashboardSharePasswordAuthFailThreshold;
+	}
+
+	public int getDashboardSharePasswordAuthFailPastMinutes()
+	{
+		return dashboardSharePasswordAuthFailPastMinutes;
+	}
+
+	public void setDashboardSharePasswordAuthFailPastMinutes(int dashboardSharePasswordAuthFailPastMinutes)
+	{
+		this.dashboardSharePasswordAuthFailPastMinutes = dashboardSharePasswordAuthFailPastMinutes;
 	}
 }

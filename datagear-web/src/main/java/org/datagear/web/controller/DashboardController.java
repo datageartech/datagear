@@ -23,8 +23,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -1061,7 +1063,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		ResponseEntity<OperationMessage> responseEntity = null;
 
-		DashboardShareSet dashboardShareSet = this.dashboardShareSetService.getById(dashboardWidget.getId());
+		String dashboardWidgetId = dashboardWidget.getId();
+		DashboardShareSet dashboardShareSet = this.dashboardShareSetService.getById(dashboardWidgetId);
 
 		if (dashboardShareSet == null || !dashboardShareSet.isEnablePassword())
 		{
@@ -1070,18 +1073,26 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 		else
 		{
-			SessionDashboardShowAuthCheckManager manager = getSessionDashboardShowAuthCheckManager(request, true);
+			DashboardShowAuthCheckManager manager = getDashboardShowAuthCheckManager(request, true);
 
-			if (form.getPassword().equals(dashboardShareSet.getPassword()))
+			if (manager.isAuthDenied(dashboardWidgetId))
 			{
-				manager.setAuthed(dashboardWidget.getId(), true);
+				responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_DENY, manager.getAuthFailThreshold(),
+								0));
+			}
+			else if (form.getPassword().equals(dashboardShareSet.getPassword()))
+			{
+				manager.setAuthed(dashboardWidgetId, true);
 				responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
 						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
 			}
 			else
 			{
+				manager.setAuthed(dashboardWidgetId, false);
 				responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
-						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_FAIL));
+						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_FAIL, manager.getAuthFailThreshold(),
+								manager.authRemain(dashboardWidgetId)));
 			}
 		}
 
@@ -1110,7 +1121,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboardShareSet.isAnonymousPassword() && !user.isAnonymous())
 			return true;
 
-		SessionDashboardShowAuthCheckManager manager = getSessionDashboardShowAuthCheckManager(request, false);
+		DashboardShowAuthCheckManager manager = getDashboardShowAuthCheckManager(request, false);
 
 		return (manager == null ? false : manager.isAuthed(dashboardWidget.getId()));
 	}
@@ -1127,13 +1138,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return authPath;
 	}
 
-	protected SessionDashboardShowAuthCheckManager getSessionDashboardShowAuthCheckManager(HttpServletRequest request,
+	protected DashboardShowAuthCheckManager getDashboardShowAuthCheckManager(HttpServletRequest request,
 			boolean nonNull)
 	{
 		HttpSession session = request.getSession();
 
-		SessionDashboardShowAuthCheckManager manager = (SessionDashboardShowAuthCheckManager) session
-				.getAttribute(SessionDashboardShowAuthCheckManager.class.getName());
+		DashboardShowAuthCheckManager manager = (DashboardShowAuthCheckManager) session
+				.getAttribute(DashboardShowAuthCheckManager.class.getName());
 
 		if (!nonNull)
 			return manager;
@@ -1142,8 +1153,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		{
 			if (manager == null)
 			{
-				manager = new SessionDashboardShowAuthCheckManager();
-				session.setAttribute(SessionDashboardShowAuthCheckManager.class.getName(), manager);
+				manager = new DashboardShowAuthCheckManager(
+						this.applicationProperties.getDashboardSharePasswordAuthFailThreshold(),
+						this.applicationProperties.getDashboardSharePasswordAuthFailPastMinutes() * 60 * 1000);
+				session.setAttribute(DashboardShowAuthCheckManager.class.getName(), manager);
 			}
 		}
 
@@ -2477,13 +2490,29 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		/** 验证未通过 */
 		public static final String TYPE_FAIL = "fail";
 
+		/** 验证拒绝 */
+		public static final String TYPE_DENY = "deny";
+
 		/** 校验结果类型 */
 		private String type;
+
+		private int authFailThreshold = -1;
+
+		/** 验证剩余次数 */
+		private int authRemain = -1;
 
 		public ShowAuthCheckResponse(String type)
 		{
 			super();
 			this.type = type;
+		}
+
+		public ShowAuthCheckResponse(String type, int authFailThreshold, int authRemain)
+		{
+			super();
+			this.type = type;
+			this.authFailThreshold = authFailThreshold;
+			this.authRemain = authRemain;
 		}
 
 		public String getType()
@@ -2496,37 +2525,202 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			this.type = type;
 		}
 
+		public int getAuthFailThreshold()
+		{
+			return authFailThreshold;
+		}
+
+		public void setAuthFailThreshold(int authFailThreshold)
+		{
+			this.authFailThreshold = authFailThreshold;
+		}
+
+		public int getAuthRemain()
+		{
+			return authRemain;
+		}
+
+		public void setAuthRemain(int authRemain)
+		{
+			this.authRemain = authRemain;
+		}
+
 		public static ShowAuthCheckResponse valueOf(String type)
 		{
 			return new ShowAuthCheckResponse(type);
 		}
+
+		public static ShowAuthCheckResponse valueOf(String type, int authFailThreshold, int authRemain)
+		{
+			return new ShowAuthCheckResponse(type, authFailThreshold, authRemain);
+		}
 	}
 
-	public static class SessionDashboardShowAuthCheckManager implements Serializable
+	public static class DashboardShowAuthCheckManager implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
-		private Map<String, Boolean> showAuthCheckInfos = null;
+		/** 失败验证次数，-1表示不限 */
+		private int authFailThreshold = -1;
 
-		public SessionDashboardShowAuthCheckManager()
+		/** 失败验证次数过去毫秒内 */
+		private long authFailPastMs = 2 * 60 * 60 * 1000;
+
+		private final Map<String, AuthCheckInfo> authCheckInfos = new HashMap<>();
+
+		public DashboardShowAuthCheckManager()
 		{
 			super();
 		}
 
+		public DashboardShowAuthCheckManager(int authFailThreshold, long authFailPastMs)
+		{
+			super();
+			this.authFailThreshold = authFailThreshold;
+			this.authFailPastMs = authFailPastMs;
+		}
+
+		public int getAuthFailThreshold()
+		{
+			return authFailThreshold;
+		}
+
+		public void setAuthFailThreshold(int authFailThreshold)
+		{
+			this.authFailThreshold = authFailThreshold;
+		}
+
+		public long getAuthFailPastMs()
+		{
+			return authFailPastMs;
+		}
+
+		public void setAuthFailPastMs(long authFailPastMs)
+		{
+			this.authFailPastMs = authFailPastMs;
+		}
+
 		public synchronized boolean isAuthed(String dashboardId)
 		{
-			if (this.showAuthCheckInfos == null)
-				return false;
-
-			return Boolean.TRUE.equals(this.showAuthCheckInfos.get(dashboardId));
+			AuthCheckInfo aci = this.authCheckInfos.get(dashboardId);
+			return (aci == null ? false : aci.isAuthed());
 		}
 
 		public synchronized void setAuthed(String dashboardId, boolean authed)
 		{
-			if (this.showAuthCheckInfos == null)
-				this.showAuthCheckInfos = new HashMap<>();
+			AuthCheckInfo aci = this.authCheckInfos.get(dashboardId);
+			if (aci == null)
+			{
+				aci = new AuthCheckInfo();
+				this.authCheckInfos.put(dashboardId, aci);
+			}
 
-			this.showAuthCheckInfos.put(dashboardId, authed);
+			if (authed)
+			{
+				aci.setAuthed(true);
+				aci.clearFailedDate();
+			}
+			else
+			{
+				aci.offerFailedDate();
+			}
+		}
+
+		public synchronized boolean isAuthDenied(String dashboardId)
+		{
+			if (this.authFailThreshold < 0)
+				return false;
+
+			AuthCheckInfo aci = this.authCheckInfos.get(dashboardId);
+
+			if (aci == null)
+				return false;
+
+			return ((this.authFailThreshold - aci.failedDateCount(this.authFailPastMs)) <= 0);
+		}
+
+		public synchronized int authRemain(String dashboardId)
+		{
+			if (this.authFailThreshold < 0)
+				return -1;
+
+			AuthCheckInfo aci = this.authCheckInfos.get(dashboardId);
+
+			int remain = this.authFailThreshold;
+
+			if (aci != null)
+				remain = this.authFailThreshold - aci.failedDateCount(this.authFailPastMs);
+
+			return (remain < 0 ? 0 : remain);
+		}
+
+		public static class AuthCheckInfo implements Serializable
+		{
+			private static final long serialVersionUID = 1L;
+
+			private boolean authed = false;
+
+			private Queue<Long> failedDates = new LinkedList<Long>();
+
+			public AuthCheckInfo()
+			{
+				super();
+			}
+
+			public boolean isAuthed()
+			{
+				return authed;
+			}
+
+			public void setAuthed(boolean authed)
+			{
+				this.authed = authed;
+			}
+
+			public Queue<Long> getFailedDates()
+			{
+				return failedDates;
+			}
+
+			public void setFailedDates(Queue<Long> failedDates)
+			{
+				this.failedDates = failedDates;
+			}
+
+			public void offerFailedDate()
+			{
+				this.failedDates.offer(System.currentTimeMillis());
+			}
+
+			public void offerFailedDate(long date)
+			{
+				this.failedDates.offer(date);
+			}
+
+			public void pollFailedDate(int keepCount)
+			{
+				while (this.failedDates.size() > keepCount)
+					this.failedDates.poll();
+			}
+
+			public void clearFailedDate()
+			{
+				this.failedDates.clear();
+			}
+
+			public int failedDateCount(long pastMs)
+			{
+				int count = 0;
+
+				long startDate = System.currentTimeMillis() - pastMs;
+				for (Long ele : this.failedDates)
+				{
+					if (ele >= startDate)
+						count++;
+				}
+
+				return count;
+			}
 		}
 	}
 }

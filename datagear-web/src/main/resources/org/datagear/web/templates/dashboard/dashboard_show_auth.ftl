@@ -99,7 +99,19 @@
 					else if(responseData.type == "fail")
 					{
 						po.element("input[name='password']").focus();
-						$.tipError("<@spring.message code='dashboard.showAuth.incorrectPassword' />");
+						
+						if(responseData.authFailThreshold < 0)
+							$.tipError("<@spring.message code='dashboard.showAuth.incorrectPassword' />");
+						else
+						{
+							<#assign messageArgs=['"+responseData.authRemain+"'] />
+							$.tipError("<@spring.messageArgs code='dashboard.showAuth.incorrectPasswordWithRemain' args=messageArgs />");
+						}
+					}
+					else if(responseData.type == "deny")
+					{
+						po.element("input[name='password']").focus();
+						$.tipError("<@spring.message code='dashboard.showAuth.authDenied' />");
 					}
 				}
 			});
