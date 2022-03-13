@@ -5240,7 +5240,7 @@
 				{
 					row:
 					{
-						"color": theme.titleColor,
+						"color": theme.color,
 						"background-color": rowBgColor
 					},
 					cell: {}
@@ -5325,6 +5325,13 @@
 			
 			var css=
 			[
+				{
+					name: (isLocalStyle ? "." + name : "") + " .dg-chart-table-title",
+					value:
+					{
+						"font-size": chartFactory.toCssFontSize(theme.titleTheme.fontSize)
+					}
+				},
 				{
 					name: qualifier + " table.dataTable",
 					value: chart.styleString(tableStyle.table)
@@ -5440,8 +5447,8 @@
 					name: " .dg-chart-table-title",
 					value:
 					{
-						"color": theme.color,
-						"background-color": theme.backgroundColor
+						"color": theme.titleTheme.color,
+						"background-color": theme.titleTheme.backgroundColor
 					}
 				});
 			}
@@ -5755,6 +5762,8 @@
 		
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-label");
+		
+		var theme = chart.theme();
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -6239,7 +6248,15 @@
 					{
 						"color": theme.color,
 						"background-color": theme.backgroundColor,
-						"border-color": theme.borderColor
+						"border-color": theme.borderColor,
+						"font-size": chartFactory.toCssFontSize(theme.fontSize)
+					}
+				},
+				{
+					name: " .dg-chart-select-select option",
+					value:
+					{
+						"font-size": chartFactory.toCssFontSize(theme.fontSize)
 					}
 				},
 				{

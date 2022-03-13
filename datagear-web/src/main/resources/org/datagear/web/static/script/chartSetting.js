@@ -1997,7 +1997,7 @@
 					],
 					value:
 					{
-						"color": theme.titleColor,
+						"color": theme.color,
 						"background-color": bgColor + " !important"
 					}
 				},

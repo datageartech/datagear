@@ -32,13 +32,6 @@ public class DashboardTheme extends Theme
 		this.chartTheme = chartTheme;
 	}
 
-	public DashboardTheme(String name, String color, String backgroundColor, String actualBackgroundColor,
-			ChartTheme chartTheme)
-	{
-		super(name, color, backgroundColor, actualBackgroundColor);
-		this.chartTheme = chartTheme;
-	}
-
 	public ChartTheme getChartTheme()
 	{
 		return chartTheme;

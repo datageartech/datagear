@@ -13,6 +13,10 @@ import java.util.Arrays;
 /**
  * 图表主题。
  * <p>
+ * {@linkplain #getTitleTheme()}、{@linkplain #getLegendTheme()}、{@linkplain #getTooltipTheme()}、{@linkplain #getHighlightTheme()}不是必填的，
+ * 它们可以由展现界面根据{@linkplain #getColor()}、{@linkplain #getActualBackgroundColor()}配合{@linkplain #getGradient()}自动生成。
+ * </p>
+ * <p>
  * 此类可为在看板内绘制统一主题的多个图表提供支持。
  * </p>
  * 
@@ -23,17 +27,26 @@ public class ChartTheme extends Theme implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 标题颜色 */
-	private String titleColor = "";
+	/** 透明颜色值常量 */
+	public static final String COLOR_TRANSPARENT = "transparent";
 
-	/** 图例颜色 */
-	private String legendColor = "";
+	/** 实际背景色 */
+	private String actualBackgroundColor;
 
 	/** 图形条目颜色 */
 	private String[] graphColors;
 
 	/** 值域映射范围图形条目颜色 */
 	private String[] graphRangeColors;
+
+	/** 背景色至前景色的渐变跨度 */
+	private int gradient = 10;
+
+	/** 标题主题 */
+	private Theme titleTheme = null;
+
+	/** 图例主题 */
+	private Theme legendTheme = null;
 
 	/** 提示框主题 */
 	private Theme tooltipTheme = null;
@@ -45,50 +58,49 @@ public class ChartTheme extends Theme implements Serializable
 	{
 	}
 
-	public ChartTheme(String name, String color, String backgroundColor, String[] graphColors,
-			String[] graphRangeColors)
-	{
-		super(name, color, backgroundColor);
-		this.graphColors = graphColors;
-		this.graphRangeColors = graphRangeColors;
-	}
-
 	public ChartTheme(String name, String color, String backgroundColor, String actualBackgroundColor,
 			String[] graphColors, String[] graphRangeColors)
 	{
-		super(name, color, backgroundColor, actualBackgroundColor);
+		super(name, color, backgroundColor);
+		this.setActualBackgroundColor(actualBackgroundColor);
 		this.graphColors = graphColors;
 		this.graphRangeColors = graphRangeColors;
 	}
 
-	public boolean hasTitleColor()
+	@Override
+	public void setBackgroundColor(String backgroundColor)
 	{
-		return (this.titleColor != null && !this.titleColor.isEmpty());
+		super.setBackgroundColor(backgroundColor);
+
+		if (!COLOR_TRANSPARENT.equalsIgnoreCase(actualBackgroundColor))
+			this.actualBackgroundColor = backgroundColor;
 	}
 
-	public String getTitleColor()
+	/**
+	 * 获取实际背景色。
+	 * <p>
+	 * 实际背景色不会是透明色{@linkplain #COLOR_TRANSPARENT}。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public String getActualBackgroundColor()
 	{
-		return titleColor;
+		return actualBackgroundColor;
 	}
 
-	public void setTitleColor(String titleColor)
+	/**
+	 * 设置实际背景色。
+	 * 
+	 * @param actualBackgroundColor
+	 * @throws IllegalArgumentException 当参数为{@linkplain #COLOR_TRANSPARENT}时
+	 */
+	public void setActualBackgroundColor(String actualBackgroundColor) throws IllegalArgumentException
 	{
-		this.titleColor = titleColor;
-	}
+		if (COLOR_TRANSPARENT.equalsIgnoreCase(actualBackgroundColor))
+			throw new IllegalArgumentException("[actualBackgroundColor] must not be '" + COLOR_TRANSPARENT + "'");
 
-	public boolean hasLegendColor()
-	{
-		return (this.legendColor != null && !this.legendColor.isEmpty());
-	}
-
-	public String getLegendColor()
-	{
-		return legendColor;
-	}
-
-	public void setLegendColor(String legendColor)
-	{
-		this.legendColor = legendColor;
+		this.actualBackgroundColor = actualBackgroundColor;
 	}
 
 	public String[] getGraphColors()
@@ -109,6 +121,46 @@ public class ChartTheme extends Theme implements Serializable
 	public void setGraphRangeColors(String[] graphRangeColors)
 	{
 		this.graphRangeColors = graphRangeColors;
+	}
+
+	public int getGradient()
+	{
+		return gradient;
+	}
+
+	public void setGradient(int gradient)
+	{
+		this.gradient = gradient;
+	}
+
+	public boolean hasTitleTheme()
+	{
+		return (this.titleTheme != null);
+	}
+
+	public Theme getTitleTheme()
+	{
+		return titleTheme;
+	}
+
+	public void setTitleTheme(Theme titleTheme)
+	{
+		this.titleTheme = titleTheme;
+	}
+
+	public boolean hasLegendTheme()
+	{
+		return (this.legendTheme != null);
+	}
+
+	public Theme getLegendTheme()
+	{
+		return legendTheme;
+	}
+
+	public void setLegendTheme(Theme legendTheme)
+	{
+		this.legendTheme = legendTheme;
 	}
 
 	public boolean hasTooltipTheme()
@@ -144,10 +196,12 @@ public class ChartTheme extends Theme implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [color=" + getColor() + ", backgroundColor=" + getBackgroundColor()
-				+ ", borderColor=" + getBorderColor() + ", titleColor=" + titleColor + ", legendColor=" + legendColor
-				+ ", graphColors=" + Arrays.toString(graphColors) + ", graphRangeColors="
-				+ Arrays.toString(graphRangeColors) + ", tooltipTheme=" + tooltipTheme + ", highlightTheme="
+		return getClass().getSimpleName() + " [name=" + getName() + ", color=" + getColor() + ", backgroundColor="
+				+ getBackgroundColor() + ", borderColor=" + getBorderColor() + ", borderWidth="
+				+ getBorderWidth() + ", fontSize=" + getFontSize() + ", actualBackgroundColor="
+				+ actualBackgroundColor + ", graphColors=" + Arrays.toString(graphColors) + ", graphRangeColors="
+				+ Arrays.toString(graphRangeColors) + ", gradient=" + gradient + ", titleTheme=" + titleTheme
+				+ ", legendTheme=" + legendTheme + ", tooltipTheme=" + tooltipTheme + ", highlightTheme="
 				+ highlightTheme + "]";
 	}
 }

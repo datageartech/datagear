@@ -914,7 +914,8 @@
 					{
 						"color": theme.color,
 						"background-color": theme.backgroundColor,
-						"border-color": theme.borderColor
+						"border-color": theme.borderColor,
+						"font-size": chartFactory.toCssFontSize(theme.fontSize)
 					}
 				},
 				{
@@ -4639,6 +4640,16 @@
 		return epn;
 	};
 	
+	chartFactory.toCssFontSize = function(fontSize)
+	{
+		if(fontSize == null)
+			return "";
+		else if($.isNumeric(fontSize))
+			return fontSize + "px";
+		else
+			return fontSize;
+	};
+	
 	/**
 	 * 记录异常日志。
 	 * 
@@ -4792,57 +4803,134 @@
 		return false;
 	};
 	
-	//如果图表主题已具备了生成其他配色的条件（color、actualBackgroundColor已设置），则尝试生成它们。
+	//填充图表主题，如果图表主题已设置了color、actualBackgroundColor、fontSize，则尝试自动填充其他相关的主题属性。
 	chartFactory._inflateChartThemeIf = function(theme)
 	{
 		if(theme.color && theme.actualBackgroundColor)
 		{
+			// < @deprecated 兼容2.13.0版本ChartTheme的titleColor、legendColor结构，未来版本会移除
+			if(!theme.titleColor)
+				theme.titleColor = theme.color;
 			if(!theme.legendColor)
 				theme.legendColor = chartFactory.gradualColor(theme, 0.9);
+			// > @deprecated 兼容2.13.0版本ChartTheme的titleColor、legendColor结构，未来版本会移除
 			
 			if(!theme.borderColor)
 				theme.borderColor = chartFactory.gradualColor(theme, 0.3);
 			
-			if(!theme.tooltipTheme)
+			var titleThemeGen =
 			{
-				var tooltipTheme =
-				{
-					name: "tooltipTheme",
-					color: theme.actualBackgroundColor,
-					backgroundColor: chartFactory.gradualColor(theme, 0.7),
-					actualBackgroundColor: chartFactory.gradualColor(theme, 0.7),
-					borderColor: chartFactory.gradualColor(theme, 0.9),
-					borderWidth: 1,
-					gradient: theme.gradient
-				};
-				
-				theme.tooltipTheme = tooltipTheme;
-			}
+				name: "titleTheme",
+				color: theme.color,
+				backgroundColor: "transparent",
+				borderColor: theme.borderColor,
+				borderWidth: 0
+			};
 			
-			if(!theme.highlightTheme)
+			// < @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
+			if(theme.titleColor)
+				titleThemeGen.titleColor = theme.titleColor;
+			// > @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
+			
+			theme.titleTheme = (!theme.titleTheme ? titleThemeGen : $.extend(true, titleThemeGen, theme.titleTheme));
+			
+			var legendThemeGen =
 			{
-				var highlightTheme =
-				{
-					name: "highlightTheme",
-					color: theme.actualBackgroundColor,
-					backgroundColor: chartFactory.gradualColor(theme, 0.8),
-					actualBackgroundColor: chartFactory.gradualColor(theme, 0.8),
-					borderColor: chartFactory.gradualColor(theme, 1),
-					borderWidth: 1,
-					gradient: theme.gradient
-				};
-				
-				theme.highlightTheme = highlightTheme;
-			}
+				name: "legendTheme",
+				color: chartFactory.gradualColor(theme, 0.9),
+				backgroundColor: "transparent",
+				borderColor: theme.borderColor,
+				borderWidth: 0
+			};
+			
+			// < @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
+			if(theme.legendColor)
+				legendThemeGen.color = theme.legendColor;
+			// > @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
+			
+			theme.legendTheme = (!theme.legendTheme ? legendThemeGen : $.extend(true, legendThemeGen, theme.legendTheme));
+			
+			var tooltipThemeGen =
+			{
+				name: "tooltipTheme",
+				color: theme.actualBackgroundColor,
+				backgroundColor: chartFactory.gradualColor(theme, 0.7),
+				borderColor: chartFactory.gradualColor(theme, 0.9),
+				borderWidth: 1
+			};
+			
+			theme.tooltipTheme = (!theme.tooltipTheme ? tooltipThemeGen : $.extend(true, tooltipThemeGen, theme.tooltipTheme));
+			
+			var highlightThemeGen =
+			{
+				name: "highlightTheme",
+				color: theme.actualBackgroundColor,
+				backgroundColor: chartFactory.gradualColor(theme, 0.8),
+				borderColor: chartFactory.gradualColor(theme, 1),
+				borderWidth: 1
+			};
+			
+			theme.highlightTheme = (!theme.highlightTheme ? highlightThemeGen : $.extend(true, highlightThemeGen, theme.highlightTheme));
 		}
-		
-		if(theme.color)
+		else if(theme.color)
 		{
+			// < @deprecated 兼容2.13.0版本ChartTheme的titleColor、legendColor结构，未来版本会移除
 			if(!theme.titleColor)
 				theme.titleColor = theme.color;
-			
 			if(!theme.legendColor)
 				theme.legendColor = theme.color;
+			// > @deprecated 兼容2.13.0版本ChartTheme的titleColor、legendColor结构，未来版本会移除
+			
+			var titleThemeGen =
+			{
+				name: "titleTheme",
+				color: theme.color,
+				backgroundColor: "transparent",
+				borderColor: theme.borderColor,
+				borderWidth: 0
+			};
+			
+			// < @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
+			if(theme.titleColor)
+				titleThemeGen.titleColor = theme.titleColor;
+			// > @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
+			
+			theme.titleTheme = (!theme.titleTheme ? titleThemeGen : $.extend(true, titleThemeGen, theme.titleTheme));
+			
+			var legendThemeGen =
+			{
+				name: "legendTheme",
+				color: theme.color,
+				backgroundColor: "transparent",
+				borderColor: theme.borderColor,
+				borderWidth: 0
+			};
+			
+			// < @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
+			if(theme.legendColor)
+				legendThemeGen.color = theme.legendColor;
+			// > @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
+			
+			theme.legendTheme = (!theme.legendTheme ? legendThemeGen : $.extend(true, legendThemeGen, theme.legendTheme));
+		}
+		
+		if(theme.fontSize)
+		{
+			theme.titleTheme = (theme.titleTheme ? theme.titleTheme : {});
+			if(!theme.titleTheme.fontSize)
+				theme.titleTheme.fontSize = theme.fontSize;
+			
+			theme.legendTheme = (theme.legendTheme ? theme.legendTheme : {});
+			if(!theme.legendTheme.fontSize)
+				theme.legendTheme.fontSize = theme.fontSize;
+			
+			theme.tooltipTheme = (theme.tooltipTheme ? theme.tooltipTheme : {});
+			if(!theme.tooltipTheme.fontSize)
+				theme.tooltipTheme.fontSize = theme.fontSize;
+			
+			theme.highlightTheme = (theme.highlightTheme ? theme.highlightTheme : {});
+			if(!theme.highlightTheme.fontSize)
+				theme.highlightTheme.fontSize = theme.fontSize;
 		}
 		
 		if(theme.borderWidth && !theme.borderStyle)
@@ -4882,11 +4970,12 @@
 			"title" : {
 		        "left" : "center",
 				"textStyle" : {
-					"color" : chartTheme.titleColor
+					"color" : chartTheme.titleTheme.color
 				},
 				"subtextStyle" : {
-					"color" : chartTheme.titleColor
-				}
+					"color" : chartTheme.titleTheme.color
+				},
+				"backgroundColor" : chartTheme.titleTheme.backgroundColor
 			},
 			"line" : {
 				"itemStyle" : {
@@ -4907,7 +4996,7 @@
 				}
 			},
 			"radar" : {
-				"name" : { "textStyle" : { "color" : chartTheme.legendColor } },
+				"name" : { "textStyle" : { "color" : chartTheme.legendTheme.color } },
 				"axisLine" : { "lineStyle" : { "color" : areaBorderColor0 } },
 				"splitLine" : { "lineStyle" : { "color" : areaBorderColor0 } },
 				"splitArea" : { "areaStyle" : { "color" : [ areaColor0, chartTheme.backgroundColor ] } },
@@ -5097,10 +5186,10 @@
 				}
 			},
 			"gauge" : {
-				"title" : { "color" : chartTheme.legendColor },
+				"title" : { "color" : chartTheme.legendTheme.color },
 				"detail":
 				{
-					"color": chartTheme.legendColor
+					"color": chartTheme.legendTheme.color
 				},
 				"progress":
 				{
@@ -5492,9 +5581,10 @@
 				"orient": "horizontal",
 				"top": 25,
 				"textStyle" : {
-					"color" : chartTheme.legendColor
+					"color" : chartTheme.legendTheme.color
 				},
-				"inactiveColor" : axisScaleLineColor
+				"inactiveColor" : axisScaleLineColor,
+				"backgroundColor" : chartTheme.legendTheme.backgroundColor
 			},
 			"tooltip" : {
 				"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
@@ -5591,6 +5681,28 @@
 				}
 			}
 		};
+		
+		//不能在上述theme中直接设置fontSize，因为即时值为null，仍然会改变默认字体
+		
+		if(chartTheme.fontSize)
+		{
+			theme.textStyle = (theme.textStyle || {});
+			theme.textStyle.fontSize = chartTheme.fontSize;
+			
+			theme.categoryAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
+			theme.valueAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
+			theme.logAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
+			theme.timeAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
+			theme.gauge.detail.fontSize = chartTheme.fontSize;
+			theme.gauge.axisLabel.fontSize = chartTheme.fontSize;
+			theme.sankey.label.fontSize = chartTheme.fontSize;
+		}
+		if(chartTheme.titleTheme.fontSize)
+			theme.title.textStyle.fontSize = chartTheme.titleTheme.fontSize;
+		if(chartTheme.legendTheme.fontSize)
+			theme.legend.textStyle.fontSize = chartTheme.legendTheme.fontSize;
+		if(chartTheme.tooltipTheme.fontSize)
+			theme.tooltip.textStyle.fontSize = chartTheme.tooltipTheme.fontSize;
 		
 		return theme;
 	};
