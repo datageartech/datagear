@@ -4829,10 +4829,14 @@
 			
 			// < @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
 			if(theme.titleColor)
-				titleThemeGen.titleColor = theme.titleColor;
+				titleThemeGen.color = theme.titleColor;
 			// > @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
 			
 			theme.titleTheme = (!theme.titleTheme ? titleThemeGen : $.extend(true, titleThemeGen, theme.titleTheme));
+			
+			// < @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
+			theme.titleColor = theme.titleTheme.color;
+			// > @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
 			
 			var legendThemeGen =
 			{
@@ -4849,6 +4853,10 @@
 			// > @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
 			
 			theme.legendTheme = (!theme.legendTheme ? legendThemeGen : $.extend(true, legendThemeGen, theme.legendTheme));
+			
+			// < @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
+			theme.legendColor = theme.legendTheme.color;
+			// > @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
 			
 			var tooltipThemeGen =
 			{
@@ -4892,10 +4900,14 @@
 			
 			// < @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
 			if(theme.titleColor)
-				titleThemeGen.titleColor = theme.titleColor;
+				titleThemeGen.color = theme.titleColor;
 			// > @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
 			
 			theme.titleTheme = (!theme.titleTheme ? titleThemeGen : $.extend(true, titleThemeGen, theme.titleTheme));
+			
+			// < @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
+			theme.titleColor = theme.titleTheme.color;
+			// > @deprecated 兼容2.13.0版本ChartTheme的titleColor结构，未来版本会移除
 			
 			var legendThemeGen =
 			{
@@ -4912,6 +4924,10 @@
 			// > @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
 			
 			theme.legendTheme = (!theme.legendTheme ? legendThemeGen : $.extend(true, legendThemeGen, theme.legendTheme));
+			
+			// < @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
+			theme.legendColor = theme.legendTheme.color;
+			// > @deprecated 兼容2.13.0版本ChartTheme的legendColor结构，未来版本会移除
 		}
 		
 		if(theme.fontSize)
