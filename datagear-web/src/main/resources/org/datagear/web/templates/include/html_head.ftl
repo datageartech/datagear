@@ -7,8 +7,8 @@
  *
 -->
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="description" content="DataGear是一款数据可视化分析平台，使用Java语言开发，采用浏览器/服务器架构，支持SQL、CSV、Excel、HTTP接口、JSON等多种数据源，主要功能包括数据管理、SQL工作台、数据导入/导出、数据集管理、图表管理、看板管理等。" />
-<meta name="keywords" content="DataGear, 数据可视化, data visualization, 数据分析, data analysis, 商业智能, BI, 图表, chart, 看板, dashboard" />
+<meta name="description" content="DataGear是一款开源免费的数据可视化分析平台，可自由制作任何您想要的数据可视化看板，支持接入SQL、CSV、Excel、HTTP接口、JSON等多种数据源。" />
+<meta name="keywords" content="开源免费的数据可视化平台, 开源免费的数据可视化系统, 开源免费的数据可视化分析平台, 开源免费的数据可视化分析系统, 数据可视化平台, 数据可视化系统, 数据可视化分析平台, 数据可视化分析系统, 数据可视化, 商业智能, 图表, 看板, data visualization, data analysis, BI, chart, dashboard" />
 <#if !isAjaxRequest>
 <#assign _hh_Version=statics['org.datagear.util.Global'].VERSION>
 <script type="text/javascript">
