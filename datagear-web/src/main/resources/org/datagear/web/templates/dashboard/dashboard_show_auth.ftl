@@ -27,6 +27,8 @@
 			<div class="user-name">
 			${currentUser.nameLabel}
 			</div>
+			<#else>
+			<a class="link" href="${contextPath}/login"><@spring.message code='main.login' /></a>
 			</#if>
 		</div>
 	</div>
