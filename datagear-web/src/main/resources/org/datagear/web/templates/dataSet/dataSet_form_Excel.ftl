@@ -128,6 +128,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
+	po.initMtableModelInput();
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.element(".nameRow-radios").checkboxradiogroup();
@@ -137,7 +138,7 @@ readonly 是否只读操作，允许为null
 	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
 	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
 
-	po.initDataSetFileInput(po.url("uploadFile"), "${((dataSet.fileSourceType)!'')?js_string?no_esc}", ${isAdd?string("true", "false")});
+	po.initDataSetFileInput(po.url("uploadFile"), "${((dataSet.fileSourceType)!'')?js_string?no_esc}", po.isAddOperation());
 	
 	po.updatePreviewOptionsData = function()
 	{
@@ -235,8 +236,7 @@ readonly 是否只读操作，允许为null
 			"displayName" :
 			{
 				"dataSetUploadFileNameRequired": true,
-				"dataSetUploadFilePreviewRequired": true,
-				"dataSetUploadFilePropertiesRequired": true
+				"dataSetUploadFilePreviewRequired": true
 			},
 			"dataSetResDirectory.directory":
 			{
@@ -245,8 +245,7 @@ readonly 是否只读操作，允许为null
 			"dataSetResFileName":
 			{
 				"dataSetServerFileNameRequired": true,
-				"dataSetServerFilePreviewRequired": true,
-				"dataSetServerFilePropertiesRequired": true
+				"dataSetServerFilePreviewRequired": true
 			},
 			"sheetIndex": {"required": true, "integer": true, "min": 1},
 			"nameRowText": {"integer": true, "min": 1},
@@ -259,8 +258,7 @@ readonly 是否只读操作，允许为null
 			"displayName" :
 			{
 				"dataSetUploadFileNameRequired": "<@spring.message code='validation.required' />",
-				"dataSetUploadFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
-				"dataSetUploadFilePropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+				"dataSetUploadFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			},
 			"dataSetResDirectory.directory":
 			{
@@ -269,8 +267,7 @@ readonly 是否只读操作，允许为null
 			"dataSetResFileName":
 			{
 				"dataSetServerFileNameRequired": "<@spring.message code='validation.required' />",
-				"dataSetServerFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
-				"dataSetServerFilePropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+				"dataSetServerFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			},
 			"sheetIndex":
 			{

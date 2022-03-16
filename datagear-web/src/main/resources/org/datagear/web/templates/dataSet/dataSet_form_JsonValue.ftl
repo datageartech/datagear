@@ -67,6 +67,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
+	po.initMtableModelInput();
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.initWorkspaceHeight();
@@ -141,7 +142,7 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"value" : {"dataSetJsonValueRequired": true, "dataSetJsonValuePreviewRequired": true, "dataSetPropertiesRequired": true}
+			"value" : {"dataSetJsonValueRequired": true, "dataSetJsonValuePreviewRequired": true}
 		},
 		messages :
 		{
@@ -149,8 +150,7 @@ readonly 是否只读操作，允许为null
 			"value" :
 			{
 				"dataSetJsonValueRequired": "<@spring.message code='validation.required' />",
-				"dataSetJsonValuePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
-				"dataSetPropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+				"dataSetJsonValuePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			}
 		},
 		submitHandler : function(form)

@@ -282,22 +282,6 @@
 		
 		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
-	
-	$.validator.addMethod("dataSetUploadFilePropertiesRequired", function(value, element)
-	{
-		if(!po.isFileSourceTypeUpload())
-			return true;
-		
-		return po.hasFormDataSetProperty();
-	});
-	
-	$.validator.addMethod("dataSetServerFilePropertiesRequired", function(value, element)
-	{
-		if(!po.isFileSourceTypeServer())
-			return true;
-		
-		return po.hasFormDataSetProperty();
-	});
 })
 (${pageId});
 </script>

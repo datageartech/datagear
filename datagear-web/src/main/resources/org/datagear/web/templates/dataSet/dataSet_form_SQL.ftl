@@ -85,6 +85,7 @@ readonly 是否只读操作，允许为null
 			+"<span class='ui-button-icon-space'> </span><@spring.message code='sqlpad.exportSqlResult' /></button>");
 	
 	$.initButtons(po.element());
+	po.initMtableModelInput();
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.initWorkspaceHeight();
@@ -230,7 +231,7 @@ readonly 是否只读操作，允许为null
 		{
 			"name" : "required",
 			"shmConFactory.schema.title" : "required",
-			"sql" : {"dataSetSqlRequired": true, "dataSetSqlPreviewRequired": true, "dataSetPropertiesRequired": true}
+			"sql" : {"dataSetSqlRequired": true, "dataSetSqlPreviewRequired": true}
 		},
 		messages :
 		{
@@ -239,8 +240,7 @@ readonly 是否只读操作，允许为null
 			"sql" :
 			{
 				"dataSetSqlRequired": "<@spring.message code='validation.required' />",
-				"dataSetSqlPreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
-				"dataSetPropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+				"dataSetSqlPreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			}
 		},
 		submitHandler : function(form)

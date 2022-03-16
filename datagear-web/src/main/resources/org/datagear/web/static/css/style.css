@@ -3677,8 +3677,8 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form .form-item-analysisProjectAware{
 	position: relative;
 }
-.page-form .form-item-analysisProjectAware > .form-item-value{
-	width: 40% !important;
+.page-form .form-item-analysisProjectAware > .form-item-value-name{
+	width: 50% !important;
 }
 .page-form .form-item-analysisProjectAware > .form-item-value input{
 	width: 60% !important;
@@ -3687,7 +3687,6 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	min-width: unset !important;
 	position: absolute;
 	right: 0;
-	top: -0.1em;
 }
 .page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value{
 	width: 12.5em !important;
@@ -3697,6 +3696,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 }
 .page-form .form-item-analysisProjectAware .analysisProjectActionSelect{
 	position: absolute;
+	margin-left: 0.1em;
 }
 .page-form .form-item-analysisProjectAware .analysisProjectActionSelect .analysis-project-menu-root,
 .page-form .form-item-analysisProjectAware .analysisProjectActionSelect .analysis-project-menu-root > .ui-menu-item-wrapper{

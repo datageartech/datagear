@@ -90,6 +90,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
+	po.initMtableModelInput();
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.element(".nameRow-radios").controlgroup();
@@ -168,7 +169,7 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"value" : {"dataSetCsvValueRequired": true, "dataSetCsvValuePreviewRequired": true, "dataSetPropertiesRequired": true},
+			"value" : {"dataSetCsvValueRequired": true, "dataSetCsvValuePreviewRequired": true},
 			"nameRowText": {"integer": true, "min": 1},
 		},
 		messages :
@@ -177,8 +178,7 @@ readonly 是否只读操作，允许为null
 			"value" :
 			{
 				"dataSetCsvValueRequired": "<@spring.message code='validation.required' />",
-				"dataSetCsvValuePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
-				"dataSetPropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+				"dataSetCsvValuePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			},
 			"nameRowText":
 			{

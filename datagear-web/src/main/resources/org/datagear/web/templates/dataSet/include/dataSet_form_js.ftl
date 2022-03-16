@@ -29,6 +29,21 @@ po.previewOptions.url = "...";
 		return "${contextPath}/dataSet/" + action;
 	};
 	
+	po.isReadonlyOperation = function()
+	{
+		return ("${readonly?string('true','false')}" == "true");
+	};
+
+	po.isAddOperation = function()
+	{
+		return ("${isAdd?string('true','false')}" == "true");
+	};
+	
+	po.isMutableModel = function()
+	{
+		return (po.element("input[name='mutableModel']:checked").val() == "true");
+	};
+	
 	po.isPreviewValueModified = function()
 	{
 		return true;
@@ -69,6 +84,11 @@ po.previewOptions.url = "...";
 	{
 		var tableTitleHeight = 30;
 		return po.element(".preview-result-table-wrapper").height() - tableTitleHeight;
+	};
+	
+	po.initMtableModelInput = function()
+	{
+		po.element(".mutableModelRadios").checkboxradiogroup();
 	};
 	
 	po.initWorkspaceHeight = function()
@@ -762,7 +782,7 @@ po.previewOptions.url = "...";
 	
 	po.buildPreviewOptionsDataSetProperties = function()
 	{
-		var isAddOperation = (po.isAddOperation != null ? po.isAddOperation : ("${isAdd?string('true', 'false')}" == "true"));
+		var isAddOperation = po.isAddOperation();
 		
 		//编辑操作无法区分已保存的属性是否是用户手动添加的，所以应全部返回
 		if(!isAddOperation)
@@ -901,7 +921,7 @@ po.previewOptions.url = "...";
 		
 		po.previewOptions.data.query.resultFetchSize = po.resultFetchSizeVal();
 		po.previewOptions.data.dataSet.dataFormat = po.getFormDataFormat();
-		po.previewOptions.data.dataSet.properties = po. buildPreviewOptionsDataSetProperties();
+		po.previewOptions.data.dataSet.properties = po.buildPreviewOptionsDataSetProperties();
 		
 		$.ajaxJson(
 		{
@@ -915,7 +935,7 @@ po.previewOptions.url = "...";
 				
 				//工作区内容有变更才更新属性，防止用户添加的属性输入框被刷新
 				//属性表单内容为空也更新，比如用户删除了所有属性时
-				if(previewValueModified || !po.hasFormDataSetProperty())
+				if(!po.isMutableModel() && !po.isReadonlyOperation() && (previewValueModified || !po.hasFormDataSetProperty()))
 				{
 					po.updateFormDataSetProperties(previewResponse.properties);
 					po.previewOptions.data.dataSet.properties = po.getFormDataSetProperties();
@@ -1044,11 +1064,6 @@ po.previewOptions.url = "...";
 		
 		return columns;
 	};
-	
-	$.validator.addMethod("dataSetPropertiesRequired", function(value, element)
-	{
-		return po.hasFormDataSetProperty();
-	});
 })
 (${pageId});
 </script>

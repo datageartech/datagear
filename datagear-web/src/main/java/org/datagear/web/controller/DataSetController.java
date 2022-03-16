@@ -1186,9 +1186,6 @@ public class DataSetController extends AbstractSchemaConnController
 		if (isBlank(dataSet.getName()))
 			throw new IllegalInputException();
 
-		if (isEmpty(dataSet.getProperties()))
-			throw new IllegalInputException();
-
 		List<DataSetParam> params = dataSet.getParams();
 		if (params != null)
 		{
