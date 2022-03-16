@@ -39,10 +39,11 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 	private String name;
 
-	private List<DataSetProperty> properties;
+	private boolean mutableModel = false;
 
-	@SuppressWarnings("unchecked")
-	private List<DataSetParam> params = Collections.EMPTY_LIST;
+	private List<DataSetProperty> properties = Collections.emptyList();
+
+	private List<DataSetParam> params = Collections.emptyList();
 
 	/** 数据格式 */
 	private DataFormat dataFormat = new DataFormat();
@@ -68,6 +69,17 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+
+	@Override
+	public boolean isMutableModel()
+	{
+		return mutableModel;
+	}
+
+	public void setMutableModel(boolean mutableModel)
+	{
+		this.mutableModel = mutableModel;
 	}
 
 	@Override
@@ -245,8 +257,8 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 		for (Map<String, ?> rowRaw : rawData)
 		{
-			// 应当仅保留数据集属性对应的数据，因为数据集属性是允许编辑的，如果用户删除了某个数据集属性，表明对应的值不想被使用
-			Map<String, Object> row = new HashMap<>();
+			// 易变模型应保留所有原始数据
+			Map<String, Object> row = (isMutableModel() ? new HashMap<>(rowRaw) : new HashMap<>());
 
 			for (int j = 0; j < plen; j++)
 			{

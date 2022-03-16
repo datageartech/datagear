@@ -26,16 +26,22 @@ public interface DataSet extends Identifiable, Serializable
 	String getName();
 
 	/**
+	 * 是否是易变模型。
+	 * <p>
+	 * 即{@linkplain #getResult(DataSetQuery)}返回数据的结构并不是固定不变、可由{@linkplain #getProperties()}描述的。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	boolean isMutableModel();
+
+	/**
 	 * 获取属性列表。
 	 * <p>
 	 * 属性列表描述{@linkplain #getResult(DataSetQuery)}返回的{@linkplain DataSetResult#getData()}的对象结构。
 	 * </p>
-	 * <p>
-	 * 属性列表并不一定与{@linkplain DataSetResult#getData()}的对象结构严格一致，
-	 * 通常是{@linkplain DataSetResult#getData()}对象包含相同、或者更多的属性。
-	 * </p>
 	 * 
-	 * @return
+	 * @return 属性列表，返回空列表则表示无属性
 	 */
 	List<DataSetProperty> getProperties();
 
@@ -49,11 +55,8 @@ public interface DataSet extends Identifiable, Serializable
 
 	/**
 	 * 获取参数列表。
-	 * <p>
-	 * 返回{@code null}或空列表，表示没有。
-	 * </p>
 	 * 
-	 * @return
+	 * @return 参数列表，返回空列表则表示无参数
 	 */
 	List<DataSetParam> getParams();
 
@@ -68,7 +71,15 @@ public interface DataSet extends Identifiable, Serializable
 	/**
 	 * 获取{@linkplain DataSetResult}。
 	 * <p>
-	 * 返回结果中的数据项应已转换为与{@linkplain #getProperties()}的{@linkplain DataSetProperty#getType()}类型一致。
+	 * 如果{@linkplain #isMutableModel()}为{@code false}，那么返回结果中的数据项属性不应超出{@linkplain #getProperties()}的范围，
+	 * 避免暴露底层数据源不期望暴露的数据；
+	 * 如果{@linkplain #isMutableModel()}为{@code true}，则返回结果中的数据项属性不受{@linkplain #getProperties()}范围限制。
+	 * </p>
+	 * <p>
+	 * 如果返回结果中的数据项属性在{@linkplain #getProperties()}中有对应，当数据项属性值为{@code null}时，应使用{@linkplain DataSetProperty#getDefaultValue()}的值。
+	 * </p>
+	 * <p>
+	 * 返回结果中的数据项属性值应已转换为与{@linkplain #getProperties()}的{@linkplain DataSetProperty#getType()}类型一致。
 	 * </p>
 	 * 
 	 * @param query

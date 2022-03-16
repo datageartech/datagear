@@ -680,6 +680,12 @@ public class HtmlChartWidgetEntityServiceImpl
 		}
 
 		@Override
+		public boolean isMutableModel()
+		{
+			return false;
+		}
+
+		@Override
 		public List<DataSetProperty> getProperties()
 		{
 			return Collections.emptyList();
