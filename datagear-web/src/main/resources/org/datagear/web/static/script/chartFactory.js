@@ -1855,28 +1855,61 @@
 	};
 	
 	/**
-	 * 获取第一个主件或者附件图表数据集对象。
+	 * 获取第一个主件图表数据集对象。
+	 * 主件图表数据集的用途是绘制图表。
 	 * 
-	 * @param attachment 可选，true 获取第一个附件图表数据集；false 获取第一个主件图表数据集。默认值为：false
-	 * @return {...} 或  undefined
+	 * @param nonNull 可选，是否要求返回非null并且在为null时抛出异常，true 是；false 否。默认值：true
+	 * @return
+	 * @since 3.0.0
 	 */
-	chartBase.chartDataSetFirst = function(attachment)
+	chartBase.chartDataSetMainFirst = function(nonNull)
 	{
-		attachment = (attachment == null ? false : attachment);
+		nonNull = (nonNull == null ? true : nonNull);
 		
 		var re = undefined;
 		
 		var chartDataSets = this.chartDataSets;
 		for(var i=0; i<chartDataSets.length; i++)
 		{
-			var isAttachment = chartDataSets[i].attachment;
-			
-			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
+			if(!chartDataSets[i].attachment)
 			{
 				re = chartDataSets[i];
 				break;
 			}
 		}
+		
+		if(nonNull && re == null)
+			throw new Error("Main ChartDataSet required");
+		
+		return re;
+	};
+	
+	/**
+	 * 获取第一个附件图表数据集对象。
+	 * 附件图表数据集的用途不是绘制图表。
+	 * 
+	 * @param nonNull 可选，是否要求返回非null并且在为null时抛出异常，true 是；false 否。默认值：true
+	 * @return
+	 * @since 3.0.0
+	 */
+	chartBase.chartDataSetAttachmentFirst = function(nonNull)
+	{
+		nonNull = (nonNull == null ? true : nonNull);
+		
+		var re = undefined;
+		
+		var chartDataSets = this.chartDataSets;
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			if(chartDataSets[i].attachment)
+			{
+				re = chartDataSets[i];
+				break;
+			}
+		}
+		
+		if(nonNull && re == null)
+			throw new Error("Attachment ChartDataSet required");
 		
 		return re;
 	};
@@ -1953,7 +1986,7 @@
 		}
 		
 		if(nonEmpty && re.length == 0)
-			throw new Error("Data set property with '"+dataSignName+"' sign must be set");
+			throw new Error("DataSetProperty with '"+dataSignName+"' sign required");
 		
 		return re;
 	};
@@ -3646,6 +3679,35 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.chartDataSetMainFirst()、chartDataSetAttachmentFirst()取代
+	/**
+	 * 获取第一个主件或者附件图表数据集对象。
+	 * 
+	 * @param attachment 可选，true 获取第一个附件图表数据集；false 获取第一个主件图表数据集。默认值为：false
+	 * @return {...} 或  undefined
+	 */
+	chartBase.chartDataSetFirst = function(attachment)
+	{
+		attachment = (attachment == null ? false : attachment);
+		
+		var re = undefined;
+		
+		var chartDataSets = this.chartDataSets;
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var isAttachment = chartDataSets[i].attachment;
+			
+			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
+			{
+				re = chartDataSets[i];
+				break;
+			}
+		}
+		
+		return re;
+	};
+	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.chartDataSetMainFirst()、chartDataSetAttachmentFirst()取代
 	
 	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.hasDataSetParam()取代
 	/**

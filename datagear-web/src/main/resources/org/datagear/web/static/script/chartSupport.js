@@ -32,7 +32,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		var chartDataSet = chart.chartDataSetFirst();
+		var chartDataSet = chart.chartDataSetMainFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
@@ -183,7 +183,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		var chartDataSet = chart.chartDataSetFirst();
+		var chartDataSet = chart.chartDataSetMainFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
@@ -404,7 +404,7 @@
 		options,
 		function(options)
 		{
-			var chartDataSet = chart.chartDataSetFirst();
+			var chartDataSet = chart.chartDataSetMainFirst();
 			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 			
 			if(options.dgAxisType == "angle")
@@ -977,7 +977,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		var chartDataSet = chart.chartDataSetFirst();
+		var chartDataSet = chart.chartDataSetMainFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
@@ -1192,7 +1192,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, weight: weightSign });
 		
-		var chartDataSet = chart.chartDataSetFirst();
+		var chartDataSet = chart.chartDataSetMainFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
@@ -2715,7 +2715,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, open: openSign, close: closeSign, min: minSign, max: maxSign });
 		
-		var chartDataSet = chart.chartDataSetFirst();
+		var chartDataSet = chart.chartDataSetMainFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
 		options = chartSupport.inflateRenderOptions(chart,
@@ -2865,7 +2865,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, weight: weightSign });
 		
-		var chartDataSet = chart.chartDataSetFirst();
+		var chartDataSet = chart.chartDataSetMainFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
@@ -3960,7 +3960,7 @@
 		chartSupport.chartSignNameMap(chart, { name: nameSign, min: minSign, lower: lowerSign,
 				median: medianSign, upper: upperSign, max: maxSign, value: valueSign });
 		
-		var chartDataSet = chart.chartDataSetFirst();
+		var chartDataSet = chart.chartDataSetMainFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
 		options = chartSupport.inflateRenderOptions(chart,
@@ -4833,7 +4833,7 @@
 		
 		var columns = [];
 		
-		var chartDataSet = chart.chartDataSetFirst();
+		var chartDataSet = chart.chartDataSetMainFirst();
 		var cps = chartSupport.tableGetColumnProperties(chart, chartDataSet, columnSign);
 		for(var i=0; i<cps.length; i++)
 		{
@@ -5179,7 +5179,7 @@
 		{
 			var columnData = [];
 			
-			var chartDataSet = chart.chartDataSetFirst();
+			var chartDataSet = chart.chartDataSetMainFirst();
 			var cps = chartSupport.tableGetColumnProperties(chart, chartDataSet, signNameMap.column);
 			for(var i=0; i<cps.length; i++)
 				columnData[i] = chartData[cps[i].name];
