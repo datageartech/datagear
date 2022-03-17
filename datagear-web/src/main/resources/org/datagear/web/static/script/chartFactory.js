@@ -2048,6 +2048,7 @@
 	 * @param chartDataSet
 	 * @param data 可选，要设置的数据，通常是：{ ... }、[ { ... }, ... ]，不设置则执行获取操作
 	 * @return 要获取的数据集结果数据，没有则返回null
+	 * @since 3.0.0
 	 */
 	chartBase.resultDataOf = function(results, chartDataSet, data)
 	{
@@ -2079,6 +2080,7 @@
 	 * @param results
 	 * @param chartDataSet
 	 * @return 不会为null的数组
+	 * @since 3.0.0
 	 */
 	chartBase.resultDatasOf = function(results, chartDataSet)
 	{
@@ -3660,6 +3662,19 @@
 		}
 		
 		return signNames;
+	};
+	
+	/**
+	 * 判断给定图表数据集是否是可变模型的。
+	 * 
+	 * @param chartDataSet 图表数据集、图表数据集索引数值
+	 * @returns 要获取的标记映射表，格式为：{ 数据集属性名: 标记名字符串数组、null, ... }，不会为null
+	 * @since 3.0.0
+	 */
+	chartBase.isMutableModel = function(chartDataSet)
+	{
+		chartDataSet = this._chartDataSetOf(chartDataSet);
+		return chartDataSet.dataSet.mutableModel;
 	};
 	
 	//-------------
