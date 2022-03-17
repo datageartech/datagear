@@ -1805,7 +1805,7 @@
 	/**
 	 * 获取主件图表数据集对象数组，它们的用途是绘制图表。
 	 * 
-	 * @return []
+	 * @return []，空数组表示没有主件图表数据集
 	 */
 	chartBase.chartDataSetsMain = function()
 	{
@@ -1826,7 +1826,7 @@
 	/**
 	 * 获取附件图表数据集对象数组，它们的用途不是绘制图表。
 	 * 
-	 * @return []
+	 * @return []，空数组表示没有附件图表数据集
 	 */
 	chartBase.chartDataSetsAttachment = function()
 	{
@@ -3256,7 +3256,7 @@
 	 * 
 	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
 	 * @param sort 可选，当chartDataSet是图表数据集时，是否依据其propertyOrders对返回结果进行重排序，true 是；false 否。默认值为：true
-	 * @returns 数据集属性数组
+	 * @returns 数据集属性数组，返回空数组表示没有属性
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetProperties = function(chartDataSet, sort)
@@ -3427,7 +3427,7 @@
 	 * 获取数据集参数数组。
 	 * 
 	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
-	 * @returns 数据集参数数组
+	 * @returns 数据集参数数组，空数组表示没有参数
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetParams = function(chartDataSet)
