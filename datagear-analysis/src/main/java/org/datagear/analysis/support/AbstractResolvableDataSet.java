@@ -50,10 +50,6 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 		checkRequiredParamValues(query);
 
 		List<DataSetProperty> properties = getProperties();
-
-		if (properties == null || properties.isEmpty())
-			throw new DataSetException("[this.getProperties()] must not be empty");
-
 		ResolvedDataSetResult result = resolveResult(query, properties, false);
 
 		return result.getResult();

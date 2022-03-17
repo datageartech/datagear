@@ -170,6 +170,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		public DataSetJson(DataSet dataSet)
 		{
 			super(dataSet.getId(), dataSet.getName(), dataSet.getProperties());
+			setMutableModel(dataSet.isMutableModel());
 			setParams(dataSet.getParams());
 			
 			if(dataSet instanceof AbstractDataSet)
