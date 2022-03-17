@@ -179,6 +179,46 @@
 	height: 100%;
 }
 
+/**原始数据图表*/
+.dg-chart-rawdata{
+	position: relative;
+}
+.dg-chart-rawdata .dg-chart-rawdata-title{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1.6em;
+	text-align: center;
+	font-weight: bold;
+	font-size: 1.2em;
+}
+.dg-chart-rawdata .dg-chart-rawdata-content{
+	position: absolute;
+	left: 0;
+	top: 1.6em;
+	right: 0;
+	bottom: 0;
+	overflow: auto;
+}
+.dg-chart-rawdata .dg-chart-rawdata-ds,
+.dg-chart-rawdata .dg-chart-rawdata-ds-name,
+.dg-chart-rawdata .dg-chart-rawdata-ds-data{
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.dg-chart-rawdata .dg-chart-rawdata-ds-name{
+	font-weight: bold;
+}
+.dg-chart-rawdata .dg-chart-rawdata-ds-data{
+	padding: 0.2em 1em;
+}
+.dg-chart-rawdata .dg-chart-rawdata-ds-data-item{
+	padding-top: 0.1em;
+	padding-bottom: 0.1em;
+}
+
 /*数据集参数值表单*/
 .dg-dspv-form{}
 .dg-dspv-form .dg-dspv-form-content{

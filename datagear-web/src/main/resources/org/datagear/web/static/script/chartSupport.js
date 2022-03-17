@@ -4835,6 +4835,10 @@
 		
 		var chartDataSet = chart.chartDataSetMainFirst();
 		var cps = chartSupport.tableGetColumnProperties(chart, chartDataSet, columnSign);
+		
+		if(!cps || cps.length == 0)
+			throw new Error("DataSetProperty required in ["+chart.dataSetAlias(chartDataSet)+"] for rendering table");
+		
 		for(var i=0; i<cps.length; i++)
 		{
 			var column =
@@ -6273,6 +6277,58 @@
 		});
 	};
 	
+	//原始数据
+	
+	chartSupport.rawDataRender = function(chart)
+	{
+		var ele = chart.elementJquery();
+		ele.addClass("dg-chart-rawdata");
+		
+		$("<div class='dg-chart-rawdata-title' />").text(chart.name).appendTo(ele);
+		$("<div class='dg-chart-rawdata-content' />").appendTo(ele);
+	};
+	
+	chartSupport.rawDataUpdate = function(chart, results)
+	{
+		var ele = chart.elementJquery();
+		var $content = $("> .dg-chart-rawdata-content", ele);
+		$(".dg-chart-rawdata-ds", $content).remove();
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var result = chart.resultOf(results, chartDataSet);
+			var datas = chart.resultDatas(result);
+			
+			var $ds = $("<div class='dg-chart-rawdata-ds' />").appendTo($content);
+			$("<div class='dg-chart-rawdata-ds-name' />").text(dataSetName).appendTo($ds);
+			var $dsd = $("<div class='dg-chart-rawdata-ds-data' />").appendTo($ds);
+			
+			for(var j=0; j<datas.length; j++)
+			{
+				var di = JSON.stringify(datas[j]);
+				$("<div class='dg-chart-rawdata-ds-data-item' />").text(di).appendTo($dsd);
+			}
+		}
+	};
+	
+	chartSupport.rawDataDestroy = function(chart)
+	{
+		var ele = chart.elementJquery();
+		
+		ele.removeClass("dg-chart-rawdata");
+		$("> .dg-chart-rawdata-title", ele).remove();
+		$("> .dg-chart-rawdata-content", ele).remove();
+	};
+	
+	chartSupport.rawDataResize = function(chart){};
+	chartSupport.rawDataOn = function(chart, eventType, handler){};
+	chartSupport.rawDataOff = function(chart, eventType, handler){};
+	
 	//自定义
 	
 	chartSupport.customAsyncRender = function(chart)
@@ -6292,10 +6348,10 @@
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
 		
-		//如果未定义，则采用表格组件，避免空白页，又可以让用户浏览和调试数据
+		//如果未定义，则采用默认方式，避免空白页，又可以让用户浏览和调试数据
 		if(!customRenderer)
 		{
-			chartSupport.tableRender(chart, "column");
+			chartSupport.rawDataRender(chart);
 		}
 		else
 		{
@@ -6320,10 +6376,10 @@
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
 		
-		//如果未定义，则采用表格组件，避免空白页，又可以让用户浏览和调试数据
+		//如果未定义，则采用默认方式，避免空白页，又可以让用户浏览和调试数据
 		if(!customRenderer)
 		{
-			chartSupport.tableUpdate(chart, results);
+			chartSupport.rawDataUpdate(chart, results);
 		}
 		else
 		{
@@ -6343,10 +6399,16 @@
 	
 	chartSupport.customDestroy = function(chart)
 	{
-		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
 		
-		if(customRenderer.destroy)
+		if(!customRenderer)
+		{
+			chartSupport.rawDataDestroy(chart);
+		}
+		else if(customRenderer.destroy)
+		{
 			customRenderer.destroy(chart);
+		}
 	};
 	
 	chartSupport.customOn = function(chart, eventType, handler)
@@ -6356,7 +6418,7 @@
 		if(customRenderer.on)
 			customRenderer.on(chart, eventType, handler);
 		else
-			throw new Error("Custom renderer 's [on] undefined");
+			throw new Error("Chart renderer 's [on] rqeuired");
 	};
 	
 	chartSupport.customOff = function(chart, eventType, handler)
@@ -6366,18 +6428,17 @@
 		if(customRenderer.off)
 			customRenderer.off(chart, eventType, handler);
 		else
-			throw new Error("Custom renderer 's [off] undefined");
+			throw new Error("Chart renderer 's [off] rqeuired");
 	};
 	
 	chartSupport.customGetCustomRenderer = function(chart, nullable)
 	{
-		if(nullable == null)
-			nullable = false;
+		nullable = (nullable == null ? false : nullable);
 		
 		var renderer = chart.renderer();
 		
 		if(renderer == null && !nullable)
-			throw new Error("Chart renderer must be defined");
+			throw new Error("Chart renderer required");
 		
 		return renderer;
 	};
