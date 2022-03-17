@@ -2027,33 +2027,6 @@
 	};
 	
 	/**
-	 * 返回第一个主件或者附件数据集结果，没有则返回undefined。
-	 * 
-	 * @param results
-	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
-	 */
-	chartBase.resultFirst = function(results, attachment)
-	{
-		attachment = (attachment == null ? false : attachment);
-		
-		var index = undefined;
-		
-		var chartDataSets = this.chartDataSets;
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			var isAttachment = chartDataSets[i].attachment;
-			
-			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
-			{
-				index = i;
-				break;
-			}
-		}
-		
-		return (index == null ? undefined : this.resultAt(results, index));
-	};
-	
-	/**
 	 * 获取/设置数据集结果对象包含的数据。
 	 * 
 	 * @param result 数据集结果对象
@@ -2066,6 +2039,20 @@
 			return (result ? result.data : undefined);
 		else
 			result.data = data;
+	};
+	
+	/**
+	 * 获取/设置指定图表数据集对应的数据集结果对象包含的数据。
+	 * 
+	 * @param results
+	 * @param chartDataSet
+	 * @param data 可选，要设置的数据，通常是：{ ... }、[ { ... }, ... ]，不设置则执行获取操作
+	 * @return 要获取的数据集结果数据，没有则返回null
+	 */
+	chartBase.resultDataOf = function(results, chartDataSet, data)
+	{
+		var result = this.resultOf(results, chartDataSet);
+		return this.resultData(result, data);
 	};
 	
 	/**
@@ -2087,16 +2074,15 @@
 	};
 	
 	/**
-	 * 获取第一个主件或者附件数据集结果的数据对象数组。
-	 * 如果数据对象是null，返回空数组：[]；如果数据对象是数组，则直接返回；否则，返回：[ 数据对象 ]。
+	 * 获取指定图表数据集对应的数据集结果对象包含的数据对象数组。
 	 * 
-	 * @param results 数据集结果数组
-	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
+	 * @param results
+	 * @param chartDataSet
 	 * @return 不会为null的数组
 	 */
-	chartBase.resultDatasFirst = function(results, attachment)
+	chartBase.resultDatasOf = function(results, chartDataSet)
 	{
-		var result = this.resultFirst(results, attachment);
+		var result = this.resultOf(results, chartDataSet);
 		return this.resultDatas(result);
 	};
 	
@@ -3153,7 +3139,7 @@
 	 *   },
 	 *   update: function(chart, results)
 	 *   {
-	 *     $(".result-data-count", chart.elementJquery()).text(chart.resultDatasFirst(results).length);
+	 *     $(".result-data-count", chart.elementJquery()).text(chart.resultDatas(...).length);
 	 *   }
 	 * }
 	 * 
@@ -3679,6 +3665,51 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
+	/**
+	 * 返回第一个主件或者附件数据集结果，没有则返回undefined。
+	 * 
+	 * @param results
+	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
+	 */
+	chartBase.resultFirst = function(results, attachment)
+	{
+		attachment = (attachment == null ? false : attachment);
+		
+		var index = undefined;
+		
+		var chartDataSets = this.chartDataSets;
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var isAttachment = chartDataSets[i].attachment;
+			
+			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
+			{
+				index = i;
+				break;
+			}
+		}
+		
+		return (index == null ? undefined : this.resultAt(results, index));
+	};
+	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
+	
+	// < @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultDatasOf()
+	/**
+	 * 获取第一个主件或者附件数据集结果的数据对象数组。
+	 * 如果数据对象是null，返回空数组：[]；如果数据对象是数组，则直接返回；否则，返回：[ 数据对象 ]。
+	 * 
+	 * @param results 数据集结果数组
+	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
+	 * @return 不会为null的数组
+	 */
+	chartBase.resultDatasFirst = function(results, attachment)
+	{
+		var result = this.resultFirst(results, attachment);
+		return this.resultDatas(result);
+	};
+	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultDatasOf()
 	
 	// < @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.chartDataSetMainFirst()、chartDataSetAttachmentFirst()取代
 	/**
