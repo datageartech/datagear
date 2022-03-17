@@ -388,6 +388,16 @@ form.input-width-9 .form-item .form-item-value .input,
 .form.input-width-9 .form-item .form-item-value .input{
 	width: 90%;
 }
+form .form-item .form-item-value input[type=text].width-7,
+form .form-item .form-item-value input[type=password].width-7,
+form .form-item .form-item-value textarea.width-7,
+form .form-item .form-item-value .input.width-7,
+.form .form-item .form-item-value input[type=text].width-7,
+.form .form-item .form-item-value input[type=password].width-7,
+.form .form-item .form-item-value textarea.width-7,
+.form .form-item .form-item-value .input.width-7{
+	width: 70%;
+}
 form .form-item .form-item-value input[type=text].width-9,
 form .form-item .form-item-value input[type=password].width-9,
 form .form-item .form-item-value textarea.width-9,
@@ -3677,31 +3687,24 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form .form-item-analysisProjectAware{
 	position: relative;
 }
-.page-form .form-item-analysisProjectAware > .form-item-value-name{
-	width: 50% !important;
-}
-.page-form .form-item-analysisProjectAware > .form-item-value input{
-	width: 60% !important;
-}
 .page-form .form-item-analysisProjectAware .form-item-analysisProject{
 	min-width: unset !important;
 	position: absolute;
+	width: 12em;
 	right: 0;
 }
 .page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value{
-	width: 12.5em !important;
-}
-.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value input{
-	width: 10em !important;
+	width: 100% !important;
+	text-align: right;
 }
 .page-form .form-item-analysisProjectAware .analysisProjectActionSelect{
-	position: absolute;
-	margin-left: 0.1em;
+	vertical-align: middle;
+	margin-right: 2px;
 }
 .page-form .form-item-analysisProjectAware .analysisProjectActionSelect .analysis-project-menu-root,
 .page-form .form-item-analysisProjectAware .analysisProjectActionSelect .analysis-project-menu-root > .ui-menu-item-wrapper{
-	width: 1.7em;
-	height: 2em;
+	width: 1.5em;
+	height: 1.5em;
 }
 
 .page-form-importDashboard{}

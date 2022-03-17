@@ -9,13 +9,14 @@
 <#--
 数据分析项目相关表单页：所属数据分析项目选择框
 -->
-<div class="form-item-analysisProject form-item display-37">
+<div class="form-item-analysisProject form-item">
 	<div class="form-item-value">
-		<input type="text" name="analysisProject.name" value="" placeholder="<@spring.message code='analysisProject.ownerAnalysisProject' />" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
+		<input type="text" name="analysisProject.name" value="" placeholder="<@spring.message code='analysisProject.ownerAnalysisProject' />" class="width-7 ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 		<input type="hidden" name="analysisProject.id" value="" />
 		<#if !readonly>
 		<ul class="analysisProjectActionSelect lightweight-menu">
-			<li class="analysis-project-menu-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
+			<li class="analysis-project-menu-root">
+				<div><span class="ui-icon ui-icon-triangle-1-s"></span> </div>
 				<ul class="ui-widget-shadow">
 					<li value='select'><a href="javascript:void(0);"><@spring.message code='select' /></a></li>
 					<li value='del'><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
