@@ -58,8 +58,10 @@ po.getSqlEditorSchemaId
 		var mode = (codeEditor.getModeAt(cursor) || {});
 		var token = (codeEditor.getTokenAt(cursor) || {});
 		
+		var schemaId = po.getSqlEditorSchemaId();
+		
 		//关键字token不应提示
-		if(token.type == "keyword")
+		if(token.type == "keyword" || !schemaId)
 		{
 			callback();
 			return;
@@ -99,7 +101,7 @@ po.getSqlEditorSchemaId
 					$.ajax(
 					{
 						type : "POST",
-						url: "${contextPath}/sqlEditor/"+po.getSqlEditorSchemaId()+"/findTableNames",
+						url: "${contextPath}/sqlEditor/"+schemaId+"/findTableNames",
 						success: function(names)
 						{
 							names = (names || []);
@@ -155,7 +157,7 @@ po.getSqlEditorSchemaId
 					$.ajax(
 					{
 						type : "POST",
-						url: "${contextPath}/sqlEditor/"+po.getSqlEditorSchemaId()+"/findColumnNames",
+						url: "${contextPath}/sqlEditor/"+schemaId+"/findColumnNames",
 						data: { table: hintInfo.tableName },
 						success: function(names)
 						{

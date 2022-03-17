@@ -2885,9 +2885,10 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form-dataSet .workspace .workspace-operation-wrapper .operation .ui-button.ui-button-icon-only,
 .page-form-dataSet .workspace .show-resolved-source-button{
 	height: 1.2em;
-	width: 2.2em;
+	width: 2em;
 	vertical-align: top;
 	border: 0px;
+	margin-right: 0;
 }
 .page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .preview-result-foot{
 	position: relative;
