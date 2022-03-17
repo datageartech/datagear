@@ -60,7 +60,8 @@
 		colon: "：",
 		chartParam: "图表参数",
 		chartData: "图表数据",
-		serialNumber: "序号"
+		serialNumber: "序号",
+		dataDetail: "数据明细"
 	});
 	
 	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
@@ -1905,6 +1906,28 @@
 			};
 			
 			columns.push(column);
+		}
+		
+		if(chart.isMutableModel(chartDataSet))
+		{
+			columns.push(
+			{
+				title: chartSetting.labels.dataDetail,
+				orderable: false,
+				data: null,
+				defaultContent: "",
+				render: function(value, type, row, meta)
+				{
+					//单元格展示绘制
+					if(type == "display")
+					{
+						return chartFactory.toJsonString(row);
+					}
+					//其他绘制，比如排序
+					else
+						return value;
+				}
+			});
 		}
 		
 		var results = chart.updateResults();

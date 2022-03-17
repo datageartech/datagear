@@ -6310,7 +6310,7 @@
 			
 			for(var j=0; j<datas.length; j++)
 			{
-				var di = JSON.stringify(datas[j]);
+				var di = chartFactory.toJsonString(datas[j]);
 				$("<div class='dg-chart-rawdata-ds-data-item' />").text(di).appendTo($dsd);
 			}
 		}

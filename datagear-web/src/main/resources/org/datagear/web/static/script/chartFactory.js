@@ -4808,6 +4808,11 @@
 		return (type == "string" || type == "number");
 	};
 	
+	chartFactory.toJsonString = function(obj)
+	{
+		return JSON.stringify(obj);
+	};
+	
 	/**内置名字标识片段*/
 	chartFactory._BUILT_IN_NAME_PART = "datagear";
 	
