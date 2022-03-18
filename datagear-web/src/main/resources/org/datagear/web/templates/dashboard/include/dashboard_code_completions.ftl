@@ -144,6 +144,7 @@
 		{name: "isAsyncUpdate", value: "isAsyncUpdate()", displayName: "isAsyncUpdate() ", displayComment: "chart", categories: ["chart"]},
 		{name: "isDataSetParamValueReady", value: "isDataSetParamValueReady()", displayName: "isDataSetParamValueReady() ", displayComment: "chart", categories: ["chart"]},
 		{name: "isInstance", value: "isInstance(", displayName: "isInstance() ", displayComment: "chart", categories: ["chart"]},
+		{name: "isMutableModel", value: "isMutableModel(", displayName: "isMutableModel() ", displayComment: "chart", categories: ["chart"]},
 		{name: "links", value: "links(", displayName: "links() ", displayComment: "chart", categories: ["chart"]},
 		{name: "listener", value: "listener(", displayName: "listener() ", displayComment: "chart", categories: ["chart"]},
 		{name: "loadMap", value: "loadMap(", displayName: "loadMap() ", displayComment: "chart", categories: ["chart"]},
