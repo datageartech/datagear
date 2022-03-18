@@ -25,6 +25,7 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldgutter.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/style.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/analysis.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link id="css_codemirror" href="${contextPath}/static/theme/<@spring.theme code='theme' />/codemirror-5.64.0/custom.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
@@ -47,6 +48,8 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/search/searchcursor.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/xml-fold.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldcode.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldgutter.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/matchbrackets.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/matchtags.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/closetag.js" type="text/javascript"></script>

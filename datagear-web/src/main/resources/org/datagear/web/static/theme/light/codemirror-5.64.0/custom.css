@@ -44,3 +44,7 @@
   background-color: #ededed !important;
   color: #000 !important;
 }
+
+.CodeMirror-foldmarker{
+	color: #000;
+}

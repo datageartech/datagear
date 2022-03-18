@@ -27,3 +27,7 @@
 .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler{
 	background-color: #000;
 }
+
+.CodeMirror-foldmarker{
+	color: #F3F3F3;
+}

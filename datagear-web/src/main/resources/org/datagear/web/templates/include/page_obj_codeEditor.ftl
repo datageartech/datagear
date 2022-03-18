@@ -34,6 +34,9 @@ page_js_obj.ftl
 		if(options.smartIndent == null)
 			options.smartIndent = false;
 		
+		if(options.indentWithTabs == null)
+			options.indentWithTabs = true;
+		
 		//强制禁用completeSingle选项，因为编辑器hint都是在下面的change事件中触发的
 		//如果这里为true，可能会导致hint死循环，且会导致退格操作无效
 		if(options.hintOptions)

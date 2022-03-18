@@ -38,3 +38,10 @@
 替换为
 
 .cm-s-custom .CodeMirror-matchingbracket { outline:1px solid #CCC; color:black !important; }
+
+4.
+新增：
+
+.CodeMirror-foldmarker{
+	color: #000;
+}

@@ -708,6 +708,8 @@
 			matchTags: true,
 			autoCloseTags: true,
 			readOnly: po.readonly,
+			foldGutter: true,
+			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 			mode: po.evalCodeModeByName(name)
 		};
 		
