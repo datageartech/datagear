@@ -3668,13 +3668,13 @@
 	 * 判断给定图表数据集是否是可变模型的。
 	 * 
 	 * @param chartDataSet 图表数据集、图表数据集索引数值
-	 * @returns 要获取的标记映射表，格式为：{ 数据集属性名: 标记名字符串数组、null, ... }，不会为null
+	 * @returns true、false
 	 * @since 3.0.0
 	 */
 	chartBase.isMutableModel = function(chartDataSet)
 	{
 		chartDataSet = this._chartDataSetOf(chartDataSet);
-		return chartDataSet.dataSet.mutableModel;
+		return (chartDataSet.dataSet.mutableModel == true);
 	};
 	
 	//-------------
