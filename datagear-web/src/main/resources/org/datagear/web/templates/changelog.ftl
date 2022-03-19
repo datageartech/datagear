@@ -15,13 +15,13 @@
 </head>
 <body>
 <#include "include/page_js_obj.ftl" >
-<div id="${pageId}">
+<div id="${pageId}" class="page-changelog">
 	<#if !isAjaxRequest>
-	<div class="main-page-head">
+	<div class="main-page-head ui-widget ui-widget-content">
 		<#include "include/html_logo.ftl">
 	</div>
 	</#if>
-	<div class="page page-changelog">
+	<div class="changelogs">
 		<form id="${pageId}-form">
 			<div class="form-content">
 				<#list versionChangelogs as versionChangelog>

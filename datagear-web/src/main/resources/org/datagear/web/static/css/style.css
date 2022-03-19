@@ -2087,6 +2087,19 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	font-weight: bold;
 }
 
+.page-changelog{}
+.page-changelog .main-page-head{
+	position: fixed;
+	width: 100%;
+}
+.page-changelog .main-page-head.ui-widget-content{
+	border-top-width: 0;
+	border-left-width: 0;
+	border-right-width: 0;
+}
+.page-changelog .changelogs{
+	padding-top: 28px;
+}
 .page-changelog form .form-item .form-item-label{
 	text-align: center;
 	width: 15%;
