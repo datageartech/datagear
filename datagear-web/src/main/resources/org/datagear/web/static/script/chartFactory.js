@@ -1862,7 +1862,7 @@
 	 * @return
 	 * @since 3.0.0
 	 */
-	chartBase.chartDataSetMainFirst = function(nonNull)
+	chartBase.chartDataSetMain = function(nonNull)
 	{
 		nonNull = (nonNull == null ? true : nonNull);
 		
@@ -1892,7 +1892,7 @@
 	 * @return
 	 * @since 3.0.0
 	 */
-	chartBase.chartDataSetAttachmentFirst = function(nonNull)
+	chartBase.chartDataSetAttachment = function(nonNull)
 	{
 		nonNull = (nonNull == null ? true : nonNull);
 		
@@ -3726,7 +3726,7 @@
 	};
 	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultDatasOf()
 	
-	// < @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.chartDataSetMainFirst()、chartDataSetAttachmentFirst()取代
+	// < @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.chartDataSetMain()、chartDataSetAttachment()取代
 	/**
 	 * 获取第一个主件或者附件图表数据集对象。
 	 * 
@@ -3753,7 +3753,7 @@
 		
 		return re;
 	};
-	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.chartDataSetMainFirst()、chartDataSetAttachmentFirst()取代
+	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.chartDataSetMain()、chartDataSetAttachment()取代
 	
 	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.hasDataSetParam()取代
 	/**
