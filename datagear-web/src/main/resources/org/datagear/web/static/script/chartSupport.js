@@ -32,7 +32,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		var chartDataSet = chart.chartDataSetMain();
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
@@ -183,7 +183,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		var chartDataSet = chart.chartDataSetMain();
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		
@@ -404,7 +404,7 @@
 		options,
 		function(options)
 		{
-			var chartDataSet = chart.chartDataSetMain();
+			var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
 			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 			
 			if(options.dgAxisType == "angle")
@@ -977,7 +977,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		var chartDataSet = chart.chartDataSetMain();
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
@@ -1192,7 +1192,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, weight: weightSign });
 		
-		var chartDataSet = chart.chartDataSetMain();
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
@@ -2715,7 +2715,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, open: openSign, close: closeSign, min: minSign, max: maxSign });
 		
-		var chartDataSet = chart.chartDataSetMain();
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
 		options = chartSupport.inflateRenderOptions(chart,
@@ -2865,7 +2865,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, weight: weightSign });
 		
-		var chartDataSet = chart.chartDataSetMain();
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
@@ -3960,7 +3960,7 @@
 		chartSupport.chartSignNameMap(chart, { name: nameSign, min: minSign, lower: lowerSign,
 				median: medianSign, upper: upperSign, max: maxSign, value: valueSign });
 		
-		var chartDataSet = chart.chartDataSetMain();
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
 		options = chartSupport.inflateRenderOptions(chart,
@@ -4833,7 +4833,7 @@
 		
 		var columns = [];
 		
-		var chartDataSet = chart.chartDataSetMain();
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
 		var cps = chartSupport.tableGetColumnProperties(chart, chartDataSet, columnSign);
 		
 		if(!cps || cps.length == 0)
@@ -7280,6 +7280,23 @@
 		};
 		
 		chart.echartsOptions(options, opts);
+	};
+	
+	chartSupport.chartDataSetMainNonNull = function(chart, renderError)
+	{
+		renderError = (renderError == null ? true : renderError);
+		
+		var chartDataSet = chart.chartDataSetMain();
+		
+		if(chartDataSet == null)
+		{
+			if(renderError)
+				$("<div />").html("Main ChartDataSet required").appendTo(chart.elementJquery());
+			
+			throw new Error("Main ChartDataSet required");
+		}
+		
+		return chartDataSet;
 	};
 	
 	//---------------------------------------------------------

@@ -1858,14 +1858,11 @@
 	 * 获取第一个主件图表数据集对象。
 	 * 主件图表数据集的用途是绘制图表。
 	 * 
-	 * @param nonNull 可选，是否要求返回非null并且在为null时抛出异常，true 是；false 否。默认值：true
-	 * @return
+	 * @return 未找到时返回null
 	 * @since 3.0.0
 	 */
-	chartBase.chartDataSetMain = function(nonNull)
+	chartBase.chartDataSetMain = function()
 	{
-		nonNull = (nonNull == null ? true : nonNull);
-		
 		var re = undefined;
 		
 		var chartDataSets = this.chartDataSets;
@@ -1878,9 +1875,6 @@
 			}
 		}
 		
-		if(nonNull && re == null)
-			throw new Error("Main ChartDataSet required");
-		
 		return re;
 	};
 	
@@ -1888,14 +1882,11 @@
 	 * 获取第一个附件图表数据集对象。
 	 * 附件图表数据集的用途不是绘制图表。
 	 * 
-	 * @param nonNull 可选，是否要求返回非null并且在为null时抛出异常，true 是；false 否。默认值：true
-	 * @return
+	 * @return 未找到时返回null
 	 * @since 3.0.0
 	 */
-	chartBase.chartDataSetAttachment = function(nonNull)
+	chartBase.chartDataSetAttachment = function()
 	{
-		nonNull = (nonNull == null ? true : nonNull);
-		
 		var re = undefined;
 		
 		var chartDataSets = this.chartDataSets;
@@ -1907,9 +1898,6 @@
 				break;
 			}
 		}
-		
-		if(nonNull && re == null)
-			throw new Error("Attachment ChartDataSet required");
 		
 		return re;
 	};
