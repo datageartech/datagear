@@ -2100,6 +2100,9 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-changelog .changelogs{
 	padding-top: 28px;
 }
+.ui-dialog .ui-dialog-content .page-changelog .changelogs{
+	padding-top: 0;
+}
 .page-changelog form .form-item .form-item-label{
 	text-align: center;
 	width: 15%;
