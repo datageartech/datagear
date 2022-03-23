@@ -37,10 +37,12 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='schema.url' /></label>
+					<label title="<@spring.message code='schema.url.desc' />">
+						<@spring.message code='schema.url' />
+					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="url" value="${(schema.url)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="url" value="${(schema.url)!''}" placeholder="jdbc:" class="ui-widget ui-widget-content ui-corner-all" />
 					<#if !readonly>
 					<span id="schemaBuildUrlHelp" class="ui-state-default ui-corner-all" style="cursor: pointer;" title="<@spring.message code='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></span>
 					</#if>
@@ -60,7 +62,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.password' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="password" value="${(schema.password)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
+					<input type="password" name="password" value="${(schema.password)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 				</div>
 			</div>
 			</#if>
