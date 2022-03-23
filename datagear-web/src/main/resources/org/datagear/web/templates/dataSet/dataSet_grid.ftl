@@ -96,7 +96,7 @@ boolean readonly 是否只读操作，默认为false
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element(".operation"));
+	po.initGridBtns();
 	po.initDataFilter();
 
 	po.currentUser = <@writeJson var=currentUser />;

@@ -20,7 +20,7 @@ page_js_obj.ftl
 		return this.element("#${pageId}-form");
 	};
 	
-	po.initButtons = function(parent)
+	po.initFormBtns = function(parent)
 	{
 		parent = (parent == null ? po.element() : parent);
 		$.initButtons(parent);

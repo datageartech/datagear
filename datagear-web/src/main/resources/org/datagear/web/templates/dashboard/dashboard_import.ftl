@@ -91,7 +91,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initFormBtns();
 	po.element(".fileinput-button").button();
 	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");
 	po.element("select[name='zipFileNameEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
@@ -133,7 +133,7 @@
 		return dashboardFileName.length > 0;
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		ignore : ".ignore",
 		rules :
@@ -158,10 +158,6 @@
 					po.pageParamCallAfterSave(true);
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 })

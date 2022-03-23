@@ -69,7 +69,7 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initFormBtns();
 	po.element(".roleEnabled-radios").checkboxradiogroup();
 	
 	po.url = function(action)
@@ -78,7 +78,7 @@ readonly 是否只读操作，允许为null
 	};
 	
 	<#if !readonly>
-	po.form().validate(
+	po.validateForm(
 	{
 		rules :
 		{
@@ -97,10 +97,6 @@ readonly 是否只读操作，允许为null
 					po.pageParamCallAfterSave(true, operationMessage.data);
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	</#if>

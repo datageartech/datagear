@@ -153,7 +153,7 @@ dataExchange_js.ftl
 	
 	po.initDataImportUIs = function()
 	{
-		$.initButtons(po.element());
+		po.initFormBtns();
 		po.element("#${pageId}-exceptionResolve").checkboxradiogroup();
 		po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
 		po.element("select[name='zipFileNameEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });

@@ -55,7 +55,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element(".operation"));
+	po.initGridBtns();
 	
 	po.url = function(action)
 	{

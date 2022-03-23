@@ -113,7 +113,7 @@ ${detectNewVersionScript?no_esc}
 <script type="text/javascript">
 (function(po)
 {
-	po.initButtons();
+	po.initFormBtns();
 	
 	po.element("#restartResetPassword").click(function()
 	{

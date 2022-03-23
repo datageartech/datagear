@@ -90,7 +90,7 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initFormBtns();
 	
 	po.driverFiles = function(){ return this.element(".driver-files"); };
 	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
@@ -202,7 +202,7 @@ readonly 是否只读操作，允许为null
 		return ($df.length > 0);
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		ignore : "",
 		rules :
@@ -236,10 +236,6 @@ readonly 是否只读操作，允许为null
 					po.pageParamCallAfterSave(true);
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	</#if>

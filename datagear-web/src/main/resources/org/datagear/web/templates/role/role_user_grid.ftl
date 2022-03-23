@@ -46,7 +46,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element(".operation"));
+	po.initGridBtns();
 	
 	po.role = <@writeJson var=role />;
 	

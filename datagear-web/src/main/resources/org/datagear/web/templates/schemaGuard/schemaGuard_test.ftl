@@ -52,7 +52,7 @@ formAction 表单提交action，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initFormBtns();
 	
 	po.element("#schemaBuildUrlHelp").click(function()
 	{
@@ -70,7 +70,7 @@ formAction 表单提交action，允许为null
 		});
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		rules :
 		{
@@ -98,10 +98,6 @@ formAction 表单提交action，允许为null
 						.html("<@spring.message code='schemaGuard.testSchemaUrl.denied' />");
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 })

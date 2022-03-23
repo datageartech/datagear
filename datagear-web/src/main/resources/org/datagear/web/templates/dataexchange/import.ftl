@@ -102,12 +102,13 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
+<#include "../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)
 {
 	po.schemaId = "${schema.id}";
 	
-	$.initButtons(po.element());
+	po.initFormBtns();
 	
 	po.element("input[name='dataType']").change(function()
 	{

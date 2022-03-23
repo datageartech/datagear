@@ -66,7 +66,7 @@ boolean readonly 是否只读操作，默认为false
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element(".operation"));
+	po.initGridBtns();
 	
 	po.url = function(action)
 	{

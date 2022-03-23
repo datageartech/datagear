@@ -134,6 +134,8 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.initFormBtns();
+	
 	po.driverEntityFormItemValue = function(){ return this.element("#driverEntityFormItemValue"); };
 	po.schemaDriverEntityFormItem = function(){ return this.element("#schemaDriverEntityFormItem"); };
 	po.isDriverEntityEmpty = (po.element("input[name='driverEntity.id']").val() == "");
@@ -198,7 +200,31 @@ readonly 是否只读操作，允许为null
 	
 	po.element("#driverEntityActionGroup").controlgroup();
 	
-	po.form().validate(
+	if(po.isDriverEntityEmpty)
+		po.schemaDriverEntityFormItem().hide();
+	
+	po.element("#schemaAdvancedSet").button(
+	{
+		icon: (po.schemaDriverEntityFormItem().is(":hidden") ? "ui-icon-triangle-1-s" : "ui-icon-triangle-1-n"),
+		showLabel: false
+	})
+	.click(function()
+	{
+		var item = po.schemaDriverEntityFormItem();
+		
+		if(item.is(":hidden"))
+		{
+			item.show();
+			$(this).button("option", "icon", "ui-icon-triangle-1-n");
+		}
+		else
+		{
+			item.hide();
+			$(this).button("option", "icon", "ui-icon-triangle-1-s");
+		}
+	});
+	
+	po.validateForm(
 	{
 		rules :
 		{
@@ -247,36 +273,6 @@ readonly 是否只读操作，允许为null
 					}
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
-		}
-	});
-	
-	$.initButtons(po.element());
-	
-	if(po.isDriverEntityEmpty)
-		po.schemaDriverEntityFormItem().hide();
-	
-	$("#schemaAdvancedSet", po.page).button(
-	{
-		icon: (po.schemaDriverEntityFormItem().is(":hidden") ? "ui-icon-triangle-1-s" : "ui-icon-triangle-1-n"),
-		showLabel: false
-	})
-	.click(function()
-	{
-		var item = po.schemaDriverEntityFormItem();
-		
-		if(item.is(":hidden"))
-		{
-			item.show();
-			$(this).button("option", "icon", "ui-icon-triangle-1-n");
-		}
-		else
-		{
-			item.hide();
-			$(this).button("option", "icon", "ui-icon-triangle-1-s");
 		}
 	});
 })

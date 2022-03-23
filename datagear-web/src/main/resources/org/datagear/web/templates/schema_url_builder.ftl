@@ -60,7 +60,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	po.initButtons();
+	po.initFormBtns();
 	
 	po.element("#previewScriptCode").click(function()
 	{

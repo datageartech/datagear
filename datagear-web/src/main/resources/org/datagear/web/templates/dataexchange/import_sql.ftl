@@ -118,6 +118,7 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
+<#include "../include/page_obj_form.ftl">
 <#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_format_time.ftl" >
 <#include "include/dataExchange_js.ftl" >

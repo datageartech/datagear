@@ -154,7 +154,7 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initFormBtns();
 	
 	<#if !readonly>
 	
@@ -196,7 +196,7 @@ readonly 是否只读操作，允许为null
 		po.open("${contextPath}/role/select", options);
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		rules :
 		{
@@ -224,10 +224,6 @@ readonly 是否只读操作，允许为null
 					po.pageParamCallAfterSave(true);
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	</#if>

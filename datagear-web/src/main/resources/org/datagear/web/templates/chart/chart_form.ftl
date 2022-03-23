@@ -253,7 +253,7 @@ readonly 是否只读操作，允许为null
 	po.chartPluginVO = <@writeJson var=chartPluginVO />;
 	po.chartDataSets = <@writeJson var=chartDataSets />;
 	
-	$.initButtons(po.element());
+	po.initFormBtns();
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((chart.analysisProject.id)!'')?js_string?no_esc}", "${((chart.analysisProject.name)!'')?js_string?no_esc}");
 	po.element(".form-item-value-chartDataSet").height($(window).height()/5*2);
@@ -958,7 +958,7 @@ readonly 是否只读操作，允许为null
 		return true;
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		ignore : "[hidden]",
 		rules :
@@ -1011,10 +1011,6 @@ readonly 是否只读操作，允许为null
 					po.previewAfterSave = false;
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	

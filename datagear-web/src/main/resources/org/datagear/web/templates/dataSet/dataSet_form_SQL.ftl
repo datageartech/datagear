@@ -84,7 +84,7 @@ readonly 是否只读操作，允许为null
 			+"<span class='ui-button-icon ui-icon ui-icon-arrowthick-1-ne'></span>"
 			+"<span class='ui-button-icon-space'> </span><@spring.message code='sqlpad.exportSqlResult' /></button>");
 	
-	$.initButtons(po.element());
+	po.initFormBtns();
 	po.initMtableModelInput();
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
@@ -224,7 +224,7 @@ readonly 是否只读操作，允许为null
 		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		ignore : "",
 		rules :
@@ -255,10 +255,6 @@ readonly 是否只读操作，允许为null
 			{
 				po.pageParamCallAfterSave(true, response.data);
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 })

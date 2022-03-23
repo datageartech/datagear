@@ -48,7 +48,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element(".operation"));
+	po.initGridBtns();
 	
 	po.categorizations = <@writeJson var=categorizations />;
 	

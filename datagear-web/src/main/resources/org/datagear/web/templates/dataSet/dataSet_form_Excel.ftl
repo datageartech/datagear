@@ -127,7 +127,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetProperties = <@writeJson var=dataSetProperties />;
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
-	$.initButtons(po.element());
+	po.initFormBtns();
 	po.initMtableModelInput();
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
@@ -227,7 +227,7 @@ readonly 是否只读操作，允许为null
 		return regex.test(value);
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		ignore : "",
 		rules :
@@ -299,10 +299,6 @@ readonly 是否只读操作，允许为null
 			{
 				po.pageParamCallAfterSave(true, response.data);
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 })

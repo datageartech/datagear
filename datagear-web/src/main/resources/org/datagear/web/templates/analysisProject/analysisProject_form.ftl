@@ -56,7 +56,7 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	po.initButtons();
+	po.initFormBtns();
 	
 	po.url = function(action)
 	{

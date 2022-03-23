@@ -69,15 +69,15 @@
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initFormBtns();
 	
 	<#if authed>
 	po.element(".authed a").attr("href", po.element(".authed input[name='redirectPath']").val());
 	</#if>
-
+	
 	po.initSysMenu();
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		rules : {},
 		messages : {},
@@ -117,10 +117,6 @@
 					}
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 })

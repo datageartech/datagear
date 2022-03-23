@@ -75,9 +75,9 @@ preview 是否是预览请求，允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.initFormBtns();
+	
 	po.dbTypeSelect = po.element("select[name='dbType']");
-
-	$.initButtons(po.element());
 	
 	po.initUrl = "${(url!'')?js_string?no_esc}";
 	
@@ -212,7 +212,7 @@ preview 是否是预览请求，允许为null
 		return $.schemaUrlBuilder.build(dbType, value);
 	};
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		submitHandler : function(form)
 		{
@@ -226,10 +226,6 @@ preview 是否是预览请求，允许为null
 			</#if>
 			
 			return false;
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	

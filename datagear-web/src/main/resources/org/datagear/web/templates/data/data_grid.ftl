@@ -103,7 +103,7 @@ boolean readonly 是否只读操作，默认为false
 	po.sqlIdentifierQuote = "${sqlIdentifierQuote?js_string?no_esc}";
 	po.isMultipleSelect = ${isMultipleSelect?c};
 	
-	$.initButtons(po.element(".operation"));
+	po.initGridBtns();
 	
 	if(!po.canEditTableData(${schema.dataPermission}))
 	{

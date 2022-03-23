@@ -210,7 +210,7 @@ dataExchange_js.ftl
 	
 	po.initDataExportUIs = function()
 	{
-		$.initButtons(po.element());
+		po.initFormBtns();
 		po.element("#${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
 		po.element("#${pageId}-add-group-select").selectmenu(
 		{

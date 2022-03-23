@@ -63,7 +63,7 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initFormBtns();
 	
 	po.element(".resource-editor-wrapper").height($(window).height()*5/9);
 	
@@ -82,7 +82,7 @@ readonly 是否只读操作，允许为null
 	po.resourceEditor = po.createCodeEditor(po.element("#${pageId}-resourceEditor"), resourceEditorOptions);
 	po.resourceEditor.focus();
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		rules :
 		{
@@ -103,10 +103,6 @@ readonly 是否只读操作，允许为null
 					po.pageParamCallAfterSave(true, operationMessage.data);
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 })

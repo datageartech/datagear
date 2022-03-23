@@ -50,7 +50,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	po.element("input:submit, input:button, input:reset, button, .fileinput-button").button();
+	po.initFormBtns();
 
 	po.url = function(action)
 	{
@@ -116,7 +116,7 @@
 		return $pluginFileName.length > 0;
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		ignore : ".ignore",
 		rules :
@@ -137,10 +137,6 @@
 					po.pageParamCallAfterSave(true);
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 })

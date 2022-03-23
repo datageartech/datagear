@@ -58,7 +58,7 @@ formAction 表单提交action，允许为null
 {
 	po.deleteUsers = <@writeJson var=deleteUsers />;
 	
-	$.initButtons(po.element());
+	po.initFormBtns();
 	
 	po.url = function(action)
 	{
@@ -128,7 +128,7 @@ formAction 表单提交action，允许为null
 		return true;
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		ignore : "",
 		rules :
@@ -155,10 +155,6 @@ formAction 表单提交action，允许为null
 					po.pageParamCallAfterSave(true, response.data);
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	

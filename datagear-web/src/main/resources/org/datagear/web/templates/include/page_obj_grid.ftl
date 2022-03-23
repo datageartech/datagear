@@ -17,6 +17,12 @@ page_js_obj.ftl
 {
 	po.elementTable = function(){ return this.element("#${pageId}-table"); };
 	
+	po.initGridBtns = function(parent)
+	{
+		parent = (parent == null ? po.element(".operation") : parent);
+		$.initButtons(parent);
+	};
+	
 	//计算表格高度
 	po.calTableHeight = function()
 	{

@@ -66,7 +66,7 @@ ${detectNewVersionScript?no_esc}
 <script type="text/javascript">
 (function(po)
 {
-	po.initButtons();
+	po.initFormBtns();
 	po.element(".remember-me-group").checkboxradiogroup({icon:true});
 	
 	po.element(".page-form").dialog(

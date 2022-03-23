@@ -1712,7 +1712,7 @@ readonly 是否只读操作，允许为null
 	po.templates = <@writeJson var=templates />;
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	
-	$.initButtons(po.element());
+	po.initFormBtns();
 	po.element().autoCloseSubPanel();
 	po.showAfterSave = false;
 	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");
@@ -1763,7 +1763,7 @@ readonly 是否只读操作，允许为null
 		po.form().submit();
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		ignore : "",
 		rules :
@@ -1833,10 +1833,6 @@ readonly 是否只读操作，允许为null
 					po.showAfterSave = false;
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	

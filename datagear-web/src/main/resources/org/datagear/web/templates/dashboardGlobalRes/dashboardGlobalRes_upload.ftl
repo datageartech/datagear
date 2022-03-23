@@ -101,7 +101,7 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initFormBtns();
 	po.element(".autoUnzip-radios").checkboxradiogroup();
 	po.element("select[name='zipFileNameEncoding']").selectmenu({ appendTo: po.element(), position: {my: "left bottom", at: "left top"}, classes: { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	
@@ -169,7 +169,7 @@ readonly 是否只读操作，允许为null
 		return ($filePath.length > 0);
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		ignore : ".ignore",
 		rules :
@@ -189,10 +189,6 @@ readonly 是否只读操作，允许为null
 			{
 				po.pageParamCallAfterSave(true, response.data);
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 })
