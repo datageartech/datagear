@@ -82,7 +82,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.password' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" />
+							<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 						</div>
 					</div>
 					<div class="form-item">
@@ -90,7 +90,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.confirmPassword' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content ui-corner-all" />
+							<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 						</div>
 					</div>
 					<#elseif step.finalStep>
@@ -113,15 +113,14 @@ ${detectNewVersionScript?no_esc}
 <script type="text/javascript">
 (function(po)
 {
-	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
-	$.initButtons(po.element());
+	po.initButtons();
 	
 	po.element("#restartResetPassword").click(function()
 	{
 		window.location.href="${contextPath}/resetPassword";
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		<#if step.step == 1>
 		rules : { username : "required" },
@@ -131,10 +130,6 @@ ${detectNewVersionScript?no_esc}
 		rules : { password : "required", confirmPassword : {"required" : true, "equalTo" : po.element("input[name='password']")} },
 		messages : { password : "<@spring.message code='validation.required' />", confirmPassword : {"required" : "<@spring.message code='validation.required' />", "equalTo" : "<@spring.message code='resetPassword.validation.confirmPasswordError' />"} },
 		</#if>
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
-		},
 		submitHandler : function(form)
 		{
 			$(form).ajaxSubmitJson(

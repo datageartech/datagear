@@ -19,7 +19,29 @@ page_js_obj.ftl
 	{
 		return this.element("#${pageId}-form");
 	};
-
+	
+	po.initButtons = function(parent)
+	{
+		parent = (parent == null ? po.element() : parent);
+		$.initButtons(parent);
+	};
+	
+	po.validateForm = function(options, form)
+	{
+		form = (form == null ? po.form() : form);
+		
+		options = $.extend(
+		{
+			errorPlacement : function(error, element)
+			{
+				error.appendTo(element.closest(".form-item-value"));
+			}
+		},
+		options);
+		
+		form.validate(options);
+	};
+	
 	po.refreshParent = function()
 	{
 		var poParent = po.parent();

@@ -56,15 +56,14 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initButtons();
 	
 	po.url = function(action)
 	{
 		return "${contextPath}/analysisProject/" + action;
 	};
 	
-	<#if !readonly>
-	po.form().validate(
+	po.validateForm(
 	{
 		rules :
 		{
@@ -83,13 +82,8 @@ readonly 是否只读操作，允许为null
 					po.pageParamCallAfterSave(true, response.data);
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
-	</#if>
 })
 (${pageId});
 </script>

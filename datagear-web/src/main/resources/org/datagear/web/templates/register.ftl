@@ -72,11 +72,12 @@ ${detectNewVersionScript?no_esc}
 <script type="text/javascript">
 (function(po)
 {
-	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
-	$.initButtons(po.element());
+	po.initButtons();
 	
-	var dialog=po.element(".page-form").dialog({
+	po.element(".page-form").dialog(
+	{
 		appendTo: po.element(),
+		classes: { "ui-dialog": "register-form-dialog" },
 		title: "<@spring.message code='register.register' />",
 		position: {my : "center top", at : "center top+75"},
 		resizable: false,
@@ -85,7 +86,9 @@ ${detectNewVersionScript?no_esc}
 		beforeClose: function(){ return false; }
 	});
 	
-	po.form().validate(
+	po.element(".register-form-dialog .ui-dialog-titlebar-close").hide();
+	
+	po.validateForm(
 	{
 		rules :
 		{
@@ -121,14 +124,8 @@ ${detectNewVersionScript?no_esc}
 					window.location.href="${contextPath}/register/success";
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
-	
-	$(".ui-dialog .ui-dialog-titlebar-close", dialog.widget).hide();
 	
 	po.initSysMenu();
 })

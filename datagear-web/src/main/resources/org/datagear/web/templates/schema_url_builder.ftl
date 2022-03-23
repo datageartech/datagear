@@ -60,7 +60,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element());
+	po.initButtons();
 	
 	po.element("#previewScriptCode").click(function()
 	{
@@ -70,7 +70,7 @@
 		});
 	});
 	
-	po.form().validate(
+	po.validateForm(
 	{
 		submitHandler : function(form)
 		{
@@ -81,10 +81,6 @@
 					po.pageParamCallAfterSave(true);
 				}
 			});
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 })
