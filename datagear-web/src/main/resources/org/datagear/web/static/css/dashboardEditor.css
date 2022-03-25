@@ -10,6 +10,10 @@
 /*看板可视编辑页面样式*/
 
 .dg-show-ve{}
-.dg-show-ve .dg-show-ve-selected{}
+.dg-show-ve .dg-show-ve-selected{
+	/*避免元素本身设置了透明度导致选中效果不明显*/
+	opacity: 10 !important;
+	filter: Alpha(Opacity=100) !important;
+}
 .dg-show-ve .dg-show-ve-new-insert{}
 .dg-show-ve.dg-show-ve-boundary{}
