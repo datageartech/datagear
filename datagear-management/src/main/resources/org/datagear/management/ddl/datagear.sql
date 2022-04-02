@@ -396,3 +396,9 @@ ALTER TABLE DATAGEAR_DB_SHARE_SET ADD CONSTRAINT DG_FK_DSS_ID FOREIGN KEY (DSS_I
 --2022-03-17
 --数据集表添加可变数据模型列
 ALTER TABLE DATAGEAR_DATA_SET ADD COLUMN DS_MUTABLE_MODEL VARCHAR(20);
+
+
+-----------------------------------------
+--version[3.0.1], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
