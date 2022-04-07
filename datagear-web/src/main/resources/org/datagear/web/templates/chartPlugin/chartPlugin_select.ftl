@@ -45,6 +45,7 @@
 <#if !isAjaxRequest>
 </div>
 </#if>
+<#include "../include/page_obj_grid.ftl">
 <script type="text/javascript">
 (function(po)
 {
