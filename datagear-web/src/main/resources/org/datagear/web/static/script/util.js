@@ -3039,7 +3039,7 @@
 		},
 		
 		/**
-		 * JSON数据格式的表单ajax提交。
+		 * 以JSON数据格式执行ajax提交表单。
 		 * 
 		 * @param options 选项，格式为：
 		 * 			{
@@ -3049,10 +3049,6 @@
 						ignore: ...,
 						//可选，表单JSON数据处理回调函数，返回false将阻止表单提交
 						handleData: function(data, form){ ... 或者 return ... },
-						//可选，成功回调函数
-						success: function(responseData, textStatus, jqXHR, formData){ ... },
-						//可选，错误回调函数
-						error: function(jqXHR, textStatus, errorThrown, formData){ ... },
 						//其他$.ajax选项
 						...
 		 * 			}
@@ -3070,24 +3066,6 @@
 				data: data
 			},
 			options);
-			
-			if(options.success)
-			{
-				var _success = options.success;
-				options.success = function(responseData, textStatus, jqXHR)
-				{
-					return _success.call(this, responseData, textStatus, jqXHR, data);
-				};
-			}
-			
-			if(options.error)
-			{
-				var _error = options.error;
-				options.error = function(jqXHR, textStatus, errorThrown)
-				{
-					return _error.call(this, jqXHR, textStatus, errorThrown, data);
-				};
-			}
 			
 			if(options.handleData)
 			{

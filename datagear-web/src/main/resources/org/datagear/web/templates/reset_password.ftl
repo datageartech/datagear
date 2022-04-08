@@ -40,7 +40,7 @@ ${detectNewVersionScript?no_esc}
 				<div class="step ui-widget ui-widget-content ui-corner-all <@stepCss currentStep=step myStepIndex=3 />"><@spring.message code='resetPassword.step.setNewPassword' /></div>
 				<div class="step ui-widget ui-widget-content ui-corner-all <@stepCss currentStep=step myStepIndex=4 />"><@spring.message code='resetPassword.step.finish' /></div>
 			</div>
-			<form id="${pageId}-form" action="${contextPath}/resetPassword/${step.action}">
+			<form id="${pageId}form" action="${contextPath}/resetPassword/${step.action}">
 				<div class="ui-widget ui-widget-content ui-corner-all form-content">
 					<#if step.step == 1>
 					<div class="form-item">
@@ -48,7 +48,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.username' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="text" name="username" value="" class="ui-widget ui-widget-content ui-corner-all" />
+							<input type="text" name="username" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
 						</div>
 					</div>
 					<#elseif step.step == 2>
@@ -82,7 +82,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.password' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
+							<input type="password" name="password" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 						</div>
 					</div>
 					<div class="form-item">
@@ -90,7 +90,7 @@ ${detectNewVersionScript?no_esc}
 							<label><@spring.message code='resetPassword.confirmPassword' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
+							<input type="password" name="confirmPassword" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 						</div>
 					</div>
 					<#elseif step.finalStep>
@@ -102,8 +102,12 @@ ${detectNewVersionScript?no_esc}
 					</#if>
 				</div>
 				<div class="form-foot">
-					<input type="button" id="restartResetPassword" value="<@spring.message code='restart' />" <#if step.firstStep>disabled="disabled"</#if> />
-					<input type="submit" value="<@spring.message code='resetPassword.next' />" <#if step.finalStep>disabled="disabled"<#else>class="recommended"</#if> />
+					<button type="button" class="restartResetPassword" <#if step.firstStep>disabled="disabled"</#if> >
+						<@spring.message code='restart' />
+					</button>
+					<button type="submit" <#if step.finalStep>disabled="disabled"<#else>class="recommended"</#if> >
+						<@spring.message code='resetPassword.next' />
+					</button>
 				</div>
 			</form>
 		</div>
@@ -115,33 +119,26 @@ ${detectNewVersionScript?no_esc}
 {
 	po.initFormBtns();
 	
-	po.element("#restartResetPassword").click(function()
+	po.element(".restartResetPassword").click(function()
 	{
 		window.location.href="${contextPath}/resetPassword";
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		<#if step.step == 1>
-		rules : { username : "required" },
-		messages : { username : "<@spring.message code='validation.required' />" },
 		<#elseif step.step == 2>
 		<#elseif step.step == 3>
-		rules : { password : "required", confirmPassword : {"required" : true, "equalTo" : po.element("input[name='password']")} },
-		messages : { password : "<@spring.message code='validation.required' />", confirmPassword : {"required" : "<@spring.message code='validation.required' />", "equalTo" : "<@spring.message code='resetPassword.validation.confirmPasswordError' />"} },
+		rules : { confirmPassword: {"equalTo" : po.elementOfName("password")} }
 		</#if>
-		submitHandler : function(form)
+	},
+	{
+		success : function()
 		{
-			$(form).ajaxSubmitJson(
-			{
-				success : function()
-				{
-					window.location.href="${contextPath}/resetPassword?step";
-				}
-			});
+			window.location.href="${contextPath}/resetPassword?step";
 		}
 	});
-
+	
 	po.initSysMenu();
 })
 (${pageId});

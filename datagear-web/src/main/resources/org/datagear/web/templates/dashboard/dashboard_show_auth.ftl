@@ -41,7 +41,7 @@
 				<@spring.messageArgs code='dashboard.showAuth.authed' args=messageArgs />
 			</div>
 		<#else>
-			<form id="${pageId}-form" action="${contextPath}/dashboard/authcheck" method="POST" class="display-block" autocomplete="off">
+			<form id="${pageId}form" action="${contextPath}/dashboard/authcheck" method="POST" class="display-block" autocomplete="off">
 				<div class="form-head">
 					<@spring.message code='dashboard.showAuth.dashboardNameQuoteLeft' /><a href="${redirectPath!''}" class="link dashboard-name">${dashboardNameMask!''}</a><@spring.message code='dashboard.showAuth.dashboardNameQuoteRight' />
 				</div>

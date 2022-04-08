@@ -32,7 +32,7 @@ Schema schema 数据库，不允许为null
 		<@spring.message code='dataExport.exportExcelData' />
 	</div>
 	<div class="content">
-		<form id="${pageId}-form" action="${contextPath}/dataexchange/${schema.id}/export/excel/doExport" method="POST">
+		<form id="${pageId}form" action="${contextPath}/dataexchange/${schema.id}/export/excel/doExport" method="POST">
 			<input type="hidden" name="dataExchangeId" value="${dataExchangeId}" />
 			<div class="form-content form-content-wizard">
 				<h3><@spring.message code='dataExport.setDataFormat' /></h3>

@@ -31,7 +31,7 @@ Schema schema 数据库，不允许为null
 	<div class="head">
 	</div>
 	<div class="content">
-		<form id="${pageId}-form" action="" method="POST">
+		<form id="${pageId}form" action="" method="POST">
 			<div class="init-sqls" style="display:none;">
 				<#if initSqls??>
 				<#list initSqls as initSql>
@@ -108,14 +108,14 @@ Schema schema 数据库，不允许为null
 	po.element("input[name='dataType']").change(function()
 	{
 		var dataType = $(this).val();
-		po.element("#${pageId}-form").attr("action", "${contextPath}/dataexchange/" + po.schemaId +"/export/" + dataType);
+		po.element("#${pageId}form").attr("action", "${contextPath}/dataexchange/" + po.schemaId +"/export/" + dataType);
 	});
 	
 	po.element("input[type=radio]").checkboxradio({icon:true});
 	po.element("#${pageId}-dataType-0").click();
 	
 	<#if isAjaxRequest>
-	po.element("#${pageId}-form").ajaxForm(
+	po.element("#${pageId}form").ajaxForm(
 	{
 		success: function(data)
 		{

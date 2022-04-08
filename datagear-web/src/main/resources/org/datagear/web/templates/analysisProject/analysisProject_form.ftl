@@ -24,7 +24,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-analysisProject">
-	<form id="${pageId}-form" action="${contextPath}/analysisProject/${formAction}" method="POST">
+	<form id="${pageId}form" action="${contextPath}/analysisProject/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(analysisProject.id)!''}" />
@@ -33,7 +33,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='analysisProject.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(analysisProject.name)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="name" value="${(analysisProject.name)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -41,13 +41,13 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='analysisProject.desc' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="desc" class="ui-widget ui-widget-content ui-corner-all">${(analysisProject.desc)!''}</textarea>
+					<textarea name="desc" maxlength="500" class="ui-widget ui-widget-content ui-corner-all">${(analysisProject.desc)!''}</textarea>
 				</div>
 			</div>
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -57,33 +57,7 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	po.initFormBtns();
-	
-	po.url = function(action)
-	{
-		return "${contextPath}/analysisProject/" + action;
-	};
-	
-	po.validateForm(
-	{
-		rules :
-		{
-			"name" : "required"
-		},
-		messages :
-		{
-			"name" : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				success : function(response)
-				{
-					po.pageParamCallAfterSave(true, response.data);
-				}
-			});
-		}
-	});
+	po.validateAjaxJsonForm();
 })
 (${pageId});
 </script>

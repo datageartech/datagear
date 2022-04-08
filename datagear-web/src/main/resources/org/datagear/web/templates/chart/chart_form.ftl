@@ -25,7 +25,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-chart">
-	<form id="${pageId}-form" action="${contextPath}/chart/${formAction}" method="POST">
+	<form id="${pageId}form" action="${contextPath}/chart/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(chart.id)!''}" />
@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='chart.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(chart.name)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="name" value="${(chart.name)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
@@ -43,7 +43,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='chart.htmlChartPlugin' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="htmlChartPlugin.id" class="ui-widget ui-widget-content ui-corner-all" value="${(chart.htmlChartPlugin.id)!''}" style="display:none" />
+					<input type="text" name="htmlChartPlugin.id" value="${(chart.htmlChartPlugin.id)!''}" required="required" class="ui-widget ui-widget-content ui-corner-all" style="display:none" />
 					<div class="chart-plugin input ui-widget ui-widget-content ui-corner-all"></div>
 					<#if !readonly>
 					<button class="selectChartPluginButton" type="button"><@spring.message code='select' /></button>
@@ -101,7 +101,7 @@ readonly 是否只读操作，允许为null
 					</div>
 					&nbsp;
 					<span class="updateInterval-wrapper">
-						<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'}" class="ui-widget ui-widget-content ui-corner-all" style="width:7em;" />
+						<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'}" required="required" class="ui-widget ui-widget-content ui-corner-all" style="width:7em;" />
 						<span><@spring.message code='chart.updateIntervalUnit' /></span>
 					</span>
 				</div>
@@ -110,7 +110,7 @@ readonly 是否只读操作，允许为null
 		<div class="form-foot">
 			<#if !readonly>
 			<button type="submit" class="recommended"><@spring.message code='save' /></button>
-			<button id="saveAndShowChart" type="button"><@spring.message code='chart.saveAndShow' /></button>
+			<button type="button" class="saveAndShowChart"><@spring.message code='chart.saveAndShow' /></button>
 			</#if>
 		</div>
 		<div id="${pageId}-dataFormatPanel" class='dataformat-panel auto-close-panel minor-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
@@ -281,9 +281,9 @@ readonly 是否只读操作，允许为null
 		po.element(".resultDataFormat-timeType-radios").controlgroup(enableMethod);
 		po.element(".resultDataFormat-timestampType-radios").controlgroup(enableMethod);
 		
-		po.element("input[name='resultDataFormat.dateFormat']").prop("disabled", !enable);
-		po.element("input[name='resultDataFormat.timeFormat']").prop("disabled", !enable);
-		po.element("input[name='resultDataFormat.timestampFormat']").prop("disabled", !enable);
+		po.elementOfName("resultDataFormat.dateFormat").prop("disabled", !enable);
+		po.elementOfName("resultDataFormat.timeFormat").prop("disabled", !enable);
+		po.elementOfName("resultDataFormat.timestampFormat").prop("disabled", !enable);
 		
 		if(enable)
 			po.element(".resultDataFormatEnableAware").removeClass("ui-state-disabled");
@@ -291,7 +291,7 @@ readonly 是否只读操作，允许为null
 			po.element(".resultDataFormatEnableAware").addClass("ui-state-disabled");
 	};
 	
-	po.element("input[name='resultDataFormatEnable']").on("change", function()
+	po.elementOfName("resultDataFormatEnable").on("change", function()
 	{
 		po.updateResultDataFormatPanelEnable();
 	});
@@ -314,11 +314,11 @@ readonly 是否只读操作，允许为null
 		po.open("${contextPath}/chartPlugin/select", options);
 	});
 	
-	po.element("input[name='updateIntervalRadio']").on("change", function()
+	po.elementOfName("updateIntervalRadio").on("change", function()
 	{
 		var radioVal = $(this).val();
 		var $inputWrapper = po.element(".updateInterval-wrapper");
-		var $input = po.element("input[name='updateInterval']");
+		var $input = po.elementOfName("updateInterval");
 		var inputVal = parseInt($input.val());
 		
 		if(!$input.attr("init-val"))
@@ -356,10 +356,10 @@ readonly 是否只读操作，允许为null
 	{
 		if(value == undefined)
 		{
-			var radioVal = po.element("input[name='updateIntervalRadio']").val();
+			var radioVal = po.element("input[name='updateIntervalRadio']:checked").val();
 			
 			if(radioVal == "2")
-				return parseInt(po.element("input[name='updateInterval']").val());
+				return parseInt(po.elementOfName("updateInterval").val());
 			else if(radioVal == "1")
 				return 0;
 			else
@@ -403,7 +403,7 @@ readonly 是否只读操作，允许为null
 			return;
 		
 		po.chartPluginVO = chartPluginVO;
-		po.element("input[name='htmlChartPlugin.id']").val(chartPluginVO.id);
+		po.elementOfName("htmlChartPlugin.id").val(chartPluginVO.id);
 		
 		var $wapper = po.element(".chart-plugin");
 		$wapper.empty();
@@ -893,7 +893,7 @@ readonly 是否只读操作，允许为null
 	
 	po.previewAfterSave = false;
 	
-	po.element("button[id=saveAndShowChart]").click(function()
+	po.element(".saveAndShowChart").click(function()
 	{
 		po.previewAfterSave = true;
 		po.form().submit();
@@ -958,25 +958,21 @@ readonly 是否只读操作，允许为null
 		return true;
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : "[hidden]",
 		rules :
 		{
-			"name" : "required",
-			"htmlChartPlugin.id": "required",
 			"dataSignValidation" : "dataSignValidationRequired",
-			"updateInterval" : {"required": true, "integer": true}
+			"updateInterval" : {"integer": true}
 		},
 		messages :
 		{
-			"name" : "<@spring.message code='validation.required' />",
-			"htmlChartPlugin.id" : "<@spring.message code='validation.required' />",
 			"dataSignValidation" :
 			{
 				"dataSignValidationRequired" : function()
 				{
-					var $input = po.element("input[name='dataSignValidation']");
+					var $input = po.elementOfName("dataSignValidation");
 					var needSignDataSetName = $input.attr("needSignDataSetName");
 					var needDataSignLabel = $input.attr("needDataSignLabel");
 					
@@ -984,38 +980,33 @@ readonly 是否只读操作，允许为null
 						.replace( /\{needSignDataSetName\}/g, needSignDataSetName)
 						.replace( /\{needDataSignLabel\}/g, needDataSignLabel);
 				}
-			},
-			"updateInterval" : {"required": "<@spring.message code='validation.required' />", "integer": "<@spring.message code='validation.integer' />"}
-		},
-		submitHandler : function(form)
+			}
+		}
+	},
+	{
+		ignore: ["dataSignValidation", "updateIntervalRadio", "resultDataFormatEnable"],
+		handleData: function(data)
 		{
-			$(form).ajaxSubmitJson(
-			{
-				ignore: ["dataSignValidation", "updateIntervalRadio", "resultDataFormatEnable"],
-				handleData: function(data)
-				{
-					data["chartDataSetVOs"] = po.getFormChartDataSets();
-				},
-				success : function(response)
-				{
-					var chart = response.data;
-					po.element("input[name='id']").val(chart.id);
-					
-					po.pageParamCallAfterSave(true, response.data);
-					
-					if(po.previewAfterSave)
-						window.open(po.url("show/"+chart.id+"/"), chart.id);
-				},
-				complete: function()
-				{
-					po.previewAfterSave = false;
-				}
-			});
+			data["chartDataSetVOs"] = po.getFormChartDataSets();
+		},
+		success : function(response)
+		{
+			var chart = response.data;
+			po.elementOfName("id").val(chart.id);
+			
+			po.pageParamCallAfterSave(true, response.data);
+			
+			if(po.previewAfterSave)
+				window.open(po.url("show/"+chart.id+"/"), chart.id);
+		},
+		complete: function()
+		{
+			po.previewAfterSave = false;
 		}
 	});
 	
 	po.initChartPlugin(po.chartPluginVO);
-	po.element(".chart-plugin").tooltip({ classes:{ "ui-tooltip": "ui-corner-all ui-widget-shadow chart-plugin-tooltip" } });
+	po.element(".chart-plugin").tooltip({ classes:{ "ui-tooltip": "chart-plugin-tooltip ui-corner-all ui-widget-shadow" } });
 	po.initChartDataSets();
 	po.updateResultDataFormatPanelEnable();
 })

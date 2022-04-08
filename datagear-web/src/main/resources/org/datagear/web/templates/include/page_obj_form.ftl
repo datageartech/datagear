@@ -15,20 +15,9 @@ page_js_obj.ftl
 <script type="text/javascript">
 (function(po)
 {
-	po.validateMessages =
-	{
-		required: "<@spring.message code='validation.required' />",
-		number: "<@spring.message code='validation.number' />",
-		digits: "<@spring.message code='validation.digits' />",
-		equalTo: "<@spring.message code='validation.equalTo' />",
-		maxlength: $.validator.format("<@spring.message code='validation.maxlength' />"),
-		minlength: $.validator.format("<@spring.message code='validation.minlength' />"),
-		integer: "<@spring.message code='validation.integer' />"
-	};
-	
 	po.form = function()
 	{
-		return this.element("#${pageId}-form");
+		return this.elementOfId("${pageId}form");
 	};
 	
 	po.initFormBtns = function(parent)
@@ -59,17 +48,60 @@ page_js_obj.ftl
 		form.validate(options);
 	};
 	
+	po.validateAjaxJsonForm = function(validateOptions, ajaxOptions, form)
+	{
+		form = (form == null ? po.form() : form);
+		
+		validateOptions = $.extend(
+		{
+			submitHandler: function(form)
+			{
+				ajaxOptions = $.extend({}, ajaxOptions);
+				
+				var ajaxSuccess = [];
+				if(ajaxOptions.success)
+					ajaxSuccess = ajaxSuccess.concat(ajaxOptions.success);
+				ajaxSuccess.push(function(response)
+				{
+					po.afterSubmitSuccess(response);
+				});
+				ajaxOptions.success = ajaxSuccess;
+				
+				$(form).ajaxSubmitJson(ajaxOptions);
+			}
+		},
+		validateOptions);
+		
+		po.validateForm(validateOptions);
+	};
+	
+	po.afterSubmitSuccess = function(response)
+	{
+		po.pageParamCallAfterSave(true, response);
+	};
+	
 	po.refreshParent = function()
 	{
-		var poParent = po.parent();
-		if(poParent && poParent.refresh && $.isFunction(poParent.refresh))
+		var parent = po.parent();
+		if(parent && parent.refresh && $.isFunction(parent.refresh))
 		{
 			try
 			{
-				poParent.refresh();
+				parent.refresh();
 			}
 			catch(e){}
 		}
+	};
+	
+	po.validateMessages =
+	{
+		required: "<@spring.message code='validation.required' />",
+		number: "<@spring.message code='validation.number' />",
+		digits: "<@spring.message code='validation.digits' />",
+		equalTo: "<@spring.message code='validation.equalTo' />",
+		maxlength: $.validator.format("<@spring.message code='validation.maxlength' />"),
+		minlength: $.validator.format("<@spring.message code='validation.minlength' />"),
+		integer: "<@spring.message code='validation.integer' />"
 	};
 })
 (${pageId});

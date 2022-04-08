@@ -22,7 +22,7 @@
 	</div>
 	</#if>
 	<div class="changelogs">
-		<form id="${pageId}-form">
+		<form id="${pageId}form">
 			<div class="form-content">
 				<#list versionChangelogs as versionChangelog>
 				<div class="form-item form-item-version">
@@ -59,7 +59,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	if($.isInDialog(po.form()))
+	if(po.isInDialog())
 	{
 		var windowHeight = $(window).height();
 		var maxHeight = windowHeight - windowHeight/4;

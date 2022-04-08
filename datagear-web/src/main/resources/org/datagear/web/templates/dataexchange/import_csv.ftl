@@ -32,7 +32,7 @@ Schema schema 数据库，不允许为null
 		<@spring.message code='dataImport.importCsvData' />
 	</div>
 	<div class="content">
-		<form id="${pageId}-form" action="${contextPath}/dataexchange/${schema.id}/import/csv/doImport" method="POST">
+		<form id="${pageId}form" action="${contextPath}/dataexchange/${schema.id}/import/csv/doImport" method="POST">
 			<input type="hidden" name="dataExchangeId" value="${dataExchangeId}" />
 			<input type="hidden" name="dependentNumberAuto" value="<@spring.message code='dataImport.dependentNumber.auto' />" />
 			<div class="form-content form-content-wizard">

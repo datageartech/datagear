@@ -138,7 +138,7 @@ dataExchange_js.ftl
 			},
 			onFinished : function(event, currentIndex)
 			{
-				po.element("#${pageId}-form").submit();
+				po.element("#${pageId}form").submit();
 			},
 			labels:
 			{
@@ -148,7 +148,7 @@ dataExchange_js.ftl
 			}
 		});
 		
-		po.element("#${pageId}-form .wizard .actions ul li:eq(2)").addClass("page-status-aware-enable edit-status-enable");
+		po.element("#${pageId}form .wizard .actions ul li:eq(2)").addClass("page-status-aware-enable edit-status-enable");
 	};
 	
 	po.initDataImportUIs = function()
@@ -236,7 +236,7 @@ dataExchange_js.ftl
 			}
 		});
 		
-		po.element("#${pageId}-form").submit(function()
+		po.element("#${pageId}form").submit(function()
 		{
 			if(po.dataExchangeTaskClient.isActive())
 				return;

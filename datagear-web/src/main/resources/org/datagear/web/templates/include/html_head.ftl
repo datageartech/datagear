@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta charset="utf-8" />
 <meta name="description" content="DataGear是一款开源免费的数据可视化分析平台，可自由制作任何您想要的数据可视化看板，支持接入SQL、CSV、Excel、HTTP接口、JSON等多种数据源。" />
 <meta name="keywords" content="开源免费的数据可视化平台, 开源免费的数据可视化系统, 开源免费的数据可视化分析平台, 开源免费的数据可视化分析系统, 数据可视化平台, 数据可视化系统, 数据可视化分析平台, 数据可视化分析系统, 数据可视化, 商业智能, 图表, 看板, data visualization, data analysis, BI, chart, dashboard" />
 <#if !isAjaxRequest>

@@ -2020,7 +2020,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-form-schemaUrlBuilder .form-item-value-scriptCode{
 	display: block;
 }
-.page-form-schemaUrlBuilder .preview-script-code-button.ui-button{
+.page-form-schemaUrlBuilder .preview-btn.ui-button{
 	padding-left: 2em;
 	padding-right: 2em;
 }

@@ -16,7 +16,7 @@
 <body>
 <#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-importDashboard">
-	<form id="${pageId}-form" action="${contextPath}/dashboard/saveImport" method="POST">
+	<form id="${pageId}form" action="${contextPath}/dashboard/saveImport" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="dashboardFileName" value="" />

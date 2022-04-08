@@ -31,7 +31,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-authorization">
-	<form id="${pageId}-form" action="${contextPath}/authorization/${resourceMeta.resourceType}/${resource}/${formAction}" method="POST">
+	<form id="${pageId}form" action="${contextPath}/authorization/${resourceMeta.resourceType}/${resource}/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(authorization.id)!''}" />
@@ -45,14 +45,14 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item-value">
 					<div class="principalType-radios">
-						<label for="${pageId}-principalType_0"><@spring.message code='authorization.principalType.USER' /></label>
-			   			<input type="radio" id="${pageId}-principalType_0" name="principalType" value="${Authorization.PRINCIPAL_TYPE_USER}" for-form-item="form-item-principal-user" />
-						<label for="${pageId}-principalType_1"><@spring.message code='authorization.principalType.ROLE' /></label>
-			   			<input type="radio" id="${pageId}-principalType_1" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ROLE}" for-form-item="form-item-principal-role" />
-						<label for="${pageId}-principalType_2"><@spring.message code='authorization.principalType.ANONYMOUS' /></label>
-			   			<input type="radio" id="${pageId}-principalType_2" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ANONYMOUS}" for-form-item="form-item-principal-anonymous" />
-						<label for="${pageId}-principalType_3"><@spring.message code='authorization.principalType.ALL' /></label>
-			   			<input type="radio" id="${pageId}-principalType_3" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ALL}" for-form-item="form-item-principal-all" />
+						<label for="${pageId}principalType0"><@spring.message code='authorization.principalType.USER' /></label>
+			   			<input type="radio" id="${pageId}principalType0" name="principalType" value="${Authorization.PRINCIPAL_TYPE_USER}" required="required" for-form-item="form-item-principal-user" />
+						<label for="${pageId}principalType1"><@spring.message code='authorization.principalType.ROLE' /></label>
+			   			<input type="radio" id="${pageId}principalType1" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ROLE}" required="required" for-form-item="form-item-principal-role" />
+						<label for="${pageId}principalType2"><@spring.message code='authorization.principalType.ANONYMOUS' /></label>
+			   			<input type="radio" id="${pageId}principalType2" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ANONYMOUS}" required="required" for-form-item="form-item-principal-anonymous" />
+						<label for="${pageId}principalType3"><@spring.message code='authorization.principalType.ALL' /></label>
+			   			<input type="radio" id="${pageId}principalType3" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ALL}" required="required" for-form-item="form-item-principal-all" />
 		   			</div>
 				</div>
 			</div>
@@ -64,7 +64,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<input type="text" name="principalNameUser" value="${(Authorization.PRINCIPAL_TYPE_USER!=principalType)?string('', (authorization.principalName)!'')}" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 					<#if !readonly>
-					<button type="button" class="principal-user-select-button"><@spring.message code='select' /></button>
+					<button type="button" class="principalUserSelectBtn"><@spring.message code='select' /></button>
 					</#if>
 				</div>
 			</div>
@@ -75,7 +75,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<input type="text" name="principalNameRole" value="${(Authorization.PRINCIPAL_TYPE_ROLE!=principalType)?string('', (authorization.principalName)!'')}" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 					<#if !readonly>
-					<button type="button" class="principal-role-select-button"><@spring.message code='select' /></button>
+					<button type="button" class="principalRoleSelectBtn"><@spring.message code='select' /></button>
 					</#if>
 				</div>
 			</div>
@@ -112,10 +112,10 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<div class="permission-radios">
 						<#list resourceMeta.permissionMetas as pm>
-						<label for="${pageId}-permission_${pm?counter}" title="<@spring.message code='${pm.permissionLabelDesc}' />">
+						<label for="${pageId}permission${pm?counter}" title="<@spring.message code='${pm.permissionLabelDesc}' />">
 							<@spring.message code='${pm.permissionLabel}' />
 						</label>
-			   			<input type="radio" id="${pageId}-permission_${pm?counter}" name="permission" value="${pm.permission}" />
+			   			<input type="radio" id="${pageId}permission${pm?counter}" name="permission" value="${pm.permission}" required="required" />
 						</#list>
 		   			</div>
 				</div>
@@ -125,27 +125,27 @@ readonly 是否只读操作，允许为null
 			</#if>
 			
 			<#if resourceMeta.enableSetEnable>
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='${resourceMeta.authEnabledLabel}' /></label>
-					</div>
-					<div class="form-item-value">
-						<div class="enabled-radios">
-							<label for="${pageId}-enabled_0"><@spring.message code='yes' /></label>
-				   			<input type="radio" id="${pageId}-enabled_0" name="enabled" value="true" />
-							<label for="${pageId}-enabled_1"><@spring.message code='no' /></label>
-				   			<input type="radio" id="${pageId}-enabled_1" name="enabled" value="false" />
-			   			</div>
-					</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='${resourceMeta.authEnabledLabel}' /></label>
 				</div>
+				<div class="form-item-value">
+					<div class="enabled-radios">
+						<label for="${pageId}enabled0"><@spring.message code='yes' /></label>
+			   			<input type="radio" id="${pageId}enabled0" name="enabled" value="true" />
+						<label for="${pageId}enabled1"><@spring.message code='no' /></label>
+			   			<input type="radio" id="${pageId}enabled1" name="enabled" value="false" />
+		   			</div>
+				</div>
+			</div>
 			<#else>
-				<input type="hidden" name="enabled" value="true" />
+			<input type="hidden" name="enabled" value="true" />
 			</#if>
 			
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -156,9 +156,7 @@ readonly 是否只读操作，允许为null
 {
 	po.initFormBtns();
 	
-	<#if !readonly>
-	
-	po.element(".principal-user-select-button").click(function()
+	po.element(".principalUserSelectBtn").click(function()
 	{
 		var options =
 		{
@@ -166,8 +164,8 @@ readonly 是否只读操作，允许为null
 			{
 				select : function(user)
 				{
-					po.element("input[name='principal']").val(user.id);
-					po.element("input[name='principalNameUser']").val(user.nameLabel);
+					po.elementOfName("principal").val(user.id);
+					po.elementOfName("principalNameUser").val(user.nameLabel);
 				}
 			}
 		};
@@ -177,7 +175,7 @@ readonly 是否只读操作，允许为null
 		po.open("${contextPath}/user/select", options);
 	});
 	
-	po.element(".principal-role-select-button").click(function()
+	po.element(".principalRoleSelectBtn").click(function()
 	{
 		var options =
 		{
@@ -185,8 +183,8 @@ readonly 是否只读操作，允许为null
 			{
 				select : function(role)
 				{
-					po.element("input[name='principal']").val(role.id);
-					po.element("input[name='principalNameRole']").val(role.name);
+					po.elementOfName("principal").val(role.id);
+					po.elementOfName("principalNameRole").val(role.name);
 				}
 			}
 		};
@@ -196,39 +194,12 @@ readonly 是否只读操作，允许为null
 		po.open("${contextPath}/role/select", options);
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm({},
 	{
-		rules :
-		{
-			resource : "required",
-			resourceType : "required",
-			principal : "required",
-			principalType : "required",
-			permission : "required"
-		},
-		messages :
-		{
-			resource : "<@spring.message code='validation.required' />",
-			resourceType : "<@spring.message code='validation.required' />",
-			principal : "<@spring.message code='validation.required' />",
-			principalType : "<@spring.message code='validation.required' />",
-			permission : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				ignore: ["principalNameUser", "principalNameRole", "principalNameAnonymous", "principalNameAll"],
-				success : function()
-				{
-					po.pageParamCallAfterSave(true);
-				}
-			});
-		}
+		ignore: ["principalNameUser", "principalNameRole", "principalNameAnonymous", "principalNameAll"]
 	});
-	</#if>
 	
-	po.element("input[name='principalType']").on("change", function()
+	po.elementOfName("principalType").on("change", function()
 	{
 		var $this = $(this);
 		var value = $this.val();
@@ -239,9 +210,9 @@ readonly 是否只读操作，允许为null
 		po.element("."+forFormItemClass).show();
 		
 		if(value == "${Authorization.PRINCIPAL_TYPE_ANONYMOUS}")
-			po.element("input[name='principal']").val("${Authorization.PRINCIPAL_ANONYMOUS}");
+			po.elementOfName("principal").val("${Authorization.PRINCIPAL_ANONYMOUS}");
 		else if(value == "${Authorization.PRINCIPAL_TYPE_ALL}")
-			po.element("input[name='principal']").val("${Authorization.PRINCIPAL_ALL}");
+			po.elementOfName("principal").val("${Authorization.PRINCIPAL_ALL}");
 		
 		<#if !readonly>
 		po.element(".form-item-principal").each(function()
@@ -250,22 +221,21 @@ readonly 是否只读操作，允许为null
 		});
 		$("input[type='text']", po.element("."+forFormItemClass)).rules("add",
 		{
-			"required" : true,
-			messages : {"required" : "<@spring.message code='validation.required' />"}
+			"required" : true
 		});
 		</#if>
 	});
 	
-	po.element("input[name='principalType'][value='${principalType}']").attr("checked", "checked").change();
+	po.element("[name='principalType'][value='${principalType}']").attr("checked", "checked").change();
 	po.element(".principalType-radios").checkboxradiogroup();
 	
 	<#if !(resourceMeta.singlePermission)>
-	po.element("input[name='permission'][value='${permission}']").attr("checked", "checked");
+	po.element("[name='permission'][value='${permission}']").attr("checked", "checked");
 	po.element(".permission-radios").checkboxradiogroup();
 	</#if>
 	
 	<#if resourceMeta.enableSetEnable>
-	po.element("input[name='enabled'][value='${enabled}']").attr("checked", "checked");
+	po.element("[name='enabled'][value='${enabled}']").attr("checked", "checked");
 	po.element(".enabled-radios").checkboxradiogroup();
 	</#if>
 })

@@ -32,7 +32,7 @@ Schema schema 数据库，不允许为null
 		<@spring.message code='dataImport.importSqlData' />
 	</div>
 	<div class="content">
-		<form id="${pageId}-form" action="${contextPath}/dataexchange/${schema.id}/import/sql/doImport" method="POST">
+		<form id="${pageId}form" action="${contextPath}/dataexchange/${schema.id}/import/sql/doImport" method="POST">
 			<input type="hidden" name="dataExchangeId" value="${dataExchangeId}" />
 			<div class="form-content form-content-wizard">
 				<h3><@spring.message code='dataImport.setDataFormat' /></h3>

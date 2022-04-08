@@ -25,7 +25,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-user">
-	<form id="${pageId}-form" action="${contextPath}/user/${formAction}" method="POST">
+	<form id="${pageId}form" action="${contextPath}/user/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(user.id)!''}" />

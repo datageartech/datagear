@@ -16,7 +16,7 @@
 <body>
 <#include "include/page_js_obj.ftl">
 <div id="${pageId}" class="page-form page-form-schemaUrlBuilder">
-	<form id="${pageId}-form" action="${contextPath}/schemaUrlBuilder/saveScriptCode" method="POST">
+	<form id="${pageId}form" action="${contextPath}/schemaUrlBuilder/saveScriptCode" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<div class="form-item">
@@ -47,12 +47,12 @@
 					<label>&nbsp;</label>
 				</div>
 				<div class="form-item-value">
-					<button id="previewScriptCode" type="button" class="preview-script-code-button"><@spring.message code='preview' /></button>
+					<button type="button" class="preview-btn"><@spring.message code='preview' /></button>
 				</div>
 			</div>
 		</div>
 		<div class="form-foot">
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 		</div>
 	</form>
 </div>
@@ -62,27 +62,15 @@
 {
 	po.initFormBtns();
 	
-	po.element("#previewScriptCode").click(function()
+	po.element(".preview-btn").click(function()
 	{
 		po.open("${contextPath}/schemaUrlBuilder/previewScriptCode",
 		{
-			data : { "scriptCode" : po.element("textarea[name='scriptCode']").val() }
+			data : { "scriptCode" : po.elementOfName("scriptCode").val() }
 		});
 	});
 	
-	po.validateForm(
-	{
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				success : function(response)
-				{
-					po.pageParamCallAfterSave(true);
-				}
-			});
-		}
-	});
+	po.validateAjaxJsonForm();
 })
 (${pageId});
 </script>

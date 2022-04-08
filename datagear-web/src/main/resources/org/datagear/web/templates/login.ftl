@@ -29,7 +29,7 @@ ${detectNewVersionScript?no_esc}
 		</div>
 	</div>
 	<div class="page-form page-form-login">
-		<form id="${pageId}-form" action="${contextPath}/login/doLogin" method="POST" class="display-block">
+		<form id="${pageId}form" action="${contextPath}/login/doLogin" method="POST" class="display-block">
 			<div class="form-head"></div>
 			<div class="form-content">
 				<div class="form-item">
@@ -37,7 +37,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='login.username' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="name" value="${loginUser}" class="ui-widget ui-widget-content ui-corner-all" />
+						<input type="text" name="name" value="${loginUser}" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -45,17 +45,17 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='login.password' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" />
+						<input type="password" name="password" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 			</div>
 			<div class="form-foot">
-				<input type="submit" class="recommended" value="<@spring.message code='login.login' />" />
+				<button type="submit" class="recommended"><@spring.message code='login.login' /></button>
 			</div>
 			<div class="form-foot small-text login-form-ext" style="text-align:right;">
-				<div class="remember-me-group">
-					<label for="remember-me-checkbox"><@spring.message code='login.rememberMe' /></label>
-		   			<input type="checkbox" id="remember-me-checkbox" name="rememberMe" value="1" />
+				<div class="rememberMeGroup">
+					<label for="${pageId}rememberMe"><@spring.message code='login.rememberMe' /></label>
+		   			<input type="checkbox" id="${pageId}rememberMe" name="rememberMe" value="1" />
 	   			</div>
 	   			<a class="link" href="${contextPath}/resetPassword"><@spring.message code='login.fogetPassword' /></a>
 			</div>
@@ -67,12 +67,12 @@ ${detectNewVersionScript?no_esc}
 (function(po)
 {
 	po.initFormBtns();
-	po.element(".remember-me-group").checkboxradiogroup({icon:true});
+	po.element(".rememberMeGroup").checkboxradiogroup({icon:true});
 	
 	po.element(".page-form").dialog(
 	{
 		appendTo: po.element(),
-		classes: { "ui-dialog": "login-form-dialog" },
+		classes: { "ui-dialog": "loginDialog ui-corner-all" },
 		title: "<@spring.message code='login.login' />",
 		position: {my : "center top", at : "center top+75"},
 		resizable: false,
@@ -81,37 +81,21 @@ ${detectNewVersionScript?no_esc}
 		beforeClose: function(){ return false; }
 	});
 	
-	po.element(".login-form-dialog .ui-dialog-titlebar-close").hide();
-	
-	po.validateForm(
-	{
-		rules :
-		{
-			name : "required",
-			password : "required"
-		},
-		messages :
-		{
-			name : "<@spring.message code='validation.required' />",
-			password : "<@spring.message code='validation.required' />"
-		}
-	});
-	
-	po.initSysMenu();
+	po.element(".loginDialog .ui-dialog-titlebar-close").hide();
 	
 	//当登录超时打开对话框时，对话框内会显示登录页面，这里调整此时的登录页布局
 	if($.isInDialog(po.element()))
 	{
 		po.element(".main-page-head").hide();
-		po.element(".login-form-dialog").css("top", "14px");
-		po.element(".login-form-dialog .ui-dialog-titlebar").hide();
+		po.element(".loginDialog").css("top", "14px");
+		po.element(".loginDialog .ui-dialog-titlebar").hide();
 	}
 	
+	po.initSysMenu();
+	po.validateForm();
+	
 	<#if authenticationFailed>
-	$(document).ready(function()
-	{
-		$.tipError("<@spring.message code='login.userNameOrPasswordError' />");
-	});
+	$.tipError("<@spring.message code='login.userNameOrPasswordError' />");
 	</#if>
 })
 (${pageId});

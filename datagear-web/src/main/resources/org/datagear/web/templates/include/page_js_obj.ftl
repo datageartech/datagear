@@ -16,49 +16,33 @@ var ${pageId} =
 	//当前页面ID
 	pageId : "${pageId}",
 	
-	/**
-	 * 获取父页面JS对象。
-	 */
+	//获取父页面JS对象
 	parent : function()
 	{
-		if(!this.parentPageId)
-			return undefined;
-		
-		var parentPage = window[this.parentPageId];
-		
-		if(!parentPage)
-			return undefined;
-		
+		var parentPage = (this.parentPageId ? window[this.parentPageId] : null);
 		//父页面DOM元素可能会在回调过程中被删除，这里加一层元素判断
-		if(parentPage.element().length == 0)
-			return undefined;
-		
-		return parentPage;
+		return (!parentPage || parentPage.element().length == 0 ? null : parentPage);
 	},
 	
-	/**
-	 * 获取页面内的指定Jquery元素。
-	 *
-	 * @param selector 可选，选择器，默认返回当前页面元素
-	 * @param parent 可选，父元素
-	 */
+	//获取页面内的元素
 	element : function(selector, parent)
 	{
-		if(!selector)
-			return $("#${pageId}");
-		else
-		{
-			if(parent)
-				return $(selector, parent);
-			else
-				return $(selector, $("#${pageId}"));
-		}
+		return (selector == null ? $("#${pageId}") : (parent ? $(selector, parent) : $(selector, $("#${pageId}"))));
 	},
 	
-	/**
-	 * 打开给定URL的页面。
-	 * 具体参数说明参考util.js中$.open。
-	 */
+	//获取页面内指定id的元素
+	elementOfId: function(id, parent)
+	{
+		return this.element("#"+id, parent);
+	},
+	
+	//获取页面内指定name的元素
+	elementOfName: function(name, parent)
+	{
+		return this.element("[name='"+name+"']", parent);
+	},
+	
+	//打开给定URL的页面，具体参数说明参考util.js中$.open。
 	open : function(url, options)
 	{
 		url = $.addParam(url, "parentPageId", this.pageId);
@@ -78,9 +62,7 @@ var ${pageId} =
 		$.open(url, options);
 	},
 	
-	/**
-	 * 关闭此页面。
-	 */
+	//关闭此页面
 	close : function()
 	{
 		var ele = this.element();
@@ -97,28 +79,6 @@ var ${pageId} =
 		}
 	},
 	
-	/**
-	 * 设置页面关闭回调函数。
-	 */
-	beforeClose : function(callback)
-	{
-		var ele = this.element();
-		
-		if($.isInDialog(ele))
-		{
-			var $dialog = $.getInDialog(ele);
-			
-			$dialog.on("dialogbeforeclose", function(event, ui)
-			{
-				callback();
-			});
-		}
-		else
-		{
-			window.close();
-		}
-	},
-	
 	//页面是否在对话框内
 	isInDialog: function()
 	{
@@ -126,7 +86,7 @@ var ${pageId} =
 		return (myDialog && myDialog.length > 0);
 	},
 	
-	/*页面所在的对话框是否钉住*/
+	//页面所在的对话框是否钉住
 	isDialogPinned: function()
 	{
 		var myDialog = $.getInDialog(this.element());
@@ -134,19 +94,13 @@ var ${pageId} =
 	},
 	
 	/**
-	 * 获取此页面参数对象。
+	 * 获取页面参数对象。
 	 * @param name 可选，页面参数对象属性名
 	 */
 	pageParam : function(name)
 	{
 		var ppo = $.pageParam(this.element());
-		
-		if(name == undefined)
-			return ppo;
-		else
-		{
-			return (ppo ? ppo[name] : undefined);
-		}
+		return (name == null ? ppo : (ppo ? ppo[name] : null));
 	},
 	
 	/**

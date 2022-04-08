@@ -26,7 +26,7 @@ preview 是否是预览请求，允许为null
 	<div class="builtInBuildersJson" style="display: none;">
 		${builtInBuildersJson!''}
 	</div>
-	<form id="${pageId}-form" action="#" method="POST">
+	<form id="${pageId}form" action="#" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<div class="form-item">

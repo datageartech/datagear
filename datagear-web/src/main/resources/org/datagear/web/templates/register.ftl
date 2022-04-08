@@ -26,7 +26,7 @@ ${detectNewVersionScript?no_esc}
 		</div>
 	</div>
 	<div class="page-form page-form-register">
-		<form id="${pageId}-form" action="${contextPath}/register/doRegister" method="POST" class="display-block">
+		<form id="${pageId}form" action="${contextPath}/register/doRegister" method="POST" class="display-block">
 			<div class="form-head"></div>
 			<div class="form-content">
 				<div class="form-item">
@@ -34,7 +34,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='register.name' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="name" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
+						<input type="text" name="name" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -42,7 +42,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='register.password' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
+						<input type="password" name="password" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -50,7 +50,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='register.confirmPassword' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
+						<input type="password" name="confirmPassword" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -58,12 +58,12 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='register.realName' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="realName" value="" class="ui-widget ui-widget-content ui-corner-all" />
+						<input type="text" name="realName" value="" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 			</div>
 			<div class="form-foot">
-				<input type="submit" class="recommended" value="<@spring.message code='register.register' />" />
+				<button type="submit" class="recommended"><@spring.message code='register.register' /></button>
 			</div>
 		</form>
 	</div>
@@ -77,7 +77,7 @@ ${detectNewVersionScript?no_esc}
 	po.element(".page-form").dialog(
 	{
 		appendTo: po.element(),
-		classes: { "ui-dialog": "register-form-dialog" },
+		classes: { "ui-dialog": "registerDialog ui-corner-all" },
 		title: "<@spring.message code='register.register' />",
 		position: {my : "center top", at : "center top+75"},
 		resizable: false,
@@ -86,44 +86,28 @@ ${detectNewVersionScript?no_esc}
 		beforeClose: function(){ return false; }
 	});
 	
-	po.element(".register-form-dialog .ui-dialog-titlebar-close").hide();
+	po.element(".registerDialog .ui-dialog-titlebar-close").hide();
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
-		rules :
+		rules:
 		{
-			name : "required",
-			password : "required",
-			confirmPassword : { "required" : true, "equalTo" : po.element("input[name='password']") }
+			confirmPassword : { "equalTo" : po.elementOfName("password") }
+		}
+	},
+	{
+		handleData: function(data)
+		{
+			var newData = {};
+			newData.user = data;
+			newData.confirmPassword = data.confirmPassword;
+			data.confirmPassword = undefined;
+			
+			return newData;
 		},
-		messages :
+		success : function()
 		{
-			name : "<@spring.message code='validation.required' />",
-			password : "<@spring.message code='validation.required' />",
-			confirmPassword :
-			{
-				"required" : "<@spring.message code='validation.required' />",
-				"equalTo" : "<@spring.message code='register.validation.confirmPasswordError' />"
-			}
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				handleData: function(data)
-				{
-					var newData = {};
-					newData.user = data;
-					newData.confirmPassword = data.confirmPassword;
-					data.confirmPassword = undefined;
-					
-					return newData;
-				},
-				success : function()
-				{
-					window.location.href="${contextPath}/register/success";
-				}
-			});
+			window.location.href="${contextPath}/register/success";
 		}
 	});
 	

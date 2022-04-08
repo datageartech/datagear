@@ -16,7 +16,7 @@
 <body>
 <#include "../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-uploadChartPlugin">
-	<form id="${pageId}-form" action="${contextPath}/chartPlugin/saveUpload" method="POST">
+	<form id="${pageId}form" action="${contextPath}/chartPlugin/saveUpload" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="pluginFileName" value="" />
@@ -25,7 +25,7 @@
 					<label><@spring.message code='chartPlugin.upload.selectFile' /></label>
 				</div>
 				<div class="form-item-value">
-					<div class="fileinput-button" title="<@spring.message code='chartPlugin.upload.desc' />">
+					<div class="fileinput-button ui-button ui-corner-all ui-widget" title="<@spring.message code='chartPlugin.upload.desc' />">
 						<@spring.message code='select' /><input type="file" accept=".zip" class="ignore">
 					</div>
 					<div class="upload-file-info"></div>
@@ -42,7 +42,7 @@
 			</div>
 		</div>
 		<div class="form-foot">
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 		</div>
 	</form>
 </div>
@@ -51,7 +51,7 @@
 (function(po)
 {
 	po.initFormBtns();
-
+	
 	po.url = function(action)
 	{
 		return "${contextPath}/chartPlugin/" + action;
@@ -63,7 +63,7 @@
 	
 	po.renderChartPluginInfos = function(uploadResult)
 	{
-		po.element("input[name='pluginFileName']").val(uploadResult.pluginFileName);
+		po.elementOfName("pluginFileName").val(uploadResult.pluginFileName);
 		
 		po.chartPluginInfos().empty();
 		
@@ -99,7 +99,7 @@
 	})
 	.bind('fileuploadadd', function (e, data)
 	{
-		po.element("input[name='pluginFileName']").val("");
+		po.elementOfName("pluginFileName").val("");
 		po.form().validate().resetForm();
 		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	})
@@ -110,13 +110,11 @@
 	
 	$.validator.addMethod("uploadChartPluginFileRequired", function(value, element)
 	{
-		var thisForm = $(element).closest("form");
-		var $pluginFileName = $("input[name='pluginFileName']", thisForm).val();
-		
+		var $pluginFileName = po.elementOfName("pluginFileName").val();
 		return $pluginFileName.length > 0;
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : ".ignore",
 		rules :
@@ -126,18 +124,10 @@
 		messages :
 		{
 			inputForValidate : "<@spring.message code='chartPlugin.upload.validation.uploadChartPluginFileRequired' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				ignore: "inputForValidate",
-				success : function()
-				{
-					po.pageParamCallAfterSave(true);
-				}
-			});
 		}
+	},
+	{
+		ignore: "inputForValidate"
 	});
 })
 (${pageId});
