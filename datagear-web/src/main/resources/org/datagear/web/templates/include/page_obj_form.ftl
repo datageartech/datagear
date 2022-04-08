@@ -15,6 +15,17 @@ page_js_obj.ftl
 <script type="text/javascript">
 (function(po)
 {
+	po.validateMessages =
+	{
+		required: "<@spring.message code='validation.required' />",
+		number: "<@spring.message code='validation.number' />",
+		digits: "<@spring.message code='validation.digits' />",
+		equalTo: "<@spring.message code='validation.equalTo' />",
+		maxlength: $.validator.format("<@spring.message code='validation.maxlength' />"),
+		minlength: $.validator.format("<@spring.message code='validation.minlength' />"),
+		integer: "<@spring.message code='validation.integer' />"
+	};
+	
 	po.form = function()
 	{
 		return this.element("#${pageId}-form");
@@ -29,6 +40,12 @@ page_js_obj.ftl
 	po.validateForm = function(options, form)
 	{
 		form = (form == null ? po.form() : form);
+		
+		if(!po.extendValidateMessages)
+		{
+			$.extend($.validator.messages, po.validateMessages);
+			po.extendValidateMessages = true;
+		}
 		
 		options = $.extend(
 		{

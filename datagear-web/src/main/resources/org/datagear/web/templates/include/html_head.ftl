@@ -40,8 +40,8 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/jQuery-File-Upload-9.21.0/js/jquery.iframe-transport.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jQuery-File-Upload-9.21.0/js/jquery.fileupload.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery.cookie-1.4.1/jquery.cookie.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/jquery-validation-1.17.0/jquery.validate.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/jquery-validation-1.17.0/additional-methods.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/jquery-validation-1.19.3/additional-methods.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery.steps-1.1.0/js/jquery.steps.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/textarea-helper-0.3.1/textarea-helper.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
