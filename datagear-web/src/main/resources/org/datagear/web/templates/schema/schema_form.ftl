@@ -32,7 +32,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.title' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="title" value="${(schema.title)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="title" value="${(schema.title)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -42,7 +42,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="url" value="${(schema.url)!''}" placeholder="jdbc:" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="url" value="${(schema.url)!''}" required="required" maxlength="1000" class="ui-widget ui-widget-content ui-corner-all" placeholder="jdbc:" />
 					<#if !readonly>
 					<span id="schemaBuildUrlHelp" class="ui-state-default ui-corner-all" style="cursor: pointer;" title="<@spring.message code='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></span>
 					</#if>
@@ -53,7 +53,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.user' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="user" value="${(schema.user)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
+					<input type="text" name="user" value="${(schema.user)!''}" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
 				</div>
 			</div>
 			<#if !readonly>
@@ -62,7 +62,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.password' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="password" value="${(schema.password)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
+					<input type="password" name="password" value="${(schema.password)!''}" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 				</div>
 			</div>
 			</#if>
@@ -127,7 +127,7 @@ readonly 是否只读操作，允许为null
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -140,19 +140,19 @@ readonly 是否只读操作，允许为null
 	
 	po.driverEntityFormItemValue = function(){ return this.element("#driverEntityFormItemValue"); };
 	po.schemaDriverEntityFormItem = function(){ return this.element("#schemaDriverEntityFormItem"); };
-	po.isDriverEntityEmpty = (po.element("input[name='driverEntity.id']").val() == "");
+	po.isDriverEntityEmpty = (po.elementOfName("driverEntity.id").val() == "");
 	
 	po.element("#schemaBuildUrlHelp").click(function()
 	{
 		po.open("${contextPath}/schemaUrlBuilder/buildUrl",
 		{
-			data : { url : po.element("input[name='url']").val() },
+			data : { url : po.elementOfName("url").val() },
 			width: "60%",
 			pageParam :
 			{
 				"setSchemaUrl" : function(url)
 				{
-					po.element("input[name='url']").val(url);
+					po.elementOfName("url").val(url);
 				}
 			}
 		});
@@ -166,7 +166,7 @@ readonly 是否只读操作，允许为null
 			{
 				select : function(driverEntity)
 				{
-					po.element("input[name='driverEntity.id']").val(driverEntity.id);
+					po.elementOfName("driverEntity.id").val(driverEntity.id);
 					po.element("#driverEntityText").val(driverEntity.displayText);
 				}
 			}
@@ -226,55 +226,37 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	
-	po.validateForm(
+	po.originalFormAction = po.form().attr("action");
+	
+	po.validateAjaxJsonForm({},
 	{
-		rules :
+		handleData: function()
 		{
-			title : "required",
-			url : "required"
-		},
-		messages :
-		{
-			title : "<@spring.message code='validation.required' />",
-			url : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			var $form = $(form);
-			
-			var originAction = $form.attr("action");
-			
 			if(po._STATE_TEST_CONNECTION == true)
-				$form.attr("action", "${contextPath}/schema/testConnection");
-			
-			$form.ajaxSubmitJson(
 			{
-				success : function(operationMessage)
-				{
-					if(po._STATE_TEST_CONNECTION == true)
-						return;
-					
-					po.pageParamCallAfterSave(true, operationMessage.data);
-				},
-				beforeSend: function()
-				{
-					if(po._STATE_TEST_CONNECTION == true)
-					{
-						po.element(".test-connection-button, input[type='submit']").addClass("ui-state-disabled");
-						po.element(".test-connection-tip").show();
-					}
-				},
-				complete: function()
-				{
-					if(po._STATE_TEST_CONNECTION == true)
-					{
-						$form.attr("action", originAction);
-						po._STATE_TEST_CONNECTION = false;
-						po.element(".test-connection-button, input[type='submit']").removeClass("ui-state-disabled");
-						po.element(".test-connection-tip").hide();
-					}
-				}
-			});
+				po.form().attr("action", "${contextPath}/schema/testConnection");
+				po.afterSubmitSuccessBak = po.afterSubmitSuccess;
+				po.afterSubmitSuccess = null;
+			}
+		},
+		beforeSend: function()
+		{
+			if(po._STATE_TEST_CONNECTION == true)
+			{
+				po.element(".test-connection-button, [type='submit']").addClass("ui-state-disabled");
+				po.element(".test-connection-tip").show();
+			}
+		},
+		complete: function()
+		{
+			if(po._STATE_TEST_CONNECTION == true)
+			{
+				po.form().attr("action", po.originalFormAction);
+				po.afterSubmitSuccess = po.afterSubmitSuccessBak;
+				po._STATE_TEST_CONNECTION = false;
+				po.element(".test-connection-button, [type='submit']").removeClass("ui-state-disabled");
+				po.element(".test-connection-tip").hide();
+			}
 		}
 	});
 })

@@ -15,6 +15,8 @@ page_obj.ftl
 <script type="text/javascript">
 (function(po)
 {
+	po.readonly = ("${(readonly!false)?string('true','false')}" == "true");
+	
 	po.form = function()
 	{
 		return this.elementOfId("${pageId}form");
@@ -56,14 +58,15 @@ page_obj.ftl
 		{
 			submitHandler: function(form)
 			{
-				ajaxOptions = $.extend({}, ajaxOptions);
+				ajaxOptions = $.extend({ closeAfterSubmit: true }, ajaxOptions);
 				
 				var ajaxSuccess = [];
 				if(ajaxOptions.success)
 					ajaxSuccess = ajaxSuccess.concat(ajaxOptions.success);
 				ajaxSuccess.push(function(response)
 				{
-					po.afterSubmitSuccess(response);
+					if(po.afterSubmitSuccess)
+						po.afterSubmitSuccess(response, ajaxOptions.closeAfterSubmit);
 				});
 				ajaxOptions.success = ajaxSuccess;
 				
@@ -72,12 +75,13 @@ page_obj.ftl
 		},
 		validateOptions);
 		
-		po.validateForm(validateOptions);
+		po.validateForm(validateOptions, form);
 	};
 	
-	po.afterSubmitSuccess = function(response)
+	po.afterSubmitSuccess = function(response, close)
 	{
-		po.pageParamCallAfterSave(true, response);
+		close = (close == null ? true : close);
+		po.pageParamCallAfterSave(close, response);
 	};
 	
 	po.refreshParent = function()

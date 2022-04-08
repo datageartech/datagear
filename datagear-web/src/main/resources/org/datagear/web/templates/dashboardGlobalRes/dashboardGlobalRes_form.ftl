@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="savePath" value="${resourcePath}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="savePath" value="${resourcePath}" required="required" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -53,7 +53,7 @@ readonly 是否只读操作，允许为null
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -67,42 +67,27 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".resource-editor-wrapper").height($(window).height()*5/9);
 	
-	var resourcePath = po.element("input[name='savePath']").val();
-	
 	var resourceEditorOptions =
 	{
-		value: po.element("textarea[name='resourceContent']").val(),
+		value: po.elementOfName("resourceContent").val(),
 		matchBrackets: true,
 		matchTags: true,
 		autoCloseTags: true,
-		readOnly: ${readonly?string("true","false")},
-		mode: po.evalCodeModeByName(resourcePath)
+		readOnly: po.readonly,
+		mode: po.evalCodeModeByName(po.elementOfName("savePath").val())
 	};
 	
-	po.resourceEditor = po.createCodeEditor(po.element("#${pageId}-resourceEditor"), resourceEditorOptions);
-	po.resourceEditor.focus();
+	po.resourceEditor = po.createCodeEditor(po.elementOfId("${pageId}-resourceEditor"), resourceEditorOptions);
 	
-	po.validateForm(
+	po.validateAjaxJsonForm({},
 	{
-		rules :
+		handleData: function(data)
 		{
-			savePath : "required"
+			data.resourceContent = po.getCodeText(po.resourceEditor);
 		},
-		messages :
+		success : function(operationMessage)
 		{
-			savePath : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			po.element("textarea[name='resourceContent']").val(po.getCodeText(po.resourceEditor));
-			
-			$(form).ajaxSubmitJson(
-			{
-				success : function(operationMessage)
-				{
-					po.pageParamCallAfterSave(true, operationMessage.data);
-				}
-			});
+			po.pageParamCallAfterSave(true, operationMessage.data);
 		}
 	});
 })

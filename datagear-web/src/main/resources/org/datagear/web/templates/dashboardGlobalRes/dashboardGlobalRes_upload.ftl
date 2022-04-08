@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					<input type="hidden" name="filePath" value="" />
 					<input type="hidden" name="fileName" value="" />
 					<div class="ui-widget ui-corner-all ui-button fileinput-button">
-						<@spring.message code='select' /><input type="file">
+						<@spring.message code='select' /><input type="file" />
 					</div>
 					<div class="upload-file-info"></div>
 				</div>
@@ -92,7 +92,7 @@ readonly 是否只读操作，允许为null
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -103,7 +103,7 @@ readonly 是否只读操作，允许为null
 {
 	po.initFormBtns();
 	po.element(".autoUnzip-radios").checkboxradiogroup();
-	po.element("select[name='zipFileNameEncoding']").selectmenu({ appendTo: po.element(), position: {my: "left bottom", at: "left top"}, classes: { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
+	po.elementOfName("zipFileNameEncoding").selectmenu({ appendTo: po.element(), position: {my: "left bottom", at: "left top"}, classes: { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	
 	po.isZipExtention = function(resName)
 	{
@@ -111,21 +111,21 @@ readonly 是否只读操作，允许为null
 		return (resName && reg.test(resName));
 	};
 	
-	po.element("input[name='autoUnzip']").on("change", function()
+	po.elementOfName("autoUnzip").on("change", function()
 	{
 		var val = $(this).val();
-		var $savePath = po.element("input[name='savePath']");
+		var savePathInput = po.elementOfName("savePath");
 		
 		if(val == "true")
 		{
-			var savePath = po.element("input[name='savePath']").val();
+			var savePath = savePathInput.val();
 			
 			if(po.isZipExtention(savePath))
-				$savePath.val(savePath.substring(0, savePath.length - 4));
+				savePathInput.val(savePath.substring(0, savePath.length - 4));
 		}
 		else
 		{
-			$savePath.val(po.element("input[name='fileName']").val());
+			savePathInput.val(po.elementOfName("fileName").val());
 		}
 	});
 	
@@ -143,16 +143,16 @@ readonly 是否只读操作，允许为null
 		success : function(uploadResult, textStatus, jqXHR)
 		{
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			po.element("input[name='filePath']").val(uploadResult.filePath);
-			po.element("input[name='fileName']").val(uploadResult.fileName);
-			po.element("input[name='savePath']").val(uploadResult.fileName);
+			po.elementOfName("filePath").val(uploadResult.filePath);
+			po.elementOfName("fileName").val(uploadResult.fileName);
+			po.elementOfName("savePath").val(uploadResult.fileName);
 		}
 	})
 	.bind('fileuploadadd', function (e, data)
 	{
-		po.element("input[name='filePath']").val("");
-		po.element("input[name='fileName']").val("");
-		po.element("input[name='savePath']").val("");
+		po.elementOfName("filePath").val("");
+		po.elementOfName("fileName").val("");
+		po.elementOfName("savePath").val("");
 		po.form().validate().resetForm();
 		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	})
@@ -163,13 +163,11 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("uploadDashboardGlobalResFileRequired", function(value, element)
 	{
-		var thisForm = $(element).closest("form");
-		var $filePath = $("input[name='filePath']", thisForm).val();
-		
+		var $filePath = po.elementOfName("filePath").val();
 		return ($filePath.length > 0);
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : ".ignore",
 		rules :
@@ -178,17 +176,7 @@ readonly 是否只读操作，允许为null
 		},
 		messages :
 		{
-			filePath : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			var formData = $.formToJson(form);
-			
-			$.postJson("${contextPath}/dashboardGlobalRes/${formAction}", formData,
-			function(response)
-			{
-				po.pageParamCallAfterSave(true, response.data);
-			});
+			filePath : po.validateMessages.required
 		}
 	});
 })

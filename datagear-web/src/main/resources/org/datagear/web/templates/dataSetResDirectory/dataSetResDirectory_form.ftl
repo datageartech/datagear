@@ -35,7 +35,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="directory" value="${(dataSetResDirectory.directory)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="directory" value="${(dataSetResDirectory.directory)!''}" required="required" maxlength="250" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -49,7 +49,7 @@ readonly 是否只读操作，允许为null
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -65,29 +65,7 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/dataSetResDirectory/" + action;
 	};
 	
-	<#if !readonly>
-	po.validateForm(
-	{
-		rules :
-		{
-			"directory" : "required"
-		},
-		messages :
-		{
-			"directory" : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				success : function(response)
-				{
-					po.pageParamCallAfterSave(true, response.data);
-				}
-			});
-		}
-	});
-	</#if>
+	po.validateAjaxJsonForm();
 })
 (${pageId});
 </script>

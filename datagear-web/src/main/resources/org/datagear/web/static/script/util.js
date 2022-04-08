@@ -401,7 +401,7 @@
 		 */
 		initButtons : function($parent)
 		{
-			$("input:submit, input:button, input:reset, button", $parent).button();
+			$("input:submit, input:button, input:reset, button, .button", $parent).button();
 		},
 		
 		/**
@@ -3057,12 +3057,10 @@
 		{
 			options = (options || {});
 			
-			var $form = $(this);
 			var data = $.formToJson(this, options.ignore);
 			
 			options = $.extend(
 			{
-				url: $form.attr("action"),
 				data: data
 			},
 			options);
@@ -3077,6 +3075,9 @@
 				if(newData !== undefined)
 					options.data = newData;
 			}
+			
+			if(!options.url)
+				options.url = $(this).attr("action");
 			
 			$.ajaxJson(options);
 		},

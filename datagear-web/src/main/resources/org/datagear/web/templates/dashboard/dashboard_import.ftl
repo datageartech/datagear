@@ -28,7 +28,7 @@
 				</div>
 				<div class="form-item-value">
 					<input type="hidden" name="inputForValidate" value="" />
-					<div class="fileinput-button">
+					<div class="fileinput-button button">
 						<@spring.message code='select' /><input type="file" accept=".html, .htm, .zip" class="ignore">
 					</div>
 					<div class="upload-file-info"></div>
@@ -55,7 +55,7 @@
 					<label><@spring.message code='dashboard.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="name" value="" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -65,7 +65,7 @@
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="template" value="" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="template" value="" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -83,7 +83,7 @@
 			</div>
 		</div>
 		<div class="form-foot">
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 		</div>
 	</form>
 </div>
@@ -92,9 +92,8 @@
 (function(po)
 {
 	po.initFormBtns();
-	po.element(".fileinput-button").button();
 	po.initAnalysisProject("${((dashboard.analysisProject.id)!'')?js_string?no_esc}", "${((dashboard.analysisProject.name)!'')?js_string?no_esc}");
-	po.element("select[name='zipFileNameEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
+	po.elementOfName("zipFileNameEncoding").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	
 	po.url = function(action)
 	{
@@ -110,55 +109,41 @@
 		success : function(uploadResult, textStatus, jqXHR)
 		{
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			po.element("input[name='name']").val(uploadResult.dashboardName);
-			po.element("input[name='template']").val(uploadResult.template);
-			po.element("input[name='dashboardFileName']").val(uploadResult.dashboardFileName);
+			po.elementOfName("name").val(uploadResult.dashboardName);
+			po.elementOfName("template").val(uploadResult.template);
+			po.elementOfName("dashboardFileName").val(uploadResult.dashboardFileName);
 		}
 	})
 	.bind('fileuploadadd', function (e, data)
 	{
-		po.element("input[name='dashboardFileName']").val("");
+		po.elementOfName("dashboardFileName").val("");
 		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	})
 	.bind('fileuploadprogressall', function (e, data)
 	{
 		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
-
+	
 	$.validator.addMethod("uploadDashboardFileRequired", function(value, element)
 	{
-		var thisForm = $(element).closest("form");
-		var dashboardFileName = $("input[name='dashboardFileName']", thisForm).val();
-		
+		var dashboardFileName = po.elementOfName("dashboardFileName").val();
 		return dashboardFileName.length > 0;
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : ".ignore",
 		rules :
 		{
-			name : "required",
-			inputForValidate : "uploadDashboardFileRequired",
-			template : "required"
+			inputForValidate : "uploadDashboardFileRequired"
 		},
 		messages :
 		{
-			name : "<@spring.message code='validation.required' />",
-			inputForValidate : "<@spring.message code='dashboard.import.validation.importDashboardFileRequired' />",
-			template : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				ignore: "inputForValidate",
-				success : function()
-				{
-					po.pageParamCallAfterSave(true);
-				}
-			});
+			inputForValidate : "<@spring.message code='dashboard.import.validation.importDashboardFileRequired' />"
 		}
+	},
+	{
+		ignore: "inputForValidate"
 	});
 })
 (${pageId});

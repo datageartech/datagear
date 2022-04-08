@@ -29,7 +29,7 @@ formAction 表单提交action，允许为null
 					<label><@spring.message code='schemaGuard.schemaUrl' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="url" value="" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="url" value="" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" />
 					<span id="schemaBuildUrlHelp" class="ui-state-default ui-corner-all" style="cursor: pointer;" title="<@spring.message code='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></span>&nbsp;
 				</div>
 			</div>
@@ -44,7 +44,7 @@ formAction 表单提交action，允许为null
 			</div>
 		</div>
 		<div class="form-foot">
-			<input type="submit" value="<@spring.message code='test' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='test' /></button>
 		</div>
 	</form>
 </div>
@@ -58,46 +58,33 @@ formAction 表单提交action，允许为null
 	{
 		po.open("${contextPath}/schemaUrlBuilder/buildUrl",
 		{
-			data : { url : po.element("input[name='url']").val() },
+			data : { url : po.elementOfName("url").val() },
 			width: "60%",
 			pageParam :
 			{
 				"setSchemaUrl" : function(url)
 				{
-					po.element("input[name='url']").val(url);
+					po.elementOfName("url").val(url);
 				}
 			}
 		});
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm({},
 	{
-		rules :
+		closeAfterSubmit: false,
+		success : function(response)
 		{
-			url : "required"
-		},
-		messages :
-		{
-			url : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				success : function(response, textStatus, jqXHR)
-				{
-					var permitted = response.data;
-					
-					po.element(".test-url").text(po.element("input[name='url']"));
-					
-					if(permitted)
-						po.element(".test-result").removeClass("denied ui-state-error").addClass("permitted ui-state-default")
-						.html("<@spring.message code='schemaGuard.testSchemaUrl.permitted' />");
-					else
-						po.element(".test-result").removeClass("permitted ui-state-default").addClass("denied ui-state-error")
-						.html("<@spring.message code='schemaGuard.testSchemaUrl.denied' />");
-				}
-			});
+			var permitted = response.data;
+			
+			po.element(".test-url").text(po.elementOfName("url").val());
+			
+			if(permitted)
+				po.element(".test-result").removeClass("denied ui-state-error").addClass("permitted ui-state-default")
+				.html("<@spring.message code='schemaGuard.testSchemaUrl.permitted' />");
+			else
+				po.element(".test-result").removeClass("permitted ui-state-default").addClass("denied ui-state-error")
+				.html("<@spring.message code='schemaGuard.testSchemaUrl.denied' />");
 		}
 	});
 })

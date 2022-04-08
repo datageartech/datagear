@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(user.name)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
+					<input type="text" name="name" value="${(user.name)!''}" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
 				</div>
 			</div>
 			<#if !readonly>
@@ -43,7 +43,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.password' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
+					<input type="password" name="password" value="" <#if isAdd>required="required"</#if> maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -51,7 +51,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.confirmPassword' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="confirmPassword" value="" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
+					<input type="password" name="confirmPassword" value="" <#if isAdd>required="required"</#if> maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="new-password" />
 				</div>
 			</div>
 			</#if>
@@ -60,7 +60,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='user.realName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="realName" value="${(user.realName)!''}" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
+					<input type="text" name="realName" value="${(user.realName)!''}" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
 				</div>
 			</div>
 			<#if !disableRoles>
@@ -96,7 +96,7 @@ readonly 是否只读操作，允许为null
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -135,7 +135,7 @@ readonly 是否只读操作，允许为null
 	
 	po.renderRole = function($parent, role)
 	{
-		var exists = po.element("input[name='roleIds[]']", $parent);
+		var exists = po.elementOfName("roleIds[]", $parent);
 		for(var i=0; i<exists.length; i++)
 		{
 			if($(exists[i]).val() == role.id)
@@ -170,65 +170,34 @@ readonly 是否只读操作，允许为null
 		po.open("${contextPath}/role/select?multiple", options);
 	});
 	
-	<#if !readonly>
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		rules :
 		{
-			name : "required",
-			<#if isAdd>
-			password : "required",
-			</#if>
 			confirmPassword :
 			{
-				<#if isAdd>
-				"required" : true,
-				</#if>
-				"equalTo" : po.element("input[name='password']")
+				"equalTo" : po.elementOfName("password")
 			}
-		},
-		messages :
+		}
+	},
+	{
+		handleData: function(data)
 		{
-			name : "<@spring.message code='validation.required' />",
-			<#if isAdd>
-			password : "<@spring.message code='validation.required' />",
-			</#if>
-			confirmPassword :
+			var confirmPassword = data.confirmPassword;
+			data.confirmPassword = undefined;
+			
+			var roleIds = (data.roleIds || []);
+			var roles = [];
+			for(var i=0; i<roleIds.length; i++)
 			{
-				<#if isAdd>
-				"required" : "<@spring.message code='validation.required' />",
-				</#if>
-				"equalTo" : "<@spring.message code='user.validation.confirmPasswordError' />"
+				roles[i] = { "id": roleIds[i] };
 			}
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				handleData: function(data)
-				{
-					var confirmPassword = data.confirmPassword;
-					data.confirmPassword = undefined;
-					
-					var roleIds = (data.roleIds || []);
-					var roles = [];
-					for(var i=0; i<roleIds.length; i++)
-					{
-						roles[i] = { "id": roleIds[i] };
-					}
-					data.roles = roles;
-					data.roleIds = undefined;
-					
-					return { "user": data, "confirmPassword": confirmPassword };
-				},
-				success : function(response)
-				{
-					po.pageParamCallAfterSave(true, response.data);
-				}
-			});
+			data.roles = roles;
+			data.roleIds = undefined;
+			
+			return { "user": data, "confirmPassword": confirmPassword };
 		}
 	});
-	</#if>
 	
 	<#if !disableRoles>
 	po.renderRoles(po.userRoles);

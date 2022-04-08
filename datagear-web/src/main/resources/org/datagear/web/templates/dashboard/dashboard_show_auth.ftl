@@ -54,7 +54,7 @@
 							<label><@spring.message code='dashboard.showAuth.password' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="password" name="password" value="" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="off" autofocus="autofocus" />
+							<input type="password" name="password" value="" maxlength="20" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" autofocus="autofocus" />
 						</div>
 					</div>
 				</div>
@@ -72,51 +72,43 @@
 	po.initFormBtns();
 	
 	<#if authed>
-	po.element(".authed a").attr("href", po.element(".authed input[name='redirectPath']").val());
+	po.element(".authed a").attr("href", po.element(".authed [name='redirectPath']").val());
 	</#if>
 	
 	po.initSysMenu();
 	
-	po.validateForm(
+	po.validateAjaxJsonForm({},
 	{
-		rules : {},
-		messages : {},
-		submitHandler : function(form)
+		handleData: function(data)
 		{
-			$(form).ajaxSubmitJson(
+			var newData = { id: data.id, password: data.password };
+			return newData;
+		},
+		success : function(operationMessage)
+		{
+			var responseData = (operationMessage.data || {});
+			
+			if(responseData.type == "success")
 			{
-				handleData: function(data)
+				window.location.href = po.elementOfName("redirectPath").val();
+			}
+			else if(responseData.type == "fail")
+			{
+				po.elementOfName("password").focus();
+				
+				if(responseData.authFailThreshold < 0)
+					$.tipError("<@spring.message code='dashboard.showAuth.incorrectPassword' />");
+				else
 				{
-					var newData = { id: data.id, password: data.password };
-					return newData;
-				},
-				success : function(operationMessage)
-				{
-					var responseData = (operationMessage.data || {});
-					
-					if(responseData.type == "success")
-					{
-						window.location.href = po.element("input[name='redirectPath']").val();
-					}
-					else if(responseData.type == "fail")
-					{
-						po.element("input[name='password']").focus();
-						
-						if(responseData.authFailThreshold < 0)
-							$.tipError("<@spring.message code='dashboard.showAuth.incorrectPassword' />");
-						else
-						{
-							<#assign messageArgs=['"+responseData.authRemain+"'] />
-							$.tipError("<@spring.messageArgs code='dashboard.showAuth.incorrectPasswordWithRemain' args=messageArgs />");
-						}
-					}
-					else if(responseData.type == "deny")
-					{
-						po.element("input[name='password']").focus();
-						$.tipError("<@spring.message code='dashboard.showAuth.authDenied' />");
-					}
+					<#assign messageArgs=['"+responseData.authRemain+"'] />
+					$.tipError("<@spring.messageArgs code='dashboard.showAuth.incorrectPasswordWithRemain' args=messageArgs />");
 				}
-			});
+			}
+			else if(responseData.type == "deny")
+			{
+				po.elementOfName("password").focus();
+				$.tipError("<@spring.message code='dashboard.showAuth.authDenied' />");
+			}
 		}
 	});
 })

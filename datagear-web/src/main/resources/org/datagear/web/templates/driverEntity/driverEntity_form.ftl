@@ -32,7 +32,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='driverEntity.displayName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="displayName" value="${(driverEntity.displayName)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="displayName" value="${(driverEntity.displayName)!''}" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -67,7 +67,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="driverClassName" value="${(driverEntity.driverClassName)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="driverClassName" value="${(driverEntity.driverClassName)!''}" required="required" maxlength="500" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -75,13 +75,13 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='driverEntity.displayDesc' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="displayDesc" class="ui-widget ui-widget-content ui-corner-all">${(driverEntity.displayDescMore)!''}</textarea>
+					<textarea name="displayDesc" maxlength="500" class="ui-widget ui-widget-content ui-corner-all">${(driverEntity.displayDescMore)!''}</textarea>
 				</div>
 			</div>
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -102,7 +102,7 @@ readonly 是否只读操作，允许为null
 	
 	po.getDriverEntityId = function()
 	{
-		return po.element("input[name='id']").val();
+		return po.elementOfName("id").val();
 	};
 	
 	po.renderDriverFiles = function(fileInfos)
@@ -179,7 +179,7 @@ readonly 是否只读操作，允许为null
 			
 			po.renderDriverFiles(serverFileInfos);
 			
-			var $driverClassName = po.element("input[name='driverClassName']");
+			var $driverClassName = po.elementOfName("driverClassName");
 			
 			if(driverClassNames && driverClassNames.length > 0 && !$driverClassName.val())
 				$driverClassName.val(driverClassNames[0]);
@@ -195,47 +195,35 @@ readonly 是否只读操作，允许为null
 	{
 		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
-
+	
 	$.validator.addMethod("driverFileRequired", function(value, element)
 	{
-		var $df = po.element("input[name='driverLibraryName[]']");
+		var $df = po.elementOfName("driverLibraryName[]");
 		return ($df.length > 0);
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : "",
 		rules :
 		{
-			displayName : "required",
-			driverFilePlaceholder : "driverFileRequired",
-			driverClassName : "required"
+			driverFilePlaceholder : "driverFileRequired"
 		},
 		messages :
 		{
-			displayName : "<@spring.message code='validation.required' />",
-			driverFilePlaceholder : "<@spring.message code='validation.required' />",
-			driverClassName : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
+			driverFilePlaceholder : po.validateMessages.required
+		}
+	},
+	{
+		ignore: "driverFilePlaceholder",
+		handleData: function(data)
 		{
-			$(form).ajaxSubmitJson(
-			{
-				ignore: "driverFilePlaceholder",
-				handleData: function(data)
-				{
-					var newData = {};
-					newData.driverEntity = data;
-					newData.driverLibraryFileNames = data.driverLibraryName;
-					data.driverLibraryName = undefined;
-					
-					return newData;
-				},
-				success : function()
-				{
-					po.pageParamCallAfterSave(true);
-				}
-			});
+			var newData = {};
+			newData.driverEntity = data;
+			newData.driverLibraryFileNames = data.driverLibraryName;
+			data.driverLibraryName = undefined;
+			
+			return newData;
 		}
 	});
 	</#if>

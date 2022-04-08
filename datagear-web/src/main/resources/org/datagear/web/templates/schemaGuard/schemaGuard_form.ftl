@@ -35,7 +35,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="pattern" value="${(schemaGuard.pattern)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="pattern" value="${(schemaGuard.pattern)!''}" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -60,7 +60,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="priority" class="ui-widget ui-widget-content ui-corner-all" value="${(schemaGuard.priority)!''}" />
+					<input type="text" name="priority" maxlength="10" class="ui-widget ui-widget-content ui-corner-all" value="${(schemaGuard.priority)!''}" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -79,7 +79,7 @@ readonly 是否只读操作，允许为null
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -97,31 +97,13 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/schemaGuard/" + action;
 	};
 	
-	<#if !readonly>
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		rules :
 		{
-			pattern : "required",
 			priority : "integer"
-		},
-		messages :
-		{
-			pattern : "<@spring.message code='validation.required' />",
-			priority : "<@spring.message code='validation.integer' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				success : function(response)
-				{
-					po.pageParamCallAfterSave(true, response.data);
-				}
-			});
 		}
 	});
-	</#if>
 })
 (${pageId});
 </script>

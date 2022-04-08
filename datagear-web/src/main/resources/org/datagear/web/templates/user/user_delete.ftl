@@ -41,14 +41,14 @@ formAction 表单提交action，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="migrateUserName" value="" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
+					<input type="text" name="migrateUserName" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" readonly="readonly" />
 					<input type="hidden" name="migrateToId" value="" />
 					<button class="selectUserBtn" type="button"><@spring.message code='select' /></button>
 				</div>
 			</div>
 		</div>
 		<div class="form-foot">
-			<input type="submit" value="<@spring.message code='delete' />" class="danger" />
+			<button type="submit" class="danger"><@spring.message code='delete' /></button>
 		</div>
 	</form>
 </div>
@@ -97,8 +97,8 @@ formAction 表单提交action，允许为null
 			{
 				select : function(user)
 				{
-					po.element("input[name='migrateToId']").val(user.id);
-					po.element("input[name='migrateUserName']").val(user.nameLabel);
+					po.elementOfName("migrateToId").val(user.id);
+					po.elementOfName("migrateUserName").val(user.nameLabel);
 				}
 			}
 		};
@@ -113,11 +113,11 @@ formAction 表单提交action，允许为null
 		var $du = po.element(".deleteUserIds");
 		return ($du.length > 0);
 	});
-
+	
 	$.validator.addMethod("migrateToUserIdIllegal", function(value, element)
 	{
 		var $du = po.element(".deleteUserIds");
-		var mu = po.element("input[name='migrateToId']").val();
+		var mu = po.elementOfName("migrateToId").val();
 		
 		for(var i=0; i<$du.length; i++)
 		{
@@ -128,34 +128,25 @@ formAction 表单提交action，允许为null
 		return true;
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : "",
 		rules :
 		{
 			deleteUserPlaceholder : "deleteUserIdRequired",
-			migrateUserName : { "required": true, "migrateToUserIdIllegal": true }
+			migrateUserName : { "migrateToUserIdIllegal": true }
 		},
 		messages :
 		{
-			deleteUserPlaceholder : "<@spring.message code='validation.required' />",
+			deleteUserPlaceholder : po.validateMessages.required,
 			migrateUserName :
 			{
-				"required": "<@spring.message code='validation.required' />",
 				"migrateToUserIdIllegal": "<@spring.message code='user.validation.migrateToUserIdIllegal' />"
 			}
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				ignore: ["deleteUserPlaceholder", "migrateUserName"],
-				success : function(response)
-				{
-					po.pageParamCallAfterSave(true, response.data);
-				}
-			});
 		}
+	},
+	{
+		ignore: ["deleteUserPlaceholder", "migrateUserName"]
 	});
 	
 	po.renderUsers(po.deleteUsers);

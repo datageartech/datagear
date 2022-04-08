@@ -42,7 +42,7 @@
 			</div>
 		</div>
 		<div class="form-foot">
-			<input type="submit" value="<@spring.message code='import' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='import' /></button>
 		</div>
 	</form>
 </div>
@@ -108,13 +108,11 @@
 	
 	$.validator.addMethod("importDriverEntityRequired", function(value, element)
 	{
-		var thisForm = $(element).closest("form");
-		var $driverEntityId = $("input[name='driverEntityIds[]']", thisForm);
-		
+		var $driverEntityId = po.elementOfName("driverEntityIds[]");
 		return $driverEntityId.length > 0;
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : ".ignore",
 		rules :
@@ -124,18 +122,10 @@
 		messages :
 		{
 			inputForValidate : "<@spring.message code='driverEntity.import.importDriverEntityRequired' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				ignore: "inputForValidate",
-				success : function()
-				{
-					po.pageParamCallAfterSave(true);
-				}
-			});
 		}
+	},
+	{
+		ignore: "inputForValidate",
 	});
 })
 (${pageId});

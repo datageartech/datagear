@@ -60,7 +60,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboardShareSet.password' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="password" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="off" />
+					<input type="password" name="password" value="${(dashboardShareSet.password)!''}" maxlength="20" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
 					<button class="togglePasswordBtn" type="button"><@spring.message code='show' /></button>
 				</div>
 			</div>
@@ -69,7 +69,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboardShareSet.confirmPassword' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="confirmPassword" value="${(dashboardShareSet.password)!''}" class="ui-widget ui-widget-content ui-corner-all" maxlength="20" autocomplete="off" />
+					<input type="password" name="confirmPassword" value="${(dashboardShareSet.password)!''}" maxlength="20" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
 				</div>
 			</div>
 		</div>
@@ -96,20 +96,20 @@ readonly 是否只读操作，允许为null
 	//保存无需刷新列表
 	po.refreshParent = null;
 	
-	po.element("input[name='enablePassword']").on("click", function()
+	po.elementOfName("enablePassword").on("click", function()
 	{
-		var enablePassword = (po.element("input[name='enablePassword']:checked").val() == "true");
+		var enablePassword = (po.element("[name='enablePassword']:checked").val() == "true");
 		if(enablePassword)
 			po.element(".enablePasswordAware").removeClass("ui-state-disabled");
 		else
 			po.element(".enablePasswordAware").addClass("ui-state-disabled");
 	});
-	po.element("input[name='enablePassword']:checked").click();
+	po.element("[name='enablePassword']:checked").click();
 	
 	po.element(".togglePasswordBtn").click(function()
 	{
-		var psdInput = po.element("input[name='password']");
-		var confirmPsdInput = po.element("input[name='confirmPassword']");
+		var psdInput = po.elementOfName("password");
+		var confirmPsdInput = po.elementOfName("confirmPassword");
 		var isShow = (psdInput.attr("type") == "text");
 		
 		if(!isShow)
@@ -128,33 +128,19 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	
-	<#if !readonly>
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		rules :
 		{
-			confirmPassword : { "equalTo" : po.element("input[name='password']") }
-		},
-		messages :
+			confirmPassword : { "equalTo" : po.elementOfName("password") }
+		}
+	},
+	{
+		handleData: function(data)
 		{
-			confirmPassword : "<@spring.message code='dashboardShareSet.validation.confirmPasswordIncorrect' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				handleData: function(data)
-				{
-					data.confirmPassword = undefined;
-				},
-				success : function(operationMessage)
-				{
-					po.pageParamCallAfterSave(true, operationMessage.data);
-				}
-			});
+			data.confirmPassword = undefined;
 		}
 	});
-	</#if>
 })
 (${pageId});
 </script>

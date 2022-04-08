@@ -33,7 +33,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='role.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(role.name)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="name" value="${(role.name)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -41,7 +41,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='role.description' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="description" class="ui-widget ui-widget-content ui-corner-all">${(role.description)!''}</textarea>
+					<textarea name="description" maxlength="200" class="ui-widget ui-widget-content ui-corner-all">${(role.description)!''}</textarea>
 				</div>
 			</div>
 			<div class="form-item">
@@ -60,7 +60,7 @@ readonly 是否只读操作，允许为null
 		</div>
 		<div class="form-foot">
 			<#if !readonly>
-			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			<button type="submit" class="recommended"><@spring.message code='save' /></button>
 			</#if>
 		</div>
 	</form>
@@ -77,29 +77,7 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/role/" + action;
 	};
 	
-	<#if !readonly>
-	po.validateForm(
-	{
-		rules :
-		{
-			name : "required"
-		},
-		messages :
-		{
-			name : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
-			{
-				success : function(operationMessage)
-				{
-					po.pageParamCallAfterSave(true, operationMessage.data);
-				}
-			});
-		}
-	});
-	</#if>
+	po.validateAjaxJsonForm();
 })
 (${pageId});
 </script>

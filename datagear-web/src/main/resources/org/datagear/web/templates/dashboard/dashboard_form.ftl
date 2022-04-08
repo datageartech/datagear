@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboard.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(dashboard.name)!''}" placeholder="<@spring.message code='dashboard.name' />" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="name" value="${(dashboard.name)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" placeholder="<@spring.message code='dashboard.name' />" />
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
@@ -136,7 +136,7 @@ readonly 是否只读操作，允许为null
 		<div class="form-foot">
 			<#if !readonly>
 			<button type="submit" class="recommended"><@spring.message code='save' /></button>
-			<button id="saveAndShowDashboard" type="button"><@spring.message code='dashboard.saveAndShow' /></button>
+			<button type="button" class="saveAndShowDashboard"><@spring.message code='dashboard.saveAndShow' /></button>
 			</#if>
 		</div>
 	</form>
@@ -1757,82 +1757,69 @@ readonly 是否只读操作，允许为null
 		return false;
 	};
 	
-	po.element("button[id='saveAndShowDashboard']").click(function()
+	po.element(".saveAndShowDashboard").click(function()
 	{
 		po.showAfterSave = true;
 		po.form().submit();
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
-		ignore : "",
-		rules :
+		ignore : ""
+	},
+	{
+		closeAfterSubmit: false,
+		handleData: function(data)
 		{
-			"name" : "required"
-		},
-		messages :
-		{
-			"name" : "<@spring.message code='validation.required' />"
-		},
-		submitHandler : function(form)
-		{
-			$(form).ajaxSubmitJson(
+			var newData = po.getResourceEditorData();
+			newData.dashboard = data;
+			newData.copySourceId = po.elementOfId("${pageId}-copySourceId").val();
+			newData.saveAdd = po.isUnsavedAdd;
+			
+			//首次复制保存时，需要把templates这里手动加入，不然会丢失
+			if(newData.copySourceId && newData.saveAdd)
+				newData.dashboard.templates = po.templates;
+			
+			var templateCount = (newData.dashboard.templates == null ? 0 : newData.dashboard.templates.length);
+			for(var i=0; i<newData.resourceIsTemplates.length; i++)
 			{
-				handleData: function(data)
-				{
-					var newData = po.getResourceEditorData();
-					newData.dashboard = data;
-					newData.copySourceId = po.element("#${pageId}-copySourceId").val();
-					newData.saveAdd = po.isUnsavedAdd;
-					
-					//首次复制保存时，需要把templates这里手动加入，不然会丢失
-					if(newData.copySourceId && newData.saveAdd)
-						newData.dashboard.templates = po.templates;
-					
-					var templateCount = (newData.dashboard.templates == null ? 0 : newData.dashboard.templates.length);
-					for(var i=0; i<newData.resourceIsTemplates.length; i++)
-					{
-						if(newData.resourceIsTemplates[i] == true || newData.resourceIsTemplates[i] == "true")
-							templateCount++;
-					}
-					
-					if(templateCount == 0)
-					{
-						$.tipInfo("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
-						po.showAfterSave = false;
-						
-						return false;
-					}
-					
-					return newData;
-				},
-				success : function(response)
-				{
-					po.isUnsavedAdd = false;
-					
-					var dashboard = response.data;
-					po.templates = dashboard.templates;
-					
-					if(po.showAfterSave)
-					{
-						var editorTabPane = po.getActiveResEditorTabPane();
-						var editorData = po.getSingleResourceEditorData(editorTabPane, false);
-						
-						if(editorData.isTemplate)
-							window.open(po.showUrl(dashboard.id, editorData.resourceName), dashboard.id);
-						else
-							window.open(po.showUrl(dashboard.id), dashboard.id);
-					}
-					
-					var close = po.pageParamCallAfterSave(false);
-					if(!close)
-						po.refreshResourceListLocal();
-				},
-				complete: function()
-				{
-					po.showAfterSave = false;
-				}
-			});
+				if(newData.resourceIsTemplates[i] == true || newData.resourceIsTemplates[i] == "true")
+					templateCount++;
+			}
+			
+			if(templateCount == 0)
+			{
+				$.tipInfo("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
+				po.showAfterSave = false;
+				
+				return false;
+			}
+			
+			return newData;
+		},
+		success : function(response)
+		{
+			po.isUnsavedAdd = false;
+			
+			var dashboard = response.data;
+			po.templates = dashboard.templates;
+			
+			if(po.showAfterSave)
+			{
+				var editorTabPane = po.getActiveResEditorTabPane();
+				var editorData = po.getSingleResourceEditorData(editorTabPane, false);
+				
+				if(editorData.isTemplate)
+					window.open(po.showUrl(dashboard.id, editorData.resourceName), dashboard.id);
+				else
+					window.open(po.showUrl(dashboard.id), dashboard.id);
+			}
+			
+			po.refreshResourceListLocal();
+		},
+		complete: function()
+		{
+			po.showAfterSave = false;
 		}
 	});
 	
@@ -1840,7 +1827,7 @@ readonly 是否只读操作，允许为null
 	po.initDashboardEditors();
 	
 	po.element(".resize-editor-button-left").click();
-	po.newResourceEditorTab(po.element("#${pageId}-initTemplateName").val(), po.element("#${pageId}-initTemplateContent").val(), true);
+	po.newResourceEditorTab(po.elementOfId("${pageId}-initTemplateName").val(), po.elementOfId("${pageId}-initTemplateContent").val(), true);
 })
 (${pageId});
 </script>
