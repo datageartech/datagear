@@ -84,10 +84,6 @@ readonly 是否只读操作，允许为null
 		handleData: function(data)
 		{
 			data.resourceContent = po.getCodeText(po.resourceEditor);
-		},
-		success : function(operationMessage)
-		{
-			po.pageParamCallAfterSave(true, operationMessage.data);
 		}
 	});
 })

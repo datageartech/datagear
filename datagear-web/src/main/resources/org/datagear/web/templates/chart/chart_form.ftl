@@ -994,8 +994,6 @@ readonly 是否只读操作，允许为null
 			var chart = response.data;
 			po.elementOfName("id").val(chart.id);
 			
-			po.pageParamCallAfterSave(true, response.data);
-			
 			if(po.previewAfterSave)
 				window.open(po.url("show/"+chart.id+"/"), chart.id);
 		},

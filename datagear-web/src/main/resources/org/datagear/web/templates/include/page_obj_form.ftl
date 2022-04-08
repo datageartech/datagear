@@ -81,7 +81,7 @@ page_obj.ftl
 	po.afterSubmitSuccess = function(response, close)
 	{
 		close = (close == null ? true : close);
-		po.pageParamCallAfterSave(close, response);
+		po.pageParamCallAfterSave(close, (response.data ? response.data : response));
 	};
 	
 	po.refreshParent = function()
