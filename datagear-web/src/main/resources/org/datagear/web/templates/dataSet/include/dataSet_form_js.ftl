@@ -10,7 +10,7 @@
 数据集表单页：JS片段
 
 依赖：
-page_js_obj.ftl
+page_obj.ftl
 
 变量：
 //自上次预览后，预览值是否已修改，不允许为null

@@ -10,7 +10,7 @@
 设置共享筛选条件片段。
 
 依赖：
-page_js_obj.ftl
+page_obj.ftl
 -->
 <#assign _ssf_AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <#assign _ssf_DataPermissionEntityService=statics['org.datagear.management.service.DataPermissionEntityService']>

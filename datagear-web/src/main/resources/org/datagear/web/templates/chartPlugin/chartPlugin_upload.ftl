@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../include/import_global.ftl">
+<#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
 <head>
@@ -14,7 +14,7 @@
 <title><#include "../include/html_title_app_name.ftl"><@spring.message code='chartPlugin.uploadChartPlugin' /></title>
 </head>
 <body>
-<#include "../include/page_js_obj.ftl" >
+<#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-uploadChartPlugin">
 	<form id="${pageId}form" action="${contextPath}/chartPlugin/saveUpload" method="POST">
 		<div class="form-head"></div>

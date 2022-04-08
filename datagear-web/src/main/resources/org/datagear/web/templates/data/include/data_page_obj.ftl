@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../../include/page_js_obj.ftl">
+<#include "../../include/page_obj.ftl">
 <script type="text/javascript">
 (function(po)
 {

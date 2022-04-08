@@ -10,7 +10,7 @@
 分页片段。
 
 依赖：
-data_page_obj.ftl
+page_obj.ftl
 
 变量：
 //分页回调函数，不允许为null，格式为：function(pagingParam){}

@@ -65,13 +65,10 @@ var ${pageId} =
 	//关闭此页面
 	close : function()
 	{
-		var ele = this.element();
+		var myDialog = $.getInDialog(this.element());
 		
-		if($.isInDialog(ele))
-		{
-			var $dialog = $.getInDialog(ele);
-			$.closeDialog($dialog);
-		}
+		if(myDialog && myDialog.length > 0)
+			$.closeDialog(myDialog);
 		else
 		{
 			//XXX 打开新窗口后不应该自动关闭

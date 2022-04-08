@@ -10,7 +10,7 @@
 数据集表单页：标题行操作JS片段
 
 依赖：
-page_js_obj.ftl
+page_obj.ftl
 
 变量：
 -->

@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "include/import_global.ftl">
+<#include "include/page_import.ftl">
 <#assign _td_Version=statics['org.datagear.util.Global'].VERSION>
 [
 	{

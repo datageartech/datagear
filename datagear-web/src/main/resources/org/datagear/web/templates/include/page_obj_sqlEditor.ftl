@@ -10,7 +10,7 @@
 SQL编辑器JS片段。
 
 依赖：
-page_js_obj.ftl
+page_obj.ftl
 page_obj_codeEditor.ftl
 
 变量：

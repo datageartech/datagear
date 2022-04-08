@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../include/import_global.ftl">
+<#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
 <head>
@@ -17,7 +17,7 @@
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-role-user">
 	<div class="head">
 		<div class="search">

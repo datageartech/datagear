@@ -10,7 +10,7 @@
 代码编辑器JS片段。
 
 依赖：
-page_js_obj.ftl
+page_obj.ftl
 
 -->
 <script type="text/javascript">

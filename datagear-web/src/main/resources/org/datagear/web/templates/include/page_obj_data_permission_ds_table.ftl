@@ -10,7 +10,7 @@
 数据源表权限JS片段。
 
 依赖：
-page_js_obj.ftl
+page_obj.ftl
 -->
 <#assign __podpSchema=statics['org.datagear.management.domain.Schema']>
 <script type="text/javascript">

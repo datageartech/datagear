@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "include/import_global.ftl">
+<#include "include/page_import.ftl">
 <#include "include/html_doctype.ftl">
 <html>
 <head>
@@ -15,7 +15,7 @@ ${detectNewVersionScript?no_esc}
 <title><#include "include/html_title_app_name.ftl"><@spring.message code='register.register' /></title>
 </head>
 <body>
-<#include "include/page_js_obj.ftl" >
+<#include "include/page_obj.ftl" >
 <div id="${pageId}">
 	<div class="main-page-head">
 		<#include "include/html_logo.ftl">

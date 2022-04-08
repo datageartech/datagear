@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../include/import_global.ftl">
+<#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <#--
 Schema schema 数据库，不允许为null
@@ -26,7 +26,7 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj.ftl">
 <div id="${pageId}" class="page-dataexchange page-dataimport-text page-dataimport-json">
 	<div class="head">
 		<@spring.message code='dataImport.importJsonData' />

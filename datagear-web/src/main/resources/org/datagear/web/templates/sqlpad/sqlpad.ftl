@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#include "../include/import_global.ftl">
+<#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <#--
 Schema schema 数据库，不允许为null
@@ -26,7 +26,7 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj.ftl">
 <div id="${pageId}" class="page-sqlpad">
 	<div class="head button-operation">
 		<button id="executeSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only first" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>

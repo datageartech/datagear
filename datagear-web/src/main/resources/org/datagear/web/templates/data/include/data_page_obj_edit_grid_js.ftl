@@ -10,7 +10,7 @@
 编辑表格功能JS片段。
 
 依赖：
-page_js_obj.ftl
+page_obj.ftl
 page_obj_grid.ftl
 data_page_obj_grid.ftl
 data_page_obj_edit_grid_html.ftl

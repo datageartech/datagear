@@ -10,7 +10,7 @@
 数据权限JS片段。
 
 依赖：
-page_js_obj.ftl
+page_obj.ftl
 -->
 <#assign __podpAuthorization=statics['org.datagear.management.domain.Authorization']>
 <script type="text/javascript">
