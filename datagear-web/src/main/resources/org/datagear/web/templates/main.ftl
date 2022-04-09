@@ -660,9 +660,9 @@ ${detectNewVersionScript?no_esc}
 			{
 				"pageParam" :
 				{
-					"afterSave" : function(response)
+					"afterSave" : function(data)
 					{
-						$.analysisProjectContext.value(response.data);
+						$.analysisProjectContext.value(data);
 					}
 				}
 			});

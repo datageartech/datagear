@@ -27,7 +27,7 @@
 		 * 				//可选，打开目标：document.body 页面内jquery对话框；"_blank" 新网页；"_file" 文件下载
 		 * 				target : document.body,
 		 * 
-		 *              //当target是页内元素时，是否作打开为对话框，默认为：true
+		 *              //当target是页内元素时，是否打开为对话框，默认为：true
 		 *              asDialog: true,
 		 * 				
 		 *				//可选，传递给新页面的参数，可以在目标页面通过$.pageParam(dom)获取
@@ -114,6 +114,8 @@
 								var title = $("> title", $dialog).text();
 								$dialog.dialog( "option", "title", title);
 							}
+							
+							$("[autofocus]:first", $dialog).focus();
 							
 							if(successCallback)
 								successCallback(data, textStatus, jqXHR);

@@ -26,7 +26,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet">
-	<form id="${pageId}form" action="#" method="POST">
+	<form id="${pageId}form" action="${contextPath}/dataSet/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">
@@ -72,10 +72,11 @@ readonly 是否只读操作，允许为null
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.initWorkspaceHeight();
 	
-	po.jsonEditor = po.createWorkspaceEditor(po.element("#${pageId}-workspaceEditor"),
+	po.jsonEditor = po.createWorkspaceEditor(po.elementOfId("${pageId}-workspaceEditor"),
 	{
-		value: po.element("textarea[name='value']").val(),
-		mode: {name: "javascript", json: true}
+		value: po.elementOfName("value").val(),
+		mode: {name: "javascript", json: true},
+		readOnly: po.readonly
 	});
 	
 	po.initWorkspaceTabs();
@@ -136,35 +137,28 @@ readonly 是否只读操作，允许为null
 		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : "",
 		rules :
 		{
-			"name" : "required",
 			"value" : {"dataSetJsonValueRequired": true, "dataSetJsonValuePreviewRequired": true}
 		},
 		messages :
 		{
-			"name" : "<@spring.message code='validation.required' />",
 			"value" :
 			{
-				"dataSetJsonValueRequired": "<@spring.message code='validation.required' />",
+				"dataSetJsonValueRequired": po.validateMessages.required,
 				"dataSetJsonValuePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			}
-		},
-		submitHandler : function(form)
+		}
+	},
+	{
+		handleData: function(data)
 		{
-			var formData = $.formToJson(form);
-			formData["properties"] = po.getFormDataSetProperties();
-			formData["params"] = po.getFormDataSetParams();
-			formData["value"] = po.getCodeText(po.jsonEditor);
-			
-			$.postJson("${contextPath}/dataSet/${formAction}", formData,
-			function(response)
-			{
-				po.pageParamCallAfterSave(true, response.data);
-			});
+			data["properties"] = po.getFormDataSetProperties();
+			data["params"] = po.getFormDataSetParams();
+			data["value"] = po.getCodeText(po.jsonEditor);
 		}
 	});
 })

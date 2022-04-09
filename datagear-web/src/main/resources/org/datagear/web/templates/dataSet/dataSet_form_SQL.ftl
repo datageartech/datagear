@@ -26,7 +26,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet">
-	<form id="${pageId}form" action="#" method="POST">
+	<form id="${pageId}form" action="${contextPath}/dataSet/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">
@@ -35,7 +35,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSet.dataSource' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="shmConFactory.schema.title" class="ui-widget ui-widget-content ui-corner-all" value="${(dataSet.connectionFactory.schema.title)!''}" readonly="readonly" />
+					<input type="text" name="shmConFactory.schema.title" required="required" class="ui-widget ui-widget-content ui-corner-all" value="${(dataSet.connectionFactory.schema.title)!''}" readonly="readonly" />
 					<input type="hidden" name="shmConFactory.schema.id" class="ui-widget ui-widget-content ui-corner-all" value="${(dataSet.connectionFactory.schema.id)!''}" />
 					<#if !readonly>
 					<button type="button" class="select-schema-button"><@spring.message code='select' /></button>
@@ -90,8 +90,11 @@ readonly 是否只读操作，允许为null
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.initWorkspaceHeight();
 	
-	po.getDataSetSchemaId = function(){ return po.element("input[name='shmConFactory.schema.id']").val(); };
-
+	po.getDataSetSchemaId = function()
+	{
+		return po.elementOfName("shmConFactory.schema.id").val();
+	};
+	
 	po.element(".select-schema-button").click(function()
 	{
 		var options =
@@ -100,8 +103,8 @@ readonly 是否只读操作，允许为null
 			{
 				select : function(schema)
 				{
-					po.element("input[name='shmConFactory.schema.title']").val(schema.title);
-					po.element("input[name='shmConFactory.schema.id']").val(schema.id);
+					po.elementOfName("shmConFactory.schema.title").val(schema.title);
+					po.elementOfName("shmConFactory.schema.id").val(schema.id);
 				}
 			}
 		};
@@ -112,11 +115,11 @@ readonly 是否只读操作，允许为null
 	});
 	
 	po.getSqlEditorSchemaId = function(){ return po.getDataSetSchemaId(); };
-	po.sqlEditor = po.createWorkspaceEditor(po.element("#${pageId}-workspaceEditor"),
+	po.sqlEditor = po.createWorkspaceEditor(po.elementOfId("${pageId}-workspaceEditor"),
 			po.inflateSqlEditorOptions(
 			{
-				value: po.element("textarea[name='sql']").val(),
-				readOnly: ${readonly?string("true","false")}
+				value: po.elementOfName("sql").val(),
+				readOnly: po.readonly
 			})
 	);
 	
@@ -224,37 +227,28 @@ readonly 是否只读操作，允许为null
 		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : "",
 		rules :
 		{
-			"name" : "required",
-			"shmConFactory.schema.title" : "required",
 			"sql" : {"dataSetSqlRequired": true, "dataSetSqlPreviewRequired": true}
 		},
 		messages :
 		{
-			"name" : "<@spring.message code='validation.required' />",
-			"shmConFactory.schema.title" : "<@spring.message code='validation.required' />",
 			"sql" :
 			{
-				"dataSetSqlRequired": "<@spring.message code='validation.required' />",
+				"dataSetSqlRequired": po.validateMessages.required,
 				"dataSetSqlPreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			}
-		},
-		submitHandler : function(form)
+		}
+	},
+	{
+		handleData: function(data)
 		{
-			var formData = $.formToJson(form);
-			formData["properties"] = po.getFormDataSetProperties();
-			formData["params"] = po.getFormDataSetParams();
-			formData["sql"] = po.getCodeText(po.sqlEditor);
-			
-			$.postJson("${contextPath}/dataSet/${formAction}", formData,
-			function(response)
-			{
-				po.pageParamCallAfterSave(true, response.data);
-			});
+			data["properties"] = po.getFormDataSetProperties();
+			data["params"] = po.getFormDataSetParams();
+			data["sql"] = po.getCodeText(po.sqlEditor);
 		}
 	});
 })

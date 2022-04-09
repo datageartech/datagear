@@ -71,16 +71,24 @@ Schema schema 数据库，不允许为null
 							</div>
 						</div>
 						<div class="form-item">
-							<div class="form-item-label"><label><@spring.message code='sqlpad.overTimeThreashold' /></label></div>
+							<div class="form-item-label">
+								<label title="<@spring.message code='sqlpad.overTimeThreashold.desc' />">
+									<@spring.message code='sqlpad.overTimeThreashold' />
+								</label>
+							</div>
 							<div class="form-item-value">
-								<input type="text" name="overTimeThreashold" value="10" class="ui-widget ui-widget-content ui-corner-all" style="width:4em;" title="<@spring.message code='sqlpad.overTimeThreashold.desc' />" />
+								<input type="text" name="overTimeThreashold" value="10" required="required" maxlength="10" class="ui-widget ui-widget-content ui-corner-all" style="width:4em;" />
 								<@spring.message code='sqlpad.overTimeThreashold.unit' />
 							</div>
 						</div>
 						<div class="form-item">
-							<div class="form-item-label"><label><@spring.message code='sqlpad.resultsetFetchSize' /></label></div>
+							<div class="form-item-label">
+								<label title="<@spring.message code='sqlpad.resultsetFetchSize.desc' />">
+									<@spring.message code='sqlpad.resultsetFetchSize' />
+								</label>
+							</div>
 							<div class="form-item-value">
-								<input type="text" name="resultsetFetchSize" value="20" class="ui-widget ui-widget-content ui-corner-all" style="width:4em;" title="<@spring.message code='sqlpad.resultsetFetchSize.desc' />" />
+								<input type="text" name="resultsetFetchSize" value="20" required="required" maxlength="10" class="ui-widget ui-widget-content ui-corner-all" style="width:4em;" />
 							</div>
 						</div>
 					</div>
@@ -176,6 +184,7 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
+<#include "../include/page_obj_form.ftl">
 <#include "../include/page_obj_tabs.ftl" >
 <#include "../include/page_obj_format_time.ftl" >
 <#include "../include/page_obj_data_permission.ftl">
@@ -1362,29 +1371,21 @@ Schema schema 数据库，不允许为null
 		}
 	});
 	
-	po.element("#settingForm").validate(
+	po.validateForm(
 	{
 		rules :
 		{
-			overTimeThreashold : { required : true, integer : true, min : 1, max : 60 },
-			resultsetFetchSize : { required : true, integer : true, min : 1, max : 1000 }
-		},
-		messages :
-		{
-			overTimeThreashold : "<@spring.message code='sqlpad.overTimeThreashold.validation' />",
-			resultsetFetchSize : "<@spring.message code='sqlpad.resultsetFetchSize.validation' />"
+			overTimeThreashold : { integer : true, min : 1, max : 60 },
+			resultsetFetchSize : { integer : true, min : 1, max : 1000 }
 		},
 		submitHandler : function(form)
 		{
 			return false;
-		},
-		errorPlacement : function(error, element)
-		{
-			error.appendTo(element.closest(".form-item-value"));
 		}
-	});
+	},
+	po.elementOfId("settingForm"));
 	
-	po.element("#sqlExceptionDetailPanel").mouseleave(function()
+	po.elementOfId("sqlExceptionDetailPanel").mouseleave(function()
 	{
 		$(this).hide();
 	});

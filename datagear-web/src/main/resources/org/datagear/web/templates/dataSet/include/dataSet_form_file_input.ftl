@@ -282,6 +282,15 @@
 		
 		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
+	
+	po.setOriginalFileNameParam = function(input)
+	{
+		input = (input == null ? po.elementOfId("${pageId}-originalFileName") : input);
+		
+		var action = po.form().attr("action");
+		action = $.addParam(action, "originalFileName", input.val());
+		po.form().attr("action", action);
+	};
 })
 (${pageId});
 </script>

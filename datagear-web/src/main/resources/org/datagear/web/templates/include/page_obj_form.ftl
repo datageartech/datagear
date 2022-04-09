@@ -103,6 +103,8 @@ page_obj.ftl
 		number: "<@spring.message code='validation.number' />",
 		digits: "<@spring.message code='validation.digits' />",
 		equalTo: "<@spring.message code='validation.equalTo' />",
+		min: $.validator.format("<@spring.message code='validation.min' />"),
+		max: $.validator.format("<@spring.message code='validation.max' />"),
 		maxlength: $.validator.format("<@spring.message code='validation.maxlength' />"),
 		minlength: $.validator.format("<@spring.message code='validation.minlength' />"),
 		integer: "<@spring.message code='validation.integer' />"

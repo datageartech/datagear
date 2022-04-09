@@ -27,7 +27,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-Http">
-	<form id="${pageId}form" action="#" method="POST">
+	<form id="${pageId}form" action="${contextPath}/dataSet/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">
@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="uri" value="${(dataSet.uri)!''}" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="uri" value="${(dataSet.uri)!''}" required="required" maxlength="1000" class="ui-widget ui-widget-content ui-corner-all" />
 					
 					<div class="item-lv inline" title="<@spring.message code='dataSet.http.requestMethod' />">
 						<div class="item-lv-l" style="display: none;">
@@ -168,10 +168,10 @@ readonly 是否只读操作，允许为null
 	po.initMtableModelInput();
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
-	po.element("select[name='requestMethod']").selectmenu({ appendTo : po.element() });
-	po.element("select[name='requestContentType']").selectmenu({ appendTo : po.element() });
-	po.element("select[name='requestContentCharset']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
-	po.element("select[name='responseContentType']").selectmenu({ appendTo : po.element() });
+	po.elementOfName("requestMethod").selectmenu({ appendTo : po.element() });
+	po.elementOfName("requestContentType").selectmenu({ appendTo : po.element() });
+	po.elementOfName("requestContentCharset").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
+	po.elementOfName("responseContentType").selectmenu({ appendTo : po.element() });
 	po.initWorkspaceHeight();
 	po.element(".workspace-editor-tabs").tabs(
 	{
@@ -189,14 +189,14 @@ readonly 是否只读操作，允许为null
 	po.element(".workspace-editor-tabs").height(po.element(".workspace-editor-wrapper").height() - po.element(".form-item-responseDataJsonPath").outerHeight(true));
 	po.element(".workspace-editor-wrapper").height(po.element(".workspace-editor-tabs").height() - workspaceEditorGapHeight);
 
-	po.requestContentEditor = po.createWorkspaceEditor(po.element("#${pageId}-workspaceEditor-requestContent"),
+	po.requestContentEditor = po.createWorkspaceEditor(po.elementOfId("${pageId}-workspaceEditor-requestContent"),
 	{
-		value: po.element("textarea[name='requestContent']").val(),
+		value: po.elementOfName("requestContent").val(),
 		mode: {name: "javascript", json: true}
 	});
-	po.headerContentEditor = po.createWorkspaceEditor(po.element("#${pageId}-workspaceEditor-headerContent"),
+	po.headerContentEditor = po.createWorkspaceEditor(po.elementOfId("${pageId}-workspaceEditor-headerContent"),
 	{
-		value: po.element("textarea[name='headerContent']").val(),
+		value: po.elementOfName("headerContent").val(),
 		mode: {name: "javascript", json: true}
 	});
 	po.getAddPropertyName = function()
@@ -211,14 +211,14 @@ readonly 是否只读操作，允许为null
 	
 	po.updatePreviewOptionsData = function()
 	{
-		var uri = po.element("input[name='uri']").val();
-		var requestMethod = po.element("select[name='requestMethod']").val();
-		var requestContentType = po.element("select[name='requestContentType']").val();
-		var requestContentCharset = po.element("select[name='requestContentCharset']").val();
-		var responseContentType = po.element("select[name='responseContentType']").val();
+		var uri = po.elementOfName("uri").val();
+		var requestMethod = po.elementOfName("requestMethod").val();
+		var requestContentType = po.elementOfName("requestContentType").val();
+		var requestContentCharset = po.elementOfName("requestContentCharset").val();
+		var responseContentType = po.elementOfName("responseContentType").val();
 		var requestContent = po.getCodeText(po.requestContentEditor);
 		var headerContent = po.getCodeText(po.headerContentEditor);
-		var responseDataJsonPath = po.element("input[name='responseDataJsonPath']").val();
+		var responseDataJsonPath = po.elementOfName("responseDataJsonPath").val();
 		
 		var dataSet = po.previewOptions.data.dataSet;
 		
@@ -240,14 +240,14 @@ readonly 是否只读操作，允许为null
 	
 	po.isPreviewValueModified = function()
 	{
-		var uri = po.element("input[name='uri']").val();
-		var requestMethod = po.element("select[name='requestMethod']").val();
-		var requestContentType = po.element("select[name='requestContentType']").val();
-		var requestContentCharset = po.element("select[name='requestContentCharset']").val();
-		var responseContentType = po.element("select[name='responseContentType']").val();
+		var uri = po.elementOfName("uri").val();
+		var requestMethod = po.elementOfName("requestMethod").val();
+		var requestContentType = po.elementOfName("requestContentType").val();
+		var requestContentCharset = po.elementOfName("requestContentCharset").val();
+		var responseContentType = po.elementOfName("responseContentType").val();
 		var requestContent = po.getCodeText(po.requestContentEditor);
 		var headerContent = po.getCodeText(po.headerContentEditor);
-		var responseDataJsonPath = po.element("input[name='responseDataJsonPath']").val();
+		var responseDataJsonPath = po.elementOfName("responseDataJsonPath").val();
 		
 		var pd = po.previewOptions.data.dataSet;
 		
@@ -284,37 +284,28 @@ readonly 是否只读操作，允许为null
 		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : "",
 		rules :
 		{
-			"name" : "required",
-			"uri" : "required",
 			"requestContent" : {"dataSetHttpPreviewRequired": true}
 		},
 		messages :
 		{
-			"name" : "<@spring.message code='validation.required' />",
-			"uri" : "<@spring.message code='validation.required' />",
 			"requestContent" :
 			{
 				"dataSetHttpPreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			}
-		},
-		submitHandler : function(form)
+		}
+	},
+	{
+		handleData: function(data)
 		{
-			var formData = $.formToJson(form);
-			formData["properties"] = po.getFormDataSetProperties();
-			formData["params"] = po.getFormDataSetParams();
-			formData["requestContent"] = po.getCodeText(po.requestContentEditor);
-			formData["headerContent"] = po.getCodeText(po.headerContentEditor);
-			
-			$.postJson("${contextPath}/dataSet/${formAction}", formData,
-			function(response)
-			{
-				po.pageParamCallAfterSave(true, response.data);
-			});
+			data["properties"] = po.getFormDataSetProperties();
+			data["params"] = po.getFormDataSetParams();
+			data["requestContent"] = po.getCodeText(po.requestContentEditor);
+			data["headerContent"] = po.getCodeText(po.headerContentEditor);
 		}
 	});
 })

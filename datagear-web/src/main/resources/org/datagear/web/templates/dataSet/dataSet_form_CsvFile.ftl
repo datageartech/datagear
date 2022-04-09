@@ -26,7 +26,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-CsvFile">
-	<form id="${pageId}form" action="#" method="POST">
+	<form id="${pageId}form" action="${contextPath}/dataSet/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">
@@ -99,7 +99,7 @@ readonly 是否只读操作，允许为null
 	po.initMtableModelInput();
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
-	po.element("select[name='encoding']").selectmenu({ appendTo: po.element(), position: {my: "left bottom", at: "left top"}, classes: { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
+	po.elementOfName("encoding").selectmenu({ appendTo: po.element(), position: {my: "left bottom", at: "left top"}, classes: { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	po.element(".nameRow-radios").controlgroup();
 	po.initWorkspaceHeight();
 	po.initWorkspaceTabs(true);
@@ -113,15 +113,15 @@ readonly 是否只读操作，允许为null
 		var dataSet = po.previewOptions.data.dataSet;
 
 		dataSet.fileSourceType = po.fileSourceTypeValue();
-		dataSet.fileName = po.element("input[name='fileName']").val();
+		dataSet.fileName = po.elementOfName("fileName").val();
 		dataSet.dataSetResDirectory = {};
-		dataSet.dataSetResDirectory.id = po.element("input[name='dataSetResDirectory.id']").val();
-		dataSet.dataSetResDirectory.directory = po.element("input[name='dataSetResDirectory.directory']").val();
-		dataSet.dataSetResFileName = po.element("input[name='dataSetResFileName']").val();
-		dataSet.encoding = po.element("select[name='encoding']").val();
+		dataSet.dataSetResDirectory.id = po.elementOfName("dataSetResDirectory.id").val();
+		dataSet.dataSetResDirectory.directory = po.elementOfName("dataSetResDirectory.directory").val();
+		dataSet.dataSetResFileName = po.elementOfName("dataSetResFileName").val();
+		dataSet.encoding = po.elementOfName("encoding").val();
 		dataSet.nameRow = po.nameRowValue();
 		
-		po.previewOptions.data.originalFileName = po.element("#${pageId}-originalFileName").val();
+		po.previewOptions.data.originalFileName = po.elementOfId("${pageId}-originalFileName").val();
 	};
 	
 	<#if !isAdd>
@@ -133,10 +133,10 @@ readonly 是否只读操作，允许为null
 	po.isPreviewValueModified = function()
 	{
 		var fileSourceType = po.fileSourceTypeValue();
-		var dataSetResDirectoryId = po.element("input[name='dataSetResDirectory.id']").val();
-		var dataSetResFileName = po.element("input[name='dataSetResFileName']").val();
-		var fileName = po.element("input[name='fileName']").val();
-		var encoding = po.element("select[name='encoding']").val();
+		var dataSetResDirectoryId = po.elementOfName("dataSetResDirectory.id").val();
+		var dataSetResFileName = po.elementOfName("dataSetResFileName").val();
+		var fileName = po.elementOfName("fileName").val();
+		var encoding = po.elementOfName("encoding").val();
 		var nameRow = po.nameRowValue();
 		
 		var pd = po.previewOptions.data.dataSet;
@@ -163,12 +163,11 @@ readonly 是否只读操作，允许为null
 	
 	po.initPreviewOperations();
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : "",
 		rules :
 		{
-			"name" : "required",
 			"displayName" :
 			{
 				"dataSetUploadFileNameRequired": true,
@@ -187,43 +186,32 @@ readonly 是否只读操作，允许为null
 		},
 		messages :
 		{
-			"name" : "<@spring.message code='validation.required' />",
 			"displayName" :
 			{
-				"dataSetUploadFileNameRequired": "<@spring.message code='validation.required' />",
+				"dataSetUploadFileNameRequired": po.validateMessages.required,
 				"dataSetUploadFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			},
 			"dataSetResDirectory.directory":
 			{
-				"dataSetServerDirectoryRequired": "<@spring.message code='validation.required' />",
+				"dataSetServerDirectoryRequired": po.validateMessages.required
 			},
 			"dataSetResFileName":
 			{
-				"dataSetServerFileNameRequired": "<@spring.message code='validation.required' />",
+				"dataSetServerFileNameRequired": po.validateMessages.required,
 				"dataSetServerFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
-			},
-			"nameRowText":
-			{
-				"integer": "<@spring.message code='validation.integer' />",
-				"min": "<@spring.message code='validation.min' />"
 			}
-		},
-		submitHandler : function(form)
+		}
+	},
+	{
+		handleData: function(data)
 		{
-			var formData = $.formToJson(form);
-			formData["properties"] = po.getFormDataSetProperties();
-			formData["params"] = po.getFormDataSetParams();
-			formData["nameRow"] = po.nameRowValue();
-			formData["nameRowRadio"] = undefined;
-			formData["nameRowText"] = undefined;
+			po.setOriginalFileNameParam();
 			
-			var originalFileName = po.element("#${pageId}-originalFileName").val();
-			
-			$.postJson("${contextPath}/dataSet/${formAction}?originalFileName="+originalFileName, formData,
-			function(response)
-			{
-				po.pageParamCallAfterSave(true, response.data);
-			});
+			data["properties"] = po.getFormDataSetProperties();
+			data["params"] = po.getFormDataSetParams();
+			data["nameRow"] = po.nameRowValue();
+			delete data["nameRowRadio"];
+			delete data["nameRowText"];
 		}
 	});
 })

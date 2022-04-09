@@ -26,7 +26,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-excel">
-	<form id="${pageId}form" action="#" method="POST">
+	<form id="${pageId}form" action="${contextPath}/dataSet/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">
@@ -46,7 +46,7 @@ readonly 是否只读操作，允许为null
 						</label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''}" class="ui-widget ui-widget-content ui-corner-all" style="width:41%;" />
+						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''}" required="required" class="ui-widget ui-widget-content ui-corner-all" style="width:41%;" />
 					</div>
 				</div>
 				<div class="form-item error-newline">
@@ -132,7 +132,7 @@ readonly 是否只读操作，允许为null
 	po.element().autoCloseSubPanel();
 	po.initAnalysisProject("${((dataSet.analysisProject.id)!'')?js_string?no_esc}", "${((dataSet.analysisProject.name)!'')?js_string?no_esc}");
 	po.element(".nameRow-radios").checkboxradiogroup();
-	po.element("#${pageId}-forceXls").checkboxradiogroup();
+	po.elementOfId("${pageId}-forceXls").checkboxradiogroup();
 	po.initWorkspaceHeight();
 	po.initWorkspaceTabs(true);
 	po.initParamPropertyDataFormat(po.dataSetParams, po.dataSetProperties);
@@ -145,18 +145,18 @@ readonly 是否只读操作，允许为null
 		var dataSet = po.previewOptions.data.dataSet;
 
 		dataSet.fileSourceType = po.fileSourceTypeValue();
-		dataSet.fileName = po.element("input[name='fileName']").val();
+		dataSet.fileName = po.elementOfName("fileName").val();
 		dataSet.dataSetResDirectory = {};
-		dataSet.dataSetResDirectory.id = po.element("input[name='dataSetResDirectory.id']").val();
-		dataSet.dataSetResDirectory.directory = po.element("input[name='dataSetResDirectory.directory']").val();
-		dataSet.dataSetResFileName = po.element("input[name='dataSetResFileName']").val();
-		dataSet.sheetIndex = po.element("input[name='sheetIndex']").val();
+		dataSet.dataSetResDirectory.id = po.elementOfName("dataSetResDirectory.id").val();
+		dataSet.dataSetResDirectory.directory = po.elementOfName("dataSetResDirectory.directory").val();
+		dataSet.dataSetResFileName = po.elementOfName("dataSetResFileName").val();
+		dataSet.sheetIndex = po.elementOfName("sheetIndex").val();
 		dataSet.nameRow = po.nameRowValue();
-		dataSet.dataRowExp = po.element("input[name='dataRowExp']").val();
-		dataSet.dataColumnExp = po.element("input[name='dataColumnExp']").val();
+		dataSet.dataRowExp = po.elementOfName("dataRowExp").val();
+		dataSet.dataColumnExp = po.elementOfName("dataColumnExp").val();
 		dataSet.forceXls = po.element("input[name='forceXls']:checked").val();
 		
-		po.previewOptions.data.originalFileName = po.element("#${pageId}-originalFileName").val();
+		po.previewOptions.data.originalFileName = po.elementOfId("${pageId}-originalFileName").val();
 	};
 	
 	<#if !isAdd>
@@ -168,13 +168,13 @@ readonly 是否只读操作，允许为null
 	po.isPreviewValueModified = function()
 	{
 		var fileSourceType = po.fileSourceTypeValue();
-		var dataSetResDirectoryId = po.element("input[name='dataSetResDirectory.id']").val();
-		var dataSetResFileName = po.element("input[name='dataSetResFileName']").val();
-		var fileName = po.element("input[name='fileName']").val();
-		var sheetIndex = po.element("input[name='sheetIndex']").val();
+		var dataSetResDirectoryId = po.elementOfName("dataSetResDirectory.id").val();
+		var dataSetResFileName = po.elementOfName("dataSetResFileName").val();
+		var fileName = po.elementOfName("fileName").val();
+		var sheetIndex = po.elementOfName("sheetIndex").val();
 		var nameRow = po.nameRowValue();
-		var dataRowExp = po.element("input[name='dataRowExp']").val();
-		var dataColumnExp = po.element("input[name='dataColumnExp']").val();
+		var dataRowExp = po.elementOfName("dataRowExp").val();
+		var dataColumnExp = po.elementOfName("dataColumnExp").val();
 		var forceXls = po.element("input[name='forceXls']:checked").val();
 		
 		var pd = po.previewOptions.data.dataSet;
@@ -227,12 +227,11 @@ readonly 是否只读操作，允许为null
 		return regex.test(value);
 	});
 	
-	po.validateForm(
+	po.validateAjaxJsonForm(
 	{
 		ignore : "",
 		rules :
 		{
-			"name" : "required",
 			"displayName" :
 			{
 				"dataSetUploadFileNameRequired": true,
@@ -247,58 +246,41 @@ readonly 是否只读操作，允许为null
 				"dataSetServerFileNameRequired": true,
 				"dataSetServerFilePreviewRequired": true
 			},
-			"sheetIndex": {"required": true, "integer": true, "min": 1},
+			"sheetIndex": {"integer": true, "min": 1},
 			"nameRowText": {"integer": true, "min": 1},
 			"dataRowExp": {"dataSetExcelDataRowExpRegex": true},
 			"dataColumnExp": {"dataSetExcelDataColumnExpRegex": true}
 		},
 		messages :
 		{
-			"name" : "<@spring.message code='validation.required' />",
 			"displayName" :
 			{
-				"dataSetUploadFileNameRequired": "<@spring.message code='validation.required' />",
+				"dataSetUploadFileNameRequired": po.validateMessages.required,
 				"dataSetUploadFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
 			},
 			"dataSetResDirectory.directory":
 			{
-				"dataSetServerDirectoryRequired": "<@spring.message code='validation.required' />",
+				"dataSetServerDirectoryRequired": po.validateMessages.required,
 			},
 			"dataSetResFileName":
 			{
-				"dataSetServerFileNameRequired": "<@spring.message code='validation.required' />",
+				"dataSetServerFileNameRequired": po.validateMessages.required,
 				"dataSetServerFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"
-			},
-			"sheetIndex":
-			{
-				"required": "<@spring.message code='validation.required' />",
-				"integer": "<@spring.message code='validation.integer' />",
-				"min": "<@spring.message code='validation.min' />"
-			},
-			"nameRowText":
-			{
-				"integer": "<@spring.message code='validation.integer' />",
-				"min": "<@spring.message code='validation.min' />"
 			},
 			"dataRowExp": {"dataSetExcelDataRowExpRegex": "<@spring.message code='dataSet.validation.excel.dataRowExp.regex' />"},
 			"dataColumnExp": {"dataSetExcelDataColumnExpRegex": "<@spring.message code='dataSet.validation.excel.dataColumnExp.regex' />"}
-		},
-		submitHandler : function(form)
+		}
+	},
+	{
+		handleData: function(data)
 		{
-			var formData = $.formToJson(form);
-			formData["properties"] = po.getFormDataSetProperties();
-			formData["params"] = po.getFormDataSetParams();
-			formData["nameRow"] = po.nameRowValue();
-			formData["nameRowRadio"] = undefined;
-			formData["nameRowText"] = undefined;
+			po.setOriginalFileNameParam();
 			
-			var originalFileName = po.element("#${pageId}-originalFileName").val();
-			
-			$.postJson("${contextPath}/dataSet/${formAction}?originalFileName="+originalFileName, formData,
-			function(response)
-			{
-				po.pageParamCallAfterSave(true, response.data);
-			});
+			data["properties"] = po.getFormDataSetProperties();
+			data["params"] = po.getFormDataSetParams();
+			data["nameRow"] = po.nameRowValue();
+			delete data["nameRowRadio"];
+			delete data["nameRowText"];
 		}
 	});
 })
