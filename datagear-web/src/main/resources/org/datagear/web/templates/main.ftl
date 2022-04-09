@@ -660,7 +660,7 @@ ${detectNewVersionScript?no_esc}
 			{
 				"pageParam" :
 				{
-					"afterSave" : function(data)
+					submitSuccess: function(data)
 					{
 						$.analysisProjectContext.value(data);
 					}
@@ -973,7 +973,7 @@ ${detectNewVersionScript?no_esc}
 					{
 						"pageParam" :
 						{
-							"afterSave" : function()
+							submitSuccess: function()
 							{
 								jstree.refresh(true);
 							}
@@ -1170,7 +1170,7 @@ ${detectNewVersionScript?no_esc}
 			{
 				"pageParam" :
 				{
-					"afterSave" : function()
+					submitSuccess: function()
 					{
 						po.refreshSchemaTree();
 					}

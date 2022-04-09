@@ -32,7 +32,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='schema.title' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="title" value="${(schema.title)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="title" value="${(schema.title)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -235,8 +235,8 @@ readonly 是否只读操作，允许为null
 			if(po._STATE_TEST_CONNECTION == true)
 			{
 				po.form().attr("action", "${contextPath}/schema/testConnection");
-				po.afterSubmitSuccessBak = po.afterSubmitSuccess;
-				po.afterSubmitSuccess = null;
+				po.defaultSubmitSuccessBak = po.defaultSubmitSuccess;
+				po.defaultSubmitSuccess = null;
 			}
 		},
 		beforeSend: function()
@@ -252,7 +252,7 @@ readonly 是否只读操作，允许为null
 			if(po._STATE_TEST_CONNECTION == true)
 			{
 				po.form().attr("action", po.originalFormAction);
-				po.afterSubmitSuccess = po.afterSubmitSuccessBak;
+				po.defaultSubmitSuccess = po.defaultSubmitSuccessBak;
 				po._STATE_TEST_CONNECTION = false;
 				po.element(".test-connection-button, [type='submit']").removeClass("ui-state-disabled");
 				po.element(".test-connection-tip").hide();

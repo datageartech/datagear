@@ -35,7 +35,7 @@ readonly 是否只读操作，允许为null
 					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="pattern" value="${(schemaGuard.pattern)!''}" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="pattern" value="${(schemaGuard.pattern)!''}" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
 				</div>
 			</div>
 			<div class="form-item">

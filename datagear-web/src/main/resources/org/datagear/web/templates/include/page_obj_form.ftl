@@ -65,8 +65,8 @@ page_obj.ftl
 					ajaxSuccess = ajaxSuccess.concat(ajaxOptions.success);
 				ajaxSuccess.push(function(response)
 				{
-					if(po.afterSubmitSuccess)
-						po.afterSubmitSuccess(response, ajaxOptions.closeAfterSubmit);
+					if(po.defaultSubmitSuccess)
+						po.defaultSubmitSuccess(response, ajaxOptions.closeAfterSubmit);
 				});
 				ajaxOptions.success = ajaxSuccess;
 				
@@ -78,10 +78,22 @@ page_obj.ftl
 		po.validateForm(validateOptions, form);
 	};
 	
-	po.afterSubmitSuccess = function(response, close)
+	po.defaultSubmitSuccess = function(response, close)
 	{
 		close = (close == null ? true : close);
-		po.pageParamCallAfterSave(close, (response.data ? response.data : response));
+		
+		if(this.refreshParent)
+			this.refreshParent();
+		
+		po.pageParamSubmitSuccess(response);
+		
+		if(close && !this.isDialogPinned())
+			this.close();
+	};
+	
+	po.pageParamSubmitSuccess = function(response)
+	{
+		this.pageParamCall("submitSuccess", (response.data ? response.data : response));
 	};
 	
 	po.refreshParent = function()

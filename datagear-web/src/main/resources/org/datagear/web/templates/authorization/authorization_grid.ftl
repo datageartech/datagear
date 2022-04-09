@@ -67,13 +67,15 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	{
 		po.open(po.url("add"),
 		{
-			pageParam :
+			<#if selectOperation>
+			pageParam:
 			{
-				afterSave : function()
+				submitSuccess: function(data)
 				{
-					po.refresh();
+					po.pageParamCallSelect(true, data);
 				}
 			}
+			</#if>
 		});
 	});
 	
@@ -89,13 +91,15 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 			po.open(po.url("edit"),
 			{
 				data : data,
-				pageParam :
+				<#if selectOperation>
+				pageParam:
 				{
-					afterSave : function()
+					submitSuccess: function(data)
 					{
-						po.refresh();
+						po.pageParamCallSelect(true, data);
 					}
 				}
+				</#if>
 			});
 		});
 	});

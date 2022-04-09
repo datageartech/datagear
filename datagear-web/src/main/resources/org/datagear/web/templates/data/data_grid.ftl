@@ -130,7 +130,7 @@ boolean readonly 是否只读操作，默认为false
 				<#if selectOperation>
 				pageParam:
 				{
-					afterSave: function(row)
+					submitSuccess: function(row)
 					{
 						po.pageParamCallSelect(true, row);
 					}

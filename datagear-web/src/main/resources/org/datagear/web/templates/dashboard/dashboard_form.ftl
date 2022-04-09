@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboard.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(dashboard.name)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" placeholder="<@spring.message code='dashboard.name' />" />
+					<input type="text" name="name" value="${(dashboard.name)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" placeholder="<@spring.message code='dashboard.name' />" autofocus="autofocus" />
 				</div>
 				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>

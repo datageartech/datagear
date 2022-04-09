@@ -241,7 +241,7 @@ selectOperation 是否选择操作，允许为null
 			<#if selectOperation>
 			pageParam:
 			{
-				afterSave: function(data)
+				submitSuccess: function(data)
 				{
 					po.pageParamCallSelect(true, data);
 				}

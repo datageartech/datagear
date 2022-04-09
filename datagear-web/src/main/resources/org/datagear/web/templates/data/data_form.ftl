@@ -99,23 +99,21 @@ boolean batchSet 是否开启批量执行功能，默认为false
 					{
 						$(thisForm).tableform("disableOperation");
 					},
-					success : function(operationMessage)
+					success : function(response)
 					{
 						var $form = $(thisForm);
 						var batchSubmit = $form.tableform("isBatchSubmit");
 						
 						$form.tableform("enableOperation");
 						
-						if(batchSubmit)
-							po.pageParamCallAfterSave(true);
-						else
+						if(!batchSubmit)
 						{
 							//更新操作成功后要更新页面初始数据，确保再次提交正确
 							if(!po.dataIsClient)
-								po.data = operationMessage.data;
-							
-							po.pageParamCallAfterSave(true, operationMessage.data);
+								po.data = response.data;
 						}
+						
+						po.defaultSubmitSuccess(response);
 					},
 					error : function()
 					{

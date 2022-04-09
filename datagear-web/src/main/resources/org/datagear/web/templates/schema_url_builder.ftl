@@ -24,7 +24,7 @@
 					<label><@spring.message code='schemaUrlBuilder.scriptCode' /></label>
 				</div>
 				<div class="form-item-value form-item-value-scriptCode">
-					<textarea name="scriptCode" class="ui-widget ui-widget-content ui-corner-all script-code-textarea">${scriptCode}</textarea>
+					<textarea name="scriptCode" class="ui-widget ui-widget-content ui-corner-all script-code-textarea" autofocus="autofocus">${scriptCode}</textarea>
 					<div class="script-code-note">
 					<span><@spring.message code='schemaUrlBuilder.scriptCodeNote.0' /></span>
 					<pre>

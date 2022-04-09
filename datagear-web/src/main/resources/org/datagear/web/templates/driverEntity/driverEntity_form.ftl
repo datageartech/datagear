@@ -32,7 +32,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='driverEntity.displayName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="displayName" value="${(driverEntity.displayName)!''}" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="displayName" value="${(driverEntity.displayName)!''}" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
 				</div>
 			</div>
 			<div class="form-item">

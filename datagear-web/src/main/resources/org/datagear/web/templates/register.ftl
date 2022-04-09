@@ -34,7 +34,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='register.name' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="name" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" />
+						<input type="text" name="name" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autocomplete="off" autofocus="autofocus" />
 					</div>
 				</div>
 				<div class="form-item">

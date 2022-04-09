@@ -29,7 +29,7 @@ formAction 表单提交action，允许为null
 					<label><@spring.message code='schemaGuard.schemaUrl' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="url" value="" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="url" value="" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
 					<span id="schemaBuildUrlHelp" class="ui-state-default ui-corner-all" style="cursor: pointer;" title="<@spring.message code='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></span>&nbsp;
 				</div>
 			</div>

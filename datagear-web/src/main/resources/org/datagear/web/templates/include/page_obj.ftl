@@ -151,26 +151,6 @@ var ${pageId} =
 	},
 	
 	/**
-	 * 调用页面参数对象的"afterSave"函数。
-	 * @param closeDefault 默认是否关闭
-	 * @param arg... 可选，函数参数
-	 */
-	pageParamCallAfterSave : function(closeDefault, arg)
-	{
-		if(this.refreshParent)
-			this.refreshParent();
-		
-		var close = this.pageParamApply("afterSave", $.makeArray(arguments).slice(1));
-		if(close !== true && close !== false)
-			close = closeDefault;
-		
-		if(close && !this.isDialogPinned())
-			this.close();
-		
-		return close;
-	},
-	
-	/**
 	 * 连接contextPath路径。
 	 * @param pathNode 可变路径节点，不需要加“/”
 	 */

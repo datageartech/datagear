@@ -122,7 +122,7 @@ boolean readonly 是否只读操作，默认为false
 						<#if selectOperation>
 						pageParam:
 						{
-							afterSave: function(data)
+							submitSuccess: function(data)
 							{
 								po.pageParamCallSelect(true, data);
 							}
@@ -139,7 +139,7 @@ boolean readonly 是否只读操作，默认为false
 					<#if selectOperation>
 					pageParam:
 					{
-						afterSave: function(data)
+						submitSuccess: function(data)
 						{
 							po.pageParamCallSelect(true, data);
 						}

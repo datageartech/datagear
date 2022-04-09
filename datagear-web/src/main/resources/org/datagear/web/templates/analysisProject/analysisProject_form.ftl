@@ -33,7 +33,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='analysisProject.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="name" value="${(analysisProject.name)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" />
+					<input type="text" name="name" value="${(analysisProject.name)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
 				</div>
 			</div>
 			<div class="form-item">

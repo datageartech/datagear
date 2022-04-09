@@ -37,7 +37,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='login.username' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="name" value="${loginUser}" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" />
+						<input type="text" name="name" value="${loginUser}" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
 					</div>
 				</div>
 				<div class="form-item">
