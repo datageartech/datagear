@@ -471,13 +471,14 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	po.initDataExchangeActions = function()
 	{
 		<#if isAjaxRequest>
-		po.element("#${pageId}-returnForm").ajaxForm(
+		po.validateAjaxForm({},
 		{
 			success: function(data)
 			{
 				po.element().parent().html(data);
 			}
-		});
+		},
+		po.elementOfId("${pageId}-returnForm"));
 		</#if>
 	}
 })

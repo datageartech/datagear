@@ -606,26 +606,23 @@
 		 * 转换为
 		 * {a: {b: [{c: "v0", d: "v1"}, {e: "v2", f: "v3"}]}}
 		 * 
-		 * @param form 表单元素、表单JQ对象、名称/值对象数组
+		 * @param form 表单元素、表单JQ对象
 		 * @param ignore 可选，忽略的表单输入项名称，格式为：字符串、字符串数组，默认为：null
 		 */
 		formToJson: function(form, ignore)
 		{
-			var $form = $(form);
-			
-			var array = ($form.is("form") ? $form.serializeArray() : form);
+			form = $(form);
+			ignore = (ignore ? ($.isArray(ignore) ? ignore : [ ignore ]) : []);
 			
 			var json = {};
 			var KeyForArray = $.uid("_keyForArray");
 			
-			if(ignore != null)
-				ignore = ($.isArray(ignore) ? ignore : [ ignore ]);
-			
+			var array = form.serializeArray();			
 			$(array).each(function(indexInArray)
 			{
 				var name = this.name;
 				
-				if(ignore && $.inArray(name, ignore) >= 0)
+				if($.inArray(name, ignore) >= 0)
 					return;
 				
 				var value = this.value;
@@ -2076,14 +2073,7 @@
 		 */
 		postJson: function(url, data, success)
 		{
-			$.ajax(
-			{
-				contentType: $.CONTENT_TYPE_JSON,
-				type : "POST",
-				url : url,
-				data : data,
-				success : success
-			});
+			$.ajaxJson(url, { data: data, success: success });
 		},
 		
 		/**
@@ -2107,21 +2097,6 @@
 				options.type = "POST";
 				$.ajax(url, options);
 			}
-		},
-		
-		/**
-		 * 使用POST方式的getJSON。
-		 */
-		getJSONOnPost : function(url, data, callback)
-		{
-			$.ajax(
-			{
-				url : url,
-				data : data,
-				success : callback,
-				dataType : "json",
-				type : "POST",
-			});
 		},
 		
 		/**
@@ -3041,11 +3016,13 @@
 		},
 		
 		/**
-		 * 以JSON数据格式执行ajax提交表单。
+		 * 执行ajax提交表单。
 		 * 
 		 * @param options 选项，格式为：
 		 * 			{
-						//可选，提交URL，默认为form的action
+						//可选，是否以JSON数据格式提交，默认为：false
+						jsonSubmit: false,
+						//可选，提交URL，默认为：表单的action属性值
 						url: "...",
 						//可选，忽略的表单输入项名称，格式为：字符串、字符串数组
 						ignore: ...,
@@ -3055,11 +3032,33 @@
 						...
 		 * 			}
 		 */
-		ajaxSubmitJson: function(options)
+		ajaxSubmit: function(options)
 		{
 			options = (options || {});
 			
-			var data = $.formToJson(this, options.ignore);
+			var form = $(this);
+			var data = null;
+			
+			if(options.jsonSubmit)
+				data = $.formToJson(this, options.ignore);
+			else
+			{
+				data = form.serializeArray();
+				
+				if(options.ignore)
+				{
+					var dataFiltered = [];
+					var ignore = ($.isArray(options.ignore) ? options.ignore : [ options.ignore ]);
+					
+					$(data).each(function()
+					{
+						if($.inArray(this.name, ignore) < 0)
+							dataFiltered.push(this);
+					});
+					
+					data = dataFiltered;
+				}
+			}
 			
 			options = $.extend(
 			{
@@ -3079,9 +3078,21 @@
 			}
 			
 			if(!options.url)
-				options.url = $(this).attr("action");
+				options.url = form.attr("action");
 			
-			$.ajaxJson(options);
+			if(options.jsonSubmit)
+				$.ajaxJson(options);
+			else
+				$.ajax(options);
+		},
+		
+		/**
+		 * 以JSON数据格式执行ajax提交表单。
+		 */
+		ajaxSubmitJson: function(options)
+		{
+			options = $.extend({ jsonSubmit: true }, options);
+			$(this).ajaxSubmit(options);
 		},
 		
 		/**

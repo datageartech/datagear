@@ -105,17 +105,17 @@ Schema schema 数据库，不允许为null
 	
 	po.initFormBtns();
 	
-	po.element("input[name='dataType']").change(function()
+	po.elementOfName("dataType").change(function()
 	{
 		var dataType = $(this).val();
-		po.element("#${pageId}form").attr("action", "${contextPath}/dataexchange/" + po.schemaId +"/export/" + dataType);
+		po.form().attr("action", "${contextPath}/dataexchange/" + po.schemaId +"/export/" + dataType);
 	});
 	
 	po.element("input[type=radio]").checkboxradio({icon:true});
-	po.element("#${pageId}-dataType-0").click();
+	po.elementOfId("${pageId}-dataType-0").click();
 	
 	<#if isAjaxRequest>
-	po.element("#${pageId}form").ajaxForm(
+	po.validateAjaxForm({},
 	{
 		success: function(data)
 		{

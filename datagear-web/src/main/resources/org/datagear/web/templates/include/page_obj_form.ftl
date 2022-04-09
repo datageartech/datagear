@@ -49,8 +49,8 @@ page_obj.ftl
 		
 		form.validate(options);
 	};
-	
-	po.validateAjaxJsonForm = function(validateOptions, ajaxOptions, form)
+
+	po.validateAjaxForm = function(validateOptions, ajaxOptions, form)
 	{
 		form = (form == null ? po.form() : form);
 		
@@ -70,12 +70,18 @@ page_obj.ftl
 				});
 				ajaxOptions.success = ajaxSuccess;
 				
-				$(form).ajaxSubmitJson(ajaxOptions);
+				$(form).ajaxSubmit(ajaxOptions);
 			}
 		},
 		validateOptions);
 		
 		po.validateForm(validateOptions, form);
+	};
+	
+	po.validateAjaxJsonForm = function(validateOptions, ajaxOptions, form)
+	{
+		ajaxOptions = $.extend({jsonSubmit: true}, ajaxOptions);
+		po.validateAjaxForm(validateOptions, ajaxOptions, form);
 	};
 	
 	po.defaultSubmitSuccess = function(response, close)

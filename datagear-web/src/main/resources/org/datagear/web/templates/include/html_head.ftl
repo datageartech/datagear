@@ -36,7 +36,6 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/jquery.layout-1.9.0/js/jquery.layout_and_plugins.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jstree-3.3.7/jstree.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/DataTables-1.11.3/js/datatables.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/jquery.form-3.51.0/jquery.form.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jQuery-File-Upload-9.21.0/js/jquery.iframe-transport.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jQuery-File-Upload-9.21.0/js/jquery.fileupload.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery.cookie-1.4.1/jquery.cookie.js" type="text/javascript"></script>
