@@ -38,13 +38,13 @@ boolean readonly 是否只读操作，默认为false
 		</div>
 		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 			<#if selectOperation>
-				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+				<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
 			</#if>
 			<#if readonly>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 			<#else>
 				<div class="add-button-wrapper" show-any-role="${Role.ROLE_DATA_ADMIN}">
-					<button class="add-button" type="button">
+					<button type="button" class="add-button">
 						<@spring.message code='add' />
 						<span class="ui-icon ui-icon-triangle-1-s"></span>
 					</button>
@@ -63,16 +63,16 @@ boolean readonly 是否只读操作，默认为false
 					</div>
 				</div>
 				<#if !selectOperation>
-				<input name="editButton" type="button" value="<@spring.message code='edit' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<button type="button" class="editButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='edit' /></button>
 				</#if>
 				<#if !selectOperation>
 				<#if !(currentUser.anonymous)>
-				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<button type="button" class="shareButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='share' /></button>
 				</#if>
 				</#if>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 				<#if !selectOperation>
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<button type="button" class="deleteButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='delete' /></button>
 				</#if>
 			</#if>
 		</div>
@@ -164,7 +164,7 @@ boolean readonly 是否只读操作，默认为false
 		po.element(".add-button-panel").hide();
 	});
 	
-	po.element("input[name=editButton]").click(function()
+	po.element(".editButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -174,7 +174,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 
-	po.element("input[name=shareButton]").click(function()
+	po.element(".shareButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -190,7 +190,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=viewButton]").click(function()
+	po.element(".viewButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -204,7 +204,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=deleteButton]").click(
+	po.element(".deleteButton").click(
 	function()
 	{
 		po.executeOnSelects(function(rows)
@@ -213,7 +213,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=confirmButton]").click(function()
+	po.element(".confirmButton").click(function()
 	{
 		<#if isMultipleSelect>
 		po.executeOnSelects(function(rows)

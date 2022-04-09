@@ -38,33 +38,33 @@ boolean readonly 是否只读操作，默认为false
 		</div>
 		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 			<#if selectOperation>
-				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+				<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
 			</#if>
 			<#if readonly>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 			<#else>
 				<div class="addGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
-					<input name="addButton" type="button" value="<@spring.message code='add' />" />
+					<button type="button" class="addButton"><@spring.message code='add' /></button>
 					<select class="addGroupSelect">
 						<option value="copy"><@spring.message code='copy' /></option>
 					</select>
 				</div>
 				<#if !selectOperation>
-				<input name="editButton" type="button" value="<@spring.message code='edit' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<button type="button" class="editButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='edit' /></button>
 				<div class="showGroup">
-					<input name="showButton" type="button" value="<@spring.message code='chart.show' />" />
+					<button type="button" class="showButton"><@spring.message code='chart.show' /></button>
 					<select class="showGroupSelect">
 						<option value="copyShowURL"><@spring.message code='copyShowURL' /></option>
 					</select>
 					<button type="button" class="copyShowURLDelegation" style="display:none;">&nbsp;</button>
 				</div>
 				<#if !(currentUser.anonymous)>
-				<input name="shareButton" type="button" value="<@spring.message code='share' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<button type="button" class="shareButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='share' /></button>
 				</#if>
 				</#if>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 				<#if !selectOperation>
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<button type="button" class="deleteButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='delete' /></button>
 				</#if>
 			</#if>
 		</div>
@@ -103,7 +103,7 @@ boolean readonly 是否只读操作，默认为false
 		return po.url("show/"+id+"/");
 	};
 
-	po.element("input[name=addButton]").click(function()
+	po.element(".addButton").click(function()
 	{
 		po.open(po.url("add"),
 		{
@@ -159,7 +159,7 @@ boolean readonly 是否只读操作，默认为false
 	});
 	po.element(".addGroup").controlgroup();
 	
-	po.element("input[name=editButton]").click(function()
+	po.element(".editButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -169,7 +169,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=shareButton]").click(function()
+	po.element(".shareButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -185,7 +185,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=viewButton]").click(function()
+	po.element(".viewButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -199,7 +199,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 
-	po.element("input[name=showButton]").click(function()
+	po.element(".showButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -251,7 +251,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	}
 	
-	po.element("input[name=deleteButton]").click(
+	po.element(".deleteButton").click(
 	function()
 	{
 		po.executeOnSelects(function(rows)
@@ -260,7 +260,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=confirmButton]").click(function()
+	po.element(".confirmButton").click(function()
 	{
 		<#if isMultipleSelect>
 		po.executeOnSelects(function(rows)

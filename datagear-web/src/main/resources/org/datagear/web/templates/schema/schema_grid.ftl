@@ -33,18 +33,18 @@ boolean readonly 是否只读操作，默认为false
 		</div>
 		<div class="operation">
 			<#if selectOperation>
-				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+				<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
 			</#if>
 			<#if readonly>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 			<#else>
-				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<button type="button" class="addButton"><@spring.message code='add' /></button>
 				<#if !selectOperation>
-				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+				<button type="button" class="editButton"><@spring.message code='edit' /></button>
 				</#if>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 				<#if !selectOperation>
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				<button type="button" class="deleteButton"><@spring.message code='delete' /></button>
 				</#if>
 			</#if>
 		</div>
@@ -73,7 +73,7 @@ boolean readonly 是否只读操作，默认为false
 		return "${contextPath}/schema/" + action;
 	};
 	
-	po.element("input[name=addButton]").click(function()
+	po.element(".addButton").click(function()
 	{
 		po.open(po.url("add"),
 		{
@@ -89,7 +89,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=editButton]").click(function()
+	po.element(".editButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -99,7 +99,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=deleteButton]").click(
+	po.element(".deleteButton").click(
 	function()
 	{
 		po.executeOnSelects(function(rows)
@@ -108,7 +108,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=viewButton]").click(function()
+	po.element(".viewButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -121,7 +121,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element("input[name=confirmButton]").click(function()
+	po.element(".confirmButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{

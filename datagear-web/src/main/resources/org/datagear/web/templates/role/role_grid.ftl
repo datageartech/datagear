@@ -32,15 +32,12 @@ selectOperation 是否选择操作，允许为null
 		</div>
 		<div class="operation">
 			<#if selectOperation>
-				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
-				<#--只有管理员可以查看角色详细信息
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
-				-->
+				<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
 			<#else>
-				<input name="addButton" type="button" value="<@spring.message code='add' />" />
-				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				<button type="button" class="addButton"><@spring.message code='add' /></button>
+				<button type="button" class="editButton"><@spring.message code='edit' /></button>
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
+				<button type="button" class="deleteButton"><@spring.message code='delete' /></button>
 			</#if>
 		</div>
 	</div>
@@ -69,7 +66,7 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/role/" + action;
 	};
 	
-	po.element("input[name=addButton]").click(function()
+	po.element(".addButton").click(function()
 	{
 		po.open(po.url("add"),
 		{
@@ -85,7 +82,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=editButton]").click(function()
+	po.element(".editButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -95,7 +92,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 
-	po.element("input[name=viewButton]").click(function()
+	po.element(".viewButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -108,7 +105,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=deleteButton]").click(
+	po.element(".deleteButton").click(
 	function()
 	{
 		po.executeOnSelects(function(rows)
@@ -117,7 +114,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=confirmButton]").click(function()
+	po.element(".confirmButton").click(function()
 	{
 		<#if isMultipleSelect>
 		po.executeOnSelects(function(rows)

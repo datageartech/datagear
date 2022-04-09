@@ -31,12 +31,12 @@ selectOperation 是否选择操作，允许为null
 		</div>
 		<div class="operation">
 			<#if selectOperation>
-				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 			<#else>
-				<input name="uploadButton" type="button" value="<@spring.message code='upload' />" />
-				<input name="downloadButton" type="button" value="<@spring.message code='download' />" />
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				<button type="button" class="uploadButton"><@spring.message code='upload' /></button>
+				<button type="button" class="downloadButton"><@spring.message code='download' /></button>
+				<button type="button" class="deleteButton"><@spring.message code='delete' /></button>
 			</#if>
 		</div>
 	</div>
@@ -64,12 +64,12 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/chartPlugin/" + action;
 	};
 
-	po.element("input[name=uploadButton]").click(function()
+	po.element(".uploadButton").click(function()
 	{
 		po.open(po.url("upload"));
 	});
 	
-	po.element("input[name=downloadButton]").click(function()
+	po.element(".downloadButton").click(function()
 	{
 		po.executeOnSelects(function(rows)
 		{
@@ -80,7 +80,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=deleteButton]").click(
+	po.element(".deleteButton").click(
 	function()
 	{
 		po.executeOnSelects(function(rows)

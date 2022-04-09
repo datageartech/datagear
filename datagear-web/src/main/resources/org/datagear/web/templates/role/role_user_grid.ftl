@@ -24,8 +24,8 @@
 			<#include "../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
-			<input name="addButton" type="button" value="<@spring.message code='add' />" />
-			<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+			<button type="button" class="addButton"><@spring.message code='add' /></button>
+			<button type="button" class="deleteButton"><@spring.message code='delete' /></button>
 		</div>
 	</div>
 	<div class="content">
@@ -55,7 +55,7 @@
 		return "${contextPath}/role/user/" + action;
 	};
 	
-	po.element("input[name=addButton]").click(function()
+	po.element(".addButton").click(function()
 	{
 		var options =
 		{
@@ -81,7 +81,7 @@
 		po.open("${contextPath}/user/select?multiple", options);
 	});
 	
-	po.element("input[name=deleteButton]").click(
+	po.element(".deleteButton").click(
 	function()
 	{
 		po.executeOnSelects(function(rows)

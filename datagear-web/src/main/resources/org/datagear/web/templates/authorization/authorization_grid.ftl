@@ -31,10 +31,10 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 			<#include "../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
-			<input name="addButton" type="button" value="<@spring.message code='add' />" />
-			<input name="editButton" type="button" value="<@spring.message code='edit' />" />
-			<input name="viewButton" type="button" value="<@spring.message code='view' />" />
-			<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+			<button type="button" class="addButton"><@spring.message code='add' /></button>
+			<button type="button" class="editButton"><@spring.message code='edit' /></button>
+			<button type="button" class="viewButton"><@spring.message code='view' /></button>
+			<button type="button" class="deleteButton"><@spring.message code='delete' /></button>
 		</div>
 	</div>
 	<div class="content">
@@ -63,7 +63,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 				+ encodeURIComponent("${resource?js_string?no_esc}") + "/" + action;
 	};
 	
-	po.element("input[name=addButton]").click(function()
+	po.element(".addButton").click(function()
 	{
 		po.open(po.url("add"),
 		{
@@ -79,7 +79,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		});
 	});
 	
-	po.element("input[name=editButton]").click(function()
+	po.element(".editButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -104,7 +104,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		});
 	});
 	
-	po.element("input[name=viewButton]").click(function()
+	po.element(".viewButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -120,7 +120,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		});
 	});
 	
-	po.element("input[name=deleteButton]").click(
+	po.element(".deleteButton").click(
 	function()
 	{
 		po.executeOnSelects(function(rows)
@@ -147,9 +147,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		columnEnabled
 	];
 	
-	var url = po.url("queryData");
-	
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, url);
+	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
 })

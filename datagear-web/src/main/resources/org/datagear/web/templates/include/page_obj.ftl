@@ -46,7 +46,6 @@ var ${pageId} =
 	open : function(url, options)
 	{
 		url = $.addParam(url, "parentPageId", this.pageId);
-		
 		options = (options || {});
 		
 		//将新对话框与当前对话框错开显示

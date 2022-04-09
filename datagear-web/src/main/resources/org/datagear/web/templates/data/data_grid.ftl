@@ -57,19 +57,19 @@ boolean readonly 是否只读操作，默认为false
 		</div>
 		<div class="operation">
 			<#if selectOperation>
-				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+				<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
 			</#if>
 			<#if readonly>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 			<#else>
-				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<button type="button" class="addButton"><@spring.message code='add' /></button>
 				<#if !selectOperation>
-				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+				<button type="button" class="editButton"><@spring.message code='edit' /></button>
 				</#if>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 				<#if !selectOperation>
-				<input name="exportButton" type="button" value="<@spring.message code='export' />" />
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				<button type="button" class="exportButton"><@spring.message code='export' /></button>
+				<button type="button" class="deleteButton"><@spring.message code='delete' /></button>
 				</#if>
 			</#if>
 		</div>
@@ -107,22 +107,22 @@ boolean readonly 是否只读操作，默认为false
 	
 	if(!po.canEditTableData(${schema.dataPermission}))
 	{
-		po.element("input[name=addButton]").attr("disabled", "disabled").hide();
-		po.element("input[name=editButton]").attr("disabled", "disabled").hide();
+		po.element(".addButton").attr("disabled", "disabled").hide();
+		po.element(".editButton").attr("disabled", "disabled").hide();
 	}
 	
 	if(!po.canDeleteTableData(${schema.dataPermission}))
-		po.element("input[name=deleteButton]").attr("disabled", "disabled").hide();
+		po.element(".deleteButton").attr("disabled", "disabled").hide();
 	
 	if(!po.canReadTableData(${schema.dataPermission}))
 	{
-		po.element("input[name=viewButton]").attr("disabled", "disabled").hide();
-		po.element("input[name=exportButton]").attr("disabled", "disabled").hide();
+		po.element(".viewButton").attr("disabled", "disabled").hide();
+		po.element(".exportButton").attr("disabled", "disabled").hide();
 	}
 	
 	po.onTable(function(table)
 	{
-		po.element("input[name=addButton]").click(function()
+		po.element(".addButton").click(function()
 		{
 			var options=
 			{
@@ -143,7 +143,7 @@ boolean readonly 是否只读操作，默认为false
 			po.open(url, options);
 		});
 		
-		po.element("input[name=editButton]").click(function()
+		po.element(".editButton").click(function()
 		{
 			po.executeOnSelect(function(row)
 			{
@@ -158,7 +158,7 @@ boolean readonly 是否只读操作，默认为false
 			});
 		});
 		
-		po.element("input[name=deleteButton]").click(function()
+		po.element(".deleteButton").click(function()
 		{
 			po.executeOnSelects(function(rows)
 			{
@@ -182,7 +182,7 @@ boolean readonly 是否只读操作，默认为false
 			});
 		});
 		
-		po.element("input[name=confirmButton]").click(function()
+		po.element(".confirmButton").click(function()
 		{
 			if(po.isMultipleSelect)
 			{
@@ -200,7 +200,7 @@ boolean readonly 是否只读操作，默认为false
 			}
 		});
 		
-		po.element("input[name=viewButton]").click(function()
+		po.element(".viewButton").click(function()
 		{
 			po.executeOnSelect(function(row)
 			{
@@ -214,7 +214,7 @@ boolean readonly 是否只读操作，默认为false
 			});
 		});
 		
-		po.element("input[name=exportButton]").click(function()
+		po.element(".exportButton").click(function()
 		{
 			var query = po.getSearchParam();
 			query["orders"] = po.getOrdersOnName();

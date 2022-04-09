@@ -35,11 +35,11 @@ selectOperation 是否选择操作，允许为null
 		</div>
 		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 			<#if selectOperation>
-				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 			<#else>
 				<div class="addGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
-					<input name="addButton" type="button" value="<@spring.message code='add' />" />
+					<button type="button" class="addButton"><@spring.message code='add' /></button>
 					<select class="addGroupSelect">
 						<option value="addInNewWindow"><@spring.message code='addInNewWindow' /></option>
 						<option value="copy"><@spring.message code='copy' /></option>
@@ -48,13 +48,13 @@ selectOperation 是否选择操作，允许为null
 					</select>
 				</div>
 				<div class="editGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
-					<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+					<button type="button" class="editButton"><@spring.message code='edit' /></button>
 					<select class="editGroupSelect">
 						<option value="editInNewWindow"><@spring.message code='editInNewWindow' /></option>
 					</select>
 				</div>
 				<div class="showGroup">
-					<input name="showButton" type="button" value="<@spring.message code='dashboard.show' />" />
+					<button type="button" class="showButton"><@spring.message code='dashboard.show' /></button>
 					<select class="showGroupSelect">
 						<option value="copyShowURL"><@spring.message code='copyShowURL' /></option>
 					</select>
@@ -68,9 +68,9 @@ selectOperation 是否选择操作，允许为null
 					</select>
 				</div>
 				</#if>
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
-				<input name="exportButton" type="button" value="<@spring.message code='export' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
-				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" show-any-role="${Role.ROLE_DATA_ADMIN}" />
+				<button type="button" class="viewButton"><@spring.message code='view' /></button>
+				<button type="button" class="exportButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='export' /></button>
+				<button type="button" class="deleteButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='delete' /></button>
 			</#if>
 		</div>
 	</div>
@@ -233,7 +233,7 @@ selectOperation 是否选择操作，允许为null
 		return po.url("show/"+id+"/");
 	};
 
-	po.element("input[name=addButton]").click(function()
+	po.element(".addButton").click(function()
 	{
 		po.open(po.url("add"),
 		{
@@ -250,7 +250,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=editButton]").click(function()
+	po.element(".editButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -276,7 +276,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=viewButton]").click(function()
+	po.element(".viewButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -290,7 +290,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=showButton]").click(function()
+	po.element(".showButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -299,7 +299,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=exportButton]").click(function()
+	po.element(".exportButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
@@ -309,7 +309,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=deleteButton]").click(
+	po.element(".deleteButton").click(
 	function()
 	{
 		po.executeOnSelects(function(rows)
@@ -318,7 +318,7 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element("input[name=confirmButton]").click(function()
+	po.element(".confirmButton").click(function()
 	{
 		po.executeOnSelect(function(row)
 		{
