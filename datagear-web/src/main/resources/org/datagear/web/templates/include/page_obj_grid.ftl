@@ -15,12 +15,47 @@ page_obj.ftl
 <script type="text/javascript">
 (function(po)
 {
+	po.selectOperation = ("${(selectOperation!false)?string('true','false')}" == "true");
+	po.isMultipleSelect = ("${(isMultipleSelect!false)?string('true','false')}" == "true");
+	
 	po.elementTable = function(){ return this.element("#${pageId}-table"); };
 	
 	po.initGridBtns = function(parent)
 	{
 		parent = (parent == null ? po.element(".operation") : parent);
 		$.initButtons(parent);
+	};
+	
+	po.confirmDeleteEntities = function(url, rows, idPropertyName)
+	{
+		po.confirm("<@spring.message code='confirmDelete' />",
+		{
+			"confirm" : function()
+			{
+				$.postJson(url, $.propertyValue(rows, (idPropertyName || "id")), function()
+				{
+					po.refresh();
+				});
+			}
+		});
+	};
+	
+	po.handleSelectOperation = function()
+	{
+		if(po.isMultipleSelect)
+		{
+			po.executeOnSelects(function(rows)
+			{
+				po.pageParamCallSelect(true, rows);
+			});
+		}
+		else
+		{
+			po.executeOnSelect(function(row)
+			{
+				po.pageParamCallSelect(true, row);
+			});
+		}
 	};
 	
 	//计算表格高度
@@ -91,20 +126,6 @@ page_obj.ftl
 		return false;
 	};
 
-	po.confirmDeleteEntities = function(url, rows, idPropertyName)
-	{
-		po.confirm("<@spring.message code='confirmDelete' />",
-		{
-			"confirm" : function()
-			{
-				$.postJson(url, $.propertyValue(rows, (idPropertyName || "id")), function()
-				{
-					po.refresh();
-				});
-			}
-		});
-	};
-	
 	po.getOrdersOnName = function($table)
 	{
 		var dataTable = ($table || po.elementTable()).DataTable();

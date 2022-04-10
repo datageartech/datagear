@@ -38,7 +38,7 @@ boolean readonly 是否只读操作，默认为false
 		</div>
 		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
 			<#if selectOperation>
-				<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
+				<button type="button" class="selectButton recommended"><@spring.message code='confirm' /></button>
 			</#if>
 			<#if readonly>
 				<button type="button" class="viewButton"><@spring.message code='view' /></button>
@@ -213,7 +213,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element(".confirmButton").click(function()
+	po.element(".selectButton").click(function()
 	{
 		<#if isMultipleSelect>
 		po.executeOnSelects(function(rows)

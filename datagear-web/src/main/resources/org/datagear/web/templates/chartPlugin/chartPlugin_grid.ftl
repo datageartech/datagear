@@ -31,7 +31,7 @@ selectOperation 是否选择操作，允许为null
 		</div>
 		<div class="operation">
 			<#if selectOperation>
-				<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
+				<button type="button" class="selectButton recommended"><@spring.message code='confirm' /></button>
 				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 			<#else>
 				<button type="button" class="uploadButton"><@spring.message code='upload' /></button>

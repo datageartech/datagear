@@ -26,7 +26,7 @@
 			<#include "../include/page_obj_searchform.ftl">
 		</div>
 		<div class="operation">
-			<button type="button" class="confirmButton recommended"><@spring.message code='confirm' /></button>
+			<button type="button" class="selectButton recommended"><@spring.message code='confirm' /></button>
 		</div>
 	</div>
 	<div class="content">
@@ -159,7 +159,7 @@
 		});
 	};
 	
-	po.element(".confirmButton").click(function()
+	po.element(".selectButton").click(function()
 	{
 		var selectId = po.element(".plugin-item.ui-state-active").attr("chart-plugin-id");
 		if(!selectId)
