@@ -148,8 +148,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	];
 	
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
-	po.initDataTable(tableSettings);
-	po.bindResizeDataTable();
+	po.initTable(tableSettings);
 })
 (${pageId});
 </script>

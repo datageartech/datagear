@@ -179,6 +179,7 @@ Schema schema 数据库，不允许为null
 </div>
 </#if>
 <#include "../include/page_obj_form.ftl">
+<#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_tabs.ftl" >
 <#include "../include/page_obj_format_time.ftl" >
 <#include "../include/page_obj_data_permission.ftl">
@@ -279,7 +280,7 @@ Schema schema 数据库，不允许为null
 			ui.element.css("height", editorHeightPercent);
 			$(".content-result", parent).css("height", resultHeightpercent);
 			
-			po.resizeSqlResultTabPanelDataTable();
+			$.resizeAutoResizable(po.sqlResultTabs, function(ele){ po.resizeAutoResizable(ele); });
 		}
 	});
 	
@@ -654,7 +655,7 @@ Schema schema 数据库，不允许为null
 	    	po.sqlResultTabs.tabs( "option", "active",  tab.index());
 	    else
 	    {
-	    	$.setResizeDataTableWhenShow(tabPanel);
+	    	$.resizeAutoResizableOnShow(tabPanel, true);
 	    	po.tabsRefreshNavForHidden(po.sqlResultTabs);
 	    }
 	    
@@ -735,14 +736,6 @@ Schema schema 数据库，不允许为null
 	    });
 	};
 	
-	po.calSqlResultTableHeight = function(tabIdOrTabPanel)
-	{
-		if(typeof(tabIdOrTabPanel) == "string")
-			tabIdOrTabPanel = po.tabsGetPaneByTabId(po.sqlResultTabs, tabIdOrTabPanel);
-		
-		return tabIdOrTabPanel.height() - 37;
-	};
-
 	po.renderRowNumberColumn = function(data, type, row, meta)
 	{
 		var row = meta.row;
@@ -763,35 +756,51 @@ Schema schema 数据库，不允许为null
 		panel.show().position({ my : "left bottom", at : "left top-5", of : target});
 	};
 	
+	po.resizeAutoResizable = function(ele)
+	{
+		ele = $(ele);
+		
+		if(ele.is("table"))
+		{
+			var height = po.evalSqlResultTableHeight(ele);
+			$.updateDataTableHeight(ele, height, true);
+		}
+	};
+	
+	po.evalSqlResultTableHeight = function(ele)
+	{
+		return $(ele).closest(".ui-tabs-panel").height() - 37;
+	};
+	
 	po.initSqlResultDataTable = function(tabId, $table, sql, sqlSelectResult)
 	{
 		var dtColumns = $.buildDataTablesColumns(sqlSelectResult.table,
+		{
+			postRender : function(data, type, rowData, meta, rowIndex, renderValue, table, column, thisColumn)
+			{
+				if(!data)
+					return renderValue;
+				
+				if($.tableMeta.isBinaryColumn(column))
 				{
-					postRender : function(data, type, rowData, meta, rowIndex, renderValue, table, column, thisColumn)
+					if(rowIndex < po.sqlResultReadActualBinaryRows)
 					{
-						if(!data)
-							return renderValue;
-						
-						if($.tableMeta.isBinaryColumn(column))
-						{
-							if(rowIndex < po.sqlResultReadActualBinaryRows)
-							{
-								return "<a href='${contextPath}/sqlpad/"+po.schemaId+"/downloadResultField?sqlpadId="+po.sqlpadId+"&value="+encodeURIComponent(data)+"'>"
-										+ $.escapeHtml(po.sqlResultBinaryPlaceholder) + "</a>";
-							}
-							else
-								return renderValue;
-						}
-						else if(data != renderValue)
-						{
-							return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' auto-close-prevent='view-long-text-result-panel' class='view-sql-result-long-text-link'>"
-									+ renderValue
-									+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
-						}
-						else
-							return renderValue;
+						return "<a href='${contextPath}/sqlpad/"+po.schemaId+"/downloadResultField?sqlpadId="+po.sqlpadId+"&value="+encodeURIComponent(data)+"'>"
+								+ $.escapeHtml(po.sqlResultBinaryPlaceholder) + "</a>";
 					}
-				});
+					else
+						return renderValue;
+				}
+				else if(data != renderValue)
+				{
+					return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' auto-close-prevent='view-long-text-result-panel' class='view-sql-result-long-text-link'>"
+							+ renderValue
+							+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
+				}
+				else
+					return renderValue;
+			}
+		});
 		
 		var newDtColumns = [
 			{
@@ -807,7 +816,7 @@ Schema schema 数据库，不允许为null
 			"data" : (sqlSelectResult.rows ? sqlSelectResult.rows : []),
 			"scrollX": true,
 			"autoWidth": true,
-			"scrollY" : po.calSqlResultTableHeight(tabId),
+			"scrollY" : po.evalSqlResultTableHeight($table),
 	        "scrollCollapse": false,
 			"paging" : false,
 			"searching" : false,
@@ -820,13 +829,8 @@ Schema schema 数据库，不允许为null
 			}
 		};
 		
-		$table.dataTable(settings);
-		
-		$.bindResizeDataTableHandler($table,
-				function()
-				{
-					return po.calSqlResultTableHeight(tabId);
-				});
+		po.initTable(settings, $table);
+		$.resizeAutoResizable(po.element("#"+tabId), function(ele){ po.resizeAutoResizable(ele); });
 	};
 	
 	po.getNextSqlResultNameSeq = function()
@@ -846,27 +850,6 @@ Schema schema 数据库，不允许为null
 		po.nextSqlResultIdSeq = seq + 1;
 		
 		return "${pageId}-sqlResultTabs-tab-" + seq;
-	};
-	
-	po.resizeSqlResultTabPanelDataTable = function()
-	{
-		$(".sql-result-tab-panel", po.sqlResultTabs).each(function()
-		{
-			var $this = $(this);
-			
-			if($this.is(":hidden"))
-			{
-				$.setResizeDataTableWhenShow($this);
-			}
-			else
-			{
-				var tableId = po.getSqlResultTabPanelTableId($this.attr("id"));
-				var table = po.element("#"+tableId, $this);
-				
-				var height = po.calSqlResultTableHeight($this);
-				$.updateDataTableHeight(table, height);
-			}
-		});
 	};
 	
 	po.getOverTimeThreashold = function($form)

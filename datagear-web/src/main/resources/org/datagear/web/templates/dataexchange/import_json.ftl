@@ -230,7 +230,7 @@ Schema schema 数据库，不允许为null
 	po.initDataExchangeActions();
 	po.initDataImportActions();
 	
-	po.elementTable().on("click", ".table-name-input", function(event)
+	po.table().on("click", ".table-name-input", function(event)
 	{
 		//阻止行选中
 		event.stopPropagation();

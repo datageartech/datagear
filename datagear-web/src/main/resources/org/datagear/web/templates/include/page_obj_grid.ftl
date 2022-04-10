@@ -18,12 +18,109 @@ page_obj.ftl
 	po.selectOperation = ("${(selectOperation!false)?string('true','false')}" == "true");
 	po.isMultipleSelect = ("${(isMultipleSelect!false)?string('true','false')}" == "true");
 	
-	po.elementTable = function(){ return this.element("#${pageId}-table"); };
+	po.table = function()
+	{
+		return this.elementOfId("${pageId}-table");
+	};
+	
+	po.tableDataTable = function(table)
+	{
+		table = (table == null ? po.table() : table);
+		return table.DataTable();
+	};
 	
 	po.initGridBtns = function(parent)
 	{
 		parent = (parent == null ? po.element(".operation") : parent);
 		$.initButtons(parent);
+	};
+	
+	po.initTable = function(settings, table, autoResize)
+	{
+		//(settings, true||false)
+		if(table === true || table === false)
+		{
+			autoResize = table;
+			table = null;
+		}
+		table = (table == null ? po.table() : table);
+		autoResize = (autoResize == null ? true : autoResize);
+		
+		table.dataTable(settings);
+		$.dataTableUtil.bindCheckColumnEvent(po.tableDataTable(table));
+		table.addClass($.AUTO_RESIZEABLE_ELE_CLASS_NAME);
+		
+		if(autoResize && !po.bindAutoResizableHandlerDone)
+		{
+			po.bindAutoResizableHandler();
+			po.bindAutoResizableHandlerDone = true;
+		}
+	};
+	
+	po.bindAutoResizableHandler = function()
+	{
+		$.bindAutoResizableHandler(po.element().attr("id"),
+		function(ele)
+		{
+			po.resizeAutoResizable(ele);
+		});
+	};
+	
+	po.resizeAutoResizable = function(ele)
+	{
+		ele = $(ele);
+		
+		if(ele.is("table"))
+		{
+			var height = po.calTableHeight();
+			$.updateDataTableHeight(ele, height, true);
+		}
+	};
+	
+	po.refresh = function(table)
+	{
+		table = (table == null ? po.table() : table);
+		
+		po.tableDataTable(table).draw();
+	};
+	
+	//单选处理函数
+	po.executeOnSelect = function(callback, table)
+	{
+		table = (table == null ? po.table() : table);
+		
+		$.dataTableUtil.executeOnSelect(po.tableDataTable(table), "<@spring.message code='pleaseSelectOnlyOneRow' />",
+		function(row, rowIndex){ callback.call(po, row, rowIndex); });
+	};
+	
+	//多选处理函数
+	po.executeOnSelects = function(callback, table)
+	{
+		table = (table == null ? po.table() : table);
+		
+		$.dataTableUtil.executeOnSelects(po.tableDataTable(table), "<@spring.message code='pleaseSelectAtLeastOneRow' />",
+		function(rows, rowIndexes){ callback.call(po, rows, rowIndexes); });
+	};
+	
+	po.getSelectedData = function(table)
+	{
+		table = (table == null ? po.table() : table);
+		
+		return $.dataTableUtil.getSelectedData(po.tableDataTable(table));
+	};
+	
+	po.addRowData = function(data, table)
+	{
+		table = (table == null ? po.table() : table);
+		
+		$.dataTableUtil.addRowData(po.tableDataTable(table), data);
+	};
+	
+	po.deleteSelectedRows = function(table)
+	{
+		table = (table == null ? po.table() : table);
+		
+		$.dataTableUtil.deleteSelectedRows(po.tableDataTable(table));
 	};
 	
 	po.confirmDeleteEntities = function(url, rows, idPropertyName)
@@ -126,10 +223,11 @@ page_obj.ftl
 		return false;
 	};
 
-	po.getOrdersOnName = function($table)
+	po.getOrdersOnName = function(table)
 	{
-		var dataTable = ($table || po.elementTable()).DataTable();
-		return $.dataTableUtil.getOrdersOnName(dataTable);
+		table = (table == null ? po.table() : table);
+		
+		return $.dataTableUtil.getOrdersOnName(po.tableDataTable(table));
 	};
 	
 	/**
@@ -260,111 +358,12 @@ page_obj.ftl
 		return settings;
 	};
 	
-	po.initDataTable = function(tableSettings, $table)
-	{
-		if($table == undefined)
-			$table = po.elementTable();
-		
-		$table.dataTable(tableSettings);
-		$.dataTableUtil.bindCheckColumnEvent($table.DataTable());
-	};
-	
-	po.refresh = function()
-	{
-		po.elementTable().DataTable().draw();
-	};
-	
-	po.setTableData = function(data, dataTable)
-	{
-		dataTable = (dataTable || po.elementTable().DataTable());
-		$.setDataTableData(dataTable, data);
-	};
-	
-	//单选处理函数
-	po.executeOnSelect = function(callback)
-	{
-		$.dataTableUtil.executeOnSelect(po.elementTable().DataTable(), "<@spring.message code='pleaseSelectOnlyOneRow' />",
-		function(row, rowIndex){ callback.call(po, row, rowIndex); });
-	};
-	
-	//多选处理函数
-	po.executeOnSelects = function(callback)
-	{
-		$.dataTableUtil.executeOnSelects(po.elementTable().DataTable(), "<@spring.message code='pleaseSelectAtLeastOneRow' />",
-		function(rows, rowIndexes){ callback.call(po, rows, rowIndexes); });
-	};
-	
-	//获取选中数据
-	po.getSelectedData = function()
-	{
-		$.dataTableUtil.getSelectedData(po.elementTable().DataTable());
-	};
-	
-	po.getRowsData = function(rows)
-	{
-		return $.dataTableUtil.getRowsData(po.elementTable().DataTable());
-	};
-	
-	po.getRowsIndex = function(rows)
-	{
-		return $.dataTableUtil.getRowsIndex(po.elementTable().DataTable());
-	};
-	
-	po.addRowData = function(data)
-	{
-		$.dataTableUtil.addRowData(po.elementTable().DataTable(), data);
-	};
-	
-	po.setRowData = function(rowIndex, data)
-	{
-		$.dataTableUtil.setRowData(po.elementTable().DataTable(), rowIndex, data);
-	};
-	
-	po.deleteRow = function(rowIndex)
-	{
-		$.dataTableUtil.deleteRow(po.elementTable().DataTable(), rowIndex);
-	};
-	
-	po.deleteAllRow = function()
-	{
-		$.dataTableUtil.deleteAllRow(po.elementTable().DataTable());
-	};
-	
-	po.deleteSelectedRows = function()
-	{
-		$.dataTableUtil.deleteSelectedRows(po.elementTable().DataTable());
-	};
-	
 	//获取表格元素的父元素
-	po.dataTableParent = function(dataTable)
+	po.tableParent = function(table)
 	{
-		return $.dataTableUtil.dataTableParent(dataTable || po.elementTable().DataTable());
-	};
-	
-	po.expectedResizeDataTableElements = [po.elementTable()[0]];
-	
-	po.calChangedDataTableHeight = function()
-	{
-		var changedTableHeight = po.calTableHeight();
+		table = (table == null ? po.table() : table);
 		
-		if(changedTableHeight == po.prevTableHeight)
-		{
-			po.prevTableHeight = changedTableHeight;
-			changedTableHeight = null;
-		}
-		else
-			po.prevTableHeight = changedTableHeight;
-		
-		return changedTableHeight;
-	};
-	
-	po.bindResizeDataTable = function()
-	{
-		$.bindResizeDataTableHandler(po.expectedResizeDataTableElements,
-			function()
-			{
-				return po.calChangedDataTableHeight();
-			});
+		return $.dataTableUtil.tableParent(po.tableDataTable(table));
 	};
 })
 (${pageId});

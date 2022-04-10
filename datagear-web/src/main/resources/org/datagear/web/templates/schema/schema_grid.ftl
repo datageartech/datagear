@@ -138,8 +138,7 @@ boolean readonly 是否只读操作，默认为false
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='schema.createTime' />", "createTime")
 	];
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
-	po.initDataTable(tableSettings);
-	po.bindResizeDataTable();
+	po.initTable(tableSettings);
 })
 (${pageId});
 </script>

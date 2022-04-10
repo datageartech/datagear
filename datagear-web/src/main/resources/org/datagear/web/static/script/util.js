@@ -1391,7 +1391,7 @@
 		/**
 		 * 构建Datatables组件的“columns”选项值。
 		 * 
-		 * @param table 必选，表
+		 * @param dbTable 必选，表
 		 * @param options 选项，格式为：
 		 * 			{
 		 * 				//可选，字符串最大显示长度
@@ -1405,11 +1405,11 @@
 		 * 			}
 		 * @returns {Array}
 		 */
-		buildDataTablesColumns : function(table, options)
+		buildDataTablesColumns : function(dbTable, options)
 		{
 			options = $.extend({ stringDisplayThreshold : 47, keywordQueryColumnCount: -1 }, options);
 			
-			var columns = table.columns;
+			var columns = dbTable.columns;
 			
 			var dtColumns = [];
 			for(var i=0; i<columns.length; i++)
@@ -1433,7 +1433,7 @@
 						var _this = meta.settings.aoColumns[meta.col];
 						
 						var columnIndex = _this.columnIndex;
-						var column = $.tableMeta.column(table, columnIndex);
+						var column = $.tableMeta.column(dbTable, columnIndex);
 						
 						renderValue = $.tableMeta.labelOfLabeledValue(data);
 						renderValue = (renderValue == undefined ? data : renderValue);
@@ -1450,7 +1450,7 @@
 							if(rowIndex.length)
 								rowIndex = rowIndex[0];
 							
-							return _this.options.postRender(data, type, row, meta, rowIndex, renderValue, table, column, _this);
+							return _this.options.postRender(data, type, row, meta, rowIndex, renderValue, dbTable, column, _this);
 						}
 						else
 							return renderValue;
@@ -1840,6 +1840,11 @@
 			options.height = $(window).height() * 0.8;
 		},
 		
+		isDatatTable : function($table)
+		{
+			return $table.hasClass("dataTable");
+		},
+		
 		updateDataTableHeight : function(dataTableElements, height, adjustWidth)
 		{
 			if(height == null && adjustWidth == null)
@@ -1862,83 +1867,85 @@
 			}
 		},
 		
-		isResizeDataTableWhenShow : function($panel)
-		{
-			return ($panel.attr("resize-table-when-show") == "1");
-		},
-		
-		setResizeDataTableWhenShow : function($panel)
-		{
-			$panel.attr("resize-table-when-show", "1");
-		},
-		
-		clearResizeDataTableWhenShow : function($panel)
-		{
-			$panel.removeAttr("resize-table-when-show");
-		},
-		
 		/**可显示、隐藏的包含DataTable的面板样式标识*/
-		TOGGLABLE_TABLE_PANEL_CLASS_NAME : "togglable-table-panel",
+		TOGGLABLE_PANEL_CLASS_NAME : "dg-togglable-panel",
+		
+		/** 自动计算尺寸元素类名标识 */
+		AUTO_RESIZEABLE_ELE_CLASS_NAME: "dg-auto-resizable-ele",
 		
 		/**
-		 * 为DataTable绑定window重设大小事件。
+		 * 获取/设置是否在显示时调用$.resizeAutoResizable()函数
 		 */
-		bindResizeDataTableHandler : function(dataTableElements, calChangedDataTableHeightFunc)
+		resizeAutoResizableOnShow: function(panel, autoResize)
 		{
-			var resizeHandler = function(event) 
-			{
-				var $dataTable0 = $(dataTableElements[0]);
-				
-				//忽略隐藏选项卡中的表格调整，仅在选项卡显示时才调整，
-				//一是DataTables对隐藏表格的宽度计算有问题，另外，绑定太多处理函数会影响jquery.resizeable组件的效率
-				
-				var toggablePanel = $dataTable0.closest(".ui-tabs-panel, ." + $.TOGGLABLE_TABLE_PANEL_CLASS_NAME);
-				if(toggablePanel.is(":hidden"))
-				{
-					$.setResizeDataTableWhenShow(toggablePanel);
-					return;
-				}
-				
-				var changedHeight = calChangedDataTableHeightFunc();
-				
-				if(changedHeight != null)
-				{
-					clearTimeout($dataTable0.data("resizeTableTimer"));
-					
-					var timer = setTimeout(function()
-					{
-						$.updateDataTableHeight(dataTableElements, changedHeight);
-					},
-					250);
-					
-					$dataTable0.data("resizeTableTimer", timer);
-				}
-			};
-			
-			$(window).bind('resize', resizeHandler);
-			
-			//如果表格处于选项卡页中，则在选项卡显示时，调整表格大小
-			var toggablePanel = $(dataTableElements[0]).closest(".ui-tabs-panel, ." + $.TOGGLABLE_TABLE_PANEL_CLASS_NAME);
-			if(toggablePanel.length > 0)
-			{
-				$.bindPanelShowCallback(toggablePanel, function($panel)
-				{
-					if(!$.isResizeDataTableWhenShow($panel))
-						return;
-					
-					var changedHeight = calChangedDataTableHeightFunc();
-					$.updateDataTableHeight(dataTableElements, changedHeight, true);
-					
-					$.clearResizeDataTableWhenShow($panel);
-				});
-			}
-			
-			return resizeHandler;
+			if(autoResize == null)
+				return (panel.data("resizeAutoResizable") == true);
+			else
+				panel.data("resizeAutoResizable", autoResize);
 		},
 		
-		isDatatTable : function($table)
+		/**
+		 * 重新调整（或在显示时调整）元素内所有$.AUTO_RESIZEABLE_ELE_CLASS_NAME元素的尺寸。
+		 */
+		resizeAutoResizable : function(ele, resizeHandler)
 		{
-			return $table.hasClass("dataTable");
+			$("."+$.AUTO_RESIZEABLE_ELE_CLASS_NAME, ele).each(function()
+			{
+				var thisEle = $(this);
+				
+				//忽略隐藏选项卡中的尺寸调整，仅在选项卡显示时才调整，
+				//一是DataTables对隐藏表格的宽度计算有问题，另外，绑定太多处理函数会影响$.resizeable组件的效率
+				var toggablePanel = thisEle.closest(".ui-tabs-panel, ." + $.TOGGLABLE_PANEL_CLASS_NAME);
+				if(toggablePanel.length > 0 && toggablePanel.is(":hidden"))
+				{
+					$.bindPanelShowCallback(toggablePanel, function(panel)
+					{
+						if(!$.resizeAutoResizableOnShow(panel))
+							return;
+						
+						$.resizeAutoResizable(panel, resizeHandler);
+						$.resizeAutoResizableOnShow(panel, false);
+					});
+					
+					$.resizeAutoResizableOnShow(toggablePanel, true);
+				}
+				else
+				{
+					resizeHandler(this);
+				}
+			});
+		},
+		
+		/**
+		 * 为元素内的所有$.AUTO_RESIZEABLE_ELE_CLASS_NAME元素绑定自动尺寸处理函数。
+		 * 
+		 * @param eleId 元素ID
+		 * @param resizeHandler 计算尺寸回调函数，格式为：function(ele){}
+		 */
+		bindAutoResizableHandler : function(eleId, resizeHandler)
+		{
+			var resizeTimoutIdName = $.uid("resizeTimoutId");
+			
+			$(window).bind('resize', function()
+			{
+				var ele = $("#"+eleId);
+				
+				if(ele.length < 1)
+					return;
+				
+				var resizeTimoutId = ele.data(resizeTimoutIdName);
+				
+				if(resizeTimoutId)
+					clearTimeout(resizeTimoutId);
+				
+				resizeTimoutId = setTimeout(function()
+				{
+					$.resizeAutoResizable(ele, resizeHandler);
+				},
+				200);
+				
+				ele.data(resizeTimoutIdName, resizeTimoutId);
+			});
 		},
 		
 		/**

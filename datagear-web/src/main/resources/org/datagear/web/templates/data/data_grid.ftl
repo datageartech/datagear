@@ -120,7 +120,7 @@ boolean readonly 是否只读操作，默认为false
 		po.element(".exportButton").attr("disabled", "disabled").hide();
 	}
 	
-	po.onTable(function(table)
+	po.onDbTable(function(dbTable)
 	{
 		po.element(".addButton").click(function()
 		{
@@ -147,7 +147,7 @@ boolean readonly 是否只读操作，默认为false
 		{
 			po.executeOnSelect(function(row)
 			{
-				var data = $.tableMeta.uniqueRecordData(table, row);
+				var data = $.tableMeta.uniqueRecordData(dbTable, row);
 				
 				po.open(po.url("edit"),
 				{
@@ -167,7 +167,7 @@ boolean readonly 是否只读操作，默认为false
 				{
 					"confirm" : function()
 					{
-						var data = $.tableMeta.uniqueRecordData(table, rows);
+						var data = $.tableMeta.uniqueRecordData(dbTable, rows);
 						
 						po.ajaxSubmitForHandleDuplication(po.url("delete"), data, "<@spring.message code='delete.continueIgnoreDuplicationTemplate' />",
 						{
@@ -204,7 +204,7 @@ boolean readonly 是否只读操作，默认为false
 		{
 			po.executeOnSelect(function(row)
 			{
-				var data = $.tableMeta.uniqueRecordData(table, row);
+				var data = $.tableMeta.uniqueRecordData(dbTable, row);
 				
 				po.open(po.url("view"),
 				{
@@ -227,15 +227,14 @@ boolean readonly 是否只读操作，默认为false
 			});
 		});
 		
-		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(table, po.sqlIdentifierQuote);
+		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(dbTable, po.sqlIdentifierQuote);
 		po.initConditionPanel();
 		po.initPagination();
-		po.initDataTableAjax(po.url("queryData"), table);
-		po.bindResizeDataTable();
+		po.initTableForDbTable(po.url("queryData"), dbTable);
 		
 		<#if !readonly>
 		if(po.canEditTableData(${schema.dataPermission}))
-			po.initEditGrid(table);
+			po.initEditGrid(dbTable);
 		else
 		{
 			po.elementEditGridSwitch().checkboxradio().checkboxradio("disable");

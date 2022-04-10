@@ -608,7 +608,7 @@ ${detectNewVersionScript?no_esc}
 		
 		po.element(".analysis-project-operation-group", dap).controlgroup();
 		
-		po.element(".analysis-project-list-panel", dap).addClass($.TOGGLABLE_TABLE_PANEL_CLASS_NAME);
+		po.element(".analysis-project-list-panel", dap).addClass($.TOGGLABLE_PANEL_CLASS_NAME);
 		
 		po.element(".analysis-project-current-value", dap).click(function()
 		{

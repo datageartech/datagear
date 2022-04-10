@@ -165,8 +165,7 @@ selectOperation 是否选择操作，允许为null
 		po.buildTableColumValueOption("", "displayText", true)
 	];
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
-	po.initDataTable(tableSettings);
-	po.bindResizeDataTable();
+	po.initTable(tableSettings);
 })
 (${pageId});
 </script>

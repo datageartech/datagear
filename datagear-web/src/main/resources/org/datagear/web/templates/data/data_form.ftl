@@ -71,11 +71,11 @@ boolean batchSet 是否开启批量执行功能，默认为false
 	if(!po.dataIsClient && po.data == null)
 		po.dataIsClient = true;
 	
-	po.onTable(function(table)
+	po.onDbTable(function(dbTable)
 	{
 		po.form().tableform(
 		{
-			table : table,
+			table : dbTable,
 			data : po.data,
 			readonly : po.readonly,
 			submit : function()

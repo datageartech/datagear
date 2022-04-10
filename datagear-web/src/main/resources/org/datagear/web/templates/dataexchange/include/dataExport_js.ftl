@@ -28,8 +28,8 @@ dataExchange_js.ftl
 		po.addRowData(rowData);
 		
 		//滚动到底部
-		var $dataTableParent = po.dataTableParent();
-		$dataTableParent.scrollTop($dataTableParent.prop("scrollHeight"));
+		var tableParent = po.tableParent();
+		tableParent.scrollTop(tableParent.prop("scrollHeight"));
 	};
 	
 	po.buildSubDataExchangesForTables = function(tableNames)
@@ -229,14 +229,11 @@ dataExchange_js.ftl
 	
 	po.initDataExportDataTable = function()
 	{
-		po.expectedResizeDataTableElements = [po.elementTable()[0]];
-		
 		var tableSettings = po.buildDataTableSettingsLocal(po.dataExportTableColumns, [], {"order": []});
 
 		po.subDataExchangeStatusColumnIndex = tableSettings.columns.length - 1;
 		
-		po.initDataTable(tableSettings);
-		po.bindResizeDataTable();
+		po.initTable(tableSettings);
 	};
 	
 	//数据库表条目拖入自动插入导出条目
@@ -274,9 +271,9 @@ dataExchange_js.ftl
 		
 		po.element(".table-delete-item-button").click(function()
 		{
-			po.executeOnSelects(function(rowDatas, rowIndexes)
+			po.executeOnSelects(function()
 			{
-				po.deleteRow(rowIndexes);
+				po.deleteSelectedRows();
 			});
 		});
 		
@@ -302,13 +299,13 @@ dataExchange_js.ftl
 			});
 		});
 		
-		po.elementTable().on("click", ".input-in-table", function(event)
+		po.table().on("click", ".input-in-table", function(event)
 		{
 			//阻止行选中
 			event.stopPropagation();
 		});
 		
-		po.elementTable().on("click", ".exchange-result-icon", function(event)
+		po.table().on("click", ".exchange-result-icon", function(event)
 		{
 			//阻止行选中
 			event.stopPropagation();

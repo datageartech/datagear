@@ -161,16 +161,13 @@ dataExchange_js.ftl
 	
 	po.initDataImportDataTable = function()
 	{
-		po.expectedResizeDataTableElements = [po.elementTable()[0]];
-		
 		var tableSettings = po.buildDataTableSettingsLocal(po.dataImportTableColumns, [], {"order": []});
 		
 		po.subDataExchangeStatusColumnIndex = tableSettings.columns.length - 1;
 		
-		po.initDataTable(tableSettings);
-		po.bindResizeDataTable();
+		po.initTable(tableSettings);
 		
-		po.elementTable().on("click", ".table-dependent-number-input", function(event)
+		po.table().on("click", ".table-dependent-number-input", function(event)
 		{
 			//阻止行选中
 			event.stopPropagation();
@@ -190,9 +187,9 @@ dataExchange_js.ftl
 		
 		po.element(".table-delete-item-button").click(function()
 		{
-			po.executeOnSelects(function(rowDatas, rowIndexes)
+			po.executeOnSelects(function()
 			{
-				po.deleteRow(rowIndexes);
+				po.deleteSelectedRows();
 			});
 		});
 		
@@ -206,7 +203,7 @@ dataExchange_js.ftl
 			po.updateDataExchangePageStatus("edit");
 		});
 		
-		po.elementTable().on("click", ".exchange-result-icon", function(event)
+		po.table().on("click", ".exchange-result-icon", function(event)
 		{
 			//阻止行选中
 			event.stopPropagation();

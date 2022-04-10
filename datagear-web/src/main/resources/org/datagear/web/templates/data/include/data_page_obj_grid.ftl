@@ -44,15 +44,12 @@ int keywordQueryColumnCount
 		return false;
 	};
 	
-	/**
-	 * 构建ajax数据表格。
-	 */
-	po.initDataTableAjax = function(url, table)
+	po.initTableForDbTable = function(url, dbTable)
 	{
-		var columns = $.buildDataTablesColumns(table, {keywordQueryColumnCount: po.keywordQueryColumnCount});
+		var columns = $.buildDataTablesColumns(dbTable, {keywordQueryColumnCount: po.keywordQueryColumnCount});
 		var settings = po.buildDataTableSettingsAjax(columns, url);
 		
-		po.initDataTable(settings);
+		po.initTable(settings);
 	};
 })
 (${pageId});

@@ -44,7 +44,7 @@
 		 * @param tableName 可选，操作对应的表名，默认是当前表名
 		 * @param callback 操作函数，格式为：function(model){ ... }
 		 */
-		onTable : function(tableName, callback)
+		onDbTable : function(tableName, callback)
 		{
 			if(!callback)
 			{

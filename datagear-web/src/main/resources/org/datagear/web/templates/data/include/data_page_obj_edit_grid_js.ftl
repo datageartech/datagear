@@ -222,7 +222,7 @@ data_page_obj_edit_grid_html.ftl
 			return content;
 		};
 		
-		po.initDataTable(settings, $editTable);
+		po.initTable(settings, $editTable);
 		po.bindEditDataTableEvents($editTable);
 	};
 	
@@ -256,7 +256,7 @@ data_page_obj_edit_grid_html.ftl
 				editDataTable.cell(row.index(), 0).data("add-row").draw();
 				
 				//滚动到底部
-				var $editDataTableParent = po.dataTableParent(editDataTable);
+				var $editDataTableParent = po.tableParent(po.elementEditTable());
 				$editDataTableParent.scrollTop($editDataTableParent.prop("scrollHeight"));
 			});
 			
@@ -322,16 +322,15 @@ data_page_obj_edit_grid_html.ftl
 		po.element(".head .search").addClass("ui-state-disabled");
 		po.element(".foot .pagination").addClass("ui-state-disabled");
 		
-		var dataTable = po.elementTable().DataTable();
-		var dataTableScrollTop = po.dataTableParent(dataTable).prop("scrollTop");
+		var dataTable = po.tableDataTable();
+		var dataTableScrollTop = po.tableParent(po.table()).prop("scrollTop");
 		var $tableContainer = $(dataTable.table().container());
 		$tableContainer.hide();
 		
 		//新建本地模式的DataTable，因为server-side模式的DataTable不能添加行
 		var $editTable = po.elementEditTable();
 		po.initEditGridDataTable($editTable, dataTable);
-		po.dataTableParent($editTable.DataTable()).scrollTop(dataTableScrollTop);
-		po.expectedResizeDataTableElements.push($editTable[0]);
+		po.tableParent($editTable).scrollTop(dataTableScrollTop);
 		
 		po.resetEditGridCache();
 		
@@ -356,9 +355,8 @@ data_page_obj_edit_grid_html.ftl
 		var $editTable = po.elementEditTable();
 		$editTable.DataTable().destroy();
 		$editTable.remove();
-		po.expectedResizeDataTableElements.pop();
 		
-		var dataTable = po.elementTable().DataTable();
+		var dataTable = po.tableDataTable();
 		var $tableContainer = $(dataTable.table().container());
 		$tableContainer.show();
 		//不加此行，窗口有resize后列宽不对
@@ -630,7 +628,7 @@ data_page_obj_edit_grid_html.ftl
 		if($form.isTableform())
 			$form.tableform("destroy");
 		
-		$formPage.appendTo(po.dataTableParent(editDataTable));
+		$formPage.appendTo(po.tableParent($table));
 		$formPage.show();
 		
 		//只有一个列，隐藏标签，否则，显示标签
@@ -902,7 +900,7 @@ data_page_obj_edit_grid_html.ftl
 		if(count <= 0)
 			return;
 		
-		var isServerSide = po.elementTable().DataTable().init().serverSide;
+		var isServerSide = po.tableDataTable().init().serverSide;
 		
 		var _confirmCallback = function()
 		{
@@ -910,7 +908,7 @@ data_page_obj_edit_grid_html.ftl
 			{
 				var editTableDatas = $.deepClone($.makeArray(editDataTable.rows(":not(.delete-row)").data()));
 				
-				var dataTable = po.elementTable().DataTable();
+				var dataTable = po.tableDataTable();
 				$.setDataTableData(dataTable, editTableDatas);
 				
 				po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows);
@@ -1028,7 +1026,7 @@ data_page_obj_edit_grid_html.ftl
 			addDatas, deleteDatas, operationMessage)
 	{
 		po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows, true);
-		po.elementTable().DataTable().draw();
+		po.tableDataTable().draw();
 		
 		po.afterSaveServerSideEditCell(editDataTable, modifiedCells, addRows, deleteRows);
 	};
@@ -1229,7 +1227,7 @@ data_page_obj_edit_grid_html.ftl
 		});
 		
 		//serverSide表格在保存编辑表格后需要刷新编辑表格数据
-		var dataTable = po.elementTable().DataTable();
+		var dataTable = po.tableDataTable();
 		var isServerSide = dataTable.init().serverSide;
 		
 		if(isServerSide)

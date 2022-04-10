@@ -167,8 +167,7 @@ selectOperation 是否选择操作，允许为null
 	];
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
 	tableSettings.ordering = false;
-	po.initDataTable(tableSettings);
-	po.bindResizeDataTable();
+	po.initTable(tableSettings);
 })
 (${pageId});
 </script>

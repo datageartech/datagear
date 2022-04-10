@@ -329,8 +329,7 @@ boolean readonly 是否只读操作，默认为false
 	
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
 	tableSettings.order = [[$.getDataTableColumn(tableSettings, "createTime"), "desc"]];
-	po.initDataTable(tableSettings);
-	po.bindResizeDataTable();
+	po.initTable(tableSettings);
 	po.handlePermissionElement();
 })
 (${pageId});

@@ -99,7 +99,7 @@
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.realName' />"), "user.realName")
 	];
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData?roleId=" + po.role.id));
-	po.initDataTable(tableSettings);
+	po.initTable(tableSettings);
 })
 (${pageId});
 </script>
