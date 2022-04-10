@@ -26,7 +26,7 @@
 						<@spring.message code='dashboard.import.selectFile' />
 					</label>
 				</div>
-				<div class="form-item-value">
+				<div class="uploadFileWrapper form-item-value">
 					<input type="hidden" name="inputForValidate" value="" />
 					<div class="fileinput-button button">
 						<@spring.message code='select' /><input type="file" accept=".html, .htm, .zip" class="ignore">
@@ -100,28 +100,18 @@
 		return "${contextPath}/dashboard/" + action;
 	};
 	
-	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
-	
-	po.element(".fileinput-button").fileupload(
+	po.element(".uploadFileWrapper").fileUpload(po.url("uploadImportFile"),
 	{
-		url : po.url("uploadImportFile"),
-		paramName : "file",
-		success : function(uploadResult, textStatus, jqXHR)
+		add: function(e, data)
 		{
-			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			po.elementOfName("name").val(uploadResult.dashboardName);
-			po.elementOfName("template").val(uploadResult.template);
-			po.elementOfName("dashboardFileName").val(uploadResult.dashboardFileName);
+			po.elementOfName("dashboardFileName").val("");
+		},
+		success: function(response)
+		{
+			po.elementOfName("name").val(response.dashboardName);
+			po.elementOfName("template").val(response.template);
+			po.elementOfName("dashboardFileName").val(response.dashboardFileName);
 		}
-	})
-	.bind('fileuploadadd', function (e, data)
-	{
-		po.elementOfName("dashboardFileName").val("");
-		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	})
-	.bind('fileuploadprogressall', function (e, data)
-	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 	
 	$.validator.addMethod("uploadDashboardFileRequired", function(value, element)

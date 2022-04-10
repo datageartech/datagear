@@ -30,10 +30,10 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-label">
 					<label><@spring.message code='dashboardGlobalRes.selectFile' /></label>
 				</div>
-				<div class="form-item-value">
+				<div class="uploadFileWrapper form-item-value">
 					<input type="hidden" name="filePath" value="" />
 					<input type="hidden" name="fileName" value="" />
-					<div class="ui-widget ui-corner-all ui-button fileinput-button">
+					<div class="fileinput-button button">
 						<@spring.message code='select' /><input type="file" />
 					</div>
 					<div class="upload-file-info"></div>
@@ -133,32 +133,21 @@ readonly 是否只读操作，允许为null
 	{
 		return "${contextPath}/dashboardGlobalRes/" + action;
 	};
-
-	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
 	
-	po.element(".fileinput-button").fileupload(
+	po.element(".uploadFileWrapper").fileUpload(po.url("uploadFile"),
 	{
-		url : po.url("uploadFile"),
-		paramName : "file",
-		success : function(uploadResult, textStatus, jqXHR)
+		add: function(e, data)
 		{
-			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			po.elementOfName("filePath").val(uploadResult.filePath);
-			po.elementOfName("fileName").val(uploadResult.fileName);
-			po.elementOfName("savePath").val(uploadResult.fileName);
+			po.elementOfName("filePath").val("");
+			po.elementOfName("fileName").val("");
+			po.elementOfName("savePath").val("");
+		},
+		success: function(response)
+		{
+			po.elementOfName("filePath").val(response.filePath);
+			po.elementOfName("fileName").val(response.fileName);
+			po.elementOfName("savePath").val(response.fileName);
 		}
-	})
-	.bind('fileuploadadd', function (e, data)
-	{
-		po.elementOfName("filePath").val("");
-		po.elementOfName("fileName").val("");
-		po.elementOfName("savePath").val("");
-		po.form().validate().resetForm();
-		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	})
-	.bind('fileuploadprogressall', function (e, data)
-	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 	
 	$.validator.addMethod("uploadDashboardGlobalResFileRequired", function(value, element)

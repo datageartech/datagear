@@ -36,7 +36,7 @@
 		
 		<#if !readonly>
 		<div class="fileinput-wrapper row-wrapper">
-			<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
+			<div class="fileinput-button button"><@spring.message code='upload' /><input type="file"></div>
 			<div class="upload-file-info"></div>
 		</div>
 		</#if>
@@ -134,25 +134,17 @@
 		if(isAddOperation || po.element("#${pageId}-originalFileName").val() == "")
 			po.element("#${pageId}-uploadDownloadLink").hide();
 		
-		po.element(".fileinput-button").fileupload(
+		po.element(".fileinput-wrapper").fileUpload(uploadURL,
 		{
-			url : uploadURL,
-			paramName : "file",
-			success : function(uploadResult, textStatus, jqXHR)
+			add: function(e, data)
 			{
-				$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-				po.element("input[name='fileName']").val(uploadResult.fileName);
-				po.element("input[name='displayName']").val(uploadResult.displayName);
+				po.elementOfName("displayName").val("");
+			},
+			success: function(response)
+			{
+				po.elementOfName("fileName").val(response.fileName);
+				po.elementOfName("displayName").val(response.displayName);
 			}
-		})
-		.bind('fileuploadadd', function (e, data)
-		{
-			po.element("input[name='displayName']").val("");
-			$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-		})
-		.bind('fileuploadprogressall', function (e, data)
-		{
-			$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 		});
 		
 		po.element(".selectServerDirectoryBtn").click(function()

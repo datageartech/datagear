@@ -26,7 +26,7 @@
 				</div>
 				<div class="form-item-value">
 					<div class="driver-import-parent">
-						<div class="fileinput-button"><@spring.message code='select' /><input type="file" accept=".zip" class="ignore"></div>
+						<div class="fileinput-button button"><@spring.message code='select' /><input type="file" accept=".zip" class="ignore"></div>
 						<div class="upload-file-info"></div>
 					</div>
 				</div>
@@ -54,8 +54,6 @@
 	
 	po.driverEntityInfos = function(){ return this.element(".driver-entity-infos"); };
 
-	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
-	
 	po.url = function(action)
 	{
 		return "${contextPath}/driverEntity/" + action;
@@ -85,25 +83,13 @@
 			.appendTo($item);
 		}
 	};
-	
-	po.element(".fileinput-button").fileupload(
+
+	po.element(".driver-import-parent").fileUpload(po.url("uploadImportFile"),
 	{
-		url : po.url("uploadImportFile"),
-		paramName : "file",
-		success : function(serverDriverEntities, textStatus, jqXHR)
+		success: function(response)
 		{
-			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			po.renderDriverEntityInfos(serverDriverEntities);
+			po.renderDriverEntityInfos(response);
 		}
-	})
-	.bind('fileuploadadd', function (e, data)
-	{
-		po.form().validate().resetForm();
-		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	})
-	.bind('fileuploadprogressall', function (e, data)
-	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 	
 	$.validator.addMethod("importDriverEntityRequired", function(value, element)

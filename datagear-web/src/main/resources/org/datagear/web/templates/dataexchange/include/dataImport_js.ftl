@@ -49,8 +49,6 @@ dataExchange_js.ftl
 	
 	po.postBuildSubDataExchange = function(subDataExchange){};
 	
-	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
-	
 	po.renderFileNameColumn = function(fileName)
 	{
 		if(!fileName)
@@ -181,27 +179,13 @@ dataExchange_js.ftl
 	
 	po.initDataImportActions = function()
 	{
-		var $fileinputButton = po.element(".fileinput-button");
-		var uploadAction = $fileinputButton.attr("upload-action");
-		
-		po.element(".fileinput-button").fileupload(
+		var uploadAction = po.element(".fileinput-button").attr("upload-action");
+		po.element(".uploadFileWrapper").fileUpload("${contextPath}/dataexchange/" + po.schemaId +"/import/" + uploadAction,
 		{
-			url : "${contextPath}/dataexchange/" + po.schemaId +"/import/" + uploadAction,
-			paramName : "file",
-			success : function(serverFileInfos, textStatus, jqXHR)
+			success: function(response)
 			{
-				$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), true);
-				
-				po.addSubDataExchangesForFileInfos(serverFileInfos);
+				po.addSubDataExchangesForFileInfos(response);
 			}
-		})
-		.bind('fileuploadadd', function (e, data)
-		{
-			$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-		})
-		.bind('fileuploadprogressall', function (e, data)
-		{
-			$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 		});
 		
 		po.element(".table-delete-item-button").click(function()

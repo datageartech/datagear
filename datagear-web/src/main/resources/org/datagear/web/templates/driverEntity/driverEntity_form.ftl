@@ -45,7 +45,7 @@ readonly 是否只读操作，允许为null
 					<input type="text" name="driverFilePlaceholder" style="display:none;" />
 					<#if !readonly>
 					<div class="driver-upload-parent">
-						<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
+						<div class="fileinput-button button"><@spring.message code='upload' /><input type="file"></div>
 						<div class="upload-file-info"></div>
 					</div>
 					</#if>
@@ -93,7 +93,6 @@ readonly 是否只读操作，允许为null
 	po.initFormBtns();
 	
 	po.driverFiles = function(){ return this.element(".driver-files"); };
-	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
 	
 	po.url = function(action)
 	{
@@ -166,16 +165,17 @@ readonly 是否只读操作，允许为null
 	};
 	
 	<#if !readonly>
-	po.element(".fileinput-button").fileupload(
+	
+	po.element(".driver-upload-parent").fileUpload(po.url("uploadDriverFile"),
 	{
-		url : po.url("uploadDriverFile"),
-		paramName : "file",
-		success : function(response, textStatus, jqXHR)
+		add: function(e, data)
+		{
+			po.elementOfName("dashboardFileName").val("");
+		},
+		success: function(response)
 		{
 			var serverFileInfos = response.fileInfos;
 			var driverClassNames = response.driverClassNames;
-			
-			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), true);
 			
 			po.renderDriverFiles(serverFileInfos);
 			
@@ -183,17 +183,7 @@ readonly 是否只读操作，允许为null
 			
 			if(driverClassNames && driverClassNames.length > 0 && !$driverClassName.val())
 				$driverClassName.val(driverClassNames[0]);
-			
-			$.tipSuccess("<@spring.message code='uploadSuccess' />");
 		}
-	})
-	.bind('fileuploadadd', function (e, data)
-	{
-		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	})
-	.bind('fileuploadprogressall', function (e, data)
-	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 	
 	$.validator.addMethod("driverFileRequired", function(value, element)

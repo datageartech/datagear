@@ -170,11 +170,11 @@ readonly 是否只读操作，允许为null
 		<form action="#" method="POST">
 			<div class="panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.uploadResource' /></div>
 			<div class="panel-content">
-				<div class="content-item">
+				<div class="uploadResourceWrapper content-item">
 					<div class="label-wrapper">
 						<label><@spring.message code='dashboard.uploadResource.select' /></label>
 					</div>
-					<div class="fileinput-button ui-button ui-corner-all ui-widget">
+					<div class="fileinput-button button">
 						<@spring.message code='select' /><input type="file" class="ignore">
 					</div>
 					<div class="upload-file-info"></div>

@@ -99,7 +99,7 @@
 						{
 							var container=$(options.target ? options.target : document.body);
 							
-							var $dialog = $("<div id='dialog-"+new Date().getTime()+"' class='dialog-content-container'></div>").appendTo(container);
+							var $dialog = $("<div id='"+$.uid("dialog")+"' class='dialog-content-container'></div>").appendTo(container);
 							
 							if(options.pageParam)
 								$.pageParam($dialog, options.pageParam);
@@ -292,17 +292,18 @@
 		{
 			options = $.extend({ data : {}, target : ""}, options);
 			
-			var $form = $("#___post_on_form___");
-			if($form.length == 0)
+			var formId = ($.GLOBAL_POST_ON_FORM_ID || ($.GLOBAL_POST_ON_FORM_ID = $.uid("form")));
+			var form = $("#"+formId);
+			if(form.length == 0)
 			{
-				$form = $("<form />").attr("id", "___post_on_form___")
+				form = $("<form />").attr("id", formId)
 					.attr("method", "POST")
 					.css("width", "0px").css("height", "0px").appendTo(document.body);
 			}
 			else
-				$form.empty();
+				form.empty();
 			
-			$form.attr("action", url).attr("target", options.target);
+			form.attr("action", url).attr("target", options.target);
 			
 			if(options.data)
 			{
@@ -320,11 +321,11 @@
 					var name = decodeURIComponent(paramPair[0]);
 					var value = decodeURIComponent(paramPair[1]);
 	
-					$("<input type='hidden' />").attr("name", name).attr("value", value).appendTo($form);
+					$("<input type='hidden' />").attr("name", name).attr("value", value).appendTo(form);
 				}
 			}
 			
-			$form[0].submit();
+			form.submit();
 		},
 		
 		/**
@@ -355,16 +356,17 @@
 			options = (options || {});
 			options = $.extend({confirmText : "Confirm", cancelText : "Cancel", title : "Confirm"}, options);
 			
-			var $confirmDialog = $("#dialog-confirm");
+			var confirmId = ($.GLOBAL_CONFIRM_DIALOG_ID || ($.GLOBAL_CONFIRM_DIALOG_ID = $.uid("confirm")));
+			var confirmDialog = $("#"+confirmId);
 			
-			if($confirmDialog.length == 0)
+			if(confirmDialog.length == 0)
 			{
-				$confirmDialog = $("<div id='dialog-confirm' class='dialog-confirm' />").appendTo(document.body);
-				var $p = $("<p><span class='ui-icon ui-icon-alert'></span></p>").appendTo($confirmDialog);
+				confirmDialog = $("<div id='"+confirmId+"' class='dialog-confirm' />").appendTo(document.body);
+				var $p = $("<p><span class='ui-icon ui-icon-alert'></span></p>").appendTo(confirmDialog);
 				$("<div class='confirm-content' />").appendTo($p);
 			}
 			
-			$(".confirm-content", $confirmDialog).html(content);
+			$(".confirm-content", confirmDialog).html(content);
 			
 			var buttons={};
 			buttons[options.confirmText] = function()
@@ -382,7 +384,7 @@
 				$(this).dialog("close");
 	        };
 			
-			$confirmDialog.dialog(
+			confirmDialog.dialog(
 			{
 				resizable: false,
 				height: "auto",
@@ -475,7 +477,9 @@
 		{
 			content = "<div class='content'>" + content +"</div>";
 			
-			var tooltip = $(".global-tooltip", document.body);
+			var tooltipId = ($.GLOBAL_TIP_ID || ($.GLOBAL_TIP_ID = $.uid("tip")));
+			var tooltip = $("#"+tooltipId);
+			
 			if(tooltip.length > 0)
 				tooltip.tooltip("destroy").remove();
 			
@@ -487,8 +491,6 @@
 			var customTooltipParent = $(".tooltip-parent");
 			if(customTooltipParent.length > 0)
 				tooltipParent = customTooltipParent[0];
-			
-			var tooltipId = $.uid("tooltip");
 			
 			tooltip = $("<div class='global-tooltip' style='display:none;' title=''>").attr("id", tooltipId)
 			.prependTo(tooltipParent).tooltip(
@@ -2638,13 +2640,15 @@
 
 	$.handleAjaxOperationMessage = function(event, jqXHR, ajaxSettings, data, thrownError)
 	{
+		var ompId = ($.GLOBAL_OPT_MSG_ID || ($.GLOBAL_OPT_MSG_ID = $.uid("opt")));
+		
 		if(!window._showAjaxOperationMessageDetail)
 		{
 			window._showAjaxOperationMessageDetail = function()
 			{
 				$.closeTip();
 				
-				var $omp = $("#__operationMessageParent");
+				var $omp = $("#"+$.GLOBAL_OPT_MSG_ID);
 				
 				var isSuccessMessage = ("true" == $omp.attr("success"));
 				
@@ -2681,9 +2685,9 @@
 			};
 		}
 		
-		var $omp = $("#__operationMessageParent");
+		var $omp = $("#"+ompId);
 		if($omp.length == 0)
-			$omp = $("<div id='__operationMessageParent' style='display:none;' />").appendTo(document.body);
+			$omp = $("<div id='"+ompId+"' style='display:none;' />").appendTo(document.body);
 		
 		var isSuccessResponse = (jqXHR.status == 200);
 		var hasResponseMessage = false;
@@ -3093,6 +3097,60 @@
 		{
 			options = $.extend({ jsonSubmit: true }, options);
 			$(this).ajaxSubmit(options);
+		},
+		
+		/**
+		 * 上传文件<div>组件，<div>中应包含<div class="fileinput-button"><input type="file"></div>，可选包含".upload-progess"显示上传进度。
+		 * 
+		 * @param url 上传URL
+		 * @param options 选项
+		 *				{
+		 *				  //上传文件参数名
+		 *				  paramName: "file",
+		 *				  //添加文件回调函数
+		 *				  add: function(e, data){},
+		 *				  //上传完成回调函数
+		 *				  success: function(response, textStatus, jqXHR){},
+		 *				  //上传按钮元素
+		 *				  buttonSelector: ".fileinput-button",
+		 *				  //进度条元素
+		 *				  progessSelector: ".upload-file-info"
+		 *				}
+		 */
+		fileUpload: function(url, options)
+		{
+			options = $.extend(
+			{
+				paramName: "file",
+				add: function(e, data){},
+				success: function(response, textStatus, jqXHR){},
+				buttonSelector: ".fileinput-button",
+				progessSelector: ".upload-file-info"
+			},
+			options);
+			
+			var btn = $(options.buttonSelector, this);
+			var progessEle = $(options.progessSelector, this);
+			
+			btn.fileupload(
+			{
+				url : url,
+				paramName : options.paramName,
+				success : function(response, textStatus, jqXHR)
+				{
+					options.success(response, textStatus, jqXHR);
+					$.fileuploadsuccessHandlerForUploadInfo(progessEle, false);
+				}
+			})
+			.bind('fileuploadadd', function (e, data)
+			{
+				options.add(e, data);
+				$.fileuploadaddHandlerForUploadInfo(e, data, progessEle);
+			})
+			.bind('fileuploadprogressall', function (e, data)
+			{
+				$.fileuploadprogressallHandlerForUploadInfo(e, data, progessEle);
+			});
 		},
 		
 		/**

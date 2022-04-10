@@ -24,8 +24,8 @@
 				<div class="form-item-label">
 					<label><@spring.message code='chartPlugin.upload.selectFile' /></label>
 				</div>
-				<div class="form-item-value">
-					<div class="fileinput-button ui-button ui-corner-all ui-widget" title="<@spring.message code='chartPlugin.upload.desc' />">
+				<div class="fileUploadWrapper form-item-value">
+					<div class="fileinput-button button" title="<@spring.message code='chartPlugin.upload.desc' />">
 						<@spring.message code='select' /><input type="file" accept=".zip" class="ignore">
 					</div>
 					<div class="upload-file-info"></div>
@@ -59,8 +59,6 @@
 
 	po.chartPluginInfos = function(){ return this.element(".chart-plugin-infos"); };
 
-	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
-	
 	po.renderChartPluginInfos = function(uploadResult)
 	{
 		po.elementOfName("pluginFileName").val(uploadResult.pluginFileName);
@@ -87,25 +85,16 @@
 		}
 	};
 	
-	po.element(".fileinput-button").fileupload(
+	po.element(".fileUploadWrapper").fileUpload(po.url("uploadFile"),
 	{
-		url : po.url("uploadFile"),
-		paramName : "file",
-		success : function(uploadResult, textStatus, jqXHR)
+		add: function(e, data)
 		{
-			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			po.renderChartPluginInfos(uploadResult);
+			po.elementOfName("pluginFileName").val("");
+		},
+		success: function(response)
+		{
+			po.renderChartPluginInfos(response);
 		}
-	})
-	.bind('fileuploadadd', function (e, data)
-	{
-		po.elementOfName("pluginFileName").val("");
-		po.form().validate().resetForm();
-		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	})
-	.bind('fileuploadprogressall', function (e, data)
-	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 	
 	$.validator.addMethod("uploadChartPluginFileRequired", function(value, element)

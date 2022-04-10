@@ -246,33 +246,19 @@
 			return false;
 		});
 		
-		po.element(".fileinput-button", uploadResPanel).fileupload(
+		po.element(".uploadResourceWrapper").fileUpload(po.url("uploadResourceFile"),
 		{
-			url : po.url("uploadResourceFile"),
-			paramName : "file",
-			success : function(uploadResult, textStatus, jqXHR)
+			success: function(response)
 			{
 				var parent = po.getSelectedResourceName();
 				if(!po.isResourceNameDirectroy(parent))
 					parent = "";
-
+				
 				var panel = po.element(".upload-resource-panel");
 				
-				po.element("input[name='uploadResName']", panel).val(parent + uploadResult.fileName);
-				po.element("input[name='uploadResFilePath']", panel).val(uploadResult.uploadFilePath);
-				
-				$.fileuploadsuccessHandlerForUploadInfo(po.element(".upload-file-info", panel), false);
+				po.element("input[name='uploadResName']", panel).val(parent + response.fileName);
+				po.element("input[name='uploadResFilePath']", panel).val(response.uploadFilePath);
 			}
-		})
-		.bind('fileuploadadd', function (e, data)
-		{
-			var panel = po.element(".upload-resource-panel");
-			$.fileuploadaddHandlerForUploadInfo(e, data, po.element(".upload-file-info", panel));
-		})
-		.bind('fileuploadprogressall', function (e, data)
-		{
-			var panel = po.element(".upload-resource-panel");
-			$.fileuploadprogressallHandlerForUploadInfo(e, data, po.element(".upload-file-info", panel));
 		});
 		
 		po.elementResListLocal(".resource-more-button-wrapper").hover(
