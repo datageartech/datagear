@@ -16,7 +16,7 @@
 <body>
 <#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-uploadChartPlugin">
-	<form id="${pageId}form" action="${contextPath}/chartPlugin/saveUpload" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/chartPlugin/saveUpload" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="pluginFileName" value="" />

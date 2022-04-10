@@ -52,7 +52,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 	<div class="head">
 	</div>
 	<div class="content">
-		<form id="${pageId}form" method="POST">
+		<form id="${pageId}-form" method="POST">
 		</form>
 	</div>
 	<div class="foot">

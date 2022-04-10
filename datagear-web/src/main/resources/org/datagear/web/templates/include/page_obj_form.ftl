@@ -19,7 +19,7 @@ page_obj.ftl
 	
 	po.form = function()
 	{
-		return this.elementOfId("${pageId}form");
+		return this.elementOfId("${pageId}-form");
 	};
 	
 	po.initFormBtns = function(parent)

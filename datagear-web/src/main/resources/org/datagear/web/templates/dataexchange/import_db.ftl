@@ -31,7 +31,7 @@ Schema schema 数据库，不允许为null
 	<div class="head">
 	</div>
 	<div class="content">
-		<form id="${pageId}form" action="#" method="POST">
+		<form id="${pageId}-form" action="#" method="POST">
 			<div class="steps">
 				<h3>选择数据类型</h3>
 				<section>
@@ -59,7 +59,7 @@ Schema schema 数据库，不允许为null
 (function(po)
 {
 	po.schemaId = "${schema.id}";
-	po.form = po.element("#${pageId}form");
+	po.form = po.element("#${pageId}-form");
 	
 	po.element(".importDataType").checkboxradiogroup();
 	

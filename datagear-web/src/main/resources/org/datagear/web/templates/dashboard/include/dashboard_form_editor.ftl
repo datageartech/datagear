@@ -101,7 +101,7 @@
 			return false;
 		});
 		po.element(".style-tabs", veStyleForm).tabs();
-		po.elementOfName("color'", veStyleForm).listpalllet(
+		po.elementOfName("color", veStyleForm).listpalllet(
 		{
 			indicator: po.element(".color-indicator", veStyleForm),
 			container: po.elementOfName("color", veStyleForm).parent(),

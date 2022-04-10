@@ -40,7 +40,7 @@ ${detectNewVersionScript?no_esc}
 				<div class="step ui-widget ui-widget-content ui-corner-all <@stepCss currentStep=step myStepIndex=3 />"><@spring.message code='resetPassword.step.setNewPassword' /></div>
 				<div class="step ui-widget ui-widget-content ui-corner-all <@stepCss currentStep=step myStepIndex=4 />"><@spring.message code='resetPassword.step.finish' /></div>
 			</div>
-			<form id="${pageId}form" action="${contextPath}/resetPassword/${step.action}">
+			<form id="${pageId}-form" action="${contextPath}/resetPassword/${step.action}">
 				<div class="ui-widget ui-widget-content ui-corner-all form-content">
 					<#if step.step == 1>
 					<div class="form-item">

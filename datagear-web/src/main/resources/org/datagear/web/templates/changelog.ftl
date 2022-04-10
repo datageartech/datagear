@@ -22,7 +22,7 @@
 	</div>
 	</#if>
 	<div class="changelogs">
-		<form id="${pageId}form">
+		<form id="${pageId}-form">
 			<div class="form-content">
 				<#list versionChangelogs as versionChangelog>
 				<div class="form-item form-item-version">

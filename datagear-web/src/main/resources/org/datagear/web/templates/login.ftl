@@ -29,7 +29,7 @@ ${detectNewVersionScript?no_esc}
 		</div>
 	</div>
 	<div class="page-form page-form-login">
-		<form id="${pageId}form" action="${contextPath}/login/doLogin" method="POST" class="display-block">
+		<form id="${pageId}-form" action="${contextPath}/login/doLogin" method="POST" class="display-block">
 			<div class="form-head"></div>
 			<div class="form-content">
 				<div class="form-item">

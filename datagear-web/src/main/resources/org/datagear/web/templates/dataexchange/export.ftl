@@ -31,7 +31,7 @@ Schema schema 数据库，不允许为null
 	<div class="head">
 	</div>
 	<div class="content">
-		<form id="${pageId}form" action="" method="POST">
+		<form id="${pageId}-form" action="" method="POST">
 			<div class="init-sqls" style="display:none;">
 				<#if initSqls??>
 				<#list initSqls as initSql>

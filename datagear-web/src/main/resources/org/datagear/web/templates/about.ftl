@@ -17,7 +17,7 @@
 <body>
 <#include "include/page_obj.ftl" >
 <div id="${pageId}" class="page page-about">
-	<form id="${pageId}form">
+	<form id="${pageId}-form">
 		<div class="form-content">
 			<div class="form-item">
 				<div class="form-item-label">

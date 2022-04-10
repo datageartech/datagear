@@ -26,7 +26,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-excel">
-	<form id="${pageId}form" action="${contextPath}/dataSet/${formAction}" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/dataSet/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">

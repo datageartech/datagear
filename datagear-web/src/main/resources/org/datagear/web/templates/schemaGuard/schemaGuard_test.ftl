@@ -21,7 +21,7 @@ formAction 表单提交action，允许为null
 <body>
 <#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-schemaGuardTest">
-	<form id="${pageId}form" action="${contextPath}/schemaGuard/${formAction}" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/schemaGuard/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<div class="form-item">

@@ -16,7 +16,7 @@
 <body>
 <#include "include/page_obj.ftl">
 <div id="${pageId}" class="page-form page-form-schemaUrlBuilder">
-	<form id="${pageId}form" action="${contextPath}/schemaUrlBuilder/saveScriptCode" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/schemaUrlBuilder/saveScriptCode" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<div class="form-item">

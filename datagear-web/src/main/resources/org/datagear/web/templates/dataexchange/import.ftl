@@ -31,7 +31,7 @@ Schema schema 数据库，不允许为null
 	<div class="head">
 	</div>
 	<div class="content">
-		<form id="${pageId}form" action="" method="POST">
+		<form id="${pageId}-form" action="" method="POST">
 			<div class="form-head">
 				<@spring.message code='dataImport.selectDataType' />
 			</div>

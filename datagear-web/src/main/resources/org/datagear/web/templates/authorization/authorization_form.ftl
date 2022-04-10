@@ -31,7 +31,7 @@ readonly 是否只读操作，允许为null
 <body>
 <#include "../include/page_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-authorization">
-	<form id="${pageId}form" action="${contextPath}/authorization/${resourceMeta.resourceType}/${resource}/${formAction}" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/authorization/${resourceMeta.resourceType}/${resource}/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(authorization.id)!''}" />
