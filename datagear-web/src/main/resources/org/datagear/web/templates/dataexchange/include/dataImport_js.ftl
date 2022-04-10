@@ -153,8 +153,8 @@ dataExchange_js.ftl
 	{
 		po.initFormBtns();
 		po.element("#${pageId}-exceptionResolve").checkboxradiogroup();
-		po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
-		po.element("select[name='zipFileNameEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
+		po.elementOfName("fileEncoding").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
+		po.elementOfName("zipFileNameEncoding").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
 		
 		po.element("#${pageId}-exceptionResolve-0").click();
 	};

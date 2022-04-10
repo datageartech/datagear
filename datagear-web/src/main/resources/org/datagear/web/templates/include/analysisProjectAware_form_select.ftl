@@ -31,8 +31,8 @@
 {
 	po.initAnalysisProject = function(id, name)
 	{
-		po.element("input[name='analysisProject.id']").attr("value", id || "");
-		po.element("input[name='analysisProject.name']").attr("value", name || "");
+		po.elementOfName("analysisProject.id").attr("value", id || "");
+		po.elementOfName("analysisProject.name").attr("value", name || "");
 		
 		po.element(".analysisProjectActionSelect").menu(
 		{
@@ -50,8 +50,8 @@
 						{
 							select : function(analysisProject)
 							{
-								po.element("input[name='analysisProject.id']").val(analysisProject.id);
-								po.element("input[name='analysisProject.name']").val(analysisProject.name);
+								po.elementOfName("analysisProject.id").val(analysisProject.id);
+								po.elementOfName("analysisProject.name").val(analysisProject.name);
 							}
 						}
 					};
@@ -62,8 +62,8 @@
 				}
 				else if("del" == action)
 	    		{
-					po.element("input[name='analysisProject.id']").val("");
-					po.element("input[name='analysisProject.name']").val("");
+					po.elementOfName("analysisProject.id").val("");
+					po.elementOfName("analysisProject.name").val("");
 	    		}
 	    	}
 		});

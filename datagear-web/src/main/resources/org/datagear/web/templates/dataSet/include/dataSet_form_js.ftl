@@ -41,7 +41,7 @@ po.previewOptions.url = "...";
 	
 	po.isMutableModel = function()
 	{
-		return (po.element("input[name='mutableModel']:checked").val() == "true");
+		return (po.element("[name='mutableModel']:checked").val() == "true");
 	};
 	
 	po.isPreviewValueModified = function()
@@ -699,10 +699,10 @@ po.previewOptions.url = "...";
 	{
 		var df =
 		{
-			"dateFormat": po.element("input[name='dataFormat.dateFormat']").val(),
-			"timeFormat": po.element("input[name='dataFormat.timeFormat']").val(),
-			"timestampFormat": po.element("input[name='dataFormat.timestampFormat']").val(),
-			"numberFormat": po.element("input[name='dataFormat.numberFormat']").val()
+			"dateFormat": po.elementOfName("dataFormat.dateFormat").val(),
+			"timeFormat": po.elementOfName("dataFormat.timeFormat").val(),
+			"timestampFormat": po.elementOfName("dataFormat.timestampFormat").val(),
+			"numberFormat": po.elementOfName("dataFormat.numberFormat").val()
 		};
 		
 		return df;
@@ -840,8 +840,8 @@ po.previewOptions.url = "...";
 			if(po.previewOptions.beforePreview() == false)
 				return;
 			
-			po.previewOptions.data.dataSet.id = po.element("input[name='id']").val();
-			po.previewOptions.data.dataSet.name = po.element("input[name='name']").val();
+			po.previewOptions.data.dataSet.id = po.elementOfName("id").val();
+			po.previewOptions.data.dataSet.name = po.elementOfName("name").val();
 			
 			if(po.hasFormDataSetParam())
 			{

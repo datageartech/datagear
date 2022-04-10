@@ -48,10 +48,10 @@ po.conditionAutocompleteSource = undefined;
 {
 	po.searchForm = function(){ return this.element("#${pageId}-searchForm"); };
 	po.likeSwitchIcon = function(){ return this.element(".like-switch-icon", this.searchForm()); };
-	po.notLikeInput = function(){ return this.element("input[name='notLike']", this.searchForm()); };
-	po.keywordInput = function(){ return this.element("input[name='keyword']", this.searchForm()); };
+	po.notLikeInput = function(){ return this.elementOfName("notLike", this.searchForm()); };
+	po.keywordInput = function(){ return this.elementOfName("keyword", this.searchForm()); };
 	po.conditionPanel = function(){ return this.element(".condition-panel", this.searchForm()); };
-	po.conditionTextarea = function(){ return this.element("textarea[name='condition']", this.searchForm()); };
+	po.conditionTextarea = function(){ return this.elementOfName("condition", this.searchForm()); };
 	po.conditionIconParent = function(){ return this.element(".search-condition-icon-parent", this.searchForm()); };
 	po.conditionIcon = function(){ return this.element(".search-condition-icon", this.searchForm()); };
 	po.conditionIconTip = function(){ return this.element(".search-condition-icon-tip", this.searchForm()); };

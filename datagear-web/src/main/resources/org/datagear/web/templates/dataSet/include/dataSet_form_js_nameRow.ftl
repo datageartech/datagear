@@ -26,11 +26,11 @@ page_obj.ftl
 		if(minAssignValue == null)
 			minAssignValue = 1;
 		
-		po.element("input[name='nameRowRadio']").on("change", function()
+		po.elementOfName("nameRowRadio").on("change", function()
 		{
 			var radioVal = $(this).val();
-			var $nameRow = po.element("input[name='nameRow']");
-			var $nameRowText = po.element("input[name='nameRowText']");
+			var $nameRow = po.elementOfName("nameRow");
+			var $nameRowText = po.elementOfName("nameRowText");
 			
 			if(radioVal == (noneValue+""))
 			{
@@ -49,12 +49,12 @@ page_obj.ftl
 		
 		po.nameRowValue = function(value)
 		{
-			var $nameRow = po.element("input[name='nameRow']");
-			var $nameRowText = po.element("input[name='nameRowText']");
+			var $nameRow = po.elementOfName("nameRow");
+			var $nameRowText = po.elementOfName("nameRowText");
 			
 			if(value === undefined)
 			{
-				var radioVal = po.element("input[name='nameRowRadio']:checked").val();
+				var radioVal = po.element("[name='nameRowRadio']:checked").val();
 				
 				if(radioVal == (noneValue+""))
 					return $nameRow.val();
@@ -66,7 +66,7 @@ page_obj.ftl
 				$nameRow.val(value);
 				$nameRowText.val(value);
 				
-				po.element("input[name='nameRowRadio'][value='"+(value >= minAssignValue ? minAssignValue : noneValue)+"']")
+				po.element("[name='nameRowRadio'][value='"+(value >= minAssignValue ? minAssignValue : noneValue)+"']")
 					.attr("checked", "checked").change();
 			}
 		};

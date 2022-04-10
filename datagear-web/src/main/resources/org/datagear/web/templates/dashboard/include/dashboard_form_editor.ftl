@@ -32,7 +32,7 @@
 				var dashboardEditor = po.visualDashboardEditor(tabPane);
 				if(dashboardEditor)
 				{
-					var text = po.element("textarea[name='content']", veContentPanel).val();
+					var text = po.elementOfName("content", veContentPanel).val();
 					dashboardEditor.setElementText(text);
 				}
 			}
@@ -101,24 +101,24 @@
 			return false;
 		});
 		po.element(".style-tabs", veStyleForm).tabs();
-		po.element("input[name='color']", veStyleForm).listpalllet(
+		po.elementOfName("color'", veStyleForm).listpalllet(
 		{
 			indicator: po.element(".color-indicator", veStyleForm),
-			container: po.element("input[name='color']", veStyleForm).parent(),
+			container: po.elementOfName("color", veStyleForm).parent(),
 			position: "fixed",
 			autoCloseContext: po.element()
 		});
-		po.element("input[name='background-color']", veStyleForm).listpalllet(
+		po.elementOfName("background-color", veStyleForm).listpalllet(
 		{
 			indicator: po.element(".bgcolor-indicator", veStyleForm),
-			container: po.element("input[name='background-color']", veStyleForm).parent(),
+			container: po.elementOfName("background-color", veStyleForm).parent(),
 			position: "fixed",
 			autoCloseContext: po.element()
 		});
-		po.element("input[name='border-color']", veStyleForm).listpalllet(
+		po.elementOfName("border-color", veStyleForm).listpalllet(
 		{
 			indicator: po.element(".border-color-indicator", veStyleForm),
-			container: po.element("input[name='border-color']", veStyleForm).parent(),
+			container: po.elementOfName("border-color", veStyleForm).parent(),
 			position: "fixed",
 			autoCloseContext: po.element()
 		});
@@ -153,24 +153,24 @@
 			
 			return false;
 		});
-		po.element("input[name='color']", veChartThemeForm).listpalllet(
+		po.elementOfName("color", veChartThemeForm).listpalllet(
 		{
 			indicator: po.element(".color-indicator", veChartThemeForm),
-			container: po.element("input[name='color']", veChartThemeForm).parent(),
+			container: po.elementOfName("color", veChartThemeForm).parent(),
 			position: "fixed",
 			autoCloseContext: po.element()
 		});
-		po.element("input[name='backgroundColor']", veChartThemeForm).listpalllet(
+		po.elementOfName("backgroundColor", veChartThemeForm).listpalllet(
 		{
 			indicator: po.element(".bgcolor-indicator", veChartThemeForm),
-			container: po.element("input[name='backgroundColor']", veChartThemeForm).parent(),
+			container: po.elementOfName("backgroundColor", veChartThemeForm).parent(),
 			position: "fixed",
 			autoCloseContext: po.element()
 		});
-		po.element("input[name='actualBackgroundColor']", veChartThemeForm).listpalllet(
+		po.elementOfName("actualBackgroundColor", veChartThemeForm).listpalllet(
 		{
 			indicator: po.element(".actbgcolor-indicator", veChartThemeForm),
-			container: po.element("input[name='actualBackgroundColor']", veChartThemeForm).parent(),
+			container: po.elementOfName("actualBackgroundColor", veChartThemeForm).parent(),
 			position: "fixed",
 			autoCloseContext: po.element()
 		});
@@ -1423,7 +1423,7 @@
 						var panel = po.element(".veditor-content-panel");
 						panel.show().position({my: "right top", at: "right bottom", of : editorOptWrapper});
 						po.resizeVisualEditorPanel(tabPane, panel);
-						po.element("textarea[name='content']", panel).val(dashboardEditor.getElementText()).focus();
+						po.elementOfName("content", panel).val(dashboardEditor.getElementText()).focus();
 					}
 					else if(veOperation == "editEleAttr")
 					{
@@ -1819,7 +1819,7 @@
 			+"</div>").appendTo(wrapper);
 		
 		var inputItem = po.element("#"+id, wrapper);
-		po.element("input[name='graphColors[]']", inputItem).listpalllet(
+		po.elementOfName("graphColors[]", inputItem).listpalllet(
 		{
 			indicator: po.element(".listpallet-indicator", inputItem),
 			container: inputItem,
@@ -1837,7 +1837,7 @@
 			+"</div>").appendTo(wrapper);
 		
 		var inputItem = po.element("#"+id, wrapper);
-		po.element("input[name='graphRangeColors[]']", inputItem).listpalllet(
+		po.elementOfName("graphRangeColors[]", inputItem).listpalllet(
 		{
 			indicator: po.element(".listpallet-indicator", inputItem),
 			container: inputItem,

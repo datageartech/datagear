@@ -233,11 +233,11 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		po.element(".page-status-aware-show."+status+"-status-show").show();
 		po.element(".page-status-aware-enable."+status+"-status-enable").removeClass("ui-state-disabled");
 		
-		var $zfne = po.element("select[name='zipFileNameEncoding']");
+		var $zfne = po.elementOfName("zipFileNameEncoding");
 		
 		if("edit" == status)
 		{
-			po.element("select[name='fileEncoding']").selectmenu("enable");
+			po.elementOfName("fileEncoding").selectmenu("enable");
 			
 			if($zfne.length > 0)
 				$zfne.selectmenu("enable");
@@ -246,7 +246,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		}
 		else
 		{
-			po.element("select[name='fileEncoding']").selectmenu("disable");
+			po.elementOfName("fileEncoding").selectmenu("disable");
 
 			if($zfne.length > 0)
 				$zfne.selectmenu("disable");
@@ -464,7 +464,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		po.element("#${pageId}-binaryFormat").controlgroup();
 		po.element(".binaryFormatSetButton").click(function()
 		{
-			po.element("input[name='dataFormat.binaryFormat']").val($(this).attr("value"));
+			po.elementOfName("dataFormat.binaryFormat").val($(this).attr("value"));
 		});
 	};
 	

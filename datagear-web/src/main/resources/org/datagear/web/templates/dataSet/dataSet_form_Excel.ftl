@@ -154,7 +154,7 @@ readonly 是否只读操作，允许为null
 		dataSet.nameRow = po.nameRowValue();
 		dataSet.dataRowExp = po.elementOfName("dataRowExp").val();
 		dataSet.dataColumnExp = po.elementOfName("dataColumnExp").val();
-		dataSet.forceXls = po.element("input[name='forceXls']:checked").val();
+		dataSet.forceXls = po.element("[name='forceXls']:checked").val();
 		
 		po.previewOptions.data.originalFileName = po.elementOfId("${pageId}-originalFileName").val();
 	};
@@ -175,7 +175,7 @@ readonly 是否只读操作，允许为null
 		var nameRow = po.nameRowValue();
 		var dataRowExp = po.elementOfName("dataRowExp").val();
 		var dataColumnExp = po.elementOfName("dataColumnExp").val();
-		var forceXls = po.element("input[name='forceXls']:checked").val();
+		var forceXls = po.element("[name='forceXls']:checked").val();
 		
 		var pd = po.previewOptions.data.dataSet;
 		var dataSetResDirectory = (pd.dataSetResDirectory || {});

@@ -77,7 +77,7 @@ preview 是否是预览请求，允许为null
 {
 	po.initFormBtns();
 	
-	po.dbTypeSelect = po.element("select[name='dbType']");
+	po.dbTypeSelect = po.elementOfName("dbType");
 	
 	po.initUrl = "${(url!'')?js_string?no_esc}";
 	
@@ -192,7 +192,7 @@ preview 是否是预览请求，允许为null
 			var inputValue = value[name];
 			
 			if(inputValue)
-				po.element("input[name='"+name+"']").val(inputValue);
+				po.elementOfName(name).val(inputValue);
 		}
 	};
 	

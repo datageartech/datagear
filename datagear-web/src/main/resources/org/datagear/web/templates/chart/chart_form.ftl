@@ -273,7 +273,7 @@ readonly 是否只读操作，允许为null
 	po.updateResultDataFormatPanelEnable = function(enable)
 	{
 		if(enable == null)
-			enable = ("true" == po.element("input[name='resultDataFormatEnable']:checked").val());
+			enable = ("true" == po.element("[name='resultDataFormatEnable']:checked").val());
 		
 		var enableMethod = (enable ? "enable" : "disable");
 		
@@ -356,7 +356,7 @@ readonly 是否只读操作，允许为null
 	{
 		if(value == undefined)
 		{
-			var radioVal = po.element("input[name='updateIntervalRadio']:checked").val();
+			var radioVal = po.element("[name='updateIntervalRadio']:checked").val();
 			
 			if(radioVal == "2")
 				return parseInt(po.elementOfName("updateInterval").val());
@@ -376,7 +376,7 @@ readonly 是否只读操作，允许为null
 			else
 				radioVal = "2";
 			
-			po.element("input[name='updateIntervalRadio'][value='"+radioVal+"']").attr("checked", "checked").change();
+			po.element("[name='updateIntervalRadio'][value='"+radioVal+"']").attr("checked", "checked").change();
 		}
 	};
 	

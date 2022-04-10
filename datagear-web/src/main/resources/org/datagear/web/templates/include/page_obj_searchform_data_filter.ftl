@@ -39,7 +39,7 @@ page_obj.ftl
 		
 		var param =
 		{
-			"keyword" : $.trim(po.element("input[name='keyword']", $form).val()),
+			"keyword" : $.trim(po.elementOfName("keyword", $form).val()),
 			"${_ssf_AbstractController.DATA_FILTER_PARAM}": po.element("#${pageId}-dataFilter", $form).val()
 		};
 		

@@ -1739,7 +1739,7 @@ readonly 是否只读操作，允许为null
 	
 	po.getDashboardId = function()
 	{
-		return  po.element("input[name='id']").val();
+		return  po.elementOfName("id").val();
 	};
 
 	po.checkDashboardUnSaved = function(tip)

@@ -143,7 +143,7 @@ Schema schema 数据库，不允许为null
 	{
 		if(currentIndex == 1)
 		{
-			var visible = po.element("input[name='exportOption.jsonDataFormat']:checked").val() == "TABLE_OBJECT";
+			var visible = po.element("[name='exportOption.jsonDataFormat']:checked").val() == "TABLE_OBJECT";
 			po.getSubDataExchangeDataTable().column(2).visible(visible, false);
 		}
 		

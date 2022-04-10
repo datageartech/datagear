@@ -195,7 +195,7 @@
 		addResPanel.draggable({ handle : ".panel-head" });
 		po.element("form", addResPanel).submit(function()
 		{
-			var name = po.element("input[name='addResName']", this).val();
+			var name = po.elementOfName("addResName", this).val();
 			if(!name)
 				return false;
 			
@@ -229,8 +229,8 @@
 			var panel = po.element(".upload-resource-panel");
 			
 			var id = po.getDashboardId();
-			var resourceName = po.element("input[name='uploadResName']", panel).val();
-			var resourceFilePath = po.element("input[name='uploadResFilePath']", panel).val();
+			var resourceName = po.elementOfName("uploadResName", panel).val();
+			var resourceFilePath = po.elementOfName("uploadResFilePath", panel).val();
 			
 			if(!id || !resourceName || !resourceFilePath)
 				return false;
@@ -256,8 +256,8 @@
 				
 				var panel = po.element(".upload-resource-panel");
 				
-				po.element("input[name='uploadResName']", panel).val(parent + response.fileName);
-				po.element("input[name='uploadResFilePath']", panel).val(response.uploadFilePath);
+				po.elementOfName("uploadResName", panel).val(parent + response.fileName);
+				po.elementOfName("uploadResFilePath", panel).val(response.uploadFilePath);
 			}
 		});
 		
@@ -281,7 +281,7 @@
 			
 			panel.show()
 				.position({ my : "right top", at : "right bottom", of : this});
-			po.element("input[name='addResName']", panel).val(initVal).focus();
+			po.elementOfName("addResName", panel).val(initVal).focus();
 		});
 		
 		po.elementResListLocal(".editResBtn").click(function()
@@ -332,8 +332,8 @@
 			
 			var panel = po.element(".upload-resource-panel");
 			
-			po.element("input[name='uploadResName']", panel).val("");
-			po.element("input[name='uploadResFilePath']", panel).val("");
+			po.elementOfName("uploadResName", panel).val("");
+			po.elementOfName("uploadResFilePath", panel).val("");
 			po.element(".upload-file-info", panel).text("");
 			
 			panel.show()

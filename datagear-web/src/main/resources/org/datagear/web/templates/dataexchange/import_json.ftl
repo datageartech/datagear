@@ -166,7 +166,7 @@ Schema schema 数据库，不允许为null
 	
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
-		var isRowArray = po.element("input[name='importOption.jsonDataFormat']:checked").val() != "TABLE_OBJECT";
+		var isRowArray = po.element("[name='importOption.jsonDataFormat']:checked").val() != "TABLE_OBJECT";
 		
 		if(isRowArray)
 			subDataExchange.dependentNumber = "<@spring.message code='dataImport.dependentNumber.auto' />";
@@ -185,10 +185,10 @@ Schema schema 数据库，不允许为null
 	{
 		if(currentIndex == 1)
 		{
-			var visible = po.element("input[name='importOption.jsonDataFormat']:checked").val() != "TABLE_OBJECT";
+			var visible = po.element("[name='importOption.jsonDataFormat']:checked").val() != "TABLE_OBJECT";
 			po.getSubDataExchangeDataTable().column(4).visible(visible, false);
 			
-			po.element("input[name='dependentNumbers']").each(function()
+			po.elementOfName("dependentNumbers").each(function()
 			{
 				var $this = $(this);
 				

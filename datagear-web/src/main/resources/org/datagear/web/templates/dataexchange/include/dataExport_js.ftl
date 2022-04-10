@@ -221,7 +221,7 @@ dataExchange_js.ftl
 					po.addAllTable();
 			}
 		});
-		po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
+		po.elementOfName("fileEncoding").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
 		po.element("#${pageId}-add-group").controlgroup();
 		
 		po.element("#${pageId}-nullForIllegalColumnValue-1").click();

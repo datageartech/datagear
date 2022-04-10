@@ -83,18 +83,18 @@
 	
 	po.fileSourceTypeValue = function()
 	{
-		return po.element("input[name='fileSourceType']:checked").val();
+		return po.element("[name='fileSourceType']:checked").val();
 	};
 	
 	po.isFileSourceTypeUpload = function(fileSourceType)
 	{
-		var value = (fileSourceType === undefined ? po.element("input[name='fileSourceType']:checked").val() : fileSourceType);
+		var value = (fileSourceType === undefined ? po.element("[name='fileSourceType']:checked").val() : fileSourceType);
 		return value == "${dsffiDirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD}";
 	};
 	
 	po.isFileSourceTypeServer = function(fileSourceType)
 	{
-		var value = (fileSourceType === undefined ? po.element("input[name='fileSourceType']:checked").val() : fileSourceType);
+		var value = (fileSourceType === undefined ? po.element("[name='fileSourceType']:checked").val() : fileSourceType);
 		return value == "${dsffiDirectoryFileDataSetEntity.FILE_SOURCE_TYPE_SERVER}";
 	};
 	
@@ -105,7 +105,7 @@
 		
 		po.element(".fileSourceType-radios").controlgroup();
 		
-		po.element("input[name='fileSourceType']").on("change", function()
+		po.elementOfName("fileSourceType").on("change", function()
 		{
 			var radioVal = $(this).val();
 			var $upload = po.element(".upload-file-input-wrapper");
@@ -125,7 +125,7 @@
 			}
 		});
 		
-		po.element("input[name='fileSourceType']").each(function()
+		po.elementOfName("fileSourceType").each(function()
 		{
 			if($(this).val() == fileSourceType)
 				$(this).attr("checked", "checked").change();
@@ -155,8 +155,8 @@
 				{
 					select : function(dataSetResDirectory)
 					{
-						po.element("input[name='dataSetResDirectory.id']").val(dataSetResDirectory.id);
-						po.element("input[name='dataSetResDirectory.directory']").val(dataSetResDirectory.directory);
+						po.elementOfName("dataSetResDirectory.id").val(dataSetResDirectory.id);
+						po.elementOfName("dataSetResDirectory.directory").val(dataSetResDirectory.directory);
 					}
 				}
 			};
@@ -172,7 +172,7 @@
 			
 			if(panel.is(":hidden"))
 			{
-				var directoryId = po.element("input[name='dataSetResDirectory.id']").val();
+				var directoryId = po.elementOfName("dataSetResDirectory.id").val();
 				
 				if(!directoryId)
 					return;
@@ -199,7 +199,7 @@
 		.on("click", ".server-file-item", function()
 		{
 			var name = $(this).attr("file-name");
-			po.element("input[name='dataSetResFileName']").val(name);
+			po.elementOfName("dataSetResFileName").val(name);
 			po.element(".server-file-list-panel").hide();
 		})
 		.on("mouseenter", ".server-file-item", function()

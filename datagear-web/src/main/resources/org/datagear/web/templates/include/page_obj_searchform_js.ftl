@@ -33,7 +33,7 @@ po.search = undefined;
 	{
 		var param =
 		{
-			"keyword" : $.trim(po.element("input[name='keyword']", po.searchForm()).val())
+			"keyword" : $.trim(po.elementOfName("keyword", po.searchForm()).val())
 		};
 		
 		return param;

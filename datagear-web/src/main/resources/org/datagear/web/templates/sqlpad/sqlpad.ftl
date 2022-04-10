@@ -871,7 +871,7 @@ Schema schema 数据库，不允许为null
 	
 	po.getOverTimeThreashold = function($form)
 	{
-		var overTimeThreashold = parseInt(po.element("input[name='overTimeThreashold']", $form).val());
+		var overTimeThreashold = parseInt(po.elementOfName("overTimeThreashold", $form).val());
 		
 		if(isNaN(overTimeThreashold))
 			overTimeThreashold = 10;
@@ -885,7 +885,7 @@ Schema schema 数据库，不允许为null
 	
 	po.getResultsetFetchSize = function($form)
 	{
-		var resultsetFetchSize = parseInt(po.element("input[name='resultsetFetchSize']", $form).val());
+		var resultsetFetchSize = parseInt(po.elementOfName("resultsetFetchSize", $form).val());
 		
 		if(isNaN(resultsetFetchSize))
 			resultsetFetchSize = 20;
@@ -935,8 +935,8 @@ Schema schema 数据库，不允许为null
 			
 			var settingForm = po.element("#settingForm");
 			
-			var commitMode = po.element("input[name='sqlCommitMode']:checked", settingForm).val();
-			var exceptionHandleMode = po.element("input[name='sqlExceptionHandleMode']:checked", settingForm).val();
+			var commitMode = po.element("[name='sqlCommitMode']:checked", settingForm).val();
+			var exceptionHandleMode = po.element("[name='sqlExceptionHandleMode']:checked", settingForm).val();
 			var overTimeThreashold = po.getOverTimeThreashold(settingForm);
 			var resultsetFetchSize = po.getResultsetFetchSize(settingForm);
 			
@@ -1149,7 +1149,7 @@ Schema schema 数据库，不允许为null
 	po.element("#sqlHistoryLoadMoreButton").click(function()
 	{
 		var $form = po.element("#viewSqlHistorySearchForm");
-		var $page = po.element("input[name='page']", $form);
+		var $page = po.elementOfName("page", $form);
 		
 		var page = parseInt($page.val());
 		if(!page)
@@ -1165,7 +1165,7 @@ Schema schema 数据库，不允许为null
 	po.element("#sqlHistoryRefreshButton").click(function()
 	{
 		var $form = po.element("#viewSqlHistorySearchForm");
-		po.element("input[name='page']", $form).val("1");
+		po.elementOfName("page", $form).val("1");
 		
 		$form.submit();
 	});
@@ -1196,7 +1196,7 @@ Schema schema 数据库，不允许为null
 		po.element(".setting-panel").toggle();
 	});
 	
-	po.element("input[name='sqlCommitMode']").change(function()
+	po.elementOfName("sqlCommitMode").change(function()
 	{
 		var value = $(this).val();
 		
@@ -1205,10 +1205,10 @@ Schema schema 数据库，不允许为null
 			//po.element("#commitSqlButton").button("enable");
 			//po.element("#rollbackSqlButton").button("enable");
 			
-			var $rollbackExceptionHandle = po.element("input[name='sqlExceptionHandleMode'][value='ROLLBACK']");
+			var $rollbackExceptionHandle = po.element("[name='sqlExceptionHandleMode'][value='ROLLBACK']");
 			$rollbackExceptionHandle.attr("disabled", "disabled");
 			if($rollbackExceptionHandle.is(":checked"))
-				po.element("input[name='sqlExceptionHandleMode'][value='ABORT']").prop("checked", true);
+				po.element("[name='sqlExceptionHandleMode'][value='ABORT']").prop("checked", true);
 			po.element("#sqlExceptionHandleModeSet").controlgroup("refresh");
 		}
 		else
@@ -1216,7 +1216,7 @@ Schema schema 数据库，不允许为null
 			//po.element("#commitSqlButton").button("disable");
 			//po.element("#rollbackSqlButton").button("disable");
 			
-			po.element("input[name='sqlExceptionHandleMode'][value='ROLLBACK']").removeAttr("disabled");
+			po.element("[name='sqlExceptionHandleMode'][value='ROLLBACK']").removeAttr("disabled");
 			po.element("#sqlExceptionHandleModeSet").controlgroup("refresh");
 		}
 	});
@@ -1405,7 +1405,7 @@ Schema schema 数据库，不允许为null
 		}
 	});
 	
-	po.element("input[name='sqlCommitMode'][value='AUTO']").click();
+	po.element("[name='sqlCommitMode'][value='AUTO']").click();
 	po.element(".result-operations .sql-result-buttons").hide();
 	
 	po.tabsBindMenuHiddenEvent(po.sqlResultTabs);
