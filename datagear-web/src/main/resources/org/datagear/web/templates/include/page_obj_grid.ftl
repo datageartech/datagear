@@ -448,7 +448,7 @@ page_obj.ftl
 	{
 		table = (table == null ? po.table() : table);
 		
-		return $.dataTableUtil.tableParent(po.tableDataTable(table));
+		return $.dataTableUtil.dataTableParent(po.tableDataTable(table));
 	};
 })
 (${pageId});
