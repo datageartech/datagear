@@ -76,7 +76,8 @@ page_obj_searchform.ftl 或者 page_obj_searchform_data_filter.ftl
 				po.searchForm().submit();
 				po.currentAnalysisProject = $.analysisProjectContext.value();
 			}
-		});
+		},
+		"refreshAnalysisProjectAware");
 	}
 })
 (${pageId});

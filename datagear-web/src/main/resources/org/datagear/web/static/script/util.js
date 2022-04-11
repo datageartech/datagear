@@ -80,7 +80,32 @@
 			}
 			else
 			{
-				var successCallback = options.success;
+				var successCallback = [];
+				successCallback[0] = function(response)
+				{
+					var container=$(options.target ? options.target : document.body);
+					
+					var $dialog = $("<div id='"+$.uid("dialog")+"' class='dialog-content-container'></div>").appendTo(container);
+					
+					if(options.pageParam)
+						$.pageParam($dialog, options.pageParam);
+					
+					if(options.asDialog)
+						$._dialog($dialog, options);
+					
+					$dialog.html(response);
+					
+					if(options.asDialog && !options.title)
+					{
+						var title = $("> title", $dialog).text();
+						$dialog.dialog( "option", "title", title);
+					}
+					
+					$("[autofocus]:first", $dialog).focus();
+				};
+				
+				if(options.success)
+					successCallback = successCallback.concat(options.success);
 				
 				options = $.extend(
 					{
@@ -94,32 +119,8 @@
 					},
 					options,
 					{
-						data : (options.data ? options.data : undefined),
-						success : function(data, textStatus, jqXHR)
-						{
-							var container=$(options.target ? options.target : document.body);
-							
-							var $dialog = $("<div id='"+$.uid("dialog")+"' class='dialog-content-container'></div>").appendTo(container);
-							
-							if(options.pageParam)
-								$.pageParam($dialog, options.pageParam);
-							
-							if(options.asDialog)
-								$._dialog($dialog, options);
-							
-							$dialog.html(data);
-							
-							if(options.asDialog && !options.title)
-							{
-								var title = $("> title", $dialog).text();
-								$dialog.dialog( "option", "title", title);
-							}
-							
-							$("[autofocus]:first", $dialog).focus();
-							
-							if(successCallback)
-								successCallback(data, textStatus, jqXHR);
-						},
+						data : options.data,
+						success : successCallback,
 						type : "POST"
 					});
 				
@@ -133,20 +134,22 @@
 		/**
 		 * 获取/设置页面参数，设置页面参数，使页面在加载完成后可以在内部获取此参数。
 		 * 
-		 * @param $dom 必选，任意dom元素
+		 * @param ele 必选，任意元素
 		 * @param param 可选，要设置的参数
 		 */
-		pageParam : function($dom, param)
+		pageParam : function(ele, param)
 		{
-			if(param == undefined)
+			ele = $(ele);
+			
+			if(param === undefined)
 			{
-				var dcc = $dom.closest("." + $.PAGE_PARAM_BINDER_CLASS);
+				var dcc = ele.closest("." + $.PAGE_PARAM_BINDER_CLASS);
 				return dcc.data("pageParam");
 			}
 			else
 			{
-				$dom.addClass($.PAGE_PARAM_BINDER_CLASS);
-				$dom.data("pageParam", param);
+				ele.addClass($.PAGE_PARAM_BINDER_CLASS);
+				ele.data("pageParam", param);
 			}
 		},
 		
@@ -154,13 +157,13 @@
 		 * 调用页面参数函数。
 		 * 如果没有页面参数或者指定的函数，返回undefined。
 		 * 
-		 * @param $dom 必选，任意dom元素
+		 * @param ele 任意元素
 		 * @param functionName 可选，如果页面参数是对象，则指定页面对象的函数名
 		 * @param argArray 可选，函数参数数组
 		 */
-		pageParamCall : function($dom, functionName, argArray)
+		pageParamCall : function(ele, functionName, argArray)
 		{
-			var pageParam = $.pageParam($dom);
+			var pageParam = $.pageParam(ele);
 			
 			//无页面参数
 			if(!pageParam)
@@ -171,8 +174,8 @@
 				return pageParam.apply(window, arguments[1]);
 			
 			//页面参数是对象
-			var fun = pageParam[arguments[1]];
-			return (fun == undefined ? undefined : fun.apply(pageParam, arguments[2]));
+			var fun = pageParam[functionName];
+			return (fun == null ? undefined : fun.apply(pageParam, argArray));
 		},
 		
 		/**
@@ -209,7 +212,7 @@
 			{
 				var titlebar = $(".ui-dialog-titlebar", $(element).dialog("widget"));
 				
-				var pinButton = $("<button type='button'></button>")
+				$("<button type='button'></button>")
 				.button({
 					label: $( "<a>" ).text( "pin" ).html(),
 					icon: "ui-icon-pin-s",
@@ -217,7 +220,7 @@
 				})
 				.appendTo( titlebar )
 				.addClass("dialog-titlebar-pin stated-active")
-				.click(function(event)
+				.click(function()
 				{
 					var $this = $(this);
 					
@@ -393,7 +396,7 @@
 				modal: true,
 				buttons: buttons,
 				title: options.title,
-				close : function(event)
+				close : function()
 				{
 					$(this).dialog("destroy").remove();
 				}
@@ -1466,6 +1469,22 @@
 		},
 		
 		/**
+		 * 构建查询条件Autocomplete组件的“source”选项值。
+		 */
+		buildSearchConditionAutocompleteSource : function(table, sqlIdentifierQuote)
+		{
+			var source = [];
+			
+			for(var i=0; i<table.columns.length; i++)
+			{
+				var column = table.columns[i];
+				source.push({label : column.name, value : sqlIdentifierQuote + column.name + sqlIdentifierQuote});
+			}
+			
+			return source;
+		},
+		
+		/**
 		 * 获取指定列名在DataTable中的列号。
 		 */
 		getDataTableColumn : function(settings, columnName)
@@ -1898,14 +1917,21 @@
 				var toggablePanel = thisEle.closest(".ui-tabs-panel, ." + $.TOGGLABLE_PANEL_CLASS_NAME);
 				if(toggablePanel.length > 0 && toggablePanel.is(":hidden"))
 				{
-					$.bindPanelShowCallback(toggablePanel, function(panel)
+					var prevBindHandler = toggablePanel.data("resizeHandlerPrevBind");
+					if(resizeHandler != prevBindHandler)
 					{
-						if(!$.resizeAutoResizableOnShow(panel))
-							return;
+						toggablePanel.data("resizeHandlerPrevBind", resizeHandler);
 						
-						$.resizeAutoResizable(panel, resizeHandler);
-						$.resizeAutoResizableOnShow(panel, false);
-					});
+						$.bindPanelShowCallback(toggablePanel, function(panel)
+						{
+							if(!$.resizeAutoResizableOnShow(panel))
+								return;
+							
+							$.resizeAutoResizable(panel, resizeHandler);
+							$.resizeAutoResizableOnShow(panel, false);
+						},
+						"resizeAutoResizable");
+					}
 					
 					$.resizeAutoResizableOnShow(toggablePanel, true);
 				}
@@ -1948,68 +1974,78 @@
 			});
 		},
 		
+		PANEL_SHOW_CALLBACK_NAME: "dg-panel-show-callback",
+		
 		/**
 		 * 为指定面板元素绑定显示时回调函数。
 		 */
-		bindPanelShowCallback: function($panel, callback)
+		bindPanelShowCallback: function(panel, callback, name)
 		{
-			var callbacks = $panel.data("_SHOW_CALLBACK");
+			panel = $(panel);
+			name = (name == null ? $.uid("cb") : name);
+			
+			var callbacks = panel.data($.PANEL_SHOW_CALLBACK_NAME);
 			if(callbacks == null)
 			{
 				callbacks = [];
-				$panel.data("_SHOW_CALLBACK", callbacks);
+				panel.data($.PANEL_SHOW_CALLBACK_NAME, callbacks);
 			}
 			
-			callbacks.push(callback);
+			var callbackObj = { name: name, value: callback };
+			
+			var idx = -1;
+			for(var i=0; i<callbacks.length; i++)
+			{
+				if(callbacks[i].name == "name")
+				{
+					idx = i;
+					break;
+				}
+			}
+			
+			if(idx >= 0)
+				callbacks[idx] = callbackObj;
+			else
+				callbacks.push(callbackObj);
 		},
 		
 		/**
 		 * 调用面板元素绑定的显示时回调函数。
 		 */
-		callPanelShowCallback : function($panel)
+		callPanelShowCallback : function(panel, recursion)
 		{
-			var callbacks = $panel.data("_SHOW_CALLBACK");
+			panel = $(panel);
+			recursion = (recursion == null ? true : recursion);
+			
+			var callbacks = panel.data($.PANEL_SHOW_CALLBACK_NAME);
 			if(callbacks)
 			{
 				for(var i=0; i<callbacks.length; i++)
-					callbacks[i]($panel);
+					callbacks[i].value(panel);
 			}
 			
-			var subTabs = $panel.find(".ui-tabs");
-			if(subTabs.length > 0)
+			if(recursion)
 			{
-				subTabs.each(function()
+				var subTabs = panel.find(".ui-tabs");
+				if(subTabs.length > 0)
 				{
-					var $this = $(this);
-					
-					var subTabsNav = $("> .ui-tabs-nav", $this);
-					var subShowTab = $("> li.ui-tabs-tab.ui-state-active", subTabsNav);
-					
-					var subTabId = $("> a.ui-tabs-anchor", subShowTab).attr("href");
-					if(subTabId.charAt(0) == "#")
-						subTabId = subTabId.substr(1);
-					
-					var subTabPanel = $("> #"+subTabId, $this);
-					
-					$.callPanelShowCallback(subTabPanel);
-				});
+					subTabs.each(function()
+					{
+						var subTab = $(this);
+						
+						var subTabsNav = $("> .ui-tabs-nav", subTab);
+						var subShowTab = $("> li.ui-tabs-tab.ui-state-active", subTabsNav);
+						
+						var subTabId = $("> a.ui-tabs-anchor", subShowTab).attr("href");
+						if(subTabId.charAt(0) == "#")
+							subTabId = subTabId.substr(1);
+						
+						var subTabPanel = $("> #"+subTabId, subTab);
+						
+						$.callPanelShowCallback(subTabPanel, false);
+					});
+				}
 			}
-		},
-		
-		/**
-		 * 构建查询条件Autocomplete组件的“source”选项值。
-		 */
-		buildSearchConditionAutocompleteSource : function(table, sqlIdentifierQuote)
-		{
-			var source = [];
-			
-			for(var i=0; i<table.columns.length; i++)
-			{
-				var column = table.columns[i];
-				source.push({label : column.name, value : sqlIdentifierQuote + column.name + sqlIdentifierQuote});
-			}
-			
-			return source;
 		},
 		
 		/**
