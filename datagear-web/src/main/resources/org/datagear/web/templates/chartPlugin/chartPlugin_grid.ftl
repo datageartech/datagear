@@ -80,15 +80,11 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element(".deleteButton").click(
-	function()
+	po.element(".deleteButton").click(function()
 	{
-		po.executeOnSelects(function(rows)
-		{
-			po.confirmDeleteEntities(po.url("delete"), rows);
-		});
+		po.handleDeleteOperation(po.url("delete"));
 	});
-
+	
 	var snColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='serialNumber' />", "id");
 	snColumn.width="4.01em";
 	snColumn.orderable=false;
@@ -124,7 +120,7 @@ selectOperation 是否选择操作，允许为null
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.desc' />"), "descLabel.value")
 	];
 	
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));
 	tableSettings.ordering = false;
 	po.initTable(tableSettings);
 })

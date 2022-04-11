@@ -204,28 +204,14 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element(".deleteButton").click(
-	function()
+	po.element(".deleteButton").click(function()
 	{
-		po.executeOnSelects(function(rows)
-		{
-			po.confirmDeleteEntities(po.url("delete"), rows);
-		});
+		po.handleDeleteOperation(po.url("delete"));
 	});
 	
 	po.element(".selectButton").click(function()
 	{
-		<#if isMultipleSelect>
-		po.executeOnSelects(function(rows)
-		{
-			po.pageParamCallSelect(true, rows);
-		});
-		<#else>
-		po.executeOnSelect(function(row)
-		{
-			po.pageParamCallSelect(true, row);
-		});
-		</#if>
+		po.handleSelectOperation();
 	});
 	
 	var dataSetTypeColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.dataSetType' />", "dataSetType");
@@ -260,7 +246,7 @@ boolean readonly 是否只读操作，默认为false
 	
 	po.initPagination();
 	
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
+	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("pagingQueryData"));
 	tableSettings.order = [[$.getDataTableColumn(tableSettings, "createTime"), "desc"]];
 	po.initTable(tableSettings);
 	po.handlePermissionElement();

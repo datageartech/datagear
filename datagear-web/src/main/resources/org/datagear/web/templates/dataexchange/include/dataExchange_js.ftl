@@ -69,7 +69,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			}
 		);
 	
-	po.calTableHeight = function()
+	po.evalTableHeight = function()
 	{
 		var height =  po.element(".form-content-wizard > .content").height() - po.element(".form-item-table-head:not(:hidden)").outerHeight(true) - 60;
 		return height;
@@ -78,7 +78,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	po.adjustDataTable = function()
 	{
 		$.dataTableUtil.adjustColumn(po.getSubDataExchangeDataTable());
-		$.updateDataTableHeight(po.table(), po.calTableHeight());
+		$.updateDataTableHeight(po.table(), po.evalTableHeight());
 	};
 
 	po.renderColumn = function(data, type, row, meta)

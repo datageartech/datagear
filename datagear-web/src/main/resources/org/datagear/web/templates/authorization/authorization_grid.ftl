@@ -65,18 +65,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	
 	po.element(".addButton").click(function()
 	{
-		po.open(po.url("add"),
-		{
-			<#if selectOperation>
-			pageParam:
-			{
-				submitSuccess: function(data)
-				{
-					po.pageParamCallSelect(true, data);
-				}
-			}
-			</#if>
-		});
+		po.handleAddOperation(po.url("add"));
 	});
 	
 	po.element(".editButton").click(function()
@@ -120,13 +109,9 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		});
 	});
 	
-	po.element(".deleteButton").click(
-	function()
+	po.element(".deleteButton").click( function()
 	{
-		po.executeOnSelects(function(rows)
-		{
-			po.confirmDeleteEntities(po.url("delete"), rows);
-		});
+		po.handleDeleteOperation(po.url("delete"));
 	});
 	
 	var columnEnabled = $.buildDataTablesColumnSimpleOption("<@spring.message code='${resourceMeta.authEnabledLabel}' />", "enabled", ${(resourceMeta.enableSetEnable)?string('false', 'true')});
@@ -147,7 +132,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		columnEnabled
 	];
 	
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));
 	po.initTable(tableSettings);
 })
 (${pageId});

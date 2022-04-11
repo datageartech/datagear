@@ -192,7 +192,7 @@ data_page_obj_edit_grid_html.ftl
 		var editTableDatas = po.getEditGridInitDatas(dataTable);
 		
 		var columns = $.buildDataTablesColumns(po.editGridMetaTable);
-		var settings = po.buildDataTableSettingsLocal(columns, editTableDatas);
+		var settings = po.buildLocalTableSettings(columns, editTableDatas);
 		//禁用排序，不然添加行会自动排序，不友好
 		settings.ordering = false;
 		

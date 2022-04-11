@@ -72,9 +72,15 @@ page_obj.ftl
 		
 		if(ele.is("table"))
 		{
-			var height = po.calTableHeight();
+			var height = po.evalTableHeight();
 			$.updateDataTableHeight(ele, height, true);
 		}
+	};
+	
+	po.evalTableHeight = function()
+	{
+		var height =  po.element("> .content").height() - 50;
+		return height;
 	};
 	
 	po.refresh = function(table)
@@ -123,79 +129,99 @@ page_obj.ftl
 		$.dataTableUtil.deleteSelectedRows(po.tableDataTable(table));
 	};
 	
-	po.confirmDeleteEntities = function(url, rows, idPropertyName)
+	po.handleAddOperation = function(url, options)
 	{
-		po.confirm("<@spring.message code='confirmDelete' />",
+		if(po.selectOperation)
 		{
-			"confirm" : function()
+			options = $.extend(true,
 			{
-				$.postJson(url, $.propertyValue(rows, (idPropertyName || "id")), function()
+				pageParam:
 				{
-					po.refresh();
-				});
-			}
-		});
+					submitSuccess: function(response)
+					{
+						var data = (response.data ? response.data : response);
+						data = (po.isMultipleSelect && !$.isArray(data) ? [data] : data);
+						
+						po.pageParamCallSelect(data);
+					}
+				}
+			},
+			options);
+		}
+		
+		po.open(url, options);
 	};
 	
-	po.handleSelectOperation = function()
+	po.handleOpenSelectedOperation = function(url, options, idPropertyName, table)
 	{
+		if(idPropertyName && typeof(idPropertyName) != "string")
+		{
+			table = idPropertyName;
+			idPropertyName = null;
+		}
+		table = (table == null ? po.table() : table);
+	};
+	
+	po.handleDeleteOperation = function(url, idPropertyName, table)
+	{
+		if(idPropertyName && typeof(idPropertyName) != "string")
+		{
+			table = idPropertyName;
+			idPropertyName = null;
+		}
+		table = (table == null ? po.table() : table);
+		
+		po.executeOnSelects(function(rows)
+		{
+			po.confirm("<@spring.message code='confirmDelete' />",
+			{
+				"confirm" : function()
+				{
+					$.postJson(url, $.propertyValue(rows, (idPropertyName || "id")), function()
+					{
+						po.refresh();
+					});
+				}
+			});
+		},
+		table);
+	};
+	
+	po.handleSelectOperation = function(table)
+	{
+		table = (table == null ? po.table() : table);
+		
 		if(po.isMultipleSelect)
 		{
 			po.executeOnSelects(function(rows)
 			{
-				po.pageParamCallSelect(true, rows);
-			});
+				po.pageParamCallSelect(rows, false);
+			},
+			table);
 		}
 		else
 		{
 			po.executeOnSelect(function(row)
 			{
-				po.pageParamCallSelect(true, row);
-			});
+				po.pageParamCallSelect(row);
+			},
+			table);
 		}
 	};
 	
-	//计算表格高度
-	po.calTableHeight = function()
-	{
-		var height =  po.element("> .content").height() - 50;
-		return height;
-	};
-	
-	po.renderCheckColumn = function(data, type, row, meta)
-	{
-		return $.dataTableUtil.renderCheckColumn(data, type, row, meta);
-	};
-	
 	/**
-	 * 默认po.buildDataTableSettingsAjax请求参数实现。
+	 * 调用页面参数对象的"select"函数。
+	 * @param selectedData 选中数据
+	 * @param close 可选，是否关闭
 	 */
-	po.dataTableAjaxParam = function()
+	po.pageParamCallSelect = function(selectedData, close)
 	{
-		var param = {};
+		close = (close == null ? true : close);
 		
-		if(po.searchParam)
-			$.extend(param, po.searchParam);
-		else if(po.getSearchParam)
-			$.extend(param, po.getSearchParam());
+		this.pageParamCall("select", selectedData);
 		
-		if(po.pagingParam)
-			$.extend(param, po.pagingParam);
-		else if(po.getPagingParam)
-			$.extend(param, po.getPagingParam());
-		
-		return param;
-	};
-	
-	/**
-	 * 默认po.buildDataTableSettingsAjax请求成功回调实现。
-	 */
-	po.dataTableAjaxSuccess = function(pagingData, textStatus, jqXHR)
-	{
-		if(po.refreshPagination)
-			po.refreshPagination(pagingData.total, pagingData.page, pagingData.pageSize);
-		
-		po.pageParamCall("dataTableAjaxSuccess", pagingData, textStatus, jqXHR);
+		if(close && !this.isDialogPinned())
+			this.close();
 	};
 	
 	/**
@@ -222,25 +248,48 @@ page_obj.ftl
 		
 		return false;
 	};
-
-	po.getOrdersOnName = function(table)
+	
+	/**
+	 * 默认po.buildAjaxTableSettings请求参数实现。
+	 */
+	po.ajaxTableParam = function()
 	{
-		table = (table == null ? po.table() : table);
+		var param = {};
 		
-		return $.dataTableUtil.getOrdersOnName(po.tableDataTable(table));
+		if(po.searchParam)
+			$.extend(param, po.searchParam);
+		else if(po.getSearchParam)
+			$.extend(param, po.getSearchParam());
+		
+		if(po.pagingParam)
+			$.extend(param, po.pagingParam);
+		else if(po.getPagingParam)
+			$.extend(param, po.getPagingParam());
+		
+		return param;
+	};
+	
+	/**
+	 * 默认po.buildAjaxTableSettings请求成功回调实现。
+	 */
+	po.ajaxTableSuccess = function(pagingData, textStatus, jqXHR)
+	{
+		if(po.refreshPagination)
+			po.refreshPagination(pagingData.total, pagingData.page, pagingData.pageSize);
+		
+		po.pageParamCall("ajaxTableSuccess", pagingData, textStatus, jqXHR);
 	};
 	
 	/**
 	 * 构建ajax数据表格选项。
 	 * 此ajax选项支持两个回调函数：
-	 *   po.dataTableAjaxParam() 用于扩展ajax请求参数；
-	 *   po.dataTableAjaxSuccess(pagingData, textStatus, jqXHR) ajax成功回调函数；
-	 * @param columns 必选，列元数据
-	 * @param url 必选，ajax请求URL
-	 * @param ajaxSuccessCallback 可选，ajax成功回调函数，function(pagingData, textStatus, jqXHR){}
+	 *   po.ajaxTableParam() 用于扩展ajax请求参数；
+	 *   po.ajaxTableSuccess(pagingData, textStatus, jqXHR) ajax成功回调函数；
+	 * @param columns 列元数据
+	 * @param url ajax请求URL
 	 * @param settings 可选，其他选项
 	 */
-	po.buildDataTableSettingsAjax = function(columns, url, settings)
+	po.buildAjaxTableSettings = function(columns, url, settings)
 	{
 		settings = $.extend(
 		{
@@ -256,7 +305,7 @@ page_obj.ftl
 					nameOrder[i] = { "name" : name, "type" : data.order[i].dir };
 				}
 				
-				var myData = po.dataTableAjaxParam();
+				var myData = po.ajaxTableParam();
 				
 				var param = $.extend({ "orders" : nameOrder }, myData);
 				
@@ -281,15 +330,15 @@ page_obj.ftl
 							callback(tableData);
 						}
 						
-						if(po.dataTableAjaxSuccess)
-							po.dataTableAjaxSuccess(data, textStatus, jqXHR);
+						if(po.ajaxTableSuccess)
+							po.ajaxTableSuccess(data, textStatus, jqXHR);
 					}
 				});
 			}
 		},
 		settings);
 		
-		return po.buildDataTableSettings(settings);
+		return po.buildTableSettings(settings);
 	};
 	
 	/**
@@ -298,7 +347,7 @@ page_obj.ftl
 	 * @param data 可选，初始数据
 	 * @param settings 可选，其他选项
 	 */
-	po.buildDataTableSettingsLocal = function(columns, data, settings)
+	po.buildLocalTableSettings = function(columns, data, settings)
 	{
 		settings = $.extend(
 		{
@@ -307,14 +356,11 @@ page_obj.ftl
 		}, 
 		settings);
 		
-		return po.buildDataTableSettings(settings);
+		return po.buildTableSettings(settings);
 	};
 	
-	/**
-	 * 构建表格选项。
-	 * @param settings 必选，选项
-	 */
-	po.buildDataTableSettings = function(settings)
+	//构建表格选项。
+	po.buildTableSettings = function(settings)
 	{
 		var newColumns = [ $.dataTableUtil.buildCheckCloumn("<@spring.message code='select' />") ];
 		newColumns = newColumns.concat(settings.columns);
@@ -338,7 +384,7 @@ page_obj.ftl
 		{
 			"scrollX": true,
 			"autoWidth": true,
-			"scrollY" : po.calTableHeight(),
+			"scrollY" : po.evalTableHeight(),
 	        "scrollCollapse": false,
 			"paging" : false,
 			"searching" : false,
@@ -356,6 +402,18 @@ page_obj.ftl
 		settings.columns = newColumns;
 		
 		return settings;
+	};
+	
+	po.renderCheckColumn = function(data, type, row, meta)
+	{
+		return $.dataTableUtil.renderCheckColumn(data, type, row, meta);
+	};
+
+	po.getOrdersOnName = function(table)
+	{
+		table = (table == null ? po.table() : table);
+		
+		return $.dataTableUtil.getOrdersOnName(po.tableDataTable(table));
 	};
 	
 	//获取表格元素的父元素

@@ -47,7 +47,7 @@ int keywordQueryColumnCount
 	po.initTableForDbTable = function(url, dbTable)
 	{
 		var columns = $.buildDataTablesColumns(dbTable, {keywordQueryColumnCount: po.keywordQueryColumnCount});
-		var settings = po.buildDataTableSettingsAjax(columns, url);
+		var settings = po.buildAjaxTableSettings(columns, url);
 		
 		po.initTable(settings);
 	};

@@ -69,18 +69,7 @@ selectOperation 是否选择操作，允许为null
 	
 	po.element(".addButton").click(function()
 	{
-		po.open(po.url("add"),
-		{
-			<#if selectOperation>
-			pageParam:
-			{
-				submitSuccess: function(data)
-				{
-					po.pageParamCallSelect(true, data);
-				}
-			}
-			</#if>
-		});
+		po.handleAddOperation(po.url("add"));
 	});
 	
 	po.element(".editButton").click(function()
@@ -111,28 +100,14 @@ selectOperation 是否选择操作，允许为null
 		po.open(po.url("test"));
 	});
 	
-	po.element(".deleteButton").click(
-	function()
+	po.element(".deleteButton").click(function()
 	{
-		po.executeOnSelects(function(rows)
-		{
-			po.confirmDeleteEntities(po.url("delete"), rows);
-		});
+		po.handleDeleteOperation(po.url("delete"));
 	});
 	
 	po.element(".selectButton").click(function()
 	{
-		<#if isMultipleSelect>
-		po.executeOnSelects(function(rows)
-		{
-			po.pageParamCallSelect(true, rows);
-		});
-		<#else>
-		po.executeOnSelect(function(row)
-		{
-			po.pageParamCallSelect(true, row);
-		});
-		</#if>
+		po.handleSelectOperation();
 	});
 	
 	var columnPermitted = $.buildDataTablesColumnSimpleOption("<@spring.message code='schemaGuard.permitted' />", "permitted");
@@ -165,7 +140,7 @@ selectOperation 是否选择操作，允许为null
 		columnEnabled,
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='schemaGuard.createTime' />", "createTime")
 	];
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));
 	tableSettings.ordering = false;
 	po.initTable(tableSettings);
 })

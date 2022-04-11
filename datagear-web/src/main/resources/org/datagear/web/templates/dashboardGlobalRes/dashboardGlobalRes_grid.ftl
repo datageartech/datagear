@@ -69,7 +69,7 @@ selectOperation 是否选择操作，允许为null
 	
 	po.element(".addButton").click(function()
 	{
-		po.open(po.url("add"));
+		po.handleAddOperation(po.url("add"));
 	});
 	
 	po.element(".uploadButton").click(function()
@@ -118,13 +118,9 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element(".deleteButton").click(
-	function()
+	po.element(".deleteButton").click(function()
 	{
-		po.executeOnSelects(function(rows)
-		{
-			po.confirmDeleteEntities(po.url("delete"), rows, "path");
-		});
+		po.handleDeleteOperation(po.url("delete"), "path");
 	});
 	
 	var tableColumns = [
@@ -132,7 +128,7 @@ selectOperation 是否选择操作，允许为null
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dashboardGlobalRes.path' />"), "path", false, true)
 	];
 	
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));
 	tableSettings.ordering = false;
 	po.initTable(tableSettings);
 })

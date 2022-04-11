@@ -170,7 +170,7 @@
 		if(!chartPlugin)
 			return;
 		
-		po.pageParamCallSelect(true, chartPlugin);
+		po.pageParamCallSelect(chartPlugin);
 	});
 	
 	po.search = function(searchParam)

@@ -105,21 +105,12 @@ boolean readonly 是否只读操作，默认为false
 
 	po.element(".addButton").click(function()
 	{
-		po.open(po.url("add"),
+		po.handleAddOperation(po.url("add"),
 		{
-			width: "85%",
-			<#if selectOperation>
-			pageParam:
-			{
-				submitSuccess: function(data)
-				{
-					po.pageParamCallSelect(true, data);
-				}
-			}
-			</#if>
+			width: "85%"
 		});
 	});
-
+	
 	po.element(".addGroupSelect").selectmenu(
 	{
 		appendTo: po.element(),
@@ -251,28 +242,14 @@ boolean readonly 是否只读操作，默认为false
 		});
 	}
 	
-	po.element(".deleteButton").click(
-	function()
+	po.element(".deleteButton").click(function()
 	{
-		po.executeOnSelects(function(rows)
-		{
-			po.confirmDeleteEntities(po.url("delete"), rows);
-		});
+		po.handleDeleteOperation(po.url("delete"));
 	});
 	
 	po.element(".selectButton").click(function()
 	{
-		<#if isMultipleSelect>
-		po.executeOnSelects(function(rows)
-		{
-			po.pageParamCallSelect(true, rows);
-		});
-		<#else>
-		po.executeOnSelect(function(row)
-		{
-			po.pageParamCallSelect(true, row);
-		});
-		</#if>
+		po.handleSelectOperation();
 	});
 	
 	var updateIntervalColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='chart.updateInterval' />", "updateInterval");
@@ -327,7 +304,7 @@ boolean readonly 是否只读操作，默认为false
 	
 	po.initPagination();
 	
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
+	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("pagingQueryData"));
 	tableSettings.order = [[$.getDataTableColumn(tableSettings, "createTime"), "desc"]];
 	po.initTable(tableSettings);
 	po.handlePermissionElement();

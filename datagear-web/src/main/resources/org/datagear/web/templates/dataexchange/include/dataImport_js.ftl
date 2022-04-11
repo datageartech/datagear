@@ -161,7 +161,7 @@ dataExchange_js.ftl
 	
 	po.initDataImportDataTable = function()
 	{
-		var tableSettings = po.buildDataTableSettingsLocal(po.dataImportTableColumns, [], {"order": []});
+		var tableSettings = po.buildLocalTableSettings(po.dataImportTableColumns, [], {"order": []});
 		
 		po.subDataExchangeStatusColumnIndex = tableSettings.columns.length - 1;
 		

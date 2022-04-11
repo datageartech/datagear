@@ -111,16 +111,6 @@ var ${pageId} =
 	},
 	
 	/**
-	 * 调用页面参数对象指定函数。
-	 * @param functionName 必选
-	 * @param argArray 可选，函数参数
-	 */
-	pageParamApply : function(functionName, argArray)
-	{
-		return $.pageParamCall(this.element(), functionName, argArray);
-	},
-	
-	/**
 	 * 打开确认对话框。
 	 * @param content 显示内容
 	 * @param options 参数选项，参考util.js的$.confirm(...)函数说明
@@ -130,23 +120,6 @@ var ${pageId} =
 		options = (options || {});
 		options = $.extend({}, options, {confirmText : "<@spring.message code='confirm' />", cancelText : "<@spring.message code='cancel' />", title : "<@spring.message code='operationConfirm' />"});
 		$.confirm(content, options);
-	},
-	
-	/**
-	 * 调用页面参数对象的"select"函数。
-	 * @param closeDefault 默认是否关闭
-	 * @param arg... 可选，函数参数
-	 */
-	pageParamCallSelect : function(closeDefault, arg)
-	{
-		var close = this.pageParamApply("select", $.makeArray(arguments).slice(1));
-		if(close !== true && close !== false)
-			close = closeDefault;
-		
-		if(close && !this.isDialogPinned())
-			this.close();
-		
-		return close;
 	},
 	
 	/**

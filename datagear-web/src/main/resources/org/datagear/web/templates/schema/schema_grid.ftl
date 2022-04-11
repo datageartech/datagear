@@ -75,18 +75,7 @@ boolean readonly 是否只读操作，默认为false
 	
 	po.element(".addButton").click(function()
 	{
-		po.open(po.url("add"),
-		{
-			<#if selectOperation>
-			pageParam:
-			{
-				submitSuccess: function(data)
-				{
-					po.pageParamCallSelect(true, data);
-				}
-			}
-			</#if>
-		});
+		po.handleAddOperation(po.url("add"));
 	});
 	
 	po.element(".editButton").click(function()
@@ -99,13 +88,9 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element(".deleteButton").click(
-	function()
+	po.element(".deleteButton").click(function()
 	{
-		po.executeOnSelects(function(rows)
-		{
-			po.confirmDeleteEntities(po.url("delete"), rows);
-		});
+		po.handleDeleteOperation(po.url("delete"));
 	});
 	
 	po.element(".viewButton").click(function()
@@ -123,10 +108,7 @@ boolean readonly 是否只读操作，默认为false
 	
 	po.element(".selectButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			po.pageParamCallSelect(true, row);
-		});
+		po.handleSelectOperation();
 	});
 	
 	var tableColumns = [
@@ -137,7 +119,7 @@ boolean readonly 是否只读操作，默认为false
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='schema.createUser' />", "createUser.nameLabel"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='schema.createTime' />", "createTime")
 	];
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));
 	po.initTable(tableSettings);
 })
 (${pageId});

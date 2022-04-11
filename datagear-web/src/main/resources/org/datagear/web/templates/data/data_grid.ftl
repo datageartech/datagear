@@ -124,23 +124,13 @@ boolean readonly 是否只读操作，默认为false
 	{
 		po.element(".addButton").click(function()
 		{
-			var options=
-			{
-				pinTitleButton: true,
-				<#if selectOperation>
-				pageParam:
-				{
-					submitSuccess: function(row)
-					{
-						po.pageParamCallSelect(true, row);
-					}
-				}
-				</#if>
-			};
-			
 			var url = po.url("add");
 			url = $.addParam(url, "batchSet", "true");
-			po.open(url, options);
+			
+			po.handleAddOperation(url,
+			{
+				pinTitleButton: true
+			});
 		});
 		
 		po.element(".editButton").click(function()
@@ -184,20 +174,7 @@ boolean readonly 是否只读操作，默认为false
 		
 		po.element(".selectButton").click(function()
 		{
-			if(po.isMultipleSelect)
-			{
-				po.executeOnSelects(function(rows)
-				{
-					po.pageParamCallSelect(false, rows);
-				});
-			}
-			else
-			{
-				po.executeOnSelect(function(row)
-				{
-					po.pageParamCallSelect(true, row);
-				});
-			}
+			po.handleSelectOperation();
 		});
 		
 		po.element(".viewButton").click(function()

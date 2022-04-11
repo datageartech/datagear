@@ -229,7 +229,7 @@ dataExchange_js.ftl
 	
 	po.initDataExportDataTable = function()
 	{
-		var tableSettings = po.buildDataTableSettingsLocal(po.dataExportTableColumns, [], {"order": []});
+		var tableSettings = po.buildLocalTableSettings(po.dataExportTableColumns, [], {"order": []});
 
 		po.subDataExchangeStatusColumnIndex = tableSettings.columns.length - 1;
 		

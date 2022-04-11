@@ -78,18 +78,7 @@ selectOperation 是否选择操作，允许为null
 	
 	po.element(".addButton").click(function()
 	{
-		po.open(po.url("add"),
-		{
-			<#if selectOperation>
-			pageParam:
-			{
-				submitSuccess: function(data)
-				{
-					po.pageParamCallSelect(true, data);
-				}
-			}
-			</#if>
-		});
+		po.handleAddOperation(po.url("add"));
 	});
 	
 	po.element(".editButton").click(function()
@@ -131,21 +120,14 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element(".deleteButton").click(
-	function()
+	po.element(".deleteButton").click(function()
 	{
-		po.executeOnSelects(function(rows)
-		{
-			po.confirmDeleteEntities(po.url("delete"), rows);
-		});
+		po.handleDeleteOperation(po.url("delete"));
 	});
 	
 	po.element(".selectButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			po.pageParamCallSelect(true, row);
-		});
+		po.handleSelectOperation();
 	});
 	
 	var tableColumns = [
@@ -158,7 +140,7 @@ selectOperation 是否选择操作，允许为null
 	
 	po.initPagination();
 	
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
+	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("pagingQueryData"));
 	tableSettings.order = [[$.getDataTableColumn(tableSettings, "createTime"), "desc"]];
 	po.initTable(tableSettings);
 	po.handlePermissionElement();
