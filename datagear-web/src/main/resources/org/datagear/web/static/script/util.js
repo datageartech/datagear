@@ -310,7 +310,7 @@
 			
 			if(options.data)
 			{
-				var param = $.param(options.data);
+				var param = (typeof(options.data) == "string" ? options.data : $.param(options.data));
 				
 				//XXX $.param会将" "转换为"+"，而这里的decodeURIComponent并不会将"+"恢复为" "，因此需要在这里预先转换
 				param = param.replace(/\+/g, " ");

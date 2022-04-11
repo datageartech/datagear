@@ -74,32 +74,14 @@ selectOperation 是否选择操作，允许为null
 	
 	po.element(".editButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("edit"), { data : data });
-		});
+		po.handleOpenOfOperation(po.url("edit"));
 	});
 
 	po.element(".viewButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("view"),
-			{
-				data : data
-			});
-		});
+		po.handleOpenOfOperation(po.url("view"));
 	});
 
-	po.element(".testButton").click(function()
-	{
-		po.open(po.url("test"));
-	});
-	
 	po.element(".deleteButton").click(function()
 	{
 		po.handleDeleteOperation(po.url("delete"));
@@ -108,6 +90,11 @@ selectOperation 是否选择操作，允许为null
 	po.element(".selectButton").click(function()
 	{
 		po.handleSelectOperation();
+	});
+	
+	po.element(".testButton").click(function()
+	{
+		po.open(po.url("test"));
 	});
 	
 	var columnPermitted = $.buildDataTablesColumnSimpleOption("<@spring.message code='schemaGuard.permitted' />", "permitted");

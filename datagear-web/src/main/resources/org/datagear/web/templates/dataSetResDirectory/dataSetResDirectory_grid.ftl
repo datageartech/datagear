@@ -80,25 +80,22 @@ selectOperation 是否选择操作，允许为null
 	
 	po.element(".editButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("edit"), { data : data });
-		});
+		po.handleOpenOfOperation(po.url("edit"));
 	});
 	
 	po.element(".viewButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("view"),
-			{
-				data : data
-			});
-		});
+		po.handleOpenOfOperation(po.url("view"));
+	});
+	
+	po.element(".deleteButton").click(function()
+	{
+		po.handleDeleteOperation(po.url("delete"));
+	});
+	
+	po.element(".selectButton").click(function()
+	{
+		po.handleSelectOperation();
 	});
 	
 	po.element(".shareButton").click(function()
@@ -115,16 +112,6 @@ selectOperation 是否选择操作，允许为null
 			$.setGridPageHeightOption(options);
 			po.open(contextPath+"/authorization/${DataSetResDirectory.AUTHORIZATION_RESOURCE_TYPE}/" + row.id +"/query", options);
 		});
-	});
-	
-	po.element(".deleteButton").click(function()
-	{
-		po.handleDeleteOperation(po.url("delete"));
-	});
-	
-	po.element(".selectButton").click(function()
-	{
-		po.handleSelectOperation();
 	});
 	
 	var tableColumns = [

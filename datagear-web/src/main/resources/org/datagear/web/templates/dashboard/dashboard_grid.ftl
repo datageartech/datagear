@@ -111,14 +111,8 @@ selectOperation 是否选择操作，允许为null
 				po.open(po.url("add"), {target: "_blank"});
     		else if(action == "copy" || action == "copyInNewWindow")
     		{
-    			po.executeOnSelect(function(row)
-  				{
-    				var options = { data: { id: row.id } };
-    				if(action == "copyInNewWindow")
-    					options.target = "_blank";
-    				
-  					po.open(po.url("copy"), options);
-  				});
+    			var options = (action == "copyInNewWindow" ? { target: "_blank" } : { width: "85%" });
+    			po.handleOpenOfOperation(po.url("copy"), options);
     		}
     		else if(action == "import")
     			po.open(po.url("import"));
@@ -141,10 +135,7 @@ selectOperation 是否选择操作，允许为null
     		
     		if(action == "editInNewWindow")
     		{
-    			po.executeOnSelect(function(row)
-				{
-					po.open(po.url("edit?id=" + row.id), {target: "_blank"});
-				});
+    			po.handleOpenOfOperation(po.url("edit"), { target: "_blank" });
     		}
     	}
 	});
@@ -209,11 +200,7 @@ selectOperation 是否选择操作，允许为null
     		
     		if(action == "shareSet")
     		{
-    			po.executeOnSelect(function(row)
-  				{
-    				var options = { data: { id: row.id } };
-  					po.open(po.url("shareSet"), options);
-  				});
+  				po.handleOpenOfOperation(po.url("shareSet"));
     		}
     	}
 	});
@@ -235,20 +222,27 @@ selectOperation 是否选择操作，允许为null
 
 	po.element(".addButton").click(function()
 	{
-		po.handleAddOperation(po.url("add"),
-		{
-			width: "85%"
-		});
+		po.handleAddOperation(po.url("add"), { width: "85%" });
 	});
 	
 	po.element(".editButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("edit"), { width: "85%", data : data });
-		});
+		po.handleOpenOfOperation(po.url("edit"), { width: "85%" });
+	});
+
+	po.element(".viewButton").click(function()
+	{
+		po.handleOpenOfOperation(po.url("view"), { width: "85%" });
+	});
+	
+	po.element(".deleteButton").click(function()
+	{
+		po.handleDeleteOperation(po.url("delete"));
+	});
+	
+	po.element(".selectButton").click(function()
+	{
+		po.handleSelectOperation();
 	});
 	
 	po.element(".shareButton").click(function()
@@ -267,20 +261,6 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	po.element(".viewButton").click(function()
-	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("view"),
-			{
-				width: "85%",
-				data : data
-			});
-		});
-	});
-	
 	po.element(".showButton").click(function()
 	{
 		po.executeOnSelect(function(row)
@@ -292,22 +272,7 @@ selectOperation 是否选择操作，允许为null
 	
 	po.element(".exportButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("export"), { target: "_blank", data : data });
-		});
-	});
-	
-	po.element(".deleteButton").click(function()
-	{
-		po.handleDeleteOperation(po.url("delete"));
-	});
-	
-	po.element(".selectButton").click(function()
-	{
-		po.handleSelectOperation();
+		po.handleOpenOfOperation(po.url("export"), { target: "_blank" });
 	});
 	
 	var tableColumns = [

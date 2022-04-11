@@ -105,10 +105,7 @@ boolean readonly 是否只读操作，默认为false
 
 	po.element(".addButton").click(function()
 	{
-		po.handleAddOperation(po.url("add"),
-		{
-			width: "85%"
-		});
+		po.handleAddOperation(po.url("add"), { width: "85%" });
 	});
 	
 	po.element(".addGroupSelect").selectmenu(
@@ -126,25 +123,7 @@ boolean readonly 是否只读操作，默认为false
     		
     		if(action == "copy")
     		{
-    			po.executeOnSelect(function(row)
- 				{
-    				var id = row.id;
-    				
-    				po.open(po.url("copy"),
-					{
-						width: "85%",
-						data: { id: id },
-						<#if selectOperation>
-						pageParam:
-						{
-							submitSuccess: function(data)
-							{
-								po.pageParamCallSelect(true, data);
-							}
-						}
-						</#if>
-					});
- 				});
+    			po.handleOpenOfOperation(po.url("copy"), { width: "85%" });
     		}
     	}
 	});
@@ -152,14 +131,14 @@ boolean readonly 是否只读操作，默认为false
 	
 	po.element(".editButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("edit"), { width: "85%", data : data });
-		});
+		po.handleOpenOfOperation(po.url("edit"), { width: "85%" });
 	});
-	
+
+	po.element(".viewButton").click(function()
+	{
+		po.handleOpenOfOperation(po.url("view"), { width: "85%" });
+	});
+
 	po.element(".shareButton").click(function()
 	{
 		po.executeOnSelect(function(row)
@@ -176,20 +155,6 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	po.element(".viewButton").click(function()
-	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("view"),
-			{
-				width: "85%",
-				data : data
-			});
-		});
-	});
-
 	po.element(".showButton").click(function()
 	{
 		po.executeOnSelect(function(row)

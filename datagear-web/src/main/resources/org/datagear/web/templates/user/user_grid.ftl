@@ -74,38 +74,17 @@ boolean readonly 是否只读操作，默认为false
 	
 	po.element(".editButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("edit"), { data : data });
-		});
+		po.handleOpenOfOperation(po.url("edit"));
 	});
 	
 	po.element(".viewButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("view"),
-			{
-				data : data
-			});
-		});
+		po.handleOpenOfOperation(po.url("view"));
 	});
 	
 	po.element(".deleteButton").click(function()
 	{
-		po.executeOnSelects(function(rows)
-		{
-			var data = $.getPropertyParamString(rows, "id");
-			
-			po.open(po.url("delete"),
-			{
-				data : data
-			});
-		});
+		po.handleOpenOfsOperation(po.url("delete"));
 	});
 	
 	po.element(".selectButton").click(function()

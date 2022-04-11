@@ -69,20 +69,14 @@ selectOperation 是否选择操作，允许为null
 		po.open(po.url("upload"));
 	});
 	
-	po.element(".downloadButton").click(function()
-	{
-		po.executeOnSelects(function(rows)
-		{
-			var param = $.getPropertyParamString(rows, "id");
-			var options = {target : "_file"};
-			
-			po.open(po.url("download?"+param), options);
-		});
-	});
-	
 	po.element(".deleteButton").click(function()
 	{
 		po.handleDeleteOperation(po.url("delete"));
+	});
+
+	po.element(".downloadButton").click(function()
+	{
+		po.handleOpenOfsOperation(po.url("download"), { target: "_file" });
 	});
 	
 	var snColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='serialNumber' />", "id");

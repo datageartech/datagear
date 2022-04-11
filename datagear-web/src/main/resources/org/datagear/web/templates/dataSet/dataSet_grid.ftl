@@ -113,39 +113,16 @@ boolean readonly 是否只读操作，默认为false
 			{
 				po.executeOnSelect(function(row)
 				{
-					var data = {"id" : row.id};
-					
-					po.open(po.url(addURL),
+					po.handleAddOperation(po.url(addURL),
 					{
 						width: "85%",
-						data : data,
-						<#if selectOperation>
-						pageParam:
-						{
-							submitSuccess: function(data)
-							{
-								po.pageParamCallSelect(true, data);
-							}
-						}
-						</#if>
+						data : {"id" : row.id}
 					});
 				});
 			}
 			else
 			{
-				po.open(po.url(addURL),
-				{
-					width: "85%",
-					<#if selectOperation>
-					pageParam:
-					{
-						submitSuccess: function(data)
-						{
-							po.pageParamCallSelect(true, data);
-						}
-					}
-					</#if>
-				});
+				po.handleAddOperation(po.url(addURL), { width: "85%" });
 			}
 		}
 	});
@@ -166,12 +143,22 @@ boolean readonly 是否只读操作，默认为false
 	
 	po.element(".editButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("edit"), { width: "85%", data : data });
-		});
+		po.handleOpenOfOperation(po.url("edit"), { width: "85%" });
+	});
+	
+	po.element(".viewButton").click(function()
+	{
+		po.handleOpenOfOperation(po.url("view"), { width: "85%" });
+	});
+	
+	po.element(".deleteButton").click(function()
+	{
+		po.handleDeleteOperation(po.url("delete"));
+	});
+	
+	po.element(".selectButton").click(function()
+	{
+		po.handleSelectOperation();
 	});
 
 	po.element(".shareButton").click(function()
@@ -188,30 +175,6 @@ boolean readonly 是否只读操作，默认为false
 			$.setGridPageHeightOption(options);
 			po.open(contextPath+"/authorization/${DataSetEntity.AUTHORIZATION_RESOURCE_TYPE}/" + row.id +"/query", options);
 		});
-	});
-	
-	po.element(".viewButton").click(function()
-	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"id" : row.id};
-			
-			po.open(po.url("view"),
-			{
-				width: "85%",
-				data : data
-			});
-		});
-	});
-	
-	po.element(".deleteButton").click(function()
-	{
-		po.handleDeleteOperation(po.url("delete"));
-	});
-	
-	po.element(".selectButton").click(function()
-	{
-		po.handleSelectOperation();
 	});
 	
 	var dataSetTypeColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.dataSetType' />", "dataSetType");

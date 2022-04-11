@@ -70,43 +70,12 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	
 	po.element(".editButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data =
-			{
-				"id" : row.id
-			};
-			
-			po.open(po.url("edit"),
-			{
-				data : data,
-				<#if selectOperation>
-				pageParam:
-				{
-					submitSuccess: function(data)
-					{
-						po.pageParamCallSelect(true, data);
-					}
-				}
-				</#if>
-			});
-		});
+		po.handleOpenOfOperation(po.url("edit"));
 	});
 	
 	po.element(".viewButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data =
-			{
-				"id" : row.id
-			};
-			
-			po.open(po.url("view"),
-			{
-				data : data
-			});
-		});
+		po.handleOpenOfOperation(po.url("view"));
 	});
 	
 	po.element(".deleteButton").click( function()

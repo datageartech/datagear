@@ -152,23 +152,36 @@ page_obj.ftl
 		po.open(url, options);
 	};
 	
-	po.handleOpenSelectedOperation = function(url, options, idPropertyName, table)
+	po.handleOpenOfOperation = function(url, options, table)
 	{
-		if(idPropertyName && typeof(idPropertyName) != "string")
-		{
-			table = idPropertyName;
-			idPropertyName = null;
-		}
 		table = (table == null ? po.table() : table);
+		
+		po.executeOnSelect(function(row)
+		{
+			var data = po.toOperationRequestData(row, false);
+			options = $.extend({ data: data }, options);
+			
+			po.open(url, options);
+		},
+		table);
 	};
 	
-	po.handleDeleteOperation = function(url, idPropertyName, table)
+	po.handleOpenOfsOperation = function(url, options, table)
 	{
-		if(idPropertyName && typeof(idPropertyName) != "string")
+		table = (table == null ? po.table() : table);
+		
+		po.executeOnSelects(function(rows)
 		{
-			table = idPropertyName;
-			idPropertyName = null;
-		}
+			var data = po.toOperationRequestData(rows, false);
+			options = $.extend({ data: data }, options);
+			
+			po.open(url, options);
+		},
+		table);
+	};
+	
+	po.handleDeleteOperation = function(url, table)
+	{
 		table = (table == null ? po.table() : table);
 		
 		po.executeOnSelects(function(rows)
@@ -177,7 +190,7 @@ page_obj.ftl
 			{
 				"confirm" : function()
 				{
-					$.postJson(url, $.propertyValue(rows, (idPropertyName || "id")), function()
+					$.postJson(url, po.toOperationRequestData(rows, true), function()
 					{
 						po.refresh();
 					});
@@ -195,7 +208,7 @@ page_obj.ftl
 		{
 			po.executeOnSelects(function(rows)
 			{
-				po.pageParamCallSelect(rows, false);
+				po.pageParamCallSelect(rows);
 			},
 			table);
 		}
@@ -207,6 +220,20 @@ page_obj.ftl
 			},
 			table);
 		}
+	};
+	
+	/**
+	 * 将单行或多行数据对象转换为操作请求数据。
+	 * 
+	 * @param data
+	 * @param json 可选，是否JSON请求
+	 */
+	po.toOperationRequestData = function(data, json)
+	{
+		if(json)
+			return $.propertyValue(data, "id");
+		else
+			return $.getPropertyParamString(data, "id");
 	};
 	
 	/**

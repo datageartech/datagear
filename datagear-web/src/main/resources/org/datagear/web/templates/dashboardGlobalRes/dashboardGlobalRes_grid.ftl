@@ -67,6 +67,14 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/dashboardGlobalRes/" + action;
 	};
 	
+	po.toOperationRequestData = function(data, json)
+	{
+		if(json)
+			return $.propertyValue(data, "path");
+		else
+			return $.getPropertyParamString(data, "path");
+	};
+	
 	po.element(".addButton").click(function()
 	{
 		po.handleAddOperation(po.url("add"));
@@ -87,27 +95,13 @@ selectOperation 是否选择操作，允许为null
 		 		return;
 			}
 			
-			var data = {"path" : row.path};
-			
-			po.open(po.url("edit"),
-			{
-				data : data
-			});
+			po.handleOpenOfOperation(po.url("edit"));
 		});
 	});
 	
 	po.element(".downloadButton").click(function()
 	{
-		po.executeOnSelect(function(row)
-		{
-			var data = {"path" : row.path};
-			
-			po.open(po.url("download"),
-			{
-				target: "_file",
-				data : data
-			});
-		});
+		po.handleOpenOfOperation(po.url("download"), { target: "_file" });
 	});
 	
 	po.element(".viewButton").click(function()
@@ -120,7 +114,7 @@ selectOperation 是否选择操作，允许为null
 	
 	po.element(".deleteButton").click(function()
 	{
-		po.handleDeleteOperation(po.url("delete"), "path");
+		po.handleDeleteOperation(po.url("delete"));
 	});
 	
 	var tableColumns = [
