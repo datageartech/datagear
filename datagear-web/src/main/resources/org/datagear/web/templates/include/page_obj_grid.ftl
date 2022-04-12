@@ -158,7 +158,8 @@ page_obj.ftl
 		
 		po.executeOnSelect(function(row)
 		{
-			var data = po.toOperationRequestData(row, false);
+			var needJson = ($.CONTENT_TYPE_JSON == (options ? options.contentType : null));
+			var data = po.toOperationRequestData(row, needJson);
 			options = $.extend({ data: data }, options);
 			
 			po.open(url, options);
@@ -172,7 +173,8 @@ page_obj.ftl
 		
 		po.executeOnSelects(function(rows)
 		{
-			var data = po.toOperationRequestData(rows, false);
+			var needJson = ($.CONTENT_TYPE_JSON == (options ? options.contentType : null));
+			var data = po.toOperationRequestData(rows, needJson);
 			options = $.extend({ data: data }, options);
 			
 			po.open(url, options);

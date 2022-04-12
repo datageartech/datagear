@@ -122,6 +122,11 @@ boolean readonly 是否只读操作，默认为false
 	
 	po.onDbTable(function(dbTable)
 	{
+		po.toOperationRequestData = function(data, json)
+		{
+			return $.tableMeta.uniqueRecordData(dbTable, data);
+		};
+		
 		po.element(".addButton").click(function()
 		{
 			var url = po.url("add");
@@ -135,16 +140,18 @@ boolean readonly 是否只读操作，默认为false
 		
 		po.element(".editButton").click(function()
 		{
-			po.executeOnSelect(function(row)
+			po.handleOpenOfOperation(po.url("edit"),
 			{
-				var data = $.tableMeta.uniqueRecordData(dbTable, row);
-				
-				po.open(po.url("edit"),
-				{
-					contentType: $.CONTENT_TYPE_JSON,
-					data : data,
-					pinTitleButton : true
-				});
+				contentType: $.CONTENT_TYPE_JSON,
+				pinTitleButton : true
+			});
+		});
+
+		po.element(".viewButton").click(function()
+		{
+			po.handleOpenOfOperation(po.url("view"),
+			{
+				contentType: $.CONTENT_TYPE_JSON
 			});
 		});
 		
@@ -175,20 +182,6 @@ boolean readonly 是否只读操作，默认为false
 		po.element(".selectButton").click(function()
 		{
 			po.handleSelectOperation();
-		});
-		
-		po.element(".viewButton").click(function()
-		{
-			po.executeOnSelect(function(row)
-			{
-				var data = $.tableMeta.uniqueRecordData(dbTable, row);
-				
-				po.open(po.url("view"),
-				{
-					contentType: $.CONTENT_TYPE_JSON,
-					data : data
-				});
-			});
 		});
 		
 		po.element(".exportButton").click(function()

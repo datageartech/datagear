@@ -1818,8 +1818,6 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	margin-left: 0.1em;
 	padding: 2px 2px;
 	position: relative;
-	opacity: 0.9;
-	filter: Alpha(Opacity=90);
 }
 .search-form .condition-panel-parent .condition-panel .condition-panel-title-bar{
 	text-align: right;
