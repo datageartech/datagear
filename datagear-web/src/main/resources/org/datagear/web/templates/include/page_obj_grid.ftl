@@ -278,6 +278,17 @@ page_obj.ftl
 		return false;
 	};
 	
+	po.buildSimpleColumn = function(title, propName, hidden, noTruncate)
+	{
+		return $.buildDataTablesColumnSimpleOption(title, propName, hidden, noTruncate);
+	};
+	
+	po.buildSearchableColumn = function(title, propName, hidden, noTruncate)
+	{
+		title = $.buildDataTablesColumnTitleSearchable(title);
+		return po.buildSimpleColumn(title, propName, hidden, noTruncate);
+	};
+	
 	/**
 	 * 默认po.buildAjaxTableSettings请求参数实现。
 	 */

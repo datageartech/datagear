@@ -118,8 +118,8 @@ selectOperation 是否选择操作，允许为null
 	});
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "path", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dashboardGlobalRes.path' />"), "path", false, true)
+		po.buildSimpleColumn("<@spring.message code='id' />", "path", true),
+		po.buildSearchableColumn("<@spring.message code='dashboardGlobalRes.path' />", "path", false, true)
 	];
 	
 	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));

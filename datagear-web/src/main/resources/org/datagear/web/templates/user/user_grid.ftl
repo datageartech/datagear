@@ -95,10 +95,10 @@ boolean readonly 是否只读操作，默认为false
 	po.initPagination();
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='user.id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.name' />"), "name"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='user.realName' />"), "realName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='user.createTime' />", "createTime")
+		po.buildSimpleColumn("<@spring.message code='user.id' />", "id", true),
+		po.buildSearchableColumn("<@spring.message code='user.name' />", "name"),
+		po.buildSearchableColumn("<@spring.message code='user.realName' />", "realName"),
+		po.buildSimpleColumn("<@spring.message code='user.createTime' />", "createTime")
 	];
 	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("pagingQueryData"));
 	po.initTable(tableSettings);

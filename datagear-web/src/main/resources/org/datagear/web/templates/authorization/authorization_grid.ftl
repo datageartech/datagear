@@ -83,7 +83,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		po.handleDeleteOperation(po.url("delete"));
 	});
 	
-	var columnEnabled = $.buildDataTablesColumnSimpleOption("<@spring.message code='${resourceMeta.authEnabledLabel}' />", "enabled", ${(resourceMeta.enableSetEnable)?string('false', 'true')});
+	var columnEnabled = po.buildSimpleColumn("<@spring.message code='${resourceMeta.authEnabledLabel}' />", "enabled", ${(resourceMeta.enableSetEnable)?string('false', 'true')});
 	columnEnabled.render = function(data, type, row, meta)
 	{
 		if(data == true)
@@ -95,9 +95,9 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	};
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='${resourceMeta.authPrincipalLabel}' />"), "principalName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='${resourceMeta.authPermissionLabel}' />", "permissionLabel", ${(resourceMeta.singlePermission)?string('true', 'false')}),
+		po.buildSimpleColumn("<@spring.message code='id' />", "id", true),
+		po.buildSearchableColumn("<@spring.message code='${resourceMeta.authPrincipalLabel}' />", "principalName"),
+		po.buildSimpleColumn("<@spring.message code='${resourceMeta.authPermissionLabel}' />", "permissionLabel", ${(resourceMeta.singlePermission)?string('true', 'false')}),
 		columnEnabled
 	];
 	

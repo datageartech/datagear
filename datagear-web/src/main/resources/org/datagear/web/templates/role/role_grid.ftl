@@ -93,7 +93,7 @@ selectOperation 是否选择操作，允许为null
 	
 	po.initPagination();
 	
-	var columnEnabled = $.buildDataTablesColumnSimpleOption("<@spring.message code='role.enabled' />", "enabled");
+	var columnEnabled = po.buildSimpleColumn("<@spring.message code='role.enabled' />", "enabled");
 	columnEnabled.render = function(data, type, row, meta)
 	{
 		if(data == true)
@@ -105,9 +105,9 @@ selectOperation 是否选择操作，允许为null
 	};
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='role.id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='role.name' />"), "name"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='role.description' />"), "description"),
+		po.buildSimpleColumn("<@spring.message code='role.id' />", "id", true),
+		po.buildSearchableColumn("<@spring.message code='role.name' />", "name"),
+		po.buildSearchableColumn("<@spring.message code='role.description' />", "description"),
 		columnEnabled
 	];
 	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("pagingQueryData"));

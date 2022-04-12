@@ -217,7 +217,7 @@ boolean readonly 是否只读操作，默认为false
 		po.handleSelectOperation();
 	});
 	
-	var updateIntervalColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='chart.updateInterval' />", "updateInterval");
+	var updateIntervalColumn = po.buildSimpleColumn("<@spring.message code='chart.updateInterval' />", "updateInterval");
 	updateIntervalColumn.render = function(data)
 	{
 		if(data < 0)
@@ -233,7 +233,7 @@ boolean readonly 是否只读操作，默认为false
 	
 	//使用ID作为列数据，确保排序可用
 	var chartPluginColumnData = "htmlChartPlugin.id";
-	var chartPluginColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", chartPluginColumnData);
+	var chartPluginColumn = po.buildSimpleColumn("<@spring.message code='chart.htmlChartPlugin' />", chartPluginColumnData);
 	chartPluginColumn.render = function(data, type, row)
 	{
 		data = row.htmlChartPlugin;
@@ -258,13 +258,13 @@ boolean readonly 是否只读操作，默认为false
 	};
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='id' />"), "id"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.name' />"), "name"),
+		po.buildSearchableColumn("<@spring.message code='id' />", "id"),
+		po.buildSearchableColumn("<@spring.message code='chart.name' />", "name"),
 		chartPluginColumn,
 		updateIntervalColumn,
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='analysisProject.ownerAnalysisProject' />"), "analysisProject.name"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createUser' />", "createUser.realName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createTime' />", "createTime")
+		po.buildSearchableColumn("<@spring.message code='analysisProject.ownerAnalysisProject' />", "analysisProject.name"),
+		po.buildSimpleColumn("<@spring.message code='chart.createUser' />", "createUser.realName"),
+		po.buildSimpleColumn("<@spring.message code='chart.createTime' />", "createTime")
 	];
 	
 	po.initPagination();

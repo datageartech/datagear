@@ -118,11 +118,11 @@ selectOperation 是否选择操作，允许为null
 	});
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='analysisProject.name' />"), "name"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='analysisProject.desc' />"), "desc"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='analysisProject.createUser' />", "createUser.realName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='analysisProject.createTime' />", "createTime")
+		po.buildSimpleColumn("<@spring.message code='id' />", "id", true),
+		po.buildSearchableColumn("<@spring.message code='analysisProject.name' />", "name"),
+		po.buildSearchableColumn("<@spring.message code='analysisProject.desc' />", "desc"),
+		po.buildSimpleColumn("<@spring.message code='analysisProject.createUser' />", "createUser.realName"),
+		po.buildSimpleColumn("<@spring.message code='analysisProject.createTime' />", "createTime")
 	];
 	
 	po.initPagination();

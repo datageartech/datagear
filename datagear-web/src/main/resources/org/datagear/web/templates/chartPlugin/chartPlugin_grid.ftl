@@ -79,7 +79,7 @@ selectOperation 是否选择操作，允许为null
 		po.handleOpenOfsOperation(po.url("download"), { target: "_file" });
 	});
 	
-	var snColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='serialNumber' />", "id");
+	var snColumn = po.buildSimpleColumn("<@spring.message code='serialNumber' />", "id");
 	snColumn.width="4.01em";
 	snColumn.orderable=false;
 	snColumn.render = function(data, type, row, meta)
@@ -94,7 +94,7 @@ selectOperation 是否选择操作，允许为null
 		}
 	};
 	
-	var iconColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.icon' />", "iconUrl", false);
+	var iconColumn = po.buildSimpleColumn("<@spring.message code='chartPlugin.icon' />", "iconUrl", false);
 	iconColumn.render = function(data, type, row, meta)
 	{
 		if($.dataTableUtil.isDisplayType(type))
@@ -106,12 +106,12 @@ selectOperation 是否选择操作，允许为null
 	};
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
+		po.buildSimpleColumn("<@spring.message code='id' />", "id", true),
 		snColumn,
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.name' />"), "nameLabel.value"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.version' />", "version"),
+		po.buildSearchableColumn("<@spring.message code='chartPlugin.name' />", "nameLabel.value"),
+		po.buildSimpleColumn("<@spring.message code='chartPlugin.version' />", "version"),
 		iconColumn,
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chartPlugin.desc' />"), "descLabel.value")
+		po.buildSearchableColumn("<@spring.message code='chartPlugin.desc' />", "descLabel.value")
 	];
 	
 	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));

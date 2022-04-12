@@ -109,29 +109,12 @@ selectOperation 是否选择操作，允许为null
 		po.handleSelectOperation();
 	});
 	
-	po.buildTableColumValueOption = function(title, data, hidden)
-	{
-		var option =
-		{
-			title : title,
-			data : data,
-			visible : !hidden,
-			render: function(data, type, row, meta)
-			{
-				return $.escapeHtml($.truncateIf(data));
-			},
-			defaultContent: "",
-		};
-		
-		return option;
-	};
-	
 	var tableColumns = [
-		po.buildTableColumValueOption("<@spring.message code='driverEntity.id' />", "id", true),
-		po.buildTableColumValueOption("<@spring.message code='driverEntity.displayName' />", "displayName"),
-		po.buildTableColumValueOption("<@spring.message code='driverEntity.driverClassName' />", "driverClassName"),
-		po.buildTableColumValueOption("<@spring.message code='driverEntity.displayDesc' />", "displayDescMore"),
-		po.buildTableColumValueOption("", "displayText", true)
+		po.buildSimpleColumn("<@spring.message code='driverEntity.id' />", "id", true),
+		po.buildSearchableColumn("<@spring.message code='driverEntity.displayName' />", "displayName"),
+		po.buildSearchableColumn("<@spring.message code='driverEntity.driverClassName' />", "driverClassName"),
+		po.buildSearchableColumn("<@spring.message code='driverEntity.displayDesc' />", "displayDescMore"),
+		po.buildSimpleColumn("", "displayText", true)
 	];
 	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));
 	po.initTable(tableSettings);

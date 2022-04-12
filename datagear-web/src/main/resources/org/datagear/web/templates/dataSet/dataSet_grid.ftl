@@ -177,7 +177,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 	});
 	
-	var dataSetTypeColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.dataSetType' />", "dataSetType");
+	var dataSetTypeColumn = po.buildSimpleColumn("<@spring.message code='dataSet.dataSetType' />", "dataSetType");
 	dataSetTypeColumn.render = function(data)
 	{
 		if("${DataSetEntity.DATA_SET_TYPE_SQL}" == data)
@@ -199,12 +199,12 @@ boolean readonly 是否只读操作，默认为false
 	};
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.name' />"), "name"),
+		po.buildSimpleColumn("<@spring.message code='id' />", "id", true),
+		po.buildSearchableColumn("<@spring.message code='dataSet.name' />", "name"),
 		dataSetTypeColumn,
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='analysisProject.ownerAnalysisProject' />"), "analysisProject.name"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createUser' />", "createUser.realName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createTime' />", "createTime")
+		po.buildSearchableColumn("<@spring.message code='analysisProject.ownerAnalysisProject' />", "analysisProject.name"),
+		po.buildSimpleColumn("<@spring.message code='dataSet.createUser' />", "createUser.realName"),
+		po.buildSimpleColumn("<@spring.message code='dataSet.createTime' />", "createTime")
 	];
 	
 	po.initPagination();

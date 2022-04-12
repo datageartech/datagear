@@ -97,7 +97,7 @@ selectOperation 是否选择操作，允许为null
 		po.open(po.url("test"));
 	});
 	
-	var columnPermitted = $.buildDataTablesColumnSimpleOption("<@spring.message code='schemaGuard.permitted' />", "permitted");
+	var columnPermitted = po.buildSimpleColumn("<@spring.message code='schemaGuard.permitted' />", "permitted");
 	columnPermitted.render = function(data, type, row, meta)
 	{
 		if(data == true)
@@ -108,7 +108,7 @@ selectOperation 是否选择操作，允许为null
 		return data;
 	};
 	
-	var columnEnabled = $.buildDataTablesColumnSimpleOption("<@spring.message code='schemaGuard.enabled' />", "enabled");
+	var columnEnabled = po.buildSimpleColumn("<@spring.message code='schemaGuard.enabled' />", "enabled");
 	columnEnabled.render = function(data, type, row, meta)
 	{
 		if(data == true)
@@ -120,12 +120,12 @@ selectOperation 是否选择操作，允许为null
 	};
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='schemaGuard.pattern' />"), "pattern"),
+		po.buildSimpleColumn("<@spring.message code='id' />", "id", true),
+		po.buildSearchableColumn("<@spring.message code='schemaGuard.pattern' />", "pattern"),
 		columnPermitted,
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='schemaGuard.priority' />", "priority"),
+		po.buildSimpleColumn("<@spring.message code='schemaGuard.priority' />", "priority"),
 		columnEnabled,
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='schemaGuard.createTime' />", "createTime")
+		po.buildSimpleColumn("<@spring.message code='schemaGuard.createTime' />", "createTime")
 	];
 	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));
 	tableSettings.ordering = false;

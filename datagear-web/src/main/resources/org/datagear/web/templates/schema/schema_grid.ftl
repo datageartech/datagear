@@ -99,12 +99,12 @@ boolean readonly 是否只读操作，默认为false
 	});
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='schema.title' />", "title"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='schema.url' />", "url"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='schema.user' />", "user"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='schema.createUser' />", "createUser.nameLabel"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='schema.createTime' />", "createTime")
+		po.buildSimpleColumn("<@spring.message code='id' />", "id", true),
+		po.buildSearchableColumn("<@spring.message code='schema.title' />", "title"),
+		po.buildSearchableColumn("<@spring.message code='schema.url' />", "url"),
+		po.buildSimpleColumn("<@spring.message code='schema.user' />", "user"),
+		po.buildSimpleColumn("<@spring.message code='schema.createUser' />", "createUser.nameLabel"),
+		po.buildSimpleColumn("<@spring.message code='schema.createTime' />", "createTime")
 	];
 	var tableSettings = po.buildAjaxTableSettings(tableColumns, po.url("queryData"));
 	po.initTable(tableSettings);
