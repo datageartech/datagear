@@ -46,7 +46,7 @@ po.conditionAutocompleteSource = undefined;
 <script type="text/javascript">
 (function(po)
 {
-	po.searchForm = function(){ return this.element("#${pageId}-searchForm"); };
+	po.searchForm = function(){ return this.elementOfId("${pageId}-searchForm"); };
 	po.likeSwitchIcon = function(){ return this.element(".like-switch-icon", this.searchForm()); };
 	po.notLikeInput = function(){ return this.elementOfName("notLike", this.searchForm()); };
 	po.keywordInput = function(){ return this.elementOfName("keyword", this.searchForm()); };

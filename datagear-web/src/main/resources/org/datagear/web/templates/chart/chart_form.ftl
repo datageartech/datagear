@@ -721,7 +721,7 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".dataformat-button").click(function()
 	{
-		var panel = po.element("#${pageId}-dataFormatPanel");
+		var panel = po.elementOfId("${pageId}-dataFormatPanel");
 		
 		if(panel.is(":hidden"))
 		{
@@ -732,7 +732,7 @@ readonly 是否只读操作，允许为null
 			panel.hide();
 	});
 	
-	po.element("#${pageId}-dataFormatPanel").draggable({ handle : ".ui-widget-header" });
+	po.elementOfId("${pageId}-dataFormatPanel").draggable({ handle : ".ui-widget-header" });
 	
 	po.element(".add-data-set-button").click(function()
 	{

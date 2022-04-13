@@ -40,7 +40,7 @@ page_obj.ftl
 		var param =
 		{
 			"keyword" : $.trim(po.elementOfName("keyword", $form).val()),
-			"${_ssf_AbstractController.DATA_FILTER_PARAM}": po.element("#${pageId}-dataFilter", $form).val()
+			"${_ssf_AbstractController.DATA_FILTER_PARAM}": po.elementOfId("${pageId}-dataFilter", $form).val()
 		};
 		
 		return param;
@@ -48,7 +48,7 @@ page_obj.ftl
 	
 	po.initDataFilter = function()
 	{
-		var $ele = po.element("#${pageId}-dataFilter");
+		var $ele = po.elementOfId("${pageId}-dataFilter");
 		
 		var val = $.cookie("${_ssf_AbstractController.DATA_FILTER_COOKIE}");
 		if(!val)
@@ -76,7 +76,7 @@ page_obj.ftl
 	
 	po.getDataFilter = function()
 	{
-		return po.element("#${pageId}-dataFilter").val();
+		return po.elementOfId("${pageId}-dataFilter").val();
 	};
 })
 (${pageId});

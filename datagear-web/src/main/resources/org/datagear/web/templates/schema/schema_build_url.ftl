@@ -90,7 +90,7 @@ preview 是否是预览请求，允许为null
 		
 		try
 		{
-			var scriptCode = po.element("#dbUrlBuilderScriptCode").text();
+			var scriptCode = po.elementOfId("dbUrlBuilderScriptCode").text();
 			var builtInBuildersJson = po.element(".builtInBuildersJson").text();
 			
 			if(builtInBuildersJson)

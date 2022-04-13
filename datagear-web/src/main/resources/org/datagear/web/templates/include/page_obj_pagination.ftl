@@ -19,7 +19,7 @@ po.paging = undefined;
 <script type="text/javascript">
 (function(po)
 {
-	po.pagination = function(){ return this.element("#${pageId}-pagination"); };
+	po.pagination = function(){ return this.elementOfId("${pageId}-pagination"); };
 	
 	po.getPagingParam = function()
 	{

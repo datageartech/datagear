@@ -30,17 +30,17 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 
 	po.getDataExchangeProgressEle = function()
 	{
-		return po.element("#${pageId}-progress");
+		return po.elementOfId("${pageId}-progress");
 	};
 
 	po.getDataExchangeProgressPercentEle = function()
 	{
-		return po.element("#${pageId}-progress-percent");
+		return po.elementOfId("${pageId}-progress-percent");
 	};
 	
 	po.getSubDataExchangeExceptionTipEle = function()
 	{
-		return po.element("#${pageId}-exchange-exception-tooltip");
+		return po.elementOfId("${pageId}-exchange-exception-tooltip");
 	};
 	
 	po.nextSubDataExchangeId = function()
@@ -461,7 +461,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	
 	po.initDataExchangeUIs = function()
 	{
-		po.element("#${pageId}-binaryFormat").controlgroup();
+		po.elementOfId("${pageId}-binaryFormat").controlgroup();
 		po.element(".binaryFormatSetButton").click(function()
 		{
 			po.elementOfName("dataFormat.binaryFormat").val($(this).attr("value"));

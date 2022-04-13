@@ -138,11 +138,11 @@ readonly 是否只读操作，允许为null
 {
 	po.initFormBtns();
 	
-	po.driverEntityFormItemValue = function(){ return this.element("#driverEntityFormItemValue"); };
-	po.schemaDriverEntityFormItem = function(){ return this.element("#schemaDriverEntityFormItem"); };
+	po.driverEntityFormItemValue = function(){ return this.elementOfId("driverEntityFormItemValue"); };
+	po.schemaDriverEntityFormItem = function(){ return this.elementOfId("schemaDriverEntityFormItem"); };
 	po.isDriverEntityEmpty = (po.elementOfName("driverEntity.id").val() == "");
 	
-	po.element("#schemaBuildUrlHelp").click(function()
+	po.elementOfId("schemaBuildUrlHelp").click(function()
 	{
 		po.open("${contextPath}/schemaUrlBuilder/buildUrl",
 		{
@@ -158,7 +158,7 @@ readonly 是否只读操作，允许为null
 		});
 	});
 	
-	po.element("#driverEntitySelectButton").click(function()
+	po.elementOfId("driverEntitySelectButton").click(function()
 	{
 		var options =
 		{
@@ -167,7 +167,7 @@ readonly 是否只读操作，允许为null
 				select : function(driverEntity)
 				{
 					po.elementOfName("driverEntity.id").val(driverEntity.id);
-					po.element("#driverEntityText").val(driverEntity.displayText);
+					po.elementOfId("driverEntityText").val(driverEntity.displayText);
 				}
 			}
 		};
@@ -175,7 +175,7 @@ readonly 是否只读操作，允许为null
 		po.open("${contextPath}/driverEntity/select", options);
 	});
 	
-	po.element("#driverEntityActionSelect").selectmenu(
+	po.elementOfId("driverEntityActionSelect").selectmenu(
 	{
 		appendTo: po.driverEntityFormItemValue(),
 		classes:
@@ -188,8 +188,8 @@ readonly 是否只读操作，允许为null
     		
 			if("del" == action)
     		{
-				po.element("#driverEntityId").val("");
-				po.element("#driverEntityText").val("");
+				po.elementOfId("driverEntityId").val("");
+				po.elementOfId("driverEntityText").val("");
     		}
     	}
 	});
@@ -200,12 +200,12 @@ readonly 是否只读操作，允许为null
 		po.form().submit();
 	});
 	
-	po.element("#driverEntityActionGroup").controlgroup();
+	po.elementOfId("driverEntityActionGroup").controlgroup();
 	
 	if(po.isDriverEntityEmpty)
 		po.schemaDriverEntityFormItem().hide();
 	
-	po.element("#schemaAdvancedSet").button(
+	po.elementOfId("schemaAdvancedSet").button(
 	{
 		icon: (po.schemaDriverEntityFormItem().is(":hidden") ? "ui-icon-triangle-1-s" : "ui-icon-triangle-1-n"),
 		showLabel: false

@@ -194,13 +194,13 @@ Schema schema 数据库，不允许为null
 	po.sqlResultReadActualBinaryRows = parseInt("${sqlResultRowMapper.readActualBinaryRows}");
 	po.sqlResultBinaryPlaceholder = "${sqlResultRowMapper.binaryPlaceholder?js_string?no_esc}";
 	
-	po.resultMessageElement = po.element("#${pageId}-resultMessage");
-	po.sqlResultTabs = po.element("#${pageId}-sqlResultTabs");
+	po.resultMessageElement = po.elementOfId("${pageId}-resultMessage");
+	po.sqlResultTabs = po.elementOfId("${pageId}-sqlResultTabs");
 	
 	$.initButtons(po.element(".head, .result-operations"));
 	po.element().autoCloseSubPanel();
-	po.element("#sqlCommitModeSet").checkboxradiogroup();
-	po.element("#sqlExceptionHandleModeSet").checkboxradiogroup();
+	po.elementOfId("sqlCommitModeSet").checkboxradiogroup();
+	po.elementOfId("sqlExceptionHandleModeSet").checkboxradiogroup();
 	
 	po.sqlpadTaskClient = new $.TaskClient("${contextPath}/sqlpad/"+po.schemaId+"/message",
 			function(message)
@@ -213,14 +213,14 @@ Schema schema 数据库，不允许为null
 		);
 	
 	po.getSqlEditorSchemaId = function(){ return po.schemaId; };
-	po.sqlEditor = po.createSqlEditor(po.element("#${pageId}-sql-editor"),
+	po.sqlEditor = po.createSqlEditor(po.elementOfId("${pageId}-sql-editor"),
 	{
 		value: "${(initSql!'')?js_string?no_esc}",
 		extraKeys:
 		{
 			"Ctrl-Enter": function()
 			{
-				po.element("#executeSqlButton").click();
+				po.elementOfId("executeSqlButton").click();
 			}
 		}
 	});
@@ -228,7 +228,7 @@ Schema schema 数据库，不允许为null
 	
 	//数据库表条目、SQL历史拖入自动插入SQL
 	$.enableTableNodeDraggable = true;
-	po.element("#${pageId}-sql-editor").droppable(
+	po.elementOfId("${pageId}-sql-editor").droppable(
 	{
 		accept: ".table-draggable, .sql-draggable",
 		drop: function(event, ui)
@@ -286,7 +286,7 @@ Schema schema 数据库，不允许为null
 	
 	po.getSqlDelimiter = function()
 	{
-		var delimiter = po.element("#sqlDelimiterInput").val();
+		var delimiter = po.elementOfId("sqlDelimiterInput").val();
 		
 		if(!delimiter)
 			delimiter = ";";
@@ -296,7 +296,7 @@ Schema schema 数据库，不允许为null
 	
 	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize)
 	{
-		if(!po.element("#toggleAutoClearResultButton").hasClass("ui-state-active"))
+		if(!po.elementOfId("toggleAutoClearResultButton").hasClass("ui-state-active"))
 			po.resultMessageElement.empty();
 		
 		$.ajax(
@@ -318,7 +318,7 @@ Schema schema 数据库，不允许为null
 			error : function()
 			{
 				po.sqlpadTaskClient.stop();
-				po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "init");
+				po.updateExecuteSqlButtonState(po.elementOfId("executeSqlButton"), "init");
 			}
 		});
 	},
@@ -403,7 +403,7 @@ Schema schema 数据库，不允许为null
 			}
 			else if(msgData.sqlResultType == "RESULT_SET")
 			{
-				var tabId = po.element("#lockSqlResultTabButton").attr("lock-tab-id");
+				var tabId = po.elementOfId("lockSqlResultTabButton").attr("lock-tab-id");
 				
 				if(!tabId)
 					tabId = po.genSqlResultTabId();
@@ -431,8 +431,8 @@ Schema schema 数据库，不允许为null
 						}
 						
 						var tabPanel = po.tabsGetPaneByTabId(po.sqlResultTabs, tabId);
-						var tabForm = po.element("#" + po.getSqlResultTabPanelFormId(tabId), tabPanel);
-						var tabSql = $("textarea[name='sql']", tabForm).val();
+						var tabForm = po.elementOfId(po.getSqlResultTabPanelFormId(tabId), tabPanel);
+						var tabSql = po.elementOfName("sql", tabForm).val();
 						
 						var sqlEquals = (sql == tabSql);
 						if(!sqlEquals)
@@ -473,7 +473,7 @@ Schema schema 数据库，不允许为null
 						$this.attr("uid", uid);
 					}
 					
-					var $seDetailPanel = po.element("#sqlExceptionDetailPanel");
+					var $seDetailPanel = po.elementOfId("sqlExceptionDetailPanel");
 					var $seDetailContent = $(".sql-exception-detail-content", $seDetailPanel);
 					
 					if(!$seDetailPanel.is(":hidden") && uid == $seDetailPanel.attr("uid"))
@@ -497,13 +497,13 @@ Schema schema 数据库，不允许为null
 			
 			if(msgData.sqlCommand == "RESUME")
 			{
-				po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "executing");
+				po.updateExecuteSqlButtonState(po.elementOfId("executeSqlButton"), "executing");
 				appendContent = false;
 				$msgDiv = null;
 			}
 			else if(msgData.sqlCommand == "PAUSE")
 			{
-				po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "paused");
+				po.updateExecuteSqlButtonState(po.elementOfId("executeSqlButton"), "paused");
 			}
 			
 			if(appendContent)
@@ -538,7 +538,7 @@ Schema schema 数据库，不允许为null
 			$("<div />").html("<@spring.message code='sqlpad.executeionFinish' />").appendTo($msgContent);
 			po.appendSQLExecutionStatMessage($msgContent, msgData.sqlExecutionStat);
 			
-			po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "init");
+			po.updateExecuteSqlButtonState(po.elementOfId("executeSqlButton"), "init");
 		}
 		else
 			$msgDiv = null;
@@ -692,24 +692,24 @@ Schema schema 数据库，不允许为null
 	    	}
 	    	else
 	    	{
-		    	po.element("#moreSqlResultTabButton").button("disable");
-		    	po.element("#refreshSqlResultTabButton").button("disable");
+		    	po.elementOfId("moreSqlResultTabButton").button("disable");
+		    	po.elementOfId("refreshSqlResultTabButton").button("disable");
 		    	
 		    	$this.ajaxSubmitJson(
 	   			{
 	   				handleData: function(data)
 	   				{
-	   					var fetchSize = po.getResultsetFetchSize(po.element("#settingForm"));
+	   					var fetchSize = po.getResultsetFetchSize(po.elementOfId("settingForm"));
 	   					data.fetchSize = fetchSize;
 	   				},
 	   				success : function(sqlSelectResult, statusText, xhr)
 	   				{
-	   					$("input[name='startRow']", $this).val(sqlSelectResult.nextStartRow);
+	   					po.elementOfName("startRow", $this).val(sqlSelectResult.nextStartRow);
 	   					
 	   					var tabId = $this.attr("tab-id");
 	   					var tabPanel = po.tabsGetPaneByTabId(po.sqlResultTabs, tabId);
 	   					
-	   					var dataTable = po.element("#" + po.getSqlResultTabPanelTableId(tabId), tabPanel).DataTable();
+	   					var dataTable = po.elementOfId(po.getSqlResultTabPanelTableId(tabId), tabPanel).DataTable();
 	   					
 	   					$.addDataTableData(dataTable, sqlSelectResult.rows, sqlSelectResult.startRow-1);
 	   					
@@ -726,8 +726,8 @@ Schema schema 数据库，不允许为null
 	   				},
 	   				complete : function()
 	   				{
-	   			    	po.element("#moreSqlResultTabButton").button("enable");
-	   			    	po.element("#refreshSqlResultTabButton").button("enable");
+	   			    	po.elementOfId("moreSqlResultTabButton").button("enable");
+	   			    	po.elementOfId("refreshSqlResultTabButton").button("enable");
 	   				}
 	   			});
 	    	}
@@ -751,7 +751,7 @@ Schema schema 数据库，不允许为null
 		target = $(target);
 		var value = $("span", target).text();
 		
-		var panel = po.element("#viewLongTextResultPanel");
+		var panel = po.elementOfId("viewLongTextResultPanel");
 		$("textarea", panel).val(value);
 		panel.show().position({ my : "left bottom", at : "left top-5", of : target});
 	};
@@ -830,7 +830,7 @@ Schema schema 数据库，不允许为null
 		};
 		
 		po.initTable(settings, $table);
-		$.resizeAutoResizable(po.element("#"+tabId), function(ele){ po.resizeAutoResizable(ele); });
+		$.resizeAutoResizable(po.elementOfId(tabId), function(ele){ po.resizeAutoResizable(ele); });
 	};
 	
 	po.getNextSqlResultNameSeq = function()
@@ -882,12 +882,12 @@ Schema schema 数据库，不允许为null
 	
 	po.isExecutionStatePaused = function()
 	{
-		var executionState = po.element("#executeSqlButton").attr("execution-state");
+		var executionState = po.elementOfId("executeSqlButton").attr("execution-state");
 		
 		return (executionState == "paused");
 	};
 	
-	po.element("#executeSqlButton").click(function()
+	po.elementOfId("executeSqlButton").click(function()
 	{
 		var $this = $(this);
 		
@@ -916,7 +916,7 @@ Schema schema 数据库，不允许为null
 			if(po.sqlpadTaskClient.isActive())
 				return;
 			
-			var settingForm = po.element("#settingForm");
+			var settingForm = po.elementOfId("settingForm");
 			
 			var commitMode = po.element("[name='sqlCommitMode']:checked", settingForm).val();
 			var exceptionHandleMode = po.element("[name='sqlExceptionHandleMode']:checked", settingForm).val();
@@ -932,7 +932,7 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
-	po.element("#stopSqlButton").click(function()
+	po.elementOfId("stopSqlButton").click(function()
 	{
 		if(po.sqlpadTaskClient.isActive())
 		{
@@ -946,7 +946,7 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
-	po.element("#commitSqlButton").click(function()
+	po.elementOfId("commitSqlButton").click(function()
 	{
 		if(po.sqlpadTaskClient.isActive())
 		{
@@ -960,7 +960,7 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
-	po.element("#rollbackSqlButton").click(function()
+	po.elementOfId("rollbackSqlButton").click(function()
 	{
 		if(po.sqlpadTaskClient.isActive())
 		{
@@ -974,13 +974,13 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
-	po.element("#clearSqlButton").click(function()
+	po.elementOfId("clearSqlButton").click(function()
 	{
 		po.sqlEditor.setValue("");
 		po.sqlEditor.focus();
 	});
 	
-	po.element("#insertSqlDelimiterDefineButton").click(function()
+	po.elementOfId("insertSqlDelimiterDefineButton").click(function()
 	{
 		var delimiter = po.getSqlDelimiter();
 		
@@ -1006,7 +1006,7 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
-	po.element("#insertSqlDelimiterButton").click(function()
+	po.elementOfId("insertSqlDelimiterButton").click(function()
 	{
 		var delimiter = po.getSqlDelimiter();
 		
@@ -1016,7 +1016,7 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
-	po.element("#viewSqlHistorySearchForm").submit(function()
+	po.elementOfId("viewSqlHistorySearchForm").submit(function()
 	{
 		var $form = $(this);
 		
@@ -1027,9 +1027,9 @@ Schema schema 数据库，不允许为null
 				var sqlHistories = pagingData.items;
 				
 				if(pagingData.page >= pagingData.pages)
-					po.element("#sqlHistoryLoadMoreButton").button("disable");
+					po.elementOfId("sqlHistoryLoadMoreButton").button("disable");
 				else
-					po.element("#sqlHistoryLoadMoreButton").button("enable");
+					po.elementOfId("sqlHistoryLoadMoreButton").button("enable");
 				
 				var retainData = ($form.attr("retain-data") != null);
 				if(retainData)
@@ -1101,7 +1101,7 @@ Schema schema 数据库，不允许为null
 		return sql;
 	};
 	
-	po.element("#insertSqlHistoryToEditorButton").click(function()
+	po.elementOfId("insertSqlHistoryToEditorButton").click(function()
 	{
 		var sql = po.getSelectedSqlHistories();
 		
@@ -1112,7 +1112,7 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
-	var clipboard = new ClipboardJS(po.element("#copySqlHistoryToClipbordButton")[0],
+	var clipboard = new ClipboardJS(po.elementOfId("copySqlHistoryToClipbordButton")[0],
 	{
 		text: function(trigger)
 		{
@@ -1129,9 +1129,9 @@ Schema schema 数据库，不允许为null
 		$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
 	});
 	
-	po.element("#sqlHistoryLoadMoreButton").click(function()
+	po.elementOfId("sqlHistoryLoadMoreButton").click(function()
 	{
-		var $form = po.element("#viewSqlHistorySearchForm");
+		var $form = po.elementOfId("viewSqlHistorySearchForm");
 		var $page = po.elementOfName("page", $form);
 		
 		var page = parseInt($page.val());
@@ -1145,15 +1145,15 @@ Schema schema 数据库，不允许为null
 		$form.submit();
 	});
 	
-	po.element("#sqlHistoryRefreshButton").click(function()
+	po.elementOfId("sqlHistoryRefreshButton").click(function()
 	{
-		var $form = po.element("#viewSqlHistorySearchForm");
+		var $form = po.elementOfId("viewSqlHistorySearchForm");
 		po.elementOfName("page", $form).val("1");
 		
 		$form.submit();
 	});
 	
-	po.element("#viewSqlHistoryButton").click(function()
+	po.elementOfId("viewSqlHistoryButton").click(function()
 	{
 		var $vhp = po.element(".view-sql-history-panel");
 		
@@ -1170,11 +1170,11 @@ Schema schema 数据库，不允许为null
 			
 			var $hl = po.element(".sql-history-list");
 			if($hl.children().length == 0)
-				po.element("#viewSqlHistorySearchForm").submit();
+				po.elementOfId("viewSqlHistorySearchForm").submit();
 		}
 	});
 	
-	po.element("#settingButton").click(function()
+	po.elementOfId("settingButton").click(function()
 	{
 		po.element(".setting-panel").toggle();
 	});
@@ -1185,26 +1185,26 @@ Schema schema 数据库，不允许为null
 		
 		if(value == "MANUAL")
 		{
-			//po.element("#commitSqlButton").button("enable");
-			//po.element("#rollbackSqlButton").button("enable");
+			//po.elementOfId("commitSqlButton").button("enable");
+			//po.elementOfId("rollbackSqlButton").button("enable");
 			
 			var $rollbackExceptionHandle = po.element("[name='sqlExceptionHandleMode'][value='ROLLBACK']");
 			$rollbackExceptionHandle.attr("disabled", "disabled");
 			if($rollbackExceptionHandle.is(":checked"))
 				po.element("[name='sqlExceptionHandleMode'][value='ABORT']").prop("checked", true);
-			po.element("#sqlExceptionHandleModeSet").controlgroup("refresh");
+			po.elementOfId("sqlExceptionHandleModeSet").controlgroup("refresh");
 		}
 		else
 		{
-			//po.element("#commitSqlButton").button("disable");
-			//po.element("#rollbackSqlButton").button("disable");
+			//po.elementOfId("commitSqlButton").button("disable");
+			//po.elementOfId("rollbackSqlButton").button("disable");
 			
 			po.element("[name='sqlExceptionHandleMode'][value='ROLLBACK']").removeAttr("disabled");
-			po.element("#sqlExceptionHandleModeSet").controlgroup("refresh");
+			po.elementOfId("sqlExceptionHandleModeSet").controlgroup("refresh");
 		}
 	});
 	
-	po.element("#toggleAutoClearResultButton").click(function()
+	po.elementOfId("toggleAutoClearResultButton").click(function()
 	{
 		var $this = $(this);
 		
@@ -1218,35 +1218,35 @@ Schema schema 数据库，不允许为null
 		}
 	});
 	
-	po.element("#clearSqlResultMessageButton").click(function()
+	po.elementOfId("clearSqlResultMessageButton").click(function()
 	{
 		po.resultMessageElement.empty();
 	});
 	
-	po.element("#moreSqlResultTabButton").click(function()
+	po.elementOfId("moreSqlResultTabButton").click(function()
 	{
 		var activeTab = po.tabsGetActiveTab(po.sqlResultTabs);
 		var activeTabId = po.tabsGetTabId(po.sqlResultTabs, activeTab);
 		var activeTabFormId = po.getSqlResultTabPanelFormId(activeTabId);
-		var activeTabForm = po.element("#" + activeTabFormId);
+		var activeTabForm = po.elementOfId(activeTabFormId);
 		
 		activeTabForm.submit();
 	});
 	
-	po.element("#refreshSqlResultTabButton").click(function()
+	po.elementOfId("refreshSqlResultTabButton").click(function()
 	{
 		var activeTab = po.tabsGetActiveTab(po.sqlResultTabs);
 		var activeTabId = po.tabsGetTabId(po.sqlResultTabs, activeTab);
 		var activeTabFormId = po.getSqlResultTabPanelFormId(activeTabId);
-		var activeTabForm = po.element("#" + activeTabFormId);
+		var activeTabForm = po.elementOfId(activeTabFormId);
 		
-		$("input[name='startRow']", activeTabForm).val(1);
+		po.elementOfName("startRow", activeTabForm).val(1);
 		activeTabForm.attr("no-more-data", "0");
 		
 		activeTabForm.submit();
 	});
 
-	po.element("#exportSqlResultTabButton").click(function()
+	po.elementOfId("exportSqlResultTabButton").click(function()
 	{
 		var activeTab = po.tabsGetActiveTab(po.sqlResultTabs);
 		
@@ -1254,8 +1254,8 @@ Schema schema 数据库，不允许为null
 		{
 			var tabId = po.tabsGetTabId(po.sqlResultTabs, activeTab);
 			var tabFormId = po.getSqlResultTabPanelFormId(tabId);
-			var tabForm = po.element("#" + tabId);
-			var sql = $("textarea[name='sql']", tabForm).val();
+			var tabForm = po.elementOfId(tabId);
+			var sql = po.elementOfName("sql", tabForm).val();
 			
 			var options = {data: {"initSqls": sql}};
 			$.setGridPageHeightOption(options);
@@ -1263,11 +1263,11 @@ Schema schema 数据库，不允许为null
 		}
 	});
 	
-	po.element("#viewSqlResultTabButton").click(function()
+	po.elementOfId("viewSqlResultTabButton").click(function()
 	{
 		var $this = $(this);
 		
-		var viewSqlStatementPanel = po.element("#viewSqlStatementPanel");
+		var viewSqlStatementPanel = po.elementOfId("viewSqlStatementPanel");
 		
 		if(!viewSqlStatementPanel.is(":hidden"))
 		{
@@ -1281,15 +1281,15 @@ Schema schema 数据库，不允许为null
 		{
 			var tabId = po.tabsGetTabId(po.sqlResultTabs, activeTab);
 			var tabFormId = po.getSqlResultTabPanelFormId(tabId);
-			var tabForm = po.element("#" + tabId);
-			var sql = $("textarea[name='sql']", tabForm).val();
+			var tabForm = po.elementOfId(tabId);
+			var sql = po.elementOfName("sql", tabForm).val();
 			
 			$("textarea", viewSqlStatementPanel).val(sql);
 			viewSqlStatementPanel.show().position({ my : "right bottom", at : "right top-5", of : $this});
 		}
 	});
 	
-	po.element("#lockSqlResultTabButton").click(function()
+	po.elementOfId("lockSqlResultTabButton").click(function()
 	{
 		var $this = $(this);
 		
@@ -1349,7 +1349,7 @@ Schema schema 数据库，不允许为null
 				$(".result-message-buttons", resultOperations).hide();
 				$(".sql-result-buttons", resultOperations).show();
 				
-				var lockSqlResultTabButton = po.element("#lockSqlResultTabButton");
+				var lockSqlResultTabButton = po.elementOfId("lockSqlResultTabButton");
 				var newTabId = po.tabsGetTabId($this, newTab);
 				
 				if(newTabId == lockSqlResultTabButton.attr("lock-tab-id"))

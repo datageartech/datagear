@@ -209,7 +209,7 @@
 			var isHtml = $.isHtmlFile(name);
 			
 			if(isHtml)
-				content = po.element("#${pageId}-defaultTemplateContent").val();
+				content = po.elementOfId("${pageId}-defaultTemplateContent").val();
 			
 			po.newResourceEditorTab(name, content, isHtml);
 			po.element(".add-resource-panel").hide();
@@ -532,7 +532,7 @@
 	
 	po.resourceEditorTabs = function()
 	{
-		return po.element("#${pageId}-resourceEditorTabs");
+		return po.elementOfId("${pageId}-resourceEditorTabs");
 	};
 	
 	po.resourceListTabs = function()

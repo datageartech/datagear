@@ -54,7 +54,7 @@ formAction 表单提交action，允许为null
 {
 	po.initFormBtns();
 	
-	po.element("#schemaBuildUrlHelp").click(function()
+	po.elementOfId("schemaBuildUrlHelp").click(function()
 	{
 		po.open("${contextPath}/schemaUrlBuilder/buildUrl",
 		{

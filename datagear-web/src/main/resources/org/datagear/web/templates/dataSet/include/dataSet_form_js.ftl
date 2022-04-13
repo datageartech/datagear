@@ -62,22 +62,22 @@ po.previewOptions.url = "...";
 	
 	po.dataSetParamsTableElement = function()
 	{
-		return po.element("#${pageId}-dataSetParamsTable");
+		return po.elementOfId("${pageId}-dataSetParamsTable");
 	};
 	
 	po.previewResultTableElement = function()
 	{
-		return po.element("#${pageId}-previewResultTable");
+		return po.elementOfId("${pageId}-previewResultTable");
 	};
 	
 	po.dataSetPropertiesTableElement = function()
 	{
-		return po.element("#${pageId}-dataSetPropertiesTable");
+		return po.elementOfId("${pageId}-dataSetPropertiesTable");
 	};
 
 	po.dataFormatPanelElement = function()
 	{
-		return po.element("#${pageId}-dataFormatPanel");
+		return po.elementOfId("${pageId}-dataFormatPanel");
 	};
 	
 	po.calWorkspaceOperationTableHeight = function()

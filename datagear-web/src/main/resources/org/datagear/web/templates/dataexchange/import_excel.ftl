@@ -161,8 +161,8 @@ Schema schema 数据库，不允许为null
 	
 	po.initDataImportExcelUIs = function()
 	{
-		po.element("#${pageId}-ignoreInexistentColumn").checkboxradiogroup();
-		po.element("#${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
+		po.elementOfId("${pageId}-ignoreInexistentColumn").checkboxradiogroup();
+		po.elementOfId("${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
 	};
 	
 	po.dataImportTableColumns.splice(3, 0,

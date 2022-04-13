@@ -168,8 +168,8 @@ Schema schema 数据库，不允许为null
 	po.initDataExportSteps();
 	po.initDataExchangeUIs();
 	po.initDataExportUIs();
-	po.element("#${pageId}-exportFileFormat").checkboxradiogroup();
-	po.element("#${pageId}-exportFileFormat-0").click();
+	po.elementOfId("${pageId}-exportFileFormat").checkboxradiogroup();
+	po.elementOfId("${pageId}-exportFileFormat-0").click();
 	po.initDataExportDataTable();
 	po.initDataExchangeActions();
 	po.initDataExportActions();

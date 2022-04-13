@@ -141,7 +141,7 @@
 			{
 				var item = $(ui.item);
 				
-				var $category = po.element("#" + item.attr("categoryId"));
+				var $category = po.elementOfId(item.attr("categoryId"));
 				var top = $category.position().top;
 				po.element(".chart-plugin-content").animate({scrollTop:top},'fast');
 			}

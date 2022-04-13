@@ -158,7 +158,7 @@ Schema schema 数据库，不允许为null
 	po.initDataExportSteps();
 	po.initDataExchangeUIs();
 	po.initDataExportUIs();
-	po.element("#${pageId}-exportCreationSql").checkboxradiogroup();
+	po.elementOfId("${pageId}-exportCreationSql").checkboxradiogroup();
 	po.initDataExportDataTable();
 	po.initDataExchangeActions();
 	po.initDataExportActions();

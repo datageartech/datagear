@@ -136,7 +136,7 @@ dataExchange_js.ftl
 			},
 			onFinished : function(event, currentIndex)
 			{
-				po.element("#${pageId}-form").submit();
+				po.form().submit();
 			},
 			labels:
 			{
@@ -146,17 +146,17 @@ dataExchange_js.ftl
 			}
 		});
 		
-		po.element("#${pageId}-form .wizard .actions ul li:eq(2)").addClass("page-status-aware-enable edit-status-enable");
+		po.element(".wizard .actions ul li:eq(2)", po.form()).addClass("page-status-aware-enable edit-status-enable");
 	};
 	
 	po.initDataImportUIs = function()
 	{
 		po.initFormBtns();
-		po.element("#${pageId}-exceptionResolve").checkboxradiogroup();
+		po.elementOfId("${pageId}-exceptionResolve").checkboxradiogroup();
 		po.elementOfName("fileEncoding").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
 		po.elementOfName("zipFileNameEncoding").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
 		
-		po.element("#${pageId}-exceptionResolve-0").click();
+		po.elementOfId("${pageId}-exceptionResolve-0").click();
 	};
 	
 	po.initDataImportDataTable = function()
@@ -217,7 +217,7 @@ dataExchange_js.ftl
 			}
 		});
 		
-		po.element("#${pageId}-form").submit(function()
+		po.form().submit(function()
 		{
 			if(po.dataExchangeTaskClient.isActive())
 				return;

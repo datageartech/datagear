@@ -195,7 +195,7 @@ dataExchange_js.ftl
 			},
 			onFinished : function(event, currentIndex)
 			{
-				po.element("#${pageId}-form").submit();
+				po.form().submit();
 			},
 			labels:
 			{
@@ -205,14 +205,14 @@ dataExchange_js.ftl
 			}
 		});
 		
-		po.element("#${pageId}-form .wizard .actions ul li:eq(2)").addClass("page-status-aware-enable edit-status-enable");
+		po.element(".wizard .actions ul li:eq(2)", po.form()).addClass("page-status-aware-enable edit-status-enable");
 	};
 	
 	po.initDataExportUIs = function()
 	{
 		po.initFormBtns();
-		po.element("#${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
-		po.element("#${pageId}-add-group-select").selectmenu(
+		po.elementOfId("${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
+		po.elementOfId("${pageId}-add-group-select").selectmenu(
 		{
 			classes : {"ui-selectmenu-button": "ui-button-icon-only ui-corner-right"},
 			select : function(event, ui)
@@ -222,9 +222,9 @@ dataExchange_js.ftl
 			}
 		});
 		po.elementOfName("fileEncoding").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
-		po.element("#${pageId}-add-group").controlgroup();
+		po.elementOfId("${pageId}-add-group").controlgroup();
 		
-		po.element("#${pageId}-nullForIllegalColumnValue-1").click();
+		po.elementOfId("${pageId}-nullForIllegalColumnValue-1").click();
 	};
 	
 	po.initDataExportDataTable = function()
@@ -342,7 +342,7 @@ dataExchange_js.ftl
 			po.updateDataExchangePageStatus("edit");
 		});
 		
-		po.element("#${pageId}-form").submit(function()
+		po.form().submit(function()
 		{
 			if(po.dataExchangeTaskClient.isActive())
 				return;
@@ -369,7 +369,7 @@ dataExchange_js.ftl
 		});
 		
 		<#if initSqls??>
-		var $returnForm = po.element("#${pageId}-returnForm");
+		var $returnForm = po.elementOfId("${pageId}-returnForm");
 		<#list initSqls as initSql>
 		po.addSubDataExchange("${initSql?js_string?no_esc}");
 		$("<textarea name='initSqls' style='display:none;'></textarea>").val("${initSql?js_string?no_esc}").appendTo($returnForm);

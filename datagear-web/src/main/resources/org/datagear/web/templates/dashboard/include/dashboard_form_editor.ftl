@@ -122,7 +122,7 @@
 			position: "fixed",
 			autoCloseContext: po.element()
 		});
-		po.element("#${pageId}-syncChartTheme", veStyleForm).checkboxradiogroup({classes:{"ui-checkboxradio-label": "small-button"}});
+		po.elementOfId("${pageId}-syncChartTheme", veStyleForm).checkboxradiogroup({classes:{"ui-checkboxradio-label": "small-button"}});
 		
 		//初始化可视编辑图表主题面板
 		var veChartThemePanel = po.element(".veditor-chartTheme-panel");
@@ -236,7 +236,7 @@
 			mode: {name: "javascript", json: true}
 		};
 		po.element(".chartOptions-editor-wrapper", veChartOptionsForm).data("chartOptionsCodeEditor",
-				po.createCodeEditor(po.element("#${pageId}ChartOptionsEditor", veChartOptionsForm), veChartOptionsEditorOptions));
+				po.createCodeEditor(po.elementOfId("${pageId}ChartOptionsEditor", veChartOptionsForm), veChartOptionsEditorOptions));
 		veChartOptionsForm.submit(function()
 		{
 			try
@@ -939,11 +939,11 @@
 		po.element(".tpl-ve-ele-path", veIfmWrapper).empty();
 		
 		var dashboardId = po.getDashboardId();
-		var form = po.element("#${pageId}-tplEditVisualForm");
+		var form = po.elementOfId("${pageId}-tplEditVisualForm");
 		form.attr("action", po.showUrl(dashboardId, templateName));
 		form.attr("target", visualEditorIfm.attr("name"));
-		$("input[name='DG_EDIT_TEMPLATE']", form).val(po.readonly ? "false" : "true");
-		$("textarea[name='DG_TEMPLATE_CONTENT']", form).val(templateContent);
+		po.elementOfName("DG_EDIT_TEMPLATE", form).val(po.readonly ? "false" : "true");
+		po.elementOfName("DG_TEMPLATE_CONTENT", form).val(templateContent);
 		form.submit();
 	};
 	
@@ -1818,7 +1818,7 @@
 			+"&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
 			+"</div>").appendTo(wrapper);
 		
-		var inputItem = po.element("#"+id, wrapper);
+		var inputItem = po.elementOfId(id, wrapper);
 		po.elementOfName("graphColors[]", inputItem).listpalllet(
 		{
 			indicator: po.element(".listpallet-indicator", inputItem),
@@ -1836,7 +1836,7 @@
 			+"&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' class='del-color-btn small-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span>&nbsp;</button>"
 			+"</div>").appendTo(wrapper);
 		
-		var inputItem = po.element("#"+id, wrapper);
+		var inputItem = po.elementOfId(id, wrapper);
 		po.elementOfName("graphRangeColors[]", inputItem).listpalllet(
 		{
 			indicator: po.element(".listpallet-indicator", inputItem),

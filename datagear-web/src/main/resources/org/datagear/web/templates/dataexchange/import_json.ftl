@@ -176,8 +176,8 @@ Schema schema 数据库，不允许为null
 	
 	po.initDataImportJsonUIs = function()
 	{
-		po.element("#${pageId}-ignoreInexistentColumn").checkboxradiogroup();
-		po.element("#${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
+		po.elementOfId("${pageId}-ignoreInexistentColumn").checkboxradiogroup();
+		po.elementOfId("${pageId}-nullForIllegalColumnValue").checkboxradiogroup();
 	};
 
 	po.onStepChangedSuper = po.onStepChanged;
@@ -224,7 +224,7 @@ Schema schema 数据库，不允许为null
 	po.initDataImportSteps();
 	po.initDataExchangeUIs();
 	po.initDataImportUIs();
-	po.element("#${pageId}-importFileFormat").checkboxradiogroup();
+	po.elementOfId("${pageId}-importFileFormat").checkboxradiogroup();
 	po.initDataImportJsonUIs();
 	po.initDataImportDataTable();
 	po.initDataExchangeActions();

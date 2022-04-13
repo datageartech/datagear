@@ -317,16 +317,16 @@ ${detectNewVersionScript?no_esc}
 	
 	po.isSearchTable = function()
 	{
-		var $icon = po.element("#schemaSearchSwitch > .ui-icon");
+		var $icon = po.element("> .ui-icon", po.elementOfId("schemaSearchSwitch"));
 		
 		return $icon.hasClass("ui-icon-calculator");
 	};
 	
 	po.getSearchSchemaFormData = function()
 	{
-		var form = po.element("#schemaSearchForm");
-		var keyword = $("input[name='keyword']", form).val();
-		var pageSize = $("input[name='pageSize']", form).val();
+		var form = po.elementOfId("schemaSearchForm");
+		var keyword = po.elementOfName("keyword", form).val();
+		var pageSize = po.elementOfName("pageSize", form).val();
 		return {"keyword" : keyword, "pageSize" : pageSize};
 	};
 	
@@ -599,7 +599,7 @@ ${detectNewVersionScript?no_esc}
 	
 	po.initDataAnalysisPanelIfNot = function()
 	{
-		var dap = po.element("#${pageId}-nav-dataAnalysis");
+		var dap = po.elementOfId("${pageId}-nav-dataAnalysis");
 		
 		if(dap.hasClass("dataAnalysisPanelInited"))
 			return;
@@ -654,7 +654,7 @@ ${detectNewVersionScript?no_esc}
 				panel.hide();
 		});
 		
-		po.element("#addAnalysisProjectButton", dap).click(function()
+		po.elementOfId("addAnalysisProjectButton", dap).click(function()
 		{
 			po.open(contextPath+"/analysisProject/add",
 			{
@@ -668,7 +668,7 @@ ${detectNewVersionScript?no_esc}
 			});
 		});
 		
-		po.element("#manageAnalysisProjectButton", dap).click(function()
+		po.elementOfId("manageAnalysisProjectButton", dap).click(function()
 		{
 			var options = {};
 			$.setGridPageHeightOption(options);
@@ -759,7 +759,7 @@ ${detectNewVersionScript?no_esc}
 		po.element().autoCloseSubPanel(".analysis-project-list-panel");
 		
 		//需要先初始化导航栏，以计算左侧布局宽度
-		po.element("#${pageId}-nav").tabs(
+		po.elementOfId("${pageId}-nav").tabs(
 		{
 			event: "click",
 			active: false,
@@ -796,7 +796,7 @@ ${detectNewVersionScript?no_esc}
 		}
 		panelMinWidth = parseInt(panelMinWidth);
 		
-		var mainNavTabsNav = po.element(".main-nav-tabs-nav", po.element("#${pageId}-nav"));
+		var mainNavTabsNav = po.element(".main-nav-tabs-nav", po.elementOfId("${pageId}-nav"));
 		var navMinWidth = 0;
 		$("> li", mainNavTabsNav).each(function()
 		{
@@ -832,9 +832,9 @@ ${detectNewVersionScript?no_esc}
 		if(!mainNavActiveTabIndex)
 			mainNavActiveTabIndex = "0";
 		mainNavActiveTabIndex = parseInt(mainNavActiveTabIndex);
-		po.element("#${pageId}-nav").tabs("option", "active", mainNavActiveTabIndex).tabs("option", "collapsible", false);
+		po.elementOfId("${pageId}-nav").tabs("option", "active", mainNavActiveTabIndex).tabs("option", "collapsible", false);
 
-		po.element("#schemaSearchSwitch").click(function()
+		po.elementOfId("schemaSearchSwitch").click(function()
 		{
 			var $icon = $(".ui-icon", this);
 			
@@ -844,7 +844,7 @@ ${detectNewVersionScript?no_esc}
 				$icon.removeClass("ui-icon-folder-collapsed").addClass("ui-icon-calculator").attr("title", "<@spring.message code='main.searchTable' />");
 		});
 		
-		po.element("#schemaOperationMenu").menu(
+		po.elementOfId("schemaOperationMenu").menu(
 		{
 			position : {my:"left top", at: "left bottom-1"},
 			focus : function(event, ui)
@@ -1151,7 +1151,7 @@ ${detectNewVersionScript?no_esc}
 			}
 		});
 		
-		po.element("#addSchemaButton").click(function()
+		po.elementOfId("addSchemaButton").click(function()
 		{
 			var jstree = po.element(".schema-panel-content").jstree(true);
 			var selNodes = jstree.get_selected(true);
@@ -1178,7 +1178,7 @@ ${detectNewVersionScript?no_esc}
 			});
 		});
 		
-		po.element("#schemaSearchForm").submit(function()
+		po.elementOfId("schemaSearchForm").submit(function()
 		{
 			var jstree = po.element(".schema-panel-content").jstree(true);
 			
@@ -1229,7 +1229,7 @@ ${detectNewVersionScript?no_esc}
 			}
 		});
 		
-		po.mainTabs = po.element("#${pageId}-mainTabs");
+		po.mainTabs = po.elementOfId("${pageId}-mainTabs");
 		
 		po.mainTabs.tabs(
 		{

@@ -96,7 +96,7 @@ readonly 是否只读操作，允许为null
 	po.element(".nameRow-radios").controlgroup();
 	po.initWorkspaceHeight();
 	
-	po.csvEditor = po.createWorkspaceEditor(po.element("#${pageId}-workspaceEditor"),
+	po.csvEditor = po.createWorkspaceEditor(po.elementOfId("${pageId}-workspaceEditor"),
 	{
 		value: po.elementOfName("value").val(),
 		readOnly: po.readonly

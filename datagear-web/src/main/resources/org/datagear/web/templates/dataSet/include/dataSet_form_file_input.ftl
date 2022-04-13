@@ -131,8 +131,8 @@
 				$(this).attr("checked", "checked").change();
 		});
 		
-		if(isAddOperation || po.element("#${pageId}-originalFileName").val() == "")
-			po.element("#${pageId}-uploadDownloadLink").hide();
+		if(isAddOperation || po.elementOfId("${pageId}-originalFileName").val() == "")
+			po.elementOfId("${pageId}-uploadDownloadLink").hide();
 		
 		po.element(".fileinput-wrapper").fileUpload(uploadURL,
 		{

@@ -88,7 +88,7 @@ String detectNewVersionScript
 	
 	po.initSysMenu = function()
 	{
-		po.element("#systemSetMenu").menu(
+		po.elementOfId("systemSetMenu").menu(
 		{
 			position : {my:"right top", at: "right bottom-1"},
 			select : function(event, ui)

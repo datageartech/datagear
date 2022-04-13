@@ -53,7 +53,7 @@ data_page_obj_edit_grid_html.ftl
 	
 	po.elementEditGridSwitch = function()
 	{
-		return po.element("#${pageId}-editGridSwitch");
+		return po.elementOfId("${pageId}-editGridSwitch");
 	};
 	
 	po.elementEditGridSwitchWrapper = function()
@@ -102,7 +102,7 @@ data_page_obj_edit_grid_html.ftl
 	{
 		var id = po.pageId +"-edit-table";
 		
-		var $editTable = po.element("#" + id);
+		var $editTable = po.elementOfId(id);
 		if($editTable.length == 0)
 			$editTable = $("<table id='"+id+"' width='100%' class='hover stripe' tabindex='0'></table>").appendTo(po.element(".content"));
 		

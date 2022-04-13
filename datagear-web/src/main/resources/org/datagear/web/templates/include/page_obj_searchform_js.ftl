@@ -19,7 +19,7 @@ po.search = undefined;
 <script type="text/javascript">
 (function(po)
 {
-	po.searchForm = function(){ return this.element("#${pageId}-searchForm"); };
+	po.searchForm = function(){ return this.elementOfId("${pageId}-searchForm"); };
 	
 	po.searchForm().submit(function()
 	{
