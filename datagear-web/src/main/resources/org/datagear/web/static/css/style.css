@@ -1768,9 +1768,21 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	vertical-align: middle;
 	position: relative;
 }
-.search-form .keyword-widget .like-switch-icon.ui-icon{
+.search-form .keyword-widget .like-switch-icon-parent{
+	position: absolute;
+	display: inline-block;
 	cursor: pointer;
-	margin-top: 0.2em;
+	left: 1px;
+	top: 0;
+	bottom: 0;
+	width: 1.5em;
+}
+.search-form .keyword-widget .like-switch-icon-parent .ui-icon{
+	position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -0.6em;
+    margin-top: -0.5em;
 }
 .search-form .keyword-widget .keyword-input-parent{
 	position: absolute;
@@ -1780,8 +1792,8 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	bottom: 0;
 }
 .search-form.search-form-data .keyword-widget .keyword-input-parent{
-	left: 18px;
-	right: 22px;
+	left: 1.6em;
+	right: 1.6em;
 }
 .search-form .keyword-widget .keyword-input-parent .keyword-input{
     width: 100%;
@@ -1798,21 +1810,25 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	display: inline-block;
 	cursor: pointer;
 	right: 1px;
-	top: 50%;
-	margin-top: -0.7em;
+	top: 0;
+	bottom: 0;
+	width: 1.5em;
 }
-.search-form .search-condition-icon{
-}
-.search-form .search-condition-icon-tip{
+.search-form .search-condition-icon-parent .ui-icon{
 	position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -0.5em;
+    margin-top: -0.5em;
+}
+.search-form .search-condition-icon-parent .search-condition-icon-tip{
+	margin-top: -0.2em;
 	display: none;
-	left: 0px;
-	top: 12px;
 }
 .search-form .condition-panel-parent{
 	position: relative;
 	width: 100%;
-	top: 0.9em;
+	top: 2.4em;
 }
 .search-form .condition-panel-parent .condition-panel{
 	display: inline-block;

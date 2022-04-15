@@ -19,8 +19,11 @@ po.search = undefined;
 -->
 <form id="${pageId}-searchForm" class="search-form search-form-data" action="#" tabindex="0" auto-close-prevent="condition-panel">
 	<div class="ui-widget ui-widget-content ui-corner-all keyword-widget">
-		<span class="ui-icon like-switch-icon ui-icon-radio-off" title="<@spring.message code='data.likeTitle' />"></span><div class="keyword-input-parent"><input name="keyword" type="text" class="ui-widget ui-widget-content ui-corner-all keyword-input" tabindex="2" title="<@spring.message code='data.keywordTitle' />" /></div>
-		<input type="hidden" name="notLike" value="" />
+		<div class="like-switch-icon-parent" title="<@spring.message code='data.likeTitle' />">
+			<span class="ui-icon like-switch-icon ui-icon-radio-off"></span>
+		</div>
+		<div class="keyword-input-parent"><input name="keyword" type="text" class="ui-widget ui-widget-content ui-corner-all keyword-input" tabindex="2" title="<@spring.message code='data.keywordTitle' />" /></div>
+		<input type="hidden" name="notLike" value="false" />
 		<div class="search-condition-icon-parent" title="<@spring.message code='data.conditionPanelWithShortcut' />">
 			<span class="search-condition-icon ui-icon ui-icon-caret-1-s"></span>
 			<span class="search-condition-icon-tip ui-icon ui-icon-bullet"></span>
@@ -45,7 +48,7 @@ po.search = undefined;
 (function(po)
 {
 	po.searchForm = function(){ return this.elementOfId("${pageId}-searchForm"); };
-	po.likeSwitchIcon = function(){ return this.element(".like-switch-icon", this.searchForm()); };
+	po.likeSwitchIconParent = function(){ return this.element(".like-switch-icon-parent", this.searchForm()); };
 	po.notLikeInput = function(){ return this.elementOfName("notLike", this.searchForm()); };
 	po.keywordInput = function(){ return this.elementOfName("keyword", this.searchForm()); };
 	po.conditionPanel = function(){ return this.element(".condition-panel", this.searchForm()); };
@@ -97,6 +100,8 @@ po.search = undefined;
 	
 	po.initConditionPanel = function(dbTable)
 	{
+		po.updateNotLikeKeyword();
+		
 		var columnCompletions = [];
 		var columns = (dbTable.columns || []);
 		for(var i=0; i<columns.length; i++)
@@ -130,24 +135,26 @@ po.search = undefined;
 		if(notLike == undefined)
 			notLike = po.notLikeInput().val();
 		
-		if(notLike)
+		if(notLike == "true")
 		{
-			po.likeSwitchIcon().removeClass("ui-icon-radio-off").addClass("ui-icon-radio-on").attr("title", "<@spring.message code='data.notLikeTitle' />");
-			po.notLikeInput().val("1");
+			po.likeSwitchIconParent().attr("title", "<@spring.message code='data.notLikeTitle' />");
+			po.element(".like-switch-icon", po.likeSwitchIconParent()).removeClass("ui-icon-radio-off").addClass("ui-icon-radio-on");
+			po.notLikeInput().val("true");
 		}
 		else
 		{
-			po.likeSwitchIcon().removeClass("ui-icon-radio-on").addClass("ui-icon-radio-off").attr("title", "<@spring.message code='data.likeTitle' />");
-			po.notLikeInput().val("");
+			po.likeSwitchIconParent().attr("title", "<@spring.message code='data.likeTitle' />");
+			po.element(".like-switch-icon", po.likeSwitchIconParent()).removeClass("ui-icon-radio-on").addClass("ui-icon-radio-off");
+			po.notLikeInput().val("false");
 		}
 	};
 	
 	po.switchLikeNotLikeKeyword = function()
 	{
-		if(po.notLikeInput().val())
-			po.updateNotLikeKeyword(false);
+		if(po.notLikeInput().val() == "true")
+			po.updateNotLikeKeyword("false");
 		else
-			po.updateNotLikeKeyword(true);
+			po.updateNotLikeKeyword("true");
 	};
 	
 	po.closeCondtionPanel = function()
@@ -172,7 +179,7 @@ po.search = undefined;
 		}
 	};
 	
-	po.likeSwitchIcon().click(function()
+	po.likeSwitchIconParent().click(function()
 	{
 		po.switchLikeNotLikeKeyword();
 		po.keywordInput().focus();
@@ -242,9 +249,6 @@ po.search = undefined;
 	});
 	
 	po.conditionPanel().draggable({ handle: ".condition-panel-title-bar" });
-	
-	po.element("input:submit", po.searchForm()).button();
-	po.updateNotLikeKeyword();
 })
 (${pageId});
 </script>
