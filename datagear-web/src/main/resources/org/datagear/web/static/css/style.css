@@ -1768,32 +1768,12 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	vertical-align: middle;
 	position: relative;
 }
-.search-form .keyword-widget .like-switch-icon-parent{
-	position: absolute;
-	display: inline-block;
-	cursor: pointer;
-	left: 1px;
-	top: 0;
-	bottom: 0;
-	width: 1.5em;
-}
-.search-form .keyword-widget .like-switch-icon-parent .ui-icon{
-	position: absolute;
-    left: 50%;
-    top: 50%;
-    margin-left: -0.6em;
-    margin-top: -0.5em;
-}
 .search-form .keyword-widget .keyword-input-parent{
 	position: absolute;
 	left: 0;
 	right: 0;
 	top: 0;
 	bottom: 0;
-}
-.search-form.search-form-data .keyword-widget .keyword-input-parent{
-	left: 1.6em;
-	right: 1.6em;
 }
 .search-form .keyword-widget .keyword-input-parent .keyword-input{
     width: 100%;
@@ -1805,7 +1785,27 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.search-form .search-condition-icon-parent{
+.search-form.search-form-data .keyword-widget .keyword-input-parent{
+	left: 1.4em;
+	right: 1.6em;
+}
+.search-form.search-form-data .keyword-widget .like-switch-icon-parent{
+	position: absolute;
+	display: inline-block;
+	cursor: pointer;
+	left: 1px;
+	top: 0;
+	bottom: 0;
+	width: 1.3em;
+}
+.search-form.search-form-data .keyword-widget .like-switch-icon-parent .ui-icon{
+	position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -0.6em;
+    margin-top: -0.5em;
+}
+.search-form.search-form-data .search-condition-icon-parent{
 	position: absolute;
 	display: inline-block;
 	cursor: pointer;
@@ -1814,23 +1814,23 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	bottom: 0;
 	width: 1.5em;
 }
-.search-form .search-condition-icon-parent .ui-icon{
+.search-form.search-form-data .search-condition-icon-parent .ui-icon{
 	position: absolute;
     left: 50%;
     top: 50%;
     margin-left: -0.5em;
     margin-top: -0.5em;
 }
-.search-form .search-condition-icon-parent .search-condition-icon-tip{
+.search-form.search-form-data .search-condition-icon-parent .search-condition-icon-tip{
 	margin-top: -0.2em;
 	display: none;
 }
-.search-form .condition-panel-parent{
+.search-form.search-form-data .condition-panel-parent{
 	position: relative;
 	width: 100%;
 	top: 2.4em;
 }
-.search-form .condition-panel-parent .condition-panel{
+.search-form.search-form-data .condition-panel-parent .condition-panel{
 	display: inline-block;
 	width: 140%;
 	height: 14em;
@@ -1839,25 +1839,25 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	padding: 2px 2px;
 	position: relative;
 }
-.search-form .condition-panel-parent .condition-panel .condition-panel-title-bar{
+.search-form.search-form-data .condition-panel-parent .condition-panel .condition-panel-title-bar{
 	text-align: right;
 	height: 16px;
 	cursor: move;
 }
-.search-form .condition-panel-parent .condition-panel .condition-panel-title-bar .condition-panel-resetpos-icon.ui-icon{
+.search-form.search-form-data .condition-panel-parent .condition-panel .condition-panel-title-bar .condition-panel-resetpos-icon.ui-icon{
 	margin-top: -0.6em;
 }
-.search-form .condition-panel-parent .condition-panel .ui-icon{
+.search-form.search-form-data .condition-panel-parent .condition-panel .ui-icon{
 	cursor: pointer;
 }
-.search-form .condition-panel-parent .condition-panel .condition-parent{
+.search-form.search-form-data .condition-panel-parent .condition-panel .condition-parent{
 	position: absolute;
 	top: 21px;
 	bottom: 21px;
 	left: 3px;
 	right: 3px;
 }
-.search-form .condition-panel-parent .condition-panel .condition-action{
+.search-form.search-form-data .condition-panel-parent .condition-panel .condition-action{
 	position: absolute;
 	left: 2px;
 	bottom: 2px;
@@ -1865,7 +1865,7 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	height: 16px;
 	font-size: 8px;
 }
-.search-form .data-filter-select-wrapper{
+.search-form.search-form-data-filter .data-filter-select-wrapper{
 	position: absolute;
 	display: inline-block;
 	padding-left: 0.5em;
