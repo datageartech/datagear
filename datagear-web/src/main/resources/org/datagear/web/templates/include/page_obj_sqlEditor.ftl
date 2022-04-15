@@ -51,6 +51,23 @@ po.getSqlEditorSchemaId
 		return options;
 	};
 	
+	po.sqlEditorHintTableAjaxOptions = function(schemaId)
+	{
+		var options = { url: "${contextPath}/sqlEditor/"+schemaId+"/findTableNames" };
+		return options;
+	};
+	
+	po.sqlEditorHintColumnAjaxOptions = function(schemaId, tableName)
+	{
+		var options =
+		{
+			url: "${contextPath}/sqlEditor/"+schemaId+"/findColumnNames",
+			data: { table: tableName }
+		};
+		
+		return options;
+	};
+	
 	po.sqlEditorHintHandler = function(codeEditor, callback)
 	{
 		var doc = codeEditor.getDoc();
@@ -69,7 +86,7 @@ po.getSqlEditorSchemaId
 		
 		var hintInfo = po.resolveSqlHintInfo(codeEditor, doc, cursor, token);
 		
-		if(!hintInfo)
+		if(!hintInfo || (hintInfo.type != "table" &&  hintInfo.type != "column"))
 		{
 			callback();
 			return;
@@ -98,10 +115,9 @@ po.getSqlEditorSchemaId
 				{
 					po.sqlHintCache.ajaxRunning = true;
 					
-					$.ajax(
+					var ajaxOptions = $.extend(
 					{
 						type : "POST",
-						url: "${contextPath}/sqlEditor/"+schemaId+"/findTableNames",
 						success: function(names)
 						{
 							names = (names || []);
@@ -129,7 +145,10 @@ po.getSqlEditorSchemaId
 							callback();
 							po.sqlHintCache.ajaxRunning = false;
 						}
-					});
+					},
+					po.sqlEditorHintTableAjaxOptions(schemaId));
+					
+					$.ajax(ajaxOptions);
 				}
 			}
 		}
@@ -154,11 +173,9 @@ po.getSqlEditorSchemaId
 				{
 					po.sqlHintCache.ajaxRunning = true;
 					
-					$.ajax(
+					var ajaxOptions = $.extend(
 					{
 						type : "POST",
-						url: "${contextPath}/sqlEditor/"+schemaId+"/findColumnNames",
-						data: { table: hintInfo.tableName },
 						success: function(names)
 						{
 							names = (names || []);
@@ -185,7 +202,10 @@ po.getSqlEditorSchemaId
 							callback();
 							po.sqlHintCache.ajaxRunning = false;
 						}
-					});
+					},
+					po.sqlEditorHintColumnAjaxOptions(schemaId, hintInfo.tableName));
+					
+					$.ajax(ajaxOptions);
 				}
 			}
 		}
@@ -196,8 +216,6 @@ po.getSqlEditorSchemaId
 	po.resolveSqlHintInfo = function(codeEditor, doc, cursor, cursorToken)
 	{
 		var info = null;
-		
-		var cursorTokenString = ($.trim(cursorToken.string) || "");
 		
 		var tokenInfo = null;
 		var cursorTmp = cursor;

@@ -1469,22 +1469,6 @@
 		},
 		
 		/**
-		 * 构建查询条件Autocomplete组件的“source”选项值。
-		 */
-		buildSearchConditionAutocompleteSource : function(table, sqlIdentifierQuote)
-		{
-			var source = [];
-			
-			for(var i=0; i<table.columns.length; i++)
-			{
-				var column = table.columns[i];
-				source.push({label : column.name, value : sqlIdentifierQuote + column.name + sqlIdentifierQuote});
-			}
-			
-			return source;
-		},
-		
-		/**
 		 * 获取指定列名在DataTable中的列号。
 		 */
 		getDataTableColumn : function(settings, columnName)
@@ -3238,6 +3222,10 @@
 						}
 						
 						panel.hide();
+						
+						var autoCloseCallback = panel.data("auto-close-callback");
+						if(autoCloseCallback)
+							autoCloseCallback();
 					}
 				});
 			});

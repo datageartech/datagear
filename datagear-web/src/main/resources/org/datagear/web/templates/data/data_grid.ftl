@@ -50,6 +50,8 @@ boolean readonly 是否只读操作，默认为false
 <div class="fill-parent">
 </#if>
 <#include "include/data_page_obj.ftl">
+<#include "../include/page_obj_codeEditor.ftl">
+<#include "../include/page_obj_sqlEditor.ftl">
 <div id="${pageId}" class="page-grid ${selectPageCss} page-grid-data">
 	<div class="head">
 		<div class="search">
@@ -104,6 +106,7 @@ boolean readonly 是否只读操作，默认为false
 	po.isMultipleSelect = ${isMultipleSelect?c};
 	
 	po.initGridBtns();
+	po.element().autoCloseSubPanel();
 	
 	if(!po.canEditTableData(${schema.dataPermission}))
 	{
@@ -197,8 +200,7 @@ boolean readonly 是否只读操作，默认为false
 			});
 		});
 		
-		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(dbTable, po.sqlIdentifierQuote);
-		po.initConditionPanel();
+		po.initConditionPanel(dbTable);
 		po.initPagination();
 		po.initTableForDbTable(po.url("queryData"), dbTable);
 		
