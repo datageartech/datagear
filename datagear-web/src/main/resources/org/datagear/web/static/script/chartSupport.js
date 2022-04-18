@@ -4814,7 +4814,7 @@
 		//默认轮播配置
 		var carouselConfig =
 		{
-			//是否开启
+			//是否开启，true 开启；false 禁用；"auto" 只有在行溢出时才开启
 			enable: false,
 			//滚动间隔毫秒数，或者返回间隔毫秒数的函数：
 			//currentRow 当前可见行
@@ -4927,7 +4927,7 @@
 			{
 				
 			}
-			else if(options.carousel === true || options.carousel === false)
+			else if(options.carousel === true || options.carousel === false || chartFactory.isString(options.carousel))
 			{
 				carouselConfig.enable = options.carousel;
 			}
@@ -5598,15 +5598,19 @@
 		
 		var rowCount = dataTable.rows().indexes().length;
 		
-		//空表格
-		if(rowCount == 0)
+		var scrollBody = $(".dataTables_scrollBody", chartContent);
+		var scrollTable = $(".dataTable", scrollBody);
+		
+		//空表格，或者，"auto"且行数未溢出时不轮播
+		if(rowCount == 0
+			|| (renderOptions.carousel.enable == "auto" && (scrollTable.height() <= scrollBody.height())))
+		{
+			scrollTable.css("margin-top", "0px");
 			return;
+		}
 		
 		chartSupport.tableStopCarousel(chart);
 		chartEle.data("tableCarouselStatus", "start");
-		
-		var scrollBody = $(".dataTables_scrollBody", chartContent);
-		var scrollTable = $(".dataTable", scrollBody);
 		
 		chartSupport.tableHandleCarousel(chart, renderOptions, chartEle, dataTable, scrollBody, scrollTable);
 	};
