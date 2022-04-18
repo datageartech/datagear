@@ -834,7 +834,9 @@
 		//javascript函数
 		else if("javascript" == mode.name && (tokenString == "." || "property" == token.type))
 		{
-			var myVarToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "variable");
+			var myVarTokenInfo = po.findPrevTokenInfo(codeEditor, doc, cursor, token,
+					function(token){ return (token.type == "variable" || token.type == "variable-2"); });
+			var myVarToken = (myVarTokenInfo ? myVarTokenInfo.token : null);
 			var myCategory = (myVarToken ? myVarToken.string : "");
 			
 			//无法确定要补全的是看板还是图表对象，所以这里采用：完全匹配变量名，否则就全部提示
