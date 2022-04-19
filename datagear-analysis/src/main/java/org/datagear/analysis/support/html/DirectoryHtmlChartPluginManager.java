@@ -592,44 +592,70 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		if (plugin == null)
 			return;
 
-		Category category = plugin.getCategory();
+		List<Category> categories = plugin.getCategories();
 
-		if (category == null)
+		if (categories == null)
 			return;
 
-		String categoryName = category.getName();
-
-		Map<String, ChartPlugin> map = getChartPluginMap();
-
-		// 如果类别定义了更详细的信息，则全部替换为使用它
-		if (category.hasNameLabel())
+		for (int i = 0; i < categories.size(); i++)
 		{
-			for (ChartPlugin chartPlugin : map.values())
+			Category category = categories.get(i);
+			String categoryName = category.getName();
+
+			Map<String, ChartPlugin> map = getChartPluginMap();
+
+			// 如果类别定义了更详细的信息，则全部替换为使用它
+			if (category.hasNameLabel())
 			{
-				if (!(chartPlugin instanceof AbstractChartPlugin))
-					continue;
-
-				Category myCategory = chartPlugin.getCategory();
-
-				if (myCategory != null && myCategory != category
-						&& StringUtil.isEquals(myCategory.getName(), categoryName))
+				for (ChartPlugin chartPlugin : map.values())
 				{
-					((AbstractChartPlugin) chartPlugin).setCategory(category);
+					if (!(chartPlugin instanceof AbstractChartPlugin))
+						continue;
+
+					List<Category> myCategories = chartPlugin.getCategories();
+
+					if (myCategories == null)
+						continue;
+
+					for (int j = 0; j < myCategories.size(); j++)
+					{
+						Category myCategory = myCategories.get(j);
+
+						if (myCategory != null && myCategory != category
+								&& StringUtil.isEquals(myCategory.getName(), categoryName))
+						{
+							myCategories.set(j, category);
+						}
+					}
 				}
 			}
-		}
-		// 否则，查找并使用定义详细信息的类别
-		else
-		{
-			for (ChartPlugin chartPlugin : map.values())
+			// 否则，查找并使用定义详细信息的类别
+			else
 			{
-				Category myCategory = chartPlugin.getCategory();
-
-				if (myCategory != null && myCategory != category && myCategory.hasNameLabel()
-						&& StringUtil.isEquals(myCategory.getName(), categoryName))
+				for (ChartPlugin chartPlugin : map.values())
 				{
-					plugin.setCategory(myCategory);
-					break;
+					List<Category> myCategories = chartPlugin.getCategories();
+
+					if (myCategories == null)
+						continue;
+
+					Category fullCategory = null;
+
+					for (Category myCategory : myCategories)
+					{
+						if (myCategory != null && myCategory != category && myCategory.hasNameLabel()
+								&& StringUtil.isEquals(myCategory.getName(), categoryName))
+						{
+							fullCategory = myCategory;
+							break;
+						}
+					}
+
+					if (fullCategory != null)
+					{
+						categories.set(i, fullCategory);
+						break;
+					}
 				}
 			}
 		}

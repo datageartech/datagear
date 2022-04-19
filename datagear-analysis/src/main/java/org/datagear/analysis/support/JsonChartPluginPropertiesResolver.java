@@ -37,16 +37,19 @@ import org.datagear.util.i18n.Label;
  * <code>
  * <pre>
  * {
- * 	id : "...",
- * 	nameLabel : "..." 或者 { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
- * 	descLabel : "..." 或者 { ... },
- * 	manualLabel : "..." 或者 { ... },
- * 	icons : "..." 或者 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
- * 	chartParams :  [ { ... }, ... ],
- * 	dataSigns : [ { ... }, ... ],
- * 	version : "...",
- * 	order: 1,
- * 	category: "..." 或者 {name: "...", ...}
+ *   id : "...",
+ *   nameLabel : "..." 或者 { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
+ *   descLabel : "..." 或者 { ... },
+ *   manualLabel : "..." 或者 { ... },
+ *   icons : "..." 或者 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
+ *   chartParams :  [ { ... }, ... ],
+ *   dataSigns : [ { ... }, ... ],
+ *   version : "...",
+ *   order: 整数值,
+ *   categories: "..." 或者 {name: "...", ...} 或者 ["...", "...", ...] 或者 [ {name: "...", ...}, {name: "...", ...}, ... ],
+ *   或者（兼容3.0.1版本格式）
+ *   category: "..." 或者 {name: "...", ...} 或者 ["...", "...", ...] 或者 [ {name: "...", ...}, {name: "...", ...}, ... ],
+ *   categoryOrders: 整数值 或者 [ 整数值, 整数值, ... ]
  * }
  * </pre>
  * </code>
@@ -75,6 +78,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param chartPlugin
 	 * @param properties
 	 */
+	@SuppressWarnings("deprecation")
 	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, Map<String, ?> properties)
 	{
 		chartPlugin.setId((String) properties.get(ChartPlugin.PROPERTY_ID));
@@ -86,7 +90,14 @@ public class JsonChartPluginPropertiesResolver
 		chartPlugin.setDataSigns(convertToDataSigns(properties.get(ChartPlugin.PROPERTY_DATA_SIGNS)));
 		chartPlugin.setVersion((String) properties.get(ChartPlugin.PROPERTY_VERSION));
 		chartPlugin.setOrder(convertToInt(properties.get(ChartPlugin.PROPERTY_ORDER), chartPlugin.getOrder()));
-		chartPlugin.setCategory(convertToCategory(properties.get(ChartPlugin.PROPERTY_CATEGORY)));
+
+		Object categoriesObj = properties.get(ChartPlugin.PROPERTY_CATEGORIES);
+		if (categoriesObj == null)
+			categoriesObj = properties.get(ChartPlugin.PROPERTY_CATEGORY_3_0_1);
+		chartPlugin.setCategories(convertToCategories(categoriesObj));
+
+		chartPlugin.setCategoryOrders(
+				convertToCategoryOrders(properties.get(ChartPlugin.PROPERTY_CATEGORY_ORDERS), chartPlugin.getOrder()));
 	}
 
 	/**
@@ -483,14 +494,22 @@ public class JsonChartPluginPropertiesResolver
 					+ DataSign.class.getName() + "] is not supported");
 	}
 
-	protected Category convertToCategory(Object obj)
+	protected List<Category> convertToCategories(Object obj)
+	{
+		List<Category> categories = new ArrayList<Category>(1);
+		convertToCategories(categories, obj);
+
+		return categories;
+	}
+
+	protected void convertToCategories(List<Category> categories, Object obj)
 	{
 		if (obj == null)
-			return null;
+			return;
 		else if (obj instanceof Category)
-			return (Category) obj;
+			categories.add((Category) obj);
 		else if (obj instanceof String)
-			return new Category((String) obj);
+			categories.add(new Category((String) obj));
 		else if (obj instanceof Map<?, ?>)
 		{
 			@SuppressWarnings("unchecked")
@@ -498,7 +517,7 @@ public class JsonChartPluginPropertiesResolver
 
 			String name = (String) map.get(DataSign.PROPERTY_NAME);
 			if (name == null)
-				return null;
+				return;
 
 			Category category = createCategory();
 			category.setName(name);
@@ -507,11 +526,51 @@ public class JsonChartPluginPropertiesResolver
 			category.setDescLabel(convertToLabel(map.get(Category.PROPERTY_DESC_LABEL)));
 			category.setOrder(convertToInt(map.get(Category.PROPERTY_ORDER), category.getOrder()));
 
-			return category;
+			categories.add(category);
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			Collection<?> collection = (Collection<?>) obj;
+			for (Object ele : collection)
+				convertToCategories(categories, ele);
+		}
+		else if (obj instanceof Object[])
+		{
+			Object[] array = (Object[]) obj;
+			for (Object ele : array)
+				convertToCategories(categories, ele);
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
 					+ Category.class.getName() + "] is not supported");
+	}
+
+	protected List<Integer> convertToCategoryOrders(Object obj, int defaultOrder)
+	{
+		List<Integer> orders = new ArrayList<Integer>(1);
+
+		if (obj != null)
+			convertToCategoryOrders(orders, obj, defaultOrder);
+
+		return orders;
+	}
+
+	protected void convertToCategoryOrders(List<Integer> orders, Object obj, int defaultOrder)
+	{
+		if (obj instanceof Collection<?>)
+		{
+			Collection<?> collection = (Collection<?>) obj;
+			for (Object ele : collection)
+				convertToCategoryOrders(orders, ele, defaultOrder);
+		}
+		else if (obj instanceof Object[])
+		{
+			Object[] array = (Object[]) obj;
+			for (Object ele : array)
+				convertToCategoryOrders(orders, ele, defaultOrder);
+		}
+		else
+			orders.add(convertToInt(obj, defaultOrder));
 	}
 
 	/**

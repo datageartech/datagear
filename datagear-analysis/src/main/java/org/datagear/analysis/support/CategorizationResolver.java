@@ -9,12 +9,10 @@ package org.datagear.analysis.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.util.StringUtil;
 
 /**
  * 将{@linkplain ChartPlugin}按照{@linkplain Category}分组处理器。
@@ -40,63 +38,184 @@ public class CategorizationResolver
 	 */
 	public List<Categorization> resolve(List<? extends ChartPlugin> chartPlugins)
 	{
-		List<Categorization> categorizations = new ArrayList<>();
-		List<ChartPlugin> uncategorizeds = new ArrayList<>();
+		List<CategorizationInfo> categorizationInfos = new ArrayList<>();
+		List<ChartPluginInfo> uncategorizeds = new ArrayList<>();
 
 		for (ChartPlugin chartPlugin : chartPlugins)
 		{
-			Category category = chartPlugin.getCategory();
+			List<Category> categories = chartPlugin.getCategories();
+			List<Integer> categoryOrders = chartPlugin.getCategoryOrders();
 
-			if (category == null || StringUtil.isEmpty(category.getName()))
-				uncategorizeds.add(chartPlugin);
+			if (categories == null || categories.isEmpty())
+				uncategorizeds.add(new ChartPluginInfo(chartPlugin, chartPlugin.getOrder()));
 			else
 			{
-				Categorization categorization = null;
-
-				for (Categorization myCategorization : categorizations)
+				for (int i = 0; i < categories.size(); i++)
 				{
-					Category myCategory = myCategorization.getCategory();
+					Category category = categories.get(i);
+					Integer order = (categoryOrders == null || categoryOrders.size() < (i + 1) ? chartPlugin.getOrder()
+							: categoryOrders.get(i));
 
-					if (category.getName().equals(myCategory.getName()))
+					CategorizationInfo categorizationInfo = null;
+
+					for (CategorizationInfo myCategorizationInfo : categorizationInfos)
 					{
-						categorization = myCategorization;
+						Category myCategory = myCategorizationInfo.getCategory();
 
-						// 使用信息最全的那个
-						if (category.hasNameLabel())
-							categorization.setCategory(category);
+						if (category.getName().equals(myCategory.getName()))
+						{
+							categorizationInfo = myCategorizationInfo;
+
+							// 使用信息最全的那个
+							if (category.hasNameLabel())
+								categorizationInfo.setCategory(category);
+						}
 					}
-				}
 
-				if (categorization == null)
-				{
-					categorization = new Categorization(category);
-					categorizations.add(categorization);
-				}
+					if (categorizationInfo == null)
+					{
+						categorizationInfo = new CategorizationInfo(category);
+						categorizationInfos.add(categorizationInfo);
+					}
 
-				categorization.addChartPlugin(chartPlugin);
+					categorizationInfo.addChartPluginInfo(new ChartPluginInfo(chartPlugin,
+							(order == null ? chartPlugin.getOrder() : order.intValue())));
+				}
 			}
 		}
 
-		Collections.sort(categorizations, CATEGORIZATION_COMPARATOR);
+		Collections.sort(categorizationInfos);
 
 		if (!uncategorizeds.isEmpty())
 		{
-			Categorization uncategorized = new Categorization(new Category(""));
-			uncategorized.setChartPlugins(uncategorizeds);
-			categorizations.add(uncategorized);
+			CategorizationInfo uncategorized = new CategorizationInfo(new Category(""));
+			uncategorized.setChartPluginInfos(uncategorizeds);
+			categorizationInfos.add(uncategorized);
 		}
+
+		return toCategorizations(categorizationInfos);
+	}
+
+	protected List<Categorization> toCategorizations(List<CategorizationInfo> categorizationInfos)
+	{
+		List<Categorization> categorizations = new ArrayList<Categorization>(categorizationInfos.size());
+
+		for (CategorizationInfo ci : categorizationInfos)
+			categorizations.add(ci.toCategorization());
 
 		return categorizations;
 	}
 
-	protected static final Comparator<Categorization> CATEGORIZATION_COMPARATOR = new Comparator<Categorization>()
+	protected static class CategorizationInfo implements Comparable<CategorizationInfo>
 	{
-		@Override
-		public int compare(Categorization o1, Categorization o2)
+		private Category category;
+
+		private List<ChartPluginInfo> chartPluginInfos = new ArrayList<>(5);
+
+		public CategorizationInfo()
 		{
-			return o1.getCategory().getOrder() - o2.getCategory().getOrder();
+			super();
 		}
-	};
+
+		public CategorizationInfo(Category category)
+		{
+			super();
+			this.category = category;
+		}
+
+		public Category getCategory()
+		{
+			return category;
+		}
+
+		public void setCategory(Category category)
+		{
+			this.category = category;
+		}
+
+		public List<ChartPluginInfo> getChartPluginInfos()
+		{
+			return chartPluginInfos;
+		}
+
+		public void setChartPluginInfos(List<ChartPluginInfo> chartPluginInfos)
+		{
+			this.chartPluginInfos = chartPluginInfos;
+		}
+
+		public void addChartPluginInfo(ChartPluginInfo cpi)
+		{
+			this.chartPluginInfos.add(cpi);
+		}
+
+		@Override
+		public int compareTo(CategorizationInfo o)
+		{
+			return getCategory().getOrder() - o.getCategory().getOrder();
+		}
+
+		public Categorization toCategorization()
+		{
+			Categorization categorization = new Categorization(this.category);
+
+			List<ChartPluginInfo> chartPluginInfos = new ArrayList<ChartPluginInfo>(this.chartPluginInfos);
+			Collections.sort(chartPluginInfos);
+
+			List<ChartPlugin> chartPlugins = new ArrayList<ChartPlugin>(chartPluginInfos.size());
+
+			for (ChartPluginInfo cpi : chartPluginInfos)
+				chartPlugins.add(cpi.getChartPlugin());
+
+			categorization.setChartPlugins(chartPlugins);
+
+			return categorization;
+		}
+	}
+
+	protected static class ChartPluginInfo implements Comparable<ChartPluginInfo>
+	{
+		private ChartPlugin chartPlugin;
+
+		private int order;
+
+		public ChartPluginInfo()
+		{
+			super();
+		}
+
+		public ChartPluginInfo(ChartPlugin chartPlugin, int order)
+		{
+			super();
+			this.chartPlugin = chartPlugin;
+			this.order = order;
+		}
+
+		public ChartPlugin getChartPlugin()
+		{
+			return chartPlugin;
+		}
+
+		public void setChartPlugin(ChartPlugin chartPlugin)
+		{
+			this.chartPlugin = chartPlugin;
+		}
+
+		public int getOrder()
+		{
+			return order;
+		}
+
+		public void setOrder(int order)
+		{
+			this.order = order;
+		}
+
+		@Override
+		public int compareTo(ChartPluginInfo o)
+		{
+			return this.order - o.order;
+		}
+	}
 
 	/**
 	 * 分类结果。
@@ -136,11 +255,6 @@ public class CategorizationResolver
 		public void setChartPlugins(List<ChartPlugin> chartPlugins)
 		{
 			this.chartPlugins = chartPlugins;
-		}
-
-		public void addChartPlugin(ChartPlugin chartPlugin)
-		{
-			this.chartPlugins.add(chartPlugin);
 		}
 	}
 }

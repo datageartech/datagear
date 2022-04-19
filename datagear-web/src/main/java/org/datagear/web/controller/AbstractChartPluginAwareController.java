@@ -179,15 +179,25 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		pluginVO.setVersion(chartPlugin.getVersion());
 		pluginVO.setOrder(chartPlugin.getOrder());
 
-		Category category = chartPlugin.getCategory();
-		if (category != null)
+		List<Category> categories = chartPlugin.getCategories();
+		if (categories != null)
 		{
-			Category categoryVO = new Category(category.getName());
-			categoryVO.setNameLabel(toConcreteLabel(category.getNameLabel(), locale));
-			categoryVO.setDescLabel(toConcreteLabel(category.getDescLabel(), locale));
-			categoryVO.setOrder(category.getOrder());
-			pluginVO.setCategory(categoryVO);
+			List<Category> categoryVOs = new ArrayList<Category>(categories.size());
+
+			for(Category category : categories)
+			{
+				Category categoryVO = new Category(category.getName());
+				categoryVO.setNameLabel(toConcreteLabel(category.getNameLabel(), locale));
+				categoryVO.setDescLabel(toConcreteLabel(category.getDescLabel(), locale));
+				categoryVO.setOrder(category.getOrder());
+
+				categoryVOs.add(categoryVO);
+			}
+
+			pluginVO.setCategories(categoryVOs);
 		}
+
+		pluginVO.setCategoryOrders(chartPlugin.getCategoryOrders());
 
 		return pluginVO;
 	}

@@ -31,7 +31,15 @@ public interface ChartPlugin extends Identifiable, Labeled, Serializable
 	String PROPERTY_DATA_SIGNS = "dataSigns";
 	String PROPERTY_VERSION = "version";
 	String PROPERTY_ORDER = "order";
-	String PROPERTY_CATEGORY = "category";
+	String PROPERTY_CATEGORIES = "categories";
+	String PROPERTY_CATEGORY_ORDERS = "categoryOrders";
+	/**
+	 * 3.0.1版本的单类别属性名，已在3.1.0版本中被{@linkplain #PROPERTY_CATEGORIES}代替。
+	 * 
+	 * @deprecated
+	 */
+	@Deprecated
+	String PROPERTY_CATEGORY_3_0_1 = "category";
 
 	/** 默认图标主题名 */
 	String DEFAULT_ICON_THEME_NAME = "default";
@@ -149,5 +157,18 @@ public interface ChartPlugin extends Identifiable, Labeled, Serializable
 	 * 
 	 * @return 返回{@code null}表示无类别
 	 */
-	Category getCategory();
+	List<Category> getCategories();
+
+	/**
+	 * 获取上述所属类别中的排序值。
+	 * <p>
+	 * 如果没有{@linkplain #getCategories()}中对应索引的排序值，则取{@linkplain #getOrder()}。
+	 * </p>
+	 * <p>
+	 * 返回{@code null}或空列表表示无排序。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	List<Integer> getCategoryOrders();
 }

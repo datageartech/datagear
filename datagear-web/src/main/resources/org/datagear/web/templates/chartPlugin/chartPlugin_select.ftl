@@ -86,13 +86,10 @@
 		var $navul = $("<ul />").appendTo($nav);
 		var $contentul = $("<ul />").appendTo($content);
 		
-		var pluginTotal = 0;
-		
 		for(var i=0; i<categorizations.length; i++)
 		{
 			var category = categorizations[i].category;
 			var pluginCount = (categorizations[i].chartPlugins ? categorizations[i].chartPlugins.length : 0);
-			pluginTotal += pluginCount;
 			var categoryId = (category.name ? "${pageId}-category-"+category.name : "${pageId}-uncategorized");
 			var label = (category.name ? (category.nameLabel && category.nameLabel.value ? category.nameLabel.value : category.name)
 							: "<@spring.message code='chartPlugin.uncategorized' />");
@@ -102,7 +99,8 @@
 			$("<a />").html(label + pluginCount).appendTo($li);
 		}
 		
-		po.element(".plugin-total").html(pluginTotal);
+		var pluginTotal = 0;
+		var pluginIdMap = {};
 		
 		for(var i=0; i<categorizations.length; i++)
 		{
@@ -132,8 +130,16 @@
 					$("<div class='plugin-icon'>&nbsp;</div>").css("background-image", "url(${contextPath}"+chartPlugin.iconUrl+")").appendTo($item);
 				
 				$("<div class='plugin-name'></div>").text(chartPlugin.nameLabel.value).appendTo($item);
+				
+				if(!pluginIdMap[chartPlugin.id])
+				{
+					pluginIdMap[chartPlugin.id] = true;
+					pluginTotal++;
+				}
 			}
 		}
+		
+		po.element(".plugin-total").html(pluginTotal);
 		
 		$navul.menu(
 		{

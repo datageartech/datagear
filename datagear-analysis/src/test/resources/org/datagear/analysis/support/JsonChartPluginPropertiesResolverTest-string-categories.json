@@ -1,0 +1,5 @@
+{
+	id : "pie-chart",
+	categories: [ "line", "bar"],
+	categoryOrders: 41
+}

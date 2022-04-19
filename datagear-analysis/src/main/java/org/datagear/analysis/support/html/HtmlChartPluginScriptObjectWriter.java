@@ -111,7 +111,8 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 			setDataSigns(plugin.getDataSigns());
 			setVersion(plugin.getVersion());
 			setOrder(plugin.getOrder());
-			setCategory(plugin.getCategory());
+			setCategories(plugin.getCategories());
+			setCategoryOrders(plugin.getCategoryOrders());
 		}
 
 		@Override

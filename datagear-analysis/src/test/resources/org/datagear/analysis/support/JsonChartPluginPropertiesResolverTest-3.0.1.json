@@ -144,20 +144,11 @@
 	],
 	version : "0.1.0",
 	order : 2,
-	categories :
-	[
-		{
-			name : 'line',
-			nameLabel : "nameLabel-line",
-			descLabel : "descLabel-line",
-			order: 41
-		},
-		{
-			name : 'bar',
-			nameLabel : "nameLabel-bar",
-			descLabel : "descLabel-bar",
-			order: 51
-		}
-	],
-	categoryOrders: [ 41, 51 ]
+	category :
+	{
+		name : 'line',
+		nameLabel : "nameLabel",
+		descLabel : "descLabel",
+		order: 41
+	}
 }

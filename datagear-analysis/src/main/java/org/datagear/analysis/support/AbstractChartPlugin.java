@@ -44,7 +44,9 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private int order = 0;
 
-	private Category category;
+	private List<Category> categories;
+
+	private List<Integer> categoryOrders;
 
 	public AbstractChartPlugin()
 	{
@@ -188,13 +190,24 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public Category getCategory()
+	public List<Category> getCategories()
 	{
-		return category;
+		return categories;
 	}
 
-	public void setCategory(Category category)
+	public void setCategories(List<Category> categories)
 	{
-		this.category = category;
+		this.categories = categories;
+	}
+
+	@Override
+	public List<Integer> getCategoryOrders()
+	{
+		return categoryOrders;
+	}
+
+	public void setCategoryOrders(List<Integer> categoryOrders)
+	{
+		this.categoryOrders = categoryOrders;
 	}
 }
