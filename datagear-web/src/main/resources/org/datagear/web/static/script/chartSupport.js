@@ -2709,6 +2709,165 @@
 		chart.eventOriginalInfo(chartEvent, echartsData);
 	};
 	
+	//地图热力图
+	
+	chartSupport.mapHeatmapRender = function(chart, nameSign, valueSign, weightSign, mapSign, options)
+	{
+		//name 经度
+		//value 纬度
+		//weight 热力
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, weight: weightSign, map: mapSign });
+		
+		options = chartSupport.inflateRenderOptions(chart,
+		{
+			title:
+			{
+		        text: chart.name
+		    },
+			geo:
+			{
+				id: 0,
+				roam: true,
+				//将在update中设置：
+				//map
+				//这里必须设置map，不然渲染会报错，update中会特殊处理
+				map: (chart.map() || "china")
+			},
+			visualMap:
+			{
+				//将在update中设置：
+				//min
+				//max
+				
+				id: 0,
+				show: false,
+				top: "top",
+				calculable: true
+			},
+			series:
+			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
+				{
+					id: 0,
+					type: "heatmap",
+					coordinateSystem: "geo",
+					pointSize: 5,
+					blurSize: 6
+				}
+			]
+		},
+		options);
+		
+		chartSupport.echartsMapChartInit(chart, options);
+	};
+	
+	chartSupport.mapHeatmapUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
+		var chartEle = chart.elementJquery();
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		var seriesName = "";
+		var seriesData = [];
+		var min = undefined, max=undefined;
+		var map = undefined;
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var result = chart.resultOf(results, chartDataSet);
+			
+			//取任一不为空的地图名列值
+			if(!map)
+				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, chartDataSet, result, signNameMap.map);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
+			var wp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.weight);
+			
+			var data = chart.resultValueObjects(result, [ np, vp, wp ]);
+			
+			for(var j=0; j<data.length; j++)
+			{
+				var dw = data[j].value[2];
+				
+				min = (min == null ? dw : Math.min(min, dw));
+				max = (max == null ? dw : Math.max(max, dw));
+			}
+			
+			chart.originalInfo(data, chartDataSet);
+			
+			seriesData = seriesData.concat(data);
+			
+			if(!seriesName)
+				seriesName = chart.dataSetAlias(chartDataSet);
+		}
+		
+		var pointSize = parseInt(Math.min(chartEle.width(), chartEle.height())/60);
+		if(pointSize < 1)
+			pointSize = 1;
+		
+		var series =
+		[{
+			id: 0,
+			name: seriesName,
+			data: seriesData,
+			type: "heatmap",
+			coordinateSystem: "geo",
+			pointSize: pointSize,
+			blurSize: parseInt(pointSize*1.2)
+		}];
+		
+		var options = { visualMap: {id: 0, min: min, max: max}, series: series };
+		chartSupport.trimNumberRange(options.visualMap);
+		
+		if(map)
+			options.geo = { id: 0, map: map };
+		
+		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
+	};
+	
+	chartSupport.mapHeatmapResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.mapHeatmapDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+
+	chartSupport.mapHeatmapOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
+				chartSupport.mapHeatmapSetChartEventData);
+	};
+	
+	chartSupport.mapHeatmapOff = function(chart, eventType, handler)
+	{
+		chart.echartsOffEventHandler(eventType, handler);
+	};
+	
+	chartSupport.mapHeatmapSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var echartsData = echartsEventParams.data;
+		var data = {};
+		
+		data[signNameMap.name] = echartsData.value[0];
+		data[signNameMap.value] = echartsData.value[1];
+		data[signNameMap.weight] = echartsData.value[2];
+		
+		chart.eventData(chartEvent, data);
+		chart.eventOriginalInfo(chartEvent, echartsData);
+	};
+	
 	//K线图
 	
 	chartSupport.candlestickRender = function(chart, nameSign, openSign, closeSign, minSign, maxSign, options)
