@@ -91,7 +91,10 @@ page_obj.ftl
 		if(this.refreshParent)
 			this.refreshParent();
 		
-		po.pageParamSubmitSuccess(response);
+		var myClose = po.pageParamSubmitSuccess(response);
+		
+		if(myClose === false)
+			return;
 		
 		if(close && !this.isDialogPinned())
 			this.close();

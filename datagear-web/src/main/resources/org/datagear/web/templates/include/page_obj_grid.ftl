@@ -247,7 +247,10 @@ page_obj.ftl
 	{
 		close = (close == null ? true : close);
 		
-		this.pageParamCall("select", selectedData);
+		var myClose = this.pageParamCall("select", selectedData);
+		
+		if(myClose === false)
+			return;
 		
 		if(close && !this.isDialogPinned())
 			this.close();
