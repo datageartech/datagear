@@ -37,24 +37,24 @@ public class GenericPropertiesProcessor implements PropertiesProcessor
 	}
 
 	@Override
-	public void process(Driver driver, Properties properties)
+	public void process(Driver driver, String url, Properties properties)
 	{
-		DevotedPropertiesProcessor processor = getDevotedPropertiesProcessor(driver, properties);
+		DevotedPropertiesProcessor processor = getDevotedPropertiesProcessor(driver, url, properties);
 
 		if (processor == null)
 			return;
 
-		processor.process(driver, properties);
+		processor.process(driver, url, properties);
 	}
 
-	protected DevotedPropertiesProcessor getDevotedPropertiesProcessor(Driver driver, Properties properties)
+	protected DevotedPropertiesProcessor getDevotedPropertiesProcessor(Driver driver, String url, Properties properties)
 	{
 		if (this.devotedPropertiesProcessors == null)
 			return null;
 
 		for (DevotedPropertiesProcessor processor : this.devotedPropertiesProcessors)
 		{
-			if (processor.supports(driver, properties))
+			if (processor.supports(driver, url, properties))
 				return processor;
 		}
 

@@ -27,9 +27,9 @@ public class OracleDevotedPropertiesProcessor extends AbstractDriverClassNameDev
 	}
 
 	@Override
-	public void process(Driver driver, Properties properties)
+	public void process(Driver driver, String url, Properties properties)
 	{
 		// 元信息返回注释
-		properties.put("remarksReporting", "true");
+		properties.setProperty("remarksReporting", "true");
 	}
 }

@@ -22,8 +22,9 @@ public interface DevotedPropertiesProcessor extends PropertiesProcessor
 	 * 是否能处理给定连接参数。
 	 * 
 	 * @param driver
+	 * @param url
 	 * @param properties
 	 * @return
 	 */
-	boolean supports(Driver driver, Properties properties);
+	boolean supports(Driver driver, String url, Properties properties);
 }

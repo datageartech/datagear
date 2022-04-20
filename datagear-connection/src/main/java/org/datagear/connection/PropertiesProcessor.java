@@ -28,7 +28,8 @@ public interface PropertiesProcessor
 	 * </p>
 	 * 
 	 * @param driver
+	 * @param url
 	 * @param properties
 	 */
-	void process(Driver driver, Properties properties);
+	void process(Driver driver, String url, Properties properties);
 }

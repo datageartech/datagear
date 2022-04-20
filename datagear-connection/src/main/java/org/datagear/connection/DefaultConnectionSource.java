@@ -367,16 +367,17 @@ public class DefaultConnectionSource implements ConnectionSource
 	protected Connection getConnection(Driver driver, ConnectionOption connectionOption)
 			throws EstablishConnectionException, ConnectionSourceException
 	{
+		String url = connectionOption.getUrl();
 		Properties properties = new Properties();
 
 		if (connectionOption.getProperties() != null)
 			properties.putAll(connectionOption.getProperties());
 
-		processConnectionProperties(driver, properties);
+		processConnectionProperties(driver, url, properties);
 
 		try
 		{
-			return getConnection(driver, connectionOption.getUrl(), properties);
+			return getConnection(driver, url, properties);
 		}
 		catch (SQLException | ExecutionException e)
 		{
@@ -505,12 +506,14 @@ public class DefaultConnectionSource implements ConnectionSource
 	 * 中的部分接口，不同的JDBC驱动可能需要配置各自的连接参数。
 	 * </p>
 	 * 
-	 * @return
+	 * @param driver
+	 * @param url
+	 * @param properties
 	 */
-	protected void processConnectionProperties(Driver driver, Properties properties)
+	protected void processConnectionProperties(Driver driver, String url, Properties properties)
 	{
 		if (this.propertiesProcessor != null)
-			this.propertiesProcessor.process(driver, properties);
+			this.propertiesProcessor.process(driver, url, properties);
 	}
 
 	/**

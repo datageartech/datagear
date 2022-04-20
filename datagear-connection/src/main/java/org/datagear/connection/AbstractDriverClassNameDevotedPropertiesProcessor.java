@@ -55,7 +55,7 @@ public abstract class AbstractDriverClassNameDevotedPropertiesProcessor implemen
 	}
 
 	@Override
-	public boolean supports(Driver driver, Properties properties)
+	public boolean supports(Driver driver, String url, Properties properties)
 	{
 		String driverClassName = driver.getClass().getName();
 
@@ -63,5 +63,18 @@ public abstract class AbstractDriverClassNameDevotedPropertiesProcessor implemen
 			return (driverClassName.toLowerCase().indexOf(this.driverClassName.toLowerCase()) >= 0);
 		else
 			return driverClassName.equalsIgnoreCase(this.driverClassName);
+	}
+
+	/**
+	 * 指定名称的连接属性是否已设置。
+	 * 
+	 * @param url
+	 * @param properties
+	 * @param propertyName
+	 * @return
+	 */
+	protected boolean isPropertyPresent(String url, Properties properties, String propertyName)
+	{
+		return (url.indexOf(propertyName + "=") >= 0 || properties.getProperty(propertyName) != null);
 	}
 }

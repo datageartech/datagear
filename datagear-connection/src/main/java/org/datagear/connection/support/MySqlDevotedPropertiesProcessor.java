@@ -27,9 +27,13 @@ public class MySqlDevotedPropertiesProcessor extends AbstractDriverClassNameDevo
 	}
 
 	@Override
-	public void process(Driver driver, Properties properties)
+	public void process(Driver driver, String url, Properties properties)
 	{
 		// 元信息返回注释
-		properties.put("useInformationSchema", "true");
+		properties.setProperty("useInformationSchema", "true");
+
+		// 默认连接超时30秒
+		if (!isPropertyPresent(url, properties, "connectTimeout"))
+			properties.setProperty("connectTimeout", "30000");
 	}
 }
