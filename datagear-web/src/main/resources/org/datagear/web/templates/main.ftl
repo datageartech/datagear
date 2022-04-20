@@ -1403,7 +1403,7 @@ ${detectNewVersionScript?no_esc}
 		<div id="${pageId}-mainTabs" class="main-tabs">
 			<ul>
 			</ul>
-			<div class="tabs-more-operation-menu-wrapper ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow" style="position: absolute; left:0px; top:0px; display: none;">
+			<div class="tabs-more-operation-menu-wrapper ui-widget ui-front ui-corner-all ui-widget-shadow" style="position: absolute; left:0px; top:0px; display: none;">
 				<ul class="tabs-more-operation-menu">
 					<li class="tab-operation-close-left"><div><@spring.message code='main.closeLeft' /></div></li>
 					<li class="tab-operation-close-right"><div><@spring.message code='main.closeRight' /></div></li>
