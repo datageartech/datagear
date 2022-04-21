@@ -86,23 +86,27 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item-value">
 					<div class="updateInterval-radios">
-						<label for="${pageId}-updateInterval_0" title="">
+						<label for="${pageId}-updateInterval-none" title="">
 							<@spring.message code='chart.updateInterval.none' />
 						</label>
-			   			<input type="radio" id="${pageId}-updateInterval_0" name="updateIntervalRadio" value="0" />
-						<label for="${pageId}-updateInterval_1" title="">
-							<@spring.message code='chart.updateInterval.realtime' />
-						</label>
-			   			<input type="radio" id="${pageId}-updateInterval_1" name="updateIntervalRadio" value="1"  />
-						<label for="${pageId}-updateInterval_2" title="">
+			   			<input type="radio" id="${pageId}-updateInterval-none" name="updateIntervalRadio" value="none" />
+						<label for="${pageId}-updateInterval-interval" title="">
 							<@spring.message code='chart.updateInterval.interval' />
 						</label>
-			   			<input type="radio" id="${pageId}-updateInterval_2" name="updateIntervalRadio" value="2"  />
+			   			<input type="radio" id="${pageId}-updateInterval-interval" name="updateIntervalRadio" value="interval"  />
+			   			<!--禁用实时刷新选项，这个功能几乎没有应用场景，且很容易误操作导致图表效果非预期
+			   			<label for="${pageId}-updateInterval-realtime" title="">
+							<@spring.message code='chart.updateInterval.realtime' />
+						</label>
+			   			<input type="radio" id="${pageId}-updateInterval-realtime" name="updateIntervalRadio" value="realtime"  />
+			   			-->
 					</div>
 					&nbsp;
 					<span class="updateInterval-wrapper">
 						<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'}" required="required" class="ui-widget ui-widget-content ui-corner-all" style="width:7em;" />
 						<span><@spring.message code='chart.updateIntervalUnit' /></span>
+						&nbsp;
+						<span class="small-text minor"><@spring.message code='chart.updateInterval.minValTip' /></span>
 					</span>
 				</div>
 			</div>
@@ -324,26 +328,28 @@ readonly 是否只读操作，允许为null
 		if(!$input.attr("init-val"))
 			$input.attr("init-val", inputVal);
 		
-		if(radioVal == "0")
+		if(radioVal == "none")
 		{
 			$input.val("-1");
-			if(inputVal > 0)
+			if(inputVal >= 0)
 				$input.attr("init-val", inputVal);
 			
 			$inputWrapper.hide();
 		}
-		else if(radioVal == "1")
+		/*禁用实时刷新选项
+		else if(radioVal == "realtime")
 		{
 			$input.val("0");
-			if(inputVal > 0)
+			if(inputVal >= 0)
 				$input.attr("init-val", inputVal);
 			
 			$inputWrapper.hide();
 		}
+		*/
 		else
 		{
 			var initVal = parseInt($input.attr("init-val"));
-			if(initVal > 0)
+			if(initVal >= 0)
 				$input.val(initVal);
 			else
 				$input.val("");
@@ -358,23 +364,25 @@ readonly 是否只读操作，允许为null
 		{
 			var radioVal = po.element("[name='updateIntervalRadio']:checked").val();
 			
-			if(radioVal == "2")
+			if(radioVal == "interval")
 				return parseInt(po.elementOfName("updateInterval").val());
-			else if(radioVal == "1")
+			else if(radioVal == "realtime")
 				return 0;
 			else
 				return -1;
 		}
 		else
 		{
-			var radioVal = "-1";
+			var radioVal = "none";
 			
 			if(value < 0)
-				radioVal = "0";
+				radioVal = "none";
+			/*禁用实时刷新选项
 			else if(value == 0)
-				radioVal = "1";
+				radioVal = "realtime";
+			*/
 			else
-				radioVal = "2";
+				radioVal = "interval";
 			
 			po.element("[name='updateIntervalRadio'][value='"+radioVal+"']").attr("checked", "checked").change();
 		}
