@@ -7,6 +7,7 @@
 
 package org.datagear.connection;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -440,6 +441,11 @@ public class DefaultConnectionSource implements ConnectionSource
 			{
 				throw t;
 			}
+			// 如果是IO异常（网络不通时可能抛出），比如：SocketException、SocketTimeoutException，则不必再尝试
+			else if (isIOExceptionCause(t))
+			{
+				throw t;
+			}
 			else
 			{
 				LOGGER.debug("Get connection from the internal DataSource failed for {}, "
@@ -476,6 +482,30 @@ public class DefaultConnectionSource implements ConnectionSource
 		}
 
 		return connection;
+	}
+
+	/**
+	 * 指定异常链是否由{@linkplain IOException}导致。
+	 * 
+	 * @param t
+	 * @return
+	 */
+	protected boolean isIOExceptionCause(Throwable t)
+	{
+		Throwable cause = t;
+
+		for (int i = 0; i < 10000; i++)
+		{
+			if (cause == null)
+				return false;
+
+			if (cause instanceof IOException)
+				return true;
+
+			cause = cause.getCause();
+		}
+
+		return false;
 	}
 
 	protected Connection getConnectionWithoutInternalDataSource(Driver driver, String url, Properties properties)

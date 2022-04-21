@@ -31,9 +31,5 @@ public class MySqlDevotedPropertiesProcessor extends AbstractDriverClassNameDevo
 	{
 		// 元信息返回注释
 		properties.setProperty("useInformationSchema", "true");
-
-		// 默认连接超时30秒
-		if (!isPropertyPresent(url, properties, "connectTimeout"))
-			properties.setProperty("connectTimeout", "30000");
 	}
 }
