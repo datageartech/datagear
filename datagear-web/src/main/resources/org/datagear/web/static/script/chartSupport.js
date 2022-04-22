@@ -174,7 +174,7 @@
 		var data = chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value);
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//柱状图
@@ -350,7 +350,7 @@
 			);
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//极坐标柱状图
@@ -552,7 +552,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//饼图
@@ -692,7 +692,7 @@
 		data[signNameMap.value] = echartsData.value;
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	chartSupport.pieEvalSeriesLayout = function(chart, renderOptions, updateOptions)
@@ -870,7 +870,7 @@
 		data[signNameMap.max] = echartsData.max;
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	chartSupport.gaugeEvalDataTitlePosition = function(chart, seriesData, colCount, initYposition, titleHeight, detailHeight)
@@ -1123,7 +1123,7 @@
 		var data = chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value);
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//坐标散点图
@@ -1337,7 +1337,7 @@
 			data[signNameMap.weight] = echartsData.value[2];
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//雷达图
@@ -1555,7 +1555,7 @@
 		data[signNameMap.max] = maxes;
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//漏斗图
@@ -1684,7 +1684,7 @@
 		data[signNameMap.value] = echartsData.value;
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//地图
@@ -1830,7 +1830,7 @@
 		data[signNameMap.value] = echartsData.value;
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//地图散点图
@@ -2053,7 +2053,7 @@
 			data[signNameMap.value] = echartsData.value[2];
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//地图关系图
@@ -2307,7 +2307,7 @@
 				data[signNameMap.sourceValue] = echartsData.value[2];
 			
 			chart.eventData(chartEvent, data);
-			chart.eventOriginalInfo(chartEvent, echartsData);
+			chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 		}
 		//边
 		else if(echartsEventParams.dataType == "edge")
@@ -2336,7 +2336,7 @@
 			}
 			
 			chart.eventData(chartEvent, data);
-			chart.eventOriginalInfo(chartEvent, echartsData);
+			chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 		}
 	};
 	
@@ -2516,7 +2516,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//地图飞线图
@@ -2706,7 +2706,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//地图热力图
@@ -2865,7 +2865,7 @@
 		data[signNameMap.weight] = echartsData.value[2];
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//K线图
@@ -3015,7 +3015,7 @@
 		data[signNameMap.max] = echartsData.value[idx+3];
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//热力图
@@ -3199,7 +3199,7 @@
 		data[signNameMap.weight] = echartsData.value[2];
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//树图
@@ -3282,7 +3282,7 @@
 		data[signNameMap.value] = echartsData.value;
 
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	chartSupport.treeInflateUpdateOptions = function(chart, updateOptions, renderOptions)
@@ -3423,7 +3423,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 		
 		return data;
 	};
@@ -3504,7 +3504,7 @@
 		data[signNameMap.value] = echartsData.value;
 
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	chartSupport.buildTreeNodeSeries = function(chart, results, initSeries)
@@ -3775,7 +3775,7 @@
 			data[signNameMap.sourceValue] = echartsData.value;
 			
 			chart.eventData(chartEvent, data);
-			chart.eventOriginalInfo(chartEvent, echartsData);
+			chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 		}
 		//边
 		else if(echartsEventParams.dataType == "edge")
@@ -3796,7 +3796,7 @@
 			data[signNameMap.value] = echartsData.value;
 
 			chart.eventData(chartEvent, data);
-			chart.eventOriginalInfo(chartEvent, echartsData);
+			chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 		}
 	};
 	
@@ -4063,7 +4063,7 @@
 			data[signNameMap.sourceValue] = echartsData.value;
 
 			chart.eventData(chartEvent, data);
-			chart.eventOriginalInfo(chartEvent, echartsData);
+			chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 		}
 		//边
 		else if(echartsEventParams.dataType == "edge")
@@ -4088,7 +4088,7 @@
 			data[signNameMap.value] = echartsData.value;
 
 			chart.eventData(chartEvent, data);
-			chart.eventOriginalInfo(chartEvent, echartsData);
+			chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 		}
 	};
 	
@@ -4321,7 +4321,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//词云图
@@ -4488,7 +4488,7 @@
 		data[signNameMap.value] = echartsData.value;
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//水球图
@@ -4660,7 +4660,7 @@
 		data[signNameMap.value] = echartsData.value;
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	//平行坐标系
@@ -4840,7 +4840,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, echartsData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
 	chartSupport.parallelEvalParallelAxis = function(chart)
@@ -5351,7 +5351,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, chartData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(chartData));
 	};
 	
 	chartSupport.tableGetChartContent = function(chart)
@@ -6183,7 +6183,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, chartData);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(chartData));
 	};
 	
 	//下拉框
@@ -6398,7 +6398,7 @@
 		}
 		
 		chart.eventData(chartEvent, data);
-		chart.eventOriginalInfo(chartEvent, chartData);
+		chart.eventOriginalDataIndex(chartEvent, (renderOptions.multiple ? chart.originalDataIndexes(chartData) : chart.originalDataIndex(chartData)));
 	};
 	
 	chartSupport.selectThemeStyleSheet = function(chart)

@@ -2437,9 +2437,9 @@
 		var event =
 		{
 			"type": eventType,
-			"chart": this,
+			"originalEvent": echartsEventParams,
 			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS,
-			"originalEvent": echartsEventParams
+			"chart": this
 		};
 		
 		return event;
@@ -2456,9 +2456,9 @@
 		var event =
 		{
 			"type": eventType,
-			"chart": this,
+			"originalEvent": htmlEvent,
 			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_HTML,
-			"originalEvent": htmlEvent
+			"chart": this
 		};
 		
 		return event;
@@ -2488,8 +2488,7 @@
 	 * 图表事件支持函数：获取/设置图表事件数据（chartBase.eventData(chartEvent)返回值）对应的原始数据集结果数据（chartEvent.originalData）。
 	 * 
 	 * @param chartEvent 图表事件对象，格式应为：{ ... }
-	 * @param originalData 可选，要设置的原始数据集结果数据，格式应为：
-	 *                     与chartBase.eventOriginalResultDataIndex(chartEvent)返回值格式一致，
+	 * @param originalData 要设置的原始数据集结果数据，通常与chartBase.eventOriginalDataIndex(chartEvent)返回值结构一致，
 	 *                     只是每一个数据集结果数据索引数值对应一个数据集结果数据对象
 	 * @returns 要获取的原始数据，未设置则返回null
 	 */
@@ -3617,12 +3616,12 @@
 			if(inflateOriginalData !== false && originalDataIndex)
 			{
 				var isArray = $.isArray(originalDataIndex);
-				originalDataIndex = (isArray ? originalDataIndex : [ originalDataIndex ]);
+				var originalDataIndexAry = (isArray ? originalDataIndex : [ originalDataIndex ]);
 				var originalData = [];
 				
-				for(var i=0; i<originalDataIndex.length; i++)
+				for(var i=0; i<originalDataIndexAry.length; i++)
 				{
-					var odi = originalDataIndex[i];
+					var odi = originalDataIndexAry[i];
 					var chartDataSetIndex = odi.chartDataSetIndex;
 					var resultDataIndex = odi.resultDataIndex;
 					var results = this.updateResults();
@@ -3649,6 +3648,20 @@
 				
 				this.eventOriginalData(chartEvent, (isArray ? originalData : originalData[0]));
 			}
+			
+			// < @deprecated 兼容3.0.1版本的chartEvent.originalChartDataSetIndex、originalResultDataIndex结构，将在未来版本移除
+			var isArray = $.isArray(originalDataIndex);
+			var originalDataIndexAry = (isArray ? originalDataIndex : [ originalDataIndex ]);
+			var originalChartDataSetIndex = [];
+			var originalResultDataIndex = [];
+			for(var i=0; i<originalDataIndexAry.length; i++)
+			{
+				originalChartDataSetIndex[i] = originalDataIndexAry[i].chartDataSetIndex;
+				originalResultDataIndex[i] = originalDataIndexAry[i].resultDataIndex;
+			}
+			chartEvent["originalChartDataSetIndex"] = (isArray ? originalChartDataSetIndex : originalChartDataSetIndex[0]);
+			chartEvent["originalResultDataIndex"] = (isArray ? originalResultDataIndex : originalResultDataIndex[0]);
+			// > @deprecated 兼容3.0.1版本的chartEvent.originalChartDataSetIndex、originalResultDataIndex结构，将在未来版本移除
 		}
 	};
 	
