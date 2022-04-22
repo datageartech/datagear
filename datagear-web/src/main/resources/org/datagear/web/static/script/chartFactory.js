@@ -3665,6 +3665,25 @@
 		}
 	};
 	
+	/**
+	 * 图表事件支持函数：创建图表的事件对象。
+	 * 
+	 * @param eventType 事件类型
+	 * @param originalEvent 底层原始事件
+	 * @since 3.1.0
+	 */
+	chartBase.eventNew = function(eventType, originalEvent)
+	{
+		var event =
+		{
+			"type": eventType,
+			"originalEvent": originalEvent,
+			"chart": this
+		};
+		
+		return event;
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
