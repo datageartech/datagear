@@ -2291,7 +2291,7 @@
 		
 		var re = [];
 		
-		var pname = chartFactory._DATA_ORIGINAL_INFO_PROP_NAME;
+		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
 		
 		for(var i=0; i<data.length; i++)
 		{

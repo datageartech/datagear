@@ -2754,6 +2754,52 @@
 	};
 	
 	/**
+	 * 获取/设置指定单条图表展示数据的原始结果数据索引信息（图表ID、图表数据集索引、结果数据索引）。
+	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
+	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始索引信息，以支持在后续的交互、事件处理中获取它们。
+	 * 
+	 * @param data 展示数据，格式为：{ ... }、[ ... ]，对于设置操作，当展示数据是对象时，将为其添加一个额外属性；当展示数据是数组时，将为其末尾添加一个元素
+	 * @param chartDataSetIndex 要设置的图表数据集索引数值、数值数组
+	 * @param resultDataIndex 要设置的结果数据索引，格式为：
+	 *                        当chartDataSetIndex是数值时：
+	 *                        数值、数值数组
+	 *                        当chartDataSetIndex是数值数组时：
+	 *                        数组（元素可以是数值、数值数组），与chartDataSetIndex数组元素一一对应
+	 */
+	chartBase.originalDataIndex = function(data, chartDataSetIndex, resultDataIndex)
+	{
+		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
+		var isArray = $.isArray(data);
+		
+		//获取
+		if(arguments.length == 1)
+		{
+			if(isArray)
+			{
+				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
+				return (tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined 
+							? tailEle : undefined);
+			}
+			else
+				return (data == null ? undefined : data[pname]);
+		}
+		else
+		{
+			var originalIdx =
+			{
+				"chartId": this.id,
+				"chartDataSetIndex": chartDataSetIndex,
+				"resultDataIndex": resultDataIndex
+			};
+			
+			if(isArray)
+				data.push(originalIdx);
+			else
+				data[pname] = originalIdx;
+		}
+	};
+	
+	/**
 	 * 获取/设置指定数据对象的原始信息属性值，包括：图表ID、图表数据集索引、结果数据索引。
 	 * 图表渲染器在构建用于渲染图表的内部数据对象时，应使用此函数设置其原始信息，以支持在后续的交互、事件处理中获取这些原始信息。
 	 * 
@@ -2787,7 +2833,7 @@
 	 */
 	chartBase.originalInfo = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
 	{
-		var pname = chartFactory._DATA_ORIGINAL_INFO_PROP_NAME;
+		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
 		
 		var isDataArray = $.isArray(data);
 		
@@ -4807,8 +4853,8 @@
 	/**内置名字标识片段*/
 	chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX = "_" + chartFactory._BUILT_IN_NAME_PART;
 	
-	/**数据对象的原始信息属性名*/
-	chartFactory._DATA_ORIGINAL_INFO_PROP_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalInfo";
+	/**图表展示数据对象的原始信息属性名*/
+	chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalDataIndex";
 	
 	/**图表主题的CSS信息属性名*/
 	chartFactory._KEY_THEME_STYLE_SHEET_INFO = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleSheetInfo";
