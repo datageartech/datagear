@@ -115,7 +115,7 @@
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var data = chart.resultValueObjects(result, [ np, vps[j] ]);
 				
-				chart.originalInfo(data, chartDataSet);
+				chart.originalDataIndexes(data, chartDataSet);
 				
 				var mySeries = {id: series.length, type: "line", name: legendName, data: data};
 				
@@ -282,7 +282,7 @@
 				var vpsMy = (renderOptions.dgHorizontal ? [vps[j], np] : [np, vps[j]]);
 				var data = chart.resultValueObjects(result, vpsMy);
 				
-				chart.originalInfo(data, chartDataSet);
+				chart.originalDataIndexes(data, chartDataSet);
 				
 				var mySeries = {id: series.length, type: "bar", name: legendName, data: data};
 				
@@ -479,7 +479,7 @@
 				else
 					data = chart.resultValueObjects(result, [np, vps[j]]);
 				
-				chart.originalInfo(data, chartDataSet);
+				chart.originalDataIndexes(data, chartDataSet);
 				
 				var mySeries = {id: series.length, type: "bar", name: legendName, data: data, coordinateSystem: "polar"};
 				
@@ -627,7 +627,7 @@
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
 			var data = chart.resultNameValueObjects(result, np, vp);
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			if(dgSplitDataSet)
 			{
@@ -815,7 +815,7 @@
 				{
 					var vpn = chart.dataSetPropertyAlias(chartDataSet,vps[k]);
 					var data = { name: vpn, value: vRow[k] };
-					chart.originalInfo(data, chartDataSet, j);
+					chart.originalDataIndex(data, chartDataSet, j);
 					
 					seriesData.push(data);
 				}
@@ -1065,7 +1065,7 @@
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var data = chart.resultValueObjects(result, [np, vps[j]]);
 				
-				chart.originalInfo(data, chartDataSet);
+				chart.originalDataIndexes(data, chartDataSet);
 				
 				for(var k=0; k<data.length; k++)
 				{
@@ -1287,7 +1287,7 @@
 				}
 			}
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			series.push({ id: series.length, type: scatterType, name: dataSetName, data: data });
 			legendData.push(dataSetName);
@@ -1464,7 +1464,7 @@
 		{
 			var myData = { name: iv[j], value: vpv[j] };
 			
-			chart.originalInfo(myData, chartDataSet, j);
+			chart.originalDataIndex(myData, chartDataSet, j);
 			
 			seriesData.push(myData);
 		}
@@ -1505,7 +1505,7 @@
 			
 			var myData = { name: name, value: vv[i] };
 			
-			chart.originalInfo(myData, chartDataSet, resultDataIndex);
+			chart.originalDataIndex(myData, chartDataSet, resultDataIndex);
 			
 			seriesData.push(myData);
 		}
@@ -1625,7 +1625,7 @@
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
 			var data = chart.resultNameValueObjects(result, np, vp);
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			legendData = legendData.concat(npv);
 			if(!seriesName)
@@ -1761,7 +1761,7 @@
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
 			var data = chart.resultNameValueObjects(result, np, vp);
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			if(!seriesName)
 				seriesName = dataSetName;
@@ -1990,7 +1990,7 @@
 			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name),
 					(vp ? [lop, lap, vp] : [lop, lap]));
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			if(vp)
 			{
@@ -2229,7 +2229,7 @@
 				//新插入
 				if(sidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === sd)
 				{
-					chart.originalInfo(sd, chartDataSet, j);
+					chart.originalDataIndex(sd, chartDataSet, j);
 				}
 				
 				var tidx = chartSupport.appendDistinct(seriesData, td, (tip ? "id" : "name"));
@@ -2237,7 +2237,7 @@
 				//新插入
 				if(tidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === td)
 				{
-					chart.originalInfo(td, chartDataSet, j);
+					chart.originalDataIndex(td, chartDataSet, j);
 				}
 				
 				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引，所以这里直接使用数据索引
@@ -2245,7 +2245,7 @@
 				link.source = sidx;
 				link.target = tidx;
 				
-				chart.originalInfo(link, chartDataSet, j);
+				chart.originalDataIndex(link, chartDataSet, j);
 				
 				seriesLinks.push(link);
 			}
@@ -2448,7 +2448,7 @@
 				{
 					var name = names[j];
 					data[j] = { name: name, coords: coordsInfos[name].coords };
-					chart.originalInfo(data[j], chartDataSet, coordsInfos[name].originalDataIndexes);
+					chart.originalDataIndex(data[j], chartDataSet, coordsInfos[name].originalDataIndexes);
 				}
 			}
 			else
@@ -2460,7 +2460,7 @@
 					originalDataIndexes[j] = j;
 				
 				data = [ { name: dataSetName, coords: data } ];
-				chart.originalInfo(data[0], chartDataSet, originalDataIndexes);
+				chart.originalDataIndex(data[0], chartDataSet, originalDataIndexes);
 			}
 			
 			legendData.push(dataSetName);
@@ -2622,7 +2622,7 @@
 				data[j].coords = [[coords[0], coords[1]], [coords[2], coords[3]]];
 			}
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data,
 							(propertyMap[categoryPropertyName] ? categoryPropertyName : null), dataSetName);
@@ -2800,7 +2800,7 @@
 				max = (max == null ? dw : Math.max(max, dw));
 			}
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			seriesData = seriesData.concat(data);
 			
@@ -2962,7 +2962,7 @@
 						chart.dataSetPropertyOfSign(chartDataSet, signNameMap.max)
 					]);
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 			
@@ -3147,7 +3147,7 @@
 				max = (max == null ? dw : Math.max(max, dw));
 			}
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			seriesData = seriesData.concat(data);
 			
@@ -3548,7 +3548,7 @@
 					chartSupport.treeNodeEvalValueMark(node);
 				}
 				
-				chart.originalInfo(node, chartDataSet, j);
+				chart.originalDataIndex(node, chartDataSet, j);
 				
 				var added = false;
 				for(var k=0; k<seriesData.length; k++)
@@ -3698,14 +3698,14 @@
 				if(tvp)
 					td.value = chart.resultRowCell(data[j], tvp);
 				
-				chart.originalInfo(sd, chartDataSet, j);
+				chart.originalDataIndex(sd, chartDataSet, j);
 				
 				var sidx = chartSupport.appendDistinct(seriesData, sd, "name");
 				
 				//新插入
 				if(sidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === sd)
 				{
-					chart.originalInfo(sd, chartDataSet, j);
+					chart.originalDataIndex(sd, chartDataSet, j);
 				}
 				
 				var tidx = chartSupport.appendDistinct(seriesData, td, "name");
@@ -3713,7 +3713,7 @@
 				//新插入
 				if(tidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === td)
 				{
-					chart.originalInfo(td, chartDataSet, j);
+					chart.originalDataIndex(td, chartDataSet, j);
 				}
 				
 				var link = {};
@@ -3724,7 +3724,7 @@
 				link._sourceIndex = sidx;
 				link._targetIndex = tidx;
 				
-				chart.originalInfo(link, chartDataSet, j);
+				chart.originalDataIndex(link, chartDataSet, j);
 				
 				seriesLinks.push(link);
 			}
@@ -3986,7 +3986,7 @@
 				//新插入
 				if(sidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === sd)
 				{
-					chart.originalInfo(sd, chartDataSet, j);
+					chart.originalDataIndex(sd, chartDataSet, j);
 				}
 				
 				var tidx = chartSupport.appendDistinct(seriesData, td, (tip ? "id" : "name"));
@@ -3994,7 +3994,7 @@
 				//新插入
 				if(tidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === td)
 				{
-					chart.originalInfo(td, chartDataSet, j);
+					chart.originalDataIndex(td, chartDataSet, j);
 				}
 				
 				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引，所以这里直接使用数据索引
@@ -4005,7 +4005,7 @@
 				if(vp)
 					link.value = chart.resultRowCell(data[j], vp);
 				
-				chart.originalInfo(link, chartDataSet, j);
+				chart.originalDataIndex(link, chartDataSet, j);
 				
 				seriesLinks.push(link);
 			}
@@ -4227,7 +4227,7 @@
 				];
 				var data = chart.resultNameValueObjects(result, np, vp);
 				
-				chart.originalInfo(data, chartDataSet);
+				chart.originalDataIndexes(data, chartDataSet);
 				
 				series.push({ id: series.length, type: "boxplot", name: dataSetName, data: data });
 				legendData.push(dataSetName);
@@ -4244,7 +4244,7 @@
 					var data = chart.resultValueObjects(result, vpsMy);
 					chartSupport.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
 					
-					chart.originalInfo(data, chartDataSet);
+					chart.originalDataIndexes(data, chartDataSet);
 					
 					series.push({ id: series.length, type: "scatter", name: legendName, data: data });
 					legendData.push(legendName);
@@ -4430,7 +4430,7 @@
 				min = (min == null ? data[j].value : Math.min(min, data[j].value));
 				max = (max == null ? data[j].value : Math.max(max, data[j].value));
 				
-				chart.originalInfo(data[j], chartDataSet, j);
+				chart.originalDataIndex(data[j], chartDataSet, j);
 			}
 			
 			seriesData = seriesData.concat(data);
@@ -4585,7 +4585,7 @@
 					for(var k=0; k<ra.length; k++)
 					{
 						var sv = { name: chart.dataSetPropertyAlias(chartDataSet, vps[k]), value: ra[k] };
-						chart.originalInfo(sv, chartDataSet, j);
+						chart.originalDataIndex(sv, chartDataSet, j);
 						data.push(sv);
 					}
 				}
@@ -4603,7 +4603,7 @@
 					for(var k=0; k<names.length; k++)
 					{
 						var sv = { name: names[k], value: values[k] };
-						chart.originalInfo(sv, chartDataSet, j);
+						chart.originalDataIndex(sv, chartDataSet, j);
 						data.push(sv);
 					}
 				}
@@ -4735,7 +4735,7 @@
 			
 			var data = chart.resultMapObjects(result, propertyMap);
 			
-			chart.originalInfo(data, chartDataSet);
+			chart.originalDataIndexes(data, chartDataSet);
 			
 			chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data,
 							(propertyMap[categoryPropertyName] ? categoryPropertyName : null), dataSetName);
@@ -5261,7 +5261,7 @@
 			for(var j=0; j<resultDatas.length; j++)
 			{
 				var data = $.extend({}, resultDatas[j]);
-				chart.originalInfo(data, chartDataSet, j);
+				chart.originalDataIndex(data, chartDataSet, j);
 				updateOptions.data.push(data);
 			}
 		}
@@ -6067,7 +6067,7 @@
 				for(var k=0; k<names.length; k++)
 				{
 					var sv = { name: names[k], value: values[k] };
-					chart.originalInfo(sv, chartDataSet, j);
+					chart.originalDataIndex(sv, chartDataSet, j);
 					
 					updateOptions.data.push(sv);
 				}
@@ -6299,7 +6299,7 @@
 				for(var k=0; k<names.length; k++)
 				{
 					var sv = { name: names[k], value: values[k] };
-					chart.originalInfo(sv, chartDataSet, j);
+					chart.originalDataIndex(sv, chartDataSet, j);
 					
 					updateOptions.data.push(sv);
 				}

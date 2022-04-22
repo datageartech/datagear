@@ -3386,19 +3386,25 @@
 	};
 	
 	/**
-	 * 获取/设置指定单条图表展示数据的原始图表数据集结果数据索引（图表ID、图表数据集索引、结果数据索引）。
+	 * 获取/设置多条图表展示数据的原始数据索引（图表ID、图表数据集索引、结果数据索引）。
 	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
-	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始索引信息，以支持在后续的交互、事件处理中获取它们。
+	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始数据索引信息，以支持在后续的交互、事件处理中获取它们。
 	 * 
-	 * @param data 展示数据，格式为：{ ... }、[ ... ]，对于设置操作，当展示数据是对象时，将为其添加一个额外属性；
-	 * 			   当展示数据是数组时，如果末尾元素已是索引信息对象，则替换；否则，追加一个元素
-	 * @param chartDataSetIndex 要设置的图表数据集索引数值、数值数组
+	 * @param data 展示数据数组，格式为：[ ... ]，元素格式允许为：{ ... }、[ ... ]，对于设置操作，当元素是对象时，将为其添加一个额外属性；
+	 * 			   当元素是数组时，如果末尾元素已是原始数据索引对象，替换；否则，追加
+	 * @param chartDataSetIndex 要设置的图表数据集对象（自动取其索引）、图表数据集对象数组（自动取其索引）、图表数据集索引数值、索引数值数组
 	 * @param resultDataIndex 要设置的结果数据索引，格式为：
-	 *                        当chartDataSetIndex是数值时：
+	 *                        当chartDataSetIndex是图表数据集对象、索引数值时：
 	 *                        数值、数值数组
-	 *                        当chartDataSetIndex是数值数组时：
+	 *                        当chartDataSetIndex是图表数据集对象数组、索引数值数组时：
+	 *                        数值，表示chartDataSetIndex数组每个元素的结果数据索引都是此数值
 	 *                        数组（元素可以是数值、数值数组），与chartDataSetIndex数组元素一一对应
-	 * @returns 要获取的原始图表数据集结果数据索引(可能为null），格式为：
+	 *                        默认值为：0
+	 * @param autoIncrement 可选，
+	 *                      当chartDataSetIndex是图表数据集对象、图表数据集索引数值且resultDataIndex是数值时，是否自动递增resultDataIndex；
+	 *                      当chartDataSetIndex是图表数据集对象数组、图表数据集索引数值数组且其元素对应位置的resultDataIndex是数值时，是否自动递增resultDataIndex。
+	 *                      默认值为：true
+	 * @returns 要获取的原始数据索引数组(元素可能为null），原始数据索引对象格式为：
 	 *									{
 	 *										//图表ID
 	 *										chartId: "...",
@@ -3413,70 +3419,6 @@
 	 *									}
 	 * @since 3.1.0
 	 */
-	chartBase.originalDataIndex = function(data, chartDataSetIndex, resultDataIndex)
-	{
-		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
-		var isArray = $.isArray(data);
-		
-		//获取
-		if(arguments.length <= 1)
-		{
-			if(isArray)
-			{
-				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
-				return (tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined 
-							? tailEle : undefined);
-			}
-			else
-				return (data == null ? undefined : data[pname]);
-		}
-		else
-		{
-			var originalIdx =
-			{
-				"chartId": this.id,
-				"chartDataSetIndex": chartDataSetIndex,
-				"resultDataIndex": resultDataIndex
-			};
-			
-			if(isArray)
-			{
-				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
-				
-				//替换
-				if(tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined)
-				{
-					data[data.length - 1] = originalIdx;
-				}
-				else
-					data.push(originalIdx);
-			}
-			else
-				data[pname] = originalIdx;
-		}
-	};
-	
-	/**
-	 * 获取/设置指定多条图表展示数据的原始图表数据集结果数据索引（图表ID、图表数据集索引、结果数据索引）。
-	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
-	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始索引信息，以支持在后续的交互、事件处理中获取它们。
-	 * 
-	 * @param data 展示数据数组，格式为：[ ... ]，元素格式允许为：{ ... }、[ ... ]
-	 * @param chartDataSetIndex 要设置的图表数据集索引数值、图表数据集对象（自动取其索引数值），或者它们的数组
-	 * @param resultDataIndex 可选，要设置的结果数据索引，格式为：
-	 *                        当chartDataSetIndex是数值时：
-	 *                        数值、数值数组
-	 *                        当chartDataSetIndex是数值数组时：
-	 *                        数值，表示chartDataSetIndex数组每个元素的结果数据索引都是此数值
-	 *                        数组（元素可以是数值、数值数组），表示chartDataSetIndex数组每个元素的结果数据索引是此数组对应位置的元素
-	 *                        默认值为：0
-	 * @param autoIncrement 可选，
-	 *                      当chartDataSetIndex是数值且resultDataIndex是数值时，设置时是否自动递增resultDataIndex；
-	 *                      当chartDataSetIndex是数组且其元素对应位置的结果数据索引是数值时，是否自动递增这个结果数据索引是数值。
-	 *                      默认值为：true
-	 * @returns 要获取的原始图表数据集结果数据索引数组(元素可能为null），元素格式参考chartBase.originalDataIndex()函数返回值
-	 * @since 3.1.0
-	 */
 	chartBase.originalDataIndexes = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
 	{
 		//获取
@@ -3485,7 +3427,7 @@
 			var re = [];
 			
 			for(var i=0; i<data.length; i++)
-				re[i] = this.originalDataIndex(data[i]);
+				re[i] = this._originalDataIndex(data[i]);
 			
 			return re;
 		}
@@ -3580,16 +3522,86 @@
 					}
 				}
 				
-				this.originalDataIndex(data[i], chartDataSetIndex, resultDataIndexMy);
+				this._originalDataIndex(data[i], chartDataSetIndex, resultDataIndexMy);
 			}
 		}
 	};
 	
 	/**
-	 * 图表事件支持函数：获取/设置图表事件对象的原始图表数据集结果数据索引（图表ID、图表数据集索引、结果数据索引），即：chartEvent.originalDataIndex。
+	 * 获取/设置单条图表展示数据的原始数据索引（图表ID、图表数据集索引、结果数据索引）。
+	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
+	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始数据索引，以支持在后续的交互、事件处理中获取它们。
+	 * 
+	 * @param data 展示数据，格式为：{ ... }、[ ... ]，对于设置操作，当展示数据是对象时，将为其添加一个额外属性；
+	 * 			   当展示数据是数组时，如果末尾元素已是索引信息对象，则替换；否则，追加一个元素
+	 * @param chartDataSetIndex 同chartBase.originalDataIndexes()函数的chartDataSetIndex参数
+	 * @param resultDataIndex 同chartBase.originalDataIndexes()函数的resultDataIndex参数
+	 * @returns 要获取的原始数据索引(可能为null），格式参考chartBase.originalDataIndexes()函数返回值
+	 * @since 3.1.0
+	 */
+	chartBase.originalDataIndex = function(data, chartDataSetIndex, resultDataIndex)
+	{
+		//获取
+		if(arguments.length <= 1)
+		{
+			return this._originalDataIndex(data);
+		}
+		else
+		{
+			data = [ data ];
+			this.originalDataIndexes(data, chartDataSetIndex, resultDataIndex, false);
+		}
+	};
+	
+	//获取/设置单条图表展示数据的原始数据索引
+	chartBase._originalDataIndex = function(data, chartDataSetIndex, resultDataIndex)
+	{
+		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
+		var isArray = $.isArray(data);
+		
+		//获取
+		if(arguments.length <= 1)
+		{
+			if(isArray)
+			{
+				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
+				return (tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined 
+							? tailEle : undefined);
+			}
+			else
+				return (data == null ? undefined : data[pname]);
+		}
+		else
+		{
+			var originalIdx =
+			{
+				"chartId": this.id,
+				"chartDataSetIndex": chartDataSetIndex,
+				"resultDataIndex": resultDataIndex
+			};
+			
+			if(isArray)
+			{
+				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
+				
+				//替换
+				if(tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined)
+				{
+					data[data.length - 1] = originalIdx;
+				}
+				else
+					data.push(originalIdx);
+			}
+			else
+				data[pname] = originalIdx;
+		}
+	};
+	
+	/**
+	 * 图表事件支持函数：获取/设置图表事件对象的原始数据索引（图表ID、图表数据集索引、结果数据索引），即：chartEvent.originalDataIndex。
 	 * 
 	 * @param chartEvent 图表事件对象，格式应为：{ ... }
-	 * @param originalDataIndex 要设置的原始图表数据集结果数据索引对象、数组，通常是chartBase.originalDataIndex()或chartBase.originalDataIndexes()函数的返回值
+	 * @param originalDataIndex 要设置的原始数据索引对象、数组，通常是chartBase.originalDataIndex()或chartBase.originalDataIndexes()函数的返回值
 	 * @param inflateOriginalData 可选，设置操作时是否根据上述originalDataIndex设置图表事件对象的原始图表数据集结果数据。默认值为：true
 	 * @returns 要获取的原始结果数据索引，未设置过为null
 	 * @since 3.1.0
@@ -3756,7 +3768,7 @@
 	};
 	// > @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventOriginalDataIndex()
 	
-	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.originalDataIndexes()
+	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.originalDataIndex()、chartBase.originalDataIndexes()
 	/**
 	 * 获取/设置指定数据对象的原始信息属性值，包括：图表ID、图表数据集索引、结果数据索引。
 	 * 图表渲染器在构建用于渲染图表的内部数据对象时，应使用此函数设置其原始信息，以支持在后续的交互、事件处理中获取这些原始信息。
@@ -3926,7 +3938,7 @@
 			}
 		}
 	};
-	// > @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.originalDataIndexes()
+	// > @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.originalDataIndex()、chartBase.originalDataIndexes()
 	
 	// < @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
 	/**
