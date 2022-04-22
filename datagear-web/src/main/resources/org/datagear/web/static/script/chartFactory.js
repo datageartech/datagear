@@ -2485,41 +2485,6 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：获取/设置图表事件数据（chartBase.eventData(chartEvent)返回值）对应的原始图表数据集索引（chartEvent.originalChartDataSetIndex）。
-	 * 
-	 * @param chartEvent 图表事件对象，格式应为：{ ... }
-	 * @param originalChartDataSetIndex 可选，要设置的原始图表数据集索引，格式应为：
-	 *                                  当图表事件数据是对象时：图表数据集索引数值、图表数据集索引数值数组
-	 *                                  当图表事件数据是对象数组时：数组，其元素可能为图表数据集索引数值、图表数据集索引数值数组
-	 *                                  其中，图表数据集索引数值允许为null，因为图表事件数据可能并非由图表结果数据构建
-	 * @returns 要获取的原始图表数据集索引，未设置则返回null
-	 */
-	chartBase.eventOriginalChartDataSetIndex = function(chartEvent, originalChartDataSetIndex)
-	{
-		if(originalChartDataSetIndex === undefined)
-			return chartEvent["originalChartDataSetIndex"];
-		else
-			chartEvent["originalChartDataSetIndex"] = originalChartDataSetIndex;
-	};
-	
-	/**
-	 * 图表事件支持函数：获取/设置图表事件数据（chartBase.eventData(chartEvent)返回值）对应的原始数据集结果数据索引（chartEvent.originalResultDataIndex）。
-	 * 
-	 * @param chartEvent 图表事件对象，格式应为：{ ... }
-	 * @param originalResultDataIndex 可选，要设置的原始数据集结果数据索引，格式应为：
-	 *                                与chartBase.eventOriginalChartDataSetIndex(chartEvent)返回值格式一致，
-	 *                                只是每一个图表数据集索引数值可能对应一个数据集结果数据索引数值、也可能对应一个数据集结果数据索引数值数组
-	 * @returns 要获取的原始数据集结果数据索引，未设置则返回null
-	 */
-	chartBase.eventOriginalResultDataIndex = function(chartEvent, originalResultDataIndex)
-	{
-		if(originalResultDataIndex === undefined)
-			return chartEvent["originalResultDataIndex"];
-		else
-			chartEvent["originalResultDataIndex"] = originalResultDataIndex;
-	};
-	
-	/**
 	 * 图表事件支持函数：获取/设置图表事件数据（chartBase.eventData(chartEvent)返回值）对应的原始数据集结果数据（chartEvent.originalData）。
 	 * 
 	 * @param chartEvent 图表事件对象，格式应为：{ ... }
@@ -2534,81 +2499,6 @@
 			return chartEvent["originalData"];
 		else
 			chartEvent["originalData"] = originalData;
-	};
-	
-	/**
-	 * 图表事件支持函数：设置图表事件对象的原始图表数据集索引、原始数据、原始结果数据索引。
-	 * 
-	 * @param chartEvent 图表事件对象，格式应为：{ ... }
-	 * @param originalInfo 图表数据对象、数组，或者原始信息对象、数组（格式参考：chartBase.originalInfo函数返回值），或者原始图表数据集索引数值（用于兼容旧版API）
-	 * @param originalResultDataIndex 可选，当originalInfo是索引数值时的原始数据索引，格式可以是：数值、数值数组
-	 */
-	chartBase.eventOriginalInfo = function(chartEvent, originalInfo, originalResultDataIndex)
-	{
-		var ocdsi = null;
-		var ordi = null;
-		var odata = null;
-		
-		var updateResults = this.updateResults();
-		
-		if(originalInfo == null)
-		{
-		}
-		else if(typeof(originalInfo) == "number")
-		{
-			ocdsi = originalInfo;
-			ordi = originalResultDataIndex;
-			
-			odata = this.resultDataElement(this.resultAt(updateResults, ocdsi), ordi);
-		}
-		else
-		{
-			var isArray = $.isArray(originalInfo);
-			
-			if(!isArray)
-				originalInfo = [ originalInfo ];
-			
-			ocdsi = [];
-			ordi = [];
-			odata = [];
-			
-			for(var i=0; i<originalInfo.length; i++)
-			{
-				//先认为是图表数据对象
-				var myOi = this.originalInfo(originalInfo[i]);
-				if(!myOi)
-					myOi = originalInfo[i];
-				
-				var myOcdsi = (myOi ? myOi.chartDataSetIndex : null);
-				var myOrdi = (myOi ? myOi.resultDataIndex : null);
-				
-				ocdsi[i] = myOcdsi;
-				ordi[i] = myOrdi;
-				
-				if($.isArray(myOcdsi))
-				{
-					odata[i] = [];
-					
-					for(var j=0; j<myOcdsi.length; j++)
-						odata[i][j] = this.resultDataElement(this.resultAt(updateResults, myOcdsi[j]), (myOrdi ? myOrdi[j] : null));
-				}
-				else
-				{
-					odata[i] = this.resultDataElement(this.resultAt(updateResults, myOcdsi), myOrdi);
-				}
-			}
-			
-			if(!isArray)
-			{
-				ocdsi = ocdsi[0];
-				ordi = ordi[0];
-				odata = odata[0];
-			}
-		}
-		
-		this.eventOriginalChartDataSetIndex(chartEvent, ocdsi);
-		this.eventOriginalResultDataIndex(chartEvent, ordi);
-		this.eventOriginalData(chartEvent, odata);
 	};
 	
 	/**
@@ -3496,7 +3386,7 @@
 	};
 	
 	/**
-	 * 获取/设置指定单条图表展示数据的原始结果数据索引信息（图表ID、图表数据集索引、结果数据索引）。
+	 * 获取/设置指定单条图表展示数据的原始图表数据集结果数据索引（图表ID、图表数据集索引、结果数据索引）。
 	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
 	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始索引信息，以支持在后续的交互、事件处理中获取它们。
 	 * 
@@ -3508,7 +3398,7 @@
 	 *                        数值、数值数组
 	 *                        当chartDataSetIndex是数值数组时：
 	 *                        数组（元素可以是数值、数值数组），与chartDataSetIndex数组元素一一对应
-	 * @returns 要获取的原始结果数据索引信息(可能为null），格式为：
+	 * @returns 要获取的原始图表数据集结果数据索引(可能为null），格式为：
 	 *									{
 	 *										//图表ID
 	 *										chartId: "...",
@@ -3567,7 +3457,7 @@
 	};
 	
 	/**
-	 * 获取/设置指定多条图表展示数据的原始结果数据索引信息（图表ID、图表数据集索引、结果数据索引）。
+	 * 获取/设置指定多条图表展示数据的原始图表数据集结果数据索引（图表ID、图表数据集索引、结果数据索引）。
 	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
 	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始索引信息，以支持在后续的交互、事件处理中获取它们。
 	 * 
@@ -3584,7 +3474,7 @@
 	 *                      当chartDataSetIndex是数值且resultDataIndex是数值时，设置时是否自动递增resultDataIndex；
 	 *                      当chartDataSetIndex是数组且其元素对应位置的结果数据索引是数值时，是否自动递增这个结果数据索引是数值。
 	 *                      默认值为：true
-	 * @returns 要获取的原始结果数据索引信息数组(元素可能为null），元素格式参考chartBase.originalDataIndex()函数返回值
+	 * @returns 要获取的原始图表数据集结果数据索引数组(元素可能为null），元素格式参考chartBase.originalDataIndex()函数返回值
 	 * @since 3.1.0
 	 */
 	chartBase.originalDataIndexes = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
@@ -3695,9 +3585,176 @@
 		}
 	};
 	
+	/**
+	 * 图表事件支持函数：获取/设置图表事件对象的原始图表数据集结果数据索引（图表ID、图表数据集索引、结果数据索引），即：chartEvent.originalDataIndex。
+	 * 
+	 * @param chartEvent 图表事件对象，格式应为：{ ... }
+	 * @param originalDataIndex 要设置的原始图表数据集结果数据索引对象、数组，通常是chartBase.originalDataIndex()或chartBase.originalDataIndexes()函数的返回值
+	 * @param inflateOriginalData 可选，设置操作时是否根据上述originalDataIndex设置图表事件对象的原始图表数据集结果数据。默认值为：true
+	 * @returns 要获取的原始结果数据索引，未设置过为null
+	 * @since 3.1.0
+	 */
+	chartBase.eventOriginalDataIndex = function(chartEvent, originalDataIndex, inflateOriginalData)
+	{
+		if(originalDataIndex === undefined)
+			return chartEvent["originalDataIndex"];
+		else
+		{
+			chartEvent["originalDataIndex"] = originalDataIndex;
+			
+			if(inflateOriginalData !== false && originalDataIndex)
+			{
+				var isArray = $.isArray(originalDataIndex);
+				originalDataIndex = (isArray ? originalDataIndex : [ originalDataIndex ]);
+				var originalData = [];
+				
+				for(var i=0; i<originalDataIndex.length; i++)
+				{
+					var odi = originalDataIndex[i];
+					var chartDataSetIndex = odi.chartDataSetIndex;
+					var resultDataIndex = odi.resultDataIndex;
+					var results = this.updateResults();
+					var originalDataMy = null;
+					
+					if($.isArray(chartDataSetIndex))
+					{
+						originalDataMy = [];
+						
+						for(var j=0; j<chartDataSetIndex.length; j++)
+						{
+							var result = this.resultAt(results, chartDataSetIndex[j]);
+							originalDataMy[j] = this.resultDataElement(result, (resultDataIndex != null ? resultDataIndex[j] : null));
+						}
+					}
+					else
+					{
+						var result = this.resultAt(results, chartDataSetIndex);
+						originalDataMy = this.resultDataElement(result, resultDataIndex);
+					}
+					
+					originalData[i] = originalDataMy;
+				}
+				
+				this.eventOriginalData(chartEvent, (isArray ? originalData : originalData[0]));
+			}
+		}
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventOriginalDataIndex()
+	/**
+	 * 图表事件支持函数：获取/设置图表事件数据（chartBase.eventData(chartEvent)返回值）对应的原始图表数据集索引（chartEvent.originalChartDataSetIndex）。
+	 * 
+	 * @param chartEvent 图表事件对象，格式应为：{ ... }
+	 * @param originalChartDataSetIndex 可选，要设置的原始图表数据集索引，格式应为：
+	 *                                  当图表事件数据是对象时：图表数据集索引数值、图表数据集索引数值数组
+	 *                                  当图表事件数据是对象数组时：数组，其元素可能为图表数据集索引数值、图表数据集索引数值数组
+	 *                                  其中，图表数据集索引数值允许为null，因为图表事件数据可能并非由图表结果数据构建
+	 * @returns 要获取的原始图表数据集索引，未设置则返回null
+	 */
+	chartBase.eventOriginalChartDataSetIndex = function(chartEvent, originalChartDataSetIndex)
+	{
+		if(originalChartDataSetIndex === undefined)
+			return chartEvent["originalChartDataSetIndex"];
+		else
+			chartEvent["originalChartDataSetIndex"] = originalChartDataSetIndex;
+	};
+	
+	/**
+	 * 图表事件支持函数：获取/设置图表事件数据（chartBase.eventData(chartEvent)返回值）对应的原始数据集结果数据索引（chartEvent.originalResultDataIndex）。
+	 * 
+	 * @param chartEvent 图表事件对象，格式应为：{ ... }
+	 * @param originalResultDataIndex 可选，要设置的原始数据集结果数据索引，格式应为：
+	 *                                与chartBase.eventOriginalChartDataSetIndex(chartEvent)返回值格式一致，
+	 *                                只是每一个图表数据集索引数值可能对应一个数据集结果数据索引数值、也可能对应一个数据集结果数据索引数值数组
+	 * @returns 要获取的原始数据集结果数据索引，未设置则返回null
+	 */
+	chartBase.eventOriginalResultDataIndex = function(chartEvent, originalResultDataIndex)
+	{
+		if(originalResultDataIndex === undefined)
+			return chartEvent["originalResultDataIndex"];
+		else
+			chartEvent["originalResultDataIndex"] = originalResultDataIndex;
+	};
+	
+	/**
+	 * 图表事件支持函数：设置图表事件对象的原始图表数据集索引、原始数据、原始结果数据索引。
+	 * 
+	 * @param chartEvent 图表事件对象，格式应为：{ ... }
+	 * @param originalInfo 图表数据对象、数组，或者原始信息对象、数组（格式参考：chartBase.originalInfo函数返回值），或者原始图表数据集索引数值（用于兼容旧版API）
+	 * @param originalResultDataIndex 可选，当originalInfo是索引数值时的原始数据索引，格式可以是：数值、数值数组
+	 */
+	chartBase.eventOriginalInfo = function(chartEvent, originalInfo, originalResultDataIndex)
+	{
+		var ocdsi = null;
+		var ordi = null;
+		var odata = null;
+		
+		var updateResults = this.updateResults();
+		
+		if(originalInfo == null)
+		{
+		}
+		else if(typeof(originalInfo) == "number")
+		{
+			ocdsi = originalInfo;
+			ordi = originalResultDataIndex;
+			
+			odata = this.resultDataElement(this.resultAt(updateResults, ocdsi), ordi);
+		}
+		else
+		{
+			var isArray = $.isArray(originalInfo);
+			
+			if(!isArray)
+				originalInfo = [ originalInfo ];
+			
+			ocdsi = [];
+			ordi = [];
+			odata = [];
+			
+			for(var i=0; i<originalInfo.length; i++)
+			{
+				//先认为是图表数据对象
+				var myOi = this.originalInfo(originalInfo[i]);
+				if(!myOi)
+					myOi = originalInfo[i];
+				
+				var myOcdsi = (myOi ? myOi.chartDataSetIndex : null);
+				var myOrdi = (myOi ? myOi.resultDataIndex : null);
+				
+				ocdsi[i] = myOcdsi;
+				ordi[i] = myOrdi;
+				
+				if($.isArray(myOcdsi))
+				{
+					odata[i] = [];
+					
+					for(var j=0; j<myOcdsi.length; j++)
+						odata[i][j] = this.resultDataElement(this.resultAt(updateResults, myOcdsi[j]), (myOrdi ? myOrdi[j] : null));
+				}
+				else
+				{
+					odata[i] = this.resultDataElement(this.resultAt(updateResults, myOcdsi), myOrdi);
+				}
+			}
+			
+			if(!isArray)
+			{
+				ocdsi = ocdsi[0];
+				ordi = ordi[0];
+				odata = odata[0];
+			}
+		}
+		
+		this.eventOriginalChartDataSetIndex(chartEvent, ocdsi);
+		this.eventOriginalResultDataIndex(chartEvent, ordi);
+		this.eventOriginalData(chartEvent, odata);
+	};
+	// > @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventOriginalDataIndex()
 	
 	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.originalDataIndexes()
 	/**
