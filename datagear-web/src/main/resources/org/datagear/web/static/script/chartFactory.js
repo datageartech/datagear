@@ -3555,45 +3555,10 @@
 	//获取/设置单条图表展示数据的原始数据索引
 	chartBase._originalDataIndex = function(data, chartDataSetIndex, resultDataIndex)
 	{
-		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
-		var isArray = $.isArray(data);
-		
-		//获取
 		if(arguments.length <= 1)
-		{
-			if(isArray)
-			{
-				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
-				return (tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined 
-							? tailEle : undefined);
-			}
-			else
-				return (data == null ? undefined : data[pname]);
-		}
+			return chartFactory.originalDataIndex(data);
 		else
-		{
-			var originalIdx =
-			{
-				"chartId": this.id,
-				"chartDataSetIndex": chartDataSetIndex,
-				"resultDataIndex": resultDataIndex
-			};
-			
-			if(isArray)
-			{
-				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
-				
-				//替换
-				if(tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined)
-				{
-					data[data.length - 1] = originalIdx;
-				}
-				else
-					data.push(originalIdx);
-			}
-			else
-				data[pname] = originalIdx;
-		}
+			chartFactory.originalDataIndex(data, this.id, chartDataSetIndex, resultDataIndex);
 	};
 	
 	/**
@@ -3615,38 +3580,8 @@
 			
 			if(inflateOriginalData !== false && originalDataIndex)
 			{
-				var isArray = $.isArray(originalDataIndex);
-				var originalDataIndexAry = (isArray ? originalDataIndex : [ originalDataIndex ]);
-				var originalData = [];
-				
-				for(var i=0; i<originalDataIndexAry.length; i++)
-				{
-					var odi = originalDataIndexAry[i];
-					var chartDataSetIndex = odi.chartDataSetIndex;
-					var resultDataIndex = odi.resultDataIndex;
-					var results = this.updateResults();
-					var originalDataMy = null;
-					
-					if($.isArray(chartDataSetIndex))
-					{
-						originalDataMy = [];
-						
-						for(var j=0; j<chartDataSetIndex.length; j++)
-						{
-							var result = this.resultAt(results, chartDataSetIndex[j]);
-							originalDataMy[j] = this.resultDataElement(result, (resultDataIndex != null ? resultDataIndex[j] : null));
-						}
-					}
-					else
-					{
-						var result = this.resultAt(results, chartDataSetIndex);
-						originalDataMy = this.resultDataElement(result, resultDataIndex);
-					}
-					
-					originalData[i] = originalDataMy;
-				}
-				
-				this.eventOriginalData(chartEvent, (isArray ? originalData : originalData[0]));
+				var originalData = chartFactory.originalData(this, originalDataIndex);
+				this.eventOriginalData(chartEvent, originalData);
 			}
 			
 			// < @deprecated 兼容3.0.1版本的chartEvent.originalChartDataSetIndex、originalResultDataIndex结构，将在未来版本移除
@@ -4282,6 +4217,106 @@
 	//----------------------------------------
 	// chartBase end
 	//----------------------------------------
+	
+	/**
+	 * 获取原始数据索引的原始数据。
+	 * 
+	 * @param chart 图表对象
+	 * @param originalDataIndex 原始数据索引，格式为：{ ... }、[ { ... }, ... ]，具体参考chartBase.originalDataIndexes()函数返回值
+	 * @since 3.1.0
+	 */
+	chartFactory.originalData = function(chart, originalDataIndex)
+	{
+		if(!originalDataIndex)
+			return undefined;
+		
+		var originalData = [];
+		
+		var isArray = $.isArray(originalDataIndex);
+		var originalDataIndexAry = (isArray ? originalDataIndex : [ originalDataIndex ]);
+		
+		for(var i=0; i<originalDataIndexAry.length; i++)
+		{
+			var odi = originalDataIndexAry[i];
+			var chartDataSetIndex = odi.chartDataSetIndex;
+			var resultDataIndex = odi.resultDataIndex;
+			var results = chart.updateResults();
+			var originalDataMy = null;
+			
+			if($.isArray(chartDataSetIndex))
+			{
+				originalDataMy = [];
+				
+				for(var j=0; j<chartDataSetIndex.length; j++)
+				{
+					var result = chart.resultAt(results, chartDataSetIndex[j]);
+					originalDataMy[j] = chart.resultDataElement(result, (resultDataIndex != null ? resultDataIndex[j] : null));
+				}
+			}
+			else
+			{
+				var result = chart.resultAt(results, chartDataSetIndex);
+				originalDataMy = chart.resultDataElement(result, resultDataIndex);
+			}
+			
+			originalData[i] = originalDataMy;
+		}
+		
+		return (isArray ? originalData : originalData[0]);
+	};
+	
+	/**
+	 * 获取/设置单条图表展示数据的原始数据索引（图表ID、图表数据集索引、结果数据索引）。
+	 * 
+	 * @param data 展示数据，格式为：{ ... }、[ ... ]，对于设置操作，当展示数据是对象时，将为其添加一个额外属性；
+	 * 			   当展示数据是数组时，如果末尾元素已是索引信息对象，则替换；否则，追加一个元素
+	 * @param chartDataSetIndex 图表数据集索引数值、数值数组
+	 * @param resultDataIndex 图表数据集结果数据索引数值、数值数组、数值数组的数组
+	 * @returns 要获取的原始数据索引(可能为null），格式参考chartBase.originalDataIndexes()函数返回值
+	 * @since 3.1.0
+	 */
+	chartFactory.originalDataIndex = function(data, chartId, chartDataSetIndex, resultDataIndex)
+	{
+		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
+		var isArray = $.isArray(data);
+		
+		//获取
+		if(arguments.length <= 1)
+		{
+			if(isArray)
+			{
+				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
+				return (tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined 
+							? tailEle : undefined);
+			}
+			else
+				return (data == null ? undefined : data[pname]);
+		}
+		else
+		{
+			var originalIdx =
+			{
+				"chartId": chartId,
+				"chartDataSetIndex": chartDataSetIndex,
+				"resultDataIndex": resultDataIndex
+			};
+			
+			if(isArray)
+			{
+				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
+				
+				//替换
+				if(tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined)
+				{
+					data[data.length - 1] = originalIdx;
+				}
+				else
+					data.push(originalIdx);
+			}
+			else
+				data[pname] = originalIdx;
+		}
+	};
 	
 	/**
 	 * 获取指定主题对象对应的CSS类名。

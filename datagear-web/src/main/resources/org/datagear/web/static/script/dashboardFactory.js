@@ -2254,6 +2254,132 @@
 	};
 	
 	/**
+	 * 获取当前用户信息。
+	 * 
+	 * @returns 用户信息，格式参考：org.datagear.web.controller.AbstractDataAnalysisController.AnalysisUser
+	 */
+	dashboardBase.user = function()
+	{
+		var user = this.renderContextAttr(renderContextAttrConst.user);
+		
+		if(user == null)
+			throw new Error("Get user is not supported");
+		
+		return user;
+	};
+	
+	/**
+	 * 销毁看板。
+	 * 销毁后，可以重新调用dashboard.init()、dashboard.render()函数。
+	 */
+	dashboardBase.destroy = function()
+	{
+		if(this._status == dashboardStatusConst.DESTROYED)
+			return;
+		
+		this._status = dashboardStatusConst.DESTROYED;
+		
+		this.stopHandleCharts();
+		this._destroyCharts();
+		this._destroyForms();
+	};
+	
+	dashboardBase._destroyCharts = function()
+	{
+		var charts = (this.charts || []);
+		
+		for(var i=0; i<charts.length; i++)
+			this._destroyChart(charts[i]);
+	};
+	
+	dashboardBase._destroyChart = function(chart)
+	{
+		try
+		{
+			chart.destroy();
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+		}
+	};
+	
+	dashboardBase._destroyForms = function()
+	{
+		var $forms = $("form[dg-dashboard-form]", document.body);
+		
+		$forms.each(function()
+		{
+			chartFactory.chartSetting.destroyDataSetParamValueForm(this);
+		});
+	};
+	
+	/**
+	 * 获取图表展示数据的原始数据索引，应是已由chartBase.originalDataIndex()、chartBase.originalDataIndexes()函数设置过。
+	 * 
+	 * @param data 图表展示数据、或其数组，格式为：{ ... }、[ ... ]、[ { ... }, ... ]、、[ [ ... ], ... ]
+	 * @param inflate 可选，是否在返回原始数据索引对象的复本并填充图表对象、原始数据集结果数据，默认值为：true
+	 * @returns 原始数据索引(可能为null）、或其数组(元素可能为null），格式为：
+	 *									{
+	 *										//同chartBase.originalDataIndexes()函数返回的原始数据索引对象结构
+	 *										...,
+	 *										//当inflate为true时，chartId对应的图表对象
+	 *										chart: 图表对象,
+	 *										//当inflate为true时，resultDataIndex对应的原始结果数据，格式为：
+	 *                                      //当chartDataSetIndex是数值时：
+	 *                                      //对象、对象数组
+	 *                                      //当chartDataSetIndex是数值数组时：
+	 *                                      //数组（元素可能是对象、对象数组）
+	 *										resultData: 结果数据
+	 *									}
+	 *									当data是图表展示数据数组时，将返回此结构的数组。
+	 * @since 3.1.0
+	 */
+	dashboardBase.originalDataIndex = function(data, inflate)
+	{
+		if(!data)
+			return undefined;
+		
+		var odIdx = chartFactory.originalDataIndex(data);
+		
+		if(odIdx == null && $.isArray(data))
+		{
+			odIdx = [];
+			
+			for(var i=0; i<data.length; i++)
+				odIdx[i] = chartFactory.originalDataIndex(data[i]);
+		}
+		
+		if(odIdx == null || inflate === false)
+			return odIdx;
+		
+		var isArray = $.isArray(odIdx);
+		var odIdxAry = (isArray ? odIdx : [ odIdx ]);
+		var odIdxAryClone = [];
+		
+		for(var i=0; i<odIdxAry.length; i++)
+		{
+			var odIdxMy = (odIdxAry[i] ? $.extend({}, odIdxAry[i]) : null);
+			odIdxAryClone[i] = odIdxMy;
+			
+			if(odIdxMy)
+			{
+				var chart = this.chartOf(odIdxMy.chartId);
+				odIdxMy["chart"] = chart;
+				if(chart)
+					odIdxMy["resultData"] = chartFactory.originalData(chart, odIdxMy);
+			}
+		}
+		
+		return (isArray ? odIdxAryClone : odIdxAryClone[0]);
+	};
+	
+	//-------------
+	// < 已弃用函数 start
+	//-------------
+	
+	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用dashboardBase.originalDataIndex()函数
+	/**
 	 * 获取指定数据对象的原始信息，这些信息是由chartBase.originalInfo函数设置过的。
 	 * 
 	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]
@@ -2335,71 +2461,7 @@
 		
 		return (isArray ? re : re[0]);
 	};
-	
-	/**
-	 * 获取当前用户信息。
-	 * 
-	 * @returns 用户信息，格式参考：org.datagear.web.controller.AbstractDataAnalysisController.AnalysisUser
-	 */
-	dashboardBase.user = function()
-	{
-		var user = this.renderContextAttr(renderContextAttrConst.user);
-		
-		if(user == null)
-			throw new Error("Get user is not supported");
-		
-		return user;
-	};
-	
-	/**
-	 * 销毁看板。
-	 * 销毁后，可以重新调用dashboard.init()、dashboard.render()函数。
-	 */
-	dashboardBase.destroy = function()
-	{
-		if(this._status == dashboardStatusConst.DESTROYED)
-			return;
-		
-		this._status = dashboardStatusConst.DESTROYED;
-		
-		this.stopHandleCharts();
-		this._destroyCharts();
-		this._destroyForms();
-	};
-	
-	dashboardBase._destroyCharts = function()
-	{
-		var charts = (this.charts || []);
-		
-		for(var i=0; i<charts.length; i++)
-			this._destroyChart(charts[i]);
-	};
-	
-	dashboardBase._destroyChart = function(chart)
-	{
-		try
-		{
-			chart.destroy();
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-		}
-	};
-	
-	dashboardBase._destroyForms = function()
-	{
-		var $forms = $("form[dg-dashboard-form]", document.body);
-		
-		$forms.each(function()
-		{
-			chartFactory.chartSetting.destroyDataSetParamValueForm(this);
-		});
-	};
-	
-	//-------------
-	// < 已弃用函数 start
-	//-------------
+	// > @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用dashboardBase.originalDataIndex()函数
 	
 	// < @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被私有函数dashboardBase._isWaitForRender取代
 	/**
