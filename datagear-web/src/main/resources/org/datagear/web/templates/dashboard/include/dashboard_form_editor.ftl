@@ -707,6 +707,7 @@
 			matchBrackets: true,
 			matchTags: true,
 			autoCloseTags: true,
+			autoCloseBrackets: true,
 			readOnly: po.readonly,
 			foldGutter: true,
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
