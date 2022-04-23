@@ -5308,7 +5308,7 @@
 		var handlerDelegation = function(htmlEvent)
 		{
 			var rowElement = this;
-			var chartEvent = chart.eventNewHtml(eventType, htmlEvent);
+			var chartEvent = chartSupport.chartEventForHtml(chart, eventType, htmlEvent);
 			chartSupport.tableSetChartEventData(chart, chartEvent, htmlEvent, rowElement);
 			
 			chart.callEventHandler(handler, chartEvent);
@@ -6148,7 +6148,7 @@
 		var handlerDelegation = function(htmlEvent)
 		{
 			var $label = $(this);
-			var chartEvent = chart.eventNewHtml(eventType, htmlEvent);
+			var chartEvent = chartSupport.chartEventForHtml(chart, eventType, htmlEvent);
 			chartSupport.labelSetChartEventData(chart, chartEvent, htmlEvent, $label);
 			
 			chart.callEventHandler(handler, chartEvent);
@@ -6352,7 +6352,7 @@
 		var handlerDelegation = function(htmlEvent)
 		{
 			var $select = $(this);
-			var chartEvent = chart.eventNewHtml(eventType, htmlEvent);
+			var chartEvent = chartSupport.chartEventForHtml(chart, eventType, htmlEvent);
 			chartSupport.selectSetChartEventData(chart, chartEvent, htmlEvent, $select);
 			
 			chart.callEventHandler(handler, chartEvent);
@@ -6982,8 +6982,12 @@
 	{
 		var hanlderDelegation = function(params)
 		{
-			var chartEvent = chart.eventNewEcharts(eventType, params);
+			var chartEvent = chart.eventNew(eventType, params);
 			chartEventDataSetter(chart, chartEvent, params);
+			
+			// < @deprecated 兼容3.0.1版本的ChartEvent.chartType，将在未来版本移除
+			chartEvent.chartType = "echarts";
+			// > @deprecated 兼容3.0.1版本的ChartEvent.chartType，将在未来版本移除
 			
 			chart.callEventHandler(eventHanlder, chartEvent);
 		};
@@ -7460,6 +7464,17 @@
 		}
 		
 		return chartDataSet;
+	};
+	
+	chartSupport.chartEventForHtml = function(chart, type, htmlEvent)
+	{
+		var event = chart.eventNew(type, htmlEvent);
+		
+		// < @deprecated 兼容3.0.1版本的ChartEvent.chartType，将在未来版本移除
+		event.chartType = "html";
+		// > @deprecated 兼容3.0.1版本的ChartEvent.chartType，将在未来版本移除
+		
+		return event;
 	};
 	
 	//---------------------------------------------------------

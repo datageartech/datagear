@@ -209,12 +209,6 @@
 	// renderContextAttrConst结束
 	//----------------------------------------
 	
-	/**图表事件的图表类型：ECharts*/
-	chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS = "echarts";
-	
-	/**图表事件的图表类型：HTML*/
-	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
-	
 	/** 内置图表选项：是否美化滚动条 */
 	chartFactory.OPTION_BEAUTIFY_SCROLLBAR = "beautifyScrollbar";
 	
@@ -2427,44 +2421,6 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：创建ECharts图表的事件对象。
-	 * 
-	 * @param eventType 事件类型
-	 * @param echartsEventParams ECharts事件处理函数的参数对象
-	 */
-	chartBase.eventNewEcharts = function(eventType, echartsEventParams)
-	{
-		var event =
-		{
-			"type": eventType,
-			"originalEvent": echartsEventParams,
-			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS,
-			"chart": this
-		};
-		
-		return event;
-	};
-	
-	/**
-	 * 图表事件支持函数：创建HTML图表的事件对象。
-	 * 
-	 * @param eventType 事件类型
-	 * @param htmlEvent HTML事件对象
-	 */
-	chartBase.eventNewHtml = function(eventType, htmlEvent)
-	{
-		var event =
-		{
-			"type": eventType,
-			"originalEvent": htmlEvent,
-			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_HTML,
-			"chart": this
-		};
-		
-		return event;
-	};
-	
-	/**
 	 * 图表事件支持函数：获取/设置图表事件的数据（chartEvent.data）。
 	 * 
 	 * 对于图表插件关联的图表渲染器，构建的图表事件数据应该以数据标记作为数据属性：
@@ -3601,17 +3557,38 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：创建图表的事件对象。
+	 * 图表事件支持函数：创建图表事件对象。
 	 * 
-	 * @param eventType 事件类型
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应在后续应通过
+	 * chartBase.eventData()、chartBase.eventOriginalDataIndex()、
+	 * chartBase.eventOriginalData()
+	 * 填充图表事件对象。
+	 * 
+	 * @param type 事件类型
 	 * @param originalEvent 底层原始事件
+	 * @returns 图表事件对象，格式为：
+ *							{
+ *								//事件类型，比如："click"、"dblclick"、"mousedown"
+ *								type: "...",
+ *								//事件数据，格式由各图表类型决定，通常是：{ ... }、[ ... ]、[ {...}, ... ]、[ [...], ... ]
+ *								data: ...,
+ *								//事件原始数据索引（图表数据集结果数据索引），格式为：{ ... }、[ {...}, ... ]
+ *								originalDataIndex: ...,
+ *								//事件原始数据（图表数据集结果数据），格式由各图表类型决定，通常是：{ ... }、[ ... ]、[ {...}, ... ]、[ [...], ... ]
+ *								originalData: ...,
+ *								//底层原始事件，通常是图表底层组件事件对象
+ *								originalEvent: ...,
+ *								//事件图表对象
+ *								chart: ...
+ * 							}
 	 * @since 3.1.0
 	 */
-	chartBase.eventNew = function(eventType, originalEvent)
+	chartBase.eventNew = function(type, originalEvent)
 	{
 		var event =
 		{
-			"type": eventType,
+			"type": type,
 			"originalEvent": originalEvent,
 			"chart": this
 		};
@@ -3622,6 +3599,50 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventNew()
+	/**
+	 * 图表事件支持函数：创建ECharts图表的事件对象。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应在后续应通过
+	 * chartBase.eventData()、chartBase.eventOriginalDataIndex()、
+	 * chartBase.eventOriginalData()
+	 * 填充图表事件对象。
+	 * 
+	 * @param type 事件类型
+	 * @param echartsEventParams ECharts事件处理函数的参数对象
+	 * @returns 图表事件对象，格式参考chartBase.eventNew()函数返回值
+	 */
+	chartBase.eventNewEcharts = function(type, echartsEventParams)
+	{
+		var event = this.eventNew(type, echartsEventParams);
+		event.chartType = "echarts";
+		
+		return event;
+	};
+	
+	/**
+	 * 图表事件支持函数：创建HTML图表的事件对象。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应在后续应通过
+	 * chartBase.eventData()、chartBase.eventOriginalDataIndex()、
+	 * chartBase.eventOriginalData()
+	 * 填充图表事件对象。
+	 * 
+	 * @param type 事件类型
+	 * @param htmlEvent HTML事件对象
+	 * @returns 图表事件对象，格式参考chartBase.eventNew()函数返回值
+	 */
+	chartBase.eventNewHtml = function(type, htmlEvent)
+	{
+		var event = this.eventNew(type, htmlEvent);
+		event.chartType = "html";
+		
+		return event;
+	};
+	// > @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventNew()
 	
 	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventOriginalDataIndex()
 	/**

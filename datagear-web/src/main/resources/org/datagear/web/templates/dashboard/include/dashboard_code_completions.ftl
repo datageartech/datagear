@@ -125,8 +125,6 @@
 		{name: "eventData", value: "eventData(", displayName: "eventData() ", displayComment: "chart", categories: ["chart"]},
 		{name: "eventHandlers", value: "eventHandlers(", displayName: "eventHandlers() ", displayComment: "chart", categories: ["chart"]},
 		{name: "eventNew", value: "eventNew(", displayName: "eventNew() ", displayComment: "chart", categories: ["chart"]},
-		{name: "eventNewEcharts", value: "eventNewEcharts(", displayName: "eventNewEcharts() ", displayComment: "chart", categories: ["chart"]},
-		{name: "eventNewHtml", value: "eventNewHtml(", displayName: "eventNewHtml() ", displayComment: "chart", categories: ["chart"]},
 		{name: "eventOriginalData", value: "eventOriginalData(", displayName: "eventOriginalData() ", displayComment: "chart", categories: ["chart"]},
 		{name: "eventOriginalDataIndex", value: "eventOriginalDataIndex(", displayName: "eventOriginalDataIndex() ", displayComment: "chart", categories: ["chart"]},
 		{name: "extValue", value: "extValue(", displayName: "extValue() ", displayComment: "chart", categories: ["chart"]},
