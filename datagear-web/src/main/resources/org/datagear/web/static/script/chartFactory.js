@@ -5903,6 +5903,17 @@
 					}
 				}
 			},
+			"themeRiver":
+			{
+				"emphasis":
+				{
+					"itemStyle":
+					{
+						"shadowBlur": 10,
+						"shadowColor": shadowColor
+					}
+				}
+			},
 			"categoryAxis" : {
 				"axisLine" : {
 					"show" : true,
@@ -6035,6 +6046,13 @@
 					}
 				}
 			},
+			"singleAxis":
+			{
+				"left": "10%",
+	            "top": "24%",
+	            "right": "10%",
+	            "bottom": "10%"
+			},
 			"toolbox" : {
 				"iconStyle" : {
 					"normal" : {
@@ -6047,10 +6065,10 @@
 			},
 			"grid":
 			{
-				"left": 30,
-				"right": 46,
-				"top": 80,
-				"bottom": 20,
+				"left": "6%",
+				"right": "10%",
+				"top": "20%",
+				"bottom": "8%",
 				"containLabel": true
 			},
 			"legend" : {

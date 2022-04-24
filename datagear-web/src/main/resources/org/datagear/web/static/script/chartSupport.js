@@ -4961,6 +4961,138 @@
 		}
 	};
 	
+	//主题河流
+	
+	chartSupport.themeRiverRender = function(chart, nameSign, valueSign, options)
+	{
+		//name 必选，河流X轴坐标，通常是数值、日期
+		//value 必选，河流数值，可多选，每一列作为一条河流
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+		
+		options = chartSupport.inflateRenderOptions(chart,
+		{
+			title:
+			{
+		        text: chart.name
+		    },
+			tooltip:
+			{
+				show: true,
+				trigger: 'axis'
+			},
+			legend:
+			{
+				id: 0,
+				//将在update中设置：
+				//data
+			},
+			singleAxis:
+			{
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np)
+			},
+			series:
+			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
+				{
+					id: 0,
+					type: "themeRiver"
+				}
+			]
+		},
+		options);
+		
+		chart.echartsInit(options);
+	};
+	
+	chartSupport.themeRiverUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		var legendData = [];
+		var seriesData = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var result = chart.resultOf(results, chartDataSet);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
+				//主题河流图只支持[ name, value, lengendName ]格式的数据条目
+				var data = chart.resultRowArrays(result, [ np, vps[j] ]);
+				for(var k=0; k<data.length; k++)
+					data[k].push(legendName);
+				
+				chart.originalDataIndexes(data, chartDataSet);
+				
+				legendData.push(legendName);
+				chartSupport.appendElement(seriesData, data);
+			}
+		}
+		
+		var series = {id: 0, type: "themeRiver", data: seriesData};
+		
+		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+		var options = { legend: { id: 0, data: legendData}, series: [ series ], singleAxis: { id: 0 } };
+		
+		options = chart.inflateUpdateOptions(results, options);
+		
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
+	};
+	
+	chartSupport.themeRiverResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.themeRiverDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+	
+	chartSupport.themeRiverOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
+				chartSupport.themeRiverSetChartEventData);
+	};
+	
+	chartSupport.themeRiverOff = function(chart, eventType, handler)
+	{
+		chart.echartsOffEventHandler(eventType, handler);
+	};
+	
+	chartSupport.themeRiverSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var echartsData = echartsEventParams.data;
+		
+		var data = undefined;
+		
+		if(echartsData)
+		{
+			data = {};
+			data[signNameMap.name] = echartsData[0];
+			data[signNameMap.value] = echartsData[1];
+		}
+		
+		chart.eventData(chartEvent, data);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	};
+	
 	//表格
 	
 	chartSupport.tableRender = function(chart, columnSign, options)
