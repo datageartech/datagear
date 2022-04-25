@@ -1727,6 +1727,9 @@
 				trim[p] = v;
 		}
 		
+		var nowChartTheme = (this.getElementChartTheme(ele) || {});
+		trim = $.extend({}, nowChartTheme, trim);
+		
 		var attrValue = this._serializeForAttrValue(trim);
 		
 		if(attrValue == "{}")
