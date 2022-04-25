@@ -5905,6 +5905,12 @@
 			},
 			"themeRiver":
 			{
+				/*ECharts-5.3.2版本这里配置不起作用
+				"left": "10%",
+	            "top": "24%",
+	            "right": "10%",
+	            "bottom": "10%",
+				*/
 				"emphasis":
 				{
 					"itemStyle":
@@ -6046,13 +6052,15 @@
 					}
 				}
 			},
+			/*ECharts-5.3.2版本这里配置不起作用（主题河流图）
 			"singleAxis":
 			{
-				"left": "10%",
-	            "top": "24%",
-	            "right": "10%",
-	            "bottom": "10%"
+				"left": "30%",
+	            "top": "54%",
+	            "right": "30%",
+	            "bottom": "40%"
 			},
+			*/
 			"toolbox" : {
 				"iconStyle" : {
 					"normal" : {

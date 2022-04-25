@@ -4991,7 +4991,13 @@
 			},
 			singleAxis:
 			{
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np)
+				id: 0,
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				//ECharts-5.3.2版本主题配置不起作用，所以这里配置
+				"left": "10%",
+	            "top": "24%",
+	            "right": "10%",
+	            "bottom": "10%",
 			},
 			series:
 			[
@@ -5043,7 +5049,12 @@
 			}
 		}
 		
-		var series = {id: 0, type: "themeRiver", data: seriesData};
+		var series =
+		{
+			id: 0,
+			type: "themeRiver",
+			data: seriesData
+		};
 		
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: { id: 0, data: legendData}, series: [ series ], singleAxis: { id: 0 } };
@@ -5078,6 +5089,7 @@
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
 		
+		//TODO ECharts-5.3.2版本这里的数据与实际的事件数据不匹配，可能是BUG
 		var echartsData = echartsEventParams.data;
 		
 		var data = undefined;
