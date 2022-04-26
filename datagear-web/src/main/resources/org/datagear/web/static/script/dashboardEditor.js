@@ -1469,8 +1469,10 @@
 		
 		var color = styleObj.color;
 		var bgColor = styleObj['background-color'];
+		var fontSize = styleObj['font-size'];
 		
-		if(color || bgColor)
+		//只有设置了值才同步
+		if(color || bgColor || fontSize != null)
 		{
 			if(color)
 				styleTheme.color = color;
@@ -1482,20 +1484,13 @@
 			
 			if(bgColor && bgColor != "transparent")
 				styleTheme.actualBackgroundColor = bgColor;
+			
+			//从元素的css中取才能获取字体尺寸像素数
+			if(fontSize != null && fontSize != "")
+				styleTheme.fontSize = ele.css("font-size");
 		}
 		
-		if(!nowTheme)
-		{
-			return styleTheme;
-		}
-		else
-		{
-			nowTheme.color = (styleTheme.color ? styleTheme.color : undefined);
-			nowTheme.backgroundColor = (styleTheme.backgroundColor ? styleTheme.backgroundColor : undefined);
-			nowTheme.actualBackgroundColor = (styleTheme.actualBackgroundColor ? styleTheme.actualBackgroundColor : undefined);
-			
-			return nowTheme;
-		}
+		return styleTheme;
 	};
 	
 	/**
@@ -1505,6 +1500,11 @@
 	 */
 	editor.checkSetElementChartTheme = function(ele)
 	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
 		return true;
 	};
 	
@@ -1573,6 +1573,11 @@
 	 */
 	editor.checkSetElementChartOptions = function(ele)
 	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
 		return true;
 	};
 	
@@ -1713,22 +1718,49 @@
 		if(chartFactory.isString(chartTheme.graphRangeColors))
 			chartTheme.graphRangeColors = this._spitIgnoreEmpty(chartTheme.graphRangeColors);
 		
-		var trim = {};
+		var mergedChartTheme = (this.getElementChartTheme(ele) || {});
 		
 		for(var p in chartTheme)
 		{
 			var v = chartTheme[p];
 			
-			if(v == null)
-				;
-			else if(chartFactory.isString(v) && v != "")
-				trim[p] = v;
-			else if($.isArray(v) && v.length > 0)
-				trim[p] = v;
+			if(v == null || v == "" || ($.isArray(v) && v.length == 0))
+				delete mergedChartTheme[p];
+			else
+				mergedChartTheme[p] = v;
 		}
 		
-		var nowChartTheme = (this.getElementChartTheme(ele) || {});
-		trim = $.extend({}, nowChartTheme, trim);
+		//确保fontSize为数值
+		if(mergedChartTheme.fontSize != null && !chartFactory.isNumber(mergedChartTheme.fontSize))
+		{
+			var fontSize = parseInt(mergedChartTheme.fontSize);
+			if(isNaN(fontSize))
+				delete mergedChartTheme.fontSize;
+			else
+				 mergedChartTheme.fontSize = fontSize;
+		}
+		
+		var trim = {};
+		
+		for(var p in mergedChartTheme)
+		{
+			var v = mergedChartTheme[p];
+			
+			if(v == null)
+				;
+			else if(chartFactory.isString(v))
+			{
+				if(v != "")
+					trim[p] = v;
+			}
+			else if($.isArray(v))
+			{
+				if(v.length > 0)
+					trim[p] = v;
+			}
+			else
+				trim[p] = v;
+		}
 		
 		var attrValue = this._serializeForAttrValue(trim);
 		
