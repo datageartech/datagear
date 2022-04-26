@@ -233,6 +233,7 @@
 		{
 			value: "",
 			matchBrackets: true,
+			autoCloseBrackets: true,
 			mode: {name: "javascript", json: true}
 		};
 		po.element(".chartOptions-editor-wrapper", veChartOptionsForm).data("chartOptionsCodeEditor",

@@ -1370,7 +1370,7 @@
 			if(so.option.syncChartTheme)
 			{
 				var thisEle = $(this);
-				var chartTheme = editor._evalElementChartThemeByStyleObj(thisEle, so.style);
+				var chartTheme = editor._evalElementChartThemeByStyleObj(thisEle, ele, so.style);
 				editor.setElementChartTheme(chartTheme, thisEle);
 			}
 			else
@@ -1427,7 +1427,7 @@
 		
 		if(so.option.syncChartTheme)
 		{
-			var chartTheme = this._evalElementChartThemeByStyleObj($(document.body), so.style);
+			var chartTheme = this._evalElementChartThemeByStyleObj($(document.body), $(document.body), so.style);
 			this.setGlobalChartTheme(chartTheme);
 		}
 	};
@@ -1462,16 +1462,15 @@
 		return re;
 	};
 	
-	editor._evalElementChartThemeByStyleObj = function(ele, styleObj)
+	editor._evalElementChartThemeByStyleObj = function(chartEle, styleEle, styleObj)
 	{
-		var nowTheme = this._getElementChartTheme(ele);
+		var nowTheme = this._getElementChartTheme(chartEle);
 		var styleTheme = {};
 		
 		var color = styleObj.color;
 		var bgColor = styleObj['background-color'];
 		var fontSize = styleObj['font-size'];
 		
-		//只有设置了值才同步
 		if(color || bgColor || fontSize != null)
 		{
 			if(color)
@@ -1487,10 +1486,22 @@
 			
 			//从元素的css中取才能获取字体尺寸像素数
 			if(fontSize != null && fontSize != "")
-				styleTheme.fontSize = ele.css("font-size");
+				styleTheme.fontSize = styleEle.css("font-size");
 		}
 		
-		return styleTheme;
+		if(!nowTheme)
+		{
+			return styleTheme;
+		}
+		else
+		{
+			nowTheme.color = (styleTheme.color ? styleTheme.color : undefined);
+			nowTheme.backgroundColor = (styleTheme.backgroundColor ? styleTheme.backgroundColor : undefined);
+			nowTheme.actualBackgroundColor = (styleTheme.actualBackgroundColor ? styleTheme.actualBackgroundColor : undefined);
+			nowTheme.fontSize = (styleTheme.fontSize != null ? styleTheme.fontSize : undefined);
+			
+			return nowTheme;
+		}
 	};
 	
 	/**

@@ -5911,6 +5911,10 @@
 	            "right": "10%",
 	            "bottom": "10%",
 				*/
+				"label":
+				{
+					"show": true 
+				},
 				"emphasis":
 				{
 					"itemStyle":
@@ -6198,6 +6202,7 @@
 			theme.gauge.detail.fontSize = chartTheme.fontSize;
 			theme.gauge.axisLabel.fontSize = chartTheme.fontSize;
 			theme.sankey.label.fontSize = chartTheme.fontSize;
+			theme.themeRiver.label.fontSize = chartTheme.fontSize;
 		}
 		if(chartTheme.titleTheme.fontSize)
 			theme.title.textStyle.fontSize = chartTheme.titleTheme.fontSize;
