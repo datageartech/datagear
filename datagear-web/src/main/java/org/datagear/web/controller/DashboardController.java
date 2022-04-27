@@ -1445,8 +1445,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (templateContent != null)
 		{
-			// 加一个"s"前缀与前端dashboardEditor.js中的"c"前缀区分
-			String staticIdPrefix = "s" + Long.toHexString(System.currentTimeMillis());
+			// 加一个"s"前缀与前端生成的区分
+			String staticIdPrefix = "datagears" + Long.toHexString(System.currentTimeMillis());
 
 			StringReader in = null;
 			StringWriter out = null;
