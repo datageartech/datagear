@@ -44,7 +44,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<input type="text" name="url" value="${(schema.url)!''}" required="required" maxlength="1000" class="ui-widget ui-widget-content ui-corner-all" placeholder="jdbc:" />
 					<#if !readonly>
-					<span id="schemaBuildUrlHelp" class="ui-state-default ui-corner-all" style="cursor: pointer;" title="<@spring.message code='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></span>
+					<button id="schemaBuildUrlHelp" type="button" class="small-button" title="<@spring.message code='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></button>
 					</#if>
 				</div>
 			</div>
