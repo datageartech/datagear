@@ -524,14 +524,15 @@
 		if(tagName == "body")
 			return false;
 		
-		if(tagName == "script" || tagName == "style")
-			return false;
-		
-		//自定义标签（Web Components）
-		if(tagName.indexOf("-") > 0)
+		if(tagName == "script" || tagName == "style" || tagName == "template")
 			return false;
 		
 		if($ele.is(":hidden"))
+			return false;
+		
+		//没有尺寸的也忽略
+		var w = $ele.width(), h = $ele.height();
+		if(w == null || w <= 0 || h == null || h <= 0)
 			return false;
 		
 		return true;
