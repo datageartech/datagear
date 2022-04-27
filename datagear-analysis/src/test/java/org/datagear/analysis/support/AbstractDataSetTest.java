@@ -70,7 +70,7 @@ public class AbstractDataSetTest
 
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
-				properties, null);
+				properties, -1, null);
 
 		assertEquals(rawData.size(), resultData.size());
 
@@ -134,7 +134,7 @@ public class AbstractDataSetTest
 
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
-				properties, null);
+				properties, -1, null);
 
 		assertEquals(rawData.size(), resultData.size());
 
@@ -193,7 +193,7 @@ public class AbstractDataSetTest
 
 			@SuppressWarnings("unchecked")
 			List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
-					properties, resultDataFormat);
+					properties, -1, resultDataFormat);
 
 			assertEquals(rawData.size(), resultData.size());
 
@@ -221,7 +221,7 @@ public class AbstractDataSetTest
 
 			@SuppressWarnings("unchecked")
 			List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
-					properties, resultDataFormat);
+					properties, -1, resultDataFormat);
 
 			assertEquals(rawData.size(), resultData.size());
 
@@ -254,7 +254,7 @@ public class AbstractDataSetTest
 
 			@SuppressWarnings("unchecked")
 			List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
-					properties, resultDataFormat);
+					properties, -1, resultDataFormat);
 
 			assertEquals(rawData.size(), resultData.size());
 
@@ -287,7 +287,7 @@ public class AbstractDataSetTest
 
 			@SuppressWarnings("unchecked")
 			List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData,
-					properties, resultDataFormat);
+					properties, -1, resultDataFormat);
 
 			assertEquals(rawData.size(), resultData.size());
 

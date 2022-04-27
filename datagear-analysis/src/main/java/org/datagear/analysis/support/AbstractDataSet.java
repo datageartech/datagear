@@ -172,13 +172,14 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 
 	 * @param rawData    {@code Collection<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
 	 * @param properties
+	 * @param fetchSize  获取条数，小于{@code 0}表示全部
 	 * @param format     允许为{@code null}
 	 * @return {@code List<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
 	 * @throws Throwable
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Object resolveResultData(Object rawData, List<DataSetProperty> properties,
-			ResultDataFormat format) throws Throwable
+			int fetchSize, ResultDataFormat format) throws Throwable
 	{
 		Object data = null;
 
@@ -228,7 +229,25 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetProperty> properties,
 			ResultDataFormat format) throws Throwable
 	{
-		Object data = resolveResultData(rawData, properties, format);
+		Object data = resolveResultData(rawData, properties, -1, format);
+		return new ResolvedDataSetResult(new DataSetResult(data), properties);
+	}
+
+	/**
+	 * 解析结果。
+	 * 
+	 * @param rawData
+	 * @param properties
+	 * @param fetchSize  获取条数，小于{@code 0}表示全部
+	 * @param format     允许为{@code null}
+	 * @return
+	 * @throws Throwable
+	 * @see {@link #resolveResultData(Object, List, ResultDataFormat)}
+	 */
+	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetProperty> properties,
+			int fetchSize, ResultDataFormat format) throws Throwable
+	{
+		Object data = resolveResultData(rawData, properties, fetchSize, format);
 		return new ResolvedDataSetResult(new DataSetResult(data), properties);
 	}
 

@@ -77,9 +77,43 @@ public class CsvValueDataSet extends AbstractCsvDataSet
 	}
 
 	@Override
-	protected TemplateResolvedSource<Reader> getCsvReader(DataSetQuery query) throws Throwable
+	protected CsvTemplateResolvedResource getCsvResource(DataSetQuery query) throws Throwable
 	{
 		String csv = resolveCsvAsTemplate(this.value, query);
-		return new TemplateResolvedSource<>(IOUtil.getReader(csv), csv);
+		return new CsvValueTemplateResolvedResource(csv, getNameRow());
+	}
+
+	protected static class CsvValueTemplateResolvedResource extends CsvTemplateResolvedResource
+	{
+		private static final long serialVersionUID = 1L;
+
+		public CsvValueTemplateResolvedResource(String resolvedTemplate, int nameRow)
+		{
+			super(resolvedTemplate, nameRow);
+		}
+
+		@Override
+		public Reader getResource() throws Throwable
+		{
+			return IOUtil.getReader(super.getResolvedTemplate());
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return super.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			return true;
+		}
 	}
 }
