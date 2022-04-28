@@ -219,7 +219,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	/**
 	 * 解析结果。
 	 * 
-	 * @param rawData
+	 * @param rawData    允许为{@code null}
 	 * @param properties
 	 * @param fetchSize  获取条数，小于{@code 0}表示全部
 	 * @param format     允许为{@code null}

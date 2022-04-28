@@ -61,7 +61,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 			resource = getResource(query, properties, resolveProperties);
 			ResourceData resourceData = resolveResourceData(resource);
 
-			ResolvedDataSetResult result = resolveResult(query, resourceData, properties, resolveProperties);
+			ResolvedDataSetResult result = resolveResult(query, properties, resolveProperties, resourceData);
 
 			if (resource.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
@@ -83,14 +83,14 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	 * 解析结果。
 	 * 
 	 * @param query
-	 * @param resourceData
 	 * @param properties        允许为{@code null}
 	 * @param resolveProperties
+	 * @param resourceData
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, ResourceData resourceData,
-			List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties, ResourceData resourceData) throws Throwable
 	{
 		List<DataSetProperty> resProperties = resourceData.getProperties();
 		Object resData = resourceData.getData();

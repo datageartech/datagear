@@ -85,7 +85,7 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * 解析结果。
 	 * 
 	 * @param query
-	 * @param rawData
+	 * @param rawData           允许为{@code null}
 	 * @param rawProperties     允许为{@code null}
 	 * @param properties        允许为{@code null}
 	 * @param resolveProperties
