@@ -23,11 +23,12 @@ public abstract class TemplateResolvedResource<T> implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	private String resolvedTemplate = null;
+	private final String resolvedTemplate;
 
-	public TemplateResolvedResource()
+	public TemplateResolvedResource(String resolvedTemplate)
 	{
 		super();
+		this.resolvedTemplate = resolvedTemplate;
 	}
 
 	public boolean hasResolvedTemplate()
@@ -45,28 +46,23 @@ public abstract class TemplateResolvedResource<T> implements Serializable
 		return resolvedTemplate;
 	}
 
-	public void setResolvedTemplate(String resolvedTemplate)
-	{
-		this.resolvedTemplate = resolvedTemplate;
-	}
-
-	/**
-	 * 获取资源。
-	 * <p>
-	 * 资源应该在此方法内创建，而不应该在此实例内创建，因为采用缓存后不会每次都得调用此方法。
-	 * </p>
-	 * 
-	 * @return
-	 * @throws Throwable
-	 */
-	public abstract T getResource() throws Throwable;
-
 	/**
 	 * 是否是幂等的，即：相等{@linkplain TemplateResolvedResource}的{@linkplain #getResource()}表示的数据也是相等的。
 	 * 
 	 * @return
 	 */
 	public abstract boolean isIdempotent();
+
+	/**
+	 * 获取资源。
+	 * <p>
+	 * 如果{@linkplain #isIdempotent()}为{@code true}，那么资源应该在此方法内创建，而不应该在此实例内创建，因为采用缓存后不会每次都得调用此方法。
+	 * </p>
+	 * 
+	 * @return
+	 * @throws Throwable
+	 */
+	public abstract T getResource() throws Throwable;
 
 	@Override
 	public int hashCode()
@@ -95,5 +91,38 @@ public abstract class TemplateResolvedResource<T> implements Serializable
 		else if (!resolvedTemplate.equals(other.resolvedTemplate))
 			return false;
 		return true;
+	}
+
+	/**
+	 * 资源数据。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 * @param <T>
+	 */
+	public static class ResoureData<T> implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private final T data;
+
+		public ResoureData(T data)
+		{
+			super();
+			this.data = data;
+		}
+
+		/**
+		 * 获取数据列表。
+		 * <p>
+		 * 返回值及其内容不应被修改，因为可能会缓存。
+		 * </p>
+		 * 
+		 * @return
+		 */
+		public T getData()
+		{
+			return data;
+		}
 	}
 }

@@ -9,7 +9,6 @@ package org.datagear.analysis.support;
 
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.TemplateResolvedResource.ResoureData;
 import org.datagear.analysis.support.fmk.JsonOutputFormat;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -97,7 +97,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	/**
 	 * 解析结果。
 	 * <p>
-	 * 如果{@linkplain #getJsonReader(Map)}返回的{@linkplain TemplateResolvedSource#hasResolvedTemplate()}，
+	 * 如果{@linkplain #getJsonResource(DataSetQuery)}返回的{@linkplain JsonTemplateResolvedResource#hasResolvedTemplate()}，
 	 * 此方法将返回{@linkplain TemplateResolvedDataSetResult}。
 	 * </p>
 	 */
@@ -105,16 +105,17 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
 			boolean resolveProperties) throws DataSetException
 	{
-		TemplateResolvedSource<Reader> reader = null;
+		JsonTemplateResolvedResource resource = null;
 		try
 		{
-			reader = getJsonReader(query);
+			resource = getJsonResource(query);
+			JsonResourceData jsonResourceData = resolveJsonResourceData(resource);
 
-			ResolvedDataSetResult result = resolveResult(query, reader.getSource(), properties, resolveProperties);
+			ResolvedDataSetResult result = resolveResult(query, jsonResourceData, properties, resolveProperties);
 
-			if (reader.hasResolvedTemplate())
+			if (resource.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
-						reader.getResolvedTemplate());
+						resource.getResolvedTemplate());
 
 			return result;
 		}
@@ -124,81 +125,74 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetSourceParseException(t, reader.getResolvedTemplate());
-		}
-		finally
-		{
-			if (reader != null)
-				IOUtil.close(reader.getSource());
+			throw new DataSetSourceParseException(t, (resource == null ? null : resource.getResolvedTemplate()));
 		}
 	}
 
 	/**
-	 * 获取JSON输入流。
+	 * 获取{@linkplain JsonTemplateResolvedResource}。
 	 * <p>
-	 * 实现方法应该返回实例级不变的输入流。
+	 * 返回的{@linkplain JsonTemplateResolvedResource#getDataJsonPath()}应是{@linkplain #getDataJsonPath()}。
 	 * </p>
 	 * 
 	 * @param query
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract TemplateResolvedSource<Reader> getJsonReader(DataSetQuery query) throws Throwable;
+	protected abstract JsonTemplateResolvedResource getJsonResource(DataSetQuery query) throws Throwable;
 
 	/**
-	 * 解析结果。
+	 * 解析JSON数据。
 	 * 
-	 * @param query
-	 * @param jsonReader
-	 *            JSON输入流
-	 * @param properties
-	 *            允许为{@code null}
-	 * @param resolveProperties
+	 * @param resource
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query,
-			Reader jsonReader, List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
+	protected JsonResourceData resolveJsonResourceData(JsonTemplateResolvedResource resource) throws Throwable
 	{
-		JsonNode jsonNode = getObjectMapperNonStardand().readTree(jsonReader);
+		Reader reader = null;
 
-		if (!isLegalResultDataJsonNode(jsonNode))
-			throw new UnsupportedJsonResultDataException("Result data must be JSON object or array");
-
-		Object rawData = resolveRawData(query, jsonNode, getDataJsonPath());
-
-		if (resolveProperties)
+		try
 		{
-			List<DataSetProperty> resolvedProperties = resolveProperties(rawData);
-			mergeDataSetProperties(resolvedProperties, properties);
-			properties = resolvedProperties;
-		}
+			reader = resource.getResource();
 
-		return resolveResult(rawData, properties, query.getResultDataFormat());
+			Object data = resolveData(reader, resource.getDataJsonPath());
+			List<DataSetProperty> properties = resolveProperties(data);
+
+			return new JsonResourceData(data, properties);
+		}
+		finally
+		{
+			IOUtil.close(reader);
+		}
 	}
 
 	/**
-	 * 解析原始数据数据。
+	 * 解析数据。
 	 * 
-	 * @param query
-	 * @param jsonNode      允许为{@code null}
-	 * @param dataJsonPath  允许为{@code null}
+	 * @param jsonReader
+	 * @param dataJsonPath
 	 * @return
 	 * @throws ReadJsonDataPathException
 	 * @throws Throwable
 	 */
-	protected Object resolveRawData(DataSetQuery query, JsonNode jsonNode, String dataJsonPath)
+	protected Object resolveData(Reader jsonReader, String dataJsonPath)
 			throws ReadJsonDataPathException, Throwable
 	{
+		JsonNode jsonNode = getObjectMapperNonStardand().readTree(jsonReader);
+	
+		if (!isLegalDataJsonNode(jsonNode))
+			throw new UnsupportedJsonResultDataException("Result data must be JSON object or array");
+	
 		if (jsonNode == null)
 			return null;
-
+	
 		Object data = getObjectMapperNonStardand().treeToValue(jsonNode, Object.class);
-
+	
 		if (data != null && !StringUtil.isEmpty(dataJsonPath))
 		{
 			String stdDataJsonPath = dataJsonPath.trim();
-
+	
 			if (!StringUtil.isEmpty(stdDataJsonPath))
 			{
 				// 转换"stores[0].books"、"[1].stores"简化模式为规范的JSONPath
@@ -209,7 +203,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 					else
 						stdDataJsonPath = "$." + stdDataJsonPath;
 				}
-
+	
 				try
 				{
 					data = JsonPath.compile(stdDataJsonPath).read(data, JACKSON_JSON_PATH_CONFIGURATION);
@@ -220,108 +214,76 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 				}
 			}
 		}
-
-		if (data != null && hasResultFetchSize(query))
-		{
-			if (data instanceof Collection<?>)
-			{
-				Collection<?> collection = (List<?>) data;
-				List<Object> dataList = new ArrayList<>();
-
-				for (Object ele : collection)
-				{
-					if (isReachResultFetchSize(query, dataList.size()))
-						break;
-
-					dataList.add(ele);
-				}
-
-				data = dataList;
-			}
-			else if (data instanceof Object[])
-			{
-				Object[] array = (Object[]) data;
-				Object[] dataArray = new Object[evalResultFetchSize(query, array.length)];
-
-				for (int i = 0; i < dataArray.length; i++)
-				{
-					dataArray[i] = array[i];
-				}
-
-				data = dataArray;
-			}
-		}
-
+	
 		return data;
 	}
 
 	/**
-	 * 是否是合法的数据集结果数据{@linkplain JsonNode}。
+	 * 是否是合法的数据{@linkplain JsonNode}。
 	 * <p>
 	 * 参考{@linkplain DataSetResult#getData()}说明。
 	 * </p>
 	 * 
-	 * @param jsonNode
-	 *            允许为{@code null}
+	 * @param jsonNode 允许为{@code null}
 	 * @return
 	 */
-	protected boolean isLegalResultDataJsonNode(JsonNode jsonNode) throws Throwable
+	protected boolean isLegalDataJsonNode(JsonNode jsonNode) throws Throwable
 	{
 		if (jsonNode == null || jsonNode.isNull())
 			return true;
-
+	
 		if (jsonNode instanceof ValueNode)
 			return false;
-
+	
 		if (jsonNode instanceof ArrayNode)
 		{
 			ArrayNode arrayNode = (ArrayNode) jsonNode;
-
+	
 			for (int i = 0; i < arrayNode.size(); i++)
 			{
 				JsonNode eleNode = arrayNode.get(i);
-
+	
 				if (eleNode == null || eleNode.isNull())
 					continue;
-
+	
 				if (!(eleNode instanceof ObjectNode))
 					return false;
 			}
 		}
-
+	
 		return true;
 	}
 
 	/**
 	 * 解析{@linkplain DataSetProperty}。
 	 * 
-	 * @param resultData 允许为{@code null}，JSON对象、JSON对象数组、JSON对象列表
+	 * @param data 允许为{@code null}，JSON对象、JSON对象数组、JSON对象列表
 	 * @return
 	 * @throws Throwable
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<DataSetProperty> resolveProperties(Object resultData) throws Throwable
+	protected List<DataSetProperty> resolveProperties(Object data) throws Throwable
 	{
-		if (resultData == null)
+		if (data == null)
 		{
 			return Collections.EMPTY_LIST;
 		}
-		else if (resultData instanceof Map<?, ?>)
+		else if (data instanceof Map<?, ?>)
 		{
-			return resolveJsonObjProperties((Map<String, ?>) resultData);
+			return resolveJsonObjProperties((Map<String, ?>) data);
 		}
-		else if (resultData instanceof List<?>)
+		else if (data instanceof List<?>)
 		{
-			List<?> list = (List<?>) resultData;
+			List<?> list = (List<?>) data;
 
 			if (list.size() == 0)
 				return Collections.EMPTY_LIST;
 			else
 				return resolveJsonObjProperties((Map<String, ?>) list.get(0));
 		}
-		else if (resultData instanceof Object[])
+		else if (data instanceof Object[])
 		{
-			Object[] array = (Object[]) resultData;
+			Object[] array = (Object[]) data;
 
 			if (array.length == 0)
 				return Collections.EMPTY_LIST;
@@ -368,6 +330,29 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		return properties;
 	}
 
+	/**
+	 * 解析结果。
+	 * 
+	 * @param query
+	 * @param jsonResourceData
+	 * @param properties        允许为{@code null}
+	 * @param resolveProperties
+	 * @return
+	 * @throws Throwable
+	 */
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query,
+			JsonResourceData jsonResourceData, List<DataSetProperty> properties, boolean resolveProperties)
+			throws Throwable
+	{
+		List<DataSetProperty> resProperties = jsonResourceData.getProperties();
+		Object resData = jsonResourceData.getData();
+
+		if (resolveProperties)
+			properties = mergeDataSetProperties(resProperties, properties);
+
+		return resolveResult(resData, properties, query.getResultFetchSize(), query.getResultDataFormat());
+	}
+
 	protected ObjectMapper getObjectMapperNonStardand()
 	{
 		return JsonSupport.getObjectMapperNonStardand();
@@ -383,5 +368,85 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	protected String resolveJsonAsTemplate(String json, DataSetQuery query)
 	{
 		return resolveTextAsTemplate(JSON_TEMPLATE_RESOLVER, json, query);
+	}
+
+	protected static abstract class JsonTemplateResolvedResource extends TemplateResolvedResource<Reader>
+	{
+		private static final long serialVersionUID = 1L;
+
+		private final String dataJsonPath;
+
+		public JsonTemplateResolvedResource(String resolvedTemplate, String dataJsonPath)
+		{
+			super(resolvedTemplate);
+			this.dataJsonPath = dataJsonPath;
+		}
+
+		public String getDataJsonPath()
+		{
+			return dataJsonPath;
+		}
+
+		@Override
+		public boolean isIdempotent()
+		{
+			return true;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + ((dataJsonPath == null) ? 0 : dataJsonPath.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			JsonTemplateResolvedResource other = (JsonTemplateResolvedResource) obj;
+			if (dataJsonPath == null)
+			{
+				if (other.dataJsonPath != null)
+					return false;
+			}
+			else if (!dataJsonPath.equals(other.dataJsonPath))
+				return false;
+			return true;
+		}
+	}
+
+	protected static class JsonResourceData extends ResoureData<Object>
+	{
+		private static final long serialVersionUID = 1L;
+
+		private final List<DataSetProperty> properties;
+
+		public JsonResourceData(Object data, List<DataSetProperty> properties)
+		{
+			super(data);
+			this.properties = (properties == null ? Collections.emptyList()
+					: Collections.unmodifiableList(properties));
+		}
+
+		/**
+		 * 获取属性列表。
+		 * <p>
+		 * 返回值及其内容不应被修改，因为可能会缓存。
+		 * </p>
+		 * 
+		 * @return
+		 */
+		public List<DataSetProperty> getProperties()
+		{
+			return properties;
+		}
 	}
 }

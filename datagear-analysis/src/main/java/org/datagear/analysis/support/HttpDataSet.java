@@ -38,6 +38,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.AbstractJsonDataSet.JsonTemplateResolvedResource;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
@@ -618,15 +619,13 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 			if (this.properties == null || this.properties.isEmpty())
 			{
-				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(reader);
-				jsonDataSet.setDataJsonPath(this.responseDataJsonPath);
-
+				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(reader, this.responseDataJsonPath);
 				return jsonDataSet.resolve(this.dataSetQuery);
 			}
 			else
 			{
-				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.properties, reader);
-				jsonDataSet.setDataJsonPath(this.responseDataJsonPath);
+				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.properties, reader,
+						this.responseDataJsonPath);
 
 				DataSetResult result = jsonDataSet.getResult(this.dataSetQuery);
 				return new ResolvedDataSetResult(result, this.properties);
@@ -664,22 +663,55 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 		private transient Reader responseJsonReader;
 
-		public HttpResponseJsonDataSet(Reader responseJsonReader)
+		public HttpResponseJsonDataSet(Reader responseJsonReader, String responseDataJsonPath)
 		{
 			super(HttpResponseJsonDataSet.class.getName(), HttpResponseJsonDataSet.class.getName());
 			this.responseJsonReader = responseJsonReader;
+			super.setDataJsonPath(responseDataJsonPath);
 		}
 
-		public HttpResponseJsonDataSet(List<DataSetProperty> properties, Reader responseJsonReader)
+		public HttpResponseJsonDataSet(List<DataSetProperty> properties, Reader responseJsonReader,
+				String responseDataJsonPath)
 		{
 			super(HttpResponseJsonDataSet.class.getName(), HttpResponseJsonDataSet.class.getName(), properties);
 			this.responseJsonReader = responseJsonReader;
+			super.setDataJsonPath(responseDataJsonPath);
 		}
 
 		@Override
-		protected TemplateResolvedSource<Reader> getJsonReader(DataSetQuery query) throws Throwable
+		protected JsonTemplateResolvedResource getJsonResource(DataSetQuery query) throws Throwable
 		{
-			return new TemplateResolvedSource<>(this.responseJsonReader);
+			return new HttpResponseJsonTemplateResolvedResource(getDataJsonPath(), this.responseJsonReader);
+		}
+	}
+
+	protected static class HttpResponseJsonTemplateResolvedResource extends JsonTemplateResolvedResource
+	{
+		private static final long serialVersionUID = 1L;
+
+		private final transient Reader jsonReader;
+
+		public HttpResponseJsonTemplateResolvedResource(String dataJsonPath, Reader jsonReader)
+		{
+			super("", dataJsonPath);
+			this.jsonReader = jsonReader;
+		}
+
+		public Reader getJsonReader()
+		{
+			return jsonReader;
+		}
+
+		@Override
+		public boolean isIdempotent()
+		{
+			return false;
+		}
+
+		@Override
+		public Reader getResource() throws Throwable
+		{
+			return this.jsonReader;
 		}
 	}
 }

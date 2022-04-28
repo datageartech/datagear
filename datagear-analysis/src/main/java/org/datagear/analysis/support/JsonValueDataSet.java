@@ -65,9 +65,43 @@ public class JsonValueDataSet extends AbstractJsonDataSet
 	}
 
 	@Override
-	protected TemplateResolvedSource<Reader> getJsonReader(DataSetQuery query) throws Throwable
+	protected JsonTemplateResolvedResource getJsonResource(DataSetQuery query) throws Throwable
 	{
 		String json = resolveJsonAsTemplate(this.value, query);
-		return new TemplateResolvedSource<>(IOUtil.getReader(json), json);
+		return new JsonValueTemplateResolvedResource(json, getDataJsonPath());
+	}
+
+	protected static class JsonValueTemplateResolvedResource extends JsonTemplateResolvedResource
+	{
+		private static final long serialVersionUID = 1L;
+
+		public JsonValueTemplateResolvedResource(String resolvedTemplate, String dataJsonPath)
+		{
+			super(resolvedTemplate, dataJsonPath);
+		}
+
+		@Override
+		public Reader getResource() throws Throwable
+		{
+			return IOUtil.getReader(super.getResolvedTemplate());
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return super.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			return true;
+		}
 	}
 }

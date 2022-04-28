@@ -23,6 +23,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.TemplateResolvedResource.ResoureData;
 import org.datagear.analysis.support.fmk.CsvOutputFormat;
 import org.datagear.util.IOUtil;
 
@@ -131,6 +132,9 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 
 	/**
 	 * 获取{@linkplain CsvTemplateResolvedResource}。
+	 * <p>
+	 * 返回的{@linkplain CsvTemplateResolvedResource#getNameRow()}应是{@linkplain #getNameRow()}。
+	 * </p>
 	 * 
 	 * @param query
 	 * @return
@@ -412,12 +416,11 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	{
 		private static final long serialVersionUID = 1L;
 
-		private int nameRow;
+		private final int nameRow;
 
 		public CsvTemplateResolvedResource(String resolvedTemplate, int nameRow)
 		{
-			super();
-			super.setResolvedTemplate(resolvedTemplate);
+			super(resolvedTemplate);
 			this.nameRow = nameRow;
 		}
 
@@ -457,32 +460,18 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		}
 	}
 
-	protected static class CsvResourceData
+	protected static class CsvResourceData extends ResoureData<List<Map<String, String>>>
 	{
-		private final List<Map<String, String>> data;
+		private static final long serialVersionUID = 1L;
 
 		private final List<DataSetProperty> properties;
 
 		public CsvResourceData(List<Map<String, String>> data,
 				List<DataSetProperty> properties)
 		{
-			super();
-			this.data = (data == null ? Collections.emptyList() : Collections.unmodifiableList(data));
+			super((data == null ? Collections.emptyList() : Collections.unmodifiableList(data)));
 			this.properties = (properties == null ? Collections.emptyList()
 					: Collections.unmodifiableList(properties));
-		}
-
-		/**
-		 * 获取数据列表。
-		 * <p>
-		 * 返回值及其内容不应被修改，因为可能会缓存。
-		 * </p>
-		 * 
-		 * @return
-		 */
-		public List<Map<String, String>> getData()
-		{
-			return data;
 		}
 
 		/**
