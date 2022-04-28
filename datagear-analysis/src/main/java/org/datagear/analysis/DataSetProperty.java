@@ -20,7 +20,7 @@ import java.math.BigInteger;
  * @author datagear@163.com
  *
  */
-public class DataSetProperty extends AbstractDataNameType implements Serializable
+public class DataSetProperty extends AbstractDataNameType implements Serializable, Cloneable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -38,6 +38,13 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 	public DataSetProperty(String name, String type)
 	{
 		super(name, type);
+	}
+
+	public DataSetProperty(DataSetProperty property)
+	{
+		super(property.getName(), property.getType());
+		this.label = property.label;
+		this.defaultValue = property.defaultValue;
 	}
 
 	public boolean hasLabel()
@@ -74,6 +81,12 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 	public void setDefaultValue(Object defaultValue)
 	{
 		this.defaultValue = defaultValue;
+	}
+
+	@Override
+	public DataSetProperty clone()
+	{
+		return new DataSetProperty(this);
 	}
 
 	@Override

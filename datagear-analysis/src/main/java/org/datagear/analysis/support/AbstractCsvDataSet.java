@@ -159,8 +159,9 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 
 			List<String> propertyNames = resolvePropertyNames(resource, csvRecords);
 			List<Map<String, String>> data = resolveData(resource, propertyNames, csvRecords);
+			List<DataSetProperty> properties = resolveProperties(propertyNames, data);
 
-			return new CsvResourceData(data, propertyNames);
+			return new CsvResourceData(data, properties);
 		}
 		finally
 		{
@@ -206,7 +207,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 						propertyNames.add(Integer.toString(j + 1));
 				}
 
-				if (isAfterNameRow(i))
+				if (isAfterNameRow(resource.getNameRow(), i))
 					break;
 			}
 		}
@@ -254,32 +255,6 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	}
 
 	/**
-	 * 解析结果。
-	 * 
-	 * @param query
-	 * @param csvResourceData
-	 * @param properties        允许为{@code null}
-	 * @param resolveProperties
-	 * @return
-	 * @throws Throwable
-	 */
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, CsvResourceData csvResourceData,
-			List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
-	{
-		List<String> resPropertyNames = csvResourceData.getPropertyNames();
-		List<Map<String, String>> resData = csvResourceData.getData();
-
-		if (resolveProperties)
-		{
-			List<DataSetProperty> resolvedProperties = resolveProperties(resPropertyNames, resData);
-			mergeDataSetProperties(resolvedProperties, properties);
-			properties = resolvedProperties;
-		}
-
-		return resolveResult(resData, properties, query.getResultFetchSize(), query.getResultDataFormat());
-	}
-
-	/**
 	 * 解析{@linkplain DataSetProperty}。
 	 * 
 	 * @param propertyNames
@@ -293,36 +268,58 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	{
 		int propertyLen = propertyNames.size();
 		List<DataSetProperty> properties = new ArrayList<>(propertyLen);
-
+	
 		for (String name : propertyNames)
 			properties.add(new DataSetProperty(name, DataSetProperty.DataType.STRING));
-
+	
 		// 根据数据格式，修订可能的数值类型：只有某一列的所有字符串都是数值格式，才认为是数值类型
 		if (data != null && data.size() > 0)
 		{
 			boolean[] isNumbers = new boolean[propertyLen];
 			Arrays.fill(isNumbers, true);
-
+	
 			for (Map<String, String> row : data)
 			{
 				for (int i = 0; i < propertyLen; i++)
 				{
 					if (!isNumbers[i])
 						continue;
-
+	
 					String value = row.get(propertyNames.get(i));
 					isNumbers[i] = isNumberString(value);
 				}
 			}
-
+	
 			for (int i = 0; i < propertyLen; i++)
 			{
 				if (isNumbers[i])
 					properties.get(i).setType(DataSetProperty.DataType.NUMBER);
 			}
 		}
-
+	
 		return properties;
+	}
+
+	/**
+	 * 解析结果。
+	 * 
+	 * @param query
+	 * @param csvResourceData
+	 * @param properties        允许为{@code null}
+	 * @param resolveProperties
+	 * @return
+	 * @throws Throwable
+	 */
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, CsvResourceData csvResourceData,
+			List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
+	{
+		List<DataSetProperty> resProperties = csvResourceData.getProperties();
+		List<Map<String, String>> resData = csvResourceData.getData();
+
+		if (resolveProperties)
+			properties = mergeDataSetProperties(resProperties, properties);
+
+		return resolveResult(resData, properties, query.getResultFetchSize(), query.getResultDataFormat());
 	}
 
 	/**
@@ -363,17 +360,6 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	/**
 	 * 是否名称行。
 	 * 
-	 * @param rowIndex 行索引（以{@code 0}计数）
-	 * @return
-	 */
-	protected boolean isNameRow(int rowIndex)
-	{
-		return ((rowIndex + 1) == this.nameRow);
-	}
-
-	/**
-	 * 是否名称行。
-	 * 
 	 * @param nameRow  名称行号（以{@code 1}计数）
 	 * @param rowIndex 行索引（以{@code 0}计数）
 	 * @return
@@ -389,13 +375,13 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 * 如果没有名称行，应返回{@code true}。
 	 * </p>
 	 * 
-	 * @param rowIndex
-	 *            行索引（以{@code 0}计数）
+	 * @param nameRow  名称行号（以{@code 1}计数）
+	 * @param rowIndex 行索引（以{@code 0}计数）
 	 * @return
 	 */
-	protected boolean isAfterNameRow(int rowIndex)
+	protected boolean isAfterNameRow(int nameRow, int rowIndex)
 	{
-		return ((rowIndex + 1) > this.nameRow);
+		return ((rowIndex + 1) > nameRow);
 	}
 
 	/**
@@ -473,41 +459,43 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 
 	protected static class CsvResourceData
 	{
-		private List<Map<String, String>> data = Collections.emptyList();
+		private final List<Map<String, String>> data;
 
-		private List<String> propertyNames = Collections.emptyList();
-
-		public CsvResourceData()
-		{
-			super();
-		}
+		private final List<DataSetProperty> properties;
 
 		public CsvResourceData(List<Map<String, String>> data,
-				List<String> propertyNames)
+				List<DataSetProperty> properties)
 		{
 			super();
-			this.data = data;
-			this.propertyNames = propertyNames;
+			this.data = (data == null ? Collections.emptyList() : Collections.unmodifiableList(data));
+			this.properties = (properties == null ? Collections.emptyList()
+					: Collections.unmodifiableList(properties));
 		}
 
+		/**
+		 * 获取数据列表。
+		 * <p>
+		 * 返回值及其内容不应被修改，因为可能会缓存。
+		 * </p>
+		 * 
+		 * @return
+		 */
 		public List<Map<String, String>> getData()
 		{
 			return data;
 		}
 
-		public void setData(List<Map<String, String>> data)
+		/**
+		 * 获取属性列表。
+		 * <p>
+		 * 返回值及其内容不应被修改，因为可能会缓存。
+		 * </p>
+		 * 
+		 * @return
+		 */
+		public List<DataSetProperty> getProperties()
 		{
-			this.data = data;
-		}
-
-		public List<String> getPropertyNames()
-		{
-			return propertyNames;
-		}
-
-		public void setPropertyNames(List<String> propertyNames)
-		{
-			this.propertyNames = propertyNames;
+			return properties;
 		}
 	}
 }

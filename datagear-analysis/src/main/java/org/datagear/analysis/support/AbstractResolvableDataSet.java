@@ -7,6 +7,7 @@
 
 package org.datagear.analysis.support;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -84,25 +85,24 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	/**
 	 * 合并{@linkplain DataSetProperty}。
 	 * <p>
-	 * 将{@code merged}待合并项里的{@linkplain DataSetProperty#getType()}、{@linkplain DataSetProperty#getLabel()}、
-	 * {@linkplain DataSetProperty#getDefaultValue()}合并至{@code dataSetProperties}里的同名项，
-	 * 多余项则直接添加至{@code dataSetProperties}，另外，也会根据{@code merged}里的排序对{@code dataSetProperties}重排。
+	 * 将合并列表的{@linkplain DataSetProperty#getType()}、{@linkplain DataSetProperty#getLabel()}、
+	 * {@linkplain DataSetProperty#getDefaultValue()}合并至基础列表里的同名项，多余项则直接添加，
+	 * 同时根据{@code merged}里的排序对{@code dataSetProperties}重排，返回一个新的列表。
 	 * </p>
 	 * 
-	 * @param dataSetProperties
-	 *            必须是可编辑的列表
-	 * @param merged
-	 *            待合并项，允许为{@code null}
+	 * @param dataSetProperties 基础列表，不会被修改
+	 * @param merged            合并列表，不会被修改，允许为{@code null}
 	 * @return
 	 */
-	protected void mergeDataSetProperties(List<? extends DataSetProperty> dataSetProperties,
+	protected List<DataSetProperty> mergeDataSetProperties(List<? extends DataSetProperty> dataSetProperties,
 			List<? extends DataSetProperty> merged)
 	{
 		if (merged == null)
 			merged = Collections.emptyList();
 
-		@SuppressWarnings("unchecked")
-		List<DataSetProperty> dps = (List<DataSetProperty>) dataSetProperties;
+		List<DataSetProperty> dps = new ArrayList<DataSetProperty>(dataSetProperties.size());
+		for (DataSetProperty dataSetProperty : dataSetProperties)
+			dps.add(dataSetProperty.clone());
 
 		for (DataSetProperty dp : dps)
 		{
@@ -141,5 +141,7 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 				return Integer.valueOf(o1Idx).compareTo(o2Idx);
 			}
 		});
+
+		return dps;
 	}
 }

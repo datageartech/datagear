@@ -52,7 +52,7 @@ public class AbstractResolvableDataSetTest
 		List<DataSetProperty> properties = new ArrayList<DataSetProperty>();
 		Collections.addAll(properties, id, name, date);
 
-		dataSet.mergeDataSetProperties(properties, propertiesMerged);
+		properties = dataSet.mergeDataSetProperties(properties, propertiesMerged);
 
 		assertEquals(4, properties.size());
 

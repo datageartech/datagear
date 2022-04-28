@@ -191,13 +191,13 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		{
 			Collection<Map<String, ?>> rawCollection = (Collection<Map<String, ?>>) rawData;
 
-			data = convertRawDataToResult(rawCollection, properties, format);
+			data = convertRawDataToResult(rawCollection, properties, fetchSize, format);
 		}
 		else if (rawData instanceof Map<?, ?>[])
 		{
 			Map<?, ?>[] rawArray = (Map<?, ?>[]) rawData;
 			List<Map<String, ?>> rawCollection = (List) Arrays.asList(rawArray);
-			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, properties, format);
+			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, properties, fetchSize, format);
 
 			data = dataList.toArray(new Map<?, ?>[dataList.size()]);
 		}
@@ -205,7 +205,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		{
 			Map<?, ?> rawMap = (Map<?, ?>) rawData;
 			List<Map<String, ?>> rawCollection = (List) Arrays.asList(rawMap);
-			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, properties, format);
+			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, properties, fetchSize, format);
 
 			data = dataList.get(0);
 		}
@@ -256,17 +256,19 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 
 	 * @param rawData
 	 * @param properties
-	 * @param format 允许为{@code null}
+	 * @param fetchSize  获取条数，小于{@code 0}表示全部
+	 * @param format     允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
 	protected List<Map<String, Object>> convertRawDataToResult(Collection<? extends Map<String, ?>> rawData,
-			List<DataSetProperty> properties, ResultDataFormat format) throws Throwable
+			List<DataSetProperty> properties, int fetchSize, ResultDataFormat format) throws Throwable
 	{
 		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
 		ResultDataFormatter formatter = (format == null ? null : new ResultDataFormatter(format));
 
-		List<Map<String, Object>> data = new ArrayList<>(rawData.size());
+		int dataSize = (fetchSize >= 0 ? fetchSize : rawData.size());
+		List<Map<String, Object>> data = new ArrayList<>(dataSize);
 
 		int plen = properties.size();
 
@@ -276,6 +278,9 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 		for (Map<String, ?> rowRaw : rawData)
 		{
+			if (data.size() >= dataSize)
+				break;
+
 			// 易变模型应保留所有原始数据
 			Map<String, Object> row = (isMutableModel() ? new HashMap<>(rowRaw) : new HashMap<>());
 
