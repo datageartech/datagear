@@ -13,13 +13,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
-import org.datagear.analysis.ResolvedDataSetResult;
-import org.datagear.analysis.support.TemplateResolvedResource.ResoureData;
+import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
 import org.datagear.analysis.support.fmk.JsonOutputFormat;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -40,7 +38,8 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
+public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends AbstractResolvableResourceDataSet<T>
+		implements ResolvableDataSet
 {
 	private static final long serialVersionUID = 1L;
 
@@ -94,72 +93,19 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		this.dataJsonPath = dataJsonPath;
 	}
 
-	/**
-	 * 解析结果。
-	 * <p>
-	 * 如果{@linkplain #getJsonResource(DataSetQuery)}返回的{@linkplain JsonTemplateResolvedResource#hasResolvedTemplate()}，
-	 * 此方法将返回{@linkplain TemplateResolvedDataSetResult}。
-	 * </p>
-	 */
 	@Override
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws DataSetException
-	{
-		JsonTemplateResolvedResource resource = null;
-		try
-		{
-			resource = getJsonResource(query);
-			JsonResourceData jsonResourceData = resolveJsonResourceData(resource);
-
-			ResolvedDataSetResult result = resolveResult(query, jsonResourceData, properties, resolveProperties);
-
-			if (resource.hasResolvedTemplate())
-				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
-						resource.getResolvedTemplate());
-
-			return result;
-		}
-		catch (DataSetException e)
-		{
-			throw e;
-		}
-		catch (Throwable t)
-		{
-			throw new DataSetSourceParseException(t, (resource == null ? null : resource.getResolvedTemplate()));
-		}
-	}
-
-	/**
-	 * 获取{@linkplain JsonTemplateResolvedResource}。
-	 * <p>
-	 * 返回的{@linkplain JsonTemplateResolvedResource#getDataJsonPath()}应是{@linkplain #getDataJsonPath()}。
-	 * </p>
-	 * 
-	 * @param query
-	 * @return
-	 * @throws Throwable
-	 */
-	protected abstract JsonTemplateResolvedResource getJsonResource(DataSetQuery query) throws Throwable;
-
-	/**
-	 * 解析JSON数据。
-	 * 
-	 * @param resource
-	 * @return
-	 * @throws Throwable
-	 */
-	protected JsonResourceData resolveJsonResourceData(JsonTemplateResolvedResource resource) throws Throwable
+	protected ResourceData resolveResourceData(T resource) throws Throwable
 	{
 		Reader reader = null;
 
 		try
 		{
-			reader = resource.getResource();
+			reader = resource.getReader();
 
 			Object data = resolveData(reader, resource.getDataJsonPath());
 			List<DataSetProperty> properties = resolveProperties(data);
 
-			return new JsonResourceData(data, properties);
+			return new ResourceData(data, properties);
 		}
 		finally
 		{
@@ -330,29 +276,6 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		return properties;
 	}
 
-	/**
-	 * 解析结果。
-	 * 
-	 * @param query
-	 * @param jsonResourceData
-	 * @param properties        允许为{@code null}
-	 * @param resolveProperties
-	 * @return
-	 * @throws Throwable
-	 */
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query,
-			JsonResourceData jsonResourceData, List<DataSetProperty> properties, boolean resolveProperties)
-			throws Throwable
-	{
-		List<DataSetProperty> resProperties = jsonResourceData.getProperties();
-		Object resData = jsonResourceData.getData();
-
-		if (resolveProperties)
-			properties = mergeDataSetProperties(resProperties, properties);
-
-		return resolveResult(resData, properties, query.getResultFetchSize(), query.getResultDataFormat());
-	}
-
 	protected ObjectMapper getObjectMapperNonStardand()
 	{
 		return JsonSupport.getObjectMapperNonStardand();
@@ -370,13 +293,24 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		return resolveTextAsTemplate(JSON_TEMPLATE_RESOLVER, json, query);
 	}
 
-	protected static abstract class JsonTemplateResolvedResource extends TemplateResolvedResource<Reader>
+	/**
+	 * JSON数据集资源。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static abstract class JsonDataSetResource extends DataSetResource
 	{
 		private static final long serialVersionUID = 1L;
 
-		private final String dataJsonPath;
+		private String dataJsonPath;
 
-		public JsonTemplateResolvedResource(String resolvedTemplate, String dataJsonPath)
+		public JsonDataSetResource()
+		{
+			super();
+		}
+
+		public JsonDataSetResource(String resolvedTemplate, String dataJsonPath)
 		{
 			super(resolvedTemplate);
 			this.dataJsonPath = dataJsonPath;
@@ -387,11 +321,16 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 			return dataJsonPath;
 		}
 
-		@Override
-		public boolean isIdempotent()
-		{
-			return true;
-		}
+		/**
+		 * 获取JSON输入流。
+		 * <p>
+		 * 输入流应该在此方法内创建，而不应该在实例内创建，因为采用缓存后不会每次都调用此方法。
+		 * </p>
+		 * 
+		 * @return
+		 * @throws Throwable
+		 */
+		public abstract Reader getReader() throws Throwable;
 
 		@Override
 		public int hashCode()
@@ -411,7 +350,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			JsonTemplateResolvedResource other = (JsonTemplateResolvedResource) obj;
+			JsonDataSetResource other = (JsonDataSetResource) obj;
 			if (dataJsonPath == null)
 			{
 				if (other.dataJsonPath != null)
@@ -420,33 +359,6 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 			else if (!dataJsonPath.equals(other.dataJsonPath))
 				return false;
 			return true;
-		}
-	}
-
-	protected static class JsonResourceData extends ResoureData<Object>
-	{
-		private static final long serialVersionUID = 1L;
-
-		private final List<DataSetProperty> properties;
-
-		public JsonResourceData(Object data, List<DataSetProperty> properties)
-		{
-			super(data);
-			this.properties = (properties == null ? Collections.emptyList()
-					: Collections.unmodifiableList(properties));
-		}
-
-		/**
-		 * 获取属性列表。
-		 * <p>
-		 * 返回值及其内容不应被修改，因为可能会缓存。
-		 * </p>
-		 * 
-		 * @return
-		 */
-		public List<DataSetProperty> getProperties()
-		{
-			return properties;
 		}
 	}
 }

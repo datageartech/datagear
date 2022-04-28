@@ -13,6 +13,8 @@ import java.util.List;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
+import org.datagear.analysis.support.JsonValueDataSet.JsonValueDataSetResource;
 import org.datagear.util.IOUtil;
 
 /**
@@ -24,7 +26,7 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public class JsonValueDataSet extends AbstractJsonDataSet
+public class JsonValueDataSet extends AbstractJsonDataSet<JsonValueDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -65,25 +67,43 @@ public class JsonValueDataSet extends AbstractJsonDataSet
 	}
 
 	@Override
-	protected JsonTemplateResolvedResource getJsonResource(DataSetQuery query) throws Throwable
+	protected JsonValueDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties) throws Throwable
 	{
 		String json = resolveJsonAsTemplate(this.value, query);
-		return new JsonValueTemplateResolvedResource(json, getDataJsonPath());
+		return new JsonValueDataSetResource(json, getDataJsonPath());
 	}
 
-	protected static class JsonValueTemplateResolvedResource extends JsonTemplateResolvedResource
+	/**
+	 * JSON文本值数据集资源。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class JsonValueDataSetResource extends JsonDataSetResource
 	{
 		private static final long serialVersionUID = 1L;
 
-		public JsonValueTemplateResolvedResource(String resolvedTemplate, String dataJsonPath)
+		public JsonValueDataSetResource()
+		{
+			super();
+		}
+
+		public JsonValueDataSetResource(String resolvedTemplate, String dataJsonPath)
 		{
 			super(resolvedTemplate, dataJsonPath);
 		}
 
 		@Override
-		public Reader getResource() throws Throwable
+		public Reader getReader() throws Throwable
 		{
 			return IOUtil.getReader(super.getResolvedTemplate());
+		}
+
+		@Override
+		public boolean isIdempotent()
+		{
+			return true;
 		}
 
 		@Override

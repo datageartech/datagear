@@ -14,6 +14,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,15 +196,10 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			DataSetQuery query, List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
 	{
 		List<Map<String, ?>> rawData = resolveRawData(cn, rs, query);
+		List<DataSetProperty> rawProperties = (resolveProperties ? resolveProperties(cn, rs, rawData)
+				: Collections.emptyList());
 
-		if (resolveProperties)
-		{
-			List<DataSetProperty> resolvedProperties = resolveProperties(cn, rs, rawData);
-			mergeDataSetProperties(resolvedProperties, properties);
-			properties = resolvedProperties;
-		}
-
-		return resolveResult(rawData, properties, query.getResultDataFormat());
+		return resolveResult(query, rawData, rawProperties, properties, resolveProperties);
 	}
 
 	/**

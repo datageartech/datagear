@@ -34,10 +34,9 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
 	public AbstractResolvableDataSet(String id, String name)
 	{
-		super(id, name, Collections.EMPTY_LIST);
+		super(id, name, Collections.emptyList());
 	}
 
 	public AbstractResolvableDataSet(String id, String name, List<DataSetProperty> properties)
@@ -83,6 +82,29 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 			List<DataSetProperty> properties, boolean resolveProperties) throws DataSetException;
 
 	/**
+	 * 解析结果。
+	 * 
+	 * @param query
+	 * @param rawData
+	 * @param rawProperties     允许为{@code null}
+	 * @param properties        允许为{@code null}
+	 * @param resolveProperties
+	 * @return
+	 * @throws Throwable
+	 */
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, Object rawData,
+			List<DataSetProperty> rawProperties, List<DataSetProperty> properties, boolean resolveProperties)
+			throws Throwable
+	{
+		if (resolveProperties)
+			properties = mergeDataSetProperties(rawProperties, properties);
+
+		properties = (properties == null ? Collections.emptyList() : properties);
+
+		return resolveResult(rawData, properties, query.getResultFetchSize(), query.getResultDataFormat());
+	}
+
+	/**
 	 * 合并{@linkplain DataSetProperty}。
 	 * <p>
 	 * 将合并列表的{@linkplain DataSetProperty#getType()}、{@linkplain DataSetProperty#getLabel()}、
@@ -90,13 +112,15 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * 同时根据{@code merged}里的排序对{@code dataSetProperties}重排，返回一个新的列表。
 	 * </p>
 	 * 
-	 * @param dataSetProperties 基础列表，不会被修改
+	 * @param dataSetProperties 基础列表，不会被修改，允许为{@code null}
 	 * @param merged            合并列表，不会被修改，允许为{@code null}
 	 * @return
 	 */
 	protected List<DataSetProperty> mergeDataSetProperties(List<? extends DataSetProperty> dataSetProperties,
 			List<? extends DataSetProperty> merged)
 	{
+		if (dataSetProperties == null)
+			dataSetProperties = Collections.emptyList();
 		if (merged == null)
 			merged = Collections.emptyList();
 

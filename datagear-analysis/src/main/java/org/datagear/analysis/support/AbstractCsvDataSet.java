@@ -18,12 +18,10 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
-import org.datagear.analysis.ResolvedDataSetResult;
-import org.datagear.analysis.support.TemplateResolvedResource.ResoureData;
+import org.datagear.analysis.support.AbstractCsvDataSet.CsvDataSetResource;
 import org.datagear.analysis.support.fmk.CsvOutputFormat;
 import org.datagear.util.IOUtil;
 
@@ -33,7 +31,8 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
+public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends AbstractResolvableResourceDataSet<T>
+		implements ResolvableDataSet
 {
 	private static final long serialVersionUID = 1L;
 
@@ -94,69 +93,14 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		this.nameRow = nameRow;
 	}
 
-	/**
-	 * 解析结果。
-	 * <p>
-	 * 如果{@linkplain #getCsvResource(DataSetQuery)}返回有{@linkplain CsvTemplateResolvedResource#hasResolvedTemplate()}，
-	 * 此方法将返回{@linkplain TemplateResolvedDataSetResult}。
-	 * </p>
-	 */
 	@Override
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws DataSetException
-	{
-		CsvTemplateResolvedResource resource = null;
-
-		try
-		{
-			resource = getCsvResource(query);
-			CsvResourceData csvResourceData = resolveCsvResourceData(resource);
-
-			ResolvedDataSetResult result = resolveResult(query, csvResourceData, properties, resolveProperties);
-
-			if (resource.hasResolvedTemplate())
-				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
-						resource.getResolvedTemplate());
-
-			return result;
-		}
-		catch (DataSetException e)
-		{
-			throw e;
-		}
-		catch (Throwable t)
-		{
-			throw new DataSetSourceParseException(t, (resource == null ? null : resource.getResolvedTemplate()));
-		}
-	}
-
-	/**
-	 * 获取{@linkplain CsvTemplateResolvedResource}。
-	 * <p>
-	 * 返回的{@linkplain CsvTemplateResolvedResource#getNameRow()}应是{@linkplain #getNameRow()}。
-	 * </p>
-	 * 
-	 * @param query
-	 * @return
-	 * @throws Throwable
-	 */
-	protected abstract CsvTemplateResolvedResource getCsvResource(DataSetQuery query)
-			throws Throwable;
-
-	/**
-	 * 解析CSV数据。
-	 * 
-	 * @param resource
-	 * @return
-	 * @throws Throwable
-	 */
-	protected CsvResourceData resolveCsvResourceData(CsvTemplateResolvedResource resource) throws Throwable
+	protected ResourceData resolveResourceData(T resource) throws Throwable
 	{
 		Reader reader = null;
 
 		try
 		{
-			reader = resource.getResource();
+			reader = resource.getReader();
 
 			CSVParser csvParser = buildCSVParser(reader);
 			List<CSVRecord> csvRecords = csvParser.getRecords();
@@ -165,7 +109,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 			List<Map<String, String>> data = resolveData(resource, propertyNames, csvRecords);
 			List<DataSetProperty> properties = resolveProperties(propertyNames, data);
 
-			return new CsvResourceData(data, properties);
+			return new ResourceData(data, properties);
 		}
 		finally
 		{
@@ -181,7 +125,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<String> resolvePropertyNames(CsvTemplateResolvedResource resource,
+	protected List<String> resolvePropertyNames(CsvDataSetResource resource,
 			List<CSVRecord> csvRecords) throws Throwable
 	{
 		List<String> propertyNames = null;
@@ -190,7 +134,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		{
 			CSVRecord csvRecord = csvRecords.get(i);
 
-			if (isNameRow(resource.getNameRow(), i))
+			if (resource.isNameRow(i))
 			{
 				int size = csvRecord.size();
 				propertyNames = new ArrayList<String>(csvRecord.size());
@@ -211,7 +155,7 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 						propertyNames.add(Integer.toString(j + 1));
 				}
 
-				if (isAfterNameRow(resource.getNameRow(), i))
+				if (resource.isAfterNameRow(i))
 					break;
 			}
 		}
@@ -231,14 +175,14 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<Map<String, String>> resolveData(CsvTemplateResolvedResource resource, List<String> propertyNames,
+	protected List<Map<String, String>> resolveData(CsvDataSetResource resource, List<String> propertyNames,
 			List<CSVRecord> csvRecords) throws Throwable
 	{
 		List<Map<String, String>> data = new ArrayList<>();
 
 		for (int i = 0, len = csvRecords.size(); i < len; i++)
 		{
-			if (isNameRow(resource.getNameRow(), i))
+			if (resource.isNameRow(i))
 				continue;
 
 			Map<String, String> row = new HashMap<>();
@@ -305,28 +249,6 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	}
 
 	/**
-	 * 解析结果。
-	 * 
-	 * @param query
-	 * @param csvResourceData
-	 * @param properties        允许为{@code null}
-	 * @param resolveProperties
-	 * @return
-	 * @throws Throwable
-	 */
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, CsvResourceData csvResourceData,
-			List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
-	{
-		List<DataSetProperty> resProperties = csvResourceData.getProperties();
-		List<Map<String, String>> resData = csvResourceData.getData();
-
-		if (resolveProperties)
-			properties = mergeDataSetProperties(resProperties, properties);
-
-		return resolveResult(resData, properties, query.getResultFetchSize(), query.getResultDataFormat());
-	}
-
-	/**
 	 * 指定的CSV值是否可被当做数值类型。
 	 * 
 	 * @param value
@@ -362,33 +284,6 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 	}
 
 	/**
-	 * 是否名称行。
-	 * 
-	 * @param nameRow  名称行号（以{@code 1}计数）
-	 * @param rowIndex 行索引（以{@code 0}计数）
-	 * @return
-	 */
-	protected boolean isNameRow(int nameRow, int rowIndex)
-	{
-		return ((rowIndex + 1) == nameRow);
-	}
-
-	/**
-	 * 是否在名称行之后。
-	 * <p>
-	 * 如果没有名称行，应返回{@code true}。
-	 * </p>
-	 * 
-	 * @param nameRow  名称行号（以{@code 1}计数）
-	 * @param rowIndex 行索引（以{@code 0}计数）
-	 * @return
-	 */
-	protected boolean isAfterNameRow(int nameRow, int rowIndex)
-	{
-		return ((rowIndex + 1) > nameRow);
-	}
-
-	/**
 	 * 构建{@linkplain CSVParser}。
 	 * 
 	 * @param reader
@@ -412,13 +307,24 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		return resolveTextAsTemplate(CSV_TEMPLATE_RESOLVER, csv, query);
 	}
 
-	protected static abstract class CsvTemplateResolvedResource extends TemplateResolvedResource<Reader>
+	/**
+	 * CSV数据集资源。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static abstract class CsvDataSetResource extends DataSetResource
 	{
 		private static final long serialVersionUID = 1L;
 
-		private final int nameRow;
+		private int nameRow;
 
-		public CsvTemplateResolvedResource(String resolvedTemplate, int nameRow)
+		public CsvDataSetResource()
+		{
+			super();
+		}
+
+		public CsvDataSetResource(String resolvedTemplate, int nameRow)
 		{
 			super(resolvedTemplate);
 			this.nameRow = nameRow;
@@ -429,11 +335,46 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 			return nameRow;
 		}
 
-		@Override
-		public boolean isIdempotent()
+		public void setNameRow(int nameRow)
 		{
-			return true;
+			this.nameRow = nameRow;
 		}
+
+		/**
+		 * 是否名称行。
+		 * 
+		 * @param rowIndex 行索引（以{@code 0}计数）
+		 * @return
+		 */
+		public boolean isNameRow(int rowIndex)
+		{
+			return ((rowIndex + 1) == this.nameRow);
+		}
+
+		/**
+		 * 是否在名称行之后。
+		 * <p>
+		 * 如果没有名称行，应返回{@code true}。
+		 * </p>
+		 * 
+		 * @param rowIndex 行索引（以{@code 0}计数）
+		 * @return
+		 */
+		public boolean isAfterNameRow(int rowIndex)
+		{
+			return ((rowIndex + 1) > this.nameRow);
+		}
+
+		/**
+		 * 获取CSV输入流。
+		 * <p>
+		 * 输入流应该在此方法内创建，而不应该在实例内创建，因为采用缓存后不会每次都调用此方法。
+		 * </p>
+		 * 
+		 * @return
+		 * @throws Throwable
+		 */
+		public abstract Reader getReader() throws Throwable;
 
 		@Override
 		public int hashCode()
@@ -453,38 +394,10 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			CsvTemplateResolvedResource other = (CsvTemplateResolvedResource) obj;
+			CsvDataSetResource other = (CsvDataSetResource) obj;
 			if (nameRow != other.nameRow)
 				return false;
 			return true;
-		}
-	}
-
-	protected static class CsvResourceData extends ResoureData<List<Map<String, String>>>
-	{
-		private static final long serialVersionUID = 1L;
-
-		private final List<DataSetProperty> properties;
-
-		public CsvResourceData(List<Map<String, String>> data,
-				List<DataSetProperty> properties)
-		{
-			super((data == null ? Collections.emptyList() : Collections.unmodifiableList(data)));
-			this.properties = (properties == null ? Collections.emptyList()
-					: Collections.unmodifiableList(properties));
-		}
-
-		/**
-		 * 获取属性列表。
-		 * <p>
-		 * 返回值及其内容不应被修改，因为可能会缓存。
-		 * </p>
-		 * 
-		 * @return
-		 */
-		public List<DataSetProperty> getProperties()
-		{
-			return properties;
 		}
 	}
 }

@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
-import org.datagear.analysis.support.AbstractExcelDataSet;
+import org.datagear.analysis.support.AbstractExcelFileDataSet;
 import org.datagear.analysis.support.ExcelDirectoryFileDataSet;
 import org.springframework.beans.BeanUtils;
 
@@ -23,7 +23,7 @@ import org.springframework.beans.BeanUtils;
  * @author datagear@163.com
  *
  */
-public class ExcelDataSetEntity extends AbstractExcelDataSet implements DirectoryFileDataSetEntity, CloneableEntity
+public class ExcelDataSetEntity extends AbstractExcelFileDataSet implements DirectoryFileDataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 

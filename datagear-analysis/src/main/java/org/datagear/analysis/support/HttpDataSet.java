@@ -38,7 +38,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
-import org.datagear.analysis.support.AbstractJsonDataSet.JsonTemplateResolvedResource;
+import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
@@ -351,10 +351,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			setHttpHeaders(request, headerContent);
 			setHttpEntity(request, requestContent);
 
-			JsonResponseHandler responseHandler = new JsonResponseHandler();
-			responseHandler.setProperties(properties);
-			responseHandler.setResponseDataJsonPath(getResponseDataJsonPath());
-			responseHandler.setDataSetQuery(query);
+			JsonResponseHandler responseHandler = new JsonResponseHandler(query, properties, resolveProperties,
+					getResponseDataJsonPath());
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
 
@@ -551,40 +549,26 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 	protected static class JsonResponseHandler implements HttpClientResponseHandler<ResolvedDataSetResult>
 	{
+		private DataSetQuery dataSetQuery;
+
 		private List<DataSetProperty> properties;
 
-		private String responseDataJsonPath = "";
+		private boolean resolveProperties;
 
-		private DataSetQuery dataSetQuery = null;
+		private String responseDataJsonPath;
 
 		public JsonResponseHandler()
 		{
 			super();
 		}
 
-		public List<DataSetProperty> getProperties()
+		public JsonResponseHandler(DataSetQuery dataSetQuery, List<DataSetProperty> properties,
+				boolean resolveProperties, String responseDataJsonPath)
 		{
-			return properties;
-		}
-
-		/**
-		 * 设置数据集属性。
-		 * 
-		 * @param properties
-		 *            如果为{@code null}或空，则执行解析
-		 */
-		public void setProperties(List<DataSetProperty> properties)
-		{
-			this.properties = properties;
-		}
-
-		public String getResponseDataJsonPath()
-		{
-			return responseDataJsonPath;
-		}
-
-		public void setResponseDataJsonPath(String responseDataJsonPath)
-		{
+			super();
+			this.dataSetQuery = dataSetQuery;
+			this.properties = (properties == null ? Collections.emptyList() : properties);
+			this.resolveProperties = resolveProperties;
 			this.responseDataJsonPath = responseDataJsonPath;
 		}
 
@@ -596,6 +580,36 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		public void setDataSetQuery(DataSetQuery dataSetQuery)
 		{
 			this.dataSetQuery = dataSetQuery;
+		}
+
+		public List<DataSetProperty> getProperties()
+		{
+			return properties;
+		}
+
+		public void setProperties(List<DataSetProperty> properties)
+		{
+			this.properties = properties;
+		}
+
+		public boolean isResolveProperties()
+		{
+			return resolveProperties;
+		}
+
+		public void setResolveProperties(boolean resolveProperties)
+		{
+			this.resolveProperties = resolveProperties;
+		}
+
+		public String getResponseDataJsonPath()
+		{
+			return responseDataJsonPath;
+		}
+
+		public void setResponseDataJsonPath(String responseDataJsonPath)
+		{
+			this.responseDataJsonPath = responseDataJsonPath;
 		}
 
 		@Override
@@ -617,9 +631,10 @@ public class HttpDataSet extends AbstractResolvableDataSet
 				reader = IOUtil.getReader(entity.getContent(), contentCharset);
 			}
 
-			if (this.properties == null || this.properties.isEmpty())
+			if (this.resolveProperties)
 			{
-				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(reader, this.responseDataJsonPath);
+				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.properties, reader,
+						this.responseDataJsonPath);
 				return jsonDataSet.resolve(this.dataSetQuery);
 			}
 			else
@@ -657,7 +672,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 	}
 
-	protected static class HttpResponseJsonDataSet extends AbstractJsonDataSet
+	protected static class HttpResponseJsonDataSet extends AbstractJsonDataSet<HttpResponseJsonDataSetResource>
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -679,21 +694,27 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 
 		@Override
-		protected JsonTemplateResolvedResource getJsonResource(DataSetQuery query) throws Throwable
+		protected HttpResponseJsonDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
+				boolean resolveProperties) throws Throwable
 		{
-			return new HttpResponseJsonTemplateResolvedResource(getDataJsonPath(), this.responseJsonReader);
+			return new HttpResponseJsonDataSetResource("", getDataJsonPath(), this.responseJsonReader);
 		}
 	}
 
-	protected static class HttpResponseJsonTemplateResolvedResource extends JsonTemplateResolvedResource
+	protected static class HttpResponseJsonDataSetResource extends JsonDataSetResource
 	{
 		private static final long serialVersionUID = 1L;
 
-		private final transient Reader jsonReader;
+		private transient Reader jsonReader;
 
-		public HttpResponseJsonTemplateResolvedResource(String dataJsonPath, Reader jsonReader)
+		public HttpResponseJsonDataSetResource()
 		{
-			super("", dataJsonPath);
+			super();
+		}
+
+		public HttpResponseJsonDataSetResource(String resolvedTemplate, String dataJsonPath, Reader jsonReader)
+		{
+			super(resolvedTemplate, dataJsonPath);
 			this.jsonReader = jsonReader;
 		}
 
@@ -709,7 +730,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 
 		@Override
-		public Reader getResource() throws Throwable
+		public Reader getReader() throws Throwable
 		{
 			return this.jsonReader;
 		}

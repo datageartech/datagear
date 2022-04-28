@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
+import org.datagear.analysis.support.AbstractJsonFileDataSet.JsonFileDataSetResource;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 
@@ -22,7 +24,7 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
+public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFileDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -55,11 +57,12 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 	}
 
 	@Override
-	protected JsonTemplateResolvedResource getJsonResource(DataSetQuery query) throws Throwable
+	protected JsonFileDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties) throws Throwable
 	{
 		File file = getJsonFile(query);
-		return new JsonFileTemplateResolvedResource(getDataJsonPath(), file.getAbsolutePath(), file.lastModified(),
-				getEncoding());
+		return new JsonFileDataSetResource("", getDataJsonPath(), getEncoding(), file.getAbsolutePath(),
+				file.lastModified());
 	}
 
 	/**
@@ -71,20 +74,31 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 	 */
 	protected abstract File getJsonFile(DataSetQuery query) throws Throwable;
 
-	protected static class JsonFileTemplateResolvedResource extends JsonTemplateResolvedResource
+	/**
+	 * JSON文件数据集资源。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class JsonFileDataSetResource extends JsonDataSetResource
 	{
 		private static final long serialVersionUID = 1L;
 
-		private final String filePath;
+		private String encoding;
 
-		private final long lastModified;
+		private String filePath;
 
-		private final String encoding;
+		private long lastModified;
 
-		public JsonFileTemplateResolvedResource(String dataJsonPath, String filePath, long lastModified,
-				String encoding)
+		public JsonFileDataSetResource()
 		{
-			super("", dataJsonPath);
+			super();
+		}
+
+		public JsonFileDataSetResource(String resolvedTemplate, String dataJsonPath,
+				String encoding, String filePath, long lastModified)
+		{
+			super(resolvedTemplate, dataJsonPath);
 			this.filePath = filePath;
 			this.lastModified = lastModified;
 			this.encoding = encoding;
@@ -106,7 +120,13 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 		}
 
 		@Override
-		public Reader getResource() throws Throwable
+		public boolean isIdempotent()
+		{
+			return true;
+		}
+
+		@Override
+		public Reader getReader() throws Throwable
 		{
 			File file = FileUtil.getFile(this.filePath);
 			return IOUtil.getReader(file, this.encoding);
@@ -132,7 +152,7 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			JsonFileTemplateResolvedResource other = (JsonFileTemplateResolvedResource) obj;
+			JsonFileDataSetResource other = (JsonFileDataSetResource) obj;
 			if (encoding == null)
 			{
 				if (other.encoding != null)

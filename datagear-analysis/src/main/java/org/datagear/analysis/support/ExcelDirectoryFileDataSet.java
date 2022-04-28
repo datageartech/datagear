@@ -25,7 +25,7 @@ import org.datagear.util.FileUtil;
  * @author datagear@163.com
  *
  */
-public class ExcelDirectoryFileDataSet extends AbstractExcelDataSet
+public class ExcelDirectoryFileDataSet extends AbstractExcelFileDataSet
 {
 	private static final long serialVersionUID = 1L;
 

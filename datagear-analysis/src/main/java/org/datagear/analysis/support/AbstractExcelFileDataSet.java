@@ -8,110 +8,96 @@
 package org.datagear.analysis.support;
 
 import java.io.File;
-import java.io.Reader;
+import java.io.InputStream;
 import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
-import org.datagear.analysis.support.AbstractCsvDataSet.CsvDataSetResource;
-import org.datagear.analysis.support.AbstractCsvFileDataSet.CsvFileDataSetResource;
+import org.datagear.analysis.support.AbstractExcelDataSet.ExcelDataSetResource;
+import org.datagear.analysis.support.AbstractExcelFileDataSet.ExcelFileDataSetResource;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 
 /**
- * 抽象CSV文件数据集。
+ * 抽象Excel文件数据集。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileDataSetResource>
+public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<ExcelFileDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 文件编码 */
-	private String encoding = IOUtil.CHARSET_UTF_8;
-
-	public AbstractCsvFileDataSet()
+	public AbstractExcelFileDataSet()
 	{
 		super();
 	}
 
-	public AbstractCsvFileDataSet(String id, String name)
+	public AbstractExcelFileDataSet(String id, String name)
 	{
 		super(id, name);
 	}
 
-	public AbstractCsvFileDataSet(String id, String name, List<DataSetProperty> properties)
+	public AbstractExcelFileDataSet(String id, String name, List<DataSetProperty> properties)
 	{
 		super(id, name, properties);
 	}
 
-	public String getEncoding()
-	{
-		return encoding;
-	}
-
-	public void setEncoding(String encoding)
-	{
-		this.encoding = encoding;
-	}
-
 	@Override
-	protected CsvFileDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties)
-			throws Throwable
+	protected ExcelFileDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties) throws Throwable
 	{
-		File file = getCsvFile(query);
-		return new CsvFileDataSetResource("", getNameRow(), getEncoding(), file.getAbsolutePath(), file.lastModified());
+		File file = getExcelFile(query);
+
+		return new ExcelFileDataSetResource("", getSheetIndex(), getNameRow(), getDataRowExp(),
+				getDataColumnExp(), (isForceXls() ? true : isXls(file)), file.getAbsolutePath(), file.lastModified());
 	}
 
 	/**
-	 * 获取CSV文件。
+	 * 给定Excel文件是否是老版本的{@code .xls}文件。
+	 * 
+	 * @param file
+	 * @return
+	 */
+	protected boolean isXls(File file)
+	{
+		return FileUtil.isExtension(file, EXTENSION_XLS);
+	}
+
+	/**
+	 * 获取Excel文件。
 	 * 
 	 * @param query
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract File getCsvFile(DataSetQuery query) throws Throwable;
+	protected abstract File getExcelFile(DataSetQuery query) throws Throwable;
 
 	/**
-	 * CSV文件数据集资源。
+	 * Excel文件数据集资源。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class CsvFileDataSetResource extends CsvDataSetResource
+	public static class ExcelFileDataSetResource extends ExcelDataSetResource
 	{
 		private static final long serialVersionUID = 1L;
-
-		private String encoding;
 
 		private String filePath;
 
 		private long lastModified;
 
-		public CsvFileDataSetResource()
+		public ExcelFileDataSetResource()
 		{
 			super();
 		}
 
-		public CsvFileDataSetResource(String resolvedTemplate, int nameRow,
-				String encoding, String filePath, long lastModified)
+		public ExcelFileDataSetResource(String resolvedTemplate, int sheetIndex, int nameRow, String dataRowExp,
+				String dataColumnExp, boolean xls, String filePath, long lastModified)
 		{
-			super(resolvedTemplate, nameRow);
-			this.encoding = encoding;
+			super(resolvedTemplate, sheetIndex, nameRow, dataRowExp, dataColumnExp, xls);
 			this.filePath = filePath;
 			this.lastModified = lastModified;
-		}
-
-		public String getEncoding()
-		{
-			return encoding;
-		}
-
-		public void setEncoding(String encoding)
-		{
-			this.encoding = encoding;
 		}
 
 		public String getFilePath()
@@ -141,10 +127,10 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 		}
 
 		@Override
-		public Reader getReader() throws Throwable
+		public InputStream getInputStream() throws Throwable
 		{
 			File file = FileUtil.getFile(this.filePath);
-			return IOUtil.getReader(file, this.encoding);
+			return IOUtil.getInputStream(file);
 		}
 
 		@Override
@@ -152,7 +138,6 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 		{
 			final int prime = 31;
 			int result = super.hashCode();
-			result = prime * result + ((encoding == null) ? 0 : encoding.hashCode());
 			result = prime * result + ((filePath == null) ? 0 : filePath.hashCode());
 			result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
 			return result;
@@ -167,14 +152,7 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			CsvFileDataSetResource other = (CsvFileDataSetResource) obj;
-			if (encoding == null)
-			{
-				if (other.encoding != null)
-					return false;
-			}
-			else if (!encoding.equals(other.encoding))
-				return false;
+			ExcelFileDataSetResource other = (ExcelFileDataSetResource) obj;
 			if (filePath == null)
 			{
 				if (other.filePath != null)

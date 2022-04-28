@@ -13,6 +13,8 @@ import java.util.List;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.support.AbstractCsvDataSet.CsvDataSetResource;
+import org.datagear.analysis.support.CsvValueDataSet.CsvValueDataSetResource;
 import org.datagear.util.IOUtil;
 
 /**
@@ -24,12 +26,12 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public class CsvValueDataSet extends AbstractCsvDataSet
+public class CsvValueDataSet extends AbstractCsvDataSet<CsvValueDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
 	/** CSV字符串 */
-	private String value;
+	private String value = "";
 
 	public CsvValueDataSet()
 	{
@@ -77,23 +79,41 @@ public class CsvValueDataSet extends AbstractCsvDataSet
 	}
 
 	@Override
-	protected CsvTemplateResolvedResource getCsvResource(DataSetQuery query) throws Throwable
+	protected CsvValueDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
+			boolean resolveProperties) throws Throwable
 	{
 		String csv = resolveCsvAsTemplate(this.value, query);
-		return new CsvValueTemplateResolvedResource(csv, getNameRow());
+		return new CsvValueDataSetResource(csv, getNameRow());
 	}
 
-	protected static class CsvValueTemplateResolvedResource extends CsvTemplateResolvedResource
+	/**
+	 * CSV文本数据集资源。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class CsvValueDataSetResource extends CsvDataSetResource
 	{
 		private static final long serialVersionUID = 1L;
 
-		public CsvValueTemplateResolvedResource(String resolvedTemplate, int nameRow)
+		public CsvValueDataSetResource()
+		{
+			super();
+		}
+
+		public CsvValueDataSetResource(String resolvedTemplate, int nameRow)
 		{
 			super(resolvedTemplate, nameRow);
 		}
 
 		@Override
-		public Reader getResource() throws Throwable
+		public boolean isIdempotent()
+		{
+			return true;
+		}
+
+		@Override
+		public Reader getReader() throws Throwable
 		{
 			return IOUtil.getReader(super.getResolvedTemplate());
 		}

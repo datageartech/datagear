@@ -221,23 +221,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 
 	 * @param rawData
 	 * @param properties
-	 * @param format     允许为{@code null}
-	 * @return
-	 * @throws Throwable
-	 * @see {@link #resolveResultData(Object, List, ResultDataFormat)}
-	 */
-	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetProperty> properties,
-			ResultDataFormat format) throws Throwable
-	{
-		Object data = resolveResultData(rawData, properties, -1, format);
-		return new ResolvedDataSetResult(new DataSetResult(data), properties);
-	}
-
-	/**
-	 * 解析结果。
-	 * 
-	 * @param rawData
-	 * @param properties
 	 * @param fetchSize  获取条数，小于{@code 0}表示全部
 	 * @param format     允许为{@code null}
 	 * @return
@@ -316,25 +299,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 是否有{@linkplain DataSetQuery#getResultFetchSize()}。
-	 * 
-	 * @param query 允许为{@code null}
-	 * @return
-	 */
-	protected boolean hasResultFetchSize(DataSetQuery query)
-	{
-		if (query == null)
-			return false;
-
-		int maxCount = query.getResultFetchSize();
-
-		if (maxCount < 0)
-			return false;
-
-		return true;
-	}
-
-	/**
 	 * 给定数目是否已到达{@linkplain DataSetQuery#getResultFetchSize()}。
 	 * 
 	 * @param query
@@ -355,23 +319,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		return count >= maxCount;
 	}
 
-	/**
-	 * 计算结果数据最大数目。
-	 * 
-	 * @param query
-	 * @param defaultSize
-	 * @return
-	 */
-	protected int evalResultFetchSize(DataSetQuery dataSetOption, int defaultSize)
-	{
-		if (dataSetOption == null)
-			return defaultSize;
-
-		int maxCount = dataSetOption.getResultFetchSize();
-
-		return (maxCount < 0 ? defaultSize : Math.min(maxCount, defaultSize));
-	}
-	
 	/**
 	 * 查找与名称数组对应的{@linkplain DataSetProperty}列表。
 	 * <p>
