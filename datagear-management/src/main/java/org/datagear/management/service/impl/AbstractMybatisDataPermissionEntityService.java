@@ -29,6 +29,7 @@ import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
+import org.datagear.util.CacheService;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.cache.Cache.ValueWrapper;
@@ -44,7 +45,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 {
 	private AuthorizationService authorizationService;
 
-	private ServiceCache permissionCache;
+	private CacheService permissionCacheService = null;
 
 	/**
 	 * 查询操作时缓存权限数目。
@@ -80,14 +81,14 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		this.authorizationService = authorizationService;
 	}
 
-	public ServiceCache getPermissionCache()
+	public CacheService getPermissionCacheService()
 	{
-		return permissionCache;
+		return permissionCacheService;
 	}
 
-	public void setPermissionCache(ServiceCache permissionCache)
+	public void setPermissionCacheService(CacheService permissionCacheService)
 	{
-		this.permissionCache = permissionCache;
+		this.permissionCacheService = permissionCacheService;
 	}
 
 	public int getPermissionCacheCountForQuery()
@@ -251,7 +252,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			return false;
 
 		for (String res : resources)
-			this.permissionCache.evictImmediately(toPermissionCacheKeyOfStr(res));
+			this.permissionCacheService.evictImmediately(toPermissionCacheKeyOfStr(res));
 
 		return true;
 	}
@@ -459,7 +460,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!isPermissionCacheEnabled())
 			return null;
 
-		ValueWrapper valueWrapper = this.permissionCache.get(toPermissionCacheKey(id));
+		ValueWrapper valueWrapper = this.permissionCacheService.get(toPermissionCacheKey(id));
 		UserIdPermissionMap upm = (valueWrapper == null ? null : (UserIdPermissionMap) valueWrapper.get());
 
 		return (upm == null ? null : upm.getPermission(userId));
@@ -472,12 +473,12 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 		Object key = toPermissionCacheKey(id);
 
-		ValueWrapper valueWrapper = this.permissionCache.get(key);
+		ValueWrapper valueWrapper = this.permissionCacheService.get(key);
 		UserIdPermissionMap upm = (valueWrapper == null ? null : (UserIdPermissionMap) valueWrapper.get());
 		if (upm == null)
 		{
 			upm = new UserIdPermissionMap();
-			this.permissionCache.put(key, upm);
+			this.permissionCacheService.put(key, upm);
 		}
 
 		upm.putPermission(userId, permission);
@@ -522,7 +523,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!isPermissionCacheEnabled())
 			return;
 
-		this.permissionCache.invalidate();
+		this.permissionCacheService.invalidate();
 	}
 
 	/**
@@ -551,7 +552,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 */
 	protected Object toPermissionCacheKeyOfStr(String id)
 	{
-		if (this.permissionCache.isShared())
+		if (this.permissionCacheService.isShared())
 			return new GlobalEntityCacheKey<String>(getSqlNamespace() + "Permission", id);
 		else
 			return id;
@@ -559,7 +560,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 	protected boolean isPermissionCacheEnabled()
 	{
-		return (this.permissionCache != null && this.permissionCache.isEnable());
+		return (this.permissionCacheService != null && this.permissionCacheService.isEnabled());
 	}
 
 	/**

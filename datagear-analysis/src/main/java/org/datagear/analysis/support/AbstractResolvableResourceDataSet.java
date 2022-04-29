@@ -226,7 +226,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		{
 			super();
 			this.data = data;
-			this.properties = properties;
+			setProperties(properties);
 		}
 
 		/**
@@ -242,6 +242,14 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 			return data;
 		}
 
+		/**
+		 * 获取{@linkplain DataSetProperty}列表。
+		 * <p>
+		 * 返回值及其内容不应被修改，因为可能会缓存。
+		 * </p>
+		 * 
+		 * @return
+		 */
 		public List<DataSetProperty> getProperties()
 		{
 			return properties;
@@ -249,7 +257,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 
 		public void setProperties(List<DataSetProperty> properties)
 		{
-			this.properties = properties;
+			this.properties = (properties == null ? Collections.emptyList() : Collections.unmodifiableList(properties));
 		}
 
 		public void setData(Object data)

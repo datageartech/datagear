@@ -30,6 +30,7 @@ import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
+import org.datagear.util.CacheService;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.cache.Cache.ValueWrapper;
@@ -44,7 +45,7 @@ import org.springframework.cache.support.SimpleValueWrapper;
 public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> extends AbstractMybatisService<T>
 		implements EntityService<ID, T>
 {
-	private ServiceCache cache = null;
+	private CacheService cacheService = null;
 	
 	/**
 	 * 查询操作时缓存实体数目。
@@ -72,14 +73,14 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		super(sqlSessionTemplate, dialect);
 	}
 
-	public ServiceCache getCache()
+	public CacheService getCacheService()
 	{
-		return cache;
+		return cacheService;
 	}
 
-	public void setCache(ServiceCache cache)
+	public void setCacheService(CacheService cacheService)
 	{
-		this.cache = cache;
+		this.cacheService = cacheService;
 	}
 
 	public int getCacheCountForQuery()
@@ -376,7 +377,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		if (!isCacheEnabled())
 			return null;
 
-		ValueWrapper valueWrapper = this.cache.get(toCacheKey(id));
+		ValueWrapper valueWrapper = this.cacheService.get(toCacheKey(id));
 
 		if (valueWrapper == null)
 			return null;
@@ -407,7 +408,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		if (value != null)
 			value = cacheCloneEntity(value);
 
-		this.cache.put(toCacheKey(id), value);
+		this.cacheService.put(toCacheKey(id), value);
 	}
 
 	/**
@@ -432,7 +433,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 			if (value != null)
 			{
 				value = cacheCloneEntity(value);
-				this.cache.put(toCacheKey(value.getId()), value);
+				this.cacheService.put(toCacheKey(value.getId()), value);
 			}
 		}
 	}
@@ -442,7 +443,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		if (!isCacheEnabled())
 			return;
 
-		this.cache.evictImmediately(toCacheKey(id));
+		this.cacheService.evictImmediately(toCacheKey(id));
 	}
 
 	protected void cacheInvalidate()
@@ -450,12 +451,12 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		if (!isCacheEnabled())
 			return;
 
-		this.cache.invalidate();
+		this.cacheService.invalidate();
 	}
 
 	protected boolean isCacheEnabled()
 	{
-		return (this.cache != null && this.cache.isEnable());
+		return (this.cacheService != null && this.cacheService.isEnabled());
 	}
 
 	/**
@@ -464,7 +465,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 * 参考{@linkplain #cacheGet(Object)}、{@linkplain #cachePut(Object, Entity)}、{@linkplain #cachePutQueryResult(List)}。
 	 * </p>
 	 * <p>
-	 * 如果{@linkplain #getCache()}的{@linkplain ServiceCache#isSerialized()}为{@code false}（比如进程内缓存），应遵循{@linkplain CloneableEntity#clone()}规则；
+	 * 如果{@linkplain #getCacheService()}的{@linkplain CacheService#isSerialized()}为{@code false}（比如进程内缓存），应遵循{@linkplain CloneableEntity#clone()}规则；
 	 * 否则，可直接返回原实体。
 	 * </p>
 	 * <p>
@@ -480,7 +481,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	@SuppressWarnings("unchecked")
 	protected T cacheCloneEntity(T value)
 	{
-		if (this.cache.isSerialized())
+		if (this.cacheService.isSerialized())
 			return value;
 
 		if (value instanceof CloneableEntity)
@@ -500,7 +501,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 */
 	protected Object toCacheKey(ID id)
 	{
-		if (this.cache.isShared())
+		if (this.cacheService.isShared())
 			return new GlobalEntityCacheKey<ID>(getSqlNamespace(), id);
 		else
 			return id;

@@ -20,7 +20,13 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.AbstractCsvDataSet;
+import org.datagear.analysis.support.AbstractDataSet;
+import org.datagear.analysis.support.AbstractJsonDataSet;
+import org.datagear.analysis.support.DataSetFmkTemplateResolver;
+import org.datagear.analysis.support.DataSetFmkTemplateResolver.NameTemplateLoader;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
@@ -149,16 +155,16 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 	private DataSourceConfig dataSourceConfig;
 
-	private ServiceCacheConfig serviceCacheConfig;
+	private CacheServiceConfig cacheServiceConfig;
 
 	@Autowired
 	public CoreConfig(ApplicationProperties applicationProperties, DataSourceConfig dataSourceConfig,
-			ServiceCacheConfig serviceCacheConfig)
+			CacheServiceConfig cacheServiceConfig)
 	{
 		super();
 		this.applicationProperties = applicationProperties;
 		this.dataSourceConfig = dataSourceConfig;
-		this.serviceCacheConfig = serviceCacheConfig;
+		this.cacheServiceConfig = cacheServiceConfig;
 	}
 
 	public ApplicationProperties getApplicationProperties()
@@ -181,14 +187,14 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		this.dataSourceConfig = dataSourceConfig;
 	}
 
-	public ServiceCacheConfig getServiceCacheConfig()
+	public CacheServiceConfig getServiceCacheConfig()
 	{
-		return serviceCacheConfig;
+		return cacheServiceConfig;
 	}
 
-	public void setServiceCacheConfig(ServiceCacheConfig serviceCacheConfig)
+	public void setServiceCacheConfig(CacheServiceConfig cacheServiceConfig)
 	{
-		this.serviceCacheConfig = serviceCacheConfig;
+		this.cacheServiceConfig = cacheServiceConfig;
 	}
 
 	@Bean
@@ -725,7 +731,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		initAuthorizationResourceServices(context);
 		initAuthorizationListenerAwares(context);
 		initAnalysisProjectAuthorizationListenerAwares(context);
-		initServiceCaches(context);
+		initCacheServices(context);
 		initDevotedDataExchangeServices(context);
 		initUserServiceCreateUserEntityServices(context);
 	}
@@ -773,21 +779,35 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected void initServiceCaches(ApplicationContext context)
+	protected void initCacheServices(ApplicationContext context)
 	{
 		Map<String, AbstractMybatisEntityService> entityServices = context
 				.getBeansOfType(AbstractMybatisEntityService.class);
 
 		for (AbstractMybatisEntityService es : entityServices.values())
 		{
-			es.setCache(this.serviceCacheConfig.getServiceCache(es.getClass()));
+			es.setCacheService(this.cacheServiceConfig.createCacheService(es.getClass()));
 
 			if (es instanceof AbstractMybatisDataPermissionEntityService<?, ?>)
 			{
 				((AbstractMybatisDataPermissionEntityService<?, ?>) es)
-						.setPermissionCache(this.serviceCacheConfig.getPermissionServiceCache(es.getClass()));
+						.setPermissionCacheService(this.cacheServiceConfig.createPermissionCacheService(es.getClass()));
 			}
 		}
+
+		DataSetFmkTemplateResolver generalTemplateResolver = AbstractDataSet.GENERAL_TEMPLATE_RESOLVER;
+		DataSetFmkTemplateResolver csvTemplateResolver = AbstractCsvDataSet.CSV_TEMPLATE_RESOLVER;
+		DataSetFmkTemplateResolver jsonTemplateResolver = AbstractJsonDataSet.JSON_TEMPLATE_RESOLVER;
+		DataSetFmkTemplateResolver sqlTemplateResolver = SqlDataSet.SQL_TEMPLATE_RESOLVER;
+
+		generalTemplateResolver.getNameTemplateLoader().setCacheService(
+				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".general"));
+		csvTemplateResolver.getNameTemplateLoader().setCacheService(
+				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".csv"));
+		jsonTemplateResolver.getNameTemplateLoader().setCacheService(
+				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".json"));
+		sqlTemplateResolver.getNameTemplateLoader().setCacheService(
+				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".sql"));
 	}
 
 	protected void initDevotedDataExchangeServices(ApplicationContext context)

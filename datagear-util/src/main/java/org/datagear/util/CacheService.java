@@ -5,18 +5,18 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-package org.datagear.management.service.impl;
+package org.datagear.util;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
 /**
- * 服务缓存。
+ * 缓存服务。
  * 
  * @author datagear@163.com
  *
  */
-public class ServiceCache
+public class CacheService
 {
 	/** 缓存 */
 	private Cache cache = null;
@@ -30,25 +30,43 @@ public class ServiceCache
 	/** 是否禁用 */
 	private boolean disabled = false;
 
-	public ServiceCache()
+	public CacheService()
 	{
 		super();
 	}
 
 	/**
-	 * @param cache
-	 *            允许{@code null}
+	 * 创建。
+	 * 
+	 * @param cache 允许{@code null}
 	 */
-	public ServiceCache(Cache cache)
+	public CacheService(Cache cache)
 	{
 		super();
 		this.cache = cache;
 	}
 
 	/**
+	 * 创建。
+	 * 
+	 * @param cache      允许{@code null}
+	 * @param serialized
+	 * @param shared
+	 * @param disabled
+	 */
+	public CacheService(Cache cache, boolean serialized, boolean shared, boolean disabled)
+	{
+		super();
+		this.cache = cache;
+		this.serialized = serialized;
+		this.shared = shared;
+		this.disabled = disabled;
+	}
+
+	/**
 	 * 获取缓存。
 	 * <p>
-	 * 使用参考{@linkplain #isEnable()}、{@linkplain #isShared()}。
+	 * 使用参考{@linkplain #isEnabled()}、{@linkplain #isShared()}。
 	 * </p>
 	 * 
 	 * @return 可能为{@code null}。
@@ -120,26 +138,23 @@ public class ServiceCache
 	 * 
 	 * @return
 	 */
-	public boolean isEnable()
+	public boolean isEnabled()
 	{
-		if (this.disabled)
-			return false;
-
-		return (this.cache != null);
+		return (!this.disabled && this.cache != null);
 	}
 
 	/**
 	 * 获取缓存。
 	 * <p>
-	 * 调用此方法前应确保{@linkplain #isEnable()}为{@code true}。
+	 * 如果{@linkplain #isSerialized()}为{@code false}，调用方应确保获取对象不被修改。
 	 * </p>
 	 * 
 	 * @param key
-	 * @return
+	 * @return 为{@code null}表示未缓存，如果{@linkplain #isEnabled()}为{@code false}，将始终返回{@code null}
 	 */
 	public ValueWrapper get(Object key)
 	{
-		if (this.cache == null)
+		if (!isEnabled())
 			return null;
 
 		return this.cache.get(key);
@@ -148,7 +163,10 @@ public class ServiceCache
 	/**
 	 * 存入缓存。
 	 * <p>
-	 * 调用此方法前应确保{@linkplain #isEnable()}为{@code true}。
+	 * 如果{@linkplain #isEnabled()}为{@code false}，将不执行任何操作。
+	 * </p>
+	 * <p>
+	 * 如果{@linkplain #isSerialized()}为{@code false}，调用方应确保存入对象不被修改，比如：存入对象副本。
 	 * </p>
 	 * 
 	 * @param key
@@ -156,7 +174,7 @@ public class ServiceCache
 	 */
 	public void put(Object key, Object value)
 	{
-		if (this.cache == null)
+		if (!isEnabled())
 			return;
 
 		this.cache.put(key, value);
@@ -165,14 +183,14 @@ public class ServiceCache
 	/**
 	 * 删除缓存。
 	 * <p>
-	 * 调用此方法前应确保{@linkplain #isEnable()}为{@code true}。
+	 * 如果{@linkplain #isEnabled()}为{@code false}，将不执行任何操作。
 	 * </p>
 	 * 
 	 * @param key
 	 */
 	public void evictImmediately(Object key)
 	{
-		if (this.cache == null)
+		if (!isEnabled())
 			return;
 
 		this.cache.evictIfPresent(key);
@@ -181,12 +199,12 @@ public class ServiceCache
 	/**
 	 * 清空缓存。
 	 * <p>
-	 * 调用此方法前应确保{@linkplain #isEnable()}为{@code true}。
+	 * 如果{@linkplain #isEnabled()}为{@code false}，将不执行任何操作。
 	 * </p>
 	 */
 	public void invalidate()
 	{
-		if (this.cache == null)
+		if (!isEnabled())
 			return;
 
 		this.cache.invalidate();

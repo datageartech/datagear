@@ -12,11 +12,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import org.datagear.util.CacheService;
+import org.springframework.cache.Cache.ValueWrapper;
 
 import freemarker.cache.TemplateLoader;
 import freemarker.core.OutputFormat;
@@ -64,13 +62,13 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 	public DataSetFmkTemplateResolver(OutputFormat outputFormat, int cacheCapacity)
 	{
 		super();
-		this.nameTemplateLoader = new NameTemplateLoader(cacheCapacity);
+		this.nameTemplateLoader = new NameTemplateLoader();
 
 		Configuration configuration = new Configuration(Configuration.VERSION_2_3_30);
 		configuration.setCacheStorage(new freemarker.cache.MruCacheStorage(0, cacheCapacity));
 
 		if (outputFormat != null)
-		configuration.setOutputFormat(outputFormat);
+			configuration.setOutputFormat(outputFormat);
 
 		setConfiguration(configuration);
 	}
@@ -172,29 +170,21 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 	 */
 	public static class NameTemplateLoader implements TemplateLoader
 	{
-		private Cache<String, NameTemplateSource> nameTemplateCache;
+		private CacheService cacheService = new CacheService(null, false, false, true);
 
-		public NameTemplateLoader(int cacheCapacity)
-		{
-			this(cacheCapacity, 60 * 60 * 24);
-		}
-
-		public NameTemplateLoader(int cacheCapacity, int cacheExpireSeconds)
+		public NameTemplateLoader()
 		{
 			super();
-
-			this.nameTemplateCache = Caffeine.newBuilder().maximumSize(cacheCapacity)
-					.expireAfterAccess(cacheExpireSeconds, TimeUnit.SECONDS).build();
 		}
 
-		protected Cache<String, NameTemplateSource> getSqlDataSetTemplateCache()
+		public CacheService getCacheService()
 		{
-			return nameTemplateCache;
+			return cacheService;
 		}
 
-		protected void setSqlDataSetTemplateCache(Cache<String, NameTemplateSource> sqlDataSetTemplateCache)
+		public void setCacheService(CacheService cacheService)
 		{
-			this.nameTemplateCache = sqlDataSetTemplateCache;
+			this.cacheService = cacheService;
 		}
 
 		@Override
@@ -205,14 +195,17 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		@Override
 		public Object findTemplateSource(String name) throws IOException
 		{
-			return this.nameTemplateCache.get(name, new Function<String, NameTemplateSource>()
-			{
-				@Override
-				public NameTemplateSource apply(String name)
-				{
-					return new NameTemplateSource(name, System.currentTimeMillis());
-				}
-			});
+			String key = getCacheKey(name);
+			ValueWrapper tsWrapper = this.cacheService.get(key);
+			Object ts = (tsWrapper == null ? null : tsWrapper.get());
+
+			if (ts != null)
+				return ts;
+
+			ts = new NameTemplateSource(name, System.currentTimeMillis());
+			this.cacheService.put(key, ts);
+
+			return ts;
 		}
 
 		@Override
@@ -225,6 +218,14 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		public Reader getReader(Object templateSource, String encoding) throws IOException
 		{
 			return new StringReader(((NameTemplateSource) templateSource).getName());
+		}
+
+		protected String getCacheKey(String name)
+		{
+			if (!this.cacheService.isShared())
+				return name;
+
+			return NameTemplateLoader.class.getName() + "." + name;
 		}
 
 		protected static class NameTemplateSource
