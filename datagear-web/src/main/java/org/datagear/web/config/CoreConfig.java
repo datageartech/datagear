@@ -549,6 +549,9 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 				this.dataSetRootDirectory(),
 				this.httpClient());
 
+		bean.setDataSetResourceDataCacheService(this.cacheServiceConfig
+				.createCacheService(DataSetEntityService.class.getName() + ".dataSetResourceDataCacheService"));
+
 		return bean;
 	}
 

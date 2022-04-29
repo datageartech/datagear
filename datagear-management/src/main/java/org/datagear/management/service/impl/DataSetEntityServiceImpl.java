@@ -17,6 +17,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.AnalysisProject;
@@ -44,6 +45,7 @@ import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.CacheService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -73,6 +75,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	private File dataSetRootDirectory;
 
 	private HttpClient httpClient;
+
+	private CacheService dataSetResourceDataCacheService = null;
 
 	public DataSetEntityServiceImpl()
 	{
@@ -184,6 +188,16 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.httpClient = httpClient;
 	}
 
+	public CacheService getDataSetResourceDataCacheService()
+	{
+		return dataSetResourceDataCacheService;
+	}
+
+	public void setDataSetResourceDataCacheService(CacheService dataSetResourceDataCacheService)
+	{
+		this.dataSetResourceDataCacheService = dataSetResourceDataCacheService;
+	}
+
 	@Override
 	public File getDataSetDirectory(String dataSetId)
 	{
@@ -203,6 +217,9 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			if (connectionFactory != null)
 				connectionFactory.setConnectionSource(this.connectionSource);
 		}
+
+		if (entity instanceof AbstractResolvableResourceDataSet<?>)
+			((AbstractResolvableResourceDataSet<?>) entity).setCacheService(getDataSetResourceDataCacheService());
 
 		return entity;
 	}

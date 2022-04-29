@@ -17,6 +17,8 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet.DataSetResource;
+import org.datagear.util.CacheService;
+import org.springframework.cache.Cache.ValueWrapper;
 
 /**
  * 抽象资源{@linkplain ResolvableDataSet}。
@@ -27,6 +29,8 @@ import org.datagear.analysis.support.AbstractResolvableResourceDataSet.DataSetRe
 public abstract class AbstractResolvableResourceDataSet<T extends DataSetResource> extends AbstractResolvableDataSet
 {
 	private static final long serialVersionUID = 1L;
+
+	private transient CacheService cacheService = null;
 
 	public AbstractResolvableResourceDataSet()
 	{
@@ -41,6 +45,16 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	public AbstractResolvableResourceDataSet(String id, String name, List<DataSetProperty> properties)
 	{
 		super(id, name, properties);
+	}
+
+	public CacheService getCacheService()
+	{
+		return cacheService;
+	}
+
+	public void setCacheService(CacheService cacheService)
+	{
+		this.cacheService = cacheService;
 	}
 
 	/**
@@ -59,7 +73,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		try
 		{
 			resource = getResource(query, properties, resolveProperties);
-			ResourceData resourceData = resolveResourceData(resource);
+			ResourceData resourceData = getResourceData(resource);
 
 			ResolvedDataSetResult result = resolveResult(query, properties, resolveProperties, resourceData);
 
@@ -77,6 +91,30 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		{
 			throw new DataSetSourceParseException(t, (resource == null ? null : resource.getResolvedTemplate()));
 		}
+	}
+
+	/**
+	 * 获取资源数据。
+	 * 
+	 * @param resource
+	 * @return
+	 * @throws Throwable
+	 */
+	protected ResourceData getResourceData(T resource) throws Throwable
+	{
+		if (!resource.isIdempotent() || this.cacheService == null || !this.cacheService.isEnabled())
+			return resolveResourceData(resource);
+
+		ValueWrapper vw = this.cacheService.get(resource);
+		ResourceData rd = (vw == null ? null : (ResourceData) vw.get());
+
+		if (rd != null)
+			return rd;
+
+		rd = resolveResourceData(resource);
+		this.cacheService.put(resource, rd);
+
+		return rd;
 	}
 
 	/**
