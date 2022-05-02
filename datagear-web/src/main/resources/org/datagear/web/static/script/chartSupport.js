@@ -4961,7 +4961,7 @@
 		}
 	};
 	
-	//主题河流
+	//主题河流图
 	
 	chartSupport.themeRiverRender = function(chart, nameSign, valueSign, options)
 	{
@@ -5100,6 +5100,436 @@
 			data[signNameMap.name] = echartsData[0];
 			data[signNameMap.value] = echartsData[1];
 		}
+		
+		chart.eventData(chartEvent, data);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	};
+	
+	//象形柱图
+	
+	chartSupport.pictorialBarSymbolPaths=
+	{
+		//星型
+		"star" : "path://m15.5,19c-0.082,0 -0.164,-0.02 -0.239,-0.061l-5.261,-2.869l-5.261,2.869c-0.168,0.092 -0.373,0.079 -0.529,-0.032s-0.235,-0.301 -0.203,-0.49l0.958,-5.746l-3.818,-3.818c-0.132,-0.132 -0.18,-0.328 -0.123,-0.506s0.209,-0.31 0.394,-0.341l5.749,-0.958l2.386,-4.772c0.085,-0.169 0.258,-0.276 0.447,-0.276s0.363,0.107 0.447,0.276l2.386,4.772l5.749,0.958c0.185,0.031 0.337,0.162 0.394,0.341s0.01,0.374 -0.123,0.506l-3.818,3.818l0.958,5.746c0.031,0.189 -0.048,0.379 -0.203,0.49c-0.086,0.061 -0.188,0.093 -0.29,0.093z",
+	};
+	
+	chartSupport.pictorialBarRender = function(chart, nameSign, valueSign, options)
+	{
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		
+		options = chartSupport.inflateRenderOptions(chart,
+		{
+			//扩展配置
+			dg:
+			{
+				pictorialBar:
+				{
+					//是否横向
+					horizontal: false,
+					//图形类型
+					symbol: "circle",
+					//图形尺寸
+					symbolSize: (vps.length > 1 ? "100%" : "50%"),
+					//图形重复
+					symbolRepeat: true,
+					//柱条间距
+					barGap: "100%"
+				}
+			},
+			title:
+			{
+		        text: chart.name
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			legend:
+			{
+				id: 0,
+				//将在update中设置：
+				//data
+			},
+			xAxis:
+			{
+				id: 0,
+				name: chart.dataSetPropertyAlias(chartDataSet, np),
+				nameGap: 5,
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				splitLine: { show: false }
+			},
+			yAxis:
+			{
+				id: 0,
+				name: (vps.length == 1 ? chart.dataSetPropertyAlias(chartDataSet, vps[0]) : ""),
+				nameGap: 5,
+				type: "value"
+			},
+			series:
+			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
+				{
+					id: 0,
+					type: "pictorialBar"
+				}
+			]
+		},
+		options,
+		function(options)
+		{
+			if(options.dg.pictorialBar.horizontal)
+			{
+				var xAxisTmp = options.xAxis;
+				options.xAxis = options.yAxis;
+				options.yAxis = xAxisTmp;
+				
+				//横向柱状图的yAxis.type不能为value，不然会变为竖向图形
+				if(options.yAxis.type == "value")
+					options.yAxis.type = "category";
+			}
+		});
+		
+		chart.echartsInit(options);
+	};
+	
+	chartSupport.pictorialBarUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		var legendData = [];
+		var series = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var result = chart.resultOf(results, chartDataSet);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
+				
+				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+				var vpsMy = (renderOptions.dg.pictorialBar.horizontal ? [vps[j], np] : [np, vps[j]]);
+				var data = chart.resultValueObjects(result, vpsMy);
+				
+				chart.originalDataIndexes(data, chartDataSet);
+				
+				var symbol = renderOptions.dg.pictorialBar.symbol;
+				if(chartSupport.pictorialBarSymbolPaths[symbol])
+					symbol = chartSupport.pictorialBarSymbolPaths[symbol];
+				
+				var mySeries =
+				{
+					id: series.length, type: "pictorialBar", name: legendName, data: data,
+					symbol: symbol,
+					symbolSize: renderOptions.dg.pictorialBar.symbolSize, symbolRepeat: renderOptions.dg.pictorialBar.symbolRepeat,
+					barGap: renderOptions.dg.pictorialBar.barGap
+				};
+				
+				legendData.push(legendName);
+				series.push(mySeries);
+			}
+		}
+		
+		var options = { legend: {id: 0, data: legendData}, series: series };
+		
+		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+		if(renderOptions.dg.pictorialBar.horizontal)
+			options.yAxis = { id: 0 };
+		else
+			options.xAxis = { id: 0 };
+		
+		options = chart.inflateUpdateOptions(results, options, function(options)
+		{
+			if(renderOptions.dg.pictorialBar.horizontal)
+				chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar", 1, 0);
+			else
+				chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
+		});
+		
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
+	};
+	
+	chartSupport.pictorialBarResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.pictorialBarDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+	
+	chartSupport.pictorialBarOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
+				chartSupport.pictorialBarSetChartEventData);
+	};
+	
+	chartSupport.pictorialBarOff = function(chart, eventType, handler)
+	{
+		chart.echartsOffEventHandler(eventType, handler);
+	};
+	
+	chartSupport.pictorialBarSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
+		var horizontal = renderOptions.dg.pictorialBar.horizontal;
+		
+		var echartsData = echartsEventParams.data;
+		var data = (horizontal ?
+				chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value, 1, 0) :
+				chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value)
+			);
+		
+		chart.eventData(chartEvent, data);
+		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	};
+	
+	//进度象形柱图
+	
+	chartSupport.pictorialBarProgressRender = function(chart, nameSign, valueSign, maxSign, options)
+	{
+		//name 名称，必选，单选
+		//value 值，必选，单选
+		//max 最大值，可选，单选，默认：100
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, max: maxSign });
+		
+		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+		
+		options = chartSupport.inflateRenderOptions(chart,
+		{
+			//扩展配置
+			dg:
+			{
+				pictorialBar:
+				{
+					//是否横向
+					horizontal: false,
+					//图形类型
+					symbol: "rect",
+					//图形尺寸
+					symbolSize: ["100%", "100%"],
+					//图形重复
+					symbolRepeat: false,
+					//图形间距
+					symbolMargin: 0,
+					//柱条间距
+					barGap: "-100%",
+					//最大值
+					max: 100,
+				}
+			},
+			title:
+			{
+		        text: chart.name
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			legend:
+			{
+				id: 0,
+				//将在update中设置：
+				//data
+			},
+			xAxis:
+			{
+				id: 0,
+				name: chart.dataSetPropertyAlias(chartDataSet, np),
+				nameGap: 5,
+				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				splitLine: { show: false }
+			},
+			yAxis:
+			{
+				id: 0,
+				name: chart.dataSetPropertyAlias(chartDataSet, vp),
+				nameGap: 5,
+				type: "value",
+				splitLine: { show: false }
+			},
+			series:
+			[
+				//将在update中设置：
+				//{}
+				//设初值以免渲染报错
+				{
+					id: 0,
+					type: "pictorialBar"
+				}
+			]
+		},
+		options,
+		function(options)
+		{
+			if(options.dg.pictorialBar.horizontal)
+			{
+				var xAxisTmp = options.xAxis;
+				options.xAxis = options.yAxis;
+				options.yAxis = xAxisTmp;
+				
+				//横向柱状图的yAxis.type不能为value，不然会变为竖向图形
+				if(options.yAxis.type == "value")
+					options.yAxis.type = "category";
+			}
+		});
+		
+		chart.echartsInit(options);
+	};
+	
+	chartSupport.pictorialBarProgressUpdate = function(chart, results)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
+		
+		var chartDataSets = chart.chartDataSetsMain();
+		
+		var seriesName = "";
+		var seriesData = [];
+		var maxValue = null;
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var result = chart.resultOf(results, chartDataSet);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
+			
+			//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+			var data = chart.resultValueObjects(result, (renderOptions.dg.pictorialBar.horizontal ? [vp, np] : [np, vp]));
+			
+			chart.originalDataIndexes(data, chartDataSet);
+			
+			//取任一不为空的地图名列值
+			if(maxValue == null)
+				maxValue = chartSupport.resultFirstNonEmptyValueOfSign(chart, chartDataSet, result, signNameMap.max);
+			
+			seriesData = seriesData.concat(data);
+			
+			if(!seriesName)
+				seriesName = dataSetName;
+		}
+		
+		maxValue = (maxValue == null ? renderOptions.dg.pictorialBar.max : maxValue);
+		
+		var symbol = renderOptions.dg.pictorialBar.symbol;
+		if(chartSupport.pictorialBarSymbolPaths[symbol])
+			symbol = chartSupport.pictorialBarSymbolPaths[symbol];
+		
+		var series =
+		[
+			{
+				id: 0,
+				type: "pictorialBar",
+				name: seriesName,
+				data: seriesData,
+				symbol: symbol,
+				symbolSize: renderOptions.dg.pictorialBar.symbolSize,
+				symbolRepeat: renderOptions.dg.pictorialBar.symbolRepeat,
+				barGap: renderOptions.dg.pictorialBar.barGap,
+				symbolBoundingData: maxValue,
+				symbolClip: true,
+				symbolMargin: renderOptions.dg.pictorialBar.symbolMargin,
+				z: 10
+			},
+			{
+				id: 1,
+				type: "pictorialBar",
+				name: seriesName+"-background",
+				data: seriesData,
+				symbol: symbol,
+				symbolSize: renderOptions.dg.pictorialBar.symbolSize,
+				symbolRepeat: 'fixed',
+				barGap: renderOptions.dg.pictorialBar.barGap,
+				symbolBoundingData: maxValue,
+				symbolClip: false,
+				symbolMargin: renderOptions.dg.pictorialBar.symbolMargin,
+				z: 1,
+				animationDuration: 0,
+				itemStyle:{ color: chart.gradualColor(0.15) },
+				silent: true
+			}
+		];
+		
+		var options = { legend: {id: 0, data: [ seriesName ]}, series: series };
+		
+		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+		if(renderOptions.dg.pictorialBar.horizontal)
+		{
+			options.xAxis = { id: 0, max: maxValue };
+			options.yAxis = { id: 0 };
+		}
+		else
+		{
+			options.xAxis = { id: 0 };
+			options.yAxis = { id: 0, max: maxValue };
+		}
+		
+		options = chart.inflateUpdateOptions(results, options, function(options)
+		{
+			if(renderOptions.dg.pictorialBar.horizontal)
+				chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar", 1, 0);
+			else
+				chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
+		});
+		
+		chartSupport.echartsOptionsReplaceMerge(chart, options);
+	};
+	
+	chartSupport.pictorialBarProgressResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
+	chartSupport.pictorialBarProgressDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+	
+	chartSupport.pictorialBarProgressOn = function(chart, eventType, handler)
+	{
+		chartSupport.bindChartEventHandlerForEcharts(chart, eventType, handler,
+				chartSupport.pictorialBarProgressSetChartEventData);
+	};
+	
+	chartSupport.pictorialBarProgressOff = function(chart, eventType, handler)
+	{
+		chart.echartsOffEventHandler(eventType, handler);
+	};
+	
+	chartSupport.pictorialBarProgressSetChartEventData = function(chart, chartEvent, echartsEventParams)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
+		var horizontal = renderOptions.dg.pictorialBar.horizontal;
+		
+		var echartsData = echartsEventParams.data;
+		var data = (horizontal ?
+				chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value, 1, 0) :
+				chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value)
+			);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
