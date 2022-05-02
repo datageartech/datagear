@@ -5301,7 +5301,7 @@
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
-	//进度象形柱图
+	//象形进度柱图
 	
 	chartSupport.pictorialBarProgressRender = function(chart, nameSign, valueSign, maxSign, options)
 	{
@@ -5329,6 +5329,8 @@
 					symbolSize: ["100%", "100%"],
 					//图形重复
 					symbolRepeat: false,
+					//背景图形重复
+					symbolRepeatForBg: false,
 					//图形间距
 					symbolMargin: 0,
 					//柱条间距
@@ -5461,14 +5463,14 @@
 				data: seriesData,
 				symbol: symbol,
 				symbolSize: renderOptions.dg.pictorialBar.symbolSize,
-				symbolRepeat: 'fixed',
+				symbolRepeat: renderOptions.dg.pictorialBar.symbolRepeatForBg,
 				barGap: renderOptions.dg.pictorialBar.barGap,
 				symbolBoundingData: maxValue,
 				symbolClip: false,
 				symbolMargin: renderOptions.dg.pictorialBar.symbolMargin,
 				z: 1,
 				animationDuration: 0,
-				itemStyle:{ color: chart.gradualColor(0.15) },
+				itemStyle:{ color: chart.gradualColor(0.2) },
 				silent: true
 			}
 		];
