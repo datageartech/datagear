@@ -162,10 +162,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	 */
 	protected void checkSaveUrlPermission(User user, String url) throws SaveSchemaUrlPermissionDeniedException
 	{
-		if (user.isAdmin())
-			return;
-
-		if (this.schemaGuardService.isPermitted(url))
+		if (this.schemaGuardService.isPermitted(user, url))
 			return;
 
 		throw new SaveSchemaUrlPermissionDeniedException();

@@ -9,6 +9,7 @@ package org.datagear.management.service;
 
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SchemaGuard;
+import org.datagear.management.domain.User;
 import org.datagear.util.AsteriskPatternMatcher;
 
 /**
@@ -30,4 +31,13 @@ public interface SchemaGuardService extends EntityService<String, SchemaGuard>
 	 * @return
 	 */
 	boolean isPermitted(String schemaUrl);
+
+	/**
+	 * 是否允许创建指定的{@linkplain Schema#getUrl()}。
+	 * 
+	 * @param user
+	 * @param schemaUrl
+	 * @return
+	 */
+	boolean isPermitted(User user, String schemaUrl);
 }

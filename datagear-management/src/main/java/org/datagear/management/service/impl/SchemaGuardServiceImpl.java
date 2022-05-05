@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.SchemaGuard;
+import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaGuardService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.Query;
@@ -93,6 +94,15 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 		}
 
 		return permitted;
+	}
+
+	@Override
+	public boolean isPermitted(User user, String schemaUrl)
+	{
+		if (user.isAdmin())
+			return true;
+
+		return this.isPermitted(schemaUrl);
 	}
 
 	@Override

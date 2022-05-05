@@ -20,6 +20,8 @@ import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.SchemaGuardService;
+import org.datagear.management.service.impl.SaveSchemaUrlPermissionDeniedException;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.TableType;
@@ -55,6 +57,9 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@Autowired
 	private DriverEntityManager driverEntityManager;
 
+	@Autowired
+	private SchemaGuardService schemaGuardService;
+
 	public SchemaController()
 	{
 		super();
@@ -68,6 +73,16 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public void setDriverEntityManager(DriverEntityManager driverEntityManager)
 	{
 		this.driverEntityManager = driverEntityManager;
+	}
+
+	public SchemaGuardService getSchemaGuardService()
+	{
+		return schemaGuardService;
+	}
+
+	public void setSchemaGuardService(SchemaGuardService schemaGuardService)
+	{
+		this.schemaGuardService = schemaGuardService;
 	}
 
 	@RequestMapping("/add")
@@ -236,6 +251,11 @@ public class SchemaController extends AbstractSchemaConnTableController
 	{
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
+
+		User user = WebUtils.getUser(request, response);
+
+		if (!this.schemaGuardService.isPermitted(user, schema.getUrl()))
+			throw new SaveSchemaUrlPermissionDeniedException();
 
 		// 用户选定驱动程序时
 		if (!isEmpty(schema.getDriverEntity()) && !isEmpty(schema.getDriverEntity().getId()))
