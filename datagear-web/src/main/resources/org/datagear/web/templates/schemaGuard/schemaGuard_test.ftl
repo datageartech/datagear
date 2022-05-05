@@ -30,7 +30,7 @@ formAction 表单提交action，允许为null
 				</div>
 				<div class="form-item-value">
 					<input type="text" name="url" value="" required="required" maxlength="200" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
-					<span id="schemaBuildUrlHelp" class="ui-state-default ui-corner-all" style="cursor: pointer;" title="<@spring.message code='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></span>&nbsp;
+					<button id="schemaBuildUrlHelp" type="button" class="small-button" title="<@spring.message code='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></button>&nbsp;
 				</div>
 			</div>
 			<div class="form-item">
