@@ -139,6 +139,9 @@
 				if(dashboardEditor)
 				{
 					var chartThemeObj = $.formToJson(this);
+					//未出现的属性将不会更新，所以这里要检查设置
+					chartThemeObj.graphColors = (chartThemeObj.graphColors === undefined ? [] : chartThemeObj.graphColors);
+					chartThemeObj.graphRangeColors = (chartThemeObj.graphRangeColors === undefined ? [] : chartThemeObj.graphRangeColors);
 					
 					if(po.veOperation == "editChartTheme")
 						dashboardEditor.setElementChartTheme(chartThemeObj);
