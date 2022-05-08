@@ -531,7 +531,7 @@
 			return false;
 		
 		//没有尺寸的也忽略
-		var w = $ele.width(), h = $ele.height();
+		var w = $ele.outerWidth(), h = $ele.outerHeight();
 		if(w == null || w <= 0 || h == null || h <= 0)
 			return false;
 		
