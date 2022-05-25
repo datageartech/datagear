@@ -685,14 +685,18 @@
 	 * 获取/设置图表监听器。
 	 * 图表监听器格式为：
 	 * {
-	 *   //渲染图表完成回调函数
+	 *   //可选，渲染图表完成回调函数
 	 *   render: function(chart){ ... },
-	 *   //更新图表数据完成回调函数
+	 *   //可选，更新图表数据完成回调函数
 	 *   update: function(chart, results){ ... },
+	 *   //可选，销毁图表完成回调函数
+	 *   destroy: function(chart){ ... },
 	 *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
 	 *   onRender: function(chart){ ... },
 	 *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
-	 *   onUpdate: function(chart, results){ ... }
+	 *   onUpdate: function(chart, results){ ... },
+	 *   //可选，销毁图表前置回调函数，返回false将阻止销毁图表
+	 *   onDestroy: function(chart){ ... }
 	 * }
 	 * 
 	 * 图表初始化时会使用图表元素的"dg-chart-listener"属性值执行设置操作。
@@ -1100,6 +1104,23 @@
 		if(this.statusDestroyed())
 			return;
 		
+		var doDestroy = true;
+		
+		var listener = this.listener();
+		if(listener && listener.onDestroy)
+			doDestroy = listener.onDestroy(this);
+		
+		if(doDestroy != false)
+		{
+			this.doDestroy();
+		}
+	};
+	
+	/**
+	 * 调用底层图表渲染器的destroy函数，执行更新数据。
+	 */
+	chartBase.doDestroy = function()
+	{
 		var $element = this.elementJquery();
 		
 		this.statusDestroyed(true);
@@ -1370,16 +1391,30 @@
 	 * 图表是否为/设置为：已销毁。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * @param postProcess 可选，当set为true时，是否执行更新后置操作，比如调用监听器的destroy函数，默认为true
 	 */
-	chartBase.statusDestroyed = function(set)
+	chartBase.statusDestroyed = function(set, postProcess)
 	{
 		if(set === true)
 		{
 			this._isActive = false;
 			this.status(chartStatusConst.DESTROYED);
+			
+			if(postProcess != false)
+				this._postProcessDestroyed();
 		}
 		else
 			return (this.status() == chartStatusConst.DESTROYED);
+	};
+	
+	/**
+	 * 执行销毁完成后置处理。
+	 */
+	chartBase._postProcessDestroyed = function()
+	{
+		var listener = this.listener();
+		if(listener && listener.destroy)
+		  listener.destroy(this);
 	};
 	
 	/**
