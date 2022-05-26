@@ -2771,9 +2771,9 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	position: absolute;
 	left:50%;
 	top: 3px;
-	margin-left: -35px;
-	width: 70px;
-	height: 70px;
+	margin-left: -40px;
+	width: 80px;
+	height: 80px;
 	background-size: 100% 100%;
 }
 .page-grid-chartPlugin-select .chart-plugin-content ul ul li .plugin-item .plugin-name{
