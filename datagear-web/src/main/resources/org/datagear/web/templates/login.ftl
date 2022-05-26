@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#assign LoginController=statics['org.datagear.web.controller.LoginController']>
 <#include "include/page_import.ftl">
 <#include "include/html_doctype.ftl">
 <html>
@@ -37,7 +38,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='login.username' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="text" name="name" value="${loginUser}" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
+						<input type="text" name="${LoginController.LOGIN_PARAM_USER_NAME}" value="${loginUsername!}" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
 					</div>
 				</div>
 				<div class="form-item">
@@ -45,7 +46,7 @@ ${detectNewVersionScript?no_esc}
 						<label><@spring.message code='login.password' /></label>
 					</div>
 					<div class="form-item-value">
-						<input type="password" name="password" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" />
+						<input type="password" name="${LoginController.LOGIN_PARAM_PASSWORD}" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
 			</div>
@@ -55,7 +56,7 @@ ${detectNewVersionScript?no_esc}
 			<div class="form-foot small-text login-form-ext" style="text-align:right;">
 				<div class="rememberMeGroup">
 					<label for="${pageId}rememberMe"><@spring.message code='login.rememberMe' /></label>
-		   			<input type="checkbox" id="${pageId}rememberMe" name="rememberMe" value="1" />
+		   			<input type="checkbox" id="${pageId}rememberMe" name="${LoginController.LOGIN_PARAM_REMEMBER_ME}" value="1" />
 	   			</div>
 	   			<a class="link" href="${contextPath}/resetPassword"><@spring.message code='login.fogetPassword' /></a>
 			</div>

@@ -16,9 +16,11 @@ import java.util.UUID;
 import org.datagear.management.domain.Role;
 import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.util.StringUtil;
+import org.datagear.web.controller.LoginController;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
 import org.datagear.web.security.AuthUser;
 import org.datagear.web.security.AuthenticationSuccessHandlerImpl;
+import org.datagear.web.security.RememberNameAuthenticationFailureHandler;
 import org.datagear.web.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -32,6 +34,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
@@ -128,6 +131,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	public AuthenticationSuccessHandler authenticationSuccessHandler()
 	{
 		AuthenticationSuccessHandlerImpl bean = new AuthenticationSuccessHandlerImpl();
+
+		return bean;
+	}
+
+	@Bean
+	public AuthenticationFailureHandler rememberNameAuthenticationFailureHandler()
+	{
+		RememberNameAuthenticationFailureHandler bean = new RememberNameAuthenticationFailureHandler();
 
 		return bean;
 	}
@@ -297,13 +308,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				//
 				.antMatchers("/**").access(disableAnonymous ? AUTH_USER_ADMIN : AUTH_ANONYMOUS_USER_ADMIN)
 
-				.and().formLogin().loginPage("/login").loginProcessingUrl("/login/doLogin").usernameParameter("name")
-				.passwordParameter("password").successHandler(authenticationSuccessHandler())
+				.and().formLogin().loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl("/login/doLogin")
+				.usernameParameter(LoginController.LOGIN_PARAM_USER_NAME)
+				.passwordParameter(LoginController.LOGIN_PARAM_PASSWORD)
+				.successHandler(this.authenticationSuccessHandler())
+				.failureHandler(this.rememberNameAuthenticationFailureHandler())
 
 				.and().logout().logoutUrl("/logout").invalidateHttpSession(true).logoutSuccessUrl("/")
 
 				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
-				.rememberMeParameter("rememberMe").rememberMeCookieName("REMEMBER_ME");
+				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName("REMEMBER_ME");
 
 		configureAnonymous(http);
 	}
