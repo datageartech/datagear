@@ -28,25 +28,35 @@
 	
 	//折线图
 	
-	chartSupport.lineRender = function(chart, nameSign, valueSign, options)
+	chartSupport.lineRender = function(chart, options)
 	{
-		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		options = $.extend(true,
+		{
+			dg:
+			{
+				//name 必选，名称
+				//value 必选，当标记category时单选，否则可多选，数值
+				//category 可选，类别，相同类别绘制为同一系列
+				dataSignNames: { name: "name", value: "value", category: "category" },
+				//是否堆叠
+				stack: false,
+				//是否平滑
+				smooth: false,
+				//是否面积
+				area: false,
+				//阶梯：true, false, "start", "middle", "end"
+				step: false
+			}
+		},
+		options);
 		
+		var dataSignNames = options.dg.dataSignNames;
 		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
-		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
+		var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
-			//扩展配置项：是否堆叠
-			dgStack: false,
-			//扩展配置项：是否平滑
-			dgSmooth: false,
-			//扩展配置项：是否面积
-			dgArea: false,
-			//扩展配置项，阶梯：true, false, "start", "middle", "end"
-			dgStep: false,
-			
 			title:
 			{
 		        text: chart.name
@@ -91,8 +101,9 @@
 	
 	chartSupport.lineUpdate = function(chart, results)
 	{
-		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
+		var dg = renderOptions.dg;
+		var dataSignNames = dg.dataSignNames;
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -103,34 +114,73 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var dataSetAlias = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
-			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
 			
-			for(var j=0; j<vps.length; j++)
+			if(cp)
 			{
-				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
+				var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
+				
+				var categoryNames = [];
+				var categoryDatasMap = {};
+				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var data = chart.resultValueObjects(result, [ np, vps[j] ]);
+				var propertyMap = { "value": [np, vp] };
+				var categoryPropertyName = chartFactory.builtinPropName("Category");
+				propertyMap[categoryPropertyName] = cp;
 				
+				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
+				chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data, categoryPropertyName, "");
 				
-				var mySeries = {id: series.length, type: "line", name: legendName, data: data};
+				for(var j=0; j<categoryNames.length; j++)
+				{
+					var categoryName = categoryNames[j];
+					var legendName = (chartDataSets.length > 1 ? dataSetAlias +"-" + categoryName : categoryName);
+					var mySeries = {id: series.length, type: "line", name: legendName, data: categoryDatasMap[categoryName]};
+					
+					//折线图按数据集分组没有展示效果，所以都使用同一个堆叠
+					if(dg.stack)
+						mySeries.stack = "stack";
+					if(dg.smooth)
+						mySeries.smooth = true;
+					if(dg.area)
+						mySeries.areaStyle = {};
+					if(dg.step != false)
+						mySeries.step = dg.step;
+					
+					legendData.push(legendName);
+					series.push(mySeries);
+				}
+			}
+			else
+			{
+				var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
 				
-				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
-				if(renderOptions.dgStack)
-					mySeries.stack = "stack";
-				if(renderOptions.dgSmooth)
-					mySeries.smooth = true;
-				if(renderOptions.dgArea)
-					mySeries.areaStyle = {};
-				if(renderOptions.dgStep != false)
-					mySeries.step = renderOptions.dgStep;
-				
-				legendData.push(legendName);
-				series.push(mySeries);
+				for(var j=0; j<vps.length; j++)
+				{
+					var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetAlias, vps, j);
+					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+					var data = chart.resultValueObjects(result, [ np, vps[j] ]);
+					chart.originalDataIndexes(data, chartDataSet);
+					var mySeries = {id: series.length, type: "line", name: legendName, data: data};
+					
+					//折线图按数据集分组没有展示效果，所以都使用同一个堆叠
+					if(dg.stack)
+						mySeries.stack = "stack";
+					if(dg.smooth)
+						mySeries.smooth = true;
+					if(dg.area)
+						mySeries.areaStyle = {};
+					if(dg.step != false)
+						mySeries.step = dg.step;
+					
+					legendData.push(legendName);
+					series.push(mySeries);
+				}
 			}
 		}
 		
@@ -168,10 +218,11 @@
 	
 	chartSupport.lineSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
-		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
+		var dataSignNames = renderOptions.dg.dataSignNames;
 		
 		var echartsData = echartsEventParams.data;
-		var data = chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value);
+		var data = chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
