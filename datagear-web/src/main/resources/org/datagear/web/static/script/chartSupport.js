@@ -129,12 +129,12 @@
 				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var propertyMap = { "value": [np, vp] };
-				var categoryPropertyName = chartFactory.builtinPropName("Category");
-				propertyMap[categoryPropertyName] = cp;
+				var categoryPropName = chartSupport.builtinCategoryPropName();
+				propertyMap[categoryPropName] = cp;
 				
 				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
-				chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data, categoryPropertyName, "");
+				chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data, categoryPropName, "");
 				
 				for(var j=0; j<categoryNames.length; j++)
 				{
@@ -220,9 +220,12 @@
 	{
 		var renderOptions= chart.renderOptions();
 		var dataSignNames = renderOptions.dg.dataSignNames;
+		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
 		var data = chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
+		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
+											echartsData[categoryPropName] : undefined);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -230,23 +233,33 @@
 	
 	//柱状图
 	
-	chartSupport.barRender = function(chart, nameSign, valueSign, options)
+	chartSupport.barRender = function(chart, options)
 	{
-		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		options = $.extend(true,
+		{
+			dg:
+			{
+				//name 必选，名称
+				//value 必选，当标记category时单选，否则可多选，数值
+				//category 可选，类别，相同类别绘制为同一系列
+				dataSignNames: { name: "name", value: "value", category: "category" },
+				//是否堆叠
+				stack: false,
+				//是否按数据集分组堆叠
+				stackGroup: true,
+				//是否横向
+				horizontal: false
+			}
+		},
+		options);
 		
+		var dataSignNames = options.dg.dataSignNames;
 		var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
-		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
+		var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
-			//扩展配置项：是否堆叠
-			dgStack: false,
-			//扩展配置项：是否横向
-			dgHorizontal: false,
-			//是否按数据集分组堆叠
-			dgStackGroup: true,
-			
 			title:
 			{
 		        text: chart.name
@@ -290,7 +303,7 @@
 		options,
 		function(options)
 		{
-			if(options.dgHorizontal)
+			if(options.dg.horizontal)
 			{
 				var xAxisTmp = options.xAxis;
 				options.xAxis = options.yAxis;
@@ -307,8 +320,9 @@
 	
 	chartSupport.barUpdate = function(chart, results)
 	{
-		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
+		var dg = renderOptions.dg;
+		var dataSignNames = dg.dataSignNames;
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -319,46 +333,83 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var dataSetAlias = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
-			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
 			
-			for(var j=0; j<vps.length; j++)
+			if(cp)
 			{
-				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
+				var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
+				
+				var categoryNames = [];
+				var categoryDatasMap = {};
 				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var vpsMy = (renderOptions.dgHorizontal ? [vps[j], np] : [np, vps[j]]);
-				var data = chart.resultValueObjects(result, vpsMy);
+				var propertyMap = { "value": (dg.horizontal ? [vp, np] : [np, vp]) };
+				var categoryPropName = chartSupport.builtinCategoryPropName();
+				propertyMap[categoryPropName] = cp;
 				
+				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
+				chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data, categoryPropName, "");
 				
-				var mySeries = {id: series.length, type: "bar", name: legendName, data: data};
-				
-				if(renderOptions.dgStack)
+				for(var j=0; j<categoryNames.length; j++)
 				{
-					mySeries.stack = (renderOptions.dgStackGroup ? dataSetName : "stack");
-					mySeries.label = { show: true };
+					var categoryName = categoryNames[j];
+					var legendName = (chartDataSets.length > 1 ? dataSetAlias +"-" + categoryName : categoryName);
+					var mySeries = {id: series.length, type: "bar", name: legendName, data: categoryDatasMap[categoryName]};
+					
+					if(dg.stack)
+					{
+						mySeries.stack = (dg.stackGroup ? dataSetAlias : "stack");
+						mySeries.label = { show: true };
+					}
+					
+					legendData.push(legendName);
+					series.push(mySeries);
 				}
+			}
+			else
+			{
+				var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
 				
-				legendData.push(legendName);
-				series.push(mySeries);
+				for(var j=0; j<vps.length; j++)
+				{
+					var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetAlias, vps, j);
+					
+					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+					var vpsMy = (dg.horizontal ? [vps[j], np] : [np, vps[j]]);
+					var data = chart.resultValueObjects(result, vpsMy);
+					
+					chart.originalDataIndexes(data, chartDataSet);
+					
+					var mySeries = {id: series.length, type: "bar", name: legendName, data: data};
+					
+					if(dg.stack)
+					{
+						mySeries.stack = (dg.stackGroup ? dataSetAlias : "stack");
+						mySeries.label = { show: true };
+					}
+					
+					legendData.push(legendName);
+					series.push(mySeries);
+				}
 			}
 		}
 		
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-		if(renderOptions.dgHorizontal)
+		if(dg.horizontal)
 			options.yAxis = { id: 0 };
 		else
 			options.xAxis = { id: 0 };
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
-			if(renderOptions.dgHorizontal)
+			if(dg.horizontal)
 				chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar", 1, 0);
 			else
 				chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar");
@@ -390,15 +441,18 @@
 	
 	chartSupport.barSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
-		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
-		var dgHorizontal = renderOptions.dgHorizontal;
+		var dataSignNames = renderOptions.dg.dataSignNames;
+		var horizontal = renderOptions.dg.horizontal;
+		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
-		var data = (dgHorizontal ?
-				chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value, 1, 0) :
-				chartSupport.extractNameValueStyleObj(echartsData, signNameMap.name, signNameMap.value)
+		var data = (horizontal ?
+				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value, 1, 0) :
+				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value)
 			);
+		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
+											echartsData[categoryPropName] : undefined);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -406,19 +460,28 @@
 	
 	//极坐标柱状图
 	
-	chartSupport.barPolarRender = function(chart, nameSign, valueSign, options)
+	chartSupport.barPolarRender = function(chart, options)
 	{
-		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		options = $.extend(true,
+		{
+			dg:
+			{
+				//name 必选，名称
+				//value 必选，当标记category时单选，否则可多选，数值
+				//category 可选，类别，相同类别绘制为同一系列
+				dataSignNames: { name: "name", value: "value", category: "category" },
+				//是否堆叠
+				stack: false,
+				//是否按数据集分组堆叠
+				stackGroup: true,
+				//坐标类型：radius（径向）、angle（角度）
+				axisType: "radius",
+			}
+		},
+		options);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
-			//扩展配置项：是否堆叠
-			dgStack: false,
-			//扩展配置项：坐标类型：radius（径向）、angle（角度）
-			dgAxisType: "radius",
-			//是否按数据集分组堆叠
-			dgStackGroup: true,
-			
 			title:
 			{
 				text: chart.name
@@ -456,9 +519,10 @@
 		function(options)
 		{
 			var chartDataSet = chartSupport.chartDataSetMainNonNull(chart);
-			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+			var dataSignNames = options.dg.dataSignNames;
+			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
 			
-			if(options.dgAxisType == "angle")
+			if(options.dg.axisType == "angle")
 			{
 				options.angleAxis =
 				{
@@ -498,9 +562,10 @@
 	
 	chartSupport.barPolarUpdate = function(chart, results)
 	{
-		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
-		var isAngleAxis = (renderOptions.dgAxisType == "angle");
+		var dg = renderOptions.dg;
+		var dataSignNames = dg.dataSignNames;
+		var isAngleAxis = (dg.axisType == "angle");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -512,38 +577,82 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var dataSetAlias = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
-			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
 			
-			for(var j=0; j<vps.length; j++)
+			if(cp)
 			{
-				var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetName, vps, j);
-				var data = null;
+				var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
 				
+				var categoryNames = [];
+				var categoryDatasMap = {};
+				
+				var propertyMap = {};
 				//角度图时使用{value: [name,value]}格式的数据会无法显示
 				if(isAngleAxis)
-					data = chart.resultNameValueObjects(result, np, vps[j]);
+					propertyMap = { name: np, value: vp};
 				//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				else
-					data = chart.resultValueObjects(result, [np, vps[j]]);
+					propertyMap = { "value": [np, vp] };
+				var categoryPropName = chartSupport.builtinCategoryPropName();
+				propertyMap[categoryPropName] = cp;
 				
+				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
+				chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data, categoryPropName, "");
 				
-				var mySeries = {id: series.length, type: "bar", name: legendName, data: data, coordinateSystem: "polar"};
-				
-				if(renderOptions.dgStack)
+				for(var j=0; j<categoryNames.length; j++)
 				{
-					mySeries.stack = (renderOptions.dgStackGroup ? dataSetName : "stack");
-					mySeries.label = { show: true };
+					var categoryName = categoryNames[j];
+					var legendName = (chartDataSets.length > 1 ? dataSetAlias +"-" + categoryName : categoryName);
+					var mySeries = {id: series.length, type: "bar", name: legendName, data: categoryDatasMap[categoryName], coordinateSystem: "polar"};
+					
+					if(dg.stack)
+					{
+						mySeries.stack = (dg.stackGroup ? dataSetAlias : "stack");
+						mySeries.label = { show: true };
+					}
+					
+					legendData.push(legendName);
+					series.push(mySeries);
+					
+					chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 				}
+			}
+			else
+			{
+				var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
 				
-				legendData.push(legendName);
-				series.push(mySeries);
-				
-				chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
+				for(var j=0; j<vps.length; j++)
+				{
+					var legendName = chartSupport.legendNameForMultipleSeries(chart, chartDataSets, chartDataSet, i, dataSetAlias, vps, j);
+					var data = null;
+					
+					//角度图时使用{value: [name,value]}格式的数据会无法显示
+					if(isAngleAxis)
+						data = chart.resultNameValueObjects(result, np, vps[j]);
+					//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+					else
+						data = chart.resultValueObjects(result, [np, vps[j]]);
+					
+					chart.originalDataIndexes(data, chartDataSet);
+					
+					var mySeries = {id: series.length, type: "bar", name: legendName, data: data, coordinateSystem: "polar"};
+					
+					if(dg.stack)
+					{
+						mySeries.stack = (dg.stackGroup ? dataSetAlias : "stack");
+						mySeries.label = { show: true };
+					}
+					
+					legendData.push(legendName);
+					series.push(mySeries);
+					
+					chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
+				}
 			}
 		}
 		
@@ -585,22 +694,26 @@
 	
 	chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
-		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
+		var dataSignNames = renderOptions.dg.dataSignNames;
+		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
 		
-		if(renderOptions.dgAxisType == "angle")
+		if(renderOptions.dg.axisType == "angle")
 		{
-			data[signNameMap.name] = echartsData.name;
-			data[signNameMap.value] = echartsData.value;
+			data[dataSignNames.name] = echartsData.name;
+			data[dataSignNames.value] = echartsData.value;
 		}
 		else
 		{
-			data[signNameMap.name] = echartsData.value[0];
-			data[signNameMap.value] = echartsData.value[1];
+			data[dataSignNames.name] = echartsData.value[0];
+			data[dataSignNames.value] = echartsData.value[1];
 		}
+		
+		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
+											echartsData[categoryPropName] : undefined);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -8102,6 +8215,11 @@
 		// > @deprecated 兼容3.0.1版本的ChartEvent.chartType，将在未来版本移除
 		
 		return event;
+	};
+	
+	chartSupport.builtinCategoryPropName = function()
+	{
+		return chartFactory.builtinPropName("Category");
 	};
 	
 	//---------------------------------------------------------
