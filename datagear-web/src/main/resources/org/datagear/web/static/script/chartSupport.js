@@ -36,7 +36,7 @@
 			{
 				//name 必选，名称
 				//value 必选，当标记category时单选，否则可多选，数值
-				//category 可选，类别，相同类别绘制为同一系列
+				//category 可选，类别，不同类别绘制为不同系列
 				dataSignNames: { name: "name", value: "value", category: "category" },
 				//是否堆叠
 				stack: false,
@@ -129,17 +129,15 @@
 				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var propertyMap = { "value": [np, vp] };
-				var categoryPropName = chartSupport.builtinCategoryPropName();
-				propertyMap[categoryPropName] = cp;
-				
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
-				chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data, categoryPropName, "");
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				
 				for(var j=0; j<categoryNames.length; j++)
 				{
 					var categoryName = categoryNames[j];
-					var legendName = (chartDataSets.length > 1 ? dataSetAlias +"-" + categoryName : categoryName);
+					var legendName = chartSupport.evalLegendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
 					var mySeries = {id: series.length, type: "line", name: legendName, data: categoryDatasMap[categoryName]};
 					
 					//折线图按数据集分组没有展示效果，所以都使用同一个堆叠
@@ -241,7 +239,7 @@
 			{
 				//name 必选，名称
 				//value 必选，当标记category时单选，否则可多选，数值
-				//category 可选，类别，相同类别绘制为同一系列
+				//category 可选，类别，不同类别绘制为不同系列
 				dataSignNames: { name: "name", value: "value", category: "category" },
 				//是否堆叠
 				stack: false,
@@ -348,17 +346,15 @@
 				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var propertyMap = { "value": (dg.horizontal ? [vp, np] : [np, vp]) };
-				var categoryPropName = chartSupport.builtinCategoryPropName();
-				propertyMap[categoryPropName] = cp;
-				
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
-				chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data, categoryPropName, "");
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				
 				for(var j=0; j<categoryNames.length; j++)
 				{
 					var categoryName = categoryNames[j];
-					var legendName = (chartDataSets.length > 1 ? dataSetAlias +"-" + categoryName : categoryName);
+					var legendName = chartSupport.evalLegendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
 					var mySeries = {id: series.length, type: "bar", name: legendName, data: categoryDatasMap[categoryName]};
 					
 					if(dg.stack)
@@ -468,7 +464,7 @@
 			{
 				//name 必选，名称
 				//value 必选，当标记category时单选，否则可多选，数值
-				//category 可选，类别，相同类别绘制为同一系列
+				//category 可选，类别，不同类别绘制为不同系列
 				dataSignNames: { name: "name", value: "value", category: "category" },
 				//是否堆叠
 				stack: false,
@@ -590,24 +586,18 @@
 				var categoryNames = [];
 				var categoryDatasMap = {};
 				
-				var propertyMap = {};
 				//角度图时使用{value: [name,value]}格式的数据会无法显示
-				if(isAngleAxis)
-					propertyMap = { name: np, value: vp};
 				//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				else
-					propertyMap = { "value": [np, vp] };
-				var categoryPropName = chartSupport.builtinCategoryPropName();
-				propertyMap[categoryPropName] = cp;
-				
+				var propertyMap = (isAngleAxis ? {name: np, value: vp} : {"value": [np, vp]});
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
-				chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data, categoryPropName, "");
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				
 				for(var j=0; j<categoryNames.length; j++)
 				{
 					var categoryName = categoryNames[j];
-					var legendName = (chartDataSets.length > 1 ? dataSetAlias +"-" + categoryName : categoryName);
+					var legendName = chartSupport.evalLegendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
 					var mySeries = {id: series.length, type: "bar", name: legendName, data: categoryDatasMap[categoryName], coordinateSystem: "polar"};
 					
 					if(dg.stack)
@@ -721,22 +711,31 @@
 	
 	//饼图
 	
-	chartSupport.pieRender = function(chart, nameSign, valueSign, options)
+	chartSupport.pieRender = function(chart, options)
 	{
-		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		options = $.extend(true,
+		{
+			dg:
+			{
+				//name 必选，名称
+				//value 必选，数值
+				//category 可选，类别，不同类别绘制为不同系列
+				dataSignNames: { name: "name", value: "value", category: "category" },
+				//是否按数据集分割系列，而非仅一个系列
+				splitDataSet: false,
+				//当splitDataSet=true时，各系列布局：
+				//nest：嵌套；grid：网格
+				seriesLayout: "nest",
+				//当splitDataSet=false且数据集无category标记时，是否环形图
+				ring: false,
+				//当splitDataSet=false且数据集无category标记时，是否玫瑰图
+				rose: false
+			}
+		},
+		options);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
-			//扩展配置项：是否按数据集分割系列，而非仅一个系列
-			dgSplitDataSet: false,
-			//扩展配置项：当dgSplitDataSet=true时，各系列布局：
-			//nest：嵌套；grid：网格
-			dgSeriesLayout: "nest",
-			//扩展配置项：当dgSplitDataSet=false时，是否环形图
-			dgRing: false,
-			//扩展配置项：当dgSplitDataSet=false时，是否玫瑰图
-			dgRose: false,
-			
 			title:
 			{
 		        text: chart.name
@@ -770,9 +769,9 @@
 	
 	chartSupport.pieUpdate = function(chart, results)
 	{
-		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var renderOptions= chart.renderOptions();
-		var dgSplitDataSet = renderOptions.dgSplitDataSet;
+		var dg = renderOptions.dg;
+		var dataSignNames = dg.dataSignNames;
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -783,30 +782,49 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			
-			var dataSetName = chart.dataSetAlias(chartDataSet);
+			var dataSetAlias = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
-			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
+			var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
 			var npv = chart.resultColumnArrays(result, np);
-			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
-			var data = chart.resultNameValueObjects(result, np, vp);
 			
+			var propertyMap = {"name": np, "value": vp};
+			if(cp)
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
+			
+			var data = chart.resultMapObjects(result, propertyMap);
 			chart.originalDataIndexes(data, chartDataSet);
 			
-			if(dgSplitDataSet)
+			if(cp)
 			{
-				series.push({ id: series.length, type: "pie", name: dataSetName, data: data});
+				var categoryNames = [];
+				var categoryDatasMap = {};
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
+				
+				for(var j=0; j<categoryNames.length; j++)
+				{
+					var categoryName = categoryNames[j];
+					var legendName = chartSupport.evalLegendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
+					var mySeries = {id: series.length, type: "pie", name: legendName, data: categoryDatasMap[categoryName]};
+					series.push(mySeries);
+				}
+			}
+			else if(dg.splitDataSet)
+			{
+				series.push({ id: series.length, type: "pie", name: dataSetAlias, data: data});
 			}
 			else
 			{
 				if(series.length == 0)
 				{
-					series.push({ id: series.length, type: "pie", name: dataSetName, data: [], radius: "60%" });
+					series.push({ id: series.length, type: "pie", name: dataSetAlias, data: [], radius: "60%" });
 					
-					if(renderOptions.dgRing)
+					if(dg.ring)
 						series[0].radius = ["35%", "55%"];
 					
-					if(renderOptions.dgRose)
+					if(dg.rose)
 						series[0].roseType = "radius";
 				}
 				
@@ -847,13 +865,14 @@
 	
 	chartSupport.pieSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
-		var signNameMap = chartSupport.chartSignNameMap(chart);
+		var renderOptions= chart.renderOptions();
+		var dataSignNames = renderOptions.dg.dataSignNames;
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
 		
-		data[signNameMap.name] = echartsData.name;
-		data[signNameMap.value] = echartsData.value;
+		data[dataSignNames.name] = echartsData.name;
+		data[dataSignNames.value] = echartsData.value;
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -861,7 +880,7 @@
 	
 	chartSupport.pieEvalSeriesLayout = function(chart, renderOptions, updateOptions)
 	{
-		if(!renderOptions.dgSplitDataSet)
+		if(!renderOptions.dg.splitDataSet)
 			return;
 		
 		var series = updateOptions.series;
@@ -870,7 +889,7 @@
 		if(!len)
 			return;
 		
-		if(renderOptions.dgSeriesLayout == "nest")
+		if(renderOptions.dg.seriesLayout == "nest")
 		{
 			var radiusMax = 80;
 			var radiusInner = 0;
@@ -892,9 +911,9 @@
 				radiusOuter = radiusInner + radiusStep;
 			}
 		}
-		else if(renderOptions.dgSeriesLayout == "grid")
+		else if(renderOptions.dg.seriesLayout == "grid")
 		{
-			
+			//TODO
 		}
 	};
 	
@@ -2773,10 +2792,7 @@
 			
 			var propertyMap = { "name": np, "coords": vps };
 			if(cp)
-			{
-				var categoryPropertyName = chartFactory.builtinPropName("Category");
-				propertyMap[categoryPropertyName] = cp;
-			}
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
 			var data = chart.resultMapObjects(result, propertyMap);
 			
@@ -2788,8 +2804,10 @@
 			
 			chart.originalDataIndexes(data, chartDataSet);
 			
-			chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data,
-							(propertyMap[categoryPropertyName] ? categoryPropertyName : null), dataSetName);
+			if(cp)
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
+			else
+				chartSupport.appendCategoryNameAndData(categoryNames, categoryDatasMap, dataSetName, data);
 		}
 		
 		var series = [];
@@ -2858,7 +2876,7 @@
 			var coords = (echartsData.coords || []);
 			var coords0 = (coords[0] || []);
 			var coords1 = (coords[1] || []);
-			var categoryPropertyName = chartFactory.builtinPropName("Category");
+			var categoryPropertyName = chartSupport.builtinCategoryPropName();
 			
 			data={};
 			data[signNameMap.name] = echartsData.name;
@@ -4889,20 +4907,25 @@
 			var dataSetName = chart.dataSetAlias(chartDataSet);
 			var result = chart.resultOf(results, chartDataSet);
 			
-			var categoryPropertyName = chartFactory.builtinPropName("Category");
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.category);
+			
 			var propertyMap =
 			{
 				"name": chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name),
 				"value": valuePropertyNamess[i]
 			};
-			propertyMap[categoryPropertyName] = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.category);
+			
+			if(cp)
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
 			var data = chart.resultMapObjects(result, propertyMap);
 			
 			chart.originalDataIndexes(data, chartDataSet);
 			
-			chartSupport.splitDataToCategory(categoryNames, categoryDatasMap, data,
-							(propertyMap[categoryPropertyName] ? categoryPropertyName : null), dataSetName);
+			if(cp)
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
+			else
+				chartSupport.appendCategoryNameAndData(categoryNames, categoryDatasMap, dataSetName, data);
 			
 			//设置每个坐标系的min、max、data
 			for(var j=0; j<data.length; j++)
@@ -4995,7 +5018,7 @@
 		
 		if(echartsData)
 		{
-			var categoryPropertyName = chartFactory.builtinPropName("Category");
+			var categoryPropertyName = chartSupport.builtinCategoryPropName();;
 			
 			data = {};
 			data[signNameMap.name] = echartsData.name;
@@ -7880,29 +7903,26 @@
 		}
 	};
 	
-	chartSupport.splitDataToCategory = function(categoryNames, categoryDatasMap, data,
-				categoryPropertyName, defaultCategoryName)
+	chartSupport.appendCategoryNameAndData =function(categoryNames, categoryDatasMap, categoryName, categoryData)
 	{
-		if(categoryPropertyName)
+		chartSupport.appendDistinct(categoryNames, categoryName);
+		
+		var categoryDatas = (categoryDatasMap[categoryName] || (categoryDatasMap[categoryName] = []));
+		chartSupport.appendElement(categoryDatas, categoryData);
+	};
+	
+	chartSupport.splitDataByCategory =function(data, categoryNames, categoryDatasMap,
+													defaultCategoryName, categoryPropertyName)
+	{
+		defaultCategoryName = (defaultCategoryName == null ? "" : defaultCategoryName);
+		categoryPropertyName = (categoryPropertyName == null ? chartSupport.builtinCategoryPropName() : categoryPropertyName);
+		
+		for(var i=0; i<data.length; i++)
 		{
-			for(var i=0; i<data.length; i++)
-			{
-				var di = data[i];
-				var categoryName = (di == null ? "" : (di[categoryPropertyName] || ""));
-				
-				chartSupport.appendDistinct(categoryNames, categoryName);
-				
-				var categoryDatas = (categoryDatasMap[categoryName] || (categoryDatasMap[categoryName] = []));
-				chartSupport.appendElement(categoryDatas, di);
-			}
-		}
-		else
-		{
-			var categoryName = defaultCategoryName;
-			chartSupport.appendDistinct(categoryNames, categoryName);
+			var di = data[i];
+			var categoryName = (di == null ? defaultCategoryName : (di[categoryPropertyName] || defaultCategoryName));
 			
-			var categoryDatas = (categoryDatasMap[categoryName] || (categoryDatasMap[categoryName] = []));
-			chartSupport.appendElement(categoryDatas, data);
+			chartSupport.appendCategoryNameAndData(categoryNames, categoryDatasMap, categoryName, di);
 		}
 	};
 	
@@ -8220,6 +8240,19 @@
 	chartSupport.builtinCategoryPropName = function()
 	{
 		return chartFactory.builtinPropName("Category");
+	};
+	
+	chartSupport.inflatePropertyMapWithCategory = function(propertyMap, categoryProperty, categoryPropName)
+	{
+		var categoryPropName = (categoryPropName == null ? chartSupport.builtinCategoryPropName() : categoryPropName);
+		propertyMap[categoryPropName] = categoryProperty;
+		
+		return propertyMap;
+	};
+	
+	chartSupport.evalLegendNameForDataCategory = function(chartDataSets, dataSetAlias, categoryName)
+	{
+		return (chartDataSets.length > 1 ? dataSetAlias +"-" + categoryName : categoryName);
 	};
 	
 	//---------------------------------------------------------
