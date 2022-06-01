@@ -1174,8 +1174,9 @@
 			dg:
 			{
 				//name 必选，名称
-				//value 必选，可多选，数值
-				dataSignNames: { name: "name", value: "value" },
+				//value 必选，当标记category时单选，否则可多选，数值
+				//category 可选，类别，不同类别绘制为不同系列
+				dataSignNames: { name: "name", value: "value", category: "category" },
 				//最大数据标记像素数
 				symbolSizeMax: undefined,
 				//最小数据标记像素数
@@ -1249,7 +1250,7 @@
 		var legendData = [];
 		var series = [];
 		
-		var min = undefined, max = undefined;
+		var dataRange = { min: null, max: null };
 		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, dg.scatterType);
 		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, dg.scatterType);
 		
@@ -1260,31 +1261,56 @@
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
 			
-			for(var j=0; j<vps.length; j++)
+			if(cp)
 			{
-				var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
+				var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
+				
+				var categoryNames = [];
+				var categoryDatasMap = {};
+				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var data = chart.resultValueObjects(result, [np, vps[j]]);
+				var propertyMap = { "value": [np, vp] };
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
+				var data = chart.resultMapObjects(result, propertyMap);
 				
 				chart.originalDataIndexes(data, chartDataSet);
+				chartSupport.evalArrayDataRange(dataRange, data, "value", 1);
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				
-				for(var k=0; k<data.length; k++)
+				for(var j=0; j<categoryNames.length; j++)
 				{
-					var valMy = data[k].value[1];
-					min = (min == null ? valMy : Math.min(min, valMy));
-					max = (max == null ? valMy : Math.max(max, valMy));
+					var categoryName = categoryNames[j];
+					var legendName = chartSupport.legendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
+					var mySeries = {id: series.length, type: dg.scatterType, name: legendName, data: categoryDatasMap[categoryName]};
+					
+					legendData.push(legendName);
+					series.push(mySeries);
 				}
+			}
+			else
+			{
+				var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
 				
-				var mySeries = { id: series.length, type: dg.scatterType, name: legendName, data: data };
-				
-				legendData.push(legendName);
-				series.push(mySeries);
+				for(var j=0; j<vps.length; j++)
+				{
+					var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
+					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+					var data = chart.resultValueObjects(result, [np, vps[j]]);
+					
+					chart.originalDataIndexes(data, chartDataSet);
+					chartSupport.evalArrayDataRange(dataRange, data, "value", 1);
+					
+					var mySeries = { id: series.length, type: dg.scatterType, name: legendName, data: data };
+					
+					legendData.push(legendName);
+					series.push(mySeries);
+				}
 			}
 		}
 		
-		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 1);
+		chartSupport.evalSeriesDataValueSymbolSize(series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 1);
 		
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
@@ -1323,9 +1349,12 @@
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
+		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
 		var data = chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
+		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
+											echartsData[categoryPropName] : undefined);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -1402,7 +1431,8 @@
 				//name 必选，名称
 				//value 必选，数值
 				//weight 可选，散点尺寸
-				dataSignNames: { name: "name", value: "value", weight: "weight" },
+				//category 可选，类别，不同类别绘制为不同系列
+				dataSignNames: { name: "name", value: "value", weight: "weight", category: "category" },
 				//最大数据标记像素数
 				symbolSizeMax: undefined,
 				//最小数据标记像素数
@@ -1475,7 +1505,7 @@
 		var legendData = [];
 		var series = [];
 		
-		var min = undefined, max = undefined;
+		var dataRange = { min: null, max: null };
 		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, dg.scatterType);
 		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, dg.scatterType);
 		
@@ -1488,26 +1518,42 @@
 			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
 			var wp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.weight);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
+			var propertyMap = { "value": (wp ? [np, vp, wp] : [np, vp]) };
 			
-			var data = (wp ? chart.resultValueObjects(result, [np, vp, wp]) : chart.resultValueObjects(result, [np, vp]));
+			if(cp)
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
+			var data = chart.resultMapObjects(result, propertyMap);
+			chart.originalDataIndexes(data, chartDataSet);
 			if(wp)
+				chartSupport.evalArrayDataRange(dataRange, data, "value", 2);
+			
+			if(cp)
 			{
-				for(var j=0; j<data.length; j++)
+				var categoryNames = [];
+				var categoryDatasMap = {};
+				
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
+				
+				for(var j=0; j<categoryNames.length; j++)
 				{
-					var wv = data[j].value[2];
-					min = (min == null ? wv : Math.min(min, wv));
-					max = (max == null ? wv : Math.max(max, wv));
+					var categoryName = categoryNames[j];
+					var legendName = chartSupport.legendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
+					var mySeries = {id: series.length, type: dg.scatterType, name: legendName, data: categoryDatasMap[categoryName]};
+					
+					legendData.push(legendName);
+					series.push(mySeries);
 				}
 			}
-			
-			chart.originalDataIndexes(data, chartDataSet);
-			
-			series.push({ id: series.length, type: dg.scatterType, name: dataSetAlias, data: data });
-			legendData.push(dataSetAlias);
+			else
+			{
+				legendData.push(dataSetAlias);
+				series.push({ id: series.length, type: dg.scatterType, name: dataSetAlias, data: data });
+			}
 		}
 		
-		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
+		chartSupport.evalSeriesDataValueSymbolSize(series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
@@ -1543,6 +1589,7 @@
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
+		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
@@ -1551,6 +1598,8 @@
 		data[dataSignNames.value] = echartsData.value[1];
 		if(echartsData.value.length > 2)
 			data[dataSignNames.weight] = echartsData.value[2];
+		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
+											echartsData[categoryPropName] : undefined);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -8542,6 +8591,36 @@
 	chartSupport.legendNameForDataCategory = function(chartDataSets, dataSetAlias, categoryName)
 	{
 		return (chartDataSets.length > 1 ? dataSetAlias +"-" + categoryName : categoryName);
+	};
+	
+	//计算数组数据最小/最大值
+	//range 待填充的最小/最大值对象，格式为：{ min: 数值, max: 数值 }
+	//data 数组
+	//propertyName0 可选，当data[i]是对象或数组时，取值属性
+	//propertyName1 可选，当data[i][propertyName0]是对象或数组时，取值属性
+	chartSupport.evalArrayDataRange = function(range, data, propertyName0, propertyName1)
+	{
+		if(data == null)
+			return range;
+		
+		for(var i=0; i<data.length; i++)
+		{
+			var val = (data[i] == null ? null : data[i]);
+			
+			if(propertyName0 != null)
+				val = (val == null ? null : val[propertyName0]);
+			
+			if(propertyName1 != null)
+				val = (val == null ? null : val[propertyName1]);
+			
+			if(val != null)
+			{
+				range.min = (range.min == null ? val : Math.min(range.min, val));
+				range.max = (range.max == null ? val : Math.max(range.max, val));
+			}
+		}
+		
+		return range;
 	};
 	
 	//---------------------------------------------------------
