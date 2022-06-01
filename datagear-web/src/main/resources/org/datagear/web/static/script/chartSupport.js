@@ -1180,6 +1180,8 @@
 				symbolSizeMax: undefined,
 				//最小数据标记像素数
 				symbolSizeMin: undefined,
+				//散点图类型："scatter"、"effectScatter"
+				scatterType: scatterType
 			}
 		},
 		options);
@@ -1233,8 +1235,6 @@
 		},
 		options);
 		
-		chartFactory.extValueBuiltin(chart, "scatterType", scatterType);
-		
 		chart.echartsInit(options);
 	};
 	
@@ -1243,7 +1243,6 @@
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
-		var scatterType = chartFactory.extValueBuiltin(chart, "scatterType");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1251,8 +1250,8 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, scatterType);
-		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, scatterType);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, dg.scatterType);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, dg.scatterType);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1278,7 +1277,7 @@
 					max = (max == null ? valMy : Math.max(max, valMy));
 				}
 				
-				var mySeries = { id: series.length, type: scatterType, name: legendName, data: data };
+				var mySeries = { id: series.length, type: dg.scatterType, name: legendName, data: data };
 				
 				legendData.push(legendName);
 				series.push(mySeries);
@@ -1408,6 +1407,8 @@
 				symbolSizeMax: undefined,
 				//最小数据标记像素数
 				symbolSizeMin: undefined,
+				//散点图类型："scatter"、"effectScatter"
+				scatterType: scatterType
 			}
 		},
 		options);
@@ -1460,8 +1461,6 @@
 		},
 		options);
 		
-		chartFactory.extValueBuiltin(chart, "scatterType", scatterType);
-		
 		chart.echartsInit(options);
 	};
 	
@@ -1470,7 +1469,6 @@
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
-		var scatterType = chartFactory.extValueBuiltin(chart, "scatterType");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -1478,8 +1476,8 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, scatterType);
-		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, scatterType);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, dg.scatterType);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, dg.scatterType);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1505,7 +1503,7 @@
 			
 			chart.originalDataIndexes(data, chartDataSet);
 			
-			series.push({ id: series.length, type: scatterType, name: dataSetAlias, data: data });
+			series.push({ id: series.length, type: dg.scatterType, name: dataSetAlias, data: data });
 			legendData.push(dataSetAlias);
 		}
 		
@@ -2171,6 +2169,8 @@
 				symbolSizeMax: undefined,
 				//最小数据标记像素数
 				symbolSizeMin: undefined,
+				//散点图类型："scatter"、"effectScatter"
+				scatterType: scatterType
 			}
 		},
 		options);
@@ -2218,8 +2218,6 @@
 		},
 		options);
 		
-		chartFactory.extValueBuiltin(chart, "scatterType", scatterType);
-		
 		chartSupport.echartsMapChartInit(chart, options);
 	};
 	
@@ -2228,7 +2226,6 @@
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
-		var scatterType = chartFactory.extValueBuiltin(chart, "scatterType");
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
@@ -2237,8 +2234,8 @@
 		var map = undefined;
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, scatterType);
-		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, scatterType);
+		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, dg.scatterType);
+		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, dg.scatterType);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -2271,7 +2268,7 @@
 			}
 			
 			legendData.push(dataSetAlias);
-			series.push({ id: series.length, type: scatterType, name: dataSetAlias, data: data, coordinateSystem: "geo" });
+			series.push({ id: series.length, type: dg.scatterType, name: dataSetAlias, data: data, coordinateSystem: "geo" });
 		}
 		
 		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
