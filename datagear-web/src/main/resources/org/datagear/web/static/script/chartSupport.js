@@ -216,7 +216,8 @@
 	chartSupport.lineSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var renderOptions= chart.renderOptions();
-		var dataSignNames = renderOptions.dg.dataSignNames;
+		var dg = renderOptions.dg;
+		var dataSignNames = dg.dataSignNames;
 		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
@@ -436,12 +437,12 @@
 	chartSupport.barSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var renderOptions= chart.renderOptions();
-		var dataSignNames = renderOptions.dg.dataSignNames;
-		var horizontal = renderOptions.dg.horizontal;
+		var dg = renderOptions.dg;
+		var dataSignNames = dg.dataSignNames;
 		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
-		var data = (horizontal ?
+		var data = (dg.horizontal ?
 				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value, 1, 0) :
 				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value)
 			);
@@ -682,13 +683,14 @@
 	chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var renderOptions= chart.renderOptions();
-		var dataSignNames = renderOptions.dg.dataSignNames;
+		var dg = renderOptions.dg;
+		var dataSignNames = dg.dataSignNames;
 		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
 		
-		if(renderOptions.dg.axisType == "angle")
+		if(dg.axisType == "angle")
 		{
 			data[dataSignNames.name] = echartsData.name;
 			data[dataSignNames.value] = echartsData.value;
@@ -862,7 +864,8 @@
 	chartSupport.pieSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	{
 		var renderOptions= chart.renderOptions();
-		var dataSignNames = renderOptions.dg.dataSignNames;
+		var dg = renderOptions.dg;
+		var dataSignNames = dg.dataSignNames;
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
