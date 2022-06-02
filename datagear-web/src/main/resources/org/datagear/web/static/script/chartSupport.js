@@ -2212,8 +2212,13 @@
 				//longitude 经度
 				//latitude 维度
 				//value 可选，数值
+				//category 可选，类别，不同类别绘制为不同系列
 				//map 可选，地图名
-				dataSignNames: { name: "name", longitude: "longitude", latitude: "latitude", value: "value", map: "map" },
+				dataSignNames:
+				{
+					name: "name", longitude: "longitude", latitude: "latitude", value: "value",
+					category: "category", map: "map"
+				},
 				//最大数据标记像素数
 				symbolSizeMax: undefined,
 				//最小数据标记像素数
@@ -2282,7 +2287,7 @@
 		var series = [];
 		var map = undefined;
 		
-		var min = undefined, max = undefined;
+		var dataRange = { min: null, max: null };
 		var symbolSizeMax = chartSupport.evalSymbolSizeMaxForScatter(chart, renderOptions, dg.scatterType);
 		var symbolSizeMin = chartSupport.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, dg.scatterType);
 		
@@ -2296,31 +2301,48 @@
 			if(!map)
 				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, chartDataSet, result, dataSignNames.map);
 			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
 			var lop = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.longitude);
 			var lap = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.latitude);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
+			var propertyMap = { "name": np, "value": (vp ? [lop, lap, vp] : [lop, lap]) };
 			
-			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name),
-					(vp ? [lop, lap, vp] : [lop, lap]));
+			if(cp)
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
+			var data = chart.resultMapObjects(result, propertyMap);
 			chart.originalDataIndexes(data, chartDataSet);
 			
 			if(vp)
+				chartSupport.evalArrayDataRange(dataRange, data, "value", 2);
+			
+			if(cp)
 			{
-				for(var j=0; j<data.length; j++)
+				var categoryNames = [];
+				var categoryDatasMap = {};
+				
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
+				
+				for(var j=0; j<categoryNames.length; j++)
 				{
-					var dv = data[j].value;
+					var categoryName = categoryNames[j];
+					var legendName = chartSupport.legendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
+					var mySeries = {id: series.length, type: dg.scatterType, name: legendName,
+									data: categoryDatasMap[categoryName], coordinateSystem: "geo"};
 					
-					min = (min == null ? dv[2] : Math.min(min, dv[2]));
-					max = (max == null ? dv[2] : Math.max(max, dv[2]));
+					legendData.push(legendName);
+					series.push(mySeries);
 				}
 			}
-			
-			legendData.push(dataSetAlias);
-			series.push({ id: series.length, type: dg.scatterType, name: dataSetAlias, data: data, coordinateSystem: "geo" });
+			else
+			{
+				legendData.push(dataSetAlias);
+				series.push({ id: series.length, type: dg.scatterType, name: dataSetAlias, data: data, coordinateSystem: "geo" });
+			}
 		}
 		
-		chartSupport.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
+		chartSupport.evalSeriesDataValueSymbolSize(series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 2);
 		
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
@@ -2356,6 +2378,7 @@
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
+		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
 		
@@ -2366,6 +2389,8 @@
 		data[dataSignNames.latitude] = echartsData.value[1];
 		if(echartsData.value.length > 2)
 			data[dataSignNames.value] = echartsData.value[2];
+		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
+											echartsData[categoryPropName] : undefined);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
