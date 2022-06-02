@@ -5533,8 +5533,9 @@
 			dg:
 			{
 				//name 河流X轴坐标，通常是数值、日期
-				//value 河流数值，可多选，每一列作为一条河流
-				dataSignNames: { name: "name", value: "value" }
+				//value 河流数值，当标记category时单选，否则可多选，每一列作为一条河流
+				//category 可选，类别，不同类别绘制为不同系列
+				dataSignNames: { name: "name", value: "value", category: "category" }
 			}
 		},
 		options);
@@ -5604,20 +5605,36 @@
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
 			
-			for(var j=0; j<vps.length; j++)
+			if(cp)
 			{
-				var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
-				//主题河流图只支持[ name, value, lengendName ]格式的数据条目
-				var data = chart.resultRowArrays(result, [ np, vps[j] ]);
-				for(var k=0; k<data.length; k++)
-					data[k].push(legendName);
+				var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
 				
+				//主题河流图只支持[ name, value, category ]格式的数据条目
+				var data = chart.resultRowArrays(result, [ np, vp, cp ]);
 				chart.originalDataIndexes(data, chartDataSet);
 				
-				legendData.push(legendName);
+				chartSupport.appendDistinct(legendData, chart.resultColumnArrays(result, cp));
 				chartSupport.appendElement(seriesData, data);
+			}
+			else
+			{
+				var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
+				
+				for(var j=0; j<vps.length; j++)
+				{
+					var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
+					//主题河流图只支持[ name, value, lengendName ]格式的数据条目
+					var data = chart.resultRowArrays(result, [ np, vps[j] ]);
+					for(var k=0; k<data.length; k++)
+						data[k].push(legendName);
+					
+					chart.originalDataIndexes(data, chartDataSet);
+					
+					chartSupport.appendDistinct(legendData, legendName);
+					chartSupport.appendElement(seriesData, data);
+				}
 			}
 		}
 		
@@ -5673,6 +5690,7 @@
 			data = {};
 			data[dataSignNames.name] = echartsData[0];
 			data[dataSignNames.value] = echartsData[1];
+			data[dataSignNames.category] = echartsData[2];
 		}
 		
 		chart.eventData(chartEvent, data);
