@@ -5615,7 +5615,15 @@
 				var data = chart.resultRowArrays(result, [ np, vp, cp ]);
 				chart.originalDataIndexes(data, chartDataSet);
 				
-				chartSupport.appendDistinct(legendData, chart.resultColumnArrays(result, cp));
+				//为类别添加前缀，确保多数据集类别不重复
+				for(var j=0; j<data.length; j++)
+				{
+					var myCategory = chartSupport.legendNameForDataCategory(chartDataSets, dataSetAlias, data[j][2]);
+					data[j][2] = myCategory;
+					
+					chartSupport.appendDistinct(legendData, myCategory);
+				}
+				
 				chartSupport.appendElement(seriesData, data);
 			}
 			else
