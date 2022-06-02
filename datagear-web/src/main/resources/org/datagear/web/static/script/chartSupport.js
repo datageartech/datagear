@@ -5720,8 +5720,9 @@
 			dg:
 			{
 				//name 名称
-				//value 数值
-				dataSignNames: { name: "name", value: "value" },
+				//value 数值，当标记category时单选，否则可多选
+				//category 可选，类别，不同类别绘制为不同系列
+				dataSignNames: { name: "name", value: "value", category: "category" },
 				//是否横向
 				horizontal: false,
 				//图形类型
@@ -5809,6 +5810,10 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
+		var symbol = dg.symbol;
+		if(chartSupport.pictorialBarSymbolPaths[symbol])
+			symbol = chartSupport.pictorialBarSymbolPaths[symbol];
+		
 		var chartDataSets = chart.chartDataSetsMain();
 		
 		var legendData = [];
@@ -5821,32 +5826,63 @@
 			var result = chart.resultOf(results, chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
 			
-			for(var j=0; j<vps.length; j++)
+			if(cp)
 			{
-				var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
+				var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
+				
+				var categoryNames = [];
+				var categoryDatasMap = {};
 				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var vpsMy = (dg.horizontal ? [vps[j], np] : [np, vps[j]]);
-				var data = chart.resultValueObjects(result, vpsMy);
-				
+				var propertyMap = { "value": (dg.horizontal ? [vp, np] : [np, vp]) };
+				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
+				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
+				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				
-				var symbol = dg.symbol;
-				if(chartSupport.pictorialBarSymbolPaths[symbol])
-					symbol = chartSupport.pictorialBarSymbolPaths[symbol];
-				
-				var mySeries =
+				for(var j=0; j<categoryNames.length; j++)
 				{
-					id: series.length, type: "pictorialBar", name: legendName, data: data,
-					symbol: symbol,
-					symbolSize: dg.symbolSize, symbolRepeat: dg.symbolRepeat,
-					barGap: dg.barGap
-				};
+					var categoryName = categoryNames[j];
+					var legendName = chartSupport.legendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
+					var mySeries =
+					{
+						id: series.length, type: "pictorialBar", name: legendName, data: categoryDatasMap[categoryName],
+						symbol: symbol,
+						symbolSize: dg.symbolSize, symbolRepeat: dg.symbolRepeat,
+						barGap: dg.barGap
+					};
+					
+					legendData.push(legendName);
+					series.push(mySeries);
+				}
+			}
+			else
+			{
+				var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
 				
-				legendData.push(legendName);
-				series.push(mySeries);
+				for(var j=0; j<vps.length; j++)
+				{
+					var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
+					
+					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+					var vpsMy = (dg.horizontal ? [vps[j], np] : [np, vps[j]]);
+					var data = chart.resultValueObjects(result, vpsMy);
+					
+					chart.originalDataIndexes(data, chartDataSet);
+					
+					var mySeries =
+					{
+						id: series.length, type: "pictorialBar", name: legendName, data: data,
+						symbol: symbol,
+						symbolSize: dg.symbolSize, symbolRepeat: dg.symbolRepeat,
+						barGap: dg.barGap
+					};
+					
+					legendData.push(legendName);
+					series.push(mySeries);
+				}
 			}
 		}
 		
@@ -5895,12 +5931,15 @@
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
+		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
 		var data = (dg.horizontal ?
 				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value, 1, 0) :
 				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value)
 			);
+		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
+											echartsData[categoryPropName] : undefined);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
