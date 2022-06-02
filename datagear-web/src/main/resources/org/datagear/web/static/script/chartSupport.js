@@ -2897,8 +2897,7 @@
 				{
 					name: "name", sourceLongitude: "sourceLongitude", sourceLatitude: "sourceLatitude",
 					targetLongitude: "targetLongitude", targetLatitude: "targetLatitude",
-					category: "category",
-					map: "map"
+					category: "category", map: "map"
 				}
 			}
 		},
@@ -4580,7 +4579,8 @@
 				dataSignNames:
 				{
 					name: "name", min: "min", lower: "lower",
-					median: "median", upper: "upper", max: "max", value: "value"
+					median: "median", upper: "upper", max: "max", value: "value",
+					category: "category"
 				},
 				//是否横向
 				horizontal: false,
@@ -4598,7 +4598,8 @@
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
-			title: {
+			title:
+			{
 		        text: chart.name
 		    },
 			tooltip:
@@ -4679,6 +4680,7 @@
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
 			var minp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.min);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
 			
 			//箱形数据集
 			if(minp)
@@ -4691,29 +4693,79 @@
 					chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.upper),
 					chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.max)
 				];
-				var data = chart.resultNameValueObjects(result, np, vp);
+				var propertyMap = { "name": np,"value": vp };
+				if(cp)
+					propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				
+				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
 				
-				series.push({ id: series.length, type: "boxplot", name: dataSetAlias, data: data });
-				legendData.push(dataSetAlias);
+				if(cp)
+				{
+					var categoryNames = [];
+					var categoryDatasMap = {};
+					
+					chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
+					
+					for(var j=0; j<categoryNames.length; j++)
+					{
+						var categoryName = categoryNames[j];
+						var legendName = chartSupport.legendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
+						var mySeries = {id: series.length, type: "boxplot", name: legendName, data: categoryDatasMap[categoryName]};
+						
+						legendData.push(legendName);
+						series.push(mySeries);
+					}
+				}
+				else
+				{
+					legendData.push(dataSetAlias);
+					series.push({ id: series.length, type: "boxplot", name: dataSetAlias, data: data });
+				}
 			}
 			//异常值数据集
 			else
 			{
-				var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
-				
-				for(var j=0; j<vps.length; j++)
+				if(cp)
 				{
-					var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
-					var vpsMy = (dg.horizontal ? [vps[j], np] : [np, vps[j]]);
-					var data = chart.resultValueObjects(result, vpsMy);
+					var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
+					
+					var categoryNames = [];
+					var categoryDatasMap = {};
+					
+					var propertyMap = { "value": (dg.horizontal ? [vp, np] : [np, vp]) };
+					propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
+					
+					var data = chart.resultMapObjects(result, propertyMap);
 					chartSupport.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
-					
 					chart.originalDataIndexes(data, chartDataSet);
+					chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 					
-					series.push({ id: series.length, type: "scatter", name: legendName, data: data });
-					legendData.push(legendName);
+					for(var j=0; j<categoryNames.length; j++)
+					{
+						var categoryName = categoryNames[j];
+						var legendName = chartSupport.legendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
+						var mySeries = {id: series.length, type: "scatter", name: legendName, data: categoryDatasMap[categoryName]};
+						
+						legendData.push(legendName);
+						series.push(mySeries);
+					}
+				}
+				else
+				{
+					var vps = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
+					
+					for(var j=0; j<vps.length; j++)
+					{
+						var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
+						var vpsMy = (dg.horizontal ? [vps[j], np] : [np, vps[j]]);
+						var data = chart.resultValueObjects(result, vpsMy);
+						chartSupport.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
+						chart.originalDataIndexes(data, chartDataSet);
+						
+						legendData.push(legendName);
+						series.push({ id: series.length, type: "scatter", name: legendName, data: data });
+					}
 				}
 			}
 			
@@ -4759,6 +4811,7 @@
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
+		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var seriesType = echartsEventParams.seriesType;
 		var echartsData = (echartsEventParams.data || {});
@@ -4784,6 +4837,8 @@
 			data[dataSignNames.name] = (dg.horizontal ? echartsValue[1] : echartsValue[0]);
 			data[dataSignNames.value] = (dg.horizontal ? echartsValue[0] : echartsValue[1]);
 		}
+		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
+											echartsData[categoryPropName] : undefined);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
