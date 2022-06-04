@@ -16,22 +16,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
 import org.datagear.management.service.CreateUserEntityService;
-import org.datagear.util.StringUtil;
 import org.datagear.web.util.WebUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 /**
- * {@linkplain AuthenticationSuccessHandler}实现类。
+ * 用于ajax的{@linkplain AuthenticationSuccessHandler}。
  * 
  * @author datagear@163.com
  *
  */
-public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler
+public class AjaxAuthenticationSuccessHandler implements AuthenticationSuccessHandler
 {
 	private List<CreateUserEntityService> createUserEntityServices;
 
-	public AuthenticationSuccessHandlerImpl()
+	public AjaxAuthenticationSuccessHandler()
 	{
 		super();
 	}
@@ -51,14 +50,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 			Authentication authentication) throws IOException, ServletException
 	{
 		migrateAnonymousUserData(request, response, authentication);
-
-		String redirectPath = WebUtils.getContextPath(request);
-
-		// 当应用无上下文路径时，redirectPath将是空字符串，此时会导致跳转至本页面，所以这里处理为"/"，确保跳转至首页
-		if (StringUtil.isEmpty(redirectPath))
-			redirectPath = "/";
-
-		response.sendRedirect(redirectPath);
+		request.getRequestDispatcher("/login/success").forward(request, response);
 	}
 
 	/**

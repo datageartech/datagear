@@ -93,11 +93,14 @@ ${detectNewVersionScript?no_esc}
 	}
 	
 	po.initSysMenu();
-	po.validateForm();
-	
-	<#if authenticationFailed>
-	$.tipError("<@spring.message code='login.userNameOrPasswordError' />");
-	</#if>
+	po.validateAjaxForm({},
+	{
+		tipSuccess: false,
+		success: function()
+		{
+			(window.top ? window.top : window).location.href="${contextPath}/";
+		}
+	});
 })
 (${pageId});
 </script>

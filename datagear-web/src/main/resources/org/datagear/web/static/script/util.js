@@ -2665,6 +2665,8 @@
 		}
 	};
 
+	//ajaxSettings.tipSuccess 是否提示成功操作消息，默认为：true
+	//ajaxSettings.tipError 是否提示错误操作消息，默认为：true
 	$.handleAjaxOperationMessage = function(event, jqXHR, ajaxSettings, data, thrownError)
 	{
 		var ompId = ($.GLOBAL_OPT_MSG_ID || ($.GLOBAL_OPT_MSG_ID = $.uid("opt")));
@@ -2776,6 +2778,9 @@
 			}
 		}
 		
+		var isTipSuccess = (ajaxSettings.tipSuccess !== false);
+		var isTipError = (ajaxSettings.tipError !== false);
+		
 		if(hasResponseMessage)
 		{
 			$omp.attr("success", isSuccessResponse);
@@ -2784,20 +2789,22 @@
 			if($(".message-detail", $omp).length > 0)
 				message += "<span class='ui-icon ui-icon-comment message-detail-icon' onclick='_showAjaxOperationMessageDetail();'></span>";
 			
-			if(isSuccessResponse)
+			if(isSuccessResponse && isTipSuccess)
 				$.tipSuccess(message);
-			else
+			else if(isTipError)
 				$.tipError(message);
 		}
 		//客户端处理ajax响应出错
 		else if(thrownError)
 		{
-			$.tipError(thrownError);
+			if(isTipError)
+				$.tipError(thrownError);
 		}
 		//客户端连接出错
 		else if(event && event.type=="ajaxError")
 		{
-			$.tipError("Error");
+			if(isTipError)
+				$.tipError("Error");
 		}
 	};
 	
@@ -3093,7 +3100,8 @@
 			
 			options = $.extend(
 			{
-				data: data
+				type: (form.attr("method") || "POST"),
+				data: data,
 			},
 			options);
 			

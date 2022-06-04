@@ -17,10 +17,9 @@ import org.datagear.management.domain.Role;
 import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.util.StringUtil;
 import org.datagear.web.controller.LoginController;
+import org.datagear.web.security.AjaxAuthenticationSuccessHandler;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
 import org.datagear.web.security.AuthUser;
-import org.datagear.web.security.AuthenticationSuccessHandlerImpl;
-import org.datagear.web.security.RememberNameAuthenticationFailureHandler;
 import org.datagear.web.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -36,6 +35,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 /**
@@ -130,7 +130,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	@Bean
 	public AuthenticationSuccessHandler authenticationSuccessHandler()
 	{
-		AuthenticationSuccessHandlerImpl bean = new AuthenticationSuccessHandlerImpl();
+		AjaxAuthenticationSuccessHandler bean = new AjaxAuthenticationSuccessHandler();
 
 		return bean;
 	}
@@ -138,7 +138,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	@Bean
 	public AuthenticationFailureHandler rememberNameAuthenticationFailureHandler()
 	{
-		RememberNameAuthenticationFailureHandler bean = new RememberNameAuthenticationFailureHandler();
+		SimpleUrlAuthenticationFailureHandler bean = new SimpleUrlAuthenticationFailureHandler("/login/error");
+		bean.setUseForward(true);
 
 		return bean;
 	}
@@ -379,7 +380,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 
 		AuthenticationSuccessHandler ash = authenticationSuccessHandler();
 
-		if (ash instanceof AuthenticationSuccessHandlerImpl)
-			((AuthenticationSuccessHandlerImpl) ash).setCreateUserEntityServices(serviceList);
+		if (ash instanceof AjaxAuthenticationSuccessHandler)
+			((AjaxAuthenticationSuccessHandler) ash).setCreateUserEntityServices(serviceList);
 	}
 }
