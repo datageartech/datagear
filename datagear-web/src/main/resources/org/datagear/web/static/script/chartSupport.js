@@ -1904,8 +1904,7 @@
 		var legendData = [];
 		var seriesName = "";
 		var seriesData = [];
-		var min = 0;
-		var max = 100;
+		var dataRange = { min: 0, max: 100 };
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -1926,18 +1925,9 @@
 			seriesData = seriesData.concat(data);
 		}
 		
-		for(var i=0; i<seriesData.length; i++)
-		{
-			var nvv = seriesData[i];
-			var v = (nvv ? (nvv.value || 0) : 0);
-			
-			if(v < min)
-				min = v;
-			else if(v > max)
-				max = v;
-		}
+		chartSupport.evalArrayDataRange(dataRange, seriesData, "value");
 		
-		var series = [ {id: 0, type: "funnel", name: seriesName, min: min, max: max, data: seriesData, sort: dg.sort } ];
+		var series = [ {id: 0, type: "funnel", name: seriesName, min: dataRange.min, max: dataRange.max, data: seriesData, sort: dg.sort } ];
 		var options = { legend: { id: 0, data: legendData }, series: series };
 		
 		options = chart.inflateUpdateOptions(results, options);
@@ -2046,10 +2036,9 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		var min = undefined;
-		var max = undefined;
 		var seriesName = "";
 		var seriesData = [];
+		var dataRange = { min: undefined, max: undefined };
 		var map = undefined;
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -2067,26 +2056,17 @@
 			var data = chart.resultNameValueObjects(result, np, vp);
 			
 			chart.originalDataIndexes(data, chartDataSet);
+			chartSupport.evalArrayDataRange(dataRange, data, "value");
 			
 			if(!seriesName)
 				seriesName = dataSetAlias;
 			
 			seriesData = seriesData.concat(data);
-			
-			if(data && data.length)
-			{
-				for(var j=0; j<data.length; j++)
-				{
-					var val = data[j].value;
-					min = (min == null ? val : Math.min(min, val));
-					max = (max == null ? val : Math.max(max, val));
-				}
-			}
 		}
 		
 		var options =
 		{
-			visualMap: {id: 0, min, min, max: max},
+			visualMap: {id: 0, min: dataRange.min, max: dataRange.max},
 			series: [ {id: 0, type: "map", name: seriesName, data: seriesData } ]
 		};
 		
@@ -3153,7 +3133,7 @@
 		
 		var seriesName = "";
 		var seriesData = [];
-		var min = undefined, max=undefined;
+		var dataRange = { min: undefined, max: undefined };
 		var map = undefined;
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -3172,15 +3152,8 @@
 			
 			var data = chart.resultValueObjects(result, [ np, vp, wp ]);
 			
-			for(var j=0; j<data.length; j++)
-			{
-				var dw = data[j].value[2];
-				
-				min = (min == null ? dw : Math.min(min, dw));
-				max = (max == null ? dw : Math.max(max, dw));
-			}
-			
 			chart.originalDataIndexes(data, chartDataSet);
+			chartSupport.evalArrayDataRange(dataRange, data, "value", 2);
 			
 			seriesData = seriesData.concat(data);
 			
@@ -3203,7 +3176,7 @@
 			blurSize: parseInt(pointSize*1.2)
 		}];
 		
-		var options = { visualMap: {id: 0, min: min, max: max}, series: series };
+		var options = { visualMap: {id: 0, min: dataRange.min, max: dataRange.max}, series: series };
 		chartSupport.trimNumberRange(options.visualMap);
 		
 		if(map)
@@ -3526,7 +3499,7 @@
 		var yAxisData = [];
 		var seriesName = "";
 		var seriesData = [];
-		var min = undefined, max=undefined;
+		var dataRange = { min: undefined, max: undefined };
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -3542,16 +3515,12 @@
 			
 			for(var j=0; j<data.length; j++)
 			{
-				var dw = data[j].value[2];
-				
 				chartSupport.appendDistinct(xAxisData, data[j].value[0]);
 				chartSupport.appendDistinct(yAxisData, data[j].value[1]);
-				
-				min = (min == null ? dw : Math.min(min, dw));
-				max = (max == null ? dw : Math.max(max, dw));
 			}
 			
 			chart.originalDataIndexes(data, chartDataSet);
+			chartSupport.evalArrayDataRange(dataRange, data, "value", 2);
 			
 			seriesData = seriesData.concat(data);
 			
@@ -3562,7 +3531,7 @@
 		var series = [ { id: 0, type: "heatmap", name: seriesName, data: seriesData } ];
 		
 		var options = { xAxis: { id: 0, data: xAxisData }, yAxis: { id: 0, data: yAxisData },
-						visualMap: {id: 0, min: min, max: max}, series: series };
+						visualMap: {id: 0, min: dataRange.min, max: dataRange.max}, series: series };
 		chartSupport.trimNumberRange(options.visualMap);
 		
 		options = chart.inflateUpdateOptions(results, options);
@@ -4943,7 +4912,7 @@
 		
 		var seriesName = "";
 		var seriesData = [];
-		var min = undefined, max=undefined;
+		var dataRange = { min: undefined, max: undefined };
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -4955,18 +4924,13 @@
 			
 			var data = chart.resultNameValueObjects(result, np, vp);
 			
-			for(var j=0; j<data.length; j++)
-			{
-				min = (min == null ? data[j].value : Math.min(min, data[j].value));
-				max = (max == null ? data[j].value : Math.max(max, data[j].value));
-				
-				chart.originalDataIndex(data[j], chartDataSet, j);
-			}
+			chart.originalDataIndexes(data, chartDataSet);
+			chartSupport.evalArrayDataRange(dataRange, data, "value");
 			
 			seriesData = seriesData.concat(data);
 		}
 		
-		min = (min >= max ? max - 1 : min);
+		dataRange.min = (dataRange.min >= dataRange.max ? dataRange.max - 1 : dataRange.min);
 		
 		//映射颜色值
 		var colorGradients = dg.colorGradients;
@@ -4974,7 +4938,7 @@
 		{
 			for(var i=0; i<seriesData.length; i++)
 			{
-				var colorIndex = parseInt((seriesData[i].value-min)/(max-min) * (colorGradients.length-1));
+				var colorIndex = parseInt((seriesData[i].value-dataRange.min)/(dataRange.max-dataRange.min) * (colorGradients.length-1));
 				seriesData[i].textStyle = { "color": colorGradients[colorIndex] };
 			}
 		}
