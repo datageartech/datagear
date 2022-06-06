@@ -5722,14 +5722,14 @@
 				{
 					"lineStyle":
 					{
-						"color": axisScaleLineColor
+						"color": chartTheme.actualBackgroundColor
 					}
 				},
 				"axisTick":
 				{
 					"lineStyle":
 					{
-						"color": axisScaleLineColor
+						"color": chartTheme.actualBackgroundColor
 					}
 				},
 				"itemStyle" : {
@@ -6234,6 +6234,7 @@
 			theme.valueAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
 			theme.logAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
 			theme.timeAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
+			theme.gauge.title.fontSize = chartTheme.fontSize;
 			theme.gauge.detail.fontSize = chartTheme.fontSize;
 			theme.gauge.axisLabel.fontSize = chartTheme.fontSize;
 			theme.sankey.label.fontSize = chartTheme.fontSize;

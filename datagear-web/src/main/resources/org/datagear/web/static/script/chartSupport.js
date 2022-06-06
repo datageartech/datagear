@@ -927,12 +927,14 @@
 				//value 必选，可多选，数值
 				//min 可选，最小值
 				//max 可选，最大值
-				dataSignNames: { value: "value", min: "min", max: "max" }
+				dataSignNames: { value: "value", min: "min", max: "max" },
+				//仪表盘类型："" 基本；"ring" 得分环；"step" 阶段
+				gaugeType: ""
 			}
 		},
 		options);
 		
-		options = chartSupport.inflateRenderOptions(chart,
+		var builtinOptions =
 		{
 			title: {
 		        text: chart.name
@@ -951,8 +953,114 @@
 					type: "gauge"
 				}
 			]
-		},
-		options);
+		};
+		
+		if(options.dg.gaugeType == "ring")
+		{
+			var itemBorderColor = chart.gradualColor(0.8);
+			var chartEle = chart.elementJquery();
+			var axisLineWidth = parseInt(Math.min(chartEle.width(), chartEle.height())/12);
+			
+			$.extend(builtinOptions.series[0],
+			{
+				startAngle: 90,
+				endAngle: -270,
+				pointer:
+				{
+					show: false
+				},
+				progress:
+				{
+					show: true,
+					overlap: false,
+					roundCap: true,
+					clip: false,
+					itemStyle:
+					{
+						borderWidth: 1,
+						borderColor: itemBorderColor
+					}
+				},
+				axisLine:
+				{
+					lineStyle:
+					{
+						width: axisLineWidth
+					}
+				},
+				splitLine:
+				{
+					show: false
+				},
+				axisTick:
+				{
+					show: false
+				},
+				axisLabel:
+				{
+					show: false
+				},
+				detail:
+				{
+					borderColor: 'auto',
+					borderRadius: 20,
+					borderWidth: 1
+				}
+			});
+		}
+		else if(options.dg.gaugeType == "step")
+		{
+			var chartEle = chart.elementJquery();
+			var axisLineWidth = parseInt(Math.min(chartEle.width(), chartEle.height())/20);
+			
+			$.extend(builtinOptions.series[0],
+			{
+				axisLine:
+				{
+					lineStyle:
+					{
+						width: axisLineWidth,
+						color:
+						[
+							[0.2, '#67e0e3'], [0.8, '#37a2da'], [1, '#fd666d']
+						]
+					}
+				},
+				pointer:
+				{
+					itemStyle:
+					{
+						color: 'auto'
+					}
+				},
+				progress:
+				{
+					show: false
+				},
+				axisTick:
+				{
+					distance: (0-axisLineWidth),
+					length: parseInt(axisLineWidth/3),
+				},
+				splitLine:
+				{
+					distance: (0-axisLineWidth),
+					length: axisLineWidth
+				},
+				axisLabel:
+				{
+					color: 'auto',
+					distance: axisLineWidth + parseInt(axisLineWidth/3)
+				},
+				detail:
+				{
+					valueAnimation: true,
+					color: 'auto'
+				}
+			});
+		}
+		
+		options = chartSupport.inflateRenderOptions(chart, builtinOptions, options);
 		
 		chart.echartsInit(options);
 	};
@@ -1017,7 +1125,10 @@
 				seriesName = dataSetAlias;
 		}
 		
-		chartSupport.gaugeEvalDataTitlePosition(chart, seriesData);
+		if(dg.gaugeType == "ring")
+			chartSupport.gaugeEvalDataTitlePosition(chart, seriesData, "center", null, 1);
+		else
+			chartSupport.gaugeEvalDataTitlePosition(chart, seriesData, "top");
 		
 		min = (min == null ? 0 : min);
 		max = (max == null ? 100 : max);
@@ -1067,8 +1178,10 @@
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
-	chartSupport.gaugeEvalDataTitlePosition = function(chart, seriesData, colCount, initYposition, titleHeight, detailHeight)
+	chartSupport.gaugeEvalDataTitlePosition = function(chart, seriesData, positionType, topPposition, colCount, titleHeight, detailHeight)
 	{
+		positionType = (positionType == null ? "center" : positionType);
+		topPposition = (topPposition == null ? 50 : topPposition);
 		if(colCount == null)
 		{
 			var len = seriesData.length;
@@ -1081,23 +1194,22 @@
 			else
 				colCount = 3;
 		}
-		if(initYposition == null)
-			initYposition = 60;
-		if(titleHeight == null)
-			titleHeight = 14;
-		if(detailHeight == null)
-			detailHeight = 15;
+		titleHeight = (titleHeight == null? 14 : titleHeight);
+		detailHeight = (detailHeight == null ? 15 : detailHeight);
 		
+		var rowHeight = titleHeight + detailHeight;
+		var rowCount = Math.ceil(seriesData.length/colCount);
 		var colCenterIdx = colCount/2;
+		var rowCenterIdx = rowCount/2;
 		var xGap = 100/colCount;
 		
 		for(var i=0; i<seriesData.length; i++)
 		{
-			var row = parseInt(i/colCount);
+			var row = Math.floor(i/colCount);
 			var col = i%colCount;
 			
 			var x = parseInt((col - colCenterIdx) * xGap + xGap/2);
-			var yt = initYposition + row*(titleHeight + detailHeight);
+			var yt = (positionType == "top" ? (topPposition + row*rowHeight) : ((row - rowCenterIdx)*rowHeight));
 			var yd = yt + titleHeight;
 			
 			seriesData[i].title = { offsetCenter: [ x+'%', yt+"%" ] };
