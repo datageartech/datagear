@@ -102,6 +102,7 @@ import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.html.HtmlFilter;
+import org.datagear.web.controller.RegisterController;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
@@ -115,6 +116,7 @@ import org.datagear.web.json.jackson.ObjectMapperBuilder.JsonSerializerConfig;
 import org.datagear.web.security.UserPasswordEncoderImpl;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.util.ChangelogResolver;
+import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.DashboardSharePasswordCryptoImpl;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
@@ -723,6 +725,16 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public GenericDataExchangeService dataExchangeService()
 	{
 		GenericDataExchangeService bean = new GenericDataExchangeService();
+		return bean;
+	}
+
+	@Bean
+	public CheckCodeManager checkCodeManager()
+	{
+		CheckCodeManager bean = new CheckCodeManager();
+
+		bean.putModule(RegisterController.CHECK_CODE_MODULE_REGISTER);
+
 		return bean;
 	}
 

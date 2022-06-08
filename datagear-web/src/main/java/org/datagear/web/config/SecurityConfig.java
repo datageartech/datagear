@@ -164,8 +164,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 
 		http.authorizeRequests()
 
-				// 切换主题
-				.antMatchers("/changeThemeData/**").permitAll()
+				// 切换主题、校验码
+				.antMatchers("/changeThemeData/**", "/checkCode/**").permitAll()
 
 				// 展示图表和看板
 				// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景

@@ -1721,6 +1721,12 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 	padding-top: 2em;
 }
 
+/*注册页*/
+.page-register{}
+.page-register .check-code{
+	margin-top: 0.1em;
+}
+
 /*用户*/
 .page-form-user{}
 .page-form-user .user-roles{

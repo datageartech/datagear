@@ -20,6 +20,7 @@ import org.datagear.management.service.UserService;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.ApplicationProperties;
+import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +43,16 @@ public class RegisterController extends AbstractController
 {
 	public static final String SESSION_KEY_REGISTER_USER_NAME = "registerSuccessUserName";
 
+	public static final String CHECK_CODE_MODULE_REGISTER = "REGISTER";
+
 	@Autowired
 	private ApplicationProperties applicationProperties;
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private CheckCodeManager checkCodeManager;
 
 	public RegisterController()
 	{
@@ -100,6 +106,9 @@ public class RegisterController extends AbstractController
 		if (this.applicationProperties.isDisableRegister())
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMessageCode("registerDisabled"));
+		
+		if(!this.checkCodeManager.isCheckCode(request.getSession(), CHECK_CODE_MODULE_REGISTER, form.getCheckCode()))
+			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "checkCodeError");
 
 		User user = form.getUser();
 		String confirmPassword = form.getConfirmPassword();
@@ -168,6 +177,8 @@ public class RegisterController extends AbstractController
 
 		private String confirmPassword;
 
+		private String checkCode;
+
 		public RegisterForm()
 		{
 			super();
@@ -191,6 +202,16 @@ public class RegisterController extends AbstractController
 		public void setConfirmPassword(String confirmPassword)
 		{
 			this.confirmPassword = confirmPassword;
+		}
+
+		public String getCheckCode()
+		{
+			return checkCode;
+		}
+
+		public void setCheckCode(String checkCode)
+		{
+			this.checkCode = checkCode;
 		}
 	}
 }

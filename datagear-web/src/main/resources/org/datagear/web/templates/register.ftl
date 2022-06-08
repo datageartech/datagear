@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#assign RegisterController=statics['org.datagear.web.controller.RegisterController']>
 <#include "include/page_import.ftl">
 <#include "include/html_doctype.ftl">
 <html>
@@ -16,7 +17,7 @@ ${detectNewVersionScript?no_esc}
 </head>
 <body>
 <#include "include/page_obj.ftl" >
-<div id="${pageId}">
+<div id="${pageId}" class="page-register">
 	<div class="main-page-head">
 		<#include "include/html_logo.ftl">
 		<div class="toolbar">
@@ -61,6 +62,15 @@ ${detectNewVersionScript?no_esc}
 						<input type="text" name="realName" value="" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='checkCode' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="checkCode" value="" required="required" maxlength="10" class="ui-widget ui-widget-content ui-corner-all" />
+						<img class="checkCodeImg check-code" />
+					</div>
+				</div>
 			</div>
 			<div class="form-foot">
 				<button type="submit" class="recommended"><@spring.message code='register.register' /></button>
@@ -101,7 +111,9 @@ ${detectNewVersionScript?no_esc}
 			var newData = {};
 			newData.user = data;
 			newData.confirmPassword = data.confirmPassword;
+			newData.checkCode = data.checkCode;
 			data.confirmPassword = undefined;
+			data.checkCode = undefined;
 			
 			return newData;
 		},
@@ -112,6 +124,12 @@ ${detectNewVersionScript?no_esc}
 	});
 	
 	po.initSysMenu();
+
+	po.element(".checkCodeImg").click(function()
+	{
+		$(this).attr("src", "${contextPath}/checkCode?_=" + $.uid("rc")+"&m=${RegisterController.CHECK_CODE_MODULE_REGISTER}");
+	})
+	.click();
 })
 (${pageId});
 </script>
