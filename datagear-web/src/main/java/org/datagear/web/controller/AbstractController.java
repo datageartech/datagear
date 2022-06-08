@@ -355,7 +355,7 @@ public abstract class AbstractController
 	protected void setOperationMessageForThrowable(HttpServletRequest request, String messageCode, Throwable throwable,
 			boolean traceException, Object... messageArgs)
 	{
-		OperationMessage operationMessage = buildOperationMessageFail(request, messageCode, messageArgs);
+		OperationMessage operationMessage = optMsgFail(request, messageCode, messageArgs);
 		if (traceException)
 			operationMessage.setThrowable(throwable);
 
@@ -395,7 +395,7 @@ public abstract class AbstractController
 
 		if (isJsonResponse)
 		{
-			OperationMessage operationMessage = getOperationMessageForHttpError(request, response);
+			OperationMessage operationMessage = getOptMsgForHttpError(request, response);
 
 			request.setAttribute(WebUtils.KEY_OPERATION_MESSAGE,
 					WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(operationMessage));
@@ -405,21 +405,21 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 构建操作成功消息（无消息内容）对应的{@linkplain ResponseEntity}。
+	 * 构建无内容的操作成功消息响应体。
 	 * <p>
 	 * 无消息内容，浏览器端不会弹出操作提示。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageSuccessEmptyResponseEntity()
+	protected ResponseEntity<OperationMessage> optMsgSuccessResponseEntity()
 	{
 		OperationMessage operationMessage = OperationMessage.valueOfSuccess("success", "");
 		return new ResponseEntity<>(operationMessage, HttpStatus.OK);
 	}
 
 	/**
-	 * 构建操作成功消息（无消息内容）对应的{@linkplain ResponseEntity}。
+	 * 构建无内容的操作成功消息响应体。
 	 * <p>
 	 * 无消息内容，浏览器端不会弹出操作提示。
 	 * </p>
@@ -427,7 +427,7 @@ public abstract class AbstractController
 	 * @param data
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageSuccessEmptyResponseEntity(Object data)
+	protected ResponseEntity<OperationMessage> optMsgSuccessResponseEntity(Object data)
 	{
 		OperationMessage operationMessage = OperationMessage.valueOfSuccess("success", "");
 		operationMessage.setData(data);
@@ -436,25 +436,26 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 构建“保存成功”操作消息对应的{@linkplain ResponseEntity}。
+	 * 构建“保存成功”操作成功消息响应体。
 	 * 
+	 * @param request
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageSaveSuccessResponseEntity(
-			HttpServletRequest request)
+	protected ResponseEntity<OperationMessage> optMsgSaveSuccessResponseEntity(HttpServletRequest request)
 	{
-		return buildOperationMessageSuccessResponseEntity(request, "saveSuccess");
+		return optMsgSuccessResponseEntity(request, "saveSuccess");
 	}
 
 	/**
-	 * 构建“保存成功”操作消息对应的{@linkplain ResponseEntity}。
+	 * 构建“保存成功”操作成功消息响应体。
 	 * 
+	 * @param request
+	 * @param data
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageSaveSuccessResponseEntity(
-			HttpServletRequest request, Object data)
+	protected ResponseEntity<OperationMessage> optMsgSaveSuccessResponseEntity(HttpServletRequest request, Object data)
 	{
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessResponseEntity(request,
+		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity(request,
 				"saveSuccess");
 		responseEntity.getBody().setData(data);
 
@@ -462,79 +463,91 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 构建保存操作消息对应的{@linkplain ResponseEntity}。
+	 * 构建“保存成功，保存了[{0}]条记录”操作成功消息响应体。
 	 * 
+	 * @param request
+	 * @param saveCount
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageSaveCountResponseEntity(HttpServletRequest request,
+	protected ResponseEntity<OperationMessage> optMsgSaveCountSuccessResponseEntity(HttpServletRequest request,
 			int saveCount)
 	{
 		if (saveCount > 0)
-			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess.withCount", saveCount);
+			return optMsgSuccessResponseEntity(request, "saveSuccess.withCount", saveCount);
 
 		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
 		// if (saveCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessResponseEntity(request,
-				"saveSuccess");
-		return responseEntity;
+		ResponseEntity<OperationMessage> re = optMsgSuccessResponseEntity(request, "saveSuccess");
+		return re;
 	}
 
 	/**
-	 * 构建“删除成功”操作消息对应的{@linkplain ResponseEntity}。
-	 * 
-	 * @return
-	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageDeleteSuccessResponseEntity(
-			HttpServletRequest request)
-	{
-		return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess");
-	}
-
-	/**
-	 * 构建删除操作消息对应的{@linkplain ResponseEntity}。
+	 * 构建“删除成功”操作成功消息响应体。
 	 * 
 	 * @param request
-	 * @param deleteCount
-	 *            实际删除数目
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageDeleteCountResponseEntity(
-			HttpServletRequest request, int deleteCount)
+	protected ResponseEntity<OperationMessage> optMsgDeleteSuccessResponseEntity(HttpServletRequest request)
+	{
+		return optMsgSuccessResponseEntity(request, "deleteSuccess");
+	}
+
+	/**
+	 * 构建“删除成功，删除了[{0}]条记录”操作成功消息响应体。
+	 * 
+	 * @param request
+	 * @param deleteCount 实际删除数目
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> optMsgDeleteCountSuccessResponseEntity(HttpServletRequest request,
+			int deleteCount)
 	{
 		if (deleteCount > 0)
-			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess.withCount", deleteCount);
+			return optMsgSuccessResponseEntity(request, "deleteSuccess.withCount", deleteCount);
 
 		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
 		// if (deleteCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "deleteFail.zeroCount");
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessResponseEntity(request,
-				"deleteSuccess");
-		return responseEntity;
+		ResponseEntity<OperationMessage> re = optMsgSuccessResponseEntity(request, "deleteSuccess");
+		return re;
 	}
 
 	/**
-	 * 构建操作成功消息对应的{@linkplain ResponseEntity}。
-	 * 
+	 * 构建操作成功消息响应体。
 	 * @param request
-	 * @param httpStatus
 	 * @param code
 	 * @param messageArgs
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageSuccessResponseEntity(HttpServletRequest request,
-			String code, Object... messageArgs)
+	protected ResponseEntity<OperationMessage> optMsgSuccessResponseEntity(HttpServletRequest request, String code,
+			Object... messageArgs)
 	{
-		OperationMessage operationMessage = buildOperationMessageSuccess(request, code, messageArgs);
-		return new ResponseEntity<>(operationMessage, HttpStatus.OK);
+		OperationMessage operationMessage = optMsgSuccess(request, code, messageArgs);
+		return optMsgResponseEntity(HttpStatus.OK, operationMessage);
 	}
 
 	/**
-	 * 构建操作失败消息对应的{@linkplain ResponseEntity}。
+	 * 构建操作失败消息响应体，HTTP状态为{@linkplain HttpStatus#BAD_REQUEST}。
+	 * 
+	 * @param request
+	 * @param code
+	 * @param messageArgs
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> optMsgFailResponseEntity(HttpServletRequest request, String code,
+			Object... messageArgs)
+	{
+		OperationMessage operationMessage = optMsgFail(request, code, messageArgs);
+		return optMsgResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
+	}
+
+	/**
+	 * 构建操作失败消息响应体。
 	 * 
 	 * @param request
 	 * @param httpStatus
@@ -542,21 +555,21 @@ public abstract class AbstractController
 	 * @param messageArgs
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageFailResponseEntity(HttpServletRequest request,
+	protected ResponseEntity<OperationMessage> optMsgFailResponseEntity(HttpServletRequest request,
 			HttpStatus httpStatus, String code, Object... messageArgs)
 	{
-		OperationMessage operationMessage = buildOperationMessageFail(request, code, messageArgs);
-		return new ResponseEntity<>(operationMessage, httpStatus);
+		OperationMessage operationMessage = optMsgFail(request, code, messageArgs);
+		return optMsgResponseEntity(httpStatus, operationMessage);
 	}
 
 	/**
-	 * 构建操作消息对应的{@linkplain ResponseEntity}。
+	 * 构建操作消息响应体。
 	 * 
 	 * @param httpStatus
 	 * @param operationMessage
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> buildOperationMessageResponseEntity(HttpStatus httpStatus,
+	protected ResponseEntity<OperationMessage> optMsgResponseEntity(HttpStatus httpStatus,
 			OperationMessage operationMessage)
 	{
 		return new ResponseEntity<>(operationMessage, httpStatus);
@@ -570,8 +583,7 @@ public abstract class AbstractController
 	 * @param messageArgs
 	 * @return
 	 */
-	protected OperationMessage buildOperationMessageSuccess(HttpServletRequest request, String code,
-			Object... messageArgs)
+	protected OperationMessage optMsgSuccess(HttpServletRequest request, String code, Object... messageArgs)
 	{
 		String message = getMessage(request, code, messageArgs);
 		return OperationMessage.valueOfSuccess(code, message);
@@ -585,7 +597,7 @@ public abstract class AbstractController
 	 * @param messageArgs
 	 * @return
 	 */
-	protected OperationMessage buildOperationMessageFail(HttpServletRequest request, String code, Object... messageArgs)
+	protected OperationMessage optMsgFail(HttpServletRequest request, String code, Object... messageArgs)
 	{
 		String message = getMessage(request, code, messageArgs);
 		return OperationMessage.valueOfFail(code, message);
@@ -598,21 +610,21 @@ public abstract class AbstractController
 	 * @param e
 	 * @return
 	 */
-	protected String buildExceptionMessageCode(String basename, Exception e)
+	protected String optMsgCode(String basename, Exception e)
 	{
-		return buildMessageCode(basename, e.getClass().getSimpleName());
+		return buildMsgCode(basename, e.getClass().getSimpleName());
 	}
 
 	/**
 	 * 构建消息码。
 	 * <p>
-	 * 此方法是一个未实现的模板方法，子类可以重写它以便隐藏{@linkplain #buildMessageCode(String, String)}的{@code basename}参数。
+	 * 此方法是一个未实现的模板方法，子类可以重写它以便隐藏{@linkplain #buildMsgCode(String, String)}的{@code basename}参数。
 	 * </p>
 	 * 
 	 * @param code
 	 * @return
 	 */
-	protected String buildMessageCode(String code)
+	protected String buildMsgCode(String code)
 	{
 		throw new UnsupportedOperationException("Not implemented");
 	}
@@ -624,7 +636,7 @@ public abstract class AbstractController
 	 * @param code
 	 * @return
 	 */
-	protected String buildMessageCode(String basename, String code)
+	protected String buildMsgCode(String basename, String code)
 	{
 		if (!isEmpty(basename))
 			return basename + "." + code;
@@ -656,17 +668,6 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 获取请求地区。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	protected Locale getLocale(HttpServletRequest request)
-	{
-		return WebUtils.getLocale(request);
-	}
-
-	/**
 	 * 获取I18N消息内容。
 	 * <p>
 	 * 如果找不到对应消息码的消息，则返回<code>"???[code]???"<code>（例如：{@code "???error???"}）。
@@ -690,13 +691,24 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 获取HTTP错误时的{@linkplain OperationMessage}。
+	 * 获取请求地区。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected Locale getLocale(HttpServletRequest request)
+	{
+		return WebUtils.getLocale(request);
+	}
+
+	/**
+	 * 获取HTTP错误时的操作消息。
 	 * 
 	 * @param request
 	 * @param response
 	 * @return
 	 */
-	protected OperationMessage getOperationMessageForHttpError(HttpServletRequest request, HttpServletResponse response)
+	protected OperationMessage getOptMsgForHttpError(HttpServletRequest request, HttpServletResponse response)
 	{
 		OperationMessage operationMessage = WebUtils.getOperationMessage(request);
 
@@ -707,39 +719,37 @@ public abstract class AbstractController
 			if (statusCode == null)
 				statusCode = response.getStatus();
 
-			operationMessage = buildOperationMessageForHttpError(request, statusCode);
+			operationMessage = buildOptMsgForHttpError(request, statusCode);
 		}
 
 		return operationMessage;
 	}
 
 	/**
-	 * 获取HTTP错误时的{@linkplain OperationMessage}。
+	 * 获取HTTP错误时的操作消息。
 	 * 
 	 * @param request
-	 * @param statusCode
-	 *            允许为{@code null}
+	 * @param statusCode 允许为{@code null}
 	 * @return
 	 */
-	protected OperationMessage getOperationMessageForHttpError(HttpServletRequest request, Integer statusCode)
+	protected OperationMessage getOptMsgForHttpError(HttpServletRequest request, Integer statusCode)
 	{
 		OperationMessage operationMessage = WebUtils.getOperationMessage(request);
 
 		if (operationMessage == null)
-			operationMessage = buildOperationMessageForHttpError(request, statusCode);
+			operationMessage = buildOptMsgForHttpError(request, statusCode);
 
 		return operationMessage;
 	}
 
 	/**
-	 * 构建HTTP错误的{@linkplain OperationMessage}。
+	 * 构建HTTP错误操作消息。
 	 * 
 	 * @param request
-	 * @param statusCode
-	 *            允许为{@code null}
+	 * @param statusCode 允许为{@code null}
 	 * @return
 	 */
-	protected OperationMessage buildOperationMessageForHttpError(HttpServletRequest request, Integer statusCode)
+	protected OperationMessage buildOptMsgForHttpError(HttpServletRequest request, Integer statusCode)
 	{
 		String message = (String) request.getAttribute("javax.servlet.error.message");
 

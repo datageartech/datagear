@@ -181,7 +181,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		Set<HtmlChartPlugin> uploads = getDirectoryHtmlChartPluginManager().upload(tmpFile);
 
-		return buildOperationMessageSuccessResponseEntity(request, "chartPlugin.upload.finish", uploads.size());
+		return optMsgSuccessResponseEntity(request, "chartPlugin.upload.finish", uploads.size());
 	}
 
 	@RequestMapping("/download")
@@ -212,7 +212,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	{
 		getDirectoryHtmlChartPluginManager().remove(ids);
 
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
+		return optMsgDeleteSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/query")

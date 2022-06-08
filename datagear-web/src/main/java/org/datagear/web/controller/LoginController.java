@@ -92,14 +92,14 @@ public class LoginController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> loginSuccess(HttpServletRequest request, HttpServletResponse response)
 	{
-		return buildOperationMessageSuccessResponseEntity(request, "login.success");
+		return optMsgSuccessResponseEntity(request, "login.success");
 	}
 
 	@RequestMapping(value = "/error", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> loginError(HttpServletRequest request, HttpServletResponse response)
 	{
-		return buildOperationMessageFailResponseEntity(request, HttpStatus.UNAUTHORIZED,
+		return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED,
 				"login.userNameOrPasswordError");
 	}
 

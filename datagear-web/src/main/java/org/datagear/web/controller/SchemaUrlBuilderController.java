@@ -93,7 +93,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 
 		saveCustomScript(scriptCode);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return optMsgSaveSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/previewScriptCode")

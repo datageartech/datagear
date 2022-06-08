@@ -228,7 +228,7 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		this.sqlpadExecutionService.submit(submit);
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	@RequestMapping(value = "/{schemaId}/command", produces = CONTENT_TYPE_JSON)
@@ -239,7 +239,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	{
 		this.sqlpadExecutionService.command(sqlpadId, sqlCommand);
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	@RequestMapping(value = "/{schemaId}/message", produces = CONTENT_TYPE_JSON)

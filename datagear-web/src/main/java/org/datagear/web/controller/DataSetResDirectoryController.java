@@ -109,7 +109,7 @@ public class DataSetResDirectoryController extends AbstractController
 
 		this.dataSetResDirectoryService.add(dataSetResDirectory);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSetResDirectory);
+		return optMsgSaveSuccessResponseEntity(request, dataSetResDirectory);
 	}
 
 	@RequestMapping("/edit")
@@ -141,7 +141,7 @@ public class DataSetResDirectoryController extends AbstractController
 
 		this.dataSetResDirectoryService.update(user, dataSetResDirectory);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSetResDirectory);
+		return optMsgSaveSuccessResponseEntity(request, dataSetResDirectory);
 	}
 
 	@RequestMapping("/view")
@@ -175,7 +175,7 @@ public class DataSetResDirectoryController extends AbstractController
 			this.dataSetResDirectoryService.deleteById(user, id);
 		}
 
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
+		return optMsgDeleteSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")

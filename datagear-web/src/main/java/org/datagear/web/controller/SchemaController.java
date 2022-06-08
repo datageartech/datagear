@@ -129,7 +129,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		getSchemaService().add(user, schema);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, schema);
+		return optMsgSaveSuccessResponseEntity(request, schema);
 	}
 
 	@RequestMapping("/edit")
@@ -169,7 +169,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 				&& (!schema.getUrl().equals(old.getUrl()) || !schema.getUser().equals(old.getUser())))
 			getTableCache().invalidate(schema.getId());
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, schema);
+		return optMsgSaveSuccessResponseEntity(request, schema);
 	}
 
 	@RequestMapping("/view")
@@ -210,7 +210,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 				getTableCache().invalidate(id);
 		}
 
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
+		return optMsgDeleteSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/query")
@@ -275,7 +275,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 			JdbcUtil.closeConnection(cn);
 		}
 
-		return buildOperationMessageSuccessResponseEntity(request, "schema.testConnection.ok");
+		return optMsgSuccessResponseEntity(request, "schema.testConnection.ok");
 	}
 
 	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)

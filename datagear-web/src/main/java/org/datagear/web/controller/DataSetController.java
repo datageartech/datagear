@@ -190,7 +190,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_JsonValue)
@@ -226,7 +226,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_JsonFile)
@@ -265,7 +265,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_Excel)
@@ -304,7 +304,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_CsvValue)
@@ -341,7 +341,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_CsvFile)
@@ -381,7 +381,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_Http)
@@ -418,7 +418,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/copy")
@@ -536,7 +536,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
@@ -555,7 +555,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
@@ -577,7 +577,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
@@ -599,7 +599,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
@@ -618,7 +618,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
@@ -640,7 +640,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
@@ -659,7 +659,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+		return optMsgSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
@@ -793,7 +793,7 @@ public class DataSetController extends AbstractSchemaConnController
 			FileUtil.deleteFile(dataSetDirectory);
 		}
 
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
+		return optMsgDeleteSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")
@@ -1196,7 +1196,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 				if (names.contains(name))
 				{
-					return buildOperationMessageFailResponseEntity(null, HttpStatus.BAD_REQUEST,
+					return optMsgFailResponseEntity(null, HttpStatus.BAD_REQUEST,
 							"dataSet.error.duplicateParamName");
 				}
 				else
@@ -1214,7 +1214,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 				if (names.contains(name))
 				{
-					return buildOperationMessageFailResponseEntity(null, HttpStatus.BAD_REQUEST,
+					return optMsgFailResponseEntity(null, HttpStatus.BAD_REQUEST,
 							"dataSet.error.duplicatePropertyName");
 				}
 				else

@@ -33,7 +33,7 @@ public class ErrorController extends AbstractController
 	public String handleError(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel)
 	{
-		OperationMessage operationMessage = getOperationMessageForHttpError(request, response);
+		OperationMessage operationMessage = getOptMsgForHttpError(request, response);
 		WebUtils.setOperationMessage(request, operationMessage);
 
 		return "/error";

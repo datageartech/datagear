@@ -303,7 +303,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		// 返回参数不应该完全加载插件对象
 		entity.setHtmlChartPlugin(paramPlugin);
-		return buildOperationMessageSaveSuccessResponseEntity(request, entity);
+		return optMsgSaveSuccessResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/view")
@@ -348,7 +348,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			this.htmlChartWidgetEntityService.deleteById(user, id);
 		}
 
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
+		return optMsgDeleteSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")

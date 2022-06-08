@@ -13,7 +13,7 @@ package org.datagear.web.controller;
  * @author datagear@163.com
  *
  */
-public class IllegalInputException extends RuntimeException
+public class IllegalInputException extends ControllerException
 {
 	private static final long serialVersionUID = 1L;
 

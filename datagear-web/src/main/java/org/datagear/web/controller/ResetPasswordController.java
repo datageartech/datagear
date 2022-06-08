@@ -127,16 +127,16 @@ public class ResetPasswordController extends AbstractController
 		User user = this.userService.getByNameNoPassword(username);
 
 		if (user == null)
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMessageCode("userNotExists"), username);
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					buildMsgCode("userNotExists"), username);
 
 		resetPasswordStep.setUser(user);
 		resetPasswordStep.setCheckFileName(IDUtil.uuid());
-		resetPasswordStep.setCheckFileTip(getMessage(request, buildMessageCode("pleaseCreateCheckFile"),
+		resetPasswordStep.setCheckFileTip(getMessage(request, buildMsgCode("pleaseCreateCheckFile"),
 				this.resetPasswordCheckFileDirectory.getAbsolutePath(), resetPasswordStep.getCheckFileName()));
 		resetPasswordStep.setStep(2, "checkUser");
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	@RequestMapping(value = "checkUser", produces = CONTENT_TYPE_JSON)
@@ -153,13 +153,13 @@ public class ResetPasswordController extends AbstractController
 				false);
 
 		if (!checkFile.exists())
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMessageCode("checkFileNotExists"));
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					buildMsgCode("checkFileNotExists"));
 
 		resetPasswordStep.setCheckOk(true);
 		resetPasswordStep.setStep(3, "setNewPassword");
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	@RequestMapping(value = "setNewPassword", produces = CONTENT_TYPE_JSON)
@@ -174,8 +174,8 @@ public class ResetPasswordController extends AbstractController
 			throw new IllegalInputException();
 
 		if (!password.equals(confirmPassword))
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMessageCode("confirmPasswordError"));
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					buildMsgCode("confirmPasswordError"));
 
 		ResetPasswordStep resetPasswordStep = getResetPasswordStep(request);
 
@@ -189,20 +189,20 @@ public class ResetPasswordController extends AbstractController
 
 		resetPasswordStep.setStep(4, "finish");
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	protected ResponseEntity<OperationMessage> buildResetPasswordStepNotInSessionResponseEntity(
 			HttpServletRequest request)
 	{
-		String code = buildMessageCode("resetPasswordStepNotInSession");
-		return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, code);
+		String code = buildMsgCode("resetPasswordStepNotInSession");
+		return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, code);
 	}
 
 	@Override
-	protected String buildMessageCode(String code)
+	protected String buildMsgCode(String code)
 	{
-		return buildMessageCode(MESSAGE_KEY_BASENAME, code);
+		return buildMsgCode(MESSAGE_KEY_BASENAME, code);
 	}
 
 	protected ResetPasswordStep getResetPasswordStep(HttpServletRequest request)

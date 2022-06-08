@@ -85,7 +85,7 @@ public class AnalysisProjectController extends AbstractController
 
 		this.analysisProjectService.add(analysisProject);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, analysisProject);
+		return optMsgSaveSuccessResponseEntity(request, analysisProject);
 	}
 
 	@RequestMapping("/edit")
@@ -117,7 +117,7 @@ public class AnalysisProjectController extends AbstractController
 
 		this.analysisProjectService.update(user, analysisProject);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, analysisProject);
+		return optMsgSaveSuccessResponseEntity(request, analysisProject);
 	}
 
 	@RequestMapping("/view")
@@ -171,7 +171,7 @@ public class AnalysisProjectController extends AbstractController
 			this.analysisProjectService.deleteById(user, id);
 		}
 
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
+		return optMsgDeleteSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")

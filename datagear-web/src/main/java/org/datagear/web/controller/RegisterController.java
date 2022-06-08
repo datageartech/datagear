@@ -85,7 +85,7 @@ public class RegisterController extends AbstractController
 		if (this.applicationProperties.isDisableRegister())
 		{
 			WebUtils.setOperationMessage(request,
-					buildOperationMessageFail(request, buildMessageCode("registerDisabled")));
+					optMsgFail(request, buildMsgCode("registerDisabled")));
 			return ERROR_PAGE_URL;
 		}
 
@@ -104,11 +104,11 @@ public class RegisterController extends AbstractController
 			@RequestBody RegisterForm form)
 	{
 		if (this.applicationProperties.isDisableRegister())
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMessageCode("registerDisabled"));
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					buildMsgCode("registerDisabled"));
 		
 		if(!this.checkCodeManager.isCheckCode(request.getSession(), CHECK_CODE_MODULE_REGISTER, form.getCheckCode()))
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "checkCodeError");
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "checkCodeError");
 
 		User user = form.getUser();
 		String confirmPassword = form.getConfirmPassword();
@@ -123,8 +123,8 @@ public class RegisterController extends AbstractController
 		user.setCreateTime(new Date());
 
 		if (this.userService.getByNameNoPassword(user.getName()) != null)
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMessageCode("userNameExists"), user.getName());
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					buildMsgCode("userNameExists"), user.getName());
 
 		user.setRoles(buildUserRolesForSave(this.applicationProperties.getDefaultRoleRegister()));
 
@@ -132,7 +132,7 @@ public class RegisterController extends AbstractController
 
 		request.getSession().setAttribute(SESSION_KEY_REGISTER_USER_NAME, user.getName());
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	@RequestMapping("/success")
@@ -147,9 +147,9 @@ public class RegisterController extends AbstractController
 	}
 
 	@Override
-	protected String buildMessageCode(String code)
+	protected String buildMsgCode(String code)
 	{
-		return buildMessageCode("register", code);
+		return buildMsgCode("register", code);
 	}
 
 	public static Set<Role> buildUserRolesForSave(String roleIdsStr)

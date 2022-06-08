@@ -324,7 +324,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	@RequestMapping("/{schemaId}/import/sql")
@@ -441,7 +441,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	@RequestMapping("/{schemaId}/import/json")
@@ -587,7 +587,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	@RequestMapping("/{schemaId}/import/excel")
@@ -719,7 +719,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		return optMsgSuccessResponseEntity();
 	}
 
 	@RequestMapping("/{schemaId}/import/db")
@@ -958,7 +958,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
 
 		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
 		responseEntity.getBody().setData(subDataExchangeFileNameMap);
@@ -1061,7 +1061,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
 
 		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
 		responseEntity.getBody().setData(subDataExchangeFileNameMap);
@@ -1174,7 +1174,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
 
 		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
 		responseEntity.getBody().setData(subDataExchangeFileNameMap);
@@ -1292,7 +1292,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
 
 		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
 		responseEntity.getBody().setData(subDataExchangeFileNameMap);
@@ -1619,7 +1619,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 			batchDataExchangeResult.cancel(subDataExchangeIds[i]);
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
 
 		return responseEntity;
 	}

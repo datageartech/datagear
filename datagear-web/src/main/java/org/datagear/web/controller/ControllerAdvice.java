@@ -590,17 +590,17 @@ public class ControllerAdvice extends AbstractController
 
 	protected String buildMessageCode(Class<? extends Throwable> clazz)
 	{
-		return buildMessageCode(clazz.getSimpleName());
+		return buildMsgCode(clazz.getSimpleName());
 	}
 
 	protected String buildMessageCodeFullName(Class<? extends Throwable> clazz)
 	{
-		return buildMessageCode(clazz.getName());
+		return buildMsgCode(clazz.getName());
 	}
 
 	@Override
-	protected String buildMessageCode(String code)
+	protected String buildMsgCode(String code)
 	{
-		return buildMessageCode("error", code);
+		return buildMsgCode("error", code);
 	}
 }

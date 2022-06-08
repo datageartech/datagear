@@ -409,7 +409,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		data.put("id", dashboard.getId());
 		data.put("templates", templates);
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
+		ResponseEntity<OperationMessage> responseEntity = optMsgSaveSuccessResponseEntity(request);
 		responseEntity.getBody().setData(data);
 
 		return responseEntity;
@@ -437,7 +437,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		this.htmlTplDashboardWidgetEntityService.update(user, widget);
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, templates);
-		return buildOperationMessageSaveSuccessResponseEntity(request, data);
+		return optMsgSaveSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/getResourceContent", produces = CONTENT_TYPE_JSON)
@@ -513,7 +513,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
-		return buildOperationMessageSaveSuccessResponseEntity(request, data);
+		return optMsgSaveSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/uploadResourceFile", produces = CONTENT_TYPE_JSON)
@@ -585,7 +585,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			IOUtil.close(out);
 		}
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return optMsgSaveSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/saveResourceContent", produces = CONTENT_TYPE_JSON)
@@ -624,7 +624,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
 		data.put("templatesChanged", templatesChanged);
 		data.put("resourceExists", resourceExists);
-		return buildOperationMessageSaveSuccessResponseEntity(request, data);
+		return optMsgSaveSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping("/import")
@@ -793,7 +793,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			File templateFile = FileUtil.getFile(uploadDirectory, fileName);
 
 			if (!templateFile.exists() || templateFile.isDirectory())
-				return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+				return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 						"dashboard.import.templateFileNotExists", fileName);
 		}
 
@@ -824,7 +824,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		dashboardWidgetResManager.copyFrom(dashboard.getId(), uploadDirectory);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return optMsgSaveSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/view")
@@ -898,7 +898,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			this.htmlTplDashboardWidgetEntityService.deleteById(user, id);
 		}
 
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
+		return optMsgDeleteSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")
@@ -990,7 +990,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		this.dashboardShareSetService.save(form);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return optMsgSaveSuccessResponseEntity(request);
 	}
 
 	/**
@@ -1068,7 +1068,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (dashboardShareSet == null || !dashboardShareSet.isEnablePassword())
 		{
-			responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+			responseEntity = optMsgSuccessResponseEntity(
 					ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
 		}
 		else
@@ -1077,20 +1077,20 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			if (manager.isAuthDenied(dashboardWidgetId))
 			{
-				responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+				responseEntity = optMsgSuccessResponseEntity(
 						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_DENY, manager.getAuthFailThreshold(),
 								0));
 			}
 			else if (form.getPassword().equals(dashboardShareSet.getPassword()))
 			{
 				manager.setAuthed(dashboardWidgetId, true);
-				responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+				responseEntity = optMsgSuccessResponseEntity(
 						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
 			}
 			else
 			{
 				manager.setAuthed(dashboardWidgetId, false);
-				responseEntity = buildOperationMessageSuccessEmptyResponseEntity(
+				responseEntity = optMsgSuccessResponseEntity(
 						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_FAIL, manager.getAuthFailThreshold(),
 								manager.authRemain(dashboardWidgetId)));
 			}

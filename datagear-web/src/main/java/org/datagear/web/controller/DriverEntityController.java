@@ -110,7 +110,7 @@ public class DriverEntityController extends AbstractController
 	public String handleIllegalImportDriverEntityFileFormatException(HttpServletRequest request,
 			HttpServletResponse response, IllegalImportDriverEntityFileFormatException exception)
 	{
-		String code = buildMessageCode("import." + IllegalImportDriverEntityFileFormatException.class.getSimpleName());
+		String code = buildMsgCode("import." + IllegalImportDriverEntityFileFormatException.class.getSimpleName());
 
 		setOperationMessageForThrowable(request, code, exception, false);
 
@@ -168,7 +168,7 @@ public class DriverEntityController extends AbstractController
 			}
 		}
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return optMsgSaveSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/import")
@@ -249,7 +249,7 @@ public class DriverEntityController extends AbstractController
 
 		this.driverEntityManager.importFromZip(in, driverEntityIds);
 
-		return buildOperationMessageSuccessResponseEntity(request, buildMessageCode("import.success"));
+		return optMsgSuccessResponseEntity(request, buildMsgCode("import.success"));
 	}
 
 	@RequestMapping(value = "/export")
@@ -298,7 +298,7 @@ public class DriverEntityController extends AbstractController
 
 		this.driverEntityManager.update(driverEntity);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return optMsgSaveSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/view")
@@ -320,7 +320,7 @@ public class DriverEntityController extends AbstractController
 	{
 		this.driverEntityManager.delete(ids);
 
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
+		return optMsgDeleteSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/query")
@@ -463,12 +463,12 @@ public class DriverEntityController extends AbstractController
 
 		if (!deleted)
 		{
-			responseEntity = buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMessageCode("deleteDriverFileFail"));
+			responseEntity = optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					buildMsgCode("deleteDriverFileFail"));
 		}
 		else
 		{
-			responseEntity = buildOperationMessageDeleteSuccessResponseEntity(request);
+			responseEntity = optMsgDeleteSuccessResponseEntity(request);
 			responseEntity.getBody().setData(fileInfos);
 		}
 
@@ -499,9 +499,9 @@ public class DriverEntityController extends AbstractController
 	}
 
 	@Override
-	protected String buildMessageCode(String code)
+	protected String buildMsgCode(String code)
 	{
-		return buildMessageCode("driverEntity", code);
+		return buildMsgCode("driverEntity", code);
 	}
 
 	protected void resolveDriverClassNames(File file, List<String> driverClassNames)

@@ -79,7 +79,7 @@ public class RoleController extends AbstractController
 
 		this.roleService.add(role);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, role);
+		return optMsgSaveSuccessResponseEntity(request, role);
 	}
 
 	@RequestMapping("/edit")
@@ -105,7 +105,7 @@ public class RoleController extends AbstractController
 
 		this.roleService.update(role);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request, role);
+		return optMsgSaveSuccessResponseEntity(request, role);
 	}
 
 	@RequestMapping("/view")
@@ -131,7 +131,7 @@ public class RoleController extends AbstractController
 	{
 		this.roleService.deleteByIds(ids);
 
-		return buildOperationMessageDeleteSuccessResponseEntity(request);
+		return optMsgDeleteSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/pagingQuery")
@@ -165,9 +165,9 @@ public class RoleController extends AbstractController
 	}
 
 	@Override
-	protected String buildMessageCode(String code)
+	protected String buildMsgCode(String code)
 	{
-		return buildMessageCode("role", code);
+		return buildMsgCode("role", code);
 	}
 
 	public static class RoleUsersForm implements ControllerForm
