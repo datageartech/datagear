@@ -205,6 +205,9 @@ public class DbVersionManager extends AbstractVersionContentReader
 						+ "] for full upgrade", e);
 		}
 
+		if (current == null)
+			throw new DbVersionManagerException("No version info found in table : " + this.versionTableName);
+
 		// 自动升级不兼容的版本
 		if (current.isHigherThan(Version.ZERO_VERSION) && current.isLowerThan(UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN))
 		{
@@ -235,7 +238,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 	 * 获取当前版本。
 	 * 
 	 * @param cn
-	 * @return
+	 * @return 当版本表中没有记录时会返回{@code null}
 	 */
 	protected Version getCurrentVersion(Connection cn) throws SQLException
 	{
