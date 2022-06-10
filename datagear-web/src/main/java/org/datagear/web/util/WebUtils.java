@@ -542,4 +542,38 @@ public class WebUtils
 
 		return URLEncoder.encode(url, IOUtil.CHARSET_UTF_8);
 	}
+
+	/**
+	 * 获取客户端地址。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getClientAddress(HttpServletRequest request)
+	{
+		String remoteAddress = request.getRemoteAddr();
+
+		String headerAddress = request.getHeader("x-forwarded-for");
+
+		if (StringUtil.isEmpty(headerAddress) || "unknown".equalsIgnoreCase(headerAddress))
+		{
+			headerAddress = request.getHeader("Proxy-Client-IP");
+		}
+
+		if (StringUtil.isEmpty(headerAddress) || "unknown".equalsIgnoreCase(headerAddress))
+		{
+			headerAddress = request.getHeader("WL-Proxy-Client-IP");
+		}
+
+		if (!StringUtil.isEmpty(headerAddress) && !"unknown".equalsIgnoreCase(headerAddress))
+		{
+			String[] adds = StringUtil.split(headerAddress, ",", true);
+
+			if (adds != null && adds.length > 0)
+				headerAddress = adds[0];
+		}
+
+		return (StringUtil.isEmpty(headerAddress) || "unknown".equalsIgnoreCase(headerAddress) ? remoteAddress
+				: headerAddress);
+	}
 }

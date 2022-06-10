@@ -21,6 +21,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
+import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,9 @@ public class ResetPasswordController extends AbstractController
 
 	@Autowired
 	private ApplicationProperties applicationProperties;
+
+	@Autowired
+	private UsernameLoginLatch usernameLoginLatch;
 
 	public ResetPasswordController()
 	{
@@ -85,6 +89,16 @@ public class ResetPasswordController extends AbstractController
 	public void setApplicationProperties(ApplicationProperties applicationProperties)
 	{
 		this.applicationProperties = applicationProperties;
+	}
+
+	public UsernameLoginLatch getUsernameLoginLatch()
+	{
+		return usernameLoginLatch;
+	}
+
+	public void setUsernameLoginLatch(UsernameLoginLatch usernameLoginLatch)
+	{
+		this.usernameLoginLatch = usernameLoginLatch;
 	}
 
 	@RequestMapping
@@ -186,8 +200,8 @@ public class ResetPasswordController extends AbstractController
 		User user = resetPasswordStep.getUser();
 
 		this.userService.updatePasswordById(user.getId(), password, true);
-
 		resetPasswordStep.setStep(4, "finish");
+		this.usernameLoginLatch.clear(user.getName());
 
 		return optMsgSuccessResponseEntity();
 	}

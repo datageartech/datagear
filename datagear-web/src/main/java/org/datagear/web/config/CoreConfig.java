@@ -123,6 +123,9 @@ import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.TableCache;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
+import org.datagear.web.util.accesslatch.AccessLatch;
+import org.datagear.web.util.accesslatch.IpLoginLatch;
+import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -734,6 +737,28 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		CheckCodeManager bean = new CheckCodeManager();
 
 		bean.putModule(RegisterController.CHECK_CODE_MODULE_REGISTER);
+
+		return bean;
+	}
+
+	@Bean
+	public IpLoginLatch ipLoginLatch()
+	{
+		AccessLatch accessLatch = new AccessLatch(this.applicationProperties.getIpLoginLatchSeconds(),
+				this.applicationProperties.getIpLoginLatchFrequency());
+
+		IpLoginLatch bean = new IpLoginLatch(accessLatch);
+
+		return bean;
+	}
+
+	@Bean
+	public UsernameLoginLatch usernameLoginLatch()
+	{
+		AccessLatch accessLatch = new AccessLatch(this.applicationProperties.getUsernameLoginLatchSeconds(),
+				this.applicationProperties.getUsernameLoginLatchFrequency());
+
+		UsernameLoginLatch bean = new UsernameLoginLatch(accessLatch);
 
 		return bean;
 	}

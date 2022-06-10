@@ -148,6 +148,22 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${dashboardSharePassword.authFailPastMinutes}")
 	private int dashboardSharePasswordAuthFailPastMinutes;
 
+	/** IP登录错误秒数限定 */
+	@Value("${ipLoginLatch.seconds}")
+	private int ipLoginLatchSeconds;
+
+	/** IP登录错误次数限定 */
+	@Value("${ipLoginLatch.frequency}")
+	private int ipLoginLatchFrequency;
+
+	/** 用户名登录错误秒数限定 */
+	@Value("${usernameLoginLatch.seconds}")
+	private int usernameLoginLatchSeconds;
+
+	/** 用户名登录错误次数限定 */
+	@Value("${usernameLoginLatch.frequency}")
+	private int usernameLoginLatchFrequency;
+
 	public ApplicationProperties()
 	{
 		super();
@@ -461,5 +477,45 @@ public abstract class ApplicationProperties implements Serializable
 	public void setDashboardSharePasswordAuthFailPastMinutes(int dashboardSharePasswordAuthFailPastMinutes)
 	{
 		this.dashboardSharePasswordAuthFailPastMinutes = dashboardSharePasswordAuthFailPastMinutes;
+	}
+
+	public int getIpLoginLatchSeconds()
+	{
+		return ipLoginLatchSeconds;
+	}
+
+	public void setIpLoginLatchSeconds(int ipLoginLatchSeconds)
+	{
+		this.ipLoginLatchSeconds = ipLoginLatchSeconds;
+	}
+
+	public int getIpLoginLatchFrequency()
+	{
+		return ipLoginLatchFrequency;
+	}
+
+	public void setIpLoginLatchFrequency(int ipLoginLatchFrequency)
+	{
+		this.ipLoginLatchFrequency = ipLoginLatchFrequency;
+	}
+
+	public int getUsernameLoginLatchSeconds()
+	{
+		return usernameLoginLatchSeconds;
+	}
+
+	public void setUsernameLoginLatchSeconds(int usernameLoginLatchSeconds)
+	{
+		this.usernameLoginLatchSeconds = usernameLoginLatchSeconds;
+	}
+
+	public int getUsernameLoginLatchFrequency()
+	{
+		return usernameLoginLatchFrequency;
+	}
+
+	public void setUsernameLoginLatchFrequency(int usernameLoginLatchFrequency)
+	{
+		this.usernameLoginLatchFrequency = usernameLoginLatchFrequency;
 	}
 }

@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.web.util.WebUtils;
+import org.datagear.web.util.accesslatch.UsernameLoginLatch;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -26,13 +28,17 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
  * @author datagear@163.com
  *
  */
-public class AjaxAuthenticationSuccessHandler implements AuthenticationSuccessHandler
+public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler
 {
 	private List<CreateUserEntityService> createUserEntityServices;
 
-	public AjaxAuthenticationSuccessHandler()
+	@Autowired
+	private UsernameLoginLatch usernameLoginLatch;
+
+	public AuthenticationSuccessHandlerImpl(UsernameLoginLatch usernameLoginLatch)
 	{
 		super();
+		this.usernameLoginLatch = usernameLoginLatch;
 	}
 
 	public List<CreateUserEntityService> getCreateUserEntityServices()
@@ -45,12 +51,31 @@ public class AjaxAuthenticationSuccessHandler implements AuthenticationSuccessHa
 		this.createUserEntityServices = createUserEntityServices;
 	}
 
+	public UsernameLoginLatch getUsernameLoginLatch()
+	{
+		return usernameLoginLatch;
+	}
+
+	public void setUsernameLoginLatch(UsernameLoginLatch usernameLoginLatch)
+	{
+		this.usernameLoginLatch = usernameLoginLatch;
+	}
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException
 	{
+		clearUsernameLoginLatch(request, response, authentication);
+
 		migrateAnonymousUserData(request, response, authentication);
 		request.getRequestDispatcher("/login/success").forward(request, response);
+	}
+
+	protected void clearUsernameLoginLatch(HttpServletRequest request, HttpServletResponse response,
+			Authentication authentication)
+	{
+		User user = WebUtils.getUser(authentication);
+		this.usernameLoginLatch.clear(user.getName());
 	}
 
 	/**

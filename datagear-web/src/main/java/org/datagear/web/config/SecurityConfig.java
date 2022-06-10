@@ -17,9 +17,11 @@ import org.datagear.management.domain.Role;
 import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.util.StringUtil;
 import org.datagear.web.controller.LoginController;
-import org.datagear.web.security.AjaxAuthenticationSuccessHandler;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
 import org.datagear.web.security.AuthUser;
+import org.datagear.web.security.AuthenticationFailureHandlerImpl;
+import org.datagear.web.security.AuthenticationSuccessHandlerImpl;
+import org.datagear.web.security.LoginLatchFilter;
 import org.datagear.web.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -35,7 +37,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 /**
@@ -46,6 +48,8 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter implements ApplicationListener<ContextRefreshedEvent>
 {
+	public static final String LOGIN_PROCESS_URL = "/login/doLogin";
+
 	/**
 	 * 授权角色：(登录用户 或 系统管理员) 且 数据管理员
 	 */
@@ -130,16 +134,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	@Bean
 	public AuthenticationSuccessHandler authenticationSuccessHandler()
 	{
-		AjaxAuthenticationSuccessHandler bean = new AjaxAuthenticationSuccessHandler();
+		AuthenticationSuccessHandlerImpl bean = new AuthenticationSuccessHandlerImpl(
+				this.coreConfig.usernameLoginLatch());
 
 		return bean;
 	}
 
 	@Bean
-	public AuthenticationFailureHandler rememberNameAuthenticationFailureHandler()
+	public AuthenticationFailureHandler authenticationFailureHandler()
 	{
-		SimpleUrlAuthenticationFailureHandler bean = new SimpleUrlAuthenticationFailureHandler("/login/error");
-		bean.setUseForward(true);
+		AuthenticationFailureHandlerImpl bean = new AuthenticationFailureHandlerImpl("/login/error",
+				this.coreConfig.ipLoginLatch(), this.coreConfig.usernameLoginLatch(),
+				LoginController.LOGIN_PARAM_USER_NAME);
 
 		return bean;
 	}
@@ -170,9 +176,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				// 展示图表和看板
 				// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
 				.antMatchers("/chartPlugin/icon/*", "/chartPlugin/chartPluginManager.js",
-						"/chart/show/**", "/chart/showData", "/dashboard/show/**",
-						"/dashboard/showData", "/dashboard/loadChart",
-						"/dashboard/heartbeat",
+						"/chart/show/**", "/chart/showData",
+						//
+						"/dashboard/show/**", "/dashboard/showData", "/dashboard/loadChart", "/dashboard/heartbeat",
 						"/dashboard/serverTime.js", "/dashboard/auth/**", "/dashboard/authcheck/**")
 				.access(AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 
@@ -309,11 +315,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				//
 				.antMatchers("/**").access(disableAnonymous ? AUTH_USER_ADMIN : AUTH_ANONYMOUS_USER_ADMIN)
 
-				.and().formLogin().loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl("/login/doLogin")
+				.and().formLogin().loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl(LOGIN_PROCESS_URL)
 				.usernameParameter(LoginController.LOGIN_PARAM_USER_NAME)
 				.passwordParameter(LoginController.LOGIN_PARAM_PASSWORD)
 				.successHandler(this.authenticationSuccessHandler())
-				.failureHandler(this.rememberNameAuthenticationFailureHandler())
+				.failureHandler(this.authenticationFailureHandler())
 
 				.and().logout().logoutUrl("/logout").invalidateHttpSession(true).logoutSuccessUrl("/")
 
@@ -321,6 +327,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName("REMEMBER_ME");
 
 		configureAnonymous(http);
+
+		http.addFilterBefore(
+				new LoginLatchFilter(LOGIN_PROCESS_URL,
+						(AuthenticationFailureHandlerImpl) this.authenticationFailureHandler()),
+				UsernamePasswordAuthenticationFilter.class);
 	}
 
 	/**
@@ -380,7 +391,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 
 		AuthenticationSuccessHandler ash = authenticationSuccessHandler();
 
-		if (ash instanceof AjaxAuthenticationSuccessHandler)
-			((AjaxAuthenticationSuccessHandler) ash).setCreateUserEntityServices(serviceList);
+		if (ash instanceof AuthenticationSuccessHandlerImpl)
+			((AuthenticationSuccessHandlerImpl) ash).setCreateUserEntityServices(serviceList);
 	}
 }

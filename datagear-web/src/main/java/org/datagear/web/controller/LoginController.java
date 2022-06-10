@@ -17,9 +17,14 @@ import javax.servlet.http.HttpSession;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
+import org.datagear.web.util.accesslatch.AccessLatch;
+import org.datagear.web.util.accesslatch.IpLoginLatch;
+import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.WebAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -57,6 +62,12 @@ public class LoginController extends AbstractController
 	@Autowired
 	private ApplicationProperties applicationProperties;
 
+	@Autowired
+	private IpLoginLatch ipLoginLatch;
+
+	@Autowired
+	private UsernameLoginLatch usernameLoginLatch;
+
 	public LoginController()
 	{
 		super();
@@ -70,6 +81,26 @@ public class LoginController extends AbstractController
 	public void setApplicationProperties(ApplicationProperties applicationProperties)
 	{
 		this.applicationProperties = applicationProperties;
+	}
+
+	public IpLoginLatch getIpLoginLatch()
+	{
+		return ipLoginLatch;
+	}
+
+	public void setIpLoginLatch(IpLoginLatch ipLoginLatch)
+	{
+		this.ipLoginLatch = ipLoginLatch;
+	}
+
+	public UsernameLoginLatch getUsernameLoginLatch()
+	{
+		return usernameLoginLatch;
+	}
+
+	public void setUsernameLoginLatch(UsernameLoginLatch usernameLoginLatch)
+	{
+		this.usernameLoginLatch = usernameLoginLatch;
 	}
 
 	/**
@@ -99,8 +130,52 @@ public class LoginController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> loginError(HttpServletRequest request, HttpServletResponse response)
 	{
-		return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED,
-				"login.userNameOrPasswordError");
+		int ipLoginRemain = this.ipLoginLatch.remain(request);
+
+		if (AccessLatch.isLatched(ipLoginRemain))
+			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "login.ipLoginLatched");
+
+		int usernameLoginRemain = this.usernameLoginLatch.remain(request.getParameter(LOGIN_PARAM_USER_NAME));
+
+		if (AccessLatch.isLatched(usernameLoginRemain))
+		{
+			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "login.usernameLoginLatched");
+		}
+		else if (AccessLatch.isNonLatch(usernameLoginRemain))
+		{
+			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "login.userNameOrPasswordError");
+		}
+		else if (usernameLoginRemain > 0)
+		{
+			if (ipLoginRemain >= 0)
+				usernameLoginRemain = Math.min(ipLoginRemain, usernameLoginRemain);
+
+			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "login.userNameOrPasswordErrorRemain",
+					usernameLoginRemain);
+		}
+		else
+		{
+			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "login.userNameOrPasswordError");
+		}
+	}
+
+	protected AuthenticationException getAuthenticationExceptionWithRemove(HttpServletRequest request)
+	{
+		// 参考org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler.saveException()
+
+		AuthenticationException authenticationException = (AuthenticationException) request
+				.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+
+		if (authenticationException == null)
+		{
+			authenticationException = (AuthenticationException) request.getSession()
+					.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+
+			if (authenticationException != null)
+				request.getSession().removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+		}
+
+		return authenticationException;
 	}
 
 	protected String resolveLoginUsername(HttpServletRequest request, HttpServletResponse response)
