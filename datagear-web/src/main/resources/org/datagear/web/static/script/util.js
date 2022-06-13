@@ -2789,10 +2789,16 @@
 			if($(".message-detail", $omp).length > 0)
 				message += "<span class='ui-icon ui-icon-comment message-detail-icon' onclick='_showAjaxOperationMessageDetail();'></span>";
 			
-			if(isSuccessResponse && isTipSuccess)
-				$.tipSuccess(message);
-			else if(isTipError)
-				$.tipError(message);
+			if(isSuccessResponse)
+			{
+				if(isTipSuccess)
+					$.tipSuccess(message);
+			}
+			else
+			{
+				if(isTipError)
+					$.tipError(message);
+			}
 		}
 		//客户端处理ajax响应出错
 		else if(thrownError)
