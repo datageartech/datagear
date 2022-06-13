@@ -249,6 +249,12 @@ public abstract class ApplicationProperties implements Serializable
 		this.directoryDashboardGlobalRes = directoryDashboardGlobalRes;
 	}
 
+	public String getDashboardGlobalResUrlPrefixName()
+	{
+		String prefix = getDashboardGlobalResUrlPrefix();
+		return (prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix);
+	}
+
 	public String getDashboardGlobalResUrlPrefix()
 	{
 		return dashboardGlobalResUrlPrefix;

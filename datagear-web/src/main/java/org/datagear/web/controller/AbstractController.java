@@ -980,4 +980,27 @@ public abstract class AbstractController
 
 		return charsetNames;
 	}
+
+	/**
+	 * 将HTTP响应{@code "Cache-Control"}头设置为：{@code "no-cache"}。
+	 * <p>
+	 * 当使用
+	 * </p>
+	 * 
+	 * <code>
+	 * <pre>
+	 * if (webRequest.checkNotModified(lastModified))
+	 *   return;
+	 * </pre>
+	 * </code>
+	 * <p>
+	 * 设置缓存时，需要配合此方法才能起作用。
+	 * </p>
+	 * 
+	 * @param response
+	 */
+	protected void setCacheControlNoCache(HttpServletResponse response)
+	{
+		response.setHeader("Cache-Control", "no-cache");
+	}
 }

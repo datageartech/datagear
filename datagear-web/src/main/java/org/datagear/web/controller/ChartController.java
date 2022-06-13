@@ -456,11 +456,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			// 处理可能的中文资源名
 			resName = WebUtils.decodeURL(resName);
 
-			setContentTypeByName(request, response, servletContext, resName);
-
 			long lastModified = this.templateDashboardWidgetResManager.lastModified(id, resName);
 			if (webRequest.checkNotModified(lastModified))
 				return;
+
+			setContentTypeByName(request, response, servletContext, resName);
+			setCacheControlNoCache(response);
 
 			InputStream in = this.templateDashboardWidgetResManager.getInputStream(id, resName);
 			OutputStream out = response.getOutputStream();

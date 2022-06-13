@@ -1263,11 +1263,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			// 优先本地资源
 			if (resManager.exists(id, resName))
 			{
-				setContentTypeByName(request, response, getServletContext(), resName);
-
 				long lastModified = resManager.lastModified(id, resName);
 				if (webRequest.checkNotModified(lastModified))
 					return;
+
+				setContentTypeByName(request, response, getServletContext(), resName);
+				setCacheControlNoCache(response);
 
 				in = resManager.getInputStream(id, resName);
 			}
@@ -1284,11 +1285,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 				if (globalRes.exists() && !globalRes.isDirectory())
 				{
-					setContentTypeByName(request, response, getServletContext(), resName);
-
 					long lastModified = globalRes.lastModified();
 					if (webRequest.checkNotModified(lastModified))
 						return;
+
+					setContentTypeByName(request, response, getServletContext(), resName);
+					setCacheControlNoCache(response);
 
 					in = IOUtil.getInputStream(globalRes);
 				}
@@ -1311,6 +1313,63 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			}
 			else
 				throw new FileNotFoundException(resName);
+		}
+	}
+
+	/**
+	 * 加载看板全局资源。
+	 * <p>
+	 * 上述{@linkplain #showResource(HttpServletRequest, HttpServletResponse, WebRequest, org.springframework.ui.Model, String)}
+	 * 支持在看版内以{@code "global/**"}相对地址的方式引入全局资源，这简化了写法，但会导致浏览器无法跨看板缓存全局资源，
+	 * 因为全局资源的绝对路径对于不同的看板也是不同的。
+	 * </p>
+	 * <p>
+	 * 此方法则是以固定的绝对路径加载全局资源，使得浏览器可以跨看板缓存它们，缺点是看板内需以{@code "../global/**"}相对地址的方式引入全局资源。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param webRequest
+	 * @throws Exception
+	 * @see {@linkplain ApplicationProperties#getDashboardGlobalResUrlPrefixName()}
+	 */
+	@RequestMapping("/show/#{applicationProperties.getDashboardGlobalResUrlPrefixName()}/**")
+	public void showGlobalResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest)
+			throws Exception
+	{
+		String resName = resolvePathAfter(request,
+				"/show/" + this.applicationProperties.getDashboardGlobalResUrlPrefixName() + "/");
+
+		if (StringUtil.isEmpty(resName))
+			throw new FileNotFoundException(resName);
+
+		resName = WebUtils.decodeURL(resName);
+		File globalRes = FileUtil.getFile(dashboardGlobalResRootDirectory, resName);
+
+		if (!globalRes.exists() || globalRes.isDirectory())
+			throw new FileNotFoundException(resName);
+
+		long lastModified = globalRes.lastModified();
+		if (webRequest.checkNotModified(lastModified))
+			return;
+
+		setContentTypeByName(request, response, getServletContext(), resName);
+		setCacheControlNoCache(response);
+
+		InputStream in = null;
+		OutputStream out = null;
+
+		try
+		{
+			in = IOUtil.getBufferedInputStream(IOUtil.getInputStream(globalRes));
+			out = IOUtil.getBufferedOutputStream(response.getOutputStream());
+
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
 		}
 	}
 

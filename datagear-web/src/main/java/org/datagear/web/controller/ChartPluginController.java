@@ -279,6 +279,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			return;
 
 		response.setContentType("image/" + icon.getType());
+		setCacheControlNoCache(response);
 
 		OutputStream out = response.getOutputStream();
 		InputStream iconIn = null;
@@ -323,6 +324,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			return;
 
 		response.setContentType(CONTENT_TYPE_JAVASCRIPT);
+		setCacheControlNoCache(response);
 
 		PrintWriter out = response.getWriter();
 
