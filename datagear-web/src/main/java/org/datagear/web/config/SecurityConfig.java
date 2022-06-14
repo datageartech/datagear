@@ -135,7 +135,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	public AuthenticationSuccessHandler authenticationSuccessHandler()
 	{
 		AuthenticationSuccessHandlerImpl bean = new AuthenticationSuccessHandlerImpl(
-				this.coreConfig.usernameLoginLatch());
+				this.coreConfig.usernameLoginLatch(), this.coreConfig.checkCodeManager());
 
 		return bean;
 	}
@@ -330,7 +330,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 
 		http.addFilterBefore(
 				new LoginLatchFilter(LOGIN_PROCESS_URL,
-						(AuthenticationFailureHandlerImpl) this.authenticationFailureHandler()),
+						(AuthenticationFailureHandlerImpl) this.authenticationFailureHandler(),
+						this.applicationProperties, this.coreConfig.checkCodeManager()),
 				UsernamePasswordAuthenticationFilter.class);
 	}
 

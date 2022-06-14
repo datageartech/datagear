@@ -49,6 +49,17 @@ ${detectNewVersionScript?no_esc}
 						<input type="password" name="${LoginController.LOGIN_PARAM_PASSWORD}" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" />
 					</div>
 				</div>
+				<#if !disableLoginCheckCode>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='checkCode' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="${LoginController.LOGIN_PARAM_CHECK_CODE}" value="" required="required" maxlength="10" class="ui-widget ui-widget-content ui-corner-all" />
+						<img class="checkCodeImg check-code" />
+					</div>
+				</div>
+				</#if>
 			</div>
 			<div class="form-foot">
 				<button type="submit" class="recommended"><@spring.message code='login.login' /></button>
@@ -101,6 +112,14 @@ ${detectNewVersionScript?no_esc}
 			(window.top ? window.top : window).location.href="${contextPath}/";
 		}
 	});
+	
+	<#if !disableLoginCheckCode>
+	po.element(".checkCodeImg").click(function()
+	{
+		$(this).attr("src", "${contextPath}/checkCode?_=" + $.uid("rc")+"&m=${LoginController.CHECK_CODE_MODULE_LOGIN}");
+	})
+	.click();
+	</#if>
 })
 (${pageId});
 </script>

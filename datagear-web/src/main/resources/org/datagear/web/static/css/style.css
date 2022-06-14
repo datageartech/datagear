@@ -1720,6 +1720,9 @@ form.table-form .form-foot .form-operation.form-operation-batch-set .batch-set-p
 .page-login .page-form-login form .form-foot.login-form-ext{
 	padding-top: 2em;
 }
+.page-login .page-form-login .check-code{
+	margin-top: 0.1em;
+}
 
 /*注册页*/
 .page-register{}

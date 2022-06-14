@@ -16,9 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
 import org.datagear.management.service.CreateUserEntityService;
+import org.datagear.web.controller.LoginController;
+import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.util.accesslatch.UsernameLoginLatch;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -32,13 +33,15 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 {
 	private List<CreateUserEntityService> createUserEntityServices;
 
-	@Autowired
 	private UsernameLoginLatch usernameLoginLatch;
 
-	public AuthenticationSuccessHandlerImpl(UsernameLoginLatch usernameLoginLatch)
+	private CheckCodeManager checkCodeManager;
+
+	public AuthenticationSuccessHandlerImpl(UsernameLoginLatch usernameLoginLatch, CheckCodeManager checkCodeManager)
 	{
 		super();
 		this.usernameLoginLatch = usernameLoginLatch;
+		this.checkCodeManager = checkCodeManager;
 	}
 
 	public List<CreateUserEntityService> getCreateUserEntityServices()
@@ -61,14 +64,31 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 		this.usernameLoginLatch = usernameLoginLatch;
 	}
 
+	public CheckCodeManager getCheckCodeManager()
+	{
+		return checkCodeManager;
+	}
+
+	public void setCheckCodeManager(CheckCodeManager checkCodeManager)
+	{
+		this.checkCodeManager = checkCodeManager;
+	}
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException
 	{
+		clearLoginCheckCode(request, response, authentication);
 		clearUsernameLoginLatch(request, response, authentication);
 
 		migrateAnonymousUserData(request, response, authentication);
 		request.getRequestDispatcher("/login/success").forward(request, response);
+	}
+
+	protected void clearLoginCheckCode(HttpServletRequest request, HttpServletResponse response,
+			Authentication authentication)
+	{
+		this.checkCodeManager.removeCheckCode(request.getSession(), LoginController.CHECK_CODE_MODULE_LOGIN);
 	}
 
 	protected void clearUsernameLoginLatch(HttpServletRequest request, HttpServletResponse response,

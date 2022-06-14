@@ -102,6 +102,7 @@ import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.html.HtmlFilter;
+import org.datagear.web.controller.LoginController;
 import org.datagear.web.controller.RegisterController;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
@@ -737,6 +738,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		CheckCodeManager bean = new CheckCodeManager();
 
 		bean.putModule(RegisterController.CHECK_CODE_MODULE_REGISTER);
+		bean.putModule(LoginController.CHECK_CODE_MODULE_LOGIN);
 
 		return bean;
 	}

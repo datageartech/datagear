@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.datagear.web.config.ApplicationProperties;
+import org.datagear.web.security.LoginCheckCodeErrorException;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.util.accesslatch.AccessLatch;
@@ -58,6 +59,13 @@ public class LoginController extends AbstractController
 	 * 登录参数：记住登录
 	 */
 	public static final String LOGIN_PARAM_REMEMBER_ME = "rememberMe";
+
+	/**
+	 * 登录参数：校验码
+	 */
+	public static final String LOGIN_PARAM_CHECK_CODE = "checkCode";
+
+	public static final String CHECK_CODE_MODULE_LOGIN = "LOGIN";
 
 	@Autowired
 	private ApplicationProperties applicationProperties;
@@ -113,6 +121,7 @@ public class LoginController extends AbstractController
 	{
 		request.setAttribute("loginUsername", resolveLoginUsername(request, response));
 		request.setAttribute("disableRegister", this.applicationProperties.isDisableRegister());
+		request.setAttribute("disableLoginCheckCode", this.applicationProperties.isDisableLoginCheckCode());
 		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneNoPassword());
 		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
 
@@ -130,10 +139,21 @@ public class LoginController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> loginError(HttpServletRequest request, HttpServletResponse response)
 	{
+		AuthenticationException ae = getAuthenticationExceptionWithRemove(request);
+		if (ae != null)
+		{
+			if (ae instanceof LoginCheckCodeErrorException)
+			{
+				return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "checkCodeError");
+			}
+		}
+
 		int ipLoginRemain = this.ipLoginLatch.remain(request);
 
 		if (AccessLatch.isLatched(ipLoginRemain))
+		{
 			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "login.ipLoginLatched");
+		}
 
 		int usernameLoginRemain = this.usernameLoginLatch.remain(request.getParameter(LOGIN_PARAM_USER_NAME));
 

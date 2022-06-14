@@ -164,6 +164,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${usernameLoginLatch.frequency}")
 	private int usernameLoginLatchFrequency;
 
+	/** 是否禁用登录验证码 */
+	@Value("${disableLoginCheckCode}")
+	private boolean disableLoginCheckCode;
+
 	public ApplicationProperties()
 	{
 		super();
@@ -523,5 +527,15 @@ public abstract class ApplicationProperties implements Serializable
 	public void setUsernameLoginLatchFrequency(int usernameLoginLatchFrequency)
 	{
 		this.usernameLoginLatchFrequency = usernameLoginLatchFrequency;
+	}
+
+	public boolean isDisableLoginCheckCode()
+	{
+		return disableLoginCheckCode;
+	}
+
+	public void setDisableLoginCheckCode(boolean disableLoginCheckCode)
+	{
+		this.disableLoginCheckCode = disableLoginCheckCode;
 	}
 }
