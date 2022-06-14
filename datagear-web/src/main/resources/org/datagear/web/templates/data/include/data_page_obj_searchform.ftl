@@ -20,7 +20,7 @@ po.search = undefined;
 <form id="${pageId}-searchForm" class="search-form search-form-data" action="#" tabindex="0" auto-close-prevent="condition-panel">
 	<div class="ui-widget ui-widget-content ui-corner-all keyword-widget">
 		<div class="like-switch-icon-parent" title="<@spring.message code='data.likeTitle' />">
-			<span class="ui-icon like-switch-icon ui-icon-radio-off"></span>
+			<span class="ui-icon like-switch-icon ui-icon-radio-on"></span>
 		</div>
 		<div class="keyword-input-parent"><input name="keyword" type="text" class="ui-widget ui-widget-content ui-corner-all keyword-input" tabindex="2" title="<@spring.message code='data.keywordTitle' />" /></div>
 		<input type="hidden" name="notLike" value="false" />
@@ -138,13 +138,13 @@ po.search = undefined;
 		if(notLike == "true")
 		{
 			po.likeSwitchIconParent().attr("title", "<@spring.message code='data.notLikeTitle' />");
-			po.element(".like-switch-icon", po.likeSwitchIconParent()).removeClass("ui-icon-radio-off").addClass("ui-icon-radio-on");
+			po.element(".like-switch-icon", po.likeSwitchIconParent()).removeClass("ui-icon-radio-on").addClass("ui-icon-radio-off");
 			po.notLikeInput().val("true");
 		}
 		else
 		{
 			po.likeSwitchIconParent().attr("title", "<@spring.message code='data.likeTitle' />");
-			po.element(".like-switch-icon", po.likeSwitchIconParent()).removeClass("ui-icon-radio-on").addClass("ui-icon-radio-off");
+			po.element(".like-switch-icon", po.likeSwitchIconParent()).removeClass("ui-icon-radio-off").addClass("ui-icon-radio-on");
 			po.notLikeInput().val("false");
 		}
 	};
