@@ -25,13 +25,14 @@ public class TextParserSupport
 	}
 
 	/**
-	 * 写完行注释后停止。
+	 * 写完行注释（<code>&#47&#47...</code>）后停止。
 	 * 
 	 * @param in
 	 * @param out
+	 * @return
 	 * @throws IOException
 	 */
-	public void writeAfterLineComment(Reader in, Writer out) throws IOException
+	public int writeAfterLineComment(Reader in, Writer out) throws IOException
 	{
 		int c = -1;
 
@@ -42,16 +43,19 @@ public class TextParserSupport
 			if (c == '\n' || c == '\r')
 				break;
 		}
+
+		return c;
 	}
 
 	/**
-	 * 写完块注释后停止。
+	 * 写完块注释（<code>&#47&#42...&#42&#47</code>）后停止。
 	 * 
 	 * @param in
 	 * @param out
+	 * @return
 	 * @throws IOException
 	 */
-	public void writeAfterBlockComment(Reader in, Writer out) throws IOException
+	public int writeAfterBlockComment(Reader in, Writer out) throws IOException
 	{
 		int c = -1;
 		while ((c = in.read()) > -1)
@@ -67,6 +71,8 @@ public class TextParserSupport
 					break;
 			}
 		}
+
+		return c;
 	}
 
 	/**
@@ -75,9 +81,11 @@ public class TextParserSupport
 	 * @param in
 	 * @param out
 	 * @param quoteChar
+	 * @param escapeChar
+	 * @return
 	 * @throws IOException
 	 */
-	public void writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar) throws IOException
+	public int writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar) throws IOException
 	{
 		int c = -1;
 
@@ -92,6 +100,8 @@ public class TextParserSupport
 				break;
 			}
 		}
+
+		return c;
 	}
 
 	/**
@@ -102,9 +112,10 @@ public class TextParserSupport
 	 * @param quoteChar
 	 * @param escapeChar
 	 * @param sb
+	 * @return
 	 * @throws IOException
 	 */
-	public void writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar, StringBuilder sb)
+	public int writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar, StringBuilder sb)
 			throws IOException
 	{
 		int c = -1;
@@ -125,6 +136,8 @@ public class TextParserSupport
 				break;
 			}
 		}
+
+		return c;
 	}
 
 	/**
