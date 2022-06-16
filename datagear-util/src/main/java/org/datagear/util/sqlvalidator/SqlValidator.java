@@ -21,9 +21,9 @@ public interface SqlValidator
 	/**
 	 * 校验。
 	 * 
-	 * @param databaseName
 	 * @param sql
+	 * @param profile
 	 * @return {@code true} 合法；{@code false} 非法
 	 */
-	boolean validate(String databaseName, String sql);
+	boolean validate(String sql, DatabaseProfile profile);
 }

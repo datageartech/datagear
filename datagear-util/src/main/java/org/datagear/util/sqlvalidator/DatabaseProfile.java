@@ -1,0 +1,93 @@
+/*
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ */
+
+package org.datagear.util.sqlvalidator;
+
+/**
+ * 数据库信息。
+ * 
+ * @author datagear@163.com
+ *
+ */
+public class DatabaseProfile
+{
+	/** 名称 */
+	private String name;
+
+	/** 标识引用符 */
+	private String identifierQuote;
+
+	public DatabaseProfile(String name, String identifierQuote)
+	{
+		super();
+		this.name = name;
+		this.identifierQuote = identifierQuote;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public String getIdentifierQuote()
+	{
+		return identifierQuote;
+	}
+
+	public void setIdentifierQuote(String identifierQuote)
+	{
+		this.identifierQuote = identifierQuote;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((identifierQuote == null) ? 0 : identifierQuote.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DatabaseProfile other = (DatabaseProfile) obj;
+		if (identifierQuote == null)
+		{
+			if (other.identifierQuote != null)
+				return false;
+		}
+		else if (!identifierQuote.equals(other.identifierQuote))
+			return false;
+		if (name == null)
+		{
+			if (other.name != null)
+				return false;
+		}
+		else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [name=" + name + ", identifierQuote=" + identifierQuote + "]";
+	}
+}
