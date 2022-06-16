@@ -1641,7 +1641,7 @@
 			var errorType = (chartResultErrorMessage ? chartResultErrorMessage.type : "Error");
 			var errorMessage = (chartResultErrorMessage ? chartResultErrorMessage.message : "Chart result error");
 			
-			chartFactory.logException(errorType + " : " + errorMessage);
+			chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + errorType + " : " + errorMessage);
 		}
 	};
 	
