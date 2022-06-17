@@ -25,14 +25,13 @@ public class TextParserSupport
 	}
 
 	/**
-	 * 写完行注释（<code>&#47&#47...</code>）后停止。
+	 * 将输入流写入输出流，直到写完行注释（<code>&#47&#47...</code>）后停止。
 	 * 
 	 * @param in
 	 * @param out
-	 * @return
 	 * @throws IOException
 	 */
-	public int writeAfterLineComment(Reader in, Writer out) throws IOException
+	public void writeAfterLineComment(Reader in, Writer out) throws IOException
 	{
 		int c = -1;
 
@@ -43,19 +42,16 @@ public class TextParserSupport
 			if (c == '\n' || c == '\r')
 				break;
 		}
-
-		return c;
 	}
 
 	/**
-	 * 写完块注释（<code>&#47&#42...&#42&#47</code>）后停止。
+	 * 将输入流写入输出流，直到写完块注释结束符（<code>&#47&#42...&#42&#47</code>）后停止。
 	 * 
 	 * @param in
 	 * @param out
-	 * @return
 	 * @throws IOException
 	 */
-	public int writeAfterBlockComment(Reader in, Writer out) throws IOException
+	public void writeAfterBlockComment(Reader in, Writer out) throws IOException
 	{
 		int c = -1;
 		while ((c = in.read()) > -1)
@@ -71,21 +67,19 @@ public class TextParserSupport
 					break;
 			}
 		}
-
-		return c;
 	}
 
 	/**
-	 * 写完引号后停止（比如：{@code "}、{@code '}）。
+	 * 将输入流写入输出流，直到写完引号后停止（比如：{@code "}、{@code '}）。
 	 * 
 	 * @param in
 	 * @param out
 	 * @param quoteChar
 	 * @param escapeChar
-	 * @return
+	 *            转义标识符，不应为引号结束符，下一个字符是普通字符
 	 * @throws IOException
 	 */
-	public int writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar) throws IOException
+	public void writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar) throws IOException
 	{
 		int c = -1;
 
@@ -100,22 +94,20 @@ public class TextParserSupport
 				break;
 			}
 		}
-
-		return c;
 	}
 
 	/**
-	 * 写完引号后停止（比如：{@code "}、{@code '}），并将写入内容复制至{@code sb}。
+	 * 将输入流写入输出流，直到写完引号后停止（比如：{@code "}、{@code '}），并将写入内容复制至{@code sb}。
 	 * 
 	 * @param in
 	 * @param out
 	 * @param quoteChar
 	 * @param escapeChar
+	 *            转义标识符，不应为引号结束符，下一个字符是普通字符
 	 * @param sb
-	 * @return
 	 * @throws IOException
 	 */
-	public int writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar, StringBuilder sb)
+	public void writeAfterQuote(Reader in, Writer out, int quoteChar, int escapeChar, StringBuilder sb)
 			throws IOException
 	{
 		int c = -1;
@@ -136,8 +128,108 @@ public class TextParserSupport
 				break;
 			}
 		}
+	}
 
-		return c;
+	/**
+	 * 将输入流写入输出流，直到写完引号后停止（比如：{@code "}、{@code '}），连续的两个引号被认为是转义内容。
+	 * 
+	 * @param in
+	 * @param out
+	 * @param quoteChar
+	 * @return {@code -1}已写完；其他 未写入输出流的下一个非引号字符
+	 * @throws IOException
+	 */
+	public int writeAfterQuoteEscapeSelf(Reader in, Writer out, int quoteChar) throws IOException
+	{
+		int c = -1;
+
+		while ((c = in.read()) > -1)
+		{
+			out.write(c);
+
+			if (c == quoteChar)
+			{
+				c = in.read();
+
+				if (c == quoteChar)
+				{
+					out.write(c);
+				}
+				else
+				{
+					return c;
+				}
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * 将输入流写入输出流，直到写完匹配字符串后停止。
+	 * 
+	 * @param in
+	 * @param out
+	 * @param str
+	 * @return
+	 * @throws IOException
+	 */
+	protected void writeAfterString(Reader in, Writer out, char[] str) throws IOException
+	{
+		int c = -1;
+		int matchCount = 0;
+
+		while ((c = in.read()) > -1)
+		{
+			out.write(c);
+
+			if (matchCount == str.length)
+				break;
+			else if (c == str[matchCount])
+				matchCount++;
+			else
+				matchCount = 0;
+		}
+	}
+
+	/**
+	 * 如果输入流匹配给定字符串，则读取，否则，回退输入流到读取前的位置。
+	 * <p>
+	 * 此方法需要{@code in}支持{@linkplain Reader#markSupported()}。
+	 * </p>
+	 * 
+	 * @param in
+	 * @param str
+	 * @param start
+	 * @param end
+	 * @return {@code true} 匹配已读完；{@code false} 不匹配已回退
+	 * @throws IOException
+	 */
+	protected boolean readIfMatchWithReset(Reader in, char[] str, int start, int end) throws IOException
+	{
+		in.mark(str.length);
+
+		int c = -1;
+		int matchCount = 0;
+
+		while ((c = in.read()) > -1)
+		{
+			if (matchCount >= (end - start))
+			{
+				break;
+			}
+			else if (c == str[matchCount + start])
+			{
+				matchCount++;
+			}
+			else
+			{
+				in.reset();
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
