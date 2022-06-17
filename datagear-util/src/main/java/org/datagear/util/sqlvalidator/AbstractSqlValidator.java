@@ -7,6 +7,7 @@
 
 package org.datagear.util.sqlvalidator;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,25 +24,26 @@ public abstract class AbstractSqlValidator implements SqlValidator
 	}
 
 	/**
-	 * 查找关键字相似的元素。
+	 * 查找关键字是{@linkplain DatabaseProfile#getName()}或{@linkplain DatabaseProfile#getUrl()}子串（忽略大小写）的元素。
 	 * 
 	 * @param <T>
 	 * @param map
-	 * @param key
-	 * @return {@code null}表示没有
+	 * @param profile
+	 * @param list
 	 */
-	protected <T> T findLikeKey(Map<String, ? extends T> map, String key)
+	protected <T> void findLikeKey(Map<String, ? extends T> map, DatabaseProfile profile, List<T> list)
 	{
-		key = key.toUpperCase();
+		String name = (profile.getName() == null ? null : profile.getName().toUpperCase());
+		String url = (profile.getUrl() == null ? null : profile.getUrl().toUpperCase());
 
 		for (Map.Entry<String, ? extends T> entry : map.entrySet())
 		{
-			String myKey = entry.getKey();
+			String key = entry.getKey().toUpperCase();
 
-			if (key.indexOf(myKey.toUpperCase()) > -1)
-				return entry.getValue();
+			if (name != null && name.indexOf(key) > -1)
+				list.add(entry.getValue());
+			else if (url != null && url.indexOf(key) > -1)
+				list.add(entry.getValue());
 		}
-
-		return null;
 	}
 }

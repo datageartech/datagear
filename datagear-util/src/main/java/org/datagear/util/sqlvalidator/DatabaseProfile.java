@@ -18,13 +18,22 @@ public class DatabaseProfile
 	/** 名称 */
 	private String name;
 
+	/** 连接URL */
+	private String url;
+
 	/** 标识引用符 */
 	private String identifierQuote;
 
-	public DatabaseProfile(String name, String identifierQuote)
+	public DatabaseProfile()
+	{
+		super();
+	}
+
+	public DatabaseProfile(String name, String url, String identifierQuote)
 	{
 		super();
 		this.name = name;
+		this.url = url;
 		this.identifierQuote = identifierQuote;
 	}
 
@@ -36,6 +45,16 @@ public class DatabaseProfile
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+
+	public String getUrl()
+	{
+		return url;
+	}
+
+	public void setUrl(String url)
+	{
+		this.url = url;
 	}
 
 	public String getIdentifierQuote()
@@ -55,6 +74,7 @@ public class DatabaseProfile
 		int result = 1;
 		result = prime * result + ((identifierQuote == null) ? 0 : identifierQuote.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((url == null) ? 0 : url.hashCode());
 		return result;
 	}
 
@@ -82,12 +102,21 @@ public class DatabaseProfile
 		}
 		else if (!name.equals(other.name))
 			return false;
+		if (url == null)
+		{
+			if (other.url != null)
+				return false;
+		}
+		else if (!url.equals(other.url))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", identifierQuote=" + identifierQuote + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", url=" + url + ", identifierQuote=" + identifierQuote
+				+ "]";
 	}
+
 }

@@ -34,8 +34,9 @@ import org.datagear.util.TextParserSupport;
  * </p>
  * 
  * @author datagear@163.com
- *
+ * @deprecated SQL校验改为采用{@linkplain SqlReplacer}策略，此类没有使用
  */
+@Deprecated
 public class SqlTokenParser extends TextParserSupport
 {
 	public SqlTokenParser()

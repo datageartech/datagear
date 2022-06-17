@@ -23,7 +23,7 @@ public interface SqlValidator
 	 * 
 	 * @param sql
 	 * @param profile
-	 * @return {@code true} 合法；{@code false} 非法
+	 * @return
 	 */
-	boolean validate(String sql, DatabaseProfile profile);
+	SqlValidation validate(String sql, DatabaseProfile profile);
 }

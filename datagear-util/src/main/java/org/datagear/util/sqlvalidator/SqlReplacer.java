@@ -33,6 +33,10 @@ import org.datagear.util.TextParserSupport;
  */
 public class SqlReplacer extends TextParserSupport
 {
+	private boolean replaceSqlString = true;
+
+	private boolean replaceQuoteIdentifier = true;
+
 	private String stringReplacement = "";
 
 	private String quoteIdentifierReplacement = "";
@@ -40,6 +44,46 @@ public class SqlReplacer extends TextParserSupport
 	public SqlReplacer()
 	{
 		super();
+	}
+
+	public boolean isReplaceSqlString()
+	{
+		return replaceSqlString;
+	}
+
+	public void setReplaceSqlString(boolean replaceSqlString)
+	{
+		this.replaceSqlString = replaceSqlString;
+	}
+
+	public boolean isReplaceQuoteIdentifier()
+	{
+		return replaceQuoteIdentifier;
+	}
+
+	public void setReplaceQuoteIdentifier(boolean replaceQuoteIdentifier)
+	{
+		this.replaceQuoteIdentifier = replaceQuoteIdentifier;
+	}
+
+	public String getStringReplacement()
+	{
+		return stringReplacement;
+	}
+
+	public void setStringReplacement(String stringReplacement)
+	{
+		this.stringReplacement = stringReplacement;
+	}
+
+	public String getQuoteIdentifierReplacement()
+	{
+		return quoteIdentifierReplacement;
+	}
+
+	public void setQuoteIdentifierReplacement(String quoteIdentifierReplacement)
+	{
+		this.quoteIdentifierReplacement = quoteIdentifierReplacement;
 	}
 
 	/**
@@ -54,6 +98,9 @@ public class SqlReplacer extends TextParserSupport
 	{
 		if (sql == null)
 			return null;
+
+		if (!this.replaceSqlString && !this.replaceSqlString)
+			return sql;
 
 		Reader in = null;
 		StringWriter out = null;
@@ -110,7 +157,7 @@ public class SqlReplacer extends TextParserSupport
 				break;
 			}
 			// SQL字符串
-			else if (c == '\'')
+			else if (c == '\'' && this.replaceSqlString)
 			{
 				out.write(c);
 				out.write(this.stringReplacement);
@@ -118,7 +165,7 @@ public class SqlReplacer extends TextParserSupport
 
 				c = writeAfterQuoteEscapeSelf(in, nopOut, '\'');
 			}
-			else if (c == iqs0)
+			else if (c == iqs0 && this.replaceQuoteIdentifier)
 			{
 				// 标识引用符是单字符
 				if (iqsLen == 1)

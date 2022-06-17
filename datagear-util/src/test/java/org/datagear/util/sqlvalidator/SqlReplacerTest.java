@@ -24,5 +24,12 @@ public class SqlReplacerTest
 
 			assertEquals("SELECT NAME, \"\" FROM TABLE WHERE ID = ''", actual);
 		}
+
+		{
+			String sql = "SELECT NAME, \"VA\"\"LUE\" FROM TABLE WHERE ID = '3''3'";
+			String actual = this.sqlReplacer.replace(sql, "\"");
+
+			assertEquals("SELECT NAME, \"\" FROM TABLE WHERE ID = ''", actual);
+		}
 	}
 }

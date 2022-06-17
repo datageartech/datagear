@@ -13,8 +13,9 @@ import java.io.Serializable;
  * SQL单词。
  * 
  * @author datagear@163.com
- *
+ * @deprecated 参考{@linkplain SqlTokenParser}
  */
+@Deprecated
 public class SqlToken implements Serializable
 {
 	private static final long serialVersionUID = 1L;
