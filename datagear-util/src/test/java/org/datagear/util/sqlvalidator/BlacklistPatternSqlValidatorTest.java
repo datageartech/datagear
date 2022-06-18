@@ -18,14 +18,14 @@ import java.util.regex.Pattern;
 import org.junit.Test;
 
 /**
- * {@linkplain KeywordBlacklistSqlValidator}单元测试类。
+ * {@linkplain BlacklistPatternSqlValidator}单元测试类。
  * 
  * @author datagear@163.com
  *
  */
-public class KeywordBlacklistSqlValidatorTest
+public class BlacklistPatternSqlValidatorTest
 {
-	public KeywordBlacklistSqlValidatorTest()
+	public BlacklistPatternSqlValidatorTest()
 	{
 		super();
 	}
@@ -34,12 +34,12 @@ public class KeywordBlacklistSqlValidatorTest
 	public void validateTest()
 	{
 		Map<String, Pattern> patterns = new HashMap<String, Pattern>();
-		patterns.put(KeywordBlacklistSqlValidator.DEFAULT_PATTERN_KEY,
-				KeywordBlacklistSqlValidator.toKeywordsPattern("DELETE", "ALTER"));
-		patterns.put("my", KeywordBlacklistSqlValidator.toKeywordsPattern("exec", "use"));
-		patterns.put("postgres", KeywordBlacklistSqlValidator.toKeywordsPattern("DROP", "CREATE"));
+		patterns.put(BlacklistPatternSqlValidator.DEFAULT_PATTERN_KEY,
+				BlacklistPatternSqlValidator.toKeywordPattern("DELETE", "ALTER"));
+		patterns.put("my", BlacklistPatternSqlValidator.toKeywordPattern("exec", "use"));
+		patterns.put("postgres", BlacklistPatternSqlValidator.toKeywordPattern("DROP", "CREATE"));
 
-		KeywordBlacklistSqlValidator validator = new KeywordBlacklistSqlValidator(patterns);
+		BlacklistPatternSqlValidator validator = new BlacklistPatternSqlValidator(patterns);
 
 		// 字符串、引用标识符里的关键字验证通过
 		{
@@ -53,6 +53,14 @@ public class KeywordBlacklistSqlValidatorTest
 		{
 			String sql = "SELECT `DELETE`, `exec` FROM TABLE WHERE VALUE='DROP'";
 			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "`");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT `DELETE`, `exec` FROM TABLE WHERE VALUE='DROP'";
+			DatabaseProfile profile = new DatabaseProfile("mysql-postgresql", "", "`");
 
 			SqlValidation validation = validator.validate(sql, profile);
 

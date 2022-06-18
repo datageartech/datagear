@@ -15,47 +15,48 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 关键字黑名单的{@linkplain SqlValidator}。
+ * 黑名单正则模式{@linkplain SqlValidator}。
  * <p>
- * 如果SQL中出现黑名单中的关键字，校验将不通过。
+ * 如果SQL匹配黑名单正则模式，校验将不通过。
  * </p>
  * <p>
- * {@linkplain #getDatabaseKeywordRegexes()}映射表中关键字为{@linkplain #DEFAULT_PATTERN_KEY}的匹配模式将优先用于任意{@linkplain DatabaseProfile}，
- * 其次是关键字为{@linkplain DatabaseProfile#getName()}子串的匹配模式、关键字为{@linkplain DatabaseProfile#getUrl()}子串的匹配模式。
+ * {@linkplain #getPatterns()}映射表中关键字为{@linkplain #DEFAULT_PATTERN_KEY}的正则模式将优先用于任意{@linkplain DatabaseProfile}，
+ * 其次是关键字为{@linkplain DatabaseProfile#getName()}子串的正则模式、关键字为{@linkplain DatabaseProfile#getUrl()}子串的正则模式。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class KeywordBlacklistSqlValidator extends AbstractSqlValidator
+public class BlacklistPatternSqlValidator extends AbstractSqlValidator
 {
 	public static final String DEFAULT_PATTERN_KEY = "default";
 
-	private Map<String, Pattern> keywordPatterns = Collections.emptyMap();
+	/** 数据库名子串/URL子串 - 正则模式 */
+	private Map<String, Pattern> patterns = Collections.emptyMap();
 
 	private boolean ignoreSqlString = true;
 
 	private boolean ignoreQuoteIdentifier = true;
 
-	public KeywordBlacklistSqlValidator()
+	public BlacklistPatternSqlValidator()
 	{
 		super();
 	}
 
-	public KeywordBlacklistSqlValidator(Map<String, Pattern> keywordPatterns)
+	public BlacklistPatternSqlValidator(Map<String, Pattern> patterns)
 	{
 		super();
-		this.keywordPatterns = keywordPatterns;
+		this.patterns = patterns;
 	}
 
-	public Map<String, Pattern> getKeywordPatterns()
+	public Map<String, Pattern> getPatterns()
 	{
-		return keywordPatterns;
+		return patterns;
 	}
 
-	public void setKeywordPatterns(Map<String, Pattern> keywordPatterns)
+	public void setPatterns(Map<String, Pattern> patterns)
 	{
-		this.keywordPatterns = keywordPatterns;
+		this.patterns = patterns;
 	}
 
 	public boolean isIgnoreSqlString()
@@ -102,11 +103,11 @@ public class KeywordBlacklistSqlValidator extends AbstractSqlValidator
 	{
 		List<Pattern> patterns = new ArrayList<Pattern>(3);
 
-		Pattern dft = this.keywordPatterns.get(DEFAULT_PATTERN_KEY);
+		Pattern dft = this.patterns.get(DEFAULT_PATTERN_KEY);
 		if (dft != null)
 			patterns.add(dft);
 
-		findLikeKey(this.keywordPatterns, profile, patterns);
+		findLikeKey(this.patterns, profile, patterns);
 
 		return patterns;
 	}
@@ -161,7 +162,7 @@ public class KeywordBlacklistSqlValidator extends AbstractSqlValidator
 	 * @param keywords
 	 * @return
 	 */
-	public static Pattern toKeywordsPattern(String... keywords)
+	public static Pattern toKeywordPattern(String... keywords)
 	{
 		StringBuilder sb = new StringBuilder();
 

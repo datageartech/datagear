@@ -10,7 +10,7 @@ package org.datagear.util.sqlvalidator;
 /**
  * SQL校验器。
  * <p>
- * 校验SQL语句是否合法，比如是否包含不允许出现的关键字。
+ * 校验SQL语句对于指定{@linkplain DatabaseProfile}是否合法，比如是否包含不允许出现的关键字。
  * </p>
  * 
  * @author datagear@163.com

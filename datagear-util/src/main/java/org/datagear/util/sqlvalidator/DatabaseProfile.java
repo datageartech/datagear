@@ -7,8 +7,10 @@
 
 package org.datagear.util.sqlvalidator;
 
+import org.datagear.util.StringUtil;
+
 /**
- * 数据库信息。
+ * SQL校验数据库信息。
  * 
  * @author datagear@163.com
  *
@@ -16,13 +18,13 @@ package org.datagear.util.sqlvalidator;
 public class DatabaseProfile
 {
 	/** 名称 */
-	private String name;
+	private String name = null;
 
 	/** 连接URL */
-	private String url;
+	private String url = null;
 
 	/** 标识引用符 */
-	private String identifierQuote;
+	private String identifierQuote = null;
 
 	public DatabaseProfile()
 	{
@@ -37,6 +39,11 @@ public class DatabaseProfile
 		this.identifierQuote = identifierQuote;
 	}
 
+	public boolean hasName()
+	{
+		return !StringUtil.isEmpty(this.name);
+	}
+
 	public String getName()
 	{
 		return name;
@@ -47,6 +54,11 @@ public class DatabaseProfile
 		this.name = name;
 	}
 
+	public boolean hasUrl()
+	{
+		return !StringUtil.isEmpty(this.url);
+	}
+
 	public String getUrl()
 	{
 		return url;
@@ -55,6 +67,11 @@ public class DatabaseProfile
 	public void setUrl(String url)
 	{
 		this.url = url;
+	}
+
+	public boolean hasIdentifierQuote()
+	{
+		return !StringUtil.isEmpty(this.identifierQuote);
 	}
 
 	public String getIdentifierQuote()
@@ -118,5 +135,4 @@ public class DatabaseProfile
 		return getClass().getSimpleName() + " [name=" + name + ", url=" + url + ", identifierQuote=" + identifierQuote
 				+ "]";
 	}
-
 }

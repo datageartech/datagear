@@ -25,6 +25,9 @@ public abstract class AbstractSqlValidator implements SqlValidator
 
 	/**
 	 * 查找关键字是{@linkplain DatabaseProfile#getName()}或{@linkplain DatabaseProfile#getUrl()}子串（忽略大小写）的元素。
+	 * <p>
+	 * {@linkplain DatabaseProfile#hasName()}、{@linkplain DatabaseProfile#hasUrl()}为{@code false}d的将不做匹配查找。
+	 * </p>
 	 * 
 	 * @param <T>
 	 * @param map
@@ -33,8 +36,8 @@ public abstract class AbstractSqlValidator implements SqlValidator
 	 */
 	protected <T> void findLikeKey(Map<String, ? extends T> map, DatabaseProfile profile, List<T> list)
 	{
-		String name = (profile.getName() == null ? null : profile.getName().toUpperCase());
-		String url = (profile.getUrl() == null ? null : profile.getUrl().toUpperCase());
+		String name = (profile.hasName() ? profile.getName().toUpperCase() : null);
+		String url = (profile.hasUrl() ? profile.getUrl().toUpperCase() : null);
 
 		for (Map.Entry<String, ? extends T> entry : map.entrySet())
 		{
