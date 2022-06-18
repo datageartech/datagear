@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * @author datagear@163.com
  *
  */
-public class BlacklistPatternSqlValidator extends AbstractSqlValidator
+public class InvalidPatternSqlValidator extends AbstractSqlValidator
 {
 	public static final String DEFAULT_PATTERN_KEY = "default";
 
@@ -38,12 +38,12 @@ public class BlacklistPatternSqlValidator extends AbstractSqlValidator
 
 	private boolean ignoreQuoteIdentifier = true;
 
-	public BlacklistPatternSqlValidator()
+	public InvalidPatternSqlValidator()
 	{
 		super();
 	}
 
-	public BlacklistPatternSqlValidator(Map<String, Pattern> patterns)
+	public InvalidPatternSqlValidator(Map<String, Pattern> patterns)
 	{
 		super();
 		this.patterns = patterns;

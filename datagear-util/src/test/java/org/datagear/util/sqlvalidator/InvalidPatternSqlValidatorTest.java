@@ -18,14 +18,14 @@ import java.util.regex.Pattern;
 import org.junit.Test;
 
 /**
- * {@linkplain BlacklistPatternSqlValidator}单元测试类。
+ * {@linkplain InvalidPatternSqlValidator}单元测试类。
  * 
  * @author datagear@163.com
  *
  */
-public class BlacklistPatternSqlValidatorTest
+public class InvalidPatternSqlValidatorTest
 {
-	public BlacklistPatternSqlValidatorTest()
+	public InvalidPatternSqlValidatorTest()
 	{
 		super();
 	}
@@ -34,12 +34,12 @@ public class BlacklistPatternSqlValidatorTest
 	public void validateTest()
 	{
 		Map<String, Pattern> patterns = new HashMap<String, Pattern>();
-		patterns.put(BlacklistPatternSqlValidator.DEFAULT_PATTERN_KEY,
-				BlacklistPatternSqlValidator.toKeywordPattern("DELETE", "ALTER"));
-		patterns.put("my", BlacklistPatternSqlValidator.toKeywordPattern("exec", "use"));
-		patterns.put("postgres", BlacklistPatternSqlValidator.toKeywordPattern("DROP", "CREATE"));
+		patterns.put(InvalidPatternSqlValidator.DEFAULT_PATTERN_KEY,
+				InvalidPatternSqlValidator.toKeywordPattern("DELETE", "ALTER"));
+		patterns.put("my", InvalidPatternSqlValidator.toKeywordPattern("exec", "use"));
+		patterns.put("postgres", InvalidPatternSqlValidator.toKeywordPattern("DROP", "CREATE"));
 
-		BlacklistPatternSqlValidator validator = new BlacklistPatternSqlValidator(patterns);
+		InvalidPatternSqlValidator validator = new InvalidPatternSqlValidator(patterns);
 
 		// 字符串、引用标识符里的关键字验证通过
 		{
