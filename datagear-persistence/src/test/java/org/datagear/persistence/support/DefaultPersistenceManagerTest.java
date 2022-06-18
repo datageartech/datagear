@@ -11,13 +11,17 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.datagear.meta.Table;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceTestSupport;
 import org.datagear.persistence.Row;
+import org.datagear.util.sqlvalidator.InvalidPatternSqlValidator;
 import org.junit.Test;
 
 /**
@@ -34,6 +38,14 @@ public class DefaultPersistenceManagerTest extends PersistenceTestSupport
 	{
 		super();
 		this.defaultPersistenceManager = new DefaultPersistenceManager(dialectSource);
+
+		Map<String, Pattern> patterns = new HashMap<String, Pattern>();
+		patterns.put(InvalidPatternSqlValidator.DEFAULT_PATTERN_KEY,
+				InvalidPatternSqlValidator.toKeywordPattern("INSERT", "UPDATE", "DELETE", "TRUNCATE", "CREATE", "ALTER",
+						"DROP"));
+		InvalidPatternSqlValidator validator = new InvalidPatternSqlValidator(patterns);
+
+		this.defaultPersistenceManager.setQuerySqlValidator(validator);
 	}
 
 	@Test

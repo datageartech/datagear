@@ -36,11 +36,19 @@ public class ApplicationPropertiesConfig
 	}
 
 	@Bean
+	@ConfigurationProperties("dsmanager.query.invalidsqlkeywords")
+	public Map<String, String> dsmanagerQueryInvalidSqlKeywords()
+	{
+		return new HashMap<String, String>();
+	}
+
+	@Bean
 	public ApplicationProperties applicationProperties()
 	{
 		ApplicationPropertiesImpl bean = new ApplicationPropertiesImpl();
 
 		bean.setSqlDataSetInvalidSqlKeywords(this.sqlDataSetInvalidSqlKeywords());
+		bean.setDsmanagerQueryInvalidSqlKeywords(this.dsmanagerQueryInvalidSqlKeywords());
 
 		return bean;
 	}

@@ -36,6 +36,9 @@ import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.Sql;
 import org.datagear.util.SqlParamValue;
 import org.datagear.util.StringUtil;
+import org.datagear.util.sqlvalidator.DatabaseProfile;
+import org.datagear.util.sqlvalidator.SqlValidation;
+import org.datagear.util.sqlvalidator.SqlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +53,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPersistenceManager.class);
 
 	private DialectSource dialectSource;
+
+	private SqlValidator querySqlValidator = null;
 
 	public DefaultPersistenceManager()
 	{
@@ -71,6 +76,16 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	public void setDialectSource(DialectSource dialectSource)
 	{
 		this.dialectSource = dialectSource;
+	}
+
+	public SqlValidator getQuerySqlValidator()
+	{
+		return querySqlValidator;
+	}
+
+	public void setQuerySqlValidator(SqlValidator querySqlValidator)
+	{
+		this.querySqlValidator = querySqlValidator;
 	}
 
 	@Override
@@ -133,7 +148,11 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 				sql.sqld(quote(dialect, name));
 
 				if (sqlParamValue instanceof LiteralSqlParamValue)
-					valueSql.sqld(addBracketIfSelectSql(((LiteralSqlParamValue) sqlParamValue).getValue()));
+				{
+					LiteralSqlParamValue lspv = (LiteralSqlParamValue) sqlParamValue;
+					validateQuerySql(cn, lspv.getValue());
+					valueSql.sqld(addBracketIfSelectSql(lspv.getValue()));
+				}
 				else
 					valueSql.sqld("?").param(sqlParamValue);
 			}
@@ -211,8 +230,11 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 					continue;
 
 				if (sqlParamValue instanceof LiteralSqlParamValue)
-					sql.sqld(quote(dialect, name) + "="
-							+ addBracketIfSelectSql(((LiteralSqlParamValue) sqlParamValue).getValue()));
+				{
+					LiteralSqlParamValue lspv = (LiteralSqlParamValue) sqlParamValue;
+					validateQuerySql(cn, lspv.getValue());
+					sql.sqld(quote(dialect, name) + "=" + addBracketIfSelectSql(lspv.getValue()));
+				}
 				else
 					sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
 
@@ -327,7 +349,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		{
 			sql.sql(buildUniqueRecordCondition(cn, dialect, table, param, sqlParamValueMapper, releasableRegistry));
 
-			List<Row> rows = executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, rowMapper);
+			List<Row> rows = executeListQueryValidation(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, rowMapper);
 
 			if (rows.size() == 1)
 				return rows.get(0);
@@ -357,7 +379,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		dialect = getDialect(cn, dialect);
 
 		Sql sql = buildQuerySql(cn, dialect, table, query, true);
-		return executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, mapper);
+		return executeListQueryValidation(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, mapper);
 	}
 
 	@Override
@@ -376,7 +398,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 		Sql queryView = buildQuerySql(cn, dialect, table, pagingQuery, true);
 
-		long total = queryCount(cn, queryView);
+		long total = executeCountQueryForQueryViewValidation(cn, queryView);
 
 		PagingData<Row> pagingData = new PagingData<>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
 
@@ -406,7 +428,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			query = dialect.toOrderSql(queryView, pagingQuery.getOrders());
 		}
 
-		rows = executeListQuery(cn, table, query, ResultSet.TYPE_SCROLL_INSENSITIVE, startRow, count, mapper);
+		rows = executeListQueryValidation(cn, table, query, ResultSet.TYPE_SCROLL_INSENSITIVE, startRow, count, mapper);
 
 		pagingData.setItems(rows);
 
@@ -430,15 +452,6 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		sql = dialect.toOrderSql(sql, query.getOrders());
 
 		return sql.getSqlValue();
-	}
-
-	protected long queryCount(Connection cn, Sql query)
-	{
-		Sql countQuery = Sql.valueOf().sql("SELECT COUNT(*) FROM (").sql(query).sql(") T");
-
-		long re = executeCountQueryWrap(cn, countQuery);
-
-		return re;
 	}
 
 	protected Sql buildQuerySql(Connection cn, Dialect dialect, Table table, Query query, boolean parameterized)
@@ -535,8 +548,11 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
 			if (sqlParamValue instanceof LiteralSqlParamValue)
-				sql.sqld(quote(dialect, name) + "="
-						+ addBracketIfSelectSql(((LiteralSqlParamValue) sqlParamValue).getValue()));
+			{
+				LiteralSqlParamValue lspv = (LiteralSqlParamValue) sqlParamValue;
+				validateQuerySql(cn, lspv.getValue());
+				sql.sqld(quote(dialect, name) + "=" + addBracketIfSelectSql(lspv.getValue()));
+			}
 			else if (sqlParamValue.hasValue())
 				sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
 			else
@@ -639,6 +655,53 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			return init;
 
 		return this.dialectSource.getDialect(cn);
+	}
+
+	protected List<Row> executeListQueryValidation(Connection cn, Table table, Sql sql, int resultSetType)
+			throws PersistenceException, SqlValidationException
+	{
+		validateQuerySql(cn, sql.getSqlValue());
+		return executeListQuery(cn, table, sql, resultSetType);
+	}
+
+	protected List<Row> executeListQueryValidation(Connection cn, Table table, Sql sql, int resultSetType,
+			RowMapper mapper)
+			throws PersistenceException, SqlValidationException
+	{
+		validateQuerySql(cn, sql.getSqlValue());
+		return executeListQuery(cn, table, sql, resultSetType, mapper);
+	}
+
+	protected List<Row> executeListQueryValidation(Connection cn, Table table, Sql sql, int resultSetType, int startRow,
+			int count, RowMapper mapper) throws PersistenceException, SqlValidationException
+	{
+		validateQuerySql(cn, sql.getSqlValue());
+		return executeListQuery(cn, table, sql, resultSetType, startRow, count, mapper);
+	}
+
+	public long executeCountQueryForQueryViewValidation(Connection cn, Sql queryView)
+			throws PersistenceException, SqlValidationException
+	{
+		validateQuerySql(cn, queryView.getSqlValue());
+		return executeCountQueryForQueryView(cn, queryView);
+	}
+
+	/**
+	 * 校验查询操作SQL。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @throws SqlValidationException
+	 */
+	protected void validateQuerySql(Connection cn, String sql) throws SqlValidationException
+	{
+		if (this.querySqlValidator == null)
+			return;
+
+		SqlValidation validation = this.querySqlValidator.validate(sql, DatabaseProfile.valueOf(cn));
+
+		if (!validation.isValid())
+			throw new SqlValidationException(sql, validation);
 	}
 
 	protected ReleasableRegistry createReleasableRegistry()

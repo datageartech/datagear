@@ -68,6 +68,20 @@ public class PersistenceSupport extends JdbcSupport
 	}
 
 	/**
+	 * 执行数目查询。
+	 * 
+	 * @param cn
+	 * @param queryView
+	 * @return
+	 * @throws PersistenceException
+	 */
+	public long executeCountQueryForQueryView(Connection cn, Sql queryView) throws PersistenceException
+	{
+		Sql countQuery = Sql.valueOf().sql("SELECT COUNT(*) FROM (").sql(queryView).sql(") T");
+		return executeCountQueryWrap(cn, countQuery);
+	}
+
+	/**
 	 * 执行更新。
 	 * 
 	 * @param cn

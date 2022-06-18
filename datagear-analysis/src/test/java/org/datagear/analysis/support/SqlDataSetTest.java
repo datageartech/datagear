@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
@@ -20,6 +21,8 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.SimpleConnectionFactory;
+import org.datagear.util.sqlvalidator.InvalidPatternSqlValidator;
+import org.datagear.util.sqlvalidator.SqlValidator;
 import org.datagear.util.test.DBTestSupport;
 import org.junit.Assert;
 import org.junit.Test;
@@ -71,6 +74,7 @@ public class SqlDataSetTest extends DBTestSupport
 
 			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetProperties, connectionFactory, sql);
 			sqlDataSet.setParams(dataSetParams);
+			sqlDataSet.setSqlValidator(createSqlValidator());
 
 			{
 				Map<String, Object> dataSetParamValues = new HashMap<>();
@@ -112,5 +116,15 @@ public class SqlDataSetTest extends DBTestSupport
 
 			JdbcUtil.closeConnection(cn);
 		}
+	}
+
+	protected SqlValidator createSqlValidator()
+	{
+		Map<String, Pattern> patterns = new HashMap<String, Pattern>();
+		patterns.put(InvalidPatternSqlValidator.DEFAULT_PATTERN_KEY,
+				InvalidPatternSqlValidator.toKeywordPattern("INSERT", "UPDATE", "DELETE", "TRUNCATE", "CREATE", "ALTER",
+						"DROP"));
+
+		return new InvalidPatternSqlValidator(patterns);
 	}
 }

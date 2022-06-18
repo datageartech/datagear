@@ -474,6 +474,8 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public PersistenceManager persistenceManager()
 	{
 		DefaultPersistenceManager bean = new DefaultPersistenceManager(this.dialectSource());
+		bean.setQuerySqlValidator(this.dsmanagerQueryInvalidPatternSqlValidator());
+
 		return bean;
 	}
 
@@ -776,6 +778,15 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	{
 		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
 				getApplicationProperties().getSqlDataSetInvalidSqlKeywords());
+
+		return bean;
+	}
+
+	@Bean
+	public InvalidPatternSqlValidator dsmanagerQueryInvalidPatternSqlValidator()
+	{
+		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
+				getApplicationProperties().getDsmanagerQueryInvalidSqlKeywords());
 
 		return bean;
 	}

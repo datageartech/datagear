@@ -42,6 +42,7 @@ import org.datagear.persistence.SqlParamValueMapperException;
 import org.datagear.persistence.support.NoColumnDefinedException;
 import org.datagear.persistence.support.SqlParamValueSqlExpressionException;
 import org.datagear.persistence.support.SqlParamValueVariableExpressionException;
+import org.datagear.persistence.support.SqlValidationException;
 import org.datagear.persistence.support.UnsupportedDialectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -204,6 +205,17 @@ public class ControllerAdvice extends AbstractController
 	{
 		String message = (exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage());
 		setOperationMessageForThrowable(request, buildMessageCode(UserSQLException.class), exception, false, message);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(SqlValidationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handlePersistenceSqlValidationException(HttpServletRequest request,
+			HttpServletResponse response, SqlValidationException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(SqlValidationException.class),
+				exception.getCause(), false, exception.getSqlValidation().getInvalidValue());
 
 		return getErrorView(request, response);
 	}
