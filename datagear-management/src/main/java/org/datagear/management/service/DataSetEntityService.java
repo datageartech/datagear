@@ -12,8 +12,10 @@ import java.io.File;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.support.ProfileDataSet;
+import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.management.domain.DataSetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.util.sqlvalidator.SqlValidator;
 
 /**
  * {@linkplain DataSetEntity}业务服务接口。
@@ -55,4 +57,11 @@ public interface DataSetEntityService extends DataPermissionEntityService<String
 	 * @return
 	 */
 	HttpClient getHttpClient();
+
+	/**
+	 * 获取用于{@linkplain SqlDataSet}校验SQL的{@linkplain SqlValidator}。
+	 * 
+	 * @return {@code null}表示没有
+	 */
+	SqlValidator getSqlDataSetSqlValidator();
 }

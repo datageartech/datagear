@@ -48,6 +48,7 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.util.CacheService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.sqlvalidator.SqlValidator;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -77,6 +78,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	private HttpClient httpClient;
 
 	private CacheService dataSetResourceDataCacheService = null;
+
+	private SqlValidator sqlDataSetSqlValidator;
 
 	public DataSetEntityServiceImpl()
 	{
@@ -199,6 +202,17 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
+	public SqlValidator getSqlDataSetSqlValidator()
+	{
+		return sqlDataSetSqlValidator;
+	}
+
+	public void setSqlDataSetSqlValidator(SqlValidator sqlDataSetSqlValidator)
+	{
+		this.sqlDataSetSqlValidator = sqlDataSetSqlValidator;
+	}
+
+	@Override
 	public File getDataSetDirectory(String dataSetId)
 	{
 		return FileUtil.getDirectory(getDataSetRootDirectory(), dataSetId);
@@ -216,6 +230,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 			if (connectionFactory != null)
 				connectionFactory.setConnectionSource(this.connectionSource);
+
+			sqlDataSetEntity.setSqlValidator(this.sqlDataSetSqlValidator);
 		}
 
 		if (entity instanceof AbstractResolvableResourceDataSet<?>)

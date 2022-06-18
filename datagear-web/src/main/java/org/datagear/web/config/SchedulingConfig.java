@@ -24,25 +24,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 public class SchedulingConfig
 {
-	private ApplicationProperties applicationProperties;
-
 	private CoreConfig coreConfig;
 
 	@Autowired
-	public SchedulingConfig(ApplicationProperties applicationProperties, CoreConfig coreConfig)
+	public SchedulingConfig(CoreConfig coreConfig)
 	{
-		this.applicationProperties = applicationProperties;
 		this.coreConfig = coreConfig;
-	}
-
-	public ApplicationProperties getApplicationProperties()
-	{
-		return applicationProperties;
-	}
-
-	public void setApplicationProperties(ApplicationProperties applicationProperties)
-	{
-		this.applicationProperties = applicationProperties;
 	}
 
 	public CoreConfig getCoreConfig()
@@ -58,7 +45,7 @@ public class SchedulingConfig
 	@Bean
 	public DirectoryCleaner tempDirectoryCleaner()
 	{
-		int expiredMinutes = this.applicationProperties
+		int expiredMinutes = this.coreConfig.getApplicationProperties()
 				.getCleanTempDirectoryExpiredMinutes();
 
 		DirectoryCleaner bean = new DirectoryCleaner(this.coreConfig.tempDirectory(), expiredMinutes);

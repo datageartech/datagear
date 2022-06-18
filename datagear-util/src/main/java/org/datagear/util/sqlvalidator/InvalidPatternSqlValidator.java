@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * </p>
  * <p>
  * {@linkplain #getPatterns()}映射表中关键字为{@linkplain #DEFAULT_PATTERN_KEY}的正则模式将优先用于任意{@linkplain DatabaseProfile}，
- * 其次是关键字为{@linkplain DatabaseProfile#getName()}子串的正则模式、关键字为{@linkplain DatabaseProfile#getUrl()}子串的正则模式。
+ * 其次是关键字为{@linkplain DatabaseProfile#getName()}子串的正则模式、关键字以{@linkplain DatabaseProfile#getUrl()}开头的正则模式。
  * </p>
  * 
  * @author datagear@163.com
@@ -107,7 +107,7 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 		if (dft != null)
 			patterns.add(dft);
 
-		findLikeKey(this.patterns, profile, patterns);
+		findMatchKey(this.patterns, profile, patterns);
 
 		return patterns;
 	}

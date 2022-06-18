@@ -22,6 +22,9 @@ import java.sql.Types;
  */
 public class JdbcUtil
 {
+	/** JDBC标准URL前缀 */
+	public static final String JDBC_URL_PREFIX = "jdbc:";
+
 	private JdbcUtil()
 	{
 		throw new UnsupportedOperationException();
@@ -442,5 +445,28 @@ public class JdbcUtil
 		{
 			return null;
 		}
+	}
+
+	/**
+	 * 获取标识符引用符。
+	 * 
+	 * @param cn
+	 * @return
+	 */
+	public static String getIdentifierQuote(Connection cn)
+	{
+		String iq;
+
+		try
+		{
+			iq = cn.getMetaData().getIdentifierQuoteString();
+		}
+		catch(Throwable e)
+		{
+			// 默认应为JDBC规范的空格
+			iq = " ";
+		}
+
+		return iq;
 	}
 }

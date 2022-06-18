@@ -7,6 +7,9 @@
 
 package org.datagear.util.sqlvalidator;
 
+import java.sql.Connection;
+
+import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
 
 /**
@@ -134,5 +137,22 @@ public class DatabaseProfile
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", url=" + url + ", identifierQuote=" + identifierQuote
 				+ "]";
+	}
+
+	/**
+	 * 由数据库连接构建{@linkplain DatabaseProfile}。
+	 * 
+	 * @param cn
+	 * @return
+	 */
+	public static DatabaseProfile valueOf(Connection cn)
+	{
+		DatabaseProfile p = new DatabaseProfile();
+
+		p.setName(JdbcUtil.getDatabaseProductNameIfSupports(cn));
+		p.setUrl(JdbcUtil.getURLIfSupports(cn));
+		p.setIdentifierQuote(JdbcUtil.getIdentifierQuote(cn));
+
+		return p;
 	}
 }

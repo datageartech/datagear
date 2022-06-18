@@ -12,6 +12,7 @@ import org.datagear.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -23,19 +24,28 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CacheServiceConfig
 {
-	private ApplicationProperties applicationProperties;
+	private ApplicationPropertiesConfig applicationPropertiesConfig;
 
 	private CacheManager cacheManager;
 
 	@Autowired
-	public CacheServiceConfig(ApplicationProperties applicationProperties)
+	public CacheServiceConfig(ApplicationPropertiesConfig applicationPropertiesConfig)
 	{
 		super();
-		this.applicationProperties = applicationProperties;
-
-		if (!this.applicationProperties.isCacheServiceDisabled())
-			this.cacheManager = createCacheManager();
+		this.applicationPropertiesConfig = applicationPropertiesConfig;
 	}
+	
+	@Bean
+	public CacheManager cacheServiceCacheManager()
+	{
+		CaffeineCacheManager bean = new CaffeineCacheManager();
+
+		if (!StringUtil.isEmpty(getApplicationProperties().getCacheServiceSpec()))
+			bean.setCacheSpecification(getApplicationProperties().getCacheServiceSpec());
+
+		return bean;
+	}
+	
 
 	public CacheService createCacheService(Class<?> cacheNameClass)
 	{
@@ -50,25 +60,21 @@ public class CacheServiceConfig
 	public CacheService createCacheService(String name)
 	{
 		CacheService cacheService = new CacheService();
+		ApplicationProperties applicationProperties = getApplicationProperties();
 		
 		cacheService
-				.setDisabled(this.applicationProperties.isCacheServiceDisabled() || this.cacheManager == null);
+				.setDisabled(applicationProperties.isCacheServiceDisabled() || this.cacheManager == null);
 		cacheService.setSerialized(false);
 		cacheService.setShared(false);
 		
-		if (this.cacheManager != null)
-			cacheService.setCache(this.cacheManager.getCache(name));
+		if (!applicationProperties.isCacheServiceDisabled())
+			cacheService.setCache(this.cacheServiceCacheManager().getCache(name));
 
 		return cacheService;
 	}
 
-	protected CacheManager createCacheManager()
+	protected ApplicationProperties getApplicationProperties()
 	{
-		CaffeineCacheManager bean = new CaffeineCacheManager();
-
-		if (!StringUtil.isEmpty(this.applicationProperties.getCacheServiceSpec()))
-			bean.setCacheSpecification(this.applicationProperties.getCacheServiceSpec());
-
-		return bean;
+		return this.applicationPropertiesConfig.applicationProperties();
 	}
 }

@@ -36,8 +36,9 @@ public class InvalidPatternSqlValidatorTest
 		Map<String, Pattern> patterns = new HashMap<String, Pattern>();
 		patterns.put(InvalidPatternSqlValidator.DEFAULT_PATTERN_KEY,
 				InvalidPatternSqlValidator.toKeywordPattern("DELETE", "ALTER"));
-		patterns.put("my", InvalidPatternSqlValidator.toKeywordPattern("exec", "use"));
+		patterns.put("mysql", InvalidPatternSqlValidator.toKeywordPattern("exec", "use"));
 		patterns.put("postgres", InvalidPatternSqlValidator.toKeywordPattern("DROP", "CREATE"));
+		patterns.put("jdbc://sqlserver", InvalidPatternSqlValidator.toKeywordPattern("dbo"));
 
 		InvalidPatternSqlValidator validator = new InvalidPatternSqlValidator(patterns);
 
@@ -73,6 +74,17 @@ public class InvalidPatternSqlValidatorTest
 			SqlValidation validation = validator.validate(sql, profile);
 
 			assertTrue(validation.isValid());
+		}
+
+		// URL匹配
+		{
+			String sql = "SELECT \"DELETE\", dbo.\"ALTER\" FROM TABLE WHERE VALUE='DROP'";
+			DatabaseProfile profile = new DatabaseProfile("SQL SERVER", "jdbc://sqlserver:1533", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertFalse(validation.isValid());
+			assertEquals("dbo", validation.getInvalidValue());
 		}
 
 		// "default"里的关键字不通过

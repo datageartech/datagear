@@ -34,6 +34,9 @@ import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
 import org.datagear.util.SqlType;
 import org.datagear.util.resource.ConnectionFactory;
+import org.datagear.util.sqlvalidator.DatabaseProfile;
+import org.datagear.util.sqlvalidator.SqlValidation;
+import org.datagear.util.sqlvalidator.SqlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +63,8 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	private ConnectionFactory connectionFactory;
 
 	private String sql;
+
+	private transient SqlValidator sqlValidator = null;
 
 	public SqlDataSet()
 	{
@@ -101,6 +106,16 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		this.sql = sql;
 	}
 
+	public SqlValidator getSqlValidator()
+	{
+		return sqlValidator;
+	}
+
+	public void setSqlValidator(SqlValidator sqlValidator)
+	{
+		this.sqlValidator = sqlValidator;
+	}
+
 	@Override
 	public TemplateResolvedDataSetResult resolve(DataSetQuery query)
 			throws DataSetException
@@ -126,6 +141,8 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			{
 				throw new SqlDataSetConnectionException(t);
 			}
+
+			validateSql(cn, sql);
 
 			Sql sqlObj = Sql.valueOf(sql);
 
@@ -178,6 +195,24 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 				}
 			}
 		}
+	}
+
+	/**
+	 * 校验SQL。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @throws SqlDataSetSqlValidationException
+	 */
+	protected void validateSql(Connection cn, String sql) throws SqlDataSetSqlValidationException
+	{
+		if (this.sqlValidator == null)
+			return;
+
+		SqlValidation validation = this.sqlValidator.validate(sql, DatabaseProfile.valueOf(cn));
+
+		if (!validation.isValid())
+			throw new SqlDataSetSqlValidationException(sql, validation);
 	}
 
 	/**

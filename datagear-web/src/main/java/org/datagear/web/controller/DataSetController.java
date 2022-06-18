@@ -854,6 +854,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		SchemaConnectionFactory connectionFactory = new SchemaConnectionFactory(getConnectionSource(), schema);
 		dataSet.setConnectionFactory(connectionFactory);
+		dataSet.setSqlValidator(this.dataSetEntityService.getSqlDataSetSqlValidator());
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 

@@ -7,6 +7,10 @@
 
 package org.datagear.web.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -25,9 +29,19 @@ public class ApplicationPropertiesConfig
 	}
 
 	@Bean
+	@ConfigurationProperties("sqldataset.invalidsqlkeywords")
+	public Map<String, String> sqlDataSetInvalidSqlKeywords()
+	{
+		return new HashMap<String, String>();
+	}
+
+	@Bean
 	public ApplicationProperties applicationProperties()
 	{
 		ApplicationPropertiesImpl bean = new ApplicationPropertiesImpl();
+
+		bean.setSqlDataSetInvalidSqlKeywords(this.sqlDataSetInvalidSqlKeywords());
+
 		return bean;
 	}
 

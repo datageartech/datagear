@@ -8,6 +8,8 @@
 package org.datagear.web.config;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 
@@ -167,6 +169,9 @@ public abstract class ApplicationProperties implements Serializable
 	/** 是否禁用登录验证码 */
 	@Value("${disableLoginCheckCode}")
 	private boolean disableLoginCheckCode;
+
+	/** SQL数据集的SQL关键字黑名单 */
+	private Map<String, String> sqlDataSetInvalidSqlKeywords = Collections.emptyMap();
 
 	public ApplicationProperties()
 	{
@@ -537,5 +542,15 @@ public abstract class ApplicationProperties implements Serializable
 	public void setDisableLoginCheckCode(boolean disableLoginCheckCode)
 	{
 		this.disableLoginCheckCode = disableLoginCheckCode;
+	}
+
+	public Map<String, String> getSqlDataSetInvalidSqlKeywords()
+	{
+		return sqlDataSetInvalidSqlKeywords;
+	}
+
+	public void setSqlDataSetInvalidSqlKeywords(Map<String, String> sqlDataSetInvalidSqlKeywords)
+	{
+		this.sqlDataSetInvalidSqlKeywords = sqlDataSetInvalidSqlKeywords;
 	}
 }

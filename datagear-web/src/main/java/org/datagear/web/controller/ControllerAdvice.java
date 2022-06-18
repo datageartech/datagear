@@ -18,6 +18,7 @@ import org.datagear.analysis.support.HeaderContentNotNameValueObjArrayJsonExcept
 import org.datagear.analysis.support.RequestContentNotNameValueObjArrayJsonException;
 import org.datagear.analysis.support.SqlDataSetConnectionException;
 import org.datagear.analysis.support.SqlDataSetSqlExecutionException;
+import org.datagear.analysis.support.SqlDataSetSqlValidationException;
 import org.datagear.analysis.support.SqlDataSetUnsupportedSqlTypeException;
 import org.datagear.analysis.support.TemplateResolverException;
 import org.datagear.analysis.support.UnsupportedJsonResultDataException;
@@ -469,6 +470,17 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetConnectionException.class), exception,
 				false, exception.getMessage());
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(SqlDataSetSqlValidationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisSqlDataSetSqlValidationException(HttpServletRequest request,
+			HttpServletResponse response, SqlDataSetSqlValidationException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetSqlValidationException.class), exception,
+				false, exception.getSqlValidation().getInvalidValue(), exception.getSql());
 
 		return getErrorView(request, response);
 	}

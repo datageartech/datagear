@@ -10,6 +10,8 @@ package org.datagear.analysis.support;
 import org.datagear.analysis.DataSetException;
 
 /**
+ * {@linkplain SqlDataSet}建立连接异常。
+ * 
  * @author datagear@163.com
  *
  */

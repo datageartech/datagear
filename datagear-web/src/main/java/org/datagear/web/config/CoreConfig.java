@@ -12,8 +12,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -101,7 +103,9 @@ import org.datagear.persistence.support.DefaultPersistenceManager;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.util.html.HtmlFilter;
+import org.datagear.util.sqlvalidator.InvalidPatternSqlValidator;
 import org.datagear.web.controller.LoginController;
 import org.datagear.web.controller.RegisterController;
 import org.datagear.web.format.DateFormatter;
@@ -157,30 +161,30 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	public static final String NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY = "dashboardGlobalResRootDirectory";
 
-	private ApplicationProperties applicationProperties;
+	private ApplicationPropertiesConfig applicationPropertiesConfig;
 
 	private DataSourceConfig dataSourceConfig;
 
 	private CacheServiceConfig cacheServiceConfig;
 
 	@Autowired
-	public CoreConfig(ApplicationProperties applicationProperties, DataSourceConfig dataSourceConfig,
+	public CoreConfig(ApplicationPropertiesConfig applicationPropertiesConfig, DataSourceConfig dataSourceConfig,
 			CacheServiceConfig cacheServiceConfig)
 	{
 		super();
-		this.applicationProperties = applicationProperties;
+		this.applicationPropertiesConfig = applicationPropertiesConfig;
 		this.dataSourceConfig = dataSourceConfig;
 		this.cacheServiceConfig = cacheServiceConfig;
 	}
 
-	public ApplicationProperties getApplicationProperties()
+	public ApplicationPropertiesConfig getApplicationPropertiesConfig()
 	{
-		return applicationProperties;
+		return applicationPropertiesConfig;
 	}
 
-	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	public void setApplicationPropertiesConfig(ApplicationPropertiesConfig applicationPropertiesConfig)
 	{
-		this.applicationProperties = applicationProperties;
+		this.applicationPropertiesConfig = applicationPropertiesConfig;
 	}
 
 	public DataSourceConfig getDataSourceConfig()
@@ -193,12 +197,12 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		this.dataSourceConfig = dataSourceConfig;
 	}
 
-	public CacheServiceConfig getServiceCacheConfig()
+	public CacheServiceConfig getCacheServiceConfig()
 	{
 		return cacheServiceConfig;
 	}
 
-	public void setServiceCacheConfig(CacheServiceConfig cacheServiceConfig)
+	public void setCacheServiceConfig(CacheServiceConfig cacheServiceConfig)
 	{
 		this.cacheServiceConfig = cacheServiceConfig;
 	}
@@ -288,55 +292,55 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public File driverEntityManagerRootDirectory()
 	{
-		return createDirectory(this.applicationProperties.getDirectoryDriver(), true);
+		return createDirectory(getApplicationProperties().getDirectoryDriver(), true);
 	}
 
 	@Bean
 	public File tempDirectory()
 	{
-		return createDirectory(this.applicationProperties.getDirectoryTemp(), true);
+		return createDirectory(getApplicationProperties().getDirectoryTemp(), true);
 	}
 
 	@Bean
 	public File chartPluginRootDirectory()
 	{
-		return createDirectory(this.applicationProperties.getDirectoryChartPlugin(), true);
+		return createDirectory(getApplicationProperties().getDirectoryChartPlugin(), true);
 	}
 
 	@Bean
 	public File dashboardRootDirectory()
 	{
-		return createDirectory(this.applicationProperties.getDirectoryDashboard(), true);
+		return createDirectory(getApplicationProperties().getDirectoryDashboard(), true);
 	}
 
 	@Bean(NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
 	public File dashboardGlobalResRootDirectory()
 	{
-		return createDirectory(this.applicationProperties.getDirectoryDashboardGlobalRes(), true);
+		return createDirectory(getApplicationProperties().getDirectoryDashboardGlobalRes(), true);
 	}
 
 	@Bean
 	public File resetPasswordCheckFileDirectory()
 	{
-		return createDirectory(this.applicationProperties.getDirectoryResetPasswordCheckFile(), true);
+		return createDirectory(getApplicationProperties().getDirectoryResetPasswordCheckFile(), true);
 	}
 
 	@Bean
 	public File dataSetRootDirectory()
 	{
-		return createDirectory(this.applicationProperties.getDirectoryDataSet(), true);
+		return createDirectory(getApplicationProperties().getDirectoryDataSet(), true);
 	}
 
 	@Bean
 	public File schemaUrlBuilderScriptFile()
 	{
-		return FileUtil.getFile(this.applicationProperties.getSchemaUrlBuilderScriptFile());
+		return FileUtil.getFile(getApplicationProperties().getSchemaUrlBuilderScriptFile());
 	}
 
 	@Bean
 	public File builtinChartPluginLastModifiedFile()
 	{
-		return FileUtil.getFile(this.applicationProperties.getBuiltinChartPluginLastModifiedFile());
+		return FileUtil.getFile(getApplicationProperties().getBuiltinChartPluginLastModifiedFile());
 	}
 
 	@Bean
@@ -394,7 +398,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public MbSqlDialectBuilder mbSqlDialectBuilder()
 	{
-		String dialectName = this.applicationProperties.getDatasourceDialect();
+		String dialectName = getApplicationProperties().getDatasourceDialect();
 
 		MbSqlDialectBuilder builder = new MbSqlDialectBuilder();
 		builder.setDialectName(dialectName);
@@ -558,6 +562,8 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		bean.setDataSetResourceDataCacheService(this.cacheServiceConfig
 				.createCacheService(DataSetEntityService.class.getName() + ".dataSetResourceDataCacheService"));
 
+		bean.setSqlDataSetSqlValidator(this.sqlDataSetInvalidPatternSqlValidator());
+
 		return bean;
 	}
 
@@ -649,8 +655,8 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public DashboardSharePasswordCrypto dashboardSharePasswordCrypto()
 	{
 		TextEncryptor textEncryptor = Encryptors.text(
-				this.applicationProperties.getDashboardSharePasswordCryptoSecretKey(),
-				this.applicationProperties.getDashboardSharePasswordCryptoSalt());
+				getApplicationProperties().getDashboardSharePasswordCryptoSecretKey(),
+				getApplicationProperties().getDashboardSharePasswordCryptoSalt());
 
 		DashboardSharePasswordCrypto bean = new DashboardSharePasswordCryptoImpl(textEncryptor);
 		return bean;
@@ -746,8 +752,8 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public IpLoginLatch ipLoginLatch()
 	{
-		AccessLatch accessLatch = new AccessLatch(this.applicationProperties.getIpLoginLatchSeconds(),
-				this.applicationProperties.getIpLoginLatchFrequency());
+		AccessLatch accessLatch = new AccessLatch(getApplicationProperties().getIpLoginLatchSeconds(),
+				getApplicationProperties().getIpLoginLatchFrequency());
 
 		IpLoginLatch bean = new IpLoginLatch(accessLatch);
 
@@ -757,10 +763,19 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public UsernameLoginLatch usernameLoginLatch()
 	{
-		AccessLatch accessLatch = new AccessLatch(this.applicationProperties.getUsernameLoginLatchSeconds(),
-				this.applicationProperties.getUsernameLoginLatchFrequency());
+		AccessLatch accessLatch = new AccessLatch(getApplicationProperties().getUsernameLoginLatchSeconds(),
+				getApplicationProperties().getUsernameLoginLatchFrequency());
 
 		UsernameLoginLatch bean = new UsernameLoginLatch(accessLatch);
+
+		return bean;
+	}
+
+	@Bean
+	public InvalidPatternSqlValidator sqlDataSetInvalidPatternSqlValidator()
+	{
+		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
+				getApplicationProperties().getSqlDataSetInvalidSqlKeywords());
 
 		return bean;
 	}
@@ -776,6 +791,33 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		initCacheServices(context);
 		initDevotedDataExchangeServices(context);
 		initUserServiceCreateUserEntityServices(context);
+	}
+
+	public ApplicationProperties getApplicationProperties()
+	{
+		return this.applicationPropertiesConfig.applicationProperties();
+	}
+
+	protected InvalidPatternSqlValidator buildInvalidPatternSqlValidator(Map<String, String> keywordsMap)
+	{
+		Map<String, Pattern> patterns = new HashMap<String, Pattern>();
+
+		for (Map.Entry<String, String> entry : keywordsMap.entrySet())
+		{
+			if (StringUtil.isEmpty(entry.getValue()))
+				continue;
+
+			String[] keywords = StringUtil.split(entry.getValue(), ",", true);
+			if (keywords.length > 0)
+			{
+				Pattern pattern = InvalidPatternSqlValidator.toKeywordPattern(keywords);
+				patterns.put(entry.getKey(), pattern);
+			}
+		}
+
+		InvalidPatternSqlValidator bean = new InvalidPatternSqlValidator(patterns);
+
+		return bean;
 	}
 
 	@SuppressWarnings("rawtypes")

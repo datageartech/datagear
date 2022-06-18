@@ -101,24 +101,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 
 	private CoreConfig coreConfig;
 
-	private ApplicationProperties applicationProperties;
-
 	@Autowired
-	public SecurityConfig(ApplicationProperties applicationProperties, CoreConfig coreConfig)
+	public SecurityConfig(CoreConfig coreConfig)
 	{
 		super();
-		this.applicationProperties = applicationProperties;
 		this.coreConfig = coreConfig;
-	}
-
-	public ApplicationProperties getApplicationProperties()
-	{
-		return applicationProperties;
-	}
-
-	public void setApplicationProperties(ApplicationProperties applicationProperties)
-	{
-		this.applicationProperties = applicationProperties;
 	}
 
 	public CoreConfig getCoreConfig()
@@ -160,7 +147,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
-		boolean disableAnonymous = this.applicationProperties.isDisableAnonymous();
+		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
 
 		// 默认是开启CSRF的，系统目前没有提供相关支持，因此需禁用
 		http.csrf().disable();
@@ -331,7 +318,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 		http.addFilterBefore(
 				new LoginLatchFilter(LOGIN_PROCESS_URL,
 						(AuthenticationFailureHandlerImpl) this.authenticationFailureHandler(),
-						this.applicationProperties, this.coreConfig.checkCodeManager()),
+						this.coreConfig.getApplicationProperties(), this.coreConfig.checkCodeManager()),
 				UsernamePasswordAuthenticationFilter.class);
 	}
 
@@ -345,7 +332,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	{
 		String anonymousAuthKey = UUID.randomUUID().toString();
 
-		String[] anonymousRoleIds = StringUtil.split(this.applicationProperties.getDefaultRoleAnonymous(), ",", true);
+		String[] anonymousRoleIds = StringUtil
+				.split(this.coreConfig.getApplicationProperties().getDefaultRoleAnonymous(), ",", true);
 		Set<String> anonymousRoleIdSet = new HashSet<>();
 		anonymousRoleIdSet.addAll(Arrays.asList(anonymousRoleIds));
 
