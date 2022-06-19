@@ -18,9 +18,13 @@ import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataImportListener;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.ExecuteDataImportSqlException;
+import org.datagear.dataexchange.SqlValidationException;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
+import org.datagear.util.sqlvalidator.DatabaseProfile;
+import org.datagear.util.sqlvalidator.SqlValidation;
+import org.datagear.util.sqlvalidator.SqlValidator;
 
 /**
  * SQL导入服务。
@@ -30,9 +34,21 @@ import org.datagear.util.SqlScriptParser.SqlStatement;
  */
 public class SqlDataImportService extends AbstractDevotedDataExchangeService<SqlDataImport>
 {
+	private SqlValidator sqlValidator;
+
 	public SqlDataImportService()
 	{
 		super();
+	}
+
+	public SqlValidator getSqlValidator()
+	{
+		return sqlValidator;
+	}
+
+	public void setSqlValidator(SqlValidator sqlValidator)
+	{
+		this.sqlValidator = sqlValidator;
 	}
 
 	@Override
@@ -65,11 +81,12 @@ public class SqlDataImportService extends AbstractDevotedDataExchangeService<Sql
 		SqlScriptParser sqlScriptParser = createSqlScriptParser(sqlReader);
 
 		SqlStatement sqlStatement = null;
+		DatabaseProfile databaseProfile = DatabaseProfile.valueOf(cn);
 
 		int index = 0;
 		while ((sqlStatement = sqlScriptParser.parseNext()) != null)
 		{
-			executeSqlStatement(dataExchange, cn, st, sqlStatement, index);
+			executeSqlStatement(dataExchange, cn, st, sqlStatement, index, databaseProfile);
 
 			index++;
 		}
@@ -83,11 +100,12 @@ public class SqlDataImportService extends AbstractDevotedDataExchangeService<Sql
 	 * @param st
 	 * @param sqlStatement
 	 * @param sqlIndex
+	 * @param databaseProfile
 	 * @return
 	 * @throws DataExchangeException
 	 */
 	protected boolean executeSqlStatement(SqlDataImport dataExchange, Connection cn, Statement st,
-			SqlStatement sqlStatement, int sqlIndex) throws DataExchangeException
+			SqlStatement sqlStatement, int sqlIndex, DatabaseProfile databaseProfile) throws DataExchangeException
 	{
 		DataImportListener listener = dataExchange.getListener();
 
@@ -95,17 +113,27 @@ public class SqlDataImportService extends AbstractDevotedDataExchangeService<Sql
 
 		DataExchangeException exception = null;
 
-		try
+		if (this.sqlValidator != null)
 		{
-			st.execute(sqlStatement.getSql());
+			SqlValidation validation = this.sqlValidator.validate(sqlStatement.getSql(), databaseProfile);
+			if (!validation.isValid())
+				exception = new SqlValidationException(sqlStatement.getSql(), validation);
 		}
-		catch (SQLException e)
+
+		if (exception == null)
 		{
-			exception = new ExecuteDataImportSqlException(dataIndex, e);
-		}
-		catch (Throwable t)
-		{
-			exception = wrapToDataExchangeException(t);
+			try
+			{
+				st.execute(sqlStatement.getSql());
+			}
+			catch(SQLException e)
+			{
+				exception = new ExecuteDataImportSqlException(dataIndex, e);
+			}
+			catch(Throwable t)
+			{
+				exception = wrapToDataExchangeException(t);
+			}
 		}
 
 		if (exception == null)

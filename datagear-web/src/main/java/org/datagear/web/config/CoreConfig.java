@@ -714,9 +714,12 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	{
 		List<DevotedDataExchangeService<?>> bean = new ArrayList<>();
 
+		SqlDataImportService sqlDataImportService = new SqlDataImportService();
+		sqlDataImportService.setSqlValidator(this.dsmanagerSqlimptSqlValidator());
+
 		bean.add(new CsvDataImportService(this.dbMetaResolver()));
 		bean.add(new CsvDataExportService(this.dbMetaResolver()));
-		bean.add(new SqlDataImportService());
+		bean.add(sqlDataImportService);
 		bean.add(new SqlDataExportService(this.dbMetaResolver()));
 		bean.add(new ExcelDataImportService(this.dbMetaResolver()));
 		bean.add(new ExcelDataExportService(this.dbMetaResolver()));
@@ -788,6 +791,15 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	{
 		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
 				getApplicationProperties().getDsmanagerQueryInvalidSqlKeywords());
+
+		return bean;
+	}
+
+	@Bean
+	public SqlValidator dsmanagerSqlimptSqlValidator()
+	{
+		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
+				getApplicationProperties().getDsmanagerSqlimptInvalidSqlKeywords());
 
 		return bean;
 	}

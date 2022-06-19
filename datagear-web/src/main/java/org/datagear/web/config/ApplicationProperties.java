@@ -176,6 +176,9 @@ public abstract class ApplicationProperties implements Serializable
 	/** 数据源管理查询操作SQL关键字黑名单 */
 	private Map<String, String> dsmanagerQueryInvalidSqlKeywords = Collections.emptyMap();
 
+	/** 数据源管理导入SQL操作SQL关键字黑名单 */
+	private Map<String, String> dsmanagerSqlimptInvalidSqlKeywords = Collections.emptyMap();
+
 	public ApplicationProperties()
 	{
 		super();
@@ -565,5 +568,15 @@ public abstract class ApplicationProperties implements Serializable
 	public void setDsmanagerQueryInvalidSqlKeywords(Map<String, String> dsmanagerQueryInvalidSqlKeywords)
 	{
 		this.dsmanagerQueryInvalidSqlKeywords = dsmanagerQueryInvalidSqlKeywords;
+	}
+
+	public Map<String, String> getDsmanagerSqlimptInvalidSqlKeywords()
+	{
+		return dsmanagerSqlimptInvalidSqlKeywords;
+	}
+
+	public void setDsmanagerSqlimptInvalidSqlKeywords(Map<String, String> dsmanagerSqlimptInvalidSqlKeywords)
+	{
+		this.dsmanagerSqlimptInvalidSqlKeywords = dsmanagerSqlimptInvalidSqlKeywords;
 	}
 }
