@@ -17,6 +17,7 @@ import org.datagear.dataexchange.ExecuteDataImportSqlException;
 import org.datagear.dataexchange.IllegalImportSourceValueException;
 import org.datagear.dataexchange.IndexDataExchangeException;
 import org.datagear.dataexchange.SetImportColumnValueException;
+import org.datagear.dataexchange.SqlValidationException;
 import org.datagear.dataexchange.TableNotFoundException;
 import org.datagear.dataexchange.UnsupportedExchangeException;
 import org.datagear.dataexchange.support.IllegalJsonDataFormatException;
@@ -205,6 +206,11 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 		{
 			IllegalJsonDataFormatException e1 = (IllegalJsonDataFormatException) e;
 			message = getI18nMessage(code, e1.getMessage());
+		}
+		else if (e instanceof SqlValidationException)
+		{
+			SqlValidationException e1 = (SqlValidationException) e;
+			message = getI18nMessage(code, e1.getSqlValidation().getInvalidValue());
 		}
 		else
 		{

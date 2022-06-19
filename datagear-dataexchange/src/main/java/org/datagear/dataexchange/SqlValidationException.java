@@ -5,9 +5,8 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-package org.datagear.persistence.support;
+package org.datagear.dataexchange;
 
-import org.datagear.persistence.PersistenceException;
 import org.datagear.util.sqlvalidator.SqlValidation;
 
 /**
@@ -16,7 +15,7 @@ import org.datagear.util.sqlvalidator.SqlValidation;
  * @author datagear@163.com
  *
  */
-public class SqlValidationException extends PersistenceException
+public class SqlValidationException extends DataExchangeException
 {
 	private static final long serialVersionUID = 1L;
 

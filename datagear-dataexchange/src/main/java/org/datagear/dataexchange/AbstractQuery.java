@@ -9,8 +9,13 @@ package org.datagear.dataexchange;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import org.datagear.util.JdbcSupport;
+import org.datagear.util.QueryResultSet;
+import org.datagear.util.Sql;
+import org.datagear.util.sqlvalidator.DatabaseProfile;
+import org.datagear.util.sqlvalidator.SqlValidation;
+import org.datagear.util.sqlvalidator.SqlValidator;
 
 /**
  * 抽象{@linkplain Query}。
@@ -18,25 +23,43 @@ import java.sql.Statement;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractQuery implements Query
+public abstract class AbstractQuery extends JdbcSupport implements Query
 {
+	private SqlValidator sqlValidator;
+
 	public AbstractQuery()
 	{
 		super();
 	}
 
+	public SqlValidator getSqlValidator()
+	{
+		return sqlValidator;
+	}
+
+	public void setSqlValidator(SqlValidator sqlValidator)
+	{
+		this.sqlValidator = sqlValidator;
+	}
+
 	/**
-	 * 执行SQL查询。
+	 * 执行查询，当{@linkplain #getSqlValidator()}不为{@code null}时，在查询前进行SQL校验。
 	 * 
 	 * @param cn
 	 * @param sql
 	 * @return
-	 * @throws SQLException
+	 * @throws SqlValidationException
+	 * @throws Throwable
 	 */
-	protected ResultSet executeQuery(Connection cn, String sql) throws SQLException
+	protected QueryResultSet executeQueryValidation(Connection cn, String sql) throws SqlValidationException, Throwable
 	{
-		Statement st = cn.createStatement();
+		if (this.sqlValidator != null)
+		{
+			SqlValidation validation = this.sqlValidator.validate(sql, DatabaseProfile.valueOf(cn));
+			if (!validation.isValid())
+				throw new SqlValidationException(sql, validation);
+		}
 
-		return st.executeQuery(sql);
+		return executeQuery(cn, Sql.valueOf(sql), ResultSet.TYPE_FORWARD_ONLY);
 	}
 }

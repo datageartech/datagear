@@ -16,6 +16,7 @@ import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Query;
+import org.datagear.util.JdbcUtil;
 import org.datagear.util.Sql;
 
 /**
@@ -68,7 +69,7 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 	@Override
 	public String quote(String name)
 	{
-		return this.identifierQuote + name + this.identifierQuote;
+		return JdbcUtil.quote(name, this.identifierQuote);
 	}
 
 	@Override

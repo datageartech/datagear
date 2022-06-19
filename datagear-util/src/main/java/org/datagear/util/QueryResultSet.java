@@ -7,6 +7,7 @@
 
 package org.datagear.util;
 
+import java.io.Closeable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -18,7 +19,7 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public class QueryResultSet
+public class QueryResultSet implements Closeable
 {
 	private Statement statement;
 
@@ -97,6 +98,7 @@ public class QueryResultSet
 	 * 此方法不会抛出任何{@linkplain Throwable}。
 	 * </p>
 	 */
+	@Override
 	public void close()
 	{
 		if (this.hasParam())

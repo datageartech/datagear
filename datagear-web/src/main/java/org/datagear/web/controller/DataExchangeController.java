@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.datagear.dataexchange.AbstractQuery;
 import org.datagear.dataexchange.BatchDataExchange;
 import org.datagear.dataexchange.BatchDataExchangeResult;
 import org.datagear.dataexchange.DataExchange;
@@ -84,6 +85,7 @@ import org.datagear.util.resource.FileOutputStreamResourceFactory;
 import org.datagear.util.resource.FileReaderResourceFactory;
 import org.datagear.util.resource.FileWriterResourceFactory;
 import org.datagear.util.resource.ResourceFactory;
+import org.datagear.util.sqlvalidator.SqlValidator;
 import org.datagear.web.dataexchange.MessageBatchDataExchangeListener;
 import org.datagear.web.dataexchange.MessageSubDataImportListener;
 import org.datagear.web.dataexchange.MessageSubTextDataExportListener;
@@ -124,6 +126,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 	private DBMetaResolver dbMetaResolver;
 
 	@Autowired
+	private SqlValidator dsmanagerQuerySqlValidator;
+
+	@Autowired
 	private File tempDirectory;
 
 	private MessageChannel messageChannel = new MessageChannel();
@@ -161,6 +166,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setDbMetaResolver(DBMetaResolver dbMetaResolver)
 	{
 		this.dbMetaResolver = dbMetaResolver;
+	}
+
+	public SqlValidator getDsmanagerQuerySqlValidator()
+	{
+		return dsmanagerQuerySqlValidator;
+	}
+
+	public void setDsmanagerQuerySqlValidator(SqlValidator dsmanagerQuerySqlValidator)
+	{
+		this.dsmanagerQuerySqlValidator = dsmanagerQuerySqlValidator;
 	}
 
 	public File getTempDirectory()
@@ -1561,10 +1576,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	protected Query toQuery(String query)
 	{
-		if (isTableNameQueryString(query))
-			return new TableQuery(query);
-		else
-			return new SqlQuery(query);
+		AbstractQuery re = (isTableNameQueryString(query) ? new TableQuery(query) : new SqlQuery(query));
+		re.setSqlValidator(this.dsmanagerQuerySqlValidator);
+		return re;
 	}
 
 	protected boolean isTableNameQueryString(String query)

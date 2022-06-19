@@ -34,6 +34,7 @@ import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.meta.Column;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.QueryResultSet;
 import org.datagear.util.resource.ConnectionFactory;
 
 /**
@@ -71,7 +72,10 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 		Connection cn = context.getConnection();
 		JdbcUtil.setReadonlyIfSupports(cn, true);
 
-		ResultSet rs = dataExchange.getQuery().execute(cn);
+		QueryResultSet qrs = dataExchange.getQuery().execute(cn);
+		context.addContextCloseable(qrs);
+
+		ResultSet rs = qrs.getResultSet();
 		List<Column> columns = getColumns(cn, rs);
 
 		writeRecords(dataExchange, cn, columns, rs, out, exportContext);

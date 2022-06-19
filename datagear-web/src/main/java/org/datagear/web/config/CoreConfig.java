@@ -106,6 +106,7 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.HtmlFilter;
 import org.datagear.util.sqlvalidator.InvalidPatternSqlValidator;
+import org.datagear.util.sqlvalidator.SqlValidator;
 import org.datagear.web.controller.LoginController;
 import org.datagear.web.controller.RegisterController;
 import org.datagear.web.format.DateFormatter;
@@ -474,7 +475,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public PersistenceManager persistenceManager()
 	{
 		DefaultPersistenceManager bean = new DefaultPersistenceManager(this.dialectSource());
-		bean.setQuerySqlValidator(this.dsmanagerQueryInvalidPatternSqlValidator());
+		bean.setQuerySqlValidator(this.dsmanagerQuerySqlValidator());
 
 		return bean;
 	}
@@ -564,7 +565,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		bean.setDataSetResourceDataCacheService(this.cacheServiceConfig
 				.createCacheService(DataSetEntityService.class.getName() + ".dataSetResourceDataCacheService"));
 
-		bean.setSqlDataSetSqlValidator(this.sqlDataSetInvalidPatternSqlValidator());
+		bean.setSqlDataSetSqlValidator(this.sqlDataSetSqlValidator());
 
 		return bean;
 	}
@@ -774,7 +775,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	}
 
 	@Bean
-	public InvalidPatternSqlValidator sqlDataSetInvalidPatternSqlValidator()
+	public SqlValidator sqlDataSetSqlValidator()
 	{
 		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
 				getApplicationProperties().getSqlDataSetInvalidSqlKeywords());
@@ -783,7 +784,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	}
 
 	@Bean
-	public InvalidPatternSqlValidator dsmanagerQueryInvalidPatternSqlValidator()
+	public SqlValidator dsmanagerQuerySqlValidator()
 	{
 		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
 				getApplicationProperties().getDsmanagerQueryInvalidSqlKeywords());

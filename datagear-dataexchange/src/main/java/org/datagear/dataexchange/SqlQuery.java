@@ -8,7 +8,8 @@
 package org.datagear.dataexchange;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
+
+import org.datagear.util.QueryResultSet;
 
 /**
  * SQL {@linkplain Query}。
@@ -42,8 +43,8 @@ public class SqlQuery extends AbstractQuery
 	}
 
 	@Override
-	public ResultSet execute(Connection cn) throws Throwable
+	public QueryResultSet execute(Connection cn) throws Throwable
 	{
-		return executeQuery(cn, this.sql);
+		return executeQueryValidation(cn, this.sql);
 	}
 }

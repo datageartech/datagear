@@ -29,7 +29,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.List;
+import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -932,7 +932,7 @@ public class IOUtil
 	 * 
 	 * @param list
 	 */
-	public static void closeIf(List<?> list)
+	public static void closeIf(Collection<?> list)
 	{
 		if (list == null)
 			return;

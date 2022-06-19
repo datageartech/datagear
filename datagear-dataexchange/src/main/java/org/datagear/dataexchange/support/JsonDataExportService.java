@@ -33,6 +33,7 @@ import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.meta.Column;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.QueryResultSet;
 
 /**
  * JSON导出服务。
@@ -79,7 +80,10 @@ public class JsonDataExportService extends AbstractDevotedDBMetaDataExchangeServ
 		Connection cn = context.getConnection();
 		JdbcUtil.setReadonlyIfSupports(cn, true);
 
-		ResultSet rs = dataExchange.getQuery().execute(cn);
+		QueryResultSet qrs = dataExchange.getQuery().execute(cn);
+		context.addContextCloseable(qrs);
+
+		ResultSet rs = qrs.getResultSet();
 		List<Column> columns = getColumns(cn, rs);
 
 		writeRecords(dataExchange, cn, columns, rs, jsonWriter, exportContext);

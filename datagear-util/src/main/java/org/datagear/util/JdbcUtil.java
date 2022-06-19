@@ -469,4 +469,33 @@ public class JdbcUtil
 
 		return iq;
 	}
+
+	/**
+	 * 给SQL标识符添加引号。
+	 * 
+	 * @param str
+	 * @param quote
+	 * @return
+	 */
+	public static String quote(String str, String quote)
+	{
+		// 字符串内的引号需进行转义
+		if (str.indexOf(quote) > -1)
+			str = str.replace(quote, quote + quote);
+
+		return quote + str + quote;
+	}
+
+	/**
+	 * 给SQL标识符添加引号。
+	 * 
+	 * @param str
+	 * @param cn
+	 * @return
+	 */
+	public static String quote(String str, Connection cn)
+	{
+		String quote = getIdentifierQuote(cn);
+		return quote(str, quote);
+	}
 }

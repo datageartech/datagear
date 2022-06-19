@@ -25,6 +25,7 @@ import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.meta.Column;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.QueryResultSet;
 
 /**
  * CSV导出服务。
@@ -63,7 +64,10 @@ public class CsvDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 		Connection cn = exportContext.getConnection();
 		JdbcUtil.setReadonlyIfSupports(cn, true);
 
-		ResultSet rs = dataExchange.getQuery().execute(cn);
+		QueryResultSet qrs = dataExchange.getQuery().execute(cn);
+		context.addContextCloseable(qrs);
+
+		ResultSet rs = qrs.getResultSet();
 
 		List<Column> columns = getColumns(cn, rs);
 		int columnCount = columns.size();

@@ -24,6 +24,7 @@ import org.datagear.meta.Column;
 import org.datagear.meta.PrimaryKey;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.QueryResultSet;
 
 /**
  * SQL导出服务。
@@ -61,7 +62,10 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 		Connection cn = context.getConnection();
 		JdbcUtil.setReadonlyIfSupports(cn, true);
 
-		ResultSet rs = dataExchange.getQuery().execute(cn);
+		QueryResultSet qrs = dataExchange.getQuery().execute(cn);
+		context.addContextCloseable(qrs);
+
+		ResultSet rs = qrs.getResultSet();
 		List<Column> columns = getColumns(cn, rs);
 
 		writeRecords(dataExchange, cn, columns, rs, sqlWriter, exportContext);

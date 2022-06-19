@@ -8,8 +8,9 @@
 package org.datagear.dataexchange;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
+
+import org.datagear.util.JdbcUtil;
+import org.datagear.util.QueryResultSet;
 
 /**
  * 表{@linkplain Query}。
@@ -43,14 +44,9 @@ public class TableQuery extends AbstractQuery
 	}
 
 	@Override
-	public ResultSet execute(Connection cn) throws Throwable
+	public QueryResultSet execute(Connection cn) throws Throwable
 	{
-		DatabaseMetaData metaData = cn.getMetaData();
-
-		String quote = metaData.getIdentifierQuoteString();
-
-		String sql = "SELECT * FROM " + quote + this.table + quote;
-
-		return executeQuery(cn, sql);
+		String sql = "SELECT * FROM " + JdbcUtil.quote(this.table, cn);
+		return executeQueryValidation(cn, sql);
 	}
 }

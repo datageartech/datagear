@@ -8,7 +8,8 @@
 package org.datagear.dataexchange;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
+
+import org.datagear.util.QueryResultSet;
 
 /**
  * 查询。
@@ -25,5 +26,5 @@ public interface Query
 	 * @return
 	 * @throws Throwable
 	 */
-	ResultSet execute(Connection cn) throws Throwable;
+	QueryResultSet execute(Connection cn) throws Throwable;
 }
