@@ -32,6 +32,8 @@ import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser.SqlStatement;
+import org.datagear.util.sqlvalidator.DatabaseProfile;
+import org.datagear.util.sqlvalidator.SqlValidation;
 import org.datagear.web.controller.SqlpadController.SqlpadFileDirectory;
 import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.OperationMessage;
@@ -54,7 +56,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	private SqlSelectManager sqlSelectManager;
 
-	private SqlPermissionChecker sqlPermissionChecker = new SqlPermissionChecker();
+	private SqlPermissionValidator sqlPermissionValidator = null;
 
 	private SchemaConnectionSupport schemaConnectionSupport = new SchemaConnectionSupport();
 
@@ -125,14 +127,14 @@ public class SqlpadExecutionService extends PersistenceSupport
 		this.sqlSelectManager = sqlSelectManager;
 	}
 
-	public SqlPermissionChecker getSqlPermissionChecker()
+	public SqlPermissionValidator getSqlPermissionValidator()
 	{
-		return sqlPermissionChecker;
+		return sqlPermissionValidator;
 	}
 
-	public void setSqlPermissionChecker(SqlPermissionChecker sqlPermissionChecker)
+	public void setSqlPermissionValidator(SqlPermissionValidator sqlPermissionValidator)
 	{
-		this.sqlPermissionChecker = sqlPermissionChecker;
+		this.sqlPermissionValidator = sqlPermissionValidator;
 	}
 
 	public SchemaConnectionSupport getSchemaConnectionSupport()
@@ -527,6 +529,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 			int totalCount = getSqlStatements().size();
 			SQLExecutionStat sqlExecutionStat = new SQLExecutionStat(totalCount);
 			SqlpadFileDirectory sqlpadFileDirectory = SqlpadFileDirectory.valueOf(getSqlpadFileDirectory());
+			SqlPermissionValidator sqlPermissionValidator = SqlpadExecutionService.this.sqlPermissionValidator;
+			DatabaseProfile databaseProfile = DatabaseProfile.valueOf(cn);
 
 			List<String> sqlHistories = new ArrayList<>();
 
@@ -538,12 +542,14 @@ public class SqlpadExecutionService extends PersistenceSupport
 						break;
 
 					SqlStatement sqlStatement = getSqlStatements().get(i);
+					SqlValidation sqlValidation = (sqlPermissionValidator == null ? null
+							: sqlPermissionValidator.validate(getUser(), getSchema(), sqlStatement, databaseProfile));
 
-					if (!SqlpadExecutionService.this.sqlPermissionChecker.hasPermission(getUser(), getSchema(),
-							sqlStatement))
+					if (sqlValidation != null && !sqlValidation.isValid())
 					{
 						sendSqlExceptionMessage(getSqlpadId(), sqlStatement, i,
-								getMessage(getLocale(), "sqlpad.executionSQLPermissionDenied"));
+								getMessage(getLocale(), "sqlpad.executionSQLPermissionDenied",
+										sqlValidation.getInvalidValue()));
 
 						sqlExecutionStat.increaseExceptionCount();
 					}

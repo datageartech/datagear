@@ -177,7 +177,16 @@ public abstract class ApplicationProperties implements Serializable
 	private Map<String, String> dsmanagerQueryInvalidSqlKeywords = Collections.emptyMap();
 
 	/** 数据源管理导入SQL操作SQL关键字黑名单 */
-	private Map<String, String> dsmanagerSqlimptInvalidSqlKeywords = Collections.emptyMap();
+	private Map<String, String> dsmanagerImptsqlInvalidSqlKeywords = Collections.emptyMap();
+
+	/** 数据源管理SQL工作台-读权限用户的SQL关键字黑名单 */
+	private Map<String, String> dsmanagerSqlpadReadInvalidSqlKeywords = Collections.emptyMap();
+
+	/** 数据源管理SQL工作台-写权限用户的SQL关键字黑名单 */
+	private Map<String, String> dsmanagerSqlpadEditInvalidSqlKeywords = Collections.emptyMap();
+
+	/** 数据源管理SQL工作台-删除权限用户的SQL关键字黑名单 */
+	private Map<String, String> dsmanagerSqlpadDeleteInvalidSqlKeywords = Collections.emptyMap();
 
 	public ApplicationProperties()
 	{
@@ -570,13 +579,43 @@ public abstract class ApplicationProperties implements Serializable
 		this.dsmanagerQueryInvalidSqlKeywords = dsmanagerQueryInvalidSqlKeywords;
 	}
 
-	public Map<String, String> getDsmanagerSqlimptInvalidSqlKeywords()
+	public Map<String, String> getDsmanagerImptsqlInvalidSqlKeywords()
 	{
-		return dsmanagerSqlimptInvalidSqlKeywords;
+		return dsmanagerImptsqlInvalidSqlKeywords;
 	}
 
-	public void setDsmanagerSqlimptInvalidSqlKeywords(Map<String, String> dsmanagerSqlimptInvalidSqlKeywords)
+	public void setDsmanagerImptsqlInvalidSqlKeywords(Map<String, String> dsmanagerImptsqlInvalidSqlKeywords)
 	{
-		this.dsmanagerSqlimptInvalidSqlKeywords = dsmanagerSqlimptInvalidSqlKeywords;
+		this.dsmanagerImptsqlInvalidSqlKeywords = dsmanagerImptsqlInvalidSqlKeywords;
+	}
+
+	public Map<String, String> getDsmanagerSqlpadReadInvalidSqlKeywords()
+	{
+		return dsmanagerSqlpadReadInvalidSqlKeywords;
+	}
+
+	public void setDsmanagerSqlpadReadInvalidSqlKeywords(Map<String, String> dsmanagerSqlpadReadInvalidSqlKeywords)
+	{
+		this.dsmanagerSqlpadReadInvalidSqlKeywords = dsmanagerSqlpadReadInvalidSqlKeywords;
+	}
+
+	public Map<String, String> getDsmanagerSqlpadEditInvalidSqlKeywords()
+	{
+		return dsmanagerSqlpadEditInvalidSqlKeywords;
+	}
+
+	public void setDsmanagerSqlpadEditInvalidSqlKeywords(Map<String, String> dsmanagerSqlpadEditInvalidSqlKeywords)
+	{
+		this.dsmanagerSqlpadEditInvalidSqlKeywords = dsmanagerSqlpadEditInvalidSqlKeywords;
+	}
+
+	public Map<String, String> getDsmanagerSqlpadDeleteInvalidSqlKeywords()
+	{
+		return dsmanagerSqlpadDeleteInvalidSqlKeywords;
+	}
+
+	public void setDsmanagerSqlpadDeleteInvalidSqlKeywords(Map<String, String> dsmanagerSqlpadDeleteInvalidSqlKeywords)
+	{
+		this.dsmanagerSqlpadDeleteInvalidSqlKeywords = dsmanagerSqlpadDeleteInvalidSqlKeywords;
 	}
 }

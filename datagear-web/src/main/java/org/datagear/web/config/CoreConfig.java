@@ -120,6 +120,7 @@ import org.datagear.web.json.jackson.LocaleSqlTimestampSerializer;
 import org.datagear.web.json.jackson.ObjectMapperBuilder;
 import org.datagear.web.json.jackson.ObjectMapperBuilder.JsonSerializerConfig;
 import org.datagear.web.security.UserPasswordEncoderImpl;
+import org.datagear.web.sqlpad.SqlPermissionValidator;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.util.ChangelogResolver;
 import org.datagear.web.util.CheckCodeManager;
@@ -702,10 +703,23 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	}
 
 	@Bean
+	public SqlPermissionValidator sqlPermissionValidator()
+	{
+		SqlPermissionValidator bean = new SqlPermissionValidator(
+				this.dsmanagerSqlpadReadSqlValidator(),
+				this.dsmanagerSqlpadEditSqlValidator(),
+				this.dsmanagerSqlpadDeleteSqlValidator());
+
+		return bean;
+	}
+
+	@Bean
 	public SqlpadExecutionService sqlpadExecutionService()
 	{
 		SqlpadExecutionService bean = new SqlpadExecutionService(this.connectionSource(), this.messageSource(),
 				this.sqlHistoryService(), this.sqlSelectManager());
+		bean.setSqlPermissionValidator(this.sqlPermissionValidator());
+
 		return bean;
 	}
 
@@ -715,7 +729,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		List<DevotedDataExchangeService<?>> bean = new ArrayList<>();
 
 		SqlDataImportService sqlDataImportService = new SqlDataImportService();
-		sqlDataImportService.setSqlValidator(this.dsmanagerSqlimptSqlValidator());
+		sqlDataImportService.setSqlValidator(this.dsmanagerImptsqlSqlValidator());
 
 		bean.add(new CsvDataImportService(this.dbMetaResolver()));
 		bean.add(new CsvDataExportService(this.dbMetaResolver()));
@@ -796,10 +810,37 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	}
 
 	@Bean
-	public SqlValidator dsmanagerSqlimptSqlValidator()
+	public SqlValidator dsmanagerImptsqlSqlValidator()
 	{
 		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
-				getApplicationProperties().getDsmanagerSqlimptInvalidSqlKeywords());
+				getApplicationProperties().getDsmanagerImptsqlInvalidSqlKeywords());
+
+		return bean;
+	}
+
+	@Bean
+	public SqlValidator dsmanagerSqlpadReadSqlValidator()
+	{
+		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
+				getApplicationProperties().getDsmanagerSqlpadReadInvalidSqlKeywords());
+
+		return bean;
+	}
+
+	@Bean
+	public SqlValidator dsmanagerSqlpadEditSqlValidator()
+	{
+		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
+				getApplicationProperties().getDsmanagerSqlpadEditInvalidSqlKeywords());
+
+		return bean;
+	}
+
+	@Bean
+	public SqlValidator dsmanagerSqlpadDeleteSqlValidator()
+	{
+		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
+				getApplicationProperties().getDsmanagerSqlpadDeleteInvalidSqlKeywords());
 
 		return bean;
 	}

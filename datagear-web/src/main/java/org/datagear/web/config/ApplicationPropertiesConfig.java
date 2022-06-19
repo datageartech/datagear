@@ -43,8 +43,29 @@ public class ApplicationPropertiesConfig
 	}
 
 	@Bean
-	@ConfigurationProperties("dsmanager.sqlimpt.invalidsqlkeywords")
-	public Map<String, String> dsmanagerSqlimptInvalidSqlKeywords()
+	@ConfigurationProperties("dsmanager.imptsql.invalidsqlkeywords")
+	public Map<String, String> dsmanagerImptsqlInvalidSqlKeywords()
+	{
+		return new HashMap<String, String>();
+	}
+
+	@Bean
+	@ConfigurationProperties("dsmanager.sqlpad.read.invalidsqlkeywords")
+	public Map<String, String> dsmanagerSqlpadReadInvalidSqlKeywords()
+	{
+		return new HashMap<String, String>();
+	}
+
+	@Bean
+	@ConfigurationProperties("dsmanager.sqlpad.edit.invalidsqlkeywords")
+	public Map<String, String> dsmanagerSqlpadEditInvalidSqlKeywords()
+	{
+		return new HashMap<String, String>();
+	}
+
+	@Bean
+	@ConfigurationProperties("dsmanager.sqlpad.delete.invalidsqlkeywords")
+	public Map<String, String> dsmanagerSqlpadDeleteInvalidSqlKeywords()
 	{
 		return new HashMap<String, String>();
 	}
@@ -56,7 +77,10 @@ public class ApplicationPropertiesConfig
 
 		bean.setSqlDataSetInvalidSqlKeywords(this.sqlDataSetInvalidSqlKeywords());
 		bean.setDsmanagerQueryInvalidSqlKeywords(this.dsmanagerQueryInvalidSqlKeywords());
-		bean.setDsmanagerSqlimptInvalidSqlKeywords(this.dsmanagerSqlimptInvalidSqlKeywords());
+		bean.setDsmanagerImptsqlInvalidSqlKeywords(this.dsmanagerImptsqlInvalidSqlKeywords());
+		bean.setDsmanagerSqlpadReadInvalidSqlKeywords(this.dsmanagerSqlpadReadInvalidSqlKeywords());
+		bean.setDsmanagerSqlpadEditInvalidSqlKeywords(this.dsmanagerSqlpadEditInvalidSqlKeywords());
+		bean.setDsmanagerSqlpadDeleteInvalidSqlKeywords(this.dsmanagerSqlpadDeleteInvalidSqlKeywords());
 
 		return bean;
 	}
