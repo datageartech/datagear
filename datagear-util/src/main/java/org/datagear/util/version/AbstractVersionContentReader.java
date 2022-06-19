@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.datagear.util.IOUtil;
+
 /**
  * 抽象版本内容读取器。
  * <p>
@@ -23,7 +25,7 @@ import java.util.List;
  */
 public abstract class AbstractVersionContentReader
 {
-	public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+	public static final String LINE_SEPARATOR = IOUtil.LINE_SEPARATOR;
 
 	/** UTF-8编码 */
 	public static final String ENCODING_UTF8 = "UTF-8";

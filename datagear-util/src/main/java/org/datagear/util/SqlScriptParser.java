@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  */
 public class SqlScriptParser
 {
-	public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+	public static final String LINE_SEPARATOR = IOUtil.LINE_SEPARATOR;
 
 	public static final char DEFAULT_DELIMITER_CHAR = ';';
 

@@ -11,7 +11,6 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +22,7 @@ import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.meta.Column;
 import org.datagear.meta.PrimaryKey;
 import org.datagear.meta.resolver.DBMetaResolver;
+import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.QueryResultSet;
 
@@ -34,7 +34,7 @@ import org.datagear.util.QueryResultSet;
  */
 public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeService<SqlDataExport>
 {
-	public static final String LINE_SEPARATOR = "\r\n";
+	public static final String LINE_SEPARATOR = IOUtil.LINE_SEPARATOR;
 
 	public SqlDataExportService()
 	{
@@ -90,6 +90,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 
 		DatabaseMetaData metaData = cn.getMetaData();
 		String quote = metaData.getIdentifierQuoteString();
+		String tableNameQuote = JdbcUtil.quoteIfNon(dataExchange.getTableName(), quote);
 
 		if (exportOption.isExportCreationSql())
 			writeCreationSql(dataExchange, cn, columns, rs, quote, out, exportContext);
@@ -101,9 +102,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 			exportContext.setDataIndex(RowDataIndex.valueOf(row));
 
 			out.write("INSERT INTO ");
-			out.write(quote);
-			out.write(dataExchange.getTableName());
-			out.write(quote);
+			out.write(tableNameQuote);
 			out.write(" (");
 
 			for (int i = 0; i < columnCount; i++)
@@ -113,9 +112,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 				if (i > 0)
 					out.write(",");
 
-				out.write(quote);
-				out.write(column.getName());
-				out.write(quote);
+				out.write(JdbcUtil.quote(column.getName(), quote));
 			}
 
 			out.write(") VALUES(");
@@ -154,7 +151,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 				else if (isSqlStringType(column.getType()))
 				{
 					out.write('\'');
-					out.write(escapeSqlStringValue(value));
+					out.write(JdbcUtil.escapeString(value));
 					out.write('\'');
 				}
 				else
@@ -188,9 +185,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 			String quote, Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
 	{
 		out.write("CREATE TABLE ");
-		out.write(quote);
-		out.write(dataExchange.getTableName());
-		out.write(quote);
+		out.write(JdbcUtil.quoteIfNon(dataExchange.getTableName(), quote));
 		out.write(LINE_SEPARATOR);
 		out.write('(');
 		out.write(LINE_SEPARATOR);
@@ -203,9 +198,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 			Column column = columns.get(i);
 
 			out.write("  ");
-			out.write(quote);
-			out.write(column.getName());
-			out.write(quote);
+			out.write(JdbcUtil.quote(column.getName(), quote));
 			out.write(' ');
 
 			out.write(column.getTypeName());
@@ -242,9 +235,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 
 			for (int i = 0, len = filterPkNames.size(); i < len; i++)
 			{
-				out.write(quote);
-				out.write(filterPkNames.get(i));
-				out.write(quote);
+				out.write(JdbcUtil.quote(filterPkNames.get(i), quote));
 
 				if (i < len - 1)
 					out.write(',');
@@ -295,23 +286,6 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 		return names;
 	}
 
-	protected String escapeSqlStringValue(String value)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		char[] cs = value.toCharArray();
-
-		for (char c : cs)
-		{
-			if (c == '\'')
-				sb.append("''");
-			else
-				sb.append(c);
-		}
-
-		return sb.toString();
-	}
-
 	/**
 	 * 是否是SQL字符串类型。
 	 * 
@@ -320,8 +294,6 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 	 */
 	protected boolean isSqlStringType(int sqlType)
 	{
-		return (Types.CHAR == sqlType || Types.VARCHAR == sqlType || Types.LONGVARCHAR == sqlType
-				|| Types.CLOB == sqlType || Types.NCHAR == sqlType || Types.NVARCHAR == sqlType
-				|| Types.LONGNVARCHAR == sqlType || Types.NCLOB == sqlType || Types.SQLXML == sqlType);
+		return JdbcUtil.isTextType(sqlType);
 	}
 }

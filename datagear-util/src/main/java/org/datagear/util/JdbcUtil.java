@@ -498,4 +498,45 @@ public class JdbcUtil
 		String quote = getIdentifierQuote(cn);
 		return quote(str, quote);
 	}
+
+	/**
+	 * 如果没有，则给SQL标识符添加引号。
+	 * 
+	 * @param str
+	 * @param quote
+	 * @return
+	 */
+	public static String quoteIfNon(String str, String quote)
+	{
+		if(str.length() < quote.length()*2)
+			return quote(str, quote);
+		
+		if (str.startsWith(quote) && str.endsWith(quote))
+			return str;
+
+		return quote(str, quote);
+	}
+
+	/**
+	 * 转义SQL字符串。
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static String escapeString(String value)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		char[] cs = value.toCharArray();
+
+		for (char c : cs)
+		{
+			if (c == '\'')
+				sb.append("''");
+			else
+				sb.append(c);
+		}
+
+		return sb.toString();
+	}
 }
