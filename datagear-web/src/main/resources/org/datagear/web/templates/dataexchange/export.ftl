@@ -114,6 +114,9 @@ Schema schema 数据库，不允许为null
 	po.element("input[type=radio]").checkboxradio({icon:true});
 	po.elementOfId("${pageId}-dataType-0").click();
 	
+	//表单提交不需刷新父页面
+	po.defaultSubmitSuccess = null;
+	
 	<#if isAjaxRequest>
 	po.validateAjaxForm({},
 	{
