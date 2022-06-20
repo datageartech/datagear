@@ -26,7 +26,7 @@ public class SqlDataSetSqlValidationException extends DataSetException
 
 	public SqlDataSetSqlValidationException(String sql, SqlValidation sqlValidation)
 	{
-		super("SQL validation exception: " + sqlValidation.getInvalidValue());
+		super(sqlValidation.getInvalidMessage());
 		this.sql = sql;
 		this.sqlValidation = sqlValidation;
 	}

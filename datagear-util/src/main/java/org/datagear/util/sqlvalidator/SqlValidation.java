@@ -57,4 +57,9 @@ public class SqlValidation implements Serializable
 	{
 		this.invalidValue = invalidValue;
 	}
+
+	public String getInvalidMessage()
+	{
+		return "Invalid SQL : " + getInvalidValue();
+	}
 }
