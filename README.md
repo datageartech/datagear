@@ -20,7 +20,7 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 
 ## 系统特点
 
-- 友好的数据源接入
+- 友好接入的数据源
 <br>支持运行时接入任意提供JDBC驱动的数据库，包括MySQL、Oracle、PostgreSQL、SQL Server等关系数据库，以及Elasticsearch、ClickHouse、Hive等大数据引擎
 
 - 多样动态的数据集
@@ -34,7 +34,7 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 
 ## 架构图
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/architecture.png](https://gitee.com/datagear/datagear/raw/master/screenshot/architecture.png)
+![screenshot/architecture.png](screenshot/architecture.png)
 
 ## 官网
 
@@ -64,39 +64,39 @@ QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[11283
 
 图表类型
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/chart.png](https://gitee.com/datagear/datagear/raw/master/screenshot/chart.png)
+![screenshot/chart.png](screenshot/chart.png)
 
 看板-可视编辑模式
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-visual-mode.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-visual-mode.gif)
+![screenshot/dashboard-visual-mode.gif](screenshot/dashboard-visual-mode.gif)
 
 看板展示
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/template-002-dg.png](https://gitee.com/datagear/datagear/raw/master/screenshot/template-002-dg.png)
+![screenshot/template-002-dg.png](screenshot/template-002-dg.png)
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/template-005-dg.png](https://gitee.com/datagear/datagear/raw/master/screenshot/template-005-dg.png)
+![screenshot/template-005-dg.png](screenshot/template-005-dg.png)
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/template-006-dg.png](https://gitee.com/datagear/datagear/raw/master/screenshot/template-006-dg.png)
+![screenshot/template-006-dg.png](screenshot/template-006-dg.png)
 
 看板展示-图表联动
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-link.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-link.gif)
+![screenshot/dashboard-map-chart-link.gif](screenshot/dashboard-map-chart-link.gif)
 
 看板展示-实时图表
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-time-series-chart.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-time-series-chart.gif)
+![screenshot/dashboard-time-series-chart.gif](screenshot/dashboard-time-series-chart.gif)
 
 看板展示-钻取
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-hierarchy.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-hierarchy.gif)
+![screenshot/dashboard-map-chart-hierarchy.gif](screenshot/dashboard-map-chart-hierarchy.gif)
 
 看板展示-表单
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-form.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-form.gif)
+![screenshot/dashboard-form.gif](screenshot/dashboard-form.gif)
 
 看板展示-联动异步加载图表
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif)
+![screenshot/dashboard-link-load-chart.gif](screenshot/dashboard-link-load-chart.gif)
 
 ## 模块介绍
 
