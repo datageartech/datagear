@@ -406,7 +406,7 @@
 	chartBase._initTheme = function()
 	{
 		var globalTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
-		var globalRawTheme = globalTheme._GLOBAL_RAW_CHART_THEME;
+		var globalRawTheme = (globalTheme ? globalTheme._GLOBAL_RAW_CHART_THEME : null);
 		
 		if(!globalTheme || !globalRawTheme)
 			throw new Error("chartFactory.initRenderContext() must be called first");
@@ -415,20 +415,15 @@
 		
 		if(eleThemeValue)
 		{
-			var eleThemeObj = chartFactory.evalSilently(eleThemeValue, {});
-			chartFactory._inflateActualBackgroundColor(eleThemeObj);
-			chartFactory._inflateChartThemeIf(eleThemeObj);
-			
-			var eleTheme = $.extend(true, {}, globalRawTheme, eleThemeObj);
-			chartFactory._inflateChartThemeIf(eleTheme);
-			
+			var eleTheme = chartFactory.evalSilently(eleThemeValue, {});
 			//将主题标识为局部主题
-			eleTheme._IS_LOCAL_CHART_THEME=true;
+			if(chartFactory.isJsonString(eleThemeValue))
+				eleTheme._IS_LOCAL_CHART_THEME = true;
 			
 			this.theme(eleTheme);
 		}
 		else
-			this.theme(globalTheme);
+			this.theme(globalTheme, false);
 	};
 	
 	/**
@@ -672,13 +667,36 @@
 	 * 图表渲染器应使用此函数获取并应用图表主题，另参考：chart.gradualColor()。
 	 * 
 	 * @param theme 可选，要设置的图表主题，没有则执行获取操作
+	 * @param inflate 可选，是否填充设置的图表主题，使其仅需设置部分属性即可，默认为：true
 	 */
-	chartBase.theme = function(theme)
+	chartBase.theme = function(theme, inflate)
 	{
 		if(theme === undefined)
 			return this._theme;
 		else
+		{
+			if(inflate !== false)
+			{
+				var globalTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
+				var globalRawTheme = (globalTheme ? globalTheme._GLOBAL_RAW_CHART_THEME : null);
+				
+				if(!globalTheme || !globalRawTheme)
+					throw new Error("chartFactory.initRenderContext() must be called first");
+				
+				if(theme !== globalTheme)
+				{
+					chartFactory._inflateActualBackgroundColor(theme);
+					chartFactory._inflateChartThemeIf(theme);
+					
+					var extTheme = $.extend(true, {}, globalRawTheme, theme);
+					chartFactory._inflateChartThemeIf(extTheme);
+					
+					$.extend(theme, extTheme);
+				}
+			}
+			
 			this._theme = theme;
+		}
 	};
 	
 	/**
@@ -5193,6 +5211,12 @@
 	chartFactory.toJsonString = function(obj)
 	{
 		return JSON.stringify(obj);
+	};
+	
+	chartFactory.isJsonString = function(str)
+	{
+		//以'{'或'['开头
+		return (chartFactory.isString(str) && /^\s*[\{\[]/.test(str));
 	};
 	
 	/**内置名字标识片段*/

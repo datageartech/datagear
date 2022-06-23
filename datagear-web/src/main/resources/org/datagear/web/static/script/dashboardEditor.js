@@ -2453,8 +2453,7 @@
 	
 	editor._isJsonString = function(str)
 	{
-		//以'{'或'['开头
-		return (chartFactory.isString(str) && /^\s*[\{\[]/.test(str));
+		return chartFactory.isJsonString(str);
 	};
 	
 	/**
