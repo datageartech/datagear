@@ -5219,6 +5219,12 @@
 		return (chartFactory.isString(str) && /^\s*[\{\[]/.test(str));
 	};
 	
+	//是否是DOM元素或Jquery对象
+	chartFactory.isDomOrJquery = function(obj)
+	{
+		return (obj && ((obj.nodeType != null && obj.nodeName != null) || (obj instanceof jQuery)));
+	};
+	
 	/**内置名字标识片段*/
 	chartFactory._BUILT_IN_NAME_PART = "datagear";
 	

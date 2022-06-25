@@ -1971,23 +1971,33 @@
 	};
 	
 	/**
-	 * 将页面中所有设置了"dg-chart-widget"属性，且未初始化为图表的HTML元素异步加载为图表。
+	 * 将元素内所有设置了"dg-chart-widget"属性，且未初始化为图表的HTML元素异步加载为图表。
 	 * 如果没有需要加载的元素，将不会执行异步请求。
-	 *
-	 * @param ajaxOptions 选填参数，参数格式可以是图表数组加载成功回调函数：function(charts){ ... }，也可以是ajax配置项：{...}。
+	 * 
+	 * @param element 可选，限定查找的根HTML元素、Jquery对象，默认为：<body>
+	 * @param ajaxOptions 可选，参数格式可以是图表数组加载成功回调函数：function(charts){ ... }，也可以是ajax配置项：{...}。
 	 * 					  如果图表数组加载成功回调函数、ajax配置项的success函数返回false，则这些图表不会加入此看板。
 	 * @return 要异步加载的HTML元素数组
 	 */
-	dashboardBase.loadUnsolvedCharts = function(ajaxOptions)
+	dashboardBase.loadUnsolvedCharts = function(element, ajaxOptions)
 	{
+		//(ajaxOptions)
+		if(arguments.length == 1 && !chartFactory.isDomOrJquery(element))
+		{
+			ajaxOptions = element;
+			element = undefined;
+		}
+		
+		element = (element == null ? document.body : element);
+		
 		this._assertInitialized();
 		
 		var unsolved = [];
 		
-		var allElements = $("["+chartFactory.elementAttrConst.WIDGET+"]");
+		var subEles = $("["+chartFactory.elementAttrConst.WIDGET+"]", element);
 		var dashboard = this;
 		
-		allElements.each(function()
+		subEles.each(function()
 		{
 			if(dashboard._loadingChartElement(this))
 				return;
