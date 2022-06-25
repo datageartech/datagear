@@ -34,7 +34,7 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <code>
  * <pre>
  * ...
- * &lt;html dg-dashboard-factory="..." dg-dashboard-var="..." dg-dashboard-import-exclude="..."&gt;
+ * &lt;html dg-dashboard-factory="..." dg-dashboard-var="..." dg-dashboard-unimport="..."&gt;
  * ...
  * &lt;head&gt;
  * ...
@@ -55,7 +55,7 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <code>html dg-dashboard-var</code>：选填，定义看板JS对象的变量名，默认为{@linkplain #getDefaultDashboardVar()}
  * </p>
  * <p>
- * <code>html dg-dashboard-import-exclude</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardWidgetRenderer#getDashboardImports()}），多个以“,”隔开
+ * <code>html dg-dashboard-unimport</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardWidgetRenderer#getDashboardImports()}），多个以“,”隔开
  * </p>
  * <p>
  * <code>div id</code>：选填，定义图表元素ID，如果不填，则会自动生成一个
@@ -80,7 +80,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			+ "dashboard-factory";
 
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE = DASHBOARD_ELEMENT_ATTR_PREFIX
-			+ "dashboard-import-exclude";
+			+ "dashboard-unimport";
 
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-widget";
 

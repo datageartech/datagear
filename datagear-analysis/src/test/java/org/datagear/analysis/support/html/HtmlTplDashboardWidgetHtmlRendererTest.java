@@ -88,7 +88,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		// 看板属性，双引号
 		{
 			String template = "<html dg-dashboard-var=\"myDashboard\" dg-dashboard-factory=\"myDashboardFactory\" "
-					+ " dg-dashboard-import-exclude=\"jquery\"><head></head><body></body></html>";
+					+ " dg-dashboard-unimport=\"jquery\"><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
 			StringWriter out = new StringWriter();
@@ -116,7 +116,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		// 看板属性，无引号
 		{
 			String template = "<html dg-dashboard-var=myDashboard dg-dashboard-factory=myDashboardFactory "
-					+ " dg-dashboard-import-exclude=jquery><head></head><body></body></html>";
+					+ " dg-dashboard-unimport=jquery><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
 			StringWriter out = new StringWriter();
@@ -144,7 +144,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		// 看板属性，单引号
 		{
 			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-factory='myDashboardFactory' "
-					+ " dg-dashboard-import-exclude='jquery'><head></head><body></body></html>";
+					+ " dg-dashboard-unimport='jquery'><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
 			StringWriter out = new StringWriter();
@@ -172,7 +172,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		// 看板属性，多个导入排除值
 		{
 			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-factory='myDashboardFactory' "
-					+ " dg-dashboard-import-exclude='jquery,theme, style'><head></head><body></body></html>";
+					+ " dg-dashboard-unimport='jquery,theme, style'><head></head><body></body></html>";
 
 			RenderContext renderContext = new DefaultRenderContext();
 			StringWriter out = new StringWriter();
