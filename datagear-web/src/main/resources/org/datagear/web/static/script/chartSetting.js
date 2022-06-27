@@ -135,16 +135,12 @@
 		for(var i=0; i<dataSetParams.length; i++)
 		{
 			var dsp = dataSetParams[i];
-			var labelText = (dsp.label ? dsp.label : dsp.name) + options.labelColon;
 			var value = paramValues[dsp.name];
 			
 			var $item = $("<div class='dg-dspv-form-item' />").appendTo($content);
 			
 			var $labelDiv = $("<div class='dg-dspv-form-item-label' />").appendTo($item);
-			var $label = $("<label />").html(labelText).appendTo($labelDiv);
-			
-			if(dsp.desc)
-				$label.attr("title", dsp.desc);
+			chartSetting.renderDataSetParamValueFormLabel($form, $labelDiv, dsp, options);
 			
 			var $valueDiv = $("<div class='dg-dspv-form-item-value' />").appendTo($item);
 			
@@ -348,6 +344,23 @@
 			
 			return css;
 		});
+	};
+	
+	/**
+	 * 渲染表单项标签。
+	 * 
+	 * @param $form
+	 * @param $parent 渲染标签的父容器元素
+	 * @param dataSetParam
+	 * @param options 
+	 */
+	chartSetting.renderDataSetParamValueFormLabel = function($form, $parent, dataSetParam, options)
+	{
+		var $label = $("<label />").html((dataSetParam.label ? dataSetParam.label : dataSetParam.name) + options.labelColon)
+							.appendTo($parent);
+		
+		if(dataSetParam.desc)
+			$label.attr("title", dataSetParam.desc);
 	};
 	
 	/**
