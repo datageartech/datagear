@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<link href="../static/lib/primevue@3.15.0/resources/themes/bootstrap4-light-blue/theme.css" rel="stylesheet" />
+<!--
+<link href="../static/lib/primevue@3.15.0/resources/themes/saga-blue/theme.css" rel="stylesheet" />
+-->
+<link href="../static/lib/primevue@3.15.0/resources/primevue.min.css" rel="stylesheet" />
+<link href="../static/lib/primeicons@5.0.0/primeicons.css" rel="stylesheet" />
+<link href="../static/lib/primeflex@3.1.2/primeflex.min.css" rel="stylesheet" />
+<script src="../static/lib/vue@3.2.36/vue.global.prod.js"></script>
+<script src="../static/lib/primevue@3.15.0/core/core.min.js"></script>
+<script src="../static/lib/primevue@3.15.0/tabmenu/tabmenu.min.js"></script>
+<script src="../static/lib/primevue@3.15.0/card/card.min.js"></script>
+<script src="../static/lib/primevue@3.15.0/datatable/datatable.min.js"></script>
+<script src="../static/lib/primevue@3.15.0/column/column.min.js"></script>
+<style>
+.grid {
+	box-sizing: border-box;
+}
+.root-menu.p-tabmenu {
+	display: inline-block;
+	padding: 0.25em;
+	box-sizing: border-box;
+}
+.root-menu.p-tabmenu .p-tabmenu-nav {
+	flex-direction: column;
+	background-color: var(--surface-card);
+	border: 0;
+}
+.root-menu.p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link,
+.root-menu.p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
+	border-width: 0 !important;
+}
+.root-menu.p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link .p-menuitem-icon {
+	margin-right: 0;
+}
+.root-menu .p-tabmenu-nav .p-menuitem-text {
+	display: none;
+}
+.root-menu.p-tabmenu .p-tabmenu-nav .p-tabmenuitem{
+	margin-bottom: 0.5em;
+}
+.root-menu.p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
+	background-color: var(--surface-card);
+}
+.root-menu.p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link{
+	background-color: var(--surface-200);
+	color: var(--primary-color);
+	border-radius: var(--border-radius);
+}
+.p-button{
+	margin-left: 0.5em;
+}
+</style>
+</head>
+<body class="m-0 surface-ground">
+<div id="app-main">
+	<div class="flex flex-column h-screen m-0">
+		<div class="flex-grow-0 surface-card text-color-secondary py-2">DataGear</div>
+		<div class="flex-grow-1 p-0">
+			<div class="grid h-full m-0">
+				<div class="nav col-fixed px-0">
+					<p-tabmenu :model="items" v-model:active-index="active" class="root-menu surface-card h-full"></p-tabmenu>
+				</div>
+				<div class="content col">
+					<div v-show="activeContent == 'database'" class="p-card w-full h-full p-2">数据源</div>
+					<div v-show="activeContent == 'project'" class="p-card w-full h-full p-2">项目</div>
+					<div v-show="activeContent == 'dataSet'" class="p-card w-full h-full p-2">数据集</div>
+					<div v-show="activeContent == 'chart'" class="p-card w-full h-full p-2">图表</div>
+					<div v-show="activeContent == 'dasboard'" class="p-card w-full h-full p-2">
+						<div class="py-2 text-right">
+							<p-button label="添加"></p-button>
+							<p-button label="编辑"></p-button>
+							<p-button class="p-button-danger">删除</p-button>
+						</div>
+						<p-datatable :value="products" :scrollable="true" scrollHeight="flex" scrollDirection="both" striped-rows>
+							<p-column field="id" header="ID"></p-column>
+							<p-column field="name" header="名称"></p-column>
+							<p-column field="category" header="项目"></p-column>
+							<p-column field="quantity" header="创建用户"></p-column>
+						</p-datatable>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="module">
+const { createApp, ref } = Vue;
+
+const App =
+{
+	setup()
+	{
+		const active = ref(4);
+		const activeContent = ref("dasboard");
+		const items = ref(
+		[
+			{
+				label: 'Database',
+				icon: 'pi pi-fw pi-database',
+				url: "test.html",
+				command: function(e){ e.originalEvent.preventDefault(); activeContent.value="database"; }
+			},
+			{
+				label: 'Project',
+				icon: 'pi pi-fw pi-folder',
+				command: function(e){ e.originalEvent.preventDefault(); activeContent.value="project"; }
+			},
+			{
+				label: 'DataSet',
+				icon: 'pi pi-fw pi-table',
+				command: function(e){ e.originalEvent.preventDefault(); activeContent.value="dataSet"; }
+			},
+			{
+				label: 'Chart',
+				icon: 'pi pi-fw pi-chart-line',
+				command: function(e){ e.originalEvent.preventDefault(); activeContent.value="chart"; }
+			},
+			{
+				label: 'Dashboard',
+				icon: 'pi pi-fw pi-images',
+				command: function(e){ e.originalEvent.preventDefault(); activeContent.value="dasboard"; }
+			}
+		]);
+
+		const products = ref(
+			[
+				{"id": "1000","code": "f230fh0g3","name": "Bamboo Watch","description": "Product Description","image": "bamboo-watch.jpg","price": 65,"category": "Accessories","quantity": 24,"inventoryStatus": "INSTOCK","rating": 5},
+				{"id": "1001","code": "nvklal433","name": "Black Watch","description": "Product Description","image": "black-watch.jpg","price": 72,"category": "Accessories","quantity": 61,"inventoryStatus": "INSTOCK","rating": 4},
+				{"id": "1002","code": "zz21cz3c1","name": "Blue Band","description": "Product Description","image": "blue-band.jpg","price": 79,"category": "Fitness","quantity": 2,"inventoryStatus": "LOWSTOCK","rating": 3},
+				{"id": "1003","code": "244wgerg2","name": "Blue T-Shirt","description": "Product Description","image": "blue-t-shirt.jpg","price": 29,"category": "Clothing","quantity": 25,"inventoryStatus": "INSTOCK","rating": 5},
+				{"id": "1004","code": "h456wer53","name": "Bracelet","description": "Product Description","image": "bracelet.jpg","price": 15,"category": "Accessories","quantity": 73,"inventoryStatus": "INSTOCK","rating": 4},
+				{"id": "1005","code": "av2231fwg","name": "Brown Purse","description": "Product Description","image": "brown-purse.jpg","price": 120,"category": "Accessories","quantity": 0,"inventoryStatus": "OUTOFSTOCK","rating": 4},
+				{"id": "1006","code": "bib36pfvm","name": "Chakra Bracelet","description": "Product Description","image": "chakra-bracelet.jpg","price": 32,"category": "Accessories","quantity": 5,"inventoryStatus": "LOWSTOCK","rating": 3},
+				{"id": "1007","code": "mbvjkgip5","name": "Galaxy Earrings","description": "Product Description","image": "galaxy-earrings.jpg","price": 34,"category": "Accessories","quantity": 23,"inventoryStatus": "INSTOCK","rating": 5},
+				{"id": "1008","code": "vbb124btr","name": "Game Controller","description": "Product Description","image": "game-controller.jpg","price": 99,"category": "Electronics","quantity": 2,"inventoryStatus": "LOWSTOCK","rating": 4},
+				{"id": "1009","code": "cm230f032","name": "Gaming Set","description": "Product Description","image": "gaming-set.jpg","price": 299,"category": "Electronics","quantity": 63,"inventoryStatus": "INSTOCK","rating": 3}
+			]
+		);
+		
+		return { active, activeContent, items, products }
+	},
+	components:
+	{
+		"p-tabmenu": primevue.tabmenu,
+		"p-button": primevue.button,
+		"p-card": primevue.card,
+		"p-datatable": primevue.datatable,
+		"p-column": primevue.column
+	}
+};
+
+createApp(App).use(primevue.config.default).mount("#app-main");
+</script>
+</body>
+</html>
