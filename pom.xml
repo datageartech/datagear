@@ -4,7 +4,7 @@
 
 	<groupId>org.datagear</groupId>
 	<artifactId>datagear</artifactId>
-	<version>3.2.0</version>
+	<version>3.3.0</version>
 	<packaging>pom</packaging>
 
 	<name>datagear</name>
