@@ -28,6 +28,8 @@
 	 * 				modal: true,
 	 *              //当dialog=true时，对话框标题
 	 * 				title: undefined,
+	 *              //当dialog=true时，对话框宽度
+	 * 				width: "60vw",
 	 *				//可选，传递给新页面的参数，可以在目标页面通过$.pageParam(dom)获取
 	 * 				pageParam : undefined,
 	 * 				//其他$.ajax参数
@@ -42,6 +44,7 @@
 			dialog: true,
 			modal : true,
 			title : undefined,
+			width: "60vw",
 			pageParam : undefined
 		},
 		options);
@@ -81,7 +84,7 @@
 					const dialogEle = $("<p-dialog />").attr("id", dialogId)
 										.attr(":header", "header").attr("v-model:visible", "visible").attr(":modal", options.modal)
 										.attr("v-on:show", "setReponseHtml").attr("v-on:after-hide", "destroyDialogEle")
-										.attr(":style", "{width: '50vw'}")
+										.attr(":style", "{width: width}")
 										.attr("class", "ajax-dialog")
 										.appendTo(rootEle);
 					
@@ -91,6 +94,7 @@
 						{
 							const header = Vue.ref(options.title || " ");
 							const visible = Vue.ref(true);
+							const width = Vue.ref(options.width);
 							const destroyDialogEle = function()
 							{
 								$("#"+rooId).remove();
@@ -108,7 +112,7 @@
 								}
 							};
 							
-							return { header, visible, setReponseHtml, destroyDialogEle };
+							return { header, visible, width, setReponseHtml, destroyDialogEle };
 						},
 						components: { "p-dialog": primevue.dialog }
 					};

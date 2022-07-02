@@ -5,11 +5,11 @@
 <#include "include/html_head.ftl">
 <title><#include "include/html_appNamePrefix.ftl">图表 - 添加</title>
 </head>
-<body class="m-0">
+<body>
 <#include "include/page_obj.ftl">
 <div id="${pid}" class="page-form horizontal">
 	<form action="#" class="flex flex-column">
-		<div class="form-content flex-grow-1 py-1 pr-2 overflow-y-auto">
+		<div class="page-form-content flex-grow-1 pr-2 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}name" class="col-12 mb-2 md:col-3 md:mb-0">名称</label>
 		        <div class="col-12 md:col-9">
@@ -25,7 +25,8 @@
 			<div class="field grid">
 				<label for="${pid}dataSet" class="col-12 mb-2 md:col-3 md:mb-0">数据集</label>
 		        <div class="col-12 md:col-9">
-		        	<p-inputtext id="${pid}dataSet" type="text" class="form-input w-full"></p-inputtext>
+		        	<p-inputtext id="${pid}dataSet" type="text" class="form-input w-full md:w-9"></p-inputtext>
+					<p-button label="选择" @click="select" class="ml-0 mt-1 md:ml-1 md:mt-0" />
 		        </div>
 			</div>
 			<div class="field grid">
@@ -41,7 +42,7 @@
 		        </div>
 			</div>
 		</div>
-		<div class="form-foot flex-grow-0 pt-3 text-center">
+		<div class="page-form-foot flex-grow-0 pt-3 text-center">
 			<p-button type="submit" label="保存" />
 		</div>
 	</form>
@@ -49,9 +50,9 @@
 <script>
 (function(po)
 {
-	po.vueSetup("openDialog", function()
+	po.vueSetup("select", function()
 	{
-		po.open("/primevue");
+		po.open("/primevue/chartList", { width: "80vw" });
 	});
 	
 	po.vueMount();

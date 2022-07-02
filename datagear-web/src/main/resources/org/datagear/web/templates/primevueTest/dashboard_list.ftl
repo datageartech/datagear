@@ -5,10 +5,10 @@
 <#include "include/html_head.ftl">
 <title><#include "include/html_appNamePrefix.ftl">看板</title>
 </head>
-<body class="m-0">
+<body>
 <#include "include/page_obj.ftl">
-<div id="${pid}">
-	<div class="grid align-items-center">
+<div id="${pid}" class="page-list">
+	<div class="page-list-header grid align-items-center">
 		<div class="col-12 md:col-3">
 			<form action="#">
 				<div class="p-inputgroup">
@@ -23,7 +23,7 @@
 			<p-button class="p-button-danger">删除</p-button>
 		</div>
 	</div>
-	<div style="height:500px;">
+	<div class="page-list-content">
 		<p-datatable :value="product.items" :scrollable="true" scroll-height="flex"
 			:paginator="true" paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
 			:rows="10"

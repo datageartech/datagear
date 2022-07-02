@@ -6,28 +6,28 @@
  */
  
 /*竖向tabmenu*/
-.p-tabmenu.vertical-tabmenu {
+.p-tabmenu.vertical-tabmenu{
 	display: inline-block;
 	padding: 0.25em;
 	box-sizing: border-box;
 }
-.p-tabmenu.vertical-tabmenu .p-tabmenu-nav {
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav{
 	flex-direction: column;
 	background-color: var(--surface-card);
 	border: 0;
 }
 .p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link,
-.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link{
 	border-width: 0 !important;
 }
-.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-icon {
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-icon{
 	margin-right: 0;
 	margin-bottom: 0.5em;
 }
 .p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem{
 	margin-bottom: 0.5em;
 }
-.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link{
 	background-color: var(--surface-card);
 	flex-direction: column;
 }
@@ -43,6 +43,17 @@
 	border-radius: var(--border-radius);
 }
 
+/*error菜单条目*/
+.p-contextmenu .p-error .p-menuitem-link,
+.p-contextmenu .p-error .p-menuitem-link .p-menuitem-text{
+	color: inherit;
+}
+
+/*对话框*/
+.p-dialog.ajax-dialog .p-dialog-content{
+	padding-bottom: 1rem;
+}
+
 /*横向操作组*/
 .h-opts > *{
 	margin-left: 0.25em;
@@ -55,15 +66,18 @@
 	margin-right: 0;
 }
 
-/*error菜单条目*/
-.p-contextmenu .p-error .p-menuitem-link,
-.p-contextmenu .p-error .p-menuitem-link .p-menuitem-text{
-	color: inherit;
+/*列表页*/
+.page-list .page-list-content{
+	/*屏幕高度 - 列表header高度*/
+	height: calc(100vh - 5rem);
 }
-
-/*对话框*/
-.p-dialog.ajax-dialog .p-dialog-content{
-	padding-bottom: 1rem;
+.main-panel .page-list .page-list-content{
+	/*屏幕高度 - 列表header高度 - 页头高度*/
+	height: calc(100vh - 5rem - 4rem);
+}
+.p-dialog .page-list .page-list-content{
+	/*对话框高度 - 列表header高度 - 对话框header高度*/
+	height: calc(90vh - 5rem - 6rem);
 }
 
 /*表单页*/
@@ -71,9 +85,11 @@
 	margin-left: 0 !important;
 	margin-right: 0 !important;
 }
-.page-form .form-content{
-	max-height: calc(100vh - 4.5rem);
+.page-form .page-form-content{
+	/*屏幕高度 - 表单foot高度*/
+	max-height: calc(100vh - 5rem);
 }
-.p-dialog .page-form .form-content{
-	max-height: 60vh;
+.p-dialog .page-form .page-form-content{
+	/*对话框高度 - 表单foot高度 - 对话框header高度*/
+	max-height: calc(90vh - 5rem - 6rem);
 }
