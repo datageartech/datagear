@@ -108,8 +108,24 @@ public class WebUtils
 	 * @param request
 	 * @param response
 	 * @return
+	 * @deprecated 请使用{@linkplain #getUser()}
 	 */
+	@Deprecated
 	public static User getUser(HttpServletRequest request, HttpServletResponse response)
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return getUser(authentication);
+	}
+
+	/**
+	 * 获取当前用户（认证用户或者匿名用户）。
+	 * <p>
+	 * 此方法不会返回{@code null}。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public static User getUser()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		return getUser(authentication);

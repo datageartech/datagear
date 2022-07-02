@@ -35,6 +35,12 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	/** 变量：页面ID关键字 */
 	public static final String VAR_PAGE_ID = WebUtils.KEY_PAGE_ID;
 
+	/** 变量：页面ID关键字 */
+	public static final String VAR_PID = "pid";
+
+	/** 变量：当前用户关键字 */
+	public static final String VAR_CURRENT_USER = "currentUser";
+
 	/** 变量：父页面ID关键字 */
 	public static final String VAR_PARENT_PAGE_ID = WebUtils.KEY_PARENT_PAGE_ID;
 
@@ -56,9 +62,11 @@ public class CustomFreeMarkerView extends FreeMarkerView
 
 		model.put(VAR_CONTEXT_PATH, WebUtils.getContextPath(request));
 		model.put(VAR_IS_AJAX_REQUEST, WebUtils.isAjaxRequest(request));
-
-		model.put(VAR_PAGE_ID, WebUtils.generatePageId());
+		String pageId = WebUtils.generatePageId();
+		model.put(VAR_PAGE_ID, pageId);
+		model.put(VAR_PID, pageId);
 		model.put(VAR_PARENT_PAGE_ID, WebUtils.getParentPageId(request));
 		model.put(VAR_STATICS, BEANS_WRAPPER.getStaticModels());
+		model.put(VAR_CURRENT_USER, WebUtils.getUser());
 	}
 }

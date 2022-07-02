@@ -1,0 +1,79 @@
+/*
+ * Copyright 2018 datagear.tech
+ *
+ * Licensed under the LGPLv3 license:
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ */
+ 
+/*竖向tabmenu*/
+.p-tabmenu.vertical-tabmenu {
+	display: inline-block;
+	padding: 0.25em;
+	box-sizing: border-box;
+}
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav {
+	flex-direction: column;
+	background-color: var(--surface-card);
+	border: 0;
+}
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link,
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
+	border-width: 0 !important;
+}
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-icon {
+	margin-right: 0;
+	margin-bottom: 0.5em;
+}
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem{
+	margin-bottom: 0.5em;
+}
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
+	background-color: var(--surface-card);
+	flex-direction: column;
+}
+.p-tabmenu.vertical-tabmenu.collapse .p-tabmenu-nav .p-tabmenuitem .p-menuitem-icon{
+	margin-bottom: 0;
+}
+.p-tabmenu.vertical-tabmenu.collapse .p-tabmenu-nav .p-menuitem-text{
+	display: none;
+}
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link{
+	background-color: var(--surface-200);
+	color: var(--primary-color);
+	border-radius: var(--border-radius);
+}
+
+/*横向操作组*/
+.h-opts > *{
+	margin-left: 0.25em;
+	margin-right: 0.25em;
+}
+.h-opts > *:first-child{
+	margin-left: 0;
+}
+.h-opts > *:last-child{
+	margin-right: 0;
+}
+
+/*error菜单条目*/
+.p-contextmenu .p-error .p-menuitem-link,
+.p-contextmenu .p-error .p-menuitem-link .p-menuitem-text{
+	color: inherit;
+}
+
+/*对话框*/
+.p-dialog.ajax-dialog .p-dialog-content{
+	padding-bottom: 1rem;
+}
+
+/*表单页*/
+.page-form .field.grid{
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+.page-form .form-content{
+	max-height: calc(100vh - 4.5rem);
+}
+.p-dialog .page-form .form-content{
+	max-height: 60vh;
+}
