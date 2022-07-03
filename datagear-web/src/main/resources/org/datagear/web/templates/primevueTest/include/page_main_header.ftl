@@ -17,7 +17,7 @@ page_obj.ftl
 User currentUser
 
 -->
-<div class="page-main-header flex-grow-0 surface-card text-color-secondary py-1">
+<div class="page-main-header flex-grow-0 p-card no-border text-color-secondary py-1">
 	<div class="grid grid-nogutter align-items-center">
 		<div class="logo col-fixed pl-1">
 			<#include "html_logo.ftl">

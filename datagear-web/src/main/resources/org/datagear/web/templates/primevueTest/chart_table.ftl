@@ -5,7 +5,7 @@
 <#include "include/html_head.ftl">
 <title><#include "include/html_app_name_prefix.ftl">图表</title>
 </head>
-<body>
+<body class="p-card no-border">
 <#include "include/page_obj.ftl">
 <div id="${pid}" class="page-table">
 	<div class="page-table-header grid align-items-center">

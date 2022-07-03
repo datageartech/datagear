@@ -5,7 +5,7 @@
 <#include "include/html_head.ftl">
 <title><#include "include/html_app_name_prefix.ftl">图表 - 添加</title>
 </head>
-<body>
+<body class="p-card no-border">
 <#include "include/page_obj.ftl">
 <div id="${pid}" class="page-form horizontal">
 	<form action="#" class="flex flex-column">
