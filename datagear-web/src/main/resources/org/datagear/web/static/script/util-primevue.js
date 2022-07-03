@@ -248,5 +248,238 @@
 		
 		return url;
 	};
+	
+	$.toJsonString = function(obj)
+	{
+		return JSON.stringify(obj);
+	};
+	
+	/**JSON内容类型常量*/
+	$.CONTENT_TYPE_JSON = "application/json";
+	
+	/**
+	 * 提交JSON数据。
+	 */
+	$.postJson = function(url, data, success)
+	{
+		$.ajaxJson(url, { data: data, success: success });
+	};
+	
+	/**
+	 * ajax提交JSON数据。
+	 * 
+	 * @param url 可选
+	 * @param options 必选
+	 */
+	$.ajaxJson = function(url, options)
+	{
+		if(options === undefined)
+		{
+			options = url;
+			options.contentType = $.CONTENT_TYPE_JSON;
+			options.type = "POST";
+			$.ajax(options);
+		}
+		else
+		{
+			options.contentType = $.CONTENT_TYPE_JSON;
+			options.type = "POST";
+			$.ajax(url, options);
+		}
+	};
+	
+	//如果请求内容类型是JSON，则自动将请求数据对象转换为JSON内容
+	$.ajaxPrefilter(function( options, originalOptions, jqXHR )
+	{
+		if(originalOptions.contentType != $.CONTENT_TYPE_JSON)
+			return;
+		
+		if(originalOptions.data)
+			options.data = $.toJsonString(originalOptions.data);
+	});
+	
+	$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError)
+	{
+		$.handleAjaxOperationMessage(event, jqXHR, ajaxSettings, null, thrownError);
+	});
+	
+	$(document).ajaxSuccess(function(event, jqXHR, ajaxSettings, data)
+	{
+		$.handleAjaxOperationMessage(event, jqXHR, ajaxSettings, data, null);
+	});
+	
+	//ajaxSettings.tipSuccess 是否提示成功操作消息，默认为：true
+	//ajaxSettings.tipError 是否提示错误操作消息，默认为：true
+	$.handleAjaxOperationMessage = function(event, jqXHR, ajaxSettings, data, thrownError)
+	{
+		var ompId = ($.GLOBAL_OPT_MSG_ID || ($.GLOBAL_OPT_MSG_ID = $.uid("opt")));
+		
+		if(!window._showAjaxOperationMessageDetail)
+		{
+			window._showAjaxOperationMessageDetail = function()
+			{
+				$.closeTip();
+				
+				var $omp = $("#"+$.GLOBAL_OPT_MSG_ID);
+				
+				var isSuccessMessage = ("true" == $omp.attr("success"));
+				
+				var $dialog = $("<div id='dialog-"+new Date().getTime()+"' class='operation-message-dialog'></div>").appendTo(document.body);
+				
+				var $messageDetail = $("<div class='message-detail' />");
+				if(!isSuccessMessage)
+					$messageDetail.addClass("ui-state-error");
+				$messageDetail.appendTo($dialog);
+				$messageDetail.html($(".message-detail", $omp).html());
+				
+				$._dialog($dialog,
+						{
+							title : $(".message", $omp).text(),
+							modal : true,
+							height: "60%",
+							position: {my: "center top", at: "center top+3"},
+							classes:
+							{
+								"ui-dialog": "ui-corner-all ui-widget-shadow" + (isSuccessMessage ? "" : "ui-state-error")
+							}
+						});
+				
+				var $dialogWidget = $dialog.dialog("widget");
+				
+				$(".ui-dialog-title", $dialogWidget).prepend("<span class='ui-icon "+(isSuccessMessage ? "ui-icon-circle-check" : "ui-icon-alert")+"'></span>");
+				
+				if(!isSuccessMessage)
+				{
+					$dialogWidget.addClass("ui-state-error");
+					$(".ui-dialog-titlebar", $dialogWidget).addClass("ui-state-error");
+					$(".ui-dialog-titlebar-close", $dialogWidget).addClass("ui-state-error");
+				}
+			};
+		}
+		
+		var $omp = $("#"+ompId);
+		if($omp.length == 0)
+			$omp = $("<div id='"+ompId+"' style='display:none;' />").appendTo(document.body);
+		
+		var isSuccessResponse = (jqXHR.status == 200);
+		var hasResponseMessage = false;
+		
+		if(jqXHR.responseText)
+		{
+			var operationMessage = $.getResponseJson(jqXHR);
+			
+			//响应为JSON操作消息的
+			if(operationMessage && operationMessage.type && operationMessage.code && operationMessage.message)
+			{
+				$omp.empty();
+				
+				var $omdiv = $("<div class='operation-message "+operationMessage.type+"' />").appendTo($omp);
+				$("<div class='message' />").appendTo($omdiv).html(operationMessage.message);
+				
+				if(operationMessage.detail)
+				{
+					var $ddiv = $("<div class='message-detail' />").appendTo($omdiv);
+					if(operationMessage.throwableDetail)
+						$("<pre />").appendTo($ddiv).html(operationMessage.detail);
+					else
+						$("<div />").appendTo($ddiv).html(operationMessage.detail);
+				}
+				
+				hasResponseMessage = true;
+			}
+			else
+			{
+				var rtPrefix = jqXHR.responseText.substr(0, 100);
+				var dpnValue = null;
+				
+				var dpnToken = "dg-page-name=\"";
+				var dpnStartIdx = rtPrefix.indexOf(dpnToken);
+				if(dpnStartIdx > -1)
+				{
+					dpnStartIdx = dpnStartIdx + dpnToken.length;
+					var dpnEndIdx = rtPrefix.indexOf("\"", dpnStartIdx);
+					dpnValue = (dpnEndIdx > dpnStartIdx ? rtPrefix.substring(dpnStartIdx, dpnEndIdx) : null);
+				}
+				
+				//响应为HTML操作消息的
+				if(dpnValue == "error")
+				{
+					$omp.html(jqXHR.responseText);
+					hasResponseMessage = true;
+				}
+				//当登录超时后，列表页点击【查询】按钮，ajax响应可能会重定向到登录页，这里特殊处理
+				else if(dpnValue == "login")
+				{
+					var url = ajaxSettings.url;
+					
+					if(url && url.indexOf("/login") < 0)
+					{
+						thrownError = "Login expired";
+						hasResponseMessage = false;
+					}
+				}
+			}
+		}
+		
+		var isTipSuccess = (ajaxSettings.tipSuccess !== false);
+		var isTipError = (ajaxSettings.tipError !== false);
+		
+		if(hasResponseMessage)
+		{
+			$omp.attr("success", isSuccessResponse);
+			var message = $(".message", $omp).html();
+			
+			if($(".message-detail", $omp).length > 0)
+				message += "<span class='ui-icon ui-icon-comment message-detail-icon' onclick='_showAjaxOperationMessageDetail();'></span>";
+			
+			if(isSuccessResponse)
+			{
+				if(isTipSuccess)
+					$.tipSuccess(message);
+			}
+			else
+			{
+				if(isTipError)
+					$.tipError(message);
+			}
+		}
+		//客户端处理ajax响应出错
+		else if(thrownError)
+		{
+			if(isTipError)
+				$.tipError(thrownError);
+		}
+		//客户端连接出错
+		else if(event && event.type=="ajaxError")
+		{
+			if(isTipError)
+				$.tipError("Error");
+		}
+	};
+	
+	/**
+	 * 获取响应的JSON对象。
+	 * 如果响应不是JSON格式，则返回null。
+	 */
+	$.getResponseJson = function(jqXHR)
+	{
+		if(jqXHR.responseJSON)
+			return jqXHR.responseJSON;
+		else
+		{
+			var responseContentType = (jqXHR.getResponseHeader("Content-Type") || "").toLowerCase();
+			
+			if(responseContentType.indexOf("json") > -1 && jqXHR.responseText)
+			{
+				var responseJSON = $.parseJSON(jqXHR.responseText);
+				
+				jqXHR.responseJSON = responseJSON;
+				
+				return responseJSON;
+			}
+			
+			return null;
+		}
+	};
 })
 (jQuery);

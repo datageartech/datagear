@@ -3,7 +3,7 @@
 <html>
 <head>
 <#include "include/html_head.ftl">
-<title><#include "include/html_appNamePrefix.ftl">图表 - 添加</title>
+<title><#include "include/html_app_name_prefix.ftl">图表 - 添加</title>
 </head>
 <body>
 <#include "include/page_obj.ftl">

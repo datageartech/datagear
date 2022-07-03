@@ -2664,7 +2664,7 @@
 			return null;
 		}
 	};
-
+	
 	//ajaxSettings.tipSuccess 是否提示成功操作消息，默认为：true
 	//ajaxSettings.tipError 是否提示错误操作消息，默认为：true
 	$.handleAjaxOperationMessage = function(event, jqXHR, ajaxSettings, data, thrownError)

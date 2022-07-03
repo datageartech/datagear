@@ -27,7 +27,7 @@ var ${pageId} =
 	//获取页面内的元素
 	element : function(selector, parent)
 	{
-		return (selector == null ? $("#${pageId}") : (parent ? $(selector, parent) : $(selector, $("#${pageId}"))));
+		return (selector == null ? $("#"+this.pageId) : (parent ? $(selector, parent) : $(selector, $("#"+this.pageId))));
 	},
 	
 	//获取页面内指定id的元素
@@ -119,13 +119,43 @@ var ${pageId} =
 		return "${contextPath}" + path;
 	},
 	
-	//获取（自动unref）/设置（自动ref）vue的setup的ref
+	attr: function(name, value)
+	{
+		var attrs = (this._attrs || (this._attrs = {}));
+		
+		if(value === undefined)
+			return attrs[name];
+		else
+			attrs[name] = value;
+	},
+	
+	//获取（自动unref）/设置（自动ref）vue的setup的ref值
 	vueRef: function(name, value)
 	{
+		var obj = this.vueSetup(name);
+		
 		if(value === undefined)
-			return Vue.unref(this.vueSetup(name));
+			return Vue.unref(obj);
 		else
-			this.vueSetup(name, Vue.ref(value));
+		{
+			if(obj == null)	
+				this.vueSetup(name, Vue.ref(value));
+			else
+				obj.value = value;
+		}
+	},
+	
+	//获取（自动toRaw）/设置（自动reactive）vue的setup的reactive值
+	vueReactive: function(name, value)
+	{
+		var obj = this.vueSetup(name);
+		
+		if(value === undefined)
+			return Vue.toRaw(obj);
+		else
+		{
+			this.vueSetup(name, Vue.reactive(value));
+		}
 	},
 	
 	//获取/设置vue的setup对象
@@ -146,9 +176,16 @@ var ${pageId} =
 			this._vueComponents[name] = value;
 	},
 	
+	//设置vue挂在后回调函数
+	vueMounted: function(callback)
+	{
+		this._vueMounted.push(callback);
+	},
+	
 	//vue的setup对象
 	_vueSetup: {},
-	
+	//vue的mounted回调函数
+	_vueMounted: [],
 	//vue组件
 	_vueComponents:
 	{
@@ -164,16 +201,28 @@ var ${pageId} =
 	},
 	
 	//vue挂载
-	vueMount: function()
+	vueMount: function(app)
 	{
 		const setupObj = this._vueSetup;
+		const mountedObj = this._vueMounted;
 		const componentsObj = this._vueComponents;
 		
-		const app =
+		app = $.extend((app || {}),
 		{
-			setup() { return setupObj },
+			setup()
+			{
+				Vue.onMounted(function()
+				{
+					mountedObj.forEach(function(callback)
+					{
+						callback();
+					});
+				});
+				
+				return setupObj;
+			},
 			components: componentsObj
-		};
+		});
 		
 		Vue.createApp(app).use(primevue.config.default).mount("#"+this.pageId);
 	}

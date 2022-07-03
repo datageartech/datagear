@@ -3,18 +3,16 @@
 <html>
 <head>
 <#include "include/html_head.ftl">
-<title><#include "include/html_appNamePrefix.ftl">主页</title>
+<title><#include "include/html_app_name_prefix.ftl">主页</title>
 </head>
 <body class="m-0 surface-ground">
 <#include "include/page_obj.ftl">
 <div id="${pid}">
 	<div class="flex flex-column h-screen m-0">
-		<div class="flex-grow-0 surface-card text-color-secondary py-1">
-			<#include "include/page_head.ftl">
-		</div>
-		<div class="flex-grow-1 p-0">
+		<#include "include/page_main_header.ftl">
+		<div class="page-main-content flex-grow-1 p-0">
 			<div class="grid h-full m-0 flex-nowrap">
-				<div class="nav col-fixed px-0">
+				<div class="page-main-menu col-fixed px-0">
 					<div class="grid grid-nogutter flex-column align-items-center p-card h-full">
 						<div class="col-fixed">
 							<p-button @click="toggleMainMenu" icon="pi pi-align-justify" class="p-button-secondary p-button-text p-button-sm opacity-40 my-1 p-1"></p-button>
@@ -27,7 +25,7 @@
 						</div>
 					</div>
 				</div>
-				<div id="${pid}mainPanels" class="col overflow-auto"></div>
+				<div id="${pid}mainPanels" class="page-main-panels col overflow-auto"></div>
 			</div>
 		</div>
 	</div>
@@ -44,17 +42,17 @@
 			{
 				label: '数据源',
 				icon: 'pi pi-fw pi-database',
-				url: "${contextPath}/primevue/dataSourceList"
+				url: "${contextPath}/primevue/chartList"
 			},
 			{
 				label: '项目',
 				icon: 'pi pi-fw pi-folder',
-				url: "${contextPath}/primevue/projectList"
+				url: "${contextPath}/primevue/chartList"
 			},
 			{
 				label: '数据集',
 				icon: 'pi pi-fw pi-table',
-				url: "${contextPath}/primevue/dataSetList"
+				url: "${contextPath}/primevue/chartList"
 			},
 			{
 				label: '图表',
@@ -81,11 +79,11 @@
 		const panelId = "${pid}mainPanel"+name;
 		var panel = po.elementOfId(panelId, parent);
 		
-		po.element("> .main-panel", parent).addClass("hidden");
+		po.element("> .page-main-panel", parent).addClass("hidden");
 		
 		if(panel.length == 0)
 		{
-			panel = $("<div id='"+panelId+"' class='main-panel p-card w-full h-full p-3' />").prop("unloaded", true).appendTo(parent);
+			panel = $("<div id='"+panelId+"' class='page-main-panel p-card w-full h-full p-3' />").prop("unloaded", true).appendTo(parent);
 		}
 		
 		panel.removeClass("hidden");

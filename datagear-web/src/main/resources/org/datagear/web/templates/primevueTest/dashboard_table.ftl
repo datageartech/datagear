@@ -3,12 +3,12 @@
 <html>
 <head>
 <#include "include/html_head.ftl">
-<title><#include "include/html_appNamePrefix.ftl">项目</title>
+<title><#include "include/html_app_name_prefix.ftl">看板</title>
 </head>
 <body>
 <#include "include/page_obj.ftl">
-<div id="${pid}" class="page-list">
-	<div class="page-list-header grid align-items-center">
+<div id="${pid}" class="page-table">
+	<div class="page-table-header grid align-items-center">
 		<div class="col-12 md:col-3">
 			<form action="#">
 				<div class="p-inputgroup">
@@ -23,16 +23,16 @@
 			<p-button class="p-button-danger">删除</p-button>
 		</div>
 	</div>
-	<div class="page-list-content">
+	<div class="page-table-content">
 		<p-datatable :value="product.items" :scrollable="true" scroll-height="flex"
 			:paginator="true" paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-			:rows="10"
-			current-page-report-template="{first}-{last} / {totalRecords}"
+			:rows="10" current-page-report-template="{first}-{last} / {totalRecords}"
 			:rows-per-page-options="[10,20,50,100]"
-			v-model:selection="product.selecteds" selection-mode="multiple" dataKey="id"
-			striped-rows>
-			<p-column selection-mode="multiple" header-style="width:3em"></p-column>
+			v-model:selection="product.selecteds" selection-mode="multiple" dataKey="id" striped-rows>
+			<p-column selection-mode="multiple" header-style="width:4rem" class="flex-grow-0"></p-column>
+			<p-column field="id" header="ID" :sortable="true"></p-column>
 			<p-column field="name" header="名称" :sortable="true"></p-column>
+			<p-column field="category" header="项目"></p-column>
 			<p-column field="quantity" header="创建用户"></p-column>
 		</p-datatable>
 	</div>
@@ -42,7 +42,7 @@
 {
 	po.vueSetup("openDialog", function()
 	{
-		po.open("/primevue");
+		po.open("/primevue/chartList");
 	});
 	
 	po.vueRef("product",

@@ -66,16 +66,16 @@
 	margin-right: 0;
 }
 
-/*列表页*/
-.page-list .page-list-content{
+/*表格页*/
+.page-table .page-table-content{
 	/*屏幕高度 - 列表header高度*/
 	height: calc(100vh - 5rem);
 }
-.main-panel .page-list .page-list-content{
-	/*屏幕高度 - 列表header高度 - 页头高度*/
+.page-main-panel .page-table .page-table-content{
+	/*屏幕高度 - 列表header高度 - 主页header高度*/
 	height: calc(100vh - 5rem - 4rem);
 }
-.p-dialog .page-list .page-list-content{
+.p-dialog .page-table .page-table-content{
 	/*对话框高度 - 列表header高度 - 对话框header高度*/
 	height: calc(90vh - 5rem - 6rem);
 }

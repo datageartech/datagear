@@ -24,6 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/primevue")
 public class PrimveVueTestController extends AbstractController
 {
+	public static final String KEY_REQUEST_ACTION = "requestAction";
+	public static final String REQUEST_ACTION_QUERY = "query";
+	public static final String REQUEST_ACTION_SINGLE_SELECT = "singleSelect";
+	public static final String REQUEST_ACTION_MULTIPLE_SELECT = "multipleSelect";
+	public static final String REQUEST_ACTION_ADD = "add";
+	public static final String REQUEST_ACTION_EDIT = "edit";
+
 	public PrimveVueTestController()
 	{
 		super();
@@ -35,34 +42,16 @@ public class PrimveVueTestController extends AbstractController
 		return "/primevueTest/main";
 	}
 
-	@RequestMapping("/dataSourceList")
-	public String dataSourceList(HttpServletRequest request, HttpServletResponse response, Model model)
-	{
-		return "/primevueTest/dataSource_list";
-	}
-
-	@RequestMapping("/projectList")
-	public String projectList(HttpServletRequest request, HttpServletResponse response, Model model)
-	{
-		return "/primevueTest/project_list";
-	}
-
-	@RequestMapping("/dataSetList")
-	public String dataSetList(HttpServletRequest request, HttpServletResponse response, Model model)
-	{
-		return "/primevueTest/dataSet_list";
-	}
-
 	@RequestMapping("/chartList")
 	public String chartList(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
-		return "/primevueTest/chart_list";
+		return "/primevueTest/chart_table";
 	}
 
 	@RequestMapping("/dashboardList")
 	public String dashboardList(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
-		return "/primevueTest/dashboard_list";
+		return "/primevueTest/dashboard_table";
 	}
 
 	@RequestMapping("/addChart")
