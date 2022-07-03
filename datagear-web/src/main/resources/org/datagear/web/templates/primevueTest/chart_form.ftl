@@ -9,7 +9,7 @@
 <#include "include/page_obj.ftl">
 <div id="${pid}" class="page-form horizontal">
 	<form action="#" class="flex flex-column">
-		<div class="page-form-content flex-grow-1 pr-2 overflow-y-auto">
+		<div class="page-form-content flex-grow-1 pr-2 pt-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}name" class="col-12 mb-2 md:col-3 md:mb-0">名称</label>
 		        <div class="col-12 md:col-9">
