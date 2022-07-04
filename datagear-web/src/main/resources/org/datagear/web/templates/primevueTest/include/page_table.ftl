@@ -180,16 +180,16 @@ String action
 	
 	po.handleAddAction = function(url, options)
 	{
-		var action = { url: url, options: options };
+		var action = { url: po.concatContextPath(url), options: options };
 		po.inflateFormActionPageParam(action);
-		po.open(url, options);
+		po.open(action.url, action.options);
 	};
 	
 	po.handleOpenOfAction = function(url, options)
 	{
 		po.executeOnSelect(function(row)
 		{
-			var action = { url: url, options: options };
+			var action = { url: po.concatContextPath(url), options: options };
 			po.inflateFormActionPageParam(action);
 			po.inflateRowAction(action, row);
 			po.open(action.url, action.options);
@@ -200,13 +200,13 @@ String action
 	{
 		po.executeOnSelects(function(rows)
 		{
-			var action = { url: url, options: options };
+			var action = { url: po.concatContextPath(url), options: options };
 			po.inflateFormActionPageParam(action);
 			po.inflateRowAction(action, rows);
 			po.open(action.url, action.options);
 		});
 	};
-
+	
 	po.handleDeleteAction = function(url, options)
 	{
 		po.executeOnSelects(function(rows)
@@ -222,7 +222,7 @@ String action
 					},
 					options);
 					
-					var action = { url: url, options: options };
+					var action = { url: po.concatContextPath(url), options: options };
 					po.inflateRowAction(action, rows);
 					
 					$.ajaxJson(url, action.options);

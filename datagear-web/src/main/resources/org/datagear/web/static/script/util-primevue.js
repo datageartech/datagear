@@ -70,57 +70,67 @@
 			{
 				const container = $(options.target ? options.target : document.body);
 				
-				const rooId = $.uid("root");
-				const rootEle = $("<div id='"+rooId+"' />").appendTo(container);
-				rootEle.addClass($.PAGE_PARAM_BINDER_CLASS);
-				
-				if(options.pageParam)
-					$.pageParam(rootEle, options.pageParam);
+				const rootId = $.uid("root");
+				const rootEle = $("<div id='"+rootId+"' />").appendTo(container);
 				
 				if(options.dialog)
 				{
-					const dialogId = rooId+"dialog";
+					const dialogId = rootId+"dialog";
 					rootEle.addClass("dialog-root");
-					const dialogEle = $("<p-dialog />").attr("id", dialogId)
-										.attr(":header", "header").attr("v-model:visible", "visible").attr(":modal", options.modal)
-										.attr("v-on:show", "setReponseHtml").attr("v-on:after-hide", "destroyDialogEle")
-										.attr(":style", "{width: width}")
-										.attr("class", "ajax-dialog")
-										.appendTo(rootEle);
+					$("<p-dialog />").attr("id", dialogId)
+								.attr(":header", "dialogModel.header").attr("v-model:visible", "dialogModel.visible").attr(":modal", options.modal)
+								.attr("v-on:show", "setReponseHtml").attr("v-on:after-hide", "destroyDialogEle")
+								.attr(":style", "{width: dialogModel.width}")
+								.attr("class", "ajax-dialog " + $.PAGE_PARAM_BINDER_CLASS)
+								.appendTo(rootEle);
 					
 					const dialogApp =
 					{
 						setup()
 						{
-							const header = Vue.ref(options.title || " ");
-							const visible = Vue.ref(true);
-							const width = Vue.ref(options.width);
+							const dialogModel = Vue.reactive(
+							{
+								header: (options.title || " "),
+								visible: true,
+								width: options.width
+							});
 							const destroyDialogEle = function()
 							{
-								$("#"+rooId).remove();
+								rootEle.remove();
 							};
 							const setReponseHtml = function()
 							{
-								let dialogContent = $("#"+dialogId+" > .p-dialog-content");
+								let dialogEle = $("#"+dialogId);
+								dialogEle.data("dialogModel", dialogModel);
+								
+								if(options.pageParam)
+									$.pageParam(dialogEle, options.pageParam);
+								
+								let dialogContent = $(" > .p-dialog-content", dialogEle);
 								dialogContent.html(response);
 								
-								if(header.value == " ")
+								if(dialogModel.header == " ")
 								{
 									let title = $("title", dialogContent).text();
 									if(title)
-										header.value = title;
+										dialogModel.header = title;
 								}
 							};
 							
-							return { header, visible, width, setReponseHtml, destroyDialogEle };
+							return {dialogModel, destroyDialogEle, setReponseHtml};
 						},
 						components: { "p-dialog": primevue.dialog }
 					};
 					
-					Vue.createApp(dialogApp).use(primevue.config.default).mount("#"+rooId);
+					Vue.createApp(dialogApp).use(primevue.config.default).mount(rootEle[0]);
 				}
 				else
 				{
+					rootEle.addClass($.PAGE_PARAM_BINDER_CLASS);
+					
+					if(options.pageParam)
+						$.pageParam(dialogEle, options.pageParam);
+					
 					rootEle.html(response);
 				}
 			};
@@ -135,6 +145,38 @@
 			});
 			
 			$.ajax(url, options);
+		}
+	};
+	
+	/**
+	 * 判断给定dom元素是否在对话框中或者将要在对话框中显示。
+	 * 
+	 * @param dom 任意DOM元素
+	 */
+	$.isInDialog = function(dom)
+	{
+		var d = $.getInDialog(dom);
+		return (d && d.length > 0);
+	};
+	
+	/**
+	 * 获取元素所处的对话框DOM对象，如果不在对话框中，返回一个空的Jquery对象（长度为0）。
+	 */
+	$.getInDialog = function(dom)
+	{
+		return $(dom).closest(".p-dialog");
+	};
+	
+	/**
+	 * 关闭并销毁对话框。
+	 */
+	$.closeDialog = function(ele)
+	{
+		var d = $.getInDialog(ele);
+		if(d && d.length > 0)
+		{
+			let dialogModel = d.data("dialogModel");
+			dialogModel.visible = false;
 		}
 	};
 	

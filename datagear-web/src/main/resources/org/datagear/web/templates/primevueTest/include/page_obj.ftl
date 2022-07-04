@@ -16,6 +16,8 @@ var ${pageId} =
 	//当前页面ID
 	pageId : "${pageId}",
 	
+	contextPath: "${contextPath}",
+	
 	//获取父页面JS对象
 	parent : function()
 	{
@@ -45,9 +47,7 @@ var ${pageId} =
 	//打开URL
 	open : function(url, options)
 	{
-		if(url.charAt(0) == "/")
-			url = this.concatContextPath(url);
-		
+		url = this.concatContextPath(url);
 		url = $.addParam(url, "parentPageId", this.pageId);
 		$.open(url, (options || {}));
 	},
@@ -55,29 +55,19 @@ var ${pageId} =
 	//关闭此页面
 	close : function()
 	{
-		var myDialog = $.getInDialog(this.element());
-		
-		if(myDialog && myDialog.length > 0)
-			$.closeDialog(myDialog);
-		else
-		{
-			//XXX 打开新窗口后不应该自动关闭
-			//window.close();
-		}
+		$.closeDialog(this.element());
 	},
 	
 	//页面是否在对话框内
 	isInDialog: function()
 	{
-		var myDialog = $.getInDialog(this.element());
-		return (myDialog && myDialog.length > 0);
+		return $.isInDialog(this.element());
 	},
 	
 	//页面所在的对话框是否钉住
 	isDialogPinned: function()
 	{
-		var myDialog = $.getInDialog(this.element());
-		return (myDialog.length < 1 ? false : $.isDialogPinned(myDialog));
+		return false;
 	},
 	
 	/**
@@ -113,14 +103,16 @@ var ${pageId} =
 			confirmText : "<@spring.message code='confirm' />",
 			cancelText : "<@spring.message code='cancel' />",
 			title : "<@spring.message code='operationConfirm' />"
-		}, options);
+		},
+		options);
+		
 		$.confirm(content, options);
 	},
 	
 	//连接应用根路径
 	concatContextPath : function(path)
 	{
-		return "${contextPath}" + path;
+		return (path.charAt(0) == "/" ? this.contextPath + path : path);
 	},
 	
 	attr: function(name, value)

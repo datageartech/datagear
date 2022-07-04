@@ -10,9 +10,12 @@ package org.datagear.web.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.web.util.OperationMessage;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * PrimveVue测试控制器。
@@ -28,8 +31,10 @@ public class PrimveVueTestController extends AbstractController
 	public static final String REQUEST_ACTION_QUERY = "query";
 	public static final String REQUEST_ACTION_SINGLE_SELECT = "singleSelect";
 	public static final String REQUEST_ACTION_MULTIPLE_SELECT = "multipleSelect";
-	public static final String REQUEST_ACTION_ADD = "add";
-	public static final String REQUEST_ACTION_EDIT = "edit";
+	public static final String REQUEST_ACTION_SAVE_ADD = "saveAdd";
+	public static final String REQUEST_ACTION_SAVE_EDIT = "saveEdit";
+	public static final String REQUEST_ACTION_SAVE = "save";
+	public static final String REQUEST_ACTION_VIEW = "view";
 
 	public PrimveVueTestController()
 	{
@@ -58,5 +63,12 @@ public class PrimveVueTestController extends AbstractController
 	public String addChart(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		return "/primevueTest/chart_form";
+	}
+
+	@RequestMapping(value = "/saveChart", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveChart(HttpServletRequest request)
+	{
+		return optMsgSaveSuccessResponseEntity(request);
 	}
 }
