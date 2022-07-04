@@ -13,24 +13,23 @@
 page_obj.ftl
 
 -->
-<form @submit.prevent="searchFormSubmit">
+<form @submit.prevent="searchFormModel.handleSubmit">
 	<div class="p-inputgroup">
-		<p-inputtext type="text" v-model="searchForm.keyword"></p-inputtext>
+		<p-inputtext type="text" v-model="searchFormModel.form.keyword"></p-inputtext>
 		<p-button type="submit" icon="pi pi-search" />
 	</div>
 </form>
 <script>
 (function(po)
 {
-	po.vueRef("searchForm",
+	po.vueSetup("searchFormModel",
 	{
-		keyword: ""
-	});
-	
-	po.vueSetup("searchFormSubmit", function()
-	{
-		var formData = po.vueRef("searchForm");
-		po.search(formData);
+		form: { keyword: "" },
+		handleSubmit: function()
+		{
+			var param = (po.vueSetup("searchFormModel").form);
+			po.search(po.vueRaw(param));
+		}
 	});
 	
 	po.search = function(formData){};

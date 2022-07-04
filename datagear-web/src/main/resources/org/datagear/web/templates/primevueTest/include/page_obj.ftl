@@ -129,42 +129,40 @@ var ${pageId} =
 			attrs[name] = value;
 	},
 	
+	//获取/设置vue的setup函数、响应式对象（自动reactive）
+	vueSetup: function(name, value)
+	{
+		if(value === undefined)
+			return this._vueSetup[name];
+		else
+		{
+			if(typeof(value) == "function")
+				this._vueSetup[name] = value;
+			else
+				this._vueSetup[name] = Vue.reactive(value);
+		}
+	},
+	
+	//获取reacitve的原始对象
+	vueRaw: function(reactiveObj)
+	{
+		return Vue.toRaw(reactiveObj);
+	},
+	
 	//获取（自动unref）/设置（自动ref）vue的setup的ref值
 	vueRef: function(name, value)
 	{
-		var obj = this.vueSetup(name);
+		var obj = this._vueSetup[name];
 		
 		if(value === undefined)
 			return Vue.unref(obj);
 		else
 		{
 			if(obj == null)	
-				this.vueSetup(name, Vue.ref(value));
+				this._vueSetup[name] = Vue.ref(value);
 			else
 				obj.value = value;
 		}
-	},
-	
-	//获取（自动toRaw）/设置（自动reactive）vue的setup的reactive值
-	vueReactive: function(name, value)
-	{
-		var obj = this.vueSetup(name);
-		
-		if(value === undefined)
-			return Vue.toRaw(obj);
-		else
-		{
-			this.vueSetup(name, Vue.reactive(value));
-		}
-	},
-	
-	//获取/设置vue的setup对象
-	vueSetup: function(name, value)
-	{
-		if(value === undefined)
-			return this._vueSetup[name];
-		else
-			this._vueSetup[name] = value;
 	},
 	
 	//获取/设置vue组件
@@ -224,7 +222,7 @@ var ${pageId} =
 			components: componentsObj
 		});
 		
-		Vue.createApp(app).use(primevue.config.default).mount("#"+this.pageId);
+		return Vue.createApp(app).use(primevue.config.default).mount("#"+this.pageId);
 	}
 };
 </script>

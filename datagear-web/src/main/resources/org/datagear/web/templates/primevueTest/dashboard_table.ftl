@@ -45,7 +45,7 @@
 		po.open("/primevue/chartList");
 	});
 	
-	po.vueRef("product",
+	po.vueSetup("product",
 	{
 		items:
 		[

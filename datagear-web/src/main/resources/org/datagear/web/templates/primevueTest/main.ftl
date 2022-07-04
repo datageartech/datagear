@@ -15,17 +15,17 @@
 				<div class="page-main-menu col-fixed px-0">
 					<div class="grid grid-nogutter flex-column align-items-center p-card h-full">
 						<div class="col-fixed">
-							<p-button @click="toggleMainMenu" icon="pi pi-align-justify" class="p-button-secondary p-button-text p-button-sm opacity-40 my-1 p-1"></p-button>
+							<p-button @click="mainMenuModel.toggle" icon="pi pi-align-justify" class="p-button-secondary p-button-text p-button-sm opacity-40 my-1 p-1"></p-button>
 						</div>
 						<div class="col">
-							<p-tabmenu :model="mainMenu.items" v-model:active-index="mainMenu.active"
-										@tab-change="handleMainMenuChange"
-										class="vertical-tabmenu" :class="{collapse: mainMenu.collapse}">
+							<p-tabmenu :model="mainMenuModel.items" v-model:active-index="mainMenuModel.active"
+										@tab-change="mainMenuModel.handleTabChange"
+										class="vertical-tabmenu" :class="{collapse: mainMenuModel.collapse}">
 							</p-tabmenu>
 						</div>
 					</div>
 				</div>
-				<div id="${pid}mainPanels" class="page-main-panels col overflow-auto"></div>
+				<div id="${pid}-mainPanels" class="page-main-panels col overflow-auto"></div>
 			</div>
 		</div>
 	</div>
@@ -33,7 +33,7 @@
 <script>
 (function(po)
 {
-	po.vueRef("mainMenu",
+	po.vueSetup("mainMenuModel",
 	{
 		active: -1,
 		collapse: false,
@@ -64,18 +64,27 @@
 				icon: 'pi pi-fw pi-images',
 				url: "${contextPath}/primevue/dashboardList"
 			}
-		]
-	});
-	
-	po.vueSetup("toggleMainMenu", function()
-	{
-		var mainMenu = po.vueRef("mainMenu");
-		mainMenu.collapse = !mainMenu.collapse;
+		],
+		
+		toggle: function()
+		{
+			var mainMenuModel = po.vueSetup("mainMenuModel");
+			mainMenuModel.collapse = !mainMenuModel.collapse;
+		},
+		handleTabChange: function(e)
+		{
+			e.originalEvent.preventDefault();
+			
+			var mainMenuModel = po.vueSetup("mainMenuModel");
+			var item = mainMenuModel.items[e.index];
+			
+			po.showMainPanel("mainMenuTab"+item.label, item.url, item.label);
+		}
 	});
 	
 	po.showMainPanel = function(name, url)
 	{
-		const parent = $("#${pid}mainPanels");
+		const parent = po.elementOfId("${pid}-mainPanels");
 		const panelId = "${pid}mainPanel"+name;
 		var panel = po.elementOfId(panelId, parent);
 		
@@ -103,15 +112,6 @@
 			});
 		}
 	};
-	
-	po.vueSetup("handleMainMenuChange", function(e)
-	{
-		e.originalEvent.preventDefault();
-		
-		var mainMenu = po.vueRef("mainMenu");
-		var item = mainMenu.items[e.index];
-		po.showMainPanel("mainMenuTab"+item.label, item.url, item.label);
-	});
 	
 	po.vueMount();
 })

@@ -24,15 +24,15 @@ User currentUser
 		</div>
 		<div class="col text-right pr-2">
 			<span class="vertical-align-super mr-1">${currentUser.nameLabel}</span>
-			<p-button type="button" @click="toggleSysMenu" aria-haspopup="true" aria-controls="${pid}-sysMenu" icon="pi pi-cog" class="p-button-secondary p-button-text p-button-rounded p-button-sm"></p-button>
-			<p-contextmenu id="${pid}-sysMenu" ref="sysMenuEle" :model="sysMenu.items" :popup="true"></p-contextmenu>
+			<p-button type="button" @click="sysMenuModel.toggle" aria-haspopup="true" aria-controls="${pid}-sysMenu" icon="pi pi-cog" class="p-button-secondary p-button-text p-button-rounded p-button-sm"></p-button>
+			<p-contextmenu id="${pid}-sysMenu" ref="sysMenuEle" :model="sysMenuModel.items" :popup="true"></p-contextmenu>
 		</div>
 	</div>
 </div>
 <script>
 (function(po)
 {
-	po.vueRef("sysMenu",
+	po.vueSetup("sysMenuModel",
 	{
 		items:
 		[
@@ -68,15 +68,15 @@ User currentUser
 			},
 			{ separator: true },
 			{ label: "退出", class: "p-error" }
-		]
+		],
+		
+		toggle: function(e)
+		{
+			po.vueRef("sysMenuEle").toggle(event);
+		}
 	});
 	
 	po.vueRef("sysMenuEle", null);
-	
-	po.vueSetup("toggleSysMenu", function()
-	{
-		po.vueRef("sysMenuEle").toggle(event);
-	});
 })
 (${pid});
 </script>
