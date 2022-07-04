@@ -29,12 +29,12 @@ String action
 	po.rowsPerPageOptions = [10, 20, 50, 100, 200];
 	po.rowsPerPage = po.rowsPerPageOptions[1];
 	
-	po.vueSetupTable = function(obj)
+	po.tableModel = function(obj)
 	{
 		return po.vueSetup("tableModel", obj);
 	};
 	
-	po.attrTable = function(obj)
+	po.tableAttr = function(obj)
 	{
 		return po.attr("tableAttr", obj);
 	};
@@ -43,7 +43,7 @@ String action
 	{
 		options = $.extend({ multiSortMeta: [], initData: true }, options);
 		
-		po.vueSetupTable(
+		var tableModel = po.tableModel(
 		{
 			items: [],
 			paginator: true,
@@ -69,7 +69,7 @@ String action
 			}
 		});
 		
-		po.attrTable(
+		po.tableAttr(
 		{
 			url: url,
 			param: { page: 1, pageSize: po.rowsPerPage, orders: po.sortMetaToOrders(options.multiSortMeta) }
@@ -85,11 +85,13 @@ String action
 				po.loadAjaxTable();
 			});
 		}
+		
+		return tableModel;
 	};
 	
 	po.setAjaxTableParam = function(param)
 	{
-		var tableAttr = po.attrTable();
+		var tableAttr = po.tableAttr();
 		$.extend(tableAttr.param, param);
 	};
 	
@@ -97,8 +99,8 @@ String action
 	{
 		options = (options || {});
 		
-		var tableAttr = po.attrTable();
-		var tableModel = po.vueSetupTable();
+		var tableAttr = po.tableAttr();
+		var tableModel = po.tableModel();
 		tableModel.loading = true;
 		
 		options = $.extend(
@@ -132,11 +134,16 @@ String action
 	
 	po.setAjaxTablePagingData = function(pagingData)
 	{
-		var tableModel = po.vueSetupTable();
+		var tableModel = po.tableModel();
 		
 		tableModel.items = pagingData.items;
 		tableModel.totalRecords = pagingData.total;
 		tableModel.selectedItems = [];
+	};
+	
+	po.refresh = function()
+	{
+		po.loadAjaxTable();
 	};
 	
 	//重写搜索表单提交处理函数
@@ -144,6 +151,52 @@ String action
 	{
 		po.setAjaxTableParam($.extend(formData, { page: 1 }));
 		po.loadAjaxTable();
+	};
+	
+	//单选处理函数
+	po.executeOnSelect = function(callback)
+	{
+		$.dataTableUtil.executeOnSelect(po.tableDataTable(table), "<@spring.message code='pleaseSelectOnlyOneRow' />",
+		function(row, rowIndex){ callback.call(po, row, rowIndex); });
+	};
+	
+	//多选处理函数
+	po.executeOnSelects = function(callback)
+	{
+		table = (table == null ? po.table() : table);
+		
+		$.dataTableUtil.executeOnSelects(po.tableDataTable(table), "<@spring.message code='pleaseSelectAtLeastOneRow' />",
+		function(rows, rowIndexes){ callback.call(po, rows, rowIndexes); });
+	};
+	
+	po.handleAddAction = function(url, options)
+	{
+		options = $.extend(
+		{
+			pageParam:
+			{
+				submitSuccess: function(response)
+				{
+					po.refresh();
+				}
+			}
+		},
+		options);
+		
+		po.open(url, options);
+	};
+	
+	po.handleOpenOfAction = function(url, options)
+	{
+		po.executeOnSelect(function(row)
+		{
+			var needJson = ($.CONTENT_TYPE_JSON == (options ? options.contentType : null));
+			var data = po.toOperationRequestData(row, needJson);
+			options = $.extend({ data: data }, options);
+			
+			po.open(url, options);
+		},
+		table);
 	};
 })
 (${pageId});

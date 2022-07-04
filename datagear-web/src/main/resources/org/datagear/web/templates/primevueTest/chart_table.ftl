@@ -38,12 +38,10 @@
 <script>
 (function(po)
 {
-	po.setupAjaxTable("/chart/pagingQueryData",
+	var tableModel = po.setupAjaxTable("/chart/pagingQueryData",
 	{
 		multiSortMeta: [ {field: "createTime", order: -1} ]
 	});
-	
-	var tableModel = po.vueSetupTable();
 	
 	tableModel.handleAdd = function()
 	{

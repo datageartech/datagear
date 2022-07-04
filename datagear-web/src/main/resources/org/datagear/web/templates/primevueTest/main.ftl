@@ -92,7 +92,8 @@
 		
 		if(panel.length == 0)
 		{
-			panel = $("<div id='"+panelId+"' class='page-main-panel p-card w-full h-full p-3' />").prop("unloaded", true).appendTo(parent);
+			panel = $("<div id='"+panelId+"' class='page-main-panel p-card w-full h-full p-3' />")
+						.prop("unloaded", true).appendTo(parent);
 		}
 		
 		panel.removeClass("hidden");

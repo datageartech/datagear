@@ -129,7 +129,7 @@ var ${pageId} =
 			attrs[name] = value;
 	},
 	
-	//获取/设置vue的setup函数、响应式对象（自动reactive）
+	//获取/设置并返回vue的setup函数、响应式对象（自动reactive）
 	vueSetup: function(name, value)
 	{
 		if(value === undefined)
@@ -140,6 +140,8 @@ var ${pageId} =
 				this._vueSetup[name] = value;
 			else
 				this._vueSetup[name] = Vue.reactive(value);
+			
+			return this._vueSetup[name];
 		}
 	},
 	
