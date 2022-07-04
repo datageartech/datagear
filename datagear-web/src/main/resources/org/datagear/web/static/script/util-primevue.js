@@ -189,6 +189,62 @@
 	};
 	
 	/**
+	 * 打开确认对话框。
+	 * @param content 显示内容
+	 * @param options
+	 * 			{
+	 * 				//可选，确定回调函数
+	 * 				confirm : function(){},
+	 * 
+	 * 				//可选，取消回调函数
+	 * 				cancel : function(){},
+	 * 
+	 * 				//可选，确定按钮文本
+	 * 				confirmText : "Confirm",
+	 * 
+	 * 				//可选，取消按钮文本
+	 * 				cancelText : "Cancel",
+	 * 
+	 * 				//可选，取消按钮文本
+	 * 				title : "Confirm"
+	 * 			}
+	 * @param yesCallback 确定回调函数
+	 * @param noCallback 取消回调函数
+	 */
+	$.confirm = function(content, options)
+	{
+		options = (options || {});
+		options = $.extend({confirmText : "Confirm", cancelText : "Cancel", title : "Confirm"}, options);
+		
+		if(options.confirm)
+			options.confirm();
+	};
+	
+	/**
+	 * 提示成功。
+	 */
+	$.tipSuccess = function(content, delayMs)
+	{
+		alert(content);
+	},
+	
+	/**
+	 * 提示错误。
+	 */
+	$.tipError = function(content, delayMs)
+	{
+		alert(content);
+	};
+	
+	/**
+	 * 提示信息。
+	 */
+	$.tipInfo = function(content, delayMs)
+	{
+		alert(content);
+	};
+	
+	/**
 	 * 生成一个唯一ID
 	 * 
 	 * @param prefix 可选，前缀
@@ -247,6 +303,24 @@
 		}
 		
 		return url;
+	};
+	
+	/**
+	 * 获取对象/对象数组指定名称属性值。
+	 * 
+	 * @param obj 对象、对象数组
+	 * @param name 属性名
+	 */
+	$.propertyValue = function(obj, name)
+	{
+		var isArray = $.isArray(obj);
+		var array = (isArray? obj : [obj]);
+		
+		var re = [];
+		for(var i=0; i<array.length; i++)
+			re[i] = array[i][name];
+		
+		return (isArray? re : re[0]);
 	};
 	
 	$.toJsonString = function(obj)

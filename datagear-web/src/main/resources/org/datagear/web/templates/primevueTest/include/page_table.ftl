@@ -156,22 +156,119 @@ String action
 	//单选处理函数
 	po.executeOnSelect = function(callback)
 	{
-		$.dataTableUtil.executeOnSelect(po.tableDataTable(table), "<@spring.message code='pleaseSelectOnlyOneRow' />",
-		function(row, rowIndex){ callback.call(po, row, rowIndex); });
+		var selectedItems = po.tableModel().selectedItems;
+		
+		if(!selectedItems || selectedItems.length != 1)
+		{
+			$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
+			return;
+		}
+		
+		callback.call(po, po.vueRaw(selectedItems[0]));
 	};
 	
 	//多选处理函数
 	po.executeOnSelects = function(callback)
 	{
-		table = (table == null ? po.table() : table);
+		var selectedItems = po.tableModel().selectedItems;
 		
-		$.dataTableUtil.executeOnSelects(po.tableDataTable(table), "<@spring.message code='pleaseSelectAtLeastOneRow' />",
-		function(rows, rowIndexes){ callback.call(po, rows, rowIndexes); });
+		if(!selectedItems || selectedItems.length < 1)
+		{
+			$.tipInfo("<@spring.message code='pleaseSelectAtLeastOneRow' />");
+			return;
+		}
+		
+		callback.call(po, po.vueRaw(selectedItems));
 	};
 	
 	po.handleAddAction = function(url, options)
 	{
-		options = $.extend(
+		var action = { url: url, options: options };
+		po.inflateFormActionPageParam(action);
+		po.open(url, options);
+	};
+	
+	po.handleOpenOfAction = function(url, options)
+	{
+		po.executeOnSelect(function(row)
+		{
+			var action = { url: url, options: options };
+			po.inflateFormActionPageParam(action);
+			po.inflateRowAction(action, row);
+			po.open(action.url, action.options);
+		});
+	};
+	
+	po.handleOpenOfsAction = function(url, options)
+	{
+		po.executeOnSelects(function(rows)
+		{
+			var action = { url: url, options: options };
+			po.inflateFormActionPageParam(action);
+			po.inflateRowAction(action, rows);
+			po.open(action.url, action.options);
+		});
+	};
+
+	po.handleDeleteAction = function(url, options)
+	{
+		po.executeOnSelects(function(rows)
+		{
+			po.confirm("<@spring.message code='confirmDelete' />",
+			{
+				"confirm" : function()
+				{
+					options = $.extend(
+					{
+						contentType: $.CONTENT_TYPE_JSON,
+						success: function(){ po.refresh(); }
+					},
+					options);
+					
+					var action = { url: url, options: options };
+					po.inflateRowAction(action, rows);
+					
+					$.ajaxJson(url, action.options);
+				}
+			});
+		});
+	};
+	
+	po.handleSelectAction = function()
+	{
+		if(po.isMultipleSelectAction)
+		{
+			po.executeOnSelects(function(rows)
+			{
+				po.pageParamCallSelect(rows);
+			});
+		}
+		else
+		{
+			po.executeOnSelect(function(row)
+			{
+				po.pageParamCallSelect(row);
+			});
+		}
+	};
+	
+	//调用页面参数对象的"select"函数
+	po.pageParamCallSelect = function(selected, close)
+	{
+		close = (close == null ? true : close);
+		
+		var myClose = this.pageParamCall("select", selected);
+		
+		if(myClose === false)
+			return;
+		
+		if(close)
+			this.close();
+	};
+	
+	po.inflateFormActionPageParam = function(action)
+	{
+		action.options = $.extend(
 		{
 			pageParam:
 			{
@@ -181,22 +278,29 @@ String action
 				}
 			}
 		},
-		options);
-		
-		po.open(url, options);
+		action.options);
 	};
 	
-	po.handleOpenOfAction = function(url, options)
+	//将单行或多行数据对象转换为操作请求数据
+	po.inflateRowAction = function(action, rowOrRows)
 	{
-		po.executeOnSelect(function(row)
+		var id = $.propertyValue(rowOrRows, "id");
+		
+		if($.CONTENT_TYPE_JSON == action.options.contentType)
 		{
-			var needJson = ($.CONTENT_TYPE_JSON == (options ? options.contentType : null));
-			var data = po.toOperationRequestData(row, needJson);
-			options = $.extend({ data: data }, options);
-			
-			po.open(url, options);
-		},
-		table);
+			var options = action.options;
+			options.data = (options.data == null ? id : $.extend({"id": id}, options.data));
+		}
+		else
+		{
+			if($.isArray(id))
+			{
+				for(var i=0; i<id.length; i++)
+					action.url = $.addParam(action.url, "id", id[i], true);
+			}
+			else
+				action.url = $.addParam(action.url, "id", id);
+		}
 	};
 })
 (${pageId});

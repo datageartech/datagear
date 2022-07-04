@@ -14,8 +14,9 @@
 		</div>
 		<div class="h-opts col-12 md:col-9 text-right">
 			<p-button label="添加" @click="tableModel.handleAdd"></p-button>
-			<p-button label="编辑"></p-button>
-			<p-button class="p-button-danger">删除</p-button>
+			<p-button label="编辑" @click="tableModel.handleEdit"></p-button>
+			<p-button label="查看" @click="tableModel.handleView"></p-button>
+			<p-button label="删除" @click="tableModel.handleDelete" class="p-button-danger"></p-button>
 		</div>
 	</div>
 	<div class="page-table-content">
@@ -45,7 +46,22 @@
 	
 	tableModel.handleAdd = function()
 	{
-		po.open("/primevue/addChart");
+		po.handleAddAction("/primevue/addChart");
+	};
+	
+	tableModel.handleEdit = function()
+	{
+		po.handleOpenOfAction("/primevue/addChart");
+	};
+	
+	tableModel.handleView = function()
+	{
+		po.handleOpenOfAction("/primevue/addChart");
+	};
+	
+	tableModel.handleDelete = function()
+	{
+		po.handleDeleteAction("/primevue/addChart");
 	};
 	
 	po.vueMount();

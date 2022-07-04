@@ -108,8 +108,12 @@ var ${pageId} =
 	 */
 	confirm : function(content, options)
 	{
-		options = (options || {});
-		options = $.extend({}, options, {confirmText : "<@spring.message code='confirm' />", cancelText : "<@spring.message code='cancel' />", title : "<@spring.message code='operationConfirm' />"});
+		options = $.extend(
+		{
+			confirmText : "<@spring.message code='confirm' />",
+			cancelText : "<@spring.message code='cancel' />",
+			title : "<@spring.message code='operationConfirm' />"
+		}, options);
 		$.confirm(content, options);
 	},
 	
