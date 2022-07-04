@@ -9,9 +9,6 @@
 <#--
 搜索表单。
 
-依赖：
-page_obj.ftl
-
 -->
 <form @submit.prevent="searchFormModel.handleSubmit">
 	<div class="p-inputgroup">

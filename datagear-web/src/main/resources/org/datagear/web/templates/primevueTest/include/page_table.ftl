@@ -9,9 +9,6 @@
 <#--
 表格JS片段。
 
-依赖：
-page_obj.ftl
-
 变量：
 //操作
 String action
@@ -281,25 +278,35 @@ String action
 		action.options);
 	};
 	
+	po.inflateRowActionIdPropName = "id";
+	po.inflateRowActionIdParamName = "id";
+	
 	//将单行或多行数据对象转换为操作请求数据
 	po.inflateRowAction = function(action, rowOrRows)
 	{
-		var id = $.propertyValue(rowOrRows, "id");
+		var id = $.propertyValue(rowOrRows, po.inflateRowActionIdPropName);
 		
 		if($.CONTENT_TYPE_JSON == action.options.contentType)
 		{
 			var options = action.options;
-			options.data = (options.data == null ? id : $.extend({"id": id}, options.data));
+			if(options.data == null)
+				options.data = id;
+			else
+			{
+				var data = {};
+				data[po.inflateRowActionIdParamName] = id;
+				options.data = $.extend(data, options.data);
+			}
 		}
 		else
 		{
 			if($.isArray(id))
 			{
 				for(var i=0; i<id.length; i++)
-					action.url = $.addParam(action.url, "id", id[i], true);
+					action.url = $.addParam(action.url, po.inflateRowActionIdParamName, id[i], true);
 			}
 			else
-				action.url = $.addParam(action.url, "id", id);
+				action.url = $.addParam(action.url, po.inflateRowActionIdParamName, id);
 		}
 	};
 })

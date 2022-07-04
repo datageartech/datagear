@@ -9,9 +9,6 @@
 <#--
 页头。
 
-依赖：
-page_obj.ftl
-
 变量：
 //当前用户，不允许为null
 User currentUser
