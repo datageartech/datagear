@@ -70,38 +70,38 @@
 			{
 				const container = $(options.target ? options.target : document.body);
 				
-				const rootId = $.uid("root");
-				const rootEle = $("<div id='"+rootId+"' />").appendTo(container);
+				const rootEleId = $.uid("app");
+				const rootEle = $("<div id='"+rootEleId+"' />").appendTo(container);
 				
 				if(options.dialog)
 				{
-					const dialogId = rootId+"dialog";
-					rootEle.addClass("dialog-root");
-					$("<p-dialog />").attr("id", dialogId)
-								.attr(":header", "dialogModel.header").attr("v-model:visible", "dialogModel.visible").attr(":modal", options.modal)
+					const dialogEleId = rootEleId+"dialog";
+					rootEle.addClass("vue-app-dialog");
+					$("<p-dialog />").attr("id", dialogEleId).attr("app-ele-id", rootEleId)
+								.attr(":header", "model.header").attr("v-model:visible", "model.visible").attr(":modal", options.modal)
 								.attr("v-on:show", "setReponseHtml").attr("v-on:after-hide", "destroyDialogEle")
-								.attr(":style", "{width: dialogModel.width}")
+								.attr(":style", "{width: model.width}")
 								.attr("class", "ajax-dialog " + $.PAGE_PARAM_BINDER_CLASS)
 								.appendTo(rootEle);
 					
-					const dialogApp =
+					var dialogApp =
 					{
 						setup()
 						{
-							const dialogModel = Vue.reactive(
+							const model = Vue.reactive(
 							{
 								header: (options.title || " "),
 								visible: true,
 								width: options.width
 							});
+							
 							const destroyDialogEle = function()
 							{
 								rootEle.remove();
 							};
 							const setReponseHtml = function()
 							{
-								let dialogEle = $("#"+dialogId);
-								dialogEle.data("dialogModel", dialogModel);
+								let dialogEle = $("#"+dialogEleId);
 								
 								if(options.pageParam)
 									$.pageParam(dialogEle, options.pageParam);
@@ -109,20 +109,21 @@
 								let dialogContent = $(" > .p-dialog-content", dialogEle);
 								dialogContent.html(response);
 								
-								if(dialogModel.header == " ")
+								if(model.header == " ")
 								{
 									let title = $("title", dialogContent).text();
 									if(title)
-										dialogModel.header = title;
+										model.header = title;
 								}
 							};
 							
-							return {dialogModel, destroyDialogEle, setReponseHtml};
+							return {model, destroyDialogEle, setReponseHtml};
 						},
 						components: { "p-dialog": primevue.dialog }
 					};
 					
-					Vue.createApp(dialogApp).use(primevue.config.default).mount(rootEle[0]);
+					dialogApp = Vue.createApp(dialogApp).use(primevue.config.default).mount(rootEle[0]);
+					rootEle.data("dialogApp", dialogApp);
 				}
 				else
 				{
@@ -175,8 +176,13 @@
 		var d = $.getInDialog(ele);
 		if(d && d.length > 0)
 		{
-			let dialogModel = d.data("dialogModel");
-			dialogModel.visible = false;
+			let appEle = $("#"+ d.attr("app-ele-id"));
+			let dialogApp = appEle.data("dialogApp");
+			
+			if(dialogApp)
+			{
+				dialogApp.model.visible = false;
+			}
 		}
 	};
 	
@@ -265,25 +271,116 @@
 	/**
 	 * 提示成功。
 	 */
-	$.tipSuccess = function(content, delayMs)
+	$.tipSuccess = function(msg)
 	{
-		alert(content);
+		var tip = $.getGlobalTip();
+		
+		if(tip)
+			tip.showSuccess(typeof(msg) == "string" ? { summary: msg } : msg);
 	},
-	
-	/**
-	 * 提示错误。
-	 */
-	$.tipError = function(content, delayMs)
-	{
-		alert(content);
-	};
 	
 	/**
 	 * 提示信息。
 	 */
-	$.tipInfo = function(content, delayMs)
+	$.tipInfo = function(msg)
 	{
-		alert(content);
+		var tip = $.getGlobalTip();
+		
+		if(tip)
+			tip.showInfo(typeof(msg) == "string" ? { summary: msg } : msg);
+	};
+	
+	/**
+	 * 提示警告。
+	 */
+	$.tipWarn = function(msg)
+	{
+		var tip = $.getGlobalTip();
+		
+		if(tip)
+			tip.showWarn(typeof(msg) == "string" ? { summary: msg } : msg);
+	};
+	
+	/**
+	 * 提示错误。
+	 */
+	$.tipError = function(msg)
+	{
+		var tip = $.getGlobalTip();
+		if(tip)
+			tip.showError(typeof(msg) == "string" ? { summary: msg } : msg);
+	};
+	
+	/**
+	 * 获取提示组件。
+	 */
+	$.getGlobalTip = function()
+	{
+		var appEle = ($.GLOBAL_TIP_APP_ELE_ID ? $("#"+$.GLOBAL_TIP_APP_ELE_ID) : null);
+		
+		if(!appEle || appEle.length == 0)
+			return null;
+		
+		return appEle.data("tipApp");
+	};
+	
+	/**
+	 * 初始化提示。
+	 */
+	$.initGlobalTip = function()
+	{
+		var appId = ($.GLOBAL_TIP_APP_ELE_ID || ($.GLOBAL_TIP_APP_ELE_ID = $.uid("app")));
+		var appEle = $("#"+appId);
+		if(appEle.length == 0)
+		{
+			appEle = $("<div id='"+appId+"' />").addClass("vue-app-tip").appendTo(document.body);
+			$("<p-toast />").attr("position", "top-center").attr("group", "global-tip").appendTo(appEle);
+			
+			const buildTipOptions = function(builtInOptions, options)
+			{
+				options = $.extend(builtInOptions, options);
+				
+				if(!options.detail)
+					options.contentStyleClass = "align-items-center empty-detail";
+				
+				return options;
+			};
+			
+			var tipApp =
+			{
+				setup()
+				{
+					const toast = primevue.usetoast.useToast();
+					
+					const showSuccess = (options) =>
+					{
+						options = buildTipOptions({ severity: "success", group: "global-tip", life: 2000 }, options);
+						toast.add(options);
+					};
+					const showInfo = (options) =>
+					{
+						options = buildTipOptions({ severity: "info", group: "global-tip", life: 3000 }, options);
+						toast.add(options);
+					};
+					const showWarn = (options) =>
+					{
+						options = buildTipOptions({ severity: "warn", group: "global-tip", life: 3000 }, options);
+						toast.add(options);
+					};
+					const showError = (options) =>
+					{
+						options = buildTipOptions({ severity: "error", group: "global-tip", life: 5000 }, options);
+						toast.add(options);
+					};
+					
+					return { showSuccess, showInfo, showWarn, showError };
+				},
+				components: { "p-toast": primevue.toast }
+			};
+			
+			tipApp = Vue.createApp(tipApp).use(primevue.config.default).use(primevue.toastservice).mount(appEle[0]);
+			appEle.data("tipApp", tipApp);
+		}
 	};
 	
 	/**

@@ -251,6 +251,8 @@ var ${pageId} =
 					{
 						callback();
 					});
+					
+					$.initGlobalTip();
 				});
 				
 				return setupObj;

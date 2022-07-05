@@ -33,6 +33,8 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/contextmenu/contextmenu.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/dialog/dialog.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/textarea/textarea.min.js"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/toast/toast.min.js"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/toastservice/toastservice.min.js"></script>
 
 <script src="${contextPath}/static/script/util-primevue.js"></script>
 </#if>

@@ -63,6 +63,19 @@
 	padding-bottom: 1rem;
 }
 
+/*上中提示框*/
+.p-toast-top-center{
+	top: 3px !important;
+}
+/*没有detail的提示框*/
+.p-toast-message-content.empty-detail{
+	padding-top: 0.7rem !important;
+	padding-bottom: 0.7rem !important;
+}
+.p-toast-message-content.empty-detail .p-toast-detail{
+	display: none !important;
+}
+
 /**无边框卡片*/
 .p-card.no-border{
 	box-shadow: none;
@@ -86,10 +99,12 @@
 	/*屏幕高度 - 列表header高度*/
 	height: calc(100vh - 5rem);
 }
+/*主页选项卡里的表格页*/
 .page-main-panel .page-table .page-table-content{
 	/*屏幕高度 - 列表header高度 - 主页header高度*/
-	height: calc(100vh - 5rem - 4rem);
+	height: calc(100vh - 5rem - 5rem);
 }
+/*对话框里的表格页*/
 .p-dialog .page-table .page-table-content{
 	/*对话框高度 - 列表header高度 - 对话框header高度*/
 	height: calc(90vh - 5rem - 6rem);
