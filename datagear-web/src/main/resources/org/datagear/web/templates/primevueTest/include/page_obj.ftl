@@ -125,6 +125,44 @@ var ${pageId} =
 			attrs[name] = value;
 	},
 	
+	//获取/填充并返回vue页面模型，在vue页面中可以"pm.*"访问模型中的属性
+	vuePageModel: function(obj)
+	{
+		return this.vueReactive("pm", obj);
+	},
+	
+	//获取/填充并返回vue的setup响应式对象（自动reactive）
+	vueReactive: function(name, obj)
+	{
+		if(obj === undefined)
+			return this._vueSetup[name];
+		else
+		{
+			var rtvObj = (this._vueSetup[name] || (this._vueSetup[name] = Vue.reactive({})));
+			
+			for(var p in obj)
+				rtvObj[p] = obj[p];
+			
+			return rtvObj;
+		}
+	},
+	
+	//设置vue的setup函数
+	vueMethod: function(name, method)
+	{
+		var methodsObj = {};
+		
+		// ({ a: Function, b: Function)
+		if(arguments.length == 1)
+			methodsObj = name;
+		// (name, Function)
+		else if(arguments.length == 2)
+			methodsObj[name] = method;
+		
+		for(var p in methodsObj)
+			this._vueSetup[p] = methodsObj[p];
+	},
+	
 	//获取/设置并返回vue的setup函数、响应式对象（自动reactive）
 	vueSetup: function(name, value)
 	{
@@ -141,13 +179,7 @@ var ${pageId} =
 		}
 	},
 	
-	//获取reacitve的原始对象
-	vueRaw: function(reactiveObj)
-	{
-		return Vue.toRaw(reactiveObj);
-	},
-	
-	//获取（自动unref）/设置（自动ref）vue的setup的ref值
+	//获取（自动unref）/设置（自动ref）vue的setup引用值
 	vueRef: function(name, value)
 	{
 		var obj = this._vueSetup[name];
@@ -176,6 +208,12 @@ var ${pageId} =
 	vueMounted: function(callback)
 	{
 		this._vueMounted.push(callback);
+	},
+
+	//获取reacitve的原始对象
+	vueRaw: function(reactiveObj)
+	{
+		return Vue.toRaw(reactiveObj);
 	},
 	
 	//vue的setup对象

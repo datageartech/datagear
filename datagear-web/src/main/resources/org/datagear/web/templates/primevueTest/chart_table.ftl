@@ -15,27 +15,27 @@
 </head>
 <body class="p-card no-border">
 <#include "include/page_obj.ftl">
-<div id="${pid}" class="page-table">
+<div id="${pid}" class="page page-table">
 	<div class="page-table-header grid align-items-center">
 		<div class="col-12 md:col-3">
 			<#include "include/page_search_form.ftl">
 		</div>
 		<div class="h-opts col-12 md:col-9 text-right">
-			<p-button label="添加" @click="tableModel.handleAdd"></p-button>
-			<p-button label="编辑" @click="tableModel.handleEdit"></p-button>
-			<p-button label="查看" @click="tableModel.handleView"></p-button>
-			<p-button label="删除" @click="tableModel.handleDelete" class="p-button-danger"></p-button>
+			<p-button label="添加" @click="onAdd"></p-button>
+			<p-button label="编辑" @click="onEdit"></p-button>
+			<p-button label="查看" @click="onView"></p-button>
+			<p-button label="删除" @click="onDelete" class="p-button-danger"></p-button>
 		</div>
 	</div>
 	<div class="page-table-content">
-		<p-datatable :value="tableModel.items" :scrollable="true" scroll-height="flex"
-			:paginator="tableModel.paginator" :paginator-template="tableModel.paginatorTemplate"
-			:rows="tableModel.rowsPerPage" :current-page-report-template="tableModel.pageReportTemplate"
-			:rows-per-page-options="tableModel.rowsPerPageOptions" :loading="tableModel.loading"
-			:lazy="true" :total-records="tableModel.totalRecords" @page="tableModel.handlePaginator($event)"
-			sort-mode="multiple" :multi-sort-meta="tableModel.multiSortMeta" @sort="tableModel.handleSort($event)"
-			v-model:selection="tableModel.selectedItems" :selection-mode="tableModel.selectionMode" dataKey="id" striped-rows>
-			<p-column selection-mode="multiple" header-style="width:4rem" class="flex-grow-0"></p-column>
+		<p-datatable :value="pm.items" :scrollable="true" scroll-height="flex"
+			:paginator="pm.paginator" :paginator-template="pm.paginatorTemplate"
+			:rows="pm.rowsPerPage" :current-page-report-template="pm.pageReportTemplate"
+			:rows-per-page-options="pm.rowsPerPageOptions" :loading="pm.loading"
+			:lazy="true" :total-records="pm.totalRecords" @page="onPaginator($event)"
+			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
+			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
+			<p-column :selection-mode="pm.selectionMode" header-style="width:4rem" class="flex-grow-0"></p-column>
 			<p-column field="id" header="ID" :sortable="true"></p-column>
 			<p-column field="name" header="名称" :sortable="true"></p-column>
 			<p-column field="createUser.realName" header="创建用户" :sortable="true"></p-column>
@@ -47,30 +47,33 @@
 <script>
 (function(po)
 {
-	var tableModel = po.setupAjaxTable("/chart/pagingQueryData",
+	po.setupAjaxTable("/chart/pagingQueryData",
 	{
 		multiSortMeta: [ {field: "createTime", order: -1} ]
 	});
 	
-	tableModel.handleAdd = function()
+	po.vueMethod(
 	{
-		po.handleAddAction("/primevue/addChart");
-	};
-	
-	tableModel.handleEdit = function()
-	{
-		po.handleOpenOfAction("/primevue/addChart");
-	};
-	
-	tableModel.handleView = function()
-	{
-		po.handleOpenOfAction("/primevue/addChart");
-	};
-	
-	tableModel.handleDelete = function()
-	{
-		po.handleDeleteAction("/primevue/addChart");
-	};
+		onAdd: function()
+		{
+			po.handleAddAction("/primevue/addChart");
+		},
+		
+		onEdit: function()
+		{
+			po.handleOpenOfAction("/primevue/addChart");
+		},
+		
+		onView: function()
+		{
+			po.handleOpenOfAction("/primevue/addChart");
+		},
+		
+		onDelete: function()
+		{
+			po.handleDeleteAction("/primevue/addChart");
+		}
+	});
 	
 	po.vueMount();
 })

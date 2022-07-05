@@ -55,6 +55,10 @@
 }
 
 /*对话框*/
+.p-dialog .p-dialog-header{
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+}
 .p-dialog.ajax-dialog .p-dialog-content{
 	padding-bottom: 1rem;
 }

@@ -26,11 +26,6 @@ String action
 	po.rowsPerPageOptions = [10, 20, 50, 100, 200];
 	po.rowsPerPage = po.rowsPerPageOptions[1];
 	
-	po.tableModel = function(obj)
-	{
-		return po.vueSetup("tableModel", obj);
-	};
-	
 	po.tableAttr = function(obj)
 	{
 		return po.attr("tableAttr", obj);
@@ -40,7 +35,7 @@ String action
 	{
 		options = $.extend({ multiSortMeta: [], initData: true }, options);
 		
-		var tableModel = po.tableModel(
+		var pm = po.vuePageModel(
 		{
 			items: [],
 			paginator: true,
@@ -52,14 +47,17 @@ String action
 			loading: false,
 			selectionMode: "multiple",
 			multiSortMeta: options.multiSortMeta,
-			selectedItems: [],
-			
-			handlePaginator: function(e)
+			selectedItems: []
+		});
+		
+		po.vueMethod(
+		{
+			onPaginator: function(e)
 			{
 				po.setAjaxTableParam({ page: e.page+1, pageSize: e.rows, orders: po.sortMetaToOrders(e.multiSortMeta) });
 				po.loadAjaxTable();
 			},
-			handleSort: function(e)
+			onSort: function(e)
 			{
 				po.setAjaxTableParam({ orders: po.sortMetaToOrders(e.multiSortMeta) });
 				po.loadAjaxTable();
@@ -83,7 +81,7 @@ String action
 			});
 		}
 		
-		return tableModel;
+		return pm;
 	};
 	
 	po.setAjaxTableParam = function(param)
@@ -97,8 +95,8 @@ String action
 		options = (options || {});
 		
 		var tableAttr = po.tableAttr();
-		var tableModel = po.tableModel();
-		tableModel.loading = true;
+		var pm = po.vuePageModel();
+		pm.loading = true;
 		
 		options = $.extend(
 		{
@@ -109,7 +107,7 @@ String action
 			},
 			complete: function()
 			{
-				tableModel.loading = false;
+				pm.loading = false;
 			}
 		},
 		options);
@@ -131,11 +129,11 @@ String action
 	
 	po.setAjaxTablePagingData = function(pagingData)
 	{
-		var tableModel = po.tableModel();
+		var pm = po.vuePageModel();
 		
-		tableModel.items = pagingData.items;
-		tableModel.totalRecords = pagingData.total;
-		tableModel.selectedItems = [];
+		pm.items = pagingData.items;
+		pm.totalRecords = pagingData.total;
+		pm.selectedItems = [];
 	};
 	
 	po.refresh = function()
@@ -153,7 +151,8 @@ String action
 	//单选处理函数
 	po.executeOnSelect = function(callback)
 	{
-		var selectedItems = po.tableModel().selectedItems;
+		var pm = po.vuePageModel();
+		var selectedItems = pm.selectedItems;
 		
 		if(!selectedItems || selectedItems.length != 1)
 		{
@@ -167,7 +166,8 @@ String action
 	//多选处理函数
 	po.executeOnSelects = function(callback)
 	{
-		var selectedItems = po.tableModel().selectedItems;
+		var pm = po.vuePageModel();
+		var selectedItems = pm.selectedItems;
 		
 		if(!selectedItems || selectedItems.length < 1)
 		{

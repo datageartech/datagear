@@ -24,27 +24,23 @@ String action
 	po.isSaveAction = (po.isSaveAddAction || po.isSaveEditAction || po.action == "${PrimveVueTestController.REQUEST_ACTION_SAVE}");
 	po.isViewAction = (po.action == "${PrimveVueTestController.REQUEST_ACTION_SAVE}");
 	
-	po.formModel = function(obj)
-	{
-		return po.vueSetup("formModel", obj);
-	};
-	
 	po.setupForm = function(data, submitUrl, options)
 	{
 		data = (data || {});
 		submitUrl = (submitUrl || "#");
 		options = (options || {});
 		
-		var formModel = po.formModel(
+		var pm = po.vuePageModel(data);
+		
+		po.vueMethod(
 		{
-			data: data,
-			submit: function(e)
+			onSubmit: function(e)
 			{
 				if(po.isViewAction)
 					return;
 				
-				var formModel = po.formModel();
-				options = $.extend(true, { closeAfterSubmit: true }, options, { data: po.vueRaw(formModel.data) });
+				var pm = po.vuePageModel();
+				options = $.extend(true, { closeAfterSubmit: true }, options, { data: po.vueRaw(pm) });
 				
 				var successHandlers = (options.success ? [].concat(options.success) : []);
 				successHandlers.push(function(response)
@@ -61,7 +57,7 @@ String action
 			}
 		});
 		
-		return formModel;
+		return pm;
 	};
 	
 	po.inflateSubmitAction = function(action){};

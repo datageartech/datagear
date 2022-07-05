@@ -23,12 +23,12 @@
 				<div class="page-main-menu col-fixed px-0">
 					<div class="grid grid-nogutter flex-column align-items-center p-card h-full">
 						<div class="col-fixed">
-							<p-button @click="mainMenuModel.toggle" icon="pi pi-align-justify" class="p-button-secondary p-button-text p-button-sm opacity-40 my-1 p-1"></p-button>
+							<p-button @click="onMainMenuToggle" icon="pi pi-align-justify" class="p-button-secondary p-button-text p-button-sm opacity-40 my-1 p-1"></p-button>
 						</div>
 						<div class="col">
-							<p-tabmenu :model="mainMenuModel.items" v-model:active-index="mainMenuModel.active"
-										@tab-change="mainMenuModel.handleTabChange"
-										class="vertical-tabmenu" :class="{collapse: mainMenuModel.collapse}">
+							<p-tabmenu :model="pm.mainMenu.items" v-model:active-index="pm.mainMenu.active"
+										@tab-change="onMainMenuTabChange"
+										class="vertical-tabmenu" :class="{collapse: pm.mainMenu.collapse}">
 							</p-tabmenu>
 						</div>
 					</div>
@@ -41,50 +41,56 @@
 <script>
 (function(po)
 {
-	po.vueSetup("mainMenuModel",
+	po.vuePageModel(
 	{
-		active: -1,
-		collapse: false,
-		items:
-		[
-			{
-				label: '数据源',
-				icon: 'pi pi-fw pi-database',
-				url: "${contextPath}/primevue/chartList"
-			},
-			{
-				label: '项目',
-				icon: 'pi pi-fw pi-folder',
-				url: "${contextPath}/primevue/chartList"
-			},
-			{
-				label: '数据集',
-				icon: 'pi pi-fw pi-table',
-				url: "${contextPath}/primevue/chartList"
-			},
-			{
-				label: '图表',
-				icon: 'pi pi-fw pi-chart-line',
-				url: "${contextPath}/primevue/chartList"
-			},
-			{
-				label: '看板',
-				icon: 'pi pi-fw pi-images',
-				url: "${contextPath}/primevue/dashboardList"
-			}
-		],
-		
-		toggle: function()
+		mainMenu:
 		{
-			var mainMenuModel = po.vueSetup("mainMenuModel");
-			mainMenuModel.collapse = !mainMenuModel.collapse;
+			active: -1,
+			collapse: false,
+			items:
+			[
+				{
+					label: '数据源',
+					icon: 'pi pi-fw pi-database',
+					url: "${contextPath}/primevue/chartList"
+				},
+				{
+					label: '项目',
+					icon: 'pi pi-fw pi-folder',
+					url: "${contextPath}/primevue/chartList"
+				},
+				{
+					label: '数据集',
+					icon: 'pi pi-fw pi-table',
+					url: "${contextPath}/primevue/chartList"
+				},
+				{
+					label: '图表',
+					icon: 'pi pi-fw pi-chart-line',
+					url: "${contextPath}/primevue/chartList"
+				},
+				{
+					label: '看板',
+					icon: 'pi pi-fw pi-images',
+					url: "${contextPath}/primevue/chartList"
+				}
+			]
+		}
+	});
+	
+	po.vueMethod(
+	{
+		onMainMenuToggle: function()
+		{
+			var pm = po.vuePageModel();
+			pm.mainMenu.collapse = !pm.mainMenu.collapse;
 		},
-		handleTabChange: function(e)
+		onMainMenuTabChange: function(e)
 		{
 			e.originalEvent.preventDefault();
 			
-			var mainMenuModel = po.vueSetup("mainMenuModel");
-			var item = mainMenuModel.items[e.index];
+			var mainMenu = po.vuePageModel().mainMenu;
+			var item = mainMenu.items[e.index];
 			
 			po.showMainPanel("mainMenuTab"+item.label, item.url, item.label);
 		}

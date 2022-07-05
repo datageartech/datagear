@@ -53,12 +53,6 @@ public class PrimveVueTestController extends AbstractController
 		return "/primevueTest/chart_table";
 	}
 
-	@RequestMapping("/dashboardList")
-	public String dashboardList(HttpServletRequest request, HttpServletResponse response, Model model)
-	{
-		return "/primevueTest/dashboard_table";
-	}
-
 	@RequestMapping("/addChart")
 	public String addChart(HttpServletRequest request, HttpServletResponse response, Model model)
 	{

@@ -10,22 +10,26 @@
 搜索表单。
 
 -->
-<form @submit.prevent="searchFormModel.handleSubmit">
+<form @submit.prevent="onSearchFormSubmit" class="py-1">
 	<div class="p-inputgroup">
-		<p-inputtext type="text" v-model="searchFormModel.form.keyword"></p-inputtext>
+		<p-inputtext type="text" v-model="pm.searchForm.keyword"></p-inputtext>
 		<p-button type="submit" icon="pi pi-search" />
 	</div>
 </form>
 <script>
 (function(po)
 {
-	po.vueSetup("searchFormModel",
+	po.vuePageModel(
 	{
-		form: { keyword: "" },
-		handleSubmit: function()
+		searchForm: { keyword: "" }
+	});
+	
+	po.vueMethod(
+	{
+		onSearchFormSubmit: function()
 		{
-			var param = (po.vueSetup("searchFormModel").form);
-			po.search(po.vueRaw(param));
+			var param = po.vueRaw(po.vuePageModel().searchForm);
+			po.search(param);
 		}
 	});
 	
