@@ -471,8 +471,9 @@
 		return JSON.stringify(obj);
 	};
 	
-	/**JSON内容类型常量*/
+	/**ajax内容类型常量*/
 	$.CONTENT_TYPE_JSON = "application/json";
+	$.CONTENT_TYPE_FORM = "application/x-www-form-urlencoded";
 	
 	/**
 	 * 提交JSON数据。

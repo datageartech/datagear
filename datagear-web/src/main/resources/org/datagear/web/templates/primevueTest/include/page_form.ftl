@@ -48,7 +48,12 @@ String action
 		var action = { url: po.concatContextPath(url), options: options };
 		po.inflateSubmitAction(action);
 		
-		$.ajaxJson(action.url, action.options);
+		var jsonSubmit = (action.options.contentType == null || action.options.contentType == $.CONTENT_TYPE_JSON);
+		
+		if(jsonSubmit)
+			$.ajaxJson(action.url, action.options);
+		else
+			$.ajax(action.url, action.options);
 		
 		return false;
 	};

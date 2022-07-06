@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping("/primevue")
-public class PrimveVueTestController extends AbstractController
+public class PrimeVueTestController extends AbstractController
 {
 	public static final String KEY_REQUEST_ACTION = "requestAction";
 	public static final String REQUEST_ACTION_QUERY = "query";
@@ -36,7 +36,7 @@ public class PrimveVueTestController extends AbstractController
 	public static final String REQUEST_ACTION_SAVE = "save";
 	public static final String REQUEST_ACTION_VIEW = "view";
 
-	public PrimveVueTestController()
+	public PrimeVueTestController()
 	{
 		super();
 	}
@@ -45,6 +45,13 @@ public class PrimveVueTestController extends AbstractController
 	public String main(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		return "/primevueTest/main";
+	}
+
+	@RequestMapping("/login")
+	public String login(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+		model.addAttribute("disableLoginCheckCode", false);
+		return "/primevueTest/login";
 	}
 
 	@RequestMapping("/chartList")
