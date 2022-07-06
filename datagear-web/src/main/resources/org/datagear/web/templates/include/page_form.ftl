@@ -14,15 +14,16 @@
 String action
 
 -->
-<#assign PrimveVueTestController=statics['org.datagear.web.controller.PrimveVueTestController']>
+<#assign AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <script>
 (function(po)
 {
-	po.action = "${action!PrimveVueTestController.REQUEST_ACTION_QUERY}";
-	po.isSaveAddAction = (po.action == "${PrimveVueTestController.REQUEST_ACTION_SAVE_ADD}");
-	po.isSaveEditAction = (po.action == "${PrimveVueTestController.REQUEST_ACTION_SAVE_EDIT}");
-	po.isSaveAction = (po.isSaveAddAction || po.isSaveEditAction || po.action == "${PrimveVueTestController.REQUEST_ACTION_SAVE}");
-	po.isViewAction = (po.action == "${PrimveVueTestController.REQUEST_ACTION_SAVE}");
+	po.action = "${requestAction!AbstractController.REQUEST_ACTION_QUERY}";
+	po.isAddAction = (po.action == "${AbstractController.REQUEST_ACTION_ADD}");
+	po.isEditAction = (po.action == "${AbstractController.REQUEST_ACTION_EDIT}");
+	po.isViewAction = (po.action == "${AbstractController.REQUEST_ACTION_VIEW}");
+	po.isReadonlyAction = (po.isViewAction);
+	po.submitAction = "${submitAction!'#'}";
 	
 	po.form = function()
 	{
@@ -63,6 +64,8 @@ String action
 		data = (data || {});
 		submitUrl = (submitUrl || "#");
 		options = (options || {});
+		
+		po.vueRef("isReadonlyAction", po.isReadonlyAction);
 		
 		var pm = po.vuePageModel(data);
 		

@@ -21,7 +21,10 @@ User currentUser
 		</div>
 		<div class="col text-right pr-2">
 			<span class="vertical-align-super mr-1">
-				<#if !currentUser.anonymous>
+				<#if currentUser.anonymous>
+					<a href="${contextPath}/login" class="link px-1"><@spring.message code='module.login' /></a>
+					<a href="${contextPath}/" class="link px-1"><@spring.message code='module.main' /></a>
+				<#else>
 					${currentUser.nameLabel}
 				</#if>
 			</span>

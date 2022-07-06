@@ -64,9 +64,7 @@ public class AnalysisProjectController extends AbstractController
 	{
 		AnalysisProject analysisProject = new AnalysisProject();
 
-		model.addAttribute("analysisProject", analysisProject);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.addAnalysisProject");
-		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
+		setFormModel(model, analysisProject, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/analysisProject/analysisProject_form";
 	}
@@ -78,7 +76,7 @@ public class AnalysisProjectController extends AbstractController
 	{
 		checkSaveEntity(analysisProject);
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		analysisProject.setId(IDUtil.randomIdOnTime20());
 		analysisProject.setCreateUser(user);
@@ -92,16 +90,14 @@ public class AnalysisProjectController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		AnalysisProject analysisProject = this.analysisProjectService.getByIdForEdit(user, id);
 
 		if (analysisProject == null)
 			throw new RecordNotFoundException();
 
-		model.addAttribute("analysisProject", analysisProject);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.editAnalysisProject");
-		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
+		setFormModel(model, analysisProject, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		return "/analysisProject/analysisProject_form";
 	}
@@ -131,9 +127,7 @@ public class AnalysisProjectController extends AbstractController
 		if (analysisProject == null)
 			throw new RecordNotFoundException();
 
-		model.addAttribute("analysisProject", analysisProject);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.viewAnalysisProject");
-		model.addAttribute(KEY_READONLY, true);
+		setFormModel(model, analysisProject, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
 
 		return "/analysisProject/analysisProject_form";
 	}
@@ -183,7 +177,7 @@ public class AnalysisProjectController extends AbstractController
 
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.manageAnalysisProject");
 
-		return "/analysisProject/analysisProject_grid";
+		return "/analysisProject/analysisProject_table";
 	}
 
 	@RequestMapping(value = "/select")
@@ -196,7 +190,7 @@ public class AnalysisProjectController extends AbstractController
 		model.addAttribute(KEY_SELECT_OPERATION, true);
 		setIsMultipleSelectAttribute(request, model);
 
-		return "/analysisProject/analysisProject_grid";
+		return "/analysisProject/analysisProject_table";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)

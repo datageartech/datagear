@@ -43,6 +43,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 
 import freemarker.template.TemplateModel;
 
@@ -64,8 +65,16 @@ public abstract class AbstractController
 
 	public static final String CONTENT_TYPE_JAVASCRIPT = "application/javascript";
 
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	public static final String KEY_TITLE_MESSAGE_KEY = "titleMessageKey";
 
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	public static final String KEY_FORM_ACTION = "formAction";
 
 	public static final String KEY_READONLY = "readonly";
@@ -83,6 +92,22 @@ public abstract class AbstractController
 	public static final String LATEST_VERSION_SCRIPT_LOCATION = Global.WEB_SITE + "/latest-version.js";
 
 	public static final String COOKIE_DETECT_NEW_VERSION_RESOLVED = "DETECT_NEW_VERSION_RESOLVED";
+
+	public static final String KEY_REQUEST_ACTION = "requestAction";
+	public static final String REQUEST_ACTION_QUERY = "query";
+	public static final String REQUEST_ACTION_SINGLE_SELECT = "singleSelect";
+	public static final String REQUEST_ACTION_MULTIPLE_SELECT = "multipleSelect";
+	public static final String REQUEST_ACTION_ADD = "add";
+	public static final String REQUEST_ACTION_EDIT = "edit";
+	public static final String REQUEST_ACTION_VIEW = "view";
+
+	public static final String KEY_SUBMIT_ACTION = "submitAction";
+	public static final String SUBMIT_ACTION_SAVE_ADD = "saveAdd";
+	public static final String SUBMIT_ACTION_SAVE_EDIT = "saveEdit";
+	public static final String SUBMIT_ACTION_SAVE = "save";
+	public static final String SUBMIT_ACTION_VIEW = "view";
+
+	public static final String KEY_FORM_MODEL = "formModel";
 
 	@Autowired
 	private ConversionService conversionService;
@@ -113,6 +138,13 @@ public abstract class AbstractController
 	public void setConversionService(ConversionService conversionService)
 	{
 		this.conversionService = conversionService;
+	}
+
+	protected void setFormModel(Model model, Object formModel, String requestAction, String submitAction)
+	{
+		model.addAttribute(KEY_FORM_MODEL, formModel);
+		model.addAttribute(KEY_REQUEST_ACTION, requestAction);
+		model.addAttribute(KEY_SUBMIT_ACTION, submitAction);
 	}
 
 	protected boolean setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,

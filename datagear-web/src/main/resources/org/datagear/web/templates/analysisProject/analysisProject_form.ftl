@@ -8,58 +8,49 @@
 -->
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
-<#--
-titleMessageKey 标题标签I18N关键字，不允许null
-formAction 表单提交action，允许为null
-readonly 是否只读操作，允许为null
--->
-<#assign formAction=(formAction!'#')>
-<#assign readonly=(readonly!false)>
-<#assign isAdd=(formAction == 'saveAdd')>
 <html>
 <head>
 <#include "../include/html_head.ftl">
-<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
+<title><#include "../include/html_app_name_prefix.ftl"><@spring.message code='module.analysisProject' /> - <@spring.message code='${requestAction}' /></title>
 </head>
-<body>
-<#include "../include/page_obj.ftl" >
-<div id="${pageId}" class="page-form page-form-analysisProject">
-	<form id="${pageId}-form" action="${contextPath}/analysisProject/${formAction}" method="POST">
-		<div class="form-head"></div>
-		<div class="form-content">
-			<input type="hidden" name="id" value="${(analysisProject.id)!''}" />
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='analysisProject.name' /></label>
-				</div>
-				<div class="form-item-value">
-					<input type="text" name="name" value="${(analysisProject.name)!''}" required="required" maxlength="100" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
-				</div>
+<body class="p-card no-border">
+<#include "../include/page_obj.ftl">
+<div id="${pid}" class="page page-form horizontal">
+	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+			<div class="field grid">
+				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0"><@spring.message code='name' /></label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-inputtext id="${pid}name" v-model="pm.name" type="text" class="input w-full"
+		        		name="name" required maxlength="10">
+		        	</p-inputtext>
+		        </div>
 			</div>
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='analysisProject.desc' /></label>
-				</div>
-				<div class="form-item-value">
-					<textarea name="desc" maxlength="500" class="ui-widget ui-widget-content ui-corner-all">${(analysisProject.desc)!''}</textarea>
-				</div>
+			<div class="field grid">
+				<label for="${pid}desc" class="field-label col-12 mb-2 md:col-3 md:mb-0"><@spring.message code='desc' /></label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-textarea id="${pid}desc" v-model="pm.desc" rows="20" class="input w-full"
+		        		name="desc" required maxlength="20">
+		        	</p-textarea>
+		        </div>
 			</div>
 		</div>
-		<div class="form-foot">
-			<#if !readonly>
-			<button type="submit" class="recommended"><@spring.message code='save' /></button>
-			</#if>
+		<div class="page-form-foot flex-grow-0 pt-3 text-center">
+			<p-button type="submit" label="<@spring.message code='save' />" />
 		</div>
 	</form>
 </div>
-<#include "../include/page_obj_form.ftl">
-<script type="text/javascript">
+<#include "../include/page_form.ftl">
+<script>
 (function(po)
 {
-	po.initFormBtns();
-	po.validateAjaxJsonForm();
+	po.submitUrl = "/analysisProject/"+po.submitAction;
+	po.formModel = <@writeJson var=formModel />;
+	
+	po.setupForm(po.formModel, po.submitUrl);
+	po.vueMount();
 })
-(${pageId});
+(${pid});
 </script>
 </body>
 </html>

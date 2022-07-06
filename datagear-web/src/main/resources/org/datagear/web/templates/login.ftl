@@ -11,101 +11,74 @@
 <#include "include/html_doctype.ftl">
 <html>
 <head>
-<meta dg-page-name="login" />
 <#include "include/html_head.ftl">
-${detectNewVersionScript?no_esc}
-<title><#include "include/html_title_app_name.ftl"><@spring.message code='login.login' /></title>
+<title><#include "include/html_app_name_prefix.ftl"><@spring.message code='module.login' /></title>
 </head>
-<body>
+<body class="m-0 surface-ground">
 <#include "include/page_obj.ftl">
-<div id="${pageId}" class="page-login">
-	<div class="main-page-head">
-		<#include "include/html_logo.ftl">
-		<div class="toolbar">
-			<#include "include/page_obj_sys_menu.ftl">
-			<#if !disableRegister>
-			<a class="link" href="${contextPath}/register"><@spring.message code='register.register' /></a>
-			</#if>
-			<a class="link" href="${contextPath}/"><@spring.message code='backToMainPage' /></a>
+<div id="${pid}" class="page page-form horizontal">
+	<div class="flex flex-column h-screen m-0">
+		<#include "include/page_main_header.ftl">
+		<div class="flex-grow-1 p-0">
+			<div class="grid grid-nogutter justify-content-center">
+				<p-card class="col-10 md:col-5 p-card mt-6">
+					<template #title><@spring.message code='module.login' /></template>
+					<template #content>
+					<form class="flex flex-column">
+						<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+							<div class="field grid">
+								<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0"><@spring.message code='username' /></label>
+						        <div class="field-input col-12 md:col-9">
+						        	<p-inputtext id="${pid}name" v-model="pm.name" type="text" class="input w-full"
+						        		name="name" required maxlength="20">
+						        	</p-inputtext>
+						        </div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0"><@spring.message code='password' /></label>
+						        <div class="field-input col-12 md:col-9">
+						        	<p-password id="${pid}password" v-model="pm.password" toggle-mask :feedback="false"
+						        		input-class="w-full" class="input w-full"
+						        		name="password" required maxlength="50">
+						        	</p-password>
+						        </div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}checkCode" class="field-label col-12 mb-2 md:col-3 md:mb-0"><@spring.message code='checkCode' /></label>
+						        <div class="field-input col-12 md:col-9">
+						        	<p-inputtext id="${pid}checkCode" v-model="pm.checkCode" type="text" class="input w-6"
+						        		name="checkCode" required maxlength="10">
+						        	</p-inputtext>
+						        	<img class="checkCodeImg ml-1 vertical-align-middle" style="height:1.5rem;" />
+						        </div>
+							</div>
+						</div>
+						<div class="page-form-foot flex-grow-0 pt-3 text-center">
+							<p-button type="submit" label="<@spring.message code='login' />" />
+						</div>
+					</form>
+					</template>
+				</p-card>
+			</div>
 		</div>
 	</div>
-	<div class="page-form page-form-login">
-		<form id="${pageId}-form" action="${contextPath}/login/doLogin" method="POST" class="display-block">
-			<div class="form-head"></div>
-			<div class="form-content">
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='login.username' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="text" name="${LoginController.LOGIN_PARAM_USER_NAME}" value="${loginUsername!}" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" autofocus="autofocus" />
-					</div>
-				</div>
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='login.password' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="password" name="${LoginController.LOGIN_PARAM_PASSWORD}" value="" required="required" maxlength="50" class="ui-widget ui-widget-content ui-corner-all" />
-					</div>
-				</div>
-				<#if !disableLoginCheckCode>
-				<div class="form-item">
-					<div class="form-item-label">
-						<label><@spring.message code='checkCode' /></label>
-					</div>
-					<div class="form-item-value">
-						<input type="text" name="${LoginController.LOGIN_PARAM_CHECK_CODE}" value="" required="required" maxlength="10" class="ui-widget ui-widget-content ui-corner-all" />
-						<img class="checkCodeImg check-code" />
-					</div>
-				</div>
-				</#if>
-			</div>
-			<div class="form-foot">
-				<button type="submit" class="recommended"><@spring.message code='login.login' /></button>
-			</div>
-			<div class="form-foot small-text login-form-ext" style="text-align:right;">
-				<div class="rememberMeGroup">
-					<label for="${pageId}rememberMe"><@spring.message code='login.rememberMe' /></label>
-		   			<input type="checkbox" id="${pageId}rememberMe" name="${LoginController.LOGIN_PARAM_REMEMBER_ME}" value="1" />
-	   			</div>
-	   			<a class="link" href="${contextPath}/resetPassword"><@spring.message code='login.fogetPassword' /></a>
-			</div>
-		</form>
-	</div>
 </div>
-<#include "include/page_obj_form.ftl">
-<script type="text/javascript">
+<#include "include/page_form.ftl">
+<script>
 (function(po)
 {
-	po.initFormBtns();
-	po.element(".rememberMeGroup").checkboxradiogroup({icon:true});
+	po.disableLoginCheckCode = ("${(disableLoginCheckCode!false)?string('true','false')}" == "true");
 	
-	po.element(".page-form").dialog(
+	po.setupForm(
 	{
-		appendTo: po.element(),
-		classes: { "ui-dialog": "loginDialog ui-corner-all" },
-		title: "<@spring.message code='login.login' />",
-		position: {my : "center top", at : "center top+75"},
-		resizable: false,
-		draggable: true,
-		width: "30%",
-		beforeClose: function(){ return false; }
-	});
-	
-	po.element(".loginDialog .ui-dialog-titlebar-close").hide();
-	
-	//当登录超时打开对话框时，对话框内会显示登录页面，这里调整此时的登录页布局
-	if($.isInDialog(po.element()))
+		name: "",
+		password: "",
+		checkCode: ""
+	},
+	"/login/doLogin",
 	{
-		po.element(".main-page-head").hide();
-		po.element(".loginDialog").css("top", "14px");
-		po.element(".loginDialog .ui-dialog-titlebar").hide();
-	}
-	
-	po.initSysMenu();
-	po.validateAjaxForm({},
-	{
+		type: "POST",
+		contentType: $.CONTENT_TYPE_FORM,
 		tipSuccess: false,
 		success: function()
 		{
@@ -113,15 +86,21 @@ ${detectNewVersionScript?no_esc}
 		}
 	});
 	
-	<#if !disableLoginCheckCode>
-	po.element(".checkCodeImg").click(function()
+	if(!po.disableLoginCheckCode)
 	{
-		$(this).attr("src", "${contextPath}/checkCode?_=" + $.uid("rc")+"&m=${LoginController.CHECK_CODE_MODULE_LOGIN}");
-	})
-	.click();
-	</#if>
+		po.vueMounted(function()
+		{
+			po.element(".checkCodeImg").click(function()
+			{
+				$(this).attr("src", "${contextPath}/checkCode?_=" + $.uid("rc")+"&m=${LoginController.CHECK_CODE_MODULE_LOGIN}");
+			})
+			.click();
+		});
+	}
+	
+	po.vueMount();
 })
-(${pageId});
+(${pid});
 </script>
 </body>
 </html>

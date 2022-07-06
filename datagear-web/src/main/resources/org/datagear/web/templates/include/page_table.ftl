@@ -14,13 +14,13 @@
 String action
 
 -->
-<#assign PrimveVueTestController=statics['org.datagear.web.controller.PrimveVueTestController']>
+<#assign AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <script>
 (function(po)
 {
-	po.action = "${action!PrimveVueTestController.REQUEST_ACTION_QUERY}";
-	po.isSingleSelectAction = (po.action == "${PrimveVueTestController.REQUEST_ACTION_SINGLE_SELECT}");
-	po.isMultipleSelectAction = (po.action == "${PrimveVueTestController.REQUEST_ACTION_MULTIPLE_SELECT}");
+	po.action = "${requestAction!AbstractController.REQUEST_ACTION_QUERY}";
+	po.isSingleSelectAction = (po.action == "${AbstractController.REQUEST_ACTION_SINGLE_SELECT}");
+	po.isMultipleSelectAction = (po.action == "${AbstractController.REQUEST_ACTION_MULTIPLE_SELECT}");
 	po.isSelectAction = (po.isSingleSelectAction || po.isMultipleSelectAction);
 	
 	po.rowsPerPageOptions = [10, 20, 50, 100, 200];
@@ -211,7 +211,7 @@ String action
 	{
 		po.executeOnSelects(function(rows)
 		{
-			po.confirm("<@spring.message code='confirmDelete' />",
+			po.confirm("<@spring.message code='confirmDeleteAsk' />",
 			{
 				"confirm" : function()
 				{

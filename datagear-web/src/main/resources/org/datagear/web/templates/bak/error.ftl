@@ -16,7 +16,7 @@
 <head>
 <meta dg-page-name="error" />
 <#include "include/html_head.ftl">
-<title><#include "include/html_app_name_prefix.ftl"><@spring.message code='error.errorOccure' /></title>
+<title><#include "include/html_title_app_name.ftl"><@spring.message code='error.errorOccure' /></title>
 </head>
 <body>
 <#if isAjaxRequest>
@@ -35,7 +35,7 @@
 	<div class="main-page-head">
 		<#include "include/html_logo.ftl">
 		<div class="toolbar">
-			<a class="link" href="${contextPath}/"><@spring.message code='module.main' /></a>
+			<a class="link" href="${contextPath}/"><@spring.message code='backToMainPage' /></a>
 		</div>
 	</div>
 	<div class="page-error">
