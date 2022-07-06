@@ -24,6 +24,35 @@ String action
 	po.isSaveAction = (po.isSaveAddAction || po.isSaveEditAction || po.action == "${PrimveVueTestController.REQUEST_ACTION_SAVE}");
 	po.isViewAction = (po.action == "${PrimveVueTestController.REQUEST_ACTION_SAVE}");
 	
+	po.form = function()
+	{
+		return po.element("form");
+	};
+	
+	po.submitForm = function(url, options)
+	{
+		if(po.isViewAction)
+			return;
+		
+		var pm = po.vuePageModel();
+		options = $.extend(true, { closeAfterSubmit: true }, options, { data: po.vueRaw(pm) });
+		
+		var successHandlers = (options.success ? [].concat(options.success) : []);
+		successHandlers.push(function(response)
+		{
+			if(po.defaultSubmitSuccessCallback)
+				po.defaultSubmitSuccessCallback(response, options.closeAfterSubmit);
+		});
+		options.success = successHandlers;
+		
+		var action = { url: po.concatContextPath(url), options: options };
+		po.inflateSubmitAction(action);
+		
+		$.ajaxJson(action.url, action.options);
+		
+		return false;
+	};
+	
 	po.setupForm = function(data, submitUrl, options)
 	{
 		data = (data || {});
@@ -32,29 +61,15 @@ String action
 		
 		var pm = po.vuePageModel(data);
 		
-		po.vueMethod(
+		po.vueMounted(function()
 		{
-			onSubmit: function(e)
+			po.form().validateForm(pm,
 			{
-				if(po.isViewAction)
-					return;
-				
-				var pm = po.vuePageModel();
-				options = $.extend(true, { closeAfterSubmit: true }, options, { data: po.vueRaw(pm) });
-				
-				var successHandlers = (options.success ? [].concat(options.success) : []);
-				successHandlers.push(function(response)
+				submitHandler: function(form)
 				{
-					if(po.defaultSubmitSuccessCallback)
-						po.defaultSubmitSuccessCallback(response, options.closeAfterSubmit);
-				});
-				options.success = successHandlers;
-				
-				var action = { url: po.concatContextPath(submitUrl), options: options };
-				po.inflateSubmitAction(action);
-				
-				$.ajaxJson(action.url, action.options);
-			}
+					return po.submitForm(submitUrl, options);
+				}
+			});
 		});
 		
 		return pm;

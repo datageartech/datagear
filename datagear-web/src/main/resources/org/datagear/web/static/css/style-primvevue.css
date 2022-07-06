@@ -94,6 +94,24 @@
 	margin-right: 0;
 }
 
+/*表单验证信息*/
+.field{
+	margin-bottom: 1.2rem;
+}
+.validate-msg{
+	position: relative;
+	height: 0px;
+}
+.validate-msg .validate-proxy{
+	width: 0;
+	height: 0;
+	display: none;
+}
+.validate-msg .p-error{
+	position: absolute;
+	top: -0.15em;
+}
+
 /*表格页*/
 .page-table .page-table-content{
 	/*屏幕高度 - 列表header高度*/

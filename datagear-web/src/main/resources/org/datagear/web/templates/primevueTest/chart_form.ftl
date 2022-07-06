@@ -16,55 +16,82 @@
 <body class="p-card no-border">
 <#include "include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<form @submit.prevent="onSubmit" class="flex flex-column">
+	<form class="flex flex-column">
 		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">名称</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}name" v-model="pm.name" name="name" required maxlength="10" type="text" class="input w-full"></p-inputtext>
+		        	<p-inputtext id="${pid}name" v-model="pm.name" type="text" class="input w-full"
+		        		name="name" required maxlength="10">
+		        	</p-inputtext>
 		        </div>
 			</div>
 			<div class="field grid">
 				<label for="${pid}type" class="field-label col-12 mb-2 md:col-3 md:mb-0">类型</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}type" v-model="pm.type" name="type" type="text" class="w-full"></p-inputtext>
+		        	<p-inputtext id="${pid}type" v-model="pm.type" type="text" class="input w-full"
+		        		name="type" required maxlength="10">
+		        	</p-inputtext>
 		        </div>
 			</div>
 			<div class="field grid">
 				<label for="${pid}dataSet" class="field-label col-12 mb-2 md:col-3 md:mb-0">数据集</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}dataSet" v-model="pm.dataSet" name="dataSet" type="text" class="input w-full md:w-9"></p-inputtext>
+		        	<p-inputtext id="${pid}dataSet" v-model="pm.dataSet" type="text" class="input w-full md:w-9"
+		        		name="dataSet" required maxlength="20">
+		        	</p-inputtext>
 					<p-button label="选择" @click="onSelectDataSet" class="ml-0 mt-1 md:ml-1 md:mt-0" />
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}checkbox" class="field-label col-12 mb-2 md:col-3 md:mb-0">更新间隔</label>
+				<label for="${pid}checkbox" class="field-label col-12 mb-2 md:col-3 md:mb-0">多选按钮</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-selectbutton v-model="pm.checkbox" :options="selectButtonOptions" :multiple="true" option-label="name" option-value="value" data-key="value"></p-selectbutton>
+		        	<p-selectbutton v-model="pm.checkbox" :options="selectButtonOptions" :multiple="true"
+		        		option-label="name" option-value="value" data-key="value" class="input">
+		        	</p-selectbutton>
+		        	<div class="validate-msg">
+		        		<input name="checkbox" required type="text" class="validate-proxy" />
+		        	</div>
 		        </div>
 			</div>
 			<div class="field grid">
 				<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0">密码</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-password id="${pid}password" v-model="pm.password" name="password" required maxlength="10" toggle-mask :feedback="false" input-class="w-full" class="input w-full"></p-password>
+		        	<p-password id="${pid}password" v-model="pm.password" toggle-mask :feedback="false"
+		        		input-class="w-full" class="input w-full"
+		        		name="password" required maxlength="10">
+		        	</p-password>
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}radio" class="field-label col-12 mb-2 md:col-3 md:mb-0">单选</label>
+				<label for="${pid}radio" class="field-label col-12 mb-2 md:col-3 md:mb-0">单选按钮</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-selectbutton v-model="pm.radio" :options="selectButtonOptions" option-label="name" option-value="value" data-key="value"></p-selectbutton>
+		        	<p-selectbutton v-model="pm.radio" :options="selectButtonOptions" option-label="name"
+		        		option-value="value" data-key="value" class="input">
+		        	</p-selectbutton>
+		        	<div class="validate-msg">
+		        		<input name="radio" required type="text" class="validate-proxy" />
+		        	</div>
 		        </div>
 			</div>
 			<div class="field grid">
 				<label for="${pid}dropdown" class="field-label col-12 mb-2 md:col-3 md:mb-0">下拉框</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-dropdown v-model="pm.dropdown" :options="selectButtonOptions" name="dropdown" required option-label="name" option-value="value" data-key="value"></p-dropdown>
+		        	<p-dropdown v-model="pm.dropdown" :options="selectButtonOptions"
+		        		option-label="name" option-value="value" data-key="value" class="input"
+		        		name="dropdown" required>
+		        	</p-dropdown>
+		        	<div class="validate-msg">
+		        		<input name="dropdown" required type="text" class="validate-proxy" />
+		        	</div>
 		        </div>
 			</div>
 			<div class="field grid">
 				<label for="${pid}desc" class="field-label col-12 mb-2 md:col-3 md:mb-0">描述</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-textarea id="${pid}desc" v-model="pm.desc" rows="20" name="desc" required maxlength="20" class="input w-full"></p-textarea>
+		        	<p-textarea id="${pid}desc" v-model="pm.desc" rows="20" class="input w-full"
+		        		name="desc" required maxlength="20">
+		        	</p-textarea>
 		        </div>
 			</div>
 		</div>
@@ -79,14 +106,14 @@
 {
 	po.setupForm(
 	{
-		name: "name",
-		type: "type",
-		dataSet: "dataSet",
-		desc: "desc",
-		checkbox: [ 0, 2 ],
-		password: "1111",
-		radio: 1,
-		dropdown: 1
+		name: "",
+		type: "",
+		dataSet: "",
+		desc: "",
+		checkbox: [],
+		password: "",
+		radio: null,
+		dropdown: null
 	},
 	"/primevue/saveChart");
 	

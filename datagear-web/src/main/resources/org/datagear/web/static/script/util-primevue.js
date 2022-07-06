@@ -14,6 +14,10 @@
 
 (function($, undefined)
 {
+	$.TYPEOF_STRING = "string";
+	$.TYPEOF_NUMBER = "number";
+	$.TYPEOF_TYPE_OBJECT = "object";
+	
 	/**
 	 * 打开给定URL页面。
 	 * 
@@ -694,5 +698,101 @@
 			return null;
 		}
 	};
+})
+(jQuery);
+
+(function($, undefined)
+{
+	//重写支持Vue响数据模型的验证方法
+	$.validator.addMethod("required", function(value)
+	{
+		if(value == null)
+			return false;
+		
+		var type = typeof(value);
+		
+		if(type == $.TYPEOF_STRING)
+			return (value.length > 0);
+		else if(type == $.TYPEOF_NUMBER)
+			return true;
+		else if($.isArray(value))
+			return (value.length > 0);
+		else
+			return true;
+	});
+
+$.fn.extend(
+{
+	/**
+	 * 构建带有输入验证功能的表单。
+	 * 
+	 * @param reactiveFormModel 响应式表单数据模型，对于".validate-proxy"的验证，将从它读取实际的值进行验证
+	 * @param options
+	 *			{
+	 *			  //忽略校验选择器
+	 *			  ignore: "...",
+	 *			  //自定义校验规则
+	 *			  rules: { ... }
+	 *			  //自定义提示消息
+	 *			  messages
+	 *			}
+	 *			详细参考：https://jqueryvalidation.org/validate/
+	 */
+	validateForm: function(reactiveFormModel, options)
+	{
+		const formEle = this;
+		const formModel = reactiveFormModel;
+		
+		options = $.extend(
+		{
+			ignore: ".ignore-validate",
+			onkeyup: false,
+			normalizer: function(value)
+			{
+				var thisEle = $(this);
+				
+				//代理formModel中的值
+				if(thisEle.hasClass("validate-proxy"))
+				{
+					//代理属性名
+					var name = thisEle.attr("name");
+					var realValue = Vue.toRaw(formModel[name]);
+					return realValue;
+				}
+				else
+					return value;
+			},
+			showErrors: function(errorMap, errorList)
+			{
+				const successList = (this.successList || []);
+				successList.forEach(function(ele)
+				{
+					const field = $(ele).closest(".field-input");
+					$("small.p-error", field).hide();
+					$(".input", field).removeClass("p-invalid");
+				});
+				
+				errorList.forEach(function(error)
+				{
+					const field = $(error.element).closest(".field-input");
+					const input = $(".input", field);
+					var msg = $(".validate-msg", field);
+					if(msg.length == 0)
+						msg = $("<div class='validate-msg' />").appendTo(field);
+					var errorEle = $(".p-error", msg);
+					if(errorEle.length == 0)
+						errorEle = $("<small class='p-error' />").appendTo(msg);
+					
+					input.addClass("p-invalid");
+					errorEle.html(error.message).show();
+				});
+			}
+		},
+		options);
+		
+		$(this).validate(options);
+	}
+});
+
 })
 (jQuery);

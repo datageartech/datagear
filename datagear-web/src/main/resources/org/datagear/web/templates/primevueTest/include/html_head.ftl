@@ -24,6 +24,8 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/css/style-primvevue.css" rel="stylesheet" />
 
 <script src="${contextPath}/static/lib/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js"></script>
+<script src="${contextPath}/static/lib/jquery-validation-1.19.3/additional-methods.min.js"></script>
 <script src="${contextPath}/static/lib/vue@3.2.36/vue.global.prod.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/core/core.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/tabmenu/tabmenu.min.js"></script>
