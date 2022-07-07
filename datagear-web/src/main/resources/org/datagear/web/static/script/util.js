@@ -18,6 +18,21 @@
 	$.TYPEOF_NUMBER = "number";
 	$.TYPEOF_TYPE_OBJECT = "object";
 	
+	$.isTypeString = function(obj)
+	{
+		return (typeof(obj) == $.TYPEOF_STRING);
+	};
+	
+	$.isTypeNumber = function(obj)
+	{
+		return (typeof(obj) == $.TYPEOF_NUMBER);
+	};
+	
+	$.isTypeObject = function(obj)
+	{
+		return (typeof(obj) == $.TYPEOF_TYPE_OBJECT);
+	};
+	
 	/**
 	 * 打开给定URL页面。
 	 * 

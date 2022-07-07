@@ -71,7 +71,9 @@ String action
 		});
 		
 		if(po.isSelectAction)
-			po.setupSelectAction();
+		{
+			//TODO
+		}
 		
 		if(options.initData)
 		{

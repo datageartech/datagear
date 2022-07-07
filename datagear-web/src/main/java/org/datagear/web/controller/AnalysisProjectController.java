@@ -83,7 +83,7 @@ public class AnalysisProjectController extends AbstractController
 
 		this.analysisProjectService.add(analysisProject);
 
-		return optMsgSaveSuccessResponseEntity(request, analysisProject);
+		return operationSuccessResponseEntity(request, analysisProject);
 	}
 
 	@RequestMapping("/edit")
@@ -104,23 +104,23 @@ public class AnalysisProjectController extends AbstractController
 
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody AnalysisProject analysisProject)
 	{
 		checkSaveEntity(analysisProject);
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		this.analysisProjectService.update(user, analysisProject);
 
-		return optMsgSaveSuccessResponseEntity(request, analysisProject);
+		return operationSuccessResponseEntity(request, analysisProject);
 	}
 
 	@RequestMapping("/view")
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		AnalysisProject analysisProject = this.analysisProjectService.getById(user, id);
 
@@ -137,7 +137,7 @@ public class AnalysisProjectController extends AbstractController
 	public AnalysisProject getByIdSilently(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		AnalysisProject analysisProject = null;
 
@@ -157,7 +157,7 @@ public class AnalysisProjectController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -165,31 +165,21 @@ public class AnalysisProjectController extends AbstractController
 			this.analysisProjectService.deleteById(user, id);
 		}
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")
 	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		User user = WebUtils.getUser(request, response);
-		model.addAttribute("currentUser", user);
-
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.manageAnalysisProject");
-
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		return "/analysisProject/analysisProject_table";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		User user = WebUtils.getUser(request, response);
-		model.addAttribute("currentUser", user);
-
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "analysisProject.selectAnalysisProject");
-		model.addAttribute(KEY_SELECT_OPERATION, true);
-		setIsMultipleSelectAttribute(request, model);
-
+		setSelectAction(request, model);
 		return "/analysisProject/analysisProject_table";
 	}
 
@@ -199,7 +189,7 @@ public class AnalysisProjectController extends AbstractController
 			final org.springframework.ui.Model springModel,
 			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<AnalysisProject> pagingData = this.analysisProjectService.pagingQuery(user, pagingQuery,

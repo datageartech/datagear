@@ -11,7 +11,11 @@
 <html>
 <head>
 <#include "../include/html_head.ftl">
-<title><#include "../include/html_app_name_prefix.ftl"><@spring.message code='module.analysisProject' /></title>
+<title>
+	<#include "../include/html_app_name_prefix.ftl">
+	<@spring.message code='module.analysisProject' />
+	<#include "../include/html_request_action_suffix.ftl">
+</title>
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">

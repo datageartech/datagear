@@ -65,20 +65,16 @@ public abstract class AbstractController
 
 	public static final String CONTENT_TYPE_JAVASCRIPT = "application/javascript";
 
-	/**
-	 * @deprecated
-	 */
 	@Deprecated
 	public static final String KEY_TITLE_MESSAGE_KEY = "titleMessageKey";
 
-	/**
-	 * @deprecated
-	 */
 	@Deprecated
 	public static final String KEY_FORM_ACTION = "formAction";
 
+	@Deprecated
 	public static final String KEY_READONLY = "readonly";
 
+	@Deprecated
 	public static final String KEY_SELECT_OPERATION = "selectOperation";
 
 	public static final String DATA_FILTER_PARAM = DataFilterPagingQuery.PROPERTY_DATA_FILTER;
@@ -105,7 +101,7 @@ public abstract class AbstractController
 	public static final String SUBMIT_ACTION_SAVE_ADD = "saveAdd";
 	public static final String SUBMIT_ACTION_SAVE_EDIT = "saveEdit";
 	public static final String SUBMIT_ACTION_SAVE = "save";
-	public static final String SUBMIT_ACTION_VIEW = "view";
+	public static final String SUBMIT_ACTION_VIEW = "#";
 
 	public static final String KEY_FORM_MODEL = "formModel";
 
@@ -310,12 +306,32 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 设置单选或多选请求操作。
+	 * 
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	protected boolean setSelectAction(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		boolean multiple = false;
+		if (request.getParameter("multiple") != null)
+			multiple = true;
+
+		model.addAttribute(KEY_REQUEST_ACTION,
+				(multiple ? REQUEST_ACTION_MULTIPLE_SELECT : REQUEST_ACTION_SINGLE_SELECT));
+
+		return multiple;
+	}
+
+	/**
 	 * 设置{@code isMultipleSelect}属性。
 	 * 
 	 * @param request
 	 * @param model
 	 * @return
 	 */
+	@Deprecated
 	protected boolean setIsMultipleSelectAttribute(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		boolean isMultipleSelect = false;
@@ -437,6 +453,35 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 构建“操作成功”消息响应体。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> operationSuccessResponseEntity(HttpServletRequest request)
+	{
+		return operationSuccessResponseEntity(request, null);
+	}
+
+	/**
+	 * 构建“操作成功”消息响应体。
+	 * 
+	 * @param request
+	 * @param data
+	 *            允许为{@code null}
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> operationSuccessResponseEntity(HttpServletRequest request, Object data)
+	{
+		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity(request, "operationSuccess");
+
+		if (data != null)
+			responseEntity.getBody().setData(data);
+
+		return responseEntity;
+	}
+
+	/**
 	 * 构建无内容的操作成功消息响应体。
 	 * <p>
 	 * 无消息内容，浏览器端不会弹出操作提示。
@@ -444,6 +489,7 @@ public abstract class AbstractController
 	 * 
 	 * @return
 	 */
+	@Deprecated
 	protected ResponseEntity<OperationMessage> optMsgSuccessResponseEntity()
 	{
 		OperationMessage operationMessage = OperationMessage.valueOfSuccess("success", "");
@@ -459,6 +505,7 @@ public abstract class AbstractController
 	 * @param data
 	 * @return
 	 */
+	@Deprecated
 	protected ResponseEntity<OperationMessage> optMsgSuccessResponseEntity(Object data)
 	{
 		OperationMessage operationMessage = OperationMessage.valueOfSuccess("success", "");
@@ -473,6 +520,7 @@ public abstract class AbstractController
 	 * @param request
 	 * @return
 	 */
+	@Deprecated
 	protected ResponseEntity<OperationMessage> optMsgSaveSuccessResponseEntity(HttpServletRequest request)
 	{
 		return optMsgSuccessResponseEntity(request, "saveSuccess");
@@ -485,6 +533,7 @@ public abstract class AbstractController
 	 * @param data
 	 * @return
 	 */
+	@Deprecated
 	protected ResponseEntity<OperationMessage> optMsgSaveSuccessResponseEntity(HttpServletRequest request, Object data)
 	{
 		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity(request,
@@ -522,6 +571,7 @@ public abstract class AbstractController
 	 * @param request
 	 * @return
 	 */
+	@Deprecated
 	protected ResponseEntity<OperationMessage> optMsgDeleteSuccessResponseEntity(HttpServletRequest request)
 	{
 		return optMsgSuccessResponseEntity(request, "deleteSuccess");

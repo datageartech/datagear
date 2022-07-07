@@ -5,6 +5,21 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
  
+ /*滚动条*/
+ *::-webkit-scrollbar{
+	width: 0.8rem;
+	height: 0.8rem;
+}
+*::-webkit-scrollbar-thumb{
+	border-radius: var(--border-radius);
+	background-color: var(--surface-300);
+}
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner{
+	border-radius: var(--border-radius);
+	background-color: var(--surface-100);
+}
+
 .text-color-secondary a.link,
 .text-color-secondary a.link:link,
 .text-color-secondary a.link:visited,

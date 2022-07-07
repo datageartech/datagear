@@ -11,7 +11,11 @@
 <html>
 <head>
 <#include "../include/html_head.ftl">
-<title><#include "../include/html_app_name_prefix.ftl"><@spring.message code='module.analysisProject' /> - <@spring.message code='${requestAction}' /></title>
+<title>
+	<#include "../include/html_app_name_prefix.ftl">
+	<@spring.message code='module.analysisProject' />
+	<#include "../include/html_request_action_suffix.ftl">
+</title>
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
@@ -22,15 +26,16 @@
 				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0"><@spring.message code='name' /></label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-inputtext id="${pid}name" v-model="pm.name" type="text" class="input w-full"
-		        		name="name" required maxlength="10">
+		        		name="name" required maxlength="100" autofocus>
 		        	</p-inputtext>
+		        	<p-inputtext v-model="pm.id" name="id" type="hidden"></p-inputtext>
 		        </div>
 			</div>
 			<div class="field grid">
 				<label for="${pid}desc" class="field-label col-12 mb-2 md:col-3 md:mb-0"><@spring.message code='desc' /></label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-textarea id="${pid}desc" v-model="pm.desc" rows="20" class="input w-full"
-		        		name="desc" required maxlength="20">
+		        	<p-textarea id="${pid}desc" v-model="pm.desc" rows="10" class="input w-full"
+		        		name="desc" maxlength="500">
 		        	</p-textarea>
 		        </div>
 			</div>
