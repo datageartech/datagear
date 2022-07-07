@@ -50,10 +50,15 @@ String action
 			rowsPerPageOptions: po.rowsPerPageOptions,
 			totalRecords: 0,
 			loading: false,
-			selectionMode: "multiple",
+			selectionMode: (po.isSingleSelectAction ? "single" : "multiple"),
 			multiSortMeta: options.multiSortMeta,
-			selectedItems: []
+			selectedItems: null
 		});
+		
+		if(po.isSelectAction)
+		{
+			po.vueRef("isSelectAction", po.isSelectAction);
+		}
 		
 		po.vueMethod(
 		{
@@ -74,11 +79,6 @@ String action
 			url: url,
 			param: { page: 1, pageSize: po.rowsPerPage, orders: po.sortMetaToOrders(options.multiSortMeta) }
 		});
-		
-		if(po.isSelectAction)
-		{
-			//TODO
-		}
 		
 		if(options.initData)
 		{
@@ -140,7 +140,7 @@ String action
 		
 		pm.items = pagingData.items;
 		pm.totalRecords = pagingData.total;
-		pm.selectedItems = [];
+		pm.selectedItems = null;
 	};
 	
 	po.refresh = function()
@@ -159,7 +159,9 @@ String action
 	po.executeOnSelect = function(callback)
 	{
 		var pm = po.vuePageModel();
-		var selectedItems = pm.selectedItems;
+		var selectedItems = po.vueRaw(pm.selectedItems);
+		//selectionMode单选模式时selectedItems不是数组
+		selectedItems = (!selectedItems || $.isArray(selectedItems) ? selectedItems : [selectedItems]);
 		
 		if(!selectedItems || selectedItems.length != 1)
 		{
@@ -167,14 +169,14 @@ String action
 			return;
 		}
 		
-		callback.call(po, po.vueRaw(selectedItems[0]));
+		callback.call(po, selectedItems[0]);
 	};
 	
 	//多选处理函数
 	po.executeOnSelects = function(callback)
 	{
 		var pm = po.vuePageModel();
-		var selectedItems = pm.selectedItems;
+		var selectedItems = po.vueRaw(pm.selectedItems);
 		
 		if(!selectedItems || selectedItems.length < 1)
 		{
@@ -182,7 +184,7 @@ String action
 			return;
 		}
 		
-		callback.call(po, po.vueRaw(selectedItems));
+		callback.call(po, selectedItems);
 	};
 	
 	po.handleAddAction = function(url, options)

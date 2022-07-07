@@ -62,17 +62,17 @@
 				{
 					label: "<@spring.message code='module.dataSet' />",
 					icon: 'pi pi-fw pi-table',
-					url: "${contextPath}/primevue/chartList"
+					url: "${contextPath}/dataSet/pagingQuery"
 				},
 				{
 					label: "<@spring.message code='module.chart' />",
 					icon: 'pi pi-fw pi-chart-line',
-					url: "${contextPath}/primevue/chartList"
+					url: "${contextPath}/chart/pagingQuery"
 				},
 				{
 					label: "<@spring.message code='module.dashboard' />",
 					icon: 'pi pi-fw pi-images',
-					url: "${contextPath}/primevue/chartList"
+					url: "${contextPath}/dashboard/pagingQuery"
 				}
 			]
 		}

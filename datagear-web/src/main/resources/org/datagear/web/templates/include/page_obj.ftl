@@ -209,7 +209,18 @@ var ${pageId} =
 	//获取reacitve的原始对象
 	vueRaw: function(reactiveObj)
 	{
-		return Vue.toRaw(reactiveObj);
+		if($.isArray(reactiveObj))
+		{
+			var re = [];
+			reactiveObj.forEach(function(item)
+			{
+				re.push(Vue.toRaw(item));
+			});
+			
+			return re;
+		}
+		else
+			return Vue.toRaw(reactiveObj);
 	},
 	
 	//vue的setup对象

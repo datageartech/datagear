@@ -355,28 +355,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		User user = WebUtils.getUser(request, response);
-		model.addAttribute("currentUser", user);
-
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
-
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.manageChart");
-
-		return "/chart/chart_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/chart/chart_table";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		User user = WebUtils.getUser(request, response);
-		model.addAttribute("currentUser", user);
-
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
-
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.selectChart");
-		model.addAttribute(KEY_SELECT_OPERATION, true);
-		setIsMultipleSelectAttribute(request, model);
-
+		setSelectAction(request, model);
 		return "/chart/chart_grid";
 	}
 
@@ -386,7 +374,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			final org.springframework.ui.Model springModel,
 			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,

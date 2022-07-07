@@ -800,25 +800,15 @@ public class DataSetController extends AbstractSchemaConnController
 	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		User user = WebUtils.getUser(request, response);
-		model.addAttribute("currentUser", user);
-
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.manageDataSet");
-
-		return "/dataSet/dataSet_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/dataSet/dataSet_table";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		User user = WebUtils.getUser(request, response);
-		model.addAttribute("currentUser", user);
-
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.selectDataSet");
-		model.addAttribute(KEY_SELECT_OPERATION, true);
-		setIsMultipleSelectAttribute(request, model);
-
-		return "/dataSet/dataSet_grid";
+		setSelectAction(request, model);
+		return "/dataSet/dataSet_table";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
@@ -827,7 +817,7 @@ public class DataSetController extends AbstractSchemaConnController
 			final org.springframework.ui.Model springModel,
 			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<DataSetEntity> pagingData = this.dataSetEntityService.pagingQuery(user, pagingQuery,
