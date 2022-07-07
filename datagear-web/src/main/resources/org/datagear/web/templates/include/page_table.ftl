@@ -23,6 +23,11 @@ String action
 	po.isMultipleSelectAction = (po.action == "${AbstractController.REQUEST_ACTION_MULTIPLE_SELECT}");
 	po.isSelectAction = (po.isSingleSelectAction || po.isMultipleSelectAction);
 	
+	po.confirmDelete = function(acceptHandler)
+	{
+		po.confirm({ message: "<@spring.message code='confirmDeleteAsk' />", accept: acceptHandler });
+	};
+	
 	po.rowsPerPageOptions = [10, 20, 50, 100, 200];
 	po.rowsPerPage = po.rowsPerPageOptions[1];
 	
@@ -213,22 +218,19 @@ String action
 	{
 		po.executeOnSelects(function(rows)
 		{
-			po.confirm("<@spring.message code='confirmDeleteAsk' />",
+			po.confirmDelete(function()
 			{
-				"confirm" : function()
+				options = $.extend(
 				{
-					options = $.extend(
-					{
-						contentType: $.CONTENT_TYPE_JSON,
-						success: function(){ po.refresh(); }
-					},
-					options);
-					
-					var action = { url: po.concatContextPath(url), options: options };
-					po.inflateRowAction(action, rows);
-					
-					$.ajaxJson(url, action.options);
-				}
+					contentType: $.CONTENT_TYPE_JSON,
+					success: function(){ po.refresh(); }
+				},
+				options);
+				
+				var action = { url: po.concatContextPath(url), options: options };
+				po.inflateRowAction(action, rows);
+				
+				$.ajaxJson(url, action.options);
 			});
 		});
 	};

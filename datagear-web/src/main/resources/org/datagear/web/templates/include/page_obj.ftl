@@ -91,22 +91,18 @@ var ${pageId} =
 		return $.pageParamCall(this.element(), functionName, argArray);
 	},
 	
-	/**
-	 * 打开确认对话框。
-	 * @param content 显示内容
-	 * @param options 参数选项，参考util.js的$.confirm(...)函数说明
-	 */
-	confirm : function(content, options)
+	//打开确认对话框
+	confirm : function(options)
 	{
 		options = $.extend(
 		{
-			confirmText : "<@spring.message code='confirm' />",
-			cancelText : "<@spring.message code='cancel' />",
-			title : "<@spring.message code='operationConfirm' />"
+			acceptLabel : "<@spring.message code='confirm' />",
+			rejectLabel : "<@spring.message code='cancel' />",
+			header : "<@spring.message code='operationConfirm' />"
 		},
 		options);
 		
-		$.confirm(content, options);
+		$.confirm(options);
 	},
 	
 	//连接应用根路径
@@ -257,6 +253,7 @@ var ${pageId} =
 					});
 					
 					$.initGlobalTip();
+					$.initGlobalConfirm();
 				});
 				
 				return setupObj;

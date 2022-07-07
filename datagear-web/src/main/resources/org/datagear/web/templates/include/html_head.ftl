@@ -40,6 +40,8 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/password/password.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/divider/divider.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/selectbutton/selectbutton.min.js"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/confirmdialog/confirmdialog.min.js"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/confirmationservice/confirmationservice.min.js"></script>
 
 <script src="${contextPath}/static/script/util.js"></script>
 </#if>

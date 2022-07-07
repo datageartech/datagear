@@ -403,6 +403,73 @@
 	};
 	
 	/**
+	 * 操作确认。
+	 * @param options { header: "", message: "", accept: function(){}, acceptLabel: "", rejectLabel: "" }
+	 */
+	$.confirm = function(options)
+	{
+		var confirm = $.getGlobalConfirm();
+		if(confirm)
+			confirm.showConfirm(options);
+	};
+	
+	/**
+	 * 获取确认框组件。
+	 */
+	$.getGlobalConfirm = function()
+	{
+		var appEle = ($.GLOBAL_CONFIRM_APP_ELE_ID ? $("#"+$.GLOBAL_CONFIRM_APP_ELE_ID) : null);
+		
+		if(!appEle || appEle.length == 0)
+			return null;
+		
+		return appEle.data("confirmApp");
+	};
+	
+	/**
+	 * 初始化确认框。
+	 */
+	$.initGlobalConfirm = function()
+	{
+		var appId = ($.GLOBAL_CONFIRM_APP_ELE_ID || ($.GLOBAL_CONFIRM_APP_ELE_ID = $.uid("app")));
+		var appEle = $("#"+appId);
+		if(appEle.length == 0)
+		{
+			appEle = $("<div id='"+appId+"' />").addClass("vue-app-confirm").appendTo(document.body);
+			$("<p-confirmdialog />").appendTo(appEle);
+			
+			const buildConfirmOptions = function(options)
+			{
+				return $.extend({ position: "center", icon: "pi pi-info-circle", acceptClass: "p-button-danger" }, options);
+			};
+			
+			var confirmApp =
+			{
+				setup()
+				{
+					const confirm = primevue.useconfirm.useConfirm();
+					
+					const showConfirm = (options) =>
+					{
+						options = buildConfirmOptions(options);
+						confirm.require(options);
+					};
+					
+					return { showConfirm };
+				},
+				components:
+				{
+					"p-confirmdialog": primevue.confirmdialog,
+					"p-button": primevue.button
+				}
+			};
+			
+			confirmApp = Vue.createApp(confirmApp).use(primevue.config.default).use(primevue.confirmationservice).mount(appEle[0]);
+			appEle.data("confirmApp", confirmApp);
+		}
+	};
+	
+	/**
 	 * 生成一个唯一ID
 	 * 
 	 * @param prefix 可选，前缀
