@@ -41,7 +41,7 @@
 			:lazy="true" :total-records="pm.totalRecords" @page="onPaginator($event)"
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
-			<p-column :selection-mode="pm.selectionMode" header-style="width:4rem" class="flex-grow-0"></p-column>
+			<p-column :selection-mode="pm.selectionMode" :frozen="true" header-style="width:4rem" class="flex-grow-0"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />"></p-column>
 			<p-column field="name" header="<@spring.message code='name' />" :sortable="true"></p-column>
 			<p-column field="htmlChartPlugin.id" header="<@spring.message code='type' />" :sortable="true"></p-column>
