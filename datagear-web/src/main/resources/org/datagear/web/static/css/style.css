@@ -109,6 +109,32 @@
 	border-radius: none;
 }
 
+.p-datatable-table th,
+.p-datatable-table td{
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.p-datatable-table .col-check{
+	min-width: 3.5em;
+	max-width: 3.5em;
+}
+.p-datatable-table .col-id{
+	min-width: 15em;
+}
+.p-datatable-table .col-name{
+	min-width:30%;
+	max-width: 40%;
+}
+.p-datatable-table .col-desc{
+	min-width:25%;
+	max-width: 35%;
+}
+.p-datatable-table .col-datetime{
+	min-width: 12em;
+	max-width: 12em;
+}
+
 /*横向操作组*/
 .h-opts > *{
 	margin-left: 0.25em;

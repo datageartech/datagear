@@ -41,12 +41,12 @@
 			:lazy="true" :total-records="pm.totalRecords" @page="onPaginator($event)"
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
-			<p-column :selection-mode="pm.selectionMode" :frozen="true" header-style="width:4rem" class="flex-grow-0"></p-column>
-			<p-column field="id" header="<@spring.message code='id' />"></p-column>
-			<p-column field="name" header="<@spring.message code='name' />" :sortable="true"></p-column>
+			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
+			<p-column field="id" header="<@spring.message code='id' />" class="col-id"></p-column>
+			<p-column field="name" header="<@spring.message code='name' />" :sortable="true" class="col-name"></p-column>
 			<p-column field="analysisProject.name" header="<@spring.message code='ownerProject' />" :sortable="true"></p-column>
 			<p-column field="createUser.realName" header="<@spring.message code='createUser' />" :sortable="true"></p-column>
-			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true"></p-column>
+			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime"></p-column>
 		</p-datatable>
 	</div>
 </div>
