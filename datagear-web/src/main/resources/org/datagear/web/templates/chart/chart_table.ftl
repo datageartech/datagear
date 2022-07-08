@@ -44,11 +44,11 @@
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" class="col-id"></p-column>
 			<p-column field="name" header="<@spring.message code='name' />" :sortable="true" class="col-name"></p-column>
-			<p-column field="htmlChartPlugin.id" header="<@spring.message code='type' />" :sortable="true"></p-column>
-			<p-column field="updateInterval" header="<@spring.message code='updateInterval' />" :sortable="true"></p-column>
-			<p-column field="analysisProject.name" header="<@spring.message code='ownerProject' />" :sortable="true"></p-column>
-			<p-column field="createUser.realName" header="<@spring.message code='createUser' />" :sortable="true"></p-column>
-			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime"></p-column>
+			<p-column field="htmlChartPlugin.id" header="<@spring.message code='type' />" :sortable="true" style="min-width:8em;"></p-column>
+			<p-column field="updateInterval" header="<@spring.message code='updateInterval' />" :sortable="true" style="min-width:8em;"></p-column>
+			<p-column field="analysisProject.name" header="<@spring.message code='ownerProject' />" :sortable="true" class="col-owner-project"></p-column>
+			<p-column field="createUser.realName" header="<@spring.message code='createUser' />" :sortable="true" class="col-user"></p-column>
+			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime col-last"></p-column>
 		</p-datatable>
 	</div>
 </div>

@@ -121,18 +121,30 @@
 }
 .p-datatable-table .col-id{
 	min-width: 15em;
+	max-width: 20em;
 }
 .p-datatable-table .col-name{
-	min-width:30%;
-	max-width: 40%;
+	min-width:12rem;
+	max-width: 30%;
 }
 .p-datatable-table .col-desc{
-	min-width:25%;
-	max-width: 35%;
+	min-width: 10em;
+	max-width: 25%;
+}
+.p-datatable-table .col-owner-project{
+	min-width:12em;
+	max-width: 25%;
+}
+.p-datatable-table .col-user{
+	min-width: 10em;
+	max-width: 10em;
 }
 .p-datatable-table .col-datetime{
 	min-width: 12em;
 	max-width: 12em;
+}
+.p-datatable-table .col-last{
+	max-width: 50%;
 }
 
 /*横向操作组*/
