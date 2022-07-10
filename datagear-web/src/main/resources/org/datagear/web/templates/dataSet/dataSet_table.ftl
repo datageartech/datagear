@@ -47,7 +47,7 @@
 			<p-column field="name" header="<@spring.message code='name' />" :sortable="true" class="col-name"></p-column>
 			<p-column field="dataSetType" header="<@spring.message code='type' />" :sortable="true" style="min-width:6em;">
 				<template #body="{data}">
-					{{formatDataSetType(data.dataSetType)}}
+					{{formatDataSetType(data)}}
 				</template>
 			</p-column>
 			<p-column field="analysisProject.name" header="<@spring.message code='ownerProject' />" :sortable="true" class="col-owner-project"></p-column>
@@ -67,8 +67,10 @@
 	
 	po.vueMethod(
 	{
-		formatDataSetType: function(type)
+		formatDataSetType: function(data)
 		{
+			var type = data.dataSetType;
+			
 			if("${DataSetEntity.DATA_SET_TYPE_SQL}" == type)
 				return "<@spring.message code='dataSetType.SQL' />";
 			else if("${DataSetEntity.DATA_SET_TYPE_Excel}" == type)

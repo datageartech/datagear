@@ -531,6 +531,42 @@
 	};
 	
 	/**
+	 * 转义HTML关键字。
+	 * 
+	 * @param text 要转义的文本
+	 */
+	$.escapeHtml = function(text)
+	{
+		if(text == null)
+			return "";
+		
+		if($.isTypeString(text))
+			return text;
+		
+		var epn = "";
+		
+		for(var i=0; i<text.length; i++)
+		{
+			var c = text.charAt(i);
+			
+			if(c == '<')
+				epn += '&lt;';
+			else if(c == '>')
+				epn += '&gt;';
+			else if(c == '&')
+				epn += '&amp;';
+			else if(c == '"')
+				epn += '&quot;';
+			else if(c == '\'')
+				epn += '&#39;';
+			else
+				epn += c;
+		}
+		
+		return epn;
+	};
+	
+	/**
 	 * 获取对象/对象数组指定名称属性值。
 	 * 
 	 * @param obj 对象、对象数组

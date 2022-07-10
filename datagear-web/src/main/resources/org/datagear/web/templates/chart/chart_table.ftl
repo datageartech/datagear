@@ -19,7 +19,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-table">
+<div id="${pid}" class="page page-table page-table-chart">
 	<div class="page-table-header grid align-items-center">
 		<div class="col-12 md:col-3">
 			<#include "../include/page_search_form.ftl">
@@ -44,8 +44,16 @@
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" class="col-id"></p-column>
 			<p-column field="name" header="<@spring.message code='name' />" :sortable="true" class="col-name"></p-column>
-			<p-column field="htmlChartPlugin.id" header="<@spring.message code='type' />" :sortable="true" style="min-width:8em;"></p-column>
-			<p-column field="updateInterval" header="<@spring.message code='updateInterval' />" :sortable="true" style="min-width:8em;"></p-column>
+			<p-column field="htmlChartPlugin.id" header="<@spring.message code='type' />" :sortable="true" style="min-width:8em;">
+				<template #body="{data}">
+					<div v-html="formatChartPlugin(data)"></div>
+				</template>
+			</p-column>
+			<p-column field="updateInterval" header="<@spring.message code='updateInterval' />" :sortable="true" style="min-width:8em;max-width:15em;">
+				<template #body="{data}">
+					{{formatInterval(data)}}
+				</template>
+			</p-column>
 			<p-column field="analysisProject.name" header="<@spring.message code='ownerProject' />" :sortable="true" class="col-owner-project"></p-column>
 			<p-column field="createUser.realName" header="<@spring.message code='createUser' />" :sortable="true" class="col-user"></p-column>
 			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime col-last"></p-column>
@@ -63,6 +71,31 @@
 	
 	po.vueMethod(
 	{
+		formatInterval: function(data)
+		{
+			var interval = data.updateInterval;
+			
+			if(interval < 0)
+				return "<@spring.message code='noUpdate' />";
+			else if(interval == 0)
+				return "<@spring.message code='realtime' />";
+			else
+				return "<@spring.message code='xxxMilliseconds' />".replace("{0}", interval);
+		},
+		formatChartPlugin: function(data)
+		{
+			var cp = data.htmlChartPlugin;
+			
+			var content = (cp.nameLabel ? (cp.nameLabel.value || cp.id) : cp.id);
+			content = $.escapeHtml(content);
+			if(cp.iconUrl)
+			{
+				content = "<div class='plugin-info'><div class='plugin-icon' style='background-image:url(${contextPath}"+$.escapeHtml(cp.iconUrl)+")'></div>"
+							+ content +" </div>";
+			}
+			
+			return content;
+		},
 		onAdd: function()
 		{
 			po.handleAddAction("/chart/add");

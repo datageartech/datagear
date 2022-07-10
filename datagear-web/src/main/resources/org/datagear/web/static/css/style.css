@@ -217,3 +217,18 @@
 	/*对话框高度 - 底部留白高度 - 对话框header高度*/
 	max-height: calc(90vh - 1rem - 6rem);
 }
+
+.page-table-chart .plugin-info{
+	position: relative;
+	padding-left: 2.2em;
+}
+.page-table-chart .plugin-info .plugin-icon{
+	position: absolute;
+	left: 0;
+	top: -0.3em;
+	width: 2rem;
+	height: 2rem;
+	vertical-align: middle;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
