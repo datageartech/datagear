@@ -71,6 +71,8 @@ String action
 		
 		po.vueMounted(function()
 		{
+			po.initGlobalValidationMessagesIfNon();
+			
 			po.form().validateForm(pm,
 			{
 				submitHandler: function(form)
@@ -85,7 +87,7 @@ String action
 	
 	po.inflateSubmitAction = function(action)
 	{
-		po.trimSubmitActionData(action);
+		//po.trimSubmitActionData(action);
 	};
 	
 	//将action.options.data没有在表单项中出现的属性删除
@@ -133,6 +135,28 @@ String action
 	po.pageParamCallSubmitSuccess = function(response)
 	{
 		po.pageParamCall("submitSuccess", (response.data ? response.data : response));
+	};
+	
+	po.initGlobalValidationMessagesIfNon = function()
+	{
+		if(!po._initGlobalValidationMessages)
+		{
+			$.extend($.validator.messages, po.globalValidationMessages);
+			po._initGlobalValidationMessages = true;
+		}
+	};
+	
+	po.globalValidationMessages =
+	{
+		required: "<@spring.message code='validation.required' />",
+		number: "<@spring.message code='validation.number' />",
+		digits: "<@spring.message code='validation.digits' />",
+		equalTo: "<@spring.message code='validation.equalTo' />",
+		min: $.validator.format("<@spring.message code='validation.min' />"),
+		max: $.validator.format("<@spring.message code='validation.max' />"),
+		maxlength: $.validator.format("<@spring.message code='validation.maxlength' />"),
+		minlength: $.validator.format("<@spring.message code='validation.minlength' />"),
+		integer: "<@spring.message code='validation.integer' />"
 	};
 })
 (${pageId});

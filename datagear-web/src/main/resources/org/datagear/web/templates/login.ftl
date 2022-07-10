@@ -56,6 +56,12 @@
 						<div class="page-form-foot flex-grow-0 pt-3 text-center">
 							<p-button type="submit" label="<@spring.message code='login' />" />
 						</div>
+						<div class="page-form-foot flex-grow-0 pt-2 text-right text-sm text-color-secondary">
+							<p-checkbox id="${pid}remremberLogin" v-model="pm.rememberMe" :binary="true" name="remremberLogin"></p-checkbox>
+							<label for="${pid}remremberLogin" class="ml-1"><@spring.message code='remremberLogin' /></label>
+							
+							<a href="${contextPath}/resetPassword" class="link ml-3"><@spring.message code='forgetPassword' /></a>
+						</div>
 					</form>
 					</template>
 				</p-card>
@@ -73,7 +79,8 @@
 	{
 		name: "",
 		password: "",
-		checkCode: ""
+		checkCode: "",
+		rememberMe: false
 	},
 	"/login/doLogin",
 	{

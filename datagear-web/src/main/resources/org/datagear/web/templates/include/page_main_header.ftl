@@ -71,7 +71,7 @@ User currentUser
 				]
 			},
 			{ separator: true },
-			{ label: "退出", class: "p-error" }
+			{ label: "退出", class: "p-error", url: "${contextPath}/logout" }
 		]
 	});
 	

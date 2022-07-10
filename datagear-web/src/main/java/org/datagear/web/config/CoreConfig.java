@@ -267,9 +267,6 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	{
 		ObjectMapperBuilder bean = new ObjectMapperBuilder();
 
-		LocaleDateSerializer localeDateSerializer = new LocaleDateSerializer();
-		localeDateSerializer.setDateFormatter(this.dateFormatter());
-
 		LocaleSqlDateSerializer localeSqlDateSerializer = new LocaleSqlDateSerializer();
 		localeSqlDateSerializer.setSqlDateFormatter(this.sqlDateFormatter());
 
@@ -279,15 +276,18 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		LocaleSqlTimestampSerializer localeSqlTimestampSerializer = new LocaleSqlTimestampSerializer();
 		localeSqlTimestampSerializer.setSqlTimestampFormatter(this.sqlTimestampFormatter());
 
+		LocaleDateSerializer localeDateSerializer = new LocaleDateSerializer();
+		localeDateSerializer.setDateFormatter(this.dateFormatter());
+
 		List<JsonSerializerConfig> jsonSerializerConfigs = new ArrayList<>();
 
-		jsonSerializerConfigs.add(new JsonSerializerConfig(java.util.Date.class, localeDateSerializer));
 		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Date.class, localeSqlDateSerializer));
 		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Time.class, localeSqlTimeSerializer));
 		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Timestamp.class, localeSqlTimestampSerializer));
+		jsonSerializerConfigs.add(new JsonSerializerConfig(java.util.Date.class, localeDateSerializer));
 
 		bean.setJsonSerializerConfigs(jsonSerializerConfigs);
-
+		
 		return bean;
 	}
 

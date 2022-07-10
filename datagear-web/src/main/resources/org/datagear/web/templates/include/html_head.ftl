@@ -34,6 +34,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/column/column.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/contextmenu/contextmenu.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/dialog/dialog.min.js"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/checkbox/checkbox.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/textarea/textarea.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/toast/toast.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/toastservice/toastservice.min.js"></script>
@@ -42,6 +43,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/selectbutton/selectbutton.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/confirmdialog/confirmdialog.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/confirmationservice/confirmationservice.min.js"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/togglebutton/togglebutton.min.js"></script>
 
 <script src="${contextPath}/static/script/util.js"></script>
 </#if>

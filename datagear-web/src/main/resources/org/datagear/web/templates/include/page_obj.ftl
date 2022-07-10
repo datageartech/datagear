@@ -236,13 +236,15 @@ var ${pageId} =
 		"p-datatable": primevue.datatable,
 		"p-column": primevue.column,
 		"p-inputtext": primevue.inputtext,
+		"p-checkbox": primevue.checkbox,
 		"p-textarea": primevue.textarea,
 		"p-card": primevue.card,
 		"p-dialog": primevue.dialog,
 		"p-password": primevue.password,
 		"p-divider": primevue.divider,
 		"p-selectbutton": primevue.selectbutton,
-		"p-dropdown": primevue.dropdown
+		"p-dropdown": primevue.dropdown,
+		"p-togglebutton": primevue.togglebutton
 	},
 	
 	//vue挂载
