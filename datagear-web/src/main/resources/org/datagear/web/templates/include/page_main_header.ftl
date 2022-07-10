@@ -14,6 +14,7 @@
 User currentUser
 
 -->
+<#assign Themes=statics['org.datagear.web.util.Themes']>
 <div class="page-main-header flex-grow-0 p-card no-border text-color-secondary py-1">
 	<div class="grid grid-nogutter align-items-center">
 		<div class="logo col-fixed pl-1">
@@ -43,6 +44,17 @@ User currentUser
 	{
 		e.originalEvent.preventDefault();
 		po.openTableDialog(e.item.url);
+	};
+	
+	po.changeTheme = function(themeName)
+	{
+		$.getJSON(contextPath+"/changeThemeData?theme=" + themeName, function(data)
+		{
+			data.forEach(function(item)
+			{
+				$("#"+item.cssId).attr("href", item.href);
+			});
+		});
 	};
 	
 	var sysMenuItems = [];
@@ -125,12 +137,62 @@ User currentUser
 			label: "<@spring.message code='module.changeTheme' />",
 			items:
 			[
-				{ label: "<@spring.message code='module.changeTheme.light' />" },
-				{ label: "<@spring.message code='module.changeTheme.dark' />" },
-				{ label: "<@spring.message code='module.changeTheme.lightGreen' />" },
-				{ label: "<@spring.message code='module.changeTheme.darkGreen' />" },
-				{ label: "<@spring.message code='module.changeTheme.lightPurple' />" },
-				{ label: "<@spring.message code='module.changeTheme.darkPurple' />" }
+				{
+					label: "<@spring.message code='module.changeTheme.blue' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.BLUE}");
+					}
+				},
+				{
+					label: "<@spring.message code='module.changeTheme.green' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.GREEN}");
+					}
+				},
+				{
+					label: "<@spring.message code='module.changeTheme.purple' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.PURPLE}");
+					}
+				},
+				{
+					label: "<@spring.message code='module.changeTheme.orange' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.ORANGE}");
+					}
+				},
+				{
+					label: "<@spring.message code='module.changeTheme.blueDark' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.BLUE_DARK}");
+					}
+				},
+				{
+					label: "<@spring.message code='module.changeTheme.greenDark' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.GREEN_DARK}");
+					}
+				},
+				{
+					label: "<@spring.message code='module.changeTheme.purpleDark' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.PURPLE_DARK}");
+					}
+				},
+				{
+					label: "<@spring.message code='module.changeTheme.orangeDark' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.ORANGE_DARK}");
+					}
+				}
 			]
 		},
 		{

@@ -17,17 +17,32 @@ import java.util.List;
  */
 public class Themes
 {
-	/** 浅色 */
-	public static final String LIGHT = "light";
-
-	/** 暗色 */
-	public static final String DARK = "dark";
+	/** 蓝色 */
+	public static final String BLUE = "blue";
 
 	/** 绿色 */
 	public static final String GREEN = "green";
 
+	/** 紫色 */
+	public static final String PURPLE = "purple";
+
+	/** 橙色 */
+	public static final String ORANGE = "orange";
+
+	/** 蓝色-暗黑模式 */
+	public static final String BLUE_DARK = "blueDark";
+
+	/** 绿色-黑暗模式 */
+	public static final String GREEN_DARK = "greenDark";
+
+	/** 暗紫色-黑暗模式 */
+	public static final String PURPLE_DARK = "purpleDark";
+
+	/** 橙色-黑暗模式 */
+	public static final String ORANGE_DARK = "orangeDark";
+
 	/** 所有主题列表 */
-	public static final List<String> THEMES = Arrays.asList(LIGHT, DARK, GREEN);
+	public static final List<String> THEMES = Arrays.asList(BLUE, GREEN, PURPLE, ORANGE, BLUE_DARK, GREEN_DARK, PURPLE_DARK, ORANGE_DARK);
 
 	/**
 	 * 校验并规范主题。
@@ -48,6 +63,6 @@ public class Themes
 			}
 		}
 
-		return LIGHT;
+		return BLUE;
 	}
 }

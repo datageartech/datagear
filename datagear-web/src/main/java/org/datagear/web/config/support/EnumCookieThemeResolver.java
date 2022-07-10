@@ -29,7 +29,7 @@ public class EnumCookieThemeResolver extends CookieThemeResolver
 	public EnumCookieThemeResolver()
 	{
 		setCookieName(COOKIE_THEME_NAME);
-		super.setDefaultThemeName(Themes.LIGHT);
+		super.setDefaultThemeName(Themes.BLUE);
 		super.setCookieMaxAge(60 * 60 * 24 * 365);
 	}
 
