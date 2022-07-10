@@ -36,43 +36,148 @@ User currentUser
 <script>
 (function(po)
 {
+	po.isUserAnonymous = ("${currentUser.anonymous?string('true','false')}" == "true");
+	po.isUserAdmin = ("${currentUser.admin?string('true','false')}" == "true");
+	
+	po.openSysMenuDialog = function(e)
+	{
+		e.originalEvent.preventDefault();
+		po.openTableDialog(e.item.url);
+	};
+	
+	var sysMenuItems = [];
+	
+	if(!po.isUserAnonymous)
+	{
+		sysMenuItems = sysMenuItems.concat([{ label: "<@spring.message code='module.personalSet' />" }, { separator: true }]);
+	}
+	
+	if(po.isUserAdmin)
+	{
+		sysMenuItems = sysMenuItems.concat(
+		[
+			{
+				label: "<@spring.message code='dataSource' />",
+				items:
+				[
+					{
+						label: "<@spring.message code='module.dataSourceDriver' />",
+						url: "${contextPath}/driverEntity/query",
+						command: function(e){ po.openSysMenuDialog(e); }
+					},
+					{
+						label: "<@spring.message code='module.dataSourceUrlBuilder' />",
+						url: "${contextPath}/schemaUrlBuilder/editScriptCode",
+						command: function(e){ po.openSysMenuDialog(e); }
+					},
+					{
+						label: "<@spring.message code='module.dataSourceGuard' />",
+						url: "${contextPath}/schemaGuard/query",
+						command: function(e){ po.openSysMenuDialog(e); }
+					}
+				]
+			},
+			{
+				label: "<@spring.message code='dataAnalysis' />",
+				items:
+				[
+					{
+						label: "<@spring.message code='module.dataSetResDirectory' />",
+						url: "${contextPath}/dataSetResDirectory/pagingQuery",
+						command: function(e){ po.openSysMenuDialog(e); }
+					},
+					{ label: "<@spring.message code='module.chartPlugin' />" },
+					{
+						label: "<@spring.message code='module.chartPlugin' />",
+						url: "${contextPath}/chartPlugin/query",
+						command: function(e){ po.openSysMenuDialog(e); }
+					},
+					{
+						label: "<@spring.message code='module.dashboardGlobalRes' />",
+						url: "${contextPath}/dashboardGlobalRes/query",
+						command: function(e){ po.openSysMenuDialog(e); }
+					}
+				]
+			},
+			{
+				label: "<@spring.message code='systemManager' />",
+				items:
+				[
+					{
+						label: "<@spring.message code='module.user' />",
+						url: "${contextPath}/user/pagingQuery",
+						command: function(e){ po.openSysMenuDialog(e); }
+					},
+					{
+						label: "<@spring.message code='module.role' />",
+						url: "${contextPath}/role/pagingQuery",
+						command: function(e){ po.openSysMenuDialog(e); }
+					}
+				]
+			},
+			{ separator: true }
+		]);
+	}
+	
+	sysMenuItems = sysMenuItems.concat(
+	[
+		{
+			label: "<@spring.message code='module.changeTheme' />",
+			items:
+			[
+				{ label: "<@spring.message code='module.changeTheme.light' />" },
+				{ label: "<@spring.message code='module.changeTheme.dark' />" },
+				{ label: "<@spring.message code='module.changeTheme.lightGreen' />" },
+				{ label: "<@spring.message code='module.changeTheme.darkGreen' />" },
+				{ label: "<@spring.message code='module.changeTheme.lightPurple' />" },
+				{ label: "<@spring.message code='module.changeTheme.darkPurple' />" }
+			]
+		},
+		{
+			label: "<@spring.message code='module.changeLanguage' />",
+			items:
+			[
+				{ label: "<@spring.message code='module.changeLanguage.cn' />" },
+				{ label: "<@spring.message code='module.changeLanguage.en' />" }
+			]
+		},
+		{
+			label: "<@spring.message code='help' />",
+			items:
+			[
+				{
+					label: "<@spring.message code='module.about' />",
+					url: "${contextPath}/about",
+					command: function(e){ po.openSysMenuDialog(e); }
+				},
+				{
+					label: "<@spring.message code='module.documentation' />",
+					url: "${statics['org.datagear.util.Global'].WEB_SITE}/documentation/",
+					target: "_blank"
+				},
+				{
+					label: "<@spring.message code='module.changelog' />",
+					url: "${contextPath}/changelog",
+					command: function(e){ po.openSysMenuDialog(e); }
+				},
+				{
+					label: "<@spring.message code='module.downloadLatestVersion' />",
+					url: "${statics['org.datagear.util.Global'].WEB_SITE}",
+					target: "_blank"
+				}
+			]
+		},
+		{ separator: true },
+		{
+			label: "<@spring.message code='module.logout' />",
+			url: "${contextPath}/logout",
+			class: "p-error"
+		}
+	]);
+	
 	po.vueReactive("sysMenu",
 	{
-		items:
-		[
-			{ label: "个人设置" },
-			{ separator: true },
-			{
-				label: "切换肤色",
-				items:
-				[
-					{ label: "浅色" },
-					{ label: "暗色" },
-					{ label: "绿色" },
-					{ label: "紫色" }
-				]
-			},
-			{
-				label: "切换语言",
-				items:
-				[
-					{ label: "中文" },
-					{ label: "英文" }
-				]
-			},
-			{
-				label: "帮助",
-				items:
-				[
-					{ label: "关于" },
-					{ label: "文档" },
-					{ label: "版本日志" },
-					{ label: "下载最新版" }
-				]
-			},
-			{ separator: true },
-			{ label: "退出", class: "p-error", url: "${contextPath}/logout" }
-		]
+		items: sysMenuItems
 	});
 	
 	po.vueMethod(

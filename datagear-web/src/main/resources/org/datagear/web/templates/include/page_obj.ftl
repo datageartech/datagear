@@ -11,15 +11,15 @@
 var ${pageId} =
 {
 	//父页面对象ID
-	parentPageId : "${parentPageId}",
+	parentPageId: "${parentPageId}",
 	
 	//当前页面ID
-	pageId : "${pageId}",
+	pageId: "${pageId}",
 	
 	contextPath: "${contextPath}",
 	
 	//获取父页面JS对象
-	parent : function()
+	parent: function()
 	{
 		var parentPage = (this.parentPageId ? window[this.parentPageId] : null);
 		//父页面DOM元素可能会在回调过程中被删除，这里加一层元素判断
@@ -27,7 +27,7 @@ var ${pageId} =
 	},
 	
 	//获取页面内的元素
-	element : function(selector, parent)
+	element: function(selector, parent)
 	{
 		return (selector == null ? $("#"+this.pageId) : (parent ? $(selector, parent) : $(selector, $("#"+this.pageId))));
 	},
@@ -45,15 +45,22 @@ var ${pageId} =
 	},
 	
 	//打开URL
-	open : function(url, options)
+	open: function(url, options)
 	{
 		url = this.concatContextPath(url);
 		url = $.addParam(url, "parentPageId", this.pageId);
 		$.open(url, (options || {}));
 	},
 	
+	//打开表格对话框
+	openTableDialog: function(url, options)
+	{
+		options = $.extend({ width: "80vw" }, options);
+		this.open(url, options);
+	},
+	
 	//关闭此页面
-	close : function()
+	close: function()
 	{
 		$.closeDialog(this.element());
 	},
@@ -74,7 +81,7 @@ var ${pageId} =
 	 * 获取页面参数对象。
 	 * @param name 可选，页面参数对象属性名
 	 */
-	pageParam : function(name)
+	pageParam: function(name)
 	{
 		var ppo = $.pageParam(this.element());
 		return (name == null ? ppo : (ppo ? ppo[name] : null));
@@ -85,14 +92,14 @@ var ${pageId} =
 	 * @param functionName 必选
 	 * @param arg,... 可选，函数参数
 	 */
-	pageParamCall : function(functionName, arg)
+	pageParamCall: function(functionName, arg)
 	{
 		var argArray = (arg == undefined ? undefined : $.makeArray(arguments).slice(1));
 		return $.pageParamCall(this.element(), functionName, argArray);
 	},
 	
 	//打开确认对话框
-	confirm : function(options)
+	confirm: function(options)
 	{
 		options = $.extend(
 		{
