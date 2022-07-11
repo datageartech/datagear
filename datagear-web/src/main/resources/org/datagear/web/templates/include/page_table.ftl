@@ -108,9 +108,9 @@ String action
 		options = $.extend(
 		{
 			data: tableAttr.param,
-			success: function(reseponse)
+			success: function(response)
 			{
-				po.setAjaxTableData(reseponse);
+				po.setAjaxTableData(response);
 			},
 			complete: function()
 			{
@@ -119,7 +119,7 @@ String action
 		},
 		options);
 		
-		$.ajaxJson(po.concatContextPath(tableAttr.url), options)
+		$.ajaxJson(po.concatContextPath(tableAttr.url), options);
 	};
 	
 	po.sortMetaToOrders = function(sortMeta)

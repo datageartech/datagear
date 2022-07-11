@@ -50,9 +50,9 @@
 			items:
 			[
 				{
-					label: "<@spring.message code='module.dataSource' />",
+					label: "<@spring.message code='module.schema' />",
 					icon: 'pi pi-fw pi-database',
-					url: "${contextPath}/primevue/chartList"
+					url: "${contextPath}/schema/query"
 				},
 				{
 					label: "<@spring.message code='module.analysisProject' />",
@@ -61,7 +61,7 @@
 				},
 				{
 					label: "<@spring.message code='module.dataSet' />",
-					icon: 'pi pi-fw pi-table',
+					icon: 'pi pi-fw pi-book',
 					url: "${contextPath}/dataSet/pagingQuery"
 				},
 				{

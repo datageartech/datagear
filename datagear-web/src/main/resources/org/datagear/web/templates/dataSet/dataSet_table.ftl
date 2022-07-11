@@ -20,8 +20,8 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-table">
-	<div class="page-table-header grid align-items-center">
+<div id="${pid}" class="page page-query page-table">
+	<div class="page-header grid align-items-center">
 		<div class="col-12 md:col-3">
 			<#include "../include/page_search_form.ftl">
 		</div>
@@ -34,7 +34,7 @@
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!isSelectAction"></p-button>
 		</div>
 	</div>
-	<div class="page-table-content">
+	<div class="page-content">
 		<p-datatable :value="pm.items" :scrollable="true" scroll-height="flex"
 			:paginator="pm.paginator" :paginator-template="pm.paginatorTemplate"
 			:rows="pm.rowsPerPage" :current-page-report-template="pm.pageReportTemplate"

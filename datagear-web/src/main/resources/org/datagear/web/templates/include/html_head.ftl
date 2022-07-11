@@ -44,6 +44,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/confirmdialog/confirmdialog.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/confirmationservice/confirmationservice.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/togglebutton/togglebutton.min.js"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/splitbutton/splitbutton.min.js"></script>
 
 <script src="${contextPath}/static/script/util.js"></script>
 </#if>

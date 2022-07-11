@@ -251,7 +251,9 @@ var ${pageId} =
 		"p-divider": primevue.divider,
 		"p-selectbutton": primevue.selectbutton,
 		"p-dropdown": primevue.dropdown,
-		"p-togglebutton": primevue.togglebutton
+		"p-togglebutton": primevue.togglebutton,
+		"p-splitbutton": primevue.splitbutton,
+		"p-tree": primevue.tree
 	},
 	
 	//vue挂载

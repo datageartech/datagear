@@ -216,18 +216,15 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/query")
 	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.manageSchema");
-
-		return "/schema/schema_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/schema/schema_tree";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.selectSchema");
-		model.addAttribute(KEY_SELECT_OPERATION, true);
-
-		return "/schema/schema_grid";
+		setSelectAction(request, model);
+		return "/schema/schema_tree";
 	}
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
@@ -235,7 +232,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public List<Schema> queryData(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		List<Schema> schemas = getSchemaService().query(user, pagingQuery);
