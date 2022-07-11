@@ -26,15 +26,24 @@
 				<div class="page-header">
 					<div class="grid align-items-center flex-nowrap">
 						<div class="col">
-							<#include "../include/page_search_form.ftl">
+							<form @submit.prevent="onSearch" class="py-1">
+								<div class="p-inputgroup">
+									<p-inputtext type="text" v-model="pm.searchForm.keyword"></p-inputtext>
+									<p-button type="submit" icon="pi pi-search" />
+								</div>
+							</form>
 						</div>
 						<div class="col-fixed text-right">
-							<p-splitbutton icon="pi pi-plus" @click="onAdd" :model="pm.schemaOptItems"></p-splitbutton>
+							<p-splitbutton icon="pi pi-plus" @click="onAdd" :model="schemaOptItems"></p-splitbutton>
 						</div>
 					</div>
 				</div>
-				<div class="page-content flex-grow-1 p-0">
-					<p-tree :value="pm.schemaNodes" @node-expand="onExpandSchemaNode" :loading="pm.loading" class="h-full overflow-auto"></p-tree>
+				<div class="page-content flex-grow-1 p-0 overflow-auto">
+					<p-tree :value="pm.schemaNodes"
+						selection-mode="multiple" v-model:selection-keys="pm.selectedNodes"
+						@node-expand="onSchemaNodeExpand" @node-select="ononSchemaNodeSelect"
+						:loading="pm.loadingSchema">
+					</p-tree>
 				</div>
 			</div>
 		</div>
@@ -46,107 +55,173 @@
 <script>
 (function(po)
 {
-	po.loadSchemaList = function()
-	{
-		var pm = po.vuePageModel();
-		pm.loading = true;
-		
-		var options =
-		{
-			success: function(response)
-			{
-				pm.schemaNodes = [];
-				response.forEach(function(schema)
-				{
-					pm.schemaNodes.push(po.schemaToNode(schema));
-				});
-			},
-			complete: function()
-			{
-				pm.loading = false;
-			}
-		};
-		
-		$.ajaxJson(po.concatContextPath("/schema/queryData"), options);
-	};
-	
-	po.loadTableList = function(schemaNode)
-	{
-		var pm = po.vuePageModel();
-		pm.loading = true;
-		
-		var options =
-		{
-			data: { keyword: "" },
-			success: function(response)
-			{
-				var items = response.items;
-				
-				schemaNode.children = [];
-				items.forEach(function(item)
-				{
-					schemaNode.children.push(po.schemaTableToNode(item));
-				});
-			},
-			complete: function()
-			{
-				pm.loading = false;
-			}
-		};
-		
-		$.ajaxJson(po.concatContextPath("/schema/"+schemaNode.key+"/pagingQueryTable"), options);
-	};
-	
-	po.schemaToNode = function(schema)
-	{
-		var node =
-		{
-			key: schema.id,
-			label: schema.title,
-			icon: "pi pi-database",
-			leaf: false
-		};
-		
-		return node;
-	};
-	
-	po.schemaTableToNode = function(table)
-	{
-		var node =
-		{
-			key: table.name,
-			label: table.name,
-			icon: "pi pi-table",
-			leaf: true
-		};
-		
-		return node;
-	};
-	
 	po.vuePageModel(
 	{
-		schemaOptItems:
-		[
-			{
-				label: "<@spring.message code='edit' />"
-			},
-			{
-				label: "<@spring.message code='delete' />"
-			}
-		],
-		
-		loading: false,
-		
-		schemaNodes: null
+		searchForm:{ keyword: "" },
+		searchType: "schema",
+		loadingSchema: false,
+		schemaNodes: null,
+		selectedNodes: null
 	});
+
+	po.vueReactive("schemaOptItems",
+	[
+		{
+			label: "<@spring.message code='edit' />"
+		},
+		{
+			label: "<@spring.message code='delete' />"
+		}
+	]);
+	
+	po.loadSchemaNodes = function()
+	{
+		var pm = po.vuePageModel();
+		var keyword = pm.searchForm.keyword;
+		
+		pm.loadingSchema = true;
+		$.ajaxJson(po.concatContextPath("/schema/queryData"),
+		{
+			data: { keyword: keyword },
+			success: function(response)
+			{
+				pm.schemaNodes = po.schemasToNodes(response);
+			},
+			complete: function()
+			{
+				pm.loadingSchema = false;
+			}
+		});
+	};
+	
+	po.loadTableNodes = function(schemaNode, page)
+	{
+		page = (page == null ? 1 : page);
+		
+		var pm = po.vuePageModel();
+		var keyword = pm.searchForm.keyword;
+		
+		pm.loadingSchema = true;
+		$.ajaxJson(po.concatContextPath("/schema/"+schemaNode.schemaId+"/pagingQueryTable"),
+		{
+			data: { keyword: "", pageSize: 100, page: page },
+			success: function(response)
+			{
+				var loadedNodes = po.tablePagingDataToNodes(schemaNode.schemaId, response);
+				
+				if(page > 1)
+				{
+					var children = schemaNode.children;
+					if(children[children.length-1].dataType = "loadMore")
+						children.pop();
+					
+					schemaNode.children = children.concat(loadedNodes);
+				}
+				else
+					schemaNode.children = loadedNodes;
+			},
+			complete: function()
+			{
+				pm.loadingSchema = false;
+			}
+		});
+	};
+	
+	po.schemasToNodes = function(schemas)
+	{
+		var re = [];
+		
+		schemas.forEach(function(schema)
+		{
+			re.push(
+			{
+				key: schema.id,
+				label: schema.title,
+				icon: "pi pi-database",
+				leaf: false,
+				dataType: "schema",
+				schemaId: schema.id
+			});
+		});
+		
+		return re;
+	};
+	
+	po.findSchemaNode = function(schemaId)
+	{
+		var pm = po.vuePageModel();
+		var schemaNodes = (pm.schemaNodes || []);
+		for(var i=0; i<schemaNodes.length; i++)
+		{
+			if(schemaNodes[i].schemaId == schemaId)
+				return schemaNodes[i];
+		}
+		
+		return null;
+	};
+	
+	po.tablePagingDataToNodes = function(schemaId, pagingData)
+	{
+		var re = [];
+		
+		pagingData.items.forEach(function(table)
+		{
+			re.push(
+			{
+				key: table.name,
+				label: table.name,
+				icon: "pi pi-table",
+				leaf: true,
+				dataType: "table",
+				schemaId: schemaId
+			});
+		});
+		
+		//添加下一页节点
+		if(pagingData.page < pagingData.pages)
+		{
+			var showCount = (pagingData.page-1) * pagingData.pageSize + pagingData.items.length;
+			
+			re.push(
+			{
+				key: "next-page-for-"+pagingData.page,
+				label : "<@spring.message code='loadMore' /> (" + showCount + "/" + pagingData.total+")",
+				icon: "pi pi-arrow-down",
+				leaf: true,
+				styleClass: "font-bold",
+				dataType: "loadMore",
+				schemaId: schemaId,
+				nextPage: pagingData.page + 1
+			});
+		}
+		
+		return re;
+	};
 	
 	po.vueMethod(
 	{
-		onExpandSchemaNode: function(node)
+		onSearch: function()
+		{
+			var pm = po.vuePageModel();
+			
+			if(pm.searchType == "schema")
+				po.loadSchemaNodes();
+			else if(pm.searchType == "table")
+				po.loadSchemaNodes();
+		},
+		onSchemaNodeExpand: function(node)
 		{
 			if(node.children == null)
 			{
-				po.loadTableList(node);
+				po.loadTableNodes(node);
+			}
+		},
+		ononSchemaNodeSelect: function(node)
+		{
+			if(node.dataType == "loadMore")
+			{
+				var mySchemaNode = po.findSchemaNode(node.schemaId);
+				po.loadTableNodes(mySchemaNode, node.nextPage);
 			}
 		},
 		onAdd: function()
@@ -172,7 +247,7 @@
 	
 	po.vueMounted(function()
 	{
-		po.loadSchemaList();
+		po.loadSchemaNodes();
 	});
 	
 	po.vueMount();
