@@ -108,9 +108,9 @@ String action
 		options = $.extend(
 		{
 			data: tableAttr.param,
-			success: function(pagingData)
+			success: function(reseponse)
 			{
-				po.setAjaxTablePagingData(pagingData);
+				po.setAjaxTableData(reseponse);
 			},
 			complete: function()
 			{
@@ -134,12 +134,13 @@ String action
 		return orders;
 	};
 	
-	po.setAjaxTablePagingData = function(pagingData)
+	po.setAjaxTableData = function(data)
 	{
+		var isPagingData = (data.items != null && data.total != null);
 		var pm = po.vuePageModel();
 		
-		pm.items = pagingData.items;
-		pm.totalRecords = pagingData.total;
+		pm.items = (isPagingData ? data.items : data);
+		pm.totalRecords = (isPagingData ? data.total : data.length);
 		pm.selectedItems = null;
 	};
 	

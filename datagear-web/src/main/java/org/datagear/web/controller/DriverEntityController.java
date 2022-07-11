@@ -326,18 +326,15 @@ public class DriverEntityController extends AbstractController
 	@RequestMapping(value = "/query")
 	public String query(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "driverEntity.manageDriverEntity");
-
-		return "/driverEntity/driverEntity_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/driverEntity/driverEntity_table";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "driverEntity.selectDriverEntity");
-		model.addAttribute(KEY_SELECT_OPERATION, true);
-
-		return "/driverEntity/driverEntity_grid";
+		setSelectAction(request, model);
+		return "/driverEntity/driverEntity_table";
 	}
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)

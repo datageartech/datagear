@@ -264,18 +264,15 @@ public class UserController extends AbstractController
 	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.manageUser");
-		return "/user/user_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/user/user_table";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.selectUser");
-		model.addAttribute(KEY_SELECT_OPERATION, true);
-		setIsMultipleSelectAttribute(request, model);
-
-		return "/user/user_grid";
+		setSelectAction(request, model);
+		return "/user/user_table";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)

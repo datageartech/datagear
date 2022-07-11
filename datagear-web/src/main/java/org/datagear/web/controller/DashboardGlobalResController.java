@@ -356,9 +356,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@RequestMapping("/query")
 	public String query(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardGlobalRes.manageDashboardGlobalRes");
-
-		return "/dashboardGlobalRes/dashboardGlobalRes_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/dashboardGlobalRes/dashboardGlobalRes_table";
 	}
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)

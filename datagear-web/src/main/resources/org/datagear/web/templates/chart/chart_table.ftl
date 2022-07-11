@@ -19,7 +19,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-table page-table-chart">
+<div id="${pid}" class="page page-table">
 	<div class="page-table-header grid align-items-center">
 		<div class="col-12 md:col-3">
 			<#include "../include/page_search_form.ftl">

@@ -124,8 +124,8 @@
 	max-width: 20em;
 }
 .p-datatable-table .col-name{
-	min-width:12rem;
-	max-width: 30%;
+	min-width:12em;
+	max-width: 25%;
 }
 .p-datatable-table .col-desc{
 	min-width: 10em;
@@ -142,6 +142,14 @@
 .p-datatable-table .col-datetime{
 	min-width: 12em;
 	max-width: 12em;
+}
+.p-datatable-table .col-version{
+	min-width: 8em;
+	max-width: 10em;
+}
+.p-datatable-table .col-boolean{
+	min-width: 6em;
+	max-width: 10em;
 }
 .p-datatable-table .col-last{
 	max-width: 50%;
@@ -218,11 +226,11 @@
 	max-height: calc(90vh - 1rem - 6rem);
 }
 
-.page-table-chart .plugin-info{
+.page-table .plugin-info{
 	position: relative;
 	padding-left: 2.2em;
 }
-.page-table-chart .plugin-info .plugin-icon{
+.page-table .plugin-info .plugin-icon{
 	position: absolute;
 	left: 0;
 	top: -0.3em;

@@ -138,19 +138,15 @@ public class RoleController extends AbstractController
 	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "role.manageRole");
-
-		return "/role/role_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/role/role_table";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "role.selectRole");
-		model.addAttribute(KEY_SELECT_OPERATION, true);
-		setIsMultipleSelectAttribute(request, model);
-
-		return "/role/role_grid";
+		setSelectAction(request, model);
+		return "/role/role_table";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)

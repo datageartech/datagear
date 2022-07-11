@@ -218,9 +218,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping("/query")
 	public String query(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chartPlugin.manageChartPlugin");
-
-		return "/chartPlugin/chartPlugin_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/chartPlugin/chartPlugin_table";
 	}
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
@@ -242,6 +241,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		model.addAttribute("categorizations", toWriteJsonTemplateModel(categorizations));
 
+		setSelectAction(request, model);
 		return "/chartPlugin/chartPlugin_select";
 	}
 

@@ -134,17 +134,16 @@ public class SchemaGuardController extends AbstractController
 	}
 
 	@RequestMapping("/query")
-	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+	public String query(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schemaGuard.manageSchemaGuard");
-
-		return "/schemaGuard/schemaGuard_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/schemaGuard/schemaGuard_table";
 	}
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<SchemaGuard> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
+	public List<SchemaGuard> queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel,
 			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
 	{

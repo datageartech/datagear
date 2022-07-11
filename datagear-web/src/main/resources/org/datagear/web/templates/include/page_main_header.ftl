@@ -73,17 +73,17 @@ User currentUser
 				items:
 				[
 					{
-						label: "<@spring.message code='module.dataSourceDriver' />",
+						label: "<@spring.message code='module.driverEntity' />",
 						url: "${contextPath}/driverEntity/query",
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
-						label: "<@spring.message code='module.dataSourceUrlBuilder' />",
+						label: "<@spring.message code='module.schemaUrlBuilder' />",
 						url: "${contextPath}/schemaUrlBuilder/editScriptCode",
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
-						label: "<@spring.message code='module.dataSourceGuard' />",
+						label: "<@spring.message code='module.schemaGuard' />",
 						url: "${contextPath}/schemaGuard/query",
 						command: function(e){ po.openSysMenuDialog(e); }
 					}
@@ -98,7 +98,6 @@ User currentUser
 						url: "${contextPath}/dataSetResDirectory/pagingQuery",
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
-					{ label: "<@spring.message code='module.chartPlugin' />" },
 					{
 						label: "<@spring.message code='module.chartPlugin' />",
 						url: "${contextPath}/chartPlugin/query",

@@ -182,22 +182,15 @@ public class DataSetResDirectoryController extends AbstractController
 	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		User user = WebUtils.getUser(request, response);
-		model.addAttribute("currentUser", user);
-
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSetResDirectory.manageDataSetResDirectory");
-
-		return "/dataSetResDirectory/dataSetResDirectory_grid";
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		return "/dataSetResDirectory/dataSetResDirectory_table";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSetResDirectory.selectDataSetResDirectory");
-		model.addAttribute(KEY_SELECT_OPERATION, true);
-		setIsMultipleSelectAttribute(request, model);
-
-		return "/dataSetResDirectory/dataSetResDirectory_grid";
+		setSelectAction(request, model);
+		return "/dataSetResDirectory/dataSetResDirectory_table";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
@@ -206,7 +199,7 @@ public class DataSetResDirectoryController extends AbstractController
 			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
 			throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		PagingData<DataSetResDirectory> pagingData = this.dataSetResDirectoryService.pagingQuery(user, pagingQuery);
@@ -219,7 +212,7 @@ public class DataSetResDirectoryController extends AbstractController
 	public List<FileInfo> listFiles(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		DataSetResDirectory dataSetResDirectory = this.dataSetResDirectoryService.getById(user, id);
 
