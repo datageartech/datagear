@@ -19,7 +19,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-query">
+<div id="${pid}" class="page page-query page-query-schema">
 	<div class="grid grid-nogutter m-0 flex-nowrap">
 		<div class="col-3">
 			<div class="flex flex-column m-0">
@@ -38,11 +38,11 @@
 						</div>
 					</div>
 				</div>
-				<div class="page-content flex-grow-1 p-0 overflow-auto">
+				<div class="page-content flex-grow-1 p-0">
 					<p-tree :value="pm.schemaNodes"
 						selection-mode="multiple" v-model:selection-keys="pm.selectedNodes"
 						@node-expand="onSchemaNodeExpand" @node-select="ononSchemaNodeSelect"
-						:loading="pm.loadingSchema">
+						:loading="pm.loadingSchema" class="schema-tree h-full overflow-auto">
 					</p-tree>
 				</div>
 			</div>
@@ -71,6 +71,28 @@
 		},
 		{
 			label: "<@spring.message code='delete' />"
+		},
+		{
+			label: "<@spring.message code='view' />"
+		},
+		{
+			label: "<@spring.message code='refresh' />"
+		},
+		{
+			label: "<@spring.message code='reload' />"
+		},
+		{
+			label: "<@spring.message code='autherization' />"
+		},
+		{ separator: true },
+		{
+			label: "<@spring.message code='module.sqlpad' />"
+		},
+		{
+			label: "<@spring.message code='module.importData' />"
+		},
+		{
+			label: "<@spring.message code='module.exportData' />"
 		}
 	]);
 	

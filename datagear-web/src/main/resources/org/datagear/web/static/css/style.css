@@ -240,3 +240,9 @@
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 }
+
+.page-query-schema .p-tree.schema-tree .p-tree-wrapper,
+.page-query-schema .p-tree.schema-tree .p-tree-wrapper .p-tree-container{
+	height: 100% !important;
+	overflow: auto;
+}
