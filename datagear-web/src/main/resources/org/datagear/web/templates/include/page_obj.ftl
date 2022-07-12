@@ -134,7 +134,7 @@ var ${pageId} =
 		return this.vueReactive("pm", obj);
 	},
 	
-	//获取/填充并返回vue的setup响应式对象（自动reactive）
+	//获取/填充并返回vue的setup响应式对象（自动reactive），对象格式必须为：{...}
 	vueReactive: function(name, obj)
 	{
 		if(obj === undefined)
@@ -207,6 +207,12 @@ var ${pageId} =
 			this._vueComponents[name] = value;
 	},
 	
+	//设置vue监听
+	vueWatch: function(target, callback)
+	{
+		this._vueWatch.push({ target: target, callback: callback });
+	},
+	
 	//设置vue挂在后回调函数
 	vueMounted: function(callback)
 	{
@@ -232,6 +238,8 @@ var ${pageId} =
 	
 	//vue的setup对象
 	_vueSetup: {},
+	//vue的watch对象
+	_vueWatch: [],
 	//vue的mounted回调函数
 	_vueMounted: [],
 	//vue组件
@@ -253,13 +261,17 @@ var ${pageId} =
 		"p-dropdown": primevue.dropdown,
 		"p-togglebutton": primevue.togglebutton,
 		"p-splitbutton": primevue.splitbutton,
-		"p-tree": primevue.tree
+		"p-tree": primevue.tree,
+		"p-tabview": primevue.tabview,
+		"p-tabpanel": primevue.tabpanel,
+		"p-menu": primevue.menu
 	},
 	
 	//vue挂载
 	vueMount: function(app)
 	{
 		const setupObj = this._vueSetup;
+		const watchObj = this._vueWatch;
 		const mountedObj = this._vueMounted;
 		const componentsObj = this._vueComponents;
 		
@@ -267,6 +279,11 @@ var ${pageId} =
 		{
 			setup()
 			{
+				watchObj.forEach(function(wt)
+				{
+					Vue.watch(wt.target, wt.callback);
+				});
+				
 				Vue.onMounted(function()
 				{
 					mountedObj.forEach(function(callback)
@@ -283,7 +300,14 @@ var ${pageId} =
 			components: componentsObj
 		});
 		
-		return Vue.createApp(app).use(primevue.config.default).mount("#"+this.pageId);
+		this._vueApp = Vue.createApp(app).use(primevue.config.default).mount("#"+this.pageId);
+		return this._vueApp;
+	},
+	
+	//获取挂载后的vue实例
+	vueApp: function()
+	{
+		return this._vueApp;
 	}
 };
 </script>

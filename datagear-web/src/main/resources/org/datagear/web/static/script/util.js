@@ -14,25 +14,6 @@
 
 (function($, undefined)
 {
-	$.TYPEOF_STRING = "string";
-	$.TYPEOF_NUMBER = "number";
-	$.TYPEOF_TYPE_OBJECT = "object";
-	
-	$.isTypeString = function(obj)
-	{
-		return (typeof(obj) == $.TYPEOF_STRING);
-	};
-	
-	$.isTypeNumber = function(obj)
-	{
-		return (typeof(obj) == $.TYPEOF_NUMBER);
-	};
-	
-	$.isTypeObject = function(obj)
-	{
-		return (typeof(obj) == $.TYPEOF_TYPE_OBJECT);
-	};
-	
 	/**
 	 * 打开给定URL页面。
 	 * 
@@ -467,6 +448,38 @@
 			confirmApp = Vue.createApp(confirmApp).use(primevue.config.default).use(primevue.confirmationservice).mount(appEle[0]);
 			appEle.data("confirmApp", confirmApp);
 		}
+	};
+	
+	$.TYPEOF_STRING = "string";
+	$.TYPEOF_NUMBER = "number";
+	$.TYPEOF_TYPE_OBJECT = "object";
+	
+	$.isTypeString = function(obj)
+	{
+		return (typeof(obj) == $.TYPEOF_STRING);
+	};
+	
+	$.isTypeNumber = function(obj)
+	{
+		return (typeof(obj) == $.TYPEOF_NUMBER);
+	};
+	
+	$.isTypeObject = function(obj)
+	{
+		return (typeof(obj) == $.TYPEOF_TYPE_OBJECT);
+	};
+	
+	$.inArrayById = function(array, idValue, idPropName)
+	{
+		idPropName = (idPropName == null ? "id" : idPropName);
+		
+		for(var i=0; i<array.length; i++)
+		{
+			if(array[i] && array[i][idPropName] == idValue)
+				return i;
+		}
+		
+		return -1;
 	};
 	
 	/**

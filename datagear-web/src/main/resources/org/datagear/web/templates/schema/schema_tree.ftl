@@ -34,20 +34,25 @@
 							</form>
 						</div>
 						<div class="col-fixed text-right">
-							<p-splitbutton icon="pi pi-plus" @click="onAdd" :model="schemaOptItems"></p-splitbutton>
+							<p-splitbutton icon="pi pi-plus" @click="onAdd" :model="pm.schemaOptItems"></p-splitbutton>
 						</div>
 					</div>
 				</div>
 				<div class="page-content flex-grow-1 p-0">
 					<p-tree :value="pm.schemaNodes"
 						selection-mode="multiple" v-model:selection-keys="pm.selectedNodes"
-						@node-expand="onSchemaNodeExpand" @node-select="ononSchemaNodeSelect"
+						@node-expand="onSchemaNodeExpand" @node-select="onSchemaNodeSelect"
 						:loading="pm.loadingSchema" class="schema-tree h-full overflow-auto">
 					</p-tree>
 				</div>
 			</div>
 		</div>
-		<div class="schema-table-wrapper col-9 overflow-auto">
+		<div class="table-tabs-wrapper col-9 pl-3">
+			<p-tabview v-model:active-index="pm.tableTabs.activeIndex" :scrollable="true" @tab-change="onTableTabChange" @tab-click="onTableTabClick">
+				<p-tabpanel v-for="tab in pm.tableTabs.items" :key="tab.id" :header="tab.title" :id="tab.id">
+					<div :id="tab.id"></div>
+				</p-tabpanel>
+			</p-tabview>
 		</div>
 	</div>
 </div>
@@ -55,47 +60,6 @@
 <script>
 (function(po)
 {
-	po.vuePageModel(
-	{
-		searchForm:{ keyword: "" },
-		searchType: "schema",
-		loadingSchema: false,
-		schemaNodes: null,
-		selectedNodes: null
-	});
-
-	po.vueReactive("schemaOptItems",
-	[
-		{
-			label: "<@spring.message code='edit' />"
-		},
-		{
-			label: "<@spring.message code='delete' />"
-		},
-		{
-			label: "<@spring.message code='view' />"
-		},
-		{
-			label: "<@spring.message code='refresh' />"
-		},
-		{
-			label: "<@spring.message code='reload' />"
-		},
-		{
-			label: "<@spring.message code='autherization' />"
-		},
-		{ separator: true },
-		{
-			label: "<@spring.message code='module.sqlpad' />"
-		},
-		{
-			label: "<@spring.message code='module.importData' />"
-		},
-		{
-			label: "<@spring.message code='module.exportData' />"
-		}
-	]);
-	
 	po.loadSchemaNodes = function()
 	{
 		var pm = po.vuePageModel();
@@ -173,13 +137,9 @@
 	{
 		var pm = po.vuePageModel();
 		var schemaNodes = (pm.schemaNodes || []);
-		for(var i=0; i<schemaNodes.length; i++)
-		{
-			if(schemaNodes[i].schemaId == schemaId)
-				return schemaNodes[i];
-		}
+		var idx = $.inArrayById(schemaNodes, schemaId, "schemaId");
 		
-		return null;
+		return (idx > -1 ? schemaNodes[idx] : null);
 	};
 	
 	po.tablePagingDataToNodes = function(schemaId, pagingData)
@@ -195,7 +155,8 @@
 				icon: "pi pi-table",
 				leaf: true,
 				dataType: "table",
-				schemaId: schemaId
+				schemaId: schemaId,
+				tableName: table.name
 			});
 		});
 		
@@ -220,8 +181,133 @@
 		return re;
 	};
 	
+	po.showSchemaTableTab = function(schemaId, tableName)
+	{
+		var pm = po.vuePageModel();
+		
+		var idx = po.getSchemaTableTabIndex(schemaId, tableName);
+		if(idx > -1)
+			pm.tableTabs.activeIndex = idx;
+		else
+		{
+			var tabId = po.schemaTableTabId(schemaId, tableName);
+			
+			pm.tableTabs.items.push(
+			{
+				id: tabId,
+				title: tableName,
+				schemaId: schemaId,
+				tableName: tableName
+			});
+			
+			pm.tableTabs.activeIndex = pm.tableTabs.items.length - 1;
+		}
+	};
+	
+	po.loadSchemaTableTab = function(schemaId, tableName)
+	{
+		var tabId = po.schemaTableTabId(schemaId, tableName);
+		var panel = po.elementOfId(tabId);
+		
+		if(panel.prop("loaded") !== true && panel.prop("loading") !== true)
+		{
+			panel.prop("loading", true);
+			panel.empty();
+			
+			po.open("/analysisProject/pagingQuery",
+			{
+				target: panel,
+				dialog: false,
+				success: function()
+				{
+					panel.prop("loaded", true);
+					panel.prop("loading", false);
+				}
+			});
+		}
+	};
+	
+	po.toSchemaTableUrl = function(schemaId, tableName)
+	{
+		return po.concatContextPath("/schema/"+schemaId+"/"+encodeURIComponent(tableName)+"/query");
+	};
+	
+	po.getSchemaTableTabIndex = function(schemaId, tableName)
+	{
+		var pm = po.vuePageModel();
+		var items = pm.tableTabs.items;
+		
+		return $.inArrayById(items, po.schemaTableTabId(schemaId, tableName));
+	};
+	
+	po.schemaTableTabId = function(schemaId, tableName)
+	{
+		var map = (po.tableTabIdMap || (po.tableTabIdMap = {}));
+		
+		//不直接使用tableName作为元素ID，因为name中可能存在与jquery冲突的字符，比如'$'
+		var key = (schemaId + tableName);
+		var value = map[key];
+		
+		if(value == null)
+		{
+			value = $.uid("schemaTableTab");
+			map[key] = value;
+		}
+		
+		return value;
+	};
+	
+	po.vuePageModel(
+	{
+		searchForm:{ keyword: "" },
+		searchType: "schema",
+		loadingSchema: false,
+		schemaNodes: null,
+		selectedNodes: null,
+		tableTabs:
+		{
+			items: [],
+			activeIndex: 0
+		},
+		schemaOptItems:
+		[
+			{
+				label: "<@spring.message code='edit' />"
+			},
+			{
+				label: "<@spring.message code='delete' />"
+			},
+			{
+				label: "<@spring.message code='view' />"
+			},
+			{
+				label: "<@spring.message code='refresh' />"
+			},
+			{
+				label: "<@spring.message code='reload' />"
+			},
+			{
+				label: "<@spring.message code='autherization' />"
+			},
+			{ separator: true },
+			{
+				label: "<@spring.message code='module.sqlpad' />"
+			},
+			{
+				label: "<@spring.message code='module.importData' />"
+			},
+			{
+				label: "<@spring.message code='module.exportData' />"
+			}
+		]
+	});
+	
 	po.vueMethod(
 	{
+		toSchemaTableUrl: function(tab)
+		{
+			return po.toSchemaTableUrl(tab.schemaId, tab.tableName);
+		},
 		onSearch: function()
 		{
 			var pm = po.vuePageModel();
@@ -231,6 +317,7 @@
 			else if(pm.searchType == "table")
 				po.loadSchemaNodes();
 		},
+		
 		onSchemaNodeExpand: function(node)
 		{
 			if(node.children == null)
@@ -238,14 +325,24 @@
 				po.loadTableNodes(node);
 			}
 		},
-		ononSchemaNodeSelect: function(node)
+		
+		onSchemaNodeSelect: function(node)
 		{
 			if(node.dataType == "loadMore")
 			{
 				var mySchemaNode = po.findSchemaNode(node.schemaId);
 				po.loadTableNodes(mySchemaNode, node.nextPage);
 			}
+			else if(node.dataType == "table")
+			{
+				po.showSchemaTableTab(node.schemaId, node.tableName);
+			}
 		},
+		
+		onTableTabChange: function(e){},
+		
+		onTableTabClick: function(e){},
+		
 		onAdd: function()
 		{
 			po.handleAddAction("/schema/add");
@@ -265,6 +362,18 @@
 		{
 			po.handleDeleteAction("/schema/delete");
 		}
+	});
+	
+	po.vueWatch(po.vuePageModel().tableTabs, function(oldVal, newVal)
+	{
+		var items = newVal.items;
+		var activeIndex = newVal.activeIndex;
+		var activeTab = items[activeIndex];
+		
+		po.vueApp().$nextTick(function()
+		{
+			po.loadSchemaTableTab(activeTab.schemaId, activeTab.tableName);
+		});
 	});
 	
 	po.vueMounted(function()
