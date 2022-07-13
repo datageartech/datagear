@@ -52,21 +52,23 @@
 			</div>
 		</div>
 		<div class="table-tabs-wrapper col-9 pl-3">
-			<p-tabview v-model:active-index="pm.tableTabs.activeIndex" :scrollable="true" @tab-change="onTableTabChange" @tab-click="onTableTabClick" class="contextmenu-tabview">
+			<p-tabview v-model:active-index="pm.tableTabs.activeIndex" :scrollable="true" @tab-change="onTableTabChange"
+				@tab-click="onTableTabClick" class="contextmenu-tabview" :class="{'opacity-0': pm.tableTabs.items.length == 0}">
 				<p-tabpanel v-for="tab in pm.tableTabs.items" :key="tab.id" :header="tab.title" :id="tab.id">
 					<template #header>
 						<p-button type="button" icon="pi pi-angle-down" class="context-menu-btn p-button-secondary p-button-text p-button-rounded"
-							@click="onTableTabMenuToggle" aria-haspopup="true" aria-controls="${pid}-tableTabMenu">
+							@click="onTableTabMenuToggle($event, tab.id)" aria-haspopup="true" aria-controls="${pid}-tableTabMenu">
 						</p-button>
 					</template>
 					<div :id="tab.id"></div>
 				</p-tabpanel>
 			</p-tabview>
-			<p-contextmenu id="${pid}-tableTabMenu" ref="tableTabMenuEle" :model="pm.tableTabMenuItems" :popup="true"></p-contextmenu>
+			<p-contextmenu id="${pid}-tableTabMenu" ref="tableTabMenuEle" :model="pm.tableTabMenuItems" :popup="true" class="text-sm"></p-contextmenu>
 		</div>
 	</div>
 </div>
 <#include "../include/page_table.ftl">
+<#include "../include/page_tabview.ftl">
 <script>
 (function(po)
 {
@@ -242,7 +244,8 @@
 				id: tabId,
 				title: tableName,
 				schemaId: schemaId,
-				tableName: tableName
+				tableName: tableName,
+				url: po.toSchemaTableUrl(schemaId, tableName)
 			});
 			
 			//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
@@ -278,7 +281,7 @@
 	
 	po.toSchemaTableUrl = function(schemaId, tableName)
 	{
-		return po.concatContextPath("/data/"+schemaId+"/"+encodeURIComponent(tableName)+"/query");
+		return po.concatContextPath("/data/"+schemaId+"/"+encodeURIComponent(tableName)+"/pagingQuery");
 	};
 	
 	po.getSchemaTableTabIndex = function(schemaId, tableName)
@@ -352,19 +355,47 @@
 		tableTabMenuItems:
 		[
 			{
-				label: "<@spring.message code='close' />"
+				label: "<@spring.message code='close' />",
+				command: function()
+				{
+					po.tabviewClose(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+				}
 			},
 			{
-				label: "<@spring.message code='closeOther' />"
+				label: "<@spring.message code='closeOther' />",
+				command: function()
+				{
+					po.tabviewCloseOther(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+				}
 			},
 			{
-				label: "<@spring.message code='closeRight' />"
+				label: "<@spring.message code='closeRight' />",
+				command: function()
+				{
+					po.tabviewCloseRight(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+				}
 			},
 			{
-				label: "<@spring.message code='closeLeft' />"
+				label: "<@spring.message code='closeLeft' />",
+				command: function()
+				{
+					po.tabviewCloseLeft(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+				}
 			},
 			{
-				label: "<@spring.message code='closeAll' />"
+				label: "<@spring.message code='closeAll' />",
+				command: function()
+				{
+					po.tabviewCloseAll(po.vuePageModel().tableTabs);
+				}
+			},
+			{ separator: true },
+			{
+				label: "<@spring.message code='openInNewWindow' />",
+				command: function()
+				{
+					po.tabviewOpenInNewWindow(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+				}
 			}
 		]
 	});
@@ -373,10 +404,6 @@
 	
 	po.vueMethod(
 	{
-		toSchemaTableUrl: function(tab)
-		{
-			return po.toSchemaTableUrl(tab.schemaId, tab.tableName);
-		},
 		onSearch: function()
 		{
 			var pm = po.vuePageModel();
@@ -424,8 +451,9 @@
 			pm.searchType = (pm.searchType == "schema" ? "table" : "schema");
 		},
 		
-		onTableTabMenuToggle: function(e)
+		onTableTabMenuToggle: function(e, tableTabId)
 		{
+			po.tableTabMenuTargetId = tableTabId;
 			po.vueRef("tableTabMenuEle").show(e);
 		},
 		
@@ -457,10 +485,13 @@
 		var activeIndex = newVal.activeIndex;
 		var activeTab = items[activeIndex];
 		
-		po.vueApp().$nextTick(function()
+		if(activeTab)
 		{
-			po.loadSchemaTableTab(activeTab.schemaId, activeTab.tableName);
-		});
+			po.vueApp().$nextTick(function()
+			{
+				po.loadSchemaTableTab(activeTab.schemaId, activeTab.tableName);
+			});
+		}
 	});
 	
 	po.vueMounted(function()

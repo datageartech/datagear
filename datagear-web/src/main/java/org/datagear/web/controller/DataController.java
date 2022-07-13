@@ -190,8 +190,8 @@ public class DataController extends AbstractSchemaConnTableController
 		this._objectMapperForBigNumberToString = this.objectMapperBuilder.buildForBigNumberToString();
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/query")
-	public String query(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping("/{schemaId}/{tableName}/pagingQuery")
+	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
@@ -218,8 +218,8 @@ public class DataController extends AbstractSchemaConnTableController
 		return "/data/data_table";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/queryData", produces = CONTENT_TYPE_JSON)
-	public void queryData(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping(value = "/{schemaId}/{tableName}/pagingQueryData", produces = CONTENT_TYPE_JSON)
+	public void pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName, @RequestBody(required = false) PagingQuery paramData)
 			throws Throwable

@@ -61,7 +61,7 @@
 			dbTable: dbTable
 		});
 		
-		po.setupAjaxTable(po.dataUrl("queryData"),
+		po.setupAjaxTable(po.dataUrl("pagingQueryData"),
 		{
 			multiSortMeta: []
 		});

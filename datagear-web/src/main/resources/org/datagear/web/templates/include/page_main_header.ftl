@@ -144,31 +144,17 @@ User currentUser
 					}
 				},
 				{
-					label: "<@spring.message code='module.changeTheme.green' />",
-					command: function(e)
-					{
-						po.changeTheme("${Themes.GREEN}");
-					}
-				},
-				{
-					label: "<@spring.message code='module.changeTheme.purple' />",
-					command: function(e)
-					{
-						po.changeTheme("${Themes.PURPLE}");
-					}
-				},
-				{
-					label: "<@spring.message code='module.changeTheme.orange' />",
-					command: function(e)
-					{
-						po.changeTheme("${Themes.ORANGE}");
-					}
-				},
-				{
 					label: "<@spring.message code='module.changeTheme.blueDark' />",
 					command: function(e)
 					{
 						po.changeTheme("${Themes.BLUE_DARK}");
+					}
+				},
+				{
+					label: "<@spring.message code='module.changeTheme.green' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.GREEN}");
 					}
 				},
 				{
@@ -179,10 +165,24 @@ User currentUser
 					}
 				},
 				{
+					label: "<@spring.message code='module.changeTheme.purple' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.PURPLE}");
+					}
+				},
+				{
 					label: "<@spring.message code='module.changeTheme.purpleDark' />",
 					command: function(e)
 					{
 						po.changeTheme("${Themes.PURPLE_DARK}");
+					}
+				},
+				{
+					label: "<@spring.message code='module.changeTheme.orange' />",
+					command: function(e)
+					{
+						po.changeTheme("${Themes.ORANGE}");
 					}
 				},
 				{
