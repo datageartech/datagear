@@ -160,11 +160,10 @@ String action
 	po.executeOnSelect = function(callback)
 	{
 		var pm = po.vuePageModel();
-		var selectedItems = po.vueRaw(pm.selectedItems);
 		//selectionMode单选模式时selectedItems不是数组
-		selectedItems = (!selectedItems || $.isArray(selectedItems) ? selectedItems : [selectedItems]);
+		var selectedItems = $.wrapAsArray(po.vueRaw(pm.selectedItems));
 		
-		if(!selectedItems || selectedItems.length != 1)
+		if(selectedItems.length != 1)
 		{
 			$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
 			return;
@@ -177,9 +176,9 @@ String action
 	po.executeOnSelects = function(callback)
 	{
 		var pm = po.vuePageModel();
-		var selectedItems = po.vueRaw(pm.selectedItems);
+		var selectedItems = $.wrapAsArray(po.vueRaw(pm.selectedItems));
 		
-		if(!selectedItems || selectedItems.length < 1)
+		if(selectedItems.length < 1)
 		{
 			$.tipInfo("<@spring.message code='pleaseSelectAtLeastOneRow' />");
 			return;

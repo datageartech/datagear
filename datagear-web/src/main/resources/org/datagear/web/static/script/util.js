@@ -483,6 +483,17 @@
 	};
 	
 	/**
+	 * 包装成数组。
+	 */
+	$.wrapAsArray = function(obj)
+	{
+		if(obj == null)
+			return [];
+		
+		return ($.isArray(obj) ? obj : [ obj ]);
+	};
+	
+	/**
 	 * 生成一个唯一ID
 	 * 
 	 * @param prefix 可选，前缀

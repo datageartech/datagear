@@ -28,8 +28,12 @@
 						<div class="col">
 							<form @submit.prevent="onSearch" class="py-1">
 								<div class="p-inputgroup">
+									<p-button type="button" :icon="pm.searchType=='schema' ? 'pi pi-database' : 'pi pi-table'"
+										class="p-button-secondary" @click="onToggleSearchType(e)"
+										title="<@spring.message code='switchSearchMode' />">
+									</p-button>
 									<p-inputtext type="text" v-model="pm.searchForm.keyword"></p-inputtext>
-									<p-button type="submit" icon="pi pi-search" />
+									<p-button type="submit" icon="pi pi-search"></p-button>
 								</div>
 							</form>
 						</div>
@@ -40,7 +44,7 @@
 				</div>
 				<div class="page-content flex-grow-1 p-0">
 					<p-tree :value="pm.schemaNodes"
-						selection-mode="multiple" v-model:selection-keys="pm.selectedNodes"
+						selection-mode="multiple" v-model:selection-keys="pm.selectedNodeKeys"
 						@node-expand="onSchemaNodeExpand" @node-select="onSchemaNodeSelect"
 						:loading="pm.loadingSchema" class="schema-tree h-full overflow-auto">
 					</p-tree>
@@ -84,13 +88,16 @@
 	{
 		page = (page == null ? 1 : page);
 		
+		if(!schemaNode)
+			return;
+		
 		var pm = po.vuePageModel();
 		var keyword = pm.searchForm.keyword;
 		
 		pm.loadingSchema = true;
 		$.ajaxJson(po.concatContextPath("/schema/"+schemaNode.schemaId+"/pagingQueryTable"),
 		{
-			data: { keyword: "", pageSize: 100, page: page },
+			data: { keyword: keyword, pageSize: 100, page: page },
 			success: function(response)
 			{
 				var loadedNodes = po.tablePagingDataToNodes(schemaNode.schemaId, response);
@@ -111,6 +118,31 @@
 				pm.loadingSchema = false;
 			}
 		});
+	};
+	
+	po.evalSchemaNodeForLoadTable = function(schemaNode)
+	{
+		if(schemaNode != null)
+			return schemaNode;
+		
+		var pm = po.vuePageModel();
+		var schemaNodes = (pm.schemaNodes || []);
+		var selectedNodeKeys = po.vueRaw(pm.selectedNodeKeys);
+		
+		if(!selectedNodeKeys)
+			return null;
+		
+		for(var i=0; i<schemaNodes.length; i++)
+		{
+			var schemaId = schemaNodes[i].schemaId;
+			for(var selectedKey in selectedNodeKeys)
+			{
+				if(selectedKey == schemaId || selectedKey.indexOf(schemaId) == 0)
+					return schemaNodes[i];
+			}
+		}
+		
+		return null;
 	};
 	
 	po.schemasToNodes = function(schemas)
@@ -150,7 +182,7 @@
 		{
 			re.push(
 			{
-				key: table.name,
+				key: schemaId + "-" + table.name,
 				label: table.name,
 				icon: "pi pi-table",
 				leaf: true,
@@ -267,7 +299,7 @@
 		searchType: "schema",
 		loadingSchema: false,
 		schemaNodes: null,
-		selectedNodes: null,
+		selectedNodeKeys: null,
 		tableTabs:
 		{
 			items: [],
@@ -319,7 +351,13 @@
 			if(pm.searchType == "schema")
 				po.loadSchemaNodes();
 			else if(pm.searchType == "table")
-				po.loadSchemaNodes();
+			{
+				var schemaNode = po.evalSchemaNodeForLoadTable();
+				if(!schemaNode)
+					$.tipInfo("<@spring.message code='pleaseSelectSchemaForSearchTable' />");
+				else
+					po.loadTableNodes(schemaNode);
+			}
 		},
 		
 		onSchemaNodeExpand: function(node)
@@ -346,6 +384,12 @@
 		onTableTabChange: function(e){},
 		
 		onTableTabClick: function(e){},
+		
+		onToggleSearchType: function(e)
+		{
+			var pm = po.vuePageModel();
+			pm.searchType = (pm.searchType == "schema" ? "table" : "schema");
+		},
 		
 		onAdd: function()
 		{

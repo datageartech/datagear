@@ -13,7 +13,7 @@
 <form @submit.prevent="onSearchFormSubmit" class="py-1">
 	<div class="p-inputgroup">
 		<p-inputtext type="text" v-model="pm.searchForm.keyword"></p-inputtext>
-		<p-button type="submit" icon="pi pi-search" />
+		<p-button type="submit" icon="pi pi-search"></p-button>
 	</div>
 </form>
 <script>
