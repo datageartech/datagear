@@ -32,6 +32,19 @@
 	text-decoration: none;
 }
 
+/*带更多菜单按钮的tabview*/
+.p-tabview.contextmenu-tabview .p-tabview-nav-container .p-tabview-nav-link{
+	padding-right: 2rem;
+}
+.p-tabview.contextmenu-tabview .p-tabview-nav-container .context-menu-btn{
+	position: absolute;
+	right: 0.2rem;
+	font-size: .75rem !important;
+	width: 1.5rem !important;
+	height: 1.5rem !important;
+	padding: 0.3rem 0.3rem !important;
+}
+
 /*竖向tabmenu*/
 .p-tabmenu.vertical-tabmenu{
 	display: inline-block;

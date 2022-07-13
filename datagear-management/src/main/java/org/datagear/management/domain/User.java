@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
+import org.datagear.util.StringUtil;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -163,20 +164,7 @@ public class User extends AbstractStringIdEntity implements CloneableEntity
 	 */
 	public String getNameLabel()
 	{
-		String nameLabel = "";
-
-		if (this.realName != null && !this.realName.isEmpty())
-			nameLabel += this.realName;
-
-		if (this.name != null && !this.name.isEmpty())
-		{
-			if (nameLabel.isEmpty())
-				nameLabel = this.name;
-			else
-				nameLabel = nameLabel + "(" + this.name + ")";
-		}
-
-		return nameLabel;
+		return (StringUtil.isEmpty(this.realName) ? this.name : this.realName);
 	}
 
 	@Override

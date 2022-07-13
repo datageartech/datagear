@@ -52,11 +52,17 @@
 			</div>
 		</div>
 		<div class="table-tabs-wrapper col-9 pl-3">
-			<p-tabview v-model:active-index="pm.tableTabs.activeIndex" :scrollable="true" @tab-change="onTableTabChange" @tab-click="onTableTabClick">
+			<p-tabview v-model:active-index="pm.tableTabs.activeIndex" :scrollable="true" @tab-change="onTableTabChange" @tab-click="onTableTabClick" class="contextmenu-tabview">
 				<p-tabpanel v-for="tab in pm.tableTabs.items" :key="tab.id" :header="tab.title" :id="tab.id">
+					<template #header>
+						<p-button type="button" icon="pi pi-angle-down" class="context-menu-btn p-button-secondary p-button-text p-button-rounded"
+							@click="onTableTabMenuToggle" aria-haspopup="true" aria-controls="${pid}-tableTabMenu">
+						</p-button>
+					</template>
 					<div :id="tab.id"></div>
 				</p-tabpanel>
 			</p-tabview>
+			<p-contextmenu id="${pid}-tableTabMenu" ref="tableTabMenuEle" :model="pm.tableTabMenuItems" :popup="true"></p-contextmenu>
 		</div>
 	</div>
 </div>
@@ -64,6 +70,8 @@
 <script>
 (function(po)
 {
+	po.currentUserId = "${currentUser.id}";
+	
 	po.loadSchemaNodes = function()
 	{
 		var pm = po.vuePageModel();
@@ -151,10 +159,15 @@
 		
 		schemas.forEach(function(schema)
 		{
+			var label = schema.title;
+			
+			if(schema.createUser && schema.createUser.id != po.currentUserId)
+				label += " ("+schema.createUser.nameLabel+")";
+			
 			re.push(
 			{
 				key: schema.id,
-				label: schema.title,
+				label: label,
 				icon: "pi pi-database",
 				leaf: false,
 				dataType: "schema",
@@ -335,8 +348,28 @@
 			{
 				label: "<@spring.message code='module.exportData' />"
 			}
+		],
+		tableTabMenuItems:
+		[
+			{
+				label: "<@spring.message code='close' />"
+			},
+			{
+				label: "<@spring.message code='closeOther' />"
+			},
+			{
+				label: "<@spring.message code='closeRight' />"
+			},
+			{
+				label: "<@spring.message code='closeLeft' />"
+			},
+			{
+				label: "<@spring.message code='closeAll' />"
+			}
 		]
 	});
+	
+	po.vueRef("tableTabMenuEle", null);
 	
 	po.vueMethod(
 	{
@@ -389,6 +422,11 @@
 		{
 			var pm = po.vuePageModel();
 			pm.searchType = (pm.searchType == "schema" ? "table" : "schema");
+		},
+		
+		onTableTabMenuToggle: function(e)
+		{
+			po.vueRef("tableTabMenuEle").show(e);
 		},
 		
 		onAdd: function()
