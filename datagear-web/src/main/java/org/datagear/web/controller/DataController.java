@@ -195,7 +195,7 @@ public class DataController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -207,15 +207,15 @@ public class DataController extends AbstractSchemaConnTableController
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
-				springModel.addAttribute(KEY_TITLE_DISPLAY_DESC, table.getComment());
 				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 				springModel.addAttribute("readonly", table.isReadonly());
+
+				springModel.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 				setGridPageAttributes(request, response, springModel, schema, table, dialect);
 			}
 		}.execute();
 
-		return "/data/data_grid";
+		return "/data/data_table";
 	}
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/queryData", produces = CONTENT_TYPE_JSON)
@@ -224,7 +224,7 @@ public class DataController extends AbstractSchemaConnTableController
 			@PathVariable("tableName") String tableName, @RequestBody(required = false) PagingQuery paramData)
 			throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, paramData);
 
 		final DefaultLOBRowMapper rowMapper = buildQueryDefaultLOBRowMapper();

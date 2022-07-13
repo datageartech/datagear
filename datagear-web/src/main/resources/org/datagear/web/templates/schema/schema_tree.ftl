@@ -200,7 +200,11 @@
 				tableName: tableName
 			});
 			
-			pm.tableTabs.activeIndex = pm.tableTabs.items.length - 1;
+			//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
+			po.vueApp().$nextTick(function()
+			{
+				pm.tableTabs.activeIndex = pm.tableTabs.items.length - 1;
+			});
 		}
 	};
 	
@@ -214,7 +218,7 @@
 			panel.prop("loading", true);
 			panel.empty();
 			
-			po.open("/analysisProject/pagingQuery",
+			po.open(po.toSchemaTableUrl(schemaId, tableName),
 			{
 				target: panel,
 				dialog: false,
@@ -229,7 +233,7 @@
 	
 	po.toSchemaTableUrl = function(schemaId, tableName)
 	{
-		return po.concatContextPath("/schema/"+schemaId+"/"+encodeURIComponent(tableName)+"/query");
+		return po.concatContextPath("/data/"+schemaId+"/"+encodeURIComponent(tableName)+"/query");
 	};
 	
 	po.getSchemaTableTabIndex = function(schemaId, tableName)
@@ -364,6 +368,7 @@
 		}
 	});
 	
+	//po.showSchemaTableTab()里不能里可获取到创建的DOM元素，所以采用此方案
 	po.vueWatch(po.vuePageModel().tableTabs, function(oldVal, newVal)
 	{
 		var items = newVal.items;
