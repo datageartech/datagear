@@ -10,11 +10,11 @@ package org.datagear.web.json.jackson;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.datagear.analysis.support.JsonSupport;
 
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -27,10 +27,18 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  */
 public class ObjectMapperBuilder
 {
-	private List<JsonSerializerConfig> jsonSerializerConfigs;
+	private final List<JsonSerializerConfig> jsonSerializerConfigs = new ArrayList<JsonSerializerConfig>();
+
+	private final List<JsonDeserializerConfig> jsonDeserializerConfigs = new ArrayList<JsonDeserializerConfig>();
 
 	public ObjectMapperBuilder()
 	{
+	}
+
+	public ObjectMapperBuilder(ObjectMapperBuilder builder)
+	{
+		this.jsonSerializerConfigs.addAll(builder.getJsonSerializerConfigs());
+		this.jsonDeserializerConfigs.addAll(builder.getJsonDeserializerConfigs());
 	}
 
 	public List<JsonSerializerConfig> getJsonSerializerConfigs()
@@ -38,9 +46,19 @@ public class ObjectMapperBuilder
 		return jsonSerializerConfigs;
 	}
 
-	public void setJsonSerializerConfigs(List<JsonSerializerConfig> jsonSerializerConfigs)
+	public List<JsonDeserializerConfig> getJsonDeserializerConfigs()
 	{
-		this.jsonSerializerConfigs = jsonSerializerConfigs;
+		return jsonDeserializerConfigs;
+	}
+
+	public void addJsonSerializer(Class<?> type, JsonSerializer<?> serializer)
+	{
+		this.jsonSerializerConfigs.add(JsonSerializerConfig.valueOf(type, serializer));
+	}
+
+	public void addJsonDeserializer(Class<?> type, JsonDeserializer<?> deserializer)
+	{
+		this.jsonDeserializerConfigs.add(JsonDeserializerConfig.valueOf(type, deserializer));
 	}
 
 	/**
@@ -48,16 +66,25 @@ public class ObjectMapperBuilder
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public ObjectMapper build()
 	{
 		ObjectMapper objectMapper = JsonSupport.create();
 		JsonSupport.setWriteJsonFeatures(objectMapper);
 		JsonSupport.setReadNonStandardJsonFeatures(objectMapper);
 
-		List<JsonSerializerConfig> configs = (this.jsonSerializerConfigs != null ? this.jsonSerializerConfigs
-				: Collections.emptyList());
+		String moduleName = ObjectMapperBuilder.class.getSimpleName();
+		SimpleModule module = new SimpleModule(moduleName);
 
-		return build(configs);
+		for (JsonSerializerConfig sc : this.jsonSerializerConfigs)
+			module.addSerializer((Class<Object>) sc.getType(), (JsonSerializer<Object>) sc.getSerializer());
+
+		for (JsonDeserializerConfig dc : this.jsonDeserializerConfigs)
+			module.addDeserializer((Class<Object>) dc.getType(), (JsonDeserializer<Object>) dc.getDeserializer());
+
+		objectMapper.registerModule(module);
+
+		return objectMapper;
 	}
 
 	/**
@@ -77,86 +104,98 @@ public class ObjectMapperBuilder
 	 */
 	public ObjectMapper buildForBigNumberToString()
 	{
-		ObjectMapper objectMapper = JsonSupport.create();
-		JsonSupport.setWriteJsonFeatures(objectMapper);
-		JsonSupport.setReadNonStandardJsonFeatures(objectMapper);
-
-		List<JsonSerializerConfig> configs = new ArrayList<JsonSerializerConfig>();
-
-		if (this.jsonSerializerConfigs != null)
-			configs.addAll(this.jsonSerializerConfigs);
+		ObjectMapperBuilder builder = new ObjectMapperBuilder(this);
 		
-		configs.add(JsonSerializerConfig.valueOf(Long.class, new LongToStringSerializer()));
-		configs.add(JsonSerializerConfig.valueOf(BigInteger.class, new BigIntegerToStringSerializer()));
-		configs.add(JsonSerializerConfig.valueOf(BigDecimal.class, new BigDecimalToStringSerializer()));
+		builder.addJsonSerializer(Long.class, new LongToStringSerializer());
+		builder.addJsonSerializer(BigInteger.class, new BigIntegerToStringSerializer());
+		builder.addJsonSerializer(BigDecimal.class, new BigDecimalToStringSerializer());
 
-		return build(configs);
+		return builder.build();
 	}
 
-	protected ObjectMapper build(List<JsonSerializerConfig> configs)
+	protected static class JsonSerializerConfig
 	{
-		ObjectMapper objectMapper = JsonSupport.create();
-		JsonSupport.setWriteJsonFeatures(objectMapper);
-		JsonSupport.setReadNonStandardJsonFeatures(objectMapper);
-
-		String moduleName = ObjectMapperBuilder.class.getSimpleName();
-
-		addSerializer(objectMapper, moduleName, configs);
-
-		return objectMapper;
-	}
-
-	@SuppressWarnings("unchecked")
-	protected void addSerializer(ObjectMapper objectMapper, String moduleName, List<JsonSerializerConfig> configs)
-	{
-		SimpleModule module = new SimpleModule(moduleName);
-
-		for (JsonSerializerConfig sc : configs)
-			module.addSerializer(sc.getSerializeType(), (JsonSerializer<Object>) sc.getJsonSerializer());
-
-		objectMapper.registerModule(module);
-	}
-
-	public static class JsonSerializerConfig
-	{
-		private Class<?> serializeType;
-		private JsonSerializer<?> jsonSerializer;
+		private Class<?> type;
+		private JsonSerializer<?> serializer;
 
 		public JsonSerializerConfig()
 		{
 			super();
 		}
 
-		public JsonSerializerConfig(Class<?> serializeType, JsonSerializer<?> jsonSerializer)
+		public JsonSerializerConfig(Class<?> type, JsonSerializer<?> serializer)
 		{
 			super();
-			this.serializeType = serializeType;
-			this.jsonSerializer = jsonSerializer;
+			this.type = type;
+			this.serializer = serializer;
 		}
 
-		public Class<?> getSerializeType()
+		public Class<?> getType()
 		{
-			return serializeType;
+			return type;
 		}
 
-		public void setSerializeType(Class<?> serializeType)
+		public void setType(Class<?> type)
 		{
-			this.serializeType = serializeType;
+			this.type = type;
 		}
 
-		public JsonSerializer<?> getJsonSerializer()
+		public JsonSerializer<?> getSerializer()
 		{
-			return jsonSerializer;
+			return serializer;
 		}
 
-		public void setJsonSerializer(JsonSerializer<?> jsonSerializer)
+		public void setSerializer(JsonSerializer<?> serializer)
 		{
-			this.jsonSerializer = jsonSerializer;
+			this.serializer = serializer;
 		}
 
-		public static JsonSerializerConfig valueOf(Class<?> serializeType, JsonSerializer<?> jsonSerializer)
+		public static JsonSerializerConfig valueOf(Class<?> type, JsonSerializer<?> serializer)
 		{
-			return new JsonSerializerConfig(serializeType, jsonSerializer);
+			return new JsonSerializerConfig(type, serializer);
+		}
+	}
+
+	protected static class JsonDeserializerConfig
+	{
+		private Class<?> type;
+		private JsonDeserializer<?> deserializer;
+
+		public JsonDeserializerConfig()
+		{
+			super();
+		}
+
+		public JsonDeserializerConfig(Class<?> type, JsonDeserializer<?> deserializer)
+		{
+			super();
+			this.type = type;
+			this.deserializer = deserializer;
+		}
+
+		public Class<?> getType()
+		{
+			return type;
+		}
+
+		public void setType(Class<?> type)
+		{
+			this.type = type;
+		}
+
+		public JsonDeserializer<?> getDeserializer()
+		{
+			return deserializer;
+		}
+
+		public void setDeserializer(JsonDeserializer<?> deserializer)
+		{
+			this.deserializer = deserializer;
+		}
+
+		public static JsonDeserializerConfig valueOf(Class<?> type, JsonDeserializer<?> deserializer)
+		{
+			return new JsonDeserializerConfig(type, deserializer);
 		}
 	}
 }

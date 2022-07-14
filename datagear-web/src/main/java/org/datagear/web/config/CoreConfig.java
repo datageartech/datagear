@@ -113,12 +113,9 @@ import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
 import org.datagear.web.format.SqlTimestampFormatter;
-import org.datagear.web.json.jackson.LocaleDateSerializer;
-import org.datagear.web.json.jackson.LocaleSqlDateSerializer;
-import org.datagear.web.json.jackson.LocaleSqlTimeSerializer;
-import org.datagear.web.json.jackson.LocaleSqlTimestampSerializer;
+import org.datagear.web.json.jackson.FormatterDeserializer;
+import org.datagear.web.json.jackson.FormatterSerializer;
 import org.datagear.web.json.jackson.ObjectMapperBuilder;
-import org.datagear.web.json.jackson.ObjectMapperBuilder.JsonSerializerConfig;
 import org.datagear.web.security.UserPasswordEncoderImpl;
 import org.datagear.web.sqlpad.SqlPermissionValidator;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
@@ -267,27 +264,34 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	{
 		ObjectMapperBuilder bean = new ObjectMapperBuilder();
 
-		LocaleSqlDateSerializer localeSqlDateSerializer = new LocaleSqlDateSerializer();
-		localeSqlDateSerializer.setSqlDateFormatter(this.sqlDateFormatter());
+		FormatterSerializer<java.sql.Date> sqlDateSerializer = new FormatterSerializer<java.sql.Date>(
+				this.sqlDateFormatter());
+		FormatterSerializer<java.sql.Time> sqlTimeSerializer = new FormatterSerializer<java.sql.Time>(
+				this.sqlTimeFormatter());
+		FormatterSerializer<java.sql.Timestamp> sqlTimestampSerializer = new FormatterSerializer<java.sql.Timestamp>(
+				this.sqlTimestampFormatter());
+		FormatterSerializer<java.util.Date> dateSerializer = new FormatterSerializer<java.util.Date>(
+				this.dateFormatter());
 
-		LocaleSqlTimeSerializer localeSqlTimeSerializer = new LocaleSqlTimeSerializer();
-		localeSqlTimeSerializer.setSqlTimeFormatter(this.sqlTimeFormatter());
+		bean.addJsonSerializer(java.sql.Date.class, sqlDateSerializer);
+		bean.addJsonSerializer(java.sql.Time.class, sqlTimeSerializer);
+		bean.addJsonSerializer(java.sql.Timestamp.class, sqlTimestampSerializer);
+		bean.addJsonSerializer(java.util.Date.class, dateSerializer);
 
-		LocaleSqlTimestampSerializer localeSqlTimestampSerializer = new LocaleSqlTimestampSerializer();
-		localeSqlTimestampSerializer.setSqlTimestampFormatter(this.sqlTimestampFormatter());
+		FormatterDeserializer<java.sql.Date> sqlDateDeserializer = new FormatterDeserializer<java.sql.Date>(
+				java.sql.Date.class, this.sqlDateFormatter());
+		FormatterDeserializer<java.sql.Time> sqlTimeDeserializer = new FormatterDeserializer<java.sql.Time>(
+				java.sql.Time.class, this.sqlTimeFormatter());
+		FormatterDeserializer<java.sql.Timestamp> sqlTimestampDeserializer = new FormatterDeserializer<java.sql.Timestamp>(
+				java.sql.Timestamp.class, this.sqlTimestampFormatter());
+		FormatterDeserializer<java.util.Date> dateDeserializer = new FormatterDeserializer<java.util.Date>(
+				java.sql.Timestamp.class, this.dateFormatter());
 
-		LocaleDateSerializer localeDateSerializer = new LocaleDateSerializer();
-		localeDateSerializer.setDateFormatter(this.dateFormatter());
+		bean.addJsonDeserializer(java.sql.Date.class, sqlDateDeserializer);
+		bean.addJsonDeserializer(java.sql.Time.class, sqlTimeDeserializer);
+		bean.addJsonDeserializer(java.sql.Timestamp.class, sqlTimestampDeserializer);
+		bean.addJsonDeserializer(java.util.Date.class, dateDeserializer);
 
-		List<JsonSerializerConfig> jsonSerializerConfigs = new ArrayList<>();
-
-		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Date.class, localeSqlDateSerializer));
-		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Time.class, localeSqlTimeSerializer));
-		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Timestamp.class, localeSqlTimestampSerializer));
-		jsonSerializerConfigs.add(new JsonSerializerConfig(java.util.Date.class, localeDateSerializer));
-
-		bean.setJsonSerializerConfigs(jsonSerializerConfigs);
-		
 		return bean;
 	}
 

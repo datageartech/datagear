@@ -309,7 +309,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 
 	/**
 	 * 如果{@linkplain CreateUserEntity#getCreateUser()}不为空，
-	 * 则使用{@linkplain UserService#getByIdNoPassword(String)}对其进行更新。
+	 * 则使用{@linkplain UserService#getByIdSimple(String)}对其进行更新。
 	 * 
 	 * @param entity
 	 *            允许为{@code null}
@@ -326,7 +326,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		String userId = (user == null ? null : user.getId());
 		
 		if(!StringUtil.isEmpty(userId))
-			entity.setCreateUser(service.getByIdNoPassword(userId));
+			entity.setCreateUser(service.getByIdSimple(userId));
 	}
 
 	/**

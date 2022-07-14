@@ -44,6 +44,14 @@ public interface UserService extends EntityService<String, User>
 	User getByIdNoPassword(String id);
 
 	/**
+	 * 根据ID获取用户基本信息，密码已被清除、且{@linkplain User#getRoles()}未设置。
+	 * 
+	 * @param id
+	 * @return
+	 */
+	User getByIdSimple(String id);
+
+	/**
 	 * 根据ID获取用户，其密码已被清除。
 	 * 
 	 * @param ids
