@@ -91,14 +91,9 @@ public class AnalysisProjectController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = WebUtils.getUser();
-
-		AnalysisProject analysisProject = this.analysisProjectService.getByIdForEdit(user, id);
-
-		if (analysisProject == null)
-			throw new RecordNotFoundException();
-
+		AnalysisProject analysisProject = getByIdForEdit(this.analysisProjectService, user, id);
+		
 		setFormModel(model, analysisProject, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
-
 		return "/analysisProject/analysisProject_form";
 	}
 
@@ -121,14 +116,9 @@ public class AnalysisProjectController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = WebUtils.getUser();
-
-		AnalysisProject analysisProject = this.analysisProjectService.getById(user, id);
-
-		if (analysisProject == null)
-			throw new RecordNotFoundException();
+		AnalysisProject analysisProject = getByIdForView(this.analysisProjectService, user, id);
 
 		setFormModel(model, analysisProject, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
-
 		return "/analysisProject/analysisProject_form";
 	}
 

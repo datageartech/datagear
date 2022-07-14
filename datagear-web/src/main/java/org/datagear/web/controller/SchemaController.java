@@ -106,19 +106,17 @@ public class SchemaController extends AbstractSchemaConnTableController
 			}
 		}
 
-		model.addAttribute("schema", schema);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.addSchema");
-		model.addAttribute(KEY_FORM_ACTION, "saveadd");
+		setFormModel(model, schema, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/schema/schema_form";
 	}
 
-	@RequestMapping(value = "/saveadd", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody Schema schema)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
@@ -129,28 +127,21 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		getSchemaService().add(user, schema);
 
-		return optMsgSaveSuccessResponseEntity(request, schema);
+		return operationSuccessResponseEntity(request, schema);
 	}
 
 	@RequestMapping("/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
-
-		Schema schema = getSchemaService().getByIdForEdit(user, id);
-
-		if (schema == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("schema", schema);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.editSchema");
-		model.addAttribute(KEY_FORM_ACTION, "saveedit");
-
+		User user = WebUtils.getUser();
+		Schema schema = getByIdForEdit(getSchemaService(), user, id);
+		
+		setFormModel(model, schema, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		return "/schema/schema_form";
 	}
 
-	@RequestMapping(value = "/saveedit", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody Schema schema)
@@ -158,7 +149,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		Schema old = getSchemaService().getById(schema.getId());
 
@@ -169,27 +160,19 @@ public class SchemaController extends AbstractSchemaConnTableController
 				&& (!schema.getUrl().equals(old.getUrl()) || !schema.getUser().equals(old.getUser())))
 			getTableCache().invalidate(schema.getId());
 
-		return optMsgSaveSuccessResponseEntity(request, schema);
+		return operationSuccessResponseEntity(request, schema);
 	}
 
 	@RequestMapping("/view")
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
-
-		Schema schema = getSchemaService().getById(user, id);
-
-		if (schema == null)
-			throw new RecordNotFoundException();
-
+		User user = WebUtils.getUser();
+		Schema schema = getByIdForView(getSchemaService(), user, id);
 		schema.clearPassword();
 
-		model.addAttribute("schema", schema);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.viewSchema");
-		model.addAttribute(KEY_READONLY, true);
-
-		return "/schema/schema_form";
+		setFormModel(model, schema, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
+		return "/analysisProject/analysisProject_form";
 	}
 
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
@@ -197,7 +180,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -210,7 +193,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 				getTableCache().invalidate(id);
 		}
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/query")
@@ -249,7 +232,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		if (!this.schemaGuardService.isPermitted(user, schema.getUrl()))
 			throw new SaveSchemaUrlPermissionDeniedException();
@@ -282,7 +265,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	{
 		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam, COOKIE_PAGINATION_SIZE);
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		pagingQuery.setOrders(Order.valueOf("title", Order.ASC));
 

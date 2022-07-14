@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.Authorization;
+import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
@@ -136,6 +137,28 @@ public abstract class AbstractController
 		this.conversionService = conversionService;
 	}
 
+	protected <ID, T extends DataPermissionEntity<ID>> T getByIdForEdit(DataPermissionEntityService<ID, T> service,
+			User user, ID id) throws RecordNotFoundException
+	{
+		T entity = service.getByIdForEdit(user, id);
+
+		if (entity == null)
+			throw new RecordNotFoundException();
+
+		return entity;
+	}
+
+	protected <ID, T extends DataPermissionEntity<ID>> T getByIdForView(DataPermissionEntityService<ID, T> service,
+			User user, ID id) throws RecordNotFoundException
+	{
+		T entity = service.getById(user, id);
+
+		if (entity == null)
+			throw new RecordNotFoundException();
+
+		return entity;
+	}
+
 	protected void setFormModel(Model model, Object formModel, String requestAction, String submitAction)
 	{
 		model.addAttribute(KEY_FORM_MODEL, formModel);
@@ -146,7 +169,7 @@ public abstract class AbstractController
 	protected boolean setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
 			AnalysisProjectService analysisProjectService, AnalysisProjectAwareEntity<?> entity)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		String analysisId = WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID);
 

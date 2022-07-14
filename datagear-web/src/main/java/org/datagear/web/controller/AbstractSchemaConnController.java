@@ -112,7 +112,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	protected Schema getSchemaForUserNotNull(HttpServletRequest request, HttpServletResponse response, String schemaId)
 			throws PermissionDeniedException, SchemaNotFoundException
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		Schema schema = this.schemaService.getById(user, schemaId);
 

@@ -87,36 +87,15 @@ String action
 	
 	po.inflateSubmitAction = function(action)
 	{
-		//po.trimSubmitActionData(action);
+		po.trimSubmitActionDataOfCreateUser(action);
 	};
 	
-	//将action.options.data没有在表单项中出现的属性删除
-	po.trimSubmitActionData = function(action)
+	po.trimSubmitActionDataOfCreateUser = function(action)
 	{
 		var data = action.options.data;
 		
-		if(!$.isTypeObject(data))
-			return;
-		
-		var form = po.form();
-		var inputs = $("input[name],textarea[name],select[name]", form);
-		var inputNames = {};
-		inputs.each(function()
-		{
-			let name = $(this).attr("name");
-			if(name)
-				inputNames[name] = true;
-		});
-		
-		var trimData = {};
-		
-		for(let p in data)
-		{
-			if(inputNames[p])
-				trimData[p] = data[p];
-		}
-		
-		action.options.data = trimData;
+		if(data && data.createUser)
+			data.createUser.nameLabel = undefined;
 	};
 	
 	po.defaultSubmitSuccessCallback = function(response, close)

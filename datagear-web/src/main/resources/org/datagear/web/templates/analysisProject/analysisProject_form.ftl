@@ -28,7 +28,6 @@
 		        	<p-inputtext id="${pid}name" v-model="pm.name" type="text" class="input w-full"
 		        		name="name" required maxlength="100" autofocus>
 		        	</p-inputtext>
-		        	<p-inputtext v-model="pm.id" name="id" type="hidden"></p-inputtext>
 		        </div>
 			</div>
 			<div class="field grid">
@@ -41,7 +40,7 @@
 			</div>
 		</div>
 		<div class="page-form-foot flex-grow-0 pt-3 text-center">
-			<p-button type="submit" label="<@spring.message code='save' />" />
+			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>
 </div>

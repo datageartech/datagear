@@ -150,7 +150,7 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 		if (user != null)
 			user.setRoles(null);
 
-		return null;
+		return user;
 	}
 
 	@Override
