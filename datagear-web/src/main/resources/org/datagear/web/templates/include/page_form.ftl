@@ -137,6 +137,21 @@ String action
 		minlength: $.validator.format("<@spring.message code='validation.minlength' />"),
 		integer: "<@spring.message code='validation.integer' />"
 	};
+	
+	po.handleOpenSelectAction = function(url, callback, options)
+	{
+		options = (options || {});
+		options = $.extend(
+		{
+			pageParam:
+			{
+				select: callback
+			}
+		},
+		options);
+		
+		po.open(url, options);
+	};
 })
 (${pageId});
 </script>

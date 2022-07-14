@@ -75,7 +75,9 @@
 			        	<p-inputtext id="${pid}driverEntity" v-model="pm.driverEntity.displayName" type="text" class="input w-10"
 			        		name="driverEntity.displayName" maxlength="200">
 			        	</p-inputtext>
-			        	<p-button type="button" label="<@spring.message code='select' />" class="p-button-secondary"></p-button>
+			        	<p-button type="button" label="<@spring.message code='select' />"
+			        		@click="onSelectDriverEntity"
+			        		class="p-button-secondary"></p-button>
 		        	</div>
 		        </div>
 			</div>
@@ -90,10 +92,37 @@
 (function(po)
 {
 	po.submitUrl = "/schema/"+po.submitAction;
-	po.formModel = <@writeJson var=formModel />;
-	po.formModel.driverEntity = (po.formModel.driverEntity == null ? {} : po.formModel.driverEntity);
 	
-	po.setupForm(po.formModel, po.submitUrl);
+	var formModel = <@writeJson var=formModel />;
+	formModel = (formModel || {});
+	formModel.driverEntity = (formModel.driverEntity == null ? {} : formModel.driverEntity);
+	
+	po.inflateSubmitAction = function(action)
+	{
+		po.trimSubmitActionDataOfCreateUser(action);
+		
+		var driverEntity = action.options.data.driverEntity;
+		if(driverEntity)
+		{
+			driverEntity.displayText = undefined;
+			driverEntity.displayDescMore = undefined;
+		}
+	};
+	
+	po.setupForm(formModel, po.submitUrl);
+	
+	po.vueMethod(
+	{
+		onSelectDriverEntity: function()
+		{
+			po.handleOpenSelectAction("/driverEntity/select", function(driverEntity)
+			{
+				var pm = po.vuePageModel();
+				pm.driverEntity = driverEntity;
+			});
+		}
+	});
+	
 	po.vueMount();
 })
 (${pid});

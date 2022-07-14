@@ -11,7 +11,7 @@
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.title}, #{entity.url}, #{entity.user}, #{entity.password},
+			#{entity.id}, #{entity.title}, #{entity.url}, #{entity.user, jdbcType=VARCHAR}, #{entity.password, jdbcType=VARCHAR},
 			#{entity.createUser.id}, #{entity.createTime}, #{entity.driverEntity.id, jdbcType=VARCHAR}
 			)
 	</insert>
@@ -20,8 +20,8 @@
 		UPDATE DATAGEAR_SCHEMA SET
 			SCHEMA_TITLE = #{entity.title},
 			SCHEMA_URL = #{entity.url},
-			SCHEMA_USER = #{entity.user},
-			SCHEMA_PASSWORD = #{entity.password},
+			SCHEMA_USER = #{entity.user, jdbcType=VARCHAR},
+			SCHEMA_PASSWORD = #{entity.password, jdbcType=VARCHAR},
 			DRIVER_ENTITY_ID = #{entity.driverEntity.id, jdbcType=VARCHAR}
 		WHERE
 			SCHEMA_ID = #{entity.id}
