@@ -20,6 +20,17 @@
 	background-color: var(--surface-100);
 }
 
+.text-primary a.link,
+.text-primary a.link:link,
+.text-primary a.link:visited,
+.text-primary a.link:active{
+	color: var(--primary-color);
+	text-decoration: none;
+}
+.text-primary a.link:hover{
+	color: var(--primary-color);
+	text-decoration: underline;
+}
 .text-color-secondary a.link,
 .text-color-secondary a.link:link,
 .text-color-secondary a.link:visited,
@@ -28,8 +39,8 @@
 	text-decoration: none;
 }
 .text-color-secondary a.link:hover{
-	color: var(--primary-color);
-	text-decoration: none;
+	color: var(--text-color-secondary);
+	text-decoration: underline;
 }
 
 /*带更多菜单按钮的tabview*/

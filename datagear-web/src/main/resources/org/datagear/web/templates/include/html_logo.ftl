@@ -6,6 +6,6 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<a href="${statics['org.datagear.util.Global'].WEB_SITE}" target="_blank" class="logo link">
+<a href="${statics['org.datagear.util.Global'].WEB_SITE}" target="_blank" class="logo link font-bold">
 	<@spring.message code="app.name" />
 </a>

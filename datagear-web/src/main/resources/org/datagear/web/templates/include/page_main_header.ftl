@@ -15,22 +15,26 @@ User currentUser
 
 -->
 <#assign Themes=statics['org.datagear.web.util.Themes']>
-<div class="page-main-header flex-grow-0 p-card no-border text-color-secondary py-1">
+<div class="page-main-header flex-grow-0 p-card no-border text-primary py-1">
 	<div class="grid grid-nogutter align-items-center">
 		<div class="logo col-fixed pl-1">
 			<#include "html_logo.ftl">
 		</div>
 		<div class="col text-right pr-2">
-			<span class="vertical-align-super mr-1">
-				<#if currentUser.anonymous>
-					<a href="${contextPath}/login" class="link px-1"><@spring.message code='module.login' /></a>
-					<a href="${contextPath}/" class="link px-1"><@spring.message code='module.main' /></a>
-				<#else>
-					${currentUser.nameLabel}
-				</#if>
-			</span>
-			<p-button type="button" @click="onSysMenuToggle" aria-haspopup="true" aria-controls="${pid}-sysMenu" icon="pi pi-cog" class="p-button-secondary p-button-text p-button-rounded p-button-sm"></p-button>
-			<p-contextmenu id="${pid}-sysMenu" ref="sysMenuEle" :model="sysMenu.items" :popup="true"></p-contextmenu>
+			<div class="flex justify-content-end align-items-center">
+				<div class="mr-1">
+					<#if currentUser.anonymous>
+						<a href="${contextPath}/login" class="link px-1"><@spring.message code='module.login' /></a>
+						<a href="${contextPath}/" class="link px-1"><@spring.message code='module.main' /></a>
+					<#else>
+						${currentUser.nameLabel}
+					</#if>
+				</div>
+				<div>
+					<p-button type="button" @click="onSysMenuToggle" aria-haspopup="true" aria-controls="${pid}-sysMenu" icon="pi pi-cog" class="p-button-secondary p-button-text p-button-rounded p-button-sm text-primary"></p-button>
+					<p-contextmenu id="${pid}-sysMenu" ref="sysMenuEle" :model="sysMenu.items" :popup="true"></p-contextmenu>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
