@@ -19,7 +19,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-query page-query-schema">
+<div id="${pid}" class="page page-manager page-manager-schema">
 	<div class="grid grid-nogutter m-0 flex-nowrap">
 		<div class="col-3">
 			<div class="flex flex-column m-0">
