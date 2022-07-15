@@ -30,6 +30,35 @@ String action
 		return po.element("form");
 	};
 	
+	po.vueRef("isAddAction", po.isAddAction);
+	po.vueRef("isEditAction", po.isEditAction);
+	po.vueRef("isViewAction", po.isViewAction);
+	po.vueRef("isReadonlyAction", po.isReadonlyAction);
+	
+	po.setupForm = function(data, submitUrl, options)
+	{
+		data = (data || {});
+		submitUrl = (submitUrl || "#");
+		options = (options || {});
+		
+		var pm = po.vuePageModel(data);
+		
+		po.vueMounted(function()
+		{
+			po.initValidationMessagesIfNon();
+			
+			po.form().validateForm(pm,
+			{
+				submitHandler: function(form)
+				{
+					return po.submitForm(submitUrl, options);
+				}
+			});
+		});
+		
+		return pm;
+	};
+
 	po.submitForm = function(url, options)
 	{
 		if(po.isViewAction)
@@ -59,44 +88,7 @@ String action
 		return false;
 	};
 	
-	po.setupForm = function(data, submitUrl, options)
-	{
-		data = (data || {});
-		submitUrl = (submitUrl || "#");
-		options = (options || {});
-		
-		po.vueRef("isReadonlyAction", po.isReadonlyAction);
-		
-		var pm = po.vuePageModel(data);
-		
-		po.vueMounted(function()
-		{
-			po.initValidationMessagesIfNon();
-			
-			po.form().validateForm(pm,
-			{
-				submitHandler: function(form)
-				{
-					return po.submitForm(submitUrl, options);
-				}
-			});
-		});
-		
-		return pm;
-	};
-	
-	po.inflateSubmitAction = function(action)
-	{
-		po.trimSubmitActionDataOfCreateUser(action);
-	};
-	
-	po.trimSubmitActionDataOfCreateUser = function(action)
-	{
-		var data = action.options.data;
-		
-		if(data && data.createUser)
-			data.createUser.nameLabel = undefined;
-	};
+	po.inflateSubmitAction = function(action){};
 	
 	po.defaultSubmitSuccessCallback = function(response, close)
 	{

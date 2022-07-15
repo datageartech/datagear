@@ -28,11 +28,13 @@
 						<div class="col">
 							<form @submit.prevent="onSearch" class="py-1">
 								<div class="p-inputgroup">
-									<p-button type="button" :icon="pm.searchType=='schema' ? 'pi pi-database' : 'pi pi-table'"
-										class="p-button-secondary" @click="onToggleSearchType(e)"
-										title="<@spring.message code='switchSearchMode' />">
-									</p-button>
-									<p-inputtext type="text" v-model="pm.searchForm.keyword"></p-inputtext>
+									<div class="p-input-icon-left flex-grow-1">
+										<i class="cursor-pointer" @click="onToggleSearchType"
+											:class="pm.searchType=='schema' ? 'pi pi-database' : 'pi pi-table'"
+											title="<@spring.message code='switchSearchMode' />">
+										</i>
+										<p-inputtext type="text" v-model="pm.searchForm.keyword" class="w-full"></p-inputtext>
+									</div>
 									<p-button type="submit" icon="pi pi-search"></p-button>
 								</div>
 							</form>
@@ -492,7 +494,7 @@
 		
 		onTableTabClick: function(e){},
 		
-		onToggleSearchType: function(e)
+		onToggleSearchType: function()
 		{
 			var pm = po.vuePageModel();
 			pm.searchType = (pm.searchType == "schema" ? "table" : "schema");

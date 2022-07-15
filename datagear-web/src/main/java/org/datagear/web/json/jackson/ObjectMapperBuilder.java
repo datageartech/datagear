@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.datagear.analysis.support.JsonSupport;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,6 +73,9 @@ public class ObjectMapperBuilder
 		ObjectMapper objectMapper = JsonSupport.create();
 		JsonSupport.setWriteJsonFeatures(objectMapper);
 		JsonSupport.setReadNonStandardJsonFeatures(objectMapper);
+		
+		//必须忽略没有setter的属性，因为请求提交的JSON可能会包含这样的属性
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 		String moduleName = ObjectMapperBuilder.class.getSimpleName();
 		SimpleModule module = new SimpleModule(moduleName);

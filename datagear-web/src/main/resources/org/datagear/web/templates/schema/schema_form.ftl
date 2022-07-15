@@ -41,7 +41,9 @@
 			        	<p-inputtext id="${pid}url" v-model="pm.url" type="text" class="input"
 			        		name="url" required maxlength="1000" placeholder="jdbc:">
 			        	</p-inputtext>
-			        	<p-button type="button" icon="pi pi-question-circle" class="p-button-secondary"></p-button>
+			        	<p-button type="button" label="<@spring.message code='help' />" class="p-button-secondary"
+			        		v-if="!isReadonlyAction">
+			        	</p-button>
 		        	</div>
 		        </div>
 			</div>
@@ -55,7 +57,7 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid" v-if="!isReadonlyAction">
 				<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='password' />
 				</label>
@@ -72,13 +74,36 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
-			        	<p-inputtext id="${pid}driverEntity" v-model="pm.driverEntity.displayName" type="text" class="input w-10"
-			        		name="driverEntity.displayName" maxlength="200">
-			        	</p-inputtext>
+		        		<div class="p-input-icon-right flex-grow-1">
+			        		<i class="pi pi-times cursor-pointer" @click="onDeleteDriverEntity" v-if="!isReadonlyAction">
+			        		</i>
+				        	<p-inputtext id="${pid}driverEntity" v-model="pm.driverEntity.displayName" type="text" class="input w-full"
+				        		readonly="readonly" name="driverEntity.displayName" maxlength="200">
+				        	</p-inputtext>
+			        	</div>
 			        	<p-button type="button" label="<@spring.message code='select' />"
-			        		@click="onSelectDriverEntity"
-			        		class="p-button-secondary"></p-button>
+			        		@click="onSelectDriverEntity" class="p-button-secondary"
+			        		v-if="!isReadonlyAction">
+			        	</p-button>
 		        	</div>
+		        </div>
+			</div>
+			<div class="field grid" v-if="isReadonlyAction">
+				<label for="${pid}createUser" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='createUser' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-inputtext id="${pid}createUser" v-model="pm.createUser.nameLabel" type="text" class="input w-full" readonly="readonly">
+		        	</p-inputtext>
+		        </div>
+			</div>
+			<div class="field grid" v-if="isReadonlyAction">
+				<label for="${pid}createTime" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='createTime' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-inputtext id="${pid}createTime" v-model="pm.createTime" type="text" class="input w-full" readonly="readonly">
+		        	</p-inputtext>
 		        </div>
 			</div>
 		</div>
@@ -97,22 +122,16 @@
 	formModel = (formModel || {});
 	formModel.driverEntity = (formModel.driverEntity == null ? {} : formModel.driverEntity);
 	
-	po.inflateSubmitAction = function(action)
-	{
-		po.trimSubmitActionDataOfCreateUser(action);
-		
-		var driverEntity = action.options.data.driverEntity;
-		if(driverEntity)
-		{
-			driverEntity.displayText = undefined;
-			driverEntity.displayDescMore = undefined;
-		}
-	};
-	
 	po.setupForm(formModel, po.submitUrl);
 	
 	po.vueMethod(
 	{
+		onDeleteDriverEntity: function()
+		{
+			var pm = po.vuePageModel();
+			pm.driverEntity = {};
+		},
+		
 		onSelectDriverEntity: function()
 		{
 			po.handleOpenSelectAction("/driverEntity/select", function(driverEntity)
