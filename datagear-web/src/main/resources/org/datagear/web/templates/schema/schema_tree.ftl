@@ -33,7 +33,7 @@
 											:class="pm.searchType=='schema' ? 'pi pi-database' : 'pi pi-table'"
 											title="<@spring.message code='switchSearchMode' />">
 										</i>
-										<p-inputtext type="text" v-model="pm.searchForm.keyword" class="w-full"></p-inputtext>
+										<p-inputtext type="text" v-model="pm.searchForm.keyword" class="w-full h-full border-noround-right"></p-inputtext>
 									</div>
 									<p-button type="submit" icon="pi pi-search"></p-button>
 								</div>

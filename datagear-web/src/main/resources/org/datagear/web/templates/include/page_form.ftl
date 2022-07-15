@@ -142,7 +142,7 @@ String action
 		},
 		options);
 		
-		po.open(url, options);
+		po.openTableDialog(url, options);
 	};
 })
 (${pageId});

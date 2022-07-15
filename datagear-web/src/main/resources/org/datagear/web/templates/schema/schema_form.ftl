@@ -77,7 +77,7 @@
 		        		<div class="p-input-icon-right flex-grow-1">
 			        		<i class="pi pi-times cursor-pointer" @click="onDeleteDriverEntity" v-if="!isReadonlyAction">
 			        		</i>
-				        	<p-inputtext id="${pid}driverEntity" v-model="pm.driverEntity.displayName" type="text" class="input w-full"
+				        	<p-inputtext id="${pid}driverEntity" v-model="pm.driverEntity.displayName" type="text" class="input w-full h-full border-noround-right"
 				        		readonly="readonly" name="driverEntity.displayName" maxlength="200">
 				        	</p-inputtext>
 			        	</div>
