@@ -18,6 +18,13 @@ var ${pageId} =
 	
 	contextPath: "${contextPath}",
 	
+	i18n:
+	{
+		confirm: "<@spring.message code='confirm' />",
+		cancel : "<@spring.message code='cancel' />",
+		operationConfirm : "<@spring.message code='operationConfirm' />"
+	},
+	
 	//获取父页面JS对象
 	parent: function()
 	{
@@ -101,11 +108,12 @@ var ${pageId} =
 	//打开确认对话框
 	confirm: function(options)
 	{
+		var po = this;
 		options = $.extend(
 		{
-			acceptLabel : "<@spring.message code='confirm' />",
-			rejectLabel : "<@spring.message code='cancel' />",
-			header : "<@spring.message code='operationConfirm' />"
+			acceptLabel : po.i18n.confirm,
+			rejectLabel : po.i18n.cancel,
+			header : po.i18n.operationConfirm
 		},
 		options);
 		

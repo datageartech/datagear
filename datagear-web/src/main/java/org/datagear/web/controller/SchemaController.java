@@ -172,7 +172,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		schema.clearPassword();
 
 		setFormModel(model, schema, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
-		return "/analysisProject/analysisProject_form";
+		return "/schema/schema_form";
 	}
 
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)

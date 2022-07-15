@@ -71,7 +71,7 @@ String action
 		
 		po.vueMounted(function()
 		{
-			po.initGlobalValidationMessagesIfNon();
+			po.initValidationMessagesIfNon();
 			
 			po.form().validateForm(pm,
 			{
@@ -116,16 +116,16 @@ String action
 		po.pageParamCall("submitSuccess", (response.data ? response.data : response));
 	};
 	
-	po.initGlobalValidationMessagesIfNon = function()
+	po.initValidationMessagesIfNon = function()
 	{
 		if(!po._initGlobalValidationMessages)
 		{
-			$.extend($.validator.messages, po.globalValidationMessages);
+			$.extend($.validator.messages, po.validationMessages);
 			po._initGlobalValidationMessages = true;
 		}
 	};
 	
-	po.globalValidationMessages =
+	po.validationMessages =
 	{
 		required: "<@spring.message code='validation.required' />",
 		number: "<@spring.message code='validation.number' />",

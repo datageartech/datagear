@@ -46,6 +46,7 @@
 		</p-datatable>
 	</div>
 </div>
+<#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">
 <script>
 (function(po)

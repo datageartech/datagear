@@ -67,12 +67,41 @@
 		</div>
 	</div>
 </div>
-<#include "../include/page_table.ftl">
+<#include "../include/page_manager.ftl">
 <#include "../include/page_tabview.ftl">
 <script>
 (function(po)
 {
 	po.currentUserId = "${currentUser.id}";
+	
+	po.refresh = function()
+	{
+		po.loadSchemaNodes();
+	};
+	
+	po.getSelectedEntities = function()
+	{
+		var pm = po.vuePageModel();
+		var schemaNodes = (pm.schemaNodes || []);
+		var selectedNodeKeys = po.vueRaw(pm.selectedNodeKeys);
+		
+		var re = [];
+		
+		if(!selectedNodeKeys)
+			return re;
+		
+		for(var i=0; i<schemaNodes.length; i++)
+		{
+			var schemaId = schemaNodes[i].schemaId;
+			for(var selectedKey in selectedNodeKeys)
+			{
+				if(selectedKey == schemaId)
+					re.push(po.vueRaw(schemaNodes[i].schema));
+			}
+		}
+		
+		return re;
+	};
 	
 	po.loadSchemaNodes = function()
 	{
@@ -86,6 +115,7 @@
 			success: function(response)
 			{
 				pm.schemaNodes = po.schemasToNodes(response);
+				pm.selectedNodeKeys = null;
 			},
 			complete: function()
 			{
@@ -173,7 +203,8 @@
 				icon: "pi pi-database",
 				leaf: false,
 				dataType: "schema",
-				schemaId: schema.id
+				schemaId: schema.id,
+				schema: schema
 			});
 		});
 		
@@ -324,16 +355,32 @@
 		schemaOptItems:
 		[
 			{
-				label: "<@spring.message code='edit' />"
+				label: "<@spring.message code='edit' />",
+				command: function()
+				{
+					po.handleOpenOfAction("/schema/edit");
+				}
 			},
 			{
-				label: "<@spring.message code='delete' />"
+				label: "<@spring.message code='view' />",
+				command: function()
+				{
+					po.handleOpenOfAction("/schema/view");
+				}
 			},
 			{
-				label: "<@spring.message code='view' />"
+				label: "<@spring.message code='delete' />",
+				command: function()
+				{
+					po.handleDeleteAction("/schema/delete");
+				}
 			},
 			{
-				label: "<@spring.message code='refresh' />"
+				label: "<@spring.message code='refresh' />",
+				command: function()
+				{
+					po.refresh();
+				}
 			},
 			{
 				label: "<@spring.message code='reload' />"
