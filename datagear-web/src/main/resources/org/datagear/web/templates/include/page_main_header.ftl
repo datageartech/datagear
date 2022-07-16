@@ -83,7 +83,7 @@ User currentUser
 					},
 					{
 						label: "<@spring.message code='module.schemaUrlBuilder' />",
-						url: "${contextPath}/schemaUrlBuilder/editScriptCode",
+						url: "${contextPath}/schemaUrlBuilder/set",
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{

@@ -34,7 +34,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-dropdown v-model="pm.dbType" :options="dbTypeDropdownItems" option-label="dbType" option-value="dbType"
-		        		option-group-label="label" option-group-children="items"  class="input w-full">
+		        		option-group-label="label" option-group-children="items" @change="onDbTypeChange" class="input w-full">
 		        	</p-dropdown>
 		        	<div class="validate-msg">
 		        		<input name="dbType" required type="text" class="validate-proxy" />
@@ -75,12 +75,18 @@
 		<div class="page-form-foot flex-grow-0 pt-3 text-center">
 			<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 		</div>
+		<div class="page-form-foot flex-grow-0 pt-3 text-center" v-if="isPreviewAction">
+			<p-inputtext id="${pid}previewResult" v-model="pm.previewResult" type="text" class="input w-8 text-center"
+        		placeholder="<@spring.message code='previewResult' />" name="previewResult" maxlength="2000">
+        	</p-inputtext>
+		</div>
 	</form>
 </div>
 <#include "../include/page_form.ftl">
 <script>
 (function(po)
 {
+	po.isPreviewAction = (po.action == "preview");
 	po.initUrl = "${(url!'')?js_string?no_esc}";
 	
 	$.schemaUrlBuilder.clear();
@@ -125,7 +131,9 @@
 		var pm = po.vuePageModel();
 		var url = $.schemaUrlBuilder.build(pm.dbType, pm);
 		
-		po.defaultSubmitSuccessCallback({ data: url });
+		if(po.isPreviewAction)
+			pm.previewResult = url;
+		po.defaultSubmitSuccessCallback({ data: url }, !po.isPreviewAction);
 	};
 	
 	var formModel =
@@ -133,11 +141,12 @@
 		dbType: urlDbType,
 		host: (urlValue && urlValue.host ? urlValue.host : ""),
 		port: (urlValue && urlValue.port ? urlValue.port : ""),
-		name: (urlValue && urlValue.name ? urlValue.name : "")
+		name: (urlValue && urlValue.name ? urlValue.name : ""),
+		previewResult: " "
 	};
 	
 	po.setupForm(formModel, "#");
-	
+	po.vueRef("isPreviewAction", po.isPreviewAction);
 	po.vueRef("dbTypeDropdownItems",
 	[
 		{
@@ -149,6 +158,23 @@
 			items: allBuilders
 		}
 	]);
+	
+	po.vueMethod(
+	{
+		onDbTypeChange: function(e)
+		{
+			var dbType = e.value;
+			var dftValue = $.schemaUrlBuilder.defaultValue(dbType);
+			
+			var pm = po.vuePageModel();
+			if(!pm.host)
+				pm.host = (dftValue.host || "");
+			if(!pm.port)
+				pm.port = (dftValue.port || "");
+			if(!pm.name)
+				pm.name = (dftValue.name || "");
+		}
+	});
 	
 	po.vueMount();
 })

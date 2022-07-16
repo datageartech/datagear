@@ -49,9 +49,10 @@
 (function(po)
 {
 	po.submitUrl = "/analysisProject/"+po.submitAction;
-	po.formModel = <@writeJson var=formModel />;
 	
-	po.setupForm(po.formModel, po.submitUrl);
+	var formModel = <@writeJson var=formModel />;
+	po.setupForm(formModel, po.submitUrl);
+	
 	po.vueMount();
 })
 (${pid});

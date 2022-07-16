@@ -79,8 +79,10 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	@RequestMapping("/set")
 	public String set(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model) throws IOException
 	{
-		model.addAttribute("scriptCode", getUrlBuilderScript());
-		setFormAction(model, "set", "saveSet");
+		SaveScriptCodeForm form = new SaveScriptCodeForm();
+		form.setCode(getUrlBuilderScript());
+		
+		setFormModel(model, form, "set", "saveSet");
 
 		return "/schemaUrlBuilder/schemaUrlBuilder_set";
 	}
@@ -90,20 +92,20 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	public ResponseEntity<OperationMessage> saveSet(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody SaveScriptCodeForm form) throws IOException
 	{
-		String scriptCode = form.getScriptCode();
+		String scriptCode = form.getCode();
 
 		saveCustomScript(scriptCode);
 
 		return operationSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/previewSet")
+	@RequestMapping("/preview")
 	public String previewScriptCode(HttpServletRequest request, org.springframework.ui.Model model,
 			@RequestParam(value = "scriptCode", required = false) String scriptCode) throws IOException
 	{
 		model.addAttribute("scriptCode", scriptCode);
 		model.addAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
-		setFormAction(model, "previewSet", "#");
+		setFormAction(model, "preview", "#");
 		
 		return "/schemaUrlBuilder/schemaUrlBuilder_build";
 	}
@@ -228,21 +230,21 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	{
 		private static final long serialVersionUID = 1L;
 
-		private String scriptCode;
+		private String code;
 
 		public SaveScriptCodeForm()
 		{
 			super();
 		}
 
-		public String getScriptCode()
+		public String getCode()
 		{
-			return scriptCode;
+			return code;
 		}
 
-		public void setScriptCode(String scriptCode)
+		public void setCode(String code)
 		{
-			this.scriptCode = scriptCode;
+			this.code = code;
 		}
 	}
 }
