@@ -162,6 +162,11 @@ public abstract class AbstractController
 	protected void setFormModel(Model model, Object formModel, String requestAction, String submitAction)
 	{
 		model.addAttribute(KEY_FORM_MODEL, formModel);
+		setFormAction(model, requestAction, submitAction);
+	}
+	
+	protected void setFormAction(Model model, String requestAction, String submitAction)
+	{
 		model.addAttribute(KEY_REQUEST_ACTION, requestAction);
 		model.addAttribute(KEY_SUBMIT_ACTION, submitAction);
 	}

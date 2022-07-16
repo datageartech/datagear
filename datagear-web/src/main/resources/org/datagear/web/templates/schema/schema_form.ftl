@@ -41,7 +41,8 @@
 			        	<p-inputtext id="${pid}url" v-model="pm.url" type="text" class="input"
 			        		name="url" required maxlength="1000" placeholder="jdbc:">
 			        	</p-inputtext>
-			        	<p-button type="button" label="<@spring.message code='help' />" class="p-button-secondary"
+			        	<p-button type="button" label="<@spring.message code='help' />" @click="onBuildSchemaUrl"
+			        		class="p-button-secondary"
 			        		v-if="!isReadonlyAction">
 			        	</p-button>
 		        	</div>
@@ -126,6 +127,24 @@
 	
 	po.vueMethod(
 	{
+		onBuildSchemaUrl: function()
+		{
+			var pm = po.vuePageModel();
+			
+			po.open("/schemaUrlBuilder/build",
+			{
+				data: {url: pm.url},
+				contentType: $.CONTENT_TYPE_FORM,
+				pageParam:
+				{
+					submitSuccess: function(url)
+					{
+						var pm = po.vuePageModel();
+						pm.url = url;
+					}
+				}
+			});
+		},
 		onDeleteDriverEntity: function()
 		{
 			var pm = po.vuePageModel();

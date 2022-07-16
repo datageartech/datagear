@@ -30,6 +30,7 @@ String action
 		return po.element("form");
 	};
 	
+	po.vueRef("action", po.action);
 	po.vueRef("isAddAction", po.isAddAction);
 	po.vueRef("isEditAction", po.isEditAction);
 	po.vueRef("isViewAction", po.isViewAction);

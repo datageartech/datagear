@@ -10,16 +10,15 @@
  * 
  * 依赖:
  * jquery.js
+ * util.js
  */
 (function($, undefined)
 {
-	var $meta = ($.tableMeta || ($.tableMeta = {}));
-
-	if(!$meta.schemaTableCache)
-		$meta.schemaTableCache = {};
+	var tableMeta = ($.tableMeta || ($.tableMeta = {}));
+	tableMeta.schemaTableCache = (tableMeta.schemaTableCache || (tableMeta.schemaTableCache = {}));
 	
 	//PersistenceSupport.supportsSqlType支持的SQL类型
-	$meta.Types=
+	tableMeta.Types=
 	{
 		TINYINT: -6, SMALLINT: 5, INTEGER: 4, BIGINT: -5, REAL: 7, FLOAT: 6,
 		DOUBLE: 8, DECIMAL: 3, NUMERIC: 2, BIT: -7, BOOLEAN: 16, CHAR: 1,
@@ -28,7 +27,7 @@
 		CLOB: 2005, BLOB: 2004, NCHAR: -15, NVARCHAR: -9, LONGNVARCHAR: -16, NCLOB: 2011, SQLXML: 2009
 	};
 	
-	$.extend($meta,
+	$.extend(tableMeta,
 	{
 		/**
 		 * 获取指定列/列数组。
@@ -405,37 +404,6 @@
 		},
 		
 		/**
-		 * 将属性名按照HTML规范转义。
-		 */
-		escapeHtml : function(text)
-		{
-			if(typeof(text) != "string")
-				return text;
-			
-			var epn = "";
-			
-			for(var i=0; i<text.length; i++)
-			{
-				var c = text.charAt(i);
-				
-				if(c == '<')
-					epn += '&lt;';
-				else if(c == '>')
-					epn += '&gt;';
-				else if(c == '&')
-					epn += '&amp;';
-				else if(c == '"')
-					epn += '&quot;';
-				else if(c == '\'')
-					epn += '&#39;';
-				else
-					epn += c;
-			}
-			
-			return epn;
-		},
-		
-		/**
 		 * 获取展示HTML。
 		 * 
 		 * @param tableOrColumn
@@ -445,8 +413,8 @@
 		displayInfoHtml : function(tableOrColumn, tagName, className)
 		{
 			tagName = (tagName || "span");
-			return "<"+tagName+" class='display-info " + (className ? className : "") + "' title='"+this.escapeHtml(tableOrColumn.comment || "")+"'>"
-						+this.escapeHtml(tableOrColumn.name)+"</"+tagName+">";
+			return "<"+tagName+" class='display-info " + (className ? className : "") + "' title='"+$.escapeHtml(tableOrColumn.comment || "")+"'>"
+						+$.escapeHtml(tableOrColumn.name)+"</"+tagName+">";
 		},
 		
 		/**
@@ -507,7 +475,7 @@
 		}
 	});
 	
-	$.extend($meta,
+	$.extend(tableMeta,
 	{
 		/**
 		 * 加载表的URL。

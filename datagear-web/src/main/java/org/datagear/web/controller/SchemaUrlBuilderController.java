@@ -76,46 +76,48 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 		this.schemaUrlBuilderScriptFile = schemaUrlBuilderScriptFile;
 	}
 
-	@RequestMapping("/editScriptCode")
-	public String editScriptCode(HttpServletRequest request, HttpServletResponse response) throws IOException
+	@RequestMapping("/set")
+	public String set(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model) throws IOException
 	{
-		request.setAttribute("scriptCode", getUrlBuilderScript());
+		model.addAttribute("scriptCode", getUrlBuilderScript());
+		setFormAction(model, "set", "saveSet");
 
-		return "/schema_url_builder";
+		return "/schemaUrlBuilder/schemaUrlBuilder_set";
 	}
 
-	@RequestMapping(value = "/saveScriptCode", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveSet", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveScriptCode(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> saveSet(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody SaveScriptCodeForm form) throws IOException
 	{
 		String scriptCode = form.getScriptCode();
 
 		saveCustomScript(scriptCode);
 
-		return optMsgSaveSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/previewScriptCode")
-	public String previewScriptCode(HttpServletRequest request,
+	@RequestMapping("/previewSet")
+	public String previewScriptCode(HttpServletRequest request, org.springframework.ui.Model model,
 			@RequestParam(value = "scriptCode", required = false) String scriptCode) throws IOException
 	{
-		request.setAttribute("scriptCode", scriptCode);
-		request.setAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
-		request.setAttribute("preview", true);
-
-		return "/schema/schema_build_url";
+		model.addAttribute("scriptCode", scriptCode);
+		model.addAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
+		setFormAction(model, "previewSet", "#");
+		
+		return "/schemaUrlBuilder/schemaUrlBuilder_build";
 	}
 
-	@RequestMapping("/buildUrl")
-	public String buildSchemaUrl(HttpServletRequest request, @RequestParam(value = "url", required = false) String url)
-			throws IOException
+	@RequestMapping("/build")
+	public String buildSchemaUrl(HttpServletRequest request, org.springframework.ui.Model model,
+			@RequestParam(value = "url", required = false) String url) throws IOException
 	{
-		request.setAttribute("scriptCode", getUrlBuilderScript());
-		request.setAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
-		request.setAttribute("url", url);
-
-		return "/schema/schema_build_url";
+		model.addAttribute("scriptCode", getUrlBuilderScript());
+		model.addAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
+		model.addAttribute("url", url);
+		setFormAction(model, "build", "#");
+		
+		return "/schemaUrlBuilder/schemaUrlBuilder_build";
 	}
 
 	protected void saveCustomScript(String scriptCode) throws IOException
