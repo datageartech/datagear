@@ -37,7 +37,7 @@
 				<label for="${pid}principalName" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='${resourceMeta.authPrincipalLabel}' />
 				</label>
-		        <div class="field-input col-12 md:col-9">
+		        <div class="field-input col-12 md:col-9" style="min-height:2.5rem;">
 		        	<div class="p-inputgroup" v-show="pm.principalType == '${Authorization.PRINCIPAL_TYPE_USER}'">
 			        	<p-inputtext id="${pid}principalName" v-model="pm.principalName" type="text" class="input"
 			        		name="principalName" required maxlength="200" readonly="readonly">
@@ -67,17 +67,20 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid" :class="{hidden: singlePermission}">
 				<label for="${pid}permission" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='${resourceMeta.authPermissionLabel}' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-selectbutton v-model="pm.permission" :options="permissionOptions"
-		        		option-label="name" option-value="value" class="input w-full">
+		        		option-label="name" option-value="value" class="input w-full" @change="onPermissionChange">
 		        	</p-selectbutton>
+		        	<div class="mt-1" style="min-height:1.5rem;">
+		        		<small class="text-color-secondary">{{permissionDesc}}</small>
+		        	</div>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid" :class="{hidden: !enableSetEnable}">
 				<label for="${pid}enabled" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='${resourceMeta.authEnabledLabel}' />
 				</label>
@@ -98,6 +101,11 @@
 (function(po)
 {
 	po.submitUrl = "/authorization/${resourceMeta.resourceType}/" + encodeURIComponent("${resource?js_string?no_esc}") + "/" + po.submitAction;
+	po.enableSetEnable = ("${resourceMeta.enableSetEnable?string('true', 'false')}" == "true");
+	po.singlePermission = ("${resourceMeta.singlePermission?string('true', 'false')}"  == "true");
+	
+	po.vueRef("enableSetEnable", po.enableSetEnable);
+	po.vueRef("singlePermission", po.singlePermission);
 	
 	po.vueRef("principalTypeOptions",
 	[
@@ -109,10 +117,24 @@
 	
 	var permissionOptions = [];
 	<#list resourceMeta.permissionMetas as pmeta>
-	permissionOptions.push({ name: "<@spring.message code='${pmeta.permissionLabel}' />", value: ${pmeta.permission} });
+	permissionOptions.push(
+	{
+		name: "<@spring.message code='${pmeta.permissionLabel}' />",
+		value: ${pmeta.permission},
+		desc: "<@spring.message code='${pmeta.permissionLabelDesc}' />"
+	});
 	</#list>
 	
 	po.vueRef("permissionOptions", permissionOptions);
+	
+	po.vueComputed("permissionDesc", function()
+	{
+		var pm = po.vuePageModel();
+		var permissionOptions = po.vueRef("permissionOptions");
+		
+		var idx = $.inArrayById(permissionOptions, pm.permission, "value");
+		return (idx >= 0 ? permissionOptions[idx].desc : "");
+	});
 	
 	po.vueRef("enabledOptions",
 	[

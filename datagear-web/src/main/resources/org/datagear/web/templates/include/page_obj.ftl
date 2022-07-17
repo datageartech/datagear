@@ -206,6 +206,22 @@ var ${pageId} =
 		}
 	},
 	
+	//设置vue的计算属性
+	vueComputed: function(name, handler)
+	{
+		var computedObj = {};
+		
+		// ({ a: Function, b: Function)
+		if(arguments.length == 1)
+			computedObj = name;
+		// (name, Function)
+		else if(arguments.length == 2)
+			computedObj[name] = handler;
+		
+		for(var p in computedObj)
+			this._vueComputed[p] = computedObj[p];
+	},
+	
 	//获取/设置vue组件
 	vueComponent: function(name, value)
 	{
@@ -248,6 +264,8 @@ var ${pageId} =
 	_vueSetup: {},
 	//vue的watch对象
 	_vueWatch: [],
+	//vue的watch对象
+	_vueComputed: {},
 	//vue的mounted回调函数
 	_vueMounted: [],
 	//vue组件
@@ -280,6 +298,7 @@ var ${pageId} =
 	{
 		const setupObj = this._vueSetup;
 		const watchObj = this._vueWatch;
+		const computedObj = this._vueComputed;
 		const mountedObj = this._vueMounted;
 		const componentsObj = this._vueComponents;
 		
@@ -291,6 +310,11 @@ var ${pageId} =
 				{
 					Vue.watch(wt.target, wt.callback);
 				});
+				
+				for(var cpn in computedObj)
+				{
+					setupObj[cpn] = Vue.computed(computedObj[cpn]);
+				}
 				
 				Vue.onMounted(function()
 				{
