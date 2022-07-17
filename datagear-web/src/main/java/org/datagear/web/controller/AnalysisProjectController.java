@@ -38,7 +38,7 @@ public class AnalysisProjectController extends AbstractController
 {
 	static
 	{
-		AuthorizationResourceMetas.registerForShare(AnalysisProject.AUTHORIZATION_RESOURCE_TYPE, "analysisProject");
+		AuthorizationResourceMetas.registerForShare(AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
 	}
 
 	@Autowired

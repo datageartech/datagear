@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#assign Schema=statics['org.datagear.management.domain.Schema']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -427,7 +428,14 @@
 				}
 			},
 			{
-				label: "<@spring.message code='autherization' />"
+				label: "<@spring.message code='autherization' />",
+				command: function()
+				{
+					po.executeOnSelect(function(schema)
+					{
+						po.openTableDialog("/authorization/${Schema.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(schema.id)+"/query");
+					});
+				}
 			},
 			{ separator: true },
 			{

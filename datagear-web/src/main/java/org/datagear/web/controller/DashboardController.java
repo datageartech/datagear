@@ -126,8 +126,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	static
 	{
-		AuthorizationResourceMetas.registerForShare(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE,
-				"dashboard");
+		AuthorizationResourceMetas.registerForShare(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE);
 	}
 
 	@Autowired

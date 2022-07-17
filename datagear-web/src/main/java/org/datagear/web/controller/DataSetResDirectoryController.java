@@ -50,8 +50,7 @@ public class DataSetResDirectoryController extends AbstractController
 {
 	static
 	{
-		AuthorizationResourceMetas.registerForShare(DataSetResDirectory.AUTHORIZATION_RESOURCE_TYPE,
-				"dataSetResDirectory");
+		AuthorizationResourceMetas.registerForShare(DataSetResDirectory.AUTHORIZATION_RESOURCE_TYPE);
 	}
 
 	@Autowired

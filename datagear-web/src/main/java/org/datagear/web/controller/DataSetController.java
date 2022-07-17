@@ -85,7 +85,7 @@ public class DataSetController extends AbstractSchemaConnController
 {
 	static
 	{
-		AuthorizationResourceMetas.registerForShare(SqlDataSetEntity.AUTHORIZATION_RESOURCE_TYPE, "dataSet");
+		AuthorizationResourceMetas.registerForShare(SqlDataSetEntity.AUTHORIZATION_RESOURCE_TYPE);
 	}
 
 	@Autowired

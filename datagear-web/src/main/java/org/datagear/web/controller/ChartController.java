@@ -72,7 +72,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 {
 	static
 	{
-		AuthorizationResourceMetas.registerForShare(HtmlChartWidgetEntity.AUTHORIZATION_RESOURCE_TYPE, "chart");
+		AuthorizationResourceMetas.registerForShare(HtmlChartWidgetEntity.AUTHORIZATION_RESOURCE_TYPE);
 	}
 
 	@Autowired

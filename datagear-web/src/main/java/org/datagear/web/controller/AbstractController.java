@@ -24,9 +24,11 @@ import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
+import org.datagear.management.domain.Entity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
+import org.datagear.management.service.EntityService;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
@@ -137,6 +139,16 @@ public abstract class AbstractController
 		this.conversionService = conversionService;
 	}
 
+	protected <ID, T extends Entity<ID>> T getByIdForEdit(EntityService<ID, T> service, ID id) throws RecordNotFoundException
+	{
+		T entity = service.getById(id);
+
+		if (entity == null)
+			throw new RecordNotFoundException();
+
+		return entity;
+	}
+
 	protected <ID, T extends DataPermissionEntity<ID>> T getByIdForEdit(DataPermissionEntityService<ID, T> service,
 			User user, ID id) throws RecordNotFoundException
 	{
@@ -152,6 +164,16 @@ public abstract class AbstractController
 			User user, ID id) throws RecordNotFoundException
 	{
 		T entity = service.getById(user, id);
+
+		if (entity == null)
+			throw new RecordNotFoundException();
+
+		return entity;
+	}
+
+	protected <ID, T extends Entity<ID>> T getByIdForView(EntityService<ID, T> service, ID id) throws RecordNotFoundException
+	{
+		T entity = service.getById(id);
 
 		if (entity == null)
 			throw new RecordNotFoundException();

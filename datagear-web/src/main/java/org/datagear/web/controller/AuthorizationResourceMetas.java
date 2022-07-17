@@ -41,21 +41,16 @@ public class AuthorizationResourceMetas
 	 * 注册用于支持分享功能的{@linkplain ResourceMeta}。
 	 * 
 	 * @param resourceType
-	 * @param labelKeyPrefix
 	 */
-	public static void registerForShare(String resourceType, String labelKeyPrefix)
+	public static void registerForShare(String resourceType)
 	{
 		PermissionMeta read = PermissionMeta.valueOfRead();
-		ResourceMeta resourceMeta = new ResourceMeta(resourceType, labelKeyPrefix, PermissionMeta.valuesOf(read));
-		resourceMeta.updateResouceTypeLabel();
+		ResourceMeta resourceMeta = new ResourceMeta(resourceType, PermissionMeta.valuesOf(read));
 		resourceMeta.setEnableSetEnable(false);
+		resourceMeta.setAuthModuleLabel("module.share");
 
-		resourceMeta.setAuthManageAuthorizationLabel("authorization.default.share.manageAuthorization");
-		resourceMeta.setAuthAddAuthorizationLabel("authorization.default.share.addAuthorization");
-		resourceMeta.setAuthEditAuthorizationLabel("authorization.default.share.editAuthorization");
-		resourceMeta.setAuthViewAuthorizationLabel("authorization.default.share.viewAuthorization");
-		resourceMeta.setAuthPrincipalTypeLabel("authorization.default.share.principalType");
 		resourceMeta.setAuthPrincipalLabel("authorization.default.share.principal");
+		resourceMeta.setAuthPrincipalTypeLabel("authorization.default.share.principalType");
 
 		register(resourceMeta);
 	}
@@ -79,20 +74,19 @@ public class AuthorizationResourceMetas
 		// 数据源授权资源元信息
 		{
 			PermissionMeta read = PermissionMeta.valueOfRead(Schema.PERMISSION_TABLE_DATA_READ);
-			read.setPermissionLabelDesc(ResourceMeta.buildLabelKey("schema", "permission.read.desc"));
+			read.setPermissionLabelDesc("schema.auth.permission.read.desc");
 
 			PermissionMeta edit = PermissionMeta.valueOfEdit(Schema.PERMISSION_TABLE_DATA_EDIT);
-			edit.setPermissionLabelDesc(ResourceMeta.buildLabelKey("schema", "permission.edit.desc"));
+			edit.setPermissionLabelDesc("schema.auth.permission.edit.desc");
 
 			PermissionMeta delete = PermissionMeta.valueOfDelete(Schema.PERMISSION_TABLE_DATA_DELETE);
-			delete.setPermissionLabelDesc(ResourceMeta.buildLabelKey("schema", "permission.delete.desc"));
+			delete.setPermissionLabelDesc("schema.auth.permission.delete.desc");
 
 			PermissionMeta none = PermissionMeta.valueOfNone();
-			none.setPermissionLabelDesc(ResourceMeta.buildLabelKey("schema", "permission.none.desc"));
+			none.setPermissionLabelDesc("schema.auth.permission.none.desc");
 
-			ResourceMeta resourceMeta = new ResourceMeta(Schema.AUTHORIZATION_RESOURCE_TYPE, "schema",
+			ResourceMeta resourceMeta = new ResourceMeta(Schema.AUTHORIZATION_RESOURCE_TYPE,
 					PermissionMeta.valuesOf(read, edit, delete, none));
-			resourceMeta.updateResouceTypeLabel();
 
 			register(resourceMeta);
 		}
@@ -116,26 +110,14 @@ public class AuthorizationResourceMetas
 		/** 资源类型 */
 		private String resourceType;
 
-		/** 标签I18N关键字前缀 */
-		private String labelKeyPrefix;
-
 		/** 资源权限元信息 */
 		private PermissionMeta[] permissionMetas;
-
-		/** 资源类型标签I18N关键字 */
-		private String resouceTypeLabel = "authorization.default.resouceTypeLabel";
 
 		/** 是否开启设置启用/禁用功能 */
 		private boolean enableSetEnable = true;
 
-		private String authManageAuthorizationLabel = "authorization.manageAuthorization";
-
-		private String authAddAuthorizationLabel = "authorization.addAuthorization";
-
-		private String authEditAuthorizationLabel = "authorization.editAuthorization";
-
-		private String authViewAuthorizationLabel = "authorization.viewAuthorization";
-
+		private String authModuleLabel = "module.authorization";
+		
 		private String authResourceLabel = "authorization.resource";
 
 		private String authResourceTypeLabel = "authorization.resourceType";
@@ -146,18 +128,17 @@ public class AuthorizationResourceMetas
 
 		private String authPermissionLabel = "authorization.permission";
 
-		private String authEnabledLabel = "authorization.enabled";
+		private String authEnabledLabel = "isEnabled";
 
 		public ResourceMeta()
 		{
 			super();
 		}
 
-		public ResourceMeta(String resourceType, String labelKeyPrefix, PermissionMeta... permissionMetas)
+		public ResourceMeta(String resourceType, PermissionMeta... permissionMetas)
 		{
 			super();
 			this.resourceType = resourceType;
-			this.labelKeyPrefix = labelKeyPrefix;
 			this.permissionMetas = permissionMetas;
 		}
 
@@ -171,16 +152,6 @@ public class AuthorizationResourceMetas
 			this.resourceType = resourceType;
 		}
 
-		public String getLabelKeyPrefix()
-		{
-			return labelKeyPrefix;
-		}
-
-		public void setLabelKeyPrefix(String labelKeyPrefix)
-		{
-			this.labelKeyPrefix = labelKeyPrefix;
-		}
-
 		public PermissionMeta[] getPermissionMetas()
 		{
 			return permissionMetas;
@@ -189,16 +160,6 @@ public class AuthorizationResourceMetas
 		public void setPermissionMetas(PermissionMeta[] permissionMetas)
 		{
 			this.permissionMetas = permissionMetas;
-		}
-
-		public String getResouceTypeLabel()
-		{
-			return resouceTypeLabel;
-		}
-
-		public void setResouceTypeLabel(String resouceTypeLabel)
-		{
-			this.resouceTypeLabel = resouceTypeLabel;
 		}
 
 		public boolean isEnableSetEnable()
@@ -211,44 +172,14 @@ public class AuthorizationResourceMetas
 			this.enableSetEnable = enableSetEnable;
 		}
 
-		public String getAuthManageAuthorizationLabel()
+		public String getAuthModuleLabel()
 		{
-			return authManageAuthorizationLabel;
+			return authModuleLabel;
 		}
 
-		public void setAuthManageAuthorizationLabel(String authManageAuthorizationLabel)
+		public void setAuthModuleLabel(String authModuleLabel)
 		{
-			this.authManageAuthorizationLabel = authManageAuthorizationLabel;
-		}
-
-		public String getAuthAddAuthorizationLabel()
-		{
-			return authAddAuthorizationLabel;
-		}
-
-		public void setAuthAddAuthorizationLabel(String authAddAuthorizationLabel)
-		{
-			this.authAddAuthorizationLabel = authAddAuthorizationLabel;
-		}
-
-		public String getAuthEditAuthorizationLabel()
-		{
-			return authEditAuthorizationLabel;
-		}
-
-		public void setAuthEditAuthorizationLabel(String authEditAuthorizationLabel)
-		{
-			this.authEditAuthorizationLabel = authEditAuthorizationLabel;
-		}
-
-		public String getAuthViewAuthorizationLabel()
-		{
-			return authViewAuthorizationLabel;
-		}
-
-		public void setAuthViewAuthorizationLabel(String authViewAuthorizationLabel)
-		{
-			this.authViewAuthorizationLabel = authViewAuthorizationLabel;
+			this.authModuleLabel = authModuleLabel;
 		}
 
 		public String getAuthResourceLabel()
@@ -324,71 +255,6 @@ public class AuthorizationResourceMetas
 		public PermissionMeta getSinglePermissionMeta()
 		{
 			return this.permissionMetas[0];
-		}
-
-		public String buildLabelKey(String subKey)
-		{
-			return buildLabelKey(this.labelKeyPrefix, subKey);
-		}
-
-		public void updateResouceTypeLabel()
-		{
-			this.resouceTypeLabel = buildLabelKey("resouceTypeLabel");
-		}
-
-		public void updateAuthManageAuthorizationLabel()
-		{
-			this.authManageAuthorizationLabel = buildLabelKey("authManageAuthorizationLabel");
-		}
-
-		public void updateAuthAddAuthorizationLabel()
-		{
-			this.authAddAuthorizationLabel = buildLabelKey("authAddAuthorizationLabel");
-		}
-
-		public void updateAuthEditAuthorizationLabel()
-		{
-			this.authEditAuthorizationLabel = buildLabelKey("authEditAuthorizationLabel");
-		}
-
-		public void updateAuthViewAuthorizationLabel()
-		{
-			this.authViewAuthorizationLabel = buildLabelKey("authViewAuthorizationLabel");
-		}
-
-		public void updateAuthResourceLabel()
-		{
-			this.authResourceLabel = buildLabelKey("authResourceLabel");
-		}
-
-		public void updateAuthResourceTypeLabel()
-		{
-			this.authResourceTypeLabel = buildLabelKey("authResourceTypeLabel");
-		}
-
-		public void updateAuthPrincipalLabel()
-		{
-			this.authPrincipalLabel = buildLabelKey("authPrincipalLabel");
-		}
-
-		public void updateAuthPrincipalTypeLabel()
-		{
-			this.authPrincipalTypeLabel = buildLabelKey("authPrincipalTypeLabel");
-		}
-
-		public void updateAuthPermissionLabel()
-		{
-			this.authPermissionLabel = buildLabelKey("authPermissionLabel");
-		}
-
-		public void updateAuthEnabledLabel()
-		{
-			this.authEnabledLabel = buildLabelKey("authEnabledLabel");
-		}
-
-		public static String buildLabelKey(String labelKeyPrefix, String subKey)
-		{
-			return labelKeyPrefix + ".auth." + subKey;
 		}
 	}
 

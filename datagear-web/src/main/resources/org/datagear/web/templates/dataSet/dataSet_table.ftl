@@ -31,6 +31,7 @@
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='view' />" @click="onView"></p-button>
+			<p-button label="<@spring.message code='share' />" @click="onShare" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!isSelectAction"></p-button>
 		</div>
 	</div>
@@ -103,6 +104,14 @@
 		onView: function()
 		{
 			po.handleOpenOfAction("/dataSet/view");
+		},
+
+		onShare: function()
+		{
+			po.executeOnSelect(function(entity)
+			{
+				po.openTableDialog("/authorization/${DataSetEntity.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(entity.id)+"/query");
+			});
 		},
 		
 		onDelete: function()
