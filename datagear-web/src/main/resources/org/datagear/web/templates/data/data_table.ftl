@@ -55,6 +55,8 @@
 <script>
 (function(po)
 {
+	po.isReloadTable = ("${reloadTable?string('true','false')}" == "true");
+	
 	po.onDbTable(function(dbTable)
 	{
 		po.vuePageModel(
@@ -96,7 +98,8 @@
 		});
 		
 		po.vueMount();
-	});
+	},
+	po.isReloadTable);
 })
 (${pid});
 </script>

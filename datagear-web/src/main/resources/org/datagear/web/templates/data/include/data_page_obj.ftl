@@ -21,15 +21,12 @@
 		return po.concatContextPath("/data/"+po.schemaId+"/"+encodeURIComponent(po.tableName)+"/"+action);
 	};
 	
-	po.onDbTable = function(tableName, callback)
+	po.onDbTable = function(callback, reload)
 	{
-		if(!callback)
-		{
-			callback = tableName;
-			tableName = this.tableName;
-		}
-		
-		$.tableMeta.on(this.schemaId, tableName, callback);
+		if(reload)
+			$.tableMeta.load(this.schemaId, this.tableName, callback);
+		else
+			$.tableMeta.on(this.schemaId, this.tableName, callback);
 	};
 	
 	/**

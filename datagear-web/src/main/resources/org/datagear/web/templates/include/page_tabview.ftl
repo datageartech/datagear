@@ -12,6 +12,17 @@
 <script>
 (function(po)
 {
+	po.tabviewTab = function(tabViewModel, tabId)
+	{
+		var items = tabViewModel.items;
+		var idx = $.inArrayById(items, tabId);
+		
+		if(idx < 0)
+			return null;
+		
+		return items[idx];
+	};
+	
 	po.tabviewClose = function(tabViewModel, tabId)
 	{
 		var items = tabViewModel.items;

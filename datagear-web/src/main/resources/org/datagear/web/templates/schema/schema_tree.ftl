@@ -75,6 +75,10 @@
 (function(po)
 {
 	po.currentUserId = "${currentUser.id}";
+
+	po.i18n.pleaseSelectOnlyOne = "<@spring.message code='schema.pleaseSelectOnlyOne' />";
+	po.i18n.pleaseSelectAtLeastOne = "<@spring.message code='schema.pleaseSelectAtLeastOne' />";
+	po.i18n.confirmDeleteAsk = "<@spring.message code='schema.confirmDeleteAsk' />";
 	
 	po.refresh = function()
 	{
@@ -289,32 +293,43 @@
 		}
 	};
 	
-	po.loadSchemaTableTab = function(schemaId, tableName)
+	po.loadSchemaTableTab = function(schemaId, tableName, reloadTable)
 	{
+		reloadTable = (reloadTable == null ? false : reloadTable);
 		var tabId = po.schemaTableTabId(schemaId, tableName);
 		var panel = po.elementOfId(tabId);
 		
-		if(panel.prop("loaded") !== true && panel.prop("loading") !== true)
+		var expectLoad = (panel.prop("loaded") !== true || reloadTable);
+		
+		if(expectLoad && panel.prop("loading") !== true)
 		{
 			panel.prop("loading", true);
 			panel.empty();
 			
-			po.open(po.toSchemaTableUrl(schemaId, tableName),
+			po.open(po.toSchemaTableUrl(schemaId, tableName, reloadTable),
 			{
 				target: panel,
 				dialog: false,
 				success: function()
 				{
 					panel.prop("loaded", true);
+				},
+				complete: function()
+				{
 					panel.prop("loading", false);
 				}
 			});
 		}
 	};
 	
-	po.toSchemaTableUrl = function(schemaId, tableName)
+	po.toSchemaTableUrl = function(schemaId, tableName, reloadTable)
 	{
-		return po.concatContextPath("/data/"+schemaId+"/"+encodeURIComponent(tableName)+"/pagingQuery");
+		var url = po.concatContextPath("/data/"+schemaId+"/"+encodeURIComponent(tableName)+"/pagingQuery");
+		
+		if(reloadTable)
+			url += "?reloadTable="+reloadTable;
+		
+		return url;
 	};
 	
 	po.getSchemaTableTabIndex = function(schemaId, tableName)
@@ -340,6 +355,40 @@
 		}
 		
 		return value;
+	};
+	
+	po.getSelectedTableNodes = function()
+	{
+		var pm = po.vuePageModel();
+		var schemaNodes = (pm.schemaNodes || []);
+		var selectedNodeKeys = po.vueRaw(pm.selectedNodeKeys);
+		
+		var re = [];
+		
+		if(!selectedNodeKeys)
+			return re;
+		
+		for(var i=0; i<schemaNodes.length; i++)
+		{
+			var children = (schemaNodes[i].children || []);
+			for(var j=0; j<children.length; j++)
+			{
+				var tableNode = children[j];
+				
+				for(var selectedKey in selectedNodeKeys)
+				{
+					if(selectedKey == tableNode.key)
+						re.push(tableNode);
+				}
+			}
+		}
+		
+		return re;
+	};
+	
+	po.refreshTableStructure = function()
+	{
+		
 	};
 	
 	po.vuePageModel(
@@ -376,16 +425,6 @@
 				{
 					po.handleDeleteAction("/schema/delete");
 				}
-			},
-			{
-				label: "<@spring.message code='refresh' />",
-				command: function()
-				{
-					po.refresh();
-				}
-			},
-			{
-				label: "<@spring.message code='reload' />"
 			},
 			{
 				label: "<@spring.message code='autherization' />"
@@ -444,6 +483,15 @@
 				command: function()
 				{
 					po.tabviewOpenInNewWindow(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+				}
+			},
+			{
+				label: "<@spring.message code='refreshTableStructure' />",
+				command: function()
+				{
+					var tab = po.tabviewTab(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+					if(tab)
+						po.loadSchemaTableTab(tab.schemaId, tab.tableName, true);
 				}
 			}
 		]

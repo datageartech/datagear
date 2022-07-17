@@ -193,7 +193,8 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping("/{schemaId}/{tableName}/pagingQuery")
 	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName) throws Throwable
+			@PathVariable("tableName") String tableName,
+			@RequestParam(value="reloadTable", required = false) Boolean reloadTable) throws Throwable
 	{
 		final User user = WebUtils.getUser();
 
@@ -209,6 +210,7 @@ public class DataController extends AbstractSchemaConnTableController
 
 				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 				springModel.addAttribute("readonly", table.isReadonly());
+				springModel.addAttribute("reloadTable", Boolean.TRUE.equals(reloadTable));
 
 				springModel.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 				setGridPageAttributes(request, response, springModel, schema, table, dialect);

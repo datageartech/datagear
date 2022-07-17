@@ -275,7 +275,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 
 				// 数据源URL构建器
 				// 构建
-				.antMatchers("/schemaUrlBuilder/buildUrl")
+				.antMatchers("/schemaUrlBuilder/build")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN_ANALYST
 						: AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN_ANALYST)
 				// 管理
