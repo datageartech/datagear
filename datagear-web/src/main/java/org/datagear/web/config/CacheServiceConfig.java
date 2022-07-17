@@ -26,8 +26,6 @@ public class CacheServiceConfig
 {
 	private ApplicationPropertiesConfig applicationPropertiesConfig;
 
-	private CacheManager cacheManager;
-
 	@Autowired
 	public CacheServiceConfig(ApplicationPropertiesConfig applicationPropertiesConfig)
 	{
@@ -46,7 +44,6 @@ public class CacheServiceConfig
 		return bean;
 	}
 	
-
 	public CacheService createCacheService(Class<?> cacheNameClass)
 	{
 		return createCacheService(cacheNameClass.getName());
@@ -63,7 +60,7 @@ public class CacheServiceConfig
 		ApplicationProperties applicationProperties = getApplicationProperties();
 		
 		cacheService
-				.setDisabled(applicationProperties.isCacheServiceDisabled() || this.cacheManager == null);
+				.setDisabled(applicationProperties.isCacheServiceDisabled());
 		cacheService.setSerialized(false);
 		cacheService.setShared(false);
 		
