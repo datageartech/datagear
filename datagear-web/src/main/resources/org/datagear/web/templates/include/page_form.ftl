@@ -47,6 +47,11 @@ String action
 		po.vueMounted(function()
 		{
 			po.initValidationMessagesIfNon();
+			
+			//当需要在options中返回DOM元素时，应定义为函数，因为vue挂载前元素可能不必配
+			if($.isFunction(options))
+				options = options();
+			
 			options = $.extend(
 			{
 				submitHandler: function(form)

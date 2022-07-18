@@ -106,9 +106,20 @@
 	po.vueRef("disableRoles", po.disableRoles);
 	
 	var formModel = <@writeJson var=formModel />;
-	po.setupForm(formModel, po.submitUrl,
+	po.setupForm(formModel, po.submitUrl, function()
 	{
-		rules: {}
+		var options =
+		{
+			rules:
+			{
+				"confirmPassword":
+				{
+					"equalTo" : po.elementOfName("password")
+				}
+			}
+		};
+		
+		return options;
 	});
 	
 	po.vueMethod(

@@ -907,7 +907,8 @@ $.fn.extend(
 	 */
 	validateForm: function(reactiveFormModel, options)
 	{
-		const formModel = reactiveFormModel;
+		const thisForm = $(this);
+		thisForm.data("reactiveFormModel", reactiveFormModel);
 		
 		options = $.extend(
 		{
@@ -922,7 +923,7 @@ $.fn.extend(
 				{
 					//代理属性名
 					var name = thisEle.attr("name");
-					var realValue = Vue.toRaw(formModel[name]);
+					var realValue = Vue.toRaw(reactiveFormModel[name]);
 					return realValue;
 				}
 				else
@@ -956,7 +957,7 @@ $.fn.extend(
 		},
 		options);
 		
-		$(this).validate(options);
+		thisForm.validate(options);
 	}
 });
 
