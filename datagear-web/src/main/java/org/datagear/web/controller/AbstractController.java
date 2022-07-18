@@ -184,7 +184,7 @@ public abstract class AbstractController
 
 	protected void setFormModel(Model model, Object formModel, String requestAction, String submitAction)
 	{
-		model.addAttribute(KEY_FORM_MODEL, formModel);
+		model.addAttribute(KEY_FORM_MODEL, toWriteJsonTemplateModel(formModel));
 		setFormAction(model, requestAction, submitAction);
 	}
 	

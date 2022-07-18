@@ -154,13 +154,13 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	}
 
 	@Override
-	public List<User> getByIdsNoPassword(String[] ids, boolean discardNull)
+	public List<User> getByIdsSimple(String[] ids, boolean discardNull)
 	{
 		List<User> users = new ArrayList<User>();
 
 		for (String id : ids)
 		{
-			User user = getByIdNoPassword(id);
+			User user = getByIdSimple(id);
 
 			if (user == null && discardNull)
 				continue;

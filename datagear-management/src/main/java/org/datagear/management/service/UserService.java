@@ -52,14 +52,14 @@ public interface UserService extends EntityService<String, User>
 	User getByIdSimple(String id);
 
 	/**
-	 * 根据ID获取用户，其密码已被清除。
+	 * 根据ID获取用户，密码已被清除、且{@linkplain User#getRoles()}未设置。
 	 * 
 	 * @param ids
 	 * @param discardNull
 	 *            对于未找到的元素，是否丢弃而不是返回{@code null}元素
 	 * @return
 	 */
-	List<User> getByIdsNoPassword(String[] ids, boolean discardNull);
+	List<User> getByIdsSimple(String[] ids, boolean discardNull);
 
 	/**
 	 * 更新，但是忽略{@linkplain User#getRoles()}。

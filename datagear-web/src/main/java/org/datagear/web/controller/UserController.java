@@ -136,8 +136,7 @@ public class UserController extends AbstractController
 		User namedUser = this.userService.getByNameNoPassword(user.getName());
 
 		if (namedUser != null)
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMsgCode("userNameExists"), user.getName());
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
 
 		user.setId(IDUtil.randomIdOnTime20());
 		// 禁用新建管理员账号功能
@@ -173,8 +172,7 @@ public class UserController extends AbstractController
 		User namedUser = this.userService.getByNameNoPassword(user.getName());
 
 		if (namedUser != null && !namedUser.getId().equals(user.getId()))
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMsgCode("userNameExists"), user.getName());
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
 
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
@@ -205,10 +203,9 @@ public class UserController extends AbstractController
 		if (isEmpty(ids))
 			throw new IllegalInputException();
 
-		List<User> users = this.userService.getByIdsNoPassword(ids, true);
+		List<User> users = this.userService.getByIdsSimple(ids, true);
 
-		model.addAttribute("deleteUsers", users);
-		setFormAction(model, REQUEST_ACTION_DELETE, "deleteDo");
+		setFormModel(model, users, REQUEST_ACTION_DELETE, "deleteDo");
 
 		return "/user/user_delete";
 	}
@@ -222,11 +219,10 @@ public class UserController extends AbstractController
 			throw new IllegalInputException();
 
 		if (Arrays.asList(form.getIds()).contains(form.getMigrateToId()))
-			throw new IllegalInputException();
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteUserCanNotBeMigrateUser");
 
 		if (User.containsAdminUser(form.getIds()))
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMsgCode("deleteAdminUserDenied"));
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteAdminUserDenied");
 
 		User user = this.userService.getById(form.getMigrateToId());
 
@@ -296,8 +292,7 @@ public class UserController extends AbstractController
 		User namedUser = this.userService.getByNameNoPassword(user.getName());
 
 		if (namedUser != null && !namedUser.getId().equals(user.getId()))
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMsgCode("userNameExists"), user.getName());
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
 
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
@@ -305,12 +300,6 @@ public class UserController extends AbstractController
 		this.userService.updateIgnoreRole(user);
 
 		return operationSuccessResponseEntity(request);
-	}
-
-	@Override
-	protected String buildMsgCode(String code)
-	{
-		return buildMsgCode("user", code);
 	}
 
 	protected List<Role> toUserRolesList(User user)

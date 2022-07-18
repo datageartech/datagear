@@ -78,7 +78,7 @@
 		
 		onDelete: function()
 		{
-			po.handleDeleteAction("/user/delete");
+			po.handleOpenOfsAction("/user/delete");
 		},
 		
 		onSelect: function()
