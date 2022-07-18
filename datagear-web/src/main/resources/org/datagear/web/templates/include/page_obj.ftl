@@ -290,7 +290,8 @@ var ${pageId} =
 		"p-tree": primevue.tree,
 		"p-tabview": primevue.tabview,
 		"p-tabpanel": primevue.tabpanel,
-		"p-menu": primevue.menu
+		"p-menu": primevue.menu,
+		"p-chip": primevue.chip
 	},
 	
 	//vue挂载

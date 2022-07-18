@@ -99,6 +99,7 @@ public abstract class AbstractController
 	public static final String REQUEST_ACTION_ADD = "add";
 	public static final String REQUEST_ACTION_EDIT = "edit";
 	public static final String REQUEST_ACTION_VIEW = "view";
+	public static final String REQUEST_ACTION_DELETE = "delete";
 
 	public static final String KEY_SUBMIT_ACTION = "submitAction";
 	public static final String SUBMIT_ACTION_SAVE_ADD = "saveAdd";

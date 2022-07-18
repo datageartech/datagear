@@ -482,6 +482,29 @@
 		return -1;
 	};
 	
+	$.removeById = function(array, idValue, idPropName)
+	{
+		var idx = $.inArrayById(array, idValue, idPropName);
+		if(idx >= 0)
+			array.splice(idx, 1);
+	};
+	
+	$.addById = function(array, eleOrEles, idPropName)
+	{
+		var eles = ($.isArray(eleOrEles) ? eleOrEles : [ eleOrEles ]);
+		idPropName = (idPropName == null ? "id" : idPropName);
+		
+		for(var i=0; i<eles.length; i++)
+		{
+			var ele = eles[i];
+			
+			var idx = $.inArrayById(array, ele[idPropName], idPropName);
+			
+			if(idx < 0)
+				array.push(ele);
+		}
+	};
+	
 	/**
 	 * 包装成数组。
 	 */
@@ -846,23 +869,24 @@
 
 (function($, undefined)
 {
-	//重写支持Vue响数据模型的验证方法
-	$.validator.addMethod("required", function(value)
-	{
-		if(value == null)
-			return false;
-		
-		var type = typeof(value);
-		
-		if(type == $.TYPEOF_STRING)
-			return (value.length > 0);
-		else if(type == $.TYPEOF_NUMBER)
-			return true;
-		else if($.isArray(value))
-			return (value.length > 0);
-		else
-			return true;
-	});
+
+//重写支持Vue响数据模型的验证方法
+$.validator.addMethod("required", function(value)
+{
+	if(value == null)
+		return false;
+	
+	var type = typeof(value);
+	
+	if(type == $.TYPEOF_STRING)
+		return (value.length > 0);
+	else if(type == $.TYPEOF_NUMBER)
+		return true;
+	else if($.isArray(value))
+		return (value.length > 0);
+	else
+		return true;
+});
 
 $.fn.extend(
 {
@@ -883,7 +907,6 @@ $.fn.extend(
 	 */
 	validateForm: function(reactiveFormModel, options)
 	{
-		const formEle = this;
 		const formModel = reactiveFormModel;
 		
 		options = $.extend(

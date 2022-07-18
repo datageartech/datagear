@@ -44,10 +44,16 @@ User currentUser
 	po.isUserAnonymous = ("${currentUser.anonymous?string('true','false')}" == "true");
 	po.isUserAdmin = ("${currentUser.admin?string('true','false')}" == "true");
 	
-	po.openSysMenuDialog = function(e)
+	po.openSysMenuDialog = function(e, tableDialog)
 	{
+		tableDialog = (tableDialog == null ? true : tableDialog);
+		
 		e.originalEvent.preventDefault();
-		po.openTableDialog(e.item.url);
+		
+		if(tableDialog)
+			po.openTableDialog(e.item.url);
+		else
+			po.open(e.item.url);
 	};
 	
 	po.changeTheme = function(themeName)
@@ -65,7 +71,16 @@ User currentUser
 	
 	if(!po.isUserAnonymous)
 	{
-		sysMenuItems = sysMenuItems.concat([{ label: "<@spring.message code='module.personalSet' />" }, { separator: true }]);
+		sysMenuItems = sysMenuItems.concat(
+		[
+			{
+				label: "<@spring.message code='module.personalSet' />",
+				url: "${contextPath}/user/personalSet",
+				command: function(e){ po.openSysMenuDialog(e, false); }
+				
+			},
+			{ separator: true }
+		]);
 	}
 	
 	if(po.isUserAdmin)

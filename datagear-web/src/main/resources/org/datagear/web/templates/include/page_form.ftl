@@ -47,14 +47,16 @@ String action
 		po.vueMounted(function()
 		{
 			po.initValidationMessagesIfNon();
-			
-			po.form().validateForm(pm,
+			options = $.extend(
 			{
 				submitHandler: function(form)
 				{
 					return po.submitForm(submitUrl, options);
 				}
-			});
+			},
+			options);
+			
+			po.form().validateForm(pm, options);
 		});
 		
 		return pm;

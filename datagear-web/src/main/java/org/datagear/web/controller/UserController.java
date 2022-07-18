@@ -120,10 +120,7 @@ public class UserController extends AbstractController
 		}
 		user.setRoles(addRoles);
 
-		model.addAttribute("user", user);
-		model.addAttribute("userRoles", toWriteJsonTemplateModel(toUserRolesList(user)));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.addUser");
-		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
+		setFormModel(model, user, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/user/user_form";
 	}
@@ -131,15 +128,9 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody UserForm userForm)
+			@RequestBody User user)
 	{
-		User user = userForm.getUser();
-		String confirmPassword = userForm.getConfirmPassword();
-
 		if (isBlank(user.getName()) || isBlank(user.getPassword()))
-			throw new IllegalInputException();
-
-		if (isBlank(confirmPassword) || !confirmPassword.equals(user.getPassword()))
 			throw new IllegalInputException();
 
 		User namedUser = this.userService.getByNameNoPassword(user.getName());
@@ -154,7 +145,7 @@ public class UserController extends AbstractController
 
 		this.userService.add(user);
 
-		return optMsgSaveSuccessResponseEntity(request, user.cloneNoPassword());
+		return operationSuccessResponseEntity(request, user);
 	}
 
 	@RequestMapping("/edit")
@@ -166,10 +157,7 @@ public class UserController extends AbstractController
 		if (user == null)
 			throw new RecordNotFoundException();
 
-		model.addAttribute("user", user);
-		model.addAttribute("userRoles", toWriteJsonTemplateModel(toUserRolesList(user)));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.editUser");
-		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
+		setFormModel(model, user, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		return "/user/user_form";
 	}
@@ -177,15 +165,9 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody UserForm userForm)
+			@RequestBody User user)
 	{
-		User user = userForm.getUser();
-		String confirmPassword = userForm.getConfirmPassword();
-
 		if (isBlank(user.getName()))
-			throw new IllegalInputException();
-
-		if (!confirmPassword.equals(user.getPassword()))
 			throw new IllegalInputException();
 
 		User namedUser = this.userService.getByNameNoPassword(user.getName());
@@ -199,7 +181,7 @@ public class UserController extends AbstractController
 
 		this.userService.update(user);
 
-		return optMsgSaveSuccessResponseEntity(request, user.cloneNoPassword());
+		return operationSuccessResponseEntity(request, user);
 	}
 
 	@RequestMapping("/view")
@@ -211,10 +193,7 @@ public class UserController extends AbstractController
 		if (user == null)
 			throw new RecordNotFoundException();
 
-		model.addAttribute("user", user);
-		model.addAttribute("userRoles", toWriteJsonTemplateModel(toUserRolesList(user)));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.viewUser");
-		model.addAttribute(KEY_READONLY, true);
+		setFormModel(model, user, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
 
 		return "/user/user_form";
 	}
@@ -228,9 +207,8 @@ public class UserController extends AbstractController
 
 		List<User> users = this.userService.getByIdsNoPassword(ids, true);
 
-		model.addAttribute("deleteUsers", toWriteJsonTemplateModel(users));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.deleteUser");
-		model.addAttribute(KEY_FORM_ACTION, "deleteDo");
+		model.addAttribute("deleteUsers", users);
+		setFormAction(model, REQUEST_ACTION_DELETE, "deleteDo");
 
 		return "/user/user_delete";
 	}
@@ -257,7 +235,7 @@ public class UserController extends AbstractController
 
 		this.userService.deleteByIds(form.getIds(), form.getMigrateToId());
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")
@@ -290,17 +268,15 @@ public class UserController extends AbstractController
 	public String personalSet(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		User operator = WebUtils.getUser(request, response);
+		User operator = WebUtils.getUser();
 
-		User user = this.userService.getById(operator.getId());
+		User user = this.userService.getByIdNoPassword(operator.getId());
 
 		if (user == null)
 			throw new RecordNotFoundException();
 
-		model.addAttribute("user", user);
 		model.addAttribute("disableRoles", true);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.personalSet");
-		model.addAttribute(KEY_FORM_ACTION, "savePersonalSet");
+		setFormModel(model, user, "personalSet", "savePersonalSet");
 
 		return "/user/user_form";
 	}
@@ -308,15 +284,12 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/savePersonalSet", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> savePersonalSet(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody UserForm userForm)
+			@RequestBody User user)
 	{
-		User user = userForm.getUser();
-		String confirmPassword = userForm.getConfirmPassword();
-
-		if (isBlank(user.getName()) || !confirmPassword.equals(user.getPassword()))
+		if (isBlank(user.getName()))
 			throw new IllegalInputException();
 
-		User operator = WebUtils.getUser(request, response);
+		User operator = WebUtils.getUser();
 
 		user.setId(operator.getId());
 
@@ -331,7 +304,7 @@ public class UserController extends AbstractController
 
 		this.userService.updateIgnoreRole(user);
 
-		return optMsgSaveSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@Override
@@ -358,40 +331,6 @@ public class UserController extends AbstractController
 		});
 
 		return list;
-	}
-
-	public static class UserForm implements ControllerForm
-	{
-		private static final long serialVersionUID = 1L;
-
-		private User user;
-
-		private String confirmPassword;
-
-		public UserForm()
-		{
-			super();
-		}
-
-		public User getUser()
-		{
-			return user;
-		}
-
-		public void setUser(User user)
-		{
-			this.user = user;
-		}
-
-		public String getConfirmPassword()
-		{
-			return confirmPassword;
-		}
-
-		public void setConfirmPassword(String confirmPassword)
-		{
-			this.confirmPassword = confirmPassword;
-		}
 	}
 
 	public static class DeleteUserForm implements ControllerForm
