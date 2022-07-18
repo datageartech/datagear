@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#assign Authorization=statics['org.datagear.management.domain.Authorization']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -39,6 +40,12 @@
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
+			<p-column field="principalType" header="<@spring.message code='${resourceMeta.authPrincipalTypeLabel}' />"
+				:sortable="true">
+				<template #body="{data}">
+					{{formatPrincipalType(data)}}
+				</template>
+			</p-column>
 			<p-column field="principalName" header="<@spring.message code='${resourceMeta.authPrincipalLabel}' />"
 				:sortable="true">
 			</p-column>
@@ -77,6 +84,21 @@
 	
 	po.vueMethod(
 	{
+		formatPrincipalType: function(data)
+		{
+			var pt = data.principalType;
+			
+			if(pt == "${Authorization.PRINCIPAL_TYPE_USER}")
+				return "<@spring.message code='authorization.principalType.USER' />";
+			else if(pt == "${Authorization.PRINCIPAL_TYPE_ROLE}")
+				return "<@spring.message code='authorization.principalType.ROLE' />";
+			else if(pt == "${Authorization.PRINCIPAL_TYPE_ANONYMOUS}")
+				return "<@spring.message code='authorization.principalType.ANONYMOUS' />";
+			else if(pt == "${Authorization.PRINCIPAL_TYPE_ALL}")
+				return "<@spring.message code='authorization.principalType.ALL' />";
+			else
+				return "";
+		},
 		formatEnabled: function(data)
 		{
 			return (data.enabled ? "<@spring.message code='true' />" : "<@spring.message code='false' />");
