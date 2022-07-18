@@ -8,13 +8,13 @@
 -->
 <#--页面JS对象块 -->
 <script type="text/javascript">
-var ${pageId} =
+var ${pid} =
 {
 	//父页面对象ID
-	parentPageId: "${parentPageId}",
+	parentPid: "${parentPid}",
 	
 	//当前页面ID
-	pageId: "${pageId}",
+	pid: "${pid}",
 	
 	contextPath: "${contextPath}",
 	
@@ -28,7 +28,7 @@ var ${pageId} =
 	//获取父页面JS对象
 	parent: function()
 	{
-		var parentPage = (this.parentPageId ? window[this.parentPageId] : null);
+		var parentPage = (this.parentPid ? window[this.parentPid] : null);
 		//父页面DOM元素可能会在回调过程中被删除，这里加一层元素判断
 		return (!parentPage || parentPage.element().length == 0 ? null : parentPage);
 	},
@@ -36,7 +36,7 @@ var ${pageId} =
 	//获取页面内的元素
 	element: function(selector, parent)
 	{
-		return (selector == null ? $("#"+this.pageId) : (parent ? $(selector, parent) : $(selector, $("#"+this.pageId))));
+		return (selector == null ? $("#"+this.pid) : (parent ? $(selector, parent) : $(selector, $("#"+this.pid))));
 	},
 	
 	//获取页面内指定id的元素
@@ -55,7 +55,7 @@ var ${pageId} =
 	open: function(url, options)
 	{
 		url = this.concatContextPath(url);
-		url = $.addParam(url, "parentPageId", this.pageId);
+		url = $.addParam(url, "parentPid", this.pid);
 		$.open(url, (options || {}));
 	},
 	
@@ -333,7 +333,7 @@ var ${pageId} =
 			components: componentsObj
 		});
 		
-		this._vueApp = Vue.createApp(app).use(primevue.config.default).mount("#"+this.pageId);
+		this._vueApp = Vue.createApp(app).use(primevue.config.default).mount("#"+this.pid);
 		return this._vueApp;
 	},
 	

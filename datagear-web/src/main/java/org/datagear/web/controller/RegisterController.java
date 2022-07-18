@@ -85,16 +85,13 @@ public class RegisterController extends AbstractController
 		if (this.applicationProperties.isDisableRegister())
 		{
 			WebUtils.setOperationMessage(request,
-					optMsgFail(request, buildMsgCode("registerDisabled")));
+					optMsgFail(request, "registerDisabled"));
 			return ERROR_PAGE_URL;
 		}
 
 		User user = new User();
-
-		model.addAttribute("user", user);
-		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneNoPassword());
-		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
-
+		setFormModel(model, user, "register", "doRegister");
+		
 		return "/register";
 	}
 
@@ -104,16 +101,14 @@ public class RegisterController extends AbstractController
 			@RequestBody RegisterForm form)
 	{
 		if (this.applicationProperties.isDisableRegister())
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, buildMsgCode("registerDisabled"));
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "registerDisabled");
 		
 		if(!this.checkCodeManager.isCheckCode(request.getSession(), CHECK_CODE_MODULE_REGISTER, form.getCheckCode()))
 			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "checkCodeError");
 
 		User user = form.getUser();
-		String confirmPassword = form.getConfirmPassword();
 
-		if (isBlank(user.getName()) || isBlank(user.getPassword()) || isBlank(confirmPassword)
-				|| !confirmPassword.equals(user.getPassword()))
+		if (isBlank(user.getName()) || isBlank(user.getPassword()))
 			throw new IllegalInputException();
 
 		user.setId(IDUtil.randomIdOnTime20());
@@ -122,7 +117,7 @@ public class RegisterController extends AbstractController
 		user.setCreateTime(new Date());
 
 		if (this.userService.getByNameNoPassword(user.getName()) != null)
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, buildMsgCode("userNameExists"),
+			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists",
 					user.getName());
 
 		user.setRoles(buildUserRolesForSave(this.applicationProperties.getDefaultRoleRegister()));
@@ -132,7 +127,7 @@ public class RegisterController extends AbstractController
 		this.checkCodeManager.removeCheckCode(request.getSession(), CHECK_CODE_MODULE_REGISTER);
 		request.getSession().setAttribute(SESSION_KEY_REGISTER_USER_NAME, user.getName());
 
-		return optMsgSuccessResponseEntity();
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/success")
@@ -144,12 +139,6 @@ public class RegisterController extends AbstractController
 			return "redirect:/register";
 		else
 			return "/register_success";
-	}
-
-	@Override
-	protected String buildMsgCode(String code)
-	{
-		return buildMsgCode("register", code);
 	}
 
 	public static Set<Role> buildUserRolesForSave(String roleIdsStr)
@@ -175,8 +164,6 @@ public class RegisterController extends AbstractController
 
 		private User user;
 
-		private String confirmPassword;
-
 		private String checkCode;
 
 		public RegisterForm()
@@ -192,16 +179,6 @@ public class RegisterController extends AbstractController
 		public void setUser(User user)
 		{
 			this.user = user;
-		}
-
-		public String getConfirmPassword()
-		{
-			return confirmPassword;
-		}
-
-		public void setConfirmPassword(String confirmPassword)
-		{
-			this.confirmPassword = confirmPassword;
 		}
 
 		public String getCheckCode()

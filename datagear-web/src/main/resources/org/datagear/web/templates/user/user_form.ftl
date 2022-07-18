@@ -106,7 +106,7 @@
 	po.vueRef("disableRoles", po.disableRoles);
 	
 	var formModel = <@writeJson var=formModel />;
-	po.setupForm(formModel, po.submitUrl, function()
+	po.setupForm(formModel, po.submitUrl, {}, function()
 	{
 		var options =
 		{

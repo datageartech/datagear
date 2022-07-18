@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
-<#assign LoginController=statics['org.datagear.web.controller.LoginController']>
+<#assign RegisterController=statics['org.datagear.web.controller.RegisterController']>
 <#include "include/page_import.ftl">
 <#include "include/html_doctype.ftl">
 <html>
@@ -14,7 +14,7 @@
 <#include "include/html_head.ftl">
 <title>
 	<#include "include/html_app_name_prefix.ftl">
-	<@spring.message code='module.login' />
+	<@spring.message code='module.register' />
 </title>
 </head>
 <body class="m-0 surface-ground">
@@ -25,7 +25,7 @@
 		<div class="flex-grow-1 p-0">
 			<div class="grid grid-nogutter justify-content-center">
 				<p-card class="col-10 md:col-5 p-card mt-6">
-					<template #title><@spring.message code='module.login' /></template>
+					<template #title><@spring.message code='module.register' /></template>
 					<template #content>
 					<form class="flex flex-column">
 						<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
@@ -34,7 +34,7 @@
 									<@spring.message code='username' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-inputtext id="${pid}name" v-model="pm.name" type="text" class="input w-full"
+						        	<p-inputtext id="${pid}name" v-model="pm.user.name" type="text" class="input w-full"
 						        		name="name" required maxlength="20">
 						        	</p-inputtext>
 						        </div>
@@ -44,13 +44,34 @@
 									<@spring.message code='password' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-password id="${pid}password" v-model="pm.password" toggle-mask :feedback="false"
-						        		input-class="w-full" class="input w-full"
-						        		name="password" required maxlength="50">
+						        	<p-password id="${pid}password" v-model="pm.user.password" class="input w-full"
+						        		input-class="w-full" toggle-mask :feedback="false"
+						        		name="password" required maxlength="50" autocomplete="new-password">
 						        	</p-password>
 						        </div>
 							</div>
-							<div class="field grid" v-if="!disableLoginCheckCode">
+							<div class="field grid">
+								<label for="${pid}confirmPassword" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+									<@spring.message code='confirmPassword' />
+								</label>
+						        <div class="field-input col-12 md:col-9">
+						        	<p-password id="${pid}confirmPassword" v-model="pm.user.confirmPassword" class="input w-full"
+						        		input-class="w-full" toggle-mask :feedback="false"
+						        		name="confirmPassword" required maxlength="50" autocomplete="new-password">
+						        	</p-password>
+						        </div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}realName" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+									<@spring.message code='realName' />
+								</label>
+						        <div class="field-input col-12 md:col-9">
+						        	<p-inputtext id="${pid}realName" v-model="pm.user.realName" type="text" class="input w-full"
+						        		name="realName" maxlength="50">
+						        	</p-inputtext>
+						        </div>
+							</div>
+							<div class="field grid">
 								<label for="${pid}checkCode" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 									<@spring.message code='checkCode' />
 								</label>
@@ -63,16 +84,7 @@
 							</div>
 						</div>
 						<div class="page-form-foot flex-grow-0 pt-3 text-center">
-							<p-button type="submit" label="<@spring.message code='login' />" />
-						</div>
-						<div class="page-form-foot flex-grow-0 pt-3 text-right text-color-secondary">
-							<p-checkbox id="${pid}remremberLogin" v-model="pm.rememberMe" :binary="true" name="remremberLogin"></p-checkbox>
-							<label for="${pid}remremberLogin" class="ml-1"><@spring.message code='remremberLogin' /></label>
-							
-							<a href="${contextPath}/resetPassword" class="link ml-3"><@spring.message code='forgetPassword' /></a>
-						</div>
-						<div class="page-form-foot flex-grow-0 pt-3 text-right text-color-secondary" v-if="!disableRegister">
-							<a href="${contextPath}/register" class="link ml-3"><@spring.message code='module.register' /></a>
+							<p-button type="submit" label="<@spring.message code='register' />" />
 						</div>
 					</form>
 					</template>
@@ -85,35 +97,38 @@
 <script>
 (function(po)
 {
-	po.disableLoginCheckCode = ("${(configProperties.disableLoginCheckCode)?string('true','false')}" == "true");
-	po.disableRegister = ("${(configProperties.disableRegister)?string('true','false')}" == "true");
-	
-	po.vueRef("disableLoginCheckCode", po.disableLoginCheckCode);
-	po.vueRef("disableRegister", po.disableRegister);
-
-	var formModel = <@writeJson var=formModel />;
-	po.setupForm(formModel, "/login/doLogin",
+	po.setupForm({user: {}}, "/register/doRegister",
 	{
-		type: "POST",
-		contentType: $.CONTENT_TYPE_FORM,
 		tipSuccess: false,
 		success: function()
 		{
-			(window.top ? window.top : window).location.href="${contextPath}/";
+			(window.top ? window.top : window).location.href="${contextPath}/register/success";
 		}
+	},
+	function()
+	{
+		var options =
+		{
+			rules:
+			{
+				"confirmPassword":
+				{
+					"equalTo" : po.elementOfName("password")
+				}
+			}
+		};
+		
+		return options;
 	});
 	
-	if(!po.disableLoginCheckCode)
+	po.vueMounted(function()
 	{
-		po.vueMounted(function()
+		po.element(".checkCodeImg").click(function()
 		{
-			po.element(".checkCodeImg").click(function()
-			{
-				$(this).attr("src", "${contextPath}/checkCode?_=" + $.uid("rc")+"&m=${LoginController.CHECK_CODE_MODULE_LOGIN}");
-			})
-			.click();
-		});
-	}
+			$(this).attr("src", "${contextPath}/checkCode?_=" + $.uid("rc")+"&m=${RegisterController.CHECK_CODE_MODULE_REGISTER}");
+		})
+		.click();
+	});
 	
 	po.vueMount();
 })

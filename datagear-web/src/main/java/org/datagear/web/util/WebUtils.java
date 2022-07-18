@@ -46,11 +46,8 @@ public class WebUtils
 	/** Servlet环境中存储操作消息的关键字 */
 	public static final String KEY_OPERATION_MESSAGE = "operationMessage";
 
-	/** 页面ID关键字 */
-	public static final String KEY_PAGE_ID = "pageId";
-
 	/** 父页面ID关键字 */
-	public static final String KEY_PARENT_PAGE_ID = "parentPageId";
+	public static final String KEY_PARENT_PAGE_ID = "parentPid";
 
 	/**
 	 * 获取应用上下文路径。
@@ -336,66 +333,13 @@ public class WebUtils
 	}
 
 	/**
-	 * 获取页面ID。
-	 * <p>
-	 * 页面ID作为一次请求的客户端标识，用于为客户端定义页面对象。
-	 * </p>
-	 * 
-	 * @param request
-	 * @return
-	 */
-	public static String getPageId(HttpServletRequest request)
-	{
-		return (String) request.getAttribute(KEY_PAGE_ID);
-	}
-
-	/**
-	 * 设置页面ID。
-	 * <p>
-	 * 设置后，在页面可以使用EL表达式<code>${pageId}</code>来获取。
-	 * </p>
-	 * 
-	 * @param request
-	 * @param pageId
-	 */
-	public static void setPageId(HttpServletRequest request, String pageId)
-	{
-		request.setAttribute(KEY_PAGE_ID, pageId);
-	}
-
-	/**
-	 * 设置页面ID。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	public static String setPageId(HttpServletRequest request)
-	{
-		String pageId = generatePageId();
-		setPageId(request, pageId);
-
-		return pageId;
-	}
-
-	/**
 	 * 生成页面ID。
 	 * 
 	 * @return
 	 */
 	public static String generatePageId()
 	{
-		return generatePageId("p");
-	}
-
-	/**
-	 * 生成页面ID。
-	 * 
-	 * @param prefix
-	 * @return
-	 */
-	public static String generatePageId(String prefix)
-	{
-		return prefix + IDUtil.randomIdOnTime20();
+		return "p" + IDUtil.randomIdOnTime20();
 	}
 
 	/**
@@ -409,50 +353,15 @@ public class WebUtils
 	 */
 	public static String getParentPageId(HttpServletRequest request)
 	{
-		String parentPage = request.getParameter(KEY_PARENT_PAGE_ID);
+		String parentPageId = request.getParameter(KEY_PARENT_PAGE_ID);
 
-		if (parentPage == null)
-			parentPage = (String) request.getAttribute(KEY_PARENT_PAGE_ID);
+		if (parentPageId == null)
+			parentPageId = (String) request.getAttribute(KEY_PARENT_PAGE_ID);
 
-		if (parentPage == null)
-			parentPage = "";
+		if (parentPageId == null)
+			parentPageId = "";
 
-		return parentPage;
-	}
-
-	/**
-	 * 获取页面表单ID。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	public static String getPageFormId(HttpServletRequest request)
-	{
-		return getPageElementId(request, "form");
-	}
-
-	/**
-	 * 获取页面表格ID。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	public static String getPageTableId(HttpServletRequest request)
-	{
-		return getPageElementId(request, "table");
-	}
-
-	/**
-	 * 获取页面元素ID。
-	 * 
-	 * @param request
-	 * @param elementId
-	 * @return
-	 */
-	public static String getPageElementId(HttpServletRequest request, String elementId)
-	{
-		String pageId = getPageId(request);
-		return pageId + "-" + elementId;
+		return parentPageId;
 	}
 
 	/**

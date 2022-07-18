@@ -36,11 +36,12 @@ String action
 	po.vueRef("isViewAction", po.isViewAction);
 	po.vueRef("isReadonlyAction", po.isReadonlyAction);
 	
-	po.setupForm = function(data, submitUrl, options)
+	po.setupForm = function(data, submitUrl, ajaxOptions, validateOptions)
 	{
 		data = (data || {});
 		submitUrl = (submitUrl || "#");
-		options = (options || {});
+		ajaxOptions = (ajaxOptions || {});
+		validateOptions = (validateOptions || {});
 		
 		var pm = po.vuePageModel(data);
 		
@@ -49,19 +50,21 @@ String action
 			po.initValidationMessagesIfNon();
 			
 			//当需要在options中返回DOM元素时，应定义为函数，因为vue挂载前元素可能不必配
-			if($.isFunction(options))
-				options = options();
+			if($.isFunction(ajaxOptions))
+				ajaxOptions = ajaxOptions();
+			if($.isFunction(validateOptions))
+				validateOptions = validateOptions();
 			
-			options = $.extend(
+			validateOptions = $.extend(
 			{
 				submitHandler: function(form)
 				{
-					return po.submitForm(submitUrl, options);
+					return po.submitForm(submitUrl, ajaxOptions);
 				}
 			},
-			options);
+			validateOptions);
 			
-			po.form().validateForm(pm, options);
+			po.form().validateForm(pm, validateOptions);
 		});
 		
 		return pm;
@@ -69,7 +72,7 @@ String action
 
 	po.submitForm = function(url, options)
 	{
-		if(po.isViewAction)
+		if(po.isViewAction || url == "#")
 			return;
 		
 		var pm = po.vuePageModel();
@@ -153,5 +156,5 @@ String action
 		po.openTableDialog(url, options);
 	};
 })
-(${pageId});
+(${pid});
 </script>

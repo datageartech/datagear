@@ -79,5 +79,5 @@
 		$.ajaxJson(url, options);
 	};
 })
-(${pageId});
+(${pid});
 </script>

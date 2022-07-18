@@ -192,5 +192,5 @@ String action
 	po.inflateEntityActionIdPropName = "id";
 	po.inflateEntityActionIdParamName = "id";
 })
-(${pageId});
+(${pid});
 </script>

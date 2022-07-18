@@ -11,7 +11,10 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.WebUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerView;
 
 import freemarker.ext.beans.BeansWrapper;
@@ -33,16 +36,16 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	public static final String VAR_CONTEXT_PATH = "contextPath";
 
 	/** 变量：页面ID关键字 */
-	public static final String VAR_PAGE_ID = WebUtils.KEY_PAGE_ID;
+	public static final String VAR_PAGE_ID = "pid";
 
-	/** 变量：页面ID关键字 */
-	public static final String VAR_PID = "pid";
+	/** 变量：父页面ID关键字 */
+	public static final String VAR_PARENT_PAGE_ID = WebUtils.KEY_PARENT_PAGE_ID;
 
 	/** 变量：当前用户关键字 */
 	public static final String VAR_CURRENT_USER = "currentUser";
 
-	/** 变量：父页面ID关键字 */
-	public static final String VAR_PARENT_PAGE_ID = WebUtils.KEY_PARENT_PAGE_ID;
+	/** 变量：应用配置属性对象 */
+	public static final String VAR_CONFIG_PROPERTIES = "configProperties";
 
 	/** 变量：访问Java静态变量关键字 */
 	public static final String VAR_STATICS = "statics";
@@ -60,13 +63,18 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	{
 		super.exposeHelpers(model, request);
 
+		model.put(VAR_PAGE_ID, WebUtils.generatePageId());
+		model.put(VAR_PARENT_PAGE_ID, WebUtils.getParentPageId(request));
 		model.put(VAR_CONTEXT_PATH, WebUtils.getContextPath(request));
 		model.put(VAR_IS_AJAX_REQUEST, WebUtils.isAjaxRequest(request));
-		String pageId = WebUtils.generatePageId();
-		model.put(VAR_PAGE_ID, pageId);
-		model.put(VAR_PID, pageId);
-		model.put(VAR_PARENT_PAGE_ID, WebUtils.getParentPageId(request));
-		model.put(VAR_STATICS, BEANS_WRAPPER.getStaticModels());
 		model.put(VAR_CURRENT_USER, WebUtils.getUser());
+		model.put(VAR_STATICS, BEANS_WRAPPER.getStaticModels());
+		model.put(VAR_CONFIG_PROPERTIES, getApplicationProperties(request));
+	}
+	
+	protected ApplicationProperties getApplicationProperties(HttpServletRequest request)
+	{
+		ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());
+		return ac.getBean(ApplicationProperties.class);
 	}
 }

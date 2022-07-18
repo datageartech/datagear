@@ -150,5 +150,5 @@ page_manager.ftl
 		po.loadAjaxTable();
 	};
 })
-(${pageId});
+(${pid});
 </script>

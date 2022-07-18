@@ -94,5 +94,5 @@
 			window.open(items[idx].url);
 	};
 })
-(${pageId});
+(${pid});
 </script>

@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.datagear.management.domain.User;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.security.LoginCheckCodeErrorException;
 import org.datagear.web.util.OperationMessage;
@@ -117,11 +118,12 @@ public class LoginController extends AbstractController
 	 * @return
 	 */
 	@RequestMapping
-	public String login(HttpServletRequest request, HttpServletResponse response)
+	public String login(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		request.setAttribute("loginUsername", resolveLoginUsername(request, response));
-		request.setAttribute("disableRegister", this.applicationProperties.isDisableRegister());
-		request.setAttribute("disableLoginCheckCode", this.applicationProperties.isDisableLoginCheckCode());
+		User user = new User();
+		user.setName(resolveLoginUsername(request, response));
+		
+		setFormModel(model, user, "login", "doLogin");
 		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
 
 		return "/login";
