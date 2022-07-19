@@ -28,7 +28,6 @@ String action
 	
 	po.i18n.pleaseSelectOnlyOne = "<@spring.message code='pleaseSelectOnlyOne' />";
 	po.i18n.pleaseSelectAtLeastOne = "<@spring.message code='pleaseSelectAtLeastOne' />";
-	po.i18n.confirmDeleteAsk = "<@spring.message code='confirmDeleteAsk' />";
 	
 	//单选处理函数
 	po.executeOnSelect = function(callback)
@@ -60,7 +59,7 @@ String action
 	
 	po.handleAddAction = function(url, options)
 	{
-		var action = { url: po.concatContextPath(url), options: options };
+		var action = { url: url, options: options };
 		po.inflateFormActionPageParam(action);
 		po.open(action.url, action.options);
 	};
@@ -69,7 +68,7 @@ String action
 	{
 		po.executeOnSelect(function(entity)
 		{
-			var action = { url: po.concatContextPath(url), options: options };
+			var action = { url: url, options: options };
 			po.inflateFormActionPageParam(action);
 			po.inflateEntityAction(action, entity);
 			po.open(action.url, action.options);
@@ -80,7 +79,7 @@ String action
 	{
 		po.executeOnSelects(function(entities)
 		{
-			var action = { url: po.concatContextPath(url), options: options };
+			var action = { url: url, options: options };
 			po.inflateFormActionPageParam(action);
 			po.inflateEntityAction(action, entities);
 			po.open(action.url, action.options);
@@ -100,17 +99,12 @@ String action
 				},
 				options);
 				
-				var action = { url: po.concatContextPath(url), options: options };
+				var action = { url: url, options: options };
 				po.inflateEntityAction(action, entities);
 				
-				$.ajaxJson(url, action.options);
+				po.ajaxJson(action.url, action.options);
 			});
 		});
-	};
-	
-	po.confirmDelete = function(acceptHandler)
-	{
-		po.confirm({ message: po.i18n.confirmDeleteAsk, accept: acceptHandler });
 	};
 	
 	po.handleSelectAction = function()

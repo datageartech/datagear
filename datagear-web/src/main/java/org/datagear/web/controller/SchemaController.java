@@ -171,7 +171,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		Schema schema = getByIdForView(getSchemaService(), user, id);
 		schema.clearPassword();
 
-		setFormModel(model, schema, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
+		setFormModel(model, schema, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		return "/schema/schema_form";
 	}
 

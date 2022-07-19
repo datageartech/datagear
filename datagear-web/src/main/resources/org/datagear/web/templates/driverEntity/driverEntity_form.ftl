@@ -33,35 +33,40 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}driverLibrary" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}driverLibrary" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='driverEntity.driverLibrary.desc' />">
 					<@spring.message code='driverLibrary' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}driverLibrary" class="input p-inputtext w-full overflow-auto" style="height:8rem;">
-		        		<p-chip v-for="dlf in driverLibraryFiles" :key="dlf.name" :label="dlf.name" class="mb-2" :removable="!isReadonlyAction" @remove="onRemoveDriverLibraryFile($event, dlf.name)"></p-chip>
+		        		<p-chip v-for="dlf in driverLibraryFiles.files" :key="dlf.key"
+		        			class="mb-2" :removable="!isReadonlyAction" @remove="onRemovedLibraryFile($event, dlf.name)">
+		        			<a :href="genDownloadLibraryPath(dlf.name)" target="_blank" class="link">
+		        				{{dlf.name+' ('+dlf.size+')'}}
+		        			</a>
+		        		</p-chip>
 		        	</div>
-		        	<div>
-			        	<p-button type="button" label="<@spring.message code='upload' />"
-			        		@click="onUploadDriverLibraryFile" class="p-button-secondary mt-1"
-			        		v-if="!isReadonlyAction">
-			        	</p-button>
-		        	</div>
-		        	<div class="desc text-color-secondary">
-			        	<small><@spring.message code='driverEntity.driverLibrary.desc' /></small>
+		        	<div class="fileupload-wrapper mt-1" v-if="!isReadonlyAction">
+			        	<p-fileupload mode="basic" name="file" :url="uploadFileUrl"
+			        		@upload="onUploadedLibraryFile" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
+			        		:auto="true" choose-label="<@spring.message code='upload' />" class="p-button-secondary">
+			        	</p-fileupload>
+			        	<div class="desc text-color-secondary">
+			        		<small><@spring.message code='driverEntity.driverLibrary.desc1' /></small>
+			        	</div>
+						<#include "../include/page_fileupload.ftl">
 		        	</div>
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}driverClassName" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}driverClassName" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='driverEntity.driverClassName.desc' />">
 					<@spring.message code='driverClassName' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-inputtext id="${pid}driverClassName" v-model="pm.driverClassName" type="text" class="input w-full"
 		        		name="driverClassName" required maxlength="500">
 		        	</p-inputtext>
-		        	<div class="desc text-color-secondary">
-		        		<small><@spring.message code='driverEntity.driverClassName.desc' /></small>
-		        	</div>
 		        </div>
 			</div>
 			<div class="field grid">
@@ -84,41 +89,95 @@
 <script>
 (function(po)
 {
-	po.url = function(action)
-	{
-		return "/driverEntity/"+action;
-	};
-	
 	po.submitUrl = "/driverEntity/"+po.submitAction;
 	
 	po.refreshDriverLibrary = function()
 	{
 		var pm = po.vuePageModel();
 		
-		if(pm.id)
+		po.getJson("/driverEntity/listDriverFile", {"id": pm.id}, function(fileInfos)
 		{
-			$.getJSON("${contextPath}/driverEntity/listDriverFile", {"id": pm.id}, function(fileInfos)
-			{
-				po.vueRef("driverLibraryFiles", fileInfos);
-			});
-		}
+			po.setDriverLibrary(fileInfos);
+		});
 	};
 	
-	po.vueRef("driverLibraryFiles", []);
+	po.driverLibraryKeySeq = 0;
+	
+	po.setDriverLibrary = function(files)
+	{
+		var driverLibraryFiles = po.vueReactive("driverLibraryFiles");
+		
+		if(!files)
+			files = po.vueRaw(driverLibraryFiles.files);
+		
+		var seq = po.driverLibraryKeySeq++;
+		$.each(files, function(idx, file)
+		{
+			file.key = file.name + seq;
+		});
+		
+		driverLibraryFiles.files = files;
+	};
+	
+	po.inflateSubmitAction = function(action)
+	{
+		var newData = { driverEntity: action.options.data, driverLibraryFileNames: [] };
+		
+		var driverLibraryFiles = po.vueReactive("driverLibraryFiles");
+		var dlfs = driverLibraryFiles.files;
+		for(var i=0; i<dlfs.length; i++)
+			newData.driverLibraryFileNames.push(dlfs[i].name);
+		
+		action.options.data = newData;
+	};
 	
 	var formModel = <@writeJson var=formModel />;
 	po.setupForm(formModel, po.submitUrl);
 	
+	po.vueReactive("driverLibraryFiles", { files: [] });
+	po.vueRef("uploadFileUrl", po.concatContextPath("/driverEntity/uploadDriverFile?id="+formModel.id));
+	
 	po.vueMethod(
 	{
-		onRemoveDriverLibraryFile: function(e, name)
+		genDownloadLibraryPath: function(name)
 		{
-			
+			var pm = po.vuePageModel();
+			return po.concatContextPath("/driverEntity/downloadDriverFile?id="+encodeURIComponent(pm.id)+"&file="+encodeURIComponent(name));
 		},
 		
-		onUploadDriverLibraryFile: function()
+		onUploadedLibraryFile: function(e)
 		{
+			var pm = po.vuePageModel();
+			var response = $.getResponseJson(e.xhr);
 			
+			po.uploadFileOnUploaded(e);
+			po.setDriverLibrary(response.fileInfos);
+			
+			var driverClassNames = response.driverClassNames;
+			if(!pm.driverClassName && driverClassNames && driverClassNames[0])
+				pm.driverClassName = driverClassNames[0];
+		},
+		
+		onRemovedLibraryFile: function(e, name)
+		{
+			po.confirmDelete(function()
+			{
+				var pm = po.vuePageModel();
+				
+				po.ajax("/driverEntity/deleteDriverFile",
+				{
+					data: {id: pm.id, file: name},
+					tipSuccess: false,
+					success: function(response)
+					{
+						po.setDriverLibrary(response.data);
+					}
+				});
+			},
+			function()
+			{
+				po.setDriverLibrary();
+			});
 		}
 	});
 	

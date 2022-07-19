@@ -86,15 +86,15 @@ String action
 		});
 		options.success = successHandlers;
 		
-		var action = { url: po.concatContextPath(url), options: options };
+		var action = { url: url, options: options };
 		po.inflateSubmitAction(action);
 		
 		var jsonSubmit = (action.options.contentType == null || action.options.contentType == $.CONTENT_TYPE_JSON);
 		
 		if(jsonSubmit)
-			$.ajaxJson(action.url, action.options);
+			po.ajaxJson(action.url, action.options);
 		else
-			$.ajax(action.url, action.options);
+			po.ajax(action.url, action.options);
 		
 		return false;
 	};

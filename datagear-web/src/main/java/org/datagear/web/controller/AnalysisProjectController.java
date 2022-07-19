@@ -118,7 +118,7 @@ public class AnalysisProjectController extends AbstractController
 		User user = WebUtils.getUser();
 		AnalysisProject analysisProject = getByIdForView(this.analysisProjectService, user, id);
 
-		setFormModel(model, analysisProject, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
+		setFormModel(model, analysisProject, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		return "/analysisProject/analysisProject_form";
 	}
 

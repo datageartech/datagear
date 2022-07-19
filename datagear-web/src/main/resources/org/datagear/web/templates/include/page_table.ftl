@@ -118,14 +118,14 @@ page_manager.ftl
 		},
 		options);
 		
-		$.ajaxJson(po.concatContextPath(tableAttr.url), options);
+		po.ajaxJson(tableAttr.url, options);
 	};
 	
 	po.sortMetaToOrders = function(sortMeta)
 	{
 		var orders = [];
 		
-		sortMeta.forEach(function(sm)
+		$.each(sortMeta, function(idx, sm)
 		{
 			orders.push({ name: sm.field, type: (sm.order > 0 ? "ASC" : "DESC") });
 		});

@@ -161,7 +161,7 @@ public class AuthorizationController extends AbstractController
 		Authorization authorization = getByIdForView(this.authorizationService, id);
 
 		model.addAttribute("permissionMetas", resourceMeta.getPermissionMetas());
-		setFormModel(model, authorization, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
+		setFormModel(model, authorization, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		return "/authorization/authorization_form";
 	}

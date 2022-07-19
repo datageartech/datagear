@@ -20,6 +20,17 @@
 	background-color: var(--surface-100);
 }
 
+a.link,
+a.link:link,
+a.link:visited,
+a.link:active{
+	color: var(--text-color);
+	text-decoration: none;
+}
+a.link:hover{
+	color: var(--text-color);
+	text-decoration: underline;
+}
 .text-primary a.link,
 .text-primary a.link:link,
 .text-primary a.link:visited,
@@ -41,6 +52,22 @@
 .text-color-secondary a.link:hover{
 	color: var(--text-color-secondary);
 	text-decoration: underline;
+}
+
+label[title]:not(.no-tip)::after,
+.tip-label[title]::after{
+	content: "?";
+	color: var(--text-color-secondary);
+	margin-left: 0.1em;
+	font-size: 0.8em;
+	margin-top: 0.1em;
+	width: 1em;
+	height: 1em;
+	text-align: center;
+	line-height: 1em;
+	border-radius: 2em;
+	border-width: 1px;
+	border-style: solid;
 }
 
 /*带更多菜单按钮的tabview*/
@@ -207,6 +234,10 @@
 .validate-msg .p-error{
 	position: absolute;
 	top: -0.15em;
+}
+
+.fileupload-wrapper .fileupload-info{
+	min-height: 1.5rem;
 }
 
 /*管理页*/

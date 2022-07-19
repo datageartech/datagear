@@ -105,7 +105,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	{
 		model.addAttribute("scriptCode", scriptCode);
 		model.addAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
-		setFormAction(model, "preview", "#");
+		setFormAction(model, "preview", SUBMIT_ACTION_NONE);
 		
 		return "/schemaUrlBuilder/schemaUrlBuilder_build";
 	}
@@ -117,7 +117,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 		model.addAttribute("scriptCode", getUrlBuilderScript());
 		model.addAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
 		model.addAttribute("url", url);
-		setFormAction(model, "build", "#");
+		setFormAction(model, "build", SUBMIT_ACTION_NONE);
 		
 		return "/schemaUrlBuilder/schemaUrlBuilder_build";
 	}

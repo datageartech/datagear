@@ -237,38 +237,6 @@
 	};
 	
 	/**
-	 * 打开确认对话框。
-	 * @param content 显示内容
-	 * @param options
-	 * 			{
-	 * 				//可选，确定回调函数
-	 * 				confirm : function(){},
-	 * 
-	 * 				//可选，取消回调函数
-	 * 				cancel : function(){},
-	 * 
-	 * 				//可选，确定按钮文本
-	 * 				confirmText : "Confirm",
-	 * 
-	 * 				//可选，取消按钮文本
-	 * 				cancelText : "Cancel",
-	 * 
-	 * 				//可选，取消按钮文本
-	 * 				title : "Confirm"
-	 * 			}
-	 * @param yesCallback 确定回调函数
-	 * @param noCallback 取消回调函数
-	 */
-	$.confirm = function(content, options)
-	{
-		options = (options || {});
-		options = $.extend({confirmText : "Confirm", cancelText : "Cancel", title : "Confirm"}, options);
-		
-		if(options.confirm)
-			options.confirm();
-	};
-	
-	/**
 	 * 提示成功。
 	 */
 	$.tipSuccess = function(msg)
@@ -932,14 +900,14 @@ $.fn.extend(
 			showErrors: function(errorMap, errorList)
 			{
 				const successList = (this.successList || []);
-				successList.forEach(function(ele)
+				$.each(successList, function(idx, ele)
 				{
 					const field = $(ele).closest(".field-input");
 					$("small.p-error", field).hide();
 					$(".input", field).removeClass("p-invalid");
 				});
 				
-				errorList.forEach(function(error)
+				$.each(errorList, function(idx, error)
 				{
 					const field = $(error.element).closest(".field-input");
 					const input = $(".input", field);

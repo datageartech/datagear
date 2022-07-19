@@ -22,7 +22,8 @@ var ${pid} =
 	{
 		confirm: "<@spring.message code='confirm' />",
 		cancel : "<@spring.message code='cancel' />",
-		operationConfirm : "<@spring.message code='operationConfirm' />"
+		operationConfirm : "<@spring.message code='operationConfirm' />",
+		confirmDeleteAsk: "<@spring.message code='confirmDeleteAsk' />",
 	},
 	
 	//获取父页面JS对象
@@ -72,6 +73,37 @@ var ${pid} =
 		$.closeDialog(this.element());
 	},
 	
+	getJson: function(url, data, success)
+	{
+		var args = $.makeArray(arguments);
+		args[0] = this.concatContextPath(url);
+		$.getJSON.apply($, args);
+	},
+	
+	post: function(url, data, success)
+	{
+		var args = $.makeArray(arguments);
+		args[0] = this.concatContextPath(url);
+		$.post.apply($, args);
+	},
+	
+	ajaxJson: function(url, options)
+	{
+		url = this.concatContextPath(url);
+		$.ajaxJson(url, options);
+	},
+	
+	ajax: function(url, options)
+	{
+		url = this.concatContextPath(url);
+		options = (options || {});
+		
+		if(options.data && !options.type)
+			options = $.extend({ type: "POST" }, options);
+		
+		$.ajax(url, options);
+	},
+	
 	//页面是否在对话框内
 	isInDialog: function()
 	{
@@ -118,6 +150,13 @@ var ${pid} =
 		options);
 		
 		$.confirm(options);
+	},
+	
+	//删除操作确认
+	confirmDelete: function(acceptHandler, rejectHandler)
+	{
+		var msg = this.i18n.confirmDeleteAsk;
+		this.confirm({ message: msg, accept: acceptHandler, reject: rejectHandler });
 	},
 	
 	//连接应用根路径
@@ -172,22 +211,6 @@ var ${pid} =
 		
 		for(var p in methodsObj)
 			this._vueSetup[p] = methodsObj[p];
-	},
-	
-	//获取/设置并返回vue的setup函数、响应式对象（自动reactive）
-	vueSetup: function(name, value)
-	{
-		if(value === undefined)
-			return this._vueSetup[name];
-		else
-		{
-			if(typeof(value) == "function")
-				this._vueSetup[name] = value;
-			else
-				this._vueSetup[name] = Vue.reactive(value);
-			
-			return this._vueSetup[name];
-		}
 	},
 	
 	//获取（自动unref）/设置（自动ref）vue的setup引用值
@@ -249,7 +272,7 @@ var ${pid} =
 		if($.isArray(reactiveObj))
 		{
 			var re = [];
-			reactiveObj.forEach(function(item)
+			$.each(reactiveObj, function(idx, item)
 			{
 				re.push(Vue.toRaw(item));
 			});
@@ -291,7 +314,8 @@ var ${pid} =
 		"p-tabview": primevue.tabview,
 		"p-tabpanel": primevue.tabpanel,
 		"p-menu": primevue.menu,
-		"p-chip": primevue.chip
+		"p-chip": primevue.chip,
+		"p-fileupload": primevue.fileupload
 	},
 	
 	//vue挂载
@@ -307,7 +331,7 @@ var ${pid} =
 		{
 			setup()
 			{
-				watchObj.forEach(function(wt)
+				$.each(watchObj, function(idx, wt)
 				{
 					Vue.watch(wt.target, wt.callback);
 				});
@@ -319,7 +343,7 @@ var ${pid} =
 				
 				Vue.onMounted(function()
 				{
-					mountedObj.forEach(function(callback)
+					$.each(mountedObj, function(idx, callback)
 					{
 						callback();
 					});

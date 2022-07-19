@@ -18,7 +18,7 @@
 	
 	po.dataUrl = function(action)
 	{
-		return po.concatContextPath("/data/"+po.schemaId+"/"+encodeURIComponent(po.tableName)+"/"+action);
+		return "/data/"+encodeURIComponent(po.schemaId)+"/"+encodeURIComponent(po.tableName)+"/"+action;
 	};
 	
 	po.onDbTable = function(callback, reload)
@@ -76,7 +76,7 @@
 		
 		var options = $.extend({}, ajaxOptions, { data : data, error : errorCallback, type : "POST" });
 		
-		$.ajaxJson(url, options);
+		po.ajaxJson(url, options);
 	};
 })
 (${pid});

@@ -31,7 +31,7 @@ User currentUser
 					</#if>
 				</div>
 				<div>
-					<p-button type="button" @click="onSysMenuToggle" aria-haspopup="true" aria-controls="${pid}-sysMenu" icon="pi pi-cog" class="p-button-secondary p-button-text p-button-rounded p-button-sm text-primary"></p-button>
+					<p-button type="button" @click="onSysMenuToggle" aria-haspopup="true" aria-controls="${pid}-sysMenu" icon="pi pi-cog" class="p-button-text p-button-rounded p-button-sm text-primary"></p-button>
 					<p-contextmenu id="${pid}-sysMenu" ref="sysMenuEle" :model="sysMenu.items" :popup="true"></p-contextmenu>
 				</div>
 			</div>
@@ -58,9 +58,9 @@ User currentUser
 	
 	po.changeTheme = function(themeName)
 	{
-		$.getJSON("${contextPath}/changeThemeData?theme=" + themeName, function(data)
+		po.getJson("/changeThemeData?theme=" + themeName, function(data)
 		{
-			data.forEach(function(item)
+			$.each(data, function(idx, item)
 			{
 				$("#"+item.cssId).attr("href", item.href);
 			});

@@ -191,7 +191,7 @@ public class UserController extends AbstractController
 		if (user == null)
 			throw new RecordNotFoundException();
 
-		setFormModel(model, user, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
+		setFormModel(model, user, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		return "/user/user_form";
 	}

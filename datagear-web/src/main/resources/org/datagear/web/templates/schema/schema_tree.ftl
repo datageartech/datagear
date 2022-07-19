@@ -116,7 +116,7 @@
 		var keyword = pm.searchForm.keyword;
 		
 		pm.loadingSchema = true;
-		$.ajaxJson(po.concatContextPath("/schema/queryData"),
+		po.ajaxJson("/schema/queryData",
 		{
 			data: { keyword: keyword },
 			success: function(response)
@@ -142,7 +142,7 @@
 		var keyword = pm.searchForm.keyword;
 		
 		pm.loadingSchema = true;
-		$.ajaxJson(po.concatContextPath("/schema/"+schemaNode.schemaId+"/pagingQueryTable"),
+		po.ajaxJson("/schema/"+schemaNode.schemaId+"/pagingQueryTable",
 		{
 			data: { keyword: keyword, pageSize: 100, page: page },
 			success: function(response)
@@ -196,7 +196,7 @@
 	{
 		var re = [];
 		
-		schemas.forEach(function(schema)
+		$.each(schemas, function(idx, schema)
 		{
 			var label = schema.title;
 			
@@ -231,7 +231,7 @@
 	{
 		var re = [];
 		
-		pagingData.items.forEach(function(table)
+		$.each(pagingData.items, function(idx, table)
 		{
 			re.push(
 			{
@@ -283,7 +283,7 @@
 				title: tableName,
 				schemaId: schemaId,
 				tableName: tableName,
-				url: po.toSchemaTableUrl(schemaId, tableName)
+				url: po.concatContextPath(po.toSchemaTableUrl(schemaId, tableName))
 			});
 			
 			//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
@@ -325,7 +325,7 @@
 	
 	po.toSchemaTableUrl = function(schemaId, tableName, reloadTable)
 	{
-		var url = po.concatContextPath("/data/"+schemaId+"/"+encodeURIComponent(tableName)+"/pagingQuery");
+		var url = "/data/"+schemaId+"/"+encodeURIComponent(tableName)+"/pagingQuery";
 		
 		if(reloadTable)
 			url += "?reloadTable="+reloadTable;

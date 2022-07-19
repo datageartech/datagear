@@ -107,7 +107,7 @@ public class RoleController extends AbstractController
 	{
 		Role role = getByIdForView(this.roleService, id);
 
-		setFormModel(model, role, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
+		setFormModel(model, role, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		
 		return "/role/role_form";
 	}

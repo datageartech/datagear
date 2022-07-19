@@ -294,7 +294,7 @@ public class DriverEntityController extends AbstractController
 		if(driverEntity == null)
 			throw new IllegalInputException();
 
-		setFormModel(model, driverEntity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
+		setFormModel(model, driverEntity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		
 		return "/driverEntity/driverEntity_form";
 	}
