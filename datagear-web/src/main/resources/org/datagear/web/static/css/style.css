@@ -154,6 +154,10 @@ label[title]:not(.no-tip)::after,
 	display: none !important;
 }
 
+.p-chip{
+	min-height: 2rem;
+}
+
 /**无边框卡片*/
 .p-card.no-border{
 	box-shadow: none;
