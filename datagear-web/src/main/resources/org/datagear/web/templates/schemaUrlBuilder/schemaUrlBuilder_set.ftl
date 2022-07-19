@@ -29,7 +29,7 @@
 							<@spring.message code='code' />
 						</label>
 				        <div class="field-input col-12 md:col-9">
-				        	<p-textarea id="${pid}code" v-model="pm.code" rows="16" class="input w-full"
+				        	<p-textarea id="${pid}code" v-model="pm.code" class="input w-full" style="min-height:18rem;"
 				        		name="code" maxlength="10000" autofocus>
 				        	</p-textarea>
 				        </div>

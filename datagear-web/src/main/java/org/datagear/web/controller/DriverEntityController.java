@@ -41,12 +41,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -105,27 +103,13 @@ public class DriverEntityController extends AbstractController
 		this.commonDriverClassNames = commonDriverClassNames;
 	}
 
-	@ExceptionHandler(IllegalImportDriverEntityFileFormatException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleIllegalImportDriverEntityFileFormatException(HttpServletRequest request,
-			HttpServletResponse response, IllegalImportDriverEntityFileFormatException exception)
-	{
-		String code = buildMsgCode("import." + IllegalImportDriverEntityFileFormatException.class.getSimpleName());
-
-		setOperationMessageForThrowable(request, code, exception, false);
-
-		return ERROR_PAGE_URL;
-	}
-
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		DriverEntity driverEntity = new DriverEntity();
 		driverEntity.setId(IDUtil.randomIdOnTime20());
 
-		model.addAttribute("driverEntity", driverEntity);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "driverEntity.addDriverEntity");
-		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
+		setFormModel(model, driverEntity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/driverEntity/driverEntity_form";
 	}
@@ -168,7 +152,7 @@ public class DriverEntityController extends AbstractController
 			}
 		}
 
-		return optMsgSaveSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request, driverEntity);
 	}
 
 	@RequestMapping("/import")
@@ -249,7 +233,7 @@ public class DriverEntityController extends AbstractController
 
 		this.driverEntityManager.importFromZip(in, driverEntityIds);
 
-		return optMsgSuccessResponseEntity(request, buildMsgCode("import.success"));
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/export")
@@ -279,10 +263,11 @@ public class DriverEntityController extends AbstractController
 	{
 		DriverEntity driverEntity = this.driverEntityManager.get(id);
 
-		model.addAttribute("driverEntity", driverEntity);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "driverEntity.editDriverEntity");
-		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
+		if(driverEntity == null)
+			throw new IllegalInputException();
 
+		setFormModel(model, driverEntity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		
 		return "/driverEntity/driverEntity_form";
 	}
 
@@ -298,18 +283,19 @@ public class DriverEntityController extends AbstractController
 
 		this.driverEntityManager.update(driverEntity);
 
-		return optMsgSaveSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request, driverEntity);
 	}
 
 	@RequestMapping("/view")
 	public String view(HttpServletRequest request, org.springframework.ui.Model model, @RequestParam("id") String id)
 	{
 		DriverEntity driverEntity = this.driverEntityManager.get(id);
+		
+		if(driverEntity == null)
+			throw new IllegalInputException();
 
-		model.addAttribute("driverEntity", driverEntity);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "driverEntity.viewDriverEntity");
-		model.addAttribute(KEY_READONLY, true);
-
+		setFormModel(model, driverEntity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
+		
 		return "/driverEntity/driverEntity_form";
 	}
 
@@ -320,7 +306,7 @@ public class DriverEntityController extends AbstractController
 	{
 		this.driverEntityManager.delete(ids);
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/query")
@@ -465,7 +451,7 @@ public class DriverEntityController extends AbstractController
 		}
 		else
 		{
-			responseEntity = optMsgDeleteSuccessResponseEntity(request);
+			responseEntity = operationSuccessResponseEntity(request);
 			responseEntity.getBody().setData(fileInfos);
 		}
 

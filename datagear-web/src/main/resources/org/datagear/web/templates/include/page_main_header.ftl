@@ -58,7 +58,7 @@ User currentUser
 	
 	po.changeTheme = function(themeName)
 	{
-		$.getJSON(contextPath+"/changeThemeData?theme=" + themeName, function(data)
+		$.getJSON("${contextPath}/changeThemeData?theme=" + themeName, function(data)
 		{
 			data.forEach(function(item)
 			{

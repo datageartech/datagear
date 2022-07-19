@@ -209,6 +209,16 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(IllegalImportDriverEntityFileFormatException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleControllerIllegalImportDriverEntityFileFormatException(HttpServletRequest request,
+			HttpServletResponse response, IllegalImportDriverEntityFileFormatException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(IllegalImportDriverEntityFileFormatException.class), exception, false);
+
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(SqlValidationException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handlePersistenceSqlValidationException(HttpServletRequest request,

@@ -69,12 +69,12 @@
 					<@spring.message code='module.role' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<div class="p-inputgroup">
-			        	<div id="${pid}roles" class="input p-inputtext w-full border-noround-right overflow-auto" style="height:6rem;">
-			        		<p-chip v-for="role in pm.roles" :key="role.id" :label="role.name" class="mb-2" :removable="!isReadonlyAction" @remove="onRemoveRole($event, role.id)"></p-chip>
-			        	</div>
+		        	<div id="${pid}roles" class="input p-inputtext w-full overflow-auto" style="height:6rem;">
+		        		<p-chip v-for="role in pm.roles" :key="role.id" :label="role.name" class="mb-2" :removable="!isReadonlyAction" @remove="onRemoveRole($event, role.id)"></p-chip>
+		        	</div>
+		        	<div>
 			        	<p-button type="button" label="<@spring.message code='select' />"
-			        		@click="onSelectRole" class="p-button-secondary"
+			        		@click="onSelectRole" class="p-button-secondary mt-1"
 			        		v-if="!isReadonlyAction">
 			        	</p-button>
 		        	</div>
