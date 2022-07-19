@@ -28,7 +28,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}users" class="input p-inputtext w-full border-noround-right overflow-auto" style="height:6rem;">
-		        		<p-chip v-for="user in pm.users" :key="user.id" :label="user.nameLabel" class="mb-2" :removable @remove="onRemoveUser($event, user.id)"></p-chip>
+		        		<p-chip v-for="user in pm.users" :key="user.id" :label="user.name" class="mb-2" :removable @remove="onRemoveUser($event, user.id)"></p-chip>
 		        	</div>
 		        </div>
 			</div>
@@ -103,7 +103,7 @@
 			{
 				var pm = po.vuePageModel();
 				pm.migrateToId = user.id;
-				pm.migrateToName = user.nameLabel;
+				pm.migrateToName = user.name;
 			});
 		}
 	});
