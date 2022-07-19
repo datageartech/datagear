@@ -7,13 +7,10 @@
 
 package org.datagear.web.controller;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.Role;
-import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -60,9 +57,7 @@ public class RoleController extends AbstractController
 	{
 		Role role = new Role();
 
-		model.addAttribute("role", role);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "role.addRole");
-		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
+		setFormModel(model, role, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/role/role_form";
 	}
@@ -79,19 +74,17 @@ public class RoleController extends AbstractController
 
 		this.roleService.add(role);
 
-		return optMsgSaveSuccessResponseEntity(request, role);
+		return operationSuccessResponseEntity(request, role);
 	}
 
 	@RequestMapping("/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		Role role = this.roleService.getById(id);
+		Role role = getByIdForEdit(this.roleService, id);
 
-		model.addAttribute("role", role);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "role.editRole");
-		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
-
+		setFormModel(model, role, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		
 		return "/role/role_form";
 	}
 
@@ -105,22 +98,17 @@ public class RoleController extends AbstractController
 
 		this.roleService.update(role);
 
-		return optMsgSaveSuccessResponseEntity(request, role);
+		return operationSuccessResponseEntity(request, role);
 	}
 
 	@RequestMapping("/view")
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		Role role = this.roleService.getById(id);
+		Role role = getByIdForView(this.roleService, id);
 
-		if (role == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("role", role);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "role.viewRole");
-		model.addAttribute(KEY_READONLY, true);
-
+		setFormModel(model, role, REQUEST_ACTION_VIEW, SUBMIT_ACTION_VIEW);
+		
 		return "/role/role_form";
 	}
 
@@ -131,7 +119,7 @@ public class RoleController extends AbstractController
 	{
 		this.roleService.deleteByIds(ids);
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/pagingQuery")
@@ -158,44 +146,5 @@ public class RoleController extends AbstractController
 
 		PagingData<Role> roles = this.roleService.pagingQuery(pagingQuery);
 		return roles;
-	}
-
-	@Override
-	protected String buildMsgCode(String code)
-	{
-		return buildMsgCode("role", code);
-	}
-
-	public static class RoleUsersForm implements ControllerForm
-	{
-		private static final long serialVersionUID = 1L;
-
-		private Role role;
-		private List<User> users;
-
-		public RoleUsersForm()
-		{
-			super();
-		}
-
-		public Role getRole()
-		{
-			return role;
-		}
-
-		public void setRole(Role role)
-		{
-			this.role = role;
-		}
-
-		public List<User> getUsers()
-		{
-			return users;
-		}
-
-		public void setUsers(List<User> users)
-		{
-			this.users = users;
-		}
 	}
 }
