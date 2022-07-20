@@ -38,7 +38,7 @@
 					<@spring.message code='driverLibrary' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<div id="${pid}driverLibrary" class="input p-inputtext w-full overflow-auto" style="height:8rem;">
+		        	<div id="${pid}driverLibrary" class="input p-component p-inputtext w-full overflow-auto" style="height:8rem;">
 		        		<p-chip v-for="dlf in driverLibraryFiles.files" :key="dlf.key"
 		        			class="mb-2" :removable="!isReadonlyAction" @remove="onRemovedLibraryFile($event, dlf.name)">
 		        			<a :href="genDownloadLibraryPath(dlf.name)" target="_blank" class="link">

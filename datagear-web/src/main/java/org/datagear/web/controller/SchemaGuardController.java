@@ -58,9 +58,7 @@ public class SchemaGuardController extends AbstractController
 	{
 		SchemaGuard schemaGuard = new SchemaGuard();
 
-		model.addAttribute("schemaGuard", schemaGuard);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schemaGuard.addSchemaGuard");
-		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
+		setFormModel(model, schemaGuard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/schemaGuard/schemaGuard_form";
 	}
@@ -76,22 +74,17 @@ public class SchemaGuardController extends AbstractController
 
 		this.schemaGuardService.add(schemaGuard);
 
-		return optMsgSaveSuccessResponseEntity(request, schemaGuard);
+		return operationSuccessResponseEntity(request, schemaGuard);
 	}
 
 	@RequestMapping("/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		SchemaGuard schemaGuard = this.schemaGuardService.getById(id);
+		SchemaGuard schemaGuard = getByIdForEdit(this.schemaGuardService, id);
 
-		if (schemaGuard == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("schemaGuard", schemaGuard);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schemaGuard.editSchemaGuard");
-		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
-
+		setFormModel(model, schemaGuard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		
 		return "/schemaGuard/schemaGuard_form";
 	}
 
@@ -104,22 +97,17 @@ public class SchemaGuardController extends AbstractController
 
 		this.schemaGuardService.update(schemaGuard);
 
-		return optMsgSaveSuccessResponseEntity(request, schemaGuard);
+		return operationSuccessResponseEntity(request, schemaGuard);
 	}
 
 	@RequestMapping("/view")
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		SchemaGuard schemaGuard = this.schemaGuardService.getById(id);
+		SchemaGuard schemaGuard = getByIdForView(this.schemaGuardService, id);
 
-		if (schemaGuard == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("schemaGuard", schemaGuard);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schemaGuard.viewSchemaGuard");
-		model.addAttribute(KEY_READONLY, true);
-
+		setFormModel(model, schemaGuard, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		
 		return "/schemaGuard/schemaGuard_form";
 	}
 
@@ -130,7 +118,7 @@ public class SchemaGuardController extends AbstractController
 	{
 		this.schemaGuardService.deleteByIds(ids);
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/query")
@@ -163,8 +151,7 @@ public class SchemaGuardController extends AbstractController
 	@RequestMapping("/test")
 	public String test(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schemaGuard.testSchemaUrl");
-		model.addAttribute(KEY_FORM_ACTION, "testExecute");
+		setFormAction(model, "test", "testExecute");
 
 		return "/schemaGuard/schemaGuard_test";
 	}
@@ -178,7 +165,7 @@ public class SchemaGuardController extends AbstractController
 
 		boolean permitted = this.schemaGuardService.isPermitted(url);
 
-		return optMsgSuccessResponseEntity(permitted);
+		return operationSuccessResponseEntity(request, permitted);
 	}
 
 	public static class SchemaGuardTestForm implements ControllerForm

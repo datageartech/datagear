@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.SchemaGuard;
 import org.datagear.management.domain.User;
@@ -131,26 +130,6 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 		super.add(entity, params);
 
 		this._schemaGuardListCache = null;
-	}
-
-	@Override
-	protected List<SchemaGuard> query(String statement, Map<String, Object> params)
-	{
-		List<SchemaGuard> list = super.query(statement, params);
-
-		SchemaGuard.sortByPriority(list);
-
-		return list;
-	}
-
-	@Override
-	protected List<SchemaGuard> query(String statement, Map<String, Object> params, RowBounds rowBounds)
-	{
-		List<SchemaGuard> list = super.query(statement, params, rowBounds);
-
-		SchemaGuard.sortByPriority(list);
-
-		return list;
 	}
 
 	@Override

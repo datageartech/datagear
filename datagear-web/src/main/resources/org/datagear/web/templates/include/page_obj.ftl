@@ -315,7 +315,8 @@ var ${pid} =
 		"p-tabpanel": primevue.tabpanel,
 		"p-menu": primevue.menu,
 		"p-chip": primevue.chip,
-		"p-fileupload": primevue.fileupload
+		"p-fileupload": primevue.fileupload,
+		"p-inlinemessage": primevue.inlinemessage
 	},
 	
 	//vue挂载

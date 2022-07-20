@@ -50,6 +50,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/menu/menu.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/chip/chip.min.js"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/fileupload/fileupload.min.js"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/inlinemessage/inlinemessage.min.js"></script>
 
 <script src="${contextPath}/static/script/util.js"></script>
 <script src="${contextPath}/static/script/schemaUrlBuilder.js"></script>

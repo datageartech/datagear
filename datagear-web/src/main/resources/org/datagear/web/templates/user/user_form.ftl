@@ -69,7 +69,7 @@
 					<@spring.message code='module.role' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<div id="${pid}roles" class="input p-inputtext w-full overflow-auto" style="height:6rem;">
+		        	<div id="${pid}roles" class="input p-component p-inputtext w-full overflow-auto" style="height:6rem;">
 		        		<p-chip v-for="role in pm.roles" :key="role.id" :label="role.name" class="mb-2" :removable="!isReadonlyAction" @remove="onRemoveRole($event, role.id)"></p-chip>
 		        	</div>
 		        	<div>

@@ -30,6 +30,7 @@
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='view' />" @click="onView"></p-button>
+			<p-button label="<@spring.message code='test' />" @click="onTest" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!isSelectAction"></p-button>
 		</div>
 	</div>
@@ -40,9 +41,18 @@
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
-			<p-column field="pattern" header="<@spring.message code='pattern' />" class="col-name"></p-column>
-			<p-column field="priority" header="<@spring.message code='priority' />" class="col-name"></p-column>
-			<p-column field="createTime" header="<@spring.message code='createTime' />" class="col-datetime col-last"></p-column>
+			<p-column field="pattern" header="<@spring.message code='pattern' />" :sortable="true" class="col-name"></p-column>
+			<p-column field="permitted" header="<@spring.message code='isPermit' />" :sortable="true">
+				<template #body="{data}">
+					{{formatPermitted(data)}}
+				</template>
+			</p-column>
+			<p-column field="priority" header="<@spring.message code='priority' />" :sortable="true"></p-column>
+			<p-column field="enabled" header="<@spring.message code='isEnable' />" :sortable="true">
+				<template #body="{data}">
+					{{formatEnabled(data)}}
+				</template>
+			</p-column>
 		</p-datatable>
 	</div>
 </div>
@@ -53,11 +63,19 @@
 {
 	po.setupAjaxTable("/schemaGuard/queryData",
 	{
-		multiSortMeta: [ {field: "pattern", order: 1} ]
+		multiSortMeta: [ {field: "priority", order: -1} ]
 	});
 	
 	po.vueMethod(
 	{
+		formatPermitted: function(data)
+		{
+			return (data.permitted ? "<@spring.message code='true' />" : "<@spring.message code='false' />");
+		},
+		formatEnabled: function(data)
+		{
+			return (data.enabled ? "<@spring.message code='true' />" : "<@spring.message code='false' />");
+		},
 		onAdd: function()
 		{
 			po.handleAddAction("/schemaGuard/add");
@@ -81,6 +99,11 @@
 		onSelect: function()
 		{
 			po.handleSelectAction();
+		},
+		
+		onTest: function()
+		{
+			po.open("/schemaGuard/test");
 		}
 	});
 	

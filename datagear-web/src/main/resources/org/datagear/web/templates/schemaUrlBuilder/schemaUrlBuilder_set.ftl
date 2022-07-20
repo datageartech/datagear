@@ -50,7 +50,7 @@
 						<div class="flex-grow-0">
 							<@spring.message code='example' /> :
 						</div>
-						<pre class="flex-grow-1 overflow-auto border-round border-solid border-1 surface-border">
+<pre class="flex-grow-1 overflow-auto p-component p-inputtext">
 {
   //<@spring.message code='schemaUrlBuilder.dbType.desc' />
   dbType : "MySQL",
@@ -61,7 +61,7 @@
   //<@spring.message code='schemaUrlBuilder.defaultValue.desc' />
   defaultValue : { host : "", port : "3306", name : "" }
 }
-						</pre>
+</pre>
 						<div class="flex-grow-0">
 							<@spring.message code='schemaUrlBuilder.code.desc' />
 						</div>

@@ -33,13 +33,14 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}url" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}url" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='schema.url.desc' />">
 					<@spring.message code='url' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
 			        	<p-inputtext id="${pid}url" v-model="pm.url" type="text" class="input"
-			        		name="url" required maxlength="1000" placeholder="jdbc:">
+			        		name="url" required maxlength="2000" placeholder="jdbc:">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='help' />" @click="onBuildSchemaUrl"
 			        		class="p-button-secondary"
@@ -70,7 +71,8 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}driverEntity" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}driverEntity" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='schema.driverEntity.desc' />">
 					<@spring.message code='module.driverEntity' />
 				</label>
 		        <div class="field-input col-12 md:col-9">

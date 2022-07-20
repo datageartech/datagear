@@ -320,3 +320,8 @@ label[title]:not(.no-tip)::after,
 	/*对话框高度 - 列表header高度 - 选项卡标题高度 - 对话框header高度*/
 	height: calc(90vh - 5rem - 5rem - 6rem);
 }
+
+/*隐藏对话框内的主页头，比如登录页*/
+.p-dialog .page-main-header{
+	display: none;
+}
