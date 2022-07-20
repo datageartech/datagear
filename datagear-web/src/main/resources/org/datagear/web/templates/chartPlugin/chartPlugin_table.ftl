@@ -27,9 +27,8 @@
 		<div class="h-opts col-12 md:col-9 text-right">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="isSelectAction"></p-button>
 			
-			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!isSelectAction"></p-button>
-			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!isSelectAction"></p-button>
-			<p-button label="<@spring.message code='view' />" @click="onView"></p-button>
+			<p-button label="<@spring.message code='upload' />" @click="onUpload" v-if="!isSelectAction"></p-button>
+			<p-button label="<@spring.message code='download' />" @click="onDownload" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!isSelectAction"></p-button>
 		</div>
 	</div>
@@ -40,6 +39,7 @@
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
+			<p-column field="order" header="<@spring.message code='order' />" :hidden="true"></p-column>
 			<p-column field="nameLabel.value" header="<@spring.message code='name' />" class="col-name" style="max-width:20em;"></p-column>
 			<p-column field="version" header="<@spring.message code='version' />" class="col-version"></p-column>
 			<p-column field="iconUrl" header="<@spring.message code='icon' />" style="min-width:6em;max-width:12em;">
@@ -58,7 +58,7 @@
 {
 	po.setupAjaxTable("/chartPlugin/queryData",
 	{
-		multiSortMeta: [ {field: "pattern", order: 1} ]
+		multiSortMeta: [ {field: "order", order: 1} ]
 	});
 	
 	po.vueMethod(
@@ -71,19 +71,15 @@
 			
 			return "";
 		},
-		onAdd: function()
+		
+		onUpload: function()
 		{
-			po.handleAddAction("/chartPlugin/add");
+			po.handleAddAction("/chartPlugin/upload");
 		},
 		
-		onEdit: function()
+		onDownload: function()
 		{
-			po.handleOpenOfAction("/chartPlugin/edit");
-		},
-		
-		onView: function()
-		{
-			po.handleOpenOfAction("/chartPlugin/view");
+			po.handleOpenOfsAction("/chartPlugin/download", { target: "_blank" });
 		},
 		
 		onDelete: function()

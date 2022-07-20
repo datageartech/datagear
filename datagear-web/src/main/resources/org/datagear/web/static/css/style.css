@@ -296,11 +296,11 @@ label[title]:not(.no-tip)::after,
 	max-height: calc(90vh - 1rem - 6rem);
 }
 
-.page-table .plugin-info{
+.plugin-info{
 	position: relative;
 	padding-left: 2.2em;
 }
-.page-table .plugin-info .plugin-icon{
+.plugin-info .plugin-icon{
 	position: absolute;
 	left: 0;
 	top: -0.3em;

@@ -8,11 +8,11 @@
 package org.datagear.web.controller;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -107,6 +107,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping("/upload")
 	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_UPLOAD, SUBMIT_ACTION_SAVE_UPLOAD);
+		
 		return "/chartPlugin/chartPlugin_upload";
 	}
 
@@ -143,17 +145,13 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		}
 
 		List<HtmlChartPluginVO> pluginInfos = new ArrayList<>();
-
-		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
-
+		Set<HtmlChartPlugin> loadedPlugins = resolveHtmlChartPlugins(zipFile);
 		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
 
 		try
 		{
-			Set<HtmlChartPlugin> loaded = loader.loads(zipFile);
-
-			for (HtmlChartPlugin chartPlugin : loaded)
+			for (HtmlChartPlugin chartPlugin : loadedPlugins)
 				pluginInfos.add(toHtmlChartPluginVO(chartPlugin, themeName, locale));
 		}
 		catch (HtmlChartPluginLoadException e)
@@ -181,7 +179,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		Set<HtmlChartPlugin> uploads = getDirectoryHtmlChartPluginManager().upload(tmpFile);
 
-		return optMsgSuccessResponseEntity(request, "chartPlugin.upload.finish", uploads.size());
+		return operationSuccessResponseEntity(request, uploads.size());
 	}
 
 	@RequestMapping("/download")
@@ -212,7 +210,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	{
 		getDirectoryHtmlChartPluginManager().remove(ids);
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/query")
@@ -259,21 +257,41 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		return categorizations;
 	}
 
-	@RequestMapping(value = "/icon/{pluginId:.+}", produces = CONTENT_TYPE_JSON)
+	@RequestMapping("/icon/{pluginId:.+}")
 	public void getPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			@PathVariable("pluginId") String pluginId) throws Exception
+			@PathVariable("pluginId") String pluginId, @RequestParam(value="tmp", required = false) String tmpPluginFileName) throws Exception
 	{
-		ChartPlugin chartPlugin = getDirectoryHtmlChartPluginManager().get(pluginId);
+		ChartPlugin chartPlugin = null;
+		
+		if(isEmpty(tmpPluginFileName))
+			chartPlugin = getDirectoryHtmlChartPluginManager().get(pluginId);
+		else
+		{
+			File tmpPluginFile = FileUtil.getFile(this.tempDirectory, tmpPluginFileName, false);
+			
+			if(tmpPluginFile.exists())
+			{
+				Set<HtmlChartPlugin> plugins = resolveHtmlChartPlugins(tmpPluginFile);
+				for(HtmlChartPlugin p : plugins)
+				{
+					if(pluginId.equals(p.getId()))
+					{
+						chartPlugin = p;
+						break;
+					}
+				}
+			}
+		}
 
-		if (chartPlugin == null)
-			throw new FileNotFoundException();
-
+		if(chartPlugin == null)
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		
 		String themeName = resolveChartPluginIconThemeName(request);
 		Icon icon = chartPlugin.getIcon(themeName);
-
-		if (icon == null)
-			throw new FileNotFoundException();
-
+		
+		if(icon == null)
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		
 		long lastModified = icon.getLastModified();
 		if (webRequest.checkNotModified(lastModified))
 			return;
@@ -283,7 +301,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		OutputStream out = response.getOutputStream();
 		InputStream iconIn = null;
-
+		
 		try
 		{
 			iconIn = icon.getInputStream();
@@ -356,6 +374,23 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		}
 
 		out.println("})(this);");
+	}
+	
+	protected Set<HtmlChartPlugin> resolveHtmlChartPlugins(File file)
+	{
+		Set<HtmlChartPlugin> loaded = Collections.emptySet();
+
+		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
+		
+		try
+		{
+			loaded = loader.loads(file);
+		}
+		catch (HtmlChartPluginLoadException e)
+		{
+		}
+		
+		return loaded;
 	}
 
 	public static class saveUploadForm implements ControllerForm
