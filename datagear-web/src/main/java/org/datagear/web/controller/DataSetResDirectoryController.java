@@ -28,15 +28,12 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * 数据集资源目录控制器。
@@ -71,25 +68,12 @@ public class DataSetResDirectoryController extends AbstractController
 		this.dataSetResDirectoryService = dataSetResDirectoryService;
 	}
 
-	@ExceptionHandler(DataSetResDirectoryNotFoundException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleDataSetResDirectoryNotFoundException(HttpServletRequest request, HttpServletResponse response,
-			DataSetResDirectoryNotFoundException exception)
-	{
-		setOperationMessageForThrowable(request, "dataSetResDirectory.DataSetResDirectoryNotFoundException", exception,
-				false, exception.getDirectory());
-
-		return getErrorView(request, response);
-	}
-
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		DataSetResDirectory dataSetResDirectory = new DataSetResDirectory();
 
-		model.addAttribute("dataSetResDirectory", dataSetResDirectory);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSetResDirectory.addDataSetResDirectory");
-		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
+		setFormModel(model, dataSetResDirectory, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/dataSetResDirectory/dataSetResDirectory_form";
 	}
@@ -101,31 +85,25 @@ public class DataSetResDirectoryController extends AbstractController
 	{
 		checkSaveEntity(dataSetResDirectory);
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		dataSetResDirectory.setId(IDUtil.randomIdOnTime20());
 		dataSetResDirectory.setCreateUser(user);
 
 		this.dataSetResDirectoryService.add(dataSetResDirectory);
 
-		return optMsgSaveSuccessResponseEntity(request, dataSetResDirectory);
+		return operationSuccessResponseEntity(request, dataSetResDirectory);
 	}
 
 	@RequestMapping("/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
+		DataSetResDirectory dataSetResDirectory = getByIdForEdit(this.dataSetResDirectoryService, user, id);
 
-		DataSetResDirectory dataSetResDirectory = this.dataSetResDirectoryService.getByIdForEdit(user, id);
-
-		if (dataSetResDirectory == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("dataSetResDirectory", dataSetResDirectory);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSetResDirectory.editDataSetResDirectory");
-		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
-
+		setFormModel(model, dataSetResDirectory, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		
 		return "/dataSetResDirectory/dataSetResDirectory_form";
 	}
 
@@ -136,28 +114,22 @@ public class DataSetResDirectoryController extends AbstractController
 	{
 		checkSaveEntity(dataSetResDirectory);
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		this.dataSetResDirectoryService.update(user, dataSetResDirectory);
 
-		return optMsgSaveSuccessResponseEntity(request, dataSetResDirectory);
+		return operationSuccessResponseEntity(request, dataSetResDirectory);
 	}
 
 	@RequestMapping("/view")
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
+		DataSetResDirectory dataSetResDirectory = getByIdForView(this.dataSetResDirectoryService, user, id);
 
-		DataSetResDirectory dataSetResDirectory = this.dataSetResDirectoryService.getById(user, id);
-
-		if (dataSetResDirectory == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("dataSetResDirectory", dataSetResDirectory);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSetResDirectory.viewDataSetResDirectory");
-		model.addAttribute(KEY_READONLY, true);
-
+		setFormModel(model, dataSetResDirectory, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		
 		return "/dataSetResDirectory/dataSetResDirectory_form";
 	}
 
@@ -166,7 +138,7 @@ public class DataSetResDirectoryController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -174,7 +146,7 @@ public class DataSetResDirectoryController extends AbstractController
 			this.dataSetResDirectoryService.deleteById(user, id);
 		}
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")

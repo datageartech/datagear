@@ -219,6 +219,17 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(DataSetResDirectoryNotFoundException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleDataSetResDirectoryNotFoundException(HttpServletRequest request, HttpServletResponse response,
+			DataSetResDirectoryNotFoundException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(DataSetResDirectoryNotFoundException.class), exception,
+				false, exception.getDirectory());
+
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(SqlValidationException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handlePersistenceSqlValidationException(HttpServletRequest request,

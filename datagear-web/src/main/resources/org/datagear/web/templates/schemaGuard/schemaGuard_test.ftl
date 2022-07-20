@@ -42,10 +42,16 @@
 		<div class="page-form-foot flex-grow-0 pt-3 text-center">
 			<p-button type="submit" label="<@spring.message code='test' />"></p-button>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center" style="min-height:6rem;">
-			<div class="py-2">{{testResult.url}}</div>
-			<p-inlinemessage severity="success" v-if="testResult.result=='true'">允许创建</p-inlinemessage>
-			<p-inlinemessage severity="error" v-if="testResult.result=='false'">禁止创建</p-inlinemessage>
+		<div class="page-form-foot flex-grow-0 pt-3 text-center" style="min-height:6.2rem;">
+			<div class="p-component py-1">{{testResult.url}}</div>
+			<div class="p-component py-1">
+				<p-inlinemessage severity="success" v-if="testResult.result=='true'">
+					<@spring.message code='creationPermitted' />
+				</p-inlinemessage>
+				<p-inlinemessage severity="error" v-if="testResult.result=='false'">
+					<@spring.message code='creationDenied' />
+				</p-inlinemessage>
+			</div>
 		</div>
 	</form>
 </div>
