@@ -49,7 +49,7 @@ page_manager.ftl
 			rowsPerPageOptions: po.rowsPerPageOptions,
 			totalRecords: 0,
 			loading: false,
-			selectionMode: (po.isSingleSelectAction ? "single" : "multiple"),
+			selectionMode: (po.isMultipleSelect ? "multiple" : "single"),
 			multiSortMeta: options.multiSortMeta,
 			selectedItems: null
 		});

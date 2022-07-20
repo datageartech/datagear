@@ -19,9 +19,8 @@ String action
 (function(po)
 {
 	po.action = "${requestAction!AbstractController.REQUEST_ACTION_QUERY}";
-	po.isSingleSelectAction = (po.action == "${AbstractController.REQUEST_ACTION_SINGLE_SELECT}");
-	po.isMultipleSelectAction = (po.action == "${AbstractController.REQUEST_ACTION_MULTIPLE_SELECT}");
-	po.isSelectAction = (po.isSingleSelectAction || po.isMultipleSelectAction);
+	po.isSelectAction = (po.action == "${AbstractController.REQUEST_ACTION_SELECT}");
+	po.isMultipleSelect = ("${(isMultipleSelect!false)?string('true','false')}" == "true");
 	
 	po.refresh = function(){ /*需实现*/ };
 	po.getSelectedEntities = function(){ /*需实现*/ };
@@ -109,7 +108,7 @@ String action
 	
 	po.handleSelectAction = function()
 	{
-		if(po.isMultipleSelectAction)
+		if(po.isMultipleSelect)
 		{
 			po.executeOnSelects(function(entities)
 			{

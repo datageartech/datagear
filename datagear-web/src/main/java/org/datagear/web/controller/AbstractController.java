@@ -94,8 +94,7 @@ public abstract class AbstractController
 
 	public static final String KEY_REQUEST_ACTION = "requestAction";
 	public static final String REQUEST_ACTION_QUERY = "query";
-	public static final String REQUEST_ACTION_SINGLE_SELECT = "singleSelect";
-	public static final String REQUEST_ACTION_MULTIPLE_SELECT = "multipleSelect";
+	public static final String REQUEST_ACTION_SELECT = "select";
 	public static final String REQUEST_ACTION_ADD = "add";
 	public static final String REQUEST_ACTION_EDIT = "edit";
 	public static final String REQUEST_ACTION_VIEW = "view";
@@ -108,6 +107,8 @@ public abstract class AbstractController
 	public static final String SUBMIT_ACTION_NONE = "#";
 
 	public static final String KEY_FORM_MODEL = "formModel";
+	
+	public static final String KEY_IS_MULTIPLE_SELECT = "isMultipleSelect";
 
 	@Autowired
 	private ConversionService conversionService;
@@ -369,8 +370,8 @@ public abstract class AbstractController
 		if (request.getParameter("multiple") != null)
 			multiple = true;
 
-		model.addAttribute(KEY_REQUEST_ACTION,
-				(multiple ? REQUEST_ACTION_MULTIPLE_SELECT : REQUEST_ACTION_SINGLE_SELECT));
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_SELECT);
+		model.addAttribute(KEY_IS_MULTIPLE_SELECT, multiple);
 
 		return multiple;
 	}
