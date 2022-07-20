@@ -59,7 +59,8 @@
 				@tab-click="onTableTabClick" class="contextmenu-tabview" :class="{'opacity-0': pm.tableTabs.items.length == 0}">
 				<p-tabpanel v-for="tab in pm.tableTabs.items" :key="tab.id" :header="tab.title" :id="tab.id">
 					<template #header>
-						<p-button type="button" icon="pi pi-angle-down" class="context-menu-btn p-button-secondary p-button-text p-button-rounded"
+						<p-button type="button" icon="pi pi-angle-down"
+							class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
 							@click="onTableTabMenuToggle($event, tab.id)" aria-haspopup="true" aria-controls="${pid}-tableTabMenu">
 						</p-button>
 					</template>

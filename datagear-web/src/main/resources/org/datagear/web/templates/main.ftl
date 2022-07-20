@@ -23,12 +23,13 @@
 				<div class="page-main-menu col-fixed px-0">
 					<div class="grid grid-nogutter flex-column align-items-center p-card h-full">
 						<div class="col-fixed">
-							<p-button @click="onMainMenuToggle" icon="pi pi-align-justify" class="p-button-secondary p-button-text p-button-sm opacity-40 my-1 p-1"></p-button>
+							<p-button @click="onMainMenuToggle" icon="pi pi-align-justify"
+								class="p-button-sm p-button-secondary p-button-rounded p-button-text opacity-40 my-1 p-1">
+							</p-button>
 						</div>
 						<div class="col">
 							<p-tabmenu :model="pm.mainMenu.items" v-model:active-index="pm.mainMenu.active"
-										@tab-change="onMainMenuTabChange"
-										class="vertical-tabmenu" :class="{collapse: pm.mainMenu.collapse}">
+								@tab-change="onMainMenuTabChange" class="vertical-tabmenu" :class="{collapse: pm.mainMenu.collapse}">
 							</p-tabmenu>
 						</div>
 					</div>

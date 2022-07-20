@@ -70,6 +70,21 @@ label[title]:not(.no-tip)::after,
 	border-style: solid;
 }
 
+/*圆角按钮sm*/
+.p-button-sm.p-button.p-button-icon-only.p-button-rounded{
+	font-size: .875rem !important;
+	width: 2rem !important;
+    height: 2rem !important;
+    padding: 0.251rem 0.251rem !important;
+}
+/*圆角按钮xs*/
+.p-button-xs.p-button.p-button-icon-only.p-button-rounded{
+	font-size: .75rem !important;
+	width: 1.5rem !important;
+	height: 1.5rem !important;
+	padding: 0.2rem 0.2rem !important;
+}
+
 /*带更多菜单按钮的tabview*/
 .p-tabview.contextmenu-tabview .p-tabview-nav-container .p-tabview-nav-link{
 	padding-right: 2rem;
@@ -77,10 +92,6 @@ label[title]:not(.no-tip)::after,
 .p-tabview.contextmenu-tabview .p-tabview-nav-container .context-menu-btn{
 	position: absolute;
 	right: 0.2rem;
-	font-size: .75rem !important;
-	width: 1.5rem !important;
-	height: 1.5rem !important;
-	padding: 0.3rem 0.3rem !important;
 }
 
 /*竖向tabmenu*/

@@ -19,6 +19,7 @@ String action
 (function(po)
 {
 	po.action = "${requestAction!AbstractController.REQUEST_ACTION_QUERY}";
+	po.isQueryAction = (po.action == "${AbstractController.REQUEST_ACTION_QUERY}");
 	po.isSelectAction = (po.action == "${AbstractController.REQUEST_ACTION_SELECT}");
 	po.isMultipleSelect = ("${(isMultipleSelect!false)?string('true','false')}" == "true");
 	
