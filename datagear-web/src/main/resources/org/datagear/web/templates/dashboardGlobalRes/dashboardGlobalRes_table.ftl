@@ -42,7 +42,7 @@
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="path" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="path" header="<@spring.message code='id' />" :hidden="true"></p-column>
-			<p-column field="path" header="<@spring.message code='path' />" :sortable="true"></p-column>
+			<p-column field="path" header="<@spring.message code='path' />"></p-column>
 		</p-datatable>
 	</div>
 </div>
