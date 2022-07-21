@@ -47,7 +47,7 @@
 					<@spring.message code='isEnable' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-selectbutton v-model="pm.enabled" :options="enabledOptions"
+		        	<p-selectbutton v-model="pm.enabled" :options="booleanOptions"
 		        		option-label="name" option-value="value" class="input w-full">
 		        	</p-selectbutton>
 		        </div>
@@ -59,16 +59,11 @@
 	</form>
 </div>
 <#include "../include/page_form.ftl">
+<#include "../include/page_boolean_options.ftl">
 <script>
 (function(po)
 {
 	po.submitUrl = "/role/"+po.submitAction;
-
-	po.vueRef("enabledOptions",
-	[
-		{name: "<@spring.message code='true' />", value: true},
-		{name: "<@spring.message code='false' />", value: false}
-	]);
 	
 	var formModel = <@writeJson var=formModel />;
 	po.setupForm(formModel, po.submitUrl);

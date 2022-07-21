@@ -28,8 +28,10 @@
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="isSelectAction"></p-button>
 			
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!isSelectAction"></p-button>
+			<p-button label="<@spring.message code='upload' />" @click="onUpload" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='view' />" @click="onView"></p-button>
+			<p-button label="<@spring.message code='download' />" @click="onDownload"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!isSelectAction"></p-button>
 		</div>
 	</div>
@@ -49,6 +51,9 @@
 <script>
 (function(po)
 {
+	po.inflateEntityActionIdPropName = "path";
+	po.inflateEntityActionIdParamName = "path";
+	
 	po.setupAjaxTable("/dashboardGlobalRes/queryData",
 	{
 		multiSortMeta: [ {field: "path", order: 1} ]
@@ -60,6 +65,11 @@
 		{
 			po.handleAddAction("/dashboardGlobalRes/add");
 		},
+
+		onUpload: function()
+		{
+			po.handleAddAction("/dashboardGlobalRes/upload");
+		},
 		
 		onEdit: function()
 		{
@@ -69,6 +79,11 @@
 		onView: function()
 		{
 			po.handleOpenOfAction("/dashboardGlobalRes/view");
+		},
+
+		onDownload: function()
+		{
+			po.handleOpenOfsAction("/dashboardGlobalRes/download", { target: "_blank" });
 		},
 		
 		onDelete: function()

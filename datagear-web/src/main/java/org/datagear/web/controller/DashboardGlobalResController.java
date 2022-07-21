@@ -104,10 +104,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 			throws Exception
 	{
-		model.addAttribute("resourcePath", "");
-		model.addAttribute("resourceContent", "");
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardGlobalRes.addDashboardGlobalRes");
-		model.addAttribute(KEY_FORM_ACTION, "save");
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
 	}
@@ -115,11 +112,10 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@RequestMapping("/upload")
 	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		model.addAttribute("availableCharsetNames", toWriteJsonTemplateModel(getAvailableCharsetNames()));
 		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardGlobalRes.uploadDashboardGlobalRes");
-		model.addAttribute(KEY_FORM_ACTION, "saveUpload");
+		setFormAction(model, REQUEST_ACTION_UPLOAD, SUBMIT_ACTION_SAVE_UPLOAD);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_upload";
 	}
@@ -162,7 +158,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 			IOUtil.copy(file, resFile, false);
 		}
 
-		return optMsgSaveSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
@@ -211,8 +207,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 
 		model.addAttribute("resourcePath", path);
 		model.addAttribute("resourceContent", resourceContent);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardGlobalRes.editDashboardGlobalRes");
-		model.addAttribute(KEY_FORM_ACTION, "save");
+		
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
 	}
@@ -250,7 +246,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 			FileUtil.deleteFile(initFile);
 		}
 
-		return optMsgSaveSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/view/**")
@@ -350,7 +346,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 			FileUtil.deleteFile(file);
 		}
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/query")

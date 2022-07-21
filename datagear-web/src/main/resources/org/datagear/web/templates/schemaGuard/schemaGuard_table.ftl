@@ -58,6 +58,7 @@
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">
+<#include "../include/page_boolean_options.ftl">
 <script>
 (function(po)
 {
@@ -70,11 +71,11 @@
 	{
 		formatPermitted: function(data)
 		{
-			return (data.permitted ? "<@spring.message code='true' />" : "<@spring.message code='false' />");
+			return po.formatBooleanValue(data.permitted);
 		},
 		formatEnabled: function(data)
 		{
-			return (data.enabled ? "<@spring.message code='true' />" : "<@spring.message code='false' />");
+			return po.formatBooleanValue(data.enabled);
 		},
 		onAdd: function()
 		{
