@@ -51,6 +51,9 @@
 		        			</div>
 		        		</p-chip>
 		        	</div>
+		        	<div class="validate-msg">
+		        		<input name="pluginFileName" required type="text" class="validate-proxy" />
+		        	</div>
 		        </div>
 			</div>
 		</div>

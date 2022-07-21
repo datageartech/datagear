@@ -1187,7 +1187,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 				if (names.contains(name))
 				{
-					return optMsgFailResponseEntity(null, HttpStatus.BAD_REQUEST,
+					return optFailResponseEntity(null, HttpStatus.BAD_REQUEST,
 							"dataSet.error.duplicateParamName");
 				}
 				else
@@ -1205,7 +1205,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 				if (names.contains(name))
 				{
-					return optMsgFailResponseEntity(null, HttpStatus.BAD_REQUEST,
+					return optFailResponseEntity(null, HttpStatus.BAD_REQUEST,
 							"dataSet.error.duplicatePropertyName");
 				}
 				else

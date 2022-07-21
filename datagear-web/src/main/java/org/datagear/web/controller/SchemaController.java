@@ -255,7 +255,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 			JdbcUtil.closeConnection(cn);
 		}
 
-		return optMsgSuccessResponseEntity(request, "schema.testConnection.ok");
+		return operationSuccessResponseEntity(request, "schema.testConnection.ok");
 	}
 
 	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)

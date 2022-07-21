@@ -179,7 +179,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		Set<HtmlChartPlugin> uploads = getDirectoryHtmlChartPluginManager().upload(tmpFile);
 
-		return operationSuccessResponseEntity(request, uploads.size());
+		return optSuccessResponseEntity(request, "chartPlugin.upload.finish", uploads.size());
 	}
 
 	@RequestMapping("/download")

@@ -527,12 +527,70 @@ public abstract class AbstractController
 	 */
 	protected ResponseEntity<OperationMessage> operationSuccessResponseEntity(HttpServletRequest request, Object data)
 	{
-		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity(request, "operationSuccess");
+		ResponseEntity<OperationMessage> responseEntity = optSuccessResponseEntity(request, "operationSuccess");
 
 		if (data != null)
 			responseEntity.getBody().setData(data);
 
 		return responseEntity;
+	}
+
+	/**
+	 * 构建操作成功消息响应体。
+	 * @param request
+	 * @param code
+	 * @param messageArgs
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> optSuccessResponseEntity(HttpServletRequest request, String code,
+			Object... messageArgs)
+	{
+		OperationMessage operationMessage = optMsgSuccess(request, code, messageArgs);
+		return optResponseEntity(HttpStatus.OK, operationMessage);
+	}
+
+	/**
+	 * 构建操作失败消息响应体，HTTP状态为{@linkplain HttpStatus#BAD_REQUEST}。
+	 * 
+	 * @param request
+	 * @param code
+	 * @param messageArgs
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> optFailResponseEntity(HttpServletRequest request, String code,
+			Object... messageArgs)
+	{
+		OperationMessage operationMessage = optMsgFail(request, code, messageArgs);
+		return optResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
+	}
+
+	/**
+	 * 构建操作失败消息响应体。
+	 * 
+	 * @param request
+	 * @param httpStatus
+	 * @param code
+	 * @param messageArgs
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> optFailResponseEntity(HttpServletRequest request,
+			HttpStatus httpStatus, String code, Object... messageArgs)
+	{
+		OperationMessage operationMessage = optMsgFail(request, code, messageArgs);
+		return optResponseEntity(httpStatus, operationMessage);
+	}
+
+	/**
+	 * 构建操作消息响应体。
+	 * 
+	 * @param httpStatus
+	 * @param operationMessage
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> optResponseEntity(HttpStatus httpStatus,
+			OperationMessage operationMessage)
+	{
+		return new ResponseEntity<>(operationMessage, httpStatus);
 	}
 
 	/**
@@ -577,7 +635,7 @@ public abstract class AbstractController
 	@Deprecated
 	protected ResponseEntity<OperationMessage> optMsgSaveSuccessResponseEntity(HttpServletRequest request)
 	{
-		return optMsgSuccessResponseEntity(request, "saveSuccess");
+		return operationSuccessResponseEntity(request, "saveSuccess");
 	}
 
 	/**
@@ -590,7 +648,7 @@ public abstract class AbstractController
 	@Deprecated
 	protected ResponseEntity<OperationMessage> optMsgSaveSuccessResponseEntity(HttpServletRequest request, Object data)
 	{
-		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity(request,
+		ResponseEntity<OperationMessage> responseEntity = operationSuccessResponseEntity(request,
 				"saveSuccess");
 		responseEntity.getBody().setData(data);
 
@@ -608,14 +666,14 @@ public abstract class AbstractController
 			int saveCount)
 	{
 		if (saveCount > 0)
-			return optMsgSuccessResponseEntity(request, "saveSuccess.withCount", saveCount);
+			return optSuccessResponseEntity(request, "saveSuccess.withCount", saveCount);
 
 		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
 		// if (saveCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
 
-		ResponseEntity<OperationMessage> re = optMsgSuccessResponseEntity(request, "saveSuccess");
+		ResponseEntity<OperationMessage> re = operationSuccessResponseEntity(request, "saveSuccess");
 		return re;
 	}
 
@@ -628,7 +686,7 @@ public abstract class AbstractController
 	@Deprecated
 	protected ResponseEntity<OperationMessage> optMsgDeleteSuccessResponseEntity(HttpServletRequest request)
 	{
-		return optMsgSuccessResponseEntity(request, "deleteSuccess");
+		return operationSuccessResponseEntity(request, "deleteSuccess");
 	}
 
 	/**
@@ -642,73 +700,15 @@ public abstract class AbstractController
 			int deleteCount)
 	{
 		if (deleteCount > 0)
-			return optMsgSuccessResponseEntity(request, "deleteSuccess.withCount", deleteCount);
+			return optSuccessResponseEntity(request, "deleteSuccess.withCount", deleteCount);
 
 		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
 		// if (deleteCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "deleteFail.zeroCount");
 
-		ResponseEntity<OperationMessage> re = optMsgSuccessResponseEntity(request, "deleteSuccess");
+		ResponseEntity<OperationMessage> re = operationSuccessResponseEntity(request, "deleteSuccess");
 		return re;
-	}
-
-	/**
-	 * 构建操作成功消息响应体。
-	 * @param request
-	 * @param code
-	 * @param messageArgs
-	 * @return
-	 */
-	protected ResponseEntity<OperationMessage> optMsgSuccessResponseEntity(HttpServletRequest request, String code,
-			Object... messageArgs)
-	{
-		OperationMessage operationMessage = optMsgSuccess(request, code, messageArgs);
-		return optMsgResponseEntity(HttpStatus.OK, operationMessage);
-	}
-
-	/**
-	 * 构建操作失败消息响应体，HTTP状态为{@linkplain HttpStatus#BAD_REQUEST}。
-	 * 
-	 * @param request
-	 * @param code
-	 * @param messageArgs
-	 * @return
-	 */
-	protected ResponseEntity<OperationMessage> optMsgFailResponseEntity(HttpServletRequest request, String code,
-			Object... messageArgs)
-	{
-		OperationMessage operationMessage = optMsgFail(request, code, messageArgs);
-		return optMsgResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
-	}
-
-	/**
-	 * 构建操作失败消息响应体。
-	 * 
-	 * @param request
-	 * @param httpStatus
-	 * @param code
-	 * @param messageArgs
-	 * @return
-	 */
-	protected ResponseEntity<OperationMessage> optMsgFailResponseEntity(HttpServletRequest request,
-			HttpStatus httpStatus, String code, Object... messageArgs)
-	{
-		OperationMessage operationMessage = optMsgFail(request, code, messageArgs);
-		return optMsgResponseEntity(httpStatus, operationMessage);
-	}
-
-	/**
-	 * 构建操作消息响应体。
-	 * 
-	 * @param httpStatus
-	 * @param operationMessage
-	 * @return
-	 */
-	protected ResponseEntity<OperationMessage> optMsgResponseEntity(HttpStatus httpStatus,
-			OperationMessage operationMessage)
-	{
-		return new ResponseEntity<>(operationMessage, httpStatus);
 	}
 
 	/**

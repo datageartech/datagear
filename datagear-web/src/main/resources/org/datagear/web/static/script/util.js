@@ -322,7 +322,7 @@
 					
 					const showSuccess = (options) =>
 					{
-						options = buildTipOptions({ severity: "success", group: "global-tip", life: 2000 }, options);
+						options = buildTipOptions({ severity: "success", group: "global-tip", life: 2500 }, options);
 						toast.add(options);
 					};
 					const showInfo = (options) =>

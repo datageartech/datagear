@@ -792,7 +792,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			File templateFile = FileUtil.getFile(uploadDirectory, fileName);
 
 			if (!templateFile.exists() || templateFile.isDirectory())
-				return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+				return optFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 						"dashboard.import.templateFileNotExists", fileName);
 		}
 

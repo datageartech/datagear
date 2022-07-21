@@ -136,7 +136,7 @@ public class UserController extends AbstractController
 		User namedUser = this.userService.getByNameNoPassword(user.getName());
 
 		if (namedUser != null)
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
 
 		user.setId(IDUtil.randomIdOnTime20());
 		// 禁用新建管理员账号功能
@@ -172,7 +172,7 @@ public class UserController extends AbstractController
 		User namedUser = this.userService.getByNameNoPassword(user.getName());
 
 		if (namedUser != null && !namedUser.getId().equals(user.getId()))
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
 
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
@@ -219,10 +219,10 @@ public class UserController extends AbstractController
 			throw new IllegalInputException();
 
 		if (Arrays.asList(form.getIds()).contains(form.getMigrateToId()))
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteUserCanNotBeMigrateUser");
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteUserCanNotBeMigrateUser");
 
 		if (User.containsAdminUser(form.getIds()))
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteAdminUserDenied");
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteAdminUserDenied");
 
 		User user = this.userService.getById(form.getMigrateToId());
 
@@ -292,7 +292,7 @@ public class UserController extends AbstractController
 		User namedUser = this.userService.getByNameNoPassword(user.getName());
 
 		if (namedUser != null && !namedUser.getId().equals(user.getId()))
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
 
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));

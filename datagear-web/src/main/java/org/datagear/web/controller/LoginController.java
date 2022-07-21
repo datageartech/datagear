@@ -133,7 +133,7 @@ public class LoginController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> loginSuccess(HttpServletRequest request, HttpServletResponse response)
 	{
-		return optMsgSuccessResponseEntity(request, "loginSuccess");
+		return operationSuccessResponseEntity(request, "loginSuccess");
 	}
 
 	@RequestMapping(value = "/error", produces = CONTENT_TYPE_JSON)
@@ -145,7 +145,7 @@ public class LoginController extends AbstractController
 		{
 			if (ae instanceof LoginCheckCodeErrorException)
 			{
-				return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "checkCodeError");
+				return optFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "checkCodeError");
 			}
 		}
 
@@ -153,30 +153,30 @@ public class LoginController extends AbstractController
 
 		if (AccessLatch.isLatched(ipLoginRemain))
 		{
-			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "ipLoginLatched");
+			return optFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "ipLoginLatched");
 		}
 
 		int usernameLoginRemain = this.usernameLoginLatch.remain(request.getParameter(LOGIN_PARAM_USER_NAME));
 
 		if (AccessLatch.isLatched(usernameLoginRemain))
 		{
-			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "usernameLoginLatched");
+			return optFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "usernameLoginLatched");
 		}
 		else if (AccessLatch.isNonLatch(usernameLoginRemain))
 		{
-			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "usernameOrPasswordError");
+			return optFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "usernameOrPasswordError");
 		}
 		else if (usernameLoginRemain > 0)
 		{
 			if (ipLoginRemain >= 0)
 				usernameLoginRemain = Math.min(ipLoginRemain, usernameLoginRemain);
 
-			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "usernameOrPasswordErrorRemain",
+			return optFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "usernameOrPasswordErrorRemain",
 					usernameLoginRemain);
 		}
 		else
 		{
-			return optMsgFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "usernameOrPasswordError");
+			return optFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "usernameOrPasswordError");
 		}
 	}
 

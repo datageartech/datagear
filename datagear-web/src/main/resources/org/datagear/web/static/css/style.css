@@ -156,6 +156,11 @@ label[title]:not(.no-tip)::after,
 .p-toast-top-center{
 	top: 3px !important;
 }
+.p-toast-top-center.p-toast{
+	min-width: 30% !important;
+	max-width: 80% !important;
+	width: auto !important;
+}
 /*没有detail的提示框*/
 .p-toast-message-content.empty-detail{
 	padding-top: 0.7rem !important;

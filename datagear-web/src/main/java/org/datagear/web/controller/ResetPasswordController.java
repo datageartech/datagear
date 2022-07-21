@@ -141,7 +141,7 @@ public class ResetPasswordController extends AbstractController
 		User user = this.userService.getByNameNoPassword(username);
 
 		if (user == null)
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMsgCode("userNotExists"), username);
 
 		resetPasswordStep.setUser(user);
@@ -167,7 +167,7 @@ public class ResetPasswordController extends AbstractController
 				false);
 
 		if (!checkFile.exists())
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMsgCode("checkFileNotExists"));
 
 		resetPasswordStep.setCheckOk(true);
@@ -188,7 +188,7 @@ public class ResetPasswordController extends AbstractController
 			throw new IllegalInputException();
 
 		if (!password.equals(confirmPassword))
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMsgCode("confirmPasswordError"));
 
 		ResetPasswordStep resetPasswordStep = getResetPasswordStep(request);
@@ -210,7 +210,7 @@ public class ResetPasswordController extends AbstractController
 			HttpServletRequest request)
 	{
 		String code = buildMsgCode("resetPasswordStepNotInSession");
-		return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, code);
+		return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, code);
 	}
 
 	@Override

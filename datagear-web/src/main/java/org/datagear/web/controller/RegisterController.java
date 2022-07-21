@@ -101,10 +101,10 @@ public class RegisterController extends AbstractController
 			@RequestBody RegisterForm form)
 	{
 		if (this.applicationProperties.isDisableRegister())
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "registerDisabled");
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "registerDisabled");
 		
 		if(!this.checkCodeManager.isCheckCode(request.getSession(), CHECK_CODE_MODULE_REGISTER, form.getCheckCode()))
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "checkCodeError");
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "checkCodeError");
 
 		User user = form.getUser();
 
@@ -117,7 +117,7 @@ public class RegisterController extends AbstractController
 		user.setCreateTime(new Date());
 
 		if (this.userService.getByNameNoPassword(user.getName()) != null)
-			return optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists",
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists",
 					user.getName());
 
 		user.setRoles(buildUserRolesForSave(this.applicationProperties.getDefaultRoleRegister()));

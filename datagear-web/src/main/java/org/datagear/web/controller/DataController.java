@@ -601,7 +601,7 @@ public class DataController extends AbstractSchemaConnTableController
 						buildMsgCode("savessSuccess"), expectedUpdateCount, acutalUpdateCount, expectedAddCount,
 						actualAddCount, expectedDeleteCount, actualDeleteCount);
 
-				ResponseEntity<OperationMessage> responseEntity = optMsgResponseEntity(HttpStatus.OK,
+				ResponseEntity<OperationMessage> responseEntity = optResponseEntity(HttpStatus.OK,
 						operationMessage);
 
 				return responseEntity;
@@ -1133,7 +1133,7 @@ public class DataController extends AbstractSchemaConnTableController
 						buildMsgCode("batchOperationSuccess"), this.batchCount, this.batchCount, 0);
 				operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
 
-				responseEntity = optMsgResponseEntity(HttpStatus.OK, operationMessage);
+				responseEntity = optResponseEntity(HttpStatus.OK, operationMessage);
 			}
 			else if (failCount == this.batchCount)// 全部失败
 			{
@@ -1141,7 +1141,7 @@ public class DataController extends AbstractSchemaConnTableController
 						buildMsgCode("batchOperationFail"), this.batchCount, 0, this.batchCount);
 				operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
 
-				responseEntity = optMsgResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
+				responseEntity = optResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
 			}
 			else
 			{
@@ -1168,7 +1168,7 @@ public class DataController extends AbstractSchemaConnTableController
 
 				operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
 
-				responseEntity = optMsgResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
+				responseEntity = optResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
 			}
 
 			return responseEntity;

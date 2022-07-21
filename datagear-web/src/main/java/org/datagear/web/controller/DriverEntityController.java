@@ -446,7 +446,7 @@ public class DriverEntityController extends AbstractController
 
 		if (!deleted)
 		{
-			responseEntity = optMsgFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+			responseEntity = optFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMsgCode("deleteDriverFileFail"));
 		}
 		else
