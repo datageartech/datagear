@@ -142,7 +142,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 			try
 			{
 				in = IOUtil.getZipInputStream(file, form.getZipFileNameEncoding());
-				IOUtil.unzip(in, parent);
+				IOUtil.unzipCheckMalformed(in, parent);
 			}
 			finally
 			{

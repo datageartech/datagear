@@ -796,6 +796,39 @@ public class IOUtil
 	 */
 	public static void unzip(ZipInputStream zipInputStream, File directory) throws IOException
 	{
+		doUnzip(zipInputStream, directory);
+	}
+
+	/**
+	 * 解压ZIP输入流至指定文件夹。
+	 * @param zipInputStream
+	 * @param directory
+	 * @throws IOException
+	 * @throws MalformedZipException
+	 */
+	public static void unzipCheckMalformed(ZipInputStream zipInputStream, File directory) throws IOException, MalformedZipException
+	{
+		try
+		{
+			doUnzip(zipInputStream, directory);
+		}
+		catch(IllegalArgumentException e)
+		{
+			if("MALFORMED".equalsIgnoreCase(e.getMessage()))
+				throw new MalformedZipException(e);
+			else
+				throw e;
+		}
+	}
+	
+	/**
+	 * 解压ZIP输入流至指定文件夹。
+	 * @param zipInputStream
+	 * @param directory
+	 * @throws IOException
+	 */
+	protected static void doUnzip(ZipInputStream zipInputStream, File directory) throws IOException
+	{
 		if (!directory.exists())
 			directory.mkdirs();
 
