@@ -17,42 +17,61 @@
 var contextPath="${contextPath}";
 </script>
 <link href="${contextPath}/static/image/logo/icon-80x80/logo-red.png" type="images/x-icon" rel="shortcut icon" />
-<link href="${contextPath}/static/lib/primevue@3.15.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" rel="stylesheet" id="primevueCssLink" />
-<link href="${contextPath}/static/lib/primevue@3.15.0/resources/primevue.min.css" rel="stylesheet" />
-<link href="${contextPath}/static/lib/primeicons@5.0.0/primeicons.css" rel="stylesheet" />
-<link href="${contextPath}/static/lib/primeflex@3.1.2/primeflex.min.css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/primevue@3.15.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" type="text/css" rel="stylesheet" id="primevueCssLink" />
+<link href="${contextPath}/static/lib/primevue@3.15.0/resources/primevue.min.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/primeicons@5.0.0/primeicons.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/primeflex@3.1.2/primeflex.min.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldgutter.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/style.css" rel="stylesheet" />
+<link href="${contextPath}/static/css/codemirror-5.64.0/custom.css" rel="stylesheet" />
 
-<script src="${contextPath}/static/lib/jquery-3.6.0/jquery-3.6.0.min.js"></script>
-<script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js"></script>
-<script src="${contextPath}/static/lib/jquery-validation-1.19.3/additional-methods.min.js"></script>
-<script src="${contextPath}/static/lib/vue@3.2.36/vue.global.prod.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/core/core.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/tabmenu/tabmenu.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/card/card.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/datatable/datatable.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/column/column.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/contextmenu/contextmenu.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/dialog/dialog.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/checkbox/checkbox.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/textarea/textarea.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/toast/toast.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/toastservice/toastservice.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/password/password.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/divider/divider.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/selectbutton/selectbutton.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/confirmdialog/confirmdialog.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/confirmationservice/confirmationservice.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/togglebutton/togglebutton.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/splitbutton/splitbutton.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/tabview/tabview.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/tabpanel/tabpanel.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/menu/menu.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/chip/chip.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/fileupload/fileupload.min.js"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/inlinemessage/inlinemessage.min.js"></script>
-
-<script src="${contextPath}/static/script/util.js"></script>
-<script src="${contextPath}/static/script/schemaUrlBuilder.js"></script>
-<script src="${contextPath}/static/script/tableMeta.js"></script>
+<script src="${contextPath}/static/lib/jquery-3.6.0/jquery-3.6.0.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/jquery-validation-1.19.3/additional-methods.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/vue@3.2.36/vue.global.prod.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/core/core.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/tabmenu/tabmenu.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/card/card.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/datatable/datatable.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/column/column.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/contextmenu/contextmenu.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/dialog/dialog.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/checkbox/checkbox.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/textarea/textarea.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/toast/toast.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/toastservice/toastservice.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/password/password.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/divider/divider.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/selectbutton/selectbutton.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/confirmdialog/confirmdialog.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/confirmationservice/confirmationservice.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/togglebutton/togglebutton.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/splitbutton/splitbutton.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/tabview/tabview.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/tabpanel/tabpanel.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/menu/menu.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/chip/chip.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/fileupload/fileupload.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/inlinemessage/inlinemessage.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/search/searchcursor.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/xml-fold.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldcode.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldgutter.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/matchbrackets.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/matchtags.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/closetag.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/addon/edit/closebrackets.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/xml/xml.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/css/css.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/htmlmixed/htmlmixed.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/javascript/javascript.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/codemirror-5.64.0/mode/sql/sql.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/clipboard-2.0.4/clipboard.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/script/util.js" type="text/javascript"></script>
+<script src="${contextPath}/static/script/schemaUrlBuilder.js" type="text/javascript"></script>
+<script src="${contextPath}/static/script/tableMeta.js" type="text/javascript"></script>
 </#if>

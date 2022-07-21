@@ -260,6 +260,31 @@ label[title]:not(.no-tip)::after,
 	min-height: 1.5rem;
 }
 
+/*代码编辑器*/
+.code-editor-wrapper{
+	padding: 1px 1px;
+}
+.code-editor-wrapper .code-editor{
+	width: 100%;
+	height: 100%;
+}
+.code-editor-wrapper .code-editor .CodeMirror{
+	height: 100%;
+}
+.CodeMirror-hints{
+	/*防止在弹出对话框中的提示被遮挡*/
+	z-index: 999999;
+	font-size: inherit;
+}
+.CodeMirror-hint{
+	padding: 0.1em 0.1em;
+}
+.CodeMirror-hints .code-completion-comment{
+	padding-left: 1em;
+    opacity: 0.6;
+    filter: Alpha(Opacity=60);
+}
+
 /*管理页*/
 .page-manager .page-content{
 	/*屏幕高度 - 管理页header高度*/
@@ -340,4 +365,14 @@ label[title]:not(.no-tip)::after,
 /*隐藏对话框内的主页头，比如登录页*/
 .p-dialog .page-main-header{
 	display: none;
+}
+
+/*看板全局资源编辑页*/
+.page-form-db-g-r .code-editor-wrapper{
+	/*屏幕高度 - 表单foot高度 - 其他元素高度*/
+	height: calc(100vh - 5rem - 7rem);
+}
+.p-dialog .page-form-db-g-r .code-editor-wrapper{
+	/*对话框高度 - 表单foot高度 - 对话框header高度*/
+	height: calc(90vh - 5rem - 6rem - 7rem);
 }

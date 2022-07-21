@@ -90,6 +90,23 @@ public class ObjectMapperBuilder
 
 		return objectMapper;
 	}
+	
+	/**
+	 * 构建新{@linkplain ObjectMapper}对象。
+	 * <p>
+	 * 对于字符串属性值，将进行HTML转义。
+	 * <p>
+	 * 
+	 * @return
+	 */
+	public ObjectMapper buildForEscapeHtml()
+	{
+		ObjectMapperBuilder builder = new ObjectMapperBuilder(this);
+
+		builder.addJsonSerializer(String.class, new EscapeHtmlStringSerializer());
+		
+		return builder.build();
+	}
 
 	/**
 	 * 构建新{@linkplain ObjectMapper}对象。
@@ -110,6 +127,26 @@ public class ObjectMapperBuilder
 	{
 		ObjectMapperBuilder builder = new ObjectMapperBuilder(this);
 		
+		builder.addJsonSerializer(Long.class, new LongToStringSerializer());
+		builder.addJsonSerializer(BigInteger.class, new BigIntegerToStringSerializer());
+		builder.addJsonSerializer(BigDecimal.class, new BigDecimalToStringSerializer());
+
+		return builder.build();
+	}
+	
+	/**
+	 * 构建新{@linkplain ObjectMapper}对象。
+	 * <p>
+	 * 具备{@linkplain #buildForEscapeHtml()}、{@linkplain #buildForBigNumberToString()}特性。
+	 * <p>
+	 * 
+	 * @return
+	 */
+	public ObjectMapper buildForEscapeHtmlAndBigNumberToString()
+	{
+		ObjectMapperBuilder builder = new ObjectMapperBuilder(this);
+
+		builder.addJsonSerializer(String.class, new EscapeHtmlStringSerializer());
 		builder.addJsonSerializer(Long.class, new LongToStringSerializer());
 		builder.addJsonSerializer(BigInteger.class, new BigIntegerToStringSerializer());
 		builder.addJsonSerializer(BigDecimal.class, new BigDecimalToStringSerializer());

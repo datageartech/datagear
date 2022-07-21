@@ -104,7 +104,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 			throws Exception
 	{
-		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, new DashboardGlobalResSaveForm(), REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
 	}
@@ -205,10 +205,12 @@ public class DashboardGlobalResController extends AbstractController implements 
 		String resourceContent = IOUtil.readString(IOUtil.getBufferedInputStream(IOUtil.getInputStream(file)),
 				IOUtil.CHARSET_UTF_8, true);
 
-		model.addAttribute("resourcePath", path);
-		model.addAttribute("resourceContent", resourceContent);
+		DashboardGlobalResSaveForm formModel = new DashboardGlobalResSaveForm();
+		formModel.setSavePath(path);
+		formModel.setInitSavePath(path);
+		formModel.setResourceContent(resourceContent);
 		
-		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
+		setFormModel(model, formModel, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
 	}

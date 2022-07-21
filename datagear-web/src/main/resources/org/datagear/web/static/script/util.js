@@ -599,6 +599,30 @@
 		return (isArray? re : re[0]);
 	};
 	
+	$.isHtmlFile = function(fileName)
+	{
+		var htmlReg = /\.(html|htm)$/gi;
+		return (fileName && htmlReg.test(fileName));
+	};
+	
+	$.isJsFile = function(fileName)
+	{
+		var jsReg = /\.(js)$/gi;
+		return (fileName && jsReg.test(fileName));
+	};
+	
+	$.isCssFile = function(fileName)
+	{
+		var cssReg = /\.(css)$/gi;
+		return (fileName && cssReg.test(fileName));
+	};
+	
+	$.isTextFile = function(fileName)
+	{
+		var reg = /\.(html|htm|css|js|json|xml|txt)$/gi;
+		return reg.test(fileName);
+	};
+	
 	$.toJsonString = function(obj)
 	{
 		return JSON.stringify(obj);

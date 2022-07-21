@@ -63,7 +63,7 @@
 	{
 		onAdd: function()
 		{
-			po.handleAddAction("/dashboardGlobalRes/add");
+			po.handleAddAction("/dashboardGlobalRes/add", { width: "70vw" });
 		},
 
 		onUpload: function()
@@ -73,7 +73,7 @@
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/dashboardGlobalRes/edit");
+			po.handleOpenOfAction("/dashboardGlobalRes/edit", { width: "70vw" });
 		},
 		
 		onView: function()

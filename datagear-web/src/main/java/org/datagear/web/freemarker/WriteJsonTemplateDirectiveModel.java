@@ -35,12 +35,14 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 {
 	public static final String KEY_VAR = "var";
 	public static final String KEY_BIG_NUMBER_TO_STRING = "bigNumberToString";
+	public static final String KEY_ESCAPE_HTML = "escapeHtml";
 
 	private ObjectMapperBuilder objectMapperBuilder;
 
 	private ObjectMapper _objectMapper;
-
+	private ObjectMapper _objectMapperForEscapeHtml;
 	private ObjectMapper _objectMapperForBigNumberToString;
+	private ObjectMapper _objectMapperForEscapeHtmlAndBigNumberToString;
 
 	public WriteJsonTemplateDirectiveModel()
 	{
@@ -62,9 +64,13 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 	{
 		this.objectMapperBuilder = objectMapperBuilder;
 		this._objectMapper = this.objectMapperBuilder.build();
+		this._objectMapperForEscapeHtml = this.objectMapperBuilder.buildForEscapeHtml();
 		this._objectMapperForBigNumberToString = this.objectMapperBuilder.buildForBigNumberToString();
+		this._objectMapperForEscapeHtmlAndBigNumberToString = this.objectMapperBuilder.buildForEscapeHtmlAndBigNumberToString();
 		JsonSupport.disableAutoCloseTargetFeature(this._objectMapper);
+		JsonSupport.disableAutoCloseTargetFeature(this._objectMapperForEscapeHtml);
 		JsonSupport.disableAutoCloseTargetFeature(this._objectMapperForBigNumberToString);
+		JsonSupport.disableAutoCloseTargetFeature(this._objectMapperForEscapeHtmlAndBigNumberToString);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -73,14 +79,24 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 			throws TemplateException, IOException
 	{
 		TemplateModel var = (TemplateModel)params.get(KEY_VAR);
+		TemplateBooleanModel escapeHtmlObj = (TemplateBooleanModel) params.get(KEY_ESCAPE_HTML);
 		TemplateBooleanModel bigNumberToStringObj = (TemplateBooleanModel) params.get(KEY_BIG_NUMBER_TO_STRING);
+		boolean escapeHtml = (escapeHtmlObj == null ? true : escapeHtmlObj.getAsBoolean());
 		boolean bigNumberToString = (bigNumberToStringObj == null ? false : bigNumberToStringObj.getAsBoolean());
 
 		Object obj = unwrap(var);
 
 		try
 		{
-			if (bigNumberToString)
+			if(escapeHtml && bigNumberToString)
+			{
+				this._objectMapperForEscapeHtmlAndBigNumberToString.writeValue(env.getOut(), obj);
+			}
+			else if(escapeHtml)
+			{
+				this._objectMapperForEscapeHtml.writeValue(env.getOut(), obj);
+			}
+			else if (bigNumberToString)
 			{
 				this._objectMapperForBigNumberToString.writeValue(env.getOut(), obj);
 			}

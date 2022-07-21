@@ -87,7 +87,7 @@ String action
 		options.success = successHandlers;
 		
 		var action = { url: url, options: options };
-		po.inflateSubmitAction(action);
+		po.inflateSubmitAction(action, action.options.data);
 		
 		var jsonSubmit = (action.options.contentType == null || action.options.contentType == $.CONTENT_TYPE_JSON);
 		
@@ -99,7 +99,7 @@ String action
 		return false;
 	};
 	
-	po.inflateSubmitAction = function(action){};
+	po.inflateSubmitAction = function(action, data){};
 	
 	po.defaultSubmitSuccessCallback = function(response, close)
 	{
