@@ -298,6 +298,9 @@ label[title]:not(.no-tip)::after,
 .CodeMirror-cursor{
 	border-left: 1px solid var(--text-color);
 }
+.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler{
+	background-color: var(--surface-100);
+}
 
 /*管理页*/
 .page-manager .page-content{
