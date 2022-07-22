@@ -92,6 +92,16 @@ page_obj.ftl
 		doc.setValue(text || "");
 	};
 	
+	po.setCodeTextTimeout = function(codeEditor, text)
+	{
+		//在对话框时，直接初始化代码编辑器会出现行号错位的情况，使用这种方式可解决
+		setTimeout(function()
+		{
+			po.setCodeText(codeEditor, text);
+		},
+		100);
+	};
+	
 	po.getSelectedCodeText = function(codeEditor)
 	{
 		var doc = codeEditor.getDoc();

@@ -267,6 +267,8 @@ label[title]:not(.no-tip)::after,
 .code-editor-wrapper .code-editor{
 	width: 100%;
 	height: 100%;
+	padding: 0 0;
+	margin: 0 0;
 }
 .code-editor-wrapper .code-editor .CodeMirror{
 	height: 100%;

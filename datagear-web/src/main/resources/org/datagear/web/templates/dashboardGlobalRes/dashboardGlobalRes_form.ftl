@@ -70,15 +70,15 @@
 		
 		var resourceEditorOptions =
 		{
-			value: pm.resourceContent,
+			value: "",
 			matchBrackets: true,
 			matchTags: true,
 			autoCloseTags: true,
-			readOnly: po.readonly,
 			mode: po.evalCodeModeByName(pm.savePath)
 		};
 		
 		po.codeEditor = po.createCodeEditor(po.elementOfId("${pid}codeEditor"), resourceEditorOptions);
+		po.setCodeTextTimeout(po.codeEditor, pm.resourceContent);
 	});
 	
 	po.vueMount();
