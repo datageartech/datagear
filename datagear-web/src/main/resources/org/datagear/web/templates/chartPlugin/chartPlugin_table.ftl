@@ -74,7 +74,7 @@
 		
 		onUpload: function()
 		{
-			po.open("/chartPlugin/upload");
+			po.handleAddAction("/chartPlugin/upload");
 		},
 		
 		onDownload: function()

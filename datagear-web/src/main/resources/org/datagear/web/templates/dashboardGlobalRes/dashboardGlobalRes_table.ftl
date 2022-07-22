@@ -56,7 +56,7 @@
 	
 	po.setupAjaxTable("/dashboardGlobalRes/queryData",
 	{
-		multiSortMeta: [ {field: "path", order: 1} ]
+		multiSortMeta: []
 	});
 	
 	po.vueMethod(
@@ -68,7 +68,7 @@
 
 		onUpload: function()
 		{
-			po.open("/dashboardGlobalRes/upload");
+			po.handleAddAction("/dashboardGlobalRes/upload");
 		},
 		
 		onEdit: function()
