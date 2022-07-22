@@ -292,7 +292,7 @@ label[title]:not(.no-tip)::after,
 }
 .CodeMirror-gutters{
 	border-right: 1px solid var(--surface-border);
-	background-color: inherit;
+	background-color: var(--surface-ground);
 	color: inherit;
 }
 .CodeMirror-cursor{
@@ -379,6 +379,16 @@ label[title]:not(.no-tip)::after,
 /*隐藏对话框内的主页头，比如登录页*/
 .p-dialog .page-main-header{
 	display: none;
+}
+
+/*数据源URL构建器编辑页面*/
+.page-form-schema-ub .code-editor-wrapper{
+	/*屏幕高度 - 表单foot高度 - 其他元素高度*/
+	height: calc(100vh - 5rem - 7rem);
+}
+.p-dialog .page-form-schema-ub .code-editor-wrapper{
+	/*对话框高度 - 表单foot高度 - 对话框header高度*/
+	height: calc(90vh - 5rem - 6rem - 7rem);
 }
 
 /*看板全局资源编辑页*/

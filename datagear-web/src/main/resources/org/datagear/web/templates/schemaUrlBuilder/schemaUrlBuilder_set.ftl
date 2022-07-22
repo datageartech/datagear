@@ -19,7 +19,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-form horizontal">
+<div id="${pid}" class="page page-form horizontal page-form-schema-ub">
 	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
 			<div class="grid grid-nogutter">
@@ -29,9 +29,9 @@
 							<@spring.message code='code' />
 						</label>
 				        <div class="field-input col-12 md:col-9">
-				        	<p-textarea id="${pid}code" v-model="pm.code" class="input w-full" style="min-height:18rem;"
-				        		name="code" maxlength="10000" autofocus>
-				        	</p-textarea>
+				        	<div id="${pid}code" class="code-editor-wrapper input p-component p-inputtext w-full">
+								<div id="${pid}codeEditor" class="code-editor"></div>
+							</div>
 				        </div>
 					</div>
 					<div class="field grid">
@@ -75,12 +75,17 @@
 	</form>
 </div>
 <#include "../include/page_form.ftl">
+<#include "../include/page_code_editor.ftl">
 <script>
 (function(po)
 {
+	po.inflateSubmitAction = function(action, data)
+	{
+		data.code = po.getCodeText(po.codeEditor);
+	};
+	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
-	
 	po.setupForm(formModel, "/schemaUrlBuilder/saveSet", { closeAfterSubmit: false });
 	
 	po.vueMethod(
@@ -93,10 +98,27 @@
 			{
 				data:
 				{
-					scriptCode: pm.code
+					scriptCode: po.getCodeText(po.codeEditor)
 				}
 			});
 		}
+	});
+	
+	po.vueMounted(function()
+	{
+		var pm = po.vuePageModel();
+		
+		var codeEditorOptions =
+		{
+			value: "",
+			matchBrackets: true,
+			matchTags: true,
+			autoCloseTags: true,
+			mode: {name: "javascript", json: true}
+		};
+		
+		po.codeEditor = po.createCodeEditor(po.elementOfId("${pid}codeEditor"), codeEditorOptions);
+		po.setCodeTextTimeout(po.codeEditor, pm.code, true);
 	});
 	
 	po.vueMount();

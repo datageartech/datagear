@@ -29,7 +29,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-inputtext id="${pid}savePath" v-model="pm.savePath" type="text" class="input w-full"
-		        		name="savePath" required maxlength="200">
+		        		name="savePath" required maxlength="200" autofocus>
 		        	</p-inputtext>
 		        </div>
 			</div>
@@ -63,7 +63,7 @@
 	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
-	po.setupForm(formModel, po.submitUrl);
+	po.setupForm(formModel, po.submitUrl, { closeAfterSubmit: false });
 	
 	po.vueMounted(function()
 	{
