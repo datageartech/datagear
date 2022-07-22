@@ -104,7 +104,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 			throws Exception
 	{
-		setFormModel(model, new DashboardGlobalResSaveForm(), REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, new DashboardGlobalResSaveForm(), REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
 	}
@@ -251,15 +251,10 @@ public class DashboardGlobalResController extends AbstractController implements 
 		return operationSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/view/**")
+	@RequestMapping("/view")
 	public void view(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			org.springframework.ui.Model model) throws Exception
+			org.springframework.ui.Model model, @RequestParam("path") String path) throws Exception
 	{
-		String path = resolvePathAfter(request, "/dashboardGlobalRes/view/");
-
-		if (StringUtil.isEmpty(path))
-			throw new FileNotFoundException(path);
-
 		path = WebUtils.decodeURL(path);
 
 		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path);

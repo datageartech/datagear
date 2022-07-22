@@ -73,14 +73,23 @@
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/dashboardGlobalRes/edit", { width: "70vw" });
+			po.executeOnSelect(function(entity)
+			{
+				if(!$.isTextFile(entity.path))
+				{
+					$.tipInfo("<@spring.message code='dashboardGlobalRes.editResourceUnsupport' />");
+			 		return;
+				}
+				
+				po.doOpenOfAction("/dashboardGlobalRes/edit", entity, { width: "70vw" });
+			});
 		},
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/dashboardGlobalRes/view");
+			po.handleOpenOfAction("/dashboardGlobalRes/view", { target: "_blank" });
 		},
-
+		
 		onDownload: function()
 		{
 			po.handleOpenOfsAction("/dashboardGlobalRes/download", { target: "_blank" });

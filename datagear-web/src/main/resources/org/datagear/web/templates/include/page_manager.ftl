@@ -68,22 +68,32 @@ String action
 	{
 		po.executeOnSelect(function(entity)
 		{
-			var action = { url: url, options: options };
-			po.inflateFormActionPageParam(action);
-			po.inflateEntityAction(action, entity);
-			po.open(action.url, action.options);
+			po.doOpenOfAction(url, entity, options);
 		});
+	};
+	
+	po.doOpenOfAction = function(url, entity, options)
+	{
+		var action = { url: url, options: options };
+		po.inflateFormActionPageParam(action);
+		po.inflateEntityAction(action, entity);
+		po.open(action.url, action.options);
 	};
 	
 	po.handleOpenOfsAction = function(url, options)
 	{
 		po.executeOnSelects(function(entities)
 		{
-			var action = { url: url, options: options };
-			po.inflateFormActionPageParam(action);
-			po.inflateEntityAction(action, entities);
-			po.open(action.url, action.options);
+			po.doOpenOfsAction(url, entities, options);
 		});
+	};
+	
+	po.doOpenOfsAction = function(url, entities, options)
+	{
+		var action = { url: url, options: options };
+		po.inflateFormActionPageParam(action);
+		po.inflateEntityAction(action, entities);
+		po.open(action.url, action.options);
 	};
 	
 	po.handleDeleteAction = function(url, options)
