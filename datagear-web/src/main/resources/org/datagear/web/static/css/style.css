@@ -286,6 +286,18 @@ label[title]:not(.no-tip)::after,
     opacity: 0.6;
     filter: Alpha(Opacity=60);
 }
+.CodeMirror{
+	background: inherit;
+	color: inherit;
+}
+.CodeMirror-gutters{
+	border-right: 1px solid var(--surface-border);
+	background-color: inherit;
+	color: inherit;
+}
+.CodeMirror-cursor{
+	border-left: 1px solid var(--text-color);
+}
 
 /*管理页*/
 .page-manager .page-content{
