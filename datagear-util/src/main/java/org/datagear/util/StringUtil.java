@@ -232,22 +232,41 @@ public class StringUtil
 		if (s == null || s.isEmpty())
 			return s;
 
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(s.length());
 
 		char[] cs = s.toCharArray();
 
-		for (char c : cs)
+		for (int i=0; i<cs.length; i++)
 		{
-			if (c == '<')
-				sb.append("&lt;");
-			else if (c == '>')
-				sb.append("&gt;");
-			else if (c == '&')
-				sb.append("&amp;");
-			else if (c == '"')
-				sb.append("&quot;");
-			else
-				sb.append(c);
+			char c = cs[i];
+			
+			switch(c)
+			{
+				case '<':
+				{
+					sb.append("&lt;");
+					break;
+				}
+				case '>':
+				{
+					sb.append("&gt;");
+					break;
+				}
+				case '"':
+				{
+					sb.append("&quot;");
+					break;
+				}
+				case '&':
+				{
+					sb.append("&amp;");
+					break;
+				}
+				default:
+				{
+					sb.append(c);
+				}
+			}
 		}
 
 		return sb.toString();
@@ -277,29 +296,54 @@ public class StringUtil
 		if (s == null)
 			return "null";
 
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(s.length());
 
 		if (quote)
 			sb.append("\"");
 
 		char[] cs = s.toCharArray();
 
-		for (char c : cs)
+		for (int i=0; i<cs.length; i++)
 		{
-			if (c == '\\')
-				sb.append("\\\\");
-			else if (c == '\'')
-				sb.append("\\\'");
-			else if (c == '"')
-				sb.append("\\\"");
-			else if (c == '\t')
-				sb.append("\\\t");
-			else if (c == '\n')
-				sb.append("\\\n");
-			else if (c == '\r')
-				sb.append("\\\r");
-			else
-				sb.append(c);
+			char c = cs[i];
+			
+			switch(c)
+			{
+				case '\\':
+				{
+					sb.append("\\\\");
+					break;
+				}
+				case '\'':
+				{
+					sb.append("\\\'");
+					break;
+				}
+				case '"':
+				{
+					sb.append("\\\"");
+					break;
+				}
+				case '\t':
+				{
+					sb.append("\\\t");
+					break;
+				}
+				case '\n':
+				{
+					sb.append("\\\n");
+					break;
+				}
+				case '\r':
+				{
+					sb.append("\\\r");
+					break;
+				}
+				default:
+				{
+					sb.append(c);
+				}
+			}
 		}
 
 		if (quote)

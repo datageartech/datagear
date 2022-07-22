@@ -20,6 +20,16 @@ import org.junit.Test;
 public class StringUtilTest
 {
 	@Test
+	public void escapeHtmlTest()
+	{
+		{
+			String  s ="abc<>\"&def";
+			String actual = StringUtil.escapeHtml(s);
+			assertEquals("abc&lt;&gt;&quot;&amp;def", actual);
+		}
+	}
+	
+	@Test
 	public void maskTest()
 	{
 		{

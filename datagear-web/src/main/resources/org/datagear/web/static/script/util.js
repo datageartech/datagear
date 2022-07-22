@@ -420,6 +420,7 @@
 	
 	$.TYPEOF_STRING = "string";
 	$.TYPEOF_NUMBER = "number";
+	$.TYPEOF_BOOLEAN = "boolean";
 	$.TYPEOF_TYPE_OBJECT = "object";
 	
 	$.isTypeString = function(obj)
@@ -552,10 +553,7 @@
 	 */
 	$.escapeHtml = function(text)
 	{
-		if(text == null)
-			return "";
-		
-		if($.isTypeString(text))
+		if(text == null || !$.isTypeString(text))
 			return text;
 		
 		var epn = "";
@@ -564,21 +562,136 @@
 		{
 			var c = text.charAt(i);
 			
-			if(c == '<')
-				epn += '&lt;';
-			else if(c == '>')
-				epn += '&gt;';
-			else if(c == '&')
-				epn += '&amp;';
-			else if(c == '"')
-				epn += '&quot;';
-			else if(c == '\'')
-				epn += '&#39;';
-			else
-				epn += c;
+			switch(c)
+			{
+				case '<':
+				{
+					epn += "&lt;";
+					break;
+				}
+				case '>':
+				{
+					epn += "&gt;";
+					break;
+				}
+				case '"':
+				{
+					epn += "&quot;";
+					break;
+				}
+				case '&':
+				{
+					epn += "&amp;";
+					break;
+				}
+				default:
+				{
+					epn += c;
+				}
+			}
 		}
 		
 		return epn;
+	};
+	
+	//反转义JSON里的HTML关键字。
+	$.unescapeHtmlForJson = function(json)
+	{
+		if(json == null)
+			return null;
+		
+		var type = typeof(json);
+		
+		if(type == $.TYPEOF_STRING)
+		{
+			return $.unescapeHtml(json);
+		}
+		else if(type == $.TYPEOF_NUMBER || type == $.TYPEOF_BOOLEAN)
+		{
+			return json;
+		}
+		else if(type == $.TYPEOF_TYPE_OBJECT)
+		{
+			if($.isArray(json))
+			{
+				for(var i=0; i<json.length; i++)
+					json[i] = $.unescapeHtmlForJson(json[i]);
+			}
+			else
+			{
+				for(var p in json)
+					json[p] = $.unescapeHtmlForJson(json[p]);
+			}
+			
+			return json;
+		}
+		else
+			return json;
+	};
+	
+	/**
+	 * 反转义HTML关键字。
+	 * 
+	 * @param text 要转义的文本
+	 */
+	$.unescapeHtml = function(text)
+	{
+		if(text == null || !$.isTypeString(text))
+			return text;
+		
+		var epn = "";
+		
+		for(var i=0; i<text.length; i++)
+		{
+			var c = text.charAt(i);
+			
+			switch(c)
+			{
+				case '&':
+				{
+					var token = $._unescapeHtmlToMaySemicolon(text, i+1);
+					
+					if(token == "lt;")
+						epn += '<';
+					else if(token == "gt;")
+						epn += '>';
+					else if(token == "quot;")
+						epn += '"';
+					else if(token == "amp;")
+						epn += '&';
+					else
+						epn += '&' + token;
+					
+					i += token.length;
+					
+					break;
+				}
+				default:
+				{
+					epn += c;
+				}
+			}
+		}
+		
+		return epn;
+	};
+	
+	$._unescapeHtmlToMaySemicolon = function(text, startIdx)
+	{
+		var re = "";
+		
+		var endIdx = Math.min(text.length, startIdx + "&quot;".length);
+		
+		for(var i=startIdx; i<endIdx; i++)
+		{
+			var c = text.charAt(i);
+			re += c;
+			
+			if(c == ';')
+				break;
+		}
+		
+		return re;
 	};
 	
 	/**

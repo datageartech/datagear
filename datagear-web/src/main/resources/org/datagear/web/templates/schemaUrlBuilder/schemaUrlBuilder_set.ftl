@@ -79,6 +79,7 @@
 (function(po)
 {
 	var formModel = <@writeJson var=formModel />;
+	formModel = $.unescapeHtmlForJson(formModel);
 	
 	po.setupForm(formModel, "/schemaUrlBuilder/saveSet", { closeAfterSubmit: false });
 	

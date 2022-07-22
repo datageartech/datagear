@@ -122,6 +122,7 @@
 	po.submitUrl = "/schema/"+po.submitAction;
 	
 	var formModel = <@writeJson var=formModel />;
+	formModel = $.unescapeHtmlForJson(formModel);
 	formModel = (formModel || {});
 	formModel.driverEntity = (formModel.driverEntity == null ? {} : formModel.driverEntity);
 	

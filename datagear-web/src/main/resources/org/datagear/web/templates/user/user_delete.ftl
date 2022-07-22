@@ -85,6 +85,7 @@
 	};
 	
 	var formModel = <@writeJson var=formModel />;
+	formModel = $.unescapeHtmlForJson(formModel);
 	formModel = { users: formModel };
 	po.setupForm(formModel, po.submitUrl);
 	

@@ -9,7 +9,7 @@
 <#include "include/page_import.ftl">
 <#assign isJsonResponse=(isJsonResponse!false)>
 <#if isJsonResponse>
-<@writeJson var=operationMessage />
+<@writeJson var=operationMessage escapeHtml=false />
 <#else>
 <#include "include/html_doctype.ftl">
 <html>

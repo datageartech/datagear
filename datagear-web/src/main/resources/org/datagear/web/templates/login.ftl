@@ -92,6 +92,7 @@
 	po.vueRef("disableRegister", po.disableRegister);
 
 	var formModel = <@writeJson var=formModel />;
+	formModel = $.unescapeHtmlForJson(formModel);
 	po.setupForm(formModel, "/login/doLogin",
 	{
 		type: "POST",

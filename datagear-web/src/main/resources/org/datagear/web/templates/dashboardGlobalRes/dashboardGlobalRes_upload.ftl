@@ -89,6 +89,7 @@
 	po.submitUrl = "/dashboardGlobalRes/"+po.submitAction;
 	
 	var availableCharsetNames = <@writeJson var=availableCharsetNames />;
+	availableCharsetNames = $.unescapeHtmlForJson(availableCharsetNames);
 	po.vueRef("availableCharsetNames", availableCharsetNames);
 	
 	po.setupForm(
