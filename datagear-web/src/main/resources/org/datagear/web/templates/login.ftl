@@ -63,7 +63,7 @@
 							</div>
 						</div>
 						<div class="page-form-foot flex-grow-0 pt-3 text-center">
-							<p-button type="submit" label="<@spring.message code='login' />" />
+							<p-button type="submit" label="<@spring.message code='login' />"></p-button>
 						</div>
 						<div class="page-form-foot flex-grow-0 pt-3 text-right text-color-secondary">
 							<p-checkbox id="${pid}remremberLogin" v-model="pm.rememberMe" :binary="true" name="remremberLogin"></p-checkbox>

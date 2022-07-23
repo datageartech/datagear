@@ -34,22 +34,32 @@ a.link:hover{
 .text-primary a.link,
 .text-primary a.link:link,
 .text-primary a.link:visited,
-.text-primary a.link:active{
+.text-primary a.link:active
+a.link.text-primary,
+a.link.text-primary:link,
+a.link.text-primary:visited,
+a.link.text-primary:active{
 	color: var(--primary-color);
 	text-decoration: none;
 }
-.text-primary a.link:hover{
+.text-primary a.link:hover,
+a.link.text-primary:hover{
 	color: var(--primary-color);
 	text-decoration: underline;
 }
 .text-color-secondary a.link,
 .text-color-secondary a.link:link,
 .text-color-secondary a.link:visited,
-.text-color-secondary a.link:active{
+.text-color-secondary a.link:active,
+a.link.text-color-secondary,
+a.link.text-color-secondary:link,
+a.link.text-color-secondary:visited,
+a.link.text-color-secondary:active{
 	color: var(--text-color-secondary);
 	text-decoration: none;
 }
-.text-color-secondary a.link:hover{
+.text-color-secondary a.link:hover,
+a.link.text-color-secondary:hover{
 	color: var(--text-color-secondary);
 	text-decoration: underline;
 }
@@ -68,6 +78,15 @@ label[title]:not(.no-tip)::after,
 	border-radius: 2em;
 	border-width: 1px;
 	border-style: solid;
+}
+
+.highlight-text{
+	color: var(--primary-color);
+	background-color: var(--surface-c);
+	border-radius: var(--border-radius);
+	padding: 0.1rem 0.2rem;
+	margin-left: 0.1rem;
+	margin-right: 0.1rem;
 }
 
 /*圆角按钮sm*/

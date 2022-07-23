@@ -205,14 +205,21 @@ User currentUser
 					target: "_blank"
 				}
 			]
-		},
-		{ separator: true },
-		{
-			label: "<@spring.message code='module.logout' />",
-			url: "${contextPath}/logout",
-			class: "p-error"
 		}
 	]);
+	
+	if(!po.isUserAnonymous)
+	{
+		sysMenuItems = sysMenuItems.concat(
+		[
+			{ separator: true },
+			{
+				label: "<@spring.message code='module.logout' />",
+				url: "${contextPath}/logout",
+				class: "p-error"
+			}
+		]);
+	}
 	
 	po.vueReactive("sysMenu",
 	{

@@ -84,7 +84,7 @@
 							</div>
 						</div>
 						<div class="page-form-foot flex-grow-0 pt-3 text-center">
-							<p-button type="submit" label="<@spring.message code='register' />" />
+							<p-button type="submit" label="<@spring.message code='register' />"></p-button>
 						</div>
 					</form>
 					</template>
