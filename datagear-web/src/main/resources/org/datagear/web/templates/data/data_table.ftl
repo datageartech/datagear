@@ -30,7 +30,7 @@
 			
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!isSelectAction"></p-button>
-			<p-button label="<@spring.message code='view' />" @click="onView"></p-button>
+			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': isSelectAction}"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!isSelectAction"></p-button>
 		</div>
 	</div>
