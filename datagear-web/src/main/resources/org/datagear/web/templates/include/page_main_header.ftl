@@ -187,7 +187,7 @@ User currentUser
 				{
 					label: "<@spring.message code='module.about' />",
 					url: "${contextPath}/about",
-					command: function(e){ po.openSysMenuDialog(e); }
+					command: function(e){ po.openSysMenuDialog(e, false); }
 				},
 				{
 					label: "<@spring.message code='module.documentation' />",

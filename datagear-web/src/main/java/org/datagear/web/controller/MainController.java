@@ -21,7 +21,6 @@ import org.datagear.util.version.Version;
 import org.datagear.util.version.VersionContent;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.ChangelogResolver;
-import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -68,8 +67,6 @@ public class MainController extends AbstractController
 	@RequestMapping({ "", "/", "/index.html" })
 	public String main(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
-		request.setAttribute("disableRegister", this.applicationProperties.isDisableRegister());
-		request.setAttribute("currentUser", WebUtils.getUser(request, response).cloneNoPassword());
 		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
 
 		return "/main";
@@ -82,7 +79,7 @@ public class MainController extends AbstractController
 	}
 
 	@RequestMapping("/changelog")
-	public String changelog(HttpServletRequest request) throws IOException
+	public String changelog(HttpServletRequest request, Model model) throws IOException
 	{
 		Version version = null;
 
@@ -102,18 +99,18 @@ public class MainController extends AbstractController
 			versionChangelogs.add(versionChangelog);
 		}
 
-		request.setAttribute("versionChangelogs", versionChangelogs);
+		model.addAttribute("versionChangelogs", versionChangelogs);
 
 		return "/changelog";
 	}
 
 	@RequestMapping("/changelogs")
-	public String changelogs(HttpServletRequest request) throws IOException
+	public String changelogs(HttpServletRequest request, Model model) throws IOException
 	{
 		List<VersionContent> versionChangelogs = this.changelogResolver.resolveAll();
 
-		request.setAttribute("versionChangelogs", versionChangelogs);
-		request.setAttribute("allListed", true);
+		model.addAttribute("versionChangelogs", versionChangelogs);
+		model.addAttribute("allListed", true);
 
 		return "/changelog";
 	}

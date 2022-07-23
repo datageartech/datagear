@@ -327,6 +327,9 @@ label[title]:not(.no-tip)::after,
 	/*屏幕高度 - 表单foot高度*/
 	max-height: calc(100vh - 5rem);
 }
+.page-form .page-form-content.no-max-height{
+	max-height: unset;
+}
 .page-form form.readonly .page-form-foot{
 	display: none;
 }
