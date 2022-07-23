@@ -93,7 +93,7 @@
 			content = $.escapeHtml(content);
 			if(cp.iconUrl)
 			{
-				content = "<div class='plugin-info'><div class='plugin-icon' style='background-image:url(${contextPath}"+$.escapeHtml(cp.iconUrl)+")'></div>"
+				content = "<div class='plugin-info inline'><div class='plugin-icon' style='background-image:url(${contextPath}"+$.escapeHtml(cp.iconUrl)+")'></div>"
 							+ content +" </div>";
 			}
 			

@@ -57,6 +57,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/fileupload/fileupload.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/inlinemessage/inlinemessage.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/steps/steps.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/dataview/dataview.min.js" type="text/javascript"></script>
 
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>

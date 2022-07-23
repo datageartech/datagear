@@ -80,6 +80,11 @@ label[title]:not(.no-tip)::after,
 	border-style: solid;
 }
 
+.state-active{
+	color: var(--primary-color);
+	box-shadow: inset 0 0 2px 2px var(--primary-color);
+}
+
 .highlight-text{
 	color: var(--primary-color);
 	background-color: var(--surface-c);
@@ -115,9 +120,7 @@ label[title]:not(.no-tip)::after,
 
 /*竖向tabmenu*/
 .p-tabmenu.vertical-tabmenu{
-	display: inline-block;
 	padding: 0.25em;
-	box-sizing: border-box;
 }
 .p-tabmenu.vertical-tabmenu .p-tabmenu-nav{
 	flex-direction: column;
@@ -367,17 +370,29 @@ label[title]:not(.no-tip)::after,
 
 .plugin-info{
 	position: relative;
-	padding-left: 2.2em;
 }
 .plugin-info .plugin-icon{
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+.plugin-info.inline{
+	padding-left: 2.2em;
+}
+.plugin-info.inline .plugin-icon{
 	position: absolute;
 	left: 0;
 	top: -0.3em;
 	width: 2rem;
 	height: 2rem;
 	vertical-align: middle;
-	background-repeat: no-repeat;
-	background-size: 100% 100%;
+}
+.plugin-info.block .plugin-icon{
+	width: 6rem;
+	height: 6rem;
+	margin-bottom: 0.5rem;
+}
+.page-chartPlugin-select .plugin-info{
+	min-height: 8rem;
 }
 
 .page-manager-schema .p-tree.schema-tree .p-tree-wrapper,

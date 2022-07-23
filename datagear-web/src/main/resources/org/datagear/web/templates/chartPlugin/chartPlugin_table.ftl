@@ -66,7 +66,7 @@
 		formatIcon: function(data)
 		{
 			if(data.iconUrl)
-				return "<div class='plugin-info'><div class='plugin-icon' "
+				return "<div class='plugin-info inline'><div class='plugin-icon' "
 							+"style='background-image:url(${contextPath}"+$.escapeHtml(data.iconUrl)+")'></div>&nbsp;</div>";
 			
 			return "";

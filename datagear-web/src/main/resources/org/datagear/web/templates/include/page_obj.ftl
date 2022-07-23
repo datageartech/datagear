@@ -317,7 +317,8 @@ var ${pid} =
 		"p-chip": primevue.chip,
 		"p-fileupload": primevue.fileupload,
 		"p-inlinemessage": primevue.inlinemessage,
-		"p-steps": primevue.steps
+		"p-steps": primevue.steps,
+		"p-dataview": primevue.dataview
 	},
 	
 	//vue挂载
