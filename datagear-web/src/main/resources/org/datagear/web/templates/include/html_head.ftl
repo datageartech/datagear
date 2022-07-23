@@ -24,8 +24,9 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldgutter.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/css/style.css" rel="stylesheet" />
-<link href="${contextPath}/static/css/codemirror-5.64.0/custom.css" rel="stylesheet" />
+<link href="${contextPath}/static/css/style.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/codemirror-5.64.0/custom.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css" type="text/css" rel="stylesheet" id="styleCssLink" />
 
 <script src="${contextPath}/static/lib/jquery-3.6.0/jquery-3.6.0.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js" type="text/javascript"></script>

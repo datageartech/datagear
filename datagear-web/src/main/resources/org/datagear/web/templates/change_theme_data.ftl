@@ -11,5 +11,9 @@
 	{
 		"cssId" : "primevueCssLink",
 		"href" : "${contextPath}/static/lib/primevue@3.15.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css"
+	},
+	{
+		"cssId" : "styleCssLink",
+		"href" : "${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css"
 	}
 ]

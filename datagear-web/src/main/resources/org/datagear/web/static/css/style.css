@@ -12,7 +12,7 @@
 }
 *::-webkit-scrollbar-thumb{
 	border-radius: var(--border-radius);
-	background-color: var(--surface-300);
+	background-color: var(--surface-200);
 }
 *::-webkit-scrollbar-track,
 *::-webkit-scrollbar-corner{
