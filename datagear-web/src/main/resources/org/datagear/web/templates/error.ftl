@@ -43,13 +43,16 @@
 					<p-card class="col-10 md:col-8 mt-6 p-inline-message p-inline-message-error">
 						<template #content>
 							<div class="operation-message ${operationMessage.type}">
-								<div class="message text-2xl">
-									${operationMessage.message}
+								<div class="message flex flex-row align-items-center justify-content-center">
+									<span class="pi pi-info-circle text-4xl"></span>
+									<div class="text-2xl pl-2">
+										${operationMessage.message}
+									</div>
 								</div>
 								<#if (operationMessage.detail)??>
-									<div class="message-detail">
-										<pre>${operationMessage.detail}</pre>
-									</div>
+								<div class="message-detail">
+									<pre>${operationMessage.detail}</pre>
+								</div>
 								</#if>
 							</div>
 						</template>
