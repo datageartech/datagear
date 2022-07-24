@@ -368,31 +368,24 @@ label[title]:not(.no-tip)::after,
 	max-height: calc(90vh - 1rem - 6rem);
 }
 
-.plugin-info{
-	position: relative;
-}
 .plugin-info .plugin-icon{
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 }
-.plugin-info.inline{
-	padding-left: 2.2em;
-}
 .plugin-info.inline .plugin-icon{
-	position: absolute;
-	left: 0;
-	top: -0.3em;
 	width: 2rem;
 	height: 2rem;
-	vertical-align: middle;
+}
+.plugin-info.inline .plugin-name{
+	padding-left: 0.25rem;
+}
+.plugin-info.block{
+	min-height: 8rem;
 }
 .plugin-info.block .plugin-icon{
 	width: 6rem;
 	height: 6rem;
 	margin-bottom: 0.5rem;
-}
-.page-chartPlugin-select .plugin-info{
-	min-height: 8rem;
 }
 
 .page-manager-schema .p-tree.schema-tree .p-tree-wrapper,

@@ -56,13 +56,7 @@
 										<div class="p-card p-3 cursor-pointer"
 											@click="onSelectChartPlugin(slotProps.data)"
 											:class="{'state-active': slotProps.data.id == pm.selectedChartPluginId }">
-											<div class="plugin-info block flex flex-column align-items-center justify-content-center">
-												<div class="plugin-icon" :style="formatChartPluginIconStyle(slotProps.data)" v-if="slotProps.data.iconUrl">
-												</div>
-												<div class="plugin-name">
-													{{(slotProps.data.nameLabel ? (slotProps.data.nameLabel.value || slotProps.data.id) : slotProps.data.id)}}
-												</div>
-											</div>
+											<div v-html="formatChartPlugin(slotProps.data)"></div>
 										</div>
 									</div>
 								</template>
@@ -183,12 +177,9 @@
 			return po.toCategorizationEleId(categorization);
 		},
 		
-		formatChartPluginIconStyle: function(chartPlugin)
+		formatChartPlugin: function(chartPlugin)
 		{
-			if(chartPlugin.iconUrl)
-				return "background-image:url(" + po.concatContextPath($.escapeHtml(chartPlugin.iconUrl)) + ")";
-			else
-				return "";
+			return $.toChartPluginHtml(chartPlugin, po.contextPath, true);
 		},
 		
 		onCategoryMenuItemChange: function(e)
@@ -206,6 +197,11 @@
 			var pm = po.vuePageModel();
 			pm.selectedChartPlugin = chartPlugin;
 			pm.selectedChartPluginId = (chartPlugin ? chartPlugin.id : null);
+		},
+		
+		onSelect: function()
+		{
+			po.handleSelectAction();
 		}
 	});
 

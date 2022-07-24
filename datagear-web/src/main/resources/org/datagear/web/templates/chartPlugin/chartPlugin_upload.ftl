@@ -45,10 +45,7 @@
 		        	<div id="${pid}preview" class="input p-component p-inputtext w-full overflow-auto" style="height:8rem;">
 		        		<p-chip v-for="p in chartPlugins.plugins" :key="p.key"
 		        			class="mb-2" :removable="!isReadonlyAction" @remove="onRemovedChartplugin($event, p.id)">
-		        			<div class="plugin-info inline">
-		        				<div class="plugin-icon" :style="p.iconStyle"></div>
-		        				<span class="plugin-name">{{p.nameLabel.value + (p.version ? " ("+p.version+")" : "")}}</span>
-		        			</div>
+		        			<div v-html="formatChartPlugin(p)"></div>
 		        		</p-chip>
 		        	</div>
 		        	<div class="validate-msg">
@@ -82,11 +79,6 @@
 		$.each(cps, function(idx, cp)
 		{
 			cp.key = cp.id + seq;
-			
-			if(cp.iconUrl)
-				cp.iconStyle = { "background-image": "url("+cp.iconUrl+"?tmp="+encodeURIComponent(pm.pluginFileName)+")" };
-			else
-				cp.iconStyle = {};
 		});
 		
 		chartPlugins.plugins = cps;
@@ -99,6 +91,11 @@
 	
 	po.vueMethod(
 	{
+		formatChartPlugin: function(chartPlugin)
+		{
+			return $.toChartPluginHtml(chartPlugin, po.contextPath);
+		},
+		
 		onUploaded: function(e)
 		{
 			var pm = po.vuePageModel();

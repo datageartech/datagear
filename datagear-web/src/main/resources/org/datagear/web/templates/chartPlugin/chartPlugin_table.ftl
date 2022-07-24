@@ -40,13 +40,12 @@
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
 			<p-column field="order" header="<@spring.message code='order' />" :hidden="true"></p-column>
-			<p-column field="nameLabel.value" header="<@spring.message code='name' />" class="col-name" style="max-width:20em;"></p-column>
-			<p-column field="version" header="<@spring.message code='version' />" class="col-version"></p-column>
-			<p-column field="iconUrl" header="<@spring.message code='icon' />" style="min-width:6em;max-width:12em;">
+			<p-column field="nameLabel" header="<@spring.message code='name' />" class="col-name">
 				<template #body="{data}">
-					<div v-html="formatIcon(data)"></div>
+					<div v-html="formatName(data)"></div>
 				</template>
 			</p-column>
+			<p-column field="version" header="<@spring.message code='version' />" class="col-version"></p-column>
 			<p-column field="descLabel.value" header="<@spring.message code='desc' />" class="col-desc" style="max-width:50em;"></p-column>
 		</p-datatable>
 	</div>
@@ -63,13 +62,9 @@
 	
 	po.vueMethod(
 	{
-		formatIcon: function(data)
+		formatName: function(data)
 		{
-			if(data.iconUrl)
-				return "<div class='plugin-info inline'><div class='plugin-icon' "
-							+"style='background-image:url(${contextPath}"+$.escapeHtml(data.iconUrl)+")'></div>&nbsp;</div>";
-			
-			return "";
+			return $.toChartPluginHtml(data, po.contextPath);
 		},
 		
 		onUpload: function()

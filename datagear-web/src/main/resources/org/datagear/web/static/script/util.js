@@ -14,6 +14,31 @@
 
 (function($, undefined)
 {
+	$.toChartPluginHtml = function(chartPlugin, contextPath, vertical)
+	{
+		vertical = (vertical == null ? false : vertical);
+		
+		var html = "<div class='plugin-info flex align-items-center justify-content-center"
+					+(vertical ? " flex-column block " : " flex-row inline ")
+					+(!chartPlugin || !chartPlugin.iconUrl ? " no-icon " : "")
+					+"'>";
+		
+		if(chartPlugin)
+		{
+			if(chartPlugin.iconUrl)
+				html += "<div class='plugin-icon' style='background-image:url("+contextPath+$.escapeHtml(chartPlugin.iconUrl)+")'></div>";
+			
+			var name = (chartPlugin.nameLabel ? (chartPlugin.nameLabel.value || chartPlugin.id) : chartPlugin.id);
+			name = $.escapeHtml(name);
+			
+			html += "<div class='plugin-name'>"+name+"</div>";
+		}
+		
+		html += "</div>"
+		
+		return html;
+	};
+	
 	/**
 	 * 打开给定URL页面。
 	 * 

@@ -87,17 +87,7 @@
 		},
 		formatChartPlugin: function(data)
 		{
-			var cp = data.htmlChartPlugin;
-			
-			var content = (cp.nameLabel ? (cp.nameLabel.value || cp.id) : cp.id);
-			content = $.escapeHtml(content);
-			if(cp.iconUrl)
-			{
-				content = "<div class='plugin-info inline'><div class='plugin-icon' style='background-image:url(${contextPath}"+$.escapeHtml(cp.iconUrl)+")'></div>"
-							+ content +" </div>";
-			}
-			
-			return content;
+			return $.toChartPluginHtml(data.htmlChartPlugin, po.contextPath);
 		},
 		onAdd: function()
 		{
