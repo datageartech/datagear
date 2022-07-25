@@ -39,6 +39,8 @@ page_manager.ftl
 	{
 		options = $.extend({ multiSortMeta: [], initData: true }, options);
 		
+		po.setupAction();
+		
 		var pm = po.vuePageModel(
 		{
 			items: [],
@@ -53,11 +55,6 @@ page_manager.ftl
 			multiSortMeta: options.multiSortMeta,
 			selectedItems: null
 		});
-		
-		if(po.isSelectAction)
-		{
-			po.vueRef("isSelectAction", po.isSelectAction);
-		}
 		
 		po.vueMethod(
 		{

@@ -388,11 +388,6 @@
 		return re;
 	};
 	
-	po.refreshTableStructure = function()
-	{
-		
-	};
-	
 	po.vuePageModel(
 	{
 		searchForm:{ keyword: "" },

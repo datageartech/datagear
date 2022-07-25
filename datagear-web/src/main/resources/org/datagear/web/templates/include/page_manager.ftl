@@ -19,8 +19,8 @@ String action
 (function(po)
 {
 	po.action = "${requestAction!AbstractController.REQUEST_ACTION_QUERY}";
-	po.isQueryAction = (po.action == "${AbstractController.REQUEST_ACTION_QUERY}");
-	po.isSelectAction = (po.action == "${AbstractController.REQUEST_ACTION_SELECT}");
+	po.isQueryAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_QUERY}") == 0);
+	po.isSelectAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_SELECT}") == 0);
 	po.isMultipleSelect = ("${(isMultipleSelect!false)?string('true','false')}" == "true");
 	
 	po.refresh = function(){ /*需实现*/ };
@@ -28,6 +28,14 @@ String action
 	
 	po.i18n.pleaseSelectOnlyOne = "<@spring.message code='pleaseSelectOnlyOne' />";
 	po.i18n.pleaseSelectAtLeastOne = "<@spring.message code='pleaseSelectAtLeastOne' />";
+	
+	po.setupAction = function()
+	{
+		po.vueRef("action", po.action);
+		po.vueRef("isQueryAction", po.isQueryAction);
+		po.vueRef("isSelectAction", po.isSelectAction);
+		po.vueRef("isMultipleSelect", po.isMultipleSelect);
+	};
 	
 	//单选处理函数
 	po.executeOnSelect = function(callback)

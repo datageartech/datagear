@@ -10,7 +10,6 @@
 表单JS片段。
 
 变量：
-//操作，不允许为null
 String action
 
 -->
@@ -18,10 +17,10 @@ String action
 <script>
 (function(po)
 {
-	po.action = "${requestAction!AbstractController.REQUEST_ACTION_QUERY}";
-	po.isAddAction = (po.action == "${AbstractController.REQUEST_ACTION_ADD}");
-	po.isEditAction = (po.action == "${AbstractController.REQUEST_ACTION_EDIT}");
-	po.isViewAction = (po.action == "${AbstractController.REQUEST_ACTION_VIEW}");
+	po.action = "${requestAction!''}";
+	po.isAddAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_ADD}") == 0);
+	po.isEditAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_EDIT}") == 0);
+	po.isViewAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_VIEW}") == 0);
 	po.isReadonlyAction = (po.isViewAction);
 	po.submitAction = "${submitAction!'#'}";
 	
@@ -30,18 +29,18 @@ String action
 		return po.element("form");
 	};
 	
-	po.vueRef("action", po.action);
-	po.vueRef("isAddAction", po.isAddAction);
-	po.vueRef("isEditAction", po.isEditAction);
-	po.vueRef("isViewAction", po.isViewAction);
-	po.vueRef("isReadonlyAction", po.isReadonlyAction);
-	
 	po.setupForm = function(data, submitUrl, ajaxOptions, validateOptions)
 	{
 		data = (data || {});
 		submitUrl = (submitUrl || "#");
 		ajaxOptions = (ajaxOptions || {});
 		validateOptions = (validateOptions || {});
+		
+		po.vueRef("action", po.action);
+		po.vueRef("isAddAction", po.isAddAction);
+		po.vueRef("isEditAction", po.isEditAction);
+		po.vueRef("isViewAction", po.isViewAction);
+		po.vueRef("isReadonlyAction", po.isReadonlyAction);
 		
 		var pm = po.vuePageModel(data);
 		

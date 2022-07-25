@@ -41,6 +41,9 @@
 		        		input-class="w-full" toggle-mask :feedback="false"
 		        		name="password" :required="isAddAction" maxlength="50" autocomplete="new-password">
 		        	</p-password>
+		        	<div class="desc text-color-secondary">
+		        		<small><@spring.message code='wontModifyIfEmpty' /></small>
+		        	</div>
 		        </div>
 			</div>
 			<div class="field grid" v-if="!isReadonlyAction">
