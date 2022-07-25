@@ -70,6 +70,7 @@
 <#include "../include/page_form.ftl">
 <#include "../include/page_code_editor.ftl">
 <#include "../include/page_sql_editor.ftl">
+<#include "../include/page_boolean_options.ftl">
 <#include "include/dataSet_form_js.ftl">
 <script>
 (function(po)

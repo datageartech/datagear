@@ -8,6 +8,10 @@
 -->
 <#--
 数据集基本输入项
+
+依赖：
+page_boolean_options.ftl
+
 -->
 <div class="field grid">
 	<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">
@@ -50,7 +54,6 @@
 		</div>
 	</div>
 </div>
-<#include "../../include/page_boolean_options.ftl">
 <script>
 (function(po)
 {

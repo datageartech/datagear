@@ -230,7 +230,7 @@ User currentUser
 	{
 		onSysMenuToggle: function(e)
 		{
-			po.vueRef("sysMenuEle").toggle(e);
+			po.vueUnref("sysMenuEle").toggle(e);
 		}
 	});
 	

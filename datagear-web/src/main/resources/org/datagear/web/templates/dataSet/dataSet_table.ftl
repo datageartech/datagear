@@ -160,7 +160,7 @@
 		
 		onAddMenuToggle: function(e)
 		{
-			po.vueRef("addMenuEle").toggle(e);
+			po.vueUnref("addMenuEle").toggle(e);
 		},
 		
 		onEdit: function()

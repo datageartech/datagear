@@ -131,7 +131,7 @@
 	po.vueComputed("permissionDesc", function()
 	{
 		var pm = po.vuePageModel();
-		var permissionOptions = po.vueRef("permissionOptions");
+		var permissionOptions = po.vueUnref("permissionOptions");
 		
 		var idx = $.inArrayById(permissionOptions, pm.permission, "value");
 		return (idx >= 0 ? permissionOptions[idx].desc : "");

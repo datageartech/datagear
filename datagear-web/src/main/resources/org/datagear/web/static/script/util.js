@@ -14,6 +14,22 @@
 
 (function($, undefined)
 {
+	$.findNameByValue = function(nameValueObjs, value)
+	{
+		var name = null;
+		
+		$.each(nameValueObjs, function(idx, nv)
+		{
+			if(nv.value == value)
+			{
+				name =  nv.name;
+				return false;
+			}
+		});
+		
+		return name;
+	};
+	
 	$.toChartPluginHtml = function(chartPlugin, contextPath, vertical)
 	{
 		vertical = (vertical == null ? false : vertical);

@@ -197,6 +197,22 @@ var ${pid} =
 		}
 	},
 	
+	//获取/设置（自动ref）vue的setup引用值
+	vueRef: function(name, value)
+	{
+		var obj = this._vueSetup[name];
+		
+		if(value === undefined)
+			return obj;
+		else
+		{
+			if(obj == null)	
+				this._vueSetup[name] = Vue.ref(value);
+			else
+				obj.value = value;
+		}
+	},
+	
 	//设置vue的setup函数
 	vueMethod: function(name, method)
 	{
@@ -211,22 +227,6 @@ var ${pid} =
 		
 		for(var p in methodsObj)
 			this._vueSetup[p] = methodsObj[p];
-	},
-	
-	//获取（自动unref）/设置（自动ref）vue的setup引用值
-	vueRef: function(name, value)
-	{
-		var obj = this._vueSetup[name];
-		
-		if(value === undefined)
-			return Vue.unref(obj);
-		else
-		{
-			if(obj == null)	
-				this._vueSetup[name] = Vue.ref(value);
-			else
-				obj.value = value;
-		}
 	},
 	
 	//设置vue的计算属性
@@ -266,7 +266,14 @@ var ${pid} =
 		this._vueMounted.push(callback);
 	},
 
-	//获取reacitve的原始对象
+	//获取指定名称对象的unref()结果
+	vueUnref: function(name)
+	{
+		var obj = this._vueSetup[name];
+		return Vue.unref(obj);
+	},
+	
+	//获取toRaw()结果对象
 	vueRaw: function(reactiveObj)
 	{
 		if($.isArray(reactiveObj))

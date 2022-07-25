@@ -555,7 +555,7 @@
 		onTableTabMenuToggle: function(e, tableTabId)
 		{
 			po.tableTabMenuTargetId = tableTabId;
-			po.vueRef("tableTabMenuEle").show(e);
+			po.vueUnref("tableTabMenuEle").show(e);
 		},
 		
 		onAdd: function()
