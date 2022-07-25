@@ -28,7 +28,12 @@
 		<div class="h-opts col-12 md:col-9 text-right">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="isSelectAction"></p-button>
 			
-			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!isSelectAction"></p-button>
+			<p-button label="<@spring.message code='add' />"
+				icon="pi pi-chevron-down" icon-pos="right" aria-haspopup="true" aria-controls="${pid}addMenu"
+				@click="onAddMenuToggle" v-if="!isSelectAction">
+			</p-button>
+			<p-menu id="${pid}addMenu" ref="addMenuEle" :model="addMenuItems" :popup="true" v-if="!isSelectAction"></p-menu>
+			
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!isSelectAction"></p-button>
 			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': isSelectAction}"></p-button>
 			<p-button label="<@spring.message code='share' />" @click="onShare" v-if="!isSelectAction"></p-button>
@@ -67,6 +72,68 @@
 		multiSortMeta: [ {field: "createTime", order: -1} ]
 	});
 	
+	po.vueRef("addMenuItems",
+	[
+		{
+			label: "<@spring.message code='dataSetType.SQL' />",
+			command: function()
+			{
+				po.handleAddAction("/dataSet/addForSQL", {width: "70vw"});
+			}
+		},
+		{
+			label: "<@spring.message code='dataSetType.CsvValue' />",
+			command: function()
+			{
+				po.handleAddAction("/dataSet/addForCsvValue", {width: "70vw"});
+			}
+		},
+		{
+			label: "<@spring.message code='dataSetType.CsvFile' />",
+			command: function()
+			{
+				po.handleAddAction("/dataSet/addForCsvFile", {width: "70vw"});
+			}
+		},
+		{
+			label: "<@spring.message code='dataSetType.Excel' />",
+			command: function()
+			{
+				po.handleAddAction("/dataSet/addForExcel", {width: "70vw"});
+			}
+		},
+		{
+			label: "<@spring.message code='dataSetType.Http' />",
+			command: function()
+			{
+				po.handleAddAction("/dataSet/addForHttp", {width: "70vw"});
+			}
+		},
+		{
+			label: "<@spring.message code='dataSetType.JsonValue' />",
+			command: function()
+			{
+				po.handleAddAction("/dataSet/addForJsonValue", {width: "70vw"});
+			}
+		},
+		{
+			label: "<@spring.message code='dataSetType.JsonFile' />",
+			command: function()
+			{
+				po.handleAddAction("/dataSet/addForJsonFile", {width: "70vw"});
+			}
+		},
+		{ separator: true },
+		{
+			label: "<@spring.message code='copy' />",
+			command: function()
+			{
+				po.handleAddAction("/dataSet/copy", {width: "70vw"});
+			}
+		}
+	]);
+	po.vueRef("addMenuEle", null);
+	
 	po.vueMethod(
 	{
 		formatDataSetType: function(data)
@@ -89,6 +156,11 @@
 				return "<@spring.message code='dataSetType.Http' />";
 			else
 				return "";
+		},
+		
+		onAddMenuToggle: function(e)
+		{
+			po.vueRef("addMenuEle").toggle(e);
 		},
 		
 		onAdd: function()

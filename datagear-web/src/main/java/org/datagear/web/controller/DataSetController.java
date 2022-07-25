@@ -164,9 +164,7 @@ public class DataSetController extends AbstractSchemaConnController
 		SqlDataSetEntity dataSet = new SqlDataSetEntity();
 		setCookieAnalysisProject(request, response, dataSet);
 
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_SQL);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_SQL);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -176,7 +174,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveAddForSql(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody SqlDataSetEntity dataSet)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
@@ -190,7 +188,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_JsonValue)
@@ -200,9 +198,7 @@ public class DataSetController extends AbstractSchemaConnController
 		JsonValueDataSetEntity dataSet = new JsonValueDataSetEntity();
 		setCookieAnalysisProject(request, response, dataSet);
 
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonValue);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonValue);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -212,7 +208,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveAddForJsonValue(HttpServletRequest request,
 			HttpServletResponse response, @RequestBody JsonValueDataSetEntity dataSet)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
@@ -226,7 +222,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_JsonFile)
@@ -236,10 +232,8 @@ public class DataSetController extends AbstractSchemaConnController
 		JsonFileDataSetEntity dataSet = new JsonFileDataSetEntity();
 		setCookieAnalysisProject(request, response, dataSet);
 
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonFile);
+		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonFile);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -249,7 +243,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveAddForJsonFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody JsonFileDataSetEntity dataSet) throws Throwable
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
@@ -264,8 +258,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_Excel)
@@ -276,9 +270,7 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setNameRow(1);
 		setCookieAnalysisProject(request, response, dataSet);
 
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Excel);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Excel);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -288,7 +280,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveAddForExcel(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody ExcelDataSetEntity dataSet) throws Throwable
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
@@ -304,7 +296,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_CsvValue)
@@ -315,9 +307,7 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setNameRow(1);
 		setCookieAnalysisProject(request, response, dataSet);
 
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvValue);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvValue);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -327,7 +317,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveAddForCsvValue(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody CsvValueDataSetEntity dataSet)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
@@ -341,7 +331,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_CsvFile)
@@ -352,10 +342,8 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setNameRow(1);
 		setCookieAnalysisProject(request, response, dataSet);
 
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvFile);
+		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvFile);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -365,7 +353,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveAddForCsvFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody CsvFileDataSetEntity dataSet) throws Throwable
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
@@ -380,8 +368,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_Http)
@@ -391,10 +379,8 @@ public class DataSetController extends AbstractSchemaConnController
 		HttpDataSetEntity dataSet = new HttpDataSetEntity();
 		setCookieAnalysisProject(request, response, dataSet);
 
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Http);
+		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());	
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Http);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -404,7 +390,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveAddForHttp(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody HttpDataSetEntity dataSet)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
@@ -417,15 +403,15 @@ public class DataSetController extends AbstractSchemaConnController
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/copy")
 	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Throwable
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		DataSetEntity dataSet = this.dataSetEntityService.getById(user, id);
 
@@ -481,16 +467,15 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setId(null);
 
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute("dataSetProperties", toWriteJsonTemplateModel(dataSet.getProperties()));
-		model.addAttribute("dataSetParams", toWriteJsonTemplateModel(dataSet.getParams()));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveAddFor" + dataSet.getDataSetType());
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD,
+						"saveAddFor" + dataSet.getDataSetType());
 
 		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType())
 				|| DataSetEntity.DATA_SET_TYPE_CsvFile.equals(dataSet.getDataSetType())
 				|| DataSetEntity.DATA_SET_TYPE_Http.equals(dataSet.getDataSetType()))
-			model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		{
+			addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
+		}
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -499,23 +484,19 @@ public class DataSetController extends AbstractSchemaConnController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
-		DataSetEntity dataSet = this.dataSetEntityService.getByIdForEdit(user, id);
+		DataSetEntity dataSet = getByIdForEdit(this.dataSetEntityService, user, id);
 
-		if (dataSet == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute("dataSetProperties", toWriteJsonTemplateModel(dataSet.getProperties()));
-		model.addAttribute("dataSetParams", toWriteJsonTemplateModel(dataSet.getParams()));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.editDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveEditFor" + dataSet.getDataSetType());
+		setFormModel(model, dataSet, REQUEST_ACTION_EDIT,
+						"saveEditFor" + dataSet.getDataSetType());
 
 		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType())
 				|| DataSetEntity.DATA_SET_TYPE_CsvFile.equals(dataSet.getDataSetType())
 				|| DataSetEntity.DATA_SET_TYPE_Http.equals(dataSet.getDataSetType()))
-			model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		{
+			addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
+		}
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -525,7 +506,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveEditForSql(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody SqlDataSetEntity dataSet)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, dataSet);
 
@@ -535,8 +516,8 @@ public class DataSetController extends AbstractSchemaConnController
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
@@ -544,7 +525,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveEditForJsonValue(HttpServletRequest request,
 			HttpServletResponse response, @RequestBody JsonValueDataSetEntity dataSet)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, dataSet);
 
@@ -554,8 +535,8 @@ public class DataSetController extends AbstractSchemaConnController
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
@@ -564,7 +545,7 @@ public class DataSetController extends AbstractSchemaConnController
 			HttpServletResponse response, @RequestBody JsonFileDataSetEntity dataSet,
 			@RequestParam("originalFileName") String originalFileName) throws Throwable
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, dataSet);
 
@@ -576,8 +557,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
@@ -586,7 +567,7 @@ public class DataSetController extends AbstractSchemaConnController
 			@RequestBody ExcelDataSetEntity dataSet, @RequestParam("originalFileName") String originalFileName)
 			throws Throwable
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, dataSet);
 
@@ -598,8 +579,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
@@ -607,7 +588,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveEditForCsvValue(HttpServletRequest request,
 			HttpServletResponse response, @RequestBody CsvValueDataSetEntity dataSet)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, dataSet);
 
@@ -617,8 +598,8 @@ public class DataSetController extends AbstractSchemaConnController
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
@@ -627,7 +608,7 @@ public class DataSetController extends AbstractSchemaConnController
 			@RequestBody CsvFileDataSetEntity dataSet, @RequestParam("originalFileName") String originalFileName)
 			throws Throwable
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, dataSet);
 
@@ -639,8 +620,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
@@ -648,7 +629,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> saveEditForHttp(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody HttpDataSetEntity dataSet)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, dataSet);
 
@@ -658,8 +639,8 @@ public class DataSetController extends AbstractSchemaConnController
 		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
-
-		return optMsgSaveSuccessResponseEntity(request, dataSet);
+		
+		return operationSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
@@ -694,7 +675,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public void downloadFile(HttpServletRequest request, HttpServletResponse response, @RequestParam("id") String id)
 			throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		DataSetEntity dataSet = this.dataSetEntityService.getById(user, id);
 
@@ -731,23 +712,18 @@ public class DataSetController extends AbstractSchemaConnController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
-		DataSetEntity dataSet = this.dataSetEntityService.getById(user, id);
+		DataSetEntity dataSet = getByIdForView(this.dataSetEntityService, user, id);
 
-		if (dataSet == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("dataSet", dataSet);
-		model.addAttribute("dataSetProperties", toWriteJsonTemplateModel(dataSet.getProperties()));
-		model.addAttribute("dataSetParams", toWriteJsonTemplateModel(dataSet.getParams()));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.viewDataSet");
-		model.addAttribute(KEY_READONLY, true);
+		setFormModel(model, dataSet, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType())
 				|| DataSetEntity.DATA_SET_TYPE_CsvFile.equals(dataSet.getDataSetType())
 				|| DataSetEntity.DATA_SET_TYPE_Http.equals(dataSet.getDataSetType()))
-			model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		{
+			addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
+		}
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -761,7 +737,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		if (!isEmpty(ids))
 		{
-			User user = WebUtils.getUser(request, response);
+			User user = WebUtils.getUser();
 
 			for (String id : ids)
 			{
@@ -782,7 +758,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -793,7 +769,7 @@ public class DataSetController extends AbstractSchemaConnController
 			FileUtil.deleteFile(dataSetDirectory);
 		}
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")
@@ -831,7 +807,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public TemplateResolvedDataSetResult previewSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview preview) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		final SqlDataSet dataSet = preview.getDataSet();
 
@@ -865,7 +841,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public TemplateResolvedDataSetResult previewJsonValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody JsonValueDataSetPreview preview) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		JsonValueDataSet dataSet = preview.getDataSet();
 
@@ -882,7 +858,7 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview)
 			throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		JsonFileDataSetEntity dataSet = preview.getDataSet();
 
@@ -900,7 +876,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResolvedDataSetResult previewExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody ExcelDataSetEntityPreview preview) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		ExcelDataSetEntity dataSet = preview.getDataSet();
 
@@ -918,7 +894,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public TemplateResolvedDataSetResult previewCsvValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody CsvValueDataSetPreview preview) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		CsvValueDataSet dataSet = preview.getDataSet();
 
@@ -934,7 +910,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResolvedDataSetResult previewCsvFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody CsvFileDataSetEntityPreview preview) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		CsvFileDataSetEntity dataSet = preview.getDataSet();
 
@@ -952,7 +928,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public TemplateResolvedDataSetResult previewHttp(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody HttpDataSetEntityPreview preview) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		HttpDataSetEntity dataSet = preview.getDataSet();
 
@@ -1061,7 +1037,7 @@ public class DataSetController extends AbstractSchemaConnController
 	protected void setAnalysisUserParamValue(HttpServletRequest request, HttpServletResponse response,
 			DataSetQuery dataSetQuery)
 	{
-		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser(request, response));
+		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser());
 		analysisUser.setParamValue(dataSetQuery);
 	}
 

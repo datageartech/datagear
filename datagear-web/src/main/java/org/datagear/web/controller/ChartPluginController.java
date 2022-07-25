@@ -237,7 +237,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		List<HtmlChartPluginVO> htmlChartPluginVOs = findHtmlChartPluginVOs(request, null);
 		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginVOs);
 
-		model.addAttribute("categorizations", toWriteJsonTemplateModel(categorizations));
+		addAttributeForWriteJson(model, "categorizations", categorizations);
 
 		setSelectAction(request, model);
 		return "/chartPlugin/chartPlugin_select";

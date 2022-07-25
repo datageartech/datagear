@@ -19,6 +19,8 @@
 <script>
 (function(po)
 {
+	po.search = function(formData){ /*需实现*/ };
+	
 	po.vuePageModel(
 	{
 		searchForm: { keyword: "" }
@@ -32,8 +34,6 @@
 			po.search(param);
 		}
 	});
-	
-	po.search = function(formData){};
 })
 (${pid});
 </script>

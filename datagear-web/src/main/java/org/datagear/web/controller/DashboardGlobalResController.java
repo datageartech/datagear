@@ -112,7 +112,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@RequestMapping("/upload")
 	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		model.addAttribute("availableCharsetNames", toWriteJsonTemplateModel(getAvailableCharsetNames()));
+		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		setFormAction(model, REQUEST_ACTION_UPLOAD, SUBMIT_ACTION_SAVE_UPLOAD);

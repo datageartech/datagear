@@ -207,7 +207,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		setSelectAction(request, model);
-		return "/schema/schema_tree";
+		return "/schema/schema_table";
 	}
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
@@ -222,6 +222,20 @@ public class SchemaController extends AbstractSchemaConnTableController
 		processForUI(request, schemas);
 
 		return schemas;
+	}
+
+	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public PagingData<Schema> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
+	{
+		User user = WebUtils.getUser();
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+
+		PagingData<Schema> pagingData = getSchemaService().pagingQuery(user, pagingQuery);
+		processForUI(request, pagingData.getItems());
+
+		return pagingData;
 	}
 
 	@RequestMapping(value = "/testConnection", produces = CONTENT_TYPE_JSON)

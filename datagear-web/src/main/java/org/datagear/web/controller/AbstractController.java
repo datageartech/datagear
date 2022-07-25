@@ -100,6 +100,7 @@ public abstract class AbstractController
 	public static final String REQUEST_ACTION_VIEW = "view";
 	public static final String REQUEST_ACTION_DELETE = "delete";
 	public static final String REQUEST_ACTION_UPLOAD = "upload";
+	public static final String REQUEST_ACTION_COPY = "copy";
 
 	public static final String KEY_SUBMIT_ACTION = "submitAction";
 	public static final String SUBMIT_ACTION_SAVE_ADD = "saveAdd";
@@ -184,10 +185,10 @@ public abstract class AbstractController
 
 		return entity;
 	}
-
+	
 	protected void setFormModel(Model model, Object formModel, String requestAction, String submitAction)
 	{
-		model.addAttribute(KEY_FORM_MODEL, toWriteJsonTemplateModel(formModel));
+		addAttributeForWriteJson(model, KEY_FORM_MODEL, formModel);
 		setFormAction(model, requestAction, submitAction);
 	}
 	
@@ -195,6 +196,11 @@ public abstract class AbstractController
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, requestAction);
 		model.addAttribute(KEY_SUBMIT_ACTION, submitAction);
+	}
+
+	protected void addAttributeForWriteJson(Model model, String name, Object value)
+	{
+		model.addAttribute(name, toWriteJsonTemplateModel(value));
 	}
 
 	protected boolean setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,

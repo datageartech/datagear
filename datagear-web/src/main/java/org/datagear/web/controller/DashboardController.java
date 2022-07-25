@@ -269,7 +269,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		String templateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
 
 		model.addAttribute("dashboard", dashboard);
-		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
+		addAttributeForWriteJson(model, "templates", dashboard.getTemplates());
 		model.addAttribute("templateName", HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0]);
 		model.addAttribute("templateContent", templateContent);
 		model.addAttribute("defaultTemplateContent", templateContent);
@@ -300,7 +300,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		String defaultTemplateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
 
 		model.addAttribute("dashboard", dashboard);
-		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
+		addAttributeForWriteJson(model, "templates", dashboard.getTemplates());
 		model.addAttribute("templateName", dashboard.getFirstTemplate());
 		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute("defaultTemplateContent", defaultTemplateContent);
@@ -332,7 +332,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		String defaultTemplateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
 
 		model.addAttribute("dashboard", dashboard);
-		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
+		addAttributeForWriteJson(model, "templates", dashboard.getTemplates());
 		model.addAttribute("templateName", dashboard.getFirstTemplate());
 		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute("defaultTemplateContent", defaultTemplateContent);
@@ -838,7 +838,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new RecordNotFoundException();
 
 		model.addAttribute("dashboard", dashboard);
-		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
+		addAttributeForWriteJson(model, "templates", dashboard.getTemplates());
 		model.addAttribute("templateName", dashboard.getFirstTemplate());
 		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute("dashboardGlobalResUrlPrefix",

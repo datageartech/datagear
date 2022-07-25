@@ -202,6 +202,9 @@ label[title]:not(.no-tip)::after,
 	border-radius: none;
 }
 
+.p-datatable.table-sm .p-datatable-thead > tr > th{
+	padding: 0.5rem 1rem;
+}
 .p-datatable-table th,
 .p-datatable-table td{
 	white-space: nowrap;
@@ -432,4 +435,13 @@ label[title]:not(.no-tip)::after,
 .p-dialog .page-form-db-g-r .code-editor-wrapper{
 	/*对话框高度 - 表单foot高度 - 对话框header高度*/
 	height: calc(90vh - 5rem - 6rem - 7rem);
+}
+
+/*数据集编辑页*/
+.page-form-dataSet .code-editor-wrapper{
+	height: 50vh;
+}
+.page-form-dataSet .params-wrapper,
+.page-form-dataSet .properties-wrapper{
+	height: 36vh;
 }

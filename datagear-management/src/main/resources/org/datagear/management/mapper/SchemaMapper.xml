@@ -76,6 +76,27 @@
 		<include refid="common.queryOrder" />
 	</select>
 	
+	<select id="pagingQueryCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(<include refid="queryViewDataPermission" />) T
+		WHERE
+			<include refid="queryCondition" />
+	</select>
+	
+	<select id="pagingQuery" resultType="org.datagear.management.domain.Schema">
+		<include refid="common.pagingQueryHead" />
+			SELECT
+				T.*
+			FROM
+				(<include refid="queryViewDataPermission" />) T
+			WHERE
+				<include refid="queryCondition" />
+			<include refid="common.queryOrder" />
+		<include refid="common.pagingQueryFoot" />
+	</select>
+	
 	<sql id="queryViewDataPermission">
 		<choose><when test="DP_CURRENT_USER == null">
 		<include refid="queryView" />
