@@ -163,19 +163,14 @@
 			po.vueRef("addMenuEle").toggle(e);
 		},
 		
-		onAdd: function()
-		{
-			po.handleAddAction("/dataSet/add");
-		},
-		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/dataSet/edit");
+			po.handleOpenOfAction("/dataSet/edit", {width: "70vw"});
 		},
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/dataSet/view");
+			po.handleOpenOfAction("/dataSet/view", {width: "70vw"});
 		},
 
 		onShare: function()

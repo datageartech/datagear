@@ -202,8 +202,18 @@ label[title]:not(.no-tip)::after,
 	border-radius: none;
 }
 
-.p-datatable.table-sm .p-datatable-thead > tr > th{
+.p-datatable.table-sm .p-datatable-thead > tr > th,
+.p-datatable.table-sm .p-datatable-tbody > tr > td{
 	padding: 0.5rem 1rem;
+}
+.p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-toggler,
+.p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-editor-init,
+.p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-editor-save,
+.p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-editor-cancel{
+	font-size: .75rem !important;
+	width: 1.5rem !important;
+	height: 1.5rem !important;
+	padding: 0.2rem 0.2rem !important;
 }
 .p-datatable-table th,
 .p-datatable-table td{
