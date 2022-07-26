@@ -17,26 +17,35 @@ page_boolean_options.ftl
 <#assign ParamInputType=statics['org.datagear.analysis.DataSetParam$InputType']>
 <#assign PropertyDataType=statics['org.datagear.analysis.DataSetProperty$DataType']>
 <div class="field grid">
-	<label for="${pid}parameters" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+	<label for="${pid}params" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 		<@spring.message code='parameter' />
 	</label>
 	<div class="field-input col-12 md:col-9">
 		<div class="p-component p-inputtext">
-			<div class="flex flex-row pb-1">
+			<div class="flex flex-row pb-2" v-if="!isReadonlyAction">
 				<div class="h-opts flex-grow-1">
-					<p-button type="button" label="<@spring.message code='add' />" class="p-button-secondary p-button-sm"></p-button>
+					<p-button type="button" label="<@spring.message code='add' />"
+						@click="onAddParam"
+						class="p-button-secondary p-button-sm"></p-button>
 					<p-button type="button" label="<@spring.message code='moveUp' />" class="p-button-secondary p-button-sm"></p-button>
 					<p-button type="button" label="<@spring.message code='moveDown' />" class="p-button-secondary p-button-sm"></p-button>
-					<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger p-button-sm"></p-button>
+					<p-button type="button" label="<@spring.message code='delete' />"
+						@click="onDeleteParam"
+						class="p-button-danger p-button-sm">
+					</p-button>
 				</div>
 			</div>
-			<div id="${pid}parameters" class="params-wrapper input w-full overflow-auto">
+			<div id="${pid}params" class="params-wrapper input w-full overflow-auto">
 				<p-datatable :value="pm.params" :scrollable="true" scroll-height="flex"
-					v-model:selection="pm.selectedParams"
-					edit-mode="row" v-model:editing-rows="editingParamRows"  @row-edit-save="onParamRowEditSave"
+					v-model:selection="tm.selectedParams"
+					v-model:editing-rows="tm.editingParamRows"  @row-edit-save="onParamRowEditSave"
+					@row-edit-cancel="onParamRowEditCancel"
 					selection-mode="multiple" dataKey="name" striped-rows class="table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
-					<p-column :row-editor="true" :frozen="true" style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center"></p-column>
+					<p-column :row-editor="true" :frozen="true"
+						style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center"
+						v-if="!isReadonlyAction">
+					</p-column>
 					<p-column field="name" header="<@spring.message code='name' />" class="col-name">
 						<template #editor="{ data, field }">
 							<p-inputtext v-model="data[field]" @keydown.enter="onRowEditInputPreventDefault" maxlength="100" autofocus></p-inputtext>
@@ -79,7 +88,11 @@ page_boolean_options.ftl
 					</p-column>
 					<p-column field="inputPayload" header="<@spring.message code='inputConfig' />" class="col-name">
 						<template #editor="{ data, field }">
-							<p-inputtext v-model="data[field]" @keydown.enter="onRowEditInputPreventDefault" maxlength="1000"></p-inputtext>
+							<!-- 行内编辑的textarea点击和按键事件会莫名触发行保存事件，所以这里添加特殊处理函数屏蔽 -->
+							<p-textarea v-model="data[field]" @click="onRowEditInputStopPropagation"
+								@keydown="onRowEditInputStopPropagation" @keydown="onRowEditInputStopPropagation"
+								rows="2" maxlength="2000">
+							</p-textarea>
 						</template>
 					</p-column>
 				</p-datatable>
@@ -93,12 +106,17 @@ page_boolean_options.ftl
 	</label>
 	<div class="field-input col-12 md:col-9">
 		<div class="p-component p-inputtext">
-			<div class="flex flex-row pb-1">
+			<div class="flex flex-row pb-2" v-if="!isReadonlyAction">
 				<div class="h-opts flex-grow-1">
-					<p-button type="button" label="<@spring.message code='add' />" class="p-button-secondary p-button-sm"></p-button>
+					<p-button type="button" label="<@spring.message code='add' />"
+						@click="onAddProperty"
+						class="p-button-secondary p-button-sm"></p-button>
 					<p-button type="button" label="<@spring.message code='moveUp' />" class="p-button-secondary p-button-sm"></p-button>
 					<p-button type="button" label="<@spring.message code='moveDown' />" class="p-button-secondary p-button-sm"></p-button>
-					<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger p-button-sm"></p-button>
+					<p-button type="button" label="<@spring.message code='delete' />"
+						@click="onDeleteProperty"
+						class="p-button-danger p-button-sm">
+					</p-button>
 				</div>
 				<div class="flex-grow-1 flex justify-content-end">
 					<p-button type="button" label="<@spring.message code='set' />" class="p-button-secondary p-button-sm"></p-button>
@@ -106,11 +124,15 @@ page_boolean_options.ftl
 			</div>
 			<div id="${pid}properties" class="properties-wrapper input w-full overflow-auto">
 				<p-datatable :value="pm.properties" :scrollable="true" scroll-height="flex"
-					v-model:selection="pm.selectedProperties"
-					edit-mode="row" v-model:editing-rows="editingPropertyRows"  @row-edit-save="onPropertyRowEditSave"
+					v-model:selection="tm.selectedProperties"
+					v-model:editing-rows="tm.editingPropertyRows" @row-edit-save="onPropertyRowEditSave"
+					@row-edit-cancel="onPropertyRowEditCancel"
 					selection-mode="multiple" dataKey="name" striped-rows class="table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
-					<p-column :row-editor="true" :frozen="true" style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center"></p-column>
+					<p-column :row-editor="true" :frozen="true"
+						style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center"
+						v-if="!isReadonlyAction">
+					</p-column>
 					<p-column field="name" header="<@spring.message code='name' />" class="col-name">
 						<template #editor="{ data, field }">
 							<p-inputtext v-model="data[field]" @keydown.enter="onRowEditInputPreventDefault" maxlength="100" autofocus></p-inputtext>
@@ -144,8 +166,23 @@ page_boolean_options.ftl
 <script>
 (function(po)
 {
-	po.vueRef("editingParamRows", []);
-	po.vueRef("editingPropertyRows", []);
+	//XXX 没找到动vue动态启/禁用编辑表格的方法，暂时采用这个方式
+	if(!po.isReadonlyAction)
+	{
+		var paramsPtable = po.element("p-datatable", po.elementOfId("${pid}params"));
+		paramsPtable.attr("edit-mode", "row");
+		
+		var propertiesPtable = po.element("p-datatable", po.elementOfId("${pid}properties"));
+		propertiesPtable.attr("edit-mode", "row");
+	}
+	
+	po.vueTmpModel(
+	{
+		selectedParams: [],
+		selectedProperties: [],
+		editingParamRows: [],
+		editingPropertyRows: []
+	});
 	
 	po.vueRef("dataSetParamDataTypeOptions",
 	[
@@ -179,6 +216,12 @@ page_boolean_options.ftl
 		{name: "<@spring.message code='dataSetProperty.DataType.UNKNOWN' />", value: "${PropertyDataType.UNKNOWN}"}
 	]);
 	
+	po.hasDuplicateName = function(array, name, ignoreIdx)
+	{
+		var nameIdx = $.inArrayById(array, name, "name");
+		return (nameIdx >= 0 && nameIdx != ignoreIdx ? true : false);
+	};
+	
 	po.vueMethod(
 	{
 		formatParamType: function(data)
@@ -200,15 +243,101 @@ page_boolean_options.ftl
 			var opts = po.vueUnref("dataSetPropertyTypeOptions");
 			return $.findNameByValue(opts, data.type);
 		},
-		onPropertyRowEditSave: function(e)
-		{
-			var pm = po.vuePageModel();
-			pm.properties[e.index] = e.newData;
-		},
 		onParamRowEditSave: function(e)
 		{
 			var pm = po.vuePageModel();
-			pm.params[e.index] = e.newData;
+			var valid = true;
+			
+			if(!e.newData.name)
+			{
+				valid = false;
+				$.tipInfo("<@spring.message code='paramNameRequired' />");
+			}
+			else if(po.hasDuplicateName(pm.params, e.newData.name, e.index))
+			{
+				valid = false;
+				$.tipInfo("<@spring.message code='paramNameMustBeUnique' />");
+			}
+			
+			if(!valid)
+			{
+				var tm = po.vueTmpModel();
+				tm.editingParamRows.push(e.data);
+			}
+			else
+			{
+				pm.params[e.index] = e.newData;
+			}
+		},
+		onParamRowEditCancel: function(e)
+		{
+			var pm = po.vuePageModel();
+			var valid = true;
+			
+			if(!e.data.name)
+			{
+				valid = false;
+				$.tipInfo("<@spring.message code='paramNameRequired' />");
+			}
+			else if(po.hasDuplicateName(pm.params, e.data.name, e.index))
+			{
+				valid = false;
+				$.tipInfo("<@spring.message code='paramNameMustBeUnique' />");
+			}
+			
+			if(!valid)
+			{
+				var tm = po.vueTmpModel();
+				tm.editingParamRows.push(e.data);
+			}
+		},
+		onPropertyRowEditSave: function(e)
+		{
+			var pm = po.vuePageModel();
+			var valid = true;
+			
+			if(!e.newData.name)
+			{
+				valid = false;
+				$.tipInfo("<@spring.message code='propertyNameRequired' />");
+			}
+			else if(po.hasDuplicateName(pm.properties, e.newData.name, e.index))
+			{
+				valid = false;
+				$.tipInfo("<@spring.message code='propertyNameMustBeUnique' />");
+			}
+			
+			if(!valid)
+			{
+				var tm = po.vueTmpModel();
+				tm.editingPropertyRows.push(e.data);
+			}
+			else
+			{
+				pm.properties[e.index] = e.newData;
+			}
+		},
+		onPropertyRowEditCancel: function(e)
+		{
+			var pm = po.vuePageModel();
+			var valid = true;
+			
+			if(!e.data.name)
+			{
+				valid = false;
+				$.tipInfo("<@spring.message code='propertyNameRequired' />");
+			}
+			else if(po.hasDuplicateName(pm.properties, e.data.name, e.index))
+			{
+				valid = false;
+				$.tipInfo("<@spring.message code='propertyNameMustBeUnique' />");
+			}
+			
+			if(!valid)
+			{
+				var tm = po.vueTmpModel();
+				tm.editingPropertyRows.push(e.data);
+			}
 		},
 		onRowEditInputPreventDefault: function(e)
 		{
@@ -217,6 +346,60 @@ page_boolean_options.ftl
 		onRowEditInputStopPropagation: function(e)
 		{
 			e.stopPropagation();
+		},
+		onAddParam: function(e)
+		{
+			var pm = po.vuePageModel();
+			var tm = po.vueTmpModel();
+			
+			pm.params.push({ name: "", type: "${ParamDataType.STRING}", required: true, inputType: "${ParamInputType.TEXT}" });
+			tm.editingParamRows.push(pm.params[pm.params.length-1]);
+		},
+		onMoveUpParam: function(e)
+		{
+			
+		},
+		onMoveDownParam: function(e)
+		{
+			
+		},
+		onDeleteParam: function(e)
+		{
+			var pm = po.vuePageModel();
+			var tm = po.vueTmpModel();
+			var sps = $.wrapAsArray(po.vueRaw(tm.selectedParams));
+			
+			$.each(sps, function(idx, sp)
+			{
+				$.removeById(pm.params, sp.name, "name");
+			});
+		},
+		onAddProperty: function(e)
+		{
+			var pm = po.vuePageModel();
+			var tm = po.vueTmpModel();
+			
+			pm.properties.push({ name: "", type: "${PropertyDataType.STRING}" });
+			tm.editingPropertyRows.push(pm.properties[pm.properties.length-1]);
+		},
+		onMoveUpProperty: function(e)
+		{
+			
+		},
+		onMoveDownProperty: function(e)
+		{
+			
+		},
+		onDeleteProperty: function(e)
+		{
+			var pm = po.vuePageModel();
+			var tm = po.vueTmpModel();
+			var sps = $.wrapAsArray(po.vueRaw(tm.selectedProperties));
+			
+			$.each(sps, function(idx, sp)
+			{
+				$.removeById(pm.properties, sp.name, "name");
+			});
 		}
 	});
 })

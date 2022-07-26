@@ -54,15 +54,14 @@
 		        	<div class="validate-msg">
 		        		<input name="sql" required type="text" class="validate-proxy" />
 		        	</div>
-		        	<p-button type="button" label="<@spring.message code='preview' />"
-		        		@click="onPreview" class="p-button-secondary mt-4"
-		        		v-if="!isReadonlyAction">
-		        	</p-button>
 		        </div>
 			</div>
 			<#include "include/dataSet_input_param_property.ftl">
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center">
+		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<p-button type="button" label="<@spring.message code='preview' />"
+        		@click="onPreview" class="p-button-secondary">
+        	</p-button>
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>

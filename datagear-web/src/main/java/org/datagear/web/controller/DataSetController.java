@@ -1161,10 +1161,13 @@ public class DataSetController extends AbstractSchemaConnController
 			{
 				String name = param.getName();
 
-				if (names.contains(name))
+				if(isEmpty(name))
 				{
-					return optFailResponseEntity(null, HttpStatus.BAD_REQUEST,
-							"dataSet.error.duplicateParamName");
+					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "paramNameRequired");
+				}
+				else if (names.contains(name))
+				{
+					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "paramNameMustBeUnique");
 				}
 				else
 					names.add(name);
@@ -1179,10 +1182,13 @@ public class DataSetController extends AbstractSchemaConnController
 			{
 				String name = property.getName();
 
-				if (names.contains(name))
+				if(isEmpty(name))
 				{
-					return optFailResponseEntity(null, HttpStatus.BAD_REQUEST,
-							"dataSet.error.duplicatePropertyName");
+					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "propertyNameRequired");
+				}
+				else if (names.contains(name))
+				{
+					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "propertyNameMustBeUnique");
 				}
 				else
 					names.add(name);
