@@ -30,7 +30,7 @@
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
 		        		<div class="p-input-icon-right flex-grow-1">
-			        		<i class="pi pi-times cursor-pointer" @click="onDeleteSchema" v-if="!isReadonlyAction">
+			        		<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteSchema" v-if="!isReadonlyAction">
 			        		</i>
 				        	<p-inputtext id="${pid}dataSource" v-model="pm.shmConFactory.schema.title" type="text" class="input w-full h-full border-noround-right"
 				        		readonly="readonly" name="shmConFactory.schema.title" required maxlength="200">
@@ -44,7 +44,8 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}sql" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}sql" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='sqlDataSet.url.desc' />">
 					<@spring.message code='sql' />
 				</label>
 		        <div class="field-input col-12 md:col-9">

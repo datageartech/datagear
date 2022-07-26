@@ -41,7 +41,7 @@ page_boolean_options.ftl
 	<div class="field-input col-12 md:col-9">
 		<div class="p-inputgroup">
 			<div class="p-input-icon-right flex-grow-1">
-				<i class="pi pi-times cursor-pointer" @click="onDeleteAnalysisProject" v-if="!isReadonlyAction">
+				<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteAnalysisProject" v-if="!isReadonlyAction">
 				</i>
 				<p-inputtext id="${pid}ownerProject" v-model="pm.analysisProject.name" type="text" class="input w-full h-full border-noround-right"
 					readonly="readonly" name="analysisProject.name" maxlength="200">

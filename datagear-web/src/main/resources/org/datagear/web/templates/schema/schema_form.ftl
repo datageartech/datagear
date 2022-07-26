@@ -50,7 +50,8 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}user" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}user" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='schema.username.desc' />">
 					<@spring.message code='username' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -60,7 +61,8 @@
 		        </div>
 			</div>
 			<div class="field grid" v-if="!isReadonlyAction">
-				<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='schema.password.desc' />">
 					<@spring.message code='password' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -78,7 +80,7 @@
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
 		        		<div class="p-input-icon-right flex-grow-1">
-			        		<i class="pi pi-times cursor-pointer" @click="onDeleteDriverEntity" v-if="!isReadonlyAction">
+			        		<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteDriverEntity" v-if="!isReadonlyAction">
 			        		</i>
 				        	<p-inputtext id="${pid}driverEntity" v-model="pm.driverEntity.displayName" type="text" class="input w-full h-full border-noround-right"
 				        		readonly="readonly" name="driverEntity.displayName" maxlength="200">

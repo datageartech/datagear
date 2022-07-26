@@ -331,7 +331,8 @@ var ${pid} =
 		"p-fileupload": primevue.fileupload,
 		"p-inlinemessage": primevue.inlinemessage,
 		"p-steps": primevue.steps,
-		"p-dataview": primevue.dataview
+		"p-dataview": primevue.dataview,
+		"p-overlaypanel": primevue.overlaypanel
 	},
 	
 	//vue挂载

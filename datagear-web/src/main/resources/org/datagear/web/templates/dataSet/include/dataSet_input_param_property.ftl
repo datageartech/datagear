@@ -17,7 +17,8 @@ page_boolean_options.ftl
 <#assign ParamInputType=statics['org.datagear.analysis.DataSetParam$InputType']>
 <#assign PropertyDataType=statics['org.datagear.analysis.DataSetProperty$DataType']>
 <div class="field grid">
-	<label for="${pid}params" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+	<label for="${pid}params" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+		title="<@spring.message code='dataSet.params.desc' />">
 		<@spring.message code='parameter' />
 	</label>
 	<div class="field-input col-12 md:col-9">
@@ -104,7 +105,8 @@ page_boolean_options.ftl
 	</div>
 </div>
 <div class="field grid">
-	<label for="${pid}properties" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+	<label for="${pid}properties" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+		title="<@spring.message code='dataSet.properties.desc' />">
 		<@spring.message code='property' />
 	</label>
 	<div class="field-input col-12 md:col-9">
@@ -125,7 +127,57 @@ page_boolean_options.ftl
 					</p-button>
 				</div>
 				<div class="flex-grow-1 flex justify-content-end">
-					<p-button type="button" label="<@spring.message code='set' />" class="p-button-secondary p-button-sm"></p-button>
+					<p-button type="button" label="<@spring.message code='set' />"
+						@click="toggleDataSourceFormatPanel" aria:haspopup="true" aria-controls="${pid}dataSourceFormatPanel"
+						class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-overlaypanel ref="dataSourceFormatPanelEle" :show-close-icon="true" id="${pid}dataSourceFormatPanel">
+						<div class="field grid mb-0">
+							<label class="field-label col-12 text-lg font-bold" title="<@spring.message code='dataSet.dataSourceFormat.desc' />">
+								<@spring.message code='dataSourceFormat' />
+							</label>
+						</div>
+						<div class="field grid">
+							<label for="${pid}dsfDate" class="field-label col-12 mb-2">
+								<@spring.message code='dateFormat' />
+							</label>
+							<div class="field-input col-12">
+								<p-inputtext id="${pid}dsfDate" v-model="pm.dataFormat.dateFormat" type="text" class="input w-full"
+					        		name="dataFormat.dateFormat" maxlength="100">
+					        	</p-inputtext>
+							</div>
+						</div>
+						<div class="field grid">
+							<label for="${pid}dsfTime" class="field-label col-12 mb-2">
+								<@spring.message code='timeFormat' />
+							</label>
+							<div class="field-input col-12">
+								<p-inputtext id="${pid}dsfTime" v-model="pm.dataFormat.timeFormat" type="text" class="input w-full"
+					        		name="dataFormat.timeFormat" maxlength="100">
+					        	</p-inputtext>
+							</div>
+						</div>
+						<div class="field grid">
+							<label for="${pid}dsfTimestamp" class="field-label col-12 mb-2">
+								<@spring.message code='datetimeFormat' />
+							</label>
+							<div class="field-input col-12">
+								<p-inputtext id="${pid}dsfTimestamp" v-model="pm.dataFormat.timestampFormat" type="text" class="input w-full"
+					        		name="dataFormat.timestampFormat" maxlength="100">
+					        	</p-inputtext>
+							</div>
+						</div>
+						<div class="field grid">
+							<label for="${pid}dsfNumber" class="field-label col-12 mb-2">
+								<@spring.message code='numberFormat' />
+							</label>
+							<div class="field-input col-12">
+								<p-inputtext id="${pid}dsfNumber" v-model="pm.dataFormat.numberFormat" type="text" class="input w-full"
+					        		name="dataFormat.numberFormat" maxlength="100">
+					        	</p-inputtext>
+							</div>
+						</div>
+					</p-overlaypanel>
 				</div>
 			</div>
 			<div id="${pid}properties" class="properties-wrapper input w-full overflow-auto">
@@ -221,6 +273,8 @@ page_boolean_options.ftl
 		{name: "<@spring.message code='dataSetProperty.DataType.BOOLEAN' />", value: "${PropertyDataType.BOOLEAN}"},
 		{name: "<@spring.message code='dataSetProperty.DataType.UNKNOWN' />", value: "${PropertyDataType.UNKNOWN}"}
 	]);
+	
+	po.vueRef("dataSourceFormatPanelEle", null);
 	
 	po.hasDuplicateName = function(array, name, ignoreIdx)
 	{
@@ -422,6 +476,10 @@ page_boolean_options.ftl
 			{
 				$.removeById(pm.properties, sp.name, "name");
 			});
+		},
+		toggleDataSourceFormatPanel: function(e)
+		{
+			po.vueUnref("dataSourceFormatPanelEle").toggle(e);
 		}
 	});
 })
