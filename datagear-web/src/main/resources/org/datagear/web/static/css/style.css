@@ -281,7 +281,8 @@ label[title]:not(.no-tip)::after,
 	position: relative;
 	height: 0px;
 }
-.validate-msg .validate-proxy{
+.validate-msg .validate-proxy,
+.validate-msg .validate-normalizer{
 	width: 0;
 	height: 0;
 	display: none;

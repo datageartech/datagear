@@ -185,7 +185,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!Authorization.canRead(permission))
 			throw new PermissionDeniedException();
 
-		T entity = super.getById(id);
+		T entity = getById(id);
 
 		if (entity != null)
 			entity.setDataPermission(permission);
@@ -204,7 +204,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!Authorization.canEdit(permission))
 			throw new PermissionDeniedException();
 
-		T entity = super.getById(id);
+		T entity = getById(id);
 
 		if (entity != null)
 			entity.setDataPermission(permission);

@@ -160,6 +160,14 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	{
 		this.analysisProject = analysisProject;
 	}
+	
+	public void clearSchemaPassword()
+	{
+		SchemaConnectionFactory connectionFactory = getConnectionFactory();
+		Schema schema = (connectionFactory == null ? null : connectionFactory.getSchema());
+		if(schema != null)
+			schema.clearPassword();
+	}
 
 	@Override
 	public SqlDataSetEntity clone()

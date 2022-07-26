@@ -505,6 +505,46 @@
 		}
 	};
 	
+	$.moveUpById = function(array, idValue, idPropName)
+	{
+		idValue = [].concat(idValue);
+		
+		for(var i=0; i<array.length; i++)
+		{
+			var v = array[i];
+			var inIdx = $.inArray(v[idPropName], idValue);
+			
+			if(inIdx > -1 && i > 0)
+			{
+				var prev = array[i - 1];
+				array[i - 1] = array[i];
+				array[i] = prev;
+				
+				idValue.splice(inIdx, 1);
+			}
+		}
+	};
+	
+	$.moveDownById = function(array, idValue, idPropName)
+	{
+		idValue = [].concat(idValue);
+		
+		for(var i=array.length - 1; i>= 0; i--)
+		{
+			var v = array[i];
+			var inIdx = $.inArray(v[idPropName], idValue);
+			
+			if(inIdx > -1 && i < (array.length - 1))
+			{
+				var next = array[i + 1];
+				array[i + 1] = array[i];
+				array[i] = next;
+				
+				idValue.splice(inIdx, 1);
+			}
+		}
+	};
+	
 	/**
 	 * 包装成数组。
 	 */
@@ -1046,7 +1086,7 @@ $.fn.extend(
 		const thisForm = $(this);
 		thisForm.data("reactiveFormModel", reactiveFormModel);
 		
-		options = $.extend(
+		var newOptions = $.extend(
 		{
 			ignore: ".ignore-validate",
 			onkeyup: false,
@@ -1060,6 +1100,12 @@ $.fn.extend(
 					//代理属性名
 					var name = thisEle.attr("name");
 					var realValue = Vue.toRaw(reactiveFormModel[name]);
+					return realValue;
+				}
+				else if(thisEle.hasClass("validate-normalizer"))
+				{
+					var name = thisEle.attr("name");
+					var realValue = options["customNormalizers"][name]();
 					return realValue;
 				}
 				else
@@ -1093,7 +1139,7 @@ $.fn.extend(
 		},
 		options);
 		
-		thisForm.validate(options);
+		thisForm.validate(newOptions);
 	}
 });
 

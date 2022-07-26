@@ -52,7 +52,7 @@
 						<div id="${pid}codeEditor" class="code-editor"></div>
 					</div>
 		        	<div class="validate-msg">
-		        		<input name="sql" required type="text" class="validate-proxy" />
+		        		<input name="sql" required type="text" class="validate-normalizer" />
 		        	</div>
 		        </div>
 			</div>
@@ -79,6 +79,7 @@
 	po.inflateSubmitAction = function(action, data)
 	{
 		data.sql = po.getCodeText(po.codeEditor);
+		data.connectionFactory = undefined;
 	};
 	
 	var formModel = <@writeJson var=formModel />;
@@ -87,7 +88,16 @@
 	formModel.shmConFactory = (formModel.shmConFactory == null ? { schema: {} } : formModel.shmConFactory);
 	formModel.shmConFactory.schema = (formModel.shmConFactory.schema == null ? {} : formModel.shmConFactory.schema);
 	
-	po.setupForm(formModel, po.submitUrl);
+	po.setupForm(formModel, po.submitUrl, {},
+	{
+		customNormalizers:
+		{
+			sql: function()
+			{
+				return po.getCodeText(po.codeEditor);
+			}
+		}
+	});
 	
 	po.vueMethod(
 	{

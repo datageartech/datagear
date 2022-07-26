@@ -25,13 +25,16 @@ page_boolean_options.ftl
 			<div class="flex flex-row pb-2" v-if="!isReadonlyAction">
 				<div class="h-opts flex-grow-1">
 					<p-button type="button" label="<@spring.message code='add' />"
-						@click="onAddParam"
-						class="p-button-secondary p-button-sm"></p-button>
-					<p-button type="button" label="<@spring.message code='moveUp' />" class="p-button-secondary p-button-sm"></p-button>
-					<p-button type="button" label="<@spring.message code='moveDown' />" class="p-button-secondary p-button-sm"></p-button>
+						@click="onAddParam" class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-button type="button" label="<@spring.message code='moveUp' />"
+						@click="onMoveUpParam" class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-button type="button" label="<@spring.message code='moveDown' />"
+						@click="onMoveDownParam" class="p-button-secondary p-button-sm">
+					</p-button>
 					<p-button type="button" label="<@spring.message code='delete' />"
-						@click="onDeleteParam"
-						class="p-button-danger p-button-sm">
+						@click="onDeleteParam" class="p-button-danger p-button-sm">
 					</p-button>
 				</div>
 			</div>
@@ -109,13 +112,16 @@ page_boolean_options.ftl
 			<div class="flex flex-row pb-2" v-if="!isReadonlyAction">
 				<div class="h-opts flex-grow-1">
 					<p-button type="button" label="<@spring.message code='add' />"
-						@click="onAddProperty"
-						class="p-button-secondary p-button-sm"></p-button>
-					<p-button type="button" label="<@spring.message code='moveUp' />" class="p-button-secondary p-button-sm"></p-button>
-					<p-button type="button" label="<@spring.message code='moveDown' />" class="p-button-secondary p-button-sm"></p-button>
+						@click="onAddProperty" class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-button type="button" label="<@spring.message code='moveUp' />"
+						@click="onMoveUpProperty" class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-button type="button" label="<@spring.message code='moveDown' />"
+						@click="onMoveDownProperty" class="p-button-secondary p-button-sm">
+					</p-button>
 					<p-button type="button" label="<@spring.message code='delete' />"
-						@click="onDeleteProperty"
-						class="p-button-danger p-button-sm">
+						@click="onDeleteProperty" class="p-button-danger p-button-sm">
 					</p-button>
 				</div>
 				<div class="flex-grow-1 flex justify-content-end">
@@ -357,11 +363,19 @@ page_boolean_options.ftl
 		},
 		onMoveUpParam: function(e)
 		{
-			
+			var pm = po.vuePageModel();
+			var tm = po.vueTmpModel();
+			var sps = $.wrapAsArray(po.vueRaw(tm.selectedParams));
+			var spNames = $.propertyValue(sps, "name");
+			$.moveUpById(pm.params, spNames, "name");
 		},
 		onMoveDownParam: function(e)
 		{
-			
+			var pm = po.vuePageModel();
+			var tm = po.vueTmpModel();
+			var sps = $.wrapAsArray(po.vueRaw(tm.selectedParams));
+			var spNames = $.propertyValue(sps, "name");
+			$.moveDownById(pm.params, spNames, "name");
 		},
 		onDeleteParam: function(e)
 		{
@@ -384,11 +398,19 @@ page_boolean_options.ftl
 		},
 		onMoveUpProperty: function(e)
 		{
-			
+			var pm = po.vuePageModel();
+			var tm = po.vueTmpModel();
+			var sps = $.wrapAsArray(po.vueRaw(tm.selectedProperties));
+			var spNames = $.propertyValue(sps, "name");
+			$.moveUpById(pm.properties, spNames, "name");
 		},
 		onMoveDownProperty: function(e)
 		{
-			
+			var pm = po.vuePageModel();
+			var tm = po.vueTmpModel();
+			var sps = $.wrapAsArray(po.vueRaw(tm.selectedProperties));
+			var spNames = $.propertyValue(sps, "name");
+			$.moveDownById(pm.properties, spNames, "name");
 		},
 		onDeleteProperty: function(e)
 		{

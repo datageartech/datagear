@@ -239,7 +239,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		return entity;
 	}
-
+	
 	@Override
 	public ProfileDataSet getProfileDataSet(User user, String id)
 	{
