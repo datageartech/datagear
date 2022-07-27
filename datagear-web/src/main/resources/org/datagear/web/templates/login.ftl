@@ -85,6 +85,8 @@
 <script>
 (function(po)
 {
+	po.submitUrl = "/login/doLogin";
+	
 	po.disableLoginCheckCode = ("${(configProperties.disableLoginCheckCode)?string('true','false')}" == "true");
 	po.disableRegister = ("${(configProperties.disableRegister)?string('true','false')}" == "true");
 	
@@ -93,7 +95,7 @@
 
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
-	po.setupForm(formModel, "/login/doLogin",
+	po.setupForm(formModel,
 	{
 		type: "POST",
 		contentType: $.CONTENT_TYPE_FORM,

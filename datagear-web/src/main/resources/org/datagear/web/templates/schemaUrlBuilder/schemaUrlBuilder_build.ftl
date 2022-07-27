@@ -144,8 +144,8 @@
 		name: (urlValue && urlValue.name ? urlValue.name : ""),
 		previewResult: " "
 	};
+	po.setupForm(formModel);
 	
-	po.setupForm(formModel, "#");
 	po.vueRef("isPreviewAction", po.isPreviewAction);
 	po.vueRef("dbTypeDropdownItems",
 	[

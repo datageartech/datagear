@@ -110,7 +110,7 @@
 	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
-	po.setupForm(formModel, po.submitUrl, {}, function()
+	po.setupForm(formModel, {}, function()
 	{
 		var options =
 		{

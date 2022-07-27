@@ -63,7 +63,7 @@
 	
 	po.vueRef("testResult", {});
 	
-	po.setupForm({ url: "" }, po.submitUrl,
+	po.setupForm({ url: "" },
 	{
 		tipSuccess: false,
 		closeAfterSubmit: false,

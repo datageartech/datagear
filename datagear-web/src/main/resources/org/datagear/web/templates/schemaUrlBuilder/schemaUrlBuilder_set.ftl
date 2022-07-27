@@ -79,6 +79,8 @@
 <script>
 (function(po)
 {
+	po.submitUrl = "/schemaUrlBuilder/saveSet";
+	
 	po.inflateSubmitAction = function(action, data)
 	{
 		data.code = po.getCodeText(po.codeEditor);
@@ -86,7 +88,7 @@
 	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
-	po.setupForm(formModel, "/schemaUrlBuilder/saveSet", { closeAfterSubmit: false });
+	po.setupForm(formModel, { closeAfterSubmit: false });
 	
 	po.vueMethod(
 	{

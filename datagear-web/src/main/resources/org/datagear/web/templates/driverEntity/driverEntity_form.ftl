@@ -119,9 +119,9 @@
 		driverLibraryFiles.files = files;
 	};
 	
-	po.inflateSubmitAction = function(action)
+	po.inflateSubmitAction = function(action, data)
 	{
-		var newData = { driverEntity: action.options.data, driverLibraryFileNames: [] };
+		var newData = { driverEntity: data, driverLibraryFileNames: [] };
 		
 		var driverLibraryFiles = po.vueReactive("driverLibraryFiles");
 		var dlfs = driverLibraryFiles.files;
@@ -133,7 +133,7 @@
 	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
-	po.setupForm(formModel, po.submitUrl);
+	po.setupForm(formModel);
 	
 	po.vueReactive("driverLibraryFiles", { files: [] });
 	po.vueRef("uploadFileUrl", po.concatContextPath("/driverEntity/uploadDriverFile?id="+formModel.id));

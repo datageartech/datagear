@@ -162,7 +162,7 @@
 
 	var formModel = <@writeJson var=step />;
 	formModel = $.unescapeHtmlForJson(formModel);
-	po.setupForm(formModel, po.submitUrl,
+	po.setupForm(formModel,
 	{
 		tipSuccess: false,
 		success: function()

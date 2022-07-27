@@ -44,34 +44,9 @@
 		</div>
 	</div>
 </div>
-<#include "include/page_form.ftl">
 <script>
 (function(po)
 {
-	po.setupForm({user: {}}, "/register/doRegister",
-	{
-		tipSuccess: false,
-		success: function()
-		{
-			(window.top ? window.top : window).location.href="${contextPath}/register/success";
-		}
-	},
-	function()
-	{
-		var options =
-		{
-			rules:
-			{
-				"confirmPassword":
-				{
-					"equalTo" : po.elementOfName("password")
-				}
-			}
-		};
-		
-		return options;
-	});
-	
 	po.vueMounted(function()
 	{
 		po.element(".loginLinkWrapper a").attr("href", "${contextPath}/login");

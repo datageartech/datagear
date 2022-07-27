@@ -84,7 +84,7 @@
 		chartPlugins.plugins = cps;
 	};
 	
-	po.setupForm({ pluginFileName: "" }, po.submitUrl);
+	po.setupForm({ pluginFileName: "" });
 	
 	po.vueReactive("chartPlugins", { plugins: [] });
 	po.vueRef("uploadFileUrl", po.concatContextPath("/chartPlugin/uploadFile"));

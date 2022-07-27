@@ -24,15 +24,20 @@ String action
 	po.isReadonlyAction = (po.isViewAction);
 	po.submitAction = "${submitAction!'#'}";
 	
+	/*需实现*/
+	//po.submitUrl = function(){ return "..."; }
+	//或
+	//po.submitUrl = "...";
+	po.submitUrl = "#";
+	
 	po.form = function()
 	{
 		return po.element("form");
 	};
 	
-	po.setupForm = function(data, submitUrl, ajaxOptions, validateOptions)
+	po.setupForm = function(data, ajaxOptions, validateOptions)
 	{
 		data = (data || {});
-		submitUrl = (submitUrl || "#");
 		ajaxOptions = (ajaxOptions || {});
 		validateOptions = (validateOptions || {});
 		
@@ -58,6 +63,7 @@ String action
 			{
 				submitHandler: function(form)
 				{
+					var submitUrl = ($.isFunction(po.submitUrl) ? po.submitUrl() : po.submitUrl);
 					return po.submitForm(submitUrl, ajaxOptions);
 				}
 			},
@@ -68,19 +74,24 @@ String action
 		
 		return pm;
 	};
-
+	
 	po.submitForm = function(url, options)
 	{
 		if(po.isViewAction || url == "#")
 			return;
 		
 		var pm = po.vuePageModel();
-		options = $.extend(true, { closeAfterSubmit: true }, options, { data: po.vueRaw(pm) });
+		options = $.extend(true,
+		{
+			defaultSuccessCallback: true,
+			closeAfterSubmit: true
+		},
+		options, { data: po.vueRaw(pm) });
 		
 		var successHandlers = (options.success ? [].concat(options.success) : []);
 		successHandlers.push(function(response)
 		{
-			if(po.defaultSubmitSuccessCallback)
+			if(options.defaultSuccessCallback && po.defaultSubmitSuccessCallback)
 				po.defaultSubmitSuccessCallback(response, options.closeAfterSubmit);
 		});
 		options.success = successHandlers;

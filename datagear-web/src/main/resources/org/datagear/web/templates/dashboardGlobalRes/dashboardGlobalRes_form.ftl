@@ -63,7 +63,7 @@
 	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
-	po.setupForm(formModel, po.submitUrl, { closeAfterSubmit: false });
+	po.setupForm(formModel, { closeAfterSubmit: false });
 	
 	po.vueMounted(function()
 	{

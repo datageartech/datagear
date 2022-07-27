@@ -22,7 +22,7 @@
 <div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-sql">
 	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
-			<#include "include/dataSet_input_base.ftl">
+			<#include "include/dataSet_form_name.ftl">
 			<div class="field grid">
 				<label for="${pid}dataSource" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='dataSource' />
@@ -57,12 +57,10 @@
 		        	</div>
 		        </div>
 			</div>
-			<#include "include/dataSet_input_param_property.ftl">
+			<#include "include/dataSet_form_param_property.ftl">
 		</div>
 		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
-			<p-button type="button" label="<@spring.message code='preview' />"
-        		@click="onPreview" class="p-button-secondary">
-        	</p-button>
+			<#include "include/dataSet_form_preview.ftl">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>
@@ -76,11 +74,14 @@
 (function(po)
 {
 	po.submitUrl = "/dataSet/"+po.submitAction;
+	po.previewUrl = "/dataSet/previewSql";
 	
 	po.inflateSubmitAction = function(action, data)
 	{
 		data.sql = po.getCodeText(po.codeEditor);
 		data.connectionFactory = undefined;
+		
+		po.inflateIfPreviewAction(action, data);
 	};
 	
 	var formModel = <@writeJson var=formModel />;
@@ -89,7 +90,7 @@
 	formModel.shmConFactory = (formModel.shmConFactory == null ? { schema: {} } : formModel.shmConFactory);
 	formModel.shmConFactory.schema = (formModel.shmConFactory.schema == null ? {} : formModel.shmConFactory.schema);
 	
-	po.setupForm(formModel, po.submitUrl, {},
+	po.setupForm(formModel, {},
 	{
 		customNormalizers:
 		{
@@ -97,6 +98,10 @@
 			{
 				return po.getCodeText(po.codeEditor);
 			}
+		},
+		invalidHandler: function()
+		{
+			po.handlePreviewInvalidForm();
 		}
 	});
 	

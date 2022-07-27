@@ -72,9 +72,8 @@
 		});
 	};
 	
-	po.inflateSubmitAction = function(action)
+	po.inflateSubmitAction = function(action, data)
 	{
-		var data = action.options.data;
 		data.ids = [];
 		
 		var users = (data.users || []);
@@ -87,7 +86,7 @@
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
 	formModel = { users: formModel };
-	po.setupForm(formModel, po.submitUrl);
+	po.setupForm(formModel);
 	
 	po.vueMethod(
 	{

@@ -806,16 +806,20 @@ public class DataSetController extends AbstractSchemaConnController
 	public TemplateResolvedDataSetResult previewSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview preview) throws Throwable
 	{
-		final User user = WebUtils.getUser();
+		User user = WebUtils.getUser();
 
-		final SqlDataSet dataSet = preview.getDataSet();
-
-		String schemaId = preview.getSchemaId();
+		SqlDataSetEntity dataSet = preview.getDataSet();
+		SchemaConnectionFactory connFactory = dataSet.getShmConFactory();
+		Schema schema = (connFactory == null ? null : connFactory.getSchema());
+		String schemaId = (schema == null ? null : schema.getId());
+		
+		if(StringUtil.isEmpty(schemaId))
+			throw new IllegalInputException();
 
 		// 新建时操作时未创建数据集
 		boolean notFound = checkDataSetEntityIdReadPermission(user, dataSet.getId());
 		// 如果数据集已创建，则使用数据集权限；如果数据集未创建，则需使用数据源权限
-		Schema schema = (notFound ? getSchemaForUserNotNull(user, schemaId) : getSchemaNotNull(schemaId));
+		schema = (notFound ? getSchemaForUserNotNull(user, schemaId) : getSchemaNotNull(schemaId));
 
 		SchemaConnectionFactory connectionFactory = new SchemaConnectionFactory(getConnectionSource(), schema);
 		dataSet.setConnectionFactory(connectionFactory);
@@ -1237,25 +1241,13 @@ public class DataSetController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class SqlDataSetPreview extends AbstractDataSetPreview<SqlDataSet>
+	public static class SqlDataSetPreview extends AbstractDataSetPreview<SqlDataSetEntity>
 	{
 		private static final long serialVersionUID = 1L;
-
-		private String schemaId;
 
 		public SqlDataSetPreview()
 		{
 			super();
-		}
-
-		public String getSchemaId()
-		{
-			return schemaId;
-		}
-
-		public void setSchemaId(String schemaId)
-		{
-			this.schemaId = schemaId;
 		}
 	}
 

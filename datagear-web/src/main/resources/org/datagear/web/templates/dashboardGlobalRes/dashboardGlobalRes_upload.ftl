@@ -99,8 +99,7 @@
 		savePath: "",
 		autoUnzip: false,
 		zipFileNameEncoding: "${zipFileNameEncodingDefault}"
-	},
-	po.submitUrl);
+	});
 	
 	po.vueRef("uploadFileUrl", po.concatContextPath("/dashboardGlobalRes/uploadFile"));
 	

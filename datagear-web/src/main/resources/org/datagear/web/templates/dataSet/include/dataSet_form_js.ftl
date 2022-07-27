@@ -10,6 +10,7 @@
 数据集表单页：JS片段
 
 依赖：
+dataSet_form_preview.ftl
 
 变量：
 
@@ -34,15 +35,10 @@
 		
 		options.extraKeys["Ctrl-Enter"] = function(editor)
 		{
-			po.onPreview();
+			po.triggerPreview();
 		};
 		
 		return po.createCodeEditor(dom, options);
-	};
-	
-	po.onPreview = function()
-	{
-		
 	};
 })
 (${pid});

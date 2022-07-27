@@ -128,7 +128,7 @@
 	formModel = (formModel || {});
 	formModel.driverEntity = (formModel.driverEntity == null ? {} : formModel.driverEntity);
 	
-	po.setupForm(formModel, po.submitUrl);
+	po.setupForm(formModel);
 	
 	po.vueMethod(
 	{

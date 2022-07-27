@@ -97,7 +97,9 @@
 <script>
 (function(po)
 {
-	po.setupForm({user: {}}, "/register/doRegister",
+	po.submitUrl = "/register/doRegister";
+	
+	po.setupForm({user: {}},
 	{
 		tipSuccess: false,
 		success: function()
