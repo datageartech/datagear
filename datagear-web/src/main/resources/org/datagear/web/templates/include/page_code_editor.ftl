@@ -21,9 +21,15 @@ page_obj.ftl
 	
 	po.createCodeEditor = function(dom, options)
 	{
-		dom = $(dom)[0];
-		
+		dom = $(dom);
 		options = (options || {});
+		
+		dom.on("keydown,keypress,keyup", function(e)
+		{
+			//阻止TAB键切换焦点
+			if(e.keyCode == $.keyCode.TAB)
+				e.stopPropagation();
+		});
 		
 		//采用系统切换主题功能模式
 		options.theme = "custom";
@@ -45,7 +51,7 @@ page_obj.ftl
 		//if(options.hintOptions)
 		//	options.hintOptions.closeOnUnfocus = false;
 		
-		var codeEditor = CodeMirror(dom, options);
+		var codeEditor = CodeMirror(dom[0], options);
 		
 		if(options.hintOptions && !options.readOnly)
 		{

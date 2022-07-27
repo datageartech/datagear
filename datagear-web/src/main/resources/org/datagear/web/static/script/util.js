@@ -771,6 +771,65 @@
 		return re;
 	};
 	
+	//判断两个结构相同的对象是否相等
+	$.equalsForSameType = function(a, b)
+	{
+		if(a == null)
+			return (b == null);
+		else if(b == null)
+			return (a == null);
+		
+		var typea = typeof(a);
+		var typeb = typeof(b);
+		
+		if(typea != typeb)
+		{
+			return false;
+		}
+		else if(typea == $.TYPEOF_TYPE_OBJECT)
+		{
+			if($.isArray(a))
+			{
+				if(a.length != b.length)
+					return false;
+				
+				for(var i=0; i<a.length; i++)
+				{
+					console.log("array: "+i+": " + $.equalsForSameType(a[i], b[i]));
+					
+					if(!$.equalsForSameType(a[i], b[i]))
+						return false;
+				}
+			}
+			else
+			{
+				for(var p in a)
+				{
+					console.log("object: "+p+": "+ $.equalsForSameType(a[p], b[p]));
+					
+					if(!$.equalsForSameType(a[p], b[p]))
+						return false;
+				}
+			}
+			
+			return true;
+		}
+		else
+		{
+			console.log("primitive: "+a+","+b+": "+(a == b));
+			
+			return (a == b);
+		}
+	};
+	
+	//常用按键，摘自jquery-ui
+	$.keyCode =
+	{
+		BACKSPACE:8, COMMA:188, DELETE:46, DOWN:40, END:35,
+		ENTER:13, ESCAPE:27, HOME:36, LEFT:37, PAGE_DOWN:34,
+		PAGE_UP:33, PERIOD:190, RIGHT:39, SPACE:32, TAB:9, UP:38
+	};
+	
 	/**
 	 * 获取对象/对象数组指定名称属性值。
 	 * 

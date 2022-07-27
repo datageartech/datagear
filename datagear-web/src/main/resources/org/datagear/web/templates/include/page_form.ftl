@@ -101,15 +101,21 @@ String action
 		
 		var jsonSubmit = (action.options.contentType == null || action.options.contentType == $.CONTENT_TYPE_JSON);
 		
-		if(jsonSubmit)
-			po.ajaxJson(action.url, action.options);
-		else
-			po.ajax(action.url, action.options);
+		if(po.beforeSubmitForm(action.url, action.options) !== false)
+		{
+			if(jsonSubmit)
+				po.ajaxJson(action.url, action.options);
+			else
+				po.ajax(action.url, action.options);
+		}
 		
 		return false;
 	};
 	
 	po.inflateSubmitAction = function(action, data){};
+	
+	//返回false会阻止表单提交
+	po.beforeSubmitForm = function(url, options){};
 	
 	po.defaultSubmitSuccessCallback = function(response, close)
 	{

@@ -84,6 +84,18 @@
 		po.inflateIfPreviewAction(action, data);
 	};
 	
+	po.getSqlEditorSchemaId = function()
+	{
+		var pm = po.vuePageModel();
+		return pm.shmConFactory.schema.id;
+	};
+	
+	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
+	{
+		fingerprint.schemaId = dataSet.shmConFactory.schema.id;
+		fingerprint.sql = dataSet.sql;
+	};
+	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
 	po.inflateDataSetModel(formModel);
