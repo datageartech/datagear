@@ -463,6 +463,12 @@
 		return (typeof(obj) == $.TYPEOF_TYPE_OBJECT);
 	};
 	
+	$.parseIntWithDefault = function(val, dftVal)
+	{
+		val = parseInt(val);
+		return (!isNaN(val) ? val : dftVal);
+	};
+	
 	$.findNameByValue = function(array, value)
 	{
 		var idx = $.inArrayById(array, value, "value");
