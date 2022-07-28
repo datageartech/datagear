@@ -24,19 +24,23 @@
 				<@spring.message code='preview' />
 			</label>
 		</div>
-		<div class="flex-grow-1" style="width:50vw;height:50vh;">
-			<p-datatable :value="tm.previewResultDatas" :scrollable="true" scroll-height="flex" striped-rows class="table-sm">
-				<p-column v-for="col in tm.previewColumns"
-					:field="col.name" :header="col.label" :sortable="false"
-					:key="col.name">
-				</p-column>
-			</p-datatable>
-		</div>
-		<div class="flex-grow-0 mt-2">
-			<div class="flex flex-row">
+		<div class="flex-grow-1">
+			<div style="width:50vw;height:50vh;">
+				<p-datatable :value="tm.previewResultDatas" :scrollable="true" scroll-height="flex"
+					striped-rows class="table-sm" v-if="!tm.previewError">
+					<p-column v-for="col in tm.previewColumns"
+						:field="col.name" :header="col.label" :sortable="false"
+						:key="col.name">
+					</p-column>
+				</p-datatable>
+				<p-textarea v-model="tm.previewTplResult" class="overflow-auto p-invalid w-full h-full" readonly
+					v-if="tm.previewError">
+				</p-textarea>
+			</div>
+			<div class="flex flex-row mt-2">
 				<div class="flex-grow-1 flex justify-content-start">
 					<div class="p-inputgroup" style="max-width:10rem">
-						<p-inputtext v-model="tm.previewFetchSize" type="text" class="input p-inputtext-sm"
+						<p-inputtext v-model="tm.previewQuery.resultFetchSize" type="text" class="input p-inputtext-sm"
 							maxlength="10" @keydown.enter="submitPreview" title="<@spring.message code='fetchSize' />">
 						</p-inputtext>
 						<p-button icon="pi pi-search" type="button" class="p-button-secondary p-button-sm"
@@ -44,7 +48,7 @@
 						</p-button>
 					</div>
 				</div>
-				<div class="flex-grow-1 flex justify-content-end">
+				<div class="flex-grow-1 flex justify-content-end" v-if="!tm.previewError">
 					<p-button icon="pi pi-comment" type="button"
 						aria:haspopup="true" aria-controls="${pid}previewTplResultPanel"
 						@click="togglePreviewTplResultPanel" class="p-button-secondary p-button-sm">
@@ -97,11 +101,11 @@
 		action.options.defaultSuccessCallback = false;
 		action.options.success = function(response)
 		{
-			po.handlePreviewResponse(response);
+			po.handlePreviewSuccess(response);
 		};
-		action.options.error = function()
+		action.options.error = function(jqXHR)
 		{
-			po.vueUnref("previewPanelEle").hide();
+			po.handlePreviewError(jqXHR);
 		};
 		
 		var tm = po.vueTmpModel();
@@ -117,11 +121,12 @@
 		dataSetQuery.resultFetchSize = (resultFetchSize < 1 ? 100 : resultFetchSize);
 	};
 	
-	po.handlePreviewResponse = function(response)
+	po.handlePreviewSuccess = function(response)
 	{
 		var pm = po.vuePageModel();
 		var tm = po.vueTmpModel();
 		
+		tm.previewError = false;
 		tm.previewPanelShow = true;
 		
 		if(!pm.mutableModel && pm.properties.length == 0)
@@ -136,6 +141,17 @@
 		tm.previewColumns = previewColumns;
 		tm.previewResultDatas = (response.result && response.result.data ? response.result.data : []);
 		tm.previewTplResult = response.templateResult;
+	};
+	
+	po.handlePreviewError = function(jqXHR)
+	{
+		var tm = po.vueTmpModel();
+		
+		tm.previewError = true;
+		tm.previewPanelShow = true;
+		
+		var er = $.getResponseJson(jqXHR);
+		tm.previewTplResult = er.data;
 	};
 	
 	po.handlePreviewInvalidForm = function()
@@ -212,10 +228,10 @@
 		//XXX 临时保存事件对象，在ajax响应后再打开面板会报错，所以采用先透明打开再显现的方案
 		previewPanelShow: false,
 		previewQuery: { resultFetchSize: 100, paramValues: {} },
-		previewFetchSize: 100,
 		previewColumns: [],
 		previewResultDatas: [],
-		previewTplResult: ""
+		previewTplResult: "",
+		previewError: false
 	});
 	
 	po.vueRef("previewPanelEle", null);
