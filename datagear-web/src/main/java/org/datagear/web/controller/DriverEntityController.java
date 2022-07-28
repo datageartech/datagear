@@ -446,8 +446,7 @@ public class DriverEntityController extends AbstractController
 
 		if (!deleted)
 		{
-			responseEntity = optFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					buildMsgCode("deleteDriverFileFail"));
+			responseEntity = optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "driverEntity.deleteDriverFileFail");
 		}
 		else
 		{
@@ -479,12 +478,6 @@ public class DriverEntityController extends AbstractController
 		}
 
 		return fileInfos;
-	}
-
-	@Override
-	protected String buildMsgCode(String code)
-	{
-		return buildMsgCode("driverEntity", code);
 	}
 
 	protected void resolveDriverClassNames(File file, List<String> driverClassNames)

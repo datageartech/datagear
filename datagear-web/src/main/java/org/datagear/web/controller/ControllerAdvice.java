@@ -45,6 +45,7 @@ import org.datagear.persistence.support.SqlParamValueVariableExpressionException
 import org.datagear.persistence.support.SqlValidationException;
 import org.datagear.persistence.support.UnsupportedDialectException;
 import org.datagear.util.MalformedZipException;
+import org.datagear.web.util.OperationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionException;
@@ -78,9 +79,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerMissingServletRequestParameterException(HttpServletRequest request,
 			HttpServletResponse response, MissingServletRequestParameterException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(MissingServletRequestParameterException.class),
-				exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -89,8 +88,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerBindException(HttpServletRequest request, HttpServletResponse response,
 			BindException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(BindException.class), exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -99,9 +97,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerMethodArgumentNotValidException(HttpServletRequest request,
 			HttpServletResponse response, MethodArgumentNotValidException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(MethodArgumentNotValidException.class), exception,
-				false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -110,9 +106,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerHttpMessageNotReadableException(HttpServletRequest request,
 			HttpServletResponse response, HttpMessageNotReadableException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(HttpMessageNotReadableException.class), exception,
-				false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -121,8 +115,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerIllegalInputException(HttpServletRequest request, HttpServletResponse response,
 			IllegalInputException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(IllegalInputException.class), exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -131,8 +124,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerIllegalArgumentException(HttpServletRequest request, HttpServletResponse response,
 			IllegalArgumentException exception)
 	{
-		setOperationMessageForInternalServerError(request, buildMessageCode(IllegalArgumentException.class), exception);
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -141,8 +133,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerRecordNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			RecordNotFoundException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(RecordNotFoundException.class), exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -151,8 +142,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerSchemaNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			SchemaNotFoundException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SchemaNotFoundException.class), exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -161,8 +151,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerConversionException(HttpServletRequest request, HttpServletResponse response,
 			ConversionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(ConversionException.class), exception, false);
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -171,9 +160,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerFileNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			FileNotFoundException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(FileNotFoundException.class), exception, false,
-				exception.getFileName());
-
+		setOptMsgForThrowable(request, exception, exception.getFileName());
 		return getErrorView(request, response);
 	}
 
@@ -182,9 +169,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerJavaIoFileNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			java.io.FileNotFoundException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCodeFullName(java.io.FileNotFoundException.class),
-				exception, false);
-
+		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(java.io.FileNotFoundException.class, true));
 		return getErrorView(request, response);
 	}
 
@@ -193,9 +178,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerDuplicateRecordException(HttpServletRequest request, HttpServletResponse response,
 			DuplicateRecordException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DuplicateRecordException.class), exception, false,
-				exception.getExpectedCount(), exception.getActualCount());
-
+		setOptMsgForThrowable(request, exception, exception.getExpectedCount(), exception.getActualCount());
 		return getErrorView(request, response);
 	}
 
@@ -204,8 +187,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerUserSQLException(HttpServletRequest request, HttpServletResponse response,
 			UserSQLException exception)
 	{
-		String message = (exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage());
-		setOperationMessageForThrowable(request, buildMessageCode(UserSQLException.class), exception, false, message);
+		String msgArg = (exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage());
+		setOptMsgForThrowable(request, exception, msgArg);
 
 		return getErrorView(request, response);
 	}
@@ -215,8 +198,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerIllegalImportDriverEntityFileFormatException(HttpServletRequest request,
 			HttpServletResponse response, IllegalImportDriverEntityFileFormatException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(IllegalImportDriverEntityFileFormatException.class), exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -225,9 +207,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleDataSetResDirectoryNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			DataSetResDirectoryNotFoundException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DataSetResDirectoryNotFoundException.class), exception,
-				false, exception.getDirectory());
-
+		setOptMsgForThrowable(request, exception, exception.getDirectory());
 		return getErrorView(request, response);
 	}
 
@@ -236,9 +216,7 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceSqlValidationException(HttpServletRequest request,
 			HttpServletResponse response, SqlValidationException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SqlValidationException.class),
-				exception.getCause(), false, exception.getSqlValidation().getInvalidValue());
-
+		setOptMsgForThrowable(request, exception, exception.getSqlValidation().getInvalidValue());
 		return getErrorView(request, response);
 	}
 
@@ -247,9 +225,7 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceSqlParamValueVariableExpressionException(HttpServletRequest request,
 			HttpServletResponse response, SqlParamValueVariableExpressionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SqlParamValueVariableExpressionException.class),
-				exception.getCause(), false, exception.getExpression());
-
+		setOptMsgForThrowable(request, exception, exception.getExpression());
 		return getErrorView(request, response);
 	}
 
@@ -258,9 +234,7 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceSqlParamValueSqlExpressionException(HttpServletRequest request,
 			HttpServletResponse response, SqlParamValueSqlExpressionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SqlParamValueSqlExpressionException.class),
-				exception.getCause(), true, exception.getExpression());
-
+		setOptMsgForThrowable(request, exception, exception.getExpression());
 		return getErrorView(request, response);
 	}
 
@@ -269,9 +243,7 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceNonUniqueResultException(HttpServletRequest request, HttpServletResponse response,
 			SqlParamValueMapperException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SqlParamValueMapperException.class), exception, true,
-				exception.getColumn().getName());
-
+		setOptMsgForThrowable(request, exception, exception.getColumn().getName());
 		return getErrorView(request, response);
 	}
 
@@ -280,8 +252,7 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceNonUniqueResultException(HttpServletRequest request, HttpServletResponse response,
 			NonUniqueResultException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(NonUniqueResultException.class), exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -290,9 +261,7 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceNoColumnDefinedException(HttpServletRequest request, HttpServletResponse response,
 			NoColumnDefinedException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(NoColumnDefinedException.class), exception, false,
-				exception.getTableName());
-
+		setOptMsgForThrowable(request, exception, exception.getTableName());
 		return getErrorView(request, response);
 	}
 
@@ -301,9 +270,7 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceUnsupportedDialectException(HttpServletRequest request, HttpServletResponse response,
 			UnsupportedDialectException exception)
 	{
-		setOperationMessageForInternalServerError(request, buildMessageCode(UnsupportedDialectException.class),
-				exception);
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -313,10 +280,9 @@ public class ControllerAdvice extends AbstractController
 			PersistenceException exception)
 	{
 		if (exception.getCause() instanceof SQLException)
-			setOperationMessageForThrowable(request, buildMessageCode(PersistenceException.class), exception.getCause(),
-					true);
+			setOptMsgForThrowableLog(request, exception, exception.getCause().getMessage());
 		else
-			setOperationMessageForInternalServerError(request, buildMessageCode(PersistenceException.class), exception);
+			setOptMsgForThrowableLog(request, exception);
 
 		return getErrorView(request, response);
 	}
@@ -326,9 +292,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleMetaTableNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			TableNotFoundException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(TableNotFoundException.class), exception, false,
-				exception.getTableName());
-
+		setOptMsgForThrowable(request, exception, exception.getTableName());
 		return getErrorView(request, response);
 	}
 
@@ -337,8 +301,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleMetaDBMetaResolverException(HttpServletRequest request, HttpServletResponse response,
 			DBMetaResolverException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DBMetaResolverException.class), exception, true);
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -347,8 +310,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionConnectionSourceException(HttpServletRequest request, HttpServletResponse response,
 			ConnectionSourceException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(ConnectionSourceException.class), exception, true);
-
+		setOptMsgForThrowableLog(request, exception, true);
 		return getErrorView(request, response);
 	}
 
@@ -357,9 +319,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionDriverEntityManagerException(HttpServletRequest request, HttpServletResponse response,
 			DriverEntityManagerException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DriverEntityManagerException.class), exception, true,
-				exception.getMessage());
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -368,9 +328,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionPathDriverFactoryException(HttpServletRequest request, HttpServletResponse response,
 			PathDriverFactoryException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(PathDriverFactoryException.class), exception, true,
-				exception.getMessage());
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -379,9 +337,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionDriverNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			DriverNotFoundException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DriverNotFoundException.class), exception, false,
-				exception.getDriverClassName());
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -390,9 +346,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionDriverClassFormatErrorException(HttpServletRequest request,
 			HttpServletResponse response, DriverClassFormatErrorException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DriverClassFormatErrorException.class), exception,
-				false);
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -401,8 +355,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionURLNotAcceptedException(HttpServletRequest request, HttpServletResponse response,
 			URLNotAcceptedException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(URLNotAcceptedException.class), exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -411,9 +364,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionUnsupportedGetConnectionException(HttpServletRequest request,
 			HttpServletResponse response, UnsupportedGetConnectionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedGetConnectionException.class), exception,
-				false);
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -422,9 +373,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionEstablishConnectionException(HttpServletRequest request, HttpServletResponse response,
 			EstablishConnectionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(EstablishConnectionException.class),
-				exception.getCause(), true);
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -437,8 +386,7 @@ public class ControllerAdvice extends AbstractController
 		if (exception.hasColumnName())
 			msgArg = msgArg + " (" + exception.getColumnName() + ")";
 
-		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetUnsupportedSqlTypeException.class),
-				exception, false, msgArg);
+		setOptMsgForThrowable(request, exception, msgArg);
 		return getErrorView(request, response);
 	}
 
@@ -447,9 +395,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisTemplateResolverException(HttpServletRequest request, HttpServletResponse response,
 			TemplateResolverException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(TemplateResolverException.class), exception, false,
-				exception.getMessage());
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -458,9 +404,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisUnsupportedResultDataException(HttpServletRequest request, HttpServletResponse response,
 			UnsupportedResultDataException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedResultDataException.class), exception,
-				false, exception.getMessage());
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -469,9 +413,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisUnsupportedJsonResultDataException(HttpServletRequest request,
 			HttpServletResponse response, UnsupportedJsonResultDataException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedJsonResultDataException.class), exception,
-				false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -480,9 +422,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisDataSetSourceParseException(HttpServletRequest request, HttpServletResponse response,
 			DataSetSourceParseException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DataSetSourceParseException.class), exception, false,
-				exception.getMessage(), exception.getSource());
-
+		setOptMsgForThrowable(request, exception, exception.getMessage(), exception.getSource());
 		return getErrorView(request, response);
 	}
 
@@ -491,9 +431,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisSqlDataSetSqlExecutionException(HttpServletRequest request,
 			HttpServletResponse response, SqlDataSetSqlExecutionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetSqlExecutionException.class), exception,
-				false, exception.getMessage(), exception.getSql());
-
+		setOptMsgForThrowable(request, exception, exception.getMessage(), exception.getSql());
 		return getErrorView(request, response);
 	}
 
@@ -502,9 +440,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisSqlDataSetConnectionException(HttpServletRequest request, HttpServletResponse response,
 			SqlDataSetConnectionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetConnectionException.class), exception,
-				false, exception.getMessage());
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -513,9 +449,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisSqlDataSetSqlValidationException(HttpServletRequest request,
 			HttpServletResponse response, SqlDataSetSqlValidationException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetSqlValidationException.class), exception,
-				false, exception.getSqlValidation().getInvalidValue(), exception.getSql());
-
+		OperationMessage om = setOptMsgForThrowable(request, exception, exception.getSqlValidation().getInvalidValue());
+		om.setData(exception.getSql());
 		return getErrorView(request, response);
 	}
 
@@ -524,9 +459,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisRequestContentNotNameValueObjArrayJsonException(HttpServletRequest request,
 			HttpServletResponse response, RequestContentNotNameValueObjArrayJsonException exception)
 	{
-		setOperationMessageForThrowable(request,
-				buildMessageCode(RequestContentNotNameValueObjArrayJsonException.class), exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -535,9 +468,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisHeaderContentNotNameValueObjArrayJsonException(HttpServletRequest request,
 			HttpServletResponse response, HeaderContentNotNameValueObjArrayJsonException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(HeaderContentNotNameValueObjArrayJsonException.class),
-				exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -546,9 +477,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisDataSetException(HttpServletRequest request, HttpServletResponse response,
 			DataSetException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DataSetException.class), exception, true,
-				exception.getMessage());
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -557,9 +486,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleServiceSaveSchemaUrlPermissionDeniedException(HttpServletRequest request,
 			HttpServletResponse response, SaveSchemaUrlPermissionDeniedException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SaveSchemaUrlPermissionDeniedException.class),
-				exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -568,8 +495,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleServicePermissionDeniedException(HttpServletRequest request, HttpServletResponse response,
 			PermissionDeniedException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(PermissionDeniedException.class), exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -578,9 +504,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleServiceDeleteBuiltinRoleDeniedException(HttpServletRequest request,
 			HttpServletResponse response, DeleteBuiltinRoleDeniedException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DeleteBuiltinRoleDeniedException.class), exception,
-				false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -589,9 +513,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleMalformedZipException(HttpServletRequest request, HttpServletResponse response,
 			MalformedZipException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(MalformedZipException.class),
-				exception, false);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -600,9 +522,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleDataIntegrityViolationException(HttpServletRequest request, HttpServletResponse response,
 			DataIntegrityViolationException exception)
 	{
-		setOperationMessageForThrowableNoArg(request, buildMessageCode(DataIntegrityViolationException.class),
-				exception, false, true);
-
+		setOptMsgForThrowableLog(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -610,54 +530,45 @@ public class ControllerAdvice extends AbstractController
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String handleThrowable(HttpServletRequest request, HttpServletResponse response, Throwable t)
 	{
-		setOperationMessageForInternalServerError(request, buildMessageCode(Throwable.class), t);
-
+		setOptMsgForThrowableMsgCodeLog(request, t, buildExceptionMsgCode(Throwable.class));
 		return getErrorView(request, response);
 	}
-
-	@Override
-	protected void setOperationMessageForThrowable(HttpServletRequest request, String messageCode, Throwable throwable,
-			boolean traceException, Object... messageArgs)
+	
+	protected OperationMessage setOptMsgForThrowable(HttpServletRequest request, Throwable t, Object... msgArgs)
 	{
-		setOperationMessageForThrowable(request, messageCode, throwable, traceException, false, messageArgs);
+		OperationMessage om = super.setOptMsgForThrowable(request, t, msgArgs);
+
+		if (LOGGER.isDebugEnabled())
+			LOGGER.error("Operation error: ", t);
+		
+		return om;
 	}
-
-	protected void setOperationMessageForThrowableNoArg(HttpServletRequest request, String messageCode,
-			Throwable throwable, boolean traceException, boolean logException)
+	
+	protected OperationMessage setOptMsgForThrowableLog(HttpServletRequest request, Throwable t, Object... msgArgs)
 	{
-		setOperationMessageForThrowable(request, messageCode, throwable, traceException, logException, new Object[0]);
+		OperationMessage om = super.setOptMsgForThrowable(request, t, msgArgs);
+		
+		LOGGER.error("Operation error: ", t);
+		
+		return om;
 	}
-
-	protected void setOperationMessageForThrowable(HttpServletRequest request, String messageCode, Throwable throwable,
-			boolean traceException, boolean logException, Object... messageArgs)
+	
+	protected OperationMessage setOptMsgForThrowableMsgCode(HttpServletRequest request, Throwable t, String msgCode, Object... msgArgs)
 	{
-		super.setOperationMessageForThrowable(request, messageCode, throwable, traceException, messageArgs);
-
-		if (logException || LOGGER.isDebugEnabled())
-			LOGGER.error("Operation cause error: ", throwable);
+		OperationMessage om = super.setOptMsgForThrowableMsgCode(request, t, msgCode, msgArgs);
+		
+		if (LOGGER.isDebugEnabled())
+			LOGGER.error("Operation error: ", t);
+		
+		return om;
 	}
-
-	protected void setOperationMessageForInternalServerError(HttpServletRequest request, String messageCode,
-			Throwable t)
+	
+	protected OperationMessage setOptMsgForThrowableMsgCodeLog(HttpServletRequest request, Throwable t, String msgCode, Object... msgArgs)
 	{
-		super.setOperationMessageForThrowable(request, messageCode, t, true, t.getMessage());
-
-		LOGGER.error("Operation cause interal server error: ", t);
-	}
-
-	protected String buildMessageCode(Class<? extends Throwable> clazz)
-	{
-		return buildMsgCode(clazz.getSimpleName());
-	}
-
-	protected String buildMessageCodeFullName(Class<? extends Throwable> clazz)
-	{
-		return buildMsgCode(clazz.getName());
-	}
-
-	@Override
-	protected String buildMsgCode(String code)
-	{
-		return buildMsgCode("error", code);
+		OperationMessage om = super.setOptMsgForThrowableMsgCode(request, t, msgCode, msgArgs);
+		
+		LOGGER.error("Operation error: ", t);
+		
+		return om;
 	}
 }

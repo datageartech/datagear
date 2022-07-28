@@ -450,26 +450,80 @@ public abstract class AbstractController
 
 		return pagingQuery;
 	}
+	
+	/**
+	 * 为异常设置{@linkplain OperationMessage}。
+	 * <p>
+	 * 消息码参考{@linkplain #buildExceptionMsgCode(Class, boolean)}。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param clazz
+	 * @param msgArgs 默认为{@code t.getMessage()}
+	 * @return
+	 */
+	protected OperationMessage setOptMsgForThrowable(HttpServletRequest request, Throwable t, Object... msgArgs)
+	{
+		String msgCode = buildExceptionMsgCode(t.getClass());
+		return setOptMsgForThrowableMsgCode(request, t, msgCode, msgArgs);
+	}
 
 	/**
 	 * 为异常设置{@linkplain OperationMessage}。
 	 * 
 	 * @param request
-	 * @param messageCode
-	 * @param throwable
-	 * @param traceException
-	 * @param messageArgs
+	 * @param t
+	 * @param msgCode
+	 * @param msgArgs 默认为{@code t.getMessage()}
+	 * @return
 	 */
-	protected void setOperationMessageForThrowable(HttpServletRequest request, String messageCode, Throwable throwable,
-			boolean traceException, Object... messageArgs)
+	protected OperationMessage setOptMsgForThrowableMsgCode(HttpServletRequest request, Throwable t, String msgCode, Object... msgArgs)
 	{
-		OperationMessage operationMessage = optMsgFail(request, messageCode, messageArgs);
-		if (traceException)
-			operationMessage.setThrowable(throwable);
+		if(msgArgs == null || msgArgs.length == 0)
+			msgArgs = new String[] { t.getMessage() };
+		
+		OperationMessage operationMessage = optMsgFail(request, msgCode, msgArgs);
+		setOperationMessage(request, operationMessage);
+		return operationMessage;
+	}
 
-		operationMessage.setData(messageArgs);
-
+	/**
+	 * 设置{@linkplain OperationMessage}。
+	 * 
+	 * @param request
+	 * @param operationMessage
+	 */
+	protected void setOperationMessage(HttpServletRequest request, OperationMessage operationMessage)
+	{
 		WebUtils.setOperationMessage(request, operationMessage);
+	}
+
+	/**
+	 * 构建异常i18n消息码。
+	 * <p>
+	 * 返回{@code "error." + clazz.getSimpleName()}消息码。
+	 * </p>
+	 * 
+	 * @param buildExceptionMsgCode
+	 * @return
+	 */
+	protected String buildExceptionMsgCode(Class<? extends Throwable> clazz)
+	{
+		return buildExceptionMsgCode(clazz, false);
+	}
+
+	/**
+	 * 构建异常i18n消息码。
+	 * <p>
+	 * 返回{@code "error." + clazz.getSimpleName()}或{@code "error." + clazz.getName()}消息码。
+	 * </p>
+	 * @param clazz
+	 * @param fullname
+	 * @return
+	 */
+	protected String buildExceptionMsgCode(Class<? extends Throwable> clazz, boolean fullname)
+	{
+		return "error." + (fullname ? clazz.getName() : clazz.getSimpleName());
 	}
 
 	/**
@@ -743,47 +797,6 @@ public abstract class AbstractController
 	{
 		String message = getMessage(request, code, messageArgs);
 		return OperationMessage.valueOfFail(code, message);
-	}
-
-	/**
-	 * 构建异常消息码。
-	 * 
-	 * @param basename
-	 * @param e
-	 * @return
-	 */
-	protected String optMsgCode(String basename, Exception e)
-	{
-		return buildMsgCode(basename, e.getClass().getSimpleName());
-	}
-
-	/**
-	 * 构建消息码。
-	 * <p>
-	 * 此方法是一个未实现的模板方法，子类可以重写它以便隐藏{@linkplain #buildMsgCode(String, String)}的{@code basename}参数。
-	 * </p>
-	 * 
-	 * @param code
-	 * @return
-	 */
-	protected String buildMsgCode(String code)
-	{
-		throw new UnsupportedOperationException("Not implemented");
-	}
-
-	/**
-	 * 构建消息码。
-	 * 
-	 * @param basename
-	 * @param code
-	 * @return
-	 */
-	protected String buildMsgCode(String basename, String code)
-	{
-		if (!isEmpty(basename))
-			return basename + "." + code;
-		else
-			return code;
 	}
 
 	/**

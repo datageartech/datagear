@@ -598,7 +598,7 @@ public class DataController extends AbstractSchemaConnTableController
 				}
 
 				OperationMessage operationMessage = optMsgSuccess(request,
-						buildMsgCode("savessSuccess"), expectedUpdateCount, acutalUpdateCount, expectedAddCount,
+						"data.savessSuccess", expectedUpdateCount, acutalUpdateCount, expectedAddCount,
 						actualAddCount, expectedDeleteCount, actualDeleteCount);
 
 				ResponseEntity<OperationMessage> responseEntity = optResponseEntity(HttpStatus.OK,
@@ -879,12 +879,6 @@ public class DataController extends AbstractSchemaConnTableController
 		return columnValues;
 	}
 
-	@Override
-	protected String buildMsgCode(String code)
-	{
-		return super.buildMsgCode("data", code);
-	}
-
 	protected DefaultLOBRowMapper buildQueryDefaultLOBRowMapper()
 	{
 		DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
@@ -1130,7 +1124,7 @@ public class DataController extends AbstractSchemaConnTableController
 			if (successCount == this.batchCount)// 全部成功
 			{
 				OperationMessage operationMessage = optMsgSuccess(request,
-						buildMsgCode("batchOperationSuccess"), this.batchCount, this.batchCount, 0);
+						"data.batchOperationSuccess", this.batchCount, this.batchCount, 0);
 				operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
 
 				responseEntity = optResponseEntity(HttpStatus.OK, operationMessage);
@@ -1138,7 +1132,7 @@ public class DataController extends AbstractSchemaConnTableController
 			else if (failCount == this.batchCount)// 全部失败
 			{
 				OperationMessage operationMessage = optMsgFail(request,
-						buildMsgCode("batchOperationFail"), this.batchCount, 0, this.batchCount);
+						"data.batchOperationFail", this.batchCount, 0, this.batchCount);
 				operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
 
 				responseEntity = optResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
@@ -1150,17 +1144,17 @@ public class DataController extends AbstractSchemaConnTableController
 				if (BatchHandleErrorMode.IGNORE.equals(this.batchHandleErrorMode))
 				{
 					operationMessage = optMsgFail(request,
-							buildMsgCode("batchOperationFinish.ignore"), this.batchCount, successCount, failCount);
+							"data.batchOperationFinish.ignore", this.batchCount, successCount, failCount);
 				}
 				else if (BatchHandleErrorMode.ROLLBACK.equals(this.batchHandleErrorMode))
 				{
 					operationMessage = optMsgFail(request,
-							buildMsgCode("batchOperationFinish.rollback"), this.batchCount, successCount);
+							"data.batchOperationFinish.rollback", this.batchCount, successCount);
 				}
 				else if (BatchHandleErrorMode.ABORT.equals(this.batchHandleErrorMode))
 				{
 					operationMessage = optMsgFail(request,
-							buildMsgCode("batchOperationFinish.abort"), this.batchCount, successCount,
+							"data.batchOperationFinish.abort", this.batchCount, successCount,
 							this.batchCount - successCount);
 				}
 				else
@@ -1203,8 +1197,8 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			StringBuilder sb = new StringBuilder();
 
-			String mcs = buildMsgCode("batchUnitResult.successHtml");
-			String mcf = buildMsgCode("batchUnitResult.failHtml");
+			String mcs = "data.batchUnitResult.successHtml";
+			String mcf = "data.batchUnitResult.failHtml";
 
 			for (BatchUnitResult batchUnitResult : batchUnitResults)
 			{
