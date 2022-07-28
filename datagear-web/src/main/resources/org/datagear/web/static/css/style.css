@@ -448,6 +448,83 @@ label[title]:not(.no-tip)::after,
 	height: calc(90vh - 5rem - 6rem - 7rem);
 }
 
+/*数据集预览参数日期选择器*/
+/*主体*/
+.xdsoft_datetimepicker{
+	color: var(--text-color);
+	background: var(--surface-overlay);
+	border-color: var(--surface-border);
+	box-shadow: 0px 0px 6px var(--surface-600);
+	-webkit-box-shadow: 0px 0px 6px var(--surface-600);
+}
+/*前景色*/
+.xdsoft_datetimepicker .xdsoft_calendar td,
+.xdsoft_datetimepicker .xdsoft_calendar th{
+	color: var(--text-color);
+}
+/*按钮*/
+.xdsoft_datetimepicker .xdsoft_label i,
+.xdsoft_datetimepicker .xdsoft_next,
+.xdsoft_datetimepicker .xdsoft_prev,
+.xdsoft_datetimepicker .xdsoft_today_button{
+	color: var(--text-color);
+}
+/*年、月*/
+.xdsoft_datetimepicker .xdsoft_label{
+	background: var(--surface-overlay);
+}
+/*年、月下拉框*/
+.xdsoft_datetimepicker .xdsoft_label>.xdsoft_select{
+	color: var(--text-color);
+	background: var(--surface-overlay);
+	border-color: var(--surface-border);
+	box-shadow: 0px 0px 6px var(--surface-600);
+	-webkit-box-shadow: 0px 0px 6pxvar(--surface-600);
+}
+/*时间框*/
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{
+	border-color: var(--surface-border);
+}
+/*时间条目*/
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{
+	color: var(--text-color);
+	border-color: var(--surface-border);
+}
+/*悬停*/
+.xdsoft_datetimepicker .xdsoft_calendar td:hover,
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div:hover,
+.xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover{
+	color: var(--text-color) !important;
+	background: var(--surface-ground) !important;
+}
+/*今天*/
+.xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today{
+	color: var(--text-color) !important;
+    background: var(--surface-ground) !important;
+	font-weight: bold;
+}
+/*选中*/
+.xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_default,
+.xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current,
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current,
+.xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option.xdsoft_current{
+	color: var(--primary-color-text) !important;
+	background: var(--primary-color) !important;
+	box-shadow: none;
+	-webkit-box-shadow: none;
+}
+/**年份选择器确定按钮*/
+.xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year{
+	color: var(--text-color) !important;
+	border: 1px solid var(--surface-border) !important;
+    background: var(--surface-ground) !important;
+}
+.xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year:hover{
+	color: var(--text-color) !important;
+	border: 1px solid var(--surface-border) !important;
+    background: var(--surface-hover) !important;
+}
+
 /*数据集编辑页*/
 .page-form-dataSet .code-editor-wrapper{
 	height: 50vh;
@@ -455,4 +532,23 @@ label[title]:not(.no-tip)::after,
 .page-form-dataSet .params-wrapper,
 .page-form-dataSet .properties-wrapper{
 	height: 36vh;
+}
+.dataSet-preview-panel .preview-param-form-wrapper{
+	width: 36vw;
+	height: 50vh;
+}
+.dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-content{
+	height: calc(50vh - 3.8rem);
+	overflow: auto;
+	box-sizing: border-box;
+	margin-bottom: 0.8rem;
+}
+.dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-content .dg-dspv-form-item-label{
+	margin-bottom: 0.3rem;
+}
+.dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-content .dg-dspv-form-item-value{
+	margin-bottom: 0.6rem;
+}
+.dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-foot{
+	text-align: center;
 }

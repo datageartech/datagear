@@ -272,7 +272,6 @@
 }
 .dg-dspv-form .dg-form-invalid{
 	border-color: red !important;
-	color: red !important;
 }
 
 /*图表展示页面设置框*/
@@ -359,7 +358,6 @@
 .dg-chart-setting-box .dg-chart-setting-panel input[type=submit].dg-param-value-form-invalid,
 .dg-chart-setting-box .dg-chart-setting-panel input[type=button].dg-param-value-form-invalid{
 	border-color: red !important;
-	color: red !important;
 }
 .dg-chart-setting-box .dg-chart-setting-panel.dg-chart-setting-data-panel .dg-chart-setting-panel-foot{
 	display: none;

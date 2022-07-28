@@ -12,7 +12,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <#if !isAjaxRequest>
-<#assign _hh_Version=statics['org.datagear.util.Global'].VERSION>
+<#assign Global=statics['org.datagear.util.Global']>
 <script type="text/javascript">
 var contextPath="${contextPath}";
 </script>
@@ -24,9 +24,11 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldgutter.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/css/style.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/css/codemirror-5.64.0/custom.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css" type="text/css" rel="stylesheet" id="styleCssLink" />
+<link href="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/analysis.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/style.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/codemirror-5.64.0/custom.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" id="styleCssLink" />
 
 <script src="${contextPath}/static/lib/jquery-3.6.0/jquery-3.6.0.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js" type="text/javascript"></script>
@@ -76,7 +78,10 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/codemirror-5.64.0/mode/javascript/javascript.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/mode/sql/sql.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/clipboard-2.0.4/clipboard.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/script/util.js" type="text/javascript"></script>
-<script src="${contextPath}/static/script/schemaUrlBuilder.js" type="text/javascript"></script>
-<script src="${contextPath}/static/script/tableMeta.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/script/util.js?v=${Global.VERSION}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/schemaUrlBuilder.js?v=${Global.VERSION}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/tableMeta.js?v=${Global.VERSION}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/chartFactory.js?v=${Global.VERSION}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/chartSetting.js?v=${Global.VERSION}" type="text/javascript"></script>
 </#if>
