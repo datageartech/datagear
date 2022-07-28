@@ -42,7 +42,8 @@ dataSet_form_preview.ftl
 		else
 		{
 			var myPreviewFingerprint = po.toPreviewFingerprint(options.data);
-			if(!$.equalsForSameType(myPreviewFingerprint, po._prevPreviewFingerprint))
+			if(!$.equalsForSameType(myPreviewFingerprint, po._prevPreviewFingerprint)
+					|| !po.isPreviewSuccess())
 			{
 				$.tipInfo("<@spring.message code='dataSet.previewRequired' />");
 				return false;

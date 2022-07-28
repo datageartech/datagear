@@ -795,8 +795,6 @@
 				
 				for(var i=0; i<a.length; i++)
 				{
-					console.log("array: "+i+": " + $.equalsForSameType(a[i], b[i]));
-					
 					if(!$.equalsForSameType(a[i], b[i]))
 						return false;
 				}
@@ -805,8 +803,6 @@
 			{
 				for(var p in a)
 				{
-					console.log("object: "+p+": "+ $.equalsForSameType(a[p], b[p]));
-					
 					if(!$.equalsForSameType(a[p], b[p]))
 						return false;
 				}
@@ -816,8 +812,6 @@
 		}
 		else
 		{
-			console.log("primitive: "+a+","+b+": "+(a == b));
-			
 			return (a == b);
 		}
 	};

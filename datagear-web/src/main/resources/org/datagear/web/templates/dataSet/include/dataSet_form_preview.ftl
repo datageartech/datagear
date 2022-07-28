@@ -92,6 +92,11 @@
 		po._inPreviewAction = boolVal;
 	};
 	
+	po.isPreviewSuccess = function()
+	{
+		return (po._isPreviewSuccess !== false);
+	};
+	
 	po.inflateIfPreviewAction = function(action, data)
 	{
 		if(!po.inPreviewAction())
@@ -123,6 +128,8 @@
 	
 	po.handlePreviewSuccess = function(response)
 	{
+		po._isPreviewSuccess = true;
+		
 		var pm = po.vuePageModel();
 		var tm = po.vueTmpModel();
 		
@@ -145,6 +152,8 @@
 	
 	po.handlePreviewError = function(jqXHR)
 	{
+		po._isPreviewSuccess = false;
+		
 		var tm = po.vueTmpModel();
 		
 		tm.previewError = true;
