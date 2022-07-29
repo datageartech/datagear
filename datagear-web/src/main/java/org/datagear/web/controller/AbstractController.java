@@ -480,11 +480,24 @@ public abstract class AbstractController
 	protected OperationMessage setOptMsgForThrowableMsgCode(HttpServletRequest request, Throwable t, String msgCode, Object... msgArgs)
 	{
 		if(msgArgs == null || msgArgs.length == 0)
-			msgArgs = new String[] { t.getMessage() };
+			msgArgs = getDefaultThrowableMsgArgs(t);
 		
 		OperationMessage operationMessage = optMsgFail(request, msgCode, msgArgs);
 		setOperationMessage(request, operationMessage);
 		return operationMessage;
+	}
+	
+	protected Object[] getDefaultThrowableMsgArgs(Throwable t)
+	{
+		String msgArg = t.getMessage();
+		
+		while(t.getCause() != null)
+		{
+			msgArg = t.getCause().getMessage();
+			t= t.getCause();
+		}
+		
+		return new String[] { msgArg };
 	}
 
 	/**

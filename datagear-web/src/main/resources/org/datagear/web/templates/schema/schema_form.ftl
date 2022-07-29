@@ -112,7 +112,10 @@
 		        </div>
 			</div>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center">
+		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<p-button type="button" :label="tm.testActionBtnLabel" @click="onTest"
+				:disabled="tm.inTestAction?true:false" class="p-button-secondary">
+			</p-button>
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>
@@ -122,13 +125,52 @@
 (function(po)
 {
 	po.submitUrl = "/schema/"+po.submitAction;
+
+	po.inTestAction = function(boolVal)
+	{
+		var tm = po.vueTmpModel();
+		
+		if(boolVal === undefined)
+			return (tm.inTestAction == true);
+		
+		tm.inTestAction = boolVal;
+		tm.testActionBtnLabel = (boolVal ? "<@spring.message code='testing' />" : "<@spring.message code='test' />");
+	};
+	
+	po.inflateSubmitAction = function(action)
+	{
+		if(!po.inTestAction())
+			return;
+		
+		action.url = "/schema/testConnection";
+		action.options.defaultSuccessCallback = false;
+	};
+	
+	po.vueTmpModel(
+	{
+		inTestAction: false,
+		testActionBtnLabel: "<@spring.message code='test' />"
+	});
 	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
-	formModel = (formModel || {});
 	formModel.driverEntity = (formModel.driverEntity == null ? {} : formModel.driverEntity);
 	
-	po.setupForm(formModel);
+	po.setupForm(formModel,
+	{
+		complete: function()
+		{
+			if(po.inTestAction())
+				po.inTestAction(false);
+		}
+	},
+	{
+		invalidHandler: function()
+		{
+			if(po.inTestAction())
+				po.inTestAction(false);
+		}
+	});
 	
 	po.vueMethod(
 	{
@@ -163,6 +205,12 @@
 				var pm = po.vuePageModel();
 				pm.driverEntity = driverEntity;
 			});
+		},
+		
+		onTest: function(e)
+		{
+			po.inTestAction(true);
+			po.form().submit();
 		}
 	});
 	
