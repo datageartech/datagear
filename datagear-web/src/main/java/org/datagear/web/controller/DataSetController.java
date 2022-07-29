@@ -337,6 +337,7 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model model)
 	{
 		CsvFileDataSetEntity dataSet = new CsvFileDataSetEntity();
+		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
 		dataSet.setNameRow(1);
 		setCookieAnalysisProject(request, response, dataSet);
 
