@@ -60,6 +60,8 @@ dataSet_form_preview.ftl
 	
 	po.createWorkspaceEditor = function(dom, options)
 	{
+		options = (options || {});
+		
 		if(options.readOnly == null)
 			options.readOnly = po.isReadonlyAction;
 		

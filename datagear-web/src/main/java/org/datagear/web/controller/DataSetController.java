@@ -28,9 +28,7 @@ import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
-import org.datagear.analysis.support.CsvValueDataSet;
 import org.datagear.analysis.support.DataSetParamValueConverter;
-import org.datagear.analysis.support.JsonValueDataSet;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.TemplateContext;
@@ -846,7 +844,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		final User user = WebUtils.getUser();
 
-		JsonValueDataSet dataSet = preview.getDataSet();
+		JsonValueDataSetEntity dataSet = preview.getDataSet();
 
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
@@ -899,7 +897,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		final User user = WebUtils.getUser();
 
-		CsvValueDataSet dataSet = preview.getDataSet();
+		CsvValueDataSetEntity dataSet = preview.getDataSet();
 
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
@@ -1251,7 +1249,7 @@ public class DataSetController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class JsonValueDataSetPreview extends AbstractDataSetPreview<JsonValueDataSet>
+	public static class JsonValueDataSetPreview extends AbstractDataSetPreview<JsonValueDataSetEntity>
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -1305,7 +1303,7 @@ public class DataSetController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class CsvValueDataSetPreview extends AbstractDataSetPreview<CsvValueDataSet>
+	public static class CsvValueDataSetPreview extends AbstractDataSetPreview<CsvValueDataSetEntity>
 	{
 		private static final long serialVersionUID = 1L;
 
