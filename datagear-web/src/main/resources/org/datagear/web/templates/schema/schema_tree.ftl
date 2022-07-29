@@ -117,7 +117,7 @@
 		var keyword = pm.searchForm.keyword;
 		
 		pm.loadingSchema = true;
-		po.ajaxJson("/schema/queryData",
+		po.ajaxJson("/schema/list",
 		{
 			data: { keyword: keyword },
 			success: function(response)
