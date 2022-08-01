@@ -35,6 +35,15 @@
 					</p-inputtext>
 				</div>
 			</div>
+			<div class="field grid">
+				<label for="${pid}encoding" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='fileEncoding' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-dropdown id="${pid}encoding" v-model="pm.encoding" :options="tm.availableCharsetNames" class="input w-full">
+		        	</p-dropdown>
+				</div>
+			</div>
 			<#include "include/dataSet_form_param_property.ftl">
 		</div>
 		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
@@ -76,6 +85,7 @@
 		fingerprint.dataSetResDirectoryId = dataSet.dataSetResDirectory.id;
 		fingerprint.dataSetResFileName = dataSet.dataSetResFileName;
 		fingerprint.nameRow = dataSet.nameRow;
+		fingerprint.encoding = dataSet.encoding;
 	};
 	
 	po.beforeSubmitForm = function(action)
@@ -83,6 +93,11 @@
 		if(!po.beforeSubmitFormWithPreview(action))
 			return false;
 	};
+	
+	po.vueTmpModel(
+	{
+		availableCharsetNames: <@writeJson var=availableCharsetNames />
+	});
 	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);

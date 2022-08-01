@@ -47,9 +47,13 @@
 	</label>
        <div class="field-input col-12 md:col-9">
        	<div class="p-inputgroup">
-        	<p-inputtext id="${pid}dataSetResDirectory" v-model="pm.dataSetResDirectory.directory" type="text" class="input"
-        		name="dataSetResDirectory.directory" required readonly>
-        	</p-inputtext>
+        	<div class="p-input-icon-right flex-grow-1">
+				<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteDataSetResDirectory" v-if="!isReadonlyAction">
+				</i>
+				<p-inputtext id="${pid}dataSetResDirectory" v-model="pm.dataSetResDirectory.directory" type="text" class="input w-full h-full border-noround-right"
+					name="dataSetResDirectory.directory" required readonly>
+				</p-inputtext>
+			</div>
         	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectDataSetResDirectory"
         		class="p-button-secondary" v-if="!isReadonlyAction">
         	</p-button>
@@ -186,6 +190,12 @@
 				var pm = po.vuePageModel();
 				pm.dataSetResDirectory = dsrd;
 			});
+		},
+		
+		onDeleteDataSetResDirectory: function(e)
+		{
+			var pm = po.vuePageModel();
+			pm.dataSetResDirectory = {};
 		},
 		
 		onSelectDataSetResFileName: function(e)
