@@ -29,7 +29,7 @@
 				<p-datatable :value="tm.previewResultDatas" :scrollable="true" scroll-height="flex"
 					striped-rows class="table-sm" v-if="!tm.previewError">
 					<p-column v-for="col in tm.previewColumns"
-						:field="col.name" :header="col.label" :sortable="false"
+						:field="col.name" :header="col.label" :sortable="false" :style="col.style"
 						:key="col.name">
 					</p-column>
 				</p-datatable>
@@ -180,12 +180,27 @@
 		var previewColumns = [];
 		$.each(pm.properties, function(i, p)
 		{
-			previewColumns.push({ name: p.name, label: p.name });	
+			previewColumns.push({ name: p.name, label: p.name, style: "" });	
 		});
+		
+		var columnAllFieldName = null;
+		if(pm.mutableModel)
+		{
+			columnAllFieldName = $.uid();
+			previewColumns.push({ name: columnAllFieldName, label: "<@spring.message code='dataSet.mutableModelDataDetail' />", style: "min-width:25rem;" });
+		}
 		
 		tm.previewColumns = previewColumns;
 		tm.previewResultDatas = (response.result && response.result.data ? response.result.data : []);
 		tm.previewTplResult = response.templateResult;
+		
+		if(pm.mutableModel)
+		{
+			$.each(tm.previewResultDatas, function(idx, rd)
+			{
+				rd[columnAllFieldName] = $.toJsonString(rd);
+			});
+		}
 	};
 	
 	po.handlePreviewError = function(jqXHR)

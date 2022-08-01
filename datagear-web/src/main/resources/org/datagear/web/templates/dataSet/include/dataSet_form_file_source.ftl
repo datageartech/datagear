@@ -119,6 +119,7 @@
 					tm.dsrFileNodes = nodes;
 				
 				tm.dsrSelectedNodeKeys = null;
+				tm.dsrSelectedNode = null;
 			},
 			complete: function()
 			{
