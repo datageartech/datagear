@@ -382,7 +382,7 @@ public class SqlpadController extends AbstractSchemaConnController
 		File file = directory.createFileFor(multipartFile.getOriginalFilename());
 		multipartFile.transferTo(file);
 
-		FileInfo fileInfo = new FileInfo(file.getName(), file.length());
+		FileInfo fileInfo = FileInfo.valueOfFile(file.getName(), file.length());
 
 		return fileInfo;
 	}

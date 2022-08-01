@@ -16,21 +16,24 @@ import java.text.DecimalFormat;
  * @author datagear@163.com
  *
  */
-public class FileInfo implements Serializable
+public class FileInfo implements Serializable, Comparable<FileInfo>
 {
 	private static final long serialVersionUID = 1L;
 
 	/** 文件名 */
 	private String name;
+	
+	/**是否目录*/
+	private boolean directory;
 
 	/** 字节数 */
-	private long bytes;
+	private long bytes = 0;
 
 	/** 展示名称 */
-	private String displayName;
+	private String displayName = "";
 
 	/** 友好显示的大小 */
-	private String size;
+	private String size = "";
 
 	public FileInfo()
 	{
@@ -44,10 +47,19 @@ public class FileInfo implements Serializable
 		this.displayName = name;
 	}
 
-	public FileInfo(String name, long bytes)
+	public FileInfo(String name, boolean directory)
 	{
 		super();
 		this.name = name;
+		this.displayName = name;
+		this.directory = directory;
+	}
+
+	public FileInfo(String name, boolean directory, long bytes)
+	{
+		super();
+		this.name = name;
+		this.directory = directory;
 		this.bytes = bytes;
 		this.displayName = name;
 		this.size = toPrettySize(bytes);
@@ -61,6 +73,16 @@ public class FileInfo implements Serializable
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+
+	public boolean isDirectory()
+	{
+		return directory;
+	}
+
+	public void setDirectory(boolean directory)
+	{
+		this.directory = directory;
 	}
 
 	public long getBytes()
@@ -95,10 +117,28 @@ public class FileInfo implements Serializable
 	}
 
 	@Override
+	public int compareTo(FileInfo o)
+	{
+		return this.name.compareTo(o.name);
+	}
+
+	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", bytes=" + bytes + ", displayName=" + displayName
-				+ ", size=" + size + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", directory=" + directory + ", bytes=" + bytes + ", displayName="
+				+ displayName + ", size=" + size + "]";
+	}
+	
+	public static FileInfo valueOfFile(String name, long bytes)
+	{
+		FileInfo fi = new FileInfo(name, false, bytes);
+		return fi;
+	}
+	
+	public static FileInfo valueOfDirectory(String name)
+	{
+		FileInfo fi = new FileInfo(name, true);
+		return fi;
 	}
 
 	/**

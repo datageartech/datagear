@@ -21,7 +21,7 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-sql">
 	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
-		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<#include "include/dataSet_form_file_source.ftl">
 			<div class="field grid">
@@ -44,25 +44,44 @@
 	</form>
 </div>
 <#include "../include/page_form.ftl">
-<#include "../include/page_code_editor.ftl">
 <#include "../include/page_boolean_options.ftl">
 <#include "include/dataSet_form_js.ftl">
 <script>
 (function(po)
 {
-	po.submitUrl = "/dataSet/"+po.submitAction;
-	po.previewUrl = "/dataSet/previewCsvFile";
-	
-	po.inflateSubmitAction = function(action, data)
+	po.submitUrl = function()
 	{
-		data.value = po.getCodeText(po.codeEditor);
-		po.inflateIfPreviewAction(action, data);
+		var url = "/dataSet/"+po.submitAction;
+
+		if(!po.isAddAction)
+			url = $.addParam(url, "originalFileName", po.originalFileName);
+		
+		return url;
+	};
+	
+	po.previewUrl = function()
+	{
+		var url = "/dataSet/previewCsvFile";
+		
+		if(!po.isAddAction)
+			url = $.addParam(url, "originalFileName", po.originalFileName);
+		
+		return url;
 	};
 	
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
-		fingerprint.value = dataSet.value;
+		fingerprint.fileSourceType = dataSet.fileSourceType;
+		fingerprint.fileName = dataSet.fileName;
+		fingerprint.dataSetResDirectoryId = dataSet.dataSetResDirectory.id;
+		fingerprint.dataSetResFileName = dataSet.dataSetResFileName;
 		fingerprint.nameRow = dataSet.nameRow;
+	};
+	
+	po.beforeSubmitForm = function(action)
+	{
+		if(!po.beforeSubmitFormWithPreview(action))
+			return false;
 	};
 	
 	var formModel = <@writeJson var=formModel />;
@@ -70,31 +89,14 @@
 	formModel.dataSetResDirectory = (!formModel.dataSetResDirectory ? {} : formModel.dataSetResDirectory);
 	po.inflateDataSetModel(formModel);
 	
+	po.originalFileName = (formModel.fileName || "");
+	
 	po.setupForm(formModel, {},
 	{
-		rules :
-		{
-			"nameRow": {"integer": true},
-		},
-		customNormalizers:
-		{
-			value: function()
-			{
-				return po.getCodeText(po.codeEditor);
-			}
-		},
 		invalidHandler: function()
 		{
 			po.handlePreviewInvalidForm();
 		}
-	});
-	
-	po.vueMounted(function()
-	{
-		var pm = po.vuePageModel();
-		
-		po.codeEditor = po.createWorkspaceEditor(po.elementOfId("${pid}codeEditor"));
-		po.setCodeTextTimeout(po.codeEditor, pm.value);
 	});
 	
 	po.vueMount();

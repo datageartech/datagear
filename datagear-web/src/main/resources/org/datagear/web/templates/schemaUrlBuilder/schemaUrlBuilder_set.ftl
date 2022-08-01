@@ -21,7 +21,7 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-schema-ub">
 	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
-		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="grid grid-nogutter">
 				<div class="col-8">
 					<div class="field grid">
@@ -81,9 +81,9 @@
 {
 	po.submitUrl = "/schemaUrlBuilder/saveSet";
 	
-	po.inflateSubmitAction = function(action, data)
+	po.beforeSubmitForm = function(action)
 	{
-		data.code = po.getCodeText(po.codeEditor);
+		action.options.data.code = po.getCodeText(po.codeEditor);
 	};
 	
 	var formModel = <@writeJson var=formModel />;

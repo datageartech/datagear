@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
 /**
  * 文件工具类。
@@ -352,11 +353,7 @@ public class FileUtil
 	 */
 	public static FileInfo getFileInfo(File file)
 	{
-		FileInfo fileInfo = new FileInfo(file.getName());
-
-		if (file.exists())
-			fileInfo.setBytes(file.length());
-
+		FileInfo fileInfo = new FileInfo(file.getName(), file.isDirectory(), file.length());
 		return fileInfo;
 	}
 
@@ -368,7 +365,7 @@ public class FileUtil
 	 */
 	public static FileInfo[] getFileInfos(File directory)
 	{
-		if (!directory.exists())
+		if (!directory.exists() || !directory.isDirectory())
 			return new FileInfo[0];
 
 		File[] files = directory.listFiles();
@@ -377,6 +374,8 @@ public class FileUtil
 
 		for (int i = 0; i < files.length; i++)
 			fileInfos[i] = getFileInfo(files[i]);
+		
+		Arrays.sort(fileInfos);
 
 		return fileInfos;
 	}

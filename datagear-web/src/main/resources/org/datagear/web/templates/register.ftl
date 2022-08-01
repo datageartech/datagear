@@ -28,7 +28,7 @@
 					<template #title><@spring.message code='module.register' /></template>
 					<template #content>
 					<form class="flex flex-column">
-						<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+						<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 							<div class="field grid">
 								<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 									<@spring.message code='username' />

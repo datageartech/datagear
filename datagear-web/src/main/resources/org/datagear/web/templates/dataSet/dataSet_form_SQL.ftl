@@ -21,7 +21,7 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-sql">
 	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
-		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<div class="field grid">
 				<label for="${pid}dataSource" class="field-label col-12 mb-2 md:col-3 md:mb-0">
@@ -76,24 +76,26 @@
 	po.submitUrl = "/dataSet/"+po.submitAction;
 	po.previewUrl = "/dataSet/previewSql";
 	
-	po.inflateSubmitAction = function(action, data)
+	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
+		fingerprint.schemaId = dataSet.shmConFactory.schema.id;
+		fingerprint.sql = dataSet.sql;
+	};
+	
+	po.beforeSubmitForm = function(action)
+	{
+		var data = action.options.data;
 		data.sql = po.getCodeText(po.codeEditor);
 		data.connectionFactory = undefined;
 		
-		po.inflateIfPreviewAction(action, data);
+		if(!po.beforeSubmitFormWithPreview(action))
+			return false;
 	};
 	
 	po.getSqlEditorSchemaId = function()
 	{
 		var pm = po.vuePageModel();
 		return pm.shmConFactory.schema.id;
-	};
-	
-	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
-	{
-		fingerprint.schemaId = dataSet.shmConFactory.schema.id;
-		fingerprint.sql = dataSet.sql;
 	};
 	
 	var formModel = <@writeJson var=formModel />;

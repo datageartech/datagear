@@ -759,7 +759,7 @@ public class DataController extends AbstractSchemaConnTableController
 
 		multipartFile.transferTo(file);
 
-		FileInfo fileInfo = new FileInfo(file.getName(), file.length());
+		FileInfo fileInfo = FileInfo.valueOfFile(file.getName(), file.length());
 
 		return fileInfo;
 	}

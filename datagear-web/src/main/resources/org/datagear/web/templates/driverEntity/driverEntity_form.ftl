@@ -21,7 +21,7 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
 	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
-		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}displayName" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='name' />
@@ -119,9 +119,9 @@
 		driverLibraryFiles.files = files;
 	};
 	
-	po.inflateSubmitAction = function(action, data)
+	po.beforeSubmitForm = function(action)
 	{
-		var newData = { driverEntity: data, driverLibraryFileNames: [] };
+		var newData = { driverEntity: action.options.data, driverLibraryFileNames: [] };
 		
 		var driverLibraryFiles = po.vueReactive("driverLibraryFiles");
 		var dlfs = driverLibraryFiles.files;

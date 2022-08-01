@@ -520,7 +520,7 @@ public class DriverEntityController extends AbstractController
 		{
 			DriverLibraryInfo driverLibraryInfo = driverLibraryInfos.get(i);
 
-			FileInfo fileInfo = new FileInfo(driverLibraryInfo.getName(), driverLibraryInfo.getSize());
+			FileInfo fileInfo = FileInfo.valueOfFile(driverLibraryInfo.getName(), driverLibraryInfo.getSize());
 
 			fileInfos[i] = fileInfo;
 		}

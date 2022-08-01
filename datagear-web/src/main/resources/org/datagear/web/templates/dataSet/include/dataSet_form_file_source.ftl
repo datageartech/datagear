@@ -67,14 +67,85 @@
         		name="dataSetResFileName" required  maxlength="1000">
         	</p-inputtext>
         	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectDataSetResFileName"
+        		aria:haspopup="true" aria-controls="${pid}dsrFilesPanel"
         		class="p-button-secondary" v-if="!isReadonlyAction">
         	</p-button>
+			<p-overlaypanel ref="dsrFilesPanelEle" append-to="body"
+				:show-close-icon="true" @show="onDsrFilesPanelShow" id="${pid}dsrFilesPanel" class="dsr-files-panel">
+				<div class="mb-2">
+					<label class="text-lg font-bold">
+						<@spring.message code='selectFile' />
+					</label>
+				</div>
+				<div class="panel-content-size-sm overflow-auto">
+					<p-tree :value="tm.dsrFileNodes"
+						selection-mode="single" v-model:selection-keys="tm.dsrSelectedNodeKeys"
+						@node-expand="onDsrFileNodeExpand" @node-select="onDsrFileNodeSelect"
+						:loading="tm.dsrLoading" class="h-full overflow-auto">
+					</p-tree>
+				</div>
+				<div class="pt-3 text-center">
+					<p-button type="button" @click="onConfirmDataSetResFileName" label="<@spring.message code='confirm' />"></p-button>
+				</div>
+			</p-overlaypanel>
 		</div>
 	</div>
 </div>
 <script>
 (function(po)
 {
+	po.loadDsrFiles = function(node)
+	{
+		var subPath = (node && node.path ? node.path : "");
+		
+		var pm = po.vuePageModel();
+		var tm = po.vueTmpModel();
+		
+		tm.dsrLoading = true;
+		po.ajax("/dataSetResDirectory/listFiles",
+		{
+			data: { id: pm.dataSetResDirectory.id, subPath: subPath },
+			success: function(response)
+			{
+				var nodes = po.dsrFileInfosToNodes(subPath, response);
+				
+				if(node)
+					node.children = nodes;
+				else
+					tm.dsrFileNodes = nodes;
+				
+				tm.dsrSelectedNodeKeys = null;
+			},
+			complete: function()
+			{
+				tm.dsrLoading = false;
+			}
+		});
+	};
+	
+	po.dsrFileInfosToNodes = function(subPath, fileInfos)
+	{
+		var re = [];
+		
+		$.each(fileInfos, function(idx, fi)
+		{
+			var myPath = (subPath ? subPath + "/" : "") + fi.name;
+			
+			re.push(
+			{
+				key: myPath,
+				label: fi.name + (fi.directory ? "" : " ("+fi.size+")"),
+				icon: (fi.directory ? "pi pi-folder" : "pi pi-file"),
+				leaf: (fi.directory ? false : true),
+				children: null,
+				fileInfo: fi,
+				path: myPath
+			});
+		});
+		
+		return re;
+	};
+	
 	po.vueTmpModel(
 	{
 		fileSourceTypeOptions:
@@ -82,8 +153,14 @@
 			{name: "<@spring.message code='dataSet.FILE_SOURCE_TYPE_UPLOAD' />", value: "${DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD}"},
 			{name: "<@spring.message code='dataSet.FILE_SOURCE_TYPE_SERVER' />", value: "${DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_SERVER}"}
 		],
-		uploadFileUrl: po.concatContextPath("/dataSet/uploadFile")
+		uploadFileUrl: po.concatContextPath("/dataSet/uploadFile"),
+		dsrFileNodes: null,
+		dsrSelectedNodeKeys: null,
+		dsrSelectedNode: null,
+		dsrLoading: false
 	});
+	
+	po.vueRef("dsrFilesPanelEle", null);
 	
 	po.vueMethod(
 	{
@@ -113,7 +190,44 @@
 		
 		onSelectDataSetResFileName: function(e)
 		{
+			var pm = po.vuePageModel();
 			
+			if(!pm.dataSetResDirectory || !pm.dataSetResDirectory.id)
+				return;
+			
+			po.vueUnref("dsrFilesPanelEle").show(e);
+		},
+		
+		onDsrFilesPanelShow: function(e)
+		{
+			po.loadDsrFiles();
+		},
+		
+		onDsrFileNodeExpand: function(node)
+		{
+			if(node.children == null)
+				po.loadDsrFiles(node);
+		},
+		
+		onDsrFileNodeSelect: function(node)
+		{
+			var tm = po.vueTmpModel();
+			tm.dsrSelectedNode = node;
+		},
+		
+		onConfirmDataSetResFileName: function(e)
+		{
+			var pm = po.vuePageModel();
+			var tm = po.vueTmpModel();
+			
+			if(!tm.dsrSelectedNode || tm.dsrSelectedNode.fileInfo.directory)
+			{
+				$.tipInfo("<@spring.message code='pleaseSelectOneFile' />");
+				return;
+			}
+			
+			pm.dataSetResFileName = tm.dsrSelectedNode.path;
+			po.vueUnref("dsrFilesPanelEle").hide();
 		}
 	});
 })

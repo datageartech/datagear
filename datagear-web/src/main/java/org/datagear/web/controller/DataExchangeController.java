@@ -1822,7 +1822,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		public DataImportFileInfo(String name, long bytes, String displayName, String tableName)
 		{
-			super(name, bytes);
+			super(name, false, bytes);
 			super.setDisplayName(displayName);
 			this.tableName = tableName;
 		}

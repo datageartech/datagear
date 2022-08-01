@@ -21,7 +21,7 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-db-g-r">
 	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
-		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}savePath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='dashboardGlobalRes.upload.savePath.desc' />">
@@ -56,9 +56,9 @@
 {
 	po.submitUrl = "/dashboardGlobalRes/"+po.submitAction;
 	
-	po.inflateSubmitAction = function(action, data)
+	po.beforeSubmitForm = function(action)
 	{
-		data.resourceContent = po.getCodeText(po.codeEditor);
+		action.options.data.resourceContent = po.getCodeText(po.codeEditor);
 	};
 	
 	var formModel = <@writeJson var=formModel />;

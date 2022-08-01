@@ -355,10 +355,6 @@ label[title]:not(.no-tip)::after,
 }
 
 /*表单页*/
-.page-form .field.grid{
-	margin-left: 0 !important;
-	margin-right: 0 !important;
-}
 .page-form .page-form-content{
 	/*屏幕高度 - 表单foot高度*/
 	max-height: calc(100vh - 5rem);
@@ -525,6 +521,11 @@ label[title]:not(.no-tip)::after,
     background: var(--surface-hover) !important;
 }
 
+.panel-content-size-sm{
+	width: 36vw;
+	height: 50vh;
+}
+
 /*数据集编辑页*/
 .page-form-dataSet .code-editor-wrapper{
 	height: 50vh;
@@ -533,11 +534,8 @@ label[title]:not(.no-tip)::after,
 .page-form-dataSet .properties-wrapper{
 	height: 36vh;
 }
-.dataSet-preview-panel .preview-param-form-wrapper{
-	width: 36vw;
-	height: 50vh;
-}
 .dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-content{
+	/*panel-content-size-sm的高度 - 按钮高度 */
 	height: calc(50vh - 3.8rem);
 	overflow: auto;
 	box-sizing: border-box;

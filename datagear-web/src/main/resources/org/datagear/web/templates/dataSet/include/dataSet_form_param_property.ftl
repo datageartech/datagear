@@ -132,49 +132,51 @@ page_boolean_options.ftl
 						class="p-button-secondary p-button-sm">
 					</p-button>
 					<p-overlaypanel ref="dataSourceFormatPanelEle" :show-close-icon="true" id="${pid}dataSourceFormatPanel">
-						<div class="field grid mb-0">
-							<label class="field-label col-12 text-lg font-bold" title="<@spring.message code='dataSet.dataSourceFormat.desc' />">
-								<@spring.message code='dataSourceFormat' />
-							</label>
-						</div>
-						<div class="field grid">
-							<label for="${pid}dsfDate" class="field-label col-12 mb-2">
-								<@spring.message code='dateFormat' />
-							</label>
-							<div class="field-input col-12">
-								<p-inputtext id="${pid}dsfDate" v-model="pm.dataFormat.dateFormat" type="text" class="input w-full"
-					        		name="dataFormat.dateFormat" maxlength="100">
-					        	</p-inputtext>
+						<div class="panel-content-size-sm px-2 overflow-auto">
+							<div class="field grid mb-0">
+								<label class="field-label col-12 text-lg font-bold" title="<@spring.message code='dataSet.dataSourceFormat.desc' />">
+									<@spring.message code='dataSourceFormat' />
+								</label>
 							</div>
-						</div>
-						<div class="field grid">
-							<label for="${pid}dsfTime" class="field-label col-12 mb-2">
-								<@spring.message code='timeFormat' />
-							</label>
-							<div class="field-input col-12">
-								<p-inputtext id="${pid}dsfTime" v-model="pm.dataFormat.timeFormat" type="text" class="input w-full"
-					        		name="dataFormat.timeFormat" maxlength="100">
-					        	</p-inputtext>
+							<div class="field grid">
+								<label for="${pid}dsfDate" class="field-label col-12 mb-2">
+									<@spring.message code='dateFormat' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}dsfDate" v-model="pm.dataFormat.dateFormat" type="text" class="input w-full"
+						        		name="dataFormat.dateFormat" maxlength="100">
+						        	</p-inputtext>
+								</div>
 							</div>
-						</div>
-						<div class="field grid">
-							<label for="${pid}dsfTimestamp" class="field-label col-12 mb-2">
-								<@spring.message code='datetimeFormat' />
-							</label>
-							<div class="field-input col-12">
-								<p-inputtext id="${pid}dsfTimestamp" v-model="pm.dataFormat.timestampFormat" type="text" class="input w-full"
-					        		name="dataFormat.timestampFormat" maxlength="100">
-					        	</p-inputtext>
+							<div class="field grid">
+								<label for="${pid}dsfTime" class="field-label col-12 mb-2">
+									<@spring.message code='timeFormat' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}dsfTime" v-model="pm.dataFormat.timeFormat" type="text" class="input w-full"
+						        		name="dataFormat.timeFormat" maxlength="100">
+						        	</p-inputtext>
+								</div>
 							</div>
-						</div>
-						<div class="field grid">
-							<label for="${pid}dsfNumber" class="field-label col-12 mb-2">
-								<@spring.message code='numberFormat' />
-							</label>
-							<div class="field-input col-12">
-								<p-inputtext id="${pid}dsfNumber" v-model="pm.dataFormat.numberFormat" type="text" class="input w-full"
-					        		name="dataFormat.numberFormat" maxlength="100">
-					        	</p-inputtext>
+							<div class="field grid">
+								<label for="${pid}dsfTimestamp" class="field-label col-12 mb-2">
+									<@spring.message code='datetimeFormat' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}dsfTimestamp" v-model="pm.dataFormat.timestampFormat" type="text" class="input w-full"
+						        		name="dataFormat.timestampFormat" maxlength="100">
+						        	</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}dsfNumber" class="field-label col-12 mb-2">
+									<@spring.message code='numberFormat' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}dsfNumber" v-model="pm.dataFormat.numberFormat" type="text" class="input w-full"
+						        		name="dataFormat.numberFormat" maxlength="100">
+						        	</p-inputtext>
+								</div>
 							</div>
 						</div>
 					</p-overlaypanel>

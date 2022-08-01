@@ -8,10 +8,7 @@
 package org.datagear.web.controller;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -180,47 +177,21 @@ public class DataSetResDirectoryController extends AbstractController
 
 	@RequestMapping(value = "/listFiles", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<FileInfo> listFiles(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @RequestParam("id") String id) throws Exception
+	public FileInfo[] listFiles(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestParam("id") String id,
+			@RequestParam(value="subPath", required = false) String subPath) throws Exception
 	{
 		User user = WebUtils.getUser();
 
-		DataSetResDirectory dataSetResDirectory = this.dataSetResDirectoryService.getById(user, id);
-
-		if (dataSetResDirectory == null)
-			throw new RecordNotFoundException();
-
-		List<FileInfo> fileInfos = new ArrayList<>();
-
+		DataSetResDirectory dataSetResDirectory =  getByIdForView(this.dataSetResDirectoryService, user, id);
 		File directory = FileUtil.getDirectory(dataSetResDirectory.getDirectory(), false);
-		listDataSetResDirectoryFilePaths(directory, "", fileInfos);
-
-		return fileInfos;
+		
+		if(!StringUtil.isEmpty(subPath))
+			directory = FileUtil.getDirectory(directory, subPath, false);
+		
+		return FileUtil.getFileInfos(directory);
 	}
-
-	protected void listDataSetResDirectoryFilePaths(File directory, String parentPath, List<FileInfo> fileInfos)
-	{
-		if (!directory.exists())
-			return;
-
-		if (!directory.isDirectory())
-			return;
-
-		File[] files = directory.listFiles();
-		Arrays.sort(files, FILE_NAME_ASC_COMPARATOR);
-
-		for (File file : files)
-		{
-			String myPath = (StringUtil.isEmpty(parentPath) ? file.getName()
-					: FileUtil.concatPath(parentPath, file.getName()));
-
-			if (file.isDirectory())
-				listDataSetResDirectoryFilePaths(file, myPath, fileInfos);
-			else
-				fileInfos.add(new FileInfo(myPath));
-		}
-	}
-
+	
 	protected void checkSaveEntity(DataSetResDirectory dataSetResDirectory)
 	{
 		if (isBlank(dataSetResDirectory.getDirectory()))

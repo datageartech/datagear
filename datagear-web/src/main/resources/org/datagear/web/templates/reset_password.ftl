@@ -31,7 +31,7 @@
 					<template #title><@spring.message code='module.resetPassword' /></template>
 					<template #content>
 					<form class="flex flex-column">
-						<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+						<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 							<div class="mb-5">
 								<p-steps :model="stepItems" :readonly="true"></p-steps>
 							</div>

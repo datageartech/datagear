@@ -97,12 +97,11 @@ String action
 		options.success = successHandlers;
 		
 		var action = { url: url, options: options };
-		po.inflateSubmitAction(action, action.options.data);
 		
-		var jsonSubmit = (action.options.contentType == null || action.options.contentType == $.CONTENT_TYPE_JSON);
-		
-		if(po.beforeSubmitForm(action.url, action.options) !== false)
+		if(po.beforeSubmitForm(action) !== false)
 		{
+			var jsonSubmit = (action.options.contentType == null || action.options.contentType == $.CONTENT_TYPE_JSON);
+			
 			if(jsonSubmit)
 				po.ajaxJson(action.url, action.options);
 			else
@@ -112,10 +111,8 @@ String action
 		return false;
 	};
 	
-	po.inflateSubmitAction = function(action, data){};
-	
 	//返回false会阻止表单提交
-	po.beforeSubmitForm = function(url, options){};
+	po.beforeSubmitForm = function(action){};
 	
 	po.defaultSubmitSuccessCallback = function(response, close)
 	{

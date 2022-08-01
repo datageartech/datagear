@@ -21,7 +21,7 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-sql">
 	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
-		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
+		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<div class="field grid">
 				<label for="${pid}value" class="field-label col-12 mb-2 md:col-3 md:mb-0"
@@ -66,16 +66,19 @@
 	po.submitUrl = "/dataSet/"+po.submitAction;
 	po.previewUrl = "/dataSet/previewCsvValue";
 	
-	po.inflateSubmitAction = function(action, data)
-	{
-		data.value = po.getCodeText(po.codeEditor);
-		po.inflateIfPreviewAction(action, data);
-	};
-	
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
 		fingerprint.value = dataSet.value;
 		fingerprint.nameRow = dataSet.nameRow;
+	};
+	
+	po.beforeSubmitForm = function(action)
+	{
+		var data = action.options.data;
+		data.value = po.getCodeText(po.codeEditor);
+		
+		if(!po.beforeSubmitFormWithPreview(action))
+			return false;
 	};
 	
 	var formModel = <@writeJson var=formModel />;

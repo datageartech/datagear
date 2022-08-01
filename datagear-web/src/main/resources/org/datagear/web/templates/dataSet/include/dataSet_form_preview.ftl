@@ -76,13 +76,29 @@
 			<@spring.message code='parameter' />
 		</label>
 	</div>
-	<div class="preview-param-form-wrapper overflow-auto"></div>
+	<div class="preview-param-form-wrapper panel-content-size-sm overflow-auto"></div>
 </p-overlaypanel>
 <script>
 (function(po)
 {
-	//需实现
+	//需实现，可以是字符串或函数
 	po.previewUrl = "#";
+	//需实现
+	po.inflatePreviewFingerprint = function(fingerprint, dataSet){};
+
+	po.toPreviewFingerprint = function(dataSet)
+	{
+		var fingerprint = {};
+		
+		fingerprint.mutableModel = dataSet.mutableModel;
+		fingerprint.properties = $.extend(true, [], dataSet.properties);
+		fingerprint.params = $.extend(true, [], dataSet.params);
+		fingerprint.dataFormat = $.extend(true, {}, dataSet.dataFormat);
+		
+		po.inflatePreviewFingerprint(fingerprint, dataSet);
+		
+		return fingerprint;
+	};
 	
 	po.inPreviewAction = function(boolVal)
 	{
@@ -94,30 +110,47 @@
 	
 	po.isPreviewSuccess = function()
 	{
-		return (po._isPreviewSuccess !== false);
+		if(po.isAddAction)
+			return (po._isPreviewSuccess === true);
+		else
+			return (po._isPreviewSuccess !== false);
 	};
 	
-	po.inflateIfPreviewAction = function(action, data)
+	po.beforeSubmitFormWithPreview = function(action)
 	{
-		if(!po.inPreviewAction())
-			return;
-		
-		action.url = po.previewUrl;
-		action.options.defaultSuccessCallback = false;
-		action.options.success = function(response)
+		if(po.inPreviewAction())
 		{
-			po.handlePreviewSuccess(response);
-		};
-		action.options.error = function(jqXHR)
+			action.url = ($.isFunction(po.previewUrl) ? po.previewUrl() : po.previewUrl);
+			action.options.defaultSuccessCallback = false;
+			action.options.success = function(response)
+			{
+				po.handlePreviewSuccess(response);
+			};
+			action.options.error = function(jqXHR)
+			{
+				po.handlePreviewError(jqXHR);
+			};
+			
+			var tm = po.vueTmpModel();
+			var previewQuery = tm.previewQuery;
+			po.trimPreviewQueryFetchSize(previewQuery);
+			
+			action.options.data = { dataSet: action.options.data, query: po.vueRaw(previewQuery) };
+			
+			po._prevPreviewFingerprint = po.toPreviewFingerprint(action.options.data.dataSet);
+		}
+		else
 		{
-			po.handlePreviewError(jqXHR);
-		};
+			var myPreviewFingerprint = po.toPreviewFingerprint(action.options.data);
+			if(!$.equalsForSameType(myPreviewFingerprint, po._prevPreviewFingerprint)
+					|| !po.isPreviewSuccess())
+			{
+				$.tipInfo("<@spring.message code='dataSet.previewRequired' />");
+				return false;
+			}
+		}
 		
-		var tm = po.vueTmpModel();
-		var previewQuery = tm.previewQuery;
-		po.trimPreviewQueryFetchSize(previewQuery);
-		
-		action.options.data = { dataSet: data, query: po.vueRaw(previewQuery) };
+		return true;
 	};
 	
 	po.trimPreviewQueryFetchSize = function(dataSetQuery)
@@ -137,7 +170,12 @@
 		tm.previewPanelShow = true;
 		
 		if(!pm.mutableModel && pm.properties.length == 0)
+		{
 			pm.properties = response.properties;
+			
+			if(po._prevPreviewFingerprint)
+				po._prevPreviewFingerprint.properties = $.extend(true, [], response.properties);
+		}
 		
 		var previewColumns = [];
 		$.each(pm.properties, function(i, p)
@@ -287,6 +325,12 @@
 		{
 			po.inflatePreviewParamPanel();
 		}
+	});
+
+	po.vueMounted(function()
+	{
+		var pm = po.vuePageModel();
+		po._prevPreviewFingerprint = po.toPreviewFingerprint(po.vueRaw(pm));
 	});
 })
 (${pid});

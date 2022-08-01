@@ -18,39 +18,6 @@ dataSet_form_preview.ftl
 <script type="text/javascript">
 (function(po)
 {
-	//需实现
-	po.inflatePreviewFingerprint = function(fingerprint, dataSet){};
-	
-	po.toPreviewFingerprint = function(dataSet)
-	{
-		var fingerprint = {};
-		fingerprint.properties = $.extend(true, [], dataSet.properties);
-		fingerprint.params = $.extend(true, [], dataSet.params);
-		fingerprint.dataFormat = $.extend(true, {}, dataSet.dataFormat);
-		
-		po.inflatePreviewFingerprint(fingerprint, dataSet);
-		
-		return fingerprint;
-	};
-	
-	po.beforeSubmitForm = function(url, options)
-	{
-		if(po.inPreviewAction())
-		{
-			po._prevPreviewFingerprint = po.toPreviewFingerprint(options.data.dataSet);
-		}
-		else
-		{
-			var myPreviewFingerprint = po.toPreviewFingerprint(options.data);
-			if(!$.equalsForSameType(myPreviewFingerprint, po._prevPreviewFingerprint)
-					|| !po.isPreviewSuccess())
-			{
-				$.tipInfo("<@spring.message code='dataSet.previewRequired' />");
-				return false;
-			}
-		}
-	};
-	
 	po.inflateDataSetModel = function(dataSet)
 	{
 		dataSet.analysisProject = (dataSet.analysisProject == null ? {} : dataSet.analysisProject);
@@ -75,12 +42,6 @@ dataSet_form_preview.ftl
 		
 		return po.createCodeEditor(dom, options);
 	};
-	
-	po.vueMounted(function()
-	{
-		var pm = po.vuePageModel();
-		po._prevPreviewFingerprint = po.toPreviewFingerprint(po.vueRaw(pm));
-	});
 })
 (${pid});
 </script>
