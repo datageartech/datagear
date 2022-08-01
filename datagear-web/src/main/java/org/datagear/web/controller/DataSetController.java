@@ -228,6 +228,7 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model model)
 	{
 		JsonFileDataSetEntity dataSet = new JsonFileDataSetEntity();
+		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
 		setCookieAnalysisProject(request, response, dataSet);
 
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
@@ -265,6 +266,7 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model model)
 	{
 		ExcelDataSetEntity dataSet = new ExcelDataSetEntity();
+		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
 		dataSet.setNameRow(1);
 		setCookieAnalysisProject(request, response, dataSet);
 
@@ -849,7 +851,6 @@ public class DataSetController extends AbstractSchemaConnController
 		final User user = WebUtils.getUser();
 
 		JsonValueDataSetEntity dataSet = preview.getDataSet();
-
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
@@ -866,9 +867,7 @@ public class DataSetController extends AbstractSchemaConnController
 		final User user = WebUtils.getUser();
 
 		JsonFileDataSetEntity dataSet = preview.getDataSet();
-
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
@@ -879,15 +878,14 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/previewExcel", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewExcel(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @RequestBody ExcelDataSetEntityPreview preview) throws Throwable
+			org.springframework.ui.Model springModel, @RequestBody ExcelDataSetEntityPreview preview,
+			@RequestParam("originalFileName") String originalFileName) throws Throwable
 	{
 		final User user = WebUtils.getUser();
 
 		ExcelDataSetEntity dataSet = preview.getDataSet();
-
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-
-		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
+		setDirectoryFileDataSetDirectory(dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -902,7 +900,6 @@ public class DataSetController extends AbstractSchemaConnController
 		final User user = WebUtils.getUser();
 
 		CsvValueDataSetEntity dataSet = preview.getDataSet();
-
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
@@ -919,9 +916,7 @@ public class DataSetController extends AbstractSchemaConnController
 		final User user = WebUtils.getUser();
 
 		CsvFileDataSetEntity dataSet = preview.getDataSet();
-
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-
 		setDirectoryFileDataSetDirectory(dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
@@ -937,9 +932,7 @@ public class DataSetController extends AbstractSchemaConnController
 		final User user = WebUtils.getUser();
 
 		HttpDataSetEntity dataSet = preview.getDataSet();
-
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-
 		dataSet.setHttpClient(getDataSetEntityService().getHttpClient());
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
@@ -1296,21 +1289,9 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private String originalFileName;
-
 		public ExcelDataSetEntityPreview()
 		{
 			super();
-		}
-
-		public String getOriginalFileName()
-		{
-			return originalFileName;
-		}
-
-		public void setOriginalFileName(String originalFileName)
-		{
-			this.originalFileName = originalFileName;
 		}
 	}
 

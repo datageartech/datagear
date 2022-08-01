@@ -39,7 +39,7 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}nameRow" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='dataSet.titleRowNumber.desc' />">
+					title="<@spring.message code='dataSet.nameRowNumber.desc' />">
 					<@spring.message code='titleRowNumber' />
 				</label>
 				<div class="field-input col-12 md:col-9">

@@ -13,7 +13,7 @@
 <#include "../include/html_head.ftl">
 <title>
 	<#include "../include/html_app_name_prefix.ftl">
-	<@spring.message code='module.dataSet.CsvFile' />
+	<@spring.message code='module.dataSet.Excel' />
 	<#include "../include/html_request_action_suffix.ftl">
 </title>
 </head>
@@ -25,6 +25,17 @@
 			<#include "include/dataSet_form_name.ftl">
 			<#include "include/dataSet_form_file_source.ftl">
 			<div class="field grid">
+				<label for="${pid}sheetIndex" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='excelDataSet.sheetIndex.desc' />">
+					<@spring.message code='sheetIndex' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-inputtext id="${pid}sheetIndex" v-model="pm.sheetIndex" type="text" class="input w-full"
+						name="sheetIndex" required maxlength="10">
+					</p-inputtext>
+				</div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}nameRow" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='dataSet.nameRowNumber.desc' />">
 					<@spring.message code='titleRowNumber' />
@@ -35,7 +46,38 @@
 					</p-inputtext>
 				</div>
 			</div>
-			<#include "include/dataSet_form_encoding.ftl">
+			<div class="field grid">
+				<label for="${pid}dataRowExp" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='excelDataSet.dataRowExp.desc' />">
+					<@spring.message code='dataRowRange' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-inputtext id="${pid}dataRowExp" v-model="pm.dataRowExp" type="text" class="input w-full"
+						name="dataRowExp" maxlength="100">
+					</p-inputtext>
+				</div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}dataColumnExp" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='excelDataSet.dataColumnExp.desc' />">
+					<@spring.message code='dataColumnRange' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-inputtext id="${pid}dataColumnExp" v-model="pm.dataColumnExp" type="text" class="input w-full"
+						name="dataColumnExp" maxlength="100">
+					</p-inputtext>
+				</div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}forceXls" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='forceXlsFormat' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-selectbutton v-model="pm.forceXls" :options="booleanOptions"
+						option-label="name" option-value="value" class="input w-full">
+					</p-selectbutton>
+				</div>
+			</div>
 			<#include "include/dataSet_form_param_property.ftl">
 		</div>
 		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
@@ -60,7 +102,7 @@
 	
 	po.previewUrl = function()
 	{
-		var url = "/dataSet/previewCsvFile";
+		var url = "/dataSet/previewExcel";
 		url = $.addParam(url, "originalFileName", po.originalFileName);
 		
 		return url;
@@ -72,8 +114,11 @@
 		fingerprint.fileName = dataSet.fileName;
 		fingerprint.dataSetResDirectoryId = dataSet.dataSetResDirectory.id;
 		fingerprint.dataSetResFileName = dataSet.dataSetResFileName;
+		fingerprint.sheetIndex = dataSet.sheetIndex;
 		fingerprint.nameRow = dataSet.nameRow;
-		fingerprint.encoding = dataSet.encoding;
+		fingerprint.dataRowExp = dataSet.dataRowExp;
+		fingerprint.dataColumnExp = dataSet.dataColumnExp;
+		fingerprint.forceXls = dataSet.forceXls;
 	};
 	
 	po.beforeSubmitForm = function(action)
@@ -93,6 +138,7 @@
 	{
 		rules:
 		{
+			"sheetIndex": {"integer": true},
 			"nameRow": {"integer": true},
 		},
 		invalidHandler: function()
