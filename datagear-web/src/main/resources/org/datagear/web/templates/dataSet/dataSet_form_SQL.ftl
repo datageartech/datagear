@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-SQL">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<div class="field grid">
@@ -30,15 +30,15 @@
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
 		        		<div class="p-input-icon-right flex-grow-1">
-			        		<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteSchema" v-if="!isReadonlyAction">
+			        		<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteSchema" v-if="!pm.isReadonlyAction">
 			        		</i>
-				        	<p-inputtext id="${pid}dataSource" v-model="pm.shmConFactory.schema.title" type="text" class="input w-full h-full border-noround-right"
+				        	<p-inputtext id="${pid}dataSource" v-model="fm.shmConFactory.schema.title" type="text" class="input w-full h-full border-noround-right"
 				        		readonly="readonly" name="shmConFactory.schema.title" required maxlength="200">
 				        	</p-inputtext>
 			        	</div>
 			        	<p-button type="button" label="<@spring.message code='select' />"
 			        		@click="onSelectSchema" class="p-button-secondary"
-			        		v-if="!isReadonlyAction">
+			        		v-if="!pm.isReadonlyAction">
 			        	</p-button>
 		        	</div>
 		        </div>
@@ -94,8 +94,8 @@
 	
 	po.getSqlEditorSchemaId = function()
 	{
-		var pm = po.vuePageModel();
-		return pm.shmConFactory.schema.id;
+		var fm = po.vueFormModel();
+		return fm.shmConFactory.schema.id;
 	};
 	
 	var formModel = <@writeJson var=formModel />;
@@ -123,27 +123,27 @@
 	{
 		onDeleteSchema: function()
 		{
-			var pm = po.vuePageModel();
-			pm.shmConFactory.schema = {};
+			var fm = po.vueFormModel();
+			fm.shmConFactory.schema = {};
 		},
 		
 		onSelectSchema: function()
 		{
 			po.handleOpenSelectAction("/schema/select", function(schema)
 			{
-				var pm = po.vuePageModel();
-				pm.shmConFactory.schema = schema;
+				var fm = po.vueFormModel();
+				fm.shmConFactory.schema = schema;
 			});
 		}
 	});
 	
 	po.vueMounted(function()
 	{
-		var pm = po.vuePageModel();
+		var fm = po.vueFormModel();
 		
 		po.codeEditor = po.createWorkspaceEditor(po.elementOfId("${pid}codeEditor"),
 							po.inflateSqlEditorOptions({ value: "" }));
-		po.setCodeTextTimeout(po.codeEditor, pm.sql);
+		po.setCodeTextTimeout(po.codeEditor, fm.sql);
 	});
 	
 	po.vueMount();

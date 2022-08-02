@@ -21,7 +21,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-Http">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<div class="field grid">
@@ -29,7 +29,7 @@
 					<@spring.message code='requestURI' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}uri" v-model="pm.uri" type="text" class="input w-full"
+					<p-inputtext id="${pid}uri" v-model="fm.uri" type="text" class="input w-full"
 		        		name="uri" required maxlength="1000">
 		        	</p-inputtext>
 				</div>
@@ -39,8 +39,8 @@
 					<@spring.message code='requestMethod' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-dropdown id="${pid}requestMethod" v-model="pm.requestMethod"
-						:options="tm.requestMethodOptions" option-label="name" option-value="value" class="input w-full">
+					<p-dropdown id="${pid}requestMethod" v-model="fm.requestMethod"
+						:options="pm.requestMethodOptions" option-label="name" option-value="value" class="input w-full">
 					</p-dropdown>
 				</div>
 			</div>
@@ -50,8 +50,8 @@
 					<@spring.message code='requestBodyType' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-dropdown id="${pid}requestContentType" v-model="pm.requestContentType"
-						:options="tm.requestContentTypeOptions" option-label="name" option-value="value" class="input w-full">
+					<p-dropdown id="${pid}requestContentType" v-model="fm.requestContentType"
+						:options="pm.requestContentTypeOptions" option-label="name" option-value="value" class="input w-full">
 					</p-dropdown>
 				</div>
 			</div>
@@ -60,8 +60,8 @@
 					<@spring.message code='requestBodyEncoding' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-dropdown id="${pid}requestContentCharset" v-model="pm.requestContentCharset"
-						:options="tm.requestContentCharsetOptions" class="input w-full">
+					<p-dropdown id="${pid}requestContentCharset" v-model="fm.requestContentCharset"
+						:options="pm.requestContentCharsetOptions" class="input w-full">
 					</p-dropdown>
 				</div>
 			</div>
@@ -98,8 +98,8 @@
 					<@spring.message code='responseBodyType' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-dropdown id="${pid}responseContentType" v-model="pm.responseContentType"
-						:options="tm.responseContentTypeOptions" option-label="name" option-value="value" class="input w-full">
+					<p-dropdown id="${pid}responseContentType" v-model="fm.responseContentType"
+						:options="pm.responseContentTypeOptions" option-label="name" option-value="value" class="input w-full">
 					</p-dropdown>
 				</div>
 			</div>
@@ -109,7 +109,7 @@
 					<@spring.message code='responseJsonPath' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}responseDataJsonPath" v-model="pm.responseDataJsonPath" type="text" class="input w-full"
+					<p-inputtext id="${pid}responseDataJsonPath" v-model="fm.responseDataJsonPath" type="text" class="input w-full"
 						name="responseDataJsonPath" maxlength="200">
 					</p-inputtext>
 				</div>
@@ -177,7 +177,7 @@
 		}
 	});
 	
-	po.vueTmpModel(
+	po.vuePageModel(
 	{
 		requestMethodOptions:
 		[
@@ -201,15 +201,15 @@
 	
 	po.vueMounted(function()
 	{
-		var pm = po.vuePageModel();
+		var fm = po.vueFormModel();
 		
 		po.requestContentEditor = po.createWorkspaceEditor(po.elementOfId("${pid}requestContentEditor"),
 									{mode: {name: "javascript", json: true}});
-		po.setCodeTextTimeout(po.requestContentEditor, pm.requestContent);
+		po.setCodeTextTimeout(po.requestContentEditor, fm.requestContent);
 
 		po.headerContentEditor = po.createWorkspaceEditor(po.elementOfId("${pid}headerContentEditor"),
 									{mode: {name: "javascript", json: true}});
-		po.setCodeTextTimeout(po.headerContentEditor, pm.headerContent);
+		po.setCodeTextTimeout(po.headerContentEditor, fm.headerContent);
 	});
 	
 	po.vueMount();

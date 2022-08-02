@@ -17,11 +17,14 @@
 		return (val == true || val == "true" ? "<@spring.message code='true' />" : "<@spring.message code='false' />");
 	};
 	
-	po.vueRef("booleanOptions",
-	[
-		{name: "<@spring.message code='true' />", value: true},
-		{name: "<@spring.message code='false' />", value: false}
-	]);
+	po.vuePageModel(
+	{
+		booleanOptions:
+		[
+			{name: "<@spring.message code='true' />", value: true},
+			{name: "<@spring.message code='false' />", value: false}
+		]
+	});
 })
 (${pid});
 </script>

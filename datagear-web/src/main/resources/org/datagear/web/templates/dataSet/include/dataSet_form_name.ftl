@@ -18,7 +18,7 @@ page_boolean_options.ftl
 		<@spring.message code='name' />
 	</label>
 	<div class="field-input col-12 md:col-9">
-		<p-inputtext id="${pid}name" v-model="pm.name" type="text" class="input w-full"
+		<p-inputtext id="${pid}name" v-model="fm.name" type="text" class="input w-full"
 			name="name" required maxlength="100" autofocus>
 		</p-inputtext>
 	</div>
@@ -29,7 +29,7 @@ page_boolean_options.ftl
 		<@spring.message code='isMutableModel' />
 	</label>
 	<div class="field-input col-12 md:col-9">
-		<p-selectbutton v-model="pm.mutableModel" :options="booleanOptions"
+		<p-selectbutton v-model="fm.mutableModel" :options="pm.booleanOptions"
 			option-label="name" option-value="value" class="input w-full">
 		</p-selectbutton>
 	</div>
@@ -41,15 +41,15 @@ page_boolean_options.ftl
 	<div class="field-input col-12 md:col-9">
 		<div class="p-inputgroup">
 			<div class="p-input-icon-right flex-grow-1">
-				<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteAnalysisProject" v-if="!isReadonlyAction">
+				<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteAnalysisProject" v-if="!pm.isReadonlyAction">
 				</i>
-				<p-inputtext id="${pid}ownerProject" v-model="pm.analysisProject.name" type="text" class="input w-full h-full border-noround-right"
+				<p-inputtext id="${pid}ownerProject" v-model="fm.analysisProject.name" type="text" class="input w-full h-full border-noround-right"
 					readonly="readonly" name="analysisProject.name" maxlength="200">
 				</p-inputtext>
 			</div>
 			<p-button type="button" label="<@spring.message code='select' />"
 				@click="onSelectAnalysisProject" class="p-button-secondary"
-				v-if="!isReadonlyAction">
+				v-if="!pm.isReadonlyAction">
 			</p-button>
 		</div>
 	</div>
@@ -61,16 +61,16 @@ page_boolean_options.ftl
 	{
 		onDeleteAnalysisProject: function()
 		{
-			var pm = po.vuePageModel();
-			pm.analysisProject = {};
+			var fm = po.vueFormModel();
+			fm.analysisProject = {};
 		},
 		
 		onSelectAnalysisProject: function()
 		{
 			po.handleOpenSelectAction("/analysisProject/select", function(analysisProject)
 			{
-				var pm = po.vuePageModel();
-				pm.analysisProject = analysisProject;
+				var fm = po.vueFormModel();
+				fm.analysisProject = analysisProject;
 			});
 		}
 	});

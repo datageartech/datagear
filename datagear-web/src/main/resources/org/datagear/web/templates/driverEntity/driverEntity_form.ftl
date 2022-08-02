@@ -20,14 +20,14 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}displayName" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='name' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}displayName" v-model="pm.displayName" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}displayName" v-model="fm.displayName" type="text" class="input w-full"
 		        		name="displayName" required maxlength="200" autofocus>
 		        	</p-inputtext>
 		        </div>
@@ -39,15 +39,15 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}driverLibrary" class="input p-component p-inputtext w-full overflow-auto" style="height:8rem;">
-		        		<p-chip v-for="dlf in driverLibraryFiles.files" :key="dlf.key"
-		        			class="mb-2" :removable="!isReadonlyAction" @remove="onRemovedLibraryFile($event, dlf.name)">
+		        		<p-chip v-for="dlf in pm.driverLibraryFiles.files" :key="dlf.key"
+		        			class="mb-2" :removable="!pm.isReadonlyAction" @remove="onRemovedLibraryFile($event, dlf.name)">
 		        			<a :href="genDownloadLibraryPath(dlf.name)" target="_blank" class="link">
 		        				{{dlf.name+' ('+dlf.size+')'}}
 		        			</a>
 		        		</p-chip>
 		        	</div>
-		        	<div class="fileupload-wrapper mt-1" v-if="!isReadonlyAction">
-			        	<p-fileupload mode="basic" name="file" :url="uploadFileUrl"
+		        	<div class="fileupload-wrapper mt-1" v-if="!pm.isReadonlyAction">
+			        	<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
 			        		@upload="onUploadedLibraryFile" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
 			        		:auto="true" choose-label="<@spring.message code='upload' />" class="p-button-secondary">
 			        	</p-fileupload>
@@ -64,7 +64,7 @@
 					<@spring.message code='driverClassName' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}driverClassName" v-model="pm.driverClassName" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}driverClassName" v-model="fm.driverClassName" type="text" class="input w-full"
 		        		name="driverClassName" required maxlength="500">
 		        	</p-inputtext>
 		        </div>
@@ -74,7 +74,7 @@
 					<@spring.message code='desc' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-textarea id="${pid}displayDesc" v-model="pm.displayDesc" rows="6" class="input w-full"
+		        	<p-textarea id="${pid}displayDesc" v-model="fm.displayDesc" rows="6" class="input w-full"
 		        		name="displayDesc" maxlength="500">
 		        	</p-textarea>
 		        </div>
@@ -93,9 +93,9 @@
 	
 	po.refreshDriverLibrary = function()
 	{
-		var pm = po.vuePageModel();
+		var fm = po.vueFormModel();
 		
-		po.getJson("/driverEntity/listDriverFile", {"id": pm.id}, function(fileInfos)
+		po.getJson("/driverEntity/listDriverFile", {"id": fm.id}, function(fileInfos)
 		{
 			po.setDriverLibrary(fileInfos);
 		});
@@ -105,10 +105,10 @@
 	
 	po.setDriverLibrary = function(files)
 	{
-		var driverLibraryFiles = po.vueReactive("driverLibraryFiles");
+		var pm = po.vuePageModel();
 		
 		if(!files)
-			files = po.vueRaw(driverLibraryFiles.files);
+			files = po.vueRaw(pm.driverLibraryFiles.files);
 		
 		var seq = po.driverLibraryKeySeq++;
 		$.each(files, function(idx, file)
@@ -116,15 +116,15 @@
 			file.key = file.name + seq;
 		});
 		
-		driverLibraryFiles.files = files;
+		pm.driverLibraryFiles.files = files;
 	};
 	
 	po.beforeSubmitForm = function(action)
 	{
+		var pm = po.vuePageModel();
 		var newData = { driverEntity: action.options.data, driverLibraryFileNames: [] };
 		
-		var driverLibraryFiles = po.vueReactive("driverLibraryFiles");
-		var dlfs = driverLibraryFiles.files;
+		var dlfs = pm.driverLibraryFiles.files;
 		for(var i=0; i<dlfs.length; i++)
 			newData.driverLibraryFileNames.push(dlfs[i].name);
 		
@@ -135,39 +135,42 @@
 	formModel = $.unescapeHtmlForJson(formModel);
 	po.setupForm(formModel);
 	
-	po.vueReactive("driverLibraryFiles", { files: [] });
-	po.vueRef("uploadFileUrl", po.concatContextPath("/driverEntity/uploadDriverFile?id="+formModel.id));
+	po.vuePageModel(
+	{
+		driverLibraryFiles: { files: [] },
+		uploadFileUrl: po.concatContextPath("/driverEntity/uploadDriverFile?id="+formModel.id)
+	});
 	
 	po.vueMethod(
 	{
 		genDownloadLibraryPath: function(name)
 		{
-			var pm = po.vuePageModel();
-			return po.concatContextPath("/driverEntity/downloadDriverFile?id="+encodeURIComponent(pm.id)+"&file="+encodeURIComponent(name));
+			var fm = po.vueFormModel();
+			return po.concatContextPath("/driverEntity/downloadDriverFile?id="+encodeURIComponent(fm.id)+"&file="+encodeURIComponent(name));
 		},
 		
 		onUploadedLibraryFile: function(e)
 		{
-			var pm = po.vuePageModel();
+			var fm = po.vueFormModel();
 			var response = $.getResponseJson(e.xhr);
 			
 			po.uploadFileOnUploaded(e);
 			po.setDriverLibrary(response.fileInfos);
 			
 			var driverClassNames = response.driverClassNames;
-			if(!pm.driverClassName && driverClassNames && driverClassNames[0])
-				pm.driverClassName = driverClassNames[0];
+			if(!fm.driverClassName && driverClassNames && driverClassNames[0])
+				fm.driverClassName = driverClassNames[0];
 		},
 		
 		onRemovedLibraryFile: function(e, name)
 		{
 			po.confirmDelete(function()
 			{
-				var pm = po.vuePageModel();
+				var fm = po.vueFormModel();
 				
 				po.ajax("/driverEntity/deleteDriverFile",
 				{
-					data: {id: pm.id, file: name},
+					data: {id: fm.id, file: name},
 					tipSuccess: false,
 					success: function(response)
 					{

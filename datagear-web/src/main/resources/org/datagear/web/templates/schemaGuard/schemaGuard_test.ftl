@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}url" class="field-label col-12 mb-2 md:col-3 md:mb-0"
@@ -29,7 +29,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
-			        	<p-inputtext id="${pid}url" v-model="pm.url" type="text" class="input"
+			        	<p-inputtext id="${pid}url" v-model="fm.url" type="text" class="input"
 			        		name="url" required maxlength="2000" placeholder="jdbc:">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='help' />" @click="onBuildSchemaUrl"
@@ -43,12 +43,12 @@
 			<p-button type="submit" label="<@spring.message code='test' />"></p-button>
 		</div>
 		<div class="page-form-foot flex-grow-0 pt-3 text-center" style="min-height:6.2rem;">
-			<div class="p-component py-1">{{testResult.url}}</div>
+			<div class="p-component py-1">{{pm.testResult.url}}</div>
 			<div class="p-component py-1">
-				<p-inlinemessage severity="success" v-if="testResult.result=='true'">
+				<p-inlinemessage severity="success" v-if="pm.testResult.result=='true'">
 					<@spring.message code='creationPermitted' />
 				</p-inlinemessage>
-				<p-inlinemessage severity="error" v-if="testResult.result=='false'">
+				<p-inlinemessage severity="error" v-if="pm.testResult.result=='false'">
 					<@spring.message code='creationDenied' />
 				</p-inlinemessage>
 			</div>
@@ -61,7 +61,10 @@
 {
 	po.submitUrl = "/schemaGuard/"+po.submitAction;
 	
-	po.vueRef("testResult", {});
+	po.vuePageModel(
+	{
+		testResult: {}
+	});
 	
 	po.setupForm({ url: "" },
 	{
@@ -69,8 +72,10 @@
 		closeAfterSubmit: false,
 		success: function(response)
 		{
+			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
-			po.vueRef("testResult", {url: pm.url, result: (response.data ? "true" : "false")});
+			
+			pm.testResult = {url: fm.url, result: (response.data ? "true" : "false")};
 		}
 	},
 	{
@@ -84,18 +89,18 @@
 	{
 		onBuildSchemaUrl: function()
 		{
-			var pm = po.vuePageModel();
+			var fm = po.vueFormModel();
 			
 			po.open("/schemaUrlBuilder/build",
 			{
-				data: {url: pm.url},
+				data: {url: fm.url},
 				contentType: $.CONTENT_TYPE_FORM,
 				pageParam:
 				{
 					submitSuccess: function(url)
 					{
-						var pm = po.vuePageModel();
-						pm.url = url;
+						var fm = po.vueFormModel();
+						fm.url = url;
 					}
 				}
 			});

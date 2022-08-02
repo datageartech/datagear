@@ -31,10 +31,13 @@ String action
 	
 	po.setupAction = function()
 	{
-		po.vueRef("action", po.action);
-		po.vueRef("isQueryAction", po.isQueryAction);
-		po.vueRef("isSelectAction", po.isSelectAction);
-		po.vueRef("isMultipleSelect", po.isMultipleSelect);
+		po.vuePageModel(
+		{
+			action: po.action,
+			isQueryAction: po.isQueryAction,
+			isSelectAction: po.isSelectAction,
+			isMultipleSelect: po.isMultipleSelect
+		});
 	};
 	
 	//单选处理函数

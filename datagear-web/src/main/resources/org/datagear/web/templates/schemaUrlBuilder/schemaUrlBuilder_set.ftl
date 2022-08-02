@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-schema-ub">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="grid grid-nogutter">
 				<div class="col-8">
@@ -94,7 +94,7 @@
 	{
 		onPreview: function()
 		{
-			var pm = po.vuePageModel();
+			var fm = po.vueFormModel();
 			
 			po.open("/schemaUrlBuilder/preview",
 			{
@@ -108,7 +108,7 @@
 	
 	po.vueMounted(function()
 	{
-		var pm = po.vuePageModel();
+		var fm = po.vueFormModel();
 		
 		var codeEditorOptions =
 		{
@@ -120,7 +120,7 @@
 		};
 		
 		po.codeEditor = po.createCodeEditor(po.elementOfId("${pid}codeEditor"), codeEditorOptions);
-		po.setCodeTextTimeout(po.codeEditor, pm.code, true);
+		po.setCodeTextTimeout(po.codeEditor, fm.code, true);
 	});
 	
 	po.vueMount();

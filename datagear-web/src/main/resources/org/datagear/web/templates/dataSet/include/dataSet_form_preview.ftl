@@ -17,7 +17,7 @@
 	@click="onPreview" class="p-button-secondary">
 </p-button>
 <p-overlaypanel ref="previewPanelEle" append-to="body"
-	:show-close-icon="true" id="${pid}previewPanel" :class="{'opacity-0': !tm.previewPanelShow}">
+	:show-close-icon="true" id="${pid}previewPanel" :class="{'opacity-0': !pm.previewPanelShow}">
 	<div class="flex flex-column">
 		<div class="flex-grow-0 mb-2">
 			<label class="text-lg font-bold">
@@ -26,21 +26,21 @@
 		</div>
 		<div class="flex-grow-1">
 			<div style="width:50vw;height:50vh;">
-				<p-datatable :value="tm.previewResultDatas" :scrollable="true" scroll-height="flex"
-					striped-rows class="table-sm" v-if="!tm.previewError">
-					<p-column v-for="col in tm.previewColumns"
+				<p-datatable :value="pm.previewResultDatas" :scrollable="true" scroll-height="flex"
+					striped-rows class="table-sm" v-if="!pm.previewError">
+					<p-column v-for="col in pm.previewColumns"
 						:field="col.name" :header="col.label" :sortable="false" :style="col.style"
 						:key="col.name">
 					</p-column>
 				</p-datatable>
-				<p-textarea v-model="tm.previewTplResult" class="overflow-auto p-invalid w-full h-full" readonly
-					v-if="tm.previewError">
+				<p-textarea v-model="pm.previewTplResult" class="overflow-auto p-invalid w-full h-full" readonly
+					v-if="pm.previewError">
 				</p-textarea>
 			</div>
 			<div class="flex flex-row mt-2">
 				<div class="flex-grow-1 flex justify-content-start">
 					<div class="p-inputgroup" style="max-width:10rem">
-						<p-inputtext v-model="tm.previewQuery.resultFetchSize" type="text" class="input p-inputtext-sm"
+						<p-inputtext v-model="pm.previewQuery.resultFetchSize" type="text" class="input p-inputtext-sm"
 							maxlength="10" @keydown.enter="submitPreview" title="<@spring.message code='fetchSize' />">
 						</p-inputtext>
 						<p-button icon="pi pi-search" type="button" class="p-button-secondary p-button-sm"
@@ -48,14 +48,14 @@
 						</p-button>
 					</div>
 				</div>
-				<div class="flex-grow-1 flex justify-content-end" v-if="!tm.previewError">
+				<div class="flex-grow-1 flex justify-content-end" v-if="!pm.previewError">
 					<p-button icon="pi pi-comment" type="button"
 						aria:haspopup="true" aria-controls="${pid}previewTplResultPanel"
 						@click="togglePreviewTplResultPanel" class="p-button-secondary p-button-sm">
 					</p-button>
 					<p-overlaypanel ref="previewTplResultEle" append-to="body"
 						:show-close-icon="true" id="${pid}previewTplResultPanel">
-						<p-textarea v-model="tm.previewTplResult" class="overflow-auto"
+						<p-textarea v-model="pm.previewTplResult" class="overflow-auto"
 							readonly style="width:30vw;height:30vh;">
 						</p-textarea>
 					</p-overlaypanel>
@@ -131,8 +131,8 @@
 				po.handlePreviewError(jqXHR);
 			};
 			
-			var tm = po.vueTmpModel();
-			var previewQuery = tm.previewQuery;
+			var pm = po.vuePageModel();
+			var previewQuery = pm.previewQuery;
 			po.trimPreviewQueryFetchSize(previewQuery);
 			
 			action.options.data = { dataSet: action.options.data, query: po.vueRaw(previewQuery) };
@@ -163,40 +163,40 @@
 	{
 		po._isPreviewSuccess = true;
 		
+		var fm = po.vueFormModel();
 		var pm = po.vuePageModel();
-		var tm = po.vueTmpModel();
 		
-		tm.previewError = false;
-		tm.previewPanelShow = true;
+		pm.previewError = false;
+		pm.previewPanelShow = true;
 		
-		if(!pm.mutableModel && pm.properties.length == 0)
+		if(!fm.mutableModel && fm.properties.length == 0)
 		{
-			pm.properties = response.properties;
+			fm.properties = response.properties;
 			
 			if(po._prevPreviewFingerprint)
 				po._prevPreviewFingerprint.properties = $.extend(true, [], response.properties);
 		}
 		
 		var previewColumns = [];
-		$.each(pm.properties, function(i, p)
+		$.each(fm.properties, function(i, p)
 		{
 			previewColumns.push({ name: p.name, label: p.name, style: "" });	
 		});
 		
 		var columnAllFieldName = null;
-		if(pm.mutableModel)
+		if(fm.mutableModel)
 		{
 			columnAllFieldName = $.uid();
 			previewColumns.push({ name: columnAllFieldName, label: "<@spring.message code='dataSet.mutableModelDataDetail' />", style: "min-width:25rem;" });
 		}
 		
-		tm.previewColumns = previewColumns;
-		tm.previewResultDatas = $.wrapAsArray(response.result && response.result.data ? response.result.data : []);
-		tm.previewTplResult = response.templateResult;
+		pm.previewColumns = previewColumns;
+		pm.previewResultDatas = $.wrapAsArray(response.result && response.result.data ? response.result.data : []);
+		pm.previewTplResult = response.templateResult;
 		
-		if(pm.mutableModel)
+		if(fm.mutableModel)
 		{
-			$.each(tm.previewResultDatas, function(idx, rd)
+			$.each(pm.previewResultDatas, function(idx, rd)
 			{
 				rd[columnAllFieldName] = $.toJsonString(rd);
 			});
@@ -207,13 +207,13 @@
 	{
 		po._isPreviewSuccess = false;
 		
-		var tm = po.vueTmpModel();
+		var pm = po.vuePageModel();
 		
-		tm.previewError = true;
-		tm.previewPanelShow = true;
+		pm.previewError = true;
+		pm.previewPanelShow = true;
 		
 		var er = $.getResponseJson(jqXHR);
-		tm.previewTplResult = er.data;
+		pm.previewTplResult = er.data;
 	};
 	
 	po.handlePreviewInvalidForm = function()
@@ -254,14 +254,14 @@
 	po.inflatePreviewParamPanel = function()
 	{
 		var wrapper = $(".preview-param-form-wrapper", po.elementOfId("${pid}previewParamPanel", document.body));
-		var tm = po.vueTmpModel();
+		var pm = po.vuePageModel();
 		
 		var formOptions = $.extend(
 		{
 			submitText: "<@spring.message code='preview' />",
 			yesText: "<@spring.message code='yes' />",
 			noText: "<@spring.message code='no' />",
-			paramValues: po.vueRaw(tm.previewQuery.paramValues),
+			paramValues: po.vueRaw(pm.previewQuery.paramValues),
 			render: function()
 			{
 				$("select, input[type='text'], textarea", this).addClass("p-inputtext p-component w-full");
@@ -269,7 +269,7 @@
 			},
 			submit: function()
 			{
-				tm.previewQuery.paramValues = chartFactory.chartSetting.getDataSetParamValueObj(this);
+				pm.previewQuery.paramValues = chartFactory.chartSetting.getDataSetParamValueObj(this);
 				
 				po.inParamFormSubmitAction(true);
 				po.triggerPreview();
@@ -279,13 +279,13 @@
 		chartFactory.chartSetting.removeDatetimePickerRoot();
 		wrapper.empty();
 		
-		var pm = po.vuePageModel();
-		var params = $.extend(true, [], po.vueRaw(pm).params);
+		var fm = po.vueFormModel();
+		var params = $.extend(true, [], po.vueRaw(fm).params);
 		
 		chartFactory.chartSetting.renderDataSetParamValueForm(wrapper, params, formOptions);
 	};
 	
-	po.vueTmpModel(
+	po.vuePageModel(
 	{
 		//XXX 临时保存事件对象，在ajax响应后再打开面板会报错，所以采用先透明打开再显现的方案
 		previewPanelShow: false,
@@ -308,13 +308,13 @@
 		},
 		onPreview: function(e)
 		{
-			var pm = po.vuePageModel();
+			var fm = po.vueFormModel();
 			
-			if(pm.params.length == 0 || po.inParamFormSubmitAction())
+			if(fm.params.length == 0 || po.inParamFormSubmitAction())
 			{
-				var tm = po.vueTmpModel();
-				tm.previewPanelShow = false;
-				po.trimPreviewQueryFetchSize(tm.previewQuery);
+				var pm = po.vuePageModel();
+				pm.previewPanelShow = false;
+				po.trimPreviewQueryFetchSize(pm.previewQuery);
 				
 				po.vueUnref("previewPanelEle").show(e);
 				po.submitPreview();
@@ -344,8 +344,8 @@
 
 	po.vueMounted(function()
 	{
-		var pm = po.vuePageModel();
-		po._prevPreviewFingerprint = po.toPreviewFingerprint(po.vueRaw(pm));
+		var fm = po.vueFormModel();
+		po._prevPreviewFingerprint = po.toPreviewFingerprint(po.vueRaw(fm));
 	});
 })
 (${pid});

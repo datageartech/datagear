@@ -34,7 +34,7 @@
 									<@spring.message code='username' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-inputtext id="${pid}name" v-model="pm.user.name" type="text" class="input w-full"
+						        	<p-inputtext id="${pid}name" v-model="fm.user.name" type="text" class="input w-full"
 						        		name="name" required maxlength="20">
 						        	</p-inputtext>
 						        </div>
@@ -44,7 +44,7 @@
 									<@spring.message code='password' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-password id="${pid}password" v-model="pm.user.password" class="input w-full"
+						        	<p-password id="${pid}password" v-model="fm.user.password" class="input w-full"
 						        		input-class="w-full" toggle-mask :feedback="false"
 						        		name="password" required maxlength="50" autocomplete="new-password">
 						        	</p-password>
@@ -55,7 +55,7 @@
 									<@spring.message code='confirmPassword' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-password id="${pid}confirmPassword" v-model="pm.user.confirmPassword" class="input w-full"
+						        	<p-password id="${pid}confirmPassword" v-model="fm.user.confirmPassword" class="input w-full"
 						        		input-class="w-full" toggle-mask :feedback="false"
 						        		name="confirmPassword" required maxlength="50" autocomplete="new-password">
 						        	</p-password>
@@ -66,7 +66,7 @@
 									<@spring.message code='realName' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-inputtext id="${pid}realName" v-model="pm.user.realName" type="text" class="input w-full"
+						        	<p-inputtext id="${pid}realName" v-model="fm.user.realName" type="text" class="input w-full"
 						        		name="realName" maxlength="50">
 						        	</p-inputtext>
 						        </div>
@@ -76,7 +76,7 @@
 									<@spring.message code='checkCode' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-inputtext id="${pid}checkCode" v-model="pm.checkCode" type="text" class="input w-6"
+						        	<p-inputtext id="${pid}checkCode" v-model="fm.checkCode" type="text" class="input w-6"
 						        		name="checkCode" required maxlength="10">
 						        	</p-inputtext>
 						        	<img class="checkCodeImg ml-1 vertical-align-middle" style="height:1.5rem;" />

@@ -26,14 +26,14 @@
 	<div class="builtInJson hidden">
 		${builtInBuildersJson!''}
 	</div>
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}dbType" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='dbType' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-dropdown v-model="pm.dbType" :options="dbTypeDropdownItems" option-label="dbType" option-value="dbType"
+		        	<p-dropdown v-model="fm.dbType" :options="pm.dbTypeDropdownItems" option-label="dbType" option-value="dbType"
 		        		option-group-label="label" option-group-children="items" @change="onDbTypeChange" class="input w-full">
 		        	</p-dropdown>
 		        	<div class="validate-msg">
@@ -46,7 +46,7 @@
 					<@spring.message code='hostNameOrIp' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}host" v-model="pm.host" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}host" v-model="fm.host" type="text" class="input w-full"
 		        		name="host" maxlength="200">
 		        	</p-inputtext>
 		        </div>
@@ -56,7 +56,7 @@
 					<@spring.message code='port' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}port" v-model="pm.port" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}port" v-model="fm.port" type="text" class="input w-full"
 		        		name="port" maxlength="20">
 		        	</p-inputtext>
 		        </div>
@@ -66,7 +66,7 @@
 					<@spring.message code='schemaName' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}name" v-model="pm.name" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}name" v-model="fm.name" type="text" class="input w-full"
 		        		name="name" maxlength="500">
 		        	</p-inputtext>
 		        </div>
@@ -75,8 +75,8 @@
 		<div class="page-form-foot flex-grow-0 pt-3 text-center">
 			<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center" v-if="isPreviewAction">
-			<p-inputtext id="${pid}previewResult" v-model="pm.previewResult" type="text" class="input w-8 text-center"
+		<div class="page-form-foot flex-grow-0 pt-3 text-center" v-if="pm.isPreviewAction">
+			<p-inputtext id="${pid}previewResult" v-model="fm.previewResult" type="text" class="input w-8 text-center"
         		placeholder="<@spring.message code='previewResult' />" name="previewResult" maxlength="2000">
         	</p-inputtext>
 		</div>
@@ -128,11 +128,11 @@
 	
 	po.submitForm = function()
 	{
-		var pm = po.vuePageModel();
-		var url = $.schemaUrlBuilder.build(pm.dbType, pm);
+		var fm = po.vueFormModel();
+		var url = $.schemaUrlBuilder.build(fm.dbType, fm);
 		
 		if(po.isPreviewAction)
-			pm.previewResult = url;
+			fm.previewResult = url;
 		po.defaultSubmitSuccessCallback({ data: url }, !po.isPreviewAction);
 	};
 	
@@ -146,18 +146,21 @@
 	};
 	po.setupForm(formModel);
 	
-	po.vueRef("isPreviewAction", po.isPreviewAction);
-	po.vueRef("dbTypeDropdownItems",
-	[
-		{
-			label: "<@spring.message code='common' />",
-			items: topBuilders
-		},
-		{
-			label: "<@spring.message code='all' />",
-			items: allBuilders
-		}
-	]);
+	po.vuePageModel(
+	{
+		isPreviewAction: po.isPreviewAction,
+		dbTypeDropdownItems:
+		[
+			{
+				label: "<@spring.message code='common' />",
+				items: topBuilders
+			},
+			{
+				label: "<@spring.message code='all' />",
+				items: allBuilders
+			}
+		]
+	});
 	
 	po.vueMethod(
 	{
@@ -166,13 +169,13 @@
 			var dbType = e.value;
 			var dftValue = $.schemaUrlBuilder.defaultValue(dbType);
 			
-			var pm = po.vuePageModel();
-			if(!pm.host)
-				pm.host = (dftValue.host || "");
-			if(!pm.port)
-				pm.port = (dftValue.port || "");
-			if(!pm.name)
-				pm.name = (dftValue.name || "");
+			var fm = po.vueFormModel();
+			if(!fm.host)
+				fm.host = (dftValue.host || "");
+			if(!fm.port)
+				fm.port = (dftValue.port || "");
+			if(!fm.name)
+				fm.name = (dftValue.name || "");
 		}
 	});
 	

@@ -34,7 +34,7 @@
 									<@spring.message code='username' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-inputtext id="${pid}name" v-model="pm.name" type="text" class="input w-full"
+						        	<p-inputtext id="${pid}name" v-model="fm.name" type="text" class="input w-full"
 						        		name="name" required maxlength="20">
 						        	</p-inputtext>
 						        </div>
@@ -44,18 +44,18 @@
 									<@spring.message code='password' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-password id="${pid}password" v-model="pm.password" toggle-mask :feedback="false"
+						        	<p-password id="${pid}password" v-model="fm.password" toggle-mask :feedback="false"
 						        		input-class="w-full" class="input w-full"
 						        		name="password" required maxlength="50">
 						        	</p-password>
 						        </div>
 							</div>
-							<div class="field grid" v-if="!disableLoginCheckCode">
+							<div class="field grid" v-if="!pm.disableLoginCheckCode">
 								<label for="${pid}checkCode" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 									<@spring.message code='checkCode' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-inputtext id="${pid}checkCode" v-model="pm.checkCode" type="text" class="input w-6"
+						        	<p-inputtext id="${pid}checkCode" v-model="fm.checkCode" type="text" class="input w-6"
 						        		name="checkCode" required maxlength="10">
 						        	</p-inputtext>
 						        	<img class="checkCodeImg ml-1 vertical-align-middle" style="height:1.5rem;" />
@@ -66,12 +66,12 @@
 							<p-button type="submit" label="<@spring.message code='login' />"></p-button>
 						</div>
 						<div class="page-form-foot flex-grow-0 pt-3 text-right text-color-secondary">
-							<p-checkbox id="${pid}remremberLogin" v-model="pm.rememberMe" :binary="true" name="remremberLogin"></p-checkbox>
+							<p-checkbox id="${pid}remremberLogin" v-model="fm.rememberMe" :binary="true" name="remremberLogin"></p-checkbox>
 							<label for="${pid}remremberLogin" class="ml-1"><@spring.message code='remremberLogin' /></label>
 							
 							<a href="${contextPath}/resetPassword" class="link ml-3"><@spring.message code='forgetPassword' /></a>
 						</div>
-						<div class="page-form-foot flex-grow-0 pt-3 text-right text-color-secondary" v-if="!disableRegister">
+						<div class="page-form-foot flex-grow-0 pt-3 text-right text-color-secondary" v-if="!pm.disableRegister">
 							<a href="${contextPath}/register" class="link ml-3"><@spring.message code='module.register' /></a>
 						</div>
 					</form>
@@ -90,9 +90,12 @@
 	po.disableLoginCheckCode = ("${(configProperties.disableLoginCheckCode)?string('true','false')}" == "true");
 	po.disableRegister = ("${(configProperties.disableRegister)?string('true','false')}" == "true");
 	
-	po.vueRef("disableLoginCheckCode", po.disableLoginCheckCode);
-	po.vueRef("disableRegister", po.disableRegister);
-
+	po.vuePageModel(
+	{
+		disableLoginCheckCode: po.disableLoginCheckCode,
+		disableRegister: po.disableRegister
+	});
+	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
 	po.setupForm(formModel,

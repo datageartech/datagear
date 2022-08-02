@@ -24,15 +24,18 @@ String action
 	po.isReadonlyAction = (po.isViewAction);
 	po.submitAction = "${submitAction!'#'}";
 	
-	/*需实现*/
-	//po.submitUrl = function(){ return "..."; }
-	//或
-	//po.submitUrl = "...";
+	/*需实现，字符串、函数*/
 	po.submitUrl = "#";
 	
 	po.form = function()
 	{
 		return po.element("form");
+	};
+	
+	//获取/填充并返回vue表单模型，在vue页面中可以"fm.*"访问模型中的属性
+	po.vueFormModel = function(obj)
+	{
+		return this.vueReactive("fm", obj);
 	};
 	
 	po.setupForm = function(data, ajaxOptions, validateOptions)
@@ -41,13 +44,16 @@ String action
 		ajaxOptions = (ajaxOptions || {});
 		validateOptions = (validateOptions || {});
 		
-		po.vueRef("action", po.action);
-		po.vueRef("isAddAction", po.isAddAction);
-		po.vueRef("isEditAction", po.isEditAction);
-		po.vueRef("isViewAction", po.isViewAction);
-		po.vueRef("isReadonlyAction", po.isReadonlyAction);
+		po.vuePageModel(
+		{
+			action: po.action,
+			isAddAction: po.isAddAction,
+			isEditAction: po.isEditAction,
+			isViewAction: po.isViewAction,
+			isReadonlyAction: po.isReadonlyAction
+		});
 		
-		var pm = po.vuePageModel(data);
+		var fm = po.vueFormModel(data);
 		
 		po.vueMounted(function()
 		{
@@ -69,10 +75,10 @@ String action
 			},
 			validateOptions);
 			
-			po.form().validateForm(pm, validateOptions);
+			po.form().validateForm(fm, validateOptions);
 		});
 		
-		return pm;
+		return fm;
 	};
 	
 	po.submitForm = function(url, options)
@@ -80,13 +86,13 @@ String action
 		if(po.isViewAction || url == "#")
 			return;
 		
-		var pm = po.vuePageModel();
+		var fm = po.vueFormModel();
 		options = $.extend(true,
 		{
 			defaultSuccessCallback: true,
 			closeAfterSubmit: true
 		},
-		options, { data: po.vueRaw(pm) });
+		options, { data: po.vueRaw(fm) });
 		
 		var successHandlers = (options.success ? [].concat(options.success) : []);
 		successHandlers.push(function(response)

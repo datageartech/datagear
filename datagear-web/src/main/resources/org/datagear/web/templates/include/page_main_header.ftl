@@ -31,9 +31,9 @@ User currentUser
 					</#if>
 				</div>
 				<div>
-					<p-button type="button" @click="onSysMenuToggle" aria-haspopup="true" aria-controls="${pid}-sysMenu" icon="pi pi-cog"
+					<p-button type="button" @click="onSysMenuToggle" aria-haspopup="true" aria-controls="${pid}sysMenu" icon="pi pi-cog"
 						class="p-button-sm p-button-text p-button-rounded text-primary"></p-button>
-					<p-contextmenu id="${pid}-sysMenu" ref="sysMenuEle" :model="sysMenu.items" :popup="true"></p-contextmenu>
+					<p-contextmenu id="${pid}sysMenu" ref="sysMenuEle" :model="pm.sysMenuItems" :popup="true"></p-contextmenu>
 				</div>
 			</div>
 		</div>
@@ -221,9 +221,9 @@ User currentUser
 		]);
 	}
 	
-	po.vueReactive("sysMenu",
+	po.vuePageModel(
 	{
-		items: sysMenuItems
+		sysMenuItems: sysMenuItems
 	});
 	
 	po.vueMethod(

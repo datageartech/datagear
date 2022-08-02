@@ -25,11 +25,11 @@
 			<#include "../include/page_search_form.ftl">
 		</div>
 		<div class="h-opts col-12 md:col-9 text-right">
-			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="isSelectAction"></p-button>
+			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
-			<p-button label="<@spring.message code='upload' />" @click="onUpload" v-if="!isSelectAction"></p-button>
-			<p-button label="<@spring.message code='download' />" @click="onDownload" v-if="!isSelectAction"></p-button>
-			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!isSelectAction"></p-button>
+			<p-button label="<@spring.message code='upload' />" @click="onUpload" v-if="!pm.isSelectAction"></p-button>
+			<p-button label="<@spring.message code='download' />" @click="onDownload" v-if="!pm.isSelectAction"></p-button>
+			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isSelectAction"></p-button>
 		</div>
 	</div>
 	<div class="page-content">

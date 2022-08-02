@@ -28,7 +28,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}users" class="input p-inputtext w-full border-noround-right overflow-auto" style="height:6rem;">
-		        		<p-chip v-for="user in pm.users" :key="user.id" :label="user.name" class="mb-2" :removable @remove="onRemoveUser($event, user.id)"></p-chip>
+		        		<p-chip v-for="user in fm.users" :key="user.id" :label="user.name" class="mb-2" :removable @remove="onRemoveUser($event, user.id)"></p-chip>
 		        	</div>
 		        </div>
 			</div>
@@ -38,7 +38,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
-			        	<p-inputtext id="${pid}migrateToName" v-model="pm.migrateToName" type="text" class="input"
+			        	<p-inputtext id="${pid}migrateToName" v-model="fm.migrateToName" type="text" class="input"
 			        		name="migrateToName" required maxlength="50" readonly="readonly">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectUser"
@@ -94,8 +94,8 @@
 	{
 		onRemoveUser: function(e, userId)
 		{
-			var pm = po.vuePageModel();
-			var users = (pm.users || []);
+			var fm = po.vueFormModel();
+			var users = (fm.users || []);
 			$.removeById(users, userId);
 		},
 		
@@ -103,9 +103,9 @@
 		{
 			po.handleOpenSelectAction("/user/select", function(user)
 			{
-				var pm = po.vuePageModel();
-				pm.migrateToId = user.id;
-				pm.migrateToName = user.name;
+				var fm = po.vueFormModel();
+				fm.migrateToId = user.id;
+				fm.migrateToName = user.name;
 			});
 		}
 	});

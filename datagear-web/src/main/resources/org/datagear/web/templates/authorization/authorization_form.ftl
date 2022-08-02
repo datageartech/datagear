@@ -21,14 +21,14 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}principalType" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='${resourceMeta.authPrincipalTypeLabel}' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-selectbutton v-model="pm.principalType" :options="principalTypeOptions"
+		        	<p-selectbutton v-model="fm.principalType" :options="pm.principalTypeOptions"
 		        		option-label="name" option-value="value" @change="onPrincipalTypeChange" class="input w-full">
 		        	</p-selectbutton>
 		        </div>
@@ -38,41 +38,41 @@
 					<@spring.message code='${resourceMeta.authPrincipalLabel}' />
 				</label>
 		        <div class="field-input col-12 md:col-9" style="min-height:2.5rem;">
-		        	<div class="p-inputgroup" v-show="pm.principalType == '${Authorization.PRINCIPAL_TYPE_USER}'">
-			        	<p-inputtext id="${pid}principalName" v-model="pm.principalName" type="text" class="input"
+		        	<div class="p-inputgroup" v-show="fm.principalType == '${Authorization.PRINCIPAL_TYPE_USER}'">
+			        	<p-inputtext id="${pid}principalName" v-model="fm.principalName" type="text" class="input"
 			        		name="principalName" required maxlength="200" readonly="readonly">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectUser"
-			        		class="p-button-secondary" v-if="!isReadonlyAction">
+			        		class="p-button-secondary" v-if="!pm.isReadonlyAction">
 			        	</p-button>
 		        	</div>
 		        	
-		        	<div class="p-inputgroup" v-show="pm.principalType == '${Authorization.PRINCIPAL_TYPE_ROLE}'">
-			        	<p-inputtext id="${pid}principalName" v-model="pm.principalName" type="text" class="input"
+		        	<div class="p-inputgroup" v-show="fm.principalType == '${Authorization.PRINCIPAL_TYPE_ROLE}'">
+			        	<p-inputtext id="${pid}principalName" v-model="fm.principalName" type="text" class="input"
 			        		name="principalName" required maxlength="200" readonly="readonly">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectRole"
-			        		class="p-button-secondary" v-if="!isReadonlyAction">
+			        		class="p-button-secondary" v-if="!pm.isReadonlyAction">
 			        	</p-button>
 		        	</div>
 		        	
-		        	<p-inputtext id="${pid}principalName" v-model="pm.principalName" type="text" class="input w-full"
-		        		v-show="pm.principalType == '${Authorization.PRINCIPAL_TYPE_ANONYMOUS}'"
+		        	<p-inputtext id="${pid}principalName" v-model="fm.principalName" type="text" class="input w-full"
+		        		v-show="fm.principalType == '${Authorization.PRINCIPAL_TYPE_ANONYMOUS}'"
 		        		name="principalName" required maxlength="200" readonly="readonly">
 		        	</p-inputtext>
 		        	
-		        	<p-inputtext id="${pid}principalName" v-model="pm.principalName" type="text" class="input w-full"
-		        		v-show="pm.principalType == '${Authorization.PRINCIPAL_TYPE_ALL}'"
+		        	<p-inputtext id="${pid}principalName" v-model="fm.principalName" type="text" class="input w-full"
+		        		v-show="fm.principalType == '${Authorization.PRINCIPAL_TYPE_ALL}'"
 		        		name="principalName" required maxlength="200" readonly="readonly">
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid" :class="{hidden: singlePermission}">
+			<div class="field grid" :class="{hidden: pm.singlePermission}">
 				<label for="${pid}permission" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='${resourceMeta.authPermissionLabel}' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-selectbutton v-model="pm.permission" :options="permissionOptions"
+		        	<p-selectbutton v-model="fm.permission" :options="pm.permissionOptions"
 		        		option-label="name" option-value="value" class="input w-full" @change="onPermissionChange">
 		        	</p-selectbutton>
 		        	<div class="mt-1" style="min-height:1.5rem;">
@@ -80,12 +80,12 @@
 		        	</div>
 		        </div>
 			</div>
-			<div class="field grid" :class="{hidden: !enableSetEnable}">
+			<div class="field grid" :class="{hidden: !pm.enableSetEnable}">
 				<label for="${pid}enabled" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='${resourceMeta.authEnabledLabel}' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-selectbutton v-model="pm.enabled" :options="booleanOptions"
+		        	<p-selectbutton v-model="fm.enabled" :options="pm.booleanOptions"
 		        		option-label="name" option-value="value" class="input w-full">
 		        	</p-selectbutton>
 		        </div>
@@ -105,17 +105,6 @@
 	po.enableSetEnable = ("${resourceMeta.enableSetEnable?string('true', 'false')}" == "true");
 	po.singlePermission = ("${resourceMeta.singlePermission?string('true', 'false')}"  == "true");
 	
-	po.vueRef("enableSetEnable", po.enableSetEnable);
-	po.vueRef("singlePermission", po.singlePermission);
-	
-	po.vueRef("principalTypeOptions",
-	[
-		{name: "<@spring.message code='authorization.principalType.USER' />", value: "${Authorization.PRINCIPAL_TYPE_USER}"},
-		{name: "<@spring.message code='authorization.principalType.ROLE' />", value: "${Authorization.PRINCIPAL_TYPE_ROLE}"},
-		{name: "<@spring.message code='authorization.principalType.ANONYMOUS' />", value: "${Authorization.PRINCIPAL_TYPE_ANONYMOUS}"},
-		{name: "<@spring.message code='authorization.principalType.ALL' />", value: "${Authorization.PRINCIPAL_TYPE_ALL}"}
-	]);
-	
 	var permissionOptions = [];
 	<#list resourceMeta.permissionMetas as pmeta>
 	permissionOptions.push(
@@ -126,15 +115,27 @@
 	});
 	</#list>
 	
-	po.vueRef("permissionOptions", permissionOptions);
+	po.vuePageModel(
+	{
+		enableSetEnable: po.enableSetEnable,
+		singlePermission: po.singlePermission,
+		principalTypeOptions:
+		[
+			{name: "<@spring.message code='authorization.principalType.USER' />", value: "${Authorization.PRINCIPAL_TYPE_USER}"},
+			{name: "<@spring.message code='authorization.principalType.ROLE' />", value: "${Authorization.PRINCIPAL_TYPE_ROLE}"},
+			{name: "<@spring.message code='authorization.principalType.ANONYMOUS' />", value: "${Authorization.PRINCIPAL_TYPE_ANONYMOUS}"},
+			{name: "<@spring.message code='authorization.principalType.ALL' />", value: "${Authorization.PRINCIPAL_TYPE_ALL}"}
+		],
+		permissionOptions: permissionOptions
+	});
 	
 	po.vueComputed("permissionDesc", function()
 	{
+		var fm = po.vueFormModel();
 		var pm = po.vuePageModel();
-		var permissionOptions = po.vueUnref("permissionOptions");
 		
-		var idx = $.inArrayById(permissionOptions, pm.permission, "value");
-		return (idx >= 0 ? permissionOptions[idx].desc : "");
+		var idx = $.inArrayById(pm.permissionOptions, fm.permission, "value");
+		return (idx >= 0 ? pm.permissionOptions[idx].desc : "");
 	});
 	
 	var formModel = <@writeJson var=formModel />;
@@ -146,22 +147,22 @@
 		onPrincipalTypeChange: function(e)
 		{
 			var pt = e.value;
-			var pm = po.vuePageModel();
+			var fm = po.vueFormModel();
 			
 			if(pt == "${Authorization.PRINCIPAL_TYPE_ANONYMOUS}")
 			{
-				pm.principal = "${Authorization.PRINCIPAL_ANONYMOUS}";
-				pm.principalName = "<@spring.message code='authorization.principalType.ANONYMOUS' />";
+				fm.principal = "${Authorization.PRINCIPAL_ANONYMOUS}";
+				fm.principalName = "<@spring.message code='authorization.principalType.ANONYMOUS' />";
 			}
 			else if(pt == "${Authorization.PRINCIPAL_TYPE_ALL}")
 			{
-				pm.principal = "${Authorization.PRINCIPAL_ALL}";
-				pm.principalName = "<@spring.message code='authorization.principalType.ALL' />";
+				fm.principal = "${Authorization.PRINCIPAL_ALL}";
+				fm.principalName = "<@spring.message code='authorization.principalType.ALL' />";
 			}
 			else
 			{
-				pm.principal = "";
-				pm.principalName = "";
+				fm.principal = "";
+				fm.principalName = "";
 			}
 		},
 		
@@ -169,9 +170,9 @@
 		{
 			po.handleOpenSelectAction("/user/select", function(user)
 			{
-				var pm = po.vuePageModel();
-				pm.principal = user.id;
-				pm.principalName = user.nameLabel;
+				var fm = po.vueFormModel();
+				fm.principal = user.id;
+				fm.principalName = user.nameLabel;
 			});
 		},
 		
@@ -179,9 +180,9 @@
 		{
 			po.handleOpenSelectAction("/role/select", function(role)
 			{
-				var pm = po.vuePageModel();
-				pm.principal = role.id;
-				pm.principalName = role.name;
+				var fm = po.vueFormModel();
+				fm.principal = role.id;
+				fm.principalName = role.name;
 			});
 		}
 	});

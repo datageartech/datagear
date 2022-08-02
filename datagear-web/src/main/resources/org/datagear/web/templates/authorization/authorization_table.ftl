@@ -25,12 +25,12 @@
 			<#include "../include/page_search_form.ftl">
 		</div>
 		<div class="h-opts col-12 md:col-9 text-right">
-			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="isSelectAction"></p-button>
+			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
-			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!isSelectAction"></p-button>
-			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!isSelectAction"></p-button>
-			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': isSelectAction}"></p-button>
-			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!isSelectAction"></p-button>
+			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isSelectAction"></p-button>
+			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isSelectAction"></p-button>
+			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
+			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isSelectAction"></p-button>
 		</div>
 	</div>
 	<div class="page-content">
@@ -50,10 +50,10 @@
 				:sortable="true">
 			</p-column>
 			<p-column field="permissionLabel" header="<@spring.message code='${resourceMeta.authPermissionLabel}' />"
-				:sortable="true" :hidden="singlePermission">
+				:sortable="true" :hidden="pm.singlePermission">
 			</p-column>
 			<p-column field="enabled" header="<@spring.message code='${resourceMeta.authEnabledLabel}' />"
-				:sortable="true" :hidden="!enableSetEnable">
+				:sortable="true" :hidden="!pm.enableSetEnable">
 				<template #body="{data}">
 					{{formatEnabled(data)}}
 				</template>
@@ -75,8 +75,11 @@
 		return "/authorization/${resourceMeta.resourceType}/" + encodeURIComponent("${resource?js_string?no_esc}") + "/" + action;
 	};
 	
-	po.vueRef("enableSetEnable", po.enableSetEnable);
-	po.vueRef("singlePermission", po.singlePermission);
+	po.vuePageModel(
+	{
+		enableSetEnable: po.enableSetEnable,
+		singlePermission: po.singlePermission
+	});
 	
 	po.setupAjaxTable(po.url("queryData"),
 	{

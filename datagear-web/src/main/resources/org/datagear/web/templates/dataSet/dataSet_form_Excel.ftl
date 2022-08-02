@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-Excel">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<#include "include/dataSet_form_file_source.ftl">
@@ -30,7 +30,7 @@
 					<@spring.message code='sheetIndex' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}sheetIndex" v-model="pm.sheetIndex" type="text" class="input w-full"
+					<p-inputtext id="${pid}sheetIndex" v-model="fm.sheetIndex" type="text" class="input w-full"
 						name="sheetIndex" required maxlength="10">
 					</p-inputtext>
 				</div>
@@ -41,7 +41,7 @@
 					<@spring.message code='titleRowNumber' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}nameRow" v-model="pm.nameRow" type="text" class="input w-full"
+					<p-inputtext id="${pid}nameRow" v-model="fm.nameRow" type="text" class="input w-full"
 						name="nameRow" required maxlength="10">
 					</p-inputtext>
 				</div>
@@ -52,7 +52,7 @@
 					<@spring.message code='dataRowRange' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}dataRowExp" v-model="pm.dataRowExp" type="text" class="input w-full"
+					<p-inputtext id="${pid}dataRowExp" v-model="fm.dataRowExp" type="text" class="input w-full"
 						name="dataRowExp" maxlength="100">
 					</p-inputtext>
 				</div>
@@ -63,7 +63,7 @@
 					<@spring.message code='dataColumnRange' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}dataColumnExp" v-model="pm.dataColumnExp" type="text" class="input w-full"
+					<p-inputtext id="${pid}dataColumnExp" v-model="fm.dataColumnExp" type="text" class="input w-full"
 						name="dataColumnExp" maxlength="100">
 					</p-inputtext>
 				</div>
@@ -73,7 +73,7 @@
 					<@spring.message code='forceXlsFormat' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-selectbutton v-model="pm.forceXls" :options="booleanOptions"
+					<p-selectbutton v-model="fm.forceXls" :options="pm.booleanOptions"
 						option-label="name" option-value="value" class="input w-full">
 					</p-selectbutton>
 				</div>

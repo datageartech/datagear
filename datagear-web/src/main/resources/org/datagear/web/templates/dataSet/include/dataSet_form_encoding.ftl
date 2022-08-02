@@ -17,14 +17,14 @@
 		<@spring.message code='fileEncoding' />
 	</label>
 	<div class="field-input col-12 md:col-9">
-		<p-dropdown id="${pid}encoding" v-model="pm.encoding" :options="tm.availableCharsetNames" class="input w-full">
+		<p-dropdown id="${pid}encoding" v-model="fm.encoding" :options="pm.availableCharsetNames" class="input w-full">
        	</p-dropdown>
 	</div>
 </div>
 <script>
 (function(po)
 {
-	po.vueTmpModel(
+	po.vuePageModel(
 	{
 		availableCharsetNames: <@writeJson var=availableCharsetNames />
 	});

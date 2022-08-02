@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}pattern" class="field-label col-12 mb-2 md:col-3 md:mb-0"
@@ -28,7 +28,7 @@
 					<@spring.message code='urlPattern' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}pattern" v-model="pm.pattern" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}pattern" v-model="fm.pattern" type="text" class="input w-full"
 		        		name="pattern" required maxlength="200" autofocus>
 		        	</p-inputtext>
 		        </div>
@@ -39,7 +39,7 @@
 					<@spring.message code='isPermit' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-selectbutton id="${pid}permitted" v-model="pm.permitted" :options="booleanOptions"
+		        	<p-selectbutton id="${pid}permitted" v-model="fm.permitted" :options="pm.booleanOptions"
 		        		option-label="name" option-value="value" class="input w-full">
 		        	</p-selectbutton>
 		        </div>
@@ -50,7 +50,7 @@
 					<@spring.message code='priority' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}priority" v-model="pm.priority" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}priority" v-model="fm.priority" type="text" class="input w-full"
 		        		name="priority" required maxlength="10">
 		        	</p-inputtext>
 		        </div>
@@ -60,7 +60,7 @@
 					<@spring.message code='isEnable' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-selectbutton id="${pid}enabled" v-model="pm.enabled" :options="booleanOptions"
+		        	<p-selectbutton id="${pid}enabled" v-model="fm.enabled" :options="pm.booleanOptions"
 		        		option-label="name" option-value="value" class="input w-full">
 		        	</p-selectbutton>
 		        </div>

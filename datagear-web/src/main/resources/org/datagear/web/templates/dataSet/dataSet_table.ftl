@@ -26,18 +26,18 @@
 			<#include "../include/page_search_form.ftl">
 		</div>
 		<div class="h-opts col-12 md:col-9 text-right">
-			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="isSelectAction"></p-button>
+			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
 			<p-button label="<@spring.message code='add' />"
 				icon="pi pi-chevron-down" icon-pos="right" aria-haspopup="true" aria-controls="${pid}addMenu"
-				@click="onAddMenuToggle" v-if="!isSelectAction">
+				@click="onAddMenuToggle" v-if="!pm.isSelectAction">
 			</p-button>
-			<p-menu id="${pid}addMenu" ref="addMenuEle" :model="addMenuItems" :popup="true" v-if="!isSelectAction"></p-menu>
+			<p-menu id="${pid}addMenu" ref="addMenuEle" :model="pm.addMenuItems" :popup="true" v-if="!pm.isSelectAction"></p-menu>
 			
-			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!isSelectAction"></p-button>
-			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': isSelectAction}"></p-button>
-			<p-button label="<@spring.message code='share' />" @click="onShare" v-if="!isSelectAction"></p-button>
-			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!isSelectAction"></p-button>
+			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isSelectAction"></p-button>
+			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
+			<p-button label="<@spring.message code='share' />" @click="onShare" v-if="!pm.isSelectAction"></p-button>
+			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isSelectAction"></p-button>
 		</div>
 	</div>
 	<div class="page-content">
@@ -72,66 +72,70 @@
 		multiSortMeta: [ {field: "createTime", order: -1} ]
 	});
 	
-	po.vueRef("addMenuItems",
-	[
-		{
-			label: "<@spring.message code='dataSetType.SQL' />",
-			command: function()
+	po.vuePageModel(
+	{
+		addMenuItems:
+		[
 			{
-				po.handleAddAction("/dataSet/addForSQL", {width: "70vw"});
-			}
-		},
-		{
-			label: "<@spring.message code='dataSetType.CsvValue' />",
-			command: function()
+				label: "<@spring.message code='dataSetType.SQL' />",
+				command: function()
+				{
+					po.handleAddAction("/dataSet/addForSQL", {width: "70vw"});
+				}
+			},
 			{
-				po.handleAddAction("/dataSet/addForCsvValue", {width: "70vw"});
-			}
-		},
-		{
-			label: "<@spring.message code='dataSetType.CsvFile' />",
-			command: function()
+				label: "<@spring.message code='dataSetType.CsvValue' />",
+				command: function()
+				{
+					po.handleAddAction("/dataSet/addForCsvValue", {width: "70vw"});
+				}
+			},
 			{
-				po.handleAddAction("/dataSet/addForCsvFile", {width: "70vw"});
-			}
-		},
-		{
-			label: "<@spring.message code='dataSetType.Excel' />",
-			command: function()
+				label: "<@spring.message code='dataSetType.CsvFile' />",
+				command: function()
+				{
+					po.handleAddAction("/dataSet/addForCsvFile", {width: "70vw"});
+				}
+			},
 			{
-				po.handleAddAction("/dataSet/addForExcel", {width: "70vw"});
-			}
-		},
-		{
-			label: "<@spring.message code='dataSetType.Http' />",
-			command: function()
+				label: "<@spring.message code='dataSetType.Excel' />",
+				command: function()
+				{
+					po.handleAddAction("/dataSet/addForExcel", {width: "70vw"});
+				}
+			},
 			{
-				po.handleAddAction("/dataSet/addForHttp", {width: "70vw"});
-			}
-		},
-		{
-			label: "<@spring.message code='dataSetType.JsonValue' />",
-			command: function()
+				label: "<@spring.message code='dataSetType.Http' />",
+				command: function()
+				{
+					po.handleAddAction("/dataSet/addForHttp", {width: "70vw"});
+				}
+			},
 			{
-				po.handleAddAction("/dataSet/addForJsonValue", {width: "70vw"});
-			}
-		},
-		{
-			label: "<@spring.message code='dataSetType.JsonFile' />",
-			command: function()
+				label: "<@spring.message code='dataSetType.JsonValue' />",
+				command: function()
+				{
+					po.handleAddAction("/dataSet/addForJsonValue", {width: "70vw"});
+				}
+			},
 			{
-				po.handleAddAction("/dataSet/addForJsonFile", {width: "70vw"});
-			}
-		},
-		{ separator: true },
-		{
-			label: "<@spring.message code='copy' />",
-			command: function()
+				label: "<@spring.message code='dataSetType.JsonFile' />",
+				command: function()
+				{
+					po.handleAddAction("/dataSet/addForJsonFile", {width: "70vw"});
+				}
+			},
+			{ separator: true },
 			{
-				po.handleOpenOfAction("/dataSet/copy", {width: "70vw"});
+				label: "<@spring.message code='copy' />",
+				command: function()
+				{
+					po.handleOpenOfAction("/dataSet/copy", {width: "70vw"});
+				}
 			}
-		}
-	]);
+		]
+	});
+	
 	po.vueRef("addMenuEle", null);
 	
 	po.vueMethod(

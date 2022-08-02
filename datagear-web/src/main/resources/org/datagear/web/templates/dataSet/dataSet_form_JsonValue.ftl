@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-dataSet page-form-dataSet-JsonValue">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<div class="field grid">
@@ -90,10 +90,10 @@
 	
 	po.vueMounted(function()
 	{
-		var pm = po.vuePageModel();
+		var fm = po.vueFormModel();
 		
 		po.codeEditor = po.createWorkspaceEditor(po.elementOfId("${pid}codeEditor"));
-		po.setCodeTextTimeout(po.codeEditor, pm.value);
+		po.setCodeTextTimeout(po.codeEditor, fm.value);
 	});
 	
 	po.vueMount();

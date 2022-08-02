@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-JsonFile">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<#include "include/dataSet_form_file_source.ftl">
@@ -30,7 +30,7 @@
 					<@spring.message code='dataJsonPath' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}dataJsonPath" v-model="pm.dataJsonPath" type="text" class="input w-full"
+					<p-inputtext id="${pid}dataJsonPath" v-model="fm.dataJsonPath" type="text" class="input w-full"
 						name="dataJsonPath" maxlength="200">
 					</p-inputtext>
 				</div>

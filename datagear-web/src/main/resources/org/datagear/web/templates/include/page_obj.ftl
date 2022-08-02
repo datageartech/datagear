@@ -181,12 +181,6 @@ var ${pid} =
 		return this.vueReactive("pm", obj);
 	},
 	
-	//获取/填充并返回vue临时模型，在vue页面中可以"tm.*"访问模型中的属性
-	vueTmpModel: function(obj)
-	{
-		return this.vueReactive("tm", obj);
-	},
-	
 	//获取/填充并返回vue的setup响应式对象（自动reactive），对象格式必须为：{...}
 	vueReactive: function(name, obj)
 	{

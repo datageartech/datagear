@@ -61,13 +61,13 @@
 					<template #header>
 						<p-button type="button" icon="pi pi-angle-down"
 							class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
-							@click="onTableTabMenuToggle($event, tab.id)" aria-haspopup="true" aria-controls="${pid}-tableTabMenu">
+							@click="onTableTabMenuToggle($event, tab.id)" aria-haspopup="true" aria-controls="${pid}tableTabMenu">
 						</p-button>
 					</template>
 					<div :id="tab.id"></div>
 				</p-tabpanel>
 			</p-tabview>
-			<p-contextmenu id="${pid}-tableTabMenu" ref="tableTabMenuEle" :model="pm.tableTabMenuItems" :popup="true" class="text-sm"></p-contextmenu>
+			<p-contextmenu id="${pid}tableTabMenu" ref="tableTabMenuEle" :model="pm.tableTabMenuItems" :popup="true" class="text-sm"></p-contextmenu>
 		</div>
 	</div>
 </div>

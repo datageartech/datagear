@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}directory" class="field-label col-12 mb-2 md:col-3 md:mb-0"
@@ -28,7 +28,7 @@
 					<@spring.message code='directory' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}directory" v-model="pm.directory" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}directory" v-model="fm.directory" type="text" class="input w-full"
 		        		name="directory" required maxlength="300" autofocus>
 		        	</p-inputtext>
 		        </div>
@@ -38,7 +38,7 @@
 					<@spring.message code='desc' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-textarea id="${pid}desc" v-model="pm.desc" rows="10" class="input w-full"
+		        	<p-textarea id="${pid}desc" v-model="fm.desc" rows="10" class="input w-full"
 		        		name="desc" maxlength="500">
 		        	</p-textarea>
 		        </div>

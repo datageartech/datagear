@@ -20,15 +20,15 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}file" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='file' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<div id="${pid}file" class="fileupload-wrapper mt-1" v-if="!isReadonlyAction">
-			        	<p-fileupload mode="basic" name="file" :url="uploadFileUrl"
+		        	<div id="${pid}file" class="fileupload-wrapper mt-1" v-if="!pm.isReadonlyAction">
+			        	<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
 			        		@upload="onUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
 			        		:auto="true" choose-label="<@spring.message code='select' />" class="p-button-secondary">
 			        	</p-fileupload>
@@ -45,7 +45,7 @@
 					<@spring.message code='savePath' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}savePath" v-model="pm.savePath" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}savePath" v-model="fm.savePath" type="text" class="input w-full"
 		        		name="savePath" required maxlength="200">
 		        	</p-inputtext>
 		        </div>
@@ -56,7 +56,7 @@
 					<@spring.message code='autoUnzip' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-selectbutton id="${pid}autoUnzip" v-model="pm.autoUnzip" :options="booleanOptions"
+		        	<p-selectbutton id="${pid}autoUnzip" v-model="fm.autoUnzip" :options="pm.booleanOptions"
 		        		option-label="name" option-value="value" class="input w-full">
 		        	</p-selectbutton>
 		        </div>
@@ -67,8 +67,8 @@
 					<@spring.message code='zipFileEncoding' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-dropdown id="${pid}zipFileNameEncoding" v-model="pm.zipFileNameEncoding"
-		        		:options="availableCharsetNames" class="input w-full">
+		        	<p-dropdown id="${pid}zipFileNameEncoding" v-model="fm.zipFileNameEncoding"
+		        		:options="pm.availableCharsetNames" class="input w-full">
 		        	</p-dropdown>
 		        	<div class="desc text-color-secondary">
 		        		<small><@spring.message code='dashboardGlobalRes.upload.notice' /></small>
@@ -90,7 +90,6 @@
 	
 	var availableCharsetNames = <@writeJson var=availableCharsetNames />;
 	availableCharsetNames = $.unescapeHtmlForJson(availableCharsetNames);
-	po.vueRef("availableCharsetNames", availableCharsetNames);
 	
 	po.setupForm(
 	{
@@ -101,19 +100,23 @@
 		zipFileNameEncoding: "${zipFileNameEncodingDefault}"
 	});
 	
-	po.vueRef("uploadFileUrl", po.concatContextPath("/dashboardGlobalRes/uploadFile"));
+	po.vuePageModel(
+	{
+		availableCharsetNames: availableCharsetNames,
+		uploadFileUrl: po.concatContextPath("/dashboardGlobalRes/uploadFile")
+	});
 	
 	po.vueMethod(
 	{
 		onUploaded: function(e)
 		{
-			var pm = po.vuePageModel();
+			var fm = po.vueFormModel();
 			var response = $.getResponseJson(e.xhr);
 			
 			po.uploadFileOnUploaded(e);
-			pm.fileName = response.fileName;
-			pm.savePath = response.fileName;
-			pm.filePath = response.filePath;
+			fm.fileName = response.fileName;
+			fm.savePath = response.fileName;
+			fm.filePath = response.filePath;
 		}
 	});
 	

@@ -34,7 +34,7 @@
 						</div>
 					</div>
 				</div>
-				<div id="${pid}-mainPanels" class="page-main-panels col overflow-auto"></div>
+				<div id="${pid}mainPanels" class="page-main-panels col overflow-auto"></div>
 			</div>
 		</div>
 	</div>
@@ -99,7 +99,7 @@
 	
 	po.showMainPanel = function(name, url)
 	{
-		const parent = po.elementOfId("${pid}-mainPanels");
+		const parent = po.elementOfId("${pid}mainPanels");
 		const panelId = "${pid}mainPanel"+name;
 		var panel = po.elementOfId(panelId, parent);
 		

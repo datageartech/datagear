@@ -33,7 +33,7 @@
 					<form class="flex flex-column">
 						<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 							<div class="mb-5">
-								<p-steps :model="stepItems" :readonly="true"></p-steps>
+								<p-steps :model="pm.stepItems" :readonly="true"></p-steps>
 							</div>
 							<div class="grid grid-nogutter justify-content-center pt-3">
 								<div class="col-12 md:col-9">
@@ -43,7 +43,7 @@
 											<@spring.message code='username' />
 										</label>
 								        <div class="field-input col-12 md:col-9">
-								        	<p-inputtext id="${pid}nameuser" v-model="pm.username" type="text" class="input w-full"
+								        	<p-inputtext id="${pid}nameuser" v-model="fm.username" type="text" class="input w-full"
 								        		name="username" required maxlength="50" autofocus>
 								        	</p-inputtext>
 								        </div>
@@ -55,7 +55,7 @@
 											<@spring.message code='username' />
 										</label>
 								        <div class="field-input col-12 md:col-9">
-								        	<p-inputtext id="${pid}nameuser" v-model="pm.username" type="text" class="input w-full"
+								        	<p-inputtext id="${pid}nameuser" v-model="fm.username" type="text" class="input w-full"
 								        		name="username" maxlength="50" readonly>
 								        	</p-inputtext>
 								        </div>
@@ -77,7 +77,7 @@
 											<@spring.message code='username' />
 										</label>
 								        <div class="field-input col-12 md:col-9">
-								        	<p-inputtext id="${pid}nameuser" v-model="pm.username" type="text" class="input w-full"
+								        	<p-inputtext id="${pid}nameuser" v-model="fm.username" type="text" class="input w-full"
 								        		name="username" maxlength="50" readonly>
 								        	</p-inputtext>
 								        </div>
@@ -87,7 +87,7 @@
 											<@spring.message code='password' />
 										</label>
 								        <div class="field-input col-12 md:col-9">
-								        	<p-password id="${pid}password" v-model="pm.password" class="input w-full"
+								        	<p-password id="${pid}password" v-model="fm.password" class="input w-full"
 								        		input-class="w-full" toggle-mask :feedback="false"
 								        		name="password" required maxlength="50" autocomplete="new-password" autofocus>
 								        	</p-password>
@@ -98,7 +98,7 @@
 											<@spring.message code='confirmPassword' />
 										</label>
 								        <div class="field-input col-12 md:col-9">
-								        	<p-password id="${pid}confirmPassword" v-model="pm.confirmPassword" class="input w-full"
+								        	<p-password id="${pid}confirmPassword" v-model="fm.confirmPassword" class="input w-full"
 								        		input-class="w-full" toggle-mask :feedback="false"
 								        		name="confirmPassword" required maxlength="50" autocomplete="new-password">
 								        	</p-password>
@@ -140,25 +140,28 @@
 {
 	po.submitUrl = "/resetPassword/${step.action}";
 	
-	po.vueRef("stepItems",
-	[
-		{
-			label: "<@spring.message code='resetPassword.step.fillUserInfo' />",
-			class: "step-1"
-		},
-		{
-			label: "<@spring.message code='resetPassword.step.checkUser' />",
-			class: "step-2"
-		},
-		{
-			label: "<@spring.message code='resetPassword.step.setNewPassword' />",
-			class: "step-3"
-		},
-		{
-			label: "<@spring.message code='resetPassword.step.finish' />",
-			class: "step-4"
-		}
-	]);
+	po.vuePageModel(
+	{
+		stepItems:
+		[
+			{
+				label: "<@spring.message code='resetPassword.step.fillUserInfo' />",
+				class: "step-1"
+			},
+			{
+				label: "<@spring.message code='resetPassword.step.checkUser' />",
+				class: "step-2"
+			},
+			{
+				label: "<@spring.message code='resetPassword.step.setNewPassword' />",
+				class: "step-3"
+			},
+			{
+				label: "<@spring.message code='resetPassword.step.finish' />",
+				class: "step-4"
+			}
+		]
+	});
 
 	var formModel = <@writeJson var=step />;
 	formModel = $.unescapeHtmlForJson(formModel);

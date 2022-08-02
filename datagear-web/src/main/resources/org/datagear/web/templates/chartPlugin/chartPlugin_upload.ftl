@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
+	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}pluginFile" class="field-label col-12 mb-2 md:col-3 md:mb-0"
@@ -28,8 +28,8 @@
 					<@spring.message code='pluginFile' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<div id="${pid}pluginFile" class="fileupload-wrapper mt-1" v-if="!isReadonlyAction">
-			        	<p-fileupload mode="basic" name="file" :url="uploadFileUrl"
+		        	<div id="${pid}pluginFile" class="fileupload-wrapper mt-1" v-if="!pm.isReadonlyAction">
+			        	<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
 			        		@upload="onUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
 			        		:auto="true" choose-label="<@spring.message code='select' />" class="p-button-secondary">
 			        	</p-fileupload>
@@ -43,8 +43,8 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}preview" class="input p-component p-inputtext w-full overflow-auto" style="height:8rem;">
-		        		<p-chip v-for="p in chartPlugins.plugins" :key="p.key"
-		        			class="mb-2" :removable="!isReadonlyAction" @remove="onRemovedChartplugin($event, p.id)">
+		        		<p-chip v-for="p in pm.chartPlugins.plugins" :key="p.key"
+		        			class="mb-2" :removable="!pm.isReadonlyAction" @remove="onRemovedChartplugin($event, p.id)">
 		        			<div v-html="formatChartPlugin(p)"></div>
 		        		</p-chip>
 		        	</div>
@@ -70,10 +70,9 @@
 	po.setChartPlugins = function(cps)
 	{
 		var pm = po.vuePageModel();
-		var chartPlugins = po.vueReactive("chartPlugins");
 		
 		if(!cps)
-			cps = po.vueRaw(chartPlugins.plugins);
+			cps = po.vueRaw(pm.chartPlugins.plugins);
 		
 		var seq = po.chartPluginKeySeq++;
 		$.each(cps, function(idx, cp)
@@ -81,13 +80,16 @@
 			cp.key = cp.id + seq;
 		});
 		
-		chartPlugins.plugins = cps;
+		pm.chartPlugins.plugins = cps;
 	};
 	
 	po.setupForm({ pluginFileName: "" });
 	
-	po.vueReactive("chartPlugins", { plugins: [] });
-	po.vueRef("uploadFileUrl", po.concatContextPath("/chartPlugin/uploadFile"));
+	po.vuePageModel(
+	{
+		chartPlugins: { plugins: [] },
+		uploadFileUrl: po.concatContextPath("/chartPlugin/uploadFile")
+	});
 	
 	po.vueMethod(
 	{
@@ -98,11 +100,11 @@
 		
 		onUploaded: function(e)
 		{
-			var pm = po.vuePageModel();
+			var fm = po.vueFormModel();
 			var response = $.getResponseJson(e.xhr);
 			
 			po.uploadFileOnUploaded(e);
-			pm.pluginFileName = response.pluginFileName;
+			fm.pluginFileName = response.pluginFileName;
 			po.setChartPlugins(response.pluginInfos);
 		},
 		
