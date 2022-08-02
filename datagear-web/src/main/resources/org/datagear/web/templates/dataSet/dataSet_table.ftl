@@ -128,7 +128,7 @@
 			label: "<@spring.message code='copy' />",
 			command: function()
 			{
-				po.handleAddAction("/dataSet/copy", {width: "70vw"});
+				po.handleOpenOfAction("/dataSet/copy", {width: "70vw"});
 			}
 		}
 	]);

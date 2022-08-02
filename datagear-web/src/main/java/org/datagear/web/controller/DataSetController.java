@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -176,6 +177,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
+		dataSet.setCreateTime(new Date());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, dataSet);
 
@@ -210,6 +212,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
+		dataSet.setCreateTime(new Date());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, dataSet);
 
@@ -246,6 +249,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
+		dataSet.setCreateTime(new Date());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, dataSet);
 
@@ -284,6 +288,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
+		dataSet.setCreateTime(new Date());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, dataSet);
 
@@ -321,6 +326,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
+		dataSet.setCreateTime(new Date());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, dataSet);
 
@@ -358,6 +364,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
+		dataSet.setCreateTime(new Date());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, dataSet);
 
@@ -395,6 +402,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user.cloneNoPassword());
+		dataSet.setCreateTime(new Date());
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, dataSet);
 
@@ -415,8 +423,6 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser();
 
 		DataSetEntity dataSet = getByIdForView(this.dataSetEntityService, user, id);
-		clearSensitiveInfo(dataSet);
-		setNullAnalysisProjectIfNoPermission(user, dataSet, getAnalysisProjectService());
 
 		if (dataSet instanceof SqlDataSetEntity)
 		{
@@ -464,6 +470,8 @@ public class DataSetController extends AbstractSchemaConnController
 		}
 
 		dataSet.setId(null);
+		clearSensitiveInfo(dataSet);
+		setNullAnalysisProjectIfNoPermission(user, dataSet, getAnalysisProjectService());
 
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD,
 						"saveAddFor" + dataSet.getDataSetType());
