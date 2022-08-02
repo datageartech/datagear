@@ -28,12 +28,15 @@
 					<@spring.message code='pluginFile' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<div id="${pid}pluginFile" class="fileupload-wrapper mt-1" v-if="!pm.isReadonlyAction">
+		        	<div id="${pid}pluginFile" class="fileupload-wrapper flex align-items-center mt-1" v-if="!pm.isReadonlyAction">
 			        	<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
 			        		@upload="onUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
-			        		:auto="true" choose-label="<@spring.message code='select' />" class="p-button-secondary">
+			        		:auto="true" choose-label="<@spring.message code='select' />" class="p-button-secondary mr-2">
 			        	</p-fileupload>
 						<#include "../include/page_fileupload.ftl">
+		        	</div>
+		        	<div class="validate-msg">
+		        		<input name="pluginFileName" required type="text" class="validate-proxy" />
 		        	</div>
 		        </div>
 			</div>
@@ -47,9 +50,6 @@
 		        			class="mb-2" :removable="!pm.isReadonlyAction" @remove="onRemovedChartplugin($event, p.id)">
 		        			<div v-html="formatChartPlugin(p)"></div>
 		        		</p-chip>
-		        	</div>
-		        	<div class="validate-msg">
-		        		<input name="pluginFileName" required type="text" class="validate-proxy" />
 		        	</div>
 		        </div>
 			</div>

@@ -46,15 +46,15 @@
 		        			</a>
 		        		</p-chip>
 		        	</div>
-		        	<div class="fileupload-wrapper mt-1" v-if="!pm.isReadonlyAction">
+		        	<div class="fileupload-wrapper flex align-items-center mt-1" v-if="!pm.isReadonlyAction">
 			        	<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
 			        		@upload="onUploadedLibraryFile" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
-			        		:auto="true" choose-label="<@spring.message code='upload' />" class="p-button-secondary">
+			        		:auto="true" choose-label="<@spring.message code='upload' />" class="p-button-secondary mr-2">
 			        	</p-fileupload>
-			        	<div class="desc text-color-secondary">
-			        		<small><@spring.message code='driverEntity.driverLibrary.desc1' /></small>
-			        	</div>
 						<#include "../include/page_fileupload.ftl">
+		        	</div>
+		        	<div class="desc text-color-secondary">
+		        		<small><@spring.message code='driverEntity.driverLibrary.desc1' /></small>
 		        	</div>
 		        </div>
 			</div>
