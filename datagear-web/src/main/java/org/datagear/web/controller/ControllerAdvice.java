@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.support.DataSetSourceParseException;
 import org.datagear.analysis.support.HeaderContentNotNameValueObjArrayJsonException;
+import org.datagear.analysis.support.ReadJsonDataPathException;
 import org.datagear.analysis.support.RequestContentNotNameValueObjArrayJsonException;
 import org.datagear.analysis.support.SqlDataSetConnectionException;
 import org.datagear.analysis.support.SqlDataSetSqlExecutionException;
@@ -187,9 +188,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerUserSQLException(HttpServletRequest request, HttpServletResponse response,
 			UserSQLException exception)
 	{
-		String msgArg = (exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage());
-		setOptMsgForThrowable(request, exception, msgArg);
-
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
@@ -417,12 +416,21 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(ReadJsonDataPathException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisReadJsonDataPathException(HttpServletRequest request, HttpServletResponse response,
+			ReadJsonDataPathException exception)
+	{
+		setOptMsgForThrowable(request, exception);
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(DataSetSourceParseException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handleAnalysisDataSetSourceParseException(HttpServletRequest request, HttpServletResponse response,
 			DataSetSourceParseException exception)
 	{
-		setOptMsgForThrowable(request, exception, exception.getMessage(), exception.getSource());
+		setOptMsgForThrowable(request, exception, getRootMessage(exception), exception.getSource());
 		return getErrorView(request, response);
 	}
 
@@ -431,7 +439,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisSqlDataSetSqlExecutionException(HttpServletRequest request,
 			HttpServletResponse response, SqlDataSetSqlExecutionException exception)
 	{
-		setOptMsgForThrowable(request, exception, exception.getMessage(), exception.getSql());
+		setOptMsgForThrowable(request, exception, getRootMessage(exception), exception.getSql());
 		return getErrorView(request, response);
 	}
 

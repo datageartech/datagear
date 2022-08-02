@@ -489,17 +489,24 @@ public abstract class AbstractController
 	
 	protected Object[] getDefaultThrowableMsgArgs(Throwable t)
 	{
-		String msgArg = t.getMessage();
-		
-		while(t.getCause() != null)
-		{
-			msgArg = t.getCause().getMessage();
-			t= t.getCause();
-		}
-		
+		String msgArg = getRootMessage(t);
 		return new String[] { msgArg };
 	}
 
+	protected String getRootMessage(Throwable t)
+	{
+		String msg = "";
+		
+		while(t != null)
+		{
+			//FileNotFoundException应屏蔽文件路径
+			msg = (t instanceof java.io.FileNotFoundException ? "File not found" : t.getMessage());
+			t= t.getCause();
+		}
+		
+		return msg;
+	}
+	
 	/**
 	 * 设置{@linkplain OperationMessage}。
 	 * 

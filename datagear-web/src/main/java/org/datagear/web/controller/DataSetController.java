@@ -858,14 +858,15 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/previewJsonFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewJsonFile(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview)
+			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview,
+			@RequestParam("originalFileName") String originalFileName)
 			throws Throwable
 	{
 		final User user = WebUtils.getUser();
 
 		JsonFileDataSetEntity dataSet = preview.getDataSet();
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
+		setDirectoryFileDataSetDirectory(dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -1264,21 +1265,9 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private String originalFileName;
-
 		public JsonFileDataSetEntityPreview()
 		{
 			super();
-		}
-
-		public String getOriginalFileName()
-		{
-			return originalFileName;
-		}
-
-		public void setOriginalFileName(String originalFileName)
-		{
-			this.originalFileName = originalFileName;
 		}
 	}
 
