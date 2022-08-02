@@ -109,7 +109,7 @@ page_obj.ftl
 			if(focus)
 				codeEditor.focus();
 		},
-		100);
+		200);
 	};
 	
 	po.getSelectedCodeText = function(codeEditor)

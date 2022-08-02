@@ -415,8 +415,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser();
 
 		DataSetEntity dataSet = getByIdForView(this.dataSetEntityService, user, id);
-		clearSqlDataSetSchemaPassword(dataSet);
-		clearDirectoryFileDataSetEntity(dataSet);
+		clearSensitiveInfo(dataSet);
 		setNullAnalysisProjectIfNoPermission(user, dataSet, getAnalysisProjectService());
 
 		if (dataSet instanceof SqlDataSetEntity)
@@ -486,8 +485,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser();
 
 		DataSetEntity dataSet = getByIdForEdit(this.dataSetEntityService, user, id);
-		clearSqlDataSetSchemaPassword(dataSet);
-		clearDirectoryFileDataSetEntity(dataSet);
+		clearSensitiveInfo(dataSet);
 		
 		setFormModel(model, dataSet, REQUEST_ACTION_EDIT,
 						"saveEditFor" + dataSet.getDataSetType());
@@ -716,8 +714,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser();
 
 		DataSetEntity dataSet = getByIdForView(this.dataSetEntityService, user, id);
-		clearSqlDataSetSchemaPassword(dataSet);
-		clearDirectoryFileDataSetEntity(dataSet);
+		clearSensitiveInfo(dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
@@ -940,16 +937,16 @@ public class DataSetController extends AbstractSchemaConnController
 		return dataSet.resolve(query);
 	}
 	
-	protected void clearSqlDataSetSchemaPassword(DataSetEntity entity)
+	protected void clearSensitiveInfo(DataSetEntity entity)
 	{
 		if(entity instanceof SqlDataSetEntity)
 			((SqlDataSetEntity) entity).clearSchemaPassword();
-	}
-	
-	protected void clearDirectoryFileDataSetEntity(DataSetEntity entity)
-	{
+		
 		if(entity instanceof DirectoryFileDataSetEntity)
 			((DirectoryFileDataSetEntity) entity).setDirectory(null);
+		
+		if(entity instanceof HttpDataSetEntity)
+			((HttpDataSetEntity) entity).setHttpClient(null);
 	}
 
 	/**
