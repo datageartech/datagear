@@ -19,7 +19,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-sql">
+<div id="${pid}" class="page page-form horizontal page-form-dataSet  page-form-dataSet-Excel">
 	<form class="flex flex-column" :class="{readonly: isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">

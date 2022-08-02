@@ -191,7 +191,7 @@
 		}
 		
 		tm.previewColumns = previewColumns;
-		tm.previewResultDatas = (response.result && response.result.data ? response.result.data : []);
+		tm.previewResultDatas = $.wrapAsArray(response.result && response.result.data ? response.result.data : []);
 		tm.previewTplResult = response.templateResult;
 		
 		if(pm.mutableModel)
