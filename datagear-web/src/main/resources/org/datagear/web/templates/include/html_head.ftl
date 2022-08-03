@@ -62,6 +62,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/dataview/dataview.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/overlaypanel/overlaypanel.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/panel/panel.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/fieldset/fieldset.min.js" type="text/javascript"></script>
 
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>

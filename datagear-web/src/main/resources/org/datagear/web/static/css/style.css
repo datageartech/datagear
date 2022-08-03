@@ -273,6 +273,11 @@ label[title]:not(.no-tip)::after,
 	border-width: 0;
 }
 
+.p-fieldset.legend-sm .p-fieldset-legend{
+	padding-top: 0.7rem;
+	padding-bottom: 0.7rem;
+}
+
 /*横向操作组*/
 .h-opts > *{
 	margin-left: 0.25em;
@@ -572,4 +577,10 @@ label[title]:not(.no-tip)::after,
 }
 .page-form-chart .chart-datasets{
 	height: 50vh;
+}
+.page-form-chart .p-fieldset.legend-sm .p-fieldset-legend{
+	min-width: 9rem;
+}
+.page-form-chart .p-fieldset.legend-sm .p-fieldset-legend .p-fieldset-legend-text{
+	justify-content: flex-start;
 }

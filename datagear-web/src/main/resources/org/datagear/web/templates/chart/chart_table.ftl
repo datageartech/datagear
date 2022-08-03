@@ -62,7 +62,7 @@
 			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime col-last"></p-column>
 		</p-datatable>
 	</div>
-	<button type="button" class="copyShowURLDelegation" class="hidden">&nbsp;</button>
+	<button type="button" class="copyShowURLDelegation hidden">&nbsp;</button>
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">
@@ -118,17 +118,17 @@
 		},
 		onAdd: function()
 		{
-			po.handleAddAction("/chart/add");
+			po.handleAddAction("/chart/add", {width: "70vw"});
 		},
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/chart/edit");
+			po.handleOpenOfAction("/chart/edit", {width: "70vw"});
 		},
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/chart/view");
+			po.handleOpenOfAction("/chart/view", {width: "70vw"});
 		},
 
 		onShare: function()

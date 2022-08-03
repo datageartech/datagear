@@ -77,48 +77,45 @@
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}chartDataSetVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
-						<p-panel v-for="cds in fm.chartDataSetVOs" :header="cds.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
+						<p-panel v-for="(cds, cdsIdx) in fm.chartDataSetVOs" :header="cds.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
 							<template #icons>
 								<p-button icon="pi pi-arrow-up" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"></p-button>
 								<p-button icon="pi pi-arrow-down" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"></p-button>
 								<p-button icon="pi pi-times" class="p-button-sm p-button-secondary p-button-rounded p-button-text p-button-danger mr-5"></p-button>
 							</template>
 							<div>
-								<div v-for="dp in cds.dataSet.properties" :key="dp.name" class="p-card p-2 mb-3">
-									<div>
-										<i class="pi pi-angle-right"></i>
-										{{dp.name}}
-									</div>
-									<div class="px-4">
-										<div class="field grid">
-											<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
-												标记
-											</label>
-											<div class="field-input col-12 md:col-9">
-												<div class="input p-component p-inputtext w-full overflow-auto" style="height:3rem;">
-												</div>
-											</div>
-										</div>
-										<div class="field grid">
-											<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
-												别名
-											</label>
-											<div class="field-input col-12 md:col-9">
-												<p-inputtext type="text" class="input w-full" maxlength="50">
-												</p-inputtext>
-											</div>
-										</div>
-										<div class="field grid">
-											<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
-												排序
-											</label>
-											<div class="field-input col-12 md:col-9">
-												<p-inputtext type="text" class="input w-full" maxlength="50">
-												</p-inputtext>
+								<p-fieldset v-for="(dp, dpIdx) in cds.dataSet.properties" :key="dp.name" :legend="dp.name" class="legend-sm mb-3">
+									<div class="field grid mb-2">
+										<label :for="'${pid}cdspidSign_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+											title="<@spring.message code='chart.cds.dataSign.desc' />">
+											<@spring.message code='sign' />
+										</label>
+										<div class="field-input col-12 md:col-9">
+											<div :id="'${pid}cdspidSign_'+cdsIdx+'_'+dpIdx" class="input p-component p-inputtext w-full overflow-auto" style="height:4rem;">
 											</div>
 										</div>
 									</div>
-								</div>
+									<div class="field grid mb-2">
+										<label :for="'${pid}cdspidAlias_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+											title="<@spring.message code='chart.cds.propertyAlias.desc' />">
+											<@spring.message code='alias' />
+										</label>
+										<div class="field-input col-12 md:col-9">
+											<p-inputtext :id="'${pid}cdspidAlias_'+cdsIdx+'_'+dpIdx" type="text" class="input w-full" maxlength="50" :placeholder="dp.name">
+											</p-inputtext>
+										</div>
+									</div>
+									<div class="field grid mb-2">
+										<label :for="'${pid}cdspidSort_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+											title="<@spring.message code='chart.cds.propertyOrder.desc' />">
+											<@spring.message code='sort' />
+										</label>
+										<div class="field-input col-12 md:col-9">
+											<p-inputtext :id="'${pid}cdspidSort_'+cdsIdx+'_'+dpIdx" type="text" class="input w-full" maxlength="50" :placeholder="dpIdx">
+											</p-inputtext>
+										</div>
+									</div>
+								</p-fieldset>
 							</div>
 						</p-panel>
 					</div>
@@ -157,6 +154,7 @@
 		{
 			return $.toChartPluginHtml(chartPlugin, po.contextPath, {justifyContent: "start"});
 		},
+		
 		onDeleteAnalysisProject: function()
 		{
 			var fm = po.vueFormModel();
