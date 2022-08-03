@@ -470,7 +470,7 @@ public class DataSetController extends AbstractSchemaConnController
 		}
 
 		dataSet.setId(null);
-		clearSensitiveInfo(dataSet);
+		convertForFormModel(dataSet);
 		setNullAnalysisProjectIfNoPermission(user, dataSet, getAnalysisProjectService());
 
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD,
@@ -493,7 +493,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser();
 
 		DataSetEntity dataSet = getByIdForEdit(this.dataSetEntityService, user, id);
-		clearSensitiveInfo(dataSet);
+		convertForFormModel(dataSet);
 		
 		setFormModel(model, dataSet, REQUEST_ACTION_EDIT,
 						"saveEditFor" + dataSet.getDataSetType());
@@ -722,7 +722,7 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser();
 
 		DataSetEntity dataSet = getByIdForView(this.dataSetEntityService, user, id);
-		clearSensitiveInfo(dataSet);
+		convertForFormModel(dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
@@ -946,7 +946,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return dataSet.resolve(query);
 	}
 	
-	protected void clearSensitiveInfo(DataSetEntity entity)
+	protected void convertForFormModel(DataSetEntity entity)
 	{
 		if(entity instanceof SqlDataSetEntity)
 			((SqlDataSetEntity) entity).clearSchemaPassword();

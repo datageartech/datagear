@@ -326,7 +326,8 @@ var ${pid} =
 		"p-inlinemessage": primevue.inlinemessage,
 		"p-steps": primevue.steps,
 		"p-dataview": primevue.dataview,
-		"p-overlaypanel": primevue.overlaypanel
+		"p-overlaypanel": primevue.overlaypanel,
+		"p-panel": primevue.panel
 	},
 	
 	//vue挂载

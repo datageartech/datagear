@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -179,12 +180,11 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
 		setCookieAnalysisProject(request, response, chart);
 
-		model.addAttribute("chart", chart);
 		addAttributeForWriteJson(model, "chartPluginVO", null);
 		model.addAttribute("initResultDataFormat", createDefaultResultDataFormat());
 		model.addAttribute("enableResultDataFormat", false);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.addChart");
-		model.addAttribute(KEY_FORM_ACTION, "save");
+
+		setFormModel(model, chart, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
 
 		return "/chart/chart_form";
 	}
@@ -193,28 +193,17 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
+		
+		HtmlChartWidgetEntity chart = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
+		convertForFormModel(chart, request);
 
-		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getByIdForEdit(user, id);
-
-		if (chart == null)
-			throw new RecordNotFoundException();
-
-		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
-
-		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
-				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
-				: null);
-
-		model.addAttribute("chart", chart);
-		addAttributeForWriteJson(model, "chartPluginVO", chartPluginVO);
-		addAttributeForWriteJson(model, "chartDataSets", toChartDataSetViewObjs(chart.getChartDataSets()));
 		model.addAttribute("initResultDataFormat",
 				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
 		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.editChart");
-		model.addAttribute(KEY_FORM_ACTION, "save");
 
+		setFormModel(model, chart, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
+		
 		return "/chart/chart_form";
 	}
 
@@ -222,13 +211,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
-		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
-
-		if (chart == null)
-			throw new RecordNotFoundException();
-
+		HtmlChartWidgetEntity chart = getByIdForView(this.htmlChartWidgetEntityService, user, id);
 		setNullAnalysisProjectIfNoPermission(user, chart, getAnalysisProjectService());
 
 		ChartDataSet[] chartDataSets = chart.getChartDataSets();
@@ -254,22 +239,14 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		}
 
 		chart.setId(null);
-	
-		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
-
-		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
-				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
-				: null);
-
-		model.addAttribute("chart", chart);
-		addAttributeForWriteJson(model, "chartPluginVO", chartPluginVO);
-		addAttributeForWriteJson(model, "chartDataSets", toChartDataSetViewObjs(chartDataSets));
+		convertForFormModel(chart, request);
+		
 		model.addAttribute("initResultDataFormat",
 				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
 		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.addChart");
-		model.addAttribute(KEY_FORM_ACTION, "save");
 
+		setFormModel(model, chart, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
+		
 		return "/chart/chart_form";
 	}
 
@@ -278,7 +255,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody HtmlChartWidgetEntity entity)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		trimAnalysisProjectAwareEntityForSave(entity);
 
@@ -288,6 +265,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		{
 			entity.setId(IDUtil.randomIdOnTime20());
 			entity.setCreateUser(user.cloneNoPassword());
+			entity.setCreateTime(new Date());
 			inflateHtmlChartWidgetEntity(entity, request);
 
 			checkSaveEntity(entity);
@@ -303,35 +281,25 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		// 返回参数不应该完全加载插件对象
 		entity.setHtmlChartPlugin(paramPlugin);
-		return optMsgSaveSuccessResponseEntity(request, entity);
+		
+		return operationSuccessResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/view")
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
-		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
-
-		if (chart == null)
-			throw new RecordNotFoundException();
-
-		chart.setPlugin(toHtmlChartPluginVO(request, chart.getPlugin()));
-
-		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
-				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
-				: null);
-
-		model.addAttribute("chart", chart);
-		addAttributeForWriteJson(model, "chartPluginVO", chartPluginVO);
-		addAttributeForWriteJson(model, "chartDataSets", toChartDataSetViewObjs(chart.getChartDataSets()));
+		HtmlChartWidgetEntity chart = getByIdForView(this.htmlChartWidgetEntityService, user, id);
+		convertForFormModel(chart, request);
+		
 		model.addAttribute("initResultDataFormat",
 				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
 		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.viewChart");
-		model.addAttribute(KEY_READONLY, true);
 
+		setFormModel(model, chart, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		
 		return "/chart/chart_form";
 	}
 
@@ -340,7 +308,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -348,7 +316,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			this.htmlChartWidgetEntityService.deleteById(user, id);
 		}
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")
@@ -379,7 +347,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
-		setChartPluginViewInfo(request, pagingData.getItems());
+		setChartPluginView(request, pagingData.getItems());
 
 		return pagingData;
 	}
@@ -409,7 +377,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		}
 		else
 		{
-			User user = WebUtils.getUser(request, response);
+			User user = WebUtils.getUser();
 			HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
 	
 			showChart(request, response, model, user, chart);
@@ -430,7 +398,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
 
 		String resName = resolvePathAfter(request, "/show/" + id + "/");
@@ -561,7 +529,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		return webContext;
 	}
 
-	protected void setChartPluginViewInfo(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
+	protected void setChartPluginView(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
 	{
 		if (entities == null)
 			return;
@@ -571,7 +539,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		for (HtmlChartWidgetEntity entity : entities)
 		{
-			entity.setPlugin(toHtmlChartPluginVO(entity.getPlugin(), themeName, locale));
+			entity.setPlugin(toHtmlChartPluginView(entity.getPlugin(), themeName, locale));
 		}
 	}
 
@@ -617,5 +585,11 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		if (isEmpty(chart.getPlugin()))
 			throw new IllegalInputException();
+	}
+	
+	protected void convertForFormModel(HtmlChartWidgetEntity entity, HttpServletRequest request)
+	{
+		entity.setPlugin(toHtmlChartPluginView(request, entity.getPlugin()));
+		entity.setChartDataSets(toChartDataSetViews(entity.getChartDataSets()));
 	}
 }

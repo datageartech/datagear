@@ -144,7 +144,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			IOUtil.close(out);
 		}
 
-		List<HtmlChartPluginVO> pluginInfos = new ArrayList<>();
+		List<HtmlChartPluginView> pluginInfos = new ArrayList<>();
 		Set<HtmlChartPlugin> loadedPlugins = resolveHtmlChartPlugins(zipFile);
 		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
@@ -152,7 +152,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		try
 		{
 			for (HtmlChartPlugin chartPlugin : loadedPlugins)
-				pluginInfos.add(toHtmlChartPluginVO(chartPlugin, themeName, locale));
+				pluginInfos.add(toHtmlChartPluginView(chartPlugin, themeName, locale));
 		}
 		catch (HtmlChartPluginLoadException e)
 		{
@@ -222,20 +222,20 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<HtmlChartPluginVO> queryData(HttpServletRequest request, HttpServletResponse response,
+	public List<HtmlChartPluginView> queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
 			throws Exception
 	{
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
-		return findHtmlChartPluginVOs(request, pagingQuery.getKeyword());
+		return findHtmlChartPluginViews(request, pagingQuery.getKeyword());
 	}
 
 	@RequestMapping("/select")
 	public String select(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		List<HtmlChartPluginVO> htmlChartPluginVOs = findHtmlChartPluginVOs(request, null);
-		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginVOs);
+		List<HtmlChartPluginView> htmlChartPluginViews = findHtmlChartPluginViews(request, null);
+		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginViews);
 
 		addAttributeForWriteJson(model, "categorizations", categorizations);
 
@@ -251,8 +251,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	{
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
-		List<HtmlChartPluginVO> htmlChartPluginVOs = findHtmlChartPluginVOs(request, pagingQuery.getKeyword());
-		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginVOs);
+		List<HtmlChartPluginView> htmlChartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword());
+		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginViews);
 
 		return categorizations;
 	}

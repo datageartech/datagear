@@ -30,6 +30,7 @@
 			
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isSelectAction"></p-button>
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isSelectAction"></p-button>
+			<p-splitbutton label="<@spring.message code='show' />" @click="onShow" :model="pm.showBtnItems" v-if="!pm.isSelectAction"></p-splitbutton>
 			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
 			<p-button label="<@spring.message code='share' />" @click="onShare" v-if="!pm.isSelectAction"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isSelectAction"></p-button>
@@ -51,15 +52,41 @@
 			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime col-last"></p-column>
 		</p-datatable>
 	</div>
+	<button type="button" class="copyShowURLDelegation" class="hidden">&nbsp;</button>
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">
 <script>
 (function(po)
 {
+	po.serverURL = "${serverURL}";
+	
+	po.buildShowURL = function(id)
+	{
+		return po.concatContextPath("/dashboard/show/"+id+"/");
+	};
+	
 	po.setupAjaxTable("/dashboard/pagingQueryData",
 	{
 		multiSortMeta: [ {field: "createTime", order: -1} ]
+	});
+
+	po.vuePageModel(
+	{
+		showBtnItems:
+		[
+			{
+				label: "<@spring.message code='copyShowUrl' />",
+				command: function()
+				{
+					po.executeOnSelect(function(entity)
+	 				{
+	    				po._currentShowURL = po.serverURL + po.buildShowURL(entity.id);
+	    				po.element(".copyShowURLDelegation").click();
+	 				});
+				}
+			}
+		]
 	});
 	
 	po.vueMethod(
@@ -95,7 +122,32 @@
 		onSelect: function()
 		{
 			po.handleSelectAction();
+		},
+		
+		onShow: function(e)
+		{
+			po.executeOnSelect(function(entity)
+			{
+				window.open(po.buildShowURL(entity.id), entity.id);
+			});
 		}
+	});
+
+	po.vueMounted(function()
+	{
+		var clipboard = new ClipboardJS(po.element(".copyShowURLDelegation")[0],
+		{
+			//需要设置container，不然在对话框中打开页面后复制不起作用
+			container: po.element()[0],
+			text: function(trigger)
+			{
+				return (po._currentShowURL || "");
+			}
+		});
+		clipboard.on('success', function(e)
+		{
+			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
+		});
 	});
 	
 	po.vueMount();

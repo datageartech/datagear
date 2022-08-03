@@ -94,15 +94,21 @@ label[title]:not(.no-tip)::after,
 	margin-right: 0.1rem;
 }
 
-/*圆角按钮sm*/
+/*圆形按钮sm*/
 .p-button-sm.p-button.p-button-icon-only.p-button-rounded{
 	font-size: .875rem !important;
 	width: 2rem !important;
     height: 2rem !important;
     padding: 0.251rem 0.251rem !important;
 }
-/*圆角按钮xs*/
+/*圆形按钮xs*/
 .p-button-xs.p-button.p-button-icon-only.p-button-rounded{
+	font-size: .75rem !important;
+	width: 1.5rem !important;
+	height: 1.5rem !important;
+	padding: 0.2rem 0.2rem !important;
+}
+.p-button-xs.p-button.p-button-icon-only{
 	font-size: .75rem !important;
 	width: 1.5rem !important;
 	height: 1.5rem !important;
@@ -259,6 +265,12 @@ label[title]:not(.no-tip)::after,
 }
 .p-datatable-table .col-last{
 	max-width: 50%;
+}
+
+/*无边框面板*/
+.p-panel.no-panel-border .p-panel-header,
+.p-panel.no-panel-border .p-panel-content{
+	border-width: 0;
 }
 
 /*横向操作组*/
@@ -549,4 +561,15 @@ label[title]:not(.no-tip)::after,
 }
 .dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-foot{
 	text-align: center;
+}
+
+.page-form-chart .plugin-info{
+	height: 2em;
+}
+.page-form-chart .plugin-info .plugin-icon{
+	width: 2rem;
+	height: 2rem;	
+}
+.page-form-chart .chart-datasets{
+	height: 50vh;
 }

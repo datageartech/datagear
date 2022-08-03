@@ -14,12 +14,19 @@
 
 (function($, undefined)
 {
-	$.toChartPluginHtml = function(chartPlugin, contextPath, vertical)
+	$.toChartPluginHtml = function(chartPlugin, contextPath, options)
 	{
-		vertical = (vertical == null ? false : vertical);
+		options = $.extend(
+		{
+			//是否竖向排版
+			vertical: false,
+			//横向对齐方式："start"、"center"、"end"
+			justifyContent: "center"
+		},
+		options);
 		
-		var html = "<div class='plugin-info flex align-items-center justify-content-center"
-					+(vertical ? " flex-column block " : " flex-row inline ")
+		var html = "<div class='plugin-info flex align-items-center justify-content-"+options.justifyContent
+					+(options.vertical ? " flex-column block " : " flex-row inline ")
 					+(!chartPlugin || !chartPlugin.iconUrl ? " no-icon " : "")
 					+"'>";
 		
@@ -840,6 +847,41 @@
 			re[i] = array[i][name];
 		
 		return (isArray? re : re[0]);
+	};
+	
+	/**
+	 * 获取对象或者对象数组的属性值参数字符串，例如：“id=1&id=2&id=3”
+	 * 
+	 * @param objOrArray
+	 * @param propertyName
+	 * @param paramName 可选，参数名
+	 */
+	$.propertyValueParam = function(objOrArray, propertyName, paramName)
+	{
+		var re = "";
+		
+		paramName = (paramName ? paramName : propertyName);
+		paramName = encodeURIComponent(paramName);
+		
+		if(!$.isArray(objOrArray))
+			objOrArray = [objOrArray];
+		
+		for(var i=0; i<objOrArray.length; i++)
+		{
+			var ele = objOrArray[i];
+			
+			var pv = (ele ? ele[propertyName] : null);
+			
+			if(pv == undefined || pv == null)
+				pv = "";
+			
+			if(re != "")
+				re += "&";
+			
+			re += paramName + "=" + encodeURIComponent(pv);
+		}
+		
+		return re;
 	};
 	
 	$.isHtmlFile = function(fileName)

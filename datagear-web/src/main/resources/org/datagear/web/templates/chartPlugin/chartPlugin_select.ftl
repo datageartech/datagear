@@ -179,7 +179,7 @@
 		
 		formatChartPlugin: function(chartPlugin)
 		{
-			return $.toChartPluginHtml(chartPlugin, po.contextPath, true);
+			return $.toChartPluginHtml(chartPlugin, po.contextPath, {vertical:true});
 		},
 		
 		onCategoryMenuItemChange: function(e)

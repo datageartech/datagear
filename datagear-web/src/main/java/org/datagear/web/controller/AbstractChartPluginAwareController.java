@@ -29,6 +29,7 @@ import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.util.i18n.Label;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
@@ -74,7 +75,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		this.categorizationResolver = categorizationResolver;
 	}
 
-	protected List<Categorization> resolveCategorizations(List<HtmlChartPluginVO> chartPluginVOs)
+	protected List<Categorization> resolveCategorizations(List<HtmlChartPluginView> chartPluginVOs)
 	{
 		return this.categorizationResolver.resolve(chartPluginVOs);
 	}
@@ -86,21 +87,20 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 * @param id
 	 * @return 返回{@code null}表示未找到
 	 */
-	protected HtmlChartPluginVO getHtmlChartPluginVO(HttpServletRequest request, String id)
+	protected HtmlChartPluginView getHtmlChartPluginView(HttpServletRequest request, String id)
 	{
 		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
 
 		if (plugins == null)
 			return null;
 
+		Locale locale = WebUtils.getLocale(request);
+		String themeName = resolveChartPluginIconThemeName(request);
+		
 		for (HtmlChartPlugin plugin : plugins)
 		{
 			if (plugin.getId().equals(id))
-			{
-				Locale locale = WebUtils.getLocale(request);
-				String themeName = resolveChartPluginIconThemeName(request);
-				return toHtmlChartPluginVO(plugin, themeName, locale);
-			}
+				return toHtmlChartPluginView(plugin, themeName, locale);
 		}
 
 		return null;
@@ -113,9 +113,9 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 * @param keyword
 	 * @return
 	 */
-	protected List<HtmlChartPluginVO> findHtmlChartPluginVOs(HttpServletRequest request, String keyword)
+	protected List<HtmlChartPluginView> findHtmlChartPluginViews(HttpServletRequest request, String keyword)
 	{
-		List<HtmlChartPluginVO> pluginViews = new ArrayList<>();
+		List<HtmlChartPluginView> pluginViews = new ArrayList<>();
 
 		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
 
@@ -125,14 +125,14 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			String themeName = resolveChartPluginIconThemeName(request);
 
 			for (HtmlChartPlugin plugin : plugins)
-				pluginViews.add(toHtmlChartPluginVO(plugin, themeName, locale));
+				pluginViews.add(toHtmlChartPluginView(plugin, themeName, locale));
 		}
 
-		return KeywordMatcher.<HtmlChartPluginVO> match(pluginViews, keyword,
-				new KeywordMatcher.MatchValue<HtmlChartPluginVO>()
+		return KeywordMatcher.<HtmlChartPluginView> match(pluginViews, keyword,
+				new KeywordMatcher.MatchValue<HtmlChartPluginView>()
 				{
 					@Override
-					public String[] get(HtmlChartPluginVO t)
+					public String[] get(HtmlChartPluginView t)
 					{
 						return new String[] { (t.getNameLabel() == null ? null : t.getNameLabel().getValue()),
 								(t.getDescLabel() == null ? null : t.getDescLabel().getValue()) };
@@ -140,66 +140,66 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 				});
 	}
 
-	protected HtmlChartPluginVO toHtmlChartPluginVO(HttpServletRequest request, HtmlChartPlugin chartPlugin)
+	protected HtmlChartPluginView toHtmlChartPluginView(HttpServletRequest request, HtmlChartPlugin chartPlugin)
 	{
 		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
 
-		return toHtmlChartPluginVO(chartPlugin, themeName, locale);
+		return toHtmlChartPluginView(chartPlugin, themeName, locale);
 	}
 
-	protected HtmlChartPluginVO toHtmlChartPluginVO(HtmlChartPlugin chartPlugin, String themeName, Locale locale)
+	protected HtmlChartPluginView toHtmlChartPluginView(HtmlChartPlugin chartPlugin, String themeName, Locale locale)
 	{
-		HtmlChartPluginVO pluginVO = new HtmlChartPluginVO();
+		HtmlChartPluginView pluginView = new HtmlChartPluginView();
 
-		pluginVO.setId(chartPlugin.getId());
+		pluginView.setId(chartPlugin.getId());
 
-		pluginVO.setNameLabel(toConcreteLabel(chartPlugin.getNameLabel(), locale));
-		pluginVO.setDescLabel(toConcreteLabel(chartPlugin.getDescLabel(), locale));
-		pluginVO.setManualLabel(toConcreteLabel(chartPlugin.getManualLabel(), locale));
+		pluginView.setNameLabel(toConcreteLabel(chartPlugin.getNameLabel(), locale));
+		pluginView.setDescLabel(toConcreteLabel(chartPlugin.getDescLabel(), locale));
+		pluginView.setManualLabel(toConcreteLabel(chartPlugin.getManualLabel(), locale));
 
-		pluginVO.setIconUrl(resolveIconUrl(chartPlugin, themeName));
+		pluginView.setIconUrl(resolveIconUrl(chartPlugin, themeName));
 
 		List<DataSign> dataSigns = chartPlugin.getDataSigns();
 		if (dataSigns != null)
 		{
-			List<DataSign> dataSignVOs = new ArrayList<>(dataSigns.size());
+			List<DataSign> dataSignViews = new ArrayList<>(dataSigns.size());
 			for (DataSign dataSign : dataSigns)
 			{
 				DataSign view = new DataSign(dataSign.getName(), dataSign.isRequired(), dataSign.isMultiple());
 				view.setNameLabel(toConcreteLabel(dataSign.getNameLabel(), locale));
 				view.setDescLabel(toConcreteLabel(dataSign.getDescLabel(), locale));
 
-				dataSignVOs.add(view);
+				dataSignViews.add(view);
 			}
 
-			pluginVO.setDataSigns(dataSignVOs);
+			pluginView.setDataSigns(dataSignViews);
 		}
 
-		pluginVO.setVersion(chartPlugin.getVersion());
-		pluginVO.setOrder(chartPlugin.getOrder());
+		pluginView.setVersion(chartPlugin.getVersion());
+		pluginView.setOrder(chartPlugin.getOrder());
 
 		List<Category> categories = chartPlugin.getCategories();
 		if (categories != null)
 		{
-			List<Category> categoryVOs = new ArrayList<Category>(categories.size());
+			List<Category> categoryViews = new ArrayList<Category>(categories.size());
 
 			for(Category category : categories)
 			{
-				Category categoryVO = new Category(category.getName());
-				categoryVO.setNameLabel(toConcreteLabel(category.getNameLabel(), locale));
-				categoryVO.setDescLabel(toConcreteLabel(category.getDescLabel(), locale));
-				categoryVO.setOrder(category.getOrder());
+				Category categoryView = new Category(category.getName());
+				categoryView.setNameLabel(toConcreteLabel(category.getNameLabel(), locale));
+				categoryView.setDescLabel(toConcreteLabel(category.getDescLabel(), locale));
+				categoryView.setOrder(category.getOrder());
 
-				categoryVOs.add(categoryVO);
+				categoryViews.add(categoryView);
 			}
 
-			pluginVO.setCategories(categoryVOs);
+			pluginView.setCategories(categoryViews);
 		}
 
-		pluginVO.setCategoryOrders(chartPlugin.getCategoryOrders());
+		pluginView.setCategoryOrders(chartPlugin.getCategoryOrders());
 
-		return pluginVO;
+		return pluginView;
 	}
 
 	protected String resolveChartPluginIconThemeName(HttpServletRequest request)
@@ -241,17 +241,17 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return "/chartPlugin/icon/" + plugin.getId();
 	}
 
-	protected ChartDataSetViewObj[] toChartDataSetViewObjs(ChartDataSet[] chartDataSets)
+	protected ChartDataSetView[] toChartDataSetViews(ChartDataSet[] chartDataSets)
 	{
 		if (chartDataSets == null)
 			return null;
 
-		ChartDataSetViewObj[] viewObjs = new ChartDataSetViewObj[chartDataSets.length];
+		ChartDataSetView[] views = new ChartDataSetView[chartDataSets.length];
 
 		for (int i = 0; i < chartDataSets.length; i++)
-			viewObjs[i] = new ChartDataSetViewObj(chartDataSets[i]);
+			views[i] = new ChartDataSetView(chartDataSets[i]);
 
-		return viewObjs;
+		return views;
 	}
 
 	/**
@@ -260,18 +260,18 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class HtmlChartPluginVO extends HtmlChartPlugin implements Serializable
+	public static class HtmlChartPluginView extends HtmlChartPlugin implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
 		private String iconUrl = null;
 
-		public HtmlChartPluginVO()
+		public HtmlChartPluginView()
 		{
 			super();
 		}
 
-		public HtmlChartPluginVO(String id, Label nameLabel)
+		public HtmlChartPluginView(String id, Label nameLabel)
 		{
 			super.setId(id);
 			super.setNameLabel(nameLabel);
@@ -285,6 +285,34 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		public void setIconUrl(String iconUrl)
 		{
 			this.iconUrl = iconUrl;
+		}
+
+		@JsonIgnore
+		@Override
+		public String getElementTagName()
+		{
+			return super.getElementTagName();
+		}
+
+		@JsonIgnore
+		@Override
+		public long getLastModified()
+		{
+			return super.getLastModified();
+		}
+
+		@JsonIgnore
+		@Override
+		public String getNewLine()
+		{
+			return super.getNewLine();
+		}
+
+		@JsonIgnore
+		@Override
+		public int getOrder()
+		{
+			return super.getOrder();
 		}
 
 		@Override
@@ -301,16 +329,16 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class ChartDataSetViewObj extends ChartDataSet
+	public static class ChartDataSetView extends ChartDataSetVO
 	{
 		private static final long serialVersionUID = 1L;
 
-		public ChartDataSetViewObj()
+		public ChartDataSetView()
 		{
 			super();
 		}
 
-		public ChartDataSetViewObj(ChartDataSet chartDataSet)
+		public ChartDataSetView(ChartDataSet chartDataSet)
 		{
 			super();
 			setDataSet(ProfileDataSet.valueOf(chartDataSet.getDataSet()));
