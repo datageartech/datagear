@@ -79,9 +79,15 @@
 					<div id="${pid}chartDataSetVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
 						<p-panel v-for="(cds, cdsIdx) in fm.chartDataSetVOs" :key="cdsIdx" :header="cds.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
 							<template #icons>
-								<p-button icon="pi pi-arrow-up" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2" v-if="!pm.isReadonlyAction"></p-button>
-								<p-button icon="pi pi-arrow-down" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2" v-if="!pm.isReadonlyAction"></p-button>
-								<p-button icon="pi pi-times" class="p-button-sm p-button-secondary p-button-rounded p-button-text p-button-danger mr-5" v-if="!pm.isReadonlyAction"></p-button>
+								<p-button icon="pi pi-arrow-up" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"
+									@click="onMoveUpChartDataSet($event, cdsIdx)" v-if="!pm.isReadonlyAction">
+								</p-button>
+								<p-button icon="pi pi-arrow-down" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"
+									@click="onMoveDownChartDataSet($event, cdsIdx)" v-if="!pm.isReadonlyAction">
+								</p-button>
+								<p-button icon="pi pi-times" class="p-button-sm p-button-secondary p-button-rounded p-button-text p-button-danger mr-5"
+									@click="onDeleteChartDataSet($event, cdsIdx)" v-if="!pm.isReadonlyAction">
+								</p-button>
 							</template>
 							<div>
 								<p-fieldset v-for="(dp, dpIdx) in cds.dataSet.properties" :key="dpIdx" :legend="formatDspFieldsetName(dp)" class="fieldset-sm mb-3">
@@ -100,7 +106,7 @@
 												</div>
 												<p-button type="button" icon="pi pi-plus"
 													aria:haspopup="true" aria-controls="${pid}dataSignsPanel"
-													@click="onShowDataSignPanel($event, dp)" class="p-button-secondary" v-if="!pm.isReadonlyAction">
+													@click="onShowDataSignPanel($event, cds, dp)" class="p-button-secondary" v-if="!pm.isReadonlyAction">
 												</p-button>
 											</div>
 										</div>
@@ -294,7 +300,7 @@
 				var requiredSign = requiredSigns[j];
 				var contains = false;
 				
-				for(var k =0; k<properties.length; k++)
+				for(var k=0; k<properties.length; k++)
 				{
 					var property = properties[k];
 					var signs = (property.cdsInfo ? (property.cdsInfo.signs || []) : []);
@@ -315,6 +321,22 @@
 		}
 		
 		return true;
+	};
+	
+	po.isChartDataSetSigned = function(chartDataSet, dataSign)
+	{
+		var properties = (chartDataSet.dataSet.properties || []);
+		
+		for(var i=0; i<properties.length; i++)
+		{
+			var property = properties[i];
+			var signs = (property.cdsInfo ? (property.cdsInfo.signs || []) : []);
+			
+			if($.inArrayById(signs, dataSign.name, "name") > -1)
+				return true;
+		}
+		
+		return false;
 	};
 	
 	po.mergeChartCdss = function(chart)
@@ -457,6 +479,7 @@
 	{
 		chartPluginDataSigns: (formModel.htmlChartPlugin ? (formModel.htmlChartPlugin.dataSigns || []) : []),
 		dataSignDetail: { label: "", detail: "" },
+		chartDataSetForSign: null,
 		dataSetPropertyForSign: null,
 		updateIntervalType: (formModel.updateInterval > -1 ? "interval" : "none"),
 		updateIntervalTypeOptions:
@@ -543,9 +566,38 @@
 			});
 		},
 		
-		onShowDataSignPanel: function(e, dataSetProperty)
+		onMoveUpChartDataSet: function(e, cdsIdx)
+		{
+			var fm = po.vueFormModel();
+			if(cdsIdx > 0)
+			{
+				var prev = fm.chartDataSetVOs[cdsIdx - 1];
+				fm.chartDataSetVOs[cdsIdx - 1] = fm.chartDataSetVOs[cdsIdx];
+				fm.chartDataSetVOs[cdsIdx] = prev;
+			}
+		},
+		
+		onMoveDownChartDataSet: function(e, cdsIdx)
+		{
+			var fm = po.vueFormModel();
+			if((cdsIdx + 1) < fm.chartDataSetVOs.length)
+			{
+				var next = fm.chartDataSetVOs[cdsIdx + 1];
+				fm.chartDataSetVOs[cdsIdx + 1] = fm.chartDataSetVOs[cdsIdx];
+				fm.chartDataSetVOs[cdsIdx] = next;
+			}
+		},
+		
+		onDeleteChartDataSet: function(e, cdsIdx)
+		{
+			var fm = po.vueFormModel();
+			fm.chartDataSetVOs.splice(cdsIdx, 1);
+		},
+		
+		onShowDataSignPanel: function(e, chartDataSet, dataSetProperty)
 		{
 			var pm = po.vuePageModel();
+			pm.chartDataSetForSign = chartDataSet;
 			pm.dataSetPropertyForSign = dataSetProperty;
 			
 			po.vueUnref("${pid}dataSignsPanelEle").show(e);
@@ -565,8 +617,17 @@
 		{
 			var pm = po.vuePageModel();
 			
-			if(pm.dataSetPropertyForSign)
+			if(pm.chartDataSetForSign && pm.dataSetPropertyForSign)
 			{
+				if(!dataSign.multiple && po.isChartDataSetSigned(pm.chartDataSetForSign, dataSign))
+				{
+					var msg = $.validator.format("<@spring.message code='chart.dataSetHasDataSign' />",
+							pm.chartDataSetForSign.dataSet.name, po.formatDataSignLabel(dataSign));
+					
+					$.tipWarn(msg);
+					return;
+				}
+				
 				var signs = pm.dataSetPropertyForSign.cdsInfo.signs;
 				
 				if($.inArrayById(signs, dataSign.name, "name") < 0)
