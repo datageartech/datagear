@@ -273,9 +273,13 @@ label[title]:not(.no-tip)::after,
 	border-width: 0;
 }
 
-.p-fieldset.legend-sm .p-fieldset-legend{
+.p-fieldset.fieldset-sm .p-fieldset-legend{
 	padding-top: 0.7rem;
 	padding-bottom: 0.7rem;
+}
+.p-fieldset.fieldset-sm .p-fieldset-content{
+	padding: 0.6rem;
+	padding-bottom: 0.1rem;
 }
 
 /*横向操作组*/
@@ -539,8 +543,16 @@ label[title]:not(.no-tip)::after,
 }
 
 .panel-content-size-sm{
-	width: 36vw;
+	width: 38vw;
 	height: 50vh;
+}
+.panel-content-size-xs{
+	width: 35vw;
+	height: 40vh;
+}
+.panel-content-size-xxs{
+	width: 30vw;
+	height: 30vh;
 }
 
 /*数据集编辑页*/
@@ -576,11 +588,11 @@ label[title]:not(.no-tip)::after,
 	height: 2rem;	
 }
 .page-form-chart .chart-datasets{
-	height: 50vh;
+	min-height: 30vh;
 }
-.page-form-chart .p-fieldset.legend-sm .p-fieldset-legend{
+.page-form-chart .p-fieldset.fieldset-sm .p-fieldset-legend{
 	min-width: 9rem;
 }
-.page-form-chart .p-fieldset.legend-sm .p-fieldset-legend .p-fieldset-legend-text{
+.page-form-chart .p-fieldset.fieldset-sm .p-fieldset-legend .p-fieldset-legend-text{
 	justify-content: flex-start;
 }

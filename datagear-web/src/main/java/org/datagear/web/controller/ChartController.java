@@ -589,7 +589,11 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	
 	protected void convertForFormModel(HtmlChartWidgetEntity entity, HttpServletRequest request)
 	{
-		entity.setPlugin(toHtmlChartPluginView(request, entity.getPlugin()));
+		HtmlChartPlugin plugin = entity.getHtmlChartPlugin();
+		
+		if(plugin != null)
+			entity.setPlugin(getHtmlChartPluginView(request, plugin.getId()));
+		
 		entity.setChartDataSets(toChartDataSetViews(entity.getChartDataSets()));
 	}
 }
