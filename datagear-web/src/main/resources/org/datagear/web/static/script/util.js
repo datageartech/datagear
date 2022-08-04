@@ -1219,13 +1219,13 @@ $.fn.extend(
 				{
 					const field = $(ele).closest(".field-input");
 					$("small.p-error", field).hide();
-					$(".input", field).removeClass("p-invalid");
+					$(".input:first", field).removeClass("p-invalid");
 				});
 				
 				$.each(errorList, function(idx, error)
 				{
 					const field = $(error.element).closest(".field-input");
-					const input = $(".input", field);
+					const input = $(".input:first", field);
 					var msg = $(".validate-msg", field);
 					if(msg.length == 0)
 						msg = $("<div class='validate-msg' />").appendTo(field);

@@ -77,14 +77,14 @@
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}chartDataSetVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
-						<p-panel v-for="(cds, cdsIdx) in fm.chartDataSetVOs" :header="cds.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
+						<p-panel v-for="(cds, cdsIdx) in fm.chartDataSetVOs" :key="cdsIdx" :header="cds.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
 							<template #icons>
 								<p-button icon="pi pi-arrow-up" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2" v-if="!pm.isReadonlyAction"></p-button>
 								<p-button icon="pi pi-arrow-down" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2" v-if="!pm.isReadonlyAction"></p-button>
 								<p-button icon="pi pi-times" class="p-button-sm p-button-secondary p-button-rounded p-button-text p-button-danger mr-5" v-if="!pm.isReadonlyAction"></p-button>
 							</template>
 							<div>
-								<p-fieldset v-for="(dp, dpIdx) in cds.dataSet.properties" :key="dp.name" :legend="dp.name" class="fieldset-sm mb-3">
+								<p-fieldset v-for="(dp, dpIdx) in cds.dataSet.properties" :key="dpIdx" :legend="formatDspFieldsetName(dp)" class="fieldset-sm mb-3">
 									<div class="field grid mb-2">
 										<label :for="'${pid}cdspidSign_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 											title="<@spring.message code='chart.cds.dataSign.desc' />">
@@ -170,6 +170,9 @@
 							v-if="!pm.isReadonlyAction">
 						</p-button>
 					</div>
+		        	<div class="validate-msg">
+		        		<input name="dspDataSignCheckVal" type="text" class="validate-normalizer" />
+		        	</div>
 				</div>
 			</div>
 			<div class="field grid">
@@ -211,7 +214,7 @@
 			</label>
 		</div>
 		<div class="panel-content-size-xs overflow-auto p-3">
-			<div v-for="ds in pm.chartPluginDataSigns" class="mb-2">
+			<div v-for="ds in pm.chartPluginDataSigns" :key="ds.name" class="mb-2">
 				<div class="p-inputgroup">
 					<p-button type="button" :label="formatDataSignLabel(ds)" icon="pi pi-plus"
 						@click="onAddDataSign($event, ds)">
@@ -258,6 +261,60 @@
 			cds.summaryDataSetEntity = cds.dataSet;
 			cds.dataSet = undefined;
 		});
+	};
+	
+	po.validateChartDataSetDataSign = function(chart)
+	{
+		var chartPlugin = chart.htmlChartPlugin;
+		var chartDataSets = (chart.chartDataSetVOs || []);
+		var dataSigns = (chartPlugin ? (chartPlugin.dataSigns || []) : []);
+		
+		if(!dataSigns)
+			return true;
+		
+		var requiredSigns = [];
+		
+		$.each(dataSigns, function(idx, dataSign)
+		{
+			if(dataSign.required == true)
+				requiredSigns.push(dataSign);
+		});
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			
+			if(chartDataSet.attachment == true)
+				continue;
+			
+			var properties = (chartDataSet.dataSet.properties || []);
+			
+			for(var j=0; j<requiredSigns.length; j++)
+			{
+				var requiredSign = requiredSigns[j];
+				var contains = false;
+				
+				for(var k =0; k<properties.length; k++)
+				{
+					var property = properties[k];
+					var signs = (property.cdsInfo ? (property.cdsInfo.signs || []) : []);
+					
+					if($.inArrayById(signs, requiredSign.name, "name") > -1)
+					{
+						contains = true;
+						break;
+					}
+				}
+				
+				if(!contains)
+				{
+					var invalidInfo = { dataSet: chartDataSet.dataSet, dataSign: requiredSign };
+					return invalidInfo;
+				}
+			}
+		}
+		
+		return true;
 	};
 	
 	po.mergeChartCdss = function(chart)
@@ -326,6 +383,8 @@
 			
 			if(propertySigns.length > 0)
 				chartDataSet.propertySigns[property.name] = propertySigns;
+			else
+				chartDataSet.propertySigns[property.name] = undefined;
 			chartDataSet.propertyAliases[property.name] = cdsInfo.alias;
 			chartDataSet.propertyOrders[property.name] = cdsInfo.order;
 			
@@ -340,6 +399,25 @@
 		else
 			return dataSign.name;
 	};
+
+	$.validator.addMethod("dspDataSignRequired", function(chart, element)
+	{
+		var re = po.validateChartDataSetDataSign(chart);
+		
+		if(re == true)
+		{
+			$(element).removeData("invalidMsg");
+			return true;
+		}
+		else
+		{
+			var msg = $.validator.format("<@spring.message code='chart.checkChartDataSetDataSign.required' />",
+						re.dataSet.name, po.formatDataSignLabel(re.dataSign));
+			$(element).data("invalidMsg", msg);
+			
+			return false;
+		}
+	});
 	
 	var formModel = <@writeJson var=formModel />;
 	formModel = $.unescapeHtmlForJson(formModel);
@@ -353,7 +431,25 @@
 	{
 		rules:
 		{
-			updateInterval: {"integer": true}
+			updateInterval: {"integer": true},
+			dspDataSignCheckVal: { "dspDataSignRequired": true }
+		},
+		customNormalizers:
+		{
+			dspDataSignCheckVal: function()
+			{
+				return po.vueFormModel();
+			}
+		},
+		messages:
+		{
+			dspDataSignCheckVal:
+			{
+				dspDataSignRequired: function(val, element)
+				{
+					return $(element).data("invalidMsg");
+				}
+			}
 		}
 	});
 	
@@ -383,6 +479,11 @@
 		formatDataSignLabel: function(dataSign)
 		{
 			return po.formatDataSignLabel(dataSign);
+		},
+		
+		formatDspFieldsetName: function(dataSetProperty)
+		{
+			return "<@spring.message code='propertyWithColon' />" + dataSetProperty.name;
 		},
 		
 		onDeleteAnalysisProject: function()

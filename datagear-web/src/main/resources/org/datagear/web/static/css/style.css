@@ -276,6 +276,7 @@ label[title]:not(.no-tip)::after,
 .p-fieldset.fieldset-sm .p-fieldset-legend{
 	padding-top: 0.7rem;
 	padding-bottom: 0.7rem;
+	font-weight: normal;
 }
 .p-fieldset.fieldset-sm .p-fieldset-content{
 	padding: 0.6rem;
