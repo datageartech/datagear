@@ -172,6 +172,32 @@
 					</div>
 				</div>
 			</div>
+			<div class="field grid">
+				<label for="${pid}updateInterval" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='chart.updateInterval.desc' />">
+					<@spring.message code='updateInterval' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<div class="flex align-content-center">
+						<div class="mr-2">
+							<p-selectbutton v-model="pm.updateIntervalType" :options="pm.updateIntervalTypeOptions"
+								option-label="name" option-value="value" @change="onUpdateIntervalTypeChange">
+							</p-selectbutton>
+						</div>
+						<div class="mr-2" v-if="pm.updateIntervalType == 'interval'">
+							<div class="p-inputgroup">
+								<p-inputtext id="${pid}updateInterval" v-model="fm.updateInterval" type="text" class="input"
+									name="updateInterval" required maxlength="10">
+								</p-inputtext>
+								<span class="p-inputgroup-addon"><@spring.message code='millisecond' /></span>
+							</div>
+						</div>
+						<div class="flex align-items-center" v-if="pm.updateIntervalType == 'interval'">
+							<small class="text-color-secondary"><@spring.message code='chart.updateIntervalValue.desc' /></small>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="page-form-foot flex-grow-0 pt-3 text-center">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
@@ -323,13 +349,25 @@
 	formModel.chartDataSets = undefined;
 	po.mergeChartCdss(formModel);
 	
-	po.setupForm(formModel, {}, {});
+	po.setupForm(formModel, {},
+	{
+		rules:
+		{
+			updateInterval: {"integer": true}
+		}
+	});
 	
 	po.vuePageModel(
 	{
 		chartPluginDataSigns: (formModel.htmlChartPlugin ? (formModel.htmlChartPlugin.dataSigns || []) : []),
 		dataSignDetail: { label: "", detail: "" },
-		dataSetPropertyForSign: null
+		dataSetPropertyForSign: null,
+		updateIntervalType: (formModel.updateInterval > -1 ? "interval" : "none"),
+		updateIntervalTypeOptions:
+		[
+			{ name: "<@spring.message code='noUpdate' />", value: "none" },
+			{ name: "<@spring.message code='interval' />", value: "interval" }
+		]
 	});
 	
 	po.vueRef("${pid}dataSignsPanelEle", null);
@@ -439,6 +477,25 @@
 		{
 			var signs = dataSetProperty.cdsInfo.signs;
 			$.removeById(signs, dataSigName, "name");
+		},
+		
+		onUpdateIntervalTypeChange: function(e)
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			
+			if(e.value == "none")
+			{
+				po._updateIntervalBackup = fm.updateInterval;
+				fm.updateInterval = -1;
+			}
+			else if(e.value == "interval")
+			{
+				if(po._updateIntervalBackup != null && po._updateIntervalBackup > -1)
+					fm.updateInterval = po._updateIntervalBackup;
+				else
+					fm.updateInterval = 1000;
+			}
 		}
 	});
 	
