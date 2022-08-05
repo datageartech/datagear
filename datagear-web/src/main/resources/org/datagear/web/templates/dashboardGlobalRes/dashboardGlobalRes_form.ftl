@@ -61,8 +61,7 @@
 		action.options.data.resourceContent = po.getCodeText(po.codeEditor);
 	};
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.setupForm(formModel, { closeAfterSubmit: false });
 	
 	po.vueMounted(function()

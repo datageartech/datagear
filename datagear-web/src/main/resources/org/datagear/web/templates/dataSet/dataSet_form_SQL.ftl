@@ -97,8 +97,7 @@
 		return fm.shmConFactory.schema.id;
 	};
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.inflateDataSetModel(formModel);
 	formModel.shmConFactory = (formModel.shmConFactory == null ? { schema: {} } : formModel.shmConFactory);
 	formModel.shmConFactory.schema = (formModel.shmConFactory.schema == null ? {} : formModel.shmConFactory.schema);

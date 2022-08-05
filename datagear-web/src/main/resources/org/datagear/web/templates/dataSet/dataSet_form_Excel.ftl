@@ -127,8 +127,7 @@
 			return false;
 	};
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.dataSetResDirectory = (!formModel.dataSetResDirectory ? {} : formModel.dataSetResDirectory);
 	po.inflateDataSetModel(formModel);
 	

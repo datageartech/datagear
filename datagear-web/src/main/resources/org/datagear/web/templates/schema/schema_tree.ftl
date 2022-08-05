@@ -143,7 +143,7 @@
 		var keyword = pm.searchForm.keyword;
 		
 		pm.loadingSchema = true;
-		po.ajaxJson("/schema/"+schemaNode.schemaId+"/pagingQueryTable",
+		po.ajaxJson("/schema/"+encodeURIComponent(schemaNode.schemaId)+"/pagingQueryTable",
 		{
 			data: { keyword: keyword, pageSize: 100, page: page },
 			success: function(response)
@@ -326,7 +326,7 @@
 	
 	po.toSchemaTableUrl = function(schemaId, tableName, reloadTable)
 	{
-		var url = "/data/"+schemaId+"/"+encodeURIComponent(tableName)+"/pagingQuery";
+		var url = "/data/"+encodeURIComponent(schemaId)+"/"+encodeURIComponent(tableName)+"/pagingQuery";
 		
 		if(reloadTable)
 			url += "?reloadTable="+reloadTable;

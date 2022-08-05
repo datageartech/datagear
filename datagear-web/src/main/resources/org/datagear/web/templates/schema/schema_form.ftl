@@ -152,8 +152,7 @@
 		testActionBtnLabel: "<@spring.message code='test' />"
 	});
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.driverEntity = (formModel.driverEntity == null ? {} : formModel.driverEntity);
 	
 	po.setupForm(formModel,

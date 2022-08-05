@@ -154,8 +154,7 @@
 			return false;
 	};
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.inflateDataSetModel(formModel);
 	
 	po.setupForm(formModel, {},
@@ -192,7 +191,7 @@
 			{name: "<@spring.message code='httpDataSet.requestContentType.FORM_URLENCODED' />", value: "${HttpDataSet.REQUEST_CONTENT_TYPE_FORM_URLENCODED}"},
 			{name: "<@spring.message code='httpDataSet.requestContentType.JSON' />", value: "${HttpDataSet.REQUEST_CONTENT_TYPE_JSON}"}
 		],
-		requestContentCharsetOptions: <@writeJson var=availableCharsetNames />,
+		requestContentCharsetOptions: $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />),
 		responseContentTypeOptions:
 		[
 			{name: "<@spring.message code='httpDataSet.responseContentType.JSON' />", value: "${HttpDataSet.RESPONSE_CONTENT_TYPE_JSON}"}

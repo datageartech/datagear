@@ -81,8 +81,7 @@
 			return false;
 	};
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.inflateDataSetModel(formModel);
 	
 	po.setupForm(formModel, {},

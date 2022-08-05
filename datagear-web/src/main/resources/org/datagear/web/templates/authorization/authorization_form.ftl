@@ -138,8 +138,7 @@
 		return (idx >= 0 ? pm.permissionOptions[idx].desc : "");
 	});
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.setupForm(formModel);
 	
 	po.vueMethod(

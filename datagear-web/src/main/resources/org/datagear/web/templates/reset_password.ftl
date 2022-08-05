@@ -162,9 +162,8 @@
 			}
 		]
 	});
-
-	var formModel = <@writeJson var=step />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=step />);
 	po.setupForm(formModel,
 	{
 		tipSuccess: false,

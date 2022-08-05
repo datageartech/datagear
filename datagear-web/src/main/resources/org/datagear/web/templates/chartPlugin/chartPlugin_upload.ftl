@@ -46,8 +46,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}preview" class="input p-component p-inputtext w-full overflow-auto" style="height:8rem;">
-		        		<p-chip v-for="p in pm.chartPlugins.plugins" :key="p.key"
-		        			class="mb-2" :removable="!pm.isReadonlyAction" @remove="onRemovedChartplugin($event, p.id)">
+		        		<p-chip v-for="p in pm.chartPlugins.plugins" :key="p.key" class="mb-2">
 		        			<div v-html="formatChartPlugin(p)"></div>
 		        		</p-chip>
 		        	</div>
@@ -106,18 +105,6 @@
 			po.uploadFileOnUploaded(e);
 			fm.pluginFileName = response.pluginFileName;
 			po.setChartPlugins(response.pluginInfos);
-		},
-		
-		onRemovedChartplugin: function(e, id)
-		{
-			po.confirmDelete(function()
-			{
-				
-			},
-			function()
-			{
-				po.setChartPlugins();
-			});
 		}
 	});
 	

@@ -88,8 +88,7 @@
 {
 	po.submitUrl = "/dashboardGlobalRes/"+po.submitAction;
 	
-	var availableCharsetNames = <@writeJson var=availableCharsetNames />;
-	availableCharsetNames = $.unescapeHtmlForJson(availableCharsetNames);
+	var availableCharsetNames = $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />);
 	
 	po.setupForm(
 	{

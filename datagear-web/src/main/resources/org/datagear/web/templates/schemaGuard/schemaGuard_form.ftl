@@ -78,8 +78,7 @@
 {
 	po.submitUrl = "/schemaGuard/"+po.submitAction;
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.setupForm(formModel, {},
 	{
 		rules :

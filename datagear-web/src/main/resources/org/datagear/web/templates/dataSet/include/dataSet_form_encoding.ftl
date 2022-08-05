@@ -26,7 +26,7 @@
 {
 	po.vuePageModel(
 	{
-		availableCharsetNames: <@writeJson var=availableCharsetNames />
+		availableCharsetNames: $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />)
 	});
 })
 (${pid});

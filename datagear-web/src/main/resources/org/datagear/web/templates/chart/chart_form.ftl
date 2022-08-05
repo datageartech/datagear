@@ -222,8 +222,9 @@
 				</div>
 			</div>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center">
+		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
+			<p-button type="button" label="<@spring.message code='saveAndShow' />" @click="onSaveAndShow"></p-button>
 		</div>
 	</form>
 	<p-overlaypanel ref="${pid}dataSignsPanelEle" append-to="body"
@@ -364,6 +365,14 @@
 {
 	po.submitUrl = "/chart/"+po.submitAction;
 	
+	po.inSaveAndShowAction = function(val)
+	{
+		if(val === undefined)
+			return (po._inSaveAndShowAction == true);
+		
+		po._inSaveAndShowAction = val;
+	};
+	
 	po.beforeSubmitForm = function(action)
 	{
 		var data = action.options.data;
@@ -381,6 +390,8 @@
 			data.resultDataFormat = po.vueRaw(pm.resultDataFormat);
 		else
 			data.resultDataFormat = undefined;
+		
+		action.options.saveAndShowAction = po.inSaveAndShowAction();
 	};
 	
 	po.validateChartDataSetDataSign = function(chart)
@@ -595,7 +606,17 @@
 	formModel.chartDataSets = undefined;
 	po.mergeChartCdss(formModel);
 	
-	po.setupForm(formModel, {},
+	po.setupForm(formModel,
+	{
+		success : function(response)
+		{
+			var options = this;
+			var chart = response.data;
+			
+			if(options.saveAndShowAction)
+				window.open(po.concatContextPath("/chart/show/"+encodeURIComponent(chart.id)+"/"), chart.id);
+		}
+	},
 	{
 		rules:
 		{
@@ -858,6 +879,19 @@
 		onShowDataFormatPanel: function(e)
 		{
 			po.vueUnref("${pid}dataFormatPanelEle").toggle(e);
+		},
+		
+		onSaveAndShow: function(e)
+		{
+			try
+			{
+				po.inSaveAndShowAction(true);
+				po.form().submit();
+			}
+			finally
+			{
+				po.inSaveAndShowAction(false);
+			}
 		}
 	});
 	

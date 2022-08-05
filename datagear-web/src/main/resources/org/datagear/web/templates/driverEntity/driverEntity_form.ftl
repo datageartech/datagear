@@ -53,7 +53,7 @@
 			        	</p-fileupload>
 						<#include "../include/page_fileupload.ftl">
 		        	</div>
-		        	<div class="desc text-color-secondary">
+		        	<div class="desc text-color-secondary" v-if="!pm.isReadonlyAction">
 		        		<small><@spring.message code='driverEntity.driverLibrary.desc1' /></small>
 		        	</div>
 		        </div>
@@ -131,8 +131,7 @@
 		action.options.data = newData;
 	};
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.setupForm(formModel);
 	
 	po.vuePageModel(

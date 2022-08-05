@@ -33,7 +33,8 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}migrateToName" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}migrateToName" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='user.migrateToUser.desc' />">
 					<@spring.message code='migrateToUser' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -85,8 +86,7 @@
 		data.users = undefined;
 	};
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel = { users: formModel };
 	po.setupForm(formModel);
 	

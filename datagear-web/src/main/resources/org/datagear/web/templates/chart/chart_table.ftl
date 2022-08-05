@@ -73,7 +73,7 @@
 	
 	po.buildShowURL = function(id)
 	{
-		return po.concatContextPath("/chart/show/"+id+"/");
+		return po.concatContextPath("/chart/show/"+encodeURIComponent(id)+"/");
 	};
 	
 	po.setupAjaxTable("/chart/pagingQueryData",
