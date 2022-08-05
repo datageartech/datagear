@@ -127,14 +127,14 @@ page_boolean_options.ftl
 					</p-button>
 				</div>
 				<div class="flex-grow-1 flex justify-content-end">
-					<p-button type="button" label="<@spring.message code='set' />"
+					<p-button type="button" label="<@spring.message code='dataFormat' />"
 						@click="toggleDataSourceFormatPanel" aria:haspopup="true" aria-controls="${pid}dataSourceFormatPanel"
 						class="p-button-secondary p-button-sm">
 					</p-button>
 					<p-overlaypanel ref="dataSourceFormatPanelEle" append-to="body" :show-close-icon="true" id="${pid}dataSourceFormatPanel">
 						<div class="pb-2">
 							<label class="text-lg font-bold" title="<@spring.message code='dataSet.dataSourceFormat.desc' />">
-								<@spring.message code='dataSourceFormat' />
+								<@spring.message code='dataFormat' />
 							</label>
 						</div>
 						<div class="panel-content-size-sm overflow-auto p-2">
