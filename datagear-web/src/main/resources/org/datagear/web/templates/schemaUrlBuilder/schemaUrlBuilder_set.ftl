@@ -34,19 +34,9 @@
 							</div>
 				        </div>
 					</div>
-					<div class="field grid">
-						<label for="${pid}preview" class="field-label col-12 mb-2 md:col-3 md:mb-0">
-							&nbsp;
-						</label>
-				        <div class="field-input col-12 md:col-9">
-				        	<p-button type="button" label="<@spring.message code='preview' />"
-				        		@click="onPreview" class="p-button-secondary">
-				        	</p-button>
-				        </div>
-					</div>
 				</div>
 				<div class="col-4">
-					<div class="flex flex-column">
+					<div class="flex flex-column pl-2">
 						<div class="flex-grow-0">
 							<@spring.message code='example' /> :
 						</div>
@@ -69,7 +59,10 @@
 				</div>
 			</div>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center">
+		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<p-button type="button" label="<@spring.message code='preview' />"
+        		@click="onPreview" class="p-button-secondary">
+        	</p-button>
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>
