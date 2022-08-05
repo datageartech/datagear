@@ -37,8 +37,7 @@
 				        	</p-inputtext>
 			        	</div>
 			        	<p-button type="button" label="<@spring.message code='select' />"
-			        		@click="onSelectSchema" class="p-button-secondary"
-			        		v-if="!pm.isReadonlyAction">
+			        		@click="onSelectSchema" v-if="!pm.isReadonlyAction">
 			        	</p-button>
 		        	</div>
 		        </div>

@@ -34,7 +34,7 @@
        	<div id="${pid}fileName" class="fileupload-wrapper flex align-items-center mt-1" v-if="!pm.isReadonlyAction">
         	<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
         		@upload="onUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
-        		:auto="true" choose-label="<@spring.message code='select' />" class="p-button-secondary mr-2">
+        		:auto="true" choose-label="<@spring.message code='select' />" class="mr-2">
 			</p-fileupload>
 			<#include "../../include/page_fileupload.ftl">
 		</div>
@@ -55,7 +55,7 @@
 				</p-inputtext>
 			</div>
         	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectDataSetResDirectory"
-        		class="p-button-secondary" v-if="!pm.isReadonlyAction">
+        		v-if="!pm.isReadonlyAction">
         	</p-button>
 		</div>
 	</div>
@@ -72,7 +72,7 @@
         	</p-inputtext>
         	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectDataSetResFileName"
         		aria:haspopup="true" aria-controls="${pid}dsrFilesPanel"
-        		class="p-button-secondary" v-if="!pm.isReadonlyAction">
+        		v-if="!pm.isReadonlyAction">
         	</p-button>
 			<p-overlaypanel ref="dsrFilesPanelEle" append-to="body"
 				:show-close-icon="true" @show="onDsrFilesPanelShow" id="${pid}dsrFilesPanel" class="dsr-files-panel">

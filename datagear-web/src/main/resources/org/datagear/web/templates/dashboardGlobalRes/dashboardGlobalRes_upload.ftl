@@ -30,7 +30,7 @@
 		        	<div id="${pid}file" class="fileupload-wrapper flex align-items-center mt-1" v-if="!pm.isReadonlyAction">
 			        	<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
 			        		@upload="onUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
-			        		:auto="true" choose-label="<@spring.message code='select' />" class="p-button-secondary mr-2">
+			        		:auto="true" choose-label="<@spring.message code='select' />" class="mr-2">
 			        	</p-fileupload>
 						<#include "../include/page_fileupload.ftl">
 		        	</div>

@@ -70,13 +70,13 @@
 	style="width:1px;z-index:-999">
 </p-button>
 <p-overlaypanel ref="previewParamPanelEle" append-to="body"
-	:show-close-icon="true" @show="onPreviewParamPanelShow" id="${pid}previewParamPanel" class="dataSet-preview-panel">
+	:show-close-icon="true" @show="onPreviewParamPanelShow" id="${pid}previewParamPanel" class="dataset-paramvalue-panel">
 	<div class="mb-2">
 		<label class="text-lg font-bold">
 			<@spring.message code='parameter' />
 		</label>
 	</div>
-	<div class="preview-param-form-wrapper panel-content-size-sm overflow-auto"></div>
+	<div class="paramvalue-form-wrapper panel-content-size-sm overflow-auto"></div>
 </p-overlaypanel>
 <script>
 (function(po)
@@ -253,7 +253,7 @@
 	
 	po.inflatePreviewParamPanel = function()
 	{
-		var wrapper = $(".preview-param-form-wrapper", po.elementOfId("${pid}previewParamPanel", document.body));
+		var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}previewParamPanel", document.body));
 		var pm = po.vuePageModel();
 		
 		var formOptions = $.extend(

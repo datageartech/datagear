@@ -43,7 +43,7 @@
 			        		name="principalName" required maxlength="200" readonly="readonly">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectUser"
-			        		class="p-button-secondary" v-if="!pm.isReadonlyAction">
+			        		v-if="!pm.isReadonlyAction">
 			        	</p-button>
 		        	</div>
 		        	
@@ -52,7 +52,7 @@
 			        		name="principalName" required maxlength="200" readonly="readonly">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectRole"
-			        		class="p-button-secondary" v-if="!pm.isReadonlyAction">
+			        		v-if="!pm.isReadonlyAction">
 			        	</p-button>
 		        	</div>
 		        	
