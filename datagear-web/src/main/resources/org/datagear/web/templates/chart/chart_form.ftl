@@ -62,8 +62,7 @@
 							v-html="formatChartPlugin(fm.htmlChartPlugin)">
 						</div>
 						<p-button type="button" label="<@spring.message code='select' />"
-							@click="onSelectChartPlugin" class="p-button-secondary"
-							v-if="!pm.isReadonlyAction">
+							@click="onSelectChartPlugin" v-if="!pm.isReadonlyAction">
 						</p-button>
 					</div>
 		        	<div class="validate-msg">
@@ -106,7 +105,7 @@
 												</div>
 												<p-button type="button" icon="pi pi-plus"
 													aria:haspopup="true" aria-controls="${pid}dataSignsPanel"
-													@click="onShowDataSignPanel($event, cds, dp)" class="p-button-secondary" v-if="!pm.isReadonlyAction">
+													@click="onShowDataSignPanel($event, cds, dp)" v-if="!pm.isReadonlyAction">
 												</p-button>
 											</div>
 										</div>
@@ -156,14 +155,19 @@
 										</p-selectbutton>
 									</div>
 								</div>
-								<div class="field grid" v-if="cds.dataSet.params.length>0">
+								<div class="field grid" v-if="cds.dataSet.params.length > 0">
 									<label for="'${pid}cdsAtchm_'+cdsIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 										title="<@spring.message code='chart.cds.paramValue.desc' />">
 										<@spring.message code='parameter' />
 									</label>
-									<div class="field-input col-12 md:col-9">
-										<p-button type="button" label="<@spring.message code='edit' />"
-											@click="" class="p-button-secondary">
+									<div class="field-input col-12 md:col-9 h-opts">
+										<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
+											aria:haspopup="true" aria-controls="${pid}paramPanel"
+											@click="onShowParamPanel($event, cds)" class="p-button-secondary">
+										</p-button>
+										<p-button type="button" label="<@spring.message code='clear' />"
+											@click="onClearParamValues($event, cds)" class="p-button-secondary p-button-danger"
+											v-if="!pm.isReadonlyAction">
 										</p-button>
 									</div>
 								</div>
@@ -171,10 +175,18 @@
 						</p-panel>
 					</div>
 					<div class="mt-1">
-						<p-button type="button" label="<@spring.message code='select' />"
-							@click="onAddDataSet" class="p-button-secondary"
-							v-if="!pm.isReadonlyAction">
-						</p-button>
+						<div class="flex justify-content-between">
+							<div>
+								<p-button type="button" label="<@spring.message code='select' />"
+									@click="onAddDataSet" v-if="!pm.isReadonlyAction">
+								</p-button>
+							</div>
+							<div>
+								<p-button type="button" label="<@spring.message code='dataFormat' />"
+									@click="onShowDataFormatPanel" class="p-button-secondary">
+								</p-button>
+							</div>
+						</div>
 					</div>
 		        	<div class="validate-msg">
 		        		<input name="dspDataSignCheckVal" type="text" class="validate-normalizer" />
@@ -247,6 +259,15 @@
 				{{pm.dataSignDetail.detail}}
 			</div>
 		</div>
+	</p-overlaypanel>
+	<p-overlaypanel ref="${pid}paramPanelEle" append-to="body"
+		:show-close-icon="true" @show="onParamPanelShow" id="${pid}paramPanel" class="dataset-paramvalue-panel">
+		<div class="mb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='parameter' />
+			</label>
+		</div>
+		<div class="paramvalue-form-wrapper panel-content-size-sm overflow-auto"></div>
 	</p-overlaypanel>
 </div>
 <#include "../include/page_form.ftl">
@@ -422,6 +443,39 @@
 			return dataSign.name;
 	};
 
+	po.inflateParamPanel = function(chartDataSet)
+	{
+		var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}paramPanel", document.body));
+		var pm = po.vuePageModel();
+		
+		var formOptions = $.extend(
+		{
+			submitText: "<@spring.message code='confirm' />",
+			yesText: "<@spring.message code='yes' />",
+			noText: "<@spring.message code='no' />",
+			paramValues: po.vueRaw(chartDataSet.query.paramValues),
+			readonly: pm.isReadonlyAction,
+			render: function()
+			{
+				$("select, input[type='text'], textarea", this).addClass("p-inputtext p-component w-full");
+				$("button", this).addClass("p-button p-component");
+			},
+			submit: function()
+			{
+				var paramValues = chartFactory.chartSetting.getDataSetParamValueObj(this);
+				chartDataSet.query.paramValues = paramValues;
+				
+				po.vueUnref("${pid}paramPanelEle").hide();
+			}
+		});
+		
+		chartFactory.chartSetting.removeDatetimePickerRoot();
+		wrapper.empty();
+		
+		var params = $.extend(true, [], po.vueRaw(chartDataSet.dataSet.params));
+		chartFactory.chartSetting.renderDataSetParamValueForm(wrapper, params, formOptions);
+	};
+	
 	$.validator.addMethod("dspDataSignRequired", function(chart, element)
 	{
 		var re = po.validateChartDataSetDataSign(chart);
@@ -491,6 +545,7 @@
 	
 	po.vueRef("${pid}dataSignsPanelEle", null);
 	po.vueRef("${pid}dataSignDetailPanelEle", null);
+	po.vueRef("${pid}paramPanelEle", null);
 	
 	po.vueMethod(
 	{
@@ -658,6 +713,28 @@
 				else
 					fm.updateInterval = 1000;
 			}
+		},
+		
+		onShowParamPanel: function(e, chartDataSet)
+		{
+			po._currentChartDataSetForParam = chartDataSet;
+			po.vueUnref("${pid}paramPanelEle").show(e);
+		},
+		
+		onParamPanelShow: function(e)
+		{
+			if(po._currentChartDataSetForParam)
+				po.inflateParamPanel(po._currentChartDataSetForParam);
+		},
+		
+		onClearParamValues: function(e, chartDataSet)
+		{
+			chartDataSet.query.paramValues = {};
+		},
+		
+		onShowDataFormatPanel: function(e)
+		{
+			
 		}
 	});
 	

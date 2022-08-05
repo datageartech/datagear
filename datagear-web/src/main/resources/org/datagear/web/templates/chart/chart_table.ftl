@@ -28,7 +28,7 @@
 		<div class="h-opts col-12 md:col-9 text-right">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
-			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isSelectAction"></p-button>
+			<p-splitbutton label="<@spring.message code='add' />" @click="onAdd" :model="pm.addBtnItems" v-if="!pm.isSelectAction"></p-splitbutton>
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isSelectAction"></p-button>
 			<p-splitbutton label="<@spring.message code='show' />" @click="onShow" :model="pm.showBtnItems" v-if="!pm.isSelectAction"></p-splitbutton>
 			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
@@ -83,6 +83,16 @@
 	
 	po.vuePageModel(
 	{
+		addBtnItems:
+		[
+			{
+				label: "<@spring.message code='copy' />",
+				command: function()
+				{
+					po.handleOpenOfAction("/chart/copy", {width: "70vw"});
+				}
+			}
+		],
 		showBtnItems:
 		[
 			{

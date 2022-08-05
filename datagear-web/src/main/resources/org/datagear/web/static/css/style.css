@@ -564,20 +564,21 @@ label[title]:not(.no-tip)::after,
 .page-form-dataSet .properties-wrapper{
 	height: 36vh;
 }
-.dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-content{
+
+.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-content{
 	/*panel-content-size-sm的高度 - 按钮高度 */
 	height: calc(50vh - 3.8rem);
 	overflow: auto;
 	box-sizing: border-box;
 	margin-bottom: 0.8rem;
 }
-.dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-content .dg-dspv-form-item-label{
+.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-content .dg-dspv-form-item-label{
 	margin-bottom: 0.3rem;
 }
-.dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-content .dg-dspv-form-item-value{
+.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-content .dg-dspv-form-item-value{
 	margin-bottom: 0.6rem;
 }
-.dataSet-preview-panel .preview-param-form-wrapper .dg-dspv-form-foot{
+.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-foot{
 	text-align: center;
 }
 
