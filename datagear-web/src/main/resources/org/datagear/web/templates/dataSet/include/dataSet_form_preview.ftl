@@ -19,12 +19,12 @@
 <p-overlaypanel ref="previewPanelEle" append-to="body"
 	:show-close-icon="true" id="${pid}previewPanel" :class="{'opacity-0': !pm.previewPanelShow}">
 	<div class="flex flex-column">
-		<div class="flex-grow-0 mb-2">
+		<div class="flex-grow-0 pb-2">
 			<label class="text-lg font-bold">
 				<@spring.message code='preview' />
 			</label>
 		</div>
-		<div class="flex-grow-1">
+		<div class="flex-grow-1 p-2">
 			<div style="width:50vw;height:50vh;">
 				<p-datatable :value="pm.previewResultDatas" :scrollable="true" scroll-height="flex"
 					striped-rows class="table-sm" v-if="!pm.previewError">
@@ -71,12 +71,12 @@
 </p-button>
 <p-overlaypanel ref="previewParamPanelEle" append-to="body"
 	:show-close-icon="true" @show="onPreviewParamPanelShow" id="${pid}previewParamPanel" class="dataset-paramvalue-panel">
-	<div class="mb-2">
+	<div class="pb-2">
 		<label class="text-lg font-bold">
 			<@spring.message code='parameter' />
 		</label>
 	</div>
-	<div class="paramvalue-form-wrapper panel-content-size-sm overflow-auto"></div>
+	<div class="paramvalue-form-wrapper panel-content-size-sm overflow-auto p-2"></div>
 </p-overlaypanel>
 <script>
 (function(po)

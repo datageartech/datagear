@@ -66,6 +66,7 @@ a.link.text-color-secondary:hover{
 
 label[title]:not(.no-tip)::after,
 .tip-label[title]::after{
+	display: inline-block;
 	content: "?";
 	color: var(--text-color-secondary);
 	margin-left: 0.1em;
@@ -566,8 +567,8 @@ label[title]:not(.no-tip)::after,
 }
 
 .dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-content{
-	/*panel-content-size-sm的高度 - 按钮高度 */
-	height: calc(50vh - 3.8rem);
+	/*panel-content-size-sm的高度 - 按钮高度和内间距 */
+	height: calc(50vh - 5rem);
 	overflow: auto;
 	box-sizing: border-box;
 	margin-bottom: 0.8rem;

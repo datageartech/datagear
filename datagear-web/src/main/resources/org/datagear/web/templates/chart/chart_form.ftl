@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#assign ResultDataFormat=statics['org.datagear.analysis.ResultDataFormat']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -145,18 +146,18 @@
 									</div>
 								</div>
 								<div class="field grid">
-									<label for="'${pid}cdsAtchm_'+cdsIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+									<label :for="'${pid}cdsAtchm_'+cdsIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 										title="<@spring.message code='chart.cds.attachment.desc' />">
 										<@spring.message code='attachment' />
 									</label>
 									<div class="field-input col-12 md:col-9">
-										<p-selectbutton id="'${pid}cdsAtchm_'+cdsIdx" v-model="cds.attachment" :options="pm.booleanOptions"
+										<p-selectbutton :id="'${pid}cdsAtchm_'+cdsIdx" v-model="cds.attachment" :options="pm.booleanOptions"
 											option-label="name" option-value="value" class="input w-full">
 										</p-selectbutton>
 									</div>
 								</div>
 								<div class="field grid" v-if="cds.dataSet.params.length > 0">
-									<label for="'${pid}cdsAtchm_'+cdsIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+									<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
 										title="<@spring.message code='chart.cds.paramValue.desc' />">
 										<@spring.message code='parameter' />
 									</label>
@@ -183,6 +184,7 @@
 							</div>
 							<div>
 								<p-button type="button" label="<@spring.message code='dataFormat' />"
+									aria:haspopup="true" aria-controls="${pid}dataFormatPanel"
 									@click="onShowDataFormatPanel" class="p-button-secondary">
 								</p-button>
 							</div>
@@ -226,12 +228,12 @@
 	</form>
 	<p-overlaypanel ref="${pid}dataSignsPanelEle" append-to="body"
 		:show-close-icon="true" id="${pid}dataSignsPanel">
-		<div class="mb-2">
+		<div class="pb-2">
 			<label class="text-lg font-bold">
 				<@spring.message code='dataSign' />
 			</label>
 		</div>
-		<div class="panel-content-size-xs overflow-auto p-3">
+		<div class="panel-content-size-xs overflow-auto p-2">
 			<div v-for="ds in pm.chartPluginDataSigns" :key="ds.name" class="mb-2">
 				<div class="p-inputgroup">
 					<p-button type="button" :label="formatDataSignLabel(ds)" icon="pi pi-plus"
@@ -239,14 +241,15 @@
 					</p-button>
 					<p-button type="button" icon="pi pi-angle-right"
 						aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
-						@click="onShowDataSignDetail($event, ds)">
+						@click="onShowDataSignDetail($event, ds)" @mouseover="onUpdateDataSignDetailPanel($event, ds)">
 					</p-button>
 				</div>
 			</div>
 		</div>
 	</p-overlaypanel>
-	<p-overlaypanel ref="${pid}dataSignDetailPanelEle" append-to="body" id="${pid}dataSignDetailPanel">
-		<div class="mb-2">
+	<p-overlaypanel ref="${pid}dataSignDetailPanelEle" append-to="body" id="${pid}dataSignDetailPanel"
+		@show="onDataSignDetailPanelShow" @hide="onDataSignDetailPanelHide">
+		<div class="pb-2">
 			<label class="text-lg font-bold">
 				<@spring.message code='desc' />
 			</label>
@@ -262,12 +265,96 @@
 	</p-overlaypanel>
 	<p-overlaypanel ref="${pid}paramPanelEle" append-to="body"
 		:show-close-icon="true" @show="onParamPanelShow" id="${pid}paramPanel" class="dataset-paramvalue-panel">
-		<div class="mb-2">
+		<div class="pb-2">
 			<label class="text-lg font-bold">
 				<@spring.message code='parameter' />
 			</label>
 		</div>
-		<div class="paramvalue-form-wrapper panel-content-size-sm overflow-auto"></div>
+		<div class="paramvalue-form-wrapper panel-content-size-sm overflow-auto p-2"></div>
+	</p-overlaypanel>
+	<p-overlaypanel ref="${pid}dataFormatPanelEle" append-to="body"
+		:show-close-icon="true" id="${pid}dataFormatPanel">
+		<div class="pb-2">
+			<label class="text-lg font-bold" title="<@spring.message code='chart.rdf.desc' />">
+				<@spring.message code='dataFormat' />
+			</label>
+		</div>
+		<div class="panel-content-size-sm overflow-auto p-2">
+			<div class="field grid">
+				<label for="${pid}rdfEnabled" class="field-label col-12 mb-2"
+					title="<@spring.message code='chart.rdf.enabled.desc' />">
+					<@spring.message code='isEnable' />
+				</label>
+				<div class="field-input col-12">
+					<p-selectbutton id="${pid}rdfEnabled" v-model="pm.enableResultDataFormat" :options="pm.booleanOptions"
+						option-label="name" option-value="value" class="input w-full">
+					</p-selectbutton>
+				</div>
+			</div>
+			<div class="field grid" v-if="pm.enableResultDataFormat">
+				<label for="${pid}rdfDateType" class="field-label col-12 mb-2">
+					<@spring.message code='dateType' />
+				</label>
+				<div class="field-input col-12">
+					<p-selectbutton id="${pid}rdfDateType" v-model="pm.resultDataFormat.dateType" :options="pm.dateOrTimeTypeOptions"
+						option-label="name" option-value="value" class="input w-full">
+					</p-selectbutton>
+				</div>
+			</div>
+			<div class="field grid" v-if="pm.enableResultDataFormat">
+				<label for="${pid}rdfDateFormat" class="field-label col-12 mb-2"
+					title="<@spring.message code='chart.rdf.dateFormat.desc' />">
+					<@spring.message code='dateFormat' />
+				</label>
+				<div class="field-input col-12">
+					<p-inputtext id="${pid}rdfDateFormat" v-model="pm.resultDataFormat.dateFormat" type="text"
+						class="input w-full" maxlength="100">
+					</p-inputtext>
+				</div>
+			</div>
+			<div class="field grid" v-if="pm.enableResultDataFormat">
+				<label for="${pid}rdfTimeType" class="field-label col-12 mb-2">
+					<@spring.message code='timeType' />
+				</label>
+				<div class="field-input col-12">
+					<p-selectbutton id="${pid}rdfTimeType" v-model="pm.resultDataFormat.timeType" :options="pm.dateOrTimeTypeOptions"
+						option-label="name" option-value="value" class="input w-full">
+					</p-selectbutton>
+				</div>
+			</div>
+			<div class="field grid" v-if="pm.enableResultDataFormat">
+				<label for="${pid}rdfTimeFormat" class="field-label col-12 mb-2"
+					title="<@spring.message code='chart.rdf.timeFormat.desc' />">
+					<@spring.message code='timeFormat' />
+				</label>
+				<div class="field-input col-12">
+					<p-inputtext id="${pid}rdfTimeFormat" v-model="pm.resultDataFormat.timeFormat" type="text"
+						class="input w-full" maxlength="100">
+					</p-inputtext>
+				</div>
+			</div>
+			<div class="field grid" v-if="pm.enableResultDataFormat">
+				<label for="${pid}rdfTimestampType" class="field-label col-12 mb-2">
+					<@spring.message code='datetimeType' />
+				</label>
+				<div class="field-input col-12">
+					<p-selectbutton id="${pid}rdfTimestampType" v-model="pm.resultDataFormat.timestampType" :options="pm.dateOrTimeTypeOptions"
+						option-label="name" option-value="value" class="input w-full">
+					</p-selectbutton>
+				</div>
+			</div>
+			<div class="field grid" v-if="pm.enableResultDataFormat">
+				<label for="${pid}rdfTimestampFormat" class="field-label col-12 mb-2"
+					title="<@spring.message code='chart.rdf.timestampFormat.desc' />">
+					<@spring.message code='datetimeFormat' />
+				</label>
+				<div class="field-input col-12">
+					<p-inputtext id="${pid}rdfTimestampFormat" v-model="pm.resultDataFormat.timestampFormat" type="text"
+						class="input w-full" maxlength="100">
+					</p-inputtext>
+				</div>
+			</div>
+		</div>
 	</p-overlaypanel>
 </div>
 <#include "../include/page_form.ftl">
@@ -288,6 +375,12 @@
 			cds.summaryDataSetEntity = cds.dataSet;
 			cds.dataSet = undefined;
 		});
+		
+		var pm = po.vuePageModel();
+		if(pm.enableResultDataFormat)
+			data.resultDataFormat = po.vueRaw(pm.resultDataFormat);
+		else
+			data.resultDataFormat = undefined;
 	};
 	
 	po.validateChartDataSetDataSign = function(chart)
@@ -495,8 +588,7 @@
 		}
 	});
 	
-	var formModel = <@writeJson var=formModel />;
-	formModel = $.unescapeHtmlForJson(formModel);
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
 	formModel.chartDataSetVOs = (formModel.chartDataSetVOs == null ? [] : formModel.chartDataSetVOs);
 	formModel.plugin = undefined;
@@ -533,6 +625,7 @@
 	{
 		chartPluginDataSigns: (formModel.htmlChartPlugin ? (formModel.htmlChartPlugin.dataSigns || []) : []),
 		dataSignDetail: { label: "", detail: "" },
+		dataSignDetailShown: false,
 		chartDataSetForSign: null,
 		dataSetPropertyForSign: null,
 		updateIntervalType: (formModel.updateInterval > -1 ? "interval" : "none"),
@@ -540,12 +633,20 @@
 		[
 			{ name: "<@spring.message code='noUpdate' />", value: "none" },
 			{ name: "<@spring.message code='interval' />", value: "interval" }
+		],
+		resultDataFormat: $.unescapeHtmlForJson(<@writeJson var=initResultDataFormat />),
+		enableResultDataFormat: ("${enableResultDataFormat?string('true', 'false')}" == "true"),
+		dateOrTimeTypeOptions:
+		[
+			{ name: "<@spring.message code='string' />", value: "${ResultDataFormat.TYPE_STRING}" },
+			{ name: "<@spring.message code='number' />", value: "${ResultDataFormat.TYPE_NUMBER}" }
 		]
 	});
 	
 	po.vueRef("${pid}dataSignsPanelEle", null);
 	po.vueRef("${pid}dataSignDetailPanelEle", null);
 	po.vueRef("${pid}paramPanelEle", null);
+	po.vueRef("${pid}dataFormatPanelEle", null);
 	
 	po.vueMethod(
 	{
@@ -668,6 +769,28 @@
 			po.vueUnref("${pid}dataSignDetailPanelEle").show(e);
 		},
 		
+		onDataSignDetailPanelShow: function(e)
+		{
+			var pm = po.vuePageModel();
+			pm.dataSignDetailShown = true;
+		},
+		
+		onDataSignDetailPanelHide: function(e)
+		{
+			var pm = po.vuePageModel();
+			pm.dataSignDetailShown = false;
+		},
+		
+		onUpdateDataSignDetailPanel: function(e, dataSign)
+		{
+			var pm = po.vuePageModel();
+			if(pm.dataSignDetailShown)
+			{
+				pm.dataSignDetail.label = po.formatDataSignLabel(dataSign);
+				pm.dataSignDetail.detail = (dataSign.descLabel ? (dataSign.descLabel.value || "") : "");
+			}
+		},
+		
 		onAddDataSign: function(e, dataSign)
 		{
 			var pm = po.vuePageModel();
@@ -718,7 +841,7 @@
 		onShowParamPanel: function(e, chartDataSet)
 		{
 			po._currentChartDataSetForParam = chartDataSet;
-			po.vueUnref("${pid}paramPanelEle").show(e);
+			po.vueUnref("${pid}paramPanelEle").toggle(e);
 		},
 		
 		onParamPanelShow: function(e)
@@ -734,7 +857,7 @@
 		
 		onShowDataFormatPanel: function(e)
 		{
-			
+			po.vueUnref("${pid}dataFormatPanelEle").toggle(e);
 		}
 	});
 	

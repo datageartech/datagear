@@ -20,6 +20,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.RowSetWriter;
 
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPluginManager;
@@ -197,10 +198,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		
 		HtmlChartWidgetEntity chart = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
 		convertForFormModel(chart, request);
-
-		model.addAttribute("initResultDataFormat",
-				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
-		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
+		setResultDataFormatModel(chart, model);
 
 		setFormModel(model, chart, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
 		
@@ -240,10 +238,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		chart.setId(null);
 		convertForFormModel(chart, request);
-		
-		model.addAttribute("initResultDataFormat",
-				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
-		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
+		setResultDataFormatModel(chart, model);
 
 		setFormModel(model, chart, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
 		
@@ -293,10 +288,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		HtmlChartWidgetEntity chart = getByIdForView(this.htmlChartWidgetEntityService, user, id);
 		convertForFormModel(chart, request);
-		
-		model.addAttribute("initResultDataFormat",
-				(chart.getResultDataFormat() != null ? chart.getResultDataFormat() : createDefaultResultDataFormat()));
-		model.addAttribute("enableResultDataFormat", (chart.getResultDataFormat() != null));
+		setResultDataFormatModel(chart, model);
 
 		setFormModel(model, chart, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		
@@ -595,5 +587,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			entity.setPlugin(getHtmlChartPluginView(request, plugin.getId()));
 		
 		entity.setChartDataSets(toChartDataSetViews(entity.getChartDataSets()));
+	}
+	
+	protected void setResultDataFormatModel(HtmlChartWidgetEntity entity, org.springframework.ui.Model model)
+	{
+		addAttributeForWriteJson(model, "initResultDataFormat",
+				(entity.getResultDataFormat() != null ? entity.getResultDataFormat() : createDefaultResultDataFormat()));
+		model.addAttribute("enableResultDataFormat", (entity.getResultDataFormat() != null));
 	}
 }
