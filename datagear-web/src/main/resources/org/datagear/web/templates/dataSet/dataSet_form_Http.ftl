@@ -66,11 +66,11 @@
 				</div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}requestContent" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+				<label for="${pid}requestContent" class="field-label col-12 mb-2"
 					title="<@spring.message code='httpDataSet.requestContent.desc' />">
 					<@spring.message code='requestBodyJson' />
 				</label>
-		        <div class="field-input col-12 md:col-9">
+		        <div class="field-input col-12">
 		        	<div id="${pid}requestContent" class="code-editor-wrapper input p-component p-inputtext w-full">
 						<div id="${pid}requestContentEditor" class="code-editor"></div>
 					</div>
@@ -80,11 +80,11 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}headerContent" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+				<label for="${pid}headerContent" class="field-label col-12 mb-2"
 					title="<@spring.message code='httpDataSet.headerContent.desc' />">
 					<@spring.message code='requestHeaderJson' />
 				</label>
-		        <div class="field-input col-12 md:col-9">
+		        <div class="field-input col-12">
 		        	<div id="${pid}headerContent" class="code-editor-wrapper input p-component p-inputtext w-full">
 						<div id="${pid}headerContentEditor" class="code-editor"></div>
 					</div>

@@ -16,7 +16,7 @@
 	aria:haspopup="true" aria-controls="${pid}previewPanel"
 	@click="onPreview" class="p-button-secondary">
 </p-button>
-<p-overlaypanel ref="previewPanelEle" append-to="body"
+<p-overlaypanel ref="${pid}previewPanelEle" append-to="body"
 	:show-close-icon="true" id="${pid}previewPanel" :class="{'opacity-0': !pm.previewPanelShow}">
 	<div class="flex flex-column">
 		<div class="flex-grow-0 pb-2">
@@ -53,7 +53,7 @@
 						aria:haspopup="true" aria-controls="${pid}previewTplResultPanel"
 						@click="togglePreviewTplResultPanel" class="p-button-secondary p-button-sm">
 					</p-button>
-					<p-overlaypanel ref="previewTplResultEle" append-to="body"
+					<p-overlaypanel ref="${pid}previewTplResultEle" append-to="body"
 						:show-close-icon="true" id="${pid}previewTplResultPanel">
 						<p-textarea v-model="pm.previewTplResult" class="overflow-auto"
 							readonly style="width:30vw;height:30vh;">
@@ -69,7 +69,7 @@
 	@click="showPreviewParamPanel" class="p-button-secondary opacity-0 overflow-hidden px-0 mx-0 white-space-nowrap"
 	style="width:1px;z-index:-999">
 </p-button>
-<p-overlaypanel ref="previewParamPanelEle" append-to="body"
+<p-overlaypanel ref="${pid}previewParamPanelEle" append-to="body"
 	:show-close-icon="true" @show="onPreviewParamPanelShow" id="${pid}previewParamPanel" class="dataset-paramvalue-panel">
 	<div class="pb-2">
 		<label class="text-lg font-bold">
@@ -220,7 +220,7 @@
 	{
 		if(po.inPreviewAction())
 		{
-			po.vueUnref("previewPanelEle").hide();
+			po.vueUnref("${pid}previewPanelEle").hide();
 		}
 	};
 	
@@ -262,6 +262,7 @@
 			yesText: "<@spring.message code='yes' />",
 			noText: "<@spring.message code='no' />",
 			paramValues: po.vueRaw(pm.previewQuery.paramValues),
+			readonly: pm.isReadonlyAction,
 			render: function()
 			{
 				$("select, input[type='text'], textarea", this).addClass("p-inputtext p-component w-full");
@@ -280,7 +281,7 @@
 		wrapper.empty();
 		
 		var fm = po.vueFormModel();
-		var params = $.extend(true, [], po.vueRaw(fm).params);
+		var params = $.extend(true, [], po.vueRaw(fm.params));
 		
 		chartFactory.chartSetting.renderDataSetParamValueForm(wrapper, params, formOptions);
 	};
@@ -296,9 +297,9 @@
 		previewError: false
 	});
 	
-	po.vueRef("previewPanelEle", null);
-	po.vueRef("previewTplResultEle", null);
-	po.vueRef("previewParamPanelEle", null);
+	po.vueRef("${pid}previewPanelEle", null);
+	po.vueRef("${pid}previewTplResultEle", null);
+	po.vueRef("${pid}previewParamPanelEle", null);
 
 	po.vueMethod(
 	{
@@ -316,7 +317,7 @@
 				pm.previewPanelShow = false;
 				po.trimPreviewQueryFetchSize(pm.previewQuery);
 				
-				po.vueUnref("previewPanelEle").show(e);
+				po.vueUnref("${pid}previewPanelEle").show(e);
 				po.submitPreview();
 				po.inParamFormSubmitAction(false);
 			}
@@ -330,11 +331,11 @@
 		},
 		togglePreviewTplResultPanel: function(e)
 		{
-			po.vueUnref("previewTplResultEle").toggle(e);
+			po.vueUnref("${pid}previewTplResultEle").toggle(e);
 		},
 		showPreviewParamPanel: function(e)
 		{
-			po.vueUnref("previewParamPanelEle").show(e);
+			po.vueUnref("${pid}previewParamPanelEle").show(e);
 		},
 		onPreviewParamPanelShow: function(e)
 		{

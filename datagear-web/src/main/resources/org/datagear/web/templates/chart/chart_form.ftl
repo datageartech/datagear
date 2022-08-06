@@ -72,7 +72,8 @@
 				</div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}chartDataSetVOs" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}chartDataSetVOs" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='chart.cds.desc' />">
 					<@spring.message code='module.dataSet' />
 				</label>
 				<div class="field-input col-12 md:col-9">
@@ -117,7 +118,8 @@
 											<@spring.message code='alias' />
 										</label>
 										<div class="field-input col-12 md:col-9">
-											<p-inputtext :id="'${pid}cdspidAlias_'+cdsIdx+'_'+dpIdx" v-model="dp.cdsInfo.alias" type="text" class="input w-full" maxlength="50" :placeholder="dp.name">
+											<p-inputtext :id="'${pid}cdspidAlias_'+cdsIdx+'_'+dpIdx" v-model="dp.cdsInfo.alias" type="text"
+												class="input w-full" maxlength="50" :placeholder="dp.label ? dp.label : dp.name">
 											</p-inputtext>
 										</div>
 									</div>

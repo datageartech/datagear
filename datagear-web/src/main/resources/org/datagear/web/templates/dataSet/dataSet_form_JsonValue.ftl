@@ -24,11 +24,11 @@
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<div class="field grid">
-				<label for="${pid}value" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+				<label for="${pid}value" class="field-label col-12 mb-2"
 					title="<@spring.message code='jsonValueDataSetEntity.value.desc' />">
 					<@spring.message code='jsonText' />
 				</label>
-		        <div class="field-input col-12 md:col-9">
+		        <div class="field-input col-12">
 		        	<div id="${pid}value" class="code-editor-wrapper input p-component p-inputtext w-full">
 						<div id="${pid}codeEditor" class="code-editor"></div>
 					</div>

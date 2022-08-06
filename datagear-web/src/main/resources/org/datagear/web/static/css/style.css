@@ -591,7 +591,7 @@ label[title]:not(.no-tip)::after,
 	height: 2rem;	
 }
 .page-form-chart .chart-datasets{
-	min-height: 25vh;
+	min-height: 30vh;
 }
 .page-form-chart .p-fieldset.fieldset-sm .p-fieldset-legend{
 	min-width: 9rem;

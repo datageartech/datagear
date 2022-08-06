@@ -43,11 +43,11 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}sql" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+				<label for="${pid}sql" class="field-label col-12 mb-2"
 					title="<@spring.message code='sqlDataSet.url.desc' />">
 					<@spring.message code='sql' />
 				</label>
-		        <div class="field-input col-12 md:col-9">
+		        <div class="field-input col-12">
 		        	<div id="${pid}sql" class="code-editor-wrapper input p-component p-inputtext w-full">
 						<div id="${pid}codeEditor" class="code-editor"></div>
 					</div>

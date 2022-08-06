@@ -218,7 +218,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		RenderContext renderContext = new DefaultRenderContext(resolveDashboardShowParamValues(request));
 		HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
-		User user = WebUtils.getUser(request, response).cloneNoPassword();
+		User user = WebUtils.getUser().cloneNoPassword();
 
 		inflateHtmlRenderContext(request, renderContext, renderAttr, responseWriter, webContext, dashboardTheme,
 				importList, htmlTitleHandler, AnalysisUser.valueOf(user));
@@ -433,7 +433,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (dashboardInfo == null)
 			throw new IllegalInputException();
 
-		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser(request, response));
+		AnalysisUser analysisUser = AnalysisUser.valueOf(WebUtils.getUser());
 
 		DashboardQuery dashboardQuery = form.getDashboardQuery();
 		Map<String, HtmlChartWidget> chartWidgets = getChartWidgets(form.getDashboardQuery(), dashboardInfo, renderer);

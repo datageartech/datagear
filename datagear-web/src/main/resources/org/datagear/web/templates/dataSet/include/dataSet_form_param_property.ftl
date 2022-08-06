@@ -17,11 +17,11 @@ page_boolean_options.ftl
 <#assign ParamInputType=statics['org.datagear.analysis.DataSetParam$InputType']>
 <#assign PropertyDataType=statics['org.datagear.analysis.DataSetProperty$DataType']>
 <div class="field grid">
-	<label for="${pid}params" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+	<label for="${pid}params" class="field-label col-12 mb-2"
 		title="<@spring.message code='dataSet.params.desc' />">
 		<@spring.message code='parameter' />
 	</label>
-	<div class="field-input col-12 md:col-9">
+	<div class="field-input col-12">
 		<div class="p-component p-inputtext">
 			<div class="flex flex-row pb-2" v-if="!pm.isReadonlyAction">
 				<div class="h-opts flex-grow-1">
@@ -105,11 +105,11 @@ page_boolean_options.ftl
 	</div>
 </div>
 <div class="field grid">
-	<label for="${pid}properties" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+	<label for="${pid}properties" class="field-label col-12 mb-2"
 		title="<@spring.message code='dataSet.properties.desc' />">
 		<@spring.message code='property' />
 	</label>
-	<div class="field-input col-12 md:col-9">
+	<div class="field-input col-12">
 		<div class="p-component p-inputtext">
 			<div class="flex flex-row pb-2" v-if="!pm.isReadonlyAction">
 				<div class="h-opts flex-grow-1">
@@ -131,7 +131,7 @@ page_boolean_options.ftl
 						@click="toggleDataSourceFormatPanel" aria:haspopup="true" aria-controls="${pid}dataSourceFormatPanel"
 						class="p-button-secondary p-button-sm">
 					</p-button>
-					<p-overlaypanel ref="dataSourceFormatPanelEle" append-to="body" :show-close-icon="true" id="${pid}dataSourceFormatPanel">
+					<p-overlaypanel ref="${pid}dataSourceFormatPanelEle" append-to="body" :show-close-icon="true" id="${pid}dataSourceFormatPanel">
 						<div class="pb-2">
 							<label class="text-lg font-bold" title="<@spring.message code='dataSet.dataSourceFormat.desc' />">
 								<@spring.message code='dataFormat' />
@@ -208,7 +208,7 @@ page_boolean_options.ftl
 							</p-dropdown>
 						</template>
 					</p-column>
-					<p-column field="displayName" header="<@spring.message code='displayName' />" class="col-name">
+					<p-column field="label" header="<@spring.message code='displayName' />" class="col-name">
 						<template #editor="{ data, field }">
 							<p-inputtext v-model="data[field]" @keydown.enter="onRowEditInputPreventDefault" maxlength="100"></p-inputtext>
 						</template>
@@ -273,7 +273,7 @@ page_boolean_options.ftl
 		]
 	});
 	
-	po.vueRef("dataSourceFormatPanelEle", null);
+	po.vueRef("${pid}dataSourceFormatPanelEle", null);
 	
 	po.hasDuplicateName = function(array, name, ignoreIdx)
 	{
@@ -478,7 +478,7 @@ page_boolean_options.ftl
 		},
 		toggleDataSourceFormatPanel: function(e)
 		{
-			po.vueUnref("dataSourceFormatPanelEle").toggle(e);
+			po.vueUnref("${pid}dataSourceFormatPanelEle").toggle(e);
 		}
 	});
 })

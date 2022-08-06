@@ -34,10 +34,10 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}resourceContent" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}resourceContent" class="field-label col-12 mb-2">
 					<@spring.message code='resourceContent' />
 				</label>
-		        <div class="field-input col-12 md:col-9">
+		        <div class="field-input col-12">
 		        	<div id="${pid}resourceContent" class="code-editor-wrapper input p-component p-inputtext w-full">
 						<div id="${pid}codeEditor" class="code-editor"></div>
 					</div>

@@ -74,7 +74,7 @@
         		aria:haspopup="true" aria-controls="${pid}dsrFilesPanel"
         		v-if="!pm.isReadonlyAction">
         	</p-button>
-			<p-overlaypanel ref="dsrFilesPanelEle" append-to="body"
+			<p-overlaypanel ref="${pid}dsrFilesPanelEle" append-to="body"
 				:show-close-icon="true" @show="onDsrFilesPanelShow" id="${pid}dsrFilesPanel" class="dsr-files-panel">
 				<div class="pb-2">
 					<label class="text-lg font-bold">
@@ -165,7 +165,7 @@
 		dsrLoading: false
 	});
 	
-	po.vueRef("dsrFilesPanelEle", null);
+	po.vueRef("${pid}dsrFilesPanelEle", null);
 	
 	po.vueMethod(
 	{
@@ -206,7 +206,7 @@
 			if(!fm.dataSetResDirectory || !fm.dataSetResDirectory.id)
 				return;
 			
-			po.vueUnref("dsrFilesPanelEle").show(e);
+			po.vueUnref("${pid}dsrFilesPanelEle").show(e);
 		},
 		
 		onDsrFilesPanelShow: function(e)
@@ -238,7 +238,7 @@
 			}
 			
 			fm.dataSetResFileName = pm.dsrSelectedNode.path;
-			po.vueUnref("dsrFilesPanelEle").hide();
+			po.vueUnref("${pid}dsrFilesPanelEle").hide();
 		}
 	});
 })

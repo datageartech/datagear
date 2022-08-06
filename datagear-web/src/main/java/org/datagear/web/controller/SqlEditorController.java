@@ -52,7 +52,7 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		List<SimpleTable> tables = new ReturnSchemaConnExecutor<List<SimpleTable>>(request, response, springModel,
 				schemaId, true)
@@ -91,7 +91,7 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 			@RequestParam("table") final String table,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		Table tableObj = null;
 
