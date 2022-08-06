@@ -155,5 +155,3 @@
 })
 (${pid});
 </script>
-</body>
-</html>

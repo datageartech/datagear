@@ -310,5 +310,3 @@
 })
 (${pid});
 </script>
-</body>
-</html>
