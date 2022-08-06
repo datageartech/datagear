@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -258,27 +259,18 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
 		setCookieAnalysisProject(request, response, dashboard);
-
 		dashboard.setId(IDUtil.randomIdOnTime20());
-		dashboard.setTemplates(new String[0]);
+		dashboard.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
+		dashboard.setCreateTime(null);
 
 		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer();
 
 		String templateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
 
-		model.addAttribute("dashboard", dashboard);
-		addAttributeForWriteJson(model, "templates", dashboard.getTemplates());
-		model.addAttribute("templateName", HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0]);
-		model.addAttribute("templateContent", templateContent);
-		model.addAttribute("defaultTemplateContent", templateContent);
-		model.addAttribute("dashboardGlobalResUrlPrefix",
-				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
-						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
-		model.addAttribute(KEY_FORM_ACTION, "save");
-		model.addAttribute("isAdd", true);
+		setFormModel(model, dashboard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
+		setFormPageAttributes(model, templateContent, templateContent);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -287,28 +279,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
 		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer();
-
 		String defaultTemplateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
 
-		model.addAttribute("dashboard", dashboard);
-		addAttributeForWriteJson(model, "templates", dashboard.getTemplates());
-		model.addAttribute("templateName", dashboard.getFirstTemplate());
-		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
-		model.addAttribute("defaultTemplateContent", defaultTemplateContent);
-		model.addAttribute("dashboardGlobalResUrlPrefix",
-				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
-						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editDashboard");
-		model.addAttribute(KEY_FORM_ACTION, "save");
+		setFormModel(model, dashboard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
+		setFormPageAttributes(model, readResourceContent(dashboard, dashboard.getFirstTemplate()), defaultTemplateContent);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -317,7 +297,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 
@@ -361,7 +341,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				|| form.getResourceContents().length != form.getResourceIsTemplates().length)
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = form.getDashboard();
 
@@ -386,6 +366,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (form.isSaveAdd())
 		{
 			dashboard.setCreateUser(user);
+			dashboard.setCreateTime(new Date());
 			this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
 			if (form.hasCopySourceId())
@@ -467,7 +448,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public List<String> listResources(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 
@@ -830,23 +811,18 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
 
-		if (dashboard == null)
-			throw new RecordNotFoundException();
-
-		model.addAttribute("dashboard", dashboard);
-		addAttributeForWriteJson(model, "templates", dashboard.getTemplates());
-		model.addAttribute("templateName", dashboard.getFirstTemplate());
 		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute("dashboardGlobalResUrlPrefix",
 				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
 						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.viewDashboard");
-		model.addAttribute(KEY_READONLY, true);
 
+		setFormModel(model, dashboard, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormPageAttributes(model, readResourceContent(dashboard, dashboard.getFirstTemplate()), "");
+		
 		return "/dashboard/dashboard_form";
 	}
 
@@ -854,7 +830,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public void export(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 
@@ -1683,6 +1659,18 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		out.println("global." + SERVERTIME_JS_VAR + "=" + new java.util.Date().getTime() + ";");
 
 		out.println("})(this);");
+	}
+	
+	protected void setFormPageAttributes(org.springframework.ui.Model model, String firstTemplateContent, String defaultTemplateContent)
+	{
+		Map<String, String> templateContent = new HashMap<String, String>();
+		templateContent.put("firstContent", firstTemplateContent);
+		templateContent.put("defaultContent", defaultTemplateContent);
+		
+		addAttributeForWriteJson(model, "templateContent", templateContent);
+		model.addAttribute("dashboardGlobalResUrlPrefix",
+				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
+						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
 	}
 
 	protected Map<String, Object> buildDashboardIdTemplatesHashMap(String id, String[] templates)

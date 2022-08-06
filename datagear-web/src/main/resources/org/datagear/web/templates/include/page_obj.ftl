@@ -321,6 +321,7 @@ var ${pid} =
 		"p-tabview": primevue.tabview,
 		"p-tabpanel": primevue.tabpanel,
 		"p-menu": primevue.menu,
+		"p-menubar": primevue.menubar,
 		"p-chip": primevue.chip,
 		"p-fileupload": primevue.fileupload,
 		"p-inlinemessage": primevue.inlinemessage,
@@ -328,7 +329,8 @@ var ${pid} =
 		"p-dataview": primevue.dataview,
 		"p-overlaypanel": primevue.overlaypanel,
 		"p-panel": primevue.panel,
-		"p-fieldset": primevue.fieldset
+		"p-fieldset": primevue.fieldset,
+		"p-listbox": primevue.listbox
 	},
 	
 	//vue挂载

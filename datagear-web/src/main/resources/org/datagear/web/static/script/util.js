@@ -823,6 +823,151 @@
 		}
 	};
 	
+	/**
+	 * 将字符串按照'/'或'\'路径分隔符拆分。
+	 */
+	$.splitAsPath = function(str, keepSeparator)
+	{
+		str = (str || "");
+		keepSeparator = (keepSeparator == null ? true : keepSeparator);
+		
+		var re = [];
+		
+		resName = str.replace("\\", "/");
+		var rns = str.split("/");
+		
+		for(var i=0; i<rns.length; i++)
+		{
+			if(rns[i])
+				re.push(rns[i]);
+		}
+		
+		if(keepSeparator)
+		{
+			for(var i=0; i<re.length; i++)
+			{
+				if(i < re.length - 1)
+					re[i] = re[i] + "/";
+				
+				if(i == 0 && str.charAt(0) == '/')
+					re[i] = "/" + re[i];
+				
+				if(i == re.length - 1 && str.charAt(str.length - 1) == '/')
+					re[i] = re[i] + "/";
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 将路径字符串数组转换为路径树。
+	 * ["a/b/c", "a/b/d", "f/g"]
+	 * 转换为
+	 * [
+	 *   {name:'a/', children: [ {name: "b/", children: [ {name: "c"}, {name: "d"} ]} ]},
+	 *   {name: "f", children: [ {name: "g"} ]}
+	 * ]
+	 *
+	 * @param strs 路径字符串数组
+	 * @param options 配置选项：
+	 *				{
+	 *				  nameProperty: "name",
+	 *				  childrenProperty: "children",
+	 *				  fullPathProperty: "fullPath",
+	 *				  keepSeparator: true,
+	 *				  created: function(node){ ... }
+	 *				}
+	 */
+	$.toPathTree = function(strs, options)
+	{
+		strs = (strs || []);
+		options = $.extend(
+		{
+			nameProperty: "name",
+			childrenProperty: "children",
+			fullPathProperty: "fullPath",
+			keepSeparator: true,
+			created: undefined
+		},
+		options);
+		
+		var re = [];
+		
+		for(var i=0; i<strs.length; i++)
+		{
+			var nodes = $.splitAsPath(strs[i], options.keepSeparator);
+			
+			var parent = re;
+			
+			for(var j=0; j<nodes.length; j++)
+			{
+				var ni = nodes[j];
+				var idx = $.inArrayById(parent, ni, options.nameProperty);
+				
+				if(j == nodes.length - 1)
+				{
+					if(idx < 0)
+					{
+						var p = {};
+						p[options.nameProperty] = ni;
+						p[options.fullPathProperty] = strs[i];
+						if(options.created)
+							options.created(p);
+						
+						parent.push(p);
+					}
+				}
+				else
+				{
+					if(idx < 0)
+					{
+						var p = {};
+						p[options.nameProperty] = ni;
+						p[options.fullPathProperty] = $.concatPathArray(nodes, 0, j+1);
+						p[options.childrenProperty] = [];
+						if(options.created)
+							options.created(p);
+							
+						parent.push(p);
+						parent = p[options.childrenProperty];
+					}
+					else
+					{
+						if(!parent[idx][options.childrenProperty])
+							parent[idx][options.childrenProperty] = [];
+						
+						parent = parent[idx][options.childrenProperty];
+					}
+				}
+			}
+		}
+		
+		return re;
+	};
+	
+	$.concatPathArray = function(paths, start, end)
+	{
+		start = (start == null ? 0 : start);
+		end = (end == null ? paths.length : Math.min(paths.length, end));
+		
+		var re = "";
+		
+		for(var i=start; i<end; i++)
+		{
+			var p = paths[i];
+			
+			if(!re)
+				re = p;
+			else if(re.charAt(re.length - 1) != '/' && p.charAt(p.length - 1) != '')
+				re += "/" + p;
+			else
+				re += p;
+		}
+		
+		return re;
+	};
+	
 	//常用按键，摘自jquery-ui
 	$.keyCode =
 	{

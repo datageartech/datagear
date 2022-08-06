@@ -115,6 +115,11 @@ label[title]:not(.no-tip)::after,
 	height: 1.5rem !important;
 	padding: 0.2rem 0.2rem !important;
 }
+.p-splitbutton.border-left-noround,
+.p-splitbutton.border-left-noround .p-splitbutton-defaultbutton{
+	border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
 
 /*带更多菜单按钮的tabview*/
 .p-tabview.contextmenu-tabview .p-tabview-nav-container .p-tabview-nav-link{
@@ -123,6 +128,12 @@ label[title]:not(.no-tip)::after,
 .p-tabview.contextmenu-tabview .p-tabview-nav-container .context-menu-btn{
 	position: absolute;
 	right: 0.2rem;
+}
+/*普通字体粗细*/
+.p-tabview.light-tabview .p-tabview-nav li .p-tabview-nav-link{
+	font-weight: normal;
+	padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
 }
 
 /*竖向tabmenu*/
@@ -159,6 +170,22 @@ label[title]:not(.no-tip)::after,
 	background-color: var(--surface-200);
 	color: var(--primary-color);
 	border-radius: var(--border-radius);
+}
+
+/*轻量菜单条*/
+.p-menubar.light-menubar{
+	background: none;
+	padding: 0.1rem 0.2rem;
+}
+.p-menubar.light-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link{
+	padding: 0.5rem 0.8rem;
+}
+.p-menubar.no-root-icon-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link .p-menuitem-icon{
+	margin-right: 0;
+}
+
+.p-selectbutton.text-sm .p-button{
+	font-size: .875rem;
 }
 
 /*error菜单条目*/
@@ -282,6 +309,10 @@ label[title]:not(.no-tip)::after,
 .p-fieldset.fieldset-sm .p-fieldset-content{
 	padding: 0.6rem;
 	padding-bottom: 0.1rem;
+}
+
+.p-divider.divider-z-0 .p-divider-content{
+	z-index: 0 !important;
 }
 
 /*横向操作组*/
@@ -463,7 +494,7 @@ label[title]:not(.no-tip)::after,
 	height: calc(100vh - 5rem - 7rem);
 }
 .p-dialog .page-form-db-g-r .code-editor-wrapper{
-	/*对话框高度 - 表单foot高度 - 对话框header高度*/
+	/*对话框高度 - 表单foot高度 - 对话框header高度 - 其他元素高度*/
 	height: calc(90vh - 5rem - 6rem - 7rem);
 }
 
@@ -598,4 +629,32 @@ label[title]:not(.no-tip)::after,
 }
 .page-form-chart .p-fieldset.fieldset-sm .p-fieldset-legend .p-fieldset-legend-text{
 	justify-content: flex-start;
+}
+
+.page-form-dashboard .p-tabview .p-tabview-panels{
+	padding: 0.5rem 0 0 0;
+}
+.page-form-dashboard .resource-contents-wrapper{
+	/*屏幕高度 - 表单foot高度 - 间隙高度*/
+	height: calc(100vh - 5rem - 2.6rem);
+}
+.p-dialog .page-form-dashboard .resource-contents-wrapper{
+	/*对话框高度 - 表单foot高度 - 对话框header高度 - 其他元素高度*/
+	height: calc(90vh - 5rem - 6rem - 2.6rem);
+}
+.page-form-dashboard .resource-contents-wrapper .template-editor-wrapper{
+	/*.resource-contents-wrapper高度 - 按钮区高度*/
+	height: calc(100vh - 5rem - 2.6rem - 6rem);
+}
+.p-dialog .page-form-dashboard .resource-contents-wrapper .template-editor-wrapper{
+	/*.resource-contents-wrapper高度 - 按钮区高度*/
+	height: calc(90vh - 5rem - 6rem - 2.6rem - 6rem);
+}
+.page-form-dashboard .resource-contents-wrapper .resource-list-wrapper{
+	/*.resource-contents-wrapper高度 - 卡片高度*/
+	height: calc(100vh - 5rem - 2.6rem - 3.5rem);
+}
+.p-dialog .page-form-dashboard .resource-contents-wrapper .resource-list-wrapper{
+	/*.resource-contents-wrapper高度 - 卡片高度*/
+	height: calc(90vh - 5rem - 6rem - 2.6rem - 3.5rem);
 }

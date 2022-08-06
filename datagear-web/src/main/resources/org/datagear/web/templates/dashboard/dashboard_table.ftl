@@ -28,8 +28,8 @@
 		<div class="h-opts col-12 md:col-9 text-right">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
-			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isSelectAction"></p-button>
-			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isSelectAction"></p-button>
+			<p-splitbutton label="<@spring.message code='add' />" @click="onAdd" :model="pm.addBtnItems" v-if="!pm.isSelectAction"></p-splitbutton>
+			<p-splitbutton label="<@spring.message code='edit' />" @click="onEdit" :model="pm.editBtnItems" v-if="!pm.isSelectAction"></p-splitbutton>
 			<p-splitbutton label="<@spring.message code='show' />" @click="onShow" :model="pm.showBtnItems" v-if="!pm.isSelectAction"></p-splitbutton>
 			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
 			<p-button label="<@spring.message code='share' />" @click="onShare" v-if="!pm.isSelectAction"></p-button>
@@ -63,7 +63,7 @@
 	
 	po.buildShowURL = function(id)
 	{
-		return po.concatContextPath("/dashboard/show/"+id+"/");
+		return po.concatContextPath("/dashboard/show/"+encodeURIComponent(id)+"/");
 	};
 	
 	po.setupAjaxTable("/dashboard/pagingQueryData",
@@ -73,6 +73,47 @@
 
 	po.vuePageModel(
 	{
+		addBtnItems:
+		[
+			{
+				label: "<@spring.message code='addInNewWindow' />",
+				command: function()
+				{
+					po.open(po.concatContextPath("/dashboard/add"), {target: "_blank"});
+				}
+			},
+			{
+				label: "<@spring.message code='copy' />",
+				command: function()
+				{
+					
+				}
+			},
+			{
+				label: "<@spring.message code='copyInNewWindow' />",
+				command: function()
+				{
+					
+				}
+			},
+			{
+				label: "<@spring.message code='import' />",
+				command: function()
+				{
+					
+				}
+			}
+		],
+		editBtnItems:
+		[
+			{
+				label: "<@spring.message code='editInNewWindow' />",
+				command: function()
+				{
+					po.handleOpenOfAction("/dashboard/edit", {target: "_blank"});
+				}
+			}
+		],
 		showBtnItems:
 		[
 			{
@@ -93,17 +134,17 @@
 	{
 		onAdd: function()
 		{
-			po.handleAddAction("/dashboard/add");
+			po.handleAddAction("/dashboard/add", {width: "90vw"});
 		},
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/dashboard/edit");
+			po.handleOpenOfAction("/dashboard/edit", {width: "90vw"});
 		},
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/dashboard/view");
+			po.handleOpenOfAction("/dashboard/view", {width: "90vw"});
 		},
 
 		onShare: function()

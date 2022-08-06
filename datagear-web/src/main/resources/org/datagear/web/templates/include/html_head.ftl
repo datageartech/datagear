@@ -55,6 +55,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/tabview/tabview.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/tabpanel/tabpanel.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/menu/menu.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/menubar/menubar.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/chip/chip.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/fileupload/fileupload.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/inlinemessage/inlinemessage.min.js" type="text/javascript"></script>
@@ -63,6 +64,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/overlaypanel/overlaypanel.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/panel/panel.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/fieldset/fieldset.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/listbox/listbox.min.js" type="text/javascript"></script>
 
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>
