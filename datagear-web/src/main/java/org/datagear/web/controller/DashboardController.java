@@ -264,13 +264,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 		dashboard.setCreateTime(null);
 
-		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
-				.getHtmlTplDashboardWidgetRenderer();
-
-		String templateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
-
 		setFormModel(model, dashboard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
-		setFormPageAttributes(model, templateContent, templateContent);
+		setFormPageAttributes(model);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -283,12 +278,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
-		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
-				.getHtmlTplDashboardWidgetRenderer();
-		String defaultTemplateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
-
 		setFormModel(model, dashboard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
-		setFormPageAttributes(model, readResourceContent(dashboard, dashboard.getFirstTemplate()), defaultTemplateContent);
+		setFormPageAttributes(model);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -426,19 +417,41 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			org.springframework.ui.Model model, @RequestParam("id") String id,
 			@RequestParam("resourceName") String resourceName) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
-
-		HtmlTplDashboardWidgetEntity widget = this.htmlTplDashboardWidgetEntityService.getById(user, id);
-
-		if (widget == null)
-			throw new RecordNotFoundException();
-
+		User user = WebUtils.getUser();
+		
 		resourceName = trimResourceName(resourceName);
 
 		Map<String, Object> data = new HashMap<>();
 		data.put("id", id);
 		data.put("resourceName", resourceName);
-		data.put("resourceContent", readResourceContent(widget, resourceName));
+		
+		HtmlTplDashboardWidgetEntity widget = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+		boolean exists = false;
+		
+		if (widget == null)
+		{
+			exists = false;
+			data.put("resourceContent", null);
+		}
+		else
+		{
+			exists = this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager().exists(id, resourceName);
+			
+			if(exists)
+				data.put("resourceContent", readResourceContent(widget, resourceName));
+		}
+		
+		data.put("resourceExists", exists);
+		
+		if(!exists && (FileUtil.isExtension(resourceName, "html") || FileUtil.isExtension(resourceName, "htm")))
+		{
+			HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
+					.getHtmlTplDashboardWidgetRenderer();
+			String templateEnding = (widget == null ? HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING : widget.getTemplateEncoding());
+			String templateContent = renderer.simpleTemplateContent(templateEnding);
+
+			data.put("defaultTemplateContent", templateContent);
+		}
 
 		return data;
 	}
@@ -815,13 +828,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
 
-		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
-		model.addAttribute("dashboardGlobalResUrlPrefix",
-				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
-						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
-
 		setFormModel(model, dashboard, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
-		setFormPageAttributes(model, readResourceContent(dashboard, dashboard.getFirstTemplate()), "");
+		setFormPageAttributes(model);
 		
 		return "/dashboard/dashboard_form";
 	}
@@ -1661,13 +1669,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		out.println("})(this);");
 	}
 	
-	protected void setFormPageAttributes(org.springframework.ui.Model model, String firstTemplateContent, String defaultTemplateContent)
+	protected void setFormPageAttributes(org.springframework.ui.Model model)
 	{
-		Map<String, String> templateContent = new HashMap<String, String>();
-		templateContent.put("firstContent", firstTemplateContent);
-		templateContent.put("defaultContent", defaultTemplateContent);
-		
-		addAttributeForWriteJson(model, "templateContent", templateContent);
 		model.addAttribute("dashboardGlobalResUrlPrefix",
 				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
 						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));

@@ -120,6 +120,14 @@ label[title]:not(.no-tip)::after,
 	border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
+.text-sm .p-button,
+.text-sm.p-button{
+	font-size: .875rem;
+}
+.text-xs .p-button,
+.text-xs.p-button{
+	font-size: .75rem;
+}
 
 /*带更多菜单按钮的tabview*/
 .p-tabview.contextmenu-tabview .p-tabview-nav-container .p-tabview-nav-link{
@@ -182,10 +190,6 @@ label[title]:not(.no-tip)::after,
 }
 .p-menubar.no-root-icon-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link .p-menuitem-icon{
 	margin-right: 0;
-}
-
-.p-selectbutton.text-sm .p-button{
-	font-size: .875rem;
 }
 
 /*error菜单条目*/

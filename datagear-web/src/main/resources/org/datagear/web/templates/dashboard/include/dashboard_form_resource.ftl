@@ -15,7 +15,7 @@
 <p-tabview class="light-tabview">
 	<p-tabpanel header="<@spring.message code='localResource' />">
 		<div class="local-resource-list-wrapper resource-list-wrapper flex flex-column p-component p-inputtext">
-			<div class="flex-grow-0">
+			<div class="flex-grow-0 text-xs">
 				<p-button type="button" icon="pi pi-plus" class="p-button-secondary p-button-sm mr-1"
 					title="<@spring.message code='dashboard.addResource.desc' />">
 				</p-button>
@@ -23,6 +23,7 @@
 					title="<@spring.message code='dashboard.uploadResource.desc' />">
 				</p-button>
 				<p-button type="button" icon="pi pi-pencil" class="p-button-secondary p-button-sm mr-1"
+					@click="onEditSelectedResource"
 					title="<@spring.message code='dashboard.editResource.desc' />">
 				</p-button>
 				<p-button type="button" icon="pi pi-copy" class="p-button-secondary p-button-sm mr-1"
@@ -60,6 +61,12 @@
 <script>
 (function(po)
 {
+	po.isResourceTemplate = function(name)
+	{
+		var fm = po.vueFormModel();
+		return ($.inArray(name, fm.templates) > -1);
+	};
+	
 	po.resourceNamesToTree = function(names)
 	{
 		var tree = $.toPathTree(names,
@@ -112,7 +119,7 @@
 			return null;
 	};
 	
-	po.setUpResourceList = function()
+	po.setupResourceList = function()
 	{
 		po.vuePageModel(
 		{
@@ -144,12 +151,28 @@
 			onOpenSelectedResourceUrl: function(e)
 			{
 				po.openSelectedResource();
+			},
+			
+			onEditSelectedResource: function(e)
+			{
+				var res = po.getSelectedResource();
+				if(res)
+				{
+				 	if(!$.isTextFile(res))
+				 	{
+				 		$.tipInfo("<@spring.message code='dashboard.editResUnsupport' />");
+				 		return;
+				 	}
+				 	else
+						po.showResourceContentTab(res);
+				}
 			}
 		});
 		
 		po.vueMounted(function()
 		{
-			po.refreshLocalResources();
+			if(po.isPersistedDashboard())
+				po.refreshLocalResources();
 		});
 	};
 })

@@ -29,12 +29,26 @@
 				<p-selectbutton v-model="tab.editMode" :options="pm.templateEditModeOptions"
 					option-label="name" option-value="value" class="text-sm">
 				</p-selectbutton>
-				<p-menubar :model="pm.tplVisualEditMenuItems" class="light-menubar no-root-icon-menubar text-sm">
-				</p-menubar>
+				<div class="flex" v-if="tab.editMode == 'code'">
+					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm"></p-button>
+					<p-menubar :model="pm.tplCodeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm">
+						<template #end>
+							<div class="p-inputgroup pl-2">
+								<p-inputtext type="text" style="width:10rem;"></p-inputtext>
+								<p-button type="button" icon="pi pi-search" class="p-button-secondary"></p-button>
+							</div>
+						</template>
+					</p-menubar>
+				</div>
+				<div class="flex" v-if="tab.editMode == 'visual'">
+					<p-button label="<@spring.message code='quickExecute' />" class="p-button-sm"></p-button>
+					<p-menubar :model="pm.tplVisualEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm">
+					</p-menubar>
+				</div>
 			</div>
 			<div class="pt-1">
 				<div class="code-editor-wrapper template-editor-wrapper p-component p-inputtext">
-					<div :id="tab.id + 'codeEditor'" class="code-editor"></div>
+					<div :id="resourceCodeEditorEleId(tab.resourceName)" class="code-editor"></div>
 				</div>
 			</div>
 		</div>
@@ -46,30 +60,43 @@
 <script>
 (function(po)
 {
-	po.templateNameTabId = function(name)
+	po.resourceContentTabId = function(name)
 	{
-		var map = (po.templateNameTabIdMap || (po.templateNameTabIdMap = {}));
+		var map = (po.resourceContentTabIdMap || (po.resourceContentTabIdMap = {}));
 		
 		//不直接使用tableName作为元素ID，因为name中可能存在与jquery冲突的字符，比如'$'
 		var value = map[name];
 		
 		if(value == null)
 		{
-			value = $.uid("templateNameTab");
+			value = $.uid("resCntTab");
 			map[name] = value;
 		}
 		
 		return value;
 	};
 	
-	po.templateNameToTabItem = function(name)
+	po.resourceCodeEditorEleId = function(name)
+	{
+		var tabId = po.resourceContentTabId(name);
+		return tabId+"codeEditor";
+	};
+
+	po.resourceVisualEditorEleId = function(name)
+	{
+		var tabId = po.resourceContentTabId(name);
+		return tabId+"visualEditor";
+	};
+	
+	po.toResourceContentTabItem = function(name)
 	{
 		var re =
 		{
-			id: po.templateNameTabId(name),
+			id: po.resourceContentTabId(name),
 			key: name,
 			title: name,
-			editMode: "code"
+			editMode: "code",
+			resourceName: name
 		};
 		
 		return re;
@@ -134,9 +161,170 @@
 		return items;
 	};
 	
+	po.getResourceContentTabIndex = function(name)
+	{
+		var pm = po.vuePageModel();
+		var items = pm.resourceContentTabs.items;
+		
+		return $.inArrayById(items, po.resourceContentTabId(name));
+	};
+	
+	po.showResourceContentTab = function(name)
+	{
+		var pm = po.vuePageModel();
+		
+		var idx = po.getResourceContentTabIndex(name);
+		if(idx > -1)
+			pm.resourceContentTabs.activeIndex = idx;
+		else
+		{
+			var tabItem = po.toResourceContentTabItem(name);
+			pm.resourceContentTabs.items.push(tabItem);
+			
+			//XXX vueMounted()回调函数中vueApp()为null？
+			if(po.vueApp())
+			{
+				//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
+				po.vueApp().$nextTick(function()
+				{
+					pm.resourceContentTabs.activeIndex = pm.resourceContentTabs.items.length - 1;
+				});
+			}
+			else
+				pm.resourceContentTabs.activeIndex = pm.resourceContentTabs.items.length - 1;
+		}
+	};
+	
+	po.loadResourceContent = function(name)
+	{
+		var tabId = po.resourceContentTabId(name);
+		var panel = po.elementOfId(tabId);
+		
+		var expectLoad = (panel.prop("loaded") !== true);
+		
+		if(expectLoad && panel.prop("loading") !== true)
+		{
+			panel.prop("loading", true);
+			
+			var fm = po.vueFormModel();
+			
+			po.ajax("/dashboard/getResourceContent",
+			{
+				data:
+				{
+					id: fm.id,
+					resourceName: name
+				},
+				success: function(response)
+				{
+					var isTemplate = po.isResourceTemplate(name);
+					
+					var resourceContent = (response.resourceExists ? response.resourceContent : "");
+					if(isTemplate && !resourceContent)
+						resourceContent = (response.defaultTemplateContent || "");
+					
+					po.setResourceContent(name, resourceContent, isTemplate);
+				},
+				complete: function()
+				{
+					panel.prop("loading", false);
+				}
+			});
+		}
+	};
+	
+	po.setResourceContent = function(name, content, isTemplate)
+	{
+		isTemplate = (isTemplate == null ? po.isResourceTemplate(name) : isTemplate);
+		
+		var editorEle = po.elementOfId(po.resourceCodeEditorEleId(name));
+		var codeEditor = editorEle.data("codeEditorInstance");
+		if(!codeEditor)
+		{
+			var codeEditorOptions =
+			{
+				value: content,
+				matchBrackets: true,
+				matchTags: true,
+				autoCloseTags: true,
+				autoCloseBrackets: true,
+				readOnly: po.isReadonlyAction,
+				foldGutter: true,
+				gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+				mode: po.evalCodeModeByName(name)
+			};
+			
+			if(isTemplate && !codeEditorOptions.readOnly)
+			{
+				codeEditorOptions.hintOptions =
+				{
+					hint: po.codeEditorHintHandler
+				};
+			}
+			
+			codeEditor = po.createCodeEditor(editorEle, codeEditorOptions);
+			editorEle.data("codeEditorInstance", codeEditor);
+		}
+		else
+			po.setCodeText(codeEditor, content);
+	};
+
+	po.codeEditorHintHandler = function(codeEditor)
+	{
+		var doc = codeEditor.getDoc();
+		var cursor = doc.getCursor();
+		var mode = (codeEditor.getModeAt(cursor) || {});
+		var token = (codeEditor.getTokenAt(cursor) || {});
+		var tokenString = (token ? $.trim(token.string) : "");
+		
+		//"dg*"的HTML元素属性
+		if("xml" == mode.name && "attribute" == token.type && /^dg/i.test(tokenString))
+		{
+			var myTagToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "tag");
+			var myCategory = (myTagToken ? myTagToken.string : null);
+			
+			var completions =
+			{
+				list: po.findCompletionList(po.codeEditorCompletionsTagAttr, tokenString, myCategory),
+				from: CodeMirror.Pos(cursor.line, token.start),
+				to: CodeMirror.Pos(cursor.line, token.end)
+			};
+			
+			return completions;
+		}
+		//javascript函数
+		else if("javascript" == mode.name && (tokenString == "." || "property" == token.type))
+		{
+			var myVarTokenInfo = po.findPrevTokenInfo(codeEditor, doc, cursor, token,
+					function(token){ return (token.type == "variable" || token.type == "variable-2"); });
+			var myVarToken = (myVarTokenInfo ? myVarTokenInfo.token : null);
+			var myCategory = (myVarToken ? myVarToken.string : "");
+			
+			//无法确定要补全的是看板还是图表对象，所以这里采用：完全匹配变量名，否则就全部提示
+			// *dashboard*
+			if(/dashboard/i.test(myCategory))
+				myCategory = "dashboard";
+			// *chart*
+			else if(/chart/i.test(myCategory))
+				myCategory = "chart";
+			else
+				myCategory = null;
+			
+			var completions =
+			{
+				list: po.findCompletionList(po.codeEditorCompletionsJsFunction, (tokenString == "." ? "" : tokenString), myCategory),
+				from: CodeMirror.Pos(cursor.line, (tokenString == "." ? token.start + 1 : token.start)),
+				to: CodeMirror.Pos(cursor.line, token.end)
+			};
+			
+			return completions;
+		}
+	};
+	
 	po.setupResourceEditor = function()
 	{
 		var fm = po.vueFormModel();
+		var pm = po.vuePageModel();
 		
 		po.vuePageModel(
 		{
@@ -147,7 +335,7 @@
 			],
 			resourceContentTabs:
 			{
-				items: (fm.templates.length > 0 ? [ po.templateNameToTabItem(fm.templates[0]) ] : []),
+				items: [],
 				activeIndex: 0
 			},
 			resourceContentTabMenuItems:
@@ -188,11 +376,14 @@
 					}
 				}
 			],
-			tplVisualEditMenuItems:
+			tplCodeEditMenuItems:
 			[
 				{
-					label: "<@spring.message code='quickExecute' />",
-				},
+					label: "<@spring.message code='save' />"
+				}
+			],
+			tplVisualEditMenuItems:
+			[
 				{
 					label: "<@spring.message code='select' />",
 					items:
@@ -302,10 +493,49 @@
 			{
 				po.resourceContentTabMenuTargetId = tabId;
 				po.vueUnref("${pid}resourceContentTabMenuEle").show(e);
+			},
+			
+			resourceCodeEditorEleId: function(name)
+			{
+				return po.resourceCodeEditorEleId(name);
+			},
+			
+			resourceVisualEditorEleId: function(name)
+			{
+				return po.resourceVisualEditorEleId(name);
 			}
 		});
 		
 		po.vueRef("${pid}resourceContentTabMenuEle", null);
+		
+		//po.showResourceContentTab()里不能里可获取到创建的DOM元素，所以采用此方案
+		po.vueWatch(pm.resourceContentTabs, function(oldVal, newVal)
+		{
+			var items = newVal.items;
+			var activeIndex = newVal.activeIndex;
+			var activeTab = items[activeIndex];
+			
+			if(activeTab)
+			{
+				//XXX vueMounted()回调函数中vueApp()为null？
+				if(po.vueApp())
+				{
+					po.vueApp().$nextTick(function()
+					{
+						po.loadResourceContent(activeTab.resourceName);
+					});
+				}
+				else
+					po.loadResourceContent(activeTab.resourceName);
+			}
+		});
+		
+		po.vueMounted(function()
+		{
+			var fm = po.vueFormModel();
+			if(fm.templates && fm.templates.length > 0)
+				po.showResourceContentTab(fm.templates[0]);
+		});
 	};
 })
 (${pid});

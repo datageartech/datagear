@@ -84,16 +84,37 @@
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_tabview.ftl">
+<#include "../include/page_code_editor.ftl">
+<#include "include/dashboard_code_completions.ftl">
 <script>
 (function(po)
 {
 	po.submitUrl = "/dashboard/"+po.submitAction;
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
-	po.templateContent = $.unescapeHtmlForJson(<@writeJson var=templateContent />);
+	
+	po.isPersistedDashboard = function()
+	{
+		if(!po.isAddAction)
+			return true;
+		
+		return (po.isAddActionSaved == true);
+	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
-	po.setupForm(formModel);
+	po.setupForm(formModel,
+	{
+		success: function()
+		{
+			if(po.isAddAction)
+			{
+				if(!po.isPersistedDashboard())
+					po.refreshLocalResources();
+				
+				po.isAddActionSaved = true;
+			}
+		}
+	});
 	
 	po.vuePageModel(
 	{
@@ -124,7 +145,7 @@
 		}
 	});
 	
-	po.setUpResourceList();
+	po.setupResourceList();
 	po.setupResourceEditor();
 	
 	po.vueMount();
