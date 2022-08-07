@@ -34,8 +34,8 @@
 					<p-menubar :model="pm.tplCodeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm">
 						<template #end>
 							<div class="p-inputgroup pl-2">
-								<p-inputtext type="text" style="width:10rem;"></p-inputtext>
-								<p-button type="button" icon="pi pi-search" class="p-button-secondary"></p-button>
+								<p-inputtext type="text" class="text-sm p-0 px-1" style="width:10rem;"></p-inputtext>
+								<p-button type="button" icon="pi pi-search" class="p-button-secondary p-button-sm"></p-button>
 							</div>
 						</template>
 					</p-menubar>
