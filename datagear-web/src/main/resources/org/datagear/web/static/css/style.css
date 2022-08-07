@@ -80,12 +80,10 @@ label[title]:not(.no-tip)::after,
 	border-width: 1px;
 	border-style: solid;
 }
-
 .state-active{
 	color: var(--primary-color);
 	box-shadow: inset 0 0 2px 2px var(--primary-color);
 }
-
 .highlight-text{
 	color: var(--primary-color);
 	background-color: var(--surface-c);
@@ -93,6 +91,13 @@ label[title]:not(.no-tip)::after,
 	padding: 0.1rem 0.2rem;
 	margin-left: 0.1rem;
 	margin-right: 0.1rem;
+}
+.bg-none{
+	background-color: none !important;
+	background: none !important;
+}
+.z-99{
+	z-index: 99;
 }
 
 /*圆形按钮sm*/

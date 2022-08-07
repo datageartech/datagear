@@ -37,7 +37,7 @@
 			<p-divider align="left" class="flex-grow-0 my-2 divider-z-0 text-sm"><@spring.message code='template' /></p-divider>
 			<div class="flex-grow-0" style="height:5rem;">
 				<p-listbox v-model="pm.localResources.selectedTemplate" :options="fm.templates"
-					@change="onChangeTemplateListItem" class="h-full overflow-auto border-none">
+					@change="onChangeTemplateListItem" class="h-full overflow-auto border-none bg-none">
 				</p-listbox>
 			</div>
 			<p-divider align="left" class="flex-grow-0 my-2 divider-z-0 text-sm"><@spring.message code='allResources' /></p-divider>
@@ -45,7 +45,7 @@
 				<p-tree :value="pm.localResources.resourceNodes"
 					selection-mode="single" v-model:selection-keys="pm.localResources.selectedResourceKeys"
 					@node-select="onLocalResourceNodeSelect"
-					class="border-none white-space-nowrap overflow-x-auto">
+					class="border-none white-space-nowrap overflow-x-auto bg-none">
 				</p-tree>
 			</div>
 		</div>

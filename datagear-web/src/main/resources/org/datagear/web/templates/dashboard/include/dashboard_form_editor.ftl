@@ -31,7 +31,7 @@
 				</p-selectbutton>
 				<div class="flex" v-if="tab.editMode == 'code'">
 					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm"></p-button>
-					<p-menubar :model="pm.tplCodeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm">
+					<p-menubar :model="pm.tplCodeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
 							<div class="p-inputgroup pl-2">
 								<p-inputtext type="text" class="text-sm p-0 px-1" style="width:10rem;"></p-inputtext>
@@ -42,7 +42,7 @@
 				</div>
 				<div class="flex" v-if="tab.editMode == 'visual'">
 					<p-button label="<@spring.message code='quickExecute' />" class="p-button-sm"></p-button>
-					<p-menubar :model="pm.tplVisualEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm">
+					<p-menubar :model="pm.tplVisualEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 					</p-menubar>
 				</div>
 			</div>
