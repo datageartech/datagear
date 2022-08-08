@@ -39,6 +39,13 @@
 		pm.fileuploadInfo.progress = "100%";
 	};
 	
+	po.clearFileuploadInfo = function()
+	{
+		var pm = po.vuePageModel();
+		pm.fileuploadInfo.name = "";
+		pm.fileuploadInfo.progress = "";
+	};
+	
 	po.vueMethod(
 	{
 		uploadFileOnSelect: function(e)

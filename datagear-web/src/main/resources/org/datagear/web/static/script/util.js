@@ -1053,6 +1053,11 @@
 		return reg.test(fileName);
 	};
 	
+	$.isDirectoryFile = function(fileName)
+	{
+		return (fileName && fileName.charAt(fileName.length - 1) == '/');
+	};
+	
 	$.toJsonString = function(obj)
 	{
 		return JSON.stringify(obj);

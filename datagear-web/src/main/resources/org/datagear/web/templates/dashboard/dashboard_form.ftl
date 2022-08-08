@@ -92,6 +92,47 @@
 {
 	po.submitUrl = "/dashboard/"+po.submitAction;
 	
+	po.beforeSubmitForm = function(action)
+	{
+		var data = action.options.data;
+		var templateCount = (data.templates && data.templates.length != null ? data.templates.length : 0);
+		
+		//隐藏基本信息后无法自动校验名称，所以这里手动校验
+		if(!data.name)
+		{
+			$.tipInfo("<@spring.message code='dashboard.nameRequired' />");
+			return false;
+		}
+		
+		data =
+		{
+			dashboard: data,
+			resourceNames: [],
+			resourceContents: [],
+			resourceIsTemplates: [],
+			saveAdd: !po.isPersistedDashboard()
+		};
+		
+		var editResInfos = po.getEditResourceInfos();
+		$.each(editResInfos, function(idx, ei)
+		{
+			data.resourceNames.push(ei.name);
+			data.resourceContents.push(ei.content);
+			data.resourceIsTemplates.push(ei.isTemplate);
+			
+			if(ei.isTemplate)
+				templateCount += 1;
+		});
+		
+		if(templateCount == 0)
+		{
+			$.tipWarn("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
+			return false;
+		}
+		
+		action.options.data = data;
+	};
+	
 	po.isPersistedDashboard = function()
 	{
 		if(!po.isAddAction)
@@ -100,21 +141,34 @@
 		return (po.isAddActionSaved == true);
 	};
 	
+	po.checkPersistedDashboard = function()
+	{
+		var fm = po.vueFormModel();
+		
+		if(!po.isPersistedDashboard() || !fm.id)
+		{
+			$.tipInfo("<@spring.message code='dashboard.saveRequired' />");
+			return false;
+		}
+		
+		return true;
+	};
+	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
 	po.setupForm(formModel,
 	{
-		success: function()
+		success: function(response)
 		{
+			po.updateTemplateList(response.data.templates);
+			po.refreshLocalRes();
+			
 			if(po.isAddAction)
 			{
-				if(!po.isPersistedDashboard())
-				{
-					po.refreshLocalRes();
-					po.refreshGlobalRes();
-				}
-				
 				po.isAddActionSaved = true;
+				
+				if(!po.isPersistedDashboard())
+					po.refreshGlobalRes();
 			}
 		}
 	});

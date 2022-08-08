@@ -26,12 +26,15 @@
 		</template>
 		<div :id="tab.id">
 			<div class="flex align-content-center justify-content-between">
-				<p-selectbutton v-model="tab.editMode" :options="pm.templateEditModeOptions"
-					option-label="name" option-value="value" class="text-sm">
-				</p-selectbutton>
-				<div class="flex" v-if="tab.editMode == 'code'">
-					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm"></p-button>
-					<p-menubar :model="pm.tplCodeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
+				<div>
+					<p-selectbutton v-model="tab.editMode" :options="pm.templateEditModeOptions"
+						option-label="name" option-value="value" class="text-sm"
+						v-if="tab.isTemplate">
+					</p-selectbutton>
+				</div>
+				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'code'">
+					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm" v-if="tab.isTemplate"></p-button>
+					<p-menubar :model="pm.codeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
 							<div class="p-inputgroup pl-2">
 								<p-inputtext type="text" class="text-sm p-0 px-1" style="width:10rem;"></p-inputtext>
@@ -40,7 +43,7 @@
 						</template>
 					</p-menubar>
 				</div>
-				<div class="flex" v-if="tab.editMode == 'visual'">
+				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'visual'" v-if="tab.isTemplate">
 					<p-button label="<@spring.message code='quickExecute' />" class="p-button-sm"></p-button>
 					<p-menubar :model="pm.tplVisualEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 					</p-menubar>
@@ -60,6 +63,8 @@
 <script>
 (function(po)
 {
+	po.defaultTemplateName = "${defaultTempalteName}";
+	
 	po.resourceContentTabId = function(name)
 	{
 		var map = (po.resourceContentTabIdMap || (po.resourceContentTabIdMap = {}));
@@ -88,15 +93,22 @@
 		return tabId+"visualEditor";
 	};
 	
-	po.toResourceContentTabItem = function(name)
+	po.toResourceContentTabItem = function(name, isTemplate)
 	{
+		if(isTemplate == null)
+		{
+			var fm = po.vueFormModel();
+			isTemplate = ($.inArray(name, fm.templates) > -1);
+		}
+		
 		var re =
 		{
 			id: po.resourceContentTabId(name),
 			key: name,
 			title: name,
 			editMode: "code",
-			resourceName: name
+			resourceName: name,
+			isTemplate: isTemplate
 		};
 		
 		return re;
@@ -169,7 +181,7 @@
 		return $.inArrayById(items, po.resourceContentTabId(name));
 	};
 	
-	po.showResourceContentTab = function(name)
+	po.showResourceContentTab = function(name, isTemplate)
 	{
 		var pm = po.vuePageModel();
 		
@@ -178,7 +190,7 @@
 			pm.resourceContentTabs.activeIndex = idx;
 		else
 		{
-			var tabItem = po.toResourceContentTabItem(name);
+			var tabItem = po.toResourceContentTabItem(name, isTemplate);
 			pm.resourceContentTabs.items.push(tabItem);
 			
 			//XXX vueMounted()回调函数中vueApp()为null？
@@ -197,7 +209,11 @@
 	
 	po.loadResourceContent = function(name)
 	{
-		var tabId = po.resourceContentTabId(name);
+		var pm = po.vuePageModel();
+		
+		var idx = po.getResourceContentTabIndex(name);
+		var tabItem = pm.resourceContentTabs.items[idx];
+		var tabId = tabItem.id;
 		var panel = po.elementOfId(tabId);
 		
 		var expectLoad = (panel.prop("loaded") !== true);
@@ -217,7 +233,7 @@
 				},
 				success: function(response)
 				{
-					var isTemplate = po.isResTemplate(name);
+					var isTemplate = tabItem.isTemplate;
 					
 					var resourceContent = (response.resourceExists ? response.resourceContent : "");
 					if(isTemplate && !resourceContent)
@@ -268,7 +284,7 @@
 		else
 			po.setCodeText(codeEditor, content);
 	};
-
+	
 	po.codeEditorHintHandler = function(codeEditor)
 	{
 		var doc = codeEditor.getDoc();
@@ -319,6 +335,27 @@
 			
 			return completions;
 		}
+	};
+
+	po.getEditResourceInfos = function()
+	{
+		var re = [];
+		
+		var pm = po.vuePageModel();
+		var items = pm.resourceContentTabs.items;
+		
+		$.each(items, function(idx, item)
+		{
+			var info = { name: item.resourceName, content: "", isTemplate: item.isTemplate };
+			
+			var editorEle = po.elementOfId(po.resourceCodeEditorEleId(item.resourceName));
+			var codeEditor = editorEle.data("codeEditorInstance");
+			info.content = po.getCodeText(codeEditor);
+			
+			re.push(info);
+		});
+		
+		return re;
 	};
 	
 	po.setupResourceEditor = function()
@@ -376,7 +413,7 @@
 					}
 				}
 			],
-			tplCodeEditMenuItems:
+			codeEditMenuItems:
 			[
 				{
 					label: "<@spring.message code='save' />"
@@ -533,8 +570,11 @@
 		po.vueMounted(function()
 		{
 			var fm = po.vueFormModel();
+			
 			if(fm.templates && fm.templates.length > 0)
-				po.showResourceContentTab(fm.templates[0]);
+				po.showResourceContentTab(fm.templates[0], true);
+			else
+				po.showResourceContentTab(po.defaultTemplateName, true);
 		});
 	};
 })

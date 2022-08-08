@@ -18,21 +18,94 @@
 			<div class="flex-grow-0 text-xs">
 				<div class="flex justify-content-between">
 					<div>
-						<p-button type="button" icon="pi pi-plus" class="p-button-secondary p-button-sm mr-1"
-							title="<@spring.message code='dashboard.addResource.desc' />">
-						</p-button>
-						<p-button type="button" icon="pi pi-upload" class="p-button-secondary p-button-sm mr-1"
-							title="<@spring.message code='dashboard.uploadResource.desc' />">
-						</p-button>
-						<p-button type="button" icon="pi pi-pencil" class="p-button-secondary p-button-sm mr-1"
-							@click="onEditSelectedLocalRes"
-							title="<@spring.message code='dashboard.editResource.desc' />">
-						</p-button>
+						<div v-if="!pm.isReadonlyAction">
+							<p-button type="button" icon="pi pi-plus" class="p-button-secondary p-button-sm mr-1"
+								aria:haspopup="true" aria-controls="${pid}addResPanelPanel"
+								@click="onToggleAddResPanel" title="<@spring.message code='dashboard.addResource.desc' />">
+							</p-button>
+							<p-overlaypanel ref="${pid}addResPanelEle" append-to="body"
+								@show="onResPanelShow" :show-close-icon="true" id="${pid}addResPanel">
+								<div class="pb-2">
+									<label class="text-lg font-bold">
+										<@spring.message code='createResource' />
+									</label>
+								</div>
+								<div class="panel-content-size-xs overflow-auto p-2">
+									<div class="field grid">
+										<label for="${pid}addResName" class="field-label col-12 mb-2"
+											title="<@spring.message code='dashboard.addResName.desc' />">
+											<@spring.message code='resourceName' />
+										</label>
+										<div class="field-input col-12">
+											<p-inputtext id="${pid}addResName" v-model="pm.addResName" type="text"
+												@keydown.enter.prevent="onAddRes"
+												class="input w-full" maxlength="200">
+											</p-inputtext>
+										</div>
+									</div>
+								</div>
+								<div class="pt-3 text-center">
+									<p-button type="button" label="<@spring.message code='confirm' />" @click="onAddRes">
+									</p-button>
+								</div>
+							</p-overlaypanel>
+							
+							<p-button type="button" icon="pi pi-upload" class="p-button-secondary p-button-sm mr-1"
+								aria:haspopup="true" aria-controls="${pid}uploadResPanel"
+								@click="onToggleUploadResPanel" title="<@spring.message code='dashboard.uploadResource.desc' />">
+							</p-button>
+							<p-overlaypanel ref="${pid}uploadResPanelEle" append-to="body"
+								@show="onResPanelShow" :show-close-icon="true" id="${pid}uploadResPanel">
+								<div class="pb-2">
+									<label class="text-lg font-bold">
+										<@spring.message code='uploadResource' />
+									</label>
+								</div>
+								<div class="panel-content-size-xs overflow-auto p-2">
+									<div class="field grid">
+										<label for="${pid}uploadFile" class="field-label col-12 mb-2">
+											<@spring.message code='file' />
+										</label>
+										<div class="field-input col-12">
+											<div id="${pid}uploadFile" class="fileupload-wrapper flex align-items-center">
+												<p-fileupload mode="basic" name="file" :url="pm.uploadRes.url"
+									        		@upload="onResUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
+									        		:auto="true" choose-label="<@spring.message code='select' />" class="mr-2">
+									        	</p-fileupload>
+												<#include "../../include/page_fileupload.ftl">
+											</div>
+										</div>
+									</div>
+									<div class="field grid">
+										<label for="${pid}uploadResName" class="field-label col-12 mb-2"
+											title="<@spring.message code='dashboard.uploadResSavePath.desc' />">
+											<@spring.message code='savePath' />
+										</label>
+										<div class="field-input col-12">
+											<p-inputtext id="${pid}uploadResName" v-model="pm.uploadRes.savePath" type="text"
+												@keydown.enter.prevent="onUploadRes"
+												class="input w-full" maxlength="200">
+											</p-inputtext>
+										</div>
+									</div>
+								</div>
+								<div class="pt-3 text-center">
+									<p-button type="button" label="<@spring.message code='confirm' />" @click="onUploadRes">
+									</p-button>
+								</div>
+							</p-overlaypanel>
+							
+							<p-button type="button" icon="pi pi-pencil" class="p-button-secondary p-button-sm mr-1"
+								@click="onEditSelectedLocalRes"
+								title="<@spring.message code='dashboard.editResource.desc' />">
+							</p-button>
+						</div>
 					</div>
 					<div>
 						<p-button type="button" icon="pi pi-copy" class="p-button-secondary p-button-sm mr-1"
 							@click="onCopyLocalResToClipboard"
-							title="<@spring.message code='dashboard.copyResourceNameToClipboard' />">
+							title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"
+							v-if="!pm.isReadonlyAction">
 						</p-button>
 						<p-button type="button" icon="pi pi-external-link" class="p-button-secondary p-button-sm mr-1"
 							@click="onOpenSelectedLocalRes"
@@ -40,16 +113,19 @@
 						</p-button>
 						<p-button type="button" icon="pi pi-ellipsis-h" class="p-button-secondary p-button-sm"
 							 aria-haspopup="true" aria-controls="${pid}localResMenu"
-							 @click="toggleLocalResMenu">
+							 @click="toggleLocalResMenu" v-if="!pm.isReadonlyAction">
 						</p-button>
 						<p-menu id="${pid}localResMenu" ref="${pid}localResMenuEle" class="text-sm"
-							:model="pm.localResMenuItems" :popup="true"></p-menu>
+							:model="pm.localResMenuItems" :popup="true"
+							v-if="!pm.isReadonlyAction">
+						</p-menu>
 					</div>
 				</div>
 			</div>
 			<p-divider align="left" class="flex-grow-0 my-2 divider-z-0 text-sm"><@spring.message code='template' /></p-divider>
 			<div class="flex-grow-0" style="height:5rem;">
 				<p-listbox v-model="pm.localRes.selectedTemplate" :options="fm.templates"
+					empty-message="<@spring.message code='none' />"
 					@change="onChangeTemplateListItem" class="h-full overflow-auto border-none bg-none">
 				</p-listbox>
 			</div>
@@ -79,7 +155,8 @@
 					<div>
 						<p-button type="button" icon="pi pi-copy" class="p-button-secondary p-button-sm mr-1"
 							@click="onCopyGlobalResToClipboard"
-							title="<@spring.message code='dashboard.copyResourceNameToClipboard' />">
+							title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"
+							v-if="!pm.isReadonlyAction">
 						</p-button>
 						<p-button type="button" icon="pi pi-external-link" class="p-button-secondary p-button-sm mr-1"
 							@click="onOpenSelectedGlobalRes"
@@ -135,18 +212,15 @@
 		{
 			var pm = po.vuePageModel();
 			pm.localRes.resourceNodes = po.resNamesToTree(response);
+			pm.localRes.selectedNodeKeys = null;
+			pm.localRes.selectedNode = null;
 		});
 	};
 	
 	po.refreshGlobalRes = function()
 	{
-		var fm = po.vueFormModel();
-		
-		if(!po.isPersistedDashboard() || !fm.id)
-		{
-			$.tipInfo("<@spring.message code='dashboard.refreshGlobalRes.tip' />");
+		if(!po.checkPersistedDashboard())
 			return;
-		}
 		
 		var pm = po.vuePageModel();
 		
@@ -214,6 +288,161 @@
 			return null;
 	};
 	
+	po.addRes = function(name)
+	{
+		if(!name)
+			return false;
+		
+		if($.isDirectoryFile(name))
+		{
+			$.tipInfo("<@spring.message code='dashboard.illegalSaveAddResourceName' />");
+			return false;
+		}
+		
+		var isTemplate = $.isHtmlFile(name);
+		po.showResourceContentTab(name, isTemplate);
+		
+		return true;
+	};
+	
+	po.uploadRes = function(savePath, filePath)
+	{
+		if(!savePath || !filePath)
+			return false;
+		
+		var fm = po.vueFormModel();
+		
+		po.post("/dashboard/saveUploadResourceFile",
+		{
+			id: fm.id,
+			resourceFilePath: filePath,
+			resourceName: savePath
+		},
+		function(response)
+		{
+			po.vueUnref("${pid}uploadResPanelEle").hide();
+			
+			var pm = po.vuePageModel();
+			pm.uploadRes.savePath = "";
+			pm.uploadRes.filePath = "";
+			po.clearFileuploadInfo();
+			po.refreshLocalRes();
+		});
+	};
+	
+	po.updateTemplateList = function(templates)
+	{
+		var fm = po.vueFormModel();
+		fm.templates = templates;
+	};
+	
+	po.setResAsTemplate = function(name)
+	{
+		if(!name || !po.checkPersistedDashboard())
+			return;
+		
+		if(!$.isHtmlFile(name))
+		{
+	 		$.tipInfo("<@spring.message code='dashboard.setResAsTemplateUnsupport' />");
+	 		return;
+		}
+		
+		var fm = po.vueFormModel();
+		var templates = po.vueRaw(fm.templates);
+		
+		if($.inArray(name, templates) < 0)
+		{
+			templates.push(name);
+			po.saveTemplateNames(templates);
+		}
+	};
+	
+	po.setResAsFirstTemplate = function(name)
+	{
+		if(!name || !po.checkPersistedDashboard())
+			return;
+		
+		if(!$.isHtmlFile(name))
+		{
+	 		$.tipInfo("<@spring.message code='dashboard.setResAsTemplateUnsupport' />");
+	 		return;
+		}
+		
+		var fm = po.vueFormModel();
+		var templates = po.vueRaw(fm.templates);
+		var idx = $.inArray(name, templates);
+		
+		if(idx == 0)
+			return;
+		else
+		{
+			if(idx > 0)
+				templates.splice(idx, 1);
+			
+			templates.unshift(name);
+			po.saveTemplateNames(templates);
+		}
+	};
+	
+	po.setTemplateAsNormalRes = function(name)
+	{
+		if(!name || !po.checkPersistedDashboard())
+			return;
+		
+		var fm = po.vueFormModel();
+		var templates = po.vueRaw(fm.templates);
+		var idx = $.inArray(name, templates);
+		
+		if(idx > -1)
+		{
+			if(templates.length < 2)
+			{
+				$.tipWarn("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
+				return;
+			}
+			
+			templates.splice(idx, 1);
+			po.saveTemplateNames(templates);
+		}
+	};
+	
+	po.saveTemplateNames = function(templates)
+	{
+		var fm = po.vueFormModel();
+		
+		po.ajaxJson("/dashboard/saveTemplateNames?id="+encodeURIComponent(fm.id),
+		{
+			data: templates,
+			success: function(response)
+			{
+				po.updateTemplateList(response.data.templates);
+			}
+		});
+	};
+	
+	po.deleteRes = function(name)
+	{
+		if(!name || !po.checkPersistedDashboard())
+			return;
+		
+		var fm = po.vueFormModel();
+		var templates = fm.templates;
+		var idx = $.inArray(name, templates);
+		
+		if(idx > -1 && templates.length < 2)
+		{
+			$.tipWarn("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
+			return;
+		}
+		
+		po.post("/dashboard/deleteResource", { id: fm.id, name: name},
+		function(response)
+		{
+			po.updateTemplateList(response.data.templates);
+			po.refreshLocalRes();
+		});
+	};
+	
 	po.setupResourceList = function()
 	{
 		po.vuePageModel(
@@ -236,27 +465,58 @@
 			[
 				{
 					label: "设为模板",
-					command: function(){}
+					command: function()
+					{
+						var resName = po.getSelectedLocalRes();
+						po.setResAsTemplate(resName);
+					}
 				},
 				{
 					label: "设为主页模板",
-					command: function(){}
+					command: function()
+					{
+						var resName = po.getSelectedLocalRes();
+						po.setResAsFirstTemplate(resName);
+					}
 				},
 				{
 					label: "取消模板",
-					command: function(){}
+					command: function()
+					{
+						var resName = po.getSelectedLocalRes();
+						po.setTemplateAsNormalRes(resName);
+					}
 				},
 				{
 					label: "<@spring.message code='refresh' />",
-					command: function(){}
+					command: function()
+					{
+						po.refreshLocalRes();
+					}
 				},
 				{ separator: true },
 				{
 					label: "<@spring.message code='delete' />",
 					class: "p-error",
-					command: function(){}
+					command: function()
+					{
+						var resName = po.getSelectedLocalRes();
+						
+						if(resName)
+						{
+							po.confirmDelete(function()
+							{
+								po.deleteRes(resName);
+							});
+						}
+					}
 				}
-			]
+			],
+			addResName: null,
+			uploadRes:
+			{
+				url: po.concatContextPath("/dashboard/uploadResourceFile"),
+			}
 		});
 		
 		po.vueMethod(
@@ -326,7 +586,7 @@
 				var pm = po.vuePageModel();
 				pm.globalRes.selectedNode = node;
 			},
-
+			
 			onCopyGlobalResToClipboard: function(e)
 			{
 				po.copyToClipboard(po.getSelectedGlobalRes());
@@ -335,6 +595,58 @@
 			onOpenSelectedGlobalRes: function(e)
 			{
 				po.openSelectedGlobalRes();
+			},
+			
+			onToggleAddResPanel: function(e)
+			{
+				var pm = po.vuePageModel();
+				po.vueUnref("${pid}addResPanelEle").toggle(e);
+			},
+			
+			onResPanelShow: function(e)
+			{
+				var panel = po.elementOfId("${pid}addResPanel", document.body);
+				po.elementOfId("${pid}addResName", panel).focus();
+			},
+			
+			onAddRes: function()
+			{
+				var pm = po.vuePageModel();
+				if(po.addRes(pm.addResName))
+				{
+					po.vueUnref("${pid}addResPanelEle").hide();
+					pm.addResName = "";
+				}
+			},
+			
+			onToggleUploadResPanel: function(e)
+			{
+				if(!po.checkPersistedDashboard())
+					return;
+				
+				po.vueUnref("${pid}uploadResPanelEle").toggle(e);
+			},
+			
+			onUploadRes: function()
+			{
+				var pm = po.vuePageModel();
+				if(po.uploadRes(pm.uploadRes.savePath, pm.uploadRes.filePath))
+				{
+					po.vueUnref("${pid}uploadResPanelEle").hide();
+				}
+			},
+			
+			onResUploaded: function(e)
+			{
+				var pm = po.vuePageModel();
+				var response = $.getResponseJson(e.xhr);
+				
+				po.uploadFileOnUploaded(e);
+				
+				var sr = po.getSelectedLocalRes();
+				
+				pm.uploadRes.savePath = ($.isDirectoryFile(sr) ? sr + response.fileName : response.fileName);
+				pm.uploadRes.filePath = response.uploadFilePath;
 			}
 		});
 		
@@ -345,6 +657,8 @@
 		});
 		
 		po.vueRef("${pid}localResMenuEle", null);
+		po.vueRef("${pid}addResPanelEle", null);
+		po.vueRef("${pid}uploadResPanelEle", null);
 	};
 })
 (${pid});

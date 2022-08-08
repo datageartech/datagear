@@ -260,7 +260,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
 		setCookieAnalysisProject(request, response, dashboard);
 		dashboard.setId(IDUtil.randomIdOnTime20());
-		dashboard.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
+		dashboard.setTemplates(new String[0]);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 		dashboard.setCreateTime(null);
 
@@ -345,8 +345,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setTemplates(templates);
 		trimAnalysisProjectAwareEntityForSave(dashboard);
 
-		if (isEmpty(dashboard.getId()) || isBlank(dashboard.getName())
-				|| isEmpty(templates) || (form.isSaveAdd() && isEmpty(resourceNames)))
+		if (isEmpty(dashboard.getId()) || isBlank(dashboard.getName()) || isEmpty(templates))
 			throw new IllegalInputException();
 
 		// 如果编辑了首页模板，则应重新解析编码
@@ -376,14 +375,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		for (int i = 0; i < resourceNames.length; i++)
 			saveResourceContent(dashboard, resourceNames[i], resourceContents[i]);
 
-		Map<String, Object> data = new HashMap<>();
-		data.put("id", dashboard.getId());
-		data.put("templates", templates);
+		Map<String, Object> data = buildDashboardIdTemplatesHashMap(dashboard.getId(), templates);
 
-		ResponseEntity<OperationMessage> responseEntity = optMsgSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(data);
-
-		return responseEntity;
+		return operationSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/saveTemplateNames", produces = CONTENT_TYPE_JSON)
@@ -395,7 +389,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (isEmpty(templates))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity widget = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 
@@ -408,7 +402,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		this.htmlTplDashboardWidgetEntityService.update(user, widget);
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, templates);
-		return optMsgSaveSuccessResponseEntity(request, data);
+		return operationSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/getResourceContent", produces = CONTENT_TYPE_JSON)
@@ -482,22 +476,22 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			org.springframework.ui.Model model, @RequestParam("id") String id, @RequestParam("name") String name)
 			throws Exception
 	{
+		User user = WebUtils.getUser();
+		
 		name = trimResourceName(name);
 
-		User user = WebUtils.getUser(request, response);
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
-
+		String[] templates = dashboard.getTemplates();
+		String[] newTemplates = mergeTemplates(templates, name, false);
+		
+		if(isEmpty(newTemplates))
+			throw new IllegalInputException();
+		
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getTemplateDashboardWidgetResManager();
 
 		dashboardWidgetResManager.delete(id, name);
-
-		String[] templates = dashboard.getTemplates();
-		String[] newTemplates = mergeTemplates(templates, name, false);
 
 		if (!Arrays.equals(templates, newTemplates))
 		{
@@ -506,7 +500,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
-		return optMsgSaveSuccessResponseEntity(request, data);
+		return operationSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/uploadResourceFile", produces = CONTENT_TYPE_JSON)
@@ -547,7 +541,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@RequestParam("id") String id, @RequestParam("resourceFilePath") String resourceFilePath,
 			@RequestParam("resourceName") String resourceName) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
 
@@ -578,7 +572,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			IOUtil.close(out);
 		}
 
-		return optMsgSaveSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/saveResourceContent", produces = CONTENT_TYPE_JSON)
@@ -1674,6 +1668,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("dashboardGlobalResUrlPrefix",
 				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
 						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
+		model.addAttribute("defaultTempalteName", HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0]);
 	}
 
 	protected Map<String, Object> buildDashboardIdTemplatesHashMap(String id, String[] templates)

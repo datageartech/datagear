@@ -199,7 +199,9 @@ label[title]:not(.no-tip)::after,
 
 /*error菜单条目*/
 .p-contextmenu .p-error .p-menuitem-link,
-.p-contextmenu .p-error .p-menuitem-link .p-menuitem-text{
+.p-contextmenu .p-error .p-menuitem-link .p-menuitem-text,
+.p-menu .p-error .p-menuitem-link,
+.p-menu .p-error .p-menuitem-link .p-menuitem-text{
 	color: inherit;
 }
 

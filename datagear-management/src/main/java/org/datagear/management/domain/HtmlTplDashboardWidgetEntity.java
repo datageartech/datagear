@@ -17,6 +17,8 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.StringUtil;
 import org.springframework.beans.BeanUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * {@linkplain HtmlTplDashboardWidget}实体。
  * 
@@ -122,11 +124,19 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 		this.analysisProject = analysisProject;
 	}
 
+	@Override
+	@JsonIgnore
+	public String getFirstTemplate() throws IllegalStateException
+	{
+		return super.getFirstTemplate();
+	}
+
 	/**
 	 * 返回{@linkplain #getTemplates()}的JSON。
 	 * 
 	 * @return
 	 */
+	@JsonIgnore
 	public String getTemplatesJson()
 	{
 		String[] templates = getTemplates();
@@ -167,6 +177,7 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 	 * 
 	 * @return
 	 */
+	@JsonIgnore
 	public String getTemplatesSplit()
 	{
 		return concatTemplates(getTemplates());
