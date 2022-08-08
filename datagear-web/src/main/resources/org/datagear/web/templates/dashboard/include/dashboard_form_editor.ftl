@@ -217,7 +217,7 @@
 				},
 				success: function(response)
 				{
-					var isTemplate = po.isResourceTemplate(name);
+					var isTemplate = po.isResTemplate(name);
 					
 					var resourceContent = (response.resourceExists ? response.resourceContent : "");
 					if(isTemplate && !resourceContent)
@@ -235,7 +235,7 @@
 	
 	po.setResourceContent = function(name, content, isTemplate)
 	{
-		isTemplate = (isTemplate == null ? po.isResourceTemplate(name) : isTemplate);
+		isTemplate = (isTemplate == null ? po.isResTemplate(name) : isTemplate);
 		
 		var editorEle = po.elementOfId(po.resourceCodeEditorEleId(name));
 		var codeEditor = editorEle.data("codeEditorInstance");

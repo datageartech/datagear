@@ -81,6 +81,7 @@
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>
+	<#include "../include/page_copy_to_clipboard.ftl">
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_tabview.ftl">
@@ -90,7 +91,6 @@
 (function(po)
 {
 	po.submitUrl = "/dashboard/"+po.submitAction;
-	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	
 	po.isPersistedDashboard = function()
 	{
@@ -109,7 +109,10 @@
 			if(po.isAddAction)
 			{
 				if(!po.isPersistedDashboard())
-					po.refreshLocalResources();
+				{
+					po.refreshLocalRes();
+					po.refreshGlobalRes();
+				}
 				
 				po.isAddActionSaved = true;
 			}

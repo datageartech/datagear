@@ -52,7 +52,7 @@
 			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime col-last"></p-column>
 		</p-datatable>
 	</div>
-	<button type="button" class="copyShowURLDelegation hidden">&nbsp;</button>
+	<#include "../include/page_copy_to_clipboard.ftl">
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">
@@ -122,8 +122,7 @@
 				{
 					po.executeOnSelect(function(entity)
 	 				{
-	    				po._currentShowURL = po.serverURL + po.buildShowURL(entity.id);
-	    				po.element(".copyShowURLDelegation").click();
+						po.copyToClipboard(po.serverURL + po.buildShowURL(entity.id));
 	 				});
 				}
 			}
@@ -172,23 +171,6 @@
 				window.open(po.buildShowURL(entity.id), entity.id);
 			});
 		}
-	});
-
-	po.vueMounted(function()
-	{
-		var clipboard = new ClipboardJS(po.element(".copyShowURLDelegation")[0],
-		{
-			//需要设置container，不然在对话框中打开页面后复制不起作用
-			container: po.element()[0],
-			text: function(trigger)
-			{
-				return (po._currentShowURL || "");
-			}
-		});
-		clipboard.on('success', function(e)
-		{
-			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
-		});
 	});
 	
 	po.vueMount();
