@@ -583,12 +583,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@RequestParam("resourceContent") String resourceContent,
 			@RequestParam(value = "isTemplate", required = false) Boolean isTemplate) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
 		resourceName = trimResourceName(resourceName);
 		
@@ -611,7 +608,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
 		data.put("templatesChanged", templatesChanged);
 		data.put("resourceExists", resourceExists);
-		return optMsgSaveSuccessResponseEntity(request, data);
+		
+		return operationSuccessResponseEntity(request, data);
 	}
 
 	@RequestMapping("/import")

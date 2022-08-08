@@ -653,11 +653,11 @@ label[title]:not(.no-tip)::after,
 	/*对话框高度 - 表单foot高度 - 对话框header高度 - 其他元素高度*/
 	height: calc(90vh - 5rem - 6rem - 2.6rem);
 }
-.page-form-dashboard .resource-contents-wrapper .template-editor-wrapper{
+.page-form-dashboard .resource-contents-wrapper .res-editor-wrapper{
 	/*.resource-contents-wrapper高度 - 按钮区高度*/
 	height: calc(100vh - 5rem - 2.6rem - 6rem);
 }
-.p-dialog .page-form-dashboard .resource-contents-wrapper .template-editor-wrapper{
+.p-dialog .page-form-dashboard .resource-contents-wrapper .res-editor-wrapper{
 	/*.resource-contents-wrapper高度 - 按钮区高度*/
 	height: calc(90vh - 5rem - 6rem - 2.6rem - 6rem);
 }
@@ -668,4 +668,38 @@ label[title]:not(.no-tip)::after,
 .p-dialog .page-form-dashboard .resource-contents-wrapper .resource-list-wrapper{
 	/*.resource-contents-wrapper高度 - 卡片高度*/
 	height: calc(90vh - 5rem - 6rem - 2.6rem - 3.5rem);
+}
+.page-form-dashboard .res-editor-wrapper.hide-editor{
+	opacity: 0;
+	z-index: 0;
+}
+.page-form-dashboard .res-editor-wrapper.show-editor{
+	opacity: 10;
+	z-index: 1;
+}
+.page-form-dashboard .res-editor-wrapper .visual-editor-ele-path-wrapper{
+	position: absolute;
+	left: 0.4rem;
+	top: 0.2rem;
+	right: 0.3rem;
+	z-index: 2;
+	overflow: hidden;
+	opacity: 0.8;
+}
+.page-form-dashboard .res-editor-wrapper .visual-editor-iframe-wrapper{
+	position: absolute;
+    left: 0;
+    top: 1.3rem;
+    right: 0;
+    bottom: 0;
+    overflow: scroll;
+}
+.page-form-dashboard .res-editor-wrapper .visual-editor-iframe{
+	position: absolute;
+    left: 0.3rem;
+    top: 0.3rem;
+    width: 80%;
+    height: 80%;
+    border-width: 0;
+    background: #FFF;
 }

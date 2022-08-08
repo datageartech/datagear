@@ -28,7 +28,7 @@
 			<div class="flex align-content-center justify-content-between">
 				<div>
 					<p-selectbutton v-model="tab.editMode" :options="pm.templateEditModeOptions"
-						option-label="name" option-value="value" class="text-sm"
+						option-label="name" option-value="value" class="text-sm" @change="onChangeEditMode($event, tab.resourceName)"
 						v-if="tab.isTemplate">
 					</p-selectbutton>
 				</div>
@@ -49,9 +49,18 @@
 					</p-menubar>
 				</div>
 			</div>
-			<div class="pt-1">
-				<div class="code-editor-wrapper template-editor-wrapper p-component p-inputtext">
+			<div class="pt-1 relative">
+				<div class="code-editor-wrapper res-editor-wrapper show-editor p-component p-inputtext p-0 w-full absolute">
 					<div :id="resourceCodeEditorEleId(tab.resourceName)" class="code-editor"></div>
+				</div>
+				<div class="visual-editor-wrapper res-editor-wrapper hide-editor p-component p-inputtext p-0 w-full absolute">
+					<div class="visual-editor-ele-path-wrapper text-sm">
+						<div class="ele-path">路径</div>
+					</div>
+					<div class="visual-editor-iframe-wrapper">
+						<iframe class="visual-editor-iframe shadow-4 border-none" :id="resourceVisualEditorEleId(tab.resourceName)" :name="resourceVisualEditorEleId(tab.resourceName)">
+						</iframe>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -112,65 +121,6 @@
 		};
 		
 		return re;
-	};
-	
-	po.buildTplVisualInsertMenuItems = function(insertType)
-	{
-		var items =
-		[
-			{
-				label: "<@spring.message code='gridLayout' />",
-				class: "insert-type-" + insertType,
-				command: function()
-				{
-				}
-			},
-			{
-				label: "<@spring.message code='divElement' />",
-				class: "insert-type-" + insertType,
-				command: function()
-				{
-				}
-			},
-			{
-				label: "<@spring.message code='textElement' />",
-				class: "insert-type-" + insertType,
-				command: function()
-				{
-				}
-			},
-			{
-				label: "<@spring.message code='image' />",
-				class: "insert-type-" + insertType,
-				command: function()
-				{
-				}
-			},
-			{
-				label: "<@spring.message code='hyperlink' />",
-				class: "insert-type-" + insertType,
-				command: function()
-				{
-				}
-			},
-			{
-				label: "<@spring.message code='video' />",
-				class: "insert-type-" + insertType,
-				command: function()
-				{
-				}
-			},
-			{ separator: true },
-			{
-				label: "<@spring.message code='chart' />",
-				class: "insert-type-" + insertType,
-				command: function()
-				{
-				}
-			}
-		];
-		
-		return items;
 	};
 	
 	po.getResourceContentTabIndex = function(name)
@@ -346,16 +296,135 @@
 		
 		$.each(items, function(idx, item)
 		{
-			var info = { name: item.resourceName, content: "", isTemplate: item.isTemplate };
-			
-			var editorEle = po.elementOfId(po.resourceCodeEditorEleId(item.resourceName));
-			var codeEditor = editorEle.data("codeEditorInstance");
-			info.content = po.getCodeText(codeEditor);
-			
-			re.push(info);
+			var info = po.getEditResourceInfo(item);
+			if(info)
+				re.push(info);
 		});
 		
 		return re;
+	};
+	
+	po.getEditResourceInfo = function(resContentTabItem)
+	{
+		if($.isTypeNumber(resContentTabItem))
+		{
+			var pm = po.vuePageModel();
+			var items = pm.resourceContentTabs.items;
+			resContentTabItem = items[resContentTabItem];
+		}
+		
+		if(resContentTabItem == null)
+			return null;
+		
+		var info = { name: resContentTabItem.resourceName, content: "", isTemplate: resContentTabItem.isTemplate };
+		
+		var editorEle = po.elementOfId(po.resourceCodeEditorEleId(info.name));
+		var codeEditor = editorEle.data("codeEditorInstance");
+		info.content = po.getCodeText(codeEditor);
+		
+		return info;
+	};
+	
+	po.saveResourceInfo = function(resInfo)
+	{
+		if(!resInfo || !po.checkPersistedDashboard())
+			return;
+		
+		var fm = po.vueFormModel();
+		
+		po.post("/dashboard/saveResourceContent",
+		{
+			id: fm.id,
+			resourceName: resInfo.name,
+			resourceContent: resInfo.content,
+			isTemplate: resInfo.isTemplate
+		},
+		function(response)
+		{
+			if(response.data.templatesChanged)
+				po.updateTemplateList(response.data.templates);
+			
+			if(!response.data.resourceExists)
+				po.refreshLocalRes();
+		});
+	};
+	
+	po.changeEditMode = function(mode, name)
+	{
+		var tabId = po.resourceContentTabId(name);
+		var tabEle = po.elementOfId(tabId);
+		var codeEditorWrapper = po.element(".code-editor-wrapper", tabEle);
+		var visualEditorWrapper = po.element(".visual-editor-wrapper", tabEle);
+		
+		if(mode == "code")
+		{
+			codeEditorWrapper.addClass("show-editor").removeClass("hide-editor");
+			visualEditorWrapper.addClass("hide-editor").removeClass("show-editor");
+		}
+		else
+		{
+			codeEditorWrapper.addClass("hide-editor").removeClass("show-editor");
+			visualEditorWrapper.addClass("show-editor").removeClass("hide-editor");
+		}
+	};
+
+	po.buildTplVisualInsertMenuItems = function(insertType)
+	{
+		var items =
+		[
+			{
+				label: "<@spring.message code='gridLayout' />",
+				class: "insert-type-" + insertType,
+				command: function()
+				{
+				}
+			},
+			{
+				label: "<@spring.message code='divElement' />",
+				class: "insert-type-" + insertType,
+				command: function()
+				{
+				}
+			},
+			{
+				label: "<@spring.message code='textElement' />",
+				class: "insert-type-" + insertType,
+				command: function()
+				{
+				}
+			},
+			{
+				label: "<@spring.message code='image' />",
+				class: "insert-type-" + insertType,
+				command: function()
+				{
+				}
+			},
+			{
+				label: "<@spring.message code='hyperlink' />",
+				class: "insert-type-" + insertType,
+				command: function()
+				{
+				}
+			},
+			{
+				label: "<@spring.message code='video' />",
+				class: "insert-type-" + insertType,
+				command: function()
+				{
+				}
+			},
+			{ separator: true },
+			{
+				label: "<@spring.message code='chart' />",
+				class: "insert-type-" + insertType,
+				command: function()
+				{
+				}
+			}
+		];
+		
+		return items;
 	};
 	
 	po.setupResourceEditor = function()
@@ -416,7 +485,12 @@
 			codeEditMenuItems:
 			[
 				{
-					label: "<@spring.message code='save' />"
+					label: "<@spring.message code='save' />",
+					command: function(e)
+					{
+						var info = po.getEditResourceInfo(pm.resourceContentTabs.activeIndex);
+						po.saveResourceInfo(info);
+					}
 				}
 			],
 			tplVisualEditMenuItems:
@@ -495,7 +569,12 @@
 					]
 				},
 				{
-					label: "<@spring.message code='save' />"
+					label: "<@spring.message code='save' />",
+					command: function(e)
+					{
+						var info = po.getEditResourceInfo(pm.resourceContentTabs.activeIndex);
+						po.saveResourceInfo(info);
+					}
 				},
 				{
 					label: "<@spring.message code='more' />",
@@ -526,6 +605,11 @@
 		
 		po.vueMethod(
 		{
+			onResourceContentTabChange: function()
+			{
+				
+			},
+			
 			onResourceContentTabMenuToggle: function(e, tabId)
 			{
 				po.resourceContentTabMenuTargetId = tabId;
@@ -540,6 +624,11 @@
 			resourceVisualEditorEleId: function(name)
 			{
 				return po.resourceVisualEditorEleId(name);
+			},
+			
+			onChangeEditMode: function(e, name)
+			{
+				po.changeEditMode(e.value, name);
 			}
 		});
 		
