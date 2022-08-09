@@ -30,7 +30,7 @@
 				<p-card class="col-10 md:col-8 p-card mt-6">
 					<template #title><@spring.message code='module.resetPassword' /></template>
 					<template #content>
-					<form class="flex flex-column">
+					<form id="${pid}form" class="flex flex-column">
 						<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 							<div class="mb-5">
 								<p-steps :model="pm.stepItems" :readonly="true"></p-steps>

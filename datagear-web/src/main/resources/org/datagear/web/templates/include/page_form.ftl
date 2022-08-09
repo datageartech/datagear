@@ -30,7 +30,7 @@ String action
 	
 	po.form = function()
 	{
-		return po.element("form:first");
+		return po.elementOfId("${pid}form");
 	};
 	
 	//获取/填充并返回vue表单模型，在vue页面中可以"fm.*"访问模型中的属性

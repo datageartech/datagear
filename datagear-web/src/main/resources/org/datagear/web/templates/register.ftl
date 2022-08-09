@@ -27,7 +27,7 @@
 				<p-card class="col-10 md:col-5 p-card mt-6">
 					<template #title><@spring.message code='module.register' /></template>
 					<template #content>
-					<form class="flex flex-column">
+					<form id="${pid}form" class="flex flex-column">
 						<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 							<div class="field grid">
 								<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">

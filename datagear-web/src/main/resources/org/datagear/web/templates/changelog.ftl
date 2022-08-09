@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<form class="flex flex-column">
+	<form id="${pid}form" class="flex flex-column">
 		<div class="page-form-content no-max-height flex-grow-1 pr-2 py-1 overflow-y-auto">
 			<#list versionChangelogs as versionChangelog>
 				<div class="field grid mb-0">

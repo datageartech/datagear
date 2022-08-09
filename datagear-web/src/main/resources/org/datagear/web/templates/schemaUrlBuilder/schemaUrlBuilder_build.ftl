@@ -26,7 +26,7 @@
 	<div class="builtInJson hidden">
 		${builtInBuildersJson!''}
 	</div>
-	<form class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
+	<form id="${pid}form" class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}dbType" class="field-label col-12 mb-2 md:col-3 md:mb-0">
