@@ -23,78 +23,10 @@
 								aria:haspopup="true" aria-controls="${pid}addResPanelPanel"
 								@click="onToggleAddResPanel" title="<@spring.message code='dashboard.addResource.desc' />">
 							</p-button>
-							<p-overlaypanel ref="${pid}addResPanelEle" append-to="body"
-								@show="onResPanelShow" :show-close-icon="true" id="${pid}addResPanel">
-								<div class="pb-2">
-									<label class="text-lg font-bold">
-										<@spring.message code='createResource' />
-									</label>
-								</div>
-								<div class="panel-content-size-xs overflow-auto p-2">
-									<div class="field grid">
-										<label for="${pid}addResName" class="field-label col-12 mb-2"
-											title="<@spring.message code='dashboard.addResName.desc' />">
-											<@spring.message code='resourceName' />
-										</label>
-										<div class="field-input col-12">
-											<p-inputtext id="${pid}addResName" v-model="pm.addResName" type="text"
-												@keydown.enter.prevent="onAddRes"
-												class="input w-full" maxlength="200">
-											</p-inputtext>
-										</div>
-									</div>
-								</div>
-								<div class="pt-3 text-center">
-									<p-button type="button" label="<@spring.message code='confirm' />" @click="onAddRes">
-									</p-button>
-								</div>
-							</p-overlaypanel>
-							
 							<p-button type="button" icon="pi pi-upload" class="p-button-secondary p-button-sm mr-1"
 								aria:haspopup="true" aria-controls="${pid}uploadResPanel"
 								@click="onToggleUploadResPanel" title="<@spring.message code='dashboard.uploadResource.desc' />">
 							</p-button>
-							<p-overlaypanel ref="${pid}uploadResPanelEle" append-to="body"
-								@show="onResPanelShow" :show-close-icon="true" id="${pid}uploadResPanel">
-								<div class="pb-2">
-									<label class="text-lg font-bold">
-										<@spring.message code='uploadResource' />
-									</label>
-								</div>
-								<div class="panel-content-size-xs overflow-auto p-2">
-									<div class="field grid">
-										<label for="${pid}uploadFile" class="field-label col-12 mb-2">
-											<@spring.message code='file' />
-										</label>
-										<div class="field-input col-12">
-											<div id="${pid}uploadFile" class="fileupload-wrapper flex align-items-center">
-												<p-fileupload mode="basic" name="file" :url="pm.uploadRes.url"
-									        		@upload="onResUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
-									        		:auto="true" choose-label="<@spring.message code='select' />" class="mr-2">
-									        	</p-fileupload>
-												<#include "../../include/page_fileupload.ftl">
-											</div>
-										</div>
-									</div>
-									<div class="field grid">
-										<label for="${pid}uploadResName" class="field-label col-12 mb-2"
-											title="<@spring.message code='dashboard.uploadResSavePath.desc' />">
-											<@spring.message code='savePath' />
-										</label>
-										<div class="field-input col-12">
-											<p-inputtext id="${pid}uploadResName" v-model="pm.uploadRes.savePath" type="text"
-												@keydown.enter.prevent="onUploadRes"
-												class="input w-full" maxlength="200">
-											</p-inputtext>
-										</div>
-									</div>
-								</div>
-								<div class="pt-3 text-center">
-									<p-button type="button" label="<@spring.message code='confirm' />" @click="onUploadRes">
-									</p-button>
-								</div>
-							</p-overlaypanel>
-							
 							<p-button type="button" icon="pi pi-pencil" class="p-button-secondary p-button-sm mr-1"
 								@click="onEditSelectedLocalRes"
 								title="<@spring.message code='dashboard.editResource.desc' />">
@@ -323,8 +255,8 @@
 			po.vueUnref("${pid}uploadResPanelEle").hide();
 			
 			var pm = po.vuePageModel();
-			pm.uploadRes.savePath = "";
-			pm.uploadRes.filePath = "";
+			pm.uploadResModel.savePath = "";
+			pm.uploadResModel.filePath = "";
 			po.clearFileuploadInfo();
 			po.refreshLocalRes();
 		});
@@ -512,10 +444,15 @@
 					}
 				}
 			],
-			addResName: null,
-			uploadRes:
+			addResModel:
+			{
+				resName: null
+			},
+			uploadResModel:
 			{
 				url: po.concatContextPath("/dashboard/uploadResourceFile"),
+				filePath: null,
+				savePath: null
 			}
 		});
 		
@@ -603,20 +540,21 @@
 				po.vueUnref("${pid}addResPanelEle").toggle(e);
 			},
 			
-			onResPanelShow: function(e)
-			{
-				var panel = po.elementOfId("${pid}addResPanel", document.body);
-				po.elementOfId("${pid}addResName", panel).focus();
-			},
-			
-			onAddRes: function()
+			onAddResPanelShow: function(e)
 			{
 				var pm = po.vuePageModel();
-				if(po.addRes(pm.addResName))
+				var panel = po.elementOfId("${pid}addResPanel", document.body);
+				var form = po.elementOfId("${pid}addResForm", panel);
+				po.elementOfId("${pid}addResName", form).focus();
+				
+				po.setupSimpleForm(form, pm.addResModel, function()
 				{
-					po.vueUnref("${pid}addResPanelEle").hide();
-					pm.addResName = "";
-				}
+					if(po.addRes(pm.addResModel.resName))
+					{
+						po.vueUnref("${pid}addResPanelEle").hide();
+						pm.addResModel.resName = "";
+					}
+				});
 			},
 			
 			onToggleUploadResPanel: function(e)
@@ -626,14 +564,17 @@
 				
 				po.vueUnref("${pid}uploadResPanelEle").toggle(e);
 			},
-			
-			onUploadRes: function()
+
+			onUploadResPanelShow: function(e)
 			{
 				var pm = po.vuePageModel();
-				if(po.uploadRes(pm.uploadRes.savePath, pm.uploadRes.filePath))
+				var panel = po.elementOfId("${pid}uploadResPanel", document.body);
+				var form = po.elementOfId("${pid}uploadResForm", panel);
+				
+				po.setupSimpleForm(form, pm.uploadResModel, function()
 				{
-					po.vueUnref("${pid}uploadResPanelEle").hide();
-				}
+					po.uploadRes(pm.uploadResModel.savePath, pm.uploadResModel.filePath)
+				});
 			},
 			
 			onResUploaded: function(e)
@@ -645,8 +586,8 @@
 				
 				var sr = po.getSelectedLocalRes();
 				
-				pm.uploadRes.savePath = ($.isDirectoryFile(sr) ? sr + response.fileName : response.fileName);
-				pm.uploadRes.filePath = response.uploadFilePath;
+				pm.uploadResModel.savePath = ($.isDirectoryFile(sr) ? sr + response.fileName : response.fileName);
+				pm.uploadResModel.filePath = response.uploadFilePath;
 			}
 		});
 		

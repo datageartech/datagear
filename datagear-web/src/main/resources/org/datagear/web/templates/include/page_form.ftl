@@ -14,6 +14,7 @@ String action
 
 -->
 <#assign AbstractController=statics['org.datagear.web.controller.AbstractController']>
+<#include "page_validation_msg.ftl">
 <script>
 (function(po)
 {
@@ -29,7 +30,7 @@ String action
 	
 	po.form = function()
 	{
-		return po.element("form");
+		return po.element("form:first");
 	};
 	
 	//获取/填充并返回vue表单模型，在vue页面中可以"fm.*"访问模型中的属性
@@ -136,28 +137,6 @@ String action
 	po.pageParamCallSubmitSuccess = function(response)
 	{
 		po.pageParamCall("submitSuccess", (response.data ? response.data : response));
-	};
-	
-	po.initValidationMessagesIfNon = function()
-	{
-		if(!po._initGlobalValidationMessages)
-		{
-			$.extend($.validator.messages, po.validationMessages);
-			po._initGlobalValidationMessages = true;
-		}
-	};
-	
-	po.validationMessages =
-	{
-		required: "<@spring.message code='validation.required' />",
-		number: "<@spring.message code='validation.number' />",
-		digits: "<@spring.message code='validation.digits' />",
-		equalTo: "<@spring.message code='validation.equalTo' />",
-		min: $.validator.format("<@spring.message code='validation.min' />"),
-		max: $.validator.format("<@spring.message code='validation.max' />"),
-		maxlength: $.validator.format("<@spring.message code='validation.maxlength' />"),
-		minlength: $.validator.format("<@spring.message code='validation.minlength' />"),
-		integer: "<@spring.message code='validation.integer' />"
 	};
 	
 	po.handleOpenSelectAction = function(url, callback, options)

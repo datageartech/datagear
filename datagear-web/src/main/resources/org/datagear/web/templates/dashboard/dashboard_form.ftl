@@ -81,9 +81,11 @@
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>
+	<#include "include/dashboard_form_resource_forms.ftl">
 	<#include "../include/page_copy_to_clipboard.ftl">
 </div>
 <#include "../include/page_form.ftl">
+<#include "../include/page_simple_form.ftl">
 <#include "../include/page_tabview.ftl">
 <#include "../include/page_code_editor.ftl">
 <#include "include/dashboard_code_completions.ftl">
