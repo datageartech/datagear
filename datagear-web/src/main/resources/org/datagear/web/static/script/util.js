@@ -589,6 +589,27 @@
 		
 		return (prefix ? prefix : "uid") + time + seq;
 	};
+
+	/**
+	 * 如果是字符串且超过指定长度，则将其截断。
+	 * 
+	 * @param str 必选，待截断的字符串
+	 * @param suffix 可选，截断后缀，默认为“...”
+	 * @param length 可选，截断长度，默认为47
+	 */
+	$.truncateIf = function(str, suffix, length)
+	{
+		if(suffix == undefined)
+			suffix = "...";
+		
+		if(length == undefined)
+			length = 47;
+		
+		if(typeof(str) == "string" && str.length > length)
+			str = str.substr(0, length) + suffix;
+		
+		return str;
+	};
 	
 	/**
 	 * 给URL添加参数。

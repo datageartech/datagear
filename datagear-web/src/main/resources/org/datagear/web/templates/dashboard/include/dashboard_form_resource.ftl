@@ -176,25 +176,16 @@
 	
 	po.openSelectedLocalRes = function()
 	{
-		var fm = po.vueFormModel();
 		var sr = po.getSelectedLocalRes();
-		if(sr && fm.id)
-		{
-			var url = po.concatContextPath("/dashboard/show/"+encodeURIComponent(fm.id)+"/"+sr);
-			window.open(url);
-		}
+		if(sr)
+			window.open(po.showUrl(sr));
 	};
 
 	po.openSelectedGlobalRes = function()
 	{
-		var fm = po.vueFormModel();
 		var gr = po.getSelectedGlobalRes();
-		
-		if(gr && fm.id)
-		{
-			var url = po.concatContextPath("/dashboard/show/" + encodeURIComponent(fm.id) +"/" + gr);
-			window.open(url);
-		}
+		if(gr)
+			window.open(po.showUrl(gr));
 	};
 	
 	po.getSelectedLocalRes = function()

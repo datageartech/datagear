@@ -20,7 +20,7 @@
 		<template #header>
 			<p-button type="button" icon="pi pi-angle-down"
 				class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
-				@click="onResourceContentTabMenuToggle($event, tab.id)"
+				@click="onResourceContentTabMenuToggle($event, tab)"
 				aria-haspopup="true" aria-controls="${pid}resourceContentTabMenu">
 			</p-button>
 		</template>
@@ -28,7 +28,7 @@
 			<div class="flex align-content-center justify-content-between">
 				<div>
 					<p-selectbutton v-model="tab.editMode" :options="pm.templateEditModeOptions"
-						option-label="name" option-value="value" class="text-sm" @change="onChangeEditMode($event, tab.resourceName)"
+						option-label="name" option-value="value" class="text-sm" @change="onChangeEditMode($event, tab)"
 						v-if="tab.isTemplate">
 					</p-selectbutton>
 				</div>
@@ -37,8 +37,8 @@
 					<p-menubar :model="pm.codeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
 							<div class="p-inputgroup pl-2">
-								<p-inputtext type="text" class="text-sm p-0 px-1" style="width:10rem;"></p-inputtext>
-								<p-button type="button" icon="pi pi-search" class="p-button-secondary p-button-sm"></p-button>
+								<p-inputtext type="text" v-model="tab.searchCodeKeyword" class="text-sm p-0 px-1" style="width:9rem;" @keydown.enter.prevent="onSearchInCodeEditor($event, tab)"></p-inputtext>
+								<p-button type="button" icon="pi pi-search" class="p-button-secondary p-button-sm" @click="onSearchInCodeEditor($event, tab)"></p-button>
 							</div>
 						</template>
 					</p-menubar>
@@ -51,14 +51,15 @@
 			</div>
 			<div class="pt-1 relative">
 				<div class="code-editor-wrapper res-editor-wrapper show-editor p-component p-inputtext p-0 w-full absolute">
-					<div :id="resourceCodeEditorEleId(tab.resourceName)" class="code-editor"></div>
+					<div :id="resCodeEditorEleId(tab)" class="code-editor"></div>
 				</div>
 				<div class="visual-editor-wrapper res-editor-wrapper hide-editor p-component p-inputtext p-0 w-full absolute">
-					<div class="visual-editor-ele-path-wrapper text-sm">
-						<div class="ele-path">路径</div>
+					<div class="visual-editor-ele-path-wrapper text-color-secondary text-sm">
+						<div class="ele-path white-space-nowrap"></div>
 					</div>
 					<div class="visual-editor-iframe-wrapper">
-						<iframe class="visual-editor-iframe shadow-4 border-none" :id="resourceVisualEditorEleId(tab.resourceName)" :name="resourceVisualEditorEleId(tab.resourceName)">
+						<iframe class="visual-editor-iframe shadow-4 border-none" :id="resVisualEditorEleId(tab)"
+							:name="resVisualEditorEleId(tab)" @load="onVisualEditorIframeLoad($event, tab)">
 						</iframe>
 					</div>
 				</div>
@@ -74,103 +75,83 @@
 {
 	po.defaultTemplateName = "${defaultTempalteName}";
 	
-	po.resourceContentTabId = function(name)
+	po.resContentTabId = function(resName)
 	{
-		var map = (po.resourceContentTabIdMap || (po.resourceContentTabIdMap = {}));
+		var map = (po.resContentTabIdMap || (po.resContentTabIdMap = {}));
 		
-		//不直接使用tableName作为元素ID，因为name中可能存在与jquery冲突的字符，比如'$'
-		var value = map[name];
+		//不直接使用resName作为元素ID，因为resName中可能存在与jquery冲突的字符，比如'$'
+		var value = map[resName];
 		
 		if(value == null)
 		{
 			value = $.uid("resCntTab");
-			map[name] = value;
+			map[resName] = value;
 		}
 		
 		return value;
 	};
 	
-	po.resourceCodeEditorEleId = function(name)
+	po.resCodeEditorEleId = function(tab)
 	{
-		var tabId = po.resourceContentTabId(name);
-		return tabId+"codeEditor";
+		return tab.id + "codeEditor";
 	};
 
-	po.resourceVisualEditorEleId = function(name)
+	po.resVisualEditorEleId = function(tab)
 	{
-		var tabId = po.resourceContentTabId(name);
-		return tabId+"visualEditor";
+		return tab.id + "visualEditor";
 	};
 	
-	po.toResourceContentTabItem = function(name, isTemplate)
+	po.toResourceContentTab = function(resName, isTemplate)
 	{
 		if(isTemplate == null)
 		{
 			var fm = po.vueFormModel();
-			isTemplate = ($.inArray(name, fm.templates) > -1);
+			isTemplate = ($.inArray(resName, fm.templates) > -1);
 		}
 		
 		var re =
 		{
-			id: po.resourceContentTabId(name),
-			key: name,
-			title: name,
+			id: po.resContentTabId(resName),
+			key: resName,
+			title: resName,
 			editMode: "code",
-			resourceName: name,
-			isTemplate: isTemplate
+			resName: resName,
+			isTemplate: isTemplate,
+			searchCodeKeyword: null
 		};
 		
 		return re;
 	};
 	
-	po.getResourceContentTabIndex = function(name)
+	po.showResourceContentTab = function(resName, isTemplate)
 	{
 		var pm = po.vuePageModel();
 		var items = pm.resourceContentTabs.items;
+		var idx = $.inArrayById(items, po.resContentTabId(resName));
 		
-		return $.inArrayById(items, po.resourceContentTabId(name));
-	};
-	
-	po.showResourceContentTab = function(name, isTemplate)
-	{
-		var pm = po.vuePageModel();
-		
-		var idx = po.getResourceContentTabIndex(name);
 		if(idx > -1)
 			pm.resourceContentTabs.activeIndex = idx;
 		else
 		{
-			var tabItem = po.toResourceContentTabItem(name, isTemplate);
-			pm.resourceContentTabs.items.push(tabItem);
+			var tab = po.toResourceContentTab(resName, isTemplate);
+			pm.resourceContentTabs.items.push(tab);
 			
-			//XXX vueMounted()回调函数中vueApp()为null？
-			if(po.vueApp())
+			//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
+			po.vueApp().$nextTick(function()
 			{
-				//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
-				po.vueApp().$nextTick(function()
-				{
-					pm.resourceContentTabs.activeIndex = pm.resourceContentTabs.items.length - 1;
-				});
-			}
-			else
 				pm.resourceContentTabs.activeIndex = pm.resourceContentTabs.items.length - 1;
+			});
 		}
 	};
 	
-	po.loadResourceContent = function(name)
+	po.loadResourceContentIfNon = function(tab)
 	{
-		var pm = po.vuePageModel();
+		var tabPanel = po.elementOfId(tab.id);
+		var loaded = tabPanel.prop("loaded");
 		
-		var idx = po.getResourceContentTabIndex(name);
-		var tabItem = pm.resourceContentTabs.items[idx];
-		var tabId = tabItem.id;
-		var panel = po.elementOfId(tabId);
-		
-		var expectLoad = (panel.prop("loaded") !== true);
-		
-		if(expectLoad && panel.prop("loading") !== true)
+		if(!loaded && !tabPanel.prop("loading"))
 		{
-			panel.prop("loading", true);
+			tabPanel.prop("loading", true);
 			
 			var fm = po.vueFormModel();
 			
@@ -179,32 +160,31 @@
 				data:
 				{
 					id: fm.id,
-					resourceName: name
+					resourceName: tab.resName
 				},
 				success: function(response)
 				{
-					var isTemplate = tabItem.isTemplate;
-					
 					var resourceContent = (response.resourceExists ? response.resourceContent : "");
-					if(isTemplate && !resourceContent)
+					if(tab.isTemplate && !resourceContent)
 						resourceContent = (response.defaultTemplateContent || "");
 					
-					po.setResourceContent(name, resourceContent, isTemplate);
+					po.setResourceContent(tab, resourceContent);
+					tabPanel.prop("loaded", true);
 				},
 				complete: function()
 				{
-					panel.prop("loading", false);
+					tabPanel.prop("loading", false);
 				}
 			});
 		}
 	};
 	
-	po.setResourceContent = function(name, content, isTemplate)
+	po.setResourceContent = function(tab, content)
 	{
-		isTemplate = (isTemplate == null ? po.isResTemplate(name) : isTemplate);
+		var tabPanel = po.elementOfId(tab.id);
+		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
+		var codeEditor = codeEditorEle.data("codeEditorInstance");
 		
-		var editorEle = po.elementOfId(po.resourceCodeEditorEleId(name));
-		var codeEditor = editorEle.data("codeEditorInstance");
 		if(!codeEditor)
 		{
 			var codeEditorOptions =
@@ -217,10 +197,10 @@
 				readOnly: po.isReadonlyAction,
 				foldGutter: true,
 				gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-				mode: po.evalCodeModeByName(name)
+				mode: po.evalCodeModeByName(tab.resName)
 			};
 			
-			if(isTemplate && !codeEditorOptions.readOnly)
+			if(tab.isTemplate && !codeEditorOptions.readOnly)
 			{
 				codeEditorOptions.hintOptions =
 				{
@@ -228,13 +208,24 @@
 				};
 			}
 			
-			codeEditor = po.createCodeEditor(editorEle, codeEditorOptions);
-			editorEle.data("codeEditorInstance", codeEditor);
+			codeEditor = po.createCodeEditor(codeEditorEle, codeEditorOptions);
+			codeEditorEle.data("codeEditorInstance", codeEditor);
+			
+			if(tab.isTemplate)
+			{
+				var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
+				
+				var topWindowSize = po.evalTopWindowSize();
+				visualEditorIfm.css("width", topWindowSize.width);
+				visualEditorIfm.css("height", topWindowSize.height);
+				
+				po.setVisualEditorIframeScale(visualEditorIfm);
+			}
 		}
 		else
 			po.setCodeText(codeEditor, content);
 	};
-	
+
 	po.codeEditorHintHandler = function(codeEditor)
 	{
 		var doc = codeEditor.getDoc();
@@ -286,7 +277,7 @@
 			return completions;
 		}
 	};
-
+	
 	po.getEditResourceInfos = function()
 	{
 		var re = [];
@@ -304,21 +295,21 @@
 		return re;
 	};
 	
-	po.getEditResourceInfo = function(resContentTabItem)
+	po.getEditResourceInfo = function(tab)
 	{
-		if($.isTypeNumber(resContentTabItem))
+		if($.isTypeNumber(tab))
 		{
 			var pm = po.vuePageModel();
 			var items = pm.resourceContentTabs.items;
-			resContentTabItem = items[resContentTabItem];
+			tab = items[tab];
 		}
 		
-		if(resContentTabItem == null)
+		if(tab == null)
 			return null;
 		
-		var info = { name: resContentTabItem.resourceName, content: "", isTemplate: resContentTabItem.isTemplate };
+		var info = { name: tab.resName, content: "", isTemplate: tab.isTemplate };
 		
-		var editorEle = po.elementOfId(po.resourceCodeEditorEleId(info.name));
+		var editorEle = po.elementOfId(po.resCodeEditorEleId(tab));
 		var codeEditor = editorEle.data("codeEditorInstance");
 		info.content = po.getCodeText(codeEditor);
 		
@@ -349,25 +340,273 @@
 		});
 	};
 	
-	po.changeEditMode = function(mode, name)
+	po.searchInCodeEditor = function(tab)
 	{
-		var tabId = po.resourceContentTabId(name);
-		var tabEle = po.elementOfId(tabId);
-		var codeEditorWrapper = po.element(".code-editor-wrapper", tabEle);
-		var visualEditorWrapper = po.element(".visual-editor-wrapper", tabEle);
+		var text = tab.searchCodeKeyword;
 		
-		if(mode == "code")
+		if(!text)
+			return;
+		
+		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab));
+		var codeEditor = codeEditorEle.data("codeEditorInstance");
+		
+		var prevSearchText = codeEditorEle.data("prevSearchText");
+		var cursor = codeEditorEle.data("prevSearchCursor");
+		var doc = codeEditor.getDoc();
+		
+		if(!cursor || text != prevSearchText)
 		{
+			cursor = codeEditor.getSearchCursor(text);
+			codeEditorEle.data("prevSearchCursor", cursor);
+			codeEditorEle.data("prevSearchText", text)
+		}
+		
+		codeEditor.focus();
+		
+		if(cursor.findNext())
+			doc.setSelection(cursor.from(), cursor.to());
+		else
+		{
+			//下次从头搜索
+			codeEditorEle.data("prevSearchCursor", null);
+		}
+	};
+	
+	po.handleChangeEditMode = function(tab)
+	{
+		var tabPanel = po.elementOfId(tab.id);
+		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
+		var codeEditorWrapper = codeEditorEle.parent();
+		var codeEditor = codeEditorEle.data("codeEditorInstance");
+		var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
+		var visualEditorIfmWrapper = visualEditorIfm.parent();
+		var visualEditorWrapper = visualEditorIfmWrapper.parent();
+		
+		if(tab.editMode == "code")
+		{
+			var changeFlag = codeEditorEle.data("changeFlag");
+			//初次由源码模式切换至可视编辑模式后，changeFlag会是1，
+			//但此时是不需要同步的，所以这里手动设置为1
+			if(changeFlag == null)
+				changeFlag = 1;
+			
+			var dashboardEditor = po.visualDashboardEditor(visualEditorIfm);
+			
+			//有修改
+			if(dashboardEditor && dashboardEditor.isChanged(changeFlag))
+			{
+				po.setCodeText(codeEditor, dashboardEditor.editedHtml());
+				
+				visualEditorIfmWrapper.data("changeFlag", codeEditor.changeGeneration());
+				codeEditorEle.data("changeFlag", dashboardEditor.changeFlag());
+			}
+			
 			codeEditorWrapper.addClass("show-editor").removeClass("hide-editor");
 			visualEditorWrapper.addClass("hide-editor").removeClass("show-editor");
 		}
 		else
 		{
+			var changeFlag = visualEditorIfmWrapper.data("changeFlag");
+			
+			//没有修改
+			if(changeFlag != null && codeEditor.isClean(changeFlag))
+				;
+			else
+			{
+				//清空iframe后再显示，防止闪屏
+				po.iframeDocument(visualEditorIfm).write("");
+				
+				visualEditorIfmWrapper.data("changeFlag", codeEditor.changeGeneration());
+				codeEditorEle.data("changeFlag", null);
+				
+				po.loadVisualEditorIframe(visualEditorIfm, tab.resName, (po.isReadonlyAction ? "" : po.getCodeText(codeEditor)));
+			}
+			
 			codeEditorWrapper.addClass("hide-editor").removeClass("show-editor");
 			visualEditorWrapper.addClass("show-editor").removeClass("hide-editor");
 		}
 	};
-
+	
+	po.initVisualDashboardEditor = function(tab)
+	{
+		var tabPanel = po.elementOfId(tab.id);
+		var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
+		var visualEditorIfmWrapper = visualEditorIfm.parent();
+		var visualEditorWrapper = visualEditorIfmWrapper.parent();
+		
+		var ifmWindow = po.iframeWindow(visualEditorIfm);
+		var dashboardEditor = (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
+		
+		var elePathWrapper = po.element("> .visual-editor-ele-path-wrapper", visualEditorWrapper);
+		var elePathEle = po.element("> .ele-path", elePathWrapper);
+		elePathEle.empty();
+		
+		if(dashboardEditor && !dashboardEditor._OVERWRITE_BY_CONTEXT)
+		{
+			dashboardEditor._OVERWRITE_BY_CONTEXT = true;
+			
+			dashboardEditor.i18n.insertInsideChartOnChartEleDenied="<@spring.message code='dashboard.opt.tip.insertInsideChartOnChartEleDenied' />";
+			dashboardEditor.i18n.selectElementForSetChart="<@spring.message code='dashboard.opt.tip.selectElementForSetChart' />";
+			dashboardEditor.i18n.canEditOnlyTextElement="<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />";
+			dashboardEditor.i18n.selectedElementRequired="<@spring.message code='dashboard.opt.tip.selectedElementRequired' />";
+			dashboardEditor.i18n.selectedNotChartElement="<@spring.message code='dashboard.opt.tip.selectedNotChartElement' />";
+			dashboardEditor.i18n.noSelectableNextElement="<@spring.message code='dashboard.opt.tip.noSelectableNextElement' />";
+			dashboardEditor.i18n.noSelectablePrevElement="<@spring.message code='dashboard.opt.tip.noSelectablePrevElement' />";
+			dashboardEditor.i18n.noSelectableChildElement="<@spring.message code='dashboard.opt.tip.noSelectableChildElement' />";
+			dashboardEditor.i18n.noSelectableParentElement="<@spring.message code='dashboard.opt.tip.noSelectableParentElement' />";
+			dashboardEditor.i18n.imgEleRequired = "<@spring.message code='dashboard.opt.tip.imgEleRequired' />";
+			dashboardEditor.i18n.hyperlinkEleRequired = "<@spring.message code='dashboard.opt.tip.hyperlinkEleRequired' />";
+			dashboardEditor.i18n.videoEleRequired = "<@spring.message code='dashboard.opt.tip.videoEleRequired' />";
+			dashboardEditor.i18n.labelEleRequired = "<@spring.message code='dashboard.opt.tip.labelEleRequired' />";
+			dashboardEditor.tipInfo = function(msg)
+			{
+				$.tipInfo(msg);
+			};
+			dashboardEditor.clickCallback = function()
+			{
+				//关闭可能已显示的面板
+				po.element().click();
+			};
+			dashboardEditor.selectElementCallback = function(ele)
+			{
+				elePathEle.empty();
+				var elePath = this.getElementPath(ele);
+				
+				$.each(elePath, function(i, ep)
+				{
+					var eleInfo = ep.tagName;
+					if(ep.id)
+						eleInfo += "#"+ep.id;
+					else if(ep.className)
+						eleInfo += "."+ep.className;
+					
+					if(i > 0)
+						$("<span class='info-separator p-1 opacity-50' />").text(">").appendTo(elePathEle);
+					
+					$("<span class='ele-info cursor-pointer' />").text($.truncateIf(eleInfo, "...", ep.tagName.length+17))
+						.attr("visualEditId", (ep.visualEditId || "")).attr("title", eleInfo).appendTo(elePathEle);
+				});
+				
+				var elePathWrapperWidth = elePathWrapper.width();
+				var elePathEleWidth = elePathEle.outerWidth(true);
+				elePathEle.css("margin-left", (elePathEleWidth > elePathWrapperWidth ? (elePathWrapperWidth - elePathEleWidth) : 0)+"px");
+			};
+			dashboardEditor.deselectElementCallback = function()
+			{
+				elePathEle.empty();
+				visualEditorIfm.data("selectedElementVeId", "");
+			};
+			dashboardEditor.beforeunloadCallback = function()
+			{
+				elePathEle.empty();
+				//保存编辑HTML、变更状态，用于刷新操作后恢复页面状态
+				visualEditorIfm.data("veEditedHtml", this.editedHtml());
+				visualEditorIfm.data("veEnableElementBoundary", this.enableElementBoundary());
+				visualEditorIfm.data("veChangeFlag", this.changeFlag());
+			};
+			
+			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
+		}
+		
+		if(dashboardEditor)
+		{
+			dashboardEditor.enableElementBoundary(visualEditorIfm.data("veEnableElementBoundary"));
+			dashboardEditor.changeFlag(visualEditorIfm.data("veChangeFlag"));
+			//XXX 这里无法恢复选中状态，因为每次重新加载后可视编辑ID会重新生成
+		}
+	};
+	
+	po.visualDashboardEditor = function(visualEditorIfm)
+	{
+		var ifmWindow = po.iframeWindow(visualEditorIfm);
+		var dashboardEditor = (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
+		
+		return dashboardEditor;
+	};
+	
+	po.loadVisualEditorIframe = function(visualEditorIfm, templateName, templateContent)
+	{
+		var fm = po.vueFormModel();
+		
+		var form = po.elementOfId("${pid}visualEditorLoadForm");
+		form.attr("action", po.showUrl(templateName));
+		form.attr("target", visualEditorIfm.attr("name"));
+		po.elementOfName("DG_EDIT_TEMPLATE", form).val(po.isReadonlyAction ? "false" : "true");
+		po.elementOfName("DG_TEMPLATE_CONTENT", form).val(templateContent);
+		
+		form.submit();
+	};
+	
+	po.evalTopWindowSize = function()
+	{
+		var topWindow = window;
+		while(topWindow.parent  && topWindow.parent != topWindow)
+			topWindow = topWindow.parent;
+		
+		var size =
+		{
+			width: $(topWindow).width(),
+			height: $(topWindow).height()
+		};
+		
+		return size;
+	};
+	
+	po.iframeWindow = function(iframe)
+	{
+		iframe = $(iframe)[0];
+		return iframe.contentWindow;
+	};
+	
+	po.iframeDocument = function(iframe)
+	{
+		iframe = $(iframe)[0];
+		return (iframe.contentDocument || iframe.contentWindow.document);
+	};
+	
+	//设置可视编辑iframe的尺寸，使其适配父元素尺寸而不会出现滚动条
+	po.setVisualEditorIframeScale = function(iframe, scale)
+	{
+		iframe = $(iframe);
+		scale = (scale == null || scale <= 0 ? "auto" : scale);
+		
+		iframe.data("veIframeScale", scale);
+		
+		if(scale == "auto")
+		{
+			var iframeWrapper = iframe.parent();
+			var ww = iframeWrapper.innerWidth(), wh = iframeWrapper.innerHeight();
+			var iw = iframe.width(), ih = iframe.height();
+			
+			//下面的计算只有iframe在iframeWrapper中是绝对定位的才准确
+			var rightGap = 10, bottomGap = 20;
+			var ileft = parseInt(iframe.css("left")), itop = parseInt(iframe.css("top"));
+			ww = ww - ileft - rightGap;
+			wh = wh - itop - bottomGap;
+			
+			if(iw <= ww && ih <= wh)
+				return;
+			
+			var scaleX = ww/iw, scaleY = wh/ih;
+			scale = Math.min(scaleX, scaleY);
+		}
+		else
+			scale = scale/100;
+		
+		iframe.css("transform-origin", "0 0");
+		iframe.css("transform", "scale("+scale+")");
+	};
+	
+	po.showFirstTemplateContent =function()
+	{
+		var fm = po.vueFormModel();
+		
+		if(fm.templates && fm.templates.length > 0)
+			po.showResourceContentTab(fm.templates[0], true);
+		else
+			po.showResourceContentTab(po.defaultTemplateName, true);
+	};
+	
 	po.buildTplVisualInsertMenuItems = function(insertType)
 	{
 		var items =
@@ -426,7 +665,7 @@
 		
 		return items;
 	};
-	
+
 	po.setupResourceEditor = function()
 	{
 		var fm = po.vueFormModel();
@@ -610,31 +849,41 @@
 				
 			},
 			
-			onResourceContentTabMenuToggle: function(e, tabId)
+			onResourceContentTabMenuToggle: function(e, tab)
 			{
-				po.resourceContentTabMenuTargetId = tabId;
+				po.resourceContentTabMenuTargetId = tab.id;
 				po.vueUnref("${pid}resourceContentTabMenuEle").show(e);
 			},
 			
-			resourceCodeEditorEleId: function(name)
+			resCodeEditorEleId: function(tab)
 			{
-				return po.resourceCodeEditorEleId(name);
+				return po.resCodeEditorEleId(tab);
 			},
 			
-			resourceVisualEditorEleId: function(name)
+			resVisualEditorEleId: function(tab)
 			{
-				return po.resourceVisualEditorEleId(name);
+				return po.resVisualEditorEleId(tab);
 			},
 			
-			onChangeEditMode: function(e, name)
+			onChangeEditMode: function(e, tab)
 			{
-				po.changeEditMode(e.value, name);
+				po.handleChangeEditMode(tab);
+			},
+			
+			onSearchInCodeEditor: function(e, tab)
+			{
+				po.searchInCodeEditor(tab);
+			},
+			
+			onVisualEditorIframeLoad: function(e, tab)
+			{
+				po.initVisualDashboardEditor(tab);
 			}
 		});
 		
 		po.vueRef("${pid}resourceContentTabMenuEle", null);
 		
-		//po.showResourceContentTab()里不能里可获取到创建的DOM元素，所以采用此方案
+		//po.showResourceContentTab()里不能获取到创建的DOM元素，所以采用此方案
 		po.vueWatch(pm.resourceContentTabs, function(oldVal, newVal)
 		{
 			var items = newVal.items;
@@ -643,27 +892,11 @@
 			
 			if(activeTab)
 			{
-				//XXX vueMounted()回调函数中vueApp()为null？
-				if(po.vueApp())
+				po.vueApp().$nextTick(function()
 				{
-					po.vueApp().$nextTick(function()
-					{
-						po.loadResourceContent(activeTab.resourceName);
-					});
-				}
-				else
-					po.loadResourceContent(activeTab.resourceName);
+					po.loadResourceContentIfNon(activeTab);
+				});
 			}
-		});
-		
-		po.vueMounted(function()
-		{
-			var fm = po.vueFormModel();
-			
-			if(fm.templates && fm.templates.length > 0)
-				po.showResourceContentTab(fm.templates[0], true);
-			else
-				po.showResourceContentTab(po.defaultTemplateName, true);
 		});
 	};
 })

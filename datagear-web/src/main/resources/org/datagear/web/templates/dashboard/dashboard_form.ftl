@@ -82,6 +82,7 @@
 		</div>
 	</form>
 	<#include "include/dashboard_form_resource_forms.ftl">
+	<#include "include/dashboard_form_editor_forms.ftl">
 	<#include "../include/page_copy_to_clipboard.ftl">
 </div>
 <#include "../include/page_form.ftl">
@@ -93,6 +94,12 @@
 (function(po)
 {
 	po.submitUrl = "/dashboard/"+po.submitAction;
+	
+	po.showUrl = function(name)
+	{
+		var fm = po.vueFormModel();
+		return po.concatContextPath("/dashboard/show/"+encodeURIComponent(fm.id)+"/"+(name ? name : ""));
+	};
 	
 	po.beforeSubmitForm = function(action)
 	{
@@ -208,6 +215,7 @@
 	po.setupResourceEditor();
 	
 	po.vueMount();
+	po.showFirstTemplateContent();
 })
 (${pid});
 </script>
