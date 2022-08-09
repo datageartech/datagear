@@ -18,39 +18,41 @@
 			<div class="flex-grow-0 text-xs">
 				<div class="flex justify-content-between">
 					<div>
-						<div v-if="!pm.isReadonlyAction">
-							<p-button type="button" icon="pi pi-plus" class="p-button-secondary p-button-sm mr-1"
+						<div class="p-buttonset" v-if="!pm.isReadonlyAction">
+							<p-button type="button" icon="pi pi-plus" class="p-button-secondary"
 								aria:haspopup="true" aria-controls="${pid}addResPanelPanel"
 								@click="onToggleAddResPanel" title="<@spring.message code='dashboard.addResource.desc' />">
 							</p-button>
-							<p-button type="button" icon="pi pi-upload" class="p-button-secondary p-button-sm mr-1"
+							<p-button type="button" icon="pi pi-upload" class="p-button-secondary"
 								aria:haspopup="true" aria-controls="${pid}uploadResPanel"
 								@click="onToggleUploadResPanel" title="<@spring.message code='dashboard.uploadResource.desc' />">
 							</p-button>
-							<p-button type="button" icon="pi pi-pencil" class="p-button-secondary p-button-sm mr-1"
+							<p-button type="button" icon="pi pi-pencil" class="p-button-secondary"
 								@click="onEditSelectedLocalRes"
 								title="<@spring.message code='dashboard.editResource.desc' />">
 							</p-button>
 						</div>
 					</div>
 					<div>
-						<p-button type="button" icon="pi pi-copy" class="p-button-secondary p-button-sm mr-1"
-							@click="onCopyLocalResToClipboard"
-							title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"
-							v-if="!pm.isReadonlyAction">
-						</p-button>
-						<p-button type="button" icon="pi pi-external-link" class="p-button-secondary p-button-sm mr-1"
-							@click="onOpenSelectedLocalRes"
-							title="<@spring.message code='dashboard.openResource.desc' />">
-						</p-button>
-						<p-button type="button" icon="pi pi-ellipsis-h" class="p-button-secondary p-button-sm"
-							 aria-haspopup="true" aria-controls="${pid}localResMenu"
-							 @click="toggleLocalResMenu" v-if="!pm.isReadonlyAction">
-						</p-button>
-						<p-menu id="${pid}localResMenu" ref="${pid}localResMenuEle" class="text-sm"
-							:model="pm.localResMenuItems" :popup="true"
-							v-if="!pm.isReadonlyAction">
-						</p-menu>
+						<div class="p-buttonset">
+							<p-button type="button" icon="pi pi-copy" class="p-button-secondary"
+								@click="onCopyLocalResToClipboard"
+								title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"
+								v-if="!pm.isReadonlyAction">
+							</p-button>
+							<p-button type="button" icon="pi pi-external-link" class="p-button-secondary"
+								@click="onOpenSelectedLocalRes"
+								title="<@spring.message code='dashboard.openResource.desc' />">
+							</p-button>
+							<p-button type="button" icon="pi pi-ellipsis-h" class="p-button-secondary"
+								 aria-haspopup="true" aria-controls="${pid}localResMenu"
+								 @click="toggleLocalResMenu" v-if="!pm.isReadonlyAction">
+							</p-button>
+							<p-menu id="${pid}localResMenu" ref="${pid}localResMenuEle" class="text-sm"
+								:model="pm.localResMenuItems" :popup="true"
+								v-if="!pm.isReadonlyAction">
+							</p-menu>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -85,15 +87,17 @@
 						</div>
 					</div>
 					<div>
-						<p-button type="button" icon="pi pi-copy" class="p-button-secondary p-button-sm mr-1"
-							@click="onCopyGlobalResToClipboard"
-							title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"
-							v-if="!pm.isReadonlyAction">
-						</p-button>
-						<p-button type="button" icon="pi pi-external-link" class="p-button-secondary p-button-sm mr-1"
-							@click="onOpenSelectedGlobalRes"
-							title="<@spring.message code='dashboard.openResource.desc' />">
-						</p-button>
+						<div class="p-buttonset">
+							<p-button type="button" icon="pi pi-copy" class="p-button-secondary"
+								@click="onCopyGlobalResToClipboard"
+								title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"
+								v-if="!pm.isReadonlyAction">
+							</p-button>
+							<p-button type="button" icon="pi pi-external-link" class="p-button-secondary"
+								@click="onOpenSelectedGlobalRes"
+								title="<@spring.message code='dashboard.openResource.desc' />">
+							</p-button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -538,14 +542,19 @@
 				var form = po.elementOfId("${pid}addResForm", panel);
 				po.elementOfId("${pid}addResName", form).focus();
 				
-				po.setupSimpleForm(form, pm.addResModel, function()
+				if(!form.data("setupSimpleForm"))
 				{
-					if(po.addRes(pm.addResModel.resName))
+					po.setupSimpleForm(form, pm.addResModel, function()
 					{
-						po.vueUnref("${pid}addResPanelEle").hide();
-						pm.addResModel.resName = "";
-					}
-				});
+						if(po.addRes(pm.addResModel.resName))
+						{
+							po.vueUnref("${pid}addResPanelEle").hide();
+							pm.addResModel.resName = "";
+						}
+					});
+					
+					form.data("setupSimpleForm", true);
+				}
 			},
 			
 			onToggleUploadResPanel: function(e)
@@ -562,10 +571,15 @@
 				var panel = po.elementOfId("${pid}uploadResPanel", document.body);
 				var form = po.elementOfId("${pid}uploadResForm", panel);
 				
-				po.setupSimpleForm(form, pm.uploadResModel, function()
+				if(!form.data("setupSimpleForm"))
 				{
-					po.uploadRes(pm.uploadResModel.savePath, pm.uploadResModel.filePath)
-				});
+					po.setupSimpleForm(form, pm.uploadResModel, function()
+					{
+						po.uploadRes(pm.uploadResModel.savePath, pm.uploadResModel.filePath)
+					});
+					
+					form.data("setupSimpleForm", true);
+				}
 			},
 			
 			onResUploaded: function(e)

@@ -62,6 +62,10 @@
 	 * 				title: undefined,
 	 *              //当dialog=true时，对话框宽度
 	 * 				width: "60vw",
+	 *              //当dialog=true时，对话框样式类
+	 * 				styleClass: "",
+	 *              //当dialog=true时，对话框位置
+	 * 				position: "center",
 	 *				//可选，传递给新页面的参数，可以在目标页面通过$.pageParam(dom)获取
 	 * 				pageParam : undefined,
 	 * 				//其他$.ajax参数
@@ -77,6 +81,8 @@
 			modal : true,
 			title : undefined,
 			width: "60vw",
+			styleClass: "",
+			position: "center",
 			pageParam : undefined
 		},
 		options);
@@ -113,7 +119,8 @@
 								.attr(":header", "model.header").attr("v-model:visible", "model.visible").attr(":modal", options.modal)
 								.attr("v-on:show", "setReponseHtml").attr("v-on:after-hide", "destroyDialogEle")
 								.attr(":style", "{width: model.width}")
-								.attr("class", "ajax-dialog " + $.PAGE_PARAM_BINDER_CLASS)
+								.attr("class", "ajax-dialog " + $.PAGE_PARAM_BINDER_CLASS + " " + options.styleClass)
+								.attr("position", options.position)
 								.appendTo(rootEle);
 					
 					var dialogApp =

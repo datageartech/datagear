@@ -324,7 +324,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setSelectAction(request, model);
-		return "/chart/chart_grid";
+		return "/chart/chart_table";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)

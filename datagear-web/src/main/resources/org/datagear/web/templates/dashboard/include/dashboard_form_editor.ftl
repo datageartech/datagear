@@ -33,7 +33,10 @@
 					</p-selectbutton>
 				</div>
 				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'code'">
-					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm" v-if="tab.isTemplate"></p-button>
+					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm"
+						aria:haspopup="true" aria-controls="${pid}insertChartPanel"
+						@click="onShowInsertChartPanel($event, tab)" v-if="tab.isTemplate">
+					</p-button>
 					<p-menubar :model="pm.codeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
 							<div class="p-inputgroup pl-2">
@@ -70,6 +73,10 @@
 <p-contextmenu id="${pid}resourceContentTabMenu" ref="${pid}resourceContentTabMenuEle"
 	:model="pm.resourceContentTabMenuItems" :popup="true" class="text-sm">
 </p-contextmenu>
+<p-overlaypanel ref="${pid}insertChartPanelEle" append-to="body" :dismissable="false"
+	@show="onInsertChartPanelShow" :show-close-icon="true" id="${pid}insertChartPanel">
+	<div id="${pid}insertChartPanelContent" class="dashboard-insert-chart-list-wrapper table-sm"></div>
+</p-overlaypanel>
 <script>
 (function(po)
 {
@@ -878,10 +885,26 @@
 			onVisualEditorIframeLoad: function(e, tab)
 			{
 				po.initVisualDashboardEditor(tab);
+			},
+			
+			onShowInsertChartPanel: function(e, tab)
+			{
+				po.handleOpenSelectAction("/chart/select?multiple",
+				function()
+				{
+					
+				},
+				{
+					modal: false,
+					width: "60vw",
+					styleClass: "table-sm",
+					position: "right"
+				});
 			}
 		});
 		
 		po.vueRef("${pid}resourceContentTabMenuEle", null);
+		po.vueRef("${pid}insertChartPanelEle", null);
 		
 		//po.showResourceContentTab()里不能获取到创建的DOM元素，所以采用此方案
 		po.vueWatch(pm.resourceContentTabs, function(oldVal, newVal)

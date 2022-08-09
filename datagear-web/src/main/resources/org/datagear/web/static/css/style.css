@@ -248,13 +248,19 @@ label[title]:not(.no-tip)::after,
 }
 
 .p-datatable.table-sm .p-datatable-thead > tr > th,
-.p-datatable.table-sm .p-datatable-tbody > tr > td{
+.p-datatable.table-sm .p-datatable-tbody > tr > td,
+.table-sm .p-datatable .p-datatable-thead > tr > th,
+.table-sm .p-datatable .p-datatable-tbody > tr > td{
 	padding: 0.5rem 1rem;
 }
 .p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-toggler,
 .p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-editor-init,
 .p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-editor-save,
-.p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-editor-cancel{
+.p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-editor-cancel,
+.table-sm .p-datatable .p-datatable-tbody > tr > td .p-row-toggler,
+.table-sm .p-datatable .p-datatable-tbody > tr > td .p-row-editor-init,
+.table-sm .p-datatable .p-datatable-tbody > tr > td .p-row-editor-save,
+.table-sm .p-datatable .p-datatable-tbody > tr > td .p-row-editor-cancel{
 	font-size: .75rem !important;
 	width: 1.5rem !important;
 	height: 1.5rem !important;
