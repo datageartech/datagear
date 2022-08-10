@@ -33,9 +33,8 @@
 					</p-selectbutton>
 				</div>
 				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'code'">
-					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm"
-						aria:haspopup="true" aria-controls="${pid}chartPanel"
-						@click="onShowChartPanel($event, tab)" v-if="tab.isTemplate">
+					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm for-open-chart-panel"
+						@click="onInsertCodeEditorChart($event, tab)" v-if="tab.isTemplate">
 					</p-button>
 					<p-menubar :model="pm.codeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
@@ -53,7 +52,7 @@
 				</div>
 			</div>
 			<div class="pt-1 relative">
-				<div class="code-editor-wrapper res-editor-wrapper opacity-show p-component p-inputtext p-0 w-full absolute">
+				<div class="code-editor-wrapper res-editor-wrapper p-component p-inputtext p-0 w-full absolute">
 					<div :id="resCodeEditorEleId(tab)" class="code-editor"></div>
 				</div>
 				<div class="visual-editor-wrapper res-editor-wrapper opacity-hide p-component p-inputtext p-0 w-full absolute">
@@ -216,6 +215,17 @@
 			
 			if(tab.isTemplate)
 			{
+				if(!po.isReadonlyAction)
+				{
+					//光标移至"</body>"的上一行，便于用户直接输入内容
+					var cursor = codeEditor.getSearchCursor("</body>");
+					if(cursor.findNext())
+					{
+						var cursorFrom = cursor.from();
+						codeEditor.getDoc().setCursor({ line: cursorFrom.line-1, ch: 0 });
+					}
+				}
+				
 				var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
 				
 				var topWindowSize = po.evalTopWindowSize();
@@ -224,9 +234,14 @@
 				
 				po.setVisualEditorIframeScale(visualEditorIfm);
 			}
+			
+			codeEditor.focus();
 		}
 		else
+		{
 			po.setCodeText(codeEditor, content);
+			codeEditor.focus();
+		}
 	};
 
 	po.codeEditorHintHandler = function(codeEditor)
@@ -298,8 +313,10 @@
 		return re;
 	};
 	
-	po.getEditResourceInfo = function(tab)
+	po.getEditResourceInfo = function(tab, noContent)
 	{
+		noContent = (noContent == null ? false : noContent);
+		
 		if($.isTypeNumber(tab))
 		{
 			var pm = po.vuePageModel();
@@ -312,11 +329,20 @@
 		
 		var info = { name: tab.resName, content: "", isTemplate: tab.isTemplate };
 		
-		var editorEle = po.elementOfId(po.resCodeEditorEleId(tab));
-		var codeEditor = editorEle.data("codeEditorInstance");
-		info.content = po.getCodeText(codeEditor);
+		if(!noContent)
+		{
+			var editorEle = po.elementOfId(po.resCodeEditorEleId(tab));
+			var codeEditor = editorEle.data("codeEditorInstance");
+			info.content = po.getCodeText(codeEditor);
+		}
 		
 		return info;
+	};
+	
+	po.getCurrentEditResourceInfo = function(noContent)
+	{
+		var pm = po.vuePageModel();
+		return po.getEditResourceInfo(pm.resourceContentTabs.activeIndex, noContent);
 	};
 	
 	po.saveResourceInfo = function(resInfo)
@@ -404,8 +430,8 @@
 				codeEditorEle.data("changeFlag", dashboardEditor.changeFlag());
 			}
 			
-			codeEditorWrapper.addClass("opacity-show").removeClass("opacity-hide");
-			visualEditorWrapper.addClass("opacity-hide").removeClass("opacity-show");
+			codeEditorWrapper.removeClass("opacity-hide");
+			visualEditorWrapper.addClass("opacity-hide");
 		}
 		else
 		{
@@ -425,8 +451,8 @@
 				po.loadVisualEditorIframe(visualEditorIfm, tab.resName, (po.isReadonlyAction ? "" : po.getCodeText(codeEditor)));
 			}
 			
-			codeEditorWrapper.addClass("opacity-hide").removeClass("opacity-show");
-			visualEditorWrapper.addClass("opacity-show").removeClass("opacity-hide");
+			codeEditorWrapper.addClass("opacity-hide");
+			visualEditorWrapper.removeClass("opacity-hide");
 		}
 	};
 	
@@ -600,19 +626,131 @@
 		iframe.css("transform", "scale("+scale+")");
 	};
 	
-	po.showSelectChartDialog = function()
+	po.showSelectChartDialog = function(selectHandler)
 	{
-		po.handleOpenSelectAction("/chart/select?multiple",
-		function()
+		var dialog = $(".dashboard-select-chart-wrapper", document.body);
+		
+		if(dialog.length == 0)
 		{
+			po.handleOpenSelectAction("/chart/select?multiple",
+			function(chartWidgets)
+			{
+				var myDialog = $(".dashboard-select-chart-wrapper", document.body);
+				var handler = myDialog.data("dashboardSelectChartHandler");
+				
+				if(handler)
+					handler(chartWidgets);
+				
+				po.hideSelectChartDialog();
+				return false;
+			},
+			{
+				modal: false,
+				styleClass: "dashboard-select-chart-wrapper table-sm",
+				width: "50vw",
+				position: "right",
+				onShow: function(dialog)
+				{
+					dialog.data("dashboardSelectChartHandler", selectHandler);
+				}
+			});
+		}
+		else
+		{
+			dialog.data("dashboardSelectChartHandler", selectHandler);
 			
-		},
+			var dialogMask = dialog.parent();
+			dialogMask.removeClass("opacity-hide");
+		}
+	};
+	
+	po.hideSelectChartDialog = function()
+	{
+		var dialog = $(".dashboard-select-chart-wrapper", document.body);
+		var dialogMask = dialog.parent();
+		dialogMask.addClass("opacity-hide");
+	};
+	
+	po.defaultInsertChartEleStyle = "display:inline-block;width:300px;height:300px;";
+	
+	po.insertCodeEditorChart = function(tab, chartWidgets)
+	{
+		if(!chartWidgets || !chartWidgets.length)
+			return;
+		
+		var tabPanel = po.elementOfId(tab.id);
+		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
+		var codeEditor = codeEditorEle.data("codeEditorInstance");
+		
+		var doc = codeEditor.getDoc();
+		var cursor = doc.getCursor();
+		
+		var dftSize = po.defaultInsertChartSize;
+		
+		var code = "";
+		
+		if(chartWidgets.length == 1)
 		{
-			modal: false,
-			styleClass: "dashboard-select-chart-wrapper table-sm",
-			width: "50vw",
-			position: "right"
-		});
+			var chartId = chartWidgets[0].id;
+			var chartName = chartWidgets[0].name;
+			
+			var text = po.getTemplatePrevTagText(codeEditor, cursor);
+			
+			// =
+			if(/=\s*$/g.test(text))
+				code = "\"" + chartId + "\"";
+			// =" 或 ='
+			else if(/=\s*['"]$/g.test(text))
+				code = chartId;
+			// <...
+			else if(/<[^>]*$/g.test(text))
+				code = " dg-chart-widget=\""+chartId+"\"";
+			else
+			{
+				code = "<div style=\""+po.defaultInsertChartEleStyle+"\" dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
+			}
+		}
+		else
+		{
+			for(var i=0; i<chartWidgets.length; i++)
+				code += "<div style=\""+po.defaultInsertChartEleStyle+"\" dg-chart-widget=\""+chartWidgets[i].id+"\"><!--"+chartWidgets[i].name+"--></div>\n";
+		}
+		
+		po.insertCodeText(codeEditor, cursor, code);
+		codeEditor.focus();
+	};
+	
+	po.getLastTagText = function(text)
+	{
+		if(!text)
+			return text;
+		
+		var idx = -1;
+		for(var i=text.length-1;i>=0;i--)
+		{
+			var c = text.charAt(i);
+			if(c == '>' || c == '<')
+			{
+				idx = i;
+				break;
+			}
+		}
+		
+		return (idx < 0 ? text : text.substr(idx));
+	};
+	
+	po.getTemplatePrevTagText = function(codeEditor, cursor)
+	{
+		var doc = codeEditor.getDoc();
+		
+		var text = doc.getLine(cursor.line).substring(0, cursor.ch);
+		
+		//反向查找直到'>'或'<'
+		var prevRow = cursor.line;
+		while((!text || !(/[<>]/g.test(text))) && (prevRow--) >= 0)
+			text = doc.getLine(prevRow) + text;
+		
+		return po.getLastTagText(text);
 	};
 	
 	po.showFirstTemplateContent =function()
@@ -674,7 +812,7 @@
 			{ separator: true },
 			{
 				label: "<@spring.message code='chart' />",
-				class: "insert-type-" + insertType,
+				class: "for-open-chart-panel insert-type-" + insertType,
 				command: function()
 				{
 				}
@@ -798,7 +936,7 @@
 						{ label: "<@spring.message code='innerInsertAfter' />", items: po.buildTplVisualInsertMenuItems("append") },
 						{ label: "<@spring.message code='innerInsertBefore' />", items: po.buildTplVisualInsertMenuItems("prepend") },
 						{ separator: true },
-						{ label: "<@spring.message code='bindOrReplaceChart' />" }
+						{ label: "<@spring.message code='bindOrReplaceChart' />", class: "for-open-chart-panel" }
 					]
 				},
 				{
@@ -898,9 +1036,12 @@
 				po.initVisualDashboardEditor(tab);
 			},
 			
-			onShowChartPanel: function(e, tab)
+			onInsertCodeEditorChart: function(e, tab)
 			{
-				po.showSelectChartDialog();
+				po.showSelectChartDialog(function(chartWidgets)
+				{
+					po.insertCodeEditorChart(tab, chartWidgets);
+				});
 			}
 		});
 		
@@ -921,6 +1062,17 @@
 					po.loadResourceContentIfNon(activeTab);
 				});
 			}
+		});
+		
+		po.element().click(function(e)
+		{
+			var targetEle = $(e.target);
+			if(targetEle.hasClass("for-open-chart-panel") || targetEle.closest(".for-open-chart-panel").length > 0)
+			{
+				//保持选择图表对话框
+			}
+			else
+				po.hideSelectChartDialog();
 		});
 	};
 })

@@ -100,12 +100,8 @@ label[title]:not(.no-tip)::after,
 	z-index: 99;
 }
 .opacity-hide{
-	opacity: 0;
-	z-index: -99;
-}
-.opacity-show{
-	opacity: 10;
-	z-index: inherit;
+	opacity: 0 !important;
+	z-index: -99 !important;
 }
 
 /*圆形按钮sm*/

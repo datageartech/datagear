@@ -66,6 +66,8 @@
 	 * 				styleClass: "",
 	 *              //当dialog=true时，对话框位置
 	 * 				position: "center",
+	 *              //当dialog=true时，对话框位置
+	 * 				onShow: function(dialogEle){},
 	 *				//可选，传递给新页面的参数，可以在目标页面通过$.pageParam(dom)获取
 	 * 				pageParam : undefined,
 	 * 				//其他$.ajax参数
@@ -83,6 +85,7 @@
 			width: "60vw",
 			styleClass: "",
 			position: "center",
+			onShow: null,
 			pageParam : undefined
 		},
 		options);
@@ -154,6 +157,9 @@
 									if(title)
 										model.header = title;
 								}
+								
+								if(options.onShow)
+									options.onShow(dialogEle);
 							};
 							
 							return {model, destroyDialogEle, setReponseHtml};

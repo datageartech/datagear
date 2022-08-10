@@ -77,8 +77,9 @@
 		        </div>
 			</div>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center">
+		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
+			<p-button type="button" label="<@spring.message code='saveAndShow' />" @click="onSaveAndShow"></p-button>
 		</div>
 	</form>
 	<#include "include/dashboard_form_resource_forms.ftl">
@@ -97,8 +98,18 @@
 	
 	po.showUrl = function(name)
 	{
+		name = (name || "");
+		
 		var fm = po.vueFormModel();
-		return po.concatContextPath("/dashboard/show/"+encodeURIComponent(fm.id)+"/"+(name ? name : ""));
+		return po.concatContextPath("/dashboard/show/"+encodeURIComponent(fm.id)+"/"+name);
+	};
+
+	po.inSaveAndShowAction = function(val)
+	{
+		if(val === undefined)
+			return (po._inSaveAndShowAction == true);
+		
+		po._inSaveAndShowAction = val;
 	};
 	
 	po.beforeSubmitForm = function(action)
@@ -140,6 +151,7 @@
 		}
 		
 		action.options.data = data;
+		action.options.saveAndShowAction = po.inSaveAndShowAction();
 	};
 	
 	po.isPersistedDashboard = function()
@@ -167,6 +179,7 @@
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
 	po.setupForm(formModel,
 	{
+		closeAfterSubmit: false,
 		success: function(response)
 		{
 			po.updateTemplateList(response.data.templates);
@@ -178,6 +191,15 @@
 				
 				if(!po.isPersistedDashboard())
 					po.refreshGlobalRes();
+			}
+			
+			var options = this;
+			if(options.saveAndShowAction)
+			{
+				var fm = po.vueFormModel();
+				var resInfo = po.getCurrentEditResourceInfo(true);
+				
+				window.open(po.showUrl(resInfo ? resInfo.name : ""), fm.id);
 			}
 		}
 	});
@@ -208,6 +230,19 @@
 		{
 			var pm = po.vuePageModel();
 			pm.resourceContentWrapperFullSize = !pm.resourceContentWrapperFullSize;
+		},
+		
+		onSaveAndShow: function(e)
+		{
+			try
+			{
+				po.inSaveAndShowAction(true);
+				po.form().submit();
+			}
+			finally
+			{
+				po.inSaveAndShowAction(false);
+			}
 		}
 	});
 	
