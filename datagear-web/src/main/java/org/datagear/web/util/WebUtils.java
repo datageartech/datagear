@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
-import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.security.AuthUser;
@@ -47,7 +46,7 @@ public class WebUtils
 	public static final String KEY_OPERATION_MESSAGE = "operationMessage";
 
 	/** 父页面ID关键字 */
-	public static final String KEY_PARENT_PAGE_ID = "parentPid";
+	public static final String KEY_PARENT_PAGE_ID = "ppid";
 
 	/**
 	 * 获取应用上下文路径。
@@ -334,12 +333,13 @@ public class WebUtils
 
 	/**
 	 * 生成页面ID。
+	 * <p>只包含{@code 0-9}、{@code a-z}，且以字母开头</p>
 	 * 
 	 * @return
 	 */
 	public static String generatePageId()
 	{
-		return "p" + IDUtil.randomIdOnTime20();
+		return "pid" + Long.toString(System.currentTimeMillis(), Character.MAX_RADIX);
 	}
 
 	/**

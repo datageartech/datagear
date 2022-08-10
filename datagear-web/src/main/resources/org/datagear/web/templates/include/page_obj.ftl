@@ -7,14 +7,15 @@
  *
 -->
 <#--页面JS对象块 -->
+<#assign WebUtils=statics['org.datagear.web.util.WebUtils']>
 <script type="text/javascript">
 var ${pid} =
 {
-	//父页面对象ID
-	parentPid: "${parentPid}",
-	
 	//当前页面ID
 	pid: "${pid}",
+	
+	//父页面对象ID
+	ppid: "${ppid}",
 	
 	contextPath: "${contextPath}",
 	
@@ -29,7 +30,7 @@ var ${pid} =
 	//获取父页面JS对象
 	parent: function()
 	{
-		var parentPage = (this.parentPid ? window[this.parentPid] : null);
+		var parentPage = (this.ppid ? window[this.ppid] : null);
 		//父页面DOM元素可能会在回调过程中被删除，这里加一层元素判断
 		return (!parentPage || parentPage.element().length == 0 ? null : parentPage);
 	},
@@ -56,7 +57,7 @@ var ${pid} =
 	open: function(url, options)
 	{
 		url = this.concatContextPath(url);
-		url = $.addParam(url, "parentPid", this.pid);
+		url = $.addParam(url, "${WebUtils.KEY_PARENT_PAGE_ID}", this.pid);
 		$.open(url, (options || {}));
 	},
 	
