@@ -21,10 +21,10 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-manager page-table">
 	<div class="page-header grid align-items-center">
-		<div class="col-12 md:col-3">
+		<div class="col-12" :class="pm.isSelectAction ? 'md:col-5' : 'md:col-3'">
 			<#include "../include/page_search_form.ftl">
 		</div>
-		<div class="h-opts col-12 md:col-9 text-right">
+		<div class="h-opts col-12 text-right" :class="pm.isSelectAction ? 'md:col-7' : 'md:col-9'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isSelectAction"></p-button>
