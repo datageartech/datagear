@@ -781,6 +781,25 @@
 			po.showResourceContentTab(po.defaultTemplateName, true);
 	};
 	
+	po.insertVeGridLayout = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertGridLayout(insertType))
+			return false;
+		
+		try
+		{
+			dashboardEditor.insertGridLayout(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
 	po.buildTplVisualInsertMenuItems = function(insertType)
 	{
 		var items =
@@ -791,7 +810,15 @@
 				class: "ve-panel-show-control gridLayoutShown",
 				command: function()
 				{
-					po.showVeGridLayoutPanel();
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						var pm = po.vuePageModel();
+						
+						po.veCurrentInsertType = this.insertType;
+						var showFillParent = dashboardEditor.canInsertFillParentGridLayout(this.insertType);
+						po.showVeGridLayoutPanel(showFillParent);
+					}
 				}
 			},
 			{

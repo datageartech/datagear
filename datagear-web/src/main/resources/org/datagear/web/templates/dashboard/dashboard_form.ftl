@@ -90,6 +90,7 @@
 <#include "../include/page_simple_form.ftl">
 <#include "../include/page_tabview.ftl">
 <#include "../include/page_code_editor.ftl">
+<#include "../include/page_boolean_options.ftl">
 <#include "include/dashboard_code_completions.ftl">
 <script>
 (function(po)
