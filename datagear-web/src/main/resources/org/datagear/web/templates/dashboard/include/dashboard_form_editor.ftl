@@ -787,42 +787,49 @@
 		[
 			{
 				label: "<@spring.message code='gridLayout' />",
-				class: "insert-type-" + insertType,
+				insertType: insertType,
+				class: "ve-panel-show-control gridLayoutShown",
 				command: function()
 				{
+					po.showVeGridLayoutPanel();
 				}
 			},
 			{
 				label: "<@spring.message code='divElement' />",
-				class: "insert-type-" + insertType,
+				insertType: insertType,
 				command: function()
 				{
 				}
 			},
 			{
 				label: "<@spring.message code='textElement' />",
-				class: "insert-type-" + insertType,
+				insertType: insertType,
+				class: "ve-panel-show-control textElementShown",
 				command: function()
 				{
+					po.showVeTextElementPanel();
 				}
 			},
 			{
 				label: "<@spring.message code='image' />",
-				class: "insert-type-" + insertType,
+				insertType: insertType,
+				class: "ve-panel-show-control imageShown",
 				command: function()
 				{
 				}
 			},
 			{
 				label: "<@spring.message code='hyperlink' />",
-				class: "insert-type-" + insertType,
+				insertType: insertType,
+				class: "ve-panel-show-control hyperlinkShown",
 				command: function()
 				{
 				}
 			},
 			{
 				label: "<@spring.message code='video' />",
-				class: "insert-type-" + insertType,
+				insertType: insertType,
+				class: "ve-panel-show-control videoShown",
 				command: function()
 				{
 				}
@@ -830,7 +837,8 @@
 			{ separator: true },
 			{
 				label: "<@spring.message code='chart' />",
-				class: "for-open-chart-panel insert-type-" + insertType,
+				class: "for-open-chart-panel",
+				insertType: insertType,
 				command: function()
 				{
 				}
@@ -1100,12 +1108,32 @@
 		po.element().click(function(e)
 		{
 			var targetEle = $(e.target);
+			
 			if(targetEle.hasClass("for-open-chart-panel") || targetEle.closest(".for-open-chart-panel").length > 0)
-			{
-				//保持选择图表对话框
-			}
+				;//保持选择图表对话框
 			else
 				po.hideSelectChartDialog();
+			
+			//隐藏其他对话框
+			var vePanelShowControlEle = targetEle;
+			if(!vePanelShowControlEle.hasClass("ve-panel-show-control"))
+				vePanelShowControlEle = targetEle.closest(".ve-panel-show-control");
+			var pm = po.vuePageModel();
+			if(vePanelShowControlEle.length > 0)
+			{
+				$.each(pm.vepss, function(p, v)
+				{
+					if(v == true && !vePanelShowControlEle.hasClass(p))
+						pm.vepss[p] = false;
+				});
+			}
+			else
+			{
+				$.each(pm.vepss, function(p, v)
+				{
+					pm.vepss[p] = false;
+				});
+			}
 		});
 	};
 })
