@@ -419,7 +419,7 @@
 			if(changeFlag == null)
 				changeFlag = 1;
 			
-			var dashboardEditor = po.visualDashboardEditor(visualEditorIfm);
+			var dashboardEditor = po.visualDashboardEditorByIframe(visualEditorIfm);
 			
 			//有修改
 			if(dashboardEditor && dashboardEditor.isChanged(changeFlag))
@@ -545,12 +545,30 @@
 		}
 	};
 	
-	po.visualDashboardEditor = function(visualEditorIfm)
+	po.visualDashboardEditorByIframe = function(visualEditorIfm)
 	{
 		var ifmWindow = po.iframeWindow(visualEditorIfm);
 		var dashboardEditor = (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
 		
 		return dashboardEditor;
+	};
+
+	po.visualDashboardEditorByTab = function(tab)
+	{
+		if(tab == null)
+		{
+			var pm = po.vuePageModel();
+			var items = pm.resourceContentTabs.items;
+			tab = items[pm.resourceContentTabs.activeIndex];
+		}
+		
+		if(!tab)
+			return null;
+		
+		var tabPanel = po.elementOfId(tab.id);
+		var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
+		
+		return po.visualDashboardEditorByIframe(visualEditorIfm);
 	};
 	
 	po.loadVisualEditorIframe = function(visualEditorIfm, templateName, templateContent)
@@ -898,24 +916,36 @@
 							label: "<@spring.message code='nextElement' />",
 							command: function()
 							{
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+									dashboardEditor.selectNextElement();
 							}
 						},
 						{
 							label: "<@spring.message code='prevElement' />",
 							command: function()
 							{
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+									dashboardEditor.selectPrevElement();
 							}
 						},
 						{
 							label: "<@spring.message code='subElement' />",
 							command: function()
 							{
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+									dashboardEditor.selectFirstChildElement();
 							}
 						},
 						{
 							label: "<@spring.message code='parentElement' />",
 							command: function()
 							{
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+									dashboardEditor.selectParentElement();
 							}
 						},
 						{ separator: true },
@@ -923,6 +953,9 @@
 							label: "<@spring.message code='cancelSelect' />",
 							command: function()
 							{
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+									dashboardEditor.deselectElement();
 							}
 						}
 					]
