@@ -34,8 +34,8 @@
 				</div>
 				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'code'">
 					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm"
-						aria:haspopup="true" aria-controls="${pid}insertChartPanel"
-						@click="onShowInsertChartPanel($event, tab)" v-if="tab.isTemplate">
+						aria:haspopup="true" aria-controls="${pid}chartPanel"
+						@click="onShowChartPanel($event, tab)" v-if="tab.isTemplate">
 					</p-button>
 					<p-menubar :model="pm.codeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
@@ -53,10 +53,10 @@
 				</div>
 			</div>
 			<div class="pt-1 relative">
-				<div class="code-editor-wrapper res-editor-wrapper show-editor p-component p-inputtext p-0 w-full absolute">
+				<div class="code-editor-wrapper res-editor-wrapper opacity-show p-component p-inputtext p-0 w-full absolute">
 					<div :id="resCodeEditorEleId(tab)" class="code-editor"></div>
 				</div>
-				<div class="visual-editor-wrapper res-editor-wrapper hide-editor p-component p-inputtext p-0 w-full absolute">
+				<div class="visual-editor-wrapper res-editor-wrapper opacity-hide p-component p-inputtext p-0 w-full absolute">
 					<div class="visual-editor-ele-path-wrapper text-color-secondary text-sm">
 						<div class="ele-path white-space-nowrap"></div>
 					</div>
@@ -73,10 +73,6 @@
 <p-contextmenu id="${pid}resourceContentTabMenu" ref="${pid}resourceContentTabMenuEle"
 	:model="pm.resourceContentTabMenuItems" :popup="true" class="text-sm">
 </p-contextmenu>
-<p-overlaypanel ref="${pid}insertChartPanelEle" append-to="body" :dismissable="false"
-	@show="onInsertChartPanelShow" :show-close-icon="true" id="${pid}insertChartPanel">
-	<div id="${pid}insertChartPanelContent" class="dashboard-insert-chart-list-wrapper table-sm"></div>
-</p-overlaypanel>
 <script>
 (function(po)
 {
@@ -408,8 +404,8 @@
 				codeEditorEle.data("changeFlag", dashboardEditor.changeFlag());
 			}
 			
-			codeEditorWrapper.addClass("show-editor").removeClass("hide-editor");
-			visualEditorWrapper.addClass("hide-editor").removeClass("show-editor");
+			codeEditorWrapper.addClass("opacity-show").removeClass("opacity-hide");
+			visualEditorWrapper.addClass("opacity-hide").removeClass("opacity-show");
 		}
 		else
 		{
@@ -429,8 +425,8 @@
 				po.loadVisualEditorIframe(visualEditorIfm, tab.resName, (po.isReadonlyAction ? "" : po.getCodeText(codeEditor)));
 			}
 			
-			codeEditorWrapper.addClass("hide-editor").removeClass("show-editor");
-			visualEditorWrapper.addClass("show-editor").removeClass("hide-editor");
+			codeEditorWrapper.addClass("opacity-hide").removeClass("opacity-show");
+			visualEditorWrapper.addClass("opacity-show").removeClass("opacity-hide");
 		}
 	};
 	
@@ -602,6 +598,21 @@
 		
 		iframe.css("transform-origin", "0 0");
 		iframe.css("transform", "scale("+scale+")");
+	};
+	
+	po.showSelectChartDialog = function()
+	{
+		po.handleOpenSelectAction("/chart/select?multiple",
+		function()
+		{
+			
+		},
+		{
+			modal: false,
+			styleClass: "dashboard-select-chart-wrapper table-sm",
+			width: "50vw",
+			position: "right"
+		});
 	};
 	
 	po.showFirstTemplateContent =function()
@@ -887,24 +898,14 @@
 				po.initVisualDashboardEditor(tab);
 			},
 			
-			onShowInsertChartPanel: function(e, tab)
+			onShowChartPanel: function(e, tab)
 			{
-				po.handleOpenSelectAction("/chart/select?multiple",
-				function()
-				{
-					
-				},
-				{
-					modal: false,
-					width: "60vw",
-					styleClass: "table-sm",
-					position: "right"
-				});
+				po.showSelectChartDialog();
 			}
 		});
 		
 		po.vueRef("${pid}resourceContentTabMenuEle", null);
-		po.vueRef("${pid}insertChartPanelEle", null);
+		po.vueRef("${pid}chartPanelEle", null);
 		
 		//po.showResourceContentTab()里不能获取到创建的DOM元素，所以采用此方案
 		po.vueWatch(pm.resourceContentTabs, function(oldVal, newVal)

@@ -169,7 +169,7 @@
 					rootEle.addClass($.PAGE_PARAM_BINDER_CLASS);
 					
 					if(options.pageParam)
-						$.pageParam(dialogEle, options.pageParam);
+						$.pageParam(rootEle, options.pageParam);
 					
 					rootEle.html(response);
 				}

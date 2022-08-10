@@ -99,6 +99,14 @@ label[title]:not(.no-tip)::after,
 .z-99{
 	z-index: 99;
 }
+.opacity-hide{
+	opacity: 0;
+	z-index: -99;
+}
+.opacity-show{
+	opacity: 10;
+	z-index: inherit;
+}
 
 /*圆形按钮sm*/
 .p-button-sm.p-button.p-button-icon-only.p-button-rounded{
@@ -675,14 +683,6 @@ label[title]:not(.no-tip)::after,
 	/*.resource-contents-wrapper高度 - 卡片高度*/
 	height: calc(90vh - 5rem - 6rem - 2.6rem - 3.5rem);
 }
-.page-form-dashboard .res-editor-wrapper.hide-editor{
-	opacity: 0;
-	z-index: 0;
-}
-.page-form-dashboard .res-editor-wrapper.show-editor{
-	opacity: 10;
-	z-index: 1;
-}
 .page-form-dashboard .res-editor-wrapper .visual-editor-ele-path-wrapper{
 	position: absolute;
 	left: 0.4rem;
@@ -708,4 +708,7 @@ label[title]:not(.no-tip)::after,
     height: 80%;
     border-width: 0;
     background: #FFF;
+}
+.dashboard-select-chart-wrapper .page-manager .page-content{
+	height: 50vh;
 }
