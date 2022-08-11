@@ -28,7 +28,7 @@ page_boolean_options.ftl
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
 					<label for="${pid}veGridLayoutRows" class="field-label col-12 mb-2">
-						<@spring.message code='dashboard.veditor.gridLayout.rows' />
+						<@spring.message code='rowCount' />
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veGridLayoutRows" v-model="pm.vepms.gridLayout.rows" type="text"
@@ -55,7 +55,7 @@ page_boolean_options.ftl
 				</div>
 				<div class="field grid">
 					<label for="${pid}veGridLayoutColumns" class="field-label col-12 mb-2">
-						<@spring.message code='dashboard.veditor.gridLayout.columns' />
+						<@spring.message code='columnCount' />
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veGridLayoutColumns" v-model="pm.vepms.gridLayout.columns" type="text"
@@ -110,8 +110,107 @@ page_boolean_options.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-textarea id="${pid}veTextElementContent" v-model="pm.vepms.textElement.content"
-							class="input w-full" name="content" autofocus>
+							class="input w-full" name="content" required autofocus>
 						</p-textarea>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+<p-dialog header="<@spring.message code='image' />" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.imageShown" @show="onVeImagePanelShow">
+	<div class="page page-form">
+		<form id="${pid}veImageForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veImageSrc" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.image.src.desc' />">
+						<@spring.message code='url' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veImageSrc" v-model="pm.vepms.image.src" type="text"
+							class="input w-full" name="src" required autofocus>
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veImageSrc" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.image.width.desc' />">
+						<@spring.message code='width' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veImageSrc" v-model="pm.vepms.image.width" type="text"
+							class="input w-full" name="width">
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veImageSrc" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.image.height.desc' />">
+						<@spring.message code='height' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veImageSrc" v-model="pm.vepms.image.height" type="text"
+							class="input w-full" name="height">
+						</p-inputtext>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
+<p-dialog header="<@spring.message code='hyperlink' />" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.hyperlinkShown" @show="onVeHyperlinkPanelShow">
+	<div class="page page-form">
+		<form id="${pid}veHyperlinkForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veHyperlinkHref" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.hyperlink.href.desc' />">
+						<@spring.message code='url' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veHyperlinkHref" v-model="pm.vepms.hyperlink.href" type="text"
+							class="input w-full" name="href" autofocus>
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veHyperlinkContent" class="field-label col-12 mb-2">
+						<@spring.message code='textContent' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veHyperlinkContent" v-model="pm.vepms.hyperlink.content" type="text"
+							class="input w-full" name="content">
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veHyperlinkTarget" class="field-label col-12 mb-2">
+						<@spring.message code='target' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veHyperlinkTarget" v-model="pm.vepms.hyperlink.target" type="text"
+							class="help-target input w-full" name="target">
+						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="_blank">
+								<@spring.message code='dashboard.veditor.hyperlink.target._blank' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="_self">
+								<@spring.message code='dashboard.veditor.hyperlink.target._self' />
+							</p-button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -130,13 +229,17 @@ page_boolean_options.ftl
 		vepss:
 		{
 			gridLayoutShown: false,
-			textElementShown: false
+			textElementShown: false,
+			imageShown: false,
+			hyperlinkShown: false
 		},
 		//可视编辑操作对话框表单模型
 		vepms:
 		{
 			gridLayout: { fillParent: false },
-			textElement: {}
+			textElement: {},
+			image: {},
+			hyperlink: {}
 		},
 		veGridLayoutPanelShowFillParent: false
 	});
@@ -173,6 +276,18 @@ page_boolean_options.ftl
 		var pm = po.vuePageModel();
 		pm.vepss.textElementShown = true;
 	};
+
+	po.showVeImagePanel = function()
+	{
+		var pm = po.vuePageModel();
+		pm.vepss.imageShown = true;
+	};
+
+	po.showVeHyperlinkPanel = function()
+	{
+		var pm = po.vuePageModel();
+		pm.vepss.hyperlinkShown = true;
+	};
 	
 	po.vueMethod(
 	{
@@ -186,7 +301,10 @@ page_boolean_options.ftl
 			po.setupSimpleForm(form, pm.vepms.gridLayout, function()
 			{
 				if(po.insertVeGridLayout(pm.vepms.gridLayout) !== false)
+				{
+					pm.vepms.gridLayout = { fillParent: false };
 					pm.vepss.gridLayoutShown = false;
+				}
 			});
 		},
 		
@@ -197,6 +315,43 @@ page_boolean_options.ftl
 			
 			po.setupSimpleForm(form, pm.vepms.textElement, function()
 			{
+				if(po.insertVeTextElement(pm.vepms.textElement) !== false)
+				{
+					pm.vepms.textElement = {};
+					pm.vepss.textElementShown = false;
+				}
+			});
+		},
+		
+		onVeImagePanelShow: function()
+		{
+			var pm = po.vuePageModel();
+			var form = po.elementOfId("${pid}veImageForm", document.body);
+			
+			po.setupSimpleForm(form, pm.vepms.image, function()
+			{
+				if(po.insertVeImage(pm.vepms.image) !== false)
+				{
+					pm.vepms.image = {};
+					pm.vepss.imageShown = false;
+				}
+			});
+		},
+		
+		onVeHyperlinkPanelShow: function()
+		{
+			var pm = po.vuePageModel();
+			var form = po.elementOfId("${pid}veHyperlinkForm", document.body);
+			
+			po.initVePanelHelperSrc(form, pm.vepms.hyperlink);
+			
+			po.setupSimpleForm(form, pm.vepms.hyperlink, function()
+			{
+				if(po.insertVeHyperlink(pm.vepms.hyperlink) !== false)
+				{
+					pm.vepms.hyperlink = {};
+					pm.vepss.hyperlinkShown = false;
+				}
 			});
 		}
 	});

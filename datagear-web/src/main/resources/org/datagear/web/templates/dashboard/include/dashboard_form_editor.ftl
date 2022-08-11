@@ -800,6 +800,63 @@
 		}
 	};
 	
+	po.insertVeTextElement = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertLabel(insertType))
+			return false;
+		
+		try
+		{
+			dashboardEditor.insertLabel(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+
+	po.insertVeImage = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertImage(insertType))
+			return false;
+		
+		try
+		{
+			dashboardEditor.insertImage(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+
+	po.insertVeHyperlink = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertHyperlink(insertType))
+			return false;
+		
+		try
+		{
+			dashboardEditor.insertHyperlink(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
 	po.buildTplVisualInsertMenuItems = function(insertType)
 	{
 		var items =
@@ -826,6 +883,14 @@
 				insertType: insertType,
 				command: function()
 				{
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						if(!dashboardEditor.checkInsertDiv(this.insertType))
+							return;
+						
+						dashboardEditor.insertDiv(this.insertType);
+					}
 				}
 			},
 			{
@@ -834,7 +899,12 @@
 				class: "ve-panel-show-control textElementShown",
 				command: function()
 				{
-					po.showVeTextElementPanel();
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						po.veCurrentInsertType = this.insertType;
+						po.showVeTextElementPanel();
+					}
 				}
 			},
 			{
@@ -843,6 +913,12 @@
 				class: "ve-panel-show-control imageShown",
 				command: function()
 				{
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						po.veCurrentInsertType = this.insertType;
+						po.showVeImagePanel();
+					}
 				}
 			},
 			{
@@ -851,6 +927,12 @@
 				class: "ve-panel-show-control hyperlinkShown",
 				command: function()
 				{
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						po.veCurrentInsertType = this.insertType;
+						po.showVeHyperlinkPanel();
+					}
 				}
 			},
 			{
@@ -1026,7 +1108,27 @@
 					label: "<@spring.message code='delete' />",
 					items:
 					[
-						{ label: "<@spring.message code='deleteElement' />" },
+						{
+							label: "<@spring.message code='deleteElement' />",
+							command: function()
+							{
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(dashboardEditor.checkDeleteElement())
+									{
+										po.confirm(
+										{
+											message: "<@spring.message code='dashboard.opt.delete.element.confirm' />",
+											accept: function()
+											{
+												dashboardEditor.deleteElement();
+											}
+										});
+									}
+								}
+							}
+						},
 						{ separator: true },
 						{ label: "<@spring.message code='unbindChart' />" }
 					]
@@ -1050,9 +1152,12 @@
 							}
 						},
 						{
-							label: "<@spring.message code='elementBorderLine' />",
+							label: "<@spring.message code='elementBoundary' />",
 							command: function()
 							{
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+									dashboardEditor.enableElementBoundary(!dashboardEditor.enableElementBoundary());
 							}
 						},
 						{
