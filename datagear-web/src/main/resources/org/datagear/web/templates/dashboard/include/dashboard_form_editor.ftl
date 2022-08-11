@@ -781,6 +781,43 @@
 			po.showResourceContentTab(po.defaultTemplateName, true);
 	};
 	
+	po.bindOrReplaceVeChart = function(chartWidgets)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor || !dashboardEditor.checkBindChart())
+			return false;
+		
+		try
+		{
+			dashboardEditor.bindChart(chartWidgets ? chartWidgets[0] : null);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
+	po.insertVeChart = function(chartWidgets)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertChart(insertType))
+			return false;
+		
+		try
+		{
+			dashboardEditor.insertChart(chartWidgets, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
 	po.insertVeGridLayout = function(model)
 	{
 		var dashboardEditor = po.visualDashboardEditorByTab();
@@ -857,10 +894,50 @@
 		}
 	};
 	
+	po.insertVeVideo = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertVideo(insertType))
+			return false;
+		
+		try
+		{
+			dashboardEditor.insertVideo(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+
 	po.buildTplVisualInsertMenuItems = function(insertType)
 	{
 		var items =
 		[
+			{
+				label: "<@spring.message code='chart' />",
+				class: "for-open-chart-panel",
+				insertType: insertType,
+				command: function()
+				{
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						if(!dashboardEditor.checkInsertChart(this.insertType))
+							return;
+						
+						po.veCurrentInsertType = this.insertType;
+						po.showSelectChartDialog(function(chartWidgets)
+						{
+							po.insertVeChart(chartWidgets);
+						});
+					}
+				}
+			},
+			{ separator: true },
 			{
 				label: "<@spring.message code='gridLayout' />",
 				insertType: insertType,
@@ -941,15 +1018,12 @@
 				class: "ve-panel-show-control videoShown",
 				command: function()
 				{
-				}
-			},
-			{ separator: true },
-			{
-				label: "<@spring.message code='chart' />",
-				class: "for-open-chart-panel",
-				insertType: insertType,
-				command: function()
-				{
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						po.veCurrentInsertType = this.insertType;
+						po.showVeVideoPanel();
+					}
 				}
 			}
 		];
@@ -1081,12 +1155,29 @@
 					label: "<@spring.message code='insert' />",
 					items:
 					[
+						{
+							label: "<@spring.message code='bindOrReplaceChart' />",
+							class: "for-open-chart-panel",
+							command: function()
+							{
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkBindChart())
+										return;
+									
+									po.showSelectChartDialog(function(chartWidgets)
+									{
+										po.bindOrReplaceVeChart(chartWidgets);
+									});
+								}
+							}
+						},
+						{ separator: true },
 						{ label: "<@spring.message code='outerInsertAfter' />", items: po.buildTplVisualInsertMenuItems("after") },
 						{ label: "<@spring.message code='outerInsertBefore' />", items: po.buildTplVisualInsertMenuItems("before") },
 						{ label: "<@spring.message code='innerInsertAfter' />", items: po.buildTplVisualInsertMenuItems("append") },
-						{ label: "<@spring.message code='innerInsertBefore' />", items: po.buildTplVisualInsertMenuItems("prepend") },
-						{ separator: true },
-						{ label: "<@spring.message code='bindOrReplaceChart' />", class: "for-open-chart-panel" }
+						{ label: "<@spring.message code='innerInsertBefore' />", items: po.buildTplVisualInsertMenuItems("prepend") }
 					]
 				},
 				{

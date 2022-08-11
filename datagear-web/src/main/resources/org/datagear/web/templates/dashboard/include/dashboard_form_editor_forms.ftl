@@ -20,6 +20,7 @@ page_boolean_options.ftl
 	<input type="hidden" name="DG_EDIT_TEMPLATE" value="true" />
 	<textarea name="DG_TEMPLATE_CONTENT"></textarea>
 </form>
+
 <p-dialog header="<@spring.message code='gridLayout' />" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.gridLayoutShown" @show="onVeGridLayoutPanelShow">
@@ -98,6 +99,7 @@ page_boolean_options.ftl
 		</form>
 	</div>
 </p-dialog>
+
 <p-dialog header="<@spring.message code='textElement' />" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.textElementShown" @show="onVeTextElementPanelShow">
@@ -121,6 +123,7 @@ page_boolean_options.ftl
 		</form>
 	</div>
 </p-dialog>
+
 <p-dialog header="<@spring.message code='image' />" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.imageShown" @show="onVeImagePanelShow">
@@ -139,23 +142,23 @@ page_boolean_options.ftl
 					</div>
 				</div>
 				<div class="field grid">
-					<label for="${pid}veImageSrc" class="field-label col-12 mb-2"
+					<label for="${pid}veImageWdith" class="field-label col-12 mb-2"
 						 title="<@spring.message code='dashboard.veditor.image.width.desc' />">
 						<@spring.message code='width' />
 					</label>
 					<div class="field-input col-12">
-						<p-inputtext id="${pid}veImageSrc" v-model="pm.vepms.image.width" type="text"
+						<p-inputtext id="${pid}veImageWdith" v-model="pm.vepms.image.width" type="text"
 							class="input w-full" name="width">
 						</p-inputtext>
 					</div>
 				</div>
 				<div class="field grid">
-					<label for="${pid}veImageSrc" class="field-label col-12 mb-2"
+					<label for="${pid}veImageHeight" class="field-label col-12 mb-2"
 						 title="<@spring.message code='dashboard.veditor.image.height.desc' />">
 						<@spring.message code='height' />
 					</label>
 					<div class="field-input col-12">
-						<p-inputtext id="${pid}veImageSrc" v-model="pm.vepms.image.height" type="text"
+						<p-inputtext id="${pid}veImageHeight" v-model="pm.vepms.image.height" type="text"
 							class="input w-full" name="height">
 						</p-inputtext>
 					</div>
@@ -220,6 +223,54 @@ page_boolean_options.ftl
 		</form>
 	</div>
 </p-dialog>
+
+<p-dialog header="<@spring.message code='video' />" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.videoShown" @show="onVeVideoPanelShow">
+	<div class="page page-form">
+		<form id="${pid}veVideoForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veVideoSrc" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.video.src.desc' />">
+						<@spring.message code='url' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veVideoSrc" v-model="pm.vepms.video.src" type="text"
+							class="input w-full" name="src" required autofocus>
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veVideoWdith" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.video.width.desc' />">
+						<@spring.message code='width' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veVideoWdith" v-model="pm.vepms.video.width" type="text"
+							class="input w-full" name="width">
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veVideoHeight" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.video.height.desc' />">
+						<@spring.message code='height' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veVideoHeight" v-model="pm.vepms.video.height" type="text"
+							class="input w-full" name="height">
+						</p-inputtext>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
 <script>
 (function(po)
 {
@@ -231,7 +282,8 @@ page_boolean_options.ftl
 			gridLayoutShown: false,
 			textElementShown: false,
 			imageShown: false,
-			hyperlinkShown: false
+			hyperlinkShown: false,
+			videoShown: false
 		},
 		//可视编辑操作对话框表单模型
 		vepms:
@@ -239,7 +291,8 @@ page_boolean_options.ftl
 			gridLayout: { fillParent: false },
 			textElement: {},
 			image: {},
-			hyperlink: {}
+			hyperlink: {},
+			video: {}
 		},
 		veGridLayoutPanelShowFillParent: false
 	});
@@ -287,6 +340,12 @@ page_boolean_options.ftl
 	{
 		var pm = po.vuePageModel();
 		pm.vepss.hyperlinkShown = true;
+	};
+	
+	po.showVeVideoPanel = function()
+	{
+		var pm = po.vuePageModel();
+		pm.vepss.videoShown = true;
 	};
 	
 	po.vueMethod(
@@ -351,6 +410,21 @@ page_boolean_options.ftl
 				{
 					pm.vepms.hyperlink = {};
 					pm.vepss.hyperlinkShown = false;
+				}
+			});
+		},
+		
+		onVeVideoPanelShow: function()
+		{
+			var pm = po.vuePageModel();
+			var form = po.elementOfId("${pid}veVideoForm", document.body);
+			
+			po.setupSimpleForm(form, pm.vepms.video, function()
+			{
+				if(po.insertVeVideo(pm.vepms.video) !== false)
+				{
+					pm.vepms.video = {};
+					pm.vepss.videoShown = false;
 				}
 			});
 		}
