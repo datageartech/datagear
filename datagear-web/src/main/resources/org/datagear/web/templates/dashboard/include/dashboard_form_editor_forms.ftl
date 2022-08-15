@@ -271,6 +271,56 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
+<p-dialog header="<@spring.message code='dashboardSize' />" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.dashboardSizeShown" @show="onVeDashboardSizePanelShow">
+	<div class="page page-form">
+		<form id="${pid}veDashboardSizeForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veDashboardSizeWdith" class="field-label col-12 mb-2">
+						<@spring.message code='width' />
+					</label>
+					<div class="field-input col-12">
+						<div class="p-inputgroup">
+							<p-inputtext id="${pid}veDashboardSizeWdith" v-model="pm.vepms.dashboardSize.width" type="text"
+								class="input w-full" name="width">
+							</p-inputtext>
+							<span class="p-inputgroup-addon">px</span>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veDashboardSizeHeight" class="field-label col-12 mb-2">
+						<@spring.message code='height' />
+					</label>
+					<div class="field-input col-12">
+						<div class="p-inputgroup">
+							<p-inputtext id="${pid}veDashboardSizeHeight" v-model="pm.vepms.dashboardSize.height" type="text"
+								class="input w-full" name="height">
+							</p-inputtext>
+							<span class="p-inputgroup-addon">px</span>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veDashboardSizeScale" class="field-label col-12 mb-2">
+						<@spring.message code='scale' />
+					</label>
+					<div class="field-input col-12">
+						<p-selectbutton id="${pid}veDashboardSizeScale" v-model="pm.vepms.dashboardSize.scale" :options="pm.dashboardSizeScaleOptions"
+							option-label="name" option-value="value" class="input w-full">
+						</p-selectbutton>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+				<p-button type="button" label="<@spring.message code='resetToDefault' />" class="p-button-secondary" @click="onVeDashboardSizeResetToDft"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
 <script>
 (function(po)
 {
@@ -283,7 +333,8 @@ page_boolean_options.ftl
 			textElementShown: false,
 			imageShown: false,
 			hyperlinkShown: false,
-			videoShown: false
+			videoShown: false,
+			dashboardSizeShown: false
 		},
 		//可视编辑操作对话框表单模型
 		vepms:
@@ -292,9 +343,18 @@ page_boolean_options.ftl
 			textElement: {},
 			image: {},
 			hyperlink: {},
-			video: {}
+			video: {},
+			dashboardSize: { scale: "auto" }
 		},
-		veGridLayoutPanelShowFillParent: false
+		veGridLayoutPanelShowFillParent: false,
+		dashboardSizeScaleOptions:
+		[
+			{ name: "<@spring.message code='auto' />", value: "auto" },
+			{ name: "100%", value: 100 },
+			{ name: "75%", value: 75 },
+			{ name: "50%", value: 50 },
+			{ name: "25%", value: 25 }
+		]
 	});
 	
 	po.initVePanelHelperSrc = function(form, formModel)
@@ -346,6 +406,13 @@ page_boolean_options.ftl
 	{
 		var pm = po.vuePageModel();
 		pm.vepss.videoShown = true;
+	};
+	
+	po.showVeDashboardSizePanel = function(dashboardSizeModel)
+	{
+		var pm = po.vuePageModel();
+		pm.vepms.dashboardSize = $.extend(true, {}, dashboardSizeModel);
+		pm.vepss.dashboardSizeShown = true;
 	};
 	
 	po.vueMethod(
@@ -427,6 +494,30 @@ page_boolean_options.ftl
 					pm.vepss.videoShown = false;
 				}
 			});
+		},
+		
+		onVeDashboardSizePanelShow: function()
+		{
+			var pm = po.vuePageModel();
+			var form = po.elementOfId("${pid}veDashboardSizeForm", document.body);
+			
+			po.setupSimpleForm(form, pm.vepms.dashboardSize, function()
+			{
+				if(po.setVeDashboardSize(null, pm.vepms.dashboardSize) !== false)
+				{
+					pm.vepss.dashboardSizeShown = false;
+				}
+			});
+		},
+		
+		onVeDashboardSizeResetToDft: function()
+		{
+			var pm = po.vuePageModel();
+			
+			if(po.setVeDashboardSize(null, {}) !== false)
+			{
+				pm.vepss.dashboardSizeShown = false;
+			}
 		}
 	});
 })

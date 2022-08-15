@@ -238,12 +238,7 @@
 				}
 				
 				var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
-				
-				var topWindowSize = po.evalTopWindowSize();
-				visualEditorIfm.css("width", topWindowSize.width);
-				visualEditorIfm.css("height", topWindowSize.height);
-				
-				po.setVisualEditorIframeScale(visualEditorIfm);
+				po.setVeDashboardSize(tab, {});
 			}
 			
 			codeEditor.focus();
@@ -615,39 +610,6 @@
 		return (iframe.contentDocument || iframe.contentWindow.document);
 	};
 	
-	//设置可视编辑iframe的尺寸，使其适配父元素尺寸而不会出现滚动条
-	po.setVisualEditorIframeScale = function(iframe, scale)
-	{
-		iframe = $(iframe);
-		scale = (scale == null || scale <= 0 ? "auto" : scale);
-		
-		iframe.data("veIframeScale", scale);
-		
-		if(scale == "auto")
-		{
-			var iframeWrapper = iframe.parent();
-			var ww = iframeWrapper.innerWidth(), wh = iframeWrapper.innerHeight();
-			var iw = iframe.width(), ih = iframe.height();
-			
-			//下面的计算只有iframe在iframeWrapper中是绝对定位的才准确
-			var rightGap = 10, bottomGap = 20;
-			var ileft = parseInt(iframe.css("left")), itop = parseInt(iframe.css("top"));
-			ww = ww - ileft - rightGap;
-			wh = wh - itop - bottomGap;
-			
-			if(iw <= ww && ih <= wh)
-				return;
-			
-			var scaleX = ww/iw, scaleY = wh/ih;
-			scale = Math.min(scaleX, scaleY);
-		}
-		else
-			scale = scale/100;
-		
-		iframe.css("transform-origin", "0 0");
-		iframe.css("transform", "scale("+scale+")");
-	};
-	
 	po.showSelectChartDialog = function(selectHandler)
 	{
 		var dialog = $(".dashboard-select-chart-wrapper", document.body);
@@ -972,6 +934,92 @@
 			editedHtml = "";
 		
 		po.loadVisualEditorIframe(visualEditorIfm, tab.resName, editedHtml);
+	};
+	
+	po.setVeDashboardSize = function(tab, model)
+	{
+		tab = (tab == null ? po.getCurrentEditTab() : tab);
+		model = (model || {});
+		
+		model =
+		{
+			width: parseInt(model.width),
+			height: parseInt(model.height),
+			scale: parseInt(model.scale)
+		};
+		
+		var topWindowSize = po.evalTopWindowSize();
+		
+		if(isNaN(model.width))
+			model.width = topWindowSize.width;
+		if(isNaN(model.height))
+			model.height = topWindowSize.height;
+		if(isNaN(model.scale))
+			model.scale = "auto";
+		
+		var tabPanel = po.elementOfId(tab.id);
+		var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
+		visualEditorIfm.data("dashboardSizeModel", model);
+		
+		visualEditorIfm.css("width", model.width);
+		visualEditorIfm.css("height", model.height);
+		
+		var cssScale = model.scale;
+		
+		//设置可视编辑iframe的尺寸，使其适配父元素尺寸而不会出现滚动条
+		if(cssScale == "auto")
+		{
+			var visualEditorIfmWrapper = visualEditorIfm.parent();
+			var ww = visualEditorIfmWrapper.innerWidth(), wh = visualEditorIfmWrapper.innerHeight();
+			
+			//下面的计算只有iframe在iframeWrapper中是绝对定位的才准确
+			var rightGap = 10, bottomGap = 20;
+			var ileft = parseInt(visualEditorIfm.css("left")), itop = parseInt(visualEditorIfm.css("top"));
+			ww = ww - ileft - rightGap;
+			wh = wh - itop - bottomGap;
+			
+			if(model.width <= ww && model.height <= wh)
+				cssScale = 1;
+			else
+				cssScale = Math.min(ww/model.width, wh/model.height);
+		}
+		else
+			cssScale = cssScale/100;
+		
+		visualEditorIfm.css("transform-origin", "0 0");
+		visualEditorIfm.css("transform", "scale("+cssScale+")");
+		
+		return true;
+	};
+	
+	//设置可视编辑iframe的尺寸，使其适配父元素尺寸而不会出现滚动条
+	po.setVisualEditorIframeScale = function(iframe, scale)
+	{
+		iframe = $(iframe);
+		
+		if(scale == "auto")
+		{
+			var iframeWrapper = iframe.parent();
+			var ww = iframeWrapper.innerWidth(), wh = iframeWrapper.innerHeight();
+			var iw = iframe.width(), ih = iframe.height();
+			
+			//下面的计算只有iframe在iframeWrapper中是绝对定位的才准确
+			var rightGap = 10, bottomGap = 20;
+			var ileft = parseInt(iframe.css("left")), itop = parseInt(iframe.css("top"));
+			ww = ww - ileft - rightGap;
+			wh = wh - itop - bottomGap;
+			
+			if(iw <= ww && ih <= wh)
+				return;
+			
+			var scaleX = ww/iw, scaleY = wh/ih;
+			scale = Math.min(scaleX, scaleY);
+		}
+		else
+			scale = scale/100;
+		
+		iframe.css("transform-origin", "0 0");
+		iframe.css("transform", "scale("+scale+")");
 	};
 	
 	po.buildTplVisualInsertMenuItems = function(insertType, parentLabelPath)
@@ -1350,8 +1398,13 @@
 					[
 						{
 							label: "<@spring.message code='dashboardSize' />",
+							class: "ve-panel-show-control dashboardSizeShown",
 							command: function()
 							{
+								var tab = po.getCurrentEditTab();
+								var tabPanel = po.elementOfId(tab.id);
+								var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
+								po.showVeDashboardSizePanel(visualEditorIfm.data("dashboardSizeModel"));
 							}
 						},
 						{
