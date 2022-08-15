@@ -21,7 +21,7 @@ page_boolean_options.ftl
 	<textarea name="DG_TEMPLATE_CONTENT"></textarea>
 </form>
 
-<p-dialog header="<@spring.message code='gridLayout' />" append-to="body"
+<p-dialog :header="pm.vepts.gridLayout" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.gridLayoutShown" @show="onVeGridLayoutPanelShow">
 	<div class="page page-form">
@@ -100,7 +100,7 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
-<p-dialog header="<@spring.message code='textElement' />" append-to="body"
+<p-dialog :header="pm.vepts.textElement" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.textElementShown" @show="onVeTextElementPanelShow">
 	<div class="page page-form">
@@ -124,7 +124,7 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
-<p-dialog header="<@spring.message code='image' />" append-to="body"
+<p-dialog :header="pm.vepts.image" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.imageShown" @show="onVeImagePanelShow">
 	<div class="page page-form">
@@ -171,7 +171,7 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
-<p-dialog header="<@spring.message code='hyperlink' />" append-to="body"
+<p-dialog :header="pm.vepts.hyperlink" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.hyperlinkShown" @show="onVeHyperlinkPanelShow">
 	<div class="page page-form">
@@ -224,7 +224,7 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
-<p-dialog header="<@spring.message code='video' />" append-to="body"
+<p-dialog :header="pm.vepts.video" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.videoShown" @show="onVeVideoPanelShow">
 	<div class="page page-form">
@@ -271,7 +271,7 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
-<p-dialog header="<@spring.message code='dashboardSize' />" append-to="body"
+<p-dialog :header="pm.vepts.dashboardSize" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.dashboardSizeShown" @show="onVeDashboardSizePanelShow">
 	<div class="page page-form">
@@ -336,6 +336,16 @@ page_boolean_options.ftl
 			videoShown: false,
 			dashboardSizeShown: false
 		},
+		//可视编辑操作对话框标题
+		vepts:
+		{
+			gridLayout: "<@spring.message code='gridLayout' />",
+			textElement: "<@spring.message code='textElement' />",
+			image: "<@spring.message code='image' />",
+			hyperlink: "<@spring.message code='hyperlink' />",
+			video: "<@spring.message code='video' />",
+			dashboardSize: "<@spring.message code='dashboardSize' />"
+		},
 		//可视编辑操作对话框表单模型
 		vepms:
 		{
@@ -345,6 +355,14 @@ page_boolean_options.ftl
 			hyperlink: {},
 			video: {},
 			dashboardSize: { scale: "auto" }
+		},
+		//可视编辑操作对话框提交处理函数
+		veshs:
+		{
+			textElement: null,
+			image: null,
+			hyperlink: null,
+			video: null
 		},
 		veGridLayoutPanelShowFillParent: false,
 		dashboardSizeScaleOptions:
@@ -384,27 +402,32 @@ page_boolean_options.ftl
 		pm.vepss.gridLayoutShown = true;
 	};
 
-	po.showVeTextElementPanel = function()
+	po.showVeTextElementPanel = function(submitHandler, model)
 	{
 		var pm = po.vuePageModel();
+		pm.veshs.textElement = submitHandler;
+		pm.vepms.textElement = $.extend(true, {}, model);
 		pm.vepss.textElementShown = true;
 	};
-
-	po.showVeImagePanel = function()
+	
+	po.showVeImagePanel = function(submitHandler)
 	{
 		var pm = po.vuePageModel();
+		pm.veshs.image = submitHandler;
 		pm.vepss.imageShown = true;
 	};
-
-	po.showVeHyperlinkPanel = function()
+	
+	po.showVeHyperlinkPanel = function(submitHandler)
 	{
 		var pm = po.vuePageModel();
+		pm.veshs.hyperlink = submitHandler;
 		pm.vepss.hyperlinkShown = true;
 	};
 	
-	po.showVeVideoPanel = function()
+	po.showVeVideoPanel = function(submitHandler)
 	{
 		var pm = po.vuePageModel();
+		pm.veshs.video = submitHandler;
 		pm.vepss.videoShown = true;
 	};
 	
@@ -441,7 +464,7 @@ page_boolean_options.ftl
 			
 			po.setupSimpleForm(form, pm.vepms.textElement, function()
 			{
-				if(po.insertVeTextElement(pm.vepms.textElement) !== false)
+				if(pm.veshs.textElement(pm.vepms.textElement) !== false)
 				{
 					pm.vepms.textElement = {};
 					pm.vepss.textElementShown = false;
@@ -456,7 +479,7 @@ page_boolean_options.ftl
 			
 			po.setupSimpleForm(form, pm.vepms.image, function()
 			{
-				if(po.insertVeImage(pm.vepms.image) !== false)
+				if(pm.veshs.image(pm.vepms.image) !== false)
 				{
 					pm.vepms.image = {};
 					pm.vepss.imageShown = false;
@@ -473,7 +496,7 @@ page_boolean_options.ftl
 			
 			po.setupSimpleForm(form, pm.vepms.hyperlink, function()
 			{
-				if(po.insertVeHyperlink(pm.vepms.hyperlink) !== false)
+				if(pm.veshs.hyperlink(pm.vepms.hyperlink) !== false)
 				{
 					pm.vepms.hyperlink = {};
 					pm.vepss.hyperlinkShown = false;
@@ -488,7 +511,7 @@ page_boolean_options.ftl
 			
 			po.setupSimpleForm(form, pm.vepms.video, function()
 			{
-				if(po.insertVeVideo(pm.vepms.video) !== false)
+				if(pm.veshs.video(pm.vepms.video) !== false)
 				{
 					pm.vepms.video = {};
 					pm.vepss.videoShown = false;

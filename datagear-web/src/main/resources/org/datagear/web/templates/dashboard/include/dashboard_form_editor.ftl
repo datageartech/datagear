@@ -822,6 +822,24 @@
 		}
 	};
 
+	po.updateVeTextElement = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor || !dashboardEditor.checkSetElementText())
+			return false;
+		
+		try
+		{
+			dashboardEditor.setElementText(model.content);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
 	po.insertVeImage = function(model)
 	{
 		var dashboardEditor = po.visualDashboardEditorByTab();
@@ -1099,7 +1117,10 @@
 					if(dashboardEditor)
 					{
 						po.veCurrentInsertType = this.insertType;
-						po.showVeTextElementPanel();
+						po.showVeTextElementPanel(function(model)
+						{
+							po.insertVeTextElement(model);
+						});
 					}
 				}
 			},
@@ -1116,7 +1137,10 @@
 					if(dashboardEditor)
 					{
 						po.veCurrentInsertType = this.insertType;
-						po.showVeImagePanel();
+						po.showVeImagePanel(function(model)
+						{
+							po.insertVeImage(model);
+						});
 					}
 				}
 			},
@@ -1133,7 +1157,10 @@
 					if(dashboardEditor)
 					{
 						po.veCurrentInsertType = this.insertType;
-						po.showVeHyperlinkPanel();
+						po.showVeHyperlinkPanel(function(model)
+						{
+							po.insertVeHyperlink(model);
+						});
 					}
 				}
 			},
@@ -1150,7 +1177,10 @@
 					if(dashboardEditor)
 					{
 						po.veCurrentInsertType = this.insertType;
-						po.showVeVideoPanel();
+						po.showVeVideoPanel(function(model)
+						{
+							po.insertVeVideo(model);
+						});
 					}
 				}
 			}
@@ -1335,7 +1365,28 @@
 						{ label: "<@spring.message code='chartTheme' />" },
 						{ label: "<@spring.message code='chartOptions' />" },
 						{ label: "<@spring.message code='elementAttribute' />" },
-						{ label: "<@spring.message code='textContent' />" }
+						{
+							label: "<@spring.message code='textContent' />",
+							class: "ve-panel-show-control textElementShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkSetElementText())
+										return;
+									
+									po.showVeTextElementPanel(function(model)
+									{
+										po.updateVeTextElement(model);
+									},
+									{ content: dashboardEditor.getElementText() });
+								}
+							}
+						}
 					]
 				},
 				{
