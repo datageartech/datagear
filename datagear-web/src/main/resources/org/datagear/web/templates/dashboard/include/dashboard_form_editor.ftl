@@ -12,11 +12,11 @@
 依赖：
 
 -->
-<p-tabview v-model:active-index="pm.resourceContentTabs.activeIndex"
+<p-tabview v-model:active-index="pm.resContentTabs.activeIndex"
 	:scrollable="true" @tab-change="onResourceContentTabChange"
 	@tab-click="onResourceContentTabClick" class="contextmenu-tabview light-tabview"
-	:class="{'opacity-0': pm.resourceContentTabs.items.length == 0}">
-	<p-tabpanel v-for="tab in pm.resourceContentTabs.items" :key="tab.key" :header="tab.title">
+	:class="{'opacity-0': pm.resContentTabs.items.length == 0}">
+	<p-tabpanel v-for="tab in pm.resContentTabs.items" :key="tab.key" :header="tab.title">
 		<template #header>
 			<p-button type="button" icon="pi pi-angle-down"
 				class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
@@ -47,7 +47,7 @@
 				</div>
 				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'visual'" v-if="tab.isTemplate">
 					<p-button label="<@spring.message code='quickExecute' />" @click="pm.onQuickExecute($event, tab)"
-						class="p-button-sm" :disabled="pm.quickExecuteMenuItem == null">
+						class="p-button-sm" :disabled="pm.quickExecuteMenuItem == null" v-tooltip.top="pm.quickExecuteTooltip">
 					</p-button>
 					<p-menubar :model="pm.tplVisualEditMenuItems" class="ve-menubar light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 					</p-menubar>
@@ -59,7 +59,15 @@
 				</div>
 				<div class="visual-editor-wrapper res-editor-wrapper opacity-hide p-component p-inputtext p-0 w-full absolute">
 					<div class="visual-editor-ele-path-wrapper text-color-secondary text-sm">
-						<div class="ele-path white-space-nowrap"></div>
+						<div class="ele-path white-space-nowrap">
+							<span v-for="(ep, epIdx) in tab.veElementPath" :key="epIdx">
+								<span class="info-separator p-1 opacity-50" v-if="epIdx > 0">&gt;</span>
+								<span class="ele-info cursor-pointer" :title="ep.displayName"
+									@click="onVeSelectByElePath($event, ep)">
+									{{formatVeElePathDisplayName(ep)}}
+								</span>
+							</span>
+						</div>
 					</div>
 					<div class="visual-editor-iframe-wrapper">
 						<iframe class="visual-editor-iframe shadow-4 border-none" :id="resVisualEditorEleId(tab)"
@@ -72,7 +80,7 @@
 	</p-tabpanel>
 </p-tabview>
 <p-contextmenu id="${pid}resourceContentTabMenu" ref="${pid}resourceContentTabMenuEle"
-	:model="pm.resourceContentTabMenuItems" :popup="true" class="text-sm">
+	:model="pm.resContentTabMenuItems" :popup="true" class="text-sm">
 </p-contextmenu>
 <script>
 (function(po)
@@ -105,7 +113,7 @@
 		return tab.id + "visualEditor";
 	};
 	
-	po.toResourceContentTab = function(resName, isTemplate)
+	po.toResContentTab = function(resName, isTemplate)
 	{
 		if(isTemplate == null)
 		{
@@ -121,34 +129,35 @@
 			editMode: "code",
 			resName: resName,
 			isTemplate: isTemplate,
-			searchCodeKeyword: null
+			searchCodeKeyword: null,
+			veElementPath: []
 		};
 		
 		return re;
 	};
 	
-	po.showResourceContentTab = function(resName, isTemplate)
+	po.showResContentTab = function(resName, isTemplate)
 	{
 		var pm = po.vuePageModel();
-		var items = pm.resourceContentTabs.items;
+		var items = pm.resContentTabs.items;
 		var idx = $.inArrayById(items, po.resContentTabId(resName));
 		
 		if(idx > -1)
-			pm.resourceContentTabs.activeIndex = idx;
+			pm.resContentTabs.activeIndex = idx;
 		else
 		{
-			var tab = po.toResourceContentTab(resName, isTemplate);
-			pm.resourceContentTabs.items.push(tab);
+			var tab = po.toResContentTab(resName, isTemplate);
+			pm.resContentTabs.items.push(tab);
 			
 			//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
 			po.vueApp().$nextTick(function()
 			{
-				pm.resourceContentTabs.activeIndex = pm.resourceContentTabs.items.length - 1;
+				pm.resContentTabs.activeIndex = pm.resContentTabs.items.length - 1;
 			});
 		}
 	};
 	
-	po.loadResourceContentIfNon = function(tab)
+	po.loadResContentIfNon = function(tab)
 	{
 		var tabPanel = po.elementOfId(tab.id);
 		var loaded = tabPanel.prop("loaded");
@@ -172,7 +181,7 @@
 					if(tab.isTemplate && !resourceContent)
 						resourceContent = (response.defaultTemplateContent || "");
 					
-					po.setResourceContent(tab, resourceContent);
+					po.setResContent(tab, resourceContent);
 					tabPanel.prop("loaded", true);
 				},
 				complete: function()
@@ -183,7 +192,7 @@
 		}
 	};
 	
-	po.setResourceContent = function(tab, content)
+	po.setResContent = function(tab, content)
 	{
 		var tabPanel = po.elementOfId(tab.id);
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
@@ -298,16 +307,16 @@
 		}
 	};
 	
-	po.getEditResourceInfos = function()
+	po.getEditResInfos = function()
 	{
 		var re = [];
 		
 		var pm = po.vuePageModel();
-		var items = pm.resourceContentTabs.items;
+		var items = pm.resContentTabs.items;
 		
 		$.each(items, function(idx, item)
 		{
-			var info = po.getEditResourceInfo(item);
+			var info = po.getEditResInfo(item);
 			if(info)
 				re.push(info);
 		});
@@ -315,14 +324,14 @@
 		return re;
 	};
 	
-	po.getEditResourceInfo = function(tab, noContent)
+	po.getEditResInfo = function(tab, noContent)
 	{
 		noContent = (noContent == null ? false : noContent);
 		
 		if($.isTypeNumber(tab))
 		{
 			var pm = po.vuePageModel();
-			var items = pm.resourceContentTabs.items;
+			var items = pm.resContentTabs.items;
 			tab = items[tab];
 		}
 		
@@ -333,21 +342,35 @@
 		
 		if(!noContent)
 		{
-			var editorEle = po.elementOfId(po.resCodeEditorEleId(tab));
-			var codeEditor = editorEle.data("codeEditorInstance");
-			info.content = po.getCodeText(codeEditor);
+			if(tab.editMode == "code")
+			{
+				var editorEle = po.elementOfId(po.resCodeEditorEleId(tab));
+				var codeEditor = editorEle.data("codeEditorInstance");
+				info.content = po.getCodeText(codeEditor);
+			}
+			else
+			{
+				var dashboardEditor = po.visualDashboardEditorByTab(tab);
+				info.content = dashboardEditor.editedHtml();
+			}
 		}
 		
 		return info;
 	};
 	
-	po.getCurrentEditResourceInfo = function(noContent)
+	po.getCurrentEditResInfo = function(noContent)
 	{
-		var pm = po.vuePageModel();
-		return po.getEditResourceInfo(pm.resourceContentTabs.activeIndex, noContent);
+		return po.getEditResInfo(po.getCurrentEditTab(), noContent);
 	};
 	
-	po.saveResourceInfo = function(resInfo)
+	po.getCurrentEditTab = function()
+	{
+		var pm = po.vuePageModel();
+		var items = pm.resContentTabs.items;
+		return items[pm.resContentTabs.activeIndex];
+	};
+	
+	po.saveResInfo = function(resInfo)
 	{
 		if(!resInfo || !po.checkPersistedDashboard())
 			return;
@@ -468,10 +491,6 @@
 		var ifmWindow = po.iframeWindow(visualEditorIfm);
 		var dashboardEditor = (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
 		
-		var elePathWrapper = po.element("> .visual-editor-ele-path-wrapper", visualEditorWrapper);
-		var elePathEle = po.element("> .ele-path", elePathWrapper);
-		elePathEle.empty();
-		
 		if(dashboardEditor && !dashboardEditor._OVERWRITE_BY_CONTEXT)
 		{
 			dashboardEditor._OVERWRITE_BY_CONTEXT = true;
@@ -500,36 +519,19 @@
 			};
 			dashboardEditor.selectElementCallback = function(ele)
 			{
-				elePathEle.empty();
-				var elePath = this.getElementPath(ele);
-				
-				$.each(elePath, function(i, ep)
-				{
-					var eleInfo = ep.tagName;
-					if(ep.id)
-						eleInfo += "#"+ep.id;
-					else if(ep.className)
-						eleInfo += "."+ep.className;
-					
-					if(i > 0)
-						$("<span class='info-separator p-1 opacity-50' />").text(">").appendTo(elePathEle);
-					
-					$("<span class='ele-info cursor-pointer' />").text($.truncateIf(eleInfo, "...", ep.tagName.length+17))
-						.attr("visualEditId", (ep.visualEditId || "")).attr("title", eleInfo).appendTo(elePathEle);
-				});
-				
-				var elePathWrapperWidth = elePathWrapper.width();
-				var elePathEleWidth = elePathEle.outerWidth(true);
-				elePathEle.css("margin-left", (elePathEleWidth > elePathWrapperWidth ? (elePathWrapperWidth - elePathEleWidth) : 0)+"px");
+				var tab = po.getCurrentEditTab();
+				tab.veElementPath = this.getElementPath(ele);
 			};
 			dashboardEditor.deselectElementCallback = function()
 			{
-				elePathEle.empty();
-				visualEditorIfm.data("selectedElementVeId", "");
+				var tab = po.getCurrentEditTab();
+				tab.veElementPath = [];
 			};
 			dashboardEditor.beforeunloadCallback = function()
 			{
-				elePathEle.empty();
+				var tab = po.getCurrentEditTab();
+				tab.veElementPath = [];
+				
 				//保存编辑HTML、变更状态，用于刷新操作后恢复页面状态
 				visualEditorIfm.data("veEditedHtml", this.editedHtml());
 				visualEditorIfm.data("veEnableElementBoundary", this.enableElementBoundary());
@@ -560,8 +562,8 @@
 		if(tab == null)
 		{
 			var pm = po.vuePageModel();
-			var items = pm.resourceContentTabs.items;
-			tab = items[pm.resourceContentTabs.activeIndex];
+			var items = pm.resContentTabs.items;
+			tab = items[pm.resContentTabs.activeIndex];
 		}
 		
 		if(!tab)
@@ -773,14 +775,14 @@
 		return po.getLastTagText(text);
 	};
 	
-	po.showFirstTemplateContent =function()
+	po.showFirstTemplateContent = function()
 	{
 		var fm = po.vueFormModel();
 		
 		if(fm.templates && fm.templates.length > 0)
-			po.showResourceContentTab(fm.templates[0], true);
+			po.showResContentTab(fm.templates[0], true);
 		else
-			po.showResourceContentTab(po.defaultTemplateName, true);
+			po.showResContentTab(po.defaultTemplateName, true);
 	};
 	
 	po.bindOrReplaceVeChart = function(chartWidgets)
@@ -927,9 +929,52 @@
 	{
 		var pm = po.vuePageModel();
 		pm.quickExecuteMenuItem = menuItem;
+		
+		var tooltip = "";
+		if(menuItem)
+		{
+			var tooltip = "";
+			var labelPath = [ menuItem.label ];
+			if(menuItem.parentLabelPath)
+			{
+				labelPath = ($.isArray(menuItem.parentLabelPath) ?
+								menuItem.parentLabelPath : [ menuItem.parentLabelPath ]).concat(labelPath);
+			}
+			
+			$.each(labelPath, function(i, pl)
+			{
+				tooltip += (tooltip ? " - " + pl : pl);
+			});
+		}
+		
+		pm.quickExecuteTooltip = tooltip;
 	};
 	
-	po.buildTplVisualInsertMenuItems = function(insertType)
+	po.veRefresh = function()
+	{
+		var tab = po.getCurrentEditTab();
+		var tabPanel = po.elementOfId(tab.id);
+		var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
+		var dashboardEditor = po.visualDashboardEditorByIframe(visualEditorIfm);
+		
+		if(dashboardEditor)
+			editedHtml = dashboardEditor.editedHtml();
+		if(!editedHtml)
+			editedHtml = visualEditorIfm.data("veEditedHtml");
+		if(!editedHtml)
+		{
+			var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
+			var codeEditorWrapper = codeEditorEle.parent();
+			var codeEditor = codeEditorEle.data("codeEditorInstance");
+			editedHtml = po.getCodeText(codeEditor);
+		}
+		if(!editedHtml)
+			editedHtml = "";
+		
+		po.loadVisualEditorIframe(visualEditorIfm, tab.resName, editedHtml);
+	};
+	
+	po.buildTplVisualInsertMenuItems = function(insertType, parentLabelPath)
 	{
 		var items =
 		[
@@ -937,6 +982,7 @@
 				label: "<@spring.message code='chart' />",
 				class: "for-open-chart-panel",
 				insertType: insertType,
+				parentLabelPath: parentLabelPath,
 				command: function()
 				{
 					po.veQuickExecuteMenuItem(this);
@@ -960,6 +1006,7 @@
 				label: "<@spring.message code='gridLayout' />",
 				insertType: insertType,
 				class: "ve-panel-show-control gridLayoutShown",
+				parentLabelPath: parentLabelPath,
 				command: function()
 				{
 					po.veQuickExecuteMenuItem(this);
@@ -976,6 +1023,7 @@
 			{
 				label: "<@spring.message code='divElement' />",
 				insertType: insertType,
+				parentLabelPath: parentLabelPath,
 				command: function()
 				{
 					po.veQuickExecuteMenuItem(this);
@@ -994,6 +1042,7 @@
 				label: "<@spring.message code='textElement' />",
 				insertType: insertType,
 				class: "ve-panel-show-control textElementShown",
+				parentLabelPath: parentLabelPath,
 				command: function()
 				{
 					po.veQuickExecuteMenuItem(this);
@@ -1010,6 +1059,7 @@
 				label: "<@spring.message code='image' />",
 				insertType: insertType,
 				class: "ve-panel-show-control imageShown",
+				parentLabelPath: parentLabelPath,
 				command: function()
 				{
 					po.veQuickExecuteMenuItem(this);
@@ -1026,6 +1076,7 @@
 				label: "<@spring.message code='hyperlink' />",
 				insertType: insertType,
 				class: "ve-panel-show-control hyperlinkShown",
+				parentLabelPath: parentLabelPath,
 				command: function()
 				{
 					po.veQuickExecuteMenuItem(this);
@@ -1042,6 +1093,7 @@
 				label: "<@spring.message code='video' />",
 				insertType: insertType,
 				class: "ve-panel-show-control videoShown",
+				parentLabelPath: parentLabelPath,
 				command: function()
 				{
 					po.veQuickExecuteMenuItem(this);
@@ -1071,46 +1123,46 @@
 				{ name: "<@spring.message code='dashboard.templateEditMode.code' />", value: "code" },
 				{ name: "<@spring.message code='dashboard.templateEditMode.visual' />", value: "visual" }
 			],
-			resourceContentTabs:
+			resContentTabs:
 			{
 				items: [],
 				activeIndex: 0
 			},
-			resourceContentTabMenuItems:
+			resContentTabMenuItems:
 			[
 				{
 					label: "<@spring.message code='close' />",
 					command: function()
 					{
-						po.tabviewClose(po.vuePageModel().resourceContentTabs, po.resourceContentTabMenuTargetId);
+						po.tabviewClose(po.vuePageModel().resContentTabs, po.resourceContentTabMenuTargetId);
 					}
 				},
 				{
 					label: "<@spring.message code='closeOther' />",
 					command: function()
 					{
-						po.tabviewCloseOther(po.vuePageModel().resourceContentTabs, po.resourceContentTabMenuTargetId);
+						po.tabviewCloseOther(po.vuePageModel().resContentTabs, po.resourceContentTabMenuTargetId);
 					}
 				},
 				{
 					label: "<@spring.message code='closeRight' />",
 					command: function()
 					{
-						po.tabviewCloseRight(po.vuePageModel().resourceContentTabs, po.resourceContentTabMenuTargetId);
+						po.tabviewCloseRight(po.vuePageModel().resContentTabs, po.resourceContentTabMenuTargetId);
 					}
 				},
 				{
 					label: "<@spring.message code='closeLeft' />",
 					command: function()
 					{
-						po.tabviewCloseLeft(po.vuePageModel().resourceContentTabs, po.resourceContentTabMenuTargetId);
+						po.tabviewCloseLeft(po.vuePageModel().resContentTabs, po.resourceContentTabMenuTargetId);
 					}
 				},
 				{
 					label: "<@spring.message code='closeAll' />",
 					command: function()
 					{
-						po.tabviewCloseAll(po.vuePageModel().resourceContentTabs);
+						po.tabviewCloseAll(po.vuePageModel().resContentTabs);
 					}
 				}
 			],
@@ -1120,8 +1172,8 @@
 					label: "<@spring.message code='save' />",
 					command: function(e)
 					{
-						var info = po.getEditResourceInfo(pm.resourceContentTabs.activeIndex);
-						po.saveResourceInfo(info);
+						var info = po.getEditResInfo(pm.resContentTabs.activeIndex);
+						po.saveResInfo(info);
 					}
 				}
 			],
@@ -1186,6 +1238,7 @@
 						{
 							label: "<@spring.message code='bindOrReplaceChart' />",
 							class: "for-open-chart-panel",
+							parentLabelPath: "<@spring.message code='insert' />",
 							command: function()
 							{
 								po.veQuickExecuteMenuItem(this);
@@ -1204,10 +1257,22 @@
 							}
 						},
 						{ separator: true },
-						{ label: "<@spring.message code='outerInsertAfter' />", items: po.buildTplVisualInsertMenuItems("after") },
-						{ label: "<@spring.message code='outerInsertBefore' />", items: po.buildTplVisualInsertMenuItems("before") },
-						{ label: "<@spring.message code='innerInsertAfter' />", items: po.buildTplVisualInsertMenuItems("append") },
-						{ label: "<@spring.message code='innerInsertBefore' />", items: po.buildTplVisualInsertMenuItems("prepend") }
+						{
+							label: "<@spring.message code='outerInsertAfter' />",
+							items: po.buildTplVisualInsertMenuItems("after", ["<@spring.message code='insert' />", "<@spring.message code='outerInsertAfter' />"])
+						},
+						{
+							label: "<@spring.message code='outerInsertBefore' />",
+							items: po.buildTplVisualInsertMenuItems("before", ["<@spring.message code='insert' />", "<@spring.message code='outerInsertBefore' />"])
+						},
+						{
+							label: "<@spring.message code='innerInsertAfter' />",
+							items: po.buildTplVisualInsertMenuItems("append", ["<@spring.message code='insert' />", "<@spring.message code='innerInsertAfter' />"])
+						},
+						{
+							label: "<@spring.message code='innerInsertBefore' />",
+							items: po.buildTplVisualInsertMenuItems("prepend", ["<@spring.message code='insert' />", "<@spring.message code='innerInsertBefore' />"])
+						}
 					]
 				},
 				{
@@ -1251,15 +1316,32 @@
 							}
 						},
 						{ separator: true },
-						{ label: "<@spring.message code='unbindChart' />" }
+						{
+							label: "<@spring.message code='unbindChart' />",
+							command: function()
+							{
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor.checkUnbindChart())
+								{
+									po.confirm(
+									{
+										message: "<@spring.message code='dashboard.opt.delete.unbindChart.confirm' />",
+										accept: function()
+										{
+											dashboardEditor.unbindChart();
+										}
+									});
+								}
+							}
+						}
 					]
 				},
 				{
 					label: "<@spring.message code='save' />",
 					command: function(e)
 					{
-						var info = po.getEditResourceInfo(pm.resourceContentTabs.activeIndex);
-						po.saveResourceInfo(info);
+						var info = po.getEditResInfo(pm.resContentTabs.activeIndex);
+						po.saveResInfo(info);
 					}
 				},
 				{
@@ -1285,12 +1367,14 @@
 							label: "<@spring.message code='refresh' />",
 							command: function()
 							{
+								po.veRefresh();
 							}
 						}
 					]
 				}
 			],
 			quickExecuteMenuItem: null,
+			quickExecuteTooltip: " ", //XXX 默认空字符串的话后续没有效果！？
 			onQuickExecute: function(e, tab)
 			{
 				e.stopPropagation();
@@ -1344,14 +1428,26 @@
 				{
 					po.insertCodeEditorChart(tab, chartWidgets);
 				});
+			},
+			
+			formatVeElePathDisplayName: function(elePath)
+			{
+				return $.truncateIf(elePath.displayName, "...", elePath.tagName.length+17);
+			},
+			
+			onVeSelectByElePath: function(e, elePath)
+			{
+				var dashboardEditor = po.visualDashboardEditorByTab();
+				if(dashboardEditor)
+					dashboardEditor.selectElement(elePath.visualEditId);
 			}
 		});
 		
 		po.vueRef("${pid}resourceContentTabMenuEle", null);
 		po.vueRef("${pid}chartPanelEle", null);
 		
-		//po.showResourceContentTab()里不能获取到创建的DOM元素，所以采用此方案
-		po.vueWatch(pm.resourceContentTabs, function(oldVal, newVal)
+		//po.showResContentTab()里不能获取到创建的DOM元素，所以采用此方案
+		po.vueWatch(pm.resContentTabs, function(oldVal, newVal)
 		{
 			var items = newVal.items;
 			var activeIndex = newVal.activeIndex;
@@ -1361,7 +1457,7 @@
 			{
 				po.vueApp().$nextTick(function()
 				{
-					po.loadResourceContentIfNon(activeTab);
+					po.loadResContentIfNon(activeTab);
 				});
 			}
 		});

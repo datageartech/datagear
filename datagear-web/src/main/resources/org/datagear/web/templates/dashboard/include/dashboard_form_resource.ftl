@@ -227,7 +227,7 @@
 		}
 		
 		var isTemplate = $.isHtmlFile(name);
-		po.showResourceContentTab(name, isTemplate);
+		po.showResContentTab(name, isTemplate);
 		
 		return true;
 	};
@@ -499,7 +499,7 @@
 				 		return;
 				 	}
 				 	else
-						po.showResourceContentTab(res);
+						po.showResContentTab(res);
 				}
 			},
 			

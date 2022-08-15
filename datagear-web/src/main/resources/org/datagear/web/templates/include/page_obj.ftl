@@ -373,7 +373,8 @@ var ${pid} =
 			components: componentsObj
 		});
 		
-		this._vueApp = Vue.createApp(app).use(primevue.config.default).mount("#"+this.pid);
+		this._vueApp = Vue.createApp(app).use(primevue.config.default)
+						.directive("tooltip", primevue.tooltip).mount("#"+this.pid);
 		return this._vueApp;
 	},
 	

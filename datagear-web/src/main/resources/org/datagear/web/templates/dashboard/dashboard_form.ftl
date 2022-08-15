@@ -134,7 +134,7 @@
 			saveAdd: !po.isPersistedDashboard()
 		};
 		
-		var editResInfos = po.getEditResourceInfos();
+		var editResInfos = po.getEditResInfos();
 		$.each(editResInfos, function(idx, ei)
 		{
 			data.resourceNames.push(ei.name);
@@ -198,7 +198,7 @@
 			if(options.saveAndShowAction)
 			{
 				var fm = po.vueFormModel();
-				var resInfo = po.getCurrentEditResourceInfo(true);
+				var resInfo = po.getCurrentEditResInfo(true);
 				
 				window.open(po.showUrl(resInfo ? resInfo.name : ""), fm.id);
 			}

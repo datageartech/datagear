@@ -686,7 +686,6 @@ label[title]:not(.no-tip)::after,
 	right: 0.3rem;
 	z-index: 2;
 	overflow: hidden;
-	opacity: 0.8;
 }
 .page-form-dashboard .res-editor-wrapper .visual-editor-iframe-wrapper{
 	position: absolute;

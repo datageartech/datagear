@@ -295,7 +295,7 @@
 		
 		this.deselectElement();
 		
-		if(ele.length > 0)
+		if(ele && ele.length > 0)
 		{
 			this._selectElement(ele);
 			
@@ -2476,15 +2476,24 @@
 				continue;
 			
 			var editEle = this._editElement(ele);
-			
-			paths.push(
+			var pathInfo =
 			{
-				"tagName": (ele[0].tagName || "").toLowerCase(),
-				"selected": this._isSelectedElement(ele),
-				"id": editEle.attr("id"),
-				"className": editEle.attr("class"),
-				"visualEditId": editEle.attr(ELEMENT_ATTR_VISUAL_EDIT_ID)
-			});
+				tagName: (ele[0].tagName || "").toLowerCase(),
+				selected: this._isSelectedElement(ele),
+				id: editEle.attr("id"),
+				className: editEle.attr("class"),
+				visualEditId: editEle.attr(ELEMENT_ATTR_VISUAL_EDIT_ID)
+			};
+			
+			var displayName = pathInfo.tagName;
+			if(pathInfo.id)
+				displayName += "#"+pathInfo.id;
+			else if(pathInfo.className)
+				displayName += "."+pathInfo.className;
+			
+			pathInfo.displayName = displayName;
+			
+			paths.push(pathInfo);
 			
 			if(isBody)
 				break;
