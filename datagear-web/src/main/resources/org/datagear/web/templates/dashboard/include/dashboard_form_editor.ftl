@@ -46,8 +46,10 @@
 					</p-menubar>
 				</div>
 				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'visual'" v-if="tab.isTemplate">
-					<p-button label="<@spring.message code='quickExecute' />" class="p-button-sm"></p-button>
-					<p-menubar :model="pm.tplVisualEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
+					<p-button label="<@spring.message code='quickExecute' />" @click="pm.onQuickExecute($event, tab)"
+						class="p-button-sm" :disabled="pm.quickExecuteMenuItem == null">
+					</p-button>
+					<p-menubar :model="pm.tplVisualEditMenuItems" class="ve-menubar light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 					</p-menubar>
 				</div>
 			</div>
@@ -912,7 +914,21 @@
 			return false;
 		}
 	};
-
+	
+	po.veQuickExecute = function(tab)
+	{
+		var pm = po.vuePageModel();
+		
+		if(pm.quickExecuteMenuItem)
+			pm.quickExecuteMenuItem.command();
+	};
+	
+	po.veQuickExecuteMenuItem = function(menuItem)
+	{
+		var pm = po.vuePageModel();
+		pm.quickExecuteMenuItem = menuItem;
+	};
+	
 	po.buildTplVisualInsertMenuItems = function(insertType)
 	{
 		var items =
@@ -923,6 +939,8 @@
 				insertType: insertType,
 				command: function()
 				{
+					po.veQuickExecuteMenuItem(this);
+					
 					var dashboardEditor = po.visualDashboardEditorByTab();
 					if(dashboardEditor)
 					{
@@ -944,11 +962,11 @@
 				class: "ve-panel-show-control gridLayoutShown",
 				command: function()
 				{
+					po.veQuickExecuteMenuItem(this);
+					
 					var dashboardEditor = po.visualDashboardEditorByTab();
 					if(dashboardEditor)
 					{
-						var pm = po.vuePageModel();
-						
 						po.veCurrentInsertType = this.insertType;
 						var showFillParent = dashboardEditor.canInsertFillParentGridLayout(this.insertType);
 						po.showVeGridLayoutPanel(showFillParent);
@@ -960,6 +978,8 @@
 				insertType: insertType,
 				command: function()
 				{
+					po.veQuickExecuteMenuItem(this);
+					
 					var dashboardEditor = po.visualDashboardEditorByTab();
 					if(dashboardEditor)
 					{
@@ -976,6 +996,8 @@
 				class: "ve-panel-show-control textElementShown",
 				command: function()
 				{
+					po.veQuickExecuteMenuItem(this);
+					
 					var dashboardEditor = po.visualDashboardEditorByTab();
 					if(dashboardEditor)
 					{
@@ -990,6 +1012,8 @@
 				class: "ve-panel-show-control imageShown",
 				command: function()
 				{
+					po.veQuickExecuteMenuItem(this);
+					
 					var dashboardEditor = po.visualDashboardEditorByTab();
 					if(dashboardEditor)
 					{
@@ -1004,6 +1028,8 @@
 				class: "ve-panel-show-control hyperlinkShown",
 				command: function()
 				{
+					po.veQuickExecuteMenuItem(this);
+					
 					var dashboardEditor = po.visualDashboardEditorByTab();
 					if(dashboardEditor)
 					{
@@ -1018,6 +1044,8 @@
 				class: "ve-panel-show-control videoShown",
 				command: function()
 				{
+					po.veQuickExecuteMenuItem(this);
+					
 					var dashboardEditor = po.visualDashboardEditorByTab();
 					if(dashboardEditor)
 					{
@@ -1160,6 +1188,8 @@
 							class: "for-open-chart-panel",
 							command: function()
 							{
+								po.veQuickExecuteMenuItem(this);
+								
 								var dashboardEditor = po.visualDashboardEditorByTab();
 								if(dashboardEditor)
 								{
@@ -1259,7 +1289,15 @@
 						}
 					]
 				}
-			]
+			],
+			quickExecuteMenuItem: null,
+			onQuickExecute: function(e, tab)
+			{
+				e.stopPropagation();
+				po.element().click();
+				
+				po.veQuickExecute(tab);
+			}
 		});
 		
 		po.vueMethod(
