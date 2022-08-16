@@ -315,13 +315,11 @@ label[title]:not(.no-tip)::after,
 .p-datatable-table .col-last{
 	max-width: 50%;
 }
-
 /*无边框面板*/
 .p-panel.no-panel-border .p-panel-header,
 .p-panel.no-panel-border .p-panel-content{
 	border-width: 0;
 }
-
 .p-fieldset.fieldset-sm .p-fieldset-legend{
 	padding-top: 0.7rem;
 	padding-bottom: 0.7rem;
@@ -331,9 +329,11 @@ label[title]:not(.no-tip)::after,
 	padding: 0.6rem;
 	padding-bottom: 0.1rem;
 }
-
 .p-divider.divider-z-0 .p-divider-content{
 	z-index: 0 !important;
+}
+.p-colorpicker.preview-h-full .p-colorpicker-preview{
+	height: 100%;
 }
 
 /*横向操作组*/

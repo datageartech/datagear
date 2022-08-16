@@ -971,6 +971,27 @@
 			return false;
 		}
 	};
+
+	po.setVeChartTheme = function(model, global)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor)
+			return false;
+		
+		try
+		{
+			if(global)
+				dashboardEditor.setGlobalChartTheme(model);
+			else
+				dashboardEditor.setElementChartTheme(model);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
 	
 	po.veQuickExecute = function(tab)
 	{
@@ -1264,9 +1285,11 @@
 		
 		return items;
 	};
-
+	
 	po.setupResourceEditor = function()
 	{
+		po.setupResourceEditorForms();
+		
 		var fm = po.vueFormModel();
 		var pm = po.vuePageModel();
 		
@@ -1434,7 +1457,25 @@
 					items:
 					[
 						{ label: "<@spring.message code='globalStyle' />" },
-						{ label: "<@spring.message code='globalChartTheme' />" },
+						{
+							label: "<@spring.message code='globalChartTheme' />",
+							class: "ve-panel-show-control chartThemeShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									po.showVeChartThemePanel(function(model)
+									{
+										return po.setVeChartTheme(model, true);
+									},
+									dashboardEditor.getGlobalChartTheme(), this.label);
+								}
+							}
+						},
 						{
 							label: "<@spring.message code='globalChartOptions' />",
 							class: "ve-panel-show-control chartOptionsShown",
@@ -1450,13 +1491,34 @@
 									{
 										return po.setVeChartOptions(model, true);
 									},
-									{ value: dashboardEditor.getGlobalChartOptions() });
+									{ value: dashboardEditor.getGlobalChartOptions() }, this.label);
 								}
 							}
 						},
 						{ separator: true },
 						{ label: "<@spring.message code='style' />" },
-						{ label: "<@spring.message code='chartTheme' />" },
+						{
+							label: "<@spring.message code='chartTheme' />",
+							class: "ve-panel-show-control chartThemeShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkSetElementChartTheme())
+										return;
+									
+									po.showVeChartThemePanel(function(model)
+									{
+										return po.setVeChartTheme(model, false);
+									},
+									dashboardEditor.getElementChartTheme(), this.label);
+								}
+							}
+						},
 						{
 							label: "<@spring.message code='chartOptions' />",
 							class: "ve-panel-show-control chartOptionsShown",
@@ -1475,7 +1537,7 @@
 									{
 										return po.setVeChartOptions(model, false);
 									},
-									{ value: dashboardEditor.getElementChartOptions() });
+									{ value: dashboardEditor.getElementChartOptions() }, this.label);
 								}
 							}
 						},

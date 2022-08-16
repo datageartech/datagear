@@ -331,7 +331,8 @@ var ${pid} =
 		"p-overlaypanel": primevue.overlaypanel,
 		"p-panel": primevue.panel,
 		"p-fieldset": primevue.fieldset,
-		"p-listbox": primevue.listbox
+		"p-listbox": primevue.listbox,
+		"p-colorpicker": primevue.colorpicker
 	},
 	
 	//vue挂载

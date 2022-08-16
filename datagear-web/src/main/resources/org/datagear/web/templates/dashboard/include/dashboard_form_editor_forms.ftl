@@ -346,63 +346,135 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
+<p-dialog :header="pm.vepts.chartTheme" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.chartThemeShown" @show="onVeChartThemePanelShow">
+	<div class="page page-form">
+		<form id="${pid}veChartThemeForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veChartThemeFgColor" class="field-label col-12 mb-2">
+						<@spring.message code='fgColor' />
+					</label>
+					<div class="field-input col-12">
+						<div class="flex justify-content-center">
+							<p-inputtext id="${pid}veChartThemeFgColor" v-model="pm.vepms.chartTheme.color" type="text"
+								class="input flex-grow-1 mr-1" name="color" autofocus>
+							</p-inputtext>
+							<p-colorpicker v-model="pm.vepmChartThemeProxy.color"
+								default-color="FFFFFF" class="flex-grow-0 preview-h-full"
+								@change="onVeChartThemeColorPickerChange($event, 'color')">
+							</p-colorpicker>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veChartThemeBgColor" class="field-label col-12 mb-2">
+						<@spring.message code='bgColor' />
+					</label>
+					<div class="field-input col-12">
+						<div class="flex justify-content-center">
+							<p-inputtext id="${pid}veChartThemeBgColor" v-model="pm.vepms.chartTheme.backgroundColor" type="text"
+								class="input flex-grow-1 mr-1" name="backgroundColor">
+							</p-inputtext>
+							<p-colorpicker v-model="pm.vepmChartThemeProxy.backgroundColor"
+								default-color="FFFFFF" class="flex-grow-0 preview-h-full"
+								@change="onVeChartThemeColorPickerChange($event, 'backgroundColor')">
+							</p-colorpicker>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veChartThemeActualBgColor" class="field-label col-12 mb-2">
+						<@spring.message code='actualBgColor' />
+					</label>
+					<div class="field-input col-12">
+						<div class="flex justify-content-center">
+							<p-inputtext id="${pid}veChartThemeActualBgColor" v-model="pm.vepms.chartTheme.actualBackgroundColor" type="text"
+								class="input flex-grow-1 mr-1" name="actualBackgroundColor">
+							</p-inputtext>
+							<p-colorpicker v-model="pm.vepmChartThemeProxy.actualBackgroundColor"
+								default-color="FFFFFF" class="flex-grow-0 preview-h-full"
+								@change="onVeChartThemeColorPickerChange($event, 'actualBackgroundColor')">
+							</p-colorpicker>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veChartThemeFontSize" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.chartTheme.fontSize.desc' />">
+						<@spring.message code='fontSize' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veChartThemeFontSize" v-model="pm.vepms.chartTheme.fontSize" type="text"
+							class="input w-full" name="fontSize">
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veChartThemeGraphColors" class="field-label col-12 mb-2">
+						<@spring.message code='dashboard.veditor.chartTheme.graphColors' />
+					</label>
+					<div class="field-input col-12">
+						<div v-for="(gc, gcIdx) in pm.vepmChartThemeProxy.graphColors" :key="gcIdx">
+							<div class="flex justify-content-center mb-1">
+								<p-inputtext id="${pid}veChartThemeGraphColors" v-model="pm.vepms.chartTheme.graphColors[gcIdx]" type="text"
+									class="input flex-grow-1 mr-1" name="graphColors">
+								</p-inputtext>
+								<p-colorpicker v-model="pm.vepmChartThemeProxy.graphColors[gcIdx]"
+									default-color="FFFFFF" class="flex-grow-0 preview-h-full mr-3"
+									@change="onVeChartThemeColorPickerChange($event, 'graphColors', gcIdx)">
+								</p-colorpicker>
+								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
+									@click="onVeChartThemeRemoveGraphColor($event, gcIdx)">
+								</p-button>
+							</div>
+						</div>
+						<div class="mt-1">
+							<p-button type="button" icon="pi pi-plus" @click="onVeChartThemeAddGraphColor"></p-button>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veChartThemeGraphRangeColors" class="field-label col-12 mb-2">
+						<@spring.message code='dashboard.veditor.chartTheme.graphRangeColors' />
+					</label>
+					<div class="field-input col-12">
+						<div v-for="(gc, gcIdx) in pm.vepmChartThemeProxy.graphRangeColors" :key="gcIdx">
+							<div class="flex justify-content-center mb-1">
+								<p-inputtext id="${pid}veChartThemeGraphRangeColors" v-model="pm.vepms.chartTheme.graphRangeColors[gcIdx]" type="text"
+									class="input flex-grow-1 mr-1" name="graphRangeColors">
+								</p-inputtext>
+								<p-colorpicker v-model="pm.vepmChartThemeProxy.graphRangeColors[gcIdx]"
+									default-color="FFFFFF" class="flex-grow-0 preview-h-full mr-3"
+									@change="onVeChartThemeColorPickerChange($event, 'graphRangeColors', gcIdx)">
+								</p-colorpicker>
+								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
+									@click="onVeChartThemeRemoveGraphRangeColor($event, gcIdx)">
+								</p-button>
+							</div>
+						</div>
+						<div class="mt-1">
+							<p-button type="button" icon="pi pi-plus" @click="onVeChartThemeAddGraphRangeColor"></p-button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
 <script>
 (function(po)
 {
-	po.vuePageModel(
+	po.veDftChartThemeModel = function()
 	{
-		//可视编辑操作对话框是否显示
-		vepss:
-		{
-			gridLayoutShown: false,
-			textElementShown: false,
-			imageShown: false,
-			hyperlinkShown: false,
-			videoShown: false,
-			dashboardSizeShown: false,
-			chartOptionsShown: false
-		},
-		//可视编辑操作对话框标题
-		vepts:
-		{
-			gridLayout: "<@spring.message code='gridLayout' />",
-			textElement: "<@spring.message code='textElement' />",
-			image: "<@spring.message code='image' />",
-			hyperlink: "<@spring.message code='hyperlink' />",
-			video: "<@spring.message code='video' />",
-			dashboardSize: "<@spring.message code='dashboardSize' />",
-			chartOptions: "<@spring.message code='chartOptions' />"
-		},
-		//可视编辑操作对话框表单模型
-		vepms:
-		{
-			gridLayout: { fillParent: false },
-			textElement: { content: "" },
-			image: {},
-			hyperlink: {},
-			video: {},
-			dashboardSize: { scale: "auto" },
-			chartOptions: { value: "" },
-		},
-		//可视编辑操作对话框提交处理函数
-		veshs:
-		{
-			textElement: function(model){},
-			image: function(model){},
-			hyperlink: function(model){},
-			video: function(model){},
-			chartOptions: function(model){}
-		},
-		veGridLayoutPanelShowFillParent: false,
-		dashboardSizeScaleOptions:
-		[
-			{ name: "<@spring.message code='auto' />", value: "auto" },
-			{ name: "100%", value: 100 },
-			{ name: "75%", value: 75 },
-			{ name: "50%", value: 50 },
-			{ name: "25%", value: 25 }
-		]
-	});
+		var re = { graphColors: [], graphRangeColors: [] };
+		return re;
+	};
 	
 	po.initVePanelHelperSrc = function(form, formModel)
 	{
@@ -431,6 +503,53 @@ page_boolean_options.ftl
 		}
 		
 		return (chartOptionsStr || "");
+	};
+	
+	po.cssColorToHexStrChartTheme = function(chartTheme)
+	{
+		var re = $.extend(true, {}, chartTheme);
+		re.color = po.cssColorToHexStr(re.color);
+		re.backgroundColor = po.cssColorToHexStr(re.backgroundColor);
+		re.actualBackgroundColor = po.cssColorToHexStr(re.actualBackgroundColor);
+		re.graphColors = po.cssColorsToHexStrs(re.graphColors);
+		re.graphRangeColors = po.cssColorsToHexStrs(re.graphRangeColors);
+		
+		return re;
+	};
+	
+	po.cssColorsToHexStrs = function(cssColors)
+	{
+		if(!cssColors)
+			return [];
+		
+		var re = [];
+		
+		$.each(cssColors, function(i, cssColor)
+		{
+			re.push(po.cssColorToHexStr(cssColor));
+		});
+		
+		return re;
+	};
+	
+	po.cssColorToHexStr = function(cssColor)
+	{
+		if(!cssColor)
+			return "";
+		else if(cssColor.charAt(0) == '#')
+			return cssColor.substr(1);
+		else
+			return cssColor;
+	};
+	
+	po.hexStrToCssColor = function(hexStr, dftCssColor)
+	{
+		if(!hexStr)
+			return dftCssColor;
+		else if(hexStr.charAt(0) != '#')
+			return "#" + hexStr;
+		else
+			return hexStr;
 	};
 	
 	po.showVeGridLayoutPanel = function(showFillParent)
@@ -482,149 +601,283 @@ page_boolean_options.ftl
 		pm.vepms.dashboardSize = $.extend(true, {}, model);
 		pm.vepss.dashboardSizeShown = true;
 	};
-
-	po.showVeChartOptionsPanel = function(submitHandler, model)
+	
+	po.showVeChartOptionsPanel = function(submitHandler, model, title)
 	{
 		var pm = po.vuePageModel();
 		pm.veshs.chartOptions = submitHandler;
 		pm.vepms.chartOptions = $.extend(true, {}, model);
+		if(title)
+			pm.vepts.chartOptions = title; 
 		pm.vepss.chartOptionsShown = true;
 	};
 	
-	po.vueMethod(
+	po.showVeChartThemePanel = function(submitHandler, model, title)
 	{
-		onVeGridLayoutPanelShow: function()
+		var pm = po.vuePageModel();
+		pm.veshs.chartTheme = submitHandler;
+		pm.vepms.chartTheme = $.extend(true, po.veDftChartThemeModel(), model);
+		pm.vepmChartThemeProxy = $.extend(true, po.veDftChartThemeModel(), po.cssColorToHexStrChartTheme(model));
+		if(title)
+			pm.vepts.chartTheme = title;
+		pm.vepss.chartThemeShown = true;
+	};
+	
+	po.setupResourceEditorForms = function()
+	{
+		po.vuePageModel(
 		{
-			var pm = po.vuePageModel();
-			var form = po.elementOfId("${pid}veGridLayoutForm", document.body);
-			
-			po.initVePanelHelperSrc(form, pm.vepms.gridLayout);
-			
-			po.setupSimpleForm(form, pm.vepms.gridLayout, function()
+			//可视编辑操作对话框是否显示
+			vepss:
 			{
-				if(po.insertVeGridLayout(pm.vepms.gridLayout) !== false)
-				{
-					pm.vepms.gridLayout = { fillParent: false };
-					pm.vepss.gridLayoutShown = false;
-				}
-			});
-		},
+				gridLayoutShown: false,
+				textElementShown: false,
+				imageShown: false,
+				hyperlinkShown: false,
+				videoShown: false,
+				dashboardSizeShown: false,
+				chartOptionsShown: false,
+				chartThemeShown: false
+			},
+			//可视编辑操作对话框标题
+			vepts:
+			{
+				gridLayout: "<@spring.message code='gridLayout' />",
+				textElement: "<@spring.message code='textElement' />",
+				image: "<@spring.message code='image' />",
+				hyperlink: "<@spring.message code='hyperlink' />",
+				video: "<@spring.message code='video' />",
+				dashboardSize: "<@spring.message code='dashboardSize' />",
+				chartOptions: "<@spring.message code='chartOptions' />",
+				chartTheme: "<@spring.message code='chartTheme' />"
+			},
+			//可视编辑操作对话框表单模型
+			vepms:
+			{
+				gridLayout: { fillParent: false },
+				textElement: { content: "" },
+				image: {},
+				hyperlink: {},
+				video: {},
+				dashboardSize: { scale: "auto" },
+				chartOptions: { value: "" },
+				chartTheme: po.veDftChartThemeModel()
+			},
+			//可视编辑操作对话框提交处理函数
+			veshs:
+			{
+				textElement: function(model){},
+				image: function(model){},
+				hyperlink: function(model){},
+				video: function(model){},
+				chartOptions: function(model){},
+				chartTheme: function(model){}
+			},
+			veGridLayoutPanelShowFillParent: false,
+			dashboardSizeScaleOptions:
+			[
+				{ name: "<@spring.message code='auto' />", value: "auto" },
+				{ name: "100%", value: 100 },
+				{ name: "75%", value: 75 },
+				{ name: "50%", value: 50 },
+				{ name: "25%", value: 25 }
+			],
+			vepmChartThemeProxy: po.veDftChartThemeModel()
+		});
 		
-		onVeTextElementPanelShow: function()
-		{
-			var pm = po.vuePageModel();
-			var form = po.elementOfId("${pid}veTextElementForm", document.body);
-			
-			po.setupSimpleForm(form, pm.vepms.textElement, function()
-			{
-				if(pm.veshs.textElement(pm.vepms.textElement) !== false)
-				{
-					pm.vepms.textElement = {};
-					pm.vepss.textElementShown = false;
-				}
-			});
-		},
+		var pm = po.vuePageModel();
 		
-		onVeImagePanelShow: function()
+		po.vueMethod(
 		{
-			var pm = po.vuePageModel();
-			var form = po.elementOfId("${pid}veImageForm", document.body);
-			
-			po.setupSimpleForm(form, pm.vepms.image, function()
+			onVeGridLayoutPanelShow: function()
 			{
-				if(pm.veshs.image(pm.vepms.image) !== false)
+				var form = po.elementOfId("${pid}veGridLayoutForm", document.body);
+				
+				po.initVePanelHelperSrc(form, pm.vepms.gridLayout);
+				
+				po.setupSimpleForm(form, pm.vepms.gridLayout, function()
 				{
-					pm.vepms.image = {};
-					pm.vepss.imageShown = false;
-				}
-			});
-		},
-		
-		onVeHyperlinkPanelShow: function()
-		{
-			var pm = po.vuePageModel();
-			var form = po.elementOfId("${pid}veHyperlinkForm", document.body);
+					if(po.insertVeGridLayout(pm.vepms.gridLayout) !== false)
+					{
+						pm.vepms.gridLayout = { fillParent: false };
+						pm.vepss.gridLayoutShown = false;
+					}
+				});
+			},
 			
-			po.initVePanelHelperSrc(form, pm.vepms.hyperlink);
-			
-			po.setupSimpleForm(form, pm.vepms.hyperlink, function()
+			onVeTextElementPanelShow: function()
 			{
-				if(pm.veshs.hyperlink(pm.vepms.hyperlink) !== false)
+				var form = po.elementOfId("${pid}veTextElementForm", document.body);
+				
+				po.setupSimpleForm(form, pm.vepms.textElement, function()
 				{
-					pm.vepms.hyperlink = {};
-					pm.vepss.hyperlinkShown = false;
-				}
-			});
-		},
-		
-		onVeVideoPanelShow: function()
-		{
-			var pm = po.vuePageModel();
-			var form = po.elementOfId("${pid}veVideoForm", document.body);
+					if(pm.veshs.textElement(pm.vepms.textElement) !== false)
+					{
+						pm.vepms.textElement = {};
+						pm.vepss.textElementShown = false;
+					}
+				});
+			},
 			
-			po.setupSimpleForm(form, pm.vepms.video, function()
+			onVeImagePanelShow: function()
 			{
-				if(pm.veshs.video(pm.vepms.video) !== false)
+				var form = po.elementOfId("${pid}veImageForm", document.body);
+				
+				po.setupSimpleForm(form, pm.vepms.image, function()
 				{
-					pm.vepms.video = {};
-					pm.vepss.videoShown = false;
-				}
-			});
-		},
-		
-		onVeDashboardSizePanelShow: function()
-		{
-			var pm = po.vuePageModel();
-			var form = po.elementOfId("${pid}veDashboardSizeForm", document.body);
+					if(pm.veshs.image(pm.vepms.image) !== false)
+					{
+						pm.vepms.image = {};
+						pm.vepss.imageShown = false;
+					}
+				});
+			},
 			
-			po.setupSimpleForm(form, pm.vepms.dashboardSize, function()
+			onVeHyperlinkPanelShow: function()
 			{
-				if(po.setVeDashboardSize(null, pm.vepms.dashboardSize) !== false)
+				var form = po.elementOfId("${pid}veHyperlinkForm", document.body);
+				
+				po.initVePanelHelperSrc(form, pm.vepms.hyperlink);
+				
+				po.setupSimpleForm(form, pm.vepms.hyperlink, function()
+				{
+					if(pm.veshs.hyperlink(pm.vepms.hyperlink) !== false)
+					{
+						pm.vepms.hyperlink = {};
+						pm.vepss.hyperlinkShown = false;
+					}
+				});
+			},
+			
+			onVeVideoPanelShow: function()
+			{
+				var form = po.elementOfId("${pid}veVideoForm", document.body);
+				
+				po.setupSimpleForm(form, pm.vepms.video, function()
+				{
+					if(pm.veshs.video(pm.vepms.video) !== false)
+					{
+						pm.vepms.video = {};
+						pm.vepss.videoShown = false;
+					}
+				});
+			},
+			
+			onVeDashboardSizePanelShow: function()
+			{
+				var form = po.elementOfId("${pid}veDashboardSizeForm", document.body);
+				
+				po.setupSimpleForm(form, pm.vepms.dashboardSize, function()
+				{
+					if(po.setVeDashboardSize(null, pm.vepms.dashboardSize) !== false)
+					{
+						pm.vepss.dashboardSizeShown = false;
+					}
+				});
+			},
+			
+			onVeDashboardSizeResetToDft: function()
+			{
+				if(po.setVeDashboardSize(null, {}) !== false)
 				{
 					pm.vepss.dashboardSizeShown = false;
 				}
-			});
-		},
-		
-		onVeDashboardSizeResetToDft: function()
-		{
-			var pm = po.vuePageModel();
+			},
 			
-			if(po.setVeDashboardSize(null, {}) !== false)
+			onVeChartOptionsPanelShow: function()
 			{
-				pm.vepss.dashboardSizeShown = false;
-			}
-		},
-		
-		onVeChartOptionsPanelShow: function()
-		{
-			var pm = po.vuePageModel();
-			var form = po.elementOfId("${pid}veChartOptionsForm", document.body);
-			var codeEditorEle = po.elementOfId("${pid}veChartOptionsCodeEditor", form);
-			
-			var editorOptions =
-			{
-				value: "",
-				matchBrackets: true,
-				autoCloseBrackets: true,
-				mode: {name: "javascript", json: true}
-			};
-			
-			codeEditorEle.empty();
-			var codeEditor = po.createCodeEditor(codeEditorEle, editorOptions);
-			po.setCodeTextTimeout(codeEditor, po.prettyChartOptionsStr(pm.vepms.chartOptions.value), true);
-			
-			po.setupSimpleForm(form, pm.vepms.chartOptions, function()
-			{
-				pm.vepms.chartOptions.value = po.getCodeText(codeEditor);
-				if(pm.veshs.chartOptions(pm.vepms.chartOptions) !== false)
+				var form = po.elementOfId("${pid}veChartOptionsForm", document.body);
+				var codeEditorEle = po.elementOfId("${pid}veChartOptionsCodeEditor", form);
+				
+				var editorOptions =
 				{
-					pm.vepms.chartOptions = {};
-					pm.vepss.chartOptionsShown = false;
-				}
-			});
-		}
-	});
+					value: "",
+					matchBrackets: true,
+					autoCloseBrackets: true,
+					mode: {name: "javascript", json: true}
+				};
+				
+				codeEditorEle.empty();
+				var codeEditor = po.createCodeEditor(codeEditorEle, editorOptions);
+				po.setCodeTextTimeout(codeEditor, po.prettyChartOptionsStr(pm.vepms.chartOptions.value), true);
+				
+				po.setupSimpleForm(form, pm.vepms.chartOptions, function()
+				{
+					pm.vepms.chartOptions.value = po.getCodeText(codeEditor);
+					if(pm.veshs.chartOptions(pm.vepms.chartOptions) !== false)
+					{
+						pm.vepms.chartOptions = {};
+						pm.vepss.chartOptionsShown = false;
+					}
+				});
+			},
+			
+			onVeChartThemePanelShow: function()
+			{
+				var form = po.elementOfId("${pid}veChartThemeForm", document.body);
+				
+				po.setupSimpleForm(form, pm.vepms.chartTheme, function()
+				{
+					if(pm.veshs.chartTheme(pm.vepms.chartTheme) !== false)
+					{
+						pm.vepms.chartTheme = po.veDftChartThemeModel();
+						pm.vepmChartThemeProxy = po.veDftChartThemeModel();
+						pm.vepss.chartThemeShown = false;
+					}
+				});
+			},
+			
+			onVeChartThemeColorPickerChange: function(e, propName, idx)
+			{
+				var proxy = pm.vepmChartThemeProxy;
+				var chartTheme = pm.vepms.chartTheme;
+				
+				//XXX 使用e.value在第一次时返回的值不是新值！？
+				var pickColor = (idx != null ? proxy[propName][idx] : proxy[propName]);
+				
+				if(idx != null)
+					chartTheme[propName][idx] = po.hexStrToCssColor(pickColor, chartTheme[propName][idx]);
+				else
+					chartTheme[propName] = po.hexStrToCssColor(pickColor, chartTheme[propName]);
+			},
+			
+			onVeChartThemeAddGraphColor: function()
+			{
+				var proxy = pm.vepmChartThemeProxy;
+				var chartTheme = pm.vepms.chartTheme;
+				
+				proxy.graphColors.push("");
+				chartTheme.graphColors.push("");
+			},
+			
+			onVeChartThemeAddGraphRangeColor: function()
+			{
+				var proxy = pm.vepmChartThemeProxy;
+				var chartTheme = pm.vepms.chartTheme;
+				
+				proxy.graphRangeColors.push("");
+				chartTheme.graphRangeColors.push("");
+			},
+			
+			onVeChartThemeRemoveGraphColor: function(e, idx)
+			{
+				var proxy = pm.vepmChartThemeProxy;
+				var chartTheme = pm.vepms.chartTheme;
+				
+				proxy.graphColors.splice(idx, 1);
+				chartTheme.graphColors.splice(idx, 1);
+			},
+			
+			onVeChartThemeRemoveGraphRangeColor: function(e, idx)
+			{
+				var proxy = pm.vepmChartThemeProxy;
+				var chartTheme = pm.vepms.chartTheme;
+				
+				proxy.graphRangeColors.splice(idx, 1);
+				chartTheme.graphRangeColors.splice(idx, 1);
+			}
+		});
+	};
 })
 (${pid});
 </script>
