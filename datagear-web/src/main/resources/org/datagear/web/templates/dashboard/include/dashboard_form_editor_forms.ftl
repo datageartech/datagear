@@ -321,6 +321,31 @@ page_boolean_options.ftl
 		</form>
 	</div>
 </p-dialog>
+
+<p-dialog :header="pm.vepts.chartOptions" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.chartOptionsShown" @show="onVeChartOptionsPanelShow">
+	<div class="page page-form">
+		<form id="${pid}veChartOptionsForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto" style="min-width:40vw;">
+				<div class="field grid">
+					<label for="${pid}veChartOptionsContent" class="field-label col-12 mb-2">
+						<@spring.message code='chartOptions' />
+					</label>
+					<div class="field-input col-12">
+						<div id="${pid}veChartOptionsContent" class="code-editor-wrapper input p-component p-inputtext w-full" style="height:30vh;">
+							<div id="${pid}veChartOptionsCodeEditor" class="code-editor"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
 <script>
 (function(po)
 {
@@ -334,7 +359,8 @@ page_boolean_options.ftl
 			imageShown: false,
 			hyperlinkShown: false,
 			videoShown: false,
-			dashboardSizeShown: false
+			dashboardSizeShown: false,
+			chartOptionsShown: false
 		},
 		//可视编辑操作对话框标题
 		vepts:
@@ -344,25 +370,28 @@ page_boolean_options.ftl
 			image: "<@spring.message code='image' />",
 			hyperlink: "<@spring.message code='hyperlink' />",
 			video: "<@spring.message code='video' />",
-			dashboardSize: "<@spring.message code='dashboardSize' />"
+			dashboardSize: "<@spring.message code='dashboardSize' />",
+			chartOptions: "<@spring.message code='chartOptions' />"
 		},
 		//可视编辑操作对话框表单模型
 		vepms:
 		{
 			gridLayout: { fillParent: false },
-			textElement: {},
+			textElement: { content: "" },
 			image: {},
 			hyperlink: {},
 			video: {},
-			dashboardSize: { scale: "auto" }
+			dashboardSize: { scale: "auto" },
+			chartOptions: { value: "" },
 		},
 		//可视编辑操作对话框提交处理函数
 		veshs:
 		{
-			textElement: null,
-			image: null,
-			hyperlink: null,
-			video: null
+			textElement: function(model){},
+			image: function(model){},
+			hyperlink: function(model){},
+			video: function(model){},
+			chartOptions: function(model){}
 		},
 		veGridLayoutPanelShowFillParent: false,
 		dashboardSizeScaleOptions:
@@ -389,6 +418,19 @@ page_boolean_options.ftl
 			
 			helpTarget.focus();
 		});
+	};
+
+	po.prettyChartOptionsStr = function(chartOptionsStr)
+	{
+		if(chartOptionsStr && /^\s*[\{\[]/.test(chartOptionsStr))
+		{
+			var obj = chartFactory.evalSilently(chartOptionsStr, chartOptionsStr);
+			
+			if(!chartFactory.isString(obj))
+				chartOptionsStr = JSON.stringify(obj, null, '\t');
+		}
+		
+		return (chartOptionsStr || "");
 	};
 	
 	po.showVeGridLayoutPanel = function(showFillParent)
@@ -439,6 +481,14 @@ page_boolean_options.ftl
 		var pm = po.vuePageModel();
 		pm.vepms.dashboardSize = $.extend(true, {}, model);
 		pm.vepss.dashboardSizeShown = true;
+	};
+
+	po.showVeChartOptionsPanel = function(submitHandler, model)
+	{
+		var pm = po.vuePageModel();
+		pm.veshs.chartOptions = submitHandler;
+		pm.vepms.chartOptions = $.extend(true, {}, model);
+		pm.vepss.chartOptionsShown = true;
 	};
 	
 	po.vueMethod(
@@ -544,6 +594,35 @@ page_boolean_options.ftl
 			{
 				pm.vepss.dashboardSizeShown = false;
 			}
+		},
+		
+		onVeChartOptionsPanelShow: function()
+		{
+			var pm = po.vuePageModel();
+			var form = po.elementOfId("${pid}veChartOptionsForm", document.body);
+			var codeEditorEle = po.elementOfId("${pid}veChartOptionsCodeEditor", form);
+			
+			var editorOptions =
+			{
+				value: "",
+				matchBrackets: true,
+				autoCloseBrackets: true,
+				mode: {name: "javascript", json: true}
+			};
+			
+			codeEditorEle.empty();
+			var codeEditor = po.createCodeEditor(codeEditorEle, editorOptions);
+			po.setCodeTextTimeout(codeEditor, po.prettyChartOptionsStr(pm.vepms.chartOptions.value), true);
+			
+			po.setupSimpleForm(form, pm.vepms.chartOptions, function()
+			{
+				pm.vepms.chartOptions.value = po.getCodeText(codeEditor);
+				if(pm.veshs.chartOptions(pm.vepms.chartOptions) !== false)
+				{
+					pm.vepms.chartOptions = {};
+					pm.vepss.chartOptionsShown = false;
+				}
+			});
 		}
 	});
 })

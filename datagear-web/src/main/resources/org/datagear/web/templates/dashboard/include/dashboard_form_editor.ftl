@@ -951,6 +951,27 @@
 		}
 	};
 	
+	po.setVeChartOptions = function(model, global)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor)
+			return false;
+		
+		try
+		{
+			if(global)
+				dashboardEditor.setGlobalChartOptions(model.value);
+			else
+				dashboardEditor.setElementChartOptions(model.value);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
 	po.veQuickExecute = function(tab)
 	{
 		var pm = po.vuePageModel();
@@ -1174,7 +1195,7 @@
 						po.veCurrentInsertType = this.insertType;
 						po.showVeTextElementPanel(function(model)
 						{
-							po.insertVeTextElement(model);
+							return po.insertVeTextElement(model);
 						});
 					}
 				}
@@ -1194,7 +1215,7 @@
 						po.veCurrentInsertType = this.insertType;
 						po.showVeImagePanel(function(model)
 						{
-							po.insertVeImage(model);
+							return po.insertVeImage(model);
 						});
 					}
 				}
@@ -1214,7 +1235,7 @@
 						po.veCurrentInsertType = this.insertType;
 						po.showVeHyperlinkPanel(function(model)
 						{
-							po.insertVeHyperlink(model);
+							return po.insertVeHyperlink(model);
 						});
 					}
 				}
@@ -1234,7 +1255,7 @@
 						po.veCurrentInsertType = this.insertType;
 						po.showVeVideoPanel(function(model)
 						{
-							po.insertVeVideo(model);
+							return po.insertVeVideo(model);
 						});
 					}
 				}
@@ -1414,11 +1435,50 @@
 					[
 						{ label: "<@spring.message code='globalStyle' />" },
 						{ label: "<@spring.message code='globalChartTheme' />" },
-						{ label: "<@spring.message code='globalChartOptions' />" },
+						{
+							label: "<@spring.message code='globalChartOptions' />",
+							class: "ve-panel-show-control chartOptionsShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									po.showVeChartOptionsPanel(function(model)
+									{
+										return po.setVeChartOptions(model, true);
+									},
+									{ value: dashboardEditor.getGlobalChartOptions() });
+								}
+							}
+						},
 						{ separator: true },
 						{ label: "<@spring.message code='style' />" },
 						{ label: "<@spring.message code='chartTheme' />" },
-						{ label: "<@spring.message code='chartOptions' />" },
+						{
+							label: "<@spring.message code='chartOptions' />",
+							class: "ve-panel-show-control chartOptionsShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkSetElementChartOptions())
+										return;
+									
+									po.showVeChartOptionsPanel(function(model)
+									{
+										return po.setVeChartOptions(model, false);
+									},
+									{ value: dashboardEditor.getElementChartOptions() });
+								}
+							}
+						},
 						{
 							label: "<@spring.message code='elementAttribute' />",
 							class: "ve-panel-show-control imageShown hyperlinkShown videoShown textElementShown",
@@ -1434,7 +1494,7 @@
 									{
 										po.showVeImagePanel(function(model)
 										{
-											po.updateVeImage(model);
+											return po.updateVeImage(model);
 										},
 										dashboardEditor.getImageAttr());
 									}
@@ -1442,7 +1502,7 @@
 									{
 										po.showVeHyperlinkPanel(function(model)
 										{
-											po.updateVeHyperlink(model);
+											return po.updateVeHyperlink(model);
 										},
 										dashboardEditor.getHyperlinkAttr());
 									}
@@ -1450,7 +1510,7 @@
 									{
 										po.showVeVideoPanel(function(model)
 										{
-											po.updateVeVideo(model);
+											return po.updateVeVideo(model);
 										},
 										dashboardEditor.getVideoAttr());
 									}
@@ -1458,7 +1518,7 @@
 									{
 										po.showVeTextElementPanel(function(model)
 										{
-											po.updateVeTextElement(model);
+											return po.updateVeTextElement(model);
 										},
 										dashboardEditor.getLabelAttr());
 									}
@@ -1483,7 +1543,7 @@
 									
 									po.showVeTextElementPanel(function(model)
 									{
-										po.updateVeTextElement(model);
+										return po.updateVeTextElement(model);
 									},
 									{ content: dashboardEditor.getElementText() });
 								}
