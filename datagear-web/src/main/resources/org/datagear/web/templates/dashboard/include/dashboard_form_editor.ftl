@@ -859,6 +859,24 @@
 		}
 	};
 
+	po.updateVeImage = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor)
+			return false;
+		
+		try
+		{
+			dashboardEditor.setImageAttr(model);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
 	po.insertVeHyperlink = function(model)
 	{
 		var dashboardEditor = po.visualDashboardEditorByTab();
@@ -870,6 +888,24 @@
 		try
 		{
 			dashboardEditor.insertHyperlink(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+
+	po.updateVeHyperlink = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor)
+			return false;
+		
+		try
+		{
+			dashboardEditor.setHyperlinkAttr(model);
 		}
 		catch(e)
 		{
@@ -889,6 +925,24 @@
 		try
 		{
 			dashboardEditor.insertVideo(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+
+	po.updateVeVideo = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor)
+			return false;
+		
+		try
+		{
+			dashboardEditor.setVideoAttr(model);
 		}
 		catch(e)
 		{
@@ -936,6 +990,7 @@
 		var tabPanel = po.elementOfId(tab.id);
 		var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
 		var dashboardEditor = po.visualDashboardEditorByIframe(visualEditorIfm);
+		var editedHtml = "";
 		
 		if(dashboardEditor)
 			editedHtml = dashboardEditor.editedHtml();
@@ -1364,7 +1419,54 @@
 						{ label: "<@spring.message code='style' />" },
 						{ label: "<@spring.message code='chartTheme' />" },
 						{ label: "<@spring.message code='chartOptions' />" },
-						{ label: "<@spring.message code='elementAttribute' />" },
+						{
+							label: "<@spring.message code='elementAttribute' />",
+							class: "ve-panel-show-control imageShown hyperlinkShown videoShown textElementShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(dashboardEditor.isImage())
+									{
+										po.showVeImagePanel(function(model)
+										{
+											po.updateVeImage(model);
+										},
+										dashboardEditor.getImageAttr());
+									}
+									else if(dashboardEditor.isHyperlink())
+									{
+										po.showVeHyperlinkPanel(function(model)
+										{
+											po.updateVeHyperlink(model);
+										},
+										dashboardEditor.getHyperlinkAttr());
+									}
+									else if(dashboardEditor.isVideo())
+									{
+										po.showVeVideoPanel(function(model)
+										{
+											po.updateVeVideo(model);
+										},
+										dashboardEditor.getVideoAttr());
+									}
+									else if(dashboardEditor.isLabel())
+									{
+										po.showVeTextElementPanel(function(model)
+										{
+											po.updateVeTextElement(model);
+										},
+										dashboardEditor.getLabelAttr());
+									}
+									else
+										$.tipInfo("<@spring.message code='dashboard.opt.edit.eleAttr.eleRequired' />");
+								}
+							}
+						},
 						{
 							label: "<@spring.message code='textContent' />",
 							class: "ve-panel-show-control textElementShown",

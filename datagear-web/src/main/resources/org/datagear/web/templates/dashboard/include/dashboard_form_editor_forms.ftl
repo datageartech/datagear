@@ -112,7 +112,7 @@ page_boolean_options.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-textarea id="${pid}veTextElementContent" v-model="pm.vepms.textElement.content"
-							class="input w-full" name="content" required autofocus>
+							class="input w-full" name="content" autofocus>
 						</p-textarea>
 					</div>
 				</div>
@@ -137,7 +137,7 @@ page_boolean_options.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veImageSrc" v-model="pm.vepms.image.src" type="text"
-							class="input w-full" name="src" required autofocus>
+							class="input w-full" name="src" autofocus>
 						</p-inputtext>
 					</div>
 				</div>
@@ -237,7 +237,7 @@ page_boolean_options.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veVideoSrc" v-model="pm.vepms.video.src" type="text"
-							class="input w-full" name="src" required autofocus>
+							class="input w-full" name="src" autofocus>
 						</p-inputtext>
 					</div>
 				</div>
@@ -410,31 +410,34 @@ page_boolean_options.ftl
 		pm.vepss.textElementShown = true;
 	};
 	
-	po.showVeImagePanel = function(submitHandler)
+	po.showVeImagePanel = function(submitHandler, model)
 	{
 		var pm = po.vuePageModel();
 		pm.veshs.image = submitHandler;
+		pm.vepms.image = $.extend(true, {}, model);
 		pm.vepss.imageShown = true;
 	};
 	
-	po.showVeHyperlinkPanel = function(submitHandler)
+	po.showVeHyperlinkPanel = function(submitHandler, model)
 	{
 		var pm = po.vuePageModel();
 		pm.veshs.hyperlink = submitHandler;
+		pm.vepms.hyperlink = $.extend(true, {}, model);
 		pm.vepss.hyperlinkShown = true;
 	};
 	
-	po.showVeVideoPanel = function(submitHandler)
+	po.showVeVideoPanel = function(submitHandler, model)
 	{
 		var pm = po.vuePageModel();
 		pm.veshs.video = submitHandler;
+		pm.vepms.video = $.extend(true, {}, model);
 		pm.vepss.videoShown = true;
 	};
 	
-	po.showVeDashboardSizePanel = function(dashboardSizeModel)
+	po.showVeDashboardSizePanel = function(model)
 	{
 		var pm = po.vuePageModel();
-		pm.vepms.dashboardSize = $.extend(true, {}, dashboardSizeModel);
+		pm.vepms.dashboardSize = $.extend(true, {}, model);
 		pm.vepss.dashboardSizeShown = true;
 	};
 	
