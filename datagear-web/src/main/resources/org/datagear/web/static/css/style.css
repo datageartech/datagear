@@ -713,7 +713,7 @@ label[title]:not(.no-tip)::after,
 	max-height: unset;
 }
 .dashboard-ve-style-panel .ve-style-tabpanel-content{
-	min-width: 38vw;
+	width: 36vw;
 	/*对话框高度 - 表单foot高度 - 对话框header高度 - 选项卡条高度*/
 	height: calc(90vh - 5rem - 6rem - 4rem);
 }
