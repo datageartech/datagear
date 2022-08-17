@@ -993,6 +993,95 @@
 		}
 	};
 	
+	po.setVeStyle = function(model, global)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor)
+			return false;
+		
+		if(po.isDisplayGrid(model.display))
+		{
+			model['align-items'] = model['align-items-grid'];
+			model['justify-content'] = model['justify-content-grid'];
+			model['align-content'] = model['align-content-grid'];
+		}
+		else if(po.isDisplayFlex(model.display))
+		{
+			model['align-items'] = model['align-items-flex'];
+			model['justify-content'] = model['justify-content-flex'];
+			model['align-content'] = model['align-content-flex'];
+		}
+		
+		if(dashboardEditor.isGridItemElement())
+			model['align-self'] = model['align-self-grid'];
+		else if(dashboardEditor.isFlexItemElement())
+			model['align-self'] = model['align-self-flex'];
+		
+		model['align-items-grid'] = null;
+		model['justify-content-grid'] = null;
+		model['align-content-grid'] = null;
+		model['align-self-grid'] = null;
+		model['align-items-flex'] = null;
+		model['justify-content-flex'] = null;
+		model['align-content-flex'] = null;
+		model['align-self-flex'] = null;
+		
+		try
+		{
+			if(global)
+				dashboardEditor.setGlobalStyle(model);
+			else
+				dashboardEditor.setElementStyle(model);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
+	po.isDisplayGrid = function(display)
+	{
+		if(!display)
+			return false;
+		
+		return /^(grid|inline-grid)$/i.test(display);
+	};
+	
+	po.isDisplayFlex = function(display)
+	{
+		if(!display)
+			return false;
+		
+		return /^(flex|inline-flex)$/i.test(display);
+	};
+	
+	po.convertToVeStyleFormModel = function(styleModel)
+	{
+		styleModel = $.extend({ syncChartTheme: true }, styleModel);
+		
+		if(po.isDisplayGrid(styleModel.display))
+		{
+			styleModel['align-items-grid'] = styleModel['align-items'];
+			styleModel['justify-content-grid'] = styleModel['justify-content'];
+			styleModel['align-content-grid'] = styleModel['align-content'];
+		}
+		else if(po.isDisplayFlex(styleModel.display))
+		{
+			styleModel['align-items-flex'] = styleModel['align-items'];
+			styleModel['justify-content-flex'] = styleModel['justify-content'];
+			styleModel['align-content-flex'] = styleModel['align-content'];
+		}
+		
+		if(styleModel.isGridItemElement)
+			styleModel['align-self-grid'] = styleModel['align-self'];
+		else if(styleModel.isFlexItemElement)
+			styleModel['align-self-flex'] = styleModel['align-self'];
+		
+		return styleModel;
+	};
+	
 	po.veQuickExecute = function(tab)
 	{
 		var pm = po.vuePageModel();
@@ -1456,7 +1545,28 @@
 					label: "<@spring.message code='edit' />",
 					items:
 					[
-						{ label: "<@spring.message code='globalStyle' />" },
+						{
+							label: "<@spring.message code='globalStyle' />",
+							class: "ve-panel-show-control styleShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									var styleModel = dashboardEditor.getGlobalStyle();
+									styleModel = po.convertToVeStyleFormModel(styleModel);
+									
+									po.showVeStylePanel(function(model)
+									{
+										return po.setVeStyle(model, true);
+									},
+									styleModel, this.label);
+								}
+							}
+						},
 						{
 							label: "<@spring.message code='globalChartTheme' />",
 							class: "ve-panel-show-control chartThemeShown",
@@ -1496,7 +1606,33 @@
 							}
 						},
 						{ separator: true },
-						{ label: "<@spring.message code='style' />" },
+						{
+							label: "<@spring.message code='style' />",
+							class: "ve-panel-show-control styleShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkSetElementStyle())
+										return;
+									
+									var styleModel = dashboardEditor.getElementStyle();
+									styleModel.isGridItemElement = dashboardEditor.isGridItemElement();
+									styleModel.isFlexItemElement = dashboardEditor.isFlexItemElement();
+									styleModel = po.convertToVeStyleFormModel(styleModel);
+									
+									po.showVeStylePanel(function(model)
+									{
+										return po.setVeStyle(model, false);
+									},
+									styleModel, this.label);
+								}
+							}
+						},
 						{
 							label: "<@spring.message code='chartTheme' />",
 							class: "ve-panel-show-control chartThemeShown",
@@ -1619,41 +1755,26 @@
 					[
 						{
 							label: "<@spring.message code='deleteElement' />",
+							class: "p-error",
 							command: function()
 							{
 								var dashboardEditor = po.visualDashboardEditorByTab();
-								if(dashboardEditor)
+								if(dashboardEditor && dashboardEditor.checkDeleteElement())
 								{
-									if(dashboardEditor.checkDeleteElement())
-									{
-										po.confirm(
-										{
-											message: "<@spring.message code='dashboard.opt.delete.element.confirm' />",
-											accept: function()
-											{
-												dashboardEditor.deleteElement();
-											}
-										});
-									}
+									dashboardEditor.deleteElement();
 								}
 							}
 						},
 						{ separator: true },
 						{
 							label: "<@spring.message code='unbindChart' />",
+							class: "p-error",
 							command: function()
 							{
 								var dashboardEditor = po.visualDashboardEditorByTab();
-								if(dashboardEditor.checkUnbindChart())
+								if(dashboardEditor && dashboardEditor.checkUnbindChart())
 								{
-									po.confirm(
-									{
-										message: "<@spring.message code='dashboard.opt.delete.unbindChart.confirm' />",
-										accept: function()
-										{
-											dashboardEditor.unbindChart();
-										}
-									});
+									dashboardEditor.unbindChart();
 								}
 							}
 						}

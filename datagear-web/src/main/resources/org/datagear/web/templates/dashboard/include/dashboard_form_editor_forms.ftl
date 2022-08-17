@@ -467,6 +467,312 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
+<p-dialog :header="pm.vepts.style" append-to="body"
+	position="center" :dismissable-mask="true" class="dashboard-ve-style-panel"
+	v-model:visible="pm.vepss.styleShown" @show="onVeStylePanelShow">
+	<div class="page page-form">
+		<form id="${pid}veStyleForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<p-tabview class="light-tabview">
+					<p-tabpanel header="<@spring.message code='color' />">
+						<div class="ve-style-tabpanel-content px-2 overflow-y-auto">
+							<div class="field grid">
+								<label for="${pid}veStyleColor" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.color.desc' />">
+									<@spring.message code='dashboard.veditor.style.color' />
+								</label>
+								<div class="field-input col-12">
+									<div class="flex justify-content-center">
+										<p-inputtext id="${pid}veStyleColor" v-model="pm.vepms.style.color" type="text"
+											class="input flex-grow-1 mr-1" name="color" autofocus>
+										</p-inputtext>
+										<p-colorpicker v-model="pm.vepmStyleProxy.color"
+											default-color="FFFFFF" class="flex-grow-0 preview-h-full"
+											@change="onVeStyleColorPickerChange($event, 'color')">
+										</p-colorpicker>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleBgColor" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.bgColor.desc' />">
+									<@spring.message code='dashboard.veditor.style.bgColor' />
+								</label>
+								<div class="field-input col-12">
+									<div class="flex justify-content-center">
+										<p-inputtext id="${pid}veStyleBgColor" v-model="pm.vepms.style['background-color']" type="text"
+											class="input flex-grow-1 mr-1" name="background-color">
+										</p-inputtext>
+										<p-colorpicker v-model="pm.vepmStyleProxy['background-color']"
+											default-color="FFFFFF" class="flex-grow-0 preview-h-full"
+											@change="onVeStyleColorPickerChange($event, 'background-color')">
+										</p-colorpicker>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleBgImage" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.bgImage.desc' />">
+									<@spring.message code='dashboard.veditor.style.bgImage' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleBgImage" v-model="pm.vepms.style['background-image']" type="text"
+										class="input w-full" name="background-image">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleBgSize" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.bgSize' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleBgSize" v-model="pm.vepms.style['background-size']" type="text"
+										class="help-target input w-full" name="background-size">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="100% 100%">
+											<@spring.message code='dashboard.veditor.style.bgSize.fill' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="100% auto">
+											<@spring.message code='dashboard.veditor.style.bgSize.fill-x' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="auto 100%">
+											<@spring.message code='dashboard.veditor.style.bgSize.fill-y' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="auto auto">
+											<@spring.message code='dashboard.veditor.style.bgSize.oirgin' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleBgRepeat" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.bgRepeat' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleBgRepeat" v-model="pm.vepms.style['background-repeat']" type="text"
+										class="help-target input w-full" name="background-repeat">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="no-repeat">
+											<@spring.message code='dashboard.veditor.style.bgRepeat.no-repeat' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="repeat">
+											<@spring.message code='dashboard.veditor.style.bgRepeat.repeat' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="repeat-x">
+											<@spring.message code='dashboard.veditor.style.bgRepeat.repeat-x' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="repeat-y">
+											<@spring.message code='dashboard.veditor.style.bgRepeat.repeat-y' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleBgPosition" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.bgPosition' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleBgPosition" v-model="pm.vepms.style['background-position']" type="text"
+										class="help-target input w-full" name="background-position">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="center center">
+											<@spring.message code='dashboard.veditor.style.bgPosition.center' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="left top">
+											<@spring.message code='dashboard.veditor.style.bgPosition.leftTop' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="right top">
+											<@spring.message code='dashboard.veditor.style.bgPosition.rightTop' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="left bottom">
+											<@spring.message code='dashboard.veditor.style.bgPosition.leftBottom' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="right bottom">
+											<@spring.message code='dashboard.veditor.style.bgPosition.rightBottom' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</p-tabpanel>
+					<p-tabpanel header="<@spring.message code='border' />">
+						<div class="ve-style-tabpanel-content px-2 overflow-y-auto">
+							<div class="field grid">
+								<label for="${pid}veStyleBorderWidth" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.borderWidth.desc' />">
+									<@spring.message code='dashboard.veditor.style.borderWidth' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleBorderWidth" v-model="pm.vepms.style['border-width']" type="text"
+										class="help-target input w-full" name="border-width">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="1px">
+										<@spring.message code='dashboard.veditor.style.borderWidth.1px' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="2px">
+										<@spring.message code='dashboard.veditor.style.borderWidth.2px' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+										<@spring.message code='dashboard.veditor.style.borderWidth.3px' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="4px">
+										<@spring.message code='dashboard.veditor.style.borderWidth.4px' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+										<@spring.message code='dashboard.veditor.style.borderWidth.5px' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleBorderColor" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.borderColor.desc' />">
+									<@spring.message code='dashboard.veditor.style.borderColor' />
+								</label>
+								<div class="field-input col-12">
+									<div class="flex justify-content-center">
+										<p-inputtext id="${pid}veStyleBorderColor" v-model="pm.vepms.style['border-color']" type="text"
+											class="input flex-grow-1 mr-1" name="border-color">
+										</p-inputtext>
+										<p-colorpicker v-model="pm.vepmStyleProxy['border-color']"
+											default-color="FFFFFF" class="flex-grow-0 preview-h-full"
+											@change="onVeStyleColorPickerChange($event, 'border-color')">
+										</p-colorpicker>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleBorderStyle" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.borderStyle' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleBorderStyle" v-model="pm.vepms.style['border-style']" type="text"
+										class="help-target input w-full" name="border-style">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="solid">
+											<@spring.message code='dashboard.veditor.style.borderStyle.solid' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="dotted">
+											<@spring.message code='dashboard.veditor.style.borderStyle.dotted' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="dashed">
+											<@spring.message code='dashboard.veditor.style.borderStyle.dashed' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleBorderRadius" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.borderRadius.desc' />">
+									<@spring.message code='dashboard.veditor.style.borderRadius' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleBorderRadius" v-model="pm.vepms.style['border-radius']" type="text"
+										class="help-target input w-full" name="border-radius">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+											<@spring.message code='dashboard.veditor.style.borderRadius.3px' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+											<@spring.message code='dashboard.veditor.style.borderRadius.5px' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10px">
+											<@spring.message code='dashboard.veditor.style.borderRadius.10px' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30px">
+											<@spring.message code='dashboard.veditor.style.borderRadius.30px' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="50px">
+											<@spring.message code='dashboard.veditor.style.borderRadius.50px' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleBoxShadow" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.boxShadow.desc' />">
+									<@spring.message code='dashboard.veditor.style.boxShadow' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleBoxShadow" v-model="pm.vepms.style['box-shadow']" type="text"
+										class="help-target input w-full" name="box-shadow">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="0px 0px 6px 4px #666">
+											<@spring.message code='dashboard.veditor.style.boxShadow.around' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="-4px -4px 6px 4px #666">
+											<@spring.message code='dashboard.veditor.style.boxShadow.lt' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="4px -4px 6px 4px #666">
+											<@spring.message code='dashboard.veditor.style.boxShadow.rt' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="4px 4px 6px 4px #666">
+											<@spring.message code='dashboard.veditor.style.boxShadow.rb' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="-4px 4px 6px 4px #666">
+											<@spring.message code='dashboard.veditor.style.boxShadow.lb' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</p-tabpanel>
+					<p-tabpanel header="<@spring.message code='size' />">
+						<div class="ve-style-tabpanel-content px-2 overflow-y-auto"></div>
+					</p-tabpanel>
+					<p-tabpanel header="<@spring.message code='position' />">
+						<div class="ve-style-tabpanel-content px-2 overflow-y-auto"></div>
+					</p-tabpanel>
+					<p-tabpanel header="<@spring.message code='font' />">
+						<div class="ve-style-tabpanel-content px-2 overflow-y-auto"></div>
+					</p-tabpanel>
+					<p-tabpanel header="<@spring.message code='gridLayout' />">
+						<div class="ve-style-tabpanel-content px-2 overflow-y-auto"></div>
+					</p-tabpanel>
+					<p-tabpanel header="<@spring.message code='flexLayout' />">
+						<div class="ve-style-tabpanel-content px-2 overflow-y-auto"></div>
+					</p-tabpanel>
+					<p-tabpanel header="<@spring.message code='other' />">
+						<div class="ve-style-tabpanel-content px-2 overflow-y-auto">
+							<div class="field grid">
+								<label for="${pid}veStyleClassName" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.className' />
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleClassName" v-model="pm.vepms.style['className']" type="text"
+										class="input w-full" name="className">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid mb-0">
+								<label for="${pid}veStyleSyncChartTheme" class="field-label col-12 mb-2"
+									 title="<@spring.message code='dashboard.veditor.style.syncChartTheme.desc' />">
+									<@spring.message code='dashboard.veditor.style.syncChartTheme' />
+								</label>
+								<div class="field-input col-12">
+									<p-selectbutton v-model="pm.vepms.style['syncChartTheme']" :options="pm.booleanOptions"
+										option-label="name" option-value="value" class="input">
+									</p-selectbutton>
+								</div>
+							</div>
+						</div>
+					</p-tabpanel>
+				</p-tabview>
+			</div>
+			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
 <script>
 (function(po)
 {
@@ -513,6 +819,16 @@ page_boolean_options.ftl
 		re.actualBackgroundColor = po.cssColorToHexStr(re.actualBackgroundColor);
 		re.graphColors = po.cssColorsToHexStrs(re.graphColors);
 		re.graphRangeColors = po.cssColorsToHexStrs(re.graphRangeColors);
+		
+		return re;
+	};
+
+	po.cssColorToHexStrStyle = function(style)
+	{
+		var re = $.extend(true, {}, style);
+		re.color = po.cssColorToHexStr(re.color);
+		re['background-color'] = po.cssColorToHexStr(re['background-color']);
+		re['border-color'] = po.cssColorToHexStr(re['border-color']);
 		
 		return re;
 	};
@@ -623,6 +939,17 @@ page_boolean_options.ftl
 		pm.vepss.chartThemeShown = true;
 	};
 	
+	po.showVeStylePanel = function(submitHandler, model, title)
+	{
+		var pm = po.vuePageModel();
+		pm.veshs.style = submitHandler;
+		pm.vepms.style = $.extend(true, {}, model);
+		pm.vepmStyleProxy = $.extend(true, {}, po.cssColorToHexStrStyle(model));
+		if(title)
+			pm.vepts.style = title;
+		pm.vepss.styleShown = true;
+	};
+	
 	po.setupResourceEditorForms = function()
 	{
 		po.vuePageModel(
@@ -637,7 +964,8 @@ page_boolean_options.ftl
 				videoShown: false,
 				dashboardSizeShown: false,
 				chartOptionsShown: false,
-				chartThemeShown: false
+				chartThemeShown: false,
+				styleShown: false,
 			},
 			//可视编辑操作对话框标题
 			vepts:
@@ -649,7 +977,8 @@ page_boolean_options.ftl
 				video: "<@spring.message code='video' />",
 				dashboardSize: "<@spring.message code='dashboardSize' />",
 				chartOptions: "<@spring.message code='chartOptions' />",
-				chartTheme: "<@spring.message code='chartTheme' />"
+				chartTheme: "<@spring.message code='chartTheme' />",
+				style: "<@spring.message code='style' />"
 			},
 			//可视编辑操作对话框表单模型
 			vepms:
@@ -661,7 +990,8 @@ page_boolean_options.ftl
 				video: {},
 				dashboardSize: { scale: "auto" },
 				chartOptions: { value: "" },
-				chartTheme: po.veDftChartThemeModel()
+				chartTheme: po.veDftChartThemeModel(),
+				style: {}
 			},
 			//可视编辑操作对话框提交处理函数
 			veshs:
@@ -671,7 +1001,8 @@ page_boolean_options.ftl
 				hyperlink: function(model){},
 				video: function(model){},
 				chartOptions: function(model){},
-				chartTheme: function(model){}
+				chartTheme: function(model){},
+				style: function(model){}
 			},
 			veGridLayoutPanelShowFillParent: false,
 			dashboardSizeScaleOptions:
@@ -682,7 +1013,8 @@ page_boolean_options.ftl
 				{ name: "50%", value: 50 },
 				{ name: "25%", value: 25 }
 			],
-			vepmChartThemeProxy: po.veDftChartThemeModel()
+			vepmChartThemeProxy: po.veDftChartThemeModel(),
+			vepmStyleProxy: {},
 		});
 		
 		var pm = po.vuePageModel();
@@ -875,6 +1207,34 @@ page_boolean_options.ftl
 				
 				proxy.graphRangeColors.splice(idx, 1);
 				chartTheme.graphRangeColors.splice(idx, 1);
+			},
+			
+			onVeStylePanelShow: function()
+			{
+				var form = po.elementOfId("${pid}veStyleForm", document.body);
+				
+				po.initVePanelHelperSrc(form, pm.vepms.style);
+				
+				po.setupSimpleForm(form, pm.vepms.style, function()
+				{
+					if(pm.veshs.style(pm.vepms.style) !== false)
+					{
+						pm.vepms.style = {};
+						pm.vepmStyleProxy = {};
+						pm.vepss.styleShown = false;
+					}
+				});
+			},
+			
+			onVeStyleColorPickerChange: function(e, propName)
+			{
+				var proxy = pm.vepmStyleProxy;
+				var style = pm.vepms.style;
+				
+				//XXX 使用e.value在第一次时返回的值不是新值！？
+				var pickColor = proxy[propName];
+				
+				style[propName] = po.hexStrToCssColor(pickColor, style[propName]);
 			}
 		});
 	};

@@ -205,7 +205,9 @@ label[title]:not(.no-tip)::after,
 .p-contextmenu .p-error .p-menuitem-link,
 .p-contextmenu .p-error .p-menuitem-link .p-menuitem-text,
 .p-menu .p-error .p-menuitem-link,
-.p-menu .p-error .p-menuitem-link .p-menuitem-text{
+.p-menu .p-error .p-menuitem-link .p-menuitem-text,
+.p-menubar .p-error .p-menuitem-link,
+.p-menubar .p-error .p-menuitem-link .p-menuitem-text{
 	color: inherit;
 }
 
@@ -706,4 +708,12 @@ label[title]:not(.no-tip)::after,
 }
 .dashboard-select-chart-wrapper .page-manager .page-content{
 	height: 50vh;
+}
+.dashboard-ve-style-panel .page-form .page-form-content{
+	max-height: unset;
+}
+.dashboard-ve-style-panel .ve-style-tabpanel-content{
+	min-width: 38vw;
+	/*对话框高度 - 表单foot高度 - 对话框header高度 - 选项卡条高度*/
+	height: calc(90vh - 5rem - 6rem - 4rem);
 }

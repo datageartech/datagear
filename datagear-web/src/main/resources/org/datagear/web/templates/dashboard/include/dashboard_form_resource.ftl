@@ -180,9 +180,14 @@
 	
 	po.openSelectedLocalRes = function()
 	{
+		var fm = po.vueFormModel();
+		
+		if(!fm.id)
+			return;
+		
 		var sr = po.getSelectedLocalRes();
 		if(sr)
-			window.open(po.showUrl(sr));
+			window.open(po.showUrl(sr), fm.id+"/"+sr);
 	};
 
 	po.openSelectedGlobalRes = function()
