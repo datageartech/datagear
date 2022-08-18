@@ -618,6 +618,35 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 构建“操作失败”消息响应体。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> operationFailResponseEntity(HttpServletRequest request)
+	{
+		return operationFailResponseEntity(request, null);
+	}
+
+	/**
+	 * 构建“操作失败”消息响应体。
+	 * 
+	 * @param request
+	 * @param data
+	 *            允许为{@code null}
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> operationFailResponseEntity(HttpServletRequest request, Object data)
+	{
+		ResponseEntity<OperationMessage> responseEntity = optFailResponseEntity(request, "operationFail");
+
+		if (data != null)
+			responseEntity.getBody().setData(data);
+
+		return responseEntity;
+	}
+
+	/**
 	 * 构建操作成功消息响应体。
 	 * @param request
 	 * @param code

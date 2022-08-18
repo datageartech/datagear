@@ -894,26 +894,20 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public String shareSet(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
 		DashboardShareSet dashboardShareSet = this.dashboardShareSetService.getById(id);
 
 		if (dashboardShareSet == null)
 		{
-			dashboardShareSet = new DashboardShareSet();
+			dashboardShareSet = new DashboardShareSet(dashboard.getId());
 			dashboardShareSet.setEnablePassword(false);
 			dashboardShareSet.setAnonymousPassword(false);
 		}
 
-		model.addAttribute("dashboard", dashboard);
-		model.addAttribute("dashboardShareSet", dashboardShareSet);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboardShareSet.dashboardShareSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveShareSet");
+		setFormModel(model, dashboardShareSet, "shareSet", "saveShareSet");
 
 		return "/dashboard/dashboard_share_set";
 	}
@@ -926,7 +920,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (isEmpty(form.getId()))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user,
 				form.getId());
@@ -936,7 +930,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		this.dashboardShareSetService.save(form);
 
-		return optMsgSaveSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	/**
@@ -956,7 +950,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@PathVariable("id") String id,
 			@RequestParam(value = DASHBOARD_SHOW_AUTH_PARAM_NAME, required = false) String name) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidget(user, id);
 
@@ -971,18 +965,21 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			redirectPath = FileUtil.concatPath(redirectPath, name, FileUtil.PATH_SEPARATOR_SLASH, false);
 
 		boolean authed = isShowAuthed(request, user, dashboardWidget);
-
-		model.addAttribute("id", id);
-		model.addAttribute("name", (name == null ? "" : name));
-		model.addAttribute("redirectPath", redirectPath);
+		
+		Map<String, Object> authModel = new HashMap<String, Object>();
+		authModel.put("id", id);
+		authModel.put("name", (name == null ? "" : name));
+		authModel.put("redirectPath", redirectPath);
+		authModel.put("authed", authed);
+		authModel.put("dashboardNameMask", StringUtil.mask(dashboardWidget.getName(), 2, 2, 6));
+		
+		setFormModel(model, authModel, "auth", "authcheck");
 		model.addAttribute("authed", authed);
-		model.addAttribute("dashboardWidget", dashboardWidget);
-		model.addAttribute("dashboardNameMask", StringUtil.mask(dashboardWidget.getName(), 2, 2, 6));
-		model.addAttribute("currentUser", user.cloneNoPassword());
+		model.addAttribute("redirectPath", redirectPath);
 
 		return "/dashboard/dashboard_show_auth";
 	}
-
+	
 	/**
 	 * 看板展示认证校验。
 	 * 
@@ -997,16 +994,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public ResponseEntity<OperationMessage> showAuthCheck(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestBody ShowAuthCheckForm form) throws Exception
 	{
-		if (isEmpty(form.getId()) || form.getPassword() == null)
+		if (isEmpty(form.getId()))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser(request, response);
-		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidget(user, form.getId());
+		User user = WebUtils.getUser();
+		HtmlTplDashboardWidgetEntity dashboardWidget = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, form.getId());
 
-		if (dashboardWidget == null)
-			throw new RecordNotFoundException();
-
+		String password = (StringUtil.isEmpty(form.getPassword()) ? "" : form.getPassword());
+		
 		ResponseEntity<OperationMessage> responseEntity = null;
 
 		String dashboardWidgetId = dashboardWidget.getId();
@@ -1014,7 +1009,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (dashboardShareSet == null || !dashboardShareSet.isEnablePassword())
 		{
-			responseEntity = optMsgSuccessResponseEntity(
+			responseEntity = operationSuccessResponseEntity(request,
 					ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
 		}
 		else
@@ -1023,22 +1018,33 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			if (manager.isAuthDenied(dashboardWidgetId))
 			{
-				responseEntity = optMsgSuccessResponseEntity(
+				responseEntity = operationSuccessResponseEntity(request,
 						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_DENY, manager.getAuthFailThreshold(),
 								0));
 			}
-			else if (form.getPassword().equals(dashboardShareSet.getPassword()))
+			else if (password.equals(dashboardShareSet.getPassword()))
 			{
 				manager.setAuthed(dashboardWidgetId, true);
-				responseEntity = optMsgSuccessResponseEntity(
+				responseEntity = operationSuccessResponseEntity(request,
 						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
 			}
 			else
 			{
 				manager.setAuthed(dashboardWidgetId, false);
-				responseEntity = optMsgSuccessResponseEntity(
-						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_FAIL, manager.getAuthFailThreshold(),
-								manager.authRemain(dashboardWidgetId)));
+				int authRemain = manager.authRemain(dashboardWidgetId);
+				
+				if(authRemain > 0)
+				{
+					responseEntity = operationSuccessResponseEntity(request,
+							ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_FAIL, manager.getAuthFailThreshold(),
+									authRemain));
+				}
+				else
+				{
+					responseEntity = operationSuccessResponseEntity(request,
+							ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_DENY, manager.getAuthFailThreshold(),
+									0));
+				}
 			}
 		}
 
@@ -1134,7 +1140,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 		else
 		{
-			User user = WebUtils.getUser(request, response);
+			User user = WebUtils.getUser();
 			HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user, id);
 
 			if (!isShowAuthed(request, user, dashboardWidget))
@@ -1176,7 +1182,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user, id);
 		String resName = resolvePathAfter(request, "/show/" + id + "/");
@@ -1561,7 +1567,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@RequestParam(LOAD_CHART_PARAM_DASHBOARD_ID) String dashboardId,
 			@RequestParam(LOAD_CHART_PARAM_CHART_WIDGET_ID) String[] chartWidgetIds) throws Throwable
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
 		DashboardInfo dashboardInfo = dashboardInfoManager.get(dashboardId);
@@ -2650,7 +2656,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			if (aci == null)
 				return false;
 
-			return ((this.authFailThreshold - aci.failedDateCount(this.authFailPastMs)) <= 0);
+			int failedDateCount = aci.failedDateCount(this.authFailPastMs);
+			return ((this.authFailThreshold - failedDateCount) <= 0);
 		}
 
 		public synchronized int authRemain(String dashboardId)

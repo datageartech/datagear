@@ -340,8 +340,8 @@ label[title]:not(.no-tip)::after,
 
 /*横向操作组*/
 .h-opts > *{
-	margin-left: 0.25em;
-	margin-right: 0.25em;
+	margin-left: 0.15em;
+	margin-right: 0.15em;
 }
 .h-opts > *:first-child{
 	margin-left: 0;
