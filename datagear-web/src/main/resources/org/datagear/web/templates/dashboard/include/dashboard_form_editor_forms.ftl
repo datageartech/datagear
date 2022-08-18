@@ -480,7 +480,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleColor" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.color.desc' />">
 									<@spring.message code='dashboard.veditor.style.color' />
-									<span class="text-color-secondary text-xs ml-1">color</span>
+									<span class="text-color-secondary text-sm ml-1">color</span>
 								</label>
 								<div class="field-input col-12">
 									<div class="flex justify-content-center">
@@ -498,7 +498,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleBgColor" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.bgColor.desc' />">
 									<@spring.message code='dashboard.veditor.style.bgColor' />
-									<span class="text-color-secondary text-xs ml-1">background-color</span>
+									<span class="text-color-secondary text-sm ml-1">background-color</span>
 								</label>
 								<div class="field-input col-12">
 									<div class="flex justify-content-center">
@@ -519,7 +519,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleBgImage" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.bgImage.desc' />">
 									<@spring.message code='dashboard.veditor.style.bgImage' />
-									<span class="text-color-secondary text-xs ml-1">background-image</span>
+									<span class="text-color-secondary text-sm ml-1">background-image</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBgImage" v-model="pm.vepms.style['background-image']" type="text"
@@ -530,7 +530,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleBgSize" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.bgSize' />
-									<span class="text-color-secondary text-xs ml-1">background-size</span>
+									<span class="text-color-secondary text-sm ml-1">background-size</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBgSize" v-model="pm.vepms.style['background-size']" type="text"
@@ -555,7 +555,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleBgRepeat" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.bgRepeat' />
-									<span class="text-color-secondary text-xs ml-1">background-repeat</span>
+									<span class="text-color-secondary text-sm ml-1">background-repeat</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBgRepeat" v-model="pm.vepms.style['background-repeat']" type="text"
@@ -580,7 +580,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleBgPosition" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.bgPosition' />
-									<span class="text-color-secondary text-xs ml-1">background-position</span>
+									<span class="text-color-secondary text-sm ml-1">background-position</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBgPosition" v-model="pm.vepms.style['background-position']" type="text"
@@ -612,7 +612,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleBorderWidth" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.borderWidth.desc' />">
 									<@spring.message code='dashboard.veditor.style.borderWidth' />
-									<span class="text-color-secondary text-xs ml-1">border-width</span>
+									<span class="text-color-secondary text-sm ml-1">border-width</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBorderWidth" v-model="pm.vepms.style['border-width']" type="text"
@@ -641,7 +641,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleBorderColor" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.borderColor.desc' />">
 									<@spring.message code='dashboard.veditor.style.borderColor' />
-									<span class="text-color-secondary text-xs ml-1">border-color</span>
+									<span class="text-color-secondary text-sm ml-1">border-color</span>
 								</label>
 								<div class="field-input col-12">
 									<div class="flex justify-content-center">
@@ -658,7 +658,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleBorderStyle" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.borderStyle' />
-									<span class="text-color-secondary text-xs ml-1">border-style</span>
+									<span class="text-color-secondary text-sm ml-1">border-style</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBorderStyle" v-model="pm.vepms.style['border-style']" type="text"
@@ -681,7 +681,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleBorderRadius" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.borderRadius.desc' />">
 									<@spring.message code='dashboard.veditor.style.borderRadius' />
-									<span class="text-color-secondary text-xs ml-1">border-radius</span>
+									<span class="text-color-secondary text-sm ml-1">border-radius</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBorderRadius" v-model="pm.vepms.style['border-radius']" type="text"
@@ -710,7 +710,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleBoxShadow" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.boxShadow.desc' />">
 									<@spring.message code='dashboard.veditor.style.boxShadow' />
-									<span class="text-color-secondary text-xs ml-1">box-shadow</span>
+									<span class="text-color-secondary text-sm ml-1">box-shadow</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBoxShadow" v-model="pm.vepms.style['box-shadow']" type="text"
@@ -742,7 +742,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleDisplay" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.display' />
-									<span class="text-color-secondary text-xs ml-1">display</span>
+									<span class="text-color-secondary text-sm ml-1">display</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleDisplay" v-model="pm.vepms.style['display']" type="text"
@@ -779,7 +779,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleWdith" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.width.desc' />">
 									<@spring.message code='dashboard.veditor.style.width' />
-									<span class="text-color-secondary text-xs ml-1">width</span>
+									<span class="text-color-secondary text-sm ml-1">width</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleWdith" v-model="pm.vepms.style['width']" type="text"
@@ -791,7 +791,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleHeight" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.height.desc' />">
 									<@spring.message code='dashboard.veditor.style.height' />
-									<span class="text-color-secondary text-xs ml-1">height</span>
+									<span class="text-color-secondary text-sm ml-1">height</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleHeight" v-model="pm.vepms.style['height']" type="text"
@@ -803,7 +803,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStylePadding" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.padding.desc' />">
 									<@spring.message code='dashboard.veditor.style.padding' />
-									<span class="text-color-secondary text-xs ml-1">padding</span>
+									<span class="text-color-secondary text-sm ml-1">padding</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStylePadding" v-model="pm.vepms.style['padding']" type="text"
@@ -815,7 +815,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleMargin" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.margin.desc' />">
 									<@spring.message code='dashboard.veditor.style.margin' />
-									<span class="text-color-secondary text-xs ml-1">margin</span>
+									<span class="text-color-secondary text-sm ml-1">margin</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleMargin" v-model="pm.vepms.style['margin']" type="text"
@@ -827,7 +827,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleBoxSizing" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.boxSizing.desc' />">
 									<@spring.message code='dashboard.veditor.style.boxSizing' />
-									<span class="text-color-secondary text-xs ml-1">box-sizing</span>
+									<span class="text-color-secondary text-sm ml-1">box-sizing</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBoxSizing" v-model="pm.vepms.style['box-sizing']" type="text"
@@ -849,7 +849,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStylePosition" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.position' />
-									<span class="text-color-secondary text-xs ml-1">position</span>
+									<span class="text-color-secondary text-sm ml-1">position</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStylePosition" v-model="pm.vepms.style['position']" type="text"
@@ -875,7 +875,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleLeft" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.left.desc' />">
 									<@spring.message code='dashboard.veditor.style.left' />
-									<span class="text-color-secondary text-xs ml-1">left</span>
+									<span class="text-color-secondary text-sm ml-1">left</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleLeft" v-model="pm.vepms.style['left']" type="text"
@@ -887,7 +887,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleTop" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.top.desc' />">
 									<@spring.message code='dashboard.veditor.style.top' />
-									<span class="text-color-secondary text-xs ml-1">top</span>
+									<span class="text-color-secondary text-sm ml-1">top</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleTop" v-model="pm.vepms.style['top']" type="text"
@@ -899,7 +899,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleRight" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.right.desc' />">
 									<@spring.message code='dashboard.veditor.style.right' />
-									<span class="text-color-secondary text-xs ml-1">right</span>
+									<span class="text-color-secondary text-sm ml-1">right</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleRight" v-model="pm.vepms.style['right']" type="text"
@@ -911,7 +911,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleBottom" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.bottom.desc' />">
 									<@spring.message code='dashboard.veditor.style.bottom' />
-									<span class="text-color-secondary text-xs ml-1">bottom</span>
+									<span class="text-color-secondary text-sm ml-1">bottom</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBottom" v-model="pm.vepms.style['bottom']" type="text"
@@ -923,7 +923,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleZindex" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.zindex.desc' />">
 									<@spring.message code='dashboard.veditor.style.zindex' />
-									<span class="text-color-secondary text-xs ml-1">z-index</span>
+									<span class="text-color-secondary text-sm ml-1">z-index</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleZindex" v-model="pm.vepms.style['z-index']" type="text"
@@ -944,7 +944,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleGridTemplateRows" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridTemplateRows.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridTemplateRows' />
-									<span class="text-color-secondary text-xs ml-1">grid-template-rows</span>
+									<span class="text-color-secondary text-sm ml-1">grid-template-rows</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridTemplateRows" v-model="pm.vepms.style['grid-template-rows']" type="text"
@@ -973,7 +973,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleGridTemplateColumns" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridTemplateColumns.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridTemplateColumns' />
-									<span class="text-color-secondary text-xs ml-1">grid-template-columns</span>
+									<span class="text-color-secondary text-sm ml-1">grid-template-columns</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridTemplateColumns" v-model="pm.vepms.style['grid-template-columns']" type="text"
@@ -1002,7 +1002,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleGridRowGap" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridRowGap.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridRowGap' />
-									<span class="text-color-secondary text-xs ml-1">grid-row-gap</span>
+									<span class="text-color-secondary text-sm ml-1">grid-row-gap</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridRowGap" v-model="pm.vepms.style['grid-row-gap']" type="text"
@@ -1014,7 +1014,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleGridColumnGap" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridColumnGap.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridColumnGap' />
-									<span class="text-color-secondary text-xs ml-1">grid-column-gap</span>
+									<span class="text-color-secondary text-sm ml-1">grid-column-gap</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridColumnGap" v-model="pm.vepms.style['grid-column-gap']" type="text"
@@ -1026,7 +1026,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleGridTemplateAreas" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridTemplateAreas.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridTemplateAreas' />
-									<span class="text-color-secondary text-xs ml-1">grid-template-areas</span>
+									<span class="text-color-secondary text-sm ml-1">grid-template-areas</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridTemplateAreas" v-model="pm.vepms.style['grid-template-areas']" type="text"
@@ -1037,7 +1037,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleGridAutoFlow" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.gridAutoFlow' />
-									<span class="text-color-secondary text-xs ml-1">grid-auto-flow</span>
+									<span class="text-color-secondary text-sm ml-1">grid-auto-flow</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridAutoFlow" v-model="pm.vepms.style['grid-auto-flow']" type="text"
@@ -1062,7 +1062,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleJustifyItems" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.justifyItems' />
-									<span class="text-color-secondary text-xs ml-1">justify-items</span>
+									<span class="text-color-secondary text-sm ml-1">justify-items</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleJustifyItems" v-model="pm.vepms.style['justify-items']" type="text"
@@ -1087,7 +1087,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleAlignItemsGrid" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.alignItemsGrid' />
-									<span class="text-color-secondary text-xs ml-1">align-items</span>
+									<span class="text-color-secondary text-sm ml-1">align-items</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleAlignItemsGrid" v-model="pm.vepms.style['align-items-grid']" type="text"
@@ -1112,7 +1112,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleJustifyContentGrid" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.justifyContentGrid' />
-									<span class="text-color-secondary text-xs ml-1">justify-content</span>
+									<span class="text-color-secondary text-sm ml-1">justify-content</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleJustifyContentGrid" v-model="pm.vepms.style['justify-content-grid']" type="text"
@@ -1148,7 +1148,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleAlignContentGrid" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.alignContentGrid' />
-									<span class="text-color-secondary text-xs ml-1">align-content</span>
+									<span class="text-color-secondary text-sm ml-1">align-content</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleAlignContentGrid" v-model="pm.vepms.style['align-content-grid']" type="text"
@@ -1185,7 +1185,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleGridAutoRows" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridTemplateColumns.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridAutoRows' />
-									<span class="text-color-secondary text-xs ml-1">grid-auto-rows</span>
+									<span class="text-color-secondary text-sm ml-1">grid-auto-rows</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridAutoRows" v-model="pm.vepms.style['grid-auto-rows']" type="text"
@@ -1214,7 +1214,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleGridAutoColumns" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridTemplateColumns.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridAutoColumns' />
-									<span class="text-color-secondary text-xs ml-1">grid-auto-columns</span>
+									<span class="text-color-secondary text-sm ml-1">grid-auto-columns</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridAutoColumns" v-model="pm.vepms.style['grid-auto-columns']" type="text"
@@ -1239,12 +1239,121 @@ page_boolean_options.ftl
 									</div>
 								</div>
 							</div>
-							
 							<p-divider align="center">
 								<label class="text-lg font-bold" title="<@spring.message code='dashboard.veditor.styleSubType.gridItem.desc' />">
 									<@spring.message code='gridItem' />
 								</label>
 							</p-divider>
+							<div class="field grid">
+								<label for="${pid}veStyleGridRowStart" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.gridRowStart.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridRowStart' />
+									<span class="text-color-secondary text-sm ml-1">grid-row-start</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleGridRowStart" v-model="pm.vepms.style['grid-row-start']" type="text"
+										class="input w-full" name="grid-row-start">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleGridRowEnd" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.gridRowEnd.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridRowEnd' />
+									<span class="text-color-secondary text-sm ml-1">grid-row-end</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleGridRowEnd" v-model="pm.vepms.style['grid-row-end']" type="text"
+										class="input w-full" name="grid-row-end">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleGridColumnStart" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.gridColumnStart.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridColumnStart' />
+									<span class="text-color-secondary text-sm ml-1">grid-column-start</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleGridColumnStart" v-model="pm.vepms.style['grid-column-start']" type="text"
+										class="input w-full" name="grid-column-start">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleGridColumnEnd" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.gridColumnEnd.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridColumnEnd' />
+									<span class="text-color-secondary text-sm ml-1">grid-column-end</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleGridColumnEnd" v-model="pm.vepms.style['grid-column-end']" type="text"
+										class="input w-full" name="grid-column-end">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleGridArea" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.gridArea.desc' />">
+									<@spring.message code='dashboard.veditor.style.gridArea' />
+									<span class="text-color-secondary text-sm ml-1">grid-area</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleGridArea" v-model="pm.vepms.style['grid-area']" type="text"
+										class="input w-full" name="grid-area">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleJustifySelf" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.justifySelf' />
+									<span class="text-color-secondary text-sm ml-1">justify-self</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleJustifySelf" v-model="pm.vepms.style['justify-self']" type="text"
+										class="help-target input w-full" name="justify-self">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="start">
+											<@spring.message code='dashboard.veditor.style.gridAligns.start' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="end">
+											<@spring.message code='dashboard.veditor.style.gridAligns.end' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="center">
+											<@spring.message code='dashboard.veditor.style.gridAligns.center' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="stretch">
+											<@spring.message code='dashboard.veditor.style.gridAligns.stretch' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleAlignSelfGrid" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.alignSelfGrid' />
+									<span class="text-color-secondary text-sm ml-1">align-self</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleAlignSelfGrid" v-model="pm.vepms.style['align-self-grid']" type="text"
+										class="help-target input w-full" name="align-self-grid">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="start">
+											<@spring.message code='dashboard.veditor.style.gridAligns.start' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="end">
+											<@spring.message code='dashboard.veditor.style.gridAligns.end' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="center">
+											<@spring.message code='dashboard.veditor.style.gridAligns.center' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="stretch">
+											<@spring.message code='dashboard.veditor.style.gridAligns.stretch' />
+										</p-button>
+									</div>
+								</div>
+							</div>
 						</div>
 					</p-tabpanel>
 					<p-tabpanel header="<@spring.message code='flexLayout' />">
@@ -1254,11 +1363,230 @@ page_boolean_options.ftl
 									<@spring.message code='flexContainer' />
 								</label>
 							</p-divider>
+							<div class="field grid">
+								<label for="${pid}veStyleFlexDirection" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.flexDirection' />
+									<span class="text-color-secondary text-sm ml-1">flex-direction</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFlexDirection" v-model="pm.vepms.style['flex-direction']" type="text"
+										class="help-target input w-full" name="flex-direction">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="row">
+											<@spring.message code='dashboard.veditor.style.flexDirection.row' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="row-reverse">
+											<@spring.message code='dashboard.veditor.style.flexDirection.row-reverse' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="column">
+											<@spring.message code='dashboard.veditor.style.flexDirection.column' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="column-reverse">
+											<@spring.message code='dashboard.veditor.style.flexDirection.column-reverse' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleFlexWrap" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.flexWrap' />
+									<span class="text-color-secondary text-sm ml-1">flex-wrap</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFlexWrap" v-model="pm.vepms.style['flex-wrap']" type="text"
+										class="help-target input w-full" name="flex-wrap">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="nowrap">
+											<@spring.message code='dashboard.veditor.style.flexWrap.nowrap' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="wrap">
+											<@spring.message code='dashboard.veditor.style.flexWrap.wrap' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="wrap-reverse">
+											<@spring.message code='dashboard.veditor.style.flexWrap.wrap-reverse' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleJustifyContentFlex" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.justifyContentFlex' />
+									<span class="text-color-secondary text-sm ml-1">justify-content</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleJustifyContentFlex" v-model="pm.vepms.style['justify-content-flex']" type="text"
+										class="help-target input w-full" name="justify-content-flex">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="flex-start">
+											<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="flex-end">
+											<@spring.message code='dashboard.veditor.style.flexAligns.flex-end' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="center">
+											<@spring.message code='dashboard.veditor.style.flexAligns.center' />
+										</p-button>
+									</div>
+									<div class="p-buttonset text-sm" style="margin-top:1px;">
+										<p-button type="button" class="help-src p-button-secondary" help-value="space-between">
+											<@spring.message code='dashboard.veditor.style.flexAligns.space-between' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="space-around">
+											<@spring.message code='dashboard.veditor.style.flexAligns.space-around' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleAlignItemsFlex" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.alignItemsFlex' />
+									<span class="text-color-secondary text-sm ml-1">align-items</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleAlignItemsFlex" v-model="pm.vepms.style['align-items-flex']" type="text"
+										class="help-target input w-full" name="align-items-flex">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="flex-start">
+											<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="flex-end">
+											<@spring.message code='dashboard.veditor.style.flexAligns.flex-end' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="center">
+											<@spring.message code='dashboard.veditor.style.flexAligns.center' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="baseline">
+											<@spring.message code='dashboard.veditor.style.flexAligns.baseline' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="stretch">
+											<@spring.message code='dashboard.veditor.style.flexAligns.stretch' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleAlignContentFlex" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.alignContentFlex' />
+									<span class="text-color-secondary text-sm ml-1">align-content</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleAlignContentFlex" v-model="pm.vepms.style['align-content-flex']" type="text"
+										class="help-target input w-full" name="align-content-flex">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="flex-start">
+											<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="flex-end">
+											<@spring.message code='dashboard.veditor.style.flexAligns.flex-end' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="center">
+											<@spring.message code='dashboard.veditor.style.flexAligns.center' />
+										</p-button>
+									</div>
+									<div class="p-buttonset text-sm" style="margin-top:1px;">
+										<p-button type="button" class="help-src p-button-secondary" help-value="space-between">
+											<@spring.message code='dashboard.veditor.style.flexAligns.space-between' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="space-around">
+											<@spring.message code='dashboard.veditor.style.flexAligns.space-around' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="stretch">
+											<@spring.message code='dashboard.veditor.style.flexAligns.stretch' />
+										</p-button>
+									</div>
+								</div>
+							</div>
 							<p-divider align="center">
 								<label class="text-lg font-bold" title="<@spring.message code='dashboard.veditor.styleSubType.flexItem.desc' />">
 									<@spring.message code='flexItem' />
 								</label>
 							</p-divider>
+							<div class="field grid">
+								<label for="${pid}veStyleOrder" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.order.desc' />">
+									<@spring.message code='dashboard.veditor.style.order' />
+									<span class="text-color-secondary text-sm ml-1">order</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleOrder" v-model="pm.vepms.style['order']" type="text"
+										class="input w-full" name="order">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleFlexGrow" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.flexGrow.desc' />">
+									<@spring.message code='dashboard.veditor.style.flexGrow' />
+									<span class="text-color-secondary text-sm ml-1">flex-grow</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFlexGrow" v-model="pm.vepms.style['flex-grow']" type="text"
+										class="input w-full" name="flex-grow">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleFlexShrink" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.flexShrink.desc' />">
+									<@spring.message code='dashboard.veditor.style.flexShrink' />
+									<span class="text-color-secondary text-sm ml-1">flex-shrink</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFlexShrink" v-model="pm.vepms.style['flex-shrink']" type="text"
+										class="input w-full" name="flex-shrink">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleFlexBasis" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.flexBasis.desc' />">
+									<@spring.message code='dashboard.veditor.style.flexBasis' />
+									<span class="text-color-secondary text-sm ml-1">flex-basis</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFlexBasis" v-model="pm.vepms.style['flex-basis']" type="text"
+										class="input w-full" name="flex-basis">
+									</p-inputtext>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleAlignSelfFlex" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.alignSelfFlex' />
+									<span class="text-color-secondary text-sm ml-1">align-self</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleAlignSelfFlex" v-model="pm.vepms.style['align-self-flex']" type="text"
+										class="help-target input w-full" name="align-self-flex">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="flex-start">
+											<@spring.message code='dashboard.veditor.style.flexAligns.flex-start' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="flex-end">
+											<@spring.message code='dashboard.veditor.style.flexAligns.flex-end' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="center">
+											<@spring.message code='dashboard.veditor.style.flexAligns.center' />
+										</p-button>
+									</div>
+									<div class="p-buttonset text-sm" style="margin-top:1px;">
+										<p-button type="button" class="help-src p-button-secondary" help-value="baseline">
+											<@spring.message code='dashboard.veditor.style.flexAligns.baseline' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="stretch">
+											<@spring.message code='dashboard.veditor.style.flexAligns.stretch' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+											<@spring.message code='dashboard.veditor.style.flexAligns.auto' />
+										</p-button>
+									</div>
+								</div>
+							</div>
 						</div>
 					</p-tabpanel>
 					<p-tabpanel header="<@spring.message code='font' />">
@@ -1266,7 +1594,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleFontFamily" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.fontFamily' />
-									<span class="text-color-secondary text-xs ml-1">font-family</span>
+									<span class="text-color-secondary text-sm ml-1">font-family</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleFontFamily" v-model="pm.vepms.style['font-family']" type="text"
@@ -1278,7 +1606,7 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleFontSize" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.fontSize.desc' />">
 									<@spring.message code='dashboard.veditor.style.fontSize' />
-									<span class="text-color-secondary text-xs ml-1">font-size</span>
+									<span class="text-color-secondary text-sm ml-1">font-size</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleFontSize" v-model="pm.vepms.style['font-size']" type="text"
@@ -1289,7 +1617,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleFontWeight" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.fontWeight' />
-									<span class="text-color-secondary text-xs ml-1">font-weight</span>
+									<span class="text-color-secondary text-sm ml-1">font-weight</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleFontWeight" v-model="pm.vepms.style['font-weight']" type="text"
@@ -1308,7 +1636,7 @@ page_boolean_options.ftl
 							<div class="field grid">
 								<label for="${pid}veStyleTextAlign" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.textAlign' />
-									<span class="text-color-secondary text-xs ml-1">text-align</span>
+									<span class="text-color-secondary text-sm ml-1">text-align</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleTextAlign" v-model="pm.vepms.style['text-align']" type="text"
