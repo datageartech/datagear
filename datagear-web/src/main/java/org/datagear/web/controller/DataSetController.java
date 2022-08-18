@@ -473,7 +473,7 @@ public class DataSetController extends AbstractSchemaConnController
 		convertForFormModel(dataSet);
 		setNullAnalysisProjectIfNoPermission(user, dataSet, getAnalysisProjectService());
 
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD,
+		setFormModel(model, dataSet, REQUEST_ACTION_COPY,
 						"saveAddFor" + dataSet.getDataSetType());
 
 		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType())

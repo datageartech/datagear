@@ -96,6 +96,7 @@
 (function(po)
 {
 	po.submitUrl = "/dashboard/"+po.submitAction;
+	po.copySourceId = "${copySourceId!''}";
 	
 	po.showUrl = function(name)
 	{
@@ -131,7 +132,8 @@
 			resourceNames: [],
 			resourceContents: [],
 			resourceIsTemplates: [],
-			saveAdd: !po.isPersistedDashboard()
+			saveAdd: !po.isPersistedDashboard(),
+			copySourceId: (po.isPersistedDashboard() ? "" : po.copySourceId)
 		};
 		
 		var editResInfos = po.getEditResInfos();
@@ -157,10 +159,10 @@
 	
 	po.isPersistedDashboard = function()
 	{
-		if(!po.isAddAction)
+		if(!po.isAddAction && !po.isCopyAction)
 			return true;
 		
-		return (po.isAddActionSaved == true);
+		return (po._isPersistedDashboard == true);
 	};
 	
 	po.checkPersistedDashboard = function()
@@ -186,12 +188,10 @@
 			po.updateTemplateList(response.data.templates);
 			po.refreshLocalRes();
 			
-			if(po.isAddAction)
+			if(!po.isPersistedDashboard())
 			{
-				po.isAddActionSaved = true;
-				
-				if(!po.isPersistedDashboard())
-					po.refreshGlobalRes();
+				po._isPersistedDashboard = true;
+				po.refreshGlobalRes();
 			}
 			
 			var options = this;

@@ -22,6 +22,7 @@ String action
 	po.isAddAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_ADD}") == 0);
 	po.isEditAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_EDIT}") == 0);
 	po.isViewAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_VIEW}") == 0);
+	po.isCopyAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_COPY}") == 0);
 	po.isReadonlyAction = (po.isViewAction);
 	po.submitAction = "${submitAction!'#'}";
 	
@@ -51,6 +52,7 @@ String action
 			isAddAction: po.isAddAction,
 			isEditAction: po.isEditAction,
 			isViewAction: po.isViewAction,
+			isCopyAction: po.isCopyAction,
 			isReadonlyAction: po.isReadonlyAction
 		});
 		

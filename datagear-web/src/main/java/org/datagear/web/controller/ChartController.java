@@ -239,7 +239,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		convertForFormModel(chart, request);
 		setResultDataFormatModel(chart, model);
 
-		setFormModel(model, chart, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
+		setFormModel(model, chart, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
 		
 		return "/chart/chart_form";
 	}

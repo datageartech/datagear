@@ -33,6 +33,7 @@
 			<p-splitbutton label="<@spring.message code='show' />" @click="onShow" :model="pm.showBtnItems" v-if="!pm.isSelectAction"></p-splitbutton>
 			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
 			<p-button label="<@spring.message code='share' />" @click="onShare" v-if="!pm.isSelectAction"></p-button>
+			<p-button label="<@spring.message code='export' />" @click="onExport" v-if="!pm.isSelectAction"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isSelectAction"></p-button>
 		</div>
 	</div>
@@ -86,21 +87,21 @@
 				label: "<@spring.message code='copy' />",
 				command: function()
 				{
-					
+					po.handleOpenOfAction("/dashboard/copy", {width: "90vw"});
 				}
 			},
 			{
 				label: "<@spring.message code='copyInNewWindow' />",
 				command: function()
 				{
-					
+					po.handleOpenOfAction("/dashboard/copy", {target: "_blank"});
 				}
 			},
 			{
 				label: "<@spring.message code='import' />",
 				command: function()
 				{
-					
+					po.handleAddAction("/dashboard/import");
 				}
 			}
 		],
@@ -170,6 +171,11 @@
 			{
 				window.open(po.buildShowURL(entity.id), entity.id);
 			});
+		},
+		
+		onExport: function(e)
+		{
+			po.handleOpenOfAction("/dashboard/export", { target: "_blank" });
 		}
 	});
 	

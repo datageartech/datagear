@@ -167,12 +167,13 @@
 			tabPanel.prop("loading", true);
 			
 			var fm = po.vueFormModel();
+			var id = (po.isPersistedDashboard() ? fm.id : po.copySourceId);
 			
 			po.ajax("/dashboard/getResourceContent",
 			{
 				data:
 				{
-					id: fm.id,
+					id: id,
 					resourceName: tab.resName
 				},
 				success: function(response)

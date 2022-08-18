@@ -110,7 +110,7 @@
 	
 	po.isPreviewSuccess = function()
 	{
-		if(po.isAddAction)
+		if(po.isAddAction || po.isCopyAction)
 			return (po._isPreviewSuccess === true);
 		else
 			return (po._isPreviewSuccess !== false);

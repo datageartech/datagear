@@ -101,12 +101,14 @@ public abstract class AbstractController
 	public static final String REQUEST_ACTION_DELETE = "delete";
 	public static final String REQUEST_ACTION_UPLOAD = "upload";
 	public static final String REQUEST_ACTION_COPY = "copy";
+	public static final String REQUEST_ACTION_IMPORT = "import";
 
 	public static final String KEY_SUBMIT_ACTION = "submitAction";
 	public static final String SUBMIT_ACTION_SAVE_ADD = "saveAdd";
 	public static final String SUBMIT_ACTION_SAVE_EDIT = "saveEdit";
 	public static final String SUBMIT_ACTION_SAVE = "save";
 	public static final String SUBMIT_ACTION_SAVE_UPLOAD = "saveUpload";
+	public static final String SUBMIT_ACTION_SAVE_IMPORT = "saveImport";
 	public static final String SUBMIT_ACTION_NONE = "#";
 
 	public static final String KEY_FORM_MODEL = "formModel";

@@ -290,33 +290,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		User user = WebUtils.getUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
-
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
 		setNullAnalysisProjectIfNoPermission(user, dashboard, getAnalysisProjectService());
 
-		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
-				.getHtmlTplDashboardWidgetRenderer();
-
-		String defaultTemplateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
-
-		model.addAttribute("dashboard", dashboard);
-		addAttributeForWriteJson(model, "templates", dashboard.getTemplates());
-		model.addAttribute("templateName", dashboard.getFirstTemplate());
-		model.addAttribute("templateContent", readResourceContent(dashboard, dashboard.getFirstTemplate()));
-		model.addAttribute("defaultTemplateContent", defaultTemplateContent);
-		model.addAttribute("dashboardGlobalResUrlPrefix",
-				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
-						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
-		model.addAttribute(KEY_FORM_ACTION, "save");
-		model.addAttribute("isAdd", true);
-
-		model.addAttribute("copySourceId", id);
-
 		dashboard.setId(IDUtil.randomIdOnTime20());
+		dashboard.setCreateTime(null);
+
+		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
+		setFormPageAttributes(model);
+		model.addAttribute("copySourceId", id);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -618,8 +600,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
 		setCookieAnalysisProject(request, response, dashboard);
 
-		model.addAttribute("dashboard", dashboard);
-		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		setFormModel(model, dashboard, REQUEST_ACTION_IMPORT, SUBMIT_ACTION_SAVE_IMPORT);
+		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		return "/dashboard/dashboard_import";
@@ -784,7 +766,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		String templateEncoding = resolveTemplateEncoding(FileUtil.getFile(uploadDirectory, templates[0]));
 
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
 		dashboard.setTemplateSplit(form.getTemplate());
@@ -809,7 +791,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		dashboardWidgetResManager.copyFrom(dashboard.getId(), uploadDirectory);
 
-		return optMsgSaveSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/view")
@@ -865,7 +847,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser(request, response);
+		User user = WebUtils.getUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -873,7 +855,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			this.htmlTplDashboardWidgetEntityService.deleteById(user, id);
 		}
 
-		return optMsgDeleteSuccessResponseEntity(request);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")
