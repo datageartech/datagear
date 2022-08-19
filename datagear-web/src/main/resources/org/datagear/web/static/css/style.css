@@ -425,15 +425,27 @@ label[title]:not(.no-tip)::after,
 	/*屏幕高度 - 管理页header高度*/
 	height: calc(100vh - 5rem);
 }
+.page-manager.page-search-ap-aware .page-content{
+	/*屏幕高度 - 管理页header高度 - 当前项目高度*/
+	height: calc(100vh - 5rem - 1.7rem);
+}
 /*主页选项卡里的管理页*/
 .page-main-panel .page-manager .page-content{
 	/*屏幕高度 - 管理页header高度 - 主页header高度*/
 	height: calc(100vh - 5rem - 5rem);
 }
+.page-main-panel .page-manager.page-search-ap-aware .page-content{
+	/*屏幕高度 - 管理页header高度 - 主页header高度 - 当前项目高度*/
+	height: calc(100vh - 5rem - 5rem - 1.7rem);
+}
 /*对话框里的管理页*/
 .p-dialog .page-manager .page-content{
 	/*对话框高度 - 管理页header高度 - 对话框header高度*/
 	height: calc(90vh - 5rem - 6rem);
+}
+.p-dialog .page-manager.page-search-ap-aware .page-content{
+	/*对话框高度 - 管理页header高度 - 对话框header高度 - 当前项目高度*/
+	height: calc(90vh - 5rem - 6rem - 1.7rem);
 }
 
 /*表单页*/
