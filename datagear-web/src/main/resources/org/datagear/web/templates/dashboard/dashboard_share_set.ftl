@@ -53,17 +53,6 @@
 		        	</p-password>
 		        </div>
 			</div>
-			<div class="field grid" :class="fm.enablePassword ? '' : 'opacity-0'">
-				<label for="${pid}confirmPassword" class="field-label col-12 mb-2 md:col-3 md:mb-0">
-					<@spring.message code='dashboardShareSet.confirmPassword' />
-				</label>
-		        <div class="field-input col-12 md:col-9">
-		        	<p-password id="${pid}confirmPassword" v-model="fm.confirmPassword" class="input w-full"
-		        		input-class="w-full" toggle-mask :feedback="false"
-		        		name="confirmPassword" :required="fm.enablePassword" maxlength="20" autocomplete="new-password">
-		        	</p-password>
-		        </div>
-			</div>
 		</div>
 		<div class="page-form-foot flex-grow-0 pt-3 text-center">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
@@ -78,27 +67,10 @@
 	po.submitUrl = "/dashboard/"+po.submitAction;
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
-	formModel.confirmPassword = formModel.password;
-	
-	po.setupForm(formModel, {}, function()
-	{
-		var options =
-		{
-			rules:
-			{
-				"confirmPassword":
-				{
-					"equalTo" : po.elementOfName("password")
-				}
-			}
-		};
-		
-		return options;
-	});
+	po.setupForm(formModel);
 	
 	po.vueMethod(
 	{
-		
 	});
 	
 	po.vueMount();
