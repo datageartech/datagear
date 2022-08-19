@@ -14,15 +14,17 @@ page_search_form_filter.ftl
 或
 page_search_form.ftl
 -->
-<div class="col-12 pb-0 pt-1">
-	<p-button type="button" :label="pm.searchAnalysisProject.name" icon="pi pi-folder"
-		class="p-button-text p-button-plain p-button-sm text-left py-1 px-1"
-		@click="onSelectCurrentAnalysisProject">
-	</p-button>
-	<p-button type="button" icon="pi pi-times"
-		class="p-button-text p-button-plain p-button-sm py-1 px-1 opacity-50"
-		@click="onClearCurrentAnalysisProject" v-if="pm.searchAnalysisProject.id != ''">
-	</p-button>
+<div class="col-12 py-0">
+	<div class="flex align-items-center pt-1">
+		<p-button type="button" :label="pm.searchAnalysisProject.name" icon="pi pi-folder"
+			class="p-button-text p-button-plain p-button-sm text-left py-1 px-1"
+			@click="onSelectCurrentAnalysisProject">
+		</p-button>
+		<p-button type="button" icon="pi pi-times"
+			class="p-button-text p-button-plain p-button-sm py-1 px-1 opacity-50"
+			@click="onClearCurrentAnalysisProject" v-if="pm.searchAnalysisProject.id != ''">
+		</p-button>
+	</div>
 </div>
 <script type="text/javascript">
 (function(po)
@@ -42,7 +44,7 @@ page_search_form.ftl
 	{
 		onSelectCurrentAnalysisProject: function()
 		{
-			po.open("/analysisProject/select",
+			po.openTableDialog("/analysisProject/select",
 			{
 				pageParam:
 				{

@@ -359,7 +359,7 @@ page_boolean_options.ftl
 						<@spring.message code='fgColor' />
 					</label>
 					<div class="field-input col-12">
-						<div class="flex justify-content-center">
+						<div class="flex">
 							<p-inputtext id="${pid}veChartThemeFgColor" v-model="pm.vepms.chartTheme.color" type="text"
 								class="input flex-grow-1 mr-1" name="color" autofocus>
 							</p-inputtext>
@@ -375,7 +375,7 @@ page_boolean_options.ftl
 						<@spring.message code='bgColor' />
 					</label>
 					<div class="field-input col-12">
-						<div class="flex justify-content-center">
+						<div class="flex">
 							<p-inputtext id="${pid}veChartThemeBgColor" v-model="pm.vepms.chartTheme.backgroundColor" type="text"
 								class="input flex-grow-1 mr-1" name="backgroundColor">
 							</p-inputtext>
@@ -391,7 +391,7 @@ page_boolean_options.ftl
 						<@spring.message code='actualBgColor' />
 					</label>
 					<div class="field-input col-12">
-						<div class="flex justify-content-center">
+						<div class="flex">
 							<p-inputtext id="${pid}veChartThemeActualBgColor" v-model="pm.vepms.chartTheme.actualBackgroundColor" type="text"
 								class="input flex-grow-1 mr-1" name="actualBackgroundColor">
 							</p-inputtext>
@@ -419,7 +419,7 @@ page_boolean_options.ftl
 					</label>
 					<div class="field-input col-12">
 						<div v-for="(gc, gcIdx) in pm.vepmChartThemeProxy.graphColors" :key="gcIdx">
-							<div class="flex justify-content-center mb-1">
+							<div class="flex mb-1">
 								<p-inputtext id="${pid}veChartThemeGraphColors" v-model="pm.vepms.chartTheme.graphColors[gcIdx]" type="text"
 									class="input flex-grow-1 mr-1" name="graphColors">
 								</p-inputtext>
@@ -443,7 +443,7 @@ page_boolean_options.ftl
 					</label>
 					<div class="field-input col-12">
 						<div v-for="(gc, gcIdx) in pm.vepmChartThemeProxy.graphRangeColors" :key="gcIdx">
-							<div class="flex justify-content-center mb-1">
+							<div class="flex mb-1">
 								<p-inputtext id="${pid}veChartThemeGraphRangeColors" v-model="pm.vepms.chartTheme.graphRangeColors[gcIdx]" type="text"
 									class="input flex-grow-1 mr-1" name="graphRangeColors">
 								</p-inputtext>
@@ -485,7 +485,7 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">color</span>
 								</label>
 								<div class="field-input col-12">
-									<div class="flex justify-content-center">
+									<div class="flex">
 										<p-inputtext id="${pid}veStyleColor" v-model="pm.vepms.style.color" type="text"
 											class="input flex-grow-1 mr-1" name="color" autofocus>
 										</p-inputtext>
@@ -503,7 +503,7 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">background-color</span>
 								</label>
 								<div class="field-input col-12">
-									<div class="flex justify-content-center">
+									<div class="flex">
 										<p-inputtext id="${pid}veStyleBgColor" v-model="pm.vepms.style['background-color']" type="text"
 											class="input flex-grow-1 mr-1" name="background-color">
 										</p-inputtext>
@@ -646,7 +646,7 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">border-color</span>
 								</label>
 								<div class="field-input col-12">
-									<div class="flex justify-content-center">
+									<div class="flex">
 										<p-inputtext id="${pid}veStyleBorderColor" v-model="pm.vepms.style['border-color']" type="text"
 											class="input flex-grow-1 mr-1" name="border-color">
 										</p-inputtext>

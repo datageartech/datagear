@@ -23,10 +23,10 @@
 <div id="${pid}" class="page page-manager page-table page-search-ap-aware">
 	<div class="page-header grid align-items-center">
 		<#include "../include/page_search_form_ap.ftl">
-		<div class="col-12 pt-1" :class="pm.isSelectAction ? 'md:col-5' : 'md:col-3'">
+		<div class="col-12 pt-1" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
 			<#include "../include/page_search_form_filter.ftl">
 		</div>
-		<div class="h-opts col-12 text-right pt-1" :class="pm.isSelectAction ? 'md:col-7' : 'md:col-9'">
+		<div class="h-opts col-12 text-right pt-1" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
 			<p-splitbutton label="<@spring.message code='add' />" @click="onAdd" :model="pm.addBtnItems" v-if="!pm.isSelectAction"></p-splitbutton>
