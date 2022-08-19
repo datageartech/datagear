@@ -23,7 +23,7 @@
 <div id="${pid}" class="page page-manager page-table">
 	<div class="page-header grid align-items-center">
 		<div class="col-12" :class="pm.isSelectAction ? 'md:col-5' : 'md:col-3'">
-			<#include "../include/page_search_form.ftl">
+			<#include "../include/page_search_form_filter.ftl">
 		</div>
 		<div class="h-opts col-12 text-right" :class="pm.isSelectAction ? 'md:col-7' : 'md:col-9'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
