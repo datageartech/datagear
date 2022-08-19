@@ -315,8 +315,10 @@ page_boolean_options.ftl
 				</div>
 			</div>
 			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="button" label="<@spring.message code='resetToDefault' />"
+					class="p-button-secondary" @click="onVeDashboardSizeResetToDft">
+				</p-button>
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
-				<p-button type="button" label="<@spring.message code='resetToDefault' />" class="p-button-secondary" @click="onVeDashboardSizeResetToDft"></p-button>
 			</div>
 		</form>
 	</div>
