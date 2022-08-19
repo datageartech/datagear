@@ -18,7 +18,11 @@ page_manager.ftl
 {
 	po.refresh = function()
 	{
-		po.loadAjaxTable();
+		//兼容搜索表单集成
+		if(po.submitSearchForm)
+			po.submitSearchForm();
+		else
+			po.loadAjaxTable();
 	};
 	
 	po.getSelectedEntities = function()
@@ -80,7 +84,7 @@ page_manager.ftl
 		{
 			po.vueMounted(function()
 			{
-				po.loadAjaxTable();
+				po.refresh();
 			});
 		}
 		

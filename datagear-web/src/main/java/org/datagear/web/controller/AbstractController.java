@@ -115,6 +115,8 @@ public abstract class AbstractController
 	
 	public static final String KEY_IS_MULTIPLE_SELECT = "isMultipleSelect";
 
+	public static final String KEY_CURRENT_ANALYSIS_PROJECT = "currentAnalysisProject";
+
 	@Autowired
 	private ConversionService conversionService;
 
@@ -205,31 +207,38 @@ public abstract class AbstractController
 		model.addAttribute(name, toWriteJsonTemplateModel(value));
 	}
 
-	protected boolean setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
+	protected void setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
 			AnalysisProjectService analysisProjectService, AnalysisProjectAwareEntity<?> entity)
+	{
+		entity.setAnalysisProject(getCookieAnalysisProject(request, response, analysisProjectService));
+	}
+
+	/**
+	 * 获取Cookie中的{@linkplain AnalysisProject}，没有则返回{@code null}。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param analysisProjectService
+	 * @return
+	 */
+	protected AnalysisProject getCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+			AnalysisProjectService analysisProjectService)
 	{
 		User user = WebUtils.getUser();
 
 		String analysisId = WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID);
-
-		if (!isEmpty(analysisId))
+		
+		if(isEmpty(analysisId))
+			return null;
+		
+		try
 		{
-			try
-			{
-				AnalysisProject analysisProject = analysisProjectService.getById(user, analysisId);
-
-				if (analysisProject != null)
-				{
-					entity.setAnalysisProject(analysisProject);
-					return true;
-				}
-			}
-			catch (Throwable t)
-			{
-			}
+			return analysisProjectService.getById(user, analysisId);
 		}
-
-		return false;
+		catch (Throwable t)
+		{
+			return null;
+		}
 	}
 
 	/**

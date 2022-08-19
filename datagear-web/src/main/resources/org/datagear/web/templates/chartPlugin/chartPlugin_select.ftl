@@ -74,7 +74,11 @@
 {
 	po.refresh = function()
 	{
-		po.loadCategorizations();
+		//兼容搜索表单集成
+		if(po.submitSearchForm)
+			po.submitSearchForm();
+		else
+			po.loadCategorizations();
 	};
 	
 	po.getSelectedEntities = function()
@@ -83,6 +87,7 @@
 		return $.wrapAsArray(po.vueRaw(pm.selectedChartPlugin));
 	};
 	
+	//重写搜索表单提交处理函数
 	po.search = function(formData)
 	{
 		po.loadCategorizations(formData);

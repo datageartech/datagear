@@ -33,6 +33,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/jquery-3.6.0/jquery-3.6.0.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/additional-methods.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/jquery.cookie-1.4.1/jquery.cookie.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/vue@3.2.36/vue.global.prod.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/core/core.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/tabmenu/tabmenu.min.js" type="text/javascript"></script>

@@ -10,7 +10,7 @@
 搜索表单。
 
 -->
-<form @submit.prevent="onSearchFormSubmit" class="py-1">
+<form id="${pid}searchForm" @submit.prevent="onSearchFormSubmit" class="py-1">
 	<div class="p-inputgroup">
 		<p-inputtext type="text" v-model="pm.searchForm.keyword" maxlength="100"></p-inputtext>
 		<p-button type="submit" icon="pi pi-search"></p-button>
@@ -21,6 +21,12 @@
 {
 	po.search = function(formData){ /*需实现*/ };
 	
+	po.submitSearchForm = function()
+	{
+		var param = po.vueRaw(po.vuePageModel().searchForm);
+		po.search(param);
+	};
+	
 	po.vuePageModel(
 	{
 		searchForm: { keyword: "" }
@@ -30,8 +36,7 @@
 	{
 		onSearchFormSubmit: function()
 		{
-			var param = po.vueRaw(po.vuePageModel().searchForm);
-			po.search(param);
+			po.submitSearchForm();
 		}
 	});
 })

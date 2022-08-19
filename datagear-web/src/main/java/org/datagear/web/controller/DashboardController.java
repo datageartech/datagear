@@ -864,6 +864,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
+				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+		
 		return "/dashboard/dashboard_table";
 	}
 
@@ -872,6 +875,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setSelectAction(request, model);
+		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
+				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+		
 		return "/chart/dashboard_table";
 	}
 

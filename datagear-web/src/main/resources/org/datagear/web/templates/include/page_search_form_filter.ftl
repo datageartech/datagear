@@ -11,7 +11,7 @@
 -->
 <#assign AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <#assign DataPermissionEntityService=statics['org.datagear.management.service.DataPermissionEntityService']>
-<form @submit.prevent="onSearchFormSubmit" class="py-1">
+<form id="${pid}searchForm" @submit.prevent="onSearchFormSubmit" class="py-1">
 	<div class="p-inputgroup">
 		<p-inputtext type="text" v-model="pm.searchForm.keyword" maxlength="100"></p-inputtext>
 		<p-button type="button" :label="pm.searchFilterLabel" class="p-button-outlined"
@@ -26,6 +26,12 @@
 (function(po)
 {
 	po.search = function(formData){ /*需实现*/ };
+	
+	po.submitSearchForm = function()
+	{
+		var param = po.vueRaw(po.vuePageModel().searchForm);
+		po.search(param);
+	};
 	
 	po.updateSearchFilterForMenuItem = function(menuItem)
 	{
@@ -73,8 +79,7 @@
 	{
 		onSearchFormSubmit: function()
 		{
-			var param = po.vueRaw(po.vuePageModel().searchForm);
-			po.search(param);
+			po.submitSearchForm();
 		},
 		
 		onToggleSearchFilterMenu: function(e)

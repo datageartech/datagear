@@ -785,6 +785,9 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
+				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+		
 		return "/dataSet/dataSet_table";
 	}
 
@@ -792,6 +795,9 @@ public class DataSetController extends AbstractSchemaConnController
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		setSelectAction(request, model);
+		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
+				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+		
 		return "/dataSet/dataSet_table";
 	}
 
