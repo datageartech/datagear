@@ -303,7 +303,6 @@ var ${pid} =
 	_vueComponents:
 	{
 		"p-tabmenu": primevue.tabmenu,
-		"p-contextmenu": primevue.contextmenu,
 		"p-button": primevue.button,
 		"p-datatable": primevue.datatable,
 		"p-column": primevue.column,
@@ -323,6 +322,7 @@ var ${pid} =
 		"p-tabpanel": primevue.tabpanel,
 		"p-menu": primevue.menu,
 		"p-menubar": primevue.menubar,
+		"p-tieredmenu": primevue.tieredmenu,
 		"p-chip": primevue.chip,
 		"p-fileupload": primevue.fileupload,
 		"p-inlinemessage": primevue.inlinemessage,

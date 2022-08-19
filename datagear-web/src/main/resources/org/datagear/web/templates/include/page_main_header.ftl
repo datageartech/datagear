@@ -33,7 +33,9 @@ User currentUser
 				<div>
 					<p-button type="button" @click="onSysMenuToggle" aria-haspopup="true" aria-controls="${pid}sysMenu" icon="pi pi-cog"
 						class="p-button-sm p-button-text p-button-rounded text-primary"></p-button>
-					<p-contextmenu id="${pid}sysMenu" ref="${pid}sysMenuEle" :model="pm.sysMenuItems" :popup="true"></p-contextmenu>
+					<p-tieredmenu id="${pid}sysMenu" ref="${pid}sysMenuEle" :model="pm.sysMenuItems" :popup="true"
+						class="left-submenu-list">
+					</p-tieredmenu>
 				</div>
 			</div>
 		</div>

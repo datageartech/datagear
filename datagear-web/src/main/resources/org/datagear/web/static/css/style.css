@@ -211,6 +211,11 @@ label[title]:not(.no-tip)::after,
 	color: inherit;
 }
 
+/*左侧弹出子菜单*/
+.p-tieredmenu.left-submenu-list .p-menuitem-active>.p-submenu-list{
+	left: -100%;
+}
+
 /*表格遮罩层*/
 .p-datatable-loading-overlay{
 	opacity: .5;
@@ -705,6 +710,9 @@ label[title]:not(.no-tip)::after,
     height: 80%;
     border-width: 0;
     background: #FFF;
+}
+.page-form-dashboard .p-menubar.ve-menubar .p-submenu-list > .p-menuitem-active > .p-submenu-list{
+	top: -350%;
 }
 .dashboard-select-chart-wrapper .page-manager .page-content{
 	height: 50vh;

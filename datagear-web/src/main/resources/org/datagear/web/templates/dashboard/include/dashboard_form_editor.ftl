@@ -36,7 +36,7 @@
 					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm for-open-chart-panel"
 						@click="onInsertCodeEditorChart($event, tab)" v-if="tab.isTemplate">
 					</p-button>
-					<p-menubar :model="pm.codeEditMenuItems" class="light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
+					<p-menubar :model="pm.codeEditMenuItems" class="ve-menubar light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
 							<div class="p-inputgroup pl-2">
 								<p-inputtext type="text" v-model="tab.searchCodeKeyword" class="text-sm p-0 px-1" style="width:9rem;" @keydown.enter.prevent="onSearchInCodeEditor($event, tab)"></p-inputtext>
@@ -79,9 +79,9 @@
 		</div>
 	</p-tabpanel>
 </p-tabview>
-<p-contextmenu id="${pid}resourceContentTabMenu" ref="${pid}resourceContentTabMenuEle"
+<p-menu id="${pid}resourceContentTabMenu" ref="${pid}resourceContentTabMenuEle"
 	:model="pm.resContentTabMenuItems" :popup="true" class="text-sm">
-</p-contextmenu>
+</p-menu>
 <script>
 (function(po)
 {

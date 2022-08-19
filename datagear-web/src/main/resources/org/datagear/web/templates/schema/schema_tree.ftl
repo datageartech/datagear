@@ -67,7 +67,7 @@
 					<div :id="tab.id"></div>
 				</p-tabpanel>
 			</p-tabview>
-			<p-contextmenu id="${pid}tableTabMenu" ref="tableTabMenuEle" :model="pm.tableTabMenuItems" :popup="true" class="text-sm"></p-contextmenu>
+			<p-menu id="${pid}tableTabMenu" ref="tableTabMenuEle" :model="pm.tableTabMenuItems" :popup="true" class="text-sm"></p-menu>
 		</div>
 	</div>
 </div>
