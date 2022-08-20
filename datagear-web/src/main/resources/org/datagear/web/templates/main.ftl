@@ -42,12 +42,14 @@
 <script>
 (function(po)
 {
+	po.mainMenuCollapseCookieName="MAIN_MENU_COLLAPSE";
+	
 	po.vuePageModel(
 	{
 		mainMenu:
 		{
 			active: -1,
-			collapse: false,
+			collapse: ($.cookie(po.mainMenuCollapseCookieName) == "true"),
 			items:
 			[
 				{
@@ -85,6 +87,9 @@
 		{
 			var pm = po.vuePageModel();
 			pm.mainMenu.collapse = !pm.mainMenu.collapse;
+			
+			$.cookie(po.mainMenuCollapseCookieName, (pm.mainMenu.collapse ? "true" : "false"),
+					{ expires : 365, path: po.concatContextPath("/") });
 		},
 		onMainMenuTabChange: function(e)
 		{

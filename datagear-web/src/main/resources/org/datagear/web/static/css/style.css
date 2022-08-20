@@ -207,7 +207,9 @@ label[title]:not(.no-tip)::after,
 .p-menu .p-error .p-menuitem-link,
 .p-menu .p-error .p-menuitem-link .p-menuitem-text,
 .p-menubar .p-error .p-menuitem-link,
-.p-menubar .p-error .p-menuitem-link .p-menuitem-text{
+.p-menubar .p-error .p-menuitem-link .p-menuitem-text,
+.p-tieredmenu .p-error .p-menuitem-link,
+.p-tieredmenu .p-error .p-menuitem-link .p-menuitem-text{
 	color: inherit;
 }
 
@@ -739,7 +741,7 @@ label[title]:not(.no-tip)::after,
 }
 
 .current-analysis-project-wrapper .ap-name-btn{
-	min-width: 25%;
+	min-width: 16%;
 	max-width: 60%;
 	white-space: nowrap;
 	overflow: hidden;
