@@ -737,3 +737,11 @@ label[title]:not(.no-tip)::after,
 	/*对话框高度 - 表单foot高度 - 对话框header高度 - 选项卡条高度*/
 	height: calc(90vh - 5rem - 6rem - 4rem);
 }
+
+.current-analysis-project-wrapper .ap-name-btn{
+	min-width: 25%;
+	max-width: 60%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

@@ -7,7 +7,7 @@
  *
 -->
 <#--
-搜索表单支持功能-当前项目。
+当前项目。
 
 依赖：
 page_search_form_filter.ftl
@@ -16,14 +16,14 @@ page_search_form.ftl
 -->
 <#assign AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <#assign APIDDataFilterPagingQuery=statics['org.datagear.web.vo.APIDDataFilterPagingQuery']>
-<div class="col-12 py-0">
+<div class="current-analysis-project-wrapper col-12 py-0">
 	<div class="flex align-items-center pt-1">
 		<p-button type="button" icon="pi pi-times"
 			class="p-button-text p-button-plain p-button-sm py-1 px-1 opacity-50"
 			@click="onClearCurrentAnalysisProject" v-if="pm.searchAnalysisProject.id != ''">
 		</p-button>
 		<p-button type="button" :label="pm.searchAnalysisProject.name" icon="pi pi-folder"
-			class="p-button-text p-button-plain p-button-sm text-left py-1 pl-1 pr-3"
+			class="ap-name-btn p-button-text p-button-plain p-button-sm text-left py-1 pl-1 pr-3"
 			@click="onSelectCurrentAnalysisProject">
 		</p-button>
 	</div>
@@ -58,7 +58,8 @@ page_search_form.ftl
 					{
 						var pm = po.vuePageModel();
 						pm.searchAnalysisProject = analysisProject;
-						$.cookie(po.currentAnalysisProjectCookieName, analysisProject.id, { expires : 365, path: po.concatContextPath("/") });
+						$.cookie(po.currentAnalysisProjectCookieName, analysisProject.id,
+								{ expires : 365, path: po.concatContextPath("/") });
 						
 						pm.searchForm[po.searchFormAnalysisProjectIdName] = pm.searchAnalysisProject.id;
 						po.submitSearchForm();

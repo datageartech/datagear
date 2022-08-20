@@ -22,7 +22,7 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-manager page-table page-search-ap-aware">
 	<div class="page-header grid align-items-center">
-		<#include "../include/page_search_form_ap.ftl">
+		<#include "../include/page_current_analysis_project.ftl">
 		<div class="col-12 pt-1" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
 			<#include "../include/page_search_form_filter.ftl">
 		</div>

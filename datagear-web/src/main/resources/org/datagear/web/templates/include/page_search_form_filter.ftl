@@ -14,7 +14,7 @@
 <form id="${pid}searchForm" @submit.prevent="onSearchFormSubmit" class="py-1">
 	<div class="p-inputgroup">
 		<p-inputtext type="text" v-model="pm.searchForm.keyword" maxlength="100"></p-inputtext>
-		<p-button type="button" :label="pm.searchFilterLabel" class="p-button-outlined"
+		<p-button type="button" :label="pm.searchFilterLabel"
 			 aria-haspopup="true" aria-controls="${pid}searchFilterMenu"
 			@click="onToggleSearchFilterMenu">
 		</p-button>
@@ -52,6 +52,7 @@
 				command: function()
 				{
 					po.updateSearchFilterForMenuItem(this);
+					po.submitSearchForm();
 				}
 			},
 			{
@@ -60,6 +61,7 @@
 				command: function()
 				{
 					po.updateSearchFilterForMenuItem(this);
+					po.submitSearchForm();
 				}
 			},
 			{
@@ -68,6 +70,7 @@
 				command: function()
 				{
 					po.updateSearchFilterForMenuItem(this);
+					po.submitSearchForm();
 				}
 			}
 		]
