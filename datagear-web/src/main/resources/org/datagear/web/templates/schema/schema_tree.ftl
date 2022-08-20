@@ -54,20 +54,20 @@
 				</div>
 			</div>
 		</div>
-		<div class="table-tabs-wrapper col-9 pl-3">
-			<p-tabview v-model:active-index="pm.tableTabs.activeIndex" :scrollable="true" @tab-change="onTableTabChange"
-				@tab-click="onTableTabClick" class="contextmenu-tabview" :class="{'opacity-0': pm.tableTabs.items.length == 0}">
-				<p-tabpanel v-for="tab in pm.tableTabs.items" :key="tab.id" :header="tab.title">
+		<div class="schema-tabs-wrapper col-9 pl-3">
+			<p-tabview v-model:active-index="pm.schemaTabs.activeIndex" :scrollable="true" @tab-change="onSchemaTabChange"
+				@tab-click="onSchemaTabClick" class="contextmenu-tabview" :class="{'opacity-0': pm.schemaTabs.items.length == 0}">
+				<p-tabpanel v-for="tab in pm.schemaTabs.items" :key="tab.id" :header="tab.title">
 					<template #header>
 						<p-button type="button" icon="pi pi-angle-down"
 							class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
-							@click="onTableTabMenuToggle($event, tab.id)" aria-haspopup="true" aria-controls="${pid}tableTabMenu">
+							@click="onSchemaTabMenuToggle($event, tab)" aria-haspopup="true" aria-controls="${pid}schemaTabMenu">
 						</p-button>
 					</template>
 					<div :id="tab.id"></div>
 				</p-tabpanel>
 			</p-tabview>
-			<p-menu id="${pid}tableTabMenu" ref="tableTabMenuEle" :model="pm.tableTabMenuItems" :popup="true" class="text-sm"></p-menu>
+			<p-menu id="${pid}schemaTabMenu" ref="${pid}schemaTabMenuEle" :model="pm.schemaTabMenuItems" :popup="true" class="text-sm"></p-menu>
 		</div>
 	</div>
 </div>
@@ -81,6 +81,11 @@
 	po.i18n.pleaseSelectOnlyOne = "<@spring.message code='schema.pleaseSelectOnlyOne' />";
 	po.i18n.pleaseSelectAtLeastOne = "<@spring.message code='schema.pleaseSelectAtLeastOne' />";
 	po.i18n.confirmDeleteAsk = "<@spring.message code='schema.confirmDeleteAsk' />";
+	
+	po.schemaTabTypeTable = "table";
+	po.schemaTabTypeSqlpad = "sqlpad";
+	po.schemaTabTypeImportData = "importData";
+	po.schemaTabTypeExportData = "exportData";
 	
 	po.refresh = function()
 	{
@@ -168,7 +173,7 @@
 		});
 	};
 	
-	po.evalSchemaNodeForLoadTable = function(schemaNode)
+	po.evalFirstAwareSchemaNode = function(schemaNode)
 	{
 		if(schemaNode != null)
 			return schemaNode;
@@ -191,6 +196,15 @@
 		}
 		
 		return null;
+	};
+	
+	po.executeOnFirstAwareSchemaNode = function(callback)
+	{
+		var schemaNode = po.evalFirstAwareSchemaNode();
+		if(!schemaNode)
+			$.tipInfo("<@spring.message code='pleaseSelectOneSchema' />");
+		else
+			callback(schemaNode);
 	};
 	
 	po.schemasToNodes = function(schemas)
@@ -267,98 +281,6 @@
 		return re;
 	};
 	
-	po.showSchemaTableTab = function(schemaId, tableName)
-	{
-		var pm = po.vuePageModel();
-		
-		var idx = po.getSchemaTableTabIndex(schemaId, tableName);
-		if(idx > -1)
-			pm.tableTabs.activeIndex = idx;
-		else
-		{
-			var tabId = po.schemaTableTabId(schemaId, tableName);
-			
-			pm.tableTabs.items.push(
-			{
-				id: tabId,
-				title: tableName,
-				schemaId: schemaId,
-				tableName: tableName,
-				url: po.concatContextPath(po.toSchemaTableUrl(schemaId, tableName))
-			});
-			
-			//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
-			po.vueApp().$nextTick(function()
-			{
-				pm.tableTabs.activeIndex = pm.tableTabs.items.length - 1;
-			});
-		}
-	};
-	
-	po.loadSchemaTableTab = function(schemaId, tableName, reloadTable)
-	{
-		reloadTable = (reloadTable == null ? false : reloadTable);
-		var tabId = po.schemaTableTabId(schemaId, tableName);
-		var panel = po.elementOfId(tabId);
-		
-		var expectLoad = (panel.prop("loaded") !== true || reloadTable);
-		
-		if(expectLoad && panel.prop("loading") !== true)
-		{
-			panel.prop("loading", true);
-			panel.empty();
-			
-			po.open(po.toSchemaTableUrl(schemaId, tableName, reloadTable),
-			{
-				target: panel,
-				dialog: false,
-				success: function()
-				{
-					panel.prop("loaded", true);
-				},
-				complete: function()
-				{
-					panel.prop("loading", false);
-				}
-			});
-		}
-	};
-	
-	po.toSchemaTableUrl = function(schemaId, tableName, reloadTable)
-	{
-		var url = "/data/"+encodeURIComponent(schemaId)+"/"+encodeURIComponent(tableName)+"/pagingQuery";
-		
-		if(reloadTable)
-			url += "?reloadTable="+reloadTable;
-		
-		return url;
-	};
-	
-	po.getSchemaTableTabIndex = function(schemaId, tableName)
-	{
-		var pm = po.vuePageModel();
-		var items = pm.tableTabs.items;
-		
-		return $.inArrayById(items, po.schemaTableTabId(schemaId, tableName));
-	};
-	
-	po.schemaTableTabId = function(schemaId, tableName)
-	{
-		var map = (po.tableTabIdMap || (po.tableTabIdMap = {}));
-		
-		//不直接使用tableName作为元素ID，因为name中可能存在与jquery冲突的字符，比如'$'
-		var key = (schemaId + tableName);
-		var value = map[key];
-		
-		if(value == null)
-		{
-			value = $.uid("schemaTableTab");
-			map[key] = value;
-		}
-		
-		return value;
-	};
-	
 	po.getSelectedTableNodes = function()
 	{
 		var pm = po.vuePageModel();
@@ -388,6 +310,112 @@
 		return re;
 	};
 	
+	po.showSchemaTab = function(schemaId, name, title, type)
+	{
+		var pm = po.vuePageModel();
+		
+		var idx = po.getSchemaTabIndex(schemaId, name);
+		if(idx > -1)
+			pm.schemaTabs.activeIndex = idx;
+		else
+		{
+			var tab =
+			{
+				id: po.toSchemaTabId(schemaId, name),
+				title: title,
+				schemaId: schemaId,
+				name: name,
+				type: type,
+			};
+			
+			//需转换为绝对路径，因为要支持在新窗口打开
+			tab.url = po.concatContextPath(po.toSchemaTabUrl(tab));
+			
+			pm.schemaTabs.items.push(tab);
+			
+			//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
+			po.vueApp().$nextTick(function()
+			{
+				pm.schemaTabs.activeIndex = pm.schemaTabs.items.length - 1;
+			});
+		}
+	};
+	
+	po.loadSchemaTab = function(tab, forceLoad, loadUrl)
+	{
+		var panel = po.elementOfId(tab.id);
+		var expectLoad = (panel.prop("loaded") !== true || forceLoad);
+		
+		if(expectLoad && panel.prop("loading") !== true)
+		{
+			panel.prop("loading", true);
+			panel.empty();
+			
+			var url = (forceLoad && loadUrl ? loadUrl : tab.url);
+			
+			if(url)
+			{
+				po.open(url,
+				{
+					target: panel,
+					dialog: false,
+					success: function()
+					{
+						panel.prop("loaded", true);
+					},
+					complete: function()
+					{
+						panel.prop("loading", false);
+					}
+				});
+			}
+		}
+	};
+	
+	po.toSchemaTabUrl = function(tab)
+	{
+		if(tab.type == po.schemaTabTypeTable)
+			return "/data/"+encodeURIComponent(tab.schemaId)+"/"+encodeURIComponent(tab.name)+"/pagingQuery";
+		else if(tab.type == po.schemaTabTypeSqlpad)
+			return "/sqlpad/"+encodeURIComponent(tab.schemaId);
+		else if(tab.type == po.schemaTabTypeImportData)
+			return "/dataexchange/"+encodeURIComponent(tab.schemaId)+"/import";
+		else if(tab.type == po.schemaTabTypeExportData)
+			return "/dataexchange/"+encodeURIComponent(tab.schemaId)+"/export";
+		else
+			return null;
+	};
+	
+	po.toSchemaReloadTableUrl = function(tableUrl)
+	{
+		return tableUrl += "?reloadTable=true";
+	};
+	
+	po.getSchemaTabIndex = function(schemaId, name)
+	{
+		var pm = po.vuePageModel();
+		var items = pm.schemaTabs.items;
+		
+		return $.inArrayById(items, po.toSchemaTabId(schemaId, name));
+	};
+	
+	po.toSchemaTabId = function(schemaId, name)
+	{
+		var map = (po._schemaTabIdMap || (po._schemaTabIdMap = {}));
+		
+		//不直接使用name作为元素ID，因为name中可能存在与jquery冲突的字符，比如'$'
+		var key = (schemaId + name);
+		var value = map[key];
+		
+		if(value == null)
+		{
+			value = $.uid("schemaTab");
+			map[key] = value;
+		}
+		
+		return value;
+	};
+	
 	po.vuePageModel(
 	{
 		searchForm:{ keyword: "" },
@@ -395,7 +423,7 @@
 		loadingSchema: false,
 		schemaNodes: null,
 		selectedNodeKeys: null,
-		tableTabs:
+		schemaTabs:
 		{
 			items: [],
 			activeIndex: 0
@@ -435,50 +463,74 @@
 			},
 			{ separator: true },
 			{
-				label: "<@spring.message code='module.sqlpad' />"
+				label: "<@spring.message code='module.sqlpad' />",
+				command: function()
+				{
+					po.executeOnFirstAwareSchemaNode(function(schemaNode)
+					{
+						var tabName = (po.schemaTabNameSqlpad ? po.schemaTabNameSqlpad : (po.schemaTabNameSqlpad = $.uid("schemaTabNameSqlpad")));
+						po.showSchemaTab(schemaNode.schemaId, tabName, "<@spring.message code='module.sqlpad' />", po.schemaTabTypeSqlpad);
+					});
+				}
 			},
 			{
-				label: "<@spring.message code='module.importData' />"
+				label: "<@spring.message code='module.importData' />",
+				command: function()
+				{
+					po.executeOnFirstAwareSchemaNode(function(schemaNode)
+					{
+						var tabName = (po.schemaTabNameImportData ? po.schemaTabNameImportData : (po.schemaTabNameImportData = $.uid("schemaTabNameImportData")));
+						po.showSchemaTab(schemaNode.schemaId, tabName, "<@spring.message code='module.importData' />", po.schemaTabTypeImportData);
+					});
+				}
 			},
 			{
-				label: "<@spring.message code='module.exportData' />"
+				label: "<@spring.message code='module.exportData' />",
+				command: function()
+				{
+					po.executeOnFirstAwareSchemaNode(function(schemaNode)
+					{
+						var tabName = (po.schemaTabNameExportData ? po.schemaTabNameExportData : (po.schemaTabNameExportData = $.uid("schemaTabNameExportData")));
+						po.showSchemaTab(schemaNode.schemaId, tabName, "<@spring.message code='module.exportData' />", po.schemaTabTypeExportData);
+					});
+				}
 			}
 		],
-		tableTabMenuItems:
+		schemaTabMenuItems:
 		[
 			{
 				label: "<@spring.message code='close' />",
 				command: function()
 				{
-					po.tabviewClose(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+					po.tabviewClose(po.vuePageModel().schemaTabs, po.schemaTabMenuOnTabId);
 				}
 			},
 			{
 				label: "<@spring.message code='closeOther' />",
 				command: function()
 				{
-					po.tabviewCloseOther(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+					po.tabviewCloseOther(po.vuePageModel().schemaTabs, po.schemaTabMenuOnTabId);
 				}
 			},
 			{
 				label: "<@spring.message code='closeRight' />",
 				command: function()
 				{
-					po.tabviewCloseRight(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+					po.tabviewCloseRight(po.vuePageModel().schemaTabs, po.schemaTabMenuOnTabId);
 				}
 			},
 			{
 				label: "<@spring.message code='closeLeft' />",
 				command: function()
 				{
-					po.tabviewCloseLeft(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+					po.tabviewCloseLeft(po.vuePageModel().schemaTabs, po.schemaTabMenuOnTabId);
 				}
 			},
 			{
 				label: "<@spring.message code='closeAll' />",
 				command: function()
 				{
-					po.tabviewCloseAll(po.vuePageModel().tableTabs);
+					po.tabviewCloseAll(po.vuePageModel().schemaTabs);
 				}
 			},
 			{ separator: true },
@@ -486,22 +538,30 @@
 				label: "<@spring.message code='openInNewWindow' />",
 				command: function()
 				{
-					po.tabviewOpenInNewWindow(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
+					po.tabviewOpenInNewWindow(po.vuePageModel().schemaTabs, po.schemaTabMenuOnTabId);
 				}
 			},
 			{
 				label: "<@spring.message code='refreshTableStructure' />",
+				visible: function()
+				{
+					var tab = po.tabviewTab(po.vuePageModel().schemaTabs, po.schemaTabMenuOnTabId);
+					return (tab && tab.type == po.schemaTabTypeTable);
+				},
 				command: function()
 				{
-					var tab = po.tabviewTab(po.vuePageModel().tableTabs, po.tableTabMenuTargetId);
-					if(tab)
-						po.loadSchemaTableTab(tab.schemaId, tab.tableName, true);
+					var tab = po.tabviewTab(po.vuePageModel().schemaTabs, po.schemaTabMenuOnTabId);
+					if(tab && tab.type == po.schemaTabTypeTable)
+					{
+						var url = po.toSchemaReloadTableUrl(tab.url);
+						po.loadSchemaTab(tab, true, url);
+					}
 				}
 			}
 		]
 	});
 	
-	po.vueRef("tableTabMenuEle", null);
+	po.vueRef("${pid}schemaTabMenuEle", null);
 	
 	po.vueMethod(
 	{
@@ -513,11 +573,10 @@
 				po.loadSchemaNodes();
 			else if(pm.searchType == "table")
 			{
-				var schemaNode = po.evalSchemaNodeForLoadTable();
-				if(!schemaNode)
-					$.tipInfo("<@spring.message code='pleaseSelectSchemaForSearchTable' />");
-				else
+				po.executeOnFirstAwareSchemaNode(function(schemaNode)
+				{
 					po.loadTableNodes(schemaNode);
+				});
 			}
 		},
 		
@@ -538,13 +597,13 @@
 			}
 			else if(node.dataType == "table")
 			{
-				po.showSchemaTableTab(node.schemaId, node.tableName);
+				po.showSchemaTab(node.schemaId, node.tableName, node.tableName, po.schemaTabTypeTable);
 			}
 		},
 		
-		onTableTabChange: function(e){},
+		onSchemaTabChange: function(e){},
 		
-		onTableTabClick: function(e){},
+		onSchemaTabClick: function(e){},
 		
 		onToggleSearchType: function()
 		{
@@ -552,10 +611,10 @@
 			pm.searchType = (pm.searchType == "schema" ? "table" : "schema");
 		},
 		
-		onTableTabMenuToggle: function(e, tableTabId)
+		onSchemaTabMenuToggle: function(e, tab)
 		{
-			po.tableTabMenuTargetId = tableTabId;
-			po.vueUnref("tableTabMenuEle").show(e);
+			po.schemaTabMenuOnTabId = tab.id;
+			po.vueUnref("${pid}schemaTabMenuEle").show(e);
 		},
 		
 		onAdd: function()
@@ -579,8 +638,8 @@
 		}
 	});
 	
-	//po.showSchemaTableTab()里不能里可获取到创建的DOM元素，所以采用此方案
-	po.vueWatch(po.vuePageModel().tableTabs, function(oldVal, newVal)
+	//po.showSchemaTab()里不能里可获取到创建的DOM元素，所以采用此方案
+	po.vueWatch(po.vuePageModel().schemaTabs, function(oldVal, newVal)
 	{
 		var items = newVal.items;
 		var activeIndex = newVal.activeIndex;
@@ -590,7 +649,7 @@
 		{
 			po.vueApp().$nextTick(function()
 			{
-				po.loadSchemaTableTab(activeTab.schemaId, activeTab.tableName);
+				po.loadSchemaTab(activeTab);
 			});
 		}
 	});

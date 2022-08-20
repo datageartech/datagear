@@ -332,7 +332,9 @@ var ${pid} =
 		"p-panel": primevue.panel,
 		"p-fieldset": primevue.fieldset,
 		"p-listbox": primevue.listbox,
-		"p-colorpicker": primevue.colorpicker
+		"p-colorpicker": primevue.colorpicker,
+		"p-splitter": primevue.splitter,
+        "p-splitterpanel": primevue.splitterpanel
 	},
 	
 	//vue挂载

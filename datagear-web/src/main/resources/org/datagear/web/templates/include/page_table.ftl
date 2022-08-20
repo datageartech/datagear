@@ -16,6 +16,13 @@ page_manager.ftl
 <script>
 (function(po)
 {
+	//重写搜索表单提交处理函数
+	po.search = function(formData)
+	{
+		po.setAjaxTableParam($.extend(formData, { page: 1 }));
+		po.loadAjaxTable();
+	};
+	
 	po.refresh = function()
 	{
 		//兼容搜索表单集成
@@ -142,13 +149,6 @@ page_manager.ftl
 		pm.items = (isPagingData ? data.items : data);
 		pm.totalRecords = (isPagingData ? data.total : data.length);
 		pm.selectedItems = null;
-	};
-	
-	//重写搜索表单提交处理函数
-	po.search = function(formData)
-	{
-		po.setAjaxTableParam($.extend(formData, { page: 1 }));
-		po.loadAjaxTable();
 	};
 })
 (${pid});
