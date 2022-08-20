@@ -122,14 +122,9 @@
 	
 	var availableCharsetNames = $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />);
 	
-	po.setupForm(
-	{
-		name: "",
-		template: "",
-		dashboardFileName: "",
-		zipFileNameEncoding: "${zipFileNameEncodingDefault}",
-		analysisProject: {}
-	});
+	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
+	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
+	po.setupForm(formModel);
 	
 	po.vuePageModel(
 	{

@@ -597,12 +597,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping("/import")
 	public String impt(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
-		setCookieAnalysisProject(request, response, dashboard);
+		DashboardImportForm form = new DashboardImportForm();
+		form.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
+		form.setAnalysisProject(getCookieAnalysisProject(request, response, getAnalysisProjectService()));
 
-		setFormModel(model, dashboard, REQUEST_ACTION_IMPORT, SUBMIT_ACTION_SAVE_IMPORT);
+		setFormModel(model, form, REQUEST_ACTION_IMPORT, SUBMIT_ACTION_SAVE_IMPORT);
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
-		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		return "/dashboard/dashboard_import";
 	}
@@ -740,7 +740,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/saveImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody SaveImportForm form) throws Exception
+			@RequestBody DashboardImportForm form) throws Exception
 	{
 		if (isEmpty(form.getName()) || isEmpty(form.getTemplate()) || isEmpty(form.getDashboardFileName()))
 			throw new IllegalInputException();
@@ -2012,7 +2012,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 	}
 
-	public static class SaveImportForm implements ControllerForm
+	public static class DashboardImportForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -2026,7 +2026,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		private AnalysisProject analysisProject;
 
-		public SaveImportForm()
+		public DashboardImportForm()
 		{
 			super();
 		}
