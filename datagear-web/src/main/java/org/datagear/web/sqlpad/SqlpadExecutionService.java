@@ -387,12 +387,12 @@ public class SqlpadExecutionService extends PersistenceSupport
 	 * 
 	 * @param channel
 	 * @param text
-	 * @param cssClass
+	 * @param textType
 	 */
-	protected void sendTextMessage(String channel, String text, String cssClass)
+	protected void sendTextMessage(String channel, String text, String textType)
 	{
 		TextMessageData textMessageData = new TextMessageData(text);
-		textMessageData.setCssClass(cssClass);
+		textMessageData.setTextType(textType);
 
 		this._messageChannel.push(channel, textMessageData);
 	}
@@ -402,13 +402,13 @@ public class SqlpadExecutionService extends PersistenceSupport
 	 * 
 	 * @param channel
 	 * @param text
-	 * @param cssClass
+	 * @param textType
 	 * @param sqlExecutionStat
 	 */
-	protected void sendTextMessage(String channel, String text, String cssClass, SQLExecutionStat sqlExecutionStat)
+	protected void sendTextMessage(String channel, String text, String textType, SQLExecutionStat sqlExecutionStat)
 	{
 		TextMessageData textMessageData = new TextMessageData(text);
-		textMessageData.setCssClass(cssClass);
+		textMessageData.setTextType(textType);
 		textMessageData.setSqlExecutionStat(sqlExecutionStat);
 
 		this._messageChannel.push(channel, textMessageData);
@@ -722,7 +722,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 				{
 					sendTextMessage(getSqlpadId(),
 							getMessage(getLocale(), "sqlpad.waitingForCommitOrRollback", getOverTimeThreashold()),
-							"message-content-highlight", sqlExecutionStat);
+							"highlight", sqlExecutionStat);
 
 					sendWatingMessage = true;
 				}
@@ -1350,7 +1350,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 		private String text;
 
-		private String cssClass;
+		private String textType;
 
 		private SQLExecutionStat sqlExecutionStat;
 
@@ -1375,14 +1375,14 @@ public class SqlpadExecutionService extends PersistenceSupport
 			this.text = text;
 		}
 
-		public String getCssClass()
+		public String getTextType()
 		{
-			return cssClass;
+			return textType;
 		}
 
-		public void setCssClass(String cssClass)
+		public void setTextType(String textType)
 		{
-			this.cssClass = cssClass;
+			this.textType = textType;
 		}
 
 		public SQLExecutionStat getSqlExecutionStat()

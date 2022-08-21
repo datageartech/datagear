@@ -43,10 +43,10 @@
 					<p-inputtext v-model="fm.sqlDelimiter" class="ml-4" style="width:6rem;"
 						title="<@spring.message code='sqlpad.sqlDelimiter' />">
 					</p-inputtext>
-					<p-button type="button" icon="pi pi-align-left" class="p-button-secondary px-4" @click="onInsertSqlDelimiterDefine"
+					<p-button type="button" icon="pi pi-flag" class="p-button-secondary px-4" @click="onInsertSqlDelimiterDefine"
 						title="<@spring.message code='sqlpad.insertSqlDelimiterDefine' />">
 					</p-button>
-					<p-button type="button" icon="pi pi-align-right" class="p-button-secondary px-4" @click="onInsertSqlDelimiter"
+					<p-button type="button" icon="pi pi-flag-fill" class="p-button-secondary px-4" @click="onInsertSqlDelimiter"
 						title="<@spring.message code='sqlpad.insertSqlDelimiter' />">
 					</p-button>
 				</span>
@@ -243,7 +243,6 @@
 	
 	po.handleExecute = function()
 	{
-		//TODO
 		var executionStatus = po.executionStatus();
 		
 		if(executionStatus == po.executionStatusType.PAUSED)
@@ -284,8 +283,6 @@
 			
 			po.sendSqlCommand(po.sqlCommandType.STOP);
 		}
-		
-		po.sqlEditor.focus();
 	};
 	
 	po.handleCommit = function()
@@ -298,8 +295,6 @@
 			
 			po.sendSqlCommand(po.sqlCommandType.COMMIT);
 		}
-		
-		po.sqlEditor.focus();
 	};
 	
 	po.handleRollback = function()
@@ -312,13 +307,12 @@
 			
 			po.sendSqlCommand(po.sqlCommandType.ROLLBACK);
 		}
-		
-		po.sqlEditor.focus();
 	};
 	
 	po.executeSql = function(sql, sqlStartRow, sqlStartColumn)
 	{
 		po.clearMessage(false);
+		po.clearResult(false);
 		
 		var fm = po.vueFormModel();
 		var data = po.vueRaw(fm);
@@ -328,6 +322,7 @@
 		
 		po.ajax("/sqlpad/"+encodeURIComponent(po.schemaId)+"/execute",
 		{
+			tipSuccess: false,
 			type : "POST",
 			data : data,
 			error : function()
@@ -346,8 +341,9 @@
 		
 		po._sendingSqlCommand = true;
 		
-		po.ajax("/sqlpad/"+po.schemaId+"/command",
+		po.ajax("/sqlpad/"+encodeURIComponent(po.schemaId)+"/command",
 		{
+			tipSuccess: false,
 			type: "POST",
 			data:
 			{
@@ -401,7 +397,7 @@
 			if(msgData.sqlResultType == po.sqlResultType.UPDATE_COUNT)
 			{
 				var text = $.validator.format("<@spring.message code='sqlpad.affectDataRowCount' />", msgData.updateCount);
-				$("<div class='inline-block sql-update-count' />").text(text).appendTo(msgContentDiv);
+				$("<div class='sql-update-count' />").text(text).appendTo(msgContentDiv);
 			}
 			else if(msgData.sqlResultType == po.sqlResultType.RESULT_SET)
 			{
@@ -449,23 +445,24 @@
 			
 			if(appendContent)
 			{
-				$("<div class='inline-block' />").html(msgData.content).appendTo(msgContentDiv);
+				$("<div />").html(msgData.content).appendTo(msgContentDiv);
 				po.appendSQLExecutionStatMessage(msgContentDiv, msgData.sqlExecutionStat);
 			}
 		}
 		else if(msgDataType == po.messageType.EXCEPTION)
 		{
 			msgDiv.addClass("execution-exception p-error");
-			$("<div class='inline-block' />").html(msgData.content).appendTo(msgContentDiv);
+			$("<div />").html(msgData.content).appendTo(msgContentDiv);
 		}
 		else if(msgDataType == po.messageType.TEXT)
 		{
 			msgDiv.addClass("execution-text");
 			
-			if(msgData.cssClass)
-				msgContentDiv.addClass(msgData.cssClass);
+			var myStyleClass = "";
+			if(msgData.textType == "highlight")
+				myStyleClass = "p-tag p-tag-danger";
 			
-			$("<div class='inline-block' />").html(msgData.text).appendTo(msgContentDiv);
+			$("<div class='"+myStyleClass+"' />").html(msgData.text).appendTo(msgContentDiv);
 			po.appendSQLExecutionStatMessage(msgContentDiv, msgData.sqlExecutionStat);
 		}
 		else if(msgDataType == po.messageType.FINISH)
@@ -475,7 +472,7 @@
 			
 			msgDiv.addClass("execution-finish");
 			
-			$("<div class='inline-block p-tag p-tag-success' />").html("<@spring.message code='sqlpad.executeionFinish' />").appendTo(msgContentDiv);
+			$("<div class='p-tag p-tag-success' />").html("<@spring.message code='sqlpad.executeionFinish' />").appendTo(msgContentDiv);
 			po.appendSQLExecutionStatMessage(msgContentDiv, msgData.sqlExecutionStat);
 			
 			po.executionStatus(po.executionStatusType.STOPPED);
@@ -606,8 +603,18 @@
 		var msgsWrapper = po.resultMsgsWrapper();
 		msgsWrapper.empty();
 	};
+
+	po.clearResult = function(force)
+	{
+		force = (force == null ? true : force);
+		
+		if(!force && po.keepResult())
+			return;
+		
+		po.tabviewCloseRight(po.vuePageModel().sqlpadTabs, po.msgsTabPanelId);
+	};
 	
-	po.isSqlpadTabMenuOnTabResultSet = function()
+	po.isSqlpadTabMenuOnTabResult = function()
 	{
 		var tab = po.sqlpadTabMenuOnTab;
 		return (tab && tab.type == "resultSet");
@@ -626,20 +633,33 @@
 		
 		po._keepMessage = keep;
 	};
+
+	po.keepResult = function(keep)
+	{
+		if(keep === undefined)
+			return (po._keepResult == true);
+		
+		po._keepResult = keep;
+	};
+	
+	po.copySetFormModel = function(source, target)
+	{
+		target.commitMode = source.commitMode;
+		target.exceptionHandleMode = source.exceptionHandleMode;
+		target.overTimeThreashold = source.overTimeThreashold;
+		target.resultsetFetchSize = source.resultsetFetchSize;
+	};
 	
 	po.setupForm(formModel);
+	
+	var setFormModel = {};
+	po.copySetFormModel(formModel, setFormModel);
 	
 	po.vuePageModel(
 	{
 		executionStatus: po.executionStatusType.STOPPED,
 		executionStatusType: po.executionStatusType,
-		setFormModel:
-		{
-			commitMode: formModel.commitMode,
-			exceptionHandleMode: formModel.exceptionHandleMode,
-			overTimeThreashold: formModel.overTimeThreashold,
-			resultsetFetchSize: formModel.resultsetFetchSize
-		},
+		setFormModel: setFormModel,
 		commitModeOptions:
 		[
 			{ name: "<@spring.message code='auto' />", value: po.commitModel.AUTO },
@@ -678,6 +698,17 @@
 				}
 			},
 			{
+				label: "<@spring.message code='sqlpad.clearResult' />",
+				visible: function()
+				{
+					return po.isSqlpadTabMenuOnTabMessage();
+				},
+				command: function()
+				{
+					po.clearResult();
+				}
+			},
+			{
 				label: "<@spring.message code='sqlpad.isKeepMessage' />",
 				icon: "pi pi-times",
 				visible: function()
@@ -695,10 +726,27 @@
 				}
 			},
 			{
+				label: "<@spring.message code='sqlpad.isKeepResult' />",
+				icon: "pi pi-times",
+				visible: function()
+				{
+					return po.isSqlpadTabMenuOnTabMessage();
+				},
+				command: function()
+				{
+					po.keepResult(!po.keepResult());
+					
+					if(po.keepResult())
+						this.icon = "pi pi-check";
+					else
+						this.icon = "pi pi-times";
+				}
+			},
+			{
 				label: "<@spring.message code='close' />",
 				visible: function()
 				{
-					return po.isSqlpadTabMenuOnTabResultSet();
+					return po.isSqlpadTabMenuOnTabResult();
 				},
 				command: function()
 				{
@@ -709,7 +757,7 @@
 				label: "<@spring.message code='closeOther' />",
 				visible: function()
 				{
-					return po.isSqlpadTabMenuOnTabResultSet();
+					return po.isSqlpadTabMenuOnTabResult();
 				},
 				command: function()
 				{
@@ -720,7 +768,7 @@
 				label: "<@spring.message code='closeRight' />",
 				visible: function()
 				{
-					return po.isSqlpadTabMenuOnTabResultSet();
+					return po.isSqlpadTabMenuOnTabResult();
 				},
 				command: function()
 				{
@@ -731,7 +779,7 @@
 				label: "<@spring.message code='closeLeft' />",
 				visible: function()
 				{
-					return po.isSqlpadTabMenuOnTabResultSet();
+					return po.isSqlpadTabMenuOnTabResult();
 				},
 				command: function()
 				{
@@ -742,11 +790,59 @@
 				label: "<@spring.message code='closeAll' />",
 				visible: function()
 				{
-					return po.isSqlpadTabMenuOnTabResultSet();
+					return po.isSqlpadTabMenuOnTabResult();
 				},
 				command: function()
 				{
 					po.tabviewCloseAll(po.vuePageModel().sqlpadTabs);
+				}
+			},
+			{
+				separator: true,
+				visible: function()
+				{
+					return po.isSqlpadTabMenuOnTabResult();
+				},
+			},
+			{
+				label: "<@spring.message code='loadMore' />",
+				visible: function()
+				{
+					return po.isSqlpadTabMenuOnTabResult();
+				},
+				command: function()
+				{
+					po.tabviewCloseAll(po.vuePageModel().sqlpadTabs);
+				}
+			},
+			{
+				label: "<@spring.message code='sqlpad.refreshSqlResult' />",
+				visible: function()
+				{
+					return po.isSqlpadTabMenuOnTabResult();
+				},
+				command: function()
+				{
+				}
+			},
+			{
+				label: "<@spring.message code='sqlpad.exportSqlResult' />",
+				visible: function()
+				{
+					return po.isSqlpadTabMenuOnTabResult();
+				},
+				command: function()
+				{
+				}
+			},
+			{
+				label: "<@spring.message code='sqlpad.viewSqlStatement' />",
+				visible: function()
+				{
+					return po.isSqlpadTabMenuOnTabResult();
+				},
+				command: function()
+				{
 				}
 			}
 		]
@@ -832,9 +928,11 @@
 		onSetPanelShow: function(e)
 		{
 			var pm = po.vuePageModel();
+			var fm = po.vueFormModel();
 			var panel = po.elementOfId("${pid}setPanel", document.body);
 			var form = po.elementOfId("${pid}setForm", panel);
-			po.elementOfId("${pid}addResName", form).focus();
+			
+			po.copySetFormModel(fm, pm.setFormModel);
 			
 			po.setupSimpleForm(form, pm.setFormModel, 
 			{
@@ -845,11 +943,7 @@
 				},
 				submitHandler:function()
 				{
-					var fm = po.vueFormModel();
-					fm.commitMode = pm.setFormModel.commitMode,
-					fm.exceptionHandleMode = pm.setFormModel.exceptionHandleMode,
-					fm.overTimeThreashold = pm.setFormModel.overTimeThreashold,
-					fm.resultsetFetchSize = pm.setFormModel.resultsetFetchSize
+					po.copySetFormModel(pm.setFormModel, fm);
 					
 					po.vueUnref("${pid}setPanelEle").hide();
 				}
