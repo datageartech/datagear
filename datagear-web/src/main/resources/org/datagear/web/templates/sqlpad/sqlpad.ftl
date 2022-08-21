@@ -445,7 +445,7 @@
 			
 			if(appendContent)
 			{
-				$("<div />").html(msgData.content).appendTo(msgContentDiv);
+				$("<div class='p-tag p-tag-info' />").html(msgData.content).appendTo(msgContentDiv);
 				po.appendSQLExecutionStatMessage(msgContentDiv, msgData.sqlExecutionStat);
 			}
 		}
