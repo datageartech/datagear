@@ -12,6 +12,24 @@
 <script>
 (function(po)
 {
+	po.tabviewTabActive = function(tabViewModel, tabId)
+	{
+		var items = tabViewModel.items;
+		var idx = $.inArrayById(items, tabId);
+		
+		if(idx >= 0)
+			tabViewModel.activeIndex = idx;
+		
+		return idx;
+	};
+	
+	po.tabviewTabIndex = function(tabViewModel, tabId)
+	{
+		var items = tabViewModel.items;
+		var idx = $.inArrayById(items, tabId);
+		return idx;
+	};
+	
 	po.tabviewTab = function(tabViewModel, tabId)
 	{
 		var items = tabViewModel.items;
@@ -31,22 +49,17 @@
 		if(idx < 0)
 			return;
 		
-		items.splice(idx, 1);
+		po.removeTabItems(tabViewModel, idx, 1);
+		
 		if(idx <= tabViewModel.activeIndex)
 			tabViewModel.activeIndex = (tabViewModel.activeIndex > 0 ? tabViewModel.activeIndex - 1 : 0);
 	};
 	
 	po.tabviewCloseOther = function(tabViewModel, tabId)
 	{
-		var items = tabViewModel.items;
-		var idx = $.inArrayById(items, tabId);
+		po.tabviewCloseLeft(tabViewModel, tabId);
+		po.tabviewCloseRight(tabViewModel, tabId);
 		
-		if(idx < 0)
-			return;
-		
-		items.splice(0, idx);
-		if(items.length > 1)
-			items.splice(1, items.length - 1);
 		tabViewModel.activeIndex = 0;
 	};
 	
@@ -59,7 +72,8 @@
 			return;
 		
 		var count = ((items.length - idx - 1) > 0 ? (items.length - idx - 1) : 0);
-		items.splice(idx+1, count);
+		po.removeTabItems(tabViewModel, idx+1, count);
+		
 		tabViewModel.activeIndex = idx;
 	};
 	
@@ -71,14 +85,13 @@
 		if(idx < 0)
 			return;
 		
-		items.splice(0, idx);
+		po.removeTabItems(tabViewModel, 0, idx);
 		tabViewModel.activeIndex = tabViewModel.activeIndex - idx;
 	};
 	
 	po.tabviewCloseAll = function(tabViewModel)
 	{
-		var items = tabViewModel.items;
-		items.splice(0, items.length);
+		po.removeTabItems(tabViewModel, 0, tabViewModel.items.length);
 		tabViewModel.activeIndex = 0;
 	};
 	
@@ -92,6 +105,21 @@
 		
 		if(items[idx] && items[idx].url)
 			window.open(items[idx].url);
+	};
+	
+	po.removeTabItems = function(tabViewModel, index, count)
+	{
+		var items = tabViewModel.items;
+		
+		var removeIdx = index;
+		for(var i=0; i<count; i++)
+		{
+			var item = items[removeIdx];
+			if(item.closeable !== false)
+				items.splice(removeIdx, 1);
+			else
+				removeIdx += 1;
+		}
 	};
 })
 (${pid});

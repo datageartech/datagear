@@ -13,7 +13,7 @@
 因为会出现嵌套form，这里面板里的form元素会被vue解析剔除
 -->
 <p-overlaypanel ref="${pid}addResPanelEle" append-to="body"
-	@show="onAddResPanelShow" :show-close-icon="true" id="${pid}addResPanel">
+	@show="onAddResPanelShow" :show-close-icon="false" id="${pid}addResPanel">
 	<form id="${pid}addResForm" action="#">
 		<div class="pb-2">
 			<label class="text-lg font-bold">
@@ -39,7 +39,7 @@
 	</form>
 </p-overlaypanel>
 <p-overlaypanel ref="${pid}uploadResPanelEle" append-to="body"
-	@show="onUploadResPanelShow" :show-close-icon="true" id="${pid}uploadResPanel">
+	@show="onUploadResPanelShow" :show-close-icon="false" id="${pid}uploadResPanel">
 	<form id="${pid}uploadResForm" action="#">
 		<div class="pb-2">
 			<label class="text-lg font-bold">

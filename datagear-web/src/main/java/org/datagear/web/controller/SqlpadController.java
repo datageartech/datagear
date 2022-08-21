@@ -169,16 +169,17 @@ public class SqlpadController extends AbstractSchemaConnController
 				checkReadTableDataPermission(schema, user);
 			}
 		}.execute();
-
+		
 		String initSql = request.getParameter("initSql");
 		if (initSql == null)
 			initSql = "";
 
 		String sqlpadId = generateSqlpadId(request, response);
-
-		springModel.addAttribute("sqlpadId", sqlpadId);
+		
+		SqlpadExecutionForm form = new SqlpadExecutionForm(schemaId, sqlpadId);
+		
+		setFormModel(springModel, form, "sqlpad", "execute");
 		springModel.addAttribute("sqlResultRowMapper", buildDefaultLOBRowMapper());
-		springModel.addAttribute("initSql", initSql);
 
 		return "/sqlpad/sqlpad";
 	}
@@ -411,6 +412,134 @@ public class SqlpadController extends AbstractSchemaConnController
 	protected String generateSqlpadId(HttpServletRequest request, HttpServletResponse response)
 	{
 		return IDUtil.uuid();
+	}
+	
+	public static class SqlpadExecutionForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+		
+		private String schemaId;
+		private String sqlpadId;
+		private String sql = "";
+		private String sqlDelimiter = ";";
+		private Integer sqlStartRow;
+		private Integer sqlStartColumn;
+		private CommitMode commitMode = CommitMode.AUTO;
+		private ExceptionHandleMode exceptionHandleMode = ExceptionHandleMode.ABORT;
+		private Integer overTimeThreashold = 10;
+		private Integer resultsetFetchSize = 20;
+		
+		public SqlpadExecutionForm()
+		{
+			super();
+		}
+
+		public SqlpadExecutionForm(String schemaId, String sqlpadId)
+		{
+			super();
+			this.schemaId = schemaId;
+			this.sqlpadId = sqlpadId;
+		}
+
+		public String getSchemaId()
+		{
+			return schemaId;
+		}
+
+		public void setSchemaId(String schemaId)
+		{
+			this.schemaId = schemaId;
+		}
+
+		public String getSqlpadId()
+		{
+			return sqlpadId;
+		}
+
+		public void setSqlpadId(String sqlpadId)
+		{
+			this.sqlpadId = sqlpadId;
+		}
+
+		public String getSql()
+		{
+			return sql;
+		}
+
+		public void setSql(String sql)
+		{
+			this.sql = sql;
+		}
+
+		public String getSqlDelimiter()
+		{
+			return sqlDelimiter;
+		}
+
+		public void setSqlDelimiter(String sqlDelimiter)
+		{
+			this.sqlDelimiter = sqlDelimiter;
+		}
+
+		public Integer getSqlStartRow()
+		{
+			return sqlStartRow;
+		}
+
+		public void setSqlStartRow(Integer sqlStartRow)
+		{
+			this.sqlStartRow = sqlStartRow;
+		}
+
+		public Integer getSqlStartColumn()
+		{
+			return sqlStartColumn;
+		}
+
+		public void setSqlStartColumn(Integer sqlStartColumn)
+		{
+			this.sqlStartColumn = sqlStartColumn;
+		}
+
+		public CommitMode getCommitMode()
+		{
+			return commitMode;
+		}
+
+		public void setCommitMode(CommitMode commitMode)
+		{
+			this.commitMode = commitMode;
+		}
+
+		public ExceptionHandleMode getExceptionHandleMode()
+		{
+			return exceptionHandleMode;
+		}
+
+		public void setExceptionHandleMode(ExceptionHandleMode exceptionHandleMode)
+		{
+			this.exceptionHandleMode = exceptionHandleMode;
+		}
+
+		public Integer getOverTimeThreashold()
+		{
+			return overTimeThreashold;
+		}
+
+		public void setOverTimeThreashold(Integer overTimeThreashold)
+		{
+			this.overTimeThreashold = overTimeThreashold;
+		}
+
+		public Integer getResultsetFetchSize()
+		{
+			return resultsetFetchSize;
+		}
+
+		public void setResultsetFetchSize(Integer resultsetFetchSize)
+		{
+			this.resultsetFetchSize = resultsetFetchSize;
+		}
 	}
 
 	/**

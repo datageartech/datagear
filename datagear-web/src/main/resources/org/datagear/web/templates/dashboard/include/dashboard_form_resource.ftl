@@ -547,19 +547,14 @@
 				var form = po.elementOfId("${pid}addResForm", panel);
 				po.elementOfId("${pid}addResName", form).focus();
 				
-				if(!form.data("setupSimpleForm"))
+				po.setupSimpleForm(form, pm.addResModel, function()
 				{
-					po.setupSimpleForm(form, pm.addResModel, function()
+					if(po.addRes(pm.addResModel.resName))
 					{
-						if(po.addRes(pm.addResModel.resName))
-						{
-							po.vueUnref("${pid}addResPanelEle").hide();
-							pm.addResModel.resName = "";
-						}
-					});
-					
-					form.data("setupSimpleForm", true);
-				}
+						po.vueUnref("${pid}addResPanelEle").hide();
+						pm.addResModel.resName = "";
+					}
+				});
 			},
 			
 			onToggleUploadResPanel: function(e)
@@ -576,15 +571,10 @@
 				var panel = po.elementOfId("${pid}uploadResPanel", document.body);
 				var form = po.elementOfId("${pid}uploadResForm", panel);
 				
-				if(!form.data("setupSimpleForm"))
+				po.setupSimpleForm(form, pm.uploadResModel, function()
 				{
-					po.setupSimpleForm(form, pm.uploadResModel, function()
-					{
-						po.uploadRes(pm.uploadResModel.savePath, pm.uploadResModel.filePath)
-					});
-					
-					form.data("setupSimpleForm", true);
-				}
+					po.uploadRes(pm.uploadResModel.savePath, pm.uploadResModel.filePath)
+				});
 			},
 			
 			onResUploaded: function(e)

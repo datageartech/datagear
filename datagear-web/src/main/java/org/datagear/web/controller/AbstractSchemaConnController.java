@@ -219,7 +219,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 			this.readonly = readonly;
 			this.customCommit = customCommit;
 		}
-
+		
 		protected void doExecute() throws Throwable
 		{
 			try
@@ -296,6 +296,19 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		 */
 		protected abstract void doExecute(HttpServletRequest request, HttpServletResponse response,
 				org.springframework.ui.Model springModel, Schema schema) throws Throwable;
+		
+		/**
+		 * 获取{@linkplain Schema}。
+		 * <p>
+		 *  只有在执行完成后才不会返回{@code null}。
+		 * </p>
+		 * 
+		 * @return
+		 */
+		public Schema getSchema()
+		{
+			return this._schema;
+		}
 	}
 
 	/**

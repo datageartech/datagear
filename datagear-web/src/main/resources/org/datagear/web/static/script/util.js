@@ -1325,6 +1325,176 @@
 			return null;
 		}
 	};
+	
+	/**
+	 * 创建任务客户端。
+	 * 任务客户端接收任务消息，直到任务完成。
+	 *
+	 * @param url 任务消息响应URL
+	 * @param messageHandler 消息处理器，格式为：function(message){ return true || false }，返回true表示任务已完成
+	 * @param options 可选，附加选项
+	 */
+	$.TaskClient = function(url, messageHandler, options)
+	{
+		this.url = url;
+		this.messageHandler = messageHandler;
+		this._status = "";
+		this.options = $.extend(
+				{
+					//轮询间隔
+					interval: 500,
+					//挂起状态时的轮询间隔
+					suspendInterval: 3000,
+					//当连续接收空消息这些秒数后，自动进入挂起状态，-1 表示不自动挂起
+					autoSuspendExpireSeconds: 10,
+					//自动挂起状态时的轮询间隔
+					autoSuspendInterval: 1500,
+					//ajax设置项
+					ajaxOptions: {}
+				},
+				options);
+	};
+	
+	$.TaskClient.prototype =
+	{
+		//开始轮询接收消息
+		start: function()
+		{
+			if(this.isActive())
+				return false;
+			
+			this._status = "active.run";
+			this._receiveAndHandleMessage();
+			
+			return true;
+		},
+		
+		//挂起，进入慢轮询状态
+		suspend: function()
+		{
+			if(!this.isActive())
+				return false;
+			
+			this._status = "active.suspend";
+			
+			return true;
+		},
+		
+		//唤醒，从慢轮询状态恢复
+		resume: function()
+		{
+			if(!this.isSuspend())
+				return false;
+			
+			this.stop();
+			this.start();
+			
+			return true;
+		},
+		
+		//停止轮询接收消息，停止后可重新start
+		stop: function()
+		{
+			if(!this.isActive())
+				return false;
+			
+			this._status = "stop";
+			if(this._timeoutId)
+			{
+				clearTimeout(this._timeoutId);
+				this._timeoutId = "";
+			}
+			
+			return true;
+		},
+		
+		isActive: function()
+		{
+			return (this._status && this._status.indexOf("active") == 0);
+		},
+		
+		isSuspend: function()
+		{
+			return (this._status == "active.suspend");
+		},
+		
+		_receiveAndHandleMessage: function()
+		{
+			if(!this.isActive())
+				return;
+			
+			var taskClient = this;
+			
+			var ajaxOptions = $.extend({}, this.options.ajaxOptions,
+					{
+						type : "POST",
+						url : this.url,
+						data : this.options.data,
+						success : function(messages)
+						{
+							if(messages == null)
+								messages = [];
+							else if(!$.isArray(messages))
+								messages = [ messages ];
+							
+							var isFinish = false;
+							
+							for(var i=0; i<messages.length; i++)
+							{
+								var myIsFinish = taskClient.messageHandler(messages[i]);
+								
+								if(!isFinish && myIsFinish === true)
+									isFinish = true;
+							}
+							
+							if(isFinish)
+								taskClient._status = "stop";
+							
+							//处理自动挂起
+							var autoSuspend = false;
+							if(taskClient.options.autoSuspendExpireSeconds > -1)
+							{
+								if(messages.length > 0)
+								{
+									autoSuspend = false;
+									taskClient._firstEmptyTime = null;
+								}
+								else
+								{
+									if(taskClient._firstEmptyTime
+											&& (new Date().getTime() - taskClient._firstEmptyTime)
+													>= taskClient.options.autoSuspendExpireSeconds*1000)
+									{
+										autoSuspend = true;
+									}
+									
+									if(!taskClient._prevMessagesEmpty)
+										taskClient._firstEmptyTime = new Date().getTime();
+								}
+								
+								taskClient._prevMessagesEmpty = (messages.length == 0);
+							}
+							
+							if(taskClient.isActive())
+							{
+								var interval = (taskClient.isSuspend() || autoSuspend ?
+										taskClient.options.suspendInterval : taskClient.options.interval);
+								
+								if(autoSuspend)
+									interval = taskClient.options.autoSuspendInterval;
+								
+								taskClient._timeoutId = setTimeout(function()
+										{
+											taskClient._receiveAndHandleMessage();
+										},
+										interval);
+							}
+						}
+					});
+			
+			$.ajax(ajaxOptions);
+		}
+	};
 })
 (jQuery);
 
