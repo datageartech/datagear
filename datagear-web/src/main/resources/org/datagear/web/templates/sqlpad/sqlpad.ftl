@@ -77,9 +77,15 @@
 			<p-splitterpanel :size="40" :min-size="20" class="overflow-auto">
 				<div class="sqlpad-tabs-wrapper w-full h-full relative">
 					<div class="opacity-0 absolute overflow-hidden flex justify-content-center" style="left:0;right:0;top:1rem;height:1px;z-index:-999;">
-						<p-button id="${pid}showFullValueProxy" type="button" icon="pi pi-cog" class="p-button-secondary px-4"
+						<p-button id="${pid}showFullValueProxy" type="button" class="p-button-secondary px-4"
 							aria:haspopup="true" aria-controls="${pid}fullValuePanel"
 							@click="onShowFullValuePanel" title="<@spring.message code='value' />">
+						</p-button>
+					</div>
+					<div class="opacity-0 absolute overflow-hidden flex justify-content-center" style="left:0;right:0;top:1rem;height:1px;z-index:-999;">
+						<p-button id="${pid}sqlStatementProxy" type="button" class="p-button-secondary px-4"
+							aria:haspopup="true" aria-controls="${pid}sqlStatementPanel"
+							@click="onShowSqlStatementPanel" title="<@spring.message code='value' />">
 						</p-button>
 					</div>
 					<p-tabview v-model:active-index="pm.sqlpadTabs.activeIndex" :scrollable="true" @tab-change="onSqlpadTabChange"
@@ -93,7 +99,7 @@
 							</template>
 							<div :id="tab.id" class="h-full">
 								<p-datatable :value="tab.result.rows" :scrollable="true" scroll-height="flex"
-									:sortable="false" striped-rows class="table-sm"
+									:sortable="false" :loading="tab.result.loading" striped-rows class="table-sm"
 									v-if="tab.type == 'resultSet'">
 									<p-column :row-editor="true" :frozen="true" header="<@spring.message code='rowNumber' />"
 										style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center">
@@ -187,6 +193,18 @@
 		</div>
 		<div class="p-2 panel-content-size-xxs">
 			<p-textarea v-model="pm.sqlResultFullValue" class="input w-full h-full">
+        	</p-textarea>
+		</div>
+	</p-overlaypanel>
+	<p-overlaypanel ref="${pid}sqlStatementPanelEle" append-to="body"
+		:show-close-icon="false" id="${pid}sqlStatementPanel">
+		<div class="pb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='sql' />
+			</label>
+		</div>
+		<div class="p-2 panel-content-size-xxs">
+			<p-textarea v-model="pm.sqlStatementValue" class="input w-full h-full">
         	</p-textarea>
 		</div>
 	</p-overlaypanel>
@@ -691,6 +709,79 @@
 		target.resultsetFetchSize = source.resultsetFetchSize;
 	};
 	
+	po.loadMoreSqlResult = function(tab)
+	{
+		var result = tab.result;
+		
+		if(result.loading == true)
+			return;
+		
+		if(result.noMoreData == true)
+		{
+			$.tipInfo("<@spring.message code='sqlpad.noMoreData' />");
+			return;
+		}
+		
+		var fm = po.vueFormModel();
+		
+		result.loading = true;
+		po.ajaxJson("/sqlpad/"+encodeURIComponent(po.schemaId)+"/select",
+		{
+			data:
+			{
+				sqlpadId: po.sqlpadId,
+				sql: tab.sql,
+				startRow: result.nextStartRow,
+				fetchSize: fm.resultsetFetchSize
+			},
+			success: function(response)
+			{
+				var rows = (response.rows || []);
+				result.nextStartRow = response.nextStartRow;
+				result.noMoreData = (rows.length < response.fetchSize);
+				
+				$.each(rows, function(i, row)
+				{
+					result.rows.push(row);
+				});
+			},
+			complete: function()
+			{
+				result.loading = false;
+			}
+		});
+	};
+	
+	po.refreshSqlResult = function(tab)
+	{
+		var result = tab.result;
+		result.nextStartRow = 1;
+		result.rows.splice(0, result.rows.length);
+		result.noMoreData = false;
+		
+		po.loadMoreSqlResult(tab);
+	};
+	
+	po.exportSqlResult = function(tab)
+	{
+		//TODO
+	};
+	
+	po.viewSqlStatement = function(tab, e)
+	{
+		if(e)
+		{
+			e = (e.originalEvent ? e.originalEvent : e);
+			e.stopPropagation();
+			e.preventDefault();
+		}
+		
+		var pm = po.vuePageModel();
+		pm.sqlStatementValue = tab.sql;
+		
+		po.elementOfId("${pid}sqlStatementProxy").click();
+	};
+	
 	po.setupForm(formModel);
 	
 	var setFormModel = {};
@@ -853,7 +944,8 @@
 				},
 				command: function()
 				{
-					po.tabviewCloseAll(po.vuePageModel().sqlpadTabs);
+					if(po.sqlpadTabMenuOnTab)
+						po.loadMoreSqlResult(po.sqlpadTabMenuOnTab);
 				}
 			},
 			{
@@ -864,6 +956,8 @@
 				},
 				command: function()
 				{
+					if(po.sqlpadTabMenuOnTab)
+						po.refreshSqlResult(po.sqlpadTabMenuOnTab);
 				}
 			},
 			{
@@ -874,6 +968,8 @@
 				},
 				command: function()
 				{
+					if(po.sqlpadTabMenuOnTab)
+						po.exportSqlResult(po.sqlpadTabMenuOnTab);
 				}
 			},
 			{
@@ -882,17 +978,21 @@
 				{
 					return po.isSqlpadTabMenuOnTabResult();
 				},
-				command: function()
+				command: function(e)
 				{
+					if(po.sqlpadTabMenuOnTab)
+						po.viewSqlStatement(po.sqlpadTabMenuOnTab, e);
 				}
 			}
 		],
-		sqlResultFullValue: ""
+		sqlResultFullValue: "",
+		sqlStatementValue: ""
 	});
 	
 	po.vueRef("${pid}sqlpadTabMenuEle", null);
 	po.vueRef("${pid}setPanelEle", null);
 	po.vueRef("${pid}fullValuePanelEle", null);
+	po.vueRef("${pid}sqlStatementPanelEle", null);
 	
 	po.vueMethod(
 	{
@@ -1045,6 +1145,11 @@
 		onShowFullValuePanel: function(e)
 		{
 			po.vueUnref("${pid}fullValuePanelEle").show(e);
+		},
+		
+		onShowSqlStatementPanel: function(e)
+		{
+			po.vueUnref("${pid}sqlStatementPanelEle").show(e);
 		}
 	});
 	
