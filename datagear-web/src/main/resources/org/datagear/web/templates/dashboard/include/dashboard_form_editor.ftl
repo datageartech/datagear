@@ -1843,8 +1843,15 @@
 			
 			onResourceContentTabMenuToggle: function(e, tab)
 			{
-				po.resourceContentTabMenuTargetId = tab.id;
-				po.vueUnref("${pid}resourceContentTabMenuEle").show(e);
+				e.stopPropagation();
+				po.vueUnref("${pid}resourceContentTabMenuEle").hide();
+				
+				//直接show会出现当点击第二个卡片但菜单还停留在第一个卡片上的情况，所以采用此方案
+				po.vueApp().$nextTick(function()
+				{
+					po.resourceContentTabMenuTargetId = tab.id;
+					po.vueUnref("${pid}resourceContentTabMenuEle").show(e);
+				});
 			},
 			
 			resCodeEditorEleId: function(tab)

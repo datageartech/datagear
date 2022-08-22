@@ -927,7 +927,7 @@
 			e.stopPropagation();
 			po.vueUnref("${pid}sqlpadTabMenuEle").hide();
 			
-			//直接show会出现点击第二个卡片时，菜单还停留在第一个卡片上，所以采用此方案
+			//直接show会出现当点击第二个卡片但菜单还停留在第一个卡片上的情况，所以采用此方案
 			po.vueApp().$nextTick(function()
 			{
 				po.sqlpadTabMenuOnTab = tab;

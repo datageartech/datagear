@@ -613,8 +613,15 @@
 		
 		onSchemaTabMenuToggle: function(e, tab)
 		{
-			po.schemaTabMenuOnTabId = tab.id;
-			po.vueUnref("${pid}schemaTabMenuEle").show(e);
+			e.stopPropagation();
+			po.vueUnref("${pid}schemaTabMenuEle").hide();
+
+			//直接show会出现当点击第二个卡片但菜单还停留在第一个卡片上的情况，所以采用此方案
+			po.vueApp().$nextTick(function()
+			{
+				po.schemaTabMenuOnTabId = tab.id;
+				po.vueUnref("${pid}schemaTabMenuEle").show(e);
+			});
 		},
 		
 		onAdd: function()
