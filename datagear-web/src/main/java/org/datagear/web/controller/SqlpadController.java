@@ -81,7 +81,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	@Autowired
 	private File tempDirectory;
 
-	private int sqlResultReadActualLobRows = 3;
+	private int sqlResultReadActualLobRows = 1;
 
 	private ObjectMapperBuilder objectMapperBuilder;
 
@@ -354,9 +354,19 @@ public class SqlpadController extends AbstractSchemaConnController
 		}
 	}
 
+	@RequestMapping(value = "/{schemaId}/sqlHistory")
+	public String sqlHistory(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@PathVariable("schemaId") String schemaId)
+	{
+		setSelectAction(request, model);
+		model.addAttribute("schemaId", schemaId);
+		
+		return "/sqlpad/sqlpad_history_table";
+	}
+
 	@RequestMapping(value = "/{schemaId}/sqlHistoryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public PagingData<SqlHistory> pagingQuerySqlHistory(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<SqlHistory> sqlHistoryData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestBody PagingQuery pagingQueryParam) throws Throwable
 	{

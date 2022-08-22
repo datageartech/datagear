@@ -781,3 +781,6 @@ label[title]:not(.no-tip)::after,
 	width: 20rem;
 	overflow: hidden;
 }
+.sql-history-panel-content .page-manager .page-content{
+	height: 45vh;
+}

@@ -56,7 +56,8 @@
 			</div>
 			<div class="flex-grow-0 text-right h-opts">
 				<p-button type="button" icon="pi pi-history" class="p-button-secondary px-4"
-					title="<@spring.message code='sqlpad.viewSqlHistory' />">
+					aria:haspopup="true" aria-controls="${pid}sqlHistoryPanel"
+					@click="onToggleSqlHistoryPanel" title="<@spring.message code='sqlHistory' />">
 				</p-button>
 				<p-button type="button" icon="pi pi-cog" class="p-button-secondary px-4"
 					aria:haspopup="true" aria-controls="${pid}setPanelPanel"
@@ -208,6 +209,17 @@
         	</p-textarea>
 		</div>
 	</p-overlaypanel>
+	<p-overlaypanel ref="${pid}sqlHistoryPanelEle" append-to="body"
+		@show="onSqlHistoryPanelShow"
+		:show-close-icon="false" id="${pid}sqlHistoryPanel">
+		<div class="pb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='sqlHistory' />
+			</label>
+		</div>
+		<div id="${pid}sqlHistoryPanelContent" class="sql-history-panel-content p-2 table-sm" style="width:50vw;">
+		</div>
+	</p-overlaypanel>
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_simple_form.ftl">
@@ -281,12 +293,14 @@
 	{
 		return po.schemaId;
 	};
-
+	
 	po.getSqlDelimiter = function()
 	{
 		var fm = po.vueFormModel();
-		if(fm.sqlDelimiter)
+		
+		if(!fm.sqlDelimiter)
 			fm.sqlDelimiter = ";";
+		
 		return fm.sqlDelimiter;
 	};
 	
@@ -781,6 +795,56 @@
 		
 		po.elementOfId("${pid}sqlStatementProxy").click();
 	};
+
+	po.loadSqlHistory = function()
+	{
+		var wrapper = po.elementOfId("${pid}sqlHistoryPanelContent", document.body);
+		if(wrapper.length > 0)
+		{
+			wrapper.empty();
+			
+			po.open("/sqlpad/"+encodeURIComponent(po.schemaId)+"/sqlHistory?multiple",
+			{
+				target: wrapper,
+				dialog: false,
+				pageParam:
+				{
+					select: function(sqlHistories)
+					{
+						po.insertSqlHistoryToSqlEditor(sqlHistories);
+					},
+					buildSqls: function(sqlHistories)
+					{
+						return po.buildSqlHistoryToSqls(sqlHistories);
+					}
+				}
+			});
+		}
+	};
+	
+	po.insertSqlHistoryToSqlEditor = function(sqlHistories)
+	{
+		var delimiter = po.getSqlDelimiter();
+		
+		var sql = po.buildSqlHistoryToSqls(sqlHistories);
+		po.insertCodeText(po.sqlEditor, sql);
+		po.sqlEditor.focus();
+	};
+	
+	po.buildSqlHistoryToSqls = function(sqlHistories)
+	{
+		var delimiter = po.getSqlDelimiter();
+		
+		var sql = "";
+		
+		$.each(sqlHistories, function(i, sh)
+		{
+			if(sh.sql)
+				sql += sh.sql + delimiter + "\n";
+		});
+		
+		return sql;
+	};
 	
 	po.setupForm(formModel);
 	
@@ -993,6 +1057,7 @@
 	po.vueRef("${pid}setPanelEle", null);
 	po.vueRef("${pid}fullValuePanelEle", null);
 	po.vueRef("${pid}sqlStatementPanelEle", null);
+	po.vueRef("${pid}sqlHistoryPanelEle", null);
 	
 	po.vueMethod(
 	{
@@ -1067,6 +1132,16 @@
 				po.sqlpadTabMenuOnTab = tab;
 				po.vueUnref("${pid}sqlpadTabMenuEle").show(e);
 			});
+		},
+		
+		onToggleSqlHistoryPanel: function(e)
+		{
+			po.vueUnref("${pid}sqlHistoryPanelEle").toggle(e);
+		},
+		
+		onSqlHistoryPanelShow: function(e)
+		{
+			po.loadSqlHistory(e);
 		},
 		
 		onToggleSetPanel: function(e)
