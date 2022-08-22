@@ -30,7 +30,7 @@
 					:icon="pm.executionStatus == pm.executionStatusType.EXECUTING ? 'pi pi-pause' : 'pi pi-play'"
 					title="<@spring.message code='sqlpad.executeWithShortcut' />">
 				</p-button>
-				<p-button type="button" icon="pi pi-stop" class="px-4" @click="onStop"
+				<p-button type="button" icon="pi pi-stop" class="p-button-secondary px-4" @click="onStop"
 					title="<@spring.message code='stop' />">
 				</p-button>
 				<p-button type="button" icon="pi pi-check" class="p-button-secondary px-4 ml-4" @click="onCommit"
@@ -75,7 +75,13 @@
 				</form>
 			</p-splitterpanel>
 			<p-splitterpanel :size="40" :min-size="20" class="overflow-auto">
-				<div class="sqlpad-tabs-wrapper w-full h-full">
+				<div class="sqlpad-tabs-wrapper w-full h-full relative">
+					<div class="opacity-0 absolute overflow-hidden flex justify-content-center" style="left:0;right:0;top:1rem;height:1px;z-index:-999;">
+						<p-button id="${pid}showFullValueProxy" type="button" icon="pi pi-cog" class="p-button-secondary px-4"
+							aria:haspopup="true" aria-controls="${pid}fullValuePanel"
+							@click="onShowFullValuePanel" title="<@spring.message code='value' />">
+						</p-button>
+					</div>
 					<p-tabview v-model:active-index="pm.sqlpadTabs.activeIndex" :scrollable="true" @tab-change="onSqlpadTabChange"
 						@tab-click="onSqlpadTabClick" class="contextmenu-tabview light-tabview h-full relative" :class="{'opacity-0': pm.sqlpadTabs.items.length == 0}">
 						<p-tabpanel v-for="tab in pm.sqlpadTabs.items" :key="tab.id" :header="tab.title">
@@ -89,15 +95,25 @@
 								<p-datatable :value="tab.result.rows" :scrollable="true" scroll-height="flex"
 									:sortable="false" striped-rows class="table-sm"
 									v-if="tab.type == 'resultSet'">
+									<p-column :row-editor="true" :frozen="true" header="<@spring.message code='rowNumber' />"
+										style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center">
+										<template #body="slotProps">
+											{{slotProps.index + 1}}
+										</template>
+									</p-column>
 									<p-column v-for="col in tab.result.table.columns"
-										:field="col.name" :header="col.name"
-										:key="col.name" style="min-width:12em">
+										:field="col.name" :header="col.name" :key="col.name">
+										<template #body="slotProps">
+											<div v-html="onRenderColumnValue(col, slotProps)"></div>
+										</template>
 									</p-column>
 								</p-datatable>
 							</div>
 						</p-tabpanel>
 					</p-tabview>
-					<p-menu id="${pid}sqlpadTabMenu" ref="${pid}sqlpadTabMenuEle" :model="pm.sqlpadTabMenuItems" :popup="true" class="text-sm"></p-menu>
+					<p-menu id="${pid}sqlpadTabMenu" ref="${pid}sqlpadTabMenuEle"
+						:model="pm.sqlpadTabMenuItems" :popup="true" class="text-sm">
+					</p-menu>
 				</div>
 			</p-splitterpanel>
 		</p-splitter>
@@ -110,7 +126,7 @@
 					<@spring.message code='set' />
 				</label>
 			</div>
-			<div class="p-2">
+			<div class="panel-content-size-xs p-2 overflow-y-auto">
 				<div class="field grid">
 					<label for="${pid}commitMode" class="field-label col-12 mb-2">
 						<@spring.message code='sqlpad.sqlCommitMode' />
@@ -162,6 +178,18 @@
 			</div>
 		</form>
 	</p-overlaypanel>
+	<p-overlaypanel ref="${pid}fullValuePanelEle" append-to="body"
+		:show-close-icon="false" id="${pid}fullValuePanel">
+		<div class="pb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='value' />
+			</label>
+		</div>
+		<div class="p-2 panel-content-size-xxs">
+			<p-textarea v-model="pm.sqlResultFullValue" class="input w-full h-full">
+        	</p-textarea>
+		</div>
+	</p-overlaypanel>
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_simple_form.ftl">
@@ -172,6 +200,10 @@
 <script>
 (function(po)
 {
+	po.sqlResultReadActualBinaryRows = parseInt("${sqlResultRowMapper.readActualBinaryRows}");
+	po.sqlResultClobPlacholder = "${sqlResultRowMapper.clobPlaceholder}";
+	po.sqlResultSqlXmlPlaceholder = "${sqlResultRowMapper.sqlXmlPlaceholder}";
+	
 	po.commitModel =
 	{
 		AUTO: "AUTO", //CommitMode.AUTO
@@ -854,11 +886,13 @@
 				{
 				}
 			}
-		]
+		],
+		sqlResultFullValue: ""
 	});
 	
 	po.vueRef("${pid}sqlpadTabMenuEle", null);
 	po.vueRef("${pid}setPanelEle", null);
+	po.vueRef("${pid}fullValuePanelEle", null);
 	
 	po.vueMethod(
 	{
@@ -965,11 +999,67 @@
 				}
 			});
 		},
+		
+		onRenderColumnValue: function(column, slotProps)
+		{
+			var value = (slotProps.data ? slotProps.data[column.name] : "");
+			
+			if(value == null || value == "")
+				return "";
+			
+			var renderValue = $.truncateIf(value);
+			
+			if($.tableMeta.isBinaryColumn(column))
+			{
+				if(slotProps.index  < po.sqlResultReadActualBinaryRows)
+				{
+					var downloadUrl = po.concatContextPath("/sqlpad/"+encodeURIComponent(po.schemaId)+"/downloadResultField");
+					downloadUrl += "?sqlpadId=" + encodeURIComponent(po.sqlpadId);
+					downloadUrl += "&value=" + encodeURIComponent(value);
+					
+					return "<a href='"+downloadUrl+"' target='_blank' class='link text-primary'>"
+							+ "<@spring.message code='download' />"
+							+"</a>";
+				}
+				else
+					return "<div class='p-tag p-tag-warning opacity-60'>"+renderValue+"</div>";
+			}
+			else if(value != renderValue)
+			{
+				return "<a href='javascript:void(0);' class='view-full-value link text-primary'>"
+						+ renderValue
+						+ "<span class='full-value hidden'>"+$.escapeHtml(value)+"</span>" + "</a>";
+			}
+			else if(value == po.sqlResultClobPlacholder && $.tableMeta.isClobColumn(column))
+			{
+				return "<div class='p-tag p-tag-warning opacity-60'>"+renderValue+"</div>";
+			}
+			else if(value == po.sqlResultSqlXmlPlaceholder && $.tableMeta.isSqlxmlColumn(column))
+			{
+				return "<div class='p-tag p-tag-warning opacity-60'>"+renderValue+"</div>";
+			}
+			else
+				return renderValue;
+		},
+		
+		onShowFullValuePanel: function(e)
+		{
+			po.vueUnref("${pid}fullValuePanelEle").show(e);
+		}
 	});
 	
 	po.vueMounted(function()
 	{
-		po.sqlEditor = po.createSqlEditor(po.elementOfId("${pid}sqlEditor"));
+		po.sqlEditor = po.createSqlEditor(po.elementOfId("${pid}sqlEditor"),
+		{
+			extraKeys:
+			{
+				"Ctrl-Enter": function()
+				{
+					po.handleExecute();
+				}
+			}
+		});
 		po.setCodeTextTimeout(po.sqlEditor, formModel.sql, true);
 		
 		po.sqlpadTaskClient = new $.TaskClient(po.concatContextPath("/sqlpad/"+encodeURIComponent(po.schemaId)+"/message"),
@@ -979,6 +1069,17 @@
 		},
 		{
 			data: { sqlpadId: po.sqlpadId }
+		});
+		
+		po.element(".sqlpad-tabs-wrapper").on("click", ".view-full-value", function(e)
+		{
+			e.stopPropagation();
+			e.preventDefault();
+			
+			var pm = po.vuePageModel();
+			pm.sqlResultFullValue = $(".full-value", this).text();
+			
+			po.elementOfId("${pid}showFullValueProxy").click();
 		});
 	});
 	

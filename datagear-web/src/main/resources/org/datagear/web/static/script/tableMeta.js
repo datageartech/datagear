@@ -354,7 +354,8 @@
 			
 			return (type == this.Types.LONGVARCHAR
 						|| type == this.Types.CLOB
-						|| type == this.Types.LONGNVARCHAR);
+						|| type == this.Types.LONGNVARCHAR
+						|| type == this.Types.NCLOB);
 		},
 		
 		isSqlxmlColumn: function(column)
