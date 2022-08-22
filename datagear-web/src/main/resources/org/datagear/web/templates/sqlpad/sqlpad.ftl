@@ -85,7 +85,16 @@
 									@click="onSqlpadTabMenuToggle($event, tab)" aria-haspopup="true" aria-controls="${pid}sqlpadTabMenu">
 								</p-button>
 							</template>
-							<div :id="tab.id" class="h-full"></div>
+							<div :id="tab.id" class="h-full">
+								<p-datatable :value="tab.result.rows" :scrollable="true" scroll-height="flex"
+									:sortable="false" striped-rows class="table-sm"
+									v-if="tab.type == 'resultSet'">
+									<p-column v-for="col in tab.result.table.columns"
+										:field="col.name" :header="col.name"
+										:key="col.name" style="min-width:12em">
+									</p-column>
+								</p-datatable>
+							</div>
 						</p-tabpanel>
 					</p-tabview>
 					<p-menu id="${pid}sqlpadTabMenu" ref="${pid}sqlpadTabMenuEle" :model="pm.sqlpadTabMenuItems" :popup="true" class="text-sm"></p-menu>
@@ -517,9 +526,9 @@
 			{
 				id: tabId,
 				title: tabTitle,
+				type: "resultSet",
 				sql: sql,
 				result: sqlSelectResult,
-				type: "resultSet"
 			};
 			
 			pm.sqlpadTabs.items.push(tab);
@@ -915,8 +924,15 @@
 		
 		onSqlpadTabMenuToggle: function(e, tab)
 		{
-			po.sqlpadTabMenuOnTab = tab;
-			po.vueUnref("${pid}sqlpadTabMenuEle").show(e);
+			e.stopPropagation();
+			po.vueUnref("${pid}sqlpadTabMenuEle").hide();
+			
+			//直接show会出现点击第二个卡片时，菜单还停留在第一个卡片上，所以采用此方案
+			po.vueApp().$nextTick(function()
+			{
+				po.sqlpadTabMenuOnTab = tab;
+				po.vueUnref("${pid}sqlpadTabMenuEle").show(e);
+			});
 		},
 		
 		onToggleSetPanel: function(e)
