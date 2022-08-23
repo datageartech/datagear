@@ -722,7 +722,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 				{
 					sendTextMessage(getSqlpadId(),
 							getMessage(getLocale(), "sqlpad.waitingForCommitOrRollback", getOverTimeThreashold()),
-							"highlight", sqlExecutionStat);
+							TextMessageData.TEXT_TYPE_WAIT_COR, sqlExecutionStat);
 
 					sendWatingMessage = true;
 				}
@@ -1347,6 +1347,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 	protected static class TextMessageData extends MessageData
 	{
 		public static final String TYPE = "TEXT";
+		
+		public static final String TEXT_TYPE_WAIT_COR = "WAIT_COMMIT_OR_ROLLBACK";
 
 		private String text;
 
@@ -1395,7 +1397,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			this.sqlExecutionStat = sqlExecutionStat;
 		}
 	}
-
+	
 	protected static class FinishMessageData extends MessageData
 	{
 		public static final String TYPE = "FINISH";

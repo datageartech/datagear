@@ -37,10 +37,12 @@
 				<p-button type="button" icon="pi pi-stop" class="p-button-secondary px-4" @click="onStop"
 					title="<@spring.message code='stop' />">
 				</p-button>
-				<p-button type="button" icon="pi pi-check" class="p-button-secondary px-4 ml-4" @click="onCommit"
+				<p-button type="button" icon="pi pi-check" class="px-4 ml-4"
+					@click="onCommit" :class="{'p-button-secondary': !pm.waitCommitOrRollback}"
 					title="<@spring.message code='commit' />">
 				</p-button>
-				<p-button type="button" icon="pi pi-undo" class="p-button-secondary px-4" @click="onRollback"
+				<p-button type="button" icon="pi pi-undo" class="px-4"
+					@click="onRollback" :class="{'p-button-secondary': !pm.waitCommitOrRollback}"
 					title="<@spring.message code='rollback' />">
 				</p-button>
 				<span class="p-inputgroup inline-flex w-auto">
@@ -285,6 +287,11 @@
 		FINISH: "FINISH" //SqlpadExecutionService.FinishMessageData
 	};
 	
+	po.textMessageTextType =
+	{
+		TEXT_TYPE_WAIT_COR: "WAIT_COMMIT_OR_ROLLBACK" //TextMessageData.TEXT_TYPE_WAIT_COR
+	};
+	
 	po.msgsTabPanelId = $.uid("msgspanel");
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
@@ -316,6 +323,16 @@
 			return pm.executionStatus;
 		
 		pm.executionStatus = status;
+	};
+
+	po.waitCommitOrRollbackStatus = function(status)
+	{
+		var pm = po.vuePageModel();
+		
+		if(status == null)
+			return pm.waitCommitOrRollback;
+		
+		pm.waitCommitOrRollback = status;
 	};
 	
 	po.handleExecute = function()
@@ -519,6 +536,11 @@
 			{
 				po.executionStatus(po.executionStatusType.PAUSED);
 			}
+			else if(msgData.sqlCommand == po.sqlCommandType.COMMIT
+						|| msgData.sqlCommand == po.sqlCommandType.ROLLBACK)
+			{
+				po.waitCommitOrRollbackStatus(false);
+			}
 			
 			if(appendContent)
 			{
@@ -536,8 +558,11 @@
 			msgDiv.addClass("execution-text");
 			
 			var myStyleClass = "";
-			if(msgData.textType == "highlight")
+			if(msgData.textType == po.textMessageTextType.TEXT_TYPE_WAIT_COR)
+			{
 				myStyleClass = "p-tag p-tag-danger";
+				po.waitCommitOrRollbackStatus(true);
+			}
 			
 			$("<div class='"+myStyleClass+"' />").html(msgData.text).appendTo(msgContentDiv);
 			po.appendSQLExecutionStatMessage(msgContentDiv, msgData.sqlExecutionStat);
@@ -854,6 +879,7 @@
 	{
 		executionStatus: po.executionStatusType.STOPPED,
 		executionStatusType: po.executionStatusType,
+		waitCommitOrRollback: false,
 		setFormModel: setFormModel,
 		commitModeOptions:
 		[
