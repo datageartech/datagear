@@ -56,7 +56,7 @@
 		</div>
 		<div class="schema-tabs-wrapper col-9 pl-3">
 			<p-tabview v-model:active-index="pm.schemaTabs.activeIndex" :scrollable="true" @tab-change="onSchemaTabChange"
-				@tab-click="onSchemaTabClick" class="contextmenu-tabview" :class="{'opacity-0': pm.schemaTabs.items.length == 0}">
+				@tab-click="onSchemaTabClick" class="contextmenu-tabview light-tabview" :class="{'opacity-0': pm.schemaTabs.items.length == 0}">
 				<p-tabpanel v-for="tab in pm.schemaTabs.items" :key="tab.id" :header="tab.title">
 					<template #header>
 						<p-button type="button" icon="pi pi-angle-down"

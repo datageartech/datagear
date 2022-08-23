@@ -192,7 +192,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String impt(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -211,7 +211,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String imptCsv(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -265,7 +265,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getTableNames().length)
 			throw new IllegalInputException();
 
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		String dataExchangeId = dataImportForm.getDataExchangeId();
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
@@ -346,7 +346,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String imptSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -397,7 +397,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getDependentNumbers().length)
 			throw new IllegalInputException();
 
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		String dataExchangeId = dataImportForm.getDataExchangeId();
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
@@ -463,7 +463,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String imptJson(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -524,7 +524,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				throw new IllegalInputException();
 		}
 
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		String dataExchangeId = importForm.getDataExchangeId();
 		String[] subDataExchangeIds = importForm.getSubDataExchangeIds();
@@ -609,7 +609,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String imptExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -662,7 +662,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getTableNames().length)
 			throw new IllegalInputException();
 
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		String dataExchangeId = dataImportForm.getDataExchangeId();
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
@@ -741,7 +741,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String imptDb(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -834,7 +834,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String expt(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -880,7 +880,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String exptCsv(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -919,7 +919,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
 
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		String dataExchangeId = exportForm.getDataExchangeId();
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
@@ -985,7 +985,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String exptExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -1023,7 +1023,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
 
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		String dataExchangeId = exportForm.getDataExchangeId();
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
@@ -1088,7 +1088,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String exptSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -1133,7 +1133,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
 
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		String dataExchangeId = exportForm.getDataExchangeId();
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
@@ -1201,7 +1201,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String exptJson(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -1252,7 +1252,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			checkNoEmptyWithElement(exportForm.getTableNames());
 		}
 
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		String dataExchangeId = exportForm.getDataExchangeId();
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();

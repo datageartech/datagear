@@ -316,6 +316,7 @@ var ${pid} =
 		"p-selectbutton": primevue.selectbutton,
 		"p-dropdown": primevue.dropdown,
 		"p-togglebutton": primevue.togglebutton,
+		"p-radiobutton": primevue.radiobutton,
 		"p-splitbutton": primevue.splitbutton,
 		"p-tree": primevue.tree,
 		"p-tabview": primevue.tabview,

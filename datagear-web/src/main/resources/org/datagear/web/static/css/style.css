@@ -502,12 +502,12 @@ label[title]:not(.no-tip)::after,
 /*数据源-表数据查询管理页*/
 .page-manager-schema .schema-tabs-wrapper .page-manager .page-content{
 	/*屏幕高度 - 列表header高度 - 选项卡标题高度*/
-	height: calc(100vh - 5rem - 5rem);
+	height: calc(100vh - 5rem - 4.5rem);
 }
 /*主页选项卡里数据源-表数据查询管理页*/
 .page-main-panel .page-manager-schema .schema-tabs-wrapper .page-manager .page-content{
 	/*屏幕高度 - 列表header高度 - 选项卡标题高度 - 主页header高度*/
-	height: calc(100vh - 5rem - 5rem - 5rem);
+	height: calc(100vh - 5rem - 4.5rem - 5rem);
 }
 
 /*隐藏对话框内的主页头，比如登录页*/
@@ -751,12 +751,12 @@ label[title]:not(.no-tip)::after,
 /*数据源-SQL工作台页*/
 .page-manager-schema .schema-tabs-wrapper .page-manager.page-sqlpad .page-content{
 	/*屏幕高度 - 选项卡标题高度 - 页header高度*/
-	height: calc(100vh - 5rem - 5.5rem);
+	height: calc(100vh - 4.5rem - 5.5rem);
 }
 /*主页选项卡里数据源-SQL工作台页*/
 .page-main-panel .page-manager-schema .schema-tabs-wrapper .page-manager.page-sqlpad .page-content{
 	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 页header高度*/
-	height: calc(100vh - 5rem - 5rem - 5.5rem);
+	height: calc(100vh - 5rem - 4.5rem - 5.5rem);
 }
 .page-sqlpad .sqlpad-tabs-wrapper .p-tabview-nav > li:first-child .p-tabview-title{
 	/*加宽消息卡片宽度，便于选中*/
