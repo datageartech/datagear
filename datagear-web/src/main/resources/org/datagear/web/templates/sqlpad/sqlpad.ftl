@@ -573,34 +573,24 @@
 	po.renderSqlResultTab = function(tabId, sql, sqlSelectResult, active)
 	{
 		var pm = po.vuePageModel();
-		var tabIndex = po.tabviewTabIndex(pm.sqlpadTabs, tabId);
-		var tab = po.tabviewTab(pm.sqlpadTabs, tabId);
 		
-		if(tab)
+		var nameSeq = po.nextSqlResultTabNameSeq();
+		var tabTitle = $.validator.format("<@spring.message code='sqlpad.selectResultWithIndex' />", nameSeq);
+		
+		var tab =
 		{
-			var tabPanel = po.elementOfId(tab.id);
-			tabPanel.empty();
-		}
-		else
-		{
-			var nameSeq = po.nextSqlResultTabNameSeq();
-			var tabTitle = $.validator.format("<@spring.message code='sqlpad.selectResultWithIndex' />", nameSeq);
-			
-			tab =
-			{
-				id: tabId,
-				title: tabTitle,
-				type: "resultSet",
-				sql: sql,
-				result: sqlSelectResult,
-			};
-			
-			pm.sqlpadTabs.items.push(tab);
-			tabIndex = pm.sqlpadTabs.items.length - 1;
-		}
+			id: tabId,
+			title: tabTitle,
+			type: "resultSet",
+			sql: sql,
+			result: sqlSelectResult,
+		};
+		
+		po.inflateResultNoMoreData(tab.result);
+		pm.sqlpadTabs.items.push(tab);
 		
 		if(active)
-			pm.sqlpadTabs.activeIndex = tabIndex;
+			pm.sqlpadTabs.activeIndex = pm.sqlpadTabs.items.length - 1;
 	};
 	
 	po.nextSqlResultTabId = function()
@@ -750,11 +740,11 @@
 			},
 			success: function(response)
 			{
-				var rows = (response.rows || []);
+				po.inflateResultNoMoreData(response);
 				result.nextStartRow = response.nextStartRow;
-				result.noMoreData = (rows.length < response.fetchSize);
+				result.noMoreData = response.noMoreData;
 				
-				$.each(rows, function(i, row)
+				$.each(response.rows, function(i, row)
 				{
 					result.rows.push(row);
 				});
@@ -764,6 +754,11 @@
 				result.loading = false;
 			}
 		});
+	};
+	
+	po.inflateResultNoMoreData = function(sqlSelectResult)
+	{
+		sqlSelectResult.noMoreData = (sqlSelectResult.rows.length < sqlSelectResult.fetchSize);
 	};
 	
 	po.refreshSqlResult = function(tab)
