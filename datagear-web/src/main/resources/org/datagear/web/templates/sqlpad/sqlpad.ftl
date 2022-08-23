@@ -24,7 +24,11 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-manager page-sqlpad">
 	<div class="page-header grid align-items-center">
-		<div class="col-12 flex">
+		<div class="col-12 flex align-items-center py-1">
+			<i class="pi pi-database text-color-secondary text-sm"></i>
+			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
+		</div>
+		<div class="col-12 flex pt-1">
 			<div class="flex-grow-1 h-opts">
 				<p-button type="button" class="px-4" @click="onExecute"
 					:icon="pm.executionStatus == pm.executionStatusType.EXECUTING ? 'pi pi-pause' : 'pi pi-play'"
