@@ -121,6 +121,7 @@
 					$("<p-dialog />").attr("id", dialogEleId).attr("app-ele-id", rootEleId)
 								.attr(":header", "model.header").attr("v-model:visible", "model.visible").attr(":modal", options.modal)
 								.attr("v-on:show", "setReponseHtml").attr("v-on:after-hide", "destroyDialogEle")
+								.attr(":close-on-escape", "false")
 								.attr(":style", "{width: model.width}")
 								.attr("class", "ajax-dialog " + $.PAGE_PARAM_BINDER_CLASS + " " + options.styleClass)
 								.attr("position", options.position)

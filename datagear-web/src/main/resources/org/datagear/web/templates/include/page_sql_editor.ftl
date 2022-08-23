@@ -80,8 +80,8 @@ po.getSqlEditorSchemaId
 		
 		var schemaId = po.getSqlEditorSchemaId();
 		
-		//关键字token不应提示
-		if(token.type == "keyword" || !schemaId)
+		//关键字token、分号token不应提示
+		if(!schemaId || token.type == "keyword" || po.isTokenSemicolonOrAfter(codeEditor, doc, cursor, token))
 		{
 			callback();
 			return;
@@ -214,6 +214,31 @@ po.getSqlEditorSchemaId
 		}
 		else
 			callback();
+	};
+	
+	//token是否是分号，或者除空格外的下一个
+	po.isTokenSemicolonOrAfter = function(codeEditor, doc, cursor, token)
+	{
+		if(!token)
+			return false;
+		
+		var scReg = /\;\s*$/;
+		
+		if(token.string && scReg.test(token.string))
+			return true;
+		
+		var blankReg = /^\s*$/;
+		
+		var foundTokenInfo = po.findPrevTokenInfo(codeEditor, doc, cursor, token, function(token)
+		{
+			if(token.string != null && !blankReg.test(token.string))
+				return true;
+		});
+		
+		if(!foundTokenInfo || !foundTokenInfo.token || !foundTokenInfo.token.string)
+			return false;
+		
+		return scReg.test(foundTokenInfo.token.string);
 	};
 	
 	po.resolveSqlHintInfo = function(codeEditor, doc, cursor, cursorToken)

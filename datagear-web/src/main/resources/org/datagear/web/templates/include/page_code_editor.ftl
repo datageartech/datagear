@@ -43,7 +43,7 @@ page_obj.ftl
 		if(options.indentWithTabs == null)
 			options.indentWithTabs = true;
 		
-		//强制禁用completeSingle选项，因为编辑器hint都是在下面的change事件中触发的
+		//强制禁用completeSingle选项，因为如果编辑器hint使用change事件中触发的话，
 		//如果这里为true，可能会导致hint死循环，且会导致退格操作无效
 		if(options.hintOptions)
 			options.hintOptions.completeSingle = false;
@@ -55,8 +55,11 @@ page_obj.ftl
 		
 		if(options.hintOptions && !options.readOnly)
 		{
-			codeEditor.on("change", function(codeEditor, changeObj)
+			codeEditor.on("keyup", function(codeEditor, e)
 			{
+				if(e.keyCode == $.keyCode.ESCAPE)
+					return;
+				
 				if(codeEditor._timeoutIdForHinting != null)
 					clearTimeout(codeEditor._timeoutIdForHinting);
 				
