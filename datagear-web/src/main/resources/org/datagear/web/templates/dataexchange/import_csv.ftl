@@ -32,31 +32,27 @@
 					:class="pm.steps.activeIndex == 1 ? '' : 'hidden'">
 					<#include "include/import_table_head.ftl">
 					<div class="subdataexchange-table-wrapper pt-2">
-						<p-datatable :value="pm.subDataExchanges" :scrollable="true" scroll-height="flex"
+						<p-datatable :value="fm.subDataExchanges" :scrollable="true" scroll-height="flex"
 							v-model:selection="pm.selectedSubDataExchanges" selection-mode="multiple"
-							:sortable="false" dataKey="subDataExchangeId" striped-rows class="table-sm">
+							:sortable="false" dataKey="id" striped-rows class="table-sm">
 							<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
-							<p-column field="number" header="<@spring.message code='givenNumber' />" style="width:4rem">
+							<p-column field="number" header="<@spring.message code='givenNumber' />" :frozen="true" style="width:5rem">
 							</p-column>
-							<p-column field="displayName" header="<@spring.message code='fileName' />"></p-column>
-							<p-column field="size" header="<@spring.message code='fileSize' />"></p-column>
-							<p-column field="tableName" header="<@spring.message code='importTableName' />">
+							<p-column field="fileDisplayName" header="<@spring.message code='fileName' />" class="col-name"></p-column>
+							<p-column field="fileSize" header="<@spring.message code='fileSize' />" class="col-version"></p-column>
+							<p-column field="tableName" header="<@spring.message code='importTableName' />" class="col-name">
 								<template #body="slotProps">
-									<div class="px-2">
-										<p-inputtext v-model="slotProps.data.tableName" class="w-full"></p-inputtext>
-									</div>
+									<p-inputtext v-model="slotProps.data.tableName" class="w-full"></p-inputtext>
 								</template>
 							</p-column>
-							<p-column field="dependentNumber" header="<@spring.message code='dependentNumber' />">
+							<p-column field="dependentNumber" header="<@spring.message code='dependentNumber' />" class="col-version">
 								<template #body="slotProps">
-									<div class="px-2">
-										<p-inputtext v-model="slotProps.data.dependentNumber" class="w-full"
-											placeholder="<@spring.message code='none' />">
-										</p-inputtext>
-									</div>
+									<p-inputtext v-model="slotProps.data.dependentNumber" class="w-full"
+										placeholder="<@spring.message code='none' />">
+									</p-inputtext>
 								</template>
 							</p-column>
-							<p-column field="importProgress" header="<@spring.message code='importProgress' />"></p-column>
+							<p-column field="status" header="<@spring.message code='importProgress' />" class="col-version col-last"></p-column>
 						</p-datatable>
 					</div>
 				</div>
@@ -74,10 +70,11 @@
 (function(po)
 {
 	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/csv/doImport";
+	po.dependentNumberAuto = "<@spring.message code='auto' />";
 	
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
-		subDataExchange.dependentNumber = "<@spring.message code='auto' />";
+		subDataExchange.dependentNumber = po.dependentNumberAuto;
 	};
 	
 	po.beforeSubmitForm = function(action)
@@ -89,17 +86,9 @@
 		}
 	};
 	
-	po.uploadUrlHandler = function()
-	{
-		var fm = po.vueFormModel();
-		var url = po.concatContextPath("/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/csv/uploadImportFile");
-		url = $.addParam(url, "dataExchangeId", po.dataExchangeId);
-		url = $.addParam(url, "zipFileNameEncoding", fm.zipFileNameEncoding);
-		
-		return url;
-	};
-	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
+	formModel.dependentNumberAuto = po.dependentNumberAuto;
+	po.inflateFormModel(formModel);
 	po.setupForm(formModel);
 	
 	po.setupImportHead("<@spring.message code='dataImport.importCsvData' />");

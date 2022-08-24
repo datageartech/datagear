@@ -39,7 +39,6 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.sql.RowSetWriter;
 
 import org.datagear.dataexchange.AbstractQuery;
 import org.datagear.dataexchange.BatchDataExchange;
@@ -229,7 +228,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		DataFormat defaultDataFormat = new DataFormat();
 		ValueDataImportOption importOption = new ValueDataImportOption(ExceptionResolve.ROLLBACK, false, false);
 		
-		TextValueFileBatchDataImportForm formModel = new TextValueFileBatchDataImportForm();
+		DefaultTextValueFileBatchDataImportForm formModel = new DefaultTextValueFileBatchDataImportForm();
 		formModel.setDataExchangeId(dataExchangeId);
 		formModel.setDataFormat(defaultDataFormat);
 		formModel.setImportOption(importOption);
@@ -259,33 +258,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptCsvDoImport(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestBody TextValueFileBatchDataImportForm dataImportForm) throws Throwable
+			@RequestBody DefaultTextValueFileBatchDataImportForm form) throws Throwable
 	{
-		if (dataImportForm == null || isEmpty(dataImportForm.getDataExchangeId())
-				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
-				|| isEmpty(dataImportForm.getFileEncoding()) || isEmpty(dataImportForm.getNumbers())
-				|| isEmpty(dataImportForm.getDependentNumbers()) || isEmpty(dataImportForm.getImportOption())
-				|| isEmpty(dataImportForm.getDataFormat()) || isEmpty(dataImportForm.getTableNames())
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getFileNames().length
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getNumbers().length
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getDependentNumbers().length
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getTableNames().length)
-			throw new IllegalInputException();
+		form.check();
 
 		final User user = WebUtils.getUser();
 
-		String dataExchangeId = dataImportForm.getDataExchangeId();
-		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
-		final String[] numbers = dataImportForm.getNumbers();
-		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
-		String[] fileNames = dataImportForm.getFileNames();
-		final String[] tableNames = dataImportForm.getTableNames();
-
-		checkNoEmptyWithElement(subDataExchangeIds);
-		checkNoEmptyWithElement(numbers);
-		checkNoEmptyWithElement(fileNames);
-		checkNoEmptyWithElement(tableNames);
-
+		String dataExchangeId = form.getDataExchangeId();
+		final List<TextValueFileSubDataImportForm> subDataExchangeForms = form.getSubDataExchanges();
+		
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
@@ -294,30 +275,29 @@ public class DataExchangeController extends AbstractSchemaConnController
 		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
-
 		Locale locale = getLocale(request);
 
-		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
+		List<SubDataExchange> subDataExchanges = new ArrayList<SubDataExchange>(subDataExchangeForms.size());
 
-		for (int i = 0; i < subDataExchangeIds.length; i++)
+		for (TextValueFileSubDataImportForm subForm : subDataExchangeForms)
 		{
-			File file = FileUtil.getFile(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, subForm.getFileName());
 			ResourceFactory<Reader> readerFactory = FileReaderResourceFactory.valueOf(file,
-					dataImportForm.getFileEncoding());
+					form.getFileEncoding());
 
-			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataImportForm.getDataFormat(),
-					dataImportForm.getImportOption(), tableNames[i], readerFactory);
+			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, form.getDataFormat(),
+					form.getImportOption(), subForm.getTableName(), readerFactory);
 
 			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
-					this.messageChannel, dataExchangeId, getMessageSource(), locale, subDataExchangeIds[i],
+					this.messageChannel, dataExchangeId, getMessageSource(), locale, subForm.getId(),
 					csvDataImport.getImportOption().getExceptionResolve());
-			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
-					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, csvDataImport));
+					evalSendDataExchangingMessageInterval(subDataExchangeForms.size(), csvDataImport));
 			csvDataImport.setListener(listener);
 
-			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], numbers[i], csvDataImport);
-			subDataExchanges[i] = subDataExchange;
+			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), subForm.getNumber(), csvDataImport);
+			subDataExchanges.add(subDataExchange);
 		}
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
@@ -327,16 +307,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 					Schema schema) throws Throwable
 			{
 				Connection cn = getConnection();
-
-				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers,
-						dataImportForm.getDependentNumberAuto());
+				inflateDependentNumbers(cn, subDataExchangeForms, form.getDependentNumberAuto());
 			}
 		}.execute();
 
-		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
+		resolveSubDataExchangeDependencies(subDataExchanges, subDataExchangeForms);
 
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchangeIds.length);
-		Collections.addAll(subDataExchangeSet, subDataExchanges);
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
 				dataExchangeId, locale);
@@ -346,7 +323,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return optMsgSuccessResponseEntity();
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/import/sql")
@@ -392,30 +369,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/import/sql/doImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptSqlDoImport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody SqlFileBatchDataImportForm dataImportForm)
+			@PathVariable("schemaId") String schemaId, @RequestBody SqlFileBatchDataImportForm form)
 			throws Exception
 	{
-		if (dataImportForm == null || isEmpty(dataImportForm.getDataExchangeId())
-				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
-				|| isEmpty(dataImportForm.getFileEncoding()) || isEmpty(dataImportForm.getNumbers())
-				|| isEmpty(dataImportForm.getDependentNumbers()) || isEmpty(dataImportForm.getImportOption())
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getFileNames().length
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getNumbers().length
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getDependentNumbers().length)
-			throw new IllegalInputException();
+		form.check();
 
 		final User user = WebUtils.getUser();
 
-		String dataExchangeId = dataImportForm.getDataExchangeId();
-		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
-		String[] numbers = dataImportForm.getNumbers();
-		String[] dependentNumbers = dataImportForm.getDependentNumbers();
-		String[] fileNames = dataImportForm.getFileNames();
-
-		checkNoEmptyWithElement(subDataExchangeIds);
-		checkNoEmptyWithElement(numbers);
-		checkNoEmptyWithElement(fileNames);
-
+		String dataExchangeId = form.getDataExchangeId();
+		final List<FileSubDataImportForm> subDataExchangeForms = form.getSubDataExchanges();
+		
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
@@ -424,36 +387,33 @@ public class DataExchangeController extends AbstractSchemaConnController
 		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
-
 		Locale locale = getLocale(request);
+		List<SubDataExchange> subDataExchanges = new ArrayList<SubDataExchange>(subDataExchangeForms.size());
 
-		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
-
-		for (int i = 0; i < subDataExchangeIds.length; i++)
+		for (FileSubDataImportForm subForm : subDataExchangeForms)
 		{
-			File file = FileUtil.getFile(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, subForm.getFileName());
 			ResourceFactory<Reader> readerFactory = FileReaderResourceFactory.valueOf(file,
-					dataImportForm.getFileEncoding());
+					form.getFileEncoding());
 
-			SqlDataImport sqlDataImport = new SqlDataImport(connectionFactory, dataImportForm.getImportOption(),
+			SqlDataImport sqlDataImport = new SqlDataImport(connectionFactory, form.getImportOption(),
 					readerFactory);
 
 			MessageSubDataImportListener listener = new MessageSubDataImportListener(this.messageChannel,
-					dataExchangeId, getMessageSource(), locale, subDataExchangeIds[i],
-					dataImportForm.getImportOption().getExceptionResolve());
-			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+					dataExchangeId, getMessageSource(), locale, subForm.getId(),
+					form.getImportOption().getExceptionResolve());
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
-					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, sqlDataImport));
+					evalSendDataExchangingMessageInterval(subDataExchangeForms.size(), sqlDataImport));
 			sqlDataImport.setListener(listener);
 
-			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], numbers[i], sqlDataImport);
-			subDataExchanges[i] = subDataExchange;
+			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), subForm.getNumber(), sqlDataImport);
+			subDataExchanges.add(subDataExchange);
 		}
 
-		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
+		resolveSubDataExchangeDependencies(subDataExchanges, subDataExchangeForms);
 
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchangeIds.length);
-		Collections.addAll(subDataExchangeSet, subDataExchanges);
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
 				dataExchangeId, locale);
@@ -463,7 +423,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return optMsgSuccessResponseEntity();
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/import/json")
@@ -511,40 +471,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptJsonDoImport(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestBody JsonFileBatchDataImportForm importForm) throws Throwable
+			@RequestBody JsonFileBatchDataImportForm form) throws Throwable
 	{
-		if (importForm == null || isEmpty(importForm.getDataExchangeId()) || isEmpty(importForm.getSubDataExchangeIds())
-				|| isEmpty(importForm.getFileNames()) || isEmpty(importForm.getFileEncoding())
-				|| isEmpty(importForm.getNumbers()) || isEmpty(importForm.getDependentNumbers())
-				|| isEmpty(importForm.getImportOption()) || isEmpty(importForm.getDataFormat())
-				|| importForm.getSubDataExchangeIds().length != importForm.getFileNames().length
-				|| importForm.getSubDataExchangeIds().length != importForm.getNumbers().length
-				|| importForm.getSubDataExchangeIds().length != importForm.getDependentNumbers().length)
-			throw new IllegalInputException();
+		form.check();
 
-		JsonDataImportOption importOption = importForm.getImportOption();
-
-		if (JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
-		{
-			if (isEmpty(importForm.getTableNames())
-					|| importForm.getSubDataExchangeIds().length != importForm.getTableNames().length)
-				throw new IllegalInputException();
-		}
+		JsonDataImportOption importOption = form.getImportOption();
 
 		final User user = WebUtils.getUser();
 
-		String dataExchangeId = importForm.getDataExchangeId();
-		String[] subDataExchangeIds = importForm.getSubDataExchangeIds();
-		final String[] numbers = importForm.getNumbers();
-		final String[] dependentNumbers = importForm.getDependentNumbers();
-		String[] fileNames = importForm.getFileNames();
-		final String[] tableNames = importForm.getTableNames();
-
-		checkNoEmptyWithElement(subDataExchangeIds);
-		checkNoEmptyWithElement(numbers);
-		checkNoEmptyWithElement(fileNames);
-		if (JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
-			checkNoEmptyWithElement(importForm.getTableNames());
+		String dataExchangeId = form.getDataExchangeId();
+		final List<TextValueFileSubDataImportForm> subDataExchangeForms = form.getSubDataExchanges();
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -554,30 +490,29 @@ public class DataExchangeController extends AbstractSchemaConnController
 		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
-
 		Locale locale = getLocale(request);
 
-		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
+		List<SubDataExchange> subDataExchanges = new ArrayList<SubDataExchange>(subDataExchangeForms.size());
 
-		for (int i = 0; i < subDataExchangeIds.length; i++)
+		for (TextValueFileSubDataImportForm subForm : subDataExchangeForms)
 		{
-			File file = FileUtil.getFile(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, subForm.getFileName());
 			ResourceFactory<Reader> readerFactory = FileReaderResourceFactory.valueOf(file,
-					importForm.getFileEncoding());
+					form.getFileEncoding());
 
-			JsonDataImport jsonDataImport = new JsonDataImport(connectionFactory, importForm.getDataFormat(),
-					importForm.getImportOption(), (tableNames == null ? null : tableNames[i]), readerFactory);
+			JsonDataImport jsonDataImport = new JsonDataImport(connectionFactory, form.getDataFormat(),
+					form.getImportOption(), subForm.getTableName(), readerFactory);
 
 			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
-					this.messageChannel, dataExchangeId, getMessageSource(), locale, subDataExchangeIds[i],
+					this.messageChannel, dataExchangeId, getMessageSource(), locale, subForm.getId(),
 					jsonDataImport.getImportOption().getExceptionResolve());
-			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
-					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, jsonDataImport));
+					evalSendDataExchangingMessageInterval(subDataExchangeForms.size(), jsonDataImport));
 			jsonDataImport.setListener(listener);
 
-			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], numbers[i], jsonDataImport);
-			subDataExchanges[i] = subDataExchange;
+			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), subForm.getNumber(), jsonDataImport);
+			subDataExchanges.add(subDataExchange);
 		}
 
 		if (JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
@@ -590,16 +525,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 				{
 					Connection cn = getConnection();
 
-					inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers,
-							importForm.getDependentNumberAuto());
+					inflateDependentNumbers(cn, subDataExchangeForms, form.getDependentNumberAuto());
 				}
 			}.execute();
 		}
 
-		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
+		resolveSubDataExchangeDependencies(subDataExchanges, subDataExchangeForms);
 
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchangeIds.length);
-		Collections.addAll(subDataExchangeSet, subDataExchanges);
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
 				dataExchangeId, locale);
@@ -609,7 +542,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return optMsgSuccessResponseEntity();
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/import/excel")
@@ -656,31 +589,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptExcelDoImport(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestBody TextValueFileBatchDataImportForm dataImportForm) throws Throwable
+			@RequestBody DefaultTextValueFileBatchDataImportForm form) throws Throwable
 	{
-		if (dataImportForm == null || isEmpty(dataImportForm.getDataExchangeId())
-				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
-				|| isEmpty(dataImportForm.getNumbers()) || isEmpty(dataImportForm.getDependentNumbers())
-				|| isEmpty(dataImportForm.getImportOption()) || isEmpty(dataImportForm.getDataFormat())
-				|| isEmpty(dataImportForm.getTableNames())
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getFileNames().length
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getNumbers().length
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getDependentNumbers().length
-				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getTableNames().length)
-			throw new IllegalInputException();
+		form.check();
 
 		final User user = WebUtils.getUser();
 
-		String dataExchangeId = dataImportForm.getDataExchangeId();
-		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
-		final String[] numbers = dataImportForm.getNumbers();
-		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
-		String[] fileNames = dataImportForm.getFileNames();
-		final String[] tableNames = dataImportForm.getTableNames();
-
-		checkNoEmptyWithElement(subDataExchangeIds);
-		checkNoEmptyWithElement(numbers);
-		checkNoEmptyWithElement(fileNames);
+		String dataExchangeId = form.getDataExchangeId();
+		final List<TextValueFileSubDataImportForm> subDataExchangeForms = form.getSubDataExchanges();
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -690,29 +606,28 @@ public class DataExchangeController extends AbstractSchemaConnController
 		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
-
 		Locale locale = getLocale(request);
 
-		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
+		List<SubDataExchange> subDataExchanges = new ArrayList<SubDataExchange>(subDataExchangeForms.size());
 
-		for (int i = 0; i < subDataExchangeIds.length; i++)
+		for (TextValueFileSubDataImportForm subForm : subDataExchangeForms)
 		{
-			File file = FileUtil.getFile(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, subForm.getFileName());
 
-			ExcelDataImport excelDataImport = new ExcelDataImport(connectionFactory, dataImportForm.getDataFormat(),
-					dataImportForm.getImportOption(), file);
-			excelDataImport.setUnifiedTable(tableNames[i]);
+			ExcelDataImport excelDataImport = new ExcelDataImport(connectionFactory, form.getDataFormat(),
+					form.getImportOption(), file);
+			excelDataImport.setUnifiedTable(subForm.getTableName());
 
 			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
-					this.messageChannel, dataExchangeId, getMessageSource(), locale, subDataExchangeIds[i],
+					this.messageChannel, dataExchangeId, getMessageSource(), locale, subForm.getId(),
 					excelDataImport.getImportOption().getExceptionResolve());
-			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
-					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, excelDataImport));
+					evalSendDataExchangingMessageInterval(subDataExchangeForms.size(), excelDataImport));
 			excelDataImport.setListener(listener);
 
-			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], numbers[i], excelDataImport);
-			subDataExchanges[i] = subDataExchange;
+			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), subForm.getNumber(), excelDataImport);
+			subDataExchanges.add(subDataExchange);
 		}
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
@@ -723,15 +638,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 			{
 				Connection cn = getConnection();
 
-				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers,
-						dataImportForm.getDependentNumberAuto());
+				inflateDependentNumbers(cn, subDataExchangeForms,
+						form.getDependentNumberAuto());
 			}
 		}.execute();
 
-		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
+		resolveSubDataExchangeDependencies(subDataExchanges, subDataExchangeForms);
 
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchangeIds.length);
-		Collections.addAll(subDataExchangeSet, subDataExchanges);
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
 				dataExchangeId, locale);
@@ -741,30 +655,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return optMsgSuccessResponseEntity();
+		return operationSuccessResponseEntity(request);
 	}
-
-	@RequestMapping("/{schemaId}/import/db")
-	public String imptDb(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
-	{
-		final User user = WebUtils.getUser();
-
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
-			{
-				checkDeleteTableDataPermission(schema, user);
-			}
-		}.execute();
-
-		springModel.addAttribute("dataExchangeId", IDUtil.uuid());
-
-		return "/dataexchange/import_db";
-	}
-
+	
 	/**
 	 * 查看子数据交换日志。
 	 * 
@@ -915,28 +808,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/csv/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptCsvDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody TextFileBatchDataExportForm exportForm)
+			@PathVariable("schemaId") String schemaId, @RequestBody DefaultTextFileBatchDataExportForm form)
 			throws Exception
 	{
-		if (exportForm == null || isEmpty(exportForm.getDataExchangeId()) || isEmpty(exportForm.getDataFormat())
-				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getFileEncoding())
-				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
-				|| isEmpty(exportForm.getFileNames())
-				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
-				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
-			throw new IllegalInputException();
+		form.check();
 
 		final User user = WebUtils.getUser();
 
-		String dataExchangeId = exportForm.getDataExchangeId();
-		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
-		String[] queries = exportForm.getQueries();
-		String[] fileNames = exportForm.getFileNames();
-
-		checkNoEmptyWithElement(subDataExchangeIds);
-		checkNoEmptyWithElement(queries);
-		checkNoEmptyWithElement(fileNames);
-
+		String dataExchangeId = form.getDataExchangeId();
+		List<TextFileSubDataExportForm> subDataExchangeForms = form.getSubDataExchanges();
+		
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
@@ -945,30 +826,29 @@ public class DataExchangeController extends AbstractSchemaConnController
 		checkReadTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
-
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
-		for (int i = 0; i < subDataExchangeIds.length; i++)
+		for (TextFileSubDataExportForm subForm : subDataExchangeForms)
 		{
-			Query query = toQuery(queries[i]);
+			Query query = toQuery(subForm.getQuery());
 
-			File file = FileUtil.getFile(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, subForm.getFileName());
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(file,
-					exportForm.getFileEncoding());
+					form.getFileEncoding());
 
-			CsvDataExport csvDataExport = new CsvDataExport(connectionFactory, exportForm.getDataFormat(),
-					exportForm.getExportOption(), query, writerFactory);
+			CsvDataExport csvDataExport = new CsvDataExport(connectionFactory, form.getDataFormat(),
+					form.getExportOption(), query, writerFactory);
 
 			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
-					dataExchangeId, getMessageSource(), getLocale(request), subDataExchangeIds[i]);
-			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+					dataExchangeId, getMessageSource(), getLocale(request), subForm.getId());
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
-					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, csvDataExport));
+					evalSendDataExchangingMessageInterval(subDataExchangeForms.size(), csvDataExport));
 			csvDataExport.setListener(listener);
 
-			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], csvDataExport);
+			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), csvDataExport);
 			subDataExchanges.add(subDataExchange);
 		}
 
@@ -980,12 +860,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
-
-		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
-		responseEntity.getBody().setData(subDataExchangeFileNameMap);
-
-		return responseEntity;
+		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeForms);
+		return operationSuccessResponseEntity(request, subDataExchangeFileNameMap);
 	}
 
 	@RequestMapping("/{schemaId}/export/excel")
@@ -1020,26 +896,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/excel/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptExcelDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody TextFileBatchDataExportForm exportForm)
+			@PathVariable("schemaId") String schemaId, @RequestBody DefaultTextFileBatchDataExportForm form)
 			throws Exception
 	{
-		if (exportForm == null || isEmpty(exportForm.getDataExchangeId()) || isEmpty(exportForm.getDataFormat())
-				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getSubDataExchangeIds())
-				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getFileNames())
-				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
-				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
-			throw new IllegalInputException();
+		form.check();
 
 		final User user = WebUtils.getUser();
 
-		String dataExchangeId = exportForm.getDataExchangeId();
-		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
-		String[] queries = exportForm.getQueries();
-		String[] fileNames = exportForm.getFileNames();
-
-		checkNoEmptyWithElement(subDataExchangeIds);
-		checkNoEmptyWithElement(queries);
-		checkNoEmptyWithElement(fileNames);
+		String dataExchangeId = form.getDataExchangeId();
+		List<TextFileSubDataExportForm> subDataExchangeForms = form.getSubDataExchanges();
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -1054,24 +919,24 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
-		for (int i = 0; i < subDataExchangeIds.length; i++)
+		for (TextFileSubDataExportForm subForm : subDataExchangeForms)
 		{
-			Query query = toQuery(queries[i]);
+			Query query = toQuery(subForm.getQuery());
 
-			File file = FileUtil.getFile(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, subForm.getFileName());
 			ResourceFactory<OutputStream> writerFactory = FileOutputStreamResourceFactory.valueOf(file);
 
-			ExcelDataExport excelDataExport = new ExcelDataExport(connectionFactory, exportForm.getDataFormat(),
-					exportForm.getExportOption(), query, writerFactory);
+			ExcelDataExport excelDataExport = new ExcelDataExport(connectionFactory, form.getDataFormat(),
+					form.getExportOption(), query, writerFactory);
 
 			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
-					dataExchangeId, getMessageSource(), getLocale(request), subDataExchangeIds[i]);
-			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+					dataExchangeId, getMessageSource(), getLocale(request), subForm.getId());
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
-					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, excelDataExport));
+					evalSendDataExchangingMessageInterval(subDataExchangeForms.size(), excelDataExport));
 			excelDataExport.setListener(listener);
 
-			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], excelDataExport);
+			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), excelDataExport);
 			subDataExchanges.add(subDataExchange);
 		}
 
@@ -1083,12 +948,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
-
-		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
-		responseEntity.getBody().setData(subDataExchangeFileNameMap);
-
-		return responseEntity;
+		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeForms);
+		return operationSuccessResponseEntity(request, subDataExchangeFileNameMap);
 	}
 
 	@RequestMapping("/{schemaId}/export/sql")
@@ -1128,30 +989,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/sql/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptSqlDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody SqlFileBatchDataExportForm exportForm)
+			@PathVariable("schemaId") String schemaId, @RequestBody SqlFileBatchDataExportForm form)
 			throws Exception
 	{
-		if (exportForm == null || isEmpty(exportForm.getDataExchangeId()) || isEmpty(exportForm.getDataFormat())
-				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getFileEncoding())
-				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
-				|| isEmpty(exportForm.getTableNames()) || isEmpty(exportForm.getFileNames())
-				|| exportForm.getSubDataExchangeIds().length != exportForm.getTableNames().length
-				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
-				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
-			throw new IllegalInputException();
+		form.check();
 
 		final User user = WebUtils.getUser();
 
-		String dataExchangeId = exportForm.getDataExchangeId();
-		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
-		String[] queries = exportForm.getQueries();
-		String[] tableNames = exportForm.getTableNames();
-		String[] fileNames = exportForm.getFileNames();
-
-		checkNoEmptyWithElement(subDataExchangeIds);
-		checkNoEmptyWithElement(queries);
-		checkNoEmptyWithElement(tableNames);
-		checkNoEmptyWithElement(fileNames);
+		String dataExchangeId = form.getDataExchangeId();
+		List<TableNameTextFileSubDataExportForm> subDataExchangeForms = form.getSubDataExchanges();
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -1161,30 +1007,29 @@ public class DataExchangeController extends AbstractSchemaConnController
 		checkReadTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
-
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
-		for (int i = 0; i < subDataExchangeIds.length; i++)
+		for (TableNameTextFileSubDataExportForm subForm : subDataExchangeForms)
 		{
-			Query query = toQuery(queries[i]);
+			Query query = toQuery(subForm.getQuery());
 
-			File file = FileUtil.getFile(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, subForm.getFileName());
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(file,
-					exportForm.getFileEncoding());
+					form.getFileEncoding());
 
-			SqlDataExport sqlDataExport = new SqlDataExport(connectionFactory, exportForm.getDataFormat(),
-					exportForm.getExportOption(), query, tableNames[i], writerFactory);
+			SqlDataExport sqlDataExport = new SqlDataExport(connectionFactory, form.getDataFormat(),
+					form.getExportOption(), query, subForm.getTableName(), writerFactory);
 
 			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
-					dataExchangeId, getMessageSource(), getLocale(request), subDataExchangeIds[i]);
-			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+					dataExchangeId, getMessageSource(), getLocale(request), subForm.getId());
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
-					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, sqlDataExport));
+					evalSendDataExchangingMessageInterval(subDataExchangeForms.size(), sqlDataExport));
 			sqlDataExport.setListener(listener);
 
-			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], sqlDataExport);
+			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), sqlDataExport);
 			subDataExchanges.add(subDataExchange);
 		}
 
@@ -1196,12 +1041,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
-
-		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
-		responseEntity.getBody().setData(subDataExchangeFileNameMap);
-
-		return responseEntity;
+		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeForms);
+		return operationSuccessResponseEntity(request, subDataExchangeFileNameMap);
 	}
 
 	@RequestMapping("/{schemaId}/export/json")
@@ -1237,39 +1078,17 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/json/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptJsonDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody JsonFileBatchDataExportForm exportForm)
+			@PathVariable("schemaId") String schemaId, @RequestBody JsonFileBatchDataExportForm form)
 			throws Exception
 	{
-		if (exportForm == null || isEmpty(exportForm.getDataExchangeId()) || isEmpty(exportForm.getDataFormat())
-				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getFileEncoding())
-				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
-				|| isEmpty(exportForm.getFileNames())
-				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
-				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
-			throw new IllegalInputException();
+		form.check();
 
-		JsonDataExportOption exportOption = exportForm.getExportOption();
-
-		if (JsonDataFormat.TABLE_OBJECT.equals(exportOption.getJsonDataFormat()))
-		{
-			if (isEmpty(exportForm.getTableNames())
-					|| exportForm.getSubDataExchangeIds().length != exportForm.getTableNames().length)
-				throw new IllegalInputException();
-
-			checkNoEmptyWithElement(exportForm.getTableNames());
-		}
+		JsonDataExportOption exportOption = form.getExportOption();
 
 		final User user = WebUtils.getUser();
 
-		String dataExchangeId = exportForm.getDataExchangeId();
-		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
-		String[] queries = exportForm.getQueries();
-		String[] tableNames = exportForm.getTableNames();
-		String[] fileNames = exportForm.getFileNames();
-
-		checkNoEmptyWithElement(subDataExchangeIds);
-		checkNoEmptyWithElement(queries);
-		checkNoEmptyWithElement(fileNames);
+		String dataExchangeId = form.getDataExchangeId();
+		List<TableNameTextFileSubDataExportForm> subDataExchangeForms = form.getSubDataExchanges();
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -1279,30 +1098,29 @@ public class DataExchangeController extends AbstractSchemaConnController
 		checkReadTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
-
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
-		for (int i = 0; i < subDataExchangeIds.length; i++)
+		for (TableNameTextFileSubDataExportForm subForm : subDataExchangeForms)
 		{
-			Query query = toQuery(queries[i]);
+			Query query = toQuery(subForm.getQuery());
 
-			File file = FileUtil.getFile(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, subForm.getFileName());
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(file,
-					exportForm.getFileEncoding());
+					form.getFileEncoding());
 
-			JsonDataExport csvDataExport = new JsonDataExport(connectionFactory, exportForm.getDataFormat(),
-					exportOption, query, writerFactory, (tableNames == null ? null : tableNames[i]));
+			JsonDataExport csvDataExport = new JsonDataExport(connectionFactory, form.getDataFormat(),
+					exportOption, query, writerFactory, subForm.getTableName());
 
 			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
-					dataExchangeId, getMessageSource(), getLocale(request), subDataExchangeIds[i]);
-			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+					dataExchangeId, getMessageSource(), getLocale(request), subForm.getId());
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
-					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, csvDataExport));
+					evalSendDataExchangingMessageInterval(subDataExchangeForms.size(), csvDataExport));
 			csvDataExport.setListener(listener);
 
-			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], csvDataExport);
+			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), csvDataExport);
 			subDataExchanges.add(subDataExchange);
 		}
 
@@ -1314,12 +1132,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
-
-		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
-		responseEntity.getBody().setData(subDataExchangeFileNameMap);
-
-		return responseEntity;
+		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeForms);
+		return operationSuccessResponseEntity(request, subDataExchangeFileNameMap);
 	}
 
 	@RequestMapping(value = "/{schemaId}/export/download")
@@ -1402,47 +1216,53 @@ public class DataExchangeController extends AbstractSchemaConnController
 	 * 根据表依赖关系填充依赖编号。
 	 * 
 	 * @param cn
-	 * @param numbers
-	 * @param tableNames
-	 * @param dependentNumbers
+	 * @param subForms
 	 * @param inflateFlag
 	 */
-	protected void inflateDependentNumbers(Connection cn, String[] numbers, String[] tableNames,
-			String[] dependentNumbers, String inflateFlag)
+	protected void inflateDependentNumbers(Connection cn, List<? extends TextValueFileSubDataImportForm> subForms, String inflateFlag)
 	{
-		if (tableNames == null || tableNames.length == 0)
+		if (subForms == null || subForms.isEmpty())
 			return;
+		
+		String[] tableNames = new String[subForms.size()];
+		for(int i=0, len=subForms.size(); i<len; i++)
+		{
+			TextValueFileSubDataImportForm subForm = subForms.get(i);
+			tableNames[i] = subForm.getTableName();
+		}
 
 		List<String[]> importTabless = this.dbMetaResolver.getImportTables(cn, tableNames);
 
-		for (int i = 0; i < dependentNumbers.length; i++)
+		for(int i=0, len=subForms.size(); i<len; i++)
 		{
-			if (!inflateFlag.equals(dependentNumbers[i]))
+			TextValueFileSubDataImportForm subForm = subForms.get(i);
+			
+			if (!inflateFlag.equals(subForm.getDependentNumber()))
 				continue;
 
 			String[] myImportTables = importTabless.get(i);
 
 			if (myImportTables == null || myImportTables.length == 0)
-				dependentNumbers[i] = "";
+				subForm.setDependentNumber("");
 			else
 			{
 				StringBuilder myDependentNumber = new StringBuilder();
 
 				for (String myImportTable : myImportTables)
 				{
-					for (int j = 0; j < tableNames.length; j++)
+					for(TextValueFileSubDataImportForm ifm : subForms)
 					{
-						if (myImportTable.equalsIgnoreCase(tableNames[j]))
+						if (myImportTable.equalsIgnoreCase(ifm.getTableName()))
 						{
 							if (myDependentNumber.length() != 0)
 								myDependentNumber.append(',');
-
-							myDependentNumber.append(numbers[j]);
+							
+							myDependentNumber.append(ifm.getNumber());
 						}
 					}
 				}
 
-				dependentNumbers[i] = myDependentNumber.toString();
+				subForm.setDependentNumber(myDependentNumber.toString());
 			}
 		}
 	}
@@ -1451,21 +1271,17 @@ public class DataExchangeController extends AbstractSchemaConnController
 	 * 处理{@linkplain SubDataExchange}依赖。
 	 * 
 	 * @param subDataExchanges
-	 * @param numbers
-	 * @param dependentNumbers
+	 * @param subForms
 	 */
-	protected void resolveSubDataExchangeDependencies(SubDataExchange[] subDataExchanges, String[] numbers,
-			String[] dependentNumbers)
+	protected void resolveSubDataExchangeDependencies(List<? extends SubDataExchange> subDataExchanges,
+			List<? extends FileSubDataImportForm> subForms)
 	{
-		for (int i = 0; i < subDataExchanges.length; i++)
+		for (int i = 0, len=subDataExchanges.size(); i < len; i++)
 		{
-			SubDataExchange subDataExchange = subDataExchanges[i];
-			String dependentNumber = dependentNumbers[i];
-
-			if (dependentNumber == null)
-				continue;
-
-			dependentNumber = dependentNumber.trim();
+			SubDataExchange subDataExchange = subDataExchanges.get(i);
+			FileSubDataImportForm subForm = subForms.get(i);
+			String dependentNumber = subForm.getDependentNumber();
+			dependentNumber = (dependentNumber == null ? null : dependentNumber.trim());
 
 			if (isEmpty(dependentNumber))
 				continue;
@@ -1481,11 +1297,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 				if (isEmpty(myDependentNumber))
 					continue;
 
-				for (int k = 0; k < numbers.length; k++)
+				for(int k=0, klen=subForms.size(); k< klen; k++)
 				{
-					if (numbers[k].equals(myDependentNumber))
+					if (subForms.get(k).getNumber().equals(myDependentNumber))
 					{
-						myDependencies.add(subDataExchanges[k]);
+						myDependencies.add(subDataExchanges.get(k));
 						break;
 					}
 				}
@@ -1571,12 +1387,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return batchDataExchange;
 	}
 
-	protected Map<String, String> buildSubDataExchangeFileNameMap(String[] subDataExchangeIds, String[] fileNames)
+	protected Map<String, String> buildSubDataExchangeFileNameMap(List<? extends AbstractFileSubDataExchangeForm> subForms)
 	{
 		Map<String, String> map = new HashMap<>();
 
-		for (int i = 0; i < subDataExchangeIds.length; i++)
-			map.put(subDataExchangeIds[i], fileNames[i]);
+		for (AbstractFileSubDataExchangeForm subForm : subForms)
+			map.put(subForm.getId(), subForm.getFileName());
 
 		return map;
 	}
@@ -1639,10 +1455,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 			batchDataExchangeResult.cancel(subDataExchangeIds[i]);
-
-		ResponseEntity<OperationMessage> responseEntity = optMsgSuccessResponseEntity();
-
-		return responseEntity;
+		
+		return operationSuccessResponseEntity(request);
 	}
 
 	protected void checkNoEmptyWithElement(Object[] array) throws IllegalInputException
@@ -1942,15 +1756,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class AbstractFileBatchDataExchangeForm implements ControllerForm
+	public static abstract class AbstractFileBatchDataExchangeForm<T extends AbstractFileSubDataExchangeForm> implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 
 		private String dataExchangeId;
 
-		private String[] subDataExchangeIds;
-
-		private String[] fileNames;
+		private List<T> subDataExchanges;
 
 		private String fileEncoding;
 
@@ -1971,24 +1783,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 			this.dataExchangeId = dataExchangeId;
 		}
 
-		public String[] getSubDataExchangeIds()
+		public List<T> getSubDataExchanges()
 		{
-			return subDataExchangeIds;
+			return subDataExchanges;
 		}
 
-		public void setSubDataExchangeIds(String[] subDataExchangeIds)
+		public void setSubDataExchanges(List<T> subDataExchanges)
 		{
-			this.subDataExchangeIds = subDataExchangeIds;
-		}
-
-		public String[] getFileNames()
-		{
-			return fileNames;
-		}
-
-		public void setFileNames(String[] fileNames)
-		{
-			this.fileNames = fileNames;
+			this.subDataExchanges = subDataExchanges;
 		}
 
 		public String getFileEncoding()
@@ -2010,18 +1812,69 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			this.zipFileNameEncoding = zipFileNameEncoding;
 		}
+		
+		public void check() throws IllegalInputException
+		{
+			if(StringUtil.isEmpty(this.dataExchangeId) || StringUtil.isEmpty(this.fileEncoding))
+				throw new IllegalInputException();
+			
+			checkSubDataExchanges();
+		}
+		
+		protected void checkSubDataExchanges() throws IllegalInputException
+		{
+			if(StringUtil.isEmpty(this.subDataExchanges))
+				throw new IllegalInputException();
+			
+			for(T sub : this.subDataExchanges)
+				checkSubDataExchange(sub);
+		}
+		
+		protected void checkSubDataExchange(T subDataExchange) throws IllegalInputException
+		{
+			if(StringUtil.isEmpty(subDataExchange.getId()) || StringUtil.isEmpty(subDataExchange.getFileName()))
+				throw new IllegalInputException();
+		}
 	}
-
-	public static class AbstractFileBatchDataImportForm extends AbstractFileBatchDataExchangeForm
+	
+	public static abstract class AbstractFileSubDataExchangeForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
+		
+		private String id;
+		
+		private String fileName;
 
-		/** 导入条目编号 */
-		private String[] numbers;
+		public AbstractFileSubDataExchangeForm()
+		{
+			super();
+		}
 
-		/** 导入条目依赖编号 */
-		private String[] dependentNumbers;
+		public String getId()
+		{
+			return id;
+		}
 
+		public void setId(String id)
+		{
+			this.id = id;
+		}
+
+		public String getFileName()
+		{
+			return fileName;
+		}
+
+		public void setFileName(String fileName)
+		{
+			this.fileName = fileName;
+		}
+	}
+
+	public static abstract class AbstractFileBatchDataImportForm<T extends FileSubDataImportForm> extends AbstractFileBatchDataExchangeForm<T>
+	{
+		private static final long serialVersionUID = 1L;
+		
 		/** 自动处理导入条目依赖编号的字面值 */
 		private String dependentNumberAuto;
 
@@ -2029,27 +1882,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			super();
 		}
-
-		public String[] getNumbers()
-		{
-			return numbers;
-		}
-
-		public void setNumbers(String[] numbers)
-		{
-			this.numbers = numbers;
-		}
-
-		public String[] getDependentNumbers()
-		{
-			return dependentNumbers;
-		}
-
-		public void setDependentNumbers(String[] dependentNumbers)
-		{
-			this.dependentNumbers = dependentNumbers;
-		}
-
+		
 		public String getDependentNumberAuto()
 		{
 			return dependentNumberAuto;
@@ -2059,9 +1892,63 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			this.dependentNumberAuto = dependentNumberAuto;
 		}
+
+		@Override
+		public void check() throws IllegalInputException
+		{
+			if(this.dependentNumberAuto == null)
+				throw new IllegalInputException();
+			
+			super.check();
+		}
+
+		@Override
+		protected void checkSubDataExchange(T subDataExchange) throws IllegalInputException
+		{
+			super.checkSubDataExchange(subDataExchange);
+
+			if(StringUtil.isEmpty(subDataExchange.getNumber()))
+				throw new IllegalInputException();
+		}
+	}
+	
+	public static class FileSubDataImportForm extends AbstractFileSubDataExchangeForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 导入条目编号 */
+		private String number;
+
+		/** 导入条目依赖编号 */
+		private String dependentNumber;
+
+		public FileSubDataImportForm()
+		{
+			super();
+		}
+
+		public String getNumber()
+		{
+			return number;
+		}
+
+		public void setNumber(String number)
+		{
+			this.number = number;
+		}
+
+		public String getDependentNumber()
+		{
+			return dependentNumber;
+		}
+
+		public void setDependentNumber(String dependentNumber)
+		{
+			this.dependentNumber = dependentNumber;
+		}
 	}
 
-	public static class TextValueFileBatchDataImportForm extends AbstractFileBatchDataImportForm
+	public static abstract class AbstractTextValueFileBatchDataImportForm<T extends TextValueFileSubDataImportForm> extends AbstractFileBatchDataImportForm<T>
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -2069,9 +1956,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		private DataFormat dataFormat;
 
-		private String[] tableNames;
-
-		public TextValueFileBatchDataImportForm()
+		public AbstractTextValueFileBatchDataImportForm()
 		{
 			super();
 		}
@@ -2096,18 +1981,62 @@ public class DataExchangeController extends AbstractSchemaConnController
 			this.dataFormat = dataFormat;
 		}
 
-		public String[] getTableNames()
+		@Override
+		public void check() throws IllegalInputException
 		{
-			return tableNames;
+			if(this.importOption == null || this.dataFormat == null)
+				throw new IllegalInputException();
+			
+			super.check();
 		}
 
-		public void setTableNames(String[] tableNames)
+		@Override
+		protected void checkSubDataExchange(T subDataExchange) throws IllegalInputException
 		{
-			this.tableNames = tableNames;
+			super.checkSubDataExchange(subDataExchange);
+			checkSubDataExchangeTableName(subDataExchange);
+		}
+		
+		protected void checkSubDataExchangeTableName(T subDataExchange) throws IllegalInputException
+		{
+			if(StringUtil.isEmpty(subDataExchange.getTableName()))
+				throw new IllegalInputException();
+		}
+	}
+	
+	public static class TextValueFileSubDataImportForm extends FileSubDataImportForm
+	{
+		private static final long serialVersionUID = 1L;
+		
+		private String tableName;
+
+		public TextValueFileSubDataImportForm()
+		{
+			super();
+		}
+
+		public String getTableName()
+		{
+			return tableName;
+		}
+
+		public void setTableName(String tableName)
+		{
+			this.tableName = tableName;
 		}
 	}
 
-	public static class JsonFileBatchDataImportForm extends TextValueFileBatchDataImportForm
+	public static class DefaultTextValueFileBatchDataImportForm extends AbstractTextValueFileBatchDataImportForm<TextValueFileSubDataImportForm>
+	{
+		private static final long serialVersionUID = 1L;
+
+		public DefaultTextValueFileBatchDataImportForm()
+		{
+			super();
+		}
+	}
+
+	public static class JsonFileBatchDataImportForm extends AbstractTextValueFileBatchDataImportForm<TextValueFileSubDataImportForm>
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -2123,9 +2052,17 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			this.importOption = importOption;
 		}
+
+		@Override
+		protected void checkSubDataExchangeTableName(TextValueFileSubDataImportForm subDataExchange)
+				throws IllegalInputException
+		{
+			if(JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
+				super.checkSubDataExchangeTableName(subDataExchange);
+		}
 	}
 
-	public static class SqlFileBatchDataImportForm extends AbstractFileBatchDataImportForm
+	public static class SqlFileBatchDataImportForm extends AbstractFileBatchDataImportForm<FileSubDataImportForm>
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -2147,7 +2084,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class TextFileBatchDataExportForm extends AbstractFileBatchDataExchangeForm
+	public static abstract class AbstractTextFileBatchDataExportForm<T extends TextFileSubDataExportForm> extends AbstractFileBatchDataExchangeForm<T>
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -2155,9 +2092,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		private DataFormat dataFormat;
 
-		private String[] queries;
-
-		public TextFileBatchDataExportForm()
+		public AbstractTextFileBatchDataExportForm()
 		{
 			super();
 		}
@@ -2182,22 +2117,82 @@ public class DataExchangeController extends AbstractSchemaConnController
 			this.dataFormat = dataFormat;
 		}
 
-		public String[] getQueries()
+		@Override
+		public void check() throws IllegalInputException
 		{
-			return queries;
+			if(this.exportOption == null || this.dataFormat == null)
+				throw new IllegalInputException();
+			
+			super.check();
 		}
 
-		public void setQueries(String[] queries)
+		@Override
+		protected void checkSubDataExchange(T subDataExchange) throws IllegalInputException
 		{
-			this.queries = queries;
+			super.checkSubDataExchange(subDataExchange);
+
+			if(StringUtil.isEmpty(subDataExchange.getQuery()))
+				throw new IllegalInputException();
 		}
 	}
 
-	public static class SqlFileBatchDataExportForm extends TextFileBatchDataExportForm
+	public static class DefaultTextFileBatchDataExportForm extends AbstractTextFileBatchDataExportForm<TextFileSubDataExportForm>
 	{
 		private static final long serialVersionUID = 1L;
 
-		private String[] tableNames;
+		public DefaultTextFileBatchDataExportForm()
+		{
+			super();
+		}
+	}
+	
+	public static class TextFileSubDataExportForm extends AbstractFileSubDataExchangeForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String query;
+
+		public TextFileSubDataExportForm()
+		{
+			super();
+		}
+
+		public String getQuery()
+		{
+			return query;
+		}
+
+		public void setQuery(String query)
+		{
+			this.query = query;
+		}
+	}
+	
+	public static class TableNameTextFileSubDataExportForm extends TextFileSubDataExportForm
+	{
+		private static final long serialVersionUID = 1L;
+		
+		private String tableName;
+
+		public TableNameTextFileSubDataExportForm()
+		{
+			super();
+		}
+
+		public String getTableName()
+		{
+			return tableName;
+		}
+
+		public void setTableName(String tableName)
+		{
+			this.tableName = tableName;
+		}
+	}
+
+	public static class SqlFileBatchDataExportForm extends AbstractTextFileBatchDataExportForm<TableNameTextFileSubDataExportForm>
+	{
+		private static final long serialVersionUID = 1L;
 
 		private SqlDataExportOption exportOption;
 
@@ -2217,38 +2212,25 @@ public class DataExchangeController extends AbstractSchemaConnController
 			this.exportOption = exportOption;
 		}
 
-		public String[] getTableNames()
+		@Override
+		protected void checkSubDataExchange(TableNameTextFileSubDataExportForm subDataExchange) throws IllegalInputException
 		{
-			return tableNames;
-		}
+			super.checkSubDataExchange(subDataExchange);
 
-		public void setTableNames(String[] tableNames)
-		{
-			this.tableNames = tableNames;
+			if(StringUtil.isEmpty(subDataExchange.getTableName()))
+				throw new IllegalInputException();
 		}
 	}
 
-	public static class JsonFileBatchDataExportForm extends TextFileBatchDataExportForm
+	public static class JsonFileBatchDataExportForm extends AbstractTextFileBatchDataExportForm<TableNameTextFileSubDataExportForm>
 	{
 		private static final long serialVersionUID = 1L;
-
-		private String[] tableNames;
 
 		private JsonDataExportOption exportOption;
 
 		public JsonFileBatchDataExportForm()
 		{
 			super();
-		}
-
-		public String[] getTableNames()
-		{
-			return tableNames;
-		}
-
-		public void setTableNames(String[] tableNames)
-		{
-			this.tableNames = tableNames;
 		}
 
 		@Override
@@ -2260,6 +2242,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setExportOption(JsonDataExportOption exportOption)
 		{
 			this.exportOption = exportOption;
+		}
+
+		@Override
+		protected void checkSubDataExchange(TableNameTextFileSubDataExportForm subDataExchange) throws IllegalInputException
+		{
+			super.checkSubDataExchange(subDataExchange);
+
+			if(JsonDataFormat.TABLE_OBJECT.equals(this.exportOption.getJsonDataFormat())
+					&& StringUtil.isEmpty(subDataExchange.getTableName()))
+				throw new IllegalInputException();
 		}
 	}
 

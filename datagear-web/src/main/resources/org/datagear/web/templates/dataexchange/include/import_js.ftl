@@ -22,12 +22,20 @@
 		
 		$.each(fileInfos, function(i, fileInfo)
 		{
-			fileInfo.subDataExchangeId = po.nextSubDataExchangeId();
-			fileInfo.number = po.nextSubDataExchangeNumber();
-			fileInfo.dependentNumber = "";
+			var sde =
+			{
+				id: po.nextSubDataExchangeId(),
+				number: po.nextSubDataExchangeNumber(),
+				fileName: fileInfo.name,
+				fileSize: fileInfo.size,
+				fileDisplayName: fileInfo.displayName,
+				tableName: fileInfo.tableName,
+				dependentNumber: "",
+				status: "<@spring.message code='dataExchange.exchangeStatus.Unstart' />"
+			};
 			
-			po.postBuildSubDataExchange(fileInfo);
-			po.addSubDataExchange(fileInfo);
+			po.postBuildSubDataExchange(sde);
+			po.addSubDataExchange(sde);
 		});
 	};
 	
