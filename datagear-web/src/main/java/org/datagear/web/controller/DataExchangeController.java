@@ -39,6 +39,7 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.RowSetWriter;
 
 import org.datagear.dataexchange.AbstractQuery;
 import org.datagear.dataexchange.BatchDataExchange;
@@ -48,6 +49,7 @@ import org.datagear.dataexchange.DataExchangeService;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataFormatContext;
 import org.datagear.dataexchange.DataImportOption;
+import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.Query;
 import org.datagear.dataexchange.SimpleBatchDataExchange;
 import org.datagear.dataexchange.SqlQuery;
@@ -223,15 +225,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		DataFormat defaultDataFormat = new DataFormat();
-
 		String dataExchangeId = IDUtil.uuid();
+		DataFormat defaultDataFormat = new DataFormat();
+		ValueDataImportOption importOption = new ValueDataImportOption(ExceptionResolve.ROLLBACK, false, false);
+		
+		TextValueFileBatchDataImportForm formModel = new TextValueFileBatchDataImportForm();
+		formModel.setDataExchangeId(dataExchangeId);
+		formModel.setDataFormat(defaultDataFormat);
+		formModel.setImportOption(importOption);
+		formModel.setFileEncoding(Charset.defaultCharset().name());
+		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 
-		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		setFormModel(springModel, formModel, "", "doImport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
-		springModel.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
+		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/import_csv";
 	}

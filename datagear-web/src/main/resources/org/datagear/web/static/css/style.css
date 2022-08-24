@@ -345,6 +345,27 @@ label[title]:not(.no-tip)::after,
 	height: 100%;
 }
 
+/*单行阶段*/
+.inline-steps .p-steps .p-steps-item .p-menuitem-link,
+.inline-steps.p-steps .p-steps-item .p-menuitem-link{
+	flex-direction: row;
+	align-items: center;
+	background: var(--surface-a);
+	z-index: 1;
+	padding-left: 0.3rem;
+	padding-right: 0.3rem;
+}
+.inline-steps .p-steps .p-steps-item .p-menuitem-link .p-steps-title,
+.inline-steps.p-steps .p-steps-item .p-menuitem-link .p-steps-title{
+	margin-top: 0;
+	padding-left: 0.5rem;
+}
+.inline-steps .p-steps .p-steps-item:before,
+.inline-steps.p-steps .p-steps-item:before{
+	margin-top: 0;
+	z-index: 0;
+}
+
 /*横向操作组*/
 .h-opts > *{
 	margin-left: 0.15em;
@@ -506,7 +527,7 @@ label[title]:not(.no-tip)::after,
 }
 /*主页选项卡里数据源-表数据查询管理页*/
 .page-main-panel .page-manager-schema .schema-tabs-wrapper .page-manager .page-content{
-	/*屏幕高度 - 列表header高度 - 选项卡标题高度 - 主页header高度*/
+	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 列表header高度*/
 	height: calc(100vh - 5rem - 4.5rem - 5rem);
 }
 
@@ -783,4 +804,41 @@ label[title]:not(.no-tip)::after,
 }
 .sql-history-panel-content .page-manager .page-content{
 	height: 45vh;
+}
+
+.page-dataexchange.page-manager .page-content{
+	/*屏幕高度 - 页头高度*/
+	height: calc(100vh - 6rem);
+}
+.page-manager-schema .schema-tabs-wrapper .page-dataexchange.page-manager .page-content{
+	/*屏幕高度 - 选项卡标题高度 - 页头高度*/
+	height: calc(100vh - 4.5rem - 6rem);
+}
+.page-main-panel .page-manager-schema .schema-tabs-wrapper .page-dataexchange.page-manager .page-content{
+	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 页头高度*/
+	height: calc(100vh - 5rem - 4.5rem - 6rem);
+}
+.page-dataexchange .page-content .page-form .page-form-content{
+	/*屏幕高度 - 页头高度 - 表单foot高度*/
+	height: calc(100vh - 6rem - 3.5rem);
+}
+.page-manager-schema .schema-tabs-wrapper .page-dataexchange .page-content .page-form .page-form-content{
+	/*屏幕高度 - 选项卡标题高度 - 页头高度 - 表单foot高度*/
+	height: calc(100vh - 4.5rem - 6rem - 3.5rem);
+}
+.page-main-panel .page-manager-schema .schema-tabs-wrapper .page-dataexchange .page-content .page-form .page-form-content{
+	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 页头高度 - 表单foot高度*/
+	height: calc(100vh - 5rem - 4.5rem - 6rem - 3.5rem);
+}
+.page-dataexchange .page-content .page-form .page-form-content .subdataexchange-table-wrapper{
+	/*屏幕高度 - 页头高度 - 表单foot高度 - 表头高度*/
+	height: calc(100vh - 6rem - 3.5rem - 3.5rem);
+}
+.page-manager-schema .schema-tabs-wrapper .page-dataexchange .page-content .page-form .page-form-content .subdataexchange-table-wrapper{
+	/*屏幕高度 - 选项卡标题高度 - 页头高度 - 表单foot高度 - 表头高度*/
+	height: calc(100vh - 4.5rem - 6rem - 3.5rem - 3.5rem);
+}
+.page-main-panel .page-manager-schema .schema-tabs-wrapper .page-dataexchange .page-content .page-form .page-form-content .subdataexchange-table-wrapper{
+	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 页头高度 - 表单foot高度 - 表头高度*/
+	height: calc(100vh - 5rem - 4.5rem - 6rem - 3.5rem - 3.5rem);
 }

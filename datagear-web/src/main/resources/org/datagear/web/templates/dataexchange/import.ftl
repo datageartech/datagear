@@ -31,7 +31,7 @@
 		</div>
 	</div>
 	<div class="page-content">
-		<form id="${pid}form">
+		<form id="${pid}form" action="#">
 			<div class="pl-5 pt-4 pb-2">
 				<div class="field-radiobutton">
 					<p-radiobutton id="${pid}vsc" name="dataType" value="csv" v-model="fm.dataType"></p-radiobutton>
@@ -72,17 +72,31 @@
 		return "/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/" + fm.dataType;
 	}
 	
-	po.setupForm({ dataType: "csv" });
-	
-	po.vuePageModel(
+	if(po.isAjaxRequest)
 	{
-		
-	});
-	
-	po.vueMethod(
+		po.setupForm({ dataType: "csv" },
+		{
+			closeAfterSubmit: false,
+			success: function(response)
+			{
+				po.element().parent().html(response);
+			}
+		});
+	}
+	//新窗口打开
+	else
 	{
+		po.setupForm({ dataType: "csv" },
+		{
+			closeAfterSubmit: false
+		});
 		
-	});
+		po.submitForm = function(url, options)
+		{
+			options.target = "_self";
+			po.open(url, options);
+		};
+	}
 	
 	po.vueMount();
 })

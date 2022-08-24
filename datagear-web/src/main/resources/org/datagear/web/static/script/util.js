@@ -52,7 +52,7 @@
 	 * @param url 请求的URL。
 	 * @param options 选项，格式如下：
 	 * 			{
-	 * 				//可选，打开目标：DOM 页面内；"_blank" 新网页；"_file" 文件下载
+	 * 				//可选，打开目标：DOM 页面内；"_blank"、"_self" 新网页；"_file" 文件下载
 	 * 				target : document.body,
 	 *              //当target是页内元素时，是否打开为对话框，默认为：true
 	 *              dialog: true,
@@ -90,19 +90,28 @@
 		},
 		options);
 		
-		if(options.target == "_blank")
+		if(options.target == "_blank" || options.target == "_self")
 		{
 			if(!options.data)
-				window.open(url);
+			{
+				if(options.target == "_blank")
+				{
+					window.open(url);
+				}
+				else if(options.target == "_self")
+				{
+					window.location.href = url;
+				}
+			}
 			else
 			{
 				//使用window.open()会使URL超长导致请求失败，因而改为postOnForm
-				$.postOnForm(url, {"data" : options.data, "target" : "_blank"});
+				$.postOnForm(url, {"data" : options.data, "target" : options.target});
 			}
 		}
 		else if(options.target == "_file")
 		{
-			$.postOnForm(url, {"data" : options.data, "target" : "_blank"});
+			$.postOnForm(url, {"data" : options.data, "target" : options.target});
 		}
 		else
 		{

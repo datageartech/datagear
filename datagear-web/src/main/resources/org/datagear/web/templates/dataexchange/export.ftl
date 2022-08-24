@@ -72,17 +72,31 @@
 		return "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/" + fm.dataType;
 	}
 	
-	po.setupForm({ dataType: "csv" });
-	
-	po.vuePageModel(
+	if(po.isAjaxRequest)
 	{
-		
-	});
-	
-	po.vueMethod(
+		po.setupForm({ dataType: "csv" },
+		{
+			closeAfterSubmit: false,
+			success: function(response)
+			{
+				po.element().parent().html(response);
+			}
+		});
+	}
+	//新窗口打开
+	else
 	{
+		po.setupForm({ dataType: "csv" },
+		{
+			closeAfterSubmit: false
+		});
 		
-	});
+		po.submitForm = function(url, options)
+		{
+			options.target = "_self";
+			po.open(url, options);
+		};
+	}
 	
 	po.vueMount();
 })

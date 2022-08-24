@@ -108,7 +108,7 @@
 								<p-datatable :value="tab.result.rows" :scrollable="true" scroll-height="flex"
 									:sortable="false" :loading="tab.result.loading" striped-rows class="table-sm"
 									v-if="tab.type == 'resultSet'">
-									<p-column :row-editor="true" :frozen="true" header="<@spring.message code='rowNumber' />"
+									<p-column :frozen="true" header="<@spring.message code='serialNumber' />"
 										style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center">
 										<template #body="slotProps">
 											{{slotProps.index + 1}}

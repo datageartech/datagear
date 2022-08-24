@@ -19,6 +19,8 @@ var ${pid} =
 	
 	contextPath: "${contextPath}",
 	
+	isAjaxRequest: ("${isAjaxRequest?string('true', 'false')}"  == "true"),
+	
 	i18n:
 	{
 		confirm: "<@spring.message code='confirm' />",
