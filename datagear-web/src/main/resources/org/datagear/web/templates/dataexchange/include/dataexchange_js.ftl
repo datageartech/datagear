@@ -52,7 +52,11 @@ page_format_time.ftl
 		
 		if(po.dataExchangeTaskClient.isActive())
 			return false;
+		
+		return po.checkSubmitForm(action);
 	};
+	
+	po.checkSubmitForm = function(action){ return true; };
 	
 	po.setupDataExchangeForm = function(formModel, ajaxOptions, validateOptions)
 	{
@@ -134,16 +138,6 @@ page_format_time.ftl
 		
 		pm.selectedSubDataExchanges = [];
 	}
-	
-	po.dataExchangeTaskClient = new $.TaskClient(po.concatContextPath("/dataexchange/"+encodeURIComponent(po.schemaId)+"/message"),
-		function(message)
-		{
-			return po.handleDataExchangeMessage(message);
-		},
-		{
-			data: { dataExchangeId: po.dataExchangeId }
-		}
-	);
 	
 	po.handleDataExchangeMessage = function(message)
 	{
@@ -402,34 +396,48 @@ page_format_time.ftl
 		});
 	};
 	
-	po.vuePageModel(
+	po.setupDataExchange = function()
 	{
-		selectedSubDataExchanges: [],
-		DataExchangeStatusEnum: po.DataExchangeStatusEnum,
-		dataExchangeStatus: po.DataExchangeStatusEnum.edit,
-		dataExchangeProgress:
+		po.vuePageModel(
 		{
-			value: 0,
-			label: "0%"
-		}
-	});
-	
-	po.vueMethod(
-	{
-		onDeleteSelSubDataExchanges: function()
-		{
-			po.deleteSelSubDataExchanges();
-		}
-	});
-	
-	po.vueMounted(function()
-	{
-		po.element(".subdataexchange-table-wrapper").on("click", ".log-detail-btn", function(e)
-		{
-			var subDataExchangeId = $(this).attr("subDataExchangeId");
-			po.viewSubDataExchangeDetailLog(subDataExchangeId);
+			selectedSubDataExchanges: [],
+			DataExchangeStatusEnum: po.DataExchangeStatusEnum,
+			dataExchangeStatus: po.DataExchangeStatusEnum.edit,
+			dataExchangeProgress:
+			{
+				value: 0,
+				label: "0%"
+			}
 		});
-	});
+		
+		po.vueMethod(
+		{
+			onDeleteSelSubDataExchanges: function()
+			{
+				po.deleteSelSubDataExchanges();
+			}
+		});
+		
+		po.vueMounted(function()
+		{
+			po.element(".subdataexchange-table-wrapper").on("click", ".log-detail-btn", function(e)
+			{
+				var subDataExchangeId = $(this).attr("subDataExchangeId");
+				po.viewSubDataExchangeDetailLog(subDataExchangeId);
+			});
+		});
+		
+		po.dataExchangeTaskClient = new $.TaskClient(
+				po.concatContextPath("/dataexchange/"+encodeURIComponent(po.schemaId)+"/message"),
+				function(message)
+				{
+					return po.handleDataExchangeMessage(message);
+				},
+				{
+					data: { dataExchangeId: po.dataExchangeId }
+				}
+		);
+	};
 })
 (${pid});
 </script>

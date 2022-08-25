@@ -38,14 +38,50 @@ dataexchange_js.ftl
 			class="p-button-danger"
 			:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
 		</p-button>
-		<p-button type="button" label="<@spring.message code='set' />"
+		<p-button type="button" label="<@spring.message code='fileEncoding' />"
+			aria:haspopup="true" aria-controls="${pid}fileEncodingPanel"
+			@click="onToggleFileEncodingPanel"
 			:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
 		</p-button>
 	</div>
+	<p-overlaypanel ref="${pid}fileEncodingPanelEle" append-to="body"
+		:show-close-icon="false" id="${pid}fileEncodingPanel">
+		<div class="pb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='fileEncoding' />
+			</label>
+		</div>
+		<div class="p-2 panel-content-size-xs overflow-auto">
+			<div class="field grid">
+				<label for="${pid}fileEncoding" class="field-label col-12 mb-2"
+					title="<@spring.message code='dataImport.fileEncoding.desc' />">
+					<@spring.message code='fileEncoding' />
+				</label>
+		        <div class="field-input col-12">
+		        	<p-dropdown id="${pid}fileEncoding" v-model="fm.fileEncoding"
+		        		:options="pm.availableCharsetNames" class="input w-full">
+		        	</p-dropdown>
+		        </div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}zipFileNameEncoding" class="field-label col-12 mb-2"
+					title="<@spring.message code='dataImport.zipFileEncoding.desc' />">
+					<@spring.message code='zipFileEncoding' />
+				</label>
+		        <div class="field-input col-12">
+		        	<p-dropdown id="${pid}zipFileNameEncoding" v-model="fm.zipFileNameEncoding"
+		        		:options="pm.availableCharsetNames" class="input w-full">
+		        	</p-dropdown>
+		        </div>
+			</div>
+		</div>
+	</p-overlaypanel>
 </div>
 <script>
 (function(po)
 {
+	po.availableCharsetNames = $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />);
+	
 	po.inflateUploadParam = function(formData)
 	{
 		var fm = po.vueFormModel();
@@ -64,7 +100,8 @@ dataexchange_js.ftl
 		
 		po.vuePageModel(
 		{
-			uploadFileUrl: uploadUrl
+			uploadFileUrl: uploadUrl,
+			availableCharsetNames: po.availableCharsetNames
 		});
 		
 		po.vueMethod(
@@ -79,8 +116,15 @@ dataexchange_js.ftl
 				
 				var response = $.getResponseJson(e.xhr);
 				uploadedHandler(response);
+			},
+			
+			onToggleFileEncodingPanel: function(e)
+			{
+				po.vueUnref("${pid}fileEncodingPanelEle").toggle(e);
 			}
 		});
+		
+		po.vueRef("${pid}fileEncodingPanelEle", null);
 	};
 })
 (${pid});

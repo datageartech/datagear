@@ -15,11 +15,49 @@ dataexchange_js.ftl
 <script>
 (function(po)
 {
-	po.stepsItems =
-	[
-		{ label: "<@spring.message code='set' />" },
-		{ label: "<@spring.message code='import' />" }
-	];
+	po.checkSubmitForm = function(action)
+	{
+		return po.checkSubmitSubDataExchanges(action);
+	};
+	
+	po.checkSubmitSubDataExchanges = function(action)
+	{
+		var data = action.options.data;
+		var subDataExchanges = data.subDataExchanges;
+		
+		if(!subDataExchanges || subDataExchanges.length == 0)
+		{
+			$.tipInfo("<@spring.message code='dataImport.importFileRequired' />");
+			return false;
+		}
+		
+		for(var i=0; i<subDataExchanges.length; i++)
+		{
+			if(po.checkSubmitSubDataExchange(subDataExchanges[i], i, action) === false)
+				return false;
+		}
+		
+		return true;
+	};
+	
+	po.checkSubmitSubDataExchange = function(subDataExchange, index, action)
+	{
+		return true;
+	};
+	
+	po.checkSubmitSubDataExchangeTableName = function(subDataExchange)
+	{
+		if(!subDataExchange.tableName)
+		{
+			var msg = $.validator.format("<@spring.message code='dataImport.tableNameRequiredAtNumber' />",
+							subDataExchange.number);
+			$.tipInfo(msg);
+			
+			return false;
+		}
+		
+		return true;
+	};
 	
 	po.addSubDataExchangesForFileInfos = function(fileInfos)
 	{

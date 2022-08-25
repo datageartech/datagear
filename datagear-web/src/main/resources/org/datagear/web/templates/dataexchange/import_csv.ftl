@@ -85,10 +85,15 @@
 		subDataExchange.dependentNumber = fm.dependentNumberAuto;
 	};
 	
+	po.checkSubmitSubDataExchange = function(subDataExchange)
+	{
+		return po.checkSubmitSubDataExchangeTableName(subDataExchange);
+	};
+	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.setupDataExchangeForm(formModel);
 	
-	po.setupSteps(po.stepsItems, true);
+	po.setupDataExchange();
 	po.setupImportHead("<@spring.message code='dataImport.importCsvData' />");
 	po.setupImportTableHead(
 			po.concatContextPath("/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/csv/uploadImportFile"),

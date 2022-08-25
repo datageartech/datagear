@@ -28,12 +28,20 @@
 <script>
 (function(po)
 {
+	po.stepsItems =
+	[
+		{ label: "<@spring.message code='set' />" },
+		{ label: "<@spring.message code='import' />" }
+	];
+	
 	po.setupImportHead = function(title)
 	{
 		po.vuePageModel(
 		{
 			importHeadTitle: title
 		});
+		
+		po.setupSteps(po.stepsItems);
 	};
 })
 (${pid});
