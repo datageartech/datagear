@@ -8,25 +8,45 @@
 -->
 <#--
 导入页脚片段
+
+依赖：
+dataexchange_js.ftl
 -->
-<div class="page-form-foot pt-3 text-center relative h-opts">
-	<div class="absolute" style="left:0;">
-		<p-button type="button" label="<@spring.message code='return' />" class="p-button-secondary"></p-button>
+<div class="page-form-foot pt-3 text-center flex justify-content-between h-opts">
+	<p-button type="button" label="<@spring.message code='return' />"
+		class="p-button-secondary"
+		:disabled="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.exchange">
+	</p-button>
+	<div class="h-opts">
+		<p-button type="button" label="<@spring.message code='previousStep' />"
+			@click="onToPrevStep" :disabled="pm.steps.activeIndex == 0 || pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
+		</p-button>
+		<p-button type="submit" label="<@spring.message code='nextStep' />"
+			:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit"
+			v-if="pm.steps.activeIndex < pm.steps.items.length-1">
+		</p-button>
+		<p-button type="submit" label="<@spring.message code='import' />"
+			:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit"
+			v-if="pm.steps.activeIndex == pm.steps.items.length-1">
+		</p-button>
 	</div>
-	<p-button type="button" label="<@spring.message code='previousStep' />"
-		@click="onToPrevStep" :disabled="pm.steps.activeIndex == 0">
-	</p-button>
-	<p-button type="submit" label="<@spring.message code='nextStep' />"
-		v-if="pm.steps.activeIndex < pm.steps.items.length-1">
-	</p-button>
-	<p-button type="submit" label="<@spring.message code='import' />"
-		v-if="pm.steps.activeIndex == pm.steps.items.length-1">
-	</p-button>
+	<div>
+		<p-button type="button" label="<@spring.message code='restart' />"
+			class="p-button-secondary" @click="onRestart"
+			v-if="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.finish">
+		</p-button>
+	</div>
 </div>
 <script>
 (function(po)
 {
-	
+	po.vueMethod(
+	{
+		onRestart: function()
+		{
+			po.dataExchangeStatus(po.DataExchangeStatusEnum.edit);
+		}
+	});
 })
 (${pid});
 </script>

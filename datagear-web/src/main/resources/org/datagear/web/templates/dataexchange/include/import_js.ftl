@@ -6,6 +6,12 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#--
+导入片段
+
+依赖：
+dataexchange_js.ftl
+-->
 <script>
 (function(po)
 {

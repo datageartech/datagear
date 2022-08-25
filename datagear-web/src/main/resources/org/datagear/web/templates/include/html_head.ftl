@@ -72,6 +72,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/splitter/splitter.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/splitterpanel/splitterpanel.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/radiobutton/radiobutton.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/progressbar/progressbar.min.js" type="text/javascript"></script>
 
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>

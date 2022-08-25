@@ -337,7 +337,8 @@ var ${pid} =
 		"p-listbox": primevue.listbox,
 		"p-colorpicker": primevue.colorpicker,
 		"p-splitter": primevue.splitter,
-        "p-splitterpanel": primevue.splitterpanel
+        "p-splitterpanel": primevue.splitterpanel,
+        "p-progressbar": primevue.progressbar
 	},
 	
 	//vue挂载

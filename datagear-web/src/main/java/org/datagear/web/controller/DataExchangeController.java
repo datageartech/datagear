@@ -687,7 +687,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		springModel.addAttribute("subDataExchangeId", subDataExchangeId);
 
-		return "/dataexchange/view_log";
+		return "/dataexchange/detail_log";
 	}
 
 	/**

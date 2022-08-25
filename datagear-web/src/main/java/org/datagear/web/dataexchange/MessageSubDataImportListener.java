@@ -99,13 +99,13 @@ public class MessageSubDataImportListener extends MessageSubDataExchangeListener
 	@Override
 	protected String getStartLog()
 	{
-		return getI18nMessage("dataImport.startImport");
+		return getI18nMessage("startImport");
 	}
 
 	@Override
 	protected String getFinishLog()
 	{
-		return getI18nMessage("dataImport.finishImport");
+		return getI18nMessage("finishImport");
 	}
 
 	/**

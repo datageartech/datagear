@@ -59,18 +59,17 @@ page_format_time.ftl
 		po.inflateFormModel(formModel);
 		ajaxOptions = $.extend(
 		{
+			tipSuccess: false,
 			beforeSend: function()
 			{
-				po.dataExchangeTaskClient.start();
+				po.dataExchangeStatus(po.DataExchangeStatusEnum.exchange);
+				po.resetDataExchangeProgress();
 				po.resetAllSubDataExchangeStatus();
-			},
-			success: function()
-			{
-				if(po.dataExchangeStatus() != po.DataExchangeStatusEnum.finish)
-					po.dataExchangeStatus(po.DataExchangeStatusEnum.exchange);
+				po.dataExchangeTaskClient.start();
 			},
 			error: function()
 			{
+				po.dataExchangeStatus(po.DataExchangeStatusEnum.edit);
 				po.dataExchangeTaskClient.stop();
 			}
 		},
@@ -187,8 +186,16 @@ page_format_time.ftl
 		if(status == null)
 			return pm.dataExchangeStatus;
 		
-		pm.dataExchangeStatus = status;
+		if(pm.dataExchangeStatus != status)
+		{
+			var oldStatus = pm.dataExchangeStatus;
+			pm.dataExchangeStatus = status;
+			
+			po.dataExchangeStatusChanged(status, oldStatus);
+		}
 	};
+	
+	po.dataExchangeStatusChanged = function(status, oldStatus){};
 
 	po.setDataExchangeProgress = function(value, duration)
 	{
@@ -206,6 +213,15 @@ page_format_time.ftl
 		
 		progress.value = value;
 		progress.label = label;
+	};
+	
+	po.resetDataExchangeProgress = function()
+	{
+		var pm = po.vuePageModel();
+		var progress = pm.dataExchangeProgress;
+		
+		progress.value = 0;
+		progress.label = "0%";
 	};
 	
 	po.handleSubDataExchangeMessage = function(message)
@@ -298,28 +314,30 @@ page_format_time.ftl
 			else if(po.DataExchangeMessageType.SubExceptionWithCount == type)
 			{
 				var exceptionResolve = message.exceptionResolve;
-				
 				var duration = po.formatDuration(message.duration);
 				
-				//未进行任何实际导入操作
-				if(message.successCount == 0 && message.failCount == 0)
-					status = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount' />";
-				else if(exceptionResolve == "ABORT")
-					status = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.ABORT' />";
-				else if(exceptionResolve == "IGNORE")
-					status = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' />";
-				else if(exceptionResolve == "ROLLBACK")
-					status = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.ROLLBACK' />";
-				
-				status = $.validator.format(status,
-							message.successCount, message.failCount, duration, message.content);
-				
-				status += "<span class='exchange-result-icon exchange-error-icon p-tag p-tag-danger'"
+				status = "<div class='flex align-items-center'>"
+							+"<button type='button' class='log-detail-btn p-button p-component p-button-danger mr-1'"
 							+" subDataExchangeId=\""+$.escapeHtml(message.subDataExchangeId)+"\""
 							+" title=\""+$.escapeHtml(message.content+"\n"+"<@spring.message code='clickForDetail' />")+"\""
 							+">"
 							+"<i class='pi pi-info-circle text-sm'></i>"
-							+"</span>";
+							+"</button>";
+				
+				var statusTmp = "";
+				//未进行任何实际导入操作
+				if(message.successCount == 0 && message.failCount == 0)
+					statusTmp = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount' />";
+				else if(exceptionResolve == "ABORT")
+					statusTmp = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.ABORT' />";
+				else if(exceptionResolve == "IGNORE")
+					statusTmp = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' />";
+				else if(exceptionResolve == "ROLLBACK")
+					statusTmp = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.ROLLBACK' />";
+				
+				status += "<div>" + $.validator.format(statusTmp, message.successCount, message.failCount, duration, message.content);
+							+"</div>";
+				status += "</div>";
 			}
 			else if(po.DataExchangeMessageType.SubSuccessWithCount == type)
 			{
@@ -327,21 +345,27 @@ page_format_time.ftl
 				
 				if(message.failCount == null || message.failCount == 0)
 				{
-					status = $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubSuccessWithCount' />",
-								message.successCount, message.failCount, duration);
+					status = "<span class='mr-1'>"
+								+"<i class='pi pi-check-circle text-sm'></i>"
+								+"</span>";
 					
-					status += "<span class='exchange-result-icon exchange-success-icon'><span class='ui-icon ui-icon-circle-check'></span></span>";
+					status += $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubSuccessWithCount' />",
+								message.successCount, message.failCount, duration);
 				}
 				else
 				{
-					status = $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' />",
-								message.successCount, message.failCount, duration);
-				
-					status += "<span class='exchange-result-icon exchange-error-icon ui-state-error' onmouseover='${pid}.showSubExceptionTip(event, this)'"
-							+" onmouseout='${pid}.hideSubExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
-							+"<span class='ui-icon ui-icon-info'></span></span>";
+					status = "<div class='flex align-items-center'>"
+						+"<button type='button' class='log-detail-btn p-button p-component p-button-danger mr-1'"
+						+" subDataExchangeId=\""+$.escapeHtml(message.subDataExchangeId)+"\""
+						+" title=\""+$.escapeHtml((message.ignoreException ? message.ignoreException+"\n" : "")+"<@spring.message code='clickForDetail' />")+"\""
+						+">"
+						+"<i class='pi pi-info-circle text-sm'></i>"
+						+"</button>";
 					
-					po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.ignoreException;
+					status += "<div>" + $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' />",
+											message.successCount, message.failCount, duration)
+							 	+"</div>";
+					status += "</div>";
 				}
 			}
 			
@@ -353,6 +377,18 @@ page_format_time.ftl
 	po.handleSubDataExchangeStatus = function(subDataExchangeId, status, message)
 	{
 		return status;
+	};
+	
+	po.viewSubDataExchangeDetailLog = function(subDataExchangeId)
+	{
+		po.open("/dataexchange/" + encodeURIComponent(po.schemaId) +"/viewLog",
+		{
+			data :
+			{
+				dataExchangeId : po.dataExchangeId,
+				subDataExchangeId : subDataExchangeId
+			}
+		});
 	};
 	
 	po.resetAllSubDataExchangeStatus = function()
@@ -374,7 +410,7 @@ page_format_time.ftl
 		dataExchangeProgress:
 		{
 			value: 0,
-			label: ""
+			label: "0%"
 		}
 	});
 	
@@ -384,6 +420,15 @@ page_format_time.ftl
 		{
 			po.deleteSelSubDataExchanges();
 		}
+	});
+	
+	po.vueMounted(function()
+	{
+		po.element(".subdataexchange-table-wrapper").on("click", ".log-detail-btn", function(e)
+		{
+			var subDataExchangeId = $(this).attr("subDataExchangeId");
+			po.viewSubDataExchangeDetailLog(subDataExchangeId);
+		});
 	});
 })
 (${pid});
