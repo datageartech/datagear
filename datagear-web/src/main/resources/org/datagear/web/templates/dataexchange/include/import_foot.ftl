@@ -14,7 +14,7 @@ dataexchange_js.ftl
 -->
 <div class="page-form-foot pt-3 text-center flex justify-content-between h-opts">
 	<p-button type="button" label="<@spring.message code='return' />"
-		class="p-button-secondary"
+		class="p-button-secondary" @click="onReturn"
 		:disabled="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.exchange">
 	</p-button>
 	<div class="h-opts">
@@ -42,6 +42,26 @@ dataexchange_js.ftl
 {
 	po.vueMethod(
 	{
+		onReturn: function()
+		{
+			var url = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/";
+			
+			if(po.isAjaxRequest)
+			{
+				po.ajax(url,
+				{
+					closeAfterSubmit: false,
+					success: function(response)
+					{
+						po.element().parent().html(response);
+					}
+				});
+			}
+			else
+			{
+				po.open(url, {target: "_self"});
+			}
+		},
 		onRestart: function()
 		{
 			po.dataExchangeStatus(po.DataExchangeStatusEnum.edit);

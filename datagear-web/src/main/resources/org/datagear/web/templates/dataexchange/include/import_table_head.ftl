@@ -51,7 +51,7 @@ dataexchange_js.ftl
 				<@spring.message code='fileEncoding' />
 			</label>
 		</div>
-		<div class="p-2 panel-content-size-xs overflow-auto">
+		<div class="p-2 panel-content-size-xxs overflow-auto">
 			<div class="field grid">
 				<label for="${pid}fileEncoding" class="field-label col-12 mb-2"
 					title="<@spring.message code='dataImport.fileEncoding.desc' />">

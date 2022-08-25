@@ -83,7 +83,6 @@
 			}
 		});
 	}
-	//新窗口打开
 	else
 	{
 		po.setupForm({ dataType: "csv" },
