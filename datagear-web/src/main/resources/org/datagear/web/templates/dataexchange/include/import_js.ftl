@@ -31,7 +31,7 @@
 				fileDisplayName: fileInfo.displayName,
 				tableName: fileInfo.tableName,
 				dependentNumber: "",
-				status: "<@spring.message code='dataExchange.exchangeStatus.Unstart' />"
+				status: po.subDataExchangeStatusUnstart
 			};
 			
 			po.postBuildSubDataExchange(sde);

@@ -6,11 +6,78 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#--
+依赖：
+page_format_time.ftl
+-->
 <script>
 (function(po)
 {
 	po.schemaId = "${schema.id}";
 	po.dataExchangeId = "${dataExchangeId}";
+	po.subDataExchangeStatusUnstart = "<@spring.message code='dataExchange.exchangeStatus.Unstart' />";
+	
+	po.DataExchangeMessageType =
+	{
+		Exception: "Exception", //MessageBatchDataExchangeListener.Exception
+		Finish: "Finish", //MessageBatchDataExchangeListener.Finish
+		Start: "Start", //MessageBatchDataExchangeListener.Start
+		Success: "Success", //MessageBatchDataExchangeListener.Success
+		SubCancelSuccess: "SubCancelSuccess", //MessageBatchDataExchangeListener.SubCancelSuccess
+		SubException: "SubException", //MessageSubDataExchangeListener.SubException
+		SubExceptionWithCount: "SubExceptionWithCount", //MessageSubDataExchangeListener.SubExceptionWithCount
+		SubExchangingWithCount: "SubExchangingWithCount", //MessageSubDataExchangeListener.SubExchangingWithCount
+		SubFinish: "SubFinish", //MessageSubDataExchangeListener.SubFinish
+		SubStart: "SubStart", //MessageSubDataExchangeListener.SubStart
+		SubSubmitFail: "SubSubmitFail", //org.datagear.web.dataexchange.MessageBatchDataExchangeListener.SubSubmitFail
+		SubSubmitSuccess: "SubSubmitSuccess", //org.datagear.web.dataexchange.MessageBatchDataExchangeListener.SubSubmitSuccess
+		SubSuccess: "SubSuccess", //MessageSubDataExchangeListener.SubSuccess
+		SubSuccessWithCount: "SubSuccessWithCount" //MessageSubDataExchangeListener.SubSuccessWithCount
+	};
+	
+	po.DataExchangeStatusEnum =
+	{
+		edit: "edit",
+		exchange: "exchange",
+		finish: "finish"
+	};
+	
+	po.beforeSubmitForm = function(action)
+	{
+		if(!po.isLastStep())
+		{
+			po.toNextStep();
+			return false;
+		}
+		
+		if(po.dataExchangeTaskClient.isActive())
+			return false;
+	};
+	
+	po.setupDataExchangeForm = function(formModel, ajaxOptions, validateOptions)
+	{
+		po.inflateFormModel(formModel);
+		ajaxOptions = $.extend(
+		{
+			beforeSend: function()
+			{
+				po.dataExchangeTaskClient.start();
+				po.resetAllSubDataExchangeStatus();
+			},
+			success: function()
+			{
+				if(po.dataExchangeStatus() != po.DataExchangeStatusEnum.finish)
+					po.dataExchangeStatus(po.DataExchangeStatusEnum.exchange);
+			},
+			error: function()
+			{
+				po.dataExchangeTaskClient.stop();
+			}
+		},
+		ajaxOptions);
+		
+		po.setupForm(formModel, ajaxOptions, validateOptions);
+	};
 	
 	po.inflateFormModel = function(formModel)
 	{
@@ -49,16 +116,6 @@
 		return re;
 	};
 	
-	po.dataExchangeTaskClient = new $.TaskClient("${contextPath}/dataexchange/"+po.schemaId+"/message",
-		function(message)
-		{
-			return po.handleDataExchangeMessage(message);
-		},
-		{
-			data: { dataExchangeId: po.dataExchangeId }
-		}
-	);
-	
 	po.addSubDataExchange = function(subDataExchange)
 	{
 		var fm = po.vueFormModel();
@@ -68,6 +125,7 @@
 	po.deleteSelSubDataExchanges = function()
 	{
 		var fm = po.vueFormModel();
+		var pm = po.vuePageModel();
 		var ss = $.wrapAsArray(po.vueRaw(pm.selectedSubDataExchanges));
 		
 		$.each(ss, function(idx, s)
@@ -78,9 +136,246 @@
 		pm.selectedSubDataExchanges = [];
 	}
 	
+	po.dataExchangeTaskClient = new $.TaskClient(po.concatContextPath("/dataexchange/"+encodeURIComponent(po.schemaId)+"/message"),
+		function(message)
+		{
+			return po.handleDataExchangeMessage(message);
+		},
+		{
+			data: { dataExchangeId: po.dataExchangeId }
+		}
+	);
+	
+	po.handleDataExchangeMessage = function(message)
+	{
+		var isFinish = false;
+		var type = (message ? message.type : "");
+		
+		if(po.DataExchangeMessageType.Start == type)
+		{
+			var fm = po.vueFormModel();
+			po.subDataExchangeCount = fm.subDataExchanges.length;
+			po.subDataExchangeFinishCount=0;
+			po.subDataExchangeExceptionMessages = {};
+			po.subDataExchangeIdRowIndexMap = {};
+			po.subDataExchangeMessageCache = {};
+			
+			po.dataExchangeStatus(po.DataExchangeStatusEnum.exchange);
+		}
+		else if(po.DataExchangeMessageType.Exception == type)
+		{
+			$.tipError($.validator.format("<@spring.message code='dataExchange.exchangeStatus.Exception' />", message.content));
+		}
+		else if(po.DataExchangeMessageType.Finish == type)
+		{
+			isFinish = true;
+			po.refreshSubDataExchangeStatus();
+			po.setDataExchangeProgress(100, message.duration);
+			po.dataExchangeStatus(po.DataExchangeStatusEnum.finish);
+		}
+		else
+			po.handleSubDataExchangeMessage(message);
+		
+		return isFinish;
+	};
+	
+	//获取/设置状态，参考：po.DataExchangeStatusEnum
+	po.dataExchangeStatus = function(status)
+	{
+		var pm = po.vuePageModel();
+		
+		if(status == null)
+			return pm.dataExchangeStatus;
+		
+		pm.dataExchangeStatus = status;
+	};
+
+	po.setDataExchangeProgress = function(value, duration)
+	{
+		var pm = po.vuePageModel();
+		var progress = pm.dataExchangeProgress;
+		
+		var label = value + "%";
+		
+		if(duration != null)
+		{
+			var duration = po.formatDuration(duration);
+			label = $.validator.format("<@spring.message code='dataExchange.exchangeProgressPercentWithDuration' />",
+						value, duration);
+		}
+		
+		progress.value = value;
+		progress.label = label;
+	};
+	
+	po.handleSubDataExchangeMessage = function(message)
+	{
+		var subDataExchangeId = message.subDataExchangeId;
+		
+		if(!subDataExchangeId)
+			return;
+		
+		var type = (message ? message.type : "");
+		
+		var toCache = true;
+		
+		if(po.DataExchangeMessageType.SubStart == type)
+		{
+			toCache = false;
+		}
+		else if(po.DataExchangeMessageType.SubFinish == type)
+		{
+			po.subDataExchangeFinishCount += 1;
+			po.setDataExchangeProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
+			
+			toCache =false;
+		}
+		else if(po.DataExchangeMessageType.SubCancelSuccess == type)
+		{
+			po.subDataExchangeFinishCount += 1;
+			po.setDataExchangeProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
+			
+			toCache =true;
+		}
+		
+		if(toCache)
+		{
+			var prevMessage = po.subDataExchangeMessageCache[subDataExchangeId];
+			
+			if(!prevMessage || message.order == null || message.order >= prevMessage.order)
+				po.subDataExchangeMessageCache[subDataExchangeId] = message;
+		}
+		
+		var refresh = false;
+		
+		var time = new Date().getTime();
+		if(!po.prevRefreshSubDataExchangeStatusTime)
+			po.prevRefreshSubDataExchangeStatusTime = time;
+		if((time - po.prevRefreshSubDataExchangeStatusTime) >= 200)
+			refresh = true;
+		
+		if(refresh)
+		{
+			po.refreshSubDataExchangeStatus();
+			po.prevRefreshSubDataExchangeStatusTime = time;
+		}
+	};
+	
+	po.refreshSubDataExchangeStatus = function()
+	{
+		var fm = po.vueFormModel();
+		var subDataExchanges = fm.subDataExchanges;
+		
+		for(var subDataExchangeId in po.subDataExchangeMessageCache)
+		{
+			var rowIndex = $.inArrayById(subDataExchanges, subDataExchangeId);
+			
+			if(rowIndex < 0)
+				continue;
+			
+			var subDataExchange = subDataExchanges[rowIndex];
+			var message = po.subDataExchangeMessageCache[subDataExchangeId];
+			var type = (message ? message.type : "");
+			var status = "";
+			
+			if(po.DataExchangeMessageType.SubSubmitSuccess == type)
+			{
+				status = "<@spring.message code='dataExchange.exchangeStatus.SubSubmitSuccess' />";
+			}
+			else if(po.DataExchangeMessageType.SubSubmitFail == type)
+			{
+				status = "<@spring.message code='dataExchange.exchangeStatus.SubSubmitFail' />";
+			}
+			else if(po.DataExchangeMessageType.SubCancelSuccess == type)
+			{
+				status = "<@spring.message code='dataExchange.exchangeStatus.SubCancelSuccess' />";
+			}
+			else if(po.DataExchangeMessageType.SubExchangingWithCount == type)
+			{
+				status = $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubExchangingWithCount' />",
+						message.successCount, message.failCount);
+			}
+			else if(po.DataExchangeMessageType.SubExceptionWithCount == type)
+			{
+				var exceptionResolve = message.exceptionResolve;
+				
+				var duration = po.formatDuration(message.duration);
+				
+				//未进行任何实际导入操作
+				if(message.successCount == 0 && message.failCount == 0)
+					status = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount' />";
+				else if(exceptionResolve == "ABORT")
+					status = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.ABORT' />";
+				else if(exceptionResolve == "IGNORE")
+					status = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' />";
+				else if(exceptionResolve == "ROLLBACK")
+					status = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.ROLLBACK' />";
+				
+				status = $.validator.format(status,
+							message.successCount, message.failCount, duration, message.content);
+				
+				status += "<span class='exchange-result-icon exchange-error-icon p-tag p-tag-danger'"
+							+" subDataExchangeId=\""+$.escapeHtml(message.subDataExchangeId)+"\""
+							+" title=\""+$.escapeHtml(message.content+"\n"+"<@spring.message code='clickForDetail' />")+"\""
+							+">"
+							+"<i class='pi pi-info-circle text-sm'></i>"
+							+"</span>";
+			}
+			else if(po.DataExchangeMessageType.SubSuccessWithCount == type)
+			{
+				var duration = po.formatDuration(message.duration);
+				
+				if(message.failCount == null || message.failCount == 0)
+				{
+					status = $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubSuccessWithCount' />",
+								message.successCount, message.failCount, duration);
+					
+					status += "<span class='exchange-result-icon exchange-success-icon'><span class='ui-icon ui-icon-circle-check'></span></span>";
+				}
+				else
+				{
+					status = $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' />",
+								message.successCount, message.failCount, duration);
+				
+					status += "<span class='exchange-result-icon exchange-error-icon ui-state-error' onmouseover='${pid}.showSubExceptionTip(event, this)'"
+							+" onmouseout='${pid}.hideSubExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
+							+"<span class='ui-icon ui-icon-info'></span></span>";
+					
+					po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.ignoreException;
+				}
+			}
+			
+			status = po.handleSubDataExchangeStatus(message.subDataExchangeId, status, message);
+			subDataExchange.status = status;
+		}
+	};
+	
+	po.handleSubDataExchangeStatus = function(subDataExchangeId, status, message)
+	{
+		return status;
+	};
+	
+	po.resetAllSubDataExchangeStatus = function()
+	{
+		var fm = po.vueFormModel();
+		var subDataExchanges = fm.subDataExchanges;
+		
+		$.each(subDataExchanges, function(i, sde)
+		{
+			sde.status = po.subDataExchangeStatusUnstart;
+		});
+	};
+	
 	po.vuePageModel(
 	{
-		selectedSubDataExchanges: []
+		selectedSubDataExchanges: [],
+		DataExchangeStatusEnum: po.DataExchangeStatusEnum,
+		dataExchangeStatus: po.DataExchangeStatusEnum.edit,
+		dataExchangeProgress:
+		{
+			value: 0,
+			label: ""
+		}
 	});
 	
 	po.vueMethod(

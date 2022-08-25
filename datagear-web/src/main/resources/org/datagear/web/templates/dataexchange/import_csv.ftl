@@ -52,7 +52,11 @@
 									</p-inputtext>
 								</template>
 							</p-column>
-							<p-column field="status" header="<@spring.message code='importProgress' />" class="col-version col-last"></p-column>
+							<p-column header="<@spring.message code='importProgress' />" class="col-version col-last">
+								<template #body="slotProps">
+									<div v-html="slotProps.data.status"></div>
+								</template>
+							</p-column>
 						</p-datatable>
 					</div>
 				</div>
@@ -64,33 +68,24 @@
 <#include "../include/page_form.ftl">
 <#include "../include/page_simple_form.ftl">
 <#include "../include/page_boolean_options.ftl">
+<#include "../include/page_format_time.ftl">
 <#include "include/dataexchange_js.ftl">
 <#include "include/import_js.ftl">
 <script>
 (function(po)
 {
 	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/csv/doImport";
-	po.dependentNumberAuto = "<@spring.message code='auto' />";
 	
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
-		subDataExchange.dependentNumber = po.dependentNumberAuto;
-	};
-	
-	po.beforeSubmitForm = function(action)
-	{
-		if(!po.isLastStep())
-		{
-			po.toNextStep();
-			return false;
-		}
+		var fm = po.vueFormModel();
+		subDataExchange.dependentNumber = fm.dependentNumberAuto;
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
-	formModel.dependentNumberAuto = po.dependentNumberAuto;
-	po.inflateFormModel(formModel);
-	po.setupForm(formModel);
+	po.setupDataExchangeForm(formModel);
 	
+	po.setupSteps(po.stepsItems, true);
 	po.setupImportHead("<@spring.message code='dataImport.importCsvData' />");
 	po.setupImportTableHead(
 			po.concatContextPath("/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/csv/uploadImportFile"),
@@ -98,7 +93,6 @@
 			{
 				po.addSubDataExchangesForFileInfos(response);
 			});
-	po.setupSteps(po.stepsItems, true);
 	
 	po.vueMount();
 })

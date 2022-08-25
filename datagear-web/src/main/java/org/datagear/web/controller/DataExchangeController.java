@@ -234,6 +234,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		formModel.setImportOption(importOption);
 		formModel.setFileEncoding(Charset.defaultCharset().name());
 		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
+		formModel.setDependentNumberAuto(getMessage(request, "auto"));
 
 		setFormModel(springModel, formModel, "", "doImport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
