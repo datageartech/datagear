@@ -236,7 +236,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 		formModel.setDependentNumberAuto(getMessage(request, "auto"));
 
-		setFormModel(springModel, formModel, "", "doImport");
+		setFormModel(springModel, formModel, "import", "doImport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
@@ -562,15 +562,21 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		DataFormat defaultDataFormat = new DataFormat();
-
 		String dataExchangeId = IDUtil.uuid();
+		DataFormat defaultDataFormat = new DataFormat();
+		ValueDataImportOption importOption = new ValueDataImportOption(ExceptionResolve.ROLLBACK, false, false);
+		
+		DefaultTextValueFileBatchDataImportForm formModel = new DefaultTextValueFileBatchDataImportForm();
+		formModel.setDataExchangeId(dataExchangeId);
+		formModel.setDataFormat(defaultDataFormat);
+		formModel.setImportOption(importOption);
+		formModel.setFileEncoding(Charset.defaultCharset().name());
+		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
+		formModel.setDependentNumberAuto(getMessage(request, "auto"));
 
-		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		setFormModel(springModel, formModel, "import", "doImport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
-		springModel.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
+		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/import_excel";
 	}

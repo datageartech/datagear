@@ -14,7 +14,7 @@ dataexchange_js.ftl
 -->
 <div class="flex align-items-center justify-content-between">
 	<div class="fileupload-wrapper flex align-items-center">
-		<label title="<@spring.message code='dataImport.uploadFile.desc' />" class="mr-3">
+		<label :title="pm.tableHeadOptions.uploadFileLabelDesc" class="mr-3">
 			<@spring.message code='uploadFile' />
 		</label>
 		<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
@@ -52,7 +52,7 @@ dataexchange_js.ftl
 			</label>
 		</div>
 		<div class="p-2 panel-content-size-xxs overflow-auto">
-			<div class="field grid">
+			<div class="field grid" v-if="pm.tableHeadOptions.fileEncodingEnable">
 				<label for="${pid}fileEncoding" class="field-label col-12 mb-2"
 					title="<@spring.message code='dataImport.fileEncoding.desc' />">
 					<@spring.message code='fileEncoding' />
@@ -91,8 +91,15 @@ dataexchange_js.ftl
 			formData.append("zipFileNameEncoding", fm.zipFileNameEncoding);
 	};
 	
-	po.setupImportTableHead = function(uploadUrl, uploadedHandler)
+	po.setupImportTableHead = function(uploadUrl, uploadedHandler, options)
 	{
+		options = $.extend(
+		{
+			uploadFileLabelDesc: "<@spring.message code='dataImport.uploadFile.desc' />",
+			fileEncodingEnable: true
+		},
+		options);
+		
 		po.dataExchangeStatusChanged = function(status, oldStatus)
 		{
 			po.clearFileuploadInfo();
@@ -101,7 +108,8 @@ dataexchange_js.ftl
 		po.vuePageModel(
 		{
 			uploadFileUrl: uploadUrl,
-			availableCharsetNames: po.availableCharsetNames
+			availableCharsetNames: po.availableCharsetNames,
+			tableHeadOptions: options
 		});
 		
 		po.vueMethod(

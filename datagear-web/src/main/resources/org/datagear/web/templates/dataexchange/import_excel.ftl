@@ -18,7 +18,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-dataexchange page-import-data-csv">
+<div id="${pid}" class="page page-manager page-dataexchange page-import-data-excel">
 	<#include "include/import_head.ftl">
 	<div class="page-content">
 		<div class="page-form">
@@ -77,7 +77,7 @@
 <script>
 (function(po)
 {
-	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/csv/doImport";
+	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/excel/doImport";
 	
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
@@ -94,15 +94,16 @@
 	po.setupDataExchangeForm(formModel);
 	
 	po.setupDataExchange();
-	po.setupImportHead("<@spring.message code='dataImport.importCsvData' />");
+	po.setupImportHead("<@spring.message code='dataImport.importExcelData' />");
 	po.setupImportTableHead(
-			po.concatContextPath("/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/csv/uploadImportFile"),
+			po.concatContextPath("/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/excel/uploadImportFile"),
 			function(response)
 			{
 				po.addSubDataExchangesForFileInfos(response);
 			},
 			{
-				uploadFileLabelDesc: "<@spring.message code='dataImport.uploadFile.csv.desc' />",
+				uploadFileLabelDesc: "<@spring.message code='dataImport.uploadFile.excel.desc' />",
+				fileEncodingEnable: false
 			});
 	
 	po.vueMount();
