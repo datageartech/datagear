@@ -11,6 +11,7 @@
 
 依赖：
 dataexchange_js.ftl
+import_js.ftl
 -->
 <div class="flex align-items-center justify-content-between">
 	<div class="fileupload-wrapper flex align-items-center">

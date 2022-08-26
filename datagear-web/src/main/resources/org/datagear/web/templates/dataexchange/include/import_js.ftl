@@ -15,6 +15,14 @@ dataexchange_js.ftl
 <script>
 (function(po)
 {
+	//org.datagear.dataexchange.ExceptionResolve
+	po.ExceptionResolve =
+	{
+		ABORT: "ABORT",
+		IGNORE: "IGNORE",
+		ROLLBACK: "ROLLBACK"
+	};
+	
 	po.checkSubmitForm = function(action)
 	{
 		return po.checkSubmitSubDataExchanges(action);
@@ -84,7 +92,25 @@ dataexchange_js.ftl
 	};
 	
 	po.postBuildSubDataExchange = function(subDataExchange){};
-	
+
+	po.vuePageModel(
+	{
+		exceptionResolveOptions:
+		[
+			{
+				name: "<@spring.message code='dataExchange.exceptionResolve.ROLLBACK' />",
+				value: po.ExceptionResolve.ROLLBACK
+			},
+			{
+				name: "<@spring.message code='dataExchange.exceptionResolve.ABORT' />",
+				value: po.ExceptionResolve.ABORT
+			},
+			{
+				name: "<@spring.message code='dataExchange.exceptionResolve.IGNORE' />",
+				value: po.ExceptionResolve.IGNORE
+			}
+		]
+	});
 })
 (${pid});
 </script>

@@ -11,6 +11,8 @@
 
 依赖：
 page_boolean_options.ftl
+dataexchange_js.ftl
+import_js.ftl
 -->
 <div class="field grid">
 	<label for="${pid}ignoreInexistentColumn" class="field-label col-12 mb-2 md:col-3 md:mb-0">
@@ -42,26 +44,3 @@ page_boolean_options.ftl
        	</p-selectbutton>
 	</div>
 </div>
-<script>
-(function(po)
-{
-	//org.datagear.dataexchange.ExceptionResolve
-	po.ExceptionResolve =
-	{
-		ABORT: "ABORT",
-		IGNORE: "IGNORE",
-		ROLLBACK: "ROLLBACK"
-	};
-	
-	po.vuePageModel(
-	{
-		exceptionResolveOptions:
-		[
-			{name: "<@spring.message code='dataExchange.exceptionResolve.ROLLBACK' />", value: po.ExceptionResolve.ROLLBACK},
-			{name: "<@spring.message code='dataExchange.exceptionResolve.ABORT' />", value: po.ExceptionResolve.ABORT},
-			{name: "<@spring.message code='dataExchange.exceptionResolve.IGNORE' />", value: po.ExceptionResolve.IGNORE}
-		]
-	});
-})
-(${pid});
-</script>

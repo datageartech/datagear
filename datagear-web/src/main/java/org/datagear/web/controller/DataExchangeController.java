@@ -342,16 +342,19 @@ public class DataExchangeController extends AbstractSchemaConnController
 				checkDeleteTableDataPermission(schema, user);
 			}
 		}.execute();
-
-		DataFormat defaultDataFormat = new DataFormat();
-
+		
 		String dataExchangeId = IDUtil.uuid();
-
-		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		DataImportOption importOption = new DataImportOption(ExceptionResolve.ROLLBACK);
+		
+		SqlFileBatchDataImportForm formModel = new SqlFileBatchDataImportForm();
+		formModel.setDataExchangeId(dataExchangeId);
+		formModel.setImportOption(importOption);
+		formModel.setFileEncoding(Charset.defaultCharset().name());
+		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
+		
+		setFormModel(springModel, formModel, "import", "doImport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
-		springModel.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
+		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/import_sql";
 	}
@@ -645,8 +648,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			{
 				Connection cn = getConnection();
 
-				inflateDependentNumbers(cn, subDataExchangeForms,
-						form.getDependentNumberAuto());
+				inflateDependentNumbers(cn, subDataExchangeForms, form.getDependentNumberAuto());
 			}
 		}.execute();
 
@@ -1224,7 +1226,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	 * 
 	 * @param cn
 	 * @param subForms
-	 * @param inflateFlag
+	 * @param inflateFlag 允许{@code null}
 	 */
 	protected void inflateDependentNumbers(Connection cn, List<? extends TextValueFileSubDataImportForm> subForms, String inflateFlag)
 	{
@@ -1244,11 +1246,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			TextValueFileSubDataImportForm subForm = subForms.get(i);
 			
-			if (!inflateFlag.equals(subForm.getDependentNumber()))
+			if(!StringUtil.isEquals(inflateFlag, subForm.getDependentNumber()))
 				continue;
-
+			
 			String[] myImportTables = importTabless.get(i);
-
+			
 			if (myImportTables == null || myImportTables.length == 0)
 				subForm.setDependentNumber("");
 			else
@@ -1883,7 +1885,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		private static final long serialVersionUID = 1L;
 		
 		/** 自动处理导入条目依赖编号的字面值 */
-		private String dependentNumberAuto;
+		private String dependentNumberAuto = null;
 
 		public AbstractFileBatchDataImportForm()
 		{
@@ -1898,15 +1900,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setDependentNumberAuto(String dependentNumberAuto)
 		{
 			this.dependentNumberAuto = dependentNumberAuto;
-		}
-
-		@Override
-		public void check() throws IllegalInputException
-		{
-			if(this.dependentNumberAuto == null)
-				throw new IllegalInputException();
-			
-			super.check();
 		}
 
 		@Override
