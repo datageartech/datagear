@@ -329,7 +329,8 @@ page_format_time.ftl
 				else if(exceptionResolve == "ROLLBACK")
 					statusTmp = "<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.ROLLBACK' />";
 				
-				status += "<div>" + $.validator.format(statusTmp, message.successCount, message.failCount, duration, message.content);
+				status += "<div title=\""+$.escapeHtml("<@spring.message code='dataExchange.exchangeStatus.desc' />")+"\">"
+								+$.validator.format(statusTmp, message.successCount, message.failCount, duration, message.content);
 							+"</div>";
 				status += "</div>";
 			}
@@ -343,8 +344,10 @@ page_format_time.ftl
 								+"<i class='pi pi-check-circle text-sm'></i>"
 								+"</span>";
 					
-					status += $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubSuccessWithCount' />",
-								message.successCount, message.failCount, duration);
+					status += "<span title=\""+$.escapeHtml("<@spring.message code='dataExchange.exchangeStatus.desc' />")+"\">"
+								+ $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubSuccessWithCount' />",
+											message.successCount, message.failCount, duration)
+								+"</span>";
 				}
 				else
 				{
@@ -356,7 +359,8 @@ page_format_time.ftl
 						+"<i class='pi pi-info-circle text-sm'></i>"
 						+"</button>";
 					
-					status += "<div>" + $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' />",
+					status += "<div title=\""+$.escapeHtml("<@spring.message code='dataExchange.exchangeStatus.desc' />")+"\">"
+								+ $.validator.format("<@spring.message code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' />",
 											message.successCount, message.failCount, duration)
 							 	+"</div>";
 					status += "</div>";
