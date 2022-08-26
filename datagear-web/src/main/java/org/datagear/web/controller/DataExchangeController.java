@@ -445,17 +445,23 @@ public class DataExchangeController extends AbstractSchemaConnController
 				checkDeleteTableDataPermission(schema, user);
 			}
 		}.execute();
-
+		
+		String dataExchangeId = IDUtil.uuid();
 		DataFormat defaultDataFormat = new DataFormat();
 		defaultDataFormat.setBinaryFormat("0x" + DataFormatContext.wrapToExpression(DataFormat.BINARY_FORMAT_HEX));
+		JsonDataImportOption importOption = new JsonDataImportOption(ExceptionResolve.ROLLBACK, false, false, JsonDataFormat.TABLE_OBJECT);
+		
+		JsonFileBatchDataImportForm formModel = new JsonFileBatchDataImportForm();
+		formModel.setDataExchangeId(dataExchangeId);
+		formModel.setDataFormat(defaultDataFormat);
+		formModel.setImportOption(importOption);
+		formModel.setFileEncoding(Charset.defaultCharset().name());
+		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
+		formModel.setDependentNumberAuto(getMessage(request, "auto"));
 
-		String dataExchangeId = IDUtil.uuid();
-
-		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		setFormModel(springModel, formModel, "import", "doImport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
-		springModel.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
+		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/import_json";
 	}
@@ -1705,7 +1711,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			if (file.isDirectory())
 				return true;
 			else
-				return file.getName().toLowerCase().endsWith(".csv");
+				return (FileUtil.isExtension(file, "csv") ||  FileUtil.isExtension(file, "txt"));
 		}
 	}
 
@@ -1722,7 +1728,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			if (file.isDirectory())
 				return true;
 			else
-				return file.getName().toLowerCase().endsWith(".sql");
+				return (FileUtil.isExtension(file, "sql") ||  FileUtil.isExtension(file, "txt"));
 		}
 	}
 
@@ -1739,11 +1745,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			if (file.isDirectory())
 				return true;
 			else
-			{
-				String lowName = file.getName().toLowerCase();
-
-				return lowName.endsWith(".json") || lowName.endsWith(".txt");
-			}
+				return (FileUtil.isExtension(file, "json") ||  FileUtil.isExtension(file, "txt"));
 		}
 	}
 
@@ -1759,9 +1761,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			if (file.isDirectory())
 				return true;
-
-			String fileName = file.getName().toLowerCase();
-			return (fileName.endsWith(".xlsx") || fileName.endsWith(".xls"));
+			else
+				return (FileUtil.isExtension(file, "xlsx") ||  FileUtil.isExtension(file, "xls"));
 		}
 	}
 
@@ -2040,24 +2041,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private JsonDataImportOption importOption;
-
 		@Override
 		public JsonDataImportOption getImportOption()
 		{
-			return importOption;
+			return (JsonDataImportOption)super.getImportOption();
 		}
 
 		public void setImportOption(JsonDataImportOption importOption)
 		{
-			this.importOption = importOption;
+			super.setImportOption(importOption);
 		}
 
 		@Override
 		protected void checkSubDataExchangeTableName(TextValueFileSubDataImportForm subDataExchange)
 				throws IllegalInputException
 		{
-			if(JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
+			if(JsonDataFormat.ROW_ARRAY.equals(getImportOption().getJsonDataFormat()))
 				super.checkSubDataExchangeTableName(subDataExchange);
 		}
 	}

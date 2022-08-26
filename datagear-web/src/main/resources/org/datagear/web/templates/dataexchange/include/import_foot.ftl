@@ -12,12 +12,14 @@
 依赖：
 dataexchange_js.ftl
 -->
-<div class="page-form-foot pt-3 text-center flex justify-content-between h-opts">
-	<p-button type="button" label="<@spring.message code='return' />"
-		class="p-button-secondary" @click="onReturn"
-		:disabled="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.exchange">
-	</p-button>
-	<div class="h-opts">
+<div class="page-form-foot pt-3 text-center flex justify-content-between">
+	<div class="w-3 text-left">
+		<p-button type="button" label="<@spring.message code='return' />"
+			class="p-button-secondary" @click="onReturn"
+			:disabled="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.exchange">
+		</p-button>
+	</div>
+	<div class="w-6 text-center h-opts">
 		<p-button type="button" label="<@spring.message code='previousStep' />"
 			@click="onToPrevStep" :disabled="pm.steps.activeIndex == 0 || pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
 		</p-button>
@@ -30,7 +32,7 @@ dataexchange_js.ftl
 			v-if="pm.steps.activeIndex == pm.steps.items.length-1">
 		</p-button>
 	</div>
-	<div>
+	<div class="w-3 text-right">
 		<p-button type="button" label="<@spring.message code='restart' />"
 			class="p-button-secondary" @click="onRestart"
 			v-if="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.finish">

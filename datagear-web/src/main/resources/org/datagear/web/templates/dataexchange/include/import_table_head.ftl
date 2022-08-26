@@ -15,9 +15,11 @@ import_js.ftl
 -->
 <div class="flex align-items-center justify-content-between">
 	<div class="fileupload-wrapper flex align-items-center">
-		<label :title="pm.tableHeadOptions.uploadFileLabelDesc" class="mr-3">
-			<@spring.message code='uploadFile' />
-		</label>
+		<div class="mr-3">
+			<label :title="pm.tableHeadOptions.uploadFileLabelDesc">
+				<@spring.message code='uploadFile' />
+			</label>
+		</div>
 		<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
        		@upload="onUploaded" @select="uploadFileOnSelect" @before-upload="onBeforeUpload" @progress="uploadFileOnProgress"
        		:auto="true" choose-label="<@spring.message code='select' />" class="mr-2"
