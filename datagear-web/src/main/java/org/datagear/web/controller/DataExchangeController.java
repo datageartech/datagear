@@ -24,11 +24,9 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -747,7 +745,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	@RequestMapping("/{schemaId}/export")
 	public String expt(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam(value="query", required = false) String[] queries,
+			@RequestParam(value="queryScript", required = false) String queryScript,
+			@RequestParam(value="queryScriptDelimiter", required = false) String queryScriptDelimiter) throws Throwable
 	{
 		final User user = WebUtils.getUser();
 
@@ -761,39 +762,34 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		List<String> initSqlList = new ArrayList<>();
+		List<String> queryList = new ArrayList<>();
 
-		String[] initSqls = request.getParameterValues("initSqls");
-		if (initSqls == null)
-			initSqls = new String[0];
-		else
-			initSqlList.addAll(Arrays.asList(initSqls));
+		if (queries != null)
+			queryList.addAll(Arrays.asList(queries));
 
-		String initScript = request.getParameter("initScript");
-		if (!StringUtil.isEmpty(initScript))
+		if (!StringUtil.isEmpty(queryScript))
 		{
-			String initScriptDelimiter = request.getParameter("initScriptDelimiter");
-
-			SqlScriptParser sqlScriptParser = new SqlScriptParser(new StringReader(initScript));
-			if (!isEmpty(initScriptDelimiter))
-				sqlScriptParser.setDelimiter(initScriptDelimiter);
+			SqlScriptParser sqlScriptParser = new SqlScriptParser(new StringReader(queryScript));
+			if (!isEmpty(queryScriptDelimiter))
+				sqlScriptParser.setDelimiter(queryScriptDelimiter);
 
 			List<SqlStatement> sqlStatements = sqlScriptParser.parseAll();
 			if (!StringUtil.isEmpty(sqlStatements))
 			{
 				for (SqlStatement sqlst : sqlStatements)
-					initSqlList.add(sqlst.getSql());
+					queryList.add(sqlst.getSql());
 			}
 		}
 
-		springModel.addAttribute("initSqls", initSqlList);
+		addAttributeForWriteJson(springModel, "queries", queryList);
 
 		return "/dataexchange/export";
 	}
 
 	@RequestMapping("/{schemaId}/export/csv")
 	public String exptCsv(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam(value="query", required = false) String[] queries) throws Throwable
 	{
 		final User user = WebUtils.getUser();
 
@@ -807,15 +803,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		DataFormat defaultDataFormat = new DataFormat();
-
 		String dataExchangeId = IDUtil.uuid();
+		DataFormat defaultDataFormat = new DataFormat();
+		TextDataExportOption exportOption = new TextDataExportOption(false);
+		
+		DefaultTextFileBatchDataExportForm formModel = new DefaultTextFileBatchDataExportForm();
+		formModel.setDataExchangeId(dataExchangeId);
+		formModel.setDataFormat(defaultDataFormat);
+		formModel.setExportOption(exportOption);
+		formModel.setFileEncoding(Charset.defaultCharset().name());
+		inflateTextFileSubDataExportForms(formModel, queries);
 
-		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		setFormModel(springModel, formModel, "export", "doExport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
-		setParamInitSqlsAttribute(request, springModel);
+		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/export_csv";
 	}
@@ -875,13 +876,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeForms);
-		return operationSuccessResponseEntity(request, subDataExchangeFileNameMap);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/export/excel")
 	public String exptExcel(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam(value="query", required = false) String[] queries) throws Throwable
 	{
 		final User user = WebUtils.getUser();
 
@@ -895,15 +896,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		DataFormat defaultDataFormat = new DataFormat();
-
 		String dataExchangeId = IDUtil.uuid();
+		DataFormat defaultDataFormat = new DataFormat();
+		TextDataExportOption exportOption = new TextDataExportOption(false);
+		
+		DefaultTextFileBatchDataExportForm formModel = new DefaultTextFileBatchDataExportForm();
+		formModel.setDataExchangeId(dataExchangeId);
+		formModel.setDataFormat(defaultDataFormat);
+		formModel.setExportOption(exportOption);
+		inflateTextFileSubDataExportForms(formModel, queries);
 
-		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		setFormModel(springModel, formModel, "export", "doExport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
-		setParamInitSqlsAttribute(request, springModel);
+		//占位，避免页面空指针
+		addAttributeForWriteJson(springModel, "availableCharsetNames", Collections.emptyList());
 
 		return "/dataexchange/export_excel";
 	}
@@ -963,13 +969,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeForms);
-		return operationSuccessResponseEntity(request, subDataExchangeFileNameMap);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/export/sql")
 	public String exptSql(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam(value="query", required = false) String[] queries) throws Throwable
 	{
 		final User user = WebUtils.getUser();
 
@@ -983,20 +989,25 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
+		String dataExchangeId = IDUtil.uuid();
 		DataFormat defaultDataFormat = new DataFormat();
 		defaultDataFormat.setDateFormat("'" + DataFormatContext.wrapToExpression(DataFormat.DEFAULT_DATE_FORMAT) + "'");
 		defaultDataFormat.setTimeFormat("'" + DataFormatContext.wrapToExpression(DataFormat.DEFAULT_TIME_FORMAT) + "'");
 		defaultDataFormat.setTimestampFormat(
 				"'" + DataFormatContext.wrapToExpression(DataFormat.DEFAULT_TIMESTAMP_FORMAT) + "'");
 		defaultDataFormat.setBinaryFormat("0x" + DataFormatContext.wrapToExpression(DataFormat.BINARY_FORMAT_HEX));
+		SqlDataExportOption exportOption = new SqlDataExportOption(false, false);
+		
+		SqlFileBatchDataExportForm formModel = new SqlFileBatchDataExportForm();
+		formModel.setDataExchangeId(dataExchangeId);
+		formModel.setDataFormat(defaultDataFormat);
+		formModel.setExportOption(exportOption);
+		formModel.setFileEncoding(Charset.defaultCharset().name());
+		inflateTextFileSubDataExportForms(formModel, queries);
 
-		String dataExchangeId = IDUtil.uuid();
-
-		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		setFormModel(springModel, formModel, "export", "doExport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
-		setParamInitSqlsAttribute(request, springModel);
+		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/export_sql";
 	}
@@ -1056,13 +1067,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeForms);
-		return operationSuccessResponseEntity(request, subDataExchangeFileNameMap);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/export/json")
 	public String exptJson(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam(value="query", required = false) String[] queries) throws Throwable
 	{
 		final User user = WebUtils.getUser();
 
@@ -1076,16 +1087,21 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
+		String dataExchangeId = IDUtil.uuid();
 		DataFormat defaultDataFormat = new DataFormat();
 		defaultDataFormat.setBinaryFormat("0x" + DataFormatContext.wrapToExpression(DataFormat.BINARY_FORMAT_HEX));
+		JsonDataExportOption exportOption = new JsonDataExportOption(false, JsonDataFormat.TABLE_OBJECT);
+		
+		JsonFileBatchDataExportForm formModel = new JsonFileBatchDataExportForm();
+		formModel.setDataExchangeId(dataExchangeId);
+		formModel.setDataFormat(defaultDataFormat);
+		formModel.setExportOption(exportOption);
+		formModel.setFileEncoding(Charset.defaultCharset().name());
+		inflateTextFileSubDataExportForms(formModel, queries);
 
-		String dataExchangeId = IDUtil.uuid();
-
-		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		setFormModel(springModel, formModel, "export", "doExport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
-		setParamInitSqlsAttribute(request, springModel);
+		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/export_json";
 	}
@@ -1147,8 +1163,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeForms);
-		return operationSuccessResponseEntity(request, subDataExchangeFileNameMap);
+		return operationSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/{schemaId}/export/download")
@@ -1215,16 +1230,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		return this.messageChannel.pull(dataExchangeId, messageCount);
 	}
-
-	protected String[] setParamInitSqlsAttribute(HttpServletRequest request, org.springframework.ui.Model springModel)
+	
+	protected <T extends TextFileSubDataExportForm> void inflateTextFileSubDataExportForms(
+			AbstractTextFileBatchDataExportForm<T> formModel, String[] queries)
 	{
-		String[] initSqls = request.getParameterValues("initSqls");
-		if (initSqls == null)
-			initSqls = new String[0];
-
-		springModel.addAttribute("initSqls", initSqls);
-
-		return initSqls;
+		if (queries == null)
+			return;
+		
+		List<T> subForms = new ArrayList<T>(queries.length);
+		
+		for(String query : queries)
+		{
+			T subForm = formModel.createTextFileSubDataExportForm();
+			subForm.setQuery(query == null ? "" : query);
+			
+			subForms.add(subForm);
+		}
 	}
 
 	/**
@@ -1400,16 +1421,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		batchDataExchange.setListener(listener);
 
 		return batchDataExchange;
-	}
-
-	protected Map<String, String> buildSubDataExchangeFileNameMap(List<? extends AbstractFileSubDataExchangeForm> subForms)
-	{
-		Map<String, String> map = new HashMap<>();
-
-		for (AbstractFileSubDataExchangeForm subForm : subForms)
-			map.put(subForm.getId(), subForm.getFileName());
-
-		return map;
 	}
 
 	protected Query toQuery(String query)
@@ -1609,10 +1620,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	protected boolean isZipFile(String fileName)
 	{
-		if (fileName == null || fileName.isEmpty())
-			return false;
-
-		return fileName.toLowerCase().endsWith(".zip");
+		return FileUtil.isExtension(fileName, "zip");
 	}
 
 	protected File getTempDataExchangeDirectory(String dataExchangeId, boolean notNull)
@@ -2133,6 +2141,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			if(StringUtil.isEmpty(subDataExchange.getQuery()))
 				throw new IllegalInputException();
 		}
+		
+		public abstract T createTextFileSubDataExportForm();
 	}
 
 	public static class DefaultTextFileBatchDataExportForm extends AbstractTextFileBatchDataExportForm<TextFileSubDataExportForm>
@@ -2142,6 +2152,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public DefaultTextFileBatchDataExportForm()
 		{
 			super();
+		}
+
+		@Override
+		public TextFileSubDataExportForm createTextFileSubDataExportForm()
+		{
+			return new TextFileSubDataExportForm();
 		}
 	}
 	
@@ -2219,6 +2235,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 			if(StringUtil.isEmpty(subDataExchange.getTableName()))
 				throw new IllegalInputException();
 		}
+
+		@Override
+		public TableNameTextFileSubDataExportForm createTextFileSubDataExportForm()
+		{
+			return new TableNameTextFileSubDataExportForm();
+		}
 	}
 
 	public static class JsonFileBatchDataExportForm extends AbstractTextFileBatchDataExportForm<TableNameTextFileSubDataExportForm>
@@ -2251,6 +2273,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 			if(JsonDataFormat.TABLE_OBJECT.equals(this.exportOption.getJsonDataFormat())
 					&& StringUtil.isEmpty(subDataExchange.getTableName()))
 				throw new IllegalInputException();
+		}
+
+		@Override
+		public TableNameTextFileSubDataExportForm createTextFileSubDataExportForm()
+		{
+			return new TableNameTextFileSubDataExportForm();
 		}
 	}
 

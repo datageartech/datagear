@@ -78,13 +78,13 @@ public class MessageSubTextDataExportListener extends MessageSubDataExchangeList
 	@Override
 	protected String getStartLog()
 	{
-		return getI18nMessage("dataExport.startExport");
+		return getI18nMessage("startExport");
 	}
 
 	@Override
 	protected String getFinishLog()
 	{
-		return getI18nMessage("dataExport.finishExport");
+		return getI18nMessage("finishExport");
 	}
 
 	/**

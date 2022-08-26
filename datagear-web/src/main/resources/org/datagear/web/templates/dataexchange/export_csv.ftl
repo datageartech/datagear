@@ -13,49 +13,48 @@
 <#include "../include/html_head.ftl">
 <title>
 	<#include "../include/html_app_name_prefix.ftl">
-	<@spring.message code='module.importData' />
+	<@spring.message code='module.exportData' />
 </title>
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-dataexchange page-import-data-csv">
-	<#include "include/import_head.ftl">
+<div id="${pid}" class="page page-manager page-dataexchange page-export-data-csv">
+	<#include "include/export_head.ftl">
 	<div class="page-content">
 		<div class="page-form">
 			<form id="${pid}form" action="#">
 				<div class="page-form-content p-2 overflow-y-auto"
 					:class="pm.steps.activeIndex == 0 ? '' : 'hidden'">
 					<#include "include/dataexchange_data_format.ftl">
-					<#include "include/import_value_data_Import_option.ftl">
 				</div>
 				<div class="page-form-content p-2 overflow-y-auto"
 					:class="pm.steps.activeIndex == 1 ? '' : 'hidden'">
-					<#include "include/import_table_head.ftl">
+					<#include "include/export_table_head.ftl">
 					<div class="subdataexchange-table-wrapper pt-2">
 						<p-datatable :value="fm.subDataExchanges" :scrollable="true" scroll-height="flex"
 							v-model:selection="pm.selectedSubDataExchanges" selection-mode="multiple"
 							:sortable="false" dataKey="id" striped-rows class="table-sm">
 							<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
-							<p-column field="number" header="<@spring.message code='givenNumber' />" :frozen="true" class="col-version">
-							</p-column>
-							<p-column field="fileDisplayName" header="<@spring.message code='fileName' />" class="col-name"></p-column>
-							<p-column field="fileSize" header="<@spring.message code='fileSize' />" class="col-version"></p-column>
-							<p-column field="tableName" header="<@spring.message code='importTableName' />" class="col-name">
+							<p-column field="number" header="<@spring.message code='rowNumber' />" :frozen="true" class="col-version">
 								<template #body="slotProps">
-									<p-inputtext v-model="slotProps.data.tableName" class="w-full"
+									{{slotProps.index + 1}}
+								</template>
+							</p-column>
+							<p-column header="<@spring.message code='dataExport.tableNameOrQuery' />" class="col-name">
+								<template #body="slotProps">
+									<p-textarea v-model="slotProps.data.query" class="w-full"
+										:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
+									</p-textarea>
+								</template>
+							</p-column>
+							<p-column header="<@spring.message code='exportFileName' />" class="col-name">
+								<template #body="slotProps">
+									<p-inputtext v-model="slotProps.data.fileName" class="w-full"
 										:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
 									</p-inputtext>
 								</template>
 							</p-column>
-							<p-column field="dependentNumber" header="<@spring.message code='dependentNumber' />" class="col-version">
-								<template #body="slotProps">
-									<p-inputtext v-model="slotProps.data.dependentNumber" class="w-full"
-										:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit"
-										placeholder="<@spring.message code='none' />">
-									</p-inputtext>
-								</template>
-							</p-column>
-							<p-column header="<@spring.message code='importProgress' />" class="col-last" style="min-width:20rem;">
+							<p-column header="<@spring.message code='exportProgress' />" class="col-last" style="min-width:20rem;">
 								<template #body="slotProps">
 									<div v-html="slotProps.data.status"></div>
 								</template>
@@ -63,7 +62,7 @@
 						</p-datatable>
 					</div>
 				</div>
-				<#include "include/import_foot.ftl">
+				<#include "include/export_foot.ftl">
 			</form>
 		</div>
 	</div>
@@ -73,37 +72,30 @@
 <#include "../include/page_boolean_options.ftl">
 <#include "../include/page_format_time.ftl">
 <#include "include/dataexchange_js.ftl">
-<#include "include/import_js.ftl">
+<#include "include/export_js.ftl">
 <script>
 (function(po)
 {
-	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/csv/doImport";
+	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/csv/doExport";
 	
-	po.postBuildSubDataExchange = function(subDataExchange)
+	po.handleExportFileNameExtension = function(fileName)
 	{
-		var fm = po.vueFormModel();
-		subDataExchange.dependentNumber = fm.dependentNumberAuto;
+		return fileName + ".csv";
 	};
 	
-	po.checkSubmitSubDataExchange = function(subDataExchange)
+	po.checkSubmitSubDataExchange = function(subDataExchange, index)
 	{
-		return po.checkSubmitSubDataExchangeTableName(subDataExchange);
+		return (po.checkSubmitSubDataExchangeQuery(subDataExchange, index)
+					&& po.checkSubmitSubDataExchangeFileName(subDataExchange, index));
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.setupDataExchangeForm(formModel);
 	
 	po.setupDataExchange();
-	po.setupImportHead("<@spring.message code='dataImport.importCsvData' />");
-	po.setupImportTableHead(
-			po.concatContextPath("/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/csv/uploadImportFile"),
-			function(response)
-			{
-				po.addSubDataExchangesForFileInfos(response);
-			},
-			{
-				uploadFileLabelDesc: "<@spring.message code='dataImport.uploadFile.csv.desc' />",
-			});
+	po.setupExport();
+	po.setupExportHead("<@spring.message code='dataExport.exportCsvData' />");
+	po.setupExportTableHead();
 	
 	po.vueMount();
 })

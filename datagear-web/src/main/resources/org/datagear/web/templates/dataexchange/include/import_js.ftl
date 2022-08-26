@@ -7,7 +7,7 @@
  *
 -->
 <#--
-导入片段
+导入JS片段
 
 依赖：
 dataexchange_js.ftl
@@ -69,7 +69,7 @@ dataexchange_js.ftl
 	
 	po.addSubDataExchangesForFileInfos = function(fileInfos)
 	{
-		if(!fileInfos.length)
+		if(!fileInfos || !fileInfos.length)
 			return;
 		
 		$.each(fileInfos, function(i, fileInfo)

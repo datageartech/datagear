@@ -7,7 +7,7 @@
  *
 -->
 <#--
-导入页脚片段
+导出页脚片段
 
 依赖：
 dataexchange_js.ftl
@@ -27,7 +27,7 @@ dataexchange_js.ftl
 			:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit"
 			v-if="pm.steps.activeIndex < pm.steps.items.length-1">
 		</p-button>
-		<p-button type="submit" label="<@spring.message code='import' />"
+		<p-button type="submit" label="<@spring.message code='export' />"
 			:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit"
 			v-if="pm.steps.activeIndex == pm.steps.items.length-1">
 		</p-button>
@@ -46,7 +46,7 @@ dataexchange_js.ftl
 	{
 		onReturn: function()
 		{
-			var url = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/import/";
+			var url = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/";
 			
 			if(po.isAjaxRequest)
 			{

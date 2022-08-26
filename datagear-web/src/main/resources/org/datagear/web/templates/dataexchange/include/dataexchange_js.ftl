@@ -137,7 +137,14 @@ page_format_time.ftl
 		});
 		
 		pm.selectedSubDataExchanges = [];
-	}
+	};
+	
+	po.getSubDataExchangeById = function(id)
+	{
+		var fm = po.vueFormModel();
+		var idx = $.inArrayById(fm.subDataExchanges, id);
+		return (idx >= 0 ? fm.subDataExchanges[idx] : null);
+	};
 	
 	po.handleDataExchangeMessage = function(message)
 	{

@@ -28,6 +28,12 @@ public class JsonDataExportOption extends TextDataExportOption
 		super();
 	}
 
+	public JsonDataExportOption(boolean nullForIllegalColumnValue, JsonDataFormat jsonDataFormat)
+	{
+		super(nullForIllegalColumnValue);
+		this.jsonDataFormat = jsonDataFormat;
+	}
+
 	public JsonDataFormat getJsonDataFormat()
 	{
 		return jsonDataFormat;
