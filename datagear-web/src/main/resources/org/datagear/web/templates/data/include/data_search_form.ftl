@@ -109,6 +109,7 @@ page_sql_editor.ftl
 		
 		po.searchConditionCodeEditor = po.createSqlEditor(ele,
 		{
+			lineNumbers: false,
 			extraKeys:
 			{
 				"Ctrl-Enter": function(editor)
