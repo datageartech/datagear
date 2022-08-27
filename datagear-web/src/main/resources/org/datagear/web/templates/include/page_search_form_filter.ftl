@@ -18,7 +18,7 @@
 			 aria-haspopup="true" aria-controls="${pid}searchFilterMenu"
 			@click="onToggleSearchFilterMenu">
 		</p-button>
-		<p-button type="submit" icon="pi pi-search"></p-button>
+		<p-button type="submit" icon="pi pi-search" class="px-4"></p-button>
 	</div>
 	<p-menu id="${pid}searchFilterMenu" ref="${pid}searchFilterMenuEle" :model="pm.searchFilterMenuItems" :popup="true"></p-menu>
 </form>

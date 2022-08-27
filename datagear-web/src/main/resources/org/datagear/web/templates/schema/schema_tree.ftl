@@ -36,7 +36,7 @@
 										</i>
 										<p-inputtext type="text" v-model="pm.searchForm.keyword" class="w-full h-full border-noround-right"></p-inputtext>
 									</div>
-									<p-button type="submit" icon="pi pi-search"></p-button>
+									<p-button type="submit" icon="pi pi-search" class="px-4"></p-button>
 								</div>
 							</form>
 						</div>

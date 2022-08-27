@@ -23,7 +23,7 @@
 <div id="${pid}" class="page page-manager page-table">
 	<div class="page-header grid align-items-center">
 		<div class="col-12" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
-			<#include "../include/page_search_form.ftl">
+			<#include "include/data_search_form.ftl">
 		</div>
 		<div class="h-opts col-12 text-right" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
@@ -52,13 +52,22 @@
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">
+<#include "../include/page_code_editor.ftl">
+<#include "../include/page_sql_editor.ftl">
 <script>
 (function(po)
 {
 	po.isReloadTable = ("${reloadTable?string('true','false')}" == "true");
+
+	po.getSqlEditorSchemaId = function()
+	{
+		return po.schemaId;
+	};
 	
 	po.onDbTable(function(dbTable)
 	{
+		po.setupSearchForm(dbTable);
+		
 		po.vuePageModel(
 		{
 			dbTable: dbTable
