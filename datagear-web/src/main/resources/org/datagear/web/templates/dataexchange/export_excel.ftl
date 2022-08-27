@@ -45,7 +45,7 @@
 							v-model:selection="pm.selectedSubDataExchanges" selection-mode="multiple"
 							:sortable="false" dataKey="id" striped-rows class="table-sm">
 							<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
-							<p-column field="number" header="<@spring.message code='rowNumber' />" :frozen="true" class="col-row-number">
+							<p-column field="number" header="<@spring.message code='serialNumber' />" :frozen="true" class="col-row-number">
 								<template #body="slotProps">
 									{{slotProps.index + 1}}
 								</template>

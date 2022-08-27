@@ -38,6 +38,11 @@
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
+			<p-column field="number" header="<@spring.message code='serialNumber' />" :frozen="true" class="col-row-number">
+				<template #body="slotProps">
+					{{slotProps.index + 1}}
+				</template>
+			</p-column>
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
 			<p-column field="order" header="<@spring.message code='order' />" :hidden="true"></p-column>
 			<p-column field="nameLabel" header="<@spring.message code='name' />" class="col-name">
