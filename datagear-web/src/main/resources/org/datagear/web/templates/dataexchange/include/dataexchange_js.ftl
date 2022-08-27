@@ -67,8 +67,6 @@ page_format_time.ftl
 			beforeSend: function()
 			{
 				po.dataExchangeStatus(po.DataExchangeStatusEnum.exchange);
-				po.resetDataExchangeProgress();
-				po.resetAllSubDataExchangeStatus();
 				po.dataExchangeTaskClient.start();
 			},
 			error: function()
@@ -121,6 +119,9 @@ page_format_time.ftl
 	
 	po.addSubDataExchange = function(subDataExchange)
 	{
+		if(!subDataExchange || !subDataExchange.id)
+			throw new Error("[id] required");
+		
 		var fm = po.vueFormModel();
 		fm.subDataExchanges.push(subDataExchange);
 	};
@@ -396,6 +397,13 @@ page_format_time.ftl
 		});
 	};
 	
+	po.resetDataExchangeStatus = function()
+	{
+		po.dataExchangeStatus(po.DataExchangeStatusEnum.edit);
+		po.resetDataExchangeProgress();
+		po.resetAllSubDataExchangeStatus();
+	};
+
 	po.resetAllSubDataExchangeStatus = function()
 	{
 		var fm = po.vueFormModel();
@@ -405,6 +413,46 @@ page_format_time.ftl
 		{
 			sde.status = po.subDataExchangeStatusUnstart;
 		});
+	};
+	
+	po.cancelSubDataExchanges = function()
+	{
+		if(po.dataExchangeStatus() != po.DataExchangeStatusEnum.exchange)
+			return;
+		
+		var cancelIds = [];
+		
+		var fm = po.vueFormModel();
+		var subDataExchanges = fm.subDataExchanges;
+		
+		$.each(subDataExchanges, function(i, sde)
+		{
+			sde.status = po.subDataExchangeStatusUnstart;
+			
+			if(!sde.status
+				|| sde.status == po.subDataExchangeStatusUnstart
+				|| sde.status == "<@spring.message code='dataExchange.exchangeStatus.SubSubmitSuccess' />")
+			{
+				cancelIds.push(sde.id);
+			}
+		});
+		
+		if(cancelIds.length > 0)
+		{
+			po.ajaxJson("/dataexchange/" + encodeURIComponent(po.schemaId) +"/cancel",
+			{
+				tipSuccess: false,
+				data:
+				{
+					dataExchangeId: po.dataExchangeId,
+					subDataExchangeIds: cancelIds
+				},
+				success: function()
+				{
+					$.tipSuccess("<@spring.message code='dataExchange.cancelCommandHasSent' />");
+				}
+			});
+		}
 	};
 	
 	po.setupDataExchange = function()
@@ -426,6 +474,11 @@ page_format_time.ftl
 			onDeleteSelSubDataExchanges: function()
 			{
 				po.deleteSelSubDataExchanges();
+			},
+			
+			onCancelSubDataExchanges: function()
+			{
+				po.cancelSubDataExchanges();
 			}
 		});
 		

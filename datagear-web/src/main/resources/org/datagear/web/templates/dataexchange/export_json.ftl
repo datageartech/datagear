@@ -18,7 +18,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-dataexchange page-export-data-csv">
+<div id="${pid}" class="page page-manager page-dataexchange page-export-data-json">
 	<#include "include/export_head.ftl">
 	<div class="page-content">
 		<div class="page-form">
@@ -33,6 +33,17 @@
 						<div class="field-input col-12 md:col-9">
 							<p-selectbutton id="${pid}nullForIllegalColumnValue" v-model="fm.exportOption.nullForIllegalColumnValue"
 								:options="pm.booleanOptions" option-label="name" option-value="value" class="input w-full">
+					       	</p-selectbutton>
+						</div>
+					</div>
+					<div class="field grid">
+						<label for="${pid}jsonDataFormat" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+							title="<@spring.message code='dataExchange.JsonDataFormat.desc' />">
+							<@spring.message code='jsonDataFormat' />
+						</label>
+						<div class="field-input col-12 md:col-9">
+							<p-selectbutton id="${pid}jsonDataFormat" v-model="fm.exportOption.jsonDataFormat"
+								:options="pm.jsonDataFormatOptions" option-label="name" option-value="value" class="input w-full">
 					       	</p-selectbutton>
 						</div>
 					</div>
@@ -55,6 +66,14 @@
 									<p-textarea v-model="slotProps.data.query" class="w-full"
 										:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
 									</p-textarea>
+								</template>
+							</p-column>
+							<p-column field="tableName" header="<@spring.message code='exportTableName' />" class="col-name"
+								v-if="fm.exportOption.jsonDataFormat == pm.JsonDataFormat.TABLE_OBJECT">
+								<template #body="slotProps">
+									<p-inputtext v-model="slotProps.data.tableName" class="w-full"
+										:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
+									</p-inputtext>
 								</template>
 							</p-column>
 							<p-column header="<@spring.message code='exportFileName' />" class="col-name">
@@ -86,16 +105,36 @@
 <script>
 (function(po)
 {
-	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/csv/doExport";
+	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/json/doExport";
+
+	//org.datagear.dataexchange.support.JsonDataFormat
+	po.JsonDataFormat =
+	{
+		TABLE_OBJECT: "TABLE_OBJECT",
+		ROW_ARRAY: "ROW_ARRAY"
+	};
+	
+	po.postBuildSubDataExchange = function(subDataExchange)
+	{
+		var fm = po.vueFormModel();
+		var isJsonDataFormat = (fm.exportOption.jsonDataFormat == po.JsonDataFormat.TABLE_OBJECT);
+		
+		if(isJsonDataFormat)
+			subDataExchange.tableName = po.resolveTableName(subDataExchange.query);
+	};
 	
 	po.handleExportFileNameExtension = function(fileName)
 	{
-		return fileName + ".csv";
+		return fileName + ".json";
 	};
 	
 	po.checkSubmitSubDataExchange = function(subDataExchange, index)
 	{
+		var fm = po.vueFormModel();
+		var isJsonDataFormat = (fm.exportOption.jsonDataFormat == po.JsonDataFormat.TABLE_OBJECT);
+		
 		return (po.checkSubmitSubDataExchangeQuery(subDataExchange, index)
+					&& (!isJsonDataFormat || (isJsonDataFormat && po.checkSubmitSubDataExchangeTableName(subDataExchange, index)))
 					&& po.checkSubmitSubDataExchangeFileName(subDataExchange, index));
 	};
 	
@@ -104,8 +143,24 @@
 	
 	po.setupDataExchange();
 	po.setupExport();
-	po.setupExportHead("<@spring.message code='dataExport.exportCsvData' />");
+	po.setupExportHead("<@spring.message code='dataExport.exportJsonData' />");
 	po.setupExportTableHead();
+
+	po.vuePageModel(
+	{
+		JsonDataFormat: po.JsonDataFormat,
+		jsonDataFormatOptions:
+		[
+			{
+				name: "<@spring.message code='dataExchange.JsonDataFormat.TABLE_OBJECT' />",
+				value: po.JsonDataFormat.TABLE_OBJECT
+			},
+			{
+				name: "<@spring.message code='dataExchange.JsonDataFormat.ROW_ARRAY' />",
+				value: po.JsonDataFormat.ROW_ARRAY
+			}
+		]
+	});
 	
 	po.vueMount();
 })

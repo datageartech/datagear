@@ -42,6 +42,11 @@ export_js.ftl
 			@click="onDownloadAll"
 			v-if="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.finish">
 		</p-button>
+		<p-button type="button" label="<@spring.message code='cancel' />"
+			title="<@spring.message code='dataExport.cancel.desc' />"
+			@click="onCancelSubDataExchanges"
+			v-if="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.exchange">
+		</p-button>
 	</div>
 	<p-overlaypanel ref="${pid}fileEncodingPanelEle" append-to="body"
 		:show-close-icon="false" id="${pid}fileEncodingPanel">

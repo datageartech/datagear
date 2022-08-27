@@ -18,7 +18,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-dataexchange page-export-data-csv">
+<div id="${pid}" class="page page-manager page-dataexchange page-export-data-excel">
 	<#include "include/export_head.ftl">
 	<div class="page-content">
 		<div class="page-form">
@@ -86,11 +86,11 @@
 <script>
 (function(po)
 {
-	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/csv/doExport";
+	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/excel/doExport";
 	
 	po.handleExportFileNameExtension = function(fileName)
 	{
-		return fileName + ".csv";
+		return fileName + ".xlsx";
 	};
 	
 	po.checkSubmitSubDataExchange = function(subDataExchange, index)
@@ -104,8 +104,8 @@
 	
 	po.setupDataExchange();
 	po.setupExport();
-	po.setupExportHead("<@spring.message code='dataExport.exportCsvData' />");
-	po.setupExportTableHead();
+	po.setupExportHead("<@spring.message code='dataExport.exportExcelData' />");
+	po.setupExportTableHead({ fileEncodingEnable: false });
 	
 	po.vueMount();
 })

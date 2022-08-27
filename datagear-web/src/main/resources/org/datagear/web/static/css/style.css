@@ -293,6 +293,10 @@ label[title]:not(.no-tip)::after,
 	min-width: 15em;
 	max-width: 20em;
 }
+.p-datatable-table .col-row-number{
+	min-width: 5em;
+	max-width: 10em;
+}
 .p-datatable-table .col-name{
 	min-width:12em;
 	max-width: 25%;

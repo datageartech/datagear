@@ -577,7 +577,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		formModel.setDataExchangeId(dataExchangeId);
 		formModel.setDataFormat(defaultDataFormat);
 		formModel.setImportOption(importOption);
-		formModel.setFileEncoding(Charset.defaultCharset().name());
+		formModel.setFileEncoding(IOUtil.CHARSET_UTF_8);
 		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 		formModel.setDependentNumberAuto(getMessage(request, "auto"));
 
@@ -904,6 +904,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		formModel.setDataExchangeId(dataExchangeId);
 		formModel.setDataFormat(defaultDataFormat);
 		formModel.setExportOption(exportOption);
+		formModel.setFileEncoding(IOUtil.CHARSET_UTF_8);
 		inflateTextFileSubDataExportForms(formModel, queries);
 
 		setFormModel(springModel, formModel, "export", "doExport");
@@ -1464,39 +1465,26 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/cancel")
 	@ResponseBody
 	public ResponseEntity<OperationMessage> cancel(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId)
-			throws Exception
+			@PathVariable("schemaId") String schemaId,
+			@RequestBody CancelDataExchangeForm form) throws Exception
 	{
-		String[] subDataExchangeIds = request.getParameterValues("subDataExchangeId");
-
-		if (isEmpty(subDataExchangeIds))
+		if (isEmpty(form.getDataExchangeId()))
 			throw new IllegalInputException();
 
-		BatchDataExchangeInfo batchDataExchangeInfo = retrieveBatchDataExchangeInfo(request, dataExchangeId);
-
-		if (batchDataExchangeInfo == null)
-			throw new IllegalInputException();
-
-		BatchDataExchangeResult batchDataExchangeResult = batchDataExchangeInfo.getBatchDataExchange().getResult();
-
-		for (int i = 0; i < subDataExchangeIds.length; i++)
-			batchDataExchangeResult.cancel(subDataExchangeIds[i]);
+		BatchDataExchangeInfo batchDataExchangeInfo = retrieveBatchDataExchangeInfo(request, form.getDataExchangeId());
+		
+		if (batchDataExchangeInfo != null && form.getSubDataExchangeIds() != null)
+		{
+			List<String> subDataExchangeIds = form.getSubDataExchangeIds();
+			BatchDataExchangeResult batchDataExchangeResult = batchDataExchangeInfo.getBatchDataExchange().getResult();
+			
+			for (String subDataExchangeId : subDataExchangeIds)
+				batchDataExchangeResult.cancel(subDataExchangeId);
+		}
 		
 		return operationSuccessResponseEntity(request);
 	}
-
-	protected void checkNoEmptyWithElement(Object[] array) throws IllegalInputException
-	{
-		if (array == null || array.length == 0)
-			throw new IllegalInputException();
-
-		for (Object ele : array)
-		{
-			if (isEmpty(ele))
-				throw new IllegalInputException();
-		}
-	}
-
+	
 	protected List<String> toTableNames(List<SimpleTable> tables)
 	{
 		List<String> list = new ArrayList<>(tables.size());
@@ -1782,7 +1770,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		private List<T> subDataExchanges;
 
-		private String fileEncoding;
+		private String fileEncoding = "";
 
 		private String zipFileNameEncoding = "";
 
@@ -2209,8 +2197,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private SqlDataExportOption exportOption;
-
 		public SqlFileBatchDataExportForm()
 		{
 			super();
@@ -2219,12 +2205,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 		@Override
 		public SqlDataExportOption getExportOption()
 		{
-			return exportOption;
+			return (SqlDataExportOption)super.getExportOption();
 		}
 
 		public void setExportOption(SqlDataExportOption exportOption)
 		{
-			this.exportOption = exportOption;
+			super.setExportOption(exportOption);
 		}
 
 		@Override
@@ -2247,8 +2233,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private JsonDataExportOption exportOption;
-
 		public JsonFileBatchDataExportForm()
 		{
 			super();
@@ -2257,12 +2241,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 		@Override
 		public JsonDataExportOption getExportOption()
 		{
-			return exportOption;
+			return (JsonDataExportOption)super.getExportOption();
 		}
 
 		public void setExportOption(JsonDataExportOption exportOption)
 		{
-			this.exportOption = exportOption;
+			super.setExportOption(exportOption);
 		}
 
 		@Override
@@ -2270,7 +2254,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			super.checkSubDataExchange(subDataExchange);
 
-			if(JsonDataFormat.TABLE_OBJECT.equals(this.exportOption.getJsonDataFormat())
+			if(JsonDataFormat.TABLE_OBJECT.equals(getExportOption().getJsonDataFormat())
 					&& StringUtil.isEmpty(subDataExchange.getTableName()))
 				throw new IllegalInputException();
 		}
@@ -2279,6 +2263,40 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public TableNameTextFileSubDataExportForm createTextFileSubDataExportForm()
 		{
 			return new TableNameTextFileSubDataExportForm();
+		}
+	}
+	
+	public static class CancelDataExchangeForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+		
+		private String dataExchangeId;
+
+		private List<String> subDataExchangeIds = Collections.emptyList();
+
+		public CancelDataExchangeForm()
+		{
+			super();
+		}
+
+		public String getDataExchangeId()
+		{
+			return dataExchangeId;
+		}
+
+		public void setDataExchangeId(String dataExchangeId)
+		{
+			this.dataExchangeId = dataExchangeId;
+		}
+
+		public List<String> getSubDataExchangeIds()
+		{
+			return subDataExchangeIds;
+		}
+
+		public void setSubDataExchangeIds(List<String> subDataExchangeIds)
+		{
+			this.subDataExchangeIds = subDataExchangeIds;
 		}
 	}
 

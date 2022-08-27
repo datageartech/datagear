@@ -46,6 +46,11 @@ import_js.ftl
 			@click="onToggleFileEncodingPanel" class="p-button-secondary"
 			v-if="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.edit">
 		</p-button>
+		<p-button type="button" label="<@spring.message code='cancel' />"
+			title="<@spring.message code='dataImport.cancel.desc' />"
+			@click="onCancelSubDataExchanges"
+			v-if="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.exchange">
+		</p-button>
 	</div>
 	<p-overlaypanel ref="${pid}fileEncodingPanelEle" append-to="body"
 		:show-close-icon="false" id="${pid}fileEncodingPanel">

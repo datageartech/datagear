@@ -66,7 +66,7 @@ dataexchange_js.ftl
 		},
 		onRestart: function()
 		{
-			po.dataExchangeStatus(po.DataExchangeStatusEnum.edit);
+			po.resetDataExchangeStatus();
 		}
 	});
 })

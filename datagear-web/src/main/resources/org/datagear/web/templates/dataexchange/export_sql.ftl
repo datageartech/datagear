@@ -18,7 +18,7 @@
 </head>
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-dataexchange page-export-data-csv">
+<div id="${pid}" class="page page-manager page-dataexchange page-export-data-sql">
 	<#include "include/export_head.ftl">
 	<div class="page-content">
 		<div class="page-form">
@@ -32,6 +32,16 @@
 						</label>
 						<div class="field-input col-12 md:col-9">
 							<p-selectbutton id="${pid}nullForIllegalColumnValue" v-model="fm.exportOption.nullForIllegalColumnValue"
+								:options="pm.booleanOptions" option-label="name" option-value="value" class="input w-full">
+					       	</p-selectbutton>
+						</div>
+					</div>
+					<div class="field grid">
+						<label for="${pid}exportCreationSql" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+							<@spring.message code='dataExport.exportCreationSql' />
+						</label>
+						<div class="field-input col-12 md:col-9">
+							<p-selectbutton id="${pid}exportCreationSql" v-model="fm.exportOption.exportCreationSql"
 								:options="pm.booleanOptions" option-label="name" option-value="value" class="input w-full">
 					       	</p-selectbutton>
 						</div>
@@ -55,6 +65,13 @@
 									<p-textarea v-model="slotProps.data.query" class="w-full"
 										:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
 									</p-textarea>
+								</template>
+							</p-column>
+							<p-column header="<@spring.message code='exportTableName' />" class="col-name">
+								<template #body="slotProps">
+									<p-inputtext v-model="slotProps.data.tableName" class="w-full"
+										:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
+									</p-inputtext>
 								</template>
 							</p-column>
 							<p-column header="<@spring.message code='exportFileName' />" class="col-name">
@@ -86,16 +103,22 @@
 <script>
 (function(po)
 {
-	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/csv/doExport";
+	po.submitUrl = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/sql/doExport";
+
+	po.postBuildSubDataExchange = function(subDataExchange)
+	{
+		subDataExchange.tableName = po.resolveTableName(subDataExchange.query);
+	};
 	
 	po.handleExportFileNameExtension = function(fileName)
 	{
-		return fileName + ".csv";
+		return fileName + ".sql";
 	};
 	
 	po.checkSubmitSubDataExchange = function(subDataExchange, index)
 	{
 		return (po.checkSubmitSubDataExchangeQuery(subDataExchange, index)
+				&& po.checkSubmitSubDataExchangeTableName(subDataExchange, index)
 					&& po.checkSubmitSubDataExchangeFileName(subDataExchange, index));
 	};
 	
@@ -104,7 +127,7 @@
 	
 	po.setupDataExchange();
 	po.setupExport();
-	po.setupExportHead("<@spring.message code='dataExport.exportCsvData' />");
+	po.setupExportHead("<@spring.message code='dataExport.exportSqlData' />");
 	po.setupExportTableHead();
 	
 	po.vueMount();
