@@ -27,7 +27,10 @@ User currentUser
 						<a href="${contextPath}/login" class="link px-1"><@spring.message code='module.login' /></a>
 						<a href="${contextPath}/" class="link px-1"><@spring.message code='module.main' /></a>
 					<#else>
-						${currentUser.nameLabel}
+						<span class="text-color-secondary">
+							<i class="pi pi-user text-sm"></i>
+							${currentUser.nameLabel}
+						</span>
 					</#if>
 				</div>
 				<div>
