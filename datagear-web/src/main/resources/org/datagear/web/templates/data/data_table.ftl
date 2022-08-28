@@ -43,8 +43,8 @@
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
-			<p-column v-for="col in pm.dbTable.columns" :header="col.name" :sortable="col.sortable"
-				:key="col.name" style="min-width:12em">
+			<p-column :field="col.name" v-for="col in pm.dbTable.columns" :header="col.name" :sortable="col.sortable && col.supported"
+				:key="col.name" style="min-width:12em" :class="{'text-500': !col.supported}">
 				<template #body="slotProps">
 					<div v-html="onRenderColumnValue(col, slotProps)"></div>
 				</template>
@@ -72,6 +72,15 @@
 	
 	po.onDbTable(function(dbTable)
 	{
+		po.inflateEntityAction = function(action, entityOrArray)
+		{
+			var options = action.options;
+			
+			options.contentType = $.CONTENT_TYPE_JSON;
+			var data = $.tableMeta.uniqueRecordData(dbTable, entityOrArray);
+			options.data = $.extend(data, options.data);
+		};
+		
 		po.setupSearchForm(dbTable);
 		
 		po.vuePageModel(
@@ -88,22 +97,22 @@
 		{
 			onAdd: function()
 			{
-				po.handleAddAction("/data/add");
+				po.handleAddAction(po.dataUrl("add"));
 			},
 			
 			onEdit: function()
 			{
-				po.handleOpenOfAction("/data/edit");
+				po.handleOpenOfAction(po.dataUrl("edit"));
 			},
 			
 			onView: function()
 			{
-				po.handleOpenOfAction("/data/view");
+				po.handleOpenOfAction(po.dataUrl("view"));
 			},
 			
 			onDelete: function()
 			{
-				po.handleDeleteAction("/data/delete");
+				po.handleDeleteAction(po.dataUrl("delete"));
 			},
 			
 			onSelect: function()
@@ -113,6 +122,9 @@
 			
 			onRenderColumnValue: function(column, slotProps)
 			{
+				if(!column.supported)
+					return "";
+				
 				var value = (slotProps.data ? slotProps.data[column.name] : "");
 				
 				if(value == null || value == "")

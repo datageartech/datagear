@@ -557,6 +557,7 @@
 				{
 					$.getJSON(loadUrl, function(table)
 					{
+						_this._inflateColumnInfo(table);
 						_this._setCachedTable(schemaId, table);
 						
 						if(callback != undefined)
@@ -576,6 +577,7 @@
 					var originalSuccessCallback = options.success;
 					options.success = function(table, textStatus, jqXHR)
 					{
+						_this._inflateColumnInfo(table);
 						_this._setCachedTable(schemaId, table);
 						
 						if(originalSuccessCallback)
@@ -609,6 +611,29 @@
 			var tables = (this.schemaTableCache[schemaId] || (this.schemaTableCache[schemaId] = {}));
 			tables[table.name] = table;
 		},
+		
+		_inflateColumnInfo: function(table)
+		{
+			var columns = (table.columns || []);
+			$.each(columns, function(i, column)
+			{
+				column.supported = $.tableMeta.supportsColumn(column);
+				column.renderAsTextarea = ($.tableMeta.isClobColumn(column) ||
+											(column.size && column.size > $.tableMeta.columnAsTextareaLength
+												&& $.tableMeta.isTextColumn(column)));
+				column.isImportKey = $.tableMeta.columnImportKey(table, column);
+				column.isBinary = $.tableMeta.isBinaryColumn(column);
+				
+				if($.tableMeta.isDateColumn(column))
+					column.isDate = true;
+				else if($.tableMeta.isTimeColumn(column))
+					column.isTime = true;
+				else if($.tableMeta.isTimestampColumn(column))
+					column.isTimestamp = true;
+			});
+		},
+		
+		columnAsTextareaLength : 101,
 	});
 })
 (jQuery);

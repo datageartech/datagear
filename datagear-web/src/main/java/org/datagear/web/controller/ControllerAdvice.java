@@ -279,7 +279,7 @@ public class ControllerAdvice extends AbstractController
 			PersistenceException exception)
 	{
 		if (exception.getCause() instanceof SQLException)
-			setOptMsgForThrowableLog(request, exception, exception.getCause().getMessage());
+			setOptMsgForThrowableMsgCodeLog(request, exception, buildExceptionMsgCode(SQLException.class));
 		else
 			setOptMsgForThrowableLog(request, exception);
 
