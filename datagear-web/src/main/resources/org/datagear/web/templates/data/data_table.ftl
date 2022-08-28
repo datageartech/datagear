@@ -43,9 +43,11 @@
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
-			<p-column v-for="col in pm.dbTable.columns"
-				:field="col.name" :header="col.name" :sortable="col.sortable"
+			<p-column v-for="col in pm.dbTable.columns" :header="col.name" :sortable="col.sortable"
 				:key="col.name" style="min-width:12em">
+				<template #body="slotProps">
+					<div v-html="onRenderColumnValue(col, slotProps)"></div>
+				</template>
 			</p-column>
 		</p-datatable>
 	</div>
@@ -58,7 +60,11 @@
 (function(po)
 {
 	po.isReloadTable = ("${reloadTable?string('true','false')}" == "true");
-
+	
+	po.queryResultBinaryPlaceholder = "${queryDefaultLOBRowMapper.binaryPlaceholder}";
+	po.queryResultClobPlacholder = "${queryDefaultLOBRowMapper.clobPlaceholder}";
+	po.queryResultSqlXmlPlaceholder = "${queryDefaultLOBRowMapper.sqlXmlPlaceholder}";
+	
 	po.getSqlEditorSchemaId = function()
 	{
 		return po.schemaId;
@@ -103,6 +109,29 @@
 			onSelect: function()
 			{
 				po.handleSelectAction();
+			},
+			
+			onRenderColumnValue: function(column, slotProps)
+			{
+				var value = (slotProps.data ? slotProps.data[column.name] : "");
+				
+				if(value == null || value == "")
+					return "";
+				
+				if($.tableMeta.isBinaryColumn(column))
+				{
+					return "<div class='p-tag p-tag-warning opacity-60'>"+po.queryResultBinaryPlaceholder+"</div>";
+				}
+				else if($.tableMeta.isClobColumn(column))
+				{
+					return "<div class='p-tag p-tag-warning opacity-60'>"+po.queryResultClobPlacholder+"</div>";
+				}
+				else if($.tableMeta.isSqlxmlColumn(column))
+				{
+					return "<div class='p-tag p-tag-warning opacity-60'>"+po.queryResultSqlXmlPlaceholder+"</div>";
+				}
+				else
+					return $.escapeHtml($.truncateIf(value));
 			}
 		});
 		

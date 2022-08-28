@@ -237,6 +237,7 @@
 (function(po)
 {
 	po.sqlResultReadActualBinaryRows = parseInt("${sqlResultRowMapper.readActualBinaryRows}");
+	po.sqlResultBinaryPlaceholder = "${sqlResultRowMapper.binaryPlaceholder}";
 	po.sqlResultClobPlacholder = "${sqlResultRowMapper.clobPlaceholder}";
 	po.sqlResultSqlXmlPlaceholder = "${sqlResultRowMapper.sqlXmlPlaceholder}";
 	
@@ -1222,24 +1223,24 @@
 							+"</a>";
 				}
 				else
-					return "<div class='p-tag p-tag-warning opacity-60'>"+renderValue+"</div>";
+					return "<div class='p-tag p-tag-warning opacity-60'>"+po.sqlResultBinaryPlaceholder+"</div>";
 			}
 			else if(value != renderValue)
 			{
 				return "<a href='javascript:void(0);' class='view-full-value link text-primary'>"
-						+ renderValue
+						+ $.escapeHtml(renderValue)
 						+ "<span class='full-value hidden'>"+$.escapeHtml(value)+"</span>" + "</a>";
 			}
 			else if(value == po.sqlResultClobPlacholder && $.tableMeta.isClobColumn(column))
 			{
-				return "<div class='p-tag p-tag-warning opacity-60'>"+renderValue+"</div>";
+				return "<div class='p-tag p-tag-warning opacity-60'>"+po.sqlResultClobPlacholder+"</div>";
 			}
 			else if(value == po.sqlResultSqlXmlPlaceholder && $.tableMeta.isSqlxmlColumn(column))
 			{
-				return "<div class='p-tag p-tag-warning opacity-60'>"+renderValue+"</div>";
+				return "<div class='p-tag p-tag-warning opacity-60'>"+po.sqlResultSqlXmlPlaceholder+"</div>";
 			}
 			else
-				return renderValue;
+				return $.escapeHtml(renderValue);
 		},
 		
 		onShowFullValuePanel: function(e)
