@@ -17,7 +17,7 @@ page_sql_editor.ftl
 		<div class="p-input-icon-left flex-grow-1">
 			<i class="cursor-pointer" @click="onToggleSearchNotLike"
 				:class="pm.searchForm.notLike ? 'pi pi-circle-fill' : 'pi pi-circle'"
-				title="<@spring.message code='switchSearchMode' />">
+				:title="pm.searchForm.notLike ? pm.searchNotLikeTrueDesc : pm.searchNotLikeFalseDesc">
 			</i>
 			<p-inputtext type="text" v-model="pm.searchForm.keyword" class="w-full h-full border-noround-right"></p-inputtext>
 		</div>
@@ -28,8 +28,8 @@ page_sql_editor.ftl
 		<p-button type="submit" icon="pi pi-search" class="px-4"></p-button>
 	</div>
 </form>
-<p-overlaypanel ref="${pid}searchConditionPanelEle" append-to="body"
-	:show-close-icon="false" id="${pid}searchConditionPanel"
+<p-overlaypanel ref="${pid}searchConditionPanelEle" append-to="#${pid}"
+	:show-close-icon="false" id="${pid}searchConditionPanel" class="opacity-hide"
 	@show="onSearchConditionPanelShow" @hide="onSearchConditionPanelHide">
 	<div class="pb-2">
 		<label class="text-lg font-bold">
@@ -135,7 +135,9 @@ page_sql_editor.ftl
 		
 		po.vuePageModel(
 		{
-			searchForm: { keyword: "", notLike: false, condition: "" }
+			searchForm: { keyword: "", notLike: false, condition: "" },
+			searchNotLikeTrueDesc: "<@spring.message code='data.searchForm.notLike.true.desc' />",
+			searchNotLikeFalseDesc: "<@spring.message code='data.searchForm.notLike.false.desc' />"
 		});
 		
 		po.vueMethod(
@@ -153,13 +155,19 @@ page_sql_editor.ftl
 			
 			onSearchConditionPanelShow: function()
 			{
-				var panel = po.elementOfId("${pid}searchConditionPanel", document.body);
+				var panel = po.elementOfId("${pid}searchConditionPanel");
+				panel.removeClass("opacity-hide");
+				
 				var codeEditorEle = po.elementOfId("${pid}searchConditionEditor", panel);
 				po.initSearchConditionCodeEditor(codeEditorEle, dbTable);
 			},
 			
 			onSearchConditionPanelHide: function()
 			{
+				var panel = po.elementOfId("${pid}searchConditionPanel");
+				//刷新表结构操作会导致空白区显示这个面板，这里使用透明度解决
+				panel.addClass("opacity-hide");
+				
 				var pm = po.vuePageModel();
 				
 				if(po.searchConditionCodeEditor)
