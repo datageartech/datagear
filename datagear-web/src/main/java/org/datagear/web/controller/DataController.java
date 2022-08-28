@@ -208,12 +208,12 @@ public class DataController extends AbstractSchemaConnTableController
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 
-				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
-				springModel.addAttribute("readonly", table.isReadonly());
-				springModel.addAttribute("reloadTable", Boolean.TRUE.equals(reloadTable));
-
 				springModel.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-				setGridPageAttributes(request, response, springModel, schema, table, dialect);
+				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
+				setIsReadonlyAction(springModel, table.isReadonly(), user);
+				springModel.addAttribute("reloadTable", Boolean.TRUE.equals(reloadTable));
+				springModel.addAttribute("queryDefaultLOBRowMapper", buildQueryDefaultLOBRowMapper());
+				springModel.addAttribute("keywordQueryColumnCount", dialect.getKeywordQueryColumnCount());
 			}
 		}.execute();
 
@@ -261,7 +261,7 @@ public class DataController extends AbstractSchemaConnTableController
 			@PathVariable("tableName") String tableName, @RequestBody(required = false) Query paramData)
 			throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		final Query query = (paramData == null ? new Query() : paramData);
 
 		String sql = new ReturnSchemaConnTableExecutor<String>(request, response, springModel, schemaId, tableName,
@@ -289,7 +289,7 @@ public class DataController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
@@ -331,7 +331,7 @@ public class DataController extends AbstractSchemaConnTableController
 	protected ResponseEntity<OperationMessage> saveAddSingle(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, String schemaId, String tableName, Row row) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		Row savedRow = new ReturnSchemaConnTableExecutor<Row>(request, response, springModel, schemaId, tableName,
 				false)
@@ -346,14 +346,14 @@ public class DataController extends AbstractSchemaConnTableController
 			}
 		}.execute();
 
-		return optMsgSaveSuccessResponseEntity(request, savedRow);
+		return operationSuccessResponseEntity(request, savedRow);
 	}
 
 	protected ResponseEntity<OperationMessage> saveAddBatch(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, String schemaId, String tableName, Row row, int batchCount,
 			BatchHandleErrorMode batchHandleErrorMode) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		ResponseEntity<OperationMessage> batchResponseEntity = new BatchReturnExecutor(request, response, springModel,
 				schemaId, tableName, batchCount, batchHandleErrorMode)
@@ -376,7 +376,7 @@ public class DataController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> paramData) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		final Row row = convertToRow(paramData);
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
@@ -418,7 +418,7 @@ public class DataController extends AbstractSchemaConnTableController
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication,
 			@RequestBody Map<String, ?> paramData) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		final Row originalRow = convertToRow((Map<String, ?>) paramData.get("originalData"));
 		final Row updateRow = convertToRow((Map<String, ?>) paramData.get("data"));
 
@@ -444,7 +444,7 @@ public class DataController extends AbstractSchemaConnTableController
 			}
 		}.execute();
 
-		return optMsgSaveSuccessResponseEntity(request, updatedRow);
+		return operationSuccessResponseEntity(request, updatedRow);
 	}
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/delete", produces = CONTENT_TYPE_JSON)
@@ -455,7 +455,7 @@ public class DataController extends AbstractSchemaConnTableController
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication,
 			@RequestBody List<Map<String, ?>> paramData) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		final Row[] rows = convertToRows(paramData);
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
@@ -490,7 +490,7 @@ public class DataController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> paramData) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		final Row row = convertToRow(paramData);
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
@@ -541,7 +541,7 @@ public class DataController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> params) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		final Row[] updateOriginRows = convertToRows((List<Map<String, ?>>) params.get("updateOrigins"));
 		final Row[] updateTargetRows = convertToRows((List<Map<String, ?>>) params.get("updateTargets"));
 		final Row[] addRows = convertToRows((List<Map<String, ?>>) params.get("adds"));
@@ -617,7 +617,7 @@ public class DataController extends AbstractSchemaConnTableController
 			@PathVariable("tableName") String tableName, @RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -646,7 +646,7 @@ public class DataController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> params) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		final Row[] rows = convertToRows((List<Map<String, ?>>) params.get("datas"));
 		final List<List<String>> columnNamess = (List<List<String>>) params.get("columnNamess");
 
@@ -692,7 +692,7 @@ public class DataController extends AbstractSchemaConnTableController
 			@PathVariable("tableName") String tableName, @RequestParam("data") String rowJsonStr,
 			@RequestParam("columnName") final String columnName) throws Throwable
 	{
-		final User user = WebUtils.getUser(request, response);
+		final User user = WebUtils.getUser();
 		@SuppressWarnings("unchecked")
 		final Row row = convertToRow(this._objectMapper.readValue(rowJsonStr, Map.class));
 

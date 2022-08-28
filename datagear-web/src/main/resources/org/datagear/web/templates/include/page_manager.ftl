@@ -22,6 +22,8 @@ String action
 	po.isQueryAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_QUERY}") == 0);
 	po.isSelectAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_SELECT}") == 0);
 	po.isMultipleSelect = ("${(isMultipleSelect!false)?string('true','false')}" == "true");
+	po.isReadonlyAction = ("${(isReadonlyAction!false)?string('true','false')}" == "true");
+	po.isReadonlyAction = (po.isReadonlyAction || po.isSelectAction);
 	
 	po.refresh = function(){ /*需实现*/ };
 	po.getSelectedEntities = function(){ /*需实现*/ };
@@ -36,7 +38,8 @@ String action
 			action: po.action,
 			isQueryAction: po.isQueryAction,
 			isSelectAction: po.isSelectAction,
-			isMultipleSelect: po.isMultipleSelect
+			isMultipleSelect: po.isMultipleSelect,
+			isReadonlyAction: po.isReadonlyAction
 		});
 	};
 	

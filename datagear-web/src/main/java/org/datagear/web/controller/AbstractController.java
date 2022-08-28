@@ -117,6 +117,8 @@ public abstract class AbstractController
 
 	public static final String KEY_CURRENT_ANALYSIS_PROJECT = "currentAnalysisProject";
 
+	public static final String KEY_IS_READONLY_ACTION = "isReadonlyAction";
+
 	@Autowired
 	private ConversionService conversionService;
 
@@ -190,6 +192,26 @@ public abstract class AbstractController
 		return entity;
 	}
 	
+	protected boolean setIsReadonlyAction(Model model, User user)
+	{
+		boolean readonly = (user == null || user.isAnonymous());
+		return setIsReadonlyAction(model, readonly);
+	}
+
+	protected boolean setIsReadonlyAction(Model model, boolean readonly)
+	{
+		model.addAttribute(KEY_IS_READONLY_ACTION, readonly);
+		return readonly;
+	}
+
+	protected boolean setIsReadonlyAction(Model model, boolean readonly, User user)
+	{
+		if(readonly == false)
+			readonly = (user != null && user.isAnonymous());
+		
+		return setIsReadonlyAction(model, readonly);
+	}
+
 	protected void setFormModel(Model model, Object formModel, String requestAction, String submitAction)
 	{
 		addAttributeForWriteJson(model, KEY_FORM_MODEL, formModel);

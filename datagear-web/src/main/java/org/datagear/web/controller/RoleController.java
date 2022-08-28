@@ -16,6 +16,7 @@ import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -127,6 +128,7 @@ public class RoleController extends AbstractController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		setIsReadonlyAction(model, WebUtils.getUser());
 		return "/role/role_table";
 	}
 

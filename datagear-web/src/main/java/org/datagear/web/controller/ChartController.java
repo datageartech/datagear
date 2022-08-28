@@ -316,6 +316,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		setIsReadonlyAction(model, WebUtils.getUser());
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
 				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
 		

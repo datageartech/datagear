@@ -16,6 +16,7 @@ import org.datagear.management.domain.SchemaGuard;
 import org.datagear.management.service.SchemaGuardService;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -126,6 +127,7 @@ public class SchemaGuardController extends AbstractController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		setIsReadonlyAction(model, WebUtils.getUser());
 		return "/schemaGuard/schemaGuard_table";
 	}
 

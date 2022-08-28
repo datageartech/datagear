@@ -37,6 +37,7 @@ import org.datagear.util.IOUtil;
 import org.datagear.web.util.DriverInfo;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -313,6 +314,7 @@ public class DriverEntityController extends AbstractController
 	public String query(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		setIsReadonlyAction(model, WebUtils.getUser());
 		return "/driverEntity/driverEntity_table";
 	}
 

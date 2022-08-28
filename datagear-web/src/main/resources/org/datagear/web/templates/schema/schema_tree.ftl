@@ -41,7 +41,18 @@
 							</form>
 						</div>
 						<div class="col-fixed text-right">
-							<p-splitbutton icon="pi pi-plus" @click="onAdd" :model="pm.schemaOptItems"></p-splitbutton>
+							<div class="p-buttonset" v-if="!pm.isReadonlyAction">
+								<p-button type="button" icon="pi pi-plus" @click="onAdd"></p-button>
+								<p-button type="button" icon="pi pi-angle-down"
+									aria-haspopup="true" aria-controls="${pid}schemaOptMenu"
+									@click="onToggleSchemaOptMenu">
+								</p-button>
+							</div>
+							<p-button type="button" icon="pi pi-angle-down"
+								aria-haspopup="true" aria-controls="${pid}schemaOptMenu"
+								@click="onToggleSchemaOptMenu" v-if="pm.isReadonlyAction">
+							</p-button>
+							<p-menu id="${pid}schemaOptMenu" ref="${pid}schemaOptMenuEle" :model="pm.schemaOptMenuItems" :popup="true"></p-menu>
 						</div>
 					</div>
 				</div>
@@ -416,6 +427,8 @@
 		return value;
 	};
 	
+	po.setupAction();
+	
 	po.vuePageModel(
 	{
 		searchForm:{ keyword: "" },
@@ -428,10 +441,14 @@
 			items: [],
 			activeIndex: 0
 		},
-		schemaOptItems:
+		schemaOptMenuItems:
 		[
 			{
 				label: "<@spring.message code='edit' />",
+				visible: function()
+				{
+					return !po.isReadonlyAction;
+				},
 				command: function()
 				{
 					po.handleOpenOfAction("/schema/edit");
@@ -446,6 +463,10 @@
 			},
 			{
 				label: "<@spring.message code='delete' />",
+				visible: function()
+				{
+					return !po.isReadonlyAction;
+				},
 				command: function()
 				{
 					po.handleDeleteAction("/schema/delete");
@@ -453,6 +474,10 @@
 			},
 			{
 				label: "<@spring.message code='autherization' />",
+				visible: function()
+				{
+					return !po.isReadonlyAction;
+				},
 				command: function()
 				{
 					po.executeOnSelect(function(schema)
@@ -475,6 +500,10 @@
 			},
 			{
 				label: "<@spring.message code='module.importData' />",
+				visible: function()
+				{
+					return !po.isReadonlyAction;
+				},
 				command: function()
 				{
 					po.executeOnFirstAwareSchemaNode(function(schemaNode)
@@ -562,6 +591,7 @@
 	});
 	
 	po.vueRef("${pid}schemaTabMenuEle", null);
+	po.vueRef("${pid}schemaOptMenuEle", null);
 	
 	po.vueMethod(
 	{
@@ -609,6 +639,11 @@
 		{
 			var pm = po.vuePageModel();
 			pm.searchType = (pm.searchType == "schema" ? "table" : "schema");
+		},
+		
+		onToggleSchemaOptMenu: function(e)
+		{
+			po.vueUnref("${pid}schemaOptMenuEle").toggle(e);
 		},
 		
 		onSchemaTabMenuToggle: function(e, tab)
