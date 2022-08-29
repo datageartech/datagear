@@ -59,7 +59,7 @@
 <script>
 (function(po)
 {
-	po.isReloadTable = ("${reloadTable?string('true','false')}" == "true");
+	po.isReloadTable = ("${(reloadTable!false)?string('true','false')}" == "true");
 	
 	po.queryResultBinaryPlaceholder = "${queryDefaultLOBRowMapper.binaryPlaceholder}";
 	po.queryResultClobPlacholder = "${queryDefaultLOBRowMapper.clobPlaceholder}";

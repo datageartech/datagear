@@ -798,7 +798,7 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 构建“保存成功，保存了[{0}]条记录”操作成功消息响应体。
+	 * 构建“操作成功，保存了[{0}]条记录”操作成功消息响应体。
 	 * 
 	 * @param request
 	 * @param saveCount
@@ -808,14 +808,14 @@ public abstract class AbstractController
 			int saveCount)
 	{
 		if (saveCount > 0)
-			return optSuccessResponseEntity(request, "saveSuccess.withCount", saveCount);
+			return optSuccessResponseEntity(request, "operationSuccess.withSaveCount", saveCount);
 
 		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
 		// if (saveCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
 
-		ResponseEntity<OperationMessage> re = operationSuccessResponseEntity(request, "saveSuccess");
+		ResponseEntity<OperationMessage> re = operationSuccessResponseEntity(request);
 		return re;
 	}
 
@@ -832,7 +832,7 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 构建“删除成功，删除了[{0}]条记录”操作成功消息响应体。
+	 * 构建“操作成功，删除了[{0}]条记录”操作成功消息响应体。
 	 * 
 	 * @param request
 	 * @param deleteCount 实际删除数目
@@ -842,14 +842,14 @@ public abstract class AbstractController
 			int deleteCount)
 	{
 		if (deleteCount > 0)
-			return optSuccessResponseEntity(request, "deleteSuccess.withCount", deleteCount);
+			return optSuccessResponseEntity(request, "operationSuccess.withDeleteCount", deleteCount);
 
 		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
 		// if (deleteCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "deleteFail.zeroCount");
 
-		ResponseEntity<OperationMessage> re = operationSuccessResponseEntity(request, "deleteSuccess");
+		ResponseEntity<OperationMessage> re = operationSuccessResponseEntity(request);
 		return re;
 	}
 

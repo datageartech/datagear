@@ -11,7 +11,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.io.Writer;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -38,9 +37,6 @@ import org.datagear.persistence.RowMapper;
 import org.datagear.persistence.SqlParamValueMapper;
 import org.datagear.persistence.support.ConversionSqlParamValueMapper;
 import org.datagear.persistence.support.DefaultLOBRowMapper;
-import org.datagear.persistence.support.SqlParamValueSqlExpressionSyntaxException;
-import org.datagear.persistence.support.SqlParamValueVariableExpressionSyntaxException;
-import org.datagear.persistence.support.expression.ExpressionEvaluationContext;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -49,16 +45,13 @@ import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
 import org.datagear.web.format.SqlTimestampFormatter;
-import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.json.jackson.ObjectMapperBuilder;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.ConversionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -587,14 +580,14 @@ public class DataController extends AbstractSchemaConnTableController
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
+				springModel.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_SELECT);
 				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
-				springModel.addAttribute(KEY_SELECT_OPERATION, true);
-				setGridPageAttributes(request, response, springModel, schema, table, dialect);
+				springModel.addAttribute("queryDefaultLOBRowMapper", buildQueryDefaultLOBRowMapper());
+				springModel.addAttribute("keywordQueryColumnCount", dialect.getKeywordQueryColumnCount());
 			}
 		}.execute();
 
-		return "/data/data_grid";
+		return "/data/data_table";
 	}
 
 	@SuppressWarnings("unchecked")
@@ -714,9 +707,7 @@ public class DataController extends AbstractSchemaConnTableController
 			throws Throwable
 	{
 		File file = FileUtil.generateUniqueFile(buildSaveSingleSqlParamValueMapper().getFilePathValueDirectory());
-
 		multipartFile.transferTo(file);
-
 		FileInfo fileInfo = FileInfo.valueOfFile(file.getName(), file.length());
 
 		return fileInfo;
@@ -753,9 +744,7 @@ public class DataController extends AbstractSchemaConnTableController
 			@RequestParam("file") String fileName) throws Throwable
 	{
 		File file = FileUtil.getFile(buildSaveSingleSqlParamValueMapper().getFilePathValueDirectory(), fileName);
-
 		FileInfo fileInfo = FileUtil.getFileInfo(file);
-
 		FileUtil.deleteFile(file);
 
 		return fileInfo;

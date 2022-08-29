@@ -28,7 +28,7 @@ page_sql_editor.ftl
 		<p-button type="submit" icon="pi pi-search" class="px-4"></p-button>
 	</div>
 </form>
-<p-overlaypanel ref="${pid}searchConditionPanelEle" append-to="#${pid}"
+<p-overlaypanel ref="${pid}searchConditionPanelEle" append-to="body"
 	:show-close-icon="false" id="${pid}searchConditionPanel" class="opacity-hide"
 	@show="onSearchConditionPanelShow" @hide="onSearchConditionPanelHide">
 	<div class="pb-2">
@@ -155,7 +155,7 @@ page_sql_editor.ftl
 			
 			onSearchConditionPanelShow: function()
 			{
-				var panel = po.elementOfId("${pid}searchConditionPanel");
+				var panel = po.elementOfId("${pid}searchConditionPanel", document.body);
 				panel.removeClass("opacity-hide");
 				
 				var codeEditorEle = po.elementOfId("${pid}searchConditionEditor", panel);
@@ -164,7 +164,7 @@ page_sql_editor.ftl
 			
 			onSearchConditionPanelHide: function()
 			{
-				var panel = po.elementOfId("${pid}searchConditionPanel");
+				var panel = po.elementOfId("${pid}searchConditionPanel", document.body);
 				//刷新表结构操作会导致空白区显示这个面板，这里使用透明度解决
 				panel.addClass("opacity-hide");
 				

@@ -103,17 +103,20 @@
 			
 		};
 		
-		var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
+		var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel bigNumberToString=true />);
 		po.originalFormModel = $.extend(true, {}, formModel);
 		
 		po.beforeSubmitForm = function(action)
 		{
-			var data = action.options.data;
-			action.options.data =
+			if(po.isEditAction)
 			{
-				data: data,
-				originalData: po.originalFormModel
-			};
+				var data = action.options.data;
+				action.options.data =
+				{
+					data: data,
+					originalData: po.originalFormModel
+				};
+			}
 		};
 		
 		po.setupForm(formModel);
@@ -148,7 +151,23 @@
 			
 			onSelectImportKeyColValue: function(e, column)
 			{
+				var importKey = $.tableMeta.columnImportKey(dbTable, column);
+				if(!importKey)
+					return;
 				
+				var url = "/data/"+encodeURIComponent(po.schemaId)+"/"+encodeURIComponent(importKey.primaryTableName)+"/select";
+				
+				po.handleOpenSelectAction(url, function(entity)
+				{
+					var colValueObj = $.tableMeta.fromImportKeyPrimary(importKey, entity);
+					
+					var fm = po.vueFormModel();
+					
+					$.each(colValueObj, function(name, value)
+					{
+						fm[name] = value;
+					});
+				});
 			},
 			
 			onUploadBinaryColValue: function(e, column)
