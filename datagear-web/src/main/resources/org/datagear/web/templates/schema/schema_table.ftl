@@ -58,7 +58,7 @@
 {
 	po.setupAjaxTable("/schema/pagingQueryData",
 	{
-		multiSortMeta: [ {field: "createTime", order: -1} ]
+		multiSortMeta: [ {field: "title", order: 1} ]
 	});
 	
 	po.vueMethod(
