@@ -19,7 +19,7 @@ page_manager.ftl
 	//重写搜索表单提交处理函数
 	po.search = function(formData)
 	{
-		po.setAjaxTableParam($.extend(formData, { page: 1 }));
+		po.ajaxTableQuery($.extend(formData, { page: 1 }));
 		po.loadAjaxTable();
 	};
 	
@@ -41,9 +41,9 @@ page_manager.ftl
 	po.rowsPerPageOptions = [10, 20, 50, 100, 200];
 	po.rowsPerPage = po.rowsPerPageOptions[1];
 	
-	po.tableAttr = function(obj)
+	po.ajaxTableAttr = function(obj)
 	{
-		return po.attr("tableAttr", obj);
+		return po.attr("ajaxTableAttr", obj);
 	};
 	
 	po.setupAjaxTable = function(url, options)
@@ -71,20 +71,20 @@ page_manager.ftl
 		{
 			onPaginator: function(e)
 			{
-				po.setAjaxTableParam({ page: e.page+1, pageSize: e.rows, orders: po.sortMetaToOrders(e.multiSortMeta) });
+				po.ajaxTableQuery({ page: e.page+1, pageSize: e.rows, orders: po.sortMetaToOrders(e.multiSortMeta) });
 				po.loadAjaxTable();
 			},
 			onSort: function(e)
 			{
-				po.setAjaxTableParam({ orders: po.sortMetaToOrders(e.multiSortMeta) });
+				po.ajaxTableQuery({ orders: po.sortMetaToOrders(e.multiSortMeta) });
 				po.loadAjaxTable();
 			}
 		});
 		
-		po.tableAttr(
+		po.ajaxTableAttr(
 		{
 			url: url,
-			param: { page: 1, pageSize: po.rowsPerPage, orders: po.sortMetaToOrders(options.multiSortMeta) }
+			query: { page: 1, pageSize: po.rowsPerPage, orders: po.sortMetaToOrders(options.multiSortMeta) }
 		});
 		
 		if(options.initData)
@@ -98,23 +98,27 @@ page_manager.ftl
 		return pm;
 	};
 	
-	po.setAjaxTableParam = function(param)
+	po.ajaxTableQuery = function(query)
 	{
-		var tableAttr = po.tableAttr();
-		$.extend(tableAttr.param, param);
+		var ajaxTableAttr = po.ajaxTableAttr();
+		
+		if(query === undefined)
+			return ajaxTableAttr.query;
+		else
+			$.extend(ajaxTableAttr.query, query);
 	};
 	
 	po.loadAjaxTable = function(options)
 	{
 		options = (options || {});
 		
-		var tableAttr = po.tableAttr();
+		var ajaxTableAttr = po.ajaxTableAttr();
 		var pm = po.vuePageModel();
 		pm.loading = true;
 		
 		options = $.extend(
 		{
-			data: tableAttr.param,
+			data: ajaxTableAttr.query,
 			success: function(response)
 			{
 				po.setAjaxTableData(response);
@@ -126,11 +130,17 @@ page_manager.ftl
 		},
 		options);
 		
-		po.ajaxJson(tableAttr.url, options);
+		po.ajaxJson(ajaxTableAttr.url, options);
 	};
 	
 	po.sortMetaToOrders = function(sortMeta)
 	{
+		if(sortMeta == null)
+		{
+			var pm = po.vuePageModel();
+			sortMeta = pm.multiSortMeta;
+		}
+		
 		var orders = [];
 		
 		$.each(sortMeta, function(idx, sm)

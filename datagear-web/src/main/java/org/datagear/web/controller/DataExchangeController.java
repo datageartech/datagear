@@ -71,6 +71,8 @@ import org.datagear.management.domain.User;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.TableType;
 import org.datagear.meta.resolver.DBMetaResolver;
+import org.datagear.persistence.Dialect;
+import org.datagear.persistence.PersistenceManager;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
@@ -129,6 +131,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	@Autowired
 	private File tempDirectory;
+	
+	@Autowired
+	private PersistenceManager persistenceManager;
 
 	private MessageChannel messageChannel = new MessageChannel();
 
@@ -185,6 +190,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setTempDirectory(File tempDirectory)
 	{
 		this.tempDirectory = tempDirectory;
+	}
+
+	public PersistenceManager getPersistenceManager()
+	{
+		return persistenceManager;
+	}
+
+	public void setPersistenceManager(PersistenceManager persistenceManager)
+	{
+		this.persistenceManager = persistenceManager;
 	}
 
 	@RequestMapping("/{schemaId}/import")
@@ -746,10 +761,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping("/{schemaId}/export")
 	public String expt(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam(value="query", required = false) String[] queries,
+			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
+			//@RequestParam(value="query", required = false) String[] queries,
 			@RequestParam(value="queryScript", required = false) String queryScript,
 			@RequestParam(value="queryScriptDelimiter", required = false) String queryScriptDelimiter) throws Throwable
 	{
+		String[] queries = request.getParameterValues("query");
+		queries = (queries == null ? new String[0] : queries);
+		
 		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
@@ -764,7 +783,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		List<String> queryList = new ArrayList<>();
 
-		if (queries != null)
+		if (!isEmpty(queries))
 			queryList.addAll(Arrays.asList(queries));
 
 		if (!StringUtil.isEmpty(queryScript))
@@ -788,9 +807,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	@RequestMapping("/{schemaId}/export/csv")
 	public String exptCsv(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam(value="query", required = false) String[] queries) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId
+			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
+			//@RequestParam(value="query", required = false) String[] queries
+			) throws Throwable
 	{
+		String[] queries = request.getParameterValues("query");
+		queries = (queries == null ? new String[0] : queries);
+		
 		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
@@ -800,6 +824,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 					Schema schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
+
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
+				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 			}
 		}.execute();
 
@@ -881,9 +908,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	@RequestMapping("/{schemaId}/export/excel")
 	public String exptExcel(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam(value="query", required = false) String[] queries) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId
+			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
+			//@RequestParam(value="query", required = false) String[] queries
+			) throws Throwable
 	{
+		String[] queries = request.getParameterValues("query");
+		queries = (queries == null ? new String[0] : queries);
+		
 		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
@@ -893,6 +925,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 					Schema schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
+
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
+				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 			}
 		}.execute();
 
@@ -975,9 +1010,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	@RequestMapping("/{schemaId}/export/sql")
 	public String exptSql(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam(value="query", required = false) String[] queries) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId
+			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
+			//@RequestParam(value="query", required = false) String[] queries
+			) throws Throwable
 	{
+		String[] queries = request.getParameterValues("query");
+		queries = (queries == null ? new String[0] : queries);
+		
 		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
@@ -987,6 +1027,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 					Schema schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
+
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
+				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 			}
 		}.execute();
 
@@ -1073,9 +1116,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	@RequestMapping("/{schemaId}/export/json")
 	public String exptJson(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam(value="query", required = false) String[] queries) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId
+			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
+			//@RequestParam(value="query", required = false) String[] queries
+			) throws Throwable
 	{
+		String[] queries = request.getParameterValues("query");
+		queries = (queries == null ? new String[0] : queries);
+		
 		final User user = WebUtils.getUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
@@ -1085,6 +1133,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 					Schema schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
+
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
+				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 			}
 		}.execute();
 

@@ -59,8 +59,13 @@ page_sql_editor.ftl
 	
 	po.submitSearchForm = function()
 	{
-		var param = po.vueRaw(po.vuePageModel().searchForm);
+		var param = po.searchFormParam();
 		po.search(param);
+	};
+	
+	po.searchFormParam = function()
+	{
+		return po.vueRaw(po.vuePageModel().searchForm);
 	};
 	
 	po.searchConditionPrefixRegex = /^\s*WHERE/i;

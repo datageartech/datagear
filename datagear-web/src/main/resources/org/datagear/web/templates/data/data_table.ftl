@@ -31,6 +31,7 @@
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
+			<p-button label="<@spring.message code='export' />" @click="onExport" v-if="!pm.isSelectAction"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isReadonlyAction"></p-button>
 		</div>
 	</div>
@@ -108,6 +109,21 @@
 			onView: function()
 			{
 				po.handleOpenOfAction(po.dataUrl("view"));
+			},
+			
+			onExport: function()
+			{
+				var query = po.ajaxTableQuery();
+				po.ajaxJson(po.dataUrl("getQuerySql"),
+				{
+					data: query,
+					success: function(response)
+					{
+						var url = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export";
+						url = $.addParam(url, "query", response.sql);
+						po.openTableDialog(url);
+					}
+				});
 			},
 			
 			onDelete: function()

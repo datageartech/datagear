@@ -17,6 +17,7 @@ dataexchange_js.ftl
 {
 	//初始导出查询语句
 	po.queries = $.unescapeHtmlForJson(<@writeJson var=queries />);
+	po.sqlIdentifierQuote = $.trim("${sqlIdentifierQuote}");
 	
 	po.checkSubmitForm = function(action)
 	{
@@ -143,17 +144,32 @@ dataexchange_js.ftl
 		if(!query)
 			return "";
 		
+		var tableName = "";
+		
 		//表名称
 		if(!/\s/.test(query))
-			return query;
+			tableName = query;
+		else
+		{
+			//第一个表名正则
+			var result = query.match(/from\s([^\,\s]*)/i);
+			
+			if(result != null && result.length >= 2)
+				tableName = (result[1] || "");
+		}
 		
-		//第一个表名正则
-		var result = query.match(/from\s([^\,\s]*)/i);
+		tableName = $.trim(tableName);
 		
-		if(result == null || result.length < 2)
-			return "";
+		if(po.sqlIdentifierQuote)
+		{
+			if(tableName.indexOf(po.sqlIdentifierQuote) == 0)
+				tableName = tableName.substr(po.sqlIdentifierQuote.length);
+			
+			if(tableName.lastIndexOf(po.sqlIdentifierQuote) == (tableName.length - po.sqlIdentifierQuote.length))
+				tableName = tableName.substr(0, (tableName.length - po.sqlIdentifierQuote.length));
+		}
 		
-		return result[1];
+		return tableName;
 	};
 
 	po.handleSubDataExchangeStatus = function(subDataExchangeId, status, message)
