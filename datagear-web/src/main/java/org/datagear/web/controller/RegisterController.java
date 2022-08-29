@@ -127,7 +127,7 @@ public class RegisterController extends AbstractController
 		this.checkCodeManager.removeCheckCode(request.getSession(), CHECK_CODE_MODULE_REGISTER);
 		request.getSession().setAttribute(SESSION_KEY_REGISTER_USER_NAME, user.getName());
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/success")

@@ -359,7 +359,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(dashboard.getId(), templates);
 
-		return operationSuccessResponseEntity(request, data);
+		return optSuccessDataResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/saveTemplateNames", produces = CONTENT_TYPE_JSON)
@@ -384,7 +384,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		this.htmlTplDashboardWidgetEntityService.update(user, widget);
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, templates);
-		return operationSuccessResponseEntity(request, data);
+		return optSuccessDataResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/getResourceContent", produces = CONTENT_TYPE_JSON)
@@ -482,7 +482,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
-		return operationSuccessResponseEntity(request, data);
+		return optSuccessDataResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/uploadResourceFile", produces = CONTENT_TYPE_JSON)
@@ -554,7 +554,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			IOUtil.close(out);
 		}
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/saveResourceContent", produces = CONTENT_TYPE_JSON)
@@ -591,7 +591,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		data.put("templatesChanged", templatesChanged);
 		data.put("resourceExists", resourceExists);
 		
-		return operationSuccessResponseEntity(request, data);
+		return optSuccessDataResponseEntity(request, data);
 	}
 
 	@RequestMapping("/import")
@@ -791,7 +791,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		dashboardWidgetResManager.copyFrom(dashboard.getId(), uploadDirectory);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/view")
@@ -855,7 +855,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			this.htmlTplDashboardWidgetEntityService.deleteById(user, id);
 		}
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")
@@ -937,7 +937,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		this.dashboardShareSetService.save(form);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	/**
@@ -1016,7 +1016,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (dashboardShareSet == null || !dashboardShareSet.isEnablePassword())
 		{
-			responseEntity = operationSuccessResponseEntity(request,
+			responseEntity = optSuccessDataResponseEntity(request,
 					ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
 		}
 		else
@@ -1025,14 +1025,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			if (manager.isAuthDenied(dashboardWidgetId))
 			{
-				responseEntity = operationSuccessResponseEntity(request,
+				responseEntity = optSuccessDataResponseEntity(request,
 						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_DENY, manager.getAuthFailThreshold(),
 								0));
 			}
 			else if (password.equals(dashboardShareSet.getPassword()))
 			{
 				manager.setAuthed(dashboardWidgetId, true);
-				responseEntity = operationSuccessResponseEntity(request,
+				responseEntity = optSuccessDataResponseEntity(request,
 						ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_SUCCESS));
 			}
 			else
@@ -1042,13 +1042,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				
 				if(authRemain > 0)
 				{
-					responseEntity = operationSuccessResponseEntity(request,
+					responseEntity = optSuccessDataResponseEntity(request,
 							ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_FAIL, manager.getAuthFailThreshold(),
 									authRemain));
 				}
 				else
 				{
-					responseEntity = operationSuccessResponseEntity(request,
+					responseEntity = optSuccessDataResponseEntity(request,
 							ShowAuthCheckResponse.valueOf(ShowAuthCheckResponse.TYPE_DENY, manager.getAuthFailThreshold(),
 									0));
 				}

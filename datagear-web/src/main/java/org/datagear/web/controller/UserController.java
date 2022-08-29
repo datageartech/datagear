@@ -144,7 +144,7 @@ public class UserController extends AbstractController
 
 		this.userService.add(user);
 
-		return operationSuccessResponseEntity(request, user);
+		return optSuccessDataResponseEntity(request, user);
 	}
 
 	@RequestMapping("/edit")
@@ -179,7 +179,7 @@ public class UserController extends AbstractController
 
 		this.userService.update(user);
 
-		return operationSuccessResponseEntity(request, user);
+		return optSuccessDataResponseEntity(request, user);
 	}
 
 	@RequestMapping("/view")
@@ -231,7 +231,7 @@ public class UserController extends AbstractController
 
 		this.userService.deleteByIds(form.getIds(), form.getMigrateToId());
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")
@@ -300,7 +300,7 @@ public class UserController extends AbstractController
 
 		this.userService.updateIgnoreRole(user);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	protected List<Role> toUserRolesList(User user)

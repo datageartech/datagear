@@ -83,7 +83,7 @@ public class AnalysisProjectController extends AbstractController
 
 		this.analysisProjectService.add(analysisProject);
 
-		return operationSuccessResponseEntity(request, analysisProject);
+		return optSuccessDataResponseEntity(request, analysisProject);
 	}
 
 	@RequestMapping("/edit")
@@ -108,7 +108,7 @@ public class AnalysisProjectController extends AbstractController
 
 		this.analysisProjectService.update(user, analysisProject);
 
-		return operationSuccessResponseEntity(request, analysisProject);
+		return optSuccessDataResponseEntity(request, analysisProject);
 	}
 
 	@RequestMapping("/view")
@@ -155,7 +155,7 @@ public class AnalysisProjectController extends AbstractController
 			this.analysisProjectService.deleteById(user, id);
 		}
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")

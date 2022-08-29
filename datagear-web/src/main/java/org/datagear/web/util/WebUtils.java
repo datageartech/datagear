@@ -101,24 +101,6 @@ public class WebUtils
 	 * 此方法不会返回{@code null}。
 	 * </p>
 	 * 
-	 * @param request
-	 * @param response
-	 * @return
-	 * @deprecated 请使用{@linkplain #getUser()}
-	 */
-	@Deprecated
-	public static User getUser(HttpServletRequest request, HttpServletResponse response)
-	{
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return getUser(authentication);
-	}
-
-	/**
-	 * 获取当前用户（认证用户或者匿名用户）。
-	 * <p>
-	 * 此方法不会返回{@code null}。
-	 * </p>
-	 * 
 	 * @return
 	 */
 	public static User getUser()
@@ -308,13 +290,13 @@ public class WebUtils
 	 */
 	public static boolean isJsonResponse(HttpServletResponse response)
 	{
-		String __contentType = response.getContentType();
-		if (__contentType == null)
-			__contentType = "";
+		String contentType = response.getContentType();
+		if (contentType == null)
+			contentType = "";
 		else
-			__contentType = __contentType.toLowerCase();
+			contentType = contentType.toLowerCase();
 
-		return (__contentType.indexOf("json") >= 0);
+		return (contentType.indexOf("json") >= 0);
 	}
 
 	/**
@@ -327,7 +309,6 @@ public class WebUtils
 	{
 		// 是否ajax请求，jquery库ajax可以使用此方案判断
 		boolean ajaxRequest = (request.getHeader("x-requested-with") != null);
-
 		return ajaxRequest;
 	}
 

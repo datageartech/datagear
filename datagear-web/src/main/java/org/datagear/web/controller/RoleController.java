@@ -75,7 +75,7 @@ public class RoleController extends AbstractController
 
 		this.roleService.add(role);
 
-		return operationSuccessResponseEntity(request, role);
+		return optSuccessDataResponseEntity(request, role);
 	}
 
 	@RequestMapping("/edit")
@@ -99,7 +99,7 @@ public class RoleController extends AbstractController
 
 		this.roleService.update(role);
 
-		return operationSuccessResponseEntity(request, role);
+		return optSuccessDataResponseEntity(request, role);
 	}
 
 	@RequestMapping("/view")
@@ -120,7 +120,7 @@ public class RoleController extends AbstractController
 	{
 		this.roleService.deleteByIds(ids);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/pagingQuery")

@@ -188,7 +188,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_JsonValue)
@@ -223,7 +223,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_JsonFile)
@@ -262,7 +262,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_Excel)
@@ -301,7 +301,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_CsvValue)
@@ -337,7 +337,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_CsvFile)
@@ -377,7 +377,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_Http)
@@ -413,7 +413,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.add(user, dataSet);
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/copy")
@@ -524,7 +524,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
@@ -543,7 +543,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
@@ -565,7 +565,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
@@ -587,7 +587,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
@@ -606,7 +606,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
@@ -628,7 +628,7 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
@@ -647,7 +647,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.dataSetEntityService.update(user, dataSet);
 		
-		return operationSuccessResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
@@ -777,7 +777,7 @@ public class DataSetController extends AbstractSchemaConnController
 			FileUtil.deleteFile(dataSetDirectory);
 		}
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/pagingQuery")

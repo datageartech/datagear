@@ -127,7 +127,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		getSchemaService().add(user, schema);
 
-		return operationSuccessResponseEntity(request, schema);
+		return optSuccessDataResponseEntity(request, schema);
 	}
 
 	@RequestMapping("/edit")
@@ -160,7 +160,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 				&& (!schema.getUrl().equals(old.getUrl()) || !schema.getUser().equals(old.getUser())))
 			getTableCache().invalidate(schema.getId());
 
-		return operationSuccessResponseEntity(request, schema);
+		return optSuccessDataResponseEntity(request, schema);
 	}
 
 	@RequestMapping("/view")
@@ -193,7 +193,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 				getTableCache().invalidate(id);
 		}
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/query")
@@ -270,7 +270,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 			JdbcUtil.closeConnection(cn);
 		}
 
-		return optSuccessResponseEntity(request, "schema.testConnection.ok");
+		return optSuccessDataResponseEntity(request, "schema.testConnection.ok");
 	}
 
 	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)

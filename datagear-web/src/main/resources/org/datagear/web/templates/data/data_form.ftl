@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#assign ConversionSqlParamValueMapper=statics['org.datagear.persistence.support.ConversionSqlParamValueMapper']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -49,21 +50,29 @@
 						</p-button>
 					</div>
 		        	
-		        	<div v-else-if="col.isBinary" class="p-inputgroup">
-						<div class="p-input-icon-right flex-grow-1">
-							<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteColValue($event, col)" v-if="!pm.isReadonlyAction">
-							</i>
-							<p-inputtext :id="'${pid}' + col.name" v-model="fm[col.name]" type="text" class="input w-full h-full border-noround-right"
-								name="col.name">
-							</p-inputtext>
+		        	<div v-else-if="col.isBinary">
+		        		<div class="p-inputgroup">
+							<div class="p-input-icon-right flex-grow-1">
+								<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteColValue($event, col)" v-if="!pm.isReadonlyAction">
+								</i>
+								<p-inputtext :id="'${pid}' + col.name" v-model="fm[col.name]" type="text" class="input w-full h-full border-noround-right"
+									name="col.name">
+								</p-inputtext>
+							</div>
+							<p-button label="<@spring.message code='download' />"
+								@click="onDownloadBinaryColValue($event, col)">
+							</p-button>
 						</div>
-						<p-splitbutton v-if="!pm.isReadonlyAction"
-							label="<@spring.message code='upload' />" :model="pm.uploadBinaryColValueBtnItems"
-							@click="onUploadBinaryColValue($event, col)">
-						</p-splitbutton>
-						<p-button v-else
-							label="<@spring.message code='download' />" @click="onDownloadBinaryColValue($event, col)">
-						</p-button>
+						<div class="fileupload-wrapper flex align-items-center mt-1" v-if="!pm.isReadonlyAction">
+				        	<p-fileupload mode="basic" name="file" :url="pm.uploadBinaryColumnFileUrl"
+				        		@upload="onBinaryColumnFileUploaded($event, col)" @select="onSelectBinaryColumnFile($event, col)" @progress="onProgressBinaryColumnFile($event, col)"
+				        		:auto="true" choose-label="<@spring.message code='upload' />" class="mr-2">
+				        	</p-fileupload>
+				        	<div class="fileupload-info text-color-secondary">
+								<small class="file-name">{{pm.binaryColumnUploadInfos[col.name].fileLabel}}</small>
+								<small class="upload-progress ml-2">{{pm.binaryColumnUploadInfos[col.name].progress}}</small>
+							</div>
+			        	</div>
 					</div>
 		        	
 		        	<p-textarea v-else-if="col.renderAsTextarea"
@@ -95,22 +104,33 @@
 (function(po)
 {
 	po.submitUrl = po.dataUrl(po.submitAction);
+	po.binaryColumnValueFilePrefix = "${ConversionSqlParamValueMapper.PREFIX_FILE_PATH}";
+	
+	po.mergeBinaryColumnValue = function(data)
+	{
+		var pm = po.vuePageModel();
+		var binaryColumnUploadInfos = pm.binaryColumnUploadInfos;
+		
+		$.each(binaryColumnUploadInfos, function(name, info)
+		{
+			if(data[name] && info.fileLabel && data[name] == info.fileLabel)
+				data[name] = po.binaryColumnValueFilePrefix + info.fileName;
+		});
+	};
 	
 	po.onDbTable(function(dbTable)
 	{
-		po.downloadBinaryColValue = function(column)
-		{
-			
-		};
-		
 		var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel bigNumberToString=true />);
 		po.originalFormModel = $.extend(true, {}, formModel);
 		
 		po.beforeSubmitForm = function(action)
 		{
+			var data = action.options.data;
+			
+			po.mergeBinaryColumnValue(data);
+			
 			if(po.isEditAction)
 			{
-				var data = action.options.data;
 				action.options.data =
 				{
 					data: data,
@@ -121,21 +141,45 @@
 		
 		po.setupForm(formModel);
 		
+		var binaryColumnUploadInfos = {};
+		$.each(dbTable.columns, function(i, column)
+		{
+			if(column.isBinary)
+			{
+				binaryColumnUploadInfos[column.name] =
+				{
+					fileName: "",
+					fileLabel: "",
+					progress: ""
+				};
+			}
+		});
+		
+		po.downloadBinaryColValue = function(column)
+		{
+			var value = po.originalFormModel[column.name];
+			
+			if(!value)
+			{
+				$.tipInfo("<@spring.message code='noDataForDownload' />");
+				return;
+			}
+			
+			var url = po.dataUrl("downloadColumnValue");
+			var data = $.tableMeta.uniqueRecordData(dbTable, po.originalFormModel);
+			data = $.toJsonString(data);
+			
+			url = $.addParam(url, "data", data);
+			url = $.addParam(url, "columnName", column.name);
+			
+			po.open(url, {target: "_blank"});
+		};
+		
 		po.vuePageModel(
 		{
 			dbTable: dbTable,
-			
-			uploadBinaryColValueBtnItems:
-			[
-				{
-					label: "<@spring.message code='download' />",
-					command: function(e, column)
-					{
-						po.downloadBinaryColValue(column);
-					}
-				}
-			],
-			
+			binaryColumnUploadInfos: binaryColumnUploadInfos,
+			uploadBinaryColumnFileUrl: po.concatContextPath("/data/uploadFile"),
 			sqlDateFormat: "${sqlDateFormat}",
 			sqlTimeFormat: "${sqlTimeFormat}",
 			sqlTimestampFormat: "${sqlTimestampFormat}"
@@ -147,6 +191,13 @@
 			{
 				var fm = po.vueFormModel();
 				fm[column.name] = null;
+				
+				if(column.isBinary)
+				{
+					var pm = po.vuePageModel();
+					var binaryColumnUploadInfos = pm.binaryColumnUploadInfos;
+					binaryColumnUploadInfos[column.name] = {};
+				}
 			},
 			
 			onSelectImportKeyColValue: function(e, column)
@@ -170,9 +221,36 @@
 				});
 			},
 			
-			onUploadBinaryColValue: function(e, column)
+			onSelectBinaryColumnFile: function(e, column)
 			{
+				var pm = po.vuePageModel();
+				var binaryColumnUploadInfos = pm.binaryColumnUploadInfos;
+				var myUploadInfo = binaryColumnUploadInfos[column.name];
 				
+				myUploadInfo.fileLabel = (e.files && e.files[0] ? e.files[0].name : "");
+			},
+			
+			onProgressBinaryColumnFile: function(e, column)
+			{
+				var pm = po.vuePageModel();
+				var binaryColumnUploadInfos = pm.binaryColumnUploadInfos;
+				var myUploadInfo = binaryColumnUploadInfos[column.name];
+				
+				myUploadInfo.progress = (e.progress >= 100 ? 99 : e.progress) +"%";
+			},
+			
+			onBinaryColumnFileUploaded: function(e, column)
+			{
+				var pm = po.vuePageModel();
+				var binaryColumnUploadInfos = pm.binaryColumnUploadInfos;
+				var myUploadInfo = binaryColumnUploadInfos[column.name];
+				var response = $.getResponseJson(e.xhr);
+				
+				myUploadInfo.fileName = response.name;
+				myUploadInfo.progress = "100%";
+				
+				var fm = po.vueFormModel();
+				fm[column.name] = myUploadInfo.fileLabel;
 			},
 			
 			onDownloadBinaryColValue: function(e, column)

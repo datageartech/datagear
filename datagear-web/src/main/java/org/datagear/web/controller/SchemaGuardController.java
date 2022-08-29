@@ -75,7 +75,7 @@ public class SchemaGuardController extends AbstractController
 
 		this.schemaGuardService.add(schemaGuard);
 
-		return operationSuccessResponseEntity(request, schemaGuard);
+		return optSuccessDataResponseEntity(request, schemaGuard);
 	}
 
 	@RequestMapping("/edit")
@@ -98,7 +98,7 @@ public class SchemaGuardController extends AbstractController
 
 		this.schemaGuardService.update(schemaGuard);
 
-		return operationSuccessResponseEntity(request, schemaGuard);
+		return optSuccessDataResponseEntity(request, schemaGuard);
 	}
 
 	@RequestMapping("/view")
@@ -119,7 +119,7 @@ public class SchemaGuardController extends AbstractController
 	{
 		this.schemaGuardService.deleteByIds(ids);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/query")
@@ -167,7 +167,7 @@ public class SchemaGuardController extends AbstractController
 
 		boolean permitted = this.schemaGuardService.isPermitted(url);
 
-		return operationSuccessResponseEntity(request, permitted);
+		return optSuccessDataResponseEntity(request, permitted);
 	}
 
 	public static class SchemaGuardTestForm implements ControllerForm

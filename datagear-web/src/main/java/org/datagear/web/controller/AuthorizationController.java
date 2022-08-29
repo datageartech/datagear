@@ -98,7 +98,7 @@ public class AuthorizationController extends AbstractController
 
 		this.authorizationService.add(authorization);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{resourceType}/{resource}/edit")
@@ -143,7 +143,7 @@ public class AuthorizationController extends AbstractController
 
 		this.authorizationService.update(authorization);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{resourceType}/{resource}/view")
@@ -179,7 +179,7 @@ public class AuthorizationController extends AbstractController
 		setResourceMetaAttribute(model, resourceType);
 		this.authorizationService.deleteByIds(resourceType, resource, ids);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/{resourceType}/{resource}/query")

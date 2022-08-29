@@ -153,7 +153,7 @@ public class DriverEntityController extends AbstractController
 			}
 		}
 
-		return operationSuccessResponseEntity(request, driverEntity);
+		return optSuccessDataResponseEntity(request, driverEntity);
 	}
 
 	@RequestMapping("/import")
@@ -234,7 +234,7 @@ public class DriverEntityController extends AbstractController
 
 		this.driverEntityManager.importFromZip(in, driverEntityIds);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/export")
@@ -284,7 +284,7 @@ public class DriverEntityController extends AbstractController
 
 		this.driverEntityManager.update(driverEntity);
 
-		return operationSuccessResponseEntity(request, driverEntity);
+		return optSuccessDataResponseEntity(request, driverEntity);
 	}
 
 	@RequestMapping("/view")
@@ -307,7 +307,7 @@ public class DriverEntityController extends AbstractController
 	{
 		this.driverEntityManager.delete(ids);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/query")
@@ -452,7 +452,7 @@ public class DriverEntityController extends AbstractController
 		}
 		else
 		{
-			responseEntity = operationSuccessResponseEntity(request);
+			responseEntity = optSuccessResponseEntity(request);
 			responseEntity.getBody().setData(fileInfos);
 		}
 

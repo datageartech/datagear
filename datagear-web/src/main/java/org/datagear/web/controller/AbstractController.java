@@ -625,9 +625,9 @@ public abstract class AbstractController
 	 * @param request
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> operationSuccessResponseEntity(HttpServletRequest request)
+	protected ResponseEntity<OperationMessage> optSuccessResponseEntity(HttpServletRequest request)
 	{
-		return operationSuccessResponseEntity(request, null);
+		return optSuccessDataResponseEntity(request, null);
 	}
 
 	/**
@@ -638,38 +638,9 @@ public abstract class AbstractController
 	 *            允许为{@code null}
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> operationSuccessResponseEntity(HttpServletRequest request, Object data)
+	protected ResponseEntity<OperationMessage> optSuccessDataResponseEntity(HttpServletRequest request, Object data)
 	{
 		ResponseEntity<OperationMessage> responseEntity = optSuccessResponseEntity(request, "operationSuccess");
-
-		if (data != null)
-			responseEntity.getBody().setData(data);
-
-		return responseEntity;
-	}
-
-	/**
-	 * 构建“操作失败”消息响应体。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	protected ResponseEntity<OperationMessage> operationFailResponseEntity(HttpServletRequest request)
-	{
-		return operationFailResponseEntity(request, null);
-	}
-
-	/**
-	 * 构建“操作失败”消息响应体。
-	 * 
-	 * @param request
-	 * @param data
-	 *            允许为{@code null}
-	 * @return
-	 */
-	protected ResponseEntity<OperationMessage> operationFailResponseEntity(HttpServletRequest request, Object data)
-	{
-		ResponseEntity<OperationMessage> responseEntity = optFailResponseEntity(request, "operationFail");
 
 		if (data != null)
 			responseEntity.getBody().setData(data);
@@ -689,6 +660,35 @@ public abstract class AbstractController
 	{
 		OperationMessage operationMessage = optMsgSuccess(request, code, messageArgs);
 		return optResponseEntity(HttpStatus.OK, operationMessage);
+	}
+
+	/**
+	 * 构建“操作失败”消息响应体。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> optFailResponseEntity(HttpServletRequest request)
+	{
+		return optFailDataResponseEntity(request, null);
+	}
+
+	/**
+	 * 构建“操作失败”消息响应体。
+	 * 
+	 * @param request
+	 * @param data
+	 *            允许为{@code null}
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> optFailDataResponseEntity(HttpServletRequest request, Object data)
+	{
+		ResponseEntity<OperationMessage> responseEntity = optFailResponseEntity(request, "operationFail");
+
+		if (data != null)
+			responseEntity.getBody().setData(data);
+
+		return responseEntity;
 	}
 
 	/**
@@ -736,75 +736,13 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 构建无内容的操作成功消息响应体。
-	 * <p>
-	 * 无消息内容，浏览器端不会弹出操作提示。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	protected ResponseEntity<OperationMessage> optMsgSuccessResponseEntity()
-	{
-		OperationMessage operationMessage = OperationMessage.valueOfSuccess("success", "");
-		return new ResponseEntity<>(operationMessage, HttpStatus.OK);
-	}
-
-	/**
-	 * 构建无内容的操作成功消息响应体。
-	 * <p>
-	 * 无消息内容，浏览器端不会弹出操作提示。
-	 * </p>
-	 * 
-	 * @param data
-	 * @return
-	 */
-	@Deprecated
-	protected ResponseEntity<OperationMessage> optMsgSuccessResponseEntity(Object data)
-	{
-		OperationMessage operationMessage = OperationMessage.valueOfSuccess("success", "");
-		operationMessage.setData(data);
-
-		return new ResponseEntity<>(operationMessage, HttpStatus.OK);
-	}
-
-	/**
-	 * 构建“保存成功”操作成功消息响应体。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	@Deprecated
-	protected ResponseEntity<OperationMessage> optMsgSaveSuccessResponseEntity(HttpServletRequest request)
-	{
-		return operationSuccessResponseEntity(request, "saveSuccess");
-	}
-
-	/**
-	 * 构建“保存成功”操作成功消息响应体。
-	 * 
-	 * @param request
-	 * @param data
-	 * @return
-	 */
-	@Deprecated
-	protected ResponseEntity<OperationMessage> optMsgSaveSuccessResponseEntity(HttpServletRequest request, Object data)
-	{
-		ResponseEntity<OperationMessage> responseEntity = operationSuccessResponseEntity(request,
-				"saveSuccess");
-		responseEntity.getBody().setData(data);
-
-		return responseEntity;
-	}
-
-	/**
 	 * 构建“操作成功，保存了[{0}]条记录”操作成功消息响应体。
 	 * 
 	 * @param request
 	 * @param saveCount
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> optMsgSaveCountSuccessResponseEntity(HttpServletRequest request,
+	protected ResponseEntity<OperationMessage> optSaveCountSuccessResponseEntity(HttpServletRequest request,
 			int saveCount)
 	{
 		if (saveCount > 0)
@@ -815,20 +753,8 @@ public abstract class AbstractController
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
 
-		ResponseEntity<OperationMessage> re = operationSuccessResponseEntity(request);
+		ResponseEntity<OperationMessage> re = optSuccessResponseEntity(request);
 		return re;
-	}
-
-	/**
-	 * 构建“删除成功”操作成功消息响应体。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	@Deprecated
-	protected ResponseEntity<OperationMessage> optMsgDeleteSuccessResponseEntity(HttpServletRequest request)
-	{
-		return operationSuccessResponseEntity(request, "deleteSuccess");
 	}
 
 	/**
@@ -838,7 +764,7 @@ public abstract class AbstractController
 	 * @param deleteCount 实际删除数目
 	 * @return
 	 */
-	protected ResponseEntity<OperationMessage> optMsgDeleteCountSuccessResponseEntity(HttpServletRequest request,
+	protected ResponseEntity<OperationMessage> optDeleteCountSuccessResponseEntity(HttpServletRequest request,
 			int deleteCount)
 	{
 		if (deleteCount > 0)
@@ -849,7 +775,7 @@ public abstract class AbstractController
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "deleteFail.zeroCount");
 
-		ResponseEntity<OperationMessage> re = operationSuccessResponseEntity(request);
+		ResponseEntity<OperationMessage> re = optSuccessResponseEntity(request);
 		return re;
 	}
 

@@ -322,7 +322,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/import/sql")
@@ -425,7 +425,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/import/json")
@@ -550,7 +550,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/import/excel")
@@ -668,7 +668,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 	
 	/**
@@ -876,7 +876,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/export/excel")
@@ -970,7 +970,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/export/sql")
@@ -1068,7 +1068,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/{schemaId}/export/json")
@@ -1164,7 +1164,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/{schemaId}/export/download")
@@ -1482,7 +1482,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				batchDataExchangeResult.cancel(subDataExchangeId);
 		}
 		
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 	
 	protected List<String> toTableNames(List<SimpleTable> tables)

@@ -133,7 +133,7 @@ public class LoginController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> loginSuccess(HttpServletRequest request, HttpServletResponse response)
 	{
-		return operationSuccessResponseEntity(request, "loginSuccess");
+		return optSuccessDataResponseEntity(request, "loginSuccess");
 	}
 
 	@RequestMapping(value = "/error", produces = CONTENT_TYPE_JSON)

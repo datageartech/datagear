@@ -73,12 +73,6 @@ public class DataController extends AbstractSchemaConnTableController
 {
 	public static final String PARAM_IGNORE_DUPLICATION = "ignoreDuplication";
 
-	public static final String KEY_DATA_IS_CLIENT = "dataIsClient";
-
-	public static final String KEY_TITLE_DISPLAY_NAME = "titleDisplayName";
-
-	public static final String KEY_TITLE_DISPLAY_DESC = "titleDisplayDesc";
-
 	public static final String KEY_SQL_IDENTIFIER_QUOTE = "sqlIdentifierQuote";
 
 	@Autowired
@@ -212,7 +206,35 @@ public class DataController extends AbstractSchemaConnTableController
 
 		return "/data/data_table";
 	}
+	
+	@RequestMapping("/{schemaId}/{tableName}/select")
+	public String select(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@PathVariable("tableName") String tableName, @RequestParam(value = "page", required = false) Integer page,
+			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
+	{
+		final User user = WebUtils.getUser();
 
+		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+			{
+				checkReadTableDataPermission(schema, user);
+
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
+
+				springModel.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_SELECT);
+				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
+				springModel.addAttribute("queryDefaultLOBRowMapper", buildQueryDefaultLOBRowMapper());
+				springModel.addAttribute("keywordQueryColumnCount", dialect.getKeywordQueryColumnCount());
+			}
+		}.execute();
+
+		return "/data/data_table";
+	}
+	
 	@RequestMapping(value = "/{schemaId}/{tableName}/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	public void pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
@@ -325,7 +347,7 @@ public class DataController extends AbstractSchemaConnTableController
 			}
 		}.execute();
 
-		return operationSuccessResponseEntity(request, savedRow);
+		return optSuccessDataResponseEntity(request, savedRow);
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/edit")
@@ -398,7 +420,7 @@ public class DataController extends AbstractSchemaConnTableController
 			}
 		}.execute();
 
-		return operationSuccessResponseEntity(request, updatedRow);
+		return optSuccessDataResponseEntity(request, updatedRow);
 	}
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/delete", produces = CONTENT_TYPE_JSON)
@@ -428,7 +450,7 @@ public class DataController extends AbstractSchemaConnTableController
 
 				checkDuplicateRecord(rows.length, count, ignoreDuplication);
 
-				ResponseEntity<OperationMessage> responseEntity = optMsgDeleteCountSuccessResponseEntity(
+				ResponseEntity<OperationMessage> responseEntity = optDeleteCountSuccessResponseEntity(
 						request, count);
 				responseEntity.getBody().setData(count);
 
@@ -562,34 +584,6 @@ public class DataController extends AbstractSchemaConnTableController
 		return responseEntity;
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/select")
-	public String select(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam(value = "page", required = false) Integer page,
-			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
-	{
-		final User user = WebUtils.getUser();
-
-		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
-
-				springModel.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_SELECT);
-				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
-				springModel.addAttribute("queryDefaultLOBRowMapper", buildQueryDefaultLOBRowMapper());
-				springModel.addAttribute("keywordQueryColumnCount", dialect.getKeywordQueryColumnCount());
-			}
-		}.execute();
-
-		return "/data/data_table";
-	}
-
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/{schemaId}/{tableName}/getColumnValuess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
@@ -709,43 +703,6 @@ public class DataController extends AbstractSchemaConnTableController
 		File file = FileUtil.generateUniqueFile(buildSaveSingleSqlParamValueMapper().getFilePathValueDirectory());
 		multipartFile.transferTo(file);
 		FileInfo fileInfo = FileInfo.valueOfFile(file.getName(), file.length());
-
-		return fileInfo;
-	}
-
-	@RequestMapping(value = "/downloadFile")
-	public void downloadFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("file") String fileName) throws Throwable
-	{
-		response.setCharacterEncoding(RESPONSE_ENCODING);
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + toResponseAttachmentFileName(request, response, fileName));
-
-		OutputStream out = null;
-
-		try
-		{
-			out = response.getOutputStream();
-
-			File file = FileUtil.getFile(buildSaveSingleSqlParamValueMapper().getFilePathValueDirectory(), fileName);
-
-			if (file.exists())
-				IOUtil.write(file, out);
-		}
-		finally
-		{
-			IOUtil.close(out);
-		}
-	}
-
-	@RequestMapping(value = "/deleteFile", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public FileInfo deleteFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("file") String fileName) throws Throwable
-	{
-		File file = FileUtil.getFile(buildSaveSingleSqlParamValueMapper().getFilePathValueDirectory(), fileName);
-		FileInfo fileInfo = FileUtil.getFileInfo(file);
-		FileUtil.deleteFile(file);
 
 		return fileInfo;
 	}
@@ -888,33 +845,6 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		if (actualCount > expectedCount && !Boolean.TRUE.equals(ignoreDuplication))
 			throw new DuplicateRecordException(expectedCount, actualCount);
-	}
-
-	/**
-	 * 是否客户端数据请求。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	protected boolean dataIsClientRequest(HttpServletRequest request)
-	{
-		return WebUtils.getBooleanValue(request, KEY_DATA_IS_CLIENT, false);
-	}
-
-	/**
-	 * 设置表格页面属性。
-	 * 
-	 * @param request
-	 * @param springModel
-	 */
-	protected void setGridPageAttributes(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, Schema schema, Table table, Dialect dialect)
-	{
-		springModel.addAttribute("queryDefaultLOBRowMapper", buildQueryDefaultLOBRowMapper());
-		springModel.addAttribute("keywordQueryColumnCount", dialect.getKeywordQueryColumnCount());
-
-		// 编辑表格需要表单属性
-		setFormPageAttributes(request, springModel);
 	}
 
 	/**

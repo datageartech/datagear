@@ -152,7 +152,7 @@ public class ResetPasswordController extends AbstractController
 				this.resetPasswordCheckFileDirectory.getAbsolutePath(), resetPasswordStep.getCheckFileName()));
 		resetPasswordStep.setStep(2, STEP_CHECK_USER);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/checkUser", produces = CONTENT_TYPE_JSON)
@@ -169,12 +169,12 @@ public class ResetPasswordController extends AbstractController
 				false);
 
 		if (!checkFile.exists())
-			return optFailResponseEntity(request, "resetPassword.checkFileNotExists");
+			return optFailDataResponseEntity(request, "resetPassword.checkFileNotExists");
 
 		resetPasswordStep.setCheckOk(true);
 		resetPasswordStep.setStep(3, STEP_SET_NEW_PASSWORD);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/setNewPassword", produces = CONTENT_TYPE_JSON)
@@ -203,12 +203,12 @@ public class ResetPasswordController extends AbstractController
 		resetPasswordStep.setStep(4, STEP_FINISH);
 		this.usernameLoginLatch.clear(user.getName());
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	protected ResponseEntity<OperationMessage> optStepNotInSessionResponseEntity(HttpServletRequest request)
 	{
-		return optFailResponseEntity(request, "resetPassword.stepNotInSession");
+		return optFailDataResponseEntity(request, "resetPassword.stepNotInSession");
 	}
 
 	protected ResetPasswordStep getResetPasswordStep(HttpServletRequest request)

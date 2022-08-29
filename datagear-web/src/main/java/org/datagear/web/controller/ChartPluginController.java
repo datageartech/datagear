@@ -210,7 +210,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	{
 		getDirectoryHtmlChartPluginManager().remove(ids);
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/query")

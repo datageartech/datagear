@@ -158,7 +158,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 			IOUtil.copy(file, resFile, false);
 		}
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
@@ -248,7 +248,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 			FileUtil.deleteFile(initFile);
 		}
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/view")
@@ -343,7 +343,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 			FileUtil.deleteFile(file);
 		}
 
-		return operationSuccessResponseEntity(request);
+		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/query")
