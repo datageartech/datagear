@@ -803,7 +803,7 @@
 	
 	po.exportSqlResult = function(tab)
 	{
-		//TODO
+		po.openTableDialog("/dataexchange/"+encodeURIComponent(po.schemaId)+"/export?query="+encodeURIComponent(tab.sql || ""));
 	};
 	
 	po.viewSqlStatement = function(tab, e)

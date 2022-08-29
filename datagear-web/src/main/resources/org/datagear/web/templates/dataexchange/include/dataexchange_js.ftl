@@ -64,6 +64,7 @@ page_format_time.ftl
 		ajaxOptions = $.extend(
 		{
 			tipSuccess: false,
+			closeAfterSubmit: false,
 			beforeSend: function()
 			{
 				po.dataExchangeStatus(po.DataExchangeStatusEnum.exchange);

@@ -52,7 +52,7 @@
 	 * @param url 请求的URL。
 	 * @param options 选项，格式如下：
 	 * 			{
-	 * 				//可选，打开目标：DOM 页面内；"_blank"、"_self" 新网页；"_file" 文件下载
+	 * 				//可选，打开目标：DOM 页面内；"_blank"、"_self" 新网页
 	 * 				target : document.body,
 	 *              //当target是页内元素时，是否打开为对话框，默认为：true
 	 *              dialog: true,
@@ -108,10 +108,6 @@
 				//使用window.open()会使URL超长导致请求失败，因而改为postOnForm
 				$.postOnForm(url, {"data" : options.data, "target" : options.target});
 			}
-		}
-		else if(options.target == "_file")
-		{
-			$.postOnForm(url, {"data" : options.data, "target" : options.target});
 		}
 		else
 		{
@@ -204,6 +200,59 @@
 		}
 	};
 	
+	/**
+	 * 转换为表单提交。
+	 * 此方法会把数据写入表单参数，然后提交表单。
+	 * 
+	 * @param url
+	 * @param options
+	 * 			{
+	 * 				//表单参数对象
+	 * 				data : undefined,
+	 * 				
+	 * 				//表单提交目标
+	 * 				target : undefined
+	 * 			}
+	 */
+	$.postOnForm = function(url, options)
+	{
+		options = $.extend({ data : {}, target : ""}, options);
+		
+		var formId = ($.GLOBAL_POST_ON_FORM_ID || ($.GLOBAL_POST_ON_FORM_ID = $.uid("form")));
+		var form = $("#"+formId);
+		if(form.length == 0)
+		{
+			form = $("<form style='display:none;width:0px;height:0px;' />").attr("id", formId).attr("method", "POST")
+						.appendTo(document.body);
+		}
+		else
+			form.empty();
+		
+		form.attr("action", url).attr("target", options.target);
+		
+		if(options.data)
+		{
+			var param = (typeof(options.data) == "string" ? options.data : $.param(options.data));
+			
+			//XXX $.param会将" "转换为"+"，而这里的decodeURIComponent并不会将"+"恢复为" "，因此需要在这里预先转换
+			param = param.replace(/\+/g, " ");
+			
+			var paramArray = param.split("&");
+			
+			for(var i=0; i<paramArray.length; i++)
+			{
+				var paramPair = paramArray[i].split("=");
+				
+				var name = decodeURIComponent(paramPair[0]);
+				var value = decodeURIComponent(paramPair[1]);
+				
+				$("<input type='hidden' />").attr("name", name).attr("value", value).appendTo(form);
+			}
+		}
+		
+		form.submit();
+	};
+		
 	/**
 	 * 判断给定dom元素是否在对话框中或者将要在对话框中显示。
 	 * 
@@ -672,6 +721,24 @@
 		}
 		
 		return url;
+	};
+	
+	/**
+	 * 将值/值数组转换为{ name: "...", value: 值 }对象/数组。
+	 */
+	$.toNameValueObj = function(valueOrValues, name)
+	{
+		var isArray = $.isArray(valueOrValues);
+		valueOrValues = (isArray ? valueOrValues : [ valueOrValues ]);
+		
+		var re = [];
+		
+		$.each(valueOrValues, function(i, v)
+		{
+			re.push({ name: name, value: v });
+		});
+		
+		return (isArray ? re : re[0]);
 	};
 	
 	/**

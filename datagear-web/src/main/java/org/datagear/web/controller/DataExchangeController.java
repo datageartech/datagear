@@ -812,10 +812,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		formModel.setDataFormat(defaultDataFormat);
 		formModel.setExportOption(exportOption);
 		formModel.setFileEncoding(Charset.defaultCharset().name());
-		inflateTextFileSubDataExportForms(formModel, queries);
 
 		setFormModel(springModel, formModel, "export", "doExport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		addAttributeForWriteJson(springModel, "queries", queries);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/export_csv";
@@ -905,10 +905,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		formModel.setDataFormat(defaultDataFormat);
 		formModel.setExportOption(exportOption);
 		formModel.setFileEncoding(IOUtil.CHARSET_UTF_8);
-		inflateTextFileSubDataExportForms(formModel, queries);
 
 		setFormModel(springModel, formModel, "export", "doExport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		addAttributeForWriteJson(springModel, "queries", queries);
 		//占位，避免页面空指针
 		addAttributeForWriteJson(springModel, "availableCharsetNames", Collections.emptyList());
 
@@ -1004,10 +1004,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		formModel.setDataFormat(defaultDataFormat);
 		formModel.setExportOption(exportOption);
 		formModel.setFileEncoding(Charset.defaultCharset().name());
-		inflateTextFileSubDataExportForms(formModel, queries);
 
 		setFormModel(springModel, formModel, "export", "doExport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		addAttributeForWriteJson(springModel, "queries", queries);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/export_sql";
@@ -1098,10 +1098,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		formModel.setDataFormat(defaultDataFormat);
 		formModel.setExportOption(exportOption);
 		formModel.setFileEncoding(Charset.defaultCharset().name());
-		inflateTextFileSubDataExportForms(formModel, queries);
 
 		setFormModel(springModel, formModel, "export", "doExport");
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		addAttributeForWriteJson(springModel, "queries", queries);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dataexchange/export_json";
@@ -1232,23 +1232,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return this.messageChannel.pull(dataExchangeId, messageCount);
 	}
 	
-	protected <T extends TextFileSubDataExportForm> void inflateTextFileSubDataExportForms(
-			AbstractTextFileBatchDataExportForm<T> formModel, String[] queries)
-	{
-		if (queries == null)
-			return;
-		
-		List<T> subForms = new ArrayList<T>(queries.length);
-		
-		for(String query : queries)
-		{
-			T subForm = formModel.createTextFileSubDataExportForm();
-			subForm.setQuery(query == null ? "" : query);
-			
-			subForms.add(subForm);
-		}
-	}
-
 	/**
 	 * 根据表依赖关系填充依赖编号。
 	 * 

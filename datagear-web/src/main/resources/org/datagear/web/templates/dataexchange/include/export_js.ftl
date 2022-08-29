@@ -15,6 +15,9 @@ dataexchange_js.ftl
 <script>
 (function(po)
 {
+	//初始导出查询语句
+	po.queries = $.unescapeHtmlForJson(<@writeJson var=queries />);
+	
 	po.checkSubmitForm = function(action)
 	{
 		return po.checkSubmitSubDataExchanges(action);
@@ -83,11 +86,13 @@ dataexchange_js.ftl
 		
 		return true;
 	};
-
-	po.addSubDataExchangesForQueries = function(queries)
+	
+	po.addSubDataExchangesForQueries = function(queries, scrollToBottom)
 	{
 		if(!queries || !queries.length)
 			return;
+		
+		scrollToBottom = (scrollToBottom == null ? true : scrollToBottom);
 		
 		$.each(queries, function(i, query)
 		{
@@ -103,12 +108,15 @@ dataexchange_js.ftl
 			po.addSubDataExchange(sde);
 		});
 		
-		po.vueApp().$nextTick(function()
+		if(scrollToBottom)
 		{
-			//滚动到底部
-			var tableWrapper = po.element(".p-datatable-wrapper", po.element(".subdataexchange-table-wrapper"));
-			tableWrapper.scrollTop(tableWrapper.prop("scrollHeight"));
-		});
+			po.vueApp().$nextTick(function()
+			{
+				//滚动到底部
+				var tableWrapper = po.element(".p-datatable-wrapper", po.element(".subdataexchange-table-wrapper"));
+				tableWrapper.scrollTop(tableWrapper.prop("scrollHeight"));
+			});
+		}
 	};
 	
 	po.postBuildSubDataExchange = function(subDataExchange){};
@@ -181,6 +189,8 @@ dataexchange_js.ftl
 	{
 		po.vueMounted(function()
 		{
+			po.addSubDataExchangesForQueries(po.queries, false);
+			
 			po.element(".subdataexchange-table-wrapper").on("click", ".download-file-btn", function(e)
 			{
 				var subDataExchangeId = $(this).attr("subDataExchangeId");

@@ -48,6 +48,14 @@ dataexchange_js.ftl
 		{
 			var url = "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/";
 			
+			if(po.queries)
+			{
+				$.each(po.queries, function(i, query)
+				{
+					url = $.addParam(url, "query", query, true);
+				});
+			}
+			
 			if(po.isAjaxRequest)
 			{
 				po.ajax(url,

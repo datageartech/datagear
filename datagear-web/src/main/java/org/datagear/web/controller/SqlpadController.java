@@ -156,7 +156,8 @@ public class SqlpadController extends AbstractSchemaConnController
 
 	@RequestMapping("/{schemaId}")
 	public String index(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam(value="sql", required = false) String sql) throws Throwable
 	{
 		final User user = WebUtils.getUser();
 
@@ -170,13 +171,11 @@ public class SqlpadController extends AbstractSchemaConnController
 			}
 		}.execute();
 		
-		String initSql = request.getParameter("initSql");
-		if (initSql == null)
-			initSql = "";
-
 		String sqlpadId = generateSqlpadId(request, response);
-		
 		SqlpadExecutionForm form = new SqlpadExecutionForm(schemaId, sqlpadId);
+		
+		if(!isEmpty(sql))
+			form.setSql(sql);
 		
 		setFormModel(springModel, form, "sqlpad", "execute");
 		springModel.addAttribute("sqlResultRowMapper", buildDefaultLOBRowMapper());

@@ -66,10 +66,18 @@
 (function(po)
 {
 	po.schemaId = "${schema.id}";
+	po.queries = ($.unescapeHtmlForJson(<@writeJson var=queries />) || []);
 	po.submitUrl = function()
 	{
 		var fm = po.vueFormModel();
-		return "/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/" + fm.dataType;
+		var url="/dataexchange/"+encodeURIComponent(po.schemaId)+"/export/" + fm.dataType;
+		
+		$.each(po.queries, function(i, query)
+		{
+			url = $.addParam(url, "query", query, true);
+		});
+		
+		return url;
 	}
 	
 	if(po.isAjaxRequest)
