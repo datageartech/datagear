@@ -449,30 +449,28 @@ label[title]:not(.no-tip)::after,
 
 /*管理页*/
 .page-manager .page-content{
-	/*屏幕高度 - 管理页header高度*/
+	/*屏幕高度 - 页内header高度*/
 	height: calc(100vh - 5rem);
 }
 .page-manager.page-search-ap-aware .page-content{
-	/*屏幕高度 - 管理页header高度 - 当前项目高度*/
-	height: calc(100vh - 5rem - 1.7rem);
+	/*屏幕高度 - 页内header高度*/
+	height: calc(100vh - 6.7rem);
 }
-/*主页选项卡里的管理页*/
 .page-main-panel .page-manager .page-content{
-	/*屏幕高度 - 管理页header高度 - 主页header高度*/
+	/*屏幕高度 - 主页header高度 - 页内header高度*/
 	height: calc(100vh - 5rem - 5rem);
 }
 .page-main-panel .page-manager.page-search-ap-aware .page-content{
-	/*屏幕高度 - 管理页header高度 - 主页header高度 - 当前项目高度*/
-	height: calc(100vh - 5rem - 5rem - 1.7rem);
+	/*屏幕高度 - 主页header高度 - 页内header高度*/
+	height: calc(100vh - 5rem - 6.7rem);
 }
-/*对话框里的管理页*/
 .p-dialog .page-manager .page-content{
-	/*对话框高度 - 管理页header高度 - 对话框header高度*/
-	height: calc(90vh - 5rem - 6rem);
+	/*对话框高度 - 对话框header高度 - 页内header高度*/
+	height: calc(90vh - 6rem - 5rem);
 }
 .p-dialog .page-manager.page-search-ap-aware .page-content{
-	/*对话框高度 - 管理页header高度 - 对话框header高度 - 当前项目高度*/
-	height: calc(90vh - 5rem - 6rem - 1.7rem);
+	/*对话框高度 - 对话框header高度 - 页内header高度*/
+	height: calc(90vh - 6rem - 6.7rem);
 }
 
 /*表单页*/
@@ -491,12 +489,12 @@ label[title]:not(.no-tip)::after,
 	max-height: calc(100vh - 1rem);
 }
 .p-dialog .page-form .page-form-content{
-	/*对话框高度 - 表单foot高度 - 对话框header高度*/
-	max-height: calc(90vh - 5rem - 6rem);
+	/*对话框高度 - 对话框header高度 - 表单foot高度*/
+	max-height: calc(90vh - 6rem - 5rem);
 }
 .p-dialog .page-form form.readonly .page-form-content{
-	/*对话框高度 - 底部留白高度 - 对话框header高度*/
-	max-height: calc(90vh - 1rem - 6rem);
+	/*对话框高度 - 对话框header高度 - 底部留白高度*/
+	max-height: calc(90vh - 6rem - 1rem);
 }
 
 .plugin-info .plugin-icon{
@@ -523,16 +521,6 @@ label[title]:not(.no-tip)::after,
 .page-manager-schema .p-tree.schema-tree .p-tree-wrapper .p-tree-container{
 	height: 100% !important;
 	overflow: auto;
-}
-/*数据源-表数据查询管理页*/
-.page-manager-schema .schema-tabs-wrapper .page-manager .page-content{
-	/*屏幕高度 - 列表header高度 - 选项卡标题高度*/
-	height: calc(100vh - 5rem - 4.5rem);
-}
-/*主页选项卡里数据源-表数据查询管理页*/
-.page-main-panel .page-manager-schema .schema-tabs-wrapper .page-manager .page-content{
-	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 列表header高度*/
-	height: calc(100vh - 5rem - 4.5rem - 5rem);
 }
 
 /*隐藏对话框内的主页头，比如登录页*/
@@ -773,12 +761,10 @@ label[title]:not(.no-tip)::after,
 	/*屏幕高度 - 页header高度*/
 	height: calc(100vh - 5.5rem);
 }
-/*数据源-SQL工作台页*/
 .page-manager-schema .schema-tabs-wrapper .page-manager.page-sqlpad .page-content{
 	/*屏幕高度 - 选项卡标题高度 - 页header高度*/
 	height: calc(100vh - 4.5rem - 5.5rem);
 }
-/*主页选项卡里数据源-SQL工作台页*/
 .page-main-panel .page-manager-schema .schema-tabs-wrapper .page-manager.page-sqlpad .page-content{
 	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 页header高度*/
 	height: calc(100vh - 5rem - 4.5rem - 5.5rem);
@@ -810,6 +796,7 @@ label[title]:not(.no-tip)::after,
 	height: 45vh;
 }
 
+/*数据源-数据导入导出页*/
 .page-dataexchange.page-manager .page-content{
 	/*屏幕高度 - 页头高度*/
 	height: calc(100vh - 6rem);
@@ -857,4 +844,22 @@ label[title]:not(.no-tip)::after,
 .p-dialog .page-dataexchange .page-content .page-form .page-form-content .subdataexchange-table-wrapper{
 	/*屏幕高度 - 对话框header高度 - 页头高度 - 表单foot高度 - 表头高度*/
 	height: calc(90vh - 6rem - 6rem - 3.5rem - 3.5rem);
+}
+
+/*数据源-表数据查询管理页*/
+.page-manager.page-schemadata .page-content{
+	/*屏幕高度 - 页内header高度*/
+	height: calc(100vh - 6.7rem);
+}
+.page-manager-schema .schema-tabs-wrapper .page-manager .page-content{
+	/*屏幕高度 - 选项卡标题高度 - 页内header高度*/
+	height: calc(100vh - 4.5rem - 6.7rem);
+}
+.page-main-panel .page-manager-schema .schema-tabs-wrapper .page-manager .page-content{
+	/*屏幕高度 - 主页header高度 - 表名选项卡标题高度 - 页内header高度*/
+	height: calc(100vh - 5rem - 4.5rem - 6.7rem);
+}
+.p-dialog .page-manager.page-schemadata .page-content{
+	/*屏幕高度 - 对话框header高度 - 页内header高度*/
+	height: calc(90vh - 6rem - 6.7rem);
 }

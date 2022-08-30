@@ -20,12 +20,19 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <#include "include/data_page_obj.ftl">
-<div id="${pid}" class="page page-manager page-table">
+<div id="${pid}" class="page page-manager page-table page-schemadata">
 	<div class="page-header grid align-items-center">
-		<div class="col-12" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
+		<div class="col-12 flex align-items-center py-1">
+			<i class="pi pi-database text-color-secondary text-sm"></i>
+			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
+			<i class="pi pi-angle-right text-color-secondary text-sm mx-2"></i>
+			<!--<i class="pi pi-table text-color-secondary text-sm"></i>-->
+			<div class="text-color-secondary text-sm">${tableName}</div>
+		</div>
+		<div class="col-12 pt-1" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
 			<#include "include/data_search_form.ftl">
 		</div>
-		<div class="h-opts col-12 text-right" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
+		<div class="h-opts col-12 pt-1 text-right" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isReadonlyAction"></p-button>
