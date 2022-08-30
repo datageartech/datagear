@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.User;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.util.SchemaConnectionSupport;
 import org.datagear.persistence.support.PersistenceSupport;
@@ -611,8 +612,10 @@ public class SqlpadExecutionService extends PersistenceSupport
 				_sqlpadExecutionRunnableMap.remove(getSqlpadId());
 			}
 
-			if (!sqlHistories.isEmpty())
-				SqlpadExecutionService.this.sqlHistoryService.addForRemain(getSchema().getId(), getUser().getId(),
+			User user = getUser();
+			
+			if (!user.isAnonymous() && !sqlHistories.isEmpty())
+				SqlpadExecutionService.this.sqlHistoryService.addForRemain(getSchema().getId(), user.getId(),
 						sqlHistories);
 		}
 
