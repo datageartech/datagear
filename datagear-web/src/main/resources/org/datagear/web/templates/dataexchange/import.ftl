@@ -19,12 +19,12 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-manager page-import-data">
-	<div class="page-header grid align-items-center">
-		<div class="col-12 flex align-items-center py-1">
+	<div class="page-header grid grid-nogutter align-items-center pb-2">
+		<div class="col-12 flex align-items-center mb-1">
 			<i class="pi pi-database text-color-secondary text-sm"></i>
 			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
 		</div>
-		<div class="col-12 pt-1">
+		<div class="col-12">
 			<label class="text-lg font-bold">
 				<@spring.message code='dataImport.selectDataType' />
 			</label>

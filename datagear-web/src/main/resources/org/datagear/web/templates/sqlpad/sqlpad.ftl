@@ -23,12 +23,12 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-manager page-sqlpad">
-	<div class="page-header grid align-items-center">
-		<div class="col-12 flex align-items-center py-1">
+	<div class="page-header grid grid-nogutter align-items-center pb-2">
+		<div class="col-12 flex align-items-center mb-2">
 			<i class="pi pi-database text-color-secondary text-sm"></i>
 			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
 		</div>
-		<div class="col-12 flex pt-1">
+		<div class="col-12 flex">
 			<div class="flex-grow-1 h-opts">
 				<p-button type="button" class="px-4" @click="onExecute"
 					:icon="pm.executionStatus == pm.executionStatusType.EXECUTING ? 'pi pi-pause' : 'pi pi-play'"

@@ -16,8 +16,8 @@ page_search_form.ftl
 -->
 <#assign AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <#assign APIDDataFilterPagingQuery=statics['org.datagear.web.vo.APIDDataFilterPagingQuery']>
-<div class="current-analysis-project-wrapper col-12 py-0">
-	<div class="flex align-items-center pt-1">
+<div class="current-analysis-project-wrapper col-12 mb-1">
+	<div class="flex align-items-center">
 		<p-button type="button" icon="pi pi-times"
 			class="p-button-text p-button-plain p-button-sm py-1 px-1 opacity-50"
 			@click="onClearCurrentAnalysisProject" v-if="pm.searchAnalysisProject.id != ''">
