@@ -547,7 +547,7 @@ public class ControllerAdvice extends AbstractController
 		OperationMessage om = super.setOptMsgForThrowable(request, t, msgArgs);
 
 		if (LOGGER.isDebugEnabled())
-			LOGGER.error("Operation error: ", t);
+			LOGGER.debug("Operation error: ", t);
 		
 		return om;
 	}
@@ -566,7 +566,7 @@ public class ControllerAdvice extends AbstractController
 		OperationMessage om = super.setOptMsgForThrowableMsgCode(request, t, msgCode, msgArgs);
 		
 		if (LOGGER.isDebugEnabled())
-			LOGGER.error("Operation error: ", t);
+			LOGGER.debug("Operation error: ", t);
 		
 		return om;
 	}

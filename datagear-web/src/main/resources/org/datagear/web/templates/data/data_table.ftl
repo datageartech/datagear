@@ -33,13 +33,27 @@
 			<#include "include/data_search_form.ftl">
 		</div>
 		<div class="h-opts col-12 pt-1 text-right" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
-			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
+			<p-button label="<@spring.message code='confirm' />" @click="onSelect"
+				v-if="pm.isSelectAction">
+			</p-button>
 			
-			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isReadonlyAction"></p-button>
-			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isReadonlyAction"></p-button>
-			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
-			<p-button label="<@spring.message code='export' />" @click="onExport" v-if="!pm.isSelectAction"></p-button>
-			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isReadonlyAction"></p-button>
+			<p-button label="<@spring.message code='add' />" @click="onAdd"
+				v-if="!pm.isReadonlyAction && pm.canEditTableData">
+			</p-button>
+			<p-button label="<@spring.message code='edit' />" @click="onEdit"
+				v-if="!pm.isReadonlyAction && pm.canEditTableData">
+			</p-button>
+			<p-button label="<@spring.message code='view' />" @click="onView"
+				:class="{'p-button-secondary': pm.isSelectAction}"
+				v-if="pm.canReadTableData">
+			</p-button>
+			<p-button label="<@spring.message code='export' />" @click="onExport"
+				v-if="!pm.isSelectAction && pm.canReadTableData">
+			</p-button>
+			<p-button label="<@spring.message code='delete' />" @click="onDelete"
+				class="p-button-danger"
+				v-if="!pm.isReadonlyAction && pm.canDeleteTableData">
+			</p-button>
 		</div>
 	</div>
 	<div class="page-content">
@@ -89,6 +103,7 @@
 			options.data = $.extend(data, options.data);
 		};
 		
+		po.setupTableDataPermission();
 		po.setupSearchForm(dbTable);
 		
 		po.vuePageModel(

@@ -6,15 +6,18 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#assign Schema=statics['org.datagear.management.domain.Schema']>
 <#include "../../include/page_obj.ftl">
 <script type="text/javascript">
 (function(po)
 {
-	//当前模式ID
 	po.schemaId = "${schema.id}";
-	
-	//当前模型名称
+	po.schemaPermission = parseInt("${schema.dataPermission}");
 	po.tableName = "${tableName}";
+	
+	po.canReadTableData = (!isNaN(po.schemaPermission) && po.schemaPermission >= parseInt("${Schema.PERMISSION_TABLE_DATA_READ}"));
+	po.canEditTableData = (!isNaN(po.schemaPermission) && po.schemaPermission >= parseInt("${Schema.PERMISSION_TABLE_DATA_EDIT}"));
+	po.canDeleteTableData = (!isNaN(po.schemaPermission) && po.schemaPermission >= parseInt("${Schema.PERMISSION_TABLE_DATA_DELETE}"));
 	
 	po.dataUrl = function(action)
 	{
@@ -77,6 +80,16 @@
 		var options = $.extend({}, ajaxOptions, { data : data, error : errorCallback, type : "POST" });
 		
 		po.ajaxJson(url, options);
+	};
+	
+	po.setupTableDataPermission = function()
+	{
+		po.vuePageModel(
+		{
+			canReadTableData: po.canReadTableData,
+			canEditTableData: po.canEditTableData,
+			canDeleteTableData: po.canDeleteTableData
+		});
 	};
 })
 (${pid});
