@@ -160,8 +160,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				// 切换主题、校验码
 				.antMatchers("/changeThemeData/**", "/checkCode/**").permitAll()
 
-				.antMatchers("/primevue/**").permitAll()
-
 				// 展示图表和看板
 				// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
 				.antMatchers("/chartPlugin/icon/*", "/chartPlugin/chartPluginManager.js",
@@ -178,7 +176,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 
 				// 数据源
 				// 编辑
-				.antMatchers("/schema/add", "/schema/saveadd", "/schema/edit", "/schema/saveedit", "/schema/delete")
+				.antMatchers("/schema/add", "/schema/saveAdd", "/schema/edit", "/schema/saveEdit", "/schema/delete")
 				.access(disableAnonymous ? AUTH_USER_ADMIN_AND_DATA_ADMIN : AUTH_ANONYMOUS_USER_ADMIN_AND_DATA_ADMIN)
 				// 其他
 				.antMatchers("/schema/**")
