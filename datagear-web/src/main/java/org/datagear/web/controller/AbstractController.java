@@ -25,6 +25,7 @@ import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.Entity;
+import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
@@ -192,24 +193,30 @@ public abstract class AbstractController
 		return entity;
 	}
 	
-	protected boolean setIsReadonlyAction(Model model, User user)
+	protected boolean setReadonlyActionOnRoleDataAnalyst(Model model, User user)
 	{
-		boolean readonly = (user == null || user.isAnonymous());
-		return setIsReadonlyAction(model, readonly);
+		boolean readonly = false;
+		
+		if(user == null || user.isAnonymous())
+		{
+			readonly = true;
+		}
+		else if(user.isAdmin())
+		{
+			readonly = false;
+		}
+		else
+		{
+			readonly = user.hasRole(Role.ROLE_DATA_ANALYST);
+		}
+		
+		return setReadonlyAction(model, readonly);
 	}
 
-	protected boolean setIsReadonlyAction(Model model, boolean readonly)
+	protected boolean setReadonlyAction(Model model, boolean readonly)
 	{
 		model.addAttribute(KEY_IS_READONLY_ACTION, readonly);
 		return readonly;
-	}
-
-	protected boolean setIsReadonlyAction(Model model, boolean readonly, User user)
-	{
-		if(readonly == false)
-			readonly = (user != null && user.isAnonymous());
-		
-		return setIsReadonlyAction(model, readonly);
 	}
 
 	protected void setFormModel(Model model, Object formModel, String requestAction, String submitAction)
@@ -407,13 +414,15 @@ public abstract class AbstractController
 	 */
 	protected boolean setSelectAction(HttpServletRequest request, org.springframework.ui.Model model)
 	{
+		setReadonlyAction(model, true);
+		
 		boolean multiple = false;
 		if (request.getParameter("multiple") != null)
 			multiple = true;
 
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_SELECT);
 		model.addAttribute(KEY_IS_MULTIPLE_SELECT, multiple);
-
+		
 		return multiple;
 	}
 

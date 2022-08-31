@@ -200,7 +200,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-		setIsReadonlyAction(model, WebUtils.getUser());
+		setReadonlyActionOnRoleDataAnalyst(model, WebUtils.getUser());
 		return "/schema/schema_tree";
 	}
 

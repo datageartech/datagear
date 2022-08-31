@@ -127,7 +127,7 @@ public class SchemaGuardController extends AbstractController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-		setIsReadonlyAction(model, WebUtils.getUser());
+		setReadonlyActionOnRoleDataAnalyst(model, WebUtils.getUser());
 		return "/schemaGuard/schemaGuard_table";
 	}
 

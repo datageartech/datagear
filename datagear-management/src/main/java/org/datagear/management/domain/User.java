@@ -148,6 +148,20 @@ public class User extends AbstractStringIdEntity implements CloneableEntity
 	{
 		this.roles = roles;
 	}
+	
+	public boolean hasRole(String roleId)
+	{
+		if(this.roles == null)
+			return false;
+		
+		for(Role role : this.roles)
+		{
+			if(role.getId().equals(roleId))
+				return true;
+		}
+		
+		return false;
+	}
 
 	/**
 	 * 清空密码，将其设置为{@code null}。

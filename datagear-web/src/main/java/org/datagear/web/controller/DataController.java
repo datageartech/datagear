@@ -197,7 +197,7 @@ public class DataController extends AbstractSchemaConnTableController
 
 				springModel.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
-				setIsReadonlyAction(springModel, table.isReadonly());
+				setReadonlyAction(springModel, table.isReadonly());
 				springModel.addAttribute("reloadTable", Boolean.TRUE.equals(reloadTable));
 				springModel.addAttribute("queryDefaultLOBRowMapper", buildQueryDefaultLOBRowMapper());
 				springModel.addAttribute("keywordQueryColumnCount", dialect.getKeywordQueryColumnCount());

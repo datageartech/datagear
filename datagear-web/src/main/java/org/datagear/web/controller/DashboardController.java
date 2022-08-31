@@ -373,10 +373,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		User user = WebUtils.getUser();
 
-		HtmlTplDashboardWidgetEntity widget = this.htmlTplDashboardWidgetEntityService.getById(user, id);
-
-		if (widget == null)
-			throw new RecordNotFoundException();
+		HtmlTplDashboardWidgetEntity widget = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
 		templates = trimResourceNames(templates);
 		widget.setTemplates(templates);
@@ -525,10 +522,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		User user = WebUtils.getUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
+		getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
 		File uploadFile = FileUtil.getDirectory(this.tempDirectory, resourceFilePath, false);
 
@@ -814,10 +808,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		User user = WebUtils.getUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getTemplateDashboardWidgetResManager();
@@ -864,7 +855,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-		setIsReadonlyAction(model, WebUtils.getUser());
+		setReadonlyActionOnRoleDataAnalyst(model, WebUtils.getUser());
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
 				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
 		
@@ -929,11 +920,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		User user = WebUtils.getUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user,
-				form.getId());
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
+		getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, form.getId());
 
 		this.dashboardShareSetService.save(form);
 
