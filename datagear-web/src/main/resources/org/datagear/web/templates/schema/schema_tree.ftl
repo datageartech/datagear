@@ -500,10 +500,6 @@
 			},
 			{
 				label: "<@spring.message code='module.importData' />",
-				visible: function()
-				{
-					return !po.isReadonlyAction;
-				},
 				command: function()
 				{
 					po.executeOnFirstAwareSchemaNode(function(schemaNode)

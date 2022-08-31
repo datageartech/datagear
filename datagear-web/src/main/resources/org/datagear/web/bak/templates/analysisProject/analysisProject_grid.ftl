@@ -32,18 +32,18 @@ selectOperation 是否选择操作，允许为null
 		<div class="search search-analysisProject">
 			<#include "../include/page_obj_searchform_data_filter.ftl">
 		</div>
-		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
+		<div class="operation" show-any-role="${Role.ROLE_DATA_MANAGER},${Role.ROLE_DATA_ANALYST}">
 			<#if selectOperation>
 				<button type="button" class="selectButton recommended"><@spring.message code='confirm' /></button>
 				<button type="button" class="viewButton view-button"><@spring.message code='view' /></button>
 			<#else>
-				<button type="button" class="addButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='add' /></button>
-				<button type="button" class="editButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='edit' /></button>
+				<button type="button" class="addButton" show-any-role="${Role.ROLE_DATA_MANAGER}"><@spring.message code='add' /></button>
+				<button type="button" class="editButton" show-any-role="${Role.ROLE_DATA_MANAGER}"><@spring.message code='edit' /></button>
 				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 				<#if !(currentUser.anonymous)>
-				<button type="button" class="shareButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='share' /></button>
+				<button type="button" class="shareButton" show-any-role="${Role.ROLE_DATA_MANAGER}"><@spring.message code='share' /></button>
 				</#if>
-				<button type="button" class="deleteButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='delete' /></button>
+				<button type="button" class="deleteButton" show-any-role="${Role.ROLE_DATA_MANAGER}"><@spring.message code='delete' /></button>
 			</#if>
 		</div>
 	</div>

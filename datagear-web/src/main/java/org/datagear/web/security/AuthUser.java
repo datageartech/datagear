@@ -69,13 +69,14 @@ public class AuthUser implements UserDetails
 		{
 			this.authorities.add(new SimpleGrantedAuthority(ROLE_ANONYMOUS));
 		}
-		else if (user.isAdmin())
-		{
-			this.authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
-		}
 		else
 		{
 			this.authorities.add(new SimpleGrantedAuthority(ROLE_USER));
+			
+			if (user.isAdmin())
+			{
+				this.authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
+			}
 		}
 	}
 

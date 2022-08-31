@@ -1315,7 +1315,7 @@ ${detectNewVersionScript?no_esc}
 				<li><a href="#${pageId}-nav-dataAnalysis"><@spring.message code='main.dataAnalysis' /></a></li>
 			</ul>
 			<div id="${pageId}-nav-dataSource" class="ui-widget ui-widget-content schema-panel">
-				<div class="schema-panel-head" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
+				<div class="schema-panel-head" show-any-role="${Role.ROLE_DATA_MANAGER},${Role.ROLE_DATA_ANALYST}">
 					<div class="schema-panel-form ui-widget ui-widget-content ui-corner-all">
 						<form id="schemaSearchForm" action="javascript:void(0);">
 							<div id="schemaSearchSwitch" class="schema-search-switch ui-button-icon-only"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
@@ -1324,16 +1324,16 @@ ${detectNewVersionScript?no_esc}
 							<input name="pageSize" type="hidden" value="100" />
 						</form>
 					</div>
-					<div class="schema-panel-operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
-						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" visible-any-role="${Role.ROLE_DATA_ADMIN}" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+					<div class="schema-panel-operation" show-any-role="${Role.ROLE_DATA_MANAGER},${Role.ROLE_DATA_ANALYST}">
+						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" visible-any-role="${Role.ROLE_DATA_MANAGER}" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 						<ul id="schemaOperationMenu" class="lightweight-menu">
 							<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
 								<ul class="ui-widget-shadow">
-									<li class="schema-operation-edit" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='edit' /></a></li>
-									<li class="schema-operation-delete" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
+									<li class="schema-operation-edit" show-any-role="${Role.ROLE_DATA_MANAGER}"><a href="javascript:void(0);"><@spring.message code='edit' /></a></li>
+									<li class="schema-operation-delete" show-any-role="${Role.ROLE_DATA_MANAGER}"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
 									<li class="schema-operation-view"><a href="javascript:void(0);"><@spring.message code='view' /></a></li>
 									<li class="schema-operation-refresh" title="<@spring.message code='main.schemaOperationMenuRefreshComment' />"><a href="javascript:void(0);"><@spring.message code='refresh' /></a></li>
-									<li class="schema-operation-authorize" show-any-role="${Role.ROLE_DATA_ADMIN}"><a href="javascript:void(0);"><@spring.message code='authorize' /></a></li>
+									<li class="schema-operation-authorize" show-any-role="${Role.ROLE_DATA_MANAGER}"><a href="javascript:void(0);"><@spring.message code='authorize' /></a></li>
 									<li class="ui-widget-header"></li>
 									<li class="schema-operation-reload" title="<@spring.message code='main.schemaOperationMenuReloadComment' />"><a href="javascript:void(0);"><@spring.message code='reload' /></a></li>
 									<li class="ui-widget-header"></li>
@@ -1346,11 +1346,11 @@ ${detectNewVersionScript?no_esc}
 						</ul>
 					</div>
 				</div>
-				<div class="schema-panel-content" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
+				<div class="schema-panel-content" show-any-role="${Role.ROLE_DATA_MANAGER},${Role.ROLE_DATA_ANALYST}">
 				</div>
 			</div>
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
-				<div class="dataAnalysis-panel-head" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
+				<div class="dataAnalysis-panel-head" show-any-role="${Role.ROLE_DATA_MANAGER},${Role.ROLE_DATA_ANALYST}">
 					<div class="analysis-project-current ui-widget ui-widget-content ui-corner-all">
 						<div class="analysis-project-current-value" auto-close-prevent="analysis-project-list-panel" title="<@spring.message code='main.analysisProject.currentValue' />"></div>
 						<div class="analysis-project-current-reset ui-button-icon-only" title="<@spring.message code='main.analysisProject.currentValue.clear' />">
@@ -1358,7 +1358,7 @@ ${detectNewVersionScript?no_esc}
 						</div>
 					</div>
 					<div class="analysis-project-operation">
-						<div class="analysis-project-operation-group" show-any-role="${Role.ROLE_DATA_ADMIN}">
+						<div class="analysis-project-operation-group" show-any-role="${Role.ROLE_DATA_MANAGER}">
 							<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title="<@spring.message code='main.analysisProject.add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 							<button id="manageAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only manage-analysis-project-button" title="<@spring.message code='main.analysisProject.manage' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='manage' /></button>
 						</div>
@@ -1368,13 +1368,13 @@ ${detectNewVersionScript?no_esc}
 						<div class="analysis-project-list-panel-content minor-dataTable pagination-light"></div>
 					</div>
 				</div>
-				<div class="dataAnalysis-panel-content" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
+				<div class="dataAnalysis-panel-content" show-any-role="${Role.ROLE_DATA_MANAGER},${Role.ROLE_DATA_ANALYST}">
 					<ul>
 						<li class="item-dataset" tabId="dataAnalysis-dataSet">
 							<a href="${contextPath}/dataSet/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dataSet' />
 								<#if currentUser.anonymous>
-								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_MANAGER}"></span>
 								</#if>
 							</a>
 						</li>
@@ -1382,7 +1382,7 @@ ${detectNewVersionScript?no_esc}
 							<a href="${contextPath}/chart/pagingQuery">
 								<@spring.message code='main.dataAnalysis.chart' />
 								<#if currentUser.anonymous>
-								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_MANAGER}"></span>
 								</#if>
 							</a>
 						</li>
@@ -1390,7 +1390,7 @@ ${detectNewVersionScript?no_esc}
 							<a href="${contextPath}/dashboard/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dashboard' />
 								<#if currentUser.anonymous>
-								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_ADMIN}"></span>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />" show-any-role="${Role.ROLE_DATA_MANAGER}"></span>
 								</#if>
 							</a>
 						</li>

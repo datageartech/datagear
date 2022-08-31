@@ -36,21 +36,21 @@ boolean readonly 是否只读操作，默认为false
 			<#include "../include/page_obj_searchform_data_filter.ftl">
 			<#include "../include/analysisProjectAware_grid_search.ftl">
 		</div>
-		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
+		<div class="operation" show-any-role="${Role.ROLE_DATA_MANAGER},${Role.ROLE_DATA_ANALYST}">
 			<#if selectOperation>
 				<button type="button" class="selectButton recommended"><@spring.message code='confirm' /></button>
 			</#if>
 			<#if readonly>
 				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 			<#else>
-				<div class="addGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
+				<div class="addGroup" show-any-role="${Role.ROLE_DATA_MANAGER}">
 					<button type="button" class="addButton"><@spring.message code='add' /></button>
 					<select class="addGroupSelect">
 						<option value="copy"><@spring.message code='copy' /></option>
 					</select>
 				</div>
 				<#if !selectOperation>
-				<button type="button" class="editButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='edit' /></button>
+				<button type="button" class="editButton" show-any-role="${Role.ROLE_DATA_MANAGER}"><@spring.message code='edit' /></button>
 				<div class="showGroup">
 					<button type="button" class="showButton"><@spring.message code='chart.show' /></button>
 					<select class="showGroupSelect">
@@ -59,12 +59,12 @@ boolean readonly 是否只读操作，默认为false
 					<button type="button" class="copyShowURLDelegation" style="display:none;">&nbsp;</button>
 				</div>
 				<#if !(currentUser.anonymous)>
-				<button type="button" class="shareButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='share' /></button>
+				<button type="button" class="shareButton" show-any-role="${Role.ROLE_DATA_MANAGER}"><@spring.message code='share' /></button>
 				</#if>
 				</#if>
 				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 				<#if !selectOperation>
-				<button type="button" class="deleteButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='delete' /></button>
+				<button type="button" class="deleteButton" show-any-role="${Role.ROLE_DATA_MANAGER}"><@spring.message code='delete' /></button>
 				</#if>
 			</#if>
 		</div>

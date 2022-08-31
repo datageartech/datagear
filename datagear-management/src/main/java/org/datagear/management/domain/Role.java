@@ -25,20 +25,26 @@ public class Role extends AbstractStringIdEntity implements CloneableEntity
 	public static final String BUILTIN_ROLE_PREFIX = "ROLE_";
 
 	/**
-	 * 角色ID：注册用户。 <br>
+	 * 角色ID：{@code ROLE_REGISTRY} 注册用户。 
+	 * <p>
 	 * 系统新添加和注册的用户都会关联此角色，便于用户针对注册用户授权。
+	 * </p>
 	 */
 	public static final String ROLE_REGISTRY = BUILTIN_ROLE_PREFIX + "REGISTRY";
 
 	/**
-	 * 角色ID：数据管理员。<br>
-	 * 可以管理数据源、数据集、图表、看板。
+	 * 角色ID：{@code ROLE_DATA_ADMIN} 数据管理员。
+	 * <p>
+	 * 可以管理（添加、编辑、查看、删除）数据源、数据集、图表、看板。
+	 * </p>
 	 */
-	public static final String ROLE_DATA_ADMIN = BUILTIN_ROLE_PREFIX + "DATA_ADMIN";
+	public static final String ROLE_DATA_MANAGER = BUILTIN_ROLE_PREFIX + "DATA_ADMIN";
 
 	/**
-	 * 角色ID：数据分析员。 <br>
+	 * 角色ID：{@code ROLE_DATA_ANALYST} 数据分析员。 
+	 * <p>
 	 * 仅可查看数据源、数据集、图表、看板，展示图表和看板。
+	 * </p>
 	 */
 	public static final String ROLE_DATA_ANALYST = BUILTIN_ROLE_PREFIX + "DATA_ANALYST";
 

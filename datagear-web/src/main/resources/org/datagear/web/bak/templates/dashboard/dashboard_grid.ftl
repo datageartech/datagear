@@ -33,12 +33,12 @@ selectOperation 是否选择操作，允许为null
 			<#include "../include/page_obj_searchform_data_filter.ftl">
 			<#include "../include/analysisProjectAware_grid_search.ftl">
 		</div>
-		<div class="operation" show-any-role="${Role.ROLE_DATA_ADMIN},${Role.ROLE_DATA_ANALYST}">
+		<div class="operation" show-any-role="${Role.ROLE_DATA_MANAGER},${Role.ROLE_DATA_ANALYST}">
 			<#if selectOperation>
 				<button type="button" class="selectButton recommended"><@spring.message code='confirm' /></button>
 				<button type="button" class="viewButton"><@spring.message code='view' /></button>
 			<#else>
-				<div class="addGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
+				<div class="addGroup" show-any-role="${Role.ROLE_DATA_MANAGER}">
 					<button type="button" class="addButton"><@spring.message code='add' /></button>
 					<select class="addGroupSelect">
 						<option value="addInNewWindow"><@spring.message code='addInNewWindow' /></option>
@@ -47,7 +47,7 @@ selectOperation 是否选择操作，允许为null
 						<option value="import"><@spring.message code='import' /></option>
 					</select>
 				</div>
-				<div class="editGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
+				<div class="editGroup" show-any-role="${Role.ROLE_DATA_MANAGER}">
 					<button type="button" class="editButton"><@spring.message code='edit' /></button>
 					<select class="editGroupSelect">
 						<option value="editInNewWindow"><@spring.message code='editInNewWindow' /></option>
@@ -61,7 +61,7 @@ selectOperation 是否选择操作，允许为null
 					<button type="button" class="copyShowURLDelegation" style="display:none;">&nbsp;</button>
 				</div>
 				<#if !(currentUser.anonymous)>
-				<div class="shareGroup" show-any-role="${Role.ROLE_DATA_ADMIN}">
+				<div class="shareGroup" show-any-role="${Role.ROLE_DATA_MANAGER}">
 					<button type="button" class="shareButton"><@spring.message code='share' /></button>
 					<select class="shareGroupSelect">
 						<option value="shareSet"><@spring.message code='dashboard.shareSet' /></option>
@@ -69,8 +69,8 @@ selectOperation 是否选择操作，允许为null
 				</div>
 				</#if>
 				<button type="button" class="viewButton"><@spring.message code='view' /></button>
-				<button type="button" class="exportButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='export' /></button>
-				<button type="button" class="deleteButton" show-any-role="${Role.ROLE_DATA_ADMIN}"><@spring.message code='delete' /></button>
+				<button type="button" class="exportButton" show-any-role="${Role.ROLE_DATA_MANAGER}"><@spring.message code='export' /></button>
+				<button type="button" class="deleteButton" show-any-role="${Role.ROLE_DATA_MANAGER}"><@spring.message code='delete' /></button>
 			</#if>
 		</div>
 	</div>
