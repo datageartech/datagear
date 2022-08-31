@@ -20,12 +20,12 @@
 <body class="m-0 surface-ground">
 <#include "include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal">
-	<div class="flex flex-column h-screen m-0">
+	<div class="flex flex-column m-0" :class="pm.isInDialog ? 'h-auto' : 'h-screen'">
 		<#include "include/page_main_header.ftl">
 		<div class="flex-grow-1 p-0">
 			<div class="grid grid-nogutter justify-content-center">
-				<p-card class="col-10 md:col-5 p-card mt-6">
-					<template #title><@spring.message code='module.login' /></template>
+				<p-card class="p-card col-10" :class="pm.isInDialog ? 'md:col-8 mt-1' : 'md:col-5 mt-6'">
+					<template #title v-if="!pm.isInDialog"><@spring.message code='module.login' /></template>
 					<template #content>
 					<form id="${pid}form" class="flex flex-column">
 						<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -93,7 +93,8 @@
 	po.vuePageModel(
 	{
 		disableLoginCheckCode: po.disableLoginCheckCode,
-		disableRegister: po.disableRegister
+		disableRegister: po.disableRegister,
+		isInDialog: po.isAjaxRequest
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
