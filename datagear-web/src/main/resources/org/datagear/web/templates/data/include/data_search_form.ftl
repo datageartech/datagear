@@ -105,6 +105,17 @@ page_sql_editor.ftl
 		};
 	};
 	
+	po.mergeSearchConditionPanelValue = function()
+	{
+		var pm = po.vuePageModel();
+		
+		if(po.searchConditionCodeEditor)
+		{
+			var condition = po.getCodeText(po.searchConditionCodeEditor);
+			pm.searchForm.condition = po.fromSearchConditionPanelValue(condition);
+		}
+	};
+	
 	po.initSearchConditionCodeEditor = function(ele, dbTable)
 	{
 		ele.empty();
@@ -173,13 +184,7 @@ page_sql_editor.ftl
 				//刷新表结构操作会导致空白区显示这个面板，这里使用透明度解决
 				panel.addClass("opacity-hide");
 				
-				var pm = po.vuePageModel();
-				
-				if(po.searchConditionCodeEditor)
-				{
-					var condition = po.getCodeText(po.searchConditionCodeEditor);
-					pm.searchForm.condition = po.fromSearchConditionPanelValue(condition);
-				}
+				po.mergeSearchConditionPanelValue();
 			},
 			
 			onClearSearchCondition: function()
@@ -195,6 +200,7 @@ page_sql_editor.ftl
 			
 			onSearchFormSubmit: function()
 			{
+				po.mergeSearchConditionPanelValue();
 				po.submitSearchForm();
 			}
 		});
