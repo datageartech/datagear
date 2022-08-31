@@ -523,8 +523,10 @@ label[title]:not(.no-tip)::after,
 	overflow: auto;
 }
 
-/*隐藏对话框内的主页头，比如登录页*/
-.p-dialog .page-main-header{
+/*隐藏嵌套页的主页头，比如登录页*/
+.p-dialog .page-main-header,
+.page-main-panel .page-main-header,
+.p-tabview-panels .page-main-header{
 	display: none;
 }
 
