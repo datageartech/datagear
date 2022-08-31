@@ -53,28 +53,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	/**
 	 * 授权角色：登录用户 且 数据管理员
 	 */
-	protected static final String AUTH_USER_AND_DATA_MANAGER = "hasAnyAuthority('" + AuthUser.ROLE_USER+ "')"
+	protected static final String AUTH_USER_AND_DATA_MANAGER = "hasAuthority('" + AuthUser.ROLE_USER+ "')"
 			+" and hasAuthority('" + Role.ROLE_DATA_MANAGER + "')";
 
 	/**
 	 * 授权角色：登录用户 且 (数据管理员 或 数据分析员)
 	 */
-	protected static final String AUTH_USER_AND_DATA_MANAGER_ANALYST = "hasAnyAuthority('" + AuthUser.ROLE_USER + "')"
+	protected static final String AUTH_USER_AND_DATA_MANAGER_OR_ANALYST = "hasAnyAuthority('" + AuthUser.ROLE_USER + "')"
 			+" and hasAnyAuthority('" + Role.ROLE_DATA_MANAGER + "','" + Role.ROLE_DATA_ANALYST + "')";
 
 	/**
-	 * 授权角色：(匿名用户 或 登录用户) 且 数据管理员
+	 * 授权角色：数据管理员 或 数据分析员
 	 */
-	protected static final String AUTH_ANONYMOUS_USER_AND_DATA_MANAGER = "hasAnyAuthority('"
-			+ AuthUser.ROLE_ANONYMOUS + "','" + AuthUser.ROLE_USER + "')"
-			+" and hasAuthority('" + Role.ROLE_DATA_MANAGER + "')";
-
-	/**
-	 * 授权角色：(匿名用户 或 登录用户) 且 (数据管理员 或 数据分析员)
-	 */
-	protected static final String AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST = "hasAnyAuthority('"
-			+ AuthUser.ROLE_ANONYMOUS + "','" + AuthUser.ROLE_USER + "')"
-			+" and hasAnyAuthority('" + Role.ROLE_DATA_MANAGER + "','" + Role.ROLE_DATA_ANALYST + "')";
+	protected static final String AUTH_DATA_MANAGER_OR_ANALYST = "hasAnyAuthority('" + Role.ROLE_DATA_MANAGER + "','" + Role.ROLE_DATA_ANALYST + "')";
 
 	/**
 	 * 授权角色：系统管理员
@@ -84,18 +75,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	/**
 	 * 授权角色：登录用户
 	 */
-	protected static final String AUTH_USER = "hasAnyAuthority('" + AuthUser.ROLE_USER + "')";
-
-	/**
-	 * 授权角色：匿名用户 或 登录用户
-	 */
-	protected static final String AUTH_ANONYMOUS_USER = "hasAnyAuthority('" + AuthUser.ROLE_ANONYMOUS + "','"
-			+ AuthUser.ROLE_USER + "')";
+	protected static final String AUTH_USER = "hasAuthority('" + AuthUser.ROLE_USER + "')";
 
 	/**
 	 * 授权角色：匿名用户
 	 */
 	protected static final String AUTH_ANONYMOUS = "hasAuthority('" + AuthUser.ROLE_ANONYMOUS + "')";
+
+	/**
+	 * 授权角色：匿名用户 或 登录用户
+	 */
+	protected static final String AUTH_ANONYMOUS_OR_USER = "hasAnyAuthority('" + AuthUser.ROLE_ANONYMOUS + "','"
+			+ AuthUser.ROLE_USER + "')";
 
 	private CoreConfig coreConfig;
 
@@ -165,12 +156,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 						//
 						"/dashboard/show/**", "/dashboard/showData", "/dashboard/loadChart", "/dashboard/heartbeat",
 						"/dashboard/serverTime.js", "/dashboard/auth/**", "/dashboard/authcheck/**")
-				.access(AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(AUTH_ANONYMOUS_OR_USER)
 
 				// 展示图表和看板
 				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
 				.antMatchers("/analysis/chart/show/**", "/analysis/dashboard/show/**")
-				.access(AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(AUTH_ANONYMOUS_OR_USER)
 
 				// 数据源
 				// 编辑
@@ -180,15 +171,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				.access(AUTH_USER_AND_DATA_MANAGER)
 				// 其他
 				.antMatchers("/schema/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 
 				// 数据源数据管理、导入导出、SQL工作台、SQL编辑器
 				// 用户针对数据源数据的所有操作都已受其所属数据源权限控制，所以不必再引入数据管理员/数据分析员权限
-				.antMatchers("/data/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_USER)
-				.antMatchers("/dataexchange/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_USER)
-				.antMatchers("/sqlpad/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_USER)
-				.antMatchers("/sqlEditor/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_USER)
+				.antMatchers("/data/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
+				.antMatchers("/dataexchange/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
+				.antMatchers("/sqlpad/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
+				.antMatchers("/sqlEditor/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
 
 				// 数据分析项目
 				// 编辑
@@ -198,8 +188,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				.access(AUTH_USER_AND_DATA_MANAGER)
 				// 其他
 				.antMatchers("/analysisProject/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 
 				// 数据集
 				// 编辑
@@ -210,8 +199,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				.access(AUTH_USER_AND_DATA_MANAGER)
 				// 其他
 				.antMatchers("/dataSet/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 
 				// 图表
 				// 编辑
@@ -220,8 +208,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				.access(AUTH_USER_AND_DATA_MANAGER)
 				// 其他
 				.antMatchers("/chart/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 
 				// 看板
 				// 编辑
@@ -235,14 +222,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				.access(AUTH_USER_AND_DATA_MANAGER)
 				// 其他
 				.antMatchers("/dashboard/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 
 				// 图表插件
 				// 选择
 				.antMatchers("/chartPlugin/select", "/chartPlugin/selectData")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 				// 管理
 				.antMatchers("/chartPlugin/**").access(AUTH_ADMIN)
 
@@ -250,16 +235,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				// 选择
 				.antMatchers("/dataSetResDirectory/view", "/dataSetResDirectory/select",
 						"/dataSetResDirectory/pagingQueryData", "/dataSetResDirectory/listFiles")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 				// 管理
 				.antMatchers("/dataSetResDirectory/**").access(AUTH_ADMIN)
 
 				// 看板全局资源
 				// 选择
 				.antMatchers("/dashboardGlobalRes/queryData")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 				// 管理
 				.antMatchers("/dashboardGlobalRes/**").access(AUTH_ADMIN)
 
@@ -270,16 +253,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				// 选择
 				.antMatchers("/driverEntity/view", "/driverEntity/select", "/driverEntity/queryData",
 						"/driverEntity/downloadDriverFile", "/driverEntity/listDriverFile")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 				// 管理
 				.antMatchers("/driverEntity/**").access(AUTH_ADMIN)
 
 				// 数据源URL构建器
 				// 构建
 				.antMatchers("/schemaUrlBuilder/build")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_ANALYST
-						: AUTH_ANONYMOUS_USER_AND_DATA_MANAGER_ANALYST)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
 				// 管理
 				.antMatchers("/schemaUrlBuilder/*").access(AUTH_ADMIN)
 
@@ -304,7 +285,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				.antMatchers("/login/**", "/register/**", "/resetPassword/**").permitAll()
 
 				//
-				.antMatchers("/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_USER)
+				.antMatchers("/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
 
 				.and().formLogin().loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl(LOGIN_PROCESS_URL)
 				.usernameParameter(LoginController.LOGIN_PARAM_USER_NAME)
