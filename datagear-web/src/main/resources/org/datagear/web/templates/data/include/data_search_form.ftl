@@ -29,7 +29,7 @@ page_sql_editor.ftl
 	</div>
 </form>
 <p-overlaypanel ref="${pid}searchConditionPanelEle" append-to="body"
-	:show-close-icon="false" id="${pid}searchConditionPanel" class="opacity-hide"
+	:show-close-icon="false" id="${pid}searchConditionPanel" class="opacity-hide-absolute"
 	@show="onSearchConditionPanelShow" @hide="onSearchConditionPanelHide">
 	<div class="pb-2">
 		<label class="text-lg font-bold">
@@ -172,7 +172,7 @@ page_sql_editor.ftl
 			onSearchConditionPanelShow: function()
 			{
 				var panel = po.elementOfId("${pid}searchConditionPanel", document.body);
-				panel.removeClass("opacity-hide");
+				panel.removeClass("opacity-hide-absolute");
 				
 				var codeEditorEle = po.elementOfId("${pid}searchConditionEditor", panel);
 				po.initSearchConditionCodeEditor(codeEditorEle, dbTable);
@@ -181,8 +181,8 @@ page_sql_editor.ftl
 			onSearchConditionPanelHide: function()
 			{
 				var panel = po.elementOfId("${pid}searchConditionPanel", document.body);
-				//刷新表结构操作会导致空白区显示这个面板，这里使用透明度解决
-				panel.addClass("opacity-hide");
+				//避免刷新表结构操作时空白区显示这个面板，避免po.onDbTable()过程中此面板占空间导致出现滚动条而抖屏
+				panel.addClass("opacity-hide-absolute");
 				
 				po.mergeSearchConditionPanelValue();
 			},

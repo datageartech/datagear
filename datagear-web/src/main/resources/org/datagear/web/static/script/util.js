@@ -116,11 +116,11 @@
 			{
 				const container = $(options.target ? options.target : document.body);
 				
-				const rootEleId = $.uid("app");
-				const rootEle = $("<div id='"+rootEleId+"' />").appendTo(container);
-				
 				if(options.dialog)
 				{
+					const rootEleId = $.uid("app");
+					const rootEle = $("<div id='"+rootEleId+"' />").appendTo(container);
+					
 					const dialogEleId = rootEleId+"dialog";
 					rootEle.addClass("vue-app-dialog");
 					$("<p-dialog />").attr("id", dialogEleId).attr("app-ele-id", rootEleId)
@@ -178,12 +178,13 @@
 				}
 				else
 				{
-					rootEle.addClass($.PAGE_PARAM_BINDER_CLASS);
+					if(!container.hasClass($.PAGE_PARAM_BINDER_CLASS))
+						container.addClass($.PAGE_PARAM_BINDER_CLASS);
 					
 					if(options.pageParam)
-						$.pageParam(rootEle, options.pageParam);
+						$.pageParam(container, options.pageParam);
 					
-					rootEle.html(response);
+					container.html(response);
 				}
 			};
 			

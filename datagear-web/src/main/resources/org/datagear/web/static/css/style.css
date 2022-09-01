@@ -103,6 +103,12 @@ label[title]:not(.no-tip)::after,
 	opacity: 0 !important;
 	z-index: -99 !important;
 }
+.opacity-hide-absolute{
+	opacity: 0 !important;
+	z-index: -99 !important;
+	/*设为absolute可不占当前空间*/
+	position: absolute;
+}
 
 /*圆形按钮sm*/
 .p-button-sm.p-button.p-button-icon-only.p-button-rounded{
