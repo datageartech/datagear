@@ -64,7 +64,7 @@
 				},
 				{
 					label: "<@spring.message code='module.dataSet' />",
-					icon: 'pi pi-fw pi-book',
+					icon: 'pi pi-fw pi-table',
 					url: "${contextPath}/dataSet/pagingQuery"
 				},
 				{

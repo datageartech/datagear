@@ -31,7 +31,7 @@
 								<div class="p-inputgroup">
 									<div class="p-input-icon-left flex-grow-1">
 										<i class="cursor-pointer" @click="onToggleSearchType"
-											:class="pm.searchType=='schema' ? 'pi pi-database' : 'pi pi-table'"
+											:class="pm.searchType=='schema' ? 'pi pi-database' : 'pi pi-file'"
 											title="<@spring.message code='switchSearchMode' />">
 										</i>
 										<p-inputtext type="text" v-model="pm.searchForm.keyword" class="w-full h-full border-noround-right"></p-inputtext>
@@ -263,7 +263,7 @@
 			{
 				key: schemaId + "-" + table.name,
 				label: table.name,
-				icon: "pi pi-table",
+				icon: "pi pi-file",
 				leaf: true,
 				dataType: "table",
 				schemaId: schemaId,

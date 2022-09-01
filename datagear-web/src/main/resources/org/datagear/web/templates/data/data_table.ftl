@@ -26,7 +26,7 @@
 			<i class="pi pi-database text-color-secondary text-sm"></i>
 			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
 			<i class="pi pi-angle-right text-color-secondary text-sm mx-2"></i>
-			<!--<i class="pi pi-table text-color-secondary text-sm"></i>-->
+			<!--<i class="pi pi-file text-color-secondary text-sm"></i>-->
 			<div class="text-color-secondary text-sm">${tableName}</div>
 		</div>
 		<div class="col-12" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
