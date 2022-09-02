@@ -1325,14 +1325,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @param request
 	 * @param response
 	 * @param model
-	 * @param user
+	 * @param currentUser
 	 * @param dashboardWidget
 	 * @param template
 	 * @param isShowForEdit
 	 * @throws Exception
 	 */
 	protected void showDashboard(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, User user, HtmlTplDashboardWidgetEntity dashboardWidget,
+			org.springframework.ui.Model model, User currentUser, HtmlTplDashboardWidgetEntity dashboardWidget,
 			String template, boolean isShowForEdit) throws Exception
 	{
 		User createUser = dashboardWidget.getCreateUser();
@@ -1342,8 +1342,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				: "");
 		EditHtmlInfo editHtmlInfo = (isShowForEdit ? buildShowForEditEditHtmlInfo(showHtml) : null);
 
-		// 确保看板创建用户对看板模板内定义的图表有权限
-		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(createUser));
+		// 使用看板创建用户，确保当前用户对看板模板内定义的图表有权限
+		// 如果当前用户是管理员，则不应使用看板创建用户，避免管理员在其他用户的看板内添加管理员创建的图表时，出现无权访问的情况，
+		// 但是，其他用户打开看板时对此图表仍无权访问
+		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(currentUser.isAdmin() ? currentUser : createUser));
 
 		Reader showHtmlIn = (isShowForEdit ? IOUtil.getReader(showHtml) : null);
 		Writer out = null;
