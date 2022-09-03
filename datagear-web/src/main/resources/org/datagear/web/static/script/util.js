@@ -119,13 +119,14 @@
 				if(options.dialog)
 				{
 					const rootEleId = $.uid("app");
-					const rootEle = $("<div id='"+rootEleId+"' />").appendTo(container);
-					
 					const dialogEleId = rootEleId+"dialog";
+					const rootEle = $("<div id='"+rootEleId+"' dialog-ele-id='"+dialogEleId+"' />").appendTo(container);
+					
 					rootEle.addClass("vue-app-dialog");
 					$("<p-dialog />").attr("id", dialogEleId).attr("app-ele-id", rootEleId)
 								.attr(":header", "model.header").attr("v-model:visible", "model.visible").attr(":modal", options.modal)
-								.attr("v-on:show", "setReponseHtml").attr("v-on:after-hide", "destroyDialogEle")
+								.attr("v-on:show", "onDialogShow").attr("v-on:after-hide", "onDialogAfterHide")
+								.attr("v-on:hide", "onDialogHide")
 								.attr(":close-on-escape", "false")
 								.attr(":style", "{width: model.width}")
 								.attr("class", "ajax-dialog " + $.PAGE_PARAM_BINDER_CLASS + " " + options.styleClass)
@@ -143,11 +144,7 @@
 								width: options.width
 							});
 							
-							const destroyDialogEle = function()
-							{
-								rootEle.remove();
-							};
-							const setReponseHtml = function()
+							const onDialogShow = function()
 							{
 								let dialogEle = $("#"+dialogEleId);
 								
@@ -167,14 +164,24 @@
 								if(options.onShow)
 									options.onShow(dialogEle);
 							};
+							const onDialogHide = function()
+							{
+								$._callBeforeDialogCloseCallbacks(rootEle);
+							};
+							const onDialogAfterHide = function()
+							{
+								$._destroyDialogApp(rootEle);
+							};
 							
-							return {model, destroyDialogEle, setReponseHtml};
+							return {model, onDialogShow, onDialogHide, onDialogAfterHide};
 						},
 						components: { "p-dialog": primevue.dialog }
 					};
 					
-					dialogApp = Vue.createApp(dialogApp).use(primevue.config.default).mount(rootEle[0]);
-					rootEle.data("dialogApp", dialogApp);
+					dialogApp = Vue.createApp(dialogApp);
+					var dialogVm = dialogApp.use(primevue.config.default).mount(rootEle[0]);
+					
+					rootEle.data("dialogApp", dialogApp).data("dialogVm", dialogVm);
 				}
 				else
 				{
@@ -274,21 +281,77 @@
 	};
 	
 	/**
-	 * 关闭并销毁对话框。
+	 * 绑定对话框关闭前回调函数。
+	 *
+	 * @param ele 对话框内的任意元素
+	 * @param name 绑定的回调函数标识名（同名的仅会有一个）
+	 * @param callback 回调函数
+	 */
+	$.bindBeforeCloseDialogCallback = function(ele, name, callback)
+	{
+		var dialogEle = $.getInDialog(ele);
+		
+		if(dialogEle && dialogEle.length > 0)
+		{
+			var callbacks = dialogEle.data("beforeCloseCallbacks");
+			if(!callbacks)
+			{
+				callbacks = {};
+				dialogEle.data("beforeCloseCallbacks", callbacks);
+			}
+			
+			callbacks[name] = callback;
+		}
+	};
+	
+	/**
+	 * 关闭并销毁由$.open()创建的对话框。
+	 * 
+	 * @param ele 对话框内的任意元素
 	 */
 	$.closeDialog = function(ele)
 	{
-		var d = $.getInDialog(ele);
-		if(d && d.length > 0)
+		var dialogEle = $.getInDialog(ele);
+		if(dialogEle && dialogEle.length > 0)
 		{
-			let appEle = $("#"+ d.attr("app-ele-id"));
-			let dialogApp = appEle.data("dialogApp");
+			var appEle = $("#"+ dialogEle.attr("app-ele-id"));
+			$._destroyDialogApp(appEle);
+		}
+	};
+	
+	$._callBeforeDialogCloseCallbacks = function(appEle)
+	{
+		var dialogEleId = appEle.attr("dialog-ele-id");
+		
+		if(dialogEleId)
+		{
+			var dialogEle = $("#"+ appEle.attr("dialog-ele-id"));
+			var beforeCloseCallbacks = dialogEle.data("beforeCloseCallbacks");
 			
-			if(dialogApp)
+			if(beforeCloseCallbacks)
 			{
-				dialogApp.model.visible = false;
+				$.each(beforeCloseCallbacks, function(name, callback)
+				{
+					callback();
+				});
 			}
 		}
+	};
+	
+	$._destroyDialogApp = function(appEle)
+	{
+		var dialogApp = appEle.data("dialogApp");
+		var dialogVm = appEle.data("dialogVm");
+		var dialogEleId = appEle.attr("dialog-ele-id");
+		
+		$._callBeforeDialogCloseCallbacks(appEle);
+		
+		if(dialogVm)
+			dialogVm.model.visible = false;
+		if(dialogApp)
+			dialogApp.unmount();
+		
+		appEle.remove();
 	};
 	
 	/*用于支持$.pageParam函数的元素CSS类名*/
@@ -1750,6 +1813,11 @@ $.inflatePageObj = function(po)
 	po.close = function()
 	{
 		$.closeDialog(this.element());
+	};
+	
+	po.beforeClose = function(name, callback)
+	{
+		$.bindBeforeCloseDialogCallback(this.element(), name, callback);
 	};
 	
 	po.getJson = function(url, data, success)

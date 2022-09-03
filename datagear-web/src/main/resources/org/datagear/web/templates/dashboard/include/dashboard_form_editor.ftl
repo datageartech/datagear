@@ -613,7 +613,7 @@
 	
 	po.showSelectChartDialog = function(selectHandler)
 	{
-		var dialog = $(".dashboard-select-chart-wrapper", document.body);
+		var dialog = po.selectChartDialog();
 		
 		if(dialog.length == 0)
 		{
@@ -651,9 +651,20 @@
 	
 	po.hideSelectChartDialog = function()
 	{
-		var dialog = $(".dashboard-select-chart-wrapper", document.body);
+		var dialog = po.selectChartDialog();
 		var dialogMask = dialog.parent();
 		dialogMask.addClass("opacity-hide");
+	};
+	
+	po.closeSelectChartDialog = function()
+	{
+		var dialog = po.selectChartDialog();
+		$.closeDialog(dialog);
+	};
+	
+	po.selectChartDialog = function()
+	{
+		return $(".dashboard-select-chart-wrapper", document.body);
 	};
 	
 	po.defaultInsertChartEleStyle = "display:inline-block;width:300px;height:300px;";
@@ -1917,6 +1928,11 @@
 					po.loadResContentIfNon(activeTab);
 				});
 			}
+		});
+		
+		po.beforeClose("closeSelectChartDialog", function()
+		{
+			po.closeSelectChartDialog();
 		});
 		
 		po.element().click(function(e)
