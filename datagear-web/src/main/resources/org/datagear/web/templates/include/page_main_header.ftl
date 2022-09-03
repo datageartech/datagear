@@ -177,6 +177,7 @@ User currentUser
 				}
 			]
 		},
+		/*
 		{
 			label: "<@spring.message code='module.changeLanguage' />",
 			items:
@@ -185,6 +186,7 @@ User currentUser
 				{ label: "<@spring.message code='module.changeLanguage.en' />" }
 			]
 		},
+		*/
 		{
 			label: "<@spring.message code='help' />",
 			items:
