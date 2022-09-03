@@ -15,6 +15,8 @@ User currentUser
 
 -->
 <#assign Themes=statics['org.datagear.web.util.Themes']>
+<#assign Global=statics['org.datagear.util.Global']>
+<#assign WebUtils=statics['org.datagear.web.util.WebUtils']>
 <div class="page-main-header flex-grow-0 p-card no-border text-primary py-1">
 	<div class="grid grid-nogutter align-items-center">
 		<div class="logo-wrapper col-fixed flex align-items-center pl-1">
@@ -35,7 +37,9 @@ User currentUser
 				</div>
 				<div>
 					<p-button type="button" @click="onSysMenuToggle" aria-haspopup="true" aria-controls="${pid}sysMenu" icon="pi pi-cog"
-						class="p-button-sm p-button-text p-button-rounded text-primary"></p-button>
+						class="p-button-sm p-button-text p-button-rounded text-primary"
+						:class="pm.newVersionDetectedTipClassName">
+					</p-button>
 					<p-tieredmenu id="${pid}sysMenu" ref="${pid}sysMenuEle" :model="pm.sysMenuItems" :popup="true"
 						class="left-submenu-list">
 					</p-tieredmenu>
@@ -49,6 +53,30 @@ User currentUser
 {
 	po.isUserAnonymous = ("${currentUser.anonymous?string('true','false')}" == "true");
 	po.isUserAdmin = ("${currentUser.admin?string('true','false')}" == "true");
+	po.currentVersion = "${Global.VERSION}";
+	
+	po.newVersionDetected = function()
+	{
+		var detectedVersion = $.cookie("DETECTED_VERSION");
+		if(typeof(DATA_GEAR_LATEST_VERSION) != "undefined")
+		{
+			$.cookie("${WebUtils.COOKIE_DETECT_NEW_VERSION_RESOLVED}", "true", {expires : 1, path : po.concatContextPath("/")});
+			
+			if(DATA_GEAR_LATEST_VERSION != detectedVersion)
+			{
+				detectedVersion = DATA_GEAR_LATEST_VERSION;
+				$.cookie("DETECTED_VERSION", detectedVersion, {expires : 100, path : po.concatContextPath("/")});
+			}
+		}
+		
+		if(!detectedVersion)
+			return false;
+		
+		return ($.compareVersion(detectedVersion, po.currentVersion) > 0);
+	};
+	
+	po.isNewVersionDetected = po.newVersionDetected();
+	po.newVersionDetectedTipClassName = (po.isNewVersionDetected ? "new-version-tip" : "");
 	
 	po.openSysMenuDialog = function(e, tableDialog)
 	{
@@ -189,6 +217,7 @@ User currentUser
 		*/
 		{
 			label: "<@spring.message code='help' />",
+			class: po.newVersionDetectedTipClassName,
 			items:
 			[
 				{
@@ -208,6 +237,7 @@ User currentUser
 				},
 				{
 					label: "<@spring.message code='module.downloadLatestVersion' />",
+					class: po.newVersionDetectedTipClassName,
 					url: "${statics['org.datagear.util.Global'].WEB_SITE}",
 					target: "_blank"
 				}
@@ -230,7 +260,8 @@ User currentUser
 	
 	po.vuePageModel(
 	{
-		sysMenuItems: sysMenuItems
+		sysMenuItems: sysMenuItems,
+		newVersionDetectedTipClassName: po.newVersionDetectedTipClassName
 	});
 	
 	po.vueMethod(

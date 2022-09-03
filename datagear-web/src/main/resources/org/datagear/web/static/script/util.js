@@ -725,7 +725,58 @@
 		
 		return (prefix ? prefix : "uid") + time + seq;
 	};
-
+	
+	/**
+	 * 比较两个版本号。
+	 * > 1：v0高于v1；= 0：v0等于v1；< 0：v0小于v1。
+	 * 
+	 * @param v0
+	 * @param v1
+	 */
+	$.compareVersion = function(v0, v1)
+	{
+		var vv0 = $.resolveVersion(v0);
+		var vv1 = $.resolveVersion(v1);
+		
+		for(var i=0; i<Math.max(vv0.length,vv1.length); i++)
+		{
+			if(vv0[i] > vv1[i])
+				return 1;
+			else if(vv0[i] < vv1[i])
+				return -1;
+		}
+		
+		return 0;
+	};
+	
+	/**
+	 * 解析版本号字符串（格式为：1.0, 1.1.0, 1.1.0-build），返回包含各分段的数组。
+	 */
+	$.resolveVersion = function(version)
+	{
+		version = (version || "");
+		
+		var ary = [0, 0, 0, ""];
+		
+		var bidx = version.indexOf("-");
+		if(bidx > -1)
+		{
+			if((bidx+1) < version.length)
+				ary[3] = version.substring(bidx+1);
+			version = version.substring(0, bidx);
+		}
+		
+		var vs = version.split(".");
+		for(var i=0; i< Math.min(3, vs.length); i++)
+		{
+			var v = parseInt(vs[i]);
+			if(!isNaN(v))
+				ary[i] = v;
+		}
+		
+		return ary;
+	};
+	
 	/**
 	 * 如果是字符串且超过指定长度，则将其截断。
 	 * 

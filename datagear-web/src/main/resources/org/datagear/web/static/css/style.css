@@ -121,6 +121,28 @@ label[title]:not(.no-tip)::after,
 	position: absolute;
 }
 
+.new-version-tip.p-button,
+.new-version-tip > .p-menuitem-link > .p-menuitem-text{
+	position: relative;
+}
+.new-version-tip.p-button::after,
+.new-version-tip > .p-menuitem-link > .p-menuitem-text::after{
+	content: "";
+	width: 8px;
+	height: 8px;
+	background: var(--red-500);
+	border-radius: 10px;
+    position: absolute;
+}
+.new-version-tip.p-button::after{
+    top: 4px;
+    right: 4px;
+}
+.new-version-tip > .p-menuitem-link > .p-menuitem-text::after{
+	top: -4px;
+	right: -8px;
+}
+
 /*圆形按钮sm*/
 .p-button-sm.p-button.p-button-icon-only.p-button-rounded{
 	font-size: .875rem !important;

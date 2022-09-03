@@ -62,6 +62,8 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	protected void exposeHelpers(Map<String, Object> model, HttpServletRequest request) throws Exception
 	{
 		super.exposeHelpers(model, request);
+		
+		ApplicationProperties applicationProperties = getApplicationProperties(request);
 
 		model.put(VAR_PAGE_ID, WebUtils.generatePageId());
 		model.put(VAR_PARENT_PAGE_ID, WebUtils.getParentPageId(request));
@@ -69,12 +71,62 @@ public class CustomFreeMarkerView extends FreeMarkerView
 		model.put(VAR_IS_AJAX_REQUEST, WebUtils.isAjaxRequest(request));
 		model.put(VAR_CURRENT_USER, WebUtils.getUser());
 		model.put(VAR_STATICS, BEANS_WRAPPER.getStaticModels());
-		model.put(VAR_CONFIG_PROPERTIES, getApplicationProperties(request));
+		model.put(VAR_CONFIG_PROPERTIES, applicationProperties);
+		
+		if(WebUtils.isEnableDetectNewVersionRequest(request))
+			setDetectNewVersionScriptAttr(model, request, applicationProperties.isDisableDetectNewVersion());
+		else
+			setDetectNewVersionScriptAttr(model, request, true);
 	}
 	
 	protected ApplicationProperties getApplicationProperties(HttpServletRequest request)
 	{
 		ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());
 		return ac.getBean(ApplicationProperties.class);
+	}
+
+	/**
+	 * 将检测新版本的JS脚本以{@code detectNewVersionScript}关键字存入{@code model}。
+	 * 
+	 * @param model
+	 * @param request
+	 * @param disableDetectNewVersion
+	 */
+	protected void setDetectNewVersionScriptAttr(Map<String, Object> model, HttpServletRequest request,
+			boolean disableDetectNewVersion)
+	{
+		String script = buildDetectNewVersionScript(request, disableDetectNewVersion);
+		model.put("detectNewVersionScript", script);
+	}
+
+	/**
+	 * 构建检测新版本的JS脚本，格式为：
+	 * <p>
+	 * <code>
+	 * &lt;script src="http://www.datagear.tech/latest-version.js" type="text/javascript"&gt;&lt;/script&gt;
+	 * </code>
+	 * </p>
+	 * <p>
+	 * 如果{@code disableDetectNewVersion}为{@code true}，或者还未到达下一次检测时间，将直接返回空字符串：{@code ""}。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param disableDetectNewVersion
+	 * @return
+	 */
+	protected String buildDetectNewVersionScript(HttpServletRequest request, boolean disableDetectNewVersion)
+	{
+		String script = "";
+
+		if (!disableDetectNewVersion)
+		{
+			String resolved = WebUtils.getCookieValue(request, WebUtils.COOKIE_DETECT_NEW_VERSION_RESOLVED);
+			disableDetectNewVersion = ("true".equalsIgnoreCase(resolved) || "1".equals(resolved) || "yes".equalsIgnoreCase(resolved));
+		}
+
+		if (!disableDetectNewVersion)
+			script = "<script src=\"" + WebUtils.LATEST_VERSION_SCRIPT_LOCATION + "\" type=\"text/javascript\"></script>";
+
+		return script;
 	}
 }

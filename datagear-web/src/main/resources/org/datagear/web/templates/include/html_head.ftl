@@ -96,4 +96,5 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/tableMeta.js?v=${Global.VERSION}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/chartFactory.js?v=${Global.VERSION}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/chartSetting.js?v=${Global.VERSION}" type="text/javascript"></script>
+${(detectNewVersionScript!'')?no_esc}
 </#if>

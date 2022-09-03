@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.datagear.management.domain.User;
-import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.security.LoginCheckCodeErrorException;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -69,9 +68,6 @@ public class LoginController extends AbstractController
 	public static final String CHECK_CODE_MODULE_LOGIN = "LOGIN";
 
 	@Autowired
-	private ApplicationProperties applicationProperties;
-
-	@Autowired
 	private IpLoginLatch ipLoginLatch;
 
 	@Autowired
@@ -80,16 +76,6 @@ public class LoginController extends AbstractController
 	public LoginController()
 	{
 		super();
-	}
-
-	public ApplicationProperties getApplicationProperties()
-	{
-		return applicationProperties;
-	}
-
-	public void setApplicationProperties(ApplicationProperties applicationProperties)
-	{
-		this.applicationProperties = applicationProperties;
 	}
 
 	public IpLoginLatch getIpLoginLatch()
@@ -124,8 +110,8 @@ public class LoginController extends AbstractController
 		user.setName(resolveLoginUsername(request, response));
 		
 		setFormModel(model, user, "login", "doLogin");
-		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
-
+		WebUtils.setEnableDetectNewVersionRequest(request);
+		
 		return "/login";
 	}
 

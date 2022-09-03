@@ -18,8 +18,8 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.UserService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
-import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.util.WebUtils;
 import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -55,9 +55,6 @@ public class ResetPasswordController extends AbstractController
 	private File resetPasswordCheckFileDirectory;
 
 	@Autowired
-	private ApplicationProperties applicationProperties;
-
-	@Autowired
 	private UsernameLoginLatch usernameLoginLatch;
 
 	public ResetPasswordController()
@@ -83,16 +80,6 @@ public class ResetPasswordController extends AbstractController
 	public void setResetPasswordCheckFileDirectory(File resetPasswordCheckFileDirectory)
 	{
 		this.resetPasswordCheckFileDirectory = resetPasswordCheckFileDirectory;
-	}
-
-	public ApplicationProperties getApplicationProperties()
-	{
-		return applicationProperties;
-	}
-
-	public void setApplicationProperties(ApplicationProperties applicationProperties)
-	{
-		this.applicationProperties = applicationProperties;
 	}
 
 	public UsernameLoginLatch getUsernameLoginLatch()
@@ -121,7 +108,7 @@ public class ResetPasswordController extends AbstractController
 		}
 
 		model.addAttribute("step", resetPasswordStep);
-		setDetectNewVersionScriptAttr(request, response, this.applicationProperties.isDisableDetectNewVersion());
+		WebUtils.setEnableDetectNewVersionRequest(request);
 
 		return "/reset_password";
 	}

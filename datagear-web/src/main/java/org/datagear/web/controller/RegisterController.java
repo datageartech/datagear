@@ -91,6 +91,7 @@ public class RegisterController extends AbstractController
 
 		User user = new User();
 		setFormModel(model, user, "register", "doRegister");
+		WebUtils.setEnableDetectNewVersionRequest(request);
 		
 		return "/register";
 	}
