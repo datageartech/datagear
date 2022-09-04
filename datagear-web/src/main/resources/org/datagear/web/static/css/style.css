@@ -5,17 +5,6 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-.logo{
-	display: inline-block;
-	width: 8.5rem;
-	height: 1rem;
-	background-size: 100% 100%;
-	background-repeat: no-repeat;
-	font-size: 1rem;
-	line-height: 1rem;
-	text-indent: -999px;
-}
-
  /*滚动条*/
  *::-webkit-scrollbar{
 	width: 0.8rem;
@@ -29,6 +18,21 @@
 *::-webkit-scrollbar-corner{
 	border-radius: var(--border-radius);
 	background-color: var(--surface-100);
+}
+
+.logo{
+	display: inline-block;
+	width: 8.5rem;
+	height: 1rem;
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	font-size: 1rem;
+	line-height: 1rem;
+	text-indent: -999px;
+	opacity: 1;
+}
+.logo:hover{
+	opacity: 0.8;
 }
 
 a.link,
