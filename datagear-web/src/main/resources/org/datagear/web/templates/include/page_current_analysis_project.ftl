@@ -19,7 +19,7 @@ page_search_form.ftl
 <div class="current-analysis-project-wrapper col-12 mb-1">
 	<div class="flex align-items-center">
 		<p-button type="button" icon="pi pi-times"
-			class="p-button-text p-button-plain p-button-sm py-1 px-1 opacity-50"
+			class="p-button-text p-button-plain p-button-sm py-1 px-1 opacity-70"
 			@click="onClearCurrentAnalysisProject" v-if="pm.searchAnalysisProject.id != ''">
 		</p-button>
 		<p-button type="button" :label="pm.searchAnalysisProject.name" icon="pi pi-folder"
