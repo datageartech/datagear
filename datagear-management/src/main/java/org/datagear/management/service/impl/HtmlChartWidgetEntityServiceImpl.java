@@ -389,7 +389,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		for (int i = 0; i < chartDataSetVOs.length; i++)
 		{
-			ChartDataSetVO vo = chartDataSetVOs[i];
+			ChartDataSetVO vo = chartDataSetVOs[i].clone();
 			String dataSetId = vo.getDataSet().getId();
 
 			DataSet dataSet = null;
@@ -403,6 +403,8 @@ public class HtmlChartWidgetEntityServiceImpl
 
 			addIfNonNull(list, (vo.getDataSet() == null ? null : vo));
 		}
+		
+		entity.setChartDataSetVOs(list.toArray(new ChartDataSetVO[list.size()]));
 	}
 
 	@SuppressWarnings("unchecked")

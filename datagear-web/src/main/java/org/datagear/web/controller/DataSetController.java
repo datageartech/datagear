@@ -953,7 +953,19 @@ public class DataSetController extends AbstractSchemaConnController
 	protected void convertForFormModel(DataSetEntity entity)
 	{
 		if(entity instanceof SqlDataSetEntity)
-			((SqlDataSetEntity) entity).clearSchemaPassword();
+		{
+			SqlDataSetEntity sqlDataSetEntity = ((SqlDataSetEntity) entity);
+			sqlDataSetEntity.clearSchemaPassword();
+			sqlDataSetEntity.setSqlValidator(null);
+			
+			SchemaConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
+			if(connectionFactory != null)
+			{
+				connectionFactory = new SchemaConnectionFactory(connectionFactory.getConnectionSource(), connectionFactory.getSchema());
+				connectionFactory.setConnectionSource(null);
+				sqlDataSetEntity.setConnectionFactory(connectionFactory);
+			}
+		}
 		
 		if(entity instanceof DirectoryFileDataSetEntity)
 			((DirectoryFileDataSetEntity) entity).setDirectory(null);

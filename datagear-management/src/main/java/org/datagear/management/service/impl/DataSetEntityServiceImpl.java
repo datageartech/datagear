@@ -227,9 +227,12 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		{
 			SqlDataSetEntity sqlDataSetEntity = (SqlDataSetEntity) entity;
 			SchemaConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
-
-			if (connectionFactory != null)
-				connectionFactory.setConnectionSource(this.connectionSource);
+			
+			if(connectionFactory != null)
+			{
+				connectionFactory = new SchemaConnectionFactory(this.connectionSource, connectionFactory.getSchema());
+				sqlDataSetEntity.setConnectionFactory(connectionFactory);
+			}
 
 			sqlDataSetEntity.setSqlValidator(this.sqlDataSetSqlValidator);
 		}
