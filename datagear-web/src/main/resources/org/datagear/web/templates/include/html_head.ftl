@@ -16,7 +16,6 @@
 <script type="text/javascript">
 var contextPath="${contextPath}";
 </script>
-<link href="${contextPath}/static/image/favicon.png" type="images/x-icon" rel="shortcut icon" />
 <link href="${contextPath}/static/lib/primevue@3.15.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" type="text/css" rel="stylesheet" id="primevueCssLink" />
 <link href="${contextPath}/static/lib/primevue@3.15.0/resources/primevue.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/primeicons@5.0.0/primeicons.css" type="text/css" rel="stylesheet" />
