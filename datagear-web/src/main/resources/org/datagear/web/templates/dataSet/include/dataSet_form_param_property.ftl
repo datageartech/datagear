@@ -131,13 +131,13 @@ page_boolean_options.ftl
 						@click="toggleDataSourceFormatPanel" aria:haspopup="true" aria-controls="${pid}dataSourceFormatPanel"
 						class="p-button-secondary p-button-sm">
 					</p-button>
-					<p-overlaypanel ref="${pid}dataSourceFormatPanelEle" append-to="body" :show-close-icon="true" id="${pid}dataSourceFormatPanel">
+					<p-overlaypanel ref="${pid}dataSourceFormatPanelEle" append-to="body" :show-close-icon="false" id="${pid}dataSourceFormatPanel">
 						<div class="pb-2">
 							<label class="text-lg font-bold" title="<@spring.message code='dataSet.dataSourceFormat.desc' />">
 								<@spring.message code='dataFormat' />
 							</label>
 						</div>
-						<div class="panel-content-size-sm overflow-auto p-2">
+						<div class="panel-content-size-xs overflow-auto p-2">
 							<div class="field grid">
 								<label for="${pid}dsfDate" class="field-label col-12 mb-2">
 									<@spring.message code='dateFormat' />

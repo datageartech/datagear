@@ -17,7 +17,7 @@
 	@click="onPreview" class="p-button-secondary">
 </p-button>
 <p-overlaypanel ref="${pid}previewPanelEle" append-to="body"
-	:show-close-icon="true" id="${pid}previewPanel" :class="{'opacity-0': !pm.previewPanelShow}">
+	:show-close-icon="false" id="${pid}previewPanel" :class="{'opacity-0': !pm.previewPanelShow}">
 	<div class="flex flex-column">
 		<div class="flex-grow-0 pb-2">
 			<label class="text-lg font-bold">
@@ -54,7 +54,7 @@
 						@click="togglePreviewTplResultPanel" class="p-button-secondary p-button-sm">
 					</p-button>
 					<p-overlaypanel ref="${pid}previewTplResultEle" append-to="body"
-						:show-close-icon="true" id="${pid}previewTplResultPanel">
+						:show-close-icon="false" id="${pid}previewTplResultPanel">
 						<p-textarea v-model="pm.previewTplResult" class="overflow-auto"
 							readonly style="width:30vw;height:30vh;">
 						</p-textarea>
@@ -70,7 +70,7 @@
 	style="width:1px;z-index:-999">
 </p-button>
 <p-overlaypanel ref="${pid}previewParamPanelEle" append-to="body"
-	:show-close-icon="true" @show="onPreviewParamPanelShow" id="${pid}previewParamPanel" class="dataset-paramvalue-panel">
+	:show-close-icon="false" @show="onPreviewParamPanelShow" id="${pid}previewParamPanel" class="dataset-paramvalue-panel">
 	<div class="pb-2">
 		<label class="text-lg font-bold">
 			<@spring.message code='parameter' />

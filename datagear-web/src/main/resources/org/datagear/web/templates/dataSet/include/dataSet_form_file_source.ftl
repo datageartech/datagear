@@ -75,13 +75,13 @@
         		v-if="!pm.isReadonlyAction">
         	</p-button>
 			<p-overlaypanel ref="${pid}dsrFilesPanelEle" append-to="body"
-				:show-close-icon="true" @show="onDsrFilesPanelShow" id="${pid}dsrFilesPanel" class="dsr-files-panel">
+				:show-close-icon="false" @show="onDsrFilesPanelShow" id="${pid}dsrFilesPanel" class="dsr-files-panel">
 				<div class="pb-2">
 					<label class="text-lg font-bold">
 						<@spring.message code='selectFile' />
 					</label>
 				</div>
-				<div class="panel-content-size-sm overflow-auto p-2">
+				<div class="panel-content-size-xxs overflow-auto p-2">
 					<p-tree :value="pm.dsrFileNodes"
 						selection-mode="single" v-model:selection-keys="pm.dsrSelectedNodeKeys"
 						@node-expand="onDsrFileNodeExpand" @node-select="onDsrFileNodeSelect"

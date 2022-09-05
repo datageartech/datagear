@@ -230,7 +230,7 @@
 		</div>
 	</form>
 	<p-overlaypanel ref="${pid}dataSignsPanelEle" append-to="body"
-		:show-close-icon="true" id="${pid}dataSignsPanel">
+		:show-close-icon="false" id="${pid}dataSignsPanel">
 		<div class="pb-2">
 			<label class="text-lg font-bold">
 				<@spring.message code='dataSign' />
@@ -267,7 +267,7 @@
 		</div>
 	</p-overlaypanel>
 	<p-overlaypanel ref="${pid}paramPanelEle" append-to="body"
-		:show-close-icon="true" @show="onParamPanelShow" id="${pid}paramPanel" class="dataset-paramvalue-panel">
+		:show-close-icon="false" @show="onParamPanelShow" id="${pid}paramPanel" class="dataset-paramvalue-panel">
 		<div class="pb-2">
 			<label class="text-lg font-bold">
 				<@spring.message code='parameter' />
@@ -276,13 +276,13 @@
 		<div class="paramvalue-form-wrapper panel-content-size-sm overflow-auto p-2"></div>
 	</p-overlaypanel>
 	<p-overlaypanel ref="${pid}dataFormatPanelEle" append-to="body"
-		:show-close-icon="true" id="${pid}dataFormatPanel">
+		:show-close-icon="false" id="${pid}dataFormatPanel">
 		<div class="pb-2">
 			<label class="text-lg font-bold" title="<@spring.message code='chart.rdf.desc' />">
 				<@spring.message code='dataFormat' />
 			</label>
 		</div>
-		<div class="panel-content-size-sm overflow-auto p-2">
+		<div class="panel-content-size-xs overflow-auto p-2">
 			<div class="field grid">
 				<label for="${pid}rdfEnabled" class="field-label col-12 mb-2"
 					title="<@spring.message code='chart.rdf.enabled.desc' />">
@@ -553,6 +553,9 @@
 	{
 		var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}paramPanel", document.body));
 		var pm = po.vuePageModel();
+		
+		if(!chartDataSet.query)
+			chartDataSet.query = {};
 		
 		var formOptions = $.extend(
 		{
