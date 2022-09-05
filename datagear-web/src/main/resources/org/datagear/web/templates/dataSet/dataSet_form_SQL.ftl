@@ -29,13 +29,9 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
-		        		<div class="p-input-icon-right flex-grow-1">
-			        		<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteSchema" v-if="!pm.isReadonlyAction">
-			        		</i>
-				        	<p-inputtext id="${pid}dataSource" v-model="fm.shmConFactory.schema.title" type="text" class="input w-full h-full border-noround-right"
-				        		readonly="readonly" name="shmConFactory.schema.title" required maxlength="200">
-				        	</p-inputtext>
-			        	</div>
+		        		<p-inputtext id="${pid}dataSource" v-model="fm.shmConFactory.schema.title" type="text" class="input"
+			        		readonly="readonly" name="shmConFactory.schema.title" required maxlength="200">
+			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />"
 			        		@click="onSelectSchema" v-if="!pm.isReadonlyAction">
 			        	</p-button>
@@ -119,12 +115,6 @@
 	
 	po.vueMethod(
 	{
-		onDeleteSchema: function()
-		{
-			var fm = po.vueFormModel();
-			fm.shmConFactory.schema = {};
-		},
-		
 		onSelectSchema: function()
 		{
 			po.handleOpenSelectAction("/schema/select", function(schema)
