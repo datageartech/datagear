@@ -836,6 +836,8 @@
 				
 				if($.inArrayById(signs, dataSign.name, "name") < 0)
 					signs.push(dataSign);
+				
+				po.vueUnref("${pid}dataSignsPanelEle").hide();
 			}
 		},
 		
