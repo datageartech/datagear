@@ -1091,6 +1091,9 @@
 		else if(styleModel.isFlexItemElement)
 			styleModel['align-self-flex'] = styleModel['align-self'];
 		
+		styleModel.isGridItemElement = undefined;
+		styleModel.isFlexItemElement = undefined;
+		
 		return styleModel;
 	};
 	
