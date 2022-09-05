@@ -260,7 +260,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 	@RequestMapping("/icon/{pluginId:.+}")
 	public void getPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			@PathVariable("pluginId") String pluginId, @RequestParam(value="tmp", required = false) String tmpPluginFileName) throws Exception
+			@PathVariable("pluginId") String pluginId,
+			@RequestParam(value="tmpPluginFileName", required = false) String tmpPluginFileName) throws Exception
 	{
 		ChartPlugin chartPlugin = null;
 		

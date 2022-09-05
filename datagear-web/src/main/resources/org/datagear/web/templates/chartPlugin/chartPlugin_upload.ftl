@@ -69,6 +69,7 @@
 	po.setChartPlugins = function(cps)
 	{
 		var pm = po.vuePageModel();
+		var fm = po.vueFormModel();
 		
 		if(!cps)
 			cps = po.vueRaw(pm.chartPlugins.plugins);
@@ -77,6 +78,9 @@
 		$.each(cps, function(idx, cp)
 		{
 			cp.key = cp.id + seq;
+			
+			if(cp.iconUrl)
+				cp.iconUrl = $.addParam(cp.iconUrl, "tmpPluginFileName", fm.pluginFileName);
 		});
 		
 		pm.chartPlugins.plugins = cps;
