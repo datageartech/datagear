@@ -1,5 +1,5 @@
 <p align="center">
-	<a href="http://www.datagear.tech"><img src="https://gitee.com/datagear/datagear/raw/master/datagear-web/src/main/resources/org/datagear/web/static/image/logo/full-210x50/logo-red-lightblack.png" alt="DataGear" /></a>
+	<a href="http://www.datagear.tech"><img src="datagear-web/src/main/resources/org/datagear/web/static/theme/blue/image/logo.png" alt="DataGear" /></a>
 </p>
 <h1 align="center">
 	数据可视化分析平台
@@ -12,7 +12,7 @@
 
 DataGear是一款开源免费的数据可视化分析平台，自由制作任何您想要的数据看板，支持接入SQL、CSV、Excel、HTTP接口、JSON等多种数据源。
 
-系统基于Spring Boot、Jquery、ECharts等技术开发。
+系统基于Spring Boot、Jquery、Vue3、PrimeVue、ECharts等技术开发。
 
 ## [DataGear 3.2.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
