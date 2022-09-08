@@ -152,7 +152,7 @@ dataexchange_js.ftl
 		else
 		{
 			//第一个表名正则
-			var result = query.match(/from\s([^\,\s]*)/i);
+			var result = query.match(/from\s+([^\,\s]*)/i);
 			
 			if(result != null && result.length >= 2)
 				tableName = (result[1] || "");
