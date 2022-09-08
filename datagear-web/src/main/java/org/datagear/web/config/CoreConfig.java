@@ -159,6 +159,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	public static final String NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY = "dashboardGlobalResRootDirectory";
+	
+	public static final String INVALID_SQL_KEYWORDS_PREFIX_REGEX="regex:";
 
 	private ApplicationPropertiesConfig applicationPropertiesConfig;
 
@@ -873,14 +875,31 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 		for (Map.Entry<String, String> entry : keywordsMap.entrySet())
 		{
-			if (StringUtil.isEmpty(entry.getValue()))
-				continue;
+			String keywordsStr = entry.getValue();
 
-			String[] keywords = StringUtil.split(entry.getValue(), ",", true);
-			if (keywords.length > 0)
+			if (StringUtil.isEmpty(keywordsStr))
+				continue;
+			
+			//正则
+			if(keywordsStr.startsWith(INVALID_SQL_KEYWORDS_PREFIX_REGEX))
 			{
-				Pattern pattern = InvalidPatternSqlValidator.toKeywordPattern(keywords);
-				patterns.put(entry.getKey(), pattern);
+				keywordsStr = keywordsStr.substring(INVALID_SQL_KEYWORDS_PREFIX_REGEX.length());
+
+				if (!StringUtil.isEmpty(keywordsStr))
+				{
+					Pattern pattern = InvalidPatternSqlValidator.compileToSqlValidatorPattern(keywordsStr);
+					patterns.put(entry.getKey(), pattern);
+				}
+			}
+			//字面
+			else
+			{
+				String[] keywords = StringUtil.split(keywordsStr, ",", true);
+				if (keywords.length > 0)
+				{
+					Pattern pattern = InvalidPatternSqlValidator.toKeywordPattern(keywords);
+					patterns.put(entry.getKey(), pattern);
+				}
 			}
 		}
 

@@ -150,13 +150,10 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 	 * <code>["UPDATE", "DELETE", "ALTER"]</code>
 	 * </p>
 	 * <p>
-	 * 将被转换为：
+	 * 转换后的正则含义：
 	 * </p>
 	 * <p>
-	 * <code>(UPDATE)|(DELETE)|(ALTER)</code>
-	 * </p>
-	 * <p>
-	 * 且忽略大小写。
+	 * 包含这些关键字且没以{@code _}、{@code 0-9}、{@code a-z}、{@code A-Z}开头，也没有以它们结尾
 	 * </p>
 	 * 
 	 * @param keywords
@@ -165,15 +162,26 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 	public static Pattern toKeywordPattern(String... keywords)
 	{
 		StringBuilder sb = new StringBuilder();
-
+		
 		for (int i = 0; i < keywords.length; i++)
 		{
 			if (i > 0)
 				sb.append('|');
 
-			sb.append("(" + Pattern.quote(keywords[i]) + ")");
+			sb.append("(" + "[^\\_\\w]" + Pattern.quote(keywords[i]) + "[^\\_\\w]" + ")");
 		}
 
-		return Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
+		return compileToSqlValidatorPattern(sb.toString());
+	}
+	
+	/**
+	 * 将正则字符串编译为用于{@linkplain SqlValidator}的正则对象（匹配时忽略大小写）。
+	 * 
+	 * @param pattern
+	 * @return
+	 */
+	public static Pattern compileToSqlValidatorPattern(String pattern)
+	{
+		return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 	}
 }

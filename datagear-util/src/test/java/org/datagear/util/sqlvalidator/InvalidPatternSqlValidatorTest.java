@@ -84,7 +84,7 @@ public class InvalidPatternSqlValidatorTest
 			SqlValidation validation = validator.validate(sql, profile);
 
 			assertFalse(validation.isValid());
-			assertEquals("dbo", validation.getInvalidValue());
+			assertEquals(" dbo.", validation.getInvalidValue());
 		}
 
 		// "default"里的关键字不通过
@@ -95,7 +95,7 @@ public class InvalidPatternSqlValidatorTest
 			SqlValidation validation = validator.validate(sql, profile);
 
 			assertFalse(validation.isValid());
-			assertEquals("DELETE", validation.getInvalidValue());
+			assertEquals(" DELETE,", validation.getInvalidValue());
 		}
 
 		// "my"里的关键字不通过
@@ -106,7 +106,7 @@ public class InvalidPatternSqlValidatorTest
 			SqlValidation validation = validator.validate(sql, profile);
 
 			assertFalse(validation.isValid());
-			assertEquals("exec", validation.getInvalidValue());
+			assertEquals(" exec,", validation.getInvalidValue());
 		}
 
 		// "postgres"里的关键字不通过
@@ -117,7 +117,7 @@ public class InvalidPatternSqlValidatorTest
 			SqlValidation validation = validator.validate(sql, profile);
 
 			assertFalse(validation.isValid());
-			assertEquals("DROP", validation.getInvalidValue());
+			assertEquals(" DROP ", validation.getInvalidValue());
 		}
 
 		// 忽略大小写
@@ -128,7 +128,149 @@ public class InvalidPatternSqlValidatorTest
 			SqlValidation validation = validator.validate(sql, profile);
 
 			assertFalse(validation.isValid());
-			assertEquals("drop", validation.getInvalidValue());
+			assertEquals(" drop ", validation.getInvalidValue());
+		}
+		
+		//子串
+		{
+			String sql = "SELECT create FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertFalse(validation.isValid());
+			assertEquals(" create ", validation.getInvalidValue());
+		}
+		{
+			String sql = "SELECT create, FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertFalse(validation.isValid());
+			assertEquals(" create,", validation.getInvalidValue());
+		}
+		{
+			String sql = "SELECT ,create FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertFalse(validation.isValid());
+			assertEquals(",create ", validation.getInvalidValue());
+		}
+		{
+			String sql = "SELECT ,create, FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertFalse(validation.isValid());
+			assertEquals(",create,", validation.getInvalidValue());
+		}
+		{
+			String sql = "SELECT create_date FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT _create FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT create_ FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT _create_ FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT zcreate FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT createz FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT zcreatez FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT Zcreate FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT createZ FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT ZcreateZ FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT 1create FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT create1 FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "SELECT 1create1 FROM TABLE";
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			SqlValidation validation = validator.validate(sql, profile);
+
+			assertTrue(validation.isValid());
 		}
 	}
 }
