@@ -65,8 +65,8 @@
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
-			<p-column :field="col.name" v-for="col in pm.dbTable.columns" :header="col.name" :sortable="col.sortable && col.supported"
-				:key="col.name" style="min-width:12em" :class="{'text-500': !col.supported}">
+			<p-column :field="col.name" v-for="col in pm.dbTable.columns" :header="col.name" :sortable="col.sortable && col.isSupported"
+				:key="col.name" style="min-width:12em" :class="{'text-500': !col.isSupported}">
 				<template #body="slotProps">
 					<div v-html="onRenderColumnValue(col, slotProps)"></div>
 				</template>
@@ -160,7 +160,7 @@
 			
 			onRenderColumnValue: function(column, slotProps)
 			{
-				if(!column.supported)
+				if(!column.isSupported)
 					return "";
 				
 				var value = (slotProps.data ? slotProps.data[column.name] : "");

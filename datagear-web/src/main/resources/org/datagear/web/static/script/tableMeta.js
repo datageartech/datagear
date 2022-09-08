@@ -617,8 +617,9 @@
 			var columns = (table.columns || []);
 			$.each(columns, function(i, column)
 			{
-				column.supported = $.tableMeta.supportsColumn(column);
-				column.renderAsTextarea = ($.tableMeta.isClobColumn(column) ||
+				column.isRequired = $.tableMeta.isRequiredColumn(column);
+				column.isSupported = $.tableMeta.supportsColumn(column);
+				column.isRenderAsTextarea = ($.tableMeta.isClobColumn(column) ||
 											(column.size && column.size > $.tableMeta.columnAsTextareaLength
 												&& $.tableMeta.isTextColumn(column)));
 				column.isImportKey = $.tableMeta.columnImportKey(table, column);

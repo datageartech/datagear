@@ -27,12 +27,12 @@
 			<div v-for="col in pm.dbTable.columns" class="field grid">
 				<label :for="'${pid}' + col.name" class="field-label overflow-hidden col-12 mb-2 md:col-3 md:mb-0"
 					:title="col.comment || col.name"
-					:class="{'text-500': !col.supported}">
+					:class="{'text-500': !col.isSupported}">
 					{{col.name}}
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	
-		        	<p-inputtext v-if="!col.supported"
+		        	<p-inputtext v-if="!col.isSupported"
 		        		:id="'${pid}' + col.name" type="text" class="input w-full"
 		        		:name="col.name" disabled>
 		        	</p-inputtext>
@@ -42,7 +42,7 @@
 							<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteColValue($event, col)" v-if="!pm.isReadonlyAction">
 							</i>
 							<p-inputtext :id="'${pid}' + col.name" v-model="fm[col.name]" type="text" class="input w-full h-full border-noround-right"
-								name="col.name">
+								:name="col.name" :required="col.isRequired">
 							</p-inputtext>
 						</div>
 						<p-button label="<@spring.message code='select' />"
@@ -56,7 +56,7 @@
 								<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteColValue($event, col)" v-if="!pm.isReadonlyAction">
 								</i>
 								<p-inputtext :id="'${pid}' + col.name" v-model="fm[col.name]" type="text" class="input w-full h-full border-noround-right"
-									name="col.name">
+									:name="col.name" :required="col.isRequired">
 								</p-inputtext>
 							</div>
 							<p-button label="<@spring.message code='download' />"
@@ -75,14 +75,14 @@
 			        	</div>
 					</div>
 		        	
-		        	<p-textarea v-else-if="col.renderAsTextarea"
+		        	<p-textarea v-else-if="col.isRenderAsTextarea"
 		        		:id="'${pid}' + col.name" v-model="fm[col.name]" rows="6" class="input w-full"
-		        		:name="col.name">
+		        		:name="col.name" :required="col.isRequired">
 		        	</p-textarea>
 		        	
 		        	<p-inputtext v-else
 		        		:id="'${pid}' + col.name" v-model="fm[col.name]" class="input w-full"
-		        		:name="col.name">
+		        		:name="col.name" :required="col.isRequired">
 		        	</p-inputtext>
 		        	
 		        	<div class="desc text-color-secondary text-sm mt-1" v-if="col.isDate || col.isTime || col.isTimestamp">
