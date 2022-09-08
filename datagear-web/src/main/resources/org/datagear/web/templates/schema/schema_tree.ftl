@@ -362,6 +362,15 @@
 			panel.prop("loading", true);
 			panel.empty();
 			
+			var loadingDiv = null;
+			
+			if(tab.type == po.schemaTabTypeTable)
+			{
+				loadingDiv = $("<div class='flex justify-content-center align-items-center h-6rem text-color-secondary' />").appendTo(panel);
+				$("<i class='pi pi-spin pi-spinner text-lg'></i>").appendTo(loadingDiv);
+				$("<span class='ml-2 text-lg'><@spring.message code='loading' /></span>").appendTo(loadingDiv);
+			}
+			
 			var url = (forceLoad && loadUrl ? loadUrl : tab.url);
 			
 			if(url)
@@ -377,6 +386,9 @@
 					complete: function()
 					{
 						panel.prop("loading", false);
+						
+						if(loadingDiv)
+							loadingDiv.remove();
 					}
 				});
 			}
