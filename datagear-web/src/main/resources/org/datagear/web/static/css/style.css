@@ -687,9 +687,9 @@ label[title]:not(.no-tip)::after,
 .page-form-dataSet .code-editor-wrapper{
 	height: 50vh;
 }
-.page-form-dataSet .params-wrapper,
-.page-form-dataSet .properties-wrapper{
-	height: 36vh;
+.page-form-dataSet .params-wrapper .params-table .p-datatable-wrapper,
+.page-form-dataSet .properties-wrapper .properties-table .p-datatable-wrapper{
+	min-height: 20vh;
 }
 
 .dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-content{
@@ -717,7 +717,7 @@ label[title]:not(.no-tip)::after,
 	height: 2rem;	
 }
 .page-form-chart .chart-datasets{
-	min-height: 30vh;
+	min-height: 20vh;
 }
 .page-form-chart .p-fieldset.fieldset-sm .p-fieldset-legend{
 	min-width: 9rem;

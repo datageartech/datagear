@@ -40,11 +40,11 @@ page_boolean_options.ftl
 				</div>
 			</div>
 			<div id="${pid}params" class="params-wrapper input w-full overflow-auto">
-				<p-datatable :value="fm.params" :scrollable="true" scroll-height="flex"
+				<p-datatable :value="fm.params" :scrollable="true"
 					v-model:selection="pm.selectedParams"
 					v-model:editing-rows="pm.editingParamRows"  @row-edit-save="onParamRowEditSave"
 					@row-edit-cancel="onParamRowEditCancel"
-					selection-mode="multiple" dataKey="name" striped-rows class="table-sm">
+					selection-mode="multiple" dataKey="name" striped-rows class="params-table table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
 					<p-column :row-editor="true" :frozen="true"
 						style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center"
@@ -183,11 +183,11 @@ page_boolean_options.ftl
 				</div>
 			</div>
 			<div id="${pid}properties" class="properties-wrapper input w-full overflow-auto">
-				<p-datatable :value="fm.properties" :scrollable="true" scroll-height="flex"
+				<p-datatable :value="fm.properties" :scrollable="true"
 					v-model:selection="pm.selectedProperties"
 					v-model:editing-rows="pm.editingPropertyRows" @row-edit-save="onPropertyRowEditSave"
 					@row-edit-cancel="onPropertyRowEditCancel"
-					selection-mode="multiple" dataKey="name" striped-rows class="table-sm">
+					selection-mode="multiple" dataKey="name" striped-rows class="properties-table table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
 					<p-column :row-editor="true" :frozen="true"
 						style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center"
