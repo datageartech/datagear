@@ -62,6 +62,10 @@ QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[11283
 
 ![screenshot/datasource-manage.png](screenshot/datasource-manage.png)
 
+SQL数据集
+
+![screenshot/add-sql-dataset.png](screenshot/add-sql-dataset.png)
+
 看板编辑
 
 ![screenshot/dashboard-edit.png](screenshot/dashboard-edit.png)
