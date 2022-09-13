@@ -14,7 +14,7 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 
 系统基于Spring Boot、Jquery、Vue3、PrimeVue、ECharts等技术开发。
 
-## [DataGear 3.2.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
+## [DataGear 4.0.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
 ## [DataGear 大屏看板模板，持续更新中...](https://gitee.com/datagear/DataGearDashboardTemplate)
 
@@ -58,15 +58,15 @@ QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[11283
 
 ## 界面
 
-图表类型
+数据源管理
 
-![screenshot/chart.png](screenshot/chart.png)
+![screenshot/datasource-manage.png](screenshot/datasource-manage.png)
+
+看板编辑
+
+![screenshot/dashboard-edit.png](screenshot/dashboard-edit.png)
 
 看板展示
-
-![screenshot/template-002-dg.png](screenshot/template-002-dg.png)
-
-![screenshot/template-005-dg.png](screenshot/template-005-dg.png)
 
 ![screenshot/template-006-dg.png](screenshot/template-006-dg.png)
 
