@@ -16,8 +16,6 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 
 ## [DataGear 4.0.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
-## [DataGear 大屏看板模板，持续更新中...](https://gitee.com/datagear/DataGearDashboardTemplate)
-
 ## 系统特点
 
 - 友好接入的数据源
