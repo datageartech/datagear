@@ -287,7 +287,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY,
 				libPrefix + "/jquery-3.6.0/jquery-3.6.0.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS,
-				libPrefix + "/echarts-5.3.2/echarts.min.js"));
+				libPrefix + "/echarts-5.3.3/echarts.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_WORDCLOUD,
 				libPrefix + "/echarts-wordcloud-2.0.0/echarts-wordcloud.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_LIQUIDFILL,
