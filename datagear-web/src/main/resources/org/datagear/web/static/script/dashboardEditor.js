@@ -660,6 +660,67 @@
 	};
 	
 	/**
+	 * 校验插入弹性布局元素。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.checkInsertFlexLayout = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 是否可以插入填满父元素的弹性布局元素。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.canInsertFillParentFlexLayout = function(insertType, refEle)
+	{
+		return this.canInsertFillParentGridLayout(insertType, refEle);
+	};
+	
+	/**
+	 * 插入弹性布局元素。
+	 * 
+	 * @param gridAttr 网格设置，格式为：{ items: 数值或数值字符串, fillParent: 布尔值或布尔值字符串 }
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertFlexLayout = function(flexAttr, insertType, refEle)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		var items = (!chartFactory.isNumber(flexAttr.items) ? parseInt(flexAttr.items) : flexAttr.items);
+		
+		//不能使用"<div />"，生成的源码格式不对
+		var div = $("<div></div>");
+		
+		var styleStr = "display:flex;justify-content:space-between;align-items:stretch;";
+		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		
+		if(flexAttr.fillParent === "true" || flexAttr.fillParent === true)
+			styleStr += "position:absolute;left:0;top:0;right:0;bottom:0;";
+		else if(insertParentEle.is("body"))
+			styleStr += "width:100%;height:300px;";
+		else
+			styleStr += "width:100%;height:100%;";
+		
+		div.attr("style", styleStr);
+		
+		for(var i=0; i<items; i++)
+		{
+			var itemDiv = $("<div></div>");
+			itemDiv.attr("style", "flex-grow:1;");
+			this._insertElement(div, itemDiv, "append");
+		}
+		
+		this.insertElement(div, insertType, refEle);
+	};
+	
+	/**
 	 * 校验insertDiv操作。
 	 * 
 	 * @param insertType 可选，参考insertElement函数的insertType参数

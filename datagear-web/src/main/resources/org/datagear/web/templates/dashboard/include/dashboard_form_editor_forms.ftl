@@ -83,11 +83,46 @@ page_boolean_options.ftl
 				</div>
 				<div class="field grid" v-if="pm.veGridLayoutPanelShowFillParent">
 					<label for="${pid}veGridLayoutFillParent" class="field-label col-12 mb-2"
-						title="<@spring.message code='dashboard.veditor.gridLayout.fillParent.desc' />">
-						<@spring.message code='dashboard.veditor.gridLayout.fillParent' />
+						title="<@spring.message code='dashboard.veditor.gridLayout.fillPage.desc' />">
+						<@spring.message code='fillPage' />
 					</label>
 					<div class="field-input col-12">
 						<p-selectbutton id="${pid}veGridLayoutFillParent" v-model="pm.vepms.gridLayout.fillParent" :options="pm.booleanOptions"
+							option-label="name" option-value="value" class="input w-full">
+						</p-selectbutton>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
+<p-dialog :header="pm.vepts.flexLayout" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.flexLayoutShown" @show="onVeFlexLayoutPanelShow">
+	<div class="page page-form">
+		<form id="${pid}veFlexLayoutForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veFlexLayoutItems" class="field-label col-12 mb-2">
+						<@spring.message code='itemCount' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veFlexLayoutItems" v-model="pm.vepms.flexLayout.items" type="text"
+							class="input w-full" name="items" maxlength="10" autofocus>
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid" v-if="pm.veFlexLayoutPanelShowFillParent">
+					<label for="${pid}veFlexLayoutFillParent" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.flexLayout.fillPage.desc' />">
+						<@spring.message code='fillPage' />
+					</label>
+					<div class="field-input col-12">
+						<p-selectbutton id="${pid}veFlexLayoutFillParent" v-model="pm.vepms.flexLayout.fillParent" :options="pm.booleanOptions"
 							option-label="name" option-value="value" class="input w-full">
 						</p-selectbutton>
 					</div>
@@ -1799,6 +1834,17 @@ page_boolean_options.ftl
 		pm.vepss.gridLayoutShown = true;
 	};
 
+	po.showVeFlexLayoutPanel = function(showFillParent)
+	{
+		showFillParent = (showFillParent == null ? false : showFillParent);
+		
+		var pm = po.vuePageModel();
+		
+		pm.veFlexLayoutPanelShowFillParent = showFillParent;
+		pm.vepms.flexLayout.fillParent = showFillParent;
+		pm.vepss.flexLayoutShown = true;
+	};
+
 	po.showVeTextElementPanel = function(submitHandler, model)
 	{
 		var pm = po.vuePageModel();
@@ -1878,6 +1924,7 @@ page_boolean_options.ftl
 			vepss:
 			{
 				gridLayoutShown: false,
+				flexLayoutShown: false,
 				textElementShown: false,
 				imageShown: false,
 				hyperlinkShown: false,
@@ -1891,6 +1938,7 @@ page_boolean_options.ftl
 			vepts:
 			{
 				gridLayout: "<@spring.message code='gridLayout' />",
+				flexLayout: "<@spring.message code='flexLayout' />",
 				textElement: "<@spring.message code='textElement' />",
 				image: "<@spring.message code='image' />",
 				hyperlink: "<@spring.message code='hyperlink' />",
@@ -1904,6 +1952,7 @@ page_boolean_options.ftl
 			vepms:
 			{
 				gridLayout: { fillParent: false },
+				flexLayout: { fillParent: false },
 				textElement: { content: "" },
 				image: {},
 				hyperlink: {},
@@ -1925,6 +1974,7 @@ page_boolean_options.ftl
 				style: function(model){}
 			},
 			veGridLayoutPanelShowFillParent: false,
+			veFlexLayoutPanelShowFillParent: false,
 			dashboardSizeScaleOptions:
 			[
 				{ name: "<@spring.message code='auto' />", value: "auto" },
@@ -1954,6 +2004,22 @@ page_boolean_options.ftl
 					{
 						pm.vepms.gridLayout = { fillParent: false };
 						pm.vepss.gridLayoutShown = false;
+					}
+				});
+			},
+			
+			onVeFlexLayoutPanelShow: function()
+			{
+				var form = po.elementOfId("${pid}veFlexLayoutForm", document.body);
+				
+				po.initVePanelHelperSrc(form, pm.vepms.flexLayout);
+				
+				po.setupSimpleForm(form, pm.vepms.flexLayout, function()
+				{
+					if(po.insertVeFlexLayout(pm.vepms.flexLayout) !== false)
+					{
+						pm.vepms.flexLayout = { fillParent: false };
+						pm.vepss.flexLayoutShown = false;
 					}
 				});
 			},

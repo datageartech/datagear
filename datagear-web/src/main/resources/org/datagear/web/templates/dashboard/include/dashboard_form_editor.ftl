@@ -814,6 +814,25 @@
 			return false;
 		}
 	};
+
+	po.insertVeFlexLayout = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertFlexLayout(insertType))
+			return false;
+		
+		try
+		{
+			dashboardEditor.insertFlexLayout(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
 	
 	po.insertVeTextElement = function(model)
 	{
@@ -1284,6 +1303,24 @@
 						po.veCurrentInsertType = this.insertType;
 						var showFillParent = dashboardEditor.canInsertFillParentGridLayout(this.insertType);
 						po.showVeGridLayoutPanel(showFillParent);
+					}
+				}
+			},
+			{
+				label: "<@spring.message code='flexLayout' />",
+				insertType: insertType,
+				class: "ve-panel-show-control flexLayoutShown",
+				parentLabelPath: parentLabelPath,
+				command: function()
+				{
+					po.veQuickExecuteMenuItem(this);
+					
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						po.veCurrentInsertType = this.insertType;
+						var showFillParent = dashboardEditor.canInsertFillParentFlexLayout(this.insertType);
+						po.showVeFlexLayoutPanel(showFillParent);
 					}
 				}
 			},
