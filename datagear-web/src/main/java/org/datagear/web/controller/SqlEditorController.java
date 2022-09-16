@@ -118,10 +118,11 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 			return Collections.EMPTY_LIST;
 
 		Column[] columns = tableObj.getColumns();
-
+		
 		List<Column> keywordColumns = findByKeyword(columns, keyword);
-		Collections.sort(keywordColumns, COLUMN_SORT_BY_NAME_COMPARATOR);
-
+		//使用列定义顺序而非名称排序顺序更合适
+		//Collections.sort(keywordColumns, COLUMN_SORT_BY_NAME_COMPARATOR);
+		
 		return keywordColumns;
 	}
 

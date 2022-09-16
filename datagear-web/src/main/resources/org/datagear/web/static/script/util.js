@@ -2694,8 +2694,8 @@ $.inflatePageCodeEditor = function(po)
 		if(options.hintOptions)
 			options.hintOptions.completeSingle = false;
 		
-		if(options.hintOptions)
-			options.hintOptions.closeOnUnfocus = false;
+		//if(options.hintOptions)
+		//	options.hintOptions.closeOnUnfocus = false;
 		
 		var codeEditor = CodeMirror(dom[0], options);
 		
