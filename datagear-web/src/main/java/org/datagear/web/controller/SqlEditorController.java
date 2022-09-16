@@ -84,9 +84,9 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/{schemaId}/findColumnNames", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/findColumns", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<String> findColumnNames(HttpServletRequest request, HttpServletResponse response,
+	public List<Column> findColumns(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("table") final String table,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
@@ -122,12 +122,7 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 		List<Column> keywordColumns = findByKeyword(columns, keyword);
 		Collections.sort(keywordColumns, COLUMN_SORT_BY_NAME_COMPARATOR);
 
-		List<String> columnNames = new ArrayList<>();
-
-		for (Column columnInfo : keywordColumns)
-			columnNames.add(columnInfo.getName());
-
-		return columnNames;
+		return keywordColumns;
 	}
 
 	/**

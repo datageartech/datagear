@@ -14,38 +14,6 @@
 
 (function($, undefined)
 {
-	$.toChartPluginHtml = function(chartPlugin, contextPath, options)
-	{
-		options = $.extend(
-		{
-			//是否竖向排版
-			vertical: false,
-			//横向对齐方式："start"、"center"、"end"
-			justifyContent: "center"
-		},
-		options);
-		
-		var html = "<div class='plugin-info flex align-items-center justify-content-"+options.justifyContent
-					+(options.vertical ? " flex-column block " : " flex-row inline ")
-					+(!chartPlugin || !chartPlugin.iconUrl ? " no-icon " : "")
-					+"'>";
-		
-		if(chartPlugin)
-		{
-			if(chartPlugin.iconUrl)
-				html += "<div class='plugin-icon' style='background-image:url("+contextPath+$.escapeHtml(chartPlugin.iconUrl)+")'></div>";
-			
-			var name = (chartPlugin.nameLabel ? (chartPlugin.nameLabel.value || chartPlugin.id) : chartPlugin.id);
-			name = $.escapeHtml(name);
-			
-			html += "<div class='plugin-name'>"+name+"</div>";
-		}
-		
-		html += "</div>"
-		
-		return html;
-	};
-	
 	/**
 	 * 打开给定URL页面。
 	 * 
@@ -1707,6 +1675,56 @@
 			$.ajax(ajaxOptions);
 		}
 	};
+	
+	$.toChartPluginHtml = function(chartPlugin, contextPath, options)
+	{
+		options = $.extend(
+		{
+			//是否竖向排版
+			vertical: false,
+			//横向对齐方式："start"、"center"、"end"
+			justifyContent: "center"
+		},
+		options);
+		
+		var html = "<div class='plugin-info flex align-items-center justify-content-"+options.justifyContent
+					+(options.vertical ? " flex-column block " : " flex-row inline ")
+					+(!chartPlugin || !chartPlugin.iconUrl ? " no-icon " : "")
+					+"'>";
+		
+		if(chartPlugin)
+		{
+			if(chartPlugin.iconUrl)
+				html += "<div class='plugin-icon' style='background-image:url("+contextPath+$.escapeHtml(chartPlugin.iconUrl)+")'></div>";
+			
+			var name = (chartPlugin.nameLabel ? (chartPlugin.nameLabel.value || chartPlugin.id) : chartPlugin.id);
+			name = $.escapeHtml(name);
+			
+			html += "<div class='plugin-name'>"+name+"</div>";
+		}
+		
+		html += "</div>"
+		
+		return html;
+	};
+	
+	$.toSqlEditorColumnCompletions = function(tableName, columns)
+	{
+		var columnCompletions = [];
+		
+		$.each(columns, function(i, column)
+		{
+			var displayComment = tableName;
+			if(column.typeName)
+				displayComment = column.typeName + " " + displayComment;
+			if(column.comment)
+				displayComment = $.truncateIf(column.comment, "", 10) + " " + displayComment;
+			
+			columnCompletions[i] = { name: column.name, displayComment: displayComment };
+		});
+		
+		return columnCompletions;
+	};
 })
 (jQuery);
 
@@ -2676,8 +2694,8 @@ $.inflatePageCodeEditor = function(po)
 		if(options.hintOptions)
 			options.hintOptions.completeSingle = false;
 		
-		//if(options.hintOptions)
-		//	options.hintOptions.closeOnUnfocus = false;
+		if(options.hintOptions)
+			options.hintOptions.closeOnUnfocus = false;
 		
 		var codeEditor = CodeMirror(dom[0], options);
 		
@@ -2951,7 +2969,7 @@ $.inflatePageSqlEditor = function(po)
 	{
 		var options =
 		{
-			url: po.concatContextPath("/sqlEditor/"+schemaId+"/findColumnNames"),
+			url: po.concatContextPath("/sqlEditor/"+schemaId+"/findColumns"),
 			data: { table: tableName }
 		};
 		
@@ -3066,15 +3084,9 @@ $.inflatePageSqlEditor = function(po)
 					var ajaxOptions = $.extend(
 					{
 						type : "POST",
-						success: function(names)
+						success: function(columns)
 						{
-							names = (names || []);
-							
-							var columnCompletions = [];
-							
-							for(var i=0; i<names.length; i++)
-								columnCompletions[i] = { name: names[i], displayComment: hintInfo.tableName };
-							
+							var columnCompletions = $.toSqlEditorColumnCompletions(hintInfo.tableName, columns);
 							po.sqlHintCache.tableColumnCompletions[hintInfo.tableName] = columnCompletions;
 							
 							var completions =

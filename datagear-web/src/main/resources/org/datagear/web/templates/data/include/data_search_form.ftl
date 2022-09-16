@@ -86,10 +86,7 @@ page_sql_editor.ftl
 	
 	po.rewriteSqlEditorHint = function(dbTable)
 	{
-		var columns = (dbTable.columns || []);
-		var columnCompletions = [];
-		for(var i=0; i<columns.length; i++)
-			columnCompletions[i] = { name: columns[i].name, displayComment: dbTable.name };
+		var columnCompletions = $.toSqlEditorColumnCompletions(dbTable.name, dbTable.columns);
 		
 		po.sqlHintCache.tableColumnCompletions[dbTable.name] = columnCompletions;
 		
