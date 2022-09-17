@@ -8,7 +8,7 @@
 package org.datagear.web.controller;
 
 import java.io.File;
-import java.util.Comparator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -126,6 +126,10 @@ public class DataSetResDirectoryController extends AbstractController
 		DataSetResDirectory dataSetResDirectory = getByIdForView(this.dataSetResDirectoryService, user, id);
 
 		setFormModel(model, dataSetResDirectory, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		boolean isShowDirectory = setIsShowDirectory(request, model);
+		
+		if(!isShowDirectory)
+			dataSetResDirectory.clearDirectory();
 		
 		return "/dataSetResDirectory/dataSetResDirectory_form";
 	}
@@ -151,7 +155,9 @@ public class DataSetResDirectoryController extends AbstractController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		setIsShowDirectory(request, model);
 		setReadonlyActionOnRoleDataAnalyst(model, WebUtils.getUser());
+		
 		return "/dataSetResDirectory/dataSetResDirectory_table";
 	}
 
@@ -159,6 +165,8 @@ public class DataSetResDirectoryController extends AbstractController
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		setSelectAction(request, model);
+		setIsShowDirectory(request, model);
+		
 		return "/dataSetResDirectory/dataSetResDirectory_table";
 	}
 
@@ -173,6 +181,13 @@ public class DataSetResDirectoryController extends AbstractController
 
 		PagingData<DataSetResDirectory> pagingData = this.dataSetResDirectoryService.pagingQuery(user, pagingQuery);
 
+		if(!isShowDirectory(request))
+		{
+			List<DataSetResDirectory> items = pagingData.getItems();
+			for(DataSetResDirectory item : items)
+				item.clearDirectory();
+		}
+		
 		return pagingData;
 	}
 
@@ -203,13 +218,18 @@ public class DataSetResDirectoryController extends AbstractController
 		if (!directory.exists())
 			throw new DataSetResDirectoryNotFoundException(dataSetResDirectory.getDirectory());
 	}
-
-	protected static final Comparator<File> FILE_NAME_ASC_COMPARATOR = new Comparator<File>()
+	
+	protected boolean setIsShowDirectory(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		@Override
-		public int compare(File o1, File o2)
-		{
-			return o1.getName().compareTo(o2.getName());
-		}
-	};
+		boolean isShowDirectory = isShowDirectory(request);
+		model.addAttribute("isShowDirectory", isShowDirectory);
+		
+		return isShowDirectory;
+	}
+	
+	protected boolean isShowDirectory(HttpServletRequest request)
+	{
+		User user = WebUtils.getUser();
+		return user.isAdmin();
+	}
 }

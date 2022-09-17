@@ -878,7 +878,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		JsonFileDataSetEntity dataSet = preview.getDataSet();
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-		setDirectoryFileDataSetDirectory(dataSet, originalFileName);
+		setDirectoryFileDataSetDirectory(user, dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -895,7 +895,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		ExcelDataSetEntity dataSet = preview.getDataSet();
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-		setDirectoryFileDataSetDirectory(dataSet, originalFileName);
+		setDirectoryFileDataSetDirectory(user, dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -927,7 +927,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		CsvFileDataSetEntity dataSet = preview.getDataSet();
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-		setDirectoryFileDataSetDirectory(dataSet, originalFileName);
+		setDirectoryFileDataSetDirectory(user, dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -968,7 +968,11 @@ public class DataSetController extends AbstractSchemaConnController
 		}
 		
 		if(entity instanceof DirectoryFileDataSetEntity)
-			((DirectoryFileDataSetEntity) entity).setDirectory(null);
+		{
+			DirectoryFileDataSetEntity dfDataSetEntity = ((DirectoryFileDataSetEntity) entity);
+			dfDataSetEntity.setDirectory(null);
+			DataSetResDirectory.clearDirectory(dfDataSetEntity.getDataSetResDirectory());
+		}
 		
 		if(entity instanceof HttpDataSetEntity)
 			((HttpDataSetEntity) entity).setHttpClient(null);
@@ -1027,7 +1031,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return true;
 	}
 
-	protected void setDirectoryFileDataSetDirectory(DirectoryFileDataSetEntity dataSet, String originalFileName)
+	protected void setDirectoryFileDataSetDirectory(User user, DirectoryFileDataSetEntity dataSet, String originalFileName)
 	{
 		String fileName = dataSet.getFileName();
 
@@ -1035,6 +1039,13 @@ public class DataSetController extends AbstractSchemaConnController
 			dataSet.setDirectory(getDataSetEntityService().getDataSetDirectory(dataSet.getId()));
 		else
 			dataSet.setDirectory(getTempDataSetDirectory());
+		
+		DataSetResDirectory dsr = dataSet.getDataSetResDirectory();
+		if(dsr != null && !isEmpty(dsr.getId()))
+		{
+			dsr = this.dataSetResDirectoryService.getById(user, dsr.getId());
+			dataSet.setDataSetResDirectory(dsr);
+		}
 	}
 
 	protected String buildFormView(String dataSetType)

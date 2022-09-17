@@ -50,8 +50,8 @@
         	<div class="p-input-icon-right flex-grow-1">
 				<i class="pi pi-times cursor-pointer opacity-60" @click="onDeleteDataSetResDirectory" v-if="!pm.isReadonlyAction">
 				</i>
-				<p-inputtext id="${pid}dataSetResDirectory" v-model="fm.dataSetResDirectory.directory" type="text" class="input w-full h-full border-noround-right"
-					name="dataSetResDirectory.directory" required readonly>
+				<p-inputtext id="${pid}dataSetResDirectory" v-model="fm.dataSetResDirectory.name" type="text" class="input w-full h-full border-noround-right"
+					name="dataSetResDirectory.name" required readonly>
 				</p-inputtext>
 			</div>
         	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectDataSetResDirectory"

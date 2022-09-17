@@ -28,6 +28,9 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 	/** 授权资源类型 */
 	public static final String AUTHORIZATION_RESOURCE_TYPE = "DataSetDirectory";
 
+	/**名称*/
+	private String name;
+	
 	/** 目录 */
 	private String directory;
 
@@ -48,9 +51,10 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 		super();
 	}
 
-	public DataSetResDirectory(String id, String directory, User createuUser)
+	public DataSetResDirectory(String id, String name, String directory, User createuUser)
 	{
 		super(id);
+		this.name = name;
 		this.directory = directory;
 		this.createUser = createuUser;
 	}
@@ -63,6 +67,16 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 	public void setDirectory(String directory)
 	{
 		this.directory = directory;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	public String getDesc()
@@ -112,7 +126,7 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [directory=" + directory + ", desc=" + desc + ", createUser=" + createUser
+		return getClass().getSimpleName() + " [name="+name+", directory=" + directory + ", desc=" + desc + ", createUser=" + createUser
 				+ ", createTime=" + createTime + ", dataPermission=" + dataPermission + "]";
 	}
 
@@ -123,5 +137,18 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 		BeanUtils.copyProperties(this, entity);
 
 		return entity;
+	}
+	
+	public void clearDirectory()
+	{
+		this.directory = null;
+	}
+	
+	public static void clearDirectory(DataSetResDirectory dsr)
+	{
+		if(dsr == null)
+			return;
+		
+		dsr.clearDirectory();
 	}
 }
