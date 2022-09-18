@@ -174,7 +174,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		setFormModel(model, schema, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		return "/schema/schema_form";
 	}
-
+	
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
@@ -351,6 +351,28 @@ public class SchemaController extends AbstractSchemaConnTableController
 		return executor.execute();
 	}
 
+	@RequestMapping("/{schemaId}/tableMeta/{tableName}")
+	public String viewTableMeta(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model springModel,
+			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName) throws Throwable
+	{
+		ReturnSchemaConnTableExecutor<Table> executor = new ReturnSchemaConnTableExecutor<Table>(request, response,
+				springModel, schemaId, tableName, true)
+		{
+			@Override
+			protected Table execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Exception
+			{
+				return table;
+			}
+		};
+		
+		Table table = executor.execute();
+		
+		setFormModel(springModel, table, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		
+		return "/schema/schema_dbtable_meta";
+	}
+	
 	/**
 	 * 处理展示。
 	 * 

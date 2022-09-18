@@ -590,6 +590,22 @@
 				}
 			},
 			{
+				label: "<@spring.message code='viewTableStructure' />",
+				visible: function()
+				{
+					var tab = po.tabviewTab(po.vuePageModel().schemaTabs, po.schemaTabMenuOnTabId);
+					return (tab && tab.type == po.schemaTabTypeTable);
+				},
+				command: function()
+				{
+					var tab = po.tabviewTab(po.vuePageModel().schemaTabs, po.schemaTabMenuOnTabId);
+					if(tab && tab.type == po.schemaTabTypeTable)
+					{
+						po.open("/schema/"+encodeURIComponent(tab.schemaId)+"/tableMeta/"+encodeURIComponent(tab.name));
+					}
+				}
+			},
+			{
 				label: "<@spring.message code='refreshTableStructure' />",
 				visible: function()
 				{
