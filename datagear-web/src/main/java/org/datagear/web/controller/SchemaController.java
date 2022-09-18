@@ -102,6 +102,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		User user = WebUtils.getUser();
 		Schema schema = getByIdForView(getSchemaService(), user, id);
 		schema.setId(null);
+		schema.clearPassword();
 		schema.setCreateUser(null);
 		schema.setCreateTime(null);
 		schema.setDataPermission(DataPermissionAware.PERMISSION_NOT_LOADED);
