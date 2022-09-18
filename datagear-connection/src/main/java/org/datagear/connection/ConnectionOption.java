@@ -58,6 +58,19 @@ public class ConnectionOption implements Serializable
 		setPassword(password);
 	}
 
+	public ConnectionOption(String url, String user, String password, Properties properties)
+	{
+		super();
+		this.url = url;
+		
+		if(properties != null)
+			this.properties.putAll(properties);
+		
+		//最后设置用户名、密码，避免被覆盖
+		setUser(user);
+		setPassword(password);
+	}
+
 	public String getUrl()
 	{
 		return url;
@@ -212,6 +225,20 @@ public class ConnectionOption implements Serializable
 	public static ConnectionOption valueOf(String url, String user, String password)
 	{
 		return new ConnectionOption(url, user, password);
+	}
+
+	/**
+	 * 构建{@linkplain ConnectionOption}实例。
+	 * 
+	 * @param url
+	 * @param user
+	 * @param password
+	 * @param properties 连接属性，允许为{@code null}
+	 * @return
+	 */
+	public static ConnectionOption valueOf(String url, String user, String password, Properties properties)
+	{
+		return new ConnectionOption(url, user, password, properties);
 	}
 
 	/**

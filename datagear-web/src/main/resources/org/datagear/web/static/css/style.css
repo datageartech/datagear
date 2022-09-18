@@ -565,6 +565,9 @@ label[title]:not(.no-tip)::after,
 	height: 100% !important;
 	overflow: auto;
 }
+.page-form-schema .properties-wrapper .properties-table .p-datatable-wrapper{
+	min-height: 5rem;
+}
 
 /*隐藏嵌套页的主页头，比如登录页*/
 .p-dialog .page-main-header,

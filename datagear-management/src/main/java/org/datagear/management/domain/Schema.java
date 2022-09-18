@@ -7,10 +7,16 @@
 
 package org.datagear.management.domain;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
+import org.datagear.analysis.support.JsonSupport;
 import org.datagear.connection.DriverEntity;
+import org.datagear.util.StringUtil;
 import org.springframework.beans.BeanUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 数据库模式实体。
@@ -65,7 +71,10 @@ public class Schema extends AbstractStringIdEntity
 	private Date createTime;
 
 	/** 数据库驱动程序路径名 */
-	private DriverEntity driverEntity;
+	private DriverEntity driverEntity = null;
+	
+	/**属性列表*/
+	private List<SchemaProperty> properties = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
@@ -155,6 +164,21 @@ public class Schema extends AbstractStringIdEntity
 	{
 		this.createTime = createTime;
 	}
+	
+	public boolean hasProperty()
+	{
+		return (this.properties != null && !this.properties.isEmpty());
+	}
+
+	public List<SchemaProperty> getProperties()
+	{
+		return properties;
+	}
+
+	public void setProperties(List<SchemaProperty> properties)
+	{
+		this.properties = properties;
+	}
 
 	public boolean hasDriverEntity()
 	{
@@ -186,6 +210,34 @@ public class Schema extends AbstractStringIdEntity
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	/**
+	 * 返回{@linkplain #getProperties()}的JSON。
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public String getPropertiesJson()
+	{
+		if (this.properties == null)
+			return "[]";
+
+		return JsonSupport.generate(this.properties, "[]");
+	}
+
+	/**
+	 * 设置{@linkplain #setProperties(List)}的JSON。
+	 * 
+	 * @param json
+	 */
+	public void setPropertiesJson(String json)
+	{
+		if (StringUtil.isEmpty(json))
+			return;
+
+		SchemaProperty[] schemaProperties = JsonSupport.parse(json, SchemaProperty[].class, null);
+		setProperties(Arrays.asList(schemaProperties));
 	}
 
 	@Override

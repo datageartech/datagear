@@ -8,12 +8,16 @@
 package org.datagear.management.util;
 
 import java.sql.Connection;
+import java.util.List;
+import java.util.Properties;
 
 import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverEntity;
 import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.SchemaProperty;
+import org.datagear.util.StringUtil;
 
 /**
  * {@linkplain Schema}数据库连接支持类。
@@ -39,9 +43,26 @@ public class SchemaConnectionSupport
 			throws ConnectionSourceException
 	{
 		Connection cn = null;
-
+		
+		Properties properties = null;
+		
+		if(schema.hasProperty())
+		{
+			properties = new Properties();
+			
+			List<SchemaProperty> schemaProperties = schema.getProperties();
+			for(SchemaProperty sp : schemaProperties)
+			{
+				String name = sp.getName();
+				String value = sp.getValue();
+				
+				if(!StringUtil.isEmpty(name))
+					properties.put(name, (value == null ? "" : value));
+			}
+		}
+		
 		ConnectionOption connectionOption = ConnectionOption.valueOf(schema.getUrl(), schema.getUser(),
-				schema.getPassword());
+				schema.getPassword(), properties);
 
 		if (schema.hasDriverEntity())
 		{

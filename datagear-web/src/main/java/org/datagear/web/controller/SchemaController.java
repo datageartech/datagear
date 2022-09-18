@@ -30,6 +30,7 @@ import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -157,7 +158,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		// 如果URL或者用户变更了，则需要清除缓存
 		if (updated && old != null
-				&& (!schema.getUrl().equals(old.getUrl()) || !schema.getUser().equals(old.getUser())))
+				&& (!StringUtil.isEquals(schema.getUrl(), old.getUrl()) || !StringUtil.isEquals(schema.getUser(), old.getUser())))
 			getTableCache().invalidate(schema.getId());
 
 		return optSuccessDataResponseEntity(request, schema);
