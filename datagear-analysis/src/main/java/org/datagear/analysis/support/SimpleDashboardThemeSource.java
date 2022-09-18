@@ -51,8 +51,8 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 							"#9A60B4", "#EA7CCC", "#B6A2DE" },
 					new String[] { "#58A52D", "#FFD700", "#FF4500" }));
 
-	public static final DashboardTheme THEME_DARK = new DashboardTheme("dark", "#EEE", "#000",
-			new ChartTheme("darkChart", "#EEE", "transparent", "#000",
+	public static final DashboardTheme THEME_DARK = new DashboardTheme("dark", "#EEE", "#17212F",
+			new ChartTheme("darkChart", "#EEE", "transparent", "#17212F",
 					new String[] { "#73C0DE", "#91CC75", "#FAC858", "#EE6666", "#B6A2DE", "#3BA272", "#FC8452",
 							"#9A60B4", "#EA7CCC", "#5470C6" },
 					new String[] { "#58A52D", "#FFD700", "#FF4500" }));

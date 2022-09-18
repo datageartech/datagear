@@ -177,23 +177,26 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	@Override
 	public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
 	{
-		return simpleTemplateContent(htmlCharset, "", "", chartWidgetId, "");
+		return simpleTemplateContent(chartWidgetId, htmlCharset, "", "", "", "", "");
 	}
 
 	/**
 	 * 获取简单模板内容。
 	 * 
+	 * @param chartWidgetIds
 	 * @param htmlCharset
-	 * @param htmlTitle
-	 * @param customChartEleStyleName
-	 *            自定义图表元素样式类名，允许为{@code null}
-	 * @param chartWidgetId
-	 * @param chartEleAttrs
+	 * @param htmlTitle HTML标题名，允许为{@code null}
+	 * @param bodyStyleName {@code body}元素的样式类名，允许为{@code null}
+	 * @param bodyAttr {@code body}元素属性，允许为{@code null}
+	 * @param chartEleStyleName
+	 *            图表元素样式类名，允许为{@code null}
+	 * @param chartEleAttr
 	 *            图表元素属性，允许为{@code null}
 	 * @return
 	 */
-	public String simpleTemplateContent(String htmlCharset, String htmlTitle, String customChartEleStyleName,
-			String[] chartWidgetId, String chartEleAttrs)
+	public String simpleTemplateContent(String[] chartWidgetIds, String htmlCharset, String htmlTitle,
+			String bodyStyleName, String bodyAttr,
+			String chartEleStyleName, String chartEleAttr)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -201,15 +204,17 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		sb.append("<html>\n");
 		sb.append("<head>\n");
 		sb.append("<meta charset=\"" + htmlCharset + "\">\n");
-		sb.append("<title>" + htmlTitle + "</title>\n");
+		sb.append("<title>" + (StringUtil.isEmpty(htmlTitle) ? "" : htmlTitle) + "</title>\n");
 		sb.append("</head>\n");
-		sb.append("<body " + ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\">\n");
+		sb.append("<body class=\"" + (StringUtil.isEmpty(bodyStyleName) ? "" : bodyStyleName) + "\" "
+						+ (StringUtil.isEmpty(bodyAttr) ? "" : bodyAttr+" ")
+						+ ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\">\n");
 		sb.append("\n");
 
-		for (String cwi : chartWidgetId)
-			sb.append("  <div class=\"" + (StringUtil.isEmpty(customChartEleStyleName) ? "" : customChartEleStyleName)
+		for (String cwi : chartWidgetIds)
+			sb.append("  <div class=\"" + (StringUtil.isEmpty(chartEleStyleName) ? "" : chartEleStyleName)
 					+ "\" " + getAttrNameChartWidget() + "=\"" + cwi + "\" "
-					+ (StringUtil.isEmpty(chartEleAttrs) ? "" : chartEleAttrs) + "></div>\n");
+					+ (StringUtil.isEmpty(chartEleAttr) ? "" : chartEleAttr) + "></div>\n");
 
 		sb.append("</body>\n");
 		sb.append("</html>");

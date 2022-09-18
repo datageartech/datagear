@@ -50,6 +50,7 @@ import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
+import org.datagear.web.util.Themes;
 import org.datagear.web.util.WebUtils;
 
 /**
@@ -399,17 +400,43 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected DashboardTheme resolveDashboardTheme(HttpServletRequest request)
 	{
 		String theme = request.getParameter(DASHBOARD_SHOW_PARAM_THEME_NAME);
-
-		// 只有参数明确了自动设置看板展示主题才执行，因为看板展示主题应由制作者决定，不应随当前系统主题而改变
-		if (DASHBOARD_SHOW_PARAM_VALUE_AUTO_THEME.equalsIgnoreCase(theme))
+		DashboardTheme dashboardTheme = null;
+		
+		if (isDashboardThemeAuto(request, theme))
+		{
 			theme = WebUtils.getTheme(request);
-
-		DashboardTheme dashboardTheme = (theme == null ? null : this.dashboardThemeSource.getDashboardTheme(theme));
+			
+			if(Themes.BLUE.equalsIgnoreCase(theme))
+				dashboardTheme = SimpleDashboardThemeSource.THEME_LIGHT;
+			else if(Themes.BLUE_DARK.equalsIgnoreCase(theme))
+				dashboardTheme = SimpleDashboardThemeSource.THEME_DARK;
+		}
+		
+		if(dashboardTheme == null)
+			dashboardTheme = (theme == null ? null : this.dashboardThemeSource.getDashboardTheme(theme));
 
 		if (dashboardTheme == null)
 			dashboardTheme = this.dashboardThemeSource.getDashboardTheme();
 
 		return dashboardTheme;
+	}
+	
+	/**
+	 * 是否看板主题自动匹配系统主题。
+	 * <p>
+	 * 默认是：
+	 * </p>
+	 * <p>
+	 * 只有参数明确了自动设置看板展示主题才执行，因为看板展示主题应由制作者决定，不应随当前系统主题而改变
+	 * </p>
+	 * 
+	 * @param request
+	 * @param theme 参数中的主题名，可能为{@code null}
+	 * @return
+	 */
+	protected boolean isDashboardThemeAuto(HttpServletRequest request, String theme)
+	{
+		return DASHBOARD_SHOW_PARAM_VALUE_AUTO_THEME.equalsIgnoreCase(theme);
 	}
 	
 	/**

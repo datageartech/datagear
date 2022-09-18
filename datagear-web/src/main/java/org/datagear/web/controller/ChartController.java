@@ -479,8 +479,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		try
 		{
 			templateIn = IOUtil
-					.getReader(this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent(IOUtil.CHARSET_UTF_8,
-							htmlTitle, "dg-chart-for-show-chart", new String[] { id },
+					.getReader(this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent(
+							new String[] { id }, IOUtil.CHARSET_UTF_8, htmlTitle,
+							this.htmlTplDashboardWidgetHtmlRenderer.getDashboardStyleName(), "",
+							"dg-chart-for-show-chart " + this.htmlTplDashboardWidgetHtmlRenderer.getChartStyleName(),
 							"dg-chart-disable-setting=\"false\""));
 
 			String responseEncoding = dashboardWidget.getTemplateEncoding();
@@ -504,6 +506,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			IOUtil.close(templateIn);
 			IOUtil.close(out);
 		}
+	}
+
+	@Override
+	protected boolean isDashboardThemeAuto(HttpServletRequest request, String theme)
+	{
+		//由于图表展示无法自定义页面样式，因此，参数未指定主题时，也应自动匹配系统主题
+		return (theme == null || super.isDashboardThemeAuto(request, theme));
 	}
 
 	protected HtmlTplDashboardWidget buildHtmlTplDashboardWidget(String chartId)
