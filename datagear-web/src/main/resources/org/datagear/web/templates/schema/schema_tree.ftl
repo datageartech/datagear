@@ -467,6 +467,17 @@
 				}
 			},
 			{
+				label: "<@spring.message code='copy' />",
+				visible: function()
+				{
+					return !po.isReadonlyAction;
+				},
+				command: function()
+				{
+					po.handleOpenOfAction("/schema/copy");
+				}
+			},
+			{
 				label: "<@spring.message code='view' />",
 				command: function()
 				{

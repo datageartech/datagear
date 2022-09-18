@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
+import org.datagear.management.domain.DataPermissionAware;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaGuardService;
@@ -87,28 +88,25 @@ public class SchemaController extends AbstractSchemaConnTableController
 	}
 
 	@RequestMapping("/add")
-	public String add(org.springframework.ui.Model model,
-			@RequestParam(value = "copyId", required = false) String copyId)
+	public String add(org.springframework.ui.Model model)
 	{
 		Schema schema = new Schema();
-
-		Schema sourceSchema = null;
-
-		if (!isEmpty(copyId))
-		{
-			sourceSchema = getSchemaService().getById(copyId);
-
-			if (sourceSchema != null)
-			{
-				schema.setTitle(sourceSchema.getTitle());
-				schema.setUrl(sourceSchema.getUrl());
-				schema.setUser(sourceSchema.getUser());
-				schema.setDriverEntity(sourceSchema.getDriverEntity());
-			}
-		}
-
 		setFormModel(model, schema, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
+		return "/schema/schema_form";
+	}
+
+	@RequestMapping("/copy")
+	public String copy(org.springframework.ui.Model model, @RequestParam("id") String id)
+	{
+		User user = WebUtils.getUser();
+		Schema schema = getByIdForView(getSchemaService(), user, id);
+		schema.setId(null);
+		schema.setCreateUser(null);
+		schema.setCreateTime(null);
+		schema.setDataPermission(DataPermissionAware.PERMISSION_NOT_LOADED);
+		
+		setFormModel(model, schema, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 		return "/schema/schema_form";
 	}
 
