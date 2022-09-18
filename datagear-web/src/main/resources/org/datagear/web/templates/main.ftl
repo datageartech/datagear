@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  *
 -->
+<#assign Global=statics['org.datagear.util.Global']>
 <#include "include/page_import.ftl">
 <#include "include/html_doctype.ftl">
 <html>
@@ -34,7 +35,21 @@
 						</div>
 					</div>
 				</div>
-				<div id="${pid}mainPanels" class="page-main-panels col overflow-auto"></div>
+				<div id="${pid}mainPanels" class="page-main-panels col overflow-auto">
+					<div id="${pid}mainPanelHome" class="page-main-panel p-card w-full h-full p-3">
+						<div class="flex flex-column align-items-center justify-content-center h-full opacity-10">
+							<div class="py-1">
+								<@spring.message code='app.name' />
+							</div>
+							<div class="py-1">
+								<@spring.message code='app.shortDesc' />
+							</div>
+							<div class="py-1">
+								${Global.WEB_SITE}
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
