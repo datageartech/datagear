@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * 此类仅支持从Excel的单个sheet读取数据，具体参考{@linkplain #setSheetName(String)}、{@linkplain #setSheetIndex(int)}。
  * </p>
  * <p>
- * 通过{@linkplain #setDataRowExp(String)}、{@linkplain #setDataColumnExp(String)}来设置读取行、列范围。
+ * 通过{@linkplain #setDataRowExp(String)}、{@linkplain #setDataColumnExp(String)}可设置读取行、列范围。
  * </p>
  * <p>
  * 通过{@linkplain #setNameRow(int)}可设置名称行。
@@ -705,20 +705,27 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		/**
 		 * 获取数据所在工作表。
 		 * 
-		 * @param resource
 		 * @param wb
 		 * @return
+		 * @throws DataSetException
 		 */
-		public Sheet getDataSheet(Workbook wb)
+		public Sheet getDataSheet(Workbook wb) throws DataSetException
 		{
+			Sheet sheet = null;
+			
 			//sheet名应优先使用
 			if(!StringUtil.isEmpty(this.sheetName))
-				return wb.getSheet(this.sheetName);
+				sheet = wb.getSheet(this.sheetName);
 			else
 			{
 				int sheetIndex = (this.sheetIndex < 1 ? 0 : this.sheetIndex - 1);
-				return wb.getSheetAt(sheetIndex);
+				sheet = wb.getSheetAt(sheetIndex);
 			}
+			
+			if(sheet == null)
+				throw new DataSetSourceParseException("No sheet found");
+			
+			return sheet;
 		}
 		
 		/**

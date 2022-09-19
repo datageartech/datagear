@@ -55,14 +55,14 @@
 	<insert id="insertExcelDataSetEntity">
 		INSERT INTO DATAGEAR_DATA_SET_EXCEL
 			(
-				DS_ID, DS_FILE_NAME, DS_DISPLAY_NAME, DS_SHEET_INDEX, DS_NAME_ROW,
-			 	DS_DATA_ROW_EXP, DS_DATA_COLUMN_EXP, DS_FORCE_XLS,
+				DS_ID, DS_FILE_NAME, DS_DISPLAY_NAME, DS_SHEET_NAME, DS_SHEET_INDEX,
+				DS_NAME_ROW, DS_DATA_ROW_EXP, DS_DATA_COLUMN_EXP, DS_FORCE_XLS,
 				DS_FILE_SOURCE_TYPE, DS_DSRD_ID, DS_DSRD_FILE_NAME
 			)
 		VALUES
 			(
-				#{entity.id}, #{entity.fileName}, #{entity.displayName}, #{entity.sheetIndex}, #{entity.nameRow},
-				#{entity.dataRowExp}, #{entity.dataColumnExp}, #{entity.forceXls},
+				#{entity.id}, #{entity.fileName}, #{entity.displayName}, #{entity.sheetName, jdbcType=VARCHAR}, #{entity.sheetIndex},
+				#{entity.nameRow}, #{entity.dataRowExp}, #{entity.dataColumnExp}, #{entity.forceXls},
 				#{entity.fileSourceType}, #{entity.dataSetResDirectory.id, jdbcType=VARCHAR}, #{entity.dataSetResFileName}
 			)
 	</insert>
@@ -182,6 +182,7 @@
 		UPDATE DATAGEAR_DATA_SET_EXCEL SET
 			DS_FILE_NAME = #{entity.fileName},
 			DS_DISPLAY_NAME = #{entity.displayName},
+			DS_SHEET_NAME = #{entity.sheetName, jdbcType=VARCHAR},
 			DS_SHEET_INDEX = #{entity.sheetIndex},
 			DS_NAME_ROW = #{entity.nameRow},
 			DS_DATA_ROW_EXP = #{entity.dataRowExp},
@@ -314,6 +315,7 @@
 			T1.*,
 			T2.DS_FILE_NAME AS ${_iq_}fileName${_iq_},
 			T2.DS_DISPLAY_NAME AS ${_iq_}displayName${_iq_},
+			T2.DS_SHEET_NAME AS ${_iq_}sheetName${_iq_},
 			T2.DS_SHEET_INDEX AS ${_iq_}sheetIndex${_iq_},
 			T2.DS_NAME_ROW AS ${_iq_}nameRow${_iq_},
 			T2.DS_DATA_ROW_EXP AS ${_iq_}dataRowExp${_iq_},

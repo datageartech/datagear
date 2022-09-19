@@ -25,13 +25,24 @@
 			<#include "include/dataSet_form_name.ftl">
 			<#include "include/dataSet_form_file_source.ftl">
 			<div class="field grid">
+				<label for="${pid}sheetName" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='excelDataSet.sheetName.desc' />">
+					<@spring.message code='sheetName' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-inputtext id="${pid}sheetName" v-model="fm.sheetName" type="text" class="input w-full"
+						name="sheetName" maxlength="200">
+					</p-inputtext>
+				</div>
+			</div>
+			<div class="field grid" v-if="pm.enableSheetIndex">
 				<label for="${pid}sheetIndex" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='excelDataSet.sheetIndex.desc' />">
 					<@spring.message code='sheetIndex' />
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<p-inputtext id="${pid}sheetIndex" v-model="fm.sheetIndex" type="text" class="input w-full"
-						name="sheetIndex" required maxlength="10">
+						name="sheetIndex" maxlength="10">
 					</p-inputtext>
 				</div>
 			</div>
@@ -114,6 +125,7 @@
 		fingerprint.fileName = dataSet.fileName;
 		fingerprint.dataSetResDirectoryId = dataSet.dataSetResDirectory.id;
 		fingerprint.dataSetResFileName = dataSet.dataSetResFileName;
+		fingerprint.sheetName = dataSet.sheetName;
 		fingerprint.sheetIndex = dataSet.sheetIndex;
 		fingerprint.nameRow = dataSet.nameRow;
 		fingerprint.dataRowExp = dataSet.dataRowExp;
@@ -144,6 +156,12 @@
 		{
 			po.handlePreviewInvalidForm();
 		}
+	});
+	
+	po.vuePageModel(
+	{
+		//用于兼容旧版本的工作表序号功能，参考AbstractExcelDataSet.getSheetIndex()
+		enableSheetIndex: (formModel.sheetIndex != null && formModel.sheetIndex > 0)
 	});
 	
 	po.vueMount();

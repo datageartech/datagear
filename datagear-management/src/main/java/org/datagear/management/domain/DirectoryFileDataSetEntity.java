@@ -119,7 +119,7 @@ public interface DirectoryFileDataSetEntity extends DataSetEntity
 	/**
 	 * 将文件名作为<code>Freemarker</code>模板解析。
 	 * <p>
-	 * 实现规则应与{@linkplain AbstractDataSet#resolveAsFmkTemplate(String, DataSetQuery)}一致。
+	 * 实现规则应与{@linkplain AbstractDataSet#resolveTextAsGeneralTemplate(String, DataSetQuery)}一致。
 	 * </p>
 	 * 
 	 * @param fileName
