@@ -27,6 +27,8 @@
 		<div class="col-12 flex align-items-center mb-2">
 			<i class="pi pi-database text-color-secondary text-sm"></i>
 			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
+			<i class="pi pi-angle-right text-color-secondary text-sm mx-1"></i>
+			<div class="text-color-secondary text-sm"><@spring.message code='module.sqlpad' /></div>
 		</div>
 		<div class="col-12 flex">
 			<div class="flex-grow-1 h-opts">

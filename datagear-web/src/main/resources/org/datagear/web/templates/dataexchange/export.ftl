@@ -23,6 +23,8 @@
 		<div class="col-12 flex align-items-center mb-1">
 			<i class="pi pi-database text-color-secondary text-sm"></i>
 			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
+			<i class="pi pi-angle-right text-color-secondary text-sm mx-1"></i>
+			<div class="text-color-secondary text-sm"><@spring.message code='module.exportData' /></div>
 		</div>
 		<div class="col-12">
 			<label class="text-lg font-bold">

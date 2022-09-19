@@ -807,15 +807,15 @@ label[title]:not(.no-tip)::after,
 /*SQL工作台页*/
 .page-manager.page-sqlpad .page-content{
 	/*屏幕高度 - 页header高度*/
-	height: calc(100vh - 5.5rem);
+	height: calc(100vh - 5.8rem);
 }
 .page-manager-schema .schema-tabs-wrapper .page-manager.page-sqlpad .page-content{
 	/*屏幕高度 - 选项卡标题高度 - 页header高度*/
-	height: calc(100vh - 4.5rem - 5.5rem);
+	height: calc(100vh - 4.5rem - 5.8rem);
 }
 .page-main-panel .page-manager-schema .schema-tabs-wrapper .page-manager.page-sqlpad .page-content{
 	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 页header高度*/
-	height: calc(100vh - 5rem - 4.5rem - 5.5rem);
+	height: calc(100vh - 5rem - 4.5rem - 5.8rem);
 }
 .page-sqlpad .sqlpad-tabs-wrapper .p-tabview-nav > li:first-child .p-tabview-title{
 	/*加宽消息卡片宽度，便于选中*/
