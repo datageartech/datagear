@@ -334,39 +334,36 @@ label[title]:not(.no-tip)::after,
 }
 .p-datatable-table .col-id{
 	min-width: 15em;
-	max-width: 20em;
 }
 .p-datatable-table .col-row-number{
 	min-width: 5em;
-	max-width: 10em;
+	max-width: 7em;
+}
+.p-datatable-table .col-edit-btn{
+	min-width: 6rem;
+	max-width: 6rem;
 }
 .p-datatable-table .col-name{
-	min-width:12em;
-	max-width: 25%;
+	width: 12em;
+	min-width: 12em;
 }
 .p-datatable-table .col-desc{
-	min-width: 10em;
-	max-width: 25%;
-}
-.p-datatable-table .col-owner-project{
-	min-width:12em;
-	max-width: 25%;
+	width: 15em;
+	min-width: 15em;
 }
 .p-datatable-table .col-user{
+	width: 10em;
 	min-width: 10em;
-	max-width: 10em;
 }
 .p-datatable-table .col-datetime{
 	min-width: 12em;
-	max-width: 12em;
 }
 .p-datatable-table .col-version{
 	min-width: 8em;
-	max-width: 10em;
 }
 .p-datatable-table .col-boolean{
 	min-width: 6em;
-	max-width: 10em;
+	max-width: 6em;
 }
 .p-datatable-table .col-last{
 	max-width: 50%;

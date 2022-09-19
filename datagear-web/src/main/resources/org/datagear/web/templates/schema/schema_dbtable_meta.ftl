@@ -59,7 +59,9 @@
 				<div class="field-input col-12">
 					<div class="p-component p-inputtext">
 						<div id="${pid}columns" class="columns-wrapper input w-full overflow-auto">
-							<p-datatable :value="fm.columns" :scrollable="true" dataKey="name" striped-rows class="columns-table table-sm">
+							<p-datatable :value="fm.columns" :scrollable="true"
+								:resizable-columns="true" column-resize-mode="expand"
+								dataKey="name" striped-rows class="columns-table table-sm">
 								<p-column field="name" header="<@spring.message code='name' />">
 								</p-column>
 								<p-column field="typeName" header="<@spring.message code='type' />">

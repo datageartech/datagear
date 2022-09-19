@@ -63,10 +63,11 @@
 			:rows-per-page-options="pm.rowsPerPageOptions" :loading="pm.loading"
 			:lazy="true" :total-records="pm.totalRecords" @page="onPaginator($event)"
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
+			:resizable-columns="true" column-resize-mode="expand"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column :field="col.name" v-for="col in pm.dbTable.columns" :header="col.name" :sortable="col.sortable && col.isSupported"
-				:key="col.name" style="min-width:12em" :class="{'text-500': !col.isSupported}">
+				:key="col.name" :class="{'text-500': !col.isSupported}">
 				<template #body="slotProps">
 					<div v-html="onRenderColumnValue(col, slotProps)"></div>
 				</template>

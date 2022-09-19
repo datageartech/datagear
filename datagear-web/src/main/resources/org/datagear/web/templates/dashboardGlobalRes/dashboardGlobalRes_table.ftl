@@ -39,6 +39,7 @@
 		<p-datatable :value="pm.items" :scrollable="true" scroll-height="flex"
 			:loading="pm.loading" :lazy="true"
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
+			:resizable-columns="true" column-resize-mode="expand"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="path" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="path" header="<@spring.message code='id' />" :hidden="true"></p-column>

@@ -44,10 +44,11 @@ page_boolean_options.ftl
 					v-model:selection="pm.selectedParams"
 					v-model:editing-rows="pm.editingParamRows"  @row-edit-save="onParamRowEditSave"
 					@row-edit-cancel="onParamRowEditCancel"
+					:resizable-columns="true" column-resize-mode="expand"
 					selection-mode="multiple" dataKey="name" striped-rows class="params-table table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
 					<p-column :row-editor="true" :frozen="true"
-						style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center"
+						class="col-edit-btn" bodyStyle="text-align:center"
 						v-if="!pm.isReadonlyAction">
 					</p-column>
 					<p-column field="name" header="<@spring.message code='name' />" class="col-name">
@@ -187,10 +188,11 @@ page_boolean_options.ftl
 					v-model:selection="pm.selectedProperties"
 					v-model:editing-rows="pm.editingPropertyRows" @row-edit-save="onPropertyRowEditSave"
 					@row-edit-cancel="onPropertyRowEditCancel"
+					:resizable-columns="true" column-resize-mode="expand"
 					selection-mode="multiple" dataKey="name" striped-rows class="properties-table table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
 					<p-column :row-editor="true" :frozen="true"
-						style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center"
+						class="col-edit-btn" bodyStyle="text-align:center"
 						v-if="!pm.isReadonlyAction">
 					</p-column>
 					<p-column field="name" header="<@spring.message code='name' />" class="col-name">

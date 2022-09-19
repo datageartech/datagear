@@ -108,10 +108,11 @@
 							</template>
 							<div :id="tab.id" class="h-full">
 								<p-datatable :value="tab.result.rows" :scrollable="true" scroll-height="flex"
+									:resizable-columns="true" column-resize-mode="expand"
 									:sortable="false" :loading="tab.result.loading" striped-rows class="table-sm"
 									v-if="tab.type == 'resultSet'">
 									<p-column :frozen="true" header="<@spring.message code='serialNumber' />"
-										style="max-width:6rem;min-width:6rem" bodyStyle="text-align:center">
+										class="col-row-number" bodyStyle="text-align:center">
 										<template #body="slotProps">
 											{{slotProps.index + 1}}
 										</template>

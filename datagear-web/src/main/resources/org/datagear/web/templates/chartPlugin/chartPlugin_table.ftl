@@ -36,6 +36,7 @@
 		<p-datatable :value="pm.items" :scrollable="true" scroll-height="flex"
 			:loading="pm.loading" :lazy="true"
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
+			:resizable-columns="true" column-resize-mode="expand"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="number" header="<@spring.message code='serialNumber' />" :frozen="true" class="col-row-number">
@@ -51,7 +52,7 @@
 				</template>
 			</p-column>
 			<p-column field="version" header="<@spring.message code='version' />" class="col-version"></p-column>
-			<p-column field="descLabel.value" header="<@spring.message code='desc' />" class="col-desc" style="max-width:50em;"></p-column>
+			<p-column field="descLabel.value" header="<@spring.message code='desc' />" class="col-desc" style="min-width:25em;"></p-column>
 		</p-datatable>
 	</div>
 </div>
