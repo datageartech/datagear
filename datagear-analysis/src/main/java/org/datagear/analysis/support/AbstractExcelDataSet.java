@@ -23,6 +23,7 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.datagear.analysis.DataSetException;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * 抽象Excel数据集。
  * <p>
- * 此类仅支持从Excel的单个sheet读取数据，具体参考{@linkplain #setSheetIndex(int)}。
+ * 此类仅支持从Excel的单个sheet读取数据，具体参考{@linkplain #setSheetName(String)}、{@linkplain #setSheetIndex(int)}。
  * </p>
  * <p>
  * 通过{@linkplain #setDataRowExp(String)}、{@linkplain #setDataColumnExp(String)}来设置读取行、列范围。
@@ -63,8 +64,11 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	protected static final RangeExpResolver RANGE_EXP_RESOLVER = RangeExpResolver
 			.valueOf(RangeExpResolver.RANGE_SPLITTER_CHAR, RangeExpResolver.RANGE_GROUP_SPLITTER_CHAR);
 
-	/** 此数据集所处的sheet索引号（以1计数） */
-	private int sheetIndex = 1;
+	/** 数据集数据所处的sheet名称 */
+	private String sheetName = "";
+
+	/** 数据集数据所处的sheet索引号（以1计数） */
+	private int sheetIndex = -1;
 
 	/** 作为名称行的行号 */
 	private int nameRow = -1;
@@ -93,17 +97,37 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		super(id, name, properties);
 	}
 
+	/**
+	 * 获取此数据集所处的sheet名。
+	 * <p>
+	 * 如果返回{@code null}、{@code ""}，则表名应使用{@linkplain #getSheetIndex()}。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public String getSheetName()
+	{
+		return sheetName;
+	}
+
+	public void setSheetName(String sheetName)
+	{
+		this.sheetName = sheetName;
+	}
+
+	/**
+	 * 获取此数据集所处的sheet号，与{@linkplain #getSheetName()}功能相同，用于兼容旧版本（4.0及以前版本）。
+	 * <p>
+	 * 只有在{@linkplain #getSheetName()}为{@code null}、{@code ""}时，才应使用此值。
+	 * </p>
+	 * 
+	 * @return 返回值{@code <1}表示未设置，应使用默认规则（比如第一个sheet）
+	 */
 	public int getSheetIndex()
 	{
 		return sheetIndex;
 	}
-
-	/**
-	 * 设置此数据集所处的sheet号。
-	 * 
-	 * @param sheetIndex
-	 *            sheet号（以{@code 1}计数）
-	 */
+	
 	public void setSheetIndex(int sheetIndex)
 	{
 		this.sheetIndex = sheetIndex;
@@ -242,8 +266,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			in = resource.getInputStream();
 			poifs = new POIFSFileSystem(in);
 			wb = new HSSFWorkbook(poifs.getRoot(), true);
-
-			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
+			Sheet sheet = resource.getDataSheet(wb);
 
 			return resolveExcelResourceDataForSheet(resource, sheet);
 		}
@@ -281,8 +304,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			in = resource.getInputStream();
 			pkg = OPCPackage.open(in);
 			wb = new XSSFWorkbook(pkg);
-
-			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
+			Sheet sheet = resource.getDataSheet(wb);
 
 			return resolveExcelResourceDataForSheet(resource, sheet);
 		}
@@ -301,7 +323,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			IOUtil.close(in);
 		}
 	}
-
+	
 	/**
 	 * 解析sheet数据。
 	 * 
@@ -615,6 +637,8 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	{
 		private static final long serialVersionUID = 1L;
 
+		private String sheetName;
+		
 		private int sheetIndex;
 
 		private int nameRow;
@@ -633,10 +657,11 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			super();
 		}
 
-		public ExcelDataSetResource(String resolvedTemplate, int sheetIndex, int nameRow, String dataRowExp,
+		public ExcelDataSetResource(String resolvedTemplate, String sheetName, int sheetIndex, int nameRow, String dataRowExp,
 				String dataColumnExp, boolean xls)
 		{
 			super(resolvedTemplate);
+			this.sheetName = sheetName;
 			this.sheetIndex = sheetIndex;
 			this.nameRow = nameRow;
 			this.dataRowExp = dataRowExp;
@@ -645,6 +670,11 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 
 			this._dataRowRanges = getRangeExpResolver().resolveIndex(this.dataRowExp);
 			this._dataColumnRanges = resolveDataColumnRanges(dataColumnExp);
+		}
+
+		public String getSheetName()
+		{
+			return sheetName;
 		}
 
 		public int getSheetIndex()
@@ -671,7 +701,26 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		{
 			return xls;
 		}
-
+		
+		/**
+		 * 获取数据所在工作表。
+		 * 
+		 * @param resource
+		 * @param wb
+		 * @return
+		 */
+		public Sheet getDataSheet(Workbook wb)
+		{
+			//sheet名应优先使用
+			if(!StringUtil.isEmpty(this.sheetName))
+				return wb.getSheet(this.sheetName);
+			else
+			{
+				int sheetIndex = (this.sheetIndex < 1 ? 0 : this.sheetIndex - 1);
+				return wb.getSheetAt(sheetIndex);
+			}
+		}
+		
 		/**
 		 * 获取Excel输入流。
 		 * 
@@ -780,6 +829,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			result = prime * result + ((dataRowExp == null) ? 0 : dataRowExp.hashCode());
 			result = prime * result + nameRow;
 			result = prime * result + sheetIndex;
+			result = prime * result + ((sheetName == null) ? 0 : sheetName.hashCode());
 			result = prime * result + (xls ? 1231 : 1237);
 			return result;
 		}
@@ -811,6 +861,13 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			if (nameRow != other.nameRow)
 				return false;
 			if (sheetIndex != other.sheetIndex)
+				return false;
+			if (sheetName == null)
+			{
+				if (other.sheetName != null)
+					return false;
+			}
+			else if (!sheetName.equals(other.sheetName))
 				return false;
 			if (xls != other.xls)
 				return false;

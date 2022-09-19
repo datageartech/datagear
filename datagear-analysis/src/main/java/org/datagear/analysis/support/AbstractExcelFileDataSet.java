@@ -17,9 +17,13 @@ import org.datagear.analysis.support.AbstractExcelDataSet.ExcelDataSetResource;
 import org.datagear.analysis.support.AbstractExcelFileDataSet.ExcelFileDataSetResource;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 
 /**
  * 抽象Excel文件数据集。
+ * <p>
+ * 此类的{@linkplain #getSheetName()}支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -48,9 +52,26 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 			boolean resolveProperties) throws Throwable
 	{
 		File file = getExcelFile(query);
-
-		return new ExcelFileDataSetResource("", getSheetIndex(), getNameRow(), getDataRowExp(),
+		
+		String sheetName = resolveSheetNameAsFmkTemplate(query);
+		
+		return new ExcelFileDataSetResource("", sheetName, getSheetIndex(), getNameRow(), getDataRowExp(),
 				getDataColumnExp(), (isForceXls() ? true : isXls(file)), file.getAbsolutePath(), file.lastModified());
+	}
+
+	protected String resolveSheetNameAsFmkTemplate(DataSetQuery query)
+	{
+		String sheetName = getSheetName();
+		
+		if(!StringUtil.isEmpty(sheetName))
+			sheetName = resolveSheetNameAsFmkTemplate(sheetName, query);
+		
+		return sheetName;
+	}
+
+	protected String resolveSheetNameAsFmkTemplate(String sheetName, DataSetQuery query)
+	{
+		return resolveTextAsGeneralTemplate(sheetName, query);
 	}
 
 	/**
@@ -92,10 +113,10 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 			super();
 		}
 
-		public ExcelFileDataSetResource(String resolvedTemplate, int sheetIndex, int nameRow, String dataRowExp,
+		public ExcelFileDataSetResource(String resolvedTemplate, String sheetName, int sheetIndex, int nameRow, String dataRowExp,
 				String dataColumnExp, boolean xls, String filePath, long lastModified)
 		{
-			super(resolvedTemplate, sheetIndex, nameRow, dataRowExp, dataColumnExp, xls);
+			super(resolvedTemplate, sheetName, sheetIndex, nameRow, dataRowExp, dataColumnExp, xls);
 			this.filePath = filePath;
 			this.lastModified = lastModified;
 		}
