@@ -68,8 +68,9 @@
 		<div class="schema-tabs-wrapper col-9 pl-3">
 			<p-tabview v-model:active-index="pm.schemaTabs.activeIndex" :scrollable="true" @tab-change="onSchemaTabChange"
 				@tab-click="onSchemaTabClick" class="contextmenu-tabview light-tabview" :class="{'opacity-0': pm.schemaTabs.items.length == 0}">
-				<p-tabpanel v-for="tab in pm.schemaTabs.items" :key="tab.id" :header="tab.title">
+				<p-tabpanel v-for="tab in pm.schemaTabs.items" :key="tab.id">
 					<template #header>
+						<span class="p-tabview-title" :title="tab.desc">{{tab.title}}</span>
 						<p-button type="button" icon="pi pi-angle-down"
 							class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
 							@click="onSchemaTabMenuToggle($event, tab)" aria-haspopup="true" aria-controls="${pid}schemaTabMenu">
@@ -321,9 +322,10 @@
 		return re;
 	};
 	
-	po.showSchemaTab = function(schemaId, name, title, type)
+	po.showSchemaTab = function(schema, name, title, type)
 	{
 		var pm = po.vuePageModel();
+		var schemaId = schema.id;
 		
 		var idx = po.getSchemaTabIndex(schemaId, name);
 		if(idx > -1)
@@ -333,10 +335,11 @@
 			var tab =
 			{
 				id: po.toSchemaTabId(schemaId, name),
-				title: title,
+				title: $.truncateIf(title, "...", 22),
 				schemaId: schemaId,
 				name: name,
 				type: type,
+				desc: schema.title + " > " + title
 			};
 			
 			//需转换为绝对路径，因为要支持在新窗口打开
@@ -517,7 +520,7 @@
 					po.executeOnFirstAwareSchemaNode(function(schemaNode)
 					{
 						var tabName = (po.schemaTabNameSqlpad ? po.schemaTabNameSqlpad : (po.schemaTabNameSqlpad = $.uid("schemaTabNameSqlpad")));
-						po.showSchemaTab(schemaNode.schemaId, tabName, "<@spring.message code='module.sqlpad' />", po.schemaTabTypeSqlpad);
+						po.showSchemaTab(schemaNode.schema, tabName, "<@spring.message code='module.sqlpad' />", po.schemaTabTypeSqlpad);
 					});
 				}
 			},
@@ -528,7 +531,7 @@
 					po.executeOnFirstAwareSchemaNode(function(schemaNode)
 					{
 						var tabName = (po.schemaTabNameImportData ? po.schemaTabNameImportData : (po.schemaTabNameImportData = $.uid("schemaTabNameImportData")));
-						po.showSchemaTab(schemaNode.schemaId, tabName, "<@spring.message code='module.importData' />", po.schemaTabTypeImportData);
+						po.showSchemaTab(schemaNode.schema, tabName, "<@spring.message code='module.importData' />", po.schemaTabTypeImportData);
 					});
 				}
 			},
@@ -539,7 +542,7 @@
 					po.executeOnFirstAwareSchemaNode(function(schemaNode)
 					{
 						var tabName = (po.schemaTabNameExportData ? po.schemaTabNameExportData : (po.schemaTabNameExportData = $.uid("schemaTabNameExportData")));
-						po.showSchemaTab(schemaNode.schemaId, tabName, "<@spring.message code='module.exportData' />", po.schemaTabTypeExportData);
+						po.showSchemaTab(schemaNode.schema, tabName, "<@spring.message code='module.exportData' />", po.schemaTabTypeExportData);
 					});
 				}
 			}
@@ -662,7 +665,8 @@
 			}
 			else if(node.dataType == "table")
 			{
-				po.showSchemaTab(node.schemaId, node.tableName, node.tableName, po.schemaTabTypeTable);
+				var mySchemaNode = po.findSchemaNode(node.schemaId);
+				po.showSchemaTab(mySchemaNode.schema, node.tableName, node.tableName, po.schemaTabTypeTable);
 			}
 		},
 		
