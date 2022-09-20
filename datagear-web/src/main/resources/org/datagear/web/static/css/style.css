@@ -682,6 +682,10 @@ label[title]:not(.no-tip)::after,
 	width: 30vw;
 	height: 30vh;
 }
+.panel-content-size-xs-mwh{
+	max-width: 35vw;
+	max-height: 40vh;
+}
 
 /*数据集编辑页*/
 .page-form-dataSet .code-editor-wrapper{

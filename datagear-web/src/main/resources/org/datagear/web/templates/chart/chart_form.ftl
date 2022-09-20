@@ -59,8 +59,13 @@
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<div class="p-inputgroup">
-						<div id="${pid}htmlChartPlugin" class="input p-component p-inputtext border-round-left"
-							v-html="formatChartPlugin(fm.htmlChartPlugin)">
+						<div id="${pid}htmlChartPlugin" class="input p-component p-inputtext border-round-left flex align-items-center">
+							<div class="flex-grow-0" v-html="formatChartPlugin(fm.htmlChartPlugin)"></div>
+							<div class="pl-1" v-if="fm.htmlChartPlugin && fm.htmlChartPlugin.descLabel && fm.htmlChartPlugin.descLabel.value">
+								<p-button type="button" icon="pi pi-info-circle"
+									@click="onShowChartPluginDesc" class="p-button-secondary p-button-text">
+								</p-button>
+							</div>
 						</div>
 						<p-button type="button" label="<@spring.message code='select' />"
 							@click="onSelectChartPlugin" v-if="!pm.isReadonlyAction">
@@ -236,7 +241,7 @@
 				<@spring.message code='dataSign' />
 			</label>
 		</div>
-		<div class="panel-content-size-xs overflow-auto p-2">
+		<div class="panel-content-size-xs-mwh overflow-auto p-2">
 			<div v-for="ds in pm.chartPluginDataSigns" :key="ds.name" class="mb-2">
 				<div class="p-inputgroup">
 					<p-button type="button" :label="formatDataSignLabel(ds)" icon="pi pi-plus"
@@ -357,6 +362,16 @@
 					</p-inputtext>
 				</div>
 			</div>
+		</div>
+	</p-overlaypanel>
+	<p-overlaypanel ref="${pid}htmlChartPluginDescEle" append-to="body" id="${pid}htmlChartPluginDesc">
+		<div class="pb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='desc' />
+			</label>
+		</div>
+		<div class="panel-content-size-xxs overflow-auto flex flex-column p-2">
+			{{formatChartPluginDesc(fm.htmlChartPlugin)}}
 		</div>
 	</p-overlaypanel>
 </div>
@@ -673,12 +688,21 @@
 	po.vueRef("${pid}dataSignDetailPanelEle", null);
 	po.vueRef("${pid}paramPanelEle", null);
 	po.vueRef("${pid}dataFormatPanelEle", null);
+	po.vueRef("${pid}htmlChartPluginDescEle", null);
 	
 	po.vueMethod(
 	{
 		formatChartPlugin: function(chartPlugin)
 		{
 			return $.toChartPluginHtml(chartPlugin, po.contextPath, {justifyContent: "start"});
+		},
+		
+		formatChartPluginDesc: function(chartPlugin)
+		{
+			if(chartPlugin && chartPlugin.descLabel && chartPlugin.descLabel.value)
+				return chartPlugin.descLabel.value;
+			else
+				return "<@spring.message code='emptyDesc' />";
 		},
 		
 		formatDataSignLabel: function(dataSign)
@@ -789,10 +813,15 @@
 		{
 			var pm = po.vuePageModel();
 			
-			pm.dataSignDetail.label = po.formatDataSignLabel(dataSign);
-			pm.dataSignDetail.detail = (dataSign.descLabel ? (dataSign.descLabel.value || "") : "");
-			
-			po.vueUnref("${pid}dataSignDetailPanelEle").show(e);
+			//直接show会出现当点击第二个卡片但面板还停留在第一个卡片上的情况，所以采用此方案
+			po.vueUnref("${pid}dataSignDetailPanelEle").hide();
+			po.vueApp().$nextTick(function()
+			{
+				pm.dataSignDetail.label = po.formatDataSignLabel(dataSign);
+				pm.dataSignDetail.detail = (dataSign.descLabel ? (dataSign.descLabel.value || "") : "");
+				
+				po.vueUnref("${pid}dataSignDetailPanelEle").show(e);
+			});
 		},
 		
 		onDataSignDetailPanelShow: function(e)
@@ -886,6 +915,11 @@
 		onShowDataFormatPanel: function(e)
 		{
 			po.vueUnref("${pid}dataFormatPanelEle").toggle(e);
+		},
+		
+		onShowChartPluginDesc: function(e)
+		{
+			po.vueUnref("${pid}htmlChartPluginDescEle").toggle(e);
 		},
 		
 		onSaveAndShow: function(e)
