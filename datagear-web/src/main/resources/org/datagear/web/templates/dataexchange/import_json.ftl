@@ -45,9 +45,10 @@
 					<div class="subdataexchange-table-wrapper pt-2">
 						<p-datatable :value="fm.subDataExchanges" :scrollable="true" scroll-height="flex"
 							v-model:selection="pm.selectedSubDataExchanges" selection-mode="multiple"
+							:resizable-columns="true" column-resize-mode="expand"
 							:sortable="false" dataKey="id" striped-rows class="table-sm">
 							<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
-							<p-column field="number" header="<@spring.message code='givenNumber' />" :frozen="true" class="col-version">
+							<p-column field="number" header="<@spring.message code='givenNumber' />" :frozen="true" class="col-row-number">
 							</p-column>
 							<p-column field="fileDisplayName" header="<@spring.message code='fileName' />" class="col-name"></p-column>
 							<p-column field="fileSize" header="<@spring.message code='fileSize' />" class="col-version"></p-column>

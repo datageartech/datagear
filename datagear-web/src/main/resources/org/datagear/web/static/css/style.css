@@ -328,6 +328,17 @@ label[title]:not(.no-tip)::after,
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+.p-datatable .p-column-resizer::after{
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 1px;
+    width: 1px;
+    height: 0.8em;
+    overflow: hidden;
+    margin-top: -0.4em;
+    background: var(--surface-d);
+}
 .p-datatable-table .col-check{
 	min-width: 3.5em;
 	max-width: 3.5em;
