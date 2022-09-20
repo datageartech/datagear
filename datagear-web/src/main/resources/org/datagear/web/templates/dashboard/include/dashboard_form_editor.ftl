@@ -149,8 +149,8 @@
 			var tab = po.toResContentTab(resName, isTemplate);
 			pm.resContentTabs.items.push(tab);
 			
-			//直接设置activeIndex不会滚动到新加的卡片，所以采用此方案
-			po.vueApp().$nextTick(function()
+			//直接设置activeIndex不会滚动到新加的卡片
+			po.vueNextTick(function()
 			{
 				pm.resContentTabs.activeIndex = pm.resContentTabs.items.length - 1;
 			});
@@ -1897,8 +1897,8 @@
 				e.stopPropagation();
 				po.vueUnref("${pid}resourceContentTabMenuEle").hide();
 				
-				//直接show会出现当点击第二个卡片但菜单还停留在第一个卡片上的情况，所以采用此方案
-				po.vueApp().$nextTick(function()
+				//直接show会导致面板还停留在上一个元素上
+				po.vueNextTick(function()
 				{
 					po.resourceContentTabMenuTargetId = tab.id;
 					po.vueUnref("${pid}resourceContentTabMenuEle").show(e);
@@ -1963,7 +1963,7 @@
 			
 			if(activeTab)
 			{
-				po.vueApp().$nextTick(function()
+				po.vueNextTick(function()
 				{
 					po.loadResContentIfNon(activeTab);
 				});

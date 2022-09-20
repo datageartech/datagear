@@ -111,7 +111,7 @@ dataexchange_js.ftl
 		
 		if(scrollToBottom)
 		{
-			po.vueApp().$nextTick(function()
+			po.vueNextTick(function()
 			{
 				//滚动到底部
 				var tableWrapper = po.element(".p-datatable-wrapper", po.element(".subdataexchange-table-wrapper"));

@@ -803,19 +803,25 @@
 		onShowDataSignPanel: function(e, chartDataSet, dataSetProperty)
 		{
 			var pm = po.vuePageModel();
-			pm.chartDataSetForSign = chartDataSet;
-			pm.dataSetPropertyForSign = dataSetProperty;
 			
-			po.vueUnref("${pid}dataSignsPanelEle").show(e);
+			//直接show会导致面板还停留在上一个元素上
+			po.vueUnref("${pid}dataSignsPanelEle").hide();
+			po.vueNextTick(function()
+			{
+				pm.chartDataSetForSign = chartDataSet;
+				pm.dataSetPropertyForSign = dataSetProperty;
+				
+				po.vueUnref("${pid}dataSignsPanelEle").show(e);
+			});
 		},
 		
 		onShowDataSignDetail: function(e, dataSign)
 		{
 			var pm = po.vuePageModel();
 			
-			//直接show会出现当点击第二个卡片但面板还停留在第一个卡片上的情况，所以采用此方案
+			//直接show会导致面板还停留在上一个元素上
 			po.vueUnref("${pid}dataSignDetailPanelEle").hide();
-			po.vueApp().$nextTick(function()
+			po.vueNextTick(function()
 			{
 				pm.dataSignDetail.label = po.formatDataSignLabel(dataSign);
 				pm.dataSignDetail.detail = (dataSign.descLabel ? (dataSign.descLabel.value || "") : "");

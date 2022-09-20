@@ -2099,6 +2099,12 @@ $.inflatePageObj = function(po)
 			return Vue.toRaw(reactiveObj);
 	};
 	
+	//执行vue的$nextTick操作
+	po.vueNextTick = function(callback)
+	{
+		po.vueApp().$nextTick(callback);
+	};
+	
 	//vue的setup对象
 	po._vueSetup = {};
 	//vue的watch对象
