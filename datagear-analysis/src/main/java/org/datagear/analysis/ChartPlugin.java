@@ -7,9 +7,7 @@
 
 package org.datagear.analysis;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.util.i18n.Label;
 import org.datagear.util.i18n.Labeled;
@@ -20,26 +18,18 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public interface ChartPlugin extends Identifiable, Labeled, Serializable
+public interface ChartPlugin extends Identifiable, Labeled
 {
 	String PROPERTY_ID = "id";
 	String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
-	String PROPERTY_MANUAL_LABEL = "manualLabel";
-	String PROPERTY_ICONS = "icons";
+	String PROPERTY_RESOURCES = "resources";
 	String PROPERTY_CHART_PARAMS = "chartParams";
 	String PROPERTY_DATA_SIGNS = "dataSigns";
 	String PROPERTY_VERSION = "version";
 	String PROPERTY_ORDER = "order";
 	String PROPERTY_CATEGORIES = "categories";
 	String PROPERTY_CATEGORY_ORDERS = "categoryOrders";
-	/**
-	 * 3.0.1版本的单类别属性名，已在3.1.0版本中被{@linkplain #PROPERTY_CATEGORIES}代替。
-	 * 
-	 * @deprecated
-	 */
-	@Deprecated
-	String PROPERTY_CATEGORY_3_0_1 = "category";
 
 	/** 默认图标主题名 */
 	String DEFAULT_ICON_THEME_NAME = "default";
@@ -56,32 +46,30 @@ public interface ChartPlugin extends Identifiable, Labeled, Serializable
 	Label getNameLabel();
 
 	/**
-	 * 获取使用指南标签。
+	 * 获取指定名称的插件资源。
+	 * 
+	 * @param name
+	 * @return 返回{@code null}表示没有
+	 */
+	ChartPluginResource getResource(String name);
+	
+	/**
+	 * 获取所有插件资源。
 	 * <p>
-	 * 返回{@code null}表示无使用标签。
+	 * 返回{@code null}或空表示没有任何资源。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	Label getManualLabel();
-
+	List<ChartPluginResource> getResources();
+	
 	/**
-	 * 获取所有风格图标。
-	 * <p>
-	 * 返回{@code null}或空表示无图标。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	Map<String, Icon> getIcons();
-
-	/**
-	 * 获取指定主题名称的图标，没有找到则获取{@linkplain #DEFAULT_ICON_THEME_NAME}对应的图标，没有找到则返回{@code null}。
+	 * 获取最匹配指定主题名称的图标资源。
 	 * 
 	 * @param themeName
-	 * @return
+	 * @return 返回{@code null}表示没有图标
 	 */
-	Icon getIcon(String themeName);
+	ChartPluginResource getIconResource(String themeName);
 
 	/**
 	 * 获取{@linkplain ChartParam}列表。

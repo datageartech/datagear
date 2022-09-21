@@ -7,6 +7,8 @@
 
 package org.datagear.analysis.support;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,8 +16,9 @@ import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartParam;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DataSign;
-import org.datagear.analysis.Icon;
+import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
 /**
@@ -26,27 +29,25 @@ import org.datagear.util.i18n.Label;
  */
 public abstract class AbstractChartPlugin extends AbstractIdentifiable implements ChartPlugin
 {
-	private static final long serialVersionUID = 1L;
-
 	private Label nameLabel;
 
-	private Label descLabel;
+	private Label descLabel = null;
 
-	private Label manualLabel;
+	private List<ChartPluginResource> resources = Collections.emptyList();
+	
+	private Map<String, String> iconResourceNames = Collections.emptyMap();
 
-	private Map<String, Icon> icons;
+	private List<ChartParam> chartParams = Collections.emptyList();
 
-	private List<ChartParam> chartParams;
+	private List<DataSign> dataSigns = Collections.emptyList();
 
-	private List<DataSign> dataSigns;
-
-	private String version;
+	private String version = "";
 
 	private int order = 0;
 
-	private List<Category> categories;
+	private List<Category> categories = Collections.emptyList();;
 
-	private List<Integer> categoryOrders;
+	private List<Integer> categoryOrders = Collections.emptyList();;
 
 	public AbstractChartPlugin()
 	{
@@ -83,36 +84,85 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public Label getManualLabel()
+	public List<ChartPluginResource> getResources()
 	{
-		return manualLabel;
+		return resources;
 	}
 
-	public void setManualLabel(Label manualLabel)
+	public void setResources(List<ChartPluginResource> resources)
 	{
-		this.manualLabel = manualLabel;
+		this.resources = resources;
+	}
+
+	public Map<String, String> getIconResourceNames()
+	{
+		return iconResourceNames;
+	}
+
+	public void setIconResourceNames(Map<String, String> iconResourceNames)
+	{
+		this.iconResourceNames = iconResourceNames;
 	}
 
 	@Override
-	public Map<String, Icon> getIcons()
+	public ChartPluginResource getResource(String name)
 	{
-		return icons;
-	}
+		if (this.resources == null)
+			return null;
 
-	public void setIcons(Map<String, Icon> icons)
-	{
-		this.icons = icons;
+		for (ChartPluginResource res : this.resources)
+		{
+			if (res.getName().equals(name))
+				return res;
+		}
+
+		return null;
 	}
 
 	@Override
-	public Icon getIcon(String themeName)
+	public ChartPluginResource getIconResource(String themeName)
 	{
-		Icon icon = (this.icons == null ? null : this.icons.get(themeName));
+		if (this.iconResourceNames == null)
+			return null;
 
-		if (icon == null && !DEFAULT_ICON_THEME_NAME.equals(themeName))
-			icon = getIcon(DEFAULT_ICON_THEME_NAME);
+		themeName = (themeName == null ? "" : themeName.toLowerCase());
 
-		return icon;
+		String firstResName = null;
+		String exactResName = null;
+		String likeResName = null;
+
+		Map<String, String> lowerKeyMap = new HashMap<String, String>();
+
+		for (Map.Entry<String, String> entry : this.iconResourceNames.entrySet())
+			lowerKeyMap.put(entry.getKey().toLowerCase(), entry.getValue());
+
+		for (Map.Entry<String, String> entry : lowerKeyMap.entrySet())
+		{
+			String myThemeName = entry.getKey();
+			String myResName = entry.getValue();
+
+			if (StringUtil.isEmpty(firstResName))
+				firstResName = myResName;
+
+			if (myThemeName.equals(themeName))
+				exactResName = myResName;
+			else if (myThemeName.indexOf(themeName) > -1 || themeName.indexOf(myThemeName) > -1)
+				likeResName = myResName;
+		}
+
+		String resName = null;
+
+		if (!StringUtil.isEmpty(exactResName))
+			resName = exactResName;
+		else if (!StringUtil.isEmpty(likeResName))
+			resName = likeResName;
+		else
+			resName = this.iconResourceNames.get(DEFAULT_ICON_THEME_NAME);
+
+		if (StringUtil.isEmpty(resName))
+			resName = firstResName;
+
+		return (StringUtil.isEmpty(resName) ? null : getResource(resName));
 	}
 
 	@Override

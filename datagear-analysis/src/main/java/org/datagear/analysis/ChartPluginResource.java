@@ -9,31 +9,30 @@ package org.datagear.analysis;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 
 /**
- * 图标。
+ * 图表插件资源。
  * 
  * @author datagear@163.com
  *
  */
-public interface Icon extends Serializable
+public interface ChartPluginResource
 {
 	/**
-	 * 获取图标类型：{@code png}、{@code jpeg}等，未知则返回空字符串。
+	 * 获取资源名称。
 	 * 
 	 * @return
 	 */
-	String getType();
-
+	String getName();
+	
 	/**
-	 * 获取图标输入流。
+	 * 获取资源输入流。
 	 * 
 	 * @return
 	 * @throws IOException
 	 */
 	InputStream getInputStream() throws IOException;
-
+	
 	/**
 	 * 获取上次修改时间。
 	 * 

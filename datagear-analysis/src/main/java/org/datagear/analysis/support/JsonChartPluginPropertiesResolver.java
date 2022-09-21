@@ -13,6 +13,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,6 @@ import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartParam;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.DataSign;
-import org.datagear.analysis.Icon;
 import org.datagear.util.IOUtil;
 import org.datagear.util.i18n.Label;
 
@@ -40,7 +40,6 @@ import org.datagear.util.i18n.Label;
  *   id : "...",
  *   nameLabel : "..." 或者 { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
  *   descLabel : "..." 或者 { ... },
- *   manualLabel : "..." 或者 { ... },
  *   icons : "..." 或者 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
  *   chartParams :  [ { ... }, ... ],
  *   dataSigns : [ { ... }, ... ],
@@ -62,6 +61,25 @@ import org.datagear.util.i18n.Label;
  */
 public class JsonChartPluginPropertiesResolver
 {
+	public static final String JSON_PROPERTY_ID = ChartPlugin.PROPERTY_ID;
+	public static final String JSON_PROPERTY_NAME_LABEL = ChartPlugin.PROPERTY_NAME_LABEL;
+	public static final String JSON_PROPERTY_DESC_LABEL = ChartPlugin.PROPERTY_DESC_LABEL;
+	public static final String JSON_PROPERTY_CHART_PARAMS = ChartPlugin.PROPERTY_CHART_PARAMS;
+	public static final String JSON_PROPERTY_DATA_SIGNS = ChartPlugin.PROPERTY_DATA_SIGNS;
+	public static final String JSON_PROPERTY_VERSION = ChartPlugin.PROPERTY_VERSION;
+	public static final String JSON_PROPERTY_ORDER = ChartPlugin.PROPERTY_ORDER;
+	public static final String JSON_PROPERTY_CATEGORIES = ChartPlugin.PROPERTY_CATEGORIES;
+	public static final String JSON_PROPERTY_CATEGORY_ORDERS = ChartPlugin.PROPERTY_CATEGORY_ORDERS;
+	public static final String JSON_PROPERTY_ICONS = "icons";
+
+	/**
+	 * 3.0.1版本的单类别属性名，已在3.1.0版本中被{@linkplain #JSON_PROPERTY_CATEGORIES}代替。
+	 * 
+	 * @deprecated
+	 */
+	@Deprecated
+	public static final String JSON_PROPERTY_CATEGORY_3_0_1 = "category";
+
 	private ConcurrentMap<String, Locale> _localeCache = new ConcurrentHashMap<>();
 
 	public JsonChartPluginPropertiesResolver()
@@ -78,26 +96,24 @@ public class JsonChartPluginPropertiesResolver
 	 * @param chartPlugin
 	 * @param properties
 	 */
-	@SuppressWarnings("deprecation")
 	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, Map<String, ?> properties)
 	{
-		chartPlugin.setId((String) properties.get(ChartPlugin.PROPERTY_ID));
-		chartPlugin.setNameLabel(convertToLabel(properties.get(ChartPlugin.PROPERTY_NAME_LABEL)));
-		chartPlugin.setDescLabel(convertToLabel(properties.get(ChartPlugin.PROPERTY_DESC_LABEL)));
-		chartPlugin.setManualLabel(convertToLabel(properties.get(ChartPlugin.PROPERTY_MANUAL_LABEL)));
-		chartPlugin.setIcons(convertToIcons(properties.get(ChartPlugin.PROPERTY_ICONS)));
-		chartPlugin.setChartParams(convertToChartParams(properties.get(ChartPlugin.PROPERTY_CHART_PARAMS)));
-		chartPlugin.setDataSigns(convertToDataSigns(properties.get(ChartPlugin.PROPERTY_DATA_SIGNS)));
-		chartPlugin.setVersion((String) properties.get(ChartPlugin.PROPERTY_VERSION));
-		chartPlugin.setOrder(convertToInt(properties.get(ChartPlugin.PROPERTY_ORDER), chartPlugin.getOrder()));
+		chartPlugin.setId((String) properties.get(JSON_PROPERTY_ID));
+		chartPlugin.setNameLabel(convertToLabel(properties.get(JSON_PROPERTY_NAME_LABEL)));
+		chartPlugin.setDescLabel(convertToLabel(properties.get(JSON_PROPERTY_DESC_LABEL)));
+		chartPlugin.setIconResourceNames(convertToIconResourceNames(properties.get(JSON_PROPERTY_ICONS)));
+		chartPlugin.setChartParams(convertToChartParams(properties.get(JSON_PROPERTY_CHART_PARAMS)));
+		chartPlugin.setDataSigns(convertToDataSigns(properties.get(JSON_PROPERTY_DATA_SIGNS)));
+		chartPlugin.setVersion((String) properties.get(JSON_PROPERTY_VERSION));
+		chartPlugin.setOrder(convertToInt(properties.get(JSON_PROPERTY_ORDER), chartPlugin.getOrder()));
 
-		Object categoriesObj = properties.get(ChartPlugin.PROPERTY_CATEGORIES);
+		Object categoriesObj = properties.get(JSON_PROPERTY_CATEGORIES);
 		if (categoriesObj == null)
-			categoriesObj = properties.get(ChartPlugin.PROPERTY_CATEGORY_3_0_1);
+			categoriesObj = properties.get(JSON_PROPERTY_CATEGORY_3_0_1);
 		chartPlugin.setCategories(convertToCategories(categoriesObj));
 
 		chartPlugin.setCategoryOrders(
-				convertToCategoryOrders(properties.get(ChartPlugin.PROPERTY_CATEGORY_ORDERS), chartPlugin.getOrder()));
+				convertToCategoryOrders(properties.get(JSON_PROPERTY_CATEGORY_ORDERS), chartPlugin.getOrder()));
 	}
 
 	/**
@@ -214,82 +230,38 @@ public class JsonChartPluginPropertiesResolver
 	}
 
 	/**
-	 * 将对象转换为{@linkplain Icon}映射表。
+	 * 将对象转换为图标资源名映射表。
 	 * 
 	 * @param obj
 	 * @return
 	 */
-	protected Map<String, Icon> convertToIcons(Object obj)
+	protected Map<String, String> convertToIconResourceNames(Object obj)
 	{
 		if (obj == null)
-			return null;
+		{
+			return Collections.emptyMap();
+		}
 		else if (obj instanceof String)
 		{
-			Map<String, Icon> icons = new HashMap<>();
-			icons.put(ChartPlugin.DEFAULT_ICON_THEME_NAME, convertToIcon(obj));
+			Map<String, String> icons = new HashMap<>();
+			icons.put(ChartPlugin.DEFAULT_ICON_THEME_NAME, (String) obj);
 
 			return icons;
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
-			Map<String, Icon> icons = new HashMap<>();
+			Map<String, String> icons = new HashMap<>();
 
 			Map<?, ?> map = (Map<?, ?>) obj;
 
 			for (Map.Entry<?, ?> entry : map.entrySet())
-			{
-				Object key = entry.getKey();
-
-				String themeName = (key instanceof String ? (String) key : key.toString());
-				Icon icon = convertToIcon(entry.getValue());
-
-				icons.put(themeName, icon);
-			}
+				icons.put(entry.getKey().toString(), entry.getValue().toString());
 
 			return icons;
 		}
 		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Icon.class.getName() + "] map is not supported");
-	}
-
-	/**
-	 * 将对象转换为{@linkplain Icon}。
-	 * 
-	 * @param obj
-	 * @return
-	 */
-	protected Icon convertToIcon(Object obj)
-	{
-		if (obj == null)
-			return null;
-		else if (obj instanceof Icon)
-			return (Icon) obj;
-		else if (obj instanceof String)
-		{
-			LocationIcon icon = createLocationIcon();
-			icon.setLocation((String) obj);
-
-			return icon;
-		}
-		else if (obj instanceof Map<?, ?>)
-		{
-			@SuppressWarnings("unchecked")
-			Map<String, ?> map = (Map<String, String>) obj;
-
-			String location = (String) map.get(LocationIcon.PROPERTY_LOCATION);
-
-			if (location == null)
-				return null;
-
-			LocationIcon icon = createLocationIcon();
-			icon.setLocation(location);
-
-			return icon;
-		}
-		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Icon.class.getName() + "] is not supported");
+			throw new UnsupportedOperationException(
+					"Convert object of type [" + obj.getClass().getName() + "] to icon map is not supported");
 	}
 
 	/**
@@ -632,11 +604,6 @@ public class JsonChartPluginPropertiesResolver
 	protected Label createLabel()
 	{
 		return new Label();
-	}
-
-	protected LocationIcon createLocationIcon()
-	{
-		return new LocationIcon();
 	}
 
 	protected ChartParam createChartParam()

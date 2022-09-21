@@ -170,8 +170,6 @@ public abstract class AbstractHtmlScriptObjectWriter
 
 	protected static class RefHtmlChartPlugin extends HtmlChartPlugin implements JsonRefObject
 	{
-		private static final long serialVersionUID = 1L;
-
 		private String refName;
 
 		public RefHtmlChartPlugin(String refName)

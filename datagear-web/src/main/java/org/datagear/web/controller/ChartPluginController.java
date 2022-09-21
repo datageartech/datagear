@@ -18,13 +18,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.Icon;
+import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.support.CategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
@@ -46,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,7 +60,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 @RequestMapping("/chartPlugin")
-public class ChartPluginController extends AbstractChartPluginAwareController
+public class ChartPluginController extends AbstractChartPluginAwareController implements ServletContextAware
 {
 	@Autowired
 	private File tempDirectory;
@@ -66,6 +69,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 
 	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = new HtmlChartPluginScriptObjectWriter();
+
+	private ServletContext servletContext;
 
 	public ChartPluginController()
 	{
@@ -104,6 +109,17 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		this.htmlChartPluginScriptObjectWriter = htmlChartPluginScriptObjectWriter;
 	}
 
+	public ServletContext getServletContext()
+	{
+		return servletContext;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext)
+	{
+		this.servletContext = servletContext;
+	}
+
 	@RequestMapping("/upload")
 	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
 	{
@@ -128,8 +144,6 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		File zipFile = FileUtil.getFile(myTmpDirectory, zipFileName);
 
-		String pluginFileName = FileUtil.getRelativePath(this.tempDirectory, zipFile);
-
 		InputStream in = null;
 		OutputStream out = null;
 		try
@@ -142,6 +156,23 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		{
 			IOUtil.close(in);
 			IOUtil.close(out);
+		}
+
+		String pluginFileName = FileUtil.getRelativePath(this.tempDirectory, myTmpDirectory);
+
+		// 如果ZIP里包含多个插件包，则应解压
+		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
+		if (!loader.isHtmlChartPluginZip(zipFile))
+		{
+			ZipInputStream zin = null;
+			try
+			{
+				IOUtil.unzip(zin, myTmpDirectory);
+			}
+			finally
+			{
+				IOUtil.close(zin);
+			}
 		}
 
 		List<HtmlChartPluginView> pluginInfos = new ArrayList<>();
@@ -259,7 +290,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/icon/{pluginId:.+}")
-	public void getPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
+	public void chartPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			@PathVariable("pluginId") String pluginId,
 			@RequestParam(value="tmpPluginFileName", required = false) String tmpPluginFileName) throws Exception
 	{
@@ -289,34 +320,31 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		
 		String themeName = resolveChartPluginIconThemeName(request);
-		Icon icon = chartPlugin.getIcon(themeName);
+		ChartPluginResource iconResource = chartPlugin.getIconResource(themeName);
 		
-		if(icon == null)
+		writeChartPluginResource(request, response, webRequest, chartPlugin, iconResource);
+	}
+
+	@RequestMapping("/resource/{pluginId:.+}/**")
+	public void chartPluginResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
+			@PathVariable("pluginId") String pluginId) throws Exception
+	{
+		ChartPlugin chartPlugin = getDirectoryHtmlChartPluginManager().get(pluginId);
+		
+		if(chartPlugin == null)
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		
-		long lastModified = icon.getLastModified();
-		if (webRequest.checkNotModified(lastModified))
-			return;
-
-		response.setContentType("image/" + icon.getType());
-		setCacheControlNoCache(response);
-
-		OutputStream out = response.getOutputStream();
-		InputStream iconIn = null;
+		String resName = resolvePathAfter(request, "/resource/" + pluginId + "/");
+		// 处理可能的中文资源名
+		resName = WebUtils.decodeURL(resName);
 		
-		try
-		{
-			iconIn = icon.getInputStream();
-			IOUtil.write(iconIn, out);
-		}
-		finally
-		{
-			IOUtil.close(iconIn);
-		}
+		ChartPluginResource resource = chartPlugin.getResource(resName);
+		
+		writeChartPluginResource(request, response, webRequest, chartPlugin, resource);
 	}
 
 	@RequestMapping("/chartPluginManager.js")
-	public void getChartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest)
+	public void chartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest)
 			throws Exception
 	{
 		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
@@ -378,7 +406,34 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		out.println("})(this);");
 	}
 	
-	protected Set<HtmlChartPlugin> resolveHtmlChartPlugins(File file)
+	protected void writeChartPluginResource(HttpServletRequest request, HttpServletResponse response,
+			WebRequest webRequest, ChartPlugin chartPlugin, ChartPluginResource resource) throws Exception
+	{
+		if (resource == null)
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+		long lastModified = resource.getLastModified();
+		if (webRequest.checkNotModified(lastModified))
+			return;
+
+		setContentTypeByName(request, response, servletContext, resource.getName());
+		setCacheControlNoCache(response);
+
+		InputStream in = null;
+		OutputStream out = response.getOutputStream();
+
+		try
+		{
+			in = resource.getInputStream();
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+	}
+
+	protected Set<HtmlChartPlugin> resolveHtmlChartPlugins(File directory)
 	{
 		Set<HtmlChartPlugin> loaded = Collections.emptySet();
 
@@ -386,7 +441,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		
 		try
 		{
-			loaded = loader.loads(file);
+			loaded = loader.loadAll(directory);
 		}
 		catch (HtmlChartPluginLoadException e)
 		{

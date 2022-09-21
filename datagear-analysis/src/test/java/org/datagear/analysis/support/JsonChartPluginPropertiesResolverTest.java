@@ -46,8 +46,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Assert.assertEquals("pie-chart", chartPlugin.getId());
 			Assert.assertNotNull(chartPlugin.getNameLabel());
 			Assert.assertNotNull(chartPlugin.getDescLabel());
-			Assert.assertNotNull(chartPlugin.getManualLabel());
-			Assert.assertNotNull(chartPlugin.getIcons());
+			Assert.assertNotNull(chartPlugin.getIconResourceNames().size() > 0);
 			Assert.assertNotNull(chartPlugin.getChartParams());
 			Assert.assertNotNull(chartPlugin.getDataSigns());
 			Assert.assertEquals("0.1.0", chartPlugin.getVersion());
@@ -72,18 +71,10 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			{
-				Label manualLabel = chartPlugin.getManualLabel();
-				Assert.assertEquals("饼图指南", manualLabel.getValue());
-				Assert.assertEquals("pie chart manual", manualLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("饼图指南中文", manualLabel.getValue(Label.toLocale("zh")));
-			}
+				Map<String, String> icons = chartPlugin.getIconResourceNames();
 
-			{
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				Map<String, LocationIcon> icons = (Map) chartPlugin.getIcons();
-
-				Assert.assertEquals("icon-0.png", icons.get("LIGHT").getLocation());
-				Assert.assertEquals("icon-1.png", icons.get("DARK").getLocation());
+				Assert.assertEquals("icon-0.png", icons.get("LIGHT"));
+				Assert.assertEquals("icon-1.png", icons.get("DARK"));
 			}
 
 			List<ChartParam> chartParams = chartPlugin.getChartParams();
@@ -240,8 +231,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Assert.assertEquals("pie-chart", chartPlugin.getId());
 			Assert.assertNotNull(chartPlugin.getNameLabel());
 			Assert.assertNotNull(chartPlugin.getDescLabel());
-			Assert.assertNotNull(chartPlugin.getManualLabel());
-			Assert.assertNotNull(chartPlugin.getIcons());
+			Assert.assertTrue(chartPlugin.getIconResourceNames().size() > 0);
 			Assert.assertNotNull(chartPlugin.getChartParams());
 			Assert.assertNotNull(chartPlugin.getDataSigns());
 			Assert.assertEquals("0.1.0", chartPlugin.getVersion());
@@ -264,18 +254,10 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			{
-				Label manualLabel = chartPlugin.getManualLabel();
-				Assert.assertEquals("饼图指南", manualLabel.getValue());
-				Assert.assertEquals("pie chart manual", manualLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("饼图指南中文", manualLabel.getValue(Label.toLocale("zh")));
-			}
+				Map<String, String> icons = chartPlugin.getIconResourceNames();
 
-			{
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				Map<String, LocationIcon> icons = (Map) chartPlugin.getIcons();
-
-				Assert.assertEquals("icon-0.png", icons.get("LIGHT").getLocation());
-				Assert.assertEquals("icon-1.png", icons.get("DARK").getLocation());
+				Assert.assertEquals("icon-0.png", icons.get("LIGHT"));
+				Assert.assertEquals("icon-1.png", icons.get("DARK"));
 			}
 
 			List<ChartParam> chartParams = chartPlugin.getChartParams();
@@ -368,8 +350,6 @@ public class JsonChartPluginPropertiesResolverTest
 
 	private static class TestChartPlugin extends AbstractChartPlugin
 	{
-		private static final long serialVersionUID = 1L;
-
 		public TestChartPlugin()
 		{
 			super();

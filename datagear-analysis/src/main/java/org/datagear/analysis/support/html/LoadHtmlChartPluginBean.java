@@ -89,7 +89,7 @@ public class LoadHtmlChartPluginBean
 	 */
 	public Set<HtmlChartPlugin> load()
 	{
-		Set<HtmlChartPlugin> plugins = this.htmlChartPluginLoader.loads(this.directory);
+		Set<HtmlChartPlugin> plugins = this.htmlChartPluginLoader.loadAll(this.directory);
 
 		if (plugins != null)
 		{

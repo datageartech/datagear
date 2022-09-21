@@ -11,17 +11,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.datagear.analysis.Icon;
-import org.datagear.analysis.support.BytesIcon;
+import org.datagear.analysis.ChartPluginResource;
+import org.datagear.analysis.support.FileChartPluginResource;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
-import org.datagear.analysis.support.LocationIcon;
+import org.datagear.analysis.support.ZipEntryChartPluginResource;
 import org.datagear.analysis.support.html.HtmlChartPluginJsDefResolver.JsDefContent;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -30,7 +31,10 @@ import org.datagear.util.StringUtil;
 /**
  * {@linkplain HtmlChartPlugin}加载器。
  * <p>
- * 此类从固定格式的文件夹或者ZIP文件中加载{@linkplain HtmlChartPlugin}，并且在加载后不再依赖原文件。
+ * 此类从固定格式的文件夹或者ZIP文件中加载{@linkplain HtmlChartPlugin}。
+ * </p>
+ * <p>
+ * 注意：加载后的{@linkplain HtmlChartPlugin}中与{@linkplain ChartPluginResource}相关的操作仍依赖原始文件。
  * </p>
  * <p>
  * 它支持的文件结构规范如下：
@@ -184,7 +188,7 @@ public class HtmlChartPluginLoader
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	public boolean isHtmlChartPluginZip(ZipInputStream in) throws HtmlChartPluginLoadException
+	protected boolean isHtmlChartPluginZip(ZipInputStream in) throws HtmlChartPluginLoadException
 	{
 		ZipEntry zipEntry = null;
 
@@ -223,7 +227,7 @@ public class HtmlChartPluginLoader
 	 */
 	public HtmlChartPlugin load(File directory) throws HtmlChartPluginLoadException
 	{
-		return loadSingleForDirectory(directory);
+		return loadSingleForDirectory(directory, null);
 	}
 
 	/**
@@ -239,21 +243,10 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定ZIP输入流加载单个{@linkplain HtmlChartPlugin}，如果ZIP文件结构不合法，将返回{@code null}。
-	 * 
-	 * @param in
-	 * @return
-	 * @throws HtmlChartPluginLoadException
-	 */
-	public HtmlChartPlugin loadZip(ZipInputStream in) throws HtmlChartPluginLoadException
-	{
-		return loadSingleForZip(in);
-	}
-
-	/**
 	 * 从指定文件加载单个{@linkplain HtmlChartPlugin}，如果文件结构不合法，将返回{@code null}。
 	 * 
 	 * @param file
+	 *            插件文件夹、插件ZIP包
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
@@ -262,7 +255,7 @@ public class HtmlChartPluginLoader
 		HtmlChartPlugin plugin = null;
 
 		if (file.isDirectory())
-			plugin = loadSingleForDirectory(file);
+			plugin = loadSingleForDirectory(file, null);
 		else if (isZipFile(file))
 			plugin = loadSingleForZip(file);
 		else
@@ -272,81 +265,30 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定文件加载多个{@linkplain HtmlChartPlugin}，没有，则返回空集合。
+	 * 从指定文件夹内加载多个{@linkplain HtmlChartPlugin}，没有，则返回空集合。
 	 * <p>
-	 * 文件可以是单个{@linkplain HtmlChartPlugin}的文件夹或者ZIP文件，也可以是包含多个{@linkplain HtmlChartPlugin}的文件夹或者ZIP文件。
+	 * 文件夹内的可以包含插件文件夹或者插件ZIP包。
 	 * </p>
 	 * 
-	 * @param file
+	 * @param directory
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	public Set<HtmlChartPlugin> loads(File file) throws HtmlChartPluginLoadException
+	public Set<HtmlChartPlugin> loadAll(File directory) throws HtmlChartPluginLoadException
 	{
+		if (!directory.isDirectory())
+			throw new IllegalArgumentException("[directory] must be directory");
+
 		Set<HtmlChartPlugin> plugins = new HashSet<>();
 
-		if (file.isDirectory())
+		File[] children = directory.listFiles();
+
+		for (File child : children)
 		{
-			if (isHtmlChartPluginDirectory(file))
-			{
-				HtmlChartPlugin plugin = load(file);
+			HtmlChartPlugin plugin = loadFile(child);
 
-				if (plugin != null)
-					plugins.add(plugin);
-			}
-			else
-			{
-				File[] children = file.listFiles();
-
-				for (File child : children)
-				{
-					HtmlChartPlugin plugin = loadFile(child);
-
-					if (plugin != null)
-						plugins.add(plugin);
-				}
-			}
-		}
-		else if (isZipFile(file))
-		{
-			if (isHtmlChartPluginZip(file))
-			{
-				HtmlChartPlugin plugin = loadZip(file);
-
-				if (plugin != null)
-					plugins.add(plugin);
-			}
-			else
-			{
-				File directory = null;
-				ZipInputStream zin = null;
-				try
-				{
-					directory = createTmpWorkDirectory();
-					zin = IOUtil.getZipInputStream(file);
-					IOUtil.unzip(zin, directory);
-				}
-				catch (IOException e)
-				{
-					throw new HtmlChartPluginLoadException(e);
-				}
-				finally
-				{
-					IOUtil.close(zin);
-				}
-
-				File[] children = directory.listFiles();
-
-				for (File child : children)
-				{
-					HtmlChartPlugin plugin = loadFile(child);
-
-					if (plugin != null)
-						plugins.add(plugin);
-				}
-
-				FileUtil.deleteFile(directory);
-			}
+			if (plugin != null)
+				plugins.add(plugin);
 		}
 
 		return plugins;
@@ -368,27 +310,14 @@ public class HtmlChartPluginLoader
 		catch (Exception e)
 		{
 			IOUtil.close(in);
-
 			throw new HtmlChartPluginLoadException(e);
 		}
 
 		try
 		{
-			return loadSingleForZip(in);
-		}
-		finally
-		{
-			IOUtil.close(in);
-		}
-	}
-
-	protected HtmlChartPlugin loadSingleForZip(ZipInputStream in) throws HtmlChartPluginLoadException
-	{
-		try
-		{
 			File tmpDirectory = createTmpWorkDirectory();
 			IOUtil.unzip(in, tmpDirectory);
-			HtmlChartPlugin chartPlugin = loadSingleForDirectory(tmpDirectory);
+			HtmlChartPlugin chartPlugin = loadSingleForDirectory(tmpDirectory, zip);
 			FileUtil.deleteFile(tmpDirectory);
 
 			return chartPlugin;
@@ -397,20 +326,26 @@ public class HtmlChartPluginLoader
 		{
 			throw new HtmlChartPluginLoadException(e);
 		}
+		finally
+		{
+			IOUtil.close(in);
+		}
 	}
 
 	/**
 	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}，返回{@code null}表示文件不合法。
 	 * 
 	 * @param directory
+	 * @param pluginZip
+	 *            当{@code directory}是由ZIP包解压而得时的原始ZIP包，否则为{@code null}
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	protected HtmlChartPlugin loadSingleForDirectory(File directory) throws HtmlChartPluginLoadException
+	protected HtmlChartPlugin loadSingleForDirectory(File directory, File pluginZip) throws HtmlChartPluginLoadException
 	{
-		File chartFile = FileUtil.getFile(directory, FILE_NAME_PLUGIN);
+		File pluginJsonFile = FileUtil.getFile(directory, FILE_NAME_PLUGIN);
 
-		if (!chartFile.exists())
+		if (!pluginJsonFile.exists())
 			return null;
 
 		HtmlChartPlugin plugin = null;
@@ -419,7 +354,7 @@ public class HtmlChartPluginLoader
 
 		try
 		{
-			chartIn = IOUtil.getReader(chartFile, this.encoding);
+			chartIn = IOUtil.getReader(pluginJsonFile, this.encoding);
 
 			JsDefContent jsDefContent = this.htmlChartPluginJsDefResolver.resolve(chartIn);
 
@@ -431,11 +366,15 @@ public class HtmlChartPluginLoader
 				this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin,
 						jsDefContent.getPluginJson());
 				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRenderer()));
-				plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
+				inflateChartPluginResources(plugin, (pluginZip == null ? directory : pluginZip));
 
 				if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))
 					plugin = null;
 			}
+		}
+		catch (HtmlChartPluginLoadException e)
+		{
+			throw e;
 		}
 		catch (Exception e)
 		{
@@ -453,63 +392,90 @@ public class HtmlChartPluginLoader
 		return plugin;
 	}
 
-	protected Map<String, Icon> toBytesIconsInDirectory(File directory, Map<String, Icon> icons) throws IOException
+	protected void inflateChartPluginResources(HtmlChartPlugin plugin, File pluginFile) throws Exception
 	{
-		if (icons == null || icons.isEmpty())
-			return icons;
+		List<ChartPluginResource> resources = Collections.emptyList();
 
-		Map<String, Icon> bytesIcons = new HashMap<>();
+		if (pluginFile.isDirectory())
+			resources = resolveChartPluginResourcesForDirectory(pluginFile);
+		else
+			resources = resolveChartPluginResourcesForZip(pluginFile);
 
-		for (Map.Entry<String, Icon> entry : icons.entrySet())
-		{
-			Icon icon = entry.getValue();
-
-			BytesIcon bytesIcon = toBytesIconInDirectory(directory, icon);
-
-			if (bytesIcon != null)
-				bytesIcons.put(entry.getKey(), bytesIcon);
-		}
-
-		return bytesIcons;
+		plugin.setResources(resources);
 	}
 
-	protected BytesIcon toBytesIconInDirectory(File directory, Icon icon) throws IOException
+	protected List<ChartPluginResource> resolveChartPluginResourcesForDirectory(File pluginDirectory) throws Exception
 	{
-		if (icon instanceof LocationIcon)
+		List<ChartPluginResource> resources = new ArrayList<ChartPluginResource>();
+		inflateChartPluginResourcesForDirectory(resources, pluginDirectory, pluginDirectory);
+
+		return (resources.isEmpty() ? Collections.emptyList() : resources);
+	}
+
+	protected void inflateChartPluginResourcesForDirectory(List<ChartPluginResource> resources, File pluginDirectory,
+			File currentDirectory) throws Exception
+	{
+		File[] children = currentDirectory.listFiles();
+
+		for (File child : children)
 		{
-			String subPath = ((LocationIcon) icon).getLocation();
+			if (child.isDirectory())
+			{
+				inflateChartPluginResourcesForDirectory(resources, pluginDirectory, child);
+			}
+			else
+			{
+				String relativePath = FileUtil.getRelativePath(pluginDirectory, child);
 
-			if (StringUtil.isEmpty(subPath))
-				return null;
-
-			File iconFile = FileUtil.getFile(directory, subPath);
-
-			return readBytesIcon(iconFile);
+				ChartPluginResource resource = new FileChartPluginResource(toChartPluginResourceName(relativePath),
+						child);
+				resources.add(resource);
+			}
 		}
-		else
-			return null;
+	}
+
+	protected List<ChartPluginResource> resolveChartPluginResourcesForZip(File pluginFileZip) throws Exception
+	{
+		List<ChartPluginResource> resources = new ArrayList<ChartPluginResource>();
+
+		ZipInputStream in = null;
+
+		try
+		{
+			in = IOUtil.getZipInputStream(pluginFileZip);
+
+			ZipEntry zipEntry = null;
+			while ((zipEntry = in.getNextEntry()) != null)
+			{
+				if (!zipEntry.isDirectory())
+				{
+					String name = zipEntry.getName();
+					ChartPluginResource resource = new ZipEntryChartPluginResource(toChartPluginResourceName(name),
+							pluginFileZip, name);
+					resources.add(resource);
+				}
+
+				in.closeEntry();
+			}
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+
+		return (resources.isEmpty() ? Collections.emptyList() : resources);
 	}
 
 	/**
-	 * 从文件读取{@linkplain BytesIcon}，文件不存在则返回{@code null}。
+	 * 转换为{@linkplain ChartPluginResource}名称。
 	 * 
-	 * @param file
+	 * @param name
 	 * @return
-	 * @throws IOException
 	 */
-	protected BytesIcon readBytesIcon(File file) throws IOException
+	public String toChartPluginResourceName(String name)
 	{
-		if (file == null || !file.exists())
-			return null;
-
-		String type = FileUtil.getExtension(file);
-		if (type == null)
-			type = "";
-
-		InputStream in = IOUtil.getInputStream(file);
-		byte[] bytes = IOUtil.readBytes(in, true);
-
-		return BytesIcon.valueOf(type, bytes, file.lastModified());
+		// 统一分隔符以兼容各操作系统
+		return FileUtil.trimPath(name, FileUtil.PATH_SEPARATOR_SLASH);
 	}
 
 	/**

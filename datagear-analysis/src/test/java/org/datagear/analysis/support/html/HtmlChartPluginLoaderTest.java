@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.Icon;
 import org.datagear.analysis.support.AbstractChartPluginManager;
 import org.datagear.util.FileUtil;
 import org.junit.Assert;
@@ -63,7 +62,7 @@ public class HtmlChartPluginLoaderTest
 		File directory = FileUtil
 				.getFile("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders");
 
-		Set<HtmlChartPlugin> plugins = this.htmlChartPluginLoader.loads(directory);
+		Set<HtmlChartPlugin> plugins = this.htmlChartPluginLoader.loadAll(directory);
 
 		List<HtmlChartPlugin> list = new ArrayList<>();
 		list.addAll(plugins);
@@ -76,7 +75,7 @@ public class HtmlChartPluginLoaderTest
 			HtmlChartPlugin plugin = list.get(0);
 			Assert.assertEquals("plugin04", plugin.getId());
 
-			Map<String, Icon> icons = plugin.getIcons();
+			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertNotNull(icons.get("light"));
 			Assert.assertNotNull(icons.get("dark"));
 		}
@@ -85,7 +84,7 @@ public class HtmlChartPluginLoaderTest
 			HtmlChartPlugin plugin = list.get(1);
 			Assert.assertEquals("plugin03", plugin.getId());
 
-			Map<String, Icon> icons = plugin.getIcons();
+			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertNotNull(icons.get("light"));
 			Assert.assertNotNull(icons.get("dark"));
 		}
@@ -94,7 +93,7 @@ public class HtmlChartPluginLoaderTest
 			HtmlChartPlugin plugin = list.get(2);
 			Assert.assertEquals("plugin02", plugin.getId());
 
-			Map<String, Icon> icons = plugin.getIcons();
+			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertNotNull(icons.get("light"));
 			Assert.assertNotNull(icons.get("dark"));
 		}
@@ -103,7 +102,7 @@ public class HtmlChartPluginLoaderTest
 			HtmlChartPlugin plugin = list.get(3);
 			Assert.assertEquals("plugin01", plugin.getId());
 
-			Map<String, Icon> icons = plugin.getIcons();
+			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertEquals(1, icons.size());
 			Assert.assertNotNull(icons.get(ChartPlugin.DEFAULT_ICON_THEME_NAME));
 		}

@@ -11,16 +11,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSign;
-import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.CategorizationResolver;
@@ -156,7 +157,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 
 		pluginView.setNameLabel(toConcreteLabel(chartPlugin.getNameLabel(), locale));
 		pluginView.setDescLabel(toConcreteLabel(chartPlugin.getDescLabel(), locale));
-		pluginView.setManualLabel(toConcreteLabel(chartPlugin.getManualLabel(), locale));
 
 		pluginView.setIconUrl(resolveIconUrl(chartPlugin, themeName));
 
@@ -232,8 +232,9 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		if (plugin == null)
 			return null;
 
-		Icon icon = plugin.getIcon(themeName);
-		return (icon == null ? null : resolveIconUrl(plugin));
+		ChartPluginResource iconRes = plugin.getIconResource(themeName);
+
+		return (iconRes == null ? null : resolveIconUrl(plugin));
 	}
 
 	protected String resolveIconUrl(HtmlChartPlugin plugin)
@@ -285,6 +286,20 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		public void setIconUrl(String iconUrl)
 		{
 			this.iconUrl = iconUrl;
+		}
+
+		@JsonIgnore
+		@Override
+		public List<ChartPluginResource> getResources()
+		{
+			return super.getResources();
+		}
+
+		@JsonIgnore
+		@Override
+		public Map<String, String> getIconResourceNames()
+		{
+			return super.getIconResourceNames();
 		}
 
 		@JsonIgnore
