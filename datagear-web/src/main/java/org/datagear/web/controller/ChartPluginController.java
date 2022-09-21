@@ -167,6 +167,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 			ZipInputStream zin = null;
 			try
 			{
+				zin = IOUtil.getZipInputStream(zipFile);
 				IOUtil.unzip(zin, myTmpDirectory);
 			}
 			finally
@@ -176,7 +177,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 		}
 
 		List<HtmlChartPluginView> pluginInfos = new ArrayList<>();
-		Set<HtmlChartPlugin> loadedPlugins = resolveHtmlChartPlugins(zipFile);
+		Set<HtmlChartPlugin> loadedPlugins = resolveHtmlChartPlugins(myTmpDirectory);
 		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
 
@@ -317,10 +318,14 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 		}
 
 		if(chartPlugin == null)
+		{
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
 		
 		String themeName = resolveChartPluginIconThemeName(request);
-		ChartPluginResource iconResource = chartPlugin.getIconResource(themeName);
+		String iconResName = chartPlugin.getIconResourceName(themeName);
+		ChartPluginResource iconResource = (StringUtil.isEmpty(iconResName) ? null :  chartPlugin.getResource(iconResName));
 		
 		writeChartPluginResource(request, response, webRequest, chartPlugin, iconResource);
 	}
@@ -332,7 +337,10 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 		ChartPlugin chartPlugin = getDirectoryHtmlChartPluginManager().get(pluginId);
 		
 		if(chartPlugin == null)
+		{
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
 		
 		String resName = resolvePathAfter(request, "/resource/" + pluginId + "/");
 		// 处理可能的中文资源名
@@ -410,7 +418,10 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 			WebRequest webRequest, ChartPlugin chartPlugin, ChartPluginResource resource) throws Exception
 	{
 		if (resource == null)
+		{
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
 
 		long lastModified = resource.getLastModified();
 		if (webRequest.checkNotModified(lastModified))

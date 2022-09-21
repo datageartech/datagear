@@ -46,15 +46,7 @@ public interface ChartPlugin extends Identifiable, Labeled
 	Label getNameLabel();
 
 	/**
-	 * 获取指定名称的插件资源。
-	 * 
-	 * @param name
-	 * @return 返回{@code null}表示没有
-	 */
-	ChartPluginResource getResource(String name);
-	
-	/**
-	 * 获取所有插件资源。
+	 * 获取此插件的所有资源。
 	 * <p>
 	 * 返回{@code null}或空表示没有任何资源。
 	 * </p>
@@ -64,12 +56,20 @@ public interface ChartPlugin extends Identifiable, Labeled
 	List<ChartPluginResource> getResources();
 	
 	/**
-	 * 获取最匹配指定主题名称的图标资源。
+	 * 获取此插件指定名称的资源。
+	 * 
+	 * @param name
+	 * @return 返回{@code null}表示没有
+	 */
+	ChartPluginResource getResource(String name);
+	
+	/**
+	 * 获取最匹配指定主题名称的图标资源名，用于通过{@linkplain #getResource(String)}获取图标资源。
 	 * 
 	 * @param themeName
-	 * @return 返回{@code null}表示没有图标
+	 * @return 返回{@code null}或空表示没有图标
 	 */
-	ChartPluginResource getIconResource(String themeName);
+	String getIconResourceName(String themeName);
 
 	/**
 	 * 获取{@linkplain ChartParam}列表。

@@ -108,34 +108,22 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	@Override
 	public ChartPluginResource getResource(String name)
 	{
-		if (this.resources == null)
+		if (this.resources == null || this.resources.isEmpty() || StringUtil.isEmpty(name))
 			return null;
 
 		for (ChartPluginResource res : this.resources)
 		{
-			if (res.getName().equals(name))
+			if (name.equals(res.getName()))
 				return res;
 		}
 
 		return null;
 	}
-
+	
 	@Override
-	public ChartPluginResource getIconResource(String themeName)
-	{
-		String resName = getIconResourceName(themeName);
-		return (StringUtil.isEmpty(resName) ? null : getResource(resName));
-	}
-
-	/**
-	 * 获取匹配指定主题的图标资源名。
-	 * 
-	 * @param themeName
-	 * @return 返回{@code null}表示无图标
-	 */
 	public String getIconResourceName(String themeName)
 	{
-		if (this.iconResourceNames == null)
+		if (this.iconResourceNames == null || this.iconResourceNames.isEmpty())
 			return null;
 
 		themeName = (themeName == null ? "" : themeName.toLowerCase());

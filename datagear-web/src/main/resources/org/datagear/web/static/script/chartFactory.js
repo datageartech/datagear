@@ -3621,20 +3621,20 @@
 	 * @param type 事件类型
 	 * @param originalEvent 底层原始事件
 	 * @returns 图表事件对象，格式为：
- *							{
- *								//事件类型，比如："click"、"dblclick"、"mousedown"
- *								type: "...",
- *								//事件数据，格式由各图表类型决定，通常是：{ ... }、[ ... ]、[ {...}, ... ]、[ [...], ... ]
- *								data: ...,
- *								//事件原始数据索引（图表数据集结果数据索引），格式为：{ ... }、[ {...}, ... ]
- *								originalDataIndex: ...,
- *								//事件原始数据（图表数据集结果数据），格式由各图表类型决定，通常是：{ ... }、[ ... ]、[ {...}, ... ]、[ [...], ... ]
- *								originalData: ...,
- *								//底层原始事件，通常是图表底层组件事件对象
- *								originalEvent: ...,
- *								//事件图表对象
- *								chart: ...
- * 							}
+	 *							{
+	 *								//事件类型，比如："click"、"dblclick"、"mousedown"
+	 *								type: "...",
+	 *								//事件数据，格式由各图表类型决定，通常是：{ ... }、[ ... ]、[ {...}, ... ]、[ [...], ... ]
+	 *								data: ...,
+	 *								//事件原始数据索引（图表数据集结果数据索引），格式为：{ ... }、[ {...}, ... ]
+	 *								originalDataIndex: ...,
+	 *								//事件原始数据（图表数据集结果数据），格式由各图表类型决定，通常是：{ ... }、[ ... ]、[ {...}, ... ]、[ [...], ... ]
+	 *								originalData: ...,
+	 *								//底层原始事件，通常是图表底层组件事件对象
+	 *								originalEvent: ...,
+	 *								//事件图表对象
+	 *								chart: ...
+	 * 							}
 	 * @since 3.1.0
 	 */
 	chartBase.eventNew = function(type, originalEvent)
@@ -3647,6 +3647,37 @@
 		};
 		
 		return event;
+	};
+	
+	/**
+	 * 获取图表插件的所有资源列表。
+	 * 
+	 * @returns 插件资源列表，格式为：[ { name: "..." }, ... ]
+	 * @since 4.1.0
+	 */
+	chartBase.pluginResources = function()
+	{
+		return (this.plugin.resources || []);
+	};
+	
+	/**
+	 * 获取图表插件指定名称资源的URL。
+	 * 使用此URL可从服务端加载资源。
+	 * 
+	 * @param name chartBase.pluginResources()函数返回的其中一个资源名
+	 * @returns 
+	 * @since 4.1.0
+	 */
+	chartBase.pluginResourceURL = function(name)
+	{
+		name = (name || "");
+		
+		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
+		
+		var url = "/chartPlugin/resource/"+encodeURIComponent(this.plugin.id)+"/"+name;
+		url = chartFactory.toWebContextPathURL(webContext, url);
+		
+		return url;
 	};
 	
 	//-------------
