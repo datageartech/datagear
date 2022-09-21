@@ -153,7 +153,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 				// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
 				.antMatchers(
 						//图表插件
-						"/chartPlugin/icon/*", "/chartPlugin/chartPluginManager.js",
+						"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
 						//图表展示
 						"/chart/show/**", "/chart/showData",
 						//看板展示

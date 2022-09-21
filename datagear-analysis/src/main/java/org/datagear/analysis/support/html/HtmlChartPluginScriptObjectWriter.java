@@ -8,16 +8,23 @@
 package org.datagear.analysis.support.html;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
 import org.datagear.util.IOUtil;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@linkplain HtmlChartPlugin} JS脚本对象输出流。
@@ -104,6 +111,8 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 		{
 			super(plugin.getId(), plugin.getNameLabel());
 			setDescLabel(plugin.getDescLabel());
+			setResources(ChartPluginResourceJson.valuesOf(plugin.getResources()));
+			setIconResourceNames(plugin.getIconResourceNames());
 			setChartParams(plugin.getChartParams());
 			setDataSigns(plugin.getDataSigns());
 			setVersion(plugin.getVersion());
@@ -112,10 +121,73 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 			setCategoryOrders(plugin.getCategoryOrders());
 		}
 
+		@JsonIgnore
 		@Override
 		public Chart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException
 		{
 			throw new UnsupportedOperationException();
+		}
+	}
+
+	protected static class ChartPluginResourceJson implements ChartPluginResource
+	{
+		private String name;
+
+		public ChartPluginResourceJson()
+		{
+			super();
+		}
+
+		public ChartPluginResourceJson(String name)
+		{
+			super();
+			this.name = name;
+		}
+
+		public ChartPluginResourceJson(ChartPluginResource resource)
+		{
+			super();
+			this.name = (resource == null ? null : resource.getName());
+		}
+
+		@Override
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		@JsonIgnore
+		@Override
+		public InputStream getInputStream() throws IOException
+		{
+			return null;
+		}
+
+		@JsonIgnore
+		@Override
+		public long getLastModified()
+		{
+			return 0;
+		}
+
+		public static List<ChartPluginResourceJson> valuesOf(List<? extends ChartPluginResource> resources)
+		{
+			if (resources == null)
+				return null;
+			else if (resources.isEmpty())
+				return Collections.emptyList();
+
+			List<ChartPluginResourceJson> resJsons = new ArrayList<ChartPluginResourceJson>(resources.size());
+
+			for (ChartPluginResource resource : resources)
+				resJsons.add(new ChartPluginResourceJson(resource));
+
+			return resJsons;
 		}
 	}
 }

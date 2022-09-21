@@ -70,4 +70,10 @@ public class FileChartPluginResource implements ChartPluginResource
 	{
 		return file.lastModified();
 	}
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [name=" + name + "]";
+	}
 }

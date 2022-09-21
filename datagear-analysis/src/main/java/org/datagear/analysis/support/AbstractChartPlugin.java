@@ -89,9 +89,10 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 		return resources;
 	}
 
-	public void setResources(List<ChartPluginResource> resources)
+	@SuppressWarnings("unchecked")
+	public void setResources(List<? extends ChartPluginResource> resources)
 	{
-		this.resources = resources;
+		this.resources = (List<ChartPluginResource>) resources;
 	}
 
 	public Map<String, String> getIconResourceNames()
@@ -121,6 +122,18 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	@Override
 	public ChartPluginResource getIconResource(String themeName)
+	{
+		String resName = getIconResourceName(themeName);
+		return (StringUtil.isEmpty(resName) ? null : getResource(resName));
+	}
+
+	/**
+	 * 获取匹配指定主题的图标资源名。
+	 * 
+	 * @param themeName
+	 * @return 返回{@code null}表示无图标
+	 */
+	public String getIconResourceName(String themeName)
 	{
 		if (this.iconResourceNames == null)
 			return null;
@@ -162,7 +175,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 		if (StringUtil.isEmpty(resName))
 			resName = firstResName;
 
-		return (StringUtil.isEmpty(resName) ? null : getResource(resName));
+		return resName;
 	}
 
 	@Override
