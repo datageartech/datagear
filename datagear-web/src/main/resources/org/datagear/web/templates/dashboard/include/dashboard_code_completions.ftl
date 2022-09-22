@@ -160,6 +160,8 @@
 		{name: "originalDataIndex", value: "originalDataIndex(", displayName: "originalDataIndex() ", displayComment: "chart", categories: ["chart"]},
 		{name: "originalDataIndexes", value: "originalDataIndexes(", displayName: "originalDataIndexes() ", displayComment: "chart", categories: ["chart"]},
 		{name: "plugin", value: "plugin", displayName: "plugin ", displayComment: "chart", categories: ["chart"]},
+		{name: "pluginResourceURL", value: "pluginResourceURL(", displayName: "pluginResourceURL() ", displayComment: "chart", categories: ["chart"]},
+		{name: "pluginResources", value: "pluginResources()", displayName: "pluginResources() ", displayComment: "chart", categories: ["chart"]},
 		{name: "refreshData", value: "refreshData()", displayName: "refreshData() ", displayComment: "chart", categories: ["chart"]},
 		{name: "registerEventHandlerDelegation", value: "registerEventHandlerDelegation(", displayName: "registerEventHandlerDelegation() ", displayComment: "chart", categories: ["chart"]},
 		{name: "removeEventHandlerDelegation", value: "removeEventHandlerDelegation(", displayName: "removeEventHandlerDelegation() ", displayComment: "chart", categories: ["chart"]},
