@@ -34,7 +34,7 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 		super();
 		super.setId(id);
 		super.setNameLabel(new Label(AttributeValueHtmlChartPlugin.class.getSimpleName()));
-		super.setChartRenderer(buildJsChartRenderer(chartAttributeName));
+		super.setRenderer(buildJsChartRenderer(chartAttributeName));
 		this.chartAttributeName = chartAttributeName;
 	}
 
@@ -46,7 +46,7 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 	public void setChartAttributeName(String chartAttributeName)
 	{
 		this.chartAttributeName = chartAttributeName;
-		super.setChartRenderer(buildJsChartRenderer(chartAttributeName));
+		super.setRenderer(buildJsChartRenderer(chartAttributeName));
 	}
 
 	protected StringJsChartRenderer buildJsChartRenderer(String valueChartParamName)

@@ -31,7 +31,7 @@ import org.datagear.util.i18n.Label;
  * <pre>
  * &lt;div id="[图表HTML元素ID]"&gt;&lt;/div&gt;
  * &lt;script type="text/javascript"&gt;
- * var [图表插件变量名]={..., chartRenderer: {...}};
+ * var [图表插件变量名]={..., renderer: {...}};
  * var [渲染上下文变量名]={...};
  * var [图表变量名]=
  * {
@@ -42,7 +42,7 @@ import org.datagear.util.i18n.Label;
  * 	renderContext : [渲染上下文变量名],
  * 	chartDataSets : [{...}, ...]
  * };
- * [图表插件变量名].chartRenderer.render([图表变量名]);
+ * [图表插件变量名].renderer.render([图表变量名]);
  * &lt;/script&gt;
  * </pre>
  * </code>
@@ -58,8 +58,14 @@ import org.datagear.util.i18n.Label;
  */
 public class HtmlChartPlugin extends AbstractChartPlugin
 {
-	public static final String PROPERTY_CHART_RENDERER = "chartRenderer";
-
+	/** 图表渲染器属性名 */
+	public static final String PROPERTY_RENDERER = "renderer";
+	
+	/**
+	 * 旧版本（4.0.0及以前版本）图表渲染器属性名，将在未来版本移除。
+	 */
+	public static final String PROPERTY_RENDERER_OLD = "chartRenderer";
+	
 	/** HTML换行符 */
 	public static final String HTML_NEW_LINE = "\n";
 
@@ -68,7 +74,7 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 	protected static final HtmlChartScriptObjectWriter HTML_CHART_SCRIPT_OBJECT_WRITER = new HtmlChartScriptObjectWriter();
 
 	/** JS图表渲染器 */
-	private JsChartRenderer chartRenderer;
+	private JsChartRenderer renderer;
 
 	/** 图表HTML元素标签名 */
 	private String elementTagName = "div";
@@ -84,20 +90,20 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 		super();
 	}
 
-	public HtmlChartPlugin(String id, Label nameLabel, JsChartRenderer chartRenderer)
+	public HtmlChartPlugin(String id, Label nameLabel, JsChartRenderer renderer)
 	{
 		super(id, nameLabel);
-		this.chartRenderer = chartRenderer;
+		this.renderer = renderer;
 	}
 
-	public JsChartRenderer getChartRenderer()
+	public JsChartRenderer getRenderer()
 	{
-		return chartRenderer;
+		return renderer;
 	}
 
-	public void setChartRenderer(JsChartRenderer chartRenderer)
+	public void setRenderer(JsChartRenderer renderer)
 	{
-		this.chartRenderer = chartRenderer;
+		this.renderer = renderer;
 	}
 
 	public String getElementTagName()
@@ -241,7 +247,7 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 
 		if (!optionInitialized.isNotWriteInvoke())
 		{
-			out.write(optionInitialized.getPluginVarName() + "." + PROPERTY_CHART_RENDERER + "."
+			out.write(optionInitialized.getPluginVarName() + "." + PROPERTY_RENDERER + "."
 					+ JsChartRenderer.RENDER_FUNCTION_NAME + "(" + chart.getVarName() + ");");
 			writeNewLine(out);
 		}

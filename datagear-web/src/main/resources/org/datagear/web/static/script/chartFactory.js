@@ -37,7 +37,7 @@
  * 
  * 此图表工厂支持为图表元素添加elementAttrConst.RENDERER属性来自定义、扩展图表渲染器，具体参考chartBase._initRenderer函数说明。
  * 
- * 此图表工厂要求图表插件的图表渲染器（chartRenderer）格式为：
+ * 此图表工厂要求图表插件的图表渲染器（chartBase.plugin.renderer）格式为：
  * {
  *   //可选，渲染图表函数是否是异步函数，默认为false
  *   asyncRender: true、false、function(chart){ ...; return true 或者 false; }
@@ -365,7 +365,7 @@
 		var plugin = this.plugin;
 		
 		//初始化可能由后台构建的仅包含id的plugin
-		if(!plugin.chartRenderer)
+		if(!plugin.renderer)
 		{
 			if(!chartFactory.chartPluginManager || !chartFactory.chartPluginManager.get)
 				throw new Error("[chartFactory.chartPluginManager.get] required");
@@ -1006,7 +1006,7 @@
 		}
 		else
 		{
-			this.plugin.chartRenderer.render(this);
+			this.plugin.renderer.render(this);
 		}
 		
 		if(!async)
@@ -1063,7 +1063,7 @@
 		}
 		else
 		{
-			this.plugin.chartRenderer.update(this, results);
+			this.plugin.renderer.update(this, results);
 		}
 		
 		if(!async)
@@ -1098,9 +1098,9 @@
 		{
 			renderer.resize(this);
 		}
-		else if(this.plugin.chartRenderer.resize)
+		else if(this.plugin.renderer.resize)
 		{
-			this.plugin.chartRenderer.resize(this);
+			this.plugin.renderer.resize(this);
 		}
 		else
 		{
@@ -1160,9 +1160,9 @@
 		{
 			renderer.destroy(this);
 		}
-		else if(this.plugin.chartRenderer.destroy)
+		else if(this.plugin.renderer.destroy)
 		{
-			this.plugin.chartRenderer.destroy(this);
+			this.plugin.renderer.destroy(this);
 		}
 		else
 		{
@@ -1217,13 +1217,13 @@
 			return (renderer.asyncRender == true);
 		}
 		
-		if(this.plugin.chartRenderer.asyncRender == undefined)
+		if(this.plugin.renderer.asyncRender == undefined)
 			return false;
 		
-		if(typeof(this.plugin.chartRenderer.asyncRender) == "function")
-			return this.plugin.chartRenderer.asyncRender(this);
+		if(typeof(this.plugin.renderer.asyncRender) == "function")
+			return this.plugin.renderer.asyncRender(this);
 		
-		return (this.plugin.chartRenderer.asyncRender == true);
+		return (this.plugin.renderer.asyncRender == true);
 	};
 	
 	/**
@@ -1243,13 +1243,13 @@
 			return (renderer.asyncUpdate == true);
 		}
 		
-		if(this.plugin.chartRenderer.asyncUpdate == undefined)
+		if(this.plugin.renderer.asyncUpdate == undefined)
 			return false;
 		
-		if(typeof(this.plugin.chartRenderer.asyncUpdate) == "function")
-			return this.plugin.chartRenderer.asyncUpdate(this, results);
+		if(typeof(this.plugin.renderer.asyncUpdate) == "function")
+			return this.plugin.renderer.asyncUpdate(this, results);
 		
-		return (this.plugin.chartRenderer.asyncUpdate == true);
+		return (this.plugin.renderer.asyncUpdate == true);
 	};
 	
 	/**
@@ -1545,12 +1545,12 @@
 		{
 			renderer.on(this, eventType, handler);
 		}
-		else if(this.plugin.chartRenderer.on)
+		else if(this.plugin.renderer.on)
 		{
-			this.plugin.chartRenderer.on(this, eventType, handler);
+			this.plugin.renderer.on(this, eventType, handler);
 		}
 		else
-			throw new Error("Chart ["+this.id+"] 's [chartRenderer.on] undefined");
+			throw new Error("Chart ["+this.id+"] 's [renderer.on] undefined");
 	};
 	
 	/**
@@ -1573,9 +1573,9 @@
 		{
 			renderer.off(this, eventType, handler);
 		}
-		else if(this.plugin.chartRenderer.off)
+		else if(this.plugin.renderer.off)
 		{
-			this.plugin.chartRenderer.off(this, eventType, handler);
+			this.plugin.renderer.off(this, eventType, handler);
 		}
 		//为ECharts图表提供默认off支持
 		else if(this._isEchartsInstance(this.internal()))
@@ -1583,7 +1583,7 @@
 			this.echartsOffEventHandler(eventType, handler);
 		}
 		else
-			throw new Error("Chart ["+this.id+"] 's [chartRenderer.off] undefined");
+			throw new Error("Chart ["+this.id+"] 's [renderer.off] undefined");
 	};
 	
 	/**

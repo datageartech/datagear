@@ -42,19 +42,24 @@ import org.datagear.util.StringUtil;
  * <code>
  * <pre>
  * |---- plugin.json
+ * |---- renderer.js    //可选，当plugin.json里没有定义renderer（或chartRenderer）属性时必须
+ * |---- ...
  * </pre>
  * </code>
  * <p>
- * 上述文件格式规范如下：
+ * <code>plugin.json</code>文件格式规范如下：
  * </p>
  * <code>
  * <pre>
  * {
- * 	id : "...",
- * 	nameLabel : { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
+ * 	//基本属性，参考{@linkplain JsonChartPluginPropertiesResolver}
  * 	...,
- * 	chartRenderer: { ... },
- * 	...
+ * 	
+ * 	//可选，图表渲染器JS对象定义，通常包含用于渲染图表的函数
+ * 	//也可以不在此定义，而在单独的renderer.js文件中定义
+ * 	renderer: {...},
+ * 	//或者用于兼容旧版本（4.0.0及以前版本）的
+ * 	chartRenderer: {...}
  * }
  * </pre>
  * </code>
@@ -67,10 +72,10 @@ import org.datagear.util.StringUtil;
  * <p>
  * ，那么上述文件结构中还应有<code>icons/light.png</code>文件。
  * </p>
- * <code>chartRenderer</code>用于定义{@linkplain HtmlChartPlugin#getChartRenderer()}内容。
+ * <code>renderer</code>（或者<code>chartRenderer</code>）用于定义{@linkplain HtmlChartPlugin#getRenderer()}内容。
  * </p>
  * <p>
- * 默认地，上述文件应该为<code>UTF-8</code>编码。
+ * 默认地，<code>plugin.json</code>、<code>renderer.js</code>文件应该为<code>UTF-8</code>编码。
  * </p>
  * 
  * @author datagear@163.com
@@ -78,8 +83,16 @@ import org.datagear.util.StringUtil;
  */
 public class HtmlChartPluginLoader
 {
+	/**
+	 * 插件JSON文件名
+	 */
 	public static final String FILE_NAME_PLUGIN = "plugin.json";
 
+	/**
+	 * 图表渲染器JS文件名
+	 */
+	public static final String FILE_NAME_RENDERER = "renderer.js";
+	
 	private HtmlChartPluginJsDefResolver htmlChartPluginJsDefResolver = new HtmlChartPluginJsDefResolver();
 
 	private JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver();
@@ -343,33 +356,49 @@ public class HtmlChartPluginLoader
 	 */
 	protected HtmlChartPlugin loadSingleForDirectory(File directory, File pluginZip) throws HtmlChartPluginLoadException
 	{
-		File pluginJsonFile = FileUtil.getFile(directory, FILE_NAME_PLUGIN);
+		File pluginFile = FileUtil.getFile(directory, FILE_NAME_PLUGIN);
 
-		if (!pluginJsonFile.exists())
+		if (!pluginFile.exists())
 			return null;
 
 		HtmlChartPlugin plugin = null;
 
-		Reader chartIn = null;
+		Reader pluginIn = null;
+		Reader rendererIn = null;
 
 		try
 		{
-			chartIn = IOUtil.getReader(pluginJsonFile, this.encoding);
-
-			JsDefContent jsDefContent = this.htmlChartPluginJsDefResolver.resolve(chartIn);
-
-			if (!StringUtil.isEmpty(jsDefContent.getPluginJson())
-					&& !StringUtil.isEmpty(jsDefContent.getPluginChartRenderer()))
+			pluginIn = IOUtil.getReader(pluginFile, this.encoding);
+			JsDefContent jsDefContent = this.htmlChartPluginJsDefResolver.resolve(pluginIn);
+			
+			if (!StringUtil.isEmpty(jsDefContent.getPluginJson()))
 			{
-				plugin = createHtmlChartPlugin();
-
-				this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin,
-						jsDefContent.getPluginJson());
-				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRenderer()));
-				inflateChartPluginResources(plugin, (pluginZip == null ? directory : pluginZip));
-
-				if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))
-					plugin = null;
+				String rendererStr = "";
+				
+				if(jsDefContent.hasPluginRenderer())
+					rendererStr = jsDefContent.getPluginRenderer();
+				else
+				{
+					File rendererFile = FileUtil.getFile(directory, FILE_NAME_RENDERER);
+					if(rendererFile.exists())
+					{
+						rendererIn = IOUtil.getReader(rendererFile, this.encoding);
+						rendererStr = IOUtil.readString(rendererIn, false);
+					}
+				}
+				
+				if(!StringUtil.isEmpty(rendererStr))
+				{
+					plugin = createHtmlChartPlugin();
+	
+					this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin,
+							jsDefContent.getPluginJson());
+					plugin.setRenderer(new StringJsChartRenderer(rendererStr));
+					inflateChartPluginResources(plugin, (pluginZip == null ? directory : pluginZip));
+	
+					if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))
+						plugin = null;
+				}
 			}
 		}
 		catch (HtmlChartPluginLoadException e)
@@ -382,7 +411,8 @@ public class HtmlChartPluginLoader
 		}
 		finally
 		{
-			IOUtil.close(chartIn);
+			IOUtil.close(pluginIn);
+			IOUtil.close(rendererIn);
 		}
 
 		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱

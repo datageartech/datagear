@@ -14,47 +14,40 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.util.TextParserSupport;
 
 /**
  * {@linkplain HtmlChartPlugin}的JS定义格式解析器。
  * <p>
- * 支持的JS定义格式：
- * </p>
- * <code>
- * <pre>
- * {
- * 	id: ...,
- * 	nameLabel: ...,
- * 	...,
- * 	chartRenderer: {...},
- * 	...
- * }
- * </pre>
- * </code>
- * <p>
- * 此类从上述格式的输入流解析{@linkplain JsDefContent}对象，其中：
+ * 此类用于从{@linkplain HtmlChartPluginLoader}定义的<code>plugin.json</code>中解析{@linkplain JsDefContent}对象，其中：
  * </p>
  * <p>
- * {@linkplain JsDefContent#getPluginJson()}为上述格式中将
+ * {@linkplain JsDefContent#getPluginJson()}为<code>plugin.json</code>中将
  * </p>
  * <p>
+ * <code>renderer: {...}</code>
+ * <br>或<br>
  * <code>chartRenderer: {...}</code>
  * </p>
  * <p>
  * 替换为
  * </p>
  * <p>
- * <code>chartRenderer: {}</code>
+ * <code>renderer: {}</code>
  * </p>
  * <p>
- * 的内容。
+ * 的内容；
  * </p>
  * <p>
- * {@linkplain JsDefContent#getPluginChartRenderer()}为上述格式中<code>chartRenderer</code>属性值的内容：
+ * {@linkplain JsDefContent#getPluginRenderer()}为上述格式中<code>renderer</code>（或<code>chartRenderer</code>）属性值内容：
  * </p>
  * <p>
  * <code>{...}</code>
+ * </p>
+ * <p>
+ * 注意：如果<code>plugin.json</code>没有定义<code>renderer</code>（或<code>chartRenderer</code>）属性，
+ * {@linkplain JsDefContent#hasPluginRenderer()}将为{@code false}。
  * </p>
  * 
  * @author datagear@163.com
@@ -62,9 +55,11 @@ import org.datagear.util.TextParserSupport;
  */
 public class HtmlChartPluginJsDefResolver extends TextParserSupport
 {
-	protected static final char PROPERTY_CHART_RENDERER_FIRST = HtmlChartPlugin.PROPERTY_CHART_RENDERER.charAt(0);
-	protected static final String PROPERTY_CHART_RENDERER_DQ = "\"" + HtmlChartPlugin.PROPERTY_CHART_RENDERER + "\"";
-	protected static final String PROPERTY_CHART_RENDERER_SQ = "'" + HtmlChartPlugin.PROPERTY_CHART_RENDERER + "'";
+	protected static final String PROPERTY_RENDERER_DQ = "\"" + HtmlChartPlugin.PROPERTY_RENDERER + "\"";
+	protected static final String PROPERTY_RENDERER_SQ = "'" + HtmlChartPlugin.PROPERTY_RENDERER + "'";
+
+	protected static final String PROPERTY_RENDERER_OLD_DQ = "\"" + HtmlChartPlugin.PROPERTY_RENDERER_OLD + "\"";
+	protected static final String PROPERTY_RENDERER_OLD_SQ = "'" + HtmlChartPlugin.PROPERTY_RENDERER_OLD + "'";
 
 	public HtmlChartPluginJsDefResolver()
 	{
@@ -106,24 +101,27 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 	public JsDefContent resolve(Reader reader) throws IOException
 	{
 		StringWriter jsonOut = new StringWriter();
-		StringWriter chartRendererOut = new StringWriter();
+		StringWriter rendererOut = new StringWriter();
 
-		resolveJsDefContent(reader, jsonOut, chartRendererOut);
+		resolveJsDefContent(reader, jsonOut, rendererOut);
 
-		return new JsDefContent(jsonOut.toString(), chartRendererOut.toString());
+		JsDefContent jsDefContent = new JsDefContent(jsonOut.toString());
+		jsDefContent.setPluginRenderer(rendererOut.toString());
+		
+		return jsDefContent;
 	}
 
-	protected void resolveJsDefContent(Reader in, Writer jsonOut, Writer chartRendererOut) throws IOException
+	protected void resolveJsDefContent(Reader in, Writer jsonOut, Writer rendererOut) throws IOException
 	{
 		StringBuilder prevToken = new StringBuilder();
-		boolean chartRendererResolved = false;
+		boolean rendererResolved = false;
 
 		int c = -1;
 		while ((c = in.read()) > -1)
 		{
 			jsonOut.write(c);
 
-			if (!chartRendererResolved)
+			if (!rendererResolved)
 			{
 				// 字符串
 				if (isJsQuote(c))
@@ -162,12 +160,15 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 				{
 					String prevStr = prevToken.toString();
 
-					if (prevStr.equals(HtmlChartPlugin.PROPERTY_CHART_RENDERER)
-							|| prevStr.equals(PROPERTY_CHART_RENDERER_DQ) || prevStr.equals(PROPERTY_CHART_RENDERER_SQ))
+					if (prevStr.equals(HtmlChartPlugin.PROPERTY_RENDERER)
+							|| prevStr.equals(PROPERTY_RENDERER_DQ) || prevStr.equals(PROPERTY_RENDERER_SQ)
+							//兼容旧版本的"chartRenderer"渲染器属性名
+							|| prevStr.equals(HtmlChartPlugin.PROPERTY_RENDERER_OLD)
+							|| prevStr.equals(PROPERTY_RENDERER_OLD_DQ) || prevStr.equals(PROPERTY_RENDERER_OLD_SQ))
 					{
-						writeAfterJsObject(in, chartRendererOut, false);
+						writeAfterJsObject(in, rendererOut, false);
 						jsonOut.append("{}");
-						chartRendererResolved = true;
+						rendererResolved = true;
 					}
 				}
 				else
@@ -239,18 +240,17 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 		private String pluginJson;
 
 		/** 插件JS渲染器对象内容 */
-		private String pluginChartRenderer;
+		private String pluginRenderer = null;
 
 		public JsDefContent()
 		{
 			super();
 		}
 
-		public JsDefContent(String pluginJson, String pluginChartRenderer)
+		public JsDefContent(String pluginJson)
 		{
 			super();
 			this.pluginJson = pluginJson;
-			this.pluginChartRenderer = pluginChartRenderer;
 		}
 
 		public String getPluginJson()
@@ -262,22 +262,27 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 		{
 			this.pluginJson = pluginJson;
 		}
-
-		public String getPluginChartRenderer()
+		
+		public boolean hasPluginRenderer()
 		{
-			return pluginChartRenderer;
+			return !StringUtil.isEmpty(this.pluginRenderer);
 		}
 
-		public void setPluginChartRenderer(String pluginChartRenderer)
+		public String getPluginRenderer()
 		{
-			this.pluginChartRenderer = pluginChartRenderer;
+			return pluginRenderer;
+		}
+
+		public void setPluginRenderer(String pluginRenderer)
+		{
+			this.pluginRenderer = pluginRenderer;
 		}
 
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [pluginJson=" + pluginJson + ", pluginChartRenderer="
-					+ pluginChartRenderer + "]";
+			return getClass().getSimpleName() + " [pluginJson=" + pluginJson + ", pluginRenderer="
+					+ pluginRenderer + "]";
 		}
 	}
 }

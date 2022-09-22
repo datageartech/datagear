@@ -48,7 +48,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 * <pre>
 	 * var [varName]=
 	 * { ... };
-	 * [varName].chartRenderer=
+	 * [varName].renderer=
 	 * {...};
 	 * <pre>
 	 * </code>
@@ -79,15 +79,15 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 */
 	protected void writeHtmlChartRenderer(Writer out, HtmlChartPlugin plugin, String varName) throws IOException
 	{
-		out.write(varName + "." + HtmlChartPlugin.PROPERTY_CHART_RENDERER + "=");
+		out.write(varName + "." + HtmlChartPlugin.PROPERTY_RENDERER + "=");
 		writeNewLine(out);
 
-		JsChartRenderer chartRenderer = plugin.getChartRenderer();
+		JsChartRenderer renderer = plugin.getRenderer();
 
-		Reader reader = chartRenderer.getReader();
-
+		Reader reader = null;
 		try
 		{
+			reader = renderer.getReader();
 			IOUtil.write(reader, out);
 		}
 		finally

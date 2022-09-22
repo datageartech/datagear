@@ -69,10 +69,17 @@ public class HtmlChartPluginLoaderTest
 
 		AbstractChartPluginManager.sort(list);
 
-		Assert.assertEquals(4, list.size());
+		Assert.assertEquals(5, list.size());
 
 		{
 			HtmlChartPlugin plugin = list.get(0);
+			Assert.assertEquals("plugin05", plugin.getId());
+			StringJsChartRenderer chartRenderer = (StringJsChartRenderer)plugin.getRenderer();
+			Assert.assertEquals(" { render: function(chart){ } }", chartRenderer.getContent());
+		}
+
+		{
+			HtmlChartPlugin plugin = list.get(1);
 			Assert.assertEquals("plugin04", plugin.getId());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
@@ -81,7 +88,7 @@ public class HtmlChartPluginLoaderTest
 		}
 
 		{
-			HtmlChartPlugin plugin = list.get(1);
+			HtmlChartPlugin plugin = list.get(2);
 			Assert.assertEquals("plugin03", plugin.getId());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
@@ -90,7 +97,7 @@ public class HtmlChartPluginLoaderTest
 		}
 
 		{
-			HtmlChartPlugin plugin = list.get(2);
+			HtmlChartPlugin plugin = list.get(3);
 			Assert.assertEquals("plugin02", plugin.getId());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
@@ -99,7 +106,7 @@ public class HtmlChartPluginLoaderTest
 		}
 
 		{
-			HtmlChartPlugin plugin = list.get(3);
+			HtmlChartPlugin plugin = list.get(4);
 			Assert.assertEquals("plugin01", plugin.getId());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
