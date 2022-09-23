@@ -376,6 +376,7 @@ public class HtmlChartPluginLoader
 				String rendererCodeType = "";
 				String rendererCodeValue = "";
 				
+				// 内联渲染器格式应该优先使用
 				if(jsDefContent.hasPluginRenderer())
 				{
 					rendererCodeType = JsChartRenderer.CODE_TYPE_OBJECT;
