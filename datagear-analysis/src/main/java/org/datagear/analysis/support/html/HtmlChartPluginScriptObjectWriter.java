@@ -34,9 +34,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 {
+	private String localPluginVarNameForInvode = "localPlugin" + Long.toHexString(System.currentTimeMillis());
+
 	public HtmlChartPluginScriptObjectWriter()
 	{
 		super();
+	}
+
+	public String getLocalPluginVarNameForInvode()
+	{
+		return localPluginVarNameForInvode;
+	}
+
+	public void setLocalPluginVarNameForInvode(String localPluginVarNameForInvode)
+	{
+		this.localPluginVarNameForInvode = localPluginVarNameForInvode;
 	}
 
 	/**
@@ -67,6 +79,8 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 		writeJsonObject(out, jsonPlugin);
 		out.write(";");
 		writeNewLine(out);
+
+		// 这里必须在写入插件基本信息后再写入渲染器代码，使得渲染器代码内可以使用插件基本信息
 		writeHtmlChartRenderer(out, plugin, varName);
 	}
 
@@ -79,24 +93,50 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 */
 	protected void writeHtmlChartRenderer(Writer out, HtmlChartPlugin plugin, String varName) throws IOException
 	{
+		JsChartRenderer renderer = plugin.getRenderer();
+		String codeType = renderer.getCodeType();
+
 		out.write(varName + "." + HtmlChartPlugin.PROPERTY_RENDERER + "=");
 		writeNewLine(out);
+		
+		if (JsChartRenderer.CODE_TYPE_OBJECT.equals(codeType))
+		{
+			writeHtmlChartRendererCodeValue(out, renderer);
+			out.write(";");
+		}
+		else if (JsChartRenderer.CODE_TYPE_INVOKE.equals(codeType))
+		{
+			String tmpVarName = this.localPluginVarNameForInvode;
 
-		JsChartRenderer renderer = plugin.getRenderer();
+			out.write("(function(" + JsChartRenderer.INVOKE_CONTEXT_PLUGIN_VAR + "){");
+			writeNewLine(out);
+			out.write("var " + tmpVarName + " =");
+			writeNewLine(out);
+			writeHtmlChartRendererCodeValue(out, renderer);
+			writeNewLine(out);
+			out.write("return " + tmpVarName + ";");
+			writeNewLine(out);
+			out.write("})(" + varName + ");");
+			writeNewLine(out);
+		}
+		else
+			throw new IOException("Unsupported JsChartRenderer code type : " + codeType);
 
+		writeNewLine(out);
+	}
+
+	protected void writeHtmlChartRendererCodeValue(Writer out, JsChartRenderer renderer) throws IOException
+	{
 		Reader reader = null;
 		try
 		{
-			reader = renderer.getReader();
+			reader = renderer.getCodeReader();
 			IOUtil.write(reader, out);
 		}
 		finally
 		{
 			IOUtil.close(reader);
 		}
-
-		out.write(";");
-		writeNewLine(out);
 	}
 
 	/**

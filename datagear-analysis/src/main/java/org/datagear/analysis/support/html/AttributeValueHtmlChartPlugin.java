@@ -51,7 +51,7 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 
 	protected StringJsChartRenderer buildJsChartRenderer(String valueChartParamName)
 	{
-		return new StringJsChartRenderer("{" + HtmlChartPlugin.HTML_NEW_LINE
+		return new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_OBJECT, "{" + HtmlChartPlugin.HTML_NEW_LINE
 		//
 				+ "	render : function(chart)" + HtmlChartPlugin.HTML_NEW_LINE
 				//

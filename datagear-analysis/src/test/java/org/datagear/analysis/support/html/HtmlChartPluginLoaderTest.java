@@ -75,7 +75,7 @@ public class HtmlChartPluginLoaderTest
 			HtmlChartPlugin plugin = list.get(0);
 			Assert.assertEquals("plugin05", plugin.getId());
 			StringJsChartRenderer chartRenderer = (StringJsChartRenderer)plugin.getRenderer();
-			Assert.assertEquals(" { render: function(chart){ } }", chartRenderer.getContent());
+			Assert.assertEquals(" { render: function(chart){ } }", chartRenderer.getCodeValue());
 		}
 
 		{

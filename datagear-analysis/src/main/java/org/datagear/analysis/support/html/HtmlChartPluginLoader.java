@@ -373,27 +373,33 @@ public class HtmlChartPluginLoader
 			
 			if (!StringUtil.isEmpty(jsDefContent.getPluginJson()))
 			{
-				String rendererStr = "";
+				String rendererCodeType = "";
+				String rendererCodeValue = "";
 				
 				if(jsDefContent.hasPluginRenderer())
-					rendererStr = jsDefContent.getPluginRenderer();
+				{
+					rendererCodeType = JsChartRenderer.CODE_TYPE_OBJECT;
+					rendererCodeValue = jsDefContent.getPluginRenderer();
+				}
 				else
 				{
 					File rendererFile = FileUtil.getFile(directory, FILE_NAME_RENDERER);
 					if(rendererFile.exists())
 					{
+						rendererCodeType = JsChartRenderer.CODE_TYPE_INVOKE;
+
 						rendererIn = IOUtil.getReader(rendererFile, this.encoding);
-						rendererStr = IOUtil.readString(rendererIn, false);
+						rendererCodeValue = IOUtil.readString(rendererIn, false);
 					}
 				}
 				
-				if(!StringUtil.isEmpty(rendererStr))
+				if (!StringUtil.isEmpty(rendererCodeType) && !StringUtil.isEmpty(rendererCodeValue))
 				{
 					plugin = createHtmlChartPlugin();
 	
 					this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin,
 							jsDefContent.getPluginJson());
-					plugin.setRenderer(new StringJsChartRenderer(rendererStr));
+					plugin.setRenderer(new StringJsChartRenderer(rendererCodeType, rendererCodeValue));
 					inflateChartPluginResources(plugin, (pluginZip == null ? directory : pluginZip));
 	
 					if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))

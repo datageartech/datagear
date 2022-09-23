@@ -9,7 +9,7 @@
 			'zh' : '饼图中文'
 		}
 	},
-	renderer:
+	chartRenderer:
 	{
 		render: function(chart)
 		{
