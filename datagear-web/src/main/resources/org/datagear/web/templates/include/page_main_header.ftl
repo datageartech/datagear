@@ -85,9 +85,9 @@ User currentUser
 		e.originalEvent.preventDefault();
 		
 		if(tableDialog)
-			po.openTableDialog(e.item.url);
+			po.openTableDialog(e.item.url, {fullUrl: true});
 		else
-			po.open(e.item.url);
+			po.open(e.item.url, {fullUrl: true});
 	};
 	
 	po.changeTheme = function(themeName)
@@ -109,7 +109,7 @@ User currentUser
 		[
 			{
 				label: "<@spring.message code='module.personalSet' />",
-				url: "${contextPath}/user/personalSet",
+				url: po.concatContextPath("/user/personalSet"),
 				command: function(e){ po.openSysMenuDialog(e, false); }
 				
 			},
@@ -127,17 +127,17 @@ User currentUser
 				[
 					{
 						label: "<@spring.message code='module.driverEntity' />",
-						url: "${contextPath}/driverEntity/query",
+						url: po.concatContextPath("/driverEntity/query"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
 						label: "<@spring.message code='module.schemaUrlBuilder' />",
-						url: "${contextPath}/schemaUrlBuilder/set",
+						url: po.concatContextPath("/schemaUrlBuilder/set"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
 						label: "<@spring.message code='module.schemaGuard' />",
-						url: "${contextPath}/schemaGuard/query",
+						url: po.concatContextPath("/schemaGuard/query"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					}
 				]
@@ -148,17 +148,17 @@ User currentUser
 				[
 					{
 						label: "<@spring.message code='module.dataSetResDirectory' />",
-						url: "${contextPath}/dataSetResDirectory/pagingQuery",
+						url: po.concatContextPath("/dataSetResDirectory/pagingQuery"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
 						label: "<@spring.message code='module.chartPlugin' />",
-						url: "${contextPath}/chartPlugin/query",
+						url: po.concatContextPath("/chartPlugin/query"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
 						label: "<@spring.message code='module.dashboardGlobalRes' />",
-						url: "${contextPath}/dashboardGlobalRes/query",
+						url: po.concatContextPath("/dashboardGlobalRes/query"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					}
 				]
@@ -169,12 +169,12 @@ User currentUser
 				[
 					{
 						label: "<@spring.message code='module.user' />",
-						url: "${contextPath}/user/pagingQuery",
+						url: po.concatContextPath("/user/pagingQuery"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
 						label: "<@spring.message code='module.role' />",
-						url: "${contextPath}/role/pagingQuery",
+						url: po.concatContextPath("/role/pagingQuery"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					}
 				]
@@ -222,7 +222,7 @@ User currentUser
 			[
 				{
 					label: "<@spring.message code='module.about' />",
-					url: "${contextPath}/about",
+					url: po.concatContextPath("/about"),
 					command: function(e){ po.openSysMenuDialog(e, false); }
 				},
 				{
@@ -232,7 +232,7 @@ User currentUser
 				},
 				{
 					label: "<@spring.message code='module.changelog' />",
-					url: "${contextPath}/changelog",
+					url: po.concatContextPath("/changelog"),
 					command: function(e){ po.openSysMenuDialog(e); }
 				},
 				{
@@ -252,7 +252,7 @@ User currentUser
 			{ separator: true },
 			{
 				label: "<@spring.message code='module.logout' />",
-				url: "${contextPath}/logout",
+				url: po.concatContextPath("/logout"),
 				class: "p-error"
 			}
 		]);

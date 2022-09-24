@@ -16,6 +16,8 @@
 <script type="text/javascript">
 var contextPath="${contextPath}";
 </script>
+<#-- 自定义应用根路径后，浏览器无法自动加载系统图标，所以这里明确指定 -->
+<link href="${contextPath}/favicon.ico?v=${Global.VERSION}" type="images/x-icon" rel="shortcut icon" />
 <link href="${contextPath}/static/lib/primevue@3.15.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" type="text/css" rel="stylesheet" id="primevueCssLink" />
 <link href="${contextPath}/static/lib/primevue@3.15.0/resources/primevue.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/primeicons@5.0.0/primeicons.css" type="text/css" rel="stylesheet" />

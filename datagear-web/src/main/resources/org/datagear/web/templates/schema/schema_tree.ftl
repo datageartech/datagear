@@ -377,6 +377,7 @@
 			{
 				po.open(url,
 				{
+					fullUrl: true,
 					target: panel,
 					dialog: false,
 					success: function()
