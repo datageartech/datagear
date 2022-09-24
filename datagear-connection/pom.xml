@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.datagear</groupId>
 		<artifactId>datagear</artifactId>
-		<version>4.0.0</version>
+		<version>4.0.1</version>
 	</parent>
 	
 	<artifactId>datagear-connection</artifactId>
