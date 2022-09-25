@@ -135,6 +135,64 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
+<p-dialog :header="pm.vepts.hxtitle" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.hxtitleShown" @show="onVeHxtitlePanelShow">
+	<div class="page page-form">
+		<form id="${pid}veHxtitleForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veHxtitleType" class="field-label col-12 mb-2">
+						<@spring.message code='type' />
+					</label>
+					<div class="field-input col-12">
+						<p-dropdown id="${pid}veHxtitleType" v-model="pm.vepms.hxtitle.type" :options="pm.hxtitleTypeOptions"
+							option-label="name" option-value="value" class="input w-full">
+							<template #option="slotProps">
+								<div v-html="formatHxtitleOptionLabel(slotProps.option)"></div>
+							</template>
+						</p-dropdown>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veHxtitleContent" class="field-label col-12 mb-2">
+						<@spring.message code='textContent' />
+					</label>
+					<div class="field-input col-12">
+						<p-textarea id="${pid}veHxtitleContent" v-model="pm.vepms.hxtitle.content"
+							class="input w-full" name="content" autofocus>
+						</p-textarea>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veHxtitleTextAlign" class="field-label col-12 mb-2">
+						<@spring.message code='dashboard.veditor.style.textAlign' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veHxtitleTextAlign" v-model="pm.vepms.hxtitle.textAlign" type="text"
+							class="help-target input w-full" name="textAlign">
+						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="left">
+								<@spring.message code='dashboard.veditor.style.textAlign.left' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="center">
+								<@spring.message code='dashboard.veditor.style.textAlign.center' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="right">
+							<@spring.message code='dashboard.veditor.style.textAlign.right' />
+							</p-button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
 <p-dialog :header="pm.vepts.textElement" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.textElementShown" @show="onVeTextElementPanelShow">
@@ -1844,7 +1902,15 @@ page_boolean_options.ftl
 		pm.vepms.flexLayout.fillParent = showFillParent;
 		pm.vepss.flexLayoutShown = true;
 	};
-
+	
+	po.showVeHxtitlePanel = function(submitHandler, model)
+	{
+		var pm = po.vuePageModel();
+		pm.veshs.hxtitle = submitHandler;
+		pm.vepms.hxtitle = $.extend(true, { type: "h1" }, model);
+		pm.vepss.hxtitleShown = true;
+	};
+	
 	po.showVeTextElementPanel = function(submitHandler, model)
 	{
 		var pm = po.vuePageModel();
@@ -1925,6 +1991,7 @@ page_boolean_options.ftl
 			{
 				gridLayoutShown: false,
 				flexLayoutShown: false,
+				hxtitleShown: false,
 				textElementShown: false,
 				imageShown: false,
 				hyperlinkShown: false,
@@ -1939,6 +2006,7 @@ page_boolean_options.ftl
 			{
 				gridLayout: "<@spring.message code='gridLayout' />",
 				flexLayout: "<@spring.message code='flexLayout' />",
+				hxtitle: "<@spring.message code='titleElement' />",
 				textElement: "<@spring.message code='textElement' />",
 				image: "<@spring.message code='image' />",
 				hyperlink: "<@spring.message code='hyperlink' />",
@@ -1953,6 +2021,7 @@ page_boolean_options.ftl
 			{
 				gridLayout: { fillParent: false },
 				flexLayout: { fillParent: false },
+				hxtitle: { type: "h1", content: "" },
 				textElement: { content: "" },
 				image: {},
 				hyperlink: {},
@@ -1965,6 +2034,7 @@ page_boolean_options.ftl
 			//可视编辑操作对话框提交处理函数
 			veshs:
 			{
+				hxtitle: function(model){},
 				textElement: function(model){},
 				image: function(model){},
 				hyperlink: function(model){},
@@ -1985,13 +2055,26 @@ page_boolean_options.ftl
 			],
 			vepmChartThemeProxy: po.veDftChartThemeModel(),
 			vepmStyleProxy: {},
-			veStyleTabviewActiveIndex: 0
+			veStyleTabviewActiveIndex: 0,
+			hxtitleTypeOptions:
+			[
+				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h1' />", value: "h1" },
+				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h2' />", value: "h2" },
+				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h3' />", value: "h3" },
+				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h4' />", value: "h4" },
+				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h5' />", value: "h5" },
+				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h6' />", value: "h6" }
+			]
 		});
 		
 		var pm = po.vuePageModel();
 		
 		po.vueMethod(
 		{
+			formatHxtitleOptionLabel: function(option)
+			{
+				return "<"+option.value+">"+option.name+"</"+option.value+">";
+			},
 			onVeGridLayoutPanelShow: function()
 			{
 				var form = po.elementOfId("${pid}veGridLayoutForm", document.body);
@@ -2020,6 +2103,21 @@ page_boolean_options.ftl
 					{
 						pm.vepms.flexLayout = { fillParent: false };
 						pm.vepss.flexLayoutShown = false;
+					}
+				});
+			},
+			
+			onVeHxtitlePanelShow: function()
+			{
+				var form = po.elementOfId("${pid}veHxtitleForm", document.body);
+				po.initVePanelHelperSrc(form, pm.vepms.hxtitle);
+				
+				po.setupSimpleForm(form, pm.vepms.hxtitle, function()
+				{
+					if(pm.veshs.hxtitle(pm.vepms.hxtitle) !== false)
+					{
+						pm.vepms.hxtitle = { type: "h1", content: "" };
+						pm.vepss.hxtitleShown = false;
 					}
 				});
 			},

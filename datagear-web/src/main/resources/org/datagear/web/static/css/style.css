@@ -793,8 +793,12 @@ label[title]:not(.no-tip)::after,
     border-width: 0;
     background: #FFF;
 }
+.page-form-dashboard .p-menubar.ve-menubar .p-menuitem-link{
+	padding-top: 0.6rem;
+	padding-bottom: 0.6rem;
+}
 .page-form-dashboard .p-menubar.ve-menubar .p-submenu-list > .p-menuitem-active > .p-submenu-list{
-	top: -350%;
+	top: -430%;
 }
 .dashboard-select-chart-wrapper .page-manager .page-content{
 	height: 50vh;

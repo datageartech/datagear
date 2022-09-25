@@ -1020,6 +1020,40 @@
 	};
 	
 	/**
+	 * 校验insertHxtitle操作。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.checkInsertHxtitle = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 插入h1-h6元素。
+	 * 
+	 * @param model 标题模型，格式为：{ type: "h1到h6", content: "", textAlign: "" }
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertHxtitle = function(model, insertType, refEle)
+	{
+		model.type = (model.type || "h1");
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		var ele = $("<"+model.type+"></"+model.type+">");
+		
+		if(model.textAlign)
+			ele.attr("style", "text-align:"+model.textAlign+";");
+		
+		ele.html(model.content || "");
+		
+		this.insertElement(ele, insertType, refEle);
+	};
+	
+	/**
 	 * 校验insertLabel操作。
 	 * 
 	 * @param insertType 可选，参考insertElement函数的insertType参数

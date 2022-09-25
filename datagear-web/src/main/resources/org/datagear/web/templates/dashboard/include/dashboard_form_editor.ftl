@@ -833,7 +833,26 @@
 			return false;
 		}
 	};
-	
+
+	po.insertVeHxtitle = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertHxtitle(insertType))
+			return false;
+		
+		try
+		{
+			dashboardEditor.insertHxtitle(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+
 	po.insertVeTextElement = function(model)
 	{
 		var dashboardEditor = po.visualDashboardEditorByTab();
@@ -1339,6 +1358,26 @@
 							return;
 						
 						dashboardEditor.insertDiv(this.insertType);
+					}
+				}
+			},
+			{
+				label: "<@spring.message code='titleElement' />",
+				insertType: insertType,
+				class: "ve-panel-show-control hxtitleShown",
+				parentLabelPath: parentLabelPath,
+				command: function()
+				{
+					po.veQuickExecuteMenuItem(this);
+					
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						po.veCurrentInsertType = this.insertType;
+						po.showVeHxtitlePanel(function(model)
+						{
+							return po.insertVeHxtitle(model);
+						});
 					}
 				}
 			},
