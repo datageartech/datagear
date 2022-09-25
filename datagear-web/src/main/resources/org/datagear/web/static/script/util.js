@@ -1866,8 +1866,12 @@ $.inflatePageObj = function(po)
 	//打开URL
 	po.open = function(url, options)
 	{
-		url = this.concatContextPath(url);
+		options = $.extend({ fullUrl: false }, (options || {}));
+		
+		if(options.fullUrl !== true)
+			url = this.concatContextPath(url);
 		url = $.addParam(url, this.ppidParamName, this.pid);
+		
 		$.open(url, (options || {}));
 	};
 	

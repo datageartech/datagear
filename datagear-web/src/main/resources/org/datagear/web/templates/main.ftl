@@ -65,32 +65,33 @@
 		{
 			active: -1,
 			collapse: ($.cookie(po.mainMenuCollapseCookieName) == "true"),
+			//这里都使用根路径，因为需要支持拖拽新窗口打开
 			items:
 			[
 				{
 					label: "<@spring.message code='module.schema' />",
 					icon: 'pi pi-fw pi-database',
-					url: "${contextPath}/schema/query"
+					url: po.concatContextPath("/schema/query")
 				},
 				{
 					label: "<@spring.message code='module.analysisProject' />",
 					icon: 'pi pi-fw pi-folder',
-					url: "${contextPath}/analysisProject/pagingQuery"
+					url: po.concatContextPath("/analysisProject/pagingQuery")
 				},
 				{
 					label: "<@spring.message code='module.dataSet' />",
 					icon: 'pi pi-fw pi-table',
-					url: "${contextPath}/dataSet/pagingQuery"
+					url: po.concatContextPath("/dataSet/pagingQuery")
 				},
 				{
 					label: "<@spring.message code='module.chart' />",
 					icon: 'pi pi-fw pi-chart-line',
-					url: "${contextPath}/chart/pagingQuery"
+					url: po.concatContextPath("/chart/pagingQuery")
 				},
 				{
 					label: "<@spring.message code='module.dashboard' />",
 					icon: 'pi pi-fw pi-images',
-					url: "${contextPath}/dashboard/pagingQuery"
+					url: po.concatContextPath("/dashboard/pagingQuery")
 				}
 			]
 		}
@@ -139,6 +140,7 @@
 			
 			po.open(url,
 			{
+				fullUrl: true,
 				target: panel,
 				dialog: false,
 				success: function()

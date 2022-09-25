@@ -35,7 +35,7 @@
 	
 	po.vueMounted(function()
 	{
-		po.ajax(po.concatContextPath("/dataexchange/" + encodeURIComponent(po.schemaId) +"/getLogContent"),
+		po.ajax("/dataexchange/" + encodeURIComponent(po.schemaId) +"/getLogContent",
 		{
 			data:
 			{

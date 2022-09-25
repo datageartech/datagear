@@ -84,7 +84,7 @@
 				label: "<@spring.message code='addInNewWindow' />",
 				command: function()
 				{
-					po.open(po.concatContextPath("/dashboard/add"), {target: "_blank"});
+					po.open("/dashboard/add", {target: "_blank"});
 				}
 			},
 			{
