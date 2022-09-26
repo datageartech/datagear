@@ -18,57 +18,127 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 /**
  * {@linkplain DashboardSharePasswordCrypto}实现类。
+ * <p>
+ * 此类的设计参考了{@linkplain org.springframework.security.crypto.password.DelegatingPasswordEncoder}类，
+ * 使其支持切换加密类型：
+ * </p>
+ * <p>
+ * {@linkplain EncryptType#NOOP} 原始明文
+ * </p>
+ * <p>
+ * {@linkplain EncryptType#STD} 标准加密
+ * </p>
+ * <p>
+ * 而不会影响已存储的密码解密。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
 public class DashboardSharePasswordCryptoImpl implements DashboardSharePasswordCrypto
 {
-	private TextEncryptor textEncryptor;
+	public static final String ENCRYPT_TYPE_PREFIX_NOOP = "{noop}";
+	
+	public static final String ENCRYPT_TYPE_PREFIX_STD = "{std}";
+	
+	private EncryptType encryptType;
+	
+	private final TextEncryptor noopTextEncryptor = Encryptors.noOpText();
+	
+	private final TextEncryptor stdTextEncryptor;
 
-	public DashboardSharePasswordCryptoImpl()
+	public DashboardSharePasswordCryptoImpl(EncryptType encryptType, String secretKey, String salt)
 	{
 		super();
+		this.encryptType = encryptType;
+		this.stdTextEncryptor =  Encryptors.text(secretKey, salt);
 	}
 
-	public DashboardSharePasswordCryptoImpl(TextEncryptor textEncryptor)
+	public EncryptType getEncryptType()
 	{
-		super();
-		this.textEncryptor = textEncryptor;
+		return encryptType;
 	}
 
-	public TextEncryptor getTextEncryptor()
+	public void setEncryptType(EncryptType encryptType)
 	{
-		return textEncryptor;
+		this.encryptType = encryptType;
 	}
 
-	public void setTextEncryptor(TextEncryptor textEncryptor)
+	public TextEncryptor getNoopTextEncryptor()
 	{
-		this.textEncryptor = textEncryptor;
+		return noopTextEncryptor;
+	}
+
+	public TextEncryptor getStdTextEncryptor()
+	{
+		return stdTextEncryptor;
 	}
 
 	@Override
 	public String encrypt(String password)
 	{
-		if (this.textEncryptor == null)
-			return password;
-
 		if (password == null || "".equals(password))
 			return password;
 
-		return this.textEncryptor.encrypt(password);
+		TextEncryptor textEncryptor = null;
+		String prefix = null;
+		
+		if(EncryptType.NOOP.equals(encryptType))
+		{
+			textEncryptor = this.noopTextEncryptor;
+			prefix = ENCRYPT_TYPE_PREFIX_NOOP;
+		}
+		else if(EncryptType.STD.equals(encryptType))
+		{
+			textEncryptor = this.stdTextEncryptor;
+			prefix = ENCRYPT_TYPE_PREFIX_STD;
+		}
+		else
+			throw new UnsupportedOperationException();
+		
+		String re = textEncryptor.encrypt(password);
+		re = prefix + re;
+		
+		return  re;
 	}
 
 	@Override
 	public String decrypt(String password)
 	{
-		if (this.textEncryptor == null)
-			return password;
-
 		if (password == null || "".equals(password))
 			return password;
-
-		return this.textEncryptor.decrypt(password);
+		
+		TextEncryptor textEncryptor = null;
+		
+		if(password.indexOf(ENCRYPT_TYPE_PREFIX_NOOP) == 0)
+		{
+			textEncryptor = this.noopTextEncryptor;
+			password = password.substring(ENCRYPT_TYPE_PREFIX_NOOP.length());
+		}
+		else if(password.indexOf(ENCRYPT_TYPE_PREFIX_STD) == 0)
+		{
+			textEncryptor = this.stdTextEncryptor;
+			password = password.substring(ENCRYPT_TYPE_PREFIX_STD.length());
+		}
+		else
+			throw new UnsupportedOperationException();
+		
+		return textEncryptor.decrypt(password);
+	}
+	
+	/**
+	 * 加密类型。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static enum EncryptType
+	{
+		/**明文*/
+		NOOP,
+		
+		/**标准*/
+		STD
 	}
 	
 	public static void main(String[] args)
@@ -85,7 +155,7 @@ public class DashboardSharePasswordCryptoImpl implements DashboardSharePasswordC
 		println("Salt:");
 		println(salt);
 
-		DashboardSharePasswordCrypto crypto = new DashboardSharePasswordCryptoImpl(Encryptors.text(secretKey, salt));
+		DashboardSharePasswordCrypto crypto = new DashboardSharePasswordCryptoImpl(EncryptType.STD, secretKey, salt);
 
 		String command = "";
 

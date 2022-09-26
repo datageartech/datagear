@@ -122,6 +122,7 @@ import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.util.ChangelogResolver;
 import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.DashboardSharePasswordCryptoImpl;
+import org.datagear.web.util.DashboardSharePasswordCryptoImpl.EncryptType;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.SqlDriverChecker;
@@ -145,8 +146,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.security.crypto.encrypt.Encryptors;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
@@ -664,11 +663,12 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	@Bean
 	public DashboardSharePasswordCrypto dashboardSharePasswordCrypto()
 	{
-		TextEncryptor textEncryptor = Encryptors.text(
+		EncryptType encryptType = (getApplicationProperties().isDashboardSharePasswordCryptoDisabled() ?  EncryptType.NOOP : EncryptType.STD);
+		
+		DashboardSharePasswordCrypto bean = new DashboardSharePasswordCryptoImpl(encryptType,
 				getApplicationProperties().getDashboardSharePasswordCryptoSecretKey(),
 				getApplicationProperties().getDashboardSharePasswordCryptoSalt());
-
-		DashboardSharePasswordCrypto bean = new DashboardSharePasswordCryptoImpl(textEncryptor);
+		
 		return bean;
 	}
 

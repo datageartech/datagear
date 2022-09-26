@@ -134,6 +134,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${cacheService.spec}")
 	private String cacheServiceSpec;
 
+	/** 看板分享密码加密是否禁用 */
+	@Value("${dashboardSharePassword.crypto.disabled}")
+	private boolean dashboardSharePasswordCryptoDisabled;
+
 	/** 看板分享密码加密密钥 */
 	@Value("${dashboardSharePassword.crypto.secretKey}")
 	private String dashboardSharePasswordCryptoSecretKey;
@@ -467,6 +471,16 @@ public abstract class ApplicationProperties implements Serializable
 	public void setCacheServiceSpec(String cacheServiceSpec)
 	{
 		this.cacheServiceSpec = cacheServiceSpec;
+	}
+
+	public boolean isDashboardSharePasswordCryptoDisabled()
+	{
+		return dashboardSharePasswordCryptoDisabled;
+	}
+
+	public void setDashboardSharePasswordCryptoDisabled(boolean dashboardSharePasswordCryptoDisabled)
+	{
+		this.dashboardSharePasswordCryptoDisabled = dashboardSharePasswordCryptoDisabled;
 	}
 
 	public String getDashboardSharePasswordCryptoSecretKey()
