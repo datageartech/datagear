@@ -14,7 +14,7 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 
 系统基于Spring Boot、Jquery、Vue3、PrimeVue、ECharts等技术开发。
 
-## [DataGear 4.0.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
+## [DataGear 4.0.1 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
 ## 系统特点
 
