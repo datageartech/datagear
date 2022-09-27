@@ -94,7 +94,7 @@ public class DashboardSharePasswordCryptoImpl implements DashboardSharePasswordC
 			prefix = ENCRYPT_TYPE_PREFIX_STD;
 		}
 		else
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("Unsupported encryption");
 		
 		String re = textEncryptor.encrypt(password);
 		re = prefix + re;
@@ -121,7 +121,7 @@ public class DashboardSharePasswordCryptoImpl implements DashboardSharePasswordC
 			password = password.substring(ENCRYPT_TYPE_PREFIX_STD.length());
 		}
 		else
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("Unsupported decryption");
 		
 		return textEncryptor.decrypt(password);
 	}
