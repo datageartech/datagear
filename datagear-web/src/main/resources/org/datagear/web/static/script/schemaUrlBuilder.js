@@ -217,6 +217,25 @@
 			delete builders[removed[i]];
 	};
 	
+	schemaUrlBuilder.sortByDbType = function(builders)
+	{
+		if(!builders || builders.length == 0)
+			return;
+			
+		builders.sort(function(ba, bb)
+		{
+			var baType = (ba ? ba.dbType : "");
+			var bbType = (bb ? bb.dbType : "");
+			
+			if(baType < bbType)
+				return -1;
+			else if(baType > bbType)
+				return 1;
+			else
+				return 0;
+		});
+	};
+	
 	/**
 	 * 由数据库URL模板解析URL。
 	 * 

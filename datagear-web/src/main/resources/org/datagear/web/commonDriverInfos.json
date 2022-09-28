@@ -142,5 +142,59 @@
 			"template": "jdbc:sqlite:{name}",
 			"defaultValue": {}
 		}
+	},
+	{
+		"name": "TiDB",
+		"driverClassNames": ["com.mysql.jdbc.Driver", "com.mysql.cj.jdbc.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:mysql://{host}:{port}/{name}",
+			"defaultValue": {"port": "4000"}
+		}
+	},
+	{
+		"name": "DM-达梦",
+		"driverClassNames": ["dm.jdbc.driver.DmDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:dm://{host}:{port}",
+			"defaultValue": {"port": "5236"}
+		}
+	},
+	{
+		"name": "OceanBase",
+		"driverClassNames": ["com.alipay.oceanbase.jdbc.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:oceanbase://{host}:{port}/{name}",
+			"defaultValue": {"port": "2883"}
+		}
+	},
+	{
+		"name": "GaussDB",
+		"driverClassNames": ["com.huawei.gauss200.jdbc.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:gaussdb://{host}:{port}/{name}",
+			"defaultValue": {"port": "25308"}
+		}
+	},
+	{
+		"name": "KingbaseES-7",
+		"driverClassNames": ["com.kingbase.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:kingbase://{host}:{port}",
+			"defaultValue": {"port": "54321"}
+		}
+	},
+	{
+		"name": "KingbaseES-8",
+		"driverClassNames": ["com.kingbase8.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:kingbase8://{host}:{port}/{name}",
+			"defaultValue": {"port": "54321"}
+		}
 	}
 ]
