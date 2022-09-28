@@ -110,6 +110,9 @@
 	if(topBuilders.length <= 0)
 		topBuilders = (allBuilders.length <= 3 ? allBuilders : allBuilders.slice(0, 3));
 	
+	$.schemaUrlBuilder.sortByDbType(topBuilders);
+	$.schemaUrlBuilder.sortByDbType(allBuilders);
+	
 	var urlDbType = null;
 	var urlValue = null;
 	
