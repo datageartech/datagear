@@ -180,6 +180,24 @@
 		}
 	},
 	{
+		"name": "TDengine",
+		"driverClassNames": ["com.taosdata.jdbc.TSDBDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:TAOS://{host}:{port}/{name}",
+			"defaultValue": {"port": "6030"}
+		}
+	},
+	{
+		"name": "TDengine-REST",
+		"driverClassNames": ["com.taosdata.jdbc.rs.RestfulDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:TAOS-RS://{host}:{port}/{name}",
+			"defaultValue": {"port": "6041"}
+		}
+	},
+	{
 		"name": "KingbaseES-7",
 		"driverClassNames": ["com.kingbase.Driver"],
 		"urlTemplate":
