@@ -214,5 +214,14 @@
 			"template": "jdbc:kingbase8://{host}:{port}/{name}",
 			"defaultValue": {"port": "54321"}
 		}
+	},
+	{
+		"name": "Oscar-神州通用",
+		"driverClassNames": ["com.oscar.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:oscar://{host}:{port}/{name}",
+			"defaultValue": {"port": "2003"}
+		}
 	}
 ]
