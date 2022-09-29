@@ -32,6 +32,8 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.CharsetFilterHandler;
 import org.datagear.util.html.HtmlFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
@@ -70,6 +72,8 @@ import org.datagear.util.html.HtmlFilter;
  */
 public abstract class HtmlTplDashboardWidgetRenderer
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HtmlTplDashboardWidgetRenderer.class);
+
 	public static final String DASHBOARD_ELEMENT_ATTR_PREFIX = "dg-";
 
 	public static final String DASHBOARD_IMPORT_ITEM_NAME_ATTR = DASHBOARD_ELEMENT_ATTR_PREFIX + "import-name";
@@ -446,6 +450,10 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		widget.setAttribute(this.htmlChartPluginForGetWidgetException.getChartAttributeName(), "Chart widget '"
 				+ (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
 
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + exceptionWidgetId
+					+ "] on exception : " + t.getMessage());
+
 		return widget;
 	}
 
@@ -457,6 +465,10 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		widget.setAttribute(this.htmlChartPluginForGetWidgetException.getChartAttributeName(),
 				"Chart widget '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
 
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + notFoundWidgetId
+					+ "] on exception : not found");
+
 		return widget;
 	}
 
@@ -466,6 +478,10 @@ public abstract class HtmlTplDashboardWidgetRenderer
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
 		widget.setAttribute(this.htmlChartPluginForGetWidgetException.getChartAttributeName(), "Chart plugin is null");
+
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + chartWidget.getId()
+					+ "] on exception : null chart plugin");
 
 		return widget;
 	}

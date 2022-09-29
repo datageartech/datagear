@@ -586,19 +586,19 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	{
 		HttpSession session = request.getSession();
 
-		SessionDashboardInfoManager dashboardManager = (SessionDashboardInfoManager) session
-				.getAttribute(SessionDashboardInfoManager.class.getName());
-
 		synchronized (session)
 		{
+			SessionDashboardInfoManager dashboardManager = (SessionDashboardInfoManager) session
+					.getAttribute(SessionDashboardInfoManager.class.getName());
+
 			if (dashboardManager == null)
 			{
 				dashboardManager = new SessionDashboardInfoManager();
 				session.setAttribute(SessionDashboardInfoManager.class.getName(), dashboardManager);
 			}
-		}
 
-		return dashboardManager;
+			return dashboardManager;
+		}
 	}
 
 	/**
