@@ -161,7 +161,7 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model model)
 	{
 		SqlDataSetEntity dataSet = new SqlDataSetEntity();
-		setCookieAnalysisProject(request, response, dataSet);
+		setRequestAnalysisProject(request, response, dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_SQL);
 
@@ -196,7 +196,7 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model model)
 	{
 		JsonValueDataSetEntity dataSet = new JsonValueDataSetEntity();
-		setCookieAnalysisProject(request, response, dataSet);
+		setRequestAnalysisProject(request, response, dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonValue);
 
@@ -232,7 +232,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		JsonFileDataSetEntity dataSet = new JsonFileDataSetEntity();
 		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
-		setCookieAnalysisProject(request, response, dataSet);
+		setRequestAnalysisProject(request, response, dataSet);
 
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonFile);
@@ -272,7 +272,7 @@ public class DataSetController extends AbstractSchemaConnController
 		ExcelDataSetEntity dataSet = new ExcelDataSetEntity();
 		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
 		dataSet.setNameRow(1);
-		setCookieAnalysisProject(request, response, dataSet);
+		setRequestAnalysisProject(request, response, dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Excel);
 
@@ -310,7 +310,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		CsvValueDataSetEntity dataSet = new CsvValueDataSetEntity();
 		dataSet.setNameRow(1);
-		setCookieAnalysisProject(request, response, dataSet);
+		setRequestAnalysisProject(request, response, dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvValue);
 
@@ -347,7 +347,7 @@ public class DataSetController extends AbstractSchemaConnController
 		CsvFileDataSetEntity dataSet = new CsvFileDataSetEntity();
 		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
 		dataSet.setNameRow(1);
-		setCookieAnalysisProject(request, response, dataSet);
+		setRequestAnalysisProject(request, response, dataSet);
 
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvFile);
@@ -385,7 +385,7 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model model)
 	{
 		HttpDataSetEntity dataSet = new HttpDataSetEntity();
-		setCookieAnalysisProject(request, response, dataSet);
+		setRequestAnalysisProject(request, response, dataSet);
 
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());	
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Http);
@@ -784,7 +784,7 @@ public class DataSetController extends AbstractSchemaConnController
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setReadonlyActionOnRoleDataAnalyst(model, WebUtils.getUser());
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
 		
 		return "/dataSet/dataSet_table";
 	}
@@ -794,7 +794,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		setSelectAction(request, model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
 		
 		return "/dataSet/dataSet_table";
 	}
@@ -1003,10 +1003,10 @@ public class DataSetController extends AbstractSchemaConnController
 		return notFound;
 	}
 
-	protected void setCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+	protected void setRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
 			DataSetEntity entity)
 	{
-		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
+		setRequestAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 
 	protected boolean copyToDirectoryFileDataSetEntityDirectoryIf(DirectoryFileDataSetEntity entity,

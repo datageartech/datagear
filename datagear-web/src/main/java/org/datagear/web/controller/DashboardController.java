@@ -258,7 +258,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
-		setCookieAnalysisProject(request, response, dashboard);
+		setRequestAnalysisProject(request, response, dashboard);
 		dashboard.setId(IDUtil.randomIdOnTime20());
 		dashboard.setTemplates(new String[0]);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
@@ -593,7 +593,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		DashboardImportForm form = new DashboardImportForm();
 		form.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
-		form.setAnalysisProject(getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+		form.setAnalysisProject(getRequestAnalysisProject(request, response, getAnalysisProjectService()));
 
 		setFormModel(model, form, REQUEST_ACTION_IMPORT, SUBMIT_ACTION_SAVE_IMPORT);
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
@@ -857,7 +857,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setReadonlyActionOnRoleDataAnalyst(model, WebUtils.getUser());
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
 		
 		return "/dashboard/dashboard_table";
 	}
@@ -868,7 +868,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setSelectAction(request, model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
 		
 		return "/chart/dashboard_table";
 	}
@@ -1899,10 +1899,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return resourceName;
 	}
 
-	protected void setCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+	protected void setRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
 			HtmlTplDashboardWidgetEntity entity)
 	{
-		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
+		setRequestAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 
 	public static class HtmlTplDashboardSaveForm implements ControllerForm

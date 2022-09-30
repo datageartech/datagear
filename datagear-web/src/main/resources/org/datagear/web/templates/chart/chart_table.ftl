@@ -131,7 +131,7 @@
 		},
 		onAdd: function()
 		{
-			po.handleAddAction("/chart/add", {width: "70vw"});
+			po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/chart/add"), {width: "70vw"});
 		},
 		
 		onEdit: function()

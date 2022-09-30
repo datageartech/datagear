@@ -236,26 +236,29 @@ public abstract class AbstractController
 		model.addAttribute(name, toWriteJsonTemplateModel(value));
 	}
 
-	protected void setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
+	protected void setRequestAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
 			AnalysisProjectService analysisProjectService, AnalysisProjectAwareEntity<?> entity)
 	{
-		entity.setAnalysisProject(getCookieAnalysisProject(request, response, analysisProjectService));
+		entity.setAnalysisProject(getRequestAnalysisProject(request, response, analysisProjectService));
 	}
 
 	/**
-	 * 获取Cookie中的{@linkplain AnalysisProject}，没有则返回{@code null}。
+	 * 获取请求中的{@linkplain AnalysisProject}，没有则返回{@code null}。
 	 * 
 	 * @param request
 	 * @param response
 	 * @param analysisProjectService
 	 * @return
 	 */
-	protected AnalysisProject getCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+	protected AnalysisProject getRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
 			AnalysisProjectService analysisProjectService)
 	{
 		User user = WebUtils.getUser();
 
-		String analysisId = WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID);
+		String analysisId = request.getParameter(KEY_ANALYSIS_PROJECT_ID);
+		
+		if(StringUtil.isEmpty(analysisId))
+			analysisId = WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID);
 		
 		if(isEmpty(analysisId))
 			return null;

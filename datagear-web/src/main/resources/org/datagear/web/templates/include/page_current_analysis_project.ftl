@@ -39,6 +39,24 @@ page_search_form.ftl
 		return re;
 	};
 	
+	po.getCurrentAnalysisProject = function()
+	{
+		var pm = po.vuePageModel();
+		return pm.searchAnalysisProject;
+	};
+	
+	po.getCurrentAnalysisProjectId = function()
+	{
+		var pm = po.vuePageModel();
+		return (pm.searchAnalysisProject ? (pm.searchAnalysisProject.id || "") : "");
+	};
+	
+	po.addCurrentAnalysisProjectIdParam = function(url)
+	{
+		var paramName = po.currentAnalysisProjectCookieName;
+		return $.addParam(url, paramName, po.getCurrentAnalysisProjectId());
+	};
+	
 	po.vuePageModel(
 	{
 		searchAnalysisProject: (currentAnalysisProject || po.searchAnalysisProjectDft())

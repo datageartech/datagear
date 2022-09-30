@@ -178,7 +178,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
-		setCookieAnalysisProject(request, response, chart);
+		setRequestAnalysisProject(request, response, chart);
 
 		addAttributeForWriteJson(model, "chartPluginVO", null);
 		model.addAttribute("initResultDataFormat", createDefaultResultDataFormat());
@@ -318,7 +318,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setReadonlyActionOnRoleDataAnalyst(model, WebUtils.getUser());
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
 		
 		return "/chart/chart_table";
 	}
@@ -329,7 +329,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setSelectAction(request, model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getCookieAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
 		
 		return "/chart/chart_table";
 	}
@@ -573,10 +573,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		}
 	}
 
-	protected void setCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+	protected void setRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
 			HtmlChartWidgetEntity entity)
 	{
-		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
+		setRequestAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 
 	protected ResultDataFormat createDefaultResultDataFormat()

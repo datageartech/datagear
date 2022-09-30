@@ -84,7 +84,7 @@
 				label: "<@spring.message code='addInNewWindow' />",
 				command: function()
 				{
-					po.open("/dashboard/add", {target: "_blank"});
+					po.open(po.addCurrentAnalysisProjectIdParam("/dashboard/add"), {target: "_blank"});
 				}
 			},
 			{
@@ -105,7 +105,7 @@
 				label: "<@spring.message code='import' />",
 				command: function()
 				{
-					po.handleAddAction("/dashboard/import");
+					po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dashboard/import"));
 				}
 			}
 		],
@@ -148,7 +148,7 @@
 	{
 		onAdd: function()
 		{
-			po.handleAddAction("/dashboard/add", {width: "90vw"});
+			po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dashboard/add"), {width: "90vw"});
 		},
 		
 		onEdit: function()
