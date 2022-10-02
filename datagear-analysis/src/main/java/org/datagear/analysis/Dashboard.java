@@ -8,6 +8,7 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class Dashboard extends DashboardQueryHandler implements Identifiable, Se
 
 	private DashboardWidget widget;
 
-	private List<Chart> charts = null;
+	private List<Chart> charts = Collections.emptyList();
 
 	public Dashboard()
 	{

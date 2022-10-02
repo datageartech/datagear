@@ -49,6 +49,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtml
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.analysis.support.html.LoadableChartWidgetsPattern;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DashboardShareSet;
@@ -1570,24 +1571,28 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (dashboardInfo == null)
 			throw new RecordNotFoundException();
-
+		
 		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidget(user, dashboardInfo.getDashboardWidgetId());
 
 		// 新建看板的可视编辑模式时还没有看板部件，这里需mock一个保证逻辑正确
 		if (dashboardWidget == null)
 			dashboardWidget = createMockHtmlTplDashboardWidgetEntity(dashboardInfo.getDashboardWidgetId(), user);
-
-		// 确保看板创建用户对看板模板内定义的图表有权限
-		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
-
+		
 		HtmlChartWidget[] chartWidgets = new HtmlChartWidget[chartWidgetIds.length];
+		
 		HtmlTplDashboardWidgetRenderer dashboardWidgetRenderer = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer();
+		
+		handleLoadChartPattern(user, dashboardInfo, dashboardWidget, chartWidgetIds, chartWidgets, dashboardWidgetRenderer);
+		
 		try
 		{
 			for (int i = 0; i < chartWidgetIds.length; i++)
-				chartWidgets[i] = dashboardWidgetRenderer.getHtmlChartWidget(chartWidgetIds[i]);
+			{
+				if(chartWidgets[i] == null)
+					chartWidgets[i] = dashboardWidgetRenderer.getHtmlChartWidget(chartWidgetIds[i]);
+			}
 
 			// 不缓存
 			response.setContentType(CONTENT_TYPE_JSON);
@@ -1606,7 +1611,70 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			ChartWidgetSourceContext.remove();
 		}
 	}
-
+	
+	protected void handleLoadChartPattern(User user, DashboardInfo dashboardInfo,
+			HtmlTplDashboardWidgetEntity dashboardWidget, String[] chartWidgetIds, HtmlChartWidget[] chartWidgets,
+			HtmlTplDashboardWidgetRenderer renderer) throws Throwable
+	{
+		LoadableChartWidgetsPattern pattern = dashboardInfo.getLoadableChartWidgetsPattern();
+		
+		//默认应设为permitted，防止用户在看板内异步加载任意图表部件
+		if(pattern == null)
+			pattern = LoadableChartWidgetsPattern.permitted();
+		
+		//可异步加载看板创建者有权限的所有图表
+		if(pattern.isPatternAll())
+		{
+			// 使用看板创建用户
+			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
+		}
+		//不可异步加载任何图表
+		else if(pattern.isPatternNone())
+		{
+			for(int i=0; i<chartWidgetIds.length; i++)
+			{
+				String chartWidgetId = chartWidgetIds[i];
+				
+				PermissionDeniedException e = new PermissionDeniedException("Permission denied");
+				chartWidgets[i] = renderer.getHtmlChartWidgetForException(chartWidgetId, e);
+			}
+		}
+		//仅可异步加载当前用户有权限的图表
+		else if(pattern.isPatternPermitted())
+		{
+			// 使用当前用户
+			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(user));
+		}
+		//仅可异步加载看板创建者有权限的、且在指定列表内的图表
+		else if(pattern.isPatternList())
+		{
+			for(int i=0; i<chartWidgetIds.length; i++)
+			{
+				String chartWidgetId = chartWidgetIds[i];
+				
+				if(!pattern.inList(chartWidgetId))
+				{
+					PermissionDeniedException e = new PermissionDeniedException("Permission denied");
+					chartWidgets[i] = renderer.getHtmlChartWidgetForException(chartWidgetId, e);
+				}
+			}
+			
+			// 使用看板创建用户
+			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
+		}
+		//未知模式
+		else
+		{
+			for(int i=0; i<chartWidgetIds.length; i++)
+			{
+				String chartWidgetId = chartWidgetIds[i];
+				
+				PermissionDeniedException e = new PermissionDeniedException("Permission denied for unknown pattern '"+pattern.getPattern()+"'");
+				chartWidgets[i] = renderer.getHtmlChartWidgetForException(chartWidgetId, e);
+			}
+		}
+	}
+	
 	/**
 	 * 看板心跳。
 	 * <p>

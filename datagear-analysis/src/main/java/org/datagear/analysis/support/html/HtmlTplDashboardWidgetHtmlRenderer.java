@@ -12,12 +12,15 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
@@ -34,7 +37,8 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <code>
  * <pre>
  * ...
- * &lt;html dg-dashboard-factory="..." dg-dashboard-var="..." dg-dashboard-unimport="..."&gt;
+ * &lt;html dg-dashboard-factory="..." dg-dashboard-var="..."
+ * 	dg-dashboard-unimport="..." dg-loadable-chart-widgets="..."&gt;
  * ...
  * &lt;head&gt;
  * ...
@@ -55,7 +59,10 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <code>html dg-dashboard-var</code>：选填，定义看板JS对象的变量名，默认为{@linkplain #getDefaultDashboardVar()}
  * </p>
  * <p>
- * <code>html dg-dashboard-unimport</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardWidgetRenderer#getDashboardImports()}），多个以“,”隔开
+ * <code>html dg-dashboard-unimport</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardRenderAttr#getImportList(RenderContext)}），多个以“,”隔开
+ * </p>
+ * <p>
+ * <code>html dg-loadable-charts</code>：选填，定义看板网页允许在页面端通过JS异步加载的{@linkplain ChartWidget}模式（{@linkplain LoadableChartWidgetsPattern}），多个以“,”隔开
  * </p>
  * <p>
  * <code>div id</code>：选填，定义图表元素ID，如果不填，则会自动生成一个
@@ -82,6 +89,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-unimport";
 
+	public static final String DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS = DASHBOARD_ELEMENT_ATTR_PREFIX
+			+ "loadable-chart-widgets";
+
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-widget";
 
 	public static final String ATTR_NAME_CHART_AUTO_RESIZE = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-auto-resize";
@@ -97,6 +107,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	/** 属性名：不导入内置库的 */
 	private String attrNameDashboardImportExclude = DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE;
+
+	/** 属性名：异步加载图表部件模式 */
+	private String attrNameLoadableChartWidgets = DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS;
 
 	/** 图表标签名 */
 	private String chartTagName = DEFAULT_CHART_TAG_NAME;
@@ -134,14 +147,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		this.attrNameDashboardVar = attrNameDashboardVar;
 	}
 
-	public String getAttrNameDashboardRenderer()
+	public String getAttrNameDashboardFactory()
 	{
 		return attrNameDashboardFactory;
 	}
 
-	public void setAttrNameDashboardRenderer(String attrNameDashboardRenderer)
+	public void setAttrNameDashboardFactory(String attrNameDashboardFactory)
 	{
-		this.attrNameDashboardFactory = attrNameDashboardRenderer;
+		this.attrNameDashboardFactory = attrNameDashboardFactory;
 	}
 
 	public String getAttrNameDashboardImportExclude()
@@ -152,6 +165,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public void setAttrNameDashboardImportExclude(String attrNameDashboardImportExclude)
 	{
 		this.attrNameDashboardImportExclude = attrNameDashboardImportExclude;
+	}
+
+	public String getAttrNameLoadableChartWidgets()
+	{
+		return attrNameLoadableChartWidgets;
+	}
+
+	public void setAttrNameLoadableChartWidgets(String attrNameLoadableChartWidgets)
+	{
+		this.attrNameLoadableChartWidgets = attrNameLoadableChartWidgets;
 	}
 
 	public String getChartTagName()
@@ -241,7 +264,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		DashboardFilterHandler filterHandler = new DashboardFilterHandler(
 				renderAttr.getHtmlWriterNonNull(renderContext), renderContext, renderAttr, dashboard, dashboardInfo);
 		getHtmlFilter().filter(templateIn, filterHandler);
-
+		
+		dashboard.setLoadableChartWidgetsPattern(resolveLoadableChartWidgetsPattern(dashboardInfo.getLoadableChartWidgets()));
+		
 		return dashboardInfo;
 	}
 
@@ -341,7 +366,40 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 		return list;
 	}
-
+	
+	/**
+	 * 从字符串解析{@linkplain LoadableChartWidgetsPattern}。
+	 * 
+	 * @param str
+	 * @return
+	 */
+	protected LoadableChartWidgetsPattern resolveLoadableChartWidgetsPattern(String str)
+	{
+		if(StringUtil.isEmpty(str))
+		{
+			return null;
+		}
+		else if(LoadableChartWidgetsPattern.PATTERN_ALL.equalsIgnoreCase(str))
+		{
+			return LoadableChartWidgetsPattern.all();
+		}
+		else if(LoadableChartWidgetsPattern.PATTERN_NONE.equalsIgnoreCase(str))
+		{
+			return LoadableChartWidgetsPattern.none();
+		}
+		else if(LoadableChartWidgetsPattern.PATTERN_PERMITTED.equalsIgnoreCase(str))
+		{
+			return LoadableChartWidgetsPattern.permitted();
+		}
+		else
+		{
+			List<String> widgetIdList = StringUtil.splitWithTrim(str, ",");
+			Set<String> widgetIdSet = new HashSet<String>(widgetIdList);
+			
+			return LoadableChartWidgetsPattern.list(widgetIdSet);
+		}
+	}
+	
 	protected class DashboardFilterHandler extends HeadBodyAwareFilterHandler
 	{
 		private final RenderContext renderContext;
@@ -544,9 +602,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				{
 					this.dashboardInfo.setImportExclude(trim(entry.getValue()));
 				}
+				else if(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameLoadableChartWidgets.equalsIgnoreCase(name))
+				{
+					this.dashboardInfo.setLoadableChartWidgets(trim(entry.getValue()));
+				}
 			}
 		}
-
+		
 		protected void resolveChartTagAttr(Map<String, String> attrs) throws IOException
 		{
 			String chartWidget = null;
@@ -590,23 +652,23 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	protected static class DashboardInfo
 	{
 		/** 看板变量名称 */
-		private String dashboardVar;
+		private String dashboardVar = null;
+		
 		/** 看板工厂名称 */
-		private String dashboardFactoryVar;
+		private String dashboardFactoryVar = null;
+		
 		/** 内置导入排除项 */
-		private String importExclude;
+		private String importExclude = null;
+		
+		/**可异步加载图表部件*/
+		private String loadableChartWidgets = null;
+		
 		/** 图表信息 */
 		private List<ChartInfo> chartInfos = new ArrayList<>();
 
 		public DashboardInfo()
 		{
 			super();
-		}
-
-		public DashboardInfo(String dashboardVar)
-		{
-			super();
-			this.dashboardVar = dashboardVar;
 		}
 
 		public String getDashboardVar()
@@ -637,6 +699,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		public void setImportExclude(String importExclude)
 		{
 			this.importExclude = importExclude;
+		}
+
+		public String getLoadableChartWidgets()
+		{
+			return loadableChartWidgets;
+		}
+
+		public void setLoadableChartWidgets(String loadableChartWidgets)
+		{
+			this.loadableChartWidgets = loadableChartWidgets;
 		}
 
 		public List<ChartInfo> getChartInfos()

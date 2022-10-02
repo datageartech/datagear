@@ -345,6 +345,21 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	{
 		return getHtmlChartWidgetForRender(htmlChartWidgetId);
 	}
+	
+	/**
+	 * 获取与指定图表部件ID相关异常的{@linkplain HtmlChartWidget}。
+	 * <p>
+	 * 此方法将返回一个不同ID（{@linkplain HtmlChartWidget#getId()}）的替代对象，用于支持渲染相关错误信息。
+	 * </p>
+	 * 
+	 * @param htmlChartWidgetId
+	 * @param t
+	 * @return
+	 */
+	public HtmlChartWidget getHtmlChartWidgetForException(String htmlChartWidgetId, Throwable t)
+	{
+		return createHtmlChartWidgetForGetException(htmlChartWidgetId, t);
+	}
 
 	/**
 	 * 渲染{@linkplain HtmlTplDashboard}。

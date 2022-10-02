@@ -26,7 +26,6 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartQuery;
 import org.datagear.analysis.ChartTheme;
-import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardQuery;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.DashboardTheme;
@@ -40,12 +39,14 @@ import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlChartWidget;
+import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.analysis.support.html.LoadableChartWidgetsPattern;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.util.Global;
@@ -677,21 +678,25 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		/**看板部件ID*/
 		private final String dashboardWidgetId;
 
+		private final LoadableChartWidgetsPattern loadableChartWidgetsPattern;
+		
 		/** 图表ID-图表部件ID映射表 */
 		private final Map<String, String> chartIdToChartWidgetIds = new HashMap<String, String>();
-
+		
 		public DashboardInfo(String dashboardId, String dashboardWidgetId)
 		{
 			super();
 			this.dashboardId = dashboardId;
 			this.dashboardWidgetId = dashboardWidgetId;
+			this.loadableChartWidgetsPattern = null;
 		}
 
-		public DashboardInfo(Dashboard dashboard)
+		public DashboardInfo(HtmlTplDashboard dashboard)
 		{
 			this.dashboardId = dashboard.getId();
 			this.dashboardWidgetId = dashboard.getWidget().getId();
-
+			this.loadableChartWidgetsPattern = dashboard.getLoadableChartWidgetsPattern();
+			
 			if (dashboard.hasChart())
 			{
 				List<Chart> charts = dashboard.getCharts();
@@ -708,6 +713,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public String getDashboardWidgetId()
 		{
 			return dashboardWidgetId;
+		}
+
+		/**
+		 * @return 可能为{@code null}
+		 */
+		public LoadableChartWidgetsPattern getLoadableChartWidgetsPattern()
+		{
+			return loadableChartWidgetsPattern;
 		}
 
 		public synchronized Map<String, String> getChartIdToChartWidgetIds()

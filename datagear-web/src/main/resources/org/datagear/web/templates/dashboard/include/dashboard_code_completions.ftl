@@ -42,10 +42,14 @@
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-form' />", categories: ["form"]},
 		{name: "dg-dashboard-listener",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-listener' />", categories: ["body"]},
+		{name: "dg-dashboard-unimport",
+				displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-unimport' />", categories: ["html"]},
 		{name: "dg-dashboard-var",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-var' />", categories: ["html"]},
 		{name: "dg-echarts-theme",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", categories: ["body", "div"]},
+		{name: "dg-loadable-chart-widgets",
+				displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-loadable-chart-widgets' />", categories: ["html"]},
 	];
 	
 	po.codeEditorCompletionsJsFunction =

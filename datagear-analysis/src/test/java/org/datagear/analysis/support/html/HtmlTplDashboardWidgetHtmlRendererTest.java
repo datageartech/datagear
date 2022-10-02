@@ -458,6 +458,127 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
 		}
 	}
+	
+	@Test
+	public void renderDashboardTestForLoadableChartWidgets() throws Throwable
+	{
+		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
+
+		{
+			String template = "<html><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			Assert.assertNull(dashboardInfo.getLoadableChartWidgets());
+			Assert.assertNull(dashboard.getLoadableChartWidgetsPattern());
+		}
+		{
+			String template = "<html dg-loadable-chart-widgets=\"all\"><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			Assert.assertEquals("all", dashboardInfo.getLoadableChartWidgets());
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().isPatternAll());
+		}
+		{
+			String template = "<html dg-loadable-chart-widgets='none'><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			Assert.assertEquals("none", dashboardInfo.getLoadableChartWidgets());
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().isPatternNone());
+		}
+		{
+			String template = "<html dg-loadable-chart-widgets='permitted'><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			Assert.assertEquals("permitted", dashboardInfo.getLoadableChartWidgets());
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().isPatternPermitted());
+		}
+		{
+			String template = "<html dg-loadable-chart-widgets='a-widget-id'><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			Assert.assertEquals("a-widget-id", dashboardInfo.getLoadableChartWidgets());
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().isPatternList());
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().getChartWidgetIds().size() == 1);
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().inList("a-widget-id"));
+		}
+		{
+			String template = "<html dg-loadable-chart-widgets='widget-id-0,widget-id-1'><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			Assert.assertEquals("widget-id-0,widget-id-1", dashboardInfo.getLoadableChartWidgets());
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().isPatternList());
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().getChartWidgetIds().size() == 2);
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().inList("widget-id-0"));
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().inList("widget-id-1"));
+		}
+		{
+			String template = "<html dg-loadable-chart-widgets='widget-id-0, widget-id-1 , widget-id-2 '><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			Assert.assertEquals("widget-id-0, widget-id-1 , widget-id-2", dashboardInfo.getLoadableChartWidgets());
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().isPatternList());
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().getChartWidgetIds().size() == 3);
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().inList("widget-id-0"));
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().inList("widget-id-1"));
+			Assert.assertTrue(dashboard.getLoadableChartWidgetsPattern().inList("widget-id-2"));
+		}
+	}
 
 	protected HtmlTplDashboardRenderAttr buildHtmlTplDashboardRenderAttr(RenderContext renderContext, Writer out)
 	{
