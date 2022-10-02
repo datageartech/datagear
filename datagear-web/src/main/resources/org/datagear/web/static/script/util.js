@@ -2713,8 +2713,11 @@ $.inflatePageCodeEditor = function(po)
 		{
 			codeEditor.on("keyup", function(codeEditor, e)
 			{
-				if(e.keyCode == $.keyCode.ESCAPE)
+				if(e.keyCode == $.keyCode.ESCAPE || e.keyCode == $.keyCode.UP
+						|| e.keyCode == $.keyCode.DOWN)
+				{
 					return;
+				}
 				
 				if(codeEditor._timeoutIdForHinting != null)
 					clearTimeout(codeEditor._timeoutIdForHinting);
