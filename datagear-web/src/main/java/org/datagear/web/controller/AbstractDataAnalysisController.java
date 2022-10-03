@@ -46,7 +46,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHa
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
-import org.datagear.analysis.support.html.LoadableChartWidgetsPattern;
+import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.util.Global;
@@ -678,7 +678,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		/**看板部件ID*/
 		private final String dashboardWidgetId;
 
-		private final LoadableChartWidgetsPattern loadableChartWidgetsPattern;
+		private final LoadableChartWidgets loadableChartWidgets;
 		
 		/** 图表ID-图表部件ID映射表 */
 		private final Map<String, String> chartIdToChartWidgetIds = new HashMap<String, String>();
@@ -688,14 +688,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			super();
 			this.dashboardId = dashboardId;
 			this.dashboardWidgetId = dashboardWidgetId;
-			this.loadableChartWidgetsPattern = null;
+			this.loadableChartWidgets = null;
 		}
 
 		public DashboardInfo(HtmlTplDashboard dashboard)
 		{
 			this.dashboardId = dashboard.getId();
 			this.dashboardWidgetId = dashboard.getWidget().getId();
-			this.loadableChartWidgetsPattern = dashboard.getLoadableChartWidgetsPattern();
+			this.loadableChartWidgets = dashboard.getLoadableChartWidgets();
 			
 			if (dashboard.hasChart())
 			{
@@ -714,13 +714,13 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		{
 			return dashboardWidgetId;
 		}
-
+		
 		/**
 		 * @return 可能为{@code null}
 		 */
-		public LoadableChartWidgetsPattern getLoadableChartWidgetsPattern()
+		public LoadableChartWidgets getLoadableChartWidgets()
 		{
-			return loadableChartWidgetsPattern;
+			return loadableChartWidgets;
 		}
 
 		public synchronized Map<String, String> getChartIdToChartWidgetIds()

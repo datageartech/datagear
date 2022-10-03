@@ -62,7 +62,7 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <code>html dg-dashboard-unimport</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardRenderAttr#getImportList(RenderContext)}），多个以“,”隔开
  * </p>
  * <p>
- * <code>html dg-loadable-charts</code>：选填，定义看板网页允许在页面端通过JS异步加载的{@linkplain ChartWidget}模式（{@linkplain LoadableChartWidgetsPattern}），多个以“,”隔开
+ * <code>html dg-loadable-charts</code>：选填，定义看板网页允许在页面端通过JS异步加载的{@linkplain ChartWidget}模式（{@linkplain LoadableChartWidgets}），多个以“,”隔开
  * </p>
  * <p>
  * <code>div id</code>：选填，定义图表元素ID，如果不填，则会自动生成一个
@@ -265,8 +265,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				renderAttr.getHtmlWriterNonNull(renderContext), renderContext, renderAttr, dashboard, dashboardInfo);
 		getHtmlFilter().filter(templateIn, filterHandler);
 		
-		dashboard.setLoadableChartWidgetsPattern(resolveLoadableChartWidgetsPattern(dashboardInfo.getLoadableChartWidgets()));
-		
 		return dashboardInfo;
 	}
 
@@ -365,39 +363,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			list.add(getHtmlChartWidgetForRender(chartInfo.getWidgetId()));
 
 		return list;
-	}
-	
-	/**
-	 * 从字符串解析{@linkplain LoadableChartWidgetsPattern}。
-	 * 
-	 * @param str
-	 * @return
-	 */
-	protected LoadableChartWidgetsPattern resolveLoadableChartWidgetsPattern(String str)
-	{
-		if(StringUtil.isEmpty(str))
-		{
-			return null;
-		}
-		else if(LoadableChartWidgetsPattern.PATTERN_ALL.equalsIgnoreCase(str))
-		{
-			return LoadableChartWidgetsPattern.all();
-		}
-		else if(LoadableChartWidgetsPattern.PATTERN_NONE.equalsIgnoreCase(str))
-		{
-			return LoadableChartWidgetsPattern.none();
-		}
-		else if(LoadableChartWidgetsPattern.PATTERN_PERMITTED.equalsIgnoreCase(str))
-		{
-			return LoadableChartWidgetsPattern.permitted();
-		}
-		else
-		{
-			List<String> widgetIdList = StringUtil.splitWithTrim(str, ",");
-			Set<String> widgetIdSet = new HashSet<String>(widgetIdList);
-			
-			return LoadableChartWidgetsPattern.list(widgetIdSet);
-		}
 	}
 	
 	protected class DashboardFilterHandler extends HeadBodyAwareFilterHandler
@@ -604,8 +569,35 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				}
 				else if(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameLoadableChartWidgets.equalsIgnoreCase(name))
 				{
-					this.dashboardInfo.setLoadableChartWidgets(trim(entry.getValue()));
+					this.dashboard.setLoadableChartWidgets(resolveLoadableChartWidgets(trim(entry.getValue())));
 				}
+			}
+		}
+		
+		protected LoadableChartWidgets resolveLoadableChartWidgets(String str)
+		{
+			if(StringUtil.isEmpty(str))
+			{
+				return null;
+			}
+			else if(LoadableChartWidgets.PATTERN_ALL.equalsIgnoreCase(str))
+			{
+				return LoadableChartWidgets.all();
+			}
+			else if(LoadableChartWidgets.PATTERN_NONE.equalsIgnoreCase(str))
+			{
+				return LoadableChartWidgets.none();
+			}
+			else if(LoadableChartWidgets.PATTERN_PERMITTED.equalsIgnoreCase(str))
+			{
+				return LoadableChartWidgets.permitted();
+			}
+			else
+			{
+				List<String> widgetIdList = StringUtil.splitWithTrim(str, ",");
+				Set<String> widgetIdSet = new HashSet<String>(widgetIdList);
+				
+				return LoadableChartWidgets.list(widgetIdSet);
 			}
 		}
 		
@@ -660,9 +652,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		/** 内置导入排除项 */
 		private String importExclude = null;
 		
-		/**可异步加载图表部件*/
-		private String loadableChartWidgets = null;
-		
 		/** 图表信息 */
 		private List<ChartInfo> chartInfos = new ArrayList<>();
 
@@ -700,17 +689,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		{
 			this.importExclude = importExclude;
 		}
-
-		public String getLoadableChartWidgets()
-		{
-			return loadableChartWidgets;
-		}
-
-		public void setLoadableChartWidgets(String loadableChartWidgets)
-		{
-			this.loadableChartWidgets = loadableChartWidgets;
-		}
-
+		
 		public List<ChartInfo> getChartInfos()
 		{
 			return chartInfos;

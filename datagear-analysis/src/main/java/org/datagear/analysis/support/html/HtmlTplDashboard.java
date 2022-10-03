@@ -24,7 +24,7 @@ public class HtmlTplDashboard extends TemplateDashboard
 	/** 看板JS对象变量名 */
 	private String varName;
 	
-	private LoadableChartWidgetsPattern loadableChartWidgetsPattern = null;
+	private LoadableChartWidgets loadableChartWidgets = null;
 
 	public HtmlTplDashboard()
 	{
@@ -62,14 +62,14 @@ public class HtmlTplDashboard extends TemplateDashboard
 	{
 		this.varName = varName;
 	}
-	
-	public LoadableChartWidgetsPattern getLoadableChartWidgetsPattern()
+
+	public LoadableChartWidgets getLoadableChartWidgets()
 	{
-		return loadableChartWidgetsPattern;
+		return loadableChartWidgets;
 	}
 
-	public void setLoadableChartWidgetsPattern(LoadableChartWidgetsPattern loadableChartWidgetsPattern)
+	public void setLoadableChartWidgets(LoadableChartWidgets loadableChartWidgets)
 	{
-		this.loadableChartWidgetsPattern = loadableChartWidgetsPattern;
+		this.loadableChartWidgets = loadableChartWidgets;
 	}
 }

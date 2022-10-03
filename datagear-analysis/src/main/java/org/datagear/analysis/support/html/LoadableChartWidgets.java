@@ -12,12 +12,12 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * 看板可在页面通过JS异步加载的图表部件模式。
+ * 看板可在页面通过JS异步加载的图表部件。
  * 
  * @author datagear@163.com
  * 
  */
-public class LoadableChartWidgetsPattern implements Serializable
+public class LoadableChartWidgets implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -37,7 +37,7 @@ public class LoadableChartWidgetsPattern implements Serializable
 	
 	private Set<String> chartWidgetIds = Collections.emptySet();
 
-	public LoadableChartWidgetsPattern(String pattern)
+	public LoadableChartWidgets(String pattern)
 	{
 		super();
 		this.pattern = pattern;
@@ -91,24 +91,24 @@ public class LoadableChartWidgetsPattern implements Serializable
 		return this.chartWidgetIds.contains(chartWidgetId);
 	}
 	
-	public static LoadableChartWidgetsPattern all()
+	public static LoadableChartWidgets all()
 	{
-		return new LoadableChartWidgetsPattern(PATTERN_ALL);
+		return new LoadableChartWidgets(PATTERN_ALL);
 	}
 	
-	public static LoadableChartWidgetsPattern none()
+	public static LoadableChartWidgets none()
 	{
-		return new LoadableChartWidgetsPattern(PATTERN_NONE);
+		return new LoadableChartWidgets(PATTERN_NONE);
 	}
 	
-	public static LoadableChartWidgetsPattern permitted()
+	public static LoadableChartWidgets permitted()
 	{
-		return new LoadableChartWidgetsPattern(PATTERN_PERMITTED);
+		return new LoadableChartWidgets(PATTERN_PERMITTED);
 	}
 	
-	public static LoadableChartWidgetsPattern list(Set<String> chartWidgetIds)
+	public static LoadableChartWidgets list(Set<String> chartWidgetIds)
 	{
-		LoadableChartWidgetsPattern re = new LoadableChartWidgetsPattern(PATTERN_LIST);
+		LoadableChartWidgets re = new LoadableChartWidgets(PATTERN_LIST);
 		re.setChartWidgetIds(chartWidgetIds);
 		
 		return re;

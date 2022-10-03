@@ -49,7 +49,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtml
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
-import org.datagear.analysis.support.html.LoadableChartWidgetsPattern;
+import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DashboardShareSet;
@@ -1616,20 +1616,20 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			HtmlTplDashboardWidgetEntity dashboardWidget, String[] chartWidgetIds, HtmlChartWidget[] chartWidgets,
 			HtmlTplDashboardWidgetRenderer renderer) throws Throwable
 	{
-		LoadableChartWidgetsPattern pattern = dashboardInfo.getLoadableChartWidgetsPattern();
+		LoadableChartWidgets lcws = dashboardInfo.getLoadableChartWidgets();
 		
 		//默认应设为permitted，防止用户在看板内异步加载任意图表部件
-		if(pattern == null)
-			pattern = LoadableChartWidgetsPattern.permitted();
+		if(lcws == null)
+			lcws = LoadableChartWidgets.permitted();
 		
 		//可异步加载看板创建者有权限的所有图表
-		if(pattern.isPatternAll())
+		if(lcws.isPatternAll())
 		{
 			// 使用看板创建用户
 			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
 		}
 		//不可异步加载任何图表
-		else if(pattern.isPatternNone())
+		else if(lcws.isPatternNone())
 		{
 			for(int i=0; i<chartWidgetIds.length; i++)
 			{
@@ -1640,19 +1640,19 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			}
 		}
 		//仅可异步加载当前用户有权限的图表
-		else if(pattern.isPatternPermitted())
+		else if(lcws.isPatternPermitted())
 		{
 			// 使用当前用户
 			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(user));
 		}
 		//仅可异步加载看板创建者有权限的、且在指定列表内的图表
-		else if(pattern.isPatternList())
+		else if(lcws.isPatternList())
 		{
 			for(int i=0; i<chartWidgetIds.length; i++)
 			{
 				String chartWidgetId = chartWidgetIds[i];
 				
-				if(!pattern.inList(chartWidgetId))
+				if(!lcws.inList(chartWidgetId))
 				{
 					PermissionDeniedException e = new PermissionDeniedException("Permission denied");
 					chartWidgets[i] = renderer.getHtmlChartWidgetForException(chartWidgetId, e);
@@ -1669,7 +1669,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			{
 				String chartWidgetId = chartWidgetIds[i];
 				
-				PermissionDeniedException e = new PermissionDeniedException("Permission denied for unknown pattern '"+pattern.getPattern()+"'");
+				PermissionDeniedException e = new PermissionDeniedException("Permission denied for unknown pattern '"+lcws.getPattern()+"'");
 				chartWidgets[i] = renderer.getHtmlChartWidgetForException(chartWidgetId, e);
 			}
 		}

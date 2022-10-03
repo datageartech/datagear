@@ -201,6 +201,7 @@
 		dashboardFactory._initOverwriteChartBaseIfNot();
 		dashboardFactory._initStartHeartBeatIfNot(dashboard.renderContext);
 		
+		dashboardFactory._refactorDashboard(dashboard);
 		$.extend(dashboard, this.dashboardBase);
 		
 		var charts = (dashboard.charts || []);
@@ -209,6 +210,20 @@
 		
 		if(instanceInit)
 			dashboard.init();
+	};
+	
+	dashboardFactory._refactorDashboard = function(dashboard)
+	{
+		//私有化属性，便于后续定义相关函数
+		dashboard._widget = dashboard.widget;
+		dashboard._template = dashboard.template;
+		dashboard._varName = dashboard.varName;
+		dashboard._loadableChartWidgets = dashboard.loadableChartWidgets;
+		
+		delete dashboard.widget;
+		delete dashboard.template;
+		delete dashboard.varName;
+		delete dashboard.loadableChartWidgets;
 	};
 	
 	dashboardFactory._initOverwriteChartBaseIfNot = function()

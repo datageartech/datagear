@@ -80,6 +80,48 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 					new TemplateDashboardWidgetJson(dashboard.getWidget()), dashboard.getVarName());
 
 			setCharts(Collections.EMPTY_LIST);
+			
+			LoadableChartWidgets lcws = dashboard.getLoadableChartWidgets();
+			setLoadableChartWidgets(lcws == null ? null : new LoadableChartWidgetsJson(lcws));
+		}
+	}
+	
+	protected static class LoadableChartWidgetsJson extends LoadableChartWidgets
+	{
+		private static final long serialVersionUID = 1L;
+
+		public LoadableChartWidgetsJson(LoadableChartWidgets pattern)
+		{
+			super(pattern.getPattern());
+			setChartWidgetIds(pattern.getChartWidgetIds());
+		}
+
+		@JsonIgnore
+		@Override
+		public boolean isPatternAll()
+		{
+			return super.isPatternAll();
+		}
+
+		@JsonIgnore
+		@Override
+		public boolean isPatternNone()
+		{
+			return super.isPatternNone();
+		}
+
+		@JsonIgnore
+		@Override
+		public boolean isPatternPermitted()
+		{
+			return super.isPatternPermitted();
+		}
+
+		@JsonIgnore
+		@Override
+		public boolean isPatternList()
+		{
+			return super.isPatternList();
 		}
 	}
 
