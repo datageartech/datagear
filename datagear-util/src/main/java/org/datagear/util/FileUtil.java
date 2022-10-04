@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 /**
@@ -664,13 +665,7 @@ public class FileUtil
 	{
 		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_DIR";
 
-		File tmp = File.createTempFile(prefix, null);
-
-		if (!tmp.delete())
-			throw new IOException("Could not create temp directory for prefix '" + prefix + "'");
-
-		if (!tmp.mkdir())
-			throw new IOException("Could not create temp directory for prefix '" + prefix + "'");
+		File tmp = Files.createTempDirectory(prefix).toFile();
 
 		return tmp;
 	}
