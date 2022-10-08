@@ -229,9 +229,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		sb.append("<meta charset=\"" + htmlCharset + "\">\n");
 		sb.append("<title>" + (StringUtil.isEmpty(htmlTitle) ? "" : htmlTitle) + "</title>\n");
 		sb.append("</head>\n");
-		sb.append("<body class=\"" + (StringUtil.isEmpty(bodyStyleName) ? "" : bodyStyleName) + "\" "
-						+ (StringUtil.isEmpty(bodyAttr) ? "" : bodyAttr+" ")
-						+ ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\">\n");
+		sb.append("<body" + (StringUtil.isEmpty(bodyStyleName) ? "" : " class=\""+bodyStyleName+"\"")
+						+ (StringUtil.isEmpty(bodyAttr) ? "" : " "+bodyAttr)
+						+ " " + ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\">\n");
 		sb.append("\n");
 
 		for (String cwi : chartWidgetIds)
