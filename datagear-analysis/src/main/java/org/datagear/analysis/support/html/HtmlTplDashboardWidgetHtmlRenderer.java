@@ -200,31 +200,35 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	@Override
 	public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
 	{
-		return simpleTemplateContent(chartWidgetId, htmlCharset, "", "", "", "", "");
+		return simpleTemplateContent(chartWidgetId, "", htmlCharset, "", "", "", "", "");
 	}
 
 	/**
 	 * 获取简单模板内容。
 	 * 
 	 * @param chartWidgetIds
+	 * @param htmlAttr
+	 *            {@code html}元素属性，允许为{@code null}
 	 * @param htmlCharset
-	 * @param htmlTitle HTML标题名，允许为{@code null}
-	 * @param bodyStyleName {@code body}元素的样式类名，允许为{@code null}
-	 * @param bodyAttr {@code body}元素属性，允许为{@code null}
+	 * @param htmlTitle
+	 *            HTML标题名，允许为{@code null}
+	 * @param bodyStyleName
+	 *            {@code body}元素的样式类名，允许为{@code null}
+	 * @param bodyAttr
+	 *            {@code body}元素属性，允许为{@code null}
 	 * @param chartEleStyleName
 	 *            图表元素样式类名，允许为{@code null}
 	 * @param chartEleAttr
 	 *            图表元素属性，允许为{@code null}
 	 * @return
 	 */
-	public String simpleTemplateContent(String[] chartWidgetIds, String htmlCharset, String htmlTitle,
-			String bodyStyleName, String bodyAttr,
-			String chartEleStyleName, String chartEleAttr)
+	public String simpleTemplateContent(String[] chartWidgetIds, String htmlAttr, String htmlCharset, String htmlTitle,
+			String bodyStyleName, String bodyAttr, String chartEleStyleName, String chartEleAttr)
 	{
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("<!DOCTYPE html>\n");
-		sb.append("<html>\n");
+		sb.append("<html" + (StringUtil.isEmpty(htmlAttr) ? "" : " " + htmlAttr) + ">\n");
 		sb.append("<head>\n");
 		sb.append("<meta charset=\"" + htmlCharset + "\">\n");
 		sb.append("<title>" + (StringUtil.isEmpty(htmlTitle) ? "" : htmlTitle) + "</title>\n");

@@ -36,6 +36,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtml
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
+import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
@@ -478,12 +479,15 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		try
 		{
-			templateIn = IOUtil
-					.getReader(this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent(
-							new String[] { id }, IOUtil.CHARSET_UTF_8, htmlTitle,
-							this.htmlTplDashboardWidgetHtmlRenderer.getDashboardStyleName(), "",
-							"dg-chart-for-show-chart " + this.htmlTplDashboardWidgetHtmlRenderer.getChartStyleName(),
-							"dg-chart-disable-setting=\"false\""));
+			// 图表展示页面应禁用异步加载功能，避免越权访问隐患
+			String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadableChartWidgets() + "=\""
+					+ LoadableChartWidgets.PATTERN_NONE + "\"";
+			String simpleTemplate = this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent(new String[] { id },
+					htmlAttr, IOUtil.CHARSET_UTF_8, htmlTitle,
+					this.htmlTplDashboardWidgetHtmlRenderer.getDashboardStyleName(), "",
+					"dg-chart-for-show-chart " + this.htmlTplDashboardWidgetHtmlRenderer.getChartStyleName(),
+					"dg-chart-disable-setting=\"false\"");
+			templateIn = IOUtil.getReader(simpleTemplate);
 
 			String responseEncoding = dashboardWidget.getTemplateEncoding();
 			response.setCharacterEncoding(responseEncoding);
