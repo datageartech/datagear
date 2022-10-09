@@ -126,6 +126,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	public static final String DASHBOARD_SHOW_AUTH_PARAM_NAME = "name";
 
+	public static final String LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor";
+
 	static
 	{
 		AuthorizationResourceMetas.registerForShare(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE);
@@ -1390,7 +1392,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 					: dashboardWidget.render(renderContext, template));
 
 			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
-			dashboardInfoManager.put(new DashboardInfo(dashboard));
+			dashboardInfoManager.put(new DashboardInfo(dashboard, isShowForEdit));
 		}
 		finally
 		{
@@ -1562,7 +1564,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/loadChart", produces = CONTENT_TYPE_JSON)
 	public void loadChart(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam(LOAD_CHART_PARAM_DASHBOARD_ID) String dashboardId,
-			@RequestParam(LOAD_CHART_PARAM_CHART_WIDGET_ID) String[] chartWidgetIds) throws Throwable
+			@RequestParam(LOAD_CHART_PARAM_CHART_WIDGET_ID) String[] chartWidgetIds,
+			@RequestParam(value = LOAD_CHART_FOR_EDITOR_PARAM, required = false) String loadChartForEditorStr)
+			throws Throwable
 	{
 		User user = WebUtils.getUser();
 
@@ -1572,6 +1576,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboardInfo == null)
 			throw new RecordNotFoundException();
 		
+		boolean loadChartForEditor = ("true".equalsIgnoreCase(loadChartForEditorStr)
+				|| "1".equals(loadChartForEditorStr));
+		loadChartForEditor = (dashboardInfo.isShowForEdit() && loadChartForEditor);
+
 		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidget(user, dashboardInfo.getDashboardWidgetId());
 
@@ -1584,7 +1592,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetRenderer dashboardWidgetRenderer = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer();
 		
-		handleLoadChartPattern(user, dashboardInfo, dashboardWidget, chartWidgetIds, chartWidgets, dashboardWidgetRenderer);
+		handleLoadChartPattern(user, dashboardInfo, dashboardWidget, chartWidgetIds, chartWidgets,
+				dashboardWidgetRenderer, loadChartForEditor);
 		
 		try
 		{
@@ -1614,13 +1623,23 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	
 	protected void handleLoadChartPattern(User user, DashboardInfo dashboardInfo,
 			HtmlTplDashboardWidgetEntity dashboardWidget, String[] chartWidgetIds, HtmlChartWidget[] chartWidgets,
-			HtmlTplDashboardWidgetRenderer renderer) throws Throwable
+			HtmlTplDashboardWidgetRenderer renderer, boolean loadChartForEditor) throws Throwable
 	{
-		LoadableChartWidgets lcws = dashboardInfo.getLoadableChartWidgets();
+		LoadableChartWidgets lcws = null;
 		
-		//默认应设为permitted，防止用户在看板内异步加载任意图表部件
-		if(lcws == null)
+		// 看板可视编辑模式时，插入图表操作不应受看板内定义的异步加载权限控制
+		if (loadChartForEditor)
+		{
 			lcws = LoadableChartWidgets.permitted();
+		}
+		else
+		{
+			lcws = dashboardInfo.getLoadableChartWidgets();
+
+			// 默认应设为permitted，防止用户在看板内异步加载任意图表部件
+			if (lcws == null)
+				lcws = LoadableChartWidgets.permitted();
+		}
 		
 		//可异步加载看板创建者有权限的所有图表
 		if(lcws.isPatternAll())

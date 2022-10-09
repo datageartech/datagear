@@ -503,7 +503,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 					templateIn);
 
 			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
-			dashboardInfoManager.put(new DashboardInfo(dashboard));
+			dashboardInfoManager.put(new DashboardInfo(dashboard, false));
 		}
 		finally
 		{

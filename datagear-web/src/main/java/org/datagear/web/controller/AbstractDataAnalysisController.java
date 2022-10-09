@@ -683,15 +683,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		/** 图表ID-图表部件ID映射表 */
 		private final Map<String, String> chartIdToChartWidgetIds = new HashMap<String, String>();
 		
-		public DashboardInfo(String dashboardId, String dashboardWidgetId)
-		{
-			super();
-			this.dashboardId = dashboardId;
-			this.dashboardWidgetId = dashboardWidgetId;
-			this.loadableChartWidgets = null;
-		}
+		private final boolean showForEdit;
 
-		public DashboardInfo(HtmlTplDashboard dashboard)
+		public DashboardInfo(HtmlTplDashboard dashboard, boolean showForEdit)
 		{
 			this.dashboardId = dashboard.getId();
 			this.dashboardWidgetId = dashboard.getWidget().getId();
@@ -703,6 +697,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 				for (Chart chart : charts)
 					this.chartIdToChartWidgetIds.put(chart.getId(), ChartWidget.getChartWidget(chart));
 			}
+
+			this.showForEdit = showForEdit;
 		}
 
 		public String getDashboardId()
@@ -726,6 +722,11 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public synchronized Map<String, String> getChartIdToChartWidgetIds()
 		{
 			return Collections.unmodifiableMap(chartIdToChartWidgetIds);
+		}
+
+		public boolean isShowForEdit()
+		{
+			return showForEdit;
 		}
 
 		public synchronized String getChartWidgetId(String chartId)

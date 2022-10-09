@@ -54,6 +54,9 @@
 	
 	var INSERT_ELE_FORMAT_FLAG = (editor.INSERT_ELE_FORMAT_FLAG = "<!--dg-format-flag-->");
 	
+	//参考org.datagear.web.controller.DashboardController.LOAD_CHART_FOR_EDITOR_PARAM
+	var LOAD_CHART_FOR_EDITOR_PARAM = (editor.LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor");
+	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
 	{
@@ -1202,7 +1205,7 @@
 			this.insertElement(chartDiv, insertType, refEle);
 		}
 		
-		this.dashboard.loadUnsolvedCharts();
+		this.dashboard.loadUnsolvedCharts(this._buildLoadChartAjaxOptions());
 	};
 	
 	editor._getInsertParentElement = function(refEle, insertType)
@@ -1256,7 +1259,7 @@
 		}
 		
 		this._setElementAttr(ele, chartFactory.elementAttrConst.WIDGET, chartWidget.id);
-		this.dashboard.loadChart(ele);
+		this.dashboard.loadChart(ele, this._buildLoadChartAjaxOptions());
 	};
 	
 	/**
@@ -2549,6 +2552,21 @@
 	editor._isJsonString = function(str)
 	{
 		return chartFactory.isJsonString(str);
+	};
+	
+	editor._buildLoadChartAjaxOptions = function()
+	{
+		var webContext = chartFactory.renderContextAttrWebContext(this.dashboard.renderContext);
+		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.loadChartURL);
+		var qidx = url.indexOf('?');
+		url = url + (qidx < 0 ? "?" : "&") + LOAD_CHART_FOR_EDITOR_PARAM + "=true";
+		
+		var re =
+		{
+			url: url
+		};
+		
+		return re;
 	};
 	
 	/**
