@@ -92,6 +92,17 @@ SQL数据集
 
 ![screenshot/dashboard-link-load-chart.gif](screenshot/dashboard-link-load-chart.gif)
 
+
+## 技术栈
+
+- 后端
+  <br>
+  Spring Boot、Mybatis、Freemarker、Derby、Jackson、Caffeine、Spring Security
+
+- 前端
+  <br>
+  jQuery、Vue3、PrimeVue、CodeMirror、ECharts、DataTables
+
 ## 模块介绍
 
 - datagear-analysis
