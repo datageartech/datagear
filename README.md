@@ -91,7 +91,7 @@ SQL数据集
 ![screenshot/dashboard-link-load-chart.gif](screenshot/dashboard-link-load-chart.gif)
 
 
-## 技术栈
+## 技术栈（前后端一体）
 
 - 后端
   <br>
