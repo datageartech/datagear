@@ -451,3 +451,9 @@ ALTER TABLE DATAGEAR_DATA_SET_EXCEL ADD COLUMN DS_SHEET_NAME VARCHAR(200);
 --2022-09-26
 --看板分享密码添加前缀
 UPDATE DATAGEAR_DB_SHARE_SET SET DSS_PSD = '{std}' || DSS_PSD WHERE DSS_PSD IS NOT NULL AND DSS_PSD != '' AND DSS_PSD NOT LIKE '{std}%';
+
+
+-----------------------------------------
+--version[4.1.1], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
