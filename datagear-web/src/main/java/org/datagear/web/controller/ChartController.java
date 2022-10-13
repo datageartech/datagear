@@ -446,6 +446,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public ErrorMessageDashboardResult showData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestBody DashboardQueryForm form) throws Exception
 	{
+		//此处获取ChartWidget不再需要权限控制，应显式移除线程变量
+		ChartWidgetSourceContext.remove();
+		
 		DashboardResult dashboardResult = getDashboardResult(request, response, form,
 				this.htmlTplDashboardWidgetHtmlRenderer);
 
@@ -467,18 +470,17 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (chart == null)
 			throw new RecordNotFoundException();
 
-		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(user));
-
-		String id = chart.getId();
-
-		String htmlTitle = chart.getName();
-		HtmlTplDashboardWidget dashboardWidget = buildHtmlTplDashboardWidget(id);
-
 		Reader templateIn = null;
 		Writer out = null;
+		
+		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(user));
 
 		try
 		{
+			String id = chart.getId();
+			String htmlTitle = chart.getName();
+			HtmlTplDashboardWidget dashboardWidget = buildHtmlTplDashboardWidget(id);
+
 			// 图表展示页面应禁用异步加载功能，避免越权访问隐患
 			String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadableChartWidgets() + "=\""
 					+ LoadableChartWidgets.PATTERN_NONE + "\"";
@@ -509,6 +511,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		{
 			IOUtil.close(templateIn);
 			IOUtil.close(out);
+			ChartWidgetSourceContext.remove();
 		}
 	}
 

@@ -1345,16 +1345,17 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				: "");
 		EditHtmlInfo editHtmlInfo = (isShowForEdit ? buildShowForEditEditHtmlInfo(showHtml) : null);
 
+		Reader showHtmlIn = null;
+		Writer out = null;
+
 		// 使用看板创建用户，确保当前用户对看板模板内定义的图表有权限
 		// 如果当前用户是管理员，则不应使用看板创建用户，避免管理员在其他用户的看板内添加管理员创建的图表时，出现无权访问的情况，
 		// 但是，其他用户打开看板时对此图表仍无权访问
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(currentUser.isAdmin() ? currentUser : createUser));
 
-		Reader showHtmlIn = (isShowForEdit ? IOUtil.getReader(showHtml) : null);
-		Writer out = null;
-
 		try
 		{
+			showHtmlIn = (isShowForEdit ? IOUtil.getReader(showHtml) : null);
 			String responseEncoding = dashboardWidget.getTemplateEncoding();
 
 			if (StringUtil.isEmpty(responseEncoding))
@@ -1545,6 +1546,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public ErrorMessageDashboardResult showData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestBody DashboardQueryForm form) throws Exception
 	{
+		//此处获取ChartWidget不再需要权限控制，应显式移除线程变量
+		ChartWidgetSourceContext.remove();
+		
 		DashboardResult dashboardResult = getDashboardResult(request, response, form,
 				this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer());
 
@@ -1592,11 +1596,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetRenderer dashboardWidgetRenderer = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer();
 		
-		handleLoadChartPattern(user, dashboardInfo, dashboardWidget, chartWidgetIds, chartWidgets,
-				dashboardWidgetRenderer, loadChartForEditor);
-		
 		try
 		{
+			handleLoadChartPattern(user, dashboardInfo, dashboardWidget, chartWidgetIds, chartWidgets,
+					dashboardWidgetRenderer, loadChartForEditor);
+			
 			for (int i = 0; i < chartWidgetIds.length; i++)
 			{
 				if(chartWidgets[i] == null)

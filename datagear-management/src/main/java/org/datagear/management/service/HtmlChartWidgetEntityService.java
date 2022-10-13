@@ -32,6 +32,7 @@ public interface HtmlChartWidgetEntityService extends DataPermissionEntityServic
 	class ChartWidgetSourceContext
 	{
 		protected static final String NAME_FOR_SERVICE_CONTEXT = ChartWidgetSourceContext.class.getName();
+		
 		private User user;
 
 		public ChartWidgetSourceContext()
