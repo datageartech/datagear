@@ -742,7 +742,7 @@
 			tooltip:
 			{
 				trigger: "item",
-				formatter: "{a} <br/>{b}: {c} ({d}%)"
+				formatter: "{a} <br />{b}: {c} ({d}%)"
 			},
 			legend:
 			{
@@ -941,7 +941,7 @@
 		    },
 			tooltip:
 			{
-				formatter: "{a} <br/>{b} : {c}"
+				formatter: "{a} <br />{b} : {c}"
 			},
 			series:
 			[
@@ -1981,7 +1981,7 @@
 		    tooltip:
 		    {
 		        trigger: "item",
-		        formatter: "{a} <br/>{b} : {c}"
+		        formatter: "{a} <br />{b} : {c}"
 		    },
 			legend:
 			{
@@ -2109,7 +2109,7 @@
 			tooltip:
 			{
 				trigger: "item",
-				formatter: "{b}<br/>{c}"
+				formatter: "{b}<br />{c}"
 			},
 			visualMap:
 			{
@@ -2332,7 +2332,10 @@
 				trigger: "item",
 				formatter: function (params)
 				{
-					return params.name + "<br/>" + params.value[2];
+					var fre = params.name;
+					if(params.value && params.value[2] != null)
+						fre +=  "<br />" + params.value[2];
+					return fre;
 				}
 			},
 			legend:
@@ -2552,7 +2555,7 @@
 			        layout: "none",
 					tooltip:
 					{
-						formatter: "{a}<br>{b}：{c}"
+						formatter: "{a}<br />{b}：{c}"
 					}
 				}
 			]
