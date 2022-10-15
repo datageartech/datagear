@@ -54,7 +54,12 @@ page_search_form.ftl
 	po.addCurrentAnalysisProjectIdParam = function(url)
 	{
 		var paramName = po.currentAnalysisProjectCookieName;
-		return $.addParam(url, paramName, po.getCurrentAnalysisProjectId());
+		var paramValue = po.getCurrentAnalysisProjectId();
+		
+		if(paramValue)
+			return $.addParam(url, paramName, paramValue);
+		else
+			return url;
 	};
 	
 	po.vuePageModel(
