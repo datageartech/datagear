@@ -116,6 +116,25 @@ page_boolean_options.ftl
 						</p-inputtext>
 					</div>
 				</div>
+				<div class="field grid">
+					<label for="${pid}veFlexLayoutDirection" class="field-label col-12 mb-2">
+						<@spring.message code='dashboard.veditor.style.flexDirection' />
+						<span class="text-color-secondary text-sm ml-1">flex-direction</span>
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veFlexLayoutDirection" v-model="pm.vepms.flexLayout.direction" type="text"
+							class="help-target input w-full" name="direction">
+						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="row">
+								<@spring.message code='dashboard.veditor.style.flexDirection.row' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="column">
+								<@spring.message code='dashboard.veditor.style.flexDirection.column' />
+							</p-button>
+						</div>
+					</div>
+				</div>
 				<div class="field grid" v-if="pm.veFlexLayoutPanelShowFillParent">
 					<label for="${pid}veFlexLayoutFillParent" class="field-label col-12 mb-2"
 						title="<@spring.message code='dashboard.veditor.flexLayout.fillPage.desc' />">

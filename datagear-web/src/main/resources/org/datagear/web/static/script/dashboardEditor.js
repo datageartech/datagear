@@ -687,7 +687,7 @@
 	/**
 	 * 插入弹性布局元素。
 	 * 
-	 * @param gridAttr 网格设置，格式为：{ items: 数值或数值字符串, fillParent: 布尔值或布尔值字符串 }
+	 * @param gridAttr 网格设置，格式为：{ items: 数值或数值字符串, direction: "...", fillParent: 布尔值或布尔值字符串 }
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
@@ -701,7 +701,8 @@
 		//不能使用"<div />"，生成的源码格式不对
 		var div = $("<div></div>");
 		
-		var styleStr = "display:flex;justify-content:space-between;align-items:stretch;";
+		var styleStr = "display:flex;"+(flexAttr.direction ? "flex-direction:"+flexAttr.direction+";" : "")
+						+"justify-content:space-between;align-items:stretch;";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
 		if(flexAttr.fillParent === "true" || flexAttr.fillParent === true)
