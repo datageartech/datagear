@@ -280,8 +280,11 @@
 	
 	chartFactory._refactorChart = function(chart)
 	{
+		chart._attributes = chart.attributes;
 		//chart.resultDataFormat属性与后面的chart.resultDataFormat()冲突，因此这里重构一下
 		chart._resultDataFormat = chart.resultDataFormat;
+		
+		delete chart.attributes;
 		delete chart.resultDataFormat;
 	};
 	
@@ -1760,8 +1763,10 @@
 	 */
 	chartBase.widgetId = function()
 	{
+		var attrs = this._attributes;
+		
 		//org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
-		return (this.attributes && this.attributes.chartWidget ? this.attributes.chartWidget.id : null);
+		return (attrs && attrs.chartWidget ? attrs.chartWidget.id : null);
 	};
 	
 	/**
