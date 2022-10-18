@@ -268,7 +268,7 @@
 	 *				  //可选，图表结果数据格式
 	 *				  resultDataFormat: {...},
 	 *				  //图表属性
-	 *				  attributes: {chartWidget: {id: "...", ..}, ...}
+	 *				  attributes: {DG_CHART_WIDGET: {id: "...", ..}, ...}
 	 *				}
 	 *				另参考：org.datagear.analysis.support.html.HtmlChart
 	 */
@@ -280,7 +280,7 @@
 	
 	chartFactory._refactorChart = function(chart)
 	{
-		chart._attributes = chart.attributes;
+		chart._attributes = (chart.attributes || {});
 		//chart.resultDataFormat属性与后面的chart.resultDataFormat()冲突，因此这里重构一下
 		chart._resultDataFormat = chart.resultDataFormat;
 		
@@ -1763,10 +1763,9 @@
 	 */
 	chartBase.widgetId = function()
 	{
-		var attrs = this._attributes;
-		
 		//org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
-		return (attrs && attrs.chartWidget ? attrs.chartWidget.id : null);
+		var chartWidget = this.attribute("DG_CHART_WIDGET");
+		return (chartWidget ? chartWidget.id : null);
 	};
 	
 	/**
@@ -3683,6 +3682,35 @@
 		url = chartFactory.toWebContextPathURL(webContext, url);
 		
 		return url;
+	};
+	
+	/**
+	 * 获取/设置图表指定属性值。
+	 * 
+	 * @param name 属性名
+	 * @param value 可选，要设置的属性值
+	 * @returns 
+	 * @since 4.2.0
+	 */
+	chartBase.attribute = function(name, value)
+	{
+		var attrs = this._attributes;
+		
+		if(value === undefined)
+			return attrs[name];
+		else
+			attrs[name] = value;
+	};
+	
+	/**
+	 * 获取图表全部属性值。
+	 * 
+	 * @returns { ... } 
+	 * @since 4.2.0
+	 */
+	chartBase.attributes = function()
+	{
+		return this._attributes;
 	};
 	
 	//-------------

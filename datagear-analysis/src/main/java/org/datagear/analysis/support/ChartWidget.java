@@ -34,7 +34,7 @@ public class ChartWidget extends ChartDefinition implements Serializable
 	private static final long serialVersionUID = 1L;
 
 	/** 图表部件渲染时的部件信息属性名 */
-	public static final String ATTR_CHART_WIDGET = "chartWidget";
+	public static final String ATTR_CHART_WIDGET = "DG_CHART_WIDGET";
 
 	private ChartPlugin plugin;
 
