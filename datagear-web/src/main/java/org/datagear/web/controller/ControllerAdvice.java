@@ -430,7 +430,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisDataSetSourceParseException(HttpServletRequest request, HttpServletResponse response,
 			DataSetSourceParseException exception)
 	{
-		setOptMsgForThrowable(request, exception, getRootMessage(exception), exception.getSource());
+		OperationMessage om = setOptMsgForThrowable(request, exception, getRootMessage(exception), exception.getSource());
+		om.setData(exception.getSource());
 		return getErrorView(request, response);
 	}
 
@@ -439,7 +440,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisSqlDataSetSqlExecutionException(HttpServletRequest request,
 			HttpServletResponse response, SqlDataSetSqlExecutionException exception)
 	{
-		setOptMsgForThrowable(request, exception, getRootMessage(exception), exception.getSql());
+		OperationMessage om = setOptMsgForThrowable(request, exception, getRootMessage(exception));
+		om.setData(exception.getSql());
 		return getErrorView(request, response);
 	}
 
