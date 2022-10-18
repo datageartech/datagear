@@ -24,6 +24,9 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 {
 	private static final long serialVersionUID = 1L;
 
+	/** 内置图表属性名前缀 */
+	public static final String BUILTIN_ATTR_PREFIX = "DG_";
+
 	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_CHART_DATASETS = "chartDataSets";

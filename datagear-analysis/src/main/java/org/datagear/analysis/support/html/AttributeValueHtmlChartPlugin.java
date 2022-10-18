@@ -16,6 +16,17 @@ import org.datagear.util.i18n.Label;
  * <p>
  * 它从{@linkplain ChartDefinition#getAttributes()}获取{@linkplain #getChartAttributeName()}的值，并将其作为图表内容渲染。
  * </p>
+ * <p>
+ * 注意：此插件的JS渲染器要求运行环境（浏览器）如下：
+ * </p>
+ * <p>
+ * jQuery 库 <br>
+ * chart.elementJquery() 函数：获取图表元素jQuery对象 <br>
+ * chart.attribute(name) 函数：获取图表指定名称的属性值
+ * </p>
+ * <p>
+ * jQuery
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -57,14 +68,12 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 				//
 				+ "	{" + HtmlChartPlugin.HTML_NEW_LINE +
 				//
-				"		var element = document.getElementById(chart.elementId);" + HtmlChartPlugin.HTML_NEW_LINE
+				"		var element = chart.elementJquery();" + HtmlChartPlugin.HTML_NEW_LINE
 				//
-				+ "		var attributes = (chart." + HtmlChart.PROPERTY_CHART_ATTRIBUTES + " || {});"
+				+ "		var value = chart.attribute(" + StringUtil.toJavaScriptString(valueChartParamName) + ");"
 				+ HtmlChartPlugin.HTML_NEW_LINE
 				//
-				+ "		element.innerHTML=attributes[" + StringUtil.toJavaScriptString(valueChartParamName) + "];"
-				+ HtmlChartPlugin.HTML_NEW_LINE
-
+				+ "		element.html(value);" + HtmlChartPlugin.HTML_NEW_LINE
 				//
 				+ "	}," + HtmlChartPlugin.HTML_NEW_LINE
 				//

@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartQuery;
 import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.DashboardQuery;
@@ -68,7 +69,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * 由于看板展示URL的请求参数会添加至渲染上下文属性中，为了避免名字冲突，所有内置属性名都应采用此前缀。
 	 * </p>
 	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX = "DG_";
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX = ChartDefinition.BUILTIN_ATTR_PREFIX;
 
 	/**
 	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setWebContextName(String)}。
