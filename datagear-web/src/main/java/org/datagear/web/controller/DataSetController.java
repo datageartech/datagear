@@ -8,6 +8,7 @@
 package org.datagear.web.controller;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -697,10 +698,13 @@ public class DataSetController extends AbstractSchemaConnController
 		// throw new IllegalInputException();
 
 		if (isEmpty(dataSetEntity.getFileName()))
-			throw new IllegalInputException();
+			throw new FileNotFoundException();
 
 		File dataSetDirectory = getDataSetEntityService().getDataSetDirectory(dataSetEntity.getId());
 		File entityFile = FileUtil.getFile(dataSetDirectory, dataSetEntity.getFileName());
+
+		if (!entityFile.exists())
+			throw new FileNotFoundException();
 
 		String displayName = dataSetEntity.getDisplayName();
 

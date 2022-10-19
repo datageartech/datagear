@@ -32,7 +32,7 @@
 			<p-inputtext id="${pid}displayName" v-model="fm.displayName" type="text" class="input"
 				name="displayName" required readonly>
 			</p-inputtext>
-			<a :href="evalDownloadFileUrl()" target="_blank" class="link p-inputgroup-addon px-3" v-if="pm.isEditAction || pm.isViewAction">
+			<a :href="evalDownloadFileUrl()" target="_blank" class="link p-inputgroup-addon px-3" v-if="pm.originalFileName">
 				<@spring.message code='download' />
 			</a>
 		</div>

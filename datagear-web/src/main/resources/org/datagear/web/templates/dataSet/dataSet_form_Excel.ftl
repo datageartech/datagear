@@ -160,6 +160,7 @@
 	
 	po.vuePageModel(
 	{
+		originalFileName: po.originalFileName,
 		//用于兼容旧版本的工作表序号功能，参考AbstractExcelDataSet.getSheetIndex()
 		enableSheetIndex: (formModel.sheetIndex != null && formModel.sheetIndex > 0)
 	});

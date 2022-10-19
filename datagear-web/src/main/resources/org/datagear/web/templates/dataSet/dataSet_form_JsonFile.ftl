@@ -96,6 +96,11 @@
 		}
 	});
 	
+	po.vuePageModel(
+	{
+		originalFileName: po.originalFileName
+	});
+	
 	po.vueMount();
 })
 (${pid});
