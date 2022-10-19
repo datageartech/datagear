@@ -28,9 +28,14 @@
 		<@spring.message code='uploadFile' />
 	</label>
 	<div class="field-input col-12 md:col-9">
-		<p-inputtext id="${pid}displayName" v-model="fm.displayName" type="text" class="input w-full"
-			name="displayName" required readonly>
-		</p-inputtext>
+		<div class="p-inputgroup">
+			<p-inputtext id="${pid}displayName" v-model="fm.displayName" type="text" class="input"
+				name="displayName" required readonly>
+			</p-inputtext>
+			<a :href="evalDownloadFileUrl()" target="_blank" class="link p-inputgroup-addon px-3" v-if="pm.isEditAction || pm.isViewAction">
+				<@spring.message code='download' />
+			</a>
+		</div>
        	<div id="${pid}fileName" class="fileupload-wrapper flex align-items-center mt-1" v-if="!pm.isReadonlyAction">
         	<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
         		@upload="onUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
@@ -169,6 +174,12 @@
 	
 	po.vueMethod(
 	{
+		evalDownloadFileUrl: function()
+		{
+			var fm = po.vueFormModel();
+			return po.concatContextPath("/dataSet/downloadFile/?id="+encodeURIComponent(fm.id));
+		},
+		
 		onFileSourceTypeChange: function()
 		{
 			
