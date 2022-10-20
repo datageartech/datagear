@@ -532,12 +532,20 @@ label[title]:not(.no-tip)::after,
 .page-form .page-form-content.no-max-height{
 	max-height: unset;
 }
+.page-form form.readonly .hide-if-readonly,
 .page-form form.readonly .page-form-foot{
 	display: none;
+}
+.page-form form.readonly.show-foot .page-form-foot{
+	display: unset;
 }
 .page-form form.readonly .page-form-content{
 	/*屏幕高度 - 底部留白高度*/
 	max-height: calc(100vh - 1rem);
+}
+.page-form form.readonly.show-foot .page-form-content{
+	/*屏幕高度 - 表单foot高度*/
+	max-height: calc(100vh - 5rem);
 }
 .p-dialog .page-form .page-form-content{
 	/*对话框高度 - 对话框header高度 - 表单foot高度*/
@@ -546,6 +554,10 @@ label[title]:not(.no-tip)::after,
 .p-dialog .page-form form.readonly .page-form-content{
 	/*对话框高度 - 对话框header高度 - 底部留白高度*/
 	max-height: calc(90vh - 6rem - 1rem);
+}
+.p-dialog .page-form form.readonly.show-foot .page-form-content{
+	/*对话框高度 - 对话框header高度 - 表单foot高度*/
+	max-height: calc(90vh - 6rem - 5rem);
 }
 
 .plugin-info .plugin-icon{

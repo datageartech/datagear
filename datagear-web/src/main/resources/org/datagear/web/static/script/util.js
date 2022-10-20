@@ -2598,16 +2598,19 @@ $.inflatePageForm = function(po)
 	
 	po.submitForm = function(url, options)
 	{
-		if(po.isViewAction || url == "#")
+		options = $.extend(
+		{
+			defaultSuccessCallback: true,
+			closeAfterSubmit: true,
+			ignoreIfViewAction: true
+		},
+		options);
+		
+		if(options.ignoreIfViewAction && (po.isViewAction || url == "#"))
 			return;
 		
 		var fm = po.vueFormModel();
-		options = $.extend(true,
-		{
-			defaultSuccessCallback: true,
-			closeAfterSubmit: true
-		},
-		options, { data: po.vueRaw(fm) });
+		options = $.extend(true, options, { data: po.vueRaw(fm) });
 		
 		var successHandlers = (options.success ? [].concat(options.success) : []);
 		successHandlers.push(function(response)

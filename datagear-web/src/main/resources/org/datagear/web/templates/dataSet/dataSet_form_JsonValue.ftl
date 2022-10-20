@@ -20,7 +20,7 @@
 <body class="p-card no-border">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal page-form-dataSet page-form-dataSet-JsonValue">
-	<form id="${pid}form" class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
+	<form id="${pid}form" class="flex flex-column show-foot" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<#include "include/dataSet_form_name.ftl">
 			<div class="field grid">
@@ -41,7 +41,7 @@
 		</div>
 		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
 			<#include "include/dataSet_form_preview.ftl">
-			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
+			<p-button type="submit" label="<@spring.message code='save' />" class="hide-if-readonly"></p-button>
 		</div>
 	</form>
 </div>
@@ -72,7 +72,11 @@
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.inflateDataSetModel(formModel);
 	
-	po.setupForm(formModel, {},
+	po.setupForm(formModel,
+	{
+		//查看页面[预览]需要禁用此项
+		ignoreIfViewAction: false
+	},
 	{
 		customNormalizers:
 		{

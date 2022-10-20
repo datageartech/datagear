@@ -262,7 +262,7 @@
 			yesText: "<@spring.message code='yes' />",
 			noText: "<@spring.message code='no' />",
 			paramValues: po.vueRaw(pm.previewQuery.paramValues),
-			readonly: pm.isReadonlyAction,
+			readonly: false,
 			render: function()
 			{
 				$("select, input[type='text'], textarea", this).addClass("p-inputtext p-component w-full");
