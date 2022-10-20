@@ -224,7 +224,7 @@ page_boolean_options.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-textarea id="${pid}veTextElementContent" v-model="pm.vepms.textElement.content"
-							class="input w-full" name="content" autofocus>
+							class="input w-full" style="height:20vh;" name="content" autofocus>
 						</p-textarea>
 					</div>
 				</div>
