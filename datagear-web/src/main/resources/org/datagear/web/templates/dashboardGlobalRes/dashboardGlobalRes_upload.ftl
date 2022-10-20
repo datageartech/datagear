@@ -45,7 +45,7 @@
 					<@spring.message code='savePath' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}savePath" v-model="fm.savePath" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}savePath" v-model="fm.savePath" type="text" class="input w-full validate-normalizer"
 		        		name="savePath" required maxlength="200">
 		        	</p-inputtext>
 		        </div>
@@ -97,6 +97,21 @@
 		savePath: "",
 		autoUnzip: false,
 		zipFileNameEncoding: "${zipFileNameEncodingDefault}"
+	},
+	{},
+	{
+		customNormalizers:
+		{
+			savePath: function()
+			{
+				var fm = po.vueFormModel();
+				
+				if(fm.autoUnzip && $.isZipFile(fm.fileName))
+					return (fm.savePath || "savePathValidatePlaceholder");
+				else
+					return fm.savePath;
+			}
+		}
 	});
 	
 	po.vuePageModel(

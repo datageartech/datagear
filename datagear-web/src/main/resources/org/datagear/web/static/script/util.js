@@ -1243,6 +1243,12 @@
 		return re;
 	};
 	
+	$.isZipFile = function(fileName)
+	{
+		var reg = /\.(zip)$/gi;
+		return (fileName && reg.test(fileName));
+	};
+	
 	$.isHtmlFile = function(fileName)
 	{
 		var htmlReg = /\.(html|htm)$/gi;
