@@ -96,15 +96,15 @@ public class ChartWidget extends ChartDefinition implements Serializable
 		chartDefinition.setId(generateChartId(renderContext));
 
 		// 添加图表对应的部件信息
-		Map<String, Object> attributesNew = new HashMap<>();
-		Map<String, Object> attributesOld = chartDefinition.getAttributes();
-		if (attributesOld != null)
-			attributesNew.putAll(attributesOld);
+		Map<String, Object> attrValuesNew = new HashMap<>();
+		Map<String, Object> attrValuesOld = chartDefinition.getAttrValues();
+		if (attrValuesOld != null)
+			attrValuesNew.putAll(attrValuesOld);
 		Map<String, Object> chartWidgetInfo = new HashMap<>();
 		chartWidgetInfo.put(ChartWidget.PROPERTY_ID, this.getId());
-		attributesNew.put(ATTR_CHART_WIDGET, chartWidgetInfo);
+		attrValuesNew.put(ATTR_CHART_WIDGET, chartWidgetInfo);
 
-		chartDefinition.setAttributes(attributesNew);
+		chartDefinition.setAttrValues(attrValuesNew);
 
 		return chartDefinition;
 	}
@@ -127,13 +127,13 @@ public class ChartWidget extends ChartDefinition implements Serializable
 	 * @param chart
 	 * @return 可能返回{@code null}
 	 */
-	public static String getChartWidget(Chart chart)
+	public static String getChartWidgetId(Chart chart)
 	{
 		if (chart == null)
 			return null;
 
 		@SuppressWarnings("unchecked")
-		Map<String, Object> chartWidgetInfo = (Map<String, Object>) chart.getAttribute(ATTR_CHART_WIDGET);
+		Map<String, Object> chartWidgetInfo = (Map<String, Object>) chart.getAttrValue(ATTR_CHART_WIDGET);
 
 		return (chartWidgetInfo == null ? null : (String) chartWidgetInfo.get(ChartWidget.PROPERTY_ID));
 	}

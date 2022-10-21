@@ -696,7 +696,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			{
 				List<Chart> charts = dashboard.getCharts();
 				for (Chart chart : charts)
-					this.chartIdToChartWidgetIds.put(chart.getId(), ChartWidget.getChartWidget(chart));
+					this.chartIdToChartWidgetIds.put(chart.getId(), ChartWidget.getChartWidgetId(chart));
 			}
 
 			this.showForEdit = showForEdit;

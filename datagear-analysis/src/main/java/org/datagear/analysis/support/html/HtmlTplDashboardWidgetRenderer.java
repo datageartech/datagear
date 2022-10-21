@@ -462,7 +462,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetException",
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
-		widget.setAttribute(this.htmlChartPluginForGetWidgetException.getChartAttributeName(), "Chart widget '"
+		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(), "Chart widget '"
 				+ (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
 
 		if (LOGGER.isDebugEnabled())
@@ -477,7 +477,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetNotFound",
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
-		widget.setAttribute(this.htmlChartPluginForGetWidgetException.getChartAttributeName(),
+		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(),
 				"Chart widget '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
 
 		if (LOGGER.isDebugEnabled())
@@ -492,7 +492,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetPluginNull",
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
-		widget.setAttribute(this.htmlChartPluginForGetWidgetException.getChartAttributeName(), "Chart plugin is null");
+		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(), "Chart plugin is null");
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + chartWidget.getId()

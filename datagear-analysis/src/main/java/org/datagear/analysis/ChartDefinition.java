@@ -30,7 +30,7 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_CHART_DATASETS = "chartDataSets";
-	public static final String PROPERTY_CHART_ATTRIBUTES = "attributes";
+	public static final String PROPERTY_CHART_ATTR_VALUES = "attrValues";
 	public static final String PROPERTY_UPDATE_INTERVAL = "updateInterval";
 
 	public static final ChartDataSet[] EMPTY_CHART_DATA_SET = new ChartDataSet[0];
@@ -41,9 +41,9 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 	/** 图表数据集 */
 	private ChartDataSet[] chartDataSets = EMPTY_CHART_DATA_SET;
 
-	/** 图表属性映射表 */
+	/** 图表属性值映射表 */
 	@SuppressWarnings("unchecked")
-	private Map<String, Object> attributes = Collections.EMPTY_MAP;
+	private Map<String, Object> attrValues = Collections.EMPTY_MAP;
 
 	/** 图表更新间隔毫秒数 */
 	private int updateInterval = -1;
@@ -66,7 +66,7 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 	public ChartDefinition(ChartDefinition chartDefinition)
 	{
 		this(chartDefinition.getId(), chartDefinition.name, chartDefinition.chartDataSets);
-		this.attributes = chartDefinition.attributes;
+		this.attrValues = chartDefinition.attrValues;
 		this.updateInterval = chartDefinition.updateInterval;
 		this.resultDataFormat = chartDefinition.resultDataFormat;
 	}
@@ -92,51 +92,51 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 	}
 
 	/**
-	 * 获取图表属性映射表。
+	 * 获取图表属性值映射表。
 	 * 
 	 * @return
 	 */
-	public Map<String, Object> getAttributes()
+	public Map<String, Object> getAttrValues()
 	{
-		return attributes;
+		return attrValues;
 	}
 
 	/**
-	 * 设置图表属性映射表。
+	 * 设置图表属性值映射表。
 	 * 
-	 * @param attributes
+	 * @param attrValues
 	 */
-	public void setAttributes(Map<String, Object> attributes)
+	public void setAttrValues(Map<String, Object> attrValues)
 	{
-		this.attributes = attributes;
+		this.attrValues = attrValues;
 	}
 
 	/**
-	 * 设置属性。
+	 * 设置属性值。
 	 * 
 	 * @param name
 	 * @param value
 	 */
-	public void setAttribute(String name, Object value)
+	public void setAttrValue(String name, Object value)
 	{
-		if (this.attributes == null || this.attributes == Collections.EMPTY_MAP)
-			this.attributes = new HashMap<>();
+		if (this.attrValues == null || this.attrValues == Collections.EMPTY_MAP)
+			this.attrValues = new HashMap<>();
 
-		this.attributes.put(name, value);
+		this.attrValues.put(name, value);
 	}
 
 	/**
-	 * 获取属性。
+	 * 获取属性值。
 	 * 
 	 * @param name
 	 * @return 返回{@code null}表示没有。
 	 */
-	public Object getAttribute(String name)
+	public Object getAttrValue(String name)
 	{
-		if (this.attributes == null)
+		if (this.attrValues == null)
 			return null;
 
-		return this.attributes.get(name);
+		return this.attrValues.get(name);
 	}
 
 	/**

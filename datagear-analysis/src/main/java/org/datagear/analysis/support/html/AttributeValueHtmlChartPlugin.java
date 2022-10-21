@@ -14,7 +14,7 @@ import org.datagear.util.i18n.Label;
 /**
  * 仅渲染图表指定属性值的{@linkplain HtmlChartPlugin}。
  * <p>
- * 它从{@linkplain ChartDefinition#getAttributes()}获取{@linkplain #getChartAttributeName()}的值，并将其作为图表内容渲染。
+ * 它从{@linkplain ChartDefinition#getAttrValues()}获取{@linkplain #getAttrName()}的值，并将其作为图表内容渲染。
  * </p>
  * <p>
  * 注意：此插件的JS渲染器要求运行环境（浏览器）如下：
@@ -22,7 +22,7 @@ import org.datagear.util.i18n.Label;
  * <p>
  * jQuery 库 <br>
  * chart.elementJquery() 函数：获取图表元素jQuery对象 <br>
- * chart.attribute(name) 函数：获取图表指定名称的属性值
+ * chart.attrValue(name) 函数：获取图表指定名称的属性值
  * </p>
  * <p>
  * jQuery
@@ -33,34 +33,34 @@ import org.datagear.util.i18n.Label;
  */
 public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 {
-	private String chartAttributeName;
+	private String attrName;
 
 	public AttributeValueHtmlChartPlugin()
 	{
 		super();
 	}
 
-	public AttributeValueHtmlChartPlugin(String id, String chartAttributeName)
+	public AttributeValueHtmlChartPlugin(String id, String attrName)
 	{
 		super();
 		super.setId(id);
 		super.setNameLabel(new Label(AttributeValueHtmlChartPlugin.class.getSimpleName()));
-		super.setRenderer(buildJsChartRenderer(chartAttributeName));
-		this.chartAttributeName = chartAttributeName;
+		super.setRenderer(buildJsChartRenderer(attrName));
+		this.attrName = attrName;
 	}
 
-	public String getChartAttributeName()
+	public String getAttrName()
 	{
-		return chartAttributeName;
+		return attrName;
 	}
 
-	public void setChartAttributeName(String chartAttributeName)
+	public void setAttrName(String attrName)
 	{
-		this.chartAttributeName = chartAttributeName;
-		super.setRenderer(buildJsChartRenderer(chartAttributeName));
+		this.attrName = attrName;
+		super.setRenderer(buildJsChartRenderer(attrName));
 	}
 
-	protected StringJsChartRenderer buildJsChartRenderer(String valueChartParamName)
+	protected StringJsChartRenderer buildJsChartRenderer(String attrName)
 	{
 		return new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_OBJECT, "{" + HtmlChartPlugin.HTML_NEW_LINE
 		//
@@ -70,7 +70,7 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 				//
 				"		var element = chart.elementJquery();" + HtmlChartPlugin.HTML_NEW_LINE
 				//
-				+ "		var value = chart.attribute(" + StringUtil.toJavaScriptString(valueChartParamName) + ");"
+				+ "		var value = chart.attrValue(" + StringUtil.toJavaScriptString(attrName) + ");"
 				+ HtmlChartPlugin.HTML_NEW_LINE
 				//
 				+ "		element.html(value);" + HtmlChartPlugin.HTML_NEW_LINE
