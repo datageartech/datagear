@@ -1614,8 +1614,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			HtmlChart[] charts = this.htmlChartWidgetJsonWriter.write(out, chartWidgets);
 
 			Map<String, String> chartIdToChartWidgetIds = new HashMap<String, String>();
-			for (int i = 0; i < chartWidgetIds.length; i++)
-				chartIdToChartWidgetIds.put(charts[i].getId(), chartWidgetIds[i]);
+			for (int i = 0; i < chartWidgets.length; i++)
+				chartIdToChartWidgetIds.put(charts[i].getId(), chartWidgets[i].getId());
 
 			dashboardInfo.putChartWidgetIds(chartIdToChartWidgetIds);
 		}
