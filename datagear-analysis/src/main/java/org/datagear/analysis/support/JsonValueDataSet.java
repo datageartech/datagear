@@ -28,8 +28,6 @@ import org.datagear.util.IOUtil;
  */
 public class JsonValueDataSet extends AbstractJsonDataSet<JsonValueDataSetResource>
 {
-	private static final long serialVersionUID = 1L;
-
 	private String value;
 
 	public JsonValueDataSet()

@@ -24,7 +24,7 @@ import org.datagear.util.i18n.Labeled;
 public class ChartParam extends AbstractLabeled implements DataNameType, Serializable
 {
 	private static final long serialVersionUID = 1L;
-
+	
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_TYPE = "type";
 	public static final String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;

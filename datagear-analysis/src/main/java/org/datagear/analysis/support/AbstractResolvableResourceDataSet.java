@@ -28,9 +28,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  */
 public abstract class AbstractResolvableResourceDataSet<T extends DataSetResource> extends AbstractResolvableDataSet
 {
-	private static final long serialVersionUID = 1L;
-
-	private transient CacheService cacheService = null;
+	private CacheService cacheService = null;
 
 	public AbstractResolvableResourceDataSet()
 	{
@@ -169,7 +167,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	public static abstract class DataSetResource implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
-
+		
 		private String resolvedTemplate = null;
 
 		public DataSetResource()

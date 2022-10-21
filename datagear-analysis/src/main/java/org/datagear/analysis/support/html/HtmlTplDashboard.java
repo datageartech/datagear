@@ -19,8 +19,6 @@ import org.datagear.analysis.TemplateDashboard;
  */
 public class HtmlTplDashboard extends TemplateDashboard
 {
-	private static final long serialVersionUID = 1L;
-
 	/** 看板JS对象变量名 */
 	private String varName;
 	

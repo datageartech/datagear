@@ -15,11 +15,9 @@ package org.datagear.analysis;
  */
 public class Chart extends ChartDefinition
 {
-	private static final long serialVersionUID = 1L;
-
 	private ChartPlugin plugin;
 
-	private transient RenderContext renderContext;
+	private RenderContext renderContext;
 
 	public Chart()
 	{

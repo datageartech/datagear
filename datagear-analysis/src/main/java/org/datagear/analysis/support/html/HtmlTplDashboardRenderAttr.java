@@ -25,8 +25,6 @@ import org.datagear.util.StringUtil;
  */
 public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 {
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * {@linkplain HtmlTplDashboardRenderAttr}的渲染上下文属性名。
 	 */

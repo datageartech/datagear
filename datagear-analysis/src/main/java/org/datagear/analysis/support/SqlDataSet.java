@@ -51,8 +51,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
-	private static final long serialVersionUID = 1L;
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataSet.class);
 
 	public static final DataSetFmkTemplateResolver SQL_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver(
@@ -64,7 +62,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 	private String sql;
 
-	private transient SqlValidator sqlValidator = null;
+	private SqlValidator sqlValidator = null;
 
 	public SqlDataSet()
 	{

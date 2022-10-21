@@ -7,7 +7,6 @@
 
 package org.datagear.analysis.support.html;
 
-import java.io.Serializable;
 import java.io.Writer;
 
 import org.datagear.analysis.ChartDefinition;
@@ -22,8 +21,6 @@ import org.datagear.analysis.RenderException;
  */
 public class HtmlChartRenderAttr extends HtmlRenderAttr
 {
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * {@linkplain HtmlChartRenderAttr}的渲染上下文属性名。
 	 */
@@ -162,10 +159,8 @@ public class HtmlChartRenderAttr extends HtmlRenderAttr
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class HtmlChartRenderOption implements Serializable
+	public static class HtmlChartRenderOption
 	{
-		private static final long serialVersionUID = 1L;
-
 		/** 图表的HTML元素ID */
 		private String chartElementId;
 

@@ -32,11 +32,9 @@ import org.datagear.util.IOUtil;
  */
 public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 {
-	private static final long serialVersionUID = 1L;
+	private HtmlTplDashboardWidgetRenderer renderer;
 
-	private transient HtmlTplDashboardWidgetRenderer renderer;
-
-	private transient TemplateDashboardWidgetResManager resManager;
+	private TemplateDashboardWidgetResManager resManager;
 
 	public HtmlTplDashboardWidget()
 	{

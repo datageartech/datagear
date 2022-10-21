@@ -27,7 +27,7 @@ import org.datagear.util.i18n.Labeled;
 public class DataSign extends AbstractLabeled implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-
+	
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_REQUIRED = "required";
 	public static final String PROPERTY_MULTIPLE = "multiple";

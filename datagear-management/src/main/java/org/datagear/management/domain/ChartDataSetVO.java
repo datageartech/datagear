@@ -7,6 +7,8 @@
 
 package org.datagear.management.domain;
 
+import java.io.Serializable;
+
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetResult;
@@ -20,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author datagear@163.com
  *
  */
-public class ChartDataSetVO extends ChartDataSet implements CloneableEntity
+public class ChartDataSetVO extends ChartDataSet implements CloneableEntity, Serializable
 {
 	private static final long serialVersionUID = 1L;
 

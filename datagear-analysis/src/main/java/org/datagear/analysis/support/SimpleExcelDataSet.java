@@ -25,8 +25,6 @@ import org.datagear.analysis.DataSetQuery;
  */
 public class SimpleExcelDataSet extends AbstractExcelFileDataSet
 {
-	private static final long serialVersionUID = 1L;
-
 	/** Excel文件 */
 	private File file;
 

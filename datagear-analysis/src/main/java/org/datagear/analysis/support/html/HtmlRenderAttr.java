@@ -7,7 +7,6 @@
 
 package org.datagear.analysis.support.html;
 
-import java.io.Serializable;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Locale;
@@ -23,10 +22,8 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public abstract class HtmlRenderAttr implements Serializable
+public abstract class HtmlRenderAttr
 {
-	private static final long serialVersionUID = 1L;
-
 	/** 属性名：HTML输出流 */
 	private String htmlWriterName = "htmlWriter";
 

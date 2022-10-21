@@ -26,8 +26,6 @@ import org.datagear.util.FileUtil;
  */
 public class CsvDirectoryFileDataSet extends AbstractCsvFileDataSet
 {
-	private static final long serialVersionUID = 1L;
-
 	/** CSV文件所在的目录 */
 	private File directory;
 

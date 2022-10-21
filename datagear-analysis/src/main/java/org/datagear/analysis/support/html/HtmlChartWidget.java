@@ -28,8 +28,6 @@ import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOpt
  */
 public class HtmlChartWidget extends ChartWidget
 {
-	private static final long serialVersionUID = 1L;
-
 	public HtmlChartWidget()
 	{
 		super();

@@ -7,6 +7,7 @@
 
 package org.datagear.management.service.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -661,7 +662,7 @@ public class HtmlChartWidgetEntityServiceImpl
 		}
 	}
 
-	protected static class IdDataSet extends AbstractIdentifiable implements DataSet
+	protected static class IdDataSet extends AbstractIdentifiable implements DataSet, Serializable
 	{
 		private static final long serialVersionUID = 1L;
 

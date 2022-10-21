@@ -7,7 +7,6 @@
 
 package org.datagear.analysis;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,10 +19,8 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class DataSetQuery implements ResultDataFormatAware, Serializable
+public class DataSetQuery implements ResultDataFormatAware
 {
-	private static final long serialVersionUID = 1L;
-
 	/** 参数值映射表 */
 	private Map<String, Object> paramValues = new HashMap<String, Object>();
 

@@ -7,18 +7,14 @@
 
 package org.datagear.analysis;
 
-import java.io.Serializable;
-
 /**
  * 抽象{@linkplain DataNameType}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractDataNameType implements DataNameType, Serializable
+public abstract class AbstractDataNameType implements DataNameType
 {
-	private static final long serialVersionUID = 1L;
-
 	/** 名称 */
 	private String name;
 

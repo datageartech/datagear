@@ -7,7 +7,6 @@
 
 package org.datagear.analysis;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -23,7 +22,7 @@ import java.util.Arrays;
  * @author datagear@163.com
  *
  */
-public class ChartTheme extends Theme implements Serializable
+public class ChartTheme extends Theme
 {
 	private static final long serialVersionUID = 1L;
 

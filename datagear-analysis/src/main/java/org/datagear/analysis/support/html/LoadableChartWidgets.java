@@ -7,7 +7,6 @@
 
 package org.datagear.analysis.support.html;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -17,10 +16,8 @@ import java.util.Set;
  * @author datagear@163.com
  * 
  */
-public class LoadableChartWidgets implements Serializable
+public class LoadableChartWidgets
 {
-	private static final long serialVersionUID = 1L;
-	
 	/** 全部 */
 	public static final String PATTERN_ALL = "all";
 	

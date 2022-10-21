@@ -41,8 +41,6 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends AbstractResolvableResourceDataSet<T>
 		implements ResolvableDataSet
 {
-	private static final long serialVersionUID = 1L;
-
 	public static final DataSetFmkTemplateResolver JSON_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver(
 			JsonOutputFormat.INSTANCE);
 
@@ -302,7 +300,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	public static abstract class JsonDataSetResource extends DataSetResource
 	{
 		private static final long serialVersionUID = 1L;
-
+		
 		private String dataJsonPath;
 
 		public JsonDataSetResource()

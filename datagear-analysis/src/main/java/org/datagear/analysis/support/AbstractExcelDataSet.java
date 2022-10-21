@@ -8,7 +8,6 @@
 package org.datagear.analysis.support;
 
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,8 +52,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> extends AbstractResolvableResourceDataSet<T>
 {
-	private static final long serialVersionUID = 1L;
-
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractExcelDataSet.class);
 
 	public static final String EXTENSION_XLSX = "xlsx";
@@ -597,10 +594,8 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		return cellValue;
 	}
 	
-	protected static class ExcelPropertyInfo implements Serializable
+	protected static class ExcelPropertyInfo
 	{
-		private static final long serialVersionUID = 1L;
-
 		/** 属性名 */
 		private final String name;
 
@@ -649,8 +644,8 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 
 		private boolean xls;
 
-		private transient List<IndexRange> _dataRowRanges = null;
-		private transient List<IndexRange> _dataColumnRanges = null;
+		private List<IndexRange> _dataRowRanges = null;
+		private List<IndexRange> _dataColumnRanges = null;
 
 		public ExcelDataSetResource()
 		{

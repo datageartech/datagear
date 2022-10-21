@@ -30,8 +30,6 @@ import org.datagear.util.StringUtil;
  */
 public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<ExcelFileDataSetResource>
 {
-	private static final long serialVersionUID = 1L;
-
 	public AbstractExcelFileDataSet()
 	{
 		super();

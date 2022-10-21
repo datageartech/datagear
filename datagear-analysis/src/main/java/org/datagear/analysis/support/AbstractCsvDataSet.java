@@ -34,8 +34,6 @@ import org.datagear.util.IOUtil;
 public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends AbstractResolvableResourceDataSet<T>
 		implements ResolvableDataSet
 {
-	private static final long serialVersionUID = 1L;
-
 	public static final DataSetFmkTemplateResolver CSV_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver(
 			CsvOutputFormat.INSTANCE);
 
@@ -316,7 +314,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	public static abstract class CsvDataSetResource extends DataSetResource
 	{
 		private static final long serialVersionUID = 1L;
-
+		
 		private int nameRow;
 
 		public CsvDataSetResource()

@@ -81,8 +81,6 @@ public class AbstractResolvableDataSetTest
 
 	private static class TestAbstractResolvableDataSet extends AbstractResolvableDataSet
 	{
-		private static final long serialVersionUID = 1L;
-
 		@Override
 		protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
 				boolean resolveProperties) throws DataSetException

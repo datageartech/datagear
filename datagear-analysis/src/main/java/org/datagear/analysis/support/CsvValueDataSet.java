@@ -28,8 +28,6 @@ import org.datagear.util.IOUtil;
  */
 public class CsvValueDataSet extends AbstractCsvDataSet<CsvValueDataSetResource>
 {
-	private static final long serialVersionUID = 1L;
-
 	/** CSV字符串 */
 	private String value = "";
 

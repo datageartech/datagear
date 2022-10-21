@@ -7,8 +7,6 @@
 
 package org.datagear.analysis.support;
 
-import java.io.Serializable;
-
 import org.datagear.util.DateNumberFormat;
 
 /**
@@ -17,7 +15,7 @@ import org.datagear.util.DateNumberFormat;
  * @author datagear@163.com
  *
  */
-public class DataFormat extends DateNumberFormat implements Serializable
+public class DataFormat extends DateNumberFormat
 {
 	private static final long serialVersionUID = 1L;
 

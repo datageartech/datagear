@@ -7,11 +7,10 @@
 
 package org.datagear.analysis.support;
 
-import java.util.List;
+import java.io.Serializable;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 
@@ -24,17 +23,12 @@ import org.datagear.analysis.DataSetResult;
  * @author datagear@163.com
  *
  */
-public class ProfileDataSet extends AbstractDataSet
+public class ProfileDataSet extends AbstractDataSet implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	public ProfileDataSet()
 	{
-	}
-
-	public ProfileDataSet(String id, String name, List<DataSetProperty> properties)
-	{
-		super(id, name, properties);
 	}
 
 	public ProfileDataSet(DataSet dataSet)

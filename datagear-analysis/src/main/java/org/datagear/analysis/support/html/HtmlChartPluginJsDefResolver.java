@@ -9,7 +9,6 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -232,10 +231,8 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 		}
 	}
 
-	public static class JsDefContent implements Serializable
+	public static class JsDefContent
 	{
-		private static final long serialVersionUID = 1L;
-
 		/** 插件定义JSON */
 		private String pluginJson;
 

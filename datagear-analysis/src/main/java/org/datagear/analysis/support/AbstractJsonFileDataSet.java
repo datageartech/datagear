@@ -26,8 +26,6 @@ import org.datagear.util.IOUtil;
  */
 public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFileDataSetResource>
 {
-	private static final long serialVersionUID = 1L;
-
 	/** 文件编码 */
 	private String encoding = IOUtil.CHARSET_UTF_8;
 

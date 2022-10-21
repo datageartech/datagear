@@ -7,6 +7,8 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
+
 /**
  * 数据集参数。
  * <p>
@@ -16,7 +18,7 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public class DataSetParam extends AbstractDataNameType
+public class DataSetParam extends AbstractDataNameType implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 

@@ -21,7 +21,7 @@ import org.datagear.util.i18n.Labeled;
 public class Category extends AbstractLabeled implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-
+	
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	public static final String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;

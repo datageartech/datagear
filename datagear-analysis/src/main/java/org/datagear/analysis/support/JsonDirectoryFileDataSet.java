@@ -27,8 +27,6 @@ import org.datagear.util.FileUtil;
  */
 public class JsonDirectoryFileDataSet extends AbstractJsonFileDataSet
 {
-	private static final long serialVersionUID = 1L;
-
 	/** JSON文件所在的目录 */
 	private File directory;
 

@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 
 import org.datagear.util.FileUtil;
 
@@ -21,10 +20,8 @@ import org.datagear.util.FileUtil;
  * @author datagear@163.com
  *
  */
-public class LocationResource implements Serializable
+public class LocationResource
 {
-	private static final long serialVersionUID = 1L;
-
 	/** 类路径资源前缀 */
 	public static final String PREFIX_CLASSPATH = "classpath:";
 

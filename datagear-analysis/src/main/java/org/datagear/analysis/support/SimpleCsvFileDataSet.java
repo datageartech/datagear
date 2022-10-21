@@ -24,8 +24,6 @@ import org.datagear.analysis.DataSetQuery;
  */
 public class SimpleCsvFileDataSet extends AbstractCsvFileDataSet
 {
-	private static final long serialVersionUID = 1L;
-
 	/** CSV文件 */
 	private File file;
 
