@@ -128,7 +128,7 @@ public class RoleController extends AbstractController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-		setReadonlyActionOnRoleDataAnalyst(model, WebUtils.getUser());
+		setReadonlyActionByRole(model, WebUtils.getUser());
 		return "/role/role_table";
 	}
 

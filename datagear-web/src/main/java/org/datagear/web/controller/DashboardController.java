@@ -858,7 +858,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-		setReadonlyActionOnRoleDataAnalyst(model, WebUtils.getUser());
+		setReadonlyActionByRole(model, WebUtils.getUser());
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
 				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
 		

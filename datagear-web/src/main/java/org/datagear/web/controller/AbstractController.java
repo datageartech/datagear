@@ -193,21 +193,17 @@ public abstract class AbstractController
 		return entity;
 	}
 	
-	protected boolean setReadonlyActionOnRoleDataAnalyst(Model model, User user)
+	protected boolean setReadonlyActionByRole(Model model, User user)
 	{
-		boolean readonly = false;
+		boolean readonly = true;
 		
 		if(user == null || user.isAnonymous())
 		{
 			readonly = true;
 		}
-		else if(user.isAdmin())
+		else if(user.isAdmin() || user.hasRole(Role.ROLE_DATA_MANAGER))
 		{
 			readonly = false;
-		}
-		else
-		{
-			readonly = user.hasRole(Role.ROLE_DATA_ANALYST);
 		}
 		
 		return setReadonlyAction(model, readonly);
