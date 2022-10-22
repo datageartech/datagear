@@ -1829,19 +1829,6 @@ page_boolean_options.ftl
 			helpTarget.focus();
 		});
 	};
-
-	po.prettyChartOptionsStr = function(chartOptionsStr)
-	{
-		if(chartOptionsStr && /^\s*[\{\[]/.test(chartOptionsStr))
-		{
-			var obj = chartFactory.evalSilently(chartOptionsStr, chartOptionsStr);
-			
-			if(!chartFactory.isString(obj))
-				chartOptionsStr = JSON.stringify(obj, null, '\t');
-		}
-		
-		return (chartOptionsStr || "");
-	};
 	
 	po.cssColorToHexStrChartTheme = function(chartTheme)
 	{
@@ -2235,7 +2222,7 @@ page_boolean_options.ftl
 				
 				codeEditorEle.empty();
 				var codeEditor = po.createCodeEditor(codeEditorEle, editorOptions);
-				po.setCodeTextTimeout(codeEditor, po.prettyChartOptionsStr(pm.vepms.chartOptions.value), true);
+				po.setCodeTextTimeout(codeEditor, (pm.vepms.chartOptions.value || ""), true);
 				
 				po.setupSimpleForm(form, pm.vepms.chartOptions, function()
 				{

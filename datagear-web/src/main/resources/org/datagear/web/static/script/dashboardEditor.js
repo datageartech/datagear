@@ -1695,10 +1695,10 @@
 	/**
 	 * 设置元素或其所有子图表元素的图表选项。
 	 * 
-	 * @param chartOptions 要设置的图表选项对象、字符串，格式为：{ ... }、"{ ... }"、"变量名"
+	 * @param chartOptionsStr 要设置的图表选项字符串
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.setElementChartOptions = function(chartOptions, ele)
+	editor.setElementChartOptions = function(chartOptionsStr, ele)
 	{
 		ele = this._currentElement(ele, true);
 		
@@ -1710,7 +1710,7 @@
 		{
 			var thisEle = $(this);
 			
-			editor._setElementChartOptions(thisEle, chartOptions);
+			editor._setElementChartOptions(thisEle, chartOptionsStr);
 			var chart = editor.dashboard.renderedChart(thisEle);
 			chart.destroy();
 			chart.init();
@@ -1734,11 +1734,11 @@
 	/**
 	 * 设置全局图表选项。
 	 * 
-	 * @param chartOptions 要设置的全局图表选项对象、字符串，格式为：{ ... }、"{ ... }"、"变量名"
+	 * @param chartOptionsStr 要设置的全局图表选项字符串
 	 */
-	editor.setGlobalChartOptions = function(chartOptions)
+	editor.setGlobalChartOptions = function(chartOptionsStr)
 	{
-		this._setElementChartOptions($(document.body), chartOptions);
+		this._setElementChartOptions($(document.body), chartOptionsStr);
 		
 		this.dashboard.destroy();
 		this.dashboard.render();
@@ -1757,34 +1757,15 @@
 		return this._getElementChartOptions(ele);
 	};
 	
-	editor._setElementChartOptions = function(ele, chartOptions, sync)
+	editor._setElementChartOptions = function(ele, chartOptionsStr, sync)
 	{
-		if(!chartOptions)
+		if(!chartOptionsStr)
 		{
 			this._removeElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, sync);
 			return;
 		}
 		
-		var attrValue = "";
-		
-		if(chartFactory.isString(chartOptions))
-		{
-			if(this._isJsonString(chartOptions))
-			{
-				chartOptions = chartFactory.evalSilently(chartOptions, {});
-				attrValue = this._serializeForAttrValue(chartOptions);
-			}
-			else
-			{
-				//chartOptions允许是某个图表选项对象的变量名
-				attrValue = chartOptions;
-			}
-		}
-		else
-			attrValue = this._serializeForAttrValue(chartOptions);
-		
-		attrValue = (attrValue ? attrValue : "{}");
-		
+		var attrValue = (chartOptionsStr ? chartOptionsStr : "{}");
 		this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, attrValue, sync);
 	};
 	
