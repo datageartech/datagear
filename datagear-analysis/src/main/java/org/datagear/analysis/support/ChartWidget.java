@@ -7,9 +7,9 @@
 
 package org.datagear.analysis.support;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable;
 
+import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
@@ -23,6 +23,9 @@ import org.datagear.util.IDUtil;
  * 图表部件。
  * <p>
  * 它可在{@linkplain RenderContext}中渲染自己所描述的{@linkplain Chart}。
+ * </p>
+ * <p>
+ * 由此部件渲染的图表可以通过{@linkplain #getChartWidgetId(Chart)}获取此部件ID。
  * </p>
  * 
  * @author datagear@163.com
@@ -91,17 +94,9 @@ public class ChartWidget extends ChartDefinition
 	{
 		ChartDefinition chartDefinition = new ChartDefinition(this);
 		chartDefinition.setId(generateChartId(renderContext));
-
+		
 		// 添加图表对应的部件信息
-		Map<String, Object> attrValuesNew = new HashMap<>();
-		Map<String, Object> attrValuesOld = chartDefinition.getAttrValues();
-		if (attrValuesOld != null)
-			attrValuesNew.putAll(attrValuesOld);
-		Map<String, Object> chartWidgetInfo = new HashMap<>();
-		chartWidgetInfo.put(ChartWidget.PROPERTY_ID, this.getId());
-		attrValuesNew.put(ATTR_CHART_WIDGET, chartWidgetInfo);
-
-		chartDefinition.setAttrValues(attrValuesNew);
+		chartDefinition.setAttrValue(ATTR_CHART_WIDGET, new ChartWidgetId(this.getId()));
 
 		return chartDefinition;
 	}
@@ -128,10 +123,28 @@ public class ChartWidget extends ChartDefinition
 	{
 		if (chart == null)
 			return null;
+		
+		ChartWidgetId cwi = (ChartWidgetId)chart.getAttrValue(ATTR_CHART_WIDGET);
+		return (cwi == null ? null : cwi.getId());
+	}
+	
+	/**
+	 * {@linkplain ChartWidget#getId()}描述类。
+	 * 
+	 * @author datagear@163.com
+	 */
+	public static class ChartWidgetId extends AbstractIdentifiable implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
 
-		@SuppressWarnings("unchecked")
-		Map<String, Object> chartWidgetInfo = (Map<String, Object>) chart.getAttrValue(ATTR_CHART_WIDGET);
+		public ChartWidgetId()
+		{
+			super();
+		}
 
-		return (chartWidgetInfo == null ? null : (String) chartWidgetInfo.get(ChartWidget.PROPERTY_ID));
+		public ChartWidgetId(String id)
+		{
+			super(id);
+		}
 	}
 }
