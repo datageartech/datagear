@@ -32,11 +32,11 @@
 		'LIGHT' :  'icon-0.png',
 		'DARK' :  'icon-1.png'
 	},
-	chartParams :
+	chartAttributes :
 	[
   		{
 			name : 'title',
-			type : 'STRING',
+			type : 'string',
 			nameLabel :
 			{
 				value : '标题',
@@ -65,7 +65,7 @@
 		},
 		{
 			name : 'interval',
-			type : 'NUMBER',
+			type : 'number',
 			nameLabel :
 			{
 				value : '间隔',

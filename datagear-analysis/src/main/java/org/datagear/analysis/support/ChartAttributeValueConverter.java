@@ -7,18 +7,18 @@
 
 package org.datagear.analysis.support;
 
-import org.datagear.analysis.ChartParam;
-import org.datagear.analysis.ChartParam.DataType;
+import org.datagear.analysis.ChartAttribute;
+import org.datagear.analysis.ChartAttribute.DataType;
 
 /**
- * {@linkplain ChartParam}值转换器。
+ * {@linkplain ChartAttribute}值转换器。
  * 
  * @author datagear@163.com
  *
  */
-public class ChartParamValueConverter extends DataValueConverter
+public class ChartAttributeValueConverter extends DataValueConverter
 {
-	public ChartParamValueConverter()
+	public ChartAttributeValueConverter()
 	{
 		super();
 	}

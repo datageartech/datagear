@@ -15,10 +15,11 @@ import java.util.Map;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.ChartParam;
+import org.datagear.analysis.ChartAttribute;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
+import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 import org.junit.Assert;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Assert.assertNotNull(chartPlugin.getNameLabel());
 			Assert.assertNotNull(chartPlugin.getDescLabel());
 			Assert.assertNotNull(chartPlugin.getIconResourceNames().size() > 0);
-			Assert.assertNotNull(chartPlugin.getChartParams());
+			Assert.assertNotNull(chartPlugin.getChartAttributes());
 			Assert.assertNotNull(chartPlugin.getDataSigns());
 			Assert.assertEquals("0.1.0", chartPlugin.getVersion());
 			Assert.assertEquals(2, chartPlugin.getOrder());
@@ -77,40 +78,73 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("icon-1.png", icons.get("DARK"));
 			}
 
-			List<ChartParam> chartParams = chartPlugin.getChartParams();
+			List<ChartAttribute> chartAttributes = chartPlugin.getChartAttributes();
 
 			{
-				ChartParam chartParam = chartParams.get(0);
+				ChartAttribute chartAttribute = chartAttributes.get(0);
 
-				Assert.assertEquals("title", chartParam.getName());
-				Assert.assertEquals(ChartParam.DataType.STRING, chartParam.getType());
+				Assert.assertEquals("title", chartAttribute.getName());
+				Assert.assertEquals(ChartAttribute.DataType.STRING, chartAttribute.getType());
 
-				Label nameLabel = chartParam.getNameLabel();
+				Label nameLabel = chartAttribute.getNameLabel();
 				Assert.assertEquals("标题", nameLabel.getValue());
 				Assert.assertEquals("title", nameLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("标题中文", nameLabel.getValue(Label.toLocale("zh")));
 
-				Label descLabel = chartParam.getDescLabel();
+				Label descLabel = chartAttribute.getDescLabel();
 				Assert.assertEquals("标题描述", descLabel.getValue());
 				Assert.assertEquals("title desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("标题描述中文", descLabel.getValue(Label.toLocale("zh")));
+				
+				Assert.assertFalse(chartAttribute.isRequired());
+				Assert.assertFalse(chartAttribute.isArray());
+				Assert.assertTrue(StringUtil.isEmpty(chartAttribute.getInputType()));
+				Assert.assertTrue(StringUtil.isEmpty(chartAttribute.getInputPayload()));
 			}
 
 			{
-				ChartParam chartParam = chartParams.get(1);
+				ChartAttribute chartAttribute = chartAttributes.get(1);
 
-				Assert.assertEquals("interval", chartParam.getName());
-				Assert.assertEquals(ChartParam.DataType.NUMBER, chartParam.getType());
+				Assert.assertEquals("interval", chartAttribute.getName());
+				Assert.assertEquals(ChartAttribute.DataType.NUMBER, chartAttribute.getType());
 
-				Label nameLabel = chartParam.getNameLabel();
+				Label nameLabel = chartAttribute.getNameLabel();
 				Assert.assertEquals("间隔", nameLabel.getValue());
 				Assert.assertEquals("interval", nameLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("间隔中文", nameLabel.getValue(Label.toLocale("zh")));
 
-				Label descLabel = chartParam.getDescLabel();
+				Label descLabel = chartAttribute.getDescLabel();
 				Assert.assertEquals("间隔描述", descLabel.getValue());
 				Assert.assertEquals("interval desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("间隔描述中文", descLabel.getValue(Label.toLocale("zh")));
+				
+				Assert.assertTrue(chartAttribute.isRequired());
+				Assert.assertTrue(chartAttribute.isArray());
+				Assert.assertEquals("mytype", chartAttribute.getInputType());
+				Assert.assertEquals("mypayload", chartAttribute.getInputPayload());
+			}
+			
+			{
+				ChartAttribute a2 = chartAttributes.get(2);
+				ChartAttribute a3 = chartAttributes.get(3);
+				ChartAttribute a4 = chartAttributes.get(4);
+				ChartAttribute a5 = chartAttributes.get(5);
+				ChartAttribute a6 = chartAttributes.get(6);
+
+				Assert.assertEquals("a2", a2.getName());
+				Assert.assertEquals(ChartAttribute.DataType.BOOLEAN, a2.getType());
+
+				Assert.assertEquals("a3", a3.getName());
+				Assert.assertEquals(ChartAttribute.DataType.STRING, a3.getType());
+
+				Assert.assertEquals("a4", a4.getName());
+				Assert.assertEquals(ChartAttribute.DataType.NUMBER, a4.getType());
+
+				Assert.assertEquals("a5", a5.getName());
+				Assert.assertEquals(ChartAttribute.DataType.BOOLEAN, a5.getType());
+
+				Assert.assertEquals("a6", a6.getName());
+				Assert.assertEquals("custom", a6.getType());
 			}
 
 			List<DataSign> dataSigns = chartPlugin.getDataSigns();
@@ -232,7 +266,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Assert.assertNotNull(chartPlugin.getNameLabel());
 			Assert.assertNotNull(chartPlugin.getDescLabel());
 			Assert.assertTrue(chartPlugin.getIconResourceNames().size() > 0);
-			Assert.assertNotNull(chartPlugin.getChartParams());
+			Assert.assertNotNull(chartPlugin.getChartAttributes());
 			Assert.assertNotNull(chartPlugin.getDataSigns());
 			Assert.assertEquals("0.1.0", chartPlugin.getVersion());
 			Assert.assertEquals(2, chartPlugin.getOrder());
@@ -260,37 +294,37 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("icon-1.png", icons.get("DARK"));
 			}
 
-			List<ChartParam> chartParams = chartPlugin.getChartParams();
+			List<ChartAttribute> chartAttributes = chartPlugin.getChartAttributes();
 
 			{
-				ChartParam chartParam = chartParams.get(0);
+				ChartAttribute chartAttribute = chartAttributes.get(0);
 
-				Assert.assertEquals("title", chartParam.getName());
-				Assert.assertEquals(ChartParam.DataType.STRING, chartParam.getType());
+				Assert.assertEquals("title", chartAttribute.getName());
+				Assert.assertEquals(ChartAttribute.DataType.STRING, chartAttribute.getType());
 
-				Label nameLabel = chartParam.getNameLabel();
+				Label nameLabel = chartAttribute.getNameLabel();
 				Assert.assertEquals("标题", nameLabel.getValue());
 				Assert.assertEquals("title", nameLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("标题中文", nameLabel.getValue(Label.toLocale("zh")));
 
-				Label descLabel = chartParam.getDescLabel();
+				Label descLabel = chartAttribute.getDescLabel();
 				Assert.assertEquals("标题描述", descLabel.getValue());
 				Assert.assertEquals("title desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("标题描述中文", descLabel.getValue(Label.toLocale("zh")));
 			}
 
 			{
-				ChartParam chartParam = chartParams.get(1);
+				ChartAttribute chartAttribute = chartAttributes.get(1);
 
-				Assert.assertEquals("interval", chartParam.getName());
-				Assert.assertEquals(ChartParam.DataType.NUMBER, chartParam.getType());
+				Assert.assertEquals("interval", chartAttribute.getName());
+				Assert.assertEquals(ChartAttribute.DataType.NUMBER, chartAttribute.getType());
 
-				Label nameLabel = chartParam.getNameLabel();
+				Label nameLabel = chartAttribute.getNameLabel();
 				Assert.assertEquals("间隔", nameLabel.getValue());
 				Assert.assertEquals("interval", nameLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("间隔中文", nameLabel.getValue(Label.toLocale("zh")));
 
-				Label descLabel = chartParam.getDescLabel();
+				Label descLabel = chartAttribute.getDescLabel();
 				Assert.assertEquals("间隔描述", descLabel.getValue());
 				Assert.assertEquals("interval desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("间隔描述中文", descLabel.getValue(Label.toLocale("zh")));

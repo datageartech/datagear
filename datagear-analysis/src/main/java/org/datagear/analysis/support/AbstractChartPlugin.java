@@ -14,7 +14,7 @@ import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Category;
-import org.datagear.analysis.ChartParam;
+import org.datagear.analysis.ChartAttribute;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DataSign;
@@ -37,7 +37,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	
 	private Map<String, String> iconResourceNames = Collections.emptyMap();
 
-	private List<ChartParam> chartParams = Collections.emptyList();
+	private List<ChartAttribute> chartAttributes = Collections.emptyList();
 
 	private List<DataSign> dataSigns = Collections.emptyList();
 
@@ -167,26 +167,26 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public List<ChartParam> getChartParams()
+	public List<ChartAttribute> getChartAttributes()
 	{
-		return chartParams;
+		return chartAttributes;
 	}
 
-	public void setChartParams(List<ChartParam> chartParams)
+	public void setChartAttributes(List<ChartAttribute> chartAttributes)
 	{
-		this.chartParams = chartParams;
+		this.chartAttributes = chartAttributes;
 	}
 
 	@Override
-	public ChartParam getChartParam(String name)
+	public ChartAttribute getChartAttribute(String name)
 	{
-		if (this.chartParams == null)
+		if (this.chartAttributes == null)
 			return null;
 
-		for (ChartParam chartParam : this.chartParams)
+		for (ChartAttribute chartAttribute : this.chartAttributes)
 		{
-			if (chartParam.getName().equals(name))
-				return chartParam;
+			if (chartAttribute.getName().equals(name))
+				return chartAttribute;
 		}
 
 		return null;

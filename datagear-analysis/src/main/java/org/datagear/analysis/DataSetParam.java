@@ -12,7 +12,7 @@ import java.io.Serializable;
 /**
  * 数据集参数。
  * <p>
- * 此类描述{@linkplain DataSet}获取{@linkplain DataSetResult}所需要的输入参数信息。
+ * 此类描述{@linkplain DataSet#getResult(DataSetQuery)}的{@linkplain DataSetQuery#setParamValues(java.util.Map)}的参数元信息。
  * </p>
  * 
  * @author datagear@163.com
@@ -121,7 +121,7 @@ public class DataSetParam extends AbstractDataNameType implements Serializable
 		/** 布尔值 */
 		public static final String BOOLEAN = "BOOLEAN";
 
-		/** 整数 */
+		/** 数值 */
 		public static final String NUMBER = "NUMBER";
 	}
 
@@ -139,15 +139,6 @@ public class DataSetParam extends AbstractDataNameType implements Serializable
 		/** 下拉框 */
 		public static final String SELECT = "select";
 
-		/** 日期 */
-		public static final String DATE = "date";
-
-		/** 时间 */
-		public static final String TIME = "time";
-
-		/** 日期时间 */
-		public static final String DATETIME = "datetime";
-
 		/** 单选框 */
 		public static final String RADIO = "radio";
 
@@ -156,5 +147,14 @@ public class DataSetParam extends AbstractDataNameType implements Serializable
 
 		/** 文本域 */
 		public static final String TEXTAREA = "textarea";
+		
+		/** 日期 */
+		public static final String DATE = "date";
+
+		/** 时间 */
+		public static final String TIME = "time";
+
+		/** 日期时间 */
+		public static final String DATETIME = "datetime";
 	}
 }

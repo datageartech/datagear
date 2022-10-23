@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.datagear.analysis.Category;
-import org.datagear.analysis.ChartParam;
+import org.datagear.analysis.ChartAttribute;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.DataSign;
 import org.datagear.util.IOUtil;
@@ -41,7 +41,7 @@ import org.datagear.util.i18n.Label;
  *   nameLabel : "..." 或者 { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
  *   descLabel : "..." 或者 { ... },
  *   icons : "..." 或者 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
- *   chartParams :  [ { ... }, ... ],
+ *   chartAttributes :  [ { ... }, ... ],
  *   dataSigns : [ { ... }, ... ],
  *   version : "...",
  *   order: 整数值,
@@ -64,7 +64,7 @@ public class JsonChartPluginPropertiesResolver
 	public static final String JSON_PROPERTY_ID = ChartPlugin.PROPERTY_ID;
 	public static final String JSON_PROPERTY_NAME_LABEL = ChartPlugin.PROPERTY_NAME_LABEL;
 	public static final String JSON_PROPERTY_DESC_LABEL = ChartPlugin.PROPERTY_DESC_LABEL;
-	public static final String JSON_PROPERTY_CHART_PARAMS = ChartPlugin.PROPERTY_CHART_PARAMS;
+	public static final String JSON_PROPERTY_CHART_PARAMS = ChartPlugin.PROPERTY_CHART_ATTRIBUTES;
 	public static final String JSON_PROPERTY_DATA_SIGNS = ChartPlugin.PROPERTY_DATA_SIGNS;
 	public static final String JSON_PROPERTY_VERSION = ChartPlugin.PROPERTY_VERSION;
 	public static final String JSON_PROPERTY_ORDER = ChartPlugin.PROPERTY_ORDER;
@@ -102,7 +102,7 @@ public class JsonChartPluginPropertiesResolver
 		chartPlugin.setNameLabel(convertToLabel(properties.get(JSON_PROPERTY_NAME_LABEL)));
 		chartPlugin.setDescLabel(convertToLabel(properties.get(JSON_PROPERTY_DESC_LABEL)));
 		chartPlugin.setIconResourceNames(convertToIconResourceNames(properties.get(JSON_PROPERTY_ICONS)));
-		chartPlugin.setChartParams(convertToChartParams(properties.get(JSON_PROPERTY_CHART_PARAMS)));
+		chartPlugin.setChartAttributes(convertToChartAttributes(properties.get(JSON_PROPERTY_CHART_PARAMS)));
 		chartPlugin.setDataSigns(convertToDataSigns(properties.get(JSON_PROPERTY_DATA_SIGNS)));
 		chartPlugin.setVersion((String) properties.get(JSON_PROPERTY_VERSION));
 		chartPlugin.setOrder(convertToInt(properties.get(JSON_PROPERTY_ORDER), chartPlugin.getOrder()));
@@ -265,12 +265,12 @@ public class JsonChartPluginPropertiesResolver
 	}
 
 	/**
-	 * 将对象转换为{@linkplain ChartParam}s。
+	 * 将对象转换为{@linkplain ChartAttribute}列表。
 	 * 
 	 * @param obj
 	 * @return
 	 */
-	protected List<ChartParam> convertToChartParams(Object obj)
+	protected List<ChartAttribute> convertToChartAttributes(Object obj)
 	{
 		if (obj == null)
 			return null;
@@ -278,20 +278,20 @@ public class JsonChartPluginPropertiesResolver
 		{
 			Object[] array = (Object[]) obj;
 
-			List<ChartParam> chartParams = new ArrayList<>();
+			List<ChartAttribute> chartAttributes = new ArrayList<>();
 
 			for (Object ele : array)
 			{
-				ChartParam chartParam = convertToChartParam(ele);
+				ChartAttribute chartAttribute = convertToChartAttribute(ele);
 
-				if (chartParam != null)
-					chartParams.add(chartParam);
+				if (chartAttribute != null)
+					chartAttributes.add(chartAttribute);
 			}
 
-			if (chartParams.isEmpty())
+			if (chartAttributes.isEmpty())
 				return null;
 
-			return chartParams;
+			return chartAttributes;
 		}
 		else if (obj instanceof Collection<?>)
 		{
@@ -299,57 +299,91 @@ public class JsonChartPluginPropertiesResolver
 			Object[] array = new Object[collection.size()];
 			collection.toArray(array);
 
-			return convertToChartParams(array);
+			return convertToChartAttributes(array);
 		}
 		else
 		{
 			Object[] array = new Object[] { obj };
 
-			return convertToChartParams(array);
+			return convertToChartAttributes(array);
 		}
 	}
 
 	/**
-	 * 将对象转换为{@linkplain ChartParam}。
+	 * 将对象转换为{@linkplain ChartAttribute}。
 	 * 
 	 * @param obj
 	 * @return
 	 */
-	protected ChartParam convertToChartParam(Object obj)
+	protected ChartAttribute convertToChartAttribute(Object obj)
 	{
 		if (obj == null)
 			return null;
-		else if (obj instanceof ChartParam)
-			return (ChartParam) obj;
+		else if (obj instanceof ChartAttribute)
+			return (ChartAttribute) obj;
 		else if (obj instanceof Map<?, ?>)
 		{
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			String name = (String) map.get(ChartParam.PROPERTY_NAME);
+			String name = (String) map.get(ChartAttribute.PROPERTY_NAME);
 			if (name == null || name.isEmpty())
 				return null;
 
-			ChartParam chartParam = createChartParam();
-			chartParam.setName(name);
+			ChartAttribute chartAttribute = createChartAttribute();
+			chartAttribute.setName(name);
+			chartAttribute.setType(convertToChartAttributeType(map.get(ChartAttribute.PROPERTY_TYPE)));
+			chartAttribute.setNameLabel(convertToLabel(map.get(ChartAttribute.PROPERTY_NAME_LABEL)));
+			chartAttribute.setDescLabel(convertToLabel(map.get(ChartAttribute.PROPERTY_DESC_LABEL)));
+			chartAttribute.setRequired(convertToBoolean(map.get(ChartAttribute.PROPERTY_REQUIRED), false));
+			chartAttribute.setArray(convertToBoolean(map.get(ChartAttribute.PROPERTY_ARRAY), false));
+			chartAttribute.setInputType(convertToChartAttributeInputType(map.get(ChartAttribute.PROPERTY_INPUT_TYPE)));
+			chartAttribute.setInputPayload(convertToChartAttributeInputType(map.get(ChartAttribute.PROPERTY_INPUT_PAYLOAD)));
 
-			chartParam.setType(convertToChartParamDataType(map.get(ChartParam.PROPERTY_TYPE)));
-			chartParam.setNameLabel(convertToLabel(map.get(ChartParam.PROPERTY_NAME_LABEL)));
-			chartParam.setDescLabel(convertToLabel(map.get(ChartParam.PROPERTY_DESC_LABEL)));
-
-			return chartParam;
+			return chartAttribute;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartParam.class.getName() + "] is not supported");
+					+ ChartAttribute.class.getName() + "] is not supported");
 	}
 
-	protected String convertToChartParamDataType(Object obj)
+	protected String convertToChartAttributeType(Object obj)
 	{
 		if (obj instanceof String)
+		{
+			String str = (String) obj;
+			
+			if(ChartAttribute.DataType.STRING.equalsIgnoreCase(str))
+				return ChartAttribute.DataType.STRING;
+			else if(ChartAttribute.DataType.BOOLEAN.equalsIgnoreCase(str))
+				return ChartAttribute.DataType.BOOLEAN;
+			else if(ChartAttribute.DataType.NUMBER.equalsIgnoreCase(str))
+				return ChartAttribute.DataType.NUMBER;
+			else
+				return str;
+		}
+		else
+			return ChartAttribute.DataType.STRING;
+	}
+
+	protected String convertToChartAttributeInputType(Object obj)
+	{
+		if(obj == null)
+			return  null;
+		else if (obj instanceof String)
 			return (String) obj;
 		else
-			return ChartParam.DataType.STRING;
+			return ChartAttribute.DataType.STRING;
+	}
+
+	protected String convertToChartAttributeInputPayload(Object obj)
+	{
+		if(obj == null)
+			return  null;
+		else if (obj instanceof String)
+			return (String) obj;
+		else
+			return obj.toString();
 	}
 
 	/**
@@ -606,9 +640,9 @@ public class JsonChartPluginPropertiesResolver
 		return new Label();
 	}
 
-	protected ChartParam createChartParam()
+	protected ChartAttribute createChartAttribute()
 	{
-		return new ChartParam();
+		return new ChartAttribute();
 	}
 
 	protected DataSign createDataSign()

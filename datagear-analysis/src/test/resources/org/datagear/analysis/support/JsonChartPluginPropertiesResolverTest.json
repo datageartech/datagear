@@ -32,7 +32,7 @@
 		'LIGHT' :  'icon-0.png',
 		'DARK' :  'icon-1.png'
 	},
-	chartParams :
+	chartAttributes :
 	[
   		{
 			name : 'title',
@@ -84,13 +84,30 @@
   					'zh' : '间隔描述中文'
   				}
   			},
-  			defaultValue : '5',
-  			constraints :
-  			{
-  				required : false,
-  				max : 30,
-  				min : 5
-  			}
+  			required: true,
+  			array: true,
+  			inputType: "mytype",
+  			inputPayload: "mypayload"
+		},
+  		{
+			name : 'a2',
+			type : 'BOOLEAN'
+		},
+  		{
+			name : 'a3',
+			type : 'string'
+		},
+  		{
+			name : 'a4',
+			type : 'number'
+		},
+  		{
+			name : 'a5',
+			type : 'boolean'
+		},
+  		{
+			name : 'a6',
+			type : 'custom'
 		}
 	],
 	dataSigns :
