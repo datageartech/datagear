@@ -247,7 +247,7 @@
 					<p-button type="button" :label="formatDataSignLabel(ds)" icon="pi pi-plus"
 						@click="onAddDataSign($event, ds)">
 					</p-button>
-					<p-button type="button" icon="pi pi-angle-right"
+					<p-button type="button" icon="pi pi-info-circle"
 						aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
 						@click="onShowDataSignDetail($event, ds)" @mouseover="onUpdateDataSignDetailPanel($event, ds)">
 					</p-button>
