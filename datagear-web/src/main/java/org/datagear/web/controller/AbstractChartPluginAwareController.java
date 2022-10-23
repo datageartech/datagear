@@ -211,14 +211,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 
 	protected Label toConcreteLabel(Label label, Locale locale)
 	{
-		if (label == null)
-			return null;
-
-		String value = label.getValue(locale);
-		if (value == null)
-			value = "";
-
-		return new Label(value);
+		return Label.concrete(label, locale);
 	}
 
 	/**

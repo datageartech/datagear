@@ -10,6 +10,7 @@ package org.datagear.analysis.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.datagear.analysis.Category;
@@ -37,6 +38,9 @@ public class JsonChartPluginPropertiesResolverTest
 	@Test
 	public void resolveChartPluginPropertiesTest() throws IOException
 	{
+		Locale enLocale = new Locale("en");
+		Locale zhLocale = new Locale("zh");
+		
 		{
 			InputStream jsonInputStream = getClass().getClassLoader()
 					.getResourceAsStream("org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest.json");
@@ -60,15 +64,15 @@ public class JsonChartPluginPropertiesResolverTest
 			{
 				Label nameLabel = chartPlugin.getNameLabel();
 				Assert.assertEquals("饼图", nameLabel.getValue());
-				Assert.assertEquals("pie chart", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("饼图中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("pie chart", nameLabel.getValue(enLocale));
+				Assert.assertEquals("饼图中文", nameLabel.getValue(zhLocale));
 			}
 
 			{
 				Label descLabel = chartPlugin.getDescLabel();
 				Assert.assertEquals("饼图描述", descLabel.getValue());
-				Assert.assertEquals("pie chart desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("饼图描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("pie chart desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("饼图描述中文", descLabel.getValue(zhLocale));
 			}
 
 			{
@@ -88,13 +92,13 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Label nameLabel = chartAttribute.getNameLabel();
 				Assert.assertEquals("标题", nameLabel.getValue());
-				Assert.assertEquals("title", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("标题中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("title", nameLabel.getValue(enLocale));
+				Assert.assertEquals("标题中文", nameLabel.getValue(zhLocale));
 
 				Label descLabel = chartAttribute.getDescLabel();
 				Assert.assertEquals("标题描述", descLabel.getValue());
-				Assert.assertEquals("title desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("标题描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("title desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("标题描述中文", descLabel.getValue(zhLocale));
 				
 				Assert.assertFalse(chartAttribute.isRequired());
 				Assert.assertFalse(chartAttribute.isArray());
@@ -110,13 +114,13 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Label nameLabel = chartAttribute.getNameLabel();
 				Assert.assertEquals("间隔", nameLabel.getValue());
-				Assert.assertEquals("interval", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("间隔中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("interval", nameLabel.getValue(enLocale));
+				Assert.assertEquals("间隔中文", nameLabel.getValue(zhLocale));
 
 				Label descLabel = chartAttribute.getDescLabel();
 				Assert.assertEquals("间隔描述", descLabel.getValue());
-				Assert.assertEquals("interval desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("间隔描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("interval desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("间隔描述中文", descLabel.getValue(zhLocale));
 				
 				Assert.assertTrue(chartAttribute.isRequired());
 				Assert.assertTrue(chartAttribute.isArray());
@@ -158,13 +162,13 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Label nameLabel = dataSign.getNameLabel();
 				Assert.assertEquals("X值", nameLabel.getValue());
-				Assert.assertEquals("X value", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("X值中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("X value", nameLabel.getValue(enLocale));
+				Assert.assertEquals("X值中文", nameLabel.getValue(zhLocale));
 
 				Label descLabel = dataSign.getDescLabel();
 				Assert.assertEquals("X值描述", descLabel.getValue());
-				Assert.assertEquals("X value desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("X值描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("X value desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("X值描述中文", descLabel.getValue(zhLocale));
 			}
 
 			{
@@ -176,13 +180,13 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Label nameLabel = dataSign.getNameLabel();
 				Assert.assertEquals("Y值", nameLabel.getValue());
-				Assert.assertEquals("Y value", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("Y值中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("Y value", nameLabel.getValue(enLocale));
+				Assert.assertEquals("Y值中文", nameLabel.getValue(zhLocale));
 
 				Label descLabel = dataSign.getDescLabel();
 				Assert.assertEquals("Y值描述", descLabel.getValue());
-				Assert.assertEquals("Y value desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("Y值描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("Y value desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("Y值描述中文", descLabel.getValue(zhLocale));
 			}
 
 			{
@@ -254,6 +258,9 @@ public class JsonChartPluginPropertiesResolverTest
 	@Test
 	public void resolveChartPluginPropertiesTest_3_0_1() throws IOException
 	{
+		Locale enLocale = new Locale("en");
+		Locale zhLocale = new Locale("zh");
+		
 		{
 			InputStream jsonInputStream = getClass().getClassLoader()
 					.getResourceAsStream(
@@ -276,15 +283,15 @@ public class JsonChartPluginPropertiesResolverTest
 			{
 				Label nameLabel = chartPlugin.getNameLabel();
 				Assert.assertEquals("饼图", nameLabel.getValue());
-				Assert.assertEquals("pie chart", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("饼图中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("pie chart", nameLabel.getValue(enLocale));
+				Assert.assertEquals("饼图中文", nameLabel.getValue(zhLocale));
 			}
 
 			{
 				Label descLabel = chartPlugin.getDescLabel();
 				Assert.assertEquals("饼图描述", descLabel.getValue());
-				Assert.assertEquals("pie chart desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("饼图描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("pie chart desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("饼图描述中文", descLabel.getValue(zhLocale));
 			}
 
 			{
@@ -304,13 +311,13 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Label nameLabel = chartAttribute.getNameLabel();
 				Assert.assertEquals("标题", nameLabel.getValue());
-				Assert.assertEquals("title", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("标题中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("title", nameLabel.getValue(enLocale));
+				Assert.assertEquals("标题中文", nameLabel.getValue(zhLocale));
 
 				Label descLabel = chartAttribute.getDescLabel();
 				Assert.assertEquals("标题描述", descLabel.getValue());
-				Assert.assertEquals("title desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("标题描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("title desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("标题描述中文", descLabel.getValue(zhLocale));
 			}
 
 			{
@@ -321,13 +328,13 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Label nameLabel = chartAttribute.getNameLabel();
 				Assert.assertEquals("间隔", nameLabel.getValue());
-				Assert.assertEquals("interval", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("间隔中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("interval", nameLabel.getValue(enLocale));
+				Assert.assertEquals("间隔中文", nameLabel.getValue(zhLocale));
 
 				Label descLabel = chartAttribute.getDescLabel();
 				Assert.assertEquals("间隔描述", descLabel.getValue());
-				Assert.assertEquals("interval desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("间隔描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("interval desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("间隔描述中文", descLabel.getValue(zhLocale));
 			}
 
 			List<DataSign> dataSigns = chartPlugin.getDataSigns();
@@ -341,13 +348,13 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Label nameLabel = dataSign.getNameLabel();
 				Assert.assertEquals("X值", nameLabel.getValue());
-				Assert.assertEquals("X value", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("X值中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("X value", nameLabel.getValue(enLocale));
+				Assert.assertEquals("X值中文", nameLabel.getValue(zhLocale));
 
 				Label descLabel = dataSign.getDescLabel();
 				Assert.assertEquals("X值描述", descLabel.getValue());
-				Assert.assertEquals("X value desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("X值描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("X value desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("X值描述中文", descLabel.getValue(zhLocale));
 			}
 
 			{
@@ -359,13 +366,13 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Label nameLabel = dataSign.getNameLabel();
 				Assert.assertEquals("Y值", nameLabel.getValue());
-				Assert.assertEquals("Y value", nameLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("Y值中文", nameLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("Y value", nameLabel.getValue(enLocale));
+				Assert.assertEquals("Y值中文", nameLabel.getValue(zhLocale));
 
 				Label descLabel = dataSign.getDescLabel();
 				Assert.assertEquals("Y值描述", descLabel.getValue());
-				Assert.assertEquals("Y value desc", descLabel.getValue(Label.toLocale("en")));
-				Assert.assertEquals("Y值描述中文", descLabel.getValue(Label.toLocale("zh")));
+				Assert.assertEquals("Y value desc", descLabel.getValue(enLocale));
+				Assert.assertEquals("Y值描述中文", descLabel.getValue(zhLocale));
 			}
 
 			{

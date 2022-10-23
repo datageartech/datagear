@@ -8,8 +8,13 @@
 package org.datagear.util.i18n;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 标签。
@@ -24,9 +29,9 @@ public class Label implements Serializable
 	public static final String PROPERTY_VALUE = "value";
 	public static final String PROPERTY_LOCALE_VALUES = "localeValues";
 
-	private String value;
+	private String value = "";
 
-	private Map<Locale, String> localeValues;
+	private Map<String, String> localeValues = null;
 
 	public Label()
 	{
@@ -39,7 +44,7 @@ public class Label implements Serializable
 		this.value = value;
 	}
 
-	public Label(String value, Map<Locale, String> localeValues)
+	public Label(String value, Map<String, String> localeValues)
 	{
 		super();
 		this.value = value;
@@ -68,26 +73,48 @@ public class Label implements Serializable
 
 	/**
 	 * 获取指定{@linkplain Locale}的标签值。
+	 * <p>
+	 * 如果没有匹配的，将返回空字符串{@code ""}。
+	 * </p>
 	 * 
 	 * @param locale
 	 * @return
 	 */
 	public String getValue(Locale locale)
 	{
-		String value = (this.localeValues == null ? null : this.localeValues.get(locale));
-
+		String value = null;
+		
+		if(this.localeValues == null || this.localeValues.isEmpty() || locale == null)
+		{
+			value = this.value;
+		}
+		else
+		{
+			List<String> keys = getStringPriorityList(locale);
+			for(String key : keys)
+			{
+				value = this.localeValues.get(key);
+				
+				if(value != null)
+					break;
+			}
+		}
+		
 		if (value == null)
 			value = this.value;
-
+		
+		if(value == null)
+			value = "";
+		
 		return value;
 	}
 
 	/**
 	 * 获取地区标签值映射表。
 	 * 
-	 * @return
+	 * @return 可能返回{@code null}
 	 */
-	public Map<Locale, String> getLocaleValues()
+	public Map<String, String> getLocaleValues()
 	{
 		return this.localeValues;
 	}
@@ -97,31 +124,67 @@ public class Label implements Serializable
 	 * 
 	 * @param localeValues
 	 */
-	public void setLocaleValues(Map<Locale, String> localeValues)
+	public void setLocaleValues(Map<String, String> localeValues)
 	{
 		this.localeValues = localeValues;
 	}
-
+	
+	public static List<String> getStringPriorityList(Locale locale)
+	{
+		List<String> re = null;
+		
+		WeakReference<List<String>> wr = LOCALE_STRING_PRIORITY_LIST.get(locale);
+		re = (wr == null ? null : wr.get());
+		
+		if(re == null)
+		{
+			re = new ArrayList<String>(4);
+			
+			String l0 = locale.toString();
+			String l1 = new Locale(locale.getLanguage(), locale.getCountry(), locale.getVariant()).toString();
+			String l2 = new Locale(locale.getLanguage(), locale.getCountry()).toString();
+			String l3 = new Locale(locale.getLanguage()).toString();
+			
+			re.add(l0);
+			if(!l1.equals(l0))
+				re.add(l1);
+			if(!l2.equals(l1))
+				re.add(l2);
+			if(!l3.equals(l2))
+				re.add(l3);
+			
+			LOCALE_STRING_PRIORITY_LIST.put(locale, new WeakReference<List<String>>(re));
+		}
+		
+		return re;
+	}
+	
+	private static final ConcurrentMap<Locale, WeakReference<List<String>>> LOCALE_STRING_PRIORITY_LIST = new ConcurrentHashMap<Locale, WeakReference<List<String>>>();
+	
 	/**
-	 * 字符串转换为{@linkplain Locale}。
+	 * 将{@linkplain Label}转换为指定{@linkplain Locale}的{@linkplain Label}。
+	 * <p>
+	 * 返回的{@linkplain Label#getValue()}是最匹配给定{@linkplain Locale}的值、{@linkplain Label#getLocaleValues()}则为{@code null}。
+	 * </p>
+	 * <p>
+	 * 如果{@code label}参数为{@code null}或{@linkplain Label#getValue()}为{@code null}，
+	 * 则返回一个{@linkplain Label#getValue()}为{@code ""}空字符串的对象。
+	 * </p>
 	 * 
+	 * @param label
 	 * @param locale
 	 * @return
 	 */
-	public static Locale toLocale(String locale)
+	public static Label concrete(Label label, Locale locale)
 	{
-		if (locale == null)
-			return null;
+		if (label == null || locale == null)
+			return new Label("");
 
-		String[] strs = locale.split("_");
+		String value = label.getValue(locale);
+		
+		if (value == null)
+			value = "";
 
-		if (strs.length == 0)
-			return null;
-		else if (strs.length == 1)
-			return new Locale(strs[0]);
-		else if (strs.length == 2)
-			return new Locale(strs[0], strs[1]);
-		else
-			return new Locale(strs[0], strs[1], strs[2]);
+		return new Label(value);
 	}
 }

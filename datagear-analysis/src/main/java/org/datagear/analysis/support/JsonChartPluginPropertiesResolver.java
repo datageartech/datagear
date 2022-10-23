@@ -17,10 +17,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartAttribute;
@@ -79,8 +76,6 @@ public class JsonChartPluginPropertiesResolver
 	 */
 	@Deprecated
 	public static final String JSON_PROPERTY_CATEGORY_3_0_1 = "category";
-
-	private ConcurrentMap<String, Locale> _localeCache = new ConcurrentHashMap<>();
 
 	public JsonChartPluginPropertiesResolver()
 	{
@@ -178,6 +173,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param obj
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	protected Label convertToLabel(Object obj)
 	{
 		if (obj == null)
@@ -193,34 +189,19 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
-			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
 			Label label = createLabel();
 			label.setValue((String) map.get(Label.PROPERTY_VALUE));
 
-			Object localeValuesObj = map.get(Label.PROPERTY_LOCALE_VALUES);
-			if (localeValuesObj != null)
-			{
-				Map<Locale, String> localeValues = new HashMap<>();
-
-				@SuppressWarnings("unchecked")
-				Map<String, String> stringLocaleValues = (Map<String, String>) localeValuesObj;
-
-				for (Map.Entry<String, String> entry : stringLocaleValues.entrySet())
-				{
-					Locale locale = this._localeCache.get(entry.getKey());
-					if (locale == null)
-					{
-						locale = stringToLocale(entry.getKey());
-						this._localeCache.putIfAbsent(entry.getKey(), locale);
-					}
-
-					localeValues.put(locale, entry.getValue());
-				}
-
-				label.setLocaleValues(localeValues);
-			}
+			Object localeValues = map.get(Label.PROPERTY_LOCALE_VALUES);
+			if(localeValues == null)
+				;
+			else if (localeValues instanceof Map<?, ?>)
+				label.setLocaleValues((Map<String, String>)localeValues);
+			else
+				throw new UnsupportedOperationException("Convert object of type [" + localeValues.getClass().getName() + "] to ["
+						+ Label.class.getName() + ".localeValues] is not supported");
 
 			return label;
 		}
@@ -623,18 +604,7 @@ public class JsonChartPluginPropertiesResolver
 			throw new UnsupportedOperationException(
 					"Convert object [" + obj + "] to [" + Integer.class.getName() + "] is not supported");
 	}
-
-	/**
-	 * 字符串转换为{@linkplain Locale}。
-	 * 
-	 * @param str
-	 * @return
-	 */
-	protected Locale stringToLocale(String str)
-	{
-		return Label.toLocale(str);
-	}
-
+	
 	protected Label createLabel()
 	{
 		return new Label();
