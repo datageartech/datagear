@@ -21,7 +21,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class ChartAttribute extends AbstractLabeled implements DataNameType, Serializable
+public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	

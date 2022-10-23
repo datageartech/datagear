@@ -18,6 +18,7 @@ import org.datagear.analysis.ChartAttribute;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DataSign;
+import org.datagear.analysis.NameAwareUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
@@ -108,16 +109,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	@Override
 	public ChartPluginResource getResource(String name)
 	{
-		if (this.resources == null || this.resources.isEmpty() || StringUtil.isEmpty(name))
-			return null;
-
-		for (ChartPluginResource res : this.resources)
-		{
-			if (name.equals(res.getName()))
-				return res;
-		}
-
-		return null;
+		return NameAwareUtil.find(this.resources, name);
 	}
 	
 	@Override
@@ -180,16 +172,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	@Override
 	public ChartAttribute getChartAttribute(String name)
 	{
-		if (this.chartAttributes == null)
-			return null;
-
-		for (ChartAttribute chartAttribute : this.chartAttributes)
-		{
-			if (chartAttribute.getName().equals(name))
-				return chartAttribute;
-		}
-
-		return null;
+		return NameAwareUtil.find(this.chartAttributes, name);
 	}
 
 	@Override

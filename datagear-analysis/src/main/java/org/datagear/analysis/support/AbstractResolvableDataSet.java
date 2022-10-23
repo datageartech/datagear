@@ -16,6 +16,7 @@ import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.NameAwareUtil;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 
@@ -128,7 +129,7 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 
 		for (DataSetProperty dp : dps)
 		{
-			DataSetProperty mp = getDataNameTypeByName(merged, dp.getName());
+			DataSetProperty mp = NameAwareUtil.find(merged, dp.getName());
 			
 			if(mp != null)
 			{
@@ -140,7 +141,7 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 
 		for (DataSetProperty mp : merged)
 		{
-			if (getDataNameTypeByName(dps, mp.getName()) == null)
+			if (NameAwareUtil.find(dps, mp.getName()) == null)
 				dps.add(mp);
 		}
 
@@ -152,13 +153,13 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 			public int compare(DataSetProperty o1, DataSetProperty o2)
 			{
 				// 优先按照merged列表中的顺序重排
-				int o1Idx = getDataNameTypeIndexByName(mergedFinal, o1.getName());
-				int o2Idx = getDataNameTypeIndexByName(mergedFinal, o2.getName());
+				int o1Idx = NameAwareUtil.findIndex(mergedFinal, o1.getName());
+				int o2Idx = NameAwareUtil.findIndex(mergedFinal, o2.getName());
 
 				if (o1Idx < 0)
-					o1Idx = getDataNameTypeIndexByName(dps, o1.getName());
+					o1Idx = NameAwareUtil.findIndex(dps, o1.getName());
 				if (o2Idx < 0)
-					o2Idx = getDataNameTypeIndexByName(dps, o2.getName());
+					o2Idx = NameAwareUtil.findIndex(dps, o2.getName());
 
 				return Integer.valueOf(o1Idx).compareTo(o2Idx);
 			}

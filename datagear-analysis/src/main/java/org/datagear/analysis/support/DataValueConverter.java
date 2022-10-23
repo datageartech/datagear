@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.datagear.analysis.DataNameType;
+import org.datagear.analysis.NameTypeAware;
 
 /**
  * 数据值转换器。
@@ -35,17 +35,17 @@ public abstract class DataValueConverter
 	/**
 	 * 转换数据值映射表，返回一个经转换的新映射表。
 	 * <p>
-	 * 如果{@code nameValues}中有未在{@code dataNameTypes}中定义的项，那么它将原样写入返回映射表中。
+	 * 如果{@code nameValues}中有未在{@code nameTypeAwares}中定义的项，那么它将原样写入返回映射表中。
 	 * </p>
 	 * 
 	 * @param nameValues
 	 *            原始名/值映射表，允许为{@code null}
-	 * @param dataNameTypes
+	 * @param nameTypeAwares
 	 *            名/类型集合，允许为{@code null}
 	 * @return
 	 * @throws DataValueConvertionException
 	 */
-	public Map<String, Object> convert(Map<String, ?> nameValues, Collection<? extends DataNameType> dataNameTypes)
+	public Map<String, Object> convert(Map<String, ?> nameValues, Collection<? extends NameTypeAware> nameTypeAwares)
 			throws DataValueConvertionException
 	{
 		if (nameValues == null)
@@ -53,9 +53,9 @@ public abstract class DataValueConverter
 
 		Map<String, Object> re = new HashMap<>(nameValues);
 
-		if (dataNameTypes != null)
+		if (nameTypeAwares != null)
 		{
-			for (DataNameType dnt : dataNameTypes)
+			for (NameTypeAware dnt : nameTypeAwares)
 			{
 				String name = dnt.getName();
 

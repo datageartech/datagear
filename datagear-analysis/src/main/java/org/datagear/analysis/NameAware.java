@@ -8,12 +8,12 @@
 package org.datagear.analysis;
 
 /**
- * 数据名、类型接口类。
+ * 名称相关类接口。
  * 
  * @author datagear@163.com
  *
  */
-public interface DataNameType
+public interface NameAware
 {
 	/**
 	 * 获取名称。
@@ -21,11 +21,4 @@ public interface DataNameType
 	 * @return
 	 */
 	String getName();
-
-	/**
-	 * 获取数据类型。
-	 * 
-	 * @return
-	 */
-	String getType();
 }

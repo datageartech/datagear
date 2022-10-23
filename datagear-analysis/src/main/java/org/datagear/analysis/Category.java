@@ -18,7 +18,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class Category extends AbstractLabeled implements Serializable
+public class Category extends AbstractLabeled implements Serializable, NameAware
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -42,6 +42,7 @@ public class Category extends AbstractLabeled implements Serializable
 		this.name = name;
 	}
 
+	@Override
 	public String getName()
 	{
 		return name;

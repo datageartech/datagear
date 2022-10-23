@@ -15,7 +15,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class Theme implements Serializable
+public class Theme implements Serializable, NameAware
 {
 	private static final long serialVersionUID = 1L;
 
@@ -49,7 +49,8 @@ public class Theme implements Serializable
 		this.color = color;
 		this.backgroundColor = backgroundColor;
 	}
-
+	
+	@Override
 	public String getName()
 	{
 		return name;

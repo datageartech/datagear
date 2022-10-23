@@ -16,15 +16,8 @@ import java.io.InputStream;
  * @author datagear@163.com
  *
  */
-public interface ChartPluginResource
+public interface ChartPluginResource extends NameAware
 {
-	/**
-	 * 获取资源名称。
-	 * 
-	 * @return
-	 */
-	String getName();
-	
 	/**
 	 * 获取资源输入流。
 	 * 

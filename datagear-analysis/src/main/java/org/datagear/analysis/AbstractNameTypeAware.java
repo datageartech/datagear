@@ -8,12 +8,12 @@
 package org.datagear.analysis;
 
 /**
- * 抽象{@linkplain DataNameType}。
+ * 抽象{@linkplain NameTypeAware}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractDataNameType implements DataNameType
+public abstract class AbstractNameTypeAware implements NameTypeAware
 {
 	/** 名称 */
 	private String name;
@@ -21,12 +21,12 @@ public abstract class AbstractDataNameType implements DataNameType
 	/** 类型 */
 	private String type;
 
-	public AbstractDataNameType()
+	public AbstractNameTypeAware()
 	{
 		super();
 	}
 
-	public AbstractDataNameType(String name, String type)
+	public AbstractNameTypeAware(String name, String type)
 	{
 		super();
 		this.name = name;

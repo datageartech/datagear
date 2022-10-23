@@ -20,7 +20,7 @@ import java.math.BigInteger;
  * @author datagear@163.com
  *
  */
-public class DataSetProperty extends AbstractDataNameType implements Cloneable, Serializable
+public class DataSetProperty extends AbstractNameTypeAware implements Cloneable, Serializable
 {
 	private static final long serialVersionUID = 1L;
 

@@ -18,7 +18,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class DataSetParam extends AbstractDataNameType implements Serializable
+public class DataSetParam extends AbstractNameTypeAware implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 

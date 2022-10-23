@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataNameType;
+import org.datagear.analysis.NameTypeAware;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetParam.DataType;
@@ -101,7 +101,7 @@ public class DataSetParamValueConverter extends DataValueConverter
 	 * </p>
 	 */
 	@Override
-	public Map<String, Object> convert(Map<String, ?> paramValues, Collection<? extends DataNameType> dataSetParams)
+	public Map<String, Object> convert(Map<String, ?> paramValues, Collection<? extends NameTypeAware> dataSetParams)
 			throws DataValueConvertionException
 	{
 		return super.convert(paramValues, dataSetParams);

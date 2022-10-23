@@ -13,6 +13,7 @@ import java.util.List;
 import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DashboardThemeSource;
+import org.datagear.analysis.NameAwareUtil;
 
 /**
  * 简单{@linkplain DashboardThemeSource}。
@@ -106,12 +107,6 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 	@Override
 	public DashboardTheme getDashboardTheme(String themeName)
 	{
-		for (DashboardTheme theme : this.dashboardThemes)
-		{
-			if (theme.getName().equals(themeName))
-				return theme;
-		}
-
-		return null;
+		return NameAwareUtil.find(this.dashboardThemes, themeName);
 	}
 }

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
-import org.datagear.analysis.DataNameType;
+import org.datagear.analysis.NameAwareUtil;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
@@ -94,7 +94,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	@Override
 	public DataSetProperty getProperty(String name)
 	{
-		return getDataNameTypeByName(this.properties, name);
+		return NameAwareUtil.find(this.properties, name);
 	}
 
 	public boolean hasParam()
@@ -116,7 +116,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	@Override
 	public DataSetParam getParam(String name)
 	{
-		return getDataNameTypeByName(this.params, name);
+		return NameAwareUtil.find(this.params, name);
 	}
 
 	/**
@@ -344,25 +344,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 */
 	protected List<DataSetProperty> findDataSetProperties(List<DataSetProperty> dataSetProperties, List<String> names)
 	{
-		List<DataSetProperty> re = new ArrayList<>(names.size());
-
-		for (int i = 0, len = names.size(); i < len; i++)
-		{
-			DataSetProperty dp = null;
-
-			for (DataSetProperty dataSetProperty : dataSetProperties)
-			{
-				if (names.get(i).equals(dataSetProperty.getName()))
-				{
-					dp = dataSetProperty;
-					break;
-				}
-			}
-
-			re.add(dp);
-		}
-
-		return re;
+		return NameAwareUtil.finds(dataSetProperties, names);
 	}
 
 	/**
@@ -438,45 +420,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	{
 		return DataSetProperty.DataType.resolveDataType(value);
 	}
-
-	/**
-	 * 获取指定名称的{@linkplain DataNameType}对象，没找到则返回{@code null}。
-	 * 
-	 * @param <T>
-	 * @param list
-	 *            允许为{@code null}
-	 * @param name
-	 * @return
-	 */
-	protected <T extends DataNameType> T getDataNameTypeByName(List<T> list, String name)
-	{
-		int index = getDataNameTypeIndexByName(list, name);
-		return (index < 0 ? null : list.get(index));
-	}
-
-	/**
-	 * 获取指定名称的{@linkplain DataNameType}的索引。
-	 * 
-	 * @param <T>
-	 * @param list
-	 *            允许为{@code null}
-	 * @param name
-	 * @return
-	 */
-	protected <T extends DataNameType> int getDataNameTypeIndexByName(List<T> list, String name)
-	{
-		if (list == null)
-			list = Collections.emptyList();
-
-		for (int i = 0, len = list.size(); i < len; i++)
-		{
-			if (name.equals(list.get(i).getName()))
-				return i;
-		}
-
-		return -1;
-	}
-
+	
 	@SuppressWarnings("unchecked")
 	protected List<Map<String, Object>> listRowsToMapRows(List<List<Object>> data, List<DataSetProperty> properties)
 	{
