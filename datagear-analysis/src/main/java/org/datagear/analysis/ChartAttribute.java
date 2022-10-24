@@ -25,7 +25,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Serializable
+public class ChartAttribute extends AbstractLabeled implements NameTypeInputAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -34,7 +34,7 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Se
 	public static final String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	public static final String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	public static final String PROPERTY_REQUIRED = "required";
-	public static final String PROPERTY_ARRAY = "array";
+	public static final String PROPERTY_MULTIPLE = "multiple";
 	public static final String PROPERTY_INPUT_TYPE = "inputType";
 	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
 
@@ -47,8 +47,8 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Se
 	/** 是否必须 */
 	private boolean required;
 	
-	/**是否数组*/
-	private boolean array;
+	/** 是否多项 */
+	private boolean multiple;
 
 	/** 界面输入框类型 */
 	private String inputType = "";
@@ -60,13 +60,13 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Se
 	{
 	}
 
-	public ChartAttribute(String name, String type, boolean required, boolean array)
+	public ChartAttribute(String name, String type, boolean required, boolean multiple)
 	{
 		super();
 		this.name = name;
 		this.type = type;
 		this.required = required;
-		this.array = array;
+		this.multiple = multiple;
 	}
 
 	@Override
@@ -94,6 +94,7 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Se
 		this.type = type;
 	}
 
+	@Override
 	public boolean isRequired()
 	{
 		return required;
@@ -104,14 +105,15 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Se
 		this.required = required;
 	}
 
-	public boolean isArray()
+	@Override
+	public boolean isMultiple()
 	{
-		return array;
+		return multiple;
 	}
 
-	public void setArray(boolean array)
+	public void setMultiple(boolean multiple)
 	{
-		this.array = array;
+		this.multiple = multiple;
 	}
 
 	/**
@@ -119,6 +121,7 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Se
 	 * 
 	 * @return
 	 */
+	@Override
 	public String getInputType()
 	{
 		return inputType;
@@ -129,6 +132,7 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Se
 		this.inputType = inputType;
 	}
 
+	@Override
 	public String getInputPayload()
 	{
 		return inputPayload;
@@ -147,7 +151,7 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Se
 	 */
 	public ChartAttribute clone(Locale locale)
 	{
-		ChartAttribute target = new ChartAttribute(this.name, this.type, this.required, this.array);
+		ChartAttribute target = new ChartAttribute(this.name, this.type, this.required, this.multiple);
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
 		LabelUtil.concrete(this, target, locale);

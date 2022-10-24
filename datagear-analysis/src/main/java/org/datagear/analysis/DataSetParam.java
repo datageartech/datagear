@@ -18,7 +18,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class DataSetParam extends AbstractNameTypeAware implements Serializable
+public class DataSetParam extends AbstractNameTypeAware implements NameTypeInputAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -45,6 +45,7 @@ public class DataSetParam extends AbstractNameTypeAware implements Serializable
 		this.required = required;
 	}
 
+	@Override
 	public boolean isRequired()
 	{
 		return required;
@@ -53,6 +54,13 @@ public class DataSetParam extends AbstractNameTypeAware implements Serializable
 	public void setRequired(boolean required)
 	{
 		this.required = required;
+	}
+
+	@Override
+	public boolean isMultiple()
+	{
+		// TODO 目前界面端未实现此特性，暂时直接返回false
+		return false;
 	}
 
 	public boolean hasDesc()
@@ -70,11 +78,7 @@ public class DataSetParam extends AbstractNameTypeAware implements Serializable
 		this.desc = desc;
 	}
 
-	public boolean hasInputType()
-	{
-		return (this.inputType != null && !this.inputType.isEmpty());
-	}
-
+	@Override
 	public String getInputType()
 	{
 		return inputType;
@@ -85,11 +89,7 @@ public class DataSetParam extends AbstractNameTypeAware implements Serializable
 		this.inputType = inputType;
 	}
 
-	public boolean hasInputPayload()
-	{
-		return (this.inputPayload != null && !this.inputPayload.isEmpty());
-	}
-
+	@Override
 	public String getInputPayload()
 	{
 		return inputPayload;

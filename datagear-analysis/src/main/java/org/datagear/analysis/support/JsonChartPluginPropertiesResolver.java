@@ -317,7 +317,7 @@ public class JsonChartPluginPropertiesResolver
 			chartAttribute.setNameLabel(convertToLabel(map.get(ChartAttribute.PROPERTY_NAME_LABEL)));
 			chartAttribute.setDescLabel(convertToLabel(map.get(ChartAttribute.PROPERTY_DESC_LABEL)));
 			chartAttribute.setRequired(convertToBoolean(map.get(ChartAttribute.PROPERTY_REQUIRED), false));
-			chartAttribute.setArray(convertToBoolean(map.get(ChartAttribute.PROPERTY_ARRAY), false));
+			chartAttribute.setMultiple(convertToBoolean(map.get(ChartAttribute.PROPERTY_MULTIPLE), false));
 			chartAttribute.setInputType(convertToChartAttributeInputType(map.get(ChartAttribute.PROPERTY_INPUT_TYPE)));
 			chartAttribute.setInputPayload(convertToChartAttributeInputType(map.get(ChartAttribute.PROPERTY_INPUT_PAYLOAD)));
 

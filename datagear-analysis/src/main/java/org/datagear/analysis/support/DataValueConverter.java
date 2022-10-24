@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.datagear.analysis.NameTypeAware;
+import org.datagear.analysis.NameTypeInputAware;
 
 /**
  * 数据值转换器。
@@ -35,7 +36,10 @@ public abstract class DataValueConverter
 	/**
 	 * 转换数据值映射表，返回一个新映射表。
 	 * <p>
-	 * 如果{@code nameValues}中有未在{@code nameTypeAwares}中定义的项，那么它将原样写入返回映射表中。
+	 * 如果{@code nameValues}中存在没有在{@code nameTypeAwares}中定义的项，那么它将原样写入返回映射表中。
+	 * </p>
+	 * <p>
+	 * 转换规则另参考{@linkplain #convert(Object, NameTypeAware)}。
 	 * </p>
 	 * 
 	 * @param nameValues
@@ -74,6 +78,10 @@ public abstract class DataValueConverter
 
 	/**
 	 * 转换数据值。
+	 * <p>
+	 * 如果{@code nameTypeAware}是{@linkplain NameTypeInputAware}实例且{@linkplain NameTypeInputAware#isMultiple()}为{@code true}，
+	 * 而{@code value}既不是数组，也不是集合，那么返回值将是包含其转换结果一个元素的{@code Object[]}数组。
+	 * </p>
 	 * 
 	 * @param <T>
 	 * @param value
@@ -84,7 +92,28 @@ public abstract class DataValueConverter
 	 */
 	public <T extends NameTypeAware> Object convert(Object value, T nameTypeAware) throws DataValueConvertionException
 	{
-		return convert(value, nameTypeAware.getType());
+		Object re = convert(value, nameTypeAware.getType());
+
+		if (re != null && nameTypeAware instanceof NameTypeInputAware)
+		{
+			NameTypeInputAware ntiAware = (NameTypeInputAware) nameTypeAware;
+
+			// 应转换为规范统一的数组
+			if (ntiAware.isMultiple())
+			{
+				if (re instanceof Object[] || re instanceof Collection<?>)
+				{
+					// 不需转换
+				}
+				else
+				{
+					Object[] array = new Object[] { re };
+					re = array;
+				}
+			}
+		}
+
+		return re;
 	}
 
 	/**

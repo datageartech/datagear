@@ -85,7 +85,7 @@
   				}
   			},
   			required: true,
-  			array: true,
+  			multiple: true,
   			inputType: "mytype",
   			inputPayload: "mypayload"
 		},

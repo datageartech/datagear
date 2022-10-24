@@ -101,7 +101,7 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("标题描述中文", descLabel.getValue(zhLocale));
 				
 				Assert.assertFalse(chartAttribute.isRequired());
-				Assert.assertFalse(chartAttribute.isArray());
+				Assert.assertFalse(chartAttribute.isMultiple());
 				Assert.assertTrue(StringUtil.isEmpty(chartAttribute.getInputType()));
 				Assert.assertTrue(StringUtil.isEmpty(chartAttribute.getInputPayload()));
 			}
@@ -123,7 +123,7 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("间隔描述中文", descLabel.getValue(zhLocale));
 				
 				Assert.assertTrue(chartAttribute.isRequired());
-				Assert.assertTrue(chartAttribute.isArray());
+				Assert.assertTrue(chartAttribute.isMultiple());
 				Assert.assertEquals("mytype", chartAttribute.getInputType());
 				Assert.assertEquals("mypayload", chartAttribute.getInputPayload());
 			}
