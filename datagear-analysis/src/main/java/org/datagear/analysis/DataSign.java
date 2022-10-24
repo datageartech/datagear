@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.datagear.util.i18n.AbstractLabeled;
+import org.datagear.util.i18n.LabelUtil;
 import org.datagear.util.i18n.Labeled;
 
 /**
@@ -86,6 +87,20 @@ public class DataSign extends AbstractLabeled implements Serializable
 		this.multiple = multiple;
 	}
 
+	/**
+	 * 复制为指定{@linkplain Locale}的对象。
+	 * 
+	 * @param locale
+	 * @return
+	 */
+	public DataSign clone(Locale locale)
+	{
+		DataSign target = new DataSign(this.name, this.required, this.multiple);
+		LabelUtil.concrete(this, target, locale);
+
+		return target;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -93,10 +108,23 @@ public class DataSign extends AbstractLabeled implements Serializable
 				+ multiple + ", nameLabel=" + getNameLabel() + ", descLabel=" + getDescLabel() + "]";
 	}
 
-	public static List<DataSign> toDataSigns(List<String> labelValues, Locale locale)
+	/**
+	 * 复制为指定{@linkplain Locale}的对象。
+	 * 
+	 * @param dataSigns
+	 * @param locale
+	 * @return
+	 */
+	public static List<DataSign> clone(List<DataSign> dataSigns, Locale locale)
 	{
-		List<DataSign> dataSigns = new ArrayList<DataSign>(labelValues.size());
+		if (dataSigns == null)
+			return null;
 
-		return dataSigns;
+		List<DataSign> re = new ArrayList<DataSign>(dataSigns.size());
+
+		for (DataSign dataSign : dataSigns)
+			re.add(dataSign.clone(locale));
+
+		return re;
 	}
 }

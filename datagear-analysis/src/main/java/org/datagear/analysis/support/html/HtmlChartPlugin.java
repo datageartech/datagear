@@ -211,7 +211,8 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 
 		HtmlChartPlugin plugin = chart.getPlugin();
 
-		getHtmlChartPluginScriptObjectWriter().write(out, plugin, optionInitialized.getPluginVarName());
+		getHtmlChartPluginScriptObjectWriter().write(out, plugin, optionInitialized.getPluginVarName(),
+				renderAttr.getLocale(renderContext));
 
 		return true;
 	}

@@ -14,15 +14,20 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
+import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
+import org.datagear.analysis.ChartAttribute;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginResource;
+import org.datagear.analysis.DataSign;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
 import org.datagear.util.IOUtil;
+import org.datagear.util.i18n.LabelUtil;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -68,11 +73,13 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 * @param out
 	 * @param plugin
 	 * @param varName
+	 * @param locale
+	 *            允许为{@code null}
 	 * @throws IOException
 	 */
-	public void write(Writer out, HtmlChartPlugin plugin, String varName) throws IOException
+	public void write(Writer out, HtmlChartPlugin plugin, String varName, Locale locale) throws IOException
 	{
-		HtmlChartPluginJson jsonPlugin = new HtmlChartPluginJson(plugin);
+		HtmlChartPluginJson jsonPlugin = new HtmlChartPluginJson(plugin, locale);
 
 		out.write("var " + varName + "=");
 		writeNewLine(out);
@@ -147,17 +154,17 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 */
 	protected static class HtmlChartPluginJson extends AbstractChartPlugin
 	{
-		public HtmlChartPluginJson(HtmlChartPlugin plugin)
+		public HtmlChartPluginJson(HtmlChartPlugin plugin, Locale locale)
 		{
 			super(plugin.getId(), plugin.getNameLabel());
-			setDescLabel(plugin.getDescLabel());
+			LabelUtil.concrete(plugin, this, locale);
 			setResources(ChartPluginResourceJson.valuesOf(plugin.getResources()));
 			setIconResourceNames(plugin.getIconResourceNames());
-			setChartAttributes(plugin.getChartAttributes());
-			setDataSigns(plugin.getDataSigns());
+			setChartAttributes(ChartAttribute.clone(plugin.getChartAttributes(), locale));
+			setDataSigns(DataSign.clone(plugin.getDataSigns(), locale));
 			setVersion(plugin.getVersion());
 			setOrder(plugin.getOrder());
-			setCategories(plugin.getCategories());
+			setCategories(Category.clone(plugin.getCategories(), locale));
 			setCategoryOrders(plugin.getCategoryOrders());
 		}
 

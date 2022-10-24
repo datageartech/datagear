@@ -356,7 +356,6 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 			throws Exception
 	{
 		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
-
 		List<HtmlChartPlugin> htmlChartPlugins = new ArrayList<>(plugins.size());
 		long lastModified = -1;
 
@@ -379,6 +378,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 		if (webRequest.checkNotModified(lastModified))
 			return;
 
+		Locale locale = WebUtils.getLocale(request);
 		response.setContentType(CONTENT_TYPE_JAVASCRIPT);
 		setCacheControlNoCache(response);
 
@@ -405,7 +405,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 			HtmlChartPlugin plugin = htmlChartPlugins.get(i);
 			String pluginVar = "plugin" + i;
 
-			this.htmlChartPluginScriptObjectWriter.write(out, plugin, pluginVar);
+			this.htmlChartPluginScriptObjectWriter.write(out, plugin, pluginVar, locale);
 
 			out.println("//@deprecated 兼容4.0.0版本的"+HtmlChartPlugin.PROPERTY_RENDERER_OLD+"属性名，未来版本会移除");
 			out.println(pluginVar + "."+ HtmlChartPlugin.PROPERTY_RENDERER_OLD +" = " + pluginVar + "."+ HtmlChartPlugin.PROPERTY_RENDERER +";");

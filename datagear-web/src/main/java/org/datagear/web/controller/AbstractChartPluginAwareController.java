@@ -33,6 +33,7 @@ import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
+import org.datagear.util.i18n.LabelUtil;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,48 +156,18 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		HtmlChartPluginView pluginView = new HtmlChartPluginView();
 
 		pluginView.setId(chartPlugin.getId());
-
-		pluginView.setNameLabel(toConcreteLabel(chartPlugin.getNameLabel(), locale));
-		pluginView.setDescLabel(toConcreteLabel(chartPlugin.getDescLabel(), locale));
+		LabelUtil.concrete(chartPlugin, pluginView, locale);
 
 		pluginView.setIconUrl(resolveIconUrl(chartPlugin, themeName));
 
 		List<DataSign> dataSigns = chartPlugin.getDataSigns();
-		if (dataSigns != null)
-		{
-			List<DataSign> dataSignViews = new ArrayList<>(dataSigns.size());
-			for (DataSign dataSign : dataSigns)
-			{
-				DataSign view = new DataSign(dataSign.getName(), dataSign.isRequired(), dataSign.isMultiple());
-				view.setNameLabel(toConcreteLabel(dataSign.getNameLabel(), locale));
-				view.setDescLabel(toConcreteLabel(dataSign.getDescLabel(), locale));
-
-				dataSignViews.add(view);
-			}
-
-			pluginView.setDataSigns(dataSignViews);
-		}
+		pluginView.setDataSigns(DataSign.clone(dataSigns, locale));
 
 		pluginView.setVersion(chartPlugin.getVersion());
 		pluginView.setOrder(chartPlugin.getOrder());
 
 		List<Category> categories = chartPlugin.getCategories();
-		if (categories != null)
-		{
-			List<Category> categoryViews = new ArrayList<Category>(categories.size());
-
-			for(Category category : categories)
-			{
-				Category categoryView = new Category(category.getName());
-				categoryView.setNameLabel(toConcreteLabel(category.getNameLabel(), locale));
-				categoryView.setDescLabel(toConcreteLabel(category.getDescLabel(), locale));
-				categoryView.setOrder(category.getOrder());
-
-				categoryViews.add(categoryView);
-			}
-
-			pluginView.setCategories(categoryViews);
-		}
+		pluginView.setCategories(Category.clone(categories, locale));
 
 		pluginView.setCategoryOrders(chartPlugin.getCategoryOrders());
 
@@ -207,11 +178,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	{
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
 		return dashboardTheme.getName();
-	}
-
-	protected Label toConcreteLabel(Label label, Locale locale)
-	{
-		return Label.concrete(label, locale);
 	}
 
 	/**

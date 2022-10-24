@@ -7,10 +7,9 @@
 
 package org.datagear.util.i18n;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -49,40 +48,6 @@ public class LabelTest
 		{
 			Label label = new Label(null);
 			assertEquals("", label.getValue(Locale.SIMPLIFIED_CHINESE));
-		}
-	}
-	
-	@Test
-	public void getStringPriorityListTest()
-	{
-		{
-			List<String> pl = Label.getStringPriorityList(Locale.SIMPLIFIED_CHINESE);
-			
-			assertEquals(2, pl.size());
-			assertEquals("zh_CN", pl.get(0));
-			assertEquals("zh", pl.get(1));
-		}
-		
-		{
-			List<String> pl = Label.getStringPriorityList(Locale.US);
-			
-			assertEquals(2, pl.size());
-			assertEquals("en_US", pl.get(0));
-			assertEquals("en", pl.get(1));
-		}
-		
-		{
-			List<String> pl = Label.getStringPriorityList(new Locale("zh"));
-			
-			assertEquals(1, pl.size());
-			assertEquals("zh", pl.get(0));
-		}
-		
-		{
-			List<String> pl = Label.getStringPriorityList(new Locale("en"));
-			
-			assertEquals(1, pl.size());
-			assertEquals("en", pl.get(0));
 		}
 	}
 }

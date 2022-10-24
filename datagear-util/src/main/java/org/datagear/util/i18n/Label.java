@@ -8,13 +8,9 @@
 package org.datagear.util.i18n;
 
 import java.io.Serializable;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * 标签。
@@ -78,6 +74,7 @@ public class Label implements Serializable
 	 * </p>
 	 * 
 	 * @param locale
+	 *            允许为{@code null}
 	 * @return
 	 */
 	public String getValue(Locale locale)
@@ -90,7 +87,7 @@ public class Label implements Serializable
 		}
 		else
 		{
-			List<String> keys = getStringPriorityList(locale);
+			List<String> keys = getPriorityStringList(locale);
 			for(String key : keys)
 			{
 				value = this.localeValues.get(key);
@@ -129,62 +126,8 @@ public class Label implements Serializable
 		this.localeValues = localeValues;
 	}
 	
-	public static List<String> getStringPriorityList(Locale locale)
+	protected List<String> getPriorityStringList(Locale locale)
 	{
-		List<String> re = null;
-		
-		WeakReference<List<String>> wr = LOCALE_STRING_PRIORITY_LIST.get(locale);
-		re = (wr == null ? null : wr.get());
-		
-		if(re == null)
-		{
-			re = new ArrayList<String>(4);
-			
-			String l0 = locale.toString();
-			String l1 = new Locale(locale.getLanguage(), locale.getCountry(), locale.getVariant()).toString();
-			String l2 = new Locale(locale.getLanguage(), locale.getCountry()).toString();
-			String l3 = new Locale(locale.getLanguage()).toString();
-			
-			re.add(l0);
-			if(!l1.equals(l0))
-				re.add(l1);
-			if(!l2.equals(l1))
-				re.add(l2);
-			if(!l3.equals(l2))
-				re.add(l3);
-			
-			LOCALE_STRING_PRIORITY_LIST.put(locale, new WeakReference<List<String>>(re));
-		}
-		
-		return re;
-	}
-	
-	private static final ConcurrentMap<Locale, WeakReference<List<String>>> LOCALE_STRING_PRIORITY_LIST = new ConcurrentHashMap<Locale, WeakReference<List<String>>>();
-	
-	/**
-	 * 将{@linkplain Label}转换为指定{@linkplain Locale}的{@linkplain Label}。
-	 * <p>
-	 * 返回的{@linkplain Label#getValue()}是最匹配给定{@linkplain Locale}的值、{@linkplain Label#getLocaleValues()}则为{@code null}。
-	 * </p>
-	 * <p>
-	 * 如果{@code label}参数为{@code null}或{@linkplain Label#getValue()}为{@code null}，
-	 * 则返回一个{@linkplain Label#getValue()}为{@code ""}空字符串的对象。
-	 * </p>
-	 * 
-	 * @param label
-	 * @param locale
-	 * @return
-	 */
-	public static Label concrete(Label label, Locale locale)
-	{
-		if (label == null || locale == null)
-			return new Label("");
-
-		String value = label.getValue(locale);
-		
-		if (value == null)
-			value = "";
-
-		return new Label(value);
+		return LabelUtil.getPriorityStringList(locale);
 	}
 }

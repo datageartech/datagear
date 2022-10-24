@@ -760,7 +760,8 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			if (pluginVarName == null)
 			{
 				pluginVarName = renderAttr.genChartPluginVarName(Integer.toString(i));
-				getHtmlChartPluginScriptObjectWriter().write(out, plugin, pluginVarName);
+				getHtmlChartPluginScriptObjectWriter().write(out, plugin, pluginVarName,
+						renderAttr.getLocale(renderContext));
 			}
 
 			pluginVarNames.add(pluginVarName);

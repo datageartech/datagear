@@ -8,8 +8,12 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import org.datagear.util.i18n.AbstractLabeled;
+import org.datagear.util.i18n.LabelUtil;
 import org.datagear.util.i18n.Labeled;
 
 /**
@@ -135,10 +139,46 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeAware, Se
 		this.inputPayload = inputPayload;
 	}
 
+	/**
+	 * 复制为指定{@linkplain Locale}的对象。
+	 * 
+	 * @param locale
+	 * @return
+	 */
+	public ChartAttribute clone(Locale locale)
+	{
+		ChartAttribute target = new ChartAttribute(this.name, this.type, this.required, this.array);
+		target.setInputType(this.inputType);
+		target.setInputPayload(this.inputPayload);
+		LabelUtil.concrete(this, target, locale);
+
+		return target;
+	}
+
 	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", type=" + type + "]";
+	}
+
+	/**
+	 * 复制为指定{@linkplain Locale}的对象。
+	 * 
+	 * @param chartAttributes
+	 * @param locale
+	 * @return
+	 */
+	public static List<ChartAttribute> clone(List<ChartAttribute> chartAttributes, Locale locale)
+	{
+		if (chartAttributes == null)
+			return null;
+
+		List<ChartAttribute> re = new ArrayList<ChartAttribute>(chartAttributes.size());
+
+		for (ChartAttribute chartAttribute : chartAttributes)
+			re.add(chartAttribute.clone(locale));
+
+		return re;
 	}
 
 	/**
