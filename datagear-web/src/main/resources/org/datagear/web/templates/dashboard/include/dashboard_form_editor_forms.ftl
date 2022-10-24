@@ -441,7 +441,7 @@ page_boolean_options.ftl
 	v-model:visible="pm.vepss.chartOptionsShown" @show="onVeChartOptionsPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veChartOptionsForm" class="flex flex-column">
-			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto" style="min-width:40vw;">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto" style="min-width:40vw;max-width:60vw;">
 				<div class="field grid">
 					<label for="${pid}veChartOptionsContent" class="field-label col-12 mb-2">
 						<@spring.message code='chartOptions' />
