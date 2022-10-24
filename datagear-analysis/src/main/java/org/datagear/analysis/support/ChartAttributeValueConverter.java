@@ -29,7 +29,7 @@ public class ChartAttributeValueConverter extends DataValueConverter
 		if (DataType.STRING.equals(type))
 			return convertToString(value, DataType.STRING);
 		else if (DataType.NUMBER.equals(type))
-			return convertToNumber(type, DataType.NUMBER);
+			return convertToNumber(value, DataType.NUMBER);
 		else if (DataType.BOOLEAN.equals(type))
 			return convertToBoolean(value, DataType.BOOLEAN);
 		else
