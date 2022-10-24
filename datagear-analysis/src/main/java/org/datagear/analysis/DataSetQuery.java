@@ -119,11 +119,10 @@ public class DataSetQuery implements ResultDataFormatAware
 	 * 
 	 * @param <T>
 	 * @param name
-	 * @param value
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T getParamValue(String name, Object value)
+	public <T> T getParamValue(String name)
 	{
 		return (T) this.paramValues.get(name);
 	}

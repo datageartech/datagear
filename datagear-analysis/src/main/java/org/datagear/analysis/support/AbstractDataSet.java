@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
-import org.datagear.analysis.NameAwareUtil;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.NameAwareUtil;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.ResultDataFormat;
 
@@ -368,29 +368,13 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 		if (source == null)
 			return null;
-
-		return convertToPropertyDataType(converter, source, property.getType());
-	}
-
-	/**
-	 * 将源对象转换为指定{@linkplain DataSetProperty.DataType}类型的对象。
-	 * <p>
-	 * 如果{@code propertyType}为{@code null}，则什么也不做直接返回。
-	 * </p>
-	 * 
-	 * @param converter
-	 * @param source
-	 * @param propertyType
-	 *            允许为{@code null}
-	 * @return
-	 */
-	protected Object convertToPropertyDataType(DataSetPropertyValueConverter converter, Object source,
-			String propertyType)
-	{
+		
+		String propertyType = property.getType();
+		
 		if (propertyType == null || DataSetProperty.DataType.UNKNOWN.equals(propertyType))
 			return source;
 
-		return converter.convert(source, propertyType);
+		return converter.convert(source, property);
 	}
 
 	/**

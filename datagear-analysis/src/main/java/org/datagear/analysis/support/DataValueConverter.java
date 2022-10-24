@@ -33,7 +33,7 @@ public abstract class DataValueConverter
 	public static final Pattern PATTERN_INTEGER = Pattern.compile("^-?[1-9]\\d*$");
 
 	/**
-	 * 转换数据值映射表，返回一个经转换的新映射表。
+	 * 转换数据值映射表，返回一个新映射表。
 	 * <p>
 	 * 如果{@code nameValues}中有未在{@code nameTypeAwares}中定义的项，那么它将原样写入返回映射表中。
 	 * </p>
@@ -63,13 +63,28 @@ public abstract class DataValueConverter
 					continue;
 
 				Object value = nameValues.get(name);
-				value = convert(value, dnt.getType());
+				value = convert(value, dnt);
 
 				re.put(name, value);
 			}
 		}
 
 		return re;
+	}
+
+	/**
+	 * 转换数据值。
+	 * 
+	 * @param <T>
+	 * @param value
+	 *            待转换的数据值、数据值数组、数据值集合。
+	 * @param nameTypeAware
+	 * @return
+	 * @throws DataValueConvertionException
+	 */
+	public <T extends NameTypeAware> Object convert(Object value, T nameTypeAware) throws DataValueConvertionException
+	{
+		return convert(value, nameTypeAware.getType());
 	}
 
 	/**
@@ -236,6 +251,7 @@ public abstract class DataValueConverter
 		if(str == null || str.isEmpty())
 			return null;
 		
+		// 这里应优先parse，因为符合format的str也可能匹配数值格式
 		try
 		{
 			return format.parse(str);

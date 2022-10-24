@@ -22,7 +22,7 @@ import org.datagear.analysis.DataSetProperty.DataType;
  * 它支持将对象转换为{@linkplain DataSetProperty.DataType}类型的值。
  * </p>
  * <p>
- * 此类的{@linkplain #convert(java.util.Map, java.util.Collection)}、{@linkplain #convert(Object, String)}不是线程安全的。
+ * 此类不是线程安全的。
  * </p>
  * 
  * @author datagear@163.com
