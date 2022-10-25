@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginResource;
-import org.datagear.analysis.support.CategorizationResolver.Categorization;
+import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;

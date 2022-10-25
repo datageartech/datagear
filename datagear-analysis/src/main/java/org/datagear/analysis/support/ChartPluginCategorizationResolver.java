@@ -13,9 +13,10 @@ import java.util.List;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.util.StringUtil;
 
 /**
- * 将{@linkplain ChartPlugin}按照{@linkplain Category}分组处理器。
+ * {@linkplain ChartPlugin}分类处理器。
  * <p>
  * 此类是线程安全的。
  * </p>
@@ -23,9 +24,9 @@ import org.datagear.analysis.ChartPlugin;
  * @author datagear@163.com
  *
  */
-public class CategorizationResolver
+public class ChartPluginCategorizationResolver
 {
-	public CategorizationResolver()
+	public ChartPluginCategorizationResolver()
 	{
 		super();
 	}
@@ -62,7 +63,7 @@ public class CategorizationResolver
 					{
 						Category myCategory = myCategorizationInfo.getCategory();
 
-						if (category.getName().equals(myCategory.getName()))
+						if (StringUtil.isEquals(category.getName(), myCategory.getName()))
 						{
 							categorizationInfo = myCategorizationInfo;
 

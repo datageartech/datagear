@@ -24,8 +24,8 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.support.CategorizationResolver;
-import org.datagear.analysis.support.CategorizationResolver.Categorization;
+import org.datagear.analysis.support.ChartPluginCategorizationResolver;
+import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChart;
@@ -51,7 +51,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	@Autowired
 	private DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager;
 
-	private CategorizationResolver categorizationResolver = new CategorizationResolver();
+	private ChartPluginCategorizationResolver chartPluginCategorizationResolver = new ChartPluginCategorizationResolver();
 
 	public AbstractChartPluginAwareController()
 	{
@@ -68,19 +68,20 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		this.directoryHtmlChartPluginManager = directoryHtmlChartPluginManager;
 	}
 
-	public CategorizationResolver getCategorizationResolver()
+	public ChartPluginCategorizationResolver getChartPluginCategorizationResolver()
 	{
-		return categorizationResolver;
+		return chartPluginCategorizationResolver;
 	}
 
-	public void setCategorizationResolver(CategorizationResolver categorizationResolver)
+	public void setChartPluginCategorizationResolver(
+			ChartPluginCategorizationResolver chartPluginCategorizationResolver)
 	{
-		this.categorizationResolver = categorizationResolver;
+		this.chartPluginCategorizationResolver = chartPluginCategorizationResolver;
 	}
 
 	protected List<Categorization> resolveCategorizations(List<HtmlChartPluginView> chartPluginVOs)
 	{
-		return this.categorizationResolver.resolve(chartPluginVOs);
+		return this.chartPluginCategorizationResolver.resolve(chartPluginVOs);
 	}
 
 	/**
