@@ -55,12 +55,28 @@
 					'zh' : '标题描述中文'
 				}
 			},
-			defaultValue : 'pie chart',
-			constraints :
+			group:
 			{
-				required : true,
-				maxlength : 20,
-				minlength : 10
+				name: "group-0",
+				nameLabel :
+				{
+					value : '分组-0',
+					localeValues :
+					{
+						'en' : 'group-0',
+						'zh' : '分组-0-中文'
+					}
+				},
+				descLabel :
+				{
+					value : '分组-0-描述',
+					localeValues :
+					{
+						'en' : 'group-0 desc',
+						'zh' : '分组-0-描述-中文'
+					}
+				},
+				order: 99
 			}
 		},
 		{
@@ -87,7 +103,8 @@
   			required: true,
   			multiple: true,
   			inputType: "mytype",
-  			inputPayload: "mypayload"
+  			inputPayload: "mypayload",
+			group: "group-1"
 		},
   		{
 			name : 'a2',

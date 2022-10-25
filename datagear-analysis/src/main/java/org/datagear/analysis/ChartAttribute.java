@@ -37,6 +37,7 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	public static final String PROPERTY_MULTIPLE = "multiple";
 	public static final String PROPERTY_INPUT_TYPE = "inputType";
 	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
+	public static final String PROPERTY_GROUP = "group";
 
 	/** 名称 */
 	private String name;
@@ -55,6 +56,9 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 
 	/** 界面输入框载荷，比如：输入框为下拉选择时，定义选项内容JSON；输入概况为日期时，定义日期格式 */
 	private String inputPayload = "";
+
+	/** 所属分组 */
+	private Group group = null;
 
 	public ChartAttribute()
 	{
@@ -144,6 +148,21 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	}
 
 	/**
+	 * 获取所属{@linkplain Group}。
+	 * 
+	 * @return 为{@code null}表示无分组
+	 */
+	public Group getGroup()
+	{
+		return group;
+	}
+
+	public void setGroup(Group group)
+	{
+		this.group = group;
+	}
+
+	/**
 	 * 复制为指定{@linkplain Locale}的对象。
 	 * 
 	 * @param locale
@@ -155,6 +174,9 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
 		LabelUtil.concrete(this, target, locale);
+
+		if (this.group != null)
+			target.setGroup(this.group.clone(locale));
 
 		return target;
 	}

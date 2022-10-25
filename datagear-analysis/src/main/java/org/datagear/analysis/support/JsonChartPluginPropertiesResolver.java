@@ -23,6 +23,7 @@ import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartAttribute;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.DataSign;
+import org.datagear.analysis.Group;
 import org.datagear.util.IOUtil;
 import org.datagear.util.i18n.Label;
 
@@ -320,6 +321,7 @@ public class JsonChartPluginPropertiesResolver
 			chartAttribute.setMultiple(convertToBoolean(map.get(ChartAttribute.PROPERTY_MULTIPLE), false));
 			chartAttribute.setInputType(convertToChartAttributeInputType(map.get(ChartAttribute.PROPERTY_INPUT_TYPE)));
 			chartAttribute.setInputPayload(convertToChartAttributeInputType(map.get(ChartAttribute.PROPERTY_INPUT_PAYLOAD)));
+			chartAttribute.setGroup(convertToGroup(map.get(ChartAttribute.PROPERTY_GROUP)));
 
 			return chartAttribute;
 		}
@@ -365,6 +367,41 @@ public class JsonChartPluginPropertiesResolver
 			return (String) obj;
 		else
 			return obj.toString();
+	}
+
+	protected Group convertToGroup(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof Group)
+			return (Group) obj;
+		else if (obj instanceof String)
+		{
+			Group group = createGroup();
+			group.setName((String) obj);
+			return group;
+		}
+		else if (obj instanceof Map<?, ?>)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, ?> map = (Map<String, ?>) obj;
+
+			String name = (String) map.get(Group.PROPERTY_NAME);
+			if (name == null)
+				return null;
+
+			Group group = createGroup();
+			group.setName(name);
+
+			group.setNameLabel(convertToLabel(map.get(Group.PROPERTY_NAME_LABEL)));
+			group.setDescLabel(convertToLabel(map.get(Group.PROPERTY_DESC_LABEL)));
+			group.setOrder(convertToInt(map.get(Group.PROPERTY_ORDER), group.getOrder()));
+
+			return group;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ Group.class.getName() + "] is not supported");
 	}
 
 	/**
@@ -496,13 +533,17 @@ public class JsonChartPluginPropertiesResolver
 		else if (obj instanceof Category)
 			categories.add((Category) obj);
 		else if (obj instanceof String)
-			categories.add(new Category((String) obj));
+		{
+			Category category = createCategory();
+			category.setName((String) obj);
+			categories.add(category);
+		}
 		else if (obj instanceof Map<?, ?>)
 		{
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			String name = (String) map.get(DataSign.PROPERTY_NAME);
+			String name = (String) map.get(Category.PROPERTY_NAME);
 			if (name == null)
 				return;
 
@@ -623,5 +664,10 @@ public class JsonChartPluginPropertiesResolver
 	protected Category createCategory()
 	{
 		return new Category();
+	}
+
+	protected Group createGroup()
+	{
+		return new Group();
 	}
 }

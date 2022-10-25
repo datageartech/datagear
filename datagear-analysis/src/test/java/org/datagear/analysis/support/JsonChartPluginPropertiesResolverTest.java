@@ -15,9 +15,10 @@ import java.util.Map;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartAttribute;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.DataSign;
+import org.datagear.analysis.Group;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.util.StringUtil;
@@ -104,6 +105,21 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertFalse(chartAttribute.isMultiple());
 				Assert.assertTrue(StringUtil.isEmpty(chartAttribute.getInputType()));
 				Assert.assertTrue(StringUtil.isEmpty(chartAttribute.getInputPayload()));
+
+				Group group = chartAttribute.getGroup();
+				Label groupNameLabel = group.getNameLabel();
+				Label groupDescLabel = group.getDescLabel();
+
+				Assert.assertEquals("group-0", group.getName());
+				Assert.assertEquals(99, group.getOrder());
+
+				Assert.assertEquals("分组-0", groupNameLabel.getValue());
+				Assert.assertEquals("group-0", groupNameLabel.getValue(enLocale));
+				Assert.assertEquals("分组-0-中文", groupNameLabel.getValue(zhLocale));
+
+				Assert.assertEquals("分组-0-描述", groupDescLabel.getValue());
+				Assert.assertEquals("group-0 desc", groupDescLabel.getValue(enLocale));
+				Assert.assertEquals("分组-0-描述-中文", groupDescLabel.getValue(zhLocale));
 			}
 
 			{
@@ -126,6 +142,15 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertTrue(chartAttribute.isMultiple());
 				Assert.assertEquals("mytype", chartAttribute.getInputType());
 				Assert.assertEquals("mypayload", chartAttribute.getInputPayload());
+
+				Group group = chartAttribute.getGroup();
+				Label groupNameLabel = group.getNameLabel();
+				Label groupDescLabel = group.getDescLabel();
+
+				Assert.assertEquals("group-1", group.getName());
+				Assert.assertEquals(0, group.getOrder());
+				Assert.assertNull(groupNameLabel);
+				Assert.assertNull(groupDescLabel);
 			}
 			
 			{
@@ -137,18 +162,23 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Assert.assertEquals("a2", a2.getName());
 				Assert.assertEquals(ChartAttribute.DataType.BOOLEAN, a2.getType());
+				Assert.assertNull(a2.getGroup());
 
 				Assert.assertEquals("a3", a3.getName());
 				Assert.assertEquals(ChartAttribute.DataType.STRING, a3.getType());
+				Assert.assertNull(a3.getGroup());
 
 				Assert.assertEquals("a4", a4.getName());
 				Assert.assertEquals(ChartAttribute.DataType.NUMBER, a4.getType());
+				Assert.assertNull(a4.getGroup());
 
 				Assert.assertEquals("a5", a5.getName());
 				Assert.assertEquals(ChartAttribute.DataType.BOOLEAN, a5.getType());
+				Assert.assertNull(a5.getGroup());
 
 				Assert.assertEquals("a6", a6.getName());
 				Assert.assertEquals("custom", a6.getType());
+				Assert.assertNull(a6.getGroup());
 			}
 
 			List<DataSign> dataSigns = chartPlugin.getDataSigns();
