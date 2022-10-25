@@ -36,6 +36,7 @@ public class JsonChartPluginPropertiesResolverTest
 {
 	private JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver();
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void resolveChartPluginPropertiesTest() throws IOException
 	{
@@ -120,6 +121,12 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("分组-0-描述", groupDescLabel.getValue());
 				Assert.assertEquals("group-0 desc", groupDescLabel.getValue(enLocale));
 				Assert.assertEquals("分组-0-描述-中文", groupDescLabel.getValue(zhLocale));
+				
+				Map<String, ?> additions = chartAttribute.getAdditions();
+				Assert.assertNotNull(additions);
+				Assert.assertEquals("that", additions.get("for"));
+				Assert.assertEquals("title.text", additions.get("optionPath"));
+				Assert.assertEquals(3, ((Number)additions.get("priority")).intValue());
 			}
 
 			{
@@ -151,6 +158,9 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals(0, group.getOrder());
 				Assert.assertNull(groupNameLabel);
 				Assert.assertNull(groupDescLabel);
+				
+				Map<String, ?> additions = chartAttribute.getAdditions();
+				Assert.assertNull(additions);
 			}
 			
 			{
@@ -163,21 +173,45 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("a2", a2.getName());
 				Assert.assertEquals(ChartAttribute.DataType.BOOLEAN, a2.getType());
 				Assert.assertNull(a2.getGroup());
+				{
+					List<?> inputPayload = (List<?>)a2.getInputPayload();
+					Assert.assertEquals(2, inputPayload.size());
+					Map<String, ?> inputPayload0 = (Map<String, ?>)inputPayload.get(0);
+					Map<String, ?> inputPayload1 = (Map<String, ?>)inputPayload.get(1);
+					Assert.assertEquals("a", inputPayload0.get("name"));
+					Assert.assertEquals(2, ((Number)inputPayload0.get("value")).intValue());
+					Assert.assertEquals("b", inputPayload1.get("name"));
+					Assert.assertEquals(3, ((Number)inputPayload1.get("value")).intValue());
+				}
 
 				Assert.assertEquals("a3", a3.getName());
 				Assert.assertEquals(ChartAttribute.DataType.STRING, a3.getType());
 				Assert.assertNull(a3.getGroup());
+				{
+					List<?> inputPayload = (List<?>)a3.getInputPayload();
+					Assert.assertEquals(2, inputPayload.size());
+					Assert.assertEquals("a", inputPayload.get(0));
+					Assert.assertEquals("b", inputPayload.get(1));
+				}
 
 				Assert.assertEquals("a4", a4.getName());
 				Assert.assertEquals(ChartAttribute.DataType.NUMBER, a4.getType());
 				Assert.assertNull(a4.getGroup());
+				{
+					List<?> inputPayload = (List<?>)a4.getInputPayload();
+					Assert.assertEquals(2, inputPayload.size());
+					Assert.assertEquals(2, ((Number)inputPayload.get(0)).intValue());
+					Assert.assertEquals(3, ((Number)inputPayload.get(1)).intValue());
+				}
 
 				Assert.assertEquals("a5", a5.getName());
 				Assert.assertEquals(ChartAttribute.DataType.BOOLEAN, a5.getType());
+				Assert.assertNull(a5.getInputPayload());
 				Assert.assertNull(a5.getGroup());
 
 				Assert.assertEquals("a6", a6.getName());
 				Assert.assertEquals("custom", a6.getType());
+				Assert.assertNull(a6.getInputPayload());
 				Assert.assertNull(a6.getGroup());
 			}
 

@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.datagear.util.i18n.AbstractLabeled;
 import org.datagear.util.i18n.LabelUtil;
@@ -38,6 +39,7 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	public static final String PROPERTY_INPUT_TYPE = "inputType";
 	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
 	public static final String PROPERTY_GROUP = "group";
+	public static final String PROPERTY_ADDITIONS = "additions";
 
 	/** 名称 */
 	private String name;
@@ -51,14 +53,17 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	/** 是否多项 */
 	private boolean multiple;
 
-	/** 界面输入框类型 */
-	private String inputType = "";
+	/** 输入框类型 */
+	private String inputType = null;
 
-	/** 界面输入框载荷，比如：输入框为下拉选择时，定义选项内容JSON；输入概况为日期时，定义日期格式 */
-	private String inputPayload = "";
-
+	/** 输入框载荷 */
+	private Object inputPayload = null;
+	
 	/** 所属分组 */
 	private Group group = null;
+
+	/** 扩展属性 */
+	private Map<String, ?> additions = null;
 
 	public ChartAttribute()
 	{
@@ -123,7 +128,7 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	/**
 	 * 获取输入框类型，常用类型参考{@linkplain InputType}。
 	 * 
-	 * @return
+	 * @return 可能为{@code null}
 	 */
 	@Override
 	public String getInputType()
@@ -137,12 +142,12 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	}
 
 	@Override
-	public String getInputPayload()
+	public Object getInputPayload()
 	{
 		return inputPayload;
 	}
 
-	public void setInputPayload(String inputPayload)
+	public void setInputPayload(Object inputPayload)
 	{
 		this.inputPayload = inputPayload;
 	}
@@ -163,6 +168,21 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	}
 
 	/**
+	 * 获取扩展属性集。
+	 * 
+	 * @return 为{@code null}表示没有
+	 */
+	public Map<String, ?> getAdditions()
+	{
+		return additions;
+	}
+
+	public void setAdditions(Map<String, ?> additions)
+	{
+		this.additions = additions;
+	}
+
+	/**
 	 * 复制为指定{@linkplain Locale}的对象。
 	 * 
 	 * @param locale
@@ -173,10 +193,9 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 		ChartAttribute target = new ChartAttribute(this.name, this.type, this.required, this.multiple);
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
+		target.setGroup(this.group != null ? this.group.clone(locale) : null);
+		target.setAdditions(this.additions);
 		LabelUtil.concrete(this, target, locale);
-
-		if (this.group != null)
-			target.setGroup(this.group.clone(locale));
 
 		return target;
 	}

@@ -77,6 +77,12 @@
 					}
 				},
 				order: 99
+			},
+			additions:
+			{
+				for: "that",
+				optionPath: "title.text",
+				priority: 3
 			}
 		},
 		{
@@ -108,15 +114,18 @@
 		},
   		{
 			name : 'a2',
-			type : 'BOOLEAN'
+			type : 'BOOLEAN',
+			inputPayload: [ {name: "a", value: 2}, {name: "b", value: 3} ]
 		},
   		{
 			name : 'a3',
-			type : 'string'
+			type : 'string',
+			inputPayload: [ "a", "b" ]
 		},
   		{
 			name : 'a4',
-			type : 'number'
+			type : 'number',
+			inputPayload: [ 2, 3 ]
 		},
   		{
 			name : 'a5',

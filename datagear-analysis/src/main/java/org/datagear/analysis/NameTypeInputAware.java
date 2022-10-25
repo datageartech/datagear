@@ -42,10 +42,10 @@ public interface NameTypeInputAware extends NameTypeAware
 	/**
 	 * 获取输入框载荷。
 	 * <p>
-	 * 比如：下拉选择输入框时，可以用于定义选项内容JSON；日期输入框时，可以用于定义日期格式
+	 * 比如：下拉选择输入框时，可以用于定义选项数组；日期输入框时，可以用于定义日期格式字符串。
 	 * </p>
 	 * 
 	 * @return 可能为{@code null}
 	 */
-	String getInputPayload();
+	Object getInputPayload();
 }

@@ -320,8 +320,9 @@ public class JsonChartPluginPropertiesResolver
 			chartAttribute.setRequired(convertToBoolean(map.get(ChartAttribute.PROPERTY_REQUIRED), false));
 			chartAttribute.setMultiple(convertToBoolean(map.get(ChartAttribute.PROPERTY_MULTIPLE), false));
 			chartAttribute.setInputType(convertToChartAttributeInputType(map.get(ChartAttribute.PROPERTY_INPUT_TYPE)));
-			chartAttribute.setInputPayload(convertToChartAttributeInputType(map.get(ChartAttribute.PROPERTY_INPUT_PAYLOAD)));
+			chartAttribute.setInputPayload(convertToChartAttributeInputPayload(map.get(ChartAttribute.PROPERTY_INPUT_PAYLOAD)));
 			chartAttribute.setGroup(convertToGroup(map.get(ChartAttribute.PROPERTY_GROUP)));
+			chartAttribute.setAdditions(convertToChartAttributeAdditions(map.get(ChartAttribute.PROPERTY_ADDITIONS)));
 
 			return chartAttribute;
 		}
@@ -359,14 +360,9 @@ public class JsonChartPluginPropertiesResolver
 			return ChartAttribute.DataType.STRING;
 	}
 
-	protected String convertToChartAttributeInputPayload(Object obj)
+	protected Object convertToChartAttributeInputPayload(Object obj)
 	{
-		if(obj == null)
-			return  null;
-		else if (obj instanceof String)
-			return (String) obj;
-		else
-			return obj.toString();
+		return obj;
 	}
 
 	protected Group convertToGroup(Object obj)
@@ -402,6 +398,18 @@ public class JsonChartPluginPropertiesResolver
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
 					+ Group.class.getName() + "] is not supported");
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Map<String, ?> convertToChartAttributeAdditions(Object obj)
+	{
+		if(obj == null)
+			return  null;
+		else if (obj instanceof Map<?, ?>)
+			return (Map<String, ?>) obj;
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ ChartAttribute.class.getName() + ".additions] is not supported");
 	}
 
 	/**
