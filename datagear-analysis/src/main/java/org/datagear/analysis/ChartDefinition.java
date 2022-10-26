@@ -39,8 +39,7 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 	private ChartDataSet[] chartDataSets = EMPTY_CHART_DATA_SET;
 
 	/** 图表属性值映射表 */
-	@SuppressWarnings("unchecked")
-	private Map<String, Object> attrValues = Collections.EMPTY_MAP;
+	private Map<String, Object> attrValues = null;
 
 	/** 图表更新间隔毫秒数 */
 	private int updateInterval = -1;
@@ -91,7 +90,7 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 	/**
 	 * 获取图表属性值映射表。
 	 * 
-	 * @return
+	 * @return 可能返回{@code null}
 	 */
 	public Map<String, Object> getAttrValues()
 	{

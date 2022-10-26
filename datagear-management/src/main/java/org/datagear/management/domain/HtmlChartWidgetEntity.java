@@ -8,11 +8,16 @@
 package org.datagear.management.domain;
 
 import java.util.Date;
+import java.util.Map;
 
 import org.datagear.analysis.support.ChartWidget;
+import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartWidget;
+import org.datagear.util.StringUtil;
 import org.springframework.beans.BeanUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * HTML {@linkplain ChartWidget}实体。
@@ -122,6 +127,44 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	/**
+	 * 获取{@linkplain #getAttrValues()}的JSON字符串形式。
+	 * <p>
+	 * 目前仅用于Mybatis持久存储。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public String getAttrValuesJson()
+	{
+		Map<String, ?> attrValues = getAttrValues();
+		
+		if(attrValues == null)
+			return null;
+		else
+			return JsonSupport.generate(attrValues, "");
+	}
+
+	/**
+	 * 设置{@linkplain #setAttrValues(Map)}的JSON字符串形式。
+	 * <p>
+	 * 目前仅用于Mybatis持久存储。
+	 * </p>
+	 * 
+	 * @param attrValuesJson
+	 */
+	@SuppressWarnings("unchecked")
+	public void setAttrValuesJson(String attrValuesJson)
+	{
+		Map<String, Object> attrValues = null;
+		
+		if(!StringUtil.isEmpty(attrValuesJson))
+			attrValues = JsonSupport.parse(attrValuesJson, Map.class, null);
+		
+		setAttrValues(attrValues);
 	}
 
 	@Override

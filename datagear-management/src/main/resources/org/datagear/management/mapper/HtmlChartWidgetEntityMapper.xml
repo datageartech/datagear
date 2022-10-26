@@ -7,12 +7,14 @@
 		INSERT INTO DATAGEAR_HTML_CHART_WIDGET
 			(
 			HCW_ID, HCW_NAME, HCW_PLUGIN_ID, HCW_UPDATE_INTERVAL, HCW_CREATE_USER_ID,
-			HCW_CREATE_TIME, HCW_AP_ID, HCW_RD_FORMAT
+			HCW_CREATE_TIME, HCW_AP_ID, HCW_RD_FORMAT,
+			HCW_ATTR_VALUES
 			)
 		VALUES
 			(
 			#{entity.id}, #{entity.name}, #{entity.htmlChartPlugin.id}, #{entity.updateInterval}, #{entity.createUser.id},
-			#{entity.createTime}, #{entity.analysisProject.id, jdbcType=VARCHAR}, #{entity.resultDataFormat, jdbcType=VARCHAR}
+			#{entity.createTime}, #{entity.analysisProject.id, jdbcType=VARCHAR}, #{entity.resultDataFormat, jdbcType=VARCHAR},
+			#{entity.attrValuesJson, jdbcType=VARCHAR}
 			)
 	</insert>
 	
@@ -35,7 +37,8 @@
 			HCW_PLUGIN_ID = #{entity.htmlChartPlugin.id},
 			HCW_UPDATE_INTERVAL = #{entity.updateInterval},
 			HCW_AP_ID = #{entity.analysisProject.id, jdbcType=VARCHAR},
-			HCW_RD_FORMAT = #{entity.resultDataFormat, jdbcType=VARCHAR}
+			HCW_RD_FORMAT = #{entity.resultDataFormat, jdbcType=VARCHAR},
+			HCW_ATTR_VALUES = #{entity.attrValuesJson, jdbcType=VARCHAR}
 		WHERE
 			HCW_ID = #{entity.id}
 	</update>
@@ -194,6 +197,7 @@
 			<include refid="common.fieldsForCreateUser" />,
 			A.HCW_CREATE_TIME AS ${_iq_}createTime${_iq_},
 			A.HCW_RD_FORMAT AS ${_iq_}resultDataFormat${_iq_},
+			A.HCW_ATTR_VALUES AS ${_iq_}attrValuesJson${_iq_},
 			AP.*
 		FROM
 			DATAGEAR_HTML_CHART_WIDGET A
