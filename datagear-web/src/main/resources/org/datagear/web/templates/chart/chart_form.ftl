@@ -203,6 +203,17 @@
 				</div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}attrValues" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='chartAttribute' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
+						aria:haspopup="true" aria-controls="${pid}attrValuesPanel"
+						@click="onShowAttrValuesPanel" class="p-button-secondary">
+					</p-button>
+				</div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}updateInterval" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='chart.updateInterval.desc' />">
 					<@spring.message code='updateInterval' />
@@ -372,6 +383,25 @@
 		</div>
 		<div class="panel-content-size-xxs overflow-auto flex flex-column p-2">
 			{{formatChartPluginDesc(fm.htmlChartPlugin)}}
+		</div>
+	</p-overlaypanel>
+	<p-overlaypanel ref="${pid}attrValuesPanelEle" append-to="body" id="${pid}attrValuesPanel">
+		<div class="pb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='chartAttribute' />
+			</label>
+		</div>
+		<div class="panel-content-size-xxs overflow-auto flex flex-column p-2">
+			<div class="field grid" v-for="(ca, caIdx) in fm.htmlChartPlugin.chartAttributes">
+				<label :for="'${pid}pluginChartAttribute_'+caIdx" class="field-label col-12 mb-2">
+					{{ca.name}}
+				</label>
+				<div class="field-input col-12">
+					<p-inputtext :id="'${pid}pluginChartAttribute_'+caIdx" v-model="fm.attrValues[ca.name]" type="text"
+						class="input w-full" maxlength="100">
+					</p-inputtext>
+				</div>
+			</div>
 		</div>
 	</p-overlaypanel>
 </div>
@@ -622,6 +652,7 @@
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
 	formModel.chartDataSetVOs = (formModel.chartDataSetVOs == null ? [] : formModel.chartDataSetVOs);
+	formModel.attrValues = (formModel.attrValues == null ? {} : formModel.attrValues);
 	formModel.plugin = undefined;
 	formModel.chartDataSets = undefined;
 	po.mergeChartCdss(formModel);
@@ -689,6 +720,7 @@
 	po.vueRef("${pid}paramPanelEle", null);
 	po.vueRef("${pid}dataFormatPanelEle", null);
 	po.vueRef("${pid}htmlChartPluginDescEle", null);
+	po.vueRef("${pid}attrValuesPanelEle", null);
 	
 	po.vueMethod(
 	{
@@ -926,6 +958,11 @@
 		onShowChartPluginDesc: function(e)
 		{
 			po.vueUnref("${pid}htmlChartPluginDescEle").toggle(e);
+		},
+		
+		onShowAttrValuesPanel: function(e)
+		{
+			po.vueUnref("${pid}attrValuesPanelEle").toggle(e);
 		},
 		
 		onSaveAndShow: function(e)
