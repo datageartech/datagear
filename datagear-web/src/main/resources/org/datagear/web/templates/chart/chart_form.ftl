@@ -7,6 +7,7 @@
  *
 -->
 <#assign ResultDataFormat=statics['org.datagear.analysis.ResultDataFormat']>
+<#assign ChartAttributeType=statics['org.datagear.analysis.ChartAttribute$DataType']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -385,27 +386,40 @@
 			{{formatChartPluginDesc(fm.htmlChartPlugin)}}
 		</div>
 	</p-overlaypanel>
-	<p-overlaypanel ref="${pid}attrValuesPanelEle" append-to="body" id="${pid}attrValuesPanel">
+	<p-overlaypanel ref="${pid}attrValuesPanelEle" append-to="body" id="${pid}attrValuesPanel" @show="onAttrValuesPanelShow">
 		<div class="pb-2">
 			<label class="text-lg font-bold">
 				<@spring.message code='chartAttribute' />
 			</label>
 		</div>
-		<div class="panel-content-size-xxs overflow-auto flex flex-column p-2">
-			<div class="field grid" v-for="(ca, caIdx) in fm.htmlChartPlugin.chartAttributes">
-				<label :for="'${pid}pluginChartAttribute_'+caIdx" class="field-label col-12 mb-2">
-					{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
-				</label>
-				<div class="field-input col-12">
-					<p-inputtext :id="'${pid}pluginChartAttribute_'+caIdx" v-model="fm.attrValues[ca.name]" type="text"
-						class="input w-full" maxlength="100">
-					</p-inputtext>
+		<div class="page page-form">
+			<form id="${pid}attrValuesPanelForm" class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
+				<div class="page-form-content panel-content-size-xxs flex-grow-1 px-2 py-1 overflow-y-auto">
+					<div class="field grid" v-for="(ca, caIdx) in fm.htmlChartPlugin.chartAttributes">
+						<label :for="'${pid}pluginChartAttribute_'+caIdx" class="field-label col-12 mb-2">
+							{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
+						</label>
+						<div class="field-input col-12" v-if="ca.type == '${ChartAttributeType.BOOLEAN}'">
+							<p-selectbutton :id="'${pid}pluginChartAttribute_'+caIdx" v-model="pm.attrValues[ca.name]" :options="pm.booleanOptions"
+								option-label="name" option-value="value" class="input w-full">
+							</p-selectbutton>
+						</div>
+						<div class="field-input col-12" v-else>
+							<p-inputtext :id="'${pid}pluginChartAttribute_'+caIdx" v-model="pm.attrValues[ca.name]" type="text"
+								class="input w-full" maxlength="1000">
+							</p-inputtext>
+						</div>
+					</div>
 				</div>
-			</div>
+				<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+					<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+				</div>
+			</form>
 		</div>
 	</p-overlaypanel>
 </div>
 <#include "../include/page_form.ftl">
+<#include "../include/page_simple_form.ftl">
 <#include "../include/page_boolean_options.ftl">
 <script>
 (function(po)
@@ -652,7 +666,6 @@
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
 	formModel.chartDataSetVOs = (formModel.chartDataSetVOs == null ? [] : formModel.chartDataSetVOs);
-	formModel.attrValues = (formModel.attrValues == null ? {} : formModel.attrValues);
 	formModel.plugin = undefined;
 	formModel.chartDataSets = undefined;
 	po.mergeChartCdss(formModel);
@@ -712,7 +725,8 @@
 		[
 			{ name: "<@spring.message code='string' />", value: "${ResultDataFormat.TYPE_STRING}" },
 			{ name: "<@spring.message code='number' />", value: "${ResultDataFormat.TYPE_NUMBER}" }
-		]
+		],
+		attrValues: (formModel.attrValues == null ? {} : $.extend(true, {}, formModel.attrValues))
 	});
 	
 	po.vueRef("${pid}dataSignsPanelEle", null);
@@ -963,6 +977,19 @@
 		onShowAttrValuesPanel: function(e)
 		{
 			po.vueUnref("${pid}attrValuesPanelEle").toggle(e);
+		},
+		
+		onAttrValuesPanelShow: function()
+		{
+			var pm = po.vuePageModel();
+			var form = po.elementOfId("${pid}attrValuesPanelForm", document.body);
+			
+			po.setupSimpleForm(form, pm.attrValues, function()
+			{
+				var fm = po.vueFormModel();
+				fm.attrValues = $.extend(true, {}, po.vueRaw(pm.attrValues));
+				po.vueUnref("${pid}attrValuesPanelEle").hide();
+			});
 		},
 		
 		onSaveAndShow: function(e)
