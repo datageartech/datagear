@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +30,7 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.ResultDataFormat;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.ChartAttributeValueConverter;
 import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
@@ -94,6 +96,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 	@Autowired
 	private DataSetEntityService dataSetEntityService;
+
+	private ChartAttributeValueConverter chartAttributeValueConverter = new ChartAttributeValueConverter();
 
 	private ServletContext servletContext;
 
@@ -162,6 +166,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public void setDataSetEntityService(DataSetEntityService dataSetEntityService)
 	{
 		this.dataSetEntityService = dataSetEntityService;
+	}
+
+	public ChartAttributeValueConverter getChartAttributeValueConverter()
+	{
+		return chartAttributeValueConverter;
+	}
+
+	public void setChartAttributeValueConverter(ChartAttributeValueConverter chartAttributeValueConverter)
+	{
+		this.chartAttributeValueConverter = chartAttributeValueConverter;
 	}
 
 	public ServletContext getServletContext()
@@ -564,7 +578,6 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (htmlChartPlugin != null)
 		{
 			htmlChartPlugin = (HtmlChartPlugin) this.chartPluginManager.get(htmlChartPlugin.getId());
-
 			entity.setHtmlChartPlugin(htmlChartPlugin);
 		}
 
@@ -577,6 +590,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 				query = getDataSetParamValueConverter().convert(query, vo.getDataSet());
 				vo.setQuery(query);
 			}
+		}
+
+		Map<String, Object> attrValues = entity.getAttrValues();
+		if (attrValues != null && htmlChartPlugin != null)
+		{
+			attrValues = getChartAttributeValueConverter().convert(attrValues, htmlChartPlugin.getChartAttributes());
+			entity.setAttrValues(attrValues);
 		}
 	}
 

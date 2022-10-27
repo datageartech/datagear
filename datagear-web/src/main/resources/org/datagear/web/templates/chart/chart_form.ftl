@@ -394,7 +394,7 @@
 		<div class="panel-content-size-xxs overflow-auto flex flex-column p-2">
 			<div class="field grid" v-for="(ca, caIdx) in fm.htmlChartPlugin.chartAttributes">
 				<label :for="'${pid}pluginChartAttribute_'+caIdx" class="field-label col-12 mb-2">
-					{{ca.name}}
+					{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
 				</label>
 				<div class="field-input col-12">
 					<p-inputtext :id="'${pid}pluginChartAttribute_'+caIdx" v-model="fm.attrValues[ca.name]" type="text"
