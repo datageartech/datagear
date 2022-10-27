@@ -169,7 +169,7 @@
 		pm.previewError = false;
 		pm.previewPanelShow = true;
 		
-		if(!fm.mutableModel && fm.properties.length == 0)
+		if(!fm.mutableModel && !pm.isReadonlyAction)
 		{
 			fm.properties = response.properties;
 			
