@@ -3688,19 +3688,19 @@
 	 * 获取/设置图表指定属性值。
 	 * 注意：org.datagear.analysis.support.html.AttributeValueHtmlChartPlugin需要此函数名。
 	 * 
-	 * @param name 属性名
+	 * @param name 图表属性、图表属性名
 	 * @param value 可选，要设置的属性值
 	 * @returns 
 	 * @since 4.2.0
 	 */
 	chartBase.attrValue = function(name, value)
 	{
-		var avs = this._attrValues;
+		name = (name && name.name != null ? name.name : name);
 		
 		if(value === undefined)
-			return avs[name];
+			return this._attrValues[name];
 		else
-			avs[name] = value;
+			this._attrValues[name] = value;
 	};
 	
 	/**
@@ -3712,6 +3712,17 @@
 	chartBase.attrValues = function()
 	{
 		return this._attrValues;
+	};
+	
+	/**
+	 * 获取图表插件的所有图表属性。
+	 * 
+	 * @returns []
+	 * @since 4.2.0
+	 */
+	chartBase.pluginChartAttributes = function()
+	{
+		return (this.plugin && this.plugin.chartAttributes ? this.plugin.chartAttributes : []);
 	};
 	
 	//-------------
