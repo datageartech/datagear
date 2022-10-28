@@ -393,28 +393,7 @@
 			</label>
 		</div>
 		<div class="page page-form">
-			<form id="${pid}attrValuesPanelForm" class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
-				<div class="page-form-content panel-content-size-xxs flex-grow-1 px-2 py-1 overflow-y-auto">
-					<div class="field grid" v-for="(ca, caIdx) in fm.htmlChartPlugin.attributes">
-						<label :for="'${pid}pluginAttribute_'+caIdx" class="field-label col-12 mb-2">
-							{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
-						</label>
-						<div class="field-input col-12" v-if="ca.type == '${ChartPluginAttributeType.BOOLEAN}'">
-							<p-selectbutton :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.attrValues[ca.name]" :options="pm.booleanOptions"
-								option-label="name" option-value="value" class="input w-full">
-							</p-selectbutton>
-						</div>
-						<div class="field-input col-12" v-else>
-							<p-inputtext :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.attrValues[ca.name]" type="text"
-								class="input w-full" maxlength="1000">
-							</p-inputtext>
-						</div>
-					</div>
-				</div>
-				<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
-					<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
-				</div>
-			</form>
+			<#include "include/chart_attr_values_form.ftl">
 		</div>
 	</p-overlaypanel>
 </div>
@@ -668,6 +647,7 @@
 	formModel.chartDataSetVOs = (formModel.chartDataSetVOs == null ? [] : formModel.chartDataSetVOs);
 	formModel.plugin = undefined;
 	formModel.chartDataSets = undefined;
+	formModel.attrValues = (formModel.attrValues || {});
 	po.mergeChartCdss(formModel);
 	
 	po.setupForm(formModel,
@@ -725,8 +705,7 @@
 		[
 			{ name: "<@spring.message code='string' />", value: "${ResultDataFormat.TYPE_STRING}" },
 			{ name: "<@spring.message code='number' />", value: "${ResultDataFormat.TYPE_NUMBER}" }
-		],
-		attrValues: (formModel.attrValues == null ? {} : $.extend(true, {}, formModel.attrValues))
+		]
 	});
 	
 	po.vueRef("${pid}dataSignsPanelEle", null);
@@ -981,14 +960,16 @@
 		
 		onAttrValuesPanelShow: function()
 		{
-			var pm = po.vuePageModel();
-			var form = po.elementOfId("${pid}attrValuesPanelForm", document.body);
-			
-			po.setupSimpleForm(form, pm.attrValues, function()
+			var fm = po.vueFormModel();
+			var chartPluginAttrs = (formModel.htmlChartPlugin ? (formModel.htmlChartPlugin.attributes || []) : []);
+			var attrValues = po.vueRaw(fm.attrValues);
+			po.setupChartAttrValuesForm(chartPluginAttrs, attrValues,
 			{
-				var fm = po.vueFormModel();
-				fm.attrValues = $.extend(true, {}, po.vueRaw(pm.attrValues));
-				po.vueUnref("${pid}attrValuesPanelEle").hide();
+				submitHandler: function(avs)
+				{
+					fm.attrValues = avs;
+					po.vueUnref("${pid}attrValuesPanelEle").hide();
+				}
 			});
 		},
 		
