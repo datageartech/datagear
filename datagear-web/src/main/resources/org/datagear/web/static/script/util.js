@@ -569,6 +569,11 @@
 		return (typeof(obj) == $.TYPEOF_NUMBER);
 	};
 	
+	$.isTypeBoolean = function(obj)
+	{
+		return (typeof(obj) == $.TYPEOF_BOOLEAN);
+	};
+	
 	$.isTypeObject = function(obj)
 	{
 		return (typeof(obj) == $.TYPEOF_TYPE_OBJECT);

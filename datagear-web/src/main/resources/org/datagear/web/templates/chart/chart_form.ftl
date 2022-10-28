@@ -961,7 +961,7 @@
 		onAttrValuesPanelShow: function()
 		{
 			var fm = po.vueFormModel();
-			var chartPluginAttrs = (formModel.htmlChartPlugin ? (formModel.htmlChartPlugin.attributes || []) : []);
+			var chartPluginAttrs = po.vueRaw(fm.htmlChartPlugin ? (fm.htmlChartPlugin.attributes || []) : []);
 			var attrValues = po.vueRaw(fm.attrValues);
 			po.setupChartAttrValuesForm(chartPluginAttrs, attrValues,
 			{

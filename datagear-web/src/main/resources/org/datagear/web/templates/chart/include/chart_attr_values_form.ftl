@@ -17,17 +17,38 @@ page_boolean_options.ftl
 <form id="${pid}chartAttrValuesForm" class="flex flex-column" :class="{readonly: pm.chartAttrValuesForm.readonly}">
 	<div class="page-form-content panel-content-size-xxs flex-grow-1 px-2 py-1 overflow-y-auto">
 		<div class="field grid" v-for="(ca, caIdx) in pm.chartAttrValuesForm.attributes">
-			<label :for="'${pid}pluginAttribute_'+caIdx" class="field-label col-12 mb-2">
+			<label :for="'${pid}pluginAttribute_'+caIdx" class="field-label col-12 mb-2"
+				:title="ca.descLabel && ca.descLabel.value ? ca.descLabel.value : null">
 				{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
 			</label>
-			<div class="field-input col-12" v-if="ca.type == pm.ChartPluginAttribute.DataType.BOOLEAN">
-				<p-selectbutton :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="pm.booleanOptions"
-					option-label="name" option-value="value" class="input w-full">
+			<div class="field-input col-12" v-if="ca.inputType == pm.ChartPluginAttribute.InputType.RADIO">
+				<p-selectbutton :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload"
+					option-label="name" option-value="value" class="input w-full" :name="ca.name">
 				</p-selectbutton>
+			</div>
+			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.SELECT">
+				<p-dropdown :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload"
+					option-label="name" option-value="value" class="input w-full" :name="ca.name">
+				</p-dropdown>
+			</div>
+			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.COLOR">
+				<div class="flex">
+					<p-inputtext :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" type="text"
+						class="input flex-grow-1 mr-1" maxlength="100" :name="ca.name">
+					</p-inputtext>
+					<p-colorpicker v-model="pm.chartAttrValuesForm.attrValues[ca.name]"
+						default-color="FFFFFF" class="flex-grow-0 preview-h-full">
+					</p-colorpicker>
+				</div>
+			</div>
+			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.TEXTAREA">
+				<p-textarea :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" type="text"
+					class="input w-full" maxlength="2000" :name="ca.name">
+				</p-textarea>
 			</div>
 			<div class="field-input col-12" v-else>
 				<p-inputtext :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" type="text"
-					class="input w-full" maxlength="1000">
+					class="input w-full" maxlength="1000" :name="ca.name">
 				</p-inputtext>
 			</div>
 		</div>
@@ -58,6 +79,61 @@ page_boolean_options.ftl
 		}
 	};
 	
+	po.trimChartPluginAttributes = function(cpas)
+	{
+		if(!cpas)
+			return [];
+		
+		cpas = $.extend(true, [], cpas);
+		
+		$.each(cpas, function(i, cpa)
+		{
+			//布尔型inputType转换为RADIO便于下面处理
+			if(cpa.type == po.ChartPluginAttribute.DataType.BOOLEAN)
+			{
+				cpa.inputType = po.ChartPluginAttribute.InputType.RADIO;
+				if(!cpa.inputPayload)
+				{
+					var pm = po.vuePageModel();
+					cpa.inputPayload = po.vueRaw(pm.booleanOptions);
+				}
+			}
+			
+			var inputType = cpa.inputType;
+			
+			//将inputPayload转换为标准的[ {name: ..., value: ...}, ... ]格式
+			if(inputType == po.ChartPluginAttribute.InputType.SELECT
+					|| inputType == po.ChartPluginAttribute.InputType.RADIO
+					|| inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
+			{
+				var inputPayload = (cpa.inputPayload || []);
+				
+				//支持非数组格式
+				if(!$.isArray(inputPayload))
+					inputPayload = [ inputPayload ];
+				
+				var inputPayloadNew = [];
+				
+				$.each(inputPayload, function(j, ip)
+				{
+					//支持元素为基本类型
+					if(ip == null || $.isTypeString(ip) || $.isTypeNumber(ip) || $.isTypeBoolean(ip))
+						ip = { name: ip, value: ip };
+					
+					//支持{value: ...}格式的元素
+					if(ip.name == null)
+						ip.name = (ip.value == null ? "null" : ip.value);
+					
+					inputPayloadNew.push(ip);
+				});
+				
+				cpa.inputPayload = inputPayloadNew;
+			}
+		});
+		
+		return cpas;
+	};
+	
 	po.vuePageModel(
 	{
 		ChartPluginAttribute: po.ChartPluginAttribute,
@@ -79,7 +155,7 @@ page_boolean_options.ftl
 		options);
 		
 		var pm = po.vuePageModel();
-		pm.chartAttrValuesForm.attributes = chartPluginAttributes;
+		pm.chartAttrValuesForm.attributes = po.trimChartPluginAttributes(chartPluginAttributes);
 		pm.chartAttrValuesForm.attrValues = $.extend(true, {}, (attrValues || {}));
 		pm.chartAttrValuesForm.readonly = options.readonly;
 		
