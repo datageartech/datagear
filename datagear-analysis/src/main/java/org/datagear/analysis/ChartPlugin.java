@@ -24,7 +24,7 @@ public interface ChartPlugin extends Identifiable, Labeled
 	String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	String PROPERTY_RESOURCES = "resources";
-	String PROPERTY_CHART_ATTRIBUTES = "chartAttributes";
+	String PROPERTY_ATTRIBUTES = "attributes";
 	String PROPERTY_DATA_SIGNS = "dataSigns";
 	String PROPERTY_VERSION = "version";
 	String PROPERTY_ORDER = "order";
@@ -72,22 +72,22 @@ public interface ChartPlugin extends Identifiable, Labeled
 	String getIconResourceName(String themeName);
 
 	/**
-	 * 获取{@linkplain ChartAttribute}列表。
+	 * 获取{@linkplain ChartPluginAttribute}列表。
 	 * <p>
 	 * 返回{@code null}表示没有。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	List<ChartAttribute> getChartAttributes();
+	List<ChartPluginAttribute> getAttributes();
 
 	/**
-	 * 获取指定名称的{@linkplain ChartAttribute}，没有找到则返回{@code null}。
+	 * 获取指定名称的{@linkplain ChartPluginAttribute}，没有找到则返回{@code null}。
 	 * 
 	 * @param name
 	 * @return
 	 */
-	ChartAttribute getChartAttribute(String name);
+	ChartPluginAttribute getAttribute(String name);
 
 	/**
 	 * 获取{@linkplain DataSign}列表。

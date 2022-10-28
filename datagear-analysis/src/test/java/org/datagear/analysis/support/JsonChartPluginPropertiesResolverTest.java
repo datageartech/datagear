@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartAttribute;
+import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Group;
@@ -54,7 +54,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Assert.assertNotNull(chartPlugin.getNameLabel());
 			Assert.assertNotNull(chartPlugin.getDescLabel());
 			Assert.assertNotNull(chartPlugin.getIconResourceNames().size() > 0);
-			Assert.assertNotNull(chartPlugin.getChartAttributes());
+			Assert.assertNotNull(chartPlugin.getAttributes());
 			Assert.assertNotNull(chartPlugin.getDataSigns());
 			Assert.assertEquals("0.1.0", chartPlugin.getVersion());
 			Assert.assertEquals(2, chartPlugin.getOrder());
@@ -84,30 +84,30 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("icon-1.png", icons.get("DARK"));
 			}
 
-			List<ChartAttribute> chartAttributes = chartPlugin.getChartAttributes();
+			List<ChartPluginAttribute> chartPluginAttributes = chartPlugin.getAttributes();
 
 			{
-				ChartAttribute chartAttribute = chartAttributes.get(0);
+				ChartPluginAttribute chartPluginAttribute = chartPluginAttributes.get(0);
 
-				Assert.assertEquals("title", chartAttribute.getName());
-				Assert.assertEquals(ChartAttribute.DataType.STRING, chartAttribute.getType());
+				Assert.assertEquals("title", chartPluginAttribute.getName());
+				Assert.assertEquals(ChartPluginAttribute.DataType.STRING, chartPluginAttribute.getType());
 
-				Label nameLabel = chartAttribute.getNameLabel();
+				Label nameLabel = chartPluginAttribute.getNameLabel();
 				Assert.assertEquals("标题", nameLabel.getValue());
 				Assert.assertEquals("title", nameLabel.getValue(enLocale));
 				Assert.assertEquals("标题中文", nameLabel.getValue(zhLocale));
 
-				Label descLabel = chartAttribute.getDescLabel();
+				Label descLabel = chartPluginAttribute.getDescLabel();
 				Assert.assertEquals("标题描述", descLabel.getValue());
 				Assert.assertEquals("title desc", descLabel.getValue(enLocale));
 				Assert.assertEquals("标题描述中文", descLabel.getValue(zhLocale));
 				
-				Assert.assertFalse(chartAttribute.isRequired());
-				Assert.assertFalse(chartAttribute.isMultiple());
-				Assert.assertTrue(StringUtil.isEmpty(chartAttribute.getInputType()));
-				Assert.assertTrue(StringUtil.isEmpty(chartAttribute.getInputPayload()));
+				Assert.assertFalse(chartPluginAttribute.isRequired());
+				Assert.assertFalse(chartPluginAttribute.isMultiple());
+				Assert.assertTrue(StringUtil.isEmpty(chartPluginAttribute.getInputType()));
+				Assert.assertTrue(StringUtil.isEmpty(chartPluginAttribute.getInputPayload()));
 
-				Group group = chartAttribute.getGroup();
+				Group group = chartPluginAttribute.getGroup();
 				Label groupNameLabel = group.getNameLabel();
 				Label groupDescLabel = group.getDescLabel();
 
@@ -122,7 +122,7 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("group-0 desc", groupDescLabel.getValue(enLocale));
 				Assert.assertEquals("分组-0-描述-中文", groupDescLabel.getValue(zhLocale));
 				
-				Map<String, ?> additions = chartAttribute.getAdditions();
+				Map<String, ?> additions = chartPluginAttribute.getAdditions();
 				Assert.assertNotNull(additions);
 				Assert.assertEquals("that", additions.get("for"));
 				Assert.assertEquals("title.text", additions.get("optionPath"));
@@ -130,27 +130,27 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			{
-				ChartAttribute chartAttribute = chartAttributes.get(1);
+				ChartPluginAttribute chartPluginAttribute = chartPluginAttributes.get(1);
 
-				Assert.assertEquals("interval", chartAttribute.getName());
-				Assert.assertEquals(ChartAttribute.DataType.NUMBER, chartAttribute.getType());
+				Assert.assertEquals("interval", chartPluginAttribute.getName());
+				Assert.assertEquals(ChartPluginAttribute.DataType.NUMBER, chartPluginAttribute.getType());
 
-				Label nameLabel = chartAttribute.getNameLabel();
+				Label nameLabel = chartPluginAttribute.getNameLabel();
 				Assert.assertEquals("间隔", nameLabel.getValue());
 				Assert.assertEquals("interval", nameLabel.getValue(enLocale));
 				Assert.assertEquals("间隔中文", nameLabel.getValue(zhLocale));
 
-				Label descLabel = chartAttribute.getDescLabel();
+				Label descLabel = chartPluginAttribute.getDescLabel();
 				Assert.assertEquals("间隔描述", descLabel.getValue());
 				Assert.assertEquals("interval desc", descLabel.getValue(enLocale));
 				Assert.assertEquals("间隔描述中文", descLabel.getValue(zhLocale));
 				
-				Assert.assertTrue(chartAttribute.isRequired());
-				Assert.assertTrue(chartAttribute.isMultiple());
-				Assert.assertEquals("mytype", chartAttribute.getInputType());
-				Assert.assertEquals("mypayload", chartAttribute.getInputPayload());
+				Assert.assertTrue(chartPluginAttribute.isRequired());
+				Assert.assertTrue(chartPluginAttribute.isMultiple());
+				Assert.assertEquals("mytype", chartPluginAttribute.getInputType());
+				Assert.assertEquals("mypayload", chartPluginAttribute.getInputPayload());
 
-				Group group = chartAttribute.getGroup();
+				Group group = chartPluginAttribute.getGroup();
 				Label groupNameLabel = group.getNameLabel();
 				Label groupDescLabel = group.getDescLabel();
 
@@ -159,19 +159,19 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertNull(groupNameLabel);
 				Assert.assertNull(groupDescLabel);
 				
-				Map<String, ?> additions = chartAttribute.getAdditions();
+				Map<String, ?> additions = chartPluginAttribute.getAdditions();
 				Assert.assertNull(additions);
 			}
 			
 			{
-				ChartAttribute a2 = chartAttributes.get(2);
-				ChartAttribute a3 = chartAttributes.get(3);
-				ChartAttribute a4 = chartAttributes.get(4);
-				ChartAttribute a5 = chartAttributes.get(5);
-				ChartAttribute a6 = chartAttributes.get(6);
+				ChartPluginAttribute a2 = chartPluginAttributes.get(2);
+				ChartPluginAttribute a3 = chartPluginAttributes.get(3);
+				ChartPluginAttribute a4 = chartPluginAttributes.get(4);
+				ChartPluginAttribute a5 = chartPluginAttributes.get(5);
+				ChartPluginAttribute a6 = chartPluginAttributes.get(6);
 
 				Assert.assertEquals("a2", a2.getName());
-				Assert.assertEquals(ChartAttribute.DataType.BOOLEAN, a2.getType());
+				Assert.assertEquals(ChartPluginAttribute.DataType.BOOLEAN, a2.getType());
 				Assert.assertNull(a2.getGroup());
 				{
 					List<?> inputPayload = (List<?>)a2.getInputPayload();
@@ -185,7 +185,7 @@ public class JsonChartPluginPropertiesResolverTest
 				}
 
 				Assert.assertEquals("a3", a3.getName());
-				Assert.assertEquals(ChartAttribute.DataType.STRING, a3.getType());
+				Assert.assertEquals(ChartPluginAttribute.DataType.STRING, a3.getType());
 				Assert.assertNull(a3.getGroup());
 				{
 					List<?> inputPayload = (List<?>)a3.getInputPayload();
@@ -195,7 +195,7 @@ public class JsonChartPluginPropertiesResolverTest
 				}
 
 				Assert.assertEquals("a4", a4.getName());
-				Assert.assertEquals(ChartAttribute.DataType.NUMBER, a4.getType());
+				Assert.assertEquals(ChartPluginAttribute.DataType.NUMBER, a4.getType());
 				Assert.assertNull(a4.getGroup());
 				{
 					List<?> inputPayload = (List<?>)a4.getInputPayload();
@@ -205,7 +205,7 @@ public class JsonChartPluginPropertiesResolverTest
 				}
 
 				Assert.assertEquals("a5", a5.getName());
-				Assert.assertEquals(ChartAttribute.DataType.BOOLEAN, a5.getType());
+				Assert.assertEquals(ChartPluginAttribute.DataType.BOOLEAN, a5.getType());
 				Assert.assertNull(a5.getInputPayload());
 				Assert.assertNull(a5.getGroup());
 
@@ -337,7 +337,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Assert.assertNotNull(chartPlugin.getNameLabel());
 			Assert.assertNotNull(chartPlugin.getDescLabel());
 			Assert.assertTrue(chartPlugin.getIconResourceNames().size() > 0);
-			Assert.assertNotNull(chartPlugin.getChartAttributes());
+			Assert.assertNotNull(chartPlugin.getAttributes());
 			Assert.assertNotNull(chartPlugin.getDataSigns());
 			Assert.assertEquals("0.1.0", chartPlugin.getVersion());
 			Assert.assertEquals(2, chartPlugin.getOrder());
@@ -365,37 +365,37 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("icon-1.png", icons.get("DARK"));
 			}
 
-			List<ChartAttribute> chartAttributes = chartPlugin.getChartAttributes();
+			List<ChartPluginAttribute> chartPluginAttributes = chartPlugin.getAttributes();
 
 			{
-				ChartAttribute chartAttribute = chartAttributes.get(0);
+				ChartPluginAttribute chartPluginAttribute = chartPluginAttributes.get(0);
 
-				Assert.assertEquals("title", chartAttribute.getName());
-				Assert.assertEquals(ChartAttribute.DataType.STRING, chartAttribute.getType());
+				Assert.assertEquals("title", chartPluginAttribute.getName());
+				Assert.assertEquals(ChartPluginAttribute.DataType.STRING, chartPluginAttribute.getType());
 
-				Label nameLabel = chartAttribute.getNameLabel();
+				Label nameLabel = chartPluginAttribute.getNameLabel();
 				Assert.assertEquals("标题", nameLabel.getValue());
 				Assert.assertEquals("title", nameLabel.getValue(enLocale));
 				Assert.assertEquals("标题中文", nameLabel.getValue(zhLocale));
 
-				Label descLabel = chartAttribute.getDescLabel();
+				Label descLabel = chartPluginAttribute.getDescLabel();
 				Assert.assertEquals("标题描述", descLabel.getValue());
 				Assert.assertEquals("title desc", descLabel.getValue(enLocale));
 				Assert.assertEquals("标题描述中文", descLabel.getValue(zhLocale));
 			}
 
 			{
-				ChartAttribute chartAttribute = chartAttributes.get(1);
+				ChartPluginAttribute chartPluginAttribute = chartPluginAttributes.get(1);
 
-				Assert.assertEquals("interval", chartAttribute.getName());
-				Assert.assertEquals(ChartAttribute.DataType.NUMBER, chartAttribute.getType());
+				Assert.assertEquals("interval", chartPluginAttribute.getName());
+				Assert.assertEquals(ChartPluginAttribute.DataType.NUMBER, chartPluginAttribute.getType());
 
-				Label nameLabel = chartAttribute.getNameLabel();
+				Label nameLabel = chartPluginAttribute.getNameLabel();
 				Assert.assertEquals("间隔", nameLabel.getValue());
 				Assert.assertEquals("interval", nameLabel.getValue(enLocale));
 				Assert.assertEquals("间隔中文", nameLabel.getValue(zhLocale));
 
-				Label descLabel = chartAttribute.getDescLabel();
+				Label descLabel = chartPluginAttribute.getDescLabel();
 				Assert.assertEquals("间隔描述", descLabel.getValue());
 				Assert.assertEquals("interval desc", descLabel.getValue(enLocale));
 				Assert.assertEquals("间隔描述中文", descLabel.getValue(zhLocale));

@@ -7,7 +7,7 @@
  *
 -->
 <#assign ResultDataFormat=statics['org.datagear.analysis.ResultDataFormat']>
-<#assign ChartAttributeType=statics['org.datagear.analysis.ChartAttribute$DataType']>
+<#assign ChartPluginAttributeType=statics['org.datagear.analysis.ChartPluginAttribute$DataType']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -395,17 +395,17 @@
 		<div class="page page-form">
 			<form id="${pid}attrValuesPanelForm" class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 				<div class="page-form-content panel-content-size-xxs flex-grow-1 px-2 py-1 overflow-y-auto">
-					<div class="field grid" v-for="(ca, caIdx) in fm.htmlChartPlugin.chartAttributes">
-						<label :for="'${pid}pluginChartAttribute_'+caIdx" class="field-label col-12 mb-2">
+					<div class="field grid" v-for="(ca, caIdx) in fm.htmlChartPlugin.attributes">
+						<label :for="'${pid}pluginAttribute_'+caIdx" class="field-label col-12 mb-2">
 							{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
 						</label>
-						<div class="field-input col-12" v-if="ca.type == '${ChartAttributeType.BOOLEAN}'">
-							<p-selectbutton :id="'${pid}pluginChartAttribute_'+caIdx" v-model="pm.attrValues[ca.name]" :options="pm.booleanOptions"
+						<div class="field-input col-12" v-if="ca.type == '${ChartPluginAttributeType.BOOLEAN}'">
+							<p-selectbutton :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.attrValues[ca.name]" :options="pm.booleanOptions"
 								option-label="name" option-value="value" class="input w-full">
 							</p-selectbutton>
 						</div>
 						<div class="field-input col-12" v-else>
-							<p-inputtext :id="'${pid}pluginChartAttribute_'+caIdx" v-model="pm.attrValues[ca.name]" type="text"
+							<p-inputtext :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.attrValues[ca.name]" type="text"
 								class="input w-full" maxlength="1000">
 							</p-inputtext>
 						</div>

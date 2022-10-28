@@ -3720,9 +3720,9 @@
 	 * @returns []
 	 * @since 4.2.0
 	 */
-	chartBase.pluginChartAttributes = function()
+	chartBase.pluginAttributes = function()
 	{
-		return (this.plugin && this.plugin.chartAttributes ? this.plugin.chartAttributes : []);
+		return (this.plugin && this.plugin.attributes ? this.plugin.attributes : []);
 	};
 	
 	//-------------

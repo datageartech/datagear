@@ -22,7 +22,7 @@ import org.datagear.util.i18n.Labeled;
  * 用于描述实体所属的分组信息。
  * </p>
  * <p>
- * 目前，此类主要用于{@linkplain ChartAttribute#getGroup()}，没有直接采用{@linkplain Category}的原因是：
+ * 目前，此类主要用于{@linkplain ChartPluginAttribute#getGroup()}，没有直接采用{@linkplain Category}的原因是：
  * 都用于{@linkplain ChartPlugin}，容易引起混淆。
  * </p>
  * 

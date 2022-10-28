@@ -32,7 +32,7 @@
 		'LIGHT' :  'icon-0.png',
 		'DARK' :  'icon-1.png'
 	},
-	chartAttributes :
+	attributes :
 	[
   		{
 			name : 'title',

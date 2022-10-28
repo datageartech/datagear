@@ -14,7 +14,7 @@ import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Category;
-import org.datagear.analysis.ChartAttribute;
+import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DataSign;
@@ -38,7 +38,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	
 	private Map<String, String> iconResourceNames = Collections.emptyMap();
 
-	private List<ChartAttribute> chartAttributes = Collections.emptyList();
+	private List<ChartPluginAttribute> attributes = Collections.emptyList();
 
 	private List<DataSign> dataSigns = Collections.emptyList();
 
@@ -159,20 +159,20 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public List<ChartAttribute> getChartAttributes()
+	public List<ChartPluginAttribute> getAttributes()
 	{
-		return chartAttributes;
+		return attributes;
 	}
 
-	public void setChartAttributes(List<ChartAttribute> chartAttributes)
+	public void setAttributes(List<ChartPluginAttribute> attributes)
 	{
-		this.chartAttributes = chartAttributes;
+		this.attributes = attributes;
 	}
 
 	@Override
-	public ChartAttribute getChartAttribute(String name)
+	public ChartPluginAttribute getAttribute(String name)
 	{
-		return NameAwareUtil.find(this.chartAttributes, name);
+		return NameAwareUtil.find(this.attributes, name);
 	}
 
 	@Override

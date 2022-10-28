@@ -16,7 +16,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.Category;
-import org.datagear.analysis.ChartAttribute;
+import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPluginResource;
@@ -165,7 +165,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		pluginView.setOrder(chartPlugin.getOrder());
 		pluginView.setCategories(Category.clone(chartPlugin.getCategories(), locale));
 		pluginView.setCategoryOrders(chartPlugin.getCategoryOrders());
-		pluginView.setChartAttributes(ChartAttribute.clone(chartPlugin.getChartAttributes(), locale));
+		pluginView.setAttributes(ChartPluginAttribute.clone(chartPlugin.getAttributes(), locale));
 
 		return pluginView;
 	}

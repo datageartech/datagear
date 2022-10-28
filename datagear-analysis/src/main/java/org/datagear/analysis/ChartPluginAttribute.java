@@ -18,7 +18,7 @@ import org.datagear.util.i18n.LabelUtil;
 import org.datagear.util.i18n.Labeled;
 
 /**
- * 图表属性。
+ * 图表插件属性。
  * <p>
  * 此类描述{@linkplain ChartPlugin#renderChart(RenderContext, ChartDefinition)}的{@linkplain ChartDefinition#setAttrValues(java.util.Map)}支持设置的属性元信息。
  * </p>
@@ -26,7 +26,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class ChartAttribute extends AbstractLabeled implements NameTypeInputAware, Serializable
+public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInputAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -65,11 +65,11 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	/** 扩展属性 */
 	private Map<String, ?> additions = null;
 
-	public ChartAttribute()
+	public ChartPluginAttribute()
 	{
 	}
 
-	public ChartAttribute(String name, String type, boolean required, boolean multiple)
+	public ChartPluginAttribute(String name, String type, boolean required, boolean multiple)
 	{
 		super();
 		this.name = name;
@@ -188,9 +188,9 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	 * @param locale
 	 * @return
 	 */
-	public ChartAttribute clone(Locale locale)
+	public ChartPluginAttribute clone(Locale locale)
 	{
-		ChartAttribute target = new ChartAttribute(this.name, this.type, this.required, this.multiple);
+		ChartPluginAttribute target = new ChartPluginAttribute(this.name, this.type, this.required, this.multiple);
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
 		target.setGroup(this.group != null ? this.group.clone(locale) : null);
@@ -209,25 +209,25 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	/**
 	 * 复制为指定{@linkplain Locale}的对象。
 	 * 
-	 * @param chartAttributes
+	 * @param chartPluginAttributes
 	 * @param locale
 	 * @return
 	 */
-	public static List<ChartAttribute> clone(List<ChartAttribute> chartAttributes, Locale locale)
+	public static List<ChartPluginAttribute> clone(List<ChartPluginAttribute> chartPluginAttributes, Locale locale)
 	{
-		if (chartAttributes == null)
+		if (chartPluginAttributes == null)
 			return null;
 
-		List<ChartAttribute> re = new ArrayList<ChartAttribute>(chartAttributes.size());
+		List<ChartPluginAttribute> re = new ArrayList<ChartPluginAttribute>(chartPluginAttributes.size());
 
-		for (ChartAttribute chartAttribute : chartAttributes)
-			re.add(chartAttribute.clone(locale));
+		for (ChartPluginAttribute chartPluginAttribute : chartPluginAttributes)
+			re.add(chartPluginAttribute.clone(locale));
 
 		return re;
 	}
 
 	/**
-	 * {@linkplain ChartAttribute#getType()}枚举。
+	 * {@linkplain ChartPluginAttribute#getType()}枚举。
 	 * 
 	 * @author datagear@163.com
 	 *
@@ -245,7 +245,7 @@ public class ChartAttribute extends AbstractLabeled implements NameTypeInputAwar
 	}
 	
 	/**
-	 * 常用的{@linkplain ChartAttribute#getInputType()}枚举。
+	 * 常用的{@linkplain ChartPluginAttribute#getInputType()}枚举。
 	 * 
 	 * @author datagear@163.com
 	 *

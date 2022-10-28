@@ -15,18 +15,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.ChartAttribute;
+import org.datagear.analysis.ChartPluginAttribute;
 import org.junit.Test;
 
 /**
- * {@linkplain ChartAttributeValueConverter}单元测试类。
+ * {@linkplain ChartPluginAttributeValueConverter}单元测试类。
  * 
  * @author datagear@163.com
  *
  */
-public class ChartAttributeValueConverterTest
+public class ChartPluginAttributeValueConverterTest
 {
-	public ChartAttributeValueConverterTest()
+	public ChartPluginAttributeValueConverterTest()
 	{
 		super();
 	}
@@ -34,15 +34,15 @@ public class ChartAttributeValueConverterTest
 	@Test
 	public void convertTest()
 	{
-		List<ChartAttribute> chartAttributes = new ArrayList<>();
-		chartAttributes.add(new ChartAttribute("name", ChartAttribute.DataType.STRING, true, false));
-		chartAttributes.add(new ChartAttribute("size", ChartAttribute.DataType.NUMBER, true, false));
-		chartAttributes.add(new ChartAttribute("enable", ChartAttribute.DataType.BOOLEAN, true, false));
+		List<ChartPluginAttribute> chartPluginAttributes = new ArrayList<>();
+		chartPluginAttributes.add(new ChartPluginAttribute("name", ChartPluginAttribute.DataType.STRING, true, false));
+		chartPluginAttributes.add(new ChartPluginAttribute("size", ChartPluginAttribute.DataType.NUMBER, true, false));
+		chartPluginAttributes.add(new ChartPluginAttribute("enable", ChartPluginAttribute.DataType.BOOLEAN, true, false));
 		
-		ChartAttributeValueConverter converter = new ChartAttributeValueConverter();
+		ChartPluginAttributeValueConverter converter = new ChartPluginAttributeValueConverter();
 
 		{
-			Map<String, Object> actual = converter.convert(null, chartAttributes);
+			Map<String, Object> actual = converter.convert(null, chartPluginAttributes);
 			assertNull(actual);
 		}
 		
@@ -54,7 +54,7 @@ public class ChartAttributeValueConverterTest
 			values.put("other0", 5);
 			values.put("other1", "false");
 
-			Map<String, Object> actual = converter.convert(values, chartAttributes);
+			Map<String, Object> actual = converter.convert(values, chartPluginAttributes);
 
 			assertEquals("aaa", actual.get("name"));
 			assertEquals(3, ((Integer) actual.get("size")).intValue());
@@ -71,7 +71,7 @@ public class ChartAttributeValueConverterTest
 			values.put("other0", new int[] { 5, 6 });
 			values.put("other1", new boolean[] { false, false });
 
-			Map<String, Object> actual = converter.convert(values, chartAttributes);
+			Map<String, Object> actual = converter.convert(values, chartPluginAttributes);
 			
 			Object[] actualName = (Object[])actual.get("name");
 			Object[] actualSize = (Object[])actual.get("size");
@@ -104,12 +104,12 @@ public class ChartAttributeValueConverterTest
 	@Test
 	public void convertTest_multiple()
 	{
-		List<ChartAttribute> chartAttributes = new ArrayList<>();
-		chartAttributes.add(new ChartAttribute("name", ChartAttribute.DataType.STRING, true, true));
-		chartAttributes.add(new ChartAttribute("size", ChartAttribute.DataType.NUMBER, true, true));
-		chartAttributes.add(new ChartAttribute("enable", ChartAttribute.DataType.BOOLEAN, true, true));
+		List<ChartPluginAttribute> chartPluginAttributes = new ArrayList<>();
+		chartPluginAttributes.add(new ChartPluginAttribute("name", ChartPluginAttribute.DataType.STRING, true, true));
+		chartPluginAttributes.add(new ChartPluginAttribute("size", ChartPluginAttribute.DataType.NUMBER, true, true));
+		chartPluginAttributes.add(new ChartPluginAttribute("enable", ChartPluginAttribute.DataType.BOOLEAN, true, true));
 		
-		ChartAttributeValueConverter converter = new ChartAttributeValueConverter();
+		ChartPluginAttributeValueConverter converter = new ChartPluginAttributeValueConverter();
 		
 		{
 			Map<String, Object> values = new HashMap<String, Object>();
@@ -119,7 +119,7 @@ public class ChartAttributeValueConverterTest
 			values.put("other0", new int[] {5, 6});
 			values.put("other1", new boolean[] {false, true});
 
-			Map<String, Object> actual = converter.convert(values, chartAttributes);
+			Map<String, Object> actual = converter.convert(values, chartPluginAttributes);
 
 			Object[] actualName = (Object[])actual.get("name");
 			Object[] actualSize = (Object[])actual.get("size");

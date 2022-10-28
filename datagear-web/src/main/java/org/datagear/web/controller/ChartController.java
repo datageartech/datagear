@@ -30,7 +30,7 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.ResultDataFormat;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
-import org.datagear.analysis.support.ChartAttributeValueConverter;
+import org.datagear.analysis.support.ChartPluginAttributeValueConverter;
 import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
@@ -97,7 +97,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@Autowired
 	private DataSetEntityService dataSetEntityService;
 
-	private ChartAttributeValueConverter chartAttributeValueConverter = new ChartAttributeValueConverter();
+	private ChartPluginAttributeValueConverter chartPluginAttributeValueConverter = new ChartPluginAttributeValueConverter();
 
 	private ServletContext servletContext;
 
@@ -168,14 +168,15 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		this.dataSetEntityService = dataSetEntityService;
 	}
 
-	public ChartAttributeValueConverter getChartAttributeValueConverter()
+	public ChartPluginAttributeValueConverter getChartPluginAttributeValueConverter()
 	{
-		return chartAttributeValueConverter;
+		return chartPluginAttributeValueConverter;
 	}
 
-	public void setChartAttributeValueConverter(ChartAttributeValueConverter chartAttributeValueConverter)
+	public void setChartPluginAttributeValueConverter(
+			ChartPluginAttributeValueConverter chartPluginAttributeValueConverter)
 	{
-		this.chartAttributeValueConverter = chartAttributeValueConverter;
+		this.chartPluginAttributeValueConverter = chartPluginAttributeValueConverter;
 	}
 
 	public ServletContext getServletContext()
@@ -595,7 +596,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		Map<String, Object> attrValues = entity.getAttrValues();
 		if (attrValues != null && htmlChartPlugin != null)
 		{
-			attrValues = getChartAttributeValueConverter().convert(attrValues, htmlChartPlugin.getChartAttributes());
+			attrValues = getChartPluginAttributeValueConverter().convert(attrValues, htmlChartPlugin.getAttributes());
 			entity.setAttrValues(attrValues);
 		}
 	}
