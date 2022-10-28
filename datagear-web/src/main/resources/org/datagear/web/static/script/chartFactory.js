@@ -3717,7 +3717,7 @@
 	/**
 	 * 获取图表插件的所有图表属性。
 	 * 
-	 * @returns []
+	 * @returns [ ]
 	 * @since 4.2.0
 	 */
 	chartBase.pluginAttributes = function()
