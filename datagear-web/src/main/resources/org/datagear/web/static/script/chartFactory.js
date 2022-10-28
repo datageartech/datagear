@@ -3704,14 +3704,18 @@
 	};
 	
 	/**
-	 * 获取图表全部属性值。
+	 * 获取/设置图表全部属性值。
 	 * 
+	 * @param values 可选，要设置的属性值映射表，格式为：{ 名称: 值, ... }
 	 * @returns { ... }
 	 * @since 4.2.0
 	 */
-	chartBase.attrValues = function()
+	chartBase.attrValues = function(values)
 	{
-		return this._attrValues;
+		if(values === undefined)
+			return this._attrValues;
+		else
+			this._attrValues = (values ? values : {});
 	};
 	
 	/**
