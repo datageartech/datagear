@@ -133,6 +133,9 @@
   		{
 			name : 'a6',
 			type : 'custom'
+		},
+  		{
+			name : 'a7'
 		}
 	],
 	dataSigns :

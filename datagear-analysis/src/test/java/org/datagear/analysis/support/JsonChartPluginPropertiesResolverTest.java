@@ -167,6 +167,7 @@ public class JsonChartPluginPropertiesResolverTest
 				ChartPluginAttribute a4 = chartPluginAttributes.get(4);
 				ChartPluginAttribute a5 = chartPluginAttributes.get(5);
 				ChartPluginAttribute a6 = chartPluginAttributes.get(6);
+				ChartPluginAttribute a7 = chartPluginAttributes.get(7);
 
 				Assert.assertEquals("a2", a2.getName());
 				Assert.assertEquals(ChartPluginAttribute.DataType.BOOLEAN, a2.getType());
@@ -211,6 +212,11 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("custom", a6.getType());
 				Assert.assertNull(a6.getInputPayload());
 				Assert.assertNull(a6.getGroup());
+
+				Assert.assertEquals("a7", a7.getName());
+				Assert.assertEquals(ChartPluginAttribute.DataType.STRING, a7.getType());
+				Assert.assertNull(a7.getInputPayload());
+				Assert.assertNull(a7.getGroup());
 			}
 
 			List<DataSign> dataSigns = chartPlugin.getDataSigns();
