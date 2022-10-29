@@ -4958,20 +4958,38 @@
 			if(rgb)
 				color = "rgb("+color.r+","+color.g+","+color.b+")";
 			else
-			{
-				var r = new Number(color.r).toString(16);
-				var g = new Number(color.g).toString(16);
-				var b = new Number(color.b).toString(16);
-				
-				color = "#" + (r.length == 1 ? "0"+r : r)
-							 + (g.length == 1 ? "0"+g : g)
-							  + (b.length == 1 ? "0"+b : b);
-			}
+				color = chartFactory.colorToHexStr(color, true);
 			
 			colors.push(color);
 		}
 		
 		return colors;
+	};
+	
+	/**
+	 * 将颜色转换为6位HEX字符串。
+	 * 
+	 * @param color 颜色字符串，格式为："#FFF"、"#FFFFFF"、"rgb(255,255,255)"
+	 * @param prefix 可选，是否添加"#"前缀
+	 * @returns 6位HEX字符串，格式示例："FFFFFF"
+	 */
+	chartFactory.colorToHexStr = function(color, prefix)
+	{
+		if(chartFactory.isString(color))
+		{
+			color = chartFactory.parseColor(color);
+		}
+		prefix = (prefix == null ? false : prefix);
+		
+		var r = new Number(color.r).toString(16);
+		var g = new Number(color.g).toString(16);
+		var b = new Number(color.b).toString(16);
+		
+		color = (prefix ? "#" : "") + (r.length == 1 ? "0"+r : r)
+					 + (g.length == 1 ? "0"+g : g)
+					  + (b.length == 1 ? "0"+b : b);
+		
+		return color;
 	};
 	
 	/**
