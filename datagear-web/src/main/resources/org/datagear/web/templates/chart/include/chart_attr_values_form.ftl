@@ -90,6 +90,13 @@ page_boolean_options.ftl
 			CHECKBOX: "${ChartPluginAttributeInputType.CHECKBOX}",
 			TEXTAREA: "${ChartPluginAttributeInputType.TEXTAREA}",
 			COLOR: "${ChartPluginAttributeInputType.COLOR}"
+		},
+		InputPayload:
+		{
+			//多选
+			MULTIPLE: "multiple",
+			//地图
+			DG_MAP: "DG_MAP"
 		}
 	};
 	
@@ -117,33 +124,32 @@ page_boolean_options.ftl
 			
 			var inputType = cpa.inputType;
 			
-			//下拉框：将inputPayload转换为{multiple: ..., options: [{name: ..., value: ...}, ...]}格式
-			if(inputType == po.ChartPluginAttribute.InputType.SELECT)
+			//下拉框、单选、复选框：将inputPayload转换为{multiple: ..., options: [{name: ..., value: ...}, ...]}格式
+			if(inputType == po.ChartPluginAttribute.InputType.SELECT
+					|| inputType == po.ChartPluginAttribute.InputType.RADIO
+					|| inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
 			{
 				var inputPayload = (cpa.inputPayload || []);
+				
+				//"DG_MAP"
+				inputPayload = po.trimChartPluginAttributeInputPayloadIfMap(inputPayload);
 				
 				//数组：转换为{multiple: false, options: [...]}格式
 				if($.isArray(inputPayload))
 					inputPayload = { multiple: false, options: inputPayload };
+				
+				//{ options: "DG_MAP" }
+				inputPayload.options = po.trimChartPluginAttributeInputPayloadIfMap(inputPayload.options);
 				
 				//默认multiple为false
 				inputPayload.multiple = (inputPayload.multiple == null ? false : inputPayload.multiple);
 				inputPayload.options = po.trimChartPluginAttributeInputOptions(inputPayload.options);
 				
-				cpa.inputPayload = inputPayload;
-			}
-			//单选、复选框：将inputPayload转换为标准的{multiple: false, options: [{name: ..., value: ...}, ...]}格式
-			else if(inputType == po.ChartPluginAttribute.InputType.RADIO
-					|| inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
-			{
-				var inputPayload = (cpa.inputPayload || []);
-				
-				//数组：转换为{multiple: false, options: [...]}格式
-				if($.isArray(inputPayload))
-					inputPayload = { multiple: false, options: inputPayload };
-				
-				inputPayload.multiple = false;
-				inputPayload.options = po.trimChartPluginAttributeInputOptions(inputPayload.options);
+				if(inputType == po.ChartPluginAttribute.InputType.RADIO
+						|| inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
+				{
+					inputPayload.multiple = false;
+				}
 				
 				cpa.inputPayload = inputPayload;
 			}
@@ -160,7 +166,7 @@ page_boolean_options.ftl
 				//"multiple"
 				else if($.isTypeString(inputPayload))
 				{
-					inputPayload = { multiple: (inputPayload == "multiple") };
+					inputPayload = { multiple: (inputPayload == po.ChartPluginAttribute.InputPayload.MULTIPLE) };
 				}
 				//不支持数值、布尔型、数组
 				else if($.isTypeNumber(inputPayload) || $.isTypeBoolean(inputPayload) || $.isArray(inputPayload))
@@ -178,6 +184,25 @@ page_boolean_options.ftl
 		});
 		
 		return cpas;
+	};
+	
+	po.trimChartPluginAttributeInputPayloadIfMap = function(inputPayload)
+	{
+		//内置地图
+		if(inputPayload == po.ChartPluginAttribute.InputPayload.DG_MAP)
+		{
+			inputPayload = [];
+			
+			$.each(dashboardFactory.builtinChartMaps, function(i, cms)
+			{
+				if(cms && cms.names && cms.names.length > 0)
+				{
+					inputPayload.push(cms.names[0]);
+				}
+			});
+		}
+		
+		return inputPayload;
 	};
 	
 	po.trimChartPluginAttributeInputOptions = function(inputOptions)
