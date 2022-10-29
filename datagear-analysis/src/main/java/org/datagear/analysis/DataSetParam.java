@@ -56,13 +56,6 @@ public class DataSetParam extends AbstractNameTypeAware implements NameTypeInput
 		this.required = required;
 	}
 
-	@Override
-	public boolean isMultiple()
-	{
-		// TODO 目前界面端未实现此特性，暂时直接返回false
-		return false;
-	}
-
 	public boolean hasDesc()
 	{
 		return (this.desc != null && !this.desc.isEmpty());

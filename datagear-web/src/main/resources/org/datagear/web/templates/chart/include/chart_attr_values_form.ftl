@@ -22,25 +22,25 @@ page_boolean_options.ftl
 				{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
 			</label>
 			<div class="field-input col-12" v-if="ca.inputType == pm.ChartPluginAttribute.InputType.RADIO">
-				<div v-for="(ip, ipIdx) in ca.inputPayload" class="inline-block mr-2">
+				<div v-for="(ip, ipIdx) in ca.inputPayload.options" class="inline-block mr-2">
 					<p-radiobutton :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :name="ca.name" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-radiobutton>
 					<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
 				</div>
 			</div>
 			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.SELECT">
-				<div v-if="ca.multiple">
-					<p-multiselect :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload"
+				<div v-if="ca.inputPayload.multiple">
+					<p-multiselect :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload.options"
 						option-label="name" option-value="value" class="input w-full" :name="ca.name">
 					</p-multiselect>
 				</div>
 				<div v-else>
-					<p-dropdown :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload"
+					<p-dropdown :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload.options"
 						option-label="name" option-value="value" class="input w-full" :name="ca.name">
 					</p-dropdown>
 				</div>
 			</div>
 			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.CHECKBOX">
-				<div v-for="(ip, ipIdx) in ca.inputPayload" class="inline-block mr-2">
+				<div v-for="(ip, ipIdx) in ca.inputPayload.options" class="inline-block mr-2">
 					<p-checkbox :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :name="ca.name" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-checkbox>
 					<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
 				</div>
@@ -102,10 +102,12 @@ page_boolean_options.ftl
 		
 		$.each(cpas, function(i, cpa)
 		{
-			//布尔型inputType转换为RADIO便于下面处理
+			//布尔型默认作为RADIO处理
 			if(cpa.type == po.ChartPluginAttribute.DataType.BOOLEAN)
 			{
-				cpa.inputType = po.ChartPluginAttribute.InputType.RADIO;
+				if(!cpa.inputType)
+					cpa.inputType = po.ChartPluginAttribute.InputType.RADIO;
+				
 				if(!cpa.inputPayload)
 				{
 					var pm = po.vuePageModel();
@@ -115,37 +117,94 @@ page_boolean_options.ftl
 			
 			var inputType = cpa.inputType;
 			
-			//将inputPayload转换为标准的[ {name: ..., value: ...}, ... ]格式
-			if(inputType == po.ChartPluginAttribute.InputType.SELECT
-					|| inputType == po.ChartPluginAttribute.InputType.RADIO
+			//下拉框：将inputPayload转换为{multiple: ..., options: [{name: ..., value: ...}, ...]}格式
+			if(inputType == po.ChartPluginAttribute.InputType.SELECT)
+			{
+				var inputPayload = (cpa.inputPayload || []);
+				
+				//数组：转换为{multiple: false, options: [...]}格式
+				if($.isArray(inputPayload))
+					inputPayload = { multiple: false, options: inputPayload };
+				
+				//默认multiple为false
+				inputPayload.multiple = (inputPayload.multiple == null ? false : inputPayload.multiple);
+				inputPayload.options = po.trimChartPluginAttributeInputOptions(inputPayload.options);
+				
+				cpa.inputPayload = inputPayload;
+			}
+			//单选、复选框：将inputPayload转换为标准的{multiple: false, options: [{name: ..., value: ...}, ...]}格式
+			else if(inputType == po.ChartPluginAttribute.InputType.RADIO
 					|| inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
 			{
 				var inputPayload = (cpa.inputPayload || []);
 				
-				//支持非数组格式
-				if(!$.isArray(inputPayload))
-					inputPayload = [ inputPayload ];
+				//数组：转换为{multiple: false, options: [...]}格式
+				if($.isArray(inputPayload))
+					inputPayload = { multiple: false, options: inputPayload };
 				
-				var inputPayloadNew = [];
+				inputPayload.multiple = false;
+				inputPayload.options = po.trimChartPluginAttributeInputOptions(inputPayload.options);
 				
-				$.each(inputPayload, function(j, ip)
+				cpa.inputPayload = inputPayload;
+			}
+			//颜色框：将inputPayload转换为标准的{multiple: ...}格式
+			else if(inputType == po.ChartPluginAttribute.InputType.COLOR)
+			{
+				var inputPayload = cpa.inputPayload;
+				
+				//null
+				if(inputPayload == null)
 				{
-					//支持元素为基本类型
-					if(ip == null || $.isTypeString(ip) || $.isTypeNumber(ip) || $.isTypeBoolean(ip))
-						ip = { name: ip, value: ip };
-					
-					//支持{value: ...}格式的元素
-					if(ip.name == null)
-						ip.name = (ip.value == null ? "null" : ip.value);
-					
-					inputPayloadNew.push(ip);
-				});
+					inputPayload = { multiple: false };
+				}
+				//"multiple"
+				else if($.isTypeString(inputPayload))
+				{
+					inputPayload = { multiple: (inputPayload == "multiple") };
+				}
+				//不支持数值、布尔型、数组
+				else if($.isTypeNumber(inputPayload) || $.isTypeBoolean(inputPayload) || $.isArray(inputPayload))
+				{
+					inputPayload = { multiple: false };
+				}
+				//{...}
+				else
+				{
+					inputPayload.multiple = (inputPayload.multiple == null ? false : true);
+				}
 				
-				cpa.inputPayload = inputPayloadNew;
+				cpa.inputPayload = inputPayload;
 			}
 		});
 		
 		return cpas;
+	};
+	
+	po.trimChartPluginAttributeInputOptions = function(inputOptions)
+	{
+		inputOptions = (inputOptions || []);
+		
+		//支持非数组格式
+		if(!$.isArray(inputOptions))
+			inputOptions = [ inputOptions ];
+		
+		var inputOptionsNew = [];
+		
+		//转换为标准的[ {name: ..., value: ...}, ... ]格式
+		$.each(inputOptions, function(i, io)
+		{
+			//支持元素为基本类型
+			if(io == null || $.isTypeString(io) || $.isTypeNumber(io) || $.isTypeBoolean(io))
+				io = { name: io, value: io };
+			
+			//支持{value: ...}格式的元素
+			if(io.name == null)
+				io.name = (io.value == null ? "null" : io.value);
+			
+			inputOptionsNew.push(io);
+		});
+		
+		return inputOptionsNew;
 	};
 	
 	po.trimChartAttrValues = function(attrValues, cpas)
@@ -164,33 +223,29 @@ page_boolean_options.ftl
 			if(v != null)
 			{
 				var inputType = cpa.inputType;
+				var inputPayload = cpa.inputPayload;
 				
-				//多选应强制转换为数组
-				if((cpa.multiple || inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
-						&& !$.isArray(v))
+				//多选输入框应强制转换为数组
+				if(inputPayload && inputPayload.multiple == true && !$.isArray(v))
 				{
 					v = [ v ];
 				}
 				
 				//应将值限定为待选值集合内，比如图表插件升级后inputPayload有所删减，那么这里的旧值应删除
-				if(inputType == po.ChartPluginAttribute.InputType.SELECT
-						|| inputType == po.ChartPluginAttribute.InputType.RADIO
-						|| inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
+				if(inputPayload && inputPayload.options && $.isArray(inputPayload.options))
 				{
-					var inputPayload = (cpa.inputPayload || []);
-					
 					if($.isArray(v))
 					{
 						var vnew = [];
 						$.each(v, function(j, vj)
 						{
-							if($.inArrayById(inputPayload, vj, "value") >= 0)
+							if($.inArrayById(inputPayload.options, vj, "value") >= 0)
 								vnew.push(vj);
 						});
 						
 						v = vnew;
 					}
-					else if($.inArrayById(inputPayload, v, "value") < 0)
+					else if($.inArrayById(inputPayload.options, v, "value") < 0)
 					{
 						v = null;
 					}

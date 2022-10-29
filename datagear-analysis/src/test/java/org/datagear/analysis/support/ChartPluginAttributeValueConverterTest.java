@@ -35,9 +35,9 @@ public class ChartPluginAttributeValueConverterTest
 	public void convertTest()
 	{
 		List<ChartPluginAttribute> chartPluginAttributes = new ArrayList<>();
-		chartPluginAttributes.add(new ChartPluginAttribute("name", ChartPluginAttribute.DataType.STRING, true, false));
-		chartPluginAttributes.add(new ChartPluginAttribute("size", ChartPluginAttribute.DataType.NUMBER, true, false));
-		chartPluginAttributes.add(new ChartPluginAttribute("enable", ChartPluginAttribute.DataType.BOOLEAN, true, false));
+		chartPluginAttributes.add(new ChartPluginAttribute("name", ChartPluginAttribute.DataType.STRING, true));
+		chartPluginAttributes.add(new ChartPluginAttribute("size", ChartPluginAttribute.DataType.NUMBER, true));
+		chartPluginAttributes.add(new ChartPluginAttribute("enable", ChartPluginAttribute.DataType.BOOLEAN, true));
 		
 		ChartPluginAttributeValueConverter converter = new ChartPluginAttributeValueConverter();
 
@@ -98,51 +98,6 @@ public class ChartPluginAttributeValueConverterTest
 			assertEquals(2, actualOther1.length);
 			assertEquals(false, actualOther1[0]);
 			assertEquals(false, actualOther1[1]);
-		}
-	}
-
-	@Test
-	public void convertTest_multiple()
-	{
-		List<ChartPluginAttribute> chartPluginAttributes = new ArrayList<>();
-		chartPluginAttributes.add(new ChartPluginAttribute("name", ChartPluginAttribute.DataType.STRING, true, true));
-		chartPluginAttributes.add(new ChartPluginAttribute("size", ChartPluginAttribute.DataType.NUMBER, true, true));
-		chartPluginAttributes.add(new ChartPluginAttribute("enable", ChartPluginAttribute.DataType.BOOLEAN, true, true));
-		
-		ChartPluginAttributeValueConverter converter = new ChartPluginAttributeValueConverter();
-		
-		{
-			Map<String, Object> values = new HashMap<String, Object>();
-			values.put("name", "aaa");
-			values.put("size", "3");
-			values.put("enable", "true");
-			values.put("other0", new int[] {5, 6});
-			values.put("other1", new boolean[] {false, true});
-
-			Map<String, Object> actual = converter.convert(values, chartPluginAttributes);
-
-			Object[] actualName = (Object[])actual.get("name");
-			Object[] actualSize = (Object[])actual.get("size");
-			Object[] actualEnable = (Object[])actual.get("enable");
-			int[] actualOther0 = (int[])actual.get("other0");
-			boolean[] actualOther1 = (boolean[])actual.get("other1");
-
-			assertEquals(1, actualName.length);
-			assertEquals("aaa", actualName[0]);
-
-			assertEquals(1, actualSize.length);
-			assertEquals(3, ((Integer) actualSize[0]).intValue());
-
-			assertEquals(1, actualEnable.length);
-			assertEquals(true, ((Boolean) actualEnable[0]).booleanValue());
-
-			assertEquals(2, actualOther0.length);
-			assertEquals(5, actualOther0[0]);
-			assertEquals(6, actualOther0[1]);
-
-			assertEquals(2, actualOther1.length);
-			assertEquals(false, actualOther1[0]);
-			assertEquals(true, actualOther1[1]);
 		}
 	}
 }

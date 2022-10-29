@@ -92,28 +92,7 @@ public abstract class DataValueConverter
 	 */
 	public <T extends NameTypeAware> Object convert(Object value, T nameTypeAware) throws DataValueConvertionException
 	{
-		Object re = convert(value, nameTypeAware.getType());
-
-		if (re != null && nameTypeAware instanceof NameTypeInputAware)
-		{
-			NameTypeInputAware ntiAware = (NameTypeInputAware) nameTypeAware;
-
-			// 应转换为规范统一的数组
-			if (ntiAware.isMultiple())
-			{
-				if (re instanceof Object[] || re instanceof Collection<?>)
-				{
-					// 不需转换
-				}
-				else
-				{
-					Object[] array = new Object[] { re };
-					re = array;
-				}
-			}
-		}
-
-		return re;
+		return convert(value, nameTypeAware.getType());
 	}
 
 	/**

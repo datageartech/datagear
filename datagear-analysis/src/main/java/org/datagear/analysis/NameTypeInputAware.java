@@ -21,17 +21,7 @@ public interface NameTypeInputAware extends NameTypeAware
 	 * @return
 	 */
 	boolean isRequired();
-
-	/**
-	 * 是否多项输入。
-	 * <p>
-	 * 多填输入的对应的数据应是数组。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	boolean isMultiple();
-
+	
 	/**
 	 * 获取输入框类型。
 	 * 

@@ -318,7 +318,6 @@ public class JsonChartPluginPropertiesResolver
 			attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
 			attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
 			attribute.setRequired(convertToBoolean(map.get(ChartPluginAttribute.PROPERTY_REQUIRED), false));
-			attribute.setMultiple(convertToBoolean(map.get(ChartPluginAttribute.PROPERTY_MULTIPLE), false));
 			attribute.setInputType(convertToAttributeInputType(map.get(ChartPluginAttribute.PROPERTY_INPUT_TYPE)));
 			attribute.setInputPayload(convertToAttributeInputPayload(map.get(ChartPluginAttribute.PROPERTY_INPUT_PAYLOAD)));
 			attribute.setGroup(convertToGroup(map.get(ChartPluginAttribute.PROPERTY_GROUP)));

@@ -107,7 +107,6 @@
   				}
   			},
   			required: true,
-  			multiple: true,
   			inputType: "mytype",
   			inputPayload: "mypayload",
 			group: "group-1"

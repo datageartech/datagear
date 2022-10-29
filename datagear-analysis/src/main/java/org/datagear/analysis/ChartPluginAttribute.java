@@ -35,7 +35,6 @@ public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInp
 	public static final String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	public static final String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	public static final String PROPERTY_REQUIRED = "required";
-	public static final String PROPERTY_MULTIPLE = "multiple";
 	public static final String PROPERTY_INPUT_TYPE = "inputType";
 	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
 	public static final String PROPERTY_GROUP = "group";
@@ -50,9 +49,6 @@ public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInp
 	/** 是否必须 */
 	private boolean required;
 	
-	/** 是否多项 */
-	private boolean multiple;
-
 	/** 输入框类型 */
 	private String inputType = null;
 
@@ -69,13 +65,12 @@ public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInp
 	{
 	}
 
-	public ChartPluginAttribute(String name, String type, boolean required, boolean multiple)
+	public ChartPluginAttribute(String name, String type, boolean required)
 	{
 		super();
 		this.name = name;
 		this.type = type;
 		this.required = required;
-		this.multiple = multiple;
 	}
 
 	@Override
@@ -112,17 +107,6 @@ public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInp
 	public void setRequired(boolean required)
 	{
 		this.required = required;
-	}
-
-	@Override
-	public boolean isMultiple()
-	{
-		return multiple;
-	}
-
-	public void setMultiple(boolean multiple)
-	{
-		this.multiple = multiple;
 	}
 
 	/**
@@ -190,7 +174,7 @@ public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInp
 	 */
 	public ChartPluginAttribute clone(Locale locale)
 	{
-		ChartPluginAttribute target = new ChartPluginAttribute(this.name, this.type, this.required, this.multiple);
+		ChartPluginAttribute target = new ChartPluginAttribute(this.name, this.type, this.required);
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
 		target.setGroup(this.group != null ? this.group.clone(locale) : null);
@@ -266,15 +250,6 @@ public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInp
 
 		/** 文本域 */
 		public static final String TEXTAREA = "textarea";
-
-		/** 日期 */
-		public static final String DATE = "date";
-
-		/** 时间 */
-		public static final String TIME = "time";
-
-		/** 日期时间 */
-		public static final String DATETIME = "datetime";
 
 		/** 颜色 */
 		public static final String COLOR = "color";
