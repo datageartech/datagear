@@ -396,7 +396,7 @@
 				<@spring.message code='chartAttribute' />
 			</label>
 		</div>
-		<div class="page page-form">
+		<div class="page page-form chart-form-chart-attr-values">
 			<#include "include/chart_attr_values_form.ftl">
 		</div>
 	</p-overlaypanel>
@@ -969,6 +969,7 @@
 		onAttrValuesPanelShow: function()
 		{
 			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
 			var chartPluginAttrs = po.vueRaw(fm.htmlChartPlugin ? (fm.htmlChartPlugin.attributes || []) : []);
 			var attrValues = po.vueRaw(fm.attrValues);
 			po.setupChartAttrValuesForm(chartPluginAttrs, attrValues,
@@ -977,7 +978,8 @@
 				{
 					fm.attrValues = avs;
 					po.vueUnref("${pid}attrValuesPanelEle").hide();
-				}
+				},
+				readonly: pm.isReadonlyAction
 			});
 		},
 		

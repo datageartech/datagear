@@ -752,6 +752,10 @@ label[title]:not(.no-tip)::after,
 .page-form-chart .p-fieldset.fieldset-sm .p-fieldset-legend .p-fieldset-legend-text{
 	justify-content: flex-start;
 }
+.chart-form-chart-attr-values .chart-attr-values-form .page-form-content{
+	width: 35vw;
+	height: 45vh;
+}
 
 .page-form-dashboard .p-tabview .p-tabview-panels{
 	padding: 0.5rem 0 0 0;

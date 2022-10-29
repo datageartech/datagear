@@ -14,8 +14,8 @@ page_boolean_options.ftl
 -->
 <#assign ChartPluginAttributeType=statics['org.datagear.analysis.ChartPluginAttribute$DataType']>
 <#assign ChartPluginAttributeInputType=statics['org.datagear.analysis.ChartPluginAttribute$InputType']>
-<form id="${pid}chartAttrValuesForm" class="flex flex-column" :class="{readonly: pm.chartAttrValuesForm.readonly}">
-	<div class="page-form-content panel-content-size-xxs flex-grow-1 px-2 py-1 overflow-y-auto">
+<form id="${pid}chartAttrValuesForm" class="flex flex-column chart-attr-values-form" :class="{readonly: pm.chartAttrValuesForm.readonly}">
+	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 		<div class="field grid" v-for="(ca, caIdx) in pm.chartAttrValuesForm.attributes">
 			<label :for="'${pid}pluginAttribute_'+caIdx" class="field-label col-12 mb-2"
 				:title="ca.descLabel && ca.descLabel.value ? ca.descLabel.value : null">
@@ -57,11 +57,12 @@ page_boolean_options.ftl
 								@change="onChartAttrValuesFormColorPickerChange($event, ca.name, colorIdx)">
 							</p-colorpicker>
 							<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
-								@click="onChartAttrValuesFormRemoveColor($event, ca.name, colorIdx)">
+								@click="onChartAttrValuesFormRemoveColor($event, ca.name, colorIdx)"
+								v-if="!pm.chartAttrValuesForm.readonly">
 							</p-button>
 						</div>
 					</div>
-					<div class="mt-1">
+					<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
 						<p-button type="button" icon="pi pi-plus" @click="onChartAttrValuesFormAddColor(ca.name)"></p-button>
 					</div>
 				</div>
@@ -349,7 +350,8 @@ page_boolean_options.ftl
 			attributes: [],
 			attrValues: {},
 			readonly: false,
-			colorProxy: {}
+			colorProxy: {},
+			formContentClass: ""
 		}
 	});
 	
