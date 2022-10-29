@@ -2165,7 +2165,8 @@ $.inflatePageObj = function(po)
 		"p-colorpicker": primevue.colorpicker,
 		"p-splitter": primevue.splitter,
         "p-splitterpanel": primevue.splitterpanel,
-        "p-progressbar": primevue.progressbar
+        "p-progressbar": primevue.progressbar,
+		"p-multiselect": primevue.multiselect
 	};
 	
 	//vue挂载

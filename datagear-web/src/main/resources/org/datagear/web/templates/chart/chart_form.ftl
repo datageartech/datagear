@@ -210,8 +210,12 @@
 				<div class="field-input col-12 md:col-9">
 					<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
 						aria:haspopup="true" aria-controls="${pid}attrValuesPanel"
+						:disabled="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0"
 						@click="onShowAttrValuesPanel" class="p-button-secondary">
 					</p-button>
+		        	<div class="desc text-color-secondary" v-if="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0">
+		        		<small><@spring.message code='chart.attrValues.noAttrDefined' /></small>
+		        	</div>
 				</div>
 			</div>
 			<div class="field grid">
@@ -424,6 +428,10 @@
 			cds.summaryDataSetEntity = cds.dataSet;
 			cds.dataSet = undefined;
 		});
+		
+		//这里必须整理属性值，因为存在切换图表类型而不编辑图表属性的情况
+		var cpas = po.trimChartPluginAttributes(data.htmlChartPlugin ? data.htmlChartPlugin.attributes : null);
+		data.attrValues = po.trimChartAttrValues(data.attrValues, cpas);
 		
 		var pm = po.vuePageModel();
 		if(pm.enableResultDataFormat)

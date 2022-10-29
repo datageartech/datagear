@@ -22,14 +22,28 @@ page_boolean_options.ftl
 				{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
 			</label>
 			<div class="field-input col-12" v-if="ca.inputType == pm.ChartPluginAttribute.InputType.RADIO">
-				<p-selectbutton :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload"
-					option-label="name" option-value="value" class="input w-full" :name="ca.name">
-				</p-selectbutton>
+				<div v-for="(ip, ipIdx) in ca.inputPayload" class="inline-block mr-2">
+					<p-radiobutton :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :name="ca.name" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-radiobutton>
+					<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
+				</div>
 			</div>
 			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.SELECT">
-				<p-dropdown :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload"
-					option-label="name" option-value="value" class="input w-full" :name="ca.name">
-				</p-dropdown>
+				<div v-if="ca.multiple">
+					<p-multiselect :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload"
+						option-label="name" option-value="value" class="input w-full" :name="ca.name">
+					</p-multiselect>
+				</div>
+				<div v-else>
+					<p-dropdown :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload"
+						option-label="name" option-value="value" class="input w-full" :name="ca.name">
+					</p-dropdown>
+				</div>
+			</div>
+			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.CHECKBOX">
+				<div v-for="(ip, ipIdx) in ca.inputPayload" class="inline-block mr-2">
+					<p-checkbox :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :name="ca.name" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-checkbox>
+					<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
+				</div>
 			</div>
 			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.COLOR">
 				<div class="flex">
@@ -134,6 +148,62 @@ page_boolean_options.ftl
 		return cpas;
 	};
 	
+	po.trimChartAttrValues = function(attrValues, cpas)
+	{
+		if(!attrValues)
+			return null;
+		
+		if(!cpas || cpas.length == 0)
+			return null;
+		
+		var re = {};
+		
+		$.each(cpas, function(i, cpa)
+		{
+			var v = attrValues[cpa.name];
+			if(v != null)
+			{
+				var inputType = cpa.inputType;
+				
+				//多选应强制转换为数组
+				if((cpa.multiple || inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
+						&& !$.isArray(v))
+				{
+					v = [ v ];
+				}
+				
+				//应将值限定为待选值集合内，比如图表插件升级后inputPayload有所删减，那么这里的旧值应删除
+				if(inputType == po.ChartPluginAttribute.InputType.SELECT
+						|| inputType == po.ChartPluginAttribute.InputType.RADIO
+						|| inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
+				{
+					var inputPayload = (cpa.inputPayload || []);
+					
+					if($.isArray(v))
+					{
+						var vnew = [];
+						$.each(v, function(j, vj)
+						{
+							if($.inArrayById(inputPayload, vj, "value") >= 0)
+								vnew.push(vj);
+						});
+						
+						v = vnew;
+					}
+					else if($.inArrayById(inputPayload, v, "value") < 0)
+					{
+						v = null;
+					}
+				}
+				
+				if(v != null)
+					re[cpa.name] = v;
+			}
+		});
+		
+		return re;
+	};
+	
 	po.vuePageModel(
 	{
 		ChartPluginAttribute: po.ChartPluginAttribute,
@@ -164,7 +234,7 @@ page_boolean_options.ftl
 		{
 			if(options && options.submitHandler)
 			{
-				var formData = $.extend(true, {}, po.vueRaw(pm.chartAttrValuesForm.attrValues));
+				var formData = po.trimChartAttrValues(po.vueRaw(pm.chartAttrValuesForm.attrValues), pm.chartAttrValuesForm.attributes);
 				options.submitHandler(formData);
 			}
 		});
