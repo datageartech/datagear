@@ -284,6 +284,10 @@
 	chartFactory._refactorChart = function(chart)
 	{
 		chart._attrValues = (chart.attrValues || {});
+		//保留原始属性值集，看板可视编辑需要使用
+		//注意，初始化_attrValuesOrigin的逻辑不能在chartBase.init中执行，
+		//因为chartBase.init可以被多次调用，chart._attrValues可能已被修改
+		chart._attrValuesOrigin = $.extend(true, {}, chart._attrValues);
 		//chart.resultDataFormat属性与后面的chart.resultDataFormat()冲突，因此这里重构一下
 		chart._resultDataFormat = chart.resultDataFormat;
 		
@@ -357,9 +361,6 @@
 			cds.paramValues = cds.query.paramValues;
 			// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
 		}
-		
-		//保留原始属性值集，看板可视编辑需要使用
-		this._attrValuesOrigin = $.extend(true, {}, this._attrValues);
 	};
 	
 	/**
@@ -659,7 +660,7 @@
 			
 			//元素上的属性值集应高优先级合并至初始属性集值
 			if(attrValues)
-				this._attrValues = $.extend(true, this._attrValues, attrValues);
+				this._attrValues = $.extend(true, {}, this._attrValuesOrigin, attrValues);
 		}
 	};
 	

@@ -330,7 +330,7 @@ page_boolean_options.ftl
 		}
 		else if(type == po.ChartPluginAttribute.DataType.BOOLEAN)
 		{
-			return (value == "true" || value == "1" || value > 0 ? true : false);
+			return (value == true || value == "true" || value == "1" || value > 0 ? true : false);
 		}
 		else if(type == po.ChartPluginAttribute.DataType.NUMBER)
 		{

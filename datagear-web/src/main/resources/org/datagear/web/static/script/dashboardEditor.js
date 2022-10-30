@@ -1734,19 +1734,30 @@
 	 */
 	editor.setElementChartAttrValues = function(attrValues, ele)
 	{
+		attrValues = (attrValues || {});
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementChartAttrValues(ele))
 			return;
 		
-		var eleAttrValue = this._serializeForAttrValue(attrValues);
+		var chart = this.dashboard.renderedChart(ele);
+		var attrValuesOrigin = (chart.attrValuesOrigin() || {});
+		var attrValuesMerge = {};
+		
+		//应该只设置有修改的图表属性值，这样在图表模块再次编辑其他图表属性值才能应用于所有引用它看板
+		for(var p in attrValues)
+		{
+			if(!this._deepEqualsForJson(attrValuesOrigin[p], attrValues[p]))
+				attrValuesMerge[p] = attrValues[p];
+		}
+		
+		var eleAttrValue = this._serializeForAttrValue(attrValuesMerge);
 		
 		if(eleAttrValue == "{}")
 			this._removeElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, true);
 		else
 			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue, true);
 		
-		var chart = this.dashboard.renderedChart(ele);
 		chart.destroy();
 		chart.init();
 	};
@@ -2540,6 +2551,49 @@
 			re += "'";
 		
 		return re;
+	};
+	
+	editor._deepEqualsForJson = function(a, b)
+	{
+		if(a == null)
+		{
+			return (b == null);
+		}
+		else if(b == null)
+		{
+			return (a == null);
+		}
+		else if($.isArray(a))
+		{
+			if(!$.isArray(b))
+				return false;
+			
+			if(a.length != b.length)
+				return false;
+			
+			for(var i=0; i<a.length; i++)
+			{
+				if(!editor._deepEqualsForJson(a[i], b[i]))
+					return false;
+			}
+			
+			return true;
+		}
+		else if($.isPlainObject(a))
+		{
+			if(!$.isPlainObject(b))
+				return false;
+			
+			for(var p in a)
+			{
+				if(!editor._deepEqualsForJson(a[p], b[p]))
+					return false;
+			}
+			
+			return true;
+		}
+		else
+			return (a == b);
 	};
 	
 	/**

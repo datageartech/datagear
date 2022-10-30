@@ -752,6 +752,9 @@ label[title]:not(.no-tip)::after,
 .page-form-chart .p-fieldset.fieldset-sm .p-fieldset-legend .p-fieldset-legend-text{
 	justify-content: flex-start;
 }
+.chart-attr-values-form .page-form-content textarea{
+	height: 5rem;
+}
 .chart-form-chart-attr-values .chart-attr-values-form .page-form-content{
 	width: 35vw;
 	height: 45vh;
