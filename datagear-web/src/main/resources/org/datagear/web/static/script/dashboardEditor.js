@@ -2463,11 +2463,13 @@
 		var type = typeof(obj);
 		
 		if(type == "string")
-			return this._toSingleQuoteJsString(obj);
-		else if(type == "number")
-			return obj.toString();
-		else if(type == "boolean")
-			return obj.toString();
+		{
+			return this._toSingleQuoteJsString(obj, true);
+		}
+		else if(type == "number" || type == "boolean")
+		{
+			return obj;
+		}
 		else if($.isArray(obj))
 		{
 			var str = "[";
@@ -2507,12 +2509,14 @@
 			return obj.toString();
 	};
 	
-	editor._toSingleQuoteJsString = function(str)
+	editor._toSingleQuoteJsString = function(str, quote)
 	{
+		quote = (quote == null ? false : quote);
+		
 		if(!str)
 			return str;
 		
-		var re = "'";
+		var re = (quote ? "'" : "");
 		
 		for(var i=0; i<str.length; i++)
 		{
@@ -2532,7 +2536,8 @@
 				re += c;
 		}
 		
-		re += "'";
+		if(quote)
+			re += "'";
 		
 		return re;
 	};

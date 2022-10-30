@@ -266,6 +266,10 @@ page_boolean_options.ftl
 		$.each(cpas, function(i, cpa)
 		{
 			var v = attrValues[cpa.name];
+			
+			//需转换类型
+			v = po.toChartAttrTypeValue(cpa.type, v);
+			
 			if(v != null)
 			{
 				var inputType = cpa.inputType;
@@ -291,9 +295,12 @@ page_boolean_options.ftl
 						
 						v = vnew;
 					}
-					else if($.inArrayById(inputPayload.options, v, "value") < 0)
+					else
 					{
-						v = null;
+						if($.inArrayById(inputPayload.options, v, "value") < 0)
+						{
+							v = null;
+						}
 					}
 				}
 				
@@ -305,7 +312,35 @@ page_boolean_options.ftl
 		return re;
 	};
 	
-	po.tochartAttrValuesFormColorProxy = function(attrValues, cpas)
+	po.toChartAttrTypeValue = function(type, value)
+	{
+		if(value == null)
+		{
+			return null;
+		}
+		else if($.isArray(value))
+		{
+			var re = [];
+			$.each(value, function(i, vi)
+			{
+				re.push(po.toChartAttrTypeValue(type, vi));
+			});
+			
+			return re;
+		}
+		else if(type == po.ChartPluginAttribute.DataType.BOOLEAN)
+		{
+			return (value == "true" || value == "1" || value > 0 ? true : false);
+		}
+		else if(type == po.ChartPluginAttribute.DataType.NUMBER)
+		{
+			return parseFloat(value);
+		}
+		else
+			return value;
+	};
+	
+	po.toChartAttrValuesFormColorProxy = function(attrValues, cpas)
 	{
 		attrValues = (attrValues || {});
 		
@@ -368,7 +403,7 @@ page_boolean_options.ftl
 		pm.chartAttrValuesForm.attributes = po.trimChartPluginAttributes(chartPluginAttributes);
 		pm.chartAttrValuesForm.attrValues = $.extend(true, {}, (attrValues || {}));
 		pm.chartAttrValuesForm.readonly = options.readonly;
-		pm.chartAttrValuesForm.colorProxy = po.tochartAttrValuesFormColorProxy(pm.chartAttrValuesForm.attrValues, pm.chartAttrValuesForm.attributes);
+		pm.chartAttrValuesForm.colorProxy = po.toChartAttrValuesFormColorProxy(pm.chartAttrValuesForm.attrValues, pm.chartAttrValuesForm.attributes);
 		
 		var validateRules = {};
 		$.each(pm.chartAttrValuesForm.attributes, function(i, cpa)
