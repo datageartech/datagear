@@ -1871,10 +1871,8 @@ page_boolean_options.ftl
 	{
 		if(!cssColor)
 			return "";
-		else if(cssColor.charAt(0) == '#')
-			return cssColor.substr(1);
 		else
-			return cssColor;
+			return chartFactory.colorToHexStr(cssColor, true);
 	};
 	
 	po.hexStrToCssColor = function(hexStr, dftCssColor)
