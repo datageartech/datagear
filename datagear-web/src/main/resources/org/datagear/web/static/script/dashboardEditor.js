@@ -2463,7 +2463,7 @@
 		var type = typeof(obj);
 		
 		if(type == "string")
-			return "'" + obj.replace(/\'/g, "\\'") + "'";
+			return this._toSingleQuoteJsString(obj);
 		else if(type == "number")
 			return obj.toString();
 		else if(type == "boolean")
@@ -2505,6 +2505,36 @@
 		}
 		else
 			return obj.toString();
+	};
+	
+	editor._toSingleQuoteJsString = function(str)
+	{
+		if(!str)
+			return str;
+		
+		var re = "'";
+		
+		for(var i=0; i<str.length; i++)
+		{
+			var c = str.charAt(i);
+			
+			if(c == '\'')
+				re += "\\'";
+			else if(c == '\n')
+				re += "\\n";
+			else if(c == '\r')
+				re += "\\r";
+			else if(c == '\t')
+				re += "\\t";
+			else if(c == '\\')
+				re += "\\\\";
+			else
+				re += c;
+		}
+		
+		re += "'";
+		
+		return re;
 	};
 	
 	/**

@@ -316,23 +316,6 @@
 		if(this.statusRendering() || this.isActive())
 			throw new Error("Chart is illegal state for init");
 		
-		this.name = (this.name || "");
-		this.chartDataSets = (this.chartDataSets || []);
-		this.updateInterval = (this.updateInterval == null ? -1 : this.updateInterval);
-		for(var i=0; i<this.chartDataSets.length; i++)
-		{
-			var cds = this.chartDataSets[i];
-			cds.propertySigns = (cds.propertySigns || {});
-			cds.alias = (cds.alias == null ?  "" : cds.alias);
-			cds.attachment = (cds.attachment == true ? true : false);
-			cds.query = (cds.query || {});
-			cds.query.paramValues = (cds.query.paramValues || {});
-			
-			// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
-			cds.paramValues = cds.query.paramValues;
-			// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
-		}
-		
 		this._clearExtValue();
 		
 		this._initBaseProperties();
@@ -345,6 +328,7 @@
 		this._initDisableSetting();
 		this._initEventHandlers();
 		this._initRenderer();
+		this._initAttrValues();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
@@ -355,12 +339,27 @@
 	 */
 	chartBase._initBaseProperties = function()
 	{
-		//为chartDataSets元素添加index属性，便于后续根据其索引获取结果集等信息
-		this.chartDataSets = (this.chartDataSets == null ? [] : this.chartDataSets);
+		this.name = (this.name || "");
+		this.chartDataSets = (this.chartDataSets || []);
+		this.updateInterval = (this.updateInterval == null ? -1 : this.updateInterval);
 		for(var i=0; i<this.chartDataSets.length; i++)
 		{
-			this.chartDataSets[i].index = i;
+			var cds = this.chartDataSets[i];
+			cds.propertySigns = (cds.propertySigns || {});
+			cds.alias = (cds.alias == null ?  "" : cds.alias);
+			cds.attachment = (cds.attachment == true ? true : false);
+			cds.query = (cds.query || {});
+			cds.query.paramValues = (cds.query.paramValues || {});
+			//为chartDataSets元素添加index属性，便于后续根据其索引获取结果集等信息
+			cds.index = i;
+			
+			// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+			cds.paramValues = cds.query.paramValues;
+			// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
 		}
+		
+		//保留原始属性值集，看板可视编辑需要使用
+		this._attrValuesOrigin = $.extend(true, {}, this._attrValues);
 	};
 	
 	/**
@@ -643,6 +642,24 @@
 			
 			if(renderer)
 				this.renderer(renderer);
+		}
+	};
+	
+	/**
+	 * 初始化图表属性值集。
+	 * 此方法从图表元素的elementAttrConst.ATTR_VALUES属性获取图表属性值集。
+	 */
+	chartBase._initAttrValues = function()
+	{
+		var attrValues = this.elementJquery().attr(elementAttrConst.ATTR_VALUES);
+		
+		if(attrValues)
+		{
+			attrValues = chartFactory.evalSilently(attrValues);
+			
+			//元素上的属性值集应高优先级合并至初始属性集值
+			if(attrValues)
+				this._attrValues = $.extend(true, this._attrValues, attrValues);
 		}
 	};
 	
@@ -3719,6 +3736,17 @@
 			return this._attrValues;
 		else
 			this._attrValues = (values ? values : {});
+	};
+	
+	/**
+	 * 获取图表全部原始属性值，通常是在定义图表时设置的，未与"dg-chart-attr-values"合并。
+	 * 
+	 * @returns { ... }
+	 * @since 4.2.0
+	 */
+	chartBase.attrValuesOrigin = function()
+	{
+		return this._attrValuesOrigin;
 	};
 	
 	/**
