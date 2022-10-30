@@ -370,13 +370,24 @@ page_boolean_options.ftl
 		pm.chartAttrValuesForm.readonly = options.readonly;
 		pm.chartAttrValuesForm.colorProxy = po.tochartAttrValuesFormColorProxy(pm.chartAttrValuesForm.attrValues, pm.chartAttrValuesForm.attributes);
 		
-		var form = po.elementOfId("${pid}chartAttrValuesForm", document.body);
-		po.setupSimpleForm(form, pm.chartAttrValuesForm.attrValues, function()
+		var validateRules = {};
+		$.each(pm.chartAttrValuesForm.attributes, function(i, cpa)
 		{
-			if(options && options.submitHandler)
+			if(cpa.type == po.ChartPluginAttribute.DataType.NUMBER)
+				validateRules[cpa.name] = { "number": true };
+		});
+		
+		var form = po.elementOfId("${pid}chartAttrValuesForm", document.body);
+		po.setupSimpleForm(form, pm.chartAttrValuesForm.attrValues,
+		{
+			rules: validateRules,
+			submitHandler: function()
 			{
-				var formData = po.trimChartAttrValues(po.vueRaw(pm.chartAttrValuesForm.attrValues), pm.chartAttrValuesForm.attributes);
-				options.submitHandler(formData);
+				if(options && options.submitHandler)
+				{
+					var formData = po.trimChartAttrValues(po.vueRaw(pm.chartAttrValuesForm.attrValues), pm.chartAttrValuesForm.attributes);
+					options.submitHandler(formData);
+				}
 			}
 		});
 	};

@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.support.DataSetSourceParseException;
+import org.datagear.analysis.support.DataValueConvertionException;
 import org.datagear.analysis.support.HeaderContentNotNameValueObjArrayJsonException;
 import org.datagear.analysis.support.ReadJsonDataPathException;
 import org.datagear.analysis.support.RequestContentNotNameValueObjArrayJsonException;
@@ -488,6 +489,15 @@ public class ControllerAdvice extends AbstractController
 			DataSetException exception)
 	{
 		setOptMsgForThrowableLog(request, exception);
+		return getErrorView(request, response);
+	}
+	
+	@ExceptionHandler(DataValueConvertionException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisDataValueConvertionException(HttpServletRequest request, HttpServletResponse response,
+			DataValueConvertionException exception)
+	{
+		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
 	}
 
