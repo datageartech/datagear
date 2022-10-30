@@ -189,6 +189,9 @@
 	/**图表渲染器*/
 	elementAttrConst.RENDERER = "dg-chart-renderer";
 	
+	/**图表属性值*/
+	elementAttrConst.ATTR_VALUES = "dg-chart-attr-values";
+	
 	//----------------------------------------
 	// elementAttrConst结束
 	//----------------------------------------

@@ -436,6 +436,14 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
+<p-dialog :header="pm.vepts.chartAttrValues" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.chartAttrValuesShown" @show="onVeChartAttrValuesPanelShow">
+	<div class="page page-form dashboard-form-chart-attr-values">
+		<#include "../../chart/include/chart_attr_values_form.ftl">
+	</div>
+</p-dialog>
+
 <p-dialog :header="pm.vepts.chartOptions" append-to="body"
 	position="center" :dismissable-mask="true"
 	v-model:visible="pm.vepss.chartOptionsShown" @show="onVeChartOptionsPanelShow">
@@ -1953,6 +1961,15 @@ page_boolean_options.ftl
 		pm.vepms.dashboardSize = $.extend(true, {}, model);
 		pm.vepss.dashboardSizeShown = true;
 	};
+
+	po.showVeChartAttrValuesPanel = function(submitHandler, model, title)
+	{
+		var pm = po.vuePageModel();
+		pm.veshs.chartAttrValues = submitHandler;
+		if(title)
+			pm.vepts.chartAttrValues = title; 
+		pm.vepss.chartAttrValuesShown = true;
+	};
 	
 	po.showVeChartOptionsPanel = function(submitHandler, model, title)
 	{
@@ -2002,6 +2019,7 @@ page_boolean_options.ftl
 				videoShown: false,
 				dashboardSizeShown: false,
 				chartOptionsShown: false,
+				chartAttrValuesShown: false,
 				chartThemeShown: false,
 				styleShown: false,
 			},
@@ -2017,6 +2035,7 @@ page_boolean_options.ftl
 				video: "<@spring.message code='video' />",
 				dashboardSize: "<@spring.message code='dashboardSize' />",
 				chartOptions: "<@spring.message code='chartOptions' />",
+				chartOptions: "<@spring.message code='chartAttribute' />",
 				chartTheme: "<@spring.message code='chartTheme' />",
 				style: "<@spring.message code='style' />"
 			},
@@ -2032,6 +2051,7 @@ page_boolean_options.ftl
 				video: {},
 				dashboardSize: { scale: "auto" },
 				chartOptions: { value: "" },
+				chartAttrValues: {},
 				chartTheme: po.veDftChartThemeModel(),
 				style: {}
 			},
@@ -2044,6 +2064,7 @@ page_boolean_options.ftl
 				hyperlink: function(model){},
 				video: function(model){},
 				chartOptions: function(model){},
+				chartAttrValues: function(model){},
 				chartTheme: function(model){},
 				style: function(model){}
 			},
@@ -2203,6 +2224,24 @@ page_boolean_options.ftl
 				{
 					pm.vepss.dashboardSizeShown = false;
 				}
+			},
+			
+			onVeChartAttrValuesPanelShow: function()
+			{
+				var dashboardEditor = po.visualDashboardEditorByTab();
+				var cpas = (dashboardEditor.getElementChartPluginAttrs() || []);
+				var attrValues = (dashboardEditor.getElementChartAttrValues() || {});
+				
+				po.setupChartAttrValuesForm(cpas, attrValues,
+				{
+					submitHandler: function(avs)
+					{
+						if(pm.veshs.chartAttrValues(avs) !== false)
+						{
+							pm.vepss.chartAttrValuesShown = false;
+						}
+					}
+				});
 			},
 			
 			onVeChartOptionsPanelShow: function()

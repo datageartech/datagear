@@ -504,6 +504,7 @@
 			dashboardEditor.i18n.hyperlinkEleRequired = "<@spring.message code='dashboard.opt.tip.hyperlinkEleRequired' />";
 			dashboardEditor.i18n.videoEleRequired = "<@spring.message code='dashboard.opt.tip.videoEleRequired' />";
 			dashboardEditor.i18n.labelEleRequired = "<@spring.message code='dashboard.opt.tip.labelEleRequired' />";
+			dashboardEditor.i18n.chartPluginNoAttrDefined = "<@spring.message code='dashboard.opt.tip.chartPluginNoAttrDefined' />";
 			dashboardEditor.tipInfo = function(msg)
 			{
 				$.tipInfo(msg);
@@ -1035,6 +1036,24 @@
 				dashboardEditor.setGlobalChartTheme(model);
 			else
 				dashboardEditor.setElementChartTheme(model);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
+	po.setVeElementChartAttrValues = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor)
+			return false;
+		
+		try
+		{
+			dashboardEditor.setElementChartAttrValues(model);
 		}
 		catch(e)
 		{
@@ -1743,6 +1762,28 @@
 										return po.setVeChartTheme(model, false);
 									},
 									dashboardEditor.getElementChartTheme(), this.label);
+								}
+							}
+						},
+						{
+							label: "<@spring.message code='chartAttribute' />",
+							class: "ve-panel-show-control chartAttrValuesShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkSetElementChartAttrValues())
+										return;
+									
+									po.showVeChartAttrValuesPanel(function(model)
+									{
+										return po.setVeElementChartAttrValues(model);
+									},
+									dashboardEditor.getElementChartAttrValues(), this.label);
 								}
 							}
 						},

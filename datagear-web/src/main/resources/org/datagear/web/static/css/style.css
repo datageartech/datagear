@@ -827,6 +827,10 @@ label[title]:not(.no-tip)::after,
 	/*对话框高度 - 表单foot高度 - 对话框header高度 - 选项卡条高度*/
 	height: calc(90vh - 5rem - 6rem - 4rem);
 }
+.dashboard-form-chart-attr-values .chart-attr-values-form .page-form-content{
+	min-width: 40vw;
+    max-width: 60vw;
+}
 
 .current-analysis-project-wrapper .ap-name-btn{
 	min-width: 16%;

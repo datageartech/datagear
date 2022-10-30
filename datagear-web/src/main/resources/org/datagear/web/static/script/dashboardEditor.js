@@ -37,6 +37,7 @@
 	i18n.hyperlinkEleRequired = "不是超链接元素";
 	i18n.videoEleRequired = "不是视频元素";
 	i18n.labelEleRequired = "不是文本标签元素";
+	i18n.chartPluginNoAttrDefined = "此图表类型没有定义可编辑属性";
 	
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
@@ -1675,6 +1676,98 @@
 	{
 		var ele = this._editElement($(document.body));
 		return this._getElementChartTheme(ele);
+	};
+	
+	/**
+	 * 校验setElementChartAttrValues操作。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkSetElementChartAttrValues = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		if(!chart)
+		{
+			this.tipInfo(i18n.selectedNotChartElement);
+			return false;
+		}
+		
+		var cpas = chart.pluginAttributes();
+		if(cpas == null || cpas.length == 0)
+		{
+			this.tipInfo(i18n.chartPluginNoAttrDefined);
+			return false;
+		}
+		
+		return true;
+	};
+	
+	/**
+	 * 获取图表元素的图表属性值。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.getElementChartAttrValues = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return null;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		if(!chart)
+			return null;
+		
+		return chart.attrValues();
+	};
+	
+	/**
+	 * 设置图表元素的图表属性值。
+	 * 
+	 * @param attrValues 要设置的图表主题对象，格式为：{ ... }
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.setElementChartAttrValues = function(attrValues, ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this.checkSetElementChartAttrValues(ele))
+			return;
+		
+		var eleAttrValue = this._serializeForAttrValue(attrValues);
+		
+		if(eleAttrValue == "{}")
+			this._removeElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, true);
+		else
+			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue, true);
+		
+		var chart = this.dashboard.renderedChart(ele);
+		chart.destroy();
+		chart.init();
+	};
+	
+	/**
+	 * 获取图表元素的ChartPluginAttribute数组。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.getElementChartPluginAttrs = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return null;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		if(!chart)
+			return null;
+		
+		return chart.pluginAttributes();
 	};
 	
 	/**
