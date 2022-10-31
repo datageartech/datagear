@@ -208,13 +208,15 @@
 					<@spring.message code='chartAttribute' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
-						aria:haspopup="true" aria-controls="${pid}attrValuesPanel"
-						:disabled="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0"
-						@click="onShowAttrValuesPanel" class="p-button-secondary">
-					</p-button>
-		        	<div class="desc text-color-secondary" v-if="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0">
-		        		<small><@spring.message code='chart.attrValues.noAttrDefined' /></small>
+					<div class="flex align-items-center">
+						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
+							aria:haspopup="true" aria-controls="${pid}attrValuesPanel"
+							:disabled="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0"
+							@click="onShowAttrValuesPanel" class="p-button-secondary mr-2">
+						</p-button>
+			        	<div class="desc text-color-secondary text-sm" v-if="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0">
+			        		<@spring.message code='chart.attrValues.noAttrDefined' />
+			        	</div>
 		        	</div>
 				</div>
 			</div>
