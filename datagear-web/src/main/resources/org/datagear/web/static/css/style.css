@@ -124,6 +124,9 @@ label[title]:not(.no-tip)::after,
 	/*设为absolute可不占当前空间*/
 	position: absolute;
 }
+.border-1px-transparent{
+	border: 1px solid transparent;
+}
 
 .new-version-tip.p-button,
 .new-version-tip > .p-menuitem-link > .p-menuitem-text{

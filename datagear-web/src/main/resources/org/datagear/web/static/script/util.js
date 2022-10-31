@@ -699,6 +699,20 @@
 		return (prefix ? prefix : "uid") + time + seq;
 	};
 	
+	//是否为空
+	$.isEmptyValue = function(value)
+	{
+		if(value == null)
+			return true;
+		
+		if($.isTypeString(value))
+			return (value.length == 0);
+		else if($.isArray(value))
+			return (value.length == 0);
+		else
+			return false;
+	};
+	
 	/**
 	 * 比较两个版本号。
 	 * > 1：v0高于v1；= 0：v0等于v1；< 0：v0小于v1。
@@ -1745,19 +1759,7 @@
 //重写支持Vue响数据模型的验证方法
 $.validator.addMethod("required", function(value)
 {
-	if(value == null)
-		return false;
-	
-	var type = typeof(value);
-	
-	if(type == $.TYPEOF_STRING)
-		return (value.length > 0);
-	else if(type == $.TYPEOF_NUMBER)
-		return true;
-	else if($.isArray(value))
-		return (value.length > 0);
-	else
-		return true;
+	return !$.isEmptyValue(value);
 });
 
 $.fn.extend(

@@ -22,31 +22,44 @@ page_boolean_options.ftl
 				{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
 			</label>
 			<div class="field-input col-12" v-if="ca.inputType == pm.ChartPluginAttribute.InputType.RADIO">
-				<div v-for="(ip, ipIdx) in ca.inputPayload.options" class="inline-block mr-2">
-					<p-radiobutton :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :name="ca.name" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-radiobutton>
-					<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
+				<div class="input border-1px-transparent p-inputtext p-component px-0 py-1">
+					<div v-for="(ip, ipIdx) in ca.inputPayload.options" class="inline-block mr-2">
+						<p-radiobutton :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-radiobutton>
+						<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
+					</div>
 				</div>
+	        	<div class="validate-msg" v-if="ca.required">
+	        		<input :name="ca.name" required type="text" class="validate-proxy" />
+	        	</div>
 			</div>
 			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.SELECT">
 				<div v-if="ca.inputPayload.multiple">
 					<p-multiselect :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload.options"
-						option-label="name" option-value="value" class="input w-full" :name="ca.name">
+						option-label="name" option-value="value" class="input w-full">
 					</p-multiselect>
 				</div>
 				<div v-else>
 					<p-dropdown :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload.options"
-						option-label="name" option-value="value" class="input w-full" :name="ca.name">
+						option-label="name" option-value="value" class="input w-full">
 					</p-dropdown>
 				</div>
+	        	<div class="validate-msg" v-if="ca.required">
+	        		<input :name="ca.name" required type="text" class="validate-proxy" />
+	        	</div>
 			</div>
 			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.CHECKBOX">
-				<div v-for="(ip, ipIdx) in ca.inputPayload.options" class="inline-block mr-2">
-					<p-checkbox :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :name="ca.name" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-checkbox>
-					<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
+				<div class="input border-1px-transparent p-inputtext p-component px-0 py-1">
+					<div v-for="(ip, ipIdx) in ca.inputPayload.options" class="inline-block mr-2">
+						<p-checkbox :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-checkbox>
+						<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
+					</div>
 				</div>
+	        	<div class="validate-msg" v-if="ca.required">
+	        		<input :name="ca.name" required type="text" class="validate-proxy" />
+	        	</div>
 			</div>
 			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.COLOR">
-				<div v-if="ca.inputPayload.multiple">
+				<div class="input border-1px-transparent p-inputtext p-component px-0 py-1" v-if="ca.inputPayload.multiple">
 					<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.colorProxy[ca.name]" :key="colorIdx">
 						<div class="flex mb-1">
 							<p-inputtext :id="'${pid}pluginAttribute_'+caIdx+'_'+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name][colorIdx]" type="text"
@@ -68,23 +81,32 @@ page_boolean_options.ftl
 				</div>
 				<div class="flex" v-else>
 					<p-inputtext :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" type="text"
-						class="input flex-grow-1 mr-1" maxlength="100" :name="ca.name">
+						class="input flex-grow-1 mr-1" maxlength="100">
 					</p-inputtext>
 					<p-colorpicker v-model="pm.chartAttrValuesForm.colorProxy[ca.name]"
 						default-color="FFFFFF" class="flex-grow-0 preview-h-full"
 						@change="onChartAttrValuesFormColorPickerChange($event, ca.name)">
 					</p-colorpicker>
 				</div>
+	        	<div class="validate-msg" v-if="ca.required">
+	        		<input :name="ca.name" required type="text" class="validate-proxy" />
+	        	</div>
 			</div>
 			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.TEXTAREA">
 				<p-textarea :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" type="text"
-					class="input w-full" maxlength="2000" :name="ca.name">
+					class="input w-full" maxlength="2000">
 				</p-textarea>
+	        	<div class="validate-msg" v-if="ca.required">
+	        		<input :name="ca.name" required type="text" class="validate-proxy" />
+	        	</div>
 			</div>
 			<div class="field-input col-12" v-else>
 				<p-inputtext :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" type="text"
-					class="input w-full" maxlength="1000" :name="ca.name">
+					class="input w-full" maxlength="1000">
 				</p-inputtext>
+	        	<div class="validate-msg" v-if="ca.required">
+	        		<input :name="ca.name" required type="text" class="validate-proxy" />
+	        	</div>
 			</div>
 		</div>
 	</div>
@@ -383,6 +405,26 @@ page_boolean_options.ftl
 		});
 		
 		return colorProxy;
+	};
+	
+	po.validateChartAttrValuesRequired = function(cpas, attrValues)
+	{
+		if(!cpas)
+			return true;
+		
+		attrValues = (attrValues || {});
+		
+		var re = true;
+		
+		$.each(cpas, function(i, cpa)
+		{
+			if(cpa.required && $.isEmptyValue(attrValues[cpa.name]))
+				re = false;
+			
+			return re;
+		});
+		
+		return re;
 	};
 	
 	po.vuePageModel(

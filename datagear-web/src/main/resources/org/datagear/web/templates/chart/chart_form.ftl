@@ -214,9 +214,12 @@
 							:disabled="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0"
 							@click="onShowAttrValuesPanel" class="p-button-secondary mr-2">
 						</p-button>
-			        	<div class="desc text-color-secondary text-sm" v-if="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0">
+			        	<div class="desc text-color-secondary text-sm" v-if="fm.htmlChartPlugin && (!fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0)">
 			        		<@spring.message code='chart.attrValues.noAttrDefined' />
 			        	</div>
+		        	</div>
+		        	<div class="validate-msg">
+		        		<input name="chartAttrValuesCheckVal" type="text" class="validate-normalizer" />
 		        	</div>
 				</div>
 			</div>
@@ -652,6 +655,12 @@
 		}
 	});
 	
+	$.validator.addMethod("chartAttrValuesRequired", function(chart)
+	{
+		var cpas = (chart.htmlChartPlugin ? chart.htmlChartPlugin.attributes : null);
+		return po.validateChartAttrValuesRequired(cpas, chart.attrValues);
+	});
+	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
 	formModel.chartDataSetVOs = (formModel.chartDataSetVOs == null ? [] : formModel.chartDataSetVOs);
@@ -675,11 +684,16 @@
 		rules:
 		{
 			updateInterval: {"integer": true},
-			dspDataSignCheckVal: { "dspDataSignRequired": true }
+			dspDataSignCheckVal: { "dspDataSignRequired": true },
+			chartAttrValuesCheckVal: { "chartAttrValuesRequired": true }
 		},
 		customNormalizers:
 		{
 			dspDataSignCheckVal: function()
+			{
+				return po.vueFormModel();
+			},
+			chartAttrValuesCheckVal: function()
 			{
 				return po.vueFormModel();
 			}
@@ -692,7 +706,8 @@
 				{
 					return $(element).data("invalidMsg");
 				}
-			}
+			},
+			chartAttrValuesCheckVal: "<@spring.message code='chart.attrValues.required' />"
 		}
 	});
 	
