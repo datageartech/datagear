@@ -655,13 +655,12 @@
 		var attrValues = this.elementJquery().attr(elementAttrConst.ATTR_VALUES);
 		
 		if(attrValues)
-		{
-			attrValues = chartFactory.evalSilently(attrValues);
-			
-			//元素上的属性值集应高优先级合并至初始属性集值
-			if(attrValues)
-				this._attrValues = $.extend(true, {}, this._attrValuesOrigin, attrValues);
-		}
+			attrValues = chartFactory.evalSilently(attrValues, {});
+		else
+			attrValues = {};
+		
+		//元素上的属性值集应高优先级合并至初始属性集值
+		this._attrValues = $.extend(true, {}, this._attrValuesOrigin, attrValues);
 	};
 	
 	/**
