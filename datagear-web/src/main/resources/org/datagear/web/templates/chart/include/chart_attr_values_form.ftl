@@ -16,97 +16,102 @@ page_boolean_options.ftl
 <#assign ChartPluginAttributeInputType=statics['org.datagear.analysis.ChartPluginAttribute$InputType']>
 <form id="${pid}chartAttrValuesForm" class="flex flex-column chart-attr-values-form" :class="{readonly: pm.chartAttrValuesForm.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
-		<div class="field grid" v-for="(ca, caIdx) in pm.chartAttrValuesForm.attributes">
-			<label :for="'${pid}pluginAttribute_'+caIdx" class="field-label col-12 mb-2"
-				:title="ca.descLabel && ca.descLabel.value ? ca.descLabel.value : null">
-				{{ca.nameLabel && ca.nameLabel.value ? ca.nameLabel.value : ca.name}}
-			</label>
-			<div class="field-input col-12" v-if="ca.inputType == pm.ChartPluginAttribute.InputType.RADIO">
-				<div class="input border-1px-transparent p-inputtext p-component px-0 py-1">
-					<div v-for="(ip, ipIdx) in ca.inputPayload.options" class="inline-block mr-2">
-						<p-radiobutton :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-radiobutton>
-						<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
-					</div>
-				</div>
-	        	<div class="validate-msg" v-if="ca.required">
-	        		<input :name="ca.name" required type="text" class="validate-proxy" />
-	        	</div>
-			</div>
-			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.SELECT">
-				<div v-if="ca.inputPayload.multiple">
-					<p-multiselect :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload.options"
-						option-label="name" option-value="value" class="input w-full">
-					</p-multiselect>
-				</div>
-				<div v-else>
-					<p-dropdown :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" :options="ca.inputPayload.options"
-						option-label="name" option-value="value" class="input w-full">
-					</p-dropdown>
-				</div>
-	        	<div class="validate-msg" v-if="ca.required">
-	        		<input :name="ca.name" required type="text" class="validate-proxy" />
-	        	</div>
-			</div>
-			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.CHECKBOX">
-				<div class="input border-1px-transparent p-inputtext p-component px-0 py-1">
-					<div v-for="(ip, ipIdx) in ca.inputPayload.options" class="inline-block mr-2">
-						<p-checkbox :id="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[ca.name]"></p-checkbox>
-						<label :for="'${pid}pluginAttribute_'+caIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
-					</div>
-				</div>
-	        	<div class="validate-msg" v-if="ca.required">
-	        		<input :name="ca.name" required type="text" class="validate-proxy" />
-	        	</div>
-			</div>
-			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.COLOR">
-				<div class="input border-1px-transparent p-inputtext p-component px-0 py-1" v-if="ca.inputPayload.multiple">
-					<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.colorProxy[ca.name]" :key="colorIdx">
-						<div class="flex mb-1">
-							<p-inputtext :id="'${pid}pluginAttribute_'+caIdx+'_'+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name][colorIdx]" type="text"
-								class="input flex-grow-1 mr-1" name="ca.name">
-							</p-inputtext>
-							<p-colorpicker v-model="pm.chartAttrValuesForm.colorProxy[ca.name][colorIdx]"
-								default-color="FFFFFF" class="flex-grow-0 preview-h-full mr-3"
-								@change="onChartAttrValuesFormColorPickerChange($event, ca.name, colorIdx)">
-							</p-colorpicker>
-							<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
-								@click="onChartAttrValuesFormRemoveColor($event, ca.name, colorIdx)"
-								v-if="!pm.chartAttrValuesForm.readonly">
-							</p-button>
+		<div v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups">
+			<p-divider align="center">
+				<label class="text-lg font-bold">{{group.label}}</label>
+			</p-divider>
+			<div class="field grid" v-for="(cpa, cpaIdx) in group.cpas">
+				<label :for="'${pid}cpattr_'+cpa.name" class="field-label col-12 mb-2"
+					:title="cpa.descLabel && cpa.descLabel.value ? cpa.descLabel.value : null">
+					{{cpa.nameLabel && cpa.nameLabel.value ? cpa.nameLabel.value : cpa.name}}
+				</label>
+				<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginAttribute.InputType.RADIO">
+					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
+						<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
+							<p-radiobutton :id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
+							<label :for="'${pid}cpattr_'+cpa.name+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
 						</div>
 					</div>
-					<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
-						<p-button type="button" icon="pi pi-plus" @click="onChartAttrValuesFormAddColor(ca.name)"></p-button>
+		        	<div class="validate-msg" v-if="cpa.required">
+		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+		        	</div>
+				</div>
+				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.SELECT">
+					<div v-if="cpa.inputPayload.multiple">
+						<p-multiselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+							option-label="name" option-value="value" class="input w-full">
+						</p-multiselect>
 					</div>
+					<div v-else>
+						<p-dropdown :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+							option-label="name" option-value="value" class="input w-full">
+						</p-dropdown>
+					</div>
+		        	<div class="validate-msg" v-if="cpa.required">
+		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+		        	</div>
 				</div>
-				<div class="flex" v-else>
-					<p-inputtext :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" type="text"
-						class="input flex-grow-1 mr-1" maxlength="100">
+				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.CHECKBOX">
+					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
+						<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
+							<p-checkbox :id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
+							<label :for="'${pid}cpattr_'+cpa.name+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
+						</div>
+					</div>
+		        	<div class="validate-msg" v-if="cpa.required">
+		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+		        	</div>
+				</div>
+				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.COLOR">
+					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="cpa.inputPayload.multiple">
+						<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.colorProxy[cpa.name]" :key="colorIdx">
+							<div class="flex mb-1">
+								<p-inputtext :id="'${pid}cpattr_'+cpa.name+'_'+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
+									class="input flex-grow-1 mr-1" name="cpa.name">
+								</p-inputtext>
+								<p-colorpicker v-model="pm.chartAttrValuesForm.colorProxy[cpa.name][colorIdx]"
+									default-color="FFFFFF" class="flex-grow-0 preview-h-full mr-3"
+									@change="onChartAttrValuesFormColorPickerChange($event, cpa.name, colorIdx)">
+								</p-colorpicker>
+								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
+									@click="onChartAttrValuesFormRemoveColor($event, cpa.name, colorIdx)"
+									v-if="!pm.chartAttrValuesForm.readonly">
+								</p-button>
+							</div>
+						</div>
+						<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
+							<p-button type="button" icon="pi pi-plus" @click="onChartAttrValuesFormAddColor(cpa.name)"></p-button>
+						</div>
+					</div>
+					<div class="flex" v-else>
+						<p-inputtext :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+							class="input flex-grow-1 mr-1" maxlength="100">
+						</p-inputtext>
+						<p-colorpicker v-model="pm.chartAttrValuesForm.colorProxy[cpa.name]"
+							default-color="FFFFFF" class="flex-grow-0 preview-h-full"
+							@change="onChartAttrValuesFormColorPickerChange($event, cpa.name)">
+						</p-colorpicker>
+					</div>
+		        	<div class="validate-msg" v-if="cpa.required">
+		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+		        	</div>
+				</div>
+				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.TEXTAREA">
+					<p-textarea :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+						class="input w-full" maxlength="2000">
+					</p-textarea>
+		        	<div class="validate-msg" v-if="cpa.required">
+		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+		        	</div>
+				</div>
+				<div class="field-input col-12" v-else>
+					<p-inputtext :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+						class="input w-full" maxlength="1000">
 					</p-inputtext>
-					<p-colorpicker v-model="pm.chartAttrValuesForm.colorProxy[ca.name]"
-						default-color="FFFFFF" class="flex-grow-0 preview-h-full"
-						@change="onChartAttrValuesFormColorPickerChange($event, ca.name)">
-					</p-colorpicker>
+		        	<div class="validate-msg" v-if="cpa.required">
+		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+		        	</div>
 				</div>
-	        	<div class="validate-msg" v-if="ca.required">
-	        		<input :name="ca.name" required type="text" class="validate-proxy" />
-	        	</div>
-			</div>
-			<div class="field-input col-12" v-else-if="ca.inputType == pm.ChartPluginAttribute.InputType.TEXTAREA">
-				<p-textarea :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" type="text"
-					class="input w-full" maxlength="2000">
-				</p-textarea>
-	        	<div class="validate-msg" v-if="ca.required">
-	        		<input :name="ca.name" required type="text" class="validate-proxy" />
-	        	</div>
-			</div>
-			<div class="field-input col-12" v-else>
-				<p-inputtext :id="'${pid}pluginAttribute_'+caIdx" v-model="pm.chartAttrValuesForm.attrValues[ca.name]" type="text"
-					class="input w-full" maxlength="1000">
-				</p-inputtext>
-	        	<div class="validate-msg" v-if="ca.required">
-	        		<input :name="ca.name" required type="text" class="validate-proxy" />
-	        	</div>
 			</div>
 		</div>
 	</div>
@@ -279,6 +284,50 @@ page_boolean_options.ftl
 		return inputOptionsNew;
 	};
 	
+	po.toChartPluginAttributeGroups = function(cpas)
+	{
+		var groups = [];
+		
+		$.each(cpas, function(i, cpa)
+		{
+			var group = null;
+			var myGroup = (cpa.group || {});
+			
+			//没有定义分组，如果末尾是【未分组】，则使用；否则，新建【未分组】
+			if(!myGroup.name)
+			{
+				var groupPrev = (groups.length > 0 ? groups[groups.length - 1] : null);
+				if(groupPrev && groupPrev.name == "")
+				{
+					group = groupPrev;
+				}
+				else
+				{
+					group = { name: "", label: "<@spring.message code='ungrouped' />", cpas: [] };
+					groups.push(group);
+				}
+			}
+			//有分组，查找或新建
+			else
+			{
+				var idx = $.inArrayById(groups, myGroup.name, "name");
+				if(idx >= 0)
+				{
+					group = groups[idx];
+				}
+				else
+				{
+					group = { name: myGroup.name, label: (myGroup.nameLabel && myGroup.nameLabel.value ? myGroup.nameLabel.value : myGroup.name), cpas: [] };
+					groups.push(group);
+				}
+			}
+			
+			group.cpas.push(cpa);
+		});
+		
+		return groups;
+	};
+	
 	//整理图表属性值：类型转换、选项值限定
 	po.trimChartAttrValues = function(attrValues, cpas)
 	{
@@ -433,6 +482,7 @@ page_boolean_options.ftl
 		chartAttrValuesForm:
 		{
 			attributes: [],
+			groups: [],
 			attrValues: {},
 			readonly: false,
 			buttons: [],
@@ -450,14 +500,17 @@ page_boolean_options.ftl
 		},
 		options);
 		
+		var cpas = po.trimChartPluginAttributes(chartPluginAttributes);
+		
 		var pm = po.vuePageModel();
-		pm.chartAttrValuesForm.attributes = po.trimChartPluginAttributes(chartPluginAttributes);
+		pm.chartAttrValuesForm.attributes = cpas;
+		pm.chartAttrValuesForm.groups = po.toChartPluginAttributeGroups(cpas);
 		pm.chartAttrValuesForm.buttons = options.buttons;
 		pm.chartAttrValuesForm.readonly = options.readonly;
 		po.setChartAttrValuesFormAttrValues(attrValues);
 		
 		var validateRules = {};
-		$.each(pm.chartAttrValuesForm.attributes, function(i, cpa)
+		$.each(cpas, function(i, cpa)
 		{
 			if(cpa.type == po.ChartPluginAttribute.DataType.NUMBER)
 				validateRules[cpa.name] = { "number": true };
