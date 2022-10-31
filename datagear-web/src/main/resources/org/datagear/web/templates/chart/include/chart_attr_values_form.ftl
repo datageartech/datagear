@@ -253,60 +253,63 @@ page_boolean_options.ftl
 		return inputOptionsNew;
 	};
 	
+	//整理图表属性值
+	//注意：attrValues中对于没有在cpas定义的属性值应原样保留，
+	//因为看板的dg-chart-attr-values应允许自己定义扩展图表属性值
 	po.trimChartAttrValues = function(attrValues, cpas)
 	{
 		if(!attrValues)
 			return null;
 		
 		if(!cpas || cpas.length == 0)
-			return null;
+			return attrValues;
 		
-		var re = {};
+		var re = $.extend(true, {}, attrValues);
 		
 		$.each(cpas, function(i, cpa)
 		{
-			var v = attrValues[cpa.name];
+			var v = re[cpa.name];
+			
+			if(v == null)
+				return;
 			
 			//需转换类型
 			v = po.toChartAttrTypeValue(cpa.type, v);
 			
-			if(v != null)
+			var inputType = cpa.inputType;
+			var inputPayload = cpa.inputPayload;
+			
+			//多选输入框应强制转换为数组
+			if(inputPayload && inputPayload.multiple == true && !$.isArray(v))
 			{
-				var inputType = cpa.inputType;
-				var inputPayload = cpa.inputPayload;
-				
-				//多选输入框应强制转换为数组
-				if(inputPayload && inputPayload.multiple == true && !$.isArray(v))
-				{
-					v = [ v ];
-				}
-				
-				//应将值限定为待选值集合内，比如图表插件升级后inputPayload有所删减，那么这里的旧值应删除
-				if(inputPayload && inputPayload.options && $.isArray(inputPayload.options))
-				{
-					if($.isArray(v))
-					{
-						var vnew = [];
-						$.each(v, function(j, vj)
-						{
-							if($.inArrayById(inputPayload.options, vj, "value") >= 0)
-								vnew.push(vj);
-						});
-						
-						v = vnew;
-					}
-					else
-					{
-						if($.inArrayById(inputPayload.options, v, "value") < 0)
-						{
-							v = null;
-						}
-					}
-				}
-				
-				if(v != null)
-					re[cpa.name] = v;
+				v = [ v ];
 			}
+			
+			//应将值限定为待选值集合内，比如图表插件升级后inputPayload有所删减，那么这里的旧值应删除
+			if(inputPayload && inputPayload.options && $.isArray(inputPayload.options))
+			{
+				if($.isArray(v))
+				{
+					var vnew = [];
+					$.each(v, function(j, vj)
+					{
+						if($.inArrayById(inputPayload.options, vj, "value") >= 0)
+							vnew.push(vj);
+					});
+					
+					v = vnew;
+				}
+				else
+				{
+					if($.inArrayById(inputPayload.options, v, "value") < 0)
+					{
+						v = null;
+					}
+				}
+			}
+			
+			if(v != null)
+				re[cpa.name] = v;
 		});
 		
 		return re;
