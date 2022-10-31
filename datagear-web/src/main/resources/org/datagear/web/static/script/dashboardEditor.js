@@ -1727,6 +1727,37 @@
 	};
 	
 	/**
+	 * 获取图表元素的重置图表属性值。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.getElementChartAttrValuesForReset = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return null;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		if(!chart)
+			return null;
+		
+		var attrValuesOrigin =  (chart.attrValuesOrigin() || {});
+		var attrValuesEle = chart.elementJquery().attr(chartFactory.elementAttrConst.ATTR_VALUES);
+		attrValuesEle = chartFactory.evalSilently(attrValuesEle, {});
+		var cpas = chart.pluginAttributes();
+		
+		$.each(cpas, function(i, cpa)
+		{
+			delete attrValuesEle[cpa.name];
+		});
+		
+		//保留元素上定义的图表插件属性之外的扩展值
+		var re = $.extend(true, {}, attrValuesOrigin, attrValuesEle);
+		return re;
+	};
+	
+	/**
 	 * 设置图表元素的图表属性值。
 	 * 
 	 * @param attrValues 要设置的图表主题对象，格式为：{ ... }

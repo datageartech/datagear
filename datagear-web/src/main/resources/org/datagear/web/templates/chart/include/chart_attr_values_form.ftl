@@ -90,6 +90,10 @@ page_boolean_options.ftl
 	</div>
 	<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
 		<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+		
+		<p-button v-for="(btn, btnIdx) in pm.chartAttrValuesForm.buttons" :key="btnIdx"
+			type="button" class="p-button-secondary" :label="btn.name" @click="btn.clickHandler">
+		</p-button>
 	</div>
 </form>
 <script>
@@ -253,11 +257,12 @@ page_boolean_options.ftl
 		return inputOptionsNew;
 	};
 	
-	//整理图表属性值
-	//注意：attrValues中对于没有在cpas定义的属性值应原样保留，
-	//因为看板的dg-chart-attr-values应允许自己定义扩展图表属性值
+	//整理图表属性值：类型转换、选项值限定
 	po.trimChartAttrValues = function(attrValues, cpas)
 	{
+		//注意：attrValues中对于没有在cpas定义的属性值应原样保留，
+		//因为看板的dg-chart-attr-values应允许定义图表插件属性之外的扩展值
+		
 		if(!attrValues)
 			return null;
 		
@@ -388,8 +393,8 @@ page_boolean_options.ftl
 			attributes: [],
 			attrValues: {},
 			readonly: false,
-			colorProxy: {},
-			formContentClass: ""
+			buttons: [],
+			colorProxy: {}
 		}
 	});
 	
@@ -398,15 +403,16 @@ page_boolean_options.ftl
 		options = $.extend(
 		{
 			submitHandler: null,
+			buttons: [],
 			readonly: false
 		},
 		options);
 		
 		var pm = po.vuePageModel();
 		pm.chartAttrValuesForm.attributes = po.trimChartPluginAttributes(chartPluginAttributes);
-		pm.chartAttrValuesForm.attrValues = $.extend(true, {}, (attrValues || {}));
+		pm.chartAttrValuesForm.buttons = options.buttons;
 		pm.chartAttrValuesForm.readonly = options.readonly;
-		pm.chartAttrValuesForm.colorProxy = po.toChartAttrValuesFormColorProxy(pm.chartAttrValuesForm.attrValues, pm.chartAttrValuesForm.attributes);
+		po.setChartAttrValuesFormAttrValues(attrValues);
 		
 		var validateRules = {};
 		$.each(pm.chartAttrValuesForm.attributes, function(i, cpa)
@@ -428,6 +434,14 @@ page_boolean_options.ftl
 				}
 			}
 		});
+	};
+	
+	po.setChartAttrValuesFormAttrValues = function(attrValues)
+	{
+		var pm = po.vuePageModel();
+		
+		pm.chartAttrValuesForm.attrValues = $.extend(true, {}, (attrValues || {}));
+		pm.chartAttrValuesForm.colorProxy = po.toChartAttrValuesFormColorProxy(pm.chartAttrValuesForm.attrValues, pm.chartAttrValuesForm.attributes);
 	};
 	
 	po.vueMethod(
