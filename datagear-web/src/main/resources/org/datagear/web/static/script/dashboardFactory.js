@@ -198,9 +198,7 @@
 	{
 		instanceInit = (instanceInit == null ? true : instanceInit);
 		
-		dashboardFactory._initOverwriteChartBaseIfNot();
 		dashboardFactory._initStartHeartBeatIfNot(dashboard.renderContext);
-		
 		dashboardFactory._refactorDashboard(dashboard);
 		$.extend(dashboard, this.dashboardBase);
 		
@@ -224,33 +222,6 @@
 		delete dashboard.template;
 		delete dashboard.varName;
 		delete dashboard.loadableChartWidgets;
-	};
-	
-	dashboardFactory._initOverwriteChartBaseIfNot = function()
-	{
-		//确保只会执行一次
-		if(chartBase._initForExtSuperByDbdfty == null)
-		{
-			chartBase._initForExtSuperByDbdfty = chartBase._initForExt;
-			chartBase._initForExt = function()
-			{
-				this._initLinks();
-				this._initAutoResize();
-				this._initUpdateGroup();
-				this._initForExtSuperByDbdfty();
-			};
-		}
-		
-		//确保只会执行一次
-		if(chartBase._postProcessRenderedSuperByDbdfty == null)
-		{
-			chartBase._postProcessRenderedSuperByDbdfty = chartBase._postProcessRendered;
-			chartBase._postProcessRendered = function()
-			{
-				this.bindLinksEventHanders(this.links());
-				this._postProcessRenderedSuperByDbdfty();
-			};
-		}
 	};
 	
 	dashboardFactory._initStartHeartBeatIfNot = function(renderContext)
@@ -373,14 +344,7 @@
 	chartBase._initLinks = function()
 	{
 		var links = this.elementJquery().attr(elementAttrConst.LINK);
-		
-		if(!links)
-			return;
-		
-		links = chartFactory.evalSilently(links);
-		
-		if(!links)
-			return;
+		links = (links ? chartFactory.evalSilently(links) : null);
 		
 		this.links(links);
 	};
@@ -398,7 +362,7 @@
 		
 		this.autoResize(autoResize == "true");
 	};
-
+	
 	/**
 	 * 初始化图表更新分组。
 	 * 此方法从body元素、图表元素的elementAttrConst.UPDATE_GROUP属性获取更新分组设置。
@@ -640,7 +604,7 @@
 		this._assertActive();
 		
 		if(!this.isDataSetParamValueReady())
-			chartFactory.logException("Chart '"+this.elementId+"' has required but unset data set param value");
+			chartFactory.logException("Chart '"+this.elementId+"' has required but unset dataset param value");
 		
 		//不能使用如下方式实现，当在A图表监听器的update函数中调用参数化B图表的refreshData()时，
 		//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
@@ -715,8 +679,8 @@
 		this._initRenderContext();
 		this._initListener();
 		this._initMapURLs();
-		this._initChartResizeHandler();
 		this._initCharts();
+		this._initChartResizeHandler();
 		
 		this._status = dashboardStatusConst.INITED;
 	};
@@ -812,8 +776,7 @@
 		}
 		// > @deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
 		
-		if(listener)
-			this.listener(listener);
+		this.listener(listener);
 	};
 	
 	/**
@@ -830,31 +793,74 @@
 	 */
 	dashboardBase._initChart = function(chart)
 	{
-		chart.renderContext = this.renderContext;
-		chart.dashboard = this;
-		
+		//采用重写chart.init()逻辑而非直接执行的方式，确保chart.init()重复调用的逻辑一致
+		this._initChartOverwriteIfNone(chart);
 		chart.init();
-		
-		var chartListener = chart.listener();
-		
-		//图表监听器不继承看板监听器功能，所有只有图表没有定义监听器时，才使用代理看板监听器
-		if(!chartListener)
+	};
+	
+	dashboardBase._initChartOverwriteIfNone = function(chart)
+	{
+		var dashboard = this;
+		chart._initDashboardByDbd = function()
 		{
-			chart.listener(this._getDelegateChartListener());
-		}
-		else
+			this.dashboard = dashboard;
+			this.renderContext = this.dashboard.renderContext;
+		};
+		
+		//确保只会执行一次
+		if(chart._initForPreSuperByDbd == null)
 		{
-			//由元素图表监听器属性生成的内部代理图表监听器，应为其添加updateError处理函数
-			if(chartListener._proxyChartListenerFromEleAttr)
+			chart._initForPreSuperByDbd = chart._initForPre;
+			chart._initForPre = function()
 			{
-				chartListener.updateError = function(chart, error)
+				this._initDashboardByDbd();
+			};
+		}
+		
+		//确保只会执行一次
+		if(chart._initForPostSuperByDbd == null)
+		{
+			chart._initForPostSuperByDbd = chart._initForPost;
+			chart._initForPost = function()
+			{
+				this._initLinks();
+				this._initAutoResize();
+				this._initUpdateGroup();
+				this._initForPostSuperByDbd();
+				
+				var chartListener = this.listener();
+				
+				//图表监听器不继承看板监听器功能，所以只有图表没有定义监听器时，才使用代理看板监听器
+				if(!chartListener)
 				{
-					var dl = this._findListenerOfFunc("updateError");
-					
-					if(dl)
-						return dl.updateError(chart, error);
-				};
-			}
+					this.listener(this.dashboard._getDelegateChartListener());
+				}
+				else
+				{
+					//由元素图表监听器属性生成的内部代理图表监听器，应为其添加updateError处理函数
+					if(chartListener._proxyChartListenerFromEleAttr)
+					{
+						chartListener.updateError = function(chart, error)
+						{
+							var dl = this._findListenerOfFunc("updateError");
+							
+							if(dl)
+								return dl.updateError(chart, error);
+						};
+					}
+				}
+			};
+		}
+		
+		//确保只会执行一次
+		if(chart._postProcessRenderedSuperByDbd == null)
+		{
+			chart._postProcessRenderedSuperByDbd = chart._postProcessRendered;
+			chart._postProcessRendered = function()
+			{
+				this.bindLinksEventHanders(this.links());
+				this._postProcessRenderedSuperByDbd();
+			};
 		}
 	};
 	

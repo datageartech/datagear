@@ -322,6 +322,7 @@
 		
 		this._clearExtValue();
 		
+		this._initForPre();
 		this._initBaseProperties();
 		this._initPlugin();
 		this._initOptions();
@@ -333,7 +334,7 @@
 		this._initEventHandlers();
 		this._initRenderer();
 		this._initAttrValues();
-		this._initForExt();
+		this._initForPost();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
@@ -369,17 +370,16 @@
 	 */
 	chartBase._initPlugin = function()
 	{
-		var plugin = this.plugin;
+		if(!chartFactory.chartPluginManager || !chartFactory.chartPluginManager.get)
+			throw new Error("[chartFactory.chartPluginManager.get] required");
 		
-		//初始化可能由后台构建的仅包含id的plugin
-		if(!plugin.renderer)
-		{
-			if(!chartFactory.chartPluginManager || !chartFactory.chartPluginManager.get)
-				throw new Error("[chartFactory.chartPluginManager.get] required");
-			
-			plugin = chartFactory.chartPluginManager.get(plugin.id);
-			this.plugin = plugin;
-		}
+		var pluginId = (this.plugin ? this.plugin.id : null);
+		var plugin = (pluginId ? chartFactory.chartPluginManager.get(pluginId) : null);
+		
+		if(plugin == null)
+			throw new Error("chart plugin ["+pluginId+"] not found");
+		
+		this.plugin = plugin;
 	};
 	
 	/**
@@ -531,8 +531,7 @@
 	{
 		var map = this.elementJquery().attr(elementAttrConst.MAP);
 		
-		if(map)
-			this.map(map);
+		this.map(map);
 	};
 	
 	/**
@@ -542,7 +541,6 @@
 	chartBase._initEchartsThemeName = function()
 	{
 		var themeName = this.elementJquery().attr(elementAttrConst.ECHARTS_THEME);
-		
 		if(!themeName)
 			themeName = $(document.body).attr(elementAttrConst.ECHARTS_THEME);
 		
@@ -637,14 +635,9 @@
 	chartBase._initRenderer = function()
 	{
 		var renderer = this.elementJquery().attr(elementAttrConst.RENDERER);
+		renderer = (renderer ? chartFactory.evalSilently(renderer) : null);
 		
-		if(renderer)
-		{
-			renderer = chartFactory.evalSilently(renderer);
-			
-			if(renderer)
-				this.renderer(renderer);
-		}
+		this.renderer(renderer);
 	};
 	
 	/**
@@ -654,20 +647,21 @@
 	chartBase._initAttrValues = function()
 	{
 		var attrValues = this.elementJquery().attr(elementAttrConst.ATTR_VALUES);
+		attrValues = (attrValues ? chartFactory.evalSilently(attrValues) : null);
 		
-		if(attrValues)
-			attrValues = chartFactory.evalSilently(attrValues, {});
-		else
-			attrValues = {};
-		
-		//元素上的属性值集应高优先级合并至初始属性集值
-		this._attrValues = $.extend(true, {}, this._attrValuesOrigin, attrValues);
+		//元素上的属性值集应高优先级合并
+		this._attrValues = $.extend(true, (this._attrValues || {}), attrValues);
 	};
 	
 	/**
-	 * 初始化扩展函数，默认什么也不做，留作扩展使用。
+	 * 初始化开始扩展函数，默认什么也不做，留作扩展使用。
 	 */
-	chartBase._initForExt = function(){};
+	chartBase._initForPre = function(){};
+	
+	/**
+	 * 初始化完成扩展函数，默认什么也不做，留作扩展使用。
+	 */
+	chartBase._initForPost = function(){};
 	
 	/**
 	 * 获取/设置图表选项，这些选项通常用于控制图表展示、交互效果，格式为：{ ... }。
