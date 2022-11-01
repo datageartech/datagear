@@ -228,26 +228,29 @@
 	
 	dashboardFactory._initOverwriteChartBaseIfNot = function()
 	{
-		//此方法不能重复执行，这里确保只执行一次
-		if(chartBase._initSuper != null)
-			return false;
-		
-		chartBase._initSuper = chartBase.init;
-		chartBase._postProcessRenderedSuper = chartBase._postProcessRendered;
-		
-		chartBase.init = function()
+		//确保只会执行一次
+		if(chartBase._initForExtSuperByDbdfty == null)
 		{
-			this._initLinks();
-			this._initAutoResize();
-			this._initUpdateGroup();
-			this._initSuper();
-		};
+			chartBase._initForExtSuperByDbdfty = chartBase._initForExt;
+			chartBase._initForExt = function()
+			{
+				this._initLinks();
+				this._initAutoResize();
+				this._initUpdateGroup();
+				this._initForExtSuperByDbdfty();
+			};
+		}
 		
-		chartBase._postProcessRendered = function()
+		//确保只会执行一次
+		if(chartBase._postProcessRenderedSuperByDbdfty == null)
 		{
-			this.bindLinksEventHanders(this.links());
-			this._postProcessRenderedSuper();
-		};
+			chartBase._postProcessRenderedSuperByDbdfty = chartBase._postProcessRendered;
+			chartBase._postProcessRendered = function()
+			{
+				this.bindLinksEventHanders(this.links());
+				this._postProcessRenderedSuperByDbdfty();
+			};
+		}
 	};
 	
 	dashboardFactory._initStartHeartBeatIfNot = function(renderContext)

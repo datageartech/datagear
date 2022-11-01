@@ -333,6 +333,7 @@
 		this._initEventHandlers();
 		this._initRenderer();
 		this._initAttrValues();
+		this._initForExt();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
@@ -662,6 +663,11 @@
 		//元素上的属性值集应高优先级合并至初始属性集值
 		this._attrValues = $.extend(true, {}, this._attrValuesOrigin, attrValues);
 	};
+	
+	/**
+	 * 初始化扩展函数，默认什么也不做，留作扩展使用。
+	 */
+	chartBase._initForExt = function(){};
 	
 	/**
 	 * 获取/设置图表选项，这些选项通常用于控制图表展示、交互效果，格式为：{ ... }。
