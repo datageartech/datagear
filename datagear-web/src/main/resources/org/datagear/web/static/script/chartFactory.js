@@ -648,9 +648,10 @@
 	{
 		var attrValues = this.elementJquery().attr(elementAttrConst.ATTR_VALUES);
 		attrValues = (attrValues ? chartFactory.evalSilently(attrValues) : null);
+		//注意：应该使用this.attrValuesOrigin()作为合并基础，因为this.attrValues()可能已被修改
+		attrValues = $.extend(true, {}, this.attrValuesOrigin(), attrValues);
 		
-		//元素上的属性值集应高优先级合并
-		this._attrValues = $.extend(true, (this._attrValues || {}), attrValues);
+		this.attrValues(attrValues);
 	};
 	
 	/**
