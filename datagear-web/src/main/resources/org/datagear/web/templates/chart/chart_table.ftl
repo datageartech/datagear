@@ -32,7 +32,7 @@
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
 			<p-splitbutton label="<@spring.message code='add' />" @click="onAdd" :model="pm.addBtnItems" v-if="!pm.isReadonlyAction"></p-splitbutton>
-			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isReadonlyAction"></p-button>
+			<p-splitbutton label="<@spring.message code='edit' />" @click="onEdit" :model="pm.editBtnItems" v-if="!pm.isReadonlyAction"></p-splitbutton>
 			<p-splitbutton label="<@spring.message code='show' />" @click="onShow" :model="pm.showBtnItems" v-if="!pm.isSelectAction"></p-splitbutton>
 			<p-button label="<@spring.message code='share' />" @click="onShare" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
@@ -90,10 +90,34 @@
 		addBtnItems:
 		[
 			{
+				label: "<@spring.message code='addInNewWindow' />",
+				command: function()
+				{
+					po.open(po.addCurrentAnalysisProjectIdParam("/chart/add"), {target: "_blank"});
+				}
+			},
+			{
 				label: "<@spring.message code='copy' />",
 				command: function()
 				{
 					po.handleOpenOfAction("/chart/copy", {width: "70vw"});
+				}
+			},
+			{
+				label: "<@spring.message code='copyInNewWindow' />",
+				command: function()
+				{
+					po.handleOpenOfAction("/chart/copy", {target: "_blank"});
+				}
+			}
+		],
+		editBtnItems:
+		[
+			{
+				label: "<@spring.message code='editInNewWindow' />",
+				command: function()
+				{
+					po.handleOpenOfAction("/chart/edit", {target: "_blank"});
 				}
 			}
 		],

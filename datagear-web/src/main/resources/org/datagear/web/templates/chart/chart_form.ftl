@@ -673,11 +673,14 @@
 	{
 		success : function(response)
 		{
-			var options = this;
+			var fm = po.vueFormModel();
 			var chart = response.data;
 			
+			fm.id = chart.id;
+			
+			var options = this;
 			if(options.saveAndShowAction)
-				window.open(po.concatContextPath("/chart/show/"+encodeURIComponent(chart.id)+"/"), chart.id);
+				window.open(po.concatContextPath("/chart/show/"+encodeURIComponent(chart.id)+"/"), "show-chart-"+chart.id);
 		}
 	},
 	{
