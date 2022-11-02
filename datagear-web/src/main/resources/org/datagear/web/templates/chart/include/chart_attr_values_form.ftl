@@ -39,12 +39,12 @@ page_boolean_options.ftl
 				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.SELECT">
 					<div v-if="cpa.inputPayload.multiple">
 						<p-multiselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-							option-label="name" option-value="value" class="input w-full">
+							option-label="name" option-value="value" :show-clear="true" class="input w-full">
 						</p-multiselect>
 					</div>
 					<div v-else>
 						<p-dropdown :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-							option-label="name" option-value="value" class="input w-full">
+							option-label="name" option-value="value" :show-clear="!cpa.required" class="input w-full">
 						</p-dropdown>
 					</div>
 		        	<div class="validate-msg" v-if="cpa.required">
