@@ -2528,6 +2528,8 @@
 		return re;
 	};
 	
+	//将符合JSON规范的对象序列化为元素属性值字符串
+	//注意：此函数使用单引号而非双引号作为引号符，因为双引号会被HTML转义为'&quot;'，对源码不友好
 	editor._serializeForAttrValue = function(obj)
 	{
 		if(obj == null)
@@ -2579,7 +2581,7 @@
 			return str;
 		}
 		else
-			return obj.toString();
+			return this._serializeForAttrValue(obj.toString());
 	};
 	
 	editor._toSingleQuoteJsString = function(str, quote)
