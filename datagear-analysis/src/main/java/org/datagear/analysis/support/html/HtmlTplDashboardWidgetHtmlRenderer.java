@@ -519,6 +519,23 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 
 		@Override
+		public void afterWrite(Reader in) throws IOException
+		{
+			if (!this.isAborted())
+			{
+				// 如果已全部完成而仍没有写看板脚本，则应在此写入，比如原始HTML里没有</body>标签
+				if (!this.dashboardScriptWritten)
+				{
+					// 确保看板脚本前已写完看板导入库
+					if (!this.dashboardImportWritten)
+						writeDashboardImportWithSet();
+
+					writeHtmlTplDashboardScriptWithSet();
+				}
+			}
+		}
+
+		@Override
 		protected void onSetInHeadTag(boolean in)
 		{
 			if (!in)

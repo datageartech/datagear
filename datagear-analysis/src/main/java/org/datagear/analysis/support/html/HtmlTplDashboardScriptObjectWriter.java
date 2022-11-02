@@ -86,6 +86,8 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 	
 	protected static class LoadableChartWidgetsJson extends LoadableChartWidgets
 	{
+		private static final long serialVersionUID = 1L;
+
 		public LoadableChartWidgetsJson(LoadableChartWidgets pattern)
 		{
 			super(pattern.getPattern());
