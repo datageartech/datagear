@@ -1679,35 +1679,6 @@
 	};
 	
 	/**
-	 * 校验setElementChartAttrValues操作。
-	 * 
-	 * @param ele 可选，元素，默认为：当前选中元素
-	 */
-	editor.checkSetElementChartAttrValues = function(ele)
-	{
-		ele = this._currentElement(ele, true);
-		
-		if(!this._checkNotEmptyElement(ele))
-			return false;
-		
-		var chart = this.dashboard.renderedChart(ele);
-		if(!chart)
-		{
-			this.tipInfo(i18n.selectedNotChartElement);
-			return false;
-		}
-		
-		var cpas = chart.pluginAttributes();
-		if(cpas == null || cpas.length == 0)
-		{
-			this.tipInfo(i18n.chartPluginNoAttrDefined);
-			return false;
-		}
-		
-		return true;
-	};
-	
-	/**
 	 * 获取图表元素的图表属性值。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
@@ -1755,6 +1726,66 @@
 		//保留元素上定义的图表插件属性之外的扩展值
 		var re = $.extend(true, {}, attrValuesOrigin, attrValuesEle);
 		return re;
+	};
+	
+	/**
+	 * 获取看板地图名称。
+	 * 
+	 * @returns { mapUrls: ["...", ...], builtins: ["...", ...] }
+	 */
+	editor.getDashboardMapNames = function()
+	{
+		var re = { mapUrls: [], builtins: [] };
+		
+		$.each(dashboardFactory.builtinChartMaps, function(i, cms)
+		{
+			if(cms && cms.names && cms.names.length > 0)
+			{
+				re.builtins.push(cms.names[0]);
+			}
+		});
+		
+		var mapURLsBody = $(document.body).attr(chartFactory.elementAttrConst.MAP_URLS);
+		mapURLsBody = (mapURLsBody ? chartFactory.evalSilently(mapURLsBody, {}) : {});
+		
+		$.each(mapURLsBody, function(p, v)
+		{
+			if(p && chartFactory.isString(v))
+			{
+				re.mapUrls.push(p);
+			}
+		});
+		
+		return re;
+	};
+	
+	/**
+	 * 校验setElementChartAttrValues操作。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkSetElementChartAttrValues = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		if(!chart)
+		{
+			this.tipInfo(i18n.selectedNotChartElement);
+			return false;
+		}
+		
+		var cpas = chart.pluginAttributes();
+		if(cpas == null || cpas.length == 0)
+		{
+			this.tipInfo(i18n.chartPluginNoAttrDefined);
+			return false;
+		}
+		
+		return true;
 	};
 	
 	/**

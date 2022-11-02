@@ -1893,6 +1893,30 @@ page_boolean_options.ftl
 			return hexStr;
 	};
 	
+	//重写chart_attr_values_form.ftl中的函数
+	po.getChartPluginAttributeInputPayloadForMap = function()
+	{
+		var inputPayload = [];
+		
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		if(dashboardEditor)
+		{
+			var mapNames = dashboardEditor.getDashboardMapNames();
+			
+			$.each(mapNames.mapUrls, function(i, n)
+			{
+				inputPayload.push({ name: n, value: n });
+			});
+			
+			$.each(mapNames.builtins, function(i, n)
+			{
+				inputPayload.push({ name: n, value: n });
+			});
+		}
+		
+		return inputPayload;
+	};
+	
 	po.showVeGridLayoutPanel = function(showFillParent)
 	{
 		showFillParent = (showFillParent == null ? false : showFillParent);
@@ -2229,8 +2253,14 @@ page_boolean_options.ftl
 			onVeChartAttrValuesPanelShow: function()
 			{
 				var dashboardEditor = po.visualDashboardEditorByTab();
-				var cpas = (dashboardEditor.getElementChartPluginAttrs() || []);
-				var attrValues = (dashboardEditor.getElementChartAttrValues() || {});
+				var cpas = [];
+				var attrValues = [];
+				
+				if(dashboardEditor)
+				{
+					cpas = (dashboardEditor.getElementChartPluginAttrs() || []);
+					attrValues = (dashboardEditor.getElementChartAttrValues() || {});
+				}
 				
 				po.setupChartAttrValuesForm(cpas, attrValues,
 				{
@@ -2247,7 +2277,11 @@ page_boolean_options.ftl
 							name: "<@spring.message code='resetToOrigin' />",
 							clickHandler: function()
 							{
-								var attrValuesReset = (dashboardEditor.getElementChartAttrValuesForReset() || {});
+								var attrValuesReset = {};
+								
+								if(dashboardEditor)
+									attrValuesReset = (dashboardEditor.getElementChartAttrValuesForReset() || {});
+								
 								po.setChartAttrValuesFormAttrValues(attrValuesReset);
 							}
 						}

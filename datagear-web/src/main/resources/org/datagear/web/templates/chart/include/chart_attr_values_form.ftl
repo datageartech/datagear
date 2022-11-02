@@ -243,16 +243,23 @@ page_boolean_options.ftl
 		//内置地图
 		if(inputPayload == po.ChartPluginAttribute.InputPayload.DG_MAP)
 		{
-			inputPayload = [];
-			
-			$.each(dashboardFactory.builtinChartMaps, function(i, cms)
-			{
-				if(cms && cms.names && cms.names.length > 0)
-				{
-					inputPayload.push(cms.names[0]);
-				}
-			});
+			inputPayload = po.getChartPluginAttributeInputPayloadForMap();
 		}
+		
+		return inputPayload;
+	};
+	
+	po.getChartPluginAttributeInputPayloadForMap = function()
+	{
+		var inputPayload = [];
+		
+		$.each(dashboardFactory.builtinChartMaps, function(i, cms)
+		{
+			if(cms && cms.names && cms.names.length > 0)
+			{
+				inputPayload.push({ name: cms.names[0], value: cms.names[0]});
+			}
+		});
 		
 		return inputPayload;
 	};
