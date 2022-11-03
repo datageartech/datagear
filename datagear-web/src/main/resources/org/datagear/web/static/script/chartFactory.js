@@ -392,16 +392,29 @@
 		
 		var $ele = this.elementJquery();
 		
-		var bodyOptions = $(document.body).attr(elementAttrConst.OPTIONS);
 		var eleOptions = $ele.attr(elementAttrConst.OPTIONS);
 		
+		var bodyOptions = this._getBodyOptions();
 		if(bodyOptions)
-			options = $.extend(true, options, chartFactory.evalSilently(bodyOptions, {}));
+			options = $.extend(true, options, bodyOptions);
 		
 		if(eleOptions)
 			options = $.extend(true, options, chartFactory.evalSilently(eleOptions, {}));
 		
 		this.options(options);
+	};
+	
+	chartBase._getBodyOptions = function()
+	{
+		var bodyOptionsStr = $(document.body).attr(elementAttrConst.OPTIONS);
+		
+		if(bodyOptionsStr != chartFactory._PREV_BODY_OPTIONS_STR)
+		{
+			chartFactory._PREV_BODY_OPTIONS_STR = bodyOptionsStr;
+			chartFactory._PREV_BODY_OPTIONS = chartFactory.evalSilently(bodyOptionsStr);
+		}
+		
+		return chartFactory._PREV_BODY_OPTIONS;
 	};
 	
 	/**
@@ -648,7 +661,8 @@
 	{
 		var attrValues = this.elementJquery().attr(elementAttrConst.ATTR_VALUES);
 		attrValues = (attrValues ? chartFactory.evalSilently(attrValues) : null);
-		//注意：应该使用this.attrValuesOrigin()作为合并基础，因为this.attrValues()可能已被修改
+		//注意：应该使用this.attrValuesOrigin()作为合并基础，因为可能this.attrValues()执行修改操作，
+		//比如修改后chart.destroy()后再chart.init()
 		attrValues = $.extend(true, {}, this.attrValuesOrigin(), attrValues);
 		
 		this.attrValues(attrValues);
