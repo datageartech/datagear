@@ -204,7 +204,8 @@
 				</div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}attrValues" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}attrValues" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='chart.attrValues.desc' />">
 					<@spring.message code='chartAttribute' />
 				</label>
 				<div class="field-input col-12 md:col-9">
