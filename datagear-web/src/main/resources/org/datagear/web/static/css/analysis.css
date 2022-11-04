@@ -304,10 +304,20 @@
 	-webkit-user-select: text;
 	z-index: 100;
 }
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-closebtn{
+	padding-left: 0.5em !important;
+    padding-right: 0.5em !important;
+    padding-top: 0.2em !important;
+    padding-bottom: 0.2em !important;
+    font-size: 0.8em !important;
+}
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head{
 	font-weight: bold;
 	white-space: nowrap;
 	padding-bottom: 0.41em;
+	display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-content{
 	overflow: auto;
@@ -317,9 +327,13 @@
 	padding-top: 0.41em;
 	text-align: center;
 }
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head button,
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head input[type=button],
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head input[type=submit],
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button,
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=button],
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=submit]{
+	font-weight: normal;
 	padding-left: 2em;
 	padding-right: 2em;
 	border-width: 1px;

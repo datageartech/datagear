@@ -53,6 +53,7 @@
 	chartSetting.labels = (chartSetting.labels ||
 	{
 		confirm: "确定",
+		close: "X",
 		yes: "是",
 		no: "否",
 		param: "参数",
@@ -63,6 +64,9 @@
 		serialNumber: "序号",
 		dataDetail: "数据明细"
 	});
+	
+	//是否在参数表单提交时关闭参数面板
+	chartSetting.closeChartSettingParamPanelOnSubmit = (chartSetting.closeChartSettingParamPanelOnSubmit || true);
 	
 	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
 	chartSetting.disableDateAwareInputAutocomplete = (chartSetting.disableDateAwareInputAutocomplete || true);
@@ -1578,7 +1582,8 @@
 		{
 			var color = chart.gradualColor(1);
 			var bgColor = chart.gradualColor(0);
-			var borderColor = chart.gradualColor(0.5);
+			var btnBorderColor = chart.gradualColor(0.5);
+			var panelBorderColor = chart.gradualColor(0.3);
 			var shadowColor = chart.gradualColor(0.9);
 			
 			var css =
@@ -1589,7 +1594,7 @@
 					{
 						"color": color,
 						"background-color": bgColor,
-						"border-color": borderColor
+						"border-color": btnBorderColor
 					}
 				},
 				{
@@ -1605,7 +1610,7 @@
 					{
 						"color": color,
 						"background-color": bgColor,
-						"border-color": borderColor,
+						"border-color": panelBorderColor,
 						"box-shadow": "0px 0px 6px " + shadowColor,
 						"-webkit-box-shadow": "0px 0px 6px " + shadowColor
 					}
@@ -1616,20 +1621,28 @@
 					{
 						"color": color,
 						"background-color": bgColor,
-						"border-color": borderColor
+						"border-color": panelBorderColor
 					}
 				},
 				{
-					name: " .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button",
+					name:
+					[
+						" .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head button",
+						" .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button"
+					],
 					value:
 					{
 						"color": color,
 						"background-color": chart.gradualColor(0.1),
-						"border-color": borderColor
+						"border-color": btnBorderColor
 					}
 				},
 				{
-					name: " .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button:hover",
+					name:
+					[
+						" .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head button:hover",
+						" .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button:hover"
+					],
 					value:
 					{
 						"background-color": chart.gradualColor(0.3)
@@ -1647,7 +1660,6 @@
 	chartSetting.openChartSettingParamPanel = function($box, chart)
 	{
 		var $chart = chart.elementJquery();
-		
 		var chartDataSets = chart.chartDataSets;
 		
 		var $panel = $(".dg-chart-setting-param-panel", $box);
@@ -1659,9 +1671,18 @@
 			//先显示，避免布局计算错误
 			$panel.show();
 			
-			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartSetting.labels.chartParam).appendTo($panel);
+			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
+			
+			$("<div class='dg-chart-setting-panel-head-title' />").html(chartSetting.labels.chartParam).appendTo($panelHead);
+			var $headBtns = $("<div class='dg-chart-setting-panel-head-btns' />").appendTo($panelHead);
+			$("<button type='button' class='dg-chart-setting-panel-closebtn' />")
+				.html(chartSetting.labels.close).appendTo($headBtns)
+				.click(function()
+				{
+					chartSetting.closeChartSettingParamPanel(chart);
+				});
 			
 			var $button = $("<button type='button' />").html(chartSetting.labels.confirm).appendTo($panelFoot);
 			
@@ -1727,7 +1748,9 @@
 					for(var i=0; i<paramValuess.length; i++)
 						chart.dataSetParamValues(paramValuess[i].index, paramValuess[i].paramValues);
 					
-					chartSetting.closeChartSettingParamPanel(chart);
+					if(chartSetting.closeChartSettingParamPanelOnSubmit)
+						chartSetting.closeChartSettingParamPanel(chart);
+					
 					chart.refreshData();
 				}
 				else
@@ -1792,9 +1815,18 @@
 			//先显示，避免布局计算错误
 			$panel.show();
 			
-			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartSetting.labels.chartData).appendTo($panel);
+			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
+			
+			$("<div class='dg-chart-setting-panel-head-title' />").html(chartSetting.labels.chartData).appendTo($panelHead);
+			var $headBtns = $("<div class='dg-chart-setting-panel-head-btns' />").appendTo($panelHead);
+			$("<button type='button' class='dg-chart-setting-panel-closebtn' />")
+				.html(chartSetting.labels.close).appendTo($headBtns)
+				.click(function()
+				{
+					chartSetting.closeChartSettingDataPanel(chart);
+				});
 			
 			chartSetting.setChartSettingDataPanelThemeStyle(chart, $panel);
 			chartSetting.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent,$panelFoot);
@@ -2157,7 +2189,7 @@
 		
 		$panelContent.css("min-width", Math.max(cw*2/5, ww*1/5));
 		$panelContent.css("max-width", ww*3/5);
-		$panelContent.css("min-height", Math.max(ch*2/5, wh*1/5) - fh);
+		//$panelContent.css("min-height", Math.max(ch*2/5, wh*1/5) - fh);
 		$panelContent.css("max-height", wh*3/5 - fh);
 	};
 	
