@@ -37,7 +37,7 @@
 	i18n.hyperlinkEleRequired = "不是超链接元素";
 	i18n.videoEleRequired = "不是视频元素";
 	i18n.labelEleRequired = "不是文本标签元素";
-	i18n.chartPluginNoAttrDefined = "此图表类型没有定义可编辑属性";
+	i18n.chartPluginNoAttrDefined = "此类型图表插件没有定义可编辑属性";
 	
 	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
