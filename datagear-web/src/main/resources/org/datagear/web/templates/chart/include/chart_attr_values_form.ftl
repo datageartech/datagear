@@ -37,10 +37,27 @@ page_boolean_options.ftl
 		        	</div>
 				</div>
 				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.SELECT">
-					<div v-if="cpa.inputPayload.multiple">
+					<div v-if="cpa.inputPayload.multiple == true">
 						<p-multiselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
 							option-label="name" option-value="value" :show-clear="true" class="input w-full">
 						</p-multiselect>
+					</div>
+					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0"
+						v-else-if="cpa.inputPayload.multiple == pm.ChartPluginAttribute.MultipleRepeat">
+						<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="svIdx">
+							<div class="flex mb-1">
+								<p-dropdown :id="'${pid}cpattr_'+cpa.name+'_'+svIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][svIdx]" :options="cpa.inputPayload.options"
+									option-label="name" option-value="value" class="input flex-grow-1 mr-1">
+								</p-dropdown>
+								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
+									@click="onChartAttrValuesFormRemoveValue($event, cpa.name, svIdx)"
+									v-if="!pm.chartAttrValuesForm.readonly">
+								</p-button>
+							</div>
+						</div>
+						<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
+							<p-button type="button" icon="pi pi-plus" @click="onChartAttrValuesFormAddValue(cpa.name)"></p-button>
+						</div>
 					</div>
 					<div v-else>
 						<p-dropdown :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
@@ -67,7 +84,7 @@ page_boolean_options.ftl
 						<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.colorProxy[cpa.name]" :key="colorIdx">
 							<div class="flex mb-1">
 								<p-inputtext :id="'${pid}cpattr_'+cpa.name+'_'+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
-									class="input flex-grow-1 mr-1" name="cpa.name">
+									class="input flex-grow-1 mr-1">
 								</p-inputtext>
 								<p-colorpicker v-model="pm.chartAttrValuesForm.colorProxy[cpa.name][colorIdx]"
 									default-color="FFFFFF" class="flex-grow-0 preview-h-full mr-3"
@@ -149,7 +166,9 @@ page_boolean_options.ftl
 			MULTIPLE: "multiple",
 			//地图
 			DG_MAP: "DG_MAP"
-		}
+		},
+		//下拉框inputPayload.multiple="repeat"值，表示可重复选取
+		MultipleRepeat: "repeat"
 	};
 	
 	po.trimChartPluginAttributes = function(cpas)
@@ -197,10 +216,13 @@ page_boolean_options.ftl
 				inputPayload.multiple = (inputPayload.multiple == null ? false : inputPayload.multiple);
 				inputPayload.options = po.trimChartPluginAttributeInputOptions(inputPayload.options);
 				
-				if(inputType == po.ChartPluginAttribute.InputType.RADIO
-						|| inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
+				if(inputType == po.ChartPluginAttribute.InputType.RADIO)
 				{
 					inputPayload.multiple = false;
+				}
+				else if(inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
+				{
+					inputPayload.multiple = true;
 				}
 				
 				cpa.inputPayload = inputPayload;
@@ -363,7 +385,8 @@ page_boolean_options.ftl
 			var inputPayload = cpa.inputPayload;
 			
 			//多选输入框应强制转换为数组
-			if(inputPayload && inputPayload.multiple == true && !$.isArray(v))
+			if(inputPayload && (inputPayload.multiple == true || inputPayload.multiple == po.ChartPluginAttribute.MultipleRepeat)
+					&& !$.isArray(v))
 			{
 				v = [ v ];
 			}
@@ -567,6 +590,25 @@ page_boolean_options.ftl
 				pickColor = (pickColor ? pickColor : attrValues[propName]);
 				attrValues[propName] = chartFactory.colorToHexStr(pickColor, true);
 			}
+		},
+		
+		onChartAttrValuesFormAddValue: function(propName)
+		{
+			var pm = po.vuePageModel();
+			var attrValues = pm.chartAttrValuesForm.attrValues;
+			
+			if(!attrValues[propName])
+				attrValues[propName] = [];
+			
+			attrValues[propName].push("");
+		},
+		
+		onChartAttrValuesFormRemoveValue: function(e, propName, idx)
+		{
+			var pm = po.vuePageModel();
+			var attrValues = pm.chartAttrValuesForm.attrValues;
+			
+			attrValues[propName].splice(idx, 1);
 		},
 		
 		onChartAttrValuesFormAddColor: function(propName)
