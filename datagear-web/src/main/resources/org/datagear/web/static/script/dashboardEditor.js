@@ -2588,7 +2588,7 @@
 	{
 		quote = (quote == null ? false : quote);
 		
-		if(!str)
+		if(str == null)
 			return str;
 		
 		var re = (quote ? "'" : "");

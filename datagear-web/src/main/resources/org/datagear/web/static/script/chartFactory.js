@@ -5021,6 +5021,9 @@
 	 */
 	chartFactory.colorToHexStr = function(color, prefix)
 	{
+		if(color == null)
+			return "";
+		
 		if(chartFactory.isString(color))
 		{
 			color = chartFactory.parseColor(color);

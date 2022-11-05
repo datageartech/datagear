@@ -700,15 +700,30 @@
 	};
 	
 	//是否为空
-	$.isEmptyValue = function(value)
+	$.isEmptyValue = function(value, checkElement)
 	{
+		checkElement = (checkElement == null ? false : checkElement);
+		
 		if(value == null)
 			return true;
 		
 		if($.isTypeString(value))
 			return (value.length == 0);
 		else if($.isArray(value))
-			return (value.length == 0);
+		{
+			if(!checkElement)
+				return (value.length == 0);
+			else
+			{
+				for(var i=0; i<value.length; i++)
+				{
+					if($.isEmptyValue(value[i], false))
+						return true;
+				}
+				
+				return (value.length == 0);
+			}
+		}
 		else
 			return false;
 	};
@@ -1770,7 +1785,7 @@ $.validator.addMethod("required", function(value, ele)
 			value = Vue.toRaw(reactiveFormModel[name]);
 	}
 	
-	return !$.isEmptyValue(value);
+	return !$.isEmptyValue(value, true);
 });
 
 $.fn.extend(
