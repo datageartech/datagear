@@ -1757,8 +1757,19 @@
 {
 
 //重写支持Vue响数据模型的验证方法
-$.validator.addMethod("required", function(value)
+$.validator.addMethod("required", function(value, ele)
 {
+	ele = $(ele);
+	
+	if(ele.hasClass("validate-proxy"))
+	{
+		var reactiveFormModel = $(this.currentForm).data("reactiveFormModel");
+		var name = ele.attr("name");
+		
+		if(reactiveFormModel && name)
+			value = Vue.toRaw(reactiveFormModel[name]);
+	}
+	
 	return !$.isEmptyValue(value);
 });
 
