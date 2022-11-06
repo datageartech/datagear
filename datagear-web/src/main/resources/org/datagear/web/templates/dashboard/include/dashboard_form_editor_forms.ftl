@@ -458,7 +458,7 @@ page_boolean_options.ftl
 			        	<div class="desc text-color-secondary">
 			        		<small><@spring.message code='chartOptions.formatDesc' /></small>
 			        	</div>
-			        	<div class="desc text-color-secondary">
+			        	<div class="desc text-color-secondary" v-if="!pm.veChartOptionsPanelForGlobal">
 			        		<small><@spring.message code='dashboard.veditor.chartOptions.desc' /></small>
 			        	</div>
 					</div>
@@ -467,7 +467,8 @@ page_boolean_options.ftl
 			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 				<p-button type="button" class="p-button-secondary" label="<@spring.message code='viewOriginalOptions' />"
-					aria:haspopup="true" aria-controls="${pid}optionsOriginPanel" @click="onShowOptionsOriginPanel" >
+					aria:haspopup="true" aria-controls="${pid}optionsOriginPanel" @click="onShowOptionsOriginPanel"
+					v-if="!pm.veChartOptionsPanelForGlobal">
 				</p-button>
 			</div>
 		</form>
@@ -2022,13 +2023,17 @@ page_boolean_options.ftl
 		pm.vepss.chartAttrValuesShown = true;
 	};
 	
-	po.showVeChartOptionsPanel = function(submitHandler, model, title)
+	po.showVeChartOptionsPanel = function(submitHandler, model, global)
 	{
+		global = (global == null ? false : global);
+		
 		var pm = po.vuePageModel();
 		pm.veshs.chartOptions = submitHandler;
 		pm.vepms.chartOptions = $.extend(true, {}, model);
-		if(title)
-			pm.vepts.chartOptions = title; 
+		pm.vepts.chartOptions = (global ? "<@spring.message code='globalChartOptions' />"
+				: "<@spring.message code='chartOptions' />");
+		pm.veChartOptionsPanelForGlobal = global;
+		
 		pm.vepss.chartOptionsShown = true;
 	};
 	
@@ -2142,7 +2147,8 @@ page_boolean_options.ftl
 				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h4' />", value: "h4" },
 				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h5' />", value: "h5" },
 				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h6' />", value: "h6" }
-			]
+			],
+			veChartOptionsPanelForGlobal: false
 		});
 		
 		var pm = po.vuePageModel();

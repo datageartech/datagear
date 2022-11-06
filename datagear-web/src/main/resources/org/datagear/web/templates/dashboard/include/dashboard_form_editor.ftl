@@ -1711,7 +1711,7 @@
 									{
 										return po.setVeChartOptions(model, true);
 									},
-									{ value: dashboardEditor.getGlobalChartOptions() }, this.label);
+									{ value: dashboardEditor.getGlobalChartOptions() }, true);
 								}
 							}
 						},
@@ -1805,7 +1805,7 @@
 									{
 										return po.setVeChartOptions(model, false);
 									},
-									{ value: dashboardEditor.getElementChartOptions() }, this.label);
+									{ value: dashboardEditor.getElementChartOptions() }, false);
 								}
 							}
 						},
