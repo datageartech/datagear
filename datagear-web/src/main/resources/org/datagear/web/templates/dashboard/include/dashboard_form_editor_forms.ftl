@@ -451,9 +451,6 @@ page_boolean_options.ftl
 		<form id="${pid}veChartOptionsForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto" style="min-width:40vw;max-width:60vw;">
 				<div class="field grid">
-					<label for="${pid}veChartOptionsContent" class="field-label col-12 mb-2">
-						<@spring.message code='chartOptions' />
-					</label>
 					<div class="field-input col-12">
 						<div id="${pid}veChartOptionsContent" class="code-editor-wrapper input p-component p-inputtext w-full" style="height:30vh;">
 							<div id="${pid}veChartOptionsCodeEditor" class="code-editor"></div>
@@ -461,11 +458,17 @@ page_boolean_options.ftl
 			        	<div class="desc text-color-secondary">
 			        		<small><@spring.message code='chartOptions.formatDesc' /></small>
 			        	</div>
+			        	<div class="desc text-color-secondary">
+			        		<small><@spring.message code='dashboard.veditor.chartOptions.desc' /></small>
+			        	</div>
 					</div>
 				</div>
 			</div>
 			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+				<p-button type="button" class="p-button-secondary" label="<@spring.message code='viewOriginalOptions' />"
+					aria:haspopup="true" aria-controls="${pid}optionsOriginPanel" @click="onShowOptionsOriginPanel" >
+				</p-button>
 			</div>
 		</form>
 	</div>
@@ -1816,6 +1819,27 @@ page_boolean_options.ftl
 	</div>
 </p-dialog>
 
+<p-overlaypanel ref="${pid}optionsOriginPanelEle" append-to="body" id="${pid}optionsOriginPanel" @show="onOptionsOriginPanelShow">
+	<div class="pb-2">
+		<label class="text-lg font-bold">
+			<@spring.message code='chartOptionsOrigin' />
+		</label>
+	</div>
+	<div class="page page-form">
+		<form id="${pid}optionsOriginForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<div class="field-input col-12">
+						<div id="${pid}optionsContent" class="code-editor-wrapper input p-component p-inputtext panel-content-size-xxs">
+							<div id="${pid}optionsContentCodeEditor" class="code-editor"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</p-overlaypanel>
+
 <script>
 (function(po)
 {
@@ -2032,6 +2056,8 @@ page_boolean_options.ftl
 	
 	po.setupResourceEditorForms = function()
 	{
+		po.vueRef("${pid}optionsOriginPanelEle", null);
+		
 		po.vuePageModel(
 		{
 			//可视编辑操作对话框是否显示
@@ -2411,6 +2437,38 @@ page_boolean_options.ftl
 				var pickColor = proxy[propName];
 				
 				style[propName] = po.hexStrToCssColor(pickColor, style[propName]);
+			},
+
+			onShowOptionsOriginPanel: function(e)
+			{
+				po.vueUnref("${pid}optionsOriginPanelEle").toggle(e);
+			},
+			
+			onOptionsOriginPanelShow: function()
+			{
+				var optionsOrigin = "";
+				
+				var dashboardEditor = po.visualDashboardEditorByTab();
+				if(dashboardEditor)
+					optionsOrigin = dashboardEditor.getElementChartOptionsOrigin();
+				
+				var form = po.elementOfId("${pid}optionsOriginForm", document.body);
+				var codeEditorEle = po.elementOfId("${pid}optionsContentCodeEditor", form);
+				
+				var editorOptions =
+				{
+					value: "",
+					matchBrackets: true,
+					autoCloseBrackets: true,
+					mode: {name: "javascript", json: true},
+					readOnly: true
+				};
+				
+				codeEditorEle.empty();
+				var codeEditor = po.createCodeEditor(codeEditorEle, editorOptions);
+				po.setCodeTextTimeout(codeEditor, (optionsOrigin || ""), true);
+				
+				po.setupSimpleForm(form, {}, function(){});
 			}
 		});
 	};

@@ -1898,6 +1898,25 @@
 	};
 	
 	/**
+	 * 获取元素原始图表选项的字符串格式。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.getElementChartOptionsOrigin = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return "";
+		
+		var chart = this.dashboard.renderedChart(ele);
+		if(!chart)
+			return "";
+		
+		return (chart.attrValue(chartFactory.CHART_ATTR_VALUE_NAME_OPTIONS) || "");
+	};
+	
+	/**
 	 * 设置全局图表选项。
 	 * 
 	 * @param chartOptionsStr 要设置的全局图表选项字符串
