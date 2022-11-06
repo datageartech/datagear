@@ -1913,7 +1913,7 @@
 		if(!chart)
 			return "";
 		
-		return (chart.attrValue(chartFactory.CHART_ATTR_VALUE_NAME_OPTIONS) || "");
+		return (chart.optionsOrigin() || "");
 	};
 	
 	/**

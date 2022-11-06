@@ -395,9 +395,9 @@
 	{
 		var options = {};
 		
-		var attrValueOptions = this.attrValue(chartFactory.CHART_ATTR_VALUE_NAME_OPTIONS);
-		if(attrValueOptions)
-			options = chartFactory.evalSilently(attrValueOptions, {});
+		var optionsOrigin = this.optionsOrigin(true);
+		if(optionsOrigin)
+			options = $.extend(true, options, optionsOrigin);
 		
 		var $ele = this.elementJquery();
 		
@@ -3782,6 +3782,25 @@
 	chartBase.pluginAttributes = function()
 	{
 		return (this.plugin && this.plugin.attributes ? this.plugin.attributes : []);
+	};
+	
+	/**
+	 * 获取原始图表选项，即在定义图表时设置的图表选项。
+	 * 
+	 * @param eval 可选，可选，是否返回选项对象而非字符串，默认为：false
+	 * @returns 字符串、{ ... }、null
+	 * @since 4.2.0
+	 */
+	chartBase.optionsOrigin = function(eval)
+	{
+		eval = (eval == null ? false : eval);
+		
+		var options = this.attrValue(chartFactory.CHART_ATTR_VALUE_NAME_OPTIONS);
+		
+		if(eval && options)
+			options = chartFactory.evalSilently(options, {});
+		
+		return options;
 	};
 	
 	//-------------
