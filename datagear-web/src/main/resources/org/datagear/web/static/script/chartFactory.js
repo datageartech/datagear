@@ -225,6 +225,11 @@
 	chartFactory.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
 	
 	/**
+	 * 图表属性值集中图表选项名，同：org.datagear.management.domain.HtmlChartWidgetEntity.ATTR_CHART_OPTIONS
+	 */
+	chartFactory.CHART_ATTR_VALUE_NAME_OPTIONS = "DG_CHART_OPTIONS";
+	
+	/**
 	 * 初始化渲染上下文。
 	 * 将webContext直接存入渲染上下文；复制chartTheme，填充相关属性后存入渲染上下文。
 	 * 之后，可以通过:
@@ -389,6 +394,10 @@
 	chartBase._initOptions = function()
 	{
 		var options = {};
+		
+		var attrValueOptions = this.attrValue(chartFactory.CHART_ATTR_VALUE_NAME_OPTIONS);
+		if(attrValueOptions)
+			options = chartFactory.evalSilently(attrValueOptions, {});
 		
 		var $ele = this.elementJquery();
 		
