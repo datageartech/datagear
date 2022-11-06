@@ -458,6 +458,9 @@ page_boolean_options.ftl
 						<div id="${pid}veChartOptionsContent" class="code-editor-wrapper input p-component p-inputtext w-full" style="height:30vh;">
 							<div id="${pid}veChartOptionsCodeEditor" class="code-editor"></div>
 						</div>
+			        	<div class="desc text-color-secondary">
+			        		<small><@spring.message code='chartOptions.formatDesc' /></small>
+			        	</div>
 					</div>
 				</div>
 			</div>

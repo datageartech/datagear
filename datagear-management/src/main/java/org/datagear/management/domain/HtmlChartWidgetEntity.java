@@ -10,6 +10,9 @@ package org.datagear.management.domain;
 import java.util.Date;
 import java.util.Map;
 
+import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
@@ -36,6 +39,17 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 
 	protected static final ChartDataSetVO[] EMPTY_CHART_DATA_VO_SET = new ChartDataSetVO[0];
 
+	/** 图表部件渲染时的图表选项信息 */
+	public static final String ATTR_CHART_OPTIONS = BUILTIN_ATTR_PREFIX + "CHART_OPTIONS";
+
+	/**
+	 * 图表选项。
+	 * <p>
+	 * 这里不应定义为Map类型，因为options里可能包含JS函数定义，无法转换为JSON字符串，转换工作由界面处理。
+	 * </p>
+	 */
+	private String options = "";
+
 	/** 创建用户 */
 	private User createUser;
 
@@ -61,6 +75,16 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 		super.setChartDataSets(EMPTY_CHART_DATA_VO_SET);
 		this.createUser = createUser;
 		this.createTime = new Date();
+	}
+
+	public String getOptions()
+	{
+		return options;
+	}
+
+	public void setOptions(String options)
+	{
+		this.options = options;
 	}
 
 	public ChartDataSetVO[] getChartDataSetVOs()
@@ -165,6 +189,15 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 			attrValues = JsonSupport.parse(attrValuesJson, Map.class, null);
 		
 		setAttrValues(attrValues);
+	}
+
+	@Override
+	protected ChartDefinition buildChartDefinition(RenderContext renderContext) throws RenderException
+	{
+		ChartDefinition chartDefinition = super.buildChartDefinition(renderContext);
+		chartDefinition.setAttrValue(ATTR_CHART_OPTIONS, this.options);
+		
+		return chartDefinition;
 	}
 
 	@Override

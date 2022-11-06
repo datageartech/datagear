@@ -225,6 +225,20 @@
 				</div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}options" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='chart.options.desc' />">
+					<@spring.message code='chartOptions' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<div class="flex align-items-center">
+						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
+							aria:haspopup="true" aria-controls="${pid}optionsPanel"
+							@click="onShowOptionsPanel" class="p-button-secondary mr-2">
+						</p-button>
+		        	</div>
+				</div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}updateInterval" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='chart.updateInterval.desc' />">
 					<@spring.message code='updateInterval' />
@@ -406,10 +420,37 @@
 			<#include "include/chart_attr_values_form.ftl">
 		</div>
 	</p-overlaypanel>
+	<p-overlaypanel ref="${pid}optionsPanelEle" append-to="body" id="${pid}optionsPanel" @show="onOptionsPanelShow">
+		<div class="pb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='chartOptions' />
+			</label>
+		</div>
+		<div class="page page-form">
+			<form id="${pid}optionsForm" class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
+				<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+					<div class="field grid">
+						<div class="field-input col-12">
+							<div id="${pid}optionsContent" class="code-editor-wrapper input p-component p-inputtext panel-content-size-xxs">
+								<div id="${pid}optionsContentCodeEditor" class="code-editor"></div>
+							</div>
+				        	<div class="desc text-color-secondary">
+				        		<small><@spring.message code='chartOptions.formatDesc' /></small>
+				        	</div>
+						</div>
+					</div>
+				</div>
+				<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+					<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+				</div>
+			</form>
+		</div>
+	</p-overlaypanel>
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_simple_form.ftl">
 <#include "../include/page_boolean_options.ftl">
+<#include "../include/page_code_editor.ftl">
 <script>
 (function(po)
 {
@@ -734,7 +775,8 @@
 		[
 			{ name: "<@spring.message code='string' />", value: "${ResultDataFormat.TYPE_STRING}" },
 			{ name: "<@spring.message code='number' />", value: "${ResultDataFormat.TYPE_NUMBER}" }
-		]
+		],
+		optionsFormModel: { options: "" }
 	});
 	
 	po.vueRef("${pid}dataSignsPanelEle", null);
@@ -743,6 +785,7 @@
 	po.vueRef("${pid}dataFormatPanelEle", null);
 	po.vueRef("${pid}htmlChartPluginDescEle", null);
 	po.vueRef("${pid}attrValuesPanelEle", null);
+	po.vueRef("${pid}optionsPanelEle", null);
 	
 	po.vueMethod(
 	{
@@ -1001,6 +1044,40 @@
 					po.vueUnref("${pid}attrValuesPanelEle").hide();
 				},
 				readonly: pm.isReadonlyAction
+			});
+		},
+
+		onShowOptionsPanel: function(e)
+		{
+			po.vueUnref("${pid}optionsPanelEle").toggle(e);
+		},
+		
+		onOptionsPanelShow: function()
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			var options = po.vueRaw(fm.options);
+			
+			var form = po.elementOfId("${pid}optionsForm", document.body);
+			var codeEditorEle = po.elementOfId("${pid}optionsContentCodeEditor", form);
+			
+			var editorOptions =
+			{
+				value: "",
+				matchBrackets: true,
+				autoCloseBrackets: true,
+				mode: {name: "javascript", json: true}
+			};
+			
+			codeEditorEle.empty();
+			var codeEditor = po.createCodeEditor(codeEditorEle, editorOptions);
+			po.setCodeTextTimeout(codeEditor, (options || ""), true);
+			
+			po.setupSimpleForm(form, pm.optionsFormModel, function()
+			{
+				pm.optionsFormModel.options = po.getCodeText(codeEditor);
+				fm.options = pm.optionsFormModel.options;
+				po.vueUnref("${pid}optionsPanelEle").hide();
 			});
 		},
 		
