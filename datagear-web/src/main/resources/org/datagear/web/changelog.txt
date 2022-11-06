@@ -768,6 +768,7 @@ DataGear版本更新日志
 新增：图表JS对象新增pluginAttributes()函数，用于获取插件图表属性集；
 新增：图表JS对象新增attrValue()、attrValues()函数，用于获取和设置图表属性值；
 新增：图表JS对象新增attrValuesOrigin()函数，用于获取原始图表属性值；
+新增：图表JS对象新增optionsOrigin()函数，用于获取原始图表选项；
 修复：修复看板可视编辑模式图表选项不支持编辑函数的BUG；
 修复：修复看板模板没有定义</body>标签会导致展示页面不渲染任何图表的BUG；
 修复：修复异步加载图表即使无权限仍可请求到数据的BUG；
