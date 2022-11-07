@@ -174,6 +174,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${disableLoginCheckCode}")
 	private boolean disableLoginCheckCode;
 
+	/** 系统使用的POI库的最小解压比率配置 */
+	@Value("${poi.zipSecureFile.minInflateRatio}")
+	private String poiZipSecureFileMinInflateRatio = "";
+
 	/** SQL数据集的SQL关键字黑名单 */
 	private Map<String, String> sqlDataSetInvalidSqlKeywords = Collections.emptyMap();
 
@@ -571,6 +575,16 @@ public abstract class ApplicationProperties implements Serializable
 	public void setDisableLoginCheckCode(boolean disableLoginCheckCode)
 	{
 		this.disableLoginCheckCode = disableLoginCheckCode;
+	}
+
+	public String getPoiZipSecureFileMinInflateRatio()
+	{
+		return poiZipSecureFileMinInflateRatio;
+	}
+
+	public void setPoiZipSecureFileMinInflateRatio(String poiZipSecureFileMinInflateRatio)
+	{
+		this.poiZipSecureFileMinInflateRatio = poiZipSecureFileMinInflateRatio;
 	}
 
 	public Map<String, String> getSqlDataSetInvalidSqlKeywords()

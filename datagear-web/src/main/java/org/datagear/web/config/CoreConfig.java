@@ -21,6 +21,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.AbstractCsvDataSet;
 import org.datagear.analysis.support.AbstractDataSet;
@@ -862,6 +863,8 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		initCacheServices(context);
 		initDevotedDataExchangeServices(context);
 		initUserServiceCreateUserEntityServices(context);
+
+		setZipSecureFileMinInflateRatio(getApplicationProperties().getPoiZipSecureFileMinInflateRatio());
 	}
 
 	public ApplicationProperties getApplicationProperties()
@@ -998,6 +1001,21 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 
 		if (userService instanceof UserServiceImpl)
 			((UserServiceImpl) userService).setCreateUserEntityServices(serviceList);
+	}
+
+	/**
+	 * 设置系统使用的POI库的最小解压比率配置，
+	 * 详细说明参考{@code application.properties}中的{@code poi.zipSecureFile.minInflateRatio}配置项说明。
+	 * 
+	 * @param ratio
+	 */
+	protected void setZipSecureFileMinInflateRatio(String ratio)
+	{
+		if (StringUtil.isEmpty(ratio))
+			return;
+
+		double rt = Double.valueOf(ratio);
+		ZipSecureFile.setMinInflateRatio(rt);
 	}
 
 	/**
