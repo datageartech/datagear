@@ -8,6 +8,7 @@
 package org.datagear.management.domain;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.datagear.analysis.ChartDefinition;
@@ -218,6 +219,13 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 			}
 
 			entity.setChartDataSetVOs(cloned);
+		}
+
+		Map<String, Object> attrValues = this.getAttrValues();
+		if (attrValues != null)
+		{
+			Map<String, Object> attrValuesClone = new HashMap<String, Object>(attrValues);
+			entity.setAttrValues(attrValuesClone);
 		}
 
 		return entity;
