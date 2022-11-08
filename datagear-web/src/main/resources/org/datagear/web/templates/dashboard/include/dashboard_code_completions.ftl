@@ -14,6 +14,8 @@
 {
 	po.codeEditorCompletionsTagAttr =
 	[
+		{name: "dg-chart-attr-values",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-attr-values' />", categories: ["div"]},
 		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"true\"",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-auto-resize' />", categories: ["body", "div"]},
 		{name: "dg-chart-disable-setting",
@@ -85,7 +87,10 @@
 		{name: "user", value: "user()", displayName: "user()", displayComment: "dashboard", categories: ["dashboard"]},
 		
 		//图表JS对象
-		{name: "autoResize", value: "autoResize(", displayName: "autoResize() ", displayComment: "chart", categories: ["chart"], categories: ["chart"]},
+		{name: "attrValue", value: "attrValue(", displayName: "attrValue() ", displayComment: "chart", categories: ["chart"]},
+		{name: "attrValues", value: "attrValues(", displayName: "attrValues() ", displayComment: "chart", categories: ["chart"]},
+		{name: "attrValuesOrigin", value: "attrValuesOrigin()", displayName: "attrValuesOrigin() ", displayComment: "chart", categories: ["chart"]},
+		{name: "autoResize", value: "autoResize(", displayName: "autoResize() ", displayComment: "chart", categories: ["chart"]},
 		{name: "bindLinksEventHanders", value: "bindLinksEventHanders(", displayName: "bindLinksEventHanders() ", displayComment: "chart", categories: ["chart"]},
 		{name: "callEventHandler", value: "callEventHandler(", displayName: "callEventHandler() ", displayComment: "chart", categories: ["chart"]},
 		{name: "chartDataSetAt", value: "chartDataSetAt(", displayName: "chartDataSetAt() ", displayComment: "chart", categories: ["chart"]},
@@ -161,9 +166,11 @@
 		{name: "onMouseover", value: "onMouseover(", displayName: "onMouseover() ", displayComment: "chart", categories: ["chart"]},
 		{name: "onMouseup", value: "onMouseup(", displayName: "onMouseup() ", displayComment: "chart", categories: ["chart"]},
 		{name: "options", value: "options(", displayName: "options() ", displayComment: "chart", categories: ["chart"]},
+		{name: "optionsOrigin", value: "optionsOrigin()", displayName: "optionsOrigin() ", displayComment: "chart", categories: ["chart"]},
 		{name: "originalDataIndex", value: "originalDataIndex(", displayName: "originalDataIndex() ", displayComment: "chart", categories: ["chart"]},
 		{name: "originalDataIndexes", value: "originalDataIndexes(", displayName: "originalDataIndexes() ", displayComment: "chart", categories: ["chart"]},
 		{name: "plugin", value: "plugin", displayName: "plugin ", displayComment: "chart", categories: ["chart"]},
+		{name: "pluginAttributes", value: "pluginAttributes()", displayName: "pluginAttributes() ", displayComment: "chart", categories: ["chart"]},
 		{name: "pluginResourceURL", value: "pluginResourceURL(", displayName: "pluginResourceURL() ", displayComment: "chart", categories: ["chart"]},
 		{name: "pluginResources", value: "pluginResources()", displayName: "pluginResources() ", displayComment: "chart", categories: ["chart"]},
 		{name: "refreshData", value: "refreshData()", displayName: "refreshData() ", displayComment: "chart", categories: ["chart"]},
