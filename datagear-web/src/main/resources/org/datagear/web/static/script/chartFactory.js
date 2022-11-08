@@ -227,7 +227,12 @@
 	/**
 	 * 图表属性值集中图表选项名，同：org.datagear.management.domain.HtmlChartWidgetEntity.ATTR_CHART_OPTIONS
 	 */
-	chartFactory.CHART_ATTR_VALUE_NAME_OPTIONS = "DG_CHART_OPTIONS";
+	chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS = "DG_CHART_OPTIONS";
+	
+	/**
+	 * 图表属性值集中图表部件名，同：org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
+	 */
+	chartFactory._CHART_ATTR_VALUE_NAME_WIDGET = "DG_CHART_WIDGET";
 	
 	/**
 	 * 初始化渲染上下文。
@@ -276,7 +281,7 @@
 	 *				  //可选，图表结果数据格式
 	 *				  resultDataFormat: {...},
 	 *				  //图表属性
-	 *				  attrValues: {DG_CHART_WIDGET: {id: "...", ..}, ...}
+	 *				  attrValues: {...}
 	 *				}
 	 *				另参考：org.datagear.analysis.support.html.HtmlChart
 	 */
@@ -289,6 +294,13 @@
 	chartFactory._refactorChart = function(chart)
 	{
 		chart._attrValues = (chart.attrValues || {});
+		
+		//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
+		chart._widget = chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
+		chart._optionsOrigin = chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
+		delete chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
+		delete chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
+		
 		//保留原始属性值集，看板可视编辑需要使用
 		//注意，初始化_attrValuesOrigin的逻辑不能在chartBase.init中执行，
 		//因为chartBase.init可以被多次调用，chart._attrValues可能已被修改
@@ -1807,8 +1819,7 @@
 	 */
 	chartBase.widgetId = function()
 	{
-		//org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
-		var chartWidget = this.attrValue("DG_CHART_WIDGET");
+		var chartWidget = this._widget;
 		return (chartWidget ? chartWidget.id : null);
 	};
 	
@@ -3729,10 +3740,10 @@
 	};
 	
 	/**
-	 * 获取/设置图表指定属性值。
+	 * 获取/设置指定图表属性值。
 	 * 注意：org.datagear.analysis.support.html.AttributeValueHtmlChartPlugin需要此函数名。
 	 * 
-	 * @param name 图表属性、图表属性名
+	 * @param name 插件属性、名称
 	 * @param value 可选，要设置的属性值
 	 * @returns 
 	 * @since 4.2.0
@@ -3748,7 +3759,7 @@
 	};
 	
 	/**
-	 * 获取/设置图表全部属性值。
+	 * 获取/设置全部图表属性值。
 	 * 
 	 * @param values 可选，要设置的属性值映射表，格式为：{ 名称: 值, ... }
 	 * @returns { ... }
@@ -3763,7 +3774,7 @@
 	};
 	
 	/**
-	 * 获取图表全部原始属性值，通常是在定义图表时设置的，未与"dg-chart-attr-values"合并。
+	 * 获取全部原始图表属性值，通常是在定义图表时设置的，未与"dg-chart-attr-values"合并。
 	 * 
 	 * @returns { ... }
 	 * @since 4.2.0
@@ -3774,7 +3785,7 @@
 	};
 	
 	/**
-	 * 获取图表插件的所有图表属性。
+	 * 获取所有插件属性。
 	 * 
 	 * @returns [ ]
 	 * @since 4.2.0
@@ -3795,10 +3806,15 @@
 	{
 		eval = (eval == null ? false : eval);
 		
-		var options = this.attrValue(chartFactory.CHART_ATTR_VALUE_NAME_OPTIONS);
+		var options = this._optionsOrigin;
 		
-		if(eval && options)
-			options = chartFactory.evalSilently(options, {});
+		if(eval)
+		{
+			if(!options || options == "")
+				options = null;
+			else
+				options = chartFactory.evalSilently(options, {});
+		}
 		
 		return options;
 	};
