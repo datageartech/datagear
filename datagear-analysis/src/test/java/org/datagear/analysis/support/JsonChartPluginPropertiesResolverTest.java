@@ -15,8 +15,8 @@ import java.util.Map;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Group;
 import org.datagear.analysis.RenderContext;
@@ -220,6 +220,7 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			List<DataSign> dataSigns = chartPlugin.getDataSigns();
+			Assert.assertEquals(3, dataSigns.size());
 
 			{
 				DataSign dataSign = dataSigns.get(0);
@@ -255,6 +256,16 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("Y值描述", descLabel.getValue());
 				Assert.assertEquals("Y value desc", descLabel.getValue(enLocale));
 				Assert.assertEquals("Y值描述中文", descLabel.getValue(zhLocale));
+			}
+
+			{
+				DataSign dataSign = dataSigns.get(2);
+
+				Assert.assertEquals("simple-value", dataSign.getName());
+				Assert.assertTrue(dataSign.isRequired());
+				Assert.assertFalse(dataSign.isMultiple());
+				Assert.assertNull(dataSign.getNameLabel());
+				Assert.assertNull(dataSign.getDescLabel());
 			}
 
 			{

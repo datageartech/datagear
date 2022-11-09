@@ -25,6 +25,7 @@ import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Group;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
 /**
@@ -169,49 +170,6 @@ public class JsonChartPluginPropertiesResolver
 	}
 
 	/**
-	 * 将对象转换为{@linkplain Label}。
-	 * 
-	 * @param obj
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	protected Label convertToLabel(Object obj)
-	{
-		if (obj == null)
-			return null;
-		else if (obj instanceof Label)
-			return (Label) obj;
-		else if (obj instanceof String)
-		{
-			Label label = createLabel();
-			label.setValue((String) obj);
-
-			return label;
-		}
-		else if (obj instanceof Map<?, ?>)
-		{
-			Map<String, ?> map = (Map<String, ?>) obj;
-
-			Label label = createLabel();
-			label.setValue((String) map.get(Label.PROPERTY_VALUE));
-
-			Object localeValues = map.get(Label.PROPERTY_LOCALE_VALUES);
-			if(localeValues == null)
-				;
-			else if (localeValues instanceof Map<?, ?>)
-				label.setLocaleValues((Map<String, String>)localeValues);
-			else
-				throw new UnsupportedOperationException("Convert object of type [" + localeValues.getClass().getName() + "] to ["
-						+ Label.class.getName() + ".localeValues] is not supported");
-
-			return label;
-		}
-		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Label.class.getName() + "] is not supported");
-	}
-
-	/**
 	 * 将对象转换为图标资源名映射表。
 	 * 
 	 * @param obj
@@ -244,6 +202,101 @@ public class JsonChartPluginPropertiesResolver
 		else
 			throw new UnsupportedOperationException(
 					"Convert object of type [" + obj.getClass().getName() + "] to icon map is not supported");
+	}
+
+	/**
+	 * 将对象转换为{@linkplain DataSigns}。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected List<DataSign> convertToDataSigns(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof Object[])
+		{
+			Object[] array = (Object[]) obj;
+	
+			List<DataSign> dataSigns = new ArrayList<>();
+	
+			for (Object ele : array)
+			{
+				DataSign dataSign = convertToDataSign(ele);
+	
+				if (dataSign != null)
+					dataSigns.add(dataSign);
+			}
+	
+			if (dataSigns.isEmpty())
+				return null;
+	
+			return dataSigns;
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			Collection<?> collection = (Collection<?>) obj;
+			Object[] array = new Object[collection.size()];
+			collection.toArray(array);
+	
+			return convertToDataSigns(array);
+		}
+		else
+		{
+			Object[] array = new Object[] { obj };
+	
+			return convertToDataSigns(array);
+		}
+	}
+
+	/**
+	 * 将对象转换为{@linkplain DataSign}。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected DataSign convertToDataSign(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof DataSign)
+			return (DataSign) obj;
+		else if (obj instanceof Map<?, ?>)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, ?> map = (Map<String, ?>) obj;
+	
+			String name = (String) map.get(DataSign.PROPERTY_NAME);
+			if (name == null || name.isEmpty())
+				return null;
+	
+			DataSign dataSign = createDataSign();
+			dataSign.setName(name);
+	
+			dataSign.setRequired(convertToDataSignRequired(map.get(DataSign.PROPERTY_REQUIRED)));
+			dataSign.setMultiple(convertToDataSignMultiple(map.get(DataSign.PROPERTY_MULTIPLE)));
+			dataSign.setNameLabel(convertToLabel(map.get(DataSign.PROPERTY_NAME_LABEL)));
+			dataSign.setDescLabel(convertToLabel(map.get(DataSign.PROPERTY_DESC_LABEL)));
+	
+			return dataSign;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ DataSign.class.getName() + "] is not supported");
+	}
+
+	protected boolean convertToDataSignRequired(Object v)
+	{
+		// 不要修改这里的默认值，因为会影响插件规范
+		boolean dftValue = true;
+		return convertToBoolean(v, dftValue);
+	}
+
+	protected boolean convertToDataSignMultiple(Object v)
+	{
+		// 不要修改这里的默认值，因为会影响插件规范
+		boolean dftValue = false;
+		return convertToBoolean(v, dftValue);
 	}
 
 	/**
@@ -317,7 +370,7 @@ public class JsonChartPluginPropertiesResolver
 			attribute.setType(convertToAttributeType(map.get(ChartPluginAttribute.PROPERTY_TYPE)));
 			attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
 			attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
-			attribute.setRequired(convertToBoolean(map.get(ChartPluginAttribute.PROPERTY_REQUIRED), false));
+			attribute.setRequired(convertToAttributeRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
 			attribute.setInputType(convertToAttributeInputType(map.get(ChartPluginAttribute.PROPERTY_INPUT_TYPE)));
 			attribute.setInputPayload(convertToAttributeInputPayload(map.get(ChartPluginAttribute.PROPERTY_INPUT_PAYLOAD)));
 			attribute.setGroup(convertToGroup(map.get(ChartPluginAttribute.PROPERTY_GROUP)));
@@ -330,23 +383,43 @@ public class JsonChartPluginPropertiesResolver
 					+ ChartPluginAttribute.class.getName() + "] is not supported");
 	}
 
+	protected boolean convertToAttributeRequired(Object v)
+	{
+		// 不要修改这里的默认值，因为会影响插件规范
+		boolean dftValue = false;
+		return convertToBoolean(v, dftValue);
+	}
+
 	protected String convertToAttributeType(Object obj)
 	{
+		// 不要修改这里的默认值，因为会影响插件规范
+		String dftValue = ChartPluginAttribute.DataType.STRING;
+
 		if (obj instanceof String)
 		{
 			String str = (String) obj;
 			
+			if (StringUtil.isEmpty(str))
+			{
+				return dftValue;
+			}
 			if(ChartPluginAttribute.DataType.STRING.equalsIgnoreCase(str))
+			{
 				return ChartPluginAttribute.DataType.STRING;
+			}
 			else if(ChartPluginAttribute.DataType.BOOLEAN.equalsIgnoreCase(str))
+			{
 				return ChartPluginAttribute.DataType.BOOLEAN;
+			}
 			else if(ChartPluginAttribute.DataType.NUMBER.equalsIgnoreCase(str))
+			{
 				return ChartPluginAttribute.DataType.NUMBER;
+			}
 			else
 				return str;
 		}
 		else
-			return ChartPluginAttribute.DataType.STRING;
+			return dftValue;
 	}
 
 	protected String convertToAttributeInputType(Object obj)
@@ -444,87 +517,6 @@ public class JsonChartPluginPropertiesResolver
 					+ enumType.getName() + "] is not supported");
 	}
 
-	/**
-	 * 将对象转换为{@linkplain DataSigns}。
-	 * 
-	 * @param obj
-	 * @return
-	 */
-	protected List<DataSign> convertToDataSigns(Object obj)
-	{
-		if (obj == null)
-			return null;
-		else if (obj instanceof Object[])
-		{
-			Object[] array = (Object[]) obj;
-
-			List<DataSign> dataSigns = new ArrayList<>();
-
-			for (Object ele : array)
-			{
-				DataSign dataSign = convertToDataSign(ele);
-
-				if (dataSign != null)
-					dataSigns.add(dataSign);
-			}
-
-			if (dataSigns.isEmpty())
-				return null;
-
-			return dataSigns;
-		}
-		else if (obj instanceof Collection<?>)
-		{
-			Collection<?> collection = (Collection<?>) obj;
-			Object[] array = new Object[collection.size()];
-			collection.toArray(array);
-
-			return convertToDataSigns(array);
-		}
-		else
-		{
-			Object[] array = new Object[] { obj };
-
-			return convertToDataSigns(array);
-		}
-	}
-
-	/**
-	 * 将对象转换为{@linkplain DataSign}。
-	 * 
-	 * @param obj
-	 * @return
-	 */
-	protected DataSign convertToDataSign(Object obj)
-	{
-		if (obj == null)
-			return null;
-		else if (obj instanceof DataSign)
-			return (DataSign) obj;
-		else if (obj instanceof Map<?, ?>)
-		{
-			@SuppressWarnings("unchecked")
-			Map<String, ?> map = (Map<String, ?>) obj;
-
-			String name = (String) map.get(DataSign.PROPERTY_NAME);
-			if (name == null || name.isEmpty())
-				return null;
-
-			DataSign dataSign = createDataSign();
-			dataSign.setName(name);
-
-			dataSign.setRequired(convertToBoolean(map.get(DataSign.PROPERTY_REQUIRED), true));
-			dataSign.setMultiple(convertToBoolean(map.get(DataSign.PROPERTY_MULTIPLE), true));
-			dataSign.setNameLabel(convertToLabel(map.get(DataSign.PROPERTY_NAME_LABEL)));
-			dataSign.setDescLabel(convertToLabel(map.get(DataSign.PROPERTY_DESC_LABEL)));
-
-			return dataSign;
-		}
-		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ DataSign.class.getName() + "] is not supported");
-	}
-
 	protected List<Category> convertToCategories(Object obj)
 	{
 		List<Category> categories = new ArrayList<Category>(1);
@@ -606,6 +598,49 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			orders.add(convertToInt(obj, defaultOrder));
+	}
+
+	/**
+	 * 将对象转换为{@linkplain Label}。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	protected Label convertToLabel(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof Label)
+			return (Label) obj;
+		else if (obj instanceof String)
+		{
+			Label label = createLabel();
+			label.setValue((String) obj);
+	
+			return label;
+		}
+		else if (obj instanceof Map<?, ?>)
+		{
+			Map<String, ?> map = (Map<String, ?>) obj;
+	
+			Label label = createLabel();
+			label.setValue((String) map.get(Label.PROPERTY_VALUE));
+	
+			Object localeValues = map.get(Label.PROPERTY_LOCALE_VALUES);
+			if(localeValues == null)
+				;
+			else if (localeValues instanceof Map<?, ?>)
+				label.setLocaleValues((Map<String, String>)localeValues);
+			else
+				throw new UnsupportedOperationException("Convert object of type [" + localeValues.getClass().getName() + "] to ["
+						+ Label.class.getName() + ".localeValues] is not supported");
+	
+			return label;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ Label.class.getName() + "] is not supported");
 	}
 
 	/**

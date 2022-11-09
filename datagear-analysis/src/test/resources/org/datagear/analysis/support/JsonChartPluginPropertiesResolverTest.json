@@ -32,6 +32,58 @@
 		'LIGHT' :  'icon-0.png',
 		'DARK' :  'icon-1.png'
 	},
+	dataSigns :
+	[
+  		{
+			name : 'x-value',
+			required : false,
+			multiple : false,
+			nameLabel :
+			{
+				value : 'X值',
+				localeValues :
+				{
+					'en' : 'X value',
+					'zh' : 'X值中文'
+				}
+			},
+			descLabel :
+			{
+				value : 'X值描述',
+				localeValues :
+				{
+					'en' : 'X value desc',
+					'zh' : 'X值描述中文'
+				}
+			}
+		},
+		{
+			name : 'y-value',
+			required : true,
+			multiple : true,
+			nameLabel :
+			{
+				value : 'Y值',
+				localeValues :
+				{
+					'en' : 'Y value',
+					'zh' : 'Y值中文'
+				}
+			},
+  			descLabel :
+  			{
+  				value : 'Y值描述',
+  				localeValues :
+  				{
+  					'en' : 'Y value desc',
+  					'zh' : 'Y值描述中文'
+  				}
+  			}
+		},
+		{
+			name: "simple-value"
+		}
+	],
 	attributes :
 	[
   		{
@@ -136,55 +188,6 @@
 		},
   		{
 			name : 'a7'
-		}
-	],
-	dataSigns :
-	[
-  		{
-			name : 'x-value',
-			required : false,
-			multiple : false,
-			nameLabel :
-			{
-				value : 'X值',
-				localeValues :
-				{
-					'en' : 'X value',
-					'zh' : 'X值中文'
-				}
-			},
-			descLabel :
-			{
-				value : 'X值描述',
-				localeValues :
-				{
-					'en' : 'X value desc',
-					'zh' : 'X值描述中文'
-				}
-			}
-		},
-		{
-			name : 'y-value',
-			required : true,
-			multiple : true,
-			nameLabel :
-			{
-				value : 'Y值',
-				localeValues :
-				{
-					'en' : 'Y value',
-					'zh' : 'Y值中文'
-				}
-			},
-  			descLabel :
-  			{
-  				value : 'Y值描述',
-  				localeValues :
-  				{
-  					'en' : 'Y value desc',
-  					'zh' : 'Y值描述中文'
-  				}
-  			}
 		}
 	],
 	version : "0.1.0",
