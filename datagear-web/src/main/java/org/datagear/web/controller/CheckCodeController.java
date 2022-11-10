@@ -175,7 +175,7 @@ public class CheckCodeController extends AbstractController
 	}
 
 	/**
-	 * 获取默认字体名。
+	 * 获取字体名。
 	 * 
 	 * @return
 	 */
@@ -185,6 +185,7 @@ public class CheckCodeController extends AbstractController
 		
 		//最优字体
 		String bestName = "Arial";
+		String bestNameLower = bestName.toLowerCase();
 
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		String[] avaNames = ge.getAvailableFontFamilyNames();
@@ -193,10 +194,17 @@ public class CheckCodeController extends AbstractController
 		{
 			for (String avaName : avaNames)
 			{
+				// 完全匹配
 				if (avaName.equalsIgnoreCase(bestName))
 				{
 					name = avaName;
 					break;
+				}
+
+				// 否则，使用第一个部分匹配的
+				if (StringUtil.isEmpty(name) && avaName.toLowerCase().indexOf(bestNameLower) >= 0)
+				{
+					name = avaName;
 				}
 			}
 			
