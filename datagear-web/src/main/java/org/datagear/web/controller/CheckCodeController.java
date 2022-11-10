@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Random;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.datagear.util.StringUtil;
 import org.datagear.web.util.CheckCodeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -65,16 +67,36 @@ public class CheckCodeController extends AbstractController
 		int fontSize = 16;
 		int codeLength = CheckCodeManager.CODE_LEN;
 		int imagePadding = 2;
-
 		int height = fontSize + imagePadding * 2;
 		int width = fontSize * codeLength + imagePadding * 2;
+		String code = this.checkCodeManager.generate();
 
-		Font font = new Font(getDefaultFontFamilyName(), Font.BOLD, fontSize);
+		BufferedImage image = createInitBufferedImage(width, height);
+		drawCheckCode(image, code, fontSize, imagePadding);
+		this.checkCodeManager.setCheckCode(session, module, code);
+		image.getGraphics().dispose();
 
+		ImageIO.write(image, "png", response.getOutputStream());
+	}
+
+	protected void drawCheckCode(BufferedImage image, String code, int fontSize, int padding)
+	{
+		Graphics g = image.getGraphics();
+		Font font = getDrawFont(fontSize);
+
+		g.setColor(getRandomColor(0, 80));
+		g.setFont(font);
+		FontMetrics fontMetrics = g.getFontMetrics();
+		int codeWidth = fontMetrics.stringWidth(code);
+
+		g.drawString(code, padding + (image.getWidth() - codeWidth) / 2, padding + fontMetrics.getAscent());
+	}
+
+	protected BufferedImage createInitBufferedImage(int width, int height)
+	{
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		Graphics g = image.getGraphics();
 		g.setColor(this.getRandomColor(200, 50));
-		g.setFont(font);
 		g.fillRect(0, 0, width, height);
 
 		Random random = new Random();
@@ -92,18 +114,7 @@ public class CheckCodeController extends AbstractController
 			g.drawLine(x, y, x1, y1);
 		}
 
-		String code = this.checkCodeManager.generate();
-		g.setColor(getRandomColor(0, 80));
-		FontMetrics fontMetrics = g.getFontMetrics();
-		int codeWidth = fontMetrics.stringWidth(code);
-
-		g.drawString(code, imagePadding + (width - codeWidth) / 2, imagePadding + fontMetrics.getAscent());
-
-		this.checkCodeManager.setCheckCode(session, module, code);
-
-		g.dispose();
-
-		ImageIO.write(image, "png", response.getOutputStream());
+		return image;
 	}
 
 	/**
@@ -139,13 +150,60 @@ public class CheckCodeController extends AbstractController
 		return new Color(r, g, b);
 	}
 
+	protected Font getDrawFont(int fontSize)
+	{
+		Font font = null;
+
+		String name = getDrawFontName();
+
+		if (!StringUtil.isEmpty(name))
+		{
+			font = new Font(name, Font.BOLD, fontSize);
+		}
+		else
+		{
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			Font[] fonts = ge.getAllFonts();
+
+			font = (fonts != null && fonts.length > 0 ? fonts[0] : null);
+		}
+
+		if (font == null)
+			throw new UnsupportedOperationException("No font found");
+
+		return font;
+	}
+
 	/**
 	 * 获取默认字体名。
 	 * 
 	 * @return
 	 */
-	protected String getDefaultFontFamilyName()
+	protected String getDrawFontName()
 	{
-		return "Arial";
+		String name = "";
+		
+		//最优字体
+		String bestName = "Arial";
+
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		String[] avaNames = ge.getAvailableFontFamilyNames();
+
+		if(avaNames != null && avaNames.length > 0)
+		{
+			for (String avaName : avaNames)
+			{
+				if (avaName.equalsIgnoreCase(bestName))
+				{
+					name = avaName;
+					break;
+				}
+			}
+			
+			if(StringUtil.isEmpty(name))
+				name = avaNames[0];
+		}
+
+		return name;
 	}
 }
