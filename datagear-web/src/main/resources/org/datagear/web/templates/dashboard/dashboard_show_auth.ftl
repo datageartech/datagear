@@ -16,8 +16,8 @@
 <meta http-equiv="refresh" content="3;url=${redirectPath}">
 </#if>
 <title>
-	<#include "../include/html_app_name_prefix.ftl">
 	<@spring.message code='module.dashboardShowAuth' />
+	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
 <body class="m-0 surface-ground">

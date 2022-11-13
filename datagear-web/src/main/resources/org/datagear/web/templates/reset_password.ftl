@@ -16,8 +16,8 @@
 <meta http-equiv="refresh" content="4;url=${contextPath}/login">
 </#if>
 <title>
-	<#include "include/html_app_name_prefix.ftl">
 	<@spring.message code='module.resetPassword' />
+	<#include "include/html_app_name_suffix.ftl">
 </title>
 </head>
 <body class="m-0 surface-ground">

@@ -14,8 +14,8 @@
 <#include "include/html_head.ftl">
 <meta http-equiv="refresh" content="3;url=${contextPath}/login">
 <title>
-	<#include "include/html_app_name_prefix.ftl">
 	<@spring.message code='module.registerSuccess' />
+	<#include "include/html_app_name_suffix.ftl">
 </title>
 </head>
 <body class="m-0 surface-ground">

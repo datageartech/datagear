@@ -12,8 +12,8 @@
 <head>
 <#include "../include/html_head.ftl">
 <title>
-	<#include "../include/html_app_name_prefix.ftl">
 	<@spring.message code='detailLog' />
+	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
 <body class="p-card no-border">
