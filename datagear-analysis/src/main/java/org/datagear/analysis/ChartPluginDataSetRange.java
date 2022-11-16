@@ -22,6 +22,9 @@ public class ChartPluginDataSetRange implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROPERTY_MAIN = "main";
+	public static final String PROPERTY_ATTACHMENT = "attachment";
+
 	private Range main = null;
 
 	private Range attachment = null;
@@ -83,6 +86,9 @@ public class ChartPluginDataSetRange implements Serializable
 	public static class Range implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
+
+		public static final String PROPERTY_MIN = "min";
+		public static final String PROPERTY_MAX = "max";
 
 		private Integer min = null;
 

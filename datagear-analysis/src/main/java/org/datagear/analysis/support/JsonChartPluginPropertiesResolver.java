@@ -22,6 +22,8 @@ import java.util.Map;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginAttribute;
+import org.datagear.analysis.ChartPluginDataSetRange;
+import org.datagear.analysis.ChartPluginDataSetRange.Range;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Group;
 import org.datagear.util.IOUtil;
@@ -42,6 +44,7 @@ import org.datagear.util.i18n.Label;
  *   icons : "..." 或者 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
  *   attributes :  [ { ... }, ... ],
  *   dataSigns : [ { ... }, ... ],
+ *   dataSetRange: { ... },
  *   version : "...",
  *   order: 整数值,
  *   categories: "..." 或者 {name: "...", ...} 或者 ["...", "...", ...] 或者 [ {name: "...", ...}, {name: "...", ...}, ... ],
@@ -65,6 +68,7 @@ public class JsonChartPluginPropertiesResolver
 	public static final String JSON_PROPERTY_DESC_LABEL = ChartPlugin.PROPERTY_DESC_LABEL;
 	public static final String JSON_PROPERTY_ATTRIBUTES = ChartPlugin.PROPERTY_ATTRIBUTES;
 	public static final String JSON_PROPERTY_DATA_SIGNS = ChartPlugin.PROPERTY_DATA_SIGNS;
+	public static final String JSON_PROPERTY_DATA_SET_RANGE = ChartPlugin.PROPERTY_DATA_SET_RANGE;
 	public static final String JSON_PROPERTY_VERSION = ChartPlugin.PROPERTY_VERSION;
 	public static final String JSON_PROPERTY_ORDER = ChartPlugin.PROPERTY_ORDER;
 	public static final String JSON_PROPERTY_CATEGORIES = ChartPlugin.PROPERTY_CATEGORIES;
@@ -101,6 +105,7 @@ public class JsonChartPluginPropertiesResolver
 		chartPlugin.setIconResourceNames(convertToIconResourceNames(properties.get(JSON_PROPERTY_ICONS)));
 		chartPlugin.setAttributes(convertToAttributes(properties.get(JSON_PROPERTY_ATTRIBUTES)));
 		chartPlugin.setDataSigns(convertToDataSigns(properties.get(JSON_PROPERTY_DATA_SIGNS)));
+		chartPlugin.setDataSetRange(convertToDataSetRange(properties.get(JSON_PROPERTY_DATA_SET_RANGE)));
 		chartPlugin.setVersion((String) properties.get(JSON_PROPERTY_VERSION));
 		chartPlugin.setOrder(convertToInt(properties.get(JSON_PROPERTY_ORDER), chartPlugin.getOrder()));
 
@@ -171,6 +176,15 @@ public class JsonChartPluginPropertiesResolver
 
 	/**
 	 * 将对象转换为图标资源名映射表。
+	 * <p>
+	 * 支持格式如下：
+	 * </p>
+	 * <p>
+	 * {@code "..."}
+	 * </p>
+	 * <p>
+	 * <code>{ "...": "...", ... }</code>
+	 * </p>
 	 * 
 	 * @param obj
 	 * @return
@@ -205,7 +219,16 @@ public class JsonChartPluginPropertiesResolver
 	}
 
 	/**
-	 * 将对象转换为{@linkplain DataSigns}。
+	 * 将对象转换为{@linkplain DataSign}列表。
+	 * <p>
+	 * 支持格式如下：
+	 * </p>
+	 * <p>
+	 * <code>{ ... }</code>
+	 * </p>
+	 * <p>
+	 * <code>[ { ... }, ... ]</code>
+	 * </p>
 	 * 
 	 * @param obj
 	 * @return
@@ -301,6 +324,15 @@ public class JsonChartPluginPropertiesResolver
 
 	/**
 	 * 将对象转换为{@linkplain ChartPluginAttribute}列表。
+	 * <p>
+	 * 支持格式如下：
+	 * </p>
+	 * <p>
+	 * <code>{ ... }</code>
+	 * </p>
+	 * <p>
+	 * <code>[ { ... }, ... ]</code>
+	 * </p>
 	 * 
 	 * @param obj
 	 * @return
@@ -485,38 +517,124 @@ public class JsonChartPluginPropertiesResolver
 	}
 
 	/**
-	 * 将对象转换为指定枚举类型的对象。
+	 * 将对象转换为{@linkplain ChartPluginDataSetRange}。
+	 * <p>
+	 * 支持如下两种格式：
+	 * </p>
+	 * <p>
+	 * {@linkplain Map Map&lt;String, ?&gt;}，完整格式：
+	 * </p>
+	 * <p>
+	 * <code>
+	 * <pre>
+	 * {
+	 *   //可选
+	 *   main:
+	 *   {
+	 *     //可选
+	 *     min: 数值,
+	 *     //可选
+	 *     max: 数值
+	 *   },
+	 *   //可选
+	 *   attachment:
+	 *   {
+	 *     //可选
+	 *     min: 数值,
+	 *     //可选
+	 *     max: 数值
+	 *   }
+	 * }
+	 * </pre>
+	 * </code>
+	 * </p>
+	 * <p>
+	 * {@linkplain Map Map&lt;String,
+	 * ?&gt;}，仅定义{@linkplain ChartPluginDataSetRange#getMain()}的格式：
+	 * </p>
+	 * <p>
+	 * <code>
+	 * <pre>
+	 * {
+	 *   //可选
+	 *   min: 数值,
+	 *   //可选
+	 *   max: 数值
+	 * }
+	 * </pre>
+	 * </code>
+	 * </p>
 	 * 
 	 * @param obj
-	 * @param enumType
-	 * @return
+	 * @return 可能为{@code null}
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends Enum<T>> T convertToEnum(Object obj, Class<T> enumType)
+	protected ChartPluginDataSetRange convertToDataSetRange(Object obj)
 	{
 		if (obj == null)
-			return null;
-		else if (enumType.isAssignableFrom(obj.getClass()))
-			return (T) obj;
-		else if (obj instanceof String)
 		{
-			String strVal = (String) obj;
+			return null;
+		}
+		else if (obj instanceof Map<?, ?>)
+		{
+			ChartPluginDataSetRange dsr = createChartPluginDataSetRange();
 
-			EnumSet<T> enumSet = EnumSet.allOf(enumType);
+			Map<String, ?> map = (Map<String, ?>) obj;
+			Map<String, ?> mainMap = (Map<String, ?>) map.get(ChartPluginDataSetRange.PROPERTY_MAIN);
+			Map<String, ?> attachmentMap = (Map<String, ?>) map.get(ChartPluginDataSetRange.PROPERTY_ATTACHMENT);
 
-			for (T e : enumSet)
+			if (mainMap == null && attachmentMap == null)
 			{
-				if (e.name().equalsIgnoreCase(strVal))
-					return e;
+				Range main = convertToRange(map);
+
+				if (main != null)
+					dsr.setMain(main);
+			}
+			else
+			{
+				dsr.setMain(convertToRange(mainMap));
+				dsr.setAttachment(convertToRange(attachmentMap));
 			}
 
-			return null;
+			return dsr;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ enumType.getName() + "] is not supported");
+					+ ChartPluginDataSetRange.class.getName() + "] is not supported");
 	}
 
+	protected Range convertToRange(Map<String, ?> map)
+	{
+		if (map == null || map.isEmpty())
+			return null;
+
+		Number min = (Number) map.get(ChartPluginDataSetRange.Range.PROPERTY_MIN);
+		Number max = (Number) map.get(ChartPluginDataSetRange.Range.PROPERTY_MAX);
+
+		if (min == null && max == null)
+			return null;
+
+		return new Range((min == null ? null : min.intValue()), (max == null ? null : max.intValue()));
+	}
+
+	/**
+	 * 将对象转换为{@linkplain Category}列表。
+	 * <p>
+	 * 支持格式如下：
+	 * </p>
+	 * <p>
+	 * <code>"..."</code>
+	 * </p>
+	 * <p>
+	 * <code>{ ... }</code>
+	 * </p>
+	 * <p>
+	 * <code>[ { ... }, ..., "...", ... ]</code>
+	 * </p>
+	 * 
+	 * @param obj
+	 * @return
+	 */
 	protected List<Category> convertToCategories(Object obj)
 	{
 		List<Category> categories = new ArrayList<Category>(1);
@@ -598,6 +716,39 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			orders.add(convertToInt(obj, defaultOrder));
+	}
+
+	/**
+	 * 将对象转换为指定枚举类型的对象。
+	 * 
+	 * @param obj
+	 * @param enumType
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T extends Enum<T>> T convertToEnum(Object obj, Class<T> enumType)
+	{
+		if (obj == null)
+			return null;
+		else if (enumType.isAssignableFrom(obj.getClass()))
+			return (T) obj;
+		else if (obj instanceof String)
+		{
+			String strVal = (String) obj;
+	
+			EnumSet<T> enumSet = EnumSet.allOf(enumType);
+	
+			for (T e : enumSet)
+			{
+				if (e.name().equalsIgnoreCase(strVal))
+					return e;
+			}
+	
+			return null;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ enumType.getName() + "] is not supported");
 	}
 
 	/**
@@ -711,5 +862,15 @@ public class JsonChartPluginPropertiesResolver
 	protected Group createGroup()
 	{
 		return new Group();
+	}
+
+	protected ChartPluginDataSetRange createChartPluginDataSetRange()
+	{
+		return new ChartPluginDataSetRange();
+	}
+
+	protected Range createRange()
+	{
+		return new Range();
 	}
 }
