@@ -470,3 +470,9 @@ ALTER TABLE DATAGEAR_HTML_CHART_WIDGET ADD COLUMN HCW_ATTR_VALUES VARCHAR(5000);
 --2022-11-06
 --图表部件表添加选项信息列
 ALTER TABLE DATAGEAR_HTML_CHART_WIDGET ADD COLUMN HCW_OPTIONS VARCHAR(5000);
+
+
+-----------------------------------------
+--version[4.3.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
