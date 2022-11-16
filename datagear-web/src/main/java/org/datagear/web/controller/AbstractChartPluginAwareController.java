@@ -161,6 +161,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		LabelUtil.concrete(chartPlugin, pluginView, locale);
 		pluginView.setIconUrl(resolveIconUrl(chartPlugin, themeName));
 		pluginView.setDataSigns(DataSign.clone(chartPlugin.getDataSigns(), locale));
+		pluginView.setDataSetRange(chartPlugin.getDataSetRange());
 		pluginView.setVersion(chartPlugin.getVersion());
 		pluginView.setOrder(chartPlugin.getOrder());
 		pluginView.setCategories(Category.clone(chartPlugin.getCategories(), locale));

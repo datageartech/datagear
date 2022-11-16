@@ -200,6 +200,7 @@
 					</div>
 		        	<div class="validate-msg">
 		        		<input name="dspDataSignCheckVal" type="text" class="validate-normalizer" />
+		        		<input name="validateDataSetRangeVal" type="text" class="validate-normalizer" />
 		        	</div>
 				</div>
 			</div>
@@ -696,6 +697,71 @@
 			return false;
 		}
 	});
+
+	$.validator.addMethod("validateDataSetRange", function(chart, element)
+	{
+		var re = true;
+		
+		var dsr = (chart.htmlChartPlugin ? chart.htmlChartPlugin.dataSetRange : null);
+		var cdss = (chart.chartDataSetVOs || []);
+		var mainCount = 0;
+		var attachmentCount = 0;
+		
+		$.each(cdss, function(i, cds)
+		{
+			if(cds.attachment)
+				attachmentCount++;
+			else
+				mainCount++;
+		});
+		
+		var msg = "";
+		var minMsg = "<@spring.message code='noLimit' />";
+		var maxMsg = "<@spring.message code='noLimit' />";
+		
+		if(re && dsr && dsr.main)
+		{
+			if(dsr.main.min != null)
+			{
+				minMsg = dsr.main.min;
+				re = (re ? (mainCount >= dsr.main.min) : false);
+			}
+			
+			if(dsr.main.max != null)
+			{
+				maxMsg = dsr.main.max;
+				re = (re ? (mainCount <= dsr.main.max) : false);
+			}
+			
+			if(!re)
+				msg = $.validator.format("<@spring.message code='chart.validateDataSetRange.main' />", minMsg, maxMsg, mainCount);
+		}
+		
+		if(re && dsr && dsr.attachment)
+		{
+			if(dsr.attachment.min != null)
+			{
+				minMsg = dsr.attachment.min;
+				re = (re ? (attachmentCount >= dsr.attachment.min) : false);
+			}
+			
+			if(dsr.attachment.max != null)
+			{
+				maxMsg = dsr.attachment.max;
+				re = (re ? (attachmentCount <= dsr.attachment.max) : false);
+			}
+			
+			if(!re)
+				msg = $.validator.format("<@spring.message code='chart.validateDataSetRange.attachment' />", minMsg, maxMsg, attachmentCount);
+		}
+		
+		if(re)
+			$(element).removeData("invalidMsg");
+		else
+			$(element).data("invalidMsg", msg);
+		
+		return re;
+	});
 	
 	$.validator.addMethod("chartAttrValuesRequired", function(chart)
 	{
@@ -730,11 +796,16 @@
 		{
 			updateInterval: {"integer": true},
 			dspDataSignCheckVal: { "dspDataSignRequired": true },
+			validateDataSetRangeVal: { "validateDataSetRange": true },
 			chartAttrValuesCheckVal: { "chartAttrValuesRequired": true }
 		},
 		customNormalizers:
 		{
 			dspDataSignCheckVal: function()
+			{
+				return po.vueFormModel();
+			},
+			validateDataSetRangeVal: function()
 			{
 				return po.vueFormModel();
 			},
@@ -748,6 +819,13 @@
 			dspDataSignCheckVal:
 			{
 				dspDataSignRequired: function(val, element)
+				{
+					return $(element).data("invalidMsg");
+				}
+			},
+			validateDataSetRangeVal:
+			{
+				validateDataSetRange: function(val, element)
 				{
 					return $(element).data("invalidMsg");
 				}

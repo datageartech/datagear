@@ -12,7 +12,7 @@ import java.io.Serializable;
 /**
  * 图表插件数据集范围。
  * <p>
- * {@linkplain ChartPlugin}使用此类定义数据集数目范围约束。
+ * {@linkplain ChartPlugin}使用此类声明它的{@linkplain ChartPlugin#renderChart(RenderContext, ChartDefinition)}的{@linkplain ChartDefinition#getChartDataSets()}的数目范围约束。
  * </p>
  * 
  * @author datagear@163.com

@@ -109,9 +109,9 @@ public interface ChartPlugin extends Identifiable, Labeled
 	DataSign getDataSign(String name);
 
 	/**
-	 * 获取数据集数目范围约束。
+	 * 获取{@linkplain ChartPluginDataSetRange}。
 	 * 
-	 * @return {@code null}表示无限制
+	 * @return {@code null}表示无约束
 	 */
 	ChartPluginDataSetRange getDataSetRange();
 
