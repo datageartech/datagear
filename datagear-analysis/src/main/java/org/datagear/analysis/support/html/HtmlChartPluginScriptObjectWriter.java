@@ -18,9 +18,9 @@ import java.util.Locale;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.RenderContext;
@@ -162,6 +162,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 			setIconResourceNames(plugin.getIconResourceNames());
 			setAttributes(ChartPluginAttribute.clone(plugin.getAttributes(), locale));
 			setDataSigns(DataSign.clone(plugin.getDataSigns(), locale));
+			setDataSetRange(plugin.getDataSetRange());
 			setVersion(plugin.getVersion());
 			setOrder(plugin.getOrder());
 			setCategories(Category.clone(plugin.getCategories(), locale));

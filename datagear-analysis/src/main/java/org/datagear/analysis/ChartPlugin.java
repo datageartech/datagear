@@ -26,6 +26,7 @@ public interface ChartPlugin extends Identifiable, Labeled
 	String PROPERTY_RESOURCES = "resources";
 	String PROPERTY_ATTRIBUTES = "attributes";
 	String PROPERTY_DATA_SIGNS = "dataSigns";
+	String PROPERTY_DATA_SET_RANGE = "dataSetRange";
 	String PROPERTY_VERSION = "version";
 	String PROPERTY_ORDER = "order";
 	String PROPERTY_CATEGORIES = "categories";
@@ -106,6 +107,13 @@ public interface ChartPlugin extends Identifiable, Labeled
 	 * @return
 	 */
 	DataSign getDataSign(String name);
+
+	/**
+	 * 获取数据集数目范围约束。
+	 * 
+	 * @return {@code null}表示无限制
+	 */
+	ChartPluginDataSetRange getDataSetRange();
 
 	/**
 	 * 渲染{@linkplain Chart}。
