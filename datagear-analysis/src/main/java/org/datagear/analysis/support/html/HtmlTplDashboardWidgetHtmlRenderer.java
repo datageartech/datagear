@@ -38,7 +38,8 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <pre>
  * ...
  * &lt;html dg-dashboard-factory="..." dg-dashboard-var="..."
- * 	dg-dashboard-unimport="..." dg-loadable-chart-widgets="..."&gt;
+ * 	dg-dashboard-unimport="..." dg-loadable-chart-widgets="..."
+ * 	dg-dashboard-auto-render="..."&gt;
  * ...
  * &lt;head&gt;
  * ...
@@ -63,6 +64,9 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * </p>
  * <p>
  * <code>html dg-loadable-charts</code>：选填，定义看板网页允许在页面端通过JS异步加载的{@linkplain ChartWidget}模式（{@linkplain LoadableChartWidgets}），多个以“,”隔开
+ * </p>
+ * <p>
+ * <code>html dg-dashboard-auto-render</code>：选填，定义看板网页是否自动执行渲染函数，可选值：{@code "true"} 是；{@code "false"} 否。默认值为：{@code "true"}
  * </p>
  * <p>
  * <code>div id</code>：选填，定义图表元素ID，如果不填，则会自动生成一个
@@ -92,6 +96,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public static final String DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "loadable-chart-widgets";
 
+	public static final String DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER = DASHBOARD_ELEMENT_ATTR_PREFIX
+			+ "dashboard-auto-render";
+
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-widget";
 
 	public static final String ATTR_NAME_CHART_AUTO_RESIZE = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-auto-resize";
@@ -110,6 +117,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	/** 属性名：异步加载图表部件模式 */
 	private String attrNameLoadableChartWidgets = DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS;
+
+	/** 属性名：是否自动执行看板渲染函数 */
+	private String attrNameDashboardAutoRender = DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER;
 
 	/** 图表标签名 */
 	private String chartTagName = DEFAULT_CHART_TAG_NAME;
@@ -175,6 +185,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public void setAttrNameLoadableChartWidgets(String attrNameLoadableChartWidgets)
 	{
 		this.attrNameLoadableChartWidgets = attrNameLoadableChartWidgets;
+	}
+
+	public String getAttrNameDashboardAutoRender()
+	{
+		return attrNameDashboardAutoRender;
+	}
+
+	public void setAttrNameDashboardAutoRender(String attrNameDashboardAutoRender)
+	{
+		this.attrNameDashboardAutoRender = attrNameDashboardAutoRender;
 	}
 
 	public String getChartTagName()
@@ -298,15 +318,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		writeDashboardJsInit(renderContext, renderAttr, out, dashboard, tmp1RenderContextVarName);
 		writeDashboardJsFactoryInit(renderContext, renderAttr, out, dashboard,
 				dashboardInfo.getDashboardFactoryVar());
-
+		
 		out.write("window." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
-
-		writeDashboardJsRender(renderContext, renderAttr, out, dashboard);
-
+		
+		if(dashboardInfo.isDashboardAutoRender())
+			writeDashboardJsRender(renderContext, renderAttr, out, dashboard);
+		
 		out.write("})();");
 		writeNewLine(out);
-
+		
 		writeScriptEndTag(out);
 		writeNewLine(out);
 	}
@@ -592,6 +613,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				{
 					this.dashboard.setLoadableChartWidgets(resolveLoadableChartWidgets(trim(entry.getValue())));
 				}
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardAutoRender.equalsIgnoreCase(name))
+				{
+					this.dashboardInfo.setDashboardAutoRender(trim(entry.getValue()));
+				}
 			}
 		}
 		
@@ -673,6 +698,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		/** 内置导入排除项 */
 		private String importExclude = null;
 		
+		/** 是否自动执行看板渲染函数 */
+		private String dashboardAutoRender = null;
+		
 		/** 图表信息 */
 		private List<ChartInfo> chartInfos = new ArrayList<>();
 
@@ -711,6 +739,21 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			this.importExclude = importExclude;
 		}
 		
+		public String getDashboardAutoRender()
+		{
+			return dashboardAutoRender;
+		}
+
+		public void setDashboardAutoRender(String dashboardAutoRender)
+		{
+			this.dashboardAutoRender = dashboardAutoRender;
+		}
+		
+		public boolean isDashboardAutoRender()
+		{
+			return !Boolean.FALSE.toString().equalsIgnoreCase(this.dashboardAutoRender);
+		}
+
 		public List<ChartInfo> getChartInfos()
 		{
 			return chartInfos;
@@ -724,8 +767,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [dashboardVar=" + dashboardVar + ", rendererVar="
-					+ dashboardFactoryVar + ", importExclude=" + importExclude + ", chartInfos=" + chartInfos + "]";
+			return getClass().getSimpleName() + " [dashboardVar=" + dashboardVar + ", dashboardFactoryVar=" + dashboardFactoryVar
+					+ ", importExclude=" + importExclude + ", dashboardAutoRender=" + dashboardAutoRender
+					+ ", chartInfos=" + chartInfos + "]";
 		}
 	}
 

@@ -52,6 +52,8 @@
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", categories: ["body", "div"]},
 		{name: "dg-loadable-chart-widgets",
 				displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-loadable-chart-widgets' />", categories: ["html"]},
+		{name: "dg-dashboard-auto-render",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-auto-render' />", categories: ["html"]}
 	];
 	
 	po.codeEditorCompletionsJsFunction =
