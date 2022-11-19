@@ -344,7 +344,7 @@
 				var categoryDatasMap = {};
 				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var propertyMap = { "value": (dg.horizontal ? [vp, np] : [np, vp]) };
+				var propertyMap = { "value": [np, vp] };
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
@@ -355,6 +355,11 @@
 					var categoryName = categoryNames[j];
 					var legendName = chartSupport.legendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
 					var mySeries = {id: series.length, type: "bar", name: legendName, data: categoryDatasMap[categoryName]};
+					
+					if(dg.horizontal)
+					{
+						mySeries.encode = { x: 1, y: 0 };
+					}
 					
 					if(dg.stack)
 					{
@@ -375,12 +380,17 @@
 					var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
 					
 					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-					var vpsMy = (dg.horizontal ? [vps[j], np] : [np, vps[j]]);
+					var vpsMy = [np, vps[j]];
 					var data = chart.resultValueObjects(result, vpsMy);
 					
 					chart.originalDataIndexes(data, chartDataSet);
 					
 					var mySeries = {id: series.length, type: "bar", name: legendName, data: data};
+					
+					if(dg.horizontal)
+					{
+						mySeries.encode = { x: 1, y: 0 };
+					}
 					
 					if(dg.stack)
 					{
@@ -442,10 +452,7 @@
 		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
-		var data = (dg.horizontal ?
-				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value, 1, 0) :
-				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value)
-			);
+		var data = chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
 		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
 											echartsData[categoryPropName] : undefined);
 		
