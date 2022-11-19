@@ -414,10 +414,7 @@
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
-			if(dg.horizontal)
-				chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar", 1, 0);
-			else
-				chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar");
+			chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar");
 		});
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -4824,7 +4821,8 @@
 					var categoryNames = [];
 					var categoryDatasMap = {};
 					
-					var propertyMap = { "value": (dg.horizontal ? [vp, np] : [np, vp]) };
+					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
+					var propertyMap = { "value": [np, vp] }; 
 					propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 					
 					var data = chart.resultMapObjects(result, propertyMap);
@@ -4838,6 +4836,11 @@
 						var legendName = chartSupport.legendNameForDataCategory(chartDataSets, dataSetAlias, categoryName);
 						var mySeries = {id: series.length, type: "scatter", name: legendName, data: categoryDatasMap[categoryName]};
 						
+						if(dg.horizontal)
+						{
+							mySeries.encode = { x: 1, y: 0 };
+						}
+						
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -4849,13 +4852,20 @@
 					for(var j=0; j<vps.length; j++)
 					{
 						var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
-						var vpsMy = (dg.horizontal ? [vps[j], np] : [np, vps[j]]);
+						var vpsMy = [np, vps[j]];
 						var data = chart.resultValueObjects(result, vpsMy);
 						chartSupport.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
 						chart.originalDataIndexes(data, chartDataSet);
 						
+						var mySeries = { id: series.length, type: "scatter", name: legendName, data: data };
+						
+						if(dg.horizontal)
+						{
+							mySeries.encode = { x: 1, y: 0 };
+						}
+						
 						legendData.push(legendName);
-						series.push({ id: series.length, type: "scatter", name: legendName, data: data });
+						series.push(mySeries);
 					}
 				}
 			}
@@ -4925,8 +4935,8 @@
 		//异常值系列
 		else
 		{
-			data[dataSignNames.name] = (dg.horizontal ? echartsValue[1] : echartsValue[0]);
-			data[dataSignNames.value] = (dg.horizontal ? echartsValue[0] : echartsValue[1]);
+			data[dataSignNames.name] = echartsValue[0];
+			data[dataSignNames.value] = echartsValue[1];
 		}
 		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
 											echartsData[categoryPropName] : undefined);
@@ -5922,7 +5932,7 @@
 				var categoryDatasMap = {};
 				
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var propertyMap = { "value": (dg.horizontal ? [vp, np] : [np, vp]) };
+				var propertyMap = { "value": [np, vp] }; 
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapObjects(result, propertyMap);
 				chart.originalDataIndexes(data, chartDataSet);
@@ -5940,6 +5950,11 @@
 						barGap: dg.barGap
 					};
 					
+					if(dg.horizontal)
+					{
+						mySeries.encode = { x: 1, y: 0 };
+					}
+					
 					legendData.push(legendName);
 					series.push(mySeries);
 				}
@@ -5953,7 +5968,7 @@
 					var legendName = chartSupport.legendNameForDataValues(chart, chartDataSets, chartDataSet, dataSetAlias, vps, j);
 					
 					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-					var vpsMy = (dg.horizontal ? [vps[j], np] : [np, vps[j]]);
+					var vpsMy = [np, vps[j]];
 					var data = chart.resultValueObjects(result, vpsMy);
 					
 					chart.originalDataIndexes(data, chartDataSet);
@@ -5965,6 +5980,11 @@
 						symbolSize: dg.symbolSize, symbolRepeat: dg.symbolRepeat,
 						barGap: dg.barGap
 					};
+					
+					if(dg.horizontal)
+					{
+						mySeries.encode = { x: 1, y: 0 };
+					}
 					
 					legendData.push(legendName);
 					series.push(mySeries);
@@ -5982,10 +6002,7 @@
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
-			if(dg.horizontal)
-				chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar", 1, 0);
-			else
-				chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
+			chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
 		});
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -6020,10 +6037,7 @@
 		var categoryPropName = chartSupport.builtinCategoryPropName();
 		
 		var echartsData = echartsEventParams.data;
-		var data = (dg.horizontal ?
-				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value, 1, 0) :
-				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value)
-			);
+		var data = chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
 		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
 											echartsData[categoryPropName] : undefined);
 		
@@ -6151,7 +6165,7 @@
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
 			
 			//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-			var data = chart.resultValueObjects(result, (dg.horizontal ? [vp, np] : [np, vp]));
+			var data = chart.resultValueObjects(result, [np, vp]);
 			
 			chart.originalDataIndexes(data, chartDataSet);
 			
@@ -6206,6 +6220,12 @@
 			}
 		];
 		
+		if(dg.horizontal)
+		{
+			series[0].encode = { x: 1, y: 0 };
+			series[1].encode = { x: 1, y: 0 };
+		}
+		
 		var options = { legend: {id: 0, data: [ seriesName ]}, series: series };
 		
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
@@ -6222,10 +6242,7 @@
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
-			if(dg.horizontal)
-				chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar", 1, 0);
-			else
-				chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
+			chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
 		});
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -6259,10 +6276,7 @@
 		var dataSignNames = dg.dataSignNames;
 		
 		var echartsData = echartsEventParams.data;
-		var data = (dg.horizontal ?
-				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value, 1, 0) :
-				chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value)
-			);
+		var data = chartSupport.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
 		
 		chart.eventData(chartEvent, data);
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
