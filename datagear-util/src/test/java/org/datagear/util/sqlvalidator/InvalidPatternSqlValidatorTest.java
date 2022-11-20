@@ -39,15 +39,132 @@ public class InvalidPatternSqlValidatorTest
 		patterns.put("mysql", InvalidPatternSqlValidator.toKeywordPattern("exec", "use"));
 		patterns.put("postgres", InvalidPatternSqlValidator.toKeywordPattern("DROP", "CREATE"));
 		patterns.put("jdbc://sqlserver", InvalidPatternSqlValidator.toKeywordPattern("dbo"));
+		
+		DatabaseProfile mysqlProfile = new DatabaseProfile("mysql", "", "`");
 
 		InvalidPatternSqlValidator validator = new InvalidPatternSqlValidator(patterns);
 
+		//基本
+		{
+			String sql = "DELETE";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		{
+			String sql = "DELETE ";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		{
+			String sql = " DELETE";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		{
+			String sql = " DELETE ";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		{
+			String sql = "delete";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		{
+			String sql = "delete ";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		{
+			String sql = " delete";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		{
+			String sql = " delete ";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		{
+			String sql = "DELETE_";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "_DELETE";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "_DELETE_";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "delete_";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "_delete";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "_delete_";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "deleteZ";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "Zdelete";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "ZdeleteZ";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertTrue(validation.isValid());
+		}
+		{
+			String sql = "DELETE FROM TABLE WHERE VALUE='DROP'";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		{
+			String sql = "delete from table where value='drop'";
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
+
+			assertFalse(validation.isValid());
+		}
+		
 		// 字符串、引用标识符里的关键字验证通过
 		{
 			String sql = "SELECT `DELETE`, `exec` FROM TABLE WHERE VALUE='DROP'";
-			DatabaseProfile profile = new DatabaseProfile("mysql", "", "`");
 
-			SqlValidation validation = validator.validate(sql, profile);
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
 
 			assertTrue(validation.isValid());
 		}
@@ -90,9 +207,8 @@ public class InvalidPatternSqlValidatorTest
 		// "default"里的关键字不通过
 		{
 			String sql = "SELECT `ALTER`, `use`, `CREATE`, DELETE, exec, DROP FROM TABLE";
-			DatabaseProfile profile = new DatabaseProfile("mysql", "", "`");
 
-			SqlValidation validation = validator.validate(sql, profile);
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
 
 			assertFalse(validation.isValid());
 			assertEquals(" DELETE,", validation.getInvalidValue());
@@ -101,9 +217,8 @@ public class InvalidPatternSqlValidatorTest
 		// "my"里的关键字不通过
 		{
 			String sql = "SELECT `ALTER`, `use`, `CREATE`, `DELETE`, exec, DROP FROM TABLE";
-			DatabaseProfile profile = new DatabaseProfile("mysql", "", "`");
 
-			SqlValidation validation = validator.validate(sql, profile);
+			SqlValidation validation = validator.validate(sql, mysqlProfile);
 
 			assertFalse(validation.isValid());
 			assertEquals(" exec,", validation.getInvalidValue());

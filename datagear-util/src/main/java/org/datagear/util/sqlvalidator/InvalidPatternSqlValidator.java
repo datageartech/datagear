@@ -168,7 +168,7 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 			if (i > 0)
 				sb.append('|');
 
-			sb.append("(" + "[^\\_\\w]" + Pattern.quote(keywords[i]) + "[^\\_\\w]" + ")");
+			sb.append("(" + "([^\\_\\w]|^)" + Pattern.quote(keywords[i]) + "([^\\_\\w]|$)" + ")");
 		}
 
 		return compileToSqlValidatorPattern(sb.toString());
