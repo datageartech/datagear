@@ -317,6 +317,24 @@ public class JsonChartPluginPropertiesResolverTest
 		{
 			InputStream jsonInputStream = getClass().getClassLoader()
 					.getResourceAsStream(
+							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-dataSetRange-number.json");
+
+			TestChartPlugin chartPlugin = new TestChartPlugin();
+			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, "UTF-8");
+
+			assertEquals("dataset-range-number", chartPlugin.getId());
+
+			ChartPluginDataSetRange dsr = chartPlugin.getDataSetRange();
+
+			assertEquals(1, dsr.getMain().getMin().intValue());
+			assertNull(dsr.getMain().getMax());
+
+			assertNull(dsr.getAttachment());
+		}
+		
+		{
+			InputStream jsonInputStream = getClass().getClassLoader()
+					.getResourceAsStream(
 							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-dataSetRange.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
@@ -511,6 +529,17 @@ public class JsonChartPluginPropertiesResolverTest
 		{
 			ChartPluginDataSetRange dsr = this.jsonChartPluginPropertiesResolver.convertToDataSetRange(null);
 			assertNull(dsr);
+		}
+
+		{
+			int min = 1;
+			
+			ChartPluginDataSetRange dsr = this.jsonChartPluginPropertiesResolver.convertToDataSetRange(min);
+
+			assertEquals(1, dsr.getMain().getMin().intValue());
+			assertNull(dsr.getMain().getMax());
+
+			assertNull(dsr.getAttachment());
 		}
 
 		{

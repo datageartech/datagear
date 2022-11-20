@@ -461,7 +461,7 @@ public class JsonChartPluginPropertiesResolver
 		else if (obj instanceof String)
 			return (String) obj;
 		else
-			return ChartPluginAttribute.DataType.STRING;
+			return ChartPluginAttribute.InputType.TEXT;
 	}
 
 	protected Object convertToAttributeInputPayload(Object obj)
@@ -519,10 +519,35 @@ public class JsonChartPluginPropertiesResolver
 	/**
 	 * 将对象转换为{@linkplain ChartPluginDataSetRange}。
 	 * <p>
-	 * 支持如下两种格式：
+	 * 支持如下三种格式：
 	 * </p>
 	 * <p>
-	 * {@linkplain Map Map&lt;String, ?&gt;}，完整格式：
+	 * 仅定义{@linkplain ChartPluginDataSetRange#getMain()}的{@linkplain Range#getMin()}格式：
+	 * </p>
+	 * <p>
+	 * <code>
+	 * <pre>
+	 * 数值
+	 * </pre>
+	 * </code>
+	 * </p>
+	 * <p>
+	 * 仅定义{@linkplain ChartPluginDataSetRange#getMain()}的格式：
+	 * </p>
+	 * <p>
+	 * <code>
+	 * <pre>
+	 * {
+	 *   //可选
+	 *   min: 数值,
+	 *   //可选
+	 *   max: 数值
+	 * }
+	 * </pre>
+	 * </code>
+	 * </p>
+	 * <p>
+	 * 完整格式：
 	 * </p>
 	 * <p>
 	 * <code>
@@ -548,22 +573,6 @@ public class JsonChartPluginPropertiesResolver
 	 * </pre>
 	 * </code>
 	 * </p>
-	 * <p>
-	 * {@linkplain Map Map&lt;String,
-	 * ?&gt;}，仅定义{@linkplain ChartPluginDataSetRange#getMain()}的格式：
-	 * </p>
-	 * <p>
-	 * <code>
-	 * <pre>
-	 * {
-	 *   //可选
-	 *   min: 数值,
-	 *   //可选
-	 *   max: 数值
-	 * }
-	 * </pre>
-	 * </code>
-	 * </p>
 	 * 
 	 * @param obj
 	 * @return 可能为{@code null}
@@ -574,6 +583,16 @@ public class JsonChartPluginPropertiesResolver
 		if (obj == null)
 		{
 			return null;
+		}
+		else if(obj instanceof Number)
+		{
+			Range mainRange = createRange();
+			mainRange.setMin(((Number) obj).intValue());
+			
+			ChartPluginDataSetRange dsr = createChartPluginDataSetRange();
+			dsr.setMain(mainRange);
+			
+			return dsr;
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
@@ -607,14 +626,18 @@ public class JsonChartPluginPropertiesResolver
 	{
 		if (map == null || map.isEmpty())
 			return null;
-
+		
 		Number min = (Number) map.get(ChartPluginDataSetRange.Range.PROPERTY_MIN);
 		Number max = (Number) map.get(ChartPluginDataSetRange.Range.PROPERTY_MAX);
-
+		
 		if (min == null && max == null)
 			return null;
-
-		return new Range((min == null ? null : min.intValue()), (max == null ? null : max.intValue()));
+		
+		Range range = createRange();
+		range.setMin(min == null ? null : min.intValue());
+		range.setMax(max == null ? null : max.intValue());
+		
+		return range;
 	}
 
 	/**
