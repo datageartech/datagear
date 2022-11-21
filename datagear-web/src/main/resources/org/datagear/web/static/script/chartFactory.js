@@ -5227,10 +5227,18 @@
 		}
 		
 		var seq = (this._uid_seq == null ? (this._uid_seq = 0) : this._uid_seq);
-		var time = (this._uid_time == null ? (this._uid_time = new Date().getTime().toString(16)) : this._uid_time);
+		var time = (this._uid_time == null ? (this._uid_time = chartFactory.currentDateMs().toString(16)) : this._uid_time);
 		this._uid_seq++;
 		
 		return this._BUILT_IN_NAME_PART + time + seq;
+	};
+	
+	/**
+	 * 获取当前日期毫秒数。
+	 */
+	chartFactory.currentDateMs = function()
+	{
+		return new Date().getTime();
 	};
 	
 	/**

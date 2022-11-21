@@ -180,6 +180,11 @@
 	dashboardFactory.LOAD_TIME = new Date().getTime();
 	
 	/**
+	 * 对于没有关联数据集的图表，是否仅执行本地更新操作，不等待服务端返回结果后再执行更新
+	 */
+	dashboardFactory.LOCAL_UPDATE_IF_EMPTY_DATA_SET = true;
+	
+	/**
 	 * 初始化原始看板对象，为其添加看板API，可选调用dashboard.init()函数。
 	 * 
 	 * @param dashboard 看板对象，格式应为：
@@ -1420,7 +1425,8 @@
 		}
 		
 		var preUpdateGroups = {};
-		var time = new Date().getTime();
+		var preUpdateLocals = [];
+		var time = chartFactory.currentDateMs();
 		
 		for(var i=0; i<charts.length; i++)
 		{
@@ -1428,16 +1434,24 @@
 			
 			if(this._isWaitForUpdate(chart, time))
 			{
-				var group = chart.updateGroup();
-				var preUpdates = preUpdateGroups[group];
-				
-				if(preUpdates == null)
+				if(dashboardFactory.LOCAL_UPDATE_IF_EMPTY_DATA_SET
+					&& (!chart.chartDataSets || chart.chartDataSets.length == 0))
 				{
-					preUpdates = [];
-					preUpdateGroups[group] = preUpdates;
+					preUpdateLocals.push(chart);
 				}
-				
-				preUpdates.push(chart);
+				else
+				{
+					var group = chart.updateGroup();
+					var preUpdates = preUpdateGroups[group];
+					
+					if(preUpdates == null)
+					{
+						preUpdates = [];
+						preUpdateGroups[group] = preUpdates;
+					}
+					
+					preUpdates.push(chart);
+				}
 			}
 		}
 		
@@ -1448,6 +1462,8 @@
 		{
 			this._doHandleChartsAjax(url, preUpdateGroups[group]);
 		}
+		
+		this._doHandleChartsLocal(preUpdateLocals);
 		
 		var dashboard = this;
 		setTimeout(function()
@@ -1500,7 +1516,7 @@
 				}
 				//> @deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
 				
-				var updateTime = new Date().getTime();
+				var updateTime = chartFactory.currentDateMs();
 				
 				dashboard._updateCharts(chartResults);
 				dashboard._handleChartResultErrors(chartResultErrorMessages);
@@ -1511,7 +1527,7 @@
 			},
 			error : function()
 			{
-				var updateTime = new Date().getTime();
+				var updateTime = chartFactory.currentDateMs();
 				
 				dashboard._setUpdateTime(preUpdateCharts, updateTime);
 				dashboard._setUpdateAjaxErrorTime(preUpdateCharts, updateTime);
@@ -1519,6 +1535,22 @@
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
 			}
 		});
+	};
+	
+	dashboardBase._doHandleChartsLocal = function(preUpdateCharts)
+	{
+		if(!preUpdateCharts || preUpdateCharts.length == 0)
+			return;
+		
+		var updateTime = chartFactory.currentDateMs();
+		
+		for(var i=0; i<preUpdateCharts.length; i++)
+		{
+			this._updateChart(preUpdateCharts[i], {});
+		}
+		
+		this._setUpdateTime(preUpdateCharts, updateTime);			
+		this._setInRequestRefreshData(preUpdateCharts, false);
 	};
 	
 	/**
@@ -1537,7 +1569,7 @@
 		var wait = false;
 		
 		if(currentTime == null)
-			currentTime = new Date().getTime();
+			currentTime = chartFactory.currentDateMs();
 		
 		//图表正处于更新数据ajax中
 		if(chart._inUpdateAjax())
@@ -1686,17 +1718,7 @@
 			if(!chart)
 				continue;
 			
-			try
-			{
-				this._updateChart(chart, chartResults[chartId]);
-			}
-			catch(e)
-			{
-				//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
-				chart.status(chartStatusConst.UPDATE_ERROR);
-				
-				chartFactory.logException(e);
-			}
+			this._updateChart(chart, chartResults[chartId]);
 		}
 	};
 	
@@ -1708,9 +1730,18 @@
 	 */
 	dashboardBase._updateChart = function(chart, chartResult)
 	{
-		var dataSetResults = (chartResult ? chartResult.dataSetResults : []);
+		var dataSetResults = (chartResult &&  chartResult.dataSetResults ? chartResult.dataSetResults : []);
 		
-		chart.update(dataSetResults);
+		try
+		{
+			chart.update(dataSetResults);
+		}
+		catch(e)
+		{
+			//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
+			chart.status(chartStatusConst.UPDATE_ERROR);
+			chartFactory.logException(e);
+		}
 	};
 	
 	dashboardBase._setUpdateTime = function(chart, time)
@@ -2275,7 +2306,7 @@
 		if(global._DataGearServerTime == null)
 			throw new Error("Get current server time is not supported");
 		
-		var cct = new Date().getTime();
+		var cct = chartFactory.currentDateMs();
 		var cst = global._DataGearServerTime + (cct - dashboardFactory.LOAD_TIME);
 		
 		if(asMillisecond == true)
