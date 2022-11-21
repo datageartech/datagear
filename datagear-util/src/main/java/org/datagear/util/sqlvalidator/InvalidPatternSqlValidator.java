@@ -135,7 +135,7 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 			return sql;
 
 		SqlReplacer sr = new SqlReplacer();
-		sr.setReplaceSqlString(this.ignoreQuoteIdentifier);
+		sr.setReplaceSqlString(this.ignoreSqlString);
 		sr.setReplaceQuoteIdentifier(this.ignoreQuoteIdentifier);
 
 		return sr.replace(sql, profile.getIdentifierQuote());

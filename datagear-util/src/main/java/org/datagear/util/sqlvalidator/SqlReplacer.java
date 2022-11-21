@@ -99,7 +99,7 @@ public class SqlReplacer extends TextParserSupport
 		if (sql == null)
 			return null;
 
-		if (!this.replaceSqlString && !this.replaceSqlString)
+		if (!this.replaceSqlString && !this.replaceQuoteIdentifier)
 			return sql;
 
 		Reader in = null;

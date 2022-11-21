@@ -13,23 +13,65 @@ import org.junit.Test;
 
 public class SqlReplacerTest
 {
-	private SqlReplacer sqlReplacer = new SqlReplacer();
-
 	@Test
 	public void replaceTest()
 	{
+		SqlReplacer sqlReplacer = new SqlReplacer();
+		
 		{
 			String sql = "SELECT NAME, \"VALUE\" FROM TABLE WHERE ID = '3'";
-			String actual = this.sqlReplacer.replace(sql, "\"");
+			String actual = sqlReplacer.replace(sql, "\"");
 
 			assertEquals("SELECT NAME, \"\" FROM TABLE WHERE ID = ''", actual);
 		}
 
 		{
 			String sql = "SELECT NAME, \"VA\"\"LUE\" FROM TABLE WHERE ID = '3''3'";
-			String actual = this.sqlReplacer.replace(sql, "\"");
+			String actual = sqlReplacer.replace(sql, "\"");
 
 			assertEquals("SELECT NAME, \"\" FROM TABLE WHERE ID = ''", actual);
+		}
+	}
+
+	@Test
+	public void replaceTest_replaceSqlString()
+	{
+		SqlReplacer sqlReplacer = new SqlReplacer();
+		sqlReplacer.setReplaceQuoteIdentifier(false);
+		
+		{
+			String sql = "SELECT NAME, \"VALUE\" FROM TABLE WHERE ID = '3'";
+			String actual = sqlReplacer.replace(sql, "\"");
+
+			assertEquals("SELECT NAME, \"VALUE\" FROM TABLE WHERE ID = ''", actual);
+		}
+
+		{
+			String sql = "SELECT NAME, \"VA\"\"LUE\" FROM TABLE WHERE ID = '3''3'";
+			String actual = sqlReplacer.replace(sql, "\"");
+
+			assertEquals("SELECT NAME, \"VA\"\"LUE\" FROM TABLE WHERE ID = ''", actual);
+		}
+	}
+
+	@Test
+	public void replaceTest_replaceQuoteIdentifier()
+	{
+		SqlReplacer sqlReplacer = new SqlReplacer();
+		sqlReplacer.setReplaceSqlString(false);
+		
+		{
+			String sql = "SELECT NAME, \"VALUE\" FROM TABLE WHERE ID = '3'";
+			String actual = sqlReplacer.replace(sql, "\"");
+
+			assertEquals("SELECT NAME, \"\" FROM TABLE WHERE ID = '3'", actual);
+		}
+
+		{
+			String sql = "SELECT NAME, \"VA\"\"LUE\" FROM TABLE WHERE ID = '3''3'";
+			String actual = sqlReplacer.replace(sql, "\"");
+
+			assertEquals("SELECT NAME, \"\" FROM TABLE WHERE ID = '3''3'", actual);
 		}
 	}
 }
