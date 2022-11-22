@@ -64,7 +64,7 @@ SQL数据集
 
 看板编辑
 
-![screenshot/dashboard-edit.png](screenshot/dashboard-edit.png)
+![screenshot/dashboard-visual-mode.gif](screenshot/dashboard-visual-mode.gif)
 
 看板展示
 
