@@ -163,13 +163,19 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 	{
 		StringBuilder sb = new StringBuilder();
 		
+		sb.append("([^\\_\\w]|^)");
+		sb.append("(");
+		
 		for (int i = 0; i < keywords.length; i++)
 		{
 			if (i > 0)
 				sb.append('|');
 
-			sb.append("(" + "([^\\_\\w]|^)" + Pattern.quote(keywords[i]) + "([^\\_\\w]|$)" + ")");
+			sb.append("(" + Pattern.quote(keywords[i]) + ")");
 		}
+		
+		sb.append(")");
+		sb.append("([^\\_\\w]|$)");
 
 		return compileToSqlValidatorPattern(sb.toString());
 	}
