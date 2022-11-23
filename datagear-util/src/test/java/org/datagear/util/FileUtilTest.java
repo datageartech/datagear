@@ -11,6 +11,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 
 import org.junit.Test;
 
@@ -126,5 +128,61 @@ public class FileUtilTest
 		assertTrue(file.isDirectory());
 
 		FileUtil.deleteFile(parent);
+	}
+	
+	@Test
+	public void createTempDirectoryTest() throws IOException
+	{
+		File directory = FileUtil.createTempDirectory();
+		
+		assertTrue(directory.isDirectory());
+		
+		File file = new File(directory, "test.txt");
+		
+		try(Writer w = IOUtil.getWriter(file))
+		{
+			w.write("test");
+		}
+		
+		assertTrue(file.length() > 0);
+		
+		FileUtil.deleteFile(directory);
+	}
+	
+	@Test
+	public void createTempFileTest() throws IOException
+	{
+		File file = FileUtil.createTempFile();
+		
+		assertFalse(file.isDirectory());
+		assertTrue(file.length() == 0);
+		
+		try(Writer w = IOUtil.getWriter(file))
+		{
+			w.write("test");
+		}
+		
+		assertTrue(file.length() > 0);
+		
+		FileUtil.deleteFile(file);
+	}
+	
+	@Test
+	public void createTempFileTest_extension() throws IOException
+	{
+		File file = FileUtil.createTempFile("mytestsuffix");
+		
+		assertFalse(file.isDirectory());
+		assertTrue(file.getName().indexOf("mytestsuffix") > 0);
+		assertTrue(file.length() == 0);
+		
+		try(Writer w = IOUtil.getWriter(file))
+		{
+			w.write("test");
+		}
+		
+		assertTrue(file.length() > 0);
+		
+		FileUtil.deleteFile(file);
 	}
 }

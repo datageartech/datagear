@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 /**
@@ -663,16 +665,8 @@ public class FileUtil
 	public static File createTempDirectory() throws IOException
 	{
 		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_DIR";
-
-		File tmp = File.createTempFile(prefix, null);
-
-		if (!tmp.delete())
-			throw new IOException("Could not create temp directory for prefix '" + prefix + "'");
-
-		if (!tmp.mkdir())
-			throw new IOException("Could not create temp directory for prefix '" + prefix + "'");
-
-		return tmp;
+		Path path = Files.createTempDirectory(prefix);
+		return path.toFile();
 	}
 
 	/**
@@ -684,7 +678,8 @@ public class FileUtil
 	public static File createTempFile() throws IOException
 	{
 		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_FILE";
-		return File.createTempFile(prefix, null);
+		Path path = Files.createTempFile(prefix, null);
+		return path.toFile();
 	}
 
 	/**
@@ -697,6 +692,7 @@ public class FileUtil
 	public static File createTempFile(String extension) throws IOException
 	{
 		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_FILE";
-		return File.createTempFile(prefix, extension);
+		Path path = Files.createTempFile(prefix, extension);
+		return path.toFile();
 	}
 }
