@@ -121,6 +121,7 @@ label[title]:not(.no-tip)::after,
 .opacity-hide-absolute{
 	opacity: 0 !important;
 	z-index: -99 !important;
+	overflow: hidden !important;
 	/*设为absolute可不占当前空间*/
 	position: absolute;
 }

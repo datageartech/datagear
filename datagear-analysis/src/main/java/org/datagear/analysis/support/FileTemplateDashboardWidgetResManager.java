@@ -13,8 +13,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
@@ -141,12 +144,7 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 
 		for (File file : files)
 		{
-			String resource = FileUtil.getRelativePath(directory, file);
-
-			resource = FileUtil.trimPath(resource, FileUtil.PATH_SEPARATOR_SLASH);
-			if (file.isDirectory())
-				resource += FileUtil.PATH_SEPARATOR_SLASH;
-
+			String resource = trimResourceName(directory, file);
 			resources.add(resource);
 		}
 
@@ -165,6 +163,44 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	{
 		File file = getFile(id, name, false);
 		FileUtil.deleteFile(file);
+	}
+
+	@Override
+	public Map<String, String> rename(String id, String srcName, String destName) throws IOException
+	{
+		File idRoot = FileUtil.getDirectory(this.rootDirectory, id);
+		
+		if(!idRoot.exists())
+			return Collections.emptyMap();
+		
+		File srcFile = FileUtil.getFile(idRoot, srcName);
+		
+		if(!srcFile.exists())
+			return Collections.emptyMap();
+		
+		File destFile = FileUtil.getFile(idRoot, destName, true);
+		
+		Map<String, String> renames = renameResourceFile(idRoot, srcFile, destFile);
+		return renames;
+	}
+	
+	protected Map<String, String> renameResourceFile(File idRoot, File srcFile, File destFile) throws IOException
+	{
+		Map<String, String> renames = new HashMap<String, String>();
+		
+		Map<File, File> tracks = FileUtil.renameWithTrack(srcFile, destFile);
+		for(Map.Entry<File, File> track : tracks.entrySet())
+		{
+			File dest = track.getKey();
+			File src = track.getValue();
+			
+			if(dest.isDirectory())
+				continue;
+			
+			renames.put(trimResourceName(idRoot, src), trimResourceName(idRoot, dest));
+		}
+		
+		return renames;
 	}
 
 	protected void listAllDescendentFiles(File directory, List<File> files)
@@ -190,6 +226,17 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 			if (child.isDirectory())
 				listAllDescendentFiles(child, files);
 		}
+	}
+	
+	protected String trimResourceName(File idDirectory, File resource)
+	{
+		String resourceName = FileUtil.getRelativePath(idDirectory, resource);
+		resourceName = FileUtil.trimPath(resourceName, FileUtil.PATH_SEPARATOR_SLASH);
+		
+		if (resource.isDirectory() && !resourceName.endsWith(FileUtil.PATH_SEPARATOR_SLASH))
+			resourceName += FileUtil.PATH_SEPARATOR_SLASH;
+
+		return resourceName;
 	}
 
 	protected File getFile(String id, String name, boolean create)

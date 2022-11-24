@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@linkplain TemplateDashboardWidget}资源管理器。
@@ -190,4 +191,15 @@ public interface TemplateDashboardWidgetResManager
 	 *            模板或者其他资源名称
 	 */
 	void delete(String id, String name);
+	
+	/**
+	 * 重命名指定资源。
+	 * 
+	 * @param id
+	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 * @param srcName 源资源名
+	 * @param destName 目标资源名
+	 * @return 已改名的所有资源映射表，结构为：<code>原资源名 -&gt; 新资源名</code>
+	 */
+	Map<String, String> rename(String id, String srcName, String destName) throws IOException;
 }

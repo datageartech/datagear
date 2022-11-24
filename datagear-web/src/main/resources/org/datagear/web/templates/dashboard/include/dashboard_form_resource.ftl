@@ -33,7 +33,7 @@
 							</p-button>
 						</div>
 					</div>
-					<div>
+					<div class="relative">
 						<div class="p-buttonset">
 							<p-button type="button" icon="pi pi-copy" class="p-button-secondary"
 								@click="onCopyLocalResToClipboard"
@@ -52,6 +52,12 @@
 								:model="pm.localResMenuItems" :popup="true"
 								v-if="!pm.isReadonlyAction">
 							</p-menu>
+						</div>
+						<div class="opacity-hide-absolute" style="top:0;left:0;width:1px;height:1px;">
+							<p-button id="${pid}renameResBtn" type="button" class="p-button-secondary"
+								@click="onToggleRenameResPanel">
+								<@spring.message code='rename' />
+							</p-button>
 						</div>
 					</div>
 				</div>
@@ -352,6 +358,21 @@
 		});
 	};
 	
+	po.renameRes = function(srcName, destName)
+	{
+		if(!srcName || !destName || srcName == destName || !po.checkPersistedDashboard())
+			return;
+		
+		var fm = po.vueFormModel();
+		
+		po.post("/dashboard/renameResource", { id: fm.id, srcName: srcName, destName: destName},
+		function(response)
+		{
+			po.updateTemplateList(response.data.templates);
+			po.refreshLocalRes();
+		});
+	};
+	
 	po.deleteRes = function(name)
 	{
 		if(!name || !po.checkPersistedDashboard())
@@ -426,6 +447,22 @@
 						po.refreshLocalRes();
 					}
 				},
+				{
+					label: "<@spring.message code='rename' />",
+					command: function(e)
+					{
+						var resName = po.getSelectedLocalRes();
+						if(resName)
+						{
+							var pm = po.vuePageModel();
+							pm.renameResModel.srcName = resName;
+							pm.renameResModel.destName = resName;
+							
+							e.originalEvent.stopPropagation();
+							po.elementOfId("${pid}renameResBtn").click();
+						}
+					}
+				},
 				{ separator: true },
 				{
 					label: "<@spring.message code='delete' />",
@@ -453,6 +490,11 @@
 				url: po.concatContextPath("/dashboard/uploadResourceFile"),
 				filePath: null,
 				savePath: null
+			},
+			renameResModel:
+			{
+				srcName: null,
+				destName: null
 			}
 		});
 		
@@ -588,6 +630,28 @@
 				
 				pm.uploadResModel.savePath = ($.isDirectoryFile(sr) ? sr + response.fileName : response.fileName);
 				pm.uploadResModel.filePath = response.uploadFilePath;
+			},
+			
+			onToggleRenameResPanel: function(e)
+			{
+				if(!po.checkPersistedDashboard())
+					return;
+				
+				po.vueUnref("${pid}renameResPanelEle").toggle(e);
+			},
+			
+			onRenameResPanelShow: function(e)
+			{
+				var pm = po.vuePageModel();
+				var panel = po.elementOfId("${pid}renameResPanel", document.body);
+				var form = po.elementOfId("${pid}renameResForm", panel);
+				po.elementOfId("${pid}destResName", form).focus();
+				
+				po.setupSimpleForm(form, pm.renameResModel, function()
+				{
+					po.renameRes(pm.renameResModel.srcName, pm.renameResModel.destName);
+					po.vueUnref("${pid}renameResPanelEle").hide();
+				});
 			}
 		});
 		
@@ -600,6 +664,7 @@
 		po.vueRef("${pid}localResMenuEle", null);
 		po.vueRef("${pid}addResPanelEle", null);
 		po.vueRef("${pid}uploadResPanelEle", null);
+		po.vueRef("${pid}renameResPanelEle", null);
 	};
 })
 (${pid});

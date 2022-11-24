@@ -15,6 +15,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.TemplateDashboardWidget;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
@@ -124,6 +125,12 @@ public class NameAsTemplateDashboardWidgetResManager extends AbstractTemplateDas
 
 	@Override
 	public void delete(String id, String name)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<String, String> rename(String id, String srcName, String destName) throws IOException
 	{
 		throw new UnsupportedOperationException();
 	}

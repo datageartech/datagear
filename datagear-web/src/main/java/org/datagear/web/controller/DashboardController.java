@@ -461,11 +461,20 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		User user = WebUtils.getUser();
 		
 		name = trimResourceName(name);
-
+		boolean isNameDirectory = FileUtil.isDirectoryName(name);
+		
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
-
+		
 		String[] templates = dashboard.getTemplates();
-		String[] newTemplates = mergeTemplates(templates, name, false);
+		List<String> newTemplatesList = new ArrayList<String>(templates.length);
+		
+		for(String tpl : templates)
+		{
+			if((isNameDirectory && !tpl.startsWith(name)) || (!isNameDirectory && !tpl.equals(name)))
+				newTemplatesList.add(tpl);
+		}
+		
+		String[] newTemplates = newTemplatesList.toArray(new String[newTemplatesList.size()]);
 		
 		if(isEmpty(newTemplates))
 			throw new IllegalInputException();
@@ -474,7 +483,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				.getTemplateDashboardWidgetResManager();
 
 		dashboardWidgetResManager.delete(id, name);
-
+		
 		if (!Arrays.equals(templates, newTemplates))
 		{
 			dashboard.setTemplates(newTemplates);
@@ -482,6 +491,52 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
+		return optSuccessDataResponseEntity(request, data);
+	}
+
+	@RequestMapping(value = "/renameResource", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> renameResource(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String id, @RequestParam("srcName") String srcName,
+			@RequestParam("destName") String destName)
+			throws Exception
+	{
+		User user = WebUtils.getUser();
+		
+		srcName = trimResourceName(srcName);
+		destName = trimResourceName(destName);
+		
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		
+		String[] templates = dashboard.getTemplates();
+		
+		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getTemplateDashboardWidgetResManager();
+		
+		Map<String, String> renames = dashboardWidgetResManager.rename(id, srcName, destName);
+		
+		String[] newTemplates = new String[templates.length];
+		
+		for(int i=0; i<templates.length; i++)
+		{
+			String tpl = templates[i];
+			
+			String destTpl = renames.get(tpl);
+			if(!StringUtil.isEmpty(destTpl))
+				tpl = destTpl;
+			
+			newTemplates[i] = tpl;
+		}
+		
+		if (!Arrays.equals(templates, newTemplates))
+		{
+			dashboard.setTemplates(newTemplates);
+			this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+		}
+
+		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
+		data.put("renames", renames);
+		
 		return optSuccessDataResponseEntity(request, data);
 	}
 
