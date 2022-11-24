@@ -872,9 +872,10 @@ public class IOUtil
 	 * @param src
 	 * @param dest
 	 * @param srcAsSubDirectory
+	 * @return 目标文件
 	 * @throws IOException
 	 */
-	public static void copy(File src, File dest, boolean srcAsSubDirectory) throws IOException
+	public static File copy(File src, File dest, boolean srcAsSubDirectory) throws IOException
 	{
 		if (src.isDirectory())
 		{
@@ -883,16 +884,18 @@ public class IOUtil
 			else if (!dest.isDirectory())
 				throw new IllegalArgumentException("[dest] must be directory");
 
-			File targetDirectory = dest;
+			File destFile = dest;
 			if (srcAsSubDirectory)
-				targetDirectory = FileUtil.getDirectory(dest, src.getName());
+				destFile = FileUtil.getDirectory(dest, src.getName());
 
 			File[] children = src.listFiles();
 			if (children != null)
 			{
 				for (File child : children)
-					copy(child, FileUtil.getFile(targetDirectory, child.getName()), false);
+					copy(child, FileUtil.getFile(destFile, child.getName()), false);
 			}
+			
+			return destFile;
 		}
 		else
 		{
@@ -900,6 +903,8 @@ public class IOUtil
 			{
 				File destFile = FileUtil.getFile(dest, src.getName());
 				copy(src, destFile, false);
+				
+				return destFile;
 			}
 			else
 			{
@@ -914,6 +919,8 @@ public class IOUtil
 				{
 					IOUtil.close(out);
 				}
+				
+				return dest;
 			}
 		}
 	}

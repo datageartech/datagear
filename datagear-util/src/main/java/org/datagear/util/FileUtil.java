@@ -14,6 +14,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 文件工具类。
@@ -85,7 +87,7 @@ public class FileUtil
 	 * 
 	 * @param file
 	 * @param createDirectory
-	 *            是否创建自身目录和上级目录
+	 *            是否创建自身目录和上级目录，如果{@code file}以{@code '/'}或者{@code '\'}结尾将被认为是创建目录
 	 * @return
 	 */
 	public static File getFile(String file, boolean createDirectory)
@@ -109,9 +111,9 @@ public class FileUtil
 	 * 获取指定目录下的文件对象。
 	 * 
 	 * @param parent
-	 * @param file
+	 * @param file 文件
 	 * @param createDirectory
-	 *            是否创建自身目录和上级目录
+	 *            是否创建自身目录和上级目录，如果{@code file}以{@code '/'}或者{@code '\'}结尾将被认为是创建目录
 	 * @return
 	 */
 	public static File getFile(File parent, String file, boolean createDirectory)
@@ -207,38 +209,54 @@ public class FileUtil
 	 * @param parent
 	 *            允许为{@code null}
 	 * @param file
-	 *            文件，以{@code '/'}或者{@code '\'}结尾将被认为是目录
+	 *            文件
 	 * @param createDirectory
-	 *            是否创建自身目录和上级目录
+	 *            是否创建自身目录和上级目录，如果{@code file}以{@code '/'}或者{@code '\'}结尾将被认为是创建目录
 	 * @return
 	 */
 	protected static File getFileNullable(File parent, String file, boolean createDirectory)
 	{
 		if (StringUtil.isEmpty(file))
 			throw new IllegalArgumentException("[file] must not be empty");
-
+		
 		file = trimPath(file);
 
 		// 只有限定了父级目录，才需要校验
 		if (parent != null)
 			checkBackwardPathNoTrim(file);
-
+		
 		File reFile = (parent == null ? new File(file) : new File(parent, file));
-
+		
 		if (createDirectory)
 		{
-			File reParent = reFile.getParentFile();
-
-			if (reParent != null && !reParent.exists())
-				reParent.mkdirs();
-
-			if (file.endsWith(PATH_SEPARATOR) && !reFile.exists())
+			createParentIfNone(reFile);
+			
+			if(!reFile.exists() && (file.endsWith(PATH_SEPARATOR) || file.endsWith(PATH_SEPARATOR_BACK_SLASH)
+					|| file.endsWith(PATH_SEPARATOR_SLASH)))
+			{
 				reFile.mkdir();
+			}
 		}
 
 		return reFile;
 	}
-
+	
+	/**
+	 * 如果没有，则创建指定文件的父目录。
+	 * 
+	 * @param file
+	 */
+	public static void createParentIfNone(File file)
+	{
+		if(file.exists())
+			return;
+		
+		File parent = file.getParentFile();
+		
+		if (parent != null && !parent.exists())
+			parent.mkdirs();
+	}
+	
 	/**
 	 * 删除文件。
 	 * 
@@ -694,5 +712,116 @@ public class FileUtil
 		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_FILE";
 		Path path = Files.createTempFile(prefix, extension);
 		return path.toFile();
+	}
+	
+	/**
+	 * 是否是目录名（以{@code '/'}或{@code '\'结尾}）。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public static boolean isDirectoryName(String name)
+	{
+		if(name == null)
+			return false;
+		
+		return (name.endsWith(PATH_SEPARATOR_SLASH) || name.endsWith(PATH_SEPARATOR_BACK_SLASH));
+	}
+	
+	/**
+	 * 判断{@code sub}是否是{@code parent}或其子目录。
+	 * 
+	 * @param parent
+	 * @param sub
+	 * @return
+	 */
+	public static boolean contains(File parent, File sub)
+	{
+		if(parent == null || sub == null)
+			return false;
+		
+		File myParent = sub;
+		
+		while(myParent != null)
+		{
+			if(myParent.equals(parent))
+				return true;
+			
+			myParent = myParent.getParentFile();
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * 重命名文件路径。
+	 * 
+	 * @param path 原文件路径
+	 * @param newPath 新文件路径，可以是原文件路径的上级路径、下级路径
+	 * @return 重命名清单，结构为：<code>新文件 -&gt; 原文件</code>
+	 * @throws IOException
+	 */
+	public static Map<File, File> renameWithTrack(File path, File newPath) throws IOException
+	{
+		Map<File, File> tracks = new HashMap<File, File>();
+		renameWithTrack(tracks, path, newPath);
+		
+		return tracks;
+	}
+	
+	protected static void renameWithTrack(Map<File, File> handledFiles, File path, File newPath) throws IOException
+	{
+		if(!path.exists() ||  path.equals(newPath))
+			return;
+		
+		if(path.isDirectory())
+		{
+			//在创建newPath前获取子文件，这样当newPath是需新建的path子目录时，可以将其忽略
+			File[] children = path.listFiles();
+			
+			if(!newPath.exists())
+				newPath.mkdirs();
+			
+			if(!newPath.isDirectory())
+				throw new IllegalArgumentException("Target file must be directory");
+			
+			handledFiles.put(newPath, path);
+			
+			for(File child : children)
+			{
+				if(!child.exists() || handledFiles.containsKey(child))
+					continue;
+				
+				File childNewFile = null;
+				
+				if(child.isDirectory())
+				{
+					childNewFile = getDirectory(newPath, child.getName(), true);
+				}
+				else
+				{
+					childNewFile = getFile(newPath, child.getName());
+				}
+				
+				renameWithTrack(handledFiles, child, childNewFile);
+			}
+			
+			if(path.listFiles().length == 0)
+				deleteFile(path);
+		}
+		else if(newPath.exists() && newPath.isDirectory())
+		{
+			newPath = getFile(newPath, path.getName());
+			renameWithTrack(handledFiles, path, newPath);
+		}
+		else
+		{
+			createParentIfNone(newPath);
+			
+			handledFiles.put(newPath, path);
+			
+			newPath = IOUtil.copy(path, newPath, false);
+			deleteFile(path);
+		}
 	}
 }
