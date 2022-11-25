@@ -42,7 +42,7 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}zipFileNameEncoding" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='dashboard.import.zipFileNameEncoding.desc' />">
+					title="<@spring.message code='zipFileEncoding.uploadAutoUzip.desc' />">
 					<@spring.message code='zipFileEncoding' />
 				</label>
 		        <div class="field-input col-12 md:col-9">

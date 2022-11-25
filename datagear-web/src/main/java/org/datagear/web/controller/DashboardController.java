@@ -266,6 +266,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setTemplates(new String[0]);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 		dashboard.setCreateTime(null);
+		
+		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
+		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		setFormModel(model, dashboard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
@@ -280,6 +283,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		User user = WebUtils.getUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		
+		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
+		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		setFormModel(model, dashboard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
@@ -298,6 +304,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		dashboard.setId(IDUtil.randomIdOnTime20());
 		dashboard.setCreateTime(null);
+		
+		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
+		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 
 		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
@@ -576,7 +585,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveUploadResourceFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") String id, @RequestParam("resourceFilePath") String resourceFilePath,
-			@RequestParam("resourceName") String resourceName) throws Exception
+			@RequestParam("resourceName") String resourceName,
+			@RequestParam("autoUnzip") boolean autoUnzip,
+			@RequestParam("zipFileNameEncoding") String zipFileNameEncoding) throws Exception
 	{
 		User user = WebUtils.getUser();
 
@@ -589,21 +600,48 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getTemplateDashboardWidgetResManager();
-
-		InputStream in = null;
-		OutputStream out = null;
-
-		try
+		
+		if(autoUnzip && FileUtil.isExtension(uploadFile, "zip"))
 		{
-			in = IOUtil.getInputStream(uploadFile);
-			out = dashboardWidgetResManager.getOutputStream(id, resourceName);
+			File unzipRoot = FileUtil.generateUniqueDirectory(this.tempDirectory);
+			File unzipDirectory = null;
+			
+			if (!StringUtil.isEmpty(resourceName))
+				unzipDirectory = FileUtil.getDirectory(unzipRoot, resourceName, true);
+			else
+				unzipDirectory = unzipRoot;
 
-			IOUtil.write(in, out);
+			ZipInputStream zin = null;
+
+			try
+			{
+				zin = IOUtil.getZipInputStream(uploadFile, zipFileNameEncoding);
+				IOUtil.unzipCheckMalformed(zin, unzipDirectory);
+			}
+			finally
+			{
+				IOUtil.close(zin);
+			}
+			
+			dashboardWidgetResManager.copyFrom(id, unzipRoot);
 		}
-		finally
+		else
 		{
-			IOUtil.close(in);
-			IOUtil.close(out);
+			InputStream in = null;
+			OutputStream out = null;
+	
+			try
+			{
+				in = IOUtil.getInputStream(uploadFile);
+				out = dashboardWidgetResManager.getOutputStream(id, resourceName);
+	
+				IOUtil.write(in, out);
+			}
+			finally
+			{
+				IOUtil.close(in);
+				IOUtil.close(out);
+			}
 		}
 
 		return optSuccessResponseEntity(request);

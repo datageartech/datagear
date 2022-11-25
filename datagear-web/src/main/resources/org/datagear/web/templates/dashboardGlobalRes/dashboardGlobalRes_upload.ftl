@@ -63,7 +63,7 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}zipFileNameEncoding" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='dashboardGlobalRes.upload.zipFileNameEncoding.desc' />">
+					title="<@spring.message code='zipFileEncoding.uploadAutoUzip.desc' />">
 					<@spring.message code='zipFileEncoding' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -71,7 +71,7 @@
 		        		:options="pm.availableCharsetNames" class="input w-full">
 		        	</p-dropdown>
 		        	<div class="desc text-color-secondary">
-		        		<small><@spring.message code='dashboardGlobalRes.upload.notice' /></small>
+		        		<small><@spring.message code='zipFileEncoding.uploadAutoUzip.notice' /></small>
 		        	</div>
 		        </div>
 			</div>

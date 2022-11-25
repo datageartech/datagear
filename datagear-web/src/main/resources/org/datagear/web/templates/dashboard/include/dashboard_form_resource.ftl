@@ -123,6 +123,8 @@
 {
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	
+	var availableCharsetNames = $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />);
+	
 	po.isResTemplate = function(name)
 	{
 		var fm = po.vueFormModel();
@@ -243,9 +245,9 @@
 		return true;
 	};
 	
-	po.uploadRes = function(savePath, filePath)
+	po.uploadRes = function(uploadModel)
 	{
-		if(!savePath || !filePath)
+		if(!uploadModel.filePath)
 			return false;
 		
 		var fm = po.vueFormModel();
@@ -253,8 +255,10 @@
 		po.post("/dashboard/saveUploadResourceFile",
 		{
 			id: fm.id,
-			resourceFilePath: filePath,
-			resourceName: savePath
+			resourceFilePath: uploadModel.filePath,
+			resourceName: (uploadModel.savePath || ""),
+			autoUnzip: uploadModel.autoUnzip,
+			zipFileNameEncoding: uploadModel.zipFileNameEncoding
 		},
 		function(response)
 		{
@@ -263,6 +267,7 @@
 			var pm = po.vuePageModel();
 			pm.uploadResModel.savePath = "";
 			pm.uploadResModel.filePath = "";
+			pm.uploadResModel.autoUnzip = false;
 			po.clearFileuploadInfo();
 			po.refreshLocalRes();
 		});
@@ -403,6 +408,7 @@
 	{
 		po.vuePageModel(
 		{
+			availableCharsetNames: availableCharsetNames,
 			localRes:
 			{
 				selectedTemplate: null,
@@ -492,7 +498,9 @@
 			{
 				url: po.concatContextPath("/dashboard/uploadResourceFile"),
 				filePath: null,
-				savePath: null
+				savePath: null,
+				autoUnzip: false,
+				zipFileNameEncoding: "${zipFileNameEncodingDefault}"
 			},
 			renameResModel:
 			{
@@ -609,16 +617,29 @@
 				
 				po.vueUnref("${pid}uploadResPanelEle").toggle(e);
 			},
-
+			
 			onUploadResPanelShow: function(e)
 			{
 				var pm = po.vuePageModel();
 				var panel = po.elementOfId("${pid}uploadResPanel", document.body);
 				var form = po.elementOfId("${pid}uploadResForm", panel);
 				
-				po.setupSimpleForm(form, pm.uploadResModel, function()
+				po.setupSimpleForm(form, pm.uploadResModel,
 				{
-					po.uploadRes(pm.uploadResModel.savePath, pm.uploadResModel.filePath)
+					customNormalizers:
+					{
+						savePath: function()
+						{
+							if(pm.uploadResModel.autoUnzip && $.isZipFile(pm.uploadResModel.filePath))
+								return (pm.uploadResModel.savePath || "savePathValidatePlaceholder");
+							else
+								return pm.uploadResModel.savePath;
+						}
+					},
+					submitHandler: function()
+					{
+						po.uploadRes(pm.uploadResModel);
+					}
 				});
 			},
 			

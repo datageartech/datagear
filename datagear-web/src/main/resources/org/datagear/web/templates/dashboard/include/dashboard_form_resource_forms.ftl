@@ -46,7 +46,7 @@
 				<@spring.message code='uploadResource' />
 			</label>
 		</div>
-		<div class="p-2">
+		<div class="p-2 panel-content-size-xs-mwh overflow-auto">
 			<div class="field grid">
 				<label for="${pid}uploadResFile" class="field-label col-12 mb-2">
 					<@spring.message code='file' />
@@ -71,9 +71,34 @@
 				</label>
 				<div class="field-input col-12">
 					<p-inputtext id="${pid}uploadResName" v-model="pm.uploadResModel.savePath" type="text"
-						class="input w-full" name="savePath" required maxlength="200">
+						class="input w-full validate-normalizer" name="savePath" required maxlength="200">
 					</p-inputtext>
 				</div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}uploadResAutoUnzip" class="field-label col-12 mb-2"
+					title="<@spring.message code='dashboard.uploadResAutoUnzip.desc' />">
+					<@spring.message code='autoUnzip' />
+				</label>
+		        <div class="field-input col-12">
+		        	<p-selectbutton id="${pid}uploadResAutoUnzip" v-model="pm.uploadResModel.autoUnzip" :options="pm.booleanOptions"
+		        		option-label="name" option-value="value" class="input w-full">
+		        	</p-selectbutton>
+		        </div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}uploadResZipFileNameEncoding" class="field-label col-12 mb-2"
+					title="<@spring.message code='zipFileEncoding.uploadAutoUzip.desc' />">
+					<@spring.message code='zipFileEncoding' />
+				</label>
+		        <div class="field-input col-12">
+		        	<p-dropdown id="${pid}uploadResZipFileNameEncoding" v-model="pm.uploadResModel.zipFileNameEncoding"
+		        		:options="pm.availableCharsetNames" class="input w-full">
+		        	</p-dropdown>
+		        	<div class="desc text-color-secondary">
+		        		<small><@spring.message code='zipFileEncoding.uploadAutoUzip.notice' /></small>
+		        	</div>
+		        </div>
 			</div>
 		</div>
 		<div class="pt-3 text-center">
