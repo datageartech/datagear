@@ -191,7 +191,7 @@ public class FileUtilTest
 	}
 	
 	@Test
-	public void renameWithTrackTest() throws IOException
+	public void renameTrackedTest() throws IOException
 	{
 		File target = FileUtil.getFile("target");
 		boolean targetExists = target.exists();
@@ -207,7 +207,7 @@ public class FileUtilTest
 			writeTestFile(src);
 			File dest = FileUtil.getFile(testRoot, "aa/bb/cc/txt.txt");
 			
-			Map<File,File> tracks = FileUtil.renameWithTrack(src, dest);
+			Map<File,File> tracks = FileUtil.renameTracked(src, dest);
 			
 			assertEquals(src, tracks.get(dest));
 			assertTrue(dest.exists());
@@ -225,7 +225,7 @@ public class FileUtilTest
 			writeTestFile(src);
 			File destDirectory = FileUtil.getDirectory(testRoot, "aa/bb/cc/", true);
 			
-			Map<File,File> tracks = FileUtil.renameWithTrack(src, destDirectory);
+			Map<File,File> tracks = FileUtil.renameTracked(src, destDirectory);
 			
 			File dest = FileUtil.getFile(destDirectory, "txt.txt");
 			
@@ -245,7 +245,7 @@ public class FileUtilTest
 			writeTestFile(src);
 			File dest = FileUtil.getFile(testRoot, "a/b/c/txt.txt");
 			
-			Map<File,File> tracks = FileUtil.renameWithTrack(src, dest);
+			Map<File,File> tracks = FileUtil.renameTracked(src, dest);
 			
 			assertTrue(tracks.isEmpty());
 			assertTrue(dest.exists());
@@ -263,7 +263,7 @@ public class FileUtilTest
 			writeTestFile(src);
 			File dest = FileUtil.getFile(testRoot, "a/b/c/");
 			
-			Map<File,File> tracks = FileUtil.renameWithTrack(src, dest);
+			Map<File,File> tracks = FileUtil.renameTracked(src, dest);
 			
 			assertTrue(tracks.isEmpty());
 			assertTrue(dest.exists());
@@ -285,7 +285,7 @@ public class FileUtilTest
 			File src = FileUtil.getFile(testRoot, "a/b");
 			File dest = FileUtil.getDirectory(testRoot, "aa/bb/cc");
 
-			Map<File,File> tracks = FileUtil.renameWithTrack(src, dest);
+			Map<File,File> tracks = FileUtil.renameTracked(src, dest);
 			
 			assertEquals(txta, tracks.get(FileUtil.getFile(dest, "c/txt-a.txt")));
 			assertEquals(txtb, tracks.get(FileUtil.getFile(dest, "c/txt-b.txt")));
@@ -310,7 +310,7 @@ public class FileUtilTest
 			File src = FileUtil.getFile(testRoot, "a/b/c");
 			File dest = FileUtil.getDirectory(testRoot, "a/b");
 			
-			Map<File,File> tracks = FileUtil.renameWithTrack(src, dest);
+			Map<File,File> tracks = FileUtil.renameTracked(src, dest);
 			
 			assertEquals(txta, tracks.get(FileUtil.getFile(dest, "d/txt-a.txt")));
 			assertEquals(txtb, tracks.get(FileUtil.getFile(dest, "d/txt-b.txt")));
@@ -336,7 +336,7 @@ public class FileUtilTest
 			File src = FileUtil.getFile(testRoot, "a/b/c");
 			File dest = FileUtil.getDirectory(testRoot, "a/b/f");
 			
-			Map<File,File> tracks = FileUtil.renameWithTrack(src, dest);
+			Map<File,File> tracks = FileUtil.renameTracked(src, dest);
 			
 			assertEquals(txta, tracks.get(FileUtil.getFile(dest, "d/txt-a.txt")));
 			assertEquals(txtb, tracks.get(FileUtil.getFile(dest, "d/txt-b.txt")));
@@ -362,7 +362,7 @@ public class FileUtilTest
 			File src = FileUtil.getFile(testRoot, "a/b/c");
 			File dest = FileUtil.getDirectory(testRoot, "a/b/c/e");
 			
-			Map<File,File> tracks = FileUtil.renameWithTrack(src, dest);
+			Map<File,File> tracks = FileUtil.renameTracked(src, dest);
 			
 			assertEquals(txta, tracks.get(FileUtil.getFile(dest, "d/txt-a.txt")));
 			assertEquals(txtb, tracks.get(FileUtil.getFile(dest, "d/txt-b.txt")));
@@ -385,7 +385,7 @@ public class FileUtilTest
 			File src = FileUtil.getFile(testRoot, "a/b");
 			File dest = FileUtil.getDirectory(testRoot, "a/b");
 
-			Map<File,File> tracks = FileUtil.renameWithTrack(src, dest);
+			Map<File,File> tracks = FileUtil.renameTracked(src, dest);
 			
 			assertTrue(tracks.isEmpty());
 			assertTrue(dest.exists());

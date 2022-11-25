@@ -188,7 +188,7 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	{
 		Map<String, String> renames = new HashMap<String, String>();
 		
-		Map<File, File> tracks = FileUtil.renameWithTrack(srcFile, destFile);
+		Map<File, File> tracks = FileUtil.renameTracked(srcFile, destFile);
 		for(Map.Entry<File, File> track : tracks.entrySet())
 		{
 			File dest = track.getKey();

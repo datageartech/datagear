@@ -761,15 +761,15 @@ public class FileUtil
 	 * @return 重命名清单，结构为：<code>新文件 -&gt; 原文件</code>
 	 * @throws IOException
 	 */
-	public static Map<File, File> renameWithTrack(File path, File newPath) throws IOException
+	public static Map<File, File> renameTracked(File path, File newPath) throws IOException
 	{
 		Map<File, File> tracks = new HashMap<File, File>();
-		renameWithTrack(tracks, path, newPath);
+		renameTracked(tracks, path, newPath);
 		
 		return tracks;
 	}
 	
-	protected static void renameWithTrack(Map<File, File> handledFiles, File path, File newPath) throws IOException
+	protected static void renameTracked(Map<File, File> handledFiles, File path, File newPath) throws IOException
 	{
 		if(!path.exists() ||  path.equals(newPath))
 			return;
@@ -803,7 +803,7 @@ public class FileUtil
 					childNewFile = getFile(newPath, child.getName());
 				}
 				
-				renameWithTrack(handledFiles, child, childNewFile);
+				renameTracked(handledFiles, child, childNewFile);
 			}
 			
 			if(path.listFiles().length == 0)
@@ -812,7 +812,7 @@ public class FileUtil
 		else if(newPath.exists() && newPath.isDirectory())
 		{
 			newPath = getFile(newPath, path.getName());
-			renameWithTrack(handledFiles, path, newPath);
+			renameTracked(handledFiles, path, newPath);
 		}
 		else
 		{
