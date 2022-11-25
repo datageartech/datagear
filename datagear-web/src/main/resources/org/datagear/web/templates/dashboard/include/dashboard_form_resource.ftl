@@ -370,6 +370,9 @@
 		{
 			po.updateTemplateList(response.data.templates);
 			po.refreshLocalRes();
+			
+			if(po.updateEditorResNames)
+				po.updateEditorResNames(response.data.renames);
 		});
 	};
 	

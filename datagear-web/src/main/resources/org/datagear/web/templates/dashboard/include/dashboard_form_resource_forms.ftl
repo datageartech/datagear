@@ -111,6 +111,9 @@
 					</p-inputtext>
 				</div>
 			</div>
+        	<div class="desc text-color-secondary">
+        		<small><@spring.message code='dashboard.renameRes.destName.desc' /></small>
+        	</div>
 		</div>
 		<div class="pt-3 text-center">
 			<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>

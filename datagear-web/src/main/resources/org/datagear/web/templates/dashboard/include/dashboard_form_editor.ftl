@@ -16,7 +16,7 @@
 	:scrollable="true" @tab-change="onResourceContentTabChange"
 	@tab-click="onResourceContentTabClick" class="contextmenu-tabview light-tabview"
 	:class="{'opacity-0': pm.resContentTabs.items.length == 0}">
-	<p-tabpanel v-for="tab in pm.resContentTabs.items" :key="tab.key" :header="tab.title">
+	<p-tabpanel v-for="tab in pm.resContentTabs.items" :key="tab.id" :header="tab.title">
 		<template #header>
 			<p-button type="button" icon="pi pi-angle-down"
 				class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
@@ -87,20 +87,52 @@
 {
 	po.defaultTemplateName = "${defaultTempalteName}";
 	
+	//实现重命名操作后编辑器更新逻辑
+	po.updateEditorResNames = function(renames)
+	{
+		/*
+		//暂时禁用，因为更新编辑器选项卡信息会导致卡片重绘而丢失已编辑信息
+		var tabIdMap = po.resContentTabIdMap;
+		if(tabIdMap)
+		{
+			$.each(renames, function(oldName, newName)
+			{
+				var tabId = tabIdMap[oldName];
+				if(tabId != null)
+				{
+					tabIdMap[newName] = tabId;
+					tabIdMap[oldName] = null;
+				}
+			});
+		}
+		
+		var pm = po.vuePageModel();
+		$.each(pm.resContentTabs.items, function(i, tab)
+		{
+			var newName = renames[tab.resName];
+			if(newName != null)
+			{
+				tab.title = newName;
+				tab.resName = newName;
+			}
+		});
+		*/
+	};
+	
 	po.resContentTabId = function(resName)
 	{
 		var map = (po.resContentTabIdMap || (po.resContentTabIdMap = {}));
 		
 		//不直接使用resName作为元素ID，因为resName中可能存在与jquery冲突的字符，比如'$'
-		var value = map[resName];
+		var tabId = map[resName];
 		
-		if(value == null)
+		if(tabId == null)
 		{
-			value = $.uid("resCntTab");
-			map[resName] = value;
+			tabId = $.uid("resCntTab");
+			map[resName] = tabId;
 		}
 		
-		return value;
+		return tabId;
 	};
 	
 	po.resCodeEditorEleId = function(tab)
@@ -124,7 +156,6 @@
 		var re =
 		{
 			id: po.resContentTabId(resName),
-			key: resName,
 			title: resName,
 			editMode: "code",
 			resName: resName,
@@ -159,13 +190,14 @@
 	
 	po.loadResContentIfNon = function(tab)
 	{
-		var tabPanel = po.elementOfId(tab.id);
-		var loaded = tabPanel.prop("loaded");
+		var loadStatus = tab.loadStatus;
+		var needLoad = (loadStatus != "loaded" && loadStatus != "loading");
 		
-		if(!loaded && !tabPanel.prop("loading"))
+		if(needLoad)
 		{
-			tabPanel.prop("loading", true);
+			tab.loadStatus = "loading";
 			
+			var tabPanel = po.elementOfId(tab.id);
 			var fm = po.vueFormModel();
 			var id = (po.isPersistedDashboard() ? fm.id : po.copySourceId);
 			
@@ -183,11 +215,10 @@
 						resourceContent = (response.defaultTemplateContent || "");
 					
 					po.setResContent(tab, resourceContent);
-					tabPanel.prop("loaded", true);
 				},
 				complete: function()
 				{
-					tabPanel.prop("loading", false);
+					tab.loadStatus = "loaded";
 				}
 			});
 		}
@@ -2037,15 +2068,15 @@
 		//po.showResContentTab()里不能获取到创建的DOM元素，所以采用此方案
 		po.vueWatch(pm.resContentTabs, function(oldVal, newVal)
 		{
-			var items = newVal.items;
-			var activeIndex = newVal.activeIndex;
-			var activeTab = items[activeIndex];
+			var newItems = newVal.items;
+			var newActiveIndex = newVal.activeIndex;
+			var newActiveTab = newItems[newActiveIndex];
 			
-			if(activeTab)
+			if(newActiveTab)
 			{
 				po.vueNextTick(function()
 				{
-					po.loadResContentIfNon(activeTab);
+					po.loadResContentIfNon(newActiveTab);
 				});
 			}
 		});
