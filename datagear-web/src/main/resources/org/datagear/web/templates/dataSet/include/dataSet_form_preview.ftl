@@ -27,6 +27,7 @@
 		<div class="flex-grow-1 p-2">
 			<div style="width:50vw;height:50vh;">
 				<p-datatable :value="pm.previewResultDatas" :scrollable="true" scroll-height="flex"
+					:resizable-columns="true" column-resize-mode="expand"
 					striped-rows class="table-sm" v-if="!pm.previewError">
 					<p-column v-for="col in pm.previewColumns"
 						:field="col.name" :header="col.label" :sortable="false" :style="col.style"
