@@ -46,7 +46,12 @@
 				area: false,
 				//阶梯：true, false, "start", "middle", "end"
 				step: false
-			}
+			},
+			
+			//扩展配置项，是否填充轴数据
+			//null、false：不填充；true：按数据顺序填充；"asc"：升序填充；"desc"：降序填充；
+			//function(a, b){} ：自定义排序填充
+			inflateAxisData : null
 		},
 		options);
 		
@@ -184,6 +189,8 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: { id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
+		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions, options, options.xAxis, 0);
+		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
@@ -247,7 +254,12 @@
 				stackGroup: true,
 				//是否横向
 				horizontal: false
-			}
+			},
+			
+			//扩展配置项，是否填充轴数据
+			//null、false：不填充；true：按数据顺序填充；"asc"：升序填充；"desc"：降序填充；
+			//function(a, b){} ：自定义排序填充
+			inflateAxisData : null
 		},
 		options);
 		
@@ -411,6 +423,8 @@
 			options.yAxis = { id: 0 };
 		else
 			options.xAxis = { id: 0 };
+		
+		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis), 0);
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -1299,7 +1313,12 @@
 				symbolSizeMin: undefined,
 				//散点图类型："scatter"、"effectScatter"
 				scatterType: scatterType
-			}
+			},
+			
+			//扩展配置项，是否填充轴数据
+			//null、false：不填充；true：按数据顺序填充；"asc"：升序填充；"desc"：降序填充；
+			//function(a, b){} ：自定义排序填充
+			inflateAxisData : null
 		},
 		options);
 		
@@ -1430,6 +1449,8 @@
 		
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
+		
+		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions, options, options.xAxis, 0);
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -8866,6 +8887,104 @@
 		}
 		
 		return range;
+	};
+	
+	/**
+	 * 处理renderOptions.inflateAxisData选项
+	 * 
+	 * @param renderOptions 渲染选项
+	 * @param updateOptions 更新选项
+	 * @param updateAxis 要更新的轴对象
+	 * @param valueExtractor 轴值提取器，数值：提取dataEle.value[数值]的值；字符串：提取dataEle[字符串]的值；自定义函数：function(dataEle, seriesEle){}
+	 */
+	chartSupport.handleInflateAxisDataForEchartsOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor)
+	{
+		var inflateAxisData = renderOptions.inflateAxisData;
+		
+		if(inflateAxisData == null || inflateAxisData == false)
+			return;
+		
+		var comparator = null;
+		
+		if(inflateAxisData == true)
+			comparator = null;
+		
+		if(chartFactory.isString(inflateAxisData))
+			comparator = inflateAxisData.toLowerCase();
+		
+		//valueExtractor可以是数值、字符串
+		if(chartFactory.isNumber(valueExtractor))
+		{
+			var arrayIndex = valueExtractor;
+			valueExtractor = function(dataEle)
+			{
+				return (dataEle && dataEle.value ? dataEle.value[arrayIndex] : null);
+			};
+		}
+		else if(chartFactory.isString(valueExtractor))
+		{
+			var name = valueExtractor;
+			valueExtractor = function(dataEle)
+			{
+				return (dataEle ? dataEle[name] : null);
+			};
+		}
+		
+		var axisData = chartSupport.extractDistinctValues(updateOptions.series, valueExtractor, comparator);
+		updateAxis.data = axisData;
+	};
+	
+	/**
+	 * 从series[i].data[i]中提取不重复的值数组
+	 * 
+	 * @param series 系列数组
+	 * @param valueExtractor 轴值提取器，function(dataEle, seriesEle){}
+	 * @param comparator 排序比较函数，null：不排序；"asc"：升序；"desc"：降序；自定义排序函数：function(a, b){} 
+	 */
+	chartSupport.extractDistinctValues = function(series, valueExtractor, comparator)
+	{
+		series = (series || []);
+		
+		if(comparator == "asc")
+		{
+			comparator = function(a, b)
+			{
+				if(a == b)
+					return 0;
+				else
+					return (a < b ? -1 : 1);
+			};
+		}
+		else if(comparator == "desc")
+		{
+			comparator = function(a, b)
+			{
+				if(a == b)
+					return 0;
+				else
+					return (a > b ? -1 : 1);
+			};
+		}
+		
+		var axisData = [];
+		
+		$.each(series, function(i, s)
+		{
+			var data = (s.data || []);
+			var myData = [];
+			$.each(data, function(j, d)
+			{
+				var v = valueExtractor(d, s);
+				myData.push(v);
+			});
+			
+			chartSupport.appendDistinct(axisData, myData);
+		});
+		
+		if(comparator != null && $.isFunction(comparator))
+			axisData.sort(comparator);
+		
+		return axisData;
 	};
 	
 	//---------------------------------------------------------
