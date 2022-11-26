@@ -85,11 +85,11 @@
 		        		:name="col.name" :required="col.isRequired">
 		        	</p-inputtext>
 		        	
-		        	<div class="desc text-color-secondary text-sm mt-1" v-if="col.isDate || col.isTime || col.isTimestamp">
-		        		<span v-if="col.isDate">{{pm.sqlDateFormat}}</span>
-		        		<span v-else-if="col.isTime">{{pm.sqlTimeFormat}}</span>
-		        		<span v-else-if="col.isTimestamp">{{pm.sqlTimestampFormat}}</span>
-		        		<span v-else></span>
+		        	<div class="desc text-color-secondary mt-1" v-if="col.isDate || col.isTime || col.isTimestamp">
+		        		<small v-if="col.isDate">{{formatAndExampleWithParam(pm.sqlDateFormat, pm.sqlDateFormatExample)}}</small>
+		        		<small v-else-if="col.isTime">{{formatAndExampleWithParam(pm.sqlTimeFormat, pm.sqlTimeFormatExample)}}</small>
+		        		<small v-else-if="col.isTimestamp">{{formatAndExampleWithParam(pm.sqlTimestampFormat, pm.sqlTimestampFormatExample)}}</small>
+		        		<small v-else></small>
 		        	</div>
 		        </div>
 			</div>
@@ -182,11 +182,19 @@
 			uploadBinaryColumnFileUrl: po.concatContextPath("/data/uploadFile"),
 			sqlDateFormat: "${sqlDateFormat}",
 			sqlTimeFormat: "${sqlTimeFormat}",
-			sqlTimestampFormat: "${sqlTimestampFormat}"
+			sqlTimestampFormat: "${sqlTimestampFormat}",
+			sqlDateFormatExample: "${sqlDateFormatExample}",
+			sqlTimeFormatExample: "${sqlTimeFormatExample}",
+			sqlTimestampFormatExample: "${sqlTimestampFormatExample}"
 		});
 		
 		po.vueMethod(
 		{
+			formatAndExampleWithParam: function(format, example)
+			{
+				return $.validator.format("<@spring.message code='formatAndExampleWithParam' />", format, example);
+			},
+			
 			onDeleteColValue: function(e, column)
 			{
 				var fm = po.vueFormModel();

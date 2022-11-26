@@ -19,7 +19,7 @@ import java.util.Locale;
  */
 public class SqlTimestampFormatter extends AbstractDateFormatter<Timestamp>
 {
-	public static final String PATTERN_DESC = "yyyy-MM-dd HH:mm:ss[.fff...]";
+	public static final String PATTERN_DESC = "yyyy-MM-dd HH:mm:ss";
 
 	protected static final String NANO_ZEROS = "000000000";
 
@@ -63,9 +63,16 @@ public class SqlTimestampFormatter extends AbstractDateFormatter<Timestamp>
 	@Override
 	public String print(Timestamp object, Locale locale)
 	{
+		return print(object, locale, true);
+	}
+
+	public String print(Timestamp object, Locale locale, boolean nano)
+	{
 		// XXX 统一采用SqlDateFormatter.print(Date, Locale)的算法
 		String str = formatByPattern(object, PATTERN_YEAR_MONTH_DAY_HOUR_MIN_SEC);
-		str += NANO_SEPARATOR + printNano(object);
+		
+		if(nano)
+			str += NANO_SEPARATOR + printNano(object);
 
 		return str;
 	}

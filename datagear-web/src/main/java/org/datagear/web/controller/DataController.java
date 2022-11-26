@@ -857,10 +857,22 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		Locale locale = WebUtils.getLocale(request);
 
+		long cm = System.currentTimeMillis();
+		java.util.Date date = new java.util.Date(cm); 
+		java.sql.Date sqlDate = new java.sql.Date(cm);
+		java.sql.Time sqlTime = new java.sql.Time(cm);
+		java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(cm);
+		
 		springModel.addAttribute("dateFormat", this.dateFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlDateFormat", this.sqlDateFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlTimestampFormat", this.sqlTimestampFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlTimeFormat", this.sqlTimeFormatter.getParsePatternDesc(locale));
+		
+		springModel.addAttribute("dateFormatExample", this.dateFormatter.print(date, locale));
+		springModel.addAttribute("sqlDateFormatExample", this.sqlDateFormatter.print(sqlDate, locale));
+		springModel.addAttribute("sqlTimestampFormatExample", this.sqlTimestampFormatter.print(sqlTimestamp,locale, false));
+		springModel.addAttribute("sqlTimeFormatExample", this.sqlTimeFormatter.print(sqlTime, locale));
+		
 		springModel.addAttribute("formDefaultLOBRowMapper", buildFormDefaultLOBRowMapper());
 	}
 }
