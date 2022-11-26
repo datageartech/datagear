@@ -49,9 +49,8 @@
 			},
 			
 			//扩展配置项，是否填充轴数据
-			//null、false：不填充；true：按数据顺序填充；"asc"：升序填充；"desc"：降序填充；
-			//function(a, b){} ：自定义排序填充
-			inflateAxisData : null
+			//格式参考chartSupport.handleInflateAxisDataForEchartsOptions()函数的inflateAxisData参数
+			inflateAxisData: null
 		},
 		options);
 		
@@ -189,7 +188,7 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: { id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions, options, options.xAxis, 0);
+		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions.inflateAxisData, options, options.xAxis, 0);
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -257,9 +256,8 @@
 			},
 			
 			//扩展配置项，是否填充轴数据
-			//null、false：不填充；true：按数据顺序填充；"asc"：升序填充；"desc"：降序填充；
-			//function(a, b){} ：自定义排序填充
-			inflateAxisData : null
+			//格式参考chartSupport.handleInflateAxisDataForEchartsOptions()函数的inflateAxisData参数
+			inflateAxisData: null
 		},
 		options);
 		
@@ -424,7 +422,7 @@
 		else
 			options.xAxis = { id: 0 };
 		
-		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis), 0);
+		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions.inflateAxisData, options, (dg.horizontal ? options.yAxis : options.xAxis), 0);
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -1316,9 +1314,8 @@
 			},
 			
 			//扩展配置项，是否填充轴数据
-			//null、false：不填充；true：按数据顺序填充；"asc"：升序填充；"desc"：降序填充；
-			//function(a, b){} ：自定义排序填充
-			inflateAxisData : null
+			//格式参考chartSupport.handleInflateAxisDataForEchartsOptions()函数的inflateAxisData参数
+			inflateAxisData: null
 		},
 		options);
 		
@@ -1450,7 +1447,7 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions, options, options.xAxis, 0);
+		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions.inflateAxisData, options, options.xAxis, 0);
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -1576,7 +1573,11 @@
 				symbolSizeMin: undefined,
 				//散点图类型："scatter"、"effectScatter"
 				scatterType: scatterType
-			}
+			},
+			
+			//扩展配置项，是否填充轴数据
+			//格式参考chartSupport.handleInflateAxisDataForEchartsOptions()函数的inflateAxisData参数
+			inflateAxisData: null
 		},
 		options);
 		
@@ -1694,6 +1695,8 @@
 		
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
+		
+		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions.inflateAxisData, options, options.xAxis, 0);
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
@@ -3447,7 +3450,6 @@
 		
 		var legendData = [];
 		var series = [];
-		var axisData = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -3467,13 +3469,16 @@
 			
 			chart.originalDataIndexes(data, chartDataSet);
 			
-			chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
-			
 			series.push({id: series.length, type: "k", name: dataSetAlias, data: data});
 		}
 		
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0, data: axisData } };
+		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
+		
+		//K线图必须设置轴数据，
+		var inflateAxisData = renderOptions.inflateAxisData;
+		inflateAxisData = (inflateAxisData == null || inflateAxisData == false ? true : inflateAxisData);
+		chartSupport.handleInflateAxisDataForEchartsOptions(true, options, options.xAxis, "name");
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
@@ -8890,17 +8895,20 @@
 	};
 	
 	/**
-	 * 处理renderOptions.inflateAxisData选项
+	 * 处理inflateAxisData选项
 	 * 
-	 * @param renderOptions 渲染选项
+	 * @param inflateAxisData 是否填充轴数据。格式为：
+	 *							null、false：不填充；
+	 *							true：按数据顺序填充；
+	 *							"asc"：升序填充；
+	 *							"desc"：降序填充；
+	 *							function(a, b){} ：自定义排序填充
 	 * @param updateOptions 更新选项
 	 * @param updateAxis 要更新的轴对象
 	 * @param valueExtractor 轴值提取器，数值：提取dataEle.value[数值]的值；字符串：提取dataEle[字符串]的值；自定义函数：function(dataEle, seriesEle){}
 	 */
-	chartSupport.handleInflateAxisDataForEchartsOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor)
+	chartSupport.handleInflateAxisDataForEchartsOptions = function(inflateAxisData, updateOptions, updateAxis, valueExtractor)
 	{
-		var inflateAxisData = renderOptions.inflateAxisData;
-		
 		if(inflateAxisData == null || inflateAxisData == false)
 			return;
 		
