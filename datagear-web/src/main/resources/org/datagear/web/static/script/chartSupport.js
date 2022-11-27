@@ -48,9 +48,9 @@
 				step: false
 			},
 			
-			//扩展配置项，是否填充轴数据
-			//格式参考chartSupport.handleInflateAxisDataForEchartsOptions()函数的inflateAxisData参数
-			inflateAxisData: null
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortAxisData: null
 		},
 		options);
 		
@@ -188,7 +188,8 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: { id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions.inflateAxisData, options, options.xAxis, 0);
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -255,9 +256,9 @@
 				horizontal: false
 			},
 			
-			//扩展配置项，是否填充轴数据
-			//格式参考chartSupport.handleInflateAxisDataForEchartsOptions()函数的inflateAxisData参数
-			inflateAxisData: null
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortAxisData: null
 		},
 		options);
 		
@@ -422,7 +423,8 @@
 		else
 			options.xAxis = { id: 0 };
 		
-		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions.inflateAxisData, options, (dg.horizontal ? options.yAxis : options.xAxis), 0);
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -1313,9 +1315,9 @@
 				scatterType: scatterType
 			},
 			
-			//扩展配置项，是否填充轴数据
-			//格式参考chartSupport.handleInflateAxisDataForEchartsOptions()函数的inflateAxisData参数
-			inflateAxisData: null
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortAxisData: null
 		},
 		options);
 		
@@ -1447,7 +1449,8 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions.inflateAxisData, options, options.xAxis, 0);
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -1575,9 +1578,9 @@
 				scatterType: scatterType
 			},
 			
-			//扩展配置项，是否填充轴数据
-			//格式参考chartSupport.handleInflateAxisDataForEchartsOptions()函数的inflateAxisData参数
-			inflateAxisData: null
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortAxisData: null
 		},
 		options);
 		
@@ -1696,7 +1699,8 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		chartSupport.handleInflateAxisDataForEchartsOptions(renderOptions.inflateAxisData, options, options.xAxis, 0);
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
@@ -3375,7 +3379,11 @@
 			dg:
 			{
 				dataSignNames: { name: "name", open: "open", close: "close", min: "min", max: "max" }
-			}
+			},
+			
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortAxisData: null
 		},
 		options);
 		
@@ -3475,10 +3483,8 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		//K线图必须设置轴数据，
-		var inflateAxisData = renderOptions.inflateAxisData;
-		inflateAxisData = (inflateAxisData == null || inflateAxisData == false ? true : inflateAxisData);
-		chartSupport.handleInflateAxisDataForEchartsOptions(true, options, options.xAxis, "name");
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+						chartSupport.inflateAxisDataExtractors.property("name"));
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
@@ -8198,13 +8204,29 @@
 	/**
 	 * 为源数组追加不重复的元素。
 	 * 
-	 * @param sourceArray
+	 * @param array 待追加数组
 	 * @param append 追加元素、数组，可以是基本类型、对象类型
-	 * @param propertyName 当是对象类型时，用于指定判断重复的属性名
+	 * @param propertyName 可选，当是对象类型时，用于指定判断重复的属性名
 	 * @returns 追加的或重复元素的索引、或者索引数组
 	 */
-	chartSupport.appendDistinct = function(sourceArray, append, propertyName)
+	chartSupport.appendDistinct = function(array, append, propertyName)
 	{
+		return chartSupport.appendDistinctQuick(array, {}, append, propertyName);
+	};
+	
+	/**
+	 * 为数组追加不重复的元素。
+	 * 
+	 * @param array 待追加数组
+	 * @param indexCache 索引缓存对象，用于存储arry中对应主键元素的索引，初始应为null、{}，格式为：{ 主键：索引数值 }
+	 * @param append 追加元素、数组，可以是基本类型、对象类型
+	 * @param propertyName 可选，当是对象类型时，用于指定判断重复的属性名
+	 * @returns 追加的或重复元素的索引、或者索引数组
+	 */
+	chartSupport.appendDistinctQuick = function(array, indexCache, append, propertyName)
+	{
+		indexCache = (indexCache == null ? {} : indexCache);
+		
 		var isArray = $.isArray(append);
 		
 		if(!isArray)
@@ -8214,15 +8236,28 @@
 		
 		for(var i=0; i<append.length; i++)
 		{
-			var av = (propertyName != null && append[i] ? append[i][propertyName] : append[i]);
-			var foundIdx = chartSupport.findInArray(sourceArray, av, propertyName);
+			var key = (propertyName != null && append[i] ? append[i][propertyName] : append[i]);
+			var keyIdx = indexCache[key];
 			
-			if(foundIdx > -1)
-				indexes[i] = foundIdx;
+			if(keyIdx != null && keyIdx > -1)
+			{
+				indexes[i] = keyIdx;
+			}
 			else
 			{
-				sourceArray.push(append[i]);
-				indexes[i] = (sourceArray.length - 1);
+				keyIdx = chartSupport.findInArray(array, key, propertyName);
+				
+				if(keyIdx != null && keyIdx > -1)
+				{
+					indexes[i] = keyIdx;
+					indexCache[key] = keyIdx;
+				}
+				else
+				{
+					array.push(append[i]);
+					indexCache[key] = array.length - 1;
+					indexes[i] = array.length - 1;
+				}
 			}
 		}
 		
@@ -8235,7 +8270,7 @@
 	 * @param array
 	 * @param value
 	 * @param propertyName 当数组元素是对象类型时，用于指定判断属性名，格式为："..."、function(ele){ return ... }
-	 * @returns 索引数值，-1 表示无
+	 * @returns 索引数值，-1 表示没有找到
 	 */
 	chartSupport.findInArray = function(array, value, propertyName)
 	{
@@ -8895,87 +8930,51 @@
 	};
 	
 	/**
-	 * 处理inflateAxisData选项
+	 * 从updateOptions.series[i].data[i]提取轴数据，并设置为updateAxis.data轴数据。
 	 * 
-	 * @param inflateAxisData 是否填充轴数据。格式为：
-	 *							null、false：不填充；
-	 *							true：按数据顺序填充；
-	 *							"asc"：升序填充；
-	 *							"desc"：降序填充；
-	 *							function(a, b){} ：自定义排序填充
+	 * @param renderOptions 渲染选项，renderOptions.dgSortAxisData配置项可以控制轴数据排序方式，格式为：
+	 *						null：不排序；
+	 *						"asc"、"ASC"：升序；
+	 *						"desc"、"DESC"：降序；
+	 *						自定义排序函数：function(a, b){}
 	 * @param updateOptions 更新选项
 	 * @param updateAxis 要更新的轴对象
-	 * @param valueExtractor 轴值提取器，数值：提取dataEle.value[数值]的值；字符串：提取dataEle[字符串]的值；自定义函数：function(dataEle, seriesEle){}
+	 * @param valueExtractor 轴数据值提取器，格式为：function(dataEle, seriesEle){}
 	 */
-	chartSupport.handleInflateAxisDataForEchartsOptions = function(inflateAxisData, updateOptions, updateAxis, valueExtractor)
+	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor)
 	{
-		if(inflateAxisData == null || inflateAxisData == false)
-			return;
+		var dgSortAxisData = renderOptions.dgSortAxisData;
 		
-		var comparator = null;
-		
-		if(inflateAxisData == true)
-			comparator = null;
-		
-		if(chartFactory.isString(inflateAxisData))
-			comparator = inflateAxisData.toLowerCase();
-		
-		//valueExtractor可以是数值、字符串
-		if(chartFactory.isNumber(valueExtractor))
+		if(chartFactory.isString(dgSortAxisData))
 		{
-			var arrayIndex = valueExtractor;
-			valueExtractor = function(dataEle)
+			dgSortAxisData = dgSortAxisData.toLowerCase();
+			
+			if(dgSortAxisData == "asc")
 			{
-				return (dataEle && dataEle.value ? dataEle.value[arrayIndex] : null);
-			};
-		}
-		else if(chartFactory.isString(valueExtractor))
-		{
-			var name = valueExtractor;
-			valueExtractor = function(dataEle)
+				dgSortAxisData = function(a, b)
+				{
+					if(a == b)
+						return 0;
+					else
+						return (a < b ? -1 : 1);
+				};
+			}
+			else if(dgSortAxisData == "desc")
 			{
-				return (dataEle ? dataEle[name] : null);
-			};
-		}
-		
-		var axisData = chartSupport.extractDistinctValues(updateOptions.series, valueExtractor, comparator);
-		updateAxis.data = axisData;
-	};
-	
-	/**
-	 * 从series[i].data[i]中提取不重复的值数组
-	 * 
-	 * @param series 系列数组
-	 * @param valueExtractor 轴值提取器，function(dataEle, seriesEle){}
-	 * @param comparator 排序比较函数，null：不排序；"asc"：升序；"desc"：降序；自定义排序函数：function(a, b){} 
-	 */
-	chartSupport.extractDistinctValues = function(series, valueExtractor, comparator)
-	{
-		series = (series || []);
-		
-		if(comparator == "asc")
-		{
-			comparator = function(a, b)
-			{
-				if(a == b)
-					return 0;
-				else
-					return (a < b ? -1 : 1);
-			};
-		}
-		else if(comparator == "desc")
-		{
-			comparator = function(a, b)
-			{
-				if(a == b)
-					return 0;
-				else
-					return (a > b ? -1 : 1);
-			};
+				dgSortAxisData = function(a, b)
+				{
+					if(a == b)
+						return 0;
+					else
+						return (a > b ? -1 : 1);
+				};
+			}
 		}
 		
 		var axisData = [];
+		var indexCache = {};
 		
+		var series = (updateOptions.series || []);
 		$.each(series, function(i, s)
 		{
 			var data = (s.data || []);
@@ -8986,13 +8985,35 @@
 				myData.push(v);
 			});
 			
-			chartSupport.appendDistinct(axisData, myData);
+			chartSupport.appendDistinctQuick(axisData, indexCache, myData);
 		});
 		
-		if(comparator != null && $.isFunction(comparator))
-			axisData.sort(comparator);
+		if(dgSortAxisData != null && $.isFunction(dgSortAxisData))
+			axisData.sort(dgSortAxisData);
 		
-		return axisData;
+		updateAxis.data = axisData;
+	};
+	
+	chartSupport.inflateAxisDataExtractors =
+	{
+		valueElement: function(idx)
+		{
+			var extractor = function(de)
+			{
+				return (de && de.value ? de.value[idx] : null);
+			};
+			
+			return extractor;
+		},
+		property: function(name)
+		{
+			var extractor = function(de)
+			{
+				return (de ? de[name] : null);
+			};
+			
+			return extractor;
+		}
 	};
 	
 	//---------------------------------------------------------
