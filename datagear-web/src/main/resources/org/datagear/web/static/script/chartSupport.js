@@ -4807,7 +4807,6 @@
 		var chartDataSets = chart.chartDataSetsMain();
 		
 		var legendData = [];
-		var axisData = [];
 		var series = [];
 		
 		var symbolSizeMax = chartSupport.evalSymbolSizeMax(chart, renderOptions);
@@ -4922,17 +4921,15 @@
 					}
 				}
 			}
-			
-			chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 		}
 		
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		//需要设置坐标值，不然刻度会错乱
 		if(dg.horizontal)
-			options.yAxis = { id: 0, data: axisData };
+			options.yAxis = { id: 0 };
 		else
-			options.xAxis = { id: 0, data: axisData };
+			options.xAxis = { id: 0 };
 		
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
 						{
