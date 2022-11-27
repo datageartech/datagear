@@ -50,7 +50,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: null
+			dgSortData: null
 		},
 		options);
 		
@@ -258,7 +258,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: null
+			dgSortData: null
 		},
 		options);
 		
@@ -1317,7 +1317,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: null
+			dgSortData: null
 		},
 		options);
 		
@@ -1580,7 +1580,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: null
+			dgSortData: null
 		},
 		options);
 		
@@ -3383,7 +3383,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: null
+			dgSortData: null
 		},
 		options);
 		
@@ -8932,7 +8932,7 @@
 	/**
 	 * 从updateOptions.series[i].data[i]提取轴数据，并设置为updateAxis.data轴数据。
 	 * 
-	 * @param renderOptions 渲染选项，renderOptions.dgSortAxisData配置项可以控制轴数据排序方式，格式为：
+	 * @param renderOptions 渲染选项，renderOptions.dgSortData配置项可以控制轴数据排序方式，格式为：
 	 *						null：不排序；
 	 *						"asc"、"ASC"：升序；
 	 *						"desc"、"DESC"：降序；
@@ -8943,15 +8943,15 @@
 	 */
 	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor)
 	{
-		var dgSortAxisData = renderOptions.dgSortAxisData;
+		var dgSortData = renderOptions.dgSortData;
 		
-		if(chartFactory.isString(dgSortAxisData))
+		if(chartFactory.isString(dgSortData))
 		{
-			dgSortAxisData = dgSortAxisData.toLowerCase();
+			dgSortData = dgSortData.toLowerCase();
 			
-			if(dgSortAxisData == "asc")
+			if(dgSortData == "asc")
 			{
-				dgSortAxisData = function(a, b)
+				dgSortData = function(a, b)
 				{
 					if(a == b)
 						return 0;
@@ -8959,9 +8959,9 @@
 						return (a < b ? -1 : 1);
 				};
 			}
-			else if(dgSortAxisData == "desc")
+			else if(dgSortData == "desc")
 			{
-				dgSortAxisData = function(a, b)
+				dgSortData = function(a, b)
 				{
 					if(a == b)
 						return 0;
@@ -8988,8 +8988,8 @@
 			chartSupport.appendDistinctQuick(axisData, indexCache, myData);
 		});
 		
-		if(dgSortAxisData != null && $.isFunction(dgSortAxisData))
-			axisData.sort(dgSortAxisData);
+		if(dgSortData != null && $.isFunction(dgSortData))
+			axisData.sort(dgSortData);
 		
 		updateAxis.data = axisData;
 	};
