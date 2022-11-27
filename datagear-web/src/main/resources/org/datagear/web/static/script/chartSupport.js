@@ -48,9 +48,9 @@
 				step: false
 			},
 			
-			//扩展配置项，轴数据排序方式
+			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: null
+			dgSortData: false
 		},
 		options);
 		
@@ -256,9 +256,9 @@
 				horizontal: false
 			},
 			
-			//扩展配置项，轴数据排序方式
+			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: null
+			dgSortData: false
 		},
 		options);
 		
@@ -489,7 +489,11 @@
 				stackGroup: true,
 				//坐标类型：radius（径向）、angle（角度）
 				axisType: "radius",
-			}
+			},
+			
+			//扩展配置项，数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortData: false
 		},
 		options);
 		
@@ -584,7 +588,6 @@
 		
 		var legendData = [];
 		var series = [];
-		var axisData = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -624,8 +627,6 @@
 					
 					legendData.push(legendName);
 					series.push(mySeries);
-					
-					chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 				}
 			}
 			else
@@ -656,8 +657,6 @@
 					
 					legendData.push(legendName);
 					series.push(mySeries);
-					
-					chartSupport.appendDistinct(axisData, chart.resultRowArrays(result, np));
 				}
 			}
 		}
@@ -665,12 +664,21 @@
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-		//这里必须设置data，不然不显示刻度
 		if(isAngleAxis)
-			options.angleAxis = { id: 0, data: axisData };
-		//这里必须设置data，不然报错
+			options.angleAxis = { id: 0 };
 		else
-			options.radiusAxis = { id: 0, data: axisData };
+			options.radiusAxis = { id: 0 };
+		
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
+						{
+							get: function(s)
+							{
+								if(isAngleAxis)
+									return chartSupport.inflateAxisDataExtractors.property("name");
+								else
+									return chartSupport.inflateAxisDataExtractors.valueElement(0);
+							}
+						});
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
@@ -747,7 +755,11 @@
 				ring: false,
 				//当splitDataSet=false且数据集无category标记时，是否玫瑰图
 				rose: false
-			}
+			},
+			
+			//扩展配置项，数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortData: false
 		},
 		options);
 		
@@ -792,7 +804,6 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		var legendData = [];
 		var series = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -804,7 +815,6 @@
 			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
 			var cp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.category);
-			var npv = chart.resultColumnArrays(result, np);
 			
 			var propertyMap = {"name": np, "value": vp};
 			if(cp)
@@ -846,13 +856,14 @@
 				
 				series[0].data = series[0].data.concat(data);
 			}
-			
-			legendData = legendData.concat(npv);
 		}
 		
-		var options = { legend: { id: 0, data: legendData }, series: series };
-		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
+		var options = { legend: { id: 0 }, series: series };
 		
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.legend,
+						chartSupport.inflateAxisDataExtractors.property("name"));
+		
+		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -1315,9 +1326,9 @@
 				scatterType: scatterType
 			},
 			
-			//扩展配置项，轴数据排序方式
+			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: null
+			dgSortData: false
 		},
 		options);
 		
@@ -1578,9 +1589,9 @@
 				scatterType: scatterType
 			},
 			
-			//扩展配置项，轴数据排序方式
+			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: null
+			dgSortData: false
 		},
 		options);
 		
@@ -3381,9 +3392,9 @@
 				dataSignNames: { name: "name", open: "open", close: "close", min: "min", max: "max" }
 			},
 			
-			//扩展配置项，轴数据排序方式
+			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: null
+			dgSortData: false
 		},
 		options);
 		
@@ -8932,14 +8943,17 @@
 	/**
 	 * 从updateOptions.series[i].data[i]提取轴数据，并设置为updateAxis.data轴数据。
 	 * 
-	 * @param renderOptions 渲染选项，renderOptions.dgSortData配置项可以控制轴数据排序方式，格式为：
-	 *						null：不排序；
+	 * @param renderOptions 渲染选项，renderOptions.dgSortData配置项可以控制数据排序方式，格式为：
 	 *						"asc"、"ASC"：升序；
 	 *						"desc"、"DESC"：降序；
-	 *						自定义排序函数：function(a, b){}
+	 *						自定义排序函数：function(a, b){}；
+	 *						null、false、其他：不排序；
 	 * @param updateOptions 更新选项
 	 * @param updateAxis 要更新的轴对象
-	 * @param valueExtractor 轴数据值提取器，格式为：function(dataEle, seriesEle){}
+	 * @param valueExtractor 轴数据值提取器，格式为：
+	 *						function(dataEle, seriesEle){}
+	 *						或者
+	 *						{ get: function(seriesEle){ return 轴数据值提取器函数对象; } }
 	 */
 	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor)
 	{
@@ -8973,23 +8987,61 @@
 		
 		var axisData = [];
 		var indexCache = {};
+		var isValueExtractorFunc = $.isFunction(valueExtractor);
+		var valueExtractors = [];
 		
 		var series = (updateOptions.series || []);
 		$.each(series, function(i, s)
 		{
 			var data = (s.data || []);
 			var myData = [];
+			var myValueExtractor = null;
+			
+			if(isValueExtractorFunc)
+				myValueExtractor = valueExtractor;
+			else
+				myValueExtractor = valueExtractor.get(s);
+			
 			$.each(data, function(j, d)
 			{
-				var v = valueExtractor(d, s);
+				var v = myValueExtractor(d, s);
 				myData.push(v);
 			});
 			
+			valueExtractors.push(myValueExtractor);
 			chartSupport.appendDistinctQuick(axisData, indexCache, myData);
 		});
 		
-		if(dgSortData != null && $.isFunction(dgSortData))
+		if($.isFunction(dgSortData))
+		{
 			axisData.sort(dgSortData);
+			
+			indexCache = {};
+			$.each(axisData, function(i, a)
+			{
+				indexCache[a] = i;
+			});
+			
+			//对系列数据重排，ECharts的某些系列类型会根据axisData自动重排，有些则不会，这里统一手动重排
+			$.each(series, function(i, s)
+			{
+				var data = (s.data || []);
+				var myValueExtractor = valueExtractors[i];
+				
+				data.sort(function(da, db)
+				{
+					var va = myValueExtractor(da, s);
+					var vb = myValueExtractor(db, s);
+					var ia = indexCache[va];
+					var ib = indexCache[vb];
+					
+					if(ia == ib)
+						return 0;
+					else
+						return (ia < ib ? -1 : 1);
+				});
+			});
+		}
 		
 		updateAxis.data = axisData;
 	};
