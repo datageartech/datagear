@@ -3557,7 +3557,11 @@
 				//value 数值
 				//weight 热力值
 				dataSignNames: { name: "name", value: "value", weight: "weight" }
-			}
+			},
+			
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortData: false
 		},
 		options);
 		
@@ -3586,6 +3590,7 @@
 			legend:
 			{
 				id: 0,
+				show: false
 			},
 			xAxis:
 			{
@@ -3657,8 +3662,6 @@
 		
 		var chartDataSets = chart.chartDataSetsMain();
 		
-		var xAxisData = [];
-		var yAxisData = [];
 		var seriesName = "";
 		var seriesData = [];
 		var dataRange = { min: undefined, max: undefined };
@@ -3675,12 +3678,6 @@
 			
 			var data = chart.resultValueObjects(result, [ np, vp, wp ]);
 			
-			for(var j=0; j<data.length; j++)
-			{
-				chartSupport.appendDistinct(xAxisData, data[j].value[0]);
-				chartSupport.appendDistinct(yAxisData, data[j].value[1]);
-			}
-			
 			chart.originalDataIndexes(data, chartDataSet);
 			chartSupport.evalArrayDataRange(dataRange, data, "value", 2);
 			
@@ -3692,9 +3689,19 @@
 		
 		var series = [ { id: 0, type: "heatmap", name: seriesName, data: seriesData } ];
 		
-		var options = { xAxis: { id: 0, data: xAxisData }, yAxis: { id: 0, data: yAxisData },
-						visualMap: {id: 0, min: dataRange.min, max: dataRange.max}, series: series };
+		var options =
+		{
+			xAxis: { id: 0 }, yAxis: { id: 0 },
+			visualMap: {id: 0, min: dataRange.min, max: dataRange.max},
+			series: series
+		};
+		
 		chartSupport.trimNumberRange(options.visualMap);
+		
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+						chartSupport.inflateAxisDataExtractors.valueElement(0));
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.yAxis,
+						chartSupport.inflateAxisDataExtractors.valueElement(1), false);
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
@@ -4197,8 +4204,7 @@
 				},
 				
 				//同series[i].orient
-				orient: "horizontal",
-				
+				orient: "horizontal"
 			}
 		},
 		options);
@@ -4719,7 +4725,11 @@
 				symbolSizeMax: undefined,
 				//最小数据标记像素数
 				symbolSizeMin: undefined,
-			}
+			},
+			
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortData: false
 		},
 		options);
 		
@@ -4824,7 +4834,7 @@
 					chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.upper),
 					chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.max)
 				];
-				var propertyMap = { "name": np,"value": vp };
+				var propertyMap = { name: np, value: vp };
 				if(cp)
 					propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				
@@ -4923,6 +4933,17 @@
 			options.yAxis = { id: 0, data: axisData };
 		else
 			options.xAxis = { id: 0, data: axisData };
+		
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+						{
+							get: function(s)
+							{
+								if(s.type == "boxplot")
+									return chartSupport.inflateAxisDataExtractors.property("name");
+								else
+									return chartSupport.inflateAxisDataExtractors.valueElement(0);
+							}
+						});
 		
 		options = chart.inflateUpdateOptions(results, options);
 		
@@ -5675,7 +5696,12 @@
 				//value 河流数值，当标记category时单选，否则可多选，每一列作为一条河流
 				//category 可选，类别，不同类别绘制为不同系列
 				dataSignNames: { name: "name", value: "value", category: "category" }
-			}
+			},
+			
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			//主题河流图的"desc"效果与预期不符，不建议使用
+			dgSortData: false
 		},
 		options);
 		
@@ -5795,6 +5821,9 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: { id: 0, data: legendData}, series: [ series ], singleAxis: { id: 0 } };
 		
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.singleAxis,
+						chartSupport.inflateAxisDataExtractors.element(0));
+		
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -5870,7 +5899,11 @@
 				symbolRepeat: true,
 				//柱条间距
 				barGap: "100%"
-			}
+			},
+			
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortData: false
 		},
 		options);
 		
@@ -6043,6 +6076,9 @@
 		else
 			options.xAxis = { id: 0 };
 		
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+						chartSupport.inflateAxisDataExtractors.valueElement(0));
+		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
@@ -6116,7 +6152,11 @@
 				barGap: "-100%",
 				//最大值
 				max: 100,
-			}
+			},
+			
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortData: false
 		},
 		options);
 		
@@ -6282,6 +6322,9 @@
 			options.xAxis = { id: 0 };
 			options.yAxis = { id: 0, max: maxValue };
 		}
+		
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -8948,15 +8991,21 @@
 	 *						"desc"、"DESC"：降序；
 	 *						自定义排序函数：function(a, b){}；
 	 *						null、false、其他：不排序；
+	 *						注意：ECharts对于轴type为"value"、"time"的，仅设置"desc"是无效的，需要把轴type改为"category"
 	 * @param updateOptions 更新选项
 	 * @param updateAxis 要更新的轴对象
 	 * @param valueExtractor 轴数据值提取器，格式为：
 	 *						function(dataEle, seriesEle){}
 	 *						或者
 	 *						{ get: function(seriesEle){ return 轴数据值提取器函数对象; } }
+	 * @param sortSeriesData 可选，是否重排系列数据，默认值为：true。
+	 *						 ECharts的某些类型图表会根据axisData自动重排，有些则不会，除非了解，建议使用默认值
 	 */
-	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor)
+	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis,
+					valueExtractor, sortSeriesData)
 	{
+		sortSeriesData = (sortSeriesData == null ? true : sortSeriesData);
+		
 		var dgSortData = renderOptions.dgSortData;
 		
 		if(chartFactory.isString(dgSortData))
@@ -9016,31 +9065,33 @@
 		{
 			axisData.sort(dgSortData);
 			
-			indexCache = {};
-			$.each(axisData, function(i, a)
+			if(sortSeriesData)
 			{
-				indexCache[a] = i;
-			});
-			
-			//对系列数据重排，ECharts的某些系列类型会根据axisData自动重排，有些则不会，这里统一手动重排
-			$.each(series, function(i, s)
-			{
-				var data = (s.data || []);
-				var myValueExtractor = valueExtractors[i];
-				
-				data.sort(function(da, db)
+				indexCache = {};
+				$.each(axisData, function(i, a)
 				{
-					var va = myValueExtractor(da, s);
-					var vb = myValueExtractor(db, s);
-					var ia = indexCache[va];
-					var ib = indexCache[vb];
-					
-					if(ia == ib)
-						return 0;
-					else
-						return (ia < ib ? -1 : 1);
+					indexCache[a] = i;
 				});
-			});
+				
+				$.each(series, function(i, s)
+				{
+					var data = (s.data || []);
+					var myValueExtractor = valueExtractors[i];
+					
+					data.sort(function(da, db)
+					{
+						var va = myValueExtractor(da, s);
+						var vb = myValueExtractor(db, s);
+						var ia = indexCache[va];
+						var ib = indexCache[vb];
+						
+						if(ia == ib)
+							return 0;
+						else
+							return (ia < ib ? -1 : 1);
+					});
+				});
+			}
 		}
 		
 		updateAxis.data = axisData;
@@ -9048,6 +9099,24 @@
 	
 	chartSupport.inflateAxisDataExtractors =
 	{
+		property: function(name)
+		{
+			var extractor = function(de)
+			{
+				return (de ? de[name] : null);
+			};
+			
+			return extractor;
+		},
+		element: function(idx)
+		{
+			var extractor = function(de)
+			{
+				return (de ? de[idx] : null);
+			};
+			
+			return extractor;
+		},
 		valueElement: function(idx)
 		{
 			var extractor = function(de)
@@ -9057,15 +9126,7 @@
 			
 			return extractor;
 		},
-		property: function(name)
-		{
-			var extractor = function(de)
-			{
-				return (de ? de[name] : null);
-			};
-			
-			return extractor;
-		}
+		
 	};
 	
 	//---------------------------------------------------------
