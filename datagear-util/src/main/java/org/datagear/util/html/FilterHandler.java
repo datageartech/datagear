@@ -116,9 +116,11 @@ public interface FilterHandler
 	 *            详细参考{@linkplain HtmlFilter#readTagName(Reader, StringBuilder)}
 	 * @param tagEnd
 	 *            标签结束符，可能为：{@code ">"}、{@code "/>"}
+	 * @param attrs
+	 *            当{@linkplain #isResolveTagAttrs(String)}为{@code true}时，会包含解析的标签属性映射表；否则，不包含。
 	 * @throws IOException
 	 */
-	void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException;
+	void afterWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs) throws IOException;
 
 	/**
 	 * 完成写入后置处理函数，包括{@linkplain #isAborted()}的情形。

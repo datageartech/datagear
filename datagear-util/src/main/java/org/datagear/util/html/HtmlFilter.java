@@ -361,7 +361,7 @@ public class HtmlFilter extends TextParserSupport
 			out.write(tagName);
 			handler.beforeWriteTagEnd(in, tagName, afterTagName, tagAttrs);
 			out.write(afterTagName);
-			handler.afterWriteTagEnd(in, tagName, afterTagName);
+			handler.afterWriteTagEnd(in, tagName, afterTagName, tagAttrs);
 
 			return afterTagName;
 		}
@@ -388,7 +388,7 @@ public class HtmlFilter extends TextParserSupport
 			if (tagEnd != null)
 			{
 				out.write(tagEnd);
-				handler.afterWriteTagEnd(in, tagName, tagEnd);
+				handler.afterWriteTagEnd(in, tagName, tagEnd, tagAttrs);
 			}
 
 			return tagEnd;

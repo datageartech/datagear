@@ -10,6 +10,7 @@ package org.datagear.util.html;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Map;
 
 /**
  * 可识别<code>"&lt;head&gt;&lt;/head&gt;"</code>、<code>"&lt;body&gt;&lt;/body&gt;"</code>标签范围的{@linkplain FilterHandler}。
@@ -82,7 +83,7 @@ public class HeadBodyAwareFilterHandler extends DefaultFilterHandler
 	}
 
 	@Override
-	public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
+	public void afterWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs) throws IOException
 	{
 		if (!this.inHeadTag && !this.inBodyTag && equalsIgnoreCase(tagName, "head"))
 		{

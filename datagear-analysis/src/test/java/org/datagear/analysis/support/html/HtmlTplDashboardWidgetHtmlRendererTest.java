@@ -7,6 +7,11 @@
 
 package org.datagear.analysis.support.html;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -24,7 +29,6 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.ChartInfo;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardInfo;
 import org.datagear.util.IOUtil;
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -77,7 +81,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 		getHtmlWithPrint(out);
 
-		Assert.assertEquals(6, dashboard.getCharts().size());
+		assertEquals(6, dashboard.getCharts().size());
 	}
 
 	@Test
@@ -101,16 +105,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			Assert.assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			Assert.assertEquals("jquery", dashboardInfo.getImportExclude());
-			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
+			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
+			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
+			assertEquals("jquery", dashboardInfo.getImportExclude());
+			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
+			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			assertTrue(html.contains(IMPORT_CONTENT_THEME));
+			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
+			assertTrue(html.contains("var DataGearDashboardTmp"));
+			assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
+			assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
 		}
 
 		// 看板属性，无引号
@@ -129,16 +133,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			Assert.assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			Assert.assertEquals("jquery", dashboardInfo.getImportExclude());
-			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
+			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
+			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
+			assertEquals("jquery", dashboardInfo.getImportExclude());
+			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
+			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			assertTrue(html.contains(IMPORT_CONTENT_THEME));
+			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
+			assertTrue(html.contains("var DataGearDashboardTmp"));
+			assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
+			assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
 		}
 
 		// 看板属性，单引号
@@ -157,16 +161,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			Assert.assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			Assert.assertEquals("jquery", dashboardInfo.getImportExclude());
-			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
+			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
+			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
+			assertEquals("jquery", dashboardInfo.getImportExclude());
+			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
+			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			assertTrue(html.contains(IMPORT_CONTENT_THEME));
+			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
+			assertTrue(html.contains("var DataGearDashboardTmp"));
+			assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
+			assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
 		}
 
 		// 看板属性，多个导入排除值
@@ -185,16 +189,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			Assert.assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			Assert.assertEquals("jquery,theme, style", dashboardInfo.getImportExclude());
-			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
-			Assert.assertFalse(html.contains(IMPORT_CONTENT_THEME));
-			Assert.assertFalse(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
+			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
+			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
+			assertEquals("jquery,theme, style", dashboardInfo.getImportExclude());
+			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
+			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			assertFalse(html.contains(IMPORT_CONTENT_THEME));
+			assertFalse(html.contains(IMPORT_CONTENT_STYLE));
+			assertTrue(html.contains("var DataGearDashboardTmp"));
+			assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
+			assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
 		}
 
 		// 看板属性，默认
@@ -212,16 +216,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertNull(dashboardInfo.getDashboardVar());
-			Assert.assertNull(dashboardInfo.getDashboardFactoryVar());
-			Assert.assertNull(dashboardInfo.getImportExclude());
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_JQUERY));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
-			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var DataGearDashboardTmp"));
-			Assert.assertTrue(html.contains("dashboardFactory.init(DataGearDashboardTmp);"));
-			Assert.assertTrue(html.contains("window.dashboard=DataGearDashboardTmp;"));
+			assertNull(dashboardInfo.getDashboardVar());
+			assertNull(dashboardInfo.getDashboardFactoryVar());
+			assertNull(dashboardInfo.getImportExclude());
+			assertTrue(html.contains(IMPORT_CONTENT_JQUERY));
+			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			assertTrue(html.contains(IMPORT_CONTENT_THEME));
+			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
+			assertTrue(html.contains("var DataGearDashboardTmp"));
+			assertTrue(html.contains("dashboardFactory.init(DataGearDashboardTmp);"));
+			assertTrue(html.contains("window.dashboard=DataGearDashboardTmp;"));
 		}
 
 		// 图表属性
@@ -258,31 +262,31 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 
 			List<ChartInfo> chartInfos = dashboardInfo.getChartInfos();
-			Assert.assertEquals(9, chartInfos.size());
+			assertEquals(9, chartInfos.size());
 
 			for (int i = 0; i < 7; i++)
 			{
 				ChartInfo chartInfo = chartInfos.get(i);
-				Assert.assertEquals("element_" + (i + 1), chartInfo.getElementId());
-				Assert.assertEquals("chartwidget_" + (i + 1), chartInfo.getWidgetId());
+				assertEquals("element_" + (i + 1), chartInfo.getElementId());
+				assertEquals("chartwidget_" + (i + 1), chartInfo.getWidgetId());
 			}
 
-			Assert.assertTrue(html.contains("<html><head>"));
-			Assert.assertTrue(html.contains("</head><body>"));
-			Assert.assertTrue(html.contains("<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\"></div>"));
-			Assert.assertTrue(html.contains("<div id='element_2' dg-chart-widget='chartwidget_2'></div>"));
-			Assert.assertTrue(html.contains("<div id=element_3 dg-chart-widget=chartwidget_3></div>"));
-			Assert.assertTrue(html.contains("<div sdf abc def 12345677788 // >"));
-			Assert.assertTrue(html.contains("<div   id=element_4    dg-chart-widget=chartwidget_4    ></div>"));
-			Assert.assertTrue(html.contains("<div   id  =  element_5    dg-chart-widget=  chartwidget_5 />"));
-			Assert.assertTrue(html.contains("<div   id=element_6    dg-chart-widget=chartwidget_6  />"));
-			Assert.assertTrue(html.contains("<div   id=element_7    dg-chart-widget=chartwidget_7  /  >"));
-			Assert.assertTrue(
+			assertTrue(html.contains("<html><head>"));
+			assertTrue(html.contains("</head><body>"));
+			assertTrue(html.contains("<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\"></div>"));
+			assertTrue(html.contains("<div id='element_2' dg-chart-widget='chartwidget_2'></div>"));
+			assertTrue(html.contains("<div id=element_3 dg-chart-widget=chartwidget_3></div>"));
+			assertTrue(html.contains("<div sdf abc def 12345677788 // >"));
+			assertTrue(html.contains("<div   id=element_4    dg-chart-widget=chartwidget_4    ></div>"));
+			assertTrue(html.contains("<div   id  =  element_5    dg-chart-widget=  chartwidget_5 />"));
+			assertTrue(html.contains("<div   id=element_6    dg-chart-widget=chartwidget_6  />"));
+			assertTrue(html.contains("<div   id=element_7    dg-chart-widget=chartwidget_7  /  >"));
+			assertTrue(
 					html.contains("<div     dg-chart-widget=chartwidget_8    /   id=\"DataGearChartElement7\" >"));
-			Assert.assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"DataGearChartElement8\" />"));
-			Assert.assertTrue(html.contains("<div     dg-chart-widget='' />"));
-			Assert.assertTrue(html.contains("<div     dg-chart-widget=\"\"  />"));
-			Assert.assertTrue(html.contains("</body></html>"));
+			assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"DataGearChartElement8\" />"));
+			assertTrue(html.contains("<div     dg-chart-widget='' />"));
+			assertTrue(html.contains("<div     dg-chart-widget=\"\"  />"));
+			assertTrue(html.contains("</body></html>"));
 		}
 
 		// 处理标题
@@ -303,8 +307,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<title>abc-suffix</title></head>"));
-			Assert.assertTrue(html.contains("<title>sdf</title>"));
+			assertTrue(html.contains("<title>abc-suffix</title></head>"));
+			assertTrue(html.contains("<title>sdf</title>"));
 		}
 
 		// 处理标题：没有<title></title>标签
@@ -325,7 +329,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<title>-suffix</title></head>"));
+			assertTrue(html.contains("<title>-suffix</title></head>"));
 		}
 
 		// 处理标题：没有<title></title>标签
@@ -346,7 +350,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<title>generated</title></head>"));
+			assertTrue(html.contains("<title>generated</title></head>"));
 		}
 
 		// 处理标题：<title/>
@@ -367,7 +371,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<title/><title>generated</title></head>"));
+			assertTrue(html.contains("<title/><title>generated</title></head>"));
 		}
 
 		// 处理标题：没有</title>
@@ -388,7 +392,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<title><title>generated</title></head>"));
+			assertTrue(html.contains("<title><title>generated</title></head>"));
 		}
 
 		// 没有<head></head>
@@ -406,10 +410,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<html><body>" + this.renderer.getNewLine() + "<style"));
-			Assert.assertTrue(html.contains("</script>" + this.renderer.getNewLine() + "</body></html>"));
-			Assert.assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
-			Assert.assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
+			assertTrue(html.contains("<html><body>" + this.renderer.getNewLine() + "<style"));
+			assertTrue(html.contains("</script>" + this.renderer.getNewLine() + "</body></html>"));
+			assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
+			assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
 		}
 
 		// 没有<body></body>
@@ -427,12 +431,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("<html><head>" + this.renderer.getNewLine() + "<style"));
-			Assert.assertTrue(html.contains(
+			assertTrue(html.contains("<html><head>" + this.renderer.getNewLine() + "<style"));
+			assertTrue(html.contains(
 					"<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"></head></html><script type=\"text/javascript\">"));
-			Assert.assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
-			Assert.assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
-			Assert.assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
+			assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
+			assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
+			assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
 		}
 
 		// <html></html>
@@ -450,12 +454,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(html.contains("</html>" + this.renderer.getNewLine() + "<style"));
-			Assert.assertTrue(html.contains(
+			assertTrue(html.contains("</html>" + this.renderer.getNewLine() + "<style"));
+			assertTrue(html.contains(
 					"<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"><script type=\"text/javascript\">"));
-			Assert.assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
-			Assert.assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
-			Assert.assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
+			assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
+			assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
+			assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
 		}
 	}
 	
@@ -474,7 +478,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template), renderAttr);
 
-			Assert.assertNull(dashboard.getLoadableChartWidgets());
+			assertNull(dashboard.getLoadableChartWidgets());
 		}
 		{
 			String template = "<html dg-loadable-chart-widgets=\"all\"><head></head><body></body></html>";
@@ -486,7 +490,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template), renderAttr);
 
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().isPatternAll());
+			assertTrue(dashboard.getLoadableChartWidgets().isPatternAll());
 		}
 		{
 			String template = "<html dg-loadable-chart-widgets='none'><head></head><body></body></html>";
@@ -498,7 +502,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template), renderAttr);
 
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().isPatternNone());
+			assertTrue(dashboard.getLoadableChartWidgets().isPatternNone());
 		}
 		{
 			String template = "<html dg-loadable-chart-widgets='permitted'><head></head><body></body></html>";
@@ -510,7 +514,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template), renderAttr);
 
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().isPatternPermitted());
+			assertTrue(dashboard.getLoadableChartWidgets().isPatternPermitted());
 		}
 		{
 			String template = "<html dg-loadable-chart-widgets='a-widget-id'><head></head><body></body></html>";
@@ -522,9 +526,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template), renderAttr);
 
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().isPatternList());
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().getChartWidgetIds().size() == 1);
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().inList("a-widget-id"));
+			assertTrue(dashboard.getLoadableChartWidgets().isPatternList());
+			assertTrue(dashboard.getLoadableChartWidgets().getChartWidgetIds().size() == 1);
+			assertTrue(dashboard.getLoadableChartWidgets().inList("a-widget-id"));
 		}
 		{
 			String template = "<html dg-loadable-chart-widgets='widget-id-0,widget-id-1'><head></head><body></body></html>";
@@ -536,10 +540,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template), renderAttr);
 
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().isPatternList());
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().getChartWidgetIds().size() == 2);
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-0"));
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-1"));
+			assertTrue(dashboard.getLoadableChartWidgets().isPatternList());
+			assertTrue(dashboard.getLoadableChartWidgets().getChartWidgetIds().size() == 2);
+			assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-0"));
+			assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-1"));
 		}
 		{
 			String template = "<html dg-loadable-chart-widgets='widget-id-0, widget-id-1 , widget-id-2 '><head></head><body></body></html>";
@@ -551,16 +555,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template), renderAttr);
 
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().isPatternList());
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().getChartWidgetIds().size() == 3);
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-0"));
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-1"));
-			Assert.assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-2"));
+			assertTrue(dashboard.getLoadableChartWidgets().isPatternList());
+			assertTrue(dashboard.getLoadableChartWidgets().getChartWidgetIds().size() == 3);
+			assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-0"));
+			assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-1"));
+			assertTrue(dashboard.getLoadableChartWidgets().inList("widget-id-2"));
 		}
 	}
-	
+
 	@Test
-	public void renderDashboard_autoRender() throws Throwable
+	public void renderDashboard_dg_dashboard_auto_render() throws Throwable
 	{
 		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
 
@@ -578,8 +582,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(dashboardInfo.isDashboardAutoRender());
-			Assert.assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
+			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 		}
 		
 		{
@@ -596,8 +600,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(dashboardInfo.isDashboardAutoRender());
-			Assert.assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
+			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 		}
 		
 		{
@@ -614,8 +618,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(dashboardInfo.isDashboardAutoRender());
-			Assert.assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
+			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 		}
 		
 		{
@@ -632,8 +636,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(dashboardInfo.isDashboardAutoRender());
-			Assert.assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
+			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 		}
 		
 		{
@@ -650,8 +654,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertTrue(dashboardInfo.isDashboardAutoRender());
-			Assert.assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
+			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 		}
 		
 		{
@@ -668,8 +672,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertFalse(dashboardInfo.isDashboardAutoRender());
-			Assert.assertFalse(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
+			assertFalse(dashboardInfo.isDashboardAutoRender());
+			assertFalse(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 		}
 		
 		{
@@ -686,8 +690,328 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			String html = getHtmlWithPrint(out);
 
-			Assert.assertFalse(dashboardInfo.isDashboardAutoRender());
-			Assert.assertFalse(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
+			assertFalse(dashboardInfo.isDashboardAutoRender());
+			assertFalse(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
+		}
+	}
+
+	@Test
+	public void renderDashboard_dg_dashboard_code() throws Throwable
+	{
+		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
+
+		{
+			String template = "<html><head></head><body><script dg-dashboard-code></script></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			String html = getHtmlWithPrint(out);
+			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+			
+			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
+			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+			
+			assertTrue(scriptStartTagEndIdx > 0);
+			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+		}
+		
+		{
+			String template = "<html><head></head><body><script dg-dashboard-code=\"render\"></script></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			String html = getHtmlWithPrint(out);
+			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+			
+			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
+			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+
+			assertTrue(scriptStartTagEndIdx > 0);
+			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+		}
+		
+		{
+			String template = "<html><head></head><body><script dg-dashboard-code=\"init\"></script></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			String html = getHtmlWithPrint(out);
+			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+			
+			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
+			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+			int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
+			int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+
+			assertTrue(scriptStartTagEndIdx > 0);
+			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardInitCodeIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardInitCodeIdx < scriptCloseTagIdx);
+			assertTrue(dashboardRenderCodeIdx < 0);
+		}
+		
+		{
+			String template = "<html><head></head><body><script dg-dashboard-code=\"abc\"></script></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			String html = getHtmlWithPrint(out);
+			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+			
+			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"abc\">") + "<script dg-dashboard-code=\"abc\">".length();
+			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+
+			assertTrue(scriptStartTagEndIdx > 0);
+			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+		}
+		
+		{
+			String template = "<html><head></head><body><script dg-dashboard-code=\"\"></script></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			String html = getHtmlWithPrint(out);
+			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+			
+			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"\">") + "<script dg-dashboard-code=\"\">".length();
+			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+
+			assertTrue(scriptStartTagEndIdx > 0);
+			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+		}
+		
+		//<head></head>里的<script dg-dashboard-code></script>忽略
+		{
+			String template = "<html><head><script dg-dashboard-code></script></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			String html = getHtmlWithPrint(out);
+			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+			
+			int scriptCloseTagIdx = html.lastIndexOf("</script></head>");
+			int bodyStartTagIdx = html.lastIndexOf("<body>");
+			int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
+			int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+
+			assertTrue(dashboardInitCodeIdx > scriptCloseTagIdx);
+			assertTrue(dashboardInitCodeIdx > bodyStartTagIdx);
+			assertTrue(dashboardRenderCodeIdx > dashboardInitCodeIdx);
+		}
+		
+		//与dg-dashboard-auto-render组合
+		{
+			{
+				String template = "<html dg-dashboard-auto-render=\"true\"><head></head><body><script dg-dashboard-code></script></body></html>";
+
+				RenderContext renderContext = new DefaultRenderContext();
+				StringWriter out = new StringWriter();
+				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+				this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+						IOUtil.getReader(template), renderAttr);
+
+				String html = getHtmlWithPrint(out);
+				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+				
+				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
+				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+				int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+
+				assertTrue(scriptStartTagEndIdx > 0);
+				assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+			}
+			{
+				String template = "<html dg-dashboard-auto-render=\"false\"><head></head><body><script dg-dashboard-code></script></body></html>";
+
+				RenderContext renderContext = new DefaultRenderContext();
+				StringWriter out = new StringWriter();
+				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+				DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+						IOUtil.getReader(template), renderAttr);
+
+				String html = getHtmlWithPrint(out);
+				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+				
+				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
+				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+				int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
+				int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+
+				assertTrue(scriptStartTagEndIdx > 0);
+				assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardInitCodeIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardInitCodeIdx < scriptCloseTagIdx);
+				assertTrue(dashboardRenderCodeIdx < 0);
+			}
+			
+			{
+				String template = "<html dg-dashboard-auto-render=\"true\"><head></head><body><script dg-dashboard-code=\"init\"></script></body></html>";
+	
+				RenderContext renderContext = new DefaultRenderContext();
+				StringWriter out = new StringWriter();
+				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+	
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+	
+				DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+						IOUtil.getReader(template), renderAttr);
+	
+				String html = getHtmlWithPrint(out);
+				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+				
+				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
+				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+				int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
+				int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+
+				assertTrue(scriptStartTagEndIdx > 0);
+				assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardInitCodeIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardInitCodeIdx < scriptCloseTagIdx);
+				assertTrue(dashboardRenderCodeIdx < 0);
+			}
+			{
+				String template = "<html dg-dashboard-auto-render=\"false\"><head></head><body><script dg-dashboard-code=\"init\"></script></body></html>";
+	
+				RenderContext renderContext = new DefaultRenderContext();
+				StringWriter out = new StringWriter();
+				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+	
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+	
+				DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+						IOUtil.getReader(template), renderAttr);
+	
+				String html = getHtmlWithPrint(out);
+				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+				
+				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
+				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+				int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
+				int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+
+				assertTrue(scriptStartTagEndIdx > 0);
+				assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardInitCodeIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardInitCodeIdx < scriptCloseTagIdx);
+				assertTrue(dashboardRenderCodeIdx < 0);
+			}
+			
+			{
+				String template = "<html dg-dashboard-auto-render=\"true\"><head></head><body><script dg-dashboard-code=\"render\"></script></body></html>";
+
+				RenderContext renderContext = new DefaultRenderContext();
+				StringWriter out = new StringWriter();
+				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+				this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+						IOUtil.getReader(template), renderAttr);
+
+				String html = getHtmlWithPrint(out);
+				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+				
+				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
+				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+				int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+
+				assertTrue(scriptStartTagEndIdx > 0);
+				assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+			}
+			{
+				String template = "<html dg-dashboard-auto-render=\"false\"><head></head><body><script dg-dashboard-code=\"render\"></script></body></html>";
+
+				RenderContext renderContext = new DefaultRenderContext();
+				StringWriter out = new StringWriter();
+				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+
+				this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+						IOUtil.getReader(template), renderAttr);
+
+				String html = getHtmlWithPrint(out);
+				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+				
+				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
+				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+				int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+
+				assertTrue(scriptStartTagEndIdx > 0);
+				assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
+				assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+			}
 		}
 	}
 

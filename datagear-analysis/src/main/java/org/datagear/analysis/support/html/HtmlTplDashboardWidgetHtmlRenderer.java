@@ -49,6 +49,8 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * ...
  * &lt;div id="..." dg-chart-widget="..."&gt;&lt;/div&gt;
  * ...
+ * &lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;
+ * ...
  * &lt;/body&gt;
  * &lt;/html&gt;
  * </pre>
@@ -73,6 +75,15 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * </p>
  * <p>
  * <code>div dg-chart-widget</code>：必填，定义图表部件ID（{@linkplain HtmlChartWidget#getId()}）
+ * </p>
+ * <p>
+ * <code>&lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;</code>：选填，自定义看板脚本写入位置，必须在<code>&lt;body&gt;&lt;/body&gt;</code>标签内，可选值：
+ * <br>
+ * {@code "init"} ：仅写入看板初始脚本，不写入调用渲染执行脚本；
+ * <br>
+ * {@code "render"} ：写入看板初始脚本、调用渲染执行脚本；
+ * <br>
+ * {@code 其他} ：由<code>dg-dashboard-auto-render</code>决定。
  * </p>
  * 
  * @author datagear@163.com
@@ -99,10 +110,17 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-auto-render";
 
+	public static final String DEFAULT_ATTR_NAME_DASHBOARD_CODE = DASHBOARD_ELEMENT_ATTR_PREFIX
+			+ "dashboard-code";
+
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-widget";
 
 	public static final String ATTR_NAME_CHART_AUTO_RESIZE = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-auto-resize";
+	
+	public static final String DASHBOARD_CODE_ATTR_VALUE_INIT = "init";
 
+	public static final String DASHBOARD_CODE_ATTR_VALUE_RENDER = "render";
+	
 	/** 看板设置标签名 */
 	private String dashboardSetTagName = DEFAULT_DASHBOARD_SET_TAG_NAME;
 
@@ -120,6 +138,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	/** 属性名：是否自动执行看板渲染函数 */
 	private String attrNameDashboardAutoRender = DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER;
+
+	/** 属性名：写入看板脚本标识属性 */
+	private String attrNameDashboardCode = DEFAULT_ATTR_NAME_DASHBOARD_CODE;
 
 	/** 图表标签名 */
 	private String chartTagName = DEFAULT_CHART_TAG_NAME;
@@ -195,6 +216,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public void setAttrNameDashboardAutoRender(String attrNameDashboardAutoRender)
 	{
 		this.attrNameDashboardAutoRender = attrNameDashboardAutoRender;
+	}
+
+	public String getAttrNameDashboardCode()
+	{
+		return attrNameDashboardCode;
+	}
+
+	public void setAttrNameDashboardCode(String attrNameDashboardCode)
+	{
+		this.attrNameDashboardCode = attrNameDashboardCode;
 	}
 
 	public String getChartTagName()
@@ -292,13 +323,27 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		return dashboardInfo;
 	}
 
+	/**
+	 * 
+	 * @param out
+	 * @param renderContext
+	 * @param renderAttr
+	 * @param dashboard
+	 * @param dashboardInfo
+	 * @param writeScriptTag
+	 * @param writeRenderCode 为{@code null}时由{@code dashboardInfo}的{@linkplain DashboardInfo#isDashboardAutoRender()}决定
+	 * @throws IOException
+	 */
 	protected void writeDashboardScript(Writer out, RenderContext renderContext,
-			HtmlTplDashboardRenderAttr renderAttr, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
-			throws IOException
+			HtmlTplDashboardRenderAttr renderAttr, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo,
+			boolean writeScriptTag, Boolean writeRenderCode) throws IOException
 	{
 		String globalDashboardVar = dashboardInfo.getDashboardVar();
 		if (StringUtil.isEmpty(globalDashboardVar))
 			globalDashboardVar = getDefaultDashboardVar();
+		
+		if(writeRenderCode == null)
+			writeRenderCode = dashboardInfo.isDashboardAutoRender();
 
 		String tmp0RenderContextVarName = renderAttr.genRenderContextVarName("Tmp0");
 		String tmp1RenderContextVarName = renderAttr.genRenderContextVarName("Tmp1");
@@ -306,9 +351,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 		dashboard.setVarName(localDashboardVarName);
 
-		writeScriptStartTag(out);
+		if(writeScriptTag)
+			writeScriptStartTag(out);
+		
 		writeNewLine(out);
-
 		out.write("(function(){");
 		writeNewLine(out);
 
@@ -322,14 +368,17 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		out.write("window." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
 		
-		if(dashboardInfo.isDashboardAutoRender())
+		if(writeRenderCode)
 			writeDashboardJsRender(renderContext, renderAttr, out, dashboard);
 		
 		out.write("})();");
 		writeNewLine(out);
 		
-		writeScriptEndTag(out);
-		writeNewLine(out);
+		if(writeScriptTag)
+		{
+			writeScriptEndTag(out);
+			writeNewLine(out);
+		}
 	}
 
 	protected void writeChartScripts(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
@@ -489,7 +538,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		public boolean isResolveTagAttrs(Reader in, String tagName)
 		{
 			return (this.isInBodyTag()
-					&& equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
+					&& (equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName)
+							|| equalsIgnoreCase(tagName, TAG_NAME_SCRIPT)))
 					|| (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"));
 		}
 
@@ -511,9 +561,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 
 		@Override
-		public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
+		public void afterWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs) throws IOException
 		{
-			super.afterWriteTagEnd(in, tagName, tagEnd);
+			super.afterWriteTagEnd(in, tagName, tagEnd, attrs);
+			
 			if (this.isInHeadTag() && !this.inTitleTag && equalsIgnoreCase(tagName, "title"))
 			{
 				this.inTitleTag = !isSelfCloseTagEnd(tagEnd);
@@ -525,6 +576,17 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 					&& (equalsIgnoreCase(tagName, "head") || equalsIgnoreCase(tagName, "body")))
 			{
 				writeDashboardImportWithSet();
+			}
+			
+			// <body>内的<script dg-dashboard-code></script>内写入看板脚本
+			if(!this.dashboardScriptWritten && this.isInBodyTag() && equalsIgnoreCase(tagName, "script"))
+			{
+				// 此处不需要再次校验和writeDashboardImportWithSet()，因为上面已确保写入
+				//if (!this.dashboardImportWritten)
+				//	writeDashboardImportWithSet();
+				
+				if(attrs != null && attrs.containsKey(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode))
+					writeHtmlTplDashboardScriptCodeWithSet(attrs.get(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode));
 			}
 
 			// 如果</body>前没写（没有定义</body>），则在</html>后写看板脚本
@@ -586,7 +648,25 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		protected void writeHtmlTplDashboardScriptWithSet() throws IOException
 		{
 			writeDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-					this.dashboardInfo);
+					this.dashboardInfo, true, null);
+
+			this.dashboardScriptWritten = true;
+		}
+		
+		protected void writeHtmlTplDashboardScriptCodeWithSet(String codeMode) throws IOException
+		{
+			Boolean writeRenderCode = null;
+			
+			//只处理合法值，否则应由dg-dashboard-auto-render特性决定
+			if(DASHBOARD_CODE_ATTR_VALUE_INIT.equalsIgnoreCase(codeMode))
+				writeRenderCode = false;
+			else if(DASHBOARD_CODE_ATTR_VALUE_RENDER.equalsIgnoreCase(codeMode))
+				writeRenderCode = true;
+			else
+				writeRenderCode = null;
+			
+			writeDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
+					this.dashboardInfo, false, writeRenderCode);
 
 			this.dashboardScriptWritten = true;
 		}
@@ -697,7 +777,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		
 		/** 内置导入排除项 */
 		private String importExclude = null;
-		
+
 		/** 是否自动执行看板渲染函数 */
 		private String dashboardAutoRender = null;
 		
@@ -753,7 +833,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		{
 			return !Boolean.FALSE.toString().equalsIgnoreCase(this.dashboardAutoRender);
 		}
-
+		
 		public List<ChartInfo> getChartInfos()
 		{
 			return chartInfos;
@@ -768,8 +848,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		public String toString()
 		{
 			return getClass().getSimpleName() + " [dashboardVar=" + dashboardVar + ", dashboardFactoryVar=" + dashboardFactoryVar
-					+ ", importExclude=" + importExclude + ", dashboardAutoRender=" + dashboardAutoRender
-					+ ", chartInfos=" + chartInfos + "]";
+					+ ", importExclude=" + importExclude + ", dashboardAutoRender=" + dashboardAutoRender + ", chartInfos=" + chartInfos + "]";
 		}
 	}
 

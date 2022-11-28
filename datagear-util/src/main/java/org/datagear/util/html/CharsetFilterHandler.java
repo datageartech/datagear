@@ -100,7 +100,7 @@ public class CharsetFilterHandler extends DefaultFilterHandler
 	}
 
 	@Override
-	public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
+	public void afterWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs) throws IOException
 	{
 		if (this.abortIfResolved && (this.charset != null || equalsIgnoreCase(tagName, "/head")))
 			this._aborted = true;

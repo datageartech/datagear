@@ -73,6 +73,8 @@ import org.slf4j.LoggerFactory;
 public abstract class HtmlTplDashboardWidgetRenderer
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HtmlTplDashboardWidgetRenderer.class);
+	
+	public static final String TAG_NAME_SCRIPT="script";
 
 	public static final String DASHBOARD_ELEMENT_ATTR_PREFIX = "dg-";
 
@@ -610,15 +612,21 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			throws IOException
 	{
 		String varName = dashboard.getVarName();
-
-		if (StringUtil.isEmpty(varName))
+		dashboardFactoryVar = getDashboardFactoryVarElseDft(dashboardFactoryVar);
+		
+		if (StringUtil.isEmpty(varName) || StringUtil.isEmpty(dashboardFactoryVar))
 			throw new IllegalArgumentException();
-
+		
+		out.write(dashboardFactoryVar + "." + this.dashboardFactoryInitFuncName + "(" + varName + ");");
+		writeNewLine(out);
+	}
+	
+	protected String getDashboardFactoryVarElseDft(String dashboardFactoryVar)
+	{
 		if (StringUtil.isEmpty(dashboardFactoryVar))
 			dashboardFactoryVar = this.defaultDashboardFactoryVar;
 
-		out.write(dashboardFactoryVar + "." + this.dashboardFactoryInitFuncName + "(" + varName + ");");
-		writeNewLine(out);
+		return dashboardFactoryVar;
 	}
 
 	/**
@@ -864,7 +872,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 */
 	protected void writeScriptStartTag(Writer out) throws IOException
 	{
-		out.write("<script type=\"text/javascript\">");
+		out.write("<"+TAG_NAME_SCRIPT+" type=\"text/javascript\">");
 	}
 
 	/**
@@ -875,7 +883,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 */
 	protected void writeScriptEndTag(Writer out) throws IOException
 	{
-		out.write("</script>");
+		out.write("</"+TAG_NAME_SCRIPT+">");
 	}
 
 	/**

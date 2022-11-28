@@ -110,7 +110,7 @@ public class DefaultFilterHandler implements FilterHandler
 	}
 
 	@Override
-	public void afterWriteTagEnd(Reader in, String tagName, String tagEnd) throws IOException
+	public void afterWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs) throws IOException
 	{
 	}
 
