@@ -1640,8 +1640,11 @@
 			
 			editor._setElementChartTheme(thisEle, chartTheme);
 			var chart = editor.dashboard.renderedChart(thisEle);
-			chart.destroy();
-			chart.init();
+			if(chart)
+			{
+				chart.destroy();
+				chart.init();
+			}
 		});
 	};
 	
@@ -1878,8 +1881,11 @@
 			
 			editor._setElementChartOptions(thisEle, chartOptionsStr);
 			var chart = editor.dashboard.renderedChart(thisEle);
-			chart.destroy();
-			chart.init();
+			if(chart)
+			{
+				chart.destroy();
+				chart.init();
+			}
 		});
 	};
 	
@@ -2419,6 +2425,7 @@
 	};
 	
 	//获取元素本身、子孙元素中所有的图表元素
+	//注意：返回的图表元素中可能有还未渲染为图表的元素
 	editor._getChartElements = function(ele)
 	{
 		var chartEles = [];
