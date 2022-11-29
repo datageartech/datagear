@@ -96,7 +96,7 @@
 				<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<div class="desc text-color-secondary text-sm">
+		        	<small class="desc text-color-secondary">
 			        	<@spring.message code='dashboard.import.notice' />
 						<br>
 						<@spring.message code='dashboard.import.notice.1' />
@@ -104,7 +104,7 @@
 						<@spring.message code='dashboard.import.notice.2' />
 						<br>
 						<@spring.message code='dashboard.import.notice.3' />
-					</div>
+					</small>
 		        </div>
 			</div>
 		</div>
