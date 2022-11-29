@@ -537,12 +537,27 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		@Override
 		public boolean isResolveTagAttrs(Reader in, String tagName)
 		{
-			return (this.isInBodyTag()
-					&& (equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName)
-							|| equalsIgnoreCase(tagName, TAG_NAME_SCRIPT)))
-					|| (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"));
+			//<body>内的图表元素标签
+			if(this.isInBodyTag() && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
+			{
+				return true;
+			}
+			
+			//<body></body>内的<script dg-dashboard-code>标签
+			if(!this.dashboardScriptWritten && this.isInBodyTag() && equalsIgnoreCase(tagName, TAG_NAME_SCRIPT))
+			{
+				return true;
+			}
+			
+			//<html ...>
+			if(!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"))
+			{
+				return true;
+			}
+			
+			return false;
 		}
-
+		
 		@Override
 		public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
 				throws IOException
@@ -578,7 +593,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				writeDashboardImportWithSet();
 			}
 			
-			// <body>内的<script dg-dashboard-code></script>内写入看板脚本
+			// <body></body>内的<script dg-dashboard-code></script>内写入看板脚本
+			// 必须限定在<body></body>内，因为页面端看板初始化需要<body>标签上的属性信息
 			if(!this.dashboardScriptWritten && this.isInBodyTag() && equalsIgnoreCase(tagName, "script"))
 			{
 				// 此处不需要再次校验和writeDashboardImportWithSet()，因为上面已确保写入
