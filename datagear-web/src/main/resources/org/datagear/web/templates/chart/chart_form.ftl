@@ -408,7 +408,7 @@
 			</label>
 		</div>
 		<div class="panel-content-size-xxs overflow-auto flex flex-column p-2">
-			{{formatChartPluginDesc(fm.htmlChartPlugin)}}
+			<div v-html="formatChartPluginDesc(fm.htmlChartPlugin)"></div>
 		</div>
 	</p-overlaypanel>
 	<p-overlaypanel ref="${pid}attrValuesPanelEle" append-to="body" id="${pid}attrValuesPanel" @show="onAttrValuesPanelShow">
