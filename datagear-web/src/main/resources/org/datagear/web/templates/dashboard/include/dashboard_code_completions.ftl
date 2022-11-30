@@ -53,7 +53,9 @@
 		{name: "dg-loadable-chart-widgets",
 				displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-loadable-chart-widgets' />", categories: ["html"]},
 		{name: "dg-dashboard-auto-render",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-auto-render' />", categories: ["html"]}
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-auto-render' />", categories: ["html"]},
+		{name: "dg-dashboard-code",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-code' />", categories: ["script"]}
 	];
 	
 	po.codeEditorCompletionsJsFunction =
