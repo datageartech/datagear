@@ -272,16 +272,29 @@
 				var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
 				po.setVeDashboardSize(tab, {});
 			}
-			
-			codeEditor.focus();
 		}
 		else
 		{
 			po.setCodeText(codeEditor, content);
-			codeEditor.focus();
 		}
+		
+		if(po.focusOnEditorAfterSetContent(tab))
+			codeEditor.focus();
 	};
-
+	
+	po.focusOnEditorAfterSetContent = function(tab)
+	{
+		var fm = po.vueFormModel();
+		var pm = po.vuePageModel();
+		var items = pm.resContentTabs.items;
+		
+		//添加页面初始不设编辑器焦点
+		if(!fm.name && items.length < 2)
+			return false;
+		else
+			return true;
+	};
+	
 	po.codeEditorHintHandler = function(codeEditor)
 	{
 		var doc = codeEditor.getDoc();

@@ -53,18 +53,22 @@
 				</div>
 			</div>
 			<div class="field grid mb-0">
-				<label for="${pid}resourceContents" class="field-label col-12 mb-2">
-					<p-button type="button" :icon="pm.resourceContentWrapperFullSize ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
-						class="p-button-xs p-button-secondary p-button-text p-button-rounded mr-1"
-						@click="onToggleResourceContentWrapperFullSize">
-					</p-button>
-					<span><@spring.message code='dashboardResource' /></span>
-					<span v-if="pm.resourceContentWrapperFullSize">
-						<span><@spring.message code='bracket.left' /></span>
-						<span>{{fm.name}}</span>
-						<span><@spring.message code='bracket.right' /></span>
-					</span>
-				</label>
+				<div class="field-label col-12 mb-2">
+					<div class="flex justify-content-between">
+						<div>
+							<span><@spring.message code='dashboardResource' /></span>
+							<span v-if="pm.resourceContentWrapperFullSize">
+								<span><@spring.message code='bracket.left' /></span>
+								<span>{{fm.name}}</span>
+								<span><@spring.message code='bracket.right' /></span>
+							</span>
+						</div>
+						<p-button type="button" :icon="pm.resourceContentWrapperFullSize ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
+							class="p-button-xs p-button-secondary p-button-text p-button-rounded mr-1"
+							@click="onToggleResourceContentWrapperFullSize" title="<@spring.message code='showOrHideName' />">
+						</p-button>
+					</div>
+				</div>
 		        <div class="field-input col-12">
 		        	<div class="resource-contents-wrapper grid grid-nogutter flex-nowrap">
 		        		<div class="col-8 md:col-9 pr-1">
