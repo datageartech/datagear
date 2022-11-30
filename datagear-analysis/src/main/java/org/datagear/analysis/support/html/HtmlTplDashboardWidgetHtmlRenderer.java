@@ -537,16 +537,19 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		@Override
 		public boolean isResolveTagAttrs(Reader in, String tagName)
 		{
-			//<body>内的图表元素标签
-			if(this.isInBodyTag() && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
+			//看板脚本未写入时<body></body>内需解析属性的标签
+			if(!this.dashboardScriptWritten && this.isInBodyTag())
 			{
-				return true;
-			}
-			
-			//<body></body>内的<script dg-dashboard-code>标签
-			if(!this.dashboardScriptWritten && this.isInBodyTag() && equalsIgnoreCase(tagName, TAG_NAME_SCRIPT))
-			{
-				return true;
+				//图表元素
+				if(equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
+				{
+					return true;
+				}
+				//<script dg-dashboard-code>
+				else if(equalsIgnoreCase(tagName, TAG_NAME_SCRIPT))
+				{
+					return true;
+				}
 			}
 			
 			//<html ...>
@@ -562,13 +565,17 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
 				throws IOException
 		{
-			// 解析<body></body>内的图表元素
-			if (this.isInBodyTag() && equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
+			// 解析<body></body>内的图表元素属性
+			if (!this.dashboardScriptWritten && this.isInBodyTag())
 			{
-				resolveChartTagAttr(attrs);
+				if(equalsIgnoreCase(tagName, HtmlTplDashboardWidgetHtmlRenderer.this.chartTagName))
+				{
+					resolveChartTagAttr(attrs);
+				}
 			}
+			
 			// 解析<html>标签上的看板属性
-			else if (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"))
+			if (!this.htmlTagResolved && equalsIgnoreCase(tagName, "html"))
 			{
 				resolveHtmlTagAttr(attrs);
 				this.htmlTagResolved = true;
@@ -580,7 +587,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		{
 			super.afterWriteTagEnd(in, tagName, tagEnd, attrs);
 			
-			if (this.isInHeadTag() && !this.inTitleTag && equalsIgnoreCase(tagName, "title"))
+			if (!this.inTitleTag && this.isInHeadTag() && equalsIgnoreCase(tagName, "title"))
 			{
 				this.inTitleTag = !isSelfCloseTagEnd(tagEnd);
 				this.getCopyWriter().setCopy(this.inTitleTag);
@@ -602,7 +609,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				//	writeDashboardImportWithSet();
 				
 				if(attrs != null && attrs.containsKey(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode))
-					writeHtmlTplDashboardScriptCodeWithSet(attrs.get(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode));
+				{
+					writeHtmlTplDashboardScriptCodeWithSet(isSelfCloseTagEnd(tagEnd),
+							attrs.get(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode));
+				}
 			}
 
 			// 如果</body>前没写（没有定义</body>），则在</html>后写看板脚本
@@ -669,7 +679,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			this.dashboardScriptWritten = true;
 		}
 		
-		protected void writeHtmlTplDashboardScriptCodeWithSet(String codeMode) throws IOException
+		protected void writeHtmlTplDashboardScriptCodeWithSet(boolean writeScriptTag, String codeMode) throws IOException
 		{
 			Boolean writeRenderCode = null;
 			
@@ -682,7 +692,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				writeRenderCode = null;
 			
 			writeDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-					this.dashboardInfo, false, writeRenderCode);
+					this.dashboardInfo, writeScriptTag, writeRenderCode);
 
 			this.dashboardScriptWritten = true;
 		}

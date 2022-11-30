@@ -15,6 +15,7 @@ import static org.junit.Assert.assertNull;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.datagear.analysis.ChartDefinition;
@@ -575,7 +576,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -593,7 +594,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -611,7 +612,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -629,7 +630,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -647,7 +648,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -665,7 +666,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -683,7 +684,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -707,7 +708,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -715,14 +716,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
-			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
-			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
+			int scriptCloseTagIdx = html.indexOf("</script></body>");
 			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 			
 			assertTrue(scriptStartTagEndIdx > 0);
 			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
 			assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
 			assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+			assertTrue(html.indexOf("<script>", scriptStartTagEndIdx) < 0);
+			assertEquals(scriptCloseTagIdx, html.indexOf("</script>", scriptStartTagEndIdx));
 		}
 		
 		{
@@ -732,7 +735,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -740,14 +743,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
-			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
-			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
+			int scriptCloseTagIdx = html.indexOf("</script></body>");
 			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 			assertTrue(scriptStartTagEndIdx > 0);
 			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
 			assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
 			assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+			assertTrue(html.indexOf("<script>", scriptStartTagEndIdx) < 0);
+			assertEquals(scriptCloseTagIdx, html.indexOf("</script>", scriptStartTagEndIdx));
 		}
 		
 		{
@@ -757,7 +762,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -766,16 +771,18 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
-			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
-			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
-			int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
-			int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
+			int scriptCloseTagIdx = html.indexOf("</script></body>");
+			int dashboardInitCodeIdx = html.indexOf(dashboardInitCode);
+			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 			assertTrue(scriptStartTagEndIdx > 0);
 			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
 			assertTrue(dashboardInitCodeIdx > scriptStartTagEndIdx);
 			assertTrue(dashboardInitCodeIdx < scriptCloseTagIdx);
 			assertTrue(dashboardRenderCodeIdx < 0);
+			assertTrue(html.indexOf("<script>", scriptStartTagEndIdx) < 0);
+			assertEquals(scriptCloseTagIdx, html.indexOf("</script>", scriptStartTagEndIdx));
 		}
 		
 		{
@@ -785,7 +792,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -793,14 +800,70 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
-			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"abc\">") + "<script dg-dashboard-code=\"abc\">".length();
-			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"abc\">") + "<script dg-dashboard-code=\"abc\">".length();
+			int scriptCloseTagIdx = html.indexOf("</script></body>");
 			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 			assertTrue(scriptStartTagEndIdx > 0);
 			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
 			assertTrue(dashboardRenderCodeIdx > scriptStartTagEndIdx);
 			assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
+			assertTrue(html.indexOf("<script>", scriptStartTagEndIdx) < 0);
+			assertEquals(scriptCloseTagIdx, html.indexOf("</script>", scriptStartTagEndIdx));
+		}
+		
+		{
+			String template = "<html><head></head><body><script dg-dashboard-code=\"abc\" /></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			String html = getHtmlWithPrint(out);
+			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+			
+			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"abc\" />") + "<script dg-dashboard-code=\"abc\" />".length();
+			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+			int writeScriptTagIdx = html.indexOf("<script type=\"text/javascript\">", scriptStartTagEndIdx);
+			int writeScriptTagEndIdx = html.indexOf("</script>", writeScriptTagIdx);
+
+			assertTrue(scriptStartTagEndIdx > 0);
+			assertTrue(dashboardRenderCodeIdx > writeScriptTagIdx);
+			assertTrue(dashboardRenderCodeIdx < writeScriptTagEndIdx);
+			assertTrue(writeScriptTagIdx >= scriptStartTagEndIdx);
+			assertTrue(writeScriptTagEndIdx > 0);
+		}
+		
+		{
+			String template = "<html><head></head><body><script dg-dashboard-code=\"abc\"/></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			String html = getHtmlWithPrint(out);
+			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
+			
+			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"abc\"/>") + "<script dg-dashboard-code=\"abc\"/>".length();
+			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+			int writeScriptTagIdx = html.indexOf("<script type=\"text/javascript\">", scriptStartTagEndIdx);
+			int writeScriptTagEndIdx = html.indexOf("</script>", writeScriptTagIdx);
+
+			assertTrue(scriptStartTagEndIdx > 0);
+			assertTrue(dashboardRenderCodeIdx > writeScriptTagIdx);
+			assertTrue(dashboardRenderCodeIdx < writeScriptTagEndIdx);
+			assertTrue(writeScriptTagIdx >= scriptStartTagEndIdx);
+			assertTrue(writeScriptTagEndIdx > 0);
 		}
 		
 		{
@@ -810,7 +873,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -818,8 +881,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
-			int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"\">") + "<script dg-dashboard-code=\"\">".length();
-			int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"\">") + "<script dg-dashboard-code=\"\">".length();
+			int scriptCloseTagIdx = html.indexOf("</script></body>");
 			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 			assertTrue(scriptStartTagEndIdx > 0);
@@ -836,7 +899,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			StringWriter out = new StringWriter();
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 					IOUtil.getReader(template), renderAttr);
@@ -845,10 +908,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
-			int scriptCloseTagIdx = html.lastIndexOf("</script></head>");
-			int bodyStartTagIdx = html.lastIndexOf("<body>");
-			int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
-			int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+			int scriptCloseTagIdx = html.indexOf("</script></head>");
+			int bodyStartTagIdx = html.indexOf("<body>");
+			int dashboardInitCodeIdx = html.indexOf(dashboardInitCode);
+			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 			assertTrue(dashboardInitCodeIdx > scriptCloseTagIdx);
 			assertTrue(dashboardInitCodeIdx > bodyStartTagIdx);
@@ -864,7 +927,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				StringWriter out = new StringWriter();
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 				this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 						IOUtil.getReader(template), renderAttr);
@@ -872,8 +935,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				String html = getHtmlWithPrint(out);
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
-				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
-				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
+				int scriptCloseTagIdx = html.indexOf("</script></body>");
 				int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 				assertTrue(scriptStartTagEndIdx > 0);
@@ -888,7 +951,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				StringWriter out = new StringWriter();
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 				DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 						IOUtil.getReader(template), renderAttr);
@@ -897,10 +960,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
-				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
-				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
-				int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
-				int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
+				int scriptCloseTagIdx = html.indexOf("</script></body>");
+				int dashboardInitCodeIdx = html.indexOf(dashboardInitCode);
+				int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 				assertTrue(scriptStartTagEndIdx > 0);
 				assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
@@ -916,7 +979,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				StringWriter out = new StringWriter();
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 	
-				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 	
 				DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 						IOUtil.getReader(template), renderAttr);
@@ -925,10 +988,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
-				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
-				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
-				int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
-				int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
+				int scriptCloseTagIdx = html.indexOf("</script></body>");
+				int dashboardInitCodeIdx = html.indexOf(dashboardInitCode);
+				int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 				assertTrue(scriptStartTagEndIdx > 0);
 				assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
@@ -943,7 +1006,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				StringWriter out = new StringWriter();
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 	
-				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 	
 				DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 						IOUtil.getReader(template), renderAttr);
@@ -952,10 +1015,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
-				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
-				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
-				int dashboardInitCodeIdx = html.lastIndexOf(dashboardInitCode);
-				int dashboardRenderCodeIdx = html.lastIndexOf(dashboardRenderCode);
+				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
+				int scriptCloseTagIdx = html.indexOf("</script></body>");
+				int dashboardInitCodeIdx = html.indexOf(dashboardInitCode);
+				int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 				assertTrue(scriptStartTagEndIdx > 0);
 				assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
@@ -971,7 +1034,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				StringWriter out = new StringWriter();
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 				this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 						IOUtil.getReader(template), renderAttr);
@@ -979,8 +1042,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				String html = getHtmlWithPrint(out);
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
-				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
-				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
+				int scriptCloseTagIdx = html.indexOf("</script></body>");
 				int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 				assertTrue(scriptStartTagEndIdx > 0);
@@ -995,7 +1058,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				StringWriter out = new StringWriter();
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, template);
+				HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
 
 				this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
 						IOUtil.getReader(template), renderAttr);
@@ -1003,8 +1066,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				String html = getHtmlWithPrint(out);
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
-				int scriptStartTagEndIdx = html.lastIndexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
-				int scriptCloseTagIdx = html.lastIndexOf("</script></body>");
+				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
+				int scriptCloseTagIdx = html.indexOf("</script></body>");
 				int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
 
 				assertTrue(scriptStartTagEndIdx > 0);
@@ -1022,6 +1085,11 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		renderAttr.setWebContext(renderContext, new WebContext(""));
 		renderAttr.setDashboardTheme(renderContext, SimpleDashboardThemeSource.THEME_LIGHT);
 		renderAttr.setImportList(renderContext, buildImportList());
+		
+		renderAttr.setIgnoreRenderAttrs(renderContext,
+				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getImportListName(),
+						renderAttr.getHtmlTitleHandlerName(),
+						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
 
 		return renderAttr;
 	}
