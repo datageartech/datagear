@@ -50,7 +50,7 @@
 			
 			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -258,7 +258,7 @@
 			
 			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -493,7 +493,7 @@
 			
 			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -759,7 +759,7 @@
 			
 			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -1328,7 +1328,7 @@
 			
 			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -1591,7 +1591,7 @@
 			
 			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -1777,7 +1777,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -1836,7 +1836,7 @@
 		
 		//临时series，series[i]表示一条雷达网，series[i].name是雷达网名称，
 		//series[i].data[i].name是雷达指标名、series[i].data[i].value雷达指标值
-		//这样可以使用已有的排序逻辑，从而支持dgSortData特性
+		//这样可以使用已有的排序逻辑，从而支持dgSortAxisData特性
 		var tmpSeries = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -1862,7 +1862,7 @@
 			}
 		}
 		
-		if(renderOptions.dgSortData)
+		if(renderOptions.dgSortAxisData)
 		{
 			var tmpAxisData = [];
 			$.each(indicatorData, function(i, indicator)
@@ -1872,7 +1872,7 @@
 			
 			var tmpOptions = { tmpAxis: { data: tmpAxisData }, series: tmpSeries };
 			
-			chartSupport.dgSortDataForUpdateOptions(renderOptions, tmpOptions, tmpOptions.tmpAxis,
+			chartSupport.dgSortAxisDataForUpdateOptions(renderOptions, tmpOptions, tmpOptions.tmpAxis,
 							true, true, chartSupport.inflateAxisDataExtractors.property("name"));
 			
 			indicatorData.sort(function(a, b)
@@ -3459,7 +3459,7 @@
 			
 			//扩展配置项，数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -3626,7 +3626,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -4794,7 +4794,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -5763,7 +5763,7 @@
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
 			//主题河流图的"desc"效果与预期不符，不建议使用
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -5965,7 +5965,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -6218,7 +6218,7 @@
 			
 			//扩展配置项，轴数据排序方式
 			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortData: false
+			dgSortAxisData: false
 		},
 		options);
 		
@@ -9048,7 +9048,7 @@
 	/**
 	 * 从updateOptions.series[i].data[i]提取轴数据，并设置为updateAxis.data轴数据。
 	 * 
-	 * @param renderOptions 渲染选项，renderOptions.dgSortData配置项可以控制数据排序方式，格式为：
+	 * @param renderOptions 渲染选项，renderOptions.dgSortAxisData配置项可以控制数据排序方式，格式为：
 	 *						"asc"、"ASC"：升序；
 	 *						"desc"、"DESC"：降序；
 	 *						自定义排序函数：function(a, b){}；
@@ -9056,7 +9056,7 @@
 	 *						注意：ECharts对于轴type为"value"、"time"的，仅设置"desc"是无效的，需要把轴type改为"category"
 	 * @param updateOptions 更新选项，格式应为：{ series: [ { data: [ ... ] } ] }
 	 * @param updateAxis 要填充轴数据的更新的轴对象，格式应为：{ data: [ 基本类型值, ...], ... }
-	 * @param valueExtractor 轴数据值提取器，格式同chartSupport.dgSortDataForUpdateOptions的valueExtractor参数
+	 * @param valueExtractor 轴数据值提取器，格式同chartSupport.dgSortAxisDataForUpdateOptions的valueExtractor参数
 	 * @param sortSeriesData 可选，是否排序系列数据，默认值为：true。
 	 */
 	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor, sortSeriesData)
@@ -9095,14 +9095,14 @@
 		
 		updateAxis.data = axisData;
 		
-		chartSupport.dgSortDataForUpdateOptions(renderOptions, updateOptions, updateAxis,
+		chartSupport.dgSortAxisDataForUpdateOptions(renderOptions, updateOptions, updateAxis,
 					true, sortSeriesData, valueExtractors);
 	};
 	
 	/**
-	 * 依据renderOptions.dgSortData对updateAxis.data、updateOptions.series[i].data进行排序。
+	 * 依据renderOptions.dgSortAxisData对updateAxis.data、updateOptions.series[i].data进行排序。
 	 * 
-	 * @param renderOptions 渲染选项，renderOptions.dgSortData配置项用于控制数据排序方式，格式为：
+	 * @param renderOptions 渲染选项，renderOptions.dgSortAxisData配置项用于控制数据排序方式，格式为：
 	 *						"asc"、"ASC"：升序；
 	 *						"desc"、"DESC"：降序；
 	 *						自定义排序函数：function(a, b){}；
@@ -9120,21 +9120,21 @@
 	 *						[ ... ]
 	 *						其元素索引与updateOptions.series[i]索引对应
 	 */
-	chartSupport.dgSortDataForUpdateOptions = function(renderOptions, updateOptions, updateAxis,
+	chartSupport.dgSortAxisDataForUpdateOptions = function(renderOptions, updateOptions, updateAxis,
 					sortAxisData, sortSeriesData, valueExtractor)
 	{
 		if(!sortAxisData && !sortSeriesData)
 			return;
 		
-		var dgSortData = renderOptions.dgSortData;
+		var dgSortAxisData = renderOptions.dgSortAxisData;
 		
-		if(chartFactory.isString(dgSortData))
+		if(chartFactory.isString(dgSortAxisData))
 		{
-			dgSortData = dgSortData.toLowerCase();
+			dgSortAxisData = dgSortAxisData.toLowerCase();
 			
-			if(dgSortData == "asc")
+			if(dgSortAxisData == "asc")
 			{
-				dgSortData = function(a, b)
+				dgSortAxisData = function(a, b)
 				{
 					if(a == b)
 						return 0;
@@ -9142,9 +9142,9 @@
 						return (a < b ? -1 : 1);
 				};
 			}
-			else if(dgSortData == "desc")
+			else if(dgSortAxisData == "desc")
 			{
-				dgSortData = function(a, b)
+				dgSortAxisData = function(a, b)
 				{
 					if(a == b)
 						return 0;
@@ -9158,9 +9158,9 @@
 		var isValueExtractorFunc = $.isFunction(valueExtractor);
 		var isValueExtractorAry = (!isValueExtractorFunc && $.isArray(valueExtractor));
 		
-		if($.isFunction(dgSortData))
+		if($.isFunction(dgSortAxisData))
 		{
-			axisData.sort(dgSortData);
+			axisData.sort(dgSortAxisData);
 			
 			if(sortSeriesData)
 			{
