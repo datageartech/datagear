@@ -1773,7 +1773,11 @@
 				//value 数值
 				//max 最大值
 				dataSignNames: { item: "item", name: "name", value: "value", max: "max" }
-			}
+			},
+			
+			//扩展配置项，轴数据排序方式
+			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
+			dgSortData: false
 		},
 		options);
 		
@@ -1830,6 +1834,11 @@
 		var indicatorData = [];
 		var seriesData = [];
 		
+		//临时series，series[i]表示一条雷达网，series[i].name是雷达网名称，
+		//series[i].data[i].name是雷达指标名、series[i].data[i].value雷达指标值
+		//这样可以使用已有的排序逻辑，从而支持dgSortData特性
+		var tmpSeries = [];
+		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
@@ -1838,17 +1847,56 @@
 			var ip = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.item);
 			
 			//行式雷达网数据，必设置【雷达网条目名称】标记
+			//一行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*n
 			if(ip)
 			{
-				chartSupport.radarUpdateForRowData(chart, results, renderOptions,
-						chartDataSet, i, result, legendData, indicatorData, seriesData)
+				chartSupport.radarUpdateTmpSeriesForRowMode(chart, results, renderOptions,
+						chartDataSet, result, legendData, indicatorData, tmpSeries)
 			}
 			//列式雷达网数据
+			//一列【指标值】数据表示一条雷达网，列式结构为：指标名, 指标上限值, [指标值]*n，其中【指标值】列名将作为雷达网条目名称
 			else
 			{
-				chartSupport.radarUpdateForColumnData(chart, results, renderOptions,
-						chartDataSet, i, result, legendData, indicatorData, seriesData)
+				chartSupport.radarUpdateTmpSeriesForColumnMode(chart, results, renderOptions,
+						chartDataSet, result, legendData, indicatorData, tmpSeries)
 			}
+		}
+		
+		if(renderOptions.dgSortData)
+		{
+			var tmpAxisData = [];
+			$.each(indicatorData, function(i, indicator)
+			{
+				tmpAxisData.push(indicator.name);
+			});
+			
+			var tmpOptions = { tmpAxis: { data: tmpAxisData }, series: tmpSeries };
+			
+			chartSupport.dgSortDataForUpdateOptions(renderOptions, tmpOptions, tmpOptions.tmpAxis,
+							true, true, chartSupport.inflateAxisDataExtractors.property("name"));
+			
+			indicatorData.sort(function(a, b)
+			{
+				var ia = chartSupport.findInArray(tmpAxisData, a.name);
+				var ib = chartSupport.findInArray(tmpAxisData, b.name);
+				
+				return (ia - ib);
+			});
+		}
+		
+		//将上述tmpSeries转换为雷达网数据
+		for(var i=0; i<tmpSeries.length; i++)
+		{
+			var ts = tmpSeries[i];
+			var radarData = { name: ts.name, value: [] };
+			$.each(ts.data, function(j, td)
+			{
+				radarData.value.push(td.value);
+			});
+			
+			chart.originalDataIndex(radarData, ts.chartDataSetIndex, ts.resultDataIndex);
+			
+			seriesData.push(radarData);
 		}
 		
 		var series = [ { id: 0, type: "radar", data: seriesData } ];
@@ -1861,9 +1909,9 @@
 		chartFactory.extValueBuiltin(chart, "radarIndicatorData", indicatorData);
 	};
 	
-	//行式雷达网数据处理，一行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*n
-	chartSupport.radarUpdateForRowData = function(chart, results, renderOptions,
-			chartDataSet, chartDataSetIdx, result, legendData, indicatorData, seriesData)
+	//行式雷达网数据处理
+	chartSupport.radarUpdateTmpSeriesForRowMode = function(chart, results, renderOptions,
+			chartDataSet, result, legendData, indicatorData, series)
 	{
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
@@ -1872,61 +1920,58 @@
 		var iv = chart.resultColumnArrays(result, ip);
 		chartSupport.appendElement(legendData, iv);
 		
-		//仅使用第一个数据集构建指示器
-		if(chartDataSetIdx == 0)
+		var np = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.name);
+		var mp = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.max);
+		var indicatorLen = Math.min(np.length, mp.length);
+		var nv = null;
+		
+		for(var i=0; i<indicatorLen; i++)
 		{
-			var np = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.name);
-			var npv = chart.resultRowArrays(result, np, 0, 1);
-			npv = (npv.length > 0 ? npv[0] : []);
+			var indicator = { name: null, max: null };
 			
-			var mp = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.max);
-			var mpv = chart.resultRowArrays(result, mp, 0, 1);
-			mpv = (mpv.length > 0 ? mpv[0] : []);
+			nv = chart.resultColumnArrays(result, np[i]);
+			var mv = chart.resultColumnArrays(result, mp[i]);
 			
-			var indicatorLen = Math.min(np.length, mp.length);
+			indicator.name = chartSupport.findNonEmpty(nv);
+			indicator.max = chartSupport.findNonEmpty(mv);
 			
-			for(var j=0; j<indicatorLen; j++)
-			{
-				var indicator = {name: npv[j], max: mpv[j]};
-				indicatorData.push(indicator);
-			}
+			chartSupport.radarAppendValidIndicator(indicatorData, indicator);
 		}
 		
+		nv = chart.resultRowArrays(result, np);
 		var vp = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
-		var vpv = chart.resultRowArrays(result, vp);
+		var vv = chart.resultRowArrays(result, vp);
+		var dataLen = Math.min(np.length, vp.length);
 		
-		for(var j=0; j<iv.length; j++)
+		for(var i=0; i<iv.length; i++)
 		{
-			var myData = { name: iv[j], value: vpv[j] };
+			var mySeries = { name: iv[i], data: [], chartDataSetIndex: chartDataSet.index, resultDataIndex: i };
 			
-			chart.originalDataIndex(myData, chartDataSet, j);
+			for(var j=0; j<dataLen; j++)
+			{
+				mySeries.data.push({ name: nv[i][j], value: vv[i][j] });
+			}
 			
-			seriesData.push(myData);
+			series.push(mySeries);
 		}
 	};
 	
-	//列式雷达网数据处理，一列【指标值】数据表示一条雷达网，列式结构为：指标名, 指标上限值, [指标值]*n，其中【指标值】列名将作为雷达网条目名称
-	chartSupport.radarUpdateForColumnData = function(chart, results, renderOptions,
-			chartDataSet, chartDataSetIdx, result, legendData, indicatorData, seriesData)
+	chartSupport.radarUpdateTmpSeriesForColumnMode = function(chart, results, renderOptions,
+			chartDataSet, result, legendData, indicatorData, series)
 	{
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		//仅使用第一个数据集构建指示器
-		if(chartDataSetIdx == 0)
+		var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
+		var nv = chart.resultColumnArrays(result, np);
+		var mp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.max);
+		var mv = chart.resultColumnArrays(result, mp);
+		var indicatorLen = Math.min(nv.length, mv.length);
+		
+		for(var i=0; i<indicatorLen; i++)
 		{
-			var np = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.name);
-			var nv = chart.resultColumnArrays(result, np);
-			var mp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.max);
-			var mv = chart.resultColumnArrays(result, mp);
-			
-			var indicatorLen = Math.min(nv.length, mv.length);
-			
-			for(var i=0; i<indicatorLen; i++)
-			{
-				var indicator = {name: nv[i], max: mv[i]};
-				indicatorData.push(indicator);
-			}
+			var indicator = {name: nv[i], max: mv[i]};
+			chartSupport.radarAppendValidIndicator(indicatorData, indicator);
 		}
 		
 		var vp = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
@@ -1936,16 +1981,36 @@
 		for(var i=0; i<indicatorData.length; i++)
 			resultDataIndex[i] = i;
 		
-		for(var i=0; i<vv.length; i++)
+		for(var i=0; i<vp.length; i++)
 		{
 			var name = chart.dataSetPropertyAlias(chartDataSet, vp[i]);
 			legendData.push(name);
 			
-			var myData = { name: name, value: vv[i] };
+			var mySeries = { name: name, data: [], chartDataSetIndex: chartDataSet.index, resultDataIndex: resultDataIndex };
 			
-			chart.originalDataIndex(myData, chartDataSet, resultDataIndex);
+			for(var j=0; j<nv.length; j++)
+			{
+				mySeries.data.push({ name: nv[j], value: vv[i][j] });
+			}
 			
-			seriesData.push(myData);
+			series.push(mySeries);
+		}
+	};
+	
+	chartSupport.radarAppendValidIndicator = function(indicatorData, indicator)
+	{
+		if(indicator && indicator.name != null)
+		{
+			var idx = chartSupport.findInArray(indicatorData, indicator.name, "name");
+			
+			if(idx < 0)
+			{
+				indicatorData.push(indicator);
+			}
+			else if(indicatorData[idx].max == null || indicatorData[idx].max < indicator.max)
+			{
+				indicatorData[idx] = indicator;
+			}
 		}
 	};
 	
@@ -8256,38 +8321,38 @@
 	 * 为源数组追加不重复的元素。
 	 * 
 	 * @param array 待追加数组
-	 * @param append 追加元素、数组，可以是基本类型、对象类型
+	 * @param eles 追加元素、数组，可以是基本类型、对象类型
 	 * @param propertyName 可选，当是对象类型时，用于指定判断重复的属性名
 	 * @returns 追加的或重复元素的索引、或者索引数组
 	 */
-	chartSupport.appendDistinct = function(array, append, propertyName)
+	chartSupport.appendDistinct = function(array, eles, propertyName)
 	{
-		return chartSupport.appendDistinctQuick(array, {}, append, propertyName);
+		return chartSupport.appendDistinctQuick(array, eles, {}, propertyName);
 	};
 	
 	/**
 	 * 为数组追加不重复的元素。
 	 * 
 	 * @param array 待追加数组
+	 * @param eles 追加元素、数组，可以是基本类型、对象类型
 	 * @param indexCache 索引缓存对象，用于存储arry中对应主键元素的索引，初始应为null、{}，格式为：{ 主键：索引数值 }
-	 * @param append 追加元素、数组，可以是基本类型、对象类型
 	 * @param propertyName 可选，当是对象类型时，用于指定判断重复的属性名
 	 * @returns 追加的或重复元素的索引、或者索引数组
 	 */
-	chartSupport.appendDistinctQuick = function(array, indexCache, append, propertyName)
+	chartSupport.appendDistinctQuick = function(array, eles, indexCache, propertyName)
 	{
 		indexCache = (indexCache == null ? {} : indexCache);
 		
-		var isArray = $.isArray(append);
+		var isArray = $.isArray(eles);
 		
 		if(!isArray)
-			append = [ append ];
+			eles = [ eles ];
 		
 		var indexes = [];
 		
-		for(var i=0; i<append.length; i++)
+		for(var i=0; i<eles.length; i++)
 		{
-			var key = (propertyName != null && append[i] ? append[i][propertyName] : append[i]);
+			var key = (propertyName != null && eles[i] ? eles[i][propertyName] : eles[i]);
 			var keyIdx = indexCache[key];
 			
 			if(keyIdx != null && keyIdx > -1)
@@ -8305,7 +8370,7 @@
 				}
 				else
 				{
-					array.push(append[i]);
+					array.push(eles[i]);
 					indexCache[key] = array.length - 1;
 					indexes[i] = array.length - 1;
 				}
@@ -8989,19 +9054,77 @@
 	 *						自定义排序函数：function(a, b){}；
 	 *						null、false、其他：不排序；
 	 *						注意：ECharts对于轴type为"value"、"time"的，仅设置"desc"是无效的，需要把轴type改为"category"
-	 * @param updateOptions 更新选项
-	 * @param updateAxis 要更新的轴对象
-	 * @param valueExtractor 轴数据值提取器，格式为：
+	 * @param updateOptions 更新选项，格式应为：{ series: [ { data: [ ... ] } ] }
+	 * @param updateAxis 要填充轴数据的更新的轴对象，格式应为：{ data: [ 基本类型值, ...], ... }
+	 * @param valueExtractor 轴数据值提取器，格式同chartSupport.dgSortDataForUpdateOptions的valueExtractor参数
+	 * @param sortSeriesData 可选，是否排序系列数据，默认值为：true。
+	 */
+	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor, sortSeriesData)
+	{
+		sortSeriesData = (sortSeriesData == null ? true : sortSeriesData);
+		
+		var axisData = [];
+		var indexCache = {};
+		var isValueExtractorFunc = $.isFunction(valueExtractor);
+		var isValueExtractorAry = (!isValueExtractorFunc && $.isArray(valueExtractor));
+		var valueExtractors = [];
+		
+		var series = (updateOptions.series || []);
+		$.each(series, function(i, s)
+		{
+			var data = (s.data || []);
+			var myData = [];
+			var myValueExtractor = null;
+			
+			if(isValueExtractorFunc)
+				myValueExtractor = valueExtractor;
+			else if(isValueExtractorAry)
+				myValueExtractor = valueExtractor[i];
+			else
+				myValueExtractor = valueExtractor.get(s);
+			
+			$.each(data, function(j, d)
+			{
+				var v = myValueExtractor(d, s);
+				myData.push(v);
+			});
+			
+			valueExtractors.push(myValueExtractor);
+			chartSupport.appendDistinctQuick(axisData, myData, indexCache);
+		});
+		
+		updateAxis.data = axisData;
+		
+		chartSupport.dgSortDataForUpdateOptions(renderOptions, updateOptions, updateAxis,
+					true, sortSeriesData, valueExtractors);
+	};
+	
+	/**
+	 * 依据renderOptions.dgSortData对updateAxis.data、updateOptions.series[i].data进行排序。
+	 * 
+	 * @param renderOptions 渲染选项，renderOptions.dgSortData配置项用于控制数据排序方式，格式为：
+	 *						"asc"、"ASC"：升序；
+	 *						"desc"、"DESC"：降序；
+	 *						自定义排序函数：function(a, b){}；
+	 *						null、false、其他：不排序；
+	 *						注意：ECharts对于轴type为"value"、"time"的，仅设置"desc"是无效的，需要把轴type改为"category"
+	 * @param updateOptions 要排序的更新选项，格式应为：{ series: [ { data: [ ... ] } ] }
+	 * @param updateAxis 要排序的轴对象，格式应为：{ data: [ 基本类型值, ...], ... }
+	 * @param sortAxisData 是否对updateAxis.data进行排序
+	 * @param sortSeriesData 是否对updateOptions.series[i].data按照updateAxis.data的顺序重排
+	 * @param valueExtractor 可选，当sortSeriesData为true时，updateOptions.series[i].data[i]的排序值提取器，格式为：
 	 *						function(dataEle, seriesEle){}
 	 *						或者
 	 *						{ get: function(seriesEle){ return 轴数据值提取器函数对象; } }
-	 * @param sortSeriesData 可选，是否重排系列数据，默认值为：true。
-	 *						 ECharts的某些类型图表会根据axisData自动重排，有些则不会，除非了解，建议使用默认值
+	 *						或者
+	 *						[ ... ]
+	 *						其元素索引与updateOptions.series[i]索引对应
 	 */
-	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis,
-					valueExtractor, sortSeriesData)
+	chartSupport.dgSortDataForUpdateOptions = function(renderOptions, updateOptions, updateAxis,
+					sortAxisData, sortSeriesData, valueExtractor)
 	{
-		sortSeriesData = (sortSeriesData == null ? true : sortSeriesData);
+		if(!sortAxisData && !sortSeriesData)
+			return;
 		
 		var dgSortData = renderOptions.dgSortData;
 		
@@ -9031,32 +9154,9 @@
 			}
 		}
 		
-		var axisData = [];
-		var indexCache = {};
+		var axisData = updateAxis.data;
 		var isValueExtractorFunc = $.isFunction(valueExtractor);
-		var valueExtractors = [];
-		
-		var series = (updateOptions.series || []);
-		$.each(series, function(i, s)
-		{
-			var data = (s.data || []);
-			var myData = [];
-			var myValueExtractor = null;
-			
-			if(isValueExtractorFunc)
-				myValueExtractor = valueExtractor;
-			else
-				myValueExtractor = valueExtractor.get(s);
-			
-			$.each(data, function(j, d)
-			{
-				var v = myValueExtractor(d, s);
-				myData.push(v);
-			});
-			
-			valueExtractors.push(myValueExtractor);
-			chartSupport.appendDistinctQuick(axisData, indexCache, myData);
-		});
+		var isValueExtractorAry = (!isValueExtractorFunc && $.isArray(valueExtractor));
 		
 		if($.isFunction(dgSortData))
 		{
@@ -9064,16 +9164,24 @@
 			
 			if(sortSeriesData)
 			{
-				indexCache = {};
+				var indexCache = {};
 				$.each(axisData, function(i, a)
 				{
 					indexCache[a] = i;
 				});
 				
+				var series = (updateOptions.series || []);
 				$.each(series, function(i, s)
 				{
 					var data = (s.data || []);
-					var myValueExtractor = valueExtractors[i];
+					var myValueExtractor = null;
+					
+					if(isValueExtractorFunc)
+						myValueExtractor = valueExtractor;
+					else if(isValueExtractorAry)
+						myValueExtractor = valueExtractor[i];
+					else
+						myValueExtractor = valueExtractor.get(s);
 					
 					data.sort(function(da, db)
 					{
@@ -9090,8 +9198,6 @@
 				});
 			}
 		}
-		
-		updateAxis.data = axisData;
 	};
 	
 	chartSupport.inflateAxisDataExtractors =
