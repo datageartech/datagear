@@ -1848,17 +1848,19 @@
 			
 			//行式雷达网数据，必设置【雷达网条目名称】标记
 			//一行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*n
+			//或者
+			//相同条目名的多行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*1
 			if(ip)
 			{
 				chartSupport.radarUpdateTmpSeriesForRowMode(chart, results, renderOptions,
-						chartDataSet, result, legendData, indicatorData, tmpSeries)
+						chartDataSet, result, indicatorData, tmpSeries)
 			}
 			//列式雷达网数据
 			//一列【指标值】数据表示一条雷达网，列式结构为：指标名, 指标上限值, [指标值]*n，其中【指标值】列名将作为雷达网条目名称
 			else
 			{
 				chartSupport.radarUpdateTmpSeriesForColumnMode(chart, results, renderOptions,
-						chartDataSet, result, legendData, indicatorData, tmpSeries)
+						chartDataSet, result, indicatorData, tmpSeries)
 			}
 		}
 		
@@ -1898,6 +1900,7 @@
 			
 			chart.originalDataIndex(radarData, ts.chartDataSetIndex, ts.resultDataIndex);
 			seriesData.push(radarData);
+			legendData.push(ts.name);
 		}
 		
 		var series = [ { id: 0, type: "radar", data: seriesData } ];
@@ -1912,53 +1915,78 @@
 	
 	//行式雷达网数据处理
 	chartSupport.radarUpdateTmpSeriesForRowMode = function(chart, results, renderOptions,
-			chartDataSet, result, legendData, indicatorData, series)
+			chartDataSet, result, indicatorData, series)
 	{
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
 		var ip = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.item);
-		var iv = chart.resultColumnArrays(result, ip);
-		chartSupport.appendElement(legendData, iv);
-		
 		var np = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.name);
 		var mp = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.max);
 		var indicatorLen = Math.min(np.length, mp.length);
-		var nv = null;
 		
 		for(var i=0; i<indicatorLen; i++)
 		{
-			var indicator = { name: null, max: null };
-			
-			nv = chart.resultColumnArrays(result, np[i]);
-			var mv = chart.resultColumnArrays(result, mp[i]);
-			
-			indicator.name = chartSupport.findNonEmpty(nv);
-			indicator.max = chartSupport.findNonEmpty(mv);
-			
-			chartSupport.radarAppendValidIndicator(indicatorData, indicator);
+			var indicators = chart.resultMapObjects(result, { name: np[i], max: mp[i] });
+			$.each(indicators, function(j, indicator)
+			{
+				chartSupport.radarAppendValidIndicator(indicatorData, indicator);
+			});
 		}
 		
-		nv = chart.resultRowArrays(result, np);
-		var vp = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
-		var vv = chart.resultRowArrays(result, vp);
-		var dataLen = Math.min(np.length, vp.length);
-		
-		for(var i=0; i<iv.length; i++)
+		if(indicatorLen == 0){}
+		//多行式雷达网
+		else if(indicatorLen == 1)
 		{
-			var mySeries = { name: iv[i], data: [], chartDataSetIndex: chartDataSet.index, resultDataIndex: i };
+			var vp = chart.dataSetPropertyOfSign(chartDataSet, dataSignNames.value);
 			
-			for(var j=0; j<dataLen; j++)
+			var categoryNames = [];
+			var categoryDatasMap = {};
+			var propertyMap = chartSupport.inflatePropertyMapWithCategory({ name: np, value: vp }, ip);
+			var data = chart.resultMapObjects(result, propertyMap);
+			chart.originalDataIndexes(data, chartDataSet);
+			chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
+			
+			for(var j=0; j<categoryNames.length; j++)
 			{
-				mySeries.data.push({ name: nv[i][j], value: vv[i][j] });
+				var categoryName = categoryNames[j];
+				var categoryDatas = categoryDatasMap[categoryName];
+				var mySeries = { name: categoryName, data: categoryDatas, chartDataSetIndex: chartDataSet.index, resultDataIndex: [] };
+				
+				$.each(categoryDatas, function(k, cd)
+				{
+					var odIdx = chart.originalDataIndex(cd);
+					mySeries.resultDataIndex.push(odIdx.resultDataIndex);
+				});
+				
+				series.push(mySeries);
 			}
+		}
+		//单行式雷达网
+		else
+		{
+			var iv = chart.resultColumnArrays(result, ip);
+			var nv = chart.resultRowArrays(result, np);
+			var vp = chart.dataSetPropertiesOfSign(chartDataSet, dataSignNames.value);
+			var vv = chart.resultRowArrays(result, vp);
+			var dataLen = Math.min(np.length, vp.length);
 			
-			series.push(mySeries);
+			for(var i=0; i<iv.length; i++)
+			{
+				var mySeries = { name: iv[i], data: [], chartDataSetIndex: chartDataSet.index, resultDataIndex: i };
+				
+				for(var j=0; j<dataLen; j++)
+				{
+					mySeries.data.push({ name: nv[i][j], value: vv[i][j] });
+				}
+				
+				series.push(mySeries);
+			}
 		}
 	};
 	
 	chartSupport.radarUpdateTmpSeriesForColumnMode = function(chart, results, renderOptions,
-			chartDataSet, result, legendData, indicatorData, series)
+			chartDataSet, result, indicatorData, series)
 	{
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
@@ -1985,8 +2013,6 @@
 		for(var i=0; i<vp.length; i++)
 		{
 			var name = chart.dataSetPropertyAlias(chartDataSet, vp[i]);
-			legendData.push(name);
-			
 			var mySeries = { name: name, data: [], chartDataSetIndex: chartDataSet.index, resultDataIndex: resultDataIndex };
 			
 			for(var j=0; j<nv.length; j++)
