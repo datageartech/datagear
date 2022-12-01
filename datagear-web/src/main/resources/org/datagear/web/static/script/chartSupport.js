@@ -1889,13 +1889,14 @@
 		{
 			var ts = tmpSeries[i];
 			var radarData = { name: ts.name, value: [] };
-			$.each(ts.data, function(j, td)
+			
+			$.each(indicatorData, function(j, indicator)
 			{
-				radarData.value.push(td.value);
+				var idx = chartSupport.findInArray(ts.data, indicator.name, "name");
+				radarData.value.push(idx > -1 ? ts.data[idx].value : null);
 			});
 			
 			chart.originalDataIndex(radarData, ts.chartDataSetIndex, ts.resultDataIndex);
-			
 			seriesData.push(radarData);
 		}
 		
