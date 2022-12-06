@@ -2840,7 +2840,10 @@
 			var isBody =  ele.is("body");
 			
 			if(!this._isSelectableElement(ele) && !isBody)
+			{
+				ele = ele.parent();
 				continue;
+			}
 			
 			var editEle = this._editElement(ele);
 			var pathInfo =
