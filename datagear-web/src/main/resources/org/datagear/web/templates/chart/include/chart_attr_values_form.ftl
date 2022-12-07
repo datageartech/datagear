@@ -23,7 +23,10 @@ page_boolean_options.ftl
 			<div class="field grid" v-for="(cpa, cpaIdx) in group.cpas">
 				<label :for="'${pid}cpattr_'+cpa.name" class="field-label col-12 mb-2"
 					:title="cpa.descLabel && cpa.descLabel.value ? cpa.descLabel.value : null">
-					{{cpa.nameLabel && cpa.nameLabel.value ? cpa.nameLabel.value : cpa.name}}
+					<span>
+						{{cpa.nameLabel && cpa.nameLabel.value ? cpa.nameLabel.value : cpa.name}}
+					</span>
+					<span class="text-color-secondary text-sm ml-1">{{cpa.name}}</span>
 				</label>
 				<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginAttribute.InputType.RADIO">
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
