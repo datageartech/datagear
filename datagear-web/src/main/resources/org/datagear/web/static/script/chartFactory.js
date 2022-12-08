@@ -5349,12 +5349,19 @@
 	
 	chartFactory.toCssFontSize = function(fontSize)
 	{
-		if(fontSize == null)
-			return "";
+		if(fontSize == null || fontSize == "")
+		{
+			//返回一个无效的css字号值，使其不影响其他层级字号设置
+			return "null";
+		}
 		else if($.isNumeric(fontSize))
+		{
 			return fontSize + "px";
+		}
 		else
+		{
 			return fontSize;
+		}
 	};
 	
 	/**

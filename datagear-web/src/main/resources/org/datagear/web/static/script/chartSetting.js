@@ -1451,9 +1451,9 @@
 		
 		var $chart = chart.elementJquery();
 		
-		if(!$chart.attr("bindChartSettingPanelEvent"))
+		if(!$chart.attr("bind-chart-setting-panel-event"))
 		{
-			$chart.attr("bindChartSettingPanelEvent", "1");
+			$chart.attr("bind-chart-setting-panel-event", "1");
 			
 			var mouseenterHandler = function(event)
 			{
@@ -1489,7 +1489,7 @@
 		var mouseenterHandler = $chart.data("chartSettingPanel-mouseenterHandler");
 		var mouseleaveHandler = $chart.data("chartSettingPanel-mouseleaveHandler");
 		
-		$chart.removeAttr("bindChartSettingPanelEvent");
+		$chart.removeAttr("bind-chart-setting-panel-event");
 		if(mouseenterHandler)
 			$chart.off("mouseenter", mouseenterHandler);
 		if(mouseleaveHandler)

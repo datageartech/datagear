@@ -6710,7 +6710,7 @@
 		if(options.titleStyle)
 			chart.elementStyle(chartTitle, options.titleStyle);
 		
-		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
+		var chartContent = $("<div class='dg-chart-table-content' />").css("top", chartTitle.outerHeight(true)).appendTo(chartEle);
 		var table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartContent);
 		var tableId = chart.id+"-table";
 		table.attr("id", tableId);
