@@ -110,7 +110,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
 
-	public static final String SERVERTIME_JS_VAR = "_" + Global.PRODUCT_NAME_EN + "ServerTime";
+	/**
+	 * 看板页面中服务端日期JS变量名：{@code _DATAGEAR_SERVER_TIME}
+	 */
+	public static final String SERVERTIME_JS_VAR = "_" + Global.PRODUCT_NAME_EN_UC + "_SERVER_TIME";
 
 	/**
 	 * 看板内置渲染上下文属性名：{@linkplain EditHtmlInfo}。

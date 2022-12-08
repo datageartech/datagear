@@ -264,7 +264,7 @@ public abstract class HtmlRenderAttr
 	 */
 	public String genChartElementId(String suffix)
 	{
-		return genIdentifier("ChartElement", suffix);
+		return genIdentifier("chartele", suffix);
 	}
 
 	/**
@@ -320,7 +320,7 @@ public abstract class HtmlRenderAttr
 	 */
 	protected String genIdentifier(String prefix, String suffix)
 	{
-		StringBuilder sb = new StringBuilder(Global.PRODUCT_NAME_EN);
+		StringBuilder sb = new StringBuilder(Global.PRODUCT_NAME_EN_LC);
 
 		if (!StringUtil.isEmpty(this.seed))
 			sb.append(this.seed);

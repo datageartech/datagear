@@ -682,7 +682,7 @@ public class FileUtil
 	 */
 	public static File createTempDirectory() throws IOException
 	{
-		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_DIR";
+		String prefix = Global.PRODUCT_NAME_EN_UC + "_TMP_DIR";
 		Path path = Files.createTempDirectory(prefix);
 		return path.toFile();
 	}
@@ -695,7 +695,7 @@ public class FileUtil
 	 */
 	public static File createTempFile() throws IOException
 	{
-		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_FILE";
+		String prefix = Global.PRODUCT_NAME_EN_UC + "_TMP_FILE";
 		Path path = Files.createTempFile(prefix, null);
 		return path.toFile();
 	}
@@ -709,7 +709,7 @@ public class FileUtil
 	 */
 	public static File createTempFile(String extension) throws IOException
 	{
-		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_FILE";
+		String prefix = Global.PRODUCT_NAME_EN_UC + "_TMP_FILE";
 		Path path = Files.createTempFile(prefix, extension);
 		return path.toFile();
 	}

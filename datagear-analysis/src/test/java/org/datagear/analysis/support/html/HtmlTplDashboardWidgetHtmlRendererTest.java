@@ -113,9 +113,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			assertTrue(html.contains("var DataGearDashboardTmp"));
-			assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
-			assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
+			assertTrue(html.contains("var datagearDashboardTmp"));
+			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("window.myDashboard=datagearDashboardTmp;"));
 		}
 
 		// 看板属性，无引号
@@ -141,9 +141,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			assertTrue(html.contains("var DataGearDashboardTmp"));
-			assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
-			assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
+			assertTrue(html.contains("var datagearDashboardTmp"));
+			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("window.myDashboard=datagearDashboardTmp;"));
 		}
 
 		// 看板属性，单引号
@@ -169,9 +169,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			assertTrue(html.contains("var DataGearDashboardTmp"));
-			assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
-			assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
+			assertTrue(html.contains("var datagearDashboardTmp"));
+			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("window.myDashboard=datagearDashboardTmp;"));
 		}
 
 		// 看板属性，多个导入排除值
@@ -197,9 +197,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertFalse(html.contains(IMPORT_CONTENT_THEME));
 			assertFalse(html.contains(IMPORT_CONTENT_STYLE));
-			assertTrue(html.contains("var DataGearDashboardTmp"));
-			assertTrue(html.contains("myDashboardFactory.init(DataGearDashboardTmp);"));
-			assertTrue(html.contains("window.myDashboard=DataGearDashboardTmp;"));
+			assertTrue(html.contains("var datagearDashboardTmp"));
+			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("window.myDashboard=datagearDashboardTmp;"));
 		}
 
 		// 看板属性，默认
@@ -224,9 +224,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			assertTrue(html.contains("var DataGearDashboardTmp"));
-			assertTrue(html.contains("dashboardFactory.init(DataGearDashboardTmp);"));
-			assertTrue(html.contains("window.dashboard=DataGearDashboardTmp;"));
+			assertTrue(html.contains("var datagearDashboardTmp"));
+			assertTrue(html.contains("dashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("window.dashboard=datagearDashboardTmp;"));
 		}
 
 		// 图表属性
@@ -283,8 +283,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains("<div   id=element_6    dg-chart-widget=chartwidget_6  />"));
 			assertTrue(html.contains("<div   id=element_7    dg-chart-widget=chartwidget_7  /  >"));
 			assertTrue(
-					html.contains("<div     dg-chart-widget=chartwidget_8    /   id=\"DataGearChartElement7\" >"));
-			assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"DataGearChartElement8\" />"));
+					html.contains("<div     dg-chart-widget=chartwidget_8    /   id=\"datagearchartele7\" >"));
+			assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"datagearchartele8\" />"));
 			assertTrue(html.contains("<div     dg-chart-widget='' />"));
 			assertTrue(html.contains("<div     dg-chart-widget=\"\"  />"));
 			assertTrue(html.contains("</body></html>"));
@@ -414,7 +414,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains("<html><body>" + this.renderer.getNewLine() + "<style"));
 			assertTrue(html.contains("</script>" + this.renderer.getNewLine() + "</body></html>"));
 			assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
-			assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
+			assertEquals(1, countOf(html, "datagearDashboardTmp.render();"));
 		}
 
 		// 没有<body></body>
@@ -436,7 +436,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(
 					"<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"></head></html><script type=\"text/javascript\">"));
 			assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
-			assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
+			assertEquals(1, countOf(html, "datagearDashboardTmp.render();"));
 			assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
 		}
 
@@ -459,7 +459,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(
 					"<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"><script type=\"text/javascript\">"));
 			assertEquals(1, countOf(html, "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"));
-			assertEquals(1, countOf(html, "DataGearDashboardTmp.render();"));
+			assertEquals(1, countOf(html, "datagearDashboardTmp.render();"));
 			assertTrue(html.endsWith("</script>" + renderer.getNewLine()));
 		}
 	}

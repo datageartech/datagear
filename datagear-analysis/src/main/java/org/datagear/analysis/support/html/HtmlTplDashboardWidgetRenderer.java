@@ -99,7 +99,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	private HtmlTplDashboardScriptObjectWriter htmlTplDashboardScriptObjectWriter = new HtmlTplDashboardScriptObjectWriter();
 
 	private AttributeValueHtmlChartPlugin htmlChartPluginForGetWidgetException = new AttributeValueHtmlChartPlugin(
-			Global.PRODUCT_NAME_EN + "HtmlChartPluginForGetWidgetException",
+			Global.PRODUCT_NAME_EN_LC + "HtmlChartPluginForGetWidgetException",
 			ChartDefinition.BUILTIN_ATTR_PREFIX + "EXCEPTION_MESSAGE");
 
 	/** 默认JS看板工厂变量名 */

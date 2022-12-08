@@ -2303,11 +2303,11 @@
 	dashboardBase.serverDate = function(asMillisecond)
 	{
 		//参考org.datagear.web.controller.DashboardController.SERVERTIME_JS_VAR
-		if(global._DataGearServerTime == null)
-			throw new Error("Get current server time is not supported");
+		if(global._DATAGEAR_SERVER_TIME == null)
+			throw new Error("Get current server date is not supported");
 		
 		var cct = chartFactory.currentDateMs();
-		var cst = global._DataGearServerTime + (cct - dashboardFactory.LOAD_TIME);
+		var cst = global._DATAGEAR_SERVER_TIME + (cct - dashboardFactory.LOAD_TIME);
 		
 		if(asMillisecond == true)
 			return cst;
