@@ -26,6 +26,8 @@ import org.datagear.analysis.DataSign;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
+import org.datagear.util.Global;
+import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.i18n.LabelUtil;
 
@@ -39,21 +41,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 {
-	private String localPluginVarNameForInvode = "localPlugin" + Long.toHexString(System.currentTimeMillis());
+	private String localRendererVarNameForInvode = Global.PRODUCT_NAME_EN_LC + "Renderer" + IDUtil.toStringOfMaxRadix();
 
 	public HtmlChartPluginScriptObjectWriter()
 	{
 		super();
 	}
 
-	public String getLocalPluginVarNameForInvode()
+	public String getLocalRendererVarNameForInvode()
 	{
-		return localPluginVarNameForInvode;
+		return localRendererVarNameForInvode;
 	}
 
-	public void setLocalPluginVarNameForInvode(String localPluginVarNameForInvode)
+	public void setLocalRendererVarNameForInvode(String localRendererVarNameForInvode)
 	{
-		this.localPluginVarNameForInvode = localPluginVarNameForInvode;
+		this.localRendererVarNameForInvode = localRendererVarNameForInvode;
 	}
 
 	/**
@@ -113,7 +115,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 		}
 		else if (JsChartRenderer.CODE_TYPE_INVOKE.equals(codeType))
 		{
-			String tmpVarName = this.localPluginVarNameForInvode;
+			String tmpVarName = this.localRendererVarNameForInvode;
 
 			out.write("(function(" + JsChartRenderer.INVOKE_CONTEXT_PLUGIN_VAR + "){");
 			writeNewLine(out);

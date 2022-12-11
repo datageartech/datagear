@@ -25,6 +25,8 @@ import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
+import org.datagear.util.Global;
+import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.CopyWriter;
 import org.datagear.util.html.HeadBodyAwareFilterHandler;
@@ -148,6 +150,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	/** 属性名：图表部件ID */
 	private String attrNameChartWidget = DEFAULT_ATTR_NAME_CHART_WIDGET;
 
+	/**全局JS对象（通常是：window）的局部变量名*/
+	private String localGlobalVarName = Global.PRODUCT_NAME_EN_LC + "Global" + IDUtil.toStringOfMaxRadix();
+
 	public HtmlTplDashboardWidgetHtmlRenderer()
 	{
 		super();
@@ -246,6 +251,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public void setAttrNameChartWidget(String attrNameChartWidget)
 	{
 		this.attrNameChartWidget = attrNameChartWidget;
+	}
+
+	public String getLocalGlobalVarName()
+	{
+		return localGlobalVarName;
+	}
+
+	public void setLocalGlobalVarName(String localGlobalVarName)
+	{
+		this.localGlobalVarName = localGlobalVarName;
 	}
 
 	@Override
@@ -355,7 +370,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			writeScriptStartTag(out);
 		
 		writeNewLine(out);
-		out.write("(function(){");
+		out.write("(function("+this.localGlobalVarName+"){");
 		writeNewLine(out);
 
 		writeDashboardJsVar(renderContext, renderAttr, out, dashboard, tmp0RenderContextVarName);
@@ -365,13 +380,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		writeDashboardJsFactoryInit(renderContext, renderAttr, out, dashboard,
 				dashboardInfo.getDashboardFactoryVar());
 		
-		out.write("window." + globalDashboardVar + "=" + localDashboardVarName + ";");
+		out.write(this.localGlobalVarName + "." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
 		
 		if(writeRenderCode)
 			writeDashboardJsRender(renderContext, renderAttr, out, dashboard);
 		
-		out.write("})();");
+		out.write("})(this);");
 		writeNewLine(out);
 		
 		if(writeScriptTag)

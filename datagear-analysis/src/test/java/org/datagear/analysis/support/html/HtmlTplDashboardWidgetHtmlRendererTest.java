@@ -115,7 +115,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp"));
 			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
-			assertTrue(html.contains("window.myDashboard=datagearDashboardTmp;"));
+			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".myDashboard=datagearDashboardTmp;"));
 		}
 
 		// 看板属性，无引号
@@ -143,7 +143,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp"));
 			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
-			assertTrue(html.contains("window.myDashboard=datagearDashboardTmp;"));
+			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".myDashboard=datagearDashboardTmp;"));
 		}
 
 		// 看板属性，单引号
@@ -171,7 +171,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp"));
 			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
-			assertTrue(html.contains("window.myDashboard=datagearDashboardTmp;"));
+			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".myDashboard=datagearDashboardTmp;"));
 		}
 
 		// 看板属性，多个导入排除值
@@ -199,7 +199,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertFalse(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp"));
 			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
-			assertTrue(html.contains("window.myDashboard=datagearDashboardTmp;"));
+			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".myDashboard=datagearDashboardTmp;"));
 		}
 
 		// 看板属性，默认
@@ -226,7 +226,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp"));
 			assertTrue(html.contains("dashboardFactory.init(datagearDashboardTmp);"));
-			assertTrue(html.contains("window.dashboard=datagearDashboardTmp;"));
+			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".dashboard=datagearDashboardTmp;"));
 		}
 
 		// 图表属性

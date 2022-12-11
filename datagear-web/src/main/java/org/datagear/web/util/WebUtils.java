@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
 import org.datagear.util.Global;
+import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.security.AuthUser;
@@ -327,7 +328,7 @@ public class WebUtils
 	 */
 	public static String generatePageId()
 	{
-		return "pid" + Long.toString(System.currentTimeMillis(), Character.MAX_RADIX);
+		return "pid" + IDUtil.toStringOfMaxRadix();
 	}
 
 	/**

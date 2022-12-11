@@ -74,6 +74,26 @@ public class IDUtil
 
 		return sb.toString();
 	}
+	
+	/**
+	 * 获取{@code System.currentTimeMillis()}的最大基数字符串。
+	 * @return
+	 */
+	public static String toStringOfMaxRadix()
+	{
+		return toStringOfMaxRadix(System.currentTimeMillis());
+	}
+	
+	/**
+	 * 获取指定长整数的最大基数字符串。
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static String toStringOfMaxRadix(long value)
+	{
+		return Long.toString(value, Character.MAX_RADIX);
+	}
 
 	private static final char[] RANDOM_CODE = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
 			'e', 'f' };
