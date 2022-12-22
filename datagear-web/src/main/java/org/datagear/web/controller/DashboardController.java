@@ -270,9 +270,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 		dashboard.setCreateTime(null);
 		
-		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
-		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
-
 		setFormModel(model, dashboard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
 
@@ -287,9 +284,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 		
-		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
-		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
-
 		setFormModel(model, dashboard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
 
@@ -308,9 +302,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setId(IDUtil.randomIdOnTime20());
 		dashboard.setCreateTime(null);
 		
-		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
-		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
-
 		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
 		model.addAttribute("copySourceId", id);
@@ -1838,6 +1829,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
 						: this.applicationProperties.getDashboardGlobalResUrlPrefix()));
 		model.addAttribute("defaultTempalteName", HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0]);
+
+		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
+		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
 	}
 
 	protected Map<String, Object> buildDashboardIdTemplatesHashMap(String id, String[] templates)
