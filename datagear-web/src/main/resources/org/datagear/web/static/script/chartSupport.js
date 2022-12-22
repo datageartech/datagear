@@ -6543,6 +6543,10 @@
 			renderCell: undefined,
 			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
 			carousel: undefined,
+			//是否禁用条纹样式效果
+			disableStripe: false,
+			//是否禁用悬浮样式效果
+			disableHover: false,
 			
 			//DataTable配置项
 			"columns": columns,
@@ -6711,7 +6715,8 @@
 			chart.elementStyle(chartTitle, options.titleStyle);
 		
 		var chartContent = $("<div class='dg-chart-table-content' />").css("top", chartTitle.outerHeight(true)).appendTo(chartEle);
-		var table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartContent);
+		var table = $("<table width='100%' class='"+(options.disableStripe ? "" : " stripe ")+(options.disableHover ? "" : " hover ")+"'></table>")
+						.appendTo(chartContent);
 		var tableId = chart.id+"-table";
 		table.attr("id", tableId);
 		
