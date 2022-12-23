@@ -29,6 +29,11 @@
 				<p-datatable :value="pm.previewResultDatas" :scrollable="true" scroll-height="flex"
 					:resizable-columns="true" column-resize-mode="expand"
 					striped-rows class="table-sm" v-if="!pm.previewError">
+					<p-column field="number" header="<@spring.message code='serialNumber' />" :frozen="true" class="col-row-number-sm">
+						<template #body="slotProps">
+							{{slotProps.index + 1}}
+						</template>
+					</p-column>
 					<p-column v-for="col in pm.previewColumns"
 						:field="col.name" :header="col.label" :sortable="false" :style="col.style"
 						:key="col.name">

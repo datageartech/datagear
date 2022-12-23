@@ -358,6 +358,12 @@ label.align-tip{
 .p-datatable-table .col-row-number{
 	min-width: 5em;
 	max-width: 7em;
+	overflow: hidden;
+}
+.p-datatable-table .col-row-number-sm{
+	min-width: 5em;
+	max-width: 5em;
+	overflow: hidden;
 }
 .p-datatable-table .col-edit-btn{
 	min-width: 6rem;
