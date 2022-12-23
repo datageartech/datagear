@@ -95,6 +95,11 @@ label[title]:not(.no-tip)::after,
 	border-width: 1px;
 	border-style: solid;
 }
+label.align-tip{
+	/*添加这个样式可以使上面的提示图标居中显示*/
+	display: flex;
+    align-items: center;
+}
 .state-active{
 	color: var(--primary-color);
 	box-shadow: inset 0 0 2px 2px var(--primary-color);

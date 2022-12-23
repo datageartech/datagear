@@ -112,22 +112,30 @@ page_boolean_options.ftl
 	</label>
 	<div class="field-input col-12">
 		<div class="p-component p-inputtext">
-			<div class="flex flex-row pb-2" v-if="!pm.isReadonlyAction">
-				<div class="h-opts flex-grow-1">
-					<p-button type="button" label="<@spring.message code='add' />"
-						@click="onAddProperty" class="p-button-secondary p-button-sm">
-					</p-button>
-					<p-button type="button" label="<@spring.message code='moveUp' />"
-						@click="onMoveUpProperty" class="p-button-secondary p-button-sm">
-					</p-button>
-					<p-button type="button" label="<@spring.message code='moveDown' />"
-						@click="onMoveDownProperty" class="p-button-secondary p-button-sm">
-					</p-button>
-					<p-button type="button" label="<@spring.message code='delete' />"
-						@click="onDeleteProperty" class="p-button-danger p-button-sm">
-					</p-button>
+			<div class="flex justify-content-between flex-row pb-2" v-if="!pm.isReadonlyAction">
+				<div class="flex">
+					<div class="h-opts">
+						<p-button type="button" label="<@spring.message code='add' />"
+							@click="onAddProperty" class="p-button-secondary p-button-sm">
+						</p-button>
+						<p-button type="button" label="<@spring.message code='moveUp' />"
+							@click="onMoveUpProperty" class="p-button-secondary p-button-sm">
+						</p-button>
+						<p-button type="button" label="<@spring.message code='moveDown' />"
+							@click="onMoveDownProperty" class="p-button-secondary p-button-sm">
+						</p-button>
+						<p-button type="button" label="<@spring.message code='delete' />"
+							@click="onDeleteProperty" class="p-button-danger p-button-sm">
+						</p-button>
+					</div>
+					<div class="flex align-items-center ml-5">
+						<p-checkbox id="${pid}propertyAutoGen" v-model="pm.autoGenerateProperty" :binary="true"></p-checkbox>
+						<label for="${pid}propertyAutoGen" class="ml-1 align-tip" title="<@spring.message code='dataSet.properties.autoGenerate.desc' />">
+							<@spring.message code='autoGenerate' />
+						</label>
+					</div>
 				</div>
-				<div class="flex-grow-1 flex justify-content-end">
+				<div>
 					<p-button type="button" label="<@spring.message code='dataFormat' />"
 						@click="toggleDataSourceFormatPanel" aria:haspopup="true" aria-controls="${pid}dataSourceFormatPanel"
 						class="p-button-secondary p-button-sm">
@@ -272,7 +280,8 @@ page_boolean_options.ftl
 			{name: "<@spring.message code='dataSetProperty.DataType.TIMESTAMP' />", value: "${PropertyDataType.TIMESTAMP}"},
 			{name: "<@spring.message code='dataSetProperty.DataType.BOOLEAN' />", value: "${PropertyDataType.BOOLEAN}"},
 			{name: "<@spring.message code='dataSetProperty.DataType.UNKNOWN' />", value: "${PropertyDataType.UNKNOWN}"}
-		]
+		],
+		autoGenerateProperty: true
 	});
 	
 	po.vueRef("${pid}dataSourceFormatPanelEle", null);
