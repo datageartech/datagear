@@ -617,7 +617,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			
 			// <body></body>内的<script dg-dashboard-code></script>内写入看板脚本
 			// 必须限定在<body></body>内，因为页面端看板初始化需要<body>标签上的属性信息
-			if(!this.dashboardScriptWritten && this.isInBodyTag() && equalsIgnoreCase(tagName, "script"))
+			if(!this.dashboardScriptWritten && this.isInBodyTag() && equalsIgnoreCase(tagName, TAG_NAME_SCRIPT))
 			{
 				// 此处不需要再次校验和writeDashboardImportWithSet()，因为上面已确保写入
 				//if (!this.dashboardImportWritten)
