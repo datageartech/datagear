@@ -7238,8 +7238,13 @@
 		
 		while(true)
 		{
+			var scrollTableHeight = scrollTable.height();
+			
+			//表格高度至少为容器高度两倍，保证滚动平滑
+			if(scrollTableHeight >= scrollBodyHeight*2)
+				break;
+			
 			//必须成倍添加数据，避免出现轮播次序混乱
-			//且至少添加一倍，保证滚动平滑
 			for(var i=0; i<rowCount; i++)
 			{
 				var addData = dataTable.row(i).data();
@@ -7247,12 +7252,6 @@
 			}
 			
 			dataTable.draw();
-			
-			var scrollTableHeight = scrollTable.height();
-			
-			//表格高度至少为容器高度两倍，保证滚动平滑
-			if(scrollTableHeight >= scrollBodyHeight*2)
-				break;
 		}
 	};
 	
@@ -7368,19 +7367,28 @@
 				idx += 2;
 			}
 			
+			var needDraw = false;
+			
 			if(removeRowIndexes.length > 0)
 			{
-				dataTable.rows(removeRowIndexes).remove().draw();
+				dataTable.rows(removeRowIndexes).remove();
 				scrollTop = scrollTop - offset;
+				needDraw = true;
 			}
+			
+			if(addRowDatas.length > 0)
+			{
+				dataTable.rows.add(addRowDatas);
+				needDraw = true;
+			}
+			
+			if(needDraw)
+				dataTable.draw();
 			
 			var span = ($.isFunction(renderOptions.carousel.span) ?
 					renderOptions.carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : renderOptions.carousel.span);
 			
 			scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
-			
-			if(addRowDatas.length > 0)
-				dataTable.rows.add(addRowDatas).draw();
 		}
 		
 		var interval = null;
