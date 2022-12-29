@@ -673,7 +673,7 @@
 		if(this._status == dashboardStatusConst.RENDERING
 				|| this._status == dashboardStatusConst.RENDERED)
 		{
-			throw new Error("dashboard is illegal state for render");
+			throw new Error("dashboard is illegal state for render()");
 		}
 		
 		if(!this.id)
@@ -893,7 +893,7 @@
 	dashboardBase.doRender = function()
 	{
 		if(this._status != dashboardStatusConst.RENDERING)
-			throw new Error("dashboard is illegal state for doRender");
+			throw new Error("dashboard is illegal state for doRender()");
 		
 		this._status = dashboardStatusConst.RENDERED;
 		
@@ -1099,10 +1099,10 @@
 	 * 删除图表。
 	 * 
 	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
-	 * @param doDestory 选填参数，是否销毁图表，默认为true
+	 * @param doDestroy 选填参数，是否销毁图表，默认为true
 	 * @return 移除的图表对象，或者图表未找到时为undefined
 	 */
-	dashboardBase.removeChart = function(chartInfo, doDestory)
+	dashboardBase.removeChart = function(chartInfo, doDestroy)
 	{
 		var newCharts = [].concat(this.charts);
 		var index = this._chartIndex(newCharts, chartInfo);
@@ -1113,7 +1113,7 @@
 		var removeds = newCharts.splice(index, 1);
 		this.charts = newCharts;
 		
-		if(doDestory != false)
+		if(doDestroy != false)
 			this._destroyChart(removeds[0]);
 		
 		return removeds[0];

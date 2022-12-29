@@ -151,6 +151,9 @@
 	/**图表状态：完成update*/
 	chartStatusConst.UPDATED = "UPDATED";
 	
+	/**图表状态：正在销毁*/
+	chartStatusConst.DESTROYING = "DESTROYING";
+
 	/**图表状态：已销毁*/
 	chartStatusConst.DESTROYED = "DESTROYED";
 
@@ -336,7 +339,7 @@
 			throw new Error("[chart.plugin] required");
 		
 		if(this.statusRendering() || this.isActive())
-			throw new Error("Chart is illegal state for init");
+			throw new Error("chart is illegal state for init()");
 		
 		this._clearExtValue();
 		
@@ -937,13 +940,13 @@
 	 */
 	chartBase.render = function()
 	{
+		if(!this.statusPreRender() && !this.statusDestroyed())
+			throw new Error("chart is illegal state for render()");
+		
 		var $element = this.elementJquery();
 		
-		if(!this.statusPreRender() && !this.statusDestroyed())
-			throw new Error("Chart is illegal state for render");
-		
 		if(chartFactory.renderedChart($element) != null)
-			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
+			throw new Error("chart element '#"+this.elementId+"' has been rendered");
 		
 		this._isRender = true;
 		
@@ -1058,6 +1061,9 @@
 	 */
 	chartBase.doRender = function()
 	{
+		if(!this.statusRendering())
+			throw new Error("chart is illegal state for doRender()");
+		
 		var async = this.isAsyncRender();
 		
 		var renderer = this.renderer();
@@ -1088,7 +1094,7 @@
 	chartBase.update = function(results)
 	{
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
-			throw new Error("Chart is illegal state for update");
+			throw new Error("chart is illegal state for update()");
 		
 		if(arguments.length == 0)
 			results = this.updateResults();
@@ -1112,6 +1118,9 @@
 	 */
 	chartBase.doUpdate = function(results)
 	{
+		if(!this.statusUpdating())
+			throw new Error("chart is illegal state for doUpdate()");
+		
 		//先保存结果，确保updateResults()在渲染器的update函数作用域内可用
 		this.updateResults(results);
 		
@@ -1181,8 +1190,10 @@
 	 */
 	chartBase.destroy = function()
 	{
-		if(this.statusDestroyed())
+		if(!this.isRender() || this.statusDestroying() || this.statusDestroyed())
 			return;
+		
+		this.statusDestroying(true);
 		
 		var doDestroy = true;
 		
@@ -1201,9 +1212,10 @@
 	 */
 	chartBase.doDestroy = function()
 	{
-		var $element = this.elementJquery();
+		if(!this.statusDestroying())
+			throw new Error("chart is illegal state for doDestroy()");
 		
-		this.statusDestroyed(true);
+		var $element = this.elementJquery();
 		
 		$element.removeClass(this.themeStyleName());
 		$element.removeClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
@@ -1242,6 +1254,8 @@
 		
 		//最后清空扩展属性值，因为上面逻辑可能会使用到
 		this._clearExtValue();
+		
+		this.statusDestroyed(true);
 	};
 	
 	/**
@@ -1330,7 +1344,7 @@
 		if(this.isActive())
 			return;
 		
-		throw new Error("Chart is not active");
+		throw new Error("chart is not active");
 	};
 	
 	/**
@@ -1465,6 +1479,19 @@
 		var listener = this.listener();
 		if(listener && listener.update)
 		  listener.update(this, this.updateResults());
+	};
+	
+	/**
+	 * 图表是否为/设置为：正在销毁。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 */
+	chartBase.statusDestroying = function(set)
+	{
+		if(set === true)
+			this.status(chartStatusConst.DESTROYING);
+		else
+			return (this.status() == chartStatusConst.DESTROYING);
 	};
 	
 	/**
@@ -1613,7 +1640,7 @@
 			this.plugin.renderer.on(this, eventType, handler);
 		}
 		else
-			throw new Error("Chart ["+this.id+"] 's [renderer.on] undefined");
+			throw new Error("chart ["+this.id+"] 's [renderer.on] undefined");
 	};
 	
 	/**
@@ -1646,7 +1673,7 @@
 			this.echartsOffEventHandler(eventType, handler);
 		}
 		else
-			throw new Error("Chart ["+this.id+"] 's [renderer.off] undefined");
+			throw new Error("chart ["+this.id+"] 's [renderer.off] undefined");
 	};
 	
 	/**
@@ -1688,7 +1715,7 @@
 		var re = (chartFactory.isNumber(chartDataSet) ? this.chartDataSetAt(chartDataSet) : chartDataSet);
 		
 		if(!nullable && re == null)
-			throw new Error("ChartDataSet not found for : " + chartDataSet);
+			throw new Error("chartDataSet not found for : " + chartDataSet);
 		
 		return re;
 	};
