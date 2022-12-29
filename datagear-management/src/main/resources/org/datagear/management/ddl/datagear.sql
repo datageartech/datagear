@@ -482,3 +482,9 @@ ALTER TABLE DATAGEAR_HTML_CHART_WIDGET ADD COLUMN HCW_OPTIONS VARCHAR(5000);
 --version[4.3.1], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+
+
+-----------------------------------------
+--version[4.4.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
