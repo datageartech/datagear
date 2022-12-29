@@ -594,21 +594,28 @@
 	
 	/**
 	 * 从服务端获取并刷新图表数据。
+	 * 
+	 * 注意：在图表监听器的回调函数中同步调用自身图表的chart.refreshData()将被忽略，这样可以避免死循环、过频繁刷新数据。
 	 */
 	chartBase.refreshData = function()
 	{
 		this._assertActive();
 		
 		if(!this.isDataSetParamValueReady())
+		{
 			chartFactory.logException("Chart '"+this.elementId+"' has required but unset dataset param value");
-		
-		//不能使用如下方式实现，当在A图表监听器的update函数中调用参数化B图表的refreshData()时，
-		//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
-		//而导致refreshData()失效
-		//this._updateAjaxErrorTime(null);
-		//this.statusPreUpdate(true);
-		
-		this._inRequestRefreshData(true);
+			return;
+		}
+		else
+		{
+			//不能使用如下方式实现，当在A图表监听器的update函数中调用参数化B图表的refreshData()时，
+			//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
+			//而导致refreshData()失效
+			//this._updateAjaxErrorTime(null);
+			//this.statusPreUpdate(true);
+			
+			this._inRequestRefreshData(true);
+		}
 	};
 	
 	chartBase._updateTime = function(time)
