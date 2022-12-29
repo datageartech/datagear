@@ -179,7 +179,7 @@
 	dashboardFactory.LOCAL_UPDATE_IF_EMPTY_DATA_SET = true;
 	
 	/**
-	 * 初始看板JSON对象，为其添加看板API，为看版内的图表JSON对象添加图表API。
+	 * 初始化看板JSON对象，为其添加看板API，为看版内的图表JSON对象添加图表API。
 	 * 
 	 * @param dashboard 看板JSON对象，格式应为：
 	 *				{
@@ -2412,7 +2412,7 @@
 	 */
 	dashboardBase.init = function()
 	{
-		chartFactory.logWarn("dashboard.init() is deprecated, it is empty now, only for compatible");
+		chartFactory.logWarn("dashboard.init() is deprecated, it is empty now, only for API compatibility");
 	};
 	// > @deprecated 兼容4.3.1版本的API，将在未来版本移除，此函数的逻辑已合并至dashboardBase.render()函数内
 	

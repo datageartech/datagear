@@ -260,9 +260,9 @@
 	};
 	
 	/**
-	 * 初始化原始图表对象，为其添加图表API，但不调用chart.init()函数。
+	 * 初始化图表JSON对象，为其添加图表API，但不调用chart.init()函数。
 	 * 
-	 * @param chart 基本图表对象，格式应为：
+	 * @param chart 图表JSON对象，格式应为：
 	 *				{
 	 *				  //唯一ID
 	 *				  id: "...",
@@ -283,6 +283,7 @@
 	 *				  //图表属性
 	 *				  attrValues: {...}
 	 *				}
+	 *				
 	 *				另参考：org.datagear.analysis.support.html.HtmlChart
 	 */
 	chartFactory.init = function(chart)
@@ -943,7 +944,9 @@
 		
 		if(chartFactory.renderedChart($element) != null)
 			throw new Error("Chart element '#"+this.elementId+"' has been rendered");
-			
+		
+		this._isRender = true;
+		
 		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
 		
 		this._createChartThemeCssIfNon();
@@ -1475,6 +1478,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
+			this._isRender = false;
 			this.status(chartStatusConst.DESTROYED);
 			
 			if(postProcess != false)
@@ -3817,6 +3821,16 @@
 		}
 		
 		return options;
+	};
+	
+	/**
+	 * 图表是否处于渲染状态（已执行渲染且未被销毁）。
+	 * 
+	 * @since 4.4.0
+	 */
+	chartBase.isRender = function()
+	{
+		return (this._isRender == true);
 	};
 	
 	//-------------
