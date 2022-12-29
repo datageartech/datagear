@@ -2,9 +2,9 @@
 	
 	图表JS对象新增isRender()函数，用于判断图表是否已渲染；
 	图表元素新增dg-chart-auto-render属性，用于控制是否自动渲染图表；
-	合并dashboard.init()至dashboard.render()，简化概念和逻辑；
-	合并chart.init()至chart.render()，简化概念和逻辑；
+	废弃chart.init()函数，将相关逻辑移至chart.render()函数中，简化相关概念逻辑；
 	ECharts版本升级至5.4.1；
+	ok 废弃dashboard.init()函数，将相关逻辑移至dashboard.render()函数中，简化相关概念逻辑；
 	
 待定：
 	
