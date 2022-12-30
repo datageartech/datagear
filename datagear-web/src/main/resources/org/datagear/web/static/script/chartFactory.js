@@ -263,6 +263,21 @@
 	};
 	
 	/**
+	 * 判断chartFactory.initRenderContext()函数是否已执行。
+	 */
+	chartFactory.isRenderContextInited = function(renderContext)
+	{
+		if(!renderContext)
+			return false;
+		
+		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
+		var chartTheme = chartFactory.renderContextAttrChartTheme(renderContext);
+		var chartThemeRaw = (chartTheme ? chartTheme._GLOBAL_RAW_CHART_THEME : null);
+		
+		return (webContext && chartTheme && chartThemeRaw);
+	};
+	
+	/**
 	 * 初始化图表JSON对象，为其添加图表API，并设置chart.statusPreRender(true)状态，但不调用chart.render()函数。
 	 * 
 	 * @param chart 图表JSON对象，格式应为：
@@ -356,17 +371,17 @@
 	 * 渲染图表。
 	 * 此函数在图表生命周期内仅允许调用一次。 
 	 * 
-	 * 图表生命周期：
-	 * chart.render() 渲染 -->-- chart.update() 更新 -->-- chart.destroy() 销毁 -->--|
-	 *       |                        |              |                             |
-	 *       |                        |------<-------|                             |
-	 *       |-------------------------------<-------------------------------------| 
-	 * 
 	 * 注意：渲染图表前应确保已调用chartFactory.initRenderContext()。
 	 * 注意：只有this.statusPreRender()或者statusDestroyed()为true，此方法才会执行。
 	 * 注意：
 	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
 	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
+	 * 
+	 * 图表生命周期：
+	 * chart.render() 渲染 -->-- chart.update() 更新 -->-- chart.destroy() 销毁 -->--|
+	 *       |                        |              |                             |
+	 *       |                        |------<-------|                             |
+	 *       |-------------------------------<-------------------------------------|
 	 */
 	chartBase.render = function()
 	{
@@ -383,6 +398,9 @@
 			throw new Error("[chart.plugin] required");
 		if(!this.plugin.renderer)
 			throw new Error("[chart.plugin.renderer] required");
+		
+		if(!chartFactory.isRenderContextInited(this.renderContext))
+			throw new Error("chart is illegal state for render()");
 		
 		var $element = this.elementJquery();
 		
@@ -480,9 +498,6 @@
 	{
 		var globalTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
 		var globalRawTheme = (globalTheme ? globalTheme._GLOBAL_RAW_CHART_THEME : null);
-		
-		if(!globalTheme || !globalRawTheme)
-			throw new Error("[chartFactory.initRenderContext()] must be called first");
 		
 		var eleThemeValue = this.elementJquery().attr(elementAttrConst.THEME);
 		
@@ -768,11 +783,11 @@
 		{
 			if(inflate !== false)
 			{
+				if(!chartFactory.isRenderContextInited(this.renderContext))
+					throw new Error("chart is illegal state for theme(t)");
+				
 				var globalTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
 				var globalRawTheme = (globalTheme ? globalTheme._GLOBAL_RAW_CHART_THEME : null);
-				
-				if(!globalTheme || !globalRawTheme)
-					throw new Error("[chartFactory.initRenderContext()] must be called first");
 				
 				if(theme !== globalTheme)
 				{

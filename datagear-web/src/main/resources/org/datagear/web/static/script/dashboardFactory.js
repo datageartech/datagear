@@ -312,7 +312,7 @@
 	
 	dashboardFactory._initChartOverwriteIfNone = function(chart)
 	{
-		//确保只会执行一次
+		//重写chart._initForPost()函数，这里确保只会执行一次
 		if(chart._initForPostSuperByDbd == null)
 		{
 			chart._initForPostSuperByDbd = chart._initForPost;
@@ -347,7 +347,7 @@
 			};
 		}
 		
-		//确保只会执行一次
+		//重写chart._postProcessRendered()函数，这里确保只会执行一次
 		if(chart._postProcessRenderedSuperByDbd == null)
 		{
 			chart._postProcessRenderedSuperByDbd = chart._postProcessRendered;
