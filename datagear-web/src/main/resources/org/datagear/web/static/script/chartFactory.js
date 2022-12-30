@@ -324,8 +324,15 @@
 	 * 初始化图表。
 	 * 此函数在图表生命周期内仅允许调用一次。 
 	 * 
+	 * 图表生命周期：
+	 * chart.init() 初始化 -->-- chart.render() 渲染 -->-- chart.update() 更新 -->-- chart.destroy() 销毁 -->--|
+	 *       |                        |                        |              |                             |
+	 *       |                        |                        |------<-------|                             |
+	 *       |                        |-----------------------------<---------------------------------------| 
+	 *       |-----------------------------------------<----------------------------------------------------| 
+	 * 
 	 * 注意：初始化图表前应确保已调用chartFactory.initRenderContext()。
-	 * 注意：此函数内不应执行渲染相关逻辑，而应仅执行初始化图表属性的相关逻辑，且允许在chart.destroy()再次执行。
+	 * 注意：此函数内不应执行渲染相关逻辑，而应仅执行初始化图表属性的相关逻辑。
 	 */
 	chartBase.init = function()
 	{
@@ -338,7 +345,7 @@
 		if(!this.plugin)
 			throw new Error("[chart.plugin] required");
 		
-		if(this.statusRendering() || this.isActive())
+		if(this.isRender())
 			throw new Error("chart is illegal state for init()");
 		
 		this._clearExtValue();
