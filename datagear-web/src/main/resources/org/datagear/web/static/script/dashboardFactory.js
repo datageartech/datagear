@@ -124,6 +124,9 @@
 	// dashboardStatusConst开始
 	//----------------------------------------
 	
+	/**看板状态：准备render*/
+	dashboardStatusConst.PRE_RENDER = "PRE_RENDER";
+	
 	/**看板状态：正在render*/
 	dashboardStatusConst.RENDERING = "RENDERING";
 	
@@ -199,6 +202,8 @@
 		this._refactorDashboard(dashboard);
 		$.extend(dashboard, this.dashboardBase);
 		this._initCharts(dashboard);
+		
+		dashboard._status = dashboardStatusConst.PRE_RENDER;
 	};
 	
 	dashboardFactory._refactorDashboard = function(dashboard)
@@ -695,8 +700,8 @@
 	 */
 	dashboardBase.render = function()
 	{
-		if(this._status == dashboardStatusConst.RENDERING
-				|| this._status == dashboardStatusConst.RENDERED)
+		if(this._status != dashboardStatusConst.PRE_RENDER
+				&& this._status != dashboardStatusConst.DESTROYED)
 		{
 			throw new Error("dashboard is illegal state for render()");
 		}
@@ -1768,7 +1773,8 @@
 	 */
 	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
-		this._assertRendered();
+		//异步加载无需看板已渲染
+		//this._assertRendered();
 		
 		element = $(element);
 		
@@ -1848,7 +1854,8 @@
 	 */
 	dashboardBase.loadCharts = function(element, chartWidgetId, ajaxOptions)
 	{
-		this._assertRendered();
+		//异步加载无需看板已渲染
+		//this._assertRendered();
 		
 		element = $(element);
 		
@@ -1951,7 +1958,8 @@
 	 */
 	dashboardBase.loadUnsolvedCharts = function(element, ajaxOptions)
 	{
-		this._assertRendered();
+		//异步加载无需看板已渲染
+		//this._assertRendered();
 		
 		//(ajaxOptions)
 		if(arguments.length == 1 && !chartFactory.isDomOrJquery(element))
@@ -2351,6 +2359,16 @@
 		}
 		
 		return (isArray ? odIdxAryClone : odIdxAryClone[0]);
+	};
+	
+	/**
+	 * 获取图表展示数据的原始数据索引，应是已由chartBase.originalDataIndex()、chartBase.originalDataIndexes()函数设置过。
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.isRender = function()
+	{
+		return (this._status == dashboardStatusConst.RENDERING || this._status == dashboardStatusConst.RENDERED);
 	};
 	
 	//-------------
