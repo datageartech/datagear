@@ -239,26 +239,20 @@
 	
 	/**
 	 * 初始化渲染上下文。
-	 * 将webContext直接存入渲染上下文；复制chartTheme，填充相关属性后存入渲染上下文。
-	 * 之后，可以通过:
-	 * chartFactory.renderContextAttrWebContext(renderContext)
-	 * chartFactory.renderContextAttrChartTheme(renderContext)
-	 * 获取它们。
 	 * 
-	 * 注意：此方法应在渲染任意图表前（chart.render()函数调用前）且body已加载后调用。
+	 * 注意：此方法应在渲染任意图表前（chart.render()函数调用前）且<body>后调用。
 	 * 
 	 * @param renderContext
-	 * @param webContext Web上下文
-	 * @param chartTheme 可选，初始图表主题
 	 */
-	chartFactory.initRenderContext = function(renderContext, webContext, chartTheme)
+	chartFactory.initRenderContext = function(renderContext)
 	{
+		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
+		var chartTheme = chartFactory.renderContextAttrChartTheme(renderContext);
+		
 		if(!webContext)
 			throw new Error("[webContext] required");
 		
 		chartTheme = chartFactory._initGlobalChartTheme(chartTheme);
-		
-		chartFactory.renderContextAttrWebContext(renderContext, webContext);
 		chartFactory.renderContextAttrChartTheme(renderContext, chartTheme);
 	};
 	
@@ -350,6 +344,7 @@
 		chart._attrValuesOrigin = $.extend(true, {}, chart._attrValues);
 		//chart.resultDataFormat属性与后面的chart.resultDataFormat()冲突，因此这里重构一下
 		chart._resultDataFormat = chart.resultDataFormat;
+		
 		delete chart.attrValues;
 		delete chart.resultDataFormat;
 		
@@ -378,12 +373,15 @@
 	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
 	 * 
 	 * 图表生命周期：
-	 * chart.render() 渲染 -->-- chart.update() 更新 -->-- chart.destroy() 销毁 -->--|
-	 *       |                        |              |                             |
-	 *       |                        |------<-------|                             |
-	 *       |-------------------------------<-------------------------------------|
+	 * chart.render() -->-- chart.update() -->-- chart.destroy() -->--|
+	 *       |                    |              |                    |
+	 *       |                    |------<-------|                    |
+	 *       |---------------------------<----------------------------|
+	 * 
+	 * @param initPostHandler 可选，图表元素上的dg-*属性初始化后置处理函数，格式为：
+	 *                          function(chart){ ... }
 	 */
-	chartBase.render = function()
+	chartBase.render = function(initPostHandler)
 	{
 		if(!this.statusPreRender() && !this.statusDestroyed())
 			throw new Error("chart is illegal state for render()");
@@ -410,6 +408,7 @@
 		this._isRender = true;
 		
 		this._clearExtValue();
+		
 		this._initForPre();
 		this._initOptions();
 		this._initTheme();
@@ -421,6 +420,11 @@
 		this._initRenderer();
 		this._initAttrValues();
 		this._initForPost();
+		
+		if(initPostHandler && $.isFunction(initPostHandler))
+		{
+			initPostHandler(this);
+		}
 		
 		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
 		this._createChartThemeCssIfNon();
@@ -750,7 +754,7 @@
 	 * 获取/设置图表选项，这些选项通常用于控制图表展示、交互效果，格式为：{ ... }。
 	 * 
 	 * 图表初始化时会使用图表元素的"dg-chart-options"属性值执行设置操作。
-	 *
+	 * 
 	 * 图表渲染器实现相关：
 	 * 图表渲染器应使用此函数获取并应用图表选项，另参考chart.inflateRenderOptions()、chart.inflateUpdateOptions()。
 	 * 

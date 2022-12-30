@@ -693,10 +693,9 @@
 	 * 注意：DOM访问相关的逻辑都应该在此函数内/后执行，确保看板内元素属性引用的JS变量只要在此函数调用前定义即可。
 	 * 
 	 * 看板生命周期：
-	 * dashboard.render()   渲染 <-|
-	 * dashboard.destroy()  销毁  -|
-	 * 
-	 * 在destroy()后可重新调用render()。
+	 * dashboard.render() -->-- dashboard.destroy() -->--|
+	 *       |                                           |
+	 *       |--------------------<----------------------|
 	 */
 	dashboardBase.render = function()
 	{
@@ -716,8 +715,8 @@
 		this._initRenderContext();
 		this._initListener();
 		this._initMapURLs();
-		this._initCharts();
 		this._initChartResizeHandler();
+		this._initCharts();
 		
 		var doRender = true;
 		
@@ -737,10 +736,14 @@
 	dashboardBase._initRenderContext = function()
 	{
 		var dashboardTheme = this.renderContextAttr(renderContextAttrConst.dashboardTheme);
-		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
-		var chartTheme = (dashboardTheme ? dashboardTheme.chartTheme : null);
+		var chartTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
+		if(!chartTheme)
+		{
+			chartTheme = (dashboardTheme ? dashboardTheme.chartTheme : null);
+			chartFactory.renderContextAttrChartTheme(this.renderContext, chartTheme);
+		}
 		
-		chartFactory.initRenderContext(this.renderContext, webContext, chartTheme);
+		chartFactory.initRenderContext(this.renderContext);
 		
 		// < @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
 		this.renderContextAttr("dashboardTheme", dashboardTheme);
