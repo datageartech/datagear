@@ -1457,7 +1457,7 @@
 			
 			var mouseenterHandler = function(event)
 			{
-				if(!chart.statusPreRender() && !chart.statusRendering())
+				if(chart.isActive())
 					chartSetting.showChartSettingBox(chart);
 			};
 			var mouseleaveHandler = function(event)

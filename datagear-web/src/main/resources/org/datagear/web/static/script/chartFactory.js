@@ -245,7 +245,7 @@
 	 * chartFactory.renderContextAttrChartTheme(renderContext)
 	 * 获取它们。
 	 * 
-	 * 注意：此方法应在初始化任意图表前（chartFactory.init()函数调用前）且body已加载后调用。
+	 * 注意：此方法应在渲染任意图表前（chart.render()函数调用前）且body已加载后调用。
 	 * 
 	 * @param renderContext
 	 * @param webContext Web上下文
@@ -263,7 +263,7 @@
 	};
 	
 	/**
-	 * 初始化图表JSON对象，为其添加图表API，但不调用chart.init()函数。
+	 * 初始化图表JSON对象，为其添加图表API，并设置chart.statusPreRender(true)状态，但不调用chart.render()函数。
 	 * 
 	 * @param chart 图表JSON对象，格式应为：
 	 *				{
@@ -291,94 +291,23 @@
 	 */
 	chartFactory.init = function(chart)
 	{
-		this._refactorChart(chart);
+		this._initChartBaseProperties(chart);
 		$.extend(chart, this.chartBase);
-	};
-	
-	chartFactory._refactorChart = function(chart)
-	{
-		chart._attrValues = (chart.attrValues || {});
 		
-		//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
-		chart._widget = chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
-		chart._optionsOrigin = chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
-		delete chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
-		delete chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
-		
-		//保留原始属性值集，看板可视编辑需要使用
-		//注意，初始化_attrValuesOrigin的逻辑不能在chartBase.init中执行，
-		//因为chartBase.init可以被多次调用，chart._attrValues可能已被修改
-		chart._attrValuesOrigin = $.extend(true, {}, chart._attrValues);
-		//chart.resultDataFormat属性与后面的chart.resultDataFormat()冲突，因此这里重构一下
-		chart._resultDataFormat = chart.resultDataFormat;
-		
-		delete chart.attrValues;
-		delete chart.resultDataFormat;
-	};
-	
-	//----------------------------------------
-	// chartBase start
-	//----------------------------------------
-	
-	/**
-	 * 初始化图表。
-	 * 此函数在图表生命周期内仅允许调用一次。 
-	 * 
-	 * 图表生命周期：
-	 * chart.init() 初始化 -->-- chart.render() 渲染 -->-- chart.update() 更新 -->-- chart.destroy() 销毁 -->--|
-	 *       |                        |                        |              |                             |
-	 *       |                        |                        |------<-------|                             |
-	 *       |                        |-----------------------------<---------------------------------------| 
-	 *       |-----------------------------------------<----------------------------------------------------| 
-	 * 
-	 * 注意：初始化图表前应确保已调用chartFactory.initRenderContext()。
-	 * 注意：此函数内不应执行渲染相关逻辑，而应仅执行初始化图表属性的相关逻辑。
-	 */
-	chartBase.init = function()
-	{
-		if(!this.id)
-			throw new Error("[chart.id] required");
-		if(!this.elementId)
-			throw new Error("[chart.elementId] required");
-		if(!this.renderContext)
-			throw new Error("[chart.renderContext] required");
-		if(!this.plugin)
-			throw new Error("[chart.plugin] required");
-		
-		if(this.isRender())
-			throw new Error("chart is illegal state for init()");
-		
-		this._clearExtValue();
-		
-		this._initForPre();
-		this._initBaseProperties();
-		this._initPlugin();
-		this._initOptions();
-		this._initTheme();
-		this._initListener();
-		this._initMap();
-		this._initEchartsThemeName();
-		this._initDisableSetting();
-		this._initEventHandlers();
-		this._initRenderer();
-		this._initAttrValues();
-		this._initForPost();
-		
-		//最后才设置为可渲染状态
-		this.statusPreRender(true);
+		chart.statusPreRender(true);
 	};
 	
 	/**
-	 * 初始化基础属性。
+	 * 初始化图表对象基础属性。
 	 */
-	chartBase._initBaseProperties = function()
+	chartFactory._initChartBaseProperties = function(chart)
 	{
-		this.name = (this.name || "");
-		this.chartDataSets = (this.chartDataSets || []);
-		this.updateInterval = (this.updateInterval == null ? -1 : this.updateInterval);
-		for(var i=0; i<this.chartDataSets.length; i++)
+		chart.name = (chart.name || "");
+		chart.chartDataSets = (chart.chartDataSets || []);
+		chart.updateInterval = (chart.updateInterval == null ? -1 : chart.updateInterval);
+		for(var i=0; i<chart.chartDataSets.length; i++)
 		{
-			var cds = this.chartDataSets[i];
+			var cds = chart.chartDataSets[i];
 			cds.propertySigns = (cds.propertySigns || {});
 			cds.alias = (cds.alias == null ?  "" : cds.alias);
 			cds.attachment = (cds.attachment == true ? true : false);
@@ -391,23 +320,115 @@
 			cds.paramValues = cds.query.paramValues;
 			// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
 		}
+		
+		chart._attrValues = (chart.attrValues || {});
+		
+		//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
+		chart._widget = chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
+		chart._optionsOrigin = chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
+		delete chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
+		delete chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
+		
+		//保留原始属性值集，看板可视编辑需要使用
+		//注意，初始化_attrValuesOrigin的逻辑不能在chartBase.render()中执行，
+		//因为chartBase.render()可以被多次调用，chart._attrValues可能已被修改
+		chart._attrValuesOrigin = $.extend(true, {}, chart._attrValues);
+		//chart.resultDataFormat属性与后面的chart.resultDataFormat()冲突，因此这里重构一下
+		chart._resultDataFormat = chart.resultDataFormat;
+		delete chart.attrValues;
+		delete chart.resultDataFormat;
+		
+		if(chartFactory.chartPluginManager && chartFactory.chartPluginManager.get)
+		{
+			var pluginId = (chart.plugin ? chart.plugin.id : null);
+			var plugin = (pluginId ? chartFactory.chartPluginManager.get(pluginId) : null);
+			
+			if(plugin)
+				chart.plugin = plugin;
+		}
 	};
 	
+	//----------------------------------------
+	// chartBase start
+	//----------------------------------------
+	
 	/**
-	 * 初始化图表插件。
+	 * 渲染图表。
+	 * 此函数在图表生命周期内仅允许调用一次。 
+	 * 
+	 * 图表生命周期：
+	 * chart.render() 渲染 -->-- chart.update() 更新 -->-- chart.destroy() 销毁 -->--|
+	 *       |                        |              |                             |
+	 *       |                        |------<-------|                             |
+	 *       |-------------------------------<-------------------------------------| 
+	 * 
+	 * 注意：渲染图表前应确保已调用chartFactory.initRenderContext()。
+	 * 注意：只有this.statusPreRender()或者statusDestroyed()为true，此方法才会执行。
+	 * 注意：
+	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
+	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
 	 */
-	chartBase._initPlugin = function()
+	chartBase.render = function()
 	{
-		if(!chartFactory.chartPluginManager || !chartFactory.chartPluginManager.get)
-			throw new Error("[chartFactory.chartPluginManager.get] required");
+		if(!this.statusPreRender() && !this.statusDestroyed())
+			throw new Error("chart is illegal state for render()");
 		
-		var pluginId = (this.plugin ? this.plugin.id : null);
-		var plugin = (pluginId ? chartFactory.chartPluginManager.get(pluginId) : null);
+		if(!this.id)
+			throw new Error("[chart.id] required");
+		if(!this.elementId)
+			throw new Error("[chart.elementId] required");
+		if(!this.renderContext)
+			throw new Error("[chart.renderContext] required");
+		if(!this.plugin)
+			throw new Error("[chart.plugin] required");
+		if(!this.plugin.renderer)
+			throw new Error("[chart.plugin.renderer] required");
 		
-		if(plugin == null)
-			throw new Error("chart plugin ["+pluginId+"] not found");
+		var $element = this.elementJquery();
 		
-		this.plugin = plugin;
+		if(chartFactory.renderedChart($element) != null)
+			throw new Error("chart element '#"+this.elementId+"' has been rendered as another chart");
+		
+		this._isRender = true;
+		
+		this._clearExtValue();
+		this._initForPre();
+		this._initOptions();
+		this._initTheme();
+		this._initListener();
+		this._initMap();
+		this._initEchartsThemeName();
+		this._initDisableSetting();
+		this._initEventHandlers();
+		this._initRenderer();
+		this._initAttrValues();
+		this._initForPost();
+		
+		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
+		this._createChartThemeCssIfNon();
+		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
+		if(chartFactory.isStaticPosition($element))
+			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
+		$element.addClass(this.themeStyleName());
+		
+		var options = this.options();
+		if(!options || options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
+			$element.addClass("dg-chart-beautify-scrollbar");
+		
+		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
+		
+		this.statusRendering(true);
+		
+		var doRender = true;
+		
+		var listener = this.listener();
+		if(listener && listener.onRender)
+		  doRender = listener.onRender(this);
+		
+		if(doRender != false)
+		{
+			this.doRender();
+		}
 	};
 	
 	/**
@@ -461,7 +482,7 @@
 		var globalRawTheme = (globalTheme ? globalTheme._GLOBAL_RAW_CHART_THEME : null);
 		
 		if(!globalTheme || !globalRawTheme)
-			throw new Error("chartFactory.initRenderContext() must be called first");
+			throw new Error("[chartFactory.initRenderContext()] must be called first");
 		
 		var eleThemeValue = this.elementJquery().attr(elementAttrConst.THEME);
 		
@@ -694,7 +715,7 @@
 		var attrValues = this.elementJquery().attr(elementAttrConst.ATTR_VALUES);
 		attrValues = (attrValues ? chartFactory.evalSilently(attrValues) : null);
 		//注意：应该使用this.attrValuesOrigin()作为合并基础，因为可能this.attrValues()执行修改操作，
-		//比如修改后chart.destroy()后再chart.init()
+		//比如修改后chart.destroy()后再chart.render()
 		attrValues = $.extend(true, {}, this.attrValuesOrigin(), attrValues);
 		
 		this.attrValues(attrValues);
@@ -751,7 +772,7 @@
 				var globalRawTheme = (globalTheme ? globalTheme._GLOBAL_RAW_CHART_THEME : null);
 				
 				if(!globalTheme || !globalRawTheme)
-					throw new Error("chartFactory.initRenderContext() must be called first");
+					throw new Error("[chartFactory.initRenderContext()] must be called first");
 				
 				if(theme !== globalTheme)
 				{
@@ -767,6 +788,19 @@
 			
 			this._theme = theme;
 		}
+	};
+	
+	/**
+	 * 获取非空图表主题。
+	 */
+	chartBase._themeNonNull = function()
+	{
+		var theme = this.theme();
+		
+		if(theme == null)
+			throw new Error("[chart.theme()] required");
+		
+		return theme;
 	};
 	
 	/**
@@ -935,61 +969,9 @@
 			this._resultDataFormat = resultDataFormat;
 	};
 	
-	/**
-	 * 渲染图表。
-	 * 此函数在图表生命周期内仅允许调用一次。 
-	 * 
-	 * 注意：只有this.statusPreRender()或者statusDestroyed()为true，此方法才会执行。
-	 * 
-	 * 注意：
-	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
-	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
-	 */
-	chartBase.render = function()
-	{
-		if(!this.statusPreRender() && !this.statusDestroyed())
-			throw new Error("chart is illegal state for render()");
-		
-		var $element = this.elementJquery();
-		
-		if(chartFactory.renderedChart($element) != null)
-			throw new Error("chart element '#"+this.elementId+"' has been rendered");
-		
-		this._isRender = true;
-		
-		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
-		
-		this._createChartThemeCssIfNon();
-		
-		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
-		if(chartFactory.isStaticPosition($element))
-			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
-		
-		$element.addClass(this.themeStyleName());
-		
-		var options = this.options();
-		if(options && options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
-			$element.addClass("dg-chart-beautify-scrollbar");
-		
-		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
-		
-		this.statusRendering(true);
-		
-		var doRender = true;
-		
-		var listener = this.listener();
-		if(listener && listener.onRender)
-		  doRender = listener.onRender(this);
-		
-		if(doRender != false)
-		{
-			this.doRender();
-		}
-	};
-	
 	chartBase._createChartThemeCssIfNon = function()
 	{
-		var theme = this.theme();
+		var theme = this._themeNonNull();
 		var thumbBgColor = this.gradualColor(0.2);
 		
 		this.themeStyleSheet(chartFactory.builtinPropName("Chart"), function()
@@ -1270,7 +1252,7 @@
 	 */
 	chartBase._destroyThemeStyleSheet = function()
 	{
-		var theme = this.theme();
+		var theme = this._themeNonNull();
 		
 		if(theme && theme._IS_LOCAL_CHART_THEME)
 			chartFactory.destroyThemeStyleSheet(theme);
@@ -1707,7 +1689,7 @@
 			{
 				var dsp = dataSet.params[j];
 				
-				if((dsp.required+"") == "true" && paramValues[dsp.name] == null)
+				if((dsp.required == true || dsp.required == "true") && paramValues[dsp.name] == null)
 					return false;
 			}
 		}
@@ -2871,7 +2853,7 @@
 			theme = factor;
 			factor = undefined;
 		}
-		theme = (theme == null ? this.theme() : theme);
+		theme = (theme == null ? this._themeNonNull() : theme);
 		
 		return chartFactory.gradualColor(theme, factor);
 	};
@@ -2915,7 +2897,7 @@
 	 */
 	chartBase.themeStyleName = function(theme)
 	{
-		theme = (theme == null ? this.theme() : theme);
+		theme = (theme == null ? this._themeNonNull() : theme);
 		return chartFactory.themeStyleName(theme);
 	};
 	
@@ -2971,7 +2953,7 @@
 		if(arguments.length == 1)
 		{
 			name = theme;
-			theme = this.theme();
+			theme = this._themeNonNull();
 		}
 		else if(arguments.length > 1)
 		{
@@ -2981,7 +2963,7 @@
 				force = css;
 				css = name;
 				name = theme;
-				theme = this.theme();
+				theme = this._themeNonNull();
 			}
 			//(theme, ...)
 			else
@@ -3360,7 +3342,7 @@
 		//从ChartTheme构建ECharts主题
 		if(!themeName)
 		{
-			var theme = this.theme();
+			var theme = this._themeNonNull();
 			themeName = theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME];
 			
 			if(!themeName)
@@ -3870,6 +3852,16 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容4.3.1版本的API，将在未来版本移除，此函数的逻辑已合并至chart.render()函数内
+	/**
+	 * 初始化图表。
+	 */
+	chartBase.init = function()
+	{
+		chartFactory.logWarn("[chart.init()] is deprecated, it is empty now, only for API compatibility");
+	};
+	// > @deprecated 兼容4.3.1版本的API，将在未来版本移除，此函数的逻辑已合并至chart.render()函数内
 	
 	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventNew()
 	/**

@@ -1643,7 +1643,7 @@
 			if(chart)
 			{
 				chart.destroy();
-				chart.init();
+				chart.render();
 			}
 		});
 	};
@@ -1824,7 +1824,7 @@
 			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue, true);
 		
 		chart.destroy();
-		chart.init();
+		chart.render();
 	};
 	
 	/**
@@ -1884,7 +1884,7 @@
 			if(chart)
 			{
 				chart.destroy();
-				chart.init();
+				chart.render();
 			}
 		});
 	};

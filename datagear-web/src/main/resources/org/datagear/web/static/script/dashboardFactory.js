@@ -187,23 +187,18 @@
 	 *				  id: "...",
 	 *				  //渲染上下文
 	 *				  renderContext: {...},
-	 *				  //可选，图表元信息，参考chartFactory.Chart函数的chartMeta参数说明
-	 *				  charts: [ 图表元信息, ... ]
+	 *				  //可选，图表JSON对象数组
+	 *				  charts: [ 图表JSON对象, ... ]
 	 *				}
 	 *				
 	 *				另参考：org.datagear.analysis.Dashboard
 	 */
 	dashboardFactory.init = function(dashboard)
 	{
-		dashboardFactory._initStartHeartBeatIfNot(dashboard.renderContext);
-		dashboardFactory._refactorDashboard(dashboard);
+		this._initStartHeartBeatIfNot(dashboard.renderContext);
+		this._refactorDashboard(dashboard);
 		$.extend(dashboard, this.dashboardBase);
-		
-		dashboard.charts = (dashboard.charts || []);
-		
-		var charts = dashboard.charts;
-		for(var i=0; i<charts.length; i++)
-			chartFactory.init(charts[i]);
+		this._initCharts(dashboard);
 	};
 	
 	dashboardFactory._refactorDashboard = function(dashboard)
@@ -291,42 +286,72 @@
 		interval);
 	};
 	
-	/**
-	 * 获取对象的指定属性路径的值。
-	 * 
-	 * @param obj
-	 * @param propertyPath 属性路径，示例：order、order.product、[0].name、order['product'].name
-	 * @return 属性路径值，属性路径不存在则返回undefined
-	 */
-	dashboardFactory.getPropertyPathValue = function(obj, propertyPath)
+	dashboardFactory._initCharts = function(dashboard)
 	{
-		if(obj == null)
-			return undefined;
+		dashboard.charts = (dashboard.charts || []);
 		
-		var value = undefined;
+		var charts = dashboard.charts;
 		
-		//简单属性值
-		value = obj[propertyPath];
+		for(var i=0; i<charts.length; i++)
+			this._initChart(dashboard, charts[i]);
+	};
+	
+	dashboardFactory._initChart = function(dashboard, chart)
+	{
+		chartFactory.init(chart);
+		chart.dashboard = dashboard;
+		chart.renderContext = dashboard.renderContext;
 		
-		if(value !== undefined)
-			return value;
-		
-		//构建eval表达式
-		if(propertyPath.charAt(0) == '[')
-			propertyPath = "obj" + propertyPath;
-		else
-			propertyPath = "obj." + propertyPath;
-		
-		try
+		this._initChartOverwriteIfNone(chart);
+	};
+	
+	dashboardFactory._initChartOverwriteIfNone = function(chart)
+	{
+		//确保只会执行一次
+		if(chart._initForPostSuperByDbd == null)
 		{
-			value = eval(propertyPath);
-		}
-		catch(e)
-		{
-			value = undefined;
+			chart._initForPostSuperByDbd = chart._initForPost;
+			chart._initForPost = function()
+			{
+				this._initLinks();
+				this._initAutoResize();
+				this._initUpdateGroup();
+				this._initForPostSuperByDbd();
+				
+				var chartListener = this.listener();
+				
+				//图表监听器不继承看板监听器功能，所以只有图表没有定义监听器时，才使用代理看板监听器
+				if(!chartListener)
+				{
+					this.listener(this.dashboard._getDelegateChartListener());
+				}
+				else
+				{
+					//由元素图表监听器属性生成的内部代理图表监听器，应为其添加updateError处理函数
+					if(chartListener._proxyChartListenerFromEleAttr)
+					{
+						chartListener.updateError = function(chart, error)
+						{
+							var dl = this._findListenerOfFunc("updateError");
+							
+							if(dl)
+								return dl.updateError(chart, error);
+						};
+					}
+				}
+			};
 		}
 		
-		return value;
+		//确保只会执行一次
+		if(chart._postProcessRenderedSuperByDbd == null)
+		{
+			chart._postProcessRenderedSuperByDbd = chart._postProcessRendered;
+			chart._postProcessRendered = function()
+			{
+				this.bindLinksEventHanders(this.links());
+				this._postProcessRenderedSuperByDbd();
+			};
+		}
 	};
 	
 	//----------------------------------------
@@ -603,7 +628,7 @@
 		
 		if(!this.isDataSetParamValueReady())
 		{
-			chartFactory.logException("Chart '"+this.elementId+"' has required but unset dataset param value");
+			chartFactory.logException("chart '#"+this.elementId+"' has required but unset dataset param value");
 			return;
 		}
 		else
@@ -773,82 +798,9 @@
 	dashboardBase._initCharts = function()
 	{
 		for(var i=0; i<this.charts.length; i++)
-			this._initChart(this.charts[i]);
-	};
-	
-	/**
-	 * 初始化看板的单个图表。
-	 */
-	dashboardBase._initChart = function(chart)
-	{
-		//采用重写chart.init()逻辑而非直接执行的方式，确保chart.init()重复调用的逻辑一致
-		this._initChartOverwriteIfNone(chart);
-		chart.init();
-	};
-	
-	dashboardBase._initChartOverwriteIfNone = function(chart)
-	{
-		var dashboard = this;
-		chart._initDashboardByDbd = function()
 		{
-			this.dashboard = dashboard;
-			this.renderContext = this.dashboard.renderContext;
-		};
-		
-		//确保只会执行一次
-		if(chart._initForPreSuperByDbd == null)
-		{
-			chart._initForPreSuperByDbd = chart._initForPre;
-			chart._initForPre = function()
-			{
-				this._initDashboardByDbd();
-			};
-		}
-		
-		//确保只会执行一次
-		if(chart._initForPostSuperByDbd == null)
-		{
-			chart._initForPostSuperByDbd = chart._initForPost;
-			chart._initForPost = function()
-			{
-				this._initLinks();
-				this._initAutoResize();
-				this._initUpdateGroup();
-				this._initForPostSuperByDbd();
-				
-				var chartListener = this.listener();
-				
-				//图表监听器不继承看板监听器功能，所以只有图表没有定义监听器时，才使用代理看板监听器
-				if(!chartListener)
-				{
-					this.listener(this.dashboard._getDelegateChartListener());
-				}
-				else
-				{
-					//由元素图表监听器属性生成的内部代理图表监听器，应为其添加updateError处理函数
-					if(chartListener._proxyChartListenerFromEleAttr)
-					{
-						chartListener.updateError = function(chart, error)
-						{
-							var dl = this._findListenerOfFunc("updateError");
-							
-							if(dl)
-								return dl.updateError(chart, error);
-						};
-					}
-				}
-			};
-		}
-		
-		//确保只会执行一次
-		if(chart._postProcessRenderedSuperByDbd == null)
-		{
-			chart._postProcessRenderedSuperByDbd = chart._postProcessRendered;
-			chart._postProcessRendered = function()
-			{
-				this.bindLinksEventHanders(this.links());
-				this._postProcessRenderedSuperByDbd();
-			};
+			var chart = this.charts[i];
+			chart.statusPreRender(true);
 		}
 	};
 	
@@ -2082,8 +2034,7 @@
 		}
 		chart.elementId = elementId;
 		
-		chartFactory.init(chart);
-		this._initChart(chart);
+		dashboardFactory._initChart(this, chart);
 	};
 	
 	/**
@@ -2298,7 +2249,7 @@
 	
 	/**
 	 * 销毁看板。
-	 * 销毁后，可以重新调用dashboard.init()、dashboard.render()函数。
+	 * 销毁后，可以重新调用dashboard.render()函数。
 	 */
 	dashboardBase.destroy = function()
 	{
@@ -2412,7 +2363,7 @@
 	 */
 	dashboardBase.init = function()
 	{
-		chartFactory.logWarn("dashboard.init() is deprecated, it is empty now, only for API compatibility");
+		chartFactory.logWarn("[dashboard.init()] is deprecated, it is empty now, only for API compatibility");
 	};
 	// > @deprecated 兼容4.3.1版本的API，将在未来版本移除，此函数的逻辑已合并至dashboardBase.render()函数内
 	
@@ -2569,6 +2520,44 @@
 	//----------------------------------------
 	// dashboardBase end
 	//----------------------------------------
+	
+	/**
+	 * 获取对象的指定属性路径的值。
+	 * 
+	 * @param obj
+	 * @param propertyPath 属性路径，示例：order、order.product、[0].name、order['product'].name
+	 * @return 属性路径值，属性路径不存在则返回undefined
+	 */
+	dashboardFactory.getPropertyPathValue = function(obj, propertyPath)
+	{
+		if(obj == null)
+			return undefined;
+		
+		var value = undefined;
+		
+		//简单属性值
+		value = obj[propertyPath];
+		
+		if(value !== undefined)
+			return value;
+		
+		//构建eval表达式
+		if(propertyPath.charAt(0) == '[')
+			propertyPath = "obj" + propertyPath;
+		else
+			propertyPath = "obj." + propertyPath;
+		
+		try
+		{
+			value = eval(propertyPath);
+		}
+		catch(e)
+		{
+			value = undefined;
+		}
+		
+		return value;
+	};
 	
 	/**
 	 * 内置地图JSON地址配置。
