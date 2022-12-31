@@ -133,6 +133,12 @@
 	// chartStatusConst开始
 	//----------------------------------------
 	
+	/**图表状态：准备init*/
+	chartStatusConst.PRE_INIT = "PRE_INIT";
+	
+	/**图表状态：完成init*/
+	chartStatusConst.INITED = "INITED";
+	
 	/**图表状态：准备render*/
 	chartStatusConst.PRE_RENDER = "PRE_RENDER";
 	
@@ -239,20 +245,28 @@
 	
 	/**
 	 * 初始化渲染上下文。
+	 * 将webContext直接存入渲染上下文；复制chartTheme，填充相关属性后存入渲染上下文。
+	 * 之后，可以通过:
+	 * chartFactory.renderContextAttrWebContext(renderContext)
+	 * chartFactory.renderContextAttrChartTheme(renderContext)
+	 * 获取它们。
 	 * 
-	 * 注意：此方法应在渲染任意图表前（chart.render()函数调用前）且<body>后调用。
+	 * 注意：此函数应在初始化任意图表前（chart.init()函数调用前）且<body>后调用。
 	 * 
 	 * @param renderContext
+	 * @param webContext Web上下文
+	 * @param chartTheme 图表主题
 	 */
-	chartFactory.initRenderContext = function(renderContext)
+	chartFactory.initRenderContext = function(renderContext, webContext, chartTheme)
 	{
-		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
-		var chartTheme = chartFactory.renderContextAttrChartTheme(renderContext);
-		
 		if(!webContext)
 			throw new Error("[webContext] required");
+		if(!chartTheme)
+			throw new Error("[chartTheme] required");
 		
-		chartTheme = chartFactory._initGlobalChartTheme(chartTheme);
+		chartFactory.initGlobalChartTheme(chartTheme);
+		
+		chartFactory.renderContextAttrWebContext(renderContext, webContext);
 		chartFactory.renderContextAttrChartTheme(renderContext, chartTheme);
 	};
 	
@@ -266,13 +280,13 @@
 		
 		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
 		var chartTheme = chartFactory.renderContextAttrChartTheme(renderContext);
-		var chartThemeRaw = (chartTheme ? chartTheme._GLOBAL_RAW_CHART_THEME : null);
+		var chartThemeRaw = (chartTheme ? chartTheme._RAW_CHART_THEME : null);
 		
 		return (webContext && chartTheme && chartThemeRaw);
 	};
 	
 	/**
-	 * 初始化图表JSON对象，为其添加图表API，并设置chart.statusPreRender(true)状态，但不调用chart.render()函数。
+	 * 初始化图表JSON对象，为其添加图表API，并设置chart.statusPreInit(true)状态，但不调用chart.init()函数。
 	 * 
 	 * @param chart 图表JSON对象，格式应为：
 	 *				{
@@ -303,7 +317,7 @@
 		this._initChartBaseProperties(chart);
 		$.extend(chart, this.chartBase);
 		
-		chart.statusPreRender(true);
+		chart.statusPreInit(true);
 	};
 	
 	/**
@@ -363,28 +377,27 @@
 	//----------------------------------------
 	
 	/**
-	 * 渲染图表。
+	 * 初始化图表，使用图表元素上的dg-*属性值初始化图表。
 	 * 此函数在图表生命周期内仅允许调用一次。 
 	 * 
-	 * 注意：渲染图表前应确保已调用chartFactory.initRenderContext()。
-	 * 注意：只有this.statusPreRender()或者statusDestroyed()为true，此方法才会执行。
-	 * 注意：
-	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
-	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
+	 * 注意：只有this.statusPreInit()或者statusDestroyed()为true，此函数才允许执行。
+	 * 注意：初始化图表前应确保已调用chartFactory.initRenderContext(this.renderContext)。
+	 * 注意：此函数内不应执行渲染相关逻辑，而应仅执行初始化图表属性的相关逻辑，因为chart.destroy()后可再次调用chart.init()。
 	 * 
 	 * 图表生命周期：
-	 * chart.render() -->-- chart.update() -->-- chart.destroy() -->--|
-	 *       |                    |              |                    |
-	 *       |                    |------<-------|                    |
-	 *       |---------------------------<----------------------------|
-	 * 
-	 * @param initPostHandler 可选，图表元素上的dg-*属性初始化后置处理函数，格式为：
-	 *                          function(chart){ ... }
+	 * chart.init() -->-- chart.render() -->-- chart.update() -->-- chart.destroy() -->--|
+	 *       |                  |                    |           |                       |
+	 *       |                  |                    |-----<-----|                       |
+	 *       |                  |--------------------------<-----------------------------| 
+	 *       |-----------------------------------<---------------------------------------| 
 	 */
-	chartBase.render = function(initPostHandler)
+	chartBase.init = function()
 	{
-		if(!this.statusPreRender() && !this.statusDestroyed())
-			throw new Error("chart is illegal state for render()");
+		if(!this.statusPreInit() && !this.statusDestroyed())
+			throw new Error("chart is illegal state for init()");
+		
+		if(!chartFactory.isRenderContextInited(this.renderContext))
+			throw new Error("chart is illegal state for init()");
 		
 		if(!this.id)
 			throw new Error("[chart.id] required");
@@ -394,18 +407,6 @@
 			throw new Error("[chart.renderContext] required");
 		if(!this.plugin)
 			throw new Error("[chart.plugin] required");
-		if(!this.plugin.renderer)
-			throw new Error("[chart.plugin.renderer] required");
-		
-		if(!chartFactory.isRenderContextInited(this.renderContext))
-			throw new Error("chart is illegal state for render()");
-		
-		var $element = this.elementJquery();
-		
-		if(chartFactory.renderedChart($element) != null)
-			throw new Error("chart element '#"+this.elementId+"' has been rendered as another chart");
-		
-		this._isRender = true;
 		
 		this._clearExtValue();
 		
@@ -421,41 +422,12 @@
 		this._initAttrValues();
 		this._initForPost();
 		
-		if(initPostHandler && $.isFunction(initPostHandler))
-		{
-			initPostHandler(this);
-		}
-		
-		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
-		this._createChartThemeCssIfNon();
-		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
-		if(chartFactory.isStaticPosition($element))
-			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
-		$element.addClass(this.themeStyleName());
-		
-		var options = this.options();
-		if(!options || options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
-			$element.addClass("dg-chart-beautify-scrollbar");
-		
-		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
-		
-		this.statusRendering(true);
-		
-		var doRender = true;
-		
-		var listener = this.listener();
-		if(listener && listener.onRender)
-		  doRender = listener.onRender(this);
-		
-		if(doRender != false)
-		{
-			this.doRender();
-		}
+		this.statusInited(true);
 	};
 	
 	/**
 	 * 初始化图表选项。
-	 * 此方法依次从<body>元素、图表元素的elementAttrConst.OPTIONS属性读取、合并图表选项。
+	 * 此函数依次从<body>元素、图表元素的elementAttrConst.OPTIONS属性读取、合并图表选项。
 	 */
 	chartBase._initOptions = function()
 	{
@@ -494,15 +466,12 @@
 	
 	/**
 	 * 初始化图表主题。
-	 * 此方法依次从图表renderContext.chartTheme、<body>元素、图表元素的elementAttrConst.THEME属性读取、合并图表主题。
+	 * 此函数依次从图表renderContext.chartTheme、<body>元素、图表元素的elementAttrConst.THEME属性读取、合并图表主题。
 	 * 
 	 * @return {...}
 	 */
 	chartBase._initTheme = function()
 	{
-		var globalTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
-		var globalRawTheme = (globalTheme ? globalTheme._GLOBAL_RAW_CHART_THEME : null);
-		
 		var eleThemeValue = this.elementJquery().attr(elementAttrConst.THEME);
 		
 		if(eleThemeValue)
@@ -515,12 +484,15 @@
 			this.theme(eleTheme);
 		}
 		else
+		{
+			var globalTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
 			this.theme(globalTheme, false);
+		}
 	};
 	
 	/**
 	 * 初始化图表监听器。
-	 * 此方法依次从图表元素、<body>元素的elementAttrConst.LISTENER属性获取监听器对象。
+	 * 此函数依次从图表元素、<body>元素的elementAttrConst.LISTENER属性获取监听器对象。
 	 */
 	chartBase._initListener = function()
 	{
@@ -610,7 +582,7 @@
 	
 	/**
 	 * 初始化图表的地图名。
-	 * 此方法从图表元素的elementAttrConst.MAP属性获取图表地图名。
+	 * 此函数从图表元素的elementAttrConst.MAP属性获取图表地图名。
 	 */
 	chartBase._initMap = function()
 	{
@@ -621,7 +593,7 @@
 	
 	/**
 	 * 初始化图表的ECharts主题名。
-	 * 此方法依次从图表元素、<body>元素的elementAttrConst.ECHARTS_THEME属性获取ECharts主题名。
+	 * 此函数依次从图表元素、<body>元素的elementAttrConst.ECHARTS_THEME属性获取ECharts主题名。
 	 */
 	chartBase._initEchartsThemeName = function()
 	{
@@ -634,7 +606,7 @@
 	
 	/**
 	 * 初始化图表是否禁用交互设置。
-	 * 此方法从图表元素的elementAttrConst.DISABLE_SETTING属性获取是否禁用值。
+	 * 此函数从图表元素的elementAttrConst.DISABLE_SETTING属性获取是否禁用值。
 	 */
 	chartBase._initDisableSetting = function()
 	{
@@ -682,7 +654,7 @@
 	
 	/**
 	 * 初始化图表事件处理函数。
-	 * 此方法从图表元素的所有以elementAttrConst.ON开头的属性获取事件处理函数。
+	 * 此函数从图表元素的所有以elementAttrConst.ON开头的属性获取事件处理函数。
 	 * 例如：
 	 * dg-chart-on-click="clickHandler" 						定义"click"事件处理函数；
 	 * dg-chart-on-mouseover="function(chartEvent){ ... }"		定义"mouseover"事件处理函数。
@@ -715,7 +687,7 @@
 	
 	/**
 	 * 初始化自定义图表渲染器。
-	 * 此方法从图表元素的elementAttrConst.RENDERER属性获取自定义图表渲染器。
+	 * 此函数从图表元素的elementAttrConst.RENDERER属性获取自定义图表渲染器。
 	 */
 	chartBase._initRenderer = function()
 	{
@@ -727,7 +699,7 @@
 	
 	/**
 	 * 初始化图表属性值集。
-	 * 此方法从图表元素的elementAttrConst.ATTR_VALUES属性获取图表属性值集。
+	 * 此函数从图表元素的elementAttrConst.ATTR_VALUES属性获取图表属性值集。
 	 */
 	chartBase._initAttrValues = function()
 	{
@@ -791,7 +763,7 @@
 					throw new Error("chart is illegal state for theme(t)");
 				
 				var globalTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
-				var globalRawTheme = (globalTheme ? globalTheme._GLOBAL_RAW_CHART_THEME : null);
+				var globalRawTheme = (globalTheme ? globalTheme._RAW_CHART_THEME : null);
 				
 				if(theme !== globalTheme)
 				{
@@ -854,7 +826,7 @@
 	
 	/**
 	 * 获取/设置图表地图名。
-	 * 此方法用于为地图类图表提供支持，如果不是地图类图表，则不必设置此项。
+	 * 此函数用于为地图类图表提供支持，如果不是地图类图表，则不必设置此项。
 	 * 
 	 * 图表初始化时会使用图表元素的"dg-chart-map"属性值执行设置操作。
 	 * 
@@ -873,7 +845,7 @@
 	
 	/**
 	 * ECharts图表支持函数：获取/设置图表的ECharts主题名。
-	 * 此方法用于为ECharts图表提供支持，如果不是ECharts图表，则不必设置此项。
+	 * 此函数用于为ECharts图表提供支持，如果不是ECharts图表，则不必设置此项。
 	 * 
 	 * 图表初始化时会使用图表元素的"dg-echarts-theme"属性值执行设置操作。
 	 * 
@@ -895,8 +867,7 @@
 	 * 
 	 * 图表初始化时会使用图表元素的"dg-chart-disable-setting"属性值执行设置操作。
 	 * 
-	 * @param setting 可选，禁用设置，没有则执行获取操作且返回格式为：{param: true||false, data: true||false}。
-	 * 					禁用设置格式为：
+	 * @param setting 可选，禁用设置，格式为：
 	 * 					//全部禁用
 	 * 					true、"true"、
 	 * 					//全部启用
@@ -908,6 +879,7 @@
 	 *						//可选，是否禁用数据透视表
 	 *						data: true || false
 	 *					}
+	 * @returns 要获取的禁用设置，格式为：{param: true、false, data: true、false}，不会为null
 	 */
 	chartBase.disableSetting = function(setting)
 	{
@@ -986,6 +958,54 @@
 			return this._resultDataFormat;
 		else
 			this._resultDataFormat = resultDataFormat;
+	};
+	
+	/**
+	 * 渲染图表。
+	 * 此函数在图表生命周期内仅允许调用一次。 
+	 * 
+	 * 注意：只有this.statusInited()或者this.statusPreRender()或者statusDestroyed()为true，此函数才允许执行。
+	 * 注意：
+	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
+	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
+	 */
+	chartBase.render = function()
+	{
+		if(!this.statusInited() && !this.statusPreRender() && !this.statusDestroyed())
+			throw new Error("chart is illegal state for render()");
+		
+		var $element = this.elementJquery();
+		
+		if(chartFactory.renderedChart($element) != null)
+			throw new Error("chart element '#"+this.elementId+"' has been rendered as another chart");
+		
+		this._isRender = true;
+		
+		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
+		this._createChartThemeCssIfNon();
+		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
+		if(chartFactory.isStaticPosition($element))
+			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
+		$element.addClass(this.themeStyleName());
+		
+		var options = this.options();
+		if(!options || options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
+			$element.addClass("dg-chart-beautify-scrollbar");
+		
+		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
+		
+		this.statusRendering(true);
+		
+		var doRender = true;
+		
+		var listener = this.listener();
+		if(listener && listener.onRender)
+		  doRender = listener.onRender(this);
+		
+		if(doRender != false)
+		{
+			this.doRender();
+		}
 	};
 	
 	chartBase._createChartThemeCssIfNon = function()
@@ -1095,7 +1115,7 @@
 	 *
 	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
-	 * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此方法才会执行。
+	 * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此函数才会执行。
 	 * 
 	 * @param results 可选，图表数据集结果，如果不设置，将使用this.updateResults()的返回值
 	 */
@@ -1287,7 +1307,7 @@
 	};
 	
 	/**
-	 * 图表的render方法是否是异步的。
+	 * 图表的render函数是否是异步的。
 	 */
 	chartBase.isAsyncRender = function()
 	{
@@ -1311,7 +1331,7 @@
 	};
 	
 	/**
-	 * 图表的update方法是否是异步的。
+	 * 图表的update函数是否是异步的。
 	 * 
 	 * @param results 图表数据集结果
 	 */
@@ -1688,8 +1708,9 @@
 	 * 图表的所有/指定数据集参数值是否齐备。
 	 * 
 	 * @param chartDataSet 可选，图表数据集、索引，默认为所有
+	 * @param msg 可选，必须作为第二个参数，格式应为：{ ... }, 当校验参数值未齐备时用于写入必填参数信息：{ chartDataSetIndex: 数值, paramName: 参数名 }
 	 */
-	chartBase.isDataSetParamValueReady = function(chartDataSet)
+	chartBase.isDataSetParamValueReady = function(chartDataSet, msg)
 	{
 		chartDataSet = this._chartDataSetOf(chartDataSet, true);
 		
@@ -1709,7 +1730,15 @@
 				var dsp = dataSet.params[j];
 				
 				if((dsp.required == true || dsp.required == "true") && paramValues[dsp.name] == null)
+				{
+					if(msg != null)
+					{
+						msg.chartDataSetIndex = i;
+						msg.paramName = dsp.name;
+					}
+					
 					return false;
+				}
 			}
 		}
 		
@@ -2404,7 +2433,7 @@
 	
 	/**
 	 * 获取指定地图名对应的地图数据地址。
-	 * 此方法先从chartFactory.chartMapURLs查找对应的地址，如果没有，则直接返回name作为地址。
+	 * 此函数先从chartFactory.chartMapURLs查找对应的地址，如果没有，则直接返回name作为地址。
 	 * 
 	 * @param name 地图名称
 	 */
@@ -2464,8 +2493,8 @@
 	
 	/**
 	 * ECharts图表支持函数：将图表初始化为ECharts图表，设置其选项。
-	 * 此方法会自动应用chartBase.echartsGetThemeName()至初始化的ECharts图表。
-	 * 此方法会自动调用chartBase.internal()将初始化的ECharts实例对象设置为图表底层组件。
+	 * 此函数会自动应用chartBase.echartsGetThemeName()至初始化的ECharts图表。
+	 * 此函数会自动调用chartBase.internal()将初始化的ECharts实例对象设置为图表底层组件。
 	 * 
 	 * @param options 要设置的ECharts选项
 	 * @param opts 可选，ECharts的init函数附加参数，具体参考ECharts.init()函数的opts参数
@@ -2766,7 +2795,7 @@
 	 * 注册图表事件处理函数代理。
 	 * 图表渲染器on函数的实现逻辑通常是：先构建适配底层组件的图表事件处理函数代理（handlerDelegation），
 	 * 在代理中构建图表事件对象，然后调用图表事件处理函数（eventHanlder）。
-	 * 此方法用于注册这些信息，使得在实现图表渲染器的off函数时，可以获取对应底层组件的图表事件处理函数代理，进而实现底层组件的解绑逻辑。
+	 * 此函数用于注册这些信息，使得在实现图表渲染器的off函数时，可以获取对应底层组件的图表事件处理函数代理，进而实现底层组件的解绑逻辑。
 	 * 
 	 * @param eventType 图表事件类型
 	 * @param eventHanlder 图表事件处理函数，格式为：function(chartEvent){ ... }
@@ -2790,7 +2819,7 @@
 	
 	/**
 	 * 删除图表事件处理函数代理，并返回已删除的代理信息对象数组。
-	 * 图表渲染器off函数的实现逻辑通常是：使用此方法移除由registerEventHandlerDelegation注册的图表事件处理函数代理信息对象，
+	 * 图表渲染器off函数的实现逻辑通常是：使用此函数移除由registerEventHandlerDelegation注册的图表事件处理函数代理信息对象，
 	 * 然后调用底层组件的事件解绑函数，解绑代理信息对象的handlerDelegation。
 	 * 
 	 * @param eventType 图表事件类型
@@ -3349,7 +3378,7 @@
 	
 	/**
 	 * ECharts图表支持函数：获取可用于此图表的且已注册的ECharts主题名。
-	 * 此方法优先返回chartBase.echartsThemeName()函数的结果，
+	 * 此函数优先返回chartBase.echartsThemeName()函数的结果，
 	 * 当其为null时，则使用chartBase.theme()构建和注册ECharts主题（仅第一次），并返回注册后的主题名。
 	 * 
 	 * @since 2.11.0
@@ -3868,19 +3897,39 @@
 		return (this._isRender == true);
 	};
 	
+	/**
+	 * 图表是否为/设置为：准备init。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	chartBase.statusPreInit = function(set)
+	{
+		if(set === true)
+			this.status(chartStatusConst.PRE_INIT);
+		else
+			return (this.status() == chartStatusConst.PRE_INIT);
+	};
+	
+	/**
+	 * 图表是否为/设置为：完成init。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	chartBase.statusInited = function(set)
+	{
+		if(set === true)
+			this.status(chartStatusConst.INITED);
+		else
+			return (this.status() == chartStatusConst.INITED);
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
-	
-	// < @deprecated 兼容4.3.1版本的API，将在未来版本移除，此函数的逻辑已合并至chart.render()函数内
-	/**
-	 * 初始化图表。
-	 */
-	chartBase.init = function()
-	{
-		chartFactory.logWarn("[chart.init()] is deprecated, it is empty now, only for API compatibility");
-	};
-	// > @deprecated 兼容4.3.1版本的API，将在未来版本移除，此函数的逻辑已合并至chart.render()函数内
 	
 	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventNew()
 	/**
@@ -5515,19 +5564,21 @@
 	chartFactory._KEY_GRADUAL_COLORS = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "GradualColors";
 	
 	/**
-	 * 初始化全局图表主题。
-	 * 基于初始图表主题、<body>的elementAttrConst.THEME属性值初始化全局图表主题。
-	 *
-	 * @param chartTheme 可选，初始图表主题，默认为：{}
-	 * @returns 一个新的图表主题
+	 * 初始化全局图表主题，基于<body>上的elementAttrConst.THEME属性值初始化图表主题。
+	 * 如果图表主题已初始化过，此函数不做任何处理，直接返回。
+	 * 
+	 * @param chartTheme 图表主题
 	 */
-	chartFactory._initGlobalChartTheme = function(chartTheme)
+	chartFactory.initGlobalChartTheme = function(chartTheme)
 	{
-		var theme = $.extend(true, {}, chartTheme);
+		if(chartTheme._RAW_CHART_THEME)
+			return false;
+		
+		var theme = chartTheme;
 		
 		chartFactory._inflateActualBackgroundColor(theme);
 		
-		var globalRawTheme = null;
+		var rawTheme = null;
 		
 		//默认值
 		if(!theme.name)
@@ -5555,7 +5606,7 @@
 			var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
 			chartFactory._inflateActualBackgroundColor(bodyThemeObj);
 			
-			globalRawTheme = $.extend(true, {}, theme, bodyThemeObj);
+			rawTheme = $.extend(true, {}, theme, bodyThemeObj);
 			
 			chartFactory._inflateChartThemeIf(bodyThemeObj);
 			
@@ -5571,10 +5622,10 @@
 			$.extend(true, theme, bodyThemeObj);
 		}
 		
-		if(globalRawTheme == null)
-			globalRawTheme = $.extend(true, {}, theme);
+		if(rawTheme == null)
+			rawTheme = $.extend(true, {}, theme);
 		
-		theme._GLOBAL_RAW_CHART_THEME = globalRawTheme;
+		theme._RAW_CHART_THEME = rawTheme;
 		
 		chartFactory._inflateChartThemeIf(theme);
 		

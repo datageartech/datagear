@@ -1640,11 +1640,7 @@
 			
 			editor._setElementChartTheme(thisEle, chartTheme);
 			var chart = editor.dashboard.renderedChart(thisEle);
-			if(chart)
-			{
-				chart.destroy();
-				chart.render();
-			}
+			editor._reRenderChart(chart);
 		});
 	};
 	
@@ -1823,8 +1819,7 @@
 		else
 			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue, true);
 		
-		chart.destroy();
-		chart.render();
+		this._reRenderChart(chart);
 	};
 	
 	/**
@@ -1881,11 +1876,7 @@
 			
 			editor._setElementChartOptions(thisEle, chartOptionsStr);
 			var chart = editor.dashboard.renderedChart(thisEle);
-			if(chart)
-			{
-				chart.destroy();
-				chart.render();
-			}
+			editor._reRenderChart(chart);
 		});
 	};
 	
@@ -1946,6 +1937,16 @@
 		
 		var ele = this._editElement($(document.body));
 		return this._getElementChartOptions(ele);
+	};
+	
+	editor._reRenderChart = function(chart)
+	{
+		if(chart)
+		{
+			chart.destroy();
+			chart.init();
+			chart.render();
+		}
 	};
 	
 	editor._setElementChartOptions = function(ele, chartOptionsStr, sync)

@@ -199,16 +199,78 @@
 	dashboardFactory.init = function(dashboard)
 	{
 		this._initStartHeartBeatIfNot(dashboard.renderContext);
-		this._refactorDashboard(dashboard);
+		this._initDashboardBaseProperties(dashboard);
 		$.extend(dashboard, this.dashboardBase);
-		this._initCharts(dashboard);
+		
+		var charts = dashboard.charts;
+		for(var i=0; i<charts.length; i++)
+			this._initChart(dashboard, charts[i]);
 		
 		dashboard._status = dashboardStatusConst.PRE_RENDER;
 	};
 	
-	dashboardFactory._refactorDashboard = function(dashboard)
+	dashboardFactory._initChart = function(dashboard, chart)
 	{
-		//私有化属性，便于后续定义相关函数
+		chart.dashboard = dashboard;
+		chart.renderContext = dashboard.renderContext;
+		chartFactory.init(chart);
+		this._initChartOverwriteIfNone(chart);
+	};
+	
+	dashboardFactory._initChartOverwriteIfNone = function(chart)
+	{
+		//确保只会执行一次
+		if(chart._initForPostSuperByDbd == null)
+		{
+			chart._initForPostSuperByDbd = chart._initForPost;
+			chart._initForPost = function()
+			{
+				this._initLinks();
+				this._initAutoResize();
+				this._initUpdateGroup();
+				this._initForPostSuperByDbd();
+				
+				var chartListener = this.listener();
+				
+				//图表监听器不继承看板监听器功能，所以只有图表没有定义监听器时，才使用代理看板监听器
+				if(!chartListener)
+				{
+					this.listener(this.dashboard._getDelegateChartListener());
+				}
+				else
+				{
+					//由元素图表监听器属性生成的内部代理图表监听器，应为其添加updateError处理函数
+					if(chartListener._proxyChartListenerFromEleAttr)
+					{
+						chartListener.updateError = function(chart, error)
+						{
+							var dl = this._findListenerOfFunc("updateError");
+							
+							if(dl)
+								return dl.updateError(chart, error);
+						};
+					}
+				}
+			};
+		}
+		
+		//确保只会执行一次
+		if(chart._postProcessRenderedSuperByDbd == null)
+		{
+			chart._postProcessRenderedSuperByDbd = chart._postProcessRendered;
+			chart._postProcessRendered = function()
+			{
+				this.bindLinksEventHanders(this.links());
+				this._postProcessRenderedSuperByDbd();
+			};
+		}
+	};
+	
+	dashboardFactory._initDashboardBaseProperties = function(dashboard)
+	{
+		dashboard.charts = (dashboard.charts || []);
+		
+		//私有化属性，便于后续定义相关同名函数
 		dashboard._widget = dashboard.widget;
 		dashboard._template = dashboard.template;
 		dashboard._varName = dashboard.varName;
@@ -289,74 +351,6 @@
 			}
 		},
 		interval);
-	};
-	
-	dashboardFactory._initCharts = function(dashboard)
-	{
-		dashboard.charts = (dashboard.charts || []);
-		
-		var charts = dashboard.charts;
-		
-		for(var i=0; i<charts.length; i++)
-			this._initChart(dashboard, charts[i]);
-	};
-	
-	dashboardFactory._initChart = function(dashboard, chart)
-	{
-		chartFactory.init(chart);
-		chart.dashboard = dashboard;
-		chart.renderContext = dashboard.renderContext;
-		
-		this._initChartOverwriteIfNone(chart);
-	};
-	
-	dashboardFactory._initChartOverwriteIfNone = function(chart)
-	{
-		//重写chart._initForPost()函数，这里确保只会执行一次
-		if(chart._initForPostSuperByDbd == null)
-		{
-			chart._initForPostSuperByDbd = chart._initForPost;
-			chart._initForPost = function()
-			{
-				this._initLinks();
-				this._initAutoResize();
-				this._initUpdateGroup();
-				this._initForPostSuperByDbd();
-				
-				var chartListener = this.listener();
-				
-				//图表监听器不继承看板监听器功能，所以只有图表没有定义监听器时，才使用代理看板监听器
-				if(!chartListener)
-				{
-					this.listener(this.dashboard._getDelegateChartListener());
-				}
-				else
-				{
-					//由元素图表监听器属性生成的内部代理图表监听器，应为其添加updateError处理函数
-					if(chartListener._proxyChartListenerFromEleAttr)
-					{
-						chartListener.updateError = function(chart, error)
-						{
-							var dl = this._findListenerOfFunc("updateError");
-							
-							if(dl)
-								return dl.updateError(chart, error);
-						};
-					}
-				}
-			};
-		}
-		
-		//重写chart._postProcessRendered()函数，这里确保只会执行一次
-		if(chart._postProcessRenderedSuperByDbd == null)
-		{
-			chart._postProcessRenderedSuperByDbd = chart._postProcessRendered;
-			chart._postProcessRendered = function()
-			{
-				this.bindLinksEventHanders(this.links());
-				this._postProcessRenderedSuperByDbd();
-			};
-		}
 	};
 	
 	//----------------------------------------
@@ -631,9 +625,11 @@
 	{
 		this._assertActive();
 		
-		if(!this.isDataSetParamValueReady())
+		var msg = {};
+		if(!this.isDataSetParamValueReady(null, msg))
 		{
-			chartFactory.logException("chart '#"+this.elementId+"' has required but unset dataset param value");
+			chartFactory.logException("chart '#"+this.elementId+"' chartDataSets["+msg.chartDataSetIndex+"] "
+										+"'s ["+msg.paramName+"] param value required");
 			return;
 		}
 		else
@@ -736,14 +732,13 @@
 	dashboardBase._initRenderContext = function()
 	{
 		var dashboardTheme = this.renderContextAttr(renderContextAttrConst.dashboardTheme);
+		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
 		var chartTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
-		if(!chartTheme)
-		{
-			chartTheme = (dashboardTheme ? dashboardTheme.chartTheme : null);
-			chartFactory.renderContextAttrChartTheme(this.renderContext, chartTheme);
-		}
 		
-		chartFactory.initRenderContext(this.renderContext);
+		if(!chartTheme)
+			chartTheme = (dashboardTheme ? dashboardTheme.chartTheme : {});
+		
+		chartFactory.initRenderContext(this.renderContext, webContext, chartTheme);
 		
 		// < @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
 		this.renderContextAttr("dashboardTheme", dashboardTheme);
@@ -801,18 +796,6 @@
 	};
 	
 	/**
-	 * 初始化看板的所有图表。
-	 */
-	dashboardBase._initCharts = function()
-	{
-		for(var i=0; i<this.charts.length; i++)
-		{
-			var chart = this.charts[i];
-			chart.statusPreRender(true);
-		}
-	};
-	
-	/**
 	 * 初始化自动调整图表大小处理器。
 	 */
 	dashboardBase._initChartResizeHandler = function()
@@ -845,6 +828,24 @@
 		};
 		
 		$window.on("resize", this._windowResizeHandler);
+	};
+	
+	dashboardBase._initCharts = function()
+	{
+		if(!this.charts)
+			return;
+		
+		for(var i=0; i<this.charts.length; i++)
+		{
+			var chart = this.charts[i];
+			
+			if(chart.statusPreInit() || chart.statusDestroyed())
+			{
+				chart.init();
+				//设置为准备渲染状态，使得后续看板可自动渲染图表
+				chart.statusPreRender(true);
+			}
+		}
 	};
 	
 	/**
@@ -1182,7 +1183,7 @@
 			config = chartFactory.evalSilently(form.attr(elementAttrConst.DASHBOARD_FORM), {});
 		
 		var dashboard = this;
-		var bindBatchSetName = "dataGearBatchSet";
+		var bindBatchSetName = chartFactory.builtinPropName("batchSet");
 		
 		config = $.extend(
 		{
@@ -1830,7 +1831,7 @@
 				re = successHandler.call(this, chart, textStatus, jqXHR);
 			
 			if(re != false)
-				dashboard.addChart(chart);
+				dashboard._addLoadedChart(chart);
 		};
 		
 		var completeHandler = myAjaxOptions.complete;
@@ -1932,7 +1933,7 @@
 			if(re != false)
 			{
 				for(var i=0; i<charts.length; i++)
-					dashboard.addChart(charts[i]);
+					dashboard._addLoadedChart(charts[i]);
 			}
 		};
 		
@@ -2046,6 +2047,19 @@
 		chart.elementId = elementId;
 		
 		dashboardFactory._initChart(this, chart);
+	};
+	
+	dashboardBase._addLoadedChart = function(chart)
+	{
+		this.addChart(chart);
+		
+		//异步加载时可能看板还未渲染
+		if(this.isRender() && chart.statusPreInit())
+		{
+			chart.init();
+			//设置为准备渲染状态，使得后续看板可自动渲染图表
+			chart.statusPreRender(true);
+		}
 	};
 	
 	/**
