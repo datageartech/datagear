@@ -379,8 +379,9 @@
 	/**
 	 * 初始化图表，使用图表元素上的dg-*属性值初始化图表。
 	 * 此函数在图表生命周期内仅允许调用一次。 
+	 * 图表初始化后处于this.statusInited()状态。
 	 * 
-	 * 注意：只有this.statusPreInit()或者statusDestroyed()为true，此函数才允许执行。
+	 * 注意：只有this.statusPreInit()或者this.statusDestroyed()为true，此函数才允许执行。
 	 * 注意：初始化图表前应确保已调用chartFactory.initRenderContext(this.renderContext)。
 	 * 注意：此函数内不应执行渲染相关逻辑，而应仅执行初始化图表属性的相关逻辑，因为chart.destroy()后可再次调用chart.init()。
 	 * 
@@ -393,12 +394,6 @@
 	 */
 	chartBase.init = function()
 	{
-		if(!this.statusPreInit() && !this.statusDestroyed())
-			throw new Error("chart is illegal state for init()");
-		
-		if(!chartFactory.isRenderContextInited(this.renderContext))
-			throw new Error("chart is illegal state for init()");
-		
 		if(!this.id)
 			throw new Error("[chart.id] required");
 		if(!this.elementId)
@@ -407,6 +402,12 @@
 			throw new Error("[chart.renderContext] required");
 		if(!this.plugin)
 			throw new Error("[chart.plugin] required");
+		
+		if(!this.statusPreInit() && !this.statusDestroyed())
+			throw new Error("chart is illegal state for init()");
+		
+		if(!chartFactory.isRenderContextInited(this.renderContext))
+			throw new Error("chart is illegal state for init()");
 		
 		this._clearExtValue();
 		
@@ -496,23 +497,11 @@
 	 */
 	chartBase._initListener = function()
 	{
-		var globalListener = $(document.body).attr(elementAttrConst.LISTENER);
+		var globalListener = this._getBodyListener();
+		
 		var localListener = this.elementJquery().attr(elementAttrConst.LISTENER);
-		
-		if(globalListener)
-		{
-			if(!chartFactory._globalChartListener)
-			{
-				chartFactory._globalChartListener = chartFactory.evalSilently(globalListener);
-			}
-			
-			globalListener = chartFactory._globalChartListener;
-		}
-		
 		if(localListener)
-		{
 			localListener = chartFactory.evalSilently(localListener);
-		}
 		
 		var myListener = null;
 		
@@ -578,6 +567,19 @@
 		}
 		
 		this.listener(myListener);
+	};
+	
+	chartBase._getBodyListener = function()
+	{
+		var bodyListenerStr = $(document.body).attr(elementAttrConst.LISTENER);
+		
+		if(bodyListenerStr != chartFactory._PREV_BODY_LISTENER_STR)
+		{
+			chartFactory._PREV_BODY_LISTENER_STR = bodyListenerStr;
+			chartFactory._PREV_BODY_LISTENER = chartFactory.evalSilently(bodyListenerStr);
+		}
+		
+		return chartFactory._PREV_BODY_LISTENER;
 	};
 	
 	/**
@@ -962,22 +964,28 @@
 	
 	/**
 	 * 渲染图表。
-	 * 此函数在图表生命周期内仅允许调用一次。 
+	 * 此函数在图表生命周期内仅允许调用一次。
+	 * 渲染中的图表处于this.statusRendering()状态，渲染完成后处于this.statusRendered()状态。 
 	 * 
-	 * 注意：只有this.statusInited()或者this.statusPreRender()或者statusDestroyed()为true，此函数才允许执行。
+	 * 注意：
+	 * 只有this.statusPreInit()或者this.statusInited()或者this.statusPreRender()或者statusDestroyed()为true，此函数才允许执行。
+	 * 特别地，当是this.statusPreInit()时，此函数内部会先调用chart.init()执行初始化，然后在执行渲染。
 	 * 注意：
 	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
 	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
 	 */
 	chartBase.render = function()
 	{
+		if(this.statusPreInit())
+			this.init();
+		
 		if(!this.statusInited() && !this.statusPreRender() && !this.statusDestroyed())
 			throw new Error("chart is illegal state for render()");
 		
 		var $element = this.elementJquery();
 		
 		if(chartFactory.renderedChart($element) != null)
-			throw new Error("chart element '#"+this.elementId+"' has been rendered as another chart");
+			throw new Error("element '#"+this.elementId+"' has been rendered as chart");
 		
 		this._isRender = true;
 		
@@ -1112,8 +1120,7 @@
 	/**
 	 * 更新图表。
 	 * 此函数在图表生命周期内允许被调用多次。 
-	 *
-	 * 注意：此函数在图表渲染完成后才可调用。
+	 * 更新中的图表处于this.statusUpdating()状态，更新完成后处于this.statusUpdated()状态。 
 	 * 
 	 * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此函数才会执行。
 	 * 
@@ -1212,6 +1219,7 @@
 	
 	/**
 	 * 销毁图表，释放图表占用的资源、恢复图表HTML元素初值。
+	 * 销毁中的图表处于this.statusDestroying()状态，销毁完成后处于this.statusDestroyed()状态。
 	 * 
 	 * 图表渲染器实现相关：
 	 * 图表渲染器应实现destroy函数，以支持此特性。

@@ -695,16 +695,16 @@
 	 */
 	dashboardBase.render = function()
 	{
+		if(!this.id)
+			throw new Error("[dashboard.id] required");
+		if(!this.renderContext)
+			throw new Error("[dashboard.renderContext] required");
+		
 		if(this._status != dashboardStatusConst.PRE_RENDER
 				&& this._status != dashboardStatusConst.DESTROYED)
 		{
 			throw new Error("dashboard is illegal state for render()");
 		}
-		
-		if(!this.id)
-			throw new Error("[dashboard.id] required");
-		if(!this.renderContext)
-			throw new Error("[dashboard.renderContext] required");
 		
 		this._status = dashboardStatusConst.RENDERING;
 		
@@ -1550,7 +1550,7 @@
 	{
 		try
 		{
-			this._doRenderChart(chart);
+			chart.render();
 		}
 		catch(e)
 		{
@@ -1559,16 +1559,6 @@
 			
 			chartFactory.logException(e);
 		}
-	};
-	
-	/**
-	 * 执行渲染指定图表。
-	 * 
-	 * @param chart 图表对象
-	 */
-	dashboardBase._doRenderChart = function(chart)
-	{
-		return chart.render();
 	};
 	
 	/**
