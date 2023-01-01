@@ -124,8 +124,11 @@
 	// dashboardStatusConst开始
 	//----------------------------------------
 	
-	/**看板状态：准备render*/
-	dashboardStatusConst.PRE_RENDER = "PRE_RENDER";
+	/**看板状态：准备init*/
+	dashboardStatusConst.PRE_INIT = "PRE_INIT";
+	
+	/**看板状态：完成init*/
+	dashboardStatusConst.INITED = "INITED";
 	
 	/**看板状态：正在render*/
 	dashboardStatusConst.RENDERING = "RENDERING";
@@ -133,7 +136,10 @@
 	/**看板状态：完成render*/
 	dashboardStatusConst.RENDERED = "RENDERED";
 	
-	/**看板状态：已销毁*/
+	/**看板状态：正在destroy*/
+	dashboardStatusConst.DESTROYING = "DESTROYING";
+	
+	/**看板状态：完成destroy*/
 	dashboardStatusConst.DESTROYED = "DESTROYED";
 	
 	//----------------------------------------
@@ -182,7 +188,7 @@
 	dashboardFactory.LOCAL_UPDATE_IF_EMPTY_DATA_SET = true;
 	
 	/**
-	 * 初始化看板JSON对象，为其添加看板API，为看版内的图表JSON对象添加图表API。
+	 * 初始化看板JSON对象，为其添加看板API，为看版内的图表JSON对象添加图表API，并设置状态：dashboard.statusPreInit(true)。
 	 * 
 	 * @param dashboard 看板JSON对象，格式应为：
 	 *				{
@@ -206,7 +212,7 @@
 		for(var i=0; i<charts.length; i++)
 			this._initChart(dashboard, charts[i]);
 		
-		dashboard._status = dashboardStatusConst.PRE_RENDER;
+		dashboard.statusPreInit(true);
 	};
 	
 	dashboardFactory._initChart = function(dashboard, chart)
@@ -684,29 +690,27 @@
 	//----------------------------------------
 	
 	/**
-	 * 渲染看板。
+	 * 初始化看板，使用<body>元素上的dg-*属性值初始化看板，使用图表元素上的dg-*属性值初始化看板内所有图标。
+	 * 看板初始化后处于this.statusInited()状态。
+	 * 此函数在看板生命周期内仅允许调用一次，在dashboard.destroy()后允许再次调用。 
 	 * 
-	 * 注意：DOM访问相关的逻辑都应该在此函数内/后执行，确保看板内元素属性引用的JS变量只要在此函数调用前定义即可。
+	 * 注意：只有this.statusPreInit()或者this.statusDestroyed()为true时，此函数才允许执行。
 	 * 
 	 * 看板生命周期：
-	 * dashboard.render() -->-- dashboard.destroy() -->--|
-	 *       |                                           |
-	 *       |--------------------<----------------------|
+	 * dashboard.init() -->-- dashboard.render() -->-- dashboard.destroy() -->--|
+	 *       |                       |                                          |
+	 *       |                       |---------------------<--------------------| 
+	 *       |------------------------------<-----------------------------------| 
 	 */
-	dashboardBase.render = function()
+	dashboardBase.init = function()
 	{
 		if(!this.id)
 			throw new Error("[dashboard.id] required");
 		if(!this.renderContext)
 			throw new Error("[dashboard.renderContext] required");
 		
-		if(this._status != dashboardStatusConst.PRE_RENDER
-				&& this._status != dashboardStatusConst.DESTROYED)
-		{
-			throw new Error("dashboard is illegal state for render()");
-		}
-		
-		this._status = dashboardStatusConst.RENDERING;
+		if(!this.statusPreInit() && !this.statusDestroyed())
+			throw new Error("dashboard is illegal state for init()");
 		
 		this._initRenderContext();
 		this._initListener();
@@ -714,16 +718,7 @@
 		this._initChartResizeHandler();
 		this._initCharts();
 		
-		var doRender = true;
-		
-		var listener = this.listener();
-		if(listener && listener.onRender)
-		  doRender = listener.onRender(this);
-		
-		if(doRender != false)
-		{
-			this.doRender();
-		}
+		this.statusInited(true);
 	};
 	
 	/**
@@ -811,7 +806,7 @@
 		{
 			setTimeout(function()
 			{
-				if(thisDashboard._status == dashboardStatusConst.RENDERED)
+				if(thisDashboard.statusRendered())
 				{
 					var charts = thisDashboard.charts;
 					
@@ -842,52 +837,8 @@
 			if(chart.statusPreInit() || chart.statusDestroyed())
 			{
 				chart.init();
-				//设置为准备渲染状态，使得后续看板可自动渲染图表
-				chart.statusPreRender(true);
 			}
 		}
-	};
-	
-	/**
-	 * 执行看板渲染。
-	 */
-	dashboardBase.doRender = function()
-	{
-		if(this._status != dashboardStatusConst.RENDERING)
-			throw new Error("dashboard is illegal state for doRender()");
-		
-		this._status = dashboardStatusConst.RENDERED;
-		
-		this._renderForms();
-		this.startHandleCharts();
-		
-		var listener = this.listener();
-		if(listener && listener.render)
-			  listener.render(this);
-	};
-	
-	/**
-	 * 渲染你看板表单。
-	 * 它将看板页面内的所有<form dg-dashboard-form="...">元素渲染为看板表单。
-	 */
-	dashboardBase._renderForms = function()
-	{
-		var $forms = $("form[dg-dashboard-form]", document.body);
-		
-		var dashboard = this;
-		$forms.each(function()
-		{
-			dashboard.renderForm(this);
-		});
-	};
-	
-	/**
-	 * 校验看板已完成render。
-	 */
-	dashboardBase._assertRendered = function()
-	{
-		if(this._status != dashboardStatusConst.RENDERED)
-			throw new Error("dashboard not rendered");
 	};
 	
 	/**
@@ -1118,6 +1069,101 @@
 	};
 	
 	/**
+	 * 渲染看板。
+	 * 渲染中的看板处于this.statusRendering()状态，渲染完成后处于this.statusRendered()状态。 
+	 * 此函数在看板生命周期内仅允许调用一次，在dashboard.destroy()后允许再次调用。
+	 * 
+	 * 注意：
+	 * 只有this.statusPreInit()或者this.statusInited()或者this.statusDestroyed()为true，此函数才允许执行。
+	 * 特别地，当是this.statusPreInit()时，此函数内部会先调用this.init()执行初始化，然后在执行渲染。
+	 */
+	dashboardBase.render = function()
+	{
+		if(this.statusPreInit())
+			this.init();
+		
+		if(!this.statusInited() && !this.statusDestroyed())
+			throw new Error("dashboard is illegal state for render()");
+		
+		this.statusRendering(true);
+		
+		var doRender = true;
+		
+		var listener = this.listener();
+		if(listener && listener.onRender)
+			doRender = listener.onRender(this);
+		
+		if(doRender != false)
+		{
+			this.doRender();
+		}
+	};
+	
+	/**
+	 * 执行看板渲染，渲染所有看板表单元素，渲染所有符合状态的图表元素；
+	 * 渲染看版内所有处于chart.statusPreRender()或者chart.statusDestroyed()状态的图表；
+	 */
+	dashboardBase.doRender = function()
+	{
+		if(!this.statusRendering())
+			throw new Error("dashboard is illegal state for doRender()");
+		
+		this._renderForms();
+		this._prepareDoRenderCharts();
+		this.startHandleCharts();
+		
+		this.statusRendered(true);
+	};
+	
+	dashboardBase._prepareDoRenderCharts = function()
+	{
+		if(!this.charts)
+			return;
+		
+		for(var i=0; i<this.charts.length; i++)
+		{
+			var chart = this.charts[i];
+			
+			if(chart.statusInited() || chart.statusDestroyed())
+			{
+				chart.statusPreRender(true);
+			}
+		}
+	};
+	
+	/**
+	 * 渲染你看板表单。
+	 */
+	dashboardBase._renderForms = function()
+	{
+		var $forms = $("form[dg-dashboard-form]", document.body);
+		
+		var dashboard = this;
+		$forms.each(function()
+		{
+			dashboard.renderForm(this);
+		});
+	};
+	
+	/**
+	 * 校验看板是否已渲染。
+	 */
+	dashboardBase._assertRender = function()
+	{
+		if(!this.isRender())
+			throw new Error("dashboard not render");
+	};
+	
+	/**
+	 * 校验看板是否处于活跃状态。
+	 */
+	dashboardBase._assertActive = function()
+	{
+		if(!this.isActive())
+			throw new Error("dashboard not active");
+	};
+	
+	/**
 	 * 渲染看板表单。
 	 * 看板表单提交时会自动将表单输入值设置为目标图表的数据集参数值，并刷新图表。
 	 * 
@@ -1173,7 +1219,7 @@
 	 */
 	dashboardBase.renderForm = function(form, config)
 	{
-		this._assertRendered();
+		this._assertRender();
 		
 		form = $(form);
 		
@@ -1267,7 +1313,7 @@
 	 */
 	dashboardBase.resizeChart = function(chartInfo)
 	{
-		this._assertRendered();
+		this._assertActive();
 		
 		var chart = this.chartOf(chartInfo);
 		chart.resize();
@@ -1278,7 +1324,7 @@
 	 */
 	dashboardBase.resizeAllCharts = function()
 	{
-		this._assertRendered();
+		this._assertActive();
 		
 		for(var i=0; i<this.charts.length; i++)
 			this.charts[i].resize();
@@ -1291,7 +1337,7 @@
 	 */
 	dashboardBase.refreshData = function(chartInfo)
 	{
-		this._assertRendered();
+		this._assertActive();
 		
 		var chart = this.chartOf(chartInfo);
 		chart.refreshData();
@@ -1311,7 +1357,7 @@
 	 */
 	dashboardBase.startHandleCharts = function()
 	{
-		this._assertRendered();
+		this._assertRender();
 		
 		if(this._doHandlingCharts == true)
 			return false;
@@ -1556,7 +1602,6 @@
 		{
 			//设置为渲染出错状态，避免渲染失败后会_doHandleCharts中会无限尝试渲染
 			chart.status(chartStatusConst.RENDER_ERROR);
-			
 			chartFactory.logException(e);
 		}
 	};
@@ -1768,7 +1813,7 @@
 	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
 		//异步加载无需看板已渲染
-		//this._assertRendered();
+		//this._assertActive();
 		
 		element = $(element);
 		
@@ -1849,7 +1894,7 @@
 	dashboardBase.loadCharts = function(element, chartWidgetId, ajaxOptions)
 	{
 		//异步加载无需看板已渲染
-		//this._assertRendered();
+		//this._assertActive();
 		
 		element = $(element);
 		
@@ -1953,7 +1998,7 @@
 	dashboardBase.loadUnsolvedCharts = function(element, ajaxOptions)
 	{
 		//异步加载无需看板已渲染
-		//this._assertRendered();
+		//this._assertActive();
 		
 		//(ajaxOptions)
 		if(arguments.length == 1 && !chartFactory.isDomOrJquery(element))
@@ -2159,8 +2204,6 @@
 	 */
 	dashboardBase.batchSetDataSetParamValues = function(sourceData, batchSet, sourceValueContext)
 	{
-		this._assertRendered();
-		
 		sourceValueContext = (sourceValueContext === undefined ? sourceData : sourceValueContext);
 		
 		var targetCharts = [];
@@ -2263,19 +2306,26 @@
 	};
 	
 	/**
-	 * 销毁看板。
-	 * 销毁后，可以重新调用dashboard.render()函数。
+	 * 销毁看板，销毁所有看板表单、所有图表。
+	 * 销毁中的看板处于this.statusDestroying()状态，看板完成后处于this.statusDestroyed()状态。
 	 */
 	dashboardBase.destroy = function()
 	{
-		if(this._status == dashboardStatusConst.DESTROYED)
+		if(!this.isRender() || this.statusDestroying() || this.statusDestroyed())
 			return;
 		
-		this._status = dashboardStatusConst.DESTROYED;
+		this.statusDestroying(true);
 		
-		this.stopHandleCharts();
-		this._destroyCharts();
-		this._destroyForms();
+		var doDestroy = true;
+		
+		var listener = this.listener();
+		if(listener && listener.onDestroy)
+			doDestroy = listener.onDestroy(this);
+		
+		if(doDestroy != false)
+		{
+			this.doDestroy();
+		}
 	};
 	
 	dashboardBase._destroyCharts = function()
@@ -2369,28 +2419,181 @@
 	};
 	
 	/**
-	 * 获取图表展示数据的原始数据索引，应是已由chartBase.originalDataIndex()、chartBase.originalDataIndexes()函数设置过。
+	 * 看板是否正在渲染、完成渲染，且完成销毁。
 	 * 
 	 * @since 4.4.0
 	 */
 	dashboardBase.isRender = function()
 	{
-		return (this._status == dashboardStatusConst.RENDERING || this._status == dashboardStatusConst.RENDERED);
+		return (this._isRender == true);
+	};
+	
+	/**
+	 * 看板是否处于活跃可用的状态（已完成渲染且未执行销毁）。
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.isActive = function()
+	{
+		return (this._isActive == true);
+	};
+	
+	/**
+	 * 获取/设置看板状态。
+	 * 注意：此函数的设置操作仅设置状态值，不执行任何其他逻辑，设置看板生命周期状态应使用具体的this.status*(true)函数。
+	 * 
+	 * @param status 可选，要设置的状态，不设置则执行获取操作
+	 */
+	dashboardBase.status = function(status)
+	{
+		if(status === undefined)
+			return (this._status || "");
+		else
+			this._status = status;
+	};
+	
+	/**
+	 * 看板是否为/设置为：准备初始化。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.statusPreInit = function(set)
+	{
+		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = false;
+			this.status(dashboardStatusConst.PRE_INIT);
+		}
+		else
+			return (this.status() == dashboardStatusConst.PRE_INIT);
+	};
+	
+	/**
+	 * 图表是否为/设置为：完成初始化。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.statusInited = function(set)
+	{
+		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = false;
+			this.status(dashboardStatusConst.INITED);
+		}
+		else
+			return (this.status() == dashboardStatusConst.INITED);
+	};
+	
+	/**
+	 * 图表是否为/设置为：渲染中。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.statusRendering = function(set)
+	{
+		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = true;
+			this.status(dashboardStatusConst.RENDERING);
+		}
+		else
+			return (this.status() == dashboardStatusConst.RENDERING);
+	};
+	
+	/**
+	 * 图表是否为/设置为：完成渲染。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.statusRendered = function(set)
+	{
+		if(set === true)
+		{
+			this._isActive = true;
+			this._isRender = true;
+			this.status(dashboardStatusConst.RENDERED);
+			
+			var listener = this.listener();
+			if(listener && listener.render)
+				listener.render(this);
+		}
+		else
+			return (this.status() == dashboardStatusConst.RENDERED);
+	};
+	
+	/**
+	 * 图表是否为/设置为：正在销毁。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.statusDestroying = function(set)
+	{
+		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = true;
+			this.status(dashboardStatusConst.DESTROYING);
+		}
+		else
+			return (this.status() == dashboardStatusConst.DESTROYING);
+	};
+	
+	/**
+	 * 图表是否为/设置为：完成销毁。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.statusDestroyed = function(set)
+	{
+		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = false;
+			this.status(dashboardStatusConst.DESTROYED);
+			
+			var listener = this.listener();
+			if(listener && listener.destroy)
+				listener.destroy(this);
+		}
+		else
+			return (this.status() == dashboardStatusConst.DESTROYED);
+	};
+	
+	/**
+	 * 执行看板销毁。
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.doDestroy = function()
+	{
+		if(!this.statusDestroying())
+			throw new Error("dashboard is illegal state for doDestroy()");
+		
+		this.stopHandleCharts();
+		this._destroyCharts();
+		this._destroyForms();
+		
+		this.statusDestroyed(true);
 	};
 	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
-	
-	// < @deprecated 兼容4.3.1版本的API，将在未来版本移除，此函数的逻辑已合并至dashboardBase.render()函数内
-	/**
-	 * 初始化看板。
-	 */
-	dashboardBase.init = function()
-	{
-		chartFactory.logWarn("[dashboard.init()] is deprecated, it is empty now, only for API compatibility");
-	};
-	// > @deprecated 兼容4.3.1版本的API，将在未来版本移除，此函数的逻辑已合并至dashboardBase.render()函数内
 	
 	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用dashboardBase.originalDataIndex()函数
 	/**

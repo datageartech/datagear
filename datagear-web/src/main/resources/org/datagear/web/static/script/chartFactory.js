@@ -378,8 +378,8 @@
 	
 	/**
 	 * 初始化图表，使用图表元素上的dg-*属性值初始化图表。
-	 * 此函数在图表生命周期内仅允许调用一次。 
 	 * 图表初始化后处于this.statusInited()状态。
+	 * 此函数在图表生命周期内仅允许调用一次，在this.destroy()后允许再次调用。 
 	 * 
 	 * 注意：只有this.statusPreInit()或者this.statusDestroyed()为true，此函数才允许执行。
 	 * 注意：初始化图表前应确保已调用chartFactory.initRenderContext(this.renderContext)。
@@ -539,6 +539,13 @@
 					if(dl)
 						return dl.update(chart, results);
 				},
+				destroy: function(chart)
+				{
+					var dl = this._findListenerOfFunc("destroy");
+					
+					if(dl)
+						return dl.destroy(chart);
+				},
 				onRender: function(chart)
 				{
 					var dl = this._findListenerOfFunc("onRender");
@@ -552,6 +559,13 @@
 					
 					if(dl)
 						return dl.onUpdate(chart, results);
+				},
+				onDestroy: function(chart)
+				{
+					var dl = this._findListenerOfFunc("onDestroy");
+					
+					if(dl)
+						return dl.onDestroy(chart);
 				},
 				_findListenerOfFunc: function(funcName)
 				{
@@ -982,25 +996,8 @@
 		if(!this.statusInited() && !this.statusPreRender() && !this.statusDestroyed())
 			throw new Error("chart is illegal state for render()");
 		
-		var $element = this.elementJquery();
-		
-		if(chartFactory.renderedChart($element) != null)
+		if(chartFactory.renderedChart(this.elementJquery()) != null)
 			throw new Error("element '#"+this.elementId+"' has been rendered as chart");
-		
-		this._isRender = true;
-		
-		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
-		this._createChartThemeCssIfNon();
-		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
-		if(chartFactory.isStaticPosition($element))
-			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
-		$element.addClass(this.themeStyleName());
-		
-		var options = this.options();
-		if(!options || options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
-			$element.addClass("dg-chart-beautify-scrollbar");
-		
-		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
 		
 		this.statusRendering(true);
 		
@@ -1008,7 +1005,7 @@
 		
 		var listener = this.listener();
 		if(listener && listener.onRender)
-		  doRender = listener.onRender(this);
+			doRender = listener.onRender(this);
 		
 		if(doRender != false)
 		{
@@ -1099,6 +1096,21 @@
 	{
 		if(!this.statusRendering())
 			throw new Error("chart is illegal state for doRender()");
+		
+		var $element = this.elementJquery();
+		
+		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
+		this._createChartThemeCssIfNon();
+		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
+		if(chartFactory.isStaticPosition($element))
+			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
+		$element.addClass(this.themeStyleName());
+		
+		var options = this.options();
+		if(!options || options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
+			$element.addClass("dg-chart-beautify-scrollbar");
+		
+		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
 		
 		var async = this.isAsyncRender();
 		
@@ -1391,7 +1403,11 @@
 	chartBase.statusPreRender = function(set)
 	{
 		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = false;
 			this.status(chartStatusConst.PRE_RENDER);
+		}
 		else
 			return (this.status() == chartStatusConst.PRE_RENDER);
 	};
@@ -1404,7 +1420,11 @@
 	chartBase.statusRendering = function(set)
 	{
 		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = true;
 			this.status(chartStatusConst.RENDERING);
+		}
 		else
 			return (this.status() == chartStatusConst.RENDERING);
 	};
@@ -1413,24 +1433,23 @@
 	 * 图表是否为/设置为：完成render。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
-	 * @param postProcess 可选，当set为true时，是否执行渲染后置操作，比如渲染交互设置表单、绑定初始事件、调用监听器、，默认为true
 	 */
-	chartBase.statusRendered = function(set, postProcess)
+	chartBase.statusRendered = function(set)
 	{
 		if(set === true)
 		{
 			this._isActive = true;
+			this._isRender = true;
 			this.status(chartStatusConst.RENDERED);
 			
-			if(postProcess != false)
-				this._postProcessRendered();
+			this._postProcessRendered();
 		}
 		else
 			return (this.status() == chartStatusConst.RENDERED);
 	};
 	
 	/**
-	 * 执行渲染完成后置处理。
+	 * 渲染完成后置处理。
 	 */
 	chartBase._postProcessRendered = function()
 	{
@@ -1439,7 +1458,7 @@
 		
 		var listener = this.listener();
 		if(listener && listener.render)
-		  listener.render(this);
+			listener.render(this);
 	};
 	
 	/**
@@ -1470,7 +1489,11 @@
 	chartBase.statusPreUpdate = function(set)
 	{
 		if(set === true)
+		{
+			this._isActive = true;
+			this._isRender = true;
 			this.status(chartStatusConst.PRE_UPDATE);
+		}
 		else
 			return (this.status() == chartStatusConst.PRE_UPDATE);
 	};
@@ -1483,7 +1506,11 @@
 	chartBase.statusUpdating = function(set)
 	{
 		if(set === true)
+		{
+			this._isActive = true;
+			this._isRender = true;
 			this.status(chartStatusConst.UPDATING);
+		}
 		else
 			return (this.status() == chartStatusConst.UPDATING);
 	};
@@ -1492,16 +1519,16 @@
 	 * 图表是否为/设置为：完成update。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
-	 * @param postProcess 可选，当set为true时，是否执行更新后置操作，比如调用监听器、，默认为true
 	 */
-	chartBase.statusUpdated = function(set, postProcess)
+	chartBase.statusUpdated = function(set)
 	{
 		if(set === true)
 		{
+			this._isActive = true;
+			this._isRender = true;
 			this.status(chartStatusConst.UPDATED);
 			
-			if(postProcess != false)
-				this._postProcessUpdated();
+			this._postProcessUpdated();
 		}
 		else
 			return (this.status() == chartStatusConst.UPDATED);
@@ -1514,7 +1541,7 @@
 	{
 		var listener = this.listener();
 		if(listener && listener.update)
-		  listener.update(this, this.updateResults());
+			listener.update(this, this.updateResults());
 	};
 	
 	/**
@@ -1525,7 +1552,11 @@
 	chartBase.statusDestroying = function(set)
 	{
 		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = true;
 			this.status(chartStatusConst.DESTROYING);
+		}
 		else
 			return (this.status() == chartStatusConst.DESTROYING);
 	};
@@ -1534,9 +1565,8 @@
 	 * 图表是否为/设置为：已销毁。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
-	 * @param postProcess 可选，当set为true时，是否执行更新后置操作，比如调用监听器的destroy函数，默认为true
 	 */
-	chartBase.statusDestroyed = function(set, postProcess)
+	chartBase.statusDestroyed = function(set)
 	{
 		if(set === true)
 		{
@@ -1544,25 +1574,22 @@
 			this._isRender = false;
 			this.status(chartStatusConst.DESTROYED);
 			
-			if(postProcess != false)
-				this._postProcessDestroyed();
+			this._postProcessDestroyed();
 		}
 		else
 			return (this.status() == chartStatusConst.DESTROYED);
 	};
 	
-	/**
-	 * 执行销毁完成后置处理。
-	 */
 	chartBase._postProcessDestroyed = function()
 	{
 		var listener = this.listener();
 		if(listener && listener.destroy)
-		  listener.destroy(this);
+			listener.destroy(this);
 	};
 	
 	/**
 	 * 获取/设置图表状态。
+	 * 注意：此函数的设置操作仅设置状态值，不执行任何其他逻辑，设置图表生命周期状态应使用具体的this.status*(true)函数。
 	 * 
 	 * @param status 可选，要设置的状态，不设置则执行获取操作
 	 */
@@ -3915,7 +3942,11 @@
 	chartBase.statusPreInit = function(set)
 	{
 		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = false;
 			this.status(chartStatusConst.PRE_INIT);
+		}
 		else
 			return (this.status() == chartStatusConst.PRE_INIT);
 	};
@@ -3930,7 +3961,11 @@
 	chartBase.statusInited = function(set)
 	{
 		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = false;
 			this.status(chartStatusConst.INITED);
+		}
 		else
 			return (this.status() == chartStatusConst.INITED);
 	};
