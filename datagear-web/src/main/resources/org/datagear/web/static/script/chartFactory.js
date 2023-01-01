@@ -1392,7 +1392,7 @@
 		if(this.isActive())
 			return;
 		
-		throw new Error("chart is not active");
+		throw new Error("chart not active");
 	};
 	
 	/**
@@ -1787,7 +1787,7 @@
 		var re = (chartFactory.isNumber(chartDataSet) ? this.chartDataSetAt(chartDataSet) : chartDataSet);
 		
 		if(!nullable && re == null)
-			throw new Error("chartDataSet not found for : " + chartDataSet);
+			throw new Error("chart data set not found for : " + chartDataSet);
 		
 		return re;
 	};
@@ -1820,7 +1820,7 @@
 			var dataSet = chartDataSet.dataSet;
 			
 			if(!dataSet.params || dataSet.params.length <= name)
-				throw new Error("No data set param defined at index : "+name);
+				throw new Error("no data set param defined at index : "+name);
 			
 			name = dataSet.params[name].name;
 		}
@@ -2183,7 +2183,7 @@
 		}
 		
 		if(nonEmpty && re.length == 0)
-			throw new Error("DataSetProperty with '"+dataSignName+"' sign required");
+			throw new Error("data set property with '"+dataSignName+"' sign required");
 		
 		return re;
 	};
@@ -2556,7 +2556,7 @@
 		var internal = this.internal();
 		
 		if(!this._isEchartsInstance(internal))
-			throw new Error("Not ECharts chart");
+			throw new Error("chart not ECharts");
 		
 		internal.setOption(options, opts);
 	};

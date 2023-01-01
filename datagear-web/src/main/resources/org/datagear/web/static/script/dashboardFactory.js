@@ -690,7 +690,7 @@
 	//----------------------------------------
 	
 	/**
-	 * 初始化看板，使用<body>元素上的dg-*属性值初始化看板，使用图表元素上的dg-*属性值初始化看板内所有图标。
+	 * 初始化看板，使用<body>元素上的dg-*属性值初始化看板，使用图表元素上的dg-*属性值初始化看板内所有图表。
 	 * 看板初始化后处于this.statusInited()状态。
 	 * 此函数在看板生命周期内仅允许调用一次，在dashboard.destroy()后允许再次调用。 
 	 * 
@@ -1243,7 +1243,16 @@
 					var charts = dashboard.batchSetDataSetParamValues(formData, batchSet, [ formData, thisForm ]);
 					
 					for(var i=0; i<charts.length; i++)
-						charts[i].refreshData();
+					{
+						try
+						{
+							charts[i].refreshData();
+						}
+						catch(e)
+						{
+							chartFactory.logException(e);
+						}
+					}
 				}
 			}
 		},
@@ -1813,7 +1822,7 @@
 	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
 		//异步加载无需看板已渲染
-		//this._assertActive();
+		//this._assertRender();
 		
 		element = $(element);
 		
@@ -1894,7 +1903,7 @@
 	dashboardBase.loadCharts = function(element, chartWidgetId, ajaxOptions)
 	{
 		//异步加载无需看板已渲染
-		//this._assertActive();
+		//this._assertRender();
 		
 		element = $(element);
 		
@@ -1998,7 +2007,7 @@
 	dashboardBase.loadUnsolvedCharts = function(element, ajaxOptions)
 	{
 		//异步加载无需看板已渲染
-		//this._assertActive();
+		//this._assertRender();
 		
 		//(ajaxOptions)
 		if(arguments.length == 1 && !chartFactory.isDomOrJquery(element))

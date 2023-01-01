@@ -208,7 +208,8 @@
 				$submitBtn = $("<button type='submit' />").html(options.submitText).appendTo($foot);
 		}
 		
-		$form.submit(function()
+		var submitHandlerKey = chartFactory.builtinPropName("dspvFormSubmitHandler");
+		var submitHandler = function()
 		{
 			if(options.readonly)
 				return false;
@@ -230,7 +231,10 @@
 			}
 			else
 				return false;
-		});
+		};
+		
+		$form.data(submitHandlerKey, submitHandler);
+		$form.on("submit", submitHandler);
 		
 		var formEle = $form[0];
 		
@@ -272,7 +276,9 @@
 					chartFactory.derivedElements(this, null);
 				}
 				
-				thisForm.off("submit");
+				var submitHandlerKey = chartFactory.builtinPropName("dspvFormSubmitHandler");
+				var submitHandler = thisForm.data(submitHandlerKey);
+				thisForm.off("submit", submitHandler);
 				thisForm.empty();
 			}
 		});
