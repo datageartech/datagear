@@ -1706,7 +1706,7 @@
 			this.plugin.renderer.on(this, eventType, handler);
 		}
 		else
-			throw new Error("chart ["+this.id+"] 's [renderer.on] undefined");
+			throw new Error("chart '#"+this.elementId+"' [renderer.on] undefined");
 	};
 	
 	/**
@@ -1739,20 +1739,17 @@
 			this.echartsOffEventHandler(eventType, handler);
 		}
 		else
-			throw new Error("chart ["+this.id+"] 's [renderer.off] undefined");
+			throw new Error("chart '#"+this.elementId+"' [renderer.off] undefined");
 	};
 	
 	/**
-	 * 图表的所有/指定数据集参数值是否齐备。
+	 * 判断图表的所有数据集参数值是否准备就绪，即：所有必填参数值都不为null。
 	 * 
-	 * @param chartDataSet 可选，图表数据集、索引，默认为所有
-	 * @param msg 可选，必须作为第二个参数，格式应为：{ ... }, 当校验参数值未齐备时用于写入必填参数信息：{ chartDataSetIndex: 数值, paramName: 参数名 }
+	 * @param msg 可选，格式应为：{}, 当校验参数值未齐备时用于写入必填参数信息：{ chartDataSetIndex: 数值, paramName: 参数名 }
 	 */
-	chartBase.isDataSetParamValueReady = function(chartDataSet, msg)
+	chartBase.isDataSetParamValueReady = function(msg)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet, true);
-		
-		var chartDataSets = (chartDataSet ? [ chartDataSet ] : this.chartDataSets);
+		var chartDataSets = (this.chartDataSets || []);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
