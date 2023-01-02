@@ -640,13 +640,12 @@
 		}
 		else
 		{
-			//不能使用如下方式实现，当在A图表监听器的update函数中调用参数化B图表的refreshData()时，
+			//这里不能使用this.statusPreUpdate(true)的方式实现
+			//当在A图表监听器的update函数中调用参数化B图表的refreshData()时，
 			//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
 			//而导致refreshData()失效
-			//this._updateAjaxErrorTime(null);
-			//this.statusPreUpdate(true);
 			
-			this._inRequestRefreshData(true);
+			this._requestRefreshData();
 		}
 	};
 	
@@ -675,9 +674,35 @@
 		return ((time - errorTime) <= dashboardFactory.UPDATE_AJAX_RETRY_SECONDS*1000);
 	};
 	
-	chartBase._inRequestRefreshData = function(inRequest)
+	chartBase._requestRefreshData = function()
 	{
-		return chartFactory.extValueBuiltin(this, "inRequestRefreshData", inRequest);
+		var requestIdx = chartFactory.extValueBuiltin(this, "requestRefreshDataIdx");
+		if(requestIdx == null || requestIdx < 0)
+			requestIdx = 0;
+		
+		requestIdx = requestIdx + 1;
+		
+		chartFactory.extValueBuiltin(this, "requestRefreshDataIdx", requestIdx);
+	};
+	
+	chartBase._isRequestRefreshData = function()
+	{
+		var requestIdx = chartFactory.extValueBuiltin(this, "requestRefreshDataIdx");
+		return (requestIdx != null && requestIdx > 0);
+	};
+	
+	chartBase._startRefreshData = function()
+	{
+		var requestIdx = chartFactory.extValueBuiltin(this, "requestRefreshDataIdx");
+		this._handleRefreshDataIdx = requestIdx;
+	};
+	
+	chartBase._finishRefreshDataIfMatch = function()
+	{
+		var requestIdxNow = chartFactory.extValueBuiltin(this, "requestRefreshDataIdx");
+		
+		if(this._handleRefreshDataIdx == requestIdxNow)
+			chartFactory.extValueBuiltin(this, "requestRefreshDataIdx", 0);
 	};
 	
 	//----------------------------------------
@@ -1458,9 +1483,11 @@
 			return;
 		
 		var data = this._buildUpdateDashboardAjaxData(preUpdateCharts);
-		var dashboard = this;
 		
-		dashboard._setInUpdateAjax(preUpdateCharts, true);
+		this._setInUpdateAjax(preUpdateCharts, true);
+		this._startChartRefreshData(preUpdateCharts);
+		
+		var dashboard = this;
 		
 		$.ajax({
 			contentType : "application/json",
@@ -1501,7 +1528,7 @@
 				dashboard._handleChartResultErrors(chartResultErrorMessages);
 				
 				dashboard._setUpdateTime(preUpdateCharts, updateTime);				
-				dashboard._setInRequestRefreshData(preUpdateCharts, false);
+				dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
 			},
 			error : function()
@@ -1510,7 +1537,7 @@
 				
 				dashboard._setUpdateTime(preUpdateCharts, updateTime);
 				dashboard._setUpdateAjaxErrorTime(preUpdateCharts, updateTime);
-				dashboard._setInRequestRefreshData(preUpdateCharts, false);
+				dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
 			}
 		});
@@ -1522,6 +1549,7 @@
 			return;
 		
 		var updateTime = chartFactory.currentDateMs();
+		this._startChartRefreshData(preUpdateCharts);
 		
 		for(var i=0; i<preUpdateCharts.length; i++)
 		{
@@ -1529,7 +1557,7 @@
 		}
 		
 		this._setUpdateTime(preUpdateCharts, updateTime);			
-		this._setInRequestRefreshData(preUpdateCharts, false);
+		this._finishChartRefreshDataIfMatch(preUpdateCharts);
 	};
 	
 	/**
@@ -1555,7 +1583,7 @@
 		{
 			wait = false;
 		}
-		else if(chart._inRequestRefreshData())
+		else if(chart._isRequestRefreshData())
 		{
 			wait = true;
 		}
@@ -1742,18 +1770,30 @@
 		}
 	};
 	
-	dashboardBase._setInRequestRefreshData = function(chart, inRequest)
+	dashboardBase._startChartRefreshData = function(chart)
 	{
-		try
+		chart = ($.isArray(chart) ? chart : [ chart ]);
+		
+		for(var i=0; i<chart.length; i++)
 		{
-			chart = ($.isArray(chart) ? chart : [ chart ]);
-			
-			for(var i=0; i<chart.length; i++)
-				chart[i]._inRequestRefreshData(inRequest);
+			chart[i]._startRefreshData();
 		}
-		catch(e)
+	};
+	
+	dashboardBase._finishChartRefreshDataIfMatch = function(chart)
+	{
+		chart = ($.isArray(chart) ? chart : [ chart ]);
+		
+		for(var i=0; i<chart.length; i++)
 		{
-			chartFactory.logException(e);
+			try
+			{
+				chart[i]._finishRefreshDataIfMatch();
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
+			}
 		}
 	};
 	
