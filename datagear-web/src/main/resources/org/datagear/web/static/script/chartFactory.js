@@ -1146,6 +1146,9 @@
 		if(arguments.length == 0)
 			results = this.updateResults();
 		
+		if(results == null)
+			throw new Error("[results] required");
+		
 		this.statusUpdating(true);
 		
 		var doUpdate = true;
