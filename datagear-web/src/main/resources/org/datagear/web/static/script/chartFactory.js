@@ -987,17 +987,13 @@
 	 * 渲染中的图表处于this.statusRendering()状态，渲染完成后处于this.statusRendered()状态。 
 	 * 
 	 * 注意：
-	 * 只有this.statusPreInit()或者this.statusInited()或者this.statusPreRender()或者statusDestroyed()为true，此函数才允许执行。
-	 * 特别地，当是this.statusPreInit()时，此函数内部会先调用chart.init()执行初始化，然后在执行渲染。
+	 * 只有this.statusInited()或者this.statusPreRender()或者statusDestroyed()为true，此函数才允许执行。
 	 * 注意：
 	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
 	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
 	 */
 	chartBase.render = function()
 	{
-		if(this.statusPreInit())
-			this.init();
-		
 		if(!this.statusInited() && !this.statusPreRender() && !this.statusDestroyed())
 			throw new Error("chart is illegal state for render()");
 		
