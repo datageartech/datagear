@@ -39,20 +39,25 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <code>
  * <pre>
  * ...
- * &lt;html dg-dashboard-factory="..." dg-dashboard-var="..."
- * 	dg-dashboard-unimport="..." dg-loadable-chart-widgets="..."
- * 	dg-dashboard-auto-render="..."&gt;
+ * &lt;html
+ *     dg-dashboard-factory="..."
+ *     dg-dashboard-var="..."
+ *     dg-dashboard-unimport="..."
+ *     dg-loadable-chart-widgets="..."
+ *     dg-dashboard-code="..."
+ *     dg-dashboard-auto-render="..."（已废弃）
+ *     &gt;
  * ...
  * &lt;head&gt;
  * ...
  * &lt;/head&gt;
  * ...
  * &lt;body&gt;
- * ...
- * &lt;div id="..." dg-chart-widget="..."&gt;&lt;/div&gt;
- * ...
- * &lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;
- * ...
+ *     ...
+ *     &lt;div id="..." dg-chart-widget="..."&gt;&lt;/div&gt;
+ *     ...
+ *     &lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;
+ *     ...
  * &lt;/body&gt;
  * &lt;/html&gt;
  * </pre>
@@ -70,7 +75,11 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <code>html dg-loadable-charts</code>：选填，定义看板网页允许在页面端通过JS异步加载的{@linkplain ChartWidget}模式（{@linkplain LoadableChartWidgets}），多个以“,”隔开
  * </p>
  * <p>
- * <code>html dg-dashboard-auto-render</code>：选填，定义看板网页是否自动执行渲染函数，可选值：{@code "true"} 是；{@code "false"} 否。默认值为：{@code "true"}
+ * <code>html dg-dashboard-code</code>：选填，自定义看板脚本写入内容，可选值参考下面的<code>&lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;</code>
+ * </p>
+ * <p>
+ * <code>html dg-dashboard-auto-render</code>：已在4.4.0版本废弃，选填，定义看板网页是否自动执行渲染函数，可选值：{@code "true"}
+ * 是；{@code "false"} 否。默认值为：{@code "true"}
  * </p>
  * <p>
  * <code>div id</code>：选填，定义图表元素ID，如果不填，则会自动生成一个
@@ -81,11 +90,11 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <p>
  * <code>&lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;</code>：选填，自定义看板脚本写入位置，必须在<code>&lt;body&gt;&lt;/body&gt;</code>标签内，可选值：
  * <br>
- * {@code "init"} ：仅写入看板初始脚本，不写入调用渲染执行脚本；
- * <br>
- * {@code "render"} ：写入看板初始脚本、调用渲染执行脚本；
- * <br>
- * {@code 其他} ：由<code>dg-dashboard-auto-render</code>决定。
+ * {@code "instance"} ：不仅写入调用看板初始化函数的代码，不写入调用看板渲染函数的代码； <br>
+ * {@code "init"} ：仅写入调用看板初始化函数的代码，不写入调用看板渲染函数的代码； <br>
+ * {@code "render"} ：写入调用看板初始化函数的代码，写入调用看板渲染函数的代码； <br>
+ * {@code 其他}
+ * ：由<code>&lt;html&gt;</code>上的<code>dg-dashboard-code</code>、<code>dg-dashboard-auto-render</code>决定。
  * </p>
  * 
  * @author datagear@163.com
@@ -109,6 +118,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public static final String DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "loadable-chart-widgets";
 
+	/**
+	 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+	 */
+	@Deprecated
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-auto-render";
 
@@ -140,7 +153,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	/** 属性名：异步加载图表部件模式 */
 	private String attrNameLoadableChartWidgets = DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS;
 
-	/** 属性名：是否自动执行看板渲染函数 */
+	/**
+	 * 属性名：是否自动执行看板渲染函数
+	 * 
+	 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+	 */
+	@Deprecated
 	private String attrNameDashboardAutoRender = DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER;
 
 	/** 属性名：写入看板脚本标识属性 */
@@ -215,11 +233,21 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		this.attrNameLoadableChartWidgets = attrNameLoadableChartWidgets;
 	}
 
+	/**
+	 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+	 * @return
+	 */
+	@Deprecated
 	public String getAttrNameDashboardAutoRender()
 	{
 		return attrNameDashboardAutoRender;
 	}
 
+	/**
+	 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+	 * @param attrNameDashboardAutoRender
+	 */
+	@Deprecated
 	public void setAttrNameDashboardAutoRender(String attrNameDashboardAutoRender)
 	{
 		this.attrNameDashboardAutoRender = attrNameDashboardAutoRender;
@@ -349,18 +377,42 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * @param dashboard
 	 * @param dashboardInfo
 	 * @param writeScriptTag
-	 * @param writeDashboardInitCode
-	 * @param writeDashboardRenderCode
 	 * @throws IOException
 	 */
 	protected void writeDashboardScript(Writer out, RenderContext renderContext,
 			HtmlTplDashboardRenderAttr renderAttr, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo,
-			boolean writeScriptTag, boolean writeDashboardInitCode, Boolean writeDashboardRenderCode) throws IOException
+			boolean writeScriptTag) throws IOException
 	{
 		String globalDashboardVar = dashboardInfo.getDashboardVar();
 		if (StringUtil.isEmpty(globalDashboardVar))
 			globalDashboardVar = getDefaultDashboardVar();
 		
+		String dashboardCode = dashboardInfo.getDashboardCode();
+		boolean writeDashboardInit = false;
+		boolean writeDashboardRender = false;
+
+		// 只处理合法值，否则应由dg-dashboard-auto-render特性决定
+		if (DASHBOARD_CODE_ATTR_VALUE_INSTANCE.equalsIgnoreCase(dashboardCode))
+		{
+			writeDashboardInit = false;
+			writeDashboardRender = false;
+		}
+		else if (DASHBOARD_CODE_ATTR_VALUE_INIT.equalsIgnoreCase(dashboardCode))
+		{
+			writeDashboardInit = true;
+			writeDashboardRender = false;
+		}
+		else if (DASHBOARD_CODE_ATTR_VALUE_RENDER.equalsIgnoreCase(dashboardCode))
+		{
+			writeDashboardInit = true;
+			writeDashboardRender = true;
+		}
+		else
+		{
+			writeDashboardInit = true;
+			writeDashboardRender = dashboardInfo.isDashboardAutoRender();
+		}
+
 		String tmp0RenderContextVarName = renderAttr.genRenderContextVarName("Tmp0");
 		String tmp1RenderContextVarName = renderAttr.genRenderContextVarName("Tmp1");
 		String localDashboardVarName = renderAttr.genDashboardVarName("Tmp");
@@ -384,10 +436,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		out.write(this.localGlobalVarName + "." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
 		
-		if (writeDashboardInitCode)
+		if (writeDashboardInit)
 			writeDashboardJsInit(renderContext, renderAttr, out, dashboard);
 
-		if (writeDashboardRenderCode)
+		if (writeDashboardRender)
 			writeDashboardJsRender(renderContext, renderAttr, out, dashboard);
 		
 		out.write("})(this);");
@@ -629,8 +681,11 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				
 				if(attrs != null && attrs.containsKey(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode))
 				{
-					writeHtmlTplDashboardScriptCodeWithSet(isSelfCloseTagEnd(tagEnd),
-							attrs.get(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode));
+					String dashboardCode = attrs.get(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode);
+					if (!StringUtil.isEmpty(dashboardCode))
+						this.dashboardInfo.setDashboardCode(dashboardCode);
+
+					writeHtmlTplDashboardScriptCodeWithSet(isSelfCloseTagEnd(tagEnd));
 				}
 			}
 
@@ -692,41 +747,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 		protected void writeHtmlTplDashboardScriptWithSet() throws IOException
 		{
-			writeDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-					this.dashboardInfo, true, true, this.dashboardInfo.isDashboardAutoRender());
-
-			this.dashboardScriptWritten = true;
+			writeHtmlTplDashboardScriptCodeWithSet(true);
 		}
 		
-		protected void writeHtmlTplDashboardScriptCodeWithSet(boolean writeScriptTag, String codeMode) throws IOException
+		protected void writeHtmlTplDashboardScriptCodeWithSet(boolean writeScriptTag) throws IOException
 		{
-			boolean writeInitCode = false;
-			boolean writeRenderCode = false;
-			
-			//只处理合法值，否则应由dg-dashboard-auto-render特性决定
-			if (DASHBOARD_CODE_ATTR_VALUE_INSTANCE.equalsIgnoreCase(codeMode))
-			{
-				writeInitCode = false;
-				writeRenderCode = false;
-			}
-			else if (DASHBOARD_CODE_ATTR_VALUE_INIT.equalsIgnoreCase(codeMode))
-			{
-				writeInitCode = true;
-				writeRenderCode = false;
-			}
-			else if(DASHBOARD_CODE_ATTR_VALUE_RENDER.equalsIgnoreCase(codeMode))
-			{
-				writeInitCode = true;
-				writeRenderCode = true;
-			}
-			else
-			{
-				writeInitCode = true;
-				writeRenderCode = this.dashboardInfo.isDashboardAutoRender();
-			}
-			
 			writeDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-					this.dashboardInfo, writeScriptTag, writeInitCode, writeRenderCode);
+					this.dashboardInfo, writeScriptTag);
 
 			this.dashboardScriptWritten = true;
 		}
@@ -752,6 +779,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				else if(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameLoadableChartWidgets.equalsIgnoreCase(name))
 				{
 					this.dashboard.setLoadableChartWidgets(resolveLoadableChartWidgets(trim(entry.getValue())));
+				}
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode.equalsIgnoreCase(name))
+				{
+					this.dashboardInfo.setDashboardCode(trim(entry.getValue()));
 				}
 				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardAutoRender.equalsIgnoreCase(name))
 				{
@@ -838,7 +869,15 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		/** 内置导入排除项 */
 		private String importExclude = null;
 
-		/** 是否自动执行看板渲染函数 */
+		/** 看板脚本 */
+		private String dashboardCode = null;
+
+		/**
+		 * 是否自动执行看板渲染函数
+		 * 
+		 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+		 */
+		@Deprecated
 		private String dashboardAutoRender = null;
 		
 		/** 图表信息 */
@@ -879,16 +918,41 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			this.importExclude = importExclude;
 		}
 		
+		public String getDashboardCode()
+		{
+			return dashboardCode;
+		}
+
+		public void setDashboardCode(String dashboardCode)
+		{
+			this.dashboardCode = dashboardCode;
+		}
+
+		/**
+		 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+		 * @return
+		 */
+		@Deprecated
 		public String getDashboardAutoRender()
 		{
 			return dashboardAutoRender;
 		}
 
+		/**
+		 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+		 * @param dashboardAutoRender
+		 */
+		@Deprecated
 		public void setDashboardAutoRender(String dashboardAutoRender)
 		{
 			this.dashboardAutoRender = dashboardAutoRender;
 		}
-		
+
+		/**
+		 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+		 * @return
+		 */
+		@Deprecated
 		public boolean isDashboardAutoRender()
 		{
 			return !Boolean.FALSE.toString().equalsIgnoreCase(this.dashboardAutoRender);

@@ -720,6 +720,8 @@
 	 * 看板初始化后处于this.statusInited()状态。
 	 * 此函数在看板生命周期内仅允许调用一次，在dashboard.destroy()后允许再次调用。 
 	 * 
+	 * 由于直到此函数调用时，才会读取元素上的dg-*属性，因而元素dg-*属性值引用的变量仅需在此函数调用前定义即可。
+	 * 
 	 * 注意：只有this.statusPreInit()或者this.statusDestroyed()为true时，此函数才允许执行。
 	 * 
 	 * 看板生命周期：

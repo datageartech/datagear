@@ -566,6 +566,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void renderDashboard_dg_dashboard_auto_render() throws Throwable
 	{
@@ -702,6 +703,132 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	public void renderDashboard_dg_dashboard_code() throws Throwable
 	{
 		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
+
+		{
+			String template = "<html dg-dashboard-code><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
+
+			String html = getHtmlWithPrint(out);
+
+			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
+			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
+		}
+
+		{
+			String template = "<html dg-dashboard-code=\"instance\"><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
+
+			String html = getHtmlWithPrint(out);
+
+			assertFalse(html.contains(dashboard.getVarName() + ".init();"));
+			assertFalse(html.contains(dashboard.getVarName() + ".render();"));
+		}
+
+		{
+			String template = "<html dg-dashboard-code=\"init\"><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
+
+			String html = getHtmlWithPrint(out);
+
+			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
+			assertFalse(html.contains(dashboard.getVarName() + ".render();"));
+		}
+
+		{
+			String template = "<html dg-dashboard-code=\"render\"><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
+
+			String html = getHtmlWithPrint(out);
+
+			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
+			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
+		}
+
+		{
+			String template = "<html dg-dashboard-code=\"abc\"><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
+
+			String html = getHtmlWithPrint(out);
+
+			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
+			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
+		}
+
+		{
+			String template = "<html dg-dashboard-code=\"render\" dg-dashboard-auto-render=\"false\"><head></head><body></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
+
+			String html = getHtmlWithPrint(out);
+
+			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
+			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
+		}
+
+		{
+			String template = "<html dg-dashboard-code=\"instance\"><head></head><body><script dg-dashboard-code=\"render\"></script></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME, IOUtil.getReader(template),
+					renderAttr);
+
+			String html = getHtmlWithPrint(out);
+
+			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
+			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
+		}
 
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code></script></body></html>";

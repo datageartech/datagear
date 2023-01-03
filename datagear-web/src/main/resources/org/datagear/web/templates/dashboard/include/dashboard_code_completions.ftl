@@ -46,8 +46,6 @@
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-listener' />", categories: ["body"]},
 		{name: "dg-echarts-theme",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", categories: ["body", "div"]},
-		{name: "dg-dashboard-auto-render",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-auto-render' />", categories: ["html"]},
 		{name: "dg-dashboard-unimport",
 				displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-unimport' />", categories: ["html"]},
 		{name: "dg-dashboard-var",
@@ -55,7 +53,7 @@
 		{name: "dg-loadable-chart-widgets",
 				displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-loadable-chart-widgets' />", categories: ["html"]},
 		{name: "dg-dashboard-code",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-code' />", categories: ["script"]}
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-code' />", categories: ["html", "script"]}
 	];
 	
 	po.codeEditorCompletionsJsFunction =
