@@ -1100,14 +1100,10 @@
 	 * 此函数在看板生命周期内仅允许调用一次，在dashboard.destroy()后允许再次调用。
 	 * 
 	 * 注意：
-	 * 只有this.statusPreInit()或者this.statusInited()或者this.statusDestroyed()为true，此函数才允许执行。
-	 * 特别地，当是this.statusPreInit()时，此函数内部会先调用this.init()执行初始化，然后在执行渲染。
+	 * 只有this.statusInited()或者this.statusDestroyed()为true时，此函数才允许执行。
 	 */
 	dashboardBase.render = function()
 	{
-		if(this.statusPreInit())
-			this.init();
-		
 		if(!this.statusInited() && !this.statusDestroyed())
 			throw new Error("dashboard is illegal state for render()");
 		
@@ -2138,12 +2134,18 @@
 	{
 		this.addChart(chart);
 		
-		//异步加载时可能看板还未渲染
-		if(this.isRender() && chart.statusPreInit())
+		if(chart.statusPreInit())
 		{
-			chart.init();
-			//设置为准备渲染状态，使得后续看板可自动渲染图表
-			chart.statusPreRender(true);
+			//应设为与看板状态保持一致
+			if(this.statusInited())
+			{
+				chart.init();
+			}
+			else if(this.isRender())
+			{
+				chart.init();
+				chart.statusPreRender(true);
+			}
 		}
 	};
 	

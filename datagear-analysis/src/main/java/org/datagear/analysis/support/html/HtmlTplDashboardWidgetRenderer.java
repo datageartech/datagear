@@ -108,6 +108,9 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	/** JS看板工厂初始化函数名 */
 	private String dashboardFactoryInitFuncName = "init";
 
+	/** 看板对象初始化函数名 */
+	private String dashboardInitFuncName = "init";
+
 	/** 看板对象渲染函数名 */
 	private String dashboardRenderFuncName = "render";
 
@@ -213,6 +216,16 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	public void setDashboardFactoryInitFuncName(String dashboardFactoryInitFuncName)
 	{
 		this.dashboardFactoryInitFuncName = dashboardFactoryInitFuncName;
+	}
+
+	public String getDashboardInitFuncName()
+	{
+		return dashboardInitFuncName;
+	}
+
+	public void setDashboardInitFuncName(String dashboardInitFuncName)
+	{
+		this.dashboardInitFuncName = dashboardInitFuncName;
 	}
 
 	public String getDashboardRenderFuncName()
@@ -627,6 +640,34 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			dashboardFactoryVar = this.defaultDashboardFactoryVar;
 
 		return dashboardFactoryVar;
+	}
+
+	/**
+	 * 写{@linkplain HtmlTplDashboard} JS初始化代码：
+	 * <p>
+	 * <code>
+	 * <pre>
+	 * [dashboard].init();
+	 * </pre>
+	 * </code>
+	 * </p>
+	 * 
+	 * @param renderContext
+	 * @param renderAttr
+	 * @param out
+	 * @param dashboard
+	 * @throws IOException
+	 */
+	protected void writeDashboardJsInit(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
+			HtmlTplDashboard dashboard) throws IOException
+	{
+		String varName = dashboard.getVarName();
+
+		if (StringUtil.isEmpty(varName))
+			throw new IllegalArgumentException();
+
+		out.write(varName + "." + this.dashboardInitFuncName + "();");
+		writeNewLine(out);
 	}
 
 	/**

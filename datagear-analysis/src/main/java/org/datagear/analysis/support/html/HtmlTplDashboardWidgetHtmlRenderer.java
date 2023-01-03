@@ -118,6 +118,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-widget";
 
 	public static final String ATTR_NAME_CHART_AUTO_RESIZE = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-auto-resize";
+
+	public static final String DASHBOARD_CODE_ATTR_VALUE_INSTANCE = "instance";
 	
 	public static final String DASHBOARD_CODE_ATTR_VALUE_INIT = "init";
 
@@ -339,6 +341,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	}
 
 	/**
+	 * 写看板脚本。
 	 * 
 	 * @param out
 	 * @param renderContext
@@ -346,20 +349,18 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * @param dashboard
 	 * @param dashboardInfo
 	 * @param writeScriptTag
-	 * @param writeRenderCode 为{@code null}时由{@code dashboardInfo}的{@linkplain DashboardInfo#isDashboardAutoRender()}决定
+	 * @param writeDashboardInitCode
+	 * @param writeDashboardRenderCode
 	 * @throws IOException
 	 */
 	protected void writeDashboardScript(Writer out, RenderContext renderContext,
 			HtmlTplDashboardRenderAttr renderAttr, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo,
-			boolean writeScriptTag, Boolean writeRenderCode) throws IOException
+			boolean writeScriptTag, boolean writeDashboardInitCode, Boolean writeDashboardRenderCode) throws IOException
 	{
 		String globalDashboardVar = dashboardInfo.getDashboardVar();
 		if (StringUtil.isEmpty(globalDashboardVar))
 			globalDashboardVar = getDefaultDashboardVar();
 		
-		if(writeRenderCode == null)
-			writeRenderCode = dashboardInfo.isDashboardAutoRender();
-
 		String tmp0RenderContextVarName = renderAttr.genRenderContextVarName("Tmp0");
 		String tmp1RenderContextVarName = renderAttr.genRenderContextVarName("Tmp1");
 		String localDashboardVarName = renderAttr.genDashboardVarName("Tmp");
@@ -383,7 +384,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		out.write(this.localGlobalVarName + "." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
 		
-		if(writeRenderCode)
+		if (writeDashboardInitCode)
+			writeDashboardJsInit(renderContext, renderAttr, out, dashboard);
+
+		if (writeDashboardRenderCode)
 			writeDashboardJsRender(renderContext, renderAttr, out, dashboard);
 		
 		out.write("})(this);");
@@ -689,25 +693,40 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		protected void writeHtmlTplDashboardScriptWithSet() throws IOException
 		{
 			writeDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-					this.dashboardInfo, true, null);
+					this.dashboardInfo, true, true, this.dashboardInfo.isDashboardAutoRender());
 
 			this.dashboardScriptWritten = true;
 		}
 		
 		protected void writeHtmlTplDashboardScriptCodeWithSet(boolean writeScriptTag, String codeMode) throws IOException
 		{
-			Boolean writeRenderCode = null;
+			boolean writeInitCode = false;
+			boolean writeRenderCode = false;
 			
 			//只处理合法值，否则应由dg-dashboard-auto-render特性决定
-			if(DASHBOARD_CODE_ATTR_VALUE_INIT.equalsIgnoreCase(codeMode))
+			if (DASHBOARD_CODE_ATTR_VALUE_INSTANCE.equalsIgnoreCase(codeMode))
+			{
+				writeInitCode = false;
 				writeRenderCode = false;
+			}
+			else if (DASHBOARD_CODE_ATTR_VALUE_INIT.equalsIgnoreCase(codeMode))
+			{
+				writeInitCode = true;
+				writeRenderCode = false;
+			}
 			else if(DASHBOARD_CODE_ATTR_VALUE_RENDER.equalsIgnoreCase(codeMode))
+			{
+				writeInitCode = true;
 				writeRenderCode = true;
+			}
 			else
-				writeRenderCode = null;
+			{
+				writeInitCode = true;
+				writeRenderCode = this.dashboardInfo.isDashboardAutoRender();
+			}
 			
 			writeDashboardScript(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-					this.dashboardInfo, writeScriptTag, writeRenderCode);
+					this.dashboardInfo, writeScriptTag, writeInitCode, writeRenderCode);
 
 			this.dashboardScriptWritten = true;
 		}

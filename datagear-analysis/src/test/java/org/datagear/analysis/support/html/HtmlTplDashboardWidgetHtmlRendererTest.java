@@ -7,10 +7,10 @@
 
 package org.datagear.analysis.support.html;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -113,9 +113,11 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			assertTrue(html.contains("var datagearDashboardTmp"));
+			assertTrue(html.contains("var datagearDashboardTmp="));
 			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
 			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".myDashboard=datagearDashboardTmp;"));
+			assertTrue(html.contains("datagearDashboardTmp.init();"));
+			assertTrue(html.contains("datagearDashboardTmp.render();"));
 		}
 
 		// 看板属性，无引号
@@ -726,6 +728,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
 			assertTrue(html.indexOf("<script>", scriptStartTagEndIdx) < 0);
 			assertEquals(scriptCloseTagIdx, html.indexOf("</script>", scriptStartTagEndIdx));
+
+			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
+			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
 		}
 		
 		{
@@ -753,6 +758,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(dashboardRenderCodeIdx < scriptCloseTagIdx);
 			assertTrue(html.indexOf("<script>", scriptStartTagEndIdx) < 0);
 			assertEquals(scriptCloseTagIdx, html.indexOf("</script>", scriptStartTagEndIdx));
+
+			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
+			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
 		}
 		
 		{
@@ -783,8 +791,47 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(dashboardRenderCodeIdx < 0);
 			assertTrue(html.indexOf("<script>", scriptStartTagEndIdx) < 0);
 			assertEquals(scriptCloseTagIdx, html.indexOf("</script>", scriptStartTagEndIdx));
+
+			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
+			assertFalse(html.contains(dashboard.getVarName() + ".render();"));
 		}
 		
+		{
+			String template = "<html><head></head><body><script dg-dashboard-code=\"instance\"></script></body></html>";
+
+			RenderContext renderContext = new DefaultRenderContext();
+			StringWriter out = new StringWriter();
+			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+
+			HtmlTplDashboard dashboard = this.renderer.createDashboard(renderContext, dashboardWidget, TEMPLATE_NAME);
+
+			DashboardInfo dashboardInfo = this.renderer.renderDashboard(renderContext, dashboard, TEMPLATE_NAME,
+					IOUtil.getReader(template), renderAttr);
+
+			String html = getHtmlWithPrint(out);
+			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(
+					dashboardInfo.getDashboardFactoryVar()) + ".init(" + dashboard.getVarName() + ");";
+			String dashboardRenderCode = dashboard.getVarName() + "." + this.renderer.getDashboardRenderFuncName()
+					+ "();";
+
+			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"instance\">")
+					+ "<script dg-dashboard-code=\"instance\">".length();
+			int scriptCloseTagIdx = html.indexOf("</script></body>");
+			int dashboardInitCodeIdx = html.indexOf(dashboardInitCode);
+			int dashboardRenderCodeIdx = html.indexOf(dashboardRenderCode);
+
+			assertTrue(scriptStartTagEndIdx > 0);
+			assertTrue(scriptCloseTagIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardInitCodeIdx > scriptStartTagEndIdx);
+			assertTrue(dashboardInitCodeIdx < scriptCloseTagIdx);
+			assertTrue(dashboardRenderCodeIdx < 0);
+			assertTrue(html.indexOf("<script>", scriptStartTagEndIdx) < 0);
+			assertEquals(scriptCloseTagIdx, html.indexOf("</script>", scriptStartTagEndIdx));
+
+			assertFalse(html.contains(dashboard.getVarName() + ".init();"));
+			assertFalse(html.contains(dashboard.getVarName() + ".render();"));
+		}
+
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code=\"abc\"></script></body></html>";
 
