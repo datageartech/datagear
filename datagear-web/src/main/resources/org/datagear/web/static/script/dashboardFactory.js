@@ -760,10 +760,7 @@
 	{
 		var dashboardTheme = this.renderContextAttr(renderContextAttrConst.dashboardTheme);
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
-		var chartTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
-		
-		if(!chartTheme)
-			chartTheme = (dashboardTheme ? dashboardTheme.chartTheme : {});
+		var chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? $.extend(true, {}, dashboardTheme.chartTheme) : {});
 		
 		chartFactory.initRenderContext(this.renderContext, webContext, chartTheme);
 		

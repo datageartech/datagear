@@ -1663,9 +1663,7 @@
 	editor.setGlobalChartTheme = function(chartTheme)
 	{
 		this._setElementChartTheme($(document.body), chartTheme);
-		
-		this.dashboard.destroy();
-		this.dashboard.render();
+		this._reRenderDashboard();
 	};
 	
 	/**
@@ -1921,9 +1919,7 @@
 	editor.setGlobalChartOptions = function(chartOptionsStr)
 	{
 		this._setElementChartOptions($(document.body), chartOptionsStr);
-		
-		this.dashboard.destroy();
-		this.dashboard.render();
+		this._reRenderDashboard();
 	};
 	
 	/**
@@ -1937,6 +1933,13 @@
 		
 		var ele = this._editElement($(document.body));
 		return this._getElementChartOptions(ele);
+	};
+	
+	editor._reRenderDashboard = function(chart)
+	{
+		this.dashboard.destroy();
+		this.dashboard.init();
+		this.dashboard.render();
 	};
 	
 	editor._reRenderChart = function(chart)

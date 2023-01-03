@@ -248,7 +248,7 @@
 	
 	/**
 	 * 初始化渲染上下文。
-	 * 将webContext直接存入渲染上下文；复制chartTheme，填充相关属性后存入渲染上下文。
+	 * 将webContext直接存入渲染上下文；填充chartTheme相关属性后存入渲染上下文。
 	 * 之后，可以通过:
 	 * chartFactory.renderContextAttrWebContext(renderContext)
 	 * chartFactory.renderContextAttrChartTheme(renderContext)
