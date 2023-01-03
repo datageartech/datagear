@@ -212,6 +212,7 @@
 		for(var i=0; i<charts.length; i++)
 			this._initChart(dashboard, charts[i]);
 		
+		//必须设置为【准备初始化】状态，确保看板页面默认的dashboard.render()调用会先执行初始化
 		dashboard.statusPreInit(true);
 	};
 	
