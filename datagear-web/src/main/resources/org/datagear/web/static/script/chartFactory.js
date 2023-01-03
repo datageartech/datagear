@@ -1238,11 +1238,13 @@
 	 * 
 	 * 图表渲染器实现相关：
 	 * 图表渲染器应实现destroy函数，以支持此特性。
+	 * 
+	 * @returns true 正常执行销毁；false 未执行销毁，因为图表处于销毁非法状态
 	 */
 	chartBase.destroy = function()
 	{
 		if(!this.isRender() || this.statusDestroying() || this.statusDestroyed())
-			return;
+			return false;
 		
 		this.statusDestroying(true);
 		
@@ -1256,6 +1258,8 @@
 		{
 			this.doDestroy();
 		}
+		
+		return true;
 	};
 	
 	/**

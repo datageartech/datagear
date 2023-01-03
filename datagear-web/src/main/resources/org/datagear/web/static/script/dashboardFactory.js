@@ -2349,7 +2349,7 @@
 		var user = this.renderContextAttr(renderContextAttrConst.user);
 		
 		if(user == null)
-			throw new Error("Get user is not supported");
+			throw new Error("get user not support");
 		
 		return user;
 	};
@@ -2357,11 +2357,13 @@
 	/**
 	 * 销毁看板，销毁所有看板表单、所有图表。
 	 * 销毁中的看板处于this.statusDestroying()状态，看板完成后处于this.statusDestroyed()状态。
+	 * 
+	 * @returns true 正常执行销毁；false 未执行销毁，因为看板处于销毁非法状态
 	 */
 	dashboardBase.destroy = function()
 	{
 		if(!this.isRender() || this.statusDestroying() || this.statusDestroyed())
-			return;
+			return false;
 		
 		this.statusDestroying(true);
 		
@@ -2375,6 +2377,8 @@
 		{
 			this.doDestroy();
 		}
+		
+		return true;
 	};
 	
 	dashboardBase._destroyCharts = function()
