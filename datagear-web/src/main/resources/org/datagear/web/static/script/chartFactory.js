@@ -136,6 +136,9 @@
 	/**图表状态：准备init*/
 	chartStatusConst.PRE_INIT = "PRE_INIT";
 	
+	/**图表状态：正在init*/
+	chartStatusConst.INITING = "INITING";
+	
 	/**图表状态：完成init*/
 	chartStatusConst.INITED = "INITED";
 	
@@ -408,6 +411,8 @@
 		
 		if(!chartFactory.isRenderContextInited(this.renderContext))
 			throw new Error("chart is illegal state for init()");
+		
+		this.statusIniting(true);
 		
 		this._clearExtValue();
 		
@@ -3953,6 +3958,25 @@
 		}
 		else
 			return (this.status() == chartStatusConst.PRE_INIT);
+	};
+	
+	/**
+	 * 图表是否为/设置为：正在init。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	chartBase.statusIniting = function(set)
+	{
+		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = false;
+			this.status(chartStatusConst.INITING);
+		}
+		else
+			return (this.status() == chartStatusConst.INITING);
 	};
 	
 	/**

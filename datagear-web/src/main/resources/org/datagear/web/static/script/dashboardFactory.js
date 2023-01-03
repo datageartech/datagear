@@ -127,6 +127,9 @@
 	/**看板状态：准备init*/
 	dashboardStatusConst.PRE_INIT = "PRE_INIT";
 	
+	/**看板状态：正在init*/
+	dashboardStatusConst.INITING = "INITING";
+	
 	/**看板状态：完成init*/
 	dashboardStatusConst.INITED = "INITED";
 	
@@ -212,7 +215,6 @@
 		for(var i=0; i<charts.length; i++)
 			this._initChart(dashboard, charts[i]);
 		
-		//必须设置为【准备初始化】状态，确保看板页面默认的dashboard.render()调用会先执行初始化
 		dashboard.statusPreInit(true);
 	};
 	
@@ -739,6 +741,8 @@
 		
 		if(!this.statusPreInit() && !this.statusDestroyed())
 			throw new Error("dashboard is illegal state for init()");
+		
+		this.statusIniting(true);
 		
 		this._initRenderContext();
 		this._initListener();
@@ -2530,7 +2534,26 @@
 	};
 	
 	/**
-	 * 图表是否为/设置为：完成初始化。
+	 * 看板是否为/设置为：正在初始化。
+	 * 
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * 
+	 * @since 4.4.0
+	 */
+	dashboardBase.statusIniting = function(set)
+	{
+		if(set === true)
+		{
+			this._isActive = false;
+			this._isRender = false;
+			this.status(dashboardStatusConst.INITING);
+		}
+		else
+			return (this.status() == dashboardStatusConst.INITING);
+	};
+	
+	/**
+	 * 看板是否为/设置为：完成初始化。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
 	 * 
@@ -2549,7 +2572,7 @@
 	};
 	
 	/**
-	 * 图表是否为/设置为：渲染中。
+	 * 看板是否为/设置为：渲染中。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
 	 * 
@@ -2568,7 +2591,7 @@
 	};
 	
 	/**
-	 * 图表是否为/设置为：完成渲染。
+	 * 看板是否为/设置为：完成渲染。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
 	 * 
@@ -2591,7 +2614,7 @@
 	};
 	
 	/**
-	 * 图表是否为/设置为：正在销毁。
+	 * 看板是否为/设置为：正在销毁。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
 	 * 
@@ -2610,7 +2633,7 @@
 	};
 	
 	/**
-	 * 图表是否为/设置为：完成销毁。
+	 * 看板是否为/设置为：完成销毁。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
 	 * 
