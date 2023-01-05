@@ -212,13 +212,12 @@
 	// renderContextAttrConst开始
 	//----------------------------------------
 	
-	//必须，Web上下文，同：
+	//渲染上下文属性名：Web上下文，同：
 	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT
 	renderContextAttrConst.webContext = "DG_WEB_CONTEXT";
 	
-	//可选，图表主题，同：
-	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME
-	renderContextAttrConst.chartTheme = "DG_CHART_THEME";
+	//渲染上下文属性名：已填充图表主题
+	renderContextAttrConst.inflatedChartTheme = "DG_INFLATED_CHART_THEME";
 	
 	//----------------------------------------
 	// renderContextAttrConst结束
@@ -248,7 +247,7 @@
 	
 	/**
 	 * 初始化渲染上下文。
-	 * 将webContext直接存入渲染上下文，使用<body>上的dg-chart-theme填充chartTheme相关属性后存入渲染上下文，
+	 * 将webContext直接存入渲染上下文，复制chartTheme后使用<body>上的dg-chart-theme填充相关属性后存入渲染上下文，
 	 * 之后可以通过:
 	 * chartFactory.renderContextAttrWebContext(renderContext)
 	 * chartFactory.renderContextAttrChartTheme(renderContext)
@@ -267,6 +266,11 @@
 		if(!chartTheme)
 			throw new Error("[chartTheme] required");
 		
+		if(chartFactory._themeInflated(chartTheme))
+			throw new Error("[chartTheme] must not inflated");
+		
+		chartTheme = $.extend(true, {}, chartTheme);
+		
 		chartFactory._inflateGlobalChartTheme(chartTheme);
 		
 		chartFactory.renderContextAttrWebContext(renderContext, webContext);
@@ -283,9 +287,9 @@
 		
 		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
 		var chartTheme = chartFactory.renderContextAttrChartTheme(renderContext);
-		var chartThemeRaw = (chartTheme ? chartTheme._RAW_CHART_THEME : null);
+		var inflated = chartFactory._themeInflated(chartTheme);
 		
-		return (webContext && chartTheme && chartThemeRaw);
+		return (webContext && chartTheme && inflated);
 	};
 	
 	/**
@@ -487,7 +491,8 @@
 	
 	/**
 	 * 初始化图表主题。
-	 * 此函数依次从图表renderContext.chartTheme、<body>元素、图表元素的elementAttrConst.THEME属性读取、合并图表主题。
+	 * 此函数依次从this.renderContext中的renderContextAttrConst.inflatedChartTheme属性值、
+	 * <body>元素、图表元素的elementAttrConst.THEME属性读取、合并图表主题。
 	 * 
 	 * @return {...}
 	 */
@@ -5085,7 +5090,7 @@
 	 */
 	chartFactory.renderContextAttrChartTheme = function(renderContext, chartTheme)
 	{
-		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.chartTheme, chartTheme);
+		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.inflatedChartTheme, chartTheme);
 	};
 	
 	/**

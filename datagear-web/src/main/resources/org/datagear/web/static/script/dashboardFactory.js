@@ -108,11 +108,15 @@
 	// renderContextAttrConst开始
 	//----------------------------------------
 	
-	//可选，看板主题，同：
+	//渲染上下文属性名：看板主题，同：
 	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME
 	renderContextAttrConst.dashboardTheme = "DG_DASHBOARD_THEME";
 	
-	//可选，看板主题，同：
+	//渲染上下文属性名：图表主题，同：
+	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME
+	renderContextAttrConst.chartTheme = "DG_CHART_THEME";
+	
+	//渲染上下文属性名：当前用户，同：
 	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER
 	renderContextAttrConst.user = "DG_USER";
 	
@@ -211,11 +215,20 @@
 		this._initDashboardBaseProperties(dashboard);
 		$.extend(dashboard, this.dashboardBase);
 		
+		this._initRenderContext(dashboard);
+		
 		var charts = dashboard.charts;
 		for(var i=0; i<charts.length; i++)
 			this._initChart(dashboard, charts[i]);
 		
 		dashboard.statusPreInit(true);
+	};
+	
+	dashboardFactory._initRenderContext = function(dashboard)
+	{
+		var dashboardTheme = dashboard.renderContextAttr(renderContextAttrConst.dashboardTheme);
+		var chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? dashboardTheme.chartTheme : {});
+		dashboard.renderContextAttr(renderContextAttrConst.chartTheme, chartTheme);
 	};
 	
 	dashboardFactory._initChart = function(dashboard, chart)
@@ -759,15 +772,15 @@
 	dashboardBase._initRenderContext = function()
 	{
 		var dashboardTheme = this.renderContextAttr(renderContextAttrConst.dashboardTheme);
-		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
-		var chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? $.extend(true, {}, dashboardTheme.chartTheme) : {});
+		var webContext = this.renderContextAttr(renderContextAttrConst.webContext);
+		var chartTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
 		
 		chartFactory.initRenderContext(this.renderContext, webContext, chartTheme);
 		
 		// < @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
 		this.renderContextAttr("dashboardTheme", dashboardTheme);
-		this.renderContextAttr("webContext", chartFactory.renderContextAttrWebContext(this.renderContext));
-		this.renderContextAttr("chartTheme", chartFactory.renderContextAttrChartTheme(this.renderContext));
+		this.renderContextAttr("webContext", webContext);
+		this.renderContextAttr("chartTheme", chartTheme);
 		// > @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
 	};
 	
@@ -1335,7 +1348,7 @@
 			form.data(bindBatchSetName, batchSet);
 		
 		config.paramValues = defaultValues;
-		config.chartTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
+		config.chartTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
 		
 		chartFactory.chartSetting.renderDataSetParamValueForm(form, items, config);
 	};
