@@ -3,12 +3,12 @@
 */
 
 .cm-s-custom span.cm-meta { color: var(--text-color-secondary); }
-.cm-s-custom span.cm-number { color: var(--indigo-500); }
-.cm-s-custom span.cm-keyword { line-height: 1em; font-weight: bold; color: var(--primary-700); }
-.cm-s-custom span.cm-atom { font-weight: bold; color: var(--primary-color); }
-.cm-s-custom span.cm-def { color: var(--primary-color); }
-.cm-s-custom span.cm-variable { color: var(--text-color); }
-.cm-s-custom span.cm-variable-2 { color: var(--text-color); }
+.cm-s-custom span.cm-number { color: var(--red-400); }
+.cm-s-custom span.cm-keyword { line-height: 1em; font-weight: bold; color: var(--primary-color); }
+.cm-s-custom span.cm-atom { font-weight: bold; color: var(--text-color); }
+.cm-s-custom span.cm-def { color: var(--blue-500); }
+.cm-s-custom span.cm-variable { color: var(--blue-500); }
+.cm-s-custom span.cm-variable-2 { color: var(--blue-500); }
 .cm-s-custom span.cm-variable-3, .cm-s-custom span.cm-type { color: var(--text-color); }
 .cm-s-custom span.cm-property { color: var(--text-color); }
 .cm-s-custom span.cm-operator { color: var(--text-color); }
@@ -18,12 +18,12 @@
 .cm-s-custom span.cm-qualifier { color: var(--text-color); }
 .cm-s-custom span.cm-error { color: var(--red-700); }
 .cm-s-custom span.cm-attribute { color: var(--primary-700); }
-.cm-s-custom span.cm-tag { color: var(--primary-color); }
+.cm-s-custom span.cm-tag { color: var(--primary-600); }
 .cm-s-custom span.cm-link { color: var(--indigo-500); }
 .cm-s-custom .CodeMirror-activeline-background { background: var(--surface-ground); }
 
 .cm-s-custom span.cm-builtin { color: var(--primary-color); }
-.cm-s-custom span.cm-bracket { color: var(--primary-300); }
+.cm-s-custom span.cm-bracket { color: var(--primary-600); }
 
 .cm-s-custom .CodeMirror-matchingbracket { outline:1px solid var(--surface-300); color: var(--text-color) !important; }
 .cm-s-custom .CodeMirror-matchingtag{ background: var(--surface-300); }

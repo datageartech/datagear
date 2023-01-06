@@ -15,9 +15,4 @@
 }
 
 /*代码编辑器*/
-.cm-s-custom span.cm-def { color: var(--primary-color); }
-.cm-s-custom span.cm-string { color: var(--green-500); }
-.cm-s-custom span.cm-string-2 { color: var(--green-500); }
-.cm-s-custom span.cm-attribute { color: var(--primary-700); }
-.cm-s-custom span.cm-tag { color: var(--primary-color); }
-.cm-s-custom span.cm-bracket { color: var(--primary-color); }
+.cm-s-custom span.cm-attribute { color: var(--blue-600); }
