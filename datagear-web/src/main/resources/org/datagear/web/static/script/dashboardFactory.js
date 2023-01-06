@@ -2604,10 +2604,11 @@
 	 * 看板是否为/设置为：完成渲染。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的render函数，默认为true
 	 * 
 	 * @since 4.4.0
 	 */
-	dashboardBase.statusRendered = function(set)
+	dashboardBase.statusRendered = function(set, postProcess)
 	{
 		if(set === true)
 		{
@@ -2615,12 +2616,21 @@
 			this._isRender = true;
 			this.status(dashboardStatusConst.RENDERED);
 			
-			var listener = this.listener();
-			if(listener && listener.render)
-				listener.render(this);
+			if(postProcess == null || postProcess == true)
+				this._postProcessRendered();
 		}
 		else
 			return (this.status() == dashboardStatusConst.RENDERED);
+	};
+	
+	/**
+	 * 渲染完成后置处理。
+	 */
+	dashboardBase._postProcessRendered = function()
+	{
+		var listener = this.listener();
+		if(listener && listener.render)
+			listener.render(this);
 	};
 	
 	/**
@@ -2646,10 +2656,11 @@
 	 * 看板是否为/设置为：完成销毁。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的destroy函数，默认为true
 	 * 
 	 * @since 4.4.0
 	 */
-	dashboardBase.statusDestroyed = function(set)
+	dashboardBase.statusDestroyed = function(set, postProcess)
 	{
 		if(set === true)
 		{
@@ -2657,12 +2668,18 @@
 			this._isRender = false;
 			this.status(dashboardStatusConst.DESTROYED);
 			
-			var listener = this.listener();
-			if(listener && listener.destroy)
-				listener.destroy(this);
+			if(postProcess == null || postProcess == true)
+				this._postProcessDestroyed();
 		}
 		else
 			return (this.status() == dashboardStatusConst.DESTROYED);
+	};
+	
+	dashboardBase._postProcessDestroyed = function()
+	{
+		var listener = this.listener();
+		if(listener && listener.destroy)
+			listener.destroy(this);
 	};
 	
 	/**

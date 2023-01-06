@@ -1463,8 +1463,9 @@
 	 * 图表是否为/设置为：完成render。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的render函数，默认为true
 	 */
-	chartBase.statusRendered = function(set)
+	chartBase.statusRendered = function(set, postProcess)
 	{
 		if(set === true)
 		{
@@ -1472,7 +1473,8 @@
 			this._isRender = true;
 			this.status(chartStatusConst.RENDERED);
 			
-			this._postProcessRendered();
+			if(postProcess == null || postProcess == true)
+				this._postProcessRendered();
 		}
 		else
 			return (this.status() == chartStatusConst.RENDERED);
@@ -1549,8 +1551,9 @@
 	 * 图表是否为/设置为：完成update。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的update函数，默认为true
 	 */
-	chartBase.statusUpdated = function(set)
+	chartBase.statusUpdated = function(set, postProcess)
 	{
 		if(set === true)
 		{
@@ -1558,7 +1561,8 @@
 			this._isRender = true;
 			this.status(chartStatusConst.UPDATED);
 			
-			this._postProcessUpdated();
+			if(postProcess == null || postProcess == true)
+				this._postProcessUpdated();
 		}
 		else
 			return (this.status() == chartStatusConst.UPDATED);
@@ -1595,8 +1599,9 @@
 	 * 图表是否为/设置为：已销毁。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的destroy函数，默认为true
 	 */
-	chartBase.statusDestroyed = function(set)
+	chartBase.statusDestroyed = function(set, postProcess)
 	{
 		if(set === true)
 		{
@@ -1604,7 +1609,8 @@
 			this._isRender = false;
 			this.status(chartStatusConst.DESTROYED);
 			
-			this._postProcessDestroyed();
+			if(postProcess == null || postProcess == true)
+				this._postProcessDestroyed();
 		}
 		else
 			return (this.status() == chartStatusConst.DESTROYED);
