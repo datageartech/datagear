@@ -12,12 +12,12 @@
 .cm-s-custom span.cm-variable-3, .cm-s-custom span.cm-type { color: var(--text-color); }
 .cm-s-custom span.cm-property { color: var(--text-color); }
 .cm-s-custom span.cm-operator { color: var(--text-color); }
-.cm-s-custom span.cm-comment { color: var(--text-color-secondary); }
+.cm-s-custom span.cm-comment { color: var(--surface-500); }
 .cm-s-custom span.cm-string { color: var(--green-600); }
 .cm-s-custom span.cm-string-2 { color: var(--green-600); }
 .cm-s-custom span.cm-qualifier { color: var(--text-color); }
 .cm-s-custom span.cm-error { color: var(--red-700); }
-.cm-s-custom span.cm-attribute { color: var(--primary-color); }
+.cm-s-custom span.cm-attribute { color: var(--primary-700); }
 .cm-s-custom span.cm-tag { color: var(--primary-color); }
 .cm-s-custom span.cm-link { color: var(--indigo-500); }
 .cm-s-custom .CodeMirror-activeline-background { background: var(--surface-ground); }
