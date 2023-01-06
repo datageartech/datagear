@@ -3005,23 +3005,28 @@
 	};
 	
 	/**
-	 * 获取主题对应的CSS类名。
+	 * 获取此图表主题对应的CSS类名。
 	 * 这个CSS类名是全局唯一的，可添加至HTML元素的"class"属性。
 	 * 
 	 * 图表在渲染前会自动为chart.element()图表元素添加chart.themeStyleName()返回的CSS类，
 	 * 使得通过chart.themeStyleSheet(name, css)函数创建的样式表可自动应用于图表元素或子元素。
 	 * 
-	 * @param theme 可选，主题对象，格式为：{ ... }，默认为：chart.theme()
 	 * @returns CSS类名，不会为null
 	 */
-	chartBase.themeStyleName = function(theme)
+	chartBase.themeStyleName = function()
 	{
-		theme = (theme == null ? this._themeNonNull() : theme);
+		var theme = this._themeNonNull();
+		
+		// < @deprecated 兼容4.3.1版本的chartBase.themeStyleName(theme)格式，将在未来版本移除
+		if(arguments[0] != null)
+			theme = arguments[0];
+		// > @deprecated 兼容4.3.1版本的chartBase.themeStyleName(theme)格式，将在未来版本移除
+		
 		return chartFactory.themeStyleName(theme);
 	};
 	
 	/**
-	 * 判断/设置与指定主题和名称关联的CSS样式表，详细参考chartFactory.themeStyleSheet()函数说明。
+	 * 判断/设置此图表主题和名称关联的CSS样式表，详细参考chartFactory.themeStyleSheet()函数说明。
 	 * 
 	 * 使用方式：
 	 * 判断与此图表主题和名称关联的CSS样式表是否已设置（返回true或者false）：
@@ -3030,12 +3035,7 @@
 	 * chart.themeStyleSheet(name, css)
 	 * 强制设置此图表主题和名称关联的CSS样式表（返回chart.themeStyleName()函数结果）：
 	 * chart.themeStyleSheet(name, css, true)
-	 * 判断与指定图表主题和名称关联的CSS样式表是否已设置（返回true或者false）：
-	 * chart.themeStyleSheet(theme, name)
-	 * 如果未设置过，则设置指定图表主题和名称关联的CSS样式表（返回chart.themeStyleName(theme)函数结果）：
-	 * chart.themeStyleSheet(theme, name, css)
-	 * 强制设置指定图表主题和名称关联的CSS样式表（返回chart.themeStyleName(theme)函数结果）：
-	 * chart.themeStyleSheet(theme, name, css, true)
+	 * 判断与指定图表主题和名称关联的CSS样式表是否已设置（返回true或者false）
 	 * 
 	 * 图表渲染器在绘制HTML图表时，可以使用此函数设置与此图表主题对应的子元素CSS样式表，例如：
 	 * 假设有用于显示数据数目的HTML图表渲染器，它将绘制如下HTML图表：
@@ -3059,35 +3059,25 @@
 	 *   }
 	 * }
 	 * 
-	 * @param theme 可选，参考chartFactory.themeStyleSheet()的theme参数，默认为：chart.theme()
 	 * @param name 参考chartFactory.themeStyleSheet()的name参数
 	 * @param css 参考chartFactory.themeStyleSheet()的css参数
 	 * @param force 参考chartFactory.themeStyleSheet()的force参数
 	 * 
 	 * @returns 参考chartFactory.themeStyleSheet()的返回值
 	 */
-	chartBase.themeStyleSheet = function(theme, name, css, force)
+	chartBase.themeStyleSheet = function(name, css, force)
 	{
-		//(name)
-		if(arguments.length == 1)
+		var theme = this._themeNonNull();
+		
+		// < @deprecated 兼容4.3.1版本的chartBase.themeStyleSheet(theme, ...)格式，将在未来版本移除
+		if(name != null && !chartFactory.isString(name))
 		{
-			name = theme;
-			theme = this._themeNonNull();
+			theme = arguments[0];
+			name = arguments[1];
+			css = arguments[2];
+			force = arguments[3];
 		}
-		else if(arguments.length > 1)
-		{
-			//(name, ...)
-			if(typeof(theme) == "string")
-			{
-				force = css;
-				css = name;
-				name = theme;
-				theme = this._themeNonNull();
-			}
-			//(theme, ...)
-			else
-				;
-		}
+		// > @deprecated 兼容4.3.1版本的chartBase.themeStyleSheet(theme, ...)格式，将在未来版本移除
 		
 		return chartFactory.themeStyleSheet(theme, name, css, force);
 	};
