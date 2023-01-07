@@ -100,6 +100,9 @@
 	/**图表更新分组*/
 	elementAttrConst.UPDATE_GROUP = "dg-chart-update-group";
 	
+	/**图表手动渲染*/
+	elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
+	
 	//----------------------------------------
 	// elementAttrConst结束
 	//----------------------------------------
@@ -721,6 +724,33 @@
 			chartFactory.extValueBuiltin(this, "requestRefreshDataIdx", 0);
 	};
 	
+	/**
+	 * 获取/设置图表是否手动渲染。
+	 * 
+	 * @param manualRender 可选，设置是否手动渲染，默认为：false
+	 * @returns true 是；false 否
+	 * 
+	 * @since 4.4.0
+	 */
+	chartBase.manualRender = function(manualRender)
+	{
+		if(manualRender === undefined)
+		{
+			//注意：此属性不应以chartBase._initManualRender()的方式初始化
+			//因为看板需要在chart.init()之前就读取它的值
+			
+			if(this._manualRender != null)
+				return (this._manualRender == true);
+			else
+			{
+				var eleValue = this.elementJquery().attr(elementAttrConst.MANUAL_RENDER);
+				return (eleValue == true || eleValue == "true");
+			}
+		}
+		else
+			this._manualRender = manualRender;
+	};
+	
 	//----------------------------------------
 	// chartBase扩展结束
 	//----------------------------------------
@@ -875,6 +905,9 @@
 		for(var i=0; i<this.charts.length; i++)
 		{
 			var chart = this.charts[i];
+			
+			if(chart.manualRender())
+				continue;
 			
 			if(chart.statusPreInit() || chart.statusDestroyed())
 			{
@@ -1161,6 +1194,9 @@
 		for(var i=0; i<this.charts.length; i++)
 		{
 			var chart = this.charts[i];
+			
+			if(chart.manualRender())
+				continue;
 			
 			if(chart.statusInited() || chart.statusDestroyed())
 			{
@@ -2149,6 +2185,9 @@
 	dashboardBase._addLoadedChart = function(chart)
 	{
 		this.addChart(chart);
+		
+		if(chart.manualRender())
+			return;
 		
 		if(chart.statusPreInit())
 		{
