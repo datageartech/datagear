@@ -779,8 +779,8 @@
 		
 		// < @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
 		this.renderContextAttr("dashboardTheme", dashboardTheme);
-		this.renderContextAttr("webContext", webContext);
-		this.renderContextAttr("chartTheme", chartTheme);
+		this.renderContextAttr("webContext", chartFactory.renderContextAttrWebContext(this.renderContext));
+		this.renderContextAttr("chartTheme", chartFactory.renderContextAttrChartTheme(this.renderContext));
 		// > @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
 	};
 	

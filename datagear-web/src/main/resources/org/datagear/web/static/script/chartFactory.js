@@ -5713,6 +5713,11 @@
 		if(bodyThemeValue)
 		{
 			var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
+			
+			//如果是引用变量，不应被修改
+			if(!chartFactory.isJsonString(bodyThemeValue))
+				bodyThemeObj = $.extend(true, {}, bodyThemeObj);
+			
 			chartFactory._inflateActualBgColorIf(bodyThemeObj);
 			
 			rawTheme = $.extend(true, {}, theme, bodyThemeObj);
