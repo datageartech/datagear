@@ -787,7 +787,7 @@
 	 * 图表初始化时会使用图表元素的"dg-chart-theme"属性值执行设置操作。
 	 * 
 	 * 图表渲染器实现相关：
-	 * 图表渲染器应使用此函数获取并应用图表主题，另参考：chart.gradualColor()。
+	 * 图表渲染器应使用此函数获取并应用图表主题，另参考：chart.themeGradualColor()。
 	 * 
 	 * @param theme 可选，要设置的图表主题，会被此函数修改，没有则执行获取操作
 	 */
@@ -1039,7 +1039,7 @@
 	chartBase._createChartThemeCssIfNon = function()
 	{
 		var theme = this._themeNonNull();
-		var thumbBgColor = this.gradualColor(0.2);
+		var thumbBgColor = this.themeGradualColor(0.2);
 		
 		this.themeStyleSheet(chartFactory.builtinPropName("Chart"), function()
 		{
@@ -2955,29 +2955,6 @@
 	};
 	
 	/**
-	 * 获取图表主题指定渐变因子的颜色。
-	 * 这个颜色是图表主题的实际背景色（actualBackgroundColor）与前景色（color）之间的某个颜色。
-	 * 
-	 * 图表渲染器在绘制图表时，可以使用此函数获取的颜色来设置图表配色。
-	 * 
-	 * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
-	 * @param theme 可选，用于获取颜色的主题，默认为：chart.theme()
-	 * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"，如果未设置factor，将返回一个包含所有渐变颜色的数组
-	 */
-	chartBase.gradualColor = function(factor, theme)
-	{
-		//gradualColor(theme)
-		if(arguments.length == 1 && typeof(factor) != "number")
-		{
-			theme = factor;
-			factor = undefined;
-		}
-		theme = (theme == null ? this._themeNonNull() : theme);
-		
-		return chartFactory.gradualColor(theme, factor);
-	};
-	
-	/**
 	 * 获取数据集结果数据指定索引的元素。
 	 * 
 	 * @param result 数据集结果对象
@@ -4018,9 +3995,52 @@
 			return (this.status() == chartStatusConst.INITED);
 	};
 	
+	/**
+	 * 获取此图表的图表主题指定渐变因子的颜色。
+	 * 这个颜色是图表主题的实际背景色（actualBackgroundColor）与前景色（color）之间的某个颜色。
+	 * 
+	 * 图表渲染器在绘制图表时，可以使用此函数获取的颜色来设置图表配色。
+	 * 
+	 * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
+	 * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"，如果未设置factor，将返回一个包含所有渐变颜色的数组
+	 * 
+	 * @since 4.4.0
+	 */
+	chartBase.themeGradualColor = function(factor)
+	{
+		var theme = this._themeNonNull();
+		return chartFactory.themeGradualColor(theme, factor);
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容4.3.1版本的API，将在未来版本移除，请使用chartBase.themeGradualColor()
+	/**
+	 * 获取图表主题指定渐变因子的颜色。
+	 * 这个颜色是图表主题的实际背景色（actualBackgroundColor）与前景色（color）之间的某个颜色。
+	 * 
+	 * 图表渲染器在绘制图表时，可以使用此函数获取的颜色来设置图表配色。
+	 * 
+	 * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
+	 * @param theme 可选，用于获取颜色的主题，默认为：chart.theme()
+	 * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"，如果未设置factor，将返回一个包含所有渐变颜色的数组
+	 */
+	chartBase.gradualColor = function(factor, theme)
+	{
+		//gradualColor(theme)
+		if(arguments.length == 1 && typeof(factor) != "number")
+		{
+			theme = factor;
+			factor = undefined;
+		}
+		
+		theme = (theme == null ? this._themeNonNull() : theme);
+		
+		return chartFactory.themeGradualColor(theme, factor);
+	};
+	// > @deprecated 兼容4.3.1版本的API，将在未来版本移除，请使用chartBase.themeGradualColor()
 	
 	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventNew()
 	/**
@@ -5192,7 +5212,7 @@
 	 * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
 	 * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"，如果未设置factor，将返回一个包含所有渐变颜色的数组
 	 */
-	chartFactory.gradualColor = function(theme, factor)
+	chartFactory.themeGradualColor = function(theme, factor)
 	{
 		var gcs = theme[chartFactory._KEY_GRADUAL_COLORS];
 		
@@ -5754,11 +5774,11 @@
 			if(!theme.titleColor)
 				theme.titleColor = theme.color;
 			if(!theme.legendColor)
-				theme.legendColor = chartFactory.gradualColor(theme, 0.9);
+				theme.legendColor = chartFactory.themeGradualColor(theme, 0.9);
 			// > @deprecated 兼容2.13.0版本ChartTheme的titleColor、legendColor结构，未来版本会移除
 			
 			if(!theme.borderColor)
-				theme.borderColor = chartFactory.gradualColor(theme, 0.3);
+				theme.borderColor = chartFactory.themeGradualColor(theme, 0.3);
 			
 			var titleThemeGen =
 			{
@@ -5783,7 +5803,7 @@
 			var legendThemeGen =
 			{
 				name: "legendTheme",
-				color: chartFactory.gradualColor(theme, 0.9),
+				color: chartFactory.themeGradualColor(theme, 0.9),
 				backgroundColor: "transparent",
 				borderColor: theme.borderColor,
 				borderWidth: 0
@@ -5804,8 +5824,8 @@
 			{
 				name: "tooltipTheme",
 				color: theme.actualBackgroundColor,
-				backgroundColor: chartFactory.gradualColor(theme, 0.7),
-				borderColor: chartFactory.gradualColor(theme, 0.9),
+				backgroundColor: chartFactory.themeGradualColor(theme, 0.7),
+				borderColor: chartFactory.themeGradualColor(theme, 0.9),
 				borderWidth: 1
 			};
 			
@@ -5815,8 +5835,8 @@
 			{
 				name: "highlightTheme",
 				color: theme.actualBackgroundColor,
-				backgroundColor: chartFactory.gradualColor(theme, 0.8),
-				borderColor: chartFactory.gradualColor(theme, 1),
+				backgroundColor: chartFactory.themeGradualColor(theme, 0.8),
+				borderColor: chartFactory.themeGradualColor(theme, 1),
 				borderWidth: 1
 			};
 			
@@ -5902,13 +5922,13 @@
 	 */
 	chartFactory.buildEchartsTheme = function(chartTheme)
 	{
-		var axisColor = chartFactory.gradualColor(chartTheme, 0.7);
-		var axisScaleLineColor = chartFactory.gradualColor(chartTheme, 0.35);
-		var areaColor0 = chartFactory.gradualColor(chartTheme, 0.15);
-		var areaBorderColor0 = chartFactory.gradualColor(chartTheme, 0.3);
-		var areaColor1 = chartFactory.gradualColor(chartTheme, 0.25);
-		var areaBorderColor1 = chartFactory.gradualColor(chartTheme, 0.5);
-		var shadowColor = chartFactory.gradualColor(chartTheme, 0.9);
+		var axisColor = chartFactory.themeGradualColor(chartTheme, 0.7);
+		var axisScaleLineColor = chartFactory.themeGradualColor(chartTheme, 0.35);
+		var areaColor0 = chartFactory.themeGradualColor(chartTheme, 0.15);
+		var areaBorderColor0 = chartFactory.themeGradualColor(chartTheme, 0.3);
+		var areaColor1 = chartFactory.themeGradualColor(chartTheme, 0.25);
+		var areaBorderColor1 = chartFactory.themeGradualColor(chartTheme, 0.5);
+		var shadowColor = chartFactory.themeGradualColor(chartTheme, 0.9);
 		
 		// < @deprecated 兼容1.8.1版本有ChartTheme.axisColor的结构
 		if(chartTheme.axisColor)
@@ -6019,8 +6039,8 @@
 				},
 				"emptyCircleStyle":
 				{
-					"color": chartFactory.gradualColor(chartTheme, 0),
-					"borderColor": chartFactory.gradualColor(chartTheme, 0.1)
+					"color": chartFactory.themeGradualColor(chartTheme, 0),
+					"borderColor": chartFactory.themeGradualColor(chartTheme, 0.1)
 				}
 			},
 			"scatter" : {

@@ -986,7 +986,7 @@
 		
 		if(options.dg.gaugeType == "ring")
 		{
-			var itemBorderColor = chart.gradualColor(0.8);
+			var itemBorderColor = chart.themeGradualColor(0.8);
 			var chartEle = chart.elementJquery();
 			var axisLineWidth = parseInt(Math.min(chartEle.width(), chartEle.height())/12);
 			
@@ -5151,7 +5151,7 @@
 							//所以这里采用fontWeight效果
 							"fontWeight": "bold",
 							"shadowBlur" : 10,
-							"shadowColor" : chart.gradualColor(0.9, chartTheme)
+							"shadowColor" : chart.themeGradualColor(0.9)
 						}
 					}
 				}
@@ -5325,7 +5325,7 @@
 						itemStyle:
 						{
 							borderColor: chartTheme.borderColor,
-							shadowColor: chart.gradualColor(0.4, chartTheme)
+							shadowColor: chart.themeGradualColor(0.4)
 						}
 					},
 					label:
@@ -6387,7 +6387,7 @@
 				symbolMargin: dg.symbolMargin,
 				z: 1,
 				animationDuration: 0,
-				itemStyle:{ color: chart.gradualColor(0.2) },
+				itemStyle:{ color: chart.themeGradualColor(0.2) },
 				silent: true
 			}
 		];
@@ -6927,7 +6927,7 @@
 					},
 					rowOdd:
 					{
-						"background-color": chart.gradualColor(0)
+						"background-color": chart.themeGradualColor(0)
 					},
 					rowEven:
 					{
@@ -6935,7 +6935,7 @@
 					},
 					rowHover:
 					{
-						"background-color": chart.gradualColor(0.2)
+						"background-color": chart.themeGradualColor(0.2)
 					},
 					rowSelected:
 					{
@@ -7109,7 +7109,7 @@
 					value:
 					{
 						color: theme.color,
-						"background-color": chart.gradualColor(0)
+						"background-color": chart.themeGradualColor(0)
 					}
 				}
 			];
@@ -7971,7 +7971,7 @@
 					value:
 					{
 						"color": theme.color,
-						"background-color": chart.gradualColor(0.1)
+						"background-color": chart.themeGradualColor(0.1)
 					}
 				}
 			];

@@ -289,9 +289,9 @@
 		var name = chartFactory.builtinPropName("DataSetParamValueForm" + (isSubStyle ? "SubYes" : "SubNo"));
 		return chartFactory.themeStyleSheet(chartTheme, name, function()
 		{
-			var color = chartFactory.gradualColor(chartTheme, 1);
-			var bgColor = chartFactory.gradualColor(chartTheme, 0);
-			var borderColor = chartFactory.gradualColor(chartTheme, 0.5);
+			var color = chartFactory.themeGradualColor(chartTheme, 1);
+			var bgColor = chartFactory.themeGradualColor(chartTheme, 0);
+			var borderColor = chartFactory.themeGradualColor(chartTheme, 0.5);
 			
 			var cssPrefix = (isSubStyle ? " " : "") + ".dg-dspv-form";
 			
@@ -333,7 +333,7 @@
 					value:
 					{
 						"color": color,
-						"background-color": chartFactory.gradualColor(chartTheme, 0.1),
+						"background-color": chartFactory.themeGradualColor(chartTheme, 0.1),
 						"border-color": borderColor
 					}
 				},
@@ -347,7 +347,7 @@
 					],
 					value:
 					{
-						"background-color": chartFactory.gradualColor(chartTheme, 0.3)
+						"background-color": chartFactory.themeGradualColor(chartTheme, 0.3)
 					}
 				}
 			];
@@ -1012,11 +1012,11 @@
 	{
 		return chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("Datetimepicker"), function()
 		{
-			var color = chartFactory.gradualColor(chartTheme, 1);
-			var bgColor = chartFactory.gradualColor(chartTheme, 0);
-			var borderColor = chartFactory.gradualColor(chartTheme, 0.3);
-			var shadowColor = chartFactory.gradualColor(chartTheme, 0.9);
-			var hoverColor = chartFactory.gradualColor(chartTheme, 0.3);
+			var color = chartFactory.themeGradualColor(chartTheme, 1);
+			var bgColor = chartFactory.themeGradualColor(chartTheme, 0);
+			var borderColor = chartFactory.themeGradualColor(chartTheme, 0.3);
+			var shadowColor = chartFactory.themeGradualColor(chartTheme, 0.9);
+			var hoverColor = chartFactory.themeGradualColor(chartTheme, 0.3);
 			
 			var cssPrefix = " .xdsoft_datetimepicker";
 			
@@ -1586,11 +1586,11 @@
 	{
 		chart.themeStyleSheet(chartFactory.builtinPropName("ChartSettingBox"), function()
 		{
-			var color = chart.gradualColor(1);
-			var bgColor = chart.gradualColor(0);
-			var btnBorderColor = chart.gradualColor(0.5);
-			var panelBorderColor = chart.gradualColor(0.3);
-			var shadowColor = chart.gradualColor(0.9);
+			var color = chart.themeGradualColor(1);
+			var bgColor = chart.themeGradualColor(0);
+			var btnBorderColor = chart.themeGradualColor(0.5);
+			var panelBorderColor = chart.themeGradualColor(0.3);
+			var shadowColor = chart.themeGradualColor(0.9);
 			
 			var css =
 			[
@@ -1607,7 +1607,7 @@
 					name: " .dg-chart-setting-box .dg-chart-setting-button:hover",
 					value:
 					{
-						"background-color": chart.gradualColor(0.2)
+						"background-color": chart.themeGradualColor(0.2)
 					}
 				},
 				{
@@ -1639,7 +1639,7 @@
 					value:
 					{
 						"color": color,
-						"background-color": chart.gradualColor(0.1),
+						"background-color": chart.themeGradualColor(0.1),
 						"border-color": btnBorderColor
 					}
 				},
@@ -1651,7 +1651,7 @@
 					],
 					value:
 					{
-						"background-color": chart.gradualColor(0.3)
+						"background-color": chart.themeGradualColor(0.3)
 					}
 				}
 			];
@@ -2057,7 +2057,7 @@
 		{
 			var theme = chart.theme();
 			//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列
-			var bgColor = chart.gradualColor(0);
+			var bgColor = chart.themeGradualColor(0);
 			
 			var cssPrefix = " .dg-chart-setting-box .dg-chart-setting-data-panel";
 			
@@ -2094,7 +2094,7 @@
 					],
 					value:
 					{
-						"background-color": chart.gradualColor(0.1)
+						"background-color": chart.themeGradualColor(0.1)
 					}
 				},
 				{
@@ -2116,7 +2116,7 @@
 					],
 					value:
 					{
-						"background-color": chart.gradualColor(0.3)
+						"background-color": chart.themeGradualColor(0.3)
 					}
 				},
 				{
