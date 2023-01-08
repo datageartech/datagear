@@ -1498,6 +1498,11 @@
 	 */
 	chartBase._renderSetting = function()
 	{
+		var disableSetting = this.disableSetting();
+		
+		if(disableSetting.param && disableSetting.data)
+			return;
+		
 		if(chartFactory.chartSetting && chartFactory.chartSetting.bindChartSettingPanelEvent)
 			chartFactory.chartSetting.bindChartSettingPanelEvent(this);
 	};

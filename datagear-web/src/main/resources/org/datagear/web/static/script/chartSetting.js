@@ -1487,9 +1487,6 @@
 	chartSetting.unbindChartSettingPanelEvent = function(chart)
 	{
 		var disableSetting = chart.disableSetting();
-
-		if(disableSetting.param == true && disableSetting.data == true)
-			return false;
 		
 		var $chart = chart.elementJquery();
 		var mouseenterHandler = $chart.data("chartSettingPanel-mouseenterHandler");
