@@ -826,3 +826,14 @@ DataGear版本更新日志
 --v4.4.0
 -----------------------------------------
 
+新增：看板新增dg-chart-manual-render属性，用于控制是否手动渲染图表；
+新增：看板dg-dashboard-code属性新增"instance"值，弃用dg-dashboard-auto-render属性；
+新增：看板JS对象新增诸多生命周期相关函数，用于更明确控制看板生命周期；
+新增：图表JS对象新增themeGradualColor()函数，替换已弃用的gradualColor()函数；
+新增：图表JS对象新增诸多生命周期相关函数，用于更明确控制图表生命周期；
+修复：修复在图表监听器中调用图表JS对象的refreshData()函数不起作用的BUG；
+改进：看板JS对象loadChart()、loadCharts()、loadUnsolvedCharts()支持指定元素ID参数；
+改进：图表JS对象简化themeStyleName()、themeStyleSheet()函数，弃用theme参数项；
+改进：图表完全禁用交互设置后不再绘制不必要的相关HTML元素；
+改进：完善看板源码编辑模式代码配色；
+改进：图表支持库ECharts版本由5.4.0升级至5.4.1；
