@@ -2754,8 +2754,17 @@
 		this.stopHandleCharts();
 		this._destroyCharts();
 		this._destroyForms();
+		this._destroyThemeStyleSheet();
 		
 		this.statusDestroyed(true);
+	};
+	
+	//销毁全局图表主题关联创建的样式表
+	dashboardBase._destroyThemeStyleSheet = function()
+	{
+		var theme = chartFactory.renderContextAttrChartTheme(this.renderContext);
+		if(theme)
+			chartFactory.destroyThemeStyleSheet(theme);
 	};
 	
 	//-------------
