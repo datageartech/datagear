@@ -257,12 +257,15 @@
 				
 				var chartListener = this.listener();
 				
+				// < @deprecated 兼容4.3.1版本的dg-dashboard-listener中监听图表相关功能，将在未来版本移除
 				//图表监听器不继承看板监听器功能，所以只有图表没有定义监听器时，才使用代理看板监听器
 				if(!chartListener)
 				{
 					this.listener(this.dashboard._getDelegateChartListener());
 				}
-				else
+				// > @deprecated 兼容4.3.1版本的dg-dashboard-listener中监听图表相关功能，将在未来版本移除
+				
+				if(chartListener)
 				{
 					//由元素图表监听器属性生成的内部代理图表监听器，应为其添加updateError处理函数
 					if(chartListener._proxyChartListenerFromEleAttr)
@@ -947,45 +950,35 @@
 		
 		this._listener = listener;
 		
+		// < @deprecated 兼容4.3.1版本的dg-dashboard-listener中监听图表相关功能，将在未来版本移除
 		//需要同步设置全局图表监听器
 		var chartListener = this._getDelegateChartListener();
 		
-		var dashboard = this;
-		
 		if(listener && listener.renderChart)
-			chartListener.render = function(chart){ listener.renderChart(dashboard, chart); };
+			chartListener.render = function(chart){ listener.renderChart(chart.dashboard, chart); };
 		else
 			chartListener.render = undefined;
 		
 		if(listener && listener.updateChart)
-			chartListener.update = function(chart, results){ listener.updateChart(dashboard, chart, results); };
+			chartListener.update = function(chart, results){ listener.updateChart(chart.dashboard, chart, results); };
 		else
 			chartListener.update = undefined;
 		
 		if(listener && listener.onRenderChart)
-			chartListener.onRender = function(chart){ return listener.onRenderChart(dashboard, chart); };
+			chartListener.onRender = function(chart){ return listener.onRenderChart(chart.dashboard, chart); };
 		else
 			chartListener.onRender = undefined;
 		
 		if(listener && listener.onUpdateChart)
-			chartListener.onUpdate = function(chart, results){ return listener.onUpdateChart(dashboard, chart, results); };
+			chartListener.onUpdate = function(chart, results){ return listener.onUpdateChart(chart.dashboard, chart, results); };
 		else
 			chartListener.onUpdate = undefined;
 		
 		if(listener && listener.updateChartError)
-			chartListener.updateError = function(chart, error){ return listener.updateChartError(dashboard, chart, error); };
+			chartListener.updateError = function(chart, error){ return listener.updateChartError(chart.dashboard, chart, error); };
 		else
 			chartListener.updateError = undefined;
-	};
-	
-	/**
-	 * 获取看板的代理图表监听器。
-	 * 为了确保任意时刻设置看板监听器（dashboard.listener(...)）都能传递至图表，所以此方法应始终返回不为null且引用不变的对象。
-	 */
-	dashboardBase._getDelegateChartListener = function()
-	{
-		var chartListener = (this._delegateChartListener || (this._delegateChartListener = {}));
-		return chartListener;
+		// > @deprecated 兼容4.3.1版本的dg-dashboard-listener中监听图表相关功能，将在未来版本移除
 	};
 	
 	/**
@@ -2770,6 +2763,18 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容4.3.1版本的dg-dashboard-listener中监听图表相关功能，将在未来版本移除
+	/**
+	 * 获取看板的代理图表监听器。
+	 * 为了确保任意时刻设置看板监听器（dashboard.listener(...)）都能传递至图表，所以此方法应始终返回不为null且引用不变的对象。
+	 */
+	dashboardBase._getDelegateChartListener = function()
+	{
+		var chartListener = (this._delegateChartListener || (this._delegateChartListener = {}));
+		return chartListener;
+	};
+	// > @deprecated 兼容4.3.1版本的dg-dashboard-listener中监听图表相关功能，将在未来版本移除
 	
 	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用dashboardBase.originalDataIndex()函数
 	/**
