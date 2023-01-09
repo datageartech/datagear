@@ -5153,44 +5153,21 @@
 	/**
 	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
 	 * 
-	 * @param element HTML元素、HTML元素ID、Jquery对象
+	 * @param element HTML元素、Jquery选择器、Jquery对象
 	 */
 	chartFactory.renderedChart = function(element)
 	{
-		element = chartFactory.toJqueryWithEleId(element);
+		element = chartFactory.toJqueryObj(element);
 		return element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART);
 	};
 	
 	/**
 	 * 获取Jquery对象。
 	 * 
-	 * @param element HTML元素、HTML元素ID、HTML元素/元素ID数组、Jquery对象
+	 * @param element HTML元素、HTML元素数组、Jquery选择器、Jquery对象
 	 */
-	chartFactory.toJqueryWithEleId = function(element)
+	chartFactory.toJqueryObj = function(element)
 	{
-		//元素ID
-		if(chartFactory.isString(element))
-		{
-			element = "#" + element;
-		}
-		//元素、元素ID数组
-		else if($.isArray(element))
-		{
-			var elements = [];
-			
-			for(var i=0; i<element.length; i++)
-			{
-				var elei = element[i];
-				
-				if(chartFactory.isString(elei))
-					elei = $("#" + elei)[0];
-				
-				elements.push(elei);
-			}
-			
-			element = elements;
-		}
-		
 		return $(element);
 	};
 	

@@ -1288,14 +1288,14 @@
 	 * 
 	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
 	 * 
-	 * @param form 要渲染的<form>表单元素、表单元素ID、Jquery对象，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
+	 * @param form 要渲染的<form>表单元素、Jquery选择器、Jquery对象，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
 	 * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
 	 */
 	dashboardBase.renderForm = function(form, config)
 	{
 		this._assertRender();
 		
-		form = chartFactory.toJqueryWithEleId(form)
+		form = chartFactory.toJqueryObj(form)
 		
 		form.addClass("dg-dashboard-form");
 		
@@ -1909,7 +1909,7 @@
 	 * dashboard.loadChart(element, ajaxOptions);
 	 * dashboard.loadChart(element, chartWidgetId, ajaxOptions);
 	 * 
-	 * @param element 用于渲染图表的HTML元素、HTML元素ID、Jquery对象
+	 * @param element 用于渲染图表的HTML元素、Jquery选择器、Jquery对象
 	 * @param chartWidgetId 选填参数，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
 	 * @param ajaxOptions 选填参数，参数格式可以是图表加载成功回调函数：function(chart){ ... }，也可以是ajax配置项：{...}。
 	 * 					  如果图表加载成功回调函数、ajax配置项的success函数返回false，则这个图表不会加入此看板。
@@ -1919,7 +1919,7 @@
 		//异步加载无需看板已渲染
 		//this._assertRender();
 		
-		element = chartFactory.toJqueryWithEleId(element);
+		element = chartFactory.toJqueryObj(element);
 		
 		if(this._loadingChartElement(element))
 			throw new Error("The element is loading chart");
@@ -1996,7 +1996,7 @@
 	 * dashboard.loadCharts(element, ajaxOptions);
 	 * dashboard.loadCharts(element, chartWidgetId, ajaxOptions);
 	 * 
-	 * @param element 用于渲染图表的HTML元素、HTML元素ID、HTML元素/元素ID数组、Jquery对象
+	 * @param element 用于渲染图表的HTML元素、HTML元素数组、Jquery选择器、Jquery对象
 	 * @param chartWidgetId 可选，要加载的图表部件ID、图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
 	 * @param ajaxOptions 可选，参数格式可以是图表数组加载成功回调函数：function(charts){ ... }，也可以是ajax配置项：{...}。
 	 * 					  如果图表数组加载成功回调函数、ajax配置项的success函数返回false，则这些图表不会加入此看板。
@@ -2006,7 +2006,7 @@
 		//异步加载无需看板已渲染
 		//this._assertRender();
 		
-		element = chartFactory.toJqueryWithEleId(element);
+		element = chartFactory.toJqueryObj(element);
 		
 		for(var i=0; i<element.length; i++)
 		{
@@ -2106,7 +2106,7 @@
 	 * dashboard.loadUnsolvedCharts(ajaxOptions);
 	 * dashboard.loadUnsolvedCharts(element, ajaxOptions);
 	 * 
-	 * @param element 可选，限定查找的根HTML元素、HTML元素ID、Jquery对象，默认为：<body>元素
+	 * @param element 可选，限定查找的根HTML元素、Jquery选择器、Jquery对象，默认为：<body>元素
 	 * @param ajaxOptions 可选，参数格式可以是图表数组加载成功回调函数：function(charts){ ... }，也可以是ajax配置项：{...}。
 	 * 					  如果图表数组加载成功回调函数、ajax配置项的success函数返回false，则这些图表不会加入此看板。
 	 * @return 要异步加载的HTML元素数组
@@ -2123,7 +2123,7 @@
 			element = undefined;
 		}
 		
-		element = (element == null ? document.body : chartFactory.toJqueryWithEleId(element));
+		element = (element == null ? document.body : chartFactory.toJqueryObj(element));
 		
 		var unsolved = [];
 		
