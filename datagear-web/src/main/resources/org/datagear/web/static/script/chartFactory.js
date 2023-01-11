@@ -1266,7 +1266,7 @@
 	 */
 	chartBase.destroy = function()
 	{
-		if(!this.isRender() || this.statusDestroying() || this.statusDestroyed())
+		if(!this.isAlive() || this.statusDestroying() || this.statusDestroyed())
 			return false;
 		
 		this.statusDestroying(true);
@@ -1407,7 +1407,7 @@
 	};
 	
 	/**
-	 * 图表是否处于活跃可用的状态（已完成渲染且未被销毁）。
+	 * 图表是否处于活跃可用的状态（已完成渲染且未执行销毁）。
 	 */
 	chartBase.isActive = function()
 	{
@@ -1415,7 +1415,7 @@
 	};
 	
 	/**
-	 * 断言图表处于活跃可用的状态。
+	 * 断言图表处于活跃的状态。
 	 */
 	chartBase._assertActive = function()
 	{
@@ -1423,6 +1423,17 @@
 			return;
 		
 		throw new Error("chart not active");
+	};
+	
+	/**
+	 * 断言图表处于活着的状态。
+	 */
+	chartBase._assertAlive = function()
+	{
+		if(this.isAlive())
+			return;
+		
+		throw new Error("chart not alive");
 	};
 	
 	/**
@@ -1435,7 +1446,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = false;
+			this._isAlive = false;
 			this.status(chartStatusConst.PRE_RENDER);
 		}
 		else
@@ -1452,7 +1463,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = true;
+			this._isAlive = true;
 			this.status(chartStatusConst.RENDERING);
 		}
 		else
@@ -1470,7 +1481,7 @@
 		if(set === true)
 		{
 			this._isActive = true;
-			this._isRender = true;
+			this._isAlive = true;
 			this.status(chartStatusConst.RENDERED);
 			
 			if(postProcess == null || postProcess == true)
@@ -1528,7 +1539,7 @@
 		if(set === true)
 		{
 			this._isActive = true;
-			this._isRender = true;
+			this._isAlive = true;
 			this.status(chartStatusConst.PRE_UPDATE);
 		}
 		else
@@ -1545,7 +1556,7 @@
 		if(set === true)
 		{
 			this._isActive = true;
-			this._isRender = true;
+			this._isAlive = true;
 			this.status(chartStatusConst.UPDATING);
 		}
 		else
@@ -1563,7 +1574,7 @@
 		if(set === true)
 		{
 			this._isActive = true;
-			this._isRender = true;
+			this._isAlive = true;
 			this.status(chartStatusConst.UPDATED);
 			
 			if(postProcess == null || postProcess == true)
@@ -1593,7 +1604,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = true;
+			this._isAlive = true;
 			this.status(chartStatusConst.DESTROYING);
 		}
 		else
@@ -1611,7 +1622,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = false;
+			this._isAlive = false;
 			this.status(chartStatusConst.DESTROYED);
 			
 			if(postProcess == null || postProcess == true)
@@ -1759,7 +1770,7 @@
 	 */
 	chartBase.off = function(eventType, handler)
 	{
-		this._assertActive();
+		this._assertAlive();
 		
 		var renderer = this.renderer();
 		
@@ -3934,13 +3945,13 @@
 	};
 	
 	/**
-	 * 图表是否处于渲染状态（已执行渲染且未被销毁）。
+	 * 图表是否是活着的（已执行渲染且未完成销毁）。
 	 * 
 	 * @since 4.4.0
 	 */
-	chartBase.isRender = function()
+	chartBase.isAlive = function()
 	{
-		return (this._isRender == true);
+		return (this._isAlive == true);
 	};
 	
 	/**
@@ -3955,7 +3966,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = false;
+			this._isAlive = false;
 			this.status(chartStatusConst.PRE_INIT);
 		}
 		else
@@ -3974,7 +3985,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = false;
+			this._isAlive = false;
 			this.status(chartStatusConst.INITING);
 		}
 		else
@@ -3993,7 +4004,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = false;
+			this._isAlive = false;
 			this.status(chartStatusConst.INITED);
 		}
 		else
@@ -4530,7 +4541,7 @@
 	 */
 	chartBase.eventUnbindHandlerDelegation = function(eventType, eventHanlder, delegationUnbinder)
 	{
-		this._assertActive();
+		this._assertAlive();
 		
 		if(delegationUnbinder == undefined)
 		{

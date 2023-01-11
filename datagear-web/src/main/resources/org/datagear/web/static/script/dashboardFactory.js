@@ -1213,12 +1213,12 @@
 	};
 	
 	/**
-	 * 校验看板是否已渲染。
+	 * 校验看板是否是活着的。
 	 */
-	dashboardBase._assertRender = function()
+	dashboardBase._assertAlive = function()
 	{
-		if(!this.isRender())
-			throw new Error("dashboard not render");
+		if(!this.isAlive())
+			throw new Error("dashboard not alive");
 	};
 	
 	/**
@@ -1286,7 +1286,7 @@
 	 */
 	dashboardBase.renderForm = function(form, config)
 	{
-		this._assertRender();
+		this._assertAlive();
 		
 		form = chartFactory.toJqueryObj(form)
 		
@@ -1433,7 +1433,7 @@
 	 */
 	dashboardBase.startHandleCharts = function()
 	{
-		this._assertRender();
+		this._assertAlive();
 		
 		if(this._doHandlingCharts == true)
 			return false;
@@ -1772,7 +1772,10 @@
 		
 		try
 		{
-			chart.update(dataSetResults);
+			if(chart.isActive())
+				chart.update(dataSetResults);
+			else
+				chartFactory.logException("chart '#"+chart.elementId+"' not active");
 		}
 		catch(e)
 		{
@@ -1910,7 +1913,7 @@
 	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
 		//异步加载无需看板已渲染
-		//this._assertRender();
+		//this._assertAlive();
 		
 		element = chartFactory.toJqueryObj(element);
 		
@@ -1997,7 +2000,7 @@
 	dashboardBase.loadCharts = function(element, chartWidgetId, ajaxOptions)
 	{
 		//异步加载无需看板已渲染
-		//this._assertRender();
+		//this._assertAlive();
 		
 		element = chartFactory.toJqueryObj(element);
 		
@@ -2107,7 +2110,7 @@
 	dashboardBase.loadUnsolvedCharts = function(element, ajaxOptions)
 	{
 		//异步加载无需看板已渲染
-		//this._assertRender();
+		//this._assertAlive();
 		
 		//(ajaxOptions)
 		if(arguments.length == 1 && !chartFactory.isString(element) && !chartFactory.isDomOrJquery(element))
@@ -2209,7 +2212,7 @@
 			{
 				chart.init();
 			}
-			else if(this.isRender())
+			else if(this.isAlive())
 			{
 				chart.init();
 				chart.statusPreRender(true);
@@ -2433,7 +2436,7 @@
 	 */
 	dashboardBase.destroy = function()
 	{
-		if(!this.isRender() || this.statusDestroying() || this.statusDestroyed())
+		if(!this.isAlive() || this.statusDestroying() || this.statusDestroyed())
 			return false;
 		
 		this.statusDestroying(true);
@@ -2543,13 +2546,13 @@
 	};
 	
 	/**
-	 * 看板是否正在渲染、完成渲染，且完成销毁。
+	 * 看板是否是活着的（已执行渲染且未完成销毁）。
 	 * 
 	 * @since 4.4.0
 	 */
-	dashboardBase.isRender = function()
+	dashboardBase.isAlive = function()
 	{
-		return (this._isRender == true);
+		return (this._isAlive == true);
 	};
 	
 	/**
@@ -2588,7 +2591,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = false;
+			this._isAlive = false;
 			this.status(dashboardStatusConst.PRE_INIT);
 		}
 		else
@@ -2607,7 +2610,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = false;
+			this._isAlive = false;
 			this.status(dashboardStatusConst.INITING);
 		}
 		else
@@ -2626,7 +2629,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = false;
+			this._isAlive = false;
 			this.status(dashboardStatusConst.INITED);
 		}
 		else
@@ -2645,7 +2648,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = true;
+			this._isAlive = true;
 			this.status(dashboardStatusConst.RENDERING);
 		}
 		else
@@ -2665,7 +2668,7 @@
 		if(set === true)
 		{
 			this._isActive = true;
-			this._isRender = true;
+			this._isAlive = true;
 			this.status(dashboardStatusConst.RENDERED);
 			
 			if(postProcess == null || postProcess == true)
@@ -2697,7 +2700,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = true;
+			this._isAlive = true;
 			this.status(dashboardStatusConst.DESTROYING);
 		}
 		else
@@ -2717,7 +2720,7 @@
 		if(set === true)
 		{
 			this._isActive = false;
-			this._isRender = false;
+			this._isAlive = false;
 			this.status(dashboardStatusConst.DESTROYED);
 			
 			if(postProcess == null || postProcess == true)
