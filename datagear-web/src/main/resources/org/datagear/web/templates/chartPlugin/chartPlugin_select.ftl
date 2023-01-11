@@ -150,13 +150,13 @@
 	{
 		var ctc = categorization.category;
 		var count = (categorization.chartPlugins ? categorization.chartPlugins.length : 0);
-		return (ctc.nameLabel && ctc.nameLabel.value ? ctc.nameLabel.value : (ctc.name || "<@spring.message code='other' />")) + " ("+count+")";
+		return (ctc.nameLabel && ctc.nameLabel.value ? ctc.nameLabel.value : (ctc.name || "<@spring.message code='uncategorized' />")) + " ("+count+")";
 	};
 	
 	po.toCategorizationEleId = function(categorization)
 	{
 		var ctc = categorization.category;
-		return po.pid + (ctc.name || "other");
+		return po.pid + (ctc.name || "uncategorized");
 	};
 	
 	po.vuePageModel(

@@ -16,9 +16,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.Category;
-import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
@@ -279,7 +279,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			return super.getNewLine();
 		}
 
-		@JsonIgnore
 		@Override
 		public int getOrder()
 		{
