@@ -1240,7 +1240,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			int subPathSlashIdx = firstTemplate.indexOf(FileUtil.PATH_SEPARATOR_SLASH);
 			if (subPathSlashIdx > 0 && subPathSlashIdx < firstTemplate.length() - 1)
 			{
-				String redirectPath = correctPath + firstTemplate;
+				String redirectPath = correctPath + WebUtils.encodePathURL(firstTemplate);
 				redirectPath = appendRequestQueryString(redirectPath, request);
 				response.sendRedirect(redirectPath);
 			}

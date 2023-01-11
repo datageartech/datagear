@@ -8,8 +8,6 @@
 package org.datagear.web.util;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -439,7 +437,7 @@ public class WebUtils
 		if (url == null)
 			return null;
 
-		return URLDecoder.decode(url, IOUtil.CHARSET_UTF_8);
+		return StringUtil.decodeURL(url, IOUtil.CHARSET_UTF_8);
 	}
 
 	/**
@@ -451,10 +449,22 @@ public class WebUtils
 	 */
 	public static String encodeURL(String url) throws UnsupportedEncodingException
 	{
-		if (url == null)
-			return null;
+		return StringUtil.encodeURL(url, IOUtil.CHARSET_UTF_8);
+	}
 
-		return URLEncoder.encode(url, IOUtil.CHARSET_UTF_8);
+	/**
+	 * 编码路径URL。
+	 * <p>
+	 * 将字符串中除了'/'的字符都进行URL编码。
+	 * </p>
+	 * 
+	 * @param url
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String encodePathURL(String url) throws UnsupportedEncodingException
+	{
+		return StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
 	}
 
 	/**

@@ -205,4 +205,34 @@ public class StringUtilTest
 			assertEquals("abhi", actual);
 		}
 	}
+
+	@Test
+	public void encodePathURLTest() throws Exception
+	{
+		{
+			String url = "abc";
+			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
+			assertEquals(url, actual);
+		}
+
+		{
+			String url = "abc/def/ghi";
+			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
+			assertEquals(url, actual);
+		}
+
+		{
+			String url = "abc/中 文/?/ghi";
+			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
+			assertEquals("abc/%E4%B8%AD+%E6%96%87/%3F/ghi", actual);
+			assertEquals(url, StringUtil.decodeURL(actual, IOUtil.CHARSET_UTF_8));
+		}
+
+		{
+			String url = "/abc//中 文/?/ghi//";
+			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
+			assertEquals("/abc//%E4%B8%AD+%E6%96%87/%3F/ghi//", actual);
+			assertEquals(url, StringUtil.decodeURL(actual, IOUtil.CHARSET_UTF_8));
+		}
+	}
 }

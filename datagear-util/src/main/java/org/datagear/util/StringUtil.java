@@ -7,6 +7,9 @@
 
 package org.datagear.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -445,5 +448,84 @@ public class StringUtil
 		sb.append(suffix);
 
 		return sb.toString();
+	}
+
+	/**
+	 * 解码URL。
+	 * 
+	 * @param url
+	 * @param encoding
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String decodeURL(String url, String encoding) throws UnsupportedEncodingException
+	{
+		if (url == null)
+			return null;
+
+		return URLDecoder.decode(url, encoding);
+	}
+
+	/**
+	 * 编码URL。
+	 * 
+	 * @param url
+	 * @param encoding
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String encodeURL(String url, String encoding) throws UnsupportedEncodingException
+	{
+		if (url == null)
+			return null;
+
+		return URLEncoder.encode(url, encoding);
+	}
+
+	/**
+	 * 编码路径URL。
+	 * <p>
+	 * 将字符串中除了'/'的字符都进行URL编码。
+	 * </p>
+	 * 
+	 * @param url
+	 * @param encoding
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String encodePathURL(String url, String encoding) throws UnsupportedEncodingException
+	{
+		if (url == null)
+			return null;
+
+		StringBuilder re = new StringBuilder();
+
+		StringBuilder node = new StringBuilder();
+		char[] cs = url.toCharArray();
+
+		for (char c : cs)
+		{
+			if (c == '/')
+			{
+				if (node.length() > 0)
+				{
+					re.append(encodeURL(node.toString(), encoding));
+					node.delete(0, node.length());
+				}
+
+				re.append(c);
+			}
+			else
+			{
+				node.append(c);
+			}
+		}
+
+		if (node.length() > 0)
+		{
+			re.append(encodeURL(node.toString(), encoding));
+		}
+
+		return re.toString();
 	}
 }
