@@ -444,7 +444,7 @@
 	 *   }
 	 * }
 	 * 
-	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，
+	 * 图表数据集参数索引对象格式参考dashboardBase._batchSetDataSetParamValues函数相关说明，
 	 * 其中value函数的sourceValueContext参数为图表事件对象（chartEvent）对象。
 	 * 
 	 * 图表初始化时会使用图表元素的"dg-chart-link"属性值执行设置操作。
@@ -610,7 +610,7 @@
 			if(!this._isLinkTriggerableByEvent(link, chartEvent))
 				continue;
 			
-			var myTargetCharts = dashboard.batchSetDataSetParamValues(batchSource, link, chartEvent);
+			var myTargetCharts = dashboard._batchSetDataSetParamValues(batchSource, link, chartEvent);
 			
 			for(var j=0; j<myTargetCharts.length; j++)
 			{
@@ -1279,7 +1279,7 @@
 	 * }
 	 * 或者，简写为图表联动设置对象的target属性值。
 	 * 
-	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
+	 * 图表数据集参数索引对象格式参考dashboardBase._batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
 	 * 
 	 * @param form 要渲染的<form>表单元素、Jquery选择器、Jquery对象，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
 	 * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
@@ -1307,7 +1307,7 @@
 				
 				if(batchSet)
 				{
-					var charts = dashboard.batchSetDataSetParamValues(formData, batchSet, [ formData, thisForm ]);
+					var charts = dashboard._batchSetDataSetParamValues(formData, batchSet, [ formData, thisForm ]);
 					
 					for(var i=0; i<charts.length; i++)
 					{
@@ -2325,7 +2325,7 @@
 	 * @param sourceValueContext 可选，传递给图表数据集参数索引对象的value函数sourceValueContext参数的对象，如果为数组，则传递多个参数，默认为sourceData
 	 * @return 批量设置的图表对象数组
 	 */
-	dashboardBase.batchSetDataSetParamValues = function(sourceData, batchSet, sourceValueContext)
+	dashboardBase._batchSetDataSetParamValues = function(sourceData, batchSet, sourceValueContext)
 	{
 		sourceValueContext = (sourceValueContext === undefined ? sourceData : sourceValueContext);
 		
@@ -2766,6 +2766,21 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容4.3.1版本的API，此函数没有必要作为开放API，因为并不如直接chart.dataSetParamValue*()好用，将在未来版本移除
+	/**
+	 * 批量设置图表数据集参数值。
+	 * 
+	 * @param sourceData 源参数值对象，格式为：{ 源参数名 : 源参数值, ...} 或者 { getValue: function(name){ return ...; } }（需支持属性路径）
+	 * @param batchSet 批量设置对象
+	 * @param sourceValueContext 可选，传递给图表数据集参数索引对象的value函数sourceValueContext参数的对象，如果为数组，则传递多个参数，默认为sourceData
+	 * @return 批量设置的图表对象数组
+	 */
+	dashboardBase.batchSetDataSetParamValues = function(sourceData, batchSet, sourceValueContext)
+	{
+		return this._batchSetDataSetParamValues(sourceData, batchSet, sourceValueContext);
+	};
+	// > @deprecated 兼容4.3.1版本的API，此函数没有必要作为开放API，因为并不如直接chart.dataSetParamValue*()好用，将在未来版本移除
 	
 	// < @deprecated 兼容4.3.1版本的dg-dashboard-listener中监听图表相关功能，将在未来版本移除
 	/**

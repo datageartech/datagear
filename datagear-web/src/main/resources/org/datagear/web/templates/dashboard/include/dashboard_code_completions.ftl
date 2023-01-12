@@ -64,7 +64,6 @@
 		{name: "addChart", value: "addChart(", displayName: "addChart()", displayComment: "dashboard", categories: ["dashboard"]},
 		{name: "chartIndex", value: "chartIndex(", displayName: "chartIndex()", displayComment: "dashboard", categories: ["dashboard"]},
 		{name: "chartOf", value: "chartOf(", displayName: "chartOf()", displayComment: "dashboard", categories: ["dashboard"]},
-		{name: "batchSetDataSetParamValues", value: "batchSetDataSetParamValues(", displayName: "batchSetDataSetParamValues()", displayComment: "dashboard", categories: ["dashboard"]},
 		{name: "charts", value: "charts", displayName: "charts", displayComment: "dashboard", categories: ["dashboard"]},
 		{name: "destroy", value: "destroy()", displayName: "destroy()", displayComment: "dashboard", categories: ["dashboard"]},
 		{name: "doDestroy", value: "doDestroy()", displayName: "doDestroy()", displayComment: "dashboard", categories: ["dashboard"]},
