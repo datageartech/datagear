@@ -418,8 +418,6 @@
 		
 		this.statusIniting(true);
 		
-		this._clearExtValue();
-		
 		this._initForPre();
 		this._initOptions();
 		this._initTheme();
@@ -1010,9 +1008,6 @@
 	 * 
 	 * 注意：
 	 * 只有this.statusInited()或者this.statusPreRender()或者statusDestroyed()为true，此函数才允许执行。
-	 * 注意：
-	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
-	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
 	 */
 	chartBase.render = function()
 	{
@@ -2038,6 +2033,7 @@
 	
 	/**
 	 * 获取/设置扩展属性值。
+	 * 所有扩展属性值都将在图表销毁后被清除。
 	 * 
 	 * @param name 扩展属性名
 	 * @param value 要设置的扩展属性值，可选，不设置则执行获取操作
