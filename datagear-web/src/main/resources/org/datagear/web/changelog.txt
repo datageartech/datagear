@@ -831,9 +831,11 @@ DataGear版本更新日志
 新增：看板JS对象新增多个生命周期相关函数，可更灵活控制看板生命周期；
 新增：图表JS对象新增themeGradualColor()函数，替换已弃用的gradualColor()函数；
 新增：图表JS对象新增多个生命周期相关函数，可更灵活控制图表生命周期；
+修复：修复看板主页模板名包含中文子路径时无法打开展示页面的BUG；
 修复：修复在图表监听器中调用自身图表JS对象的refreshData()函数不起作用的BUG；
 改进：弃用dg-dashboard-listener中图表事件相关回调函数，dg-chart-listener已具备相同功能；
 改进：图表JS对象简化themeStyleName()、themeStyleSheet()函数，弃用theme参数项；
+改进：弃用dashboard.batchSetDataSetParamValues()函数，它并不实用；
 改进：图表完全禁用交互设置后不再绘制不必要的相关HTML元素；
 改进：完善看板源码编辑模式代码配色；
 改进：内置自定义图表插件单独分类，避免与未分类的插件混淆；
