@@ -2438,17 +2438,33 @@ $.inflatePageManager = function(po)
 $.inflatePageTable = function(po)
 {
 	//重写搜索表单提交处理函数
-	po.search = function(formData)
+	po.search = function(formData, resetPage)
 	{
-		po.ajaxTableQuery($.extend(formData, { page: 1 }));
+		resetPage = (resetPage == null ? po.searchResetPage : resetPage);
+		
+		if(resetPage)
+			formData = $.extend({ page: 1 }, formData);
+		else
+			formData = $.extend({}, formData);
+		
+		//每次应重置
+		if(!po.searchResetPage)
+			po.searchResetPage = true;
+		
+		po.ajaxTableQuery(formData);
 		po.loadAjaxTable();
 	};
+	
+	po.searchResetPage = true;
 	
 	po.refresh = function()
 	{
 		//兼容搜索表单集成
 		if(po.submitSearchForm)
+		{
+			po.searchResetPage = false;
 			po.submitSearchForm();
+		}
 		else
 			po.loadAjaxTable();
 	};
@@ -2477,6 +2493,7 @@ $.inflatePageTable = function(po)
 		{
 			items: [],
 			paginator: true,
+			pageRecordIndex: 0,
 			paginatorTemplate: "CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown",
 			pageReportTemplate: "{first}-{last} / {totalRecords}",
 			rowsPerPage: po.rowsPerPage,
@@ -2579,6 +2596,7 @@ $.inflatePageTable = function(po)
 		
 		pm.items = (isPagingData ? data.items : data);
 		pm.totalRecords = (isPagingData ? data.total : data.length);
+		pm.pageRecordIndex = (isPagingData ? data.startIndex : 0);
 		pm.selectedItems = null;
 	};
 };

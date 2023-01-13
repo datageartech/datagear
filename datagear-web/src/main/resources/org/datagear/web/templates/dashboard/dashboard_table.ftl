@@ -42,7 +42,7 @@
 	</div>
 	<div class="page-content">
 		<p-datatable :value="pm.items" :scrollable="true" scroll-height="flex"
-			:paginator="pm.paginator" :paginator-template="pm.paginatorTemplate"
+			:paginator="pm.paginator" :paginator-template="pm.paginatorTemplate" :first="pm.pageRecordIndex"
 			:rows="pm.rowsPerPage" :current-page-report-template="pm.pageReportTemplate"
 			:rows-per-page-options="pm.rowsPerPageOptions" :loading="pm.loading"
 			:lazy="true" :total-records="pm.totalRecords" @page="onPaginator($event)"
