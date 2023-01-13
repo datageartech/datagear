@@ -24,20 +24,20 @@
 		<div class="page-form-content no-max-height flex-grow-1 pr-2 py-1 overflow-y-auto">
 			<#list versionChangelogs as versionChangelog>
 				<div class="field grid mb-0">
-					<label for="${pid}version" class="field-label col-12 mb-2 md:col-3 md:mb-0 justify-content-center">
+					<label for="${pid}version" class="field-label col-12 mb-2 md:col-2 md:mb-0 justify-content-center">
 						<@spring.message code='version' />
 					</label>
-			        <div class="field-input col-12 md:col-9">
+			        <div class="field-input col-12 md:col-10">
 			        	<div id="${pid}version" class="text-xl font-bold">
 			        		${versionChangelog.version}
 			        	</div>
 			        </div>
 				</div>
 				<div class="field grid mb-0">
-					<label for="${pid}versionContent" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<label for="${pid}versionContent" class="field-label col-12 mb-2 md:col-2 md:mb-0">
 						&nbsp;
 					</label>
-			        <div class="field-input col-12 md:col-9">
+			        <div class="field-input col-12 md:col-10">
 			        	<div id="${pid}versionContent">
 			        		<ul class="pl-4">
 								<#list versionChangelog.contents as item>
