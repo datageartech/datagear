@@ -4913,16 +4913,20 @@
 		if(!theme)
 			return;
 		
-		var infoMap = (theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO] || {});
-		theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO] = null;
+		var infoMap = theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO];
 		
-		for(var name in infoMap)
+		if(infoMap != null)
 		{
-			var info = infoMap[name];
-			var styleId = (info ? info.styleId : null);
+			theme[chartFactory._KEY_THEME_STYLE_SHEET_INFO] = null;
 			
-			if(styleId)
-				$("#" + styleId).remove();
+			for(var name in infoMap)
+			{
+				var info = infoMap[name];
+				var styleId = (info ? info.styleId : null);
+				
+				if(styleId)
+					$("#" + styleId).remove();
+			}
 		}
 	};
 	

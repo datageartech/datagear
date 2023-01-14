@@ -2755,12 +2755,16 @@
 		this.statusDestroyed(true);
 	};
 	
-	//销毁全局图表主题关联创建的样式表
+	//销毁所有图表主题关联创建的样式表
 	dashboardBase._destroyThemeStyleSheet = function()
 	{
 		var theme = chartFactory.renderContextAttrChartTheme(this.renderContext);
-		if(theme)
-			chartFactory.destroyThemeStyleSheet(theme);
+		chartFactory.destroyThemeStyleSheet(theme);
+		
+		//图表可能使用的是公用图表主题，需要这里再次确认销毁
+		var charts = (this.charts || []);
+		for(var i=0; i<charts.length; i++)
+			chartFactory.destroyThemeStyleSheet(charts[i].theme());
 	};
 	
 	//-------------
