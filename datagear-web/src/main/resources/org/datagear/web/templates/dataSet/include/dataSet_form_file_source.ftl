@@ -15,7 +15,7 @@
 <#assign DirectoryFileDataSetEntity=statics['org.datagear.management.domain.DirectoryFileDataSetEntity']>
 <div class="field grid">
 	<label for="${pid}fileSourceType" class="field-label col-12 mb-2 md:col-3 md:mb-0">
-		<@spring.message code='fileType' />
+		<@spring.message code='fileSource' />
 	</label>
 	<div class="field-input col-12 md:col-9">
       	<p-selectbutton v-model="fm.fileSourceType" :options="pm.fileSourceTypeOptions"
