@@ -705,16 +705,16 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @param renderContext
 	 * @param renderAttr
 	 * @param dashboard
-	 * @param importExclude
+	 * @param unimportStr 导入排除项字符串，以{@code ','}分隔导入排除项
 	 * @throws IOException
 	 */
 	protected void writeDashboardImport(Writer out, RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-			HtmlTplDashboard dashboard, String importExclude) throws IOException
+			HtmlTplDashboard dashboard, String unimportStr) throws IOException
 	{
-		List<String> excludes = StringUtil.splitWithTrim(importExclude, ",");
+		List<String> unimports = StringUtil.splitWithTrim(unimportStr, ",");
 
 		// 后台生成的样式应该放在最开头，确保页面生成的、用户自定义的css有更高优先级
-		if (!excludes.contains(this.themeImportName))
+		if (!unimports.contains(this.themeImportName))
 		{
 			writeNewLine(out);
 			writeDashboardThemeStyle(renderContext, renderAttr, out, dashboard);
@@ -728,7 +728,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			{
 				String name = impt.getName();
 
-				if (excludes.contains(name))
+				if (unimports.contains(name))
 					continue;
 
 				String content = impt.getContent();

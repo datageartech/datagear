@@ -108,7 +108,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
 			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			assertEquals("jquery", dashboardInfo.getImportExclude());
+			assertEquals("jquery", dashboardInfo.getDashboardUnimport());
 			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
@@ -138,7 +138,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
 			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			assertEquals("jquery", dashboardInfo.getImportExclude());
+			assertEquals("jquery", dashboardInfo.getDashboardUnimport());
 			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
@@ -166,7 +166,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
 			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			assertEquals("jquery", dashboardInfo.getImportExclude());
+			assertEquals("jquery", dashboardInfo.getDashboardUnimport());
 			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
@@ -194,7 +194,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
 			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			assertEquals("jquery,theme, style", dashboardInfo.getImportExclude());
+			assertEquals("jquery,theme, style", dashboardInfo.getDashboardUnimport());
 			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertFalse(html.contains(IMPORT_CONTENT_THEME));
@@ -221,7 +221,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 			assertNull(dashboardInfo.getDashboardVar());
 			assertNull(dashboardInfo.getDashboardFactoryVar());
-			assertNull(dashboardInfo.getImportExclude());
+			assertNull(dashboardInfo.getDashboardUnimport());
 			assertTrue(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));

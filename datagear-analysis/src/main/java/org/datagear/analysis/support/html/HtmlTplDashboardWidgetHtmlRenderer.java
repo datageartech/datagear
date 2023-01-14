@@ -103,8 +103,6 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  */
 public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRenderer
 {
-	public static final String DEFAULT_DASHBOARD_SET_TAG_NAME = "html";
-
 	public static final String DEFAULT_CHART_TAG_NAME = "div";
 
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_VAR = DASHBOARD_ELEMENT_ATTR_PREFIX + "dashboard-var";
@@ -112,7 +110,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_FACTORY = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-factory";
 
-	public static final String DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE = DASHBOARD_ELEMENT_ATTR_PREFIX
+	public static final String DEFAULT_ATTR_NAME_DASHBOARD_UNIMPORT = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-unimport";
 
 	public static final String DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS = DASHBOARD_ELEMENT_ATTR_PREFIX
@@ -138,17 +136,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	public static final String DASHBOARD_CODE_ATTR_VALUE_RENDER = "render";
 	
-	/** 看板设置标签名 */
-	private String dashboardSetTagName = DEFAULT_DASHBOARD_SET_TAG_NAME;
-
 	/** 属性名：看板JS变量名 */
 	private String attrNameDashboardVar = DEFAULT_ATTR_NAME_DASHBOARD_VAR;
 
 	/** 属性名：看板工厂JS变量名 */
 	private String attrNameDashboardFactory = DEFAULT_ATTR_NAME_DASHBOARD_FACTORY;
 
-	/** 属性名：不导入内置库的 */
-	private String attrNameDashboardImportExclude = DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE;
+	/** 属性名：看板导入排除项 */
+	private String attrNameDashboardUnimport = DEFAULT_ATTR_NAME_DASHBOARD_UNIMPORT;
 
 	/** 属性名：异步加载图表部件模式 */
 	private String attrNameLoadableChartWidgets = DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS;
@@ -183,16 +178,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		super(chartWidgetSource);
 	}
 
-	public String getDashboardSetTagName()
-	{
-		return dashboardSetTagName;
-	}
-
-	public void setDashboardSetTagName(String dashboardSetTagName)
-	{
-		this.dashboardSetTagName = dashboardSetTagName;
-	}
-
 	public String getAttrNameDashboardVar()
 	{
 		return attrNameDashboardVar;
@@ -213,14 +198,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		this.attrNameDashboardFactory = attrNameDashboardFactory;
 	}
 
-	public String getAttrNameDashboardImportExclude()
+	public String getAttrNameDashboardUnimport()
 	{
-		return attrNameDashboardImportExclude;
+		return attrNameDashboardUnimport;
 	}
 
-	public void setAttrNameDashboardImportExclude(String attrNameDashboardImportExclude)
+	public void setAttrNameDashboardUnimport(String attrNameDashboardUnimport)
 	{
-		this.attrNameDashboardImportExclude = attrNameDashboardImportExclude;
+		this.attrNameDashboardUnimport = attrNameDashboardUnimport;
 	}
 
 	public String getAttrNameLoadableChartWidgets()
@@ -740,7 +725,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		protected void writeDashboardImportWithSet() throws IOException
 		{
 			writeDashboardImport(getOut(), this.renderContext, this.renderAttr, this.dashboard,
-					this.dashboardInfo.getImportExclude());
+					this.dashboardInfo.getDashboardUnimport());
 
 			this.dashboardImportWritten = true;
 		}
@@ -772,9 +757,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				{
 					this.dashboardInfo.setDashboardFactoryVar(trim(entry.getValue()));
 				}
-				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardImportExclude.equalsIgnoreCase(name))
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardUnimport.equalsIgnoreCase(name))
 				{
-					this.dashboardInfo.setImportExclude(trim(entry.getValue()));
+					this.dashboardInfo.setDashboardUnimport(trim(entry.getValue()));
 				}
 				else if(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameLoadableChartWidgets.equalsIgnoreCase(name))
 				{
@@ -866,8 +851,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		/** 看板工厂名称 */
 		private String dashboardFactoryVar = null;
 		
-		/** 内置导入排除项 */
-		private String importExclude = null;
+		/** 导入排除项 */
+		private String dashboardUnimport = null;
 
 		/** 看板脚本 */
 		private String dashboardCode = null;
@@ -908,14 +893,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			this.dashboardFactoryVar = dashboardFactoryVar;
 		}
 
-		public String getImportExclude()
+		public String getDashboardUnimport()
 		{
-			return importExclude;
+			return dashboardUnimport;
 		}
 
-		public void setImportExclude(String importExclude)
+		public void setDashboardUnimport(String dashboardUnimport)
 		{
-			this.importExclude = importExclude;
+			this.dashboardUnimport = dashboardUnimport;
 		}
 		
 		public String getDashboardCode()
@@ -972,7 +957,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		public String toString()
 		{
 			return getClass().getSimpleName() + " [dashboardVar=" + dashboardVar + ", dashboardFactoryVar=" + dashboardFactoryVar
-					+ ", importExclude=" + importExclude + ", dashboardAutoRender=" + dashboardAutoRender + ", chartInfos=" + chartInfos + "]";
+					+ ", dashboardUnimport=" + dashboardUnimport + ", dashboardAutoRender=" + dashboardAutoRender + ", chartInfos=" + chartInfos + "]";
 		}
 	}
 

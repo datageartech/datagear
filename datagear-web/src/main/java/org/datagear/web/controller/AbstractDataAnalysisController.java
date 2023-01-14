@@ -169,7 +169,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";
 
 	/**
-	 * 内置看板资源名，不要修改它们，因为它们可能会在看板模板中通过{@linkplain HtmlTplDashboardWidgetHtmlRenderer#DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE}设置。
+	 * 内置看板资源名，不要修改它们，因为它们可能会在看板模板中通过{@linkplain HtmlTplDashboardWidgetHtmlRenderer#DEFAULT_ATTR_NAME_DASHBOARD_UNIMPORT}设置。
 	 */
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY = "jquery";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS = "echarts";
