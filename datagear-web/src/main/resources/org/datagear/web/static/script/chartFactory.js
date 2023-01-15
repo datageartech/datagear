@@ -410,6 +410,9 @@
 		if(!this.plugin)
 			throw new Error("[chart.plugin] required");
 		
+		if(this.element() == null)
+			throw new Error("chart element '#"+this.elementId+"' required");
+		
 		if(!this.statusPreInit() && !this.statusDestroyed())
 			throw new Error("chart is illegal state for init()");
 		
