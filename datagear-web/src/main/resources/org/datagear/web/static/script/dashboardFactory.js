@@ -1142,10 +1142,14 @@
 	 * 此函数在看板生命周期内仅允许调用一次，在dashboard.destroy()后允许再次调用。
 	 * 
 	 * 注意：
-	 * 只有this.statusInited()或者this.statusDestroyed()为true时，此函数才允许执行。
+	 * 只有this.statusPreInit()或者this.statusInited()或者this.statusDestroyed()为true时，此函数才允许执行。
+	 * 特别地，当处于this.statusPreInit()时，此函数内部会先调用this.init()函数。
 	 */
 	dashboardBase.render = function()
 	{
+		if(this.statusPreInit())
+			this.init();
+		
 		if(!this.statusInited() && !this.statusDestroyed())
 			throw new Error("dashboard is illegal state for render()");
 		

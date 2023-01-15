@@ -1007,10 +1007,14 @@
 	 * 渲染中的图表处于this.statusRendering()状态，渲染完成后处于this.statusRendered()状态。 
 	 * 
 	 * 注意：
-	 * 只有this.statusInited()或者this.statusPreRender()或者statusDestroyed()为true，此函数才允许执行。
+	 * 只有this.statusPreInit()或者this.statusInited()或者this.statusPreRender()或者statusDestroyed()为true，此函数才允许执行。
+	 * 特别地，当处于this.statusPreInit()时，此函数内部会先调用this.init()函数。
 	 */
 	chartBase.render = function()
 	{
+		if(this.statusPreInit())
+			this.init();
+		
 		if(!this.statusInited() && !this.statusPreRender() && !this.statusDestroyed())
 			throw new Error("chart is illegal state for render()");
 		
