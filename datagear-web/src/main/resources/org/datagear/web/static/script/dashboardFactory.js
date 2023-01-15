@@ -912,6 +912,14 @@
 			if(chart.manualRender())
 				continue;
 			
+			//如果图表元素不存在（比如在<template></template>里），应忽略初始化
+			var chartEle = chart.element();
+			if(chartEle == null)
+			{
+				chartFactory.logWarn("chart '#"+chart.elementId+"' element not found, init() ignored");
+				continue;
+			}
+			
 			if(chart.statusPreInit() || chart.statusDestroyed())
 			{
 				chart.init();
