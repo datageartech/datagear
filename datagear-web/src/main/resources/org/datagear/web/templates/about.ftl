@@ -65,7 +65,13 @@
 		        	</div>
 		        </div>
 			</div>
-			
+			<div class="grid mt-5">
+		        <div class="field-input col-12">
+		        	<div id="${pid}copyright" class="text-color-secondary text-center">
+		        		<@spring.message code='app.copyright' />
+		        	</div>
+		        </div>
+			</div>
 		</div>
 	</form>
 </div>
