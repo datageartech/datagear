@@ -922,8 +922,20 @@
 			
 			if(chart.statusPreInit() || chart.statusDestroyed())
 			{
-				chart.init();
+				this._initChart(chart);
 			}
+		}
+	};
+	
+	dashboardBase._initChart = function(chart)
+	{
+		try
+		{
+			chart.init();
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
 		}
 	};
 	
