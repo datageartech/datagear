@@ -1,9 +1,6 @@
 下一版本：
 	
-	ok 图表JS对象新增isRender()函数，用于判断图表是否已执行渲染；
-	ok 图表元素新增dg-chart-manual-render属性，用于控制是否手动渲染图表；
-	ok ECharts版本升级至5.4.1；
-	ok 废弃dg-dashboard-listener中图表事件相关回调函数；
+	
 	
 待定：
 	
