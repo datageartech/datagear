@@ -197,6 +197,9 @@
 	 */
 	dashboardFactory.LOCAL_UPDATE_IF_EMPTY_DATA_SET = true;
 	
+	/**图表主题关联的看板表单实体ID*/
+	dashboardFactory._THEME_REF_DASHBOARD_FORM_ID = "DG_REF_DASHBOARD_FORM_ID";
+	
 	/**
 	 * 初始化看板JSON对象，为其添加看板API，为看版内的图表JSON对象添加图表API，并设置状态：dashboard.statusPreInit(true)。
 	 * 
@@ -1320,6 +1323,7 @@
 			config = chartFactory.evalSilently(form.attr(elementAttrConst.DASHBOARD_FORM), {});
 		
 		var dashboard = this;
+		var globalTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
 		var bindBatchSetName = chartFactory.builtinPropName("batchSet");
 		
 		config = $.extend(
@@ -1401,7 +1405,9 @@
 			form.data(bindBatchSetName, batchSet);
 		
 		config.paramValues = defaultValues;
-		config.chartTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
+		config.chartTheme = globalTheme;
+		
+		chartFactory.addThemeRefEntity(globalTheme, dashboardFactory._THEME_REF_DASHBOARD_FORM_ID);
 		
 		chartFactory.chartSetting.renderDataSetParamValueForm(form, items, config);
 	};
@@ -2507,6 +2513,9 @@
 		{
 			chartFactory.chartSetting.destroyDataSetParamValueForm(this);
 		});
+		
+		var globalTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
+		chartFactory.removeThemeRefEntity(globalTheme, dashboardFactory._THEME_REF_DASHBOARD_FORM_ID);
 	};
 	
 	/**
@@ -2774,21 +2783,8 @@
 		this.stopHandleCharts();
 		this._destroyCharts();
 		this._destroyForms();
-		this._destroyThemeStyleSheet();
 		
 		this.statusDestroyed(true);
-	};
-	
-	//销毁所有图表主题关联创建的样式表
-	dashboardBase._destroyThemeStyleSheet = function()
-	{
-		var theme = chartFactory.renderContextAttrChartTheme(this.renderContext);
-		chartFactory.destroyThemeStyleSheet(theme);
-		
-		//图表可能使用的是公用图表主题，需要这里再次确认销毁
-		var charts = (this.charts || []);
-		for(var i=0; i<charts.length; i++)
-			chartFactory.destroyThemeStyleSheet(charts[i].theme());
 	};
 	
 	//-------------

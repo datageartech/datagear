@@ -504,10 +504,6 @@
 		if(eleThemeValue)
 		{
 			var eleTheme = chartFactory.evalSilently(eleThemeValue, {});
-			//将主题标识为局部主题
-			if(chartFactory.isJsonString(eleThemeValue))
-				eleTheme._IS_LOCAL_CHART_THEME = true;
-			
 			this.theme(eleTheme);
 		}
 		else
@@ -1038,6 +1034,48 @@
 		}
 	};
 	
+	/**
+	 * 调用底层图表渲染器的render函数，执行渲染。
+	 */
+	chartBase.doRender = function()
+	{
+		if(!this.statusRendering())
+			throw new Error("chart is illegal state for doRender()");
+		
+		var $element = this.elementJquery();
+		var theme = this._themeNonNull();
+		
+		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
+		chartFactory.addThemeRefEntity(theme, this.id);
+		this._createChartThemeCssIfNon();
+		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
+		if(chartFactory.isStaticPosition($element))
+			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
+		$element.addClass(this.themeStyleName());
+		
+		var options = this.options();
+		if(!options || options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
+			$element.addClass("dg-chart-beautify-scrollbar");
+		
+		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
+		
+		var async = this.isAsyncRender();
+		
+		var renderer = this.renderer();
+		
+		if(renderer && renderer.render)
+		{
+			renderer.render(this);
+		}
+		else
+		{
+			this.plugin.renderer.render(this);
+		}
+		
+		if(!async)
+			this.statusRendered(true);
+	};
+	
 	chartBase._createChartThemeCssIfNon = function()
 	{
 		var theme = this._themeNonNull();
@@ -1112,46 +1150,6 @@
 			
 			return css;
 		});
-	};
-	
-	/**
-	 * 调用底层图表渲染器的render函数，执行渲染。
-	 */
-	chartBase.doRender = function()
-	{
-		if(!this.statusRendering())
-			throw new Error("chart is illegal state for doRender()");
-		
-		var $element = this.elementJquery();
-		
-		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
-		this._createChartThemeCssIfNon();
-		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
-		if(chartFactory.isStaticPosition($element))
-			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
-		$element.addClass(this.themeStyleName());
-		
-		var options = this.options();
-		if(!options || options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
-			$element.addClass("dg-chart-beautify-scrollbar");
-		
-		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
-		
-		var async = this.isAsyncRender();
-		
-		var renderer = this.renderer();
-		
-		if(renderer && renderer.render)
-		{
-			renderer.render(this);
-		}
-		else
-		{
-			this.plugin.renderer.render(this);
-		}
-		
-		if(!async)
-			this.statusRendered(true);
 	};
 	
 	/**
@@ -1306,7 +1304,9 @@
 		//应在这里先销毁图表元素内部创建的元素，
 		//因为renderer.destroy()可能会清空图表元素（比如echarts.dispose()函数）
 		this._destroySetting();
-		this._destroyThemeStyleSheet();
+		
+		var theme = this._themeNonNull();
+		chartFactory.removeThemeRefEntity(theme, this.id);
 		
 		var renderer = this.renderer();
 		
@@ -1336,17 +1336,6 @@
 		this._clearExtValue();
 		
 		this.statusDestroyed(true);
-	};
-	
-	/**
-	 * 销毁图表主题关联创建的样式表。
-	 */
-	chartBase._destroyThemeStyleSheet = function()
-	{
-		var theme = this._themeNonNull();
-		
-		if(theme && theme._IS_LOCAL_CHART_THEME)
-			chartFactory.destroyThemeStyleSheet(theme);
 	};
 	
 	/**
@@ -4913,6 +4902,55 @@
 	};
 	
 	/**
+	 * 添加主题关联实体。
+	 */
+	chartFactory.addThemeRefEntity = function(theme, entityId)
+	{
+		if(!theme)
+			return;
+		
+		var entityIds = (theme[chartFactory._KEY_THEME_REF_ENTITY_IDS]
+							|| (theme[chartFactory._KEY_THEME_REF_ENTITY_IDS] = {}));
+		
+		entityIds[entityId] = true;
+	};
+	
+	/**
+	 * 移除主题关联实体，并在没有关联时销毁样式表。
+	 */
+	chartFactory.removeThemeRefEntity = function(theme, entityId, destroyCss)
+	{
+		destroyCss = (destroyCss == null ? true : destroyCss);
+		
+		if(!theme)
+			return;
+		
+		var entityIds = (theme[chartFactory._KEY_THEME_REF_ENTITY_IDS] || {});
+		
+		if(entityIds[entityId] == true)
+			entityIds[entityId] = false;
+		
+		if(destroyCss)
+		{
+			var refCount = 0;
+			
+			for(var p in entityIds)
+			{
+				if(entityIds[p] == true)
+				{
+					refCount++;
+				}
+			}
+			
+			//只有主题没有被使用了，才销毁样式表
+			if(refCount == 0)
+			{
+				chartFactory.destroyThemeStyleSheet(theme);
+			}
+		}
+	};
+	
+	/**
 	 * 销毁主题关联创建的样式表。
 	 */
 	chartFactory.destroyThemeStyleSheet = function(theme)
@@ -5689,6 +5727,9 @@
 	
 	/**图表展示数据对象的原始信息属性名*/
 	chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "OriginalDataIndex";
+	
+	/**图表主题关联的实体ID属性名*/
+	chartFactory._KEY_THEME_REF_ENTITY_IDS = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "RefEntityIds";
 	
 	/**图表主题的CSS信息属性名*/
 	chartFactory._KEY_THEME_STYLE_SHEET_INFO = chartFactory._BUILT_IN_NAME_UNDERSCORE_PREFIX + "StyleSheetInfo";
