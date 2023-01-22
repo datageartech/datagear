@@ -53,22 +53,18 @@
 		        	</div>
 		        </div>
 			</div>
-			<div class="field grid">
-				<label for="${pid}license" class="field-label col-12 mb-2 md:col-3 md:mb-0">
-					<@spring.message code='license' />
-				</label>
-		        <div class="field-input col-12 md:col-9">
-		        	<div id="${pid}license" class="text-primary">
-		        		<a href="http://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" class="link">
-							<@spring.message code='app.license' />
-						</a>
-		        	</div>
-		        </div>
-			</div>
 			<div class="grid mt-5">
 		        <div class="field-input col-12">
-		        	<div id="${pid}copyright" class="text-color-secondary text-center">
-		        		<@spring.message code='app.copyright' />
+		        	<div class="text-color-secondary text-center pb-1">
+		        		© 2018-2023 datagear.tech
+		        	</div>
+		        	<div class="text-color-secondary text-center pt-1">
+		        		Licensed under the LGPLv3 license
+		        	</div>
+		        	<div class="text-color-secondary text-center pt-1">
+		        		<a href="http://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" class="link text-color-secondary">
+		        			http://www.gnu.org/licenses/lgpl-3.0.html
+		        		</a>
 		        	</div>
 		        </div>
 			</div>
