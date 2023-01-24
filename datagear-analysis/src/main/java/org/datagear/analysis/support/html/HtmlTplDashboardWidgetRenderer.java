@@ -126,12 +126,18 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	/** 默认看板变量名 */
 	private String defaultDashboardVar = DEFAULT_DASHBOARD_VAR;
 
-	private ImportHtmlChartPluginVarNameResolver importHtmlChartPluginVarNameResolver;
+	private ImportHtmlChartPluginVarNameResolver importHtmlChartPluginVarNameResolver = null;
 
 	/** 换行符 */
 	private String newLine = HtmlChartPlugin.HTML_NEW_LINE;
 
 	private HtmlFilter htmlFilter = new HtmlFilter();
+
+	private String htmlChartWidgetIdForGetException = IDUtil.uuid();
+	
+	private String HtmlChartWidgetIdForNotFound = IDUtil.uuid();
+	
+	private String HtmlChartWidgetIdForPluginNull = IDUtil.uuid();
 
 	public HtmlTplDashboardWidgetRenderer()
 	{
@@ -309,6 +315,36 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		this.htmlFilter = htmlFilter;
 	}
 
+	public String getHtmlChartWidgetIdForGetException()
+	{
+		return htmlChartWidgetIdForGetException;
+	}
+
+	public void setHtmlChartWidgetIdForGetException(String htmlChartWidgetIdForGetException)
+	{
+		this.htmlChartWidgetIdForGetException = htmlChartWidgetIdForGetException;
+	}
+
+	public String getHtmlChartWidgetIdForNotFound()
+	{
+		return HtmlChartWidgetIdForNotFound;
+	}
+
+	public void setHtmlChartWidgetIdForNotFound(String htmlChartWidgetIdForNotFound)
+	{
+		HtmlChartWidgetIdForNotFound = htmlChartWidgetIdForNotFound;
+	}
+
+	public String getHtmlChartWidgetIdForPluginNull()
+	{
+		return HtmlChartWidgetIdForPluginNull;
+	}
+
+	public void setHtmlChartWidgetIdForPluginNull(String htmlChartWidgetIdForPluginNull)
+	{
+		HtmlChartWidgetIdForPluginNull = htmlChartWidgetIdForPluginNull;
+	}
+
 	/**
 	 * 解析HTML输入流的字符集，如果解析不到，则返回{@code null}。
 	 * 
@@ -474,7 +510,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	protected HtmlChartWidget createHtmlChartWidgetForGetException(String exceptionWidgetId, Throwable t)
 	{
-		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetException",
+		HtmlChartWidget widget = new HtmlChartWidget(this.htmlChartWidgetIdForGetException, "HtmlChartWidgetForWidgetException",
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
 		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(), "Chart widget '"
@@ -489,7 +525,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	protected HtmlChartWidget createHtmlChartWidgetForNotFound(String notFoundWidgetId)
 	{
-		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetNotFound",
+		HtmlChartWidget widget = new HtmlChartWidget(this.HtmlChartWidgetIdForNotFound, "HtmlChartWidgetForWidgetNotFound",
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
 		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(),
@@ -504,7 +540,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	protected HtmlChartWidget createHtmlChartWidgetForPluginNull(ChartWidget chartWidget)
 	{
-		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetPluginNull",
+		HtmlChartWidget widget = new HtmlChartWidget(this.HtmlChartWidgetIdForPluginNull, "HtmlChartWidgetForWidgetPluginNull",
 				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
 		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(), "Chart plugin is null");
@@ -514,6 +550,16 @@ public abstract class HtmlTplDashboardWidgetRenderer
 					+ "] on exception : null chart plugin");
 
 		return widget;
+	}
+	
+	/**
+	 * 生成一个新看ID。
+	 * 
+	 * @return
+	 */
+	protected String nextDashboardId()
+	{
+		return IDUtil.uuid();
 	}
 
 	/**
@@ -821,14 +867,16 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	/**
 	 * 写{@linkplain HtmlChart}。
-	 *
+	 * 
 	 * @param renderContext
 	 * @param chartWidget
+	 * @param chartId
 	 * @return
+	 * @throws RenderException
 	 */
-	protected HtmlChart writeChart(RenderContext renderContext, HtmlChartWidget chartWidget) throws RenderException
+	protected HtmlChart writeChart(RenderContext renderContext, HtmlChartWidget chartWidget, String chartId) throws RenderException
 	{
-		return chartWidget.render(renderContext);
+		return chartWidget.render(renderContext, chartId);
 	}
 
 	/**
@@ -937,21 +985,22 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	{
 		out.write(getNewLine());
 	}
-
+	
 	/**
 	 * 创建{@linkplain HtmlTplDashboard}实例。
 	 * 
 	 * @param renderContext
 	 * @param dashboardWidget
+	 * @param dashboardId
 	 * @param template
 	 * @return
 	 */
-	protected HtmlTplDashboard createDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
-			String template)
+	protected static HtmlTplDashboard createDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
+			String dashboardId, String template)
 	{
 		HtmlTplDashboard dashboard = new HtmlTplDashboard();
 
-		dashboard.setId(IDUtil.uuid());
+		dashboard.setId(dashboardId);
 		dashboard.setTemplate(template);
 		dashboard.setWidget(dashboardWidget);
 		dashboard.setRenderContext(renderContext);

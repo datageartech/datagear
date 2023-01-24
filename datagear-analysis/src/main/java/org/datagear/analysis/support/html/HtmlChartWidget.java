@@ -61,8 +61,12 @@ public class HtmlChartWidget extends ChartWidget
 	@Override
 	public HtmlChart render(RenderContext renderContext) throws RenderException
 	{
-		HtmlChart chart = (HtmlChart) super.render(renderContext);
+		return (HtmlChart) super.render(renderContext);
+	}
 
-		return chart;
+	@Override
+	public HtmlChart render(RenderContext renderContext, String chartId) throws RenderException
+	{
+		return (HtmlChart)super.render(renderContext, chartId);
 	}
 }

@@ -18,6 +18,7 @@ import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.util.IDUtil;
+import org.datagear.util.StringUtil;
 
 /**
  * 图表部件。
@@ -87,13 +88,29 @@ public class ChartWidget extends ChartDefinition
 	 */
 	public Chart render(RenderContext renderContext) throws RenderException
 	{
-		return this.plugin.renderChart(renderContext, buildChartDefinition(renderContext));
+		return render(renderContext, null);
 	}
 
-	protected ChartDefinition buildChartDefinition(RenderContext renderContext) throws RenderException
+	/**
+	 * 渲染{@linkplain Chart}。
+	 * 
+	 * @param renderContext
+	 * @param chartId 允许为{@code null}
+	 * @return
+	 * @throws RenderException
+	 */
+	public Chart render(RenderContext renderContext, String chartId) throws RenderException
+	{
+		if(StringUtil.isEmpty(chartId))
+			chartId = generateChartId(renderContext);
+		
+		return this.plugin.renderChart(renderContext, buildChartDefinition(chartId));
+	}
+
+	protected ChartDefinition buildChartDefinition(String id) throws RenderException
 	{
 		ChartDefinition chartDefinition = new ChartDefinition(this);
-		chartDefinition.setId(generateChartId(renderContext));
+		chartDefinition.setId(id);
 		
 		// 添加图表对应的部件信息
 		chartDefinition.setAttrValue(ATTR_CHART_WIDGET, new ChartWidgetId(this.getId()));

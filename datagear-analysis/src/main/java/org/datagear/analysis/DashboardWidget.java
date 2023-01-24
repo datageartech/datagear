@@ -20,6 +20,9 @@ public interface DashboardWidget extends Identifiable
 {
 	/**
 	 * 渲染{@linkplain Dashboard}。
+	 * <p>
+	 * 每次渲染的{@linkplain Dashboard#getId()}都应全局唯一，{@linkplain Dashboard#getCharts()}中每个{@linkplain Chart#getId()}应局部唯一。
+	 * </p>
 	 * 
 	 * @param renderContext
 	 * @return

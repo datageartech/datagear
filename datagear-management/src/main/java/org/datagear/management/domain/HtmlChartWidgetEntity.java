@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.JsonSupport;
@@ -193,9 +192,9 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	}
 
 	@Override
-	protected ChartDefinition buildChartDefinition(RenderContext renderContext) throws RenderException
+	protected ChartDefinition buildChartDefinition(String id) throws RenderException
 	{
-		ChartDefinition chartDefinition = super.buildChartDefinition(renderContext);
+		ChartDefinition chartDefinition = super.buildChartDefinition(id);
 		chartDefinition.setAttrValue(ATTR_CHART_OPTIONS, this.options);
 		
 		return chartDefinition;
