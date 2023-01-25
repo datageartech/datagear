@@ -23,6 +23,7 @@ import java.util.List;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
@@ -55,38 +56,40 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 	protected static final String IMPORT_CONTENT_STYLE = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">";
 
+	protected static final String DASHBOARD_ID = IDUtil.uuid();
+
 	protected static final String HTML_CHART_WIDGET_ID_01 = "chart-widget-01";
 
 	protected static final String HTML_CHART_WIDGET_ID_02 = "chart-widget-01";
-
-	private HtmlTplDashboardWidgetHtmlRenderer renderer;
-
+	
+	private HtmlChartWidget htmlChartWidget01;
+	private HtmlChartWidget htmlChartWidget02;
+	private TestFixedIdHtmlTplDashboardWidgetHtmlRenderer renderer;
 	private TemplateDashboardWidgetResManager resManager;
 	
-	private String dashboardId = IDUtil.uuid();
-
 	public HtmlTplDashboardWidgetHtmlRendererTest() throws Exception
 	{
 		super();
 
 		HtmlChartPlugin chartPlugin = HtmlChartPluginTest.createHtmlChartPlugin();
 
-		HtmlChartWidget htmlChartWidget01 = new HtmlChartWidget(HTML_CHART_WIDGET_ID_01, "chart-widget-01",
+		this.htmlChartWidget01 = new HtmlChartWidget(HTML_CHART_WIDGET_ID_01, "chart-widget-01",
 				ChartDefinition.EMPTY_CHART_DATA_SET, chartPlugin);
 
-		HtmlChartWidget htmlChartWidget02 = new HtmlChartWidget(HTML_CHART_WIDGET_ID_02, "chart-widget-02",
+		this.htmlChartWidget02 = new HtmlChartWidget(HTML_CHART_WIDGET_ID_02, "chart-widget-02",
 				ChartDefinition.EMPTY_CHART_DATA_SET, chartPlugin);
 
 		this.resManager = new FileTemplateDashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/html");
 
-		this.renderer = new HtmlTplDashboardWidgetHtmlRenderer(new SimpleChartWidgetSource(htmlChartWidget01, htmlChartWidget02));
+		this.renderer = new TestFixedIdHtmlTplDashboardWidgetHtmlRenderer(new SimpleChartWidgetSource(this.htmlChartWidget01, this.htmlChartWidget02));
 	}
 
 	@Test
 	public void renderTest() throws Exception
 	{
-		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
+		HtmlTplDashboardWidgetHtmlRenderer renderer = new HtmlTplDashboardWidgetHtmlRenderer(new SimpleChartWidgetSource(this.htmlChartWidget01, this.htmlChartWidget02));
+		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget(renderer);
 
 		HtmlTplDashboard dashboard1 = null;
 		HtmlTplDashboard dashboard2 = null;
@@ -129,7 +132,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -155,7 +158,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -173,7 +176,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -197,7 +200,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -215,7 +218,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -239,7 +242,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -257,7 +260,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -281,7 +284,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -298,7 +301,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -322,7 +325,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -361,7 +364,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -401,7 +404,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -421,7 +424,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -437,7 +440,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -457,7 +460,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -472,7 +475,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -492,7 +495,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -507,7 +510,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -527,7 +530,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -542,7 +545,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -562,7 +565,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -577,7 +580,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -594,7 +597,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -612,7 +615,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -629,7 +632,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -649,7 +652,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -666,7 +669,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -686,7 +689,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -708,7 +711,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -723,7 +726,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -738,7 +741,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -753,7 +756,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -768,7 +771,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -783,7 +786,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -798,7 +801,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -813,7 +816,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -828,7 +831,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -845,7 +848,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -860,7 +863,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -878,7 +881,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -893,7 +896,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -912,7 +915,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -935,7 +938,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -951,7 +954,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -967,7 +970,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -983,7 +986,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -999,7 +1002,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1015,7 +1018,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1031,7 +1034,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1047,7 +1050,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1063,7 +1066,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1079,7 +1082,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1095,7 +1098,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1111,7 +1114,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1127,7 +1130,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1143,7 +1146,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1165,7 +1168,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1181,7 +1184,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1197,7 +1200,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1213,7 +1216,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1229,7 +1232,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1245,7 +1248,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1261,7 +1264,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1277,7 +1280,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1293,7 +1296,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1309,7 +1312,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1325,7 +1328,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1341,7 +1344,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1357,7 +1360,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1373,7 +1376,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1389,7 +1392,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1417,7 +1420,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1433,7 +1436,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1461,7 +1464,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1477,7 +1480,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1508,7 +1511,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1524,7 +1527,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1558,7 +1561,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1574,7 +1577,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1599,7 +1602,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1615,7 +1618,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1640,7 +1643,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1656,7 +1659,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1681,7 +1684,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1697,7 +1700,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1720,7 +1723,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1737,7 +1740,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1761,7 +1764,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -1779,7 +1782,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr, dashboardId);
+						IOUtil.getReader(template), renderAttr);
 				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
 				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1802,7 +1805,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+							IOUtil.getReader(template), renderAttr1, dashboardInfo);
 					
 					String html1 = getHtmlWithPrint(out1);
 					
@@ -1817,7 +1820,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr, dashboardId);
+						IOUtil.getReader(template), renderAttr);
 				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
 				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1843,7 +1846,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+							IOUtil.getReader(template), renderAttr1, dashboardInfo);
 					
 					String html1 = getHtmlWithPrint(out1);
 					
@@ -1859,7 +1862,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr, dashboardId);
+						IOUtil.getReader(template), renderAttr);
 				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
 				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1885,7 +1888,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+							IOUtil.getReader(template), renderAttr1, dashboardInfo);
 					
 					String html1 = getHtmlWithPrint(out1);
 					
@@ -1900,7 +1903,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr, dashboardId);
+						IOUtil.getReader(template), renderAttr);
 				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
 				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1926,7 +1929,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+							IOUtil.getReader(template), renderAttr1, dashboardInfo);
 					
 					String html1 = getHtmlWithPrint(out1);
 					
@@ -1942,7 +1945,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr, dashboardId);
+						IOUtil.getReader(template), renderAttr);
 				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
 				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -1965,7 +1968,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+							IOUtil.getReader(template), renderAttr1, dashboardInfo);
 					
 					String html1 = getHtmlWithPrint(out1);
 					
@@ -1980,7 +1983,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr, dashboardId);
+						IOUtil.getReader(template), renderAttr);
 				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
 				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
@@ -2003,7 +2006,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+							IOUtil.getReader(template), renderAttr1, dashboardInfo);
 					
 					String html1 = getHtmlWithPrint(out1);
 					
@@ -2064,7 +2067,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr, dashboardId);
+					IOUtil.getReader(template), renderAttr);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			dashboardInfo = filterContext.getTplDashboardInfo();
@@ -2077,7 +2080,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
 
 				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardId, dashboardInfo);
+						IOUtil.getReader(template), renderAttr1, dashboardInfo);
 				
 				String html1 = getHtmlWithPrint(out1);
 				
@@ -2098,7 +2101,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			long beforeTime = System.currentTimeMillis();
 			
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					reader, renderAttr, dashboardId);
+					reader, renderAttr);
 			
 			rawTimes += System.currentTimeMillis() - beforeTime;
 		}
@@ -2113,7 +2116,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			long beforeTime = System.currentTimeMillis();
 			
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					reader, renderAttr, dashboardId, dashboardInfo);
+					reader, renderAttr, dashboardInfo);
 			
 			cacheTimes += System.currentTimeMillis() - beforeTime;
 		}
@@ -2154,9 +2157,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 	protected HtmlTplDashboardWidget createHtmlTplDashboardWidget()
 	{
-		HtmlTplDashboardWidget dashboardWidget = new HtmlTplDashboardWidget("widget01", TEMPLATE_NAME, this.renderer,
-				this.resManager);
-		return dashboardWidget;
+		return createHtmlTplDashboardWidget(this.renderer);
+	}
+
+	protected HtmlTplDashboardWidget createHtmlTplDashboardWidget(HtmlTplDashboardWidgetHtmlRenderer renderer)
+	{
+		return new HtmlTplDashboardWidget("widget01", TEMPLATE_NAME, renderer, this.resManager);
 	}
 
 	protected int countOf(String src, String sub)
@@ -2187,5 +2193,30 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		System.out.println("");
 
 		return html;
+	}
+	
+	private static class TestFixedIdHtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetHtmlRenderer
+	{
+		public TestFixedIdHtmlTplDashboardWidgetHtmlRenderer()
+		{
+			super();
+		}
+
+		public TestFixedIdHtmlTplDashboardWidgetHtmlRenderer(ChartWidgetSource chartWidgetSource)
+		{
+			super(chartWidgetSource);
+		}
+
+		@Override
+		protected String nextDashboardId()
+		{
+			return DASHBOARD_ID;
+		}
+
+		@Override
+		protected String nextChartId(HtmlTplDashboard dashboard, int chartIndex)
+		{
+			return "chart-id-" + chartIndex;
+		}
 	}
 }

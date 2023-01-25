@@ -170,8 +170,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	/**全局JS对象（通常是：window）的局部变量名*/
 	private String localGlobalVarName = Global.PRODUCT_NAME_EN_LC + "Global" + IDUtil.toStringOfMaxRadix();
 	
-	private String chartIdSeed = IDUtil.randomIdOnTime20();
-
 	public HtmlTplDashboardWidgetHtmlRenderer()
 	{
 		super();
@@ -339,16 +337,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr) throws Throwable
 	{
 		DashboardFilterContext context = doRenderDashboard(renderContext, dashboardWidget, template,
-				templateIn, renderAttr, nextDashboardId());
+				templateIn, renderAttr);
 		return context.getDashboard();
 	}
 
 	protected DashboardFilterContext doRenderDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
-			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr, String dashboardId) throws Throwable
+			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr) throws Throwable
 	{
 		Writer out = renderAttr.getHtmlWriterNonNull(renderContext);
 		DashboardFilterContext context = new DashboardFilterContext(renderContext, renderAttr, dashboardWidget,
-				template, dashboardId);
+				template, nextDashboardId());
 		DashboardFilterHandler filterHandler = new DashboardFilterHandler(out, context);
 		
 		getHtmlFilter().filter(templateIn, filterHandler);
@@ -357,12 +355,11 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	}
 
 	protected DashboardFilterContext doRenderDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
-			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr,
-			String dashboardId, TplDashboardInfo tplDashboardInfo) throws Throwable
+			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr, TplDashboardInfo tplDashboardInfo) throws Throwable
 	{
 		Writer out = renderAttr.getHtmlWriterNonNull(renderContext);
 		DashboardFilterContext context = new DashboardFilterContext(renderContext, renderAttr, dashboardWidget,
-				template, dashboardId, tplDashboardInfo);
+				template, nextDashboardId(), tplDashboardInfo);
 		IndexedDashboardFilterHandler filterHandler = new IndexedDashboardFilterHandler(out, context);
 		
 		getHtmlFilter().filter(templateIn, filterHandler);
@@ -482,14 +479,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			chartRenderOption.setNotWritePluginObject(true);
 			chartRenderOption.setNotWriteRenderContextObject(true);
 			chartRenderOption.setRenderContextVarName(dashboard.getVarName() + "." + Dashboard.PROPERTY_RENDER_CONTEXT);
-
+			
 			chartRenderAttr.inflate(chartRenderContext, out, chartRenderOption);
-
+			
 			for (int i = 0, len = tplChartInfos.size(); i < len; i++)
 			{
 				TplChartInfo tplChartInfo = tplChartInfos.get(i);
 				HtmlChartWidget chartWidget = chartWidgets.get(i);
-				String chartId = generateChartId(dashboard, tplDashboardInfo, i);
+				String chartId = nextChartId(dashboard, i);
 				
 				chartRenderOption.setChartElementId(tplChartInfo.getElementId());
 				chartRenderOption.setPluginVarName(chartPluginVarNames.get(i));
@@ -499,12 +496,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				charts.add(chart);
 			}
 		}
-	}
-	
-	protected String generateChartId(HtmlTplDashboard dashboard, TplDashboardInfo tplDashboardInfo, int chartIndex)
-	{
-		//图表ID仅需看版内唯一即可
-		return Integer.toString(chartIndex) + this.chartIdSeed;
 	}
 
 	protected List<HtmlChartWidget> getChartWidgets(List<TplChartInfo> tplChartInfos)
