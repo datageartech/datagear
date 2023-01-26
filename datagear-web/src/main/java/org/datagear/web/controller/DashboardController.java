@@ -40,15 +40,15 @@ import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ErrorMessageDashboardResult;
+import org.datagear.analysis.support.html.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartWidget;
-import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
+import org.datagear.analysis.support.html.HtmlChartWidgetJsonRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtmlTitleHandler;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.Authorization;
@@ -150,7 +150,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	private DashboardShareSetService dashboardShareSetService;
 
 	@Autowired
-	private HtmlChartWidgetJsonWriter htmlChartWidgetJsonWriter;
+	private HtmlChartWidgetJsonRenderer htmlChartWidgetJsonRenderer;
 
 	@Autowired
 	private File tempDirectory;
@@ -209,14 +209,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		this.dashboardShareSetService = dashboardShareSetService;
 	}
 
-	public HtmlChartWidgetJsonWriter getHtmlChartWidgetJsonWriter()
+	public HtmlChartWidgetJsonRenderer getHtmlChartWidgetJsonRenderer()
 	{
-		return htmlChartWidgetJsonWriter;
+		return htmlChartWidgetJsonRenderer;
 	}
 
-	public void setHtmlChartWidgetJsonWriter(HtmlChartWidgetJsonWriter htmlChartWidgetJsonWriter)
+	public void setHtmlChartWidgetJsonRenderer(HtmlChartWidgetJsonRenderer htmlChartWidgetJsonRenderer)
 	{
-		this.htmlChartWidgetJsonWriter = htmlChartWidgetJsonWriter;
+		this.htmlChartWidgetJsonRenderer = htmlChartWidgetJsonRenderer;
 	}
 
 	public File getTempDirectory()
@@ -1461,24 +1461,25 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				importList.add(HtmlTplDashboardImport.valueOfJavaScript("dashboardEditor",
 						WebUtils.getContextPath(request) + "/static/script/dashboardEditor.js?v=" + Global.VERSION));
 			}
-
+			
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
 					getMessage(request, "dashboard.show.htmlTitleSuffix", getMessage(request, "app.name")),
 					getMessage(request, "dashboard.show.htmlTitleSuffixForEmpty", dashboardWidget.getName(),
 							getMessage(request, "app.name")));
-			RenderContext renderContext = createHtmlRenderContext(request, response, out,
+			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response, template, out,
 					createWebContext(request), importList, htmlTitleHandler);
-
+			
 			// 移除参数中的模板内容，一是它不应该传入页面，二是它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错
 			renderContext.removeAttribute(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
-
+			
 			if (isShowForEdit)
 				renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO, editHtmlInfo);
-
-			HtmlTplDashboard dashboard = (showHtmlIn != null
-					? dashboardWidget.render(renderContext, template, showHtmlIn)
-					: dashboardWidget.render(renderContext, template));
-
+			
+			if(showHtmlIn != null)
+				renderContext.setTemplateReader(showHtmlIn);
+			
+			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
+			
 			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
 			dashboardInfoManager.put(new DashboardInfo(dashboard, isShowForEdit));
 		}
@@ -1698,7 +1699,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			response.setContentType(CONTENT_TYPE_JSON);
 			PrintWriter out = response.getWriter();
 
-			HtmlChart[] charts = this.htmlChartWidgetJsonWriter.write(out, chartWidgets);
+			HtmlChart[] charts = this.htmlChartWidgetJsonRenderer.render(out, chartWidgets);
 
 			Map<String, String> chartIdToChartWidgetIds = new HashMap<String, String>();
 			for (int i = 0; i < chartWidgets.length; i++)

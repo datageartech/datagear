@@ -7,10 +7,9 @@
 
 package org.datagear.analysis.support.html;
 
-import java.io.Reader;
 import java.io.StringReader;
 
-import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.RenderException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -107,8 +106,8 @@ public class HtmlTplDashboardWidgetRendererTest
 		}
 
 		@Override
-		protected HtmlTplDashboard renderDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
-				String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr) throws Throwable
+		public HtmlTplDashboard render(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext)
+				throws RenderException
 		{
 			return null;
 		}

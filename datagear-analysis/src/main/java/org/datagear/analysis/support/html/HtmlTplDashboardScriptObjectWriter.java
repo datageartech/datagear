@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
+import org.datagear.analysis.TplDashboardRenderContext;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -74,7 +74,7 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 		@SuppressWarnings("unchecked")
 		public HtmlTplDashboardJson(HtmlTplDashboard dashboard, String renderContextVarName)
 		{
-			super(dashboard.getId(), dashboard.getTemplate(), new RefRenderContext(renderContextVarName),
+			super(dashboard.getId(), new RefRenderContext(renderContextVarName), dashboard.getTemplate(),
 					new TplDashboardWidgetJson(dashboard.getWidget()), dashboard.getVarName());
 
 			setCharts(Collections.EMPTY_LIST);
@@ -151,7 +151,7 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 		}
 
 		@Override
-		protected HtmlTplDashboard renderTemplate(RenderContext renderContext, String template) throws RenderException
+		public HtmlTplDashboard render(TplDashboardRenderContext renderContext) throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}

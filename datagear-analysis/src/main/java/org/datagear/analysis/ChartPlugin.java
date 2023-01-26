@@ -118,12 +118,12 @@ public interface ChartPlugin extends Identifiable, Labeled
 	/**
 	 * 渲染{@linkplain Chart}。
 	 * 
-	 * @param renderContext
 	 * @param chartDefinition
+	 * @param renderContext
 	 * @return
 	 * @throws RenderException
 	 */
-	Chart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException;
+	Chart renderChart(ChartDefinition chartDefinition, RenderContext renderContext) throws RenderException;
 
 	/**
 	 * 获取版本号。

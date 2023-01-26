@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,16 +36,14 @@ import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.SimpleDashboardQueryHandler;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.DataSetParamValueConverter;
-import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlChartWidget;
+import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
@@ -72,7 +69,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX = ChartDefinition.BUILTIN_ATTR_PREFIX;
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setWebContextName(String)}。
+	 * 看板内置渲染上下文属性名。
 	 * <p>
 	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
 	 * </p>
@@ -81,7 +78,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			+ "WEB_CONTEXT";
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setDashboardThemeName(String)}。
+	 * 看板内置渲染上下文属性名。
 	 * <p>
 	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
 	 * </p>
@@ -108,34 +105,10 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			+ "USER";
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setHtmlTitleHandlerName(String)}。
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_TITLE_HANDLER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "HTML_TITLE_HANDLER";
-
-	/**
-	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setImportListName(String)}。
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_IMPORT_LIST = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "IMPORT_LIST";
-
-	/**
-	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setHtmlWriterName(String)}。
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_WRITER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "HTML_WRITER";
-
-	/**
-	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setLocaleName(String)}。
+	 * 看板内置渲染上下文属性名。
 	 */
 	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_LOCALE = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 			+ "LOCALE";
-
-	/**
-	 * 看板内置渲染上下文属性名：{@linkplain HtmlTplDashboardRenderAttr#setIgnoreRenderAttrsName(String)}。
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_IGNORE = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "IGNORE_RENDER_ATTRS_NAME";
 
 	/**
 	 * 看板展示URL的请求参数名：系统主题。
@@ -214,50 +187,26 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		this.dashboardThemeSource = dashboardThemeSource;
 	}
 
-	protected RenderContext createHtmlRenderContext(HttpServletRequest request, HttpServletResponse response,
-			Writer responseWriter, WebContext webContext, List<HtmlTplDashboardImport> importList,
+	protected HtmlTplDashboardRenderContext createRenderContext(HttpServletRequest request, HttpServletResponse response,
+			String template, Writer responseWriter, WebContext webContext, List<HtmlTplDashboardImport> importList,
 			HtmlTitleHandler htmlTitleHandler) throws IOException
 	{
-		RenderContext renderContext = new DefaultRenderContext(resolveDashboardShowParamValues(request));
-		HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
+		HtmlTplDashboardRenderContext renderContext = new HtmlTplDashboardRenderContext(template, responseWriter);
+		
+		Map<String, ?> paramValues = resolveDashboardShowParamValues(request);
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
-		User user = WebUtils.getUser().cloneNoPassword();
-
-		inflateHtmlRenderContext(request, renderContext, renderAttr, responseWriter, webContext, dashboardTheme,
-				importList, htmlTitleHandler, AnalysisUser.valueOf(user));
+		AnalysisUser analysisUser= AnalysisUser.valueOf(WebUtils.getUser().cloneNoPassword());
+		
+		renderContext.putAttributes(paramValues);
+		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT, webContext);
+		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME, dashboardTheme);
+		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, analysisUser);
+		
+		renderContext.setImportList(importList);
+		renderContext.setDashboardTheme(dashboardTheme);
+		renderContext.setHtmlTitleHandler(htmlTitleHandler);
 
 		return renderContext;
-	}
-
-	protected void inflateHtmlRenderContext(HttpServletRequest request, RenderContext renderContext,
-			HtmlTplDashboardRenderAttr renderAttr, Writer responseWriter, WebContext webContext,
-			DashboardTheme dashboardTheme, List<HtmlTplDashboardImport> importList, HtmlTitleHandler htmlTitleHandler,
-			AnalysisUser analysisUser)
-	{
-		renderAttr.inflate(renderContext, responseWriter);
-		renderAttr.setWebContext(renderContext, webContext);
-		renderAttr.setImportList(renderContext, importList);
-		renderAttr.setDashboardTheme(renderContext, dashboardTheme);
-		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, analysisUser);
-		renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
-		renderAttr.setIgnoreRenderAttrs(renderContext,
-				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getImportListName(),
-						renderAttr.getHtmlTitleHandlerName(),
-						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
-	}
-
-	protected HtmlTplDashboardRenderAttr createHtmlTplDashboardRenderAttr()
-	{
-		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
-		renderAttr.setHtmlWriterName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_WRITER);
-		renderAttr.setLocaleName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_LOCALE);
-		renderAttr.setIgnoreRenderAttrsName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_IGNORE);
-		renderAttr.setImportListName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_IMPORT_LIST);
-		renderAttr.setWebContextName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT);
-		renderAttr.setDashboardThemeName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME);
-		renderAttr.setHtmlTitleHandlerName(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_HTML_TITLE_HANDLER);
-
-		return renderAttr;
 	}
 
 	/**
@@ -1101,6 +1050,67 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 				analysisRoles.add(new AnalysisRole(role));
 
 			return analysisRoles;
+		}
+	}
+	
+	/**
+	 * Web上下文信息。
+	 * <p>
+	 * 这些信息将输出至客户端，提供看板交互支持。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class WebContext
+	{
+		/** 上下文路径 */
+		private String contextPath;
+
+		/** Web属性集 */
+		private Map<String, ?> attributes = new HashMap<String, Object>();
+
+		public WebContext()
+		{
+			super();
+		}
+
+		public WebContext(String contextPath)
+		{
+			super();
+			this.contextPath = contextPath;
+		}
+
+		public String getContextPath()
+		{
+			return contextPath;
+		}
+
+		public void setContextPath(String contextPath)
+		{
+			this.contextPath = contextPath;
+		}
+
+		public Map<String, ?> getAttributes()
+		{
+			return attributes;
+		}
+
+		public void setAttributes(Map<String, ?> attributes)
+		{
+			this.attributes = attributes;
+		}
+
+		@SuppressWarnings("unchecked")
+		public void addAttribute(String name, Object value)
+		{
+			((Map<String, Object>) this.attributes).put(name, value);
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [contextPath=" + contextPath + ", attributes=" + attributes + "]";
 		}
 	}
 }

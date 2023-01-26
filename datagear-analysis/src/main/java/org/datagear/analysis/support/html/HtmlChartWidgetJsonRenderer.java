@@ -13,27 +13,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.support.DefaultRenderContext;
-import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.util.StringUtil;
 
 /**
- * {@linkplain HtmlChartWidget} JSON输出流。
+ * {@linkplain HtmlChartWidget} JSON渲染器。
  * 
  * @author datagear@163.com
  *
  */
-public class HtmlChartWidgetJsonWriter
+public class HtmlChartWidgetJsonRenderer
 {
-	public HtmlChartWidgetJsonWriter()
+	public HtmlChartWidgetJsonRenderer()
 	{
 		super();
 	}
 
 	/**
-	 * 输出JSON。
+	 * 渲染JSON。
 	 * 
 	 * @param out
 	 * @param chartWidget
@@ -41,13 +38,13 @@ public class HtmlChartWidgetJsonWriter
 	 * @throws RenderException
 	 * @throws IOException
 	 */
-	public HtmlChart write(Writer out, HtmlChartWidget chartWidget) throws RenderException, IOException
+	public HtmlChart render(Writer out, HtmlChartWidget chartWidget) throws RenderException, IOException
 	{
-		return writeJsonSetting(out, new HtmlChartWidgetJsonSetting(chartWidget));
+		return renderJsonSetting(out, new HtmlChartWidgetJsonSetting(chartWidget));
 	}
 
 	/**
-	 * 输出JSON。
+	 * 渲染JSON。
 	 * 
 	 * @param out
 	 * @param jsonSetting
@@ -55,22 +52,22 @@ public class HtmlChartWidgetJsonWriter
 	 * @throws RenderException
 	 * @throws IOException
 	 */
-	public HtmlChart writeJsonSetting(Writer out, HtmlChartWidgetJsonSetting jsonSetting)
+	public HtmlChart renderJsonSetting(Writer out, HtmlChartWidgetJsonSetting jsonSetting)
 			throws RenderException, IOException
 	{
 		HtmlChartWidget chartWidget = jsonSetting.getChartWidget();
-
-		RenderContext renderContext = new DefaultRenderContext();
-		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
-		HtmlChartRenderOption renderOption = new HtmlChartRenderOption(jsonSetting.getChartElementId(),
-				genPluginVarName(chartWidget), jsonSetting.getChartVarName(), jsonSetting.getRenderContextVarName());
-		renderOption.setNotWriteChartElement(true);
-		renderOption.setNotWritePluginObject(true);
-		renderOption.setNotWriteRenderContextObject(true);
-		renderOption.setNotWriteScriptTag(true);
-		renderOption.setNotWriteInvoke(true);
-		renderOption.setWriteChartJson(true);
-		renderAttr.inflate(renderContext, out, renderOption);
+		HtmlChartRenderContext renderContext = new HtmlChartRenderContext(out);
+		
+		renderContext.setChartElementId(jsonSetting.getChartElementId());
+		renderContext.setPluginVarName(genPluginVarName(chartWidget));
+		renderContext.setChartVarName(jsonSetting.getChartVarName());
+		renderContext.setRenderContextVarName(jsonSetting.getRenderContextVarName());
+		renderContext.setNotWriteChartElement(true);
+		renderContext.setNotWritePluginObject(true);
+		renderContext.setNotWriteRenderContextObject(true);
+		renderContext.setNotWriteScriptTag(true);
+		renderContext.setNotWriteInvoke(true);
+		renderContext.setWriteChartJson(true);
 
 		HtmlChart chart = chartWidget.render(renderContext);
 
@@ -78,7 +75,7 @@ public class HtmlChartWidgetJsonWriter
 	}
 
 	/**
-	 * 输出JSON。
+	 * 渲染JSON。
 	 * 
 	 * @param out
 	 * @param chartWidgets
@@ -86,16 +83,16 @@ public class HtmlChartWidgetJsonWriter
 	 * @throws RenderException
 	 * @throws IOException
 	 */
-	public HtmlChart[] write(Writer out, HtmlChartWidget... chartWidgets) throws RenderException, IOException
+	public HtmlChart[] render(Writer out, HtmlChartWidget... chartWidgets) throws RenderException, IOException
 	{
 		List<HtmlChartWidget> list = Arrays.asList(chartWidgets);
-		List<HtmlChart> charts = write(out, list);
+		List<HtmlChart> charts = render(out, list);
 
 		return charts.toArray(new HtmlChart[charts.size()]);
 	}
 
 	/**
-	 * 输出JSON。
+	 * 渲染JSON。
 	 * 
 	 * @param out
 	 * @param chartWidgets
@@ -103,18 +100,18 @@ public class HtmlChartWidgetJsonWriter
 	 * @throws RenderException
 	 * @throws IOException
 	 */
-	public List<HtmlChart> write(Writer out, List<? extends HtmlChartWidget> chartWidgets)
+	public List<HtmlChart> render(Writer out, List<? extends HtmlChartWidget> chartWidgets)
 			throws RenderException, IOException
 	{
 		List<HtmlChartWidgetJsonSetting> jsonSettings = new ArrayList<>(chartWidgets.size());
 		for (HtmlChartWidget chartWidget : chartWidgets)
 			jsonSettings.add(new HtmlChartWidgetJsonSetting(chartWidget));
 
-		return writeJsonSetting(out, jsonSettings);
+		return renderJsonSetting(out, jsonSettings);
 	}
 
 	/**
-	 * 输出JSON。
+	 * 渲染JSON。
 	 * 
 	 * @param out
 	 * @param jsonSettings
@@ -122,22 +119,18 @@ public class HtmlChartWidgetJsonWriter
 	 * @throws RenderException
 	 * @throws IOException
 	 */
-	public List<HtmlChart> writeJsonSetting(Writer out, List<? extends HtmlChartWidgetJsonSetting> jsonSettings)
+	public List<HtmlChart> renderJsonSetting(Writer out, List<? extends HtmlChartWidgetJsonSetting> jsonSettings)
 			throws RenderException, IOException
 	{
 		List<HtmlChart> htmlCharts = new ArrayList<>(jsonSettings.size());
-
-		RenderContext renderContext = new DefaultRenderContext();
-
-		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
-		HtmlChartRenderOption renderOption = new HtmlChartRenderOption("", "", "", "");
-		renderOption.setNotWriteChartElement(true);
-		renderOption.setNotWritePluginObject(true);
-		renderOption.setNotWriteRenderContextObject(true);
-		renderOption.setNotWriteScriptTag(true);
-		renderOption.setNotWriteInvoke(true);
-		renderOption.setWriteChartJson(true);
-		renderAttr.inflate(renderContext, out, renderOption);
+		
+		HtmlChartRenderContext renderContext = new HtmlChartRenderContext(out);
+		renderContext.setNotWriteChartElement(true);
+		renderContext.setNotWritePluginObject(true);
+		renderContext.setNotWriteRenderContextObject(true);
+		renderContext.setNotWriteScriptTag(true);
+		renderContext.setNotWriteInvoke(true);
+		renderContext.setWriteChartJson(true);
 
 		out.write('[');
 
@@ -146,10 +139,10 @@ public class HtmlChartWidgetJsonWriter
 			HtmlChartWidgetJsonSetting jsonSetting = jsonSettings.get(i);
 			HtmlChartWidget chartWidget = jsonSetting.getChartWidget();
 
-			renderOption.setChartElementId(jsonSetting.getChartElementId());
-			renderOption.setPluginVarName(genPluginVarName(chartWidget));
-			renderOption.setChartVarName(jsonSetting.getChartVarName());
-			renderOption.setRenderContextVarName(jsonSetting.getRenderContextVarName());
+			renderContext.setChartElementId(jsonSetting.getChartElementId());
+			renderContext.setPluginVarName(genPluginVarName(chartWidget));
+			renderContext.setChartVarName(jsonSetting.getChartVarName());
+			renderContext.setRenderContextVarName(jsonSetting.getRenderContextVarName());
 
 			HtmlChart chart = chartWidget.render(renderContext);
 

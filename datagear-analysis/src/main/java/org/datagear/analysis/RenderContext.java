@@ -21,7 +21,7 @@ import java.util.Map;
 public interface RenderContext
 {
 	String PROPERTY_ATTRIBUTES = "attributes";
-
+	
 	/**
 	 * 获取属性。
 	 * 
@@ -62,4 +62,19 @@ public interface RenderContext
 	 * @return
 	 */
 	Map<String, ?> getAttributes();
+	
+	/**
+	 * 设置多个属性。
+	 * 
+	 * @param attrs
+	 */
+	void putAttributes(Map<String, ?> attrs);
+	
+	/**
+	 * 设置多个属性。
+	 * 
+	 * @param renderContext
+	 */
+	void putAttributes(RenderContext renderContext);
+	
 }

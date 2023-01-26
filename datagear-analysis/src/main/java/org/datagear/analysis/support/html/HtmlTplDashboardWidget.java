@@ -8,23 +8,17 @@
 package org.datagear.analysis.support.html;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
 
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.TplDashboardWidget;
 import org.datagear.analysis.TplDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardRenderContext;
 import org.datagear.util.IOUtil;
 
 /**
  * HTML {@linkplain TplDashboardWidget}。
  * <p>
- * 此类将看板代码（HTML、JavaScript）输出至{@linkplain HtmlTplDashboardRenderAttr#getHtmlWriter(RenderContext)}。
- * </p>
- * <p>
- * 注意：此类{@linkplain #render(RenderContext)}、{@linkplain #render(RenderContext, String)}的{@linkplain RenderContext}
- * 必须符合{@linkplain HtmlTplDashboardRenderAttr#inflate(RenderContext, Writer)}规范。
+ * 注意：此类的{@linkplain #render(TplDashboardRenderContext)}参数必须是{@linkplain HtmlTplDashboardRenderContext}实例。
  * </p>
  * 
  * @author datagear@163.com
@@ -76,36 +70,20 @@ public class HtmlTplDashboardWidget extends TplDashboardWidget
 	{
 		this.resManager = resManager;
 	}
-
+	
 	@Override
-	public HtmlTplDashboard render(RenderContext renderContext) throws RenderException
+	public HtmlTplDashboard render(TplDashboardRenderContext renderContext) throws RenderException
 	{
-		return (HtmlTplDashboard) super.render(renderContext);
-	}
-
-	@Override
-	public HtmlTplDashboard render(RenderContext renderContext, String template, Reader templateIn)
-			throws RenderException, IllegalArgumentException
-	{
-		return (HtmlTplDashboard) super.render(renderContext, template, templateIn);
-	}
-
-	@Override
-	public HtmlTplDashboard render(RenderContext renderContext, String template)
-			throws RenderException, IllegalArgumentException
-	{
-		return (HtmlTplDashboard) super.render(renderContext, template);
-	}
-
-	@Override
-	protected HtmlTplDashboard renderTemplate(RenderContext renderContext, String template) throws RenderException
-	{
-		Reader templateIn = null;
-
+		if(!(renderContext instanceof HtmlTplDashboardRenderContext))
+			throw new IllegalArgumentException("[renderContext] must be instance of " + HtmlTplDashboardRenderContext.class.getSimpleName());
+		
+		HtmlTplDashboardRenderContext rawRenderContext = (HtmlTplDashboardRenderContext)renderContext;
+		HtmlTplDashboardRenderContext fullRenderContext = null;
+		
 		try
 		{
-			templateIn = getResourceReader(template);
-			return renderTemplate(renderContext, template, templateIn);
+			fullRenderContext = toFullRenderContext(rawRenderContext);
+			return this.renderer.render(this, fullRenderContext);
 		}
 		catch(IOException e)
 		{
@@ -113,19 +91,21 @@ public class HtmlTplDashboardWidget extends TplDashboardWidget
 		}
 		finally
 		{
-			IOUtil.close(templateIn);
+			if(fullRenderContext != null && fullRenderContext.getTemplateReader() != renderContext.getTemplateReader())
+				IOUtil.close(fullRenderContext.getTemplateReader());
 		}
 	}
-
-	@Override
-	protected HtmlTplDashboard renderTemplate(RenderContext renderContext, String template, Reader templateIn)
-			throws RenderException
+	
+	protected HtmlTplDashboardRenderContext toFullRenderContext(HtmlTplDashboardRenderContext renderContext) throws IOException
 	{
-		return this.renderer.render(renderContext, this, template, templateIn);
-	}
-
-	protected Reader getResourceReader(String name) throws IOException
-	{
-		return IOUtil.getBufferedReader(this.resManager.getReader(this, name));
+		HtmlTplDashboardRenderContext full = new HtmlTplDashboardRenderContext(renderContext);
+		
+		if(!full.hasTemplateReader())
+		{
+			full.setTemplateReader(IOUtil.getBufferedReader(this.resManager.getReader(this, full.getTemplate())));
+			full.setTemplateLastModified(this.resManager.lastModified(this.getId(), full.getTemplate()));
+		}
+		
+		return full;
 	}
 }

@@ -10,10 +10,10 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Collections;
 
+import org.datagear.analysis.DefaultRenderContext;
 import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.support.DefaultRenderContext;
 
 /**
  * HTML {@linkplain RenderContext} JS脚本对象输出流。
@@ -39,8 +39,11 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	 * {
 	 * 	attributes : {...}
 	 * };
-	 * <pre>
+	 * </pre>
 	 * </code>
+	 * <p>
+	 * 注意：只会写入{@linkplain RenderContext#getAttributes()}。
+	 * </p>
 	 * 
 	 * @param out
 	 * @param renderContext
@@ -63,8 +66,11 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	 * {
 	 * 	attributes : {...}
 	 * };
-	 * <pre>
+	 * </pre>
 	 * </code>
+	 * <p>
+	 * 注意：只会写入{@linkplain RenderContext#getAttributes()}。
+	 * </p>
 	 * 
 	 * @param out
 	 * @param renderContext
@@ -93,8 +99,11 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	 * <code>
 	 * <pre>
 	 * var [varName]= {};
-	 * <pre>
+	 * </pre>
 	 * </code>
+	 * <p>
+	 * 注意：只会写入空JS对象。
+	 * </p>
 	 * 
 	 * @param out
 	 * @param renderContext
@@ -124,11 +133,10 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 			this(renderContext, null);
 		}
 
-		@SuppressWarnings("unchecked")
 		public RenderContextJson(RenderContext renderContext, Collection<String> ignoreAttrs)
 		{
 			super();
-			setAttributes((Map<String, Object>) renderContext.getAttributes());
+			setAttributes(renderContext.getAttributes());
 
 			if (ignoreAttrs != null)
 			{
@@ -149,45 +157,7 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 		public NoAttributesRenderContextJson(RenderContext renderContext)
 		{
 			super();
-			super.setAttributes(null);
-		}
-
-		@Override
-		public <T> T getAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setAttribute(String name, Object value)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <T> T removeAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean hasAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	/**
-	 * 用于输出JSON且仅带有{@linkplain RenderContext#getAttributes()}的{@linkplain RenderContext}。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	protected static class OnlyAttributesRenderContextJson extends DefaultRenderContext
-	{
-		public OnlyAttributesRenderContextJson(RenderContext renderContext)
-		{
-			super(renderContext.getAttributes());
+			super.setAttributes(Collections.emptyMap());
 		}
 
 		@Override

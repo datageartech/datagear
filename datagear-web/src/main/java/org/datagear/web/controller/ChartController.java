@@ -27,17 +27,16 @@ import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetQuery;
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.ResultDataFormat;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartPluginAttributeValueConverter;
 import org.datagear.analysis.support.ErrorMessageDashboardResult;
+import org.datagear.analysis.support.html.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtmlTitleHandler;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.ChartDataSetVO;
@@ -513,11 +512,11 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
 					getMessage(request, "chart.show.htmlTitleSuffix", getMessage(request, "app.name")));
-			RenderContext renderContext = createHtmlRenderContext(request, response, out,
+			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response, dashboardWidget.getFirstTemplate(), out,
 					createWebContext(request), buildHtmlTplDashboardImports(request), htmlTitleHandler);
+			renderContext.setTemplateReader(templateIn);
 
-			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, dashboardWidget.getFirstTemplate(),
-					templateIn);
+			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 
 			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
 			dashboardInfoManager.put(new DashboardInfo(dashboard, false));

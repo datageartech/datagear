@@ -286,7 +286,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		}
 
 		@Override
-		public HtmlChart renderChart(RenderContext renderContext, ChartDefinition chartDefinition)
+		public HtmlChart renderChart(ChartDefinition chartDefinition, RenderContext renderContext)
 				throws RenderException
 		{
 			throw new UnsupportedOperationException();

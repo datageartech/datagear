@@ -7,9 +7,9 @@
 
 package org.datagear.analysis.support.html;
 
-import org.datagear.analysis.DashboardWidget;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TplDashboard;
+import org.datagear.analysis.TplDashboardWidget;
 
 /**
  * HTML模板看板。
@@ -29,10 +29,10 @@ public class HtmlTplDashboard extends TplDashboard
 		super();
 	}
 
-	public HtmlTplDashboard(String id, String template, RenderContext renderContext,
+	public HtmlTplDashboard(String id, RenderContext renderContext, String template,
 			HtmlTplDashboardWidget dashboardWidget, String varName)
 	{
-		super(id, template, renderContext, dashboardWidget);
+		super(id, renderContext, template, dashboardWidget);
 		this.varName = varName;
 	}
 
@@ -43,7 +43,7 @@ public class HtmlTplDashboard extends TplDashboard
 	}
 
 	@Override
-	public void setWidget(DashboardWidget widget)
+	public void setWidget(TplDashboardWidget widget)
 	{
 		if (widget != null && !(widget instanceof HtmlTplDashboardWidget))
 			throw new IllegalArgumentException();

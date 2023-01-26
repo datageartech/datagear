@@ -104,7 +104,7 @@ public class ChartWidget extends ChartDefinition
 		if(StringUtil.isEmpty(chartId))
 			chartId = generateChartId(renderContext);
 		
-		return this.plugin.renderChart(renderContext, buildChartDefinition(chartId));
+		return this.plugin.renderChart(buildChartDefinition(chartId), renderContext);
 	}
 
 	protected ChartDefinition buildChartDefinition(String id) throws RenderException

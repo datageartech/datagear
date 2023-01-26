@@ -32,7 +32,7 @@ import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
-import org.datagear.analysis.support.html.HtmlChartWidgetJsonWriter;
+import org.datagear.analysis.support.html.HtmlChartWidgetJsonRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.IdJsonImportHtmlChartPluginVarNameResolver;
 import org.datagear.connection.ConnectionSource;
@@ -636,9 +636,9 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	}
 
 	@Bean
-	public HtmlChartWidgetJsonWriter htmlChartWidgetJsonWriter()
+	public HtmlChartWidgetJsonRenderer htmlChartWidgetJsonRenderer()
 	{
-		HtmlChartWidgetJsonWriter bean = new HtmlChartWidgetJsonWriter();
+		HtmlChartWidgetJsonRenderer bean = new HtmlChartWidgetJsonRenderer();
 		return bean;
 	}
 

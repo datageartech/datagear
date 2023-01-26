@@ -20,14 +20,11 @@ public class Dashboard extends DashboardQueryHandler implements Identifiable
 {
 	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_RENDER_CONTEXT = "renderContext";
-	public static final String PROPERTY_WIDGET = "widget";
 	public static final String PROPERTY_CHARTS = "charts";
 
 	private String id;
 
 	private RenderContext renderContext;
-
-	private DashboardWidget widget;
 
 	private List<Chart> charts = Collections.emptyList();
 
@@ -36,12 +33,11 @@ public class Dashboard extends DashboardQueryHandler implements Identifiable
 		super();
 	}
 
-	public Dashboard(String id, RenderContext renderContext, DashboardWidget widget)
+	public Dashboard(String id, RenderContext renderContext)
 	{
 		super();
 		this.id = id;
 		this.renderContext = renderContext;
-		this.widget = widget;
 	}
 
 	@Override
@@ -63,16 +59,6 @@ public class Dashboard extends DashboardQueryHandler implements Identifiable
 	public void setRenderContext(RenderContext renderContext)
 	{
 		this.renderContext = renderContext;
-	}
-
-	public DashboardWidget getWidget()
-	{
-		return widget;
-	}
-
-	public void setWidget(DashboardWidget widget)
-	{
-		this.widget = widget;
 	}
 
 	/**

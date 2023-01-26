@@ -15,18 +15,23 @@ package org.datagear.analysis;
  */
 public class TplDashboard extends Dashboard
 {
-	/** 模板 */
+	public static final String PROPERTY_TEMPLATE = "template";
+	public static final String PROPERTY_WIDGET = "widget";
+	
 	private String template;
+	
+	private TplDashboardWidget widget;
 
 	public TplDashboard()
 	{
 		super();
 	}
 
-	public TplDashboard(String id, String template, RenderContext renderContext, TplDashboardWidget widget)
+	public TplDashboard(String id, RenderContext renderContext, String template, TplDashboardWidget widget)
 	{
-		super(id, renderContext, widget);
+		super(id, renderContext);
 		this.template = template;
+		this.widget = widget;
 	}
 
 	public String getTemplate()
@@ -39,18 +44,13 @@ public class TplDashboard extends Dashboard
 		this.template = template;
 	}
 
-	@Override
 	public TplDashboardWidget getWidget()
 	{
-		return (TplDashboardWidget) super.getWidget();
+		return this.widget;
 	}
 
-	@Override
-	public void setWidget(DashboardWidget widget)
+	public void setWidget(TplDashboardWidget widget)
 	{
-		if (widget != null && !(widget instanceof TplDashboardWidget))
-			throw new IllegalArgumentException();
-
-		super.setWidget(widget);
+		this.widget = widget;
 	}
 }

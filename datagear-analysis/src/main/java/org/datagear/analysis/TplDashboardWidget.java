@@ -6,23 +6,19 @@
  */
 package org.datagear.analysis;
 
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 模板看板部件。
  * <p>
- * 它可在{@linkplain RenderContext}中渲染其模板名称（{@linkplain #getTemplates()}）所描述的{@linkplain Dashboard}。
- * </p>
- * <p>
- * 此类的{@linkplain #render(RenderContext)}渲染{@linkplain #getFirstTemplate()}模板。
+ * 它可在{@linkplain TplDashboardRenderContext}中渲染指定模板名称（{@linkplain #getTemplates()}）所描述的{@linkplain TplDashboard}。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public abstract class TplDashboardWidget extends AbstractIdentifiable implements DashboardWidget
+public abstract class TplDashboardWidget extends AbstractIdentifiable
 {
 	public static final String DEFAULT_TEMPLATE_ENCODING = "UTF-8";
 
@@ -128,71 +124,15 @@ public abstract class TplDashboardWidget extends AbstractIdentifiable implements
 	}
 
 	/**
-	 * 渲染{@linkplain #getFirstTemplate()}的{@linkplain TplDashboard}。
-	 */
-	@Override
-	public TplDashboard render(RenderContext renderContext) throws RenderException
-	{
-		String template = getFirstTemplate();
-		return renderTemplate(renderContext, template);
-	}
-
-	/**
-	 * 渲染指定模板名称的{@linkplain TplDashboard}。
-	 * 
-	 * @param renderContext
-	 * @param template      模板名称，应是{@linkplain #isTemplate(String)}为{@code true}
-	 * @return
-	 * @throws RenderException
-	 * @throws IllegalArgumentException {@code template}不是模板名称时
-	 */
-	public TplDashboard render(RenderContext renderContext, String template)
-			throws RenderException, IllegalArgumentException
-	{
-		if (!isTemplate(template))
-			throw new IllegalArgumentException("[" + template + "] is not template");
-
-		return renderTemplate(renderContext, template);
-	}
-
-	/**
-	 * 渲染指定模板名称的{@linkplain TplDashboard}。
+	 * 渲染指定模板的{@linkplain TplDashboard}。
 	 * <p>
-	 * 模板名称不必是{@linkplain #isTemplate(String)}为{@code true}的，通常用于支持渲染即时看板。
+	 * 每次渲染的{@linkplain TplDashboard#getId()}都应全局唯一，{@linkplain TplDashboard#getCharts()}中每个{@linkplain Chart#getId()}应局部唯一。
 	 * </p>
 	 * 
 	 * @param renderContext
-	 * @param template      模板名称，{@linkplain #isTemplate(String)}不必为{@code true}
-	 * @param templateIn    {@code template}模板的输入流
 	 * @return
 	 * @throws RenderException
 	 */
-	public TplDashboard render(RenderContext renderContext, String template, Reader templateIn)
-			throws RenderException
-	{
-		return renderTemplate(renderContext, template, templateIn);
-	}
-
-	/**
-	 * 渲染指定名称模板。
-	 * 
-	 * @param renderContext
-	 * @param template
-	 * @return
-	 * @throws RenderException
-	 */
-	protected abstract TplDashboard renderTemplate(RenderContext renderContext, String template)
-			throws RenderException;
-
-	/**
-	 * 渲染指定名称模板。
-	 * 
-	 * @param renderContext
-	 * @param template
-	 * @param templateIn
-	 * @return
-	 * @throws RenderException
-	 */
-	protected abstract TplDashboard renderTemplate(RenderContext renderContext, String template, Reader templateIn)
+	public abstract TplDashboard render(TplDashboardRenderContext renderContext)
 			throws RenderException;
 }

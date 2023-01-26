@@ -166,6 +166,18 @@ public abstract class AbstractHtmlScriptObjectWriter
 		{
 			return null;
 		}
+
+		@Override
+		public void putAttributes(Map<String, ?> attrs)
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void putAttributes(RenderContext renderContext)
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	protected static class RefHtmlChartPlugin extends HtmlChartPlugin implements JsonRefObject

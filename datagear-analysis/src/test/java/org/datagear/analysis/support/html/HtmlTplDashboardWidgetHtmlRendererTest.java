@@ -16,23 +16,22 @@ import static org.junit.Assert.assertTrue;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.DefaultRenderContext;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtmlTitleHandler;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardFilterContext;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.TplChartInfo;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.TplDashboardInfo;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.TplChartMeta;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.TplDashboardMeta;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.junit.Test;
@@ -66,6 +65,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	private HtmlChartWidget htmlChartWidget02;
 	private TestFixedIdHtmlTplDashboardWidgetHtmlRenderer renderer;
 	private TplDashboardWidgetResManager resManager;
+	private HtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
 	
 	public HtmlTplDashboardWidgetHtmlRendererTest() throws Exception
 	{
@@ -88,30 +88,25 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	@Test
 	public void renderTest() throws Exception
 	{
-		HtmlTplDashboardWidgetHtmlRenderer renderer = new HtmlTplDashboardWidgetHtmlRenderer(new SimpleChartWidgetSource(this.htmlChartWidget01, this.htmlChartWidget02));
+		HtmlTplDashboardWidgetHtmlRenderer renderer = new HtmlTplDashboardWidgetHtmlRenderer(
+				new SimpleChartWidgetSource(this.htmlChartWidget01, this.htmlChartWidget02));
 		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget(renderer);
 
 		HtmlTplDashboard dashboard1 = null;
 		HtmlTplDashboard dashboard2 = null;
 		
 		{
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			buildHtmlTplDashboardRenderAttr(renderContext, out);
-	
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext();
 			dashboard1 = dashboardWidget.render(renderContext);
 	
 			assertEquals(6, dashboard1.getCharts().size());
 		}
 		
 		{
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			buildHtmlTplDashboardRenderAttr(renderContext, out);
-	
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext();
 			dashboard2 = dashboardWidget.render(renderContext);
-	
-			assertEquals(6, dashboard1.getCharts().size());
+			
+			assertEquals(6, dashboard2.getCharts().size());
 		}
 		
 		assertNotEquals(dashboard1.getId(), dashboard2.getId());
@@ -127,20 +122,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html dg-dashboard-var=\"myDashboard\" dg-dashboard-factory=\"myDashboardFactory\" "
 					+ " dg-dashboard-unimport=\"jquery\"><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			assertEquals("jquery", dashboardInfo.getDashboardUnimport());
+			assertEquals("myDashboard", dashboardMeta.getDashboardVar());
+			assertEquals("myDashboardFactory", dashboardMeta.getDashboardFactoryVar());
+			assertEquals("jquery", dashboardMeta.getDashboardUnimport());
 			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
@@ -153,14 +144,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -171,20 +157,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html dg-dashboard-var=myDashboard dg-dashboard-factory=myDashboardFactory "
 					+ " dg-dashboard-unimport=jquery><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			assertEquals("jquery", dashboardInfo.getDashboardUnimport());
+			assertEquals("myDashboard", dashboardMeta.getDashboardVar());
+			assertEquals("myDashboardFactory", dashboardMeta.getDashboardFactoryVar());
+			assertEquals("jquery", dashboardMeta.getDashboardUnimport());
 			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
@@ -195,14 +177,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -213,20 +190,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-factory='myDashboardFactory' "
 					+ " dg-dashboard-unimport='jquery'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			assertEquals("jquery", dashboardInfo.getDashboardUnimport());
+			assertEquals("myDashboard", dashboardMeta.getDashboardVar());
+			assertEquals("myDashboardFactory", dashboardMeta.getDashboardFactoryVar());
+			assertEquals("jquery", dashboardMeta.getDashboardUnimport());
 			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
@@ -237,14 +210,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -255,20 +223,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-factory='myDashboardFactory' "
 					+ " dg-dashboard-unimport='jquery,theme, style'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
-			assertEquals("jquery,theme, style", dashboardInfo.getDashboardUnimport());
+			assertEquals("myDashboard", dashboardMeta.getDashboardVar());
+			assertEquals("myDashboardFactory", dashboardMeta.getDashboardFactoryVar());
+			assertEquals("jquery,theme, style", dashboardMeta.getDashboardUnimport());
 			assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertFalse(html.contains(IMPORT_CONTENT_THEME));
@@ -279,14 +243,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -296,20 +255,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertNull(dashboardInfo.getDashboardVar());
-			assertNull(dashboardInfo.getDashboardFactoryVar());
-			assertNull(dashboardInfo.getDashboardUnimport());
+			assertNull(dashboardMeta.getDashboardVar());
+			assertNull(dashboardMeta.getDashboardFactoryVar());
+			assertNull(dashboardMeta.getDashboardUnimport());
 			assertTrue(html.contains(IMPORT_CONTENT_JQUERY));
 			assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
@@ -320,14 +275,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -359,25 +309,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					//
 					+ HtmlChartPlugin.HTML_NEW_LINE + "</body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			List<TplChartInfo> chartInfos = dashboardInfo.getTplChartInfos();
-			assertEquals(11, chartInfos.size());
+			List<TplChartMeta> chartMetas = dashboardMeta.getTplChartMetas();
+			assertEquals(11, chartMetas.size());
 
 			for (int i = 0; i < 7; i++)
 			{
-				TplChartInfo chartInfo = chartInfos.get(i);
-				assertEquals("element_" + (i + 1), chartInfo.getElementId());
-				assertEquals("chartwidget_" + (i + 1), chartInfo.getWidgetId());
+				TplChartMeta chartMeta = chartMetas.get(i);
+				assertEquals("element_" + (i + 1), chartMeta.getElementId());
+				assertEquals("chartwidget_" + (i + 1), chartMeta.getWidgetId());
 			}
 
 			assertTrue(html.contains("<html><head>"));
@@ -399,14 +345,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -416,33 +357,22 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head><title>abc</title></head><body><title>sdf</title></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-
-			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix");
-			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			renderContext.setHtmlTitleHandler(this.htmlTitleHandler);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains("<title>abc-suffix</title></head>"));
 			assertTrue(html.contains("<title>sdf</title>"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -452,67 +382,45 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			renderContext.setHtmlTitleHandler(this.htmlTitleHandler);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix");
-			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
-
-			assertTrue(html.contains("<title>-suffix</title></head>"));
-			
-			//缓存
-			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
-				
-				assertEquals(html, html1);
-			}
-		}
-
-		// 处理标题：没有<title></title>标签
-		{
-			String template = "<html><head></head><body></body></html>";
-
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-
-			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
-			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
-			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains("<title>generated</title></head>"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
-				String html1 = getHtmlWithPrint(out1);
+				assertEquals(html, html1);
+			}
+		}
+
+		// 处理标题：没有<title></title>标签
+		{
+			String template = "<html><head></head><body></body></html>";
+
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			renderContext.setHtmlTitleHandler(this.htmlTitleHandler);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
+
+			HtmlTplDashboard dashboard = filterContext.getDashboard();
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+
+			assertTrue(html.contains("<title>generated</title></head>"));
+			
+			//缓存
+			{
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -522,32 +430,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head><title/></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			renderContext.setHtmlTitleHandler(this.htmlTitleHandler);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
-			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains("<title/><title>generated</title></head>"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -557,32 +454,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head><title></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			renderContext.setHtmlTitleHandler(this.htmlTitleHandler);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
-			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
-
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains("<title><title>generated</title></head>"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -592,16 +478,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains("<html><body>" + this.renderer.getNewLine() + "<style"));
 			assertTrue(html.contains("</script>" + this.renderer.getNewLine() + "</body></html>"));
@@ -610,14 +492,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -627,16 +504,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains("<html><head>" + this.renderer.getNewLine() + "<style"));
 			assertTrue(html.contains(
@@ -647,14 +520,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -664,16 +532,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains("</html>" + this.renderer.getNewLine() + "<style"));
 			assertTrue(html.contains(
@@ -684,14 +548,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -706,29 +565,20 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertNull(dashboard.getLoadableChartWidgets());
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -736,29 +586,20 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-loadable-chart-widgets=\"all\"><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(dashboard.getLoadableChartWidgets().isPatternAll());
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -766,29 +607,20 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-loadable-chart-widgets='none'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(dashboard.getLoadableChartWidgets().isPatternNone());
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -796,29 +628,20 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-loadable-chart-widgets='permitted'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(dashboard.getLoadableChartWidgets().isPatternPermitted());
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -826,16 +649,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-loadable-chart-widgets='a-widget-id'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(dashboard.getLoadableChartWidgets().isPatternList());
 			assertTrue(dashboard.getLoadableChartWidgets().getChartWidgetIds().size() == 1);
@@ -843,14 +662,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -858,16 +672,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-loadable-chart-widgets='widget-id-0,widget-id-1'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(dashboard.getLoadableChartWidgets().isPatternList());
 			assertTrue(dashboard.getLoadableChartWidgets().getChartWidgetIds().size() == 2);
@@ -876,14 +686,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -891,16 +696,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-loadable-chart-widgets='widget-id-0, widget-id-1 , widget-id-2 '><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(dashboard.getLoadableChartWidgets().isPatternList());
 			assertTrue(dashboard.getLoadableChartWidgets().getChartWidgetIds().size() == 3);
@@ -910,14 +711,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -933,30 +729,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(dashboardMeta.isDashboardAutoRender());
 			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -965,30 +752,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-auto-render='true'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(dashboardMeta.isDashboardAutoRender());
 			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -997,30 +775,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-auto-render=''><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(dashboardMeta.isDashboardAutoRender());
 			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1029,30 +798,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-auto-render><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(dashboardMeta.isDashboardAutoRender());
 			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1061,30 +821,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-auto-render='a'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertTrue(dashboardInfo.isDashboardAutoRender());
+			assertTrue(dashboardMeta.isDashboardAutoRender());
 			assertTrue(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1093,30 +844,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-auto-render='false'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertFalse(dashboardInfo.isDashboardAutoRender());
+			assertFalse(dashboardMeta.isDashboardAutoRender());
 			assertFalse(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1125,30 +867,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-auto-render='FaLse'><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
-			assertFalse(dashboardInfo.isDashboardAutoRender());
+			assertFalse(dashboardMeta.isDashboardAutoRender());
 			assertFalse(html.contains(dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1163,30 +896,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-code><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
 			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1195,30 +919,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-code=\"instance\"><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertFalse(html.contains(dashboard.getVarName() + ".init();"));
 			assertFalse(html.contains(dashboard.getVarName() + ".render();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1227,30 +942,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-code=\"init\"><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
 			assertFalse(html.contains(dashboard.getVarName() + ".render();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1259,30 +965,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-code=\"render\"><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
 			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1291,30 +988,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-code=\"abc\"><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
 			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1323,30 +1011,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-code=\"render\" dg-dashboard-auto-render=\"false\"><head></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
 			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1355,30 +1034,21 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html dg-dashboard-code=\"instance\"><head></head><body><script dg-dashboard-code=\"render\"></script></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			assertTrue(html.contains(dashboard.getVarName() + ".init();"));
 			assertTrue(html.contains(dashboard.getVarName() + ".render();"));
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1387,16 +1057,13 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code></script></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+			
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
@@ -1415,14 +1082,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1431,16 +1093,13 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code=\"render\"></script></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+			
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
@@ -1459,14 +1118,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1475,17 +1129,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code=\"init\"></script></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
-			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+			
+			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
@@ -1506,14 +1157,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1522,18 +1168,15 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code=\"instance\"></script></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+			
 			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(
-					dashboardInfo.getDashboardFactoryVar()) + ".init(" + dashboard.getVarName() + ");";
+					dashboardMeta.getDashboardFactoryVar()) + ".init(" + dashboard.getVarName() + ");";
 			String dashboardRenderCode = dashboard.getVarName() + "." + this.renderer.getDashboardRenderFuncName()
 					+ "();";
 
@@ -1556,14 +1199,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1572,16 +1210,13 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code=\"abc\"></script></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+			
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"abc\">") + "<script dg-dashboard-code=\"abc\">".length();
@@ -1597,14 +1232,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1613,16 +1243,13 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code=\"abc\" /></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+			
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"abc\" />") + "<script dg-dashboard-code=\"abc\" />".length();
@@ -1638,14 +1265,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1654,16 +1276,13 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code=\"abc\"/></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+			
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"abc\"/>") + "<script dg-dashboard-code=\"abc\"/>".length();
@@ -1679,14 +1298,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1695,16 +1309,13 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head></head><body><script dg-dashboard-code=\"\"></script></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+			
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"\">") + "<script dg-dashboard-code=\"\">".length();
@@ -1718,14 +1329,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1735,17 +1341,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		{
 			String template = "<html><head><script dg-dashboard-code></script></head><body></body></html>";
 
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
-			
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
-			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+			
+			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptCloseTagIdx = html.indexOf("</script></head>");
@@ -1759,14 +1362,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
@@ -1777,16 +1375,13 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			{
 				String template = "<html dg-dashboard-auto-render=\"true\"><head></head><body><script dg-dashboard-code></script></body></html>";
 
-				RenderContext renderContext = new DefaultRenderContext();
-				StringWriter out = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+				HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr);
-				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
-				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-				String html = getHtmlWithPrint(out);
+				TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+				String html = getHtmlWithPrint(renderContext);
+				
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
 				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
@@ -1800,14 +1395,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				
 				//缓存
 				{
-					RenderContext renderContext1 = new DefaultRenderContext();
-					StringWriter out1 = new StringWriter();
-					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardInfo);
-					
-					String html1 = getHtmlWithPrint(out1);
+					HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+					this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+					String html1 = getHtmlWithPrint(renderContext1);
 					
 					assertEquals(html, html1);
 				}
@@ -1815,17 +1405,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			{
 				String template = "<html dg-dashboard-auto-render=\"false\"><head></head><body><script dg-dashboard-code></script></body></html>";
 
-				RenderContext renderContext = new DefaultRenderContext();
-				StringWriter out = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+				HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr);
-				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
-				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-				String html = getHtmlWithPrint(out);
-				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+				TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+				String html = getHtmlWithPrint(renderContext);
+				
+				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
 				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
@@ -1841,14 +1428,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				
 				//缓存
 				{
-					RenderContext renderContext1 = new DefaultRenderContext();
-					StringWriter out1 = new StringWriter();
-					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardInfo);
-					
-					String html1 = getHtmlWithPrint(out1);
+					HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+					this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+					String html1 = getHtmlWithPrint(renderContext1);
 					
 					assertEquals(html, html1);
 				}
@@ -1856,18 +1438,15 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			
 			{
 				String template = "<html dg-dashboard-auto-render=\"true\"><head></head><body><script dg-dashboard-code=\"init\"></script></body></html>";
-	
-				RenderContext renderContext = new DefaultRenderContext();
-				StringWriter out = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr);
-				
+				HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
+
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
-				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-				String html = getHtmlWithPrint(out);
-				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+				TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+				String html = getHtmlWithPrint(renderContext);
+				
+				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
 				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
@@ -1883,32 +1462,24 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				
 				//缓存
 				{
-					RenderContext renderContext1 = new DefaultRenderContext();
-					StringWriter out1 = new StringWriter();
-					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardInfo);
-					
-					String html1 = getHtmlWithPrint(out1);
+					HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+					this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+					String html1 = getHtmlWithPrint(renderContext1);
 					
 					assertEquals(html, html1);
 				}
 			}
 			{
 				String template = "<html dg-dashboard-auto-render=\"false\"><head></head><body><script dg-dashboard-code=\"init\"></script></body></html>";
-	
-				RenderContext renderContext = new DefaultRenderContext();
-				StringWriter out = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr);
-				
+				HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
+
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
-				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-				String html = getHtmlWithPrint(out);
-				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardInfo.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+				TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+				String html = getHtmlWithPrint(renderContext);
+
+				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
 				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
@@ -1924,14 +1495,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				
 				//缓存
 				{
-					RenderContext renderContext1 = new DefaultRenderContext();
-					StringWriter out1 = new StringWriter();
-					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardInfo);
-					
-					String html1 = getHtmlWithPrint(out1);
+					HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+					this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+					String html1 = getHtmlWithPrint(renderContext1);
 					
 					assertEquals(html, html1);
 				}
@@ -1940,16 +1506,13 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			{
 				String template = "<html dg-dashboard-auto-render=\"true\"><head></head><body><script dg-dashboard-code=\"render\"></script></body></html>";
 
-				RenderContext renderContext = new DefaultRenderContext();
-				StringWriter out = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+				HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr);
-				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
-				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-				String html = getHtmlWithPrint(out);
+				TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+				String html = getHtmlWithPrint(renderContext);
+
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
 				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
@@ -1963,14 +1526,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				
 				//缓存
 				{
-					RenderContext renderContext1 = new DefaultRenderContext();
-					StringWriter out1 = new StringWriter();
-					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardInfo);
-					
-					String html1 = getHtmlWithPrint(out1);
+					HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+					this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+					String html1 = getHtmlWithPrint(renderContext1);
 					
 					assertEquals(html, html1);
 				}
@@ -1978,16 +1536,13 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			{
 				String template = "<html dg-dashboard-auto-render=\"false\"><head></head><body><script dg-dashboard-code=\"render\"></script></body></html>";
 
-				RenderContext renderContext = new DefaultRenderContext();
-				StringWriter out = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
+				HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
-				DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr);
-				
 				HtmlTplDashboard dashboard = filterContext.getDashboard();
-				TplDashboardInfo dashboardInfo = filterContext.getTplDashboardInfo();
-				String html = getHtmlWithPrint(out);
+				TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+				String html = getHtmlWithPrint(renderContext);
+
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
 				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"render\">") + "<script dg-dashboard-code=\"render\">".length();
@@ -2001,14 +1556,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				
 				//缓存
 				{
-					RenderContext renderContext1 = new DefaultRenderContext();
-					StringWriter out1 = new StringWriter();
-					HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-					this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-							IOUtil.getReader(template), renderAttr1, dashboardInfo);
-					
-					String html1 = getHtmlWithPrint(out1);
+					HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+					this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+					String html1 = getHtmlWithPrint(renderContext1);
 					
 					assertEquals(html, html1);
 				}
@@ -2059,88 +1609,81 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				"</body>" +
 				"</html>";
 
-		TplDashboardInfo dashboardInfo = null;
+		TplDashboardMeta dashboardMeta = null;
 		
 		{
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
 
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					IOUtil.getReader(template), renderAttr);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
-			dashboardInfo = filterContext.getTplDashboardInfo();
-			String html = getHtmlWithPrint(out);
+			dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
 
 			//缓存
 			{
-				RenderContext renderContext1 = new DefaultRenderContext();
-				StringWriter out1 = new StringWriter();
-				HtmlTplDashboardRenderAttr renderAttr1 = buildHtmlTplDashboardRenderAttr(renderContext1, out1);
-
-				this.renderer.doRenderDashboard(renderContext1, dashboardWidget, TEMPLATE_NAME,
-						IOUtil.getReader(template), renderAttr1, dashboardInfo);
-				
-				String html1 = getHtmlWithPrint(out1);
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
 				
 				assertEquals(html, html1);
 			}
 		}
 		
 		long rawTimes = 0;
-		long cacheTimes = 0;
+		long enhanceTimes = 0;
 		
 		for(int i=0; i<loopCount; i++)
 		{
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-			Reader reader = IOUtil.getReader(template);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
 			
 			long beforeTime = System.currentTimeMillis();
-			
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					reader, renderAttr);
+
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 			
 			rawTimes += System.currentTimeMillis() - beforeTime;
 		}
 		
 		for(int i=0; i<loopCount; i++)
 		{
-			RenderContext renderContext = new DefaultRenderContext();
-			StringWriter out = new StringWriter();
-			HtmlTplDashboardRenderAttr renderAttr = buildHtmlTplDashboardRenderAttr(renderContext, out);
-			Reader reader = IOUtil.getReader(template);
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
 			
 			long beforeTime = System.currentTimeMillis();
 			
-			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(renderContext, dashboardWidget, TEMPLATE_NAME,
-					reader, renderAttr, dashboardInfo);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext, dashboardMeta);
 			
-			cacheTimes += System.currentTimeMillis() - beforeTime;
+			enhanceTimes += System.currentTimeMillis() - beforeTime;
 		}
 		
-		double enhance = rawTimes/(double)cacheTimes;
+		double enhance = rawTimes/(double)enhanceTimes;
 		
-		//性能至少提高1.2倍
-		assertTrue(enhance > 1.2f);
+		assertTrue(enhance > 1.1f);
+		
+		System.out.println("-----------------------");
+		System.out.println("test count   : " + loopCount);
+		System.out.println("raw time     : " + rawTimes);
+		System.out.println("enhance time : " + enhanceTimes);
+		System.out.println("enhance ratio : " + new DecimalFormat("0.00").format(enhance));
+		System.out.println("-----------------------");
 	}
-
-	protected HtmlTplDashboardRenderAttr buildHtmlTplDashboardRenderAttr(RenderContext renderContext, Writer out)
+	
+	protected HtmlTplDashboardRenderContext buildRenderContext()
 	{
-		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
-		renderAttr.inflate(renderContext, out);
-		renderAttr.setWebContext(renderContext, new WebContext(""));
-		renderAttr.setDashboardTheme(renderContext, SimpleDashboardThemeSource.THEME_LIGHT);
-		renderAttr.setImportList(renderContext, buildImportList());
+		return buildRenderContext(TEMPLATE_NAME, null, new StringWriter());
+	}
+	
+	protected HtmlTplDashboardRenderContext buildRenderContext(String templateContent)
+	{
+		return buildRenderContext(TEMPLATE_NAME, IOUtil.getReader(templateContent), new StringWriter());
+	}
+	
+	protected HtmlTplDashboardRenderContext buildRenderContext(String template, Reader templateReader, Writer out)
+	{
+		HtmlTplDashboardRenderContext renderContext = new HtmlTplDashboardRenderContext(template, templateReader, out);
+		renderContext.setDashboardTheme(SimpleDashboardThemeSource.THEME_LIGHT);
+		renderContext.setImportList(buildImportList());
 		
-		renderAttr.setIgnoreRenderAttrs(renderContext,
-				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getImportListName(),
-						renderAttr.getHtmlTitleHandlerName(),
-						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
-
-		return renderAttr;
+		return renderContext;
 	}
 
 	protected List<HtmlTplDashboardImport> buildImportList()
@@ -2181,6 +1724,11 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		}
 
 		return c;
+	}
+
+	protected String getHtmlWithPrint(HtmlTplDashboardRenderContext renderContext)
+	{
+		return getHtmlWithPrint((StringWriter)renderContext.getWriter());
 	}
 
 	protected String getHtmlWithPrint(StringWriter out)

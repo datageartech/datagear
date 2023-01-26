@@ -173,7 +173,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 
 		@JsonIgnore
 		@Override
-		public Chart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException
+		public Chart renderChart(ChartDefinition chartDefinition, RenderContext renderContext) throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}

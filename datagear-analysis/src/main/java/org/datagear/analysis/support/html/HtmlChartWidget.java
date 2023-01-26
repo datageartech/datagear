@@ -7,20 +7,17 @@
 
 package org.datagear.analysis.support.html;
 
-import java.io.Writer;
-
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
-import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 
 /**
  * HTML {@linkplain ChartWidget}。
  * <p>
- * 注意：此类{@linkplain #render(RenderContext)}的{@linkplain RenderContext}必须符合{@linkplain HtmlChartRenderAttr#inflate(RenderContext, Writer, HtmlChartRenderOption)}规范。
+ * 注意：此类{@linkplain #render(RenderContext)}和{@linkplain #render(RenderContext, String)}的{@linkplain RenderContext}参数必须是{@linkplain HtmlChartRenderContext}实例。
  * </p>
  * 
  * @author datagear@163.com

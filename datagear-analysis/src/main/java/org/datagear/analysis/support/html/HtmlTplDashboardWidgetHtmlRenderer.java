@@ -20,12 +20,9 @@ import java.util.Set;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.Dashboard;
-import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.DefaultRenderContext;
-import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.HtmlTitleHandler;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
@@ -71,7 +68,7 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
  * <code>html dg-dashboard-var</code>：选填，定义看板JS对象的变量名，默认为{@linkplain #getDefaultDashboardVar()}
  * </p>
  * <p>
- * <code>html dg-dashboard-unimport</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardRenderAttr#getImportList(RenderContext)}），多个以“,”隔开
+ * <code>html dg-dashboard-unimport</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardRenderContext#getImportList()}），多个以“,”隔开
  * </p>
  * <p>
  * <code>html dg-loadable-charts</code>：选填，定义看板网页允许在页面端通过JS异步加载的{@linkplain ChartWidget}模式（{@linkplain LoadableChartWidgets}），多个以“,”隔开
@@ -333,36 +330,38 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	}
 
 	@Override
-	protected HtmlTplDashboard renderDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
-			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr) throws Throwable
+	public HtmlTplDashboard render(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext)
+			throws RenderException
 	{
-		DashboardFilterContext context = doRenderDashboard(renderContext, dashboardWidget, template,
-				templateIn, renderAttr);
-		return context.getDashboard();
+		try
+		{
+			DashboardFilterContext context = doRenderDashboard(dashboardWidget, renderContext);
+			return context.getDashboard();
+		}
+		catch(IOException e)
+		{
+			throw new RenderException(e);
+		}
 	}
-
-	protected DashboardFilterContext doRenderDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
-			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr) throws Throwable
+	
+	protected DashboardFilterContext doRenderDashboard(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext)
+			throws RenderException, IOException
 	{
-		Writer out = renderAttr.getHtmlWriterNonNull(renderContext);
-		DashboardFilterContext context = new DashboardFilterContext(renderContext, renderAttr, dashboardWidget,
-				template, nextDashboardId());
-		DashboardFilterHandler filterHandler = new DashboardFilterHandler(out, context);
+		DashboardFilterContext context = new DashboardFilterContext(dashboardWidget, renderContext, nextDashboardId());
+		DashboardFilterHandler filterHandler = new DashboardFilterHandler(context);
 		
-		getHtmlFilter().filter(templateIn, filterHandler);
+		getHtmlFilter().filter(renderContext.getTemplateReader(), filterHandler);
 		
 		return context;
 	}
-
-	protected DashboardFilterContext doRenderDashboard(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget,
-			String template, Reader templateIn, HtmlTplDashboardRenderAttr renderAttr, TplDashboardInfo tplDashboardInfo) throws Throwable
+	
+	protected DashboardFilterContext doRenderDashboard(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext,
+			TplDashboardMeta dashboardMeta) throws RenderException, IOException
 	{
-		Writer out = renderAttr.getHtmlWriterNonNull(renderContext);
-		DashboardFilterContext context = new DashboardFilterContext(renderContext, renderAttr, dashboardWidget,
-				template, nextDashboardId(), tplDashboardInfo);
-		IndexedDashboardFilterHandler filterHandler = new IndexedDashboardFilterHandler(out, context);
+		DashboardFilterContext context = new DashboardFilterContext(dashboardWidget, renderContext, dashboardMeta, nextDashboardId());
+		IndexedDashboardFilterHandler filterHandler = new IndexedDashboardFilterHandler(context);
 		
-		getHtmlFilter().filter(templateIn, filterHandler);
+		getHtmlFilter().filter(renderContext.getTemplateReader(), filterHandler);
 		
 		return context;
 	}
@@ -370,23 +369,21 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	/**
 	 * 写看板脚本。
 	 * 
-	 * @param out
 	 * @param renderContext
-	 * @param renderAttr
-	 * @param tplDashboardInfo
+	 * @param dashboardMeta
 	 * @param dashboard
 	 * @param writeScriptTag
 	 * @throws IOException
 	 */
-	protected void writeDashboardScript(Writer out, RenderContext renderContext,
-			HtmlTplDashboardRenderAttr renderAttr, TplDashboardInfo tplDashboardInfo, HtmlTplDashboard dashboard,
-			boolean writeScriptTag) throws IOException
+	protected void writeDashboardScript(HtmlTplDashboardRenderContext renderContext, TplDashboardMeta dashboardMeta,
+			HtmlTplDashboard dashboard, boolean writeScriptTag) throws IOException
 	{
-		String globalDashboardVar = tplDashboardInfo.getDashboardVar();
+		String globalDashboardVar = dashboardMeta.getDashboardVar();
 		if (StringUtil.isEmpty(globalDashboardVar))
 			globalDashboardVar = getDefaultDashboardVar();
 		
-		String dashboardCode = tplDashboardInfo.getDashboardCode();
+		Writer out = renderContext.getWriter();
+		String dashboardCode = dashboardMeta.getDashboardCode();
 		boolean writeDashboardInit = false;
 		boolean writeDashboardRender = false;
 
@@ -409,15 +406,15 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		else
 		{
 			writeDashboardInit = true;
-			writeDashboardRender = tplDashboardInfo.isDashboardAutoRender();
+			writeDashboardRender = dashboardMeta.isDashboardAutoRender();
 		}
 
-		String tmp0RenderContextVarName = renderAttr.genRenderContextVarName("Tmp0");
-		String tmp1RenderContextVarName = renderAttr.genRenderContextVarName("Tmp1");
-		String localDashboardVarName = renderAttr.genDashboardVarName("Tmp");
+		String tmp0RenderContextVarName = renderContext.varNameOfRenderContext("Tmp0");
+		String tmp1RenderContextVarName = renderContext.varNameOfRenderContext("Tmp1");
+		String localDashboardVarName = renderContext.varNameOfDashboard("Tmp");
 
 		dashboard.setVarName(localDashboardVarName);
-		dashboard.setLoadableChartWidgets(tplDashboardInfo.getLoadableChartWidgets());
+		dashboard.setLoadableChartWidgets(dashboardMeta.getLoadableChartWidgets());
 
 		if(writeScriptTag)
 			writeScriptStartTag(out);
@@ -426,21 +423,20 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		out.write("(function("+this.localGlobalVarName+"){");
 		writeNewLine(out);
 
-		writeDashboardJsVar(renderContext, renderAttr, out, dashboard, tmp0RenderContextVarName);
+		writeDashboardJsVar(renderContext, dashboard, tmp0RenderContextVarName);
 
-		writeChartScripts(renderContext, renderAttr, out, dashboard, tplDashboardInfo);
-		writeDashboardJsInit(renderContext, renderAttr, out, dashboard, tmp1RenderContextVarName);
-		writeDashboardJsFactoryInit(renderContext, renderAttr, out, dashboard,
-				tplDashboardInfo.getDashboardFactoryVar());
+		writeChartScripts(renderContext, dashboard, dashboardMeta);
+		writeDashboardJsInit(renderContext, dashboard, tmp1RenderContextVarName);
+		writeDashboardJsFactoryInit(renderContext, dashboard, dashboardMeta.getDashboardFactoryVar());
 		
 		out.write(this.localGlobalVarName + "." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
 		
 		if (writeDashboardInit)
-			writeDashboardJsInit(renderContext, renderAttr, out, dashboard);
+			writeDashboardJsInit(renderContext, dashboard);
 
 		if (writeDashboardRender)
-			writeDashboardJsRender(renderContext, renderAttr, out, dashboard);
+			writeDashboardJsRender(renderContext, dashboard);
 		
 		out.write("})(this);");
 		writeNewLine(out);
@@ -452,8 +448,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 	}
 
-	protected void writeChartScripts(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
-			HtmlTplDashboard dashboard, TplDashboardInfo tplDashboardInfo) throws IOException
+	/**
+	 * 写图表脚本。
+	 * 
+	 * @param renderContext
+	 * @param dashboard
+	 * @param dashboardMeta
+	 * @throws IOException
+	 */
+	protected void writeChartScripts(HtmlTplDashboardRenderContext renderContext,
+			HtmlTplDashboard dashboard, TplDashboardMeta dashboardMeta) throws IOException
 	{
 		List<Chart> charts = dashboard.getCharts();
 		if (charts == null)
@@ -462,35 +466,31 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			dashboard.setCharts(charts);
 		}
 
-		List<TplChartInfo> tplChartInfos = tplDashboardInfo.getTplChartInfos();
-		if (tplChartInfos != null)
+		List<TplChartMeta> chartMetas = dashboardMeta.getTplChartMetas();
+		
+		if (chartMetas != null)
 		{
-			List<HtmlChartWidget> chartWidgets = getChartWidgets(tplChartInfos);
-			List<String> chartPluginVarNames = writeChartPluginScriptsResolveImport(renderContext, renderAttr, out,
-					chartWidgets);
+			List<HtmlChartWidget> chartWidgets = getChartWidgets(chartMetas);
+			List<String> chartPluginVarNames = writeChartPluginScriptsResolveImport(renderContext, chartWidgets);
 
-			RenderContext chartRenderContext = new DefaultRenderContext(renderContext);
-			HtmlChartRenderAttr chartRenderAttr = new HtmlChartRenderAttr();
-
-			HtmlChartRenderOption chartRenderOption = new HtmlChartRenderOption(chartRenderAttr);
-			chartRenderOption.setNotWriteChartElement(true);
-			chartRenderOption.setNotWriteScriptTag(true);
-			chartRenderOption.setNotWriteInvoke(true);
-			chartRenderOption.setNotWritePluginObject(true);
-			chartRenderOption.setNotWriteRenderContextObject(true);
-			chartRenderOption.setRenderContextVarName(dashboard.getVarName() + "." + Dashboard.PROPERTY_RENDER_CONTEXT);
+			HtmlChartRenderContext chartRenderContext = new HtmlChartRenderContext(renderContext.getWriter());
+			chartRenderContext.setAttributes(renderContext.getAttributes());
+			chartRenderContext.setNotWriteChartElement(true);
+			chartRenderContext.setNotWriteScriptTag(true);
+			chartRenderContext.setNotWriteInvoke(true);
+			chartRenderContext.setNotWritePluginObject(true);
+			chartRenderContext.setNotWriteRenderContextObject(true);
+			chartRenderContext.setRenderContextVarName(dashboard.getVarName() + "." + Dashboard.PROPERTY_RENDER_CONTEXT);
 			
-			chartRenderAttr.inflate(chartRenderContext, out, chartRenderOption);
-			
-			for (int i = 0, len = tplChartInfos.size(); i < len; i++)
+			for (int i = 0, len = chartMetas.size(); i < len; i++)
 			{
-				TplChartInfo tplChartInfo = tplChartInfos.get(i);
+				TplChartMeta chartMeta = chartMetas.get(i);
 				HtmlChartWidget chartWidget = chartWidgets.get(i);
 				String chartId = nextChartId(dashboard, i);
 				
-				chartRenderOption.setChartElementId(tplChartInfo.getElementId());
-				chartRenderOption.setPluginVarName(chartPluginVarNames.get(i));
-				chartRenderOption.setChartVarName(chartRenderAttr.genChartVarName(Integer.toString(i)));
+				chartRenderContext.setChartElementId(chartMeta.getElementId());
+				chartRenderContext.setPluginVarName(chartPluginVarNames.get(i));
+				chartRenderContext.setChartVarName(renderContext.varNameOfChart(Integer.toString(i)));
 				
 				HtmlChart chart = writeChart(chartRenderContext, chartWidget, chartId);
 				charts.add(chart);
@@ -498,15 +498,15 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 	}
 
-	protected List<HtmlChartWidget> getChartWidgets(List<TplChartInfo> tplChartInfos)
+	protected List<HtmlChartWidget> getChartWidgets(List<TplChartMeta> chartMetas)
 	{
 		List<HtmlChartWidget> list = new ArrayList<>();
 
-		if (tplChartInfos == null)
+		if (chartMetas == null)
 			return list;
 
-		for (TplChartInfo tplChartInfo : tplChartInfos)
-			list.add(getHtmlChartWidgetForRender(tplChartInfo.getWidgetId()));
+		for (TplChartMeta chartMeta : chartMetas)
+			list.add(getHtmlChartWidgetForRender(chartMeta.getWidgetId()));
 
 		return list;
 	}
@@ -516,7 +516,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * 
 	 * @author datagear@163.com
 	 */
-	protected static class TplDashboardInfo
+	protected static class TplDashboardMeta
 	{
 		/** 看板变量名称 */
 		private String dashboardVar = null;
@@ -539,7 +539,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		private String dashboardAutoRender = null;
 		
 		/** 图表信息 */
-		private List<TplChartInfo> tplChartInfos = new ArrayList<>();
+		private List<TplChartMeta> chartMetas = new ArrayList<>();
 		
 		/** 异步加载信息 */
 		private LoadableChartWidgets loadableChartWidgets = null;
@@ -564,7 +564,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		 */
 		private List<TplDashboardInserter> afterWriteInserters = new ArrayList<TplDashboardInserter>();
 		
-		public TplDashboardInfo()
+		public TplDashboardMeta()
 		{
 			super();
 		}
@@ -659,14 +659,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			this.dashboardAutoRender = dashboardAutoRender;
 		}
 
-		public List<TplChartInfo> getTplChartInfos()
+		public List<TplChartMeta> getTplChartMetas()
 		{
-			return tplChartInfos;
+			return chartMetas;
 		}
 
-		public void addTplChartInfo(TplChartInfo tplChartInfo)
+		public void addTplChartMeta(TplChartMeta tplChartMeta)
 		{
-			this.tplChartInfos.add(tplChartInfo);
+			this.chartMetas.add(tplChartMeta);
 		}
 
 		public LoadableChartWidgets getLoadableChartWidgets()
@@ -751,7 +751,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		{
 			return getClass().getSimpleName() + " [dashboardVar=" + dashboardVar + ", dashboardFactoryVar=" + dashboardFactoryVar
 					+ ", dashboardUnimport=" + dashboardUnimport + ", dashboardCode=" + dashboardCode
-					+ ", tplChartInfos=" + tplChartInfos + "]";
+					+ ", chartMetas=" + chartMetas + "]";
 		}
 	}
 
@@ -760,7 +760,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * 
 	 * @author datagear@163.com
 	 */
-	protected static class TplChartInfo
+	protected static class TplChartMeta
 	{
 		/** 图表部件ID */
 		private String widgetId;
@@ -768,7 +768,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		/** 图表元素ID */
 		private String elementId;
 		
-		public TplChartInfo(String widgetId, String elementId)
+		public TplChartMeta(String widgetId, String elementId)
 		{
 			super();
 			this.widgetId = widgetId;
@@ -812,11 +812,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		/**
 		 * 插入内容。
 		 * 
-		 * @param out
 		 * @param filterContext
 		 * @throws IOException
 		 */
-		void insert(Writer out, DashboardFilterContext filterContext) throws IOException;
+		void insert(DashboardFilterContext filterContext) throws IOException;
 	}
 	
 	protected static class TplDashboardTextInserter implements TplDashboardInserter
@@ -845,8 +844,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 
 		@Override
-		public void insert(Writer out, DashboardFilterContext filterContext) throws IOException
+		public void insert(DashboardFilterContext filterContext) throws IOException
 		{
+			Writer out = filterContext.getRenderContext().getWriter();
 			out.write(this.text);
 		}
 	}
@@ -854,66 +854,46 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	/**
 	 * HTML看板模板过滤上下文。
 	 * <p>
-	 * 完成过滤后，将填充{@linkplain DashboardFilterContext#getDashboard()}、{@linkplain DashboardFilterContext#getTplDashboardInfo()}。
+	 * 完成过滤后，将填充{@linkplain DashboardFilterContext#getDashboard()}、{@linkplain DashboardFilterContext#getDashboardMeta()}。
 	 * </p>
 	 * 
 	 * @author datagear@163.com
 	 */
 	protected static class DashboardFilterContext
 	{
-		public final RenderContext renderContext;
-		public final HtmlTplDashboardRenderAttr renderAttr;
 		private final HtmlTplDashboardWidget dashboardWidget;
-		private final String template;
+		private final HtmlTplDashboardRenderContext renderContext;
 		
-		private final TplDashboardInfo tplDashboardInfo;
+		private final TplDashboardMeta dashboardMeta;
 		private final HtmlTplDashboard dashboard;
 		
-		public DashboardFilterContext(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-				HtmlTplDashboardWidget dashboardWidget, String template, String dashboardId)
+		public DashboardFilterContext(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext, String dashboardId)
 		{
 			super();
-			this.renderContext = renderContext;
-			this.renderAttr = renderAttr;
 			this.dashboardWidget = dashboardWidget;
-			this.template = template;
-			this.tplDashboardInfo = new TplDashboardInfo();
-			this.dashboard = createDashboard(renderContext, dashboardWidget, dashboardId, template);
+			this.renderContext = renderContext;
+			this.dashboard = createDashboard(dashboardWidget, renderContext, dashboardId, renderContext.getTemplate());
+			this.dashboardMeta = new TplDashboardMeta();
 		}
 
-		public DashboardFilterContext(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-				HtmlTplDashboardWidget dashboardWidget, String template, String dashboardId, TplDashboardInfo tplDashboardInfo)
+		public DashboardFilterContext(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext,
+										TplDashboardMeta dashboardMeta, String dashboardId)
 		{
 			super();
-			this.renderContext = renderContext;
-			this.renderAttr = renderAttr;
 			this.dashboardWidget = dashboardWidget;
-			this.template = template;
-			this.tplDashboardInfo = tplDashboardInfo;
-			this.dashboard = createDashboard(renderContext, dashboardWidget, dashboardId, template);
+			this.renderContext = renderContext;
+			this.dashboardMeta = dashboardMeta;
+			this.dashboard = createDashboard(dashboardWidget, renderContext, dashboardId, renderContext.getTemplate());
 		}
 
-		public DashboardFilterContext(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-				HtmlTplDashboardWidget dashboardWidget, String template, TplDashboardInfo tplDashboardInfo,
+		public DashboardFilterContext(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext, TplDashboardMeta dashboardMeta,
 				HtmlTplDashboard dashboard)
 		{
 			super();
-			this.renderContext = renderContext;
-			this.renderAttr = renderAttr;
 			this.dashboardWidget = dashboardWidget;
-			this.template = template;
-			this.tplDashboardInfo = tplDashboardInfo;
+			this.renderContext = renderContext;
+			this.dashboardMeta = dashboardMeta;
 			this.dashboard = dashboard;
-		}
-
-		public RenderContext getRenderContext()
-		{
-			return renderContext;
-		}
-
-		public HtmlTplDashboardRenderAttr getRenderAttr()
-		{
-			return renderAttr;
 		}
 
 		public HtmlTplDashboardWidget getDashboardWidget()
@@ -921,14 +901,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			return dashboardWidget;
 		}
 
-		public String getTemplate()
+		public HtmlTplDashboardRenderContext getRenderContext()
 		{
-			return template;
+			return renderContext;
 		}
 
-		public TplDashboardInfo getTplDashboardInfo()
+		public TplDashboardMeta getDashboardMeta()
 		{
-			return tplDashboardInfo;
+			return dashboardMeta;
 		}
 
 		public HtmlTplDashboard getDashboard()
@@ -958,9 +938,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		private boolean dashboardImportWritten = false;
 		private boolean dashboardScriptWritten = false;
 
-		public DashboardFilterHandler(Writer out, DashboardFilterContext filterContext)
+		public DashboardFilterHandler(DashboardFilterContext filterContext)
 		{
-			super(new CopyWriter(out, new StringWriter(), false));
+			super(new CopyWriter(filterContext.getRenderContext().getWriter(), new StringWriter(), false));
 			this.filterContext = filterContext;
 		}
 
@@ -985,7 +965,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				// 优先</title>前插入标题后缀
 				if (equalsIgnoreCase(tagName, "/title"))
 				{
-					HtmlTitleHandler htmlTitleHandler = this.filterContext.renderAttr.getHtmlTitleHandler(this.filterContext.renderContext);
+					HtmlTitleHandler htmlTitleHandler = this.filterContext.getRenderContext().getHtmlTitleHandler();
 					if (htmlTitleHandler != null)
 					{
 						String titleContent = ((StringWriter) this.getCopyWriter().getCopyOut()).toString();
@@ -993,7 +973,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 						write(titleContent);
 						
 						TplDashboardTextInserter inserter = new TplDashboardTextInserter(titleContent);
-						this.filterContext.getTplDashboardInfo().addBeforeWriteTagStartInserter(this.tagCount, inserter);
+						this.filterContext.getDashboardMeta().addBeforeWriteTagStartInserter(this.tagCount, inserter);
 					}
 					
 					this.titleTagHandled = true;
@@ -1001,14 +981,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				// 其次</head>前插入<title></title>
 				else if(equalsIgnoreCase(tagName, "/head"))
 				{
-					HtmlTitleHandler htmlTitleHandler = this.filterContext.renderAttr.getHtmlTitleHandler(this.filterContext.renderContext);
+					HtmlTitleHandler htmlTitleHandler = this.filterContext.getRenderContext().getHtmlTitleHandler();
 					if (htmlTitleHandler != null)
 					{
 						String titleContent = "<title>" + htmlTitleHandler.suffix("") + "</title>";
 						write(titleContent);
 						
 						TplDashboardTextInserter inserter = new TplDashboardTextInserter(titleContent);
-						this.filterContext.getTplDashboardInfo().addBeforeWriteTagStartInserter(this.tagCount, inserter);
+						this.filterContext.getDashboardMeta().addBeforeWriteTagStartInserter(this.tagCount, inserter);
 					}
 
 					this.titleTagHandled = true;
@@ -1103,7 +1083,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				{
 					String dashboardCode = attrs.get(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode);
 					if (!StringUtil.isEmpty(dashboardCode))
-						this.filterContext.getTplDashboardInfo().setDashboardCode(dashboardCode);
+						this.filterContext.getDashboardMeta().setDashboardCode(dashboardCode);
 
 					writeHtmlTplDashboardScriptIfNon(isSelfCloseTagEnd(tagEnd), POS_AFTER_WRITE_TAG_END);
 				}
@@ -1152,20 +1132,20 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			if(this.dashboardImportWritten)
 				return false;
 			
-			writeDashboardImport(getOut(), this.filterContext.getRenderContext(), this.filterContext.getRenderAttr(),
-					this.filterContext.getDashboard(), this.filterContext.getTplDashboardInfo().getDashboardUnimport());
+			writeDashboardImport(this.filterContext.getRenderContext(),
+					this.filterContext.getDashboard(), this.filterContext.getDashboardMeta().getDashboardUnimport());
 
-			TplDashboardInfo tplDashboardInfo = this.filterContext.getTplDashboardInfo();
+			TplDashboardMeta dashboardMeta = this.filterContext.getDashboardMeta();
 			TplDashboardImportInserter inserter = new TplDashboardImportInserter();
 			
 			if(POS_BEFORE_WRITE_TAG_START.equals(pos))
-				tplDashboardInfo.addBeforeWriteTagStartInserter(this.tagCount, inserter);
+				dashboardMeta.addBeforeWriteTagStartInserter(this.tagCount, inserter);
 			else if(POS_BEFORE_WRITE_TAG_END.equals(pos))
-				tplDashboardInfo.addBeforeWriteTagEndInserter(this.tagCount, inserter);
+				dashboardMeta.addBeforeWriteTagEndInserter(this.tagCount, inserter);
 			else if(POS_AFTER_WRITE_TAG_END.equals(pos))
-				tplDashboardInfo.addAfterWriteTagEndInserter(this.tagCount, inserter);
+				dashboardMeta.addAfterWriteTagEndInserter(this.tagCount, inserter);
 			else if(POS_AFTER_WRITE.equals(pos))
-				tplDashboardInfo.addAfterWriteInserter(inserter);
+				dashboardMeta.addAfterWriteInserter(inserter);
 			else
 				throw new UnsupportedOperationException();
 
@@ -1181,20 +1161,20 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			
 			writeDashboardImportIfNon(pos);
 			
-			writeDashboardScript(getOut(), this.filterContext.renderContext, this.filterContext.renderAttr,
-					this.filterContext.getTplDashboardInfo(), this.filterContext.getDashboard(), writeScriptTag);
+			writeDashboardScript(this.filterContext.getRenderContext(),
+					this.filterContext.getDashboardMeta(), this.filterContext.getDashboard(), writeScriptTag);
 
-			TplDashboardInfo tplDashboardInfo = this.filterContext.getTplDashboardInfo();
+			TplDashboardMeta dashboardMeta = this.filterContext.getDashboardMeta();
 			TplDashboardScriptInserter inserter = new TplDashboardScriptInserter(writeScriptTag);
 			
 			if(POS_BEFORE_WRITE_TAG_START.equals(pos))
-				tplDashboardInfo.addBeforeWriteTagStartInserter(this.tagCount, inserter);
+				dashboardMeta.addBeforeWriteTagStartInserter(this.tagCount, inserter);
 			else if(POS_BEFORE_WRITE_TAG_END.equals(pos))
-				tplDashboardInfo.addBeforeWriteTagEndInserter(this.tagCount, inserter);
+				dashboardMeta.addBeforeWriteTagEndInserter(this.tagCount, inserter);
 			else if(POS_AFTER_WRITE_TAG_END.equals(pos))
-				tplDashboardInfo.addAfterWriteTagEndInserter(this.tagCount, inserter);
+				dashboardMeta.addAfterWriteTagEndInserter(this.tagCount, inserter);
 			else if(POS_AFTER_WRITE.equals(pos))
-				tplDashboardInfo.addAfterWriteInserter(inserter);
+				dashboardMeta.addAfterWriteInserter(inserter);
 			else
 				throw new UnsupportedOperationException();
 			
@@ -1211,27 +1191,27 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 				if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardVar.equalsIgnoreCase(name))
 				{
-					this.filterContext.getTplDashboardInfo().setDashboardVar(trim(entry.getValue()));
+					this.filterContext.getDashboardMeta().setDashboardVar(trim(entry.getValue()));
 				}
 				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardFactory.equalsIgnoreCase(name))
 				{
-					this.filterContext.getTplDashboardInfo().setDashboardFactoryVar(trim(entry.getValue()));
+					this.filterContext.getDashboardMeta().setDashboardFactoryVar(trim(entry.getValue()));
 				}
 				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardUnimport.equalsIgnoreCase(name))
 				{
-					this.filterContext.getTplDashboardInfo().setDashboardUnimport(trim(entry.getValue()));
+					this.filterContext.getDashboardMeta().setDashboardUnimport(trim(entry.getValue()));
 				}
 				else if(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameLoadableChartWidgets.equalsIgnoreCase(name))
 				{
-					this.filterContext.getTplDashboardInfo().setLoadableChartWidgets(resolveLoadableChartWidgets(trim(entry.getValue())));
+					this.filterContext.getDashboardMeta().setLoadableChartWidgets(resolveLoadableChartWidgets(trim(entry.getValue())));
 				}
 				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode.equalsIgnoreCase(name))
 				{
-					this.filterContext.getTplDashboardInfo().setDashboardCode(trim(entry.getValue()));
+					this.filterContext.getDashboardMeta().setDashboardCode(trim(entry.getValue()));
 				}
 				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardAutoRender.equalsIgnoreCase(name))
 				{
-					this.filterContext.getTplDashboardInfo().setDashboardAutoRender(trim(entry.getValue()));
+					this.filterContext.getDashboardMeta().setDashboardAutoRender(trim(entry.getValue()));
 				}
 			}
 		}
@@ -1288,24 +1268,24 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			if (StringUtil.isEmpty(chartWidget))
 				return;
 
-			TplDashboardInfo tplDashboardInfo = this.filterContext.getTplDashboardInfo();
-			TplChartInfo tplChartInfo = new TplChartInfo(chartWidget, elementId);
+			TplDashboardMeta dashboardMeta = this.filterContext.getDashboardMeta();
+			TplChartMeta chartMeta = new TplChartMeta(chartWidget, elementId);
 			
 			// 元素没有定义“id”属性，应自动插入
-			if (StringUtil.isEmpty(tplChartInfo.getElementId()))
+			if (StringUtil.isEmpty(chartMeta.getElementId()))
 			{
-				String elementIdSuffix = Integer.toString(tplDashboardInfo.getTplChartInfos().size());
-				elementId = this.filterContext.renderAttr.genChartElementId(elementIdSuffix);
-				tplChartInfo.setElementId(elementId);
+				String elementIdSuffix = Integer.toString(dashboardMeta.getTplChartMetas().size());
+				elementId = this.filterContext.getRenderContext().elementIdOfChart(elementIdSuffix);
+				chartMeta.setElementId(elementId);
 
 				String writeContent = " id=\"" + elementId + "\" ";
 				write(writeContent);
 				
 				TplDashboardTextInserter inserter = new TplDashboardTextInserter(writeContent);
-				tplDashboardInfo.addBeforeWriteTagEndInserter(this.tagCount, inserter);
+				dashboardMeta.addBeforeWriteTagEndInserter(this.tagCount, inserter);
 			}
 
-			tplDashboardInfo.addTplChartInfo(tplChartInfo);
+			dashboardMeta.addTplChartMeta(chartMeta);
 		}
 	}
 	
@@ -1317,10 +1297,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 		
 		@Override
-		public void insert(Writer out, DashboardFilterContext filterContext) throws IOException
+		public void insert(DashboardFilterContext filterContext) throws IOException
 		{
-			writeDashboardImport(out, filterContext.getRenderContext(), filterContext.getRenderAttr(), filterContext.getDashboard(),
-					filterContext.getTplDashboardInfo().getDashboardUnimport());
+			writeDashboardImport(filterContext.getRenderContext(), filterContext.getDashboard(),
+					filterContext.getDashboardMeta().getDashboardUnimport());
 		}
 	}
 	
@@ -1345,15 +1325,15 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 
 		@Override
-		public void insert(Writer out, DashboardFilterContext filterContext) throws IOException
+		public void insert(DashboardFilterContext filterContext) throws IOException
 		{
-			writeDashboardScript(out, filterContext.getRenderContext(), filterContext.getRenderAttr(),
-					filterContext.getTplDashboardInfo(), filterContext.getDashboard(), this.writeScriptTag);
+			writeDashboardScript(filterContext.getRenderContext(),
+					filterContext.getDashboardMeta(), filterContext.getDashboard(), this.writeScriptTag);
 		}
 	}
 	
 	/**
-	 * 基于{@linkplain DashboardFilterContext#getTplDashboardInfo()}中索引信息的HTML看板模版过滤器。
+	 * 基于{@linkplain DashboardFilterContext#getDashboardMeta()}中索引信息的HTML看板模版过滤器。
 	 * 
 	 * @author datagear@163.com
 	 */
@@ -1361,16 +1341,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	{
 		private final DashboardFilterContext filterContext;
 		
-		private final TplDashboardInfo tplDashboardInfo;
+		private final TplDashboardMeta dashboardMeta;
 		private int tagCount = 0;
 
-		public IndexedDashboardFilterHandler(Writer out, DashboardFilterContext filterContext)
+		public IndexedDashboardFilterHandler(DashboardFilterContext filterContext)
 		{
-			super(new CopyWriter(out, new StringWriter(), false));
+			super(filterContext.getRenderContext().getWriter());
 			this.filterContext = filterContext;
-			this.tplDashboardInfo = this.filterContext.getTplDashboardInfo();
+			this.dashboardMeta = this.filterContext.getDashboardMeta();
 			
-			if(this.tplDashboardInfo == null)
+			if(this.dashboardMeta == null)
 				throw new IllegalArgumentException();
 		}
 
@@ -1382,7 +1362,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		@Override
 		public void beforeWriteTagStart(Reader in, String tagName) throws IOException
 		{
-			doInsert(this.tplDashboardInfo.getBeforeWriteTagStartInserters(this.tagCount));
+			doInsert(this.dashboardMeta.getBeforeWriteTagStartInserters(this.tagCount));
 			
 			this.tagCount++;
 		}
@@ -1391,30 +1371,30 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		public void beforeWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
 				throws IOException
 		{
-			doInsert(this.tplDashboardInfo.getBeforeWriteTagEndInserters(this.tagCount));
+			doInsert(this.dashboardMeta.getBeforeWriteTagEndInserters(this.tagCount));
 		}
 
 		@Override
 		public void afterWriteTagEnd(Reader in, String tagName, String tagEnd, Map<String, String> attrs)
 				throws IOException
 		{
-			doInsert(this.tplDashboardInfo.getAfterWriteTagEndInserters(this.tagCount));
+			doInsert(this.dashboardMeta.getAfterWriteTagEndInserters(this.tagCount));
 		}
 
 		@Override
 		public void afterWrite(Reader in) throws IOException
 		{
-			doInsert(this.tplDashboardInfo.getAfterWriteInserters());
+			doInsert(this.dashboardMeta.getAfterWriteInserters());
 		}
 		
 		protected void doInsert(List<TplDashboardInserter> inserters) throws IOException
 		{
 			if(inserters == null || inserters.isEmpty())
 				return;
-			
+
 			for(TplDashboardInserter inserter : inserters)
 			{
-				inserter.insert(getOut(), this.filterContext);
+				inserter.insert(this.filterContext);
 			}
 		}
 	}

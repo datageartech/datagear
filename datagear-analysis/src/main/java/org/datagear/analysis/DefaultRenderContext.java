@@ -5,52 +5,48 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  */
 
-package org.datagear.analysis.support;
+package org.datagear.analysis;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.datagear.analysis.RenderContext;
-
 /**
- * 抽象{@linkplain RenderContext}。
+ * 默认{@linkplain RenderContext}。
  * 
  * @author datagear@163.com
  *
  */
 public class DefaultRenderContext implements RenderContext
 {
-	private Map<String, Object> attributes = new HashMap<>();
+	private Map<String, Object> attributes;
 
 	public DefaultRenderContext()
 	{
 		super();
+		this.attributes = new HashMap<>();
 	}
 
 	public DefaultRenderContext(Map<String, ?> attributes)
 	{
 		super();
-		this.attributes.putAll(attributes);
+		this.setAttributes(attributes);
 	}
 
-	public DefaultRenderContext(RenderContext renderContext)
+	public DefaultRenderContext(DefaultRenderContext renderContext)
 	{
 		super();
-
-		Map<String, ?> attributes = renderContext.getAttributes();
-		if (attributes != null)
-			this.attributes.putAll(attributes);
+		this.attributes = renderContext.attributes;
 	}
 
-	public void setAttributes(Map<String, Object> attributes)
+	public Map<String, Object> getAttributes()
 	{
-		this.attributes = attributes;
+		return attributes;
 	}
 
-	@Override
-	public Map<String, ?> getAttributes()
+	@SuppressWarnings("unchecked")
+	public void setAttributes(Map<String, ?> attributes)
 	{
-		return this.attributes;
+		this.attributes = (Map<String, Object>)attributes;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -77,5 +73,19 @@ public class DefaultRenderContext implements RenderContext
 	public boolean hasAttribute(String name)
 	{
 		return this.attributes.containsKey(name);
+	}
+
+	@Override
+	public void putAttributes(Map<String, ?> attrs)
+	{
+		if(attrs != null)
+			this.attributes.putAll(attrs);
+	}
+
+	@Override
+	public void putAttributes(RenderContext renderContext)
+	{
+		if(renderContext != null)
+			putAttributes(renderContext.getAttributes());
 	}
 }

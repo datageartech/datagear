@@ -11,8 +11,6 @@ import java.io.File;
 import java.io.StringWriter;
 
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.support.DefaultRenderContext;
-import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.junit.Assert;
@@ -34,20 +32,15 @@ public class HtmlChartPluginTest
 	{
 		HtmlChartPlugin htmlChartPlugin = createHtmlChartPlugin();
 
-		DefaultRenderContext renderContext = new DefaultRenderContext();
-		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
-		StringWriter stringWriter = new StringWriter();
-		HtmlChartRenderOption renderOption = new HtmlChartRenderOption(renderAttr);
-		renderAttr.inflate(renderContext, stringWriter, renderOption);
+		HtmlChartRenderContext renderContext = createHtmlChartRenderContext();
+		htmlChartPlugin.renderChart(new ChartDefinition(), renderContext);
 
-		htmlChartPlugin.renderChart(renderContext, new ChartDefinition());
-
-		String html = getHtmlWithPrint(stringWriter);
+		String html = getHtmlWithPrint(renderContext);
 		JsChartRenderer renderer = htmlChartPlugin.getRenderer();
 		String rendererStr = IOUtil.readString(renderer.getCodeReader(), true);
 
-		Assert.assertTrue(html.contains("<div id=\"" + renderOption.getChartElementId() + "\"></div>"));
-		Assert.assertTrue(html.contains("(" + renderOption.getChartVarName() + ");"));
+		Assert.assertTrue(html.contains("<div id=\"" + renderContext.getChartElementId() + "\"></div>"));
+		Assert.assertTrue(html.contains("(" + renderContext.getChartVarName() + ");"));
 		Assert.assertTrue(rendererStr.contains("this is render function"));
 		Assert.assertTrue(rendererStr.contains("this is update function"));
 	}
@@ -57,24 +50,19 @@ public class HtmlChartPluginTest
 	{
 		HtmlChartPlugin htmlChartPlugin = createHtmlChartPluginForRendererFile();
 
-		DefaultRenderContext renderContext = new DefaultRenderContext();
-		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
-		StringWriter stringWriter = new StringWriter();
-		HtmlChartRenderOption renderOption = new HtmlChartRenderOption(renderAttr);
-		renderOption.setPluginVarName("myChartPlugin");
-		renderAttr.inflate(renderContext, stringWriter, renderOption);
+		HtmlChartRenderContext renderContext = createHtmlChartRenderContext();
+		renderContext.setPluginVarName("myChartPlugin");
+		htmlChartPlugin.renderChart(new ChartDefinition(), renderContext);
 
-		htmlChartPlugin.renderChart(renderContext, new ChartDefinition());
-
-		String html = getHtmlWithPrint(stringWriter);
+		String html = getHtmlWithPrint(renderContext);
 		JsChartRenderer renderer = htmlChartPlugin.getRenderer();
 		String rendererStr = IOUtil.readString(renderer.getCodeReader(), true);
 
-		Assert.assertTrue(html.contains("<div id=\"" + renderOption.getChartElementId() + "\"></div>"));
-		Assert.assertTrue(html.contains("(" + renderOption.getChartVarName() + ");"));
+		Assert.assertTrue(html.contains("<div id=\"" + renderContext.getChartElementId() + "\"></div>"));
+		Assert.assertTrue(html.contains("(" + renderContext.getChartVarName() + ");"));
 		Assert.assertTrue(rendererStr.contains("(function(localPlugin)"));
 		Assert.assertTrue(rendererStr.contains("})(plugin);"));
-		Assert.assertTrue(html.contains("})(" + renderOption.getPluginVarName() + ");"));
+		Assert.assertTrue(html.contains("})(" + renderContext.getPluginVarName() + ");"));
 	}
 
 	@Test
@@ -82,16 +70,11 @@ public class HtmlChartPluginTest
 	{
 		HtmlChartPlugin htmlChartPlugin = createHtmlChartPlugin();
 
-		DefaultRenderContext renderContext = new DefaultRenderContext();
-		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
-		StringWriter stringWriter = new StringWriter();
-		HtmlChartRenderOption renderOption = new HtmlChartRenderOption(renderAttr);
-		renderOption.setRenderContextVarName("chartRenderContext");
-		renderAttr.inflate(renderContext, stringWriter, renderOption);
+		HtmlChartRenderContext renderContext = createHtmlChartRenderContext();
+		renderContext.setRenderContextVarName("chartRenderContext");
+		htmlChartPlugin.renderChart(new ChartDefinition(), renderContext);
 
-		htmlChartPlugin.renderChart(renderContext, new ChartDefinition());
-
-		String html = getHtmlWithPrint(stringWriter);
+		String html = getHtmlWithPrint(renderContext);
 
 		Assert.assertTrue(html.contains("\"renderContext\":chartRenderContext"));
 	}
@@ -101,22 +84,23 @@ public class HtmlChartPluginTest
 	{
 		HtmlChartPlugin htmlChartPlugin = createHtmlChartPluginOld();
 
-		DefaultRenderContext renderContext = new DefaultRenderContext();
-		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
-		StringWriter stringWriter = new StringWriter();
-		HtmlChartRenderOption renderOption = new HtmlChartRenderOption(renderAttr);
-		renderAttr.inflate(renderContext, stringWriter, renderOption);
+		HtmlChartRenderContext renderContext = createHtmlChartRenderContext();
+		htmlChartPlugin.renderChart(new ChartDefinition(), renderContext);
 
-		htmlChartPlugin.renderChart(renderContext, new ChartDefinition());
-
-		String html = getHtmlWithPrint(stringWriter);
+		String html = getHtmlWithPrint(renderContext);
 		JsChartRenderer renderer = htmlChartPlugin.getRenderer();
 		String rendererStr = IOUtil.readString(renderer.getCodeReader(), true);
 
-		Assert.assertTrue(html.contains("<div id=\"" + renderOption.getChartElementId() + "\"></div>"));
-		Assert.assertTrue(html.contains("(" + renderOption.getChartVarName() + ");"));
+		Assert.assertTrue(html.contains("<div id=\"" + renderContext.getChartElementId() + "\"></div>"));
+		Assert.assertTrue(html.contains("(" + renderContext.getChartVarName() + ");"));
 		Assert.assertTrue(rendererStr.contains("this is render function"));
 		Assert.assertTrue(rendererStr.contains("this is update function"));
+	}
+	
+	protected HtmlChartRenderContext createHtmlChartRenderContext()
+	{
+		HtmlChartRenderContext renderContext = new HtmlChartRenderContext(new StringWriter());
+		return renderContext;
 	}
 
 	public static HtmlChartPlugin createHtmlChartPlugin() throws Exception
@@ -143,6 +127,11 @@ public class HtmlChartPluginTest
 		HtmlChartPlugin htmlChartPlugin = new HtmlChartPluginLoader().load(directory);
 
 		return htmlChartPlugin;
+	}
+	
+	protected String getHtmlWithPrint(HtmlChartRenderContext renderContext)
+	{
+		return getHtmlWithPrint((StringWriter)renderContext.getWriter());
 	}
 
 	protected String getHtmlWithPrint(StringWriter out)
