@@ -22,13 +22,13 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.AbstractCsvDataSet;
 import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.AbstractJsonDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver.NameTemplateLoader;
-import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
@@ -610,9 +610,9 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	}
 
 	@Bean
-	public TemplateDashboardWidgetResManager templateDashboardWidgetResManager()
+	public TplDashboardWidgetResManager tplDashboardWidgetResManager()
 	{
-		FileTemplateDashboardWidgetResManager bean = new FileTemplateDashboardWidgetResManager(
+		FileTplDashboardWidgetResManager bean = new FileTplDashboardWidgetResManager(
 				this.dashboardRootDirectory());
 		return bean;
 	}
@@ -647,7 +647,7 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	{
 		HtmlTplDashboardWidgetEntityServiceImpl bean = new HtmlTplDashboardWidgetEntityServiceImpl(
 				this.sqlSessionFactory(), this.mbSqlDialect(), this.authorizationService(),
-				this.htmlTplDashboardWidgetRenderer(), this.templateDashboardWidgetResManager(),
+				this.htmlTplDashboardWidgetRenderer(), this.tplDashboardWidgetResManager(),
 				this.analysisProjectService(), this.userService());
 
 		return bean;

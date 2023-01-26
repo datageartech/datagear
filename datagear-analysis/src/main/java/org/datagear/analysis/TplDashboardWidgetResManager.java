@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@linkplain TemplateDashboardWidget}资源管理器。
+ * {@linkplain TplDashboardWidget}资源管理器。
  * <p>
  * 此类通过{@linkplain DashboardWidget#getId()}来管理{@linkplain DashboardWidget}资源。
  * </p>
@@ -25,7 +25,7 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public interface TemplateDashboardWidgetResManager
+public interface TplDashboardWidgetResManager
 {
 	/**
 	 * 获取默认资源编码。
@@ -38,7 +38,7 @@ public interface TemplateDashboardWidgetResManager
 	 * 指定名称的资源是否存在。
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 * @param name
 	 *            模板或者其他资源名称
 	 * @return
@@ -48,7 +48,7 @@ public interface TemplateDashboardWidgetResManager
 	/**
 	 * 获取指定名称资源的输入流。
 	 * <p>
-	 * 使用{@linkplain TemplateDashboardWidget#getTemplateEncoding()}、或者{@linkplain #getDefaultEncoding()}编码。
+	 * 使用{@linkplain TplDashboardWidget#getTemplateEncoding()}、或者{@linkplain #getDefaultEncoding()}编码。
 	 * </p>
 	 * 
 	 * @param widget
@@ -57,13 +57,13 @@ public interface TemplateDashboardWidgetResManager
 	 * @return
 	 * @throws IOException
 	 */
-	Reader getReader(TemplateDashboardWidget widget, String name) throws IOException;
+	Reader getReader(TplDashboardWidget widget, String name) throws IOException;
 
 	/**
 	 * 获取指定名称资源的输入流。
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 * @param name
 	 *            模板或者其他资源名称
 	 * @param encoding
@@ -76,7 +76,7 @@ public interface TemplateDashboardWidgetResManager
 	/**
 	 * 获取指定名称资源的输出流。
 	 * <p>
-	 * 使用{@linkplain TemplateDashboardWidget#getTemplateEncoding()}、或者{@linkplain #getDefaultEncoding()}编码。
+	 * 使用{@linkplain TplDashboardWidget#getTemplateEncoding()}、或者{@linkplain #getDefaultEncoding()}编码。
 	 * </p>
 	 * 
 	 * @param widget
@@ -85,13 +85,13 @@ public interface TemplateDashboardWidgetResManager
 	 * @return
 	 * @throws IOException
 	 */
-	Writer getWriter(TemplateDashboardWidget widget, String name) throws IOException;
+	Writer getWriter(TplDashboardWidget widget, String name) throws IOException;
 
 	/**
 	 * 获取指定名称资源的输出流。
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 * @param name
 	 *            模板或者其他资源名称
 	 * @param encoding
@@ -105,7 +105,7 @@ public interface TemplateDashboardWidgetResManager
 	 * 获取指定名称资源的输入流。
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 * @param name
 	 *            模板或者其他资源名称
 	 * @return
@@ -117,7 +117,7 @@ public interface TemplateDashboardWidgetResManager
 	 * 获取指定名称资源的输出流。
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 * @param name
 	 *            模板或者其他资源名称
 	 * @return
@@ -132,14 +132,14 @@ public interface TemplateDashboardWidgetResManager
 	 * </p>
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 * @param directory
 	 * @throws IOException
 	 */
 	void copyFrom(String id, File directory) throws IOException;
 
 	/**
-	 * 将指定{@linkplain TemplateDashboardWidget#getId()}的所有资源拷贝至目标目录。
+	 * 将指定{@linkplain TplDashboardWidget#getId()}的所有资源拷贝至目标目录。
 	 * 
 	 * @param id
 	 * @param directory
@@ -148,7 +148,7 @@ public interface TemplateDashboardWidgetResManager
 	void copyTo(String id, File directory) throws IOException;
 
 	/**
-	 * 将指定源{@linkplain TemplateDashboardWidget#getId()}（{@code sourceId}）的所有资源拷贝为目标{@linkplain TemplateDashboardWidget#getId()}（{@code targetId}）资源。
+	 * 将指定源{@linkplain TplDashboardWidget#getId()}（{@code sourceId}）的所有资源拷贝为目标{@linkplain TplDashboardWidget#getId()}（{@code targetId}）资源。
 	 * 
 	 * @param sourceId
 	 * @param targetId
@@ -159,7 +159,7 @@ public interface TemplateDashboardWidgetResManager
 	/**
 	 * 获取指定资源上次修改时间。
 	 * 
-	 * @param id   {@linkplain TemplateDashboardWidget#getId()}
+	 * @param id   {@linkplain TplDashboardWidget#getId()}
 	 * @param name 模板或者其他资源名称
 	 * @return
 	 */
@@ -169,7 +169,7 @@ public interface TemplateDashboardWidgetResManager
 	 * 列出所有资源。
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 * @return
 	 */
 	List<String> list(String id);
@@ -178,7 +178,7 @@ public interface TemplateDashboardWidgetResManager
 	 * 删除指定ID的所有资源。
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 */
 	void delete(String id);
 
@@ -186,7 +186,7 @@ public interface TemplateDashboardWidgetResManager
 	 * 删除指定资源。
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 * @param name
 	 *            模板或者其他资源名称
 	 */
@@ -196,7 +196,7 @@ public interface TemplateDashboardWidgetResManager
 	 * 重命名指定资源。
 	 * 
 	 * @param id
-	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 *            {@linkplain TplDashboardWidget#getId()}
 	 * @param srcName 源资源名
 	 * @param destName 目标资源名
 	 * @return 已改名的所有资源映射表，结构为：<code>原资源名 -&gt; 新资源名</code>

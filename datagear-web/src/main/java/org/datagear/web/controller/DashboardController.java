@@ -38,7 +38,7 @@ import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartWidget;
@@ -349,8 +349,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			if (form.hasCopySourceId())
 			{
-				TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-						.getTemplateDashboardWidgetResManager();
+				TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+						.getTplDashboardWidgetResManager();
 
 				dashboardWidgetResManager.copyTo(form.getCopySourceId(), dashboard.getId());
 			}
@@ -414,7 +414,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 		else
 		{
-			exists = this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager().exists(id, resourceName);
+			exists = this.htmlTplDashboardWidgetEntityService.getTplDashboardWidgetResManager().exists(id, resourceName);
 			
 			if(exists)
 				data.put("resourceContent", readResourceContent(widget, resourceName));
@@ -447,8 +447,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboard == null)
 			return new ArrayList<>(0);
 
-		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getTemplateDashboardWidgetResManager();
+		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getTplDashboardWidgetResManager();
 
 		List<String> resources = dashboardWidgetResManager.list(dashboard.getId());
 
@@ -482,8 +482,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if(isEmpty(newTemplates))
 			throw new IllegalInputException();
 		
-		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getTemplateDashboardWidgetResManager();
+		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getTplDashboardWidgetResManager();
 
 		dashboardWidgetResManager.delete(id, name);
 		
@@ -513,8 +513,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		
 		String[] templates = dashboard.getTemplates();
 		
-		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getTemplateDashboardWidgetResManager();
+		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getTplDashboardWidgetResManager();
 		
 		Map<String, String> renames = dashboardWidgetResManager.rename(id, srcName, destName);
 		
@@ -592,8 +592,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (!uploadFile.exists())
 			throw new IllegalInputException();
 
-		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getTemplateDashboardWidgetResManager();
+		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getTplDashboardWidgetResManager();
 		
 		if(autoUnzip && FileUtil.isExtension(uploadFile, "zip"))
 		{
@@ -656,7 +656,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		resourceName = trimResourceName(resourceName);
 		
 		boolean templatesChanged = false;
-		boolean resourceExists = this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager()
+		boolean resourceExists = this.htmlTplDashboardWidgetEntityService.getTplDashboardWidgetResManager()
 				.exists(id, resourceName);
 		
 		saveResourceContent(dashboard, resourceName, resourceContent);
@@ -870,8 +870,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
-		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getTemplateDashboardWidgetResManager();
+		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getTplDashboardWidgetResManager();
 
 		dashboardWidgetResManager.copyFrom(dashboard.getId(), uploadDirectory);
 
@@ -900,8 +900,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
 
-		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getTemplateDashboardWidgetResManager();
+		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getTplDashboardWidgetResManager();
 
 		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 		dashboardWidgetResManager.copyTo(dashboard.getId(), tmpDirectory);
@@ -1293,8 +1293,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		{
 			InputStream in = null;
 
-			TemplateDashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
-					.getTemplateDashboardWidgetResManager();
+			TplDashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
+					.getTplDashboardWidgetResManager();
 
 			// 优先本地资源
 			if (resManager.exists(id, resName))
@@ -1447,7 +1447,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			if (StringUtil.isEmpty(responseEncoding))
 				responseEncoding = this.htmlTplDashboardWidgetEntityService
-						.getTemplateDashboardWidgetResManager().getDefaultEncoding();
+						.getTplDashboardWidgetResManager().getDefaultEncoding();
 
 			response.setCharacterEncoding(responseEncoding);
 			response.setContentType(CONTENT_TYPE_HTML);
@@ -1530,7 +1530,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetEntity dashboardWidget = new HtmlTplDashboardWidgetEntity(id,
 				HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0],
 				this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer(),
-				this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager(), id, createUser);
+				this.htmlTplDashboardWidgetEntityService.getTplDashboardWidgetResManager(), id, createUser);
 
 		dashboardWidget.setDataPermission(Authorization.PERMISSION_EDIT_START);
 
@@ -1962,7 +1962,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		try
 		{
 			writer = IOUtil.getBufferedWriter(this.htmlTplDashboardWidgetEntityService
-					.getTemplateDashboardWidgetResManager().getWriter(widget, name));
+					.getTplDashboardWidgetResManager().getWriter(widget, name));
 			writer.write(content);
 		}
 		finally
@@ -1977,7 +1977,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		try
 		{
-			reader = this.htmlTplDashboardWidgetEntityService.getTemplateDashboardWidgetResManager().getReader(widget,
+			reader = this.htmlTplDashboardWidgetEntityService.getTplDashboardWidgetResManager().getReader(widget,
 					name);
 		}
 		catch(FileNotFoundException e)

@@ -10,7 +10,7 @@ package org.datagear.management.domain;
 import java.util.Collection;
 import java.util.Date;
 
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
@@ -59,7 +59,7 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 	}
 
 	public HtmlTplDashboardWidgetEntity(String id, String template, HtmlTplDashboardWidgetRenderer renderer,
-			TemplateDashboardWidgetResManager resManager,
+			TplDashboardWidgetResManager resManager,
 			String name, User createUser)
 	{
 		super(id, template, renderer, resManager);

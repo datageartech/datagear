@@ -10,7 +10,7 @@ package org.datagear.management.service.impl;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
@@ -40,7 +40,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 
 	private HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer;
 
-	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
+	private TplDashboardWidgetResManager tplDashboardWidgetResManager;
 
 	private AnalysisProjectService analysisProjectService;
 
@@ -54,13 +54,13 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
 			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer,
-			TemplateDashboardWidgetResManager templateDashboardWidgetResManager,
+			TplDashboardWidgetResManager tplDashboardWidgetResManager,
 			AnalysisProjectService analysisProjectService,
 			UserService userService)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
+		this.tplDashboardWidgetResManager = tplDashboardWidgetResManager;
 		this.analysisProjectService = analysisProjectService;
 		this.userService = userService;
 	}
@@ -68,13 +68,13 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
 			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer,
-			TemplateDashboardWidgetResManager templateDashboardWidgetResManager,
+			TplDashboardWidgetResManager tplDashboardWidgetResManager,
 			AnalysisProjectService analysisProjectService,
 			UserService userService)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
+		this.tplDashboardWidgetResManager = tplDashboardWidgetResManager;
 		this.analysisProjectService = analysisProjectService;
 		this.userService = userService;
 	}
@@ -90,15 +90,15 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
 	}
 
-	public TemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager()
+	public TplDashboardWidgetResManager getTplDashboardWidgetResManager()
 	{
-		return templateDashboardWidgetResManager;
+		return tplDashboardWidgetResManager;
 	}
 
-	public void setTemplateDashboardWidgetResManager(
-			TemplateDashboardWidgetResManager templateDashboardWidgetResManager)
+	public void setTplDashboardWidgetResManager(
+			TplDashboardWidgetResManager tplDashboardWidgetResManager)
 	{
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
+		this.tplDashboardWidgetResManager = tplDashboardWidgetResManager;
 	}
 
 	public AnalysisProjectService getAnalysisProjectService()
@@ -129,7 +129,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		if (dashboard != null)
 		{
 			dashboard.setRenderer(this.htmlTplDashboardWidgetRenderer);
-			dashboard.setResManager(this.templateDashboardWidgetResManager);
+			dashboard.setResManager(this.tplDashboardWidgetResManager);
 		}
 
 		return dashboard;
@@ -187,7 +187,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		boolean deleted = super.deleteById(id, params);
 
 		if (deleted)
-			this.templateDashboardWidgetResManager.delete(id);
+			this.tplDashboardWidgetResManager.delete(id);
 
 		return deleted;
 	}

@@ -14,20 +14,20 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import org.datagear.analysis.TemplateDashboardWidget;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidget;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
 /**
- * 抽象{@linkplain TemplateDashboardWidgetResManager}。
+ * 抽象{@linkplain TplDashboardWidgetResManager}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractTemplateDashboardWidgetResManager implements TemplateDashboardWidgetResManager
+public abstract class AbstractTplDashboardWidgetResManager implements TplDashboardWidgetResManager
 {
-	public AbstractTemplateDashboardWidgetResManager()
+	public AbstractTplDashboardWidgetResManager()
 	{
 		super();
 	}
@@ -39,7 +39,7 @@ public abstract class AbstractTemplateDashboardWidgetResManager implements Templ
 	}
 
 	@Override
-	public Reader getReader(TemplateDashboardWidget widget, String name) throws IOException
+	public Reader getReader(TplDashboardWidget widget, String name) throws IOException
 	{
 		String encoding = getResourceEncodingWithDefault(widget);
 		return getReader(widget.getId(), name, encoding);
@@ -54,7 +54,7 @@ public abstract class AbstractTemplateDashboardWidgetResManager implements Templ
 	}
 
 	@Override
-	public Writer getWriter(TemplateDashboardWidget widget, String name) throws IOException
+	public Writer getWriter(TplDashboardWidget widget, String name) throws IOException
 	{
 		String encoding = getResourceEncodingWithDefault(widget);
 		return getWriter(widget.getId(), name, encoding);
@@ -69,7 +69,7 @@ public abstract class AbstractTemplateDashboardWidgetResManager implements Templ
 		return IOUtil.getWriter(out, encoding);
 	}
 
-	protected String getResourceEncodingWithDefault(TemplateDashboardWidget widget)
+	protected String getResourceEncodingWithDefault(TplDashboardWidget widget)
 	{
 		String encoding = widget.getTemplateEncoding();
 

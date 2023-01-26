@@ -13,17 +13,17 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public class TemplateDashboard extends Dashboard
+public class TplDashboard extends Dashboard
 {
 	/** 模板 */
 	private String template;
 
-	public TemplateDashboard()
+	public TplDashboard()
 	{
 		super();
 	}
 
-	public TemplateDashboard(String id, String template, RenderContext renderContext, TemplateDashboardWidget widget)
+	public TplDashboard(String id, String template, RenderContext renderContext, TplDashboardWidget widget)
 	{
 		super(id, renderContext, widget);
 		this.template = template;
@@ -40,15 +40,15 @@ public class TemplateDashboard extends Dashboard
 	}
 
 	@Override
-	public TemplateDashboardWidget getWidget()
+	public TplDashboardWidget getWidget()
 	{
-		return (TemplateDashboardWidget) super.getWidget();
+		return (TplDashboardWidget) super.getWidget();
 	}
 
 	@Override
 	public void setWidget(DashboardWidget widget)
 	{
-		if (widget != null && !(widget instanceof TemplateDashboardWidget))
+		if (widget != null && !(widget instanceof TplDashboardWidget))
 			throw new IllegalArgumentException();
 
 		super.setWidget(widget);

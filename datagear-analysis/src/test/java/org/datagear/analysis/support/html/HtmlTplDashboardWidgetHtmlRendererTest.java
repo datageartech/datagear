@@ -22,10 +22,10 @@ import java.util.List;
 
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DefaultRenderContext;
-import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.DefaultHtmlTitleHandler;
@@ -65,7 +65,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	private HtmlChartWidget htmlChartWidget01;
 	private HtmlChartWidget htmlChartWidget02;
 	private TestFixedIdHtmlTplDashboardWidgetHtmlRenderer renderer;
-	private TemplateDashboardWidgetResManager resManager;
+	private TplDashboardWidgetResManager resManager;
 	
 	public HtmlTplDashboardWidgetHtmlRendererTest() throws Exception
 	{
@@ -79,7 +79,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		this.htmlChartWidget02 = new HtmlChartWidget(HTML_CHART_WIDGET_ID_02, "chart-widget-02",
 				ChartDefinition.EMPTY_CHART_DATA_SET, chartPlugin);
 
-		this.resManager = new FileTemplateDashboardWidgetResManager(
+		this.resManager = new FileTplDashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/html");
 
 		this.renderer = new TestFixedIdHtmlTplDashboardWidgetHtmlRenderer(new SimpleChartWidgetSource(this.htmlChartWidget01, this.htmlChartWidget02));

@@ -29,7 +29,7 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.ResultDataFormat;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartPluginAttributeValueConverter;
 import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
@@ -92,7 +92,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	private HtmlTplDashboardWidgetHtmlRenderer htmlTplDashboardWidgetHtmlRenderer;
 
 	@Autowired
-	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
+	private TplDashboardWidgetResManager tplDashboardWidgetResManager;
 
 	@Autowired
 	private DataSetEntityService dataSetEntityService;
@@ -147,15 +147,15 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		this.htmlTplDashboardWidgetHtmlRenderer = htmlTplDashboardWidgetHtmlRenderer;
 	}
 
-	public TemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager()
+	public TplDashboardWidgetResManager getTplDashboardWidgetResManager()
 	{
-		return templateDashboardWidgetResManager;
+		return tplDashboardWidgetResManager;
 	}
 
-	public void setTemplateDashboardWidgetResManager(
-			TemplateDashboardWidgetResManager templateDashboardWidgetResManager)
+	public void setTplDashboardWidgetResManager(
+			TplDashboardWidgetResManager tplDashboardWidgetResManager)
 	{
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
+		this.tplDashboardWidgetResManager = tplDashboardWidgetResManager;
 	}
 
 	public DataSetEntityService getDataSetEntityService()
@@ -426,14 +426,14 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			// 处理可能的中文资源名
 			resName = WebUtils.decodeURL(resName);
 
-			long lastModified = this.templateDashboardWidgetResManager.lastModified(id, resName);
+			long lastModified = this.tplDashboardWidgetResManager.lastModified(id, resName);
 			if (webRequest.checkNotModified(lastModified))
 				return;
 
 			setContentTypeByName(request, response, servletContext, resName);
 			setCacheControlNoCache(response);
 
-			InputStream in = this.templateDashboardWidgetResManager.getInputStream(id, resName);
+			InputStream in = this.tplDashboardWidgetResManager.getInputStream(id, resName);
 			OutputStream out = response.getOutputStream();
 
 			try
@@ -540,7 +540,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	protected HtmlTplDashboardWidget buildHtmlTplDashboardWidget(String chartId)
 	{
 		return new HtmlTplDashboardWidget(chartId, "index.html",
-				this.htmlTplDashboardWidgetHtmlRenderer, this.templateDashboardWidgetResManager);
+				this.htmlTplDashboardWidgetHtmlRenderer, this.tplDashboardWidgetResManager);
 	}
 
 	protected WebContext createWebContext(HttpServletRequest request)

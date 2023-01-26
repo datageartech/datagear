@@ -17,13 +17,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.TemplateDashboardWidget;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidget;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
 /**
- * 将资源名称作为资源内容的{@linkplain TemplateDashboardWidgetResManager}。
+ * 将资源名称作为资源内容的{@linkplain TplDashboardWidgetResManager}。
  * <p>
  * 此类的：
  * </p>
@@ -31,7 +31,7 @@ import org.datagear.util.StringUtil;
  * {@linkplain #exists(String, String)}始终返回{@code true}；
  * </p>
  * <p>
- * {@linkplain #getReader(TemplateDashboardWidget, String)}、{@linkplain #getReader(String, String, String)}始终返回由资源名称构建的输入流；
+ * {@linkplain #getReader(TplDashboardWidget, String)}、{@linkplain #getReader(String, String, String)}始终返回由资源名称构建的输入流；
  * </p>
  * <p>
  * {@linkplain #lastModified(String, String)}始终返回{@code 0}；
@@ -46,9 +46,9 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public class NameAsTemplateDashboardWidgetResManager extends AbstractTemplateDashboardWidgetResManager
+public class NameAsTplDashboardWidgetResManager extends AbstractTplDashboardWidgetResManager
 {
-	public NameAsTemplateDashboardWidgetResManager()
+	public NameAsTplDashboardWidgetResManager()
 	{
 		super();
 	}

@@ -75,7 +75,7 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 		public HtmlTplDashboardJson(HtmlTplDashboard dashboard, String renderContextVarName)
 		{
 			super(dashboard.getId(), dashboard.getTemplate(), new RefRenderContext(renderContextVarName),
-					new TemplateDashboardWidgetJson(dashboard.getWidget()), dashboard.getVarName());
+					new TplDashboardWidgetJson(dashboard.getWidget()), dashboard.getVarName());
 
 			setCharts(Collections.EMPTY_LIST);
 			
@@ -129,9 +129,9 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class TemplateDashboardWidgetJson extends HtmlTplDashboardWidget
+	protected static class TplDashboardWidgetJson extends HtmlTplDashboardWidget
 	{
-		public TemplateDashboardWidgetJson(HtmlTplDashboardWidget dashboardWidget)
+		public TplDashboardWidgetJson(HtmlTplDashboardWidget dashboardWidget)
 		{
 			super(dashboardWidget.getId(), dashboardWidget.getTemplates(), null, null);
 		}

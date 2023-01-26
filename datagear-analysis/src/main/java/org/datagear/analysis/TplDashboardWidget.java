@@ -22,7 +22,7 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public abstract class TemplateDashboardWidget extends AbstractIdentifiable implements DashboardWidget
+public abstract class TplDashboardWidget extends AbstractIdentifiable implements DashboardWidget
 {
 	public static final String DEFAULT_TEMPLATE_ENCODING = "UTF-8";
 
@@ -31,12 +31,12 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 
 	private String templateEncoding = DEFAULT_TEMPLATE_ENCODING;
 
-	public TemplateDashboardWidget()
+	public TplDashboardWidget()
 	{
 		super();
 	}
 
-	public TemplateDashboardWidget(String id, String... templates)
+	public TplDashboardWidget(String id, String... templates)
 	{
 		super(id);
 		this.templates = templates;
@@ -128,17 +128,17 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	}
 
 	/**
-	 * 渲染{@linkplain #getFirstTemplate()}的{@linkplain TemplateDashboard}。
+	 * 渲染{@linkplain #getFirstTemplate()}的{@linkplain TplDashboard}。
 	 */
 	@Override
-	public TemplateDashboard render(RenderContext renderContext) throws RenderException
+	public TplDashboard render(RenderContext renderContext) throws RenderException
 	{
 		String template = getFirstTemplate();
 		return renderTemplate(renderContext, template);
 	}
 
 	/**
-	 * 渲染指定模板名称的{@linkplain TemplateDashboard}。
+	 * 渲染指定模板名称的{@linkplain TplDashboard}。
 	 * 
 	 * @param renderContext
 	 * @param template      模板名称，应是{@linkplain #isTemplate(String)}为{@code true}
@@ -146,7 +146,7 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	 * @throws RenderException
 	 * @throws IllegalArgumentException {@code template}不是模板名称时
 	 */
-	public TemplateDashboard render(RenderContext renderContext, String template)
+	public TplDashboard render(RenderContext renderContext, String template)
 			throws RenderException, IllegalArgumentException
 	{
 		if (!isTemplate(template))
@@ -156,7 +156,7 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	}
 
 	/**
-	 * 渲染指定模板名称的{@linkplain TemplateDashboard}。
+	 * 渲染指定模板名称的{@linkplain TplDashboard}。
 	 * <p>
 	 * 模板名称不必是{@linkplain #isTemplate(String)}为{@code true}的，通常用于支持渲染即时看板。
 	 * </p>
@@ -167,7 +167,7 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	 * @return
 	 * @throws RenderException
 	 */
-	public TemplateDashboard render(RenderContext renderContext, String template, Reader templateIn)
+	public TplDashboard render(RenderContext renderContext, String template, Reader templateIn)
 			throws RenderException
 	{
 		return renderTemplate(renderContext, template, templateIn);
@@ -181,7 +181,7 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	 * @return
 	 * @throws RenderException
 	 */
-	protected abstract TemplateDashboard renderTemplate(RenderContext renderContext, String template)
+	protected abstract TplDashboard renderTemplate(RenderContext renderContext, String template)
 			throws RenderException;
 
 	/**
@@ -193,6 +193,6 @@ public abstract class TemplateDashboardWidget extends AbstractIdentifiable imple
 	 * @return
 	 * @throws RenderException
 	 */
-	protected abstract TemplateDashboard renderTemplate(RenderContext renderContext, String template, Reader templateIn)
+	protected abstract TplDashboard renderTemplate(RenderContext renderContext, String template, Reader templateIn)
 			throws RenderException;
 }

@@ -20,32 +20,32 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.Dashboard;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 
 /**
- * 基于文件的{@linkplain TemplateDashboardWidgetResManager}。
+ * 基于文件的{@linkplain TplDashboardWidgetResManager}。
  * 
  * @author datagear@163.com
  *
  */
-public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashboardWidgetResManager
+public class FileTplDashboardWidgetResManager extends AbstractTplDashboardWidgetResManager
 {
 	private File rootDirectory;
 
-	public FileTemplateDashboardWidgetResManager()
+	public FileTplDashboardWidgetResManager()
 	{
 		super();
 	}
 
-	public FileTemplateDashboardWidgetResManager(File rootDirectory)
+	public FileTplDashboardWidgetResManager(File rootDirectory)
 	{
 		super();
 		this.rootDirectory = rootDirectory;
 	}
 
-	public FileTemplateDashboardWidgetResManager(String rootDirectory)
+	public FileTplDashboardWidgetResManager(String rootDirectory)
 	{
 		super();
 		this.rootDirectory = FileUtil.getDirectory(FileUtil.trimPath(rootDirectory));

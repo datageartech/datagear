@@ -9,7 +9,7 @@ package org.datagear.analysis.support.html;
 
 import org.datagear.analysis.DashboardWidget;
 import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.TemplateDashboard;
+import org.datagear.analysis.TplDashboard;
 
 /**
  * HTML模板看板。
@@ -17,7 +17,7 @@ import org.datagear.analysis.TemplateDashboard;
  * @author datagear@163.com
  *
  */
-public class HtmlTplDashboard extends TemplateDashboard
+public class HtmlTplDashboard extends TplDashboard
 {
 	/** 看板JS对象变量名 */
 	private String varName;

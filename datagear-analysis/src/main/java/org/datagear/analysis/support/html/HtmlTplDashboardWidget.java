@@ -13,12 +13,12 @@ import java.io.Writer;
 
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.TemplateDashboardWidget;
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidget;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.util.IOUtil;
 
 /**
- * HTML {@linkplain TemplateDashboardWidget}。
+ * HTML {@linkplain TplDashboardWidget}。
  * <p>
  * 此类将看板代码（HTML、JavaScript）输出至{@linkplain HtmlTplDashboardRenderAttr#getHtmlWriter(RenderContext)}。
  * </p>
@@ -30,11 +30,11 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public class HtmlTplDashboardWidget extends TemplateDashboardWidget
+public class HtmlTplDashboardWidget extends TplDashboardWidget
 {
 	private HtmlTplDashboardWidgetRenderer renderer;
 
-	private TemplateDashboardWidgetResManager resManager;
+	private TplDashboardWidgetResManager resManager;
 
 	public HtmlTplDashboardWidget()
 	{
@@ -42,7 +42,7 @@ public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 	}
 
 	public HtmlTplDashboardWidget(String id, String template, HtmlTplDashboardWidgetRenderer renderer,
-			TemplateDashboardWidgetResManager resManager)
+			TplDashboardWidgetResManager resManager)
 	{
 		super(id, template);
 		this.renderer = renderer;
@@ -50,7 +50,7 @@ public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 	}
 
 	public HtmlTplDashboardWidget(String id, String[] templates, HtmlTplDashboardWidgetRenderer renderer,
-			TemplateDashboardWidgetResManager resManager)
+			TplDashboardWidgetResManager resManager)
 	{
 		super(id, templates);
 		this.renderer = renderer;
@@ -67,12 +67,12 @@ public class HtmlTplDashboardWidget extends TemplateDashboardWidget
 		this.renderer = renderer;
 	}
 
-	public TemplateDashboardWidgetResManager getResManager()
+	public TplDashboardWidgetResManager getResManager()
 	{
 		return resManager;
 	}
 
-	public void setResManager(TemplateDashboardWidgetResManager resManager)
+	public void setResManager(TplDashboardWidgetResManager resManager)
 	{
 		this.resManager = resManager;
 	}

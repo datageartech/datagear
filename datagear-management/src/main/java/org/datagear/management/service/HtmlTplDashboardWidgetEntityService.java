@@ -7,7 +7,7 @@
 
 package org.datagear.management.service;
 
-import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
@@ -35,7 +35,7 @@ public interface HtmlTplDashboardWidgetEntityService
 	 * 
 	 * @return
 	 */
-	TemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager();
+	TplDashboardWidgetResManager getTplDashboardWidgetResManager();
 
 	/**
 	 * 获取可用于执行分析的{@linkplain HtmlTplDashboardWidget}。
