@@ -482,11 +482,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			chartRenderContext.setNotWriteRenderContextObject(true);
 			chartRenderContext.setRenderContextVarName(dashboard.getVarName() + "." + Dashboard.PROPERTY_RENDER_CONTEXT);
 			
+			String seed = nextChartIdSeed(dashboard);
+			
 			for (int i = 0, len = chartMetas.size(); i < len; i++)
 			{
 				TplChartMeta chartMeta = chartMetas.get(i);
 				HtmlChartWidget chartWidget = chartWidgets.get(i);
-				String chartId = nextChartId(dashboard, i);
+				String chartId = nextChartId(dashboard, seed, i);
 				
 				chartRenderContext.setChartElementId(chartMeta.getElementId());
 				chartRenderContext.setPluginVarName(chartPluginVarNames.get(i));
@@ -496,6 +498,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				charts.add(chart);
 			}
 		}
+	}
+	
+	protected String nextChartIdSeed(HtmlTplDashboard dashboard)
+	{
+		return IDUtil.randomIdOnTime20();
+	}
+	
+	protected String nextChartId(HtmlTplDashboard dashboard, String seed, int chartIndex)
+	{
+		return Integer.toString(chartIndex) + seed;
 	}
 
 	protected List<HtmlChartWidget> getChartWidgets(List<TplChartMeta> chartMetas)

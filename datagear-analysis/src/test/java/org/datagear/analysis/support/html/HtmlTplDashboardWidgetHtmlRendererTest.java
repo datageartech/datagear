@@ -1573,40 +1573,40 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		
 		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
 
-		String template = "<html>" +
-				"<head>" +
-				"<title></title>" +
-				"<style>" +
-				".test{" +
-				"	color: red;" +
-				"}" +
-				"</style>" +
-				"<script>" +
-				"var a = 3;" +
-				"var b = 4;" +
-				"</script>" +
-				"</head>" +
-				"<body>" +
-				"<div class=\"main\" style=\"width:100%;height:100vh;\">" +
-				"	<div class=\"head\" style=\"width:100%;height:20vh;\">head</div>" +
-				"	<div class=\"content\" style=\"width:100%;height:60vh;\">" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" +
-				"		" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" +
-				"		" +
-				"		<div dg-chart-widget=\"unknown-0\"></div>" +
-				"		<div dg-chart-widget=\"unknown-1\"></div>" +
-				"		<div dg-chart-widget=\"unknown-2\" id=\"myelementid\"></div>" +
-				"	</div>" +
-				"	<div class=\"foot\" style=\"width:100%;height:20vh;\">foot</div>" +
-				"</div>" +
-				"</body>" +
+		String template = "<html>" + "\n" +
+				"<head>" + "\n" +
+				"<title></title>" + "\n" +
+				"<style>" + "\n" +
+				".test{" + "\n" +
+				"	color: red;" + "\n" +
+				"}" + "\n" +
+				"</style>" + "\n" +
+				"<script>" + "\n" +
+				"var a = 3;" + "\n" +
+				"var b = 4;" + "\n" +
+				"</script>" + "\n" +
+				"</head>" + "\n" +
+				"<body>" + "\n" +
+				"<div class=\"main\" style=\"width:100%;height:100vh;\">" + "\n" +
+				"	<div class=\"head\" style=\"width:100%;height:20vh;\">head</div>" + "\n" +
+				"	<div class=\"content\" style=\"width:100%;height:60vh;\">" + "\n" +
+				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" + "\n" +
+				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" + "\n" +
+				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" + "\n" +
+				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" + "\n" +
+				"		" + "\n" +
+				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" + "\n" +
+				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" + "\n" +
+				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" + "\n" +
+				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" + "\n" +
+				"		" + "\n" +
+				"		<div dg-chart-widget=\"unknown-0\"></div>" + "\n" +
+				"		<div dg-chart-widget=\"unknown-1\"></div>" + "\n" +
+				"		<div dg-chart-widget=\"unknown-2\" id=\"myelementid\"></div>" + "\n" +
+				"	</div>" + "\n" +
+				"	<div class=\"foot\" style=\"width:100%;height:20vh;\">foot</div>" + "\n" +
+				"</div>" + "\n" +
+				"</body>" + "\n" +
 				"</html>";
 
 		TplDashboardMeta dashboardMeta = null;
@@ -1762,9 +1762,15 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		}
 
 		@Override
-		protected String nextChartId(HtmlTplDashboard dashboard, int chartIndex)
+		protected String nextChartIdSeed(HtmlTplDashboard dashboard)
 		{
-			return "chart-id-" + chartIndex;
+			return "chart-id-";
+		}
+
+		@Override
+		protected String nextChartId(HtmlTplDashboard dashboard, String seed, int chartIndex)
+		{
+			return seed + chartIndex;
 		}
 	}
 }

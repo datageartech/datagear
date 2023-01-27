@@ -523,18 +523,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	}
 	
 	/**
-	 * 生成一个看板内唯一的图表ID。
-	 * 
-	 * @param dashboard
-	 * @param chartIndex
-	 * @return
-	 */
-	protected String nextChartId(HtmlTplDashboard dashboard, int chartIndex)
-	{
-		return IDUtil.randomIdOnTime20() + Integer.toString(chartIndex);
-	}
-	
-	/**
 	 * 写{@linkplain HtmlTplDashboard} JS变量：
 	 * <p>
 	 * <code>
