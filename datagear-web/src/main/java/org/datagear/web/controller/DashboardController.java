@@ -46,9 +46,9 @@ import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.Authorization;
@@ -1476,7 +1476,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO, editHtmlInfo);
 			
 			if(showHtmlIn != null)
+			{
 				renderContext.setTemplateReader(showHtmlIn);
+				renderContext.setTemplateLastModified(HtmlTplDashboardRenderContext.TEMPLATE_LAST_MODIFIED_NONE);
+			}
 			
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 			

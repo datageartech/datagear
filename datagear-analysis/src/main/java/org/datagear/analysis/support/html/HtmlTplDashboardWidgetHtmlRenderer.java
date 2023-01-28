@@ -9,6 +9,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -23,12 +24,14 @@ import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
+import org.datagear.util.CacheService;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.CopyWriter;
 import org.datagear.util.html.DefaultFilterHandler;
 import org.datagear.util.html.HeadBodyAwareFilterHandler;
+import org.springframework.cache.Cache.ValueWrapper;
 
 /**
  * 使用原生HTML网页作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
@@ -167,6 +170,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	/**全局JS对象（通常是：window）的局部变量名*/
 	private String localGlobalVarName = Global.PRODUCT_NAME_EN_LC + "Global" + IDUtil.toStringOfMaxRadix();
 	
+	private CacheService cacheService = null;
+
 	public HtmlTplDashboardWidgetHtmlRenderer()
 	{
 		super();
@@ -277,6 +282,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		this.localGlobalVarName = localGlobalVarName;
 	}
 
+	public CacheService getCacheService()
+	{
+		return cacheService;
+	}
+
+	public void setCacheService(CacheService cacheService)
+	{
+		this.cacheService = cacheService;
+	}
+
 	@Override
 	public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
 	{
@@ -333,9 +348,25 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public HtmlTplDashboard render(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext)
 			throws RenderException
 	{
+		if (!renderContext.hasTemplateReader())
+			throw new IllegalArgumentException("[renderContext.templateReader] required");
+
+		TplDashboardMeta dashboardMeta = getTplDashboardMetaCache(dashboardWidget, renderContext);
+
 		try
 		{
-			DashboardFilterContext context = doRenderDashboard(dashboardWidget, renderContext);
+			DashboardFilterContext context = null;
+
+			if (dashboardMeta != null)
+			{
+				context = doRenderDashboard(dashboardWidget, renderContext, dashboardMeta);
+			}
+			else
+			{
+				context = doRenderDashboard(dashboardWidget, renderContext);
+				setTplDashboardMetaCache(dashboardWidget, renderContext, context.getDashboardMeta());
+			}
+
 			return context.getDashboard();
 		}
 		catch(IOException e)
@@ -344,8 +375,143 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 	}
 	
-	protected DashboardFilterContext doRenderDashboard(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext)
-			throws RenderException, IOException
+	/**
+	 * 获取{@linkplain TplDashboardMeta}缓存。
+	 * 
+	 * @param dashboardWidget
+	 * @param renderContext
+	 * @return {@code null}表示无缓存
+	 */
+	protected TplDashboardMeta getTplDashboardMetaCache(HtmlTplDashboardWidget dashboardWidget,
+			HtmlTplDashboardRenderContext renderContext)
+	{
+		if (this.cacheService == null)
+			return null;
+		// 没有上次修改时间的不应返回缓存
+		if (!renderContext.hasTemplateLastModified())
+			return null;
+
+		TplDashboardMetaCacheKey key = new TplDashboardMetaCacheKey(dashboardWidget.getId(),
+				renderContext.getTemplate(), renderContext.getTemplateLastModified());
+
+		ValueWrapper valueWrapper = this.cacheService.get(key);
+
+		return (valueWrapper == null ? null : (TplDashboardMeta) valueWrapper.get());
+	}
+
+	/**
+	 * 设置{@linkplain TplDashboardMeta}缓存。
+	 * 
+	 * @param dashboardWidget
+	 * @param renderContext
+	 * @param dashboardMeta
+	 * @return
+	 */
+	protected boolean setTplDashboardMetaCache(HtmlTplDashboardWidget dashboardWidget,
+			HtmlTplDashboardRenderContext renderContext, TplDashboardMeta dashboardMeta)
+	{
+		if (this.cacheService == null)
+			return false;
+		// 没有上次修改时间的不应设置缓存
+		if (!renderContext.hasTemplateLastModified())
+			return false;
+
+		TplDashboardMetaCacheKey key = new TplDashboardMetaCacheKey(dashboardWidget.getId(),
+				renderContext.getTemplate(), renderContext.getTemplateLastModified());
+
+		this.cacheService.put(key, dashboardMeta);
+
+		return true;
+	}
+
+	/**
+	 * {@linkplain TplDashboardMeta}缓存主键。
+	 * 
+	 * @author datagear@163.com
+	 */
+	protected static class TplDashboardMetaCacheKey implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private final String dashboardWidgetId;
+
+		private final String template;
+
+		private final long templateLastModified;
+
+		public TplDashboardMetaCacheKey(String dashboardWidgetId, String template, long templateLastModified)
+		{
+			super();
+			this.dashboardWidgetId = dashboardWidgetId;
+			this.template = template;
+			this.templateLastModified = templateLastModified;
+		}
+
+		public String getDashboardWidgetId()
+		{
+			return dashboardWidgetId;
+		}
+
+		public String getTemplate()
+		{
+			return template;
+		}
+
+		public long getTemplateLastModified()
+		{
+			return templateLastModified;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dashboardWidgetId == null) ? 0 : dashboardWidgetId.hashCode());
+			result = prime * result + ((template == null) ? 0 : template.hashCode());
+			result = prime * result + (int) (templateLastModified ^ (templateLastModified >>> 32));
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TplDashboardMetaCacheKey other = (TplDashboardMetaCacheKey) obj;
+			if (dashboardWidgetId == null)
+			{
+				if (other.dashboardWidgetId != null)
+					return false;
+			}
+			else if (!dashboardWidgetId.equals(other.dashboardWidgetId))
+				return false;
+			if (template == null)
+			{
+				if (other.template != null)
+					return false;
+			}
+			else if (!template.equals(other.template))
+				return false;
+			if (templateLastModified != other.templateLastModified)
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [dashboardWidgetId=" + dashboardWidgetId + ", template=" + template
+					+ ", templateLastModified=" + templateLastModified + "]";
+		}
+	}
+
+	protected DashboardFilterContext doRenderDashboard(HtmlTplDashboardWidget dashboardWidget,
+			HtmlTplDashboardRenderContext renderContext) throws RenderException, IOException
 	{
 		DashboardFilterContext context = new DashboardFilterContext(dashboardWidget, renderContext, nextDashboardId());
 		DashboardFilterHandler filterHandler = new DashboardFilterHandler(context);
@@ -355,10 +521,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		return context;
 	}
 	
-	protected DashboardFilterContext doRenderDashboard(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext,
-			TplDashboardMeta dashboardMeta) throws RenderException, IOException
+	protected DashboardFilterContext doRenderDashboard(HtmlTplDashboardWidget dashboardWidget,
+			HtmlTplDashboardRenderContext renderContext, TplDashboardMeta dashboardMeta)
+			throws RenderException, IOException
 	{
-		DashboardFilterContext context = new DashboardFilterContext(dashboardWidget, renderContext, dashboardMeta, nextDashboardId());
+		DashboardFilterContext context = new DashboardFilterContext(dashboardWidget, renderContext, dashboardMeta,
+				nextDashboardId());
 		IndexedDashboardFilterHandler filterHandler = new IndexedDashboardFilterHandler(context);
 		
 		getHtmlFilter().filter(renderContext.getTemplateReader(), filterHandler);
@@ -524,12 +692,17 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	}
 
 	/**
-	 * 模版里解析而得的看板信息。
+	 * 模板里解析而得的看板信息。
+	 * <p>
+	 * 此类需支持序列化，因为可能被缓存。
+	 * </p>
 	 * 
 	 * @author datagear@163.com
 	 */
-	protected static class TplDashboardMeta
+	protected static class TplDashboardMeta implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		/** 看板变量名称 */
 		private String dashboardVar = null;
 		
@@ -768,12 +941,17 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	}
 
 	/**
-	 * 模版里解析而得的图表信息。
+	 * 模板里解析而得的图表信息。
+	 * <p>
+	 * 此类需支持序列化，因为可能被缓存。
+	 * </p>
 	 * 
 	 * @author datagear@163.com
 	 */
-	protected static class TplChartMeta
+	protected static class TplChartMeta implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		/** 图表部件ID */
 		private String widgetId;
 		
@@ -815,11 +993,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	}
 	
 	/**
-	 * HTML看板模版插入内容。
+	 * HTML看板模板插入内容。
+	 * <p>
+	 * 子类需支持序列化，因为可能被缓存。
+	 * </p>
 	 * 
 	 * @author datagear@163.com
 	 */
-	protected static interface TplDashboardInserter
+	protected static interface TplDashboardInserter extends Serializable
 	{
 		/**
 		 * 插入内容。
@@ -830,8 +1011,15 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		void insert(DashboardFilterContext filterContext) throws IOException;
 	}
 	
+	/**
+	 * 插入内容：普通文本。
+	 * 
+	 * @author datagear@163.com
+	 */
 	protected static class TplDashboardTextInserter implements TplDashboardInserter
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String text = "";
 
 		public TplDashboardTextInserter()
@@ -860,6 +1048,67 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		{
 			Writer out = filterContext.getRenderContext().getWriter();
 			out.write(this.text);
+		}
+	}
+
+	/**
+	 * 插入内容：看板导入项。
+	 * <p>
+	 * 注意：由于需要支持序列化，所以此类不能定义为非静态匿名内部类。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 */
+	protected static class TplDashboardImportInserter implements TplDashboardInserter
+	{
+		private static final long serialVersionUID = 1L;
+	
+		public TplDashboardImportInserter()
+		{
+			super();
+		}
+		
+		@Override
+		public void insert(DashboardFilterContext filterContext) throws IOException
+		{
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	/**
+	 * 插入内容：看板脚本。
+	 * <p>
+	 * 注意：由于需要支持序列化，所以此类不能定义为非静态匿名内部类。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 */
+	protected static class TplDashboardScriptInserter implements TplDashboardInserter
+	{
+		private static final long serialVersionUID = 1L;
+	
+		private boolean writeScriptTag;
+		
+		public TplDashboardScriptInserter(boolean writeScriptTag)
+		{
+			super();
+			this.writeScriptTag = writeScriptTag;
+		}
+	
+		public boolean isWriteScriptTag()
+		{
+			return writeScriptTag;
+		}
+	
+		public void setWriteScriptTag(boolean writeScriptTag)
+		{
+			this.writeScriptTag = writeScriptTag;
+		}
+	
+		@Override
+		public void insert(DashboardFilterContext filterContext) throws IOException
+		{
+			throw new UnsupportedOperationException();
 		}
 	}
 
@@ -1301,51 +1550,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		}
 	}
 	
-	protected class TplDashboardImportInserter implements TplDashboardInserter
-	{
-		public TplDashboardImportInserter()
-		{
-			super();
-		}
-		
-		@Override
-		public void insert(DashboardFilterContext filterContext) throws IOException
-		{
-			writeDashboardImport(filterContext.getRenderContext(), filterContext.getDashboard(),
-					filterContext.getDashboardMeta().getDashboardUnimport());
-		}
-	}
-	
-	protected class TplDashboardScriptInserter implements TplDashboardInserter
-	{
-		private boolean writeScriptTag;
-		
-		public TplDashboardScriptInserter(boolean writeScriptTag)
-		{
-			super();
-			this.writeScriptTag = writeScriptTag;
-		}
-
-		public boolean isWriteScriptTag()
-		{
-			return writeScriptTag;
-		}
-
-		public void setWriteScriptTag(boolean writeScriptTag)
-		{
-			this.writeScriptTag = writeScriptTag;
-		}
-
-		@Override
-		public void insert(DashboardFilterContext filterContext) throws IOException
-		{
-			writeDashboardScript(filterContext.getRenderContext(),
-					filterContext.getDashboardMeta(), filterContext.getDashboard(), this.writeScriptTag);
-		}
-	}
-	
 	/**
-	 * 基于{@linkplain DashboardFilterContext#getDashboardMeta()}中索引信息的HTML看板模版过滤器。
+	 * 基于{@linkplain DashboardFilterContext#getDashboardMeta()}中索引信息的HTML看板模板过滤器。
 	 * 
 	 * @author datagear@163.com
 	 */
@@ -1406,7 +1612,21 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 			for(TplDashboardInserter inserter : inserters)
 			{
-				inserter.insert(this.filterContext);
+				if (inserter instanceof TplDashboardImportInserter)
+				{
+					writeDashboardImport(this.filterContext.getRenderContext(), this.filterContext.getDashboard(),
+							this.filterContext.getDashboardMeta().getDashboardUnimport());
+				}
+				else if (inserter instanceof TplDashboardScriptInserter)
+				{
+					writeDashboardScript(this.filterContext.getRenderContext(), this.filterContext.getDashboardMeta(),
+							this.filterContext.getDashboard(),
+							((TplDashboardScriptInserter) inserter).isWriteScriptTag());
+				}
+				else
+				{
+					inserter.insert(this.filterContext);
+				}
 			}
 		}
 	}

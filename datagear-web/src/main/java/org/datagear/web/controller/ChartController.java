@@ -34,9 +34,9 @@ import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
-import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.ChartDataSetVO;
@@ -515,6 +515,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response, dashboardWidget.getFirstTemplate(), out,
 					createWebContext(request), buildHtmlTplDashboardImports(request), htmlTitleHandler);
 			renderContext.setTemplateReader(templateIn);
+			renderContext.setTemplateLastModified(HtmlTplDashboardRenderContext.TEMPLATE_LAST_MODIFIED_NONE);
 
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 

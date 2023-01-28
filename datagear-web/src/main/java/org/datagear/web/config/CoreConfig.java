@@ -983,6 +983,14 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".json"));
 		sqlTemplateResolver.getNameTemplateLoader().setCacheService(
 				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".sql"));
+
+		Map<String, HtmlTplDashboardWidgetHtmlRenderer> renderers = context
+				.getBeansOfType(HtmlTplDashboardWidgetHtmlRenderer.class);
+
+		for (HtmlTplDashboardWidgetHtmlRenderer renderer : renderers.values())
+		{
+			renderer.setCacheService(this.cacheServiceConfig.createCacheService(renderer.getClass()));
+		}
 	}
 
 	protected void initDevotedDataExchangeServices(ApplicationContext context)

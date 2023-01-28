@@ -54,6 +54,12 @@ public class HtmlTplDashboardRenderContext extends TplDashboardRenderContext
 		super(template, templateReader, writer);
 	}
 
+	public HtmlTplDashboardRenderContext(String template, Reader templateReader, long templateLastModified,
+			Writer writer)
+	{
+		super(template, templateReader, templateLastModified, writer);
+	}
+
 	public HtmlTplDashboardRenderContext(HtmlTplDashboardRenderContext renderContext)
 	{
 		super(renderContext);

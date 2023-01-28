@@ -10,6 +10,7 @@ package org.datagear.analysis.support.html;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -18,12 +19,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.DefaultRenderContext;
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
@@ -32,9 +30,11 @@ import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardFilterContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.TplChartMeta;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.TplDashboardMeta;
+import org.datagear.util.CacheService;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.junit.Test;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 
 /**
  * {@linkplain HtmlTplDashboardWidgetHtmlRenderer}单元测试类。
@@ -66,6 +66,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	private TestFixedIdHtmlTplDashboardWidgetHtmlRenderer renderer;
 	private TplDashboardWidgetResManager resManager;
 	private HtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
+	private TestFixedIdHtmlTplDashboardWidgetHtmlRenderer rendererWithCache;
 	
 	public HtmlTplDashboardWidgetHtmlRendererTest() throws Exception
 	{
@@ -82,7 +83,15 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		this.resManager = new FileTplDashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/html");
 
-		this.renderer = new TestFixedIdHtmlTplDashboardWidgetHtmlRenderer(new SimpleChartWidgetSource(this.htmlChartWidget01, this.htmlChartWidget02));
+		ChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(this.htmlChartWidget01,
+				this.htmlChartWidget02);
+		
+		this.renderer = new TestFixedIdHtmlTplDashboardWidgetHtmlRenderer(chartWidgetSource);
+		this.rendererWithCache = new TestFixedIdHtmlTplDashboardWidgetHtmlRenderer(chartWidgetSource);
+
+		ConcurrentMapCache cache = new ConcurrentMapCache(HtmlTplDashboardWidgetHtmlRendererTest.class.getSimpleName());
+		CacheService cacheService = new CacheService(cache);
+		this.rendererWithCache.setCacheService(cacheService);
 	}
 
 	@Test
@@ -1567,46 +1576,46 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	}
 	
 	@Test
-	public void renderDashboardPerformanceTest() throws Throwable
+	public void doRenderDashboardTest_forPerformance() throws Throwable
 	{
 		int loopCount = 5000;
 		
 		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
 
-		String template = "<html>" + "\n" +
-				"<head>" + "\n" +
-				"<title></title>" + "\n" +
-				"<style>" + "\n" +
-				".test{" + "\n" +
-				"	color: red;" + "\n" +
-				"}" + "\n" +
-				"</style>" + "\n" +
-				"<script>" + "\n" +
-				"var a = 3;" + "\n" +
-				"var b = 4;" + "\n" +
-				"</script>" + "\n" +
-				"</head>" + "\n" +
-				"<body>" + "\n" +
-				"<div class=\"main\" style=\"width:100%;height:100vh;\">" + "\n" +
-				"	<div class=\"head\" style=\"width:100%;height:20vh;\">head</div>" + "\n" +
-				"	<div class=\"content\" style=\"width:100%;height:60vh;\">" + "\n" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" + "\n" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" + "\n" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" + "\n" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_01+"\"></div>" + "\n" +
-				"		" + "\n" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" + "\n" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" + "\n" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" + "\n" +
-				"		<div dg-chart-widget=\""+HTML_CHART_WIDGET_ID_02+"\"></div>" + "\n" +
-				"		" + "\n" +
-				"		<div dg-chart-widget=\"unknown-0\"></div>" + "\n" +
-				"		<div dg-chart-widget=\"unknown-1\"></div>" + "\n" +
-				"		<div dg-chart-widget=\"unknown-2\" id=\"myelementid\"></div>" + "\n" +
-				"	</div>" + "\n" +
-				"	<div class=\"foot\" style=\"width:100%;height:20vh;\">foot</div>" + "\n" +
-				"</div>" + "\n" +
-				"</body>" + "\n" +
+		String template = "<html>" + "\n" + //
+				"<head>" + "\n" + //
+				"<title></title>" + "\n" + //
+				"<style>" + "\n" + //
+				".test{" + "\n" + //
+				"	color: red;" + "\n" + //
+				"}" + "\n" + //
+				"</style>" + "\n" + //
+				"<script>" + "\n" + //
+				"var a = 3;" + "\n" + //
+				"var b = 4;" + "\n" + //
+				"</script>" + "\n" + //
+				"</head>" + "\n" + //
+				"<body>" + "\n" + //
+				"<div class=\"main\" style=\"width:100%;height:100vh;\">" + "\n" + //
+				"	<div class=\"head\" style=\"width:100%;height:20vh;\">head</div>" + "\n" + //
+				"	<div class=\"content\" style=\"width:100%;height:60vh;\">" + "\n" + //
+				"		<div dg-chart-widget=\"" + HTML_CHART_WIDGET_ID_01 + "\"></div>" + "\n" + //
+				"		<div dg-chart-widget=\"" + HTML_CHART_WIDGET_ID_01 + "\"></div>" + "\n" + //
+				"		<div dg-chart-widget=\"" + HTML_CHART_WIDGET_ID_01 + "\"></div>" + "\n" + //
+				"		<div dg-chart-widget=\"" + HTML_CHART_WIDGET_ID_01 + "\"></div>" + "\n" + //
+				"		" + "\n" + //
+				"		<div dg-chart-widget=\"" + HTML_CHART_WIDGET_ID_02 + "\"></div>" + "\n" + //
+				"		<div dg-chart-widget=\"" + HTML_CHART_WIDGET_ID_02 + "\"></div>" + "\n" + //
+				"		<div dg-chart-widget=\"" + HTML_CHART_WIDGET_ID_02 + "\"></div>" + "\n" + //
+				"		<div dg-chart-widget=\"" + HTML_CHART_WIDGET_ID_02 + "\"></div>" + "\n" + //
+				"		" + "\n" + //
+				"		<div dg-chart-widget=\"unknown-0\"></div>" + "\n" + //
+				"		<div dg-chart-widget=\"unknown-1\"></div>" + "\n" + //
+				"		<div dg-chart-widget=\"unknown-2\" id=\"myelementid\"></div>" + "\n" + //
+				"	</div>" + "\n" + //
+				"	<div class=\"foot\" style=\"width:100%;height:20vh;\">foot</div>" + "\n" + //
+				"</div>" + "\n" + //
+				"</body>" + "\n" + //
 				"</html>";
 
 		TplDashboardMeta dashboardMeta = null;
@@ -1653,6 +1662,64 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext, dashboardMeta);
 			
 			enhanceTimes += System.currentTimeMillis() - beforeTime;
+		}
+		
+		double enhance = rawTimes/(double)enhanceTimes;
+		
+		assertTrue(enhance > 1.1f);
+		
+		System.out.println("-----------------------");
+		System.out.println("test count   : " + loopCount);
+		System.out.println("raw time     : " + rawTimes);
+		System.out.println("enhance time : " + enhanceTimes);
+		System.out.println("enhance ratio : " + new DecimalFormat("0.00").format(enhance));
+		System.out.println("-----------------------");
+	}
+	
+	@Test
+	public void renderTest_forPerformance() throws Throwable
+	{
+		int loopCount = 5000;
+		long rawTimes = 0;
+		long enhanceTimes = 0;
+		
+		{
+			HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget(this.renderer);
+
+			for (int i = 0; i < loopCount; i++)
+			{
+				HtmlTplDashboardRenderContext renderContext = buildRenderContext();
+				renderContext = dashboardWidget.toFullRenderContext(renderContext);
+
+				assertNull(this.renderer.getTplDashboardMetaCache(dashboardWidget, renderContext));
+
+				long beforeTime = System.currentTimeMillis();
+
+				dashboardWidget.render(renderContext);
+
+				rawTimes += System.currentTimeMillis() - beforeTime;
+			}
+		}
+		
+		{
+			HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget(this.rendererWithCache);
+
+			for (int i = 0; i < loopCount; i++)
+			{
+				HtmlTplDashboardRenderContext renderContext = buildRenderContext();
+				renderContext = dashboardWidget.toFullRenderContext(renderContext);
+
+				if (i == 0)
+					assertNull(this.rendererWithCache.getTplDashboardMetaCache(dashboardWidget, renderContext));
+				else
+					assertNotNull(this.rendererWithCache.getTplDashboardMetaCache(dashboardWidget, renderContext));
+
+				long beforeTime = System.currentTimeMillis();
+
+				dashboardWidget.render(renderContext);
+
+				enhanceTimes += System.currentTimeMillis() - beforeTime;
+			}
 		}
 		
 		double enhance = rawTimes/(double)enhanceTimes;

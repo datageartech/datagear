@@ -10,9 +10,9 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 
 import org.datagear.analysis.RenderException;
+import org.datagear.analysis.TplDashboardRenderContext;
 import org.datagear.analysis.TplDashboardWidget;
 import org.datagear.analysis.TplDashboardWidgetResManager;
-import org.datagear.analysis.TplDashboardRenderContext;
 import org.datagear.util.IOUtil;
 
 /**
@@ -75,7 +75,8 @@ public class HtmlTplDashboardWidget extends TplDashboardWidget
 	public HtmlTplDashboard render(TplDashboardRenderContext renderContext) throws RenderException
 	{
 		if(!(renderContext instanceof HtmlTplDashboardRenderContext))
-			throw new IllegalArgumentException("[renderContext] must be instance of " + HtmlTplDashboardRenderContext.class.getSimpleName());
+			throw new IllegalArgumentException(
+					"[renderContext] must be instance of " + HtmlTplDashboardRenderContext.class.getSimpleName());
 		
 		HtmlTplDashboardRenderContext rawRenderContext = (HtmlTplDashboardRenderContext)renderContext;
 		HtmlTplDashboardRenderContext fullRenderContext = null;
@@ -96,15 +97,28 @@ public class HtmlTplDashboardWidget extends TplDashboardWidget
 		}
 	}
 	
-	protected HtmlTplDashboardRenderContext toFullRenderContext(HtmlTplDashboardRenderContext renderContext) throws IOException
+	/**
+	 * 获取完整的{@linkplain HtmlTplDashboardRenderContext}。
+	 * <p>
+	 * 如果{@code renderContext}参数的{@linkplain HtmlTplDashboardRenderContext#hasTemplateReader()}为{@code true}，将直接返回它；
+	 * 否则，返回一个新的已设置了与{@linkplain HtmlTplDashboardRenderContext#getTemplate()}相关的{@linkplain HtmlTplDashboardRenderContext#setTemplateReader(java.io.Reader)}、
+	 * {@linkplain HtmlTplDashboardRenderContext#setTemplateLastModified(long)}信息的{@linkplain HtmlTplDashboardRenderContext}对象。
+	 * </p>
+	 * 
+	 * @param renderContext
+	 * @return
+	 * @throws IOException
+	 */
+	public HtmlTplDashboardRenderContext toFullRenderContext(HtmlTplDashboardRenderContext renderContext)
+			throws IOException
 	{
+		if (renderContext.hasTemplateReader())
+			return renderContext;
+
 		HtmlTplDashboardRenderContext full = new HtmlTplDashboardRenderContext(renderContext);
 		
-		if(!full.hasTemplateReader())
-		{
-			full.setTemplateReader(IOUtil.getBufferedReader(this.resManager.getReader(this, full.getTemplate())));
-			full.setTemplateLastModified(this.resManager.lastModified(this.getId(), full.getTemplate()));
-		}
+		full.setTemplateReader(IOUtil.getBufferedReader(this.resManager.getReader(this, full.getTemplate())));
+		full.setTemplateLastModified(this.resManager.lastModified(this.getId(), full.getTemplate()));
 		
 		return full;
 	}

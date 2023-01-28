@@ -21,11 +21,13 @@ import java.io.Writer;
  */
 public class TplDashboardRenderContext extends DefaultRenderContext
 {
+	public static final long TEMPLATE_LAST_MODIFIED_NONE = -1;
+
 	/**模板名*/
 	private String template;
 
 	/**模版上次修改时间*/
-	private long templateLastModified = -1;
+	private long templateLastModified = TEMPLATE_LAST_MODIFIED_NONE;
 
 	/**模版输入流*/
 	private Reader templateReader = null;
@@ -58,6 +60,15 @@ public class TplDashboardRenderContext extends DefaultRenderContext
 		super();
 		this.template = template;
 		this.templateReader = templateReader;
+		this.writer = writer;
+	}
+
+	public TplDashboardRenderContext(String template, Reader templateReader, long templateLastModified, Writer writer)
+	{
+		super();
+		this.template = template;
+		this.templateReader = templateReader;
+		this.templateLastModified = templateLastModified;
 		this.writer = writer;
 	}
 
