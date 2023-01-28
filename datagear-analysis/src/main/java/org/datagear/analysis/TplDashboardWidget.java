@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 模板看板部件。
  * <p>
- * 它可在{@linkplain TplDashboardRenderContext}中渲染指定模板名称（{@linkplain #getTemplates()}）所描述的{@linkplain TplDashboard}。
+ * 它可以渲染指定{@linkplain TplDashboardRenderContext}的{@linkplain TplDashboard}。
  * </p>
  * 
  * @author datagear@163.com
@@ -124,7 +124,10 @@ public abstract class TplDashboardWidget extends AbstractIdentifiable
 	}
 
 	/**
-	 * 渲染指定模板的{@linkplain TplDashboard}。
+	 * 渲染{@linkplain TplDashboard}。
+	 * <p>
+	 * 如果参数的{@linkplain TplDashboardRenderContext#getTemplateReader()}不为{@code null}，那么实现类不应在渲染完成后关闭其输入流。
+	 * </p>
 	 * <p>
 	 * 每次渲染的{@linkplain TplDashboard#getId()}都应全局唯一，{@linkplain TplDashboard#getCharts()}中每个{@linkplain Chart#getId()}应局部唯一。
 	 * </p>

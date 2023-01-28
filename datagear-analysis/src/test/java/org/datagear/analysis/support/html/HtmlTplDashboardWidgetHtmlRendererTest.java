@@ -380,6 +380,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			//缓存
 			{
 				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				renderContext1.setHtmlTitleHandler(this.htmlTitleHandler);
 				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
 				String html1 = getHtmlWithPrint(renderContext1);
 				
@@ -404,6 +405,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			//缓存
 			{
 				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				renderContext1.setHtmlTitleHandler(this.htmlTitleHandler);
 				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
 				String html1 = getHtmlWithPrint(renderContext1);
 				
@@ -428,6 +430,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			//缓存
 			{
 				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				renderContext1.setHtmlTitleHandler(this.htmlTitleHandler);
 				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
 				String html1 = getHtmlWithPrint(renderContext1);
 				
@@ -452,6 +455,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			//缓存
 			{
 				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				renderContext1.setHtmlTitleHandler(this.htmlTitleHandler);
 				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
 				String html1 = getHtmlWithPrint(renderContext1);
 				
@@ -476,6 +480,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			//缓存
 			{
 				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				renderContext1.setHtmlTitleHandler(this.htmlTitleHandler);
 				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
 				String html1 = getHtmlWithPrint(renderContext1);
 				
