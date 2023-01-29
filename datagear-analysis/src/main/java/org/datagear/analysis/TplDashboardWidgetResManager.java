@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * {@linkplain TplDashboardWidget}资源管理器。
  * <p>
- * 此类通过{@linkplain DashboardWidget#getId()}来管理{@linkplain DashboardWidget}资源。
+ * 此类通过{@linkplain DashboardWidget#getId()}来管理{@linkplain TplDashboardWidget}的模板及其他资源。
  * </p>
  * 
  * @author datagear@163.com

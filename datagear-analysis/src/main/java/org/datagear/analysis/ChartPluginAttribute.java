@@ -20,7 +20,7 @@ import org.datagear.util.i18n.Labeled;
 /**
  * 图表插件属性。
  * <p>
- * 此类描述{@linkplain ChartPlugin#renderChart(RenderContext, ChartDefinition)}的{@linkplain ChartDefinition#setAttrValues(java.util.Map)}支持设置的属性元信息。
+ * 此类描述{@linkplain ChartPlugin#renderChart(ChartDefinition, RenderContext)}的{@linkplain ChartDefinition#setAttrValues(java.util.Map)}支持设置的属性元信息。
  * </p>
  * 
  * @author datagear@163.com

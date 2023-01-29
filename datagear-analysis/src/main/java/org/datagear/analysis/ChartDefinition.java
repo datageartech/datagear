@@ -27,7 +27,7 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_CHART_DATASETS = "chartDataSets";
-	public static final String PROPERTY_CHART_ATTR_VALUES = "attrValues";
+	public static final String PROPERTY_ATTR_VALUES = "attrValues";
 	public static final String PROPERTY_UPDATE_INTERVAL = "updateInterval";
 
 	public static final ChartDataSet[] EMPTY_CHART_DATA_SET = new ChartDataSet[0];

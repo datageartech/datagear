@@ -8,7 +8,7 @@
 package org.datagear.analysis;
 
 /**
- * 获取图表结果错误信息。
+ * 图表结果错误信息。
  * 
  * @author datagear@163.com
  *
