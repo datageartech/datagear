@@ -148,12 +148,17 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("writeJson", new WriteJsonTemplateDirectiveModel(this.coreConfig.objectMapperBuilder()));
 
-		bean.setTemplateLoaderPath("classpath:org/datagear/web/templates/");
+		bean.setTemplateLoaderPaths(getFreeMarkerTemplateLoaderPaths());
 		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);
 		bean.setFreemarkerSettings(settings);
 		bean.setFreemarkerVariables(variables);
 
 		return bean;
+	}
+	
+	protected String[] getFreeMarkerTemplateLoaderPaths()
+	{
+		return new String[] { "classpath:org/datagear/web/templates/" };
 	}
 
 	@Bean("themeSource")

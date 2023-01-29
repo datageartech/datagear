@@ -25,13 +25,13 @@ import org.datagear.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * {@linkplain DirectoryHtmlChartPluginManager}初始化器。
  * <p>
  * 此类的{@linkplain #init()}方法首先调用{@linkplain DirectoryHtmlChartPluginManager#init()}方法，
- * 然后加载<code>org/datagear/web/builtInHtmlChartPlugins/*.zip</code>类路径的{@linkplain HtmlChartPlugin}。
+ * 然后加载{@linkplain #getClasspathPatterns()}类路径（默认为：<code>org/datagear/web/builtInHtmlChartPlugins/*.zip</code>）的{@linkplain HtmlChartPlugin}。
  * </p>
  * <p>
  * 创建此类的实例后，需要调用{@linkplain #init()}执行初始化。
@@ -46,7 +46,9 @@ public class DirectoryHtmlChartPluginManagerInitializer
 
 	public static final String DEFAULT_CLASSPATH_PATTERN = "classpath:org/datagear/web/builtInHtmlChartPlugins/*.zip";
 
-	private String classpathPattern = DEFAULT_CLASSPATH_PATTERN;
+	private ResourcePatternResolver resourcePatternResolver;
+
+	private String[] classpathPatterns = new String[] { DEFAULT_CLASSPATH_PATTERN };
 
 	private DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager;
 
@@ -56,34 +58,40 @@ public class DirectoryHtmlChartPluginManagerInitializer
 	/** 已载入过的图表插件上次修改时间信息存储文件 */
 	private File builtinChartPluginLastModifiedFile;
 
-	private PathMatchingResourcePatternResolver _pathMatchingResourcePatternResolver;
-
 	public DirectoryHtmlChartPluginManagerInitializer()
 	{
 		super();
-		this._pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver(
-				DirectoryHtmlChartPluginManagerInitializer.class.getClassLoader());
 	}
 
-	public DirectoryHtmlChartPluginManagerInitializer(DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager,
+	public DirectoryHtmlChartPluginManagerInitializer(ResourcePatternResolver resourcePatternResolver,
+			DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager,
 			File tmpDirectory, File builtinChartPluginLastModifiedFile)
 	{
 		super();
+		this.resourcePatternResolver = resourcePatternResolver;
 		this.directoryHtmlChartPluginManager = directoryHtmlChartPluginManager;
 		this.tmpDirectory = tmpDirectory;
 		this.builtinChartPluginLastModifiedFile = builtinChartPluginLastModifiedFile;
-		this._pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver(
-				DirectoryHtmlChartPluginManagerInitializer.class.getClassLoader());
 	}
 
-	public String getClasspathPattern()
+	public ResourcePatternResolver getResourcePatternResolver()
 	{
-		return classpathPattern;
+		return resourcePatternResolver;
 	}
 
-	public void setClasspathPattern(String classpathPattern)
+	public void setResourcePatternResolver(ResourcePatternResolver resourcePatternResolver)
 	{
-		this.classpathPattern = classpathPattern;
+		this.resourcePatternResolver = resourcePatternResolver;
+	}
+
+	public String[] getClasspathPatterns()
+	{
+		return classpathPatterns;
+	}
+
+	public void setClasspathPatterns(String[] classpathPatterns)
+	{
+		this.classpathPatterns = classpathPatterns;
 	}
 
 	public DirectoryHtmlChartPluginManager getDirectoryHtmlChartPluginManager()
@@ -135,7 +143,7 @@ public class DirectoryHtmlChartPluginManagerInitializer
 	{
 		try
 		{
-			loadHtmlChartPlugins(this.classpathPattern);
+			loadHtmlChartPlugins();
 		}
 		catch (Throwable t)
 		{
@@ -144,50 +152,53 @@ public class DirectoryHtmlChartPluginManagerInitializer
 		}
 	}
 
-	protected void loadHtmlChartPlugins(String classpathPattern) throws IOException
+	protected void loadHtmlChartPlugins() throws IOException
 	{
-		Resource[] resources = this._pathMatchingResourcePatternResolver.getResources(classpathPattern);
-
-		if (resources == null || resources.length == 0)
-			return;
-
 		Map<String, Number> prevLastModifieds = prevLastModifieds();
 		Map<String, Number> thisLastModifieds = new HashMap<String, Number>();
 
 		File tmpDirectory = createTmpWorkDirectory();
 
-		for (Resource resource : resources)
+		for(String classpathPattern : this.classpathPatterns)
 		{
-			String name = resource.getFilename();
-			long thisLastModified = lastModified(resource);
-			Number prevLastModified = prevLastModifieds.get(name);
-
-			if (prevLastModified == null || prevLastModified.longValue() != thisLastModified)
+			Resource[] resources = this.resourcePatternResolver.getResources(classpathPattern);
+	
+			if (resources != null)
 			{
-				File file = FileUtil.getFile(tmpDirectory, name);
-
-				InputStream in = null;
-
-				try
+				for (Resource resource : resources)
 				{
-					in = resource.getInputStream();
-					IOUtil.write(in, file);
+					String name = resource.getFilename();
+					long thisLastModified = lastModified(resource);
+					Number prevLastModified = prevLastModifieds.get(name);
+		
+					if (prevLastModified == null || prevLastModified.longValue() != thisLastModified)
+					{
+						File file = FileUtil.getFile(tmpDirectory, name);
+		
+						InputStream in = null;
+		
+						try
+						{
+							in = resource.getInputStream();
+							IOUtil.write(in, file);
+						}
+						finally
+						{
+							IOUtil.close(in);
+						}
+		
+						thisLastModifieds.put(name, thisLastModified);
+		
+						if (LOGGER.isDebugEnabled())
+							LOGGER.debug(
+									"The built-in chart plugin file [" + name + "] has been changed, reload is to be done");
+					}
+					else
+					{
+						if (LOGGER.isDebugEnabled())
+							LOGGER.debug("The built-in chart plugin file [" + name + "] has no change, reload is ignored");
+					}
 				}
-				finally
-				{
-					IOUtil.close(in);
-				}
-
-				thisLastModifieds.put(name, thisLastModified);
-
-				if (LOGGER.isDebugEnabled())
-					LOGGER.debug(
-							"The built-in chart plugin file [" + name + "] has been changed, reload is to be done");
-			}
-			else
-			{
-				if (LOGGER.isDebugEnabled())
-					LOGGER.debug("The built-in chart plugin file [" + name + "] has no change, reload is ignored");
 			}
 		}
 

@@ -387,20 +387,42 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	{
 		try
 		{
-			PathMatchingResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
-			Resource[] mapperResources = pathResolver.getResources("classpath*:org/datagear/management/mapper/*.xml");
-
-			SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
-			bean.setDataSource(this.dataSourceConfig.dataSource());
-			bean.setMapperLocations(mapperResources);
-			bean.setTypeHandlers(new TypeHandler<?>[] { new LiteralBooleanTypeHandler(), new DataFormatTypeHandler(),
-					new ResultDataFormatTypeHandler() });
+			SqlSessionFactoryBean bean = this.getSqlSessionFactoryBean();
 			return bean.getObject();
 		}
 		catch (Exception e)
 		{
 			throw new BeanInitializationException("Init " + SqlSessionFactory.class + " failed", e);
 		}
+	}
+	
+	protected SqlSessionFactoryBean getSqlSessionFactoryBean() throws Exception
+	{
+		SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
+		
+		bean.setDataSource(this.dataSourceConfig.dataSource());
+		bean.setMapperLocations(this.getSqlSessionMapperResources());
+		bean.setTypeHandlers(new TypeHandler<?>[] { new LiteralBooleanTypeHandler(), new DataFormatTypeHandler(),
+				new ResultDataFormatTypeHandler() });
+		
+		return bean;
+	}
+	
+	protected Resource[] getSqlSessionMapperResources() throws Exception
+	{
+		PathMatchingResourcePatternResolver resolver = this.resourcePatternResolver();
+		Resource[] mapperResources = resolver.getResources(
+				org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
+				+ "org/datagear/management/mapper/*.xml");
+		
+		return mapperResources;
+	}
+	
+	@Bean
+	public PathMatchingResourcePatternResolver resourcePatternResolver()
+	{
+		PathMatchingResourcePatternResolver bean = new PathMatchingResourcePatternResolver();
+		return bean;
 	}
 
 	@Bean
@@ -594,9 +616,17 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public DirectoryHtmlChartPluginManagerInitializer directoryHtmlChartPluginManagerInitializer()
 	{
 		DirectoryHtmlChartPluginManagerInitializer bean = new DirectoryHtmlChartPluginManagerInitializer(
-				this.directoryHtmlChartPluginManager(), this.tempDirectory(), this.builtinChartPluginLastModifiedFile());
-
+				this.resourcePatternResolver(), this.directoryHtmlChartPluginManager(),
+				this.tempDirectory(), this.builtinChartPluginLastModifiedFile());
+		
+		bean.setClasspathPatterns(getBuiltInHtmlChartPluginClasspathPatterns());
+		
 		return bean;
+	}
+	
+	protected String[] getBuiltInHtmlChartPluginClasspathPatterns()
+	{
+		return new String[] { DirectoryHtmlChartPluginManagerInitializer.DEFAULT_CLASSPATH_PATTERN };
 	}
 
 	@Bean
