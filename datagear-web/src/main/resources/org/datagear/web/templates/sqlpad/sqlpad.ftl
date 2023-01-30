@@ -229,6 +229,7 @@
 		<div id="${pid}sqlHistoryPanelContent" class="sql-history-panel-content p-2 table-sm" style="width:50vw;">
 		</div>
 	</p-overlaypanel>
+	<#include "../include/page_foot.ftl">
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_simple_form.ftl">

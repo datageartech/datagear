@@ -58,6 +58,7 @@
 		</p-datatable>
 	</div>
 	<#include "../include/page_copy_to_clipboard.ftl">
+	<#include "../include/page_foot.ftl">
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">

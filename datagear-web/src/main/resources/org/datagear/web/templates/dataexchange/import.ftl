@@ -61,6 +61,7 @@
 			</div>
 		</form>
 	</div>
+	<#include "../include/page_foot.ftl">
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_simple_form.ftl">

@@ -56,7 +56,7 @@
 			<div class="grid mt-5">
 		        <div class="field-input col-12">
 		        	<div class="text-color-secondary text-center pb-1">
-		        		© 2018-2023 datagear.tech
+		        		${Global.COPYRIGHT}
 		        	</div>
 		        	<div class="text-color-secondary text-center pt-1">
 		        		Licensed under the LGPLv3 license

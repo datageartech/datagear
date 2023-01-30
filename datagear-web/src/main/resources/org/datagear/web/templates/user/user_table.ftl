@@ -49,6 +49,7 @@
 			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime col-last"></p-column>
 		</p-datatable>
 	</div>
+	<#include "../include/page_foot.ftl">
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">

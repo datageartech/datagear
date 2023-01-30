@@ -37,4 +37,7 @@ public final class Global
 
 	/** 官网 */
 	public static final String WEB_SITE = "http://www.datagear.tech";
+
+	/** 版权声明 */
+	public static final String COPYRIGHT = "© 2018 datagear.tech";
 }

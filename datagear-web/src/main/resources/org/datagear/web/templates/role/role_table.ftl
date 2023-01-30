@@ -53,6 +53,7 @@
 			<p-column field="description" header="<@spring.message code='desc' />" :sortable="true"></p-column>
 		</p-datatable>
 	</div>
+	<#include "../include/page_foot.ftl">
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">

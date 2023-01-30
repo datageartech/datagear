@@ -82,6 +82,7 @@
 			<p-menu id="${pid}schemaTabMenu" ref="${pid}schemaTabMenuEle" :model="pm.schemaTabMenuItems" :popup="true" class="text-sm"></p-menu>
 		</div>
 	</div>
+	<#include "../include/page_foot.ftl">
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_tabview.ftl">
