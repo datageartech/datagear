@@ -1,9 +1,19 @@
 <#--
  *
- * Copyright 2018 datagear.tech
+ * Copyright 2018-2023 datagear.tech
  *
- * Licensed under the LGPLv3 license:
- * http://www.gnu.org/licenses/lgpl-3.0.html
+ * This file is part of DataGear.
+ *
+ * DataGear is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Lesser General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ *
+ * DataGear is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with DataGear.
+ * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
 <#assign Global=statics['org.datagear.util.Global']>
@@ -54,16 +64,16 @@
 		        </div>
 			</div>
 			<div class="grid mt-5">
-		        <div class="field-input col-12">
+		        <div class="field-input col-12 text-sm">
 		        	<div class="text-color-secondary text-center pb-1">
-		        		${Global.COPYRIGHT}
+		        		Copyright 2018-2023 datagear.tech
 		        	</div>
 		        	<div class="text-color-secondary text-center pt-1">
-		        		Licensed under the LGPLv3 license
+		        		Licensed under the LGPLv3 license, see
 		        	</div>
 		        	<div class="text-color-secondary text-center pt-1">
-		        		<a href="http://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" class="link text-color-secondary">
-		        			http://www.gnu.org/licenses/lgpl-3.0.html
+		        		<a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" class="link text-color-secondary">
+		        			https://www.gnu.org/licenses/lgpl-3.0.html
 		        		</a>
 		        	</div>
 		        </div>

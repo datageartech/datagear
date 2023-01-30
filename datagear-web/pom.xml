@@ -245,6 +245,8 @@
 			    		</goals>
 			    		<configuration>
 			    			<tasks>
+			    				<copy file="../COPYING" todir="${project.build.directory}/${productName}" />
+			    				<copy file="../COPYING.LESSER" todir="${project.build.directory}/${productName}" />
 			    				<copy file="../LICENSE" todir="${project.build.directory}/${productName}" />
 			    			</tasks>
 			    		</configuration>
@@ -260,6 +262,8 @@
 							<tasks>
 								<copy file="${project.build.directory}/${productName}.war" tofile="${dist.target.dir}/${productNameJar}" />
 								<mkdir dir="${dist.target.dir}/logs"/>
+			    				<copy file="../COPYING" todir="${dist.target.dir}" />
+			    				<copy file="../COPYING.LESSER" todir="${dist.target.dir}" />
 								<copy file="../LICENSE" todir="${dist.target.dir}" />
 								
 								<zip destfile="${dist.package.target.dir}/${productName}.zip" basedir="${project.build.directory}/${productName}-bin" includes="${productName}/**/*" />

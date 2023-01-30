@@ -183,8 +183,8 @@ SQL数据集
 
 ## Copyright & License
 
-© 2018 datagear.tech
+Copyright 2018-2023 datagear.tech
 
-Licensed under the LGPLv3 license:
+Licensed under the LGPLv3 license, see
 
 [http://www.gnu.org/licenses/lgpl-3.0.html](http://www.gnu.org/licenses/lgpl-3.0.html)

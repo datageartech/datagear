@@ -36,6 +36,8 @@
 			    		</goals>
 			    		<configuration>
 			    			<tasks>
+			    				<copy file="../COPYING" todir="${project.build.outputDirectory}" />
+			    				<copy file="../COPYING.LESSER" todir="${project.build.outputDirectory}" />
 			    				<copy file="../LICENSE" todir="${project.build.outputDirectory}" />
 			    			</tasks>
 			    		</configuration>
