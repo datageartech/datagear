@@ -183,7 +183,7 @@ SQL数据集
 
 ## Copyright & License
 
-Copyright 2018-2021 datagear.tech
+© 2018 datagear.tech
 
 Licensed under the LGPLv3 license:
 
