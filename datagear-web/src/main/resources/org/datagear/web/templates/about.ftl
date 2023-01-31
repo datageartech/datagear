@@ -76,8 +76,8 @@
 			<div class="grid">
 		        <div class="field-input col-12 text-sm">
 		        	<div class="text-color-secondary pt-1">
-<pre class="text-color-secondary text-sm">
-Copyright 2018-2023 datagear.tech
+<pre class="text-color-secondary text-xs" style="white-space:break-spaces;">
+<span class="text-sm">Copyright 2018-2023 datagear.tech</span>
 
 DataGear is free software: you can redistribute it and/or modify it under the terms of
 the GNU Lesser General Public License as published by the Free Software Foundation,
