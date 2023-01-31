@@ -48,8 +48,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/checkCode")
 public class CheckCodeController extends AbstractController
 {
+	protected static final int CODE_FONT_SIZE = 16;
+
+	protected static final int IMAGE_PADDING = 2;
+
 	@Autowired
 	private CheckCodeManager checkCodeManager;
+
+	private volatile Font _drawFont = null;
 
 	public CheckCodeController()
 	{
@@ -77,32 +83,30 @@ public class CheckCodeController extends AbstractController
 		response.setHeader("Cache-Control", "no-cache");
 		response.setDateHeader("Expires", 0);
 
-		int fontSize = 16;
 		int codeLength = CheckCodeManager.CODE_LEN;
-		int imagePadding = 2;
-		int height = fontSize + imagePadding * 2;
-		int width = fontSize * codeLength + imagePadding * 2;
+		int height = CODE_FONT_SIZE + IMAGE_PADDING * 2;
+		int width = CODE_FONT_SIZE * codeLength + IMAGE_PADDING * 2;
 		String code = this.checkCodeManager.generate();
 
 		BufferedImage image = createInitBufferedImage(width, height);
-		drawCheckCode(image, code, fontSize, imagePadding);
+		drawCheckCode(image, code);
 		this.checkCodeManager.setCheckCode(session, module, code);
 		image.getGraphics().dispose();
 
 		ImageIO.write(image, "png", response.getOutputStream());
 	}
 
-	protected void drawCheckCode(BufferedImage image, String code, int fontSize, int padding)
+	protected void drawCheckCode(BufferedImage image, String code)
 	{
 		Graphics g = image.getGraphics();
-		Font font = getDrawFont(fontSize);
+		Font font = getDrawFont();
 
 		g.setColor(getRandomColor(0, 80));
 		g.setFont(font);
 		FontMetrics fontMetrics = g.getFontMetrics();
 		int codeWidth = fontMetrics.stringWidth(code);
 
-		g.drawString(code, padding + (image.getWidth() - codeWidth) / 2, padding + fontMetrics.getAscent());
+		g.drawString(code, IMAGE_PADDING + (image.getWidth() - codeWidth) / 2, IMAGE_PADDING + fontMetrics.getAscent());
 	}
 
 	protected BufferedImage createInitBufferedImage(int width, int height)
@@ -163,28 +167,33 @@ public class CheckCodeController extends AbstractController
 		return new Color(r, g, b);
 	}
 
-	protected Font getDrawFont(int fontSize)
+	protected Font getDrawFont()
 	{
-		Font font = null;
-
-		String name = getDrawFontName();
-
-		if (!StringUtil.isEmpty(name))
+		if (this._drawFont == null)
 		{
-			font = new Font(name, Font.BOLD, fontSize);
+			Font font = null;
+
+			String name = getDrawFontName();
+
+			if (!StringUtil.isEmpty(name))
+			{
+				font = new Font(name, Font.BOLD, CODE_FONT_SIZE);
+			}
+			else
+			{
+				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+				Font[] fonts = ge.getAllFonts();
+
+				font = (fonts != null && fonts.length > 0 ? fonts[0] : null);
+			}
+
+			if (font == null)
+				throw new UnsupportedOperationException("No font found");
+
+			this._drawFont = font;
 		}
-		else
-		{
-			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-			Font[] fonts = ge.getAllFonts();
 
-			font = (fonts != null && fonts.length > 0 ? fonts[0] : null);
-		}
-
-		if (font == null)
-			throw new UnsupportedOperationException("No font found");
-
-		return font;
+		return this._drawFont;
 	}
 
 	/**
