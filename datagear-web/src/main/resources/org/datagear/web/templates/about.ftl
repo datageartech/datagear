@@ -33,7 +33,7 @@
 	<form id="${pid}form" class="flex flex-column">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			
-			<div class="field grid">
+			<div class="field grid mb-3">
 				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='name' />
 				</label>
@@ -43,7 +43,7 @@
 		        	</div>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid mb-3">
 				<label for="${pid}version" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='version' />
 				</label>
@@ -53,7 +53,7 @@
 		        	</div>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid mb-3">
 				<label for="${pid}officalSite" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='officalSite' />
 				</label>
@@ -63,18 +63,33 @@
 		        	</div>
 		        </div>
 			</div>
-			<div class="grid mt-5">
+			<div class="field grid">
+				<label for="${pid}sourceCode" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='sourceCode' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<div id="${pid}sourceCode" class="text-primary">
+		        		<a href="${Global.WEB_SITE}" target="_blank" class="link">${Global.WEB_SITE}</a>
+		        	</div>
+		        </div>
+			</div>
+			<div class="grid">
 		        <div class="field-input col-12 text-sm">
-		        	<div class="text-color-secondary text-center pb-1">
-		        		Copyright 2018-2023 datagear.tech
-		        	</div>
-		        	<div class="text-color-secondary text-center pt-1">
-		        		Licensed under the LGPLv3 license, see
-		        	</div>
-		        	<div class="text-color-secondary text-center pt-1">
-		        		<a href="https://www.gnu.org/licenses/" target="_blank" class="link text-color-secondary">
-		        			https://www.gnu.org/licenses/
-		        		</a>
+		        	<div class="text-color-secondary pt-1">
+<pre class="text-color-secondary text-sm">
+Copyright 2018-2023 datagear.tech
+
+DataGear is free software: you can redistribute it and/or modify it under the terms of
+the GNU Lesser General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
+
+DataGear is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along with DataGear.
+If not, see &lt;<a href="https://www.gnu.org/licenses/" target="_blank" class="link text-color-secondary">https://www.gnu.org/licenses/</a>&gt;.
+</pre>
 		        	</div>
 		        </div>
 			</div>
