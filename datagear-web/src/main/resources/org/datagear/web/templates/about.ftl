@@ -72,8 +72,8 @@
 		        		Licensed under the LGPLv3 license, see
 		        	</div>
 		        	<div class="text-color-secondary text-center pt-1">
-		        		<a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" class="link text-color-secondary">
-		        			https://www.gnu.org/licenses/lgpl-3.0.html
+		        		<a href="https://www.gnu.org/licenses/" target="_blank" class="link text-color-secondary">
+		        			https://www.gnu.org/licenses/
 		        		</a>
 		        	</div>
 		        </div>
