@@ -227,9 +227,9 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	}
 
 	@Override
-	public String resolveFileNameAsFmkTemplate(String fileName, DataSetQuery query)
+	public String resolveTemplateFileName(String fileName, DataSetQuery query)
 	{
-		return resolveTextAsGeneralTemplate(fileName, query);
+		return resolveTemplatePlain(fileName, query);
 	}
 
 	@Override

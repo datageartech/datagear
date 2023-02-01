@@ -29,10 +29,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.support.AbstractCsvDataSet.CsvDataSetResource;
-import org.datagear.analysis.support.fmk.CsvOutputFormat;
 import org.datagear.util.IOUtil;
 
 /**
@@ -44,9 +42,6 @@ import org.datagear.util.IOUtil;
 public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends AbstractResolvableResourceDataSet<T>
 		implements ResolvableDataSet
 {
-	public static final DataSetFmkTemplateResolver CSV_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver(
-			CsvOutputFormat.INSTANCE);
-
 	/**
 	 * CSV解析器。
 	 */
@@ -301,18 +296,6 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	protected CSVParser buildCSVParser(Reader reader) throws Throwable
 	{
 		return CSV_FORMAT.parse(reader);
-	}
-
-	/**
-	 * 将指定CSV文本作为模板解析。
-	 * 
-	 * @param csv
-	 * @param query
-	 * @return
-	 */
-	protected String resolveCsvAsTemplate(String csv, DataSetQuery query)
-	{
-		return resolveTextAsTemplate(CSV_TEMPLATE_RESOLVER, csv, query);
 	}
 
 	/**

@@ -36,7 +36,6 @@ import org.datagear.analysis.DataSetProperty.DataType;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
-import org.datagear.analysis.support.fmk.SqlOutputFormat;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcSupport;
@@ -62,9 +61,6 @@ import org.slf4j.LoggerFactory;
 public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataSet.class);
-
-	public static final DataSetFmkTemplateResolver SQL_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver(
-			SqlOutputFormat.INSTANCE);
 
 	protected static final JdbcSupport JDBC_SUPPORT = new JdbcSupport();
 
@@ -135,7 +131,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
 			boolean resolveProperties) throws DataSetException
 	{
-		String sql = resolveSqlAsTemplate(getSql(), query);
+		String sql = resolveTemplateSql(getSql(), query);
 
 		Connection cn = null;
 
@@ -452,17 +448,5 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected JdbcSupport getJdbcSupport()
 	{
 		return JDBC_SUPPORT;
-	}
-
-	/**
-	 * 将指定SQL文本作为模板解析。
-	 * 
-	 * @param sql
-	 * @param query
-	 * @return
-	 */
-	protected String resolveSqlAsTemplate(String sql, DataSetQuery query)
-	{
-		return resolveTextAsTemplate(SQL_TEMPLATE_RESOLVER, sql, query);
 	}
 }

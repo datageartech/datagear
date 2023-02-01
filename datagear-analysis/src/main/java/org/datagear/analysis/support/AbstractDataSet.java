@@ -43,8 +43,6 @@ import org.datagear.analysis.ResultDataFormat;
  */
 public abstract class AbstractDataSet extends AbstractIdentifiable implements DataSet
 {
-	public static final DataSetFmkTemplateResolver GENERAL_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver();
-
 	private String name;
 
 	private boolean mutableModel = false;
@@ -442,39 +440,109 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 将指定文本作为通用模板解析（没有特定语境，比如：SQL、CSV、JSON）。
-	 * 
-	 * @param text
-	 * @param query
-	 * @return
-	 */
-	protected String resolveTextAsGeneralTemplate(String text, DataSetQuery query)
-	{
-		return resolveTextAsTemplate(GENERAL_TEMPLATE_RESOLVER, text, query);
-	}
-
-	/**
-	 * 将指定文本作为模板解析。
+	 * 解析模板：普通文本。
 	 * <p>
-	 * 注意：即使此数据集没有定义任何参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
+	 * 注意：无论数据集是否有定义参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
 	 * </p>
 	 * <ol>
 	 * <li>用户编写了无需参数的模板内容；</li>
 	 * <li>用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值；</li>
 	 * </ol>
 	 * 
-	 * @param templateResolver
 	 * @param text
 	 * @param query
 	 * @return
 	 */
-	protected String resolveTextAsTemplate(TemplateResolver templateResolver, String text, DataSetQuery query)
+	protected String resolveTemplatePlain(String text, DataSetQuery query)
 	{
-		if (text == null)
-			return null;
+		return DataSetFmkTemplateResolvers.resolvePlain(text, toTemplateContext(query));
+	}
 
+	/**
+	 * 解析模板：CSV。
+	 * <p>
+	 * 注意：无论数据集是否有定义参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
+	 * </p>
+	 * <ol>
+	 * <li>用户编写了无需参数的模板内容；</li>
+	 * <li>用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值；</li>
+	 * </ol>
+	 * 
+	 * @param text
+	 * @param query
+	 * @return
+	 */
+	protected String resolveTemplateCsv(String text, DataSetQuery query)
+	{
+		return DataSetFmkTemplateResolvers.resolveCsv(text, toTemplateContext(query));
+	}
+
+	/**
+	 * 解析模板：JSON。
+	 * <p>
+	 * 注意：无论数据集是否有定义参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
+	 * </p>
+	 * <ol>
+	 * <li>用户编写了无需参数的模板内容；</li>
+	 * <li>用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值；</li>
+	 * </ol>
+	 * 
+	 * @param text
+	 * @param query
+	 * @return
+	 */
+	protected String resolveTemplateJson(String text, DataSetQuery query)
+	{
+		return DataSetFmkTemplateResolvers.resolveJson(text, toTemplateContext(query));
+	}
+
+	/**
+	 * 解析模板：SQL。
+	 * <p>
+	 * 注意：无论数据集是否有定义参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
+	 * </p>
+	 * <ol>
+	 * <li>用户编写了无需参数的模板内容；</li>
+	 * <li>用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值；</li>
+	 * </ol>
+	 * 
+	 * @param text
+	 * @param query
+	 * @return
+	 */
+	protected String resolveTemplateSql(String text, DataSetQuery query)
+	{
+		return DataSetFmkTemplateResolvers.resolveSql(text, toTemplateContext(query));
+	}
+
+	/**
+	 * 解析模板：XML。
+	 * <p>
+	 * 注意：无论数据集是否有定义参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
+	 * </p>
+	 * <ol>
+	 * <li>用户编写了无需参数的模板内容；</li>
+	 * <li>用户不定义数据集参数，但却定义模板内容，之后用户自行在{@linkplain DataSet#getResult(DataSetQuery)}参数映射表中传递模板内容所须的参数值；</li>
+	 * </ol>
+	 * 
+	 * @param text
+	 * @param query
+	 * @return
+	 */
+	protected String resolveTemplateXml(String text, DataSetQuery query)
+	{
+		return DataSetFmkTemplateResolvers.resolveXml(text, toTemplateContext(query));
+	}
+
+	/**
+	 * 将{@linkplain DataSetQuery}转换为{@linkplain TemplateContext}。
+	 * 
+	 * @param query
+	 * @return
+	 */
+	protected TemplateContext toTemplateContext(DataSetQuery query)
+	{
 		Map<String, ?> values = query.getParamValues();
-
-		return templateResolver.resolve(text, new TemplateContext(values));
+		return new TemplateContext(values);
 	}
 }

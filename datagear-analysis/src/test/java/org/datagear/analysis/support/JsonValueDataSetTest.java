@@ -111,14 +111,19 @@ public class JsonValueDataSetTest
 	@Test
 	public void resolveTest_hasParam()
 	{
+		String name = "aaa---\"---\\---\r---\n";
+		String nameEscape = "aaa---\\\"---\\\\---\\r---\\n";
+
 		List<DataSetParam> params = new ArrayList<>();
+		params.add(new DataSetParam("name", DataSetParam.DataType.STRING, true));
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
 		JsonValueDataSet dataSet = new JsonValueDataSet(JsonValueDataSet.class.getSimpleName(),
-				JsonValueDataSet.class.getSimpleName(), "[ { name:'aaa', value: 11, size: ${size} } ]");
+				JsonValueDataSet.class.getSimpleName(), "[ { name:\"${name}\", value: 11, size: ${size} } ]");
 		dataSet.setParams(params);
 
 		Map<String, Object> paramValues = new HashMap<>();
+		paramValues.put("name", name);
 		paramValues.put("size", 12);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
@@ -126,7 +131,7 @@ public class JsonValueDataSetTest
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 
-		assertEquals("[ { name:'aaa', value: 11, size: 12 } ]", result.getTemplateResult());
+		assertEquals("[ { name:\"" + nameEscape + "\", value: 11, size: 12 } ]", result.getTemplateResult());
 
 		{
 			assertEquals(3, properties.size());
@@ -156,7 +161,7 @@ public class JsonValueDataSetTest
 			{
 				Map<String, Object> row = data.get(0);
 
-				assertEquals("aaa", row.get("name"));
+				assertEquals(name, row.get("name"));
 				assertEquals(11, ((Number) row.get("value")).intValue());
 				assertEquals(12, ((Number) row.get("size")).intValue());
 			}

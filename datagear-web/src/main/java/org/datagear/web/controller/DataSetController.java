@@ -40,9 +40,9 @@ import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.ProfileDataSet;
-import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
 import org.datagear.management.domain.Authorization;
@@ -1080,7 +1080,7 @@ public class DataSetController extends AbstractSchemaConnController
 		DataSetQuery dataSetQuery = DataSetQuery.valueOf(converted);
 		setAnalysisUserParamValue(request, response, dataSetQuery);
 
-		return SqlDataSet.SQL_TEMPLATE_RESOLVER.resolve(source, new TemplateContext(dataSetQuery.getParamValues()));
+		return DataSetFmkTemplateResolvers.SQL.resolve(source, new TemplateContext(dataSetQuery.getParamValues()));
 	}
 
 	protected DataSetQuery convertDataSetQuery(HttpServletRequest request, HttpServletResponse response,

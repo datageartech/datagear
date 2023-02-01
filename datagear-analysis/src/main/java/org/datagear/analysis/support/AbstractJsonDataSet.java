@@ -24,11 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
-import org.datagear.analysis.support.fmk.JsonOutputFormat;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
@@ -51,9 +49,6 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends AbstractResolvableResourceDataSet<T>
 		implements ResolvableDataSet
 {
-	public static final DataSetFmkTemplateResolver JSON_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver(
-			JsonOutputFormat.INSTANCE);
-
 	/** 使用Jackson的{@code JSONPath}配置 */
 	protected static final Configuration JACKSON_JSON_PATH_CONFIGURATION = Configuration.builder()
 			.jsonProvider(new JacksonJsonProvider()).mappingProvider(new JacksonMappingProvider()).build();
@@ -287,18 +282,6 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	protected ObjectMapper getObjectMapperNonStardand()
 	{
 		return JsonSupport.getObjectMapperNonStardand();
-	}
-
-	/**
-	 * 将指定JSON文本作为模板解析。
-	 * 
-	 * @param json
-	 * @param query
-	 * @return
-	 */
-	protected String resolveJsonAsTemplate(String json, DataSetQuery query)
-	{
-		return resolveTextAsTemplate(JSON_TEMPLATE_RESOLVER, json, query);
 	}
 
 	/**

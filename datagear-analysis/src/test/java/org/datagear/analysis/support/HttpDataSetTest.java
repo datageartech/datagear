@@ -97,8 +97,15 @@ public class HttpDataSetTest
 						String p0 = params.get(PARAM_NAME_0);
 						String p1 = params.get(PARAM_NAME_1);
 
-						StringEntity responseEntity = new StringEntity("[{name: '" + PARAM_NAME_0 + "', value: '" + p0
-								+ "'}, {name: '" + PARAM_NAME_1 + "', value: '" + p1 + "'}]",
+						Map<String, String> re0 = new HashMap<String, String>();
+						re0.put("name", PARAM_NAME_0);
+						re0.put("value", p0);
+
+						Map<String, String> re1 = new HashMap<String, String>();
+						re1.put("name", PARAM_NAME_1);
+						re1.put("value", p1);
+
+						StringEntity responseEntity = new StringEntity(toJsonString(Arrays.asList(re0, re1)),
 								ContentType.APPLICATION_JSON);
 						response.setEntity(responseEntity);
 					}
@@ -113,6 +120,39 @@ public class HttpDataSetTest
 						String reqJson = getRequestStringContent(request);
 
 						StringEntity responseEntity = new StringEntity(reqJson, ContentType.APPLICATION_JSON);
+						response.setEntity(responseEntity);
+					}
+				})
+				//
+				.register("/testText", new HttpRequestHandler()
+				{
+					@Override
+					public void handle(ClassicHttpRequest request, ClassicHttpResponse response, HttpContext context)
+							throws HttpException, IOException
+					{
+
+						String reqStr = getRequestStringContent(request);
+						Map<String, String> responseJson = new HashMap<String, String>();
+						responseJson.put("value", reqStr);
+						responseJson.put("contentType", request.getHeader("content-type").getValue());
+						StringEntity responseEntity = new StringEntity(toJsonString(Arrays.asList(responseJson)),
+								ContentType.APPLICATION_JSON);
+						response.setEntity(responseEntity);
+					}
+				})
+				//
+				.register("/testXml", new HttpRequestHandler()
+				{
+					@Override
+					public void handle(ClassicHttpRequest request, ClassicHttpResponse response, HttpContext context)
+							throws HttpException, IOException
+					{
+						String reqStr = getRequestStringContent(request);
+						Map<String, String> responseJson = new HashMap<String, String>();
+						responseJson.put("value", reqStr);
+						responseJson.put("contentType", request.getHeader("content-type").getValue());
+						StringEntity responseEntity = new StringEntity(toJsonString(Arrays.asList(responseJson)),
+								ContentType.APPLICATION_JSON);
 						response.setEntity(responseEntity);
 					}
 				})
@@ -255,14 +295,15 @@ public class HttpDataSetTest
 	public void resolveTest_REQUEST_CONTENT_TYPE_FORM_URLENCODED() throws Throwable
 	{
 		String pv0 = "p0";
-		String pv1 = "参数值1";
+		String pv1 = "参数值1:\"---\\---\r---\n";
+		String pv1JsonStr = "参数值1:\\\"---\\\\---\\r---\\n";
 
 		List<DataSetParam> params = Arrays.asList(new DataSetParam("param", DataSetParam.DataType.NUMBER, true));
 
 		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
 				SERVER + "/testParam");
-		dataSet.setRequestContent("[ { name: '" + PARAM_NAME_0 + "', value: '" + pv0 + "' }, { name: '" + PARAM_NAME_1
-				+ "', value: '${param}' } ]");
+		dataSet.setRequestContent("[ { name: \"" + PARAM_NAME_0 + "\", value: \"" + pv0 + "\" }, { name: \""
+				+ PARAM_NAME_1 + "\", value: \"${param}\" } ]");
 		dataSet.setParams(params);
 
 		Map<String, Object> paramValues = new HashMap<>();
@@ -277,7 +318,7 @@ public class HttpDataSetTest
 		{
 			assertEquals(2, properties.size());
 
-			assertTrue(templateResult.contains("value: '" + pv1 + "'"));
+			assertTrue(templateResult.contains("value: \"" + pv1JsonStr + "\""));
 
 			{
 				DataSetProperty property = properties.get(0);
@@ -315,15 +356,16 @@ public class HttpDataSetTest
 	public void resolveTest_REQUEST_CONTENT_TYPE_JSON() throws Throwable
 	{
 		String pv0 = "p0";
-		String pv1 = "参数值1";
+		String pv1 = "参数值1:\"---\\---\r---\n";
+		String pv1JsonStr = "参数值1:\\\"---\\\\---\\r---\\n";
 
-		List<DataSetParam> params = Arrays.asList(new DataSetParam("param", DataSetParam.DataType.NUMBER, true));
+		List<DataSetParam> params = Arrays.asList(new DataSetParam("param", DataSetParam.DataType.STRING, true));
 
 		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
 				SERVER + "/testJson");
 		dataSet.setRequestContentType(HttpDataSet.REQUEST_CONTENT_TYPE_JSON);
-		dataSet.setRequestContent("[ { name: '" + PARAM_NAME_0 + "', value: '" + pv0 + "' }, { name: '" + PARAM_NAME_1
-				+ "', value: '${param}' } ]");
+		dataSet.setRequestContent("[ { name: \"" + PARAM_NAME_0 + "\", value: \"" + pv0 + "\" }, { name: \""
+				+ PARAM_NAME_1 + "\", value: \"${param}\" } ]");
 		dataSet.setParams(params);
 
 		Map<String, Object> paramValues = new HashMap<>();
@@ -338,7 +380,7 @@ public class HttpDataSetTest
 		{
 			assertEquals(2, properties.size());
 
-			assertTrue(templateResult.contains("value: '" + pv1 + "'"));
+			assertTrue(templateResult.contains("value: \"" + pv1JsonStr + "\""));
 
 			{
 				DataSetProperty property = properties.get(0);
@@ -368,6 +410,121 @@ public class HttpDataSetTest
 
 				assertEquals(PARAM_NAME_1, row.get("name"));
 				assertEquals(pv1, row.get("value"));
+			}
+		}
+	}
+
+	@Test
+	public void resolveTest_REQUEST_CONTENT_TYPE_TEXT() throws Throwable
+	{
+		String pv0 = "p0";
+		String pv1 = "参数\"值1";
+
+		List<DataSetParam> params = Arrays.asList(new DataSetParam("param", DataSetParam.DataType.STRING, true));
+
+		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+				SERVER + "/testText");
+		dataSet.setRequestContentCharset("GBK");
+		dataSet.setRequestContentType(HttpDataSet.REQUEST_CONTENT_TYPE_TEXT);
+		dataSet.setRequestContent("value0=" + pv0 + ",value1=${param}");
+		dataSet.setParams(params);
+
+		Map<String, Object> paramValues = new HashMap<>();
+		paramValues.put("param", pv1);
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
+		List<DataSetProperty> properties = result.getProperties();
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
+		String templateResult = result.getTemplateResult();
+
+		{
+			assertEquals(2, properties.size());
+
+			assertTrue(templateResult.contains("value1=" + pv1));
+
+			{
+				DataSetProperty property = properties.get(0);
+				assertEquals("value", property.getName());
+				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+			}
+
+			{
+				DataSetProperty property = properties.get(1);
+				assertEquals("contentType", property.getName());
+				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+			}
+		}
+
+		{
+			assertEquals(1, data.size());
+
+			{
+				Map<String, Object> row = data.get(0);
+				assertEquals("value0=" + pv0 + ",value1=" + pv1 + "", row.get("value"));
+				assertEquals("text/plain; charset=GBK", row.get("contentType"));
+			}
+		}
+	}
+
+	@Test
+	public void resolveTest_REQUEST_CONTENT_TYPE_TEXT_XML() throws Throwable
+	{
+		String v0 = "p0";
+		String v1 = "参数值1";
+		String v2 = "&---<--->---\"---'";
+		String v2Escape = "&amp;---&lt;---&gt;---&quot;---&apos;";
+
+		List<DataSetParam> params = Arrays.asList(new DataSetParam("v0", DataSetParam.DataType.NUMBER, true),
+				new DataSetParam("v1", DataSetParam.DataType.STRING, true),
+				new DataSetParam("v2", DataSetParam.DataType.STRING, true));
+
+		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+				SERVER + "/testXml");
+		dataSet.setRequestContentCharset("GBK");
+		dataSet.setRequestContentType(HttpDataSet.REQUEST_CONTENT_TYPE_TEXT_XML);
+		dataSet.setRequestContent("<entity><v0>${v0}</v0><v1>${v1}</v1><v2>${v2}</v2></entity>");
+		dataSet.setParams(params);
+
+		Map<String, Object> paramValues = new HashMap<>();
+		paramValues.put("v0", v0);
+		paramValues.put("v1", v1);
+		paramValues.put("v2", v2);
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
+		List<DataSetProperty> properties = result.getProperties();
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
+		String templateResult = result.getTemplateResult();
+
+		{
+			assertEquals(2, properties.size());
+
+			assertTrue(templateResult.contains("<v0>" + v0 + "</v0>"));
+			assertTrue(templateResult.contains("<v1>" + v1 + "</v1>"));
+			assertTrue(templateResult.contains("<v2>" + v2Escape + "</v2>"));
+
+			{
+				DataSetProperty property = properties.get(0);
+				assertEquals("value", property.getName());
+				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+			}
+
+			{
+				DataSetProperty property = properties.get(1);
+				assertEquals("contentType", property.getName());
+				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+			}
+		}
+
+		{
+			assertEquals(1, data.size());
+
+			{
+				Map<String, Object> row = data.get(0);
+				assertEquals("<entity><v0>" + v0 + "</v0><v1>" + v1 + "</v1><v2>" + v2Escape + "</v2></entity>",
+						row.get("value"));
+				assertEquals("text/xml; charset=GBK", row.get("contentType"));
 			}
 		}
 	}
@@ -505,5 +662,10 @@ public class HttpDataSetTest
 		String content = IOUtil.readString(reader, false);
 
 		return content;
+	}
+
+	protected static String toJsonString(Object o) throws IOException
+	{
+		return JsonSupport.generate(o);
 	}
 }

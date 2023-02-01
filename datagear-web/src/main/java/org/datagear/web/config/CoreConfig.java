@@ -33,13 +33,9 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.datagear.analysis.TplDashboardWidgetResManager;
-import org.datagear.analysis.support.AbstractCsvDataSet;
-import org.datagear.analysis.support.AbstractDataSet;
-import org.datagear.analysis.support.AbstractJsonDataSet;
-import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver.NameTemplateLoader;
+import org.datagear.analysis.support.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
-import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonRenderer;
@@ -1010,18 +1006,13 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 			}
 		}
 
-		DataSetFmkTemplateResolver generalTemplateResolver = AbstractDataSet.GENERAL_TEMPLATE_RESOLVER;
-		DataSetFmkTemplateResolver csvTemplateResolver = AbstractCsvDataSet.CSV_TEMPLATE_RESOLVER;
-		DataSetFmkTemplateResolver jsonTemplateResolver = AbstractJsonDataSet.JSON_TEMPLATE_RESOLVER;
-		DataSetFmkTemplateResolver sqlTemplateResolver = SqlDataSet.SQL_TEMPLATE_RESOLVER;
-
-		generalTemplateResolver.getNameTemplateLoader().setCacheService(
-				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".general"));
-		csvTemplateResolver.getNameTemplateLoader().setCacheService(
+		DataSetFmkTemplateResolvers.PLAIN.getNameTemplateLoader().setCacheService(
+				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".plain"));
+		DataSetFmkTemplateResolvers.CSV.getNameTemplateLoader().setCacheService(
 				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".csv"));
-		jsonTemplateResolver.getNameTemplateLoader().setCacheService(
+		DataSetFmkTemplateResolvers.JSON.getNameTemplateLoader().setCacheService(
 				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".json"));
-		sqlTemplateResolver.getNameTemplateLoader().setCacheService(
+		DataSetFmkTemplateResolvers.SQL.getNameTemplateLoader().setCacheService(
 				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".sql"));
 
 		Map<String, HtmlTplDashboardWidgetHtmlRenderer> renderers = context

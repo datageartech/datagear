@@ -17,6 +17,8 @@
 
 package org.datagear.analysis.support;
 
+import static org.junit.Assert.assertTrue;
+
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -124,6 +126,45 @@ public class SqlDataSetTest extends DBTestSupport
 				}
 			}
 
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
+	@Test
+	public void getResultTest_escape() throws Exception
+	{
+		String name = "aa---'---";
+		String nameEscape = "aa---''---";
+
+		Connection cn = null;
+
+		try
+		{
+			cn = getConnection();
+			SimpleConnectionFactory connectionFactory = new SimpleConnectionFactory(cn, false);
+
+			String sql = "SELECT ID, NAME FROM T_ACCOUNT WHERE NAME='${name}'";
+
+			List<DataSetProperty> dataSetProperties = Arrays.asList(
+					new DataSetProperty("ID", DataSetProperty.DataType.INTEGER),
+					new DataSetProperty("NAME", DataSetProperty.DataType.STRING));
+
+			List<DataSetParam> dataSetParams = Arrays
+					.asList(new DataSetParam("name", DataSetParam.DataType.STRING, true));
+
+			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetProperties, connectionFactory, sql);
+			sqlDataSet.setParams(dataSetParams);
+			sqlDataSet.setSqlValidator(createSqlValidator());
+
+			Map<String, Object> dataSetParamValues = new HashMap<>();
+			dataSetParamValues.put("name", name);
+
+			TemplateResolvedDataSetResult result = sqlDataSet.resolve(DataSetQuery.valueOf(dataSetParamValues));
+			String templateResult = result.getTemplateResult();
+			assertTrue(templateResult.contains(" NAME='" + nameEscape + "'"));
+		}
+		finally
+		{
 			JdbcUtil.closeConnection(cn);
 		}
 	}

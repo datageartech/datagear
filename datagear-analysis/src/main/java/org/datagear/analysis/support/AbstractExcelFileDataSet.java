@@ -61,25 +61,35 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 	{
 		File file = getExcelFile(query);
 		
-		String sheetName = resolveSheetNameAsFmkTemplate(query);
+		String sheetName = resolveTemplateSheetName(query);
 		
 		return new ExcelFileDataSetResource("", sheetName, getSheetIndex(), getNameRow(), getDataRowExp(),
 				getDataColumnExp(), (isForceXls() ? true : isXls(file)), file.getAbsolutePath(), file.lastModified());
 	}
 
-	protected String resolveSheetNameAsFmkTemplate(DataSetQuery query)
+	protected String resolveTemplateSheetName(DataSetQuery query)
 	{
 		String sheetName = getSheetName();
 		
 		if(!StringUtil.isEmpty(sheetName))
-			sheetName = resolveSheetNameAsFmkTemplate(sheetName, query);
+			sheetName = resolveTemplateSheetName(sheetName, query);
 		
 		return sheetName;
 	}
 
-	protected String resolveSheetNameAsFmkTemplate(String sheetName, DataSetQuery query)
+	/**
+	 * 解析模板：工作表名。
+	 * <p>
+	 * 实现规则应与{@linkplain AbstractDataSet#resolveTemplatePlain(String, DataSetQuery)}一致。
+	 * </p>
+	 * 
+	 * @param fileName
+	 * @param query
+	 * @return
+	 */
+	protected String resolveTemplateSheetName(String sheetName, DataSetQuery query)
 	{
-		return resolveTextAsGeneralTemplate(sheetName, query);
+		return resolveTemplatePlain(sheetName, query);
 	}
 
 	/**

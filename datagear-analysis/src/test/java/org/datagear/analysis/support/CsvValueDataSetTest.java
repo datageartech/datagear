@@ -111,22 +111,34 @@ public class CsvValueDataSetTest
 	@Test
 	public void resolveTest_hasParam()
 	{
+		String name = "aa---\"---";
+		int value = 11;
+		int size = 12;
+		String nameEscape = "aa---\"\"---";
+
 		List<DataSetParam> params = new ArrayList<>();
+		params.add(new DataSetParam("name", DataSetParam.DataType.STRING, true));
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
-		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", "name, value, size \n aaa, 11, ${size}");
+		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a",
+				"name, value, size" //
+						+ "\n" //
+						+ "\"${name}\", " + value + ", ${size}");
 		dataSet.setParams(params);
 		dataSet.setNameRow(1);
 
 		Map<String, Object> paramValues = new HashMap<>();
-		paramValues.put("size", 12);
+		paramValues.put("name", name);
+		paramValues.put("size", size);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
 		List<DataSetProperty> properties = result.getProperties();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 
-		assertEquals("name, value, size \n aaa, 11, 12", result.getTemplateResult());
+		assertEquals("name, value, size" //
+				+ "\n" //
+				+ "\"" + nameEscape + "\"" + ", " + value + ", " + size, result.getTemplateResult());
 
 		{
 			assertEquals(3, properties.size());
@@ -156,9 +168,9 @@ public class CsvValueDataSetTest
 			{
 				Map<String, Object> row = data.get(0);
 
-				assertEquals("aaa", row.get("name"));
-				assertEquals(11, ((Number) row.get("value")).intValue());
-				assertEquals(12, ((Number) row.get("size")).intValue());
+				assertEquals(name, row.get("name"));
+				assertEquals(value, ((Number) row.get("value")).intValue());
+				assertEquals(size, ((Number) row.get("size")).intValue());
 			}
 		}
 	}

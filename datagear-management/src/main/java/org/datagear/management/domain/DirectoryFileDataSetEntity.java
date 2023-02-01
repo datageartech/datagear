@@ -127,16 +127,16 @@ public interface DirectoryFileDataSetEntity extends DataSetEntity
 	void setDataSetResFileName(String fileName);
 
 	/**
-	 * 将文件名作为<code>Freemarker</code>模板解析。
+	 * 解析模板：文件名。
 	 * <p>
-	 * 实现规则应与{@linkplain AbstractDataSet#resolveTextAsGeneralTemplate(String, DataSetQuery)}一致。
+	 * 实现规则应与{@linkplain AbstractDataSet#resolveTemplatePlain(String, DataSetQuery)}一致。
 	 * </p>
 	 * 
 	 * @param fileName
 	 * @param query
 	 * @return
 	 */
-	String resolveFileNameAsFmkTemplate(String fileName, DataSetQuery query);
+	String resolveTemplateFileName(String fileName, DataSetQuery query);
 
 	FileSupport FILE_SUPPORT = new FileSupport();
 
@@ -151,7 +151,7 @@ public interface DirectoryFileDataSetEntity extends DataSetEntity
 			else if (FILE_SOURCE_TYPE_SERVER.equals(entity.getFileSourceType()))
 			{
 				// 服务器端文件名允许参数化
-				String fileName = entity.resolveFileNameAsFmkTemplate(entity.getDataSetResFileName(), query);
+				String fileName = entity.resolveTemplateFileName(entity.getDataSetResFileName(), query);
 
 				File directory = FileUtil.getDirectory(entity.getDataSetResDirectory().getDirectory(), false);
 				file = FileUtil.getFile(directory, fileName, false);

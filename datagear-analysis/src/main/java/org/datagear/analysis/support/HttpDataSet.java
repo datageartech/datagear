@@ -95,6 +95,16 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	public static final String REQUEST_CONTENT_TYPE_JSON = "JSON";
 
 	/**
+	 * 请求内容类型：TEXT，对应的HTTP请求类型为：text/plain
+	 */
+	public static final String REQUEST_CONTENT_TYPE_TEXT = "TEXT";
+
+	/**
+	 * 请求内容类型：TEXT_XML，对应的HTTP请求类型为：text/xml
+	 */
+	public static final String REQUEST_CONTENT_TYPE_TEXT_XML = "TEXT_XML";
+
+	/**
 	 * 响应内容类型：JSON，对应的HTTP响应类型为：application/json
 	 */
 	public static final String RESPONSE_CONTENT_TYPE_JSON = "JSON";
@@ -351,13 +361,11 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		try
 		{
 			uri = resolveTemplateUri(query);
-			headerContent = resolveTemplateHeaderContent(query);
-			requestContent = resolveTemplateRequestContent(query);
 
 			ClassicHttpRequest request = createHttpRequest(uri);
 
-			setHttpHeaders(request, headerContent);
-			setHttpEntity(request, requestContent);
+			headerContent = setHttpHeaders(request, query);
+			requestContent = setHttpEntity(request, query);
 
 			JsonResponseHandler responseHandler = new JsonResponseHandler(query, properties, resolveProperties,
 					getResponseDataJsonPath());
@@ -411,67 +419,75 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		return sb.toString();
 	}
 
-	protected void setHttpHeaders(ClassicHttpRequest request, String headerContent) throws Throwable
+	protected String setHttpHeaders(ClassicHttpRequest request, DataSetQuery query) throws Throwable
 	{
-		if (StringUtil.isEmpty(headerContent))
-			return;
+		if (StringUtil.isEmpty(this.headerContent))
+			return "";
+
+		String headerContent = resolveTemplateJson(this.headerContent, query);
 
 		List<NameValuePair> headers = toNameValuePairs(headerContent);
 
 		if (headers == NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON)
-			throw new HeaderContentNotNameValueObjArrayJsonException(headerContent);
+			throw new HeaderContentNotNameValueObjArrayJsonException(this.headerContent);
 
 		for (NameValuePair header : headers)
 			request.setHeader(header.getName(), header.getValue());
+
+		return headerContent;
 	}
 
-	protected void setHttpEntity(ClassicHttpRequest request, String requestContent) throws Throwable
+	protected String setHttpEntity(ClassicHttpRequest request, DataSetQuery query) throws Throwable
 	{
+		String requestContent = this.requestContent;
+
 		if (REQUEST_CONTENT_TYPE_FORM_URLENCODED.equals(this.requestContentType))
 		{
+			requestContent = resolveTemplateJson(this.requestContent, query);
 			List<NameValuePair> params = toNameValuePairs(requestContent);
 
 			if (params == NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON)
-				throw new RequestContentNotNameValueObjArrayJsonException(requestContent);
+				throw new RequestContentNotNameValueObjArrayJsonException(this.requestContent);
 
 			request.setEntity(new UrlEncodedFormEntity(params, Charset.forName(this.requestContentCharset)));
 		}
 		else if (REQUEST_CONTENT_TYPE_JSON.equals(this.requestContentType))
 		{
+			requestContent = resolveTemplateJson(this.requestContent, query);
 			ContentType contentType = ContentType.create(ContentType.APPLICATION_JSON.getMimeType(),
 					Charset.forName(this.requestContentCharset));
 			StringEntity entity = new StringEntity(requestContent, contentType);
 			request.setEntity(entity);
 		}
+		else if (REQUEST_CONTENT_TYPE_TEXT.equals(this.requestContentType))
+		{
+			requestContent = resolveTemplatePlain(this.requestContent, query);
+			ContentType contentType = ContentType.create(ContentType.TEXT_PLAIN.getMimeType(),
+					Charset.forName(this.requestContentCharset));
+			StringEntity entity = new StringEntity(requestContent, contentType);
+			request.setEntity(entity);
+		}
+		else if (REQUEST_CONTENT_TYPE_TEXT_XML.equals(this.requestContentType))
+		{
+			requestContent = resolveTemplateXml(this.requestContent, query);
+			ContentType contentType = ContentType.create(ContentType.TEXT_XML.getMimeType(),
+					Charset.forName(this.requestContentCharset));
+			StringEntity entity = new StringEntity(requestContent, contentType);
+			request.setEntity(entity);
+		}
 		else
-			throw new DataSetException("Request content type [" + this.requestContentType + "] is not supported");
+		{
+			requestContent = resolveTemplatePlain(this.requestContent, query);
+			StringEntity entity = new StringEntity(requestContent);
+			request.setEntity(entity);
+		}
+
+		return requestContent;
 	}
 
 	protected String resolveTemplateUri(DataSetQuery query) throws Throwable
 	{
-		return resolveTextAsGeneralTemplate(this.uri, query);
-	}
-
-	protected String resolveTemplateHeaderContent(DataSetQuery query) throws Throwable
-	{
-		return resolveJsonAsTemplate(this.headerContent, query);
-	}
-
-	protected String resolveTemplateRequestContent(DataSetQuery query) throws Throwable
-	{
-		return resolveJsonAsTemplate(this.requestContent, query);
-	}
-
-	/**
-	 * 将指定JSON文本作为模板解析。
-	 * 
-	 * @param json
-	 * @param query
-	 * @return
-	 */
-	protected String resolveJsonAsTemplate(String json, DataSetQuery query)
-	{
-		return resolveTextAsTemplate(AbstractJsonDataSet.JSON_TEMPLATE_RESOLVER, json, query);
+		return resolveTemplatePlain(this.uri, query);
 	}
 
 	protected ClassicHttpRequest createHttpRequest(String uri) throws Throwable
