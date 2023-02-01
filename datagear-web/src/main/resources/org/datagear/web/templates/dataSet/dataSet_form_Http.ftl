@@ -78,7 +78,7 @@
 			<div class="field grid">
 				<label for="${pid}requestContent" class="field-label col-12 mb-2"
 					title="<@spring.message code='httpDataSet.requestContent.desc' />">
-					<@spring.message code='requestBodyJson' />
+					<@spring.message code='requestBody' />
 				</label>
 		        <div class="field-input col-12">
 		        	<div id="${pid}requestContent" class="code-editor-wrapper input p-component p-inputtext w-full">
@@ -197,13 +197,15 @@
 			{name: "<@spring.message code='httpDataSet.requestMethod.GET' />", value: "${HttpDataSet.REQUEST_METHOD_GET}"},
 			{name: "<@spring.message code='httpDataSet.requestMethod.POST' />", value: "${HttpDataSet.REQUEST_METHOD_POST}"},
 			{name: "<@spring.message code='httpDataSet.requestMethod.PUT' />", value: "${HttpDataSet.REQUEST_METHOD_PUT}"},
-			{name: "<@spring.message code='httpDataSet.requestMethod.GET' />", value: "${HttpDataSet.REQUEST_METHOD_PATCH}"},
+			{name: "<@spring.message code='httpDataSet.requestMethod.PATCH' />", value: "${HttpDataSet.REQUEST_METHOD_PATCH}"},
 			{name: "<@spring.message code='httpDataSet.requestMethod.DELETE' />", value: "${HttpDataSet.REQUEST_METHOD_DELETE}"}
 		],
 		requestContentTypeOptions:
 		[
 			{name: "<@spring.message code='httpDataSet.requestContentType.FORM_URLENCODED' />", value: "${HttpDataSet.REQUEST_CONTENT_TYPE_FORM_URLENCODED}"},
-			{name: "<@spring.message code='httpDataSet.requestContentType.JSON' />", value: "${HttpDataSet.REQUEST_CONTENT_TYPE_JSON}"}
+			{name: "<@spring.message code='httpDataSet.requestContentType.JSON' />", value: "${HttpDataSet.REQUEST_CONTENT_TYPE_JSON}"},
+			{name: "<@spring.message code='httpDataSet.requestContentType.TEXT' />", value: "${HttpDataSet.REQUEST_CONTENT_TYPE_TEXT}"},
+			{name: "<@spring.message code='httpDataSet.requestContentType.TEXT_XML' />", value: "${HttpDataSet.REQUEST_CONTENT_TYPE_TEXT_XML}"}
 		],
 		requestContentCharsetOptions: $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />),
 		responseContentTypeOptions:
