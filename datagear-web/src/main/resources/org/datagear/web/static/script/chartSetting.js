@@ -1759,7 +1759,10 @@
 					$thisButton.removeClass("dg-param-value-form-invalid");
 					
 					for(var i=0; i<paramValuess.length; i++)
-						chart.dataSetParamValues(paramValuess[i].index, paramValuess[i].paramValues);
+					{
+						//这里设置参数应采用inflate模式，因为数据集允许隐式参数（未明确定义数据集参数的参数化语法），这里不应清除它们
+						chart.dataSetParamValues(paramValuess[i].index, paramValuess[i].paramValues, true);
+					}
 					
 					if(chartSetting.closeChartSettingParamPanelOnSubmit)
 						chartSetting.closeChartSettingParamPanel(chart);
