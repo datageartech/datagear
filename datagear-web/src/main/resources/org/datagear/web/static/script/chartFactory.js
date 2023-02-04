@@ -1890,10 +1890,11 @@
 	 * 获取/设置第一个数据集参数值集。
 	 * 
 	 * @param paramValues 可选，要设置的参数名/值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
+	 * @param inflate 可选，设置操作是否仅填充在paramValues中出现的参数值，而保留旧参数值，默认值为：false
 	 */
-	chartBase.dataSetParamValuesFirst = function(paramValues)
+	chartBase.dataSetParamValuesFirst = function(paramValues, inflate)
 	{
-		return this.dataSetParamValues(0, paramValues);
+		return this.dataSetParamValues(0, paramValues, inflate);
 	};
 	
 	/**
@@ -1901,8 +1902,9 @@
 	 * 
 	 * @param chartDataSet 指定图表数据集或其索引
 	 * @param paramValues 可选，要设置的参数值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
+	 * @param inflate 可选，设置操作是否仅填充在paramValues中出现的参数值，而保留旧参数值，默认值为：false
 	 */
-	chartBase.dataSetParamValues = function(chartDataSet, paramValues)
+	chartBase.dataSetParamValues = function(chartDataSet, paramValues, inflate)
 	{
 		chartDataSet = this._chartDataSetOf(chartDataSet);
 		
@@ -1915,6 +1917,8 @@
 			return paramValuesCurrent;
 		else
 		{
+			inflate = (inflate == null ? false : inflate);
+			
 			if($.isArray(paramValues))
 			{
 				var params = (chartDataSet.dataSet.params || []);
@@ -1930,7 +1934,14 @@
 				paramValues = paramValuesObj;
 			}
 			
-			chartDataSet.query.paramValues = paramValues;
+			if(inflate)
+			{
+				$.extend(paramValuesCurrent, paramValues);
+			}
+			else
+			{
+				chartDataSet.query.paramValues = paramValues;
+			}
 			
 			// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
 			chartDataSet.paramValues = chartDataSet.query.paramValues;
