@@ -27,9 +27,13 @@ page_boolean_options.ftl
 <#assign ParamInputType=statics['org.datagear.analysis.DataSetParam$InputType']>
 <#assign PropertyDataType=statics['org.datagear.analysis.DataSetProperty$DataType']>
 <div class="field grid">
-	<label for="${pid}params" class="field-label col-12 mb-2"
-		title="<@spring.message code='dataSet.params.desc' />">
-		<@spring.message code='parameter' />
+	<label for="${pid}params" class="field-label col-12 mb-2 flex-column align-items-start">
+		<div>
+			<@spring.message code='parameter' />
+		</div>
+		<div class="text-xs text-color-secondary">
+			<@spring.message code='dataSet.params.desc' />
+		</div>
 	</label>
 	<div class="field-input col-12">
 		<div class="p-component p-inputtext">
