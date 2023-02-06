@@ -1245,7 +1245,7 @@
 					if(!myValid)
 						break;
 					
-					var val = $(this).attr("value");
+					var val = $(checkeds[i]).attr("value");
 					myValid = (val == "" ? true : regexNumber.test(val));
 				}
 				
