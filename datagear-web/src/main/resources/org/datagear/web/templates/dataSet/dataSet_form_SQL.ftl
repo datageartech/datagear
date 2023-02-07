@@ -69,8 +69,10 @@
 			<p-button type="submit" label="<@spring.message code='save' />" class="hide-if-readonly"></p-button>
 		</div>
 	</form>
+	<#include "include/dataSet_form_param_property_form.ftl">
 </div>
 <#include "../include/page_form.ftl">
+<#include "../include/page_simple_form.ftl">
 <#include "../include/page_code_editor.ftl">
 <#include "../include/page_sql_editor.ftl">
 <#include "../include/page_boolean_options.ftl">
