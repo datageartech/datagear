@@ -268,9 +268,14 @@
 		$form.each(function()
 		{
 			var thisForm = $(this);
-			var isGenerated = thisForm.attr("dg-generated-ele");
 			
-			if(isGenerated)
+			var dateWidgets = $(".dg-dspv-form-widget-date", thisForm);
+			dateWidgets.each(function()
+			{
+				chartSetting.destroyDatetimePicker($(this));
+			});
+			
+			if(thisForm.attr("dg-generated-ele"))
 				chartFactory.removeElementWithDerived(this);
 			else
 			{
@@ -501,7 +506,7 @@
 		},
 		options);
 		
-		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
+		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
 		
 		if(chartSetting.disableDateAwareInputAutocomplete)
@@ -544,7 +549,7 @@
 		},
 		options);
 		
-		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
+		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
 		
 		if(chartSetting.disableDateAwareInputAutocomplete)
@@ -593,7 +598,7 @@
 		},
 		options);
 		
-		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
+		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
 		
 		if(chartSetting.disableDateAwareInputAutocomplete)
@@ -854,6 +859,18 @@
 		$input.datetimepicker(options);
 		
 		return $wrapper;
+	};
+	
+	/**
+	 * 销毁日期选择器组件。
+	 */
+	chartSetting.destroyDatetimePicker = function($input)
+	{
+		try
+		{
+			$input.datetimepicker("destroy");
+		}
+		catch(e){}
 	};
 	
 	chartSetting.datetimepickerInit = function()

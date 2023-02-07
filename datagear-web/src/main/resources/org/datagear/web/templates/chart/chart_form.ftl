@@ -319,7 +319,7 @@
 		</div>
 	</p-overlaypanel>
 	<p-overlaypanel ref="${pid}paramPanelEle" append-to="body"
-		:show-close-icon="false" @show="onParamPanelShow" id="${pid}paramPanel" class="dataset-paramvalue-panel">
+		:show-close-icon="false" @show="onParamPanelShow" @hide="onParamPanelHide" id="${pid}paramPanel" class="dataset-paramvalue-panel">
 		<div class="pb-2">
 			<label class="text-lg font-bold">
 				<@spring.message code='parameter' />
@@ -1096,6 +1096,12 @@
 		{
 			if(po._currentChartDataSetForParam)
 				po.inflateParamPanel(po._currentChartDataSetForParam);
+		},
+		
+		onParamPanelHide: function(e)
+		{
+			var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}paramPanel", document.body));
+			chartFactory.chartSetting.destroyDataSetParamValueForm(wrapper);
 		},
 		
 		onClearParamValues: function(e, chartDataSet)

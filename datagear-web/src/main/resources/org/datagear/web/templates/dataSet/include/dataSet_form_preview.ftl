@@ -86,7 +86,7 @@
 	style="width:1px;z-index:-999">
 </p-button>
 <p-overlaypanel ref="${pid}previewParamPanelEle" append-to="body"
-	:show-close-icon="false" @show="onPreviewParamPanelShow" id="${pid}previewParamPanel" class="dataset-paramvalue-panel">
+	:show-close-icon="false" @show="onPreviewParamPanelShow" @hide="onPreviewParamPanelHide" id="${pid}previewParamPanel" class="dataset-paramvalue-panel">
 	<div class="pb-2">
 		<label class="text-lg font-bold">
 			<@spring.message code='parameter' />
@@ -356,6 +356,11 @@
 		onPreviewParamPanelShow: function(e)
 		{
 			po.inflatePreviewParamPanel();
+		},
+		onPreviewParamPanelHide: function(e)
+		{
+			var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}previewParamPanel", document.body));
+			chartFactory.chartSetting.destroyDataSetParamValueForm(wrapper);
 		}
 	});
 
