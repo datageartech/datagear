@@ -241,6 +241,26 @@
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-label{
 	padding-bottom: 0.2em;
 }
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-label label{
+	/*添加这个样式可以使下面的提示图标居中显示*/
+	display: flex;
+    align-items: center;
+}
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-label label[title]::after{
+	display: inline-block;
+	content: "?";
+	margin-left: 0.1em;
+	font-size: 0.8em;
+	margin-top: 0.1em;
+	width: 1em;
+	height: 1em;
+	text-align: center;
+	line-height: 1em;
+	border-radius: 2em;
+	border-width: 1px;
+	border-style: solid;
+	opacity: 0.7;
+}
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-radio-wrapper,
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-checkbox-wrapper{
 	white-space: nowrap;

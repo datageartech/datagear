@@ -377,11 +377,11 @@
 	 * @param $form
 	 * @param $parent 渲染标签的父容器元素
 	 * @param dataSetParam
-	 * @param formOptions 
+	 * @param formOptions
 	 */
 	chartSetting.renderDataSetParamValueFormLabel = function($form, $parent, dataSetParam, formOptions)
 	{
-		var $label = $("<label />").html((dataSetParam.label ? dataSetParam.label : dataSetParam.name) + formOptions.labelColon)
+		var $label = $("<label />").html(dataSetParam.label ? dataSetParam.label : dataSetParam.name)
 							.appendTo($parent);
 		
 		if(dataSetParam.desc)

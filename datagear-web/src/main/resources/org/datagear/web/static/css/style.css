@@ -93,7 +93,6 @@ label[title]:not(.no-tip)::after,
 .tip-label[title]::after{
 	display: inline-block;
 	content: "?";
-	color: var(--text-color-secondary);
 	margin-left: 0.1em;
 	font-size: 0.8em;
 	margin-top: 0.1em;
@@ -104,6 +103,7 @@ label[title]:not(.no-tip)::after,
 	border-radius: 2em;
 	border-width: 1px;
 	border-style: solid;
+	opacity: 0.7;
 }
 label.align-tip{
 	/*添加这个样式可以使上面的提示图标居中显示*/
