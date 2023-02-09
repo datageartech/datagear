@@ -40,6 +40,12 @@ public class DataSetProperty extends AbstractNameTypeAware implements Cloneable,
 	/** 默认值 */
 	private Object defaultValue = null;
 
+	/** 是否是需计算的 */
+	private boolean evaluated = false;
+
+	/** 计算表达式 */
+	private String expression = null;
+
 	public DataSetProperty()
 	{
 		super();
@@ -55,6 +61,8 @@ public class DataSetProperty extends AbstractNameTypeAware implements Cloneable,
 		super(property.getName(), property.getType());
 		this.label = property.label;
 		this.defaultValue = property.defaultValue;
+		this.evaluated = property.evaluated;
+		this.expression = property.expression;
 	}
 
 	public boolean hasLabel()
@@ -91,6 +99,34 @@ public class DataSetProperty extends AbstractNameTypeAware implements Cloneable,
 	public void setDefaultValue(Object defaultValue)
 	{
 		this.defaultValue = defaultValue;
+	}
+
+	/**
+	 * 是否是需计算的。
+	 * <p>
+	 * 如果为{@code true}，应使用{@linkplain #getExpression()}表达式计算求值。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public boolean isEvaluated()
+	{
+		return evaluated;
+	}
+
+	public void setEvaluated(boolean evaluated)
+	{
+		this.evaluated = evaluated;
+	}
+
+	public String getExpression()
+	{
+		return expression;
+	}
+
+	public void setExpression(String expression)
+	{
+		this.expression = expression;
 	}
 
 	@Override
