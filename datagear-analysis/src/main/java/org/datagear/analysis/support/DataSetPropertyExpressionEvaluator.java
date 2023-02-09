@@ -20,8 +20,10 @@ package org.datagear.analysis.support;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetProperty;
 import org.springframework.context.expression.MapAccessor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -30,9 +32,9 @@ import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
 
 /**
- * 计算{@linkplain DataSetProperty}的表达式计算器。
+ * {@linkplain DataSetProperty}表达式计算器。
  * <p>
- * 此类用于计算{@linkplain DataSetProperty#getExpression()}表达式的值，支持诸如：
+ * 此类用于计算{@linkplain DataSet#getProperties()}的{@linkplain DataSetProperty#getExpression()}表达式的值，支持诸如：
  * </p>
  * <p>
  * <code>(属性名A + 属性名B)*2 - 属性名C/3</code>
@@ -50,6 +52,8 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
 public class DataSetPropertyExpressionEvaluator
 {
 	private ExpressionParser expressionParser = new SpelExpressionParser();
+	
+	private ConversionService conversionService = null;
 
 	public DataSetPropertyExpressionEvaluator()
 	{
@@ -66,8 +70,18 @@ public class DataSetPropertyExpressionEvaluator
 		this.expressionParser = expressionParser;
 	}
 
+	public ConversionService getConversionService()
+	{
+		return conversionService;
+	}
+
+	public void setConversionService(ConversionService conversionService)
+	{
+		this.conversionService = conversionService;
+	}
+
 	/**
-	 * 对计算{@linkplain DataSetProperty}进行表达式计算。
+	 * 计算{@linkplain DataSetProperty}表达式的值。
 	 * 
 	 * @param property
 	 *            {@linkplain DataSetProperty#getExpression()}不应为空
@@ -94,12 +108,12 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	/**
-	 * 对计算{@linkplain DataSetProperty}进行表达式计算。
+	 * 计算{@linkplain DataSetProperty}表达式的值。
 	 * 
 	 * @param property
 	 *            {@linkplain DataSetProperty#getExpression()}不应为空
 	 * @param datas
-	 * @return 当{@linkplain DataSetProperty#getExpression()}为空时将返回{@code null}
+	 * @return
 	 * @throws DataSetPropertyExpressionEvaluatorException
 	 */
 	public Object[] eval(DataSetProperty property, Object[] datas) throws DataSetPropertyExpressionEvaluatorException
@@ -121,12 +135,12 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	/**
-	 * 对计算{@linkplain DataSetProperty}进行表达式计算。
+	 * 计算{@linkplain DataSetProperty}表达式的值。
 	 * 
 	 * @param property
 	 *            {@linkplain DataSetProperty#getExpression()}不应为空
 	 * @param datas
-	 * @return 当{@linkplain DataSetProperty#getExpression()}为空时将返回{@code null}
+	 * @return
 	 * @throws DataSetPropertyExpressionEvaluatorException
 	 */
 	public List<Object> eval(DataSetProperty property, List<?> datas)
@@ -151,7 +165,7 @@ public class DataSetPropertyExpressionEvaluator
 	protected Object[] doEvalArray(String expression, Object[] datas) throws Throwable
 	{
 		Expression exp = this.expressionParser.parseExpression(expression);
-		EvaluationContext context = buildMapFirstEvaluationContext();
+		EvaluationContext context = buildSimpleMapAccessEvaluationContext();
 
 		return doEvalArray(exp, context, datas);
 	}
@@ -171,7 +185,7 @@ public class DataSetPropertyExpressionEvaluator
 	protected List<Object> doEvalList(String expression, List<?> datas) throws Throwable
 	{
 		Expression exp = this.expressionParser.parseExpression(expression);
-		EvaluationContext context = buildMapFirstEvaluationContext();
+		EvaluationContext context = buildSimpleMapAccessEvaluationContext();
 
 		return doEvalList(exp, context, datas);
 	}
@@ -192,7 +206,7 @@ public class DataSetPropertyExpressionEvaluator
 	protected Object doEvalSingle(String expression, Object data) throws Throwable
 	{
 		Expression exp = this.expressionParser.parseExpression(expression);
-		EvaluationContext context = buildMapFirstEvaluationContext();
+		EvaluationContext context = buildSimpleMapAccessEvaluationContext();
 
 		return doEvalSingle(exp, context, data);
 	}
@@ -203,24 +217,28 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	/**
-	 * 构建{@code Map}优先的计算上下文。
+	 * 构建支持{@linkplain Map}宽松访问语法的的计算上下文。
 	 * <p>
-	 * Spring默认对于{@code Map}的访问格式为：{@code map['key']}，而数据集的结果数据几乎都是{@code Map}类型的，
-	 * 这导致定义表达式会较繁琐且不够直观。
+	 * Spring表达式默认对于{@linkplain Map}的访问语法为：{@code map['key']}，而数据集的结果数据几乎都是{@code Map}类型的，
+	 * 这样会导致定义表达式会较繁琐且不够直观。
 	 * </p>
 	 * <p>
-	 * 因而，此方法返回的{@linkplain EvaluationContext}做了特殊处理，支持以{@code map.key}的格式读取{@code Map}，
+	 * 因而，此方法返回的{@linkplain EvaluationContext}做了特殊处理，支持以{@code map.key}的宽松语法访问{@linkplain Map}，
 	 * 从而简化表达式定义。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	protected EvaluationContext buildMapFirstEvaluationContext()
+	protected EvaluationContext buildSimpleMapAccessEvaluationContext()
 	{
+		//注意：这里Builder构造方法参数的MapAccessor必须在DataBindingPropertyAccessor之前，
+		//才能使得"map.size"表达式优先访问"size"关键字的值而非map的大小
 		SimpleEvaluationContext.Builder builder = new SimpleEvaluationContext.Builder(new MapAccessor(),
 				DataBindingPropertyAccessor.forReadOnlyAccess());
-		EvaluationContext context = builder.build();
-
-		return context;
+		
+		if(this.conversionService != null)
+			builder.withConversionService(this.conversionService);
+		
+		return builder.build();
 	}
 }

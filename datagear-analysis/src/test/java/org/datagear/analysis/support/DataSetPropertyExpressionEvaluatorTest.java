@@ -51,6 +51,44 @@ public class DataSetPropertyExpressionEvaluatorTest
 
 		assertEquals(17, result.intValue());
 	}
+	
+	@Test
+	public void doEvalSingleTest_mapKeyFirst() throws Throwable
+	{
+		//map.size应取"size"关键字的值
+		{
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("width", 3);
+			data.put("height", 6);
+			data.put("bean", new ExpBean());
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("size", 6);
+			map.put("age", 12);
+			map.put("weight", 5);
+			data.put("map", map);
+
+			Number result = (Number) this.evaluator.doEvalSingle("(width * height)/2 + map.size + bean.d", data);
+
+			assertEquals(17, result.intValue());
+		}
+		
+		//map.size应取map的大小
+		{
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("width", 3);
+			data.put("height", 6);
+			data.put("bean", new ExpBean());
+			Map<String, Object> map = new HashMap<String, Object>();
+			//map.put("size", 6);
+			map.put("age", 12);
+			map.put("weight", 5);
+			data.put("map", map);
+	
+			Number result = (Number) this.evaluator.doEvalSingle("(width * height)/2 + map.size + bean.d", data);
+	
+			assertEquals(13, result.intValue());
+		}
+	}
 
 	protected static class ExpBean
 	{
