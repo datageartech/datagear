@@ -1291,10 +1291,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 					HtmlTitleHandler htmlTitleHandler = this.filterContext.getRenderContext().getHtmlTitleHandler();
 					if (htmlTitleHandler != null)
 					{
-						String titleContent = ((StringWriter) this.getCopyWriter().getCopyOut()).toString();
-						write(htmlTitleHandler.suffix(titleContent));
+						String rawTitleContent = ((StringWriter) this.getCopyWriter().getCopyOut()).toString();
+						String titleContent = htmlTitleHandler.suffix(rawTitleContent);
+						titleContent = StringUtil.escapeHtml(titleContent);
+
+						write(titleContent);
 						
-						TplDashboardTitleInserter inserter = new TplDashboardTitleInserter(titleContent, false);
+						TplDashboardTitleInserter inserter = new TplDashboardTitleInserter(rawTitleContent, false);
 						this.filterContext.getDashboardMeta().addBeforeWriteTagStartInserter(this.tagCount, inserter);
 					}
 					
@@ -1306,11 +1309,15 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 					HtmlTitleHandler htmlTitleHandler = this.filterContext.getRenderContext().getHtmlTitleHandler();
 					if (htmlTitleHandler != null)
 					{
+						String rawTitleContent = "";
+						String titleContent = htmlTitleHandler.suffix(rawTitleContent);
+						titleContent = StringUtil.escapeHtml(titleContent);
+
 						write(HTML_TAG_TITLE_START);
-						write(htmlTitleHandler.suffix(""));
+						write(titleContent);
 						write(HTML_TAG_TITLE_CLOSE);
 						
-						TplDashboardTitleInserter inserter = new TplDashboardTitleInserter("", true);
+						TplDashboardTitleInserter inserter = new TplDashboardTitleInserter(rawTitleContent, true);
 						this.filterContext.getDashboardMeta().addBeforeWriteTagStartInserter(this.tagCount, inserter);
 					}
 
@@ -1686,7 +1693,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 						if (titleInserter.isWrapTitleTag())
 							out.write(HTML_TAG_TITLE_START);
 
-						out.write(htmlTitleHandler.suffix(titleInserter.getRawTitleContent()));
+						String titleContent = htmlTitleHandler.suffix(titleInserter.getRawTitleContent());
+						titleContent = StringUtil.escapeHtml(titleContent);
+
+						out.write(titleContent);
 
 						if (titleInserter.isWrapTitleTag())
 							out.write(HTML_TAG_TITLE_CLOSE);

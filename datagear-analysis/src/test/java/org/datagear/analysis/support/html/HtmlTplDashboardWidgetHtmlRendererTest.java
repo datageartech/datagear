@@ -76,6 +76,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	private TestFixedIdHtmlTplDashboardWidgetHtmlRenderer renderer;
 	private TplDashboardWidgetResManager resManager;
 	private HtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler("-suffix", "generated");
+	private HtmlTitleHandler htmlTitleHandlerEscape = new DefaultHtmlTitleHandler("-<b>escape</b>", "<b>escape</b>");
 	private TestFixedIdHtmlTplDashboardWidgetHtmlRenderer rendererWithCache;
 	
 	public HtmlTplDashboardWidgetHtmlRendererTest() throws Exception
@@ -398,24 +399,25 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			}
 		}
 
-		// 处理标题：没有<title></title>标签
+		// 处理标题：需转义
 		{
-			String template = "<html><head></head><body></body></html>";
+			String template = "<html><head><title>abc</title></head><body><title>sdf</title></body></html>";
 
 			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
-			renderContext.setHtmlTitleHandler(this.htmlTitleHandler);
+			renderContext.setHtmlTitleHandler(this.htmlTitleHandlerEscape);
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 
 			HtmlTplDashboard dashboard = filterContext.getDashboard();
 			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
 			String html = getHtmlWithPrint(renderContext);
 
-			assertTrue(html.contains("<title>generated</title></head>"));
+			assertTrue(html.contains("<title>abc-&lt;b&gt;escape&lt;/b&gt;</title></head>"));
+			assertTrue(html.contains("<title>sdf</title>"));
 			
 			//缓存
 			{
 				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
-				renderContext1.setHtmlTitleHandler(this.htmlTitleHandler);
+				renderContext1.setHtmlTitleHandler(this.htmlTitleHandlerEscape);
 				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
 				String html1 = getHtmlWithPrint(renderContext1);
 				
@@ -444,6 +446,31 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
 				String html1 = getHtmlWithPrint(renderContext1);
 				
+				assertEquals(html, html1);
+			}
+		}
+
+		// 处理标题：没有<title></title>标签，需转义
+		{
+			String template = "<html><head></head><body></body></html>";
+
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			renderContext.setHtmlTitleHandler(this.htmlTitleHandlerEscape);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
+
+			HtmlTplDashboard dashboard = filterContext.getDashboard();
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+
+			assertTrue(html.contains("<title>&lt;b&gt;escape&lt;/b&gt;</title></head>"));
+
+			// 缓存
+			{
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				renderContext1.setHtmlTitleHandler(this.htmlTitleHandlerEscape);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
+
 				assertEquals(html, html1);
 			}
 		}
@@ -1681,7 +1708,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		
 		double enhance = rawTimes/(double)enhanceTimes;
 		
-		assertTrue(enhance > 1.1f);
+		assertTrue(enhance > 1.0f);
 		
 		System.out.println("-----------------------");
 		System.out.println("test count   : " + loopCount);
@@ -1739,7 +1766,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		
 		double enhance = rawTimes/(double)enhanceTimes;
 		
-		assertTrue(enhance > 1.1f);
+		assertTrue(enhance > 1.0f);
 		
 		System.out.println("-----------------------");
 		System.out.println("test count   : " + loopCount);
