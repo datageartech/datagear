@@ -317,6 +317,51 @@ public class AbstractDataSetTest
 		}
 	}
 
+	@Test
+	public void convertRawDataToResultTest_expression() throws Throwable
+	{
+		TestAbstractDataSet dataSet = new TestAbstractDataSet();
+
+		List<Map<String, Object>> rawData = new ArrayList<Map<String, Object>>();
+
+		Map<String, Object> raw0 = new HashMap<String, Object>();
+		raw0.put("v0", "2");
+		raw0.put("v1", "6");
+		raw0.put("s0", "aaa");
+
+		Collections.addAll(rawData, raw0);
+
+		List<DataSetProperty> properties = new ArrayList<DataSetProperty>();
+		{
+			DataSetProperty p0 = new DataSetProperty("v0", DataSetProperty.DataType.INTEGER);
+			DataSetProperty p1 = new DataSetProperty("v1", DataSetProperty.DataType.NUMBER);
+			DataSetProperty p2 = new DataSetProperty("s0", DataSetProperty.DataType.STRING);
+
+			DataSetProperty avg = new DataSetProperty("avg", DataSetProperty.DataType.DECIMAL);
+			avg.setEvaluated(true);
+			avg.setExpression("(v0 + v1)/2");
+
+			DataSetProperty suffix = new DataSetProperty("suffix", DataSetProperty.DataType.STRING);
+			suffix.setEvaluated(true);
+			suffix.setExpression("s0 + '-sufix'");
+
+			Collections.addAll(properties, p0, p1, p2, avg, suffix);
+		}
+
+		List<Map<String, Object>> resultData = dataSet.convertRawDataToResult(rawData, properties, -1, null);
+
+		assertEquals(rawData.size(), resultData.size());
+
+		{
+			Map<String, Object> re0 = resultData.get(0);
+
+			assertEquals(raw0.get("v0"), ((Number) re0.get("v0")).toString());
+			assertEquals(raw0.get("v1"), ((Number) re0.get("v1")).toString());
+			assertEquals(4, ((Number) re0.get("avg")).intValue());
+			assertEquals("aaa-sufix", re0.get("suffix"));
+		}
+	}
+
 	private static class TestAbstractDataSet extends AbstractDataSet
 	{
 		@Override

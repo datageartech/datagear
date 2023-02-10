@@ -17,6 +17,8 @@
 
 package org.datagear.analysis.support;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -41,6 +43,16 @@ import org.datagear.analysis.DataSetProperty.DataType;
 public class DataSetPropertyValueConverter extends DataValueConverter
 {
 	private DataFormat dataFormat;
+
+	/**
+	 * 是否忽略{@linkplain BigInteger}至{@linkplain DataType#INTEGER}的转换。
+	 */
+	private boolean ignoreBigIntegerToInteger = true;
+
+	/**
+	 * 是否忽略{@linkplain BigDecimal}至{@linkplain DataType#DECIMAL}的转换。
+	 */
+	private boolean ignoreBigDecimalToDecimal = true;
 
 	private SimpleDateFormat _dateFormat = null;
 	private SimpleDateFormat _timeFormat = null;
@@ -72,6 +84,26 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 		this._timeFormat = new SimpleDateFormat(dataFormat.getTimeFormat());
 		this._timestampFormat = new SimpleDateFormat(dataFormat.getTimestampFormat());
 		this._numberFormat = new DecimalFormat(dataFormat.getNumberFormat());
+	}
+
+	public boolean isIgnoreBigIntegerToInteger()
+	{
+		return ignoreBigIntegerToInteger;
+	}
+
+	public void setIgnoreBigIntegerToInteger(boolean ignoreBigIntegerToInteger)
+	{
+		this.ignoreBigIntegerToInteger = ignoreBigIntegerToInteger;
+	}
+
+	public boolean isIgnoreBigDecimalToDecimal()
+	{
+		return ignoreBigDecimalToDecimal;
+	}
+
+	public void setIgnoreBigDecimalToDecimal(boolean ignoreBigDecimalToDecimal)
+	{
+		this.ignoreBigDecimalToDecimal = ignoreBigDecimalToDecimal;
 	}
 
 	@Override
@@ -179,9 +211,19 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 		else if (DataType.BOOLEAN.equals(type))
 			return (value.intValue() > 0);
 		else if (DataType.INTEGER.equals(type))
-			return value.longValue();
+		{
+			if (this.ignoreBigIntegerToInteger && (value instanceof BigInteger))
+				return value;
+			else
+				return value.longValue();
+		}
 		else if (DataType.DECIMAL.equals(type))
-			return value.doubleValue();
+		{
+			if (this.ignoreBigDecimalToDecimal && (value instanceof BigDecimal))
+				return value;
+			else
+				return value.doubleValue();
+		}
 		else if (DataType.DATE.equals(type))
 			return new Date(value.longValue());
 		else if (DataType.TIME.equals(type))

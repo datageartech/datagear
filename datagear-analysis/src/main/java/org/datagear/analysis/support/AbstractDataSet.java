@@ -34,6 +34,8 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.NameAwareUtil;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.ResultDataFormat;
+import org.datagear.analysis.support.DataSetPropertyExpressionEvaluator.EvalPostHandler;
+import org.datagear.util.StringUtil;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -255,15 +257,15 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	{
 		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
 		ResultDataFormatter formatter = (format == null ? null : new ResultDataFormatter(format));
+		List<Object> defaultValues = getDefaultValues(properties, converter);
+		EvaludatedPropertiesInfo evaludatedPropertiesInfo = getEvaludatedPropertiesInfo(properties, defaultValues);
+		List<DataSetProperty> evaluatedProperties = evaludatedPropertiesInfo.getProperties();
+		boolean hasEvaluatedProperty = (evaluatedProperties != null && !evaluatedProperties.isEmpty());
 
 		int dataSize = (fetchSize >= 0 ? fetchSize : rawData.size());
 		List<Map<String, Object>> data = new ArrayList<>(dataSize);
 
 		int plen = properties.size();
-
-		Object[] defaultValues = new Object[plen];
-		Object dvPlaceholder = new Object();
-		Arrays.fill(defaultValues, dvPlaceholder);
 
 		for (Map<String, ?> rowRaw : rawData)
 		{
@@ -282,18 +284,14 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 				value = convertToPropertyDataType(converter, value, property);
 
 				if (value == null)
+					value = defaultValues.get(j);
+
+				// 格式化应是最后步骤，如果没有计算属性，则可以在此直接进行格式化；否则，应先处理计算属性后再格式化
+				if (!hasEvaluatedProperty)
 				{
-					if (defaultValues[j] == dvPlaceholder)
-					{
-						Object defaultValue = property.getDefaultValue();
-						defaultValues[j] = convertToPropertyDataType(converter, defaultValue, property);
-					}
-
-					value = defaultValues[j];
+					if (formatter != null)
+						value = formatter.format(value);
 				}
-
-				if (formatter != null)
-					value = formatter.format(value);
 
 				row.put(name, value);
 			}
@@ -301,7 +299,93 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 			data.add(row);
 		}
 
+		if (hasEvaluatedProperty)
+		{
+			evalAndFormatResultData(data, evaluatedProperties, evaludatedPropertiesInfo.getDefaultValues(), converter,
+					formatter);
+		}
+
 		return data;
+	}
+
+	/**
+	 * 对{@linkplain DataSetProperty#getExpression()}计算求值，并执行必要的数据格式化。
+	 * 
+	 * @param data
+	 * @param evaluatedProperties
+	 * @param defaultValues
+	 * @param converter
+	 * @param formatter
+	 */
+	protected void evalAndFormatResultData(List<Map<String, Object>> data,
+			List<DataSetProperty> evaluatedProperties, List<Object> defaultValues,
+			DataSetPropertyValueConverter converter, ResultDataFormatter formatter)
+	{
+		DataSetPropertyExpressionEvaluator evaluator = getDataSetPropertyExpressionEvaluator();
+
+		evaluator.eval(evaluatedProperties, data, new EvalPostHandler<Map<String, Object>>()
+		{
+			@Override
+			public void handle(DataSetProperty property, int propertyIndex, Map<String, Object> data, Object value)
+			{
+				value = convertToPropertyDataType(converter, value, property);
+
+				if (value == null)
+					value = defaultValues.get(propertyIndex);
+
+				if (formatter != null)
+					value = formatter.format(value);
+
+				data.put(property.getName(), value);
+			}
+		});
+	}
+
+	protected DataSetPropertyExpressionEvaluator getDataSetPropertyExpressionEvaluator()
+	{
+		return DataSetPropertyExpressionEvaluator.DEFAULT;
+	}
+
+	/**
+	 * 获取需计算的属性列表。
+	 * 
+	 * @param properties
+	 * @param defaultValues
+	 * @return 空列表表示没有计算属性
+	 */
+	protected EvaludatedPropertiesInfo getEvaludatedPropertiesInfo(List<DataSetProperty> properties,
+			List<Object> defaultValues)
+	{
+		List<DataSetProperty> eps = new ArrayList<DataSetProperty>(3);
+		List<Object> evs = new ArrayList<Object>(3);
+
+		for (int i = 0, len = properties.size(); i < len; i++)
+		{
+			DataSetProperty p = properties.get(i);
+
+			if (p.isEvaluated() && !StringUtil.isEmpty(p.getExpression()))
+			{
+				eps.add(p);
+				evs.add(defaultValues.get(i));
+			}
+		}
+
+		return new EvaludatedPropertiesInfo(eps, evs);
+	}
+
+	protected List<Object> getDefaultValues(List<DataSetProperty> properties,
+			DataSetPropertyValueConverter converter)
+	{
+		List<Object> defaultValues = new ArrayList<Object>(properties.size());
+
+		for (DataSetProperty p : properties)
+		{
+			Object defaultValue = p.getDefaultValue();
+			defaultValue = convertToPropertyDataType(converter, defaultValue, p);
+			defaultValues.add(defaultValue);
+		}
+
+		return defaultValues;
 	}
 
 	/**
@@ -399,7 +483,13 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		if (dataFormat == null)
 			dataFormat = new DataFormat();
 
-		return new DataSetPropertyValueConverter(dataFormat);
+		DataSetPropertyValueConverter converter = new DataSetPropertyValueConverter(dataFormat);
+
+		// 这里应设为true，可避免精度丢失，同时可保留BigDecimal的原始小数位数
+		converter.setIgnoreBigIntegerToInteger(true);
+		converter.setIgnoreBigDecimalToDecimal(true);
+
+		return converter;
 	}
 
 	/**
@@ -544,5 +634,28 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	{
 		Map<String, ?> values = query.getParamValues();
 		return new TemplateContext(values);
+	}
+
+	protected static class EvaludatedPropertiesInfo
+	{
+		private final List<DataSetProperty> properties;
+		private final List<Object> defaultValues;
+
+		public EvaludatedPropertiesInfo(List<DataSetProperty> properties, List<Object> defaultValues)
+		{
+			super();
+			this.properties = properties;
+			this.defaultValues = defaultValues;
+		}
+
+		public List<DataSetProperty> getProperties()
+		{
+			return properties;
+		}
+
+		public List<Object> getDefaultValues()
+		{
+			return defaultValues;
+		}
 	}
 }

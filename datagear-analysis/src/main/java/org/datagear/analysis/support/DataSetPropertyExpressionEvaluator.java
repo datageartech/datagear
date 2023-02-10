@@ -19,6 +19,7 @@ package org.datagear.analysis.support;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetProperty;
@@ -27,12 +28,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
 
 /**
- * {@linkplain DataSetProperty}表达式计算器。
+ * {@linkplain DataSetProperty#getExpression()}表达式计算器。
  * <p>
  * 此类用于计算{@linkplain DataSet#getProperties()}的{@linkplain DataSetProperty#getExpression()}表达式的值，支持诸如：
  * </p>
@@ -51,6 +53,8 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  */
 public class DataSetPropertyExpressionEvaluator
 {
+	public static final DataSetPropertyExpressionEvaluator DEFAULT = new DataSetPropertyExpressionEvaluator();
+
 	private ExpressionParser expressionParser = new SpelExpressionParser();
 	
 	private ConversionService conversionService = null;
@@ -81,21 +85,21 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	/**
-	 * 计算{@linkplain DataSetProperty}表达式的值。
+	 * 计算表达式的值。
 	 * 
-	 * @param property
-	 *            {@linkplain DataSetProperty#getExpression()}不应为空
+	 * @param expression
 	 * @param data
 	 * @return
 	 * @throws DataSetPropertyExpressionEvaluatorException
 	 */
-	public Object eval(DataSetProperty property, Object data) throws DataSetPropertyExpressionEvaluatorException
+	public Object eval(String expression, Object data) throws DataSetPropertyExpressionEvaluatorException
 	{
-		String expression = property.getExpression();
+		Expression exp = parseExpression(expression);
 
 		try
 		{
-			return doEvalSingle(expression, data);
+			EvaluationContext context = buildSimpleMapAccessEvaluationContext();
+			return doEvalSingle(exp, context, data);
 		}
 		catch (DataSetPropertyExpressionEvaluatorException e)
 		{
@@ -108,7 +112,7 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	/**
-	 * 计算{@linkplain DataSetProperty}表达式的值。
+	 * 计算表达式的值。
 	 * 
 	 * @param property
 	 *            {@linkplain DataSetProperty#getExpression()}不应为空
@@ -116,13 +120,14 @@ public class DataSetPropertyExpressionEvaluator
 	 * @return
 	 * @throws DataSetPropertyExpressionEvaluatorException
 	 */
-	public Object[] eval(DataSetProperty property, Object[] datas) throws DataSetPropertyExpressionEvaluatorException
+	public Object[] eval(String expression, Object[] datas) throws DataSetPropertyExpressionEvaluatorException
 	{
-		String expression = property.getExpression();
+		Expression exp = parseExpression(expression);
 
 		try
 		{
-			return doEvalArray(expression, datas);
+			EvaluationContext context = buildSimpleMapAccessEvaluationContext();
+			return doEvalArray(exp, context, datas);
 		}
 		catch (DataSetPropertyExpressionEvaluatorException e)
 		{
@@ -135,22 +140,62 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	/**
-	 * 计算{@linkplain DataSetProperty}表达式的值。
+	 * 计算表达式的值。
 	 * 
-	 * @param property
-	 *            {@linkplain DataSetProperty#getExpression()}不应为空
+	 * @param expression
 	 * @param datas
 	 * @return
 	 * @throws DataSetPropertyExpressionEvaluatorException
 	 */
-	public List<Object> eval(DataSetProperty property, List<?> datas)
+	public List<Object> eval(String expression, List<?> datas) throws DataSetPropertyExpressionEvaluatorException
+	{
+		Expression exp = parseExpression(expression);
+
+		try
+		{
+			EvaluationContext context = buildSimpleMapAccessEvaluationContext();
+			return doEvalList(exp, context, datas);
+		}
+		catch (DataSetPropertyExpressionEvaluatorException e)
+		{
+			throw e;
+		}
+		catch (Throwable t)
+		{
+			throw new DataSetPropertyExpressionEvaluatorException(t);
+		}
+	}
+
+	/**
+	 * 计算和处理表达式的值。
+	 * 
+	 * @param dataSetProperties
+	 *            它们的{@linkplain DataSetProperty#getExpression()}应不为空
+	 * @param datas
+	 * @param handler
+	 * @throws DataSetPropertyExpressionEvaluatorException
+	 */
+	public <T> void eval(List<DataSetProperty> dataSetProperties, List<T> datas, EvalPostHandler<? super T> handler)
 			throws DataSetPropertyExpressionEvaluatorException
 	{
-		String expression = property.getExpression();
-
+		List<Expression> expressions = parseExpressions(dataSetProperties);
+		int plen = dataSetProperties.size();
+		
 		try
 		{
-			return doEvalList(expression, datas);
+			EvaluationContext context = buildSimpleMapAccessEvaluationContext();
+
+			for (T data : datas)
+			{
+				for (int j = 0; j < plen; j++)
+				{
+					DataSetProperty property = dataSetProperties.get(j);
+					Expression expression = expressions.get(j);
+
+					Object value = doEvalSingle(expression, context, data);
+					handler.handle(property, j, data, value);
+				}
+			}
 		}
 		catch (DataSetPropertyExpressionEvaluatorException e)
 		{
@@ -162,12 +207,17 @@ public class DataSetPropertyExpressionEvaluator
 		}
 	}
 
-	protected Object[] doEvalArray(String expression, Object[] datas) throws Throwable
+	protected List<Expression> parseExpressions(List<DataSetProperty> dataSetProperties)
+			throws DataSetPropertyExpressionEvaluatorException
 	{
-		Expression exp = this.expressionParser.parseExpression(expression);
-		EvaluationContext context = buildSimpleMapAccessEvaluationContext();
-
-		return doEvalArray(exp, context, datas);
+		List<Expression> expressions = new ArrayList<Expression>(dataSetProperties.size());
+		
+		for(DataSetProperty p : dataSetProperties)
+		{
+			expressions.add(parseExpression(p.getExpression()));
+		}
+		
+		return expressions;
 	}
 
 	protected Object[] doEvalArray(Expression expression, EvaluationContext context, Object[] datas) throws Throwable
@@ -180,14 +230,6 @@ public class DataSetPropertyExpressionEvaluator
 		}
 
 		return re;
-	}
-
-	protected List<Object> doEvalList(String expression, List<?> datas) throws Throwable
-	{
-		Expression exp = this.expressionParser.parseExpression(expression);
-		EvaluationContext context = buildSimpleMapAccessEvaluationContext();
-
-		return doEvalList(exp, context, datas);
 	}
 
 	protected List<Object> doEvalList(Expression expression, EvaluationContext context, List<?> datas)
@@ -203,17 +245,26 @@ public class DataSetPropertyExpressionEvaluator
 		return re;
 	}
 
-	protected Object doEvalSingle(String expression, Object data) throws Throwable
-	{
-		Expression exp = this.expressionParser.parseExpression(expression);
-		EvaluationContext context = buildSimpleMapAccessEvaluationContext();
-
-		return doEvalSingle(exp, context, data);
-	}
-
 	protected Object doEvalSingle(Expression expression, EvaluationContext context, Object data) throws Throwable
 	{
 		return expression.getValue(context, data);
+	}
+
+	protected Expression parseExpression(String expression)
+			throws DataSetPropertyExpressionEvaluatorParseException, DataSetPropertyExpressionEvaluatorException
+	{
+		try
+		{
+			return this.expressionParser.parseExpression(expression);
+		}
+		catch (ParseException e)
+		{
+			throw new DataSetPropertyExpressionEvaluatorParseException(e);
+		}
+		catch (Throwable t)
+		{
+			throw new DataSetPropertyExpressionEvaluatorException(t);
+		}
 	}
 
 	/**
@@ -240,5 +291,25 @@ public class DataSetPropertyExpressionEvaluator
 			builder.withConversionService(this.conversionService);
 		
 		return builder.build();
+	}
+
+	/**
+	 * 计算后置处理器。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static interface EvalPostHandler<T>
+	{
+		/**
+		 * 计算完成。
+		 * 
+		 * @param property
+		 * @params propertyIndex
+		 * @param data
+		 * @param value
+		 *            计算结果值
+		 */
+		void handle(DataSetProperty property, int propertyIndex, T data, Object value);
 	}
 }

@@ -19,6 +19,8 @@ package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +37,7 @@ public class DataSetPropertyExpressionEvaluatorTest
 	private DataSetPropertyExpressionEvaluator evaluator = new DataSetPropertyExpressionEvaluator();
 
 	@Test
-	public void doEvalSingleTest() throws Throwable
+	public void evalTest_Object() throws Throwable
 	{
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("width", 3);
@@ -47,13 +49,13 @@ public class DataSetPropertyExpressionEvaluatorTest
 		map.put("weight", 5);
 		data.put("map", map);
 
-		Number result = (Number) this.evaluator.doEvalSingle("(width * height)/2 + map.size + bean.d", data);
+		Number result = (Number) this.evaluator.eval("(width * height)/2 + map.size + bean.d", data);
 
 		assertEquals(17, result.intValue());
 	}
 	
 	@Test
-	public void doEvalSingleTest_mapKeyFirst() throws Throwable
+	public void evalTest_mapKeyFirst() throws Throwable
 	{
 		//map.size应取"size"关键字的值
 		{
@@ -67,7 +69,7 @@ public class DataSetPropertyExpressionEvaluatorTest
 			map.put("weight", 5);
 			data.put("map", map);
 
-			Number result = (Number) this.evaluator.doEvalSingle("(width * height)/2 + map.size + bean.d", data);
+			Number result = (Number) this.evaluator.eval("(width * height)/2 + map.size + bean.d", data);
 
 			assertEquals(17, result.intValue());
 		}
@@ -84,10 +86,22 @@ public class DataSetPropertyExpressionEvaluatorTest
 			map.put("weight", 5);
 			data.put("map", map);
 	
-			Number result = (Number) this.evaluator.doEvalSingle("(width * height)/2 + map.size + bean.d", data);
+			Number result = (Number) this.evaluator.eval("(width * height)/2 + map.size + bean.d", data);
 	
 			assertEquals(13, result.intValue());
 		}
+	}
+
+	@Test
+	public void bigIntegerAndBigDecimalTest()
+	{
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("width", BigInteger.valueOf(1000L));
+		data.put("height", BigDecimal.valueOf(1.2D));
+
+		Number result = (Number) this.evaluator.eval("(width * height)/2", data);
+
+		assertEquals(600, result.intValue());
 	}
 
 	protected static class ExpBean
