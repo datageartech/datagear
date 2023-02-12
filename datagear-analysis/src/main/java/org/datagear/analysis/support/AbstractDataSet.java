@@ -256,11 +256,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 			List<DataSetProperty> properties, int fetchSize, ResultDataFormat format) throws Throwable
 	{
 		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
-		ResultDataFormatter formatter = (format == null ? null : new ResultDataFormatter(format));
 		List<Object> defaultValues = getDefaultValues(properties, converter);
-		EvaludatedPropertiesInfo evaludatedPropertiesInfo = getEvaludatedPropertiesInfo(properties, defaultValues);
-		List<DataSetProperty> evaluatedProperties = evaludatedPropertiesInfo.getProperties();
-		boolean hasEvaluatedProperty = (evaluatedProperties != null && !evaluatedProperties.isEmpty());
 
 		int dataSize = (fetchSize >= 0 ? fetchSize : rawData.size());
 		List<Map<String, Object>> data = new ArrayList<>(dataSize);
@@ -275,70 +271,81 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 			// 易变模型应保留所有原始数据
 			Map<String, Object> row = (isMutableModel() ? new HashMap<>(rowRaw) : new HashMap<>());
 
-			for (int j = 0; j < plen; j++)
+			for (int i = 0; i < plen; i++)
 			{
-				DataSetProperty property = properties.get(j);
+				DataSetProperty property = properties.get(i);
 
 				String name = property.getName();
 				Object value = rowRaw.get(name);
 				value = convertToPropertyDataType(converter, value, property);
-
-				if (value == null)
-					value = defaultValues.get(j);
-
-				// 格式化应是最后步骤，如果没有计算属性，则可以在此直接进行格式化；否则，应先处理计算属性后再格式化
-				if (!hasEvaluatedProperty)
-				{
-					if (formatter != null)
-						value = formatter.format(value);
-				}
+				
+				//无论是否计算属性，这里都应设置默认值
+				if(value == null)
+					value = defaultValues.get(i);
 
 				row.put(name, value);
 			}
 
 			data.add(row);
 		}
-
-		if (hasEvaluatedProperty)
-		{
-			evalAndFormatResultData(data, evaluatedProperties, evaludatedPropertiesInfo.getDefaultValues(), converter,
-					formatter);
-		}
-
+		
+		// 计算表达式，此时计算可以确保所有非计算属性值都可用
+		evalResultData(data, properties, defaultValues, converter);
+		
+		// 格式化，应是最后步骤
+		formatResultData(data, properties, format);
+		
 		return data;
 	}
-
-	/**
-	 * 对{@linkplain DataSetProperty#getExpression()}计算求值，并执行必要的数据格式化。
-	 * 
-	 * @param data
-	 * @param evaluatedProperties
-	 * @param defaultValues
-	 * @param converter
-	 * @param formatter
-	 */
-	protected void evalAndFormatResultData(List<Map<String, Object>> data,
-			List<DataSetProperty> evaluatedProperties, List<Object> defaultValues,
-			DataSetPropertyValueConverter converter, ResultDataFormatter formatter)
+	
+	protected void evalResultData(List<Map<String, Object>> data, List<DataSetProperty> properties,
+			List<Object> defaultValues, DataSetPropertyValueConverter converter)
 	{
-		DataSetPropertyExpressionEvaluator evaluator = getDataSetPropertyExpressionEvaluator();
+		EvaludatedPropertiesInfo evalPropertiesInfo = getEvalPropertiesInfo(properties, defaultValues);
+		List<DataSetProperty> evalProperties = evalPropertiesInfo.getProperties();
+		List<Object> evalDefaultValues = evalPropertiesInfo.getDefaultValues();
+		
+		if(evalProperties.isEmpty())
+			return;
 
-		evaluator.eval(evaluatedProperties, data, new EvalPostHandler<Map<String, Object>>()
+		DataSetPropertyExpressionEvaluator evaluator = getDataSetPropertyExpressionEvaluator();
+		
+		evaluator.eval(evalProperties, data, new EvalPostHandler<Map<String, Object>>()
 		{
 			@Override
 			public void handle(DataSetProperty property, int propertyIndex, Map<String, Object> data, Object value)
 			{
 				value = convertToPropertyDataType(converter, value, property);
-
+				
 				if (value == null)
-					value = defaultValues.get(propertyIndex);
-
-				if (formatter != null)
-					value = formatter.format(value);
-
+					value = evalDefaultValues.get(propertyIndex);
+				
 				data.put(property.getName(), value);
 			}
 		});
+	}
+	
+	protected void formatResultData(List<Map<String, Object>> data, List<DataSetProperty> properties, ResultDataFormat format)
+	{
+		if(format == null)
+			return;
+		
+		ResultDataFormatter formatter = new ResultDataFormatter(format);
+		int plen = properties.size();
+
+		for (Map<String, Object> row : data)
+		{
+			for (int i = 0; i < plen; i++)
+			{
+				DataSetProperty property = properties.get(i);
+				String name = property.getName();
+				Object value = row.get(name);
+				Object fv = formatter.format(value);
+				
+				if(fv != value)
+					row.put(name, fv);
+			}
+		}
 	}
 
 	protected DataSetPropertyExpressionEvaluator getDataSetPropertyExpressionEvaluator()
@@ -347,30 +354,30 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 获取需计算的属性列表。
+	 * 获取计算属性列表。
 	 * 
 	 * @param properties
 	 * @param defaultValues
 	 * @return 空列表表示没有计算属性
 	 */
-	protected EvaludatedPropertiesInfo getEvaludatedPropertiesInfo(List<DataSetProperty> properties,
+	protected EvaludatedPropertiesInfo getEvalPropertiesInfo(List<DataSetProperty> properties,
 			List<Object> defaultValues)
 	{
-		List<DataSetProperty> eps = new ArrayList<DataSetProperty>(3);
-		List<Object> evs = new ArrayList<Object>(3);
+		List<DataSetProperty> evalProperties = new ArrayList<DataSetProperty>(2);
+		List<Object> evalDefaultValues = new ArrayList<Object>(2);
 
 		for (int i = 0, len = properties.size(); i < len; i++)
 		{
 			DataSetProperty p = properties.get(i);
-
-			if (p.isEvaluated() && !StringUtil.isEmpty(p.getExpression()))
+			
+			if (isEvaluatedProperty(p))
 			{
-				eps.add(p);
-				evs.add(defaultValues.get(i));
+				evalProperties.add(p);
+				evalDefaultValues.add(defaultValues.get(i));
 			}
 		}
 
-		return new EvaludatedPropertiesInfo(eps, evs);
+		return new EvaludatedPropertiesInfo(evalProperties, evalDefaultValues);
 	}
 
 	protected List<Object> getDefaultValues(List<DataSetProperty> properties,
@@ -386,6 +393,11 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return defaultValues;
+	}
+	
+	protected boolean isEvaluatedProperty(DataSetProperty property)
+	{
+		return (property.isEvaluated() && !StringUtil.isEmpty(property.getExpression()));
 	}
 
 	/**

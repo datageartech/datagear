@@ -23,12 +23,14 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetProperty;
-import org.springframework.context.expression.MapAccessor;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
+import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
@@ -39,10 +41,54 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * 此类用于计算{@linkplain DataSet#getProperties()}的{@linkplain DataSetProperty#getExpression()}表达式的值，支持诸如：
  * </p>
  * <p>
- * <code>(属性名A + 属性名B)*2 - 属性名C/3</code>
+ * <code>"(属性名A + 属性名B)*2 - 属性名C/3"</code>
  * </p>
  * <p>
- * 的表达式求值计算。
+ * 的表达式计算。
+ * </p>
+ * <p>表达式规范：</p>
+ * <p>
+ * <ol>
+ * <li>属性值：<br>
+ * {@code 属性名}
+ * </li>
+ * <li>数值计算：<br>
+ * 加：{@code A + B}<br>
+ * 减：{@code A - B}<br>
+ * 乘：{@code A * B}<br>
+ * 除：{@code A / B}<br>
+ * 求余：{@code A % B}<br>
+ * 混合：{@code (A + B)*C - D/E + 2}
+ * </li>
+ * <li>比较计算：<br>
+ * 小于：{@code A < B}<br>
+ * 大于：{@code A > B}<br>
+ * 小于等于：{@code A <= B}<br>
+ * 大于等于：{@code A >= B}<br>
+ * 等于：{@code A == B}<br>
+ * 不等于：{@code A != B}<br>
+ * </li>
+ * <li>逻辑计算：<br>
+ * 与：{@code A && B}<br>
+ * 或：{@code A || B}<br>
+ * 非：{@code !A}
+ * </li>
+ * <li>三元计算：<br>
+ * {@code A ? B : C}
+ * </li>
+ * <li>函数调用：<br>
+ * {@code 函数名(A, ...)}
+ * </li>
+ * </ol>
+ * </p>
+ * <p>
+ * 其中，{@code A}、{@code B}、{@code C}、{@code D}、{@code E}为上述上下文合法的表达式。
+ * </p>
+ * <p>
+ * 表达式示例：
+ * </p>
+ * <p>
+ * {@code "属性名A >= 属性名B ? (属性名C + 属性名D)/2 : (属性名E + 属性名F)*2"}
  * </p>
  * <p>
  * 此类是线程安全的。
@@ -187,13 +233,13 @@ public class DataSetPropertyExpressionEvaluator
 
 			for (T data : datas)
 			{
-				for (int j = 0; j < plen; j++)
+				for (int i = 0; i < plen; i++)
 				{
-					DataSetProperty property = dataSetProperties.get(j);
-					Expression expression = expressions.get(j);
+					DataSetProperty property = dataSetProperties.get(i);
+					Expression expression = expressions.get(i);
 
 					Object value = doEvalSingle(expression, context, data);
-					handler.handle(property, j, data, value);
+					handler.handle(property, i, data, value);
 				}
 			}
 		}
@@ -311,5 +357,59 @@ public class DataSetPropertyExpressionEvaluator
 		 *            计算结果值
 		 */
 		void handle(DataSetProperty property, int propertyIndex, T data, Object value);
+	}
+	
+	/**
+	 * 适用于{@linkplain DataSetProperty#getExpression()}表达式计算规范的{@linkplain Map}访问器。
+	 * <p>
+	 * {@linkplain Map}访问规范包括：
+	 * </p>
+	 * <p>
+	 * 1. 只允许访问{@linkplain Map}的关键字值，不允许访问{@linkplain Map}对象本身的属性（比如{@code size}属性）。
+	 * </p>
+	 * <p>
+	 * 2. 只允许读操作，不允许写操作。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class MapAccessor implements PropertyAccessor
+	{
+		public MapAccessor()
+		{
+			super();
+		}
+
+		@Override
+		public Class<?>[] getSpecificTargetClasses()
+		{
+			return new Class<?>[] {Map.class};
+		}
+
+		@Override
+		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException
+		{
+			return (target instanceof Map);
+		}
+
+		@Override
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException
+		{
+			Object value = ((Map<?, ?>) target).get(name);
+			return new TypedValue(value);
+		}
+
+		@Override
+		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException
+		{
+			return false;
+		}
+
+		@Override
+		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 }

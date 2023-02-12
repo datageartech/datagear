@@ -1681,8 +1681,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			}
 		}
 		
-		long rawTimes = 0;
-		long enhanceTimes = 0;
+		double rawTimes = 0;
+		double enhanceTimes = 0;
 		
 		for(int i=0; i<loopCount; i++)
 		{
@@ -1708,7 +1708,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		
 		double enhance = rawTimes/(double)enhanceTimes;
 		
-		assertTrue(enhance > 1.0f);
+		assertTrue(enhance > 1.0d);
 		
 		System.out.println("-----------------------");
 		System.out.println("test count   : " + loopCount);
@@ -1722,8 +1722,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	public void renderTest_forPerformance() throws Throwable
 	{
 		int loopCount = 5000;
-		long rawTimes = 0;
-		long enhanceTimes = 0;
+		double rawTimes = 0;
+		double enhanceTimes = 0;
 		
 		{
 			HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget(this.renderer);
@@ -1764,9 +1764,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			}
 		}
 		
-		double enhance = rawTimes/(double)enhanceTimes;
+		double enhance = rawTimes/enhanceTimes;
 		
-		assertTrue(enhance > 1.0f);
+		assertTrue(enhance > 1.0d);
 		
 		System.out.println("-----------------------");
 		System.out.println("test count   : " + loopCount);
