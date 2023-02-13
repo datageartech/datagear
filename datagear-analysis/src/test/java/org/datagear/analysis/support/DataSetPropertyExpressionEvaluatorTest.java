@@ -25,10 +25,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.support.DataSetPropertyExpressionEvaluator.ValueSetter;
 import org.junit.Test;
 
 /**
@@ -241,7 +246,24 @@ public class DataSetPropertyExpressionEvaluatorTest
 	@Test
 	public void evalTest_denied()
 	{
-		//方法调用
+		// 禁止的表达式：方法调用
+		{
+			String exception = null;
+
+			try
+			{
+				Map<String, Object> data = new HashMap<String, Object>();
+				data.put("string", "abc");
+
+				this.evaluator.eval("size()", data);
+			}
+			catch (DataSetPropertyExpressionEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertNotNull(exception);
+		}
 		{
 			String exception = null;
 			
@@ -277,7 +299,7 @@ public class DataSetPropertyExpressionEvaluatorTest
 			assertNotNull(exception);
 		}
 		
-		//类型
+		// 禁止的表达式：类型
 		{
 			String exception = null;
 			
@@ -293,6 +315,83 @@ public class DataSetPropertyExpressionEvaluatorTest
 			
 			assertNotNull(exception);
 		}
+	}
+
+	@Test
+	public void evalTest_List_DataSetProperty()
+	{
+		List<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
+
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("v0", 2);
+		data.put("v1", 3);
+		data.put("v2", 4);
+
+		Collections.addAll(datas, data);
+
+		List<DataSetProperty> properties = new ArrayList<DataSetProperty>();
+		{
+			DataSetProperty p0 = new DataSetProperty("v0", DataSetProperty.DataType.INTEGER);
+			DataSetProperty p1 = new DataSetProperty("v1", DataSetProperty.DataType.INTEGER);
+			DataSetProperty p2 = new DataSetProperty("v2", DataSetProperty.DataType.INTEGER);
+			DataSetProperty p3 = new DataSetProperty("v3", DataSetProperty.DataType.INTEGER);
+
+			p1.setEvaluated(true);
+			p1.setExpression("v0 + v1 + v2");
+
+			p2.setEvaluated(true);
+			p2.setExpression("v0 + v1");
+
+			p3.setEvaluated(true);
+			p3.setExpression("v0 + v1 + v2");
+
+			Collections.addAll(properties, p0, p1, p2, p3);
+		}
+
+		this.evaluator.eval(properties, datas, new ValueSetter<Map<String, Object>>()
+		{
+			@Override
+			public void set(DataSetProperty property, int propertyIndex, Map<String, Object> data, Object value)
+			{
+				data.put(property.getName(), value);
+			}
+		});
+
+		assertEquals(2, ((Number) data.get("v0")).intValue());
+		assertEquals(9, ((Number) data.get("v1")).intValue());
+		assertEquals(11, ((Number) data.get("v2")).intValue());
+		assertEquals(22, ((Number) data.get("v3")).intValue());
+	}
+
+	@Test
+	public void evalTest_List_DataSetProperty_noExpression()
+	{
+		List<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
+
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("v0", 2);
+		data.put("s0", "aaa");
+
+		Collections.addAll(datas, data);
+
+		List<DataSetProperty> properties = new ArrayList<DataSetProperty>();
+		{
+			DataSetProperty p0 = new DataSetProperty("v0", DataSetProperty.DataType.INTEGER);
+			DataSetProperty p1 = new DataSetProperty("s0", DataSetProperty.DataType.STRING);
+
+			Collections.addAll(properties, p0, p1);
+		}
+
+		boolean evaled = this.evaluator.eval(properties, datas, new ValueSetter<Map<String, Object>>()
+		{
+			@Override
+			public void set(DataSetProperty property, int propertyIndex, Map<String, Object> data, Object value)
+			{
+				data.put(property.getName(), value);
+			}
+		});
+
+		assertFalse(evaled);
 	}
 
 	protected static class ExpBean

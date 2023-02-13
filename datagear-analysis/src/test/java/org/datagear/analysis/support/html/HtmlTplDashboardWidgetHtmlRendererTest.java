@@ -1620,7 +1620,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	@Test
 	public void doRenderDashboardTest_forPerformance() throws Throwable
 	{
-		int loopCount = 5000;
+		int loopCount = 10000;
 		
 		HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget();
 
@@ -1706,7 +1706,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			enhanceTimes += System.currentTimeMillis() - beforeTime;
 		}
 		
-		double enhance = rawTimes/(double)enhanceTimes;
+		double enhance = rawTimes/enhanceTimes;
 		
 		assertTrue(enhance > 1.0d);
 		
@@ -1721,7 +1721,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	@Test
 	public void renderTest_forPerformance() throws Throwable
 	{
-		int loopCount = 5000;
+		int loopCount = 10000;
 		double rawTimes = 0;
 		double enhanceTimes = 0;
 		

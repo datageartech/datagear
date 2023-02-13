@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.util.StringUtil;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -47,14 +48,15 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * 的表达式计算。
  * </p>
  * <p>
- * 表达式规范：
+ * 表达式语法规范：
  * </p>
  * <p>
  * <ol>
  * <li>属性值：<br>
- * {@linkplain Map}、{@code JavaBean}：{@code 属性名}、{@code 属性名.属性名}<br>
+ * {@linkplain Map}简化语法：{@code 属性名}、{@code 属性名.属性名}<br>
+ * {@linkplain Map}标准语法：{@code ['属性名']}、{@code ["属性名"]}、{@code 属性名['属性名']}、{@code 属性名["属性名"]}<br>
+ * {@code JavaBean}：{@code 属性名}、{@code 属性名.属性名}<br>
  * {@linkplain List}、数组：{@code [索引数值]}、{@code 属性名[索引数值]}<br>
- * {@linkplain Map}：{@code ['属性名']}、{@code ["属性名"]}、{@code 属性名['属性名']}<br>
  * </li>
  * <li>数值计算：<br>
  * 加：{@code A + B}<br>
@@ -93,6 +95,22 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * </p>
  * <p>
  * 其中，{@code A}、{@code B}、{@code C}、{@code D}、{@code E}为上述上下文合法的表达式。
+ * </p>
+ * <p>
+ * 对于{@linkplain #eval(List, List, ValueSetter)}方法，
+ * 表达式中的{@code 属性名}可以是{@code properties}列表中任意的{@linkplain DataSetProperty#getName()}，取值规范如下所示：
+ * </p>
+ * <p>
+ * <ol>
+ * <li>非计算属性：{@code datas}元素对象的对应属性值<br>
+ * </li>
+ * <li>自身属性：{@code datas}元素对象的对应原始属性值<br>
+ * </li>
+ * <li>前置计算属性：属性表达式计算结果值<br>
+ * </li>
+ * <li>后置计算属性：{@code datas}元素对象的对应原始属性值<br>
+ * </li>
+ * </ol>
  * </p>
  * <p>
  * 表达式示例：
@@ -154,7 +172,7 @@ public class DataSetPropertyExpressionEvaluator
 
 		try
 		{
-			EvaluationContext context = buildSimpleMapAccessEvaluationContext();
+			EvaluationContext context = buildEvaluationContext();
 			return doEvalSingle(exp, context, data);
 		}
 		catch (DataSetPropertyExpressionEvaluatorException e)
@@ -182,7 +200,7 @@ public class DataSetPropertyExpressionEvaluator
 
 		try
 		{
-			EvaluationContext context = buildSimpleMapAccessEvaluationContext();
+			EvaluationContext context = buildEvaluationContext();
 			return doEvalArray(exp, context, datas);
 		}
 		catch (DataSetPropertyExpressionEvaluatorException e)
@@ -209,7 +227,7 @@ public class DataSetPropertyExpressionEvaluator
 
 		try
 		{
-			EvaluationContext context = buildSimpleMapAccessEvaluationContext();
+			EvaluationContext context = buildEvaluationContext();
 			return doEvalList(exp, context, datas);
 		}
 		catch (DataSetPropertyExpressionEvaluatorException e)
@@ -223,35 +241,50 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	/**
-	 * 计算和处理表达式的值。
+	 * 统一计算和设置{@linkplain DataSetProperty#getExpression()}的值。
+	 * <p>
+	 * 这里统一处理表达式计算，使得{@linkplain DataSetProperty#getExpression()}可具有更灵活的支持规范，
+	 * 具体参考此类说明：{@linkplain DataSetPropertyExpressionEvaluator}。
+	 * </p>
 	 * 
-	 * @param dataSetProperties
-	 *            它们的{@linkplain DataSetProperty#getExpression()}应不为空
+	 * @param properties
 	 * @param datas
-	 * @param handler
+	 * @param valueSetter
+	 * @returns {@code true} 执行了计算和设置；{@code false}
+	 *          未执行计算和设置，因为{@code properties}中没有需计算的
 	 * @throws DataSetPropertyExpressionEvaluatorException
 	 */
-	public <T> void eval(List<DataSetProperty> dataSetProperties, List<T> datas, EvalPostHandler<? super T> handler)
+	public <T> boolean eval(List<DataSetProperty> properties, List<T> datas, ValueSetter<? super T> valueSetter)
 			throws DataSetPropertyExpressionEvaluatorException
 	{
-		List<Expression> expressions = parseExpressions(dataSetProperties);
-		int plen = dataSetProperties.size();
+		int plen = properties.size();
+		List<Expression> expressions = new ArrayList<Expression>(plen);
+		int count = parseExpressions(properties, expressions);
 		
+		if (count < 1)
+			return false;
+
 		try
 		{
-			EvaluationContext context = buildSimpleMapAccessEvaluationContext();
+			EvaluationContext context = buildEvaluationContext();
 
 			for (T data : datas)
 			{
+				// 必须按顺序计算，确保表达式中的属性取值逻辑符合规范
 				for (int i = 0; i < plen; i++)
 				{
-					DataSetProperty property = dataSetProperties.get(i);
+					DataSetProperty property = properties.get(i);
 					Expression expression = expressions.get(i);
 
-					Object value = doEvalSingle(expression, context, data);
-					handler.handle(property, i, data, value);
+					if (expression != null)
+					{
+						Object value = doEvalSingle(expression, context, data);
+						valueSetter.set(property, i, data, value);
+					}
 				}
 			}
+
+			return true;
 		}
 		catch (DataSetPropertyExpressionEvaluatorException e)
 		{
@@ -263,17 +296,39 @@ public class DataSetPropertyExpressionEvaluator
 		}
 	}
 
-	protected List<Expression> parseExpressions(List<DataSetProperty> dataSetProperties)
+	/**
+	 * 解析表达式对象。
+	 * 
+	 * @param properties
+	 * @param expressions
+	 *            用于写入表达式的列表，如果某个元素为{@code null}，表示不是计算属性
+	 * @returns 计算属性的个数
+	 * @throws DataSetPropertyExpressionEvaluatorException
+	 */
+	protected int parseExpressions(List<DataSetProperty> properties, List<Expression> expressions)
 			throws DataSetPropertyExpressionEvaluatorException
 	{
-		List<Expression> expressions = new ArrayList<Expression>(dataSetProperties.size());
+		int count = 0;
 		
-		for(DataSetProperty p : dataSetProperties)
+		for(DataSetProperty p : properties)
 		{
-			expressions.add(parseExpression(p.getExpression()));
+			if (isEvaluatedProperty(p))
+			{
+				Expression expression = parseExpression(p.getExpression());
+				expressions.add(expression);
+
+				count++;
+			}
+			else
+				expressions.add(null);
 		}
 		
-		return expressions;
+		return count;
+	}
+
+	protected boolean isEvaluatedProperty(DataSetProperty property)
+	{
+		return (property.isEvaluated() && !StringUtil.isEmpty(property.getExpression()));
 	}
 
 	protected Object[] doEvalArray(Expression expression, EvaluationContext context, Object[] datas) throws Throwable
@@ -324,19 +379,19 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	/**
-	 * 构建支持{@linkplain Map}宽松访问语法的的计算上下文。
+	 * 构建支持此类的表达式语法规范的的计算上下文。
 	 * <p>
-	 * Spring表达式默认对于{@linkplain Map}的访问语法为：{@code map['key']}，而数据集的结果数据几乎都是{@code Map}类型的，
+	 * Spring表达式对于{@linkplain Map}的默认访问语法为：{@code map['key']}，而数据集的结果数据几乎都是{@code Map}类型的，
 	 * 这样会导致定义表达式会较繁琐且不够直观。
 	 * </p>
 	 * <p>
 	 * 因而，此方法返回的{@linkplain EvaluationContext}做了特殊处理，除了支持{@code map['key']}的标准语法，
-	 * 还支持以{@code map.key}的宽松语法访问{@linkplain Map}，从而简化表达式定义。
+	 * 还支持以{@code map.key}的简化语法访问{@linkplain Map}，从而简化表达式定义。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	protected EvaluationContext buildSimpleMapAccessEvaluationContext()
+	protected EvaluationContext buildEvaluationContext()
 	{
 		//注意：这里Builder构造方法参数的MapAccessor必须在DataBindingPropertyAccessor之前，
 		//才能使得"map.size"表达式优先访问"size"关键字的值而非map的大小
@@ -350,35 +405,40 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	/**
-	 * 计算后置处理器。
+	 * 计算结果值设置器。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static interface EvalPostHandler<T>
+	public static interface ValueSetter<T>
 	{
 		/**
-		 * 计算完成。
+		 * 设置计算结果值。
 		 * 
 		 * @param property
 		 * @params propertyIndex
 		 * @param data
+		 *            待设置{@code value}的数据对象
 		 * @param value
 		 *            计算结果值
 		 */
-		void handle(DataSetProperty property, int propertyIndex, T data, Object value);
+		void set(DataSetProperty property, int propertyIndex, T data, Object value);
 	}
 	
 	/**
-	 * 适用于{@linkplain DataSetProperty#getExpression()}表达式计算规范的{@linkplain Map}访问器。
+	 * 支持{@linkplain #DataSetPropertyExpressionEvaluator}表达式规范的{@linkplain Map}访问器。
 	 * <p>
-	 * {@linkplain Map}访问规范包括：
+	 * 此类对{@linkplain Map}的访问规范包括：
 	 * </p>
 	 * <p>
-	 * 1. 只允许访问{@linkplain Map}的关键字值，不允许访问{@linkplain Map}对象本身的属性（比如{@code size}属性）。
+	 * 1. 支持以{@code map.key}的语法访问关键字值；
 	 * </p>
 	 * <p>
-	 * 2. 只允许读操作，不允许写操作。
+	 * 2.
+	 * 只允许访问{@linkplain Map}的关键字值，不允许访问{@linkplain Map}对象本身的属性（比如{@code size}属性）；
+	 * </p>
+	 * <p>
+	 * 3. 只允许读操作，不允许写操作。
 	 * </p>
 	 * 
 	 * @author datagear@163.com

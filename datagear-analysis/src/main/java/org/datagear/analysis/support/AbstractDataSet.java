@@ -34,8 +34,7 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.NameAwareUtil;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.ResultDataFormat;
-import org.datagear.analysis.support.DataSetPropertyExpressionEvaluator.EvalPostHandler;
-import org.datagear.util.StringUtil;
+import org.datagear.analysis.support.DataSetPropertyExpressionEvaluator.ValueSetter;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -289,7 +288,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 			data.add(row);
 		}
 		
-		// 计算表达式，此时计算可以确保所有非计算属性值都可用（包括自身）
+		// 计算表达式
 		evalResultData(data, properties, defaultValues, converter);
 		
 		// 格式化，应是最后步骤
@@ -301,24 +300,17 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	protected void evalResultData(List<Map<String, Object>> data, List<DataSetProperty> properties,
 			List<Object> defaultValues, DataSetPropertyValueConverter converter)
 	{
-		EvaludatedPropertiesInfo evalPropertiesInfo = getEvalPropertiesInfo(properties, defaultValues);
-		List<DataSetProperty> evalProperties = evalPropertiesInfo.getProperties();
-		List<Object> evalDefaultValues = evalPropertiesInfo.getDefaultValues();
-		
-		if(evalProperties.isEmpty())
-			return;
-
 		DataSetPropertyExpressionEvaluator evaluator = getDataSetPropertyExpressionEvaluator();
 		
-		evaluator.eval(evalProperties, data, new EvalPostHandler<Map<String, Object>>()
+		evaluator.eval(properties, data, new ValueSetter<Map<String, Object>>()
 		{
 			@Override
-			public void handle(DataSetProperty property, int propertyIndex, Map<String, Object> data, Object value)
+			public void set(DataSetProperty property, int propertyIndex, Map<String, Object> data, Object value)
 			{
 				value = convertToPropertyDataType(converter, value, property);
 				
 				if (value == null)
-					value = evalDefaultValues.get(propertyIndex);
+					value = defaultValues.get(propertyIndex);
 				
 				data.put(property.getName(), value);
 			}
@@ -353,33 +345,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		return DataSetPropertyExpressionEvaluator.DEFAULT;
 	}
 
-	/**
-	 * 获取计算属性列表。
-	 * 
-	 * @param properties
-	 * @param defaultValues
-	 * @return 空列表表示没有计算属性
-	 */
-	protected EvaludatedPropertiesInfo getEvalPropertiesInfo(List<DataSetProperty> properties,
-			List<Object> defaultValues)
-	{
-		List<DataSetProperty> evalProperties = new ArrayList<DataSetProperty>(2);
-		List<Object> evalDefaultValues = new ArrayList<Object>(2);
-
-		for (int i = 0, len = properties.size(); i < len; i++)
-		{
-			DataSetProperty p = properties.get(i);
-			
-			if (isEvaluatedProperty(p))
-			{
-				evalProperties.add(p);
-				evalDefaultValues.add(defaultValues.get(i));
-			}
-		}
-
-		return new EvaludatedPropertiesInfo(evalProperties, evalDefaultValues);
-	}
-
 	protected List<Object> getDefaultValues(List<DataSetProperty> properties,
 			DataSetPropertyValueConverter converter)
 	{
@@ -393,11 +358,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return defaultValues;
-	}
-	
-	protected boolean isEvaluatedProperty(DataSetProperty property)
-	{
-		return (property.isEvaluated() && !StringUtil.isEmpty(property.getExpression()));
 	}
 
 	/**
