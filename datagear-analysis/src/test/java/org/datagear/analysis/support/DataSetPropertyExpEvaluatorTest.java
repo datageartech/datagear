@@ -19,6 +19,7 @@ package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -33,18 +34,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.DataSetPropertyExpressionEvaluator.ValueSetter;
+import org.datagear.analysis.support.DataSetPropertyExpEvaluator.ValueSetter;
 import org.junit.Test;
 
 /**
- * {@linkplain DataSetPropertyExpressionEvaluator}单元测试类。
+ * {@linkplain DataSetPropertyExpEvaluator}单元测试类。
  * 
  * @author datagear@163.com
  *
  */
-public class DataSetPropertyExpressionEvaluatorTest
+public class DataSetPropertyExpEvaluatorTest
 {
-	private DataSetPropertyExpressionEvaluator evaluator = new DataSetPropertyExpressionEvaluator();
+	private DataSetPropertyExpEvaluator evaluator = new DataSetPropertyExpEvaluator();
 
 	@Test
 	public void evalTest() throws Throwable
@@ -234,7 +235,7 @@ public class DataSetPropertyExpressionEvaluatorTest
 			{
 				this.evaluator.eval("(中文关键字 + 中文对象.d) * width", data);
 			}
-			catch (DataSetPropertyExpressionEvaluatorException e)
+			catch (DataSetPropertyExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -246,18 +247,79 @@ public class DataSetPropertyExpressionEvaluatorTest
 	@Test
 	public void evalTest_denied()
 	{
+		// 禁止的表达式：数据写入
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("string", "abc");
+			ExpBean bean = new ExpBean();
+			data.put("bean", bean);
+			Map<String, Object> map = new HashMap<String, Object>();
+			data.put("map", map);
+
+			try
+			{
+				this.evaluator.eval("bean.d = 33", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertNotEquals(33, bean.d);
+			assertNotNull(exception);
+		}
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+
+			try
+			{
+				this.evaluator.eval("age = 33", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertTrue(data.isEmpty());
+			assertNotNull(exception);
+		}
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("string", "abc");
+			Map<String, Object> map = new HashMap<String, Object>();
+			data.put("map", map);
+
+			try
+			{
+				this.evaluator.eval("map.age = 33", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertTrue(map.isEmpty());
+			assertNotNull(exception);
+		}
+		
 		// 禁止的表达式：方法调用
 		{
 			String exception = null;
 
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("string", "abc");
+
 			try
 			{
-				Map<String, Object> data = new HashMap<String, Object>();
-				data.put("string", "abc");
-
 				this.evaluator.eval("size()", data);
 			}
-			catch (DataSetPropertyExpressionEvaluatorException e)
+			catch (DataSetPropertyExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -266,15 +328,15 @@ public class DataSetPropertyExpressionEvaluatorTest
 		}
 		{
 			String exception = null;
-			
+
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("string", "abc");
+
 			try
 			{
-				Map<String, Object> data = new HashMap<String, Object>();
-				data.put("string", "abc");
-
 				this.evaluator.eval("string.length()", data);
 			}
-			catch(DataSetPropertyExpressionEvaluatorException e)
+			catch(DataSetPropertyExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -283,15 +345,15 @@ public class DataSetPropertyExpressionEvaluatorTest
 		}
 		{
 			String exception = null;
-			
+
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("string", "abc");
+
 			try
 			{
-				Map<String, Object> data = new HashMap<String, Object>();
-				data.put("string", "abc");
-
 				this.evaluator.eval("string.toUpperCase()", data);
 			}
-			catch(DataSetPropertyExpressionEvaluatorException e)
+			catch(DataSetPropertyExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -302,13 +364,32 @@ public class DataSetPropertyExpressionEvaluatorTest
 		// 禁止的表达式：类型
 		{
 			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
 			
 			try
 			{
-				Map<String, Object> data = new HashMap<String, Object>();
 				this.evaluator.eval("T(java.lang.Math).random()", data);
 			}
-			catch(DataSetPropertyExpressionEvaluatorException e)
+			catch(DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+			
+			assertNotNull(exception);
+		}
+		
+		// 禁止的表达式：创建
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+			
+			try
+			{
+				this.evaluator.eval("new java.lang.String()", data);
+			}
+			catch(DataSetPropertyExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}

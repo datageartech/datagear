@@ -32,6 +32,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
@@ -125,15 +126,21 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * @author datagear@163.com
  *
  */
-public class DataSetPropertyExpressionEvaluator
+public class DataSetPropertyExpEvaluator
 {
-	public static final DataSetPropertyExpressionEvaluator DEFAULT = new DataSetPropertyExpressionEvaluator();
+	public static final DataSetPropertyExpEvaluator DEFAULT = new DataSetPropertyExpEvaluator();
 
-	private ExpressionParser expressionParser = new SpelExpressionParser();
+	/**
+	 * 表达式解析器。
+	 * <p>
+	 * 这里考虑安全，明确禁止了它的{@code autoGrowNullReferences}、{@code autoGrowCollections}特性
+	 * </p>
+	 */
+	private ExpressionParser expressionParser = new SpelExpressionParser(new SpelParserConfiguration(false, false));
 	
 	private ConversionService conversionService = null;
 
-	public DataSetPropertyExpressionEvaluator()
+	public DataSetPropertyExpEvaluator()
 	{
 		super();
 	}
@@ -164,9 +171,9 @@ public class DataSetPropertyExpressionEvaluator
 	 * @param expression
 	 * @param data
 	 * @return
-	 * @throws DataSetPropertyExpressionEvaluatorException
+	 * @throws DataSetPropertyExpEvaluatorException
 	 */
-	public Object eval(String expression, Object data) throws DataSetPropertyExpressionEvaluatorException
+	public Object eval(String expression, Object data) throws DataSetPropertyExpEvaluatorException
 	{
 		Expression exp = parseExpression(expression);
 
@@ -175,13 +182,13 @@ public class DataSetPropertyExpressionEvaluator
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalSingle(exp, context, data);
 		}
-		catch (DataSetPropertyExpressionEvaluatorException e)
+		catch (DataSetPropertyExpEvaluatorException e)
 		{
 			throw e;
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpressionEvaluatorException(t);
+			throw new DataSetPropertyExpEvaluatorException(t);
 		}
 	}
 
@@ -192,9 +199,9 @@ public class DataSetPropertyExpressionEvaluator
 	 *            {@linkplain DataSetProperty#getExpression()}不应为空
 	 * @param datas
 	 * @return
-	 * @throws DataSetPropertyExpressionEvaluatorException
+	 * @throws DataSetPropertyExpEvaluatorException
 	 */
-	public Object[] eval(String expression, Object[] datas) throws DataSetPropertyExpressionEvaluatorException
+	public Object[] eval(String expression, Object[] datas) throws DataSetPropertyExpEvaluatorException
 	{
 		Expression exp = parseExpression(expression);
 
@@ -203,13 +210,13 @@ public class DataSetPropertyExpressionEvaluator
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalArray(exp, context, datas);
 		}
-		catch (DataSetPropertyExpressionEvaluatorException e)
+		catch (DataSetPropertyExpEvaluatorException e)
 		{
 			throw e;
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpressionEvaluatorException(t);
+			throw new DataSetPropertyExpEvaluatorException(t);
 		}
 	}
 
@@ -219,9 +226,9 @@ public class DataSetPropertyExpressionEvaluator
 	 * @param expression
 	 * @param datas
 	 * @return
-	 * @throws DataSetPropertyExpressionEvaluatorException
+	 * @throws DataSetPropertyExpEvaluatorException
 	 */
-	public List<Object> eval(String expression, List<?> datas) throws DataSetPropertyExpressionEvaluatorException
+	public List<Object> eval(String expression, List<?> datas) throws DataSetPropertyExpEvaluatorException
 	{
 		Expression exp = parseExpression(expression);
 
@@ -230,13 +237,13 @@ public class DataSetPropertyExpressionEvaluator
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalList(exp, context, datas);
 		}
-		catch (DataSetPropertyExpressionEvaluatorException e)
+		catch (DataSetPropertyExpEvaluatorException e)
 		{
 			throw e;
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpressionEvaluatorException(t);
+			throw new DataSetPropertyExpEvaluatorException(t);
 		}
 	}
 
@@ -244,7 +251,7 @@ public class DataSetPropertyExpressionEvaluator
 	 * 统一计算和设置{@linkplain DataSetProperty#getExpression()}的值。
 	 * <p>
 	 * 这里统一处理表达式计算，使得{@linkplain DataSetProperty#getExpression()}可具有更灵活的支持规范，
-	 * 具体参考此类说明：{@linkplain DataSetPropertyExpressionEvaluator}。
+	 * 具体参考此类说明：{@linkplain DataSetPropertyExpEvaluator}。
 	 * </p>
 	 * 
 	 * @param properties
@@ -252,10 +259,10 @@ public class DataSetPropertyExpressionEvaluator
 	 * @param valueSetter
 	 * @returns {@code true} 执行了计算和设置；{@code false}
 	 *          未执行计算和设置，因为{@code properties}中没有需计算的
-	 * @throws DataSetPropertyExpressionEvaluatorException
+	 * @throws DataSetPropertyExpEvaluatorException
 	 */
 	public <T> boolean eval(List<DataSetProperty> properties, List<T> datas, ValueSetter<? super T> valueSetter)
-			throws DataSetPropertyExpressionEvaluatorException
+			throws DataSetPropertyExpEvaluatorException
 	{
 		int plen = properties.size();
 		List<Expression> expressions = new ArrayList<Expression>(plen);
@@ -286,13 +293,13 @@ public class DataSetPropertyExpressionEvaluator
 
 			return true;
 		}
-		catch (DataSetPropertyExpressionEvaluatorException e)
+		catch (DataSetPropertyExpEvaluatorException e)
 		{
 			throw e;
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpressionEvaluatorException(t);
+			throw new DataSetPropertyExpEvaluatorException(t);
 		}
 	}
 
@@ -303,10 +310,10 @@ public class DataSetPropertyExpressionEvaluator
 	 * @param expressions
 	 *            用于写入表达式的列表，如果某个元素为{@code null}，表示不是计算属性
 	 * @returns 计算属性的个数
-	 * @throws DataSetPropertyExpressionEvaluatorException
+	 * @throws DataSetPropertyExpEvaluatorException
 	 */
 	protected int parseExpressions(List<DataSetProperty> properties, List<Expression> expressions)
-			throws DataSetPropertyExpressionEvaluatorException
+			throws DataSetPropertyExpEvaluatorException
 	{
 		int count = 0;
 		
@@ -362,7 +369,7 @@ public class DataSetPropertyExpressionEvaluator
 	}
 
 	protected Expression parseExpression(String expression)
-			throws DataSetPropertyExpressionEvaluatorParseException, DataSetPropertyExpressionEvaluatorException
+			throws DataSetPropertyExpEvaluatorParseException, DataSetPropertyExpEvaluatorException
 	{
 		try
 		{
@@ -370,11 +377,11 @@ public class DataSetPropertyExpressionEvaluator
 		}
 		catch (ParseException e)
 		{
-			throw new DataSetPropertyExpressionEvaluatorParseException(e);
+			throw new DataSetPropertyExpEvaluatorParseException(e);
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpressionEvaluatorException(t);
+			throw new DataSetPropertyExpEvaluatorException(t);
 		}
 	}
 
@@ -387,6 +394,9 @@ public class DataSetPropertyExpressionEvaluator
 	 * <p>
 	 * 因而，此方法返回的{@linkplain EvaluationContext}做了特殊处理，除了支持{@code map['key']}的标准语法，
 	 * 还支持以{@code map.key}的简化语法访问{@linkplain Map}，从而简化表达式定义。
+	 * </p>
+	 * <p>
+	 * 另外，为了安全性，返回的{@linkplain EvaluationContext}禁用了数据写入、方法调用、类型引用表达式支持。
 	 * </p>
 	 * 
 	 * @return
@@ -426,7 +436,7 @@ public class DataSetPropertyExpressionEvaluator
 	}
 	
 	/**
-	 * 支持{@linkplain #DataSetPropertyExpressionEvaluator}表达式规范的{@linkplain Map}访问器。
+	 * 支持{@linkplain DataSetPropertyExpEvaluator}表达式规范的{@linkplain Map}访问器。
 	 * <p>
 	 * 此类对{@linkplain Map}的访问规范包括：
 	 * </p>

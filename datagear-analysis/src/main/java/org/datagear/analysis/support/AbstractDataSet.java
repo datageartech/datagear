@@ -34,7 +34,7 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.NameAwareUtil;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.ResultDataFormat;
-import org.datagear.analysis.support.DataSetPropertyExpressionEvaluator.ValueSetter;
+import org.datagear.analysis.support.DataSetPropertyExpEvaluator.ValueSetter;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -300,7 +300,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	protected void evalResultData(List<Map<String, Object>> data, List<DataSetProperty> properties,
 			List<Object> defaultValues, DataSetPropertyValueConverter converter)
 	{
-		DataSetPropertyExpressionEvaluator evaluator = getDataSetPropertyExpressionEvaluator();
+		DataSetPropertyExpEvaluator evaluator = getDataSetPropertyExpEvaluator();
 		
 		evaluator.eval(properties, data, new ValueSetter<Map<String, Object>>()
 		{
@@ -340,9 +340,9 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 	}
 
-	protected DataSetPropertyExpressionEvaluator getDataSetPropertyExpressionEvaluator()
+	protected DataSetPropertyExpEvaluator getDataSetPropertyExpEvaluator()
 	{
-		return DataSetPropertyExpressionEvaluator.DEFAULT;
+		return DataSetPropertyExpEvaluator.DEFAULT;
 	}
 
 	protected List<Object> getDefaultValues(List<DataSetProperty> properties,

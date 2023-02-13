@@ -20,31 +20,31 @@ package org.datagear.analysis.support;
 import org.datagear.analysis.DataSetException;
 
 /**
- * {@linkplain DataSetPropertyExpressionEvaluator}解析异常。
+ * {@linkplain DataSetPropertyExpEvaluator}解析异常。
  * 
  * @author datagear@163.com
  *
  */
-public class DataSetPropertyExpressionEvaluatorParseException extends DataSetException
+public class DataSetPropertyExpEvaluatorParseException extends DataSetException
 {
 	private static final long serialVersionUID = 1L;
 
-	public DataSetPropertyExpressionEvaluatorParseException()
+	public DataSetPropertyExpEvaluatorParseException()
 	{
 		super();
 	}
 
-	public DataSetPropertyExpressionEvaluatorParseException(String message)
+	public DataSetPropertyExpEvaluatorParseException(String message)
 	{
 		super(message);
 	}
 
-	public DataSetPropertyExpressionEvaluatorParseException(Throwable cause)
+	public DataSetPropertyExpEvaluatorParseException(Throwable cause)
 	{
 		super(cause);
 	}
 
-	public DataSetPropertyExpressionEvaluatorParseException(String message, Throwable cause)
+	public DataSetPropertyExpEvaluatorParseException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}
