@@ -119,6 +119,11 @@ public class DataSetProperty extends AbstractNameTypeAware implements Cloneable,
 		this.evaluated = evaluated;
 	}
 
+	/**
+	 * 获取表达式。
+	 * 
+	 * @return {@code null}或空字符串表示没有表达式
+	 */
 	public String getExpression()
 	{
 		return expression;
@@ -139,7 +144,7 @@ public class DataSetProperty extends AbstractNameTypeAware implements Cloneable,
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", label=" + label
-				+ ", defaultValue=" + defaultValue + "]";
+				+ ", defaultValue=" + defaultValue + ", evaluated=" + evaluated + ", expression=" + expression + "]";
 	}
 
 	/**

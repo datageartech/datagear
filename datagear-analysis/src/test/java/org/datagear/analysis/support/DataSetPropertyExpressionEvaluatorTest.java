@@ -18,8 +18,10 @@
 package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -52,17 +54,93 @@ public class DataSetPropertyExpressionEvaluatorTest
 		map.put("weight", 5);
 		data.put("map", map);
 		data.put("list", Arrays.asList(1,3,5));
+		data.put("BigInteger", BigInteger.valueOf(1000L));
+		data.put("BigDecimal", BigDecimal.valueOf(1.2D));
+		data.put("string", "abc");
+		data.put("中文关键字", 6);
+		data.put("special']name", 6);
 
-		//基本数值运算
+		// 基本数值运算，宽松Map访问方式
 		{
-			Number result = (Number) this.evaluator.eval("(width * height)/2 + map.size + bean.d + list[1]", data);
-			assertEquals(20, result.intValue());
+			Number result = (Number) this.evaluator.eval("(width * height)/2 + map.size + bean.d + list[1] + 5%2",
+					data);
+			assertEquals(21, result.intValue());
 		}
 		
+		// 基本数值运算，标准Map访问方式
+		{
+			Number result = (Number) this.evaluator
+					.eval("(['width'] * height)/2 + map[\"size\"] + bean.d + list[1] + 5%2",
+					data);
+			assertEquals(21, result.intValue());
+		}
+
 		//三元运算
 		{
 			Number result = (Number) this.evaluator.eval("width > height ? width + map.size : height + map.size", data);
 			assertEquals(12, result.intValue());
+		}
+
+		// BigInteger、BigDecimal
+		{
+			Number result = (Number) this.evaluator.eval("(BigInteger * BigDecimal)/2 + width - 1", data);
+			assertEquals(602, result.intValue());
+		}
+
+		// 混合
+		{
+			Number result = (Number) this.evaluator.eval(
+					"(width * height)/2 + map.size + bean.d + list[1] + (width > height ? width + map.size : height + map.size) - 1",
+					data);
+			assertEquals(31, result.intValue());
+		}
+
+		// 字符串合并
+		{
+			String result = (String) this.evaluator.eval("string + '-suffix'", data);
+			assertEquals("abc-suffix", result);
+		}
+
+		// 中文关键字
+		{
+			Number result = (Number) this.evaluator.eval("(['中文关键字'] + 2) * 3", data);
+			assertEquals(24, result.intValue());
+		}
+
+		// 特殊字符
+		{
+			Number result = (Number) this.evaluator.eval("([\"special']name\"] + 2) * 3", data);
+			assertEquals(24, result.intValue());
+		}
+
+		// 字面值
+		{
+			String result = (String) this.evaluator.eval("'abc'", data);
+			assertEquals("abc", result);
+		}
+		{
+			String result = (String) this.evaluator.eval("\"abc\"", data);
+			assertEquals("abc", result);
+		}
+		{
+			Integer result = (Integer) this.evaluator.eval("3", data);
+			assertEquals(3, result.intValue());
+		}
+		{
+			Number result = (Number) this.evaluator.eval("3.25", data);
+			assertEquals(3.25d, result.doubleValue(), 0.001d);
+		}
+		{
+			Boolean result = (Boolean) this.evaluator.eval("true", data);
+			assertTrue(result.booleanValue());
+		}
+		{
+			Boolean result = (Boolean) this.evaluator.eval("false", data);
+			assertFalse(result.booleanValue());
+		}
+		{
+			Object result = this.evaluator.eval("null", data);
+			assertNull(result);
 		}
 	}
 
@@ -120,18 +198,6 @@ public class DataSetPropertyExpressionEvaluatorTest
 	}
 	
 	@Test
-	public void evalTest_forBigIntegerAndBigDecimal()
-	{
-		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("width", BigInteger.valueOf(1000L));
-		data.put("height", BigDecimal.valueOf(1.2D));
-
-		Number result = (Number) this.evaluator.eval("(width * height)/2", data);
-
-		assertEquals(600, result.intValue());
-	}
-	
-	@Test
 	public void evalTest_forStringLength()
 	{
 		Map<String, Object> data = new HashMap<String, Object>();
@@ -141,6 +207,37 @@ public class DataSetPropertyExpressionEvaluatorTest
 		assertEquals(3, length.intValue());
 	}
 	
+	@Test
+	public void evalTest_forChineseKey()
+	{
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("width", 3);
+		data.put("中文关键字", 6);
+		data.put("中文对象", new ExpBean());
+
+		// 中文关键字只能使用标准Map访问语法
+		{
+			Number result = (Number) this.evaluator.eval("(['中文关键字'] + ['中文对象'].d) * width", data);
+			assertEquals(24, result.intValue());
+		}
+
+		// 中文关键字无法使用宽松Map访问语法
+		{
+			String exception = null;
+			
+			try
+			{
+				this.evaluator.eval("(中文关键字 + 中文对象.d) * width", data);
+			}
+			catch (DataSetPropertyExpressionEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+			
+			assertNotNull(exception);
+		}
+	}
+
 	@Test
 	public void evalTest_denied()
 	{

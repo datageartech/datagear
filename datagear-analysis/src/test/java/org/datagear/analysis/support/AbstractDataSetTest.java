@@ -327,6 +327,7 @@ public class AbstractDataSetTest
 		Map<String, Object> raw0 = new HashMap<String, Object>();
 		raw0.put("v0", "2");
 		raw0.put("v1", "6");
+		raw0.put("v2", 7);
 		raw0.put("s0", "aaa");
 
 		Collections.addAll(rawData, raw0);
@@ -335,7 +336,12 @@ public class AbstractDataSetTest
 		{
 			DataSetProperty p0 = new DataSetProperty("v0", DataSetProperty.DataType.INTEGER);
 			DataSetProperty p1 = new DataSetProperty("v1", DataSetProperty.DataType.NUMBER);
-			DataSetProperty p2 = new DataSetProperty("s0", DataSetProperty.DataType.STRING);
+			DataSetProperty p2 = new DataSetProperty("v2", DataSetProperty.DataType.NUMBER);
+			DataSetProperty p3 = new DataSetProperty("s0", DataSetProperty.DataType.STRING);
+
+			// 支持自身计算
+			p2.setEvaluated(true);
+			p2.setExpression("v2 * 3 + v1");
 
 			DataSetProperty avg = new DataSetProperty("avg", DataSetProperty.DataType.DECIMAL);
 			avg.setEvaluated(true);
@@ -345,7 +351,7 @@ public class AbstractDataSetTest
 			suffix.setEvaluated(true);
 			suffix.setExpression("s0 + '-sufix'");
 
-			Collections.addAll(properties, p0, p1, p2, avg, suffix);
+			Collections.addAll(properties, p0, p1, p2, p3, avg, suffix);
 		}
 
 		List<Map<String, Object>> resultData = dataSet.convertRawDataToResult(rawData, properties, -1, null);
@@ -357,6 +363,7 @@ public class AbstractDataSetTest
 
 			assertEquals(raw0.get("v0"), ((Number) re0.get("v0")).toString());
 			assertEquals(raw0.get("v1"), ((Number) re0.get("v1")).toString());
+			assertEquals(27, ((Number) re0.get("v2")).intValue());
 			assertEquals(4, ((Number) re0.get("avg")).intValue());
 			assertEquals("aaa-sufix", re0.get("suffix"));
 		}

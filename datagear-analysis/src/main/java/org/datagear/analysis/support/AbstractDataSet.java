@@ -289,7 +289,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 			data.add(row);
 		}
 		
-		// 计算表达式，此时计算可以确保所有非计算属性值都可用
+		// 计算表达式，此时计算可以确保所有非计算属性值都可用（包括自身）
 		evalResultData(data, properties, defaultValues, converter);
 		
 		// 格式化，应是最后步骤

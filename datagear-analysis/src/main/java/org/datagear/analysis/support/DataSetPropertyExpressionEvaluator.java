@@ -46,11 +46,15 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * <p>
  * 的表达式计算。
  * </p>
- * <p>表达式规范：</p>
+ * <p>
+ * 表达式规范：
+ * </p>
  * <p>
  * <ol>
  * <li>属性值：<br>
- * {@code 属性名}
+ * {@linkplain Map}、{@code JavaBean}：{@code 属性名}、{@code 属性名.属性名}<br>
+ * {@linkplain List}、数组：{@code [索引数值]}、{@code 属性名[索引数值]}<br>
+ * {@linkplain Map}：{@code ['属性名']}、{@code ["属性名"]}、{@code 属性名['属性名']}<br>
  * </li>
  * <li>数值计算：<br>
  * 加：{@code A + B}<br>
@@ -58,7 +62,7 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * 乘：{@code A * B}<br>
  * 除：{@code A / B}<br>
  * 求余：{@code A % B}<br>
- * 混合：{@code (A + B)*C - D/E + 2}
+ * 混合：{@code (A + B)*C - D/E + 2}<br>
  * </li>
  * <li>比较计算：<br>
  * 小于：{@code A < B}<br>
@@ -71,13 +75,19 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * <li>逻辑计算：<br>
  * 与：{@code A && B}<br>
  * 或：{@code A || B}<br>
- * 非：{@code !A}
+ * 非：{@code !A}<br>
  * </li>
  * <li>三元计算：<br>
- * {@code A ? B : C}
+ * {@code A ? B : C}<br>
  * </li>
- * <li>函数调用：<br>
- * {@code 函数名(A, ...)}
+ * <li>字符串拼接：<br>
+ * {@code A + B}、{@code A + B + 'suffix'}<br>
+ * </li>
+ * <li>字面值：<br>
+ * 数值：{@code 3}、{@code 5}、{@code 26.13}<br>
+ * 字符串：{@code 'abc'}、{@code "abc"}<br>
+ * 布尔值：{@code true}、{@code false}<br>
+ * NULL：{@code null}<br>
  * </li>
  * </ol>
  * </p>
@@ -320,8 +330,8 @@ public class DataSetPropertyExpressionEvaluator
 	 * 这样会导致定义表达式会较繁琐且不够直观。
 	 * </p>
 	 * <p>
-	 * 因而，此方法返回的{@linkplain EvaluationContext}做了特殊处理，支持以{@code map.key}的宽松语法访问{@linkplain Map}，
-	 * 从而简化表达式定义。
+	 * 因而，此方法返回的{@linkplain EvaluationContext}做了特殊处理，除了支持{@code map['key']}的标准语法，
+	 * 还支持以{@code map.key}的宽松语法访问{@linkplain Map}，从而简化表达式定义。
 	 * </p>
 	 * 
 	 * @return
