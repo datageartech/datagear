@@ -29,7 +29,6 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.SpelParserConfiguration;
@@ -271,6 +270,8 @@ public class DataSetPropertyExpEvaluator
 		if (count < 1)
 			return false;
 
+		DataSetProperty property = null;
+
 		try
 		{
 			EvaluationContext context = buildEvaluationContext();
@@ -280,7 +281,7 @@ public class DataSetPropertyExpEvaluator
 				// 必须按顺序计算，确保表达式中的属性取值逻辑符合规范
 				for (int i = 0; i < plen; i++)
 				{
-					DataSetProperty property = properties.get(i);
+					property = properties.get(i);
 					Expression expression = expressions.get(i);
 
 					if (expression != null)
@@ -299,7 +300,7 @@ public class DataSetPropertyExpEvaluator
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpEvaluatorException(t);
+			throw new DataSetPropertyExpEvaluatorException(t, (property == null ? "" : property.getName()));
 		}
 	}
 
@@ -321,7 +322,7 @@ public class DataSetPropertyExpEvaluator
 		{
 			if (isEvaluatedProperty(p))
 			{
-				Expression expression = parseExpression(p.getExpression());
+				Expression expression = parseExpression(p);
 				expressions.add(expression);
 
 				count++;
@@ -368,6 +369,19 @@ public class DataSetPropertyExpEvaluator
 		return expression.getValue(context, data);
 	}
 
+	protected Expression parseExpression(DataSetProperty property)
+			throws DataSetPropertyExpEvaluatorParseException, DataSetPropertyExpEvaluatorException
+	{
+		try
+		{
+			return this.expressionParser.parseExpression(property.getExpression());
+		}
+		catch (Throwable t)
+		{
+			throw new DataSetPropertyExpEvaluatorParseException(t, property.getName());
+		}
+	}
+
 	protected Expression parseExpression(String expression)
 			throws DataSetPropertyExpEvaluatorParseException, DataSetPropertyExpEvaluatorException
 	{
@@ -375,13 +389,9 @@ public class DataSetPropertyExpEvaluator
 		{
 			return this.expressionParser.parseExpression(expression);
 		}
-		catch (ParseException e)
-		{
-			throw new DataSetPropertyExpEvaluatorParseException(e);
-		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpEvaluatorException(t);
+			throw new DataSetPropertyExpEvaluatorParseException(t);
 		}
 	}
 

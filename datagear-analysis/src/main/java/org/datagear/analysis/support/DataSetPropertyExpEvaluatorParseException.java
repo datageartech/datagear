@@ -17,15 +17,13 @@
 
 package org.datagear.analysis.support;
 
-import org.datagear.analysis.DataSetException;
-
 /**
  * {@linkplain DataSetPropertyExpEvaluator}解析异常。
  * 
  * @author datagear@163.com
  *
  */
-public class DataSetPropertyExpEvaluatorParseException extends DataSetException
+public class DataSetPropertyExpEvaluatorParseException extends DataSetPropertyExpEvaluatorException
 {
 	private static final long serialVersionUID = 1L;
 
@@ -34,18 +32,33 @@ public class DataSetPropertyExpEvaluatorParseException extends DataSetException
 		super();
 	}
 
-	public DataSetPropertyExpEvaluatorParseException(String message)
+	public DataSetPropertyExpEvaluatorParseException(String message, String propertyName)
 	{
-		super(message);
+		super(message, propertyName);
 	}
 
-	public DataSetPropertyExpEvaluatorParseException(Throwable cause)
+	public DataSetPropertyExpEvaluatorParseException(String message, Throwable cause, String propertyName)
 	{
-		super(cause);
+		super(message, cause, propertyName);
 	}
 
 	public DataSetPropertyExpEvaluatorParseException(String message, Throwable cause)
 	{
 		super(message, cause);
+	}
+
+	public DataSetPropertyExpEvaluatorParseException(String message)
+	{
+		super(message);
+	}
+
+	public DataSetPropertyExpEvaluatorParseException(Throwable cause, String propertyName)
+	{
+		super(cause, propertyName);
+	}
+
+	public DataSetPropertyExpEvaluatorParseException(Throwable cause)
+	{
+		super(cause);
 	}
 }

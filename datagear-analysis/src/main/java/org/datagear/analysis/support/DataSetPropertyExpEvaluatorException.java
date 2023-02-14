@@ -29,6 +29,8 @@ public class DataSetPropertyExpEvaluatorException extends DataSetException
 {
 	private static final long serialVersionUID = 1L;
 
+	private String propertyName = "";
+
 	public DataSetPropertyExpEvaluatorException()
 	{
 		super();
@@ -39,13 +41,41 @@ public class DataSetPropertyExpEvaluatorException extends DataSetException
 		super(message);
 	}
 
+	public DataSetPropertyExpEvaluatorException(String message, String propertyName)
+	{
+		super(message);
+		this.propertyName = propertyName;
+	}
+
 	public DataSetPropertyExpEvaluatorException(Throwable cause)
 	{
 		super(cause);
 	}
 
+	public DataSetPropertyExpEvaluatorException(Throwable cause, String propertyName)
+	{
+		super(cause);
+		this.propertyName = propertyName;
+	}
+
 	public DataSetPropertyExpEvaluatorException(String message, Throwable cause)
 	{
 		super(message, cause);
+	}
+
+	public DataSetPropertyExpEvaluatorException(String message, Throwable cause, String propertyName)
+	{
+		super(message, cause);
+		this.propertyName = propertyName;
+	}
+
+	public String getPropertyName()
+	{
+		return propertyName;
+	}
+
+	protected void setPropertyName(String propertyName)
+	{
+		this.propertyName = propertyName;
 	}
 }

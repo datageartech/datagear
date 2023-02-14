@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.support.DataSetPropertyExpEvaluatorException;
+import org.datagear.analysis.support.DataSetPropertyExpEvaluatorParseException;
 import org.datagear.analysis.support.DataSetSourceParseException;
 import org.datagear.analysis.support.DataValueConvertionException;
 import org.datagear.analysis.support.HeaderContentNotNameValueObjArrayJsonException;
@@ -511,6 +513,26 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(DataSetPropertyExpEvaluatorParseException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisDataSetPropertyExpEvaluatorParseException(HttpServletRequest request,
+			HttpServletResponse response, DataSetPropertyExpEvaluatorParseException exception)
+	{
+		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
+				exception.getPropertyName(), getRootMessage(exception));
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(DataSetPropertyExpEvaluatorException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisDataSetPropertyExpEvaluatorException(HttpServletRequest request,
+			HttpServletResponse response, DataSetPropertyExpEvaluatorException exception)
+	{
+		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
+				exception.getPropertyName(), getRootMessage(exception));
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(SaveSchemaUrlPermissionDeniedException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handleServiceSaveSchemaUrlPermissionDeniedException(HttpServletRequest request,
@@ -564,6 +586,7 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 	
+	@Override
 	protected OperationMessage setOptMsgForThrowable(HttpServletRequest request, Throwable t, Object... msgArgs)
 	{
 		OperationMessage om = super.setOptMsgForThrowable(request, t, msgArgs);
@@ -583,6 +606,7 @@ public class ControllerAdvice extends AbstractController
 		return om;
 	}
 	
+	@Override
 	protected OperationMessage setOptMsgForThrowableMsgCode(HttpServletRequest request, Throwable t, String msgCode, Object... msgArgs)
 	{
 		OperationMessage om = super.setOptMsgForThrowableMsgCode(request, t, msgCode, msgArgs);
