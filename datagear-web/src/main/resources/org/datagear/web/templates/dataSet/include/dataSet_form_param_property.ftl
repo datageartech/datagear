@@ -191,6 +191,13 @@ dataSet_form_param_property_form.ftl
 					</p-column>
 					<p-column field="defaultValue" header="<@spring.message code='defaultValue' />" class="col-name">
 					</p-column>
+					<p-column field="evaluated" header="<@spring.message code='enableExpression' />" class="col-name">
+						<template #body="{data}">
+							{{formatPropertyEvaludated(data)}}
+						</template>
+					</p-column>
+					<p-column field="expression" header="<@spring.message code='expression' />" class="col-name">
+					</p-column>
 				</p-datatable>
 			</div>
 		</div>

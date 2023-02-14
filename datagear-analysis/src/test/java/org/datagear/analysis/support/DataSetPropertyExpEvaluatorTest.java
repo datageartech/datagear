@@ -66,7 +66,7 @@ public class DataSetPropertyExpEvaluatorTest
 		data.put("中文关键字", 6);
 		data.put("special']name", 6);
 
-		// 基本数值运算，宽松Map访问方式
+		// 基本数值运算，简单Map访问方式
 		{
 			Number result = (Number) this.evaluator.eval("(width * height)/2 + map.size + bean.d + list[1] + 5%2",
 					data);
@@ -85,6 +85,10 @@ public class DataSetPropertyExpEvaluatorTest
 		{
 			Number result = (Number) this.evaluator.eval("width > height ? width + map.size : height + map.size", data);
 			assertEquals(12, result.intValue());
+		}
+		{
+			Number result = (Number) this.evaluator.eval("width == null ?  0 : width", data);
+			assertEquals(3, result.intValue());
 		}
 
 		// BigInteger、BigDecimal
@@ -107,13 +111,11 @@ public class DataSetPropertyExpEvaluatorTest
 			assertEquals("abc-suffix", result);
 		}
 
-		// 中文关键字
+		// 特殊字符
 		{
 			Number result = (Number) this.evaluator.eval("(['中文关键字'] + 2) * 3", data);
 			assertEquals(24, result.intValue());
 		}
-
-		// 特殊字符
 		{
 			Number result = (Number) this.evaluator.eval("([\"special']name\"] + 2) * 3", data);
 			assertEquals(24, result.intValue());
@@ -214,26 +216,30 @@ public class DataSetPropertyExpEvaluatorTest
 	}
 	
 	@Test
-	public void evalTest_forChineseKey()
+	public void evalTest_specialStringKey()
 	{
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("width", 3);
+		data.put("height", 6);
+		data.put("height_1", 1);
+		data.put("height-2", 1);
 		data.put("中文关键字", 6);
 		data.put("中文对象", new ExpBean());
 
-		// 中文关键字只能使用标准Map访问语法
+		// 特殊字符关键字只能使用标准Map访问语法
 		{
-			Number result = (Number) this.evaluator.eval("(['中文关键字'] + ['中文对象'].d) * width", data);
+			Number result = (Number) this.evaluator.eval("(['中文关键字'] + ['中文对象'].d) * width * height_1 * ['height-2']",
+					data);
 			assertEquals(24, result.intValue());
 		}
 
-		// 中文关键字无法使用宽松Map访问语法
+		// 特殊字符关键字无法使用简单Map访问语法
 		{
 			String exception = null;
 			
 			try
 			{
-				this.evaluator.eval("(中文关键字 + 中文对象.d) * width", data);
+				this.evaluator.eval("(中文关键字 + 中文对象.d) * width * height-2", data);
 			}
 			catch (DataSetPropertyExpEvaluatorException e)
 			{

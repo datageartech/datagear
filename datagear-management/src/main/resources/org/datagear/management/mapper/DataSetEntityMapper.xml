@@ -108,12 +108,14 @@
 		INSERT INTO DATAGEAR_DATA_SET_PROP
 			(
 			PROP_DS_ID, PROP_NAME, PROP_TYPE, PROP_LABEL,
-			PROP_DFT_VALUE, PROP_ORDER
+			PROP_DFT_VALUE, PROP_EVALUATED, PROP_EXPRESSION,
+			PROP_ORDER
 			)
 		VALUES
 			(
 			#{entity.dataSetId}, #{entity.child.name}, #{entity.child.type}, #{entity.child.label, jdbcType=VARCHAR},
-			#{entity.child.defaultValue, jdbcType=VARCHAR}, #{entity.order}
+			#{entity.child.defaultValue, jdbcType=VARCHAR}, #{entity.child.evaluated}, #{entity.child.expression, jdbcType=VARCHAR}, 
+			#{entity.order}
 			)
 	</insert>
 	
@@ -399,6 +401,8 @@
 			PROP_TYPE AS ${_iq_}child.type${_iq_},
 			PROP_LABEL AS ${_iq_}child.label${_iq_},
 			PROP_DFT_VALUE AS ${_iq_}child.defaultValue${_iq_},
+			PROP_EVALUATED AS ${_iq_}child.evaluated${_iq_},
+			PROP_EXPRESSION AS ${_iq_}child.expression${_iq_},
 			PROP_ORDER AS ${_iq_}order${_iq_}
 		FROM
 			DATAGEAR_DATA_SET_PROP

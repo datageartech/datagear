@@ -146,6 +146,8 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 				dp.setType(mp.getType());
 				dp.setLabel(mp.getLabel());
 				dp.setDefaultValue(mp.getDefaultValue());
+				dp.setEvaluated(mp.isEvaluated());
+				dp.setExpression(mp.getExpression());
 			}
 		}
 

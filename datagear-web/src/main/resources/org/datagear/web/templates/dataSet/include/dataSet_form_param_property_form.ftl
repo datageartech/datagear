@@ -151,6 +151,28 @@ page_simple_form.ftl
 						</p-inputtext>
 					</div>
 				</div>
+				<div class="field grid">
+					<label for="${pid}dsppFormEvaluated" class="field-label col-12 mb-2">
+						<@spring.message code='enableExpression' />
+					</label>
+					<div class="field-input col-12">
+						<p-selectbutton id="${pid}dsppFormEvaluated" v-model="pm.dataSetPropertyForm.data.evaluated" :options="pm.booleanOptions"
+							option-label="name" option-value="value" class="input w-full">
+						</p-selectbutton>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}dsppFormExpression" class="field-label col-12 mb-2"
+						title="<@spring.message code='dataSetProperty.expression.desc' />">
+						<@spring.message code='expression' />
+					</label>
+					<div class="field-input col-12">
+						<p-textarea id="${pid}dsppFormExpression" v-model="pm.dataSetPropertyForm.data.expression" type="text"
+							class="input w-full" name="expression" rows="3" maxlength="1000"
+							:disabled="!pm.dataSetPropertyForm.data.evaluated">
+						</p-textarea>
+					</div>
+				</div>
 			</div>
 			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
@@ -184,7 +206,8 @@ page_simple_form.ftl
 		data = $.extend(true,
 				{
 					name: "",
-					type: "${PropertyDataType.STRING}"
+					type: "${PropertyDataType.STRING}",
+					evaluated: false
 				},
 				po.vueRaw(data));
 		
@@ -306,7 +329,11 @@ page_simple_form.ftl
 		{
 			var pm = po.vuePageModel();
 			return $.findNameByValue(pm.dataSetPropertyTypeOptions, data.type);
-		}
+		},
+		formatPropertyEvaludated: function(data)
+		{
+			return po.formatBooleanValue(data.evaluated);
+		},
 	});
 })
 (${pid});
