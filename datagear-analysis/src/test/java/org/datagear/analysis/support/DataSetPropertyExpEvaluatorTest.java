@@ -251,31 +251,9 @@ public class DataSetPropertyExpEvaluatorTest
 	}
 
 	@Test
-	public void evalTest_denied()
+	public void evalTest_illegalSyntax()
 	{
-		// 禁止的表达式：数据写入
-		{
-			String exception = null;
-
-			Map<String, Object> data = new HashMap<String, Object>();
-			data.put("string", "abc");
-			ExpBean bean = new ExpBean();
-			data.put("bean", bean);
-			Map<String, Object> map = new HashMap<String, Object>();
-			data.put("map", map);
-
-			try
-			{
-				this.evaluator.eval("bean.d = 33", data);
-			}
-			catch (DataSetPropertyExpEvaluatorException e)
-			{
-				exception = e.getMessage();
-			}
-
-			assertNotEquals(33, bean.d);
-			assertNotNull(exception);
-		}
+		// 禁止的语法：数据写入
 		{
 			String exception = null;
 
@@ -297,7 +275,23 @@ public class DataSetPropertyExpEvaluatorTest
 			String exception = null;
 
 			Map<String, Object> data = new HashMap<String, Object>();
-			data.put("string", "abc");
+
+			try
+			{
+				this.evaluator.eval("['age'] = 33", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertTrue(data.isEmpty());
+			assertNotNull(exception);
+		}
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
 			Map<String, Object> map = new HashMap<String, Object>();
 			data.put("map", map);
 
@@ -313,8 +307,46 @@ public class DataSetPropertyExpEvaluatorTest
 			assertTrue(map.isEmpty());
 			assertNotNull(exception);
 		}
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+			Map<String, Object> map = new HashMap<String, Object>();
+			data.put("map", map);
+
+			try
+			{
+				this.evaluator.eval("['map']['age'] = 33", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertTrue(map.isEmpty());
+			assertNotNull(exception);
+		}
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+			ExpBean bean = new ExpBean();
+			data.put("bean", bean);
+
+			try
+			{
+				this.evaluator.eval("bean.d = 33", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertNotEquals(33, bean.d);
+			assertNotNull(exception);
+		}
 		
-		// 禁止的表达式：方法调用
+		// 禁止的语法：方法调用
 		{
 			String exception = null;
 
@@ -367,7 +399,7 @@ public class DataSetPropertyExpEvaluatorTest
 			assertNotNull(exception);
 		}
 		
-		// 禁止的表达式：类型
+		// 禁止的语法：类型
 		{
 			String exception = null;
 
@@ -385,7 +417,7 @@ public class DataSetPropertyExpEvaluatorTest
 			assertNotNull(exception);
 		}
 		
-		// 禁止的表达式：创建
+		// 禁止的语法：创建
 		{
 			String exception = null;
 
@@ -400,6 +432,75 @@ public class DataSetPropertyExpEvaluatorTest
 				exception = e.getMessage();
 			}
 			
+			assertNotNull(exception);
+		}
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+
+			try
+			{
+				this.evaluator.eval("{1,2,3}", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertNotNull(exception);
+		}
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+
+			try
+			{
+				this.evaluator.eval("{a:1,b:2,c:3}", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertNotNull(exception);
+		}
+
+		// 禁止的语法：bean引用
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+
+			try
+			{
+				this.evaluator.eval("@bean", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertNotNull(exception);
+		}
+
+		// 禁止的语法
+		{
+			String exception = null;
+
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("width", 3);
+
+			try
+			{
+				this.evaluator.eval("width > 0 ? new java.lang.String('b') : {1,2,3}", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
 			assertNotNull(exception);
 		}
 	}

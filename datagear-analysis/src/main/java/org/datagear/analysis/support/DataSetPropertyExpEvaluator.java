@@ -29,9 +29,22 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParserConfiguration;
+import org.springframework.expression.spel.ast.Assign;
+import org.springframework.expression.spel.ast.BeanReference;
+import org.springframework.expression.spel.ast.ConstructorReference;
+import org.springframework.expression.spel.ast.InlineList;
+import org.springframework.expression.spel.ast.InlineMap;
+import org.springframework.expression.spel.ast.MethodReference;
+import org.springframework.expression.spel.ast.Projection;
+import org.springframework.expression.spel.ast.QualifiedIdentifier;
+import org.springframework.expression.spel.ast.Selection;
+import org.springframework.expression.spel.ast.TypeReference;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
@@ -174,10 +187,10 @@ public class DataSetPropertyExpEvaluator
 	 */
 	public Object eval(String expression, Object data) throws DataSetPropertyExpEvaluatorException
 	{
-		Expression exp = parseExpression(expression);
-
 		try
 		{
+			Expression exp = parseExpression(expression);
+
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalSingle(exp, context, data);
 		}
@@ -202,10 +215,10 @@ public class DataSetPropertyExpEvaluator
 	 */
 	public Object[] eval(String expression, Object[] datas) throws DataSetPropertyExpEvaluatorException
 	{
-		Expression exp = parseExpression(expression);
-
 		try
 		{
+			Expression exp = parseExpression(expression);
+
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalArray(exp, context, datas);
 		}
@@ -229,10 +242,10 @@ public class DataSetPropertyExpEvaluator
 	 */
 	public List<Object> eval(String expression, List<?> datas) throws DataSetPropertyExpEvaluatorException
 	{
-		Expression exp = parseExpression(expression);
-
 		try
 		{
+			Expression exp = parseExpression(expression);
+
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalList(exp, context, datas);
 		}
@@ -374,7 +387,11 @@ public class DataSetPropertyExpEvaluator
 	{
 		try
 		{
-			return this.expressionParser.parseExpression(property.getExpression());
+			return parseExpression(property.getExpression());
+		}
+		catch (DataSetPropertyExpEvaluatorException e)
+		{
+			throw e;
 		}
 		catch (Throwable t)
 		{
@@ -382,16 +399,74 @@ public class DataSetPropertyExpEvaluator
 		}
 	}
 
-	protected Expression parseExpression(String expression)
-			throws DataSetPropertyExpEvaluatorParseException, DataSetPropertyExpEvaluatorException
+	protected Expression parseExpression(String expression) throws Throwable
 	{
-		try
+		Expression exp = this.expressionParser.parseExpression(expression);
+
+		checkPermission(exp);
+
+		return exp;
+	}
+
+	protected void checkPermission(Expression expression) throws Throwable
+	{
+		if (!(expression instanceof SpelExpression))
+			return;
+
+		SpelExpression spelExpression = (SpelExpression) expression;
+		SpelNode spelNode = spelExpression.getAST();
+
+		checkSpelNode(spelExpression, spelNode);
+	}
+
+	/**
+	 * 校验Spel表达式是否合法。
+	 * <p>
+	 * Spel没有提供更细粒度的表达式控制配置，所以这里通过判断{@linkplain SpelNode}的类型来禁用某些{@linkplain DataSetPropertyExpEvaluator}表达式规范无关的语法，
+	 * 以避免安全问题。
+	 * </p>
+	 * 
+	 * @param spelExpression
+	 * @param spelNode
+	 * @throws Throwable
+	 */
+	protected void checkSpelNode(SpelExpression spelExpression, SpelNode spelNode) throws Throwable
+	{
+		if (spelNode == null)
+			return;
+
+		boolean illegal = false;
+
+		// 表达式中不允许出现这些语法
+		if (spelNode instanceof Assign)
+			illegal = true;
+		else if (spelNode instanceof BeanReference)
+			illegal = true;
+		else if (spelNode instanceof ConstructorReference)
+			illegal = true;
+		else if (spelNode instanceof InlineList)
+			illegal = true;
+		else if (spelNode instanceof InlineMap)
+			illegal = true;
+		else if (spelNode instanceof MethodReference)
+			illegal = true;
+		else if (spelNode instanceof Projection)
+			illegal = true;
+		else if (spelNode instanceof QualifiedIdentifier)
+			illegal = true;
+		else if (spelNode instanceof Selection)
+			illegal = true;
+		else if (spelNode instanceof TypeReference)
+			illegal = true;
+		
+		if(illegal)
+			throw new ParseException(spelNode.toStringAST(), spelNode.getStartPosition(), "illegal syntax");
+
+		int cc = spelNode.getChildCount();
+
+		for (int i = 0; i < cc; i++)
 		{
-			return this.expressionParser.parseExpression(expression);
-		}
-		catch (Throwable t)
-		{
-			throw new DataSetPropertyExpEvaluatorParseException(t);
+			checkSpelNode(spelExpression, spelNode.getChild(i));
 		}
 	}
 
