@@ -171,6 +171,39 @@ page_simple_form.ftl
 							class="input w-full" name="expression" rows="3" maxlength="1000"
 							:disabled="!pm.dataSetPropertyForm.data.evaluated">
 						</p-textarea>
+						<div class="mt-1" v-if="pm.dataSetPropertyForm.data.evaluated">
+							<div class="text-color-secondary text-xs"><@spring.message code='insertOperatorColon' /></div>
+							<div>
+								<p-button type="button" label="+" title="<@spring.message code='exp.addition' />"
+									@click="onInsertExpText('+')" class="p-button-secondary p-button-sm mr-1 mt-1">
+								</p-button>
+								<p-button type="button" label="-" title="<@spring.message code='exp.subtraction' />"
+									@click="onInsertExpText('-')" class="p-button-secondary p-button-sm mr-1 mt-1">
+								</p-button>
+								<p-button type="button" label="*" title="<@spring.message code='exp.multiplication' />"
+									@click="onInsertExpText('*')" class="p-button-secondary p-button-sm mr-1 mt-1">
+								</p-button>
+								<p-button type="button" label="/" title="<@spring.message code='exp.division' />"
+									@click="onInsertExpText('/')" class="p-button-secondary p-button-sm mr-1 mt-1">
+								</p-button>
+								<p-button type="button" label="%" title="<@spring.message code='exp.modulus' />"
+									@click="onInsertExpText('%')" class="p-button-secondary p-button-sm mr-1 mt-1">
+								</p-button>
+								<p-button type="button" label="("
+									@click="onInsertExpText('(')" class="p-button-secondary p-button-sm mr-1 mt-1">
+								</p-button>
+								<p-button type="button" label=")"
+									@click="onInsertExpText(')')" class="p-button-secondary p-button-sm mr-1 mt-1">
+								</p-button>
+							</div>
+							<div class="text-color-secondary text-xs mt-1"><@spring.message code='insertPropNameColon' /></div>
+							<div>
+								<p-button v-for="p in pm.dataSetPropertyForm.avaliableProperties" :key="p.name"
+									type="button" :label="p.name"
+									@click="onInsertExpPropName(p.name)" class="p-button-secondary p-button-sm mr-1 mt-1">
+								</p-button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -201,7 +234,7 @@ page_simple_form.ftl
 		pm.dataSetParamForm.show = true;
 	};
 
-	po.showDataSetPropertyForm = function(action, data, submitHandler)
+	po.showDataSetPropertyForm = function(action, data, submitHandler, avaliableProperties)
 	{
 		data = $.extend(true,
 				{
@@ -215,6 +248,7 @@ page_simple_form.ftl
 		pm.dataSetPropertyForm.title = "<@spring.message code='property' />" + " - " + action;
 		pm.dataSetPropertyForm.data = data;
 		pm.dataSetPropertyForm.submitHandler = submitHandler;
+		pm.dataSetPropertyForm.avaliableProperties = avaliableProperties;
 		pm.dataSetPropertyForm.show = true;
 	};
 	
@@ -232,7 +266,8 @@ page_simple_form.ftl
 			show: false,
 			title: "",
 			data: {},
-			submitHandler: null
+			submitHandler: null,
+			avaliableProperties: []
 		},
 		dataSetParamDataTypeOptions:
 		[
@@ -310,6 +345,54 @@ page_simple_form.ftl
 				
 				pm.dataSetPropertyForm.show = (close === false);
 			});
+		},
+		onInsertExpText: function(text)
+		{
+			var form = po.elementOfId("${pid}dataSetPropertyForm", document.body);
+			var textarea = po.elementOfId("${pid}dsppFormExpression", form);
+			var newVal = $.insertAtCaret(textarea, text);
+			
+			var pm = po.vuePageModel();
+			pm.dataSetPropertyForm.data.expression = newVal;
+		},
+		onInsertExpPropName: function(name)
+		{
+			var form = po.elementOfId("${pid}dataSetPropertyForm", document.body);
+			var textarea = po.elementOfId("${pid}dsppFormExpression", form);
+			
+			var hasSq = false;
+			var hasDq = false;
+			var hasSpecial = false;
+			
+			for(var i=0; i<name.length; i++)
+			{
+				var ch = name.charAt(i);
+				
+				if(ch == "'")
+					hasSq = true;
+				else if(ch == "\"")
+					hasDq = true;
+				else if(!((ch >= 'a' && ch <='z') || (ch >= 'A' && ch <='Z') || ch == '_'))
+					hasSpecial = true;
+			}
+			
+			if(hasSq && hasDq)
+			{
+				$.tipWarn("<@spring.message code='sqWhileDqPropNameInExpIsIllegal' />");
+				return;
+			}
+			
+			if(hasSq)
+				name = "[\"" + name + "\"]";
+			else if(hasDq)
+				name = "['" + name + "']";
+			else if(hasSpecial)
+				name = "['" + name + "']";
+			
+			var newVal = $.insertAtCaret(textarea, name);
+			
+			var pm = po.vuePageModel();
+			pm.dataSetPropertyForm.data.expression = newVal;
 		},
 		formatParamType: function(data)
 		{

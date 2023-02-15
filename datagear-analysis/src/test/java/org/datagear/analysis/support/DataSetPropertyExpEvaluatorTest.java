@@ -65,6 +65,7 @@ public class DataSetPropertyExpEvaluatorTest
 		data.put("string", "abc");
 		data.put("中文关键字", 6);
 		data.put("special']name", 6);
+		data.put("special\"]name", 6);
 
 		// 基本数值运算，简单Map访问方式
 		{
@@ -118,6 +119,10 @@ public class DataSetPropertyExpEvaluatorTest
 		}
 		{
 			Number result = (Number) this.evaluator.eval("([\"special']name\"] + 2) * 3", data);
+			assertEquals(24, result.intValue());
+		}
+		{
+			Number result = (Number) this.evaluator.eval("(['special\"]name'] + 2) * 3", data);
 			assertEquals(24, result.intValue());
 		}
 
@@ -225,12 +230,55 @@ public class DataSetPropertyExpEvaluatorTest
 		data.put("height-2", 1);
 		data.put("中文关键字", 6);
 		data.put("中文对象", new ExpBean());
+		data.put("special'name", 6);
+		data.put("special\"name", 6);
+		data.put("special'\"name", 6);
 
 		// 特殊字符关键字只能使用标准Map访问语法
 		{
 			Number result = (Number) this.evaluator.eval("(['中文关键字'] + ['中文对象'].d) * width * height_1 * ['height-2']",
 					data);
 			assertEquals(24, result.intValue());
+		}
+		{
+			Number result = (Number) this.evaluator.eval("([\"special'name\"] + 2) * 3", data);
+			assertEquals(24, result.intValue());
+		}
+		{
+			Number result = (Number) this.evaluator.eval("(['special\"name'] + 2) * 3", data);
+			assertEquals(24, result.intValue());
+		}
+
+		// 同时包含单引号、双引号的无法处理
+		{
+			String exception = null;
+
+			try
+			{
+				this.evaluator.eval("([\"special'\"name\"] + 2) * 3", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertNotNull(exception);
+		}
+
+		// 同时包含单引号、双引号的无法处理
+		{
+			String exception = null;
+
+			try
+			{
+				this.evaluator.eval("(['special\\'\"name'] + 2) * 3", data);
+			}
+			catch (DataSetPropertyExpEvaluatorException e)
+			{
+				exception = e.getMessage();
+			}
+
+			assertNotNull(exception);
 		}
 
 		// 特殊字符关键字无法使用简单Map访问语法

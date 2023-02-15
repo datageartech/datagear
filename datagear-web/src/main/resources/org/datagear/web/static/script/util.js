@@ -564,6 +564,42 @@
 		}
 	};
 	
+	//在输入框光标位置插入文本
+	$.insertAtCaret = function(ele, text, focus)
+	{
+		ele = (ele ? $(ele) : null);
+		text = (text == null ? "" : text);
+		focus = (focus == null ? true : focus);
+		
+		var dom = (ele ? ele[0] : null);
+		
+		if(!dom)
+			return;
+		
+		var val = ele.val();
+		
+		if(dom.selectionStart != null)
+		{
+			var startIdx = dom.selectionStart;
+			var endIdx = dom.selectionEnd;
+			val = val.substring(0, startIdx) + text + val.substring(endIdx, val.length);
+			
+			ele.val(val);
+			dom.selectionStart = startIdx + text.length;
+			dom.selectionEnd = dom.selectionStart;
+		}
+		else
+		{
+			val = val + text;
+			ele.val(val);
+		}
+		
+		if(focus)
+			ele.focus();
+		
+		return val;
+	};
+	
 	$.TYPEOF_STRING = "string";
 	$.TYPEOF_NUMBER = "number";
 	$.TYPEOF_BOOLEAN = "boolean";

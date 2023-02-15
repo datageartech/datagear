@@ -262,10 +262,10 @@ dataSet_form_param_property_form.ftl
 		},
 		onAddProperty: function(e)
 		{
+			var fm = po.vueFormModel();
+			
 			po.showDataSetPropertyForm("<@spring.message code='add' />", {}, function(dsp)
 			{
-				var fm = po.vueFormModel();
-				
 				if(po.hasDuplicateName(fm.properties, dsp.name))
 				{
 					$.tipInfo("<@spring.message code='propertyNameMustBeUnique' />");
@@ -273,7 +273,8 @@ dataSet_form_param_property_form.ftl
 				}
 				
 				fm.properties.push(dsp);
-			});
+			},
+			fm.properties);
 		},
 		onEditProperty: function(e)
 		{
@@ -295,7 +296,8 @@ dataSet_form_param_property_form.ftl
 				}
 				
 				fm.properties[dspIdx] = dsp;
-			});
+			},
+			fm.properties);
 		},
 		onMoveUpParam: function(e)
 		{
