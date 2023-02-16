@@ -172,69 +172,81 @@ page_simple_form.ftl
 							:disabled="!pm.dataSetPropertyForm.data.evaluated">
 						</p-textarea>
 						<div class="mt-1" v-if="pm.dataSetPropertyForm.data.evaluated">
-							<div class="text-color-secondary text-sm"><@spring.message code='insertOperatorColon' /></div>
-							<div>
-								<p-button type="button" label="+" title="<@spring.message code='exp.addition' />"
-									@click="onInsertExpText('+')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="-" title="<@spring.message code='exp.subtraction' />"
-									@click="onInsertExpText('-')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="*" title="<@spring.message code='exp.multiplication' />"
-									@click="onInsertExpText('*')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="/" title="<@spring.message code='exp.division' />"
-									@click="onInsertExpText('/')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="%" title="<@spring.message code='exp.modulus' />"
-									@click="onInsertExpText('%')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="("
-									@click="onInsertExpText('(')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label=")"
-									@click="onInsertExpText(')')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-							</div>
-							<div>
-								<p-button type="button" label="&gt;" title="<@spring.message code='exp.gt' />"
-									@click="onInsertExpText('&gt;')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="&lt;" title="<@spring.message code='exp.lt' />"
-									@click="onInsertExpText('&lt;')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="&gt;=" title="<@spring.message code='exp.ge' />"
-									@click="onInsertExpText('&gt;=')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="&lt;=" title="<@spring.message code='exp.le' />"
-									@click="onInsertExpText('&lt;=')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="==" title="<@spring.message code='exp.eq' />"
-									@click="onInsertExpText('==')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="!=" title="<@spring.message code='exp.ne' />"
-									@click="onInsertExpText('!=')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="!" title="<@spring.message code='exp.not' />"
-									@click="onInsertExpText('!')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label="?"
-									@click="onInsertExpText('?')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-								<p-button type="button" label=":"
-									@click="onInsertExpText(':')" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-							</div>
-							<div class="text-color-secondary text-sm mt-1"><@spring.message code='insertPropNameColon' /></div>
-							<div>
-								<p-button v-for="p in pm.dataSetPropertyForm.avaliableProperties" :key="p.name"
-									type="button" :label="p.name"
-									@click="onInsertExpPropName(p.name)" class="p-button-secondary p-button-sm mr-1 mt-1">
-								</p-button>
-							</div>
-							<div class="text-color-secondary text-sm mt-1">
-								<@spring.message code='dataSetProperty.expression.usePropName.desc' />
-							</div>
+							<p-tabview class="xs-tabview text-color-secondary text-sm">
+								<p-tabpanel header="<@spring.message code='insertPropName' />">
+									<div>
+										<p-button v-for="p in pm.dataSetPropertyForm.avaliableProperties" :key="p.name"
+											type="button" :label="p.name"
+											@click="onInsertExpPropName(p.name)" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+									</div>
+									<div class="mt-2 text-color-secondary">
+										<@spring.message code='dataSetProperty.expression.usePropName.desc' />
+									</div>
+								</p-tabpanel>
+								<p-tabpanel header="<@spring.message code='insertOperator' />">
+									<div>
+										<p-button type="button" label="+" title="<@spring.message code='exp.addition' />"
+											@click="onInsertExpOperator('+')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="-" title="<@spring.message code='exp.subtraction' />"
+											@click="onInsertExpOperator('-')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="*" title="<@spring.message code='exp.multiplication' />"
+											@click="onInsertExpOperator('*')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="/" title="<@spring.message code='exp.division' />"
+											@click="onInsertExpOperator('/')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="%" title="<@spring.message code='exp.modulus' />"
+											@click="onInsertExpOperator('%')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="("
+											@click="onInsertExpOperator('(')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label=")"
+											@click="onInsertExpOperator(')')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+									</div>
+									<div>
+										<p-button type="button" label="&gt;" title="<@spring.message code='exp.gt' />"
+											@click="onInsertExpOperator('&gt;')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="&lt;" title="<@spring.message code='exp.lt' />"
+											@click="onInsertExpOperator('&lt;')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="&gt;=" title="<@spring.message code='exp.ge' />"
+											@click="onInsertExpOperator('&gt;=')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="&lt;=" title="<@spring.message code='exp.le' />"
+											@click="onInsertExpOperator('&lt;=')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="==" title="<@spring.message code='exp.eq' />"
+											@click="onInsertExpOperator('==')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="!=" title="<@spring.message code='exp.ne' />"
+											@click="onInsertExpOperator('!=')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+									</div>
+									<div>
+										<p-button type="button" label="&&" title="<@spring.message code='exp.and' />"
+											@click="onInsertExpOperator('&&')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="||" title="<@spring.message code='exp.or' />"
+											@click="onInsertExpOperator('||')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="!" title="<@spring.message code='exp.not' />"
+											@click="onInsertExpOperator('!')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label="?"
+											@click="onInsertExpOperator('?')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+										<p-button type="button" label=":"
+											@click="onInsertExpOperator(':')" class="p-button-secondary p-button-sm mr-1 mt-1">
+										</p-button>
+									</div>
+								</p-tabpanel>
+							</p-tabview>
 						</div>
 					</div>
 				</div>
@@ -378,7 +390,7 @@ page_simple_form.ftl
 				pm.dataSetPropertyForm.show = (close === false);
 			});
 		},
-		onInsertExpText: function(text)
+		onInsertExpOperator: function(text)
 		{
 			var form = po.elementOfId("${pid}dataSetPropertyForm", document.body);
 			var textarea = po.elementOfId("${pid}dsppFormExpression", form);

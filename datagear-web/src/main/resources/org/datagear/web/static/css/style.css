@@ -214,6 +214,14 @@ label.align-tip{
 	padding-top: 0.7rem;
     padding-bottom: 0.7rem;
 }
+.p-tabview.xs-tabview .p-tabview-nav li .p-tabview-nav-link{
+	font-weight: normal;
+	padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+.p-tabview.xs-tabview .p-tabview-panels{
+	padding: 0.3rem;
+}
 
 /*竖向tabmenu*/
 .p-tabmenu.vertical-tabmenu{
