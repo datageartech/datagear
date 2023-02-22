@@ -160,6 +160,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			}
 			catch (Throwable t)
 			{
+				QueryResultSet.close(qrs);
 				throw new SqlDataSetSqlExecutionException(sql, t);
 			}
 
@@ -180,8 +181,10 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			{
 				throw new DataSetException(t);
 			}
-
-			QueryResultSet.close(qrs);
+			finally
+			{
+				QueryResultSet.close(qrs);
+			}
 
 			return dataSetResult;
 		}
