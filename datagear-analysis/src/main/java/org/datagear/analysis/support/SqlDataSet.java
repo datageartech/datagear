@@ -234,51 +234,13 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs,
 			DataSetQuery query, List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
 	{
-		List<Map<String, ?>> rawData = resolveRawData(cn, rs, query);
-		List<DataSetProperty> rawProperties = (resolveProperties ? resolveProperties(cn, rs, rawData)
-				: Collections.emptyList());
-
+		List<DataSetProperty> rawProperties =(resolveProperties ? new ArrayList<DataSetProperty>() : Collections.emptyList());
+		List<Map<String, ?>> rawData = resolveRawData(cn, rs, query, resolveProperties, rawProperties);
+		
+		if(resolveProperties)
+			calibrateProperties(rawProperties, rawData);
+		
 		return resolveResult(query, rawData, rawProperties, properties, resolveProperties);
-	}
-
-	/**
-	 * 解析{@linkplain DataSetProperty}。
-	 * 
-	 * @param cn
-	 * @param rs
-	 * @param rawData
-	 *            允许为{@code null}
-	 * @return
-	 * @throws Throwable
-	 */
-	protected List<DataSetProperty> resolveProperties(Connection cn, ResultSet rs, List<Map<String, ?>> rawData)
-			throws Throwable
-	{
-		JdbcSupport jdbcSupport = getJdbcSupport();
-		ResultSetMetaData rsMeta = rs.getMetaData();
-		String[] colNames = jdbcSupport.getColumnNames(rsMeta);
-		SqlType[] sqlTypes = jdbcSupport.getColumnSqlTypes(rsMeta);
-
-		List<DataSetProperty> properties = new ArrayList<>(colNames.length);
-
-		for (int i = 0; i < colNames.length; i++)
-		{
-			DataSetProperty property = new DataSetProperty(colNames[i], toPropertyDataType(sqlTypes[i], colNames[i]));
-
-			@JDBCCompatiblity("某些驱动程序可能存在一种情况，列类型会被toPropertyDataType()解析为DataType.UNKNOWN，但是实际值是允许的，"
-					+ "比如PostgreSQL-42.2.5驱动对于[SELECT 'aaa' as NAME]语句，结果的SQL类型是Types.OTHER，但实际值是允许的字符串")
-			boolean resolveTypeByValue = DataType.UNKNOWN.equals(property.getType());
-
-			if (resolveTypeByValue && rawData != null && rawData.size() > 0)
-			{
-				Map<String, ?> row0 = rawData.get(0);
-				property.setType(resolvePropertyDataType(row0.get(property.getName())));
-			}
-
-			properties.add(property);
-		}
-
-		return properties;
 	}
 
 	/**
@@ -287,11 +249,13 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	 * @param cn
 	 * @param rs
 	 * @param query
+	 * @param resolveProperties 是否同时解析{@linkplain DataSetProperty}并写入下面的{@code properties}中
+	 * @param properties
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<Map<String, ?>> resolveRawData(Connection cn, ResultSet rs, DataSetQuery query)
-			throws Throwable
+	protected List<Map<String, ?>> resolveRawData(Connection cn, ResultSet rs, DataSetQuery query,
+			boolean resolveProperties, List<DataSetProperty> properties) throws Throwable
 	{
 		List<Map<String, ?>> data = new ArrayList<>();
 
@@ -300,9 +264,26 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		ResultSetMetaData rsMeta = rs.getMetaData();
 		String[] colNames = jdbcSupport.getColumnNames(rsMeta);
 		SqlType[] sqlTypes = jdbcSupport.getColumnSqlTypes(rsMeta);
-
-		checkDataType(cn, rs, colNames, sqlTypes, jdbcSupport);
-
+		String[] propertyTypes = new String[colNames.length];
+		
+		//无论是否解析properties，都应保留此处逻辑，用于校验数据类型合法
+		for (int i = 0; i < colNames.length; i++)
+			propertyTypes[i] = toPropertyDataType(sqlTypes[i], colNames[i]);
+		
+		if(resolveProperties)
+		{
+			@JDBCCompatiblity("应在遍历ResultSet数据前读取ResultSetMetaData信息解析数据集属性，"
+								+"因为某些驱动在遍历数据后读取ResultSetMetaData会报【ResultSet已关闭】的错误（比如DB2-9.7驱动）")
+			List<DataSetProperty> localProperties = new ArrayList<>(colNames.length);
+			for (int i = 0; i < colNames.length; i++)
+			{
+				DataSetProperty property = new DataSetProperty(colNames[i], propertyTypes[i]);
+				localProperties.add(property);
+			}
+			
+			properties.addAll(localProperties);
+		}
+		
 		while (rs.next())
 		{
 			if (isReachResultFetchSize(query, data.size()))
@@ -322,24 +303,6 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		return data;
 	}
 
-	/**
-	 * 校验{@linkplain ResultSet}的数据类型。
-	 * 
-	 * @param cn
-	 * @param rs
-	 * @param colNames
-	 * @param sqlTypes
-	 * @param jdbcSupport
-	 * @throws SQLException
-	 * @throws SqlDataSetUnsupportedSqlTypeException
-	 */
-	protected void checkDataType(Connection cn, ResultSet rs, String[] colNames, SqlType[] sqlTypes,
-			JdbcSupport jdbcSupport) throws SQLException, SqlDataSetUnsupportedSqlTypeException
-	{
-		for (int i = 0; i < colNames.length; i++)
-			toPropertyDataType(sqlTypes[i], colNames[i]);
-	}
-
 	protected Object getColumnValue(Connection cn, ResultSet rs, String columnName, int sqlType,
 			JdbcSupport jdbcSupport) throws Throwable
 	{
@@ -353,6 +316,42 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		}
 
 		return value;
+	}
+
+	/**
+	 * 校准{@linkplain DataSetProperty}。
+	 * <p>
+	 * 某些驱动程序可能存在一种情况，列类型会被{@linkplain #toPropertyDataType(SqlType, String)}解析为{@linkplain DataType#UNKNOWN}，但是实际值是允许的，
+	 * 比如：PostgreSQL-42.2.5驱动对于{@code "SELECT 'aaa' as NAME"}语句，结果的SQL类型是{@linkplain Types#OTHER}，但实际值是允许的字符串。
+	 * </p>
+	 * <p>
+	 * 因此，需要此方法根据实际的数据值重新校准。
+	 * </p>
+	 * 
+	 * @param properties
+	 * @param data
+	 * @throws Throwable
+	 */
+	protected void calibrateProperties(List<DataSetProperty> properties, List<Map<String, ?>> data)
+			throws Throwable
+	{
+		if(properties == null || properties.isEmpty())
+			return;
+		
+		if(data == null || data.isEmpty())
+			return;
+		
+		Map<String, ?> row0 = data.get(0);
+		
+		for (DataSetProperty property : properties)
+		{
+			boolean resolveTypeByValue = DataType.UNKNOWN.equals(property.getType());
+
+			if (resolveTypeByValue)
+			{
+				property.setType(resolvePropertyDataType(row0.get(property.getName())));
+			}
+		}
 	}
 
 	/**
