@@ -273,18 +273,16 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		for (int i = 0; i < colNames.length; i++)
 			propertyTypes[i] = toPropertyDataType(sqlTypes[i], colNames[i]);
 		
-		if(resolveProperties)
+		@JDBCCompatiblity("应在遍历ResultSet数据前读取ResultSetMetaData信息解析数据集属性，"
+				+ "因为某些驱动在遍历数据后读取ResultSetMetaData会报【ResultSet已关闭】的错误（比如DB2-9.7的db2jcc4.jar驱动）")
+		boolean resolvePropertiesHere = resolveProperties;
+		if (resolvePropertiesHere)
 		{
-			@JDBCCompatiblity("应在遍历ResultSet数据前读取ResultSetMetaData信息解析数据集属性，"
-								+"因为某些驱动在遍历数据后读取ResultSetMetaData会报【ResultSet已关闭】的错误（比如DB2-9.7驱动）")
-			List<DataSetProperty> localProperties = new ArrayList<>(colNames.length);
 			for (int i = 0; i < colNames.length; i++)
 			{
 				DataSetProperty property = new DataSetProperty(colNames[i], propertyTypes[i]);
-				localProperties.add(property);
+				properties.add(property);
 			}
-			
-			properties.addAll(localProperties);
 		}
 		
 		while (rs.next())
