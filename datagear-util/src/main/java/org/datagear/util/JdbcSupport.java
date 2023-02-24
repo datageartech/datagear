@@ -951,8 +951,8 @@ public class JdbcSupport
 	/**
 	 * 获取列值。
 	 * <p>
-	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Type Conversions
-	 * Supported by ResultSet getter Methods”表，并且使用其中的最佳方法。
+	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“TABLE B-6 Type
+	 * Conversions Supported by ResultSet getter Methods”表，并且尽量使用其中的推荐方法。
 	 * </p>
 	 * 
 	 * @param cn
@@ -1054,7 +1054,7 @@ public class JdbcSupport
 
 			case Types.INTEGER:
 			{
-				value = rs.getInt(columnName);
+				value = getColumnValueForInteger(cn, rs, columnName, sqlType);
 				break;
 			}
 
@@ -1138,7 +1138,7 @@ public class JdbcSupport
 
 			case Types.SMALLINT:
 			{
-				value = rs.getShort(columnName);
+				value = getColumnValueForSmallint(cn, rs, columnName, sqlType);
 				break;
 			}
 
@@ -1170,7 +1170,7 @@ public class JdbcSupport
 
 			case Types.TINYINT:
 			{
-				value = rs.getByte(columnName);
+				value = getColumnValueForTinyint(cn, rs, columnName, sqlType);
 				break;
 			}
 
@@ -1195,6 +1195,99 @@ public class JdbcSupport
 
 		if (rs.wasNull())
 			value = null;
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#INTEGER}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param sqlType
+	 *            应固定是{@linkplain Types#INTEGER}
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForInteger(Connection cn, ResultSet rs, String columnName, int sqlType)
+			throws SQLException
+	{
+		Object value = null;
+
+		try
+		{
+			// 优先使用JDBC规范中的推荐方法
+			value = rs.getInt(columnName);
+		}
+		catch (SQLException e)
+		{
+			@JDBCCompatiblity("数据库通常允许无符号数值类型，上述ResultSet.getInt()取值可能因为超出int类型值范围而报错，这里升级类型再次尝试")
+			long bigValue = rs.getLong(columnName);
+			value = bigValue;
+		}
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#SMALLINT}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param sqlType
+	 *            应固定是{@linkplain Types#SMALLINT}
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForSmallint(Connection cn, ResultSet rs, String columnName, int sqlType)
+			throws SQLException
+	{
+		Object value = null;
+
+		try
+		{
+			// 优先使用JDBC规范中的推荐方法
+			value = rs.getShort(columnName);
+		}
+		catch (SQLException e)
+		{
+			@JDBCCompatiblity("数据库通常允许无符号数值类型，上述ResultSet.getShort()取值可能因为超出short类型值范围而报错，这里升级类型再次尝试")
+			int bigValue = rs.getInt(columnName);
+			value = bigValue;
+		}
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#TINYINT}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param sqlType
+	 *            应固定是{@linkplain Types#TINYINT}
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForTinyint(Connection cn, ResultSet rs, String columnName, int sqlType)
+			throws SQLException
+	{
+		Object value = null;
+
+		try
+		{
+			// 优先使用JDBC规范中的推荐方法
+			value = rs.getByte(columnName);
+		}
+		catch (SQLException e)
+		{
+			@JDBCCompatiblity("数据库通常允许无符号数值类型，上述ResultSet.getByte()取值可能因为超出byte类型值范围而报错，这里升级类型再次尝试")
+			int bigValue = rs.getInt(columnName);
+			value = bigValue;
+		}
 
 		return value;
 	}
