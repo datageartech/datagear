@@ -7762,6 +7762,8 @@
 			//	  ...
 			// ]
 			
+			//下拉框ID
+			id: undefined,
 			//下拉框名称
 			name: undefined,
 			//是否多选
@@ -7790,6 +7792,8 @@
 		
 		var $select = $("<select class='dg-chart-select-select' />").appendTo(chartEle);
 		
+		if(options.id)
+			$select.attr("id", options.id);
 		if(options.name)
 			$select.attr("name", options.name);
 		if(options.multiple)
