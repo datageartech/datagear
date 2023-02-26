@@ -678,7 +678,7 @@
 	{
 		var setting = {};
 		
-		if(settingAttr == null || settingAttr == "")
+		if(chartFactory.isNullOrEmpty(settingAttr))
 			settingAttr == "false";
 		
 		if(settingAttr == "false" || settingAttr == false)
@@ -3948,7 +3948,7 @@
 		
 		if(eval)
 		{
-			if(!options || options == "")
+			if(chartFactory.isNullOrEmpty(options))
 				options = null;
 			else
 				options = chartFactory.evalSilently(options, {});
@@ -5658,7 +5658,7 @@
 	
 	chartFactory.toCssFontSize = function(fontSize)
 	{
-		if(fontSize == null || fontSize == "")
+		if(chartFactory.isNullOrEmpty(fontSize))
 		{
 			//返回一个无效的css字号值，使其不影响其他层级字号设置
 			return "null";
@@ -5738,6 +5738,12 @@
 	chartFactory.isDomOrJquery = function(obj)
 	{
 		return (obj && ((obj.nodeType != null && obj.nodeName != null) || (obj instanceof jQuery)));
+	};
+	
+	//是否为null、undefined、空字符串、空数组
+	chartFactory.isNullOrEmpty = function(v)
+	{
+		return (v == null || v === "" || v.length == 0);
 	};
 	
 	/**内置名字标识片段*/

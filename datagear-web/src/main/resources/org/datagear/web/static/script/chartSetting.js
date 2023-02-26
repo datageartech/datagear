@@ -1231,7 +1231,7 @@
 			{
 				var val = $required.val();
 				
-				if(!val || val == "" || val.length == 0)
+				if(chartFactory.isNullOrEmpty(val))
 				{
 					$required.addClass("dg-validation-required");
 					validationOk = false;
@@ -1263,7 +1263,7 @@
 						break;
 					
 					var val = $(checkeds[i]).attr("value");
-					myValid = (val == "" ? true : regexNumber.test(val));
+					myValid = (chartFactory.isNullOrEmpty(val) ? true : regexNumber.test(val));
 				}
 				
 				if(!myValid)
@@ -1285,7 +1285,7 @@
 					if(!myValid)
 						break;
 					
-					myValid = (val[i] == "" ? true : regexNumber.test(val[i]));
+					myValid = (chartFactory.isNullOrEmpty(val) ? true : regexNumber.test(val[i]));
 				}
 				
 				if(!myValid)
@@ -1370,7 +1370,7 @@
 		{
 			var v = re[p];
 			
-			if(v == "" || ($.isArray(v) && v.length == 0))
+			if(chartFactory.isNullOrEmpty(v))
 				re[p] = null;
 		}
 		

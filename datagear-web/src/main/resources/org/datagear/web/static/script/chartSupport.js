@@ -6678,7 +6678,7 @@
 			
 			//DataTables-1.10.18是允许column.data为""的，升级至1.11.3后则会有一个警告弹出框，
 			//这里设置defaultContent可以解决此问题
-			if(column.data == "" && column.defaultContent == null)
+			if(chartFactory.isNullOrEmpty(column.data) && column.defaultContent == null)
 				column.defaultContent = "";
 			
 			if(column.render == null)

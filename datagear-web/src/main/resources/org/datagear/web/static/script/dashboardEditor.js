@@ -532,7 +532,7 @@
 		
 		var tagName = ($ele[0].tagName || "").toLowerCase();
 		
-		if(tagName == "")
+		if(chartFactory.isNullOrEmpty(tagName))
 			return false;
 		
 		if(tagName == "body")
@@ -2021,7 +2021,7 @@
 		{
 			var v = chartTheme[p];
 			
-			if(v == null || v == "" || ($.isArray(v) && v.length == 0))
+			if(chartFactory.isNullOrEmpty(v))
 				delete mergedChartTheme[p];
 			else
 				mergedChartTheme[p] = v;
@@ -2120,7 +2120,7 @@
 		{
 			var value = styleObj[name];
 			
-			if(value == null || value == "")
+			if(chartFactory.isNullOrEmpty(value))
 				delete nowStyleObj[name];
 			else
 			{
