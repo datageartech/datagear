@@ -47,6 +47,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -474,7 +476,7 @@ public class JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	@JDBCCompatiblity("某些驱动程序不支持PreparedStatement.setObject方法（比如：Hive JDBC），所以这里没有使用")
+	@JDBCCompatiblity("某些驱动程序不支持PreparedStatement.setObject()方法（比如：Hive JDBC），所以这里没有使用")
 	public Object setParamValue(Connection cn, PreparedStatement st, int paramIndex, SqlParamValue paramValue)
 			throws SQLException
 	{
@@ -506,22 +508,10 @@ public class JdbcSupport
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			{
-				BigDecimal v = null;
-
-				if (value instanceof BigDecimal)
-					v = (BigDecimal) value;
-				else if (value instanceof BigInteger)
-					v = new BigDecimal((BigInteger) value);
-				else if (value instanceof Number)
-					v = new BigDecimal(((Number) value).doubleValue());
-
-				if (v != null)
-				{
-					st.setBigDecimal(paramIndex, v);
-					value = v;
-				}
+				if ((value instanceof BigDecimal) || (value instanceof BigInteger))
+					st.setBigDecimal(paramIndex, (BigDecimal) value);
 				else
-					value = setParamValueExt(cn, st, paramIndex, paramValue);
+					value = setParamValueForNumber(cn, st, paramIndex, paramValue);
 
 				break;
 			}
@@ -531,6 +521,16 @@ public class JdbcSupport
 			{
 				if (value instanceof Boolean)
 					st.setBoolean(paramIndex, (Boolean) value);
+				else if(value instanceof String)
+				{
+					String sv = (String)value;
+					st.setBoolean(paramIndex, ("true".equalsIgnoreCase(sv) || "1".equals(sv)));
+				}
+				else if(value instanceof Number)
+				{
+					Number nv = (Number)value;
+					st.setBoolean(paramIndex, (nv.intValue() > 0));
+				}
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
 
@@ -538,84 +538,62 @@ public class JdbcSupport
 			}
 
 			case Types.TINYINT:
+			{
+				if (value instanceof Byte)
+					st.setByte(paramIndex, (Byte) value);
+				else
+					value = setParamValueForNumber(cn, st, paramIndex, paramValue);
+
+				break;
+			}
+			
 			case Types.SMALLINT:
+			{
+				if (value instanceof Short)
+					st.setShort(paramIndex, (Short) value);
+				else
+					value = setParamValueForNumber(cn, st, paramIndex, paramValue);
+
+				break;
+			}
+			
 			case Types.INTEGER:
 			{
-				Integer v = null;
-
 				if (value instanceof Integer)
-					v = (Integer) value;
-				else if (value instanceof Number)
-					v = ((Number) value).intValue();
-
-				if (v != null)
-				{
-					st.setInt(paramIndex, v);
-					value = v;
-				}
+					st.setInt(paramIndex, (Integer) value);
 				else
-					value = setParamValueExt(cn, st, paramIndex, paramValue);
+					value = setParamValueForNumber(cn, st, paramIndex, paramValue);
 
 				break;
 			}
 
 			case Types.BIGINT:
 			{
-				Long v = null;
-
 				if (value instanceof Long)
-					v = (Long) value;
-				else if (value instanceof Number)
-					v = ((Number) value).longValue();
-
-				if (v != null)
-				{
-					st.setLong(paramIndex, v);
-					value = v;
-				}
+					st.setLong(paramIndex, (Long) value);
 				else
-					value = setParamValueExt(cn, st, paramIndex, paramValue);
+					value = setParamValueForNumber(cn, st, paramIndex, paramValue);
 
 				break;
 			}
 
 			case Types.REAL:
+			case Types.FLOAT:
 			{
-				Float v = null;
-
 				if (value instanceof Float)
-					v = (Float) value;
-				else if (value instanceof Number)
-					v = ((Number) value).floatValue();
-
-				if (v != null)
-				{
-					st.setFloat(paramIndex, v);
-					value = v;
-				}
+					st.setFloat(paramIndex, (Float) value);
 				else
-					value = setParamValueExt(cn, st, paramIndex, paramValue);
+					value = setParamValueForNumber(cn, st, paramIndex, paramValue);
 
 				break;
 			}
 
-			case Types.FLOAT:
 			case Types.DOUBLE:
 			{
-				Double v = null;
-
 				if (value instanceof Double)
-					v = (Double) value;
-				else if (value instanceof Number)
-					v = ((Number) value).doubleValue();
-
-				if (v != null)
-				{
-					st.setDouble(paramIndex, v);
-					value = v;
-				}
+					st.setDouble(paramIndex, (Double) value);
 				else
-					value = setParamValueExt(cn, st, paramIndex, paramValue);
+					value = setParamValueForNumber(cn, st, paramIndex, paramValue);
 
 				break;
 			}
@@ -871,6 +849,47 @@ public class JdbcSupport
 	}
 
 	/**
+	 * 根据数值类型设置{@linkplain SqlParamValue}。
+	 * 
+	 * @param cn
+	 * @param st
+	 * @param paramIndex
+	 * @param paramValue
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object setParamValueForNumber(Connection cn, PreparedStatement st, int paramIndex, SqlParamValue paramValue)
+			throws SQLException
+	{
+		Object value = paramValue.getValue();
+		
+		if(value instanceof Byte)
+			st.setByte(paramIndex, ((Byte)value).byteValue());
+		else if(value instanceof Short)
+			st.setShort(paramIndex, ((Short)value).shortValue());
+		else if(value instanceof Integer)
+			st.setInt(paramIndex, ((Integer)value).intValue());
+		else if(value instanceof Long)
+			st.setLong(paramIndex, ((Long)value).longValue());
+		else if(value instanceof Float)
+			st.setFloat(paramIndex, ((Float)value).floatValue());
+		else if(value instanceof Double)
+			st.setDouble(paramIndex, ((Double)value).doubleValue());
+		else if(value instanceof BigInteger)
+			st.setBigDecimal(paramIndex, new BigDecimal((BigInteger)value));
+		else if(value instanceof BigDecimal)
+			st.setBigDecimal(paramIndex, (BigDecimal)value);
+		else if(value instanceof AtomicInteger)
+			st.setInt(paramIndex, ((AtomicInteger)value).intValue());
+		else if(value instanceof AtomicLong)
+			st.setLong(paramIndex, ((AtomicLong)value).longValue());
+		else
+			value = setParamValueExt(cn, st, paramIndex, paramValue);
+			
+		return value;
+	}
+
+	/**
 	 * 扩展设置{@linkplain SqlParamValue}。
 	 * 
 	 * @param cn
@@ -961,7 +980,7 @@ public class JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	@JDBCCompatiblity("某些驱动程序可能不支持ResultSet.getObject方法，所以这里没有使用")
+	@JDBCCompatiblity("某些驱动程序可能不支持ResultSet.getObject()方法，所以这里没有使用")
 	public Object getColumnValue(Connection cn, ResultSet rs, String columnName, int sqlType) throws SQLException
 	{
 		Object value = null;
@@ -976,7 +995,7 @@ public class JdbcSupport
 
 			case Types.BIGINT:
 			{
-				value = rs.getLong(columnName);
+				value = getColumnValueForBigInt(cn, rs, columnName, sqlType);
 				break;
 			}
 
@@ -1042,13 +1061,13 @@ public class JdbcSupport
 
 			case Types.DOUBLE:
 			{
-				value = rs.getDouble(columnName);
+				value = getColumnValueForDouble(cn, rs, columnName, sqlType);
 				break;
 			}
 
 			case Types.FLOAT:
 			{
-				value = rs.getFloat(columnName);
+				value = getColumnValueForFloat(cn, rs, columnName, sqlType);
 				break;
 			}
 
@@ -1200,6 +1219,99 @@ public class JdbcSupport
 	}
 
 	/**
+	 * 获取{@linkplain Types#BIGINT}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param sqlType
+	 *            应固定是{@linkplain Types#BIGINT}
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForBigInt(Connection cn, ResultSet rs, String columnName, int sqlType)
+			throws SQLException
+	{
+		Object value = null;
+
+		try
+		{
+			// 优先使用JDBC规范中的推荐方法
+			value = rs.getLong(columnName);
+		}
+		catch (SQLException e)
+		{
+			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getLong()取值可能因为超出long类型值范围而报错，这里升级类型再次尝试")
+			BigDecimal bigValue = rs.getBigDecimal(columnName);
+			value = (bigValue == null ? null : bigValue.toBigInteger());
+		}
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#DOUBLE}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param sqlType
+	 *            应固定是{@linkplain Types#DOUBLE}
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForDouble(Connection cn, ResultSet rs, String columnName, int sqlType)
+			throws SQLException
+	{
+		Object value = null;
+
+		try
+		{
+			// 优先使用JDBC规范中的推荐方法
+			value = rs.getDouble(columnName);
+		}
+		catch (SQLException e)
+		{
+			@JDBCCompatiblity("数据库中的值可能因为超出double类型值范围而报错，这里升级类型再次尝试")
+			BigDecimal bigValue = rs.getBigDecimal(columnName);
+			value = bigValue;
+		}
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#FLOAT}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param sqlType
+	 *            应固定是{@linkplain Types#FLOAT}
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForFloat(Connection cn, ResultSet rs, String columnName, int sqlType)
+			throws SQLException
+	{
+		Object value = null;
+
+		try
+		{
+			// 优先使用JDBC规范中的推荐方法
+			value = rs.getFloat(columnName);
+		}
+		catch (SQLException e)
+		{
+			@JDBCCompatiblity("数据库中的值可能因为超出float类型值范围而报错，这里升级类型再次尝试")
+			double bigValue = rs.getDouble(columnName);
+			value = bigValue;
+		}
+
+		return value;
+	}
+
+	/**
 	 * 获取{@linkplain Types#INTEGER}的值。
 	 * 
 	 * @param cn
@@ -1222,7 +1334,7 @@ public class JdbcSupport
 		}
 		catch (SQLException e)
 		{
-			@JDBCCompatiblity("数据库通常允许无符号数值类型，上述ResultSet.getInt()取值可能因为超出int类型值范围而报错，这里升级类型再次尝试")
+			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getInt()取值可能因为超出int类型值范围而报错，这里升级类型再次尝试")
 			long bigValue = rs.getLong(columnName);
 			value = bigValue;
 		}
@@ -1253,7 +1365,7 @@ public class JdbcSupport
 		}
 		catch (SQLException e)
 		{
-			@JDBCCompatiblity("数据库通常允许无符号数值类型，上述ResultSet.getShort()取值可能因为超出short类型值范围而报错，这里升级类型再次尝试")
+			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getShort()取值可能因为超出short类型值范围而报错，这里升级类型再次尝试")
 			int bigValue = rs.getInt(columnName);
 			value = bigValue;
 		}
@@ -1284,8 +1396,8 @@ public class JdbcSupport
 		}
 		catch (SQLException e)
 		{
-			@JDBCCompatiblity("数据库通常允许无符号数值类型，上述ResultSet.getByte()取值可能因为超出byte类型值范围而报错，这里升级类型再次尝试")
-			int bigValue = rs.getInt(columnName);
+			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getByte()取值可能因为超出byte类型值范围而报错，这里升级类型再次尝试")
+			short bigValue = rs.getShort(columnName);
 			value = bigValue;
 		}
 

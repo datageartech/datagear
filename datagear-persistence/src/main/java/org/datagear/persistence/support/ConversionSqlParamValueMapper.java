@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -51,6 +52,7 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlParamValue;
 import org.datagear.util.StringUtil;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
@@ -533,13 +535,34 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 			}
 
 			case Types.TINYINT:
+			{
+				if (value instanceof Number)
+					paramValue = value;
+				else
+					//实际的数值可能超出JDBC规范推荐的数据类型，因此需要尝试更大的类型
+					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Byte.class, Short.class, Integer.class);
+
+				break;
+			}
+			
 			case Types.SMALLINT:
+			{
+				if (value instanceof Number)
+					paramValue = value;
+				else
+					//实际的数值可能超出JDBC规范推荐的数据类型，因此需要尝试更大的类型
+					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Short.class, Integer.class, Long.class);
+
+				break;
+			}
+			
 			case Types.INTEGER:
 			{
 				if (value instanceof Number)
 					paramValue = value;
 				else
-					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Integer.class);
+					//实际的数值可能超出JDBC规范推荐的数据类型，因此需要尝试更大的类型
+					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Integer.class, Long.class, BigInteger.class);
 
 				break;
 			}
@@ -549,28 +572,31 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				if (value instanceof Number)
 					paramValue = value;
 				else
-					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Long.class);
+					//实际的数值可能超出JDBC规范推荐的数据类型，因此需要尝试更大的类型
+					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Long.class, BigInteger.class);
 
 				break;
 			}
 
 			case Types.REAL:
+			case Types.FLOAT:
 			{
 				if (value instanceof Number)
 					paramValue = value;
 				else
-					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Float.class);
+					//实际的数值可能超出JDBC规范推荐的数据类型，因此需要尝试更大的类型
+					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Float.class, Double.class, BigDecimal.class);
 
 				break;
 			}
-
-			case Types.FLOAT:
+			
 			case Types.DOUBLE:
 			{
 				if (value instanceof Number)
 					paramValue = value;
 				else
-					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Double.class);
+					//实际的数值可能超出JDBC规范推荐的数据类型，因此需要尝试更大的类型
+					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Double.class, BigDecimal.class);
 
 				break;
 			}
@@ -792,18 +818,33 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	 * @param table
 	 * @param column
 	 * @param value
-	 * @param suggestType
+	 * @param suggestTypes
 	 *            建议类型
 	 * @return
 	 * @throws Throwable
 	 */
 	protected SqlParamValue mapToSqlParamValueExt(Connection cn, Table table, Column column, Object value,
-			Class<?> suggestType) throws Throwable
+			Class<?>... suggestTypes) throws Throwable
 	{
 		if (this.conversionService != null)
 		{
-			Object target = this.conversionService.convert(value, suggestType);
-			return createSqlParamValue(column, target);
+			ConversionFailedException e0 = null;
+			
+			for(int i=0; i<suggestTypes.length; i++)
+			{
+				try
+				{
+					Object target = this.conversionService.convert(value, suggestTypes[i]);
+					return createSqlParamValue(column, target);
+				}
+				catch(ConversionFailedException e)
+				{
+					if(i == 0)
+						e0 = e;
+				}
+			}
+			
+			throw e0;
 		}
 		else
 			throw new UnsupportedSqlParamValueMapperException(table, column, value);
