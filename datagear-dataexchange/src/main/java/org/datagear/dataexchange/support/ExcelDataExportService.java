@@ -196,7 +196,7 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 
 		try
 		{
-			value = getValue(cn, rs, columnIndex, column.getType());
+			value = getColumnValueSimple(cn, rs, column);
 		}
 		catch (Throwable t)
 		{

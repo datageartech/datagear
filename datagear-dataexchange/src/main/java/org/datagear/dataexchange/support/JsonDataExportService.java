@@ -198,7 +198,7 @@ public class JsonDataExportService extends AbstractDevotedDBMetaDataExchangeServ
 
 		try
 		{
-			value = getValue(cn, rs, columnIndex, column.getType());
+			value = getColumnValueSimple(cn, rs, column);
 
 			if (value == null)
 			{

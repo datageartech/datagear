@@ -46,8 +46,6 @@ import org.junit.Test;
  */
 public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 {
-	public static final String TABLE_NAME = "T_DATA_IMPORT";
-
 	private BatchDataExchangeService<BatchDataExchange> batchDataExchangeService;
 
 	public BatchDataExchangeServiceTest()
@@ -75,7 +73,8 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
 		{
-			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataFormat, importOption, TABLE_NAME,
+			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataFormat, importOption,
+					TABLE_NAME_DATA_IMPORT,
 					getTestReaderResourceFactory("BatchDataExchangeServiceTest_1.csv"));
 
 			SubDataExchange subDataExchange = new SubDataExchange("import-0", csvDataImport);
@@ -83,7 +82,8 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		}
 
 		{
-			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataFormat, importOption, TABLE_NAME,
+			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataFormat, importOption,
+					TABLE_NAME_DATA_IMPORT,
 					getTestReaderResourceFactory("BatchDataExchangeServiceTest_2.csv"));
 
 			SubDataExchange subDataExchange = new SubDataExchange("import-1", csvDataImport);
@@ -98,7 +98,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory
 					.valueOf(FileUtil.getFile("target/BatchDataExchangeServiceTest.csv"), "UTF-8");
 			CsvDataExport csvDataExport = new CsvDataExport(connectionFactory, dataFormat,
-					new TextDataExportOption(true), new TableQuery(TABLE_NAME), writerFactory);
+					new TextDataExportOption(true), new TableQuery(TABLE_NAME_DATA_IMPORT), writerFactory);
 			csvDataExport.setListener(new TextDataExportListener()
 			{
 				@Override
@@ -200,13 +200,13 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 
 		try
 		{
-			clearTable(cn, TABLE_NAME);
+			clearTable(cn, TABLE_NAME_DATA_IMPORT);
 
 			this.batchDataExchangeService.exchange(batchDataExchange);
 
 			batchDataExchange.getResult().waitForFinish();
 
-			int count = getCount(cn, TABLE_NAME);
+			int count = getCount(cn, TABLE_NAME_DATA_IMPORT);
 
 			Assert.assertEquals(6, count);
 			Assert.assertEquals(3, submitSuccessCount.intValue());

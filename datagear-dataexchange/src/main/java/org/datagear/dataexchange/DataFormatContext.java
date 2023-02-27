@@ -17,6 +17,8 @@
 
 package org.datagear.dataexchange;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -58,7 +60,7 @@ public class DataFormatContext
 	private DateFormat _dateFormat;
 	private DateFormat _timeFormat;
 	private DateFormat _timestampFormat;
-	private NumberFormat _numberFormat;
+	private DecimalFormat _numberFormat;
 
 	public DataFormatContext()
 	{
@@ -91,6 +93,8 @@ public class DataFormatContext
 		this._timestampFormat = new SimpleDateFormat(getTimestampPattern(), dataFormat.getLocale());
 		this._numberFormat = new DecimalFormat(getNumberPattern(),
 				DecimalFormatSymbols.getInstance(dataFormat.getLocale()));
+		// 始终解析为BigDecimal，因为源数据范围未知
+		this._numberFormat.setParseBigDecimal(true);
 	}
 
 	public ExpressionResolver getExpressionResolver()
@@ -288,6 +292,86 @@ public class DataFormatContext
 	}
 
 	/**
+	 * 解析{@code Byte}。
+	 * 
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public Byte parseByte(String value) throws ParseException
+	{
+		BigDecimal number = parseBigDecimal(value);
+		return (number == null ? null : number.byteValue());
+	}
+
+	/**
+	 * 解析{@code Short}。
+	 * 
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public Number parseByteIfExact(String value) throws ParseException
+	{
+		Number number = parseShortIfExact(value);
+
+		if (number == null)
+			return null;
+
+		if (number instanceof Short)
+		{
+			Short v = (Short) number;
+
+			if (v.byteValue() == v.shortValue())
+				return v.byteValue();
+			else
+				return v;
+		}
+		else
+			return number;
+	}
+
+	/**
+	 * 解析{@code Integer}。
+	 * 
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public Short parseShort(String value) throws ParseException
+	{
+		BigDecimal number = parseBigDecimal(value);
+		return (number == null ? null : number.shortValue());
+	}
+
+	/**
+	 * 解析{@code Short}。
+	 * 
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public Number parseShortIfExact(String value) throws ParseException
+	{
+		Number number = parseIntIfExact(value);
+
+		if (number == null)
+			return null;
+
+		if (number instanceof Integer)
+		{
+			Integer v = (Integer) number;
+
+			if (v.shortValue() == v.intValue())
+				return v.shortValue();
+			else
+				return v;
+		}
+		else
+			return number;
+	}
+
+	/**
 	 * 解析{@code Integer}。
 	 * 
 	 * @param value
@@ -296,8 +380,35 @@ public class DataFormatContext
 	 */
 	public Integer parseInt(String value) throws ParseException
 	{
-		Number number = parseNumber(value, true);
+		BigDecimal number = parseBigDecimal(value);
 		return (number == null ? null : number.intValue());
+	}
+
+	/**
+	 * 解析{@code Integer}。
+	 * 
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public Number parseIntIfExact(String value) throws ParseException
+	{
+		Number number = parseLongIfExact(value);
+
+		if (number == null)
+			return null;
+
+		if (number instanceof Long)
+		{
+			Long v = (Long) number;
+
+			if (v.intValue() == v.longValue())
+				return v.intValue();
+			else
+				return v;
+		}
+		else
+			return number;
 	}
 
 	/**
@@ -309,8 +420,45 @@ public class DataFormatContext
 	 */
 	public Long parseLong(String value) throws ParseException
 	{
-		Number number = parseNumber(value, true);
+		BigDecimal number = parseBigDecimal(value);
 		return (number == null ? null : number.longValue());
+	}
+
+	/**
+	 * 解析{@code Long}。
+	 * 
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public Number parseLongIfExact(String value) throws ParseException
+	{
+		BigInteger number = parseBigInteger(value);
+
+		if (number == null)
+			return null;
+
+		try
+		{
+			return number.longValueExact();
+		}
+		catch (ArithmeticException e)
+		{
+			return number;
+		}
+	}
+
+	/**
+	 * 解析{@linkplain BigInteger}。
+	 * 
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public BigInteger parseBigInteger(String value) throws ParseException
+	{
+		BigDecimal number = parseBigDecimal(value);
+		return (number == null ? null : number.toBigInteger());
 	}
 
 	/**
@@ -322,8 +470,30 @@ public class DataFormatContext
 	 */
 	public Float parseFloat(String value) throws ParseException
 	{
-		Number number = parseNumber(value, false);
+		BigDecimal number = parseBigDecimal(value);
 		return (number == null ? null : number.floatValue());
+	}
+
+	/**
+	 * 解析{@code Float}。
+	 * 
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public Number parseFloatIfExact(String value) throws ParseException
+	{
+		BigDecimal number = parseBigDecimal(value);
+
+		if (number == null)
+			return null;
+
+		float v = number.floatValue();
+
+		if (v == Float.NEGATIVE_INFINITY || v == Float.POSITIVE_INFINITY)
+			return parseDoubleIfExact(value);
+		else
+			return v;
 	}
 
 	/**
@@ -335,8 +505,54 @@ public class DataFormatContext
 	 */
 	public Double parseDouble(String value) throws ParseException
 	{
-		Number number = parseNumber(value, false);
+		BigDecimal number = parseBigDecimal(value);
 		return (number == null ? null : number.doubleValue());
+	}
+
+	/**
+	 * 解析{@code Double}。
+	 * 
+	 * @param value
+	 * @return
+	 * @throws ParseException
+	 */
+	public Number parseDoubleIfExact(String value) throws ParseException
+	{
+		BigDecimal number = parseBigDecimal(value);
+
+		if (number == null)
+			return null;
+
+		double v = number.doubleValue();
+
+		if (v == Double.NEGATIVE_INFINITY || v == Double.POSITIVE_INFINITY)
+			return number;
+		else
+			return v;
+	}
+
+	/**
+	 * 解析{@linkplain BigDecimal}。
+	 * 
+	 * @param value
+	 * @param integerOnly
+	 * @return
+	 * @throws ParseException
+	 */
+	public BigDecimal parseBigDecimal(String value) throws ParseException
+	{
+		if (value == null || value.isEmpty())
+			return null;
+
+		if (this._numberExpression != null)
+		{
+			value = this.expressionResolver.extract(this.dataFormat.getNumberFormat(), this._numberExpression, value);
+
+			if (value == null || value.isEmpty())
+				return null;
+		}
+
+		return (BigDecimal) this._numberFormat.parse(value);
 	}
 
 	/**
@@ -509,31 +725,6 @@ public class DataFormatContext
 			sv = this.expressionResolver.evaluate(this.dataFormat.getBinaryFormat(), this._binaryExpression, sv, "");
 
 		return sv;
-	}
-
-	/**
-	 * 解析{@linkplain Number}。
-	 * 
-	 * @param value
-	 * @param integerOnly
-	 * @return
-	 * @throws ParseException
-	 */
-	protected Number parseNumber(String value, boolean integerOnly) throws ParseException
-	{
-		if (value == null || value.isEmpty())
-			return null;
-
-		if (this._numberExpression != null)
-		{
-			value = this.expressionResolver.extract(this.dataFormat.getNumberFormat(), this._numberExpression, value);
-
-			if (value == null || value.isEmpty())
-				return null;
-		}
-
-		this._numberFormat.setParseIntegerOnly(integerOnly);
-		return this._numberFormat.parse(value);
 	}
 
 	/**

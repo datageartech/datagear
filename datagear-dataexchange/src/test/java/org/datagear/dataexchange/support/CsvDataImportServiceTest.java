@@ -44,8 +44,6 @@ import org.junit.Test;
  */
 public class CsvDataImportServiceTest extends DataexchangeTestSupport
 {
-	public static final String TABLE_NAME = "T_DATA_IMPORT";
-
 	private CsvDataImportService csvDataImportService;
 
 	public CsvDataImportServiceTest()
@@ -72,9 +70,9 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 				ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
 						true);
 				CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-						valueDataImportOption, TABLE_NAME, readerFactory);
+						valueDataImportOption, TABLE_NAME_DATA_IMPORT, readerFactory);
 
-				clearTable(cn, TABLE_NAME);
+				clearTable(cn, TABLE_NAME_DATA_IMPORT);
 
 				this.csvDataImportService.exchange(impt);
 			}
@@ -106,7 +104,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 
 			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					valueDataImportOption, TABLE_NAME, readerFactory);
+					valueDataImportOption, TABLE_NAME_DATA_IMPORT, readerFactory);
 
 			impt.setListener(new MockValueDataImportListener()
 			{
@@ -118,11 +116,11 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 				}
 			});
 
-			clearTable(cn, TABLE_NAME);
+			clearTable(cn, TABLE_NAME_DATA_IMPORT);
 
 			this.csvDataImportService.exchange(impt);
 
-			int count = getCount(cn, TABLE_NAME);
+			int count = getCount(cn, TABLE_NAME_DATA_IMPORT);
 
 			Assert.assertEquals(3, count);
 
@@ -156,7 +154,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.IGNORE, true,
 					true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					valueDataImportOption, TABLE_NAME, readerFactory);
+					valueDataImportOption, TABLE_NAME_DATA_IMPORT, readerFactory);
 
 			impt.setListener(new MockValueDataImportListener()
 			{
@@ -175,11 +173,11 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 				}
 			});
 
-			clearTable(cn, TABLE_NAME);
+			clearTable(cn, TABLE_NAME_DATA_IMPORT);
 
 			this.csvDataImportService.exchange(impt);
 
-			int count = getCount(cn, TABLE_NAME);
+			int count = getCount(cn, TABLE_NAME_DATA_IMPORT);
 
 			Assert.assertEquals(2, count);
 			Assert.assertEquals(2, successCount.intValue());
@@ -212,9 +210,9 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 				ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true,
 						false);
 				CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-						valueDataImportOption, TABLE_NAME, readerFactory);
+						valueDataImportOption, TABLE_NAME_DATA_IMPORT, readerFactory);
 
-				clearTable(cn, TABLE_NAME);
+				clearTable(cn, TABLE_NAME_DATA_IMPORT);
 
 				this.csvDataImportService.exchange(impt);
 			}
@@ -224,5 +222,61 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 				IOUtil.close(reader);
 			}
 		});
+	}
+
+	@Test
+	public void exchangeTest_unsigned_number() throws Exception
+	{
+		DataFormat dataFormat = new DataFormat();
+
+		Connection cn = null;
+		Reader reader = null;
+
+		try
+		{
+			cn = getConnection();
+
+			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
+					"support/CsvDataImportServiceTest_unsigned_number.csv");
+
+			final AtomicInteger successCount = new AtomicInteger(0);
+			final AtomicInteger ignoreCount = new AtomicInteger(0);
+
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.IGNORE, true,
+					true);
+			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
+					valueDataImportOption, TABLE_NAME_UNSIGNED_NUMBER, readerFactory);
+
+			impt.setListener(new MockValueDataImportListener()
+			{
+				@Override
+				public void onSuccess(DataIndex dataIndex)
+				{
+					super.onSuccess(dataIndex);
+					successCount.incrementAndGet();
+				}
+
+				@Override
+				public void onIgnore(DataIndex dataIndex, DataExchangeException e)
+				{
+					super.onIgnore(dataIndex, e);
+					ignoreCount.incrementAndGet();
+				}
+			});
+
+			clearTable(cn, TABLE_NAME_UNSIGNED_NUMBER);
+
+			this.csvDataImportService.exchange(impt);
+
+			int count = getCount(cn, TABLE_NAME_UNSIGNED_NUMBER);
+
+			Assert.assertEquals(2, count);
+			Assert.assertEquals(2, successCount.intValue());
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+			IOUtil.close(reader);
+		}
 	}
 }

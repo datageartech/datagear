@@ -23,7 +23,7 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public class UnsupportedSqlValueException extends Exception
+public class UnsupportedSqlValueException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 
@@ -34,7 +34,7 @@ public class UnsupportedSqlValueException extends Exception
 
 	public UnsupportedSqlValueException(int sqlType, Object sqlValue)
 	{
-		super("Value [" + sqlValue + "] for sql type [" + sqlType + "] is not supported");
+		super("Value [" + sqlValue + "] for sql type [" + sqlType + "] unsupported");
 	}
 
 	public UnsupportedSqlValueException(String message)

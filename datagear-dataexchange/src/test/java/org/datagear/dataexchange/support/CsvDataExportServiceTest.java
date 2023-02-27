@@ -54,8 +54,6 @@ import org.junit.Test;
  */
 public class CsvDataExportServiceTest extends DataexchangeTestSupport
 {
-	public static final String TABLE_NAME = "T_DATA_EXPORT";
-
 	private CsvDataImportService csvDataImportService;
 	private CsvDataExportService csvDataExportService;
 
@@ -82,9 +80,29 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 
 			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					valueDataImportOption, TABLE_NAME, readerFactory);
+					valueDataImportOption, TABLE_NAME_DATA_EXPORT, readerFactory);
 
-			clearTable(cn, TABLE_NAME);
+			clearTable(cn, TABLE_NAME_DATA_EXPORT);
+
+			this.csvDataImportService.exchange(impt);
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+			IOUtil.close(reader);
+		}
+
+		try
+		{
+			cn = getConnection();
+			ResourceFactory<Reader> readerFactory = ClasspathReaderResourceFactory
+					.valueOf(getResourceClasspath("support/CsvDataImportServiceTest_unsigned_number.csv"), "UTF-8");
+
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
+					valueDataImportOption, TABLE_NAME_UNSIGNED_NUMBER, readerFactory);
+
+			clearTable(cn, TABLE_NAME_UNSIGNED_NUMBER);
 
 			this.csvDataImportService.exchange(impt);
 		}
@@ -113,7 +131,7 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(outFile, "UTF-8");
 
 			CsvDataExport csvDataExport = new CsvDataExport(new SimpleConnectionFactory(cn, false), dataFormat,
-					new TextDataExportOption(true), new TableQuery(TABLE_NAME), writerFactory);
+					new TextDataExportOption(true), new TableQuery(TABLE_NAME_DATA_EXPORT), writerFactory);
 
 			this.csvDataExportService.exchange(csvDataExport);
 		}
@@ -125,6 +143,65 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 
 		CSVParser sourceCsvParser = CSVFormat.DEFAULT.parse(ClasspathReaderResourceFactory
 				.valueOf(getResourceClasspath("support/CsvDataExportServiceTest.csv"), "UTF-8").get());
+
+		CSVParser exportCsvParser = CSVFormat.DEFAULT
+				.parse(new InputStreamReader(new FileInputStream(outFile), "UTF-8"));
+
+		List<CSVRecord> sourceRecords = sourceCsvParser.getRecords();
+		List<CSVRecord> exportRecords = exportCsvParser.getRecords();
+
+		assertEquals(sourceRecords.size(), exportRecords.size());
+
+		for (int i = 0; i < sourceRecords.size(); i++)
+		{
+			CSVRecord sourceRecord = sourceRecords.get(i);
+			CSVRecord exportRecord = exportRecords.get(i);
+
+			assertEquals(sourceRecord.size(), exportRecord.size());
+
+			for (int j = 0; j < sourceRecord.size(); j++)
+			{
+				String sourceValue = sourceRecord.get(j);
+				String exportValue = exportRecord.get(j);
+
+				assertEquals(sourceValue, exportValue);
+			}
+		}
+
+		sourceCsvParser.close();
+		exportCsvParser.close();
+	}
+
+	@Test
+	public void exptTest_unsigned_number() throws Exception
+	{
+		DataFormat dataFormat = new DataFormat();
+		dataFormat.setBinaryFormat("0x${Hex}");
+
+		File outFile = FileUtil.getFile("target/CsvDataExportServiceTest_unsigned_number.csv");
+
+		Connection cn = null;
+		Writer writer = null;
+
+		try
+		{
+			cn = getConnection();
+
+			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(outFile, "UTF-8");
+
+			CsvDataExport csvDataExport = new CsvDataExport(new SimpleConnectionFactory(cn, false), dataFormat,
+					new TextDataExportOption(true), new TableQuery(TABLE_NAME_UNSIGNED_NUMBER), writerFactory);
+
+			this.csvDataExportService.exchange(csvDataExport);
+		}
+		finally
+		{
+			IOUtil.close(writer);
+			JdbcUtil.closeConnection(cn);
+		}
+
+		CSVParser sourceCsvParser = CSVFormat.DEFAULT.parse(ClasspathReaderResourceFactory
+				.valueOf(getResourceClasspath("support/CsvDataImportServiceTest_unsigned_number.csv"), "UTF-8").get());
 
 		CSVParser exportCsvParser = CSVFormat.DEFAULT
 				.parse(new InputStreamReader(new FileInputStream(outFile), "UTF-8"));

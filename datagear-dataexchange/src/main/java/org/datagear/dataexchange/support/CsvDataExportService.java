@@ -100,7 +100,7 @@ public class CsvDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 
 				try
 				{
-					value = getStringValue(cn, rs, i + 1, column.getType(), exportContext.getDataFormatContext());
+					value = getStringValue(cn, rs, column, exportContext.getDataFormatContext());
 				}
 				catch (Throwable t)
 				{

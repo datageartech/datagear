@@ -508,7 +508,7 @@ public class JdbcSupport
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			{
-				if ((value instanceof BigDecimal) || (value instanceof BigInteger))
+				if (value instanceof BigDecimal)
 					st.setBigDecimal(paramIndex, (BigDecimal) value);
 				else
 					value = setParamValueForNumber(cn, st, paramIndex, paramValue);
@@ -524,7 +524,8 @@ public class JdbcSupport
 				else if(value instanceof String)
 				{
 					String sv = (String)value;
-					st.setBoolean(paramIndex, ("true".equalsIgnoreCase(sv) || "1".equals(sv)));
+					st.setBoolean(paramIndex,
+							("true".equalsIgnoreCase(sv) || "1".equals(sv) || "on".equalsIgnoreCase(sv)));
 				}
 				else if(value instanceof Number)
 				{
@@ -626,6 +627,8 @@ public class JdbcSupport
 					v = (java.sql.Date) value;
 				else if (value instanceof java.util.Date)
 					v = new java.sql.Date(((java.util.Date) value).getTime());
+				else if (value instanceof Number)
+					value = new java.sql.Date(((Number) value).longValue());
 
 				if (v != null)
 				{
@@ -647,6 +650,8 @@ public class JdbcSupport
 					v = (java.sql.Time) value;
 				else if (value instanceof java.util.Date)
 					v = new java.sql.Time(((java.util.Date) value).getTime());
+				else if (value instanceof Number)
+					value = new java.sql.Time(((Number) value).longValue());
 
 				if (v != null)
 				{
@@ -668,6 +673,8 @@ public class JdbcSupport
 					v = (java.sql.Timestamp) value;
 				else if (value instanceof java.util.Date)
 					v = new java.sql.Timestamp(((java.util.Date) value).getTime());
+				else if (value instanceof Number)
+					value = new java.sql.Timestamp(((Number) value).longValue());
 
 				if (v != null)
 				{

@@ -73,4 +73,9 @@ public class SqlParamValue
 	{
 		return getClass().getSimpleName() + " [value=" + value + ", type=" + type + "]";
 	}
+
+	public static SqlParamValue valueOf(Object value, int type)
+	{
+		return new SqlParamValue(value, type);
+	}
 }

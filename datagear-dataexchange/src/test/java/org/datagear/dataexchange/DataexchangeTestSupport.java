@@ -48,6 +48,7 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 {
 	public static final String TABLE_NAME_DATA_IMPORT = "T_DATA_IMPORT";
 	public static final String TABLE_NAME_DATA_EXPORT = "T_DATA_EXPORT";
+	public static final String TABLE_NAME_UNSIGNED_NUMBER = "T_UNSIGNED_NUMBER";
 
 	protected DBMetaResolver dbMetaResolver;
 

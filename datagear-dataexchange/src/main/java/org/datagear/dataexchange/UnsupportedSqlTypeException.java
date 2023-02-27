@@ -23,7 +23,7 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public class UnsupportedSqlTypeException extends Exception
+public class UnsupportedSqlTypeException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 

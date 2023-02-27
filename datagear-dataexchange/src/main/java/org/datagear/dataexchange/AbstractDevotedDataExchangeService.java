@@ -30,6 +30,7 @@ import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
@@ -48,6 +49,7 @@ import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.support.PersistenceSupport;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.SqlParamValue;
 import org.datagear.util.resource.ResourceFactory;
 
 /**
@@ -581,16 +583,12 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 	/**
 	 * 设置{@linkplain PreparedStatement}的参数值，并在必要时进行数据类型转换。
-	 * <p>
-	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Java Types Mapper to
-	 * JDBC Types”表。
-	 * </p>
 	 * 
 	 * @param cn
 	 * @param st
-	 * @param parameterIndex
-	 * @param sqlType
-	 * @param parameterValue
+	 * @param paramIndex
+	 * @param paramValue
+	 * @param column
 	 * @param dataFormatContext
 	 *            当{@code parameterValue}为字符串且需要类型转换时使用，允许为{@code null}
 	 * @throws SQLException
@@ -599,15 +597,19 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @throws UnsupportedSqlValueException
 	 * @throws UnsupportedSqlTypeException
 	 */
-	protected void setParameterValue(Connection cn, PreparedStatement st, int parameterIndex, int sqlType,
-			Object parameterValue, DataFormatContext dataFormatContext) throws SQLException, ParseException,
+	protected void setParamValue(Connection cn, PreparedStatement st, int paramIndex, Object paramValue,
+			Column column, DataFormatContext dataFormatContext) throws SQLException, ParseException,
 			DecoderException, UnsupportedSqlValueException, UnsupportedSqlTypeException
 	{
-		if (parameterValue == null)
+		int sqlType = column.getType();
+
+		if (paramValue == null)
 		{
-			st.setNull(parameterIndex, sqlType);
+			st.setNull(paramIndex, sqlType);
 			return;
 		}
+
+		Object value = paramValue;
 
 		switch (sqlType)
 		{
@@ -615,14 +617,8 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
 			{
-				String value = null;
-
-				if (parameterValue instanceof String)
-					value = (String) parameterValue;
-				else
-					value = parameterValue.toString();
-
-				st.setString(parameterIndex, value);
+				if (!(value instanceof String))
+					value = value.toString();
 
 				break;
 			}
@@ -630,129 +626,57 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			{
-				BigDecimal value = null;
-
-				if (parameterValue instanceof BigDecimal)
-					value = (BigDecimal) parameterValue;
-				else if (parameterValue instanceof BigInteger)
-					value = new BigDecimal((BigInteger) parameterValue);
-				else if (parameterValue instanceof Number)
-					value = new BigDecimal(((Number) parameterValue).doubleValue());
-				else if (parameterValue instanceof String)
-					value = new BigDecimal((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				st.setBigDecimal(parameterIndex, value);
-
-				break;
-			}
-
-			case Types.BIT:
-			case Types.BOOLEAN:
-			{
-				boolean value = false;
-
-				if (parameterValue instanceof Boolean)
-					value = (Boolean) parameterValue;
-				else if (parameterValue instanceof String)
-				{
-					String str = (String) parameterValue;
-					value = ("true".equalsIgnoreCase(str) || "1".equals(str) || "on".equalsIgnoreCase(str));
-				}
-				else if (parameterValue instanceof Number)
-					value = (((Number) parameterValue).intValue() > 0);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				st.setBoolean(parameterIndex, value);
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseBigDecimal((String) paramValue);
 
 				break;
 			}
 
 			case Types.TINYINT:
+			{
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseByteIfExact((String) paramValue);
+
+				break;
+			}
+
 			case Types.SMALLINT:
+			{
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseShortIfExact((String) paramValue);
+
+				break;
+			}
+
 			case Types.INTEGER:
 			{
-				Integer value = null;
-
-				if (parameterValue instanceof Integer)
-					value = (Integer) parameterValue;
-				else if (parameterValue instanceof Number)
-					value = ((Number) parameterValue).intValue();
-				else if (parameterValue instanceof String && dataFormatContext != null)
-					value = dataFormatContext.parseInt((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				if (value == null)
-					st.setNull(parameterIndex, sqlType);
-				else
-					st.setInt(parameterIndex, value);
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseIntIfExact((String) paramValue);
 
 				break;
 			}
 
 			case Types.BIGINT:
 			{
-				Long value = null;
-
-				if (parameterValue instanceof Long)
-					value = (Long) parameterValue;
-				else if (parameterValue instanceof Number)
-					value = ((Number) parameterValue).longValue();
-				else if (parameterValue instanceof String && dataFormatContext != null)
-					value = dataFormatContext.parseLong((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				if (value == null)
-					st.setNull(parameterIndex, sqlType);
-				else
-					st.setLong(parameterIndex, value);
+				if (paramValue instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseLongIfExact((String) paramValue);
 
 				break;
 			}
 
 			case Types.REAL:
+			case Types.FLOAT:
 			{
-				Float value = null;
-
-				if (parameterValue instanceof Float)
-					value = (Float) parameterValue;
-				else if (parameterValue instanceof Number)
-					value = ((Number) parameterValue).floatValue();
-				else if (parameterValue instanceof String && dataFormatContext != null)
-					value = dataFormatContext.parseFloat((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				if (value == null)
-					st.setNull(parameterIndex, sqlType);
-				else
-					st.setFloat(parameterIndex, value);
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseFloatIfExact((String) paramValue);
 
 				break;
 			}
 
-			case Types.FLOAT:
 			case Types.DOUBLE:
 			{
-				Double value = null;
-
-				if (parameterValue instanceof Double)
-					value = (Double) parameterValue;
-				else if (parameterValue instanceof Number)
-					value = ((Number) parameterValue).doubleValue();
-				else if (parameterValue instanceof String && dataFormatContext != null)
-					value = dataFormatContext.parseDouble((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				if (value == null)
-					st.setNull(parameterIndex, sqlType);
-				else
-					st.setDouble(parameterIndex, value);
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseDoubleIfExact((String) paramValue);
 
 				break;
 			}
@@ -761,127 +685,42 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			case Types.VARBINARY:
 			case Types.LONGVARBINARY:
 			{
-				byte[] value = null;
-
-				if (parameterValue instanceof byte[])
-					value = (byte[]) parameterValue;
-				else if (parameterValue instanceof String && dataFormatContext != null)
-					value = dataFormatContext.parseBytes((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				if (value == null)
-					st.setNull(parameterIndex, sqlType);
-				else
-					st.setBytes(parameterIndex, value);
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseBytes((String) paramValue);
 
 				break;
 			}
 
 			case Types.DATE:
 			{
-				java.sql.Date value = null;
-
-				if (parameterValue instanceof java.sql.Date)
-					value = (java.sql.Date) parameterValue;
-				else if (parameterValue instanceof java.util.Date)
-					value = new java.sql.Date(((java.util.Date) parameterValue).getTime());
-				else if (parameterValue instanceof Number)
-					value = new java.sql.Date(((Number) parameterValue).longValue());
-				else if (parameterValue instanceof String && dataFormatContext != null)
-					value = dataFormatContext.parseDate((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				if (value == null)
-					st.setNull(parameterIndex, sqlType);
-				else
-					st.setDate(parameterIndex, value);
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseDate((String) paramValue);
 
 				break;
 			}
 
 			case Types.TIME:
+			case Types.TIME_WITH_TIMEZONE:
 			{
-				java.sql.Time value = null;
-
-				if (parameterValue instanceof java.sql.Time)
-					value = (java.sql.Time) parameterValue;
-				else if (parameterValue instanceof java.util.Date)
-					value = new java.sql.Time(((java.util.Date) parameterValue).getTime());
-				else if (parameterValue instanceof Number)
-					value = new java.sql.Time(((Number) parameterValue).longValue());
-				else if (parameterValue instanceof String && dataFormatContext != null)
-					value = dataFormatContext.parseTime((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				if (value == null)
-					st.setNull(parameterIndex, sqlType);
-				else
-					st.setTime(parameterIndex, value);
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseTime((String) paramValue);
 
 				break;
 			}
 
 			case Types.TIMESTAMP:
+			case Types.TIMESTAMP_WITH_TIMEZONE:
 			{
-				java.sql.Timestamp value = null;
-
-				if (parameterValue instanceof java.sql.Timestamp)
-					value = (java.sql.Timestamp) parameterValue;
-				else if (parameterValue instanceof java.util.Date)
-					value = new java.sql.Timestamp(((java.util.Date) parameterValue).getTime());
-				else if (parameterValue instanceof Number)
-					value = new java.sql.Timestamp(((Number) parameterValue).longValue());
-				else if (parameterValue instanceof String && dataFormatContext != null)
-					value = dataFormatContext.parseTimestamp((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				if (value == null)
-					st.setNull(parameterIndex, sqlType);
-				else
-					st.setTimestamp(parameterIndex, value);
-
-				break;
-			}
-
-			case Types.CLOB:
-			{
-				String value = null;
-
-				if (parameterValue instanceof String)
-					value = (String) parameterValue;
-				else
-					value = parameterValue.toString();
-
-				Clob clob = cn.createClob();
-				clob.setString(1, value);
-				st.setClob(parameterIndex, clob);
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseTimestamp((String) paramValue);
 
 				break;
 			}
 
 			case Types.BLOB:
 			{
-				byte[] value = null;
-
-				if (parameterValue instanceof byte[])
-					value = (byte[]) parameterValue;
-				else if (parameterValue instanceof String && dataFormatContext != null)
-					value = dataFormatContext.parseBytes((String) parameterValue);
-				else
-					throw new UnsupportedSqlValueException(sqlType, parameterValue);
-
-				if (value == null)
-					st.setNull(parameterIndex, sqlType);
-				else
-				{
-					Blob blob = cn.createBlob();
-					blob.setBytes(1, value);
-					st.setBlob(parameterIndex, blob);
-				}
+				if (value instanceof String && dataFormatContext != null)
+					value = dataFormatContext.parseBytes((String) paramValue);
 
 				break;
 			}
@@ -890,55 +729,45 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			case Types.NVARCHAR:
 			case Types.LONGNVARCHAR:
 			{
-				String value = null;
+				if (!(value instanceof String))
+					value = paramValue.toString();
 
-				if (parameterValue instanceof String)
-					value = (String) parameterValue;
-				else
-					value = parameterValue.toString();
-
-				st.setNString(parameterIndex, value);
 				break;
 			}
 
 			case Types.NCLOB:
 			{
-				String value = null;
+				if (!(value instanceof String))
+					value = paramValue.toString();
 
-				if (parameterValue instanceof String)
-					value = (String) parameterValue;
-				else
-					value = parameterValue.toString();
-
-				NClob nclob = cn.createNClob();
-				nclob.setString(1, value);
-				st.setNClob(parameterIndex, nclob);
 				break;
 			}
 
 			case Types.SQLXML:
 			{
-				String value = null;
+				if (!(value instanceof String))
+					value = paramValue.toString();
 
-				if (parameterValue instanceof String)
-					value = (String) parameterValue;
-				else
-					value = parameterValue.toString();
-
-				SQLXML sqlxml = cn.createSQLXML();
-				sqlxml.setString(value);
-				st.setSQLXML(parameterIndex, sqlxml);
 				break;
 			}
 
 			default:
-
-				throw new UnsupportedSqlTypeException(sqlType);
+			{
+			}
 		}
+
+		super.setParamValue(cn, st, paramIndex, SqlParamValue.valueOf(value, sqlType));
+	}
+
+	@Override
+	protected Object setParamValueExt(Connection cn, PreparedStatement st, int paramIndex, SqlParamValue paramValue)
+			throws SQLException
+	{
+		throw new UnsupportedSqlValueException(paramValue.getType(), paramValue.getValue());
 	}
 
 	/**
-	 * 获取字段值。
+	 * 获取简单字段值。
 	 * <p>
 	 * 此方法会对部分JDBC数据进行转换，仅返回如下类型的对象：
 	 * </p>
@@ -946,93 +775,28 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * {@linkplain String}、{@linkplain Number}子类、{@linkplain Boolean}、{@linkplain java.sql.Date}、
 	 * {@linkplain java.sql.Timestamp}、{@linkplain java.sql.Time}、{@code byte[]}。
 	 * </p>
-	 * <p>
-	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Type Conversions
-	 * Supported by ResultSet getter Methods”表，并且使用其中的最佳方法。
-	 * </p>
 	 * 
 	 * @param cn
 	 * @param rs
-	 * @param columnIndex
-	 * @param sqlType
+	 * @param column
 	 * @return
 	 * @throws SQLException
 	 * @throws IOException
 	 * @throws UnsupportedSqlTypeException
 	 */
-	protected Object getValue(Connection cn, ResultSet rs, int columnIndex, int sqlType)
+	protected Object getColumnValueSimple(Connection cn, ResultSet rs, Column column)
 			throws SQLException, IOException, UnsupportedSqlTypeException
 	{
 		Object value = null;
 
+		int sqlType = column.getType();
+		String columnName = column.getName();
+
 		switch (sqlType)
 		{
-			case Types.TINYINT:
-			{
-				value = rs.getByte(columnIndex);
-				break;
-			}
-
-			case Types.SMALLINT:
-			{
-				value = rs.getShort(columnIndex);
-				break;
-			}
-
-			case Types.INTEGER:
-			{
-				value = rs.getInt(columnIndex);
-				break;
-			}
-
-			case Types.BIGINT:
-			{
-				value = rs.getLong(columnIndex);
-				break;
-			}
-
-			case Types.REAL:
-			{
-				value = rs.getFloat(columnIndex);
-				break;
-			}
-
-			case Types.FLOAT:
-			case Types.DOUBLE:
-			{
-				value = rs.getDouble(columnIndex);
-				break;
-			}
-
-			case Types.DECIMAL:
-			case Types.NUMERIC:
-			{
-				value = rs.getBigDecimal(columnIndex);
-				break;
-			}
-
-			case Types.BIT:
-			{
-				value = rs.getBoolean(columnIndex);
-				break;
-			}
-
-			case Types.BOOLEAN:
-			{
-				value = rs.getBoolean(columnIndex);
-				break;
-			}
-
-			case Types.CHAR:
-			case Types.VARCHAR:
-			{
-				value = rs.getString(columnIndex);
-				break;
-			}
-
 			case Types.LONGVARCHAR:
 			{
-				Reader reader = rs.getCharacterStream(columnIndex);
+				Reader reader = rs.getCharacterStream(columnName);
 
 				try
 				{
@@ -1047,16 +811,9 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 				break;
 			}
 
-			case Types.BINARY:
-			case Types.VARBINARY:
-			{
-				value = rs.getBytes(columnIndex);
-				break;
-			}
-
 			case Types.LONGVARBINARY:
 			{
-				InputStream in = rs.getBinaryStream(columnIndex);
+				InputStream in = rs.getBinaryStream(columnName);
 
 				try
 				{
@@ -1073,27 +830,9 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 				break;
 			}
 
-			case Types.DATE:
-			{
-				value = rs.getDate(columnIndex);
-				break;
-			}
-
-			case Types.TIME:
-			{
-				value = rs.getTime(columnIndex);
-				break;
-			}
-
-			case Types.TIMESTAMP:
-			{
-				value = rs.getTimestamp(columnIndex);
-				break;
-			}
-
 			case Types.CLOB:
 			{
-				Clob clob = rs.getClob(columnIndex);
+				Clob clob = rs.getClob(columnName);
 
 				if (!rs.wasNull())
 				{
@@ -1114,7 +853,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 			case Types.BLOB:
 			{
-				Blob blob = rs.getBlob(columnIndex);
+				Blob blob = rs.getBlob(columnName);
 
 				if (!rs.wasNull())
 				{
@@ -1133,16 +872,9 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 				break;
 			}
 
-			case Types.NCHAR:
-			case Types.NVARCHAR:
-			{
-				value = rs.getNString(columnIndex);
-				break;
-			}
-
 			case Types.LONGNVARCHAR:
 			{
-				Reader reader = rs.getNCharacterStream(columnIndex);
+				Reader reader = rs.getNCharacterStream(columnName);
 
 				try
 				{
@@ -1159,7 +891,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 			case Types.NCLOB:
 			{
-				NClob nclob = rs.getNClob(columnIndex);
+				NClob nclob = rs.getNClob(columnName);
 
 				if (!rs.wasNull())
 				{
@@ -1178,9 +910,19 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 				break;
 			}
 
+			case Types.ROWID:
+			{
+				RowId rowId = rs.getRowId(columnName);
+
+				if (!rs.wasNull())
+					value = rowId.getBytes();
+
+				break;
+			}
+
 			case Types.SQLXML:
 			{
-				SQLXML sqlXml = rs.getSQLXML(columnIndex);
+				SQLXML sqlXml = rs.getSQLXML(columnName);
 
 				if (!rs.wasNull())
 				{
@@ -1199,9 +941,22 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 				break;
 			}
 
+			case Types.ARRAY:
+			case Types.DATALINK:
+			case Types.DISTINCT:
+			case Types.JAVA_OBJECT:
+			case Types.OTHER:
+			case Types.REF:
+			case Types.REF_CURSOR:
+			{
+				value = getColumnValueExt(cn, rs, columnName, sqlType);
+
+				break;
+			}
+
 			default:
 
-				throw new UnsupportedSqlTypeException(sqlType);
+				value = super.getColumnValue(cn, rs, columnName, sqlType);
 		}
 
 		if (rs.wasNull())
@@ -1210,23 +965,28 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		return value;
 	}
 
+	@Override
+	protected Object getColumnValueExt(Connection cn, ResultSet rs, String columnName, int sqlType) throws SQLException
+	{
+		throw new UnsupportedSqlTypeException(sqlType);
+	}
+
 	/**
 	 * 获取字段的的字符串值。
 	 * 
 	 * @param cn
 	 * @param rs
-	 * @param columnIndex
-	 * @param sqlType
+	 * @param column
 	 * @param dataFormatContext
 	 * @return
 	 * @throws SQLException
 	 * @throws IOException
 	 * @throws UnsupportedSqlTypeException
 	 */
-	protected String getStringValue(Connection cn, ResultSet rs, int columnIndex, int sqlType,
+	protected String getStringValue(Connection cn, ResultSet rs, Column column,
 			DataFormatContext dataFormatContext) throws SQLException, IOException, UnsupportedSqlTypeException
 	{
-		Object value = getValue(cn, rs, columnIndex, sqlType);
+		Object value = getColumnValueSimple(cn, rs, column);
 		String valueStr = null;
 
 		if (value == null)
@@ -1259,7 +1019,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		}
 		else if (value instanceof Boolean)
 		{
-			if (Types.BIT == sqlType)
+			if (Types.BIT == column.getType())
 				valueStr = Boolean.TRUE.equals(value) ? "1" : "0";
 			else
 				valueStr = value.toString();
@@ -1337,7 +1097,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 		try
 		{
-			setImportParameterValues(cn, st, columns, columnValues, dataIndex, nullForIllegalColumnValue,
+			setImportParamValues(cn, st, columns, columnValues, dataIndex, nullForIllegalColumnValue,
 					dataFormatContext, listener);
 
 			executeImportPreparedStatement(st, dataIndex);
@@ -1402,7 +1162,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param listener
 	 * @throws SetImportColumnValueException
 	 */
-	protected void setImportParameterValues(Connection cn, PreparedStatement st, List<Column> columns,
+	protected void setImportParamValues(Connection cn, PreparedStatement st, List<Column> columns,
 			List<? extends Object> columnValues, DataIndex dataIndex, boolean nullForIllegalColumnValue,
 			DataFormatContext dataFormatContext, ValueDataImportListener listener) throws SetImportColumnValueException
 	{
@@ -1413,13 +1173,12 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		{
 			Column column = columns.get(i);
 			String columnName = column.getName();
-			int sqlType = column.getType();
 			int parameterIndex = i + 1;
 			Object rawValue = (columnValues == null || columnValueCount - 1 < i ? null : columnValues.get(i));
 
 			try
 			{
-				setParameterValue(cn, st, parameterIndex, sqlType, rawValue, dataFormatContext);
+				setParamValue(cn, st, parameterIndex, rawValue, column, dataFormatContext);
 			}
 			catch (Throwable t)
 			{
@@ -1435,7 +1194,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 				{
 					try
 					{
-						st.setNull(parameterIndex, sqlType);
+						st.setNull(parameterIndex, column.getType());
 					}
 					catch (SQLException e1)
 					{
