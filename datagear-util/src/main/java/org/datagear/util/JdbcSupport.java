@@ -995,7 +995,7 @@ public class JdbcSupport
 
 			case Types.BIGINT:
 			{
-				value = getColumnValueForBigInt(cn, rs, columnName, sqlType);
+				value = getColumnValueForBigInt(cn, rs, columnName);
 				break;
 			}
 
@@ -1061,19 +1061,19 @@ public class JdbcSupport
 
 			case Types.DOUBLE:
 			{
-				value = getColumnValueForDouble(cn, rs, columnName, sqlType);
+				value = getColumnValueForDouble(cn, rs, columnName);
 				break;
 			}
 
 			case Types.FLOAT:
 			{
-				value = getColumnValueForFloat(cn, rs, columnName, sqlType);
+				value = getColumnValueForFloat(cn, rs, columnName);
 				break;
 			}
 
 			case Types.INTEGER:
 			{
-				value = getColumnValueForInteger(cn, rs, columnName, sqlType);
+				value = getColumnValueForInteger(cn, rs, columnName);
 				break;
 			}
 
@@ -1157,7 +1157,7 @@ public class JdbcSupport
 
 			case Types.SMALLINT:
 			{
-				value = getColumnValueForSmallint(cn, rs, columnName, sqlType);
+				value = getColumnValueForSmallint(cn, rs, columnName);
 				break;
 			}
 
@@ -1189,7 +1189,7 @@ public class JdbcSupport
 
 			case Types.TINYINT:
 			{
-				value = getColumnValueForTinyint(cn, rs, columnName, sqlType);
+				value = getColumnValueForTinyint(cn, rs, columnName);
 				break;
 			}
 
@@ -1224,12 +1224,10 @@ public class JdbcSupport
 	 * @param cn
 	 * @param rs
 	 * @param columnName
-	 * @param sqlType
-	 *            应固定是{@linkplain Types#BIGINT}
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForBigInt(Connection cn, ResultSet rs, String columnName, int sqlType)
+	protected Object getColumnValueForBigInt(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1255,12 +1253,10 @@ public class JdbcSupport
 	 * @param cn
 	 * @param rs
 	 * @param columnName
-	 * @param sqlType
-	 *            应固定是{@linkplain Types#DOUBLE}
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForDouble(Connection cn, ResultSet rs, String columnName, int sqlType)
+	protected Object getColumnValueForDouble(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1286,12 +1282,10 @@ public class JdbcSupport
 	 * @param cn
 	 * @param rs
 	 * @param columnName
-	 * @param sqlType
-	 *            应固定是{@linkplain Types#FLOAT}
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForFloat(Connection cn, ResultSet rs, String columnName, int sqlType)
+	protected Object getColumnValueForFloat(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1304,7 +1298,7 @@ public class JdbcSupport
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("数据库中的值可能因为超出float类型值范围而报错，这里升级类型再次尝试")
-			double bigValue = rs.getDouble(columnName);
+			Object bigValue = getColumnValueForDouble(cn, rs, columnName);
 			value = bigValue;
 		}
 
@@ -1317,12 +1311,10 @@ public class JdbcSupport
 	 * @param cn
 	 * @param rs
 	 * @param columnName
-	 * @param sqlType
-	 *            应固定是{@linkplain Types#INTEGER}
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForInteger(Connection cn, ResultSet rs, String columnName, int sqlType)
+	protected Object getColumnValueForInteger(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1335,7 +1327,7 @@ public class JdbcSupport
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getInt()取值可能因为超出int类型值范围而报错，这里升级类型再次尝试")
-			long bigValue = rs.getLong(columnName);
+			Object bigValue = getColumnValueForBigInt(cn, rs, columnName);
 			value = bigValue;
 		}
 
@@ -1348,12 +1340,10 @@ public class JdbcSupport
 	 * @param cn
 	 * @param rs
 	 * @param columnName
-	 * @param sqlType
-	 *            应固定是{@linkplain Types#SMALLINT}
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForSmallint(Connection cn, ResultSet rs, String columnName, int sqlType)
+	protected Object getColumnValueForSmallint(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1366,7 +1356,7 @@ public class JdbcSupport
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getShort()取值可能因为超出short类型值范围而报错，这里升级类型再次尝试")
-			int bigValue = rs.getInt(columnName);
+			Object bigValue = getColumnValueForInteger(cn, rs, columnName);
 			value = bigValue;
 		}
 
@@ -1379,12 +1369,10 @@ public class JdbcSupport
 	 * @param cn
 	 * @param rs
 	 * @param columnName
-	 * @param sqlType
-	 *            应固定是{@linkplain Types#TINYINT}
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForTinyint(Connection cn, ResultSet rs, String columnName, int sqlType)
+	protected Object getColumnValueForTinyint(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1397,7 +1385,7 @@ public class JdbcSupport
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getByte()取值可能因为超出byte类型值范围而报错，这里升级类型再次尝试")
-			short bigValue = rs.getShort(columnName);
+			Object bigValue = getColumnValueForSmallint(cn, rs, columnName);
 			value = bigValue;
 		}
 
