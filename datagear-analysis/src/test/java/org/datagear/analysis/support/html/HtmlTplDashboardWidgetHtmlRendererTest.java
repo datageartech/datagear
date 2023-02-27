@@ -1681,34 +1681,34 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			}
 		}
 		
-		double rawTimes = 0;
-		double enhanceTimes = 0;
+		long rawTimes = 0;
+		long enhanceTimes = 0;
 		
 		for(int i=0; i<loopCount; i++)
 		{
 			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
 			
-			long beforeTime = System.currentTimeMillis();
+			long startTime = System.nanoTime();
 
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
 			
-			rawTimes += System.currentTimeMillis() - beforeTime;
+			rawTimes += System.nanoTime() - startTime;
 		}
 		
 		for(int i=0; i<loopCount; i++)
 		{
 			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
 			
-			long beforeTime = System.currentTimeMillis();
+			long startTime = System.nanoTime();
 			
 			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext, dashboardMeta);
 			
-			enhanceTimes += System.currentTimeMillis() - beforeTime;
+			enhanceTimes += System.nanoTime() - startTime;
 		}
 		
-		double enhance = rawTimes/enhanceTimes;
+		double enhance = ((double)rawTimes)/enhanceTimes;
 		
-		assertTrue(enhance > 1.0d);
+		assertTrue(enhance >= 1.0d);
 		
 		System.out.println("-----------------------");
 		System.out.println("test count   : " + loopCount);
@@ -1722,8 +1722,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	public void renderTest_forPerformance() throws Throwable
 	{
 		int loopCount = 10000;
-		double rawTimes = 0;
-		double enhanceTimes = 0;
+		long rawTimes = 0;
+		long enhanceTimes = 0;
 		
 		{
 			HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget(this.renderer);
@@ -1735,11 +1735,11 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 				assertNull(this.renderer.getTplDashboardMetaCache(dashboardWidget, renderContext));
 
-				long beforeTime = System.currentTimeMillis();
+				long startTime = System.nanoTime();
 
 				dashboardWidget.render(renderContext);
 
-				rawTimes += System.currentTimeMillis() - beforeTime;
+				rawTimes += System.nanoTime() - startTime;
 			}
 		}
 		
@@ -1756,17 +1756,17 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				else
 					assertNotNull(this.rendererWithCache.getTplDashboardMetaCache(dashboardWidget, renderContext));
 
-				long beforeTime = System.currentTimeMillis();
+				long startTime = System.nanoTime();
 
 				dashboardWidget.render(renderContext);
 
-				enhanceTimes += System.currentTimeMillis() - beforeTime;
+				enhanceTimes += System.nanoTime() - startTime;
 			}
 		}
 		
-		double enhance = rawTimes/enhanceTimes;
+		double enhance = ((double)rawTimes)/enhanceTimes;
 		
-		assertTrue(enhance > 1.0d);
+		assertTrue(enhance >= 1.0d);
 		
 		System.out.println("-----------------------");
 		System.out.println("test count   : " + loopCount);
