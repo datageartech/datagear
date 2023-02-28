@@ -24,7 +24,9 @@
 	<span class="text-color-secondary pr-1">
 		Copyright 2018-2023 datagear.tech
 	</span>
+	<#--
 	<a href="${Global.WEB_SITE}" target="_blank" class="link text-color-secondary">
 		${Global.WEB_SITE}
 	</a>
+	-->
 </div>
