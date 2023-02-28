@@ -21,8 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -993,14 +991,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			;
 		else if (value instanceof Number)
 		{
-			Number number = (Number) value;
-
-			if (number instanceof Float || number instanceof Double)
-				valueStr = dataFormatContext.formatDouble(number.doubleValue());
-			else if (number instanceof BigDecimal || value instanceof BigInteger)
-				valueStr = number.toString();
-			else
-				valueStr = dataFormatContext.formatLong(number.longValue());
+			valueStr = dataFormatContext.formatNumber((Number) value);
 		}
 		else if (value instanceof Date)
 		{

@@ -700,6 +700,22 @@ public class DataFormatContext
 	}
 
 	/**
+	 * 格式化{@code Number}。
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public String formatNumber(Number value)
+	{
+		String sv = (value == null ? null : this._numberFormat.format(value));
+
+		if (sv != null && this._numberExpression != null)
+			sv = this.expressionResolver.evaluate(this.dataFormat.getNumberFormat(), this._numberExpression, sv, "");
+
+		return sv;
+	}
+
+	/**
 	 * 格式化字节数组。
 	 * 
 	 * @param value
@@ -723,22 +739,6 @@ public class DataFormatContext
 
 		if (this._binaryExpression != null)
 			sv = this.expressionResolver.evaluate(this.dataFormat.getBinaryFormat(), this._binaryExpression, sv, "");
-
-		return sv;
-	}
-
-	/**
-	 * 格式化{@code Number}。
-	 * 
-	 * @param value
-	 * @return
-	 */
-	protected String formatNumber(Number value)
-	{
-		String sv = (value == null ? null : this._numberFormat.format(value));
-
-		if (sv != null && this._numberExpression != null)
-			sv = this.expressionResolver.evaluate(this.dataFormat.getNumberFormat(), this._numberExpression, sv, "");
 
 		return sv;
 	}
