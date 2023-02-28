@@ -524,13 +524,12 @@ public class JdbcSupport
 				else if(value instanceof String)
 				{
 					String sv = (String)value;
-					st.setBoolean(paramIndex,
-							("true".equalsIgnoreCase(sv) || "1".equals(sv) || "on".equalsIgnoreCase(sv)));
+					st.setBoolean(paramIndex, toJdbcBoolean(sv));
 				}
 				else if(value instanceof Number)
 				{
 					Number nv = (Number)value;
-					st.setBoolean(paramIndex, (nv.intValue() > 0));
+					st.setBoolean(paramIndex, toJdbcBoolean(nv));
 				}
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
@@ -910,6 +909,28 @@ public class JdbcSupport
 			throws SQLException
 	{
 		throw new UnsupportedOperationException("Set JDBC type [" + paramValue.getType() + "] value is not supported");
+	}
+
+	/**
+	 * 字符串转换为JDBC的布尔值。
+	 * 
+	 * @param v
+	 * @return
+	 */
+	protected boolean toJdbcBoolean(String v)
+	{
+		return StringUtil.toBoolean(v);
+	}
+
+	/**
+	 * 数值转换为JDBC的布尔值。
+	 * 
+	 * @param v
+	 * @return
+	 */
+	protected boolean toJdbcBoolean(Number v)
+	{
+		return StringUtil.toBoolean(v);
 	}
 
 	protected void write(File file, OutputStream out) throws SQLException

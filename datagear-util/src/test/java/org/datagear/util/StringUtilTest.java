@@ -18,6 +18,8 @@
 package org.datagear.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -243,6 +245,110 @@ public class StringUtilTest
 			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
 			assertEquals("/abc//%E4%B8%AD+%E6%96%87/%3F/ghi//", actual);
 			assertEquals(url, StringUtil.decodeURL(actual, IOUtil.CHARSET_UTF_8));
+		}
+	}
+
+	@Test
+	public void toBooleanTest_String() throws Exception
+	{
+		{
+			String v = "true";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			String v = "TRUE";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			String v = "1";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			String v = "y";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			String v = "Y";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			String v = "yes";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			String v = "YES";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			String v = "on";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			String v = "ON";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			String v = "是";
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+
+		{
+			String v = null;
+			boolean actual = StringUtil.toBoolean(v);
+			assertFalse(actual);
+		}
+
+		{
+			String v = "";
+			boolean actual = StringUtil.toBoolean(v);
+			assertFalse(actual);
+		}
+
+		{
+			String v = "2";
+			boolean actual = StringUtil.toBoolean(v);
+			assertFalse(actual);
+		}
+	}
+
+	@Test
+	public void toBooleanTest_Number() throws Exception
+	{
+		{
+			int v = 1;
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+		{
+			int v = 2;
+			boolean actual = StringUtil.toBoolean(v);
+			assertTrue(actual);
+		}
+
+		{
+			Integer v = null;
+			boolean actual = StringUtil.toBoolean(v);
+			assertFalse(actual);
+		}
+		{
+			int v = 0;
+			boolean actual = StringUtil.toBoolean(v);
+			assertFalse(actual);
+		}
+		{
+			int v = -1;
+			boolean actual = StringUtil.toBoolean(v);
+			assertFalse(actual);
 		}
 	}
 }

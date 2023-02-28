@@ -1622,7 +1622,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		String editTemplate = request.getParameter(DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE);
 		// 有编辑模板请求参数
-		return (("true".equalsIgnoreCase(editTemplate) || "1".equals(editTemplate)));
+		return StringUtil.toBoolean(editTemplate);
 	}
 
 	protected boolean isDashboardShowForEditRequest(HttpServletRequest request,
@@ -1681,8 +1681,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboardInfo == null)
 			throw new RecordNotFoundException();
 		
-		boolean loadChartForEditor = ("true".equalsIgnoreCase(loadChartForEditorStr)
-				|| "1".equals(loadChartForEditorStr));
+		boolean loadChartForEditor = StringUtil.toBoolean(loadChartForEditorStr);
 		loadChartForEditor = (dashboardInfo.isShowForEdit() && loadChartForEditor);
 
 		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService

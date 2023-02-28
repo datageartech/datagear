@@ -843,7 +843,7 @@ public class JsonChartPluginPropertiesResolver
 		else if (obj instanceof String)
 		{
 			String str = (String) obj;
-			return ("1".equals(str) || "true".equalsIgnoreCase(str));
+			return StringUtil.toBoolean(str);
 		}
 		else
 			throw new UnsupportedOperationException(

@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetProperty.DataType;
+import org.datagear.util.StringUtil;
 
 /**
  * {@linkplain DataSetProperty}值转换器。
@@ -156,7 +157,7 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 			return null;
 
 		if (DataType.BOOLEAN.equals(type))
-			return "true".equalsIgnoreCase(value) || "1".equals(value);
+			return StringUtil.toBoolean(value);
 		else if (DataType.NUMBER.equals(type))
 			return this._numberFormat.parse(value);
 		else if (DataType.INTEGER.equals(type))

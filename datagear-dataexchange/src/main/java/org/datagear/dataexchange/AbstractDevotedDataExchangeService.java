@@ -38,7 +38,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.DecoderException;
@@ -993,7 +992,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		{
 			valueStr = dataFormatContext.formatNumber((Number) value);
 		}
-		else if (value instanceof Date)
+		else if (value instanceof java.util.Date)
 		{
 			if (value instanceof java.sql.Date)
 				valueStr = dataFormatContext.formatDate((java.sql.Date) value);
@@ -1002,7 +1001,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			else if (value instanceof java.sql.Timestamp)
 				valueStr = dataFormatContext.formatTimestamp((Timestamp) value);
 			else
-				valueStr = dataFormatContext.formatDate((java.sql.Date) value);
+				valueStr = dataFormatContext.formatDate(new java.sql.Date(((java.util.Date) value).getTime()));
 		}
 		else if (value instanceof String)
 		{

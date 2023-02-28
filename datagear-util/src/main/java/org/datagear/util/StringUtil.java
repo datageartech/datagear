@@ -538,4 +538,45 @@ public class StringUtil
 
 		return re.toString();
 	}
+
+	/**
+	 * 字符串转换为布尔值。
+	 * <p>
+	 * 返回{@code true}的字符串（忽略大小写）：
+	 * </p>
+	 * <p>
+	 * {@code "true"}、{@code "1"}、{@code "y"}、{@code "yes"}、{@code "on"}、{@code "是"}
+	 * </p>
+	 * <p>
+	 * 其他情况都将返回{@code false}。
+	 * </p>
+	 * 
+	 * @param v
+	 * @return
+	 */
+	public static boolean toBoolean(String v)
+	{
+		if (v == null)
+			return false;
+
+		return ("true".equalsIgnoreCase(v) || "1".equals(v) || "y".equalsIgnoreCase(v) || "yes".equalsIgnoreCase(v)
+				|| "on".equalsIgnoreCase(v) || "是".equals(v));
+	}
+
+	/**
+	 * 数值转换为布尔值。
+	 * <p>
+	 * 数值大于{@code 0}时返回{@code true}，否则返回{@code true}。
+	 * </p>
+	 * 
+	 * @param v
+	 * @return
+	 */
+	public static boolean toBoolean(Number v)
+	{
+		if (v == null)
+			return false;
+
+		return (v.intValue() > 0);
+	}
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.datagear.util.StringUtil;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.WebUtils;
 import org.springframework.context.ApplicationContext;
@@ -131,7 +132,7 @@ public class CustomFreeMarkerView extends FreeMarkerView
 		if (!disableDetectNewVersion)
 		{
 			String resolved = WebUtils.getCookieValue(request, WebUtils.COOKIE_DETECT_NEW_VERSION_RESOLVED);
-			disableDetectNewVersion = ("true".equalsIgnoreCase(resolved) || "1".equals(resolved) || "yes".equalsIgnoreCase(resolved));
+			disableDetectNewVersion = StringUtil.toBoolean(resolved);
 		}
 
 		if (!disableDetectNewVersion)

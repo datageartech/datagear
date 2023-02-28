@@ -59,6 +59,7 @@ import org.datagear.meta.Column;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.StringUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -710,7 +711,7 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 				if (XssfCellType.BOOLEAN.equals(this._cellType))
 				{
 					String content = this._cellContents.toString();
-					value = ("true".equalsIgnoreCase(content) || "1".equals(content) || "on".equalsIgnoreCase(content));
+					value = StringUtil.toBoolean(content);
 				}
 				else if (XssfCellType.NUMBER.equals(this._cellType))
 				{
