@@ -524,7 +524,8 @@ page_boolean_options.ftl
 					</div>
 				</div>
 				<div class="field grid">
-					<label for="${pid}veChartThemeActualBgColor" class="field-label col-12 mb-2">
+					<label for="${pid}veChartThemeActualBgColor" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.chartTheme.actualBgColor.desc' />">
 						<@spring.message code='actualBgColor' />
 					</label>
 					<div class="field-input col-12">
@@ -551,7 +552,8 @@ page_boolean_options.ftl
 					</div>
 				</div>
 				<div class="field grid">
-					<label for="${pid}veChartThemeGraphColors" class="field-label col-12 mb-2">
+					<label for="${pid}veChartThemeGraphColors" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.chartTheme.graphColors.desc' />">
 						<@spring.message code='dashboard.veditor.chartTheme.graphColors' />
 					</label>
 					<div class="field-input col-12">
@@ -575,7 +577,8 @@ page_boolean_options.ftl
 					</div>
 				</div>
 				<div class="field grid">
-					<label for="${pid}veChartThemeGraphRangeColors" class="field-label col-12 mb-2">
+					<label for="${pid}veChartThemeGraphRangeColors" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.chartTheme.graphRangeColors.desc' />">
 						<@spring.message code='dashboard.veditor.chartTheme.graphRangeColors' />
 					</label>
 					<div class="field-input col-12">
@@ -1731,17 +1734,6 @@ page_boolean_options.ftl
 					<p-tabpanel header="<@spring.message code='font' />">
 						<div class="ve-style-tabpanel-content px-2 overflow-y-auto">
 							<div class="field grid">
-								<label for="${pid}veStyleFontFamily" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.fontFamily' />
-									<span class="text-color-secondary text-sm ml-1">font-family</span>
-								</label>
-								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleFontFamily" v-model="pm.vepms.style['font-family']" type="text"
-										class="input w-full" name="font-family">
-									</p-inputtext>
-								</div>
-							</div>
-							<div class="field grid">
 								<label for="${pid}veStyleFontSize" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.fontSize.desc' />">
 									<@spring.message code='dashboard.veditor.style.fontSize' />
@@ -1751,25 +1743,6 @@ page_boolean_options.ftl
 									<p-inputtext id="${pid}veStyleFontSize" v-model="pm.vepms.style['font-size']" type="text"
 										class="input w-full" name="font-size">
 									</p-inputtext>
-								</div>
-							</div>
-							<div class="field grid">
-								<label for="${pid}veStyleFontWeight" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.fontWeight' />
-									<span class="text-color-secondary text-sm ml-1">font-weight</span>
-								</label>
-								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleFontWeight" v-model="pm.vepms.style['font-weight']" type="text"
-										class="help-target input w-full" name="font-weight">
-									</p-inputtext>
-									<div class="p-buttonset mt-1 text-sm">
-										<p-button type="button" class="help-src p-button-secondary" help-value="normal">
-											<@spring.message code='dashboard.veditor.style.fontWeight.normal' />
-										</p-button>
-										<p-button type="button" class="help-src p-button-secondary" help-value="bold">
-											<@spring.message code='dashboard.veditor.style.fontWeight.bold' />
-										</p-button>
-									</div>
 								</div>
 							</div>
 							<div class="field grid">
@@ -1792,6 +1765,36 @@ page_boolean_options.ftl
 										<@spring.message code='dashboard.veditor.style.textAlign.right' />
 										</p-button>
 									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleFontWeight" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.fontWeight' />
+									<span class="text-color-secondary text-sm ml-1">font-weight</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFontWeight" v-model="pm.vepms.style['font-weight']" type="text"
+										class="help-target input w-full" name="font-weight">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="normal">
+											<@spring.message code='dashboard.veditor.style.fontWeight.normal' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="bold">
+											<@spring.message code='dashboard.veditor.style.fontWeight.bold' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleFontFamily" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.fontFamily' />
+									<span class="text-color-secondary text-sm ml-1">font-family</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFontFamily" v-model="pm.vepms.style['font-family']" type="text"
+										class="input w-full" name="font-family">
+									</p-inputtext>
 								</div>
 							</div>
 						</div>
