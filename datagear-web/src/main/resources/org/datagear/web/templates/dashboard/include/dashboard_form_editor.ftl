@@ -740,27 +740,24 @@
 		
 		var code = "";
 		
-		if(chartWidgets.length == 1)
-		{
-			var chartId = chartWidgets[0].id;
-			var chartName = chartWidgets[0].name;
-			
-			var text = po.getTemplatePrevTagText(codeEditor, cursor);
-			
-			// =
-			if(/=\s*$/g.test(text))
-				code = "\"" + chartId + "\"";
-			// =" 或 ='
-			else if(/=\s*['"]$/g.test(text))
-				code = chartId;
-			// <...
-			else if(/<[^>]*$/g.test(text))
-				code = " dg-chart-widget=\""+chartId+"\"";
-			else
-			{
-				code = "<div style=\""+po.defaultInsertChartEleStyle+"\" dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
-			}
-		}
+		var chartId = chartWidgets[0].id;
+		var chartName = chartWidgets[0].name;
+		var text = po.getTemplatePrevTagText(codeEditor, cursor);
+		var textNext = po.getTemplateNextText(codeEditor, cursor);
+		
+		// =
+		if(/=\s*$/g.test(text))
+			code = "\"" + chartId + "\"";
+		// ="... 或 ='...
+		else if(/=\s*['"][^'"]*$/g.test(text))
+			code = chartId;
+		// <...
+		else if(/<[^>]*$/g.test(text))
+			code = " dg-chart-widget=\""+chartId+"\"";
+		// "..." 或 '...'
+		else if(/['"][^'"]*$/g.test(text) && /^[^'"]*['"]/g.test(textNext))
+			code = chartId;
+		// >...
 		else
 		{
 			for(var i=0; i<chartWidgets.length; i++)
@@ -771,13 +768,19 @@
 		codeEditor.focus();
 	};
 	
-	po.getLastTagText = function(text)
+	po.getTemplatePrevTagText = function(codeEditor, cursor)
 	{
-		if(!text)
-			return text;
+		var doc = codeEditor.getDoc();
+		
+		var text = (doc.getLine(cursor.line).substring(0, cursor.ch) || "");
+		
+		//反向查找直到'>'或'<'
+		var prevRow = cursor.line;
+		while(text.length <= 500 && !(/[<>]/g.test(text)) && (prevRow--) >= 0)
+			text = doc.getLine(prevRow) + text;
 		
 		var idx = -1;
-		for(var i=text.length-1;i>=0;i--)
+		for(var i=text.length-1; i>=0; i--)
 		{
 			var c = text.charAt(i);
 			if(c == '>' || c == '<')
@@ -790,18 +793,12 @@
 		return (idx < 0 ? text : text.substr(idx));
 	};
 	
-	po.getTemplatePrevTagText = function(codeEditor, cursor)
+	po.getTemplateNextText = function(codeEditor, cursor)
 	{
 		var doc = codeEditor.getDoc();
+		var text = (doc.getLine(cursor.line).substring(cursor.ch) || "");
 		
-		var text = doc.getLine(cursor.line).substring(0, cursor.ch);
-		
-		//反向查找直到'>'或'<'
-		var prevRow = cursor.line;
-		while((!text || !(/[<>]/g.test(text))) && (prevRow--) >= 0)
-			text = doc.getLine(prevRow) + text;
-		
-		return po.getLastTagText(text);
+		return text;
 	};
 	
 	po.showFirstTemplateContent = function()
