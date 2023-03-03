@@ -223,5 +223,14 @@
 			"template": "jdbc:oscar://{host}:{port}/{name}",
 			"defaultValue": {"port": "2003"}
 		}
+	},
+	{
+		"name": "MariaDB",
+		"driverClassNames": ["org.mariadb.jdbc.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:mariadb://{host}:{port}/{name}",
+			"defaultValue": {"port": "3306"}
+		}
 	}
 ]
