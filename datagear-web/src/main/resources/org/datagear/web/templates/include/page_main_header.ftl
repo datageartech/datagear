@@ -27,7 +27,7 @@ User currentUser
 <#assign Themes=statics['org.datagear.web.util.Themes']>
 <#assign Global=statics['org.datagear.util.Global']>
 <#assign WebUtils=statics['org.datagear.web.util.WebUtils']>
-<div class="page-main-header flex-grow-0 p-card no-border text-primary py-1">
+<div class="page-main-header flex-grow-0 p-card no-border text-primary py-1 border-noround-top border-noround-bottom">
 	<div class="grid grid-nogutter align-items-center">
 		<div class="logo-wrapper col-fixed flex align-items-center pl-1">
 			<#include "html_logo.ftl">

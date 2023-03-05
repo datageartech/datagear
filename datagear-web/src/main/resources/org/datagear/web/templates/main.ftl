@@ -34,8 +34,8 @@
 		<#include "include/page_main_header.ftl">
 		<div class="page-main-content flex-grow-1 p-0">
 			<div class="grid h-full m-0 flex-nowrap">
-				<div class="page-main-menu col-fixed px-0">
-					<div class="grid grid-nogutter flex-column align-items-center p-card h-full">
+				<div class="page-main-menu col-fixed px-0 pb-0">
+					<div class="grid grid-nogutter flex-column align-items-center p-card h-full border-noround-left border-noround-bottom">
 						<div class="col-fixed">
 							<p-button @click="onMainMenuToggle" icon="pi pi-align-justify"
 								class="p-button-sm p-button-secondary p-button-rounded p-button-text opacity-40 my-1 p-1">
@@ -48,9 +48,9 @@
 						</div>
 					</div>
 				</div>
-				<div id="${pid}mainPanels" class="page-main-panels col overflow-auto">
-					<div id="${pid}mainPanelHome" class="page-main-panel p-card w-full h-full p-3">
-						<div class="flex flex-column align-items-center justify-content-center h-full opacity-10">
+				<div id="${pid}mainPanels" class="page-main-panels col overflow-auto pb-0 pr-0">
+					<div id="${pid}mainPanelHome" class="page-main-panel p-card w-full h-full p-3 border-noround-bottom border-noround-right">
+						<div class="flex flex-column align-items-center justify-content-center h-full opacity-20">
 							<div class="py-1">
 								<@spring.message code='app.name' />
 							</div>
@@ -66,6 +66,7 @@
 			</div>
 		</div>
 	</div>
+	<#include "include/page_foot.ftl">
 </div>
 <script>
 (function(po)
@@ -141,7 +142,7 @@
 		
 		if(panel.length == 0)
 		{
-			panel = $("<div id='"+panelId+"' class='page-main-panel p-card w-full h-full p-3' />")
+			panel = $("<div id='"+panelId+"' class='page-main-panel p-card w-full h-full p-3 border-noround-bottom border-noround-right' />")
 						.prop("unloaded", true).appendTo(parent);
 		}
 		
