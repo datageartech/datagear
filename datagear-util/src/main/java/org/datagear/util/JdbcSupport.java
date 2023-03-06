@@ -1161,7 +1161,7 @@ public class JdbcSupport
 
 			case Types.REAL:
 			{
-				value = rs.getFloat(columnName);
+				value = getColumnValueForFloat(cn, rs, columnName);
 				break;
 			}
 

@@ -17,7 +17,6 @@
 
 package org.datagear.persistence.support;
 
-import java.math.BigDecimal;
 import java.sql.Types;
 
 import org.datagear.meta.Column;
@@ -27,6 +26,7 @@ import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Query;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.NumberParser;
 import org.datagear.util.Sql;
 
 /**
@@ -42,6 +42,8 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 
 	/** 作为关键字查询的列数 */
 	private int keywordQueryColumnCount = Dialect.DEFAULT_KEYWORD_QUERY_COLUMN_COUNT;
+
+	private NumberParser numberParser = new NumberParser();
 
 	public AbstractDialect()
 	{
@@ -74,6 +76,16 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 	public void setKeywordQueryColumnCount(int keywordQueryColumnCount)
 	{
 		this.keywordQueryColumnCount = keywordQueryColumnCount;
+	}
+
+	public NumberParser getNumberParser()
+	{
+		return numberParser;
+	}
+
+	public void setNumberParser(NumberParser numberParser)
+	{
+		this.numberParser = numberParser;
 	}
 
 	@Override
@@ -231,143 +243,66 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 	 */
 	protected Number parseToNumber(String str, int sqlType)
 	{
-		switch (sqlType)
-		{
-			case Types.TINYINT:
-			case Types.SMALLINT:
-			case Types.INTEGER:
-			{
-				Integer value = parseInteger(str);
-				return (value == null ? null : value.intValue());
-			}
-			case Types.BIGINT:
-			{
-				Long value = parseLong(str);
-				return (value == null ? null : value.longValue());
-			}
-			case Types.REAL:
-			case Types.FLOAT:
-			{
-				Float value = parseFloat(str);
-				return (value == null ? null : value.floatValue());
-			}
-			case Types.DOUBLE:
-			{
-				Double value = parseDouble(str);
-				return (value == null ? null : value.doubleValue());
-			}
-			case Types.NUMERIC:
-			case Types.DECIMAL:
-			{
-				return toBigDecimal(str);
-			}
-			default:
-				return null;
-		}
-	}
+		Number value = null;
 
-	/**
-	 * 转换为{@code Integer}。
-	 * <p>
-	 * 如果不合法，将返回{@code null}。
-	 * </p>
-	 * 
-	 * @param str
-	 * @return
-	 */
-	protected Integer parseInteger(String str)
-	{
 		try
 		{
-			return new Integer(str);
+			switch (sqlType)
+			{
+				case Types.TINYINT:
+				{
+					value = this.numberParser.parseByteIfExact(str);
+					break;
+				}
+
+				case Types.SMALLINT:
+				{
+					value = this.numberParser.parseShortIfExact(str);
+					break;
+				}
+
+				case Types.INTEGER:
+				{
+					value = this.numberParser.parseIntIfExact(str);
+					break;
+				}
+
+				case Types.BIGINT:
+				{
+					value = this.numberParser.parseLongIfExact(str);
+					break;
+				}
+
+				case Types.REAL:
+				case Types.FLOAT:
+				{
+					value = this.numberParser.parseFloatIfExact(str);
+					break;
+				}
+
+				case Types.DOUBLE:
+				{
+					value = this.numberParser.parseDoubleIfExact(str);
+					break;
+				}
+
+				case Types.NUMERIC:
+				case Types.DECIMAL:
+				{
+					value = this.numberParser.parseBigDecimal(str);
+					break;
+				}
+
+				default:
+				{
+					value = null;
+				}
+			}
 		}
 		catch (Throwable t)
 		{
-			return null;
 		}
-	}
 
-	/**
-	 * 转换为{@code Long}。
-	 * <p>
-	 * 如果不合法，将返回{@code null}。
-	 * </p>
-	 * 
-	 * @param str
-	 * @return
-	 */
-	protected Long parseLong(String str)
-	{
-		try
-		{
-			return new Long(str);
-		}
-		catch (Throwable t)
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * 转换为{@code Float}。
-	 * <p>
-	 * 如果不合法，将返回{@code null}。
-	 * </p>
-	 * 
-	 * @param str
-	 * @return
-	 */
-	protected Float parseFloat(String str)
-	{
-		try
-		{
-			return new Float(str);
-		}
-		catch (Throwable t)
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * 转换为{@code Double}。
-	 * <p>
-	 * 如果不合法，将返回{@code null}。
-	 * </p>
-	 * 
-	 * @param str
-	 * @return
-	 */
-	protected Double parseDouble(String str)
-	{
-		try
-		{
-			return new Double(str);
-		}
-		catch (Throwable t)
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * 转换为{@code BigDecimal}。
-	 * <p>
-	 * 如果不合法，将返回{@code null}。
-	 * </p>
-	 * 
-	 * @param str
-	 * @return
-	 */
-	protected BigDecimal toBigDecimal(String str)
-	{
-		try
-		{
-			return new BigDecimal(str);
-		}
-		catch (Throwable t)
-		{
-			return null;
-		}
+		return value;
 	}
 }

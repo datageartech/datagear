@@ -46,6 +46,7 @@ import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.support.PersistenceSupport;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.NumberParserException;
 import org.datagear.util.SqlParamValue;
 import org.datagear.util.resource.ResourceFactory;
 
@@ -590,13 +591,14 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 *            当{@code parameterValue}为字符串且需要类型转换时使用，允许为{@code null}
 	 * @throws SQLException
 	 * @throws ParseException
+	 * @throws NumberParserException
 	 * @throws DecoderException
 	 * @throws UnsupportedSqlValueException
 	 * @throws UnsupportedSqlTypeException
 	 */
 	protected void setParamValue(Connection cn, PreparedStatement st, int paramIndex, Object paramValue,
 			Column column, DataFormatContext dataFormatContext) throws SQLException, ParseException,
-			DecoderException, UnsupportedSqlValueException, UnsupportedSqlTypeException
+			NumberParserException, DecoderException, UnsupportedSqlValueException, UnsupportedSqlTypeException
 	{
 		int sqlType = column.getType();
 
@@ -1174,8 +1176,8 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			{
 				SetImportColumnValueException e = null;
 
-				if ((t instanceof ParseException) || (t instanceof DecoderException)
-						|| (t instanceof UnsupportedSqlValueException))
+				if ((t instanceof ParseException) || (t instanceof NumberParserException)
+						|| (t instanceof DecoderException) || (t instanceof UnsupportedSqlValueException))
 					e = new IllegalImportSourceValueException(dataIndex, columnName, rawValue, t);
 				else
 					e = new SetImportColumnValueException(dataIndex, columnName, rawValue, t);
