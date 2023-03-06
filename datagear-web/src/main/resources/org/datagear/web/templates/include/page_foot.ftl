@@ -20,7 +20,7 @@
 页脚
 -->
 <#assign Global=statics['org.datagear.util.Global']>
-<div class="page-foot text-center text-xs opacity-20 text-color-secondary">
+<div class="page-foot text-center text-xs opacity-30 text-color-secondary">
 	<span class="text-color-secondary">
 		Copyright 2018-2023 datagear.tech
 	</span>
