@@ -177,6 +177,7 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 	{
 		DataFormat dataFormat = new DataFormat();
 		dataFormat.setBinaryFormat("0x${Hex}");
+		dataFormat.setNumberFormat("#.##");
 
 		File outFile = FileUtil.getFile("target/CsvDataExportServiceTest_unsigned_number.csv");
 
