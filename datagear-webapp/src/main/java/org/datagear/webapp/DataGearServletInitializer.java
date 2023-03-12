@@ -15,9 +15,9 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web;
+package org.datagear.webapp;
 
-import org.datagear.web.DataGearApplication.DataGearBanner;
+import org.datagear.web.util.ApplicationBanner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
@@ -36,6 +36,6 @@ public class DataGearServletInitializer extends SpringBootServletInitializer
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
 	{
 		application.profiles(PROFILE_WAR);
-		return application.sources(DataGearApplication.class).banner(new DataGearBanner());
+		return application.sources(DataGearApplication.class).banner(new ApplicationBanner());
 	}
 }

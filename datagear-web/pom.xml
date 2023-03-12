@@ -11,16 +11,6 @@
 	
 	<artifactId>datagear-web</artifactId>
 	<name>datagear-web</name>
-	<packaging>war</packaging>
-	
-	<properties>
-		<failOnMissingWebXml>false</failOnMissingWebXml>
-		<productName>datagear-${project.version}</productName>
-		<productNameJar>${productName}.jar</productNameJar>
-		<productNameWar>${productName}.war</productNameWar>
-		<dist.target.dir>${project.build.directory}/${productName}-bin/${productName}</dist.target.dir>
-		<dist.package.target.dir>${project.build.directory}/${productName}-packages</dist.package.target.dir>
-	</properties>
 	
 	<dependencies>
 		<dependency>
@@ -55,23 +45,40 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+		
+		
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context-support</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+    </dependency>
+		<!--
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
-				<!-- 后面重新引入并设为provided，避免war包中包含内嵌Server库 -->
-				<exclusion>
-					<artifactId>spring-boot-starter-tomcat</artifactId>
-					<groupId>org.springframework.boot</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<groupId>org.springframework.boot</groupId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -85,6 +92,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
@@ -119,161 +127,32 @@
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<optional>true</optional>
-		</dependency>
 	</dependencies>
 	
 	<build>
-		<finalName>${productName}</finalName>
-		
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Built-By>datagear.tech</Built-By>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
+			    <artifactId>maven-antrun-plugin</artifactId>
 			    <version>${maven-antrun-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>clearDistDirectory</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<delete dir="${dist.target.dir}" includeEmptyDirs="true" />
-								<mkdir dir="${dist.target.dir}"/>
-								<delete dir="${dist.package.target.dir}" includeEmptyDirs="true" />
-								<mkdir dir="${dist.package.target.dir}" />
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>prepareWarResources</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/${productName}/</outputDirectory>
-							<resources>
-								<resource>
-									<directory>dist/war</directory>
-									<filtering>true</filtering>
-									<includes>
-										<include>readme.txt</include>
-									</includes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					
-					<execution>
-						<id>prepareDistResources</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${dist.target.dir}/</outputDirectory>
-							<resources>
-								<resource>
-									<directory>dist/bin</directory>
-									<filtering>false</filtering>
-									<includes>
-										<include>config/**/*</include>
-									</includes>
-								</resource>
-								<resource>
-									<directory>dist/bin</directory>
-									<filtering>true</filtering>
-									<includes>
-										<include>readme.txt</include>
-										<include>shutdown.sh</include>
-										<include>startup.bat</include>
-										<include>startup.sh</include>
-									</includes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-			    <version>${maven-antrun-plugin.version}</version>
-				<executions>
-					<execution>
-			    		<id>prepareWarLICENSE</id>
+			    <executions>
+			    	<!-- 拷贝LICENSE文件 -->
+			    	<execution>
+			    		<id>copyLICENSE</id>
 			    		<phase>prepare-package</phase>
 			    		<goals>
 			    			<goal>run</goal>
 			    		</goals>
 			    		<configuration>
 			    			<tasks>
-			    				<copy file="../COPYING" todir="${project.build.directory}/${productName}" />
-			    				<copy file="../COPYING.LESSER" todir="${project.build.directory}/${productName}" />
-			    				<copy file="../LICENSE" todir="${project.build.directory}/${productName}" />
+			    				<copy file="../COPYING" todir="${project.build.outputDirectory}" />
+			    				<copy file="../COPYING.LESSER" todir="${project.build.outputDirectory}" />
+			    				<copy file="../LICENSE" todir="${project.build.outputDirectory}" />
 			    			</tasks>
 			    		</configuration>
 			    	</execution>
-			    	
-					<execution>
-						<id>buildDistPackage</id>
-						<phase>package</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<copy file="${project.build.directory}/${productName}.war" tofile="${dist.target.dir}/${productNameJar}" />
-								<mkdir dir="${dist.target.dir}/logs"/>
-			    				<copy file="../COPYING" todir="${dist.target.dir}" />
-			    				<copy file="../COPYING.LESSER" todir="${dist.target.dir}" />
-								<copy file="../LICENSE" todir="${dist.target.dir}" />
-								
-								<zip destfile="${dist.package.target.dir}/${productName}.zip" basedir="${project.build.directory}/${productName}-bin" includes="${productName}/**/*" />
-								<copy file="${project.build.directory}/${productNameWar}.original" tofile="${dist.package.target.dir}/${productNameWar}" />
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
+			    </executions>
 			</plugin>
-			
 		</plugins>
 	</build>
 </project>
