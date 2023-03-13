@@ -19,13 +19,6 @@
 <#--
 页脚
 -->
-<#assign Global=statics['org.datagear.util.Global']>
 <div class="page-foot text-center text-xs opacity-30 text-color-secondary">
 	<span class="text-color-secondary">Copyright 2018-2023 datagear.tech</span>
-	<span class="text-color-secondary ml-2">LGPL-3.0 license</span>
-	<#--
-	<a href="${Global.WEB_SITE}" target="_blank" class="link text-color-secondary">
-		${Global.WEB_SITE}
-	</a>
-	-->
 </div>
