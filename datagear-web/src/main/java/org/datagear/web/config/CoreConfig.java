@@ -32,10 +32,13 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
+import org.datagear.analysis.DashboardThemeSource;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver.NameTemplateLoader;
 import org.datagear.analysis.support.DataSetFmkTemplateResolvers;
+import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
+import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonRenderer;
@@ -537,6 +540,20 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 	public HtmlFilter htmlFilter()
 	{
 		HtmlFilter bean = new HtmlFilter();
+		return bean;
+	}
+	
+	@Bean
+	public DataSetParamValueConverter dataSetParamValueConverter()
+	{
+		DataSetParamValueConverter bean = new DataSetParamValueConverter();
+		return bean;
+	}
+	
+	@Bean
+	public DashboardThemeSource dashboardThemeSource()
+	{
+		DashboardThemeSource bean = new SimpleDashboardThemeSource();
 		return bean;
 	}
 

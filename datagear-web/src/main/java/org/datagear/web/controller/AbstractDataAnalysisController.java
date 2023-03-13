@@ -46,7 +46,6 @@ import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.SimpleDashboardQueryHandler;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.DataSetParamValueConverter;
-import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
@@ -59,8 +58,9 @@ import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
-import org.datagear.web.util.Themes;
+import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 抽象数据分析控制器。
@@ -168,9 +168,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER = "chartPluginManager";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE = "dashboardStyle";
 
-	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
+	@Autowired
+	private DataSetParamValueConverter dataSetParamValueConverter;
 
-	private DashboardThemeSource dashboardThemeSource = new SimpleDashboardThemeSource();
+	@Autowired
+	private DashboardThemeSource dashboardThemeSource;
+	
+	@Autowired
+	private ThemeSpec themeSpec;
 
 	public AbstractDataAnalysisController()
 	{
@@ -195,6 +200,16 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public void setDashboardThemeSource(DashboardThemeSource dashboardThemeSource)
 	{
 		this.dashboardThemeSource = dashboardThemeSource;
+	}
+
+	public ThemeSpec getThemeSpec()
+	{
+		return themeSpec;
+	}
+
+	public void setThemeSpec(ThemeSpec themeSpec)
+	{
+		this.themeSpec = themeSpec;
 	}
 
 	protected HtmlTplDashboardRenderContext createRenderContext(HttpServletRequest request, HttpServletResponse response,
@@ -366,11 +381,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (isDashboardThemeAuto(request, theme))
 		{
 			theme = WebUtils.getTheme(request);
-			
-			if(Themes.BLUE.equalsIgnoreCase(theme))
-				dashboardTheme = SimpleDashboardThemeSource.THEME_LIGHT;
-			else if(Themes.BLUE_DARK.equalsIgnoreCase(theme))
-				dashboardTheme = SimpleDashboardThemeSource.THEME_DARK;
+			dashboardTheme = this.themeSpec.dashboardTheme(theme);
 		}
 		
 		if(dashboardTheme == null)

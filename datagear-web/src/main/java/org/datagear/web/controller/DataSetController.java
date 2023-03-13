@@ -107,7 +107,8 @@ public class DataSetController extends AbstractSchemaConnController
 	@Autowired
 	private File tempDirectory;
 
-	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
+	@Autowired
+	private DataSetParamValueConverter dataSetParamValueConverter;
 
 	@Autowired
 	private DataSetResDirectoryService dataSetResDirectoryService;

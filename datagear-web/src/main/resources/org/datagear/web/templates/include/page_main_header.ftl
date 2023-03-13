@@ -24,7 +24,7 @@
 User currentUser
 
 -->
-<#assign Themes=statics['org.datagear.web.util.Themes']>
+<#assign ThemeSpec=statics['org.datagear.web.util.ThemeSpec']>
 <#assign Global=statics['org.datagear.util.Global']>
 <#assign WebUtils=statics['org.datagear.web.util.WebUtils']>
 <div class="page-main-header flex-grow-0 p-card no-border text-primary py-1 border-noround-top border-noround-bottom">
@@ -121,7 +121,6 @@ User currentUser
 				label: "<@spring.message code='module.personalSet' />",
 				url: po.concatContextPath("/user/personalSet"),
 				command: function(e){ po.openSysMenuDialog(e, false); }
-				
 			},
 			{ separator: true }
 		]);
@@ -203,14 +202,14 @@ User currentUser
 					label: "<@spring.message code='module.changeTheme.blue' />",
 					command: function(e)
 					{
-						po.changeTheme("${Themes.BLUE}");
+						po.changeTheme("${ThemeSpec.BLUE}");
 					}
 				},
 				{
 					label: "<@spring.message code='module.changeTheme.blueDark' />",
 					command: function(e)
 					{
-						po.changeTheme("${Themes.BLUE_DARK}");
+						po.changeTheme("${ThemeSpec.BLUE_DARK}");
 					}
 				}
 			]

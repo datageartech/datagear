@@ -28,6 +28,7 @@ import org.datagear.web.config.support.EnumCookieThemeResolver;
 import org.datagear.web.controller.MainController;
 import org.datagear.web.freemarker.CustomFreeMarkerView;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
+import org.datagear.web.util.ThemeSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.ErrorPageRegistrar;
 import org.springframework.context.annotation.Bean;
@@ -183,7 +184,14 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 	@Bean("themeResolver")
 	public EnumCookieThemeResolver themeResolver()
 	{
-		EnumCookieThemeResolver bean = new EnumCookieThemeResolver();
+		EnumCookieThemeResolver bean = new EnumCookieThemeResolver(this.themeSpec());
+		return bean;
+	}
+	
+	@Bean
+	public ThemeSpec themeSpec()
+	{
+		ThemeSpec bean = new ThemeSpec();
 		return bean;
 	}
 
