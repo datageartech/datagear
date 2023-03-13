@@ -75,7 +75,7 @@
 			</div>
 			<div class="field grid mb-2">
 				<label for="${pid}license" class="field-label col-12 mb-2 md:col-3 md:mb-0">
-					<@spring.message code='license' />
+					<@spring.message code='openSourceLicense' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}license" class="text-primary">
