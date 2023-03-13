@@ -130,7 +130,7 @@
 							<outputDirectory>${project.build.directory}/${productName}/</outputDirectory>
 							<resources>
 								<resource>
-									<directory>dist/war</directory>
+									<directory>src/dist/war</directory>
 									<filtering>true</filtering>
 									<includes>
 										<include>readme.txt</include>
@@ -150,14 +150,14 @@
 							<outputDirectory>${dist.target.dir}/</outputDirectory>
 							<resources>
 								<resource>
-									<directory>dist/bin</directory>
+									<directory>src/dist/bin</directory>
 									<filtering>false</filtering>
 									<includes>
 										<include>config/**/*</include>
 									</includes>
 								</resource>
 								<resource>
-									<directory>dist/bin</directory>
+									<directory>src/dist/bin</directory>
 									<filtering>true</filtering>
 									<includes>
 										<include>readme.txt</include>
