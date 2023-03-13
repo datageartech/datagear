@@ -63,7 +63,7 @@
 		        	</div>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid mb-3">
 				<label for="${pid}sourceCode" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='sourceCode' />
 				</label>
@@ -73,8 +73,18 @@
 		        	</div>
 		        </div>
 			</div>
-			<div class="grid">
-		        <div class="col-12 text-color-secondary text-sm pt-1 overflow-auto">
+			<div class="field grid mb-2">
+				<label for="${pid}license" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='license' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<div id="${pid}license" class="text-primary">
+		        		<a href="https://www.gnu.org/licenses/" target="_blank" class="link">LGPL-3.0</a>
+		        	</div>
+		        </div>
+			</div>
+			<div class="field grid mb-0">
+		        <div class="col-12 text-color-secondary text-sm overflow-auto">
 <pre>
 Copyright 2018-2023 datagear.tech
 
