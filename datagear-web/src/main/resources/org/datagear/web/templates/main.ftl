@@ -41,7 +41,7 @@
 								class="p-button-sm p-button-secondary p-button-rounded p-button-text opacity-40 my-1 p-1">
 							</p-button>
 						</div>
-						<div class="col">
+						<div class="col overflow-auto">
 							<p-tabmenu :model="pm.mainMenu.items" v-model:active-index="pm.mainMenu.active"
 								@tab-change="onMainMenuTabChange" class="vertical-tabmenu" :class="{collapse: pm.mainMenu.collapse}">
 							</p-tabmenu>
