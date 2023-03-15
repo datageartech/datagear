@@ -31,9 +31,11 @@ import org.springframework.context.annotation.PropertySource;
  * @author datagear@163.com
  */
 @Configuration
-@PropertySource(value = "classpath:org/datagear/web/application.properties", encoding = "UTF-8")
+@PropertySource(value = ApplicationPropertiesConfig.PROPERTY_SOURCE_PATH, encoding = "UTF-8")
 public class ApplicationPropertiesConfig
 {
+	public static final String PROPERTY_SOURCE_PATH = "classpath:org/datagear/web/application.properties";
+	
 	public ApplicationPropertiesConfig()
 	{
 	}

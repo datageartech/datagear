@@ -31,9 +31,10 @@ import org.springframework.transaction.PlatformTransactionManager;
  *
  */
 @Configuration
-@ImportResource("classpath:org/datagear/web/transactionConfig.xml")
+@ImportResource(TransactionConfig.CONFIG_RESOURCE_PATH)
 public class TransactionConfig
 {
+	public static final String CONFIG_RESOURCE_PATH = "classpath:org/datagear/web/transactionConfig.xml";
 	/** transactionConfig.xml中使用此Bean名 */
 	public static final String TX_MANAGER_BEAN = "txManager";
 
