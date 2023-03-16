@@ -110,14 +110,24 @@ public class ThemeSpec
 	public DashboardTheme dashboardTheme(String theme)
 	{
 		theme = trimTheme(theme);
-		
+		return toDashboardTheme(theme);
+	}
+
+	/**
+	 * 获取系统主题对应的{@linkplain DashboardTheme}。
+	 * 
+	 * @param theme
+	 * @return
+	 */
+	protected DashboardTheme toDashboardTheme(String theme)
+	{
 		DashboardTheme dh = null;
-		
-		if(BLUE.equalsIgnoreCase(theme))
+
+		if (BLUE.equalsIgnoreCase(theme))
 			dh = SimpleDashboardThemeSource.THEME_LIGHT;
-		else if(BLUE_DARK.equalsIgnoreCase(theme))
+		else if (BLUE_DARK.equalsIgnoreCase(theme))
 			dh = SimpleDashboardThemeSource.THEME_DARK;
-		
+
 		return dh;
 	}
 }

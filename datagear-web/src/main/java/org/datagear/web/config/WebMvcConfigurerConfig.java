@@ -62,6 +62,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ComponentScan(basePackageClasses = MainController.class)
 public class WebMvcConfigurerConfig implements WebMvcConfigurer
 {
+	/** 系统静态资源路径通配模式 */
+	public static final String STATIC_RES_PATH_PATTERN = "/static/**";
+
+	/** 系统静态资源位置 */
+	public static final String STATIC_RES_LOCATION = "classpath:/org/datagear/web/static/";
+
+	/** Freemarker模板路径 */
+	public static final String FREEMARKER_TEMPLATE_PATH = "classpath:org/datagear/web/templates/";
+
+	/** 系统主题配置基础前缀 */
+	public static final String THEME_SOURCE_BASENAME_PREFIX = "org.datagear.web.theme.";
+
 	private CoreConfig coreConfig;
 
 	@Autowired
@@ -84,7 +96,7 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
-		registry.addResourceHandler("/static/**").addResourceLocations("classpath:/org/datagear/web/static/");
+		registry.addResourceHandler(STATIC_RES_PATH_PATTERN).addResourceLocations(STATIC_RES_LOCATION);
 	}
 
 	@Override
@@ -169,14 +181,14 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 	
 	protected String[] getFreeMarkerTemplateLoaderPaths()
 	{
-		return new String[] { "classpath:org/datagear/web/templates/" };
+		return new String[] { FREEMARKER_TEMPLATE_PATH };
 	}
 
 	@Bean("themeSource")
 	public ResourceBundleThemeSource themeSource()
 	{
 		ResourceBundleThemeSource bean = new ResourceBundleThemeSource();
-		bean.setBasenamePrefix("org.datagear.web.theme.");
+		bean.setBasenamePrefix(THEME_SOURCE_BASENAME_PREFIX);
 
 		return bean;
 	}
