@@ -32,7 +32,7 @@ import org.datagear.util.version.VersionContent;
 /**
  * 更新日志解析器。
  * <p>
- * 此类解析{@linkplain #CHANGELOG_CLASS_PATH}类路径文件的更新日志。
+ * 此类解析{@linkplain #getChangelogPath()}类路径文件的更新日志。
  * </p>
  * 
  * @author datagear@163.com
@@ -44,12 +44,24 @@ public class ChangelogResolver extends AbstractVersionContentReader
 
 	/** 数据库SQL文件中版本号注释开头标识 */
 	public static final String VERSION_LINE_PREFIX = "--v";
+	
+	private String changelogPath = CHANGELOG_CLASS_PATH;
 
 	private String changelogEncoding = ENCODING_UTF8;
 
 	public ChangelogResolver()
 	{
 		super();
+	}
+
+	public String getChangelogPath()
+	{
+		return changelogPath;
+	}
+
+	public void setChangelogPath(String changelogPath)
+	{
+		this.changelogPath = changelogPath;
 	}
 
 	public String getChangelogEncoding()
@@ -136,7 +148,7 @@ public class ChangelogResolver extends AbstractVersionContentReader
 
 	protected BufferedReader getChangelogBufferedReader() throws IOException
 	{
-		InputStream in = getClass().getClassLoader().getResourceAsStream(CHANGELOG_CLASS_PATH);
+		InputStream in = getClass().getClassLoader().getResourceAsStream(this.changelogPath);
 		return new BufferedReader(new InputStreamReader(in, this.changelogEncoding));
 	}
 
