@@ -28,16 +28,26 @@ import org.springframework.core.env.Environment;
 
 /**
  * 数据源配置。
+ * <p>
+ * 子类应该添加如下注解：
+ * </p>
+ * <pre>
+ * {@code @Configuration}
+ * </pre>
+ * <p>
+ * Spring会递归处理{@linkplain Configuration @Configuration}类的父类，可能会导致某些非预期的父类配置被加载，
+ * 所以此类没有添加{@linkplain Configuration @Configuration}。
+ * </p>
  * 
  * @author datagear@163.com
  */
 @Configuration
-public class DataSourceConfig
+public class DataSourceConfigSupport
 {
 	private Environment environment;
 
 	@Autowired
-	public DataSourceConfig(Environment environment)
+	public DataSourceConfigSupport(Environment environment)
 	{
 		super();
 	}

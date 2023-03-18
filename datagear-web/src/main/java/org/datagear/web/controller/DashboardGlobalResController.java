@@ -39,7 +39,7 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.web.config.CoreConfig;
+import org.datagear.web.config.CoreConfigSupport;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -66,7 +66,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class DashboardGlobalResController extends AbstractController implements ServletContextAware
 {
 	@Autowired
-	@Qualifier(CoreConfig.NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
+	@Qualifier(CoreConfigSupport.NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
 	private File dashboardGlobalResRootDirectory;
 
 	@Autowired

@@ -17,8 +17,8 @@
 
 package org.datagear.webapp;
 
-import org.datagear.web.config.WebMvcConfigurerConfig;
 import org.datagear.web.util.ApplicationBanner;
+import org.datagear.webapp.config.WebMvcConfigurerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;

@@ -52,11 +52,20 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 /**
  * 安全配置。
+ * <p>
+ * 子类应该添加如下注解：
+ * </p>
+ * <pre>
+ * {@code @Configuration}
+ * </pre>
+ * <p>
+ * Spring会递归处理{@linkplain Configuration @Configuration}类的父类，可能会导致某些非预期的父类配置被加载，
+ * 所以此类没有添加{@linkplain Configuration @Configuration}。
+ * </p>
  * 
  * @author datagear@163.com
  */
-@Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter implements ApplicationListener<ContextRefreshedEvent>
+public class SecurityConfigSupport extends WebSecurityConfigurerAdapter implements ApplicationListener<ContextRefreshedEvent>
 {
 	public static final String LOGIN_PROCESS_URL = "/login/doLogin";
 
@@ -98,21 +107,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 	protected static final String AUTH_ANONYMOUS_OR_USER = "hasAnyAuthority('" + AuthUser.ROLE_ANONYMOUS + "','"
 			+ AuthUser.ROLE_USER + "')";
 
-	private CoreConfig coreConfig;
+	private CoreConfigSupport coreConfig;
 
 	@Autowired
-	public SecurityConfig(CoreConfig coreConfig)
+	public SecurityConfigSupport(CoreConfigSupport coreConfig)
 	{
 		super();
 		this.coreConfig = coreConfig;
 	}
 
-	public CoreConfig getCoreConfig()
+	public CoreConfigSupport getCoreConfig()
 	{
 		return coreConfig;
 	}
 
-	public void setCoreConfig(CoreConfig coreConfig)
+	public void setCoreConfig(CoreConfigSupport coreConfig)
 	{
 		this.coreConfig = coreConfig;
 	}
@@ -374,7 +383,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Appl
 
 	protected void inflateAuthenticationSuccessHandler(ApplicationContext context)
 	{
-		List<CreateUserEntityService> serviceList = CoreConfig.getCreateUserEntityServices(context);
+		List<CreateUserEntityService> serviceList = CoreConfigSupport.getCreateUserEntityServices(context);
 
 		AuthenticationSuccessHandler ash = authenticationSuccessHandler();
 

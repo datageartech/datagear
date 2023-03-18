@@ -23,20 +23,28 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 /**
- * 属性配置。
+ * 属性配置支持类。
+ * <p>
+ * 子类应该添加如下注解：
+ * </p>
+ * <pre>
+ * {@code @Configuration}
+ * {@code @PropertySource(value = ApplicationPropertiesConfigSupport.PROPERTY_SOURCE_PATH, encoding = "UTF-8")}
+ * </pre>
+ * <p>
+ * Spring会递归处理{@linkplain Configuration @Configuration}类的父类，可能会导致某些非预期的父类配置被加载，
+ * 所以此类没有添加{@linkplain Configuration @Configuration}。
+ * </p>
  * 
  * @author datagear@163.com
  */
-@Configuration
-@PropertySource(value = ApplicationPropertiesConfig.PROPERTY_SOURCE_PATH, encoding = "UTF-8")
-public class ApplicationPropertiesConfig
+public class ApplicationPropertiesConfigSupport
 {
 	public static final String PROPERTY_SOURCE_PATH = "classpath:org/datagear/web/application.properties";
 	
-	public ApplicationPropertiesConfig()
+	public ApplicationPropertiesConfigSupport()
 	{
 	}
 

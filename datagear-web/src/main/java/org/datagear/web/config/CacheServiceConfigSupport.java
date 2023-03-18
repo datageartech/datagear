@@ -27,17 +27,27 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 缓存服务配置。
+ * <p>
+ * 子类应该添加如下注解：
+ * </p>
+ * <pre>
+ * {@code @Configuration}
+ * {@code @EnableCaching}
+ * </pre>
+ * <p>
+ * Spring会递归处理{@linkplain Configuration @Configuration}类的父类，可能会导致某些非预期的父类配置被加载，
+ * 所以此类没有添加{@linkplain Configuration @Configuration}。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-@Configuration
-public class CacheServiceConfig
+public class CacheServiceConfigSupport
 {
-	private ApplicationPropertiesConfig applicationPropertiesConfig;
+	private ApplicationPropertiesConfigSupport applicationPropertiesConfig;
 
 	@Autowired
-	public CacheServiceConfig(ApplicationPropertiesConfig applicationPropertiesConfig)
+	public CacheServiceConfigSupport(ApplicationPropertiesConfigSupport applicationPropertiesConfig)
 	{
 		super();
 		this.applicationPropertiesConfig = applicationPropertiesConfig;

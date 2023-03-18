@@ -144,7 +144,6 @@ import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
@@ -160,26 +159,34 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * 核心配置。
+ * <p>
+ * 子类应该添加如下注解：
+ * </p>
+ * <pre>
+ * {@code @Configuration}
+ * </pre>
+ * <p>
+ * Spring会递归处理{@linkplain Configuration @Configuration}类的父类，可能会导致某些非预期的父类配置被加载，
+ * 所以此类没有添加{@linkplain Configuration @Configuration}。
+ * </p>
  * 
  * @author datagear@163.com
  */
-@Configuration
-@EnableCaching
-public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
+public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEvent>
 {
 	public static final String NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY = "dashboardGlobalResRootDirectory";
 	
 	public static final String INVALID_SQL_KEYWORDS_PREFIX_REGEX="regex:";
 
-	private ApplicationPropertiesConfig applicationPropertiesConfig;
+	private ApplicationPropertiesConfigSupport applicationPropertiesConfig;
 
-	private DataSourceConfig dataSourceConfig;
+	private DataSourceConfigSupport dataSourceConfig;
 
-	private CacheServiceConfig cacheServiceConfig;
+	private CacheServiceConfigSupport cacheServiceConfig;
 
 	@Autowired
-	public CoreConfig(ApplicationPropertiesConfig applicationPropertiesConfig, DataSourceConfig dataSourceConfig,
-			CacheServiceConfig cacheServiceConfig)
+	public CoreConfigSupport(ApplicationPropertiesConfigSupport applicationPropertiesConfig, DataSourceConfigSupport dataSourceConfig,
+			CacheServiceConfigSupport cacheServiceConfig)
 	{
 		super();
 		this.applicationPropertiesConfig = applicationPropertiesConfig;
@@ -187,32 +194,32 @@ public class CoreConfig implements ApplicationListener<ContextRefreshedEvent>
 		this.cacheServiceConfig = cacheServiceConfig;
 	}
 
-	public ApplicationPropertiesConfig getApplicationPropertiesConfig()
+	public ApplicationPropertiesConfigSupport getApplicationPropertiesConfig()
 	{
 		return applicationPropertiesConfig;
 	}
 
-	public void setApplicationPropertiesConfig(ApplicationPropertiesConfig applicationPropertiesConfig)
+	public void setApplicationPropertiesConfig(ApplicationPropertiesConfigSupport applicationPropertiesConfig)
 	{
 		this.applicationPropertiesConfig = applicationPropertiesConfig;
 	}
 
-	public DataSourceConfig getDataSourceConfig()
+	public DataSourceConfigSupport getDataSourceConfig()
 	{
 		return dataSourceConfig;
 	}
 
-	public void setDataSourceConfig(DataSourceConfig dataSourceConfig)
+	public void setDataSourceConfig(DataSourceConfigSupport dataSourceConfig)
 	{
 		this.dataSourceConfig = dataSourceConfig;
 	}
 
-	public CacheServiceConfig getCacheServiceConfig()
+	public CacheServiceConfigSupport getCacheServiceConfig()
 	{
 		return cacheServiceConfig;
 	}
 
-	public void setCacheServiceConfig(CacheServiceConfig cacheServiceConfig)
+	public void setCacheServiceConfig(CacheServiceConfigSupport cacheServiceConfig)
 	{
 		this.cacheServiceConfig = cacheServiceConfig;
 	}

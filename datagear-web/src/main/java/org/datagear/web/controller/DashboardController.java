@@ -81,7 +81,7 @@ import org.datagear.util.html.HeadBodyAwareFilterHandler;
 import org.datagear.util.html.HtmlFilter;
 import org.datagear.util.html.RedirectWriter;
 import org.datagear.web.config.ApplicationProperties;
-import org.datagear.web.config.CoreConfig;
+import org.datagear.web.config.CoreConfigSupport;
 import org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlInfo;
 import org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlInfoFilterHandler;
 import org.datagear.web.controller.DashboardController.DashboardShowForEdit.ShowHtmlFilterHandler;
@@ -150,7 +150,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 
 	@Autowired
-	@Qualifier(CoreConfig.NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
+	@Qualifier(CoreConfigSupport.NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
 	private File dashboardGlobalResRootDirectory;
 
 	@Autowired

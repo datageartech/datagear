@@ -25,14 +25,12 @@ import java.util.Properties;
 import org.datagear.util.IOUtil;
 import org.datagear.web.config.support.CustomErrorPageRegistrar;
 import org.datagear.web.config.support.EnumCookieThemeResolver;
-import org.datagear.web.controller.MainController;
 import org.datagear.web.freemarker.CustomFreeMarkerView;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.ThemeSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.ErrorPageRegistrar;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -54,13 +52,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Web配置。
+ * <p>
+ * 子类应该添加如下注解：
+ * </p>
+ * <pre>
+ * {@code @Configuration}
+ * {@code @ComponentScan(basePackageClasses = org.datagear.web.controller.MainController.class)}
+ * </pre>
+ * <p>
+ * Spring会递归处理{@linkplain Configuration @Configuration}类的父类，可能会导致某些非预期的父类配置被加载，
+ * 所以此类没有添加{@linkplain Configuration @Configuration}。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-@Configuration
-@ComponentScan(basePackageClasses = MainController.class)
-public class WebMvcConfigurerConfig implements WebMvcConfigurer
+public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 {
 	/** 系统静态资源路径通配模式 */
 	public static final String STATIC_RES_PATH_PATTERN = "/static/**";
@@ -74,21 +81,21 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 	/** 系统主题配置基础前缀 */
 	public static final String THEME_SOURCE_BASENAME_PREFIX = "org.datagear.web.theme.";
 
-	private CoreConfig coreConfig;
+	private CoreConfigSupport coreConfig;
 
 	@Autowired
-	public WebMvcConfigurerConfig(CoreConfig coreConfig)
+	public WebMvcConfigurerConfigSupport(CoreConfigSupport coreConfig)
 	{
 		super();
 		this.coreConfig = coreConfig;
 	}
 
-	public CoreConfig getCoreConfig()
+	public CoreConfigSupport getCoreConfig()
 	{
 		return coreConfig;
 	}
 
-	public void setCoreConfig(CoreConfig coreConfig)
+	public void setCoreConfig(CoreConfigSupport coreConfig)
 	{
 		this.coreConfig = coreConfig;
 	}

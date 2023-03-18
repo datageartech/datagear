@@ -15,12 +15,10 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.config;
+package org.datagear.webapp.config;
 
-import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
+import org.datagear.web.config.WebMvcRegistrationsConfigSupport;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 /**
  * Web配置。
@@ -29,11 +27,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
  *
  */
 @Configuration
-public class WebMvcRegistrationsConfig implements WebMvcRegistrations
+public class WebMvcRegistrationsConfig extends WebMvcRegistrationsConfigSupport
 {
-	@Override
-	public ExceptionHandlerExceptionResolver getExceptionHandlerExceptionResolver()
+	public WebMvcRegistrationsConfig()
 	{
-		return new DeliverContentTypeExceptionHandlerExceptionResolver();
+		super();
 	}
 }
