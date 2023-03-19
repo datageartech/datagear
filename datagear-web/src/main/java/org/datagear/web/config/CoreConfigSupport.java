@@ -399,7 +399,8 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean(initMethod = "upgrade")
 	public DbVersionManager dbVersionManager()
 	{
-		DbVersionManager bean = new DbVersionManager(this.dataSourceConfig.dataSource());
+		DbVersionManager bean = new DbVersionManager(this.dataSourceConfig.dataSource(),
+				this.resourcePatternResolver());
 		return bean;
 	}
 

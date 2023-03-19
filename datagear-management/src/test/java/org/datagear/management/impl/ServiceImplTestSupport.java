@@ -17,6 +17,7 @@
 
 package org.datagear.management.impl;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -27,6 +28,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.dbversion.DbVersionManager;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.management.util.dialect.MbSqlDialectBuilder;
+import org.datagear.util.FileUtil;
 import org.datagear.util.test.DBTestSupport;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.core.io.Resource;
@@ -44,11 +46,13 @@ public class ServiceImplTestSupport extends DBTestSupport
 
 	static
 	{
+		FileUtil.deleteFile(new File("target/test/derby-for-service"));
+
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName("org.apache.derby.jdbc.EmbeddedDriver");
-		dataSource.setUrl("jdbc:derby:target/test/derby;create=true");
+		dataSource.setUrl("jdbc:derby:target/test/derby-for-service;create=true");
 
-		DbVersionManager bean = new DbVersionManager(dataSource);
+		DbVersionManager bean = new DbVersionManager(dataSource, new PathMatchingResourcePatternResolver());
 		bean.upgrade();
 
 		DATA_SOURCE = dataSource;

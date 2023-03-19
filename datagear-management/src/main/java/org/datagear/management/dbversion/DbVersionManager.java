@@ -19,12 +19,13 @@ package org.datagear.management.dbversion;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -37,6 +38,8 @@ import org.datagear.util.version.Version;
 import org.datagear.util.version.VersionContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * 数据库版本管理器。
@@ -60,7 +63,8 @@ public class DbVersionManager extends AbstractVersionContentReader
 	private static final Logger LOGGER = LoggerFactory.getLogger(DbVersionManager.class);
 
 	/** 脚本资源文件路径 */
-	public static final String SQL_SCRIPT_RESOURCE = "org/datagear/management/ddl/datagear.sql";
+	public static final String SQL_SCRIPT_RESOURCE_LOCATION = ResourceLoader.CLASSPATH_URL_PREFIX
+			+ "org/datagear/management/ddl/datagear.sql";
 
 	/** 数据库SQL文件中版本号注释开头标识 */
 	public static final String VERSION_LINE_PREFIX = "--version[";
@@ -77,23 +81,48 @@ public class DbVersionManager extends AbstractVersionContentReader
 
 	public static final String DEFAULT_VERSION_TABLE_NAME = "DATAGEAR_VERSION";
 
-	private String sqlScriptLocation = SQL_SCRIPT_RESOURCE;
+	private DataSource dataSource;
+
+	private ResourceLoader resourceLoader;
+
+	private String sqlScriptLocation = SQL_SCRIPT_RESOURCE_LOCATION;
 
 	private String sqlScriptEncoding = ENCODING_UTF8;
 
 	private String versionTableName = DEFAULT_VERSION_TABLE_NAME;
 
-	private DataSource dataSource;
+	private volatile SqlVersionContents sqlVersionContents = null;
 
 	public DbVersionManager()
 	{
 		super();
 	}
 
-	public DbVersionManager(DataSource dataSource)
+	public DbVersionManager(DataSource dataSource, ResourceLoader resourceLoader)
 	{
 		super();
 		this.dataSource = dataSource;
+		this.resourceLoader = resourceLoader;
+	}
+
+	public DataSource getDataSource()
+	{
+		return dataSource;
+	}
+
+	public void setDataSource(DataSource dataSource)
+	{
+		this.dataSource = dataSource;
+	}
+
+	public ResourceLoader getResourceLoader()
+	{
+		return resourceLoader;
+	}
+
+	public void setResourceLoader(ResourceLoader resourceLoader)
+	{
+		this.resourceLoader = resourceLoader;
 	}
 
 	public String getSqlScriptLocation()
@@ -126,16 +155,6 @@ public class DbVersionManager extends AbstractVersionContentReader
 		this.versionTableName = versionTableName;
 	}
 
-	public DataSource getDataSource()
-	{
-		return dataSource;
-	}
-
-	public void setDataSource(DataSource dataSource)
-	{
-		this.dataSource = dataSource;
-	}
-
 	/**
 	 * 获取当前版本。
 	 * 
@@ -164,17 +183,32 @@ public class DbVersionManager extends AbstractVersionContentReader
 	/**
 	 * 升级至最新版本。
 	 * 
-	 * @return
+	 * @return 最新版本
 	 * @throws DbVersionManagerException
 	 */
 	public Version upgrade() throws DbVersionManagerException
+	{
+		Version latest = Version.valueOf(Global.VERSION);
+		upgrade(latest);
+
+		return latest;
+	}
+
+	/**
+	 * 升级至指定版本。
+	 * 
+	 * @param to 目标版本
+	 * @throws DbVersionManagerException
+	 */
+	public void upgrade(Version to) throws DbVersionManagerException
 	{
 		Connection cn = null;
 		try
 		{
 			cn = this.dataSource.getConnection();
+			Version current = getCurrentVersionForUpgrade(cn);
 
-			return upgrade(cn);
+			upgrade(cn, current, to);
 		}
 		catch (SQLException e)
 		{
@@ -190,15 +224,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 		}
 	}
 
-	/**
-	 * 执行升级。
-	 * 
-	 * @param cn
-	 * @return
-	 * @throws SQLException
-	 * @throws IOException
-	 */
-	protected Version upgrade(Connection cn) throws SQLException, IOException
+	protected Version getCurrentVersionForUpgrade(Connection cn) throws DbVersionManagerException
 	{
 		Version current = null;
 
@@ -206,7 +232,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 		{
 			current = getCurrentVersion(cn);
 		}
-		catch (SQLException e)
+		catch(SQLException e)
 		{
 			current = Version.ZERO_VERSION;
 
@@ -218,8 +244,22 @@ public class DbVersionManager extends AbstractVersionContentReader
 		if (current == null)
 			throw new DbVersionManagerException("No version info found in table : " + this.versionTableName);
 
+		return current;
+	}
+
+	/**
+	 * 执行升级。
+	 * 
+	 * @param cn
+	 * @param from
+	 * @param to
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	protected void upgrade(Connection cn, Version from, Version to) throws SQLException, IOException
+	{
 		// 自动升级不兼容的版本
-		if (current.isHigherThan(Version.ZERO_VERSION) && current.isLowerThan(UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN))
+		if (from.isHigherThan(Version.ZERO_VERSION) && from.isLowerThan(UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN))
 		{
 			throw new DbVersionManagerException("Upgrade lower than " + Global.PRODUCT_NAME_EN + "-"
 					+ UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString() + " NOT support, you MUST run "
@@ -230,18 +270,15 @@ public class DbVersionManager extends AbstractVersionContentReader
 		}
 
 		if (LOGGER.isInfoEnabled())
-			LOGGER.info("Start upgrade database version from [" + current + "] to the latest");
+			LOGGER.info("Start upgrade database version from [" + from + "] to [" + to + "]");
 
-		Version target = updateSchema(cn, current);
-		target = Version.valueOf(Global.VERSION);
+		updateSchema(cn, from, to);
 
-		if (target.isHigherThan(current))
-			updateVersion(cn, target);
+		if (to.isHigherThan(from))
+			updateVersion(cn, to);
 
 		if (LOGGER.isInfoEnabled())
-			LOGGER.info("Finish upgrade database version from [" + current + "] to the latest verion [" + target + "]");
-
-		return target;
+			LOGGER.info("Finish upgrade database version from [" + from + "] to [" + to + "]");
 	}
 
 	/**
@@ -418,39 +455,34 @@ public class DbVersionManager extends AbstractVersionContentReader
 	 * 
 	 * @param cn
 	 * @param from
+	 * @param to   目标版本
 	 * @return
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	protected Version updateSchema(Connection cn, Version from) throws SQLException, IOException
+	protected void updateSchema(Connection cn, Version from, Version to) throws SQLException, IOException
 	{
-		Version target = null;
-
-		List<VersionContent> versionContents = resolveUpgradeSqlVersionContents(from);
+		List<VersionContent> versionContents = resolveUpgradeSqlVersionContents(from, to);
 
 		if (versionContents == null || versionContents.isEmpty())
 		{
 			if (LOGGER.isInfoEnabled())
-				LOGGER.info("No upgrade sqls for verion [" + from + "], it is already the latest");
-
-			target = from;
+				LOGGER.info("No upgrade sqls from version [" + from + "] to [" + to + "]");
 		}
 		else
 		{
 			for (VersionContent versionContent : versionContents)
 			{
-				target = versionContent.getVersion();
+				Version myVersion = versionContent.getVersion();
 
 				if (LOGGER.isInfoEnabled())
-					LOGGER.info("Got upgrade sqls for verion from [" + from + "] to [" + target + "] (line "
+					LOGGER.info("Got upgrade sqls for version from [" + from + "] to [" + myVersion + "] (line "
 							+ versionContent.getVersionStartLine() + " - " + versionContent.getVersionEndLine()
 							+ ") in [" + this.sqlScriptLocation + "]");
 
 				executeSqls(cn, versionContent.getContents());
 			}
 		}
-
-		return target;
 	}
 
 	/**
@@ -471,7 +503,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 			for (String sql : sqls)
 			{
 				if (LOGGER.isInfoEnabled())
-					LOGGER.info("Start executing sql : " + sql);
+					LOGGER.info("Start execute sql : " + sql);
 
 				st.execute(sql);
 			}
@@ -485,24 +517,75 @@ public class DbVersionManager extends AbstractVersionContentReader
 	/**
 	 * 解析升级SQL脚本内容。
 	 * 
-	 * @param current
+	 * @param from 起始版本（不包含）
+	 * @param to   目标版本（包含）
 	 * @return
 	 * @throws IOException
 	 */
-	protected List<VersionContent> resolveUpgradeSqlVersionContents(Version current) throws IOException
+	protected List<VersionContent> resolveUpgradeSqlVersionContents(Version from, Version to) throws IOException
 	{
-		BufferedReader reader = null;
+		if (from == null)
+			throw new IllegalArgumentException("Version [from] required");
+		if (to == null)
+			throw new IllegalArgumentException("Version [to] required");
 
-		try
-		{
-			reader = getSqlScriptBufferedReader();
+		List<VersionContent> myVersionContents = new ArrayList<VersionContent>();
 
-			return resolveVersionContents(reader, current, null, false, true);
-		}
-		finally
+		List<VersionContent> allVersionContents = resolveAllSqlVersionContents();
+		for (VersionContent vc : allVersionContents)
 		{
-			IOUtil.close(reader);
+			Version myVersion = vc.getVersion();
+			
+			if (myVersion.isHigherThan(from) && (myVersion.equals(to) || myVersion.isLowerThan(to)))
+			{
+				myVersionContents.add(vc);
+			}
 		}
+
+		return myVersionContents;
+	}
+
+	/**
+	 * 解析所有版本SQL脚本。
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	protected List<VersionContent> resolveAllSqlVersionContents() throws IOException
+	{
+		Resource resource = getSqlScriptResource();
+		long lastModified = resource.lastModified();
+
+		if (this.sqlVersionContents == null || this.sqlVersionContents.getLastModified() < 0
+				|| this.sqlVersionContents.getLastModified() != lastModified)
+		{
+			BufferedReader reader = null;
+
+			try
+			{
+				reader = IOUtil.getReader(resource.getInputStream(), this.sqlScriptEncoding);
+				List<VersionContent> svcs = resolveVersionContents(reader, null, null, false, true);
+
+				this.sqlVersionContents = new SqlVersionContents(svcs, lastModified);
+			}
+			finally
+			{
+				IOUtil.close(reader);
+			}
+		}
+
+		return this.sqlVersionContents.getVersionContents();
+	}
+
+	/**
+	 * 获取SQL脚本资源。
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	protected Resource getSqlScriptResource() throws IOException
+	{
+		return this.resourceLoader.getResource(this.sqlScriptLocation);
 	}
 
 	@Override
@@ -582,18 +665,27 @@ public class DbVersionManager extends AbstractVersionContentReader
 		return sql;
 	}
 
-	/**
-	 * 获取SQL脚本输入流。
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	protected BufferedReader getSqlScriptBufferedReader() throws IOException
+	protected static class SqlVersionContents
 	{
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				DbVersionManager.class.getClassLoader().getResourceAsStream(this.sqlScriptLocation),
-				this.sqlScriptEncoding));
+		private final List<VersionContent> versionContents;
 
-		return reader;
+		private final long lastModified;
+
+		public SqlVersionContents(List<VersionContent> versionContents, long lastModified)
+		{
+			super();
+			this.versionContents = Collections.unmodifiableList(versionContents);
+			this.lastModified = lastModified;
+		}
+
+		public List<VersionContent> getVersionContents()
+		{
+			return versionContents;
+		}
+
+		public long getLastModified()
+		{
+			return lastModified;
+		}
 	}
 }
