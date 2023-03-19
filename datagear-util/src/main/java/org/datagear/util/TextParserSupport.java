@@ -39,9 +39,10 @@ public class TextParserSupport
 	 * 
 	 * @param in
 	 * @param out
+	 * @return 行注释的下一个字符：{@code '\n'}、{@code '\r'}、{@code -1}
 	 * @throws IOException
 	 */
-	public void writeAfterLineComment(Reader in, Writer out) throws IOException
+	public int writeAfterLineComment(Reader in, Writer out) throws IOException
 	{
 		int c = -1;
 
@@ -52,6 +53,8 @@ public class TextParserSupport
 			if (c == '\n' || c == '\r')
 				break;
 		}
+		
+		return c;
 	}
 
 	/**

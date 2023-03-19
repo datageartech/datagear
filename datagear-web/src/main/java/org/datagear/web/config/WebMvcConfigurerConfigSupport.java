@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.datagear.util.IOUtil;
+import org.datagear.web.config.support.ClearCssCommentResourceTransformer;
+import org.datagear.web.config.support.ClearJsCommentResourceTransformer;
 import org.datagear.web.config.support.CustomErrorPageRegistrar;
 import org.datagear.web.config.support.EnumCookieThemeResolver;
 import org.datagear.web.freemarker.CustomFreeMarkerView;
@@ -72,6 +74,15 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	/** 系统静态资源路径通配模式 */
 	public static final String STATIC_RES_PATH_PATTERN = "/static/**";
 
+	/** 系统CSS静态资源路径通配模式 */
+	public static final String STATIC_RES_CSS_PATH_PATTERN = "/static/css/**/*.css";
+
+	/** 系统JS静态资源路径通配模式 */
+	public static final String STATIC_RES_JS_PATH_PATTERN = "/static/script/**/*.js";
+
+	/** 系统theme静态资源路径通配模式 */
+	public static final String STATIC_RES_THEME_PATH_PATTERN = "/static/theme/**/*.css";
+
 	/** 系统静态资源位置 */
 	public static final String STATIC_RES_LOCATION = "classpath:/org/datagear/web/static/";
 
@@ -103,7 +114,20 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
-		registry.addResourceHandler(STATIC_RES_PATH_PATTERN).addResourceLocations(STATIC_RES_LOCATION);
+		registry.addResourceHandler(STATIC_RES_PATH_PATTERN).addResourceLocations(STATIC_RES_LOCATION)
+			.resourceChain(false)
+			.addTransformer(getClearCssCommentResourceTransformer())
+			.addTransformer(getClearJsCommentResourceTransformer());
+	}
+	
+	protected ClearCssCommentResourceTransformer getClearCssCommentResourceTransformer()
+	{
+		return new ClearCssCommentResourceTransformer(STATIC_RES_CSS_PATH_PATTERN, STATIC_RES_THEME_PATH_PATTERN);
+	}
+	
+	protected ClearJsCommentResourceTransformer getClearJsCommentResourceTransformer()
+	{
+		return new ClearJsCommentResourceTransformer(STATIC_RES_JS_PATH_PATTERN);
 	}
 
 	@Override

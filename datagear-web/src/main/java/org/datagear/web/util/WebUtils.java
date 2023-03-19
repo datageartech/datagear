@@ -511,6 +511,32 @@ public class WebUtils
 				: headerAddress);
 	}
 	
+	/**
+	 * 解析请求路径中{@code pathPrefix}之后的路径名，如果路径不包含{@code pathPrefix}，则返回{@code null}。
+	 * 
+	 * @param request
+	 * @param pathPrefix
+	 *            为空或{@code null}，则返回整个请求路径
+	 * @return
+	 */
+	public static String resolvePathAfter(HttpServletRequest request, String pathPrefix)
+	{
+		String uri = request.getRequestURI();
+
+		if (StringUtil.isEmpty(pathPrefix))
+			return uri;
+
+		if (uri.endsWith(pathPrefix))
+			return "";
+
+		int index = uri.indexOf(pathPrefix);
+
+		if (index < 0)
+			return null;
+
+		return uri.substring(index + pathPrefix.length());
+	}
+	
 	public static void setEnableDetectNewVersionRequest(HttpServletRequest request)
 	{
 		request.setAttribute("enableDetectNewVersion", true);

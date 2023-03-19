@@ -988,20 +988,7 @@ public abstract class AbstractController
 	 */
 	protected String resolvePathAfter(HttpServletRequest request, String pathPrefix)
 	{
-		String uri = request.getRequestURI();
-
-		if (StringUtil.isEmpty(pathPrefix))
-			return uri;
-
-		if (uri.endsWith(pathPrefix))
-			return "";
-
-		int index = uri.indexOf(pathPrefix);
-
-		if (index < 0)
-			return null;
-
-		return uri.substring(index + pathPrefix.length());
+		return WebUtils.resolvePathAfter(request, pathPrefix);
 	}
 
 	/**
