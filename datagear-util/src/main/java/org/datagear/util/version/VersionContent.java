@@ -78,7 +78,7 @@ public class VersionContent implements Serializable, Comparable<VersionContent>
 	 */
 	public boolean hasContents()
 	{
-		return this.versionStartLine >= 0 && this.contents != null && !this.contents.isEmpty();
+		return this.contents != null && !this.contents.isEmpty();
 	}
 
 	public List<String> getContents()

@@ -194,7 +194,12 @@ public class DbVersionManager extends AbstractVersionContentReader
 
 		try
 		{
+			cn = this.dataSource.getConnection();
 			return getCurrentVersionSafe(cn);
+		}
+		catch (SQLException e)
+		{
+			throw new DbVersionManagerException(e);
 		}
 		finally
 		{
@@ -319,16 +324,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 	 */
 	protected void upgrade(Connection cn, Version from, Version to) throws SQLException, IOException
 	{
-		// 自动升级不兼容的版本
-		if (from.isHigherThan(Version.ZERO_VERSION) && from.isLowerThan(UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN))
-		{
-			throw new DbVersionManagerException("Upgrade lower than " + Global.PRODUCT_NAME_EN + "-"
-					+ UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString() + " NOT support, you MUST run "
-					+ Global.PRODUCT_NAME_EN + "-" + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
-					+ " for upgrading version to " + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
-					+ " first, then shutdown it, then run " + Global.PRODUCT_NAME_EN + "-"
-					+ to);
-		}
+		checkUpgradeVersion(from, to);
 
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Start upgrade database version from [" + from + "] to [" + to + "]");
@@ -341,12 +337,33 @@ public class DbVersionManager extends AbstractVersionContentReader
 		else
 		{
 			if (LOGGER.isInfoEnabled())
-				LOGGER.info("Upgrade database version from [" + from + "] to [" + to + "] is ignored, [" + to
-						+ "] is not higher than [" + from + "]");
+				LOGGER.info("Upgrade is ignored, target version [" + to
+						+ "] is not higher than from version [" + from + "]");
 		}
 
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Finish upgrade database version from [" + from + "] to [" + to + "]");
+	}
+
+	/**
+	 * 校验是否允许升级版本。
+	 * 
+	 * @param from
+	 * @param to
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	protected void checkUpgradeVersion(Version from, Version to) throws SQLException, IOException
+	{
+		// 自动升级不兼容的版本
+		if (from.isHigherThan(Version.ZERO_VERSION) && from.isLowerThan(UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN))
+		{
+			throw new DbVersionManagerException("Upgrade lower than " + Global.PRODUCT_NAME_EN + "-"
+					+ UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString() + " NOT support, you MUST run "
+					+ Global.PRODUCT_NAME_EN + "-" + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
+					+ " for upgrading version to " + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
+					+ " first, then shutdown it, then run " + Global.PRODUCT_NAME_EN + "-" + to);
+		}
 	}
 
 	/**

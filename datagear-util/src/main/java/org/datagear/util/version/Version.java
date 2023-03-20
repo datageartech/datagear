@@ -91,6 +91,11 @@ public class Version implements Serializable, Comparable<Version>
 			this.build = "";
 	}
 
+	public Version(Version version)
+	{
+		this(version.major, version.minor, version.revision, version.build);
+	}
+
 	public String getMajor()
 	{
 		return major;
@@ -226,7 +231,7 @@ public class Version implements Serializable, Comparable<Version>
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof Version))
 			return false;
 		Version other = (Version) obj;
 		if (major == null)
