@@ -169,6 +169,29 @@ public abstract class AbstractVersionContentReader
 	}
 
 	/**
+	 * 从指定字符串的{@code prefix}、{@code suffix}之间解析版本号。
+	 * 
+	 * @param str
+	 * @param prefix
+	 * @param suffix
+	 * @return
+	 */
+	protected Version resolveVersion(String str, String prefix, String suffix)
+	{
+		int start = str.indexOf(prefix);
+
+		if (start < 0)
+			throw new IllegalArgumentException("[" + str + "] is not version line");
+
+		start = start + prefix.length();
+		int end = str.indexOf(suffix, start);
+
+		String version = str.substring(start, end);
+
+		return Version.valueOf(version);
+	}
+
+	/**
 	 * 判断给定行是否是版本标识行。
 	 * 
 	 * @param line

@@ -181,23 +181,55 @@ public class DbVersionManager extends AbstractVersionContentReader
 	}
 
 	/**
+	 * 获取当前版本。
+	 * <p>
+	 * 当底层出现SQL异常时（通常是版本表不存在，数据库没有初始化），此方法会返回{@linkplain Version#ZERO_VERSION}。
+	 * </p>
+	 * 
+	 * @return 当没有定义时返回{@code null}
+	 */
+	public Version getCurrentVersionSafe()
+	{
+		Connection cn = null;
+
+		try
+		{
+			return getCurrentVersionSafe(cn);
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
+	/**
 	 * 升级至最新版本。
 	 * 
-	 * @return 最新版本
 	 * @throws DbVersionManagerException
 	 */
-	public Version upgrade() throws DbVersionManagerException
+	public void upgrade() throws DbVersionManagerException
 	{
-		Version latest = getLatestVersion();
-		upgrade(latest);
-
-		return latest;
+		upgrade(Global.VERSION);
 	}
 
 	/**
 	 * 升级至指定版本。
 	 * 
-	 * @param to 目标版本
+	 * @param to
+	 *            目标版本
+	 * @throws DbVersionManagerException
+	 */
+	public void upgrade(String to) throws DbVersionManagerException
+	{
+		Version toVersion = Version.valueOf(to);
+		upgrade(toVersion);
+	}
+
+	/**
+	 * 升级至指定版本。
+	 * 
+	 * @param to
+	 *            目标版本
 	 * @throws DbVersionManagerException
 	 */
 	public void upgrade(Version to) throws DbVersionManagerException
@@ -206,7 +238,11 @@ public class DbVersionManager extends AbstractVersionContentReader
 		try
 		{
 			cn = this.dataSource.getConnection();
-			Version current = getCurrentVersionForUpgrade(cn);
+
+			Version current = getCurrentVersionSafe(cn);
+
+			if (current == null)
+				throw new DbVersionManagerException("No version found in table : " + this.versionTableName);
 
 			upgrade(cn, current, to);
 		}
@@ -244,7 +280,16 @@ public class DbVersionManager extends AbstractVersionContentReader
 		}
 	}
 
-	protected Version getCurrentVersionForUpgrade(Connection cn) throws DbVersionManagerException
+	/**
+	 * 安全获取当前版本号。
+	 * <p>
+	 * 当底层出现SQL异常时（通常是版本表不存在，数据库没有初始化），此方法会返回{@linkplain Version#ZERO_VERSION}。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @return 当版本表里没有版本号数据时返回{@code null}
+	 */
+	protected Version getCurrentVersionSafe(Connection cn)
 	{
 		Version current = null;
 
@@ -257,12 +302,8 @@ public class DbVersionManager extends AbstractVersionContentReader
 			current = Version.ZERO_VERSION;
 
 			if (LOGGER.isWarnEnabled())
-				LOGGER.warn("The database may not be initialized, the current version will be set to [" + current
-						+ "] for full upgrade", e);
+				LOGGER.warn("The database may not be initialized, version [" + current + "] is returned", e);
 		}
-
-		if (current == null)
-			throw new DbVersionManagerException("No version found in table : " + this.versionTableName);
 
 		return current;
 	}
@@ -286,29 +327,26 @@ public class DbVersionManager extends AbstractVersionContentReader
 					+ Global.PRODUCT_NAME_EN + "-" + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
 					+ " for upgrading version to " + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
 					+ " first, then shutdown it, then run " + Global.PRODUCT_NAME_EN + "-"
-					+ getLatestVersion());
+					+ to);
 		}
 
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Start upgrade database version from [" + from + "] to [" + to + "]");
 
-		updateSchema(cn, from, to);
-
 		if (to.isHigherThan(from))
+		{
+			updateSchema(cn, from, to);
 			updateVersion(cn, to);
+		}
+		else
+		{
+			if (LOGGER.isInfoEnabled())
+				LOGGER.info("Upgrade database version from [" + from + "] to [" + to + "] is ignored, [" + to
+						+ "] is not higher than [" + from + "]");
+		}
 
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Finish upgrade database version from [" + from + "] to [" + to + "]");
-	}
-
-	/**
-	 * 获取最新版。
-	 * 
-	 * @return
-	 */
-	protected Version getLatestVersion()
-	{
-		return Version.valueOf(Global.VERSION);
 	}
 
 	/**
@@ -556,11 +594,6 @@ public class DbVersionManager extends AbstractVersionContentReader
 	 */
 	protected List<VersionContent> resolveUpgradeSqlVersionContents(Version from, Version to) throws IOException
 	{
-		if (from == null)
-			throw new IllegalArgumentException("[from] required");
-		if (to == null)
-			throw new IllegalArgumentException("[to] required");
-
 		List<VersionContent> myVersionContents = new ArrayList<VersionContent>();
 
 		List<VersionContent> allVersionContents = resolveAllSqlVersionContents();
@@ -670,17 +703,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 	@Override
 	protected Version resolveVersion(String line)
 	{
-		int start = line.indexOf(VERSION_LINE_PREFIX);
-
-		if (start < 0)
-			throw new IllegalArgumentException("[" + line + "] is not version line");
-
-		start = start + VERSION_LINE_PREFIX.length();
-		int end = line.indexOf(VERSION_LINE_SUFFIX, start);
-
-		String version = line.substring(start, end);
-
-		return Version.valueOf(version);
+		return resolveVersion(line, VERSION_LINE_PREFIX, VERSION_LINE_SUFFIX);
 	}
 
 	/**
