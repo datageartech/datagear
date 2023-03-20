@@ -63,7 +63,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 	private static final Logger LOGGER = LoggerFactory.getLogger(DbVersionManager.class);
 
 	/** 脚本资源文件路径 */
-	public static final String SQL_SCRIPT_RESOURCE_LOCATION = ResourceLoader.CLASSPATH_URL_PREFIX
+	public static final String DEFAULT_SQL_SCRIPT_LOCATION = ResourceLoader.CLASSPATH_URL_PREFIX
 			+ "org/datagear/management/ddl/datagear.sql";
 
 	/** 数据库SQL文件中版本号注释开头标识 */
@@ -85,7 +85,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 
 	private ResourceLoader resourceLoader;
 
-	private String sqlScriptLocation = SQL_SCRIPT_RESOURCE_LOCATION;
+	private String sqlScriptLocation = DEFAULT_SQL_SCRIPT_LOCATION;
 
 	private String sqlScriptEncoding = ENCODING_UTF8;
 
@@ -158,8 +158,9 @@ public class DbVersionManager extends AbstractVersionContentReader
 	/**
 	 * 获取当前版本。
 	 * 
-	 * @return
+	 * @return 当没有定义时返回{@code null}
 	 * @throws DbVersionManagerException
+	 *             当获取异常时（通常是版本表不存在）
 	 */
 	public Version getCurrentVersion() throws DbVersionManagerException
 	{
@@ -167,7 +168,6 @@ public class DbVersionManager extends AbstractVersionContentReader
 		try
 		{
 			cn = this.dataSource.getConnection();
-
 			return getCurrentVersion(cn);
 		}
 		catch (SQLException e)
@@ -188,7 +188,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 	 */
 	public Version upgrade() throws DbVersionManagerException
 	{
-		Version latest = Version.valueOf(Global.VERSION);
+		Version latest = getLatestVersion();
 		upgrade(latest);
 
 		return latest;
@@ -224,6 +224,26 @@ public class DbVersionManager extends AbstractVersionContentReader
 		}
 	}
 
+	/**
+	 * 获取从{@code from}升级至{@code to}版本需执行的SQL。
+	 * 
+	 * @param from
+	 * @param to
+	 * @return
+	 * @throws DbVersionManagerException
+	 */
+	public List<VersionContent> getUpgradeSqls(Version from, Version to) throws DbVersionManagerException
+	{
+		try
+		{
+			return resolveUpgradeSqlVersionContents(from, to);
+		}
+		catch (IOException e)
+		{
+			throw new DbVersionManagerException(e);
+		}
+	}
+
 	protected Version getCurrentVersionForUpgrade(Connection cn) throws DbVersionManagerException
 	{
 		Version current = null;
@@ -242,7 +262,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 		}
 
 		if (current == null)
-			throw new DbVersionManagerException("No version info found in table : " + this.versionTableName);
+			throw new DbVersionManagerException("No version found in table : " + this.versionTableName);
 
 		return current;
 	}
@@ -266,7 +286,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 					+ Global.PRODUCT_NAME_EN + "-" + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
 					+ " for upgrading version to " + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
 					+ " first, then shutdown it, then run " + Global.PRODUCT_NAME_EN + "-"
-					+ Global.VERSION);
+					+ getLatestVersion());
 		}
 
 		if (LOGGER.isInfoEnabled())
@@ -282,10 +302,22 @@ public class DbVersionManager extends AbstractVersionContentReader
 	}
 
 	/**
+	 * 获取最新版。
+	 * 
+	 * @return
+	 */
+	protected Version getLatestVersion()
+	{
+		return Version.valueOf(Global.VERSION);
+	}
+
+	/**
 	 * 获取当前版本。
 	 * 
 	 * @param cn
 	 * @return 当版本表中没有记录时会返回{@code null}
+	 * @throws SQLException
+	 *             当执行查询版本SQL出现异常时，比如：版本表不存在（通常是数据库没有初始化）
 	 */
 	protected Version getCurrentVersion(Connection cn) throws SQLException
 	{
@@ -525,9 +557,9 @@ public class DbVersionManager extends AbstractVersionContentReader
 	protected List<VersionContent> resolveUpgradeSqlVersionContents(Version from, Version to) throws IOException
 	{
 		if (from == null)
-			throw new IllegalArgumentException("Version [from] required");
+			throw new IllegalArgumentException("[from] required");
 		if (to == null)
-			throw new IllegalArgumentException("Version [to] required");
+			throw new IllegalArgumentException("[to] required");
 
 		List<VersionContent> myVersionContents = new ArrayList<VersionContent>();
 
