@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 /**
@@ -72,7 +73,7 @@ public class DerbySqlClient extends JdbcSupport
 
 		try
 		{
-			applicationContext = new AnnotationConfigApplicationContext(ApplicationPropertiesConfigSupport.class,
+			applicationContext = new AnnotationConfigApplicationContext(DerbySqlClientPropertiesConfig.class,
 					DerbySqlClientDataSourceConfig.class);
 
 			DataSource dataSource = applicationContext.getBean(DataSource.class);
@@ -290,6 +291,16 @@ public class DerbySqlClient extends JdbcSupport
 	public static void main(String[] args) throws Exception
 	{
 		new DerbySqlClient().run();
+	}
+
+	@Configuration
+	@PropertySource(value = ApplicationPropertiesConfigSupport.PROPERTY_SOURCE_PATH, encoding = "UTF-8")
+	public static class DerbySqlClientPropertiesConfig extends ApplicationPropertiesConfigSupport
+	{
+		public DerbySqlClientPropertiesConfig()
+		{
+			super();
+		}
 	}
 
 	@Configuration
